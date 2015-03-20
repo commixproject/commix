@@ -45,7 +45,7 @@ def updater():
     sys.stdout.write("["+colors.GREEN+" OK "+ colors.RESET+"]\n")
     sys.stdout.flush()
     print "\n------"
-    update = subprocess.Popen("git pull ", shell=True).wait()
+    update = subprocess.Popen("git reset --hard HEAD && git pull", shell=True).wait()
     print "------\n"
       
   else:
