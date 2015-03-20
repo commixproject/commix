@@ -38,6 +38,10 @@ def installer():
   # Check if OS is Linux.
   if platform.system() == "Linux":
     
+    # You need to have root privileges to run this script
+    if os.geteuid() != 0:
+      exit("You need to have root privileges to run this script.\n")
+      
     # Check if commix is already installed.
     if os.path.isdir("/usr/share/"  + settings.APPLICATION + ""):
       print "[" + colors.RED + " FAILED " + colors.RESET + "]" 
@@ -70,6 +74,7 @@ def installer():
     sys.stdout.write("(*) Installing "  + settings.APPLICATION + " into the /usr/share/"  + settings.APPLICATION + " ... ")
     try:
       subprocess.Popen("git clone https://github.com/stasinopoulos/"  + settings.APPLICATION + " /usr/share/"  + settings.APPLICATION + " >/dev/null 2>&1", shell=True).wait()
+      subprocess.Popen("chmod 775 /usr/share/"  + settings.APPLICATION + "/" + settings.APPLICATION + ".py >/dev/null 2>&1", shell=True).wait()
     except:
       print "[" + colors.RED + " FAILED " + colors.RESET + "]"
       sys.exit(0)
@@ -77,9 +82,11 @@ def installer():
     sys.stdout.flush()
     
     sys.stdout.write("(*) Installing "  + settings.APPLICATION + " to /usr/bin/"  + settings.APPLICATION + " ... ")
-    try:
-      subprocess.Popen("cp /usr/share/"  + settings.APPLICATION + "/"  + settings.APPLICATION + " /usr/bin >/dev/null 2>&1", shell=True).wait()
-      subprocess.Popen("chmod +x /usr/bin/"  + settings.APPLICATION + " >/dev/null 2>&1", shell=True).wait()
+    try:    
+      with open('/usr/bin/commix', 'w') as f:
+	f.write('#!/bin/bash\n')
+	f.write('cd /usr/share/commix/ && ./commix.py "$@"')
+	subprocess.Popen("chmod +x /usr/bin/"  + settings.APPLICATION + " >/dev/null 2>&1", shell=True).wait()
     except:
       print "[" + colors.RED + " FAILED " + colors.RESET + "]"
       sys.exit(0)
