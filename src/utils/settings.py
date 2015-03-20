@@ -35,13 +35,13 @@ TWITTER = "@ancst"
 # Inject Tag
 INJECT_TAG = "INJECT_HERE"
 
-# Output Directory
-OUTPUT_DIR = ".output/"
-dir = os.path.dirname(OUTPUT_DIR)
-try:
-    os.stat(OUTPUT_DIR)
-except:
-    os.mkdir(OUTPUT_DIR)       
+## Output Directory
+#OUTPUT_DIR = ".output/"
+#dir = os.path.dirname(OUTPUT_DIR)
+#try:
+#    os.stat(OUTPUT_DIR)
+#except:
+#    os.mkdir(OUTPUT_DIR)       
 
 # The base64 decode trick
 B64_DEC_TRICK = " | base64 -d "
