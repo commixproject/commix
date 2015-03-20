@@ -17,15 +17,15 @@ Commix (short for [com]mand [i]njection e[x]ploiter) has a simple environment an
 The tool is only for testing and academic purposes and can only be used where strict consent has been given. Do not use it for illegal purposes!!
 
 #Usage
-Usage: ./commix.py [options]
+    Usage: ./commix.py [options]
 
 ####Options:
 
-  -h, --help            Show help and exit.
-  --verbose             Enable the verbose mode.
-  --install             Install 'commix' to your system.
-  --version             Show version number and exit.
-  --update              Check for updates (apply if any) and exit.
+    -h, --help            Show help and exit.
+    --verbose             Enable the verbose mode.
+    --install             Install 'commix' to your system.
+    --version             Show version number and exit.
+    --update              Check for updates (apply if any) and exit.
 
 ####Target:
     This options has to be provided, to define the target URL.
