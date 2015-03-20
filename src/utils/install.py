@@ -40,7 +40,8 @@ def installer():
     
     # You need to have root privileges to run this script
     if os.geteuid() != 0:
-      exit("You need to have root privileges to run this script.\n")
+      print colors.RED + "\n(x) Error:  You need to have root privileges to run this option.\n" + colors.RESET
+      sys.exit(0)
       
     # Check if commix is already installed.
     if os.path.isdir("/usr/share/"  + settings.APPLICATION + ""):
