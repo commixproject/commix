@@ -3,7 +3,7 @@
 
 """
  This file is part of commix tool.
- Copyright (c) 2014 Anastasios Stasinopoulos (@ancst).
+ Copyright (c) 2015 Anastasios Stasinopoulos (@ancst).
  https://github.com/stasinopoulos/commix
 
  This program is free software: you can redistribute it and/or modify
@@ -17,6 +17,7 @@
 import os
 import sys
 import time
+import subprocess
 
 from src.utils import colors
 from src.utils import settings
@@ -39,17 +40,16 @@ def updater():
   sys.stdout.flush()
   
   # Check if ".git" exists!
-  if os.path.isfile("./.git"):
+  if os.path.isdir("./.git"):
  
     sys.stdout.write("["+colors.GREEN+" OK "+ colors.RESET+"]\n")
     sys.stdout.flush()
     print "\n------"
-    update = subprocess.Popen("git pull", shell=True).wait()
+    update = subprocess.Popen("git pull ", shell=True).wait()
     print "------\n"
       
   else:
     print "["+ colors.RED + " FAILED " + colors.RESET +"]"
-    print "(x) Download the latest version from: "
-    print " --> https://github.com/stasinopoulos/"+ settings.APPLICATION +"/archive/master.zip\n"
+    print "(x) Do it manually, 'git clone https://github.com/stasinopoulos/"+settings.APPLICATION +".git "+settings.APPLICATION+"'\n"
     
   sys.exit(1)

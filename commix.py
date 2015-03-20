@@ -1,9 +1,9 @@
-﻿#!/usr/bin/env python
+#!/usr/bin/env python
 # encoding: UTF-8
 
 """
  This file is part of commix tool.
- Copyright (c) 2014 Anastasios Stasinopoulos (@ancst).
+ Copyright (c) 2015 Anastasios Stasinopoulos (@ancst).
  https://github.com/stasinopoulos/commix
 
  This program is free software: you can redistribute it and/or modify
