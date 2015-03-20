@@ -17,7 +17,7 @@ Commix (short for [com]mand [i]njection e[x]ploiter) has a simple environment an
 The tool is only for testing and academic purposes and can only be used where strict consent has been given. Do not use it for illegal purposes!!
 
 #Usage
-    Usage: ./commix.py [options]
+    Usage: python commix.py [options]
 
 ####Options:
 
