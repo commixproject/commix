@@ -74,7 +74,8 @@ def installer():
     
     sys.stdout.write("(*) Installing "  + settings.APPLICATION + " into the /usr/share/"  + settings.APPLICATION + " ... ")
     try:
-      subprocess.Popen("git clone https://github.com/stasinopoulos/"  + settings.APPLICATION + " /usr/share/"  + settings.APPLICATION + " >/dev/null 2>&1", shell=True).wait()
+      current_dir = os.getcwd()
+      subprocess.Popen("cp -r " + current_dir + " /usr/share/" + settings.APPLICATION + " >/dev/null 2>&1", shell=True).wait()
       subprocess.Popen("chmod 775 /usr/share/"  + settings.APPLICATION + "/" + settings.APPLICATION + ".py >/dev/null 2>&1", shell=True).wait()
     except:
       print "[" + colors.RED + " FAILED " + colors.RESET + "]"
