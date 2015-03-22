@@ -74,6 +74,9 @@ def do_check(url):
   else:
     pass
   
+  # Check if defined method is POST.
+  parameter = menu.options.parameter
+
   # Check if it is vulnerable to classic command injection technique.
   if menu.options.tech == "classic":
     if classic.exploitation(url,delay,filename) == False:
