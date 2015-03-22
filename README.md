@@ -5,7 +5,7 @@
 	  \/____/\/___/  \/_/\/_/\/_/\/_/\/_/\/_/\/_/\//\/_/ { v0.01b }
 
 	+--
-	Automatic All-in-One OS Command Injection and Exploitation Tool
+	Automated All-in-One OS Command Injection and Exploitation Tool
 	Copyright (c) 2015 Anastasios Stasinopoulos (@ancst)
 	+--
 
