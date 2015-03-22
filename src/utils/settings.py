@@ -26,7 +26,7 @@ import random
 
 # About
 APPLICATION = "commix"
-DESCRIPTION = "Automatic All-in-One OS Command Injection and Exploitation Tool"
+DESCRIPTION = "Automated All-in-One OS Command Injection and Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION = "v0.01b"
 YEAR    = "2015"
