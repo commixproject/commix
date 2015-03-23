@@ -19,7 +19,7 @@ The tool is only for testing and academic purposes and can only be used where st
 #Installation
 Download commix by cloning the Git repository:
 
-  git clone https://github.com/stasinopoulos/commix.git commix
+    git clone https://github.com/stasinopoulos/commix.git commix
 
 
 #Usage
