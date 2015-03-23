@@ -95,6 +95,14 @@ def installer():
     sys.stdout.write("[" + colors.GREEN + " DONE " + colors.RESET + "]\n")
     sys.stdout.flush()
     
+    #Create the Output Directory
+    OUTPUT_DIR = ".output/"
+    dir = os.path.dirname(OUTPUT_DIR)
+    try:
+	os.stat(OUTPUT_DIR)
+    except:
+	os.mkdir(OUTPUT_DIR)  
+    
     print colors.BOLD + "(!) The installation is finished! Type '"  + settings.APPLICATION + "' to launch it." + colors.RESET
 
   else :

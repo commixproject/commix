@@ -16,6 +16,12 @@ Commix (short for [com]mand [i]njection e[x]ploiter) has a simple environment an
 #Disclaimer
 The tool is only for testing and academic purposes and can only be used where strict consent has been given. Do not use it for illegal purposes!!
 
+#Installation
+Download commix by cloning the Git repository:
+
+  git clone https://github.com/stasinopoulos/commix.git commix
+
+
 #Usage
     Usage: python commix.py [options]
 
