@@ -21,7 +21,7 @@ from src.utils import settings
  Show version number and exit.
 """
 def show_version():
-  print settings.APPLICATION + " " + settings.VERSION + "\n"
+  print settings.VERSION + settings.COMMIT_ID + "\n"
   sys.exit(1)
 
 

@@ -35,7 +35,14 @@ TWITTER = "@ancst"
 # Inject Tag
 INJECT_TAG = "INJECT_HERE"
 
-## Output Directory
+# Check Commit ID
+if os.path.isdir("./.git"):
+  with open('.git/refs/heads/master', 'r') as f:
+    COMMIT_ID = "-" + f.readline()[0:7]
+else:
+    COMMIT_ID = ""
+    
+# Output Directory
 OUTPUT_DIR = ".output/"
 dir = os.path.dirname(OUTPUT_DIR)
 try:
@@ -66,3 +73,4 @@ MAX_OPTION_LENGTH = 18
 
 # Python version.
 PYTHON_VERSION = sys.version.split()[0]
+
