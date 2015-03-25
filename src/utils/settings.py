@@ -65,6 +65,9 @@ SUFFIXES = ["","#","//","\\\\","&","|"]
 # The white-spaces
 WHITESPACES = ["%20","$IFS"]
 
+# Bad combination of prefix and seperator
+JUNK_COMBINATION = ["&&&","|||","|&&","&|"]
+
 # Time delay
 DELAY = 1
 

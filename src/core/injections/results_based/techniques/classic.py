@@ -58,6 +58,11 @@ def exploitation(url,delay,filename):
       for suffix in settings.SUFFIXES:
 	for seperator in settings.SEPERATORS:
 	  
+	  # Check for bad combination of prefix and seperator
+	  combination = prefix + seperator
+	  if combination in settings.JUNK_COMBINATION:
+	    prefix = ""
+	  
 	  # Encode (urlencode) prefixes and suffixes
 	  encoded_prefix = urllib.quote_plus(prefix)
 	  encoded_suffix = urllib.quote_plus(suffix)

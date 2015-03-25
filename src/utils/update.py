@@ -36,7 +36,7 @@ def updater():
   requirment = "git"
   requirments.do_check(requirment)
   
-  sys.stdout.write("(*) Updating "+ settings.APPLICATION + " (via Gihub) ... ")
+  sys.stdout.write("(*) Updating "+ settings.APPLICATION + " (via Github) ... ")
   sys.stdout.flush()
   
   # Check if ".git" exists!
