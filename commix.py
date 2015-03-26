@@ -14,10 +14,7 @@
  For more see the file 'readme/COPYING' for copying permission.
 """
 
-import re
-import os
 import sys
-import urllib
 import urllib2
 import httplib
 
@@ -80,8 +77,6 @@ def main():
 	if not menu.options.parameter:
 	  print colors.RED + "(x) Error: You must specify the testable parameter for 'POST' method.\n" + colors.RESET
 	  sys.exit(0)
-	else:
-	  parameter = menu.options.parameter
 	  
       try:
 	request = urllib2.Request(url)

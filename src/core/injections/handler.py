@@ -17,15 +17,12 @@
 import os
 import sys
 import time
-import urllib
-import urllib2
 import datetime
 
 from src.utils import menu
 from src.utils import colors
 from src.utils import settings
 
-from src.core.requests import headers
 from src.core.requests import authentication
 
 from src.core.injections.results_based.techniques import classic
@@ -43,7 +40,6 @@ def do_check(url):
   # Print the findings to log file.
   parts = url.split('//', 1)
   host = parts[1].split('/', 1)[0]
-  dir = os.path.dirname(settings.OUTPUT_DIR + host + "/")
   try:
       os.stat(settings.OUTPUT_DIR + host + "/")
   except:

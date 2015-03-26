@@ -19,7 +19,6 @@ import sys
 import platform
 import subprocess
 
-from src.utils import menu
 from src.utils import colors
 from src.utils import settings
 from src.utils import requirments
@@ -97,7 +96,6 @@ def installer():
     
     #Create the Output Directory
     OUTPUT_DIR = ".output/"
-    dir = os.path.dirname(OUTPUT_DIR)
     try:
 	os.stat(OUTPUT_DIR)
     except:

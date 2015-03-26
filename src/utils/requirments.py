@@ -14,11 +14,7 @@
  For more see the file 'doc/COPYING' for copying permission.
 """
 
-import os
-import sys
 import subprocess
-
-from src.utils import colors
 
 """
  Check for requirments.

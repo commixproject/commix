@@ -15,7 +15,7 @@
 """
 
 import sys
-from src.utils import settings
+from src.utils import colors, settings
 
 """
  Show version number and exit.

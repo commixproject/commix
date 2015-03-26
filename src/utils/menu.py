@@ -22,7 +22,6 @@ from optparse import OptionParser
 
 from src.utils import colors
 from src.utils import settings
-from src.utils import version
 
 
 def banner():

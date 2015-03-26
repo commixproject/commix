@@ -14,7 +14,7 @@
  For more see the file 'readme/COPYING' for copying permission.
 """
 
-import urllib
+import sys
 import urllib2
 import cookielib
 

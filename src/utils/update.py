@@ -29,7 +29,6 @@ from src.utils import requirments
 
 def updater():
   	
-  definepath = os.getcwd()
   time.sleep(1)
   
   # Check if git is installed
@@ -45,7 +44,7 @@ def updater():
     sys.stdout.write("["+colors.GREEN+" OK "+ colors.RESET+"]\n")
     sys.stdout.flush()
     print "\n------"
-    update = subprocess.Popen("git reset --hard HEAD && git pull", shell=True).wait()
+    subprocess.Popen("git reset --hard HEAD && git pull", shell=True).wait()
     print "------\n"
       
   else:
