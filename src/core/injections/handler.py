@@ -40,7 +40,6 @@ def do_check(url):
   # Print the findings to log file.
   parts = url.split('//', 1)
   host = parts[1].split('/', 1)[0]
-  dir = os.path.dirname(settings.OUTPUT_DIR + host + "/")
   try:
       os.stat(settings.OUTPUT_DIR + host + "/")
   except:
