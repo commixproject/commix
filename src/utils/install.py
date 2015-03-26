@@ -19,7 +19,6 @@ import sys
 import platform
 import subprocess
 
-from src.utils import menu
 from src.utils import colors
 from src.utils import settings
 from src.utils import requirments

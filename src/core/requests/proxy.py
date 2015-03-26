@@ -15,7 +15,6 @@
 """
 
 import sys
-import base64
 import urllib2
 
 from src.utils import menu

@@ -14,10 +14,7 @@
  For more see the file 'readme/COPYING' for copying permission.
 """
 
-import re
-import os
 import sys
-import urllib
 import urllib2
 import httplib
 
