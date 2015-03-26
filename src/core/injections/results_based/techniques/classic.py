@@ -29,6 +29,7 @@ from src.utils import colors
 from src.utils import settings
 
 from src.core.requests import headers
+from src.core.requests import parameters
 
 """
  The "classic injection" technique on Classic OS Command Injection.
@@ -124,6 +125,10 @@ def exploitation(url,delay,filename):
 	      
 	      # Check if defined method is GET (Default).
 	      if menu.options.method == "GET":
+		
+		# Check if its not specified the 'INJECT_HERE' tag
+		url = parameters.do_GET_check(url)
+		
 		# Define the vulnerable parameter
 		if re.findall(r"&(.*)="+settings.INJECT_TAG+"", url):
 		  vuln_parameter = re.findall(r"&(.*)="+settings.INJECT_TAG+"", url)
@@ -160,6 +165,10 @@ def exploitation(url,delay,filename):
 	      else:
 		parameter = menu.options.parameter
 		parameter = urllib2.unquote(parameter)
+		
+		# Check if its not specified the 'INJECT_HERE' tag
+		parameter = parameters.do_POST_check(parameter)
+		
 		data = re.sub(settings.INJECT_TAG, payload, parameter)
 		
 		# Define the vulnerable parameter
@@ -304,6 +313,10 @@ def exploitation(url,delay,filename):
 		      
 		    # Check if defined method is GET (Default).
 		    if menu.options.method == "GET":
+		      
+		      # Check if its not specified the 'INJECT_HERE' tag
+		      url = parameters.do_GET_check(url)
+		      
 		      target = re.sub(settings.INJECT_TAG, payload, url)
 		      vuln_parameter = ''.join(vuln_parameter)
 		      request = urllib2.Request(target)
@@ -331,6 +344,10 @@ def exploitation(url,delay,filename):
 		      # Check if defined method is POST.
 		      parameter = menu.options.parameter
 		      parameter = urllib2.unquote(parameter)
+		      
+		      # Check if its not specified the 'INJECT_HERE' tag
+		      parameter = parameters.do_POST_check(parameter)
+		      
 		      data = re.sub(settings.INJECT_TAG, payload, parameter)
 		      request = urllib2.Request(url, data)
 		      
