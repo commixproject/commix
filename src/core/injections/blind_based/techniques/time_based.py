@@ -192,12 +192,12 @@ def exploitation(url,delay,filename):
 	      # Check if defined method is POST.
 	      else:
 		# Check if defined the testable parameters.
-		if not menu.options.parameter:
+		if not menu.options.data:
 		  print colors.RED + "(x) Error: You must specify the testable parameter.\n" + colors.RESET
 		  break
 		  
 		else:
-		  parameter = menu.options.parameter
+		  parameter = menu.options.data
 		  parameter = urllib2.unquote(parameter)
 		  
 		  # Check if its not specified the 'INJECT_HERE' tag
@@ -398,7 +398,7 @@ def exploitation(url,delay,filename):
 			  
 		      # Check if defined method is POST.
 		      else :
-			parameter = menu.options.parameter
+			parameter = menu.options.data
 			parameter = urllib2.unquote(parameter)
 			
 			# Check if its not specified the 'INJECT_HERE' tag

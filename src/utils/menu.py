@@ -41,7 +41,7 @@ Copyright (c) """ + settings.YEAR + """ """ + settings.AUTHOR + """ (""" + setti
 
 _ = os.path.normpath(sys.argv[0])
 
-usage = "./%prog [options]"
+usage = "python %prog [options]"
 
 parser = OptionParser(usage=usage)
 
@@ -141,10 +141,10 @@ request.add_option("--auth-cred",
 injection = OptionGroup(parser, colors.BOLD + "Injection" + colors.RESET, 
 			"These options can be used, to specify which parameters to inject and to provide custom injection payloads.")
 
-injection.add_option("--param", 
+injection.add_option("--data", 
 		action="store",
-		dest="parameter",
-		help="Parameter(s) to inject (use 'INJECT_HERE' tag).")
+		dest="data",
+		help="POST data to inject (use 'INJECT_HERE' tag).")
 
 injection.add_option("--suffix", 
 		action="store",

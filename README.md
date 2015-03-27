@@ -68,7 +68,7 @@ Download commix by cloning the Git repository:
     These options can be used, to specify which parameters to inject and
     to provide custom injection payloads.
 
-    --param=PARAMETER   Parameter(s) to inject (use 'INJECT_HERE' tag).
+    --data=PARAMETER    POST data to inject (use 'INJECT_HERE' tag).
     --suffix=SUFFIX     Injection payload suffix string.
     --prefix=PREFIX     Injection payload prefix string.
     --technique=TECH    Specify a certain injection technique : 'classic',
@@ -83,7 +83,7 @@ Download commix by cloning the Git repository:
 ####Usage Examples:
 **Exploiting Damn Vulnerable Web App :**
 
-    python commix.py --url="http://192.168.178.58/DVWA-1.0.8/vulnerabilities/exec/#" --method="POST" --param="ip=INJECT_HERE&submit=submit" --cookie="security=medium; PHPSESSID=nq30op434117mo7o2oe5bl7is4"
+    python commix.py --url="http://192.168.178.58/DVWA-1.0.8/vulnerabilities/exec/#" --method="POST" --data="ip=INJECT_HERE&submit=submit" --cookie="security=medium; PHPSESSID=nq30op434117mo7o2oe5bl7is4"
     
 **Exploiting php-Charts 1.0 *(using injection payload suffix & prefix string)* :**
 
@@ -91,4 +91,4 @@ Download commix by cloning the Git repository:
     
 **Exploiting OWASP Mutillidae *(using Extra headers and HTTP proxy)* :**
 
-    python commix.py --url="http://192.168.178.46/mutillidae/index.php?popUpNotificationCode=SL5&page=dns-lookup.php" --param="target_host=INJECT_HERE" --method="POST" --headers="Accept-Language:fr\nETag:123\n" --proxy="127.0.0.1:8081"
+    python commix.py --url="http://192.168.178.46/mutillidae/index.php?popUpNotificationCode=SL5&page=dns-lookup.php" --data="target_host=INJECT_HERE" --method="POST" --headers="Accept-Language:fr\nETag:123\n" --proxy="127.0.0.1:8081"

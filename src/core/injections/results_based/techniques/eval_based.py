@@ -171,7 +171,7 @@ def exploitation(url,delay,filename):
 
 	    else:
 	        # Check if defined method is POST.
-		parameter = menu.options.parameter
+		parameter = menu.options.data
 		parameter = urllib2.unquote(parameter)
 		
 		# Check if its not specified the 'INJECT_HERE' tag
@@ -373,7 +373,7 @@ def exploitation(url,delay,filename):
 
 		  else:
 		    # Check if defined method is POST.
-		    parameter = menu.options.parameter
+		    parameter = menu.options.data
 		    parameter = urllib2.unquote(parameter)
 		    
 		    # Check if its not specified the 'INJECT_HERE' tag
