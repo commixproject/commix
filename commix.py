@@ -74,7 +74,7 @@ def main():
       url = menu.options.url
       
       if menu.options.method == "POST":
-	if not menu.options.parameter:
+	if not menu.options.data:
 	  print colors.RED + "(x) Error: You must specify the testable parameter for 'POST' method.\n" + colors.RESET
 	  sys.exit(0)
 	  
