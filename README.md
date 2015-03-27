@@ -68,7 +68,7 @@ Download commix by cloning the Git repository:
     These options can be used, to specify which parameters to inject and
     to provide custom injection payloads.
 
-    --data=PARAMETER    POST data to inject (use 'INJECT_HERE' tag).
+    --data=DATA         POST data to inject (use 'INJECT_HERE' tag).
     --suffix=SUFFIX     Injection payload suffix string.
     --prefix=PREFIX     Injection payload prefix string.
     --technique=TECH    Specify a certain injection technique : 'classic',
