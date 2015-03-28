@@ -72,10 +72,10 @@ Download commix by cloning the Git repository:
     --suffix=SUFFIX     Injection payload suffix string.
     --prefix=PREFIX     Injection payload prefix string.
     --technique=TECH    Specify a certain injection technique : 'classic',
-                        'eval-based', 'time-based' or 'boolean-based'.
+                        'eval-based', 'time-based' or 'file-based'.
     --maxlen=MAXLEN     The length of the output on time-based technique
                         (Default: 10000 chars).
-    --delay=DELAY       Set Time-delay for time-based and boolean-based
+    --delay=DELAY       Set Time-delay for time-based and file-based
                         techniques (Default: 1 sec).
     --base64            Use Base64 (enc)/(de)code trick to prevent false-
                         positive results.

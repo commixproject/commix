@@ -28,7 +28,7 @@ from src.core.requests import authentication
 from src.core.injections.results_based.techniques import classic
 from src.core.injections.results_based.techniques import eval_based
 from src.core.injections.blind_based.techniques import time_based
-from src.core.injections.blind_based.techniques import boolean_based
+from src.core.injections.semiblind_based.techniques import file_based 
 
 """
  Command Injection and exploitation handler.
@@ -89,7 +89,7 @@ def do_check(url):
       else:
 	print colors.RED + "(x) The '"+ parameter +"' appear to be not injectable." + colors.RESET
 	
-  # Check if it is vulnerable to time-based command injection technique.
+  # Check if it is vulnerable to time-based blind command injection technique.
   elif menu.options.tech == "time-based":
     if time_based.exploitation(url,delay,filename) == False:
       if menu.options.method == "GET":
@@ -97,9 +97,9 @@ def do_check(url):
       else:
 	print colors.RED + "(x) The '"+ parameter +"' appear to be not injectable." + colors.RESET
 	
-  # Check if it is vulnerable to boolean-based command injection technique.
-  elif menu.options.tech == "boolean-based":
-    if boolean_based.exploitation(url,delay,filename) == False:
+  # Check if it is vulnerable to file-based semiblind command injection technique.
+  elif menu.options.tech == "file-based":
+    if file_based.exploitation(url,delay,filename) == False:
       if menu.options.method == "GET":
 	print colors.RED + "(x) The '"+ url +"' appear to be not injectable." + colors.RESET
       else:
@@ -122,12 +122,12 @@ def do_check(url):
     else:
       time_based_state = True
       
-    if boolean_based.exploitation(url,delay,filename) == False:
-      boolean_based_state = False
+    if file_based.exploitation(url,delay,filename) == False:
+      file_based_state = False
     else:
-      boolean_based_state = True
+      file_based_state = True
 
-    if classic_state == False and eval_based_state == False and time_based_state == False and boolean_based_state == False :
+    if classic_state == False and eval_based_state == False and time_based_state == False and file_based_state == False :
       if menu.options.method == "GET":
 	print colors.RED + "(x) The '"+ url +"' appear to be not injectable." + colors.RESET
       else:

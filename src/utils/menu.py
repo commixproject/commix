@@ -159,7 +159,7 @@ injection.add_option("--prefix",
 injection.add_option("--technique", 
 		action="store",
 		dest="tech",
-		help="Specify a certain injection technique : 'classic', 'eval-based', 'time-based' or 'boolean-based'.")
+		help="Specify a certain injection technique : 'classic', 'eval-based', 'time-based' or 'file-based'.")
 
 injection.add_option("--maxlen", 
 		action="store",
@@ -170,7 +170,7 @@ injection.add_option("--maxlen",
 injection.add_option("--delay", 
 		action="store",
 		dest="delay",
-		help="Set Time-delay for time-based and boolean-based techniques (Default: 1 sec).")
+		help="Set Time-delay for time-based and file-based techniques (Default: 1 sec).")
 
 injection.add_option("--base64", 
 		action="store_true",
