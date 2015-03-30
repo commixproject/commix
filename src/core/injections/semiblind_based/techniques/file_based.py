@@ -37,8 +37,8 @@ from src.core.injections.semiblind_based.techniques import tempfile_based
  The "File-based" technique on Semiblind-based OS Command Injection.
 """
 
-def exploitation(url,delay,filename):
-  
+def exploitation(url,delay,filename,http_request_method):
+
   counter = 0
   vp_flag = True
   no_result = True
@@ -55,12 +55,6 @@ def exploitation(url,delay,filename):
   output_file.write("\n(+) Type : " + injection_type)
   output_file.write("\n(+) Technique : " + technique.title())
   output_file.close()
-  
-  # Check if HTTP Method is POST.
-  if not menu.options.data:
-    http_request_method = "GET"
-  else:
-    http_request_method = "POST"
     
   for whitespace in settings.WHITESPACES:
     for prefix in settings.PREFIXES:
@@ -235,7 +229,7 @@ def exploitation(url,delay,filename):
 		    print colors.RED + "\n(x) Error: Unable to upload the '"+ OUTPUT_TEXTFILE +"' on '/var/www'." + colors.RESET
 		    tmp_file = "/tmp/"
 		    sys.stdout.write("(*) Trying to upload the "+ OUTPUT_TEXTFILE +" on temp (" + tmp_file + ") directory ...\n")
-		    tempfile_based.exploitation(url,delay,filename,tmp_file)     
+		    tempfile_based.exploitation(url,delay,filename,tmp_file,http_request_method)     
 		      
 	      except urllib2.URLError, e:
 		  print colors.RED + "(x) Error: The host seems to be down!" + colors.RESET

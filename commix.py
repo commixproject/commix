@@ -34,10 +34,12 @@ from src.core.injections import handler
 """
 
 def main():
-  
+
   try:
     #Call the banner
     menu.banner()
+    
+    print "\n(*) Initializing, please wait... "
     
     # Check python version number.
     version.python_version()

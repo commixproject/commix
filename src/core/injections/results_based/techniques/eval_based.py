@@ -34,7 +34,7 @@ from src.core.requests import parameters
  The "eval-based" injection technique on Classic OS Command Injection.
 """
 
-def exploitation(url,delay,filename):
+def exploitation(url,delay,filename,http_request_method):
   
   counter = 0
   vp_flag = True
@@ -51,12 +51,6 @@ def exploitation(url,delay,filename):
   output_file.write("\n(+) Type : " + injection_type)
   output_file.write("\n(+) Technique : " + technique.title())
   output_file.close()
-  
-  # Check if HTTP Method is POST.
-  if not menu.options.data:
-    http_request_method = "GET"
-  else:
-    http_request_method = "POST"
   
   for prefix in settings.PREFIXES:
     for suffix in settings.SUFFIXES:

