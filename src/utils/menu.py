@@ -85,11 +85,6 @@ target.add_option("--url-reload",
 request = OptionGroup(parser,  colors.BOLD + "Request" + colors.RESET, 
 		      "These options can be used, to specify how to connect to the target URL.")
 
-request.add_option("--method", 
-		action="store",
-		dest="method",
-		help="HTTP method (GET or POST).")
-
 request.add_option("--host",
                 action="store",
 		dest="host",

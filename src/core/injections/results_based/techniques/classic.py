@@ -52,6 +52,12 @@ def exploitation(url,delay,filename):
   output_file.write("\n(+) Type : " + injection_type)
   output_file.write("\n(+) Technique : " + technique.title())
   output_file.close()
+
+  # Check if defined method is POST.
+  if not menu.options.data:
+    http_request_method = "GET"
+  else:
+    http_request_method = "POST"
   
   for whitespace in settings.WHITESPACES:
     for prefix in settings.PREFIXES:
@@ -123,7 +129,7 @@ def exploitation(url,delay,filename):
 		sys.stdout.write("\n" + colors.GREY + payload + colors.RESET)
 	      
 	      # Check if defined method is GET (Default).
-	      if menu.options.method == "GET":
+	      if http_request_method == "GET":
 		
 		# Check if its not specified the 'INJECT_HERE' tag
 		url = parameters.do_GET_check(url)
@@ -216,12 +222,12 @@ def exploitation(url,delay,filename):
 	    	    
 	    found = True
 	    no_result = False
-	    if menu.options.method == "GET":
+	    if http_request_method == "GET":
 	      	      
 	      # Print the findings to log file
 	      if vp_flag == True:
 		output_file = open(filename + ".txt", "a")
-		output_file.write("\n(+) Parameter : " + vuln_parameter + " (" + menu.options.method + ")")
+		output_file.write("\n(+) Parameter : " + vuln_parameter + " (" + http_request_method + ")")
 		output_file.write("\n---\n")
 		vp_flag = False
 		output_file.close()
@@ -232,7 +238,7 @@ def exploitation(url,delay,filename):
 	      output_file.close()
 	      
 	      # Print the findings to terminal.
-	      print colors.BOLD + "\n(!) The ("+ menu.options.method + ") '" + vuln_parameter +"' parameter is vulnerable to "+ injection_type +"."+ colors.RESET
+	      print colors.BOLD + "\n(!) The ("+ http_request_method + ") '" + vuln_parameter +"' parameter is vulnerable to "+ injection_type +"."+ colors.RESET
 	      print "  (+) Type : "+ colors.YELLOW + colors.BOLD + injection_type + colors.RESET + ""
 	      print "  (+) Technique : "+ colors.YELLOW + colors.BOLD + technique.title() + colors.RESET + ""
 	      print "  (+) Parameter : "+ colors.YELLOW + colors.BOLD + vuln_parameter + colors.RESET + ""
@@ -243,7 +249,7 @@ def exploitation(url,delay,filename):
 	      # Print the findings to log file
 	      if vp_flag == True:
 		output_file = open(filename + ".txt", "a")
-		output_file.write("\n(+) Parameter : " + vuln_parameter + " (" + menu.options.method + ")")
+		output_file.write("\n(+) Parameter : " + vuln_parameter + " (" + http_request_method + ")")
 		output_file.write("\n---\n")
 		vp_flag = False
 		output_file.close()
@@ -254,7 +260,7 @@ def exploitation(url,delay,filename):
 	      output_file.close()
 	      
 	      # Print the findings to terminal.
-	      print colors.BOLD + "\n(!) The ("+ menu.options.method + ") '" + vuln_parameter +"' parameter is vulnerable to "+ injection_type +"."+ colors.RESET
+	      print colors.BOLD + "\n(!) The ("+ http_request_method + ") '" + vuln_parameter +"' parameter is vulnerable to "+ injection_type +"."+ colors.RESET
 	      print "  (+) Type : "+ colors.YELLOW + colors.BOLD + injection_type + colors.RESET + ""
 	      print "  (+) Technique : "+ colors.YELLOW + colors.BOLD + technique.title() + colors.RESET + ""
 	      print "  (+) Parameter : "+ colors.YELLOW + colors.BOLD + vuln_parameter + colors.RESET + ""
@@ -311,7 +317,7 @@ def exploitation(url,delay,filename):
 		      sys.stdout.write("\n" + colors.GREY + payload + colors.RESET)
 		      
 		    # Check if defined method is GET (Default).
-		    if menu.options.method == "GET":
+		    if http_request_method == "GET":
 		      
 		      # Check if its not specified the 'INJECT_HERE' tag
 		      url = parameters.do_GET_check(url)

@@ -56,13 +56,6 @@ def main():
     if menu.options.install:
 	install.installer()
 	sys.exit(0)
-	
-    if not menu.options.method:
-      menu.options.method = "GET"
-      
-    if menu.options.method != "GET" and menu.options.method != "POST":
-      print colors.RED + "(x) Error: HTTP method must be GET or POST.\n" + colors.RESET
-      sys.exit(0)
     
     # Check arguments
     if len(sys.argv) == 1:
@@ -72,12 +65,7 @@ def main():
 
     if menu.options.url:
       url = menu.options.url
-      
-      if menu.options.method == "POST":
-	if not menu.options.data:
-	  print colors.RED + "(x) Error: You must specify the testable parameter for 'POST' method.\n" + colors.RESET
-	  sys.exit(0)
-	  
+      	  
       try:
 	request = urllib2.Request(url)
 	

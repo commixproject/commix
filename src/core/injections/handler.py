@@ -70,13 +70,17 @@ def do_check(url):
   else:
     pass
   
-  # Check if defined method is POST.
-  parameter = menu.options.data
+  # Check if HTTP Method is POST.
+  if not menu.options.data:
+    http_request_method = "GET"
+  else:
+    http_request_method = "POST"
+    parameter = menu.options.data
 
   # Check if it is vulnerable to classic command injection technique.
   if menu.options.tech == "classic":
     if classic.exploitation(url,delay,filename) == False:
-      if menu.options.method == "GET":
+      if http_request_method == "GET":
 	print colors.RED + "(x) The '"+ url +"' appear to be not injectable." + colors.RESET
       else:
 	print colors.RED + "(x) The '"+ parameter +"' appear to be not injectable." + colors.RESET
@@ -84,7 +88,7 @@ def do_check(url):
   # Check if it is vulnerable to eval-based command injection technique.
   elif menu.options.tech == "eval-based":
     if eval_based.exploitation(url,delay,filename) == False:
-      if menu.options.method == "GET":
+      if http_request_method == "GET":
 	print colors.RED + "(x) The '"+ url +"' appear to be not injectable." + colors.RESET
       else:
 	print colors.RED + "(x) The '"+ parameter +"' appear to be not injectable." + colors.RESET
@@ -92,7 +96,7 @@ def do_check(url):
   # Check if it is vulnerable to time-based blind command injection technique.
   elif menu.options.tech == "time-based":
     if time_based.exploitation(url,delay,filename) == False:
-      if menu.options.method == "GET":
+      if http_request_method == "GET":
 	print colors.RED + "(x) The '"+ url +"' appear to be not injectable." + colors.RESET
       else:
 	print colors.RED + "(x) The '"+ parameter +"' appear to be not injectable." + colors.RESET
@@ -100,7 +104,7 @@ def do_check(url):
   # Check if it is vulnerable to file-based semiblind command injection technique.
   elif menu.options.tech == "file-based":
     if file_based.exploitation(url,delay,filename) == False:
-      if menu.options.method == "GET":
+      if http_request_method == "GET":
 	print colors.RED + "(x) The '"+ url +"' appear to be not injectable." + colors.RESET
       else:
 	print colors.RED + "(x) The '"+ parameter +"' appear to be not injectable." + colors.RESET
@@ -128,7 +132,7 @@ def do_check(url):
       file_based_state = True
 
     if classic_state == False and eval_based_state == False and time_based_state == False and file_based_state == False :
-      if menu.options.method == "GET":
+      if http_request_method == "GET":
 	print colors.RED + "(x) The '"+ url +"' appear to be not injectable." + colors.RESET
       else:
 	print colors.RED + "(x) The '"+ parameter +"' appear to be not injectable." + colors.RESET

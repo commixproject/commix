@@ -51,7 +51,6 @@ Download commix by cloning the Git repository:
     These options can be used, to specify how to connect to the target
     URL.
 
-    --method=METHOD     HTTP method (GET or POST).
     --host=HOST         HTTP Host header.
     --referer=REFERER   HTTP Referer header.
     --user-agent=AGENT  HTTP User-Agent header.
@@ -83,7 +82,7 @@ Download commix by cloning the Git repository:
 ####Usage Examples:
 **Exploiting Damn Vulnerable Web App :**
 
-    python commix.py --url="http://192.168.178.58/DVWA-1.0.8/vulnerabilities/exec/#" --method="POST" --data="ip=INJECT_HERE&submit=submit" --cookie="security=medium; PHPSESSID=nq30op434117mo7o2oe5bl7is4"
+    python commix.py --url="http://192.168.178.58/DVWA-1.0.8/vulnerabilities/exec/#" --data="ip=INJECT_HERE&submit=submit" --cookie="security=medium; PHPSESSID=nq30op434117mo7o2oe5bl7is4"
     
 **Exploiting php-Charts 1.0 *(using injection payload suffix & prefix string)* :**
 
@@ -91,4 +90,4 @@ Download commix by cloning the Git repository:
     
 **Exploiting OWASP Mutillidae *(using Extra headers and HTTP proxy)* :**
 
-    python commix.py --url="http://192.168.178.46/mutillidae/index.php?popUpNotificationCode=SL5&page=dns-lookup.php" --data="target_host=INJECT_HERE" --method="POST" --headers="Accept-Language:fr\nETag:123\n" --proxy="127.0.0.1:8081"
+    python commix.py --url="http://192.168.178.46/mutillidae/index.php?popUpNotificationCode=SL5&page=dns-lookup.php" --data="target_host=INJECT_HERE" --headers="Accept-Language:fr\nETag:123\n" --proxy="127.0.0.1:8081"
