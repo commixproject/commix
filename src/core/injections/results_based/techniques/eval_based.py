@@ -42,7 +42,7 @@ def exploitation(url,delay,filename,http_request_method):
   injection_type = "Results-based Command Injection"
   technique = "eval-based injection technique"
     
-  sys.stdout.write( "(*) Testing the "+ technique +"... ")
+  sys.stdout.write( colors.BOLD + "(*) Testing the "+ technique + "... " + colors.RESET)
   sys.stdout.flush()
   
   # Print the findings to log file.

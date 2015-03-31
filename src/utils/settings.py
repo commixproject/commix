@@ -68,6 +68,12 @@ JUNK_COMBINATION = ["&&&","|||","|&&","&|"]
 # Time delay
 DELAY = 1
 
+# Default Temp Directory
+TMP_DIR = "/tmp/"
+
+# Default Server's Root Directory
+SRV_ROOT_DIR = "/var/www/"
+
 # The max help option length.
 MAX_OPTION_LENGTH = 18
 

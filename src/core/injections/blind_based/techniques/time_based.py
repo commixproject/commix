@@ -57,7 +57,7 @@ def exploitation(url,delay,filename,http_request_method):
   if menu.options.url_reload == True:
     print colors.RED + "(x) Error: The '--url-reload' option is not available in "+ technique +"!" + colors.RESET
 
-  sys.stdout.write( "(*) Testing the "+ technique +"... ")
+  sys.stdout.write( colors.BOLD + "(*) Testing the "+ technique + "... " + colors.RESET)
   sys.stdout.flush()
   
   for prefix in settings.PREFIXES:
