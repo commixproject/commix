@@ -173,6 +173,12 @@ injection.add_option("--base64",
 		default = False,
 		help="Use Base64 (enc)/(de)code trick to prevent false-positive results.")
 
+injection.add_option("--icmp_exfil", 
+		action="store",
+		dest="ip_icmp_data",
+		default = False,
+		help="Use the ICMP exfiltration technique (e.g. 'ip_src=192.168.178.1,ip_dst=192.168.178.3').")
+
 parser.add_option_group(target)
 parser.add_option_group(request)
 parser.add_option_group(injection)

