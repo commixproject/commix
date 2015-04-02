@@ -38,9 +38,7 @@ def main():
   try:
     #Call the banner
     menu.banner()
-    
-    print "\n(*) Initializing, please wait... "
-    
+        
     # Check python version number.
     version.python_version()
     
@@ -66,8 +64,10 @@ def main():
 	sys.exit(0)
 
     if menu.options.url:
+
+      print "\n(*) Initializing, please wait... "
       url = menu.options.url
-      	  
+      
       try:
 	request = urllib2.Request(url)
 	

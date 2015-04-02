@@ -38,7 +38,6 @@ Copyright (c) """ + settings.YEAR + """ """ + settings.AUTHOR + """ (""" + setti
 +--
 """
 
-
 _ = os.path.normpath(sys.argv[0])
 
 usage = "python %prog [options]"
@@ -139,7 +138,7 @@ injection = OptionGroup(parser, colors.BOLD + "Injection" + colors.RESET,
 injection.add_option("--data", 
 		action="store",
 		dest="data",
-		help="POST data to inject (use 'INJECT_HERE' tag).")
+		help="POST data to inject (use '"+settings.INJECT_TAG+"' tag).")
 
 injection.add_option("--suffix", 
 		action="store",
@@ -165,7 +164,7 @@ injection.add_option("--maxlen",
 injection.add_option("--delay", 
 		action="store",
 		dest="delay",
-		help="Set Time-delay for time-based and file-based techniques (Default: 1 sec).")
+		help="Set Time-delay for time-based and file-based techniques (Default: "+str(settings.DELAY)+" sec).")
 
 injection.add_option("--base64", 
 		action="store_true",
