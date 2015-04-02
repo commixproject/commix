@@ -21,6 +21,7 @@ from src.utils import settings
   do automated scan on... every parameter.
 """
 
+# Check if its not specified the 'INJECT_HERE' tag on GET Requests
 def do_GET_check(url):
   
   #Find the host part
@@ -46,7 +47,7 @@ def do_GET_check(url):
     # Reconstruct the url
     url = url_part +"?"+ parameters
     return url
-  
+
   # Check if multiple paramerters
   else:
     for i in range(0,len(multi_parameters)-1):
@@ -72,7 +73,25 @@ def do_GET_check(url):
     return url
   
   
+# Define the vulnerable parameter
+def vuln_GET_param(url):
+  
+    # Define the vulnerable parameter
+    if re.findall(r"&(.*)=" + settings.INJECT_TAG + "", url):
+      vuln_parameter = re.findall(r"&(.*)=" + settings.INJECT_TAG + "", url)
+      
+    elif re.findall(r"\?(.*)=" + settings.INJECT_TAG + "", url):
+      vuln_parameter = re.findall(r"\?(.*)=" + settings.INJECT_TAG + "", url)
+      
+    else:
+      vuln_parameter = url
+    vuln_parameter = ''.join(vuln_parameter)
+    return url
+  
+  
+# Check if its not specified the 'INJECT_HERE' tag on GET Requests
 def do_POST_check(parameter):
+  
   # Split parameters 
   multi_parameters = parameter.split("&")
   
@@ -106,5 +125,24 @@ def do_POST_check(parameter):
       multi_parameters[i-1] = multi_parameters[i-1].replace(inject_value, old)
       parameter = '&'.join(multi_parameters)
     return parameter
+
+
+# Define the vulnerable parameter
+def vuln_POST_param(parameter,url):
+  
+    # Define the vulnerable parameter
+    if re.findall(r"&(.*)=" + settings.INJECT_TAG + "", url):
+      vuln_parameter = re.findall(r"&(.*)=" + settings.INJECT_TAG + "", url)
+      
+    elif re.findall(r"\?(.*)=" + settings.INJECT_TAG + "", url):
+      vuln_parameter = re.findall(r"\?(.*)=" + settings.INJECT_TAG + "", url)
+      
+    else:
+      vuln_parameter = parameter
+    vuln_parameter = ''.join(vuln_parameter)
+    
+    return vuln_parameter
+  
+  
   
 #eof

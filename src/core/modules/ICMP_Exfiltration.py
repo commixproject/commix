@@ -1,4 +1,18 @@
-#!/bin/python
+#!/usr/bin/env python
+# encoding: UTF-8
+
+"""
+ This file is part of commix tool.
+ Copyright (c) 2015 Anastasios Stasinopoulos (@ancst).
+ https://github.com/stasinopoulos/commix
+
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+ 
+ For more see the file 'readme/COPYING' for copying permission.
+"""
 
 import os
 import sys
@@ -17,6 +31,10 @@ from scapy.all import *
 
 """
   The ICMP Exfiltration technique.
+  -------------------------------------
+  [1] http://blog.ring-zer0.com/2014/02/data-exfiltration-on-linux.html
+  [2] http://blog.curesec.com/article/blog/23.html
+  --------------------------------------
 """
 
 def packet_handler(Packet):

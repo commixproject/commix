@@ -137,7 +137,6 @@ def exploitation(url,delay,filename,http_request_method):
 	      if urllib.unquote(payload) == payload:
 		is_encoded = True
 	
-	      #payload = re.sub(" ", "%20", payload)
 	      # Check if defined "--verbose" option.
 	      if menu.options.verbose:
 		if seperator == ";" or seperator == "&&" or seperator == "||":
@@ -152,19 +151,12 @@ def exploitation(url,delay,filename,http_request_method):
 		
 		# Check if its not specified the 'INJECT_HERE' tag
 		url = parameters.do_GET_check(url)
-		    
+		
+		# Encoding non-ASCII characters payload.
 		payload = urllib.quote(payload)
+		
 		# Define the vulnerable parameter
-		if re.findall(r"&(.*)="+settings.INJECT_TAG+"", url):
-		  vuln_parameter = re.findall(r"&(.*)="+settings.INJECT_TAG+"", url)
-		  vuln_parameter = ''.join(vuln_parameter)
-		  
-		elif re.findall(r"\?(.*)="+settings.INJECT_TAG+"", url):
-		  vuln_parameter = re.findall(r"\?(.*)="+settings.INJECT_TAG+"", url)
-		  vuln_parameter = ''.join(vuln_parameter)
-		  
-		else:
-		  vuln_parameter = url
+		vuln_parameter = parameters.vuln_GET_param(url)
 		  
 		target = re.sub(settings.INJECT_TAG, payload, url)
 		request = urllib2.Request(target)
@@ -198,21 +190,12 @@ def exploitation(url,delay,filename,http_request_method):
 		# Check if its not specified the 'INJECT_HERE' tag
 		parameter = parameters.do_POST_check(parameter)
 		
+		# Define the POST data
 		data = re.sub(settings.INJECT_TAG, payload, parameter)
-
-		# Define the vulnerable parameter
-		if re.findall(r"&(.*)="+settings.INJECT_TAG+"", url):
-		  vuln_parameter = re.findall(r"&(.*)="+settings.INJECT_TAG+"", url)
-		  vuln_parameter = ''.join(vuln_parameter)
-		  
-		elif re.findall(r"\?(.*)="+settings.INJECT_TAG+"", url):
-		  vuln_parameter = re.findall(r"\?(.*)="+settings.INJECT_TAG+"", url)
-		  vuln_parameter = ''.join(vuln_parameter)
-		  
-		else:
-		  vuln_parameter = parameter
-		  
 		request = urllib2.Request(url, data)
+		
+		# Define the vulnerable parameter
+		vuln_parameter = parameters.vuln_POST_param(parameter,url)
 		
 		# Check if defined extra headers.
 		headers.do_check(request)

