@@ -173,7 +173,13 @@ injection.add_option("--base64",
 		default = False,
 		help="Use Base64 (enc)/(de)code trick to prevent false-positive results.")
 
-injection.add_option("--icmp_exfil", 
+injection.add_option("--tmp-path", 
+		action="store",
+		dest="tmp_path",
+		default = False,
+		help="Set remote absolute path of temporary files directory.")
+
+injection.add_option("--icmp-exfil", 
 		action="store",
 		dest="ip_icmp_data",
 		default = False,

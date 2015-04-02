@@ -69,7 +69,7 @@ JUNK_COMBINATION = ["&&&","|||","|&&","&|"]
 DELAY = 1
 
 # Default Temp Directory
-TMP_DIR = "/tmp/"
+TMP_PATH = "/tmp/"
 
 # Default Server's Root Directory
 SRV_ROOT_DIR = "/var/www/"

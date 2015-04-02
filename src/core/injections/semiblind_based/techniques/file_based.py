@@ -215,9 +215,13 @@ def exploitation(url,delay,filename,http_request_method):
 	      except urllib2.HTTPError, e:
 		  if e.getcode() == 404:
 		    stop_injection = True
+		    if menu.options.tmp_path:
+		      tmp_path = menu.options.tmp_path
+		    else:
+		      tmp_path = settings.TMP_PATH
 		    print colors.BOLD + colors.RED + "\n(x) Error: Unable to upload the '"+ OUTPUT_TEXTFILE +"' on '" + settings.SRV_ROOT_DIR + "'." + colors.RESET
-		    sys.stdout.write("(*) Trying to upload the '"+ OUTPUT_TEXTFILE +"' on temporary directory (" + settings.TMP_DIR + ")...\n")
-		    tempfile_based.exploitation(url,delay,filename,http_request_method)     
+		    sys.stdout.write("(*) Trying to upload the '"+ OUTPUT_TEXTFILE +"' on temporary directory (" + tmp_path + ")...\n")
+		    tempfile_based.exploitation(url,delay,filename,tmp_path,http_request_method)     
 		    sys.exit(0)
 		    
 	      except urllib2.URLError, e:

@@ -34,7 +34,7 @@ from src.core.requests import parameters
  __Warning:__ This technique is still experimental, is not yet fully functional and may leads to false-positive resutls.
 """
 
-def exploitation(url,delay,filename,http_request_method):
+def exploitation(url,delay,filename,tmp_path,http_request_method):
   
   counter = 0
   vp_flag = True
@@ -86,7 +86,7 @@ def exploitation(url,delay,filename,http_request_method):
 	  B64_DEC_TRICK = ""
 	  
 	# The output file for file-based injection technique.
-	OUTPUT_TEXTFILE = settings.TMP_DIR + B64_ENC_TAG + ".txt"
+	OUTPUT_TEXTFILE = tmp_path + B64_ENC_TAG + ".txt"
 	
 	tag_length = len(TAG) + 4
 	for j in range(1,int(tag_length)):
