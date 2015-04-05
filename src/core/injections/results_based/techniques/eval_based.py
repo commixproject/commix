@@ -60,11 +60,7 @@ def exploitation(url,delay,filename,http_request_method):
 	combination = prefix + seperator
 	if combination in settings.JUNK_COMBINATION:
 	  prefix = ""
-	
-	# Encode (urlencode) prefixes and suffixes
-	encoded_prefix = urllib.quote_plus(prefix)
-	encoded_suffix = urllib.quote_plus(suffix)
-	
+		
 	# Change TAG on every request to prevent false-positive resutls.
 	TAG = ''.join(random.choice(string.ascii_uppercase) for i in range(6))  
 	B64_ENC_TAG = base64.b64encode(TAG)
@@ -91,7 +87,7 @@ def exploitation(url,delay,filename,http_request_method):
 	    payload = prefix + payload
 	    
 	  else:
-	    encoded_payload = encoded_prefix + payload
+	    #encoded_payload = encoded_prefix + payload
 	    payload = prefix + payload
 	    
 	  # Check if defined "--suffix" option.
@@ -100,43 +96,72 @@ def exploitation(url,delay,filename,http_request_method):
 	    payload = payload + suffix
 	    
 	  else:
-	    encoded_payload = encoded_payload + encoded_suffix
 	    payload = payload + suffix
-
-	  payload_list = []
-	  if payload != encoded_payload:
-	    payload_list.append(payload)
-	    payload_list.append(encoded_payload)
-	  else:
-	    payload_list.append(payload)
+      
+	  #payload = payload + ""+ B64_DEC_TRICK +""
+	  payload = re.sub(" ", "%20", payload)
 	  
-	  for payload in payload_list :
-	    if urllib.unquote(payload) == payload:
-	      is_encoded = True
-	
-	    #payload = payload + ""+ B64_DEC_TRICK +""
-	    payload = re.sub(" ", "%20", payload)
+	  # Check if defined "--verbose" option.
+	  if menu.options.verbose:
+	    if seperator == ";":
+	      sys.stdout.write("\n" + colors.GREY + payload + colors.RESET)
+	      
+	  # Check if defined method is GET (Default).
+	  if http_request_method == "GET":
 	    
-	    # Check if defined "--verbose" option.
-	    if menu.options.verbose:
-	      if seperator == ";":
-		sys.stdout.write("\n" + colors.GREY + payload + colors.RESET)
+	    # Check if its not specified the 'INJECT_HERE' tag
+	    url = parameters.do_GET_check(url)
+		  
+	    # Define the vulnerable parameter
+	    vuln_parameter = parameters.vuln_GET_param(url)
+	    
+	    target = re.sub(settings.INJECT_TAG, payload, url)
+	    request = urllib2.Request(target)
+	    
+	    # Check if defined extra headers.
+	    headers.do_check(request)
+	      
+	    # Check if defined any HTTP Proxy.
+	    if menu.options.proxy:
+	      try:
+		proxy= urllib2.ProxyHandler({'http': menu.options.proxy})
+		opener = urllib2.build_opener(proxy)
+		urllib2.install_opener(opener)
+		try:
+		  response = urllib2.urlopen(request)
+		  
+		except urllib2.HTTPError, error:
+		  response = error
 		
-	    # Check if defined method is GET (Default).
-	    if http_request_method == "GET":
+	      except urllib2.HTTPError, err:
+		print "\n(x) Error : " + str(err)
+		sys.exit(1) 
+	
+	    else:
+	      try:
+		response = urllib2.urlopen(request)
+		
+	      except urllib2.HTTPError, error:
+		response = error
+
+	  else:
+	      # Check if defined method is POST.
+	      parameter = menu.options.data
+	      parameter = urllib2.unquote(parameter)
 	      
 	      # Check if its not specified the 'INJECT_HERE' tag
-	      url = parameters.do_GET_check(url)
-		    
-	      # Define the vulnerable parameter
-	      vuln_parameter = parameters.vuln_GET_param(url)
+	      parameter = parameters.do_POST_check(parameter)
 	      
-	      target = re.sub(settings.INJECT_TAG, payload, url)
-	      request = urllib2.Request(target)
+	      # Define the POST data
+	      data = re.sub(settings.INJECT_TAG, payload, parameter)
+	      request = urllib2.Request(url, data)
+	      
+	      # Define the vulnerable parameter
+	      vuln_parameter = parameters.vuln_POST_param(parameter,url)
 	      
 	      # Check if defined extra headers.
 	      headers.do_check(request)
-		
+
 	      # Check if defined any HTTP Proxy.
 	      if menu.options.proxy:
 		try:
@@ -159,57 +184,16 @@ def exploitation(url,delay,filename,http_request_method):
 		  
 		except urllib2.HTTPError, error:
 		  response = error
-
-	    else:
-	        # Check if defined method is POST.
-		parameter = menu.options.data
-		parameter = urllib2.unquote(parameter)
-		
-		# Check if its not specified the 'INJECT_HERE' tag
-		parameter = parameters.do_POST_check(parameter)
-		
-		# Define the POST data
-		data = re.sub(settings.INJECT_TAG, payload, parameter)
-		request = urllib2.Request(url, data)
-		
-		# Define the vulnerable parameter
-		vuln_parameter = parameters.vuln_POST_param(parameter,url)
-		
-		# Check if defined extra headers.
-		headers.do_check(request)
-
-		# Check if defined any HTTP Proxy.
-		if menu.options.proxy:
-		  try:
-		    proxy= urllib2.ProxyHandler({'http': menu.options.proxy})
-		    opener = urllib2.build_opener(proxy)
-		    urllib2.install_opener(opener)
-		    try:
-		      response = urllib2.urlopen(request)
-		      
-		    except urllib2.HTTPError, error:
-		      response = error
-		    
-		  except urllib2.HTTPError, err:
-		    print "\n(x) Error : " + str(err)
-		    sys.exit(1) 
+		  
+	  # if need page reload
+	  if menu.options.url_reload: 
+	    time.sleep(delay)
+	    response = urllib.urlopen(url)
 	    
-		else:
-		  try:
-		    response = urllib2.urlopen(request)
-		    
-		  except urllib2.HTTPError, error:
-		    response = error
-		    
-	    # if need page reload
-	    if menu.options.url_reload: 
-	      time.sleep(delay)
-	      response = urllib.urlopen(url)
-	      
-	    html_data = response.read()
-	    html_data= re.sub("\n", "", html_data)
-    
-	    shell = re.findall(r""+TAG+TAG+TAG+"", html_data)
+	  html_data = response.read()
+	  html_data= re.sub("\n", "", html_data)
+
+	  shell = re.findall(r""+TAG+TAG+TAG+"", html_data)
 
 	except:
 	  continue
@@ -285,33 +269,21 @@ def exploitation(url,delay,filename,http_request_method):
 			    )
 		  
 		  payload = re.sub(" ","%20", payload)
-		  
-		  # Check if defined "--ifs" option.
-		  #if menu.options.ifs == True:
-		    #if seperator != " ":
-		      #payload = re.sub(" ", settings.WHITESPACE, payload)
-		  #else:
-		      #payload = re.sub(" ", "%20", payload)
-		      
-		  # Check if defined "--prefix" option.
+
 		  if menu.options.prefix:
 		    prefix = menu.options.prefix
 		    payload = prefix + payload
+		    
 		  else:
-		    if is_encoded == True:
-		      payload = encoded_prefix + payload
-		    else:
-		      payload = prefix + payload
+		    payload = prefix + payload
 		    
 		  # Check if defined "--suffix" option.
 		  if menu.options.suffix:
 		    suffix = menu.options.suffix
 		    payload = payload + suffix
+		    
 		  else:
-		    if is_encoded == True:
-		      payload = payload + encoded_suffix
-		    else:
-		      payload = payload + suffix
+		    payload = payload + suffix
 		      
 		  # Check if defined "--verbose" option.
 		  if menu.options.verbose:
@@ -422,3 +394,4 @@ def exploitation(url,delay,filename,http_request_method):
   
   else :
     print ""
+

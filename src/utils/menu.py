@@ -184,6 +184,12 @@ injection.add_option("--icmp-exfil",
 		default = False,
 		help="Use the ICMP exfiltration technique (e.g. 'ip_src=192.168.178.1,ip_dst=192.168.178.3').")
 
+injection.add_option("--alter-shell", 
+		action="store_true",
+		dest="alter_shell",
+		default = False,
+		help="Use an alternative os-shell (Python).")
+
 parser.add_option_group(target)
 parser.add_option_group(request)
 parser.add_option_group(injection)

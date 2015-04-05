@@ -16,6 +16,7 @@
 
 import sys
 import os
+import urllib
 
 """
  The global variables.
@@ -51,24 +52,24 @@ except:
 B64_DEC_TRICK = " | base64 -d "
 
 # The command injection seperators.
-SEPERATORS = [" ",";","&","&&","|","||"]
+SEPERATORS = [" ",";","&","|","||","&&","%26","%26%26","%7C","%7C%7C"]
 
 # The command injection prefixes.
-PREFIXES = ["","'",")","')","|","&"]
+PREFIXES = ["","'",")","')","|","&","%27","%29","%27%29","%7C","%26"] 
 
 # The command injection suffixes.
-SUFFIXES = ["","#","//","\\\\","&","|"]
+SUFFIXES = ["","#","//","\\\\","&","|","%27","%5C%5C","%27%29","%26","%7C"]
 
 # The white-spaces
 WHITESPACES = ["%20","$IFS"]
 
 # Bad combination of prefix and seperator
-JUNK_COMBINATION = ["&&&","|||","|&&","&|"]
+JUNK_COMBINATION = ["&&&","|||","|&&","&|","%27;","&;","|;","%29;","%27%29;","%7C;","%26;","%27;","%27||","%29&","%27%29&","%7C&","%26&"]
 
 # Time delay
 DELAY = 1
 
-# Default Temp Directory
+# Default Temp Directorya
 TMP_PATH = "/tmp/"
 
 # Default Server's Root Directory
@@ -79,4 +80,5 @@ MAX_OPTION_LENGTH = 18
 
 # Python version.
 PYTHON_VERSION = sys.version.split()[0]
+
 
