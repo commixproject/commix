@@ -76,7 +76,8 @@ Download commix by cloning the Git repository:
     --tmp-path=TMP_P..  Set remote absolute path of temporary files directory.
     --icmp-exfil=IP_..  Use the ICMP exfiltration technique (e.g.
                         'ip_src=192.168.178.1,ip_dst=192.168.178.3').
-    --alter-shell       Use an alternative os-shell (Python).
+    --alter-shell       Use an alternative os-shell (Python). Available only
+                        for 'tempfile-based' injections.
 
 ####Usage Examples
 **Exploiting [Damn Vulnerable Web App] (http://www.dvwa.co.uk/)**

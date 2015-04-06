@@ -188,7 +188,7 @@ injection.add_option("--alter-shell",
 		action="store_true",
 		dest="alter_shell",
 		default = False,
-		help="Use an alternative os-shell (Python).")
+		help="Use an alternative os-shell (Python). Available, only for 'tempfile-based' injections.")
 
 parser.add_option_group(target)
 parser.add_option_group(request)
