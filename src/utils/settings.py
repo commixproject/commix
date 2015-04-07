@@ -52,10 +52,10 @@ except:
 B64_DEC_TRICK = " | base64 -d "
 
 # The command injection seperators.
-SEPERATORS = [" ",";","&","|","||","&&","%26","%26%26","%7C","%7C%7C"]
+SEPERATORS = ["",";","&","|","||","&&","%0a","%26","%26%26","%7C","%7C%7C"]
 
 # The command injection prefixes.
-PREFIXES = ["","'",")","')","|","&","%27","%29","%27%29","%7C","%26"] 
+PREFIXES = ["","'",")","')","|","&","%0a","%27","%29","%27%29","%7C","%26"] 
 
 # The command injection suffixes.
 SUFFIXES = ["","#","//","\\\\","&","|","%27","%5C%5C","%27%29","%26","%7C"]
