@@ -202,8 +202,6 @@ def classic_exploitation_handler(url,delay,filename,http_request_method):
 	      
 	      # Check if defined extra headers.
 	      headers.do_check(request)
-	      opener = urllib2.build_opener(urllib2.HTTPHandler(debuglevel=1))
-	      feeddata = opener.open(request).read()
 	      
 	      # Define the vulnerable parameter
 	      vuln_parameter = parameters.vuln_POST_param(parameter,url)
