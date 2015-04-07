@@ -148,11 +148,11 @@ def exploitation(url,delay,filename,tmp_path,http_request_method):
 	  data = re.sub(settings.INJECT_TAG, payload, parameter)
 	  request = urllib2.Request(url, data)
 	  
-	  # Define the vulnerable parameter
-	  vuln_parameter = parameters.vuln_POST_param(parameter,url)
-	  
 	  # Check if defined extra headers.
 	  headers.do_check(request)
+	  
+	  # Define the vulnerable parameter
+	  vuln_parameter = parameters.vuln_POST_param(parameter,url)
 	  
 	  # Check if defined any HTTP Proxy.
 	  if menu.options.proxy:
