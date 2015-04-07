@@ -51,8 +51,8 @@ except:
 # The base64 decode trick
 B64_DEC_TRICK = " | base64 -d "
 
-# The command injection seperators.
-SEPERATORS = ["",";","&","|","||","&&","%0a","%26","%26%26","%7C","%7C%7C"]
+# The command injection separators.
+SEPARATORS = ["",";","&","|","||","&&","%0a","%26","%26%26","%7C","%7C%7C"]
 
 # The command injection prefixes.
 PREFIXES = ["","'",")","')","|","&","%0a","%27","%29","%27%29","%7C","%26"] 
@@ -63,7 +63,7 @@ SUFFIXES = ["","#","//","\\\\","&","|","%27","%5C%5C","%27%29","%26","%7C"]
 # The white-spaces
 WHITESPACES = ["%20","$IFS"]
 
-# Bad combination of prefix and seperator
+# Bad combination of prefix and separator
 JUNK_COMBINATION = ["&&&","|||","|&&","&|","%27;","&;","|;","%29;","%27%29;","%7C;","%26;","%27;","%27||","%29&","%27%29&","%7C&","%26&"]
 
 # Time delay

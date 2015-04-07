@@ -64,10 +64,10 @@ def exploitation(url,delay,filename,http_request_method):
   
   for prefix in settings.PREFIXES:
     for suffix in settings.SUFFIXES:
-      for seperator in settings.SEPERATORS:
+      for separator in settings.SEPARATORS:
 
-	# Check for bad combination of prefix and seperator
-	combination = prefix + seperator
+	# Check for bad combination of prefix and separator
+	combination = prefix + separator
 	if combination in settings.JUNK_COMBINATION:
 	  prefix = ""
 	
@@ -78,7 +78,7 @@ def exploitation(url,delay,filename,http_request_method):
 	  try:
 	    
 	    # Time-based decision payload (check if host is vulnerable).
-	    payload = time_based_payloads.decision(seperator,TAG,j,delay,http_request_method)
+	    payload = time_based_payloads.decision(separator,TAG,j,delay,http_request_method)
 	    
 	    # Check if defined "--prefix" option.
 	    if menu.options.prefix:
@@ -96,7 +96,7 @@ def exploitation(url,delay,filename,http_request_method):
 	      
 	    # Check if defined "--verbose" option.
 	    if menu.options.verbose:
-	      if seperator == ";" or seperator == "&&" or seperator == "||":
+	      if separator == ";" or separator == "&&" or separator == "||":
 		sys.stdout.write("\n" + colors.GREY + payload + colors.RESET)
 
 	    start = 0
@@ -243,7 +243,7 @@ def exploitation(url,delay,filename,http_request_method):
 		    for j in range(1,int(maxlen)):
 		      
 		      # Execute shell commands on vulnerable host.
-		      payload = time_based_payloads.cmd_execution(seperator,cmd,j,delay,http_request_method)
+		      payload = time_based_payloads.cmd_execution(separator,cmd,j,delay,http_request_method)
 			
 		      # Check if defined "--prefix" option.
 		      if menu.options.prefix:
@@ -351,7 +351,7 @@ def exploitation(url,delay,filename,http_request_method):
 		      for ascii_char in range(32, 129):
 			
 			# Get the execution ouput, of shell execution.
-			payload = time_based_payloads.get_char(seperator,cmd,i,ascii_char,delay,http_request_method)
+			payload = time_based_payloads.get_char(separator,cmd,i,ascii_char,delay,http_request_method)
 			  
 			# Check if defined "--prefix" option.
 			if menu.options.prefix:
