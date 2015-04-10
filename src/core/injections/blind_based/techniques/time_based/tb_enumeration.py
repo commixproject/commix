@@ -15,6 +15,7 @@
 """
 
 import sys
+import time
 
 from src.utils import menu
 from src.utils import colors
