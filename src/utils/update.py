@@ -45,10 +45,14 @@ def updater():
     sys.stdout.flush()
     print "\n------"
     subprocess.Popen("git reset --hard HEAD && git pull", shell=True).wait()
+    # Delete *.pyc files.
+    subprocess.Popen("find . -name \"*.pyc\" -exec rm -rf {} \;", shell=True).wait()
+    # Delete empty directories and files.
+    subprocess.Popen("find . -empty -type d -delete", shell=True).wait()
     print "------\n"
       
   else:
     print "["+ colors.RED + " FAILED " + colors.RESET +"]"
-    print "(x) Do it manually, 'git clone https://github.com/stasinopoulos/"+settings.APPLICATION +".git "+settings.APPLICATION+"'\n"
+    print colors.BGRED + "(x) Do it manually: "+ colors.BOLD +"'git clone https://github.com/stasinopoulos/"+settings.APPLICATION +".git " + settings.APPLICATION +"' "+ colors.RESET + "\n"
     
   sys.exit(1)
