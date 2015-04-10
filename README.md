@@ -41,7 +41,7 @@ Download commix by cloning the Git repository:
 ####Target
     This options has to be provided, to define the target URL.
 
-    --url=URL           Target URL.
+    --url=URL           Target URL
     --url-reload        Reload target URL after command execution.
 
 ####Request
@@ -58,11 +58,19 @@ Download commix by cloning the Git repository:
     --auth-data=AUTH..  Login parameters and data.
     --auth-cred=AUTH..  HTTP Basic Authentication credentials (e.g.
                         'admin:admin').
+####Enumeration
+    These options can be used, to enumerate the target host.
+
+    --current-user	Retrieve current user.
+    --hostname		Retrieve server hostname.
+    --is-root           Check if the current user have root privs.
+
 ####Injection
     These options can be used, to specify which parameters to inject and
     to provide custom injection payloads.
 
-    --data=DATA         POST data to inject (use 'INJECT_HERE' tag).
+    --data=DATA         POST data to inject (use 'INJECT_HERE' tag to specify
+                        the testable parameter).
     --suffix=SUFFIX     Injection payload suffix string.
     --prefix=PREFIX     Injection payload prefix string.
     --technique=TECH    Specify a certain injection technique : 'classic',
@@ -78,6 +86,8 @@ Download commix by cloning the Git repository:
                         'ip_src=192.168.178.1,ip_dst=192.168.178.3').
     --alter-shell       Use an alternative os-shell (Python). Available only
                         for 'tempfile-based' injections.
+    --os-shell=OS_SH..  Execute a single operating system command.
+
 
 ####Usage Examples
 **Exploiting [Damn Vulnerable Web App] (http://www.dvwa.co.uk/)**

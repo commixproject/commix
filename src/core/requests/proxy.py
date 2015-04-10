@@ -2,7 +2,7 @@
 # encoding: UTF-8
 
 """
- This file is part of commix tool.
+ This file is part of commix (@commixproject) tool.
  Copyright (c) 2015 Anastasios Stasinopoulos (@ancst).
  https://github.com/stasinopoulos/commix
 
@@ -51,6 +51,6 @@ def do_check(url):
     sys.stdout.flush()
     
   else:
-    print "[" + colors.RED+ " FAILED "+colors.RESET+"]\n"
+    print "[" + colors.BGRED+ " FAILED "+colors.RESET+"]\n"
     sys.exit(1)
     

@@ -2,7 +2,7 @@
 # encoding: UTF-8
 
 """
- This file is part of commix tool.
+ This file is part of commix (@commixproject) tool.
  Copyright (c) 2015 Anastasios Stasinopoulos (@ancst).
  https://github.com/stasinopoulos/commix
 
@@ -39,13 +39,13 @@ def installer():
     
     # You need to have root privileges to run this script
     if os.geteuid() != 0:
-      print colors.RED + "\n(x) Error:  You need to have root privileges to run this option.\n" + colors.RESET
+      print colors.BGRED + "\n(x) Error:  You need to have root privileges to run this option.\n" + colors.RESET
       sys.exit(0)
       
     # Check if commix is already installed.
     if os.path.isdir("/usr/share/"  + settings.APPLICATION + ""):
       print "[" + colors.RED + " FAILED " + colors.RESET + "]" 
-      print colors.RED + "(x) Error: "  + settings.APPLICATION + " is already installed in /usr/share/"  + settings.APPLICATION + ", remove and start again." + colors.RESET
+      print colors.BGRED + "(x) Error: "  + settings.APPLICATION + " is already installed in /usr/share/"  + settings.APPLICATION + ", remove and start again." + colors.RESET
       print ""
       sys.exit(0)
       
@@ -61,8 +61,8 @@ def installer():
 	  requirments.do_check(item)
       else:
 	print "[" + colors.RED + " FAILED " + colors.RESET + "]"
-	print colors.RED + "(x) Error: The installer is not designed for any other Linux distro than Ubuntu / Debian." + colors.RESET
-	print colors.RED + "    Please install manually: " + dependencies + colors.RESET
+	print colors.BGRED + "(x) Error: The installer is not designed for any other Linux distro than Ubuntu / Debian." + colors.RESET
+	print colors.BGRED + "    Please install manually: " + dependencies + colors.RESET
 	print ""
 	sys.exit(0)
 	
@@ -105,8 +105,8 @@ def installer():
 
   else :
     print "[" + colors.RED + " FAILED " + colors.RESET + "]"
-    print colors.RED + "(x) Error: The installer is not designed for any other system other than Linux." + colors.RESET
-    print colors.RED + "    Please install manually: " + packages + dependencies + colors.RESET
+    print colors.BGRED + "(x) Error: The installer is not designed for any other system other than Linux." + colors.RESET
+    print colors.BGRED + "    Please install manually: " + packages + dependencies + colors.RESET
     print ""
     sys.exit(0)
 

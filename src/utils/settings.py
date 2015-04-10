@@ -2,7 +2,7 @@
 # encoding: UTF-8
 
 """
- This file is part of commix tool.
+ This file is part of commix (@commixproject) tool.
  Copyright (c) 2015 Anastasios Stasinopoulos (@ancst).
  https://github.com/stasinopoulos/commix
 
@@ -81,4 +81,7 @@ MAX_OPTION_LENGTH = 18
 # Python version.
 PYTHON_VERSION = sys.version.split()[0]
 
-
+# Enumeration Commands
+CURRENT_USER = "whoami"
+HOSTNAME = "hostname"
+ISROOT = "echo $(id -u)"

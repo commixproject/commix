@@ -2,7 +2,7 @@
 # encoding: UTF-8
 
 """
- This file is part of commix tool.
+ This file is part of commix (@commixproject) tool.
  Copyright (c) 2015 Anastasios Stasinopoulos (@ancst).
  https://github.com/stasinopoulos/commix
 
@@ -25,13 +25,13 @@ from src.utils import settings
 
 from src.core.requests import authentication
 
-from src.core.injections.results_based.techniques import classic
-from src.core.injections.results_based.techniques import eval_based
-from src.core.injections.blind_based.techniques import time_based
-from src.core.injections.semiblind_based.techniques import file_based 
+from src.core.injections.results_based.techniques.classic import cb_handler
+from src.core.injections.results_based.techniques.eval_based import eb_handler
+from src.core.injections.blind_based.techniques.time_based import tb_handler
+from src.core.injections.semiblind_based.techniques.file_based import fb_handler 
 
 """
- Command Injection and exploitation handler.
+ Command Injection and exploitation controler.
  Checks if the testable parameter is exploitable.
 """
 
@@ -64,7 +64,7 @@ def do_check(url):
     authentication.auth_process()
 	    
   elif menu.options.auth_url or menu.options.auth_data: 
-    print colors.RED + "(x) Error: You must specify both login panel URL and login parameters.\n" + colors.RESET
+    print colors.BGRED + "(x) Error: You must specify both login panel URL and login parameters.\n" + colors.RESET
     sys.exit(0)
     
   else:
@@ -79,75 +79,75 @@ def do_check(url):
 
   # Check if it is vulnerable to classic command injection technique.
   if menu.options.tech == "classic":
-    if classic.exploitation(url,delay,filename,http_request_method) == False:
+    if cb_handler.exploitation(url,delay,filename,http_request_method) == False:
       if http_request_method == "GET":
-	print colors.RED + "(x) The '"+ url +"' appear to be not injectable." + colors.RESET
+	print colors.BGRED + "(x) The '"+ url +"' appear to be not injectable." + colors.RESET
       else:
-	print colors.RED + "(x) The '"+ parameter +"' appear to be not injectable." + colors.RESET
+	print colors.BGRED + "(x) The '"+ parameter +"' appear to be not injectable." + colors.RESET
     print "(*) The scan has finished successfully!"
     print "(*) Results can be found at : '" + os.getcwd() + "/" + filename +".txt' \n"
     sys.exit(0)
     
   # Check if it is vulnerable to eval-based command injection technique.
   elif menu.options.tech == "eval-based":
-    if eval_based.exploitation(url,delay,filename,http_request_method) == False:
+    if eb_handler.exploitation(url,delay,filename,http_request_method) == False:
       if http_request_method == "GET":
-	print colors.RED + "(x) The '"+ url +"' appear to be not injectable." + colors.RESET
+	print colors.BGRED + "(x) The '"+ url +"' appear to be not injectable." + colors.RESET
       else:
-	print colors.RED + "(x) The '"+ parameter +"' appear to be not injectable." + colors.RESET
+	print colors.BGRED + "(x) The '"+ parameter +"' appear to be not injectable." + colors.RESET
     print "(*) The scan has finished successfully!"
     print "(*) Results can be found at : '" + os.getcwd() + "/" + filename +".txt' \n"
     sys.exit(0)
     
   # Check if it is vulnerable to time-based blind command injection technique.
   elif menu.options.tech == "time-based":
-    if time_based.exploitation(url,delay,filename,http_request_method) == False:
+    if tb_handler.exploitation(url,delay,filename,http_request_method) == False:
       if http_request_method == "GET":
-	print colors.RED + "(x) The '"+ url +"' appear to be not injectable." + colors.RESET
+	print colors.BGRED + "(x) The '"+ url +"' appear to be not injectable." + colors.RESET
       else:
-	print colors.RED + "(x) The '"+ parameter +"' appear to be not injectable." + colors.RESET
+	print colors.BGRED + "(x) The '"+ parameter +"' appear to be not injectable." + colors.RESET
     print "(*) The scan has finished successfully!"
     print "(*) Results can be found at : '" + os.getcwd() + "/" + filename +".txt' \n"
     sys.exit(0)
     
   # Check if it is vulnerable to file-based semiblind command injection technique.
   elif menu.options.tech == "file-based":
-    if file_based.exploitation(url,delay,filename,http_request_method) == False:
+    if fb_handler.exploitation(url,delay,filename,http_request_method) == False:
       if http_request_method == "GET":
-	print colors.RED + "(x) The '"+ url +"' appear to be not injectable." + colors.RESET
+	print colors.BGRED + "(x) The '"+ url +"' appear to be not injectable." + colors.RESET
       else:
-	print colors.RED + "(x) The '"+ parameter +"' appear to be not injectable." + colors.RESET
+	print colors.BGRED + "(x) The '"+ parameter +"' appear to be not injectable." + colors.RESET
     print "(*) The scan has finished successfully!"
     print "(*) Results can be found at : '" + os.getcwd() + "/" + filename +".txt' \n"
     sys.exit(0)
   
   else:
     # Automated command injection and exploitation.
-    if classic.exploitation(url,delay,filename,http_request_method) == False:
+    if cb_handler.exploitation(url,delay,filename,http_request_method) == False:
 	classic_state = False
     else:
       classic_state = True
       
-    if eval_based.exploitation(url,delay,filename,http_request_method) == False:
+    if eb_handler.exploitation(url,delay,filename,http_request_method) == False:
       eval_based_state = False
     else:
       eval_based_state = True
       
-    if time_based.exploitation(url,delay,filename,http_request_method) == False:
+    if tb_handler.exploitation(url,delay,filename,http_request_method) == False:
       time_based_state = False
     else:
       time_based_state = True
       
-    if file_based.exploitation(url,delay,filename,http_request_method) == False:
+    if fb_handler.exploitation(url,delay,filename,http_request_method) == False:
       file_based_state = False
     else:
       file_based_state = True
 
     if classic_state == False and eval_based_state == False and time_based_state == False and file_based_state == False :
       if http_request_method == "GET":
-	print colors.RED + "(x) The '"+ url +"' appear to be not injectable." + colors.RESET
+	print colors.BGRED + "(x) The '"+ url +"' appear to be not injectable." + colors.RESET
       else:
-	print colors.RED + "(x) The '"+ parameter +"' appear to be not injectable." + colors.RESET
+	print colors.BGRED + "(x) The '"+ parameter +"' appear to be not injectable." + colors.RESET
 	    
   print "\n(*) The scan has finished successfully!"
   print "(*) Results can be found at : '" + os.getcwd() + "/" + filename +".txt' \n"

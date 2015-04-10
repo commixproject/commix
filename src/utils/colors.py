@@ -2,7 +2,7 @@
 # encoding: UTF-8
 
 """
- This file is part of commix tool.
+ This file is part of commix (@commixproject) tool.
  Copyright (c) 2015 Anastasios Stasinopoulos (@ancst).
  https://github.com/stasinopoulos/commix
 
@@ -18,13 +18,17 @@
  ANSI color codes
 """
 
+# Font colors
 RESET = '\033[0;0m'
 BOLD = '\033[1m'
 UNDERL = '\033[4m'
 GREY = '\033[90m'
-RED = '\033[91m'
+RED = '\033[31m'
 GREEN = '\033[32m'
 YELLOW = '\033[33m'
 BLUE = '\033[94m'
 PURPLE = '\033[95m'
 CYAN = '\033[96m'
+
+# Background Colors
+BGRED = '\033[41m'

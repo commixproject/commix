@@ -2,7 +2,7 @@
 # encoding: UTF-8
 
 """
- This file is part of commix tool.
+ This file is part of commix (@commixproject) tool.
  Copyright (c) 2015 Anastasios Stasinopoulos (@ancst).
  https://github.com/stasinopoulos/commix
 
@@ -30,7 +30,7 @@ def banner():
   /'___\ / __`\ /' __` __`\ /' __` __`\/\ \ /\ \/'\   
  /\ \__//\ \L\ \/\ \/\ \/\ \/\ \/\ \/\ \ \ \\\/>  </  
  \ \____\ \____/\ \_\ \_\ \_\ \_\ \_\ \_\ \_\\/\_/\\_\\
-  \/____/\/___/  \/_/\/_/\/_/\/_/\/_/\/_/\/_/\//\/_/ { """ + colors.RED + settings.VERSION  + settings.COMMIT_ID + colors.RESET + """ }
+  \/____/\/___/  \/_/\/_/\/_/\/_/\/_/\/_/\/_/\//\/_/ { """ + colors.BOLD + colors.RED + settings.VERSION  + settings.COMMIT_ID + colors.RESET + """ }
 
 +--
 """ + colors.BOLD + settings.DESCRIPTION + colors.RESET + """
@@ -73,7 +73,7 @@ target = OptionGroup(parser, colors.BOLD + "Target" + colors.RESET,
 target.add_option("--url",
                 action="store",
 		dest="url",
-		help="Target URL.")
+		help="Target URL")
 		
 target.add_option("--url-reload",
                 action="store_true",
@@ -131,6 +131,27 @@ request.add_option("--auth-cred",
 		dest="auth_cred",
                 help="HTTP Basic Authentication credentials (e.g. 'admin:admin').")
 
+# Enumeration options
+enumeration = OptionGroup(parser, colors.BOLD + "Enumeration" + colors.RESET, 
+			"These options can be used, to enumerate the target host.")
+
+enumeration.add_option("--current-user", 
+		action="store_true",
+		dest="current_user",
+		default = False,
+		help="Retrieve current user name.")
+
+enumeration.add_option("--hostname", 
+		action="store_true",
+		dest="hostname",
+		default = False,
+		help="Retrieve current hostname.")
+
+enumeration.add_option("--is-root", 
+		action="store_true",
+		dest="is_root",
+		default = False,
+		help="Check if the current user have root privs.")
 # Injection options
 injection = OptionGroup(parser, colors.BOLD + "Injection" + colors.RESET, 
 			"These options can be used, to specify which parameters to inject and to provide custom injection payloads.")
@@ -138,7 +159,7 @@ injection = OptionGroup(parser, colors.BOLD + "Injection" + colors.RESET,
 injection.add_option("--data", 
 		action="store",
 		dest="data",
-		help="POST data to inject (use '"+settings.INJECT_TAG+"' tag).")
+		help="POST data to inject (use '"+settings.INJECT_TAG+"' tag to specify the testable parameter).")
 
 injection.add_option("--suffix", 
 		action="store",
@@ -190,8 +211,15 @@ injection.add_option("--alter-shell",
 		default = False,
 		help="Use an alternative os-shell (Python). Available, only for 'tempfile-based' injections.")
 
+injection.add_option("--os-shell", 
+		action="store",
+		dest="os_shell",
+		default = False,
+		help="Execute a single operating system command.")
+
 parser.add_option_group(target)
 parser.add_option_group(request)
+parser.add_option_group(enumeration)
 parser.add_option_group(injection)
 
 # Dirty hack from SQLMAP, to display longer options without breaking into two lines.

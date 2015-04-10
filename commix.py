@@ -2,7 +2,7 @@
 # encoding: UTF-8
 
 """
- This file is part of commix tool.
+ This file is part of commix (@commixproject) tool.
  Copyright (c) 2015 Anastasios Stasinopoulos (@ancst).
  https://github.com/stasinopoulos/commix
 
@@ -26,7 +26,7 @@ from src.utils import install
 
 from src.core.requests import proxy
 from src.core.requests import headers
-from src.core.injections import handler
+from src.core.injections import controller
 
 
 """
@@ -65,7 +65,7 @@ def main():
 
     if menu.options.url:
 
-      print "\n(*) Initializing, please wait... "
+      print "(*) Initializing, please wait... "
       url = menu.options.url
       
       try:
@@ -83,18 +83,18 @@ def main():
 	  sys.exit(0)
 
 	elif e.getcode() == 401:
-	  print colors.RED + "(x) Error: Authorization required!\n" + colors.RESET
+	  print colors.BGRED + "(x) Error: Authorization required!" + colors.RESET + "\n"
 	  sys.exit(0)
 
 	elif e.getcode() == 404:
-	  print colors.RED + "(x) Error: The host seems to be down!\n" + colors.RESET
+	  print colors.BGRED + "(x) Error: The host seems to be down!" + colors.RESET + "\n"
 	  sys.exit(0)
 
 	else:
 	  raise
 
       except urllib2.URLError, e:
-	  print colors.RED + "(x) Error: The host seems to be down!" + colors.RESET
+	  print colors.BGRED + "(x) Error: The host seems to be down!" + colors.RESET + "\n"
 	  sys.exit(0)
 	
       except httplib.BadStatusLine, e:
@@ -102,15 +102,15 @@ def main():
 	  pass
 	
     else:
-      print colors.RED + "(x) Error: You must specify the target URL.\n" + colors.RESET
+      print colors.BGRED + "(x) Error: You must specify the target URL." + colors.RESET + "\n"
       sys.exit(0)
       
    #Check if defined "--proxy" option.
     if menu.options.proxy:
       proxy.do_check(url)
 
-    # Launch injection and exploitation handler.
-    handler.do_check(url)
+    # Launch injection and exploitation controller.
+    controller.do_check(url)
     
   except (KeyboardInterrupt, SystemExit): 
     print ""

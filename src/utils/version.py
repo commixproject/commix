@@ -2,7 +2,7 @@
 # encoding: UTF-8
 
 """
- This file is part of commix tool.
+ This file is part of commix (@commixproject) tool.
  Copyright (c) 2015 Anastasios Stasinopoulos (@ancst).
  https://github.com/stasinopoulos/commix
 
@@ -30,5 +30,5 @@ def show_version():
 """
 def python_version():
   if settings.PYTHON_VERSION >= "3" or settings.PYTHON_VERSION < "2.6":
-    print colors.RED + "(x) Error: Incompatible Python version (" + settings.PYTHON_VERSION + ") detected."
+    print colors.BGRED + "(x) Error: Incompatible Python version (" + settings.PYTHON_VERSION + ") detected."
     sys.exit(1)
