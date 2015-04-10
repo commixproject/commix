@@ -63,7 +63,7 @@ Download commix by cloning the Git repository:
 
     --current-user	Retrieve current user.
     --hostname		Retrieve server hostname.
-    --is-root           Check if the current user have root privs.
+    --is-root		Check if the current user have root privs.
 
 ####Injection
     These options can be used, to specify which parameters to inject and
