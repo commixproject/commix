@@ -35,6 +35,8 @@ def do_check(separator,TAG,prefix,suffix,http_request_method,url,vuln_parameter)
     response = eb_injector.injection(separator,TAG,cmd,prefix,suffix,http_request_method,url,vuln_parameter)
     shell = eb_injector.injection_results(response,TAG)
     if shell:
+      if menu.options.verbose:
+	print ""
       shell = "".join(str(p) for p in shell).replace(" ", "", 1)
       print "  (+) Current User : "+ colors.YELLOW + colors.BOLD + shell + colors.RESET + ""
 
@@ -44,6 +46,8 @@ def do_check(separator,TAG,prefix,suffix,http_request_method,url,vuln_parameter)
     response = eb_injector.injection(separator,TAG,cmd,prefix,suffix,http_request_method,url,vuln_parameter)
     shell = eb_injector.injection_results(response,TAG)
     if shell:
+      if menu.options.verbose:
+	print ""
       sys.stdout.write( "  (+) Current user have root privs :")
       sys.stdout.flush()
       shell = "".join(str(p) for p in shell)
@@ -59,6 +63,8 @@ def do_check(separator,TAG,prefix,suffix,http_request_method,url,vuln_parameter)
     response = eb_injector.injection(separator,TAG,cmd,prefix,suffix,http_request_method,url,vuln_parameter)
     shell = eb_injector.injection_results(response,TAG)
     if shell:
+      if menu.options.verbose:
+	print ""
       shell = "".join(str(p) for p in shell).replace(" ", "", 1)
       print "  (+) Hostname : "+ colors.YELLOW + colors.BOLD +  shell + colors.RESET + ""
 
@@ -68,6 +74,8 @@ def do_check(separator,TAG,prefix,suffix,http_request_method,url,vuln_parameter)
     response = eb_injector.injection(separator,TAG,cmd,prefix,suffix,http_request_method,url,vuln_parameter)
     shell = eb_injector.injection_results(response,TAG)
     if shell:
+      if menu.options.verbose:
+	print ""
       shell = "".join(str(p) for p in shell).replace(" ", "", 1)
       print "\n" + colors.GREEN + colors.BOLD + shell + colors.RESET
       sys.exit(0)

@@ -204,7 +204,7 @@ def fb_injection_handler(url,delay,filename,http_request_method):
 	    print "  (+) Payload : "+ colors.YELLOW + colors.BOLD + re.sub("%20", " ", payload) + colors.RESET
 	    
 	  # Check for any enumeration options.
-	  fb_enumeration.do_check(separator,payload,TAG,prefix,suffix,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE)
+	  fb_enumeration.do_check(separator,payload,TAG,prefix,suffix,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,delay)
 	      
 	  # Pseudo-Terminal shell
 	  gotshell = raw_input("\n(*) Do you want a Pseudo-Terminal shell? [Y/n] > ")
@@ -225,7 +225,7 @@ def fb_injection_handler(url,delay,filename,http_request_method):
 		  shell = fb_injector.injection_results(url,OUTPUT_TEXTFILE,delay)
 		  
 		  if shell:
-		    shell = "".join(str(p) for p in shell)
+		    shell = " ".join(str(p) for p in shell)
 		    print "\n" + colors.GREEN + colors.BOLD + shell + colors.RESET + "\n"
 
 	      except KeyboardInterrupt: 

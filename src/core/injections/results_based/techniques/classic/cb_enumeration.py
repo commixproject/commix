@@ -34,6 +34,8 @@ def do_check(separator,TAG,prefix,suffix,whitespace,http_request_method,url,vuln
     response = cb_injector.injection(separator,TAG,cmd,prefix,suffix,whitespace,http_request_method,url,vuln_parameter)
     shell = cb_injector.injection_results(response,TAG)
     if shell:
+      if menu.options.verbose:
+	print ""
       shell = "".join(str(p) for p in shell)
       print "  (+) Current User : "+ colors.YELLOW + colors.BOLD + shell + colors.RESET + ""
 
@@ -43,6 +45,8 @@ def do_check(separator,TAG,prefix,suffix,whitespace,http_request_method,url,vuln
     response = cb_injector.injection(separator,TAG,cmd,prefix,suffix,whitespace,http_request_method,url,vuln_parameter)
     shell = cb_injector.injection_results(response,TAG)
     if shell:
+      if menu.options.verbose:
+	print ""
       sys.stdout.write( "  (+) Current user have root privs :")
       sys.stdout.flush()
       shell = "".join(str(p) for p in shell)
@@ -57,6 +61,8 @@ def do_check(separator,TAG,prefix,suffix,whitespace,http_request_method,url,vuln
     response = cb_injector.injection(separator,TAG,cmd,prefix,suffix,whitespace,http_request_method,url,vuln_parameter)
     shell = cb_injector.injection_results(response,TAG)
     if shell:
+      if menu.options.verbose:
+	print ""
       shell = "".join(str(p) for p in shell)
       print "  (+) Hostname : "+ colors.YELLOW + colors.BOLD +  shell + colors.RESET + ""
 
@@ -66,6 +72,8 @@ def do_check(separator,TAG,prefix,suffix,whitespace,http_request_method,url,vuln
     response = cb_injector.injection(separator,TAG,cmd,prefix,suffix,whitespace,http_request_method,url,vuln_parameter)
     shell = cb_injector.injection_results(response,TAG)
     if shell:
+      if menu.options.verbose:
+	print ""
       shell = "".join(str(p) for p in shell)
       print "\n" + colors.GREEN + colors.BOLD + shell + colors.RESET
       sys.exit(0)

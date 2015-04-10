@@ -27,7 +27,7 @@ from src.core.injections.semiblind_based.techniques.file_based import fb_injecto
  The "File-based" technique on Semiblind-based OS Command Injection.
 """
 
-def do_check(separator,payload,TAG,prefix,suffix,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE):
+def do_check(separator,payload,TAG,prefix,suffix,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,delay):
 
   # Current user enumeration
   if menu.options.current_user:
@@ -35,6 +35,8 @@ def do_check(separator,payload,TAG,prefix,suffix,http_request_method,url,vuln_pa
     response = fb_injector.injection(separator,payload,TAG,cmd,prefix,suffix,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE)			  
     shell = fb_injector.injection_results(url,OUTPUT_TEXTFILE,delay)
     if shell:
+      if menu.options.verbose:
+	print ""
       shell = "".join(str(p) for p in shell)
       print "  (+) Current User : "+ colors.YELLOW + colors.BOLD + shell + colors.RESET + ""
 
@@ -58,6 +60,8 @@ def do_check(separator,payload,TAG,prefix,suffix,http_request_method,url,vuln_pa
     response = fb_injector.injection(separator,payload,TAG,cmd,prefix,suffix,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE)			  
     shell = fb_injector.injection_results(url,OUTPUT_TEXTFILE,delay)
     if shell:
+      if menu.options.verbose:
+	print ""
       shell = "".join(str(p) for p in shell)
       print "  (+) Hostname : "+ colors.YELLOW + colors.BOLD +  shell + colors.RESET + ""
       
@@ -67,6 +71,8 @@ def do_check(separator,payload,TAG,prefix,suffix,http_request_method,url,vuln_pa
     response = fb_injector.injection(separator,payload,TAG,cmd,prefix,suffix,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE)		  
     shell = fb_injector.injection_results(url,OUTPUT_TEXTFILE,delay)
     if shell:
+      if menu.options.verbose:
+	print ""
       shell = "".join(str(p) for p in shell)
       print "\n" + colors.GREEN + colors.BOLD + shell + colors.RESET
       sys.exit(0)
