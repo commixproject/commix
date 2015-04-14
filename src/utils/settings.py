@@ -60,11 +60,20 @@ PREFIXES = ["","'",")","')","|","&","%0a","%27","%29","%27%29","%7C","%26"]
 # The command injection suffixes.
 SUFFIXES = ["","'","#","//","\\\\","&","|","%27","%5C%5C","%27%29","%26","%7C"]
 
-# The white-spaces
-WHITESPACES = ["%20","$IFS"]
-
 # Bad combination of prefix and separator
 JUNK_COMBINATION = ["&&&","|||","|&&","&|","&;","|;","%7C;","%26;","%27;","%27||","%29&","%27%29&","%7C&"]
+
+# The code injection separators.
+EVAL_SEPARATORS = ["",";"]
+
+# The code injection prefixes.
+EVAL_PREFIXES = ["",")","')","\")",");","');","\");","\".","'.",");}","');}","\");}"]
+
+# The code injection suffixes.
+EVAL_SUFFIXES = ["","\\\\","//","#",".\"",".'"]
+
+# The white-spaces
+WHITESPACES = ["%20","$IFS"]
 
 # Time delay
 DELAY = 1
