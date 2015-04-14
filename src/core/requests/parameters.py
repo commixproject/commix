@@ -51,31 +51,21 @@ def do_GET_check(url):
       
     # Reconstruct the url
     url = url_part +"?"+ parameters
-    
     return url
 
   # Check if multiple paramerters
   else:
     all_params = '&'.join(multi_parameters)
-
+    
     # Check if defined the "INJECT_HERE" tag
     if settings.INJECT_TAG in all_params:
       for i in range(0,len(multi_parameters)):
-	if settings.INJECT_TAG not in multi_parameters[i]:
-	  
-	  # Check it is on first parameter
-	  if i == 0 :
-	    old = re.findall(r'=(.*)', multi_parameters[i])
-	    old = ''.join(old)
-	  else :
-	    old = value
-	    
-	  # Grab the value of parameter.
-	  value = re.findall(r'=(.*)', multi_parameters[i])
-	  value = ''.join(value)
-	  parameter = '&'.join(multi_parameters)
-	  url = url_part +"?"+ parameter
-	  
+	# Grab the value of parameter.
+	value = re.findall(r'=(.*)', multi_parameters[i])
+	value = ''.join(value)
+	parameter = '&'.join(multi_parameters)
+
+      url = url_part +"?"+ parameter  
       return url
     
     else:
@@ -156,18 +146,11 @@ def do_POST_check(parameter):
     if settings.INJECT_TAG in all_params:
       for i in range(0,len(multi_parameters)):
 	if settings.INJECT_TAG not in multi_parameters[i]:
-	  
-	  # Check it is on first parameter
-	  if i == 0 :
-	    old = re.findall(r'=(.*)', multi_parameters[i])
-	    old = ''.join(old)
-	  else :
-	    old = value
-	    
 	  # Grab the value of parameter.
 	  value = re.findall(r'=(.*)', multi_parameters[i])
 	  value = ''.join(value)
 	  parameter = '&'.join(multi_parameters)
+	  
       return parameter
     
     else:
