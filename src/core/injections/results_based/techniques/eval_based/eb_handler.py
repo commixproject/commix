@@ -59,9 +59,9 @@ def eb_injection_handler(url,delay,filename,http_request_method):
   output_file.write("\n(+) Technique : " + technique.title())
   output_file.close()
   
-  for prefix in settings.PREFIXES:
-    for suffix in settings.SUFFIXES:
-      for separator in settings.SEPARATORS:
+  for prefix in settings.EVAL_PREFIXES:
+    for suffix in settings.EVAL_SUFFIXES:
+      for separator in settings.EVAL_SEPARATORS:
 	
 	# Check for bad combination of prefix and separator
 	combination = prefix + separator
