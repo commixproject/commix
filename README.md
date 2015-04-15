@@ -23,6 +23,11 @@ The tool is only for testing and academic purposes and can only be used where st
 [Python](http://www.python.org/download/) version **2.6.x** or **2.7.x** is required for running this program.
 
 #Installation
+
+Commix comes pre-installed on the following Linux distributions:
+
+- [BlackArch](http://blackarch.org/)
+
 Download commix by cloning the Git repository:
 
     git clone https://github.com/stasinopoulos/commix.git commix
