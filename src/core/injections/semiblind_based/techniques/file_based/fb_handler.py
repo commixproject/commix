@@ -125,8 +125,11 @@ def fb_injection_handler(url,delay,filename,http_request_method):
 	  time.sleep(delay)
 	  
 	  try:
+	    # Check if defined extra headers.
+	    request = urllib2.Request(output)
+	    headers.do_check(request)
 	    # Evaluate test results.
-	    output = urllib2.urlopen(output)
+	    output = urllib2.urlopen(request)
 	    html_data = output.read()
 	    shell = re.findall(r""+TAG+"", html_data)
 	    
