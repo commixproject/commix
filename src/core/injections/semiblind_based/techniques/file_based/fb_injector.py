@@ -73,6 +73,8 @@ def injection_test(payload,http_request_method,url):
 
     else:
       response = urllib2.urlopen(request)
+      # Just to be sure
+      response.read()
       
   # Check if defined method is POST.
   else:
@@ -106,6 +108,8 @@ def injection_test(payload,http_request_method,url):
 
     else:
       response = urllib2.urlopen(request)
+      # Just to be sure
+      response.read()
       
   return response,vuln_parameter
 
@@ -212,9 +216,13 @@ def injection_results(url,OUTPUT_TEXTFILE,delay):
   last_param = path_parts[count]
   output = url.replace(last_param, OUTPUT_TEXTFILE)
   time.sleep(delay)
+
+  # Check if defined extra headers.
+  request = urllib2.Request(output)
+  headers.do_check(request)
   
-  # Grab execution results
-  output = urllib2.urlopen(output)
+  # Evaluate test results.
+  output = urllib2.urlopen(request)
   html_data = output.read()
   shell = re.findall(r"(.*)", html_data)
   

@@ -86,7 +86,12 @@ def fb_injection_handler(url,delay,filename,http_request_method):
 	# The output file for file-based injection technique.
 	OUTPUT_TEXTFILE = B64_ENC_TAG + ".txt"
 	
-	sys.stdout.write( "\n(*) Trying to upload the '"+ OUTPUT_TEXTFILE +"' on "+settings.SRV_ROOT_DIR+"... ")
+	if menu.options.srv_root_dir:
+	  SRV_ROOT_DIR = menu.options.srv_root_dir
+	else:
+	  SRV_ROOT_DIR = settings.SRV_ROOT_DIR
+	  
+	sys.stdout.write( "\n(*) Trying to upload the '"+ OUTPUT_TEXTFILE +"' on " + SRV_ROOT_DIR + "... ")
 	try:
 	  
 	  # File-based decision payload (check if host is vulnerable).
@@ -128,6 +133,7 @@ def fb_injection_handler(url,delay,filename,http_request_method):
 	    # Check if defined extra headers.
 	    request = urllib2.Request(output)
 	    headers.do_check(request)
+	    
 	    # Evaluate test results.
 	    output = urllib2.urlopen(request)
 	    html_data = output.read()

@@ -70,13 +70,12 @@ def main():
       
       try:
 	request = urllib2.Request(url)
-	
-	# Check if defined extra headers.
+	#Check if defined extra headers.
 	headers.do_check(request)
-	
+        #print request.headers
 	response = urllib2.urlopen(request)
 	content = response.read()
-	
+
       except urllib2.HTTPError, e:
 	if e.getcode() == 500:
 	  content = e.read()
@@ -85,7 +84,11 @@ def main():
 	elif e.getcode() == 401:
 	  print colors.BGRED + "(x) Error: Authorization required!" + colors.RESET + "\n"
 	  sys.exit(0)
-
+	  
+	elif e.getcode() == 403:
+	  print colors.BGRED + "(x) Error: You don't have permission to access this page." + colors.RESET + "\n"
+	  sys.exit(0)
+	  
 	elif e.getcode() == 404:
 	  print colors.BGRED + "(x) Error: The host seems to be down!" + colors.RESET + "\n"
 	  sys.exit(0)

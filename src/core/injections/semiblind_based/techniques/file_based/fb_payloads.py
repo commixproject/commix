@@ -23,7 +23,7 @@
 def decision(separator,B64_ENC_TAG,B64_DEC_TRICK,OUTPUT_TEXTFILE):
   
   payload = (separator + " " +
-	     "$(echo '" + B64_ENC_TAG + "'" + B64_DEC_TRICK + " >" + OUTPUT_TEXTFILE + ")"
+	     "$(echo " + B64_ENC_TAG + "" + B64_DEC_TRICK + " > " + OUTPUT_TEXTFILE + ")"
 	    ) 
   
   return payload

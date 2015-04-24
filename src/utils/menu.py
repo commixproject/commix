@@ -197,7 +197,13 @@ injection.add_option("--tmp-path",
 		action="store",
 		dest="tmp_path",
 		default = False,
-		help="Set remote absolute path of temporary files directory.")
+		help="Set remote absolute path of temporary files directory (Default: /tmp/).")
+
+injection.add_option("--root-dir", 
+		action="store",
+		dest="srv_root_dir",
+		default = False,
+		help="Set remote absolute path of web server's root directory (Default: /var/www/).")
 
 injection.add_option("--icmp-exfil", 
 		action="store",
