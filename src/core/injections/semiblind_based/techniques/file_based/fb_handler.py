@@ -54,7 +54,29 @@ def fb_injection_handler(url,delay,filename,http_request_method):
   technique = "file-based semiblind injection technique"
   
   print colors.BOLD + "(*) Testing the "+ technique + "... " + colors.RESET
+
+  # Change TAG on every request to prevent false-positive resutls.
+  TAG = ''.join(random.choice(string.ascii_uppercase) for i in range(6)) 
+
+  # Check if defined "--base64" option.
+  if menu.options.base64_trick == True:
+    B64_ENC_TAG = base64.b64encode(TAG)
+    B64_DEC_TRICK = settings.B64_DEC_TRICK
+  else:
+    B64_ENC_TAG = TAG
+    B64_DEC_TRICK = ""
+    
+  # The output file for file-based injection technique.
+  OUTPUT_TEXTFILE = B64_ENC_TAG + ".txt"
   
+  if menu.options.srv_root_dir:
+    SRV_ROOT_DIR = menu.options.srv_root_dir
+  else:
+    SRV_ROOT_DIR = settings.SRV_ROOT_DIR
+
+  sys.stdout.write("(*) Trying to upload the '"+ OUTPUT_TEXTFILE +"' on " + SRV_ROOT_DIR + "... ")
+  sys.stdout.flush()
+
   # Print the findings to log file.
   output_file = open(filename + ".txt", "a")
   output_file.write("\n---")
@@ -70,28 +92,6 @@ def fb_injection_handler(url,delay,filename,http_request_method):
 	combination = prefix + separator
 	if combination in settings.JUNK_COMBINATION:
 	  prefix = ""
-
-	# Change TAG on every request to prevent false-positive resutls.
-	TAG = ''.join(random.choice(string.ascii_uppercase) for i in range(6)) 
-
-	# Check if defined "--base64" option.
-	if menu.options.base64_trick == True:
-	  B64_ENC_TAG = base64.b64encode(TAG)
-	  B64_DEC_TRICK = settings.B64_DEC_TRICK
-	else:
-	  B64_ENC_TAG = TAG
-	  B64_DEC_TRICK = ""
-	  
-	# The output file for file-based injection technique.
-	OUTPUT_TEXTFILE = B64_ENC_TAG + ".txt"
-	
-	if menu.options.srv_root_dir:
-	  SRV_ROOT_DIR = menu.options.srv_root_dir
-	else:
-	  SRV_ROOT_DIR = settings.SRV_ROOT_DIR
-
-	sys.stdout.write("(*) Trying to upload the '"+ OUTPUT_TEXTFILE +"' on " + SRV_ROOT_DIR + "... ")
-	sys.stdout.flush()
 
 	try:
 	  # File-based decision payload (check if host is vulnerable).
@@ -142,22 +142,8 @@ def fb_injection_handler(url,delay,filename,http_request_method):
 	  # If temp-based technique failed, use the "/tmp/" directory for tempfile-based technique.
 	  except urllib2.HTTPError, e:
 	      if e.getcode() == 404 :
-		if not menu.options.verbose:
-		  print "[" + colors.RED + " FAILED "+colors.RESET+"]"
-		else:
-		  print colors.BGRED + "\n(x) Error: Unable to upload the '"+ OUTPUT_TEXTFILE +"' on '" + settings.SRV_ROOT_DIR + "'." + colors.RESET + ""
-		tmp_upload = raw_input("(*) Do you want to upload file, on temporary directory [Y/n] > ")
-		if tmp_upload == "Y" or tmp_upload == "y":
-		  stop_injection = True
-		  if menu.options.tmp_path:
-		    tmp_path = menu.options.tmp_path
-		  else:
-		    tmp_path = settings.TMP_PATH
-		  sys.stdout.write("(*) Trying to upload file, on temporary directory (" + tmp_path + ")...\n")
-		  tfb_handler.exploitation(url,delay,filename,tmp_path,http_request_method)     
-		  sys.exit(0)
-		else:
 		  continue
+		
 	      elif e.getcode() == 401:
 		print colors.BGRED + "(x) Error: Authorization required!" + colors.RESET + "\n"
 		sys.exit(0)
@@ -169,10 +155,11 @@ def fb_injection_handler(url,delay,filename,http_request_method):
 	except KeyboardInterrupt: 
 	  raise
 	
+	except urllib2.URLError, e:
+	  print "\n" + colors.BGRED + "(x) Error: " + e.reason + colors.RESET
+	  sys.exit(0)
+	
 	except :
-	  if stop_injection:
-	    raise
-	  else:
 	    continue
 	  
 	# Yaw, got shellz! 
@@ -253,16 +240,22 @@ def fb_injection_handler(url,delay,filename,http_request_method):
 		sys.exit(0)
 	    
 	  else:
-	    print "(*) Continue testing the "+ technique +"... "
 	    pass
 
   if no_result == True:
     if menu.options.verbose == False:
       print "[" + colors.RED + " FAILED "+colors.RESET+"]"
-      return False
-  
     else:
       print ""
+    if menu.options.tmp_path:
+      tmp_path = menu.options.tmp_path
+    else:
+      tmp_path = settings.TMP_PATH
+    tmp_upload = raw_input("(*) Do you want to try the temporary directory (" + tmp_path + ") [Y/n] > ")
+    if tmp_upload == "Y" or tmp_upload == "y":
+      sys.stdout.write("(*) Trying to upload file, on temporary directory (" + tmp_path + ")...\n")
+      tfb_handler.exploitation(url,delay,filename,tmp_path,http_request_method)     
+    else:
       return False
   
   else :
