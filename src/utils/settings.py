@@ -94,3 +94,7 @@ PYTHON_VERSION = sys.version.split()[0]
 CURRENT_USER = "whoami"
 HOSTNAME = "hostname"
 ISROOT = "echo $(id -u)"
+
+# 'Yes' or enter inputs
+# Accepts YES/Y/yes/y or "enter"
+CHOISE_YES = set(['yes','y', 'ye', ''])

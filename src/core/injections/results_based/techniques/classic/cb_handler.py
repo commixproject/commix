@@ -229,8 +229,8 @@ def cb_injection_handler(url,delay,filename,http_request_method):
 	    cb_enumeration.do_check(separator,TAG,prefix,suffix,whitespace,http_request_method,url,vuln_parameter)
 	    
 	    # Pseudo-Terminal shell
-	    gotshell = raw_input("\n(*) Do you want a Pseudo-Terminal shell? [Y/n] > ")
-	    if gotshell == "Y" or gotshell == "y":
+	    gotshell = raw_input("\n(*) Do you want a Pseudo-Terminal shell? [Y/n] > ").lower()
+	    if gotshell in settings.CHOISE_YES:
 	      print ""
 	      print "Pseudo-Terminal (type 'q' or use <Ctrl-C> to quit)"
 	      while True:

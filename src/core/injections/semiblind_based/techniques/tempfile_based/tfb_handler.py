@@ -157,8 +157,8 @@ def tfb_injection_handler(url,delay,filename,tmp_path,http_request_method):
 	tfb_enumeration.do_check(separator,maxlen,TAG,delay,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,alter_shell)
 	
 	# Pseudo-Terminal shell
-	gotshell = raw_input("\n(*) Do you want a Pseudo-Terminal shell? [Y/n] > ")
-	if gotshell == "Y" or gotshell == "y":
+	gotshell = raw_input("\n(*) Do you want a Pseudo-Terminal shell? [Y/n] > ").lower()
+	if gotshell in settings.CHOISE_YES:
 	  print ""
 	  print "Pseudo-Terminal (type 'q' or use <Ctrl-C> to quit)"
 	  while True:
