@@ -118,23 +118,22 @@ def vuln_GET_param(url):
 
 # Check if its not specified the 'INJECT_HERE' tag on GET Requests
 def do_POST_check(parameter):
-  
+
   # Split parameters 
   multi_parameters = parameter.split("&")
   
   # Check if single paramerter
   if len(multi_parameters) == 1:
-    
+
       # Check if defined the INJECT_TAG
-      if settings.INJECT_TAG not in parameters:
+      if settings.INJECT_TAG not in parameter:
 	
 	#Grab the value of parameter.
-	value = re.findall(r'=(.*)', parameters)
+	value = re.findall(r'=(.*)', parameter)
 	value = ''.join(value)
-	
 	# Replace the value of parameter with INJECT tag
 	inject_value = value.replace(value, settings.INJECT_TAG)
-	parameters = parameters.replace(value, inject_value)
+	parameter = parameter.replace(value, inject_value)
 	
       return parameter
   
