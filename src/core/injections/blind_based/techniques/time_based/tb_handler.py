@@ -41,7 +41,7 @@ from src.core.injections.blind_based.techniques.time_based import tb_enumeration
 # The "time-based" injection technique handler.
 #-------------------------------------------------
 def tb_injection_handler(url,delay,filename,http_request_method):
-  
+
   counter = 0
   vp_flag = True
   no_result = True
@@ -55,7 +55,7 @@ def tb_injection_handler(url,delay,filename,http_request_method):
   output_file.write("\n(+) Type : " + injection_type)
   output_file.write("\n(+) Technique : " + technique.title())
   output_file.close()
-    
+  
   # Check if defined "--maxlen" option.
   if menu.options.maxlen:
     maxlen = menu.options.maxlen
@@ -63,14 +63,15 @@ def tb_injection_handler(url,delay,filename,http_request_method):
   # Check if defined "--url-reload" option.
   if menu.options.url_reload == True:
     print colors.BGRED + "(x) Error: The '--url-reload' option is not available in "+ technique +"!" + colors.RESET
-
-  sys.stdout.write( colors.BOLD + "(*) Testing the "+ technique + "... " + colors.RESET)
-  sys.stdout.flush()
+  i = 0
+  # Calculate all possible combinations
+  total = (len(settings.PREFIXES) * len(settings.SEPARATORS) * len(settings.SUFFIXES) - len(settings.JUNK_COMBINATION))
   
   for prefix in settings.PREFIXES:
     for suffix in settings.SUFFIXES:
       for separator in settings.SEPARATORS:
-
+	i = i + 1
+	
 	# Check for bad combination of prefix and separator
 	combination = prefix + separator
 	if combination in settings.JUNK_COMBINATION:
@@ -84,7 +85,7 @@ def tb_injection_handler(url,delay,filename,http_request_method):
 	  try:
 	    # Time-based decision payload (check if host is vulnerable).
 	    payload = tb_payloads.decision(separator,TAG,j,delay,http_request_method)
-	    
+
 	    # Check if defined "--prefix" option.
 	    if menu.options.prefix:
 	      prefix = menu.options.prefix
@@ -106,7 +107,23 @@ def tb_injection_handler(url,delay,filename,http_request_method):
 		
 	    # Check if target host is vulnerable.
 	    how_long,vuln_parameter = tb_injector.injection_test(payload,http_request_method,url)
-
+	    if not menu.options.verbose:
+	      percent = ((i*100)/total)
+	      if how_long == delay:
+		percent = colors.GREEN + "SUCCEED" + colors.RESET
+	      elif percent == 100:
+		if no_result == True:
+		  percent = colors.RED + "FAILED" + colors.RESET
+		else:
+		    percent = str(percent)+"%"
+	      else:
+		percent = str(percent)+"%"
+	      sys.stdout.write(colors.BOLD + "\r(*) Testing the "+ technique + "... " + colors.RESET +  "[ " + percent + " ]")  
+	      sys.stdout.flush()
+	      
+	  except KeyboardInterrupt: 
+	    raise
+	
 	  except:
 	    continue
 	  
@@ -156,7 +173,7 @@ def tb_injection_handler(url,delay,filename,http_request_method):
 	      print "  (+) Type : "+ colors.YELLOW + colors.BOLD + injection_type + colors.RESET + ""
 	      print "  (+) Technique : "+ colors.YELLOW + colors.BOLD + technique.title() + colors.RESET + ""
 	      print "  (+) Parameter : "+ colors.YELLOW + colors.BOLD + vuln_parameter + colors.RESET + ""
-	      print "  (+) Payload : "+ colors.YELLOW + colors.BOLD + re.sub("%20", " ", payload) + colors.RESET + "\n"
+	      print "  (+) Payload : "+ colors.YELLOW + colors.BOLD + re.sub("%20", " ", payload) + colors.RESET
 	      
 	    # Check for any enumeration options.
 	    tb_enumeration.do_check(separator,maxlen,TAG,prefix,suffix,delay,http_request_method,url,vuln_parameter)
@@ -187,11 +204,11 @@ def tb_injection_handler(url,delay,filename,http_request_method):
 
 	    else:
 	      print "(*) Continue testing the "+ technique +"... "
-	      break
+	      pass
 	  
   if no_result == True:
     if menu.options.verbose == False:
-      print "[" + colors.RED + " FAILED "+colors.RESET+"]"
+      print ""
       return False
   
     else:
@@ -199,8 +216,10 @@ def tb_injection_handler(url,delay,filename,http_request_method):
       return False
   
   else :
-    print ""
-    
+    sys.stdout.write("\r")
+    sys.stdout.flush()
     
 def exploitation(url,delay,filename,http_request_method):
     tb_injection_handler(url,delay,filename,http_request_method)
+    
+#eof

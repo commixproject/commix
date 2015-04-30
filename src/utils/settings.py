@@ -51,23 +51,23 @@ except:
 # The base64 decode trick
 B64_DEC_TRICK = " | base64 -d "
 
-# The command injection separators.
-SEPARATORS = ["",";","&","|","||","&&","%0a","%26","%26%26","%7C","%7C%7C"]
-
 # The command injection prefixes.
-PREFIXES = ["","'",")","')","|","&","%0a","%27","%29","%27%29","%7C","%26"] 
+PREFIXES = ["","|","&","%7C","%26"] 
+
+# The command injection separators.
+SEPARATORS = ["",";","&","|","||","&&","%0a","%3B","%26","%26%26","%7C","%7C%7C"]
 
 # The command injection suffixes.
-SUFFIXES = ["","'","#","//","\\\\","&","|","%27","%5C%5C","%27%29","%26","%7C"]
+SUFFIXES = ["","#","//","\\\\","&","|","%5C%5C","%2F%2F","%26","%7C"]
 
 # Bad combination of prefix and separator
-JUNK_COMBINATION = ["&&&","|||","|&&","&|","&;","|;","%7C;","%26;","%27;","%27||","%29&","%27%29&","%7C&"]
+JUNK_COMBINATION = ["&&&","|||","|&&","&|","&;","|;","%7C;","%26;","%7C&"]
+
+# The code injection prefixes.
+EVAL_PREFIXES = ["","'",")","')","\")","\".","'.",");}","');}","\");}"]
 
 # The code injection separators.
 EVAL_SEPARATORS = ["",";"]
-
-# The code injection prefixes.
-EVAL_PREFIXES = ["",")","')","\")",");","');","\");","\".","'.",");}","');}","\");}"]
 
 # The code injection suffixes.
 EVAL_SUFFIXES = ["","\\\\","//","#",".\"",".'"]
@@ -95,6 +95,8 @@ CURRENT_USER = "whoami"
 HOSTNAME = "hostname"
 ISROOT = "echo $(id -u)"
 
-# 'Yes' or enter inputs
 # Accepts YES/Y/yes/y or "enter"
 CHOISE_YES = set(['yes','y', 'ye', ''])
+
+# Available injectipon techniques
+AVAILABLE_TECHNIQUES = set(["classic","eval-based","time-based","file-based"])

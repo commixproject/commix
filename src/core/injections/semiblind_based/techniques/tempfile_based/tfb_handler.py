@@ -64,12 +64,13 @@ def tfb_injection_handler(url,delay,filename,tmp_path,http_request_method):
   # Check if defined "--url-reload" option.
   if menu.options.url_reload == True:
     print colors.BGRED + "(x) Error: The '--url-reload' option is not available in "+ technique +"!" + colors.RESET
-
-  sys.stdout.write( colors.BOLD + "(*) Testing the "+ technique + "... " + colors.RESET)
-  sys.stdout.flush()
-
+  
+  i = 0
+  # Calculate all possible combinations
+  total = len(settings.SEPARATORS)
   for separator in settings.SEPARATORS:
-	    
+    i = i + 1
+	  
     # Change TAG on every request to prevent false-positive resutls.
     TAG = ''.join(random.choice(string.ascii_uppercase) for i in range(6))  
     
@@ -89,20 +90,48 @@ def tfb_injection_handler(url,delay,filename,tmp_path,http_request_method):
     for j in range(1,int(tag_length)):
       try:
 	# Tempfile-based decision payload (check if host is vulnerable).
-	if not alter_shell :
-	  payload = tfb_payloads.decision(separator,j,TAG,OUTPUT_TEXTFILE,delay,http_request_method)
-	  
-	else:
+	if alter_shell :
 	  payload = tfb_payloads.decision_alter_shell(separator,j,TAG,OUTPUT_TEXTFILE,delay,http_request_method)
+  
+	else:
+	  payload = tfb_payloads.decision(separator,j,TAG,OUTPUT_TEXTFILE,delay,http_request_method)
 
 	# Check if defined "--verbose" option.
 	if menu.options.verbose:
 	  if separator == ";" or separator == "&&" or separator == "||":
 	    sys.stdout.write("\n" + colors.GREY + payload + colors.RESET)
-
+	    
+	# Check if target host is vulnerable
 	how_long,vuln_parameter = tfb_injector.injection_test(payload,http_request_method,url)
-
+	if not menu.options.verbose:
+	  percent = ((i*100)/total)
+	  if how_long == delay:
+	    percent = colors.GREEN + "SUCCEED" + colors.RESET
+	  elif percent == 100:
+	    if no_result == True:
+	      percent = colors.RED + "FAILED" + colors.RESET
+	    else:
+		percent = str(percent)+"%"
+	  else:
+	    percent = str(percent)+"%"
+	  sys.stdout.write(colors.BOLD + "\r(*) Testing the "+ technique + "... " + colors.RESET +  "[ " + percent + " ]")  
+	  sys.stdout.flush()
+	  
+      except KeyboardInterrupt: 
+	raise
+      
       except:
+	if not menu.options.verbose:
+	  percent = ((i*100)/total)
+	  if percent == 100:
+	    if no_result == True:
+	      percent = colors.RED + "FAILED" + colors.RESET
+	    else:
+		percent = str(percent)+"%"
+	  else:
+	    percent = str(percent)+"%"
+	  sys.stdout.write(colors.BOLD + "\r(*) Testing the "+ technique + "... " + colors.RESET +  "[ " + percent + " ]")  
+	  sys.stdout.flush()
 	continue
       
       # Yaw, got shellz! 
@@ -182,11 +211,11 @@ def tfb_injection_handler(url,delay,filename,tmp_path,http_request_method):
 
 	else:
 	  print "(*) Continue testing the "+ technique +"... "
-	  break
-      
+	  pass
+	    
   if no_result == True:
     if menu.options.verbose == False:
-      print "[" + colors.RED + " FAILED "+colors.RESET+"]"
+      print ""
       return False
   
     else:
@@ -194,8 +223,12 @@ def tfb_injection_handler(url,delay,filename,tmp_path,http_request_method):
       return False
   
   else :
-    print ""
-    
+    if menu.options.verbose == True:
+      print ""
+    sys.stdout.write("\r")  
+    sys.stdout.flush()
     
 def exploitation(url,delay,filename,tmp_path,http_request_method):
     tfb_injection_handler(url,delay,filename,tmp_path,http_request_method)
+    
+#eof

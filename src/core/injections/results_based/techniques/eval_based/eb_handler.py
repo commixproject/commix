@@ -59,9 +59,14 @@ def eb_injection_handler(url,delay,filename,http_request_method):
   output_file.write("\n(+) Technique : " + technique.title())
   output_file.close()
   
+  i = 0
+  # Calculate all possible combinations
+  total = len(settings.EVAL_PREFIXES) * len(settings.EVAL_SEPARATORS) * len(settings.EVAL_SUFFIXES)
+  
   for prefix in settings.EVAL_PREFIXES:
     for suffix in settings.EVAL_SUFFIXES:
       for separator in settings.EVAL_SEPARATORS:
+	i = i + 1
 	
 	# Check for bad combination of prefix and separator
 	combination = prefix + separator
@@ -114,7 +119,23 @@ def eb_injection_handler(url,delay,filename,http_request_method):
 	    
 	  # Evaluate test results.
 	  shell = eb_injector.injection_test_results(response,TAG)
-
+	  if not menu.options.verbose:
+	    percent = ((i*100)/total)
+	    if percent == 100:
+	      if no_result == True:
+		percent = colors.RED + "FAILED" + colors.RESET
+	      else:
+		percent = str(percent)+"%"
+	    elif len(shell) != 0:
+	      percent = colors.GREEN + "SUCCEED" + colors.RESET
+	    else:
+	      percent = str(percent)+"%"
+	    sys.stdout.write(colors.BOLD + "\r(*) Testing the "+ technique + "... " + colors.RESET +  "[ " + percent + " ]")  
+	    sys.stdout.flush()
+	    
+	except KeyboardInterrupt: 
+	  raise
+	  
 	except:
 	  continue
 	
@@ -200,12 +221,13 @@ def eb_injection_handler(url,delay,filename,http_request_method):
 		sys.exit(0)
 	  
 	  else:
-	    print "(*) Continue testing the "+ technique +"... "
+	    sys.stdout.write("\r(*) Continue testing the "+ technique +"... ")
+	    sys.stdout.flush()
 	    pass
 	  
   if no_result == True:
     if menu.options.verbose == False:
-      print "[" + colors.RED + " FAILED "+colors.RESET+"]"
+      print ""
       return False
   
     else:
@@ -213,8 +235,10 @@ def eb_injection_handler(url,delay,filename,http_request_method):
       return False
   
   else :
-    print ""
-
+    sys.stdout.write("\r")
+    sys.stdout.flush()
 
 def exploitation(url,delay,filename,http_request_method):
     eb_injection_handler(url,delay,filename,http_request_method)
+
+#eof

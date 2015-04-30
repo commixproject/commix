@@ -297,7 +297,7 @@ def injection(separator,maxlen,TAG,cmd,delay,http_request_method,url,vuln_parame
 	if not menu.options.verbose:
 	  output.append(chr(ascii_char))
 	  percent = ((i*100)/j)
-	  sys.stdout.write("\r(*) Grabbing the output from '" + OUTPUT_TEXTFILE + "', please wait... ["+str(percent)+"%]")
+	  sys.stdout.write("\r(*) Grabbing the output from '" + OUTPUT_TEXTFILE + "', please wait... [ "+str(percent)+"% ]")
 	  sys.stdout.flush()
 	else:
 	  output.append(chr(ascii_char))

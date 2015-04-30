@@ -105,7 +105,7 @@ def cb_injection_handler(url,delay,filename,http_request_method):
   injection_type = "Results-based Command Injection"
   technique = "classic injection technique"
       
-  sys.stdout.write( colors.BOLD + "(*) Testing the "+ technique + "... " + colors.RESET)
+  sys.stdout.write(colors.BOLD + "(*) Testing the "+ technique + "... " + colors.RESET)
   sys.stdout.flush()
   
   # Print the findings to log file.
@@ -114,12 +114,15 @@ def cb_injection_handler(url,delay,filename,http_request_method):
   output_file.write("\n(+) Type : " + injection_type)
   output_file.write("\n(+) Technique : " + technique.title())
   output_file.close()
-  
+  i = 0
+  # Calculate all possible combinations
+  total = len(settings.WHITESPACES) * len(settings.PREFIXES) * len(settings.SEPARATORS) * len(settings.SUFFIXES)
   for whitespace in settings.WHITESPACES:
     for prefix in settings.PREFIXES:
       for suffix in settings.SUFFIXES:
 	for separator in settings.SEPARATORS:
-	  
+	  i = i + 1
+
 	  # Check for bad combination of prefix and separator
 	  combination = prefix + separator
 	  if combination in settings.JUNK_COMBINATION:
@@ -173,7 +176,23 @@ def cb_injection_handler(url,delay,filename,http_request_method):
 	      
 	    # Evaluate test results.
 	    shell = cb_injector.injection_test_results(response,TAG)
-	    
+	    if not menu.options.verbose:
+	      percent = ((i*100)/total)
+	      if percent == 100:
+		if no_result == True:
+		  percent = colors.RED + "FAILED" + colors.RESET
+		else:
+		  percent = str(percent)+"%"
+	      elif len(shell) != 0:
+		percent = colors.GREEN + "SUCCEED" + colors.RESET
+	      else:
+		percent = str(percent)+"%"
+	      sys.stdout.write(colors.BOLD + "\r(*) Testing the "+ technique + "... " + colors.RESET +  "[ " + percent + " ]")  
+	      sys.stdout.flush()
+	      
+	  except KeyboardInterrupt: 
+	    raise
+	  
 	  except:
 	    continue
 	  
@@ -259,21 +278,23 @@ def cb_injection_handler(url,delay,filename,http_request_method):
 		  sys.exit(0)
 	      
 	    else:
-	      print "(*) Continue testing the "+ technique +"... "
+	      sys.stdout.write("\r(*) Continue testing the "+ technique +"... ")
+	      sys.stdout.flush()
 	      pass
+	    
 
   if no_result == True:
     if menu.options.verbose == False:
-      print "[" + colors.RED + " FAILED "+colors.RESET+"]"
+      print ""
+      return False
   
     else:
       print ""
-    
-    return False
+      return False
   
   else :
-    print ""
-    
+    sys.stdout.write("\r")
+    sys.stdout.flush()
     
     
 def exploitation(url,delay,filename,http_request_method):
@@ -285,3 +306,4 @@ def exploitation(url,delay,filename,http_request_method):
   else:
     cb_injection_handler(url,delay,filename,http_request_method)
 
+#eof

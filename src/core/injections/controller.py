@@ -84,8 +84,12 @@ def do_check(url):
 	print colors.BGRED + "(x) The '"+ url +"' appear to be not injectable." + colors.RESET
       else:
 	print colors.BGRED + "(x) The '"+ parameter +"' appear to be not injectable." + colors.RESET
-    print "(*) The scan has finished successfully!"
-    print "(*) Results can be found at : '" + os.getcwd() + "/" + filename +".txt' \n"
+    if menu.options.verbose:
+      print "\n"
+    percent = colors.PURPLE + "FINISHED" + colors.RESET
+    sys.stdout.write(colors.BOLD + "\r(*) The process of testing the "+ menu.options.tech + " injection technique... " + colors.RESET +  "[ " + percent + " ]")  
+    sys.stdout.flush()
+    print "\n(*) Results can be found at : '" + os.getcwd() + "/" + filename +".txt' \n"
     sys.exit(0)
     
   # Check if it is vulnerable to eval-based command injection technique.
@@ -95,8 +99,12 @@ def do_check(url):
 	print colors.BGRED + "(x) The '"+ url +"' appear to be not injectable." + colors.RESET
       else:
 	print colors.BGRED + "(x) The '"+ parameter +"' appear to be not injectable." + colors.RESET
-    print "(*) The scan has finished successfully!"
-    print "(*) Results can be found at : '" + os.getcwd() + "/" + filename +".txt' \n"
+    if menu.options.verbose:
+      print "\n"
+    percent = colors.PURPLE + "FINISHED" + colors.RESET
+    sys.stdout.write(colors.BOLD + "\r(*) The process of testing the "+ menu.options.tech + " injection technique... " + colors.RESET +  "[ " + percent + " ]")  
+    sys.stdout.flush()
+    print "\n(*) Results can be found at : '" + os.getcwd() + "/" + filename +".txt' \n"
     sys.exit(0)
     
   # Check if it is vulnerable to time-based blind command injection technique.
@@ -106,8 +114,12 @@ def do_check(url):
 	print colors.BGRED + "(x) The '"+ url +"' appear to be not injectable." + colors.RESET
       else:
 	print colors.BGRED + "(x) The '"+ parameter +"' appear to be not injectable." + colors.RESET
-    print "(*) The scan has finished successfully!"
-    print "(*) Results can be found at : '" + os.getcwd() + "/" + filename +".txt' \n"
+    if menu.options.verbose:
+      print "\n"
+    percent = colors.PURPLE + "FINISHED" + colors.RESET
+    sys.stdout.write(colors.BOLD + "\r(*) The process of testing the "+ menu.options.tech + " injection technique... " + colors.RESET +  "[ " + percent + " ]")  
+    sys.stdout.flush()
+    print "\n(*) Results can be found at : '" + os.getcwd() + "/" + filename +".txt' \n"
     sys.exit(0)
     
   # Check if it is vulnerable to file-based semiblind command injection technique.
@@ -117,8 +129,12 @@ def do_check(url):
 	print colors.BGRED + "(x) The '"+ url +"' appear to be not injectable." + colors.RESET
       else:
 	print colors.BGRED + "(x) The '"+ parameter +"' appear to be not injectable." + colors.RESET
-    print "(*) The scan has finished successfully!"
-    print "(*) Results can be found at : '" + os.getcwd() + "/" + filename +".txt' \n"
+    if menu.options.verbose:
+      print "\n"
+    percent = colors.PURPLE + "FINISHED" + colors.RESET
+    sys.stdout.write(colors.BOLD + "\r(*) The process of testing the "+ menu.options.tech + " injection technique... " + colors.RESET +  "[ " + percent + " ]")  
+    sys.stdout.flush()
+    print "\n(*) Results can be found at : '" + os.getcwd() + "/" + filename +".txt' \n"
     sys.exit(0)
   
   else:
@@ -148,8 +164,6 @@ def do_check(url):
 	print colors.BGRED + "(x) The '"+ url +"' appear to be not injectable." + colors.RESET
       else:
 	print colors.BGRED + "(x) The '"+ parameter +"' appear to be not injectable." + colors.RESET
-	    
-  print "\n(*) The scan has finished successfully!"
   print "(*) Results can be found at : '" + os.getcwd() + "/" + filename +".txt' \n"
   sys.exit(0)
   

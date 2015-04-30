@@ -23,10 +23,12 @@ from src.utils import colors
 from src.utils import update
 from src.utils import version
 from src.utils import install
+from src.utils import settings
 
 from src.core.requests import proxy
 from src.core.requests import headers
 from src.core.injections import controller
+
 
 
 """
@@ -62,7 +64,12 @@ def main():
 	menu.parser.print_help()
 	print ""
 	sys.exit(0)
-
+	
+    #Check if specified wrong injection technique
+    if menu.options.tech and menu.options.tech not in settings.AVAILABLE_TECHNIQUES:
+      print colors.BGRED + "(x) Error: Specified wrong injection technique!" + colors.RESET
+      sys.exit(0)
+      
     if menu.options.url:
 
       print "(*) Initializing, please wait... "
@@ -70,8 +77,10 @@ def main():
       
       try:
 	request = urllib2.Request(url)
+	
 	#Check if defined extra headers.
 	headers.do_check(request)
+	
         #print request.headers
 	response = urllib2.urlopen(request)
 	content = response.read()
