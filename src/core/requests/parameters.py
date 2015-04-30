@@ -105,15 +105,21 @@ def vuln_GET_param(url):
   # Define the vulnerable parameter
   if re.findall(r"&(.*)=" + settings.INJECT_TAG + "", url):
     vuln_parameter = re.findall(r"&(.*)=" + settings.INJECT_TAG + "", url)
+    vuln_parameter = ''.join(vuln_parameter)
+    vuln_parameter = re.sub(r"(.*)=(.*)&", "", vuln_parameter)
     
   elif re.findall(r"\?(.*)=" + settings.INJECT_TAG + "", url):
     vuln_parameter = re.findall(r"\?(.*)=" + settings.INJECT_TAG + "", url)
+    vuln_parameter = ''.join(vuln_parameter)
     
-  else:
-    vuln_parameter = url
-  vuln_parameter = ''.join(vuln_parameter)
+  elif re.findall(r"(.*)=" + settings.INJECT_TAG + "", url):
+    vuln_parameter = re.findall(r"(.*)=" + settings.INJECT_TAG + "", url)
+    vuln_parameter = ''.join(vuln_parameter)
 
-  return url
+  else:
+    pass
+
+  return vuln_parameter 
 
 
 # Check if its not specified the 'INJECT_HERE' tag on GET Requests
@@ -186,18 +192,18 @@ def do_POST_check(parameter):
 def vuln_POST_param(parameter,url):
   
     # Define the vulnerable parameter
-    if re.findall(r"&(.*)=" + settings.INJECT_TAG + "", url):
-      vuln_parameter = re.findall(r"&(.*)=" + settings.INJECT_TAG + "", url)
-      
-    elif re.findall(r"\?(.*)=" + settings.INJECT_TAG + "", url):
-      vuln_parameter = re.findall(r"\?(.*)=" + settings.INJECT_TAG + "", url)
-      
+    if re.findall(r"&(.*)=" + settings.INJECT_TAG + "", parameter):
+      vuln_parameter = re.findall(r"&(.*)=" + settings.INJECT_TAG + "", parameter)
+      vuln_parameter = ''.join(vuln_parameter)
+      vuln_parameter = re.sub(r"(.*)=(.*)&", "", vuln_parameter)
+
+    elif re.findall(r"(.*)=" + settings.INJECT_TAG + "", parameter):
+      vuln_parameter = re.findall(r"(.*)=" + settings.INJECT_TAG + "", parameter)
+      vuln_parameter = ''.join(vuln_parameter)
+
     else:
-      vuln_parameter = parameter
-    vuln_parameter = ''.join(vuln_parameter)
+      pass
     
     return vuln_parameter
-  
-  
-  
+    
 #eof
