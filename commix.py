@@ -72,7 +72,8 @@ def main():
       
     if menu.options.url:
 
-      print "(*) Initializing, please wait... "
+      sys.stdout.write(colors.BOLD +"(*) Checking connection to the target URL... " + colors.RESET)
+      sys.stdout.flush()
       url = menu.options.url
       
       try:
@@ -84,8 +85,10 @@ def main():
         #print request.headers
 	response = urllib2.urlopen(request)
 	content = response.read()
-
+	print "[ " + colors.GREEN + "SUCCEED" + colors.RESET + " ]"
+	
       except urllib2.HTTPError, e:
+	print "[ " + colors.RED + "FAILED" + colors.RESET + " ]"
 	if e.getcode() == 500:
 	  content = e.read()
 	  sys.exit(0)
@@ -106,10 +109,12 @@ def main():
 	  raise
 
       except urllib2.URLError, e:
+	  print "[ " + colors.RED + "FAILED" + colors.RESET + " ]"
 	  print colors.BGRED + "(x) Error: The host seems to be down!" + colors.RESET + "\n"
 	  sys.exit(0)
 	
       except httplib.BadStatusLine, e:
+	  print "[ " + colors.RED + "FAILED" + colors.RESET + " ]"
 	  print e.line, e.message
 	  pass
 	

@@ -21,6 +21,7 @@ import string
 import random
 import urllib
 import urllib2
+import requests
 
 from src.utils import menu
 from src.utils import colors
@@ -55,7 +56,7 @@ def tb_injection_handler(url,delay,filename,http_request_method):
   output_file.write("\n(+) Type : " + injection_type)
   output_file.write("\n(+) Technique : " + technique.title())
   output_file.close()
-  
+    
   # Check if defined "--maxlen" option.
   if menu.options.maxlen:
     maxlen = menu.options.maxlen
@@ -67,6 +68,13 @@ def tb_injection_handler(url,delay,filename,http_request_method):
   # Calculate all possible combinations
   total = (len(settings.PREFIXES) * len(settings.SEPARATORS) * len(settings.SUFFIXES) - len(settings.JUNK_COMBINATION))
   
+  # Estimating the response time (in seconds)
+  sys.stdout.write("(*) The estimated response time is ")  
+  sys.stdout.flush()
+  url_time_response = requests.get(url).elapsed.seconds
+  print str(url_time_response) + " second" + "s"[url_time_response == 1:] + "."
+  delay = int(delay) + int(url_time_response)
+
   for prefix in settings.PREFIXES:
     for suffix in settings.SUFFIXES:
       for separator in settings.SEPARATORS:
@@ -129,7 +137,7 @@ def tb_injection_handler(url,delay,filename,http_request_method):
 	  
 	  # Yaw, got shellz! 
 	  # Do some magic tricks!
-	  if how_long == delay:
+	  if how_long == delay :
 	    found = True
 	    no_result = False
 	    
@@ -207,7 +215,9 @@ def tb_injection_handler(url,delay,filename,http_request_method):
 		  sys.exit(0)
 
 	    else:
-	      print "(*) Continue testing the "+ technique +"... "
+	      if menu.options.verbose:
+		sys.stdout.write("\r(*) Continue testing the "+ technique +"... ")
+		sys.stdout.flush()
 	      pass
 	  
   if no_result == True:

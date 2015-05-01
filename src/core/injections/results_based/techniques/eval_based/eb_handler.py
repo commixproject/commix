@@ -225,8 +225,9 @@ def eb_injection_handler(url,delay,filename,http_request_method):
 		sys.exit(0)
 	  
 	  else:
-	    sys.stdout.write("\r(*) Continue testing the "+ technique +"... ")
-	    sys.stdout.flush()
+	    if menu.options.verbose:
+	      sys.stdout.write("\r(*) Continue testing the "+ technique +"... ")
+	      sys.stdout.flush()
 	    pass
 	  
   if no_result == True:

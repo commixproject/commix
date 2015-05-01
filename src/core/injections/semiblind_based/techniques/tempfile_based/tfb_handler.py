@@ -21,6 +21,7 @@ import string
 import random
 import urllib
 import urllib2
+import requests
 
 from src.utils import menu
 from src.utils import colors
@@ -68,6 +69,14 @@ def tfb_injection_handler(url,delay,filename,tmp_path,http_request_method):
   i = 0
   # Calculate all possible combinations
   total = len(settings.SEPARATORS)
+  
+  # Estimating the response time (in seconds)
+  sys.stdout.write("(*) The estimated response time is ")  
+  sys.stdout.flush()
+  url_time_response = requests.get(url).elapsed.seconds
+  print str(url_time_response) + " second" + "s"[url_time_response == 1:] + "."
+  delay = int(delay) + int(url_time_response)
+  
   for separator in settings.SEPARATORS:
     i = i + 1
 	  
@@ -214,7 +223,9 @@ def tfb_injection_handler(url,delay,filename,tmp_path,http_request_method):
 	      sys.exit(0)
 
 	else:
-	  print "(*) Continue testing the "+ technique +"... "
+	  if menu.options.verbose:
+	    sys.stdout.write("\r(*) Continue testing the "+ technique +"... ")
+	    sys.stdout.flush()
 	  pass
 	    
   if no_result == True:

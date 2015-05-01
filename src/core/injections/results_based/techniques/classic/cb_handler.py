@@ -218,7 +218,7 @@ def cb_injection_handler(url,delay,filename,http_request_method):
 	      
 	      #Vulnerabe Parameter
 	      GET_vuln_param = parameters.vuln_GET_param(url)
-	      
+
 	      # Print the findings to terminal.
 	      print colors.BOLD + "\n(!) The ("+ http_request_method + ") '" + colors.UNDERL + GET_vuln_param + colors.RESET + colors.BOLD + "' parameter is vulnerable to "+ injection_type +"."+ colors.RESET
 	      print "  (+) Type : "+ colors.YELLOW + colors.BOLD + injection_type + colors.RESET + ""
@@ -282,8 +282,9 @@ def cb_injection_handler(url,delay,filename,http_request_method):
 		  sys.exit(0)
 	      
 	    else:
-	      sys.stdout.write("\r(*) Continue testing the "+ technique +"... ")
-	      sys.stdout.flush()
+	      if menu.options.verbose:
+		sys.stdout.write("\r(*) Continue testing the "+ technique +"... ")
+		sys.stdout.flush()
 	      pass
 	    
 
