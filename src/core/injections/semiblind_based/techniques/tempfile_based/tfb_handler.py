@@ -21,8 +21,7 @@ import string
 import random
 import urllib
 import urllib2
-import requests
-
+  
 from src.utils import menu
 from src.utils import colors
 from src.utils import settings
@@ -34,6 +33,15 @@ from src.core.injections.semiblind_based.techniques.tempfile_based import tfb_in
 from src.core.injections.semiblind_based.techniques.tempfile_based import tfb_payloads
 from src.core.injections.semiblind_based.techniques.tempfile_based import tfb_enumeration
 
+import requests
+if requests.__version__ < "1.2.0":
+  # Add elapsed attribute to Response objects to time how long a request took.
+  # http://docs.python-requests.org/en/latest/community/updates/
+  print colors.BGRED + "(x) Error: You must upgrade 'requests' module!" + colors.RESET
+  print colors.BGRED + "(x) apt-get install python-pip" + colors.RESET
+  print colors.BGRED + "(x) pip install --upgrade requests" + colors.RESET
+  sys.exit(0)
+  
 """
  The "tempfile-based" injection technique on Semiblind OS Command Injection.
  __Warning:__ This technique is still experimental, is not yet fully functional and may leads to false-positive resutls.
