@@ -21,7 +21,7 @@ import string
 import random
 import urllib
 import urllib2
- 
+
 from src.utils import menu
 from src.utils import colors
 from src.utils import settings
@@ -32,15 +32,6 @@ from src.core.requests import parameters
 from src.core.injections.blind_based.techniques.time_based import tb_injector
 from src.core.injections.blind_based.techniques.time_based import tb_payloads
 from src.core.injections.blind_based.techniques.time_based import tb_enumeration
-
-import requests
-if requests.__version__ < "1.2.0":
-  # Add elapsed attribute to Response objects to time how long a request took.
-  # http://docs.python-requests.org/en/latest/community/updates/
-  print colors.BGRED + "(x) Error: You must upgrade 'requests' module!" + colors.RESET
-  print colors.BGRED + "(x) apt-get install python-pip" + colors.RESET
-  print colors.BGRED + "(x) pip install --upgrade requests" + colors.RESET
-  sys.exit(0)
 
 """
  The "time-based" injection technique on Blind OS Command Injection.
@@ -76,13 +67,18 @@ def tb_injection_handler(url,delay,filename,http_request_method):
   # Calculate all possible combinations
   total = (len(settings.PREFIXES) * len(settings.SEPARATORS) * len(settings.SUFFIXES) - len(settings.JUNK_COMBINATION))
   
-  # Estimating the response time (in seconds)
+  #Estimating the response time (in seconds)
   sys.stdout.write("(*) The estimated response time is ")  
   sys.stdout.flush()
-  url_time_response = requests.get(url).elapsed.seconds
+  opener = urllib.FancyURLopener({})
+  start = time.time()
+  f = opener.open(url)
+  end = time.time()
+  diff = end - start
+  url_time_response = int(diff)
   print str(url_time_response) + " second" + "s"[url_time_response == 1:] + "."
   delay = int(delay) + int(url_time_response)
-
+  
   for prefix in settings.PREFIXES:
     for suffix in settings.SUFFIXES:
       for separator in settings.SEPARATORS:
