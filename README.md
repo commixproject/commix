@@ -132,4 +132,4 @@ A collection of pwnable VMs, that includes web apps vulnerable to command inject
 
 [![][img]][txt]
 [img]: https://cdn3.iconfinder.com/data/icons/peelicons-vol-1/50/Twitter-32.png (Follow @commixproject :))
-[txt]: http://www.twitter.com/soplerproject
+[txt]: http://www.twitter.com/commixproject
