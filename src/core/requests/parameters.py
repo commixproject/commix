@@ -118,13 +118,15 @@ def vuln_GET_param(url):
     
   # Check if one parameter but 
   # not defined the INJECT_TAG.
-  else:
-    if settings.INJECT_TAG not in url:
+  elif settings.INJECT_TAG not in url:
       #Grab the value of parameter.
       value = re.findall(r'\?(.*)=', url)
       value = ''.join(value)
       vuln_parameter = value
-
+      
+  else:
+    vuln_parameter = url
+    
   return vuln_parameter 
 
 
@@ -139,7 +141,6 @@ def do_POST_check(parameter):
 
       # Check if defined the INJECT_TAG
       if settings.INJECT_TAG not in parameter:
-	
 	#Grab the value of parameter.
 	value = re.findall(r'=(.*)', parameter)
 	value = ''.join(value)
