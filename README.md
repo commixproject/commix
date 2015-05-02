@@ -129,3 +129,7 @@ A collection of pwnable VMs, that includes web apps vulnerable to command inject
 - [SpiderLabs: MCIR (ShelLOL)](https://github.com/SpiderLabs/MCIR/tree/master/shellol)
 - [Kioptrix: 2014 (#5)](https://www.vulnhub.com/entry/kioptrix-2014-5,62/)
 - [...]
+
+[![][img]][txt]
+[img]: https://cdn3.iconfinder.com/data/icons/peelicons-vol-1/50/Twitter-32.png (Follow @commixproject :))
+[txt]: http://www.twitter.com/soplerproject
