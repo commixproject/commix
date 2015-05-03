@@ -97,7 +97,7 @@ Download commix by cloning the Git repository:
 
 
 ####Usage Examples
-**Exploiting [Damn Vulnerable Web App] (http://www.dvwa.co.uk/)**
+**Exploiting [Damn Vulnerable Web App] (http://www.dvwa.co.uk/):**
 
     python commix.py --url="http://192.168.178.58/DVWA-1.0.8/vulnerabilities/exec/#" --data="ip=INJECT_HERE&submit=submit" --cookie="security=medium; PHPSESSID=nq30op434117mo7o2oe5bl7is4"
     
@@ -118,7 +118,7 @@ Download commix by cloning the Git repository:
     python commix.py --url="http://192.168.178.6:8080/phptax/drawimage.php?pfilez=INJECT_HERE&pdf=make" --user-agent="Mozilla/4.0 Mozilla4_browser" --technique="file-based" --root-dir="/"
 
 
-####Command injection testbeds.
+####Command injection testbeds
 A collection of pwnable VMs, that includes web apps vulnerable to command injections.
 - [Damn Vulnerable Web App] (http://www.dvwa.co.uk/)
 - [OWASP: Mutillidae] (https://www.owasp.org/index.php/Category:OWASP_Mutillidae)
@@ -129,6 +129,9 @@ A collection of pwnable VMs, that includes web apps vulnerable to command inject
 - [SpiderLabs: MCIR (ShelLOL)](https://github.com/SpiderLabs/MCIR/tree/master/shellol)
 - [Kioptrix: 2014 (#5)](https://www.vulnhub.com/entry/kioptrix-2014-5,62/)
 - [...]
+
+####Exploitation Demos
+- [Exploiting DVWA](https://www.youtube.com/watch?v=PT4uSTCxKJU)
 
 [![][img]][txt]
 [img]: https://cdn3.iconfinder.com/data/icons/peelicons-vol-1/50/Twitter-32.png (Follow @commixproject :))
