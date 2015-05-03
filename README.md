@@ -132,6 +132,7 @@ A collection of pwnable VMs, that includes web apps vulnerable to command inject
 
 ####Exploitation Demos
 - [Exploiting DVWA](https://www.youtube.com/watch?v=PT4uSTCxKJU)
+- [Exploiting bWAPP](https://www.youtube.com/watch?v=zqI8NcHfboo)
 
 [![][img]][txt]
 [img]: https://cdn3.iconfinder.com/data/icons/peelicons-vol-1/50/Twitter-32.png (Follow @commixproject :))
