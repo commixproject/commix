@@ -129,6 +129,7 @@ A collection of pwnable VMs, that includes web apps vulnerable to command inject
 - [Pentester Academy: Command Injection ISO: 1] (https://www.vulnhub.com/entry/command-injection-iso-1,81/)
 - [SpiderLabs: MCIR (ShelLOL)](https://github.com/SpiderLabs/MCIR/tree/master/shellol)
 - [Kioptrix: 2014 (#5)](https://www.vulnhub.com/entry/kioptrix-2014-5,62/)
+- [w3af-moth] (https://github.com/andresriancho/w3af-moth/)
 - [...]
 
 ####Exploitation Demos
