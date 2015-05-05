@@ -97,8 +97,14 @@ request.add_option("--referer",
 request.add_option("--user-agent",
                 action="store",
 		dest="agent",
-		default="Mozilla/5.0 (Windows NT 5.1; rv:31.0) Gecko/20100101 Firefox/31.0",
+		default = settings.APPLICATION + "/" + settings.VERSION + settings.COMMIT_ID,
 		help="HTTP User-Agent header.")
+
+request.add_option("--random-agent",
+                action="store_true",
+		dest="random_agent",
+		default = False,
+		help="Use a randomly selected HTTP User-Agent header.")
 
 request.add_option("--cookie",
                 action="store",

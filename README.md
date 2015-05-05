@@ -57,6 +57,7 @@ Download commix by cloning the Git repository:
     --referer=REFERER   HTTP Referer header.
     --user-agent=AGENT  HTTP User-Agent header.
     --cookie=COOKIE     HTTP Cookie header.
+    --random-agent      Use a randomly selected HTTP User-Agent header.
     --headers=HEADERS   Extra headers (e.g. 'Header1:Value1\nHeader2:Value2').
     --proxy=PROXY       Use a HTTP proxy (e.g. '127.0.0.1:8080').
     --auth-url=AUTH_..  Login panel URL.
@@ -128,7 +129,6 @@ A collection of pwnable VMs, that includes web apps vulnerable to command inject
 - [Pentester Academy: Command Injection ISO: 1] (https://www.vulnhub.com/entry/command-injection-iso-1,81/)
 - [SpiderLabs: MCIR (ShelLOL)](https://github.com/SpiderLabs/MCIR/tree/master/shellol)
 - [Kioptrix: 2014 (#5)](https://www.vulnhub.com/entry/kioptrix-2014-5,62/)
-- [w3af-moth] (https://github.com/andresriancho/w3af-moth/)
 - [...]
 
 ####Exploitation Demos

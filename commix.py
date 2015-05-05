@@ -17,6 +17,7 @@
 import sys
 import urllib2
 import httplib
+import random
 
 from src.utils import menu
 from src.utils import colors
@@ -28,8 +29,6 @@ from src.utils import settings
 from src.core.requests import proxy
 from src.core.requests import headers
 from src.core.injections import controller
-
-
 
 """
  The main function.
@@ -70,8 +69,12 @@ def main():
       print colors.BGRED + "(x) Error: Specified wrong injection technique!" + colors.RESET
       sys.exit(0)
       
+    #Check if defined "--random-agent" option.
+    if menu.options.random_agent:
+      menu.options.agent = random.choice(settings.USER_AGENT_LIST)
+      
+    #Check if defined "--url" option.
     if menu.options.url:
-
       sys.stdout.write(colors.BOLD +"(*) Checking connection to the target URL... " + colors.RESET)
       sys.stdout.flush()
       url = menu.options.url
