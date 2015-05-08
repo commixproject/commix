@@ -15,9 +15,9 @@
 """
 
 import sys
-import urllib2
-import httplib
 import random
+import httplib
+import urllib2
 
 from src.utils import menu
 from src.utils import colors
@@ -79,6 +79,10 @@ def main():
       sys.stdout.flush()
       url = menu.options.url
       
+      # Check if a URL starts with "http://".
+      if not url.startswith("http://"):
+	url = "http://" + url
+	
       try:
 	request = urllib2.Request(url)
 	
