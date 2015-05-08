@@ -95,8 +95,8 @@ CURRENT_USER = "whoami"
 HOSTNAME = "hostname"
 ISROOT = "echo $(id -u)"
 
-# Accepts YES/Y/yes/y or "enter"
-CHOISE_YES = set(['yes','y', 'ye', ''])
+# Accepts YES or Y or yes or y. Don't accept just enter to prevent user's mistype. No case sensitive or case insentive doubts.
+CHOISE_YES = set(['yes','y','YES','Y'])
 
 # Available injectipon techniques
 AVAILABLE_TECHNIQUES = set(["classic","eval-based","time-based","file-based"])
