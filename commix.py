@@ -18,6 +18,7 @@ import sys
 import random
 import httplib
 import urllib2
+import urlparse
 
 from src.utils import menu
 from src.utils import colors
@@ -78,11 +79,11 @@ def main():
       sys.stdout.write(colors.BOLD +"(*) Checking connection to the target URL... " + colors.RESET)
       sys.stdout.flush()
       url = menu.options.url
-      
-      # Check if a URL starts with "http://".
-      if not url.startswith("http://"):
+
+      # If URL not starts with any URI scheme, add "http://"
+      if not urlparse.urlparse(url).scheme:
 	url = "http://" + url
-	
+
       try:
 	request = urllib2.Request(url)
 	
