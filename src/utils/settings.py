@@ -91,9 +91,21 @@ MAX_OPTION_LENGTH = 18
 PYTHON_VERSION = sys.version.split()[0]
 
 # Enumeration Commands
+
+# Current user
 CURRENT_USER = "whoami"
+
+#The hostname
 HOSTNAME = "hostname"
+
+# Check if current user is root
 ISROOT = "echo $(id -u)"
+
+# Operation System.
+RECOGNISE_OS = "uname -s"
+
+# Hardware platform.
+RECOGNISE_HP = "uname -m"
 
 # Accepts YES/Y/yes/y or "enter"
 CHOISE_YES = set(['yes','y', 'ye', ''])

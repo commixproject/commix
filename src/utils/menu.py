@@ -158,6 +158,12 @@ enumeration.add_option("--is-root",
 		dest="is_root",
 		default = False,
 		help="Check if the current user have root privs.")
+
+enumeration.add_option("--sys-info", 
+		action="store_true",
+		dest="sys_info",
+		default = False,
+		help="Retrieve system information.")
 # Injection options
 injection = OptionGroup(parser, colors.BOLD + "Injection" + colors.RESET, 
 			"These options can be used, to specify which parameters to inject and to provide custom injection payloads.")
