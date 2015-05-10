@@ -67,10 +67,13 @@ Download commix by cloning the Git repository:
 ####Enumeration
     These options can be used, to enumerate the target host.
 
-    --current-user	Retrieve current user.
-    --hostname		Retrieve server hostname.
-    --is-root		Check if the current user have root privs.
-    --sys-info		Retrieve system information.
+    --current-user      Retrieve current user name.
+    --hostname          Retrieve current hostname.
+    --is-root           Check if the current user have root privs.
+    --sys-info          Retrieve system information.
+    --users             Retrieve system users.
+    --passwords         Retrieve system users password hashes.
+    --privileges        Retrieve system users privileges.
 
 ####Injection
     These options can be used, to specify which parameters to inject and

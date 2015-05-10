@@ -164,6 +164,25 @@ enumeration.add_option("--sys-info",
 		dest="sys_info",
 		default = False,
 		help="Retrieve system information.")
+
+enumeration.add_option("--users", 
+		action="store_true",
+		dest="users",
+		default = False,
+		help="Retrieve system users.")
+
+enumeration.add_option("--passwords", 
+		action="store_true",
+		dest="passwords",
+		default = False,
+		help="Retrieve system users password hashes.")
+
+enumeration.add_option("--privileges", 
+		action="store_true",
+		dest="privileges",
+		default = False,
+		help="Retrieve system users privileges.")
+
 # Injection options
 injection = OptionGroup(parser, colors.BOLD + "Injection" + colors.RESET, 
 			"These options can be used, to specify which parameters to inject and to provide custom injection payloads.")
@@ -229,9 +248,9 @@ injection.add_option("--alter-shell",
 		default = False,
 		help="Use an alternative os-shell (Python). Available, only for 'tempfile-based' injections.")
 
-injection.add_option("--os-shell", 
+injection.add_option("--os-cmd", 
 		action="store",
-		dest="os_shell",
+		dest="os_cmd",
 		default = False,
 		help="Execute a single operating system command.")
 

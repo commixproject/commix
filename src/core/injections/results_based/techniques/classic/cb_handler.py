@@ -105,7 +105,7 @@ def cb_injection_handler(url,delay,filename,http_request_method):
   injection_type = "Results-based Command Injection"
   technique = "classic injection technique"
       
-  sys.stdout.write(colors.BOLD + "(*) Testing the "+ technique + "... " + colors.RESET)
+  sys.stdout.write("(*) Testing the "+ technique + "... ")
   sys.stdout.flush()
   
   # Print the findings to log file.
@@ -187,7 +187,7 @@ def cb_injection_handler(url,delay,filename,http_request_method):
 		percent = colors.GREEN + "SUCCEED" + colors.RESET
 	      else:
 		percent = str(percent)+"%"
-	      sys.stdout.write(colors.BOLD + "\r(*) Testing the "+ technique + "... " + colors.RESET +  "[ " + percent + " ]")  
+	      sys.stdout.write("\r(*) Testing the "+ technique + "... " +  "[ " + percent + " ]")  
 	      sys.stdout.flush()
 	      
 	  except KeyboardInterrupt: 

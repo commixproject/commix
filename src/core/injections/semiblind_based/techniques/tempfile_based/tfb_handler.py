@@ -127,7 +127,7 @@ def tfb_injection_handler(url,delay,filename,tmp_path,http_request_method):
 		percent = str(percent)+"%"
 	  else:
 	    percent = str(percent)+"%"
-	  sys.stdout.write(colors.BOLD + "\r(*) Testing the "+ technique + "... " + colors.RESET +  "[ " + percent + " ]")  
+	  sys.stdout.write("\r(*) Testing the "+ technique + "... " +  "[ " + percent + " ]")  
 	  sys.stdout.flush()
 	  
       except KeyboardInterrupt: 

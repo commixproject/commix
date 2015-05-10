@@ -53,7 +53,7 @@ def fb_injection_handler(url,delay,filename,http_request_method):
   injection_type = "Semiblind-based Command Injection"
   technique = "file-based semiblind injection technique"
   
-  print colors.BOLD + "(*) Testing the "+ technique + "... " + colors.RESET
+  print "(*) Testing the "+ technique + "... "
 
   # Change TAG on every request to prevent false-positive resutls.
   TAG = ''.join(random.choice(string.ascii_uppercase) for i in range(6)) 

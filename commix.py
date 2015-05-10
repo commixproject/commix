@@ -76,7 +76,7 @@ def main():
       
     #Check if defined "--url" option.
     if menu.options.url:
-      sys.stdout.write(colors.BOLD +"(*) Checking connection to the target URL... " + colors.RESET)
+      sys.stdout.write("(*) Checking connection to the target URL... ")
       sys.stdout.flush()
       url = menu.options.url
 

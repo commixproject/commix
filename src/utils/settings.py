@@ -83,6 +83,8 @@ TMP_PATH = "/tmp/"
 
 # Default Server's Root Directory
 SRV_ROOT_DIR = "/var/www/"
+PASSWD_FILE = "/etc/passwd"
+SHADOW_FILE = "/etc/shadow"
 
 # The max help option length.
 MAX_OPTION_LENGTH = 18
@@ -106,6 +108,10 @@ RECOGNISE_OS = "uname -s"
 
 # Hardware platform.
 RECOGNISE_HP = "uname -m"
+
+# /etc/passwd
+SYS_USERS = "awk -F ':' '{ print $1\":\"$3\":\"$6\"(@)\"}' " + PASSWD_FILE
+SYS_PASSES = "awk -F ':' '{ print $1\":\"$2\"(@)\"}' " + SHADOW_FILE 
 
 # Accepts YES/Y/yes/y or "enter"
 CHOISE_YES = set(['yes','y', 'ye', ''])
