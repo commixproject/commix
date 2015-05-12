@@ -62,8 +62,9 @@ Download commix by cloning the Git repository:
     --proxy=PROXY       Use a HTTP proxy (e.g. '127.0.0.1:8080').
     --auth-url=AUTH_..  Login panel URL.
     --auth-data=AUTH..  Login parameters and data.
-    --auth-cred=AUTH..  HTTP Basic Authentication credentials (e.g.
-                        'admin:admin').
+    --auth-type=AUTH..  HTTP authentication type (e.g. 'basic').
+    --auth-cred=AUTH..  HTTP Authentication credentials (e.g. 'admin:admin').
+
 ####Enumeration
     These options can be used, to enumerate the target host.
 

@@ -64,7 +64,7 @@ def main():
 	menu.parser.print_help()
 	print ""
 	sys.exit(0)
-	
+
     #Check if specified wrong injection technique
     if menu.options.tech and menu.options.tech not in settings.AVAILABLE_TECHNIQUES:
       print colors.BGRED + "(x) Error: Specified wrong injection technique!" + colors.RESET
@@ -86,15 +86,12 @@ def main():
 
       try:
 	request = urllib2.Request(url)
-	
 	#Check if defined extra headers.
 	headers.do_check(request)
-	
-        #print request.headers
 	response = urllib2.urlopen(request)
 	content = response.read()
 	print "[ " + colors.GREEN + "SUCCEED" + colors.RESET + " ]"
-	
+	  
       except urllib2.HTTPError, e:
 	print "[ " + colors.RED + "FAILED" + colors.RESET + " ]"
 	if e.getcode() == 500:
@@ -102,8 +99,12 @@ def main():
 	  sys.exit(0)
 
 	elif e.getcode() == 401:
-	  print colors.BGRED + "(x) Error: Authorization required!" + colors.RESET + "\n"
-	  sys.exit(0)
+	  if menu.options.auth_type != "basic":
+	    print colors.BGRED + "(x) Error: Only 'Basic' Access Authentication is supported." + colors.RESET
+	    sys.exit(0)
+	  else:
+	    print colors.BGRED + "(x) Error: Authorization required!" + colors.RESET + "\n"
+	    sys.exit(0)
 	  
 	elif e.getcode() == 403:
 	  print colors.BGRED + "(x) Error: You don't have permission to access this page." + colors.RESET + "\n"

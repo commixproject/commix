@@ -87,7 +87,7 @@ def do_check(url):
     if menu.options.verbose:
       print "\n"
     percent = colors.PURPLE + "FINISHED" + colors.RESET
-    sys.stdout.write(colors.BOLD + "\r(*) The process of testing the "+ menu.options.tech + " injection technique... " + colors.RESET +  "[ " + percent + " ]")  
+    sys.stdout.write(colors.BOLD + "\r(!) The process of testing the "+ menu.options.tech + " injection technique... " + colors.RESET +  "[ " + percent + " ]")  
     sys.stdout.flush()
     print "\n(*) Results can be found at : '" + os.getcwd() + "/" + filename +".txt' \n"
     sys.exit(0)
@@ -102,7 +102,7 @@ def do_check(url):
     if menu.options.verbose:
       print "\n"
     percent = colors.PURPLE + "FINISHED" + colors.RESET
-    sys.stdout.write(colors.BOLD + "\r(*) The process of testing the "+ menu.options.tech + " injection technique... " + colors.RESET +  "[ " + percent + " ]")  
+    sys.stdout.write(colors.BOLD + "\r(!) The process of testing the "+ menu.options.tech + " injection technique... " + colors.RESET +  "[ " + percent + " ]")  
     sys.stdout.flush()
     print "\n(*) Results can be found at : '" + os.getcwd() + "/" + filename +".txt' \n"
     sys.exit(0)
@@ -117,7 +117,7 @@ def do_check(url):
     if menu.options.verbose:
       print "\n"
     percent = colors.PURPLE + "FINISHED" + colors.RESET
-    sys.stdout.write(colors.BOLD + "\r(*) The process of testing the "+ menu.options.tech + " injection technique... " + colors.RESET +  "[ " + percent + " ]")  
+    sys.stdout.write(colors.BOLD + "\r(!) The process of testing the "+ menu.options.tech + " injection technique... " + colors.RESET +  "[ " + percent + " ]")  
     sys.stdout.flush()
     print "\n(*) Results can be found at : '" + os.getcwd() + "/" + filename +".txt' \n"
     sys.exit(0)
@@ -132,7 +132,7 @@ def do_check(url):
     if menu.options.verbose:
       print "\n"
     percent = colors.PURPLE + "FINISHED" + colors.RESET
-    sys.stdout.write(colors.BOLD + "\r(*) The process of testing the "+ menu.options.tech + " injection technique... " + colors.RESET +  "[ " + percent + " ]")  
+    sys.stdout.write(colors.BOLD + "\r(!) The process of testing the "+ menu.options.tech + " injection technique... " + colors.RESET +  "[ " + percent + " ]")  
     sys.stdout.flush()
     print "\n(*) Results can be found at : '" + os.getcwd() + "/" + filename +".txt' \n"
     sys.exit(0)

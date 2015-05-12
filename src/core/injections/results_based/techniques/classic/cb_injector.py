@@ -95,6 +95,7 @@ def injection_test(payload,http_request_method,url):
 #-------------------------
 def injection_test_results(response,TAG):
   
+  # Check the execution results
   html_data = response.read()
   shell = re.findall(r"" + TAG + TAG + TAG + "", html_data)
   
@@ -194,7 +195,7 @@ def injection(separator,TAG,cmd,prefix,suffix,whitespace,http_request_method,url
 # Command execution results.
 #-----------------------------
 def injection_results(response,TAG):
-  
+
   # Grab execution results
   html_data = response.read()
   shell = re.findall(r"" + TAG + TAG + "(.*)" + TAG + TAG + "", html_data)

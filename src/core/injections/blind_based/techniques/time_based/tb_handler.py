@@ -70,9 +70,14 @@ def tb_injection_handler(url,delay,filename,http_request_method):
   #Estimating the response time (in seconds)
   sys.stdout.write(colors.BOLD + "(!) The estimated response time is ")  
   sys.stdout.flush()
-  opener = urllib.FancyURLopener({})
+  #opener = urllib.FancyURLopener({})
+  request = urllib2.Request(url)
+  headers.do_check(request)
   start = time.time()
-  f = opener.open(url)
+  #f = opener.open(url)
+  response = urllib2.urlopen(request)
+  response.read(1)
+  response.close()
   end = time.time()
   diff = end - start
   url_time_response = int(diff)
@@ -137,11 +142,11 @@ def tb_injection_handler(url,delay,filename,http_request_method):
 	    raise
 	
 	  except:
-	    continue
+	    break
 	  
 	  # Yaw, got shellz! 
 	  # Do some magic tricks!
-	  if how_long == delay :
+	  if how_long >= delay :
 	    found = True
 	    no_result = False
 	    
@@ -222,7 +227,7 @@ def tb_injection_handler(url,delay,filename,http_request_method):
 	      if menu.options.verbose:
 		sys.stdout.write("\r(*) Continue testing the "+ technique +"... ")
 		sys.stdout.flush()
-	      pass
+	      break
 	  
   if no_result == True:
     if menu.options.verbose == False:

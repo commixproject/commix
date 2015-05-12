@@ -220,7 +220,7 @@ def injection(separator,maxlen,TAG,cmd,prefix,suffix,delay,http_request_method,u
     end  = time.time()
     how_long = int(end - start)
     
-    if how_long == delay:
+    if how_long >= delay:
       if menu.options.verbose:
 	print "\n"
       print colors.BOLD + "(!) Retrieved " + str(j) + " characters."+ colors.RESET
@@ -312,7 +312,7 @@ def injection(separator,maxlen,TAG,cmd,prefix,suffix,delay,http_request_method,u
       end  = time.time()
       how_long = int(end - start)
             
-      if how_long == delay:
+      if how_long >= delay:
 	if not menu.options.verbose:
 	  output.append(chr(ascii_char))
 	  percent = ((i*100)/j)
@@ -320,7 +320,8 @@ def injection(separator,maxlen,TAG,cmd,prefix,suffix,delay,http_request_method,u
 	  sys.stdout.flush()
 	else:
 	  output.append(chr(ascii_char))
-	  
+	break
+    
   check_end  = time.time()
   check_how_long = int(check_end - check_start)
 

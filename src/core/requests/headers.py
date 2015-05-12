@@ -16,10 +16,11 @@
 
 import re
 import base64
-
+import urllib2
 from src.utils import menu
-
+from src.utils import colors
 """
+
  Check for added headers.
 """
 
@@ -45,11 +46,13 @@ def do_check(request):
     Cookie = menu.options.cookie
     request.add_header('Cookie', Cookie)
 
-  # Check if defined any HTTP Basic Authentication credentials.
-  if menu.options.auth_cred:
-    b64_string = base64.encodestring(menu.options.auth_cred).replace('\n', '')
-    request.add_header("Authorization", "Basic " + b64_string +"")
-    
+  # Check if defined any HTTP Authentication credentials.
+  # HTTP Authentication: Basic Access Authentication
+  if menu.options.auth_type == "basic":
+    if menu.options.auth_cred:
+      b64_string = base64.encodestring(menu.options.auth_cred).replace('\n', '')
+      request.add_header("Authorization", "Basic " + b64_string +"")
+  
   # Check if defined any extra HTTP headers.
   if menu.options.headers:
     extra_headers = menu.options.headers

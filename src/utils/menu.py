@@ -132,10 +132,15 @@ request.add_option("--auth-data",
 		dest="auth_data",
                 help="Login parameters and data.")
 
+request.add_option("--auth-type",
+                action="store",
+		dest="auth_type",
+                help="HTTP authentication type (e.g. 'basic').")
+
 request.add_option("--auth-cred",
                 action="store",
 		dest="auth_cred",
-                help="HTTP Basic Authentication credentials (e.g. 'admin:admin').")
+                help="HTTP Authentication credentials (e.g. 'admin:admin').")
 
 # Enumeration options
 enumeration = OptionGroup(parser, colors.BOLD + "Enumeration" + colors.RESET, 

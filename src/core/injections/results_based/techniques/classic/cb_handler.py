@@ -129,8 +129,8 @@ def cb_injection_handler(url,delay,filename,http_request_method):
 	    prefix = ""
 
 	  # Change TAG on every request to prevent false-positive resutls.
-	  TAG = ''.join(random.choice(string.ascii_uppercase) for i in range(6))  
-	  
+	  TAG = ''.join(random.choice(string.ascii_uppercase) for i in range(6)) 
+
 	  # Check if defined "--base64" option.
 	  if menu.options.base64_trick == True:
 	    B64_ENC_TAG = base64.b64encode(TAG)

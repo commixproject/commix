@@ -13,7 +13,7 @@
  
  For more see the file 'readme/COPYING' for copying permission.
 """
-
+import os
 import re
 import sys
 import time
@@ -72,9 +72,13 @@ def tfb_injection_handler(url,delay,filename,tmp_path,http_request_method):
   #Estimating the response time (in seconds)
   sys.stdout.write("(*) The estimated response time is ")  
   sys.stdout.flush()
-  opener = urllib.FancyURLopener({})
+  #opener = urllib.FancyURLopener({})
+  request = urllib2.Request(url)
   start = time.time()
-  f = opener.open(url)
+  #f = opener.open(url)
+  headers.do_check(request)
+  response = urllib2.urlopen(request)
+  response.close()
   end = time.time()
   diff = end - start
   url_time_response = int(diff)
@@ -118,7 +122,7 @@ def tfb_injection_handler(url,delay,filename,tmp_path,http_request_method):
 	how_long,vuln_parameter = tfb_injector.injection_test(payload,http_request_method,url)
 	if not menu.options.verbose:
 	  percent = ((i*100)/total)
-	  if how_long == delay:
+	  if how_long >= delay:
 	    percent = colors.GREEN + "SUCCEED" + colors.RESET
 	  elif percent == 100:
 	    if no_result == True:
@@ -141,15 +145,14 @@ def tfb_injection_handler(url,delay,filename,tmp_path,http_request_method):
 	      percent = colors.RED + "FAILED" + colors.RESET
 	    else:
 		percent = str(percent)+"%"
+	    raise
 	  else:
 	    percent = str(percent)+"%"
-	  sys.stdout.write(colors.BOLD + "\r(*) Testing the "+ technique + "... " + colors.RESET +  "[ " + percent + " ]")  
-	  sys.stdout.flush()
 	continue
       
       # Yaw, got shellz! 
       # Do some magic tricks!
-      if how_long == delay:
+      if how_long >= delay:
 	found = True
 	no_result = False
 	
@@ -230,8 +233,8 @@ def tfb_injection_handler(url,delay,filename,tmp_path,http_request_method):
 	  if menu.options.verbose:
 	    sys.stdout.write("\r(*) Continue testing the "+ technique +"... ")
 	    sys.stdout.flush()
-	  pass
-	    
+	  break
+    
   if no_result == True:
     if menu.options.verbose == False:
       print ""
