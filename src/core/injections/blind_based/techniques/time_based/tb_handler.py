@@ -125,7 +125,7 @@ def tb_injection_handler(url,delay,filename,http_request_method):
 	    how_long,vuln_parameter = tb_injector.injection_test(payload,http_request_method,url)
 	    if not menu.options.verbose:
 	      percent = ((i*100)/total)
-	      if how_long == delay:
+	      if how_long >= delay:
 		percent = colors.GREEN + "SUCCEED" + colors.RESET
 	      elif percent == 100:
 		if no_result == True:
