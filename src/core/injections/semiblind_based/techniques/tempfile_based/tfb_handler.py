@@ -69,20 +69,20 @@ def tfb_injection_handler(url,delay,filename,tmp_path,http_request_method):
   # Calculate all possible combinations
   total = len(settings.SEPARATORS)
   
-  #Estimating the response time (in seconds)
-  sys.stdout.write("(*) The estimated response time is ")  
-  sys.stdout.flush()
-  #opener = urllib.FancyURLopener({})
+  # Estimating the response time (in seconds)
+  # opener = urllib.FancyURLopener({})
   request = urllib2.Request(url)
+  headers.do_check(request)
   start = time.time()
   #f = opener.open(url)
-  headers.do_check(request)
   response = urllib2.urlopen(request)
+  response.read(1)
   response.close()
   end = time.time()
   diff = end - start
   url_time_response = int(diff)
-  print str(url_time_response) + " second" + "s"[url_time_response == 1:] + "."
+  if url_time_response != 0 :
+    print colors.BOLD + "(!) The estimated response time is " + str(url_time_response) + " second" + "s"[url_time_response == 1:] + "." + colors.RESET
   delay = int(delay) + int(url_time_response)
   
   for separator in settings.SEPARATORS:
@@ -143,8 +143,10 @@ def tfb_injection_handler(url,delay,filename,tmp_path,http_request_method):
 	  if percent == 100:
 	    if no_result == True:
 	      percent = colors.RED + "FAILED" + colors.RESET
+	      sys.stdout.write("\r(*) Testing the "+ technique + "... " +  "[ " + percent + " ]")  
+	      sys.stdout.flush()
 	    else:
-		percent = str(percent)+"%"
+	      percent = str(percent)+"%"
 	    raise
 	  else:
 	    percent = str(percent)+"%"

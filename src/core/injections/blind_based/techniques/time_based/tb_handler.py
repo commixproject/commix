@@ -67,10 +67,8 @@ def tb_injection_handler(url,delay,filename,http_request_method):
   # Calculate all possible combinations
   total = (len(settings.PREFIXES) * len(settings.SEPARATORS) * len(settings.SUFFIXES) - len(settings.JUNK_COMBINATION))
   
-  #Estimating the response time (in seconds)
-  sys.stdout.write(colors.BOLD + "(!) The estimated response time is ")  
-  sys.stdout.flush()
-  #opener = urllib.FancyURLopener({})
+  # Estimating the response time (in seconds)
+  # opener = urllib.FancyURLopener({})
   request = urllib2.Request(url)
   headers.do_check(request)
   start = time.time()
@@ -81,7 +79,8 @@ def tb_injection_handler(url,delay,filename,http_request_method):
   end = time.time()
   diff = end - start
   url_time_response = int(diff)
-  print str(url_time_response) + " second" + "s"[url_time_response == 1:] + "." + colors.RESET
+  if url_time_response != 0 :
+    print colors.BOLD + "(!) The estimated response time is " + str(url_time_response) + " second" + "s"[url_time_response == 1:] + "." + colors.RESET
   delay = int(delay) + int(url_time_response)
   
   for prefix in settings.PREFIXES:
