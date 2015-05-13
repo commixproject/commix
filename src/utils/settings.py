@@ -118,6 +118,9 @@ FILE_READ = "cat "
 # Accepts YES/Y/yes/y or "enter"
 CHOISE_YES = set(['yes','y', 'ye', ''])
 
+# Available alternative shells
+AVAILABLE_SHELLS = set(["python"])
+
 # Available injectipon techniques
 AVAILABLE_TECHNIQUES = set(["classic","eval-based","time-based","file-based"])
 

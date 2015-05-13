@@ -137,7 +137,7 @@ def fb_injection_handler(url,delay,filename,http_request_method):
 
 	  #Check if defined "--verbose" option.
 	  if menu.options.verbose:
-	    sys.stdout.write("\n" +colors.GREY + payload + colors.RESET)
+	    sys.stdout.write(colors.GREY + payload + colors.RESET+"\n")
 	    
 	  # Check if target host is vulnerable.
 	  response,vuln_parameter = fb_injector.injection_test(payload,http_request_method,url)

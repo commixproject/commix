@@ -76,7 +76,7 @@ Download commix by cloning the Git repository:
     --passwords         Retrieve system users password hashes.
     --privileges        Retrieve system users privileges.
 
-####File access:
+####File access
     These options can be used to access files on the target host.
 
     --file-read=FILE..  Read a file from the target host.
@@ -102,8 +102,8 @@ Download commix by cloning the Git repository:
                         directory (Default: /var/www/).
     --icmp-exfil=IP_..  Use the ICMP exfiltration technique (e.g.
                         'ip_src=192.168.178.1,ip_dst=192.168.178.3').
-    --alter-shell       Use an alternative os-shell (Python). Available only
-                        for 'tempfile-based' injections.
+    --alter-shell=AL..  Use an alternative os-shell (e.g. Python). Available,
+                        only for 'tempfile-based' injections.
     --os-cmd=OS_CMD     Execute a single operating system command.
 
 

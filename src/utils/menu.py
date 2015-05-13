@@ -257,10 +257,9 @@ injection.add_option("--icmp-exfil",
 		help="Use the ICMP exfiltration technique (e.g. 'ip_src=192.168.178.1,ip_dst=192.168.178.3').")
 
 injection.add_option("--alter-shell", 
-		action="store_true",
+		action="store",
 		dest="alter_shell",
-		default = False,
-		help="Use an alternative os-shell (Python). Available, only for 'tempfile-based' injections.")
+		help="Use an alternative os-shell (e.g. Python). Available, only for 'tempfile-based' injections.")
 
 injection.add_option("--os-cmd", 
 		action="store",

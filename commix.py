@@ -69,7 +69,12 @@ def main():
     if menu.options.tech and menu.options.tech not in settings.AVAILABLE_TECHNIQUES:
       print colors.BGRED + "(x) Error: Specified wrong injection technique!" + colors.RESET
       sys.exit(0)
-      
+
+    #Check if specified wrong alternative shell
+    if menu.options.alter_shell.lower() not in settings.AVAILABLE_SHELLS:
+      print colors.BGRED + "(x) Error: '" + menu.options.alter_shell + "' shell is not supported!" + colors.RESET
+      sys.exit(0)
+
     #Check if defined "--random-agent" option.
     if menu.options.random_agent:
       menu.options.agent = random.choice(settings.USER_AGENT_LIST)
