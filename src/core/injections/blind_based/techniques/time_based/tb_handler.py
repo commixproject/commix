@@ -32,6 +32,7 @@ from src.core.requests import parameters
 from src.core.injections.blind_based.techniques.time_based import tb_injector
 from src.core.injections.blind_based.techniques.time_based import tb_payloads
 from src.core.injections.blind_based.techniques.time_based import tb_enumeration
+from src.core.injections.blind_based.techniques.time_based import tb_file_access
 
 """
  The "time-based" injection technique on Blind OS Command Injection.
@@ -197,6 +198,9 @@ def tb_injection_handler(url,delay,filename,http_request_method):
 	      
 	    # Check for any enumeration options.
 	    tb_enumeration.do_check(separator,maxlen,TAG,prefix,suffix,delay,http_request_method,url,vuln_parameter)
+
+	    # Check for any system file access options.
+	    tb_file_access.do_check(separator,maxlen,TAG,prefix,suffix,delay,http_request_method,url,vuln_parameter)
 	    
 	    # Pseudo-Terminal shell
 	    gotshell = raw_input("\n(*) Do you want a Pseudo-Terminal shell? [Y/n] > ").lower()

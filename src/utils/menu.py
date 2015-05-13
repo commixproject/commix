@@ -188,6 +188,15 @@ enumeration.add_option("--privileges",
 		default = False,
 		help="Retrieve system users privileges.")
 
+# File access options
+file_access = OptionGroup(parser, colors.BOLD + "File access" + colors.RESET, 
+			"These options can be used to access files on the target host.")
+
+file_access.add_option("--file-read", 
+		action="store",
+		dest="file_read",
+		help="Read a file from the target host.")
+
 # Injection options
 injection = OptionGroup(parser, colors.BOLD + "Injection" + colors.RESET, 
 			"These options can be used, to specify which parameters to inject and to provide custom injection payloads.")
@@ -262,7 +271,9 @@ injection.add_option("--os-cmd",
 parser.add_option_group(target)
 parser.add_option_group(request)
 parser.add_option_group(enumeration)
+parser.add_option_group(file_access)
 parser.add_option_group(injection)
+
 
 # Dirty hack from SQLMAP, to display longer options without breaking into two lines.
 def _(self, *args):

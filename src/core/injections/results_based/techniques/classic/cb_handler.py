@@ -34,6 +34,7 @@ from src.core.requests import parameters
 from src.core.injections.results_based.techniques.classic import cb_injector
 from src.core.injections.results_based.techniques.classic import cb_payloads
 from src.core.injections.results_based.techniques.classic import cb_enumeration
+from src.core.injections.results_based.techniques.classic import cb_file_access
 
 """
   The "classic" technique on Result-based OS Command Injection.
@@ -250,6 +251,9 @@ def cb_injection_handler(url,delay,filename,http_request_method):
 	      
 	    # Check for any enumeration options.
 	    cb_enumeration.do_check(separator,TAG,prefix,suffix,whitespace,http_request_method,url,vuln_parameter)
+	    print ""
+	    # Check for any system file access options.
+	    cb_file_access.do_check(separator,TAG,prefix,suffix,whitespace,http_request_method,url,vuln_parameter)
 	    
 	    # Pseudo-Terminal shell
 	    gotshell = raw_input("\n(*) Do you want a Pseudo-Terminal shell? [Y/n] > ").lower()

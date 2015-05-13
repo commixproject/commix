@@ -112,6 +112,9 @@ RECOGNISE_HP = "uname -m"
 SYS_USERS = "awk -F ':' '{ print $1\":\"$3\":\"$6\"(@)\"}' " + PASSWD_FILE
 SYS_PASSES = "awk -F ':' '{ print $1\":\"$2\"(@)\"}' " + SHADOW_FILE 
 
+# File System access options
+FILE_READ = "cat "
+
 # Accepts YES/Y/yes/y or "enter"
 CHOISE_YES = set(['yes','y', 'ye', ''])
 

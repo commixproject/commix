@@ -20,7 +20,6 @@ from src.utils import menu
 from src.utils import colors
 from src.utils import settings
 
-
 from src.core.injections.semiblind_based.techniques.file_based import fb_injector
 
 """

@@ -34,6 +34,7 @@ from src.core.requests import parameters
 from src.core.injections.semiblind_based.techniques.file_based import fb_injector
 from src.core.injections.semiblind_based.techniques.file_based import fb_payloads
 from src.core.injections.semiblind_based.techniques.file_based import fb_enumeration
+from src.core.injections.semiblind_based.techniques.file_based import fb_file_access
 from src.core.injections.semiblind_based.techniques.tempfile_based import tfb_handler
 
 """
@@ -270,6 +271,10 @@ def fb_injection_handler(url,delay,filename,http_request_method):
 	    
 	  # Check for any enumeration options.
 	  fb_enumeration.do_check(separator,payload,TAG,prefix,suffix,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,delay)
+	  print ""
+	  # Check for any system file access options.
+	  fb_file_access.do_check(separator,payload,TAG,prefix,suffix,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,delay)
+	  
 	  try:
 	    # Pseudo-Terminal shell
 	    gotshell = raw_input("\n(*) Do you want a Pseudo-Terminal shell? [Y/n] > ").lower()
@@ -285,7 +290,7 @@ def fb_injection_handler(url,delay,filename,http_request_method):
 		else:
 		  # The main command injection exploitation.
 		  response = fb_injector.injection(separator,payload,TAG,cmd,prefix,suffix,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE)
-		  
+		  print ""
 		  # Command execution results.
 		  shell = fb_injector.injection_results(url,OUTPUT_TEXTFILE,delay)
 		  

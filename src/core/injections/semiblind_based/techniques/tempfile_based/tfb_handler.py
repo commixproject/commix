@@ -32,7 +32,8 @@ from src.core.requests import parameters
 from src.core.injections.semiblind_based.techniques.tempfile_based import tfb_injector
 from src.core.injections.semiblind_based.techniques.tempfile_based import tfb_payloads
 from src.core.injections.semiblind_based.techniques.tempfile_based import tfb_enumeration
-  
+from src.core.injections.semiblind_based.techniques.tempfile_based import tfb_file_access
+
 """
  The "tempfile-based" injection technique on Semiblind OS Command Injection.
  __Warning:__ This technique is still experimental, is not yet fully functional and may leads to false-positive resutls.
@@ -206,6 +207,9 @@ def tfb_injection_handler(url,delay,filename,tmp_path,http_request_method):
 	  
 	# Check for any enumeration options.
 	tfb_enumeration.do_check(separator,maxlen,TAG,delay,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,alter_shell)
+
+	# Check for any enumeration options.
+	tfb_file_access.do_check(separator,maxlen,TAG,delay,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,alter_shell)
 	
 	# Pseudo-Terminal shell
 	gotshell = raw_input("\n(*) Do you want a Pseudo-Terminal shell? [Y/n] > ").lower()

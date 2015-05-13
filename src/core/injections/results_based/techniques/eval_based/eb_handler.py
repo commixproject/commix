@@ -33,6 +33,7 @@ from src.core.requests import parameters
 from src.core.injections.results_based.techniques.eval_based import eb_injector
 from src.core.injections.results_based.techniques.eval_based import eb_payloads
 from src.core.injections.results_based.techniques.eval_based import eb_enumeration
+from src.core.injections.results_based.techniques.eval_based import eb_file_access
 
 """
  The "eval-based" injection technique on Classic OS Command Injection.
@@ -193,7 +194,10 @@ def eb_injection_handler(url,delay,filename,http_request_method):
 	    
 	  # Check for any enumeration options.
 	  eb_enumeration.do_check(separator,TAG,prefix,suffix,http_request_method,url,vuln_parameter)
-
+	  print ""
+	  # Check for any system file access options.
+	  eb_file_access.do_check(separator,TAG,prefix,suffix,http_request_method,url,vuln_parameter)
+	  
 	  # Pseudo-Terminal shell
 	  gotshell = raw_input("\n(*) Do you want a Pseudo-Terminal shell? [Y/n] > ").lower()
 	  if gotshell in settings.CHOISE_YES:

@@ -76,6 +76,11 @@ Download commix by cloning the Git repository:
     --passwords         Retrieve system users password hashes.
     --privileges        Retrieve system users privileges.
 
+####File access:
+    These options can be used to access files on the target host.
+
+    --file-read=FILE..  Read a file from the target host.
+
 ####Injection
     These options can be used, to specify which parameters to inject and
     to provide custom injection payloads.
