@@ -151,7 +151,7 @@ def tfb_injection_handler(url,delay,filename,tmp_path,http_request_method):
 	    raise
 	  else:
 	    percent = str(percent)+"%"
-	continue
+	break
       
       # Yaw, got shellz! 
       # Do some magic tricks!

