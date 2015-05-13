@@ -71,9 +71,10 @@ def main():
       sys.exit(0)
 
     #Check if specified wrong alternative shell
-    if menu.options.alter_shell.lower() not in settings.AVAILABLE_SHELLS:
-      print colors.BGRED + "(x) Error: '" + menu.options.alter_shell + "' shell is not supported!" + colors.RESET
-      sys.exit(0)
+    if menu.options.alter_shell:
+      if menu.options.alter_shell.lower() not in settings.AVAILABLE_SHELLS:
+	print colors.BGRED + "(x) Error: '" + menu.options.alter_shell + "' shell is not supported!" + colors.RESET
+	sys.exit(0)
 
     #Check if defined "--random-agent" option.
     if menu.options.random_agent:
