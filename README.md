@@ -144,11 +144,11 @@ A collection of pwnable VMs, that includes web apps vulnerable to command inject
 - [SpiderLabs: MCIR (ShelLOL)](https://github.com/SpiderLabs/MCIR/tree/master/shellol)
 - [Kioptrix: 2014 (#5)](https://www.vulnhub.com/entry/kioptrix-2014-5,62/)
 - [w3af-moth] (https://github.com/andresriancho/w3af-moth/)
-- [...]
 
 ####Exploitation Demos
-- [Exploiting DVWA](https://www.youtube.com/watch?v=PT4uSTCxKJU)
-- [Exploiting bWAPP](https://www.youtube.com/watch?v=zqI8NcHfboo)
+- [Exploiting DVWA (1.0.8) command injection flaws.](https://www.youtube.com/watch?v=PT4uSTCxKJU)
+- [Exploiting bWAPP command injection flaws (normal & blind).](https://www.youtube.com/watch?v=zqI8NcHfboo)
+- [Exploiting 'Persistence' blind command injection flaw.](https://www.youtube.com/watch?v=aVTGqiyVz5o)
 
 [![][img]][txt]
 [img]: https://cdn3.iconfinder.com/data/icons/peelicons-vol-1/50/Twitter-32.png (Follow @commixproject :))
