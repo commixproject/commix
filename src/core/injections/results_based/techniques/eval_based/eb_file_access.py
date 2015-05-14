@@ -40,6 +40,7 @@ def do_check(separator,TAG,prefix,suffix,http_request_method,url,vuln_parameter)
 	print ""
       sys.stdout.write(colors.BOLD + "(!) Contents of file " + colors.UNDERL + file_to_read + colors.RESET + " : ")
       sys.stdout.flush()
+      print shell
     else:
      sys.stdout.write(colors.BGRED + "(x) Error: It seems that you don't have permissions to read the '"+ file_to_read + "' file.\n" + colors.RESET)
      sys.stdout.flush()
