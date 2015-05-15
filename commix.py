@@ -14,6 +14,7 @@
  For more see the file 'readme/COPYING' for copying permission.
 """
 
+import os
 import sys
 import random
 import httplib
@@ -76,6 +77,15 @@ def main():
 	print colors.BGRED + "(x) Error: '" + menu.options.alter_shell + "' shell is not supported!" + colors.RESET
 	sys.exit(0)
 
+    # Check if specified file-access options
+    if menu.options.file_dest == None:
+      if menu.options.file_write:
+	file_name = os.path.split(menu.options.file_write)[1]
+	menu.options.file_dest = settings.SRV_ROOT_DIR + file_name
+    elif menu.options.file_dest and  menu.options.file_write == None :
+      print colors.BGRED + "(x) Error: You must enter the '--file-write' parameter." + colors.RESET
+      sys.exit(0)
+	
     #Check if defined "--random-agent" option.
     if menu.options.random_agent:
       menu.options.agent = random.choice(settings.USER_AGENT_LIST)

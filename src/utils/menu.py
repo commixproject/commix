@@ -197,6 +197,16 @@ file_access.add_option("--file-read",
 		dest="file_read",
 		help="Read a file from the target host.")
 
+file_access.add_option("--file-write", 
+		action="store",
+		dest="file_write",
+		help="Write to a file on the target host.")
+
+file_access.add_option("--file-dest", 
+		action="store",
+		dest="file_dest",
+		help="Host's absolute filepath to write to.")
+
 # Injection options
 injection = OptionGroup(parser, colors.BOLD + "Injection" + colors.RESET, 
 			"These options can be used, to specify which parameters to inject and to provide custom injection payloads.")

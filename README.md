@@ -80,6 +80,8 @@ Download commix by cloning the Git repository:
     These options can be used to access files on the target host.
 
     --file-read=FILE..  Read a file from the target host.
+    --file-write=FIL..  Write to a file on the target host.
+    --file-dest=FILE..  Host's absolute filepath to write to.
 
 ####Injection
     These options can be used, to specify which parameters to inject and

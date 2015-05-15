@@ -141,11 +141,13 @@ def tfb_injection_handler(url,delay,filename,tmp_path,http_request_method):
       except:
 	if not menu.options.verbose:
 	  percent = ((i*100)/total)
+	  
 	  if percent == 100:
 	    if no_result == True:
 	      percent = colors.RED + "FAILED" + colors.RESET
 	      sys.stdout.write("\r(*) Testing the "+ technique + "... " +  "[ " + percent + " ]")  
 	      sys.stdout.flush()
+	      break
 	    else:
 	      percent = str(percent)+"%"
 	    raise

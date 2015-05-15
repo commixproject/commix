@@ -124,9 +124,12 @@ def injection_test(payload,http_request_method,url):
 # The main command injection exploitation.
 #----------------------------------------------
 def injection(separator,maxlen,TAG,cmd,prefix,suffix,delay,http_request_method,url,vuln_parameter):
-
+  if menu.options.file_write:
+    minlen = 0
+  else:
+    minlen = 1
   print "\n(*) Retrieving the length of execution output..."
-  for j in range(1,int(maxlen)):
+  for j in range(int(minlen),int(maxlen)):
     
     # Execute shell commands on vulnerable host.
     payload = tb_payloads.cmd_execution(separator,cmd,j,delay,http_request_method)

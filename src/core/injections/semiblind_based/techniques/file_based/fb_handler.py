@@ -67,6 +67,7 @@ def fb_injection_handler(url,delay,filename,http_request_method):
   no_result = True
   is_encoded= False
   stop_injection = False
+  call_tmp_based = False
   injection_type = "Semiblind-based Command Injection"
   technique = "file-based semiblind injection technique"
   
@@ -76,11 +77,16 @@ def fb_injection_handler(url,delay,filename,http_request_method):
     tmp_path = settings.TMP_PATH
 		  
   print "(*) Testing the "+ technique + "... "
-  
-  if menu.options.srv_root_dir:
-    SRV_ROOT_DIR = menu.options.srv_root_dir
+    
+  if menu.options.file_dest:
+    if '/tmp/' in menu.options.file_dest:
+      call_tmp_based = True
+    SRV_ROOT_DIR = os.path.split(menu.options.file_dest)[0]
   else:
-    SRV_ROOT_DIR = settings.SRV_ROOT_DIR
+    if menu.options.srv_root_dir:
+      SRV_ROOT_DIR = menu.options.srv_root_dir
+    else:
+      SRV_ROOT_DIR = settings.SRV_ROOT_DIR
 
   # Print the findings to log file.
   output_file = open(filename + ".txt", "a")
@@ -170,9 +176,14 @@ def fb_injection_handler(url,delay,filename,http_request_method):
 	  except urllib2.HTTPError, e:
 	      if e.getcode() == 404:
 		percent = ((i*100)/total)
+		if call_tmp_based == True:
+		  exit_loops = True
+		  tmp_path = os.path.split(menu.options.file_dest)[0] + "/"
+		  tfb_controller(no_result,url,delay,tmp_path,filename,http_request_method)
+		  raise
 		# Show an error message, after 20 failed tries.
 		# Use the "/tmp/" directory for tempfile-based technique.
-		if i == 20:
+		elif i == 20 :
 		  print "\n" + colors.BGRED + "(x) Error: It seems that you don't have permissions to write on "+ SRV_ROOT_DIR + "." + colors.RESET
 		  tmp_upload = raw_input("(*) Do you want to try the temporary directory (" + tmp_path + ") [Y/n] > ").lower()
 		  if tmp_upload in settings.CHOISE_YES:
