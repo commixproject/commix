@@ -155,6 +155,7 @@ A collection of pwnable VMs, that includes web apps vulnerable to command inject
 - [Exploiting DVWA (1.0.8) command injection flaws.](https://www.youtube.com/watch?v=PT4uSTCxKJU)
 - [Exploiting bWAPP command injection flaws (normal & blind).](https://www.youtube.com/watch?v=zqI8NcHfboo)
 - [Exploiting 'Persistence' blind command injection flaw.](https://www.youtube.com/watch?v=aVTGqiyVz5o)
+- [Upload a PHP shell (i.e. Metasploit PHP Meterpreter) on target host.](https://www.youtube.com/watch?v=MdzGY2ws2zY)
 
 [![][img]][txt]
 [img]: https://cdn3.iconfinder.com/data/icons/peelicons-vol-1/50/Twitter-32.png (Follow @commixproject :))
