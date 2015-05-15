@@ -67,6 +67,10 @@ def do_check(separator,maxlen,TAG,delay,http_request_method,url,vuln_parameter,O
     else:
       dest_to_write = menu.options.file_dest
     cmd = settings.FILE_WRITE + " '"+ content + "' "
+    if os.path.split(menu.options.file_dest)[1] == "":
+      dest_to_write = os.path.split(menu.options.file_dest)[0] + "/" + os.path.split(menu.options.file_write)[1]
+    else:
+      dest_to_write = menu.options.file_dest
     OUTPUT_TEXTFILE = dest_to_write
     check_how_long,output = tfb_injector.injection(separator,maxlen,TAG,cmd,delay,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,alter_shell)
     shell = output
@@ -84,7 +88,5 @@ def do_check(separator,maxlen,TAG,delay,http_request_method,url,vuln_parameter,O
     else:
      sys.stdout.write(colors.BGRED + "(x) Error: It seems that you don't have permissions to write the '"+ dest_to_write + "' file.\n" + colors.RESET)
      sys.stdout.flush()
-
-# eof
 
 # eof

