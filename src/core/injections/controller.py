@@ -45,12 +45,14 @@ def do_check(url):
   except:
       os.mkdir(settings.OUTPUT_DIR + host + "/") 
   
-  filename = datetime.datetime.fromtimestamp(time.time()).strftime('%Y_%m_%d_%H_%M_%S')
-  filename = settings.OUTPUT_DIR + host + "/" + filename
+  filename = settings.OUTPUT_DIR + host + "/ " + settings.OUTPUT_FILE_NAME
   output_file = open(filename + ".txt", "a")
-  output_file.write("\n(+) Host : " + host)
-  output_file.write("\n(+) Date : " + datetime.datetime.fromtimestamp(time.time()).strftime('%m/%d/%Y'))
-  output_file.write("\n(+) Time : " + datetime.datetime.fromtimestamp(time.time()).strftime('%H:%M:%S'))
+  output_file.write("\n---")
+  output_file.write("\nTime : " + datetime.datetime.fromtimestamp(time.time()).strftime('%H:%M:%S'))
+  output_file.write("\nDate : " + datetime.datetime.fromtimestamp(time.time()).strftime('%m/%d/%Y'))
+  output_file.write("\n---")
+  output_file.write("\nURL : " + url)
+  output_file.write("\n---")
   output_file.close()
 
   # Check if defined "--delay" option.

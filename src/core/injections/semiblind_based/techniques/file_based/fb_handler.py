@@ -68,6 +68,7 @@ def fb_injection_handler(url,delay,filename,http_request_method):
   is_encoded= False
   stop_injection = False
   call_tmp_based = False
+  export_injection_info = False
   injection_type = "Semiblind-based Command Injection"
   technique = "file-based semiblind injection technique"
   
@@ -87,13 +88,6 @@ def fb_injection_handler(url,delay,filename,http_request_method):
       SRV_ROOT_DIR = menu.options.srv_root_dir
     else:
       SRV_ROOT_DIR = settings.SRV_ROOT_DIR
-
-  # Print the findings to log file.
-  output_file = open(filename + ".txt", "a")
-  output_file.write("\n---")
-  output_file.write("\n(+) Type : " + injection_type)
-  output_file.write("\n(+) Technique : " + technique.title())
-  output_file.close()
   
   i = 0
   # Calculate all possible combinations
@@ -234,12 +228,20 @@ def fb_injection_handler(url,delay,filename,http_request_method):
 	  found = True
 	  no_result = False
 	  
+	  # Print the findings to log file.
+	  if export_injection_info == False:
+	    output_file = open(filename + ".txt", "a")
+	    output_file.write("\n(+) Type : " + injection_type)
+	    output_file.write("\n(+) Technique : " + technique.title())
+	    output_file.close()
+	    export_injection_info = True
+  
 	  if http_request_method == "GET":
 	    # Print the findings to log file
 	    if vp_flag == True:
 	      output_file = open(filename + ".txt", "a")
 	      output_file.write("\n(+) Parameter : " + vuln_parameter + " (" + http_request_method + ")")
-	      output_file.write("\n---\n")
+	      output_file.write("\n")
 	      vp_flag = False
 	      output_file.close()
 	      
@@ -262,7 +264,7 @@ def fb_injection_handler(url,delay,filename,http_request_method):
 	    if vp_flag == True:
 	      output_file = open(filename + ".txt", "a")
 	      output_file.write("\n(+) Parameter : " + vuln_parameter + " (" + http_request_method + ")")
-	      output_file.write("\n---\n")
+	      output_file.write("\n")
 	      vp_flag = False
 	      output_file.close()
 	      

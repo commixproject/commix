@@ -33,6 +33,9 @@ TWITTER = "@ancst"
 # Inject Tag
 INJECT_TAG = "INJECT_HERE"
 
+# Output file name
+OUTPUT_FILE_NAME = "logs"
+
 # Check Commit ID
 if os.path.isdir("./.git"):
   with open('.git/refs/heads/master', 'r') as f:

@@ -48,16 +48,10 @@ def tfb_injection_handler(url,delay,filename,tmp_path,http_request_method):
   vp_flag = True
   no_result = True
   is_encoded= False
+  export_injection_info = False
   injection_type = "Semiblind-based Command Injection"
   technique = "tempfile-based injection technique"
-  
-  # Print the findings to log file.
-  output_file = open(filename + ".txt", "a")
-  output_file.write("\n---")
-  output_file.write("\n(+) Type : " + injection_type)
-  output_file.write("\n(+) Technique : " + technique.title())
-  output_file.close()
-    
+      
   # Check if defined "--maxlen" option.
   if menu.options.maxlen:
     maxlen = menu.options.maxlen
@@ -161,12 +155,21 @@ def tfb_injection_handler(url,delay,filename,tmp_path,http_request_method):
 	found = True
 	no_result = False
 	
+	# Print the findings to log file.
+	if export_injection_info == False:
+	  output_file = open(filename + ".txt", "a")
+	  output_file.write("\n---")
+	  output_file.write("\n(+) Type : " + injection_type)
+	  output_file.write("\n(+) Technique : " + technique.title())
+	  output_file.close()
+	  export_injection_info = True
+  
 	if http_request_method == "GET":
 	  # Print the findings to log file
 	  if vp_flag == True:
 	    output_file = open(filename + ".txt", "a")
 	    output_file.write("\n(+) Parameter : " + vuln_parameter + " (" + http_request_method + ")")
-	    output_file.write("\n---\n")
+	    output_file.write("\n")
 	    vp_flag = False
 	    output_file.close()
 	    
@@ -189,7 +192,7 @@ def tfb_injection_handler(url,delay,filename,tmp_path,http_request_method):
 	  if vp_flag == True:
 	    output_file = open(filename + ".txt", "a")
 	    output_file.write("\n(+) Parameter : " + vuln_parameter + " (" + http_request_method + ")")
-	    output_file.write("\n---\n")
+	    output_file.write("\n")
 	    vp_flag = False
 	    output_file.close()
 	    

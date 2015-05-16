@@ -47,19 +47,13 @@ def eb_injection_handler(url,delay,filename,http_request_method):
   counter = 0
   vp_flag = True
   no_result = True
+  export_injection_info = False
   injection_type = "Results-based Command Injection"
   technique = "eval-based injection technique"
     
   sys.stdout.write( colors.BOLD + "(*) Testing the "+ technique + "... " + colors.RESET)
   sys.stdout.flush()
-  
-  # Print the findings to log file.
-  output_file = open(filename + ".txt", "a")
-  output_file.write("\n---")
-  output_file.write("\n(+) Type : " + injection_type)
-  output_file.write("\n(+) Technique : " + technique.title())
-  output_file.close()
-  
+    
   i = 0
   # Calculate all possible combinations
   total = len(settings.EVAL_PREFIXES) * len(settings.EVAL_SEPARATORS) * len(settings.EVAL_SUFFIXES)
@@ -145,13 +139,21 @@ def eb_injection_handler(url,delay,filename,http_request_method):
 	if shell:
 	  found = True
 	  no_result = False
-	  
+
+	  # Print the findings to log file.
+	  if export_injection_info == False:
+	    output_file = open(filename + ".txt", "a")
+	    output_file.write("\n(+) Type : " + injection_type)
+	    output_file.write("\n(+) Technique : " + technique.title())
+	    output_file.close()
+	    export_injection_info = True
+
 	  if http_request_method == "GET":
 	    # Print the findings to log file
 	    if vp_flag == True:
 	      output_file = open(filename + ".txt", "a")
 	      output_file.write("\n(+) Parameter : " + vuln_parameter + " (" + http_request_method + ")")
-	      output_file.write("\n---\n")
+	      output_file.write("\n")
 	      vp_flag = False
 	      output_file.close()
 	      
@@ -174,7 +176,6 @@ def eb_injection_handler(url,delay,filename,http_request_method):
 	    if vp_flag == True:
 	      output_file = open(filename + ".txt", "a")
 	      output_file.write("\n(+) Parameter : " + vuln_parameter + " (" + http_request_method + ")")
-	      output_file.write("\n---\n")
 	      vp_flag = False
 	      output_file.close()
 	      
