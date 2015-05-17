@@ -74,18 +74,18 @@ def do_check(separator,maxlen,TAG,delay,http_request_method,url,vuln_parameter,O
 	if shell:
 	  sys.stdout.write(colors.BOLD + "\n\n  (!) The current user is " + colors.UNDERL + cu_account + colors.RESET)
 	  if shell != "0":
-	      sys.stdout.write(colors.BOLD + " and it is " + colors.UNDERL + "not" + colors.RESET + colors.BOLD + " privilleged" + colors.RESET + ".")
+	      sys.stdout.write(colors.BOLD + " and it is " + colors.UNDERL + "not" + colors.RESET + colors.BOLD + " privilleged" + colors.RESET + ".\n")
 	      sys.stdout.flush()
 	  else:
-	    sys.stdout.write(colors.BOLD + " and it is " + colors.UNDERL + "" + colors.RESET + colors.BOLD + " privilleged" + colors.RESET + ".")
+	    sys.stdout.write(colors.BOLD + " and it is " + colors.UNDERL + "" + colors.RESET + colors.BOLD + " privilleged" + colors.RESET + ".\n")
 	    sys.stdout.flush()
       else:
-	sys.stdout.write(colors.BOLD + "\n(!) The current user is " + colors.UNDERL + cu_account + colors.RESET + ".")
+	sys.stdout.write(colors.BOLD + "\n\n  (!) The current user is " + colors.UNDERL + cu_account + colors.RESET + ".\n")
 	sys.stdout.flush()
 	
   # System users enumeration
   if menu.options.users:
-    sys.stdout.write("\n\n(*) Fetching '" + settings.PASSWD_FILE + "' to enumerate users entries... ")
+    sys.stdout.write("\n(*) Fetching '" + settings.PASSWD_FILE + "' to enumerate users entries... ")
     sys.stdout.flush()
     cmd = settings.SYS_USERS 	    
     check_how_long,output = tfb_injector.injection(separator,maxlen,TAG,cmd,delay,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,alter_shell)

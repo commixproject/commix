@@ -195,7 +195,7 @@ def eb_injection_handler(url,delay,filename,http_request_method):
 	    
 	  # Check for any enumeration options.
 	  eb_enumeration.do_check(separator,TAG,prefix,suffix,http_request_method,url,vuln_parameter)
-	  print ""
+
 	  # Check for any system file access options.
 	  eb_file_access.do_check(separator,TAG,prefix,suffix,http_request_method,url,vuln_parameter)
 	  
@@ -239,11 +239,9 @@ def eb_injection_handler(url,delay,filename,http_request_method):
     if menu.options.verbose == False:
       print ""
       return False
-  
     else:
       print ""
       return False
-  
   else :
     sys.stdout.write("\r")
     sys.stdout.flush()

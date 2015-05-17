@@ -29,7 +29,6 @@ from src.core.injections.results_based.techniques.classic import cb_handler
 from src.core.injections.results_based.techniques.eval_based import eb_handler
 from src.core.injections.blind_based.techniques.time_based import tb_handler
 from src.core.injections.semiblind_based.techniques.file_based import fb_handler 
-
 """
  Command Injection and exploitation controler.
  Checks if the testable parameter is exploitable.
@@ -44,8 +43,10 @@ def do_check(url):
       os.stat(settings.OUTPUT_DIR + host + "/")
   except:
       os.mkdir(settings.OUTPUT_DIR + host + "/") 
+      
+  # The logs filename construction.
+  filename = settings.OUTPUT_DIR + host + "/" + settings.OUTPUT_FILE_NAME
   
-  filename = settings.OUTPUT_DIR + host + "/ " + settings.OUTPUT_FILE_NAME
   output_file = open(filename + ".txt", "a")
   output_file.write("\n---")
   output_file.write("\nTime : " + datetime.datetime.fromtimestamp(time.time()).strftime('%H:%M:%S'))
@@ -81,11 +82,11 @@ def do_check(url):
 
   # Check if it is vulnerable to classic command injection technique.
   if menu.options.tech == "classic":
-    if cb_handler.exploitation(url,delay,filename,http_request_method) == False:
+    if cb_handler.exploitation(url,delay,filename,http_request_method) == None:
       if http_request_method == "GET":
-	print colors.BGRED + "(x) The '"+ url +"' appear to be not injectable." + colors.RESET
+	print colors.BGRED + "(x) The url '"+ url +"' appear to be not injectable." + colors.RESET
       else:
-	print colors.BGRED + "(x) The '"+ parameter +"' appear to be not injectable." + colors.RESET
+	print colors.BGRED + "(x) The '"+ parameter +"' parameter appear to be not injectable." + colors.RESET
     if menu.options.verbose:
       print "\n"
     percent = colors.PURPLE + "FINISHED" + colors.RESET
@@ -96,11 +97,11 @@ def do_check(url):
     
   # Check if it is vulnerable to eval-based command injection technique.
   elif menu.options.tech == "eval-based":
-    if eb_handler.exploitation(url,delay,filename,http_request_method) == False:
+    if eb_handler.exploitation(url,delay,filename,http_request_method) == None:
       if http_request_method == "GET":
-	print colors.BGRED + "(x) The '"+ url +"' appear to be not injectable." + colors.RESET
+	print colors.BGRED + "(x) The url '"+ url +"' appear to be not injectable." + colors.RESET
       else:
-	print colors.BGRED + "(x) The '"+ parameter +"' appear to be not injectable." + colors.RESET
+	print colors.BGRED + "(x) The '"+ parameter +"' parameter appear to be not injectable." + colors.RESET
     if menu.options.verbose:
       print "\n"
     percent = colors.PURPLE + "FINISHED" + colors.RESET
@@ -111,11 +112,11 @@ def do_check(url):
     
   # Check if it is vulnerable to time-based blind command injection technique.
   elif menu.options.tech == "time-based":
-    if tb_handler.exploitation(url,delay,filename,http_request_method) == False:
+    if tb_handler.exploitation(url,delay,filename,http_request_method) == None:
       if http_request_method == "GET":
-	print colors.BGRED + "(x) The '"+ url +"' appear to be not injectable." + colors.RESET
+	print colors.BGRED + "(x) The url '"+ url +"' appear to be not injectable." + colors.RESET
       else:
-	print colors.BGRED + "(x) The '"+ parameter +"' appear to be not injectable." + colors.RESET
+	print colors.BGRED + "(x) The '"+ parameter +"' parameter appear to be not injectable." + colors.RESET
     if menu.options.verbose:
       print "\n"
     percent = colors.PURPLE + "FINISHED" + colors.RESET
@@ -126,11 +127,11 @@ def do_check(url):
     
   # Check if it is vulnerable to file-based semiblind command injection technique.
   elif menu.options.tech == "file-based":
-    if fb_handler.exploitation(url,delay,filename,http_request_method) == False:
+    if fb_handler.exploitation(url,delay,filename,http_request_method) == None:
       if http_request_method == "GET":
-	print colors.BGRED + "(x) The '"+ url +"' appear to be not injectable." + colors.RESET
+	print colors.BGRED + "(x) The url '"+ url +"' appear to be not injectable." + colors.RESET
       else:
-	print colors.BGRED + "(x) The '"+ parameter +"' appear to be not injectable." + colors.RESET
+	print colors.BGRED + "(x) The '"+ parameter +"' parameter appear to be not injectable." + colors.RESET
     if menu.options.verbose:
       print "\n"
     percent = colors.PURPLE + "FINISHED" + colors.RESET
@@ -141,31 +142,36 @@ def do_check(url):
   
   else:
     # Automated command injection and exploitation.
-    if cb_handler.exploitation(url,delay,filename,http_request_method) == False:
-	classic_state = False
+    # Check if classic results-based command injection technique succeeds.
+    if cb_handler.exploitation(url,delay,filename,http_request_method) == None:
+      classic_state = False
     else:
       classic_state = True
       
-    if eb_handler.exploitation(url,delay,filename,http_request_method) == False:
+    # Check if eval results-based command injection technique succeeds.
+    if eb_handler.exploitation(url,delay,filename,http_request_method) == None:
       eval_based_state = False
     else:
       eval_based_state = True
       
-    if tb_handler.exploitation(url,delay,filename,http_request_method) == False:
+    # Check if time-based blind command injection technique succeeds.
+    if tb_handler.exploitation(url,delay,filename,http_request_method) == None:
       time_based_state = False
     else:
       time_based_state = True
       
-    if fb_handler.exploitation(url,delay,filename,http_request_method) == False:
+    # Check if file-based semiblind command injection technique succeeds.
+    if fb_handler.exploitation(url,delay,filename,http_request_method) == None:
       file_based_state = False
     else:
       file_based_state = True
 
     if classic_state == False and eval_based_state == False and time_based_state == False and file_based_state == False :
       if http_request_method == "GET":
-	print colors.BGRED + "(x) The '"+ url +"' appear to be not injectable." + colors.RESET
+	print colors.BGRED + "(x) The url '"+ url +"' appear to be not injectable." + colors.RESET
       else:
-	print colors.BGRED + "(x) The '"+ parameter +"' appear to be not injectable." + colors.RESET
+	print colors.BGRED + "(x) The '"+ parameter +"' parameter appear to be not injectable." + colors.RESET
+	
   print "(*) Results can be found at : '" + os.getcwd() + "/" + filename +".txt' \n"
   sys.exit(0)
   

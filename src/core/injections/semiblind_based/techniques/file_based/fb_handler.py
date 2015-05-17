@@ -183,6 +183,8 @@ def fb_injection_handler(url,delay,filename,http_request_method):
 		  if tmp_upload in settings.CHOISE_YES:
 		    exit_loops = True
 		    tfb_controller(no_result,url,delay,tmp_path,filename,http_request_method)
+		    if no_result == True:
+		      return False
 		  else:
 		    continue
 		else:
@@ -284,7 +286,7 @@ def fb_injection_handler(url,delay,filename,http_request_method):
 	    
 	  # Check for any enumeration options.
 	  fb_enumeration.do_check(separator,payload,TAG,prefix,suffix,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,delay)
-	  print ""
+
 	  # Check for any system file access options.
 	  fb_file_access.do_check(separator,payload,TAG,prefix,suffix,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,delay)
 	  
@@ -323,10 +325,15 @@ def fb_injection_handler(url,delay,filename,http_request_method):
 	    sys.exit(0)
 	    
   if no_result == True:
-    print ""
+    if menu.options.verbose == False:
+      print ""
+      return False
+    else:
+      print ""
+      return False
   else :
     sys.stdout.write("\r")
-    sys.stdout.flush()	
+    sys.stdout.flush()
     
 def exploitation(url,delay,filename,http_request_method):
     fb_injection_handler(url,delay,filename,http_request_method)

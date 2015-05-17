@@ -238,11 +238,9 @@ def tb_injection_handler(url,delay,filename,http_request_method):
     if menu.options.verbose == False:
       print ""
       return False
-  
     else:
       print ""
       return False
-  
   else :
     sys.stdout.write("\r")
     sys.stdout.flush()

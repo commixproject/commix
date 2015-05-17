@@ -158,7 +158,6 @@ def tfb_injection_handler(url,delay,filename,tmp_path,http_request_method):
 	# Print the findings to log file.
 	if export_injection_info == False:
 	  output_file = open(filename + ".txt", "a")
-	  output_file.write("\n---")
 	  output_file.write("\n(+) Type : " + injection_type)
 	  output_file.write("\n(+) Technique : " + technique.title())
 	  output_file.close()
@@ -250,15 +249,11 @@ def tfb_injection_handler(url,delay,filename,tmp_path,http_request_method):
     if menu.options.verbose == False:
       print ""
       return False
-  
     else:
       print ""
       return False
-  
   else :
-    if menu.options.verbose == True:
-      print ""
-    sys.stdout.write("\r")  
+    sys.stdout.write("\r")
     sys.stdout.flush()
     
 def exploitation(url,delay,filename,tmp_path,http_request_method):

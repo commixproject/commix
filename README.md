@@ -11,19 +11,15 @@
 	+--
 
 #General Information
-
 Commix (short for [comm]and [i]njection e[x]ploiter) has a simple environment and it can be used, from web developers, penetration testers or even security researchers to test web applications with the view to find bugs, errors or vulnerabilities related to command injection attacks. By using this tool, it is very easy to find and exploit a command injection vulnerability in a certain vulnerable parameter or string. Commix is written in Python programming language.
-
 
 #Disclaimer
 The tool is only for testing and academic purposes and can only be used where strict consent has been given. Do not use it for illegal purposes!!
-
 
 #Requirements
 [Python](http://www.python.org/download/) version **2.6.x** or **2.7.x** is required for running this program.
 
 #Installation
-
 Commix comes pre-installed on the following Linux distributions:
 
 - [BlackArch](http://blackarch.org/)
@@ -34,7 +30,7 @@ Download commix by cloning the Git repository:
 
 
 #Usage
-    Usage: python commix.py [options]
+    Usage : python commix.py [options]
 
 ####Options
     -h, --help            Show help and exit.
@@ -108,9 +104,11 @@ Download commix by cloning the Git repository:
                         only for 'tempfile-based' injections.
     --os-cmd=OS_CMD     Execute a single operating system command.
 
-
 ####Usage Examples
-Check [Wiki page](https://github.com/stasinopoulos/commix/wiki/Usage-Examples) for many test cases (examples).
+So, do you want to get some ideas on how to use commix? Just go and check '[usage examples](https://github.com/stasinopoulos/commix/wiki/Usage-Examples)' wiki page, where there are several test cases / attack scenarios.
+
+####Upload shells
+Commix enables you to upload web-shells (e.g metasploit PHP meterpreter) easily on target host. For more, check '[upload shells](https://github.com/stasinopoulos/commix/wiki/Upload-shells)' wiki page.
 
 ####Command injection testbeds
 A collection of pwnable VMs, that includes web apps vulnerable to command injections.

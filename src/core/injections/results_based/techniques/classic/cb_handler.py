@@ -254,7 +254,7 @@ def cb_injection_handler(url,delay,filename,http_request_method):
 	      
 	    # Check for any enumeration options.
 	    cb_enumeration.do_check(separator,TAG,prefix,suffix,whitespace,http_request_method,url,vuln_parameter)
-	    print ""
+
 	    # Check for any system file access options.
 	    cb_file_access.do_check(separator,TAG,prefix,suffix,whitespace,http_request_method,url,vuln_parameter)
 	    
@@ -294,27 +294,22 @@ def cb_injection_handler(url,delay,filename,http_request_method):
 		sys.stdout.flush()
 	      pass
 	    
-
   if no_result == True:
     if menu.options.verbose == False:
       print ""
       return False
-  
     else:
       print ""
       return False
-  
   else :
     sys.stdout.write("\r")
     sys.stdout.flush()
-    
     
 def exploitation(url,delay,filename,http_request_method):
   
   # Use the ICMP Exfiltration technique
   if menu.options.ip_icmp_data:
     icmp_exfiltration_handler(url,http_request_method)
-    
   else:
     cb_injection_handler(url,delay,filename,http_request_method)
 
