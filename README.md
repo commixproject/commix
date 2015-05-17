@@ -129,6 +129,13 @@ A collection of pwnable VMs, that includes web apps vulnerable to command inject
 - [Exploiting 'Persistence' blind command injection flaw.](https://www.youtube.com/watch?v=aVTGqiyVz5o)
 - [Upload a PHP shell (i.e. Metasploit PHP Meterpreter) on target host.](https://www.youtube.com/watch?v=MdzGY2ws2zY)
 
+####Bugs and enhancements
+For bug reports or enhancements, please open an issue [here](https://github.com/stasinopoulos/commix/issues).
+
+####Supported platforms
+- Linux
+- Mac OS X
+
 [![][img]][txt]
 [img]: https://cdn3.iconfinder.com/data/icons/peelicons-vol-1/50/Twitter-32.png (Follow @commixproject :))
 [txt]: http://www.twitter.com/commixproject
