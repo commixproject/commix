@@ -14,8 +14,8 @@
  For more see the file 'readme/COPYING' for copying permission.
 """
 
+import os
 import sys
-import os.path
 
 from src.utils import menu
 from src.utils import colors
@@ -52,13 +52,16 @@ def do_check(separator,TAG,prefix,suffix,whitespace,http_request_method,url,vuln
     if not os.path.exists(file_to_write):
       sys.stdout.write(colors.BGRED + "\n(x) Error: It seems that the '"+ file_to_write + "' is not exists." + colors.RESET)
       sys.stdout.flush()
+      sys.exit(0)
+      
     if os.path.isfile(file_to_write):
       with open(file_to_write, 'r') as content_file:
-	content = [line.rstrip('\n') for line in content_file]
-      content = "".join(str(p) for p in content)
+	content = [line.replace("\n", " ") for line in content_file]
+      content = "".join(str(p) for p in content).replace("'","\"")
     else:
       sys.stdout.write(colors.BGRED + "\n(x) Error: It seems that '"+ file_to_write + "' is not a file." + colors.RESET)
       sys.stdout.flush()
+      
     # Check the file-destination
     if os.path.split(menu.options.file_dest)[1] == "" :
       dest_to_write = os.path.split(menu.options.file_dest)[0] + "/" + os.path.split(menu.options.file_write)[1]
@@ -70,6 +73,7 @@ def do_check(separator,TAG,prefix,suffix,whitespace,http_request_method,url,vuln
     response = cb_injector.injection(separator,TAG,cmd,prefix,suffix,whitespace,http_request_method,url,vuln_parameter)
     shell = cb_injector.injection_results(response,TAG)
     shell = "".join(str(p) for p in shell)
+    
     # Check if file exists!
     cmd = "echo $(ls " + dest_to_write + ")"
     response = cb_injector.injection(separator,TAG,cmd,prefix,suffix,whitespace,http_request_method,url,vuln_parameter)
@@ -78,10 +82,10 @@ def do_check(separator,TAG,prefix,suffix,whitespace,http_request_method,url,vuln
     if shell:
       if menu.options.verbose:
 	print ""
-      sys.stdout.write(colors.BOLD + "(!) The " + colors.UNDERL + shell + colors.RESET + colors.BOLD +" file was created successfully!\n" + colors.RESET)
+      sys.stdout.write(colors.BOLD + "\n(!) The " + colors.UNDERL + shell + colors.RESET + colors.BOLD +" file was created successfully!\n" + colors.RESET)
       sys.stdout.flush()
     else:
-     sys.stdout.write(colors.BGRED + "(x) Error: It seems that you don't have permissions to write the '"+ dest_to_write + "' file." + colors.RESET)
+     sys.stdout.write(colors.BGRED + "\n(x) Error: It seems that you don't have permissions to write the '"+ dest_to_write + "' file." + colors.RESET)
      sys.stdout.flush()
 
 # eof

