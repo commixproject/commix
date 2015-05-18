@@ -44,14 +44,14 @@ def do_check(separator,maxlen,TAG,delay,http_request_method,url,vuln_parameter,O
       sys.stdout.flush()
       print shell
     else:
-     sys.stdout.write(colors.BGRED + "(x) Error: It seems that you don't have permissions to read the '"+ file_to_read + "' file.\n" + colors.RESET)
+     sys.stdout.write("\n" + colors.BGRED + "(x) Error: It seems that you don't have permissions to read the '"+ file_to_read + "' file.\n" + colors.RESET)
      sys.stdout.flush()
      
   #  Write file
   if menu.options.file_write:
     file_to_write = menu.options.file_write
     if not os.path.exists(file_to_write):
-      sys.stdout.write(colors.BGRED + "\n(x) Error: It seems that the '"+ file_to_write + "' is not exists." + colors.RESET)
+      sys.stdout.write("\n" + colors.BGRED + "(x) Error: It seems that the '"+ file_to_write + "' is not exists." + colors.RESET)
       sys.stdout.flush()
       sys.exit(0)
       
@@ -60,7 +60,7 @@ def do_check(separator,maxlen,TAG,delay,http_request_method,url,vuln_parameter,O
 	content = [line.replace("\n", " ") for line in content_file]
       content = "".join(str(p) for p in content).replace("'","\"")
     else:
-      sys.stdout.write(colors.BGRED + "\n(x) Error: It seems that '"+ file_to_write + "' is not a file." + colors.RESET)
+      sys.stdout.write("\n" + colors.BGRED + "(x) Error: It seems that '"+ file_to_write + "' is not a file." + colors.RESET)
       sys.stdout.flush()
       
     if not settings.TMP_PATH in menu.options.file_dest:
@@ -93,7 +93,7 @@ def do_check(separator,maxlen,TAG,delay,http_request_method,url,vuln_parameter,O
       sys.stdout.write(colors.BOLD + "\n(!) The " + colors.UNDERL + shell + colors.RESET + colors.BOLD +" file was created successfully!\n" + colors.RESET)
       sys.stdout.flush()
     else:
-     sys.stdout.write(colors.BGRED + "\n(x) Error: It seems that you don't have permissions to write the '"+ dest_to_write + "' file.\n" + colors.RESET)
+     sys.stdout.write("\n" + colors.BGRED + "(x) Error: It seems that you don't have permissions to write the '"+ dest_to_write + "' file.\n" + colors.RESET)
      sys.stdout.flush()
 
 # eof
