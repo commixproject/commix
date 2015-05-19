@@ -50,7 +50,7 @@ def do_check(separator,maxlen,TAG,prefix,suffix,delay,http_request_method,url,vu
   if menu.options.file_write:
     file_to_write = menu.options.file_write
     if not os.path.exists(file_to_write):
-      sys.stdout.write("\n" + colors.BGRED + "(x) Error: It seems that the '"+ file_to_write + "' is not exists." + colors.RESET)
+      sys.stdout.write("\n" + colors.BGRED + "(x) Error: It seems that the '"+ file_to_write + "' does not exists." + colors.RESET)
       sys.stdout.flush()
       sys.exit(0)
       
