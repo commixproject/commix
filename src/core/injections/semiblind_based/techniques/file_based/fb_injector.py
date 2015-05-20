@@ -66,16 +66,18 @@ def injection_test(payload,http_request_method,url):
 	opener = urllib2.build_opener(proxy)
 	urllib2.install_opener(opener)
 	response = urllib2.urlopen(request)
-	
       except urllib2.HTTPError, err:
 	print "\n(x) Error : " + str(err)
 	sys.exit(1) 
 
     else:
-      response = urllib2.urlopen(request)
-      # Just to be sure
-      response.read()
-      
+      try:
+	response = urllib2.urlopen(request)
+	response.read()
+      except urllib2.HTTPError, err:
+	print "\n(x) Error : " + str(err)
+	sys.exit(1) 
+	
   # Check if defined method is POST.
   else:
     parameter = menu.options.data
@@ -100,16 +102,18 @@ def injection_test(payload,http_request_method,url):
 	proxy= urllib2.ProxyHandler({'http': menu.options.proxy})
 	opener = urllib2.build_opener(proxy)
 	urllib2.install_opener(opener)
-	response = urllib2.urlopen(request)
-		      
+	response = urllib2.urlopen(request)  
       except urllib2.HTTPError, err:
 	print "\n(x) Error : " + str(err)
 	sys.exit(1) 
 
     else:
-      response = urllib2.urlopen(request)
-      # Just to be sure
-      response.read()
+      try:
+	response = urllib2.urlopen(request)
+	response.read()
+      except urllib2.HTTPError, err:
+	print "\n(x) Error : " + str(err)
+	sys.exit(1) 
       
   return response,vuln_parameter
 
@@ -161,14 +165,17 @@ def injection(separator,payload,TAG,cmd,prefix,suffix,http_request_method,url,vu
 	proxy= urllib2.ProxyHandler({'http': menu.options.proxy})
 	opener = urllib2.build_opener(proxy)
 	urllib2.install_opener(opener)
-	response = urllib2.urlopen(request)
-			
+	response = urllib2.urlopen(request)	
       except urllib2.HTTPError, err:
 	print "\n(x) Error : " + str(err)
 	sys.exit(1) 
 
     else:
-      response = urllib2.urlopen(request)
+      try:
+	response = urllib2.urlopen(request)
+      except urllib2.HTTPError, err:
+	print "\n(x) Error : " + str(err)
+	sys.exit(1) 
       
   else :
     # Check if defined method is POST.
@@ -191,13 +198,16 @@ def injection(separator,payload,TAG,cmd,prefix,suffix,http_request_method,url,vu
 	opener = urllib2.build_opener(proxy)
 	urllib2.install_opener(opener)
 	response = urllib2.urlopen(request)
-			
       except urllib2.HTTPError, err:
 	print "\n(x) Error : " + str(err)
 	sys.exit(1) 
 
     else:
-      response = urllib2.urlopen(request)
+      try:
+	response = urllib2.urlopen(request)
+      except urllib2.HTTPError, err:
+	print "\n(x) Error : " + str(err)
+	sys.exit(1) 
       
   return response
 

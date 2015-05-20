@@ -83,9 +83,14 @@ def injection_test(payload,http_request_method,url):
     except urllib2.HTTPError, err:
       print "\n(x) Error : " + str(err)
       sys.exit(1) 
+      
   else:
-    response = urllib2.urlopen(request)
-
+    try:
+      response = urllib2.urlopen(request)
+    except urllib2.HTTPError, err:
+      print "\n(x) Error : " + str(err)
+      sys.exit(1) 
+      
   return response,vuln_parameter
 
 
@@ -147,13 +152,16 @@ def injection(separator,TAG,cmd,prefix,suffix,http_request_method,url,vuln_param
 	opener = urllib2.build_opener(proxy)
 	urllib2.install_opener(opener)
 	response = urllib2.urlopen(request)
-			
       except urllib2.HTTPError, err:
 	print "\n(x) Error : " + str(err)
 	sys.exit(1) 
 
     else:
-      response = urllib2.urlopen(request)
+      try:
+	response = urllib2.urlopen(request)
+      except urllib2.HTTPError, err:
+	print "\n(x) Error : " + str(err)
+	sys.exit(1) 
       
   else :
     # Check if defined method is POST.
@@ -176,13 +184,16 @@ def injection(separator,TAG,cmd,prefix,suffix,http_request_method,url,vuln_param
 	opener = urllib2.build_opener(proxy)
 	urllib2.install_opener(opener)
 	response = urllib2.urlopen(request)
-			
       except urllib2.HTTPError, err:
 	print "\n(x) Error : " + str(err)
 	sys.exit(1) 
 
     else:
-      response = urllib2.urlopen(request)
+      try:
+	response = urllib2.urlopen(request)
+      except urllib2.HTTPError, err:
+	print "\n(x) Error : " + str(err)
+	sys.exit(1) 
       
   return response
 

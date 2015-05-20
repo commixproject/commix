@@ -71,15 +71,18 @@ def injection_test(payload,http_request_method,url):
 	urllib2.install_opener(opener)
 	response = urllib2.urlopen(request)
 	response.read()
-	
       except urllib2.HTTPError, err:
 	print "\n(x) Error : " + str(err)
 	sys.exit(1) 
 
     else:
-      response = urllib2.urlopen(request)
-      response.read()
-      
+      try:
+	response = urllib2.urlopen(request)
+	response.read()
+      except urllib2.HTTPError, err:
+	print "\n(x) Error : " + str(err)
+	sys.exit(1) 
+	
   # Check if defined method is POST.
   else:
     parameter = menu.options.data
@@ -106,14 +109,17 @@ def injection_test(payload,http_request_method,url):
 	urllib2.install_opener(opener)
 	response = urllib2.urlopen(request)
 	response.read()
-	
       except urllib2.HTTPError, err:
 	print "\n(x) Error : " + str(err)
 	sys.exit(1) 
 
     else:
-      response = urllib2.urlopen(request)
-      response.read()
+      try:
+	response = urllib2.urlopen(request)
+	response.read()
+      except urllib2.HTTPError, err:
+	print "\n(x) Error : " + str(err)
+	sys.exit(1) 
       
   end  = time.time()
   how_long = int(end - start)
@@ -180,15 +186,18 @@ def injection(separator,maxlen,TAG,cmd,prefix,suffix,delay,http_request_method,u
 	  urllib2.install_opener(opener)
 	  response = urllib2.urlopen(request)
 	  response.read()
-	  
 	except urllib2.HTTPError, err:
 	  print "\n(x) Error : " + str(err)
 	  sys.exit(1) 
   
       else:
-	response = urllib2.urlopen(request)
-	response.read()
-	
+	try:
+	  response = urllib2.urlopen(request)
+	  response.read()
+	except urllib2.HTTPError, err:
+	  print "\n(x) Error : " + str(err)
+	  sys.exit(1) 
+	  
     # Check if defined method is POST.
     else :
       parameter = menu.options.data
@@ -211,15 +220,18 @@ def injection(separator,maxlen,TAG,cmd,prefix,suffix,delay,http_request_method,u
 	  urllib2.install_opener(opener)
 	  response = urllib2.urlopen(request)
 	  response.read()
-	  
 	except urllib2.HTTPError, err:
 	  print "\n(x) Error : " + str(err)
 	  sys.exit(1) 
   
       else:
-	response = urllib2.urlopen(request)
-	response.read()
-	
+	try:
+	  response = urllib2.urlopen(request)
+	  response.read()
+	except urllib2.HTTPError, err:
+	  print "\n(x) Error : " + str(err)
+	  sys.exit(1) 
+	  
     end  = time.time()
     how_long = int(end - start)
     
@@ -277,15 +289,18 @@ def injection(separator,maxlen,TAG,cmd,prefix,suffix,delay,http_request_method,u
 	    urllib2.install_opener(opener)
 	    response = urllib2.urlopen(request)
 	    response.read()
-	    
 	  except urllib2.HTTPError, err:
 	    print "\n(x) Error : " + str(err)
 	    sys.exit(1) 
     
 	else:
-	  response = urllib2.urlopen(request)
-	  response.read()
-	  
+	  try:
+	    response = urllib2.urlopen(request)
+	    response.read()
+	  except urllib2.HTTPError, err:
+	    print "\n(x) Error : " + str(err)
+	    sys.exit(1) 
+	    
       else :
 	
 	parameter = urllib2.unquote(parameter)
@@ -303,14 +318,17 @@ def injection(separator,maxlen,TAG,cmd,prefix,suffix,delay,http_request_method,u
 	    urllib2.install_opener(opener)
 	    response = urllib2.urlopen(request)
 	    response.read()
-	    
 	  except urllib2.HTTPError, err:
 	    print "\n(x) Error : " + str(err)
 	    sys.exit(1) 
     
 	else:
-	  response = urllib2.urlopen(request)
-	  response.read()
+	  try:
+	    response = urllib2.urlopen(request)
+	    response.read()
+	  except urllib2.HTTPError, err:
+	    print "\n(x) Error : " + str(err)
+	    sys.exit(1) 
 	  
       end  = time.time()
       how_long = int(end - start)
