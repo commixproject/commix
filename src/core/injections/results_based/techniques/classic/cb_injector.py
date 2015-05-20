@@ -82,13 +82,13 @@ def injection_test(payload,http_request_method,url):
       urllib2.install_opener(opener)
       response = urllib2.urlopen(request)
     except urllib2.HTTPError, err:
-      print "\n(x) Error : " + str(err)
+      print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
       sys.exit(1) 
   else:
     try:
       response = urllib2.urlopen(request)
     except urllib2.HTTPError, err:
-      print "\n(x) Error : " + str(err)
+      print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
       sys.exit(1) 
       
   return response,vuln_parameter
@@ -157,7 +157,7 @@ def injection(separator,TAG,cmd,prefix,suffix,whitespace,http_request_method,url
 	urllib2.install_opener(opener)
 	response = urllib2.urlopen(request)
       except urllib2.HTTPError, err:
-	print "\n(x) Error : " + str(err)
+	print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
 	sys.exit(1) 
 
     else:
@@ -165,7 +165,7 @@ def injection(separator,TAG,cmd,prefix,suffix,whitespace,http_request_method,url
 	response = urllib2.urlopen(request)
 	
       except urllib2.HTTPError, err:
-	print "\n(x) Error : " + str(err)
+	print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
 	sys.exit(1) 
 	
   else :
@@ -190,14 +190,14 @@ def injection(separator,TAG,cmd,prefix,suffix,whitespace,http_request_method,url
 	urllib2.install_opener(opener)
 	response = urllib2.urlopen(request)
       except urllib2.HTTPError, err:
-	print "\n(x) Error : " + str(err)
+	print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
 	sys.exit(1) 
 
     else:
       try:
 	response = urllib2.urlopen(request)
       except urllib2.HTTPError, err:
-	print "\n(x) Error : " + str(err)
+	print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
 	sys.exit(1) 
 	
   return response

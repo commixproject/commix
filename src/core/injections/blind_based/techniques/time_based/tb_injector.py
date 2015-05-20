@@ -72,7 +72,7 @@ def injection_test(payload,http_request_method,url):
 	response = urllib2.urlopen(request)
 	response.read()
       except urllib2.HTTPError, err:
-	print "\n(x) Error : " + str(err)
+	print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
 	sys.exit(1) 
 
     else:
@@ -80,7 +80,7 @@ def injection_test(payload,http_request_method,url):
 	response = urllib2.urlopen(request)
 	response.read()
       except urllib2.HTTPError, err:
-	print "\n(x) Error : " + str(err)
+	print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
 	sys.exit(1) 
 	
   # Check if defined method is POST.
@@ -110,7 +110,7 @@ def injection_test(payload,http_request_method,url):
 	response = urllib2.urlopen(request)
 	response.read()
       except urllib2.HTTPError, err:
-	print "\n(x) Error : " + str(err)
+	print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
 	sys.exit(1) 
 
     else:
@@ -118,7 +118,7 @@ def injection_test(payload,http_request_method,url):
 	response = urllib2.urlopen(request)
 	response.read()
       except urllib2.HTTPError, err:
-	print "\n(x) Error : " + str(err)
+	print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
 	sys.exit(1) 
       
   end  = time.time()
@@ -187,7 +187,7 @@ def injection(separator,maxlen,TAG,cmd,prefix,suffix,delay,http_request_method,u
 	  response = urllib2.urlopen(request)
 	  response.read()
 	except urllib2.HTTPError, err:
-	  print "\n(x) Error : " + str(err)
+	  print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
 	  sys.exit(1) 
   
       else:
@@ -195,7 +195,7 @@ def injection(separator,maxlen,TAG,cmd,prefix,suffix,delay,http_request_method,u
 	  response = urllib2.urlopen(request)
 	  response.read()
 	except urllib2.HTTPError, err:
-	  print "\n(x) Error : " + str(err)
+	  print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
 	  sys.exit(1) 
 	  
     # Check if defined method is POST.
@@ -221,7 +221,7 @@ def injection(separator,maxlen,TAG,cmd,prefix,suffix,delay,http_request_method,u
 	  response = urllib2.urlopen(request)
 	  response.read()
 	except urllib2.HTTPError, err:
-	  print "\n(x) Error : " + str(err)
+	  print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
 	  sys.exit(1) 
   
       else:
@@ -229,7 +229,7 @@ def injection(separator,maxlen,TAG,cmd,prefix,suffix,delay,http_request_method,u
 	  response = urllib2.urlopen(request)
 	  response.read()
 	except urllib2.HTTPError, err:
-	  print "\n(x) Error : " + str(err)
+	  print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
 	  sys.exit(1) 
 	  
     end  = time.time()
@@ -290,7 +290,7 @@ def injection(separator,maxlen,TAG,cmd,prefix,suffix,delay,http_request_method,u
 	    response = urllib2.urlopen(request)
 	    response.read()
 	  except urllib2.HTTPError, err:
-	    print "\n(x) Error : " + str(err)
+	    print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
 	    sys.exit(1) 
     
 	else:
@@ -298,7 +298,7 @@ def injection(separator,maxlen,TAG,cmd,prefix,suffix,delay,http_request_method,u
 	    response = urllib2.urlopen(request)
 	    response.read()
 	  except urllib2.HTTPError, err:
-	    print "\n(x) Error : " + str(err)
+	    print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
 	    sys.exit(1) 
 	    
       else :
@@ -319,7 +319,7 @@ def injection(separator,maxlen,TAG,cmd,prefix,suffix,delay,http_request_method,u
 	    response = urllib2.urlopen(request)
 	    response.read()
 	  except urllib2.HTTPError, err:
-	    print "\n(x) Error : " + str(err)
+	    print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
 	    sys.exit(1) 
     
 	else:
@@ -327,7 +327,7 @@ def injection(separator,maxlen,TAG,cmd,prefix,suffix,delay,http_request_method,u
 	    response = urllib2.urlopen(request)
 	    response.read()
 	  except urllib2.HTTPError, err:
-	    print "\n(x) Error : " + str(err)
+	    print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
 	    sys.exit(1) 
 	  
       end  = time.time()

@@ -95,7 +95,7 @@ def main():
       sys.stdout.write("(*) Checking connection to the target URL... ")
       sys.stdout.flush()
       url = menu.options.url
-
+      
       # If URL not starts with any URI scheme, add "http://"
       if not urlparse.urlparse(url).scheme:
 	url = "http://" + url

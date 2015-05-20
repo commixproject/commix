@@ -311,7 +311,7 @@ def fb_injection_handler(url,delay,filename,http_request_method):
 		  
 		  if shell:
 		    shell = " ".join(str(p) for p in shell)
-		    print "\n" + colors.GREEN + colors.BOLD + shell + colors.RESET + "\n"
+		    print colors.GREEN + colors.BOLD + shell + colors.RESET + "\n"
 	    else:
 	      delete_previous_shell(separator,payload,TAG,prefix,suffix,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE)
 	      if menu.options.verbose:
