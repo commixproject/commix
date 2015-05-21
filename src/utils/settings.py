@@ -120,6 +120,8 @@ SYS_PASSES = "awk -F ':' '{ print $1\":\"$2\"(@)\"}' " + SHADOW_FILE
 FILE_READ = "cat "
 # Write file
 FILE_WRITE = "echo "
+# Write file
+FILE_UPLOAD = "wget "
 
 # Accepts YES/Y/yes/y or "enter"
 CHOISE_YES = set(['yes','y', 'ye', ''])

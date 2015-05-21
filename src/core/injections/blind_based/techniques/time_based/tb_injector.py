@@ -130,7 +130,7 @@ def injection_test(payload,http_request_method,url):
 # The main command injection exploitation.
 #----------------------------------------------
 def injection(separator,maxlen,TAG,cmd,prefix,suffix,delay,http_request_method,url,vuln_parameter):
-  if menu.options.file_write:
+  if menu.options.file_write or menu.options.file_upload:
     minlen = 0
   else:
     minlen = 1

@@ -202,10 +202,15 @@ file_access.add_option("--file-write",
 		dest="file_write",
 		help="Write to a file on the target host.")
 
+file_access.add_option("--file-upload", 
+		action="store",
+		dest="file_upload",
+		help="Upload a file on the target host.")
+
 file_access.add_option("--file-dest", 
 		action="store",
 		dest="file_dest",
-		help="Host's absolute filepath to write to.")
+		help="Host's absolute filepath to write and/or upload to.")
 
 # Injection options
 injection = OptionGroup(parser, colors.BOLD + "Injection" + colors.RESET, 
