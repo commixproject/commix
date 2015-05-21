@@ -55,7 +55,7 @@ def do_check(separator,maxlen,TAG,prefix,suffix,delay,http_request_method,url,vu
   if menu.options.file_write:
     file_to_write = menu.options.file_write
     if not os.path.exists(file_to_write):
-      sys.stdout.write("\n" + colors.BGRED + "(x) Error: It seems that the '"+ file_to_write + "' does not exists." + colors.RESET)
+      sys.stdout.write("\n" + colors.BGRED + "(x) Error: It seems that the '"+ file_to_write + "' file, does not exists." + colors.RESET)
       sys.stdout.flush()
       sys.exit(0)
       
@@ -101,9 +101,10 @@ def do_check(separator,maxlen,TAG,prefix,suffix,delay,http_request_method,url,vu
     file_to_upload = menu.options.file_upload
     
     # check if remote file exists.
-    check_if_exists = urllib2.urlopen(file_to_upload)
-    if check_if_exists.code != 200:
-      sys.stdout.write("\n" + colors.BGRED + "(x) Error: It seems that the '"+ file_to_upload + "' does not exists." + colors.RESET)
+    try:
+      urllib2.urlopen(file_to_upload)
+    except urllib2.HTTPError, err:
+      sys.stdout.write("\n" + colors.BGRED + "(x) Error: It seems that the '"+ file_to_upload + "' file, does not exists. ("+str(err)+")" + colors.RESET + "\n")
       sys.stdout.flush()
       sys.exit(0)
       

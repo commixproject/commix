@@ -53,7 +53,7 @@ def do_check(separator,TAG,prefix,suffix,http_request_method,url,vuln_parameter)
   if menu.options.file_write:
     file_to_write = menu.options.file_write
     if not os.path.exists(file_to_write):
-      sys.stdout.write("\n" + colors.BGRED + "(x) Error: It seems that the '"+ file_to_write + "' does not exists." + colors.RESET)
+      sys.stdout.write("\n" + colors.BGRED + "(x) Error: It seems that the '"+ file_to_write + "' file, does not exists." + colors.RESET)
       sys.stdout.flush()
       sys.exit(0)
       
@@ -91,7 +91,7 @@ def do_check(separator,TAG,prefix,suffix,http_request_method,url,vuln_parameter)
       sys.stdout.write(colors.BOLD + "\n(!) The " + colors.UNDERL + shell + colors.RESET + colors.BOLD +" file was created successfully!\n" + colors.RESET)
       sys.stdout.flush()
     else:
-     sys.stdout.write("\n" + colors.BGRED + "(x) Error: It seems that you don't have permissions to write the '"+ dest_to_write + "' file.\n" + colors.RESET)
+     sys.stdout.write("\n" + colors.BGRED + "(x) Error: It seems that you don't have permissions to write the '"+ dest_to_write + "' file." + colors.RESET + "\n")
      sys.stdout.flush()
 
 
@@ -100,9 +100,10 @@ def do_check(separator,TAG,prefix,suffix,http_request_method,url,vuln_parameter)
     file_to_upload = menu.options.file_upload
     
     # check if remote file exists.
-    check_if_exists = urllib2.urlopen(file_to_upload)
-    if check_if_exists.code != 200:
-      sys.stdout.write("\n" + colors.BGRED + "(x) Error: It seems that the '"+ file_to_upload + "' does not exists." + colors.RESET)
+    try:
+      urllib2.urlopen(file_to_upload)
+    except urllib2.HTTPError, err:
+      sys.stdout.write("\n" + colors.BGRED + "(x) Error: It seems that the '"+ file_to_upload + "' file, does not exists. ("+str(err)+")" + colors.RESET + "\n")
       sys.stdout.flush()
       sys.exit(0)
       
@@ -132,7 +133,7 @@ def do_check(separator,TAG,prefix,suffix,http_request_method,url,vuln_parameter)
       sys.stdout.write(colors.BOLD + "\n(!) The " + colors.UNDERL + shell + colors.RESET + colors.BOLD +" file was uploaded successfully!\n" + colors.RESET)
       sys.stdout.flush()
     else:
-     sys.stdout.write("\n" + colors.BGRED + "(x) Error: It seems that you don't have permissions to write the '"+ dest_to_upload + "' file." + colors.RESET)
+     sys.stdout.write("\n" + colors.BGRED + "(x) Error: It seems that you don't have permissions to write the '"+ dest_to_upload + "' file." + colors.RESET + "\n")
      sys.stdout.flush()
 
 # eof
