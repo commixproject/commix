@@ -77,7 +77,8 @@ Download commix by cloning the Git repository:
 
     --file-read=FILE..  Read a file from the target host.
     --file-write=FIL..  Write to a file on the target host.
-    --file-dest=FILE..  Host's absolute filepath to write to.
+    --file-upload=FI..  Upload a file on the target host.
+    --file-dest=FILE..  Host's absolute filepath to write and/or upload to.
 
 ####Injection
     These options can be used, to specify which parameters to inject and
