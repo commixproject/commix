@@ -179,14 +179,22 @@ def fb_injection_handler(url,delay,filename,http_request_method):
 		# Use the "/tmp/" directory for tempfile-based technique.
 		elif i == 20 :
 		  print "\n" + colors.BGRED + "(x) Error: It seems that you don't have permissions to write on "+ SRV_ROOT_DIR + "." + colors.RESET
-		  tmp_upload = raw_input("(*) Do you want to try the temporary directory (" + tmp_path + ") [Y/n] > ").lower()
-		  if tmp_upload in settings.CHOISE_YES:
-		    exit_loops = True
-		    tfb_controller(no_result,url,delay,tmp_path,filename,http_request_method)
-		    if no_result == True:
-		      return False
-		  else:
-		    continue
+		  while True:
+		    tmp_upload = raw_input("(*) Do you want to try the temporary directory (" + tmp_path + ") [Y/n] > ").lower()
+		    if tmp_upload in settings.CHOISE_YES:
+		      exit_loops = True
+		      tfb_controller(no_result,url,delay,tmp_path,filename,http_request_method)
+		      if no_result == True:
+			return False
+		    elif tmp_upload in settings.CHOISE_NO:
+		      break
+		    else:
+		      if tmp_upload == "":
+			tmp_upload = "enter"
+		      print colors.BGRED + "(x) Error: '" + tmp_upload + "' is not a valid answer." + colors.RESET
+		      pass
+		  continue
+		
 		else:
 		  if exit_loops == False:
 		    if not menu.options.verbose:
