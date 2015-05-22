@@ -259,41 +259,48 @@ def cb_injection_handler(url,delay,filename,http_request_method):
 	    cb_file_access.do_check(separator,TAG,prefix,suffix,whitespace,http_request_method,url,vuln_parameter)
 	    
 	    # Pseudo-Terminal shell
-	    gotshell = raw_input("\n(*) Do you want a Pseudo-Terminal shell? [Y/n] > ").lower()
-	    if gotshell in settings.CHOISE_YES:
-	      print ""
-	      print "Pseudo-Terminal (type 'q' or use <Ctrl-C> to quit)"
-	      while True:
-		try:
-		  cmd = raw_input("Shell > ")
-		  if cmd == "q":
-		    sys.exit(0)
-		    
-		  else:
-		    # The main command injection exploitation.
-		    response = cb_injector.injection(separator,TAG,cmd,prefix,suffix,whitespace,http_request_method,url,vuln_parameter)
-		    
-		    # if need page reload
-		    if menu.options.url_reload:
-		      time.sleep(delay)
-		      response = urllib.urlopen(url)
+	    while True:
+	      gotshell = raw_input("\n(*) Do you want a Pseudo-Terminal shell? [Y/n] > ").lower()
+	      if gotshell in settings.CHOISE_YES:
+		print ""
+		print "Pseudo-Terminal (type 'q' or use <Ctrl-C> to quit)"
+		while True:
+		  try:
+		    cmd = raw_input("Shell > ")
+		    if cmd == "q":
+		      sys.exit(0)
 		      
-		    # Command execution results.
-		    shell = cb_injector.injection_results(response,TAG)
-		    if shell:
-		      shell = "".join(str(p) for p in shell)
-		      print "\n" + colors.GREEN + colors.BOLD + shell + colors.RESET + "\n"
+		    else:
+		      # The main command injection exploitation.
+		      response = cb_injector.injection(separator,TAG,cmd,prefix,suffix,whitespace,http_request_method,url,vuln_parameter)
+		      
+		      # if need page reload
+		      if menu.options.url_reload:
+			time.sleep(delay)
+			response = urllib.urlopen(url)
+			
+		      # Command execution results.
+		      shell = cb_injector.injection_results(response,TAG)
+		      if shell:
+			shell = "".join(str(p) for p in shell)
+			print "\n" + colors.GREEN + colors.BOLD + shell + colors.RESET + "\n"
 
-		except KeyboardInterrupt: 
-		  print ""
-		  sys.exit(0)
+		  except KeyboardInterrupt: 
+		    print ""
+		    sys.exit(0)
+
+	      elif gotshell in settings.CHOISE_NO:
+		if menu.options.verbose:
+		  sys.stdout.write("\r(*) Continue testing the "+ technique +"... ")
+		  sys.stdout.flush()
+		break
 	      
-	    else:
-	      if menu.options.verbose:
-		sys.stdout.write("\r(*) Continue testing the "+ technique +"... ")
-		sys.stdout.flush()
-	      pass
-	    
+	      else:
+		if gotshell == "":
+		  gotshell = "enter"
+		print colors.BGRED + "(x) Error: '" + gotshell + "' is not a valid answer." + colors.RESET
+		pass
+	      
   if no_result == True:
     if menu.options.verbose == False:
       print ""

@@ -123,8 +123,11 @@ FILE_WRITE = "echo "
 # Write file
 FILE_UPLOAD = "wget "
 
-# Accepts YES/Y/yes/y or "enter"
-CHOISE_YES = set(['yes','y', 'ye', ''])
+# Accepts YES,YE,Y,yes,ye,y
+CHOISE_YES = set(['yes','ye','y'])
+
+# Accepts NO,N,no,n
+CHOISE_NO = set(['no','n'])
 
 # Available alternative shells
 AVAILABLE_SHELLS = set(["python"])

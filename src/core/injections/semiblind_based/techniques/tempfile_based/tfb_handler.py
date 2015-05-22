@@ -216,34 +216,43 @@ def tfb_injection_handler(url,delay,filename,tmp_path,http_request_method):
 	tfb_file_access.do_check(separator,maxlen,TAG,delay,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,alter_shell)
 	
 	# Pseudo-Terminal shell
-	gotshell = raw_input("\n(*) Do you want a Pseudo-Terminal shell? [Y/n] > ").lower()
-	if gotshell in settings.CHOISE_YES:
-	  print ""
-	  print "Pseudo-Terminal (type 'q' or use <Ctrl-C> to quit)"
-	  while True:
-	    try:
-	      cmd = raw_input("Shell > ")
-	      if cmd == "q":
+	while True:
+	  gotshell = raw_input("\n(*) Do you want a Pseudo-Terminal shell? [Y/n] > ").lower()
+	  if gotshell in settings.CHOISE_YES:
+	    print ""
+	    print "Pseudo-Terminal (type 'q' or use <Ctrl-C> to quit)"
+	    while True:
+	      try:
+		cmd = raw_input("Shell > ")
+		if cmd == "q":
+		  sys.exit(0)
+		  
+		else:
+		  # The main command injection exploitation.
+		  check_how_long,output  = tfb_injector.injection(separator,maxlen,TAG,cmd,delay,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,alter_shell)
+		  
+		  if menu.options.verbose:
+		    print ""
+		  print "\n\n" + colors.GREEN + colors.BOLD + output + colors.RESET
+		  print "\n(*) Finished in "+ time.strftime('%H:%M:%S', time.gmtime(check_how_long)) +".\n"
+		  
+	      except KeyboardInterrupt: 
+		print ""
 		sys.exit(0)
 		
-	      else:
-		# The main command injection exploitation.
-		check_how_long,output  = tfb_injector.injection(separator,maxlen,TAG,cmd,delay,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,alter_shell)
-		
-		if menu.options.verbose:
-		  print ""
-		print "\n\n" + colors.GREEN + colors.BOLD + output + colors.RESET
-		print "\n(*) Finished in "+ time.strftime('%H:%M:%S', time.gmtime(check_how_long)) +".\n"
-		
-	    except KeyboardInterrupt: 
-	      print ""
-	      sys.exit(0)
-
-	else:
-	  if menu.options.verbose:
-	    sys.stdout.write("\r(*) Continue testing the "+ technique +"... ")
-	    sys.stdout.flush()
-	  break
+	  elif gotshell in settings.CHOISE_NO:
+	    break
+	    if menu.options.verbose:
+	      sys.stdout.write("\r(*) Continue testing the "+ technique +"... ")
+	      sys.stdout.flush()
+	  
+	  else:
+	    if gotshell == "":
+	      gotshell = "enter"
+	    print colors.BGRED + "(x) Error: '" + gotshell + "' is not a valid answer." + colors.RESET
+	    pass
+	  
+	break
     
   if no_result == True:
     if menu.options.verbose == False:
