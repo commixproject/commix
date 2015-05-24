@@ -23,6 +23,7 @@ The tool is only for testing and academic purposes and can only be used where st
 Commix comes pre-installed on the following Linux distributions:
 
 - [BlackArch](http://blackarch.org/)
+- [ArchAssault](https://archassault.org/)
 
 Download commix by cloning the Git repository:
 
