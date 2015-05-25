@@ -262,6 +262,7 @@ def tb_injection_handler(url,delay,filename,http_request_method):
     sys.stdout.flush()
     
 def exploitation(url,delay,filename,http_request_method):
-    tb_injection_handler(url,delay,filename,http_request_method)
+    if tb_injection_handler(url,delay,filename,http_request_method) == False:
+      return False
     
 #eof

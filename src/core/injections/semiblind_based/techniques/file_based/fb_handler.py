@@ -360,6 +360,7 @@ def fb_injection_handler(url,delay,filename,http_request_method):
     sys.stdout.flush()
     
 def exploitation(url,delay,filename,http_request_method):
-    fb_injection_handler(url,delay,filename,http_request_method)
+    if fb_injection_handler(url,delay,filename,http_request_method) == False:
+      return False
 
 #eof

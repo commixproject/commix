@@ -82,7 +82,7 @@ def do_check(url):
 
   # Check if it is vulnerable to classic command injection technique.
   if menu.options.tech == "classic":
-    if cb_handler.exploitation(url,delay,filename,http_request_method) == None:
+    if cb_handler.exploitation(url,delay,filename,http_request_method) == False:
       if http_request_method == "GET":
 	print colors.BGRED + "(x) The url '"+ url +"' appear to be not injectable." + colors.RESET
       else:
@@ -97,7 +97,7 @@ def do_check(url):
     
   # Check if it is vulnerable to eval-based command injection technique.
   elif menu.options.tech == "eval-based":
-    if eb_handler.exploitation(url,delay,filename,http_request_method) == None:
+    if eb_handler.exploitation(url,delay,filename,http_request_method) == False:
       if http_request_method == "GET":
 	print colors.BGRED + "(x) The url '"+ url +"' appear to be not injectable." + colors.RESET
       else:
@@ -112,7 +112,7 @@ def do_check(url):
     
   # Check if it is vulnerable to time-based blind command injection technique.
   elif menu.options.tech == "time-based":
-    if tb_handler.exploitation(url,delay,filename,http_request_method) == None:
+    if tb_handler.exploitation(url,delay,filename,http_request_method) == False:
       if http_request_method == "GET":
 	print colors.BGRED + "(x) The url '"+ url +"' appear to be not injectable." + colors.RESET
       else:
@@ -127,7 +127,7 @@ def do_check(url):
     
   # Check if it is vulnerable to file-based semiblind command injection technique.
   elif menu.options.tech == "file-based":
-    if fb_handler.exploitation(url,delay,filename,http_request_method) == None:
+    if fb_handler.exploitation(url,delay,filename,http_request_method) == False:
       if http_request_method == "GET":
 	print colors.BGRED + "(x) The url '"+ url +"' appear to be not injectable." + colors.RESET
       else:
@@ -143,25 +143,25 @@ def do_check(url):
   else:
     # Automated command injection and exploitation.
     # Check if classic results-based command injection technique succeeds.
-    if cb_handler.exploitation(url,delay,filename,http_request_method) == None:
+    if cb_handler.exploitation(url,delay,filename,http_request_method) == False:
       classic_state = False
     else:
       classic_state = True
       
     # Check if eval results-based command injection technique succeeds.
-    if eb_handler.exploitation(url,delay,filename,http_request_method) == None:
+    if eb_handler.exploitation(url,delay,filename,http_request_method) == False:
       eval_based_state = False
     else:
       eval_based_state = True
       
     # Check if time-based blind command injection technique succeeds.
-    if tb_handler.exploitation(url,delay,filename,http_request_method) == None:
+    if tb_handler.exploitation(url,delay,filename,http_request_method) == False:
       time_based_state = False
     else:
       time_based_state = True
       
     # Check if file-based semiblind command injection technique succeeds.
-    if fb_handler.exploitation(url,delay,filename,http_request_method) == None:
+    if fb_handler.exploitation(url,delay,filename,http_request_method) == False:
       file_based_state = False
     else:
       file_based_state = True
@@ -171,8 +171,8 @@ def do_check(url):
 	print colors.BGRED + "(x) The url '"+ url +"' appear to be not injectable." + colors.RESET
       else:
 	print colors.BGRED + "(x) The '"+ parameter +"' parameter appear to be not injectable." + colors.RESET
-	
-  print "(*) Results can be found at : '" + os.getcwd() + "/" + filename +".txt' \n"
+    else:
+      print "(*) The results can be found at '" + os.getcwd() + "/" + filename +".txt'"
   sys.exit(0)
   
 #eof

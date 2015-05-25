@@ -241,19 +241,18 @@ def eb_injection_handler(url,delay,filename,http_request_method):
 		gotshell = "enter"
 	      print colors.BGRED + "(x) Error: '" + gotshell + "' is not a valid answer." + colors.RESET
 	      pass
-	
+	    
   if no_result == True:
-    if menu.options.verbose == False:
-      print ""
-      return False
-    else:
-      print ""
-      return False
+    print ""
+    return False
+
   else :
     sys.stdout.write("\r")
     sys.stdout.flush()
+    return True
 
 def exploitation(url,delay,filename,http_request_method):
-    eb_injection_handler(url,delay,filename,http_request_method)
+    if eb_injection_handler(url,delay,filename,http_request_method) == False:
+      return False
 
 #eof

@@ -325,6 +325,7 @@ def exploitation(url,delay,filename,http_request_method):
   if menu.options.ip_icmp_data:
     icmp_exfiltration_handler(url,http_request_method)
   else:
-    cb_injection_handler(url,delay,filename,http_request_method)
+    if cb_injection_handler(url,delay,filename,http_request_method) == False:
+      return False
 
 #eof
