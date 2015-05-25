@@ -36,7 +36,6 @@ from src.core.injections.results_based.techniques.eval_based import eb_payloads
  The "eval-based" injection technique on Classic OS Command Injection.
 """
 
-
 #-----------------------------------------
 # Check if target host is vulnerable.
 #-----------------------------------------
@@ -205,8 +204,8 @@ def injection_results(response,TAG):
   
   # Grab execution results
   html_data = response.read()
-  html_data= re.sub("\n", "", html_data)
-  shell = re.findall(r"" + TAG + TAG + "(.*)" + TAG + TAG + "", html_data)
+  html_data= re.sub("\n", " ", html_data)
+  shell = re.findall(r"" + TAG + " " + TAG + "(.*)" + TAG + " " + TAG + "", html_data)
   
   return shell
 

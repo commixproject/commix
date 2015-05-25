@@ -223,7 +223,7 @@ def eb_injection_handler(url,delay,filename,http_request_method):
 		    # Command execution results.
 		    shell = eb_injector.injection_results(response,TAG)
 		    if shell:
-		      shell = "".join(str(p) for p in shell).replace(" ", "", 1)
+		      shell = "".join(str(p) for p in shell).replace(" ", "", 1)[:-1]
 		      print "\n" + colors.GREEN + colors.BOLD + shell + colors.RESET + "\n"
 		    
 		except KeyboardInterrupt: 
