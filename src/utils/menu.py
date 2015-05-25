@@ -274,7 +274,7 @@ injection.add_option("--icmp-exfil",
 injection.add_option("--alter-shell", 
 		action="store",
 		dest="alter_shell",
-		help="Use an alternative os-shell (e.g. Python). Available, only for 'tempfile-based' injections.")
+		help="Use an alternative os-shell (e.g. Python).")
 
 injection.add_option("--os-cmd", 
 		action="store",

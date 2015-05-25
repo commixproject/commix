@@ -147,7 +147,7 @@ def injection(separator,maxlen,TAG,cmd,delay,http_request_method,url,vuln_parame
 
     # Check if defined "--verbose" option.
     if menu.options.verbose:
-      sys.stdout.write("\n" + colors.GREY + payload + colors.RESET)
+      sys.stdout.write("\n" + colors.GREY + payload.replace("\n","\\n") + colors.RESET)
       
     start = 0
     end = 0
@@ -249,7 +249,7 @@ def injection(separator,maxlen,TAG,cmd,delay,http_request_method,url,vuln_parame
 	
       # Check if defined "--verbose" option.
       if menu.options.verbose:
-	sys.stdout.write("\n" + colors.GREY + payload + colors.RESET)
+	sys.stdout.write("\n" + colors.GREY + payload.replace("\n","\\n") + colors.RESET)
 	
       start = 0
       end = 0

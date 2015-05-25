@@ -111,7 +111,7 @@ def tfb_injection_handler(url,delay,filename,tmp_path,http_request_method):
 	# Check if defined "--verbose" option.
 	if menu.options.verbose:
 	  if separator == ";" or separator == "&&" or separator == "||":
-	    sys.stdout.write("\n" + colors.GREY + payload + colors.RESET)
+	    sys.stdout.write("\n" + colors.GREY + payload.replace("\n","\\n") + colors.RESET)
 	    
 	# Check if target host is vulnerable
 	how_long,vuln_parameter = tfb_injector.injection_test(payload,http_request_method,url)
@@ -184,7 +184,7 @@ def tfb_injection_handler(url,delay,filename,tmp_path,http_request_method):
 	  print colors.BOLD + "\n(!) The ("+ http_request_method + ") '" + colors.UNDERL + GET_vuln_param + colors.RESET + colors.BOLD + "' parameter is vulnerable to "+ injection_type +"."+ colors.RESET
 	  print "  (+) Type : "+ colors.YELLOW + colors.BOLD + injection_type + colors.RESET + ""
 	  print "  (+) Technique : "+ colors.YELLOW + colors.BOLD + technique.title() + colors.RESET + ""
-	  print "  (+) Payload : "+ colors.YELLOW + colors.BOLD + re.sub("%20", " ", urllib.unquote_plus(payload)) + colors.RESET
+	  print "  (+) Payload : "+ colors.YELLOW + colors.BOLD + re.sub("%20", " ", urllib.unquote_plus(payload.replace("\n","\\n"))) + colors.RESET
 	    
 	else :
 	  # Print the findings to log file
@@ -207,7 +207,7 @@ def tfb_injection_handler(url,delay,filename,tmp_path,http_request_method):
 	  print colors.BOLD + "\n(!) The ("+ http_request_method + ") '" + colors.UNDERL + POST_vuln_param + colors.RESET + colors.BOLD + "' parameter is vulnerable to "+ injection_type +"."+ colors.RESET
 	  print "  (+) Type : "+ colors.YELLOW + colors.BOLD + injection_type + colors.RESET + ""
 	  print "  (+) Technique : "+ colors.YELLOW + colors.BOLD + technique.title() + colors.RESET + ""
-	  print "  (+) Payload : "+ colors.YELLOW + colors.BOLD + re.sub("%20", " ", payload) + colors.RESET
+	  print "  (+) Payload : "+ colors.YELLOW + colors.BOLD + re.sub("%20", " ", payload.replace("\n","\\n")) + colors.RESET
 	  
 	# Check for any enumeration options.
 	tfb_enumeration.do_check(separator,maxlen,TAG,delay,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,alter_shell)

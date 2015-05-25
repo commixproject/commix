@@ -20,7 +20,7 @@ The tool is only for testing and academic purposes and can only be used where st
 [Python](http://www.python.org/download/) version **2.6.x** or **2.7.x** is required for running this program.
 
 #Installation
-Commix comes pre-installed on the following Linux distributions:
+Commix comes packaged on the official repositories, of the following Linux distributions:
 
 - [BlackArch](http://blackarch.org/)
 - [ArchAssault](https://archassault.org/)
@@ -102,8 +102,7 @@ Download commix by cloning the Git repository:
                         directory (Default: /var/www/).
     --icmp-exfil=IP_..  Use the ICMP exfiltration technique (e.g.
                         'ip_src=192.168.178.1,ip_dst=192.168.178.3').
-    --alter-shell=AL..  Use an alternative os-shell (e.g. Python). Available,
-                        only for 'tempfile-based' injections.
+    --alter-shell=AL..  Use an alternative os-shell (e.g. Python).
     --os-cmd=OS_CMD     Execute a single operating system command.
 
 ####Usage Examples
@@ -141,3 +140,4 @@ For bug reports or enhancements, please open an issue [here](https://github.com/
 [![][img]][txt]
 [img]: https://cdn3.iconfinder.com/data/icons/peelicons-vol-1/50/Twitter-32.png (Follow @commixproject :))
 [txt]: http://www.twitter.com/commixproject
+

