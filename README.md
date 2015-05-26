@@ -129,6 +129,7 @@ A collection of pwnable VMs, that includes web apps vulnerable to command inject
 - [Exploiting bWAPP command injection flaws (normal & blind).](https://www.youtube.com/watch?v=zqI8NcHfboo)
 - [Exploiting 'Persistence' blind command injection flaw.](https://www.youtube.com/watch?v=aVTGqiyVz5o)
 - [Upload a PHP shell (i.e. Metasploit PHP Meterpreter) on target host.](https://www.youtube.com/watch?v=MdzGY2ws2zY)
+- [Upload a Weevely PHP web shell on target host](https://www.youtube.com/watch?v=cy7AW6OQBmU)
 
 ####Bugs and enhancements
 For bug reports or enhancements, please open an issue [here](https://github.com/stasinopoulos/commix/issues).
