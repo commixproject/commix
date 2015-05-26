@@ -70,7 +70,7 @@ JUNK_COMBINATION = ["&&&","|||","|&&","&|","&;","|;","%7C;","%26;","%7C&"]
 EVAL_PREFIXES = ["","'",")","')","\")","\".","'.",");}","');}","\");}"]
 
 # The code injection separators.
-EVAL_SEPARATORS = ["",";"]
+EVAL_SEPARATORS = ["",";","%0a","\\\\n"]
 
 # The code injection suffixes.
 EVAL_SUFFIXES = ["","\\\\","//","#",".\"",".'"]

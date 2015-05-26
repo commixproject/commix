@@ -99,8 +99,8 @@ def injection_test(payload,http_request_method,url):
 def injection_test_results(response,TAG):
   
   html_data = response.read()
-  html_data= re.sub("\n", "", html_data)
-  shell = re.findall(r"" + TAG + TAG + TAG + "", html_data)
+  html_data= re.sub("\n", " ", html_data)
+  shell = re.findall(r"" + TAG + " " + TAG + " " + TAG + " " , html_data)
   
   return shell
 
