@@ -29,6 +29,8 @@ from src.core.injections.results_based.techniques.classic import cb_handler
 from src.core.injections.results_based.techniques.eval_based import eb_handler
 from src.core.injections.blind_based.techniques.time_based import tb_handler
 from src.core.injections.semiblind_based.techniques.file_based import fb_handler 
+from src.core.modules import modules_handler
+
 """
  Command Injection and exploitation controler.
  Checks if the testable parameter is exploitable.
@@ -79,6 +81,9 @@ def do_check(url):
   else:
     http_request_method = "POST"
     parameter = menu.options.data
+    
+  # Load modules
+  modules_handler.load_modules(url,http_request_method)
 
   # Check if it is vulnerable to classic command injection technique.
   if menu.options.tech == "classic":

