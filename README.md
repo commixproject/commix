@@ -20,15 +20,15 @@ The tool is only for testing and academic purposes and can only be used where st
 [Python](http://www.python.org/download/) version **2.6.x** or **2.7.x** is required for running this program.
 
 #Installation
-Commix comes packaged on the official repositories, of the following Linux distributions:
-
-- [BlackArch](http://blackarch.org/)
-- [ArchAssault](https://archassault.org/)
 
 Download commix by cloning the Git repository:
 
     git clone https://github.com/stasinopoulos/commix.git commix
 
+Commix comes packaged on the official repositories of the following Linux distributions, so you can use the package manager to install it!
+
+- [ArchAssault](https://archassault.org/)
+- [BlackArch](http://blackarch.org/)
 
 #Usage
     Usage : python commix.py [options]
@@ -108,10 +108,13 @@ Download commix by cloning the Git repository:
 ####Usage Examples
 So, do you want to get some ideas on how to use commix? Just go and check '[usage examples](https://github.com/stasinopoulos/commix/wiki/Usage-Examples)' wiki page, where there are several test cases / attack scenarios.
 
-####Upload shells
+####Upload Shells
 Commix enables you to upload web-shells (e.g metasploit PHP meterpreter) easily on target host. For more, check '[upload shells](https://github.com/stasinopoulos/commix/wiki/Upload-shells)' wiki page.
 
-####Command injection testbeds
+####Modules Development
+Do you want to increase the capabilities of the commix tool and/or to adapt it to our needs? You can easily develop and import our own modules. For more, check '[module development](https://github.com/stasinopoulos/commix/wiki/Module-Development)' wiki page.
+
+####Command Injection Testbeds
 A collection of pwnable VMs, that includes web apps vulnerable to command injections.
 - [Damn Vulnerable Web App] (http://www.dvwa.co.uk/)
 - [OWASP: Mutillidae] (https://www.owasp.org/index.php/Category:OWASP_Mutillidae)
@@ -129,16 +132,15 @@ A collection of pwnable VMs, that includes web apps vulnerable to command inject
 - [Exploiting bWAPP command injection flaws (normal & blind).](https://www.youtube.com/watch?v=zqI8NcHfboo)
 - [Exploiting 'Persistence' blind command injection flaw.](https://www.youtube.com/watch?v=aVTGqiyVz5o)
 - [Upload a PHP shell (i.e. Metasploit PHP Meterpreter) on target host.](https://www.youtube.com/watch?v=MdzGY2ws2zY)
-- [Upload a Weevely PHP web shell on target host](https://www.youtube.com/watch?v=cy7AW6OQBmU)
+- [Upload a Weevely PHP web shell on target host.](https://www.youtube.com/watch?v=cy7AW6OQBmU)
 
-####Bugs and enhancements
+####Bugs and Enhancements
 For bug reports or enhancements, please open an issue [here](https://github.com/stasinopoulos/commix/issues).
 
-####Supported platforms
+####Supported Platforms
 - Linux
 - Mac OS X
 
 [![][img]][txt]
 [img]: https://cdn3.iconfinder.com/data/icons/peelicons-vol-1/50/Twitter-32.png (Follow @commixproject :))
 [txt]: http://www.twitter.com/commixproject
-
