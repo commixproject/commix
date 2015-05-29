@@ -101,8 +101,10 @@ def tfb_injection_handler(url,delay,filename,tmp_path,http_request_method):
     
     for j in range(1,int(tag_length)):
       try:
+
 	# Tempfile-based decision payload (check if host is vulnerable).
 	if alter_shell :
+
 	  payload = tfb_payloads.decision_alter_shell(separator,j,TAG,OUTPUT_TEXTFILE,delay,http_request_method)
   
 	else:
@@ -152,6 +154,7 @@ def tfb_injection_handler(url,delay,filename,tmp_path,http_request_method):
       # Yaw, got shellz! 
       # Do some magic tricks!
       if how_long >= delay:
+
 	found = True
 	no_result = False
 	
@@ -208,7 +211,7 @@ def tfb_injection_handler(url,delay,filename,tmp_path,http_request_method):
 	  print "  (+) Type : "+ colors.YELLOW + colors.BOLD + injection_type + colors.RESET + ""
 	  print "  (+) Technique : "+ colors.YELLOW + colors.BOLD + technique.title() + colors.RESET + ""
 	  print "  (+) Payload : "+ colors.YELLOW + colors.BOLD + re.sub("%20", " ", payload.replace("\n","\\n")) + colors.RESET
-	  
+	
 	# Check for any enumeration options.
 	tfb_enumeration.do_check(separator,maxlen,TAG,delay,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,alter_shell)
 

