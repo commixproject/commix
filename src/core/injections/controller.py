@@ -23,13 +23,13 @@ from src.utils import menu
 from src.utils import colors
 from src.utils import settings
 
+from src.core.modules import modules_handler
 from src.core.requests import authentication
 
 from src.core.injections.results_based.techniques.classic import cb_handler
 from src.core.injections.results_based.techniques.eval_based import eb_handler
 from src.core.injections.blind_based.techniques.time_based import tb_handler
-from src.core.injections.semiblind_based.techniques.file_based import fb_handler 
-from src.core.modules import modules_handler
+from src.core.injections.semiblind_based.techniques.file_based import fb_handler
 
 """
  Command Injection and exploitation controler.

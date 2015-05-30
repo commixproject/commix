@@ -18,16 +18,16 @@ import sys
 
 from src.utils import menu
 from src.utils import colors
-
-try:
-  from src.core.modules import ICMP_Exfiltration
-except ImportError as e:
-  print "\n" + colors.BGRED + "(x) Error:",e
-  print colors.RESET
-  sys.exit(1)
-
+from src.utils import settings
+  
 def load_modules(url,http_request_method):
-  # Load the module ICMP_Exfiltration
-  if menu.options.ip_icmp_data:
-    # The ICMP Exfiltration handler
-    ICMP_Exfiltration.icmp_exfiltration_handler(url,http_request_method)
+  # Check if defined the ICMP exfiltration module
+  if menu.options.ip_icmp_data :
+    try:
+      # The ICMP_Exfiltration module
+      from src.core.modules import ICMP_Exfiltration
+      # The ICMP Exfiltration handler
+      ICMP_Exfiltration.icmp_exfiltration_handler(url,http_request_method)
+    except ImportError as e:
+      print "\n" + colors.BGRED + "(x) Error : " + str(e) + colors.RESET
+      sys.exit(1) 

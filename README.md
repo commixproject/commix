@@ -81,6 +81,14 @@ Commix comes packaged on the official repositories of the following Linux distri
     --file-upload=FI..  Upload a file on the target host.
     --file-dest=FILE..  Host's absolute filepath to write and/or upload to.
 
+####Modules:
+    These options can be used increase the detection and/or injection
+    capabilities.
+
+    --icmp-exfil=IP_..  The ICMP exfiltration technique (e.g.
+                        'ip_src=192.168.178.1,ip_dst=192.168.178.3').
+
+
 ####Injection
     These options can be used, to specify which parameters to inject and
     to provide custom injection payloads.

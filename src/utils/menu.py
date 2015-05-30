@@ -212,6 +212,15 @@ file_access.add_option("--file-dest",
 		dest="file_dest",
 		help="Host's absolute filepath to write and/or upload to.")
 
+# Modules options
+modules = OptionGroup(parser, colors.BOLD + "Modules" + colors.RESET, 
+			"These options can be used increase the detection and/or injection  capabilities.")
+modules.add_option("--icmp-exfil", 
+		action="store",
+		dest="ip_icmp_data",
+		default = False,
+		help="The ICMP exfiltration technique (e.g. 'ip_src=192.168.178.1,ip_dst=192.168.178.3').")
+
 # Injection options
 injection = OptionGroup(parser, colors.BOLD + "Injection" + colors.RESET, 
 			"These options can be used, to specify which parameters to inject and to provide custom injection payloads.")
@@ -265,12 +274,6 @@ injection.add_option("--root-dir",
 		default = False,
 		help="Set remote absolute path of web server's root directory (Default: /var/www/).")
 
-injection.add_option("--icmp-exfil", 
-		action="store",
-		dest="ip_icmp_data",
-		default = False,
-		help="Use the ICMP exfiltration technique (e.g. 'ip_src=192.168.178.1,ip_dst=192.168.178.3').")
-
 injection.add_option("--alter-shell", 
 		action="store",
 		dest="alter_shell",
@@ -286,8 +289,8 @@ parser.add_option_group(target)
 parser.add_option_group(request)
 parser.add_option_group(enumeration)
 parser.add_option_group(file_access)
+parser.add_option_group(modules)
 parser.add_option_group(injection)
-
 
 # Dirty hack from SQLMAP, to display longer options without breaking into two lines.
 def _(self, *args):
