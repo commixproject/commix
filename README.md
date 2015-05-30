@@ -81,7 +81,7 @@ Commix comes packaged on the official repositories of the following Linux distri
     --file-upload=FI..  Upload a file on the target host.
     --file-dest=FILE..  Host's absolute filepath to write and/or upload to.
 
-####Modules:
+####Modules
     These options can be used increase the detection and/or injection
     capabilities.
 
