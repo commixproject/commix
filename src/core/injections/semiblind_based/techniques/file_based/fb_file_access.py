@@ -25,7 +25,7 @@ from src.utils import settings
 from src.core.injections.semiblind_based.techniques.file_based import fb_injector
 
 """
- The "File-based" technique on Semiblind-based OS Command Injection.
+ The "file-based" technique on Semiblind-based OS Command Injection.
 """
 
 def do_check(separator,payload,TAG,delay,prefix,suffix,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,alter_shell):

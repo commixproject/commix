@@ -34,7 +34,7 @@ from src.core.requests import parameters
 from src.core.injections.semiblind_based.techniques.file_based import fb_payloads
 
 """
- The "File-based" technique on Semiblind-based OS Command Injection.
+ The "file-based" technique on Semiblind-based OS Command Injection.
 """
 
 #-----------------------------------------

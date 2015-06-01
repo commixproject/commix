@@ -14,12 +14,12 @@
  For more see the file 'readme/COPYING' for copying permission.
 """
 
+import urllib
+
 """
   The "time-based" injection technique on Blind OS Command Injection.
   The available "time-based" payloads.
 """
-
-import urllib
 
 #----------------------------------------------------------------
 # Time-based decision payload (check if host is vulnerable).

@@ -38,7 +38,7 @@ from src.core.injections.semiblind_based.techniques.file_based import fb_file_ac
 from src.core.injections.semiblind_based.techniques.tempfile_based import tfb_handler
 
 """
- The "File-based" technique on Semiblind-based OS Command Injection.
+ The "file-based" technique on Semiblind-based OS Command Injection.
 """
 
 # If temp-based technique failed, 

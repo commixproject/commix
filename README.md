@@ -9,6 +9,9 @@
 	Automated All-in-One OS Command Injection and Exploitation Tool
 	Copyright (c) 2015 Anastasios Stasinopoulos (@ancst)
 	+--
+	
+[![GPLv3 License](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://github.com/stasinopoulos/commix/blob/master/readme/COPYING)
+[![Twitter](https://img.shields.io/badge/Twitter-commixproject-blue.svg)](http://www.twitter.com/commixproject)
 
 #General Information
 Commix (short for [comm]and [i]njection e[x]ploiter) has a simple environment and it can be used, from web developers, penetration testers or even security researchers to test web applications with the view to find bugs, errors or vulnerabilities related to command injection attacks. By using this tool, it is very easy to find and exploit a command injection vulnerability in a certain vulnerable parameter or string. Commix is written in Python programming language.
@@ -20,7 +23,6 @@ The tool is only for testing and academic purposes and can only be used where st
 [Python](http://www.python.org/download/) version **2.6.x** or **2.7.x** is required for running this program.
 
 #Installation
-
 Download commix by cloning the Git repository:
 
     git clone https://github.com/stasinopoulos/commix.git commix
@@ -29,6 +31,9 @@ Commix comes packaged on the official repositories of the following Linux distri
 
 - [ArchAssault](https://archassault.org/)
 - [BlackArch](http://blackarch.org/)
+
+Commix also comes as a plugin, on the following penetration testing frameworks:
+- [The Penetration Testers Framework (PTF)](https://github.com/trustedsec/ptf)
 
 #Usage
     Usage : python commix.py [options]
@@ -87,8 +92,6 @@ Commix comes packaged on the official repositories of the following Linux distri
 
     --icmp-exfil=IP_..  The ICMP exfiltration technique (e.g.
                         'ip_src=192.168.178.1,ip_dst=192.168.178.3').
-
-
 ####Injection
     These options can be used, to specify which parameters to inject and
     to provide custom injection payloads.
@@ -148,7 +151,3 @@ For bug reports or enhancements, please open an issue [here](https://github.com/
 ####Supported Platforms
 - Linux
 - Mac OS X
-
-[![][img]][txt]
-[img]: https://cdn3.iconfinder.com/data/icons/peelicons-vol-1/50/Twitter-32.png (Follow @commixproject :))
-[txt]: http://www.twitter.com/commixproject

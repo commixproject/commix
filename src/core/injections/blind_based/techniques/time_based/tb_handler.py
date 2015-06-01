@@ -42,7 +42,8 @@ from src.core.injections.blind_based.techniques.time_based import tb_file_access
 # The "time-based" injection technique handler.
 #-------------------------------------------------
 def tb_injection_handler(url,delay,filename,http_request_method):
-
+	
+  i = 0
   counter = 0
   vp_flag = True
   no_result = True
@@ -58,16 +59,14 @@ def tb_injection_handler(url,delay,filename,http_request_method):
   # Check if defined "--url-reload" option.
   if menu.options.url_reload == True:
     print colors.BGRED + "(x) Error: The '--url-reload' option is not available in "+ technique +"!" + colors.RESET
-  i = 0
+
   # Calculate all possible combinations
   total = (len(settings.PREFIXES) * len(settings.SEPARATORS) * len(settings.SUFFIXES) - len(settings.JUNK_COMBINATION))
   
   # Estimating the response time (in seconds)
-  # opener = urllib.FancyURLopener({})
   request = urllib2.Request(url)
   headers.do_check(request)
   start = time.time()
-  #f = opener.open(url)
   response = urllib2.urlopen(request)
   response.read(1)
   response.close()

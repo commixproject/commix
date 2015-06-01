@@ -33,9 +33,8 @@ from src.core.requests import parameters
 from src.core.injections.blind_based.techniques.time_based import tb_payloads
 
 """
- The "eval-based" injection technique on Classic OS Command Injection.
+ The "time-based" injection technique on Blind OS Command Injection.
 """
-
 
 #-----------------------------------------
 # Check if target host is vulnerable.
@@ -175,8 +174,6 @@ def injection(separator,maxlen,TAG,cmd,prefix,suffix,delay,http_request_method,u
       
       target = re.sub(settings.INJECT_TAG, payload, url)
       vuln_parameter = ''.join(vuln_parameter)
-      
-      #print target
       request = urllib2.Request(target)
   
       # Check if defined extra headers.
@@ -246,7 +243,6 @@ def injection(separator,maxlen,TAG,cmd,prefix,suffix,delay,http_request_method,u
       break
 	      
   i = j + 1
-  #print "(*) Grabbing the output, please wait... \n"
   check_start = 0
   check_end = 0
   check_start = time.time()
