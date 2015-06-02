@@ -43,7 +43,7 @@ from src.core.injections.blind_based.techniques.time_based import tb_file_access
 #-------------------------------------------------
 def tb_injection_handler(url,delay,filename,http_request_method):
 	
-  i = 0
+  num_of_chars = 0
   counter = 0
   vp_flag = True
   no_result = True
@@ -80,7 +80,7 @@ def tb_injection_handler(url,delay,filename,http_request_method):
   for prefix in settings.PREFIXES:
     for suffix in settings.SUFFIXES:
       for separator in settings.SEPARATORS:
-	i = i + 1
+	num_of_chars = num_of_chars + 1
 	
 	# Check for bad combination of prefix and separator
 	combination = prefix + separator
@@ -91,18 +91,18 @@ def tb_injection_handler(url,delay,filename,http_request_method):
 	alter_shell = menu.options.alter_shell
 	
 	# Change TAG on every request to prevent false-positive resutls.
-	TAG = ''.join(random.choice(string.ascii_uppercase) for i in range(6))
+	TAG = ''.join(random.choice(string.ascii_uppercase) for num_of_chars in range(6))
 	tag_length = len(TAG) + 4
 	
-	for j in range(1,int(tag_length)):
+	for output_length in range(1,int(tag_length)):
 	  try:
 	    
 	    if alter_shell:
 	      # Time-based decision payload (check if host is vulnerable).
-	      payload = tb_payloads.decision_alter_shell(separator,TAG,j,delay,http_request_method)
+	      payload = tb_payloads.decision_alter_shell(separator,TAG,output_length,delay,http_request_method)
 	    else:
 	      # Time-based decision payload (check if host is vulnerable).
-	      payload = tb_payloads.decision(separator,TAG,j,delay,http_request_method)
+	      payload = tb_payloads.decision(separator,TAG,output_length,delay,http_request_method)
 
 	    # Check if defined "--prefix" option.
 	    if menu.options.prefix:
@@ -125,7 +125,7 @@ def tb_injection_handler(url,delay,filename,http_request_method):
 	    # Check if target host is vulnerable.
 	    how_long,vuln_parameter = tb_injector.injection_test(payload,http_request_method,url)
 	    if not menu.options.verbose:
-	      percent = ((i*100)/total)
+	      percent = ((num_of_chars*100)/total)
 	      if how_long >= delay:
 		percent = colors.GREEN + "SUCCEED" + colors.RESET
 	      elif percent == 100:

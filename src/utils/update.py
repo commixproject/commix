@@ -46,7 +46,7 @@ def updater():
     print "\n------"
     subprocess.Popen("git reset --hard HEAD && git pull", shell=True).wait()
     # Delete *.pyc files.
-    subprocess.Popen("find . -name \"*.pyc\" -exec rm -rf {} \;", shell=True).wait()
+    subprocess.Popen("find . -name \"*.pyc\" -delete", shell=True).wait()
     # Delete empty directories and files.
     subprocess.Popen("find . -empty -type d -delete", shell=True).wait()
     print "------\n"

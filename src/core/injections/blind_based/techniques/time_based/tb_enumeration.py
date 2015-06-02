@@ -39,7 +39,7 @@ def do_check(separator,maxlen,TAG,prefix,suffix,delay,http_request_method,url,vu
       sys.stdout.write(colors.BOLD + "\n\n  (!) The hostname is " + colors.UNDERL + shell + colors.RESET + ".\n")
       sys.stdout.flush()
       
-  # "Retrieve certain system information (operating system, hardware platform)
+  # Retrieve certain system information (operating system, hardware platform)
   if menu.options.sys_info:
     cmd = settings.RECOGNISE_OS	    
     check_how_long,output =tb_injector.injection(separator,maxlen,TAG,cmd,prefix,suffix,delay,http_request_method,url,vuln_parameter,alter_shell)

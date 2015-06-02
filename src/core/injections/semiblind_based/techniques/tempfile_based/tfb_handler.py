@@ -60,16 +60,14 @@ def tfb_injection_handler(url,delay,filename,tmp_path,http_request_method):
   if menu.options.url_reload == True:
     print colors.BGRED + "(x) Error: The '--url-reload' option is not available in "+ technique +"!" + colors.RESET
   
-  i = 0
+  num_of_chars = 0
   # Calculate all possible combinations
   total = len(settings.SEPARATORS)
   
   # Estimating the response time (in seconds)
-  # opener = urllib.FancyURLopener({})
   request = urllib2.Request(url)
   headers.do_check(request)
   start = time.time()
-  #f = opener.open(url)
   response = urllib2.urlopen(request)
   response.read(1)
   response.close()
@@ -81,10 +79,10 @@ def tfb_injection_handler(url,delay,filename,tmp_path,http_request_method):
   delay = int(delay) + int(url_time_response)
   
   for separator in settings.SEPARATORS:
-    i = i + 1
+    num_of_chars = num_of_chars + 1
 	  
     # Change TAG on every request to prevent false-positive resutls.
-    TAG = ''.join(random.choice(string.ascii_uppercase) for i in range(6))  
+    TAG = ''.join(random.choice(string.ascii_uppercase) for num_of_chars in range(6))  
     
     # Check if defined "--base64" option.
     if menu.options.base64_trick == True:
@@ -99,16 +97,16 @@ def tfb_injection_handler(url,delay,filename,tmp_path,http_request_method):
     alter_shell = menu.options.alter_shell
     tag_length = len(TAG) + 4
     
-    for j in range(1,int(tag_length)):
+    for output_length in range(1,int(tag_length)):
       try:
 
 	# Tempfile-based decision payload (check if host is vulnerable).
 	if alter_shell :
 
-	  payload = tfb_payloads.decision_alter_shell(separator,j,TAG,OUTPUT_TEXTFILE,delay,http_request_method)
+	  payload = tfb_payloads.decision_alter_shell(separator,output_length,TAG,OUTPUT_TEXTFILE,delay,http_request_method)
   
 	else:
-	  payload = tfb_payloads.decision(separator,j,TAG,OUTPUT_TEXTFILE,delay,http_request_method)
+	  payload = tfb_payloads.decision(separator,output_length,TAG,OUTPUT_TEXTFILE,delay,http_request_method)
 
 	# Check if defined "--verbose" option.
 	if menu.options.verbose:
@@ -118,7 +116,7 @@ def tfb_injection_handler(url,delay,filename,tmp_path,http_request_method):
 	# Check if target host is vulnerable
 	how_long,vuln_parameter = tfb_injector.injection_test(payload,http_request_method,url)
 	if not menu.options.verbose:
-	  percent = ((i*100)/total)
+	  percent = ((num_of_chars*100)/total)
 	  if how_long >= delay:
 	    percent = colors.GREEN + "SUCCEED" + colors.RESET
 	  elif percent == 100:
@@ -136,7 +134,7 @@ def tfb_injection_handler(url,delay,filename,tmp_path,http_request_method):
       
       except:
 	if not menu.options.verbose:
-	  percent = ((i*100)/total)
+	  percent = ((num_of_chars*100)/total)
 	  
 	  if percent == 100:
 	    if no_result == True:

