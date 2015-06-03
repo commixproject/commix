@@ -111,8 +111,6 @@ Commix also comes as a plugin, on the following penetration testing frameworks:
     --tmp-path=TMP_P..  Set remote absolute path of temporary files directory.
     --root-dir=SRV_R..  Set remote absolute path of web server's root
                         directory (Default: /var/www/).
-    --icmp-exfil=IP_..  Use the ICMP exfiltration technique (e.g.
-                        'ip_src=192.168.178.1,ip_dst=192.168.178.3').
     --alter-shell=AL..  Use an alternative os-shell (e.g. Python).
     --os-cmd=OS_CMD     Execute a single operating system command.
 
