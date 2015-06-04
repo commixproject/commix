@@ -69,7 +69,7 @@ def do_check(separator,payload,TAG,delay,prefix,suffix,http_request_method,url,v
     cu_account = fb_injector.injection_results(url,OUTPUT_TEXTFILE,delay)
     if cu_account:
       cu_account = "".join(str(p) for p in cu_account)
-      # Check if the user have super privilleges.
+      # Check if the user have super privileges.
       if menu.options.is_root:
 	cmd = settings.ISROOT
 	response = fb_injector.injection(separator,payload,TAG,cmd,prefix,suffix,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,alter_shell)

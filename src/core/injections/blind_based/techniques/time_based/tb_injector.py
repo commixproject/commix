@@ -252,10 +252,10 @@ def injection(separator,maxlen,TAG,cmd,prefix,suffix,delay,http_request_method,u
     for ascii_char in range(32, 129):
       
       if alter_shell:
-	# Get the execution ouput, of shell execution.
+	# Get the execution output, of shell execution.
 	payload = tb_payloads.get_char_alter_shell(separator,cmd,num_of_chars,ascii_char,delay,http_request_method)
       else:
-	# Get the execution ouput, of shell execution.
+	# Get the execution output, of shell execution.
 	payload = tb_payloads.get_char(separator,cmd,num_of_chars,ascii_char,delay,http_request_method)
 	
       # Check if defined "--prefix" option.

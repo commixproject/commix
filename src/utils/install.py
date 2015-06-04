@@ -51,7 +51,7 @@ def installer():
       
     # Check for git.
     if not os.path.isfile("/usr/bin/git") or not os.path.isfile("/usr/bin/pip"):
-      # Install requirment.
+      # Install requirement.
       if os.path.isfile("/etc/apt/sources.list"):
 	sys.stdout.write("[" + colors.GREEN + " DONE " + colors.RESET + "]\n")
 	sys.stdout.flush()

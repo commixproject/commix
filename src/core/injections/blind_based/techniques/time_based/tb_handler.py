@@ -90,7 +90,7 @@ def tb_injection_handler(url,delay,filename,http_request_method):
 	# Define alter shell
 	alter_shell = menu.options.alter_shell
 	
-	# Change TAG on every request to prevent false-positive resutls.
+	# Change TAG on every request to prevent false-positive results.
 	TAG = ''.join(random.choice(string.ascii_uppercase) for num_of_chars in range(6))
 	tag_length = len(TAG) + 4
 	
@@ -172,7 +172,7 @@ def tb_injection_handler(url,delay,filename,http_request_method):
 	      output_file.write("  ("+str(counter)+") Payload : "+ re.sub("%20", " ", payload) + "\n")
 	      output_file.close()
 
-	      #Vulnerabe Parameter
+	      #Vulnerable Parameter
 	      GET_vuln_param = parameters.vuln_GET_param(url)
 	      
 	      # Print the findings to terminal.
@@ -195,7 +195,7 @@ def tb_injection_handler(url,delay,filename,http_request_method):
 	      output_file.write("  ("+str(counter)+") Payload : "+ re.sub("%20", " ", payload) + "\n")
 	      output_file.close()
 
-	      #Vulnerabe Parameter
+	      #Vulnerable Parameter
 	      POST_vuln_param = vuln_parameter
 	      
 	      # Print the findings to terminal.

@@ -186,7 +186,7 @@ def cmd_execution_alter_shell(separator,cmd,output_length,delay,http_request_met
   return payload
 
 #---------------------------------------------------
-# Get the execution ouput, of shell execution.
+# Get the execution output, of shell execution.
 #---------------------------------------------------
 def get_char(separator,cmd,num_of_chars,ascii_char,delay,http_request_method):
   if separator == ";" :

@@ -66,7 +66,7 @@ def do_check(separator,maxlen,TAG,prefix,suffix,delay,http_request_method,url,vu
     cu_account = output
     if cu_account:
       cu_account = "".join(str(p) for p in output)
-      # Check if the user have super privilleges.
+      # Check if the user have super privileges.
       if menu.options.is_root:
 	cmd = settings.ISROOT
 	check_how_long,output =tb_injector.injection(separator,maxlen,TAG,cmd,prefix,suffix,delay,http_request_method,url,vuln_parameter,alter_shell)

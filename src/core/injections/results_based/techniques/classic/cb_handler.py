@@ -70,7 +70,7 @@ def cb_injection_handler(url,delay,filename,http_request_method):
 	  if combination in settings.JUNK_COMBINATION:
 	    prefix = ""
 
-	  # Change TAG on every request to prevent false-positive resutls.
+	  # Change TAG on every request to prevent false-positive results.
 	  TAG = ''.join(random.choice(string.ascii_uppercase) for i in range(6)) 
 
 	  # Check if defined "--base64" option.
@@ -173,7 +173,7 @@ def cb_injection_handler(url,delay,filename,http_request_method):
 	      output_file.write("  ("+str(counter)+") Payload : "+ re.sub("%20"," ",payload) + "\n")
 	      output_file.close()
 	      
-	      #Vulnerabe Parameter
+	      #Vulnerable Parameter
 	      GET_vuln_param = parameters.vuln_GET_param(url)
 
 	      # Print the findings to terminal.
@@ -196,7 +196,7 @@ def cb_injection_handler(url,delay,filename,http_request_method):
 	      output_file.write("  ("+str(counter)+") Payload : "+ re.sub("%20"," ",payload) + "\n")
 	      output_file.close()
 	      
-	      #Vulnerabe Parameter
+	      #Vulnerable Parameter
 	      POST_vuln_param = vuln_parameter
 	      
 	      # Print the findings to terminal.

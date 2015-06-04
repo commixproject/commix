@@ -32,7 +32,7 @@ from src.core.injections.blind_based.techniques.time_based import tb_handler
 from src.core.injections.semiblind_based.techniques.file_based import fb_handler
 
 """
- Command Injection and exploitation controler.
+ Command Injection and exploitation controller.
  Checks if the testable parameter is exploitable.
 """
 

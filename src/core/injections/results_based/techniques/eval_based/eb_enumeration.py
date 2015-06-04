@@ -71,7 +71,7 @@ def do_check(separator,TAG,prefix,suffix,http_request_method,url,vuln_parameter)
     cu_account = eb_injector.injection_results(response,TAG)
     if cu_account:
       cu_account = "".join(str(p) for p in cu_account).replace(" ", "", 1)[:-1]
-      # Check if the user have super privilleges.
+      # Check if the user have super privileges.
       if menu.options.is_root:
 	cmd = settings.ISROOT
 	response = eb_injector.injection(separator,TAG,cmd,prefix,suffix,http_request_method,url,vuln_parameter)
