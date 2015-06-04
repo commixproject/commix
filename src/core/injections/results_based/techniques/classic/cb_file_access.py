@@ -93,7 +93,6 @@ def do_check(separator,TAG,prefix,suffix,whitespace,http_request_method,url,vuln
      sys.stdout.write("\n" + colors.BGRED + "(x) Error: It seems that you don't have permissions to write the '"+ dest_to_write + "' file." + colors.RESET)
      sys.stdout.flush()
 
-
   #  Upload file
   if menu.options.file_upload:
     file_to_upload = menu.options.file_upload

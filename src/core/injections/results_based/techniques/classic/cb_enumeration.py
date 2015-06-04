@@ -111,7 +111,7 @@ def do_check(separator,TAG,prefix,suffix,whitespace,http_request_method,url,vuln
             if int(fields[1]) == 0:
               is_privilleged = colors.RESET + " is" +  colors.BOLD + " root user "
             elif int(fields[1]) > 0 and int(fields[1]) < 99 :
-              is_privilleged = colors.RESET + " is" +  colors.BOLD + "  system user "
+              is_privilleged = colors.RESET + " is" +  colors.BOLD + " system user "
             elif int(fields[1]) >= 99 and int(fields[1]) < 65534 :
               if int(fields[1]) == 99 or int(fields[1]) == 60001 or int(fields[1]) == 65534:
                 is_privilleged = colors.RESET + " is" +  colors.BOLD + " anonymous user "
@@ -125,7 +125,7 @@ def do_check(separator,TAG,prefix,suffix,whitespace,http_request_method,url,vuln
             is_privilleged = ""
           print "  ("+str(count)+") '" + colors.BOLD + colors.UNDERL + fields[0]+ colors.RESET + "'" + colors.BOLD + is_privilleged + colors.RESET + "(uid=" + fields[1] + "). Home directory is in '" + colors.BOLD + fields[2]+ colors.RESET + "'." 
       else:
-        print colors.BGRED + "\n(x) Error: Cannot open '" + settings.PASSWD_FILE + "'." + colors.RESET
+        print "\n" + colors.BGRED + "(x) Error: Cannot open '" + settings.PASSWD_FILE + "'." + colors.RESET
         
   # System password enumeration
   if menu.options.passwords:
@@ -149,7 +149,7 @@ def do_check(separator,TAG,prefix,suffix,whitespace,http_request_method,url,vuln
           if fields[1] != "*" and fields[1] != "!!" and fields[1] != "":
             print "  ("+str(count)+") " + colors.BOLD + fields[0]+ colors.RESET + " : " + colors.BOLD + fields[1]+ colors.RESET
       else:
-        print colors.BGRED + "\n(x) Error: Cannot open '" + settings.SHADOW_FILE + "'." + colors.RESET
+        print "\n" + colors.BGRED + "(x) Error: Cannot open '" + settings.SHADOW_FILE + "'." + colors.RESET
         
   # Single os-shell execution
   if menu.options.os_cmd:

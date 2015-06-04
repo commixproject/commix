@@ -119,7 +119,7 @@ def do_check(separator,maxlen,TAG,prefix,suffix,delay,http_request_method,url,vu
             is_privilleged = ""
           print "  ("+str(count)+") '" + colors.BOLD + colors.UNDERL + fields[0]+ colors.RESET + "'" + colors.BOLD + is_privilleged + colors.RESET + "(uid=" + fields[1] + ").Home directory is in '" + colors.BOLD + fields[2]+ colors.RESET + "'." 
       else:
-        print colors.BGRED + "\n(x) Error: Cannot open '" + settings.PASSWD_FILE + "'." + colors.RESET
+        print "\n" + colors.BGRED + "(x) Error: Cannot open '" + settings.PASSWD_FILE + "'." + colors.RESET
 
   # System users enumeration
   if menu.options.passwords:
@@ -142,7 +142,7 @@ def do_check(separator,maxlen,TAG,prefix,suffix,delay,http_request_method,url,vu
           if fields[1] != "*" and fields[1] != "!!" and fields[1] != "":
             print "  ("+str(count)+") " + colors.BOLD + fields[0]+ colors.RESET + " : " + colors.BOLD + fields[1]+ colors.RESET
       else:
-        print colors.BGRED + "\n(x) Error: Cannot open '" + settings.SHADOW_FILE + "'." + colors.RESET
+        print "\n" + colors.BGRED + "(x) Error: Cannot open '" + settings.SHADOW_FILE + "'." + colors.RESET
 
   # Single os-shell execution
   if menu.options.os_cmd:

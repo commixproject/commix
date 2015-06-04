@@ -107,7 +107,6 @@ def main():
       
       # If URL not starts with any URI scheme, add "http://"
       if not urlparse.urlparse(url).scheme:
-        
         url = "http://" + url
 
       try:
@@ -117,7 +116,6 @@ def main():
         response = urllib2.urlopen(request)
         content = response.read()
         print "[ " + colors.GREEN + "SUCCEED" + colors.RESET + " ]"
-          
       except urllib2.HTTPError, e:
         print "[ " + colors.RED + "FAILED" + colors.RESET + " ]"
 
