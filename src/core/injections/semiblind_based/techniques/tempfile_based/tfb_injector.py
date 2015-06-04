@@ -65,23 +65,23 @@ def injection_test(payload,http_request_method,url):
     # Check if defined any HTTP Proxy.
     if menu.options.proxy:
       try:
-	proxy= urllib2.ProxyHandler({'http': menu.options.proxy})
-	opener = urllib2.build_opener(proxy)
-	urllib2.install_opener(opener)
-	response = urllib2.urlopen(request)
-	response.read()
-	
+        proxy= urllib2.ProxyHandler({'http': menu.options.proxy})
+        opener = urllib2.build_opener(proxy)
+        urllib2.install_opener(opener)
+        response = urllib2.urlopen(request)
+        response.read()
+        
       except urllib2.HTTPError, err:
-	print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
-	sys.exit(1) 
+        print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
+        sys.exit(1) 
 
     else:
       try:
-	response = urllib2.urlopen(request)
-	response.read()
+        response = urllib2.urlopen(request)
+        response.read()
       except urllib2.HTTPError, err:
-	print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
-	sys.exit(1) 
+        print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
+        sys.exit(1) 
       
   # Check if defined method is POST.
   else:
@@ -104,22 +104,22 @@ def injection_test(payload,http_request_method,url):
     # Check if defined any HTTP Proxy.
     if menu.options.proxy:
       try:
-	proxy= urllib2.ProxyHandler({'http': menu.options.proxy})
-	opener = urllib2.build_opener(proxy)
-	urllib2.install_opener(opener)
-	response = urllib2.urlopen(request)
-	response.read()
+        proxy= urllib2.ProxyHandler({'http': menu.options.proxy})
+        opener = urllib2.build_opener(proxy)
+        urllib2.install_opener(opener)
+        response = urllib2.urlopen(request)
+        response.read()
       except urllib2.HTTPError, err:
-	print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
-	sys.exit(1) 
+        print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
+        sys.exit(1) 
 
     else:
       try:
-	response = urllib2.urlopen(request)
-	response.read()
+        response = urllib2.urlopen(request)
+        response.read()
       except urllib2.HTTPError, err:
-	print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
-	sys.exit(1) 
+        print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
+        sys.exit(1) 
       
   end  = time.time()
   how_long = int(end - start)
@@ -168,27 +168,27 @@ def injection(separator,maxlen,TAG,cmd,delay,http_request_method,url,vuln_parame
   
       # Check if defined extra headers.
       headers.do_check(request)
-		      
+                      
       # Check if defined any HTTP Proxy.
       if menu.options.proxy:
-	try:
-	  proxy= urllib2.ProxyHandler({'http': menu.options.proxy})
-	  opener = urllib2.build_opener(proxy)
-	  urllib2.install_opener(opener)
-	  response = urllib2.urlopen(request)
-	  response.read()
-	except urllib2.HTTPError, err:
-	  print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
-	  sys.exit(1) 
+        try:
+          proxy= urllib2.ProxyHandler({'http': menu.options.proxy})
+          opener = urllib2.build_opener(proxy)
+          urllib2.install_opener(opener)
+          response = urllib2.urlopen(request)
+          response.read()
+        except urllib2.HTTPError, err:
+          print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
+          sys.exit(1) 
   
       else:
-	try:
-	  response = urllib2.urlopen(request)
-	  response.read()
-	except urllib2.HTTPError, err:
-	  print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
-	  sys.exit(1) 
-	
+        try:
+          response = urllib2.urlopen(request)
+          response.read()
+        except urllib2.HTTPError, err:
+          print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
+          sys.exit(1) 
+        
     # Check if defined method is POST.
     else :
       parameter = menu.options.data
@@ -205,33 +205,33 @@ def injection(separator,maxlen,TAG,cmd,delay,http_request_method,url,vuln_parame
 
       # Check if defined any HTTP Proxy.
       if menu.options.proxy:
-	try:
-	  proxy= urllib2.ProxyHandler({'http': menu.options.proxy})
-	  opener = urllib2.build_opener(proxy)
-	  urllib2.install_opener(opener)
-	  response = urllib2.urlopen(request)
-	  response.read()
-	except urllib2.HTTPError, err:
-	  print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
-	  sys.exit(1) 
+        try:
+          proxy= urllib2.ProxyHandler({'http': menu.options.proxy})
+          opener = urllib2.build_opener(proxy)
+          urllib2.install_opener(opener)
+          response = urllib2.urlopen(request)
+          response.read()
+        except urllib2.HTTPError, err:
+          print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
+          sys.exit(1) 
   
       else:
-	try:
-	  response = urllib2.urlopen(request)
-	  response.read()
-	except urllib2.HTTPError, err:
-	  print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
-	  sys.exit(1) 
-	
+        try:
+          response = urllib2.urlopen(request)
+          response.read()
+        except urllib2.HTTPError, err:
+          print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
+          sys.exit(1) 
+        
     end  = time.time()
     how_long = int(end - start)
     
     if how_long >= delay:
       if menu.options.verbose:
-	print "\n"
+        print "\n"
       print colors.BOLD + "(!) Retrieved " + str(output_length) + " characters."+ colors.RESET
       break
-	      
+              
   num_of_chars = output_length + 1
   check_start = 0
   check_end = 0
@@ -243,89 +243,89 @@ def injection(separator,maxlen,TAG,cmd,delay,http_request_method,url,vuln_parame
       
       # Get the execution ouput, of shell execution.
       if not alter_shell :
-	payload = tfb_payloads.get_char(separator,OUTPUT_TEXTFILE,num_of_chars,ascii_char,delay,http_request_method)
+        payload = tfb_payloads.get_char(separator,OUTPUT_TEXTFILE,num_of_chars,ascii_char,delay,http_request_method)
       else:
-	payload = tfb_payloads.get_char_alter_shell(separator,OUTPUT_TEXTFILE,num_of_chars,ascii_char,delay,http_request_method)
-	
+        payload = tfb_payloads.get_char_alter_shell(separator,OUTPUT_TEXTFILE,num_of_chars,ascii_char,delay,http_request_method)
+        
       # Check if defined "--verbose" option.
       if menu.options.verbose:
-	sys.stdout.write("\n" + colors.GREY + payload.replace("\n","\\n") + colors.RESET)
-	
+        sys.stdout.write("\n" + colors.GREY + payload.replace("\n","\\n") + colors.RESET)
+        
       start = 0
       end = 0
       start = time.time()
       
       if http_request_method == "GET":
-	payload = urllib.quote(payload)
-	target = re.sub(settings.INJECT_TAG, payload, url)
-	vuln_parameter = ''.join(vuln_parameter)
-	request = urllib2.Request(target)
-	
-	# Check if defined extra headers.
-	headers.do_check(request)
-	  
-	# Check if defined any HTTP Proxy.
-	if menu.options.proxy:
-	  try:
-	    proxy= urllib2.ProxyHandler({'http': menu.options.proxy})
-	    opener = urllib2.build_opener(proxy)
-	    urllib2.install_opener(opener)
-	    response = urllib2.urlopen(request)
-	    response.read()
-	  except urllib2.HTTPError, err:
-	    print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
-	    sys.exit(1) 
+        payload = urllib.quote(payload)
+        target = re.sub(settings.INJECT_TAG, payload, url)
+        vuln_parameter = ''.join(vuln_parameter)
+        request = urllib2.Request(target)
+        
+        # Check if defined extra headers.
+        headers.do_check(request)
+          
+        # Check if defined any HTTP Proxy.
+        if menu.options.proxy:
+          try:
+            proxy= urllib2.ProxyHandler({'http': menu.options.proxy})
+            opener = urllib2.build_opener(proxy)
+            urllib2.install_opener(opener)
+            response = urllib2.urlopen(request)
+            response.read()
+          except urllib2.HTTPError, err:
+            print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
+            sys.exit(1) 
     
-	else:
-	  try:
-	    response = urllib2.urlopen(request)
-	    response.read()
-	  except urllib2.HTTPError, err:
-	    print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
-	    sys.exit(1) 
-	  
+        else:
+          try:
+            response = urllib2.urlopen(request)
+            response.read()
+          except urllib2.HTTPError, err:
+            print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
+            sys.exit(1) 
+          
       else :
-	parameter = urllib2.unquote(parameter)
-	data = re.sub(settings.INJECT_TAG, payload, parameter)
-	request = urllib2.Request(url, data)
-	
-	# Check if defined extra headers.
-	headers.do_check(request)
-	  
-	# Check if defined any HTTP Proxy.
-	if menu.options.proxy:
-	  try:
-	    proxy= urllib2.ProxyHandler({'http': menu.options.proxy})
-	    opener = urllib2.build_opener(proxy)
-	    urllib2.install_opener(opener)
-	    response = urllib2.urlopen(request)
-	    response.read()
-	  except urllib2.HTTPError, err:
-	    print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
-	    sys.exit(1) 
+        parameter = urllib2.unquote(parameter)
+        data = re.sub(settings.INJECT_TAG, payload, parameter)
+        request = urllib2.Request(url, data)
+        
+        # Check if defined extra headers.
+        headers.do_check(request)
+          
+        # Check if defined any HTTP Proxy.
+        if menu.options.proxy:
+          try:
+            proxy= urllib2.ProxyHandler({'http': menu.options.proxy})
+            opener = urllib2.build_opener(proxy)
+            urllib2.install_opener(opener)
+            response = urllib2.urlopen(request)
+            response.read()
+          except urllib2.HTTPError, err:
+            print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
+            sys.exit(1) 
     
-	else:
-	  try:
-	    response = urllib2.urlopen(request)
-	    response.read()
-	  except urllib2.HTTPError, err:
-	    print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
-	    sys.exit(1) 
-	  
+        else:
+          try:
+            response = urllib2.urlopen(request)
+            response.read()
+          except urllib2.HTTPError, err:
+            print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
+            sys.exit(1) 
+          
       end  = time.time()
       how_long = int(end - start)
 
             
       if how_long >= delay:
-	if not menu.options.verbose:
-	  output.append(chr(ascii_char))
-	  percent = ((num_of_chars*100)/output_length)
-	  sys.stdout.write("\r(*) Grabbing the output from '" + OUTPUT_TEXTFILE + "', please wait... [ "+str(percent)+"% ]")
-	  sys.stdout.flush()
-	else:
-	  output.append(chr(ascii_char))
-	break
-	  
+        if not menu.options.verbose:
+          output.append(chr(ascii_char))
+          percent = ((num_of_chars*100)/output_length)
+          sys.stdout.write("\r(*) Grabbing the output from '" + OUTPUT_TEXTFILE + "', please wait... [ "+str(percent)+"% ]")
+          sys.stdout.flush()
+        else:
+          output.append(chr(ascii_char))
+        break
+          
   check_end  = time.time()
   check_how_long = int(check_end - check_start)
 

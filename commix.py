@@ -47,24 +47,24 @@ def main():
     
     #Check if defined "--version" option.
     if menu.options.version:
-	version.show_version()
-	sys.exit(0)
-	
-    #Check if defined "--update" option.	
+      version.show_version()
+      sys.exit(0)
+        
+    #Check if defined "--update" option.        
     if menu.options.update:
-	update.updater()
-	sys.exit(0)
-	
-    #Check if defined "--install" option.	
+      update.updater()
+      sys.exit(0)
+        
+    #Check if defined "--install" option.        
     if menu.options.install:
-	install.installer()
-	sys.exit(0)
+      install.installer()
+      sys.exit(0)
     
     # Check arguments
     if len(sys.argv) == 1:
-	menu.parser.print_help()
-	print ""
-	sys.exit(0)
+      menu.parser.print_help()
+      print ""
+      sys.exit(0)
 
     #Check if specified wrong injection technique
     if menu.options.tech and menu.options.tech not in settings.AVAILABLE_TECHNIQUES:
@@ -74,8 +74,8 @@ def main():
     #Check if specified wrong alternative shell
     if menu.options.alter_shell:
       if menu.options.alter_shell.lower() not in settings.AVAILABLE_SHELLS:
-	print colors.BGRED + "(x) Error: '" + menu.options.alter_shell + "' shell is not supported!" + colors.RESET
-	sys.exit(0)
+        print colors.BGRED + "(x) Error: '" + menu.options.alter_shell + "' shell is not supported!" + colors.RESET
+        sys.exit(0)
 
     # Check if specified file-access options
     #Check if not defined "--file-dest" option.
@@ -83,18 +83,18 @@ def main():
       
       # Check if defined "--file-write" option.
       if menu.options.file_write:
-	file_name = os.path.split(menu.options.file_write)[1]
-	menu.options.file_dest = settings.SRV_ROOT_DIR + file_name
-	
+        file_name = os.path.split(menu.options.file_write)[1]
+        menu.options.file_dest = settings.SRV_ROOT_DIR + file_name
+        
       # Check if defined "--file-upload" option.
       if menu.options.file_upload:
-	file_name = os.path.split(menu.options.file_upload)[1]
-	menu.options.file_dest = settings.SRV_ROOT_DIR + file_name
-	
+        file_name = os.path.split(menu.options.file_upload)[1]
+        menu.options.file_dest = settings.SRV_ROOT_DIR + file_name
+        
     elif menu.options.file_dest and menu.options.file_write == None and menu.options.file_upload == None :
       print colors.BGRED + "(x) Error: You must enter the '--file-write' or '--file-upload' parameter." + colors.RESET
       sys.exit(0)
-	
+        
     #Check if defined "--random-agent" option.
     if menu.options.random_agent:
       menu.options.agent = random.choice(settings.USER_AGENT_LIST)
@@ -107,51 +107,54 @@ def main():
       
       # If URL not starts with any URI scheme, add "http://"
       if not urlparse.urlparse(url).scheme:
-	url = "http://" + url
+        
+        url = "http://" + url
 
       try:
-	request = urllib2.Request(url)
-	#Check if defined extra headers.
-	headers.do_check(request)
-	response = urllib2.urlopen(request)
-	content = response.read()
-	print "[ " + colors.GREEN + "SUCCEED" + colors.RESET + " ]"
-	  
+        request = urllib2.Request(url)
+        #Check if defined extra headers.
+        headers.do_check(request)
+        response = urllib2.urlopen(request)
+        content = response.read()
+        print "[ " + colors.GREEN + "SUCCEED" + colors.RESET + " ]"
+          
       except urllib2.HTTPError, e:
-	print "[ " + colors.RED + "FAILED" + colors.RESET + " ]"
-	if e.getcode() == 500:
-	  content = e.read()
-	  sys.exit(0)
+        print "[ " + colors.RED + "FAILED" + colors.RESET + " ]"
 
-	elif e.getcode() == 401:
-	  if menu.options.auth_type != "basic":
-	    print colors.BGRED + "(x) Error: Only 'Basic' Access Authentication is supported." + colors.RESET
-	    sys.exit(0)
-	  else:
-	    print colors.BGRED + "(x) Error: Authorization required!" + colors.RESET + "\n"
-	    sys.exit(0)
-	  
-	elif e.getcode() == 403:
-	  print colors.BGRED + "(x) Error: You don't have permission to access this page." + colors.RESET + "\n"
-	  sys.exit(0)
-	  
-	elif e.getcode() == 404:
-	  print colors.BGRED + "(x) Error: The host seems to be down!" + colors.RESET + "\n"
-	  sys.exit(0)
+        # Check the codes of responses
+        if e.getcode() == 500:
+          content = e.read()
+          sys.exit(0)
 
-	else:
-	  raise
+        elif e.getcode() == 401:
+          if menu.options.auth_type != "basic":
+            print colors.BGRED + "(x) Error: Only 'Basic' Access Authentication is supported." + colors.RESET
+            sys.exit(0)
+          else:
+            print colors.BGRED + "(x) Error: Authorization required!" + colors.RESET + "\n"
+            sys.exit(0)
+          
+        elif e.getcode() == 403:
+          print colors.BGRED + "(x) Error: You don't have permission to access this page." + colors.RESET + "\n"
+          sys.exit(0)
+          
+        elif e.getcode() == 404:
+          print colors.BGRED + "(x) Error: The host seems to be down!" + colors.RESET + "\n"
+          sys.exit(0)
+
+        else:
+          raise
 
       except urllib2.URLError, e:
-	  print "[ " + colors.RED + "FAILED" + colors.RESET + " ]"
-	  print colors.BGRED + "(x) Error: The host seems to be down!" + colors.RESET + "\n"
-	  sys.exit(0)
-	
+          print "[ " + colors.RED + "FAILED" + colors.RESET + " ]"
+          print colors.BGRED + "(x) Error: The host seems to be down!" + colors.RESET + "\n"
+          sys.exit(0)
+        
       except httplib.BadStatusLine, e:
-	  print "[ " + colors.RED + "FAILED" + colors.RESET + " ]"
-	  print e.line, e.message
-	  pass
-	
+          print "[ " + colors.RED + "FAILED" + colors.RESET + " ]"
+          print e.line, e.message
+          pass
+        
     else:
       print colors.BGRED + "(x) Error: You must specify the target URL." + colors.RESET + "\n"
       sys.exit(0)

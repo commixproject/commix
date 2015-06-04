@@ -41,7 +41,7 @@ from src.core.injections.semiblind_based.techniques.file_based import fb_payload
 # Check if target host is vulnerable.
 #-----------------------------------------
 def injection_test(payload,http_request_method,url):
-  		    
+                      
   # Check if defined method is GET (Default).
   if http_request_method == "GET":
     # Check if its not specified the 'INJECT_HERE' tag
@@ -62,22 +62,22 @@ def injection_test(payload,http_request_method,url):
     # Check if defined any HTTP Proxy.
     if menu.options.proxy:
       try:
-	proxy= urllib2.ProxyHandler({'http': menu.options.proxy})
-	opener = urllib2.build_opener(proxy)
-	urllib2.install_opener(opener)
-	response = urllib2.urlopen(request)
+        proxy= urllib2.ProxyHandler({'http': menu.options.proxy})
+        opener = urllib2.build_opener(proxy)
+        urllib2.install_opener(opener)
+        response = urllib2.urlopen(request)
       except urllib2.HTTPError, err:
-	print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
-	sys.exit(1) 
+        print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
+        sys.exit(1) 
 
     else:
       try:
-	response = urllib2.urlopen(request)
-	response.read()
+        response = urllib2.urlopen(request)
+        response.read()
       except urllib2.HTTPError, err:
-	print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
-	sys.exit(1) 
-	
+        print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
+        sys.exit(1) 
+        
   # Check if defined method is POST.
   else:
     parameter = menu.options.data
@@ -99,21 +99,21 @@ def injection_test(payload,http_request_method,url):
     # Check if defined any HTTP Proxy.
     if menu.options.proxy:
       try:
-	proxy= urllib2.ProxyHandler({'http': menu.options.proxy})
-	opener = urllib2.build_opener(proxy)
-	urllib2.install_opener(opener)
-	response = urllib2.urlopen(request)  
+        proxy= urllib2.ProxyHandler({'http': menu.options.proxy})
+        opener = urllib2.build_opener(proxy)
+        urllib2.install_opener(opener)
+        response = urllib2.urlopen(request)  
       except urllib2.HTTPError, err:
-	print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
-	sys.exit(1) 
+        print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
+        sys.exit(1) 
 
     else:
       try:
-	response = urllib2.urlopen(request)
-	response.read()
+        response = urllib2.urlopen(request)
+        response.read()
       except urllib2.HTTPError, err:
-	print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
-	sys.exit(1) 
+        print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
+        sys.exit(1) 
       
   return response,vuln_parameter
 
@@ -146,7 +146,7 @@ def injection(separator,payload,TAG,cmd,prefix,suffix,http_request_method,url,vu
   # Check if defined "--verbose" option.
   if menu.options.verbose:
     sys.stdout.write("\n" + colors.GREY + payload.replace("\n","\\n") + colors.RESET)
-		    
+                    
   # Check if defined method is GET (Default).
   if http_request_method == "GET":
     # Check if its not specified the 'INJECT_HERE' tag
@@ -160,25 +160,25 @@ def injection(separator,payload,TAG,cmd,prefix,suffix,http_request_method,url,vu
     request = urllib2.Request(target)
     
     # Check if defined extra headers.
-    headers.do_check(request)	
+    headers.do_check(request)        
       
     # Check if defined any HTTP Proxy.
     if menu.options.proxy:
       try:
-	proxy= urllib2.ProxyHandler({'http': menu.options.proxy})
-	opener = urllib2.build_opener(proxy)
-	urllib2.install_opener(opener)
-	response = urllib2.urlopen(request)	
+        proxy= urllib2.ProxyHandler({'http': menu.options.proxy})
+        opener = urllib2.build_opener(proxy)
+        urllib2.install_opener(opener)
+        response = urllib2.urlopen(request)        
       except urllib2.HTTPError, err:
-	print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
-	sys.exit(1) 
+        print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
+        sys.exit(1) 
 
     else:
       try:
-	response = urllib2.urlopen(request)
+        response = urllib2.urlopen(request)
       except urllib2.HTTPError, err:
-	print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
-	sys.exit(1) 
+        print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
+        sys.exit(1) 
       
   else :
     # Check if defined method is POST.
@@ -192,25 +192,25 @@ def injection(separator,payload,TAG,cmd,prefix,suffix,http_request_method,url,vu
     request = urllib2.Request(url, data)
     
     # Check if defined extra headers.
-    headers.do_check(request)	
+    headers.do_check(request)        
       
     # Check if defined any HTTP Proxy.
     if menu.options.proxy:
       try:
-	proxy= urllib2.ProxyHandler({'http': menu.options.proxy})
-	opener = urllib2.build_opener(proxy)
-	urllib2.install_opener(opener)
-	response = urllib2.urlopen(request)
+        proxy= urllib2.ProxyHandler({'http': menu.options.proxy})
+        opener = urllib2.build_opener(proxy)
+        urllib2.install_opener(opener)
+        response = urllib2.urlopen(request)
       except urllib2.HTTPError, err:
-	print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
-	sys.exit(1) 
+        print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
+        sys.exit(1) 
 
     else:
       try:
-	response = urllib2.urlopen(request)
+        response = urllib2.urlopen(request)
       except urllib2.HTTPError, err:
-	print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
-	sys.exit(1) 
+        print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
+        sys.exit(1) 
       
   return response
 
@@ -223,7 +223,7 @@ def injection_results(url,OUTPUT_TEXTFILE,delay):
   path = url
   path_parts = path.split('/')
   count = 0
-  for part in path_parts:	
+  for part in path_parts:        
     count = count + 1
   count = count - 1
   last_param = path_parts[count]

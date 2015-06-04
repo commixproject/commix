@@ -54,7 +54,7 @@ def signal_handler(signal, frame):
 
 def snif(ip_dst,ip_src):
   print( colors.BOLD + "(!) Started the sniffer between " + colors.YELLOW + ip_src + colors.RESET + colors.BOLD + 
-	" and " + colors.YELLOW + ip_dst + colors.RESET + colors.BOLD + "." + colors.RESET)
+        " and " + colors.YELLOW + ip_dst + colors.RESET + colors.BOLD + "." + colors.RESET)
   
   while True:
     sniff(filter = "icmp and src " + ip_dst, prn=packet_handler, timeout=settings.DELAY)
@@ -82,9 +82,9 @@ def input_cmd(http_request_method,url,vuln_parameter,ip_src):
     try:
       cmd = raw_input("Shell > ")
       if cmd == "q":
-	os._exit(0)
+        os._exit(0)
       else: 
-	cmd_exec(http_request_method,cmd,url,vuln_parameter,ip_src)
+        cmd_exec(http_request_method,cmd,url,vuln_parameter,ip_src)
     except KeyboardInterrupt:
       print ""
       os._exit(0)

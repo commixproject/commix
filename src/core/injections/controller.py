@@ -67,7 +67,7 @@ def do_check(url):
   # Do authentication if needed.
   if menu.options.auth_url and menu.options.auth_data:
     authentication.auth_process()
-	    
+            
   elif menu.options.auth_url or menu.options.auth_data: 
     print colors.BGRED + "(x) Error: You must specify both login panel URL and login parameters.\n" + colors.RESET
     sys.exit(0)
@@ -89,9 +89,9 @@ def do_check(url):
   if menu.options.tech == "classic":
     if cb_handler.exploitation(url,delay,filename,http_request_method) == False:
       if http_request_method == "GET":
-	print colors.BGRED + "(x) The url '"+ url +"' appear to be not injectable." + colors.RESET
+        print colors.BGRED + "(x) The url '"+ url +"' appear to be not injectable." + colors.RESET
       else:
-	print colors.BGRED + "(x) The '"+ parameter +"' parameter appear to be not injectable." + colors.RESET
+        print colors.BGRED + "(x) The '"+ parameter +"' parameter appear to be not injectable." + colors.RESET
     if menu.options.verbose:
       print "\n"
     percent = colors.PURPLE + "FINISHED" + colors.RESET
@@ -104,9 +104,9 @@ def do_check(url):
   elif menu.options.tech == "eval-based":
     if eb_handler.exploitation(url,delay,filename,http_request_method) == False:
       if http_request_method == "GET":
-	print colors.BGRED + "(x) The url '"+ url +"' appear to be not injectable." + colors.RESET
+        print colors.BGRED + "(x) The url '"+ url +"' appear to be not injectable." + colors.RESET
       else:
-	print colors.BGRED + "(x) The '"+ parameter +"' parameter appear to be not injectable." + colors.RESET
+        print colors.BGRED + "(x) The '"+ parameter +"' parameter appear to be not injectable." + colors.RESET
     if menu.options.verbose:
       print "\n"
     percent = colors.PURPLE + "FINISHED" + colors.RESET
@@ -119,9 +119,9 @@ def do_check(url):
   elif menu.options.tech == "time-based":
     if tb_handler.exploitation(url,delay,filename,http_request_method) == False:
       if http_request_method == "GET":
-	print colors.BGRED + "(x) The url '"+ url +"' appear to be not injectable." + colors.RESET
+        print colors.BGRED + "(x) The url '"+ url +"' appear to be not injectable." + colors.RESET
       else:
-	print colors.BGRED + "(x) The '"+ parameter +"' parameter appear to be not injectable." + colors.RESET
+        print colors.BGRED + "(x) The '"+ parameter +"' parameter appear to be not injectable." + colors.RESET
     if menu.options.verbose:
       print "\n"
     percent = colors.PURPLE + "FINISHED" + colors.RESET
@@ -134,9 +134,9 @@ def do_check(url):
   elif menu.options.tech == "file-based":
     if fb_handler.exploitation(url,delay,filename,http_request_method) == False:
       if http_request_method == "GET":
-	print colors.BGRED + "(x) The url '"+ url +"' appear to be not injectable." + colors.RESET
+        print colors.BGRED + "(x) The url '"+ url +"' appear to be not injectable." + colors.RESET
       else:
-	print colors.BGRED + "(x) The '"+ parameter +"' parameter appear to be not injectable." + colors.RESET
+        print colors.BGRED + "(x) The '"+ parameter +"' parameter appear to be not injectable." + colors.RESET
     if menu.options.verbose:
       print "\n"
     percent = colors.PURPLE + "FINISHED" + colors.RESET
@@ -173,9 +173,9 @@ def do_check(url):
 
     if classic_state == False and eval_based_state == False and time_based_state == False and file_based_state == False :
       if http_request_method == "GET":
-	print colors.BGRED + "(x) The url '"+ url +"' appear to be not injectable." + colors.RESET
+        print colors.BGRED + "(x) The url '"+ url +"' appear to be not injectable." + colors.RESET
       else:
-	print colors.BGRED + "(x) The '"+ parameter +"' parameter appear to be not injectable." + colors.RESET
+        print colors.BGRED + "(x) The '"+ parameter +"' parameter appear to be not injectable." + colors.RESET
     else:
       print "(*) The results can be found at '" + os.getcwd() + "/" + filename +".txt'"
   sys.exit(0)

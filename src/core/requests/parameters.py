@@ -60,10 +60,10 @@ def do_GET_check(url):
     # Check if defined the "INJECT_HERE" tag
     if settings.INJECT_TAG in all_params:
       for i in range(0,len(multi_parameters)):
-	# Grab the value of parameter.
-	value = re.findall(r'=(.*)', multi_parameters[i])
-	value = ''.join(value)
-	parameter = '&'.join(multi_parameters)
+        # Grab the value of parameter.
+        value = re.findall(r'=(.*)', multi_parameters[i])
+        value = ''.join(value)
+        parameter = '&'.join(multi_parameters)
 
       url = url_part +"?"+ parameter  
       return url
@@ -75,27 +75,27 @@ def do_GET_check(url):
       ## Multiple paramerters without the "INJECT_HERE" tag.
       #urls_list = []
       #for i in range(0,len(multi_parameters)):
-	#if i == 0 :
-	  #old = re.findall(r'=(.*)', multi_parameters[i])
-	  #old = ''.join(old)
-	#else :
-	  #old = value
-	  
-	## Grab the value of parameter.
-	#value = re.findall(r'=(.*)', multi_parameters[i])
-	#value = ''.join(value)
-	
-	##Replace the value of parameter with INJECT tag
-	#inject_value = value.replace(value, settings.INJECT_TAG)
-	#multi_parameters[i] = multi_parameters[i].replace(value, inject_value)
-	#multi_parameters[i-1] = multi_parameters[i-1].replace(inject_value, old)
-	#parameter = '&'.join(multi_parameters)
-	
-	## Reconstruct the url
-	#url = url_part +"?"+ parameter
-	
-	## Add all urls to url list.
-	#urls_list.append(url)
+        #if i == 0 :
+          #old = re.findall(r'=(.*)', multi_parameters[i])
+          #old = ''.join(old)
+        #else :
+          #old = value
+          
+        ## Grab the value of parameter.
+        #value = re.findall(r'=(.*)', multi_parameters[i])
+        #value = ''.join(value)
+        
+        ##Replace the value of parameter with INJECT tag
+        #inject_value = value.replace(value, settings.INJECT_TAG)
+        #multi_parameters[i] = multi_parameters[i].replace(value, inject_value)
+        #multi_parameters[i-1] = multi_parameters[i-1].replace(inject_value, old)
+        #parameter = '&'.join(multi_parameters)
+        
+        ## Reconstruct the url
+        #url = url_part +"?"+ parameter
+        
+        ## Add all urls to url list.
+        #urls_list.append(url)
       #return urls_list
 
 
@@ -141,13 +141,13 @@ def do_POST_check(parameter):
 
       # Check if defined the INJECT_TAG
       if settings.INJECT_TAG not in parameter:
-	#Grab the value of parameter.
-	value = re.findall(r'=(.*)', parameter)
-	value = ''.join(value)
-	# Replace the value of parameter with INJECT tag
-	inject_value = value.replace(value, settings.INJECT_TAG)
-	parameter = parameter.replace(value, inject_value)
-	
+        #Grab the value of parameter.
+        value = re.findall(r'=(.*)', parameter)
+        value = ''.join(value)
+        # Replace the value of parameter with INJECT tag
+        inject_value = value.replace(value, settings.INJECT_TAG)
+        parameter = parameter.replace(value, inject_value)
+        
       return parameter
   
   # Check if multiple paramerters
@@ -157,12 +157,12 @@ def do_POST_check(parameter):
     # Check if defined the "INJECT_HERE" tag
     if settings.INJECT_TAG in all_params:
       for i in range(0,len(multi_parameters)):
-	if settings.INJECT_TAG not in multi_parameters[i]:
-	  # Grab the value of parameter.
-	  value = re.findall(r'=(.*)', multi_parameters[i])
-	  value = ''.join(value)
-	  parameter = '&'.join(multi_parameters)
-	  
+        if settings.INJECT_TAG not in multi_parameters[i]:
+          # Grab the value of parameter.
+          value = re.findall(r'=(.*)', multi_parameters[i])
+          value = ''.join(value)
+          parameter = '&'.join(multi_parameters)
+          
       return parameter
     
     else:
@@ -172,25 +172,25 @@ def do_POST_check(parameter):
       ## Multiple paramerters without the "INJECT_HERE" tag.
       #paramerters_list = []
       #for i in range(0,len(multi_parameters)):
-	#if i == 0 :
-	  #old = re.findall(r'=(.*)', multi_parameters[i])
-	  #old = ''.join(old)
-	#else :
-	  #old = value
-	  
-	## Grab the value of parameter.
-	#value = re.findall(r'=(.*)', multi_parameters[i])
-	#value = ''.join(value)
-	
-	##Replace the value of parameter with INJECT tag
-	#inject_value = value.replace(value, settings.INJECT_TAG)
-	#multi_parameters[i] = multi_parameters[i].replace(value, inject_value)
-	#multi_parameters[i-1] = multi_parameters[i-1].replace(inject_value, old)
-	#parameter = '&'.join(multi_parameters)
-	
-	## Reconstruct the paramerters
-	## Add all parameters to paramerters list.
-	#paramerters_list.append(parameter)
+        #if i == 0 :
+          #old = re.findall(r'=(.*)', multi_parameters[i])
+          #old = ''.join(old)
+        #else :
+          #old = value
+          
+        ## Grab the value of parameter.
+        #value = re.findall(r'=(.*)', multi_parameters[i])
+        #value = ''.join(value)
+        
+        ##Replace the value of parameter with INJECT tag
+        #inject_value = value.replace(value, settings.INJECT_TAG)
+        #multi_parameters[i] = multi_parameters[i].replace(value, inject_value)
+        #multi_parameters[i-1] = multi_parameters[i-1].replace(inject_value, old)
+        #parameter = '&'.join(multi_parameters)
+        
+        ## Reconstruct the paramerters
+        ## Add all parameters to paramerters list.
+        #paramerters_list.append(parameter)
 
       #return paramerters_list
 

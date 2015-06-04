@@ -28,7 +28,7 @@ from src.utils import requirments
 """
 
 def updater():
-  	
+          
   time.sleep(1)
   
   # Check if git is installed

@@ -41,7 +41,7 @@ def do_check(separator,maxlen,TAG,delay,http_request_method,url,vuln_parameter,O
     shell = "".join(str(p) for p in shell)
     if shell:
       if menu.options.verbose:
-	print ""
+        print ""
       sys.stdout.write(colors.BOLD + "\n\n (!) Contents of file " + colors.UNDERL + file_to_read + colors.RESET + " : ")
       sys.stdout.flush()
       print shell
@@ -60,7 +60,7 @@ def do_check(separator,maxlen,TAG,delay,http_request_method,url,vuln_parameter,O
       
     if os.path.isfile(file_to_write):
       with open(file_to_write, 'r') as content_file:
-	content = [line.replace("\n", " ") for line in content_file]
+        content = [line.replace("\n", " ") for line in content_file]
       content = "".join(str(p) for p in content).replace("'","\"")
     else:
       sys.stdout.write("\n" + colors.BGRED + "(x) Error: It seems that '"+ file_to_write + "' is not a file." + colors.RESET)
@@ -94,7 +94,7 @@ def do_check(separator,maxlen,TAG,delay,http_request_method,url,vuln_parameter,O
     shell = "".join(str(p) for p in shell)
     if shell:
       if menu.options.verbose:
-	print ""
+        print ""
       sys.stdout.write(colors.BOLD + "\n(!) The " + colors.UNDERL + shell + colors.RESET + colors.BOLD +" file was created successfully!\n" + colors.RESET)
       sys.stdout.flush()
     else:
@@ -142,7 +142,7 @@ def do_check(separator,maxlen,TAG,delay,http_request_method,url,vuln_parameter,O
     shell = "".join(str(p) for p in shell)
     if shell:
       if menu.options.verbose:
-	print ""
+        print ""
       sys.stdout.write(colors.BOLD + "\n(!) The " + colors.UNDERL + shell + colors.RESET + colors.BOLD +" file was created successfully!\n" + colors.RESET)
       sys.stdout.flush()
     else:

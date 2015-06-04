@@ -45,245 +45,245 @@ usage = "python %prog [options]"
 parser = OptionParser(usage=usage)
 
 parser.add_option("--verbose",
-		action="store_true",
-		dest="verbose",
-		default=False,
+                action="store_true",
+                dest="verbose",
+                default=False,
                 help="Enable the verbose mode.")
 
 parser.add_option("--install",
-		action="store_true",
-		dest="install",
-		default=False,
+                action="store_true",
+                dest="install",
+                default=False,
                 help="Install 'commix' to your system.")
 
 parser.add_option("--version",
-		action="store_true",
-		dest="version",
-		help="Show version number and exit.")
+                action="store_true",
+                dest="version",
+                help="Show version number and exit.")
 
 parser.add_option("--update", 
-		action="store_true",
-		dest="update",
-		help="Check for updates (apply if any) and exit.")
+                action="store_true",
+                dest="update",
+                help="Check for updates (apply if any) and exit.")
 
 # Target options
 target = OptionGroup(parser, colors.BOLD + "Target" + colors.RESET, 
-		     "This options has to be provided, to define the target URL. ")
+                     "This options has to be provided, to define the target URL. ")
 
 target.add_option("--url",
                 action="store",
-		dest="url",
-		help="Target URL")
-		
+                dest="url",
+                help="Target URL")
+                
 target.add_option("--url-reload",
                 action="store_true",
-		dest="url_reload",
-		default=False,
-		help="Reload target URL after command execution.")
+                dest="url_reload",
+                default=False,
+                help="Reload target URL after command execution.")
 # Request options
 request = OptionGroup(parser,  colors.BOLD + "Request" + colors.RESET, 
-		      "These options can be used, to specify how to connect to the target URL.")
+                      "These options can be used, to specify how to connect to the target URL.")
 
 request.add_option("--host",
                 action="store",
-		dest="host",
+                dest="host",
                 help="HTTP Host header.")
 
 request.add_option("--referer",
                 action="store",
-		dest="referer",
+                dest="referer",
                 help="HTTP Referer header.")
 
 request.add_option("--user-agent",
                 action="store",
-		dest="agent",
-		default = settings.APPLICATION + "/" + settings.VERSION + settings.COMMIT_ID,
-		help="HTTP User-Agent header.")
+                dest="agent",
+                default = settings.APPLICATION + "/" + settings.VERSION + settings.COMMIT_ID,
+                help="HTTP User-Agent header.")
 
 request.add_option("--random-agent",
                 action="store_true",
-		dest="random_agent",
-		default = False,
-		help="Use a randomly selected HTTP User-Agent header.")
+                dest="random_agent",
+                default = False,
+                help="Use a randomly selected HTTP User-Agent header.")
 
 request.add_option("--cookie",
                 action="store",
-		dest="cookie",
+                dest="cookie",
                 help="HTTP Cookie header.")
 
 request.add_option("--headers",
                 action="store",
-		dest="headers",
+                dest="headers",
                 help="Extra headers (e.g. 'Header1:Value1\\nHeader2:Value2').")
 
 request.add_option("--proxy",
-		action="store",
-		dest="proxy",
-		default=False,
+                action="store",
+                dest="proxy",
+                default=False,
                 help="Use a HTTP proxy (e.g. '127.0.0.1:8080').")
 
 request.add_option("--auth-url",
                 action="store",
-		dest="auth_url",
-		help="Login panel URL.")
+                dest="auth_url",
+                help="Login panel URL.")
 
 request.add_option("--auth-data",
                 action="store",
-		dest="auth_data",
+                dest="auth_data",
                 help="Login parameters and data.")
 
 request.add_option("--auth-type",
                 action="store",
-		dest="auth_type",
+                dest="auth_type",
                 help="HTTP authentication type (e.g. 'basic').")
 
 request.add_option("--auth-cred",
                 action="store",
-		dest="auth_cred",
+                dest="auth_cred",
                 help="HTTP Authentication credentials (e.g. 'admin:admin').")
 
 # Enumeration options
 enumeration = OptionGroup(parser, colors.BOLD + "Enumeration" + colors.RESET, 
-			"These options can be used, to enumerate the target host.")
+                        "These options can be used, to enumerate the target host.")
 
 enumeration.add_option("--current-user", 
-		action="store_true",
-		dest="current_user",
-		default = False,
-		help="Retrieve current user name.")
+                action="store_true",
+                dest="current_user",
+                default = False,
+                help="Retrieve current user name.")
 
 enumeration.add_option("--hostname", 
-		action="store_true",
-		dest="hostname",
-		default = False,
-		help="Retrieve current hostname.")
+                action="store_true",
+                dest="hostname",
+                default = False,
+                help="Retrieve current hostname.")
 
 enumeration.add_option("--is-root", 
-		action="store_true",
-		dest="is_root",
-		default = False,
-		help="Check if the current user have root privs.")
+                action="store_true",
+                dest="is_root",
+                default = False,
+                help="Check if the current user have root privs.")
 
 enumeration.add_option("--sys-info", 
-		action="store_true",
-		dest="sys_info",
-		default = False,
-		help="Retrieve system information.")
+                action="store_true",
+                dest="sys_info",
+                default = False,
+                help="Retrieve system information.")
 
 enumeration.add_option("--users", 
-		action="store_true",
-		dest="users",
-		default = False,
-		help="Retrieve system users.")
+                action="store_true",
+                dest="users",
+                default = False,
+                help="Retrieve system users.")
 
 enumeration.add_option("--passwords", 
-		action="store_true",
-		dest="passwords",
-		default = False,
-		help="Retrieve system users password hashes.")
+                action="store_true",
+                dest="passwords",
+                default = False,
+                help="Retrieve system users password hashes.")
 
 enumeration.add_option("--privileges", 
-		action="store_true",
-		dest="privileges",
-		default = False,
-		help="Retrieve system users privileges.")
+                action="store_true",
+                dest="privileges",
+                default = False,
+                help="Retrieve system users privileges.")
 
 # File access options
 file_access = OptionGroup(parser, colors.BOLD + "File access" + colors.RESET, 
-			"These options can be used to access files on the target host.")
+                        "These options can be used to access files on the target host.")
 
 file_access.add_option("--file-read", 
-		action="store",
-		dest="file_read",
-		help="Read a file from the target host.")
+                action="store",
+                dest="file_read",
+                help="Read a file from the target host.")
 
 file_access.add_option("--file-write", 
-		action="store",
-		dest="file_write",
-		help="Write to a file on the target host.")
+                action="store",
+                dest="file_write",
+                help="Write to a file on the target host.")
 
 file_access.add_option("--file-upload", 
-		action="store",
-		dest="file_upload",
-		help="Upload a file on the target host.")
+                action="store",
+                dest="file_upload",
+                help="Upload a file on the target host.")
 
 file_access.add_option("--file-dest", 
-		action="store",
-		dest="file_dest",
-		help="Host's absolute filepath to write and/or upload to.")
+                action="store",
+                dest="file_dest",
+                help="Host's absolute filepath to write and/or upload to.")
 
 # Modules options
 modules = OptionGroup(parser, colors.BOLD + "Modules" + colors.RESET, 
-			"These options can be used increase the detection and/or injection  capabilities.")
+                        "These options can be used increase the detection and/or injection  capabilities.")
 modules.add_option("--icmp-exfil", 
-		action="store",
-		dest="ip_icmp_data",
-		default = False,
-		help="The ICMP exfiltration technique (e.g. 'ip_src=192.168.178.1,ip_dst=192.168.178.3').")
+                action="store",
+                dest="ip_icmp_data",
+                default = False,
+                help="The ICMP exfiltration technique (e.g. 'ip_src=192.168.178.1,ip_dst=192.168.178.3').")
 
 # Injection options
 injection = OptionGroup(parser, colors.BOLD + "Injection" + colors.RESET, 
-			"These options can be used, to specify which parameters to inject and to provide custom injection payloads.")
+                        "These options can be used, to specify which parameters to inject and to provide custom injection payloads.")
 
 injection.add_option("--data", 
-		action="store",
-		dest="data",
-		help="POST data to inject (use '"+settings.INJECT_TAG+"' tag to specify the testable parameter).")
+                action="store",
+                dest="data",
+                help="POST data to inject (use '"+settings.INJECT_TAG+"' tag to specify the testable parameter).")
 
 injection.add_option("--suffix", 
-		action="store",
-		dest="suffix",
-		help="Injection payload suffix string.")
+                action="store",
+                dest="suffix",
+                help="Injection payload suffix string.")
 
 injection.add_option("--prefix", 
-		action="store",
-		dest="prefix",
-		help="Injection payload prefix string.")
+                action="store",
+                dest="prefix",
+                help="Injection payload prefix string.")
 
 injection.add_option("--technique", 
-		action="store",
-		dest="tech",
-		help="Specify a certain injection technique : 'classic', 'eval-based', 'time-based' or 'file-based'.")
+                action="store",
+                dest="tech",
+                help="Specify a certain injection technique : 'classic', 'eval-based', 'time-based' or 'file-based'.")
 
 injection.add_option("--maxlen", 
-		action="store",
-		dest="maxlen",
-		default="10000",
-		help="The length of the output on time-based technique (Default: 10000 chars).")
+                action="store",
+                dest="maxlen",
+                default="10000",
+                help="The length of the output on time-based technique (Default: 10000 chars).")
 
 injection.add_option("--delay", 
-		action="store",
-		dest="delay",
-		help="Set Time-delay for time-based and file-based techniques (Default: "+str(settings.DELAY)+" sec).")
+                action="store",
+                dest="delay",
+                help="Set Time-delay for time-based and file-based techniques (Default: "+str(settings.DELAY)+" sec).")
 
 injection.add_option("--base64", 
-		action="store_true",
-		dest="base64_trick",
-		default = False,
-		help="Use Base64 (enc)/(de)code trick to prevent false-positive results.")
+                action="store_true",
+                dest="base64_trick",
+                default = False,
+                help="Use Base64 (enc)/(de)code trick to prevent false-positive results.")
 
 injection.add_option("--tmp-path", 
-		action="store",
-		dest="tmp_path",
-		default = False,
-		help="Set remote absolute path of temporary files directory (Default: /tmp/).")
+                action="store",
+                dest="tmp_path",
+                default = False,
+                help="Set remote absolute path of temporary files directory (Default: /tmp/).")
 
 injection.add_option("--root-dir", 
-		action="store",
-		dest="srv_root_dir",
-		default = False,
-		help="Set remote absolute path of web server's root directory (Default: /var/www/).")
+                action="store",
+                dest="srv_root_dir",
+                default = False,
+                help="Set remote absolute path of web server's root directory (Default: /var/www/).")
 
 injection.add_option("--alter-shell", 
-		action="store",
-		dest="alter_shell",
-		help="Use an alternative os-shell (e.g. Python).")
+                action="store",
+                dest="alter_shell",
+                help="Use an alternative os-shell (e.g. Python).")
 
 injection.add_option("--os-cmd", 
-		action="store",
-		dest="os_cmd",
-		default = False,
-		help="Execute a single operating system command.")
+                action="store",
+                dest="os_cmd",
+                default = False,
+                help="Execute a single operating system command.")
 
 parser.add_option_group(target)
 parser.add_option_group(request)
@@ -296,7 +296,7 @@ parser.add_option_group(injection)
 def _(self, *args):
     _ = parser.formatter._format_option_strings(*args)
     if len(_) > settings.MAX_OPTION_LENGTH:
-	_ = ("%%.%ds.." % (settings.MAX_OPTION_LENGTH - parser.formatter.indent_increment)) % _
+        _ = ("%%.%ds.." % (settings.MAX_OPTION_LENGTH - parser.formatter.indent_increment)) % _
     return _
 
 parser.formatter._format_option_strings = parser.formatter.format_option_strings

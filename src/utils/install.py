@@ -53,19 +53,19 @@ def installer():
     if not os.path.isfile("/usr/bin/git") or not os.path.isfile("/usr/bin/pip"):
       # Install requirement.
       if os.path.isfile("/etc/apt/sources.list"):
-	sys.stdout.write("[" + colors.GREEN + " DONE " + colors.RESET + "]\n")
-	sys.stdout.flush()
-	# Check for dependencies.
-	dependencies_items = dependencies.split()
-	for item in dependencies_items:
-	  requirments.do_check(item)
+        sys.stdout.write("[" + colors.GREEN + " DONE " + colors.RESET + "]\n")
+        sys.stdout.flush()
+        # Check for dependencies.
+        dependencies_items = dependencies.split()
+        for item in dependencies_items:
+          requirments.do_check(item)
       else:
-	print "[" + colors.RED + " FAILED " + colors.RESET + "]"
-	print colors.BGRED + "(x) Error: The installer is not designed for any other Linux distro than Ubuntu / Debian." + colors.RESET
-	print colors.BGRED + "    Please install manually: " + dependencies + colors.RESET
-	print ""
-	sys.exit(0)
-	
+        print "[" + colors.RED + " FAILED " + colors.RESET + "]"
+        print colors.BGRED + "(x) Error: The installer is not designed for any other Linux distro than Ubuntu / Debian." + colors.RESET
+        print colors.BGRED + "    Please install manually: " + dependencies + colors.RESET
+        print ""
+        sys.exit(0)
+        
     # Force install of necessary packages
     subprocess.Popen("apt-get --force-yes -y install " + packages + ">/dev/null 2>&1", shell=True).wait()
     sys.stdout.write("[" + colors.GREEN + " DONE " + colors.RESET + "]\n")
@@ -85,9 +85,9 @@ def installer():
     sys.stdout.write("(*) Installing "  + settings.APPLICATION + " to /usr/bin/"  + settings.APPLICATION + " ... ")
     try:    
       with open('/usr/bin/commix', 'w') as f:
-	f.write('#!/bin/bash\n')
-	f.write('cd /usr/share/commix/ && ./commix.py "$@"')
-	subprocess.Popen("chmod +x /usr/bin/"  + settings.APPLICATION + " >/dev/null 2>&1", shell=True).wait()
+        f.write('#!/bin/bash\n')
+        f.write('cd /usr/share/commix/ && ./commix.py "$@"')
+        subprocess.Popen("chmod +x /usr/bin/"  + settings.APPLICATION + " >/dev/null 2>&1", shell=True).wait()
     except:
       print "[" + colors.RED + " FAILED " + colors.RESET + "]"
       sys.exit(0)
@@ -97,9 +97,9 @@ def installer():
     #Create the Output Directory
     OUTPUT_DIR = ".output/"
     try:
-	os.stat(OUTPUT_DIR)
+        os.stat(OUTPUT_DIR)
     except:
-	os.mkdir(OUTPUT_DIR)  
+        os.mkdir(OUTPUT_DIR)  
     
     print colors.BOLD + "(!) The installation is finished! Type '"  + settings.APPLICATION + "' to launch it." + colors.RESET
 
