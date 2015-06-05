@@ -69,6 +69,8 @@ def main():
     #Check if specified wrong injection technique
     if menu.options.tech and menu.options.tech not in settings.AVAILABLE_TECHNIQUES:
       found_tech = False
+      # Convert injection technique(s) to lowercase
+      menu.options.tech = menu.options.tech.lower()
       #Check if used the ',' separator
       if "," in menu.options.tech:
         split_techniques_names = menu.options.tech.split(",")
