@@ -100,8 +100,7 @@ Commix also comes as a plugin, on the following penetration testing frameworks:
                         the testable parameter).
     --suffix=SUFFIX     Injection payload suffix string.
     --prefix=PREFIX     Injection payload prefix string.
-    --technique=TECH    Specify a certain injection technique : 'classic',
-                        'eval-based', 'time-based' or 'file-based'.
+    --technique=TECH    Specify injection technique(s) to use.
     --maxlen=MAXLEN     The length of the output on time-based technique
                         (Default: 10000 chars).
     --delay=DELAY       Set Time-delay for time-based and file-based

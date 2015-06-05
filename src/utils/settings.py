@@ -118,22 +118,29 @@ SYS_PASSES = "awk -F ':' '{ print $1\":\"$2\"(@)\"}' " + SHADOW_FILE
 # File System access options
 # Read file
 FILE_READ = "cat "
+
 # Write file
 FILE_WRITE = "echo "
+
 # Write file
 FILE_UPLOAD = "wget "
 
 # Accepts YES,YE,Y,yes,ye,y
-CHOISE_YES = set(['yes','ye','y'])
+CHOISE_YES = ['yes','ye','y']
 
 # Accepts NO,N,no,n
-CHOISE_NO = set(['no','n'])
+CHOISE_NO = ['no','n']
 
 # Available alternative shells
-AVAILABLE_SHELLS = set(["python"])
+AVAILABLE_SHELLS = ["python"]
 
 # Available injectipon techniques
-AVAILABLE_TECHNIQUES = set(["classic","eval-based","time-based","file-based"])
+AVAILABLE_TECHNIQUES = [
+        "classic","c",
+        "eval-based","e",
+        "time-based","t",
+        "file-based","f",
+]
 
 # User Agent List
 USER_AGENT_LIST = [

@@ -243,7 +243,7 @@ injection.add_option("--prefix",
 injection.add_option("--technique", 
                 action="store",
                 dest="tech",
-                help="Specify a certain injection technique : 'classic', 'eval-based', 'time-based' or 'file-based'.")
+                help="Specify injection technique(s) to use.")
 
 injection.add_option("--maxlen", 
                 action="store",

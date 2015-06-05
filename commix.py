@@ -68,8 +68,23 @@ def main():
 
     #Check if specified wrong injection technique
     if menu.options.tech and menu.options.tech not in settings.AVAILABLE_TECHNIQUES:
-      print colors.BGRED + "(x) Error: Specified wrong injection technique!" + colors.RESET
-      sys.exit(0)
+      found_tech = False
+      #Check if used the ',' separator
+      if "," in menu.options.tech:
+        split_techniques_names = menu.options.tech.split(",")
+      else:
+        split_techniques_names = menu.options.tech.split()
+      if split_techniques_names:
+        for i in range(0,len(split_techniques_names)):
+          if len(menu.options.tech) <= 4:
+            split_first_letter = list(menu.options.tech)
+            for j in range(0,len(split_first_letter)):
+              if split_first_letter[j] in settings.AVAILABLE_TECHNIQUES:
+                found_tech = True
+          if split_techniques_names[i].replace(' ', '') not in settings.AVAILABLE_TECHNIQUES and found_tech == False:
+            print colors.BGRED + "(x) Error: You specified wrong '" + split_techniques_names[i] + "' injection technique." + colors.RESET
+            print colors.BGRED + "(x) The available techniques are: classic,eval-based,time-based,file-based or c,e,t,f (with or without commas)." + colors.RESET
+            sys.exit(0)
 
     #Check if specified wrong alternative shell
     if menu.options.alter_shell:
