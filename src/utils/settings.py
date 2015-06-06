@@ -14,8 +14,8 @@
  For more see the file 'doc/COPYING' for copying permission.
 """
 
-import sys
 import os
+import sys
 import urllib
 
 """

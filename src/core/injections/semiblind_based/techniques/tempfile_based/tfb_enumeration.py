@@ -18,8 +18,8 @@ import sys
 import time
 
 from src.utils import menu
-from src.utils import colors
 from src.utils import settings
+from src.thirdparty.colorama import Fore, Back, Style, init
 
 from src.core.injections.semiblind_based.techniques.tempfile_based import tfb_injector
 
@@ -37,7 +37,7 @@ def do_check(separator,maxlen,TAG,delay,http_request_method,url,vuln_parameter,O
     shell = output 
     if shell:
       shell = "".join(str(p) for p in output)
-      sys.stdout.write(colors.BOLD + "\n\n  (!) The hostname is " + colors.UNDERL + shell + colors.RESET + ".\n")
+      sys.stdout.write(Style.BRIGHT + "\n\n  (!) The hostname is " + Style.UNDERLINE + shell + Style.RESET_ALL + ".\n")
       sys.stdout.flush()
       
   # "Retrieve certain system information (operating system, hardware platform)
@@ -53,11 +53,11 @@ def do_check(separator,maxlen,TAG,delay,http_request_method,url,vuln_parameter,O
         target_arch = output
         if target_arch:
           target_arch = "".join(str(p) for p in target_arch)
-          sys.stdout.write(colors.BOLD + "\n\n  (!) The target operating system is " + colors.UNDERL + target_os + colors.RESET)
-          sys.stdout.write(colors.BOLD + " and the hardware platform is " + colors.UNDERL + target_arch + colors.RESET + ".\n")
+          sys.stdout.write(Style.BRIGHT + "\n\n  (!) The target operating system is " + Style.UNDERLINE + target_os + Style.RESET_ALL)
+          sys.stdout.write(Style.BRIGHT + " and the hardware platform is " + Style.UNDERLINE + target_arch + Style.RESET_ALL + ".\n")
           sys.stdout.flush()
       else:
-        sys.stdout.write(colors.BOLD + "\n  (!) The target operating system is " + colors.UNDERL + target_os + colors.RESET + ".\n")
+        sys.stdout.write(Style.BRIGHT + "\n  (!) The target operating system is " + Style.UNDERLINE + target_os + Style.RESET_ALL + ".\n")
         sys.stdout.flush()
 
   # The current user enumeration
@@ -72,15 +72,15 @@ def do_check(separator,maxlen,TAG,delay,http_request_method,url,vuln_parameter,O
         cmd = settings.ISROOT
         check_how_long,output = tfb_injector.injection(separator,maxlen,TAG,cmd,delay,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,alter_shell)
         if shell:
-          sys.stdout.write(colors.BOLD + "\n\n  (!) The current user is " + colors.UNDERL + cu_account + colors.RESET)
+          sys.stdout.write(Style.BRIGHT + "\n\n  (!) The current user is " + Style.UNDERLINE + cu_account + Style.RESET_ALL)
           if shell != "0":
-              sys.stdout.write(colors.BOLD + " and it is " + colors.UNDERL + "not" + colors.RESET + colors.BOLD + " privilleged" + colors.RESET + ".\n")
+              sys.stdout.write(Style.BRIGHT + " and it is " + Style.UNDERLINE + "not" + Style.RESET_ALL + Style.BRIGHT + " privilleged" + Style.RESET_ALL + ".\n")
               sys.stdout.flush()
           else:
-            sys.stdout.write(colors.BOLD + " and it is " + colors.UNDERL + "" + colors.RESET + colors.BOLD + " privilleged" + colors.RESET + ".\n")
+            sys.stdout.write(Style.BRIGHT + " and it is " + Style.UNDERLINE + "" + Style.RESET_ALL + Style.BRIGHT + " privilleged" + Style.RESET_ALL + ".\n")
             sys.stdout.flush()
       else:
-        sys.stdout.write(colors.BOLD + "\n\n  (!) The current user is " + colors.UNDERL + cu_account + colors.RESET + ".\n")
+        sys.stdout.write(Style.BRIGHT + "\n\n  (!) The current user is " + Style.UNDERLINE + cu_account + Style.RESET_ALL + ".\n")
         sys.stdout.flush()
         
   # System users enumeration
@@ -95,7 +95,7 @@ def do_check(separator,maxlen,TAG,delay,http_request_method,url,vuln_parameter,O
       sys_users = sys_users.replace("(@)","\n")
       sys_users = sys_users.split( )
       if len(sys_users) != 0 :
-        sys.stdout.write(colors.BOLD + "\n(!) Identified " + str(len(sys_users)) + " entries in '" + settings.PASSWD_FILE + "'.\n" + colors.RESET)
+        sys.stdout.write(Style.BRIGHT + "\n(!) Identified " + str(len(sys_users)) + " entries in '" + settings.PASSWD_FILE + "'.\n" + Style.RESET_ALL)
         sys.stdout.flush()
         count = 0
         for line in sys_users:
@@ -104,23 +104,23 @@ def do_check(separator,maxlen,TAG,delay,http_request_method,url,vuln_parameter,O
           # System users privileges enumeration
           if menu.options.privileges:
             if int(fields[1]) == 0:
-              is_privilleged = colors.RESET + " is" +  colors.BOLD + " root user "
+              is_privilleged = Style.RESET_ALL + " is" +  Style.BRIGHT + " root user "
             elif int(fields[1]) > 0 and int(fields[1]) < 99 :
-              is_privilleged = colors.RESET + " is" +  colors.BOLD + "  system user "
+              is_privilleged = Style.RESET_ALL + " is" +  Style.BRIGHT + "  system user "
             elif int(fields[1]) >= 99 and int(fields[1]) < 65534 :
               if int(fields[1]) == 99 or int(fields[1]) == 60001 or int(fields[1]) == 65534:
-                is_privilleged = colors.RESET + " is" +  colors.BOLD + " anonymous user "
+                is_privilleged = Style.RESET_ALL + " is" +  Style.BRIGHT + " anonymous user "
               elif int(fields[1]) == 60002:
-                is_privilleged = colors.RESET + " is" +  colors.BOLD + " non-trusted user "
+                is_privilleged = Style.RESET_ALL + " is" +  Style.BRIGHT + " non-trusted user "
               else:
-                is_privilleged = colors.RESET + " is" +  colors.BOLD + " regular user "
+                is_privilleged = Style.RESET_ALL + " is" +  Style.BRIGHT + " regular user "
             else :
               is_privilleged = ""
           else :
             is_privilleged = ""
-          print "  ("+str(count)+") '" + colors.BOLD + colors.UNDERL + fields[0]+ colors.RESET + "'" + colors.BOLD + is_privilleged + colors.RESET + "(uid=" + fields[1] + ").Home directory is in '" + colors.BOLD + fields[2]+ colors.RESET + "'." 
+          print "  ("+str(count)+") '" + Style.BRIGHT + Style.UNDERLINE + fields[0]+ Style.RESET_ALL + "'" + Style.BRIGHT + is_privilleged + Style.RESET_ALL + "(uid=" + fields[1] + ").Home directory is in '" + Style.BRIGHT + fields[2]+ Style.RESET_ALL + "'." 
       else:
-        print "\n" + colors.BGRED + "(x) Error: Cannot open '" + settings.PASSWD_FILE + "'." + colors.RESET
+        print "\n" + Back.RED + "(x) Error: Cannot open '" + settings.PASSWD_FILE + "'." + Style.RESET_ALL
 
   # System users enumeration
   if menu.options.passwords:
@@ -134,16 +134,16 @@ def do_check(separator,maxlen,TAG,delay,http_request_method,url,vuln_parameter,O
       sys_passes = sys_passes.replace("(@)","\n")
       sys_passes = sys_passes.split( )
       if len(sys_passes) != 0 :
-        sys.stdout.write(colors.BOLD + "\n(!) Identified " + str(len(sys_passes)) + " entries in '" + settings.SHADOW_FILE + "'.\n" + colors.RESET)
+        sys.stdout.write(Style.BRIGHT + "\n(!) Identified " + str(len(sys_passes)) + " entries in '" + settings.SHADOW_FILE + "'.\n" + Style.RESET_ALL)
         sys.stdout.flush()
         count = 0
         for line in sys_passes:
           count = count + 1
           fields = line.split(":")
           if fields[1] != "*" and fields[1] != "!!" and fields[1] != "":
-            print "  ("+str(count)+") " + colors.BOLD + fields[0]+ colors.RESET + " : " + colors.BOLD + fields[1]+ colors.RESET
+            print "  ("+str(count)+") " + Style.BRIGHT + fields[0]+ Style.RESET_ALL + " : " + Style.BRIGHT + fields[1]+ Style.RESET_ALL
       else:
-        print "\n" + colors.BGRED + "(x) Error: Cannot open '" + settings.SHADOW_FILE + "'." + colors.RESET
+        print "\n" + Back.RED + "(x) Error: Cannot open '" + settings.SHADOW_FILE + "'." + Style.RESET_ALL
         
   # Single os-shell execution
   if menu.options.os_cmd:
@@ -154,7 +154,7 @@ def do_check(separator,maxlen,TAG,delay,http_request_method,url,vuln_parameter,O
       if menu.options.verbose:
         print ""
       shell = "".join(str(p) for p in shell)
-      print "\n\n" + colors.GREEN + colors.BOLD + shell + colors.RESET
+      print "\n\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL
       sys.exit(0)
 
 # eof

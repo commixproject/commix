@@ -20,9 +20,8 @@ import sys
 from optparse import OptionGroup
 from optparse import OptionParser
 
-from src.utils import colors
 from src.utils import settings
-
+from src.thirdparty.colorama import Fore, Back, Style, init
 
 def banner():
   print """                                       __           
@@ -30,11 +29,11 @@ def banner():
   /'___\ / __`\ /' __` __`\ /' __` __`\/\ \ /\ \/'\   
  /\ \__//\ \L\ \/\ \/\ \/\ \/\ \/\ \/\ \ \ \\\/>  </  
  \ \____\ \____/\ \_\ \_\ \_\ \_\ \_\ \_\ \_\\/\_/\\_\\
-  \/____/\/___/  \/_/\/_/\/_/\/_/\/_/\/_/\/_/\//\/_/ { """ + colors.BOLD + colors.RED + settings.VERSION  + settings.COMMIT_ID + colors.RESET + """ }
+  \/____/\/___/  \/_/\/_/\/_/\/_/\/_/\/_/\/_/\//\/_/ { """ + Style.BRIGHT + Fore.RED + settings.VERSION  + settings.COMMIT_ID + Style.RESET_ALL + """ }
 
 +--
-""" + colors.BOLD + settings.DESCRIPTION + colors.RESET + """
-Copyright (c) """ + settings.YEAR + """ """ + settings.AUTHOR + """ (""" + settings.TWITTER + colors.RESET +""")
+""" + Style.BRIGHT + settings.DESCRIPTION + Style.RESET_ALL + """
+Copyright (c) """ + settings.YEAR + """ """ + settings.AUTHOR + """ (""" + settings.TWITTER + Style.RESET_ALL +""")
 +--
 """
 
@@ -67,7 +66,7 @@ parser.add_option("--update",
                 help="Check for updates (apply if any) and exit.")
 
 # Target options
-target = OptionGroup(parser, colors.BOLD + "Target" + colors.RESET, 
+target = OptionGroup(parser, Style.BRIGHT + "Target" + Style.RESET_ALL, 
                      "This options has to be provided, to define the target URL. ")
 
 target.add_option("--url",
@@ -81,7 +80,7 @@ target.add_option("--url-reload",
                 default=False,
                 help="Reload target URL after command execution.")
 # Request options
-request = OptionGroup(parser,  colors.BOLD + "Request" + colors.RESET, 
+request = OptionGroup(parser,  Style.BRIGHT + "Request" + Style.RESET_ALL, 
                       "These options can be used, to specify how to connect to the target URL.")
 
 request.add_option("--host",
@@ -143,7 +142,7 @@ request.add_option("--auth-cred",
                 help="HTTP Authentication credentials (e.g. 'admin:admin').")
 
 # Enumeration options
-enumeration = OptionGroup(parser, colors.BOLD + "Enumeration" + colors.RESET, 
+enumeration = OptionGroup(parser, Style.BRIGHT + "Enumeration" + Style.RESET_ALL, 
                         "These options can be used, to enumerate the target host.")
 
 enumeration.add_option("--current-user", 
@@ -189,7 +188,7 @@ enumeration.add_option("--privileges",
                 help="Retrieve system users privileges.")
 
 # File access options
-file_access = OptionGroup(parser, colors.BOLD + "File access" + colors.RESET, 
+file_access = OptionGroup(parser, Style.BRIGHT + "File access" + Style.RESET_ALL, 
                         "These options can be used to access files on the target host.")
 
 file_access.add_option("--file-read", 
@@ -213,7 +212,7 @@ file_access.add_option("--file-dest",
                 help="Host's absolute filepath to write and/or upload to.")
 
 # Modules options
-modules = OptionGroup(parser, colors.BOLD + "Modules" + colors.RESET, 
+modules = OptionGroup(parser, Style.BRIGHT + "Modules" + Style.RESET_ALL, 
                         "These options can be used increase the detection and/or injection  capabilities.")
 modules.add_option("--icmp-exfil", 
                 action="store",
@@ -222,7 +221,7 @@ modules.add_option("--icmp-exfil",
                 help="The ICMP exfiltration technique (e.g. 'ip_src=192.168.178.1,ip_dst=192.168.178.3').")
 
 # Injection options
-injection = OptionGroup(parser, colors.BOLD + "Injection" + colors.RESET, 
+injection = OptionGroup(parser, Style.BRIGHT + "Injection" + Style.RESET_ALL, 
                         "These options can be used, to specify which parameters to inject and to provide custom injection payloads.")
 
 injection.add_option("--data", 

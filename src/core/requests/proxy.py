@@ -18,7 +18,7 @@ import sys
 import urllib2
 
 from src.utils import menu
-from src.utils import colors
+from src.thirdparty.colorama import Fore, Back, Style, init
 
 from src.core.requests import headers
 
@@ -47,10 +47,10 @@ def do_check(url):
     pass
   
   if check_proxy == True:
-    sys.stdout.write("["+colors.GREEN+" OK "+colors.RESET+"]\n")
+    sys.stdout.write("["+Fore.GREEN+" OK "+Style.RESET_ALL+"]\n")
     sys.stdout.flush()
     
   else:
-    print "[" + colors.BGRED+ " FAILED "+colors.RESET+"]\n"
+    print "[" + Back.RED+ " FAILED "+Style.RESET_ALL+"]\n"
     sys.exit(1)
     

@@ -22,11 +22,11 @@ import urllib2
 import urlparse
 
 from src.utils import menu
-from src.utils import colors
 from src.utils import update
 from src.utils import version
 from src.utils import install
 from src.utils import settings
+from src.thirdparty.colorama import Fore, Back, Style, init
 
 from src.core.requests import proxy
 from src.core.requests import headers
@@ -35,6 +35,11 @@ from src.core.injections import controller
 """
  The main function.
 """
+
+# use Colorama to make Termcolor work on Windows too :)
+is_windows = hasattr(sys, 'getwindowsversion')
+if is_windows:
+  init()
 
 def main():
 
@@ -84,14 +89,14 @@ def main():
               if split_first_letter[j] in settings.AVAILABLE_TECHNIQUES:
                 found_tech = True
           if split_techniques_names[i].replace(' ', '') not in settings.AVAILABLE_TECHNIQUES and found_tech == False:
-            print colors.BGRED + "(x) Error: You specified wrong '" + split_techniques_names[i] + "' injection technique." + colors.RESET
-            print colors.BGRED + "(x) The available techniques are: classic,eval-based,time-based,file-based or c,e,t,f (with or without commas)." + colors.RESET
+            print Back.RED + "(x) Error: You specified wrong '" + split_techniques_names[i] + "' injection technique." + Style.RESET_ALL
+            print Back.RED + "(x) The available techniques are: classic,eval-based,time-based,file-based or c,e,t,f (with or without commas)." + Style.RESET_ALL
             sys.exit(0)
 
     #Check if specified wrong alternative shell
     if menu.options.alter_shell:
       if menu.options.alter_shell.lower() not in settings.AVAILABLE_SHELLS:
-        print colors.BGRED + "(x) Error: '" + menu.options.alter_shell + "' shell is not supported!" + colors.RESET
+        print Back.RED + "(x) Error: '" + menu.options.alter_shell + "' shell is not supported!" + Style.RESET_ALL
         sys.exit(0)
 
     # Check if specified file-access options
@@ -109,7 +114,7 @@ def main():
         menu.options.file_dest = settings.SRV_ROOT_DIR + file_name
         
     elif menu.options.file_dest and menu.options.file_write == None and menu.options.file_upload == None :
-      print colors.BGRED + "(x) Error: You must enter the '--file-write' or '--file-upload' parameter." + colors.RESET
+      print Back.RED + "(x) Error: You must enter the '--file-write' or '--file-upload' parameter." + Style.RESET_ALL
       sys.exit(0)
         
     #Check if defined "--random-agent" option.
@@ -132,9 +137,9 @@ def main():
         headers.do_check(request)
         response = urllib2.urlopen(request)
         content = response.read()
-        print "[ " + colors.GREEN + "SUCCEED" + colors.RESET + " ]"
+        print "[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]"
       except urllib2.HTTPError, e:
-        print "[ " + colors.RED + "FAILED" + colors.RESET + " ]"
+        print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
 
         # Check the codes of responses
         if e.getcode() == 500:
@@ -143,35 +148,35 @@ def main():
 
         elif e.getcode() == 401:
           if menu.options.auth_type != "basic":
-            print colors.BGRED + "(x) Error: Only 'Basic' Access Authentication is supported." + colors.RESET
+            print Back.RED + "(x) Error: Only 'Basic' Access Authentication is supported." + Style.RESET_ALL
             sys.exit(0)
           else:
-            print colors.BGRED + "(x) Error: Authorization required!" + colors.RESET + "\n"
+            print Back.RED + "(x) Error: Authorization required!" + Style.RESET_ALL + "\n"
             sys.exit(0)
           
         elif e.getcode() == 403:
-          print colors.BGRED + "(x) Error: You don't have permission to access this page." + colors.RESET + "\n"
+          print Back.RED + "(x) Error: You don't have permission to access this page." + Style.RESET_ALL + "\n"
           sys.exit(0)
           
         elif e.getcode() == 404:
-          print colors.BGRED + "(x) Error: The host seems to be down!" + colors.RESET + "\n"
+          print Back.RED + "(x) Error: The host seems to be down!" + Style.RESET_ALL + "\n"
           sys.exit(0)
 
         else:
           raise
 
       except urllib2.URLError, e:
-          print "[ " + colors.RED + "FAILED" + colors.RESET + " ]"
-          print colors.BGRED + "(x) Error: The host seems to be down!" + colors.RESET + "\n"
+          print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
+          print Back.RED + "(x) Error: The host seems to be down!" + Style.RESET_ALL + "\n"
           sys.exit(0)
         
       except httplib.BadStatusLine, e:
-          print "[ " + colors.RED + "FAILED" + colors.RESET + " ]"
+          print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
           print e.line, e.message
           pass
         
     else:
-      print colors.BGRED + "(x) Error: You must specify the target URL." + colors.RESET + "\n"
+      print Back.RED + "(x) Error: You must specify the target URL." + Style.RESET_ALL + "\n"
       sys.exit(0)
       
    #Check if defined "--proxy" option.

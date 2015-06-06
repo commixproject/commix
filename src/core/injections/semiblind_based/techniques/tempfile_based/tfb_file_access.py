@@ -19,8 +19,8 @@ import sys
 import urllib2
 
 from src.utils import menu
-from src.utils import colors
 from src.utils import settings
+from src.thirdparty.colorama import Fore, Back, Style, init
 
 from src.core.injections.semiblind_based.techniques.tempfile_based import tfb_injector
 
@@ -42,11 +42,11 @@ def do_check(separator,maxlen,TAG,delay,http_request_method,url,vuln_parameter,O
     if shell:
       if menu.options.verbose:
         print ""
-      sys.stdout.write(colors.BOLD + "\n\n (!) Contents of file " + colors.UNDERL + file_to_read + colors.RESET + " : ")
+      sys.stdout.write(Style.BRIGHT + "\n\n (!) Contents of file " + Style.UNDERLINE + file_to_read + Style.RESET_ALL + " : ")
       sys.stdout.flush()
       print shell
     else:
-     sys.stdout.write("\n" + colors.BGRED + "(x) Error: It seems that you don't have permissions to read the '"+ file_to_read + "' file.\n" + colors.RESET)
+     sys.stdout.write("\n" + Back.RED + "(x) Error: It seems that you don't have permissions to read the '"+ file_to_read + "' file.\n" + Style.RESET_ALL)
      sys.stdout.flush()
      
      
@@ -54,7 +54,7 @@ def do_check(separator,maxlen,TAG,delay,http_request_method,url,vuln_parameter,O
   if menu.options.file_write:
     file_to_write = menu.options.file_write
     if not os.path.exists(file_to_write):
-      sys.stdout.write("\n" + colors.BGRED + "(x) Error: It seems that the '"+ file_to_write + "' file, does not exists." + colors.RESET)
+      sys.stdout.write("\n" + Back.RED + "(x) Error: It seems that the '"+ file_to_write + "' file, does not exists." + Style.RESET_ALL)
       sys.stdout.flush()
       sys.exit(0)
       
@@ -63,7 +63,7 @@ def do_check(separator,maxlen,TAG,delay,http_request_method,url,vuln_parameter,O
         content = [line.replace("\n", " ") for line in content_file]
       content = "".join(str(p) for p in content).replace("'","\"")
     else:
-      sys.stdout.write("\n" + colors.BGRED + "(x) Error: It seems that '"+ file_to_write + "' is not a file." + colors.RESET)
+      sys.stdout.write("\n" + Back.RED + "(x) Error: It seems that '"+ file_to_write + "' is not a file." + Style.RESET_ALL)
       sys.stdout.flush()
       
     if not settings.TMP_PATH in menu.options.file_dest:
@@ -95,10 +95,10 @@ def do_check(separator,maxlen,TAG,delay,http_request_method,url,vuln_parameter,O
     if shell:
       if menu.options.verbose:
         print ""
-      sys.stdout.write(colors.BOLD + "\n(!) The " + colors.UNDERL + shell + colors.RESET + colors.BOLD +" file was created successfully!\n" + colors.RESET)
+      sys.stdout.write(Style.BRIGHT + "\n(!) The " + Style.UNDERLINE + shell + Style.RESET_ALL + Style.BRIGHT +" file was created successfully!\n" + Style.RESET_ALL)
       sys.stdout.flush()
     else:
-     sys.stdout.write("\n" + colors.BGRED + "(x) Error: It seems that you don't have permissions to write the '"+ dest_to_write + "' file." + colors.RESET + "\n")
+     sys.stdout.write("\n" + Back.RED + "(x) Error: It seems that you don't have permissions to write the '"+ dest_to_write + "' file." + Style.RESET_ALL + "\n")
      sys.stdout.flush()
 
 
@@ -110,7 +110,7 @@ def do_check(separator,maxlen,TAG,delay,http_request_method,url,vuln_parameter,O
     try:
       urllib2.urlopen(file_to_upload)
     except urllib2.HTTPError, err:
-      sys.stdout.write("\n" + colors.BGRED + "(x) Error: It seems that the '"+ file_to_upload + "' file, does not exists. ("+str(err)+")" + colors.RESET + "\n")
+      sys.stdout.write("\n" + Back.RED + "(x) Error: It seems that the '"+ file_to_upload + "' file, does not exists. ("+str(err)+")" + Style.RESET_ALL + "\n")
       sys.stdout.flush()
       sys.exit(0)
 
@@ -143,10 +143,10 @@ def do_check(separator,maxlen,TAG,delay,http_request_method,url,vuln_parameter,O
     if shell:
       if menu.options.verbose:
         print ""
-      sys.stdout.write(colors.BOLD + "\n(!) The " + colors.UNDERL + shell + colors.RESET + colors.BOLD +" file was created successfully!\n" + colors.RESET)
+      sys.stdout.write(Style.BRIGHT + "\n(!) The " + Style.UNDERLINE + shell + Style.RESET_ALL + Style.BRIGHT +" file was created successfully!\n" + Style.RESET_ALL)
       sys.stdout.flush()
     else:
-     sys.stdout.write("\n" + colors.BGRED + "(x) Error: It seems that you don't have permissions to write the '"+ dest_to_upload + "' file." + colors.RESET + "\n")
+     sys.stdout.write("\n" + Back.RED + "(x) Error: It seems that you don't have permissions to write the '"+ dest_to_upload + "' file." + Style.RESET_ALL + "\n")
      sys.stdout.flush()
      
 # eof

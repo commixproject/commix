@@ -25,8 +25,8 @@ import urllib
 import urllib2
 
 from src.utils import menu
-from src.utils import colors
 from src.utils import settings
+from src.thirdparty.colorama import Fore, Back, Style, init
 
 from src.core.requests import headers
 from src.core.requests import parameters
@@ -113,7 +113,7 @@ def cb_injection_handler(url,delay,filename,http_request_method):
 
             # Check if defined "--verbose" option.
             if menu.options.verbose:
-              sys.stdout.write("\n" + colors.GREY + payload + colors.RESET)
+              sys.stdout.write("\n" + colors.GREY + payload + Style.RESET_ALL)
               
             # Check if target host is vulnerable.
             response,vuln_parameter = cb_injector.injection_test(payload,http_request_method,url)
@@ -129,11 +129,11 @@ def cb_injection_handler(url,delay,filename,http_request_method):
               percent = ((i*100)/total)
               if percent == 100:
                 if no_result == True:
-                  percent = colors.RED + "FAILED" + colors.RESET
+                  percent = Fore.RED + "FAILED" + Style.RESET_ALL
                 else:
                   percent = str(percent)+"%"
               elif len(shell) != 0:
-                percent = colors.GREEN + "SUCCEED" + colors.RESET
+                percent = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
               else:
                 percent = str(percent)+"%"
               sys.stdout.write("\r(*) Testing the "+ technique + "... " +  "[ " + percent + " ]")  
@@ -177,10 +177,10 @@ def cb_injection_handler(url,delay,filename,http_request_method):
               GET_vuln_param = parameters.vuln_GET_param(url)
 
               # Print the findings to terminal.
-              print colors.BOLD + "\n(!) The ("+ http_request_method + ") '" + colors.UNDERL + GET_vuln_param + colors.RESET + colors.BOLD + "' parameter is vulnerable to "+ injection_type +"."+ colors.RESET
-              print "  (+) Type : "+ colors.YELLOW + colors.BOLD + injection_type + colors.RESET + ""
-              print "  (+) Technique : "+ colors.YELLOW + colors.BOLD + technique.title() + colors.RESET + ""
-              print "  (+) Payload : "+ colors.YELLOW + colors.BOLD + re.sub("%20"," ",payload) + colors.RESET
+              print Style.BRIGHT + "\n(!) The ("+ http_request_method + ") '" + Style.UNDERLINE + GET_vuln_param + Style.RESET_ALL + Style.BRIGHT + "' parameter is vulnerable to "+ injection_type +"."+ Style.RESET_ALL
+              print "  (+) Type : "+ Fore.YELLOW + Style.BRIGHT + injection_type + Style.RESET_ALL + ""
+              print "  (+) Technique : "+ Fore.YELLOW + Style.BRIGHT + technique.title() + Style.RESET_ALL + ""
+              print "  (+) Payload : "+ Fore.YELLOW + Style.BRIGHT + re.sub("%20"," ",payload) + Style.RESET_ALL
 
             else :
               # Print the findings to log file
@@ -200,10 +200,10 @@ def cb_injection_handler(url,delay,filename,http_request_method):
               POST_vuln_param = vuln_parameter
               
               # Print the findings to terminal.
-              print colors.BOLD + "\n(!) The ("+ http_request_method + ") '" + colors.UNDERL + POST_vuln_param + colors.RESET + colors.BOLD + "' parameter is vulnerable to "+ injection_type +"."+ colors.RESET
-              print "  (+) Type : "+ colors.YELLOW + colors.BOLD + injection_type + colors.RESET + ""
-              print "  (+) Technique : "+ colors.YELLOW + colors.BOLD + technique.title() + colors.RESET + ""
-              print "  (+) Payload : "+ colors.YELLOW + colors.BOLD + re.sub("%20"," ",payload) + colors.RESET
+              print Style.BRIGHT + "\n(!) The ("+ http_request_method + ") '" + Style.UNDERLINE + POST_vuln_param + Style.RESET_ALL + Style.BRIGHT + "' parameter is vulnerable to "+ injection_type +"."+ Style.RESET_ALL
+              print "  (+) Type : "+ Fore.YELLOW + Style.BRIGHT + injection_type + Style.RESET_ALL + ""
+              print "  (+) Technique : "+ Fore.YELLOW + Style.BRIGHT + technique.title() + Style.RESET_ALL + ""
+              print "  (+) Payload : "+ Fore.YELLOW + Style.BRIGHT + re.sub("%20"," ",payload) + Style.RESET_ALL
               
             # Check for any enumeration options.
             cb_enumeration.do_check(separator,TAG,prefix,suffix,whitespace,http_request_method,url,vuln_parameter,alter_shell)
@@ -236,7 +236,7 @@ def cb_injection_handler(url,delay,filename,http_request_method):
                       shell = cb_injector.injection_results(response,TAG)
                       if shell:
                         shell = "".join(str(p) for p in shell)
-                        print "\n" + colors.GREEN + colors.BOLD + shell + colors.RESET + "\n"
+                        print "\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n"
 
                   except KeyboardInterrupt: 
                     print ""
@@ -251,7 +251,7 @@ def cb_injection_handler(url,delay,filename,http_request_method):
               else:
                 if gotshell == "":
                   gotshell = "enter"
-                print colors.BGRED + "(x) Error: '" + gotshell + "' is not a valid answer." + colors.RESET
+                print Back.RED + "(x) Error: '" + gotshell + "' is not a valid answer." + Style.RESET_ALL
                 pass
               
   if no_result == True:

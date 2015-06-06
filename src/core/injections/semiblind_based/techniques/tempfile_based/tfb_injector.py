@@ -23,8 +23,8 @@ import urllib
 import urllib2
 
 from src.utils import menu
-from src.utils import colors
 from src.utils import settings
+from src.thirdparty.colorama import Fore, Back, Style, init
 
 from src.core.requests import headers
 from src.core.requests import parameters
@@ -72,7 +72,7 @@ def injection_test(payload,http_request_method,url):
         response.read()
         
       except urllib2.HTTPError, err:
-        print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
+        print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
         sys.exit(1) 
 
     else:
@@ -80,7 +80,7 @@ def injection_test(payload,http_request_method,url):
         response = urllib2.urlopen(request)
         response.read()
       except urllib2.HTTPError, err:
-        print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
+        print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
         sys.exit(1) 
       
   # Check if defined method is POST.
@@ -110,7 +110,7 @@ def injection_test(payload,http_request_method,url):
         response = urllib2.urlopen(request)
         response.read()
       except urllib2.HTTPError, err:
-        print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
+        print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
         sys.exit(1) 
 
     else:
@@ -118,7 +118,7 @@ def injection_test(payload,http_request_method,url):
         response = urllib2.urlopen(request)
         response.read()
       except urllib2.HTTPError, err:
-        print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
+        print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
         sys.exit(1) 
       
   end  = time.time()
@@ -147,7 +147,7 @@ def injection(separator,maxlen,TAG,cmd,delay,http_request_method,url,vuln_parame
 
     # Check if defined "--verbose" option.
     if menu.options.verbose:
-      sys.stdout.write("\n" + colors.GREY + payload.replace("\n","\\n") + colors.RESET)
+      sys.stdout.write("\n" + colors.GREY + payload.replace("\n","\\n") + Style.RESET_ALL)
       
     start = 0
     end = 0
@@ -178,7 +178,7 @@ def injection(separator,maxlen,TAG,cmd,delay,http_request_method,url,vuln_parame
           response = urllib2.urlopen(request)
           response.read()
         except urllib2.HTTPError, err:
-          print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
+          print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
           sys.exit(1) 
   
       else:
@@ -186,7 +186,7 @@ def injection(separator,maxlen,TAG,cmd,delay,http_request_method,url,vuln_parame
           response = urllib2.urlopen(request)
           response.read()
         except urllib2.HTTPError, err:
-          print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
+          print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
           sys.exit(1) 
         
     # Check if defined method is POST.
@@ -212,7 +212,7 @@ def injection(separator,maxlen,TAG,cmd,delay,http_request_method,url,vuln_parame
           response = urllib2.urlopen(request)
           response.read()
         except urllib2.HTTPError, err:
-          print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
+          print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
           sys.exit(1) 
   
       else:
@@ -220,7 +220,7 @@ def injection(separator,maxlen,TAG,cmd,delay,http_request_method,url,vuln_parame
           response = urllib2.urlopen(request)
           response.read()
         except urllib2.HTTPError, err:
-          print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
+          print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
           sys.exit(1) 
         
     end  = time.time()
@@ -229,7 +229,7 @@ def injection(separator,maxlen,TAG,cmd,delay,http_request_method,url,vuln_parame
     if how_long >= delay:
       if menu.options.verbose:
         print "\n"
-      print colors.BOLD + "(!) Retrieved " + str(output_length) + " characters."+ colors.RESET
+      print Style.BRIGHT + "(!) Retrieved " + str(output_length) + " characters."+ Style.RESET_ALL
       break
               
   num_of_chars = output_length + 1
@@ -249,7 +249,7 @@ def injection(separator,maxlen,TAG,cmd,delay,http_request_method,url,vuln_parame
         
       # Check if defined "--verbose" option.
       if menu.options.verbose:
-        sys.stdout.write("\n" + colors.GREY + payload.replace("\n","\\n") + colors.RESET)
+        sys.stdout.write("\n" + colors.GREY + payload.replace("\n","\\n") + Style.RESET_ALL)
         
       start = 0
       end = 0
@@ -273,7 +273,7 @@ def injection(separator,maxlen,TAG,cmd,delay,http_request_method,url,vuln_parame
             response = urllib2.urlopen(request)
             response.read()
           except urllib2.HTTPError, err:
-            print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
+            print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
             sys.exit(1) 
     
         else:
@@ -281,7 +281,7 @@ def injection(separator,maxlen,TAG,cmd,delay,http_request_method,url,vuln_parame
             response = urllib2.urlopen(request)
             response.read()
           except urllib2.HTTPError, err:
-            print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
+            print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
             sys.exit(1) 
           
       else :
@@ -301,7 +301,7 @@ def injection(separator,maxlen,TAG,cmd,delay,http_request_method,url,vuln_parame
             response = urllib2.urlopen(request)
             response.read()
           except urllib2.HTTPError, err:
-            print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
+            print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
             sys.exit(1) 
     
         else:
@@ -309,7 +309,7 @@ def injection(separator,maxlen,TAG,cmd,delay,http_request_method,url,vuln_parame
             response = urllib2.urlopen(request)
             response.read()
           except urllib2.HTTPError, err:
-            print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
+            print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
             sys.exit(1) 
           
       end  = time.time()

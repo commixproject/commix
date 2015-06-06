@@ -25,8 +25,8 @@ import urllib
 import urllib2
 
 from src.utils import menu
-from src.utils import colors
 from src.utils import settings
+from src.thirdparty.colorama import Fore, Back, Style, init
 
 from src.core.requests import headers
 from src.core.requests import parameters
@@ -145,7 +145,7 @@ def fb_injection_handler(url,delay,filename,http_request_method):
 
           # Check if defined "--verbose" option.
           if menu.options.verbose:
-            sys.stdout.write("\n" + colors.GREY + payload.replace("\n","\\n") + colors.RESET)
+            sys.stdout.write("\n" + colors.GREY + payload.replace("\n","\\n") + Style.RESET_ALL)
             
           # Check if target host is vulnerable.
           response,vuln_parameter = fb_injector.injection_test(payload,http_request_method,url)
@@ -171,7 +171,7 @@ def fb_injection_handler(url,delay,filename,http_request_method):
             html_data = output.read()
             shell = re.findall(r"" + TAG + "", html_data)
             if len(shell) != 0 and not menu.options.verbose:
-              percent = colors.GREEN + "SUCCEED" + colors.RESET
+              percent = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
               sys.stdout.write("\r(*) Trying to upload the '"+ OUTPUT_TEXTFILE +"' on " + SRV_ROOT_DIR + "... [ " + percent + " ]")  
               sys.stdout.flush()
               
@@ -186,7 +186,7 @@ def fb_injection_handler(url,delay,filename,http_request_method):
                 # Show an error message, after 20 failed tries.
                 # Use the "/tmp/" directory for tempfile-based technique.
                 elif i == 20 :
-                  print "\n" + colors.BGRED + "(x) Error: It seems that you don't have permissions to write on "+ SRV_ROOT_DIR + "." + colors.RESET
+                  print "\n" + Back.RED + "(x) Error: It seems that you don't have permissions to write on "+ SRV_ROOT_DIR + "." + Style.RESET_ALL
                   while True:
                     tmp_upload = raw_input("(*) Do you want to try the temporary directory (" + tmp_path + ") [Y/n] > ").lower()
                     if tmp_upload in settings.CHOISE_YES:
@@ -199,7 +199,7 @@ def fb_injection_handler(url,delay,filename,http_request_method):
                     else:
                       if tmp_upload == "":
                         tmp_upload = "enter"
-                      print colors.BGRED + "(x) Error: '" + tmp_upload + "' is not a valid answer." + colors.RESET
+                      print Back.RED + "(x) Error: '" + tmp_upload + "' is not a valid answer." + Style.RESET_ALL
                       pass
                   continue
                 
@@ -208,7 +208,7 @@ def fb_injection_handler(url,delay,filename,http_request_method):
                     if not menu.options.verbose:
                       if percent == 100:
                         if no_result == True:
-                          percent = colors.RED + "FAILED" + colors.RESET
+                          percent = Fore.RED + "FAILED" + Style.RESET_ALL
                         else:
                           percent = str(percent)+"%"
                       else:
@@ -222,11 +222,11 @@ def fb_injection_handler(url,delay,filename,http_request_method):
                     raise
                 
               elif e.getcode() == 401:
-                print colors.BGRED + "(x) Error: Authorization required!" + colors.RESET + "\n"
+                print Back.RED + "(x) Error: Authorization required!" + Style.RESET_ALL + "\n"
                 sys.exit(0)
                 
               elif e.getcode() == 403:
-                print colors.BGRED + "(x) Error: You don't have permission to access this page." + colors.RESET + "\n"
+                print Back.RED + "(x) Error: You don't have permission to access this page." + Style.RESET_ALL + "\n"
                 sys.exit(0)
           
         except KeyboardInterrupt:
@@ -234,7 +234,7 @@ def fb_injection_handler(url,delay,filename,http_request_method):
           raise
         
         except urllib2.URLError, e:
-          #print "\n" + colors.BGRED + "(x) Error: " + str(e.reason) + colors.RESET
+          #print "\n" + Back.RED + "(x) Error: " + str(e.reason) + Style.RESET_ALL
           sys.exit(0)
         
         except:
@@ -272,10 +272,10 @@ def fb_injection_handler(url,delay,filename,http_request_method):
             GET_vuln_param = parameters.vuln_GET_param(url)
               
             # Print the findings to terminal.
-            print colors.BOLD + "\n(!) The ("+ http_request_method + ") '" + colors.UNDERL + GET_vuln_param + colors.RESET + colors.BOLD + "' parameter is vulnerable to "+ injection_type +"."+ colors.RESET
-            print "  (+) Type : "+ colors.YELLOW + colors.BOLD + injection_type + colors.RESET + ""
-            print "  (+) Technique : "+ colors.YELLOW + colors.BOLD + technique.title() + colors.RESET + ""
-            print "  (+) Payload : "+ colors.YELLOW + colors.BOLD + re.sub("%20", " ", payload.replace("\n","\\n")) + colors.RESET
+            print Style.BRIGHT + "\n(!) The ("+ http_request_method + ") '" + Style.UNDERLINE + GET_vuln_param + Style.RESET_ALL + Style.BRIGHT + "' parameter is vulnerable to "+ injection_type +"."+ Style.RESET_ALL
+            print "  (+) Type : "+ Fore.YELLOW + Style.BRIGHT + injection_type + Style.RESET_ALL + ""
+            print "  (+) Technique : "+ Fore.YELLOW + Style.BRIGHT + technique.title() + Style.RESET_ALL + ""
+            print "  (+) Payload : "+ Fore.YELLOW + Style.BRIGHT + re.sub("%20", " ", payload.replace("\n","\\n")) + Style.RESET_ALL
 
           else :
             # Print the findings to log file
@@ -295,10 +295,10 @@ def fb_injection_handler(url,delay,filename,http_request_method):
             POST_vuln_param = vuln_parameter
             
             # Print the findings to terminal.
-            print colors.BOLD + "\n(!) The ("+ http_request_method + ") '" + colors.UNDERL + POST_vuln_param + colors.RESET + colors.BOLD + "' parameter is vulnerable to "+ injection_type +"."+ colors.RESET
-            print "  (+) Type : "+ colors.YELLOW + colors.BOLD + injection_type + colors.RESET + ""
-            print "  (+) Technique : "+ colors.YELLOW + colors.BOLD + technique.title() + colors.RESET + ""
-            print "  (+) Payload : "+ colors.YELLOW + colors.BOLD + re.sub("%20", " ", payload.replace("\n","\\n")) + colors.RESET
+            print Style.BRIGHT + "\n(!) The ("+ http_request_method + ") '" + Style.UNDERLINE + POST_vuln_param + Style.RESET_ALL + Style.BRIGHT + "' parameter is vulnerable to "+ injection_type +"."+ Style.RESET_ALL
+            print "  (+) Type : "+ Fore.YELLOW + Style.BRIGHT + injection_type + Style.RESET_ALL + ""
+            print "  (+) Technique : "+ Fore.YELLOW + Style.BRIGHT + technique.title() + Style.RESET_ALL + ""
+            print "  (+) Payload : "+ Fore.YELLOW + Style.BRIGHT + re.sub("%20", " ", payload.replace("\n","\\n")) + Style.RESET_ALL
             
           # Check for any enumeration options.
           fb_enumeration.do_check(separator,payload,TAG,delay,prefix,suffix,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,alter_shell)
@@ -328,7 +328,7 @@ def fb_injection_handler(url,delay,filename,http_request_method):
                     
                     if shell:
                       shell = " ".join(str(p) for p in shell)
-                      print colors.GREEN + colors.BOLD + shell + colors.RESET + "\n"
+                      print Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n"
                     
               elif gotshell in settings.CHOISE_NO:
                 delete_previous_shell(separator,payload,TAG,prefix,suffix,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,alter_shell)
@@ -340,7 +340,7 @@ def fb_injection_handler(url,delay,filename,http_request_method):
               else:
                 if gotshell == "":
                   gotshell = "enter"
-                print colors.BGRED + "(x) Error: '" + gotshell + "' is not a valid answer." + colors.RESET
+                print Back.RED + "(x) Error: '" + gotshell + "' is not a valid answer." + Style.RESET_ALL
                 pass
             
           except KeyboardInterrupt: 

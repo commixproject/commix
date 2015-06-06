@@ -20,8 +20,8 @@ import time
 import datetime
 
 from src.utils import menu
-from src.utils import colors
 from src.utils import settings
+from src.thirdparty.colorama import Fore, Back, Style, init
 
 from src.core.modules import modules_handler
 from src.core.requests import authentication
@@ -39,13 +39,13 @@ from src.core.injections.semiblind_based.techniques.file_based import fb_handler
 def execute_classic_technique(url,delay,filename,http_request_method):
   if cb_handler.exploitation(url,delay,filename,http_request_method) == False:
     if http_request_method == "GET":
-      print colors.BGRED + "(x) The url '"+ url +"' appear to be not injectable." + colors.RESET
+      print Back.RED + "(x) The url '"+ url +"' appear to be not injectable." + Style.RESET_ALL
     else:
-      print colors.BGRED + "(x) The '"+ parameter +"' parameter appear to be not injectable." + colors.RESET
+      print Back.RED + "(x) The '"+ parameter +"' parameter appear to be not injectable." + Style.RESET_ALL
   if menu.options.verbose:
     print "\n"
-  percent = colors.PURPLE + "FINISHED" + colors.RESET
-  sys.stdout.write(colors.BOLD + "\r(!) The process of testing the "+ menu.options.tech + " injection technique... " + colors.RESET +  "[ " + percent + " ]")  
+  percent = colors.PURPLE + "FINISHED" + Style.RESET_ALL
+  sys.stdout.write(Style.BRIGHT + "\r(!) The process of testing the "+ menu.options.tech + " injection technique... " + Style.RESET_ALL +  "[ " + percent + " ]")  
   sys.stdout.flush()
   print "\n(*) Results can be found at : '" + os.getcwd() + "/" + filename +".txt' \n"
   sys.exit(0)
@@ -53,13 +53,13 @@ def execute_classic_technique(url,delay,filename,http_request_method):
 def execute_eval_based_technique(url,delay,filename,http_request_method):
   if eb_handler.exploitation(url,delay,filename,http_request_method) == False:
     if http_request_method == "GET":
-      print colors.BGRED + "(x) The url '"+ url +"' appear to be not injectable." + colors.RESET
+      print Back.RED + "(x) The url '"+ url +"' appear to be not injectable." + Style.RESET_ALL
     else:
-      print colors.BGRED + "(x) The '"+ parameter +"' parameter appear to be not injectable via "+ menu.options.tech + "." + colors.RESET
+      print Back.RED + "(x) The '"+ parameter +"' parameter appear to be not injectable via "+ menu.options.tech + "." + Style.RESET_ALL
   if menu.options.verbose:
     print "\n"
-  percent = colors.PURPLE + "FINISHED" + colors.RESET
-  sys.stdout.write(colors.BOLD + "\r(!) The process of testing the "+ menu.options.tech + " injection technique... " + colors.RESET +  "[ " + percent + " ]")  
+  percent = colors.PURPLE + "FINISHED" + Style.RESET_ALL
+  sys.stdout.write(Style.BRIGHT + "\r(!) The process of testing the "+ menu.options.tech + " injection technique... " + Style.RESET_ALL +  "[ " + percent + " ]")  
   sys.stdout.flush()
   print "\n(*) Results can be found at : '" + os.getcwd() + "/" + filename +".txt' \n"
   sys.exit(0)
@@ -67,13 +67,13 @@ def execute_eval_based_technique(url,delay,filename,http_request_method):
 def execute_time_based_technique(url,delay,filename,http_request_method):
   if tb_handler.exploitation(url,delay,filename,http_request_method) == False:
     if http_request_method == "GET":
-      print colors.BGRED + "(x) The url '"+ url +"' appear to be not injectable." + colors.RESET
+      print Back.RED + "(x) The url '"+ url +"' appear to be not injectable." + Style.RESET_ALL
     else:
-      print colors.BGRED + "(x) The '"+ parameter +"' parameter appear to be not injectable." + colors.RESET
+      print Back.RED + "(x) The '"+ parameter +"' parameter appear to be not injectable." + Style.RESET_ALL
   if menu.options.verbose:
     print "\n"
-  percent = colors.PURPLE + "FINISHED" + colors.RESET
-  sys.stdout.write(colors.BOLD + "\r(!) The process of testing the "+ menu.options.tech + " injection technique... " + colors.RESET +  "[ " + percent + " ]")  
+  percent = colors.PURPLE + "FINISHED" + Style.RESET_ALL
+  sys.stdout.write(Style.BRIGHT + "\r(!) The process of testing the "+ menu.options.tech + " injection technique... " + Style.RESET_ALL +  "[ " + percent + " ]")  
   sys.stdout.flush()
   print "\n(*) Results can be found at : '" + os.getcwd() + "/" + filename +".txt' \n"
   sys.exit(0)
@@ -81,13 +81,13 @@ def execute_time_based_technique(url,delay,filename,http_request_method):
 def execute_file_based_technique(url,delay,filename,http_request_method):
   if fb_handler.exploitation(url,delay,filename,http_request_method) == False:
     if http_request_method == "GET":
-      print colors.BGRED + "(x) The url '"+ url +"' appear to be not injectable." + colors.RESET
+      print Back.RED + "(x) The url '"+ url +"' appear to be not injectable." + Style.RESET_ALL
     else:
-      print colors.BGRED + "(x) The '"+ parameter +"' parameter appear to be not injectable." + colors.RESET
+      print Back.RED + "(x) The '"+ parameter +"' parameter appear to be not injectable." + Style.RESET_ALL
   if menu.options.verbose:
     print "\n"
-  percent = colors.PURPLE + "FINISHED" + colors.RESET
-  sys.stdout.write(colors.BOLD + "\r(!) The process of testing the "+ menu.options.tech + " injection technique... " + colors.RESET +  "[ " + percent + " ]")  
+  percent = colors.PURPLE + "FINISHED" + Style.RESET_ALL
+  sys.stdout.write(Style.BRIGHT + "\r(!) The process of testing the "+ menu.options.tech + " injection technique... " + Style.RESET_ALL +  "[ " + percent + " ]")  
   sys.stdout.flush()
   print "\n(*) Results can be found at : '" + os.getcwd() + "/" + filename +".txt' \n"
   sys.exit(0)
@@ -123,7 +123,7 @@ def do_check(url):
   if menu.options.auth_url and menu.options.auth_data:
     authentication.auth_process()      
   elif menu.options.auth_url or menu.options.auth_data: 
-    print colors.BGRED + "(x) Error: You must specify both login panel URL and login parameters.\n" + colors.RESET
+    print Back.RED + "(x) Error: You must specify both login panel URL and login parameters.\n" + Style.RESET_ALL
     sys.exit(0)
   else:
     pass
@@ -212,9 +212,9 @@ def do_check(url):
 
   if classic_state == False and eval_based_state == False and time_based_state == False and file_based_state == False :
     if http_request_method == "GET":
-      print colors.BGRED + "(x) The url '"+ url +"' appear to be not injectable." + colors.RESET
+      print Back.RED + "(x) The url '"+ url +"' appear to be not injectable." + Style.RESET_ALL
     else:
-      print colors.BGRED + "(x) The '"+ parameter +"' parameter appear to be not injectable." + colors.RESET
+      print Back.RED + "(x) The '"+ parameter +"' parameter appear to be not injectable." + Style.RESET_ALL
   else:
     print "(*) The results can be found at '" + os.getcwd() + "/" + filename +".txt'"
   sys.exit(0)

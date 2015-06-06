@@ -19,9 +19,9 @@ import sys
 import time
 import subprocess
 
-from src.utils import colors
 from src.utils import settings
 from src.utils import requirments
+from src.thirdparty.colorama import Fore, Back, Style, init
 
 """
  Check for updates (apply if any) and exit!
@@ -41,7 +41,7 @@ def updater():
   # Check if ".git" exists!
   if os.path.isdir("./.git"):
  
-    sys.stdout.write("["+colors.GREEN+" OK "+ colors.RESET+"]\n")
+    sys.stdout.write("["+Fore.GREEN+" OK "+ Style.RESET_ALL+"]\n")
     sys.stdout.flush()
     print "\n------"
     subprocess.Popen("git reset --hard HEAD && git pull", shell=True).wait()
@@ -52,7 +52,7 @@ def updater():
     print "------\n"
       
   else:
-    print "["+ colors.RED + " FAILED " + colors.RESET +"]"
-    print colors.BGRED + "(x) Do it manually: "+ colors.BOLD +"'git clone https://github.com/stasinopoulos/"+settings.APPLICATION +".git " + settings.APPLICATION +"' "+ colors.RESET + "\n"
+    print "["+ Fore.RED + " FAILED " + Style.RESET_ALL +"]"
+    print Back.RED + "(x) Do it manually: "+ Style.BRIGHT +"'git clone https://github.com/stasinopoulos/"+settings.APPLICATION +".git " + settings.APPLICATION +"' "+ Style.RESET_ALL + "\n"
     
   sys.exit(1)

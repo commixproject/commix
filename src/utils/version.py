@@ -15,7 +15,8 @@
 """
 
 import sys
-from src.utils import colors, settings
+from src.utils import settings
+from src.thirdparty.colorama import Fore, Back, Style, init
 
 """
  Show version number and exit.
@@ -30,5 +31,5 @@ def show_version():
 """
 def python_version():
   if settings.PYTHON_VERSION >= "3" or settings.PYTHON_VERSION < "2.6":
-    print colors.BGRED + "(x) Error: Incompatible Python version (" + settings.PYTHON_VERSION + ") detected."
+    print Back.RED + "(x) Error: Incompatible Python version (" + settings.PYTHON_VERSION + ") detected."
     sys.exit(1)

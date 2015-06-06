@@ -15,8 +15,9 @@
 """
 import re
 import os
-from src.utils import colors
+
 from src.utils import settings
+from src.thirdparty.colorama import Fore, Back, Style, init
 
 """
   If its not specified the 'INJECT_HERE' tag on any parameter, 
@@ -69,7 +70,7 @@ def do_GET_check(url):
       return url
     
     else:
-      print "\n" + colors.BGRED + "(x) Error: You must set the \"INJECT_HERE\" tag to specify the testable parameter." + colors.RESET + "\n"
+      print "\n" + Back.RED + "(x) Error: You must set the \"INJECT_HERE\" tag to specify the testable parameter." + Style.RESET_ALL + "\n"
       os._exit(0)
       
       ## Multiple paramerters without the "INJECT_HERE" tag.
@@ -166,7 +167,7 @@ def do_POST_check(parameter):
       return parameter
     
     else:
-      print "\n" + colors.BGRED + "(x) Error: You must set the \"INJECT_HERE\" tag to specify the testable parameter." + colors.RESET + "\n"
+      print "\n" + Back.RED + "(x) Error: You must set the \"INJECT_HERE\" tag to specify the testable parameter." + Style.RESET_ALL + "\n"
       os._exit(0)
       
       ## Multiple paramerters without the "INJECT_HERE" tag.

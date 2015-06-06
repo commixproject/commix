@@ -17,8 +17,10 @@
 import re
 import base64
 import urllib2
+
 from src.utils import menu
-from src.utils import colors
+from src.thirdparty.colorama import Fore, Back, Style, init
+
 """
 
  Check for added headers.

@@ -23,8 +23,8 @@ import urllib
 import urllib2
 
 from src.utils import menu
-from src.utils import colors
 from src.utils import settings
+from src.thirdparty.colorama import Fore, Back, Style, init
 
 from src.core.requests import headers
 from src.core.requests import parameters
@@ -58,7 +58,7 @@ def tb_injection_handler(url,delay,filename,http_request_method):
     
   # Check if defined "--url-reload" option.
   if menu.options.url_reload == True:
-    print colors.BGRED + "(x) Error: The '--url-reload' option is not available in "+ technique +"!" + colors.RESET
+    print Back.RED + "(x) Error: The '--url-reload' option is not available in "+ technique +"!" + Style.RESET_ALL
 
   # Calculate all possible combinations
   total = (len(settings.PREFIXES) * len(settings.SEPARATORS) * len(settings.SUFFIXES) - len(settings.JUNK_COMBINATION))
@@ -74,7 +74,7 @@ def tb_injection_handler(url,delay,filename,http_request_method):
   diff = end - start
   url_time_response = int(diff)
   if url_time_response != 0 :
-    print colors.BOLD + "(!) The estimated response time is " + str(url_time_response) + " second" + "s"[url_time_response == 1:] + "." + colors.RESET
+    print Style.BRIGHT + "(!) The estimated response time is " + str(url_time_response) + " second" + "s"[url_time_response == 1:] + "." + Style.RESET_ALL
   delay = int(delay) + int(url_time_response)
   
   for prefix in settings.PREFIXES:
@@ -120,17 +120,17 @@ def tb_injection_handler(url,delay,filename,http_request_method):
               
             # Check if defined "--verbose" option.
             if menu.options.verbose:
-              sys.stdout.write("\n" + colors.GREY + payload.replace("\n","\\n") + colors.RESET)
+              sys.stdout.write("\n" + colors.GREY + payload.replace("\n","\\n") + Style.RESET_ALL)
                 
             # Check if target host is vulnerable.
             how_long,vuln_parameter = tb_injector.injection_test(payload,http_request_method,url)
             if not menu.options.verbose:
               percent = ((num_of_chars*100)/total)
               if how_long >= delay:
-                percent = colors.GREEN + "SUCCEED" + colors.RESET
+                percent = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
               elif percent == 100:
                 if no_result == True:
-                  percent = colors.RED + "FAILED" + colors.RESET
+                  percent = Fore.RED + "FAILED" + Style.RESET_ALL
                 else:
                     percent = str(percent)+"%"
               else:
@@ -176,10 +176,10 @@ def tb_injection_handler(url,delay,filename,http_request_method):
               GET_vuln_param = parameters.vuln_GET_param(url)
               
               # Print the findings to terminal.
-              print colors.BOLD + "\n(!) The ("+ http_request_method + ") '" + colors.UNDERL + GET_vuln_param + colors.RESET + colors.BOLD + "' parameter is vulnerable to "+ injection_type +"."+ colors.RESET
-              print "  (+) Type : "+ colors.YELLOW + colors.BOLD + injection_type + colors.RESET + ""
-              print "  (+) Technique : "+ colors.YELLOW + colors.BOLD + technique.title() + colors.RESET + ""
-              print "  (+) Payload : "+ colors.YELLOW + colors.BOLD + re.sub("%20", " ", urllib.unquote_plus(payload.replace("\n","\\n"))) + colors.RESET
+              print Style.BRIGHT + "\n(!) The ("+ http_request_method + ") '" + Style.UNDERLINE + GET_vuln_param + Style.RESET_ALL + Style.BRIGHT + "' parameter is vulnerable to "+ injection_type +"."+ Style.RESET_ALL
+              print "  (+) Type : "+ Fore.YELLOW + Style.BRIGHT + injection_type + Style.RESET_ALL + ""
+              print "  (+) Technique : "+ Fore.YELLOW + Style.BRIGHT + technique.title() + Style.RESET_ALL + ""
+              print "  (+) Payload : "+ Fore.YELLOW + Style.BRIGHT + re.sub("%20", " ", urllib.unquote_plus(payload.replace("\n","\\n"))) + Style.RESET_ALL
                 
             else :
               # Print the findings to log file
@@ -199,10 +199,10 @@ def tb_injection_handler(url,delay,filename,http_request_method):
               POST_vuln_param = vuln_parameter
               
               # Print the findings to terminal.
-              print colors.BOLD + "\n(!) The ("+ http_request_method + ") '" + colors.UNDERL + POST_vuln_param + colors.RESET + colors.BOLD + "' parameter is vulnerable to "+ injection_type +"."+ colors.RESET
-              print "  (+) Type : "+ colors.YELLOW + colors.BOLD + injection_type + colors.RESET + ""
-              print "  (+) Technique : "+ colors.YELLOW + colors.BOLD + technique.title() + colors.RESET + ""
-              print "  (+) Payload : "+ colors.YELLOW + colors.BOLD + re.sub("%20", " ", payload.replace("\n","\\n")) + colors.RESET
+              print Style.BRIGHT + "\n(!) The ("+ http_request_method + ") '" + Style.UNDERLINE + POST_vuln_param + Style.RESET_ALL + Style.BRIGHT + "' parameter is vulnerable to "+ injection_type +"."+ Style.RESET_ALL
+              print "  (+) Type : "+ Fore.YELLOW + Style.BRIGHT + injection_type + Style.RESET_ALL + ""
+              print "  (+) Technique : "+ Fore.YELLOW + Style.BRIGHT + technique.title() + Style.RESET_ALL + ""
+              print "  (+) Payload : "+ Fore.YELLOW + Style.BRIGHT + re.sub("%20", " ", payload.replace("\n","\\n")) + Style.RESET_ALL
               
             # Check for any enumeration options.
             tb_enumeration.do_check(separator,maxlen,TAG,prefix,suffix,delay,http_request_method,url,vuln_parameter,alter_shell)
@@ -228,7 +228,7 @@ def tb_injection_handler(url,delay,filename,http_request_method):
                       
                       if menu.options.verbose:
                         print ""
-                      print "\n\n" + colors.GREEN + colors.BOLD + output + colors.RESET
+                      print "\n\n" + Fore.GREEN + Style.BRIGHT + output + Style.RESET_ALL
                       print "\n(*) Finished in "+ time.strftime('%H:%M:%S', time.gmtime(check_how_long)) +".\n"
                       
                   except KeyboardInterrupt: 
@@ -244,7 +244,7 @@ def tb_injection_handler(url,delay,filename,http_request_method):
               else:
                 if gotshell == "":
                   gotshell = "enter"
-                print colors.BGRED + "(x) Error: '" + gotshell + "' is not a valid answer." + colors.RESET
+                print Back.RED + "(x) Error: '" + gotshell + "' is not a valid answer." + Style.RESET_ALL
                 pass
               
             break

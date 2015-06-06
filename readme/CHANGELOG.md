@@ -1,4 +1,5 @@
 ## Version 0.1b [2015]
+* Added termcolor support for Windows.
 * Added file access options.
 * Added enumeration options.
 * Added an alternative option for os-shell (Python).

@@ -17,8 +17,8 @@ import os
 import sys
 
 from src.utils import menu
-from src.utils import colors
 from src.utils import settings
+from src.thirdparty.colorama import Fore, Back, Style, init
   
 def load_modules(url,http_request_method):
   # Check if defined the ICMP exfiltration module
@@ -29,5 +29,5 @@ def load_modules(url,http_request_method):
       # The ICMP Exfiltration handler
       ICMP_Exfiltration.icmp_exfiltration_handler(url,http_request_method)
     except ImportError as e:
-      print "\n" + colors.BGRED + "(x) Error : " + str(e) + colors.RESET
+      print "\n" + Back.RED + "(x) Error : " + str(e) + Style.RESET_ALL
       sys.exit(1) 

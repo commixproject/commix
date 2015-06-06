@@ -25,8 +25,8 @@ import urllib
 import urllib2
 
 from src.utils import menu
-from src.utils import colors
 from src.utils import settings
+from src.thirdparty.colorama import Fore, Back, Style, init
 
 from src.core.requests import headers
 from src.core.requests import parameters
@@ -82,13 +82,13 @@ def injection_test(payload,http_request_method,url):
       urllib2.install_opener(opener)
       response = urllib2.urlopen(request)
     except urllib2.HTTPError, err:
-      print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
+      print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
       sys.exit(1) 
   else:
     try:
       response = urllib2.urlopen(request)
     except urllib2.HTTPError, err:
-      print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
+      print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
       sys.exit(1) 
       
   return response,vuln_parameter
@@ -139,7 +139,7 @@ def injection(separator,TAG,cmd,prefix,suffix,whitespace,http_request_method,url
       
   # Check if defined "--verbose" option.
   if menu.options.verbose:
-    sys.stdout.write("\n" + colors.GREY + payload + colors.RESET)
+    sys.stdout.write("\n" + colors.GREY + payload + Style.RESET_ALL)
     
   # Check if defined method is GET (Default).
   if http_request_method == "GET":
@@ -161,7 +161,7 @@ def injection(separator,TAG,cmd,prefix,suffix,whitespace,http_request_method,url
         urllib2.install_opener(opener)
         response = urllib2.urlopen(request)
       except urllib2.HTTPError, err:
-        print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
+        print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
         sys.exit(1) 
 
     else:
@@ -169,7 +169,7 @@ def injection(separator,TAG,cmd,prefix,suffix,whitespace,http_request_method,url
         response = urllib2.urlopen(request)
         
       except urllib2.HTTPError, err:
-        print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
+        print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
         sys.exit(1) 
         
   else :
@@ -194,14 +194,14 @@ def injection(separator,TAG,cmd,prefix,suffix,whitespace,http_request_method,url
         urllib2.install_opener(opener)
         response = urllib2.urlopen(request)
       except urllib2.HTTPError, err:
-        print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
+        print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
         sys.exit(1) 
 
     else:
       try:
         response = urllib2.urlopen(request)
       except urllib2.HTTPError, err:
-        print "\n" + colors.BGRED + "(x) Error : " + str(err) + colors.RESET
+        print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
         sys.exit(1) 
         
   return response
