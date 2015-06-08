@@ -220,6 +220,12 @@ modules.add_option("--icmp-exfil",
                 default = False,
                 help="The ICMP exfiltration technique (e.g. 'ip_src=192.168.178.1,ip_dst=192.168.178.3').")
 
+modules.add_option("--shellshock", 
+                action="store_true",
+                dest="shellshock",
+                default = False,
+                help="The 'shellshock' injection technique.")
+
 # Injection options
 injection = OptionGroup(parser, Style.BRIGHT + "Injection" + Style.RESET_ALL, 
                         "These options can be used, to specify which parameters to inject and to provide custom injection payloads.")

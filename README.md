@@ -92,6 +92,8 @@ Commix also comes as a plugin, on the following penetration testing frameworks:
 
     --icmp-exfil=IP_..  The ICMP exfiltration technique (e.g.
                         'ip_src=192.168.178.1,ip_dst=192.168.178.3').
+    --shellshock        The 'shellshock' injection technique.
+
 ####Injection
     These options can be used, to specify which parameters to inject and
     to provide custom injection payloads.
@@ -129,6 +131,7 @@ A collection of pwnable VMs, that includes web apps vulnerable to command inject
 - [bWAPP: bee-box (v1.6)] (http://www.itsecgames.com/)
 - [Persistence] (https://www.vulnhub.com/entry/persistence-1,103/)
 - [Pentester Lab: Web For Pentester] (https://www.vulnhub.com/entry/pentester-lab-web-for-pentester,71/)
+- [Pentester Lab: CVE-2014-6271/Shellshock] (https://www.vulnhub.com/entry/pentester-lab-cve-2014-6271-shellshock,104/)
 - [Pentester Academy: Command Injection ISO: 1] (https://www.vulnhub.com/entry/command-injection-iso-1,81/)
 - [SpiderLabs: MCIR (ShelLOL)](https://github.com/SpiderLabs/MCIR/tree/master/shellol)
 - [Kioptrix: Level 1.1 (#2)](https://www.vulnhub.com/entry/kioptrix-level-11-2,23/)
