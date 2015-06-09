@@ -40,7 +40,7 @@ To get a list of all options and switches use:
 
     python commix.py -h
 
-Do you want to have a quick look on all available options and switches? Check [here](https://github.com/stasinopoulos/commix/wiki/Usage).
+Do you want to have a quick look of all available options and switches? Check [here](https://github.com/stasinopoulos/commix/wiki/Usage).
 
 ####Usage Examples
 So, do you want to get some ideas on how to use commix? Just go and check '[usage examples](https://github.com/stasinopoulos/commix/wiki/Usage-Examples)' wiki page, where there are several test cases and attack scenarios.
@@ -69,6 +69,7 @@ A collection of pwnable VMs, that includes web apps vulnerable to command inject
 - [Exploiting DVWA (1.0.8) command injection flaws.](https://www.youtube.com/watch?v=PT4uSTCxKJU)
 - [Exploiting bWAPP command injection flaws (normal & blind).](https://www.youtube.com/watch?v=zqI8NcHfboo)
 - [Exploiting 'Persistence' blind command injection flaw.](https://www.youtube.com/watch?v=aVTGqiyVz5o)
+- [Exploiting shellshock command injection flaws.](https://www.youtube.com/watch?v=5NvopJsCj4w)
 - [Upload a PHP shell (i.e. Metasploit PHP Meterpreter) on target host.](https://www.youtube.com/watch?v=MdzGY2ws2zY)
 - [Upload a Weevely PHP web shell on target host.](https://www.youtube.com/watch?v=cy7AW6OQBmU)
 
