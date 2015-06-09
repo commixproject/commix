@@ -35,88 +35,15 @@ Commix comes packaged on the official repositories of the following Linux distri
 Commix also comes as a plugin, on the following penetration testing frameworks:
 - [The Penetration Testers Framework (PTF)](https://github.com/trustedsec/ptf)
 
-#Usage
-    Usage : python commix.py [options]
+####Usage
+To get a list of all options and switches use:
 
-####Options
-    -h, --help            Show help and exit.
-    --verbose             Enable the verbose mode.
-    --install             Install 'commix' to your system.
-    --version             Show version number and exit.
-    --update              Check for updates (apply if any) and exit.
+    python commix.py -h
 
-####Target
-    This options has to be provided, to define the target URL.
-
-    --url=URL           Target URL
-    --url-reload        Reload target URL after command execution.
-
-####Request
-    These options can be used, to specify how to connect to the target
-    URL.
-
-    --host=HOST         HTTP Host header.
-    --referer=REFERER   HTTP Referer header.
-    --user-agent=AGENT  HTTP User-Agent header.
-    --cookie=COOKIE     HTTP Cookie header.
-    --random-agent      Use a randomly selected HTTP User-Agent header.
-    --headers=HEADERS   Extra headers (e.g. 'Header1:Value1\nHeader2:Value2').
-    --proxy=PROXY       Use a HTTP proxy (e.g. '127.0.0.1:8080').
-    --auth-url=AUTH_..  Login panel URL.
-    --auth-data=AUTH..  Login parameters and data.
-    --auth-type=AUTH..  HTTP authentication type (e.g. 'basic').
-    --auth-cred=AUTH..  HTTP Authentication credentials (e.g. 'admin:admin').
-
-####Enumeration
-    These options can be used, to enumerate the target host.
-
-    --current-user      Retrieve current user name.
-    --hostname          Retrieve current hostname.
-    --is-root           Check if the current user have root privs.
-    --sys-info          Retrieve system information.
-    --users             Retrieve system users.
-    --passwords         Retrieve system users password hashes.
-    --privileges        Retrieve system users privileges.
-
-####File access
-    These options can be used to access files on the target host.
-
-    --file-read=FILE..  Read a file from the target host.
-    --file-write=FIL..  Write to a file on the target host.
-    --file-upload=FI..  Upload a file on the target host.
-    --file-dest=FILE..  Host's absolute filepath to write and/or upload to.
-
-####Modules
-    These options can be used increase the detection and/or injection
-    capabilities.
-
-    --icmp-exfil=IP_..  The ICMP exfiltration technique (e.g.
-                        'ip_src=192.168.178.1,ip_dst=192.168.178.3').
-    --shellshock        The 'shellshock' injection technique.
-
-####Injection
-    These options can be used, to specify which parameters to inject and
-    to provide custom injection payloads.
-
-    --data=DATA         POST data to inject (use 'INJECT_HERE' tag to specify
-                        the testable parameter).
-    --suffix=SUFFIX     Injection payload suffix string.
-    --prefix=PREFIX     Injection payload prefix string.
-    --technique=TECH    Specify injection technique(s) to use.
-    --maxlen=MAXLEN     The length of the output on time-based technique
-                        (Default: 10000 chars).
-    --delay=DELAY       Set Time-delay for time-based and file-based
-                        techniques (Default: 1 sec).
-    --base64            Use Base64 (enc)/(de)code trick to prevent false-
-                        positive results.
-    --tmp-path=TMP_P..  Set remote absolute path of temporary files directory.
-    --root-dir=SRV_R..  Set remote absolute path of web server's root
-                        directory (Default: /var/www/).
-    --alter-shell=AL..  Use an alternative os-shell (e.g. Python).
-    --os-cmd=OS_CMD     Execute a single operating system command.
+Do you want to have a quick look on all available options and switches? Check [here](https://github.com/stasinopoulos/commix/wiki/Usage).
 
 ####Usage Examples
-So, do you want to get some ideas on how to use commix? Just go and check '[usage examples](https://github.com/stasinopoulos/commix/wiki/Usage-Examples)' wiki page, where there are several test cases / attack scenarios.
+So, do you want to get some ideas on how to use commix? Just go and check '[usage examples](https://github.com/stasinopoulos/commix/wiki/Usage-Examples)' wiki page, where there are several test cases and attack scenarios.
 
 ####Upload Shells
 Commix enables you to upload web-shells (e.g metasploit PHP meterpreter) easily on target host. For more, check '[upload shells](https://github.com/stasinopoulos/commix/wiki/Upload-shells)' wiki page.
@@ -126,23 +53,22 @@ Do you want to increase the capabilities of the commix tool and/or to adapt it t
 
 ####Command Injection Testbeds
 A collection of pwnable VMs, that includes web apps vulnerable to command injections.
-- [Damn Vulnerable Web App] (http://www.dvwa.co.uk/)
-- [OWASP: Mutillidae] (https://www.owasp.org/index.php/Category:OWASP_Mutillidae)
-- [bWAPP: bee-box (v1.6)] (http://www.itsecgames.com/)
-- [Persistence] (https://www.vulnhub.com/entry/persistence-1,103/)
-- [Pentester Lab: Web For Pentester] (https://www.vulnhub.com/entry/pentester-lab-web-for-pentester,71/)
-- [Pentester Lab: CVE-2014-6271/Shellshock] (https://www.vulnhub.com/entry/pentester-lab-cve-2014-6271-shellshock,104/)
-- [Pentester Academy: Command Injection ISO: 1] (https://www.vulnhub.com/entry/command-injection-iso-1,81/)
+- [Damn Vulnerable Web App](http://www.dvwa.co.uk/)
+- [OWASP: Mutillidae](https://www.owasp.org/index.php/Category:OWASP_Mutillidae)
+- [bWAPP: bee-box (v1.6)](http://www.itsecgames.com/)
+- [Persistence](https://www.vulnhub.com/entry/persistence-1,103/)
+- [Pentester Lab: Web For Pentester](https://www.vulnhub.com/entry/pentester-lab-web-for-pentester,71/)
+- [Pentester Lab: CVE-2014-6271/Shellshock](https://www.vulnhub.com/entry/pentester-lab-cve-2014-6271-shellshock,104/)
+- [Pentester Academy: Command Injection ISO: 1](https://www.vulnhub.com/entry/command-injection-iso-1,81/)
 - [SpiderLabs: MCIR (ShelLOL)](https://github.com/SpiderLabs/MCIR/tree/master/shellol)
 - [Kioptrix: Level 1.1 (#2)](https://www.vulnhub.com/entry/kioptrix-level-11-2,23/)
 - [Kioptrix: 2014 (#5)](https://www.vulnhub.com/entry/kioptrix-2014-5,62/)
-- [w3af-moth] (https://github.com/andresriancho/w3af-moth/)
+- [w3af-moth](https://github.com/andresriancho/w3af-moth/)
 
 ####Exploitation Demos
 - [Exploiting DVWA (1.0.8) command injection flaws.](https://www.youtube.com/watch?v=PT4uSTCxKJU)
 - [Exploiting bWAPP command injection flaws (normal & blind).](https://www.youtube.com/watch?v=zqI8NcHfboo)
 - [Exploiting 'Persistence' blind command injection flaw.](https://www.youtube.com/watch?v=aVTGqiyVz5o)
-- [Exploiting shellshock command injection flaws.](https://www.youtube.com/watch?v=5NvopJsCj4w)
 - [Upload a PHP shell (i.e. Metasploit PHP Meterpreter) on target host.](https://www.youtube.com/watch?v=MdzGY2ws2zY)
 - [Upload a Weevely PHP web shell on target host.](https://www.youtube.com/watch?v=cy7AW6OQBmU)
 
@@ -152,3 +78,4 @@ For bug reports or enhancements, please open an issue [here](https://github.com/
 ####Supported Platforms
 - Linux
 - Mac OS X
+- Windows (experimental)
