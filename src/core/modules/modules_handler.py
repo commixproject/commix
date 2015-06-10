@@ -21,22 +21,22 @@ from src.utils import settings
 from src.thirdparty.colorama import Fore, Back, Style, init
   
 def load_modules(url,http_request_method):
-  # Check if defined the ICMP exfiltration module
+  # Check if defined the icmp exfiltration module
   if menu.options.ip_icmp_data :
     try:
-      # The ICMP_Exfiltration module
-      from src.core.modules import ICMP_Exfiltration
-      # The ICMP Exfiltration handler
-      ICMP_Exfiltration.icmp_exfiltration_handler(url,http_request_method)
+      # The icmp exfiltration module
+      from src.core.modules.icmp_exfiltration import icmp_exfiltration
+      # The icmp exfiltration handler
+      icmp_exfiltration.icmp_exfiltration_handler(url,http_request_method)
     except ImportError as e:
       print "\n" + Back.RED + "(x) Error : " + str(e) + Style.RESET_ALL
       sys.exit(1) 
     sys.exit(1)
-  # Check if defined the ICMP exfiltration module
+  # Check if defined the icmp exfiltration module
   if menu.options.shellshock :
     try:
       # The Shellshock module
-      from src.core.modules import shellshock
+      from src.core.modules.shellshock import shellshock
       # The Shellshock handler
       shellshock.shellshock_handler(url,http_request_method)
     except ImportError as e:

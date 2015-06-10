@@ -161,7 +161,7 @@ enumeration.add_option("--is-root",
                 action="store_true",
                 dest="is_root",
                 default = False,
-                help="Check if the current user have root privs.")
+                help="Check if the current user have root privileges.")
 
 enumeration.add_option("--sys-info", 
                 action="store_true",
@@ -218,7 +218,8 @@ modules.add_option("--icmp-exfil",
                 action="store",
                 dest="ip_icmp_data",
                 default = False,
-                help="The ICMP exfiltration technique (e.g. 'ip_src=192.168.178.1,ip_dst=192.168.178.3').")
+
+                help="The 'icmp exfiltration' injection techniques       (e.g. 'ip_src=192.168.178.1,ip_dst=192.168.178.3').")
 
 modules.add_option("--shellshock", 
                 action="store_true",
