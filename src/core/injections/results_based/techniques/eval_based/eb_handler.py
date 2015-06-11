@@ -51,7 +51,7 @@ def eb_injection_handler(url,delay,filename,http_request_method):
   injection_type = "Results-based Command Injection"
   technique = "eval-based injection technique"
     
-  sys.stdout.write( Style.BRIGHT + "(*) Testing the "+ technique + "... " + Style.RESET_ALL)
+  sys.stdout.write("(*) Testing the "+ technique + "... ")
   sys.stdout.flush()
     
   i = 0

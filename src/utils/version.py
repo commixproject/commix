@@ -23,7 +23,7 @@ from src.thirdparty.colorama import Fore, Back, Style, init
 """
 def show_version():
   print settings.VERSION + settings.COMMIT_ID + "\n"
-  sys.exit(1)
+  sys.exit(0)
 
 
 """
@@ -32,4 +32,4 @@ def show_version():
 def python_version():
   if settings.PYTHON_VERSION >= "3" or settings.PYTHON_VERSION < "2.6":
     print Back.RED + "(x) Error: Incompatible Python version (" + settings.PYTHON_VERSION + ") detected."
-    sys.exit(1)
+    sys.exit(0)

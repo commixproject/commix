@@ -120,6 +120,18 @@ request.add_option("--proxy",
                 dest="proxy",
                 default=False,
                 help="Use a HTTP proxy (e.g. '127.0.0.1:8080').")
+                
+request.add_option("--tor",
+                action="store_true",
+                dest="tor",
+                default=False,
+                help="Use the Tor network.")
+
+request.add_option("--tor-port",
+                action="store",
+                dest="tor_port",
+                default=False,
+                help="Set Tor proxy port (Default: 8118).")
 
 request.add_option("--auth-url",
                 action="store",
@@ -213,13 +225,13 @@ file_access.add_option("--file-dest",
 
 # Modules options
 modules = OptionGroup(parser, Style.BRIGHT + "Modules" + Style.RESET_ALL, 
-                        "These options can be used increase the detection and/or injection  capabilities.")
+                        "These options can be used increase the detection and/or injection capabilities.")
 modules.add_option("--icmp-exfil", 
                 action="store",
                 dest="ip_icmp_data",
                 default = False,
 
-                help="The 'icmp exfiltration' injection techniques       (e.g. 'ip_src=192.168.178.1,ip_dst=192.168.178.3').")
+                help="The 'icmp exfiltration' injection technique        (e.g. 'ip_src=192.168.178.1,ip_dst=192.168.178.3').")
 
 modules.add_option("--shellshock", 
                 action="store_true",

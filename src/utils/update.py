@@ -55,4 +55,4 @@ def updater():
     print "["+ Fore.RED + " FAILED " + Style.RESET_ALL +"]"
     print Back.RED + "(x) Do it manually: "+ Style.BRIGHT +"'git clone https://github.com/stasinopoulos/"+settings.APPLICATION +".git " + settings.APPLICATION +"' "+ Style.RESET_ALL + "\n"
     
-  sys.exit(1)
+  sys.exit(0)

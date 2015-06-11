@@ -154,3 +154,10 @@ USER_AGENT_LIST = [
         "Mozilla/4.0 (compatible; MSIE 7.0b; Windows NT 6.0)",
         "Mozilla/4.0 (compatible; MSIE 7.0b; Windows NT 5.1; .NET CLR 1.1.4322; InfoPath.1; .NET CLR 2.0.50727)",
 ]
+
+# Proxy Protocol
+PROXY_PROTOCOL = "http"
+
+# Privoxy Proxy
+PRIVOXY_IP = "127.0.0.1"
+PRIVOXY_PORT = "8118"

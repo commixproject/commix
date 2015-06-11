@@ -18,6 +18,7 @@ import sys
 import urllib2
 
 from src.utils import menu
+from src.utils import settings
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 from src.core.requests import headers
@@ -27,18 +28,16 @@ from src.core.requests import headers
 """
 
 def do_check(url):
-
   check_proxy = True
-  sys.stdout.write("(*) Testing proxy "+menu.options.proxy+" ... ")
+  sys.stdout.write("(*) Testing proxy "+menu.options.proxy+"... ")
   sys.stdout.flush()
   try:
     request = urllib2.Request(url)
     # Check if defined extra headers.
     headers.do_check(request)
-    request.set_proxy(menu.options.proxy,"http")
+    request.set_proxy(menu.options.proxy,settings.PROXY_PROTOCOL)
     try:
       check = urllib2.urlopen(request)
-      
     except urllib2.HTTPError, error:
       check = error
       
@@ -51,6 +50,12 @@ def do_check(url):
     sys.stdout.flush()
     
   else:
-    print "[" + Back.RED+ " FAILED "+Style.RESET_ALL+"]\n"
-    sys.exit(1)
-    
+    print "[" + Fore.RED+ " FAILED "+Style.RESET_ALL+"]\n"
+    sys.exit(0)
+
+def use_proxy(request):
+  proxy = urllib2.ProxyHandler({settings.PROXY_PROTOCOL: menu.options.proxy})
+  opener = urllib2.build_opener(proxy)
+  urllib2.install_opener(opener)
+  response = urllib2.urlopen(request)
+  return response

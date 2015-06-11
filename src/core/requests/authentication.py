@@ -19,6 +19,9 @@ import urllib2
 import cookielib
 
 from src.utils import menu
+
+from src.core.requests import tor
+from src.core.requests import proxy
 from src.core.requests import headers
 
 """
@@ -39,16 +42,25 @@ def auth_process():
   # Check if defined any HTTP Proxy.
   if menu.options.proxy:
     try:
-      proxy= urllib2.ProxyHandler({'http': menu.options.proxy})
-      opener = urllib2.build_opener(proxy)
-      urllib2.install_opener(opener)
-      response = urllib2.urlopen(request)
-    
+      response = proxy.use_proxy(request)
     except urllib2.HTTPError, err:
-      print "\n(x) Error : " + str(err)
-      sys.exit(1) 
+      print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
+      raise SystemExit() 
+
+  # Check if defined Tor.
+  elif menu.options.tor:
+    try:
+      response = tor.use_tor(request)
+    except urllib2.HTTPError, err:
+      print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
+      raise SystemExit() 
 
   else:
-    response = urllib2.urlopen(request) 
-    
+    try:
+      response = urllib2.urlopen(request)
+    except urllib2.HTTPError, err:
+      print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
+      raise SystemExit() 
+
+
 #eof

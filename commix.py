@@ -28,6 +28,7 @@ from src.utils import install
 from src.utils import settings
 from src.thirdparty.colorama import Fore, Back, Style, init
 
+from src.core.requests import tor
 from src.core.requests import proxy
 from src.core.requests import headers
 from src.core.injections import controller
@@ -100,9 +101,8 @@ def main():
         sys.exit(0)
 
     # Check if specified file-access options
-    #Check if not defined "--file-dest" option.
+    # Check if not defined "--file-dest" option.
     if menu.options.file_dest == None:
-      
       # Check if defined "--file-write" option.
       if menu.options.file_write:
         file_name = os.path.split(menu.options.file_write)[1]
@@ -120,7 +120,7 @@ def main():
     #Check if defined "--random-agent" option.
     if menu.options.random_agent:
       menu.options.agent = random.choice(settings.USER_AGENT_LIST)
-      
+            
     #Check if defined "--url" option.
     if menu.options.url:
       sys.stdout.write("(*) Checking connection to the target URL... ")
@@ -133,11 +133,17 @@ def main():
 
       try:
         request = urllib2.Request(url)
+        
         #Check if defined extra headers.
         headers.do_check(request)
         response = urllib2.urlopen(request)
         content = response.read()
         print "[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]"
+
+        #Check if defined "--tor" option.
+        if menu.options.tor:
+          tor.do_check()
+
       except urllib2.HTTPError, e:
         print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
 
