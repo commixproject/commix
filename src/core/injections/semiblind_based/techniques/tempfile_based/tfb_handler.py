@@ -111,7 +111,7 @@ def tfb_injection_handler(url,delay,filename,tmp_path,http_request_method):
         # Check if defined "--verbose" option.
         if menu.options.verbose:
           if separator == ";" or separator == "&&" or separator == "||":
-            sys.stdout.write("\n" + colors.GREY + payload.replace("\n","\\n") + Style.RESET_ALL)
+            sys.stdout.write("\n" + Fore.GREY + payload.replace("\n","\\n") + Style.RESET_ALL)
             
         # Check if target host is vulnerable
         how_long,vuln_parameter = tfb_injector.injection_test(payload,http_request_method,url)

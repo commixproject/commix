@@ -120,7 +120,7 @@ def tb_injection_handler(url,delay,filename,http_request_method):
               
             # Check if defined "--verbose" option.
             if menu.options.verbose:
-              sys.stdout.write("\n" + colors.GREY + payload.replace("\n","\\n") + Style.RESET_ALL)
+              sys.stdout.write("\n" + Fore.GREY + payload.replace("\n","\\n") + Style.RESET_ALL)
                 
             # Check if target host is vulnerable.
             how_long,vuln_parameter = tb_injector.injection_test(payload,http_request_method,url)

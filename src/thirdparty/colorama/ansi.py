@@ -46,6 +46,7 @@ def clear_line(mode=2):
 class AnsiFore:
     BLACK           = 30
     RED             = 31
+    GREY            = 90
     GREEN           = 32
     YELLOW          = 33
     BLUE            = 34

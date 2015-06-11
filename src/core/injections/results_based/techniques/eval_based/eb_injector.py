@@ -130,7 +130,7 @@ def injection(separator,TAG,cmd,prefix,suffix,http_request_method,url,vuln_param
       
   # Check if defined "--verbose" option.
   if menu.options.verbose:
-    sys.stdout.write("\n" + colors.GREY + payload + Style.RESET_ALL)
+    sys.stdout.write("\n" + Fore.GREY + payload + Style.RESET_ALL)
     
   # Check if defined method is GET (Default).
   if http_request_method == "GET":

@@ -101,7 +101,7 @@ def eb_injection_handler(url,delay,filename,http_request_method):
 
           # Check if defined "--verbose" option.
           if menu.options.verbose:
-            sys.stdout.write("\n" + colors.GREY + payload + Style.RESET_ALL)
+            sys.stdout.write("\n" + Fore.GREY + payload + Style.RESET_ALL)
 
           # Check if target host is vulnerable.
           response,vuln_parameter = eb_injector.injection_test(payload,http_request_method,url)          
