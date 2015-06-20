@@ -58,7 +58,7 @@ B64_DEC_TRICK = " | base64 -d "
 PREFIXES = ["","|","&","%7C","%26"] 
 
 # The command injection separators.
-SEPARATORS = ["",";","&","|","||","&&","%0a","%3B","%26","%26%26","%7C","%7C%7C"]
+SEPARATORS = [""," ",";","&","|","||","&&","%0a","%3B","%26","%26%26","%7C","%7C%7C"]
 
 # The command injection suffixes.
 SUFFIXES = ["","#","//","\\\\","&","|","%5C%5C","%2F%2F","%26","%7C"]
