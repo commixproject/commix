@@ -47,7 +47,8 @@ def tfb_injection_handler(url,delay,filename,tmp_path,http_request_method):
   counter = 0
   vp_flag = True
   no_result = True
-  is_encoded= False
+  is_encoded = False
+  fixation = False
   export_injection_info = False
   injection_type = "Semiblind-based Command Injection"
   technique = "tempfile-based injection technique"
@@ -234,8 +235,11 @@ def tfb_injection_handler(url,delay,filename,tmp_path,http_request_method):
                   
                   if menu.options.verbose:
                     print ""
-                  print "\n\n" + Fore.GREEN + Style.BRIGHT + output + Style.RESET_ALL
-                  print "\n(*) Finished in "+ time.strftime('%H:%M:%S', time.gmtime(check_how_long)) +".\n"
+                  if output != "" and check_how_long != 0 :
+                    print "\n\n" + Fore.GREEN + Style.BRIGHT + output + Style.RESET_ALL
+                    print "\n(*) Finished in "+ time.strftime('%H:%M:%S', time.gmtime(check_how_long)) +".\n"
+                  else:
+                    print ""
                   
               except KeyboardInterrupt: 
                 print ""
@@ -270,4 +274,4 @@ def exploitation(url,delay,filename,tmp_path,http_request_method):
     if tfb_injection_handler(url,delay,filename,tmp_path,http_request_method) == False:
       return False
     
-#eof
+#eof 

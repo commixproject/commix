@@ -47,7 +47,8 @@ def tb_injection_handler(url,delay,filename,http_request_method):
   counter = 0
   vp_flag = True
   no_result = True
-  is_encoded= False
+  is_encoded = False
+  fixation = False
   export_injection_info = False
   injection_type = "Blind-based Command Injection"
   technique = "time-based injection technique"
@@ -147,8 +148,13 @@ def tb_injection_handler(url,delay,filename,http_request_method):
           # Yaw, got shellz! 
           # Do some magic tricks!
           if how_long >= delay :
-            found = True
-            no_result = False
+            # Time relative false positive fixation.
+            if len(TAG) == output_length :
+              if fixation == True:
+                delay = delay + 1
+            else:
+              fixation = True
+              continue
             
             # Print the findings to log file.
             if export_injection_info == False:
@@ -225,11 +231,14 @@ def tb_injection_handler(url,delay,filename,http_request_method):
                     else:
                       # The main command injection exploitation.
                       check_how_long,output  = tb_injector.injection(separator,maxlen,TAG,cmd,prefix,suffix,delay,http_request_method,url,vuln_parameter,alter_shell)
-                      
-                      if menu.options.verbose:
-                        print ""
+
+                    if menu.options.verbose:
+                      print ""
+                    if output != "" and check_how_long != 0 :
                       print "\n\n" + Fore.GREEN + Style.BRIGHT + output + Style.RESET_ALL
                       print "\n(*) Finished in "+ time.strftime('%H:%M:%S', time.gmtime(check_how_long)) +".\n"
+                    else:
+                      print ""
                       
                   except KeyboardInterrupt: 
                     print ""
