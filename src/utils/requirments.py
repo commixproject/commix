@@ -23,11 +23,11 @@ import subprocess
 def do_check(requirment):
 
   try:
-    # pipe output to /dev/null for silence.
+    # pipe output to /dev/null for silence
     null = open("/dev/null", "w")
     subprocess.Popen(requirment, stdout=null, stderr=null)
     null.close()
+    return True
 
   except OSError:
-      subprocess.Popen("apt-get install "+ requirment + " >/dev/null 2>&1", shell=True).wait()
-  
+    return False

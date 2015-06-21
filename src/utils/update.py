@@ -30,29 +30,33 @@ from src.thirdparty.colorama import Fore, Back, Style, init
 def updater():
           
   time.sleep(1)
+    
+  sys.stdout.write("(*) Checking requirements to update "+ settings.APPLICATION + " via Github... ")
+  sys.stdout.flush()
   
   # Check if git is installed
   requirment = "git"
   requirments.do_check(requirment)
-  
-  sys.stdout.write("(*) Updating "+ settings.APPLICATION + " (via Github) ... ")
-  sys.stdout.flush()
-  
-  # Check if ".git" exists!
-  if os.path.isdir("./.git"):
- 
-    sys.stdout.write("["+Fore.GREEN+" OK "+ Style.RESET_ALL+"]\n")
-    sys.stdout.flush()
-    print "\n------"
-    subprocess.Popen("git reset --hard HEAD && git pull", shell=True).wait()
-    # Delete *.pyc files.
-    subprocess.Popen("find . -name \"*.pyc\" -delete", shell=True).wait()
-    # Delete empty directories and files.
-    subprocess.Popen("find . -empty -type d -delete", shell=True).wait()
-    print "------\n"
-      
+  if requirments.do_check(requirment) == True :
+    # Check if ".git" exists!
+    if os.path.isdir("./.git"):
+      # Check if git is installed
+      sys.stdout.write("[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]\n")
+      sys.stdout.flush()
+      print "\n---"
+      subprocess.Popen("git reset --hard HEAD && git pull", shell=True).wait()
+      # Delete *.pyc files.
+      subprocess.Popen("find . -name \"*.pyc\" -delete", shell=True).wait()
+      # Delete empty directories and files.
+      subprocess.Popen("find . -empty -type d -delete", shell=True).wait()
+      print "---\n"
+    else:
+      print "["+ Fore.RED + " FAILED " + Style.RESET_ALL +"]"
+      print Back.RED + "(x) Error: Do it manually, "+ Style.BRIGHT +"'git clone https://github.com/stasinopoulos/"+settings.APPLICATION +".git " + settings.APPLICATION +"' "+ Style.RESET_ALL + "\n"   
+      sys.exit(0)
   else:
-    print "["+ Fore.RED + " FAILED " + Style.RESET_ALL +"]"
-    print Back.RED + "(x) Do it manually: "+ Style.BRIGHT +"'git clone https://github.com/stasinopoulos/"+settings.APPLICATION +".git " + settings.APPLICATION +"' "+ Style.RESET_ALL + "\n"
-    
+      print "["+ Fore.RED + " FAILED " + Style.RESET_ALL +"]"
+      print Back.RED + "(x) Error: " + requirment + " not found." + Style.RESET_ALL + "\n"
+      sys.exit(0)
+
   sys.exit(0)
