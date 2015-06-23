@@ -274,12 +274,6 @@ injection.add_option("--delay",
                 dest="delay",
                 help="Set Time-delay for time-based and file-based techniques (Default: "+str(settings.DELAY)+" sec).")
 
-injection.add_option("--base64", 
-                action="store_true",
-                dest="base64_trick",
-                default = False,
-                help="Use Base64 (enc)/(de)code trick to prevent false-positive results.")
-
 injection.add_option("--tmp-path", 
                 action="store",
                 dest="tmp_path",

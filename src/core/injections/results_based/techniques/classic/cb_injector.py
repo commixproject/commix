@@ -43,7 +43,7 @@ from src.core.injections.results_based.techniques.classic import cb_payloads
 #-----------------------------------------
 # Check if target host is vulnerable.
 #-----------------------------------------
-def injection_test(payload,http_request_method,url):
+def injection_test(payload, http_request_method, url):
                       
   # Check if defined method is GET (Default).
   if http_request_method == "GET":
@@ -97,7 +97,7 @@ def injection_test(payload,http_request_method,url):
     headers.do_check(request)
     
     # Define the vulnerable parameter
-    vuln_parameter = parameters.vuln_POST_param(parameter,url)
+    vuln_parameter = parameters.vuln_POST_param(parameter, url)
   
     # Check if defined any HTTP Proxy.
     if menu.options.proxy:
@@ -122,17 +122,17 @@ def injection_test(payload,http_request_method,url):
         print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
         raise SystemExit() 
       
-  return response,vuln_parameter
+  return response, vuln_parameter
 
  
 #-------------------------
 # Evaluate test results.
 #-------------------------
-def injection_test_results(response,TAG):
+def injection_test_results(response, TAG, randvcalc):
   
   # Check the execution results
   html_data = response.read()
-  shell = re.findall(r"" + TAG + TAG + TAG + "", html_data)
+  shell = re.findall(r"" + TAG + str(randvcalc) + TAG + TAG + "", html_data)
   
   return shell
 
@@ -140,14 +140,14 @@ def injection_test_results(response,TAG):
 #----------------------------------------------
 # # The main command injection exploitation.
 #----------------------------------------------
-def injection(separator,TAG,cmd,prefix,suffix,whitespace,http_request_method,url,vuln_parameter,alter_shell):
+def injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell):
 
   if alter_shell:
     # Classic decision payload (check if host is vulnerable).
-    payload = cb_payloads.cmd_execution_alter_shell(separator,TAG,cmd)
+    payload = cb_payloads.cmd_execution_alter_shell(separator, TAG, cmd)
   else:
     # Classic decision payload (check if host is vulnerable).
-    payload = cb_payloads.cmd_execution(separator,TAG,cmd)
+    payload = cb_payloads.cmd_execution(separator, TAG, cmd)
 
   if separator == " " :
     payload = re.sub(" ", "%20", payload)
@@ -249,7 +249,7 @@ def injection(separator,TAG,cmd,prefix,suffix,whitespace,http_request_method,url
 #-----------------------------
 # Command execution results.
 #-----------------------------
-def injection_results(response,TAG):
+def injection_results(response, TAG):
 
   # Grab execution results
   html_data = response.read()

