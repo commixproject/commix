@@ -28,9 +28,9 @@ def decision(separator, TAG, randv1, randv2):
 """
 __Warning__: The alternative shells are still experimental.
 """
-def decision_alter_shell(separator, TAG):
+def decision_alter_shell(separator, TAG, randv1, randv2):
   payload = (separator + 
-            " python -c \"print '" + TAG + "' + '" + TAG + "' + '" + TAG + "' + '" + TAG + "'\""
+            " python -c \"print '" + TAG + "' + '" + str(int(randv1 + randv2)) + "' + '" + TAG + "' + '" + TAG + "'\""
              ) 
   return payload
 

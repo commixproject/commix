@@ -86,7 +86,7 @@ def cb_injection_handler(url, delay, filename, http_request_method):
               payload = cb_payloads.decision(separator, TAG, randv1, randv2)
             else:
               # Classic -alter shell- decision payload (check if host is vulnerable).
-              payload = cb_payloads.decision_alter_shell(separator, TAG)
+              payload = cb_payloads.decision_alter_shell(separator, TAG, randv1, randv2)
             
             # Check if defined "--prefix" option.
             if menu.options.prefix:
