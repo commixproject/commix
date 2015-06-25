@@ -1,4 +1,5 @@
 ## Version 0.1b [2015]
+* Added a generic false-positive prevention technique (removed --base64).
 * Added Tor network support.
 * Added termcolor support for Windows.
 * Added file access options.
