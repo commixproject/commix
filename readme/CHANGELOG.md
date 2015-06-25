@@ -1,7 +1,8 @@
 ## Version 0.1b [2015]
 * Added a generic false-positive prevention technique (removed --base64).
 * Added Tor network support.
-* Added termcolor support for Windows.
+* Added a 'shellshock' (cve-2014-6271) module.
+* Added termcolor support for Windows (colorama).
 * Added file access options.
 * Added enumeration options.
 * Added an alternative option for os-shell (Python).
