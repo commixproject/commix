@@ -178,7 +178,7 @@ def fb_injection_handler(url, delay, filename, http_request_method):
                 elif i == 20 :
                   print "\n" + Back.RED + "(x) Error: It seems that you don't have permissions to write on "+ SRV_ROOT_DIR + "." + Style.RESET_ALL
                   while True:
-                    tmp_upload = raw_input("(*) Do you want to try the temporary directory (" + tmp_path + ") [Y/n] > ").lower()
+                    tmp_upload = raw_input("(?) Do you want to try the temporary directory (" + tmp_path + ") [Y/n] > ").lower()
                     if tmp_upload in settings.CHOISE_YES:
                       exit_loops = True
                       tfb_controller(no_result, url, delay, tmp_path, filename, http_request_method)
@@ -299,7 +299,7 @@ def fb_injection_handler(url, delay, filename, http_request_method):
           try:
             while True:
               # Pseudo-Terminal shell
-              gotshell = raw_input("\n(*) Do you want a Pseudo-Terminal shell? [Y/n] > ").lower()
+              gotshell = raw_input("\n(?) Do you want a Pseudo-Terminal shell? [Y/n] > ").lower()
               if gotshell in settings.CHOISE_YES:
                 print ""
                 print "Pseudo-Terminal (type 'q' or use <Ctrl-C> to quit)"

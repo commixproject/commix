@@ -211,7 +211,7 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method):
         
         # Pseudo-Terminal shell
         while True:
-          gotshell = raw_input("\n(*) Do you want a Pseudo-Terminal shell? [Y/n] > ").lower()
+          gotshell = raw_input("\n(?) Do you want a Pseudo-Terminal shell? [Y/n] > ").lower()
           if gotshell in settings.CHOISE_YES:
             print ""
             print "Pseudo-Terminal (type 'q' or use <Ctrl-C> to quit)"

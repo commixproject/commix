@@ -64,7 +64,7 @@ def classic_check(url,http_request_method):
 
 def classic_input_cmd(url,http_request_method):
     while True:
-      gotshell = raw_input("\n(*) Do you want a Pseudo-Terminal shell? [Y/n] > ").lower()
+      gotshell = raw_input("\n(?) Do you want a Pseudo-Terminal shell? [Y/n] > ").lower()
       if gotshell in settings.CHOISE_YES:
           print "\nPseudo-Terminal (type 'q' or use <Ctrl-C> to quit)"
           while True:
