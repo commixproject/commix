@@ -133,7 +133,8 @@ def injection_test_results(response, TAG, randvcalc):
   # Check the execution results
   html_data = response.read()
   shell = re.findall(r"" + TAG + str(randvcalc) + TAG + TAG + "", html_data)
-  
+  if len(shell) > 1:
+    shell = shell[0]
   return shell
 
 
@@ -254,7 +255,8 @@ def injection_results(response, TAG):
   # Grab execution results
   html_data = response.read()
   shell = re.findall(r"" + TAG + TAG + "(.*)" + TAG + TAG + "", html_data)
-  
+  if len(shell) > 1:
+    shell = shell[0]
   return shell
 
 
