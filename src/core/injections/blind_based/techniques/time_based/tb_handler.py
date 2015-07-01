@@ -105,19 +105,9 @@ def tb_injection_handler(url, delay, filename, http_request_method):
               # Time-based decision payload (check if host is vulnerable).
               payload = tb_payloads.decision(separator, TAG, output_length, delay, http_request_method)
 
-            # Check if defined "--prefix" option.
-            if menu.options.prefix:
-              prefix = menu.options.prefix
-              payload = prefix + payload
-            else:
-              payload = prefix + payload
-
-            # Check if defined "--suffix" option.
-            if menu.options.suffix:
-              suffix = menu.options.suffix
-              payload = payload + suffix
-            else:
-              payload = payload + suffix
+            # Fix prefixes / suffixes
+            payload = parameters.prefixes(payload, prefix)
+            payload = parameters.suffixes(payload, suffix)
               
             # Check if defined "--verbose" option.
             if menu.options.verbose:

@@ -155,19 +155,9 @@ def injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_meth
   else:
     payload = re.sub(" ", whitespace, payload)
 
-  # Check if defined "--prefix" option.
-  if menu.options.prefix:
-    prefix = menu.options.prefix
-    payload = prefix + payload
-  else:
-    payload = prefix + payload
-    
-  # Check if defined "--suffix" option.
-  if menu.options.suffix:
-    suffix = menu.options.suffix
-    payload = payload + suffix
-  else:
-    payload = payload + suffix
+  # Fix prefixes / suffixes
+  payload = parameters.prefixes(payload, prefix)
+  payload = parameters.suffixes(payload, suffix)
       
   # Check if defined "--verbose" option.
   if menu.options.verbose:

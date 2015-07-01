@@ -144,19 +144,9 @@ def injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vul
   payload = eb_payloads.cmd_execution(separator, TAG, cmd)
   payload = re.sub(" ", "%20", payload)
 
-  # Check if defined "--prefix" option.
-  if menu.options.prefix:
-    prefix = menu.options.prefix
-    payload = prefix + payload
-  else:
-    payload = prefix + payload
-    
-  # Check if defined "--suffix" option.
-  if menu.options.suffix:
-    suffix = menu.options.suffix
-    payload = payload + suffix
-  else:
-    payload = payload + suffix
+  # Fix prefixes / suffixes
+  payload = parameters.prefixes(payload, prefix)
+  payload = parameters.suffixes(payload, suffix)
       
   # Check if defined "--verbose" option.
   if menu.options.verbose:

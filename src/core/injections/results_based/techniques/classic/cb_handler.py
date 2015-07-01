@@ -88,19 +88,9 @@ def cb_injection_handler(url, delay, filename, http_request_method):
               # Classic -alter shell- decision payload (check if host is vulnerable).
               payload = cb_payloads.decision_alter_shell(separator, TAG, randv1, randv2)
             
-            # Check if defined "--prefix" option.
-            if menu.options.prefix:
-              prefix = menu.options.prefix
-              payload = prefix + payload
-            else:
-              payload = prefix + payload
-              
-            # Check if defined "--suffix" option.
-            if menu.options.suffix:
-              suffix = menu.options.suffix
-              payload = payload + suffix
-            else:
-              payload = payload + suffix
+            # Fix prefixes / suffixes
+            payload = parameters.prefixes(payload, prefix)
+            payload = parameters.suffixes(payload, suffix)
 
             if separator == " " :
               payload = re.sub(" ", "%20", payload)

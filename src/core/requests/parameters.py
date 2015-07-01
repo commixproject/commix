@@ -16,6 +16,7 @@
 import re
 import os
 
+from src.utils import menu
 from src.utils import settings
 from src.thirdparty.colorama import Fore, Back, Style, init
 
@@ -197,7 +198,7 @@ def do_POST_check(parameter):
 
 
 # Define the vulnerable parameter
-def vuln_POST_param(parameter,url):
+def vuln_POST_param(parameter, url):
   
     # Define the vulnerable parameter
     if re.findall(r"&(.*)=" + settings.INJECT_TAG + "", parameter):
@@ -215,3 +216,21 @@ def vuln_POST_param(parameter,url):
     return vuln_parameter
     
 #eof
+
+def prefixes(payload, prefix):
+  # Check if defined "--prefix" option.
+  if menu.options.prefix:
+    payload = menu.options.prefix + prefix + payload
+  else:
+    payload = prefix + payload
+    
+  return payload
+
+def suffixes(payload, suffix):
+  # Check if defined "--suffix" option.
+  if menu.options.suffix:
+    payload = payload + suffix + menu.options.suffix
+  else:
+    payload = payload + suffix
+
+  return payload
