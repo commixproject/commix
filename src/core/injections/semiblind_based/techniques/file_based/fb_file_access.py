@@ -20,8 +20,8 @@ import urllib2
 
 from src.utils import menu
 from src.utils import settings
-from src.thirdparty.colorama import Fore, Back, Style, init
 
+from src.thirdparty.colorama import Fore, Back, Style, init
 from src.core.injections.semiblind_based.techniques.file_based import fb_injector
 
 """

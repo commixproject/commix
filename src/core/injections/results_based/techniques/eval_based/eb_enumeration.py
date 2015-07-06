@@ -56,11 +56,15 @@ def do_check(separator, TAG, prefix, suffix, http_request_method, url, vuln_para
         response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter)
         target_arch = eb_injector.injection_results(response, TAG)
         if target_arch:
+          if menu.options.verbose:
+            print ""
           target_arch = "".join(str(p) for p in target_arch).replace(" ", "", 1)[:-1]
           sys.stdout.write(Style.BRIGHT + "(!) The target operating system is " + Style.UNDERLINE + target_os + Style.RESET_ALL)
           sys.stdout.write(Style.BRIGHT + " and the hardware platform is " + Style.UNDERLINE + target_arch + Style.RESET_ALL + ".\n")
           sys.stdout.flush()
       else:
+        if menu.options.verbose:
+          print ""
         sys.stdout.write(Style.BRIGHT + "(!) The target operating system is " + Style.UNDERLINE + target_os + Style.RESET_ALL + ".\n")
         sys.stdout.flush()
 

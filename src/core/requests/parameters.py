@@ -20,60 +20,59 @@ from src.utils import menu
 from src.utils import settings
 from src.thirdparty.colorama import Fore, Back, Style, init
 
-"""
-  If its not specified the 'INJECT_HERE' tag on any parameter, 
-  do automated scan on... every parameter.
-"""
-
-# Check if its not specified the 'INJECT_HERE' tag on GET Requests
+# --------------------------------------------------------------
+# Check if the 'INJECT_HERE' tag, is specified on GET Requests.
+# --------------------------------------------------------------
 def do_GET_check(url):
-  
-  #Find the host part
+  if settings.INJECT_TAG not in url:
+    print "\n" + Back.RED + "(x) Error: You must set the \"INJECT_HERE\" tag to specify the testable parameter." + Style.RESET_ALL + "\n"
+    os._exit(0)
+
+  # Find the host part
   url_part = url.split("?")[0]
-  
-  #Find the parameter part
+
+  # Find the parameter part
   parameters = url.split("?")[1]
-  
+
   # Split parameters
   multi_parameters = parameters.split("&")
-  
-  # Check if single paramerter
+
+  # Check if single paramerter is supplied.
   if len(multi_parameters) == 1:
-    
+
     # Check if defined the INJECT_TAG
     if settings.INJECT_TAG not in parameters:
-      
-      #Grab the value of parameter.
+
+      # Grab the value of parameter.
       value = re.findall(r'=(.*)', parameters)
       value = ''.join(value)
-      
+
       # Replace the value of parameter with INJECT tag
       inject_value = value.replace(value, settings.INJECT_TAG)
       parameters = parameters.replace(value, inject_value)
-      
+
     # Reconstruct the url
     url = url_part +"?"+ parameters
     return url
 
-  # Check if multiple paramerters
+  # Check if multiple paramerters are supplied.
   else:
     all_params = '&'.join(multi_parameters)
-    
+
     # Check if defined the "INJECT_HERE" tag
     if settings.INJECT_TAG in all_params:
       for i in range(0,len(multi_parameters)):
+
         # Grab the value of parameter.
         value = re.findall(r'=(.*)', multi_parameters[i])
         value = ''.join(value)
         parameter = '&'.join(multi_parameters)
-
       url = url_part +"?"+ parameter  
       return url
-    
     else:
       print "\n" + Back.RED + "(x) Error: You must set the \"INJECT_HERE\" tag to specify the testable parameter." + Style.RESET_ALL + "\n"
       os._exit(0)
-      
+
       ## Multiple paramerters without the "INJECT_HERE" tag.
       #urls_list = []
       #for i in range(0,len(multi_parameters)):
@@ -81,96 +80,95 @@ def do_GET_check(url):
           #old = re.findall(r'=(.*)', multi_parameters[i])
           #old = ''.join(old)
         #else :
-          #old = value
-          
+          #old = value 
         ## Grab the value of parameter.
         #value = re.findall(r'=(.*)', multi_parameters[i])
         #value = ''.join(value)
-        
         ##Replace the value of parameter with INJECT tag
         #inject_value = value.replace(value, settings.INJECT_TAG)
         #multi_parameters[i] = multi_parameters[i].replace(value, inject_value)
         #multi_parameters[i-1] = multi_parameters[i-1].replace(inject_value, old)
         #parameter = '&'.join(multi_parameters)
-        
         ## Reconstruct the url
         #url = url_part +"?"+ parameter
-        
         ## Add all urls to url list.
         #urls_list.append(url)
       #return urls_list
 
 
-# Define the vulnerable parameter
+# --------------------------------------
+# Define the vulnerable GET parameter.
+# --------------------------------------
 def vuln_GET_param(url):
-  
   # Define the vulnerable parameter
   if re.findall(r"&(.*)=" + settings.INJECT_TAG + "", url):
     vuln_parameter = re.findall(r"&(.*)=" + settings.INJECT_TAG + "", url)
     vuln_parameter = ''.join(vuln_parameter)
     vuln_parameter = re.sub(r"(.*)=(.*)&", "", vuln_parameter)
-    
+
   elif re.findall(r"\?(.*)=" + settings.INJECT_TAG + "", url):
     vuln_parameter = re.findall(r"\?(.*)=" + settings.INJECT_TAG + "", url)
     vuln_parameter = ''.join(vuln_parameter)
-    
+
   elif re.findall(r"(.*)=" + settings.INJECT_TAG + "", url):
     vuln_parameter = re.findall(r"(.*)=" + settings.INJECT_TAG + "", url)
     vuln_parameter = ''.join(vuln_parameter)
-    
-  # Check if one parameter but 
-  # not defined the INJECT_TAG.
+
+  # Check if only one parameter supplied but, not defined the INJECT_TAG.
   elif settings.INJECT_TAG not in url:
+
       #Grab the value of parameter.
       value = re.findall(r'\?(.*)=', url)
       value = ''.join(value)
       vuln_parameter = value
-      
+
   else:
     vuln_parameter = url
     
   return vuln_parameter 
 
 
-# Check if its not specified the 'INJECT_HERE' tag on GET Requests
+# --------------------------------------------------------------
+# Check if the 'INJECT_HERE' tag, is specified on POST Requests.
+# --------------------------------------------------------------
 def do_POST_check(parameter):
 
   # Split parameters 
   multi_parameters = parameter.split("&")
-  
-  # Check if single paramerter
+
+  # Check if single paramerter is supplied.
   if len(multi_parameters) == 1:
 
       # Check if defined the INJECT_TAG
       if settings.INJECT_TAG not in parameter:
+
         #Grab the value of parameter.
         value = re.findall(r'=(.*)', parameter)
         value = ''.join(value)
+
         # Replace the value of parameter with INJECT tag
         inject_value = value.replace(value, settings.INJECT_TAG)
         parameter = parameter.replace(value, inject_value)
-        
       return parameter
-  
-  # Check if multiple paramerters
+
+  # Check if multiple paramerters are supplied.
   else:
     all_params = '&'.join(multi_parameters)
-    
+
     # Check if defined the "INJECT_HERE" tag
     if settings.INJECT_TAG in all_params:
       for i in range(0,len(multi_parameters)):
         if settings.INJECT_TAG not in multi_parameters[i]:
+
           # Grab the value of parameter.
           value = re.findall(r'=(.*)', multi_parameters[i])
           value = ''.join(value)
           parameter = '&'.join(multi_parameters)
-          
       return parameter
-    
     else:
       print "\n" + Back.RED + "(x) Error: You must set the \"INJECT_HERE\" tag to specify the testable parameter." + Style.RESET_ALL + "\n"
       os._exit(0)
-      
+
       ## Multiple paramerters without the "INJECT_HERE" tag.
       #paramerters_list = []
       #for i in range(0,len(multi_parameters)):
@@ -179,27 +177,25 @@ def do_POST_check(parameter):
           #old = ''.join(old)
         #else :
           #old = value
-          
         ## Grab the value of parameter.
         #value = re.findall(r'=(.*)', multi_parameters[i])
         #value = ''.join(value)
-        
         ##Replace the value of parameter with INJECT tag
         #inject_value = value.replace(value, settings.INJECT_TAG)
         #multi_parameters[i] = multi_parameters[i].replace(value, inject_value)
         #multi_parameters[i-1] = multi_parameters[i-1].replace(inject_value, old)
         #parameter = '&'.join(multi_parameters)
-        
         ## Reconstruct the paramerters
         ## Add all parameters to paramerters list.
         #paramerters_list.append(parameter)
-
       #return paramerters_list
 
 
-# Define the vulnerable parameter
+# --------------------------------------
+# Define the vulnerable POST parameter.
+# --------------------------------------
 def vuln_POST_param(parameter, url):
-  
+
     # Define the vulnerable parameter
     if re.findall(r"&(.*)=" + settings.INJECT_TAG + "", parameter):
       vuln_parameter = re.findall(r"&(.*)=" + settings.INJECT_TAG + "", parameter)
@@ -212,21 +208,29 @@ def vuln_POST_param(parameter, url):
 
     else:
       vuln_parameter = parameter
-    
-    return vuln_parameter
-    
-#eof
 
+    return vuln_parameter
+ 
+
+# --------------------------------
+# Define the injection prefixes.
+# --------------------------------
 def prefixes(payload, prefix):
+
   # Check if defined "--prefix" option.
   if menu.options.prefix:
     payload = menu.options.prefix + prefix + payload
   else:
-    payload = prefix + payload
-    
+    payload = prefix + payload 
+
   return payload
 
+
+# --------------------------------
+# Define the injection suffixes.
+# --------------------------------
 def suffixes(payload, suffix):
+
   # Check if defined "--suffix" option.
   if menu.options.suffix:
     payload = payload + suffix + menu.options.suffix
@@ -234,3 +238,27 @@ def suffixes(payload, suffix):
     payload = payload + suffix
 
   return payload
+
+
+# --------------------------------
+# The cookie based injection.
+# --------------------------------
+def specify_cookie_parameter(cookie):
+
+  # Specify the vulnerable cookie parameter
+  if re.findall(r"&(.*)=" + settings.INJECT_TAG + "", cookie):
+    inject_cookie = re.findall(r";(.*)=" + settings.INJECT_TAG + "", cookie)
+    inject_cookie = ''.join(inject_cookie)
+    inject_cookie = re.sub(r"(.*)=(.*);", "", inject_cookie)
+
+  elif re.findall(r"(.*)=" + settings.INJECT_TAG + "", cookie):
+    inject_cookie = re.findall(r"(.*)=" + settings.INJECT_TAG + "", cookie)
+    inject_cookie = ''.join(inject_cookie)
+
+  else:
+    inject_cookie = cookie
+
+  return inject_cookie 
+
+
+  #eof

@@ -29,7 +29,7 @@ from src.core.requests import headers
 
 def do_check(url):
   check_proxy = True
-  sys.stdout.write("(*) Testing proxy "+menu.options.proxy+"... ")
+  sys.stdout.write("(*) Testing proxy " + menu.options.proxy + " ... ")
   sys.stdout.flush()
   try:
     request = urllib2.Request(url)
@@ -40,17 +40,14 @@ def do_check(url):
       check = urllib2.urlopen(request)
     except urllib2.HTTPError, error:
       check = error
-      
   except:
     check_proxy = False
     pass
-  
   if check_proxy == True:
-    sys.stdout.write("["+Fore.GREEN+" OK "+Style.RESET_ALL+"]\n")
+    sys.stdout.write("[" + Fore.GREEN + "  OK " + Style.RESET_ALL + " ]\n")
     sys.stdout.flush()
-    
   else:
-    print "[" + Fore.RED+ " FAILED "+Style.RESET_ALL+"]\n"
+    print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + " ]\n"
     sys.exit(0)
 
 def use_proxy(request):
@@ -58,4 +55,5 @@ def use_proxy(request):
   opener = urllib2.build_opener(proxy)
   urllib2.install_opener(opener)
   response = urllib2.urlopen(request)
+
   return response

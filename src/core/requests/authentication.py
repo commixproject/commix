@@ -30,7 +30,6 @@ from src.core.requests import headers
 """
 
 def auth_process():
-
   auth_url = menu.options.auth_url
   auth_data = menu.options.auth_data
   cj = cookielib.CookieJar()

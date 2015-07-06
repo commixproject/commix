@@ -18,8 +18,8 @@ import sys
 
 from src.utils import menu
 from src.utils import settings
-from src.thirdparty.colorama import Fore, Back, Style, init
 
+from src.thirdparty.colorama import Fore, Back, Style, init
 from src.core.injections.semiblind_based.techniques.file_based import fb_injector
 
 """
@@ -44,21 +44,27 @@ def do_check(separator, payload, TAG, delay, prefix, suffix, http_request_method
       
   # "Retrieve certain system information (operating system, hardware platform)
   if menu.options.sys_info:
-    cmd = settings.RECOGNISE_OS            
+    cmd = settings.RECOGNISE_OS     
     response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
     target_os = fb_injector.injection_results(url, OUTPUT_TEXTFILE, delay)
     if target_os:
+      if menu.options.verbose:
+        print ""
       target_os = "".join(str(p) for p in target_os)
       if target_os == "Linux":
         cmd = settings.RECOGNISE_HP
         response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
         target_arch = fb_injector.injection_results(url, OUTPUT_TEXTFILE, delay)
         if target_arch:
+          if menu.options.verbose:
+            print "" 
           target_arch = "".join(str(p) for p in target_arch)
           sys.stdout.write(Style.BRIGHT + "(!) The target operating system is " + Style.UNDERLINE + target_os + Style.RESET_ALL)
           sys.stdout.write(Style.BRIGHT + " and the hardware platform is " + Style.UNDERLINE + target_arch + Style.RESET_ALL + ".\n")
           sys.stdout.flush()
       else:
+        if menu.options.verbose:
+          print ""
         sys.stdout.write(Style.BRIGHT + "(!) The target operating system is " + Style.UNDERLINE + target_os + Style.RESET_ALL + ".\n")
         sys.stdout.flush()
 
@@ -76,6 +82,8 @@ def do_check(separator, payload, TAG, delay, prefix, suffix, http_request_method
         shell = fb_injector.injection_results(url, OUTPUT_TEXTFILE, delay)
         if shell:
           shell = "".join(str(p) for p in shell)
+          if menu.options.verbose:
+            print ""
           sys.stdout.write(Style.BRIGHT + "(!) The current user is " + Style.UNDERLINE + cu_account + Style.RESET_ALL)
           if shell != "0":
               sys.stdout.write(Style.BRIGHT + " and it is " + Style.UNDERLINE + "not" + Style.RESET_ALL + Style.BRIGHT + " privilleged" + Style.RESET_ALL + ".\n")
@@ -84,6 +92,8 @@ def do_check(separator, payload, TAG, delay, prefix, suffix, http_request_method
             sys.stdout.write(Style.BRIGHT + " and it is " + Style.UNDERLINE + "" + Style.RESET_ALL + Style.BRIGHT + " privilleged" + Style.RESET_ALL + ".\n")
             sys.stdout.flush()
       else:
+        if menu.options.verbose:
+          print ""
         sys.stdout.write(Style.BRIGHT + "(!) The current user is " + Style.UNDERLINE + cu_account + Style.RESET_ALL + ".\n")
         sys.stdout.flush()
         
@@ -97,6 +107,8 @@ def do_check(separator, payload, TAG, delay, prefix, suffix, http_request_method
       sys_users = sys_users.replace("(@)", "\n")
       sys_users = sys_users.split( )
       if len(sys_users) != 0 :
+        if menu.options.verbose:
+          print ""
         sys.stdout.write("(*) Fetching '" + settings.PASSWD_FILE + "' to enumerate users entries... ")
         sys.stdout.flush()
         sys.stdout.write(Style.BRIGHT + "\n(!) Identified " + str(len(sys_users)) + " entries in '" + settings.PASSWD_FILE + "'.\n" + Style.RESET_ALL)
@@ -128,7 +140,7 @@ def do_check(separator, payload, TAG, delay, prefix, suffix, http_request_method
         
   # System password enumeration
   if menu.options.passwords:
-    cmd = settings.SYS_PASSES            
+    cmd = settings.SYS_PASSES    
     response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
     sys_passes = fb_injector.injection_results(url, OUTPUT_TEXTFILE, delay)
     if sys_passes :

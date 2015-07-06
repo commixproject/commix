@@ -23,7 +23,9 @@ import urllib
 import urllib2
 
 from src.utils import menu
+from src.utils import logs
 from src.utils import settings
+
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 from src.core.requests import headers
@@ -43,16 +45,18 @@ from src.core.injections.blind_based.techniques.time_based import tb_file_access
 #-------------------------------------------------
 def tb_injection_handler(url, delay, filename, http_request_method):
         
-  num_of_chars = 0
+  num_of_chars = 1
   counter = 0
   vp_flag = True
   no_result = True
   is_encoded = False
   fixation = False
   export_injection_info = False
+
   injection_type = "Blind-based Command Injection"
   technique = "time-based injection technique"
-      
+
+
   # Check if defined "--maxlen" option.
   if menu.options.maxlen:
     maxlen = menu.options.maxlen
@@ -78,6 +82,9 @@ def tb_injection_handler(url, delay, filename, http_request_method):
     print Style.BRIGHT + "(!) The estimated response time is " + str(url_time_response) + " second" + "s"[url_time_response == 1:] + "." + Style.RESET_ALL
   delay = int(delay) + int(url_time_response)
   
+  sys.stdout.write("(*) Testing the "+ technique + "... ")
+  sys.stdout.flush()
+
   for prefix in settings.PREFIXES:
     for suffix in settings.SUFFIXES:
       for separator in settings.SEPARATORS:
@@ -112,9 +119,17 @@ def tb_injection_handler(url, delay, filename, http_request_method):
             # Check if defined "--verbose" option.
             if menu.options.verbose:
               sys.stdout.write("\n" + Fore.GREY + payload.replace("\n", "\\n") + Style.RESET_ALL)
-                
-            # Check if target host is vulnerable.
-            how_long, vuln_parameter = tb_injector.injection_test(payload, http_request_method, url)
+
+            # Cookie Injection
+            if settings.COOKIE_INJECTION == True:
+              # Check if target host is vulnerable to cookie injection.
+              vuln_parameter = parameters.specify_cookie_parameter(menu.options.cookie)
+              how_long = tb_injector.cookie_injection_test(url, vuln_parameter, payload)
+
+            else:
+              # Check if target host is vulnerable.
+              how_long, vuln_parameter = tb_injector.injection_test(payload, http_request_method, url)
+
             if not menu.options.verbose:
               percent = ((num_of_chars*100)/total)
               if how_long >= delay:
@@ -145,61 +160,31 @@ def tb_injection_handler(url, delay, filename, http_request_method):
             else:
               fixation = True
               continue
-            
+
+
+            if settings.COOKIE_INJECTION == True: 
+              http_request_method = "cookie"
+              found_vuln_parameter = vuln_parameter
+            else:
+              if http_request_method == "GET":
+                found_vuln_parameter = parameters.vuln_GET_param(url)
+              else :
+                found_vuln_parameter = vuln_parameter
+
             # Print the findings to log file.
             if export_injection_info == False:
-              output_file = open(filename + ".txt", "a")
-              output_file.write("\n(+) Type : " + injection_type)
-              output_file.write("\n(+) Technique : " + technique.title())
-              output_file.close()
-              export_injection_info = True
-  
-            if http_request_method == "GET":
-              # Print the findings to log file
-              if vp_flag == True:
-                output_file = open(filename + ".txt", "a")
-                output_file.write("\n(+) Parameter : " + vuln_parameter + " (" + http_request_method + ")")
-                output_file.write("\n")
-                vp_flag = False
-                output_file.close()
-                
-              counter = counter + 1
-              output_file = open(filename + ".txt", "a")
-              output_file.write("  ("+str(counter)+") Payload : "+ re.sub("%20", " ", payload) + "\n")
-              output_file.close()
+              export_injection_info = logs.add_type_and_technique(export_injection_info, filename, injection_type, technique)
+            if vp_flag == True:
+              vp_flag = logs.add_parameter(vp_flag, filename, http_request_method, vuln_parameter, payload)
+            logs.upload_payload(filename, counter, payload) 
+            counter = counter + 1
+            
+            # Print the findings to terminal.
+            print Style.BRIGHT + "\n(!) The ("+ http_request_method + ") '" + Style.UNDERLINE + found_vuln_parameter + Style.RESET_ALL + Style.BRIGHT + "' parameter is vulnerable to "+ injection_type +"."+ Style.RESET_ALL
+            print "  (+) Type : "+ Fore.YELLOW + Style.BRIGHT + injection_type + Style.RESET_ALL + ""
+            print "  (+) Technique : "+ Fore.YELLOW + Style.BRIGHT + technique.title() + Style.RESET_ALL + ""
+            print "  (+) Payload : "+ Fore.YELLOW + Style.BRIGHT + re.sub("%20", " ", urllib.unquote_plus(payload.replace("\n", "\\n"))) + Style.RESET_ALL
 
-              #Vulnerable Parameter
-              GET_vuln_param = parameters.vuln_GET_param(url)
-              
-              # Print the findings to terminal.
-              print Style.BRIGHT + "\n(!) The ("+ http_request_method + ") '" + Style.UNDERLINE + GET_vuln_param + Style.RESET_ALL + Style.BRIGHT + "' parameter is vulnerable to "+ injection_type +"."+ Style.RESET_ALL
-              print "  (+) Type : "+ Fore.YELLOW + Style.BRIGHT + injection_type + Style.RESET_ALL + ""
-              print "  (+) Technique : "+ Fore.YELLOW + Style.BRIGHT + technique.title() + Style.RESET_ALL + ""
-              print "  (+) Payload : "+ Fore.YELLOW + Style.BRIGHT + re.sub("%20", " ", urllib.unquote_plus(payload.replace("\n", "\\n"))) + Style.RESET_ALL
-                
-            else :
-              # Print the findings to log file
-              if vp_flag == True:
-                output_file = open(filename + ".txt", "a")
-                output_file.write("\n(+) Parameter : " + vuln_parameter + " (" + http_request_method + ")")
-                output_file.write("\n")
-                vp_flag = False
-                output_file.close()
-                
-              counter = counter + 1
-              output_file = open(filename + ".txt", "a")
-              output_file.write("  ("+str(counter)+") Payload : "+ re.sub("%20", " ", payload) + "\n")
-              output_file.close()
-
-              #Vulnerable Parameter
-              POST_vuln_param = vuln_parameter
-              
-              # Print the findings to terminal.
-              print Style.BRIGHT + "\n(!) The ("+ http_request_method + ") '" + Style.UNDERLINE + POST_vuln_param + Style.RESET_ALL + Style.BRIGHT + "' parameter is vulnerable to "+ injection_type +"."+ Style.RESET_ALL
-              print "  (+) Type : "+ Fore.YELLOW + Style.BRIGHT + injection_type + Style.RESET_ALL + ""
-              print "  (+) Technique : "+ Fore.YELLOW + Style.BRIGHT + technique.title() + Style.RESET_ALL + ""
-              print "  (+) Payload : "+ Fore.YELLOW + Style.BRIGHT + re.sub("%20", " ", payload.replace("\n", "\\n")) + Style.RESET_ALL
-              
             # Check for any enumeration options.
             tb_enumeration.do_check(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell)
 
@@ -258,7 +243,12 @@ def tb_injection_handler(url, delay, filename, http_request_method):
   else :
     sys.stdout.write("\r")
     sys.stdout.flush()
+
     
+"""
+The exploitation function.
+(call the injection handler)
+"""
 def exploitation(url, delay, filename, http_request_method):
     if tb_injection_handler(url, delay, filename, http_request_method) == False:
       return False

@@ -21,9 +21,9 @@ import urllib
   The available "tempfile-based" payloads.
 """
 
-#----------------------------------------------------------------
+# ----------------------------------------------------------------
 # Tempfile-based decision payload (check if host is vulnerable).
-#----------------------------------------------------------------
+# ----------------------------------------------------------------
 def decision(separator, j, TAG, OUTPUT_TEXTFILE, delay, http_request_method):
 
   if separator == ";" :
@@ -202,7 +202,7 @@ def cmd_execution_alter_shell(separator, cmd, j, OUTPUT_TEXTFILE, delay, http_re
   return payload
 
 #---------------------------------------------------
-# Get the execution ouput, of shell execution.
+# Get the execution output, of shell execution.
 #---------------------------------------------------
 def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, delay, http_request_method):
   

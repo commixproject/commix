@@ -20,8 +20,8 @@ import urllib2
 
 from src.utils import menu
 from src.utils import settings
-from src.thirdparty.colorama import Fore, Back, Style, init
 
+from src.thirdparty.colorama import Fore, Back, Style, init
 from src.core.injections.results_based.techniques.classic import cb_injector
 
 """
@@ -81,6 +81,7 @@ def do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, ur
     
     # Check if file exists!
     cmd = "echo $(ls " + dest_to_write + ")"
+    # Check if defined cookie injection.
     response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell)
     shell = cb_injector.injection_results(response, TAG)
     shell = "".join(str(p) for p in shell)

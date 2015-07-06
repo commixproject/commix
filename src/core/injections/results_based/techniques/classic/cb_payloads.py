@@ -14,6 +14,11 @@
  For more see the file 'readme/COPYING' for copying permission.
 """
 
+"""
+  The classic injection technique on Classic OS Command Injection.
+  The available "classic" payloads.
+"""
+
 # ----------------------------------------------------------
 # Classic decision payload (check if host is vulnerable).
 # ----------------------------------------------------------

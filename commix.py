@@ -94,6 +94,10 @@ def main():
             print Back.RED + "(x) The available techniques are: classic,eval-based,time-based,file-based or c,e,t,f (with or without commas)." + Style.RESET_ALL
             sys.exit(0)
 
+    # Cookie Injection
+    if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
+      settings.COOKIE_INJECTION = True
+
     #Check if specified wrong alternative shell
     if menu.options.alter_shell:
       if menu.options.alter_shell.lower() not in settings.AVAILABLE_SHELLS:

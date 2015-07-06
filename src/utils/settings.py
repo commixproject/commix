@@ -158,3 +158,8 @@ PROXY_PROTOCOL = "http"
 # Privoxy Proxy
 PRIVOXY_IP = "127.0.0.1"
 PRIVOXY_PORT = "8118"
+
+# Cookie injection
+COOKIE_INJECTION = False
+
+#eof

