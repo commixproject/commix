@@ -133,9 +133,9 @@ def injection_test(payload, http_request_method, url):
 # Check if target host is vulnerable.
 # ------------------------------------
 def cookie_injection_test(url, vuln_parameter, payload):
-  opener = urllib2.build_opener()
-  opener.addheaders.append(('Cookie', vuln_parameter + "=" + payload))
-  response = opener.open(url)
+  request = urllib2.build_opener()
+  request.addheaders.append(('Cookie', vuln_parameter + "=" + payload))
+  response = request.open(url)
   
   return response
 
