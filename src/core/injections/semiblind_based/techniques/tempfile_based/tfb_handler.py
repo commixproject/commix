@@ -76,9 +76,12 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method):
   response.close()
   end = time.time()
   diff = end - start
-  url_time_response = int(diff)
-  if url_time_response != 0 :
+  if int(diff) < 1:
+    url_time_response = int(diff)
+  else:
+    url_time_response = int(round(diff))
     print Style.BRIGHT + "(!) The estimated response time is " + str(url_time_response) + " second" + "s"[url_time_response == 1:] + "." + Style.RESET_ALL
+ 
   delay = int(delay) + int(url_time_response)
   
   for separator in settings.SEPARATORS:
@@ -117,13 +120,15 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method):
 
         if not menu.options.verbose:
           percent = ((num_of_chars*100)/total)
-          if how_long >= delay:
-            percent = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
+          if (url_time_response <= 1 and how_long == delay) or \
+          (url_time_response >= 2 and how_long > delay and len(TAG) == output_length):
+            if len(TAG) == output_length :
+              percent = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
           elif percent == 100:
             if no_result == True:
               percent = Fore.RED + "FAILED" + Style.RESET_ALL
             else:
-                percent = str(percent)+"%"
+              percent = str(percent)+"%"
           else:
             percent = str(percent)+"%"
           sys.stdout.write("\r(*) Testing the "+ technique + "... " +  "[ " + percent + " ]")  
@@ -151,8 +156,9 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method):
       
       # Yaw, got shellz! 
       # Do some magic tricks!
-      if how_long >= delay:
-        
+      if (url_time_response <= 1 and how_long == delay) or \
+      (url_time_response >= 2 and how_long > delay and len(TAG) == output_length):
+      
         # Time relative false positive fixation.
         if len(TAG) == output_length :
           if fixation == True:
