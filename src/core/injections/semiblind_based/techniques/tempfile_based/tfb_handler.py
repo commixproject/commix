@@ -152,6 +152,14 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method):
       # Yaw, got shellz! 
       # Do some magic tricks!
       if how_long >= delay:
+        
+        # Time relative false positive fixation.
+        if len(TAG) == output_length :
+          if fixation == True:
+            delay = delay + 1
+        else:
+          fixation = True
+          continue
 
         found = True
         no_result = False
