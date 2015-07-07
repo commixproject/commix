@@ -138,18 +138,58 @@ def injection_test(payload, http_request_method, url):
 # Check if target host is vulnerable.(Cookie-based injection)
 # --------------------------------------------------------------
 def cookie_injection_test(url, vuln_parameter, payload):
+
+  def inject_cookie(url, vuln_parameter, payload, proxy):
+    if proxy == None:
+      opener = urllib2.build_opener()
+    else:
+      opener = urllib2.build_opener(proxy)
+    # Encoding non-ASCII characters payload.
+    payload = urllib.quote(payload)
+    opener.addheaders.append(('Cookie', vuln_parameter + "=" + payload))
+    request = urllib2.Request(url)
+    # Check if defined extra headers.
+    headers.do_check(request)
+    response = opener.open(request)
+    return response
+
   start = 0
   end = 0
   start = time.time()
-  request = urllib2.build_opener()
-  # Encoding non-ASCII characters payload.
-  payload = urllib.quote(payload)
-  request.addheaders.append(('Cookie', vuln_parameter + "=" + payload))
-  response = request.open(url)
+
+  proxy = None 
+  response = inject_cookie(url, vuln_parameter, payload, proxy)
+  
+  # Check if defined any HTTP Proxy.
+  if menu.options.proxy:
+    try:
+      proxy = urllib2.ProxyHandler({settings.PROXY_PROTOCOL: menu.options.proxy})
+      response = inject_cookie(url, vuln_parameter, payload, proxy)
+    except urllib2.HTTPError, err:
+      print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
+      raise SystemExit() 
+
+  # Check if defined Tor.
+  elif menu.options.tor:
+    try:
+      proxy = urllib2.ProxyHandler({settings.PROXY_PROTOCOL:settings.PRIVOXY_IP + ":" + PRIVOXY_PORT})
+      response = inject_cookie(url, vuln_parameter, payload, proxy)
+    except urllib2.HTTPError, err:
+      print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
+      raise SystemExit() 
+
+  else:
+    try:
+      response = inject_cookie(url, vuln_parameter, payload, proxy)
+    except urllib2.HTTPError, err:
+      print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
+      raise SystemExit() 
+
   end  = time.time()
   how_long = int(end - start)
 
   return how_long
+
 
 # -------------------------------------------
 # The main command injection exploitation.

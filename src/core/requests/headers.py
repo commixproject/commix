@@ -19,6 +19,7 @@ import base64
 import urllib2
 
 from src.utils import menu
+from src.utils import settings
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 """
@@ -43,7 +44,7 @@ def do_check(request):
     request.add_header('User-Agent', Agent)
     
   # Check if defined any HTTP Cookie header.
-  if menu.options.cookie:
+  if menu.options.cookie and settings.COOKIE_INJECTION == False:
     Cookie = menu.options.cookie
     request.add_header('Cookie', Cookie)
 
