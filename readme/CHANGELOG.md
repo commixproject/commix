@@ -1,4 +1,5 @@
 ## Version 0.1b [2015]
+* Added support for cookie-based command injections.
 * Added a generic false-positive prevention technique (removed --base64).
 * Added Tor network support.
 * Added a 'shellshock' (cve-2014-6271) module.
