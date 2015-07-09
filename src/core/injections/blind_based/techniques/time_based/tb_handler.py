@@ -134,8 +134,8 @@ def tb_injection_handler(url, delay, filename, http_request_method):
 
             if not menu.options.verbose:
               percent = ((num_of_chars*100)/total)
-              if (url_time_response <= 1 and how_long == delay) or \
-              (url_time_response >= 2 and how_long > delay and len(TAG) == output_length):
+              if (url_time_response <= 1 and how_long >= delay) or \
+              (url_time_response >= 2 and how_long > delay):
                 if len(TAG) == output_length :
                   percent = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
               elif percent == 100:
@@ -156,8 +156,8 @@ def tb_injection_handler(url, delay, filename, http_request_method):
           
           # Yaw, got shellz! 
           # Do some magic tricks!
-          if (url_time_response <= 1 and how_long == delay) or \
-          (url_time_response >= 2 and how_long > delay and len(TAG) == output_length):
+          if (url_time_response <= 1 and how_long >= delay) or \
+          (url_time_response >= 2 and how_long > delay):
           
             # Time relative false positive fixation.
             if len(TAG) == output_length :
