@@ -46,10 +46,10 @@ from src.core.injections.semiblind_based.techniques.tempfile_based import tfb_ha
 
 # If temp-based technique failed, 
 # use the "/tmp/" directory for tempfile-based technique.
-def tfb_controller(no_result, url, delay, tmp_path, filename, http_request_method):
+def tfb_controller(no_result, url, delay, filename, tmp_path, http_request_method, url_time_response):
   if no_result == True:
     sys.stdout.write("(*) Trying to upload file, on temporary directory (" + tmp_path + ")...\n")
-    tfb_handler.exploitation(url, delay, filename, tmp_path, http_request_method)     
+    tfb_handler.exploitation(url, delay, filename, tmp_path, http_request_method, url_time_response)     
   else :
     sys.stdout.write("\r")
     sys.stdout.flush()
@@ -64,9 +64,9 @@ def delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_
 """
 The "file-based" injection technique handler
 """
-def fb_injection_handler(url, delay, filename, http_request_method):
-
+def fb_injection_handler(url, delay, filename, http_request_method, url_time_response):
   counter = 1
+  failed_tries = 20
   vp_flag = True
   exit_loops = False
   no_result = True
@@ -74,6 +74,7 @@ def fb_injection_handler(url, delay, filename, http_request_method):
   stop_injection = False
   call_tmp_based = False
   export_injection_info = False
+  
   injection_type = "Semiblind-based Command Injection"
   technique = "file-based semiblind injection technique"
 
@@ -174,17 +175,18 @@ def fb_injection_handler(url, delay, filename, http_request_method):
                 if call_tmp_based == True:
                   exit_loops = True
                   tmp_path = os.path.split(menu.options.file_dest)[0] + "/"
-                  tfb_controller(no_result, url, delay, tmp_path, filename, http_request_method)
+                  tfb_controller(no_result, url, delay, filename, tmp_path, http_request_method, url_time_response)
                   raise
+                  
                 # Show an error message, after 20 failed tries.
                 # Use the "/tmp/" directory for tempfile-based technique.
-                elif i == 20 :
+                elif i == failed_tries :
                   print "\n" + Back.RED + "(x) Error: It seems that you don't have permissions to write on "+ SRV_ROOT_DIR + "." + Style.RESET_ALL
                   while True:
                     tmp_upload = raw_input("(?) Do you want to try the temporary directory (" + tmp_path + ") [Y/n] > ").lower()
                     if tmp_upload in settings.CHOISE_YES:
                       exit_loops = True
-                      tfb_controller(no_result, url, delay, tmp_path, filename, http_request_method)
+                      tfb_controller(no_result, url, delay, filename, tmp_path, http_request_method, url_time_response)
                       if no_result == True:
                         return False
                     elif tmp_upload in settings.CHOISE_NO:
@@ -325,8 +327,8 @@ def fb_injection_handler(url, delay, filename, http_request_method):
 The exploitation function.
 (call the injection handler)
 """ 
-def exploitation(url, delay, filename, http_request_method):
-    if fb_injection_handler(url, delay, filename, http_request_method) == False:
+def exploitation(url, delay, filename, http_request_method, url_time_response):
+    if fb_injection_handler(url, delay, filename, http_request_method, url_time_response) == False:
       return False
 
 #eof

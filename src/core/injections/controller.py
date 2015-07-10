@@ -23,6 +23,7 @@ from src.utils import settings
 
 from src.thirdparty.colorama import Fore, Back, Style, init
 
+from src.core.requests import requests
 from src.core.modules import modules_handler
 from src.core.requests import authentication
 
@@ -75,8 +76,8 @@ def execute_eval_based_technique(url, delay, filename, http_request_method):
 # --------------------------------------------
 # Execute the time-based injection technique.
 # --------------------------------------------
-def execute_time_based_technique(url, delay, filename, http_request_method):
-  if tb_handler.exploitation(url, delay, filename, http_request_method) == False:
+def execute_time_based_technique(url, delay, filename, http_request_method, url_time_response):
+  if tb_handler.exploitation(url, delay, filename, http_request_method, url_time_response) == False:
     if http_request_method == "GET":
       print Back.RED + "(x) The url '"+ url +"' appear to be not injectable." + Style.RESET_ALL
     else:
@@ -93,8 +94,8 @@ def execute_time_based_technique(url, delay, filename, http_request_method):
 # --------------------------------------------
 # Execute the file-based injection technique.
 # --------------------------------------------
-def execute_file_based_technique(url, delay, filename, http_request_method):
-  if fb_handler.exploitation(url, delay, filename, http_request_method) == False:
+def execute_file_based_technique(url, delay, filename, http_request_method, url_time_response):
+  if fb_handler.exploitation(url, delay, filename, http_request_method, url_time_response) == False:
     if http_request_method == "GET":
       print Back.RED + "(x) The url '"+ url +"' appear to be not injectable." + Style.RESET_ALL
     else:
@@ -111,7 +112,6 @@ def execute_file_based_technique(url, delay, filename, http_request_method):
 # General check on every injection technique.
 # ---------------------------------------------
 def do_check(url):
-
   # The logs filename construction.
   filename = logs.create_log_file(url)
 
@@ -120,7 +120,7 @@ def do_check(url):
     delay = menu.options.delay
   else:
     delay = settings.DELAY
-      
+
   # Do authentication if needed.
   if menu.options.auth_url and menu.options.auth_data:
     authentication.auth_process()      
@@ -140,6 +140,9 @@ def do_check(url):
   # Load modules
   modules_handler.load_modules(url, http_request_method)
 
+  # Estimating the response time (in seconds)
+  delay, url_time_response = requests.estimate_response_time(url, delay)
+
   # Check all injection techniques
   if not menu.options.tech:
     # Check if it is vulnerable to classic command injection technique.
@@ -153,12 +156,12 @@ def do_check(url):
     else:
       eval_based_state = True
     # Check if it is vulnerable to time-based blind command injection technique.
-    if tb_handler.exploitation(url, delay, filename, http_request_method) == False:
+    if tb_handler.exploitation(url, delay, filename, http_request_method, url_time_response) == False:
       time_based_state = False
     else:
       time_based_state = True
     # Check if it is vulnerable to file-based semiblind command injection technique.
-    if fb_handler.exploitation(url, delay, filename, http_request_method) == False:
+    if fb_handler.exploitation(url, delay, filename, http_request_method, url_time_response) == False:
       file_based_state = False
     else:
       file_based_state = True
@@ -191,24 +194,24 @@ def do_check(url):
     # Check if it is vulnerable to time-based blind command injection technique.
     if "time-based" in menu.options.tech or len(menu.options.tech) <= 4 and "t" in menu.options.tech:
       # Check if time-based blind command injection technique succeeds.
-      if tb_handler.exploitation(url, delay, filename, http_request_method) == False:
+      if tb_handler.exploitation(url, delay, filename, http_request_method, url_time_response) == False:
         time_based_state = False
       else:
         time_based_state = True
     elif menu.options.tech == "time-based":
-      execute_time_based_technique(url, delay, filename, http_request_method)
+      execute_time_based_technique(url, delay, filename, http_request_method, url_time_response)
     else:
       time_based_state = False
 
     # Check if it is vulnerable to file-based semiblind command injection technique.
     if "file-based" in menu.options.tech or len(menu.options.tech) <= 4 and "f" in menu.options.tech:
        # Check if file-based semiblind command injection technique succeeds.
-      if fb_handler.exploitation(url, delay, filename, http_request_method) == False:
+      if fb_handler.exploitation(url, delay, filename, http_request_method, url_time_response) == False:
         file_based_state = False
       else:
         file_based_state = True
     elif menu.options.tech == "file-based":
-      execute_file_based_technique(url, delay, filename, http_request_method)
+      execute_file_based_technique(url, delay, filename, http_request_method, url_time_response)
     else:
       file_based_state = False
 

