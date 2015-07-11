@@ -115,11 +115,13 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
               # Check if target host is vulnerable.
               how_long, vuln_parameter = tb_injector.injection_test(payload, http_request_method, url)
 
-            if not menu.options.verbose:
               percent = ((num_of_chars * 100) / total)
 
               if percent == 100 and no_result == True:
-                 percent = Fore.RED + "FAILED" + Style.RESET_ALL
+                if not menu.options.verbose:
+                  percent = Fore.RED + "FAILED" + Style.RESET_ALL
+                else:
+                  percent = ""
               else:
                 if (url_time_response <= 1 and how_long >= delay) or \
                 (url_time_response >= 2 and how_long > delay):
@@ -139,13 +141,16 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                   output = tb_injector.false_positive_check(separator, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, randvcalc, alter_shell)
                   
                   if str(output) == str(randvcalc):
-                    percent = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
-
+                    if not menu.options.verbose:
+                      percent = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
+                    else:
+                      percent = ""
                 else:
                   percent = str(percent)+"%"
-
-              sys.stdout.write("\r(*) Testing the "+ technique + "... " +  "[ " + percent + " ]")  
-              sys.stdout.flush()
+                  
+              if not menu.options.verbose:
+                sys.stdout.write("\r(*) Testing the "+ technique + "... " +  "[ " + percent + " ]")  
+                sys.stdout.flush()
 
           except KeyboardInterrupt: 
             raise

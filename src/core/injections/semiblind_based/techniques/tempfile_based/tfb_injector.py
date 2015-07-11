@@ -355,6 +355,9 @@ def injection(separator, maxlen, TAG, cmd, delay, http_request_method, url, vuln
 def false_positive_check(separator, TAG, cmd, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, randvcalc, alter_shell):
   
   found_chars = False
+  if menu.options.verbose: 
+    sys.stdout.write("\n(*) Testing the reliability of used payload... ")
+    sys.stdout.flush()  
 
   for output_length in range(1, 3):
     
