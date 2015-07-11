@@ -65,6 +65,7 @@ def examine_requests(payload, vuln_parameter, http_request_method, url):
     parameter = parameters.do_POST_check(parameter)
     
     data = re.sub(settings.INJECT_TAG, payload, parameter)
+    data = data.replace("+","%2B")
     request = urllib2.Request(url, data)
     
   # Check if defined extra headers.
