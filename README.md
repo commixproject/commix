@@ -32,8 +32,9 @@ Commix comes packaged on the official repositories of the following Linux distri
 - [ArchAssault](https://archassault.org/)
 - [BlackArch](http://blackarch.org/)
 
-Commix also comes as a plugin, on the following penetration testing frameworks:
+Commix also comes pre-installed, on the following penetration testing frameworks:
 - [The Penetration Testers Framework (PTF)](https://github.com/trustedsec/ptf)
+- [PentestBox](https://tools.pentestbox.com/)
 
 ####Usage
 To get a list of all options and switches use:
