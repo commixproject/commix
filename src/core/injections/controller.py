@@ -51,7 +51,7 @@ def execute_classic_technique(url, delay, filename, http_request_method):
   percent = colors.PURPLE + "FINISHED" + Style.RESET_ALL
   sys.stdout.write(Style.BRIGHT + "\r(!) The process of testing the "+ menu.options.tech + " injection technique... " + Style.RESET_ALL +  "[ " + percent + " ]")  
   sys.stdout.flush()
-  print "\n(*) Results can be found at : '" + os.getcwd() + "/" + filename +".txt' \n"
+  logs.logs_notification(filename)
   sys.exit(0)
 
 
@@ -69,7 +69,7 @@ def execute_eval_based_technique(url, delay, filename, http_request_method):
   percent = colors.PURPLE + "FINISHED" + Style.RESET_ALL
   sys.stdout.write(Style.BRIGHT + "\r(!) The process of testing the "+ menu.options.tech + " injection technique... " + Style.RESET_ALL +  "[ " + percent + " ]")  
   sys.stdout.flush()
-  print "\n(*) Results can be found at : '" + os.getcwd() + "/" + filename +".txt' \n"
+  logs.logs_notification(filename)
   sys.exit(0)
 
 
@@ -87,7 +87,7 @@ def execute_time_based_technique(url, delay, filename, http_request_method, url_
   percent = colors.PURPLE + "FINISHED" + Style.RESET_ALL
   sys.stdout.write(Style.BRIGHT + "\r(!) The process of testing the "+ menu.options.tech + " injection technique... " + Style.RESET_ALL +  "[ " + percent + " ]")  
   sys.stdout.flush()
-  print "\n(*) Results can be found at : '" + os.getcwd() + "/" + filename +".txt' \n"
+  logs.logs_notification(filename)
   sys.exit(0)
 
 
@@ -105,15 +105,13 @@ def execute_file_based_technique(url, delay, filename, http_request_method, url_
   percent = colors.PURPLE + "FINISHED" + Style.RESET_ALL
   sys.stdout.write(Style.BRIGHT + "\r(!) The process of testing the "+ menu.options.tech + " injection technique... " + Style.RESET_ALL +  "[ " + percent + " ]")  
   sys.stdout.flush()
-  print "\n(*) Results can be found at : '" + os.getcwd() + "/" + filename +".txt' \n"
+  logs.logs_notification(filename)
   sys.exit(0)
 
 # ---------------------------------------------
 # General check on every injection technique.
 # ---------------------------------------------
-def do_check(url):
-  # The logs filename construction.
-  filename = logs.create_log_file(url)
+def do_check(url, filename):
 
   # Check if defined "--delay" option.
   if menu.options.delay:
@@ -221,7 +219,7 @@ def do_check(url):
     else:
       print Back.RED + "(x) The '"+ parameter +"' parameter appear to be not injectable." + Style.RESET_ALL
   else:
-    print "(*) The results can be found at '" + os.getcwd() + "/" + filename +".txt'"
+    logs.logs_notification(filename)
   sys.exit(0)
   
 #eof

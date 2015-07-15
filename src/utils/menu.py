@@ -43,27 +43,36 @@ usage = "python %prog [options]"
 
 parser = OptionParser(usage=usage)
 
-parser.add_option("--verbose",
+# General options
+general = OptionGroup(parser, Style.BRIGHT + "General" + Style.RESET_ALL, 
+                        "These options relate to general matters. ")
+
+general.add_option("--verbose",
                 action="store_true",
                 dest="verbose",
                 default=False,
                 help="Enable the verbose mode.")
 
-parser.add_option("--install",
+general.add_option("--install",
                 action="store_true",
                 dest="install",
                 default=False,
                 help="Install 'commix' to your system.")
 
-parser.add_option("--version",
+general.add_option("--version",
                 action="store_true",
                 dest="version",
                 help="Show version number and exit.")
 
-parser.add_option("--update", 
+general.add_option("--update", 
                 action="store_true",
                 dest="update",
                 help="Check for updates (apply if any) and exit.")
+
+general.add_option("--output-dir", 
+                action="store",
+                dest="output_dir",
+                help="Set custom output directory path.")
 
 # Target options
 target = OptionGroup(parser, Style.BRIGHT + "Target" + Style.RESET_ALL, 
@@ -72,16 +81,17 @@ target = OptionGroup(parser, Style.BRIGHT + "Target" + Style.RESET_ALL,
 target.add_option("--url",
                 action="store",
                 dest="url",
-                help="Target URL")
+                help="Target URL.")
                 
 target.add_option("--url-reload",
                 action="store_true",
                 dest="url_reload",
                 default=False,
                 help="Reload target URL after command execution.")
+
 # Request options
 request = OptionGroup(parser,  Style.BRIGHT + "Request" + Style.RESET_ALL, 
-                      "These options can be used, to specify how to connect to the target URL.")
+                      "These options can be used to specify how to connect to the target URL.")
 
 request.add_option("--host",
                 action="store",
@@ -155,7 +165,7 @@ request.add_option("--auth-cred",
 
 # Enumeration options
 enumeration = OptionGroup(parser, Style.BRIGHT + "Enumeration" + Style.RESET_ALL, 
-                        "These options can be used, to enumerate the target host.")
+                        "These options can be used to enumerate the target host.")
 
 enumeration.add_option("--current-user", 
                 action="store_true",
@@ -241,7 +251,7 @@ modules.add_option("--shellshock",
 
 # Injection options
 injection = OptionGroup(parser, Style.BRIGHT + "Injection" + Style.RESET_ALL, 
-                        "These options can be used, to specify which parameters to inject and to provide custom injection payloads.")
+                        "These options can be used to specify which parameters to inject and to provide custom injection payloads.")
 
 injection.add_option("--data", 
                 action="store",
@@ -278,13 +288,13 @@ injection.add_option("--tmp-path",
                 action="store",
                 dest="tmp_path",
                 default = False,
-                help="Set remote absolute path of temporary files directory (Default: /tmp/).")
+                help="Set remote absolute path of temporary files directory (Default: " + settings.TMP_PATH + ").")
 
 injection.add_option("--root-dir", 
                 action="store",
                 dest="srv_root_dir",
                 default = False,
-                help="Set remote absolute path of web server's root directory (Default: /var/www/).")
+                help="Set remote absolute path of web server's root directory (Default: " + settings.SRV_ROOT_DIR + ").")
 
 injection.add_option("--alter-shell", 
                 action="store",
@@ -297,6 +307,7 @@ injection.add_option("--os-cmd",
                 default = False,
                 help="Execute a single operating system command.")
 
+parser.add_option_group(general)
 parser.add_option_group(target)
 parser.add_option_group(request)
 parser.add_option_group(enumeration)
@@ -304,7 +315,10 @@ parser.add_option_group(file_access)
 parser.add_option_group(modules)
 parser.add_option_group(injection)
 
-# Dirty hack from SQLMAP, to display longer options without breaking into two lines.
+"""
+Dirty hack from sqlmap [1], to display longer options without breaking into two lines.
+[1] https://github.com/sqlmapproject/sqlmap/blob/fdc8e664dff305aca19acf143c7767b9a7626881/lib/parse/cmdline.py
+"""
 def _(self, *args):
     _ = parser.formatter._format_option_strings(*args)
     if len(_) > settings.MAX_OPTION_LENGTH:
@@ -313,7 +327,7 @@ def _(self, *args):
 
 parser.formatter._format_option_strings = parser.formatter.format_option_strings
 parser.formatter.format_option_strings = type(parser.formatter.format_option_strings)(_, parser, type(parser))
-        
+
 option = parser.get_option("-h")
 option.help = option.help.capitalize().replace("Show this help message and exit", "Show help and exit.")
 

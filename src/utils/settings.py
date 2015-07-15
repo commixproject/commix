@@ -33,9 +33,6 @@ TWITTER = "@ancst"
 # Inject Tag
 INJECT_TAG = "INJECT_HERE"
 
-# Output file name
-OUTPUT_FILE_NAME = "logs"
-
 # Check Commit ID
 if os.path.isdir("./.git"):
   with open('.git/refs/heads/master', 'r') as f:
@@ -44,12 +41,15 @@ else:
     COMMIT_ID = ""
     
 # Output Directory
-OUTPUT_DIR = ".output/"
-dir = os.path.dirname(OUTPUT_DIR)
-try:
-    os.stat(OUTPUT_DIR)
-except:
-    os.mkdir(OUTPUT_DIR)       
+OUTPUT_DIR = ".output/"  
+
+# Output file name
+OUTPUT_FILE_NAME = "logs"
+
+# Output file name
+OUTPUT_FILE_EXT = ".txt"
+
+OUTPUT_FILE = OUTPUT_FILE_NAME + OUTPUT_FILE_EXT
 
 # The command injection prefixes.
 PREFIXES = ["","|","&","%7C","%26"] 

@@ -22,10 +22,12 @@ import urllib2
 import urlparse
 
 from src.utils import menu
+from src.utils import logs
 from src.utils import update
 from src.utils import version
 from src.utils import install
 from src.utils import settings
+
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 from src.core.requests import tor
@@ -188,18 +190,36 @@ def main():
     else:
       print Back.RED + "(x) Error: You must specify the target URL." + Style.RESET_ALL + "\n"
       sys.exit(0)
-      
-   #Check if defined "--proxy" option.
+
+    #Check if defined "--proxy" option.
     if menu.options.proxy:
       proxy.do_check(url)
 
+    if menu.options.output_dir:
+      output_dir = menu.options.output_dir
+    else:
+      output_dir = settings.OUTPUT_DIR
+    dir = os.path.dirname(output_dir)
+    try:
+      os.stat(output_dir)
+    except:
+      os.mkdir(output_dir)   
+
+    # The logs filename construction.
+    filename = logs.create_log_file(url, output_dir)
+
     # Launch injection and exploitation controller.
-    controller.do_check(url)
-    
-  except (KeyboardInterrupt, SystemExit): 
+    controller.do_check(url, filename)
+
+  except KeyboardInterrupt: 
+    logs.logs_notification(filename)
     print ""
     sys.exit(0)
-    
+
+  except SystemExit: 
+    print ""
+    sys.exit(0)
+
 if __name__ == '__main__':
     main()
     
