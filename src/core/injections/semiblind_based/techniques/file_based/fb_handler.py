@@ -65,6 +65,7 @@ def delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_
 The "file-based" injection technique handler
 """
 def fb_injection_handler(url, delay, filename, http_request_method, url_time_response):
+  
   counter = 1
   failed_tries = 20
   vp_flag = True

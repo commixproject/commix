@@ -136,7 +136,7 @@ def do_check(url, filename):
     parameter = menu.options.data
     
   # Load modules
-  modules_handler.load_modules(url, http_request_method)
+  modules_handler.load_modules(url, http_request_method, filename)
 
   # Estimating the response time (in seconds)
   delay, url_time_response = requests.estimate_response_time(url, delay)

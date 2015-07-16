@@ -20,14 +20,14 @@ from src.utils import menu
 from src.utils import settings
 from src.thirdparty.colorama import Fore, Back, Style, init
   
-def load_modules(url,http_request_method):
+def load_modules(url, http_request_method, filename):
   # Check if defined the icmp exfiltration module
   if menu.options.ip_icmp_data :
     try:
       # The icmp exfiltration module
       from src.core.modules.icmp_exfiltration import icmp_exfiltration
       # The icmp exfiltration handler
-      icmp_exfiltration.icmp_exfiltration_handler(url,http_request_method)
+      icmp_exfiltration.icmp_exfiltration_handler(url, http_request_method)
     except ImportError as e:
       print "\n" + Back.RED + "(x) Error : " + str(e) + Style.RESET_ALL
       sys.exit(0) 
@@ -38,7 +38,7 @@ def load_modules(url,http_request_method):
       # The Shellshock module
       from src.core.modules.shellshock import shellshock
       # The Shellshock handler
-      shellshock.shellshock_handler(url,http_request_method)
+      shellshock.shellshock_handler(url, http_request_method, filename)
     except ImportError as e:
       print "\n" + Back.RED + "(x) Error : " + str(e) + Style.RESET_ALL
       sys.exit(0) 

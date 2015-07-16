@@ -41,6 +41,7 @@ def create_log_file(url, output_dir):
       os.stat(output_dir + host + "/")
   except:
       os.mkdir(output_dir + host + "/") 
+
   # The logs filename construction.
   filename = output_dir + host + "/" + settings.OUTPUT_FILE
   output_file = open(filename, "a")
@@ -65,18 +66,23 @@ def add_type_and_technique(export_injection_info, filename, injection_type, tech
 
   return export_injection_info
 
+
 def add_parameter(vp_flag, filename, http_request_method, vuln_parameter, payload):
 
   if vp_flag == True:
     output_file = open(filename, "a")
     if settings.COOKIE_INJECTION == True:
       http_request_method = "cookie"
-    output_file.write("\n(+) Parameter : " + vuln_parameter + " (" + http_request_method + ")")
+    if vuln_parameter == "HTTP Header" :
+      output_file.write("\n(+) Parameter : " + http_request_method + " HTTP Header ")
+    else :
+      vp_flag = False
+      output_file.write("\n(+) Parameter : " + vuln_parameter + "(" + http_request_method + ")")
     output_file.write("\n")
-    vp_flag = False
     output_file.close()
 
   return vp_flag
+
 
 def upload_payload(filename, counter, payload):
 
@@ -87,5 +93,7 @@ def upload_payload(filename, counter, payload):
     output_file.write("  ("+str(counter)+") Payload : " + re.sub("%20", " ", payload) + "\n")
   output_file.close()
 
+
 def logs_notification(filename):
+
   print Style.BRIGHT + "\n(!) The results can be found at '" + os.getcwd() + "/" + filename + "' \n" + Style.RESET_ALL

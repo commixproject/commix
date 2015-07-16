@@ -45,6 +45,7 @@ from src.core.injections.semiblind_based.techniques.tempfile_based import tfb_fi
 # The "tempfile-based" injection technique handler
 #-------------------------------------------------
 def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, url_time_response):
+  
   counter = 1
   vp_flag = True
   no_result = True

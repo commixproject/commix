@@ -44,9 +44,9 @@ from src.core.injections.blind_based.techniques.time_based import tb_file_access
 # The "time-based" injection technique handler.
 #-------------------------------------------------
 def tb_injection_handler(url, delay, filename, http_request_method, url_time_response):
-
+  
+  counter = 1
   num_of_chars = 1
-  counter = 0
   vp_flag = True
   no_result = True
   is_encoded = False

