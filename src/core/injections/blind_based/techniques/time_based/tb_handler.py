@@ -115,42 +115,43 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
               # Check if target host is vulnerable.
               how_long, vuln_parameter = tb_injector.injection_test(payload, http_request_method, url)
 
-              percent = ((num_of_chars * 100) / total)
+            # Injection percentage calculation
+            percent = ((num_of_chars * 100) / total)
 
-              if percent == 100 and no_result == True:
-                if not menu.options.verbose:
-                  percent = Fore.RED + "FAILED" + Style.RESET_ALL
-                else:
-                  percent = ""
-              else:
-                if (url_time_response <= 1 and how_long >= delay) or \
-                (url_time_response >= 2 and how_long > delay):
-
-                  # Time relative false positive fixation.
-                  if len(TAG) == output_length :
-                    if fixation == True:
-                      delay = delay + 1
-                  else:
-                    fixation = True
-                    continue
-
-                  randv1 = random.randrange(0, 1)
-                  randv2 = random.randrange(1, 2)
-                  randvcalc = randv1 + randv2
-                  cmd = "(" + str(randv1) + "+" + str(randv2) + ")"
-                  output = tb_injector.false_positive_check(separator, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, randvcalc, alter_shell)
-                  
-                  if str(output) == str(randvcalc):
-                    if not menu.options.verbose:
-                      percent = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
-                    else:
-                      percent = ""
-                else:
-                  percent = str(percent)+"%"
-                  
+            if percent == 100 and no_result == True:
               if not menu.options.verbose:
-                sys.stdout.write("\r(*) Testing the "+ technique + "... " +  "[ " + percent + " ]")  
-                sys.stdout.flush()
+                percent = Fore.RED + "FAILED" + Style.RESET_ALL
+              else:
+                percent = ""
+            else:
+              if (url_time_response <= 1 and how_long >= delay) or \
+              (url_time_response >= 2 and how_long > delay):
+
+                # Time relative false positive fixation.
+                if len(TAG) == output_length :
+                  if fixation == True:
+                    delay = delay + 1
+                else:
+                  fixation = True
+                  continue
+
+                randv1 = random.randrange(0, 1)
+                randv2 = random.randrange(1, 2)
+                randvcalc = randv1 + randv2
+                cmd = "(" + str(randv1) + "+" + str(randv2) + ")"
+                output = tb_injector.false_positive_check(separator, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, randvcalc, alter_shell)
+                
+                if str(output) == str(randvcalc):
+                  if not menu.options.verbose:
+                    percent = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
+                  else:
+                    percent = ""
+              else:
+                percent = str(percent)+"%"
+                
+            if not menu.options.verbose:
+              sys.stdout.write("\r(*) Testing the "+ technique + "... " +  "[ " + percent + " ]")  
+              sys.stdout.flush()
 
           except KeyboardInterrupt: 
             raise
@@ -164,7 +165,6 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
           (url_time_response >= 2 and how_long > delay):
 
             if len(TAG) == output_length :
-              
               found = True
               no_result = False
 
