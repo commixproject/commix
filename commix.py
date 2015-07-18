@@ -14,6 +14,7 @@
  For more see the file 'readme/COPYING' for copying permission.
 """
 
+import re
 import os
 import sys
 import random
@@ -106,6 +107,16 @@ def main():
         print Back.RED + "(x) Error: '" + menu.options.alter_shell + "' shell is not supported!" + Style.RESET_ALL
         sys.exit(0)
 
+
+    # Check if defined "--file-upload" option.
+    if menu.options.file_upload:
+
+      # Check if not defined URL for upload.
+      if not re.match(settings.VALID_URL_FORMAT, menu.options.file_upload):
+        sys.stdout.write(Back.RED + "(x) Error: The '"+ menu.options.file_upload + "' is not a valid URL. " + Style.RESET_ALL + "\n")
+        sys.stdout.flush()
+        sys.exit(0)
+
     # Check if specified file-access options
     # Check if not defined "--file-dest" option.
     if menu.options.file_dest == None:
@@ -116,6 +127,7 @@ def main():
         
       # Check if defined "--file-upload" option.
       if menu.options.file_upload:
+
         file_name = os.path.split(menu.options.file_upload)[1]
         menu.options.file_dest = settings.SRV_ROOT_DIR + file_name
         

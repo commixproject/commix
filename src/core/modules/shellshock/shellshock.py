@@ -257,12 +257,6 @@ def file_access(url, cve, check_header):
   if menu.options.file_upload:
     file_to_upload = menu.options.file_upload
     
-    # Check if not defined URL for upload.
-    if not re.match('https?://(?:www)?(?:[\w-]{2,255}(?:\.\w{2,6}){1,2})(?:/[\w&%?#-]{1,300})?',file_to_upload):
-      sys.stdout.write("\n" + Back.RED + "(x) Error: The '"+ file_to_upload + "' is not URL. " + Style.RESET_ALL + "\n")
-      sys.stdout.flush()
-      sys.exit(0)
-
     # check if remote file exists.
     try:
       urllib2.urlopen(file_to_upload)

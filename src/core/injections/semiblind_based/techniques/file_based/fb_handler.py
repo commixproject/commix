@@ -314,24 +314,21 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
             print ""
             sys.exit(0)
             
+            
   if no_result == True:
-    if menu.options.verbose == False:
-      print ""
-      return False
-    else:
-      print ""
-      return False
+    print ""
+    return False
+
   else :
     sys.stdout.write("\r")
     sys.stdout.flush()
 
-    
 """
 The exploitation function.
 (call the injection handler)
-""" 
+"""
 def exploitation(url, delay, filename, http_request_method, url_time_response):
-    if fb_injection_handler(url, delay, filename, http_request_method, url_time_response) == False:
-      return False
+  if fb_injection_handler(url, delay, filename, http_request_method, url_time_response) == False:
+    return False
 
 #eof

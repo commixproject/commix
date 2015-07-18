@@ -97,7 +97,7 @@ def do_check(separator, maxlen, TAG, prefix, suffix, delay, http_request_method,
   #  Upload file
   if menu.options.file_upload:
     file_to_upload = menu.options.file_upload
-    
+
     # check if remote file exists.
     try:
       urllib2.urlopen(file_to_upload)

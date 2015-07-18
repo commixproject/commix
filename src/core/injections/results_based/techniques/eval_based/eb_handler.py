@@ -209,6 +209,7 @@ def eb_injection_handler(url, delay, filename, http_request_method):
               print Back.RED + "(x) Error: '" + gotshell + "' is not a valid answer." + Style.RESET_ALL
               pass
             
+            
   if no_result == True:
     print ""
     return False
@@ -216,10 +217,13 @@ def eb_injection_handler(url, delay, filename, http_request_method):
   else :
     sys.stdout.write("\r")
     sys.stdout.flush()
-    return True
 
+"""
+The exploitation function.
+(call the injection handler)
+"""
 def exploitation(url, delay, filename, http_request_method):
-    if eb_injection_handler(url, delay, filename, http_request_method) == False:
-      return False
+  if eb_injection_handler(url, delay, filename, http_request_method) == False:
+    return False
 
 #eof

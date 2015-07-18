@@ -220,16 +220,12 @@ def cb_injection_handler(url, delay, filename, http_request_method):
                 pass
               
   if no_result == True:
-    if menu.options.verbose == False:
-      print ""
-      return False
-    else:
-      print ""
-      return False
+    print ""
+    return False
   else :
     sys.stdout.write("\r")
     sys.stdout.flush()
-    
+
 """
 The exploitation function.
 (call the injection handler)
@@ -237,6 +233,5 @@ The exploitation function.
 def exploitation(url, delay, filename, http_request_method):
   if cb_injection_handler(url, delay, filename, http_request_method) == False:
     return False
-
 
 #eof

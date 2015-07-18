@@ -96,4 +96,4 @@ def upload_payload(filename, counter, payload):
 
 def logs_notification(filename):
 
-  print Style.BRIGHT + "\n(!) The results can be found at '" + os.getcwd() + "/" + filename + "' \n" + Style.RESET_ALL
+  print Style.BRIGHT + "(!) The results can be found at '" + os.getcwd() + "/" + filename + "' \n" + Style.RESET_ALL
