@@ -176,9 +176,10 @@ def eb_injection_handler(url, delay, filename, http_request_method):
                   cmd = raw_input("Shell > ")
                   cmd = re.sub(" ", "%20", cmd)
                   if cmd == "q":
+                    logs.logs_notification(filename)
                     sys.exit(0)
-                  else:
 
+                  else:
                     # The main command injection exploitation.
                     response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter)
                           
@@ -194,8 +195,7 @@ def eb_injection_handler(url, delay, filename, http_request_method):
                       print "\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n"
                     
                 except KeyboardInterrupt: 
-                  print ""
-                  sys.exit(0)
+                  raise
               
             elif gotshell in settings.CHOISE_NO:
               if menu.options.verbose:

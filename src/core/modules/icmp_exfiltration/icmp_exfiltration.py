@@ -24,7 +24,9 @@ import urllib2
 import threading
 
 from src.utils import menu
+from src.utils import logs
 from src.utils import settings
+
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 from src.core.requests import tor
@@ -88,12 +90,15 @@ def input_cmd(http_request_method, url, vuln_parameter, ip_src):
     try:
       cmd = raw_input("Shell > ")
       if cmd == "q":
+        logs.logs_notification(filename)
         os._exit(0)
       else: 
         cmd_exec(http_request_method, cmd, url, vuln_parameter, ip_src)
+
     except KeyboardInterrupt:
       print ""
       os._exit(0)
+      
     except:
       print ""
       os._exit(0)

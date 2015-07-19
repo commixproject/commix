@@ -224,7 +224,7 @@ def main():
     controller.do_check(url, filename)
 
   except KeyboardInterrupt: 
-    print "\n" + Back.RED + "(x) Error: Aborted (Ctrl+C was pressed!)" + Style.RESET_ALL
+    print "\n" + Back.RED + "(x) Aborted: Ctrl-C was pressed!" + Style.RESET_ALL
     logs.logs_notification(filename)
     print ""
     sys.exit(0)

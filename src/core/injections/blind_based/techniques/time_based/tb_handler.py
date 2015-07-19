@@ -207,6 +207,7 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                     try:
                       cmd = raw_input("Shell > ")
                       if cmd == "q":
+                        logs.logs_notification(filename)
                         sys.exit(0)
                         
                       else:
@@ -222,8 +223,7 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                         print ""
                         
                     except KeyboardInterrupt: 
-                      print ""
-                      sys.exit(0)
+                      raise
                   
                 elif gotshell in settings.CHOISE_NO:
                   break

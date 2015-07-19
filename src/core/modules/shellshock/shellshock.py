@@ -376,14 +376,15 @@ def shellshock_handler(url, http_request_method, filename):
                   try:
                     cmd = raw_input("Shell > ")
                     if cmd == "q":
+                      logs.logs_notification(filename)
                       sys.exit(0)
 
                     else: 
                       shell = cmd_exec(url, cmd, cve, check_header)
                       print "\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n" 
+                      
                   except KeyboardInterrupt:
-                    print ""
-                    sys.exit(0)
+                    raise
 
                   except:
                     print ""

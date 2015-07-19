@@ -284,6 +284,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                   cmd = raw_input("Shell > ")
                   if cmd == "q":
                     delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+                    logs.logs_notification(filename)
                     sys.exit(0)
                     
                   else:
@@ -311,8 +312,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
             
           except KeyboardInterrupt: 
             delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
-            print ""
-            sys.exit(0)
+            raise
             
             
   if no_result == True:

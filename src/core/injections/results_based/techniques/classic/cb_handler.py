@@ -186,6 +186,7 @@ def cb_injection_handler(url, delay, filename, http_request_method):
                   try:
                     cmd = raw_input("Shell > ")
                     if cmd == "q":
+                      logs.logs_notification(filename)
                       sys.exit(0)
                       
                     else:
@@ -204,8 +205,7 @@ def cb_injection_handler(url, delay, filename, http_request_method):
                         print "\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n"
 
                   except KeyboardInterrupt: 
-                    print ""
-                    sys.exit(0)
+                    raise
 
               elif gotshell in settings.CHOISE_NO:
                 if menu.options.verbose:

@@ -213,6 +213,7 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
                 try:
                   cmd = raw_input("Shell > ")
                   if cmd == "q":
+                    logs.logs_notification(filename)
                     sys.exit(0)
                     
                   else:
@@ -229,8 +230,7 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
                       print ""
                     
                 except KeyboardInterrupt: 
-                  print ""
-                  sys.exit(0)
+                  raise
                   
             elif gotshell in settings.CHOISE_NO:
               break
