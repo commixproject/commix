@@ -164,6 +164,10 @@ def eb_injection_handler(url, delay, filename, http_request_method):
           # Check for any system file access options.
           eb_file_access.do_check(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter)
 
+          # Check if defined single cmd.
+          if menu.options.os_cmd:
+            eb_enumeration.single_os_cmd_exec(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter)
+
           # Pseudo-Terminal shell
           while True:
             gotshell = raw_input("\n(?) Do you want a Pseudo-Terminal shell? [Y/n] > ").lower()

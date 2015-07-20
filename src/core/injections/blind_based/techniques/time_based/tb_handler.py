@@ -197,6 +197,10 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
               # Check for any system file access options.
               tb_file_access.do_check(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell)
               
+              # Check if defined single cmd.
+              if menu.options.os_cmd:
+                tb_enumeration.single_os_cmd_exec(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell)
+
               # Pseudo-Terminal shell
               while True:
                 gotshell = raw_input("\n(?) Do you want a Pseudo-Terminal shell? [Y/n] > ").lower()

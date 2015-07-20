@@ -175,11 +175,16 @@ def cb_injection_handler(url, delay, filename, http_request_method):
 
             # Check for any system file access options.
             cb_file_access.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell)
-            
+
+            # Check if defined single cmd.
+            if menu.options.os_cmd:
+              cb_enumeration.single_os_cmd_exec(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell)
+
             # Pseudo-Terminal shell
             while True:
               gotshell = raw_input("\n(?) Do you want a Pseudo-Terminal shell? [Y/n] > ").lower()
               if gotshell in settings.CHOISE_YES:
+
                 print ""
                 print "Pseudo-Terminal (type 'q' or use <Ctrl-C> to quit)"
                 while True:

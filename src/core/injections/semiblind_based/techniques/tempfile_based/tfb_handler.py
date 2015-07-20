@@ -203,6 +203,10 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
           # Check for any enumeration options.
           tfb_file_access.do_check(separator, maxlen, TAG, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
           
+          # Check if defined single cmd.
+          if menu.options.os_cmd:
+            tfb_enumeration.single_os_cmd_exec(separator, maxlen, TAG, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+
           # Pseudo-Terminal shell
           while True:
             gotshell = raw_input("\n(?) Do you want a Pseudo-Terminal shell? [Y/n] > ").lower()
