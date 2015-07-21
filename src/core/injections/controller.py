@@ -37,81 +37,15 @@ from src.core.injections.semiblind_based.techniques.file_based import fb_handler
  Checks if the testable parameter is exploitable.
 """
 
-# ------------------------------------------
-# Execute the classic injection technique.
-# ------------------------------------------
-def execute_classic_technique(url, delay, filename, http_request_method):
-  if cb_handler.exploitation(url, delay, filename, http_request_method) == False:
-    if http_request_method == "GET":
-      print Back.RED + "(x) The url '"+ url +"' appear to be not injectable." + Style.RESET_ALL
-    else:
-      print Back.RED + "(x) The '"+ parameter +"' parameter appear to be not injectable." + Style.RESET_ALL
-  if menu.options.verbose:
-    print "\n"
-  percent = colors.PURPLE + "FINISHED" + Style.RESET_ALL
-  sys.stdout.write(Style.BRIGHT + "\r(!) The process of testing the "+ menu.options.tech + " injection technique... " + Style.RESET_ALL +  "[ " + percent + " ]")  
-  sys.stdout.flush()
-  logs.logs_notification(filename)
-  sys.exit(0)
-
-
-# --------------------------------------------
-# Execute the eval-based injection technique.
-# --------------------------------------------
-def execute_eval_based_technique(url, delay, filename, http_request_method):
-  if eb_handler.exploitation(url, delay, filename, http_request_method) == False:
-    if http_request_method == "GET":
-      print Back.RED + "(x) The url '"+ url +"' appear to be not injectable." + Style.RESET_ALL
-    else:
-      print Back.RED + "(x) The '"+ parameter +"' parameter appear to be not injectable via "+ menu.options.tech + "." + Style.RESET_ALL
-  if menu.options.verbose:
-    print "\n"
-  percent = colors.PURPLE + "FINISHED" + Style.RESET_ALL
-  sys.stdout.write(Style.BRIGHT + "\r(!) The process of testing the "+ menu.options.tech + " injection technique... " + Style.RESET_ALL +  "[ " + percent + " ]")  
-  sys.stdout.flush()
-  logs.logs_notification(filename)
-  sys.exit(0)
-
-
-# --------------------------------------------
-# Execute the time-based injection technique.
-# --------------------------------------------
-def execute_time_based_technique(url, delay, filename, http_request_method, url_time_response):
-  if tb_handler.exploitation(url, delay, filename, http_request_method, url_time_response) == False:
-    if http_request_method == "GET":
-      print Back.RED + "(x) The url '"+ url +"' appear to be not injectable." + Style.RESET_ALL
-    else:
-      print Back.RED + "(x) The '"+ parameter +"' parameter appear to be not injectable." + Style.RESET_ALL
-  if menu.options.verbose:
-    print "\n"
-  percent = colors.PURPLE + "FINISHED" + Style.RESET_ALL
-  sys.stdout.write(Style.BRIGHT + "\r(!) The process of testing the "+ menu.options.tech + " injection technique... " + Style.RESET_ALL +  "[ " + percent + " ]")  
-  sys.stdout.flush()
-  logs.logs_notification(filename)
-  sys.exit(0)
-
-
-# --------------------------------------------
-# Execute the file-based injection technique.
-# --------------------------------------------
-def execute_file_based_technique(url, delay, filename, http_request_method, url_time_response):
-  if fb_handler.exploitation(url, delay, filename, http_request_method, url_time_response) == False:
-    if http_request_method == "GET":
-      print Back.RED + "(x) The url '"+ url +"' appear to be not injectable." + Style.RESET_ALL
-    else:
-      print Back.RED + "(x) The '"+ parameter +"' parameter appear to be not injectable." + Style.RESET_ALL
-  if menu.options.verbose:
-    print "\n"
-  percent = colors.PURPLE + "FINISHED" + Style.RESET_ALL
-  sys.stdout.write(Style.BRIGHT + "\r(!) The process of testing the "+ menu.options.tech + " injection technique... " + Style.RESET_ALL +  "[ " + percent + " ]")  
-  sys.stdout.flush()
-  logs.logs_notification(filename)
-  sys.exit(0)
-
 # ---------------------------------------------
 # General check on every injection technique.
 # ---------------------------------------------
 def do_check(url, filename):
+
+  classic_state = False
+  eval_based_state = False
+  time_based_state = False
+  file_based_state = False
 
   # Check if defined "--delay" option.
   if menu.options.delay:
@@ -144,72 +78,59 @@ def do_check(url, filename):
   # Check all injection techniques
   if not menu.options.tech:
     # Check if it is vulnerable to classic command injection technique.
-    if cb_handler.exploitation(url, delay, filename, http_request_method) == False:
-      classic_state = False
-    else:
+    if cb_handler.exploitation(url, delay, filename, http_request_method) != False:
       classic_state = True
+
     # Check if it is vulnerable to eval-based command injection technique.
-    if eb_handler.exploitation(url, delay, filename, http_request_method) == False:
-      eval_based_state = False
-    else:
+    if eb_handler.exploitation(url, delay, filename, http_request_method) != False:
       eval_based_state = True
+
     # Check if it is vulnerable to time-based blind command injection technique.
-    if tb_handler.exploitation(url, delay, filename, http_request_method, url_time_response) == False:
-      time_based_state = False
-    else:
+    if tb_handler.exploitation(url, delay, filename, http_request_method, url_time_response) != False:
       time_based_state = True
+
     # Check if it is vulnerable to file-based semiblind command injection technique.
-    if fb_handler.exploitation(url, delay, filename, http_request_method, url_time_response) == False:
-      file_based_state = False
-    else:
+    if fb_handler.exploitation(url, delay, filename, http_request_method, url_time_response) != False:
       file_based_state = True
 
   else:
     # Check if it is vulnerable to classic command injection technique.
     if "classic" in menu.options.tech or len(menu.options.tech) <= 4 and "c" in menu.options.tech:
       # Check if classic results-based command injection technique succeeds.
-      if cb_handler.exploitation(url, delay, filename, http_request_method) == False:
-        classic_state = False
-      else:
+      if cb_handler.exploitation(url, delay, filename, http_request_method) != False:
         classic_state = True
     elif menu.options.tech == "classic":
-      execute_classic_technique(url, delay, filename, http_request_method)
+      cb_handler.exploitation(url, delay, filename, http_request_method)
     else:
       classic_state = False
 
     # Check if it is vulnerable to eval-based command injection technique.
     if "eval-based" in menu.options.tech or len(menu.options.tech) <= 4 and "e" in menu.options.tech:
       # Check if eval-based command injection technique succeeds.
-      if eb_handler.exploitation(url, delay, filename, http_request_method) == False:
-        eval_based_state = False
-      else:
+      if eb_handler.exploitation(url, delay, filename, http_request_method) != False:
         eval_based_state = True
     elif menu.options.tech == "eval-based":
-      execute_eval_based_technique(url, delay, filename, http_request_method)
+      eb_handler.exploitation(url, delay, filename, http_request_method)
     else:
       eval_based_state = False
 
     # Check if it is vulnerable to time-based blind command injection technique.
     if "time-based" in menu.options.tech or len(menu.options.tech) <= 4 and "t" in menu.options.tech:
       # Check if time-based blind command injection technique succeeds.
-      if tb_handler.exploitation(url, delay, filename, http_request_method, url_time_response) == False:
-        time_based_state = False
-      else:
+      if tb_handler.exploitation(url, delay, filename, http_request_method, url_time_response) != False:
         time_based_state = True
     elif menu.options.tech == "time-based":
-      execute_time_based_technique(url, delay, filename, http_request_method, url_time_response)
+      tb_handler.exploitation(url, delay, filename, http_request_method, url_time_response)
     else:
       time_based_state = False
 
     # Check if it is vulnerable to file-based semiblind command injection technique.
     if "file-based" in menu.options.tech or len(menu.options.tech) <= 4 and "f" in menu.options.tech:
        # Check if file-based semiblind command injection technique succeeds.
-      if fb_handler.exploitation(url, delay, filename, http_request_method, url_time_response) == False:
-        file_based_state = False
-      else:
+      if fb_handler.exploitation(url, delay, filename, http_request_method, url_time_response) != False:
         file_based_state = True
     elif menu.options.tech == "file-based":
-      execute_file_based_technique(url, delay, filename, http_request_method, url_time_response)
+      fb_handler.exploitation(url, delay, filename, http_request_method, url_time_response)
     else:
       file_based_state = False
 
