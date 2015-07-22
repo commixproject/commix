@@ -284,19 +284,30 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
             sys.exit(0)
 
           try:
+            # Pseudo-Terminal shell
+            go_back = False
             while True:
-              # Pseudo-Terminal shell
+              if go_back == True:
+                break
               gotshell = raw_input("\n(?) Do you want a Pseudo-Terminal shell? [Y/n] > ").lower()
               if gotshell in settings.CHOISE_YES:
                 print ""
                 print "Pseudo-Terminal (type 'q' or use <Ctrl-C> to quit)"
                 while True:
                   cmd = raw_input("Shell > ")
-                  if cmd == "q":
-                    # Delete previous shell (text) files (output)
-                    delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
-                    logs.logs_notification(filename)
-                    sys.exit(0)
+                  if cmd.lower() in settings.SHELL_OPTIONS:
+                    if cmd.lower() == "?":
+                      menu.shell_options()
+                    elif cmd.lower() == "quit":
+                      # Delete previous shell (text) files (output)
+                      delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+                      logs.logs_notification(filename)
+                      sys.exit(0)
+                    elif cmd.lower() == "back":
+                      go_back = True
+                      break
+                    else:
+                      pass
                     
                   else:
                     response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)

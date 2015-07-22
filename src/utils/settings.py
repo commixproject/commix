@@ -165,4 +165,7 @@ COOKIE_INJECTION = False
 # Valid URL format check
 VALID_URL_FORMAT = "https?://(?:www)?(?:[\w-]{2,255}(?:\.\w{2,6}){1,2})(?:/[\w&%?#-]{1,300})?"
 
+# Accepted shell menu options
+SHELL_OPTIONS = ['?','quit','back']
+
 #eof

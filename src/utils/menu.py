@@ -333,4 +333,10 @@ option.help = option.help.capitalize().replace("Show this help message and exit"
 
 (options, args) = parser.parse_args()
 
+
+def shell_options():
+      print """
+  Type '""" + Style.BRIGHT + """back""" + Style.RESET_ALL + """' to go back to the injection proccess.
+  Type '""" + Style.BRIGHT + """quit""" + Style.RESET_ALL + """' (or use <Ctrl-C>) to quit commix.
+      """
 #eof

@@ -181,19 +181,29 @@ def cb_injection_handler(url, delay, filename, http_request_method):
               cb_enumeration.single_os_cmd_exec(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell)
 
             # Pseudo-Terminal shell
+            go_back = False
             while True:
+              if go_back == True:
+                break
               gotshell = raw_input("\n(?) Do you want a Pseudo-Terminal shell? [Y/n] > ").lower()
               if gotshell in settings.CHOISE_YES:
-
                 print ""
-                print "Pseudo-Terminal (type 'q' or use <Ctrl-C> to quit)"
+                print "Pseudo-Terminal (type '?' for shell options)"
                 while True:
                   try:
                     cmd = raw_input("Shell > ")
-                    if cmd == "q":
-                      logs.logs_notification(filename)
-                      sys.exit(0)
-                      
+                    if cmd.lower() in settings.SHELL_OPTIONS:
+                      if cmd.lower() == "?":
+                        menu.shell_options()
+                      elif cmd.lower() == "quit":
+                        logs.logs_notification(filename)
+                        sys.exit(0)
+                      elif cmd.lower() == "back":
+                        go_back = True
+                        break
+                      else:
+                        pass
+
                     else:
                       # Command execution results.
                       response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell)
