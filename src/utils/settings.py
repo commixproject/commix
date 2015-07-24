@@ -52,13 +52,13 @@ OUTPUT_FILE_EXT = ".txt"
 OUTPUT_FILE = OUTPUT_FILE_NAME + OUTPUT_FILE_EXT
 
 # The command injection prefixes.
-PREFIXES = ["","|","&","%7C","%26"] 
+PREFIXES = ["","'","\"""|","&","%27","%22","%7C","%26"] 
 
 # The command injection separators.
 SEPARATORS = [""," ",";","&","|","||","&&","%0a","%3B","%26","%26%26","%7C","%7C%7C"]
 
 # The command injection suffixes.
-SUFFIXES = ["","#","//","\\\\","&","|","%5C%5C","%2F%2F","%26","%7C"]
+SUFFIXES = ["","'","\"","#","//","\\\\","&","|","%27","%22","%5C%5C","%2F%2F","%26","%7C"]
 
 # Bad combination of prefix and separator
 JUNK_COMBINATION = ["&&&","|||","|&&","&|","&;","|;","%7C;","%26;","%7C&"]
