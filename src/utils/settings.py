@@ -52,7 +52,7 @@ OUTPUT_FILE_EXT = ".txt"
 OUTPUT_FILE = OUTPUT_FILE_NAME + OUTPUT_FILE_EXT
 
 # The command injection prefixes.
-PREFIXES = ["","'","\"""|","&","%27","%22","%7C","%26"] 
+PREFIXES = ["","'","\"","|","&","%27","%22","%7C","%26"] 
 
 # The command injection separators.
 SEPARATORS = [""," ",";","&","|","||","&&","%0a","%3B","%26","%26%26","%7C","%7C%7C"]
