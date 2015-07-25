@@ -35,6 +35,7 @@ Commix comes packaged on the official repositories of the following Linux distri
 Commix also comes pre-installed, on the following penetration testing frameworks:
 - [The Penetration Testers Framework (PTF)](https://github.com/trustedsec/ptf)
 - [PentestBox](https://tools.pentestbox.com/)
+- [Weakerthan](http://www.weaknetlabs.com/)
 
 ####Usage
 To get a list of all options and switches use:
