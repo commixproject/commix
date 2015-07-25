@@ -256,7 +256,7 @@ def cookie_injection_test(url, vuln_parameter, payload):
 # -------------------------------------------
 # The main command injection exploitation.
 # -------------------------------------------
-def injection(separator, maxlen, TAG, cmd, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell):
+def injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell):
   if menu.options.file_write or menu.options.file_upload :
     minlen = 0
   else:
@@ -273,6 +273,10 @@ def injection(separator, maxlen, TAG, cmd, delay, http_request_method, url, vuln
       payload = tfb_payloads.cmd_execution_alter_shell(separator, cmd, output_length, OUTPUT_TEXTFILE, delay, http_request_method)
     else:
       payload = tfb_payloads.cmd_execution(separator, cmd, output_length, OUTPUT_TEXTFILE, delay, http_request_method)  
+
+    # Fix prefixes / suffixes
+    payload = parameters.prefixes(payload, prefix)
+    payload = parameters.suffixes(payload, suffix)
 
     # Check if defined "--verbose" option.
     if menu.options.verbose:
@@ -315,6 +319,10 @@ def injection(separator, maxlen, TAG, cmd, delay, http_request_method, url, vuln
         else:
           payload = tfb_payloads.get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, delay, http_request_method)
 
+        # Fix prefixes / suffixes
+        payload = parameters.prefixes(payload, prefix)
+        payload = parameters.suffixes(payload, suffix)
+
         # Check if defined "--verbose" option.
         if menu.options.verbose:
           sys.stdout.write("\n" + Fore.GREY + payload.replace("\n", "\\n") + Style.RESET_ALL)
@@ -352,7 +360,7 @@ def injection(separator, maxlen, TAG, cmd, delay, http_request_method, url, vuln
 # -------------------------------------
 # False Positive check and evaluation.
 # -------------------------------------
-def false_positive_check(separator, TAG, cmd, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, randvcalc, alter_shell):
+def false_positive_check(separator, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, randvcalc, alter_shell):
   
   found_chars = False
   if menu.options.verbose: 
@@ -366,6 +374,10 @@ def false_positive_check(separator, TAG, cmd, delay, http_request_method, url, v
       payload = tfb_payloads.cmd_execution_alter_shell(separator, cmd, output_length, OUTPUT_TEXTFILE, delay, http_request_method)
     else:
       payload = tfb_payloads.cmd_execution(separator, cmd, output_length, OUTPUT_TEXTFILE, delay, http_request_method)
+
+    # Fix prefixes / suffixes
+    payload = parameters.prefixes(payload, prefix)
+    payload = parameters.suffixes(payload, suffix)
 
     # Check if defined "--verbose" option.
     if menu.options.verbose:
@@ -397,7 +409,11 @@ def false_positive_check(separator, TAG, cmd, delay, http_request_method, url, v
           payload = tfb_payloads.fp_result_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, delay, http_request_method)
         else:
           payload = tfb_payloads.fp_result(separator, OUTPUT_TEXTFILE, ascii_char, delay, http_request_method)
-          
+
+        # Fix prefixes / suffixes
+        payload = parameters.prefixes(payload, prefix)
+        payload = parameters.suffixes(payload, suffix)        
+
         # Check if defined "--verbose" option.
         if menu.options.verbose:
           sys.stdout.write("\n" + Fore.GREY + payload.replace("\n", "\\n") + Style.RESET_ALL)

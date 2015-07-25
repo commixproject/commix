@@ -50,7 +50,6 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
   vp_flag = True
   no_result = True
   is_encoded = False
-  fixation = False
   export_injection_info = False
 
   injection_type = "Blind-based Command Injection"
@@ -123,18 +122,12 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                 percent = Fore.RED + "FAILED" + Style.RESET_ALL
               else:
                 percent = ""
+                
             else:
               if (url_time_response <= 1 and how_long >= delay) or \
               (url_time_response >= 2 and how_long > delay):
 
                 # Time relative false positive fixation.
-                if len(TAG) == output_length :
-                  if fixation == True:
-                    delay = delay + 1
-                else:
-                  fixation = True
-                  continue
-
                 randv1 = random.randrange(0, 1)
                 randv2 = random.randrange(1, 2)
                 randvcalc = randv1 + randv2
@@ -146,6 +139,9 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                     percent = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
                   else:
                     percent = ""
+                else:
+                  break
+                  
               else:
                 percent = str(percent)+"%"
                 
