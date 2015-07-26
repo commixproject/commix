@@ -1,8 +1,9 @@
 ## Version 0.1b [2015]
+* Added CVE-2014-6278 support on 'shellshock' module.
 * Added support for cookie-based command injections.
 * Added a generic false-positive prevention technique (removed --base64).
 * Added Tor network support.
-* Added a 'shellshock' (cve-2014-6271) module.
+* Added a 'shellshock' (CVE-2014-6271) module.
 * Added termcolor support for Windows (colorama).
 * Added file access options.
 * Added enumeration options.
@@ -13,5 +14,5 @@
 * Removed the "boolean-based" blind technique.
 * Added More Options.
 
-## Version 0.1 [2014]
-* Initial release {The Birth!}
+## Version 0.1a [2014]
+* The initial release {aka the Birth!}
