@@ -115,10 +115,20 @@ request.add_option("--random-agent",
                 default = False,
                 help="Use a randomly selected HTTP User-Agent header.")
 
+request.add_option("--param-del",
+                action="store",
+                dest="pdel",
+                help="Set character for splitting parameter values.")
+
 request.add_option("--cookie",
                 action="store",
                 dest="cookie",
                 help="HTTP Cookie header.")
+
+request.add_option("--cookie-del",
+                action="store",
+                dest="cdel",
+                help="Set character for splitting cookie values.")
 
 request.add_option("--headers",
                 action="store",

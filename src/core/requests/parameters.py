@@ -35,7 +35,7 @@ def do_GET_check(url):
   parameters = url.split("?")[1]
 
   # Split parameters
-  multi_parameters = parameters.split("&")
+  multi_parameters = parameters.split(settings.PARAMETER_DELIMITER)
 
   # Check if single paramerter is supplied.
   if len(multi_parameters) == 1:
@@ -57,7 +57,7 @@ def do_GET_check(url):
 
   # Check if multiple paramerters are supplied.
   else:
-    all_params = '&'.join(multi_parameters)
+    all_params = settings.PARAMETER_DELIMITER.join(multi_parameters)
 
     # Check if defined the "INJECT_HERE" tag
     if settings.INJECT_TAG in all_params:
@@ -66,7 +66,7 @@ def do_GET_check(url):
         # Grab the value of parameter.
         value = re.findall(r'=(.*)', multi_parameters[i])
         value = ''.join(value)
-        parameter = '&'.join(multi_parameters)
+        parameter = settings.PARAMETER_DELIMITER.join(multi_parameters)
       url = url_part +"?"+ parameter  
       return url
     else:
@@ -101,10 +101,11 @@ def do_GET_check(url):
 # --------------------------------------
 def vuln_GET_param(url):
   # Define the vulnerable parameter
-  if re.findall(r"&(.*)=" + settings.INJECT_TAG + "", url):
-    vuln_parameter = re.findall(r"&(.*)=" + settings.INJECT_TAG + "", url)
+
+  if re.findall(r"" + settings.PARAMETER_DELIMITER + "(.*)=" + settings.INJECT_TAG + "", url):
+    vuln_parameter = re.findall(r"" + settings.PARAMETER_DELIMITER + "(.*)=" + settings.INJECT_TAG + "", url)
     vuln_parameter = ''.join(vuln_parameter)
-    vuln_parameter = re.sub(r"(.*)=(.*)&", "", vuln_parameter)
+    vuln_parameter = re.sub(r"(.*)=(.*)" + settings.PARAMETER_DELIMITER, "", vuln_parameter)
 
   elif re.findall(r"\?(.*)=" + settings.INJECT_TAG + "", url):
     vuln_parameter = re.findall(r"\?(.*)=" + settings.INJECT_TAG + "", url)
@@ -134,7 +135,7 @@ def vuln_GET_param(url):
 def do_POST_check(parameter):
 
   # Split parameters 
-  multi_parameters = parameter.split("&")
+  multi_parameters = parameter.split(settings.PARAMETER_DELIMITER)
 
   # Check if single paramerter is supplied.
   if len(multi_parameters) == 1:
@@ -153,7 +154,7 @@ def do_POST_check(parameter):
 
   # Check if multiple paramerters are supplied.
   else:
-    all_params = '&'.join(multi_parameters)
+    all_params = settings.PARAMETER_DELIMITER.join(multi_parameters)
 
     # Check if defined the "INJECT_HERE" tag
     if settings.INJECT_TAG in all_params:
@@ -163,7 +164,7 @@ def do_POST_check(parameter):
           # Grab the value of parameter.
           value = re.findall(r'=(.*)', multi_parameters[i])
           value = ''.join(value)
-          parameter = '&'.join(multi_parameters)
+          parameter = settings.PARAMETER_DELIMITER.join(multi_parameters)
       return parameter
     else:
       print "\n" + Back.RED + "(x) Error: You must set the \"INJECT_HERE\" tag to specify the testable parameter." + Style.RESET_ALL + "\n"
@@ -197,10 +198,10 @@ def do_POST_check(parameter):
 def vuln_POST_param(parameter, url):
 
     # Define the vulnerable parameter
-    if re.findall(r"&(.*)=" + settings.INJECT_TAG + "", parameter):
-      vuln_parameter = re.findall(r"&(.*)=" + settings.INJECT_TAG + "", parameter)
+    if re.findall(r"" + settings.PARAMETER_DELIMITER + "(.*)=" + settings.INJECT_TAG + "", parameter):
+      vuln_parameter = re.findall(r"" + settings.PARAMETER_DELIMITER + "(.*)=" + settings.INJECT_TAG + "", parameter)
       vuln_parameter = ''.join(vuln_parameter)
-      vuln_parameter = re.sub(r"(.*)=(.*)&", "", vuln_parameter)
+      vuln_parameter = re.sub(r"(.*)=(.*)"+ settings.PARAMETER_DELIMITER, "", vuln_parameter)
 
     elif re.findall(r"(.*)=" + settings.INJECT_TAG + "", parameter):
       vuln_parameter = re.findall(r"(.*)=" + settings.INJECT_TAG + "", parameter)
@@ -246,10 +247,10 @@ def suffixes(payload, suffix):
 def specify_cookie_parameter(cookie):
 
   # Specify the vulnerable cookie parameter
-  if re.findall(r"&(.*)=" + settings.INJECT_TAG + "", cookie):
-    inject_cookie = re.findall(r";(.*)=" + settings.INJECT_TAG + "", cookie)
+  if re.findall(r"" + settings.COOKIE_DELIMITER + "(.*)=" + settings.INJECT_TAG + "", cookie):
+    inject_cookie = re.findall(r"" + settings.COOKIE_DELIMITER + "(.*)=" + settings.INJECT_TAG + "", cookie)
     inject_cookie = ''.join(inject_cookie)
-    inject_cookie = re.sub(r"(.*)=(.*);", "", inject_cookie)
+    inject_cookie = re.sub(r"(.*)=(.*)"+settings.COOKIE_DELIMITER, "", inject_cookie)
 
   elif re.findall(r"(.*)=" + settings.INJECT_TAG + "", cookie):
     inject_cookie = re.findall(r"(.*)=" + settings.INJECT_TAG + "", cookie)

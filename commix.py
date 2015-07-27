@@ -48,23 +48,23 @@ if is_windows:
 def main():
 
   try:
-    #Call the banner
+    # Checkall the banner
     menu.banner()
         
     # Check python version number.
     version.python_version()
     
-    #Check if defined "--version" option.
+    # Check if defined "--version" option.
     if menu.options.version:
       version.show_version()
       sys.exit(0)
         
-    #Check if defined "--update" option.        
+    # Check if defined "--update" option.        
     if menu.options.update:
       update.updater()
       sys.exit(0)
         
-    #Check if defined "--install" option.        
+    # Check if defined "--install" option.        
     if menu.options.install:
       install.installer()
       sys.exit(0)
@@ -75,12 +75,20 @@ def main():
       print ""
       sys.exit(0)
 
-    #Check if specified wrong injection technique
+    # Check if defined character used for splitting parameter values.
+    if menu.options.pdel:
+     settings.PARAMETER_DELIMITER = menu.options.pdel
+
+    # Check if defined character used for splitting cookie values.
+    if menu.options.cdel:
+     settings.COOKIE_DELIMITER = menu.options.cdel
+
+    # Check if specified wrong injection technique
     if menu.options.tech and menu.options.tech not in settings.AVAILABLE_TECHNIQUES:
       found_tech = False
       # Convert injection technique(s) to lowercase
       menu.options.tech = menu.options.tech.lower()
-      #Check if used the ',' separator
+      # Check if used the ',' separator
       if "," in menu.options.tech:
         split_techniques_names = menu.options.tech.split(",")
       else:
@@ -101,7 +109,7 @@ def main():
     if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
       settings.COOKIE_INJECTION = True
 
-    #Check if specified wrong alternative shell
+    # Check if specified wrong alternative shell
     if menu.options.alter_shell:
       if menu.options.alter_shell.lower() not in settings.AVAILABLE_SHELLS:
         print Back.RED + "(x) Error: '" + menu.options.alter_shell + "' shell is not supported!" + Style.RESET_ALL
@@ -135,11 +143,11 @@ def main():
       print Back.RED + "(x) Error: You must enter the '--file-write' or '--file-upload' parameter." + Style.RESET_ALL
       sys.exit(0)
         
-    #Check if defined "--random-agent" option.
+    # Check if defined "--random-agent" option.
     if menu.options.random_agent:
       menu.options.agent = random.choice(settings.USER_AGENT_LIST)
             
-    #Check if defined "--url" option.
+    # Check if defined "--url" option.
     if menu.options.url:
       sys.stdout.write("(*) Checking connection to the target URL... ")
       sys.stdout.flush()
@@ -152,13 +160,13 @@ def main():
       try:
         request = urllib2.Request(url)
         
-        #Check if defined extra headers.
+        # Check if defined extra headers.
         headers.do_check(request)
         response = urllib2.urlopen(request)
         content = response.read()
         print "[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]"
 
-        #Check if defined "--tor" option.
+        # Check if defined "--tor" option.
         if menu.options.tor:
           tor.do_check()
 
@@ -203,7 +211,7 @@ def main():
       print Back.RED + "(x) Error: You must specify the target URL." + Style.RESET_ALL + "\n"
       sys.exit(0)
 
-    #Check if defined "--proxy" option.
+    # Check if defined "--proxy" option.
     if menu.options.proxy:
       proxy.do_check(url)
 

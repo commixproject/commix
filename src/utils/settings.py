@@ -168,4 +168,10 @@ VALID_URL_FORMAT = "https?://(?:www)?(?:[\w-]{2,255}(?:\.\w{2,6}){1,2})(?:/[\w&%
 # Accepted shell menu options
 SHELL_OPTIONS = ['?','quit','back']
 
+# Cookie delimiter
+COOKIE_DELIMITER = ";"
+
+# Cookie delimiter
+PARAMETER_DELIMITER = "&"
+
 #eof

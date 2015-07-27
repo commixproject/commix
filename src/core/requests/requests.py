@@ -41,7 +41,7 @@ def estimate_response_time(url, delay):
     url_time_response = int(diff)
   else:
     url_time_response = int(round(diff))
-    print Style.BRIGHT + "(!) The estimated response time is " + str(url_time_response) + " second" + "s"[url_time_response == 1:] + "." + Style.RESET_ALL
+    print Fore.YELLOW + "(^) Warning: The estimated response time is " + str(url_time_response) + " second" + "s"[url_time_response == 1:] + " and that may cause delays." + Style.RESET_ALL
   delay = int(delay) + int(url_time_response)
 
   return delay, url_time_response
