@@ -45,7 +45,7 @@ def file_read(separator, maxlen, TAG, prefix, suffix, delay, http_request_method
     sys.stdout.flush()
     print shell
   else:
-   sys.stdout.write("\n" + Back.RED + "(x) Error: It seems that you don't have permissions to read the '"+ file_to_read + "' file.\n" + Style.RESET_ALL)
+   sys.stdout.write("\n" + Back.RED + "(x) Error: It seems that you don't have permissions to read the '"+ file_to_read + "' file." + Style.RESET_ALL)
    sys.stdout.flush()
    
 
@@ -92,7 +92,7 @@ def file_write(separator, maxlen, TAG, prefix, suffix, delay, http_request_metho
     sys.stdout.write(Style.BRIGHT + "\n\n  (!) The " + Style.UNDERLINE + shell + Style.RESET_ALL + Style.BRIGHT +" file was created successfully!\n" + Style.RESET_ALL)
     sys.stdout.flush()
   else:
-   sys.stdout.write("\n" + Back.RED + "(x) Error: It seems that you don't have permissions to write the '"+ dest_to_write + "' file.\n" + Style.RESET_ALL)
+   sys.stdout.write("\n" + Back.RED + "(x) Error: It seems that you don't have permissions to write the '"+ dest_to_write + "' file." + Style.RESET_ALL)
    sys.stdout.flush()
    
    

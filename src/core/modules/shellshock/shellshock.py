@@ -417,10 +417,10 @@ def shellshock_handler(url, http_request_method, filename):
         continue
 
   except urllib2.HTTPError, err:
-    print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
+    print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
 
   except urllib2.URLError, err:
-    print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
+    print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
 
 
 """
@@ -446,7 +446,7 @@ def cmd_exec(url, cmd, cve, check_header):
       return shell
 
     except urllib2.URLError, err:
-      print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
+      print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
       sys.exit(0)
 
   shell = check_for_shell(url, cmd, cve, check_header)

@@ -29,7 +29,7 @@ def load_modules(url, http_request_method, filename):
       # The icmp exfiltration handler
       icmp_exfiltration.icmp_exfiltration_handler(url, http_request_method)
     except ImportError as e:
-      print "\n" + Back.RED + "(x) Error : " + str(e) + Style.RESET_ALL
+      print "\n" + Back.RED + "(x) Error: " + str(e) + Style.RESET_ALL
       sys.exit(0) 
     sys.exit(0)
   # Check if defined the icmp exfiltration module
@@ -40,6 +40,6 @@ def load_modules(url, http_request_method, filename):
       # The Shellshock handler
       shellshock.shellshock_handler(url, http_request_method, filename)
     except ImportError as e:
-      print "\n" + Back.RED + "(x) Error : " + str(e) + Style.RESET_ALL
+      print "\n" + Back.RED + "(x) Error: " + str(e) + Style.RESET_ALL
       sys.exit(0) 
     sys.exit(0) 

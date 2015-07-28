@@ -45,7 +45,7 @@ def file_read(separator, TAG, prefix, suffix, whitespace, http_request_method, u
     sys.stdout.flush()
     print shell
   else:
-   sys.stdout.write("\n" + Back.RED + "(x) Error: It seems that you don't have permissions to read the '"+ file_to_read + "' file.\n" + Style.RESET_ALL)
+   sys.stdout.write("\n" + Back.RED + "(x) Error: It seems that you don't have permissions to read the '"+ file_to_read + "' file." + Style.RESET_ALL)
    sys.stdout.flush()
 
 

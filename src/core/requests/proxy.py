@@ -48,7 +48,7 @@ def do_check(url):
     sys.stdout.flush()
   else:
     print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + " ]\n"
-    print Back.RED + "(x) Error : Could not connect to proxy." + Style.RESET_ALL
+    print Back.RED + "(x) Error: Could not connect to proxy." + Style.RESET_ALL
     sys.exit(0)
 
 def use_proxy(request):

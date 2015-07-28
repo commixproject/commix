@@ -63,12 +63,12 @@ def do_check():
 
     except urllib2.URLError, err:
       print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
-      print Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
+      print Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
       sys.exit(0)
       
     except urllib2.HTTPError, err:
       print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
-      print Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
+      print Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
       sys.exit(0)
 
 def use_tor(request):

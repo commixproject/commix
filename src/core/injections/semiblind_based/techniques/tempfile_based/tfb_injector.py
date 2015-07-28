@@ -76,7 +76,7 @@ def examine_requests(payload, vuln_parameter, http_request_method, url):
     try:
       response = proxy.use_proxy(request)
     except urllib2.HTTPError, err:
-      print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
+      print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
       raise SystemExit() 
 
   # Check if defined Tor.
@@ -84,14 +84,14 @@ def examine_requests(payload, vuln_parameter, http_request_method, url):
     try:
       response = tor.use_tor(request)
     except urllib2.HTTPError, err:
-      print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
+      print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
       raise SystemExit() 
 
   else:
     try:
       response = urllib2.urlopen(request)
     except urllib2.HTTPError, err:
-      print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
+      print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
       raise SystemExit() 
         
   end  = time.time()
@@ -131,7 +131,7 @@ def injection_test(payload, http_request_method, url):
       try:
         response = proxy.use_proxy(request)
       except urllib2.HTTPError, err:
-        print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
+        print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
         raise SystemExit() 
 
     # Check if defined Tor.
@@ -139,14 +139,14 @@ def injection_test(payload, http_request_method, url):
       try:
         response = tor.use_tor(request)
       except urllib2.HTTPError, err:
-        print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
+        print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
         raise SystemExit() 
 
     else:
       try:
         response = urllib2.urlopen(request)
       except urllib2.HTTPError, err:
-        print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
+        print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
         raise SystemExit() 
       
   # Check if defined method is POST.
@@ -172,7 +172,7 @@ def injection_test(payload, http_request_method, url):
       try:
         response = proxy.use_proxy(request)
       except urllib2.HTTPError, err:
-        print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
+        print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
         raise SystemExit() 
 
     # Check if defined Tor.
@@ -180,14 +180,14 @@ def injection_test(payload, http_request_method, url):
       try:
         response = tor.use_tor(request)
       except urllib2.HTTPError, err:
-        print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
+        print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
         raise SystemExit() 
 
     else:
       try:
         response = urllib2.urlopen(request)
       except urllib2.HTTPError, err:
-        print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
+        print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
         raise SystemExit()  
       
   end  = time.time()
@@ -228,7 +228,7 @@ def cookie_injection_test(url, vuln_parameter, payload):
       proxy = urllib2.ProxyHandler({settings.PROXY_PROTOCOL: menu.options.proxy})
       response = inject_cookie(url, vuln_parameter, payload, proxy)
     except urllib2.HTTPError, err:
-      print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
+      print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
       raise SystemExit() 
 
   # Check if defined Tor.
@@ -237,14 +237,14 @@ def cookie_injection_test(url, vuln_parameter, payload):
       proxy = urllib2.ProxyHandler({settings.PROXY_PROTOCOL:settings.PRIVOXY_IP + ":" + PRIVOXY_PORT})
       response = inject_cookie(url, vuln_parameter, payload, proxy)
     except urllib2.HTTPError, err:
-      print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
+      print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
       raise SystemExit() 
 
   else:
     try:
       response = inject_cookie(url, vuln_parameter, payload, proxy)
     except urllib2.HTTPError, err:
-      print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
+      print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
       raise SystemExit() 
 
   end  = time.time()

@@ -38,7 +38,7 @@ if os.path.isdir("./.git"):
   with open('.git/refs/heads/master', 'r') as f:
     COMMIT_ID = "-" + f.readline()[0:7]
 else:
-    COMMIT_ID = ""
+    COMMIT_ID = "-" + "NonGit"
     
 # Output Directory
 OUTPUT_DIR = ".output/"  

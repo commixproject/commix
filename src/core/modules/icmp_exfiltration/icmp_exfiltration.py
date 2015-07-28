@@ -149,7 +149,7 @@ def icmp_exfiltration_handler(url, http_request_method):
     try:
       response = proxy.use_proxy(request)
     except urllib2.HTTPError, err:
-      print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
+      print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
       os._exit(0)
 
   # Check if defined Tor.
@@ -157,14 +157,14 @@ def icmp_exfiltration_handler(url, http_request_method):
     try:
       response = tor.use_tor(request)
     except urllib2.HTTPError, err:
-      print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
+      print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
       os._exit(0)
 
   else:
     try:
       response = urllib2.urlopen(request)
     except urllib2.HTTPError, err:
-      print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
+      print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
       os._exit(0)
 
   ip_data = menu.options.ip_icmp_data
