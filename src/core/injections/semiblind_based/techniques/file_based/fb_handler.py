@@ -317,8 +317,11 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                     
                     if shell:
                       shell = " ".join(str(p) for p in shell)
-                      print Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n"
-                    
+                      if shell != "":
+                        print Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n"
+                      else:
+                        print Back.RED + "(x) Error: The '" + cmd + "' command, does not return any output." + Style.RESET_ALL + "\n"
+
               elif gotshell in settings.CHOISE_NO:
                 # Delete previous shell (text) files (output)
                 delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)

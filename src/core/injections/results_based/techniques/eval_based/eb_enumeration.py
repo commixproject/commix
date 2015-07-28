@@ -184,11 +184,11 @@ def single_os_cmd_exec(separator, TAG, prefix, suffix, http_request_method, url,
   shell = eb_injector.injection_results(response, TAG)
   if shell:
     shell = "".join(str(p) for p in shell).replace(" ", "", 1)[:-1]
-    if menu.options.verbose:
-      print ""
-    print "\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL
+    if shell != "":
+      print "\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL
+    else:
+      print "\n" + Back.RED + "(x) Error: The '" + cmd + "' command, does not return any output." + Style.RESET_ALL
     sys.exit(0)
-
 
 """
 Check the defined options

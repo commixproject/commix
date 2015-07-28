@@ -205,7 +205,10 @@ def eb_injection_handler(url, delay, filename, http_request_method):
                     shell = eb_injector.injection_results(response, TAG)
                     if shell:
                       shell = "".join(str(p) for p in shell).replace(" ", "", 1)[:-1]
-                      print "\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n"
+                      if shell != "":
+                        print "\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n"
+                      else:
+                        print "\n" + Back.RED + "(x) Error: The '" + cmd + "' command, does not return any output." + Style.RESET_ALL + "\n"
                     
                 except KeyboardInterrupt: 
                   raise

@@ -233,7 +233,7 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                         print "\n\n" + Fore.GREEN + Style.BRIGHT + output + Style.RESET_ALL
                         print "\n(*) Finished in "+ time.strftime('%H:%M:%S', time.gmtime(check_how_long)) +".\n"
                       else:
-                        print ""
+                        print "\n" + Back.RED + "(x) Error: The '" + cmd + "' command, does not return any output." + Style.RESET_ALL + "\n"
                         
                     except KeyboardInterrupt: 
                       raise

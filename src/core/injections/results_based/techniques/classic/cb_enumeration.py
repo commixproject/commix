@@ -175,7 +175,6 @@ def system_passwords(separator, TAG, prefix, suffix, whitespace, http_request_me
       sys.stdout.flush()
       print "\n" + Back.RED + "(x) Error: Cannot open '" + settings.SHADOW_FILE + "'." + Style.RESET_ALL
 
-
 """
 Single os-shell execution
 """
@@ -184,12 +183,12 @@ def single_os_cmd_exec(separator, TAG, prefix, suffix, whitespace, http_request_
   response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell)
   shell = cb_injector.injection_results(response, TAG)
   if shell:
-    if menu.options.verbose:
-      print ""
     shell = "".join(str(p) for p in shell)
-    print "\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL
+    if shell != "":
+      print "\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL 
+    else:
+      print "\n" + Back.RED + "(x) Error: The '" + cmd + "' command, does not return any output." + Style.RESET_ALL 
     sys.exit(0)
-
 
 """
 Check the defined options

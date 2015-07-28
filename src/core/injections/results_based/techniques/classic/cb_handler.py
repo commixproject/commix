@@ -217,7 +217,10 @@ def cb_injection_handler(url, delay, filename, http_request_method):
                       shell = cb_injector.injection_results(response, TAG)
                       if shell:
                         shell = "".join(str(p) for p in shell)
-                        print "\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n"
+                        if shell != "":
+                          print "\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n"
+                        else:
+                          print "\n" + Back.RED + "(x) Error: The '" + cmd + "' command, does not return any output." + Style.RESET_ALL + "\n"
 
                   except KeyboardInterrupt: 
                     raise

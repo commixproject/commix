@@ -186,10 +186,12 @@ def single_os_cmd_exec(separator, payload, TAG, delay, prefix, suffix, http_requ
   response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
   shell = fb_injector.injection_results(url, OUTPUT_TEXTFILE, delay)
   if shell:
-    if menu.options.verbose:
-      print ""
     shell = " ".join(str(p) for p in shell)
-    print "\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL
+    if shell != "":
+      print "\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n"
+    else:
+      print "\n" + Back.RED + "(x) Error: The '" + cmd + "' command, does not return any output." + Style.RESET_ALL
+  sys.exit(0)
 
 """
 Check the defined options

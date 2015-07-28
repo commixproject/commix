@@ -214,7 +214,7 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
               
               # Check if defined single cmd.
               if menu.options.os_cmd:
-                tfb_enumeration.single_os_cmd_exec(separator, maxlen, prefix, suffix, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+                tfb_enumeration.single_os_cmd_exec(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
 
               # Pseudo-Terminal shell
               go_back = False
@@ -252,7 +252,7 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
                           print "\n\n" + Fore.GREEN + Style.BRIGHT + output + Style.RESET_ALL
                           print "\n(*) Finished in "+ time.strftime('%H:%M:%S', time.gmtime(check_how_long)) +".\n"
                         else:
-                          print ""
+                          print "\n" + Back.RED + "(x) Error: The '" + cmd + "' command, does not return any output." + Style.RESET_ALL + "\n"
                         
                     except KeyboardInterrupt: 
                       raise
