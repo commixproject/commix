@@ -225,6 +225,61 @@ def cookie_injection_test(url, vuln_parameter, payload):
 
   return how_long
 
+# --------------------------------------------------------------
+# Check if target host is vulnerable.(User-Agent-based injection)
+# --------------------------------------------------------------
+def user_agent_injection_test(url, vuln_parameter, payload):
+
+  def inject_user_agent(url, vuln_parameter, payload, proxy):
+    if proxy == None:
+      opener = urllib2.build_opener()
+    else:
+      opener = urllib2.build_opener(proxy)
+
+    request = urllib2.Request(url)
+    #Check if defined extra headers.
+    headers.do_check(request)
+    payload = urllib.unquote(payload)
+    request.add_header('User-Agent', payload)
+    response = opener.open(request)
+    return response
+
+  start = 0
+  end = 0
+  start = time.time()
+
+  proxy = None 
+  response = inject_user_agent(url, vuln_parameter, payload, proxy)
+  
+  # Check if defined any HTTP Proxy.
+  if menu.options.proxy:
+    try:
+      proxy = urllib2.ProxyHandler({settings.PROXY_PROTOCOL: menu.options.proxy})
+      response = inject_user_agent(url, vuln_parameter, payload, proxy)
+    except urllib2.HTTPError, err:
+      print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
+      raise SystemExit() 
+
+  # Check if defined Tor.
+  elif menu.options.tor:
+    try:
+      proxy = urllib2.ProxyHandler({settings.PROXY_PROTOCOL:settings.PRIVOXY_IP + ":" + PRIVOXY_PORT})
+      response = inject_user_agent(url, vuln_parameter, payload, proxy)
+    except urllib2.HTTPError, err:
+      print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
+      raise SystemExit() 
+
+  else:
+    try:
+      response = inject_user_agent(url, vuln_parameter, payload, proxy)
+    except urllib2.HTTPError, err:
+      print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
+      raise SystemExit() 
+
+  end  = time.time()
+  how_long = int(end - start)
+
+  return how_long
 
 # -------------------------------------------
 # The main command injection exploitation.
@@ -256,9 +311,14 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_m
     # Check if defined "--verbose" option.
     if menu.options.verbose:
       sys.stdout.write("\n" + Fore.GREY + payload.replace("\n", "\\n") + Style.RESET_ALL)
-
+    
+    # Check if defined cookie with "INJECT_HERE" tag
     if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
       how_long = cookie_injection_test(url, vuln_parameter, payload)
+
+    # Check if defined user-agent with "INJECT_HERE" tag
+    elif menu.options.agent and settings.INJECT_TAG in menu.options.agent:
+      how_long = user_agent_injection_test(url, vuln_parameter, payload)
 
     else:  
       how_long = examine_requests(payload, vuln_parameter, http_request_method, url)
@@ -302,10 +362,15 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_m
         # Check if defined "--verbose" option.
         if menu.options.verbose:
           sys.stdout.write("\n" + Fore.GREY + payload.replace("\n", "\\n") + Style.RESET_ALL)
-          
+
+        # Check if defined cookie with "INJECT_HERE" tag
         if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
           how_long = cookie_injection_test(url, vuln_parameter, payload)
-          
+
+        # Check if defined user-agent with "INJECT_HERE" tag
+        elif menu.options.agent and settings.INJECT_TAG in menu.options.agent:
+          how_long = user_agent_injection_test(url, vuln_parameter, payload)
+
         else:    
           how_long = examine_requests(payload, vuln_parameter, http_request_method, url)
                 
@@ -360,8 +425,13 @@ def false_positive_check(separator, TAG, cmd, prefix, suffix, delay, http_reques
     if menu.options.verbose:
       sys.stdout.write("\n" + Fore.GREY + payload.replace("\n", "\\n") + Style.RESET_ALL)
 
+    # Check if defined cookie with "INJECT_HERE" tag
     if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
       how_long = cookie_injection_test(url, vuln_parameter, payload)
+
+    # Check if defined user-agent with "INJECT_HERE" tag
+    elif menu.options.agent and settings.INJECT_TAG in menu.options.agent:
+      how_long = user_agent_injection_test(url, vuln_parameter, payload)
 
     else:  
       how_long = examine_requests(payload, vuln_parameter, http_request_method, url)
@@ -398,10 +468,15 @@ def false_positive_check(separator, TAG, cmd, prefix, suffix, delay, http_reques
         # Check if defined "--verbose" option.
         if menu.options.verbose:
           sys.stdout.write("\n" + Fore.GREY + payload.replace("\n", "\\n") + Style.RESET_ALL)
-          
+
+        # Check if defined cookie with "INJECT_HERE" tag
         if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
           how_long = cookie_injection_test(url, vuln_parameter, payload)
-          
+
+        # Check if defined user-agent with "INJECT_HERE" tag
+        elif menu.options.agent and settings.INJECT_TAG in menu.options.agent:
+          how_long = user_agent_injection_test(url, vuln_parameter, payload)
+
         else:    
           how_long = examine_requests(payload, vuln_parameter, http_request_method, url)
                 

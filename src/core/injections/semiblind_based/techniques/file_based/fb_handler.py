@@ -142,6 +142,13 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
             # Check if target host is vulnerable to cookie injection.
             vuln_parameter = parameters.specify_cookie_parameter(menu.options.cookie)
             response = fb_injector.cookie_injection_test(url, vuln_parameter, payload)
+
+          # User-Agent Injection
+          elif settings.USER_AGENT_INJECTION == True:
+            # Check if target host is vulnerable to user-agent injection.
+            vuln_parameter = parameters.specify_user_agent_parameter(menu.options.agent)
+            response = fb_injector.user_agent_injection_test(url, vuln_parameter, payload)          
+
           else:
             # Check if target host is vulnerable.
             response, vuln_parameter = fb_injector.injection_test(payload, http_request_method, url)
@@ -249,6 +256,11 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
           if settings.COOKIE_INJECTION == True: 
             http_request_method = "cookie"
             found_vuln_parameter = vuln_parameter
+
+          elif settings.USER_AGENT_INJECTION == True: 
+            http_request_method = "GET"
+            found_vuln_parameter = "User-Agent"
+
           else:
             if http_request_method == "GET":
               found_vuln_parameter = parameters.vuln_GET_param(url)

@@ -109,6 +109,10 @@ def main():
     if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
       settings.COOKIE_INJECTION = True
 
+    # User-Agent Injection
+    if menu.options.agent and settings.INJECT_TAG in menu.options.agent:
+      settings.USER_AGENT_INJECTION = True
+
     # Check if specified wrong alternative shell
     if menu.options.alter_shell:
       if menu.options.alter_shell.lower() not in settings.AVAILABLE_SHELLS:

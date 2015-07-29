@@ -110,6 +110,12 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
               vuln_parameter = parameters.specify_cookie_parameter(menu.options.cookie)
               how_long = tb_injector.cookie_injection_test(url, vuln_parameter, payload)
 
+            # User-Agent Injection
+            elif settings.USER_AGENT_INJECTION == True:
+              # Check if target host is vulnerable to user-agent injection.
+              vuln_parameter = parameters.specify_user_agent_parameter(menu.options.agent)
+              how_long = tb_injector.user_agent_injection_test(url, vuln_parameter, payload)
+
             else:
               # Check if target host is vulnerable.
               how_long, vuln_parameter = tb_injector.injection_test(payload, http_request_method, url)
@@ -167,6 +173,11 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
               if settings.COOKIE_INJECTION == True: 
                 http_request_method = "cookie"
                 found_vuln_parameter = vuln_parameter
+
+              elif settings.USER_AGENT_INJECTION == True: 
+                http_request_method = "GET"
+                found_vuln_parameter = "User-Agent"
+                
               else:
                 if http_request_method == "GET":
                   found_vuln_parameter = parameters.vuln_GET_param(url)
@@ -185,7 +196,7 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
               print Style.BRIGHT + "\n(!) The ("+ http_request_method + ") '" + Style.UNDERLINE + found_vuln_parameter + Style.RESET_ALL + Style.BRIGHT + "' parameter is vulnerable to "+ injection_type +"."+ Style.RESET_ALL
               print "  (+) Type : "+ Fore.YELLOW + Style.BRIGHT + injection_type + Style.RESET_ALL + ""
               print "  (+) Technique : "+ Fore.YELLOW + Style.BRIGHT + technique.title() + Style.RESET_ALL + ""
-              print "  (+) Payload : "+ Fore.YELLOW + Style.BRIGHT + re.sub("%20", " ", urllib.unquote_plus(payload.replace("\n", "\\n"))) + Style.RESET_ALL
+              print "  (+) Payload : "+ Fore.YELLOW + Style.BRIGHT + re.sub("%20", " ", payload.replace("\n", "\\n")) + Style.RESET_ALL
 
               # Check for any enumeration options.
               tb_enumeration.do_check(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell)

