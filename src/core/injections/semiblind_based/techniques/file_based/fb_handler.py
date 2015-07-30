@@ -192,7 +192,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                 elif i == failed_tries :
                   if not menu.options.verbose:
                     print ""
-                  print Back.RED + "(x) Error: It seems that you don't have permissions to write on "+ SRV_ROOT_DIR + "." + Style.RESET_ALL
+                  print Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to write on "+ SRV_ROOT_DIR + "." + Style.RESET_ALL
                   while True:
                     tmp_upload = raw_input("(?) Do you want to try the temporary directory (" + tmp_path + ") [Y/n] > ").lower()
                     if tmp_upload in settings.CHOISE_YES:
