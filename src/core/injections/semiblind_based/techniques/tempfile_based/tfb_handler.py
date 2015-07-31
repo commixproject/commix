@@ -190,18 +190,25 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
               no_result = False
               
               if settings.COOKIE_INJECTION == True: 
-                http_request_method = "cookie"
+                header_name = " Cookie"
                 found_vuln_parameter = vuln_parameter
-                
-              elif settings.USER_AGENT_INJECTION == True: 
-                http_request_method = "GET"
-                found_vuln_parameter = "User-Agent"
+                the_type = " HTTP header"
 
+              elif settings.USER_AGENT_INJECTION == True: 
+                header_name = " User-Agent"
+                found_vuln_parameter = ""
+                the_type = " HTTP header"
+                
               else:
+                header_name = ""
+                the_type = " parameter"
                 if http_request_method == "GET":
                   found_vuln_parameter = parameters.vuln_GET_param(url)
                 else :
                   found_vuln_parameter = vuln_parameter
+
+              if len(found_vuln_parameter) != 0 :
+                found_vuln_parameter = " '" + Style.UNDERLINE + found_vuln_parameter + Style.RESET_ALL  + Style.BRIGHT + "'" 
 
               # Print the findings to log file.
               if export_injection_info == False:
@@ -212,7 +219,7 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
               counter = counter + 1
               
               # Print the findings to terminal.
-              print Style.BRIGHT + "\n(!) The ("+ http_request_method + ") '" + Style.UNDERLINE + found_vuln_parameter + Style.RESET_ALL + Style.BRIGHT + "' parameter is vulnerable to "+ injection_type +"."+ Style.RESET_ALL
+              print Style.BRIGHT + "\n(!) The ("+ http_request_method + ")" + found_vuln_parameter + header_name + the_type + " is vulnerable to "+ injection_type + "." + Style.RESET_ALL
               print "  (+) Type : "+ Fore.YELLOW + Style.BRIGHT + injection_type + Style.RESET_ALL + ""
               print "  (+) Technique : "+ Fore.YELLOW + Style.BRIGHT + technique.title() + Style.RESET_ALL + ""
               print "  (+) Payload : "+ Fore.YELLOW + Style.BRIGHT + re.sub("%20", " ", payload.replace("\n", "\\n")) + Style.RESET_ALL

@@ -24,6 +24,7 @@ from src.utils import settings
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 from src.core.requests import requests
+from src.core.requests import parameters
 from src.core.modules import modules_handler
 from src.core.requests import authentication
 
@@ -62,15 +63,41 @@ def do_check(url, filename):
   else:
     pass
   
-  # Check if HTTP Method is POST.
+  # Check if HTTP Method is GET or POST.
+  header_name = ""
   if not menu.options.data:
     http_request_method = "GET"
+    check_parameter  = parameters.vuln_GET_param(url)
+    the_type = " parameter "
+
   else:
     http_request_method = "POST"
     parameter = menu.options.data
-    
+    check_parameter = parameters.vuln_POST_param(parameter, url)
+    the_type = " parameter " 
+
   # Load modules
   modules_handler.load_modules(url, http_request_method, filename)
+
+  # Cookie Injection
+  if settings.COOKIE_INJECTION == True:
+    header_name = " Cookie"
+    check_parameter  = parameters.specify_cookie_parameter(menu.options.cookie)
+    the_type = " HTTP header "
+            
+  # User-Agent Injection
+  elif settings.USER_AGENT_INJECTION == True:
+    header_name = " User-Agent"
+    check_parameter  = ""
+    the_type = " HTTP header "
+
+  else : 
+    pass
+
+  if len(check_parameter) != 0 :
+    check_parameter = " '" + check_parameter + "'"
+
+  print "(*) Setting the " + "(" + http_request_method + ")" + check_parameter + header_name + the_type + "for tests."
 
   # Estimating the response time (in seconds)
   delay, url_time_response = requests.estimate_response_time(url, delay)
