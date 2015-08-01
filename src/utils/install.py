@@ -31,7 +31,7 @@ def installer():
   packages = "build-essential python-dev"
   dependencies = "git python-pip"
   
-  sys.stdout.write("(*) Starting installer ... ")
+  sys.stdout.write("(*) Starting the installer... ")
   sys.stdout.flush()
   
   # Check if OS is Linux.
@@ -53,7 +53,7 @@ def installer():
     if not os.path.isfile("/usr/bin/git") or not os.path.isfile("/usr/bin/pip"):
       # Install requirement.
       if os.path.isfile("/etc/apt/sources.list"):
-        sys.stdout.write("[" + Fore.GREEN + " DONE " + Style.RESET_ALL + "]\n")
+        sys.stdout.write("[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]\n")
         sys.stdout.flush()
         # Check for dependencies.
         dependencies_items = dependencies.split()
@@ -68,10 +68,10 @@ def installer():
         
     # Force install of necessary packages
     subprocess.Popen("apt-get --force-yes -y install " + packages + ">/dev/null 2>&1", shell=True).wait()
-    sys.stdout.write("[" + Fore.GREEN + " DONE " + Style.RESET_ALL + "]\n")
+    sys.stdout.write("[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]\n")
     sys.stdout.flush()
     
-    sys.stdout.write("(*) Installing "  + settings.APPLICATION + " into the /usr/share/"  + settings.APPLICATION + " ... ")
+    sys.stdout.write("(*) Installing "  + settings.APPLICATION + " into the /usr/share/"  + settings.APPLICATION + "... ")
     try:
       current_dir = os.getcwd()
       subprocess.Popen("cp -r " + current_dir + " /usr/share/" + settings.APPLICATION + " >/dev/null 2>&1", shell=True).wait()
@@ -79,10 +79,10 @@ def installer():
     except:
       print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
       sys.exit(0)
-    sys.stdout.write("[" + Fore.GREEN + " DONE " + Style.RESET_ALL + "]\n")
+    sys.stdout.write("[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]\n")
     sys.stdout.flush()
     
-    sys.stdout.write("(*) Installing "  + settings.APPLICATION + " to /usr/bin/"  + settings.APPLICATION + " ... ")
+    sys.stdout.write("(*) Installing "  + settings.APPLICATION + " to /usr/bin/"  + settings.APPLICATION + "... ")
     try:    
       with open('/usr/bin/commix', 'w') as f:
         f.write('#!/bin/bash\n')
@@ -91,7 +91,7 @@ def installer():
     except:
       print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
       sys.exit(0)
-    sys.stdout.write("[" + Fore.GREEN + " DONE " + Style.RESET_ALL + "]\n")
+    sys.stdout.write("[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]\n")
     sys.stdout.flush()
     
     #Create the Output Directory
