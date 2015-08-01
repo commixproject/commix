@@ -1,4 +1,5 @@
 ## Version 0.1b [2015]
+* Added support for user-agent-based command injections.
 * Added CVE-2014-6278 support on 'shellshock' module.
 * Added support for cookie-based command injections.
 * Added a generic false-positive prevention technique (removed --base64).
