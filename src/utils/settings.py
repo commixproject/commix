@@ -39,7 +39,10 @@ if os.path.isdir("./.git"):
     COMMIT_ID = "-" + f.readline()[0:7]
 else:
     COMMIT_ID = "-" + "NonGit"
-    
+
+# Git URL.
+GIT_URL = "https://github.com/stasinopoulos/" + APPLICATION + ".git"
+
 # Output Directory
 OUTPUT_DIR = ".output/"  
 
