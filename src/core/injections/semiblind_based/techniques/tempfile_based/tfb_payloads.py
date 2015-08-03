@@ -111,7 +111,7 @@ def decision_alter_shell(separator, j, TAG, OUTPUT_TEXTFILE, delay, http_request
     pass
 
     # New line fixation
-  if settings.USER_AGENT_INJECTION == True:
+  if settings.USER_AGENT_INJECTION == True or settings.REFERER_INJECTION == True:
     payload = payload.replace("\n","%0d")
 
   return payload
@@ -204,7 +204,7 @@ def cmd_execution_alter_shell(separator, cmd, j, OUTPUT_TEXTFILE, delay, http_re
     pass
 
     # New line fixation
-  if settings.USER_AGENT_INJECTION == True:
+  if settings.USER_AGENT_INJECTION == True or settings.REFERER_INJECTION == True:
     payload = payload.replace("\n","%0d")
 
   return payload
@@ -287,7 +287,7 @@ def get_char_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, d
     pass
 
     # New line fixation
-  if settings.USER_AGENT_INJECTION == True:
+  if settings.USER_AGENT_INJECTION == True or settings.REFERER_INJECTION == True:
     payload = payload.replace("\n","%0d")
   
   return payload
@@ -369,7 +369,7 @@ def fp_result_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, 
     pass
 
     # New line fixation
-  if settings.USER_AGENT_INJECTION == True:
+  if settings.USER_AGENT_INJECTION == True or settings.REFERER_INJECTION == True:
     payload = payload.replace("\n","%0d")
   
   return payload

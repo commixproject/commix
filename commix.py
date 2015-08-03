@@ -113,12 +113,15 @@ def main():
     if menu.options.agent and settings.INJECT_TAG in menu.options.agent:
       settings.USER_AGENT_INJECTION = True
 
+    # Referer Injection
+    if menu.options.referer and settings.INJECT_TAG in menu.options.referer:
+      settings.REFERER_INJECTION = True
+
     # Check if specified wrong alternative shell
     if menu.options.alter_shell:
       if menu.options.alter_shell.lower() not in settings.AVAILABLE_SHELLS:
         print Back.RED + "(x) Error: '" + menu.options.alter_shell + "' shell is not supported!" + Style.RESET_ALL
         sys.exit(0)
-
 
     # Check if defined "--file-upload" option.
     if menu.options.file_upload:

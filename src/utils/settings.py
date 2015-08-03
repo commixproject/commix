@@ -168,6 +168,9 @@ COOKIE_INJECTION = False
 # User-Agent injection
 USER_AGENT_INJECTION = False
 
+# Referer injection
+REFERER_INJECTION = False
+
 # Valid URL format check
 VALID_URL_FORMAT = "https?://(?:www)?(?:[\w-]{2,255}(?:\.\w{2,6}){1,2})(?:/[\w&%?#-]{1,300})?"
 

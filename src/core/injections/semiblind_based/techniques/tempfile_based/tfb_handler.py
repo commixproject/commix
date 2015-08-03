@@ -115,6 +115,12 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
               vuln_parameter = parameters.specify_user_agent_parameter(menu.options.agent)
               how_long = tfb_injector.user_agent_injection_test(url, vuln_parameter, payload)
 
+            # Referer Injection
+            elif settings.REFERER_INJECTION == True:
+              # Check if target host is vulnerable to referer injection.
+              vuln_parameter = parameters.specify_referer_parameter(menu.options.referer)
+              how_long = tfb_injector.referer_injection_test(url, vuln_parameter, payload)
+
             else:
               # Check if target host is vulnerable.
               how_long, vuln_parameter = tfb_injector.injection_test(payload, http_request_method, url)
@@ -198,7 +204,12 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
                 header_name = " User-Agent"
                 found_vuln_parameter = ""
                 the_type = " HTTP header"
-                
+
+              elif settings.REFERER_INJECTION == True: 
+                header_name = " Referer"
+                found_vuln_parameter = ""
+                the_type = " HTTP header"
+
               else:
                 header_name = ""
                 the_type = " parameter"

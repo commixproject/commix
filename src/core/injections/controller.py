@@ -91,6 +91,12 @@ def do_check(url, filename):
     check_parameter  = ""
     the_type = " HTTP header "
 
+  # Referer Injection
+  elif settings.REFERER_INJECTION == True:
+    header_name = " Referer"
+    check_parameter  = ""
+    the_type = " HTTP header "
+
   else : 
     pass
 

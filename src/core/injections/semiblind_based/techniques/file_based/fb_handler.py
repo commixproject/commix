@@ -149,6 +149,12 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
             vuln_parameter = parameters.specify_user_agent_parameter(menu.options.agent)
             response = fb_injector.user_agent_injection_test(url, vuln_parameter, payload)          
 
+          # Referer Injection
+          elif settings.REFERER_INJECTION == True:
+            # Check if target host is vulnerable to referer injection.
+            vuln_parameter = parameters.specify_referer_parameter(menu.options.referer)
+            response = fb_injector.referer_injection_test(url, vuln_parameter, payload)
+
           else:
             # Check if target host is vulnerable.
             response, vuln_parameter = fb_injector.injection_test(payload, http_request_method, url)
@@ -262,7 +268,12 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
             header_name = " User-Agent"
             found_vuln_parameter = ""
             the_type = " HTTP header"
-            
+
+          elif settings.REFERER_INJECTION == True: 
+            header_name = " Referer"
+            found_vuln_parameter = ""
+            the_type = " HTTP header"
+ 
           else:
             header_name = ""
             the_type = " parameter"

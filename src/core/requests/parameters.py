@@ -271,5 +271,15 @@ def specify_user_agent_parameter(user_agent):
    # Nothing to specify here! :)
 
   return user_agent
+
   
+# --------------------------------
+# The referer based injection.
+# --------------------------------
+def specify_referer_parameter(referer):
+
+   # Specify the vulnerable referer parameter.
+   # Nothing to specify here! :)
+
+  return referer
 #eof
