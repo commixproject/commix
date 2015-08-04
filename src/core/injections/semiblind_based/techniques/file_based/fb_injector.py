@@ -50,8 +50,8 @@ def injection_test(payload, http_request_method, url):
     # Check if its not specified the 'INJECT_HERE' tag
     url = parameters.do_GET_check(url)
     
-    # Encoding non-ASCII characters payload.
-    payload = urllib.quote(payload)
+    # Encoding spaces.
+    payload = payload.replace(" ","%20")
     
     # Define the vulnerable parameter
     vuln_parameter = parameters.vuln_GET_param(url)
@@ -92,7 +92,7 @@ def injection_test(payload, http_request_method, url):
     
     # Check if its not specified the 'INJECT_HERE' tag
     parameter = parameters.do_POST_check(parameter)
-    
+
     # Define the POST data
     data = re.sub(settings.INJECT_TAG, payload, parameter)
     request = urllib2.Request(url, data)
@@ -311,9 +311,9 @@ def injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method,
       # Check if its not specified the 'INJECT_HERE' tag
       url = parameters.do_GET_check(url)
       
-      # Encoding non-ASCII characters payload.
-      payload = urllib.quote(payload)
-      
+      # Encoding spaces.
+      payload = payload.replace(" ","%20")
+
       target = re.sub(settings.INJECT_TAG, payload, url)
       vuln_parameter = ''.join(vuln_parameter)
       request = urllib2.Request(target)
@@ -348,7 +348,7 @@ def injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method,
       # Check if defined method is POST.
       parameter = menu.options.data
       parameter = urllib2.unquote(parameter)
-      
+
       # Check if its not specified the 'INJECT_HERE' tag
       parameter = parameters.do_POST_check(parameter)
       
