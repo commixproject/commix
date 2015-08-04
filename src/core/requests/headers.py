@@ -35,7 +35,7 @@ def do_check(request):
     
   # Check if defined any HTTP Referer header.
   if menu.options.referer:
-    Referer = menu.options.agent
+    Referer = menu.options.referer
     request.add_header('Referer', Referer)
     
   # Check if defined any HTTP User-Agent header.
