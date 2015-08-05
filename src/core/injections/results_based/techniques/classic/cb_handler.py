@@ -102,7 +102,7 @@ def cb_injection_handler(url, delay, filename, http_request_method):
 
             # Check if defined "--verbose" option.
             if menu.options.verbose:
-              sys.stdout.write("\n" + Fore.GREY + payload + Style.RESET_ALL)
+              sys.stdout.write("\n" + Fore.GREY + "(~) Payload: " + payload.replace("%20"," ") + Style.RESET_ALL)
               
             # if need page reload
             if menu.options.url_reload:

@@ -291,7 +291,7 @@ def injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method,
       
   # Check if defined "--verbose" option.
   if menu.options.verbose:
-    sys.stdout.write("\n" + Fore.GREY + payload.replace("\n", "\\n") + Style.RESET_ALL)
+    sys.stdout.write("\n" + Fore.GREY + "(~) Payload: " + payload.replace("\n", "\\n") + Style.RESET_ALL)
   
   # Check if defined cookie with "INJECT_HERE" tag
   if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:

@@ -323,7 +323,7 @@ def shellshock_handler(url, http_request_method, filename):
 
         # Check if defined "--verbose" option.
         if menu.options.verbose:
-          sys.stdout.write("\n" + Fore.GREY + payload + Style.RESET_ALL)
+          sys.stdout.write("\n" + Fore.GREY + "(~) Payload: " + payload + Style.RESET_ALL)
 
         header = {check_header : payload}
         request = urllib2.Request(url, None, header)
@@ -437,7 +437,7 @@ def cmd_exec(url, cmd, cve, check_header):
 
       # Check if defined "--verbose" option.
       if menu.options.verbose:
-        sys.stdout.write("\n" + Fore.GREY + payload + Style.RESET_ALL)
+        sys.stdout.write("\n" + Fore.GREY + "(~) Payload: " + payload + Style.RESET_ALL)
 
       header = { check_header : payload }
       request = urllib2.Request(url, None, header)

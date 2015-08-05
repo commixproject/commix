@@ -90,7 +90,7 @@ def eb_injection_handler(url, delay, filename, http_request_method):
 
           # Check if defined "--verbose" option.
           if menu.options.verbose:
-            sys.stdout.write("\n" + Fore.GREY + payload + Style.RESET_ALL)
+            sys.stdout.write("\n" + Fore.GREY + "(~) Payload: " + payload + Style.RESET_ALL)
 
           # Cookie Injection
           if settings.COOKIE_INJECTION == True:

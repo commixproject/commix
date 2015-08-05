@@ -101,7 +101,7 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
             # Check if defined "--verbose" option.
             if menu.options.verbose:
               if separator == ";" or separator == "&&" or separator == "||":
-                print Fore.GREY + payload.replace("\n", "\\n") + Style.RESET_ALL
+                print Fore.GREY + "(~) Payload: " + payload.replace("\n", "\\n") + Style.RESET_ALL
                 
             # Cookie Injection
             if settings.COOKIE_INJECTION == True:

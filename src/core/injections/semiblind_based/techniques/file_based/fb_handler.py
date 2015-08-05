@@ -135,7 +135,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
 
           # Check if defined "--verbose" option.
           if menu.options.verbose:
-            print Fore.GREY + payload.replace("\n", "\\n") + Style.RESET_ALL
+            print Fore.GREY + "(~) Payload: " + payload.replace("\n", "\\n") + Style.RESET_ALL
 
           # Cookie Injection
           if settings.COOKIE_INJECTION == True:

@@ -34,12 +34,12 @@ def do_check(request):
     request.add_header('Host', Host)
     
   # Check if defined any HTTP Referer header.
-  if menu.options.referer:
+  if menu.options.referer and settings.REFERER_INJECTION == False:
     Referer = menu.options.referer
     request.add_header('Referer', Referer)
     
   # Check if defined any HTTP User-Agent header.
-  if menu.options.agent:
+  if menu.options.agent and settings.USER_AGENT_INJECTION == False:
     Agent = menu.options.agent
     request.add_header('User-Agent', Agent)
     
