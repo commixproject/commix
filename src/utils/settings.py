@@ -183,4 +183,35 @@ COOKIE_DELIMITER = ";"
 # Cookie delimiter
 PARAMETER_DELIMITER = "&"
 
+# Web-page Charset
+CHARSET = ""
+
+# Character Sets List (basic)
+CHARSET_LIST = [
+        "big5",
+        "euc-kr",
+        "iso-8859-1",
+        "iso-8859-2",
+        "iso-8859-3",
+        "iso-8859-4",
+        "iso-8859-5",
+        "iso-8859-6",
+        "iso-8859-7",
+        "iso-8859-8",
+        "koi8-r",
+        "shift-jis",
+        "x-euc",
+        "utf-8",
+        "windows-1250",
+        "windows-1251",
+        "windows-1252",
+        "windows-1253",
+        "windows-1254",
+        "windows-1255",
+        "windows-1256",
+        "windows-1257",
+        "windows-1258",
+        "windows-874",
+]
+
 #eof
