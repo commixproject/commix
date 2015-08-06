@@ -77,6 +77,7 @@ A collection of pwnable VMs, that includes web apps vulnerable to command inject
 - [Upload a Weevely PHP web shell on target host.](https://www.youtube.com/watch?v=cy7AW6OQBmU)
 - [Exploiting cookie-based command injection flaws via commix.](https://www.youtube.com/watch?v=ae4DOS-3vm8)
 - [Exploiting user-agent-based command injection flaws via commix.](https://www.youtube.com/watch?v=g3hSFOFRJrc)
+- [Exploiting referer-based command injection flaws via commix.](https://www.youtube.com/watch?v=uMt9_jDaJUI)
 
 ####Bugs and Enhancements
 For bug reports or enhancements, please open an issue [here](https://github.com/stasinopoulos/commix/issues).
