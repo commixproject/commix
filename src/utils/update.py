@@ -51,7 +51,8 @@ def updater():
         print "---\n"
       else:
         print "["+ Fore.RED + " FAILED " + Style.RESET_ALL +"]"
-        print Back.RED + "(x) Error: Do it manually: "+ Style.BRIGHT +"'git clone " + settings.GIT_URL + " " + settings.APPLICATION +"' "+ Style.RESET_ALL + "\n"   
+
+        print Back.RED + "(x) Error: The '.git' directory not found. Do it manually: "+ Style.BRIGHT +"'git clone " + settings.GIT_URL + " " + settings.APPLICATION +"' "+ Style.RESET_ALL    
         sys.exit(0)
     else:
         print "["+ Fore.RED + " FAILED " + Style.RESET_ALL +"]"
