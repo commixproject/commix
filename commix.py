@@ -175,8 +175,15 @@ def main():
         content = response.read()
         print "[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]"
         
-        # Charset detection.
-        charset = re.findall(r"charset=(.*)\"", html_data)
+        # Charset detection [1].
+        # [1] http://www.w3schools.com/html/html_charset.asp
+        # Check if HTML4 format
+        content = re.findall(r";charset=(.*)\"", html_data)
+        if len(content) != 0 :
+          charset = content
+        else:
+           # Check if HTML5 format
+          charset = re.findall(r"charset=['\"](.*)['\"]", html_data)
         if len(charset) != 0 :
           settings.CHARSET = charset[len(charset)-1]
           if settings.CHARSET.lower() not in  settings.CHARSET_LIST:
