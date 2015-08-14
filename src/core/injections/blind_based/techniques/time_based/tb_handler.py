@@ -268,11 +268,11 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                       raise
                   
                 elif gotshell in settings.CHOISE_NO:
-                  break
                   if menu.options.verbose:
                     sys.stdout.write("\r(*) Continue testing the "+ technique +"... ")
                     sys.stdout.flush()
-                
+                  break
+
                 else:
                   if gotshell == "":
                     gotshell = "enter"
