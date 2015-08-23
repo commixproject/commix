@@ -44,7 +44,8 @@ from src.core.injections.blind_based.techniques.time_based import tb_file_access
 # The "time-based" injection technique handler.
 #-------------------------------------------------
 def tb_injection_handler(url, delay, filename, http_request_method, url_time_response):
-  
+
+  percent = 0
   counter = 1
   num_of_chars = 1
   vp_flag = True
@@ -65,8 +66,9 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
 
   # Calculate all possible combinations
   total = (len(settings.PREFIXES) * len(settings.SEPARATORS) * len(settings.SUFFIXES) - len(settings.JUNK_COMBINATION))
-    
-  sys.stdout.write("(*) Testing the "+ technique + "... ")
+
+  percent = str(percent)+"%"
+  sys.stdout.write("\r(*) Testing the "+ technique + "... " +  "[ " + percent + " ]")  
   sys.stdout.flush()
 
   for prefix in settings.PREFIXES:
@@ -144,9 +146,10 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                 randv2 = random.randrange(1, 2)
                 randvcalc = randv1 + randv2
                 cmd = "(" + str(randv1) + "+" + str(randv2) + ")"
-                output = tb_injector.false_positive_check(separator, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, randvcalc, alter_shell)
                 
-                if str(output) == str(randvcalc):
+                # Check for false positive resutls
+                output = tb_injector.false_positive_check(separator, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, randvcalc, alter_shell)
+                if str(output) == str(randvcalc) and len(TAG) == output_length:
                   if not menu.options.verbose:
                     percent = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
                   else:
@@ -262,8 +265,15 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                         print "\n\n" + Fore.GREEN + Style.BRIGHT + output + Style.RESET_ALL
                         print "\n(*) Finished in "+ time.strftime('%H:%M:%S', time.gmtime(check_how_long)) +".\n"
                       else:
-                        print "\n" + Back.RED + "(x) Error: The '" + cmd + "' command, does not return any output." + Style.RESET_ALL + "\n"
-                        
+                        # Check if exists pipe filtration.
+                        if output != False :
+                           print "\n" + Fore.YELLOW  + "(^) Warning: It appears that '" + cmd + "' command could not return any output" + (', due to pipe (|) filtration.', '.')[separator == "||"]  + Style.RESET_ALL
+                           print Fore.YELLOW  + "             "+ ('To bypass that limitation, u', 'U')[separator == "||"]  +"se '--alter-shell' or try another injection technique (i.e. '--technique=\"f\"')" + Style.RESET_ALL 
+                           sys.exit(1)
+                        # Check for fault command.
+                        else:
+                           print Back.RED + "(x) Error: The '" + cmd + "' command, does not return any output." + Style.RESET_ALL + "\n"
+
                     except KeyboardInterrupt: 
                       raise
                   

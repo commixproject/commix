@@ -451,12 +451,16 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_m
     check_how_long = int(check_end - check_start)
     output = "".join(str(p) for p in output)
 
+    # Check for empty output.
+    if output == (len(output) * " "):
+      output = ""
+
   else:
     check_start = 0
     sys.stdout.write("["+Fore.RED+" FAILED "+ Style.RESET_ALL+"]\n")
     sys.stdout.flush()  
     check_how_long = 0
-    output = ""
+    output = False
 
   return  check_how_long, output
 
