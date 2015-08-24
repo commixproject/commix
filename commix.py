@@ -156,6 +156,7 @@ def main():
             
     # Check if defined "--url" option.
     if menu.options.url:
+
       sys.stdout.write("(*) Checking connection to the target URL... ")
       sys.stdout.flush()
       url = menu.options.url
@@ -163,6 +164,19 @@ def main():
       # If URL not starts with any URI scheme, add "http://"
       if not urlparse.urlparse(url).scheme:
         url = "http://" + url
+
+      if menu.options.output_dir:
+        output_dir = menu.options.output_dir
+      else:
+        output_dir = settings.OUTPUT_DIR
+      dir = os.path.dirname(output_dir)
+      try:
+        os.stat(output_dir)
+      except:
+        os.mkdir(output_dir)   
+
+      # The logs filename construction.
+      filename = logs.create_log_file(url, output_dir)
 
       try:
         request = urllib2.Request(url)
@@ -240,19 +254,6 @@ def main():
     # Check if defined "--proxy" option.
     if menu.options.proxy:
       proxy.do_check(url)
-
-    if menu.options.output_dir:
-      output_dir = menu.options.output_dir
-    else:
-      output_dir = settings.OUTPUT_DIR
-    dir = os.path.dirname(output_dir)
-    try:
-      os.stat(output_dir)
-    except:
-      os.mkdir(output_dir)   
-
-    # The logs filename construction.
-    filename = logs.create_log_file(url, output_dir)
 
     # Launch injection and exploitation controller.
     controller.do_check(url, filename)
