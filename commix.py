@@ -41,8 +41,7 @@ from src.core.injections import controller
 """
 
 # use Colorama to make Termcolor work on Windows too :)
-is_windows = hasattr(sys, 'getwindowsversion')
-if is_windows:
+if settings.IS_WINDOWS:
   init()
 
 def main():
