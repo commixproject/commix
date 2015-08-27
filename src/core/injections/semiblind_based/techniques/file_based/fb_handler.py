@@ -195,7 +195,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                   
                 # Show an error message, after 20 failed tries.
                 # Use the "/tmp/" directory for tempfile-based technique.
-                elif i == failed_tries :
+                elif i == failed_tries and no_result == True :
                   if not menu.options.verbose:
                     print ""
                   print Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to write on "+ SRV_ROOT_DIR + "." + Style.RESET_ALL
