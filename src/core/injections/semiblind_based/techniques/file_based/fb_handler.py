@@ -322,7 +322,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
               gotshell = raw_input("\n(?) Do you want a Pseudo-Terminal shell? [Y/n] > ").lower()
               if gotshell in settings.CHOISE_YES:
                 print ""
-                print "Pseudo-Terminal (type 'q' or use <Ctrl-C> to quit)"
+                print "Pseudo-Terminal (type '?' for shell options)"
                 while True:
                   cmd = raw_input("Shell > ")
                   if cmd.lower() in settings.SHELL_OPTIONS:

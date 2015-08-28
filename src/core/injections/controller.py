@@ -168,10 +168,14 @@ def do_check(url, filename):
       file_based_state = False
 
   if classic_state == False and eval_based_state == False and time_based_state == False and file_based_state == False :
-    if http_request_method == "GET":
-      print Back.RED + "(x) The url '"+ url +"' appear to be not injectable." + Style.RESET_ALL
+    info_msg = "(x) Critical: The tested (" + http_request_method + ")" + check_parameter +" parameter appear to be not injectable."
+    if not menu.options.alter_shell :
+      info_msg += " Use the option '--alter-shell'"
     else:
-      print Back.RED + "(x) The '"+ parameter +"' parameter appear to be not injectable." + Style.RESET_ALL
+      info_msg += " Remove the option '--alter-shell'"
+    info_msg += " and/or try to audit the HTTP headers (i.e 'User-Agent', 'Referer', 'Cookie' etc)."
+    print Back.RED + info_msg + Style.RESET_ALL 
+
   else:
     logs.logs_notification(filename)
   sys.exit(0)
