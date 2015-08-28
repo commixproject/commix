@@ -179,6 +179,7 @@ def main():
 
       try:
         request = urllib2.Request(url)
+        response = urllib2.urlopen(request)
 
         # Check if defined extra headers.
         headers.do_check(request)
@@ -187,7 +188,20 @@ def main():
 
         content = response.read()
         print "[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]"
-        
+
+        if response.info()['server'] :
+          server_banner = response.info()['server']
+        found_server_banner = False
+        for i in range(0,len(settings.SERVER_BANNERS)):
+          if settings.SERVER_BANNERS[i].lower() in server_banner.lower():
+            if menu.options.verbose:
+              print Style.BRIGHT + "(!) The server was identified as " + Style.UNDERLINE + server_banner + Style.RESET_ALL + "." + Style.RESET_ALL
+            found_server_banner = True
+            break
+
+        if found_server_banner != True:
+          print  Fore.YELLOW + "(^) Warning: The server which was identified as " + server_banner + " seems unknown." + Style.RESET_ALL
+
         # Charset detection [1].
         # [1] http://www.w3schools.com/html/html_charset.asp
         # Check if HTML4 format
@@ -199,11 +213,11 @@ def main():
           charset = re.findall(r"charset=['\"](.*)['\"]", html_data)
         if len(charset) != 0 :
           settings.CHARSET = charset[len(charset)-1]
-          if settings.CHARSET.lower() not in  settings.CHARSET_LIST:
-            print  Fore.YELLOW + "(^) Warning: The indicated web-page charset '"  + settings.CHARSET + "' seems unknown." + Style.RESET_ALL
+          if settings.CHARSET.lower() not in settings.CHARSET_LIST:
+            print  Fore.YELLOW + "(^) Warning: The indicated web-page charset "  + settings.CHARSET + " seems unknown." + Style.RESET_ALL
           else:
-            if menu.options.verbose: 
-              print "(*) The indicated web-page charset is '"  + settings.CHARSET + "'."
+            if menu.options.verbose:
+              print Style.BRIGHT + "(!) The indicated web-page charset appears to be "  + Style.UNDERLINE  + settings.CHARSET + Style.RESET_ALL + "." + Style.RESET_ALL
 
         # Check if defined "--tor" option.
         if menu.options.tor:

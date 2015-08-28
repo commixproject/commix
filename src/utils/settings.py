@@ -217,4 +217,10 @@ CHARSET_LIST = [
         "windows-874",
 ]
 
+SERVER_BANNERS = [
+    "Microsoft-IIS",
+    "Apache",
+    "Nginx"
+]
+
 #eof
