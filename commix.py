@@ -196,6 +196,7 @@ def main():
           if settings.SERVER_BANNERS[i].lower() in server_banner.lower():
             if menu.options.verbose:
               print Style.BRIGHT + "(!) The server was identified as " + Style.UNDERLINE + server_banner + Style.RESET_ALL + "." + Style.RESET_ALL
+            settings.SERVER_BANNER = server_banner
             found_server_banner = True
             break
 

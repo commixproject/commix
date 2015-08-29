@@ -88,7 +88,8 @@ DELAY = 1
 TMP_PATH = "/tmp/"
 
 # Default Server's Root Directory
-SRV_ROOT_DIR = "/var/www/"
+SRV_ROOT_DIR = "/var/www"
+
 PASSWD_FILE = "/etc/passwd"
 SHADOW_FILE = "/etc/shadow"
 
@@ -216,6 +217,8 @@ CHARSET_LIST = [
         "windows-1258",
         "windows-874",
 ]
+
+SERVER_BANNER = ""
 
 SERVER_BANNERS = [
     "Microsoft-IIS",
