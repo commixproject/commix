@@ -143,7 +143,7 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
 
                 cmd = "echo $((" + str(randv1) + "+" + str(randv2) + "))"
                 output  = tfb_injector.false_positive_check(separator, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, randvcalc, alter_shell)
-                if str(output) == str(randvcalc):
+                if str(output) == str(randvcalc) and len(TAG) == output_length:
                   if not menu.options.verbose:
                     percent = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
                   else:
