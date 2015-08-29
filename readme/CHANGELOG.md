@@ -1,4 +1,5 @@
 ## Version 0.1b [2015]
+* Added support for HTML Charset and HTTP "Server" response-header reconnaissance (on verbose mode).
 * Payloads on "tempfile-based" semiblind technique, have been replaced by new (more solid) ones.
 * Added a "new-line" separator support, on "time-based" blind & "tempfile-based" semiblind techniques.
 * Added support for referer-based command injections.
