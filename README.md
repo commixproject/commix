@@ -36,6 +36,7 @@ Commix also comes pre-installed, on the following penetration testing frameworks
 - [The Penetration Testers Framework (PTF)](https://github.com/trustedsec/ptf)
 - [PentestBox](https://tools.pentestbox.com/)
 - [Weakerthan](http://www.weaknetlabs.com/)
+- [CTF-Tools](https://github.com/zardus/ctf-tools)
 
 ####Usage
 To get a list of all options and switches use:
