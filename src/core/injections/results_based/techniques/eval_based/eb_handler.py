@@ -83,9 +83,10 @@ def eb_injection_handler(url, delay, filename, http_request_method):
           # Eval-based decision payload (check if host is vulnerable).
           payload = eb_payloads.decision(separator, TAG, randv1, randv2)
           
+          suffix = urllib.quote(suffix)
           # Fix prefixes / suffixes
           payload = parameters.prefixes(payload, prefix)
-          payload = parameters.suffixes(payload, urllib.quote(suffix))
+          payload = parameters.suffixes(payload, suffix)
 
           payload = payload + "" + TAG + ""
           payload = re.sub(" ", "%20", payload)
