@@ -53,9 +53,11 @@ def eb_injection_handler(url, delay, filename, http_request_method):
   injection_type = "Results-based Command Injection"
   technique = "eval-based injection technique"
   
+  url = eb_injector.warning_detection(url)
+
   sys.stdout.write("(*) Testing the "+ technique + "... ")
   sys.stdout.flush()
-    
+
   i = 0
   # Calculate all possible combinations
   total = len(settings.EVAL_PREFIXES) * len(settings.EVAL_SEPARATORS) * len(settings.EVAL_SUFFIXES)
@@ -113,7 +115,7 @@ def eb_injection_handler(url, delay, filename, http_request_method):
           else:
             found_cookie_injection = False
             # Check if target host is vulnerable.
-            response, vuln_parameter = eb_injector.injection_test(payload, http_request_method, url)         
+            response, vuln_parameter = eb_injector.injection_test(payload, http_request_method, url)
   
           # if need page reload
           if menu.options.url_reload: 

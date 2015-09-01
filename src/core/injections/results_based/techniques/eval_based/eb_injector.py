@@ -22,6 +22,7 @@ import random
 import base64
 import urllib
 import urllib2
+import urlparse
 
 from src.utils import menu
 from src.utils import settings
@@ -42,7 +43,7 @@ from src.core.injections.results_based.techniques.eval_based import eb_payloads
 # Check if target host is vulnerable.
 # ------------------------------------
 def injection_test(payload, http_request_method, url):
-                      
+
   # Check if defined method is GET (Default).
   if http_request_method == "GET":
     
@@ -123,6 +124,42 @@ def injection_test(payload, http_request_method, url):
       
   return response, vuln_parameter
 
+def warning_detection(url):
+
+  # Find the host part
+  url_part = url.split("=")[0]
+  request = urllib2.Request(url_part)
+  response = urllib2.urlopen(request)
+  html_data = response.read()
+
+  error_msg = ""
+  if "eval()'d code" in html_data:
+    error_msg = "'eval()'"
+
+  if "Cannot execute a blank command in" in html_data:
+    error_msg = "execution of a blank command,"
+
+  if "sh: command substitution:" in html_data:
+    error_msg = "command substitution"
+
+  if "Warning: usort()" in html_data:
+    error_msg = "'usort()'"
+
+  if re.findall(r"=/(.*)/&", url):
+    if "Warning: preg_replace():" in html_data:
+      error_msg = "'preg_replace()'"
+    url = url.replace("/&","/e&")
+
+  if "Warning: assert():" in html_data:
+    error_msg = "'assert()'"
+
+  if "Failure evaluating code:" in html_data:
+    error_msg = "code evaluation"
+  
+  if error_msg != "":
+    print Fore.YELLOW + "(^) Warning: A failure message on " + error_msg + " was detected on page's response." + Style.RESET_ALL
+
+  return url
 
 # ------------------------
 # Evaluate test results.
@@ -132,7 +169,6 @@ def injection_test_results(response, TAG, randvcalc):
   html_data = response.read()
   html_data= re.sub("\n", " ", html_data)
   shell = re.findall(r"" + TAG + " " + str(randvcalc) + " " + TAG + " " + TAG + " " , html_data)
-  
   return shell
 
 # --------------------------------------------------------------
