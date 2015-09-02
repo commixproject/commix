@@ -64,12 +64,12 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
   if menu.options.url_reload == True:
     print Back.RED + "(x) Error: The '--url-reload' option is not available in "+ technique +"!" + Style.RESET_ALL
 
-  # Calculate all possible combinations
-  total = (len(settings.PREFIXES) * len(settings.SEPARATORS) * len(settings.SUFFIXES) - len(settings.JUNK_COMBINATION))
-
   percent = str(percent)+"%"
   sys.stdout.write("\r(*) Testing the "+ technique + "... " +  "[ " + percent + " ]")  
   sys.stdout.flush()
+
+  # Calculate all possible combinations
+  total = (len(settings.PREFIXES) * len(settings.SEPARATORS) * len(settings.SUFFIXES) - len(settings.JUNK_COMBINATION))
 
   for prefix in settings.PREFIXES:
     for suffix in settings.SUFFIXES:
@@ -130,6 +130,7 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
 
             # Injection percentage calculation
             percent = ((num_of_chars * 100) / total)
+            float_percent = "{0:.1f}".format(round(((num_of_chars*100)/(total * 1.0)),2))
 
             if percent == 100 and no_result == True:
               if not menu.options.verbose:
@@ -158,7 +159,7 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                   break
                   
               else:
-                percent = str(percent)+"%"
+                percent = str(float_percent)+"%"
                 
             if not menu.options.verbose:
               sys.stdout.write("\r(*) Testing the "+ technique + "... " +  "[ " + percent + " ]")  

@@ -198,6 +198,8 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
           except urllib2.HTTPError, e:
               if e.getcode() == 404:
                 percent = ((i*100)/total)
+                float_percent = "{0:.1f}".format(round(((i*100)/(total*1.0)),2))
+
                 if call_tmp_based == True:
                   exit_loops = True
                   tmp_path = os.path.split(menu.options.file_dest)[0] + "/"
@@ -233,9 +235,9 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                         if no_result == True:
                           percent = Fore.RED + "FAILED" + Style.RESET_ALL
                         else:
-                          percent = str(percent)+"%"
+                          percent = str(float_percent)+"%"
                       else:
-                        percent = str(percent)+"%"
+                        percent = str(float_percent)+"%"
 
                       sys.stdout.write("\r(*) Testing the "+ technique + "... [ " + percent + " ]")  
                       sys.stdout.flush()

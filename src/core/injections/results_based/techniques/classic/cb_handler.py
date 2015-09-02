@@ -136,15 +136,17 @@ def cb_injection_handler(url, delay, filename, http_request_method):
 
             if not menu.options.verbose:
               percent = ((i*100)/total)
+              float_percent = "{0:.1f}".format(round(((i*100)/(total*1.0)),2))
+
               if percent == 100:
                 if no_result == True:
                   percent = Fore.RED + "FAILED" + Style.RESET_ALL
                 else:
-                  percent = str(percent)+"%"
+                  percent = str(float_percent)+"%"
               elif len(shell) != 0:
                 percent = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
               else:
-                percent = str(percent)+"%"
+                percent = str(float_percent)+"%"
               sys.stdout.write("\r(*) Testing the "+ technique + "... " +  "[ " + percent + " ]")  
               sys.stdout.flush()
               

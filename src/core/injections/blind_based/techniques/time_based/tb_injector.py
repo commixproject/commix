@@ -441,7 +441,8 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_m
           if not menu.options.verbose:
             output.append(chr(ascii_char))
             percent = ((num_of_chars*100)/output_length)
-            sys.stdout.write("\r(*) Grabbing the output, please wait... [ "+str(percent)+"% ]")
+            float_percent = "{0:.1f}".format(round(((num_of_chars*100)/(output_length*1.0)),2))
+            sys.stdout.write("\r(*) Grabbing the output, please wait... [ "+str(float_percent)+"% ]")
             sys.stdout.flush()
           else:
             output.append(chr(ascii_char))

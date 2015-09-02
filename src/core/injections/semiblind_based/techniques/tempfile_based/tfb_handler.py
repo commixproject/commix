@@ -126,6 +126,7 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
 
             # Injection percentage calculation
             percent = ((num_of_chars * 100) / total)
+            float_percent = "{0:.1f}".format(round(((num_of_chars*100)/(total*1.0)),2))
 
             if percent == 100 and no_result == True:
               if not menu.options.verbose:
@@ -152,7 +153,7 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
                   break
                     
               else:
-                percent = str(percent)+"%"
+                percent = str(float_percent)+"%"
                 
             if not menu.options.verbose:
               sys.stdout.write("\r(*) Testing the "+ technique + "... " +  "[ " + percent + " ]")  
@@ -163,6 +164,7 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
           
           except:
             percent = ((num_of_chars * 100) / total)
+            float_percent = "{0:.1f}".format(round(((num_of_chars*100)/(total*1.0)),2))
             if percent == 100:
               if no_result == True:
                 if not menu.options.verbose:
@@ -173,7 +175,7 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
                   percent = ""
                 break
               else:
-                percent = str(percent)+"%"
+                percent = str(float_percent)+"%"
               #Print logs notification message
               percent = Fore.BLUE + "FINISHED" + Style.RESET_ALL
               sys.stdout.write("\r(*) Testing the "+ technique + "... " +  "[ " + percent + " ]")  
@@ -182,7 +184,7 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
               logs.logs_notification(filename)
               raise
             else:
-              percent = str(percent)+"%"
+              percent = str(float_percent)+"%"
             break
           
           # Yaw, got shellz! 
