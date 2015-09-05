@@ -179,8 +179,6 @@ def main():
 
       try:
         request = urllib2.Request(url)
-        response = urllib2.urlopen(request)
-
         # Check if defined extra headers.
         headers.do_check(request)
         response = urllib2.urlopen(request)
