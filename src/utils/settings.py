@@ -218,12 +218,17 @@ CHARSET_LIST = [
         "windows-874",
 ]
 
+# Default server banner
 SERVER_BANNER = ""
 
+# Server banners list
 SERVER_BANNERS = [
     "Microsoft-IIS",
     "Apache",
     "Nginx"
 ]
+
+# Injection logs report
+SHOW_LOGS_MSG = False
 
 #eof

@@ -272,8 +272,9 @@ def main():
 
   except KeyboardInterrupt: 
     print "\n" + Back.RED + "(x) Aborted: Ctrl-C was pressed!" + Style.RESET_ALL
-    logs.logs_notification(filename)
-    print ""
+    if settings.SHOW_LOGS_MSG == True:
+      logs.logs_notification(filename)
+      print ""
     sys.exit(0)
 
   except SystemExit: 

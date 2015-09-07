@@ -58,6 +58,7 @@ def create_log_file(url, output_dir):
 def add_type_and_technique(export_injection_info, filename, injection_type, technique):
 
   if export_injection_info == False:
+    settings.SHOW_LOGS_MSG = True
     output_file = open(filename, "a")
     output_file.write("\n(+) Type : " + injection_type)
     output_file.write("\n(+) Technique : " + technique.title())
@@ -95,5 +96,4 @@ def upload_payload(filename, counter, payload):
 
 
 def logs_notification(filename):
-
-  print Style.BRIGHT + "(!) The results can be found at '" + os.getcwd() + "/" + filename + "'" + Style.RESET_ALL
+  print Style.BRIGHT + "\n(!) The results can be found at '" + os.getcwd() + "/" + filename + "'" + Style.RESET_ALL
