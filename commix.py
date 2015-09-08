@@ -280,6 +280,15 @@ def main():
   except SystemExit: 
     print ""
     sys.exit(0)
+  
+  # Accidental stop / restart of the target host server.
+  except httplib.BadStatusLine, e:
+    if e.line == "" or e.message == "":
+      print "\n" + Back.RED + "(x) Error: The target host is not responding." + \
+            " Ensure that host is up and running and try again." + Style.RESET_ALL + "\n"
+    else: 
+      print Back.RED + "(x) Error: " + e.line + e.message + Style.RESET_ALL
+    sys.exit(0)
 
 if __name__ == '__main__':
     main()
