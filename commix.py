@@ -21,6 +21,17 @@ import random
 import httplib
 import urllib2
 import urlparse
+# Disable SSL verification.
+# For python versions 2.7.9 or above.
+import ssl
+try:
+  _create_unverified_https_context = ssl._create_unverified_context
+except AttributeError:
+  # Legacy Python that doesn't verify HTTPS certificates by default
+  pass
+else:
+  # Handle target environment that doesn't support HTTPS verification
+  ssl._create_default_https_context = _create_unverified_https_context
 
 from src.utils import menu
 from src.utils import logs
@@ -43,6 +54,8 @@ from src.core.injections import controller
 # use Colorama to make Termcolor work on Windows too :)
 if settings.IS_WINDOWS:
   init()
+
+
 
 def main():
 
