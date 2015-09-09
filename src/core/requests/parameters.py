@@ -24,9 +24,6 @@ from src.thirdparty.colorama import Fore, Back, Style, init
 # Check if the 'INJECT_HERE' tag, is specified on GET Requests.
 # --------------------------------------------------------------
 def do_GET_check(url):
-  if settings.INJECT_TAG not in url:
-    print "\n" + Back.RED + "(x) Error: You must set the \"INJECT_HERE\" tag to specify the testable parameter." + Style.RESET_ALL + "\n"
-    os._exit(0)
 
   # Find the host part
   url_part = url.split("?")[0]
@@ -57,21 +54,21 @@ def do_GET_check(url):
 
   # Check if multiple paramerters are supplied.
   else:
-    all_params = settings.PARAMETER_DELIMITER.join(multi_parameters)
-
     # Check if defined the "INJECT_HERE" tag
-    if settings.INJECT_TAG in all_params:
-      for i in range(0,len(multi_parameters)):
-
-        # Grab the value of parameter.
-        value = re.findall(r'=(.*)', multi_parameters[i])
-        value = ''.join(value)
-        parameter = settings.PARAMETER_DELIMITER.join(multi_parameters)
-      url = url_part +"?"+ parameter  
-      return url
-    else:
+    if settings.INJECT_TAG not in url:
       print "\n" + Back.RED + "(x) Error: You must set the \"INJECT_HERE\" tag to specify the testable parameter." + Style.RESET_ALL + "\n"
       os._exit(0)
+
+    all_params = settings.PARAMETER_DELIMITER.join(multi_parameters)
+
+    for i in range(0,len(multi_parameters)):
+      # Grab the value of parameter.
+      value = re.findall(r'=(.*)', multi_parameters[i])
+      value = ''.join(value)
+      parameter = settings.PARAMETER_DELIMITER.join(multi_parameters)
+
+    url = url_part +"?"+ parameter  
+    return url
 
       ## Multiple paramerters without the "INJECT_HERE" tag.
       #urls_list = []
@@ -95,13 +92,12 @@ def do_GET_check(url):
         #urls_list.append(url)
       #return urls_list
 
-
 # --------------------------------------
 # Define the vulnerable GET parameter.
 # --------------------------------------
 def vuln_GET_param(url):
-  # Define the vulnerable parameter
 
+  # Define the vulnerable parameter
   if re.findall(r"" + settings.PARAMETER_DELIMITER + "(.*)=" + settings.INJECT_TAG + "", url):
     vuln_parameter = re.findall(r"" + settings.PARAMETER_DELIMITER + "(.*)=" + settings.INJECT_TAG + "", url)
     vuln_parameter = ''.join(vuln_parameter)
@@ -154,21 +150,19 @@ def do_POST_check(parameter):
 
   # Check if multiple paramerters are supplied.
   else:
-    all_params = settings.PARAMETER_DELIMITER.join(multi_parameters)
-
     # Check if defined the "INJECT_HERE" tag
-    if settings.INJECT_TAG in all_params:
-      for i in range(0,len(multi_parameters)):
-        if settings.INJECT_TAG not in multi_parameters[i]:
-
-          # Grab the value of parameter.
-          value = re.findall(r'=(.*)', multi_parameters[i])
-          value = ''.join(value)
-          parameter = settings.PARAMETER_DELIMITER.join(multi_parameters)
-      return parameter
-    else:
+    if settings.INJECT_TAG not in multi_parameters[i]:
       print "\n" + Back.RED + "(x) Error: You must set the \"INJECT_HERE\" tag to specify the testable parameter." + Style.RESET_ALL + "\n"
       os._exit(0)
+
+    all_params = settings.PARAMETER_DELIMITER.join(multi_parameters)
+
+    for i in range(0,len(multi_parameters)):
+      # Grab the value of parameter.
+      value = re.findall(r'=(.*)', multi_parameters[i])
+      value = ''.join(value)
+      parameter = settings.PARAMETER_DELIMITER.join(multi_parameters)
+    return parameter
 
       ## Multiple paramerters without the "INJECT_HERE" tag.
       #paramerters_list = []
