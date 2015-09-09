@@ -132,7 +132,6 @@ def do_POST_check(parameter):
 
   # Split parameters 
   multi_parameters = parameter.split(settings.PARAMETER_DELIMITER)
-
   # Check if single paramerter is supplied.
   if len(multi_parameters) == 1:
 
@@ -151,7 +150,7 @@ def do_POST_check(parameter):
   # Check if multiple paramerters are supplied.
   else:
     # Check if defined the "INJECT_HERE" tag
-    if settings.INJECT_TAG not in multi_parameters[i]:
+    if settings.INJECT_TAG not in parameter:
       print "\n" + Back.RED + "(x) Error: You must set the \"INJECT_HERE\" tag to specify the testable parameter." + Style.RESET_ALL + "\n"
       os._exit(0)
 
