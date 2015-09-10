@@ -29,6 +29,7 @@ from src.core.injections.semiblind_based.techniques.file_based import fb_injecto
 """
 Hostname enumeration
 """
+
 def hostname(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell):
   cmd = settings.HOSTNAME
   response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)

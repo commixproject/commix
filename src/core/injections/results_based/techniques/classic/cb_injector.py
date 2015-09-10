@@ -292,16 +292,21 @@ def injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_meth
   else:
     # Classic decision payload (check if host is vulnerable).
     payload = cb_payloads.cmd_execution(separator, TAG, cmd)
-
-  if separator == " " :
-    payload = re.sub(" ", "%20", payload)
-  else:
-    payload = re.sub(" ", whitespace, payload)
+    
+  if not menu.options.base64:
+    if separator == " " :
+      payload = re.sub(" ", "%20", payload)
+    else:
+      payload = re.sub(" ", whitespace, payload)
 
   # Fix prefixes / suffixes
   payload = parameters.prefixes(payload, prefix)
   payload = parameters.suffixes(payload, suffix)
       
+  if menu.options.base64:
+    payload = urllib.unquote(payload)
+    payload = base64.b64encode(payload)
+
   # Check if defined "--verbose" option.
   if menu.options.verbose:
     sys.stdout.write("\n" + Fore.GREY + "(~) Payload: " + payload + Style.RESET_ALL)
@@ -321,6 +326,7 @@ def injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_meth
   else:
     # Check if defined method is GET (Default).
     if http_request_method == "GET":
+      
       # Check if its not specified the 'INJECT_HERE' tag
       url = parameters.do_GET_check(url)
       

@@ -95,10 +95,14 @@ def cb_injection_handler(url, delay, filename, http_request_method):
             payload = parameters.prefixes(payload, prefix)
             payload = parameters.suffixes(payload, suffix)
 
-            if separator == " " :
-              payload = re.sub(" ", "%20", payload)
+            if menu.options.base64:
+              payload = urllib.unquote(payload)
+              payload = base64.b64encode(payload)
             else:
-              payload = re.sub(" ", whitespace, payload)
+              if separator == " " :
+                payload = re.sub(" ", "%20", payload)
+              else:
+                payload = re.sub(" ", whitespace, payload)
 
             # Check if defined "--verbose" option.
             if menu.options.verbose:

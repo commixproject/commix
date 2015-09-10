@@ -326,12 +326,17 @@ def injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vul
   
   # Execute shell commands on vulnerable host.
   payload = eb_payloads.cmd_execution(separator, TAG, cmd)
-  payload = re.sub(" ", "%20", payload)
 
   # Fix prefixes / suffixes
   payload = parameters.prefixes(payload, prefix)
   payload = parameters.suffixes(payload, suffix)
-      
+
+  if menu.options.base64:
+    payload = urllib.unquote(payload)
+    payload = base64.b64encode(payload)
+  else:
+    payload = re.sub(" ", "%20", payload)
+
   # Check if defined "--verbose" option.
   if menu.options.verbose:
     sys.stdout.write("\n" + Fore.GREY + "(~) Payload: " + payload + Style.RESET_ALL)

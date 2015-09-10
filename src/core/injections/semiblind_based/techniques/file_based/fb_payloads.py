@@ -18,6 +18,8 @@
   The "file-based" technique on Semiblind-based OS Command Injection.
   The available "file-based" payloads.
 """
+
+from src.utils import menu
 from src.utils import settings
 
 # ----------------------------------------------------------
@@ -43,7 +45,8 @@ def decision_alter_shell(separator, TAG, OUTPUT_TEXTFILE):
   if settings.USER_AGENT_INJECTION == True or settings.REFERER_INJECTION == True :
     payload = payload.replace("\n", separator)
   else:
-    payload = payload.replace("\n","%0d")
+    if not menu.options.base64:
+      payload = payload.replace("\n","%0d")
 
   return payload
 
@@ -71,6 +74,7 @@ def cmd_execution_alter_shell(separator, cmd, OUTPUT_TEXTFILE):
   if settings.USER_AGENT_INJECTION == True or settings.REFERER_INJECTION == True :
     payload = payload.replace("\n", separator)
   else:
-    payload = payload.replace("\n","%0d")
+    if not menu.options.base64:
+      payload = payload.replace("\n","%0d")
 
   return payload

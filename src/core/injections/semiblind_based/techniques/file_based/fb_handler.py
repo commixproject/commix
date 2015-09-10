@@ -150,6 +150,9 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
           payload = parameters.prefixes(payload, prefix)
           payload = parameters.suffixes(payload, suffix)
 
+          if menu.options.base64:
+            payload = base64.b64encode(payload)
+
           # Check if defined "--verbose" option.
           if menu.options.verbose:
             print "(*) Trying to upload the '"+ OUTPUT_TEXTFILE +"' on " + settings.SRV_ROOT_DIR + "..."
@@ -312,7 +315,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
           print "  (+) Type : "+ Fore.YELLOW + Style.BRIGHT + injection_type + Style.RESET_ALL + ""
           print "  (+) Technique : "+ Fore.YELLOW + Style.BRIGHT + technique.title() + Style.RESET_ALL + ""
           print "  (+) Payload : "+ Fore.YELLOW + Style.BRIGHT + re.sub("%20", " ", payload.replace("\n", "\\n")) + Style.RESET_ALL
-          
+
           # Check for any enumeration options.
           fb_enumeration.do_check(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
 

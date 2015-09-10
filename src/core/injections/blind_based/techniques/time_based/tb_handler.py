@@ -19,6 +19,7 @@ import sys
 import time
 import string
 import random
+import base64
 import urllib
 import urllib2
 
@@ -101,7 +102,10 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
             # Fix prefixes / suffixes
             payload = parameters.prefixes(payload, prefix)
             payload = parameters.suffixes(payload, suffix)
-              
+
+            if menu.options.base64:
+              payload = base64.b64encode(payload)
+
             # Check if defined "--verbose" option.
             if menu.options.verbose:
               sys.stdout.write("\n" + Fore.GREY + "(~) Payload: " + payload.replace("\n", "\\n") + Style.RESET_ALL)

@@ -317,6 +317,12 @@ injection.add_option("--os-cmd",
                 default = False,
                 help="Execute a single operating system command.")
 
+injection.add_option("--base64", 
+                action="store_true",
+                dest="base64",
+                default = False,
+                help="Encode the operating system command to Base64 format.")
+
 parser.add_option_group(general)
 parser.add_option_group(target)
 parser.add_option_group(request)

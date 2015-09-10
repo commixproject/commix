@@ -13,12 +13,14 @@
  
  For more see the file 'readme/COPYING' for copying permission.
 """
+
 import os
 import re
 import sys
 import time
 import string
 import random
+import base64
 import urllib
 import urllib2
   
@@ -97,7 +99,11 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
             # Fix prefixes / suffixes
             payload = parameters.prefixes(payload, prefix)
             payload = parameters.suffixes(payload, suffix)
-              
+
+            # Encode payload to Base64
+            if menu.options.base64:
+              payload = base64.b64encode(payload)
+
             # Check if defined "--verbose" option.
             if menu.options.verbose:
               sys.stdout.write("\n" + Fore.GREY + "(~) Payload: " + payload.replace("\n", "\\n") + Style.RESET_ALL)

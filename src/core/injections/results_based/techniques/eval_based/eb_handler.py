@@ -82,15 +82,18 @@ def eb_injection_handler(url, delay, filename, http_request_method):
         try:
           # Eval-based decision payload (check if host is vulnerable).
           payload = eb_payloads.decision(separator, TAG, randv1, randv2)
-          
           suffix = urllib.quote(suffix)
 
           # Fix prefixes / suffixes
           payload = parameters.prefixes(payload, prefix)
           payload = parameters.suffixes(payload, suffix)
-
           payload = payload + "" + TAG + ""
-          payload = re.sub(" ", "%20", payload)
+
+          if menu.options.base64:
+            payload = urllib.unquote(payload)
+            payload = base64.b64encode(payload)
+          else:
+            payload = re.sub(" ", "%20", payload)
 
           # Check if defined "--verbose" option.
           if menu.options.verbose:
