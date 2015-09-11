@@ -348,7 +348,6 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                     elif cmd.lower() == "quit":
                       # Delete previous shell (text) files (output)
                       delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
-                      logs.logs_notification(filename)
                       sys.exit(0)
                     elif cmd.lower() == "back":
                       go_back = True

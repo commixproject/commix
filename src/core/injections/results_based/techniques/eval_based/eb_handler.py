@@ -223,7 +223,6 @@ def eb_injection_handler(url, delay, filename, http_request_method):
                     if cmd.lower() == "?":
                       menu.shell_options()
                     elif cmd.lower() == "quit":
-                      logs.logs_notification(filename)
                       sys.exit(0)
                     elif cmd.lower() == "back":
                       go_back = True

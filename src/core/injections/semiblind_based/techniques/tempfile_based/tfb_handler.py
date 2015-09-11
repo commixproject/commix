@@ -269,7 +269,6 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
                           menu.shell_options()
                           continue
                         elif cmd.lower() == "quit":
-                          logs.logs_notification(filename)
                           sys.exit(0)
                         elif cmd.lower() == "back":
                           go_back = True
