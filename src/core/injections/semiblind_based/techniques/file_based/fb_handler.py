@@ -336,7 +336,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
             while True:
               if go_back == True:
                 break
-              gotshell = raw_input("\n(?) Do you want a Pseudo-Terminal shell? [Y/n] > ").lower()
+              gotshell = raw_input("\n(?) Do you want a Pseudo-Terminal shell? [Y/n/q] > ").lower()
               if gotshell in settings.CHOISE_YES:
                 print ""
                 print "Pseudo-Terminal (type '?' for shell options)"
@@ -376,7 +376,12 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                   sys.stdout.write("\r\n(*) Continue testing the "+ technique +"... ")
                   sys.stdout.flush()
                 break
-              
+
+              elif gotshell in settings.CHOISE_QUIT:
+                # Delete previous shell (text) files (output)
+                delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+                sys.exit(0)
+
               else:
                 if gotshell == "":
                   gotshell = "enter"

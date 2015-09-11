@@ -212,7 +212,7 @@ def eb_injection_handler(url, delay, filename, http_request_method):
           while True:
             if go_back == True:
               break
-            gotshell = raw_input("\n(?) Do you want a Pseudo-Terminal shell? [Y/n] > ").lower()
+            gotshell = raw_input("\n(?) Do you want a Pseudo-Terminal shell? [Y/n/q] > ").lower()
             if gotshell in settings.CHOISE_YES:
               print ""
               print "Pseudo-Terminal (type '?' for shell options)"
@@ -257,7 +257,10 @@ def eb_injection_handler(url, delay, filename, http_request_method):
                 sys.stdout.write("\r(*) Continue testing the "+ technique +"... ")
                 sys.stdout.flush()
               break
-            
+
+            elif gotshell in settings.CHOISE_QUIT:
+              sys.exit(0)
+
             else:
               if gotshell == "":
                 gotshell = "enter"

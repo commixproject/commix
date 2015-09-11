@@ -292,7 +292,9 @@ def main():
     sys.exit(0)
 
   except SystemExit: 
-    print ""
+    if settings.SHOW_LOGS_MSG == True:
+      logs.logs_notification(filename)
+      print ""
     sys.exit(0)
   
   # Accidental stop / restart of the target host server.

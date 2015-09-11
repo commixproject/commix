@@ -135,6 +135,9 @@ CHOISE_YES = ['yes','ye','y']
 # Accepts NO,N,no,n
 CHOISE_NO = ['no','n']
 
+# Accepts QUIT,Q,quit,q
+CHOISE_QUIT = ['q','quit']
+
 # Available alternative shells
 AVAILABLE_SHELLS = ["python"]
 
