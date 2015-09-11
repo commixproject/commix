@@ -102,7 +102,13 @@ def do_GET_check(url):
 def vuln_GET_param(url):
 
   # Define the vulnerable parameter
-  if re.findall(r"" + settings.PARAMETER_DELIMITER + "(.*)=" + settings.INJECT_TAG + "", url):
+  if "?" not in url:
+      #Grab the value of parameter.
+      value = re.findall(r'/(.*)/' + settings.INJECT_TAG + "", url)
+      value = ''.join(value)
+      vuln_parameter = re.sub(r"/(.*)/", "", value)
+
+  elif re.findall(r"" + settings.PARAMETER_DELIMITER + "(.*)=" + settings.INJECT_TAG + "", url):
     vuln_parameter = re.findall(r"" + settings.PARAMETER_DELIMITER + "(.*)=" + settings.INJECT_TAG + "", url)
     vuln_parameter = ''.join(vuln_parameter)
     vuln_parameter = re.sub(r"(.*)=(.*)" + settings.PARAMETER_DELIMITER, "", vuln_parameter)
