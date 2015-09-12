@@ -58,28 +58,31 @@ OUTPUT_FILE_EXT = ".txt"
 OUTPUT_FILE = OUTPUT_FILE_NAME + OUTPUT_FILE_EXT
 
 # The command injection prefixes.
-PREFIXES = ["","'","\"","|","&","%27","%22","%7C","%26"] 
+PREFIXES = ["", "'", "\"", "|", "&", "%27", "%22", "%7C", "%26"] 
 
 # The command injection separators.
-SEPARATORS = [""," ",";","&","|","||","&&","%0a","%3B","%26","%26%26","%7C","%7C%7C"]
+SEPARATORS = ["", " ", ";", "&", "|", "||", "&&", "%0a", "%3B", "%26", "%26%26", "%7C", "%7C%7C"]
 
 # The command injection suffixes.
-SUFFIXES = ["","'","\"","#","//","\\\\","&","|","%27","%22","%5C%5C","%2F%2F","%26","%7C"]
+SUFFIXES = ["", "'", "\"", "#", "//", "\\\\", "&", "|", "%27", "%22", "%5C%5C", "%2F%2F", "%26", "%7C"]
 
 # Bad combination of prefix and separator
-JUNK_COMBINATION = ["&&&","|||","|&&","&|","&;","|;","%7C;","%26;","%7C&"]
+JUNK_COMBINATION = ["&&&", "|||", "|&&", "&|", "&;", "|;", "%7C;", "%26;", "%7C&"]
+
+# Execution functions
+EXECUTION_FUNCTIONS = ["exec", "system", "shell_exec", "passthru",  "proc_open", "popen"]
 
 # The code injection prefixes.
-EVAL_PREFIXES = ["","'",")","')","\")","\".","'.",");}","');}","\");}"]
+EVAL_PREFIXES = ["", "'", ")", "')", "\")", "\".", "'.", ");}", "');}", "\");}"]
 
 # The code injection separators.
-EVAL_SEPARATORS = ["",";","%0a","\\\\n"]
+EVAL_SEPARATORS = ["", ";", "%0a", "\\\\n"]
 
 # The code injection suffixes.
-EVAL_SUFFIXES = ["","\\\\","//","#",".\"",".'"]
+EVAL_SUFFIXES = ["", "\\\\", "//", "#", ".\"", ".'", ")}"]
 
 # The white-spaces
-WHITESPACES = ["%20","$IFS"]
+WHITESPACES = ["%20", "$IFS"]
 
 # Time delay
 DELAY = 1
@@ -143,10 +146,10 @@ AVAILABLE_SHELLS = ["python"]
 
 # Available injectipon techniques
 AVAILABLE_TECHNIQUES = [
-        "classic","c",
-        "eval-based","e",
-        "time-based","t",
-        "file-based","f",
+        "classic", "c",
+        "eval-based", "e",
+        "time-based", "t",
+        "file-based", "f",
 ]
 
 # User Agent List

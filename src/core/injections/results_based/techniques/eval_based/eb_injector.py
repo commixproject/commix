@@ -330,6 +330,9 @@ def injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vul
   # Fix prefixes / suffixes
   payload = parameters.prefixes(payload, prefix)
   payload = parameters.suffixes(payload, suffix)
+  # Fixation for specific payload.
+  if ")%3B" + urllib.quote(")}") in payload:
+    payload = payload.replace(")%3B" + urllib.quote(")}"), ")" + urllib.quote(")}"))
 
   if menu.options.base64:
     payload = urllib.unquote(payload)

@@ -177,7 +177,7 @@ def do_check(url, filename):
     print Back.RED + info_msg + Style.RESET_ALL 
 
   else:
-    logs.logs_notification(filename)
+    print ""
   sys.exit(0)
   
 #eof
