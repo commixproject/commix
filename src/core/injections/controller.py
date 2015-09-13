@@ -67,12 +67,14 @@ def do_check(url, filename):
   header_name = ""
   if not menu.options.data:
     http_request_method = "GET"
-    check_parameter  = parameters.vuln_GET_param(url)
+    url = parameters.do_GET_check(url)
+    check_parameter = parameters.vuln_GET_param(url)
     the_type = " parameter "
 
   else:
     http_request_method = "POST"
     parameter = menu.options.data
+    parameter = parameters.do_POST_check(parameter)
     check_parameter = parameters.vuln_POST_param(parameter, url)
     the_type = " parameter " 
 

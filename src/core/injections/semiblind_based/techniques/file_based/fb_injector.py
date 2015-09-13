@@ -49,7 +49,7 @@ def injection_test(payload, http_request_method, url):
   if http_request_method == "GET":
     
     # Check if its not specified the 'INJECT_HERE' tag
-    url = parameters.do_GET_check(url)
+    #url = parameters.do_GET_check(url)
     
     # Encoding spaces.
     payload = payload.replace(" ","%20")
@@ -314,7 +314,7 @@ def injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method,
     if http_request_method == "GET":
 
       # Check if its not specified the 'INJECT_HERE' tag
-      url = parameters.do_GET_check(url)
+      #url = parameters.do_GET_check(url)
 
       payload = payload.replace(" ","%20")
 

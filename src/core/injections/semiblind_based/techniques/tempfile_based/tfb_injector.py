@@ -51,7 +51,7 @@ def examine_requests(payload, vuln_parameter, http_request_method, url):
     payload = urllib.quote(payload)
     
     # Check if its not specified the 'INJECT_HERE' tag
-    url = parameters.do_GET_check(url)
+    #url = parameters.do_GET_check(url)
     
     target = re.sub(settings.INJECT_TAG, payload, url)
     vuln_parameter = ''.join(vuln_parameter)
@@ -113,7 +113,7 @@ def injection_test(payload, http_request_method, url):
   if http_request_method == "GET":
     
     # Check if its not specified the 'INJECT_HERE' tag
-    url = parameters.do_GET_check(url)
+    #url = parameters.do_GET_check(url)
     
     # Encoding non-ASCII characters payload.
     payload = urllib.quote(payload)
