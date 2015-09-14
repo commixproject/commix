@@ -67,7 +67,10 @@ def do_check(url, filename):
   header_name = ""
   if not menu.options.data:
     http_request_method = "GET"
-    url = parameters.do_GET_check(url)
+    if not settings.COOKIE_INJECTION \
+    and not settings.USER_AGENT_INJECTION \
+    and not settings.REFERER_INJECTION:
+    	url = parameters.do_GET_check(url)
     check_parameter = parameters.vuln_GET_param(url)
     the_type = " parameter "
 
