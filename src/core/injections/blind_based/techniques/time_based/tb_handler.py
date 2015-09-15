@@ -147,13 +147,14 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
               (url_time_response >= 2 and how_long > delay):
 
                 # Time relative false positive fixation.
-                randv1 = random.randrange(0, 1)
-                randv2 = random.randrange(1, 2)
-                randvcalc = randv1 + randv2
-                cmd = "(" + str(randv1) + "+" + str(randv2) + ")"
-                
-                # Check for false positive resutls
-                output = tb_injector.false_positive_check(separator, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, randvcalc, alter_shell)
+                if len(TAG) == output_length:
+                  randv1 = random.randrange(0, 1)
+                  randv2 = random.randrange(1, 2)
+                  randvcalc = randv1 + randv2
+                  cmd = "(" + str(randv1) + "+" + str(randv2) + ")"
+                  # Check for false positive resutls
+                  output = tb_injector.false_positive_check(separator, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, randvcalc, alter_shell)
+                  
                 if str(output) == str(randvcalc) and len(TAG) == output_length:
                   if not menu.options.verbose:
                     percent = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
