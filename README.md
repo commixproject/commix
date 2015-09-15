@@ -67,6 +67,7 @@ A collection of pwnable VMs, that includes web apps vulnerable to command inject
 - [Kioptrix: Level 1.1 (#2)](https://www.vulnhub.com/entry/kioptrix-level-11-2,23/)
 - [Kioptrix: 2014 (#5)](https://www.vulnhub.com/entry/kioptrix-2014-5,62/)
 - [Acid Server: 1](https://www.vulnhub.com/entry/acid-server-1,125/)
+- [Flick: 2](https://www.vulnhub.com/entry/flick-2,122/)
 - [w3af-moth](https://github.com/andresriancho/w3af-moth/)
 - [commix-testbed](https://github.com/stasinopoulos/commix-testbed)
 
