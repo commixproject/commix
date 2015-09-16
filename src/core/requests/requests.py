@@ -27,9 +27,11 @@ from src.thirdparty.colorama import Fore, Back, Style, init
 # -------------------------------------------
 # Estimating the response time (in seconds)
 # -------------------------------------------
-def estimate_response_time(url, delay):
-
-  request = urllib2.Request(url)
+def estimate_response_time(url, http_request_method, delay):
+  if http_request_method == "GET":
+    request = urllib2.Request(url)
+  else:
+    request = urllib2.Request(url,"") 
   headers.do_check(request)
   start = time.time()
   response = urllib2.urlopen(request)

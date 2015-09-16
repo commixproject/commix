@@ -111,7 +111,7 @@ def do_check(url, filename):
   print "(*) Setting the " + "(" + http_request_method + ")" + check_parameter + header_name + the_type + "for tests."
 
   # Estimating the response time (in seconds)
-  delay, url_time_response = requests.estimate_response_time(url, delay)
+  delay, url_time_response = requests.estimate_response_time(url, http_request_method, delay)
 
   # Check all injection techniques
   if not menu.options.tech:
