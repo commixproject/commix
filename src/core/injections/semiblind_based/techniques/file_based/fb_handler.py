@@ -94,12 +94,21 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
   else:
     if menu.options.srv_root_dir:
       settings.SRV_ROOT_DIR = menu.options.srv_root_dir
-
     else:
+      # Debian/Ubunt have been updated to use /var/www/html as default instead of /var/www.
+      if "debian" or "ubuntu" in settings.SERVER_BANNER.lower():
+          check_version = re.findall(r"/(.*)\.", settings.SERVER_BANNER.lower())
+          if check_version[0] > "2.3":
+            # Add "/html" to servers root directory
+            settings.SRV_ROOT_DIR = settings.SRV_ROOT_DIR + "/html"
+          else:
+            settings.SRV_ROOT_DIR = settings.SRV_ROOT_DIR 
       # Add "/html" to servers root directory
-      if "debian" or "fedora" or "centos" in settings.SERVER_BANNER.lower():
+      elif "fedora" or "centos" in settings.SERVER_BANNER.lower():
         settings.SRV_ROOT_DIR = settings.SRV_ROOT_DIR + "/html"
-
+      else:
+        pass
+        
       path = urlparse.urlparse(url).path
       path_parts = path.split('/')
       count = 0
