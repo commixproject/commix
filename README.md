@@ -62,6 +62,7 @@ A collection of pwnable VMs, that includes web apps vulnerable to command inject
 - [Persistence](https://www.vulnhub.com/entry/persistence-1,103/)
 - [Pentester Lab: Web For Pentester](https://www.vulnhub.com/entry/pentester-lab-web-for-pentester,71/)
 - [Pentester Lab: CVE-2014-6271/Shellshock](https://www.vulnhub.com/entry/pentester-lab-cve-2014-6271-shellshock,104/)
+- [Pentester Lab: Rack Cookies and Commands injection](https://pentesterlab.com/exercises/rack_cookies_and_commands_injection/)
 - [Pentester Academy: Command Injection ISO: 1](https://www.vulnhub.com/entry/command-injection-iso-1,81/)
 - [SpiderLabs: MCIR (ShelLOL)](https://github.com/SpiderLabs/MCIR/tree/master/shellol)
 - [Kioptrix: Level 1.1 (#2)](https://www.vulnhub.com/entry/kioptrix-level-11-2,23/)
@@ -78,9 +79,10 @@ A collection of pwnable VMs, that includes web apps vulnerable to command inject
 - [Exploiting shellshock command injection flaws.](https://www.youtube.com/watch?v=5NvopJsCj4w)
 - [Upload a PHP shell (i.e. Metasploit PHP Meterpreter) on target host.](https://www.youtube.com/watch?v=MdzGY2ws2zY)
 - [Upload a Weevely PHP web shell on target host.](https://www.youtube.com/watch?v=cy7AW6OQBmU)
-- [Exploiting cookie-based command injection flaws via commix.](https://www.youtube.com/watch?v=ae4DOS-3vm8)
-- [Exploiting user-agent-based command injection flaws via commix.](https://www.youtube.com/watch?v=g3hSFOFRJrc)
-- [Exploiting referer-based command injection flaws via commix.](https://www.youtube.com/watch?v=uMt9_jDaJUI)
+- [Exploiting cookie-based command injection flaws.](https://www.youtube.com/watch?v=ae4DOS-3vm8)
+- [Exploiting user-agent-based command injection flaws.](https://www.youtube.com/watch?v=g3hSFOFRJrc)
+- [Exploiting referer-based command injection flaws.](https://www.youtube.com/watch?v=uMt9_jDaJUI)
+- [Rack cookies and commands injection.](https://www.youtube.com/watch?v=Bq7xYRC2nI4) 
 
 ####Bugs and Enhancements
 For bug reports or enhancements, please open an issue [here](https://github.com/stasinopoulos/commix/issues).
