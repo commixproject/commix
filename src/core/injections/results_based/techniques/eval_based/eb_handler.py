@@ -57,7 +57,7 @@ def eb_injection_handler(url, delay, filename, http_request_method):
     settings.EXECUTION_FUNCTIONS[item] = "${" + settings.EXECUTION_FUNCTIONS[item] + "("
   settings.EVAL_PREFIXES = settings.EVAL_PREFIXES + settings.EXECUTION_FUNCTIONS
 
-  url = eb_injector.warning_detection(url)
+  url = eb_injector.warning_detection(url, http_request_method)
 
   sys.stdout.write("(*) Testing the "+ technique + "... ")
   sys.stdout.flush()

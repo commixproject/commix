@@ -46,7 +46,7 @@ def cmd_execution(separator, TAG, cmd):
   payload = (separator + 
             "echo " + TAG +
             "$(echo " + TAG + ")" +
-            "$(" + cmd + ")"+
+            "$(echo $(" + cmd + "))"+
             "$(echo " + TAG + ")" + TAG + ""
             )
   return payload

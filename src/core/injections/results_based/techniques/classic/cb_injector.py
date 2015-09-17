@@ -410,3 +410,4 @@ def injection_results(response, TAG):
   if len(shell) > 1:
     shell = shell[0]
   return shell
+

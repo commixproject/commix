@@ -23,6 +23,7 @@ import random
 import base64
 import urllib
 import urllib2
+import HTMLParser
 
 from src.utils import menu
 from src.utils import logs
@@ -252,6 +253,8 @@ def cb_injection_handler(url, delay, filename, http_request_method):
                       shell = cb_injector.injection_results(response, TAG)
                       if shell:
                         shell = "".join(str(p) for p in shell)
+                        html_parser = HTMLParser.HTMLParser()
+                        shell = html_parser.unescape(shell)
                         if shell != "":
                           print "\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n"
                         else:

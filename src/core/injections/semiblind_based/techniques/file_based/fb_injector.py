@@ -396,9 +396,12 @@ def injection_output(url, OUTPUT_TEXTFILE, delay):
       path = menu.options.srv_root_dir.replace("/var/www/", "/")
       if "html/" in menu.options.srv_root_dir:
         path = path.replace("html/", "")
+      if path not in url:
+        path = "/"
       scheme = urlparse.urlparse(url).scheme
       netloc = urlparse.urlparse(url).netloc
       output = scheme + "://" + netloc + path + OUTPUT_TEXTFILE
+      
   else:
     path = urlparse.urlparse(url).path
     path_parts = path.split('/')
