@@ -286,8 +286,8 @@ injection.add_option("--technique",
 injection.add_option("--maxlen", 
                 action="store",
                 dest="maxlen",
-                default="10000",
-                help="The length of the output on time-based technique (Default: 10000 chars).")
+                default=settings.MAXLEN,
+                help="The length of the output on time-based technique (Default: "+str(settings.MAXLEN)+" chars).")
 
 injection.add_option("--delay", 
                 action="store",

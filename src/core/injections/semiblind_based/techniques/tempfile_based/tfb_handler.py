@@ -60,7 +60,7 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
   
   # Check if defined "--maxlen" option.
   if menu.options.maxlen:
-    maxlen = menu.options.maxlen
+    maxlen = settings.MAXLEN
     
   # Check if defined "--url-reload" option.
   if menu.options.url_reload == True:

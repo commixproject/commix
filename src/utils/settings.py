@@ -54,8 +54,10 @@ OUTPUT_FILE_NAME = "logs"
 
 # Output file name
 OUTPUT_FILE_EXT = ".txt"
-
 OUTPUT_FILE = OUTPUT_FILE_NAME + OUTPUT_FILE_EXT
+
+# Max Length
+MAXLEN = "10000"
 
 # The command injection prefixes.
 PREFIXES = ["", "'", "\"", "|", "&", "%27", "%22", "%7C", "%26"] 
