@@ -26,7 +26,7 @@ import urllib
 APPLICATION = "commix"
 DESCRIPTION = "Automated All-in-One OS Command Injection and Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION = "v0.1b"
+VERSION = "v0.2b"
 YEAR    = "2015"
 TWITTER = "@ancst" 
 
