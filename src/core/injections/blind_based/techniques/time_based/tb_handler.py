@@ -233,7 +233,11 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
               
               # Check if defined single cmd.
               if menu.options.os_cmd:
-                tb_enumeration.single_os_cmd_exec(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell)
+                cmd = menu.options.os_cmd
+                check_how_long, output = tb_enumeration.single_os_cmd_exec(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell)
+                # Exploirt injection result
+                tb_injector.export_injection_results(cmd, separator, output, check_how_long)
+                sys.exit(0)
 
               # Pseudo-Terminal shell
               go_back = False
@@ -262,23 +266,9 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                       else:
                         # The main command injection exploitation.
                         check_how_long, output = tb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell)
-
-                      if menu.options.verbose:
+                        # Exploirt injection result
+                        tb_injector.export_injection_results(cmd, separator, output, check_how_long)
                         print ""
-
-                      if output != "" and check_how_long != 0 :
-                        print "\n\n" + Fore.GREEN + Style.BRIGHT + output + Style.RESET_ALL
-                        print "\n(*) Finished in "+ time.strftime('%H:%M:%S', time.gmtime(check_how_long)) +".\n"
-                      else:
-                        # Check if exists pipe filtration.
-                        if output != False :
-                           print "\n" + Fore.YELLOW  + "(^) Warning: It appears that '" + cmd + "' command could not return any output" + (', due to pipe (|) filtration.', '.')[separator == "||"]  + Style.RESET_ALL
-                           print Fore.YELLOW  + "             "+ ('To bypass that limitation, u', 'U')[separator == "||"]  +"se '--alter-shell' or try another injection technique (i.e. '--technique=\"f\"')" + Style.RESET_ALL 
-                           sys.exit(1)
-                        # Check for fault command.
-                        else:
-                           print Back.RED + "(x) Error: The '" + cmd + "' command, does not return any output." + Style.RESET_ALL + "\n"
-
                     except KeyboardInterrupt: 
                       raise
                   

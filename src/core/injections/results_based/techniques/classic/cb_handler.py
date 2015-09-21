@@ -216,7 +216,7 @@ def cb_injection_handler(url, delay, filename, http_request_method):
             # Check if defined single cmd.
             if menu.options.os_cmd:
               cb_enumeration.single_os_cmd_exec(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell)
-
+              
             # Pseudo-Terminal shell
             go_back = False
             while True:

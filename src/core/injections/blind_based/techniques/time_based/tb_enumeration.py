@@ -165,13 +165,7 @@ Single os-shell execution
 def single_os_cmd_exec(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell):
   cmd =  menu.options.os_cmd
   check_how_long, output  = tb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell)
-  shell = output
-  if shell != "":
-    shell = "".join(str(p) for p in shell)
-    print "\n\n" + Fore.GREEN + Style.BRIGHT + output + Style.RESET_ALL
-  else:
-    print "\n" + Back.RED + "(x) Error: The '" + cmd + "' command, does not return any output." + Style.RESET_ALL
-  sys.exit(0)
+  return check_how_long, output
 
 
 """

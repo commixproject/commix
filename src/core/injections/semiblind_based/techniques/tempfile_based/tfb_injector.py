@@ -411,13 +411,14 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_m
       how_long = examine_requests(payload, vuln_parameter, http_request_method, url)
     
     if how_long >= delay:
-      if menu.options.verbose:
-        print "\n"
-      else:
-        sys.stdout.write("["+Fore.GREEN+" SUCCEED "+ Style.RESET_ALL+"]\n")
-        sys.stdout.flush()
-      print Style.BRIGHT + "(!) Retrieved " + str(output_length) + " characters."+ Style.RESET_ALL
-      found_chars = True
+      if output_length > 1:
+        if menu.options.verbose:
+          print "\n"
+        else:
+          sys.stdout.write("["+Fore.GREEN+" SUCCEED "+ Style.RESET_ALL+"]\n")
+          sys.stdout.flush()
+        print Style.BRIGHT + "(!) Retrieved " + str(output_length) + " characters."+ Style.RESET_ALL
+        found_chars = True
       break
 
   if found_chars == True :
@@ -596,4 +597,19 @@ def false_positive_check(separator, TAG, cmd, prefix, suffix, delay, http_reques
     if str(output) == str(randvcalc):
       return output
 
+
+# -------------------------------
+# Export the injection results
+# -------------------------------
+def export_injection_results(cmd, separator, output, check_how_long):
+  if menu.options.verbose:
+    print ""  
+  if output != "" and check_how_long != 0 :
+    print "\n\n" + Fore.GREEN + Style.BRIGHT + output + Style.RESET_ALL
+    sys.stdout.write("\n(*) Finished in "+ time.strftime('%H:%M:%S', time.gmtime(check_how_long)))
+    if not menu.options.os_cmd:
+      print "\n"
+  else:
+    print Back.RED + "(x) Error: The '" + cmd + "' command, does not return any output." + Style.RESET_ALL
+  
 #eof

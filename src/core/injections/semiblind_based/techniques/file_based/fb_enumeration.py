@@ -189,7 +189,7 @@ def single_os_cmd_exec(separator, payload, TAG, delay, prefix, suffix, http_requ
   if shell:
     shell = " ".join(str(p) for p in shell)
     if shell != "":
-      print "\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n"
+      print "\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL 
     else:
       print "\n" + Back.RED + "(x) Error: The '" + cmd + "' command, does not return any output." + Style.RESET_ALL
   sys.exit(0)
