@@ -47,13 +47,19 @@ def updater():
         if os.path.isdir("./.git"):
           sys.stdout.write("[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]\n")
           sys.stdout.flush()
-          print "\n---"
+          start = 0
+          end = 0
+          start = time.time()
+          print "---"
           subprocess.Popen("git reset --hard HEAD && git pull", shell=True).wait()
           # Delete *.pyc files.
           subprocess.Popen("find . -name \"*.pyc\" -delete", shell=True).wait()
           # Delete empty directories and files.
           subprocess.Popen("find . -empty -type d -delete", shell=True).wait()
-          print "---\n"
+          print "---"
+          end  = time.time()
+          how_long = int(end - start)
+          print "(*) Finished in "+ time.strftime('%H:%M:%S', time.gmtime(how_long)) + ".\n"
         else:
           print "["+ Fore.RED + " FAILED " + Style.RESET_ALL +"]"
           print Back.RED + "(x) Error: The '.git' directory not found. Do it manually: "+ Style.BRIGHT +"'git clone " + settings.GIT_URL + " " + settings.APPLICATION +"' "+ Style.RESET_ALL    
