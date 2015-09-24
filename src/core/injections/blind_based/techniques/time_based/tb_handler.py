@@ -262,6 +262,11 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                           go_back = True
                           if checks.check_next_attack_vector(technique, go_back) == True:
                             break
+                          else:
+                            if no_result == True:
+                              return False 
+                            else:
+                              return True  
                         else:
                           pass
                         
