@@ -27,7 +27,7 @@ def do_GET_check(url):
 
   # Check for REST-ful URLs format. 
   if "?" not in url:
-    if settings.INJECT_TAG not in url:
+    if settings.INJECT_TAG not in url and not menu.options.shellshock:
       print "\n" + Back.RED + "(x) Error: You must set the \"INJECT_HERE\" tag to specify the testable parameter." + Style.RESET_ALL + "\n"
       os._exit(0)
     return url

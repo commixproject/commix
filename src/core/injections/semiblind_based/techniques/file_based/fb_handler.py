@@ -31,6 +31,7 @@ from src.utils import settings
 
 from src.thirdparty.colorama import Fore, Back, Style, init
 
+from src.core.injections.controller import checks
 from src.core.requests import headers
 from src.core.requests import parameters
 
@@ -225,7 +226,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                     print ""
                   print Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to write on "+ settings.SRV_ROOT_DIR + "." + Style.RESET_ALL
                   while True:
-                    tmp_upload = raw_input("(?) Do you want to try the temporary directory (" + tmp_path + ") [Y/n] > ").lower()
+                    tmp_upload = raw_input("(?) Do you want to try the temporary directory (" + tmp_path + ") [Y/n/q] > ").lower()
                     if tmp_upload in settings.CHOISE_YES:
                       exit_loops = True
                       tfb_controller(no_result, url, delay, filename, tmp_path, http_request_method, url_time_response)
@@ -233,6 +234,9 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                         return False
                     elif tmp_upload in settings.CHOISE_NO:
                       break
+                    elif tmp_upload in settings.CHOISE_QUIT:
+                      print ""
+                      raise
                     else:
                       if tmp_upload == "":
                         tmp_upload = "enter"
@@ -360,20 +364,25 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                       sys.exit(0)
                     elif cmd.lower() == "back":
                       go_back = True
-                      break
+                      if checks.check_next_attack_vector(technique, go_back) == True:
+                        break
+                      else:
+                        if no_result == True:
+                          return False 
+                        else:
+                          return True 
                     else:
                       pass
                     
                   else:
                     response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
-                    print ""
                     # Command execution results.
                     shell = fb_injector.injection_results(url, OUTPUT_TEXTFILE, delay)
                     
                     if shell:
                       shell = " ".join(str(p) for p in shell)
                       if shell != "":
-                        print Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n"
+                        print "\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n"
                       else:
                         print Back.RED + "(x) Error: The '" + cmd + "' command, does not return any output." + Style.RESET_ALL + "\n"
 
@@ -381,9 +390,14 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                 # Delete previous shell (text) files (output)
                 delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
                 if menu.options.verbose:
-                  sys.stdout.write("\r\n(*) Continue testing the "+ technique +"... ")
-                  sys.stdout.flush()
-                break
+                  print ""
+                if checks.check_next_attack_vector(technique, go_back) == True:
+                  break
+                else:
+                  if no_result == True:
+                    return False 
+                  else:
+                    return True  
 
               elif gotshell in settings.CHOISE_QUIT:
                 # Delete previous shell (text) files (output)

@@ -29,6 +29,7 @@ from src.utils import settings
 
 from src.thirdparty.colorama import Fore, Back, Style, init
 
+from src.core.injections.controller import checks
 from src.core.requests import headers
 from src.core.requests import parameters
 
@@ -234,12 +235,17 @@ def eb_injection_handler(url, delay, filename, http_request_method):
                       sys.exit(0)
                     elif cmd.lower() == "back":
                       go_back = True
-                      break
+                      if checks.check_next_attack_vector(technique, go_back) == True:
+                        break
+                      else:
+                        if no_result == True:
+                          return False 
+                        else:
+                          return True 
                     else:
                       pass
                       
                   else:
-
                     # The main command injection exploitation.
                     response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter)
                           
@@ -255,16 +261,19 @@ def eb_injection_handler(url, delay, filename, http_request_method):
                       if shell != "":
                         print "\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n"
                       else:
-                        print "\n" + Back.RED + "(x) Error: The '" + cmd + "' command, does not return any output." + Style.RESET_ALL + "\n"
+                        print Back.RED + "(x) Error: The '" + cmd + "' command, does not return any output." + Style.RESET_ALL + "\n"
                     
                 except KeyboardInterrupt: 
                   raise
               
             elif gotshell in settings.CHOISE_NO:
-              if menu.options.verbose:
-                sys.stdout.write("\r(*) Continue testing the "+ technique +"... ")
-                sys.stdout.flush()
-              break
+              if checks.check_next_attack_vector(technique, go_back) == True:
+                break
+              else:
+                if no_result == True:
+                  return False 
+                else:
+                  return True  
 
             elif gotshell in settings.CHOISE_QUIT:
               sys.exit(0)

@@ -29,6 +29,7 @@ from src.utils import settings
 
 from src.thirdparty.colorama import Fore, Back, Style, init
 
+from src.core.injections.controller import checks
 from src.core.requests import headers
 from src.core.requests import parameters
 
@@ -259,7 +260,8 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                           sys.exit(0)
                         elif cmd.lower() == "back":
                           go_back = True
-                          break
+                          if checks.check_next_attack_vector(technique, go_back) == True:
+                            break
                         else:
                           pass
                         
@@ -273,11 +275,14 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                       raise
                   
                 elif gotshell in settings.CHOISE_NO:
-                  if menu.options.verbose:
-                    sys.stdout.write("\r(*) Continue testing the "+ technique +"... ")
-                    sys.stdout.flush()
-                  break
-
+                  if checks.check_next_attack_vector(technique, go_back) == True:
+                    break
+                  else:
+                    if no_result == True:
+                      return False 
+                    else:
+                      return True  
+                      
                 elif gotshell in settings.CHOISE_QUIT:
                   sys.exit(0)
 

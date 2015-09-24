@@ -179,10 +179,10 @@ def do_check(url, filename):
     else:
       info_msg += " Remove the option '--alter-shell'"
     info_msg += " and/or try to audit the HTTP headers (i.e 'User-Agent', 'Referer', 'Cookie' etc)."
-    print Back.RED + info_msg + Style.RESET_ALL 
+    print Back.RED + info_msg + Style.RESET_ALL  + "\n"
 
-  else:
-    print ""
+  # else:
+  #   print ""
   sys.exit(0)
-  
+
 #eof

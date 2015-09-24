@@ -11,6 +11,7 @@ from src.utils import settings
 
 from src.thirdparty.colorama import Fore, Back, Style, init
 
+from src.core.injections.controller import checks
 from src.core.requests import headers
 from src.core.requests import parameters
 
@@ -393,7 +394,13 @@ def shellshock_handler(url, http_request_method, filename):
                         sys.exit(0)
                       elif cmd.lower() == "back":
                         go_back = True
-                        break
+                        if checks.check_next_attack_vector(technique, go_back) == True:
+                          break
+                        else:
+                          if no_result == True:
+                            return False 
+                          else:
+                            return True  
                       else:
                         pass
 
@@ -409,13 +416,13 @@ def shellshock_handler(url, http_request_method, filename):
                     sys.exit(0)
 
               elif gotshell in settings.CHOISE_NO:
-                if menu.options.verbose:
-                  sys.stdout.write("\r(*) Continue testing the "+ technique +"... ")
-                  sys.stdout.flush()
-                break
-
-              elif gotshell in settings.CHOISE_QUIT:
-                sys.exit(0)
+                if checks.check_next_attack_vector(technique, go_back) == True:
+                  break
+                else:
+                  if no_result == True:
+                    return False 
+                  else:
+                    return True 
 
               else:
                 if gotshell == "":
