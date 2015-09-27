@@ -159,13 +159,20 @@ def file_upload(separator, maxlen, TAG, prefix, suffix, delay, http_request_meth
 Check the defined options
 """
 def do_check(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell):
+  
   if menu.options.file_read:
     file_read(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+    settings.FILE_ACCESS_DONE = True
 
   if menu.options.file_write:
     file_write(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+    settings.FILE_ACCESS_DONE = True
 
   if menu.options.file_upload:
     file_upload(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+    settings.FILE_ACCESS_DONE = True
+
+  if settings.FILE_ACCESS_DONE == True:
+    print ""
 
 # eof

@@ -89,6 +89,12 @@ def main():
       print ""
       sys.exit(0)
 
+    # Modification on payload
+    if not menu.options.shellshock:
+      settings.CURRENT_USER = "echo $(" + settings.CURRENT_USER + ")"
+      settings.SYS_USERS  = "echo $(" + settings.SYS_USERS + ")"
+      settings.SYS_PASSES  = "echo $(" + settings.SYS_PASSES + ")"
+
     # Check if defined character used for splitting parameter values.
     if menu.options.pdel:
      settings.PARAMETER_DELIMITER = menu.options.pdel

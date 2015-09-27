@@ -185,7 +185,7 @@ def single_os_cmd_exec(separator, TAG, prefix, suffix, whitespace, http_request_
   if shell:
     shell = "".join(str(p) for p in shell)
     if shell != "":
-      print "\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL
+      print Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL
     else:
       print "\n" + Back.RED + "(x) Error: The '" + cmd + "' command, does not return any output." + Style.RESET_ALL 
     sys.exit(0)
@@ -194,21 +194,30 @@ def single_os_cmd_exec(separator, TAG, prefix, suffix, whitespace, http_request_
 Check the defined options
 """
 def do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell):
+
   if menu.options.hostname:
     hostname(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell)
+    settings.ENUMERATION_DONE = True
   else:
     print ""
     
   if menu.options.current_user:
     current_user(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell)
+    settings.ENUMERATION_DONE = True
 
   if menu.options.sys_info:
     system_information(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell)
+    settings.ENUMERATION_DONE = True
 
   if menu.options.users:
     system_users(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell)
+    settings.ENUMERATION_DONE = True
 
   if menu.options.passwords:
     system_passwords(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell)
+    settings.ENUMERATION_DONE = True
+
+  if settings.ENUMERATION_DONE == True:
+    print ""
 
 # eof

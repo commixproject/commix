@@ -200,19 +200,27 @@ Check the defined options
 def do_check(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell):
   if menu.options.hostname:
     hostname(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+    settings.ENUMERATION_DONE = True
   else:
     print ""
     
   if menu.options.current_user:
     current_user(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+    settings.ENUMERATION_DONE = True
 
   if menu.options.sys_info:
     system_information(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+    settings.ENUMERATION_DONE = True
 
   if menu.options.users:
     system_users(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+    settings.ENUMERATION_DONE = True
 
   if menu.options.passwords:
     system_passwords(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+    settings.ENUMERATION_DONE = True
 
+  if settings.ENUMERATION_DONE == True:
+    print ""
+    
 # eof

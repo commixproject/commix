@@ -196,18 +196,27 @@ Check the defined options
 def do_check(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter):
   if menu.options.hostname:
     hostname(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter)
+    settings.ENUMERATION_DONE = True
   else:
     print ""
     
   if menu.options.current_user:
     current_user(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter)
+    settings.ENUMERATION_DONE = True
 
   if menu.options.sys_info:
     system_information(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter)
+    settings.ENUMERATION_DONE = True
 
   if menu.options.users:
     system_users(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter)
+    settings.ENUMERATION_DONE = True
 
   if menu.options.passwords:
     system_passwords(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter)
+    settings.ENUMERATION_DONE = True
+
+  if settings.ENUMERATION_DONE == True:
+    print ""
+    
 # eof

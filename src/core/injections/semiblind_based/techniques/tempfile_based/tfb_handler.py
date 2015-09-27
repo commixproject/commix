@@ -246,10 +246,43 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
               print "  (+) Payload : "+ Fore.YELLOW + Style.BRIGHT + re.sub("%20", " ", payload.replace("\n", "\\n")) + Style.RESET_ALL
               
               # Check for any enumeration options.
-              tfb_enumeration.do_check(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+              if settings.ENUMERATION_DONE == True :
+                while True:
+                  enumerate_again = raw_input("\n(?) Do you want to enumerate again? [Y/n/q] > ").lower()
+                  if enumerate_again in settings.CHOISE_YES:
+                    tfb_enumeration.do_check(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+                    break
+                  elif enumerate_again in settings.CHOISE_NO: 
+                    break
+                  elif enumerate_again in settings.CHOISE_QUIT:
+                    sys.exit(0)
+                  else:
+                    if enumerate_again == "":
+                      enumerate_again = "enter"
+                    print Back.RED + "(x) Error: '" + enumerate_again + "' is not a valid answer." + Style.RESET_ALL
+                    pass
+              else:
+                tfb_enumeration.do_check(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
 
-              # Check for any enumeration options.
-              tfb_file_access.do_check(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+              # Check for any system file access options.
+              if settings.FILE_ACCESS_DONE == True :
+                while True:
+                  file_access_again = raw_input("(?) Do you want to access files again? [Y/n] > ").lower()
+                  if file_access_again in settings.CHOISE_YES:
+                    print ""
+                    tfb_file_access.do_check(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+                    break
+                  elif file_access_again in settings.CHOISE_NO: 
+                    break
+                  elif file_access_again in settings.CHOISE_QUIT:
+                    sys.exit(0)
+                  else:
+                    if file_access_again == "":
+                      file_access_again = "enter"
+                    print Back.RED + "(x) Error: '" + file_access_again + "' is not a valid answer." + Style.RESET_ALL
+                    pass
+              else:
+                tfb_file_access.do_check(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
               
               # Check if defined single cmd.
               if menu.options.os_cmd:
@@ -263,7 +296,7 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
               while True:
                 if go_back == True:
                   break
-                gotshell = raw_input("\n(?) Do you want a Pseudo-Terminal shell? [Y/n/q] > ").lower()
+                gotshell = raw_input("(?) Do you want a Pseudo-Terminal shell? [Y/n/q] > ").lower()
                 if gotshell in settings.CHOISE_YES:
                   print ""
                   print "Pseudo-Terminal (type '?' for shell options)"

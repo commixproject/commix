@@ -178,19 +178,28 @@ def single_os_cmd_exec(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_
 Check the defined options
 """
 def do_check(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell):
+  
   if menu.options.hostname:
     hostname(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+    settings.ENUMERATION_DONE = True
 
   if menu.options.current_user:
     current_user(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+    settings.ENUMERATION_DONE = True
 
   if menu.options.sys_info:
     system_information(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+    settings.ENUMERATION_DONE = True
 
   if menu.options.users:
     system_users(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+    settings.ENUMERATION_DONE = True
 
   if menu.options.passwords:
     system_passwords(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+    settings.ENUMERATION_DONE = True
+
+  if settings.ENUMERATION_DONE == True:
+    print ""
 
 # eof

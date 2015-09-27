@@ -106,7 +106,7 @@ PYTHON_VERSION = sys.version.split()[0]
 
 # Enumeration Commands
 # Current user
-CURRENT_USER = "echo $(whoami)"
+CURRENT_USER = "whoami"
 
 # The hostname
 HOSTNAME = "hostname"
@@ -121,8 +121,8 @@ RECOGNISE_OS = "uname -s"
 RECOGNISE_HP = "uname -m"
 
 # /etc/passwd
-SYS_USERS = "echo $(awk -F ':' '{ print $1\":\"$3\":\"$6\"(@)\"}' " + PASSWD_FILE + ")"
-SYS_PASSES = "echo $(awk -F ':' '{ print $1\":\"$2\"(@)\"}' " + SHADOW_FILE + ")"
+SYS_USERS = "awk -F ':' '{ print $1\":\"$3\":\"$6\"(@)\"}' " + PASSWD_FILE 
+SYS_PASSES = "awk -F ':' '{ print $1\":\"$2\"(@)\"}' " + SHADOW_FILE 
 
 # File System access options
 # Read file
@@ -238,5 +238,11 @@ SERVER_BANNERS = [
 
 # Injection logs report
 SHOW_LOGS_MSG = False
+
+# Enumeration options
+ENUMERATION_DONE = False
+
+# FIle access options
+FILE_ACCESS_DONE = False
 
 #eof

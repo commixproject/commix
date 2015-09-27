@@ -147,11 +147,17 @@ Check the defined options
 def do_check(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter):
   if menu.options.file_read:
     file_read(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter)
+    settings.FILE_ACCESS_DONE = True
 
   if menu.options.file_write:
     file_write(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter)
+    settings.FILE_ACCESS_DONE = True
 
   if menu.options.file_upload:
     file_upload(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter)
+    settings.FILE_ACCESS_DONE = True
+
+  if settings.FILE_ACCESS_DONE == True:
+    print ""
 
 # eof
