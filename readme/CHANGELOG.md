@@ -1,3 +1,7 @@
+## Version 0.2b [2015]
+* Added the ability to get the user's approval before re-{enumerate / file-read} target.
+* Added the ability to stop current injection technique and proceed on the next one(s).
+
 ## Version 0.1b [2015]
 * Added new eval-based payload (str_replace filter bypass).
 * Added check for (GET) RESTful URL format.
