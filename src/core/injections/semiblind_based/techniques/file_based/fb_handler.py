@@ -51,7 +51,8 @@ If temp-based technique failed, use the "/tmp/" directory for tempfile-based tec
 def tfb_controller(no_result, url, delay, filename, tmp_path, http_request_method, url_time_response):
   if no_result == True:
     sys.stdout.write("(*) Trying to create a file, on temporary directory (" + tmp_path + ")...\n")
-    tfb_handler.exploitation(url, delay, filename, tmp_path, http_request_method, url_time_response)     
+    call_tfb = tfb_handler.exploitation(url, delay, filename, tmp_path, http_request_method, url_time_response)   
+    return call_tfb
   else :
     sys.stdout.write("\r")
     sys.stdout.flush()
@@ -59,9 +60,9 @@ def tfb_controller(no_result, url, delay, filename, tmp_path, http_request_metho
 """
 Delete previous shells outputs.
 """
-def delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell):
+def delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
   cmd = "rm " + settings.SRV_ROOT_DIR + OUTPUT_TEXTFILE
-  response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell=None)
+  response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
 
 
 """
@@ -229,9 +230,14 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                     tmp_upload = raw_input("(?) Do you want to try the temporary directory (" + tmp_path + ") [Y/n/q] > ").lower()
                     if tmp_upload in settings.CHOISE_YES:
                       exit_loops = True
-                      tfb_controller(no_result, url, delay, filename, tmp_path, http_request_method, url_time_response)
-                      if no_result == True:
-                        return False
+                      call_tfb = tfb_controller(no_result, url, delay, filename, tmp_path, http_request_method, url_time_response)
+                      if call_tfb != False:
+                        return True
+                      else:
+                        if no_result == True:
+                          return False
+                        else:
+                          return True
                     elif tmp_upload in settings.CHOISE_NO:
                       break
                     elif tmp_upload in settings.CHOISE_QUIT:
@@ -273,7 +279,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
           
         except KeyboardInterrupt:
           # Delete previous shell (text) files (output)
-          delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+          delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
           raise
         
         except urllib2.URLError, e:
@@ -320,7 +326,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
             export_injection_info = logs.add_type_and_technique(export_injection_info, filename, injection_type, technique)
           if vp_flag == True:
             vp_flag = logs.add_parameter(vp_flag, filename, http_request_method, vuln_parameter, payload)
-          logs.upload_payload(filename, counter, payload) 
+          logs.update_payload(filename, counter, payload) 
           counter = counter + 1
           
           # Print the findings to terminal.
@@ -334,7 +340,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
             while True:
               enumerate_again = raw_input("\n(?) Do you want to enumerate again? [Y/n/q] > ").lower()
               if enumerate_again in settings.CHOISE_YES:
-                fb_enumeration.do_check(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+                fb_enumeration.do_check(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
                 break
               elif enumerate_again in settings.CHOISE_NO: 
                 break
@@ -344,15 +350,15 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                 print Back.RED + "(x) Error: '" + enumerate_again + "' is not a valid answer." + Style.RESET_ALL
                 pass
           else:
-            fb_enumeration.do_check(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+            fb_enumeration.do_check(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
 
           # Check for any system file access options.
           if settings.FILE_ACCESS_DONE == True :
             while True:
               file_access_again = raw_input("(?) Do you want to access files again? [Y/n/q] > ").lower()
-              if file_access_again  in settings.CHOISE_YES:
+              if file_access_again in settings.CHOISE_YES:
                 print ""
-                fb_file_access.do_check(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+                fb_file_access.do_check(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
                 break
               elif file_access_again in settings.CHOISE_NO: 
                 break
@@ -364,14 +370,14 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                 print Back.RED + "(x) Error: '" + file_access_again  + "' is not a valid answer." + Style.RESET_ALL
                 pass
           else:
-            fb_file_access.do_check(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+            fb_file_access.do_check(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
           
           # Check if defined single cmd.
           if menu.options.os_cmd:
-            fb_enumeration.single_os_cmd_exec(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+            fb_enumeration.single_os_cmd_exec(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
             
             # Delete previous shell (text) files (output)
-            delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+            delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
             sys.exit(0)
 
           try:
@@ -391,7 +397,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                       menu.shell_options()
                     elif cmd.lower() == "quit":
                       # Delete previous shell (text) files (output)
-                      delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+                      delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
                       sys.exit(0)
                     elif cmd.lower() == "back":
                       go_back = True
@@ -406,7 +412,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                       pass
                     
                   else:
-                    response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+                    response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
                     # Command execution results.
                     shell = fb_injector.injection_results(url, OUTPUT_TEXTFILE, delay)
                     
@@ -419,7 +425,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
 
               elif gotshell in settings.CHOISE_NO:
                 # Delete previous shell (text) files (output)
-                delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+                delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
                 if menu.options.verbose:
                   print ""
                 if checks.check_next_attack_vector(technique, go_back) == True:
@@ -432,7 +438,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
 
               elif gotshell in settings.CHOISE_QUIT:
                 # Delete previous shell (text) files (output)
-                delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+                delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
                 sys.exit(0)
 
               else:
@@ -443,7 +449,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
             
           except KeyboardInterrupt: 
             # Delete previous shell (text) files (output)
-            delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell)
+            delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
             raise
             
             

@@ -367,7 +367,7 @@ def referer_injection_test(url, vuln_parameter, payload):
 # -------------------------------------------
 # The main command injection exploitation.
 # -------------------------------------------
-def injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell):
+def injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
   if menu.options.file_write or menu.options.file_upload :
     minlen = 0
   else:

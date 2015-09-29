@@ -278,7 +278,7 @@ def referer_injection_test(url, vuln_parameter, payload):
 # -------------------------------------------
 # The main command injection exploitation.
 # -------------------------------------------
-def injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell):
+def injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
 
   # Execute shell commands on vulnerable host.
   if alter_shell :

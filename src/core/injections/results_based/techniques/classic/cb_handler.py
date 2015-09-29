@@ -199,7 +199,7 @@ def cb_injection_handler(url, delay, filename, http_request_method):
               export_injection_info = logs.add_type_and_technique(export_injection_info, filename, injection_type, technique)
             if vp_flag == True:
               vp_flag = logs.add_parameter(vp_flag, filename, http_request_method, vuln_parameter, payload)
-            logs.upload_payload(filename, counter, payload) 
+            logs.update_payload(filename, counter, payload) 
             counter = counter + 1
             
             # Print the findings to terminal.
@@ -213,7 +213,7 @@ def cb_injection_handler(url, delay, filename, http_request_method):
               while True:
                 enumerate_again = raw_input("\n(?) Do you want to enumerate again? [Y/n/q] > ").lower()
                 if enumerate_again in settings.CHOISE_YES:
-                  cb_enumeration.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell)
+                  cb_enumeration.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
                   break
                 elif enumerate_again in settings.CHOISE_NO: 
                   break
@@ -225,7 +225,7 @@ def cb_injection_handler(url, delay, filename, http_request_method):
                   print Back.RED + "(x) Error: '" + enumerate_again + "' is not a valid answer." + Style.RESET_ALL
                   pass
             else:
-              cb_enumeration.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell)
+              cb_enumeration.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
 
             # Check for any system file access options.
             if settings.FILE_ACCESS_DONE == True :
@@ -233,7 +233,7 @@ def cb_injection_handler(url, delay, filename, http_request_method):
                 file_access_again = raw_input("(?) Do you want to access files again? [Y/n/q] > ").lower()
                 if file_access_again in settings.CHOISE_YES:
                   print ""
-                  cb_file_access.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell)
+                  cb_file_access.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
                   break
                 elif file_access_again in settings.CHOISE_NO: 
                   break
@@ -245,11 +245,11 @@ def cb_injection_handler(url, delay, filename, http_request_method):
                   print Back.RED + "(x) Error: '" + file_access_again  + "' is not a valid answer." + Style.RESET_ALL
                   pass
             else:
-              cb_file_access.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell)
+              cb_file_access.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
 
             # Check if defined single cmd.
             if menu.options.os_cmd:
-              cb_enumeration.single_os_cmd_exec(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell)
+              cb_enumeration.single_os_cmd_exec(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
 
             # Pseudo-Terminal shell
             go_back = False
@@ -282,7 +282,7 @@ def cb_injection_handler(url, delay, filename, http_request_method):
 
                     else:
                       # Command execution results.
-                      response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell)
+                      response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
                       
                       # if need page reload
                       if menu.options.url_reload:

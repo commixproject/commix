@@ -217,7 +217,7 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                 export_injection_info = logs.add_type_and_technique(export_injection_info, filename, injection_type, technique)
               if vp_flag == True:
                 vp_flag = logs.add_parameter(vp_flag, filename, http_request_method, vuln_parameter, payload)
-              logs.upload_payload(filename, counter, payload) 
+              logs.update_payload(filename, counter, payload) 
               counter = counter + 1
               
               # Print the findings to terminal.
@@ -231,7 +231,7 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                 while True:
                   enumerate_again = raw_input("\n(?) Do you want to enumerate again? [Y/n/q] > ").lower()
                   if enumerate_again in settings.CHOISE_YES:
-                    tb_enumeration.do_check(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell)
+                    tb_enumeration.do_check(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename)
                     break
                   elif enumerate_again in settings.CHOISE_NO: 
                     break
@@ -243,7 +243,7 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                     print Back.RED + "(x) Error: '" + enumerate_again + "' is not a valid answer." + Style.RESET_ALL
                     pass
               else:
-                tb_enumeration.do_check(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell)
+                tb_enumeration.do_check(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename)
 
               # Check for any system file access options.
               if settings.FILE_ACCESS_DONE == True :
@@ -251,7 +251,7 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                   file_access_again = raw_input("(?) Do you want to access files again? [Y/n/q] > ").lower()
                   if file_access_again in settings.CHOISE_YES:
                     print ""
-                    tb_file_access.do_check(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell)
+                    tb_file_access.do_check(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename)
                     break
                   elif file_access_again in settings.CHOISE_NO: 
                     break
@@ -263,12 +263,12 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                     print Back.RED + "(x) Error: '" + file_access_again  + "' is not a valid answer." + Style.RESET_ALL
                     pass
               else:
-                tb_file_access.do_check(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell)
+                tb_file_access.do_check(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename)
               
               # Check if defined single cmd.
               if menu.options.os_cmd:
                 cmd = menu.options.os_cmd
-                check_how_long, output = tb_enumeration.single_os_cmd_exec(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell)
+                check_how_long, output = tb_enumeration.single_os_cmd_exec(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename)
                 # Exploirt injection result
                 tb_injector.export_injection_results(cmd, separator, output, check_how_long)
                 sys.exit(0)
@@ -305,7 +305,7 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                         
                       else:
                         # The main command injection exploitation.
-                        check_how_long, output = tb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell)
+                        check_how_long, output = tb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename)
                         # Exploirt injection result
                         tb_injector.export_injection_results(cmd, separator, output, check_how_long)
                         print ""

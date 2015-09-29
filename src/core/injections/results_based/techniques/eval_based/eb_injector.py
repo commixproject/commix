@@ -325,7 +325,7 @@ def referer_injection_test(url, vuln_parameter, payload):
 # -------------------------------------------
 # The main command injection exploitation.
 # -------------------------------------------
-def injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter):
+def injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, filename):
   
   # Execute shell commands on vulnerable host.
   payload = eb_payloads.cmd_execution(separator, TAG, cmd)

