@@ -176,8 +176,10 @@ def system_users(separator, payload, TAG, delay, prefix, suffix, http_request_me
               is_privilleged_nh = " is regular user "
           else :
             is_privilleged = ""
+            is_privilleged_nh = ""
         else :
           is_privilleged = ""
+          is_privilleged_nh = ""
         print "  ("+str(count)+") '" + Style.BRIGHT + Style.UNDERLINE + fields[0]+ Style.RESET_ALL + "'" + Style.BRIGHT + is_privilleged + Style.RESET_ALL + "(uid=" + fields[1] + "). Home directory is in '" + Style.BRIGHT + fields[2]+ Style.RESET_ALL + "'." 
         # Add infos to logs file.   
         output_file = open(filename, "a")
