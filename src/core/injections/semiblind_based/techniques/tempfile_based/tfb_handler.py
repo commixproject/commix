@@ -351,7 +351,6 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
     return False
 
   else :
-    print "sss"
     sys.stdout.write("\r")
     sys.stdout.flush()
 
