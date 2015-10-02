@@ -208,7 +208,7 @@ def enumeration(url, cve, check_header, filename):
           output_file.write("      ("+str(count)+") '" + fields[0]+ "'" + is_privilleged_nh + "(uid=" + fields[1] + "). Home directory is in '" + fields[2] + "'.\n" )
           output_file.close()
       else:
-        print "\n" + Fore.YELLOW + "(^) Warning: Cannot open '" + settings.PASSWD_FILE + "'." + Style.RESET_ALL
+        print Fore.YELLOW + "(^) Warning: Cannot open '" + settings.PASSWD_FILE + "'." + Style.RESET_ALL
     settings.ENUMERATION_DONE = True
 
     #-------------------------------------
@@ -242,7 +242,7 @@ def enumeration(url, cve, check_header, filename):
               output_file.write("      ("+str(count)+") " + fields[0] + " : " + fields[1])
               output_file.close()
         else:
-          print "\n" + Fore.YELLOW + "(^) Warning: Cannot open '" + settings.SHADOW_FILE + "'." + Style.RESET_ALL
+          print Fore.YELLOW + "(^) Warning: Cannot open '" + settings.SHADOW_FILE + "'." + Style.RESET_ALL
       settings.ENUMERATION_DONE = True  
 
   if settings.ENUMERATION_DONE == True:
@@ -264,11 +264,14 @@ def file_access(url, cve, check_header, filename):
     if shell:
       if menu.options.verbose:
         print ""
-      sys.stdout.write(Style.BRIGHT + "(!) Contents of file " + Style.UNDERLINE + file_to_read + Style.RESET_ALL + " : \n")
+      sys.stdout.write(Style.BRIGHT + "(!) The contents of file '" + Style.UNDERLINE + file_to_read + Style.RESET_ALL + "' : \n")
       sys.stdout.flush()
       print shell
+      output_file = open(filename, "a")
+      output_file.write("    (!) The contents of file '" + file_to_read + "' : " + shell + ".\n")
+      output_file.close()
     else:
-     sys.stdout.write("\n" + Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to read the '"+ file_to_read + "' file.\n" + Style.RESET_ALL)
+     sys.stdout.write(Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to read the '"+ file_to_read + "' file.\n" + Style.RESET_ALL)
      sys.stdout.flush()
     settings.FILE_ACCESS_DONE = True
 
@@ -278,7 +281,7 @@ def file_access(url, cve, check_header, filename):
   if menu.options.file_write:
     file_to_write = menu.options.file_write
     if not os.path.exists(file_to_write):
-      sys.stdout.write("\n" + Fore.YELLOW + "(^) Warning: It seems that the '"+ file_to_write + "' file, does not exists." + Style.RESET_ALL)
+      sys.stdout.write(Fore.YELLOW + "(^) Warning: It seems that the '"+ file_to_write + "' file, does not exists." + Style.RESET_ALL + "\n")
       sys.stdout.flush()
       sys.exit(0)
       
@@ -287,7 +290,7 @@ def file_access(url, cve, check_header, filename):
         content = [line.replace("\n", " ") for line in content_file]
       content = "".join(str(p) for p in content).replace("'", "\"")
     else:
-      sys.stdout.write("\n" + Fore.YELLOW + "(^) Warning: It seems that '"+ file_to_write + "' is not a file." + Style.RESET_ALL)
+      sys.stdout.write(Fore.YELLOW + "(^) Warning: It seems that '"+ file_to_write + "' is not a file." + Style.RESET_ALL)
       sys.stdout.flush()
     settings.FILE_ACCESS_DONE = True
 
@@ -315,7 +318,7 @@ def file_access(url, cve, check_header, filename):
       sys.stdout.write(Style.BRIGHT + "\n(!) The " + Style.UNDERLINE + shell + Style.RESET_ALL + Style.BRIGHT +" file was created successfully!\n" + Style.RESET_ALL)
       sys.stdout.flush()
     else:
-     sys.stdout.write("\n" + Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to write the '"+ dest_to_write + "' file." + Style.RESET_ALL)
+     sys.stdout.write(Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to write the '"+ dest_to_write + "' file." + Style.RESET_ALL)
      sys.stdout.flush()
     settings.FILE_ACCESS_DONE = True
 
@@ -329,7 +332,7 @@ def file_access(url, cve, check_header, filename):
     try:
       urllib2.urlopen(file_to_upload)
     except urllib2.HTTPError, err:
-      sys.stdout.write("\n" + Fore.YELLOW + "(^) Warning: It seems that the '"+ file_to_upload + "' file, does not exists. ("+str(err)+")" + Style.RESET_ALL + "\n")
+      sys.stdout.write(Fore.YELLOW + "(^) Warning: It seems that the '"+ file_to_upload + "' file, does not exists. ("+str(err)+")" + Style.RESET_ALL + "\n")
       sys.stdout.flush()
       sys.exit(0)
       
@@ -356,7 +359,7 @@ def file_access(url, cve, check_header, filename):
       sys.stdout.write(Style.BRIGHT + "\n(!) The " + Style.UNDERLINE + shell + Style.RESET_ALL + Style.BRIGHT +" file was uploaded successfully!\n" + Style.RESET_ALL)
       sys.stdout.flush()
     else:
-     sys.stdout.write("\n" + Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to write the '"+ dest_to_upload + "' file." + Style.RESET_ALL)
+     sys.stdout.write(Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to write the '"+ dest_to_upload + "' file." + Style.RESET_ALL)
      sys.stdout.flush()
     settings.FILE_ACCESS_DONE = True
 

@@ -374,7 +374,8 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_m
     minlen = 1
     
   found_chars = False
-  sys.stdout.write("\n(*) Retrieving the length of execution output... ")
+
+  sys.stdout.write("(*) Retrieving the length of execution output... ")
   sys.stdout.flush()  
   for output_length in range(int(minlen), int(maxlen)):
     
@@ -486,8 +487,11 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_m
 
   else:
     check_start = 0
-    sys.stdout.write("["+Fore.RED+" FAILED "+ Style.RESET_ALL+"]\n")
-    sys.stdout.flush()  
+    if not menu.options.verbose:
+      sys.stdout.write("["+Fore.RED+" FAILED "+ Style.RESET_ALL+"]\n")
+      sys.stdout.flush() 
+    else:
+      print "" 
     check_how_long = 0
     output = ""
 

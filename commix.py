@@ -91,7 +91,7 @@ def main():
 
     # Modification on payload
     if not menu.options.shellshock:
-      settings.CURRENT_USER = "echo $(" + settings.CURRENT_USER + ")"
+      #settings.CURRENT_USER = "echo $(" + settings.CURRENT_USER + ")"
       settings.SYS_USERS  = "echo $(" + settings.SYS_USERS + ")"
       settings.SYS_PASSES  = "echo $(" + settings.SYS_PASSES + ")"
 
@@ -143,32 +143,39 @@ def main():
         print Back.RED + "(x) Error: '" + menu.options.alter_shell + "' shell is not supported!" + Style.RESET_ALL
         sys.exit(0)
 
+    # Check the file-destination
+    if menu.options.file_write and not menu.options.file_dest or \
+    menu.options.file_upload  and not menu.options.file_dest:
+      print Back.RED + "(x) Error: Host's absolute filepath to write and/or upload, must be specified (--file-dest)." + Style.RESET_ALL + "\n"
+      sys.exit(0)
+
+    if menu.options.file_dest and menu.options.file_write == None and menu.options.file_upload == None :
+       print Back.RED + "(x) Error: You must enter the '--file-write' or '--file-upload' parameter." + Style.RESET_ALL + "\n"
+       sys.exit(0)
+
     # Check if defined "--file-upload" option.
     if menu.options.file_upload:
-
       # Check if not defined URL for upload.
       if not re.match(settings.VALID_URL_FORMAT, menu.options.file_upload):
-        sys.stdout.write(Back.RED + "(x) Error: The '"+ menu.options.file_upload + "' is not a valid URL. " + Style.RESET_ALL + "\n")
-        sys.stdout.flush()
+        print Back.RED + "(x) Error: The '"+ menu.options.file_upload + "' is not a valid URL. " + Style.RESET_ALL + "\n"
         sys.exit(0)
 
-    # Check if specified file-access options
-    # Check if not defined "--file-dest" option.
-    if menu.options.file_dest == None:
-      # Check if defined "--file-write" option.
-      if menu.options.file_write:
-        file_name = os.path.split(menu.options.file_write)[1]
-        menu.options.file_dest = settings.SRV_ROOT_DIR + file_name
+    # # Check if specified file-access options
+    # # Check if not defined "--file-dest" option.
+    # if menu.options.file_dest == None:
+    #   # Check if defined "--file-write" option.
+    #   if menu.options.file_write:
+    #     file_name = os.path.split(menu.options.file_write)[1]
+    #     menu.options.file_dest = settings.SRV_ROOT_DIR + file_name
         
-      # Check if defined "--file-upload" option.
-      if menu.options.file_upload:
-
-        file_name = os.path.split(menu.options.file_upload)[1]
-        menu.options.file_dest = settings.SRV_ROOT_DIR + file_name
+    #   # Check if defined "--file-upload" option.
+    #   if menu.options.file_upload:
+    #     file_name = os.path.split(menu.options.file_upload)[1]
+    #     menu.options.file_dest = settings.SRV_ROOT_DIR + file_name
         
-    elif menu.options.file_dest and menu.options.file_write == None and menu.options.file_upload == None :
-      print Back.RED + "(x) Error: You must enter the '--file-write' or '--file-upload' parameter." + Style.RESET_ALL
-      sys.exit(0)
+    # elif menu.options.file_dest and menu.options.file_write == None and menu.options.file_upload == None :
+    #   print Back.RED + "(x) Error: You must enter the '--file-write' or '--file-upload' parameter." + Style.RESET_ALL
+    #   sys.exit(0)
         
     # Check if defined "--random-agent" option.
     if menu.options.random_agent:

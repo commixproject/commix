@@ -234,6 +234,8 @@ def single_os_cmd_exec(separator, TAG, prefix, suffix, whitespace, http_request_
   response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
   shell = cb_injector.injection_results(response, TAG)
   if shell:
+    if settings.FILE_ACCESS_DONE == False:
+      print""
     shell = "".join(str(p) for p in shell)
     if shell != "":
       print Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL
@@ -249,8 +251,10 @@ def do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, ur
   if menu.options.hostname:
     hostname(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
     settings.ENUMERATION_DONE = True
+  elif settings.ENUMERATION_DONE == False:
+      print ""
   else:
-    print ""
+  		print ""
     
   if menu.options.current_user:
     current_user(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
@@ -268,7 +272,7 @@ def do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, ur
     system_passwords(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
     settings.ENUMERATION_DONE = True
 
-  if settings.ENUMERATION_DONE == True:
+  if settings.ENUMERATION_DONE :
     print ""
-
+    
 # eof

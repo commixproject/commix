@@ -232,7 +232,8 @@ def cb_injection_handler(url, delay, filename, http_request_method):
               while True:
                 file_access_again = raw_input("(?) Do you want to access files again? [Y/n/q] > ").lower()
                 if file_access_again in settings.CHOISE_YES:
-                  print ""
+                  if not menu.options.verbose:
+                    print ""
                   cb_file_access.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
                   break
                 elif file_access_again in settings.CHOISE_NO: 
@@ -298,6 +299,8 @@ def cb_injection_handler(url, delay, filename, http_request_method):
                         if shell != "":
                           print "\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n"
                         else:
+                          if menu.options.verbose:
+                            print ""
                           print Back.RED + "(x) Error: The '" + cmd + "' command, does not return any output." + Style.RESET_ALL + "\n"
 
                   except KeyboardInterrupt: 

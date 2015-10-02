@@ -235,6 +235,8 @@ def single_os_cmd_exec(separator, payload, TAG, delay, prefix, suffix, http_requ
   response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
   shell = fb_injector.injection_results(url, OUTPUT_TEXTFILE, delay)
   if shell:
+    if settings.FILE_ACCESS_DONE == False:
+      print ""
     shell = " ".join(str(p) for p in shell)
     if shell != "":
       print "\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL 
@@ -250,8 +252,10 @@ def do_check(separator, payload, TAG, delay, prefix, suffix, http_request_method
   if menu.options.hostname:
     hostname(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
     settings.ENUMERATION_DONE = True
+  elif settings.ENUMERATION_DONE == False:
+      print ""
   else:
-    print ""
+      print ""
     
   if menu.options.current_user:
     current_user(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
@@ -269,7 +273,7 @@ def do_check(separator, payload, TAG, delay, prefix, suffix, http_request_method
     system_passwords(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
     settings.ENUMERATION_DONE = True
 
-  if settings.ENUMERATION_DONE == True:
+  if settings.ENUMERATION_DONE :
     print ""
     
 # eof

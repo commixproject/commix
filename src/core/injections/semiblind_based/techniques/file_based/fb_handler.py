@@ -89,10 +89,8 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
   else:
     tmp_path = settings.TMP_PATH
                       
-  if menu.options.file_dest:
-    if '/tmp/' in menu.options.file_dest:
-      call_tmp_based = True
-    SRV_ROOT_DIR = os.path.split(menu.options.file_dest)[0]
+  if '/tmp/' in menu.options.file_dest:
+    call_tmp_based = True
   else:
     if menu.options.srv_root_dir:
       settings.SRV_ROOT_DIR = menu.options.srv_root_dir
@@ -290,7 +288,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
           sys.exit(0)
         
         except:
-          continue
+          raise
           
         # Yaw, got shellz! 
         # Do some magic tricks!
@@ -360,7 +358,8 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
             while True:
               file_access_again = raw_input("(?) Do you want to access files again? [Y/n/q] > ").lower()
               if file_access_again in settings.CHOISE_YES:
-                print ""
+                if not menu.options.verbose:
+                  print ""
                 fb_file_access.do_check(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
                 break
               elif file_access_again in settings.CHOISE_NO: 

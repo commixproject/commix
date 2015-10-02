@@ -93,6 +93,8 @@ def current_user(separator, TAG, prefix, suffix, http_request_method, url, vuln_
   cu_account = eb_injector.injection_results(response, TAG)
   if cu_account:
     cu_account = "".join(str(p) for p in cu_account).replace(" ", "", 1)[:-1]
+    if menu.options.verbose:
+      print ""
     # Check if the user have super privileges.
     if menu.options.is_root:
       cmd = settings.ISROOT
@@ -233,6 +235,8 @@ def single_os_cmd_exec(separator, TAG, prefix, suffix, http_request_method, url,
   response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, filename)
   shell = eb_injector.injection_results(response, TAG)
   if shell:
+    if settings.FILE_ACCESS_DONE == False:
+      print""
     shell = "".join(str(p) for p in shell).replace(" ", "", 1)[:-1]
     if shell != "":
       print "\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL
@@ -247,8 +251,10 @@ def do_check(separator, TAG, prefix, suffix, http_request_method, url, vuln_para
   if menu.options.hostname:
     hostname(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, filename)
     settings.ENUMERATION_DONE = True
+  elif settings.ENUMERATION_DONE == False:
+      print ""
   else:
-    print ""
+      print ""
     
   if menu.options.current_user:
     current_user(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, filename)
@@ -266,7 +272,7 @@ def do_check(separator, TAG, prefix, suffix, http_request_method, url, vuln_para
     system_passwords(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, filename)
     settings.ENUMERATION_DONE = True
 
-  if settings.ENUMERATION_DONE == True:
+  if settings.ENUMERATION_DONE :
     print ""
     
 # eof

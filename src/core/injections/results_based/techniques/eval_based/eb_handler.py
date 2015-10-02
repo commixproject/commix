@@ -231,7 +231,8 @@ def eb_injection_handler(url, delay, filename, http_request_method):
             while True:
               file_access_again = raw_input("(?) Do you want to access files again? [Y/n/q] > ").lower()
               if file_access_again in settings.CHOISE_YES:
-                print ""
+                if not menu.options.verbose:
+                  print ""
                 eb_file_access.do_check(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, filename)
                 break
               elif file_access_again in settings.CHOISE_NO: 

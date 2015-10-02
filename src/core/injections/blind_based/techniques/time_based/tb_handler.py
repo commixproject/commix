@@ -227,7 +227,7 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
               print "  (+) Payload : "+ Fore.YELLOW + Style.BRIGHT + re.sub("%20", " ", payload.replace("\n", "\\n")) + Style.RESET_ALL
 
               # Check for any enumeration options.
-              if settings.ENUMERATION_DONE == True :
+              if settings.ENUMERATION_DONE == True:
                 while True:
                   enumerate_again = raw_input("\n(?) Do you want to enumerate again? [Y/n/q] > ").lower()
                   if enumerate_again in settings.CHOISE_YES:
@@ -246,11 +246,10 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                 tb_enumeration.do_check(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename)
 
               # Check for any system file access options.
-              if settings.FILE_ACCESS_DONE == True :
+              if settings.FILE_ACCESS_DONE == True:
                 while True:
                   file_access_again = raw_input("(?) Do you want to access files again? [Y/n/q] > ").lower()
                   if file_access_again in settings.CHOISE_YES:
-                    print ""
                     tb_file_access.do_check(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename)
                     break
                   elif file_access_again in settings.CHOISE_NO: 
@@ -264,7 +263,7 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                     pass
               else:
                 tb_file_access.do_check(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename)
-              
+
               # Check if defined single cmd.
               if menu.options.os_cmd:
                 cmd = menu.options.os_cmd
@@ -304,6 +303,7 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                           pass
                         
                       else:
+                        print ""
                         # The main command injection exploitation.
                         check_how_long, output = tb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename)
                         # Exploirt injection result
