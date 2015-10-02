@@ -88,8 +88,8 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
     tmp_path = menu.options.tmp_path
   else:
     tmp_path = settings.TMP_PATH
-                      
-  if '/tmp/' in menu.options.file_dest:
+
+  if menu.options.file_dest and '/tmp/' in menu.options.file_dest:
     call_tmp_based = True
   else:
     if menu.options.srv_root_dir:
@@ -122,10 +122,10 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
       EXTRA_DIR = path.replace(last_param, "")
       settings.SRV_ROOT_DIR = settings.SRV_ROOT_DIR + EXTRA_DIR
 
-  if not menu.options.verbose:
-    print "(*) Trying to create a file on " + settings.SRV_ROOT_DIR + "... "
-  else:
-    print "(*) Testing the "+ technique + "... "
+    if not menu.options.verbose:
+      print "(*) Trying to create a file on " + settings.SRV_ROOT_DIR + "... "
+    else:
+      print "(*) Testing the "+ technique + "... "
 
   i = 0
   # Calculate all possible combinations
