@@ -426,10 +426,13 @@ def injection_results(url, OUTPUT_TEXTFILE, delay):
   headers.do_check(request)
   
   # Evaluate test results.
-  output = urllib2.urlopen(request)
-  html_data = output.read()
-  shell = re.findall(r"(.*)", html_data)
-  
+  try:
+    output = urllib2.urlopen(request)
+    html_data = output.read()
+    shell = re.findall(r"(.*)", html_data)
+  except urllib2.HTTPError, e:
+    if e.getcode() == 404:
+      shell = ""
   return shell
 
 #eof

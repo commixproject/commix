@@ -422,7 +422,8 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                       shell = " ".join(str(p) for p in shell)
                       if shell != "":
                         print "\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n"
-                      else:
+
+                    if not shell or shell == "":
                         print Back.RED + "(x) Error: The '" + cmd + "' command, does not return any output." + Style.RESET_ALL + "\n"
 
               elif gotshell in settings.CHOISE_NO:
