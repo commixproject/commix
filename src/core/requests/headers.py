@@ -55,6 +55,10 @@ def do_check(request):
       b64_string = base64.encodestring(menu.options.auth_cred).replace('\n', '')
       request.add_header("Authorization", "Basic " + b64_string +"")
   
+  # The MIME media type for JSON.
+  if settings.IS_JSON:
+  	request.add_header("Content-Type", "application/json")
+
   # Check if defined any extra HTTP headers.
   if menu.options.headers:
     extra_headers = menu.options.headers

@@ -18,11 +18,13 @@ import re
 import os
 import sys
 import time
+import json
 import string
 import random
 import base64
 import urllib
 import urllib2
+import HTMLParser
 
 from src.utils import menu
 from src.utils import settings
@@ -87,10 +89,16 @@ def injection_test(payload, http_request_method, url):
     
     # Check if its not specified the 'INJECT_HERE' tag
     parameter = parameters.do_POST_check(parameter)
-    
-    # Define the POST data
-    data = re.sub(settings.INJECT_TAG, payload, parameter)
-    request = urllib2.Request(url, data)
+
+    # Define the POST data  
+    if settings.IS_JSON == False:
+      data = re.sub(settings.INJECT_TAG, payload, parameter)
+      request = urllib2.Request(url, data)
+    else:
+      payload = payload.replace("\"", "\\\"")
+      data = re.sub(settings.INJECT_TAG, urllib.unquote(payload), parameter)
+      data = json.loads(data, strict = False)
+      request = urllib2.Request(url, json.dumps(data))
     
     # Check if defined extra headers.
     headers.do_check(request)
@@ -368,8 +376,15 @@ def injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_meth
       # Check if its not specified the 'INJECT_HERE' tag
       parameter = parameters.do_POST_check(parameter)
       
-      data = re.sub(settings.INJECT_TAG, payload, parameter)
-      request = urllib2.Request(url, data)
+      # Define the POST data  
+      if settings.IS_JSON == False:
+        data = re.sub(settings.INJECT_TAG, payload, parameter)
+        request = urllib2.Request(url, data)
+      else:
+        payload = payload.replace("\"", "\\\"")
+        data = re.sub(settings.INJECT_TAG, urllib.unquote(payload), parameter)
+        data = json.loads(data, strict = False)
+        request = urllib2.Request(url, json.dumps(data))
       
       # Check if defined extra headers.
       headers.do_check(request)
@@ -409,5 +424,7 @@ def injection_results(response, TAG):
   shell = re.findall(r"" + TAG + TAG + "(.*)" + TAG + TAG + "", html_data)
   if len(shell) > 1:
     shell = shell[0]
+  shell = shell[0].replace("\/","/")
+
   return shell
 

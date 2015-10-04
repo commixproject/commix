@@ -57,8 +57,6 @@ from src.core.injections.controller import controller
 if settings.IS_WINDOWS:
   init()
 
-
-
 def main():
 
   try:
@@ -146,18 +144,18 @@ def main():
     # Check the file-destination
     if menu.options.file_write and not menu.options.file_dest or \
     menu.options.file_upload  and not menu.options.file_dest:
-      print Back.RED + "(x) Error: Host's absolute filepath to write and/or upload, must be specified (--file-dest)." + Style.RESET_ALL + "\n"
+      print Back.RED + "(x) Error: Host's absolute filepath to write and/or upload, must be specified (--file-dest)." + Style.RESET_ALL
       sys.exit(0)
 
     if menu.options.file_dest and menu.options.file_write == None and menu.options.file_upload == None :
-       print Back.RED + "(x) Error: You must enter the '--file-write' or '--file-upload' parameter." + Style.RESET_ALL + "\n"
+       print Back.RED + "(x) Error: You must enter the '--file-write' or '--file-upload' parameter." + Style.RESET_ALL
        sys.exit(0)
 
     # Check if defined "--file-upload" option.
     if menu.options.file_upload:
       # Check if not defined URL for upload.
       if not re.match(settings.VALID_URL_FORMAT, menu.options.file_upload):
-        print Back.RED + "(x) Error: The '"+ menu.options.file_upload + "' is not a valid URL. " + Style.RESET_ALL + "\n"
+        print Back.RED + "(x) Error: The '"+ menu.options.file_upload + "' is not a valid URL. " + Style.RESET_ALL
         sys.exit(0)
 
     # # Check if specified file-access options
@@ -268,15 +266,15 @@ def main():
             print Back.RED + "(x) Error: Only 'Basic' Access Authentication is supported." + Style.RESET_ALL
             sys.exit(0)
           else:
-            print Back.RED + "(x) Error: Authorization required!" + Style.RESET_ALL + "\n"
+            print Back.RED + "(x) Error: Authorization required!" + Style.RESET_ALL
             sys.exit(0)
           
         elif e.getcode() == 403:
-          print Back.RED + "(x) Error: You don't have permission to access this page." + Style.RESET_ALL + "\n"
+          print Back.RED + "(x) Error: You don't have permission to access this page." + Style.RESET_ALL
           sys.exit(0)
           
         elif e.getcode() == 404:
-          print Back.RED + "(x) Error: The host seems to be down!" + Style.RESET_ALL + "\n"
+          print Back.RED + "(x) Error: The host seems to be down!" + Style.RESET_ALL
           sys.exit(0)
 
         else:
@@ -284,7 +282,7 @@ def main():
 
       except urllib2.URLError, e:
           print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
-          print Back.RED + "(x) Error: The host seems to be down!" + Style.RESET_ALL + "\n"
+          print Back.RED + "(x) Error: The host seems to be down!" + Style.RESET_ALL
           sys.exit(0)
         
       except httplib.BadStatusLine, e:
@@ -293,7 +291,7 @@ def main():
           pass
         
     else:
-      print Back.RED + "(x) Error: You must specify the target URL." + Style.RESET_ALL + "\n"
+      print Back.RED + "(x) Error: You must specify the target URL." + Style.RESET_ALL
       sys.exit(0)
 
     # Check if defined "--proxy" option.
@@ -307,20 +305,20 @@ def main():
     print "\n" + Back.RED + "(x) Aborted: Ctrl-C was pressed!" + Style.RESET_ALL
     if settings.SHOW_LOGS_MSG == True:
       logs.logs_notification(filename)
-      print ""
+    print ""
     sys.exit(0)
 
   except SystemExit: 
     if settings.SHOW_LOGS_MSG == True:
       logs.logs_notification(filename)
-      print ""
+    print ""
     sys.exit(0)
   
   # Accidental stop / restart of the target host server.
   except httplib.BadStatusLine, e:
     if e.line == "" or e.message == "":
       print "\n" + Back.RED + "(x) Error: The target host is not responding." + \
-            " Ensure that host is up and running and try again." + Style.RESET_ALL + "\n"
+            " Ensure that host is up and running and try again." + Style.RESET_ALL
     else: 
       print Back.RED + "(x) Error: " + e.line + e.message + Style.RESET_ALL
     sys.exit(0)

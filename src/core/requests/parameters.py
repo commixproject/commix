@@ -15,6 +15,8 @@
 """
 import re
 import os
+import sys
+import json
 
 from src.utils import menu
 from src.utils import settings
@@ -28,7 +30,7 @@ def do_GET_check(url):
   # Check for REST-ful URLs format. 
   if "?" not in url:
     if settings.INJECT_TAG not in url and not menu.options.shellshock:
-      print "\n" + Back.RED + "(x) Error: You must set the \"INJECT_HERE\" tag to specify the testable parameter." + Style.RESET_ALL + "\n"
+      print Back.RED + "(x) Error: You must set the \"INJECT_HERE\" tag to specify the testable parameter." + Style.RESET_ALL + "\n"
       os._exit(0)
     return url
 
@@ -60,7 +62,7 @@ def do_GET_check(url):
   else:
     # Check if defined the "INJECT_HERE" tag
     if settings.INJECT_TAG not in url:
-      print "\n" + Back.RED + "(x) Error: You must set the \"INJECT_HERE\" tag to specify the testable parameter." + Style.RESET_ALL + "\n"
+      print Back.RED + "(x) Error: You must set the \"INJECT_HERE\" tag to specify the testable parameter." + Style.RESET_ALL + "\n"
       os._exit(0)
 
     all_params = settings.PARAMETER_DELIMITER.join(multi_parameters)
@@ -139,38 +141,96 @@ def vuln_GET_param(url):
 # --------------------------------------------------------------
 def do_POST_check(parameter):
 
-  # Split parameters 
-  multi_parameters = parameter.split(settings.PARAMETER_DELIMITER)
-  # Check if single paramerter is supplied.
-  if len(multi_parameters) == 1:
+  # Check if valid JSON
+  def is_JSON_check(parameter):
+    try:
+      json_object = json.loads(parameter)
+    except ValueError, err:
+      if not "No JSON object could be decoded" in err:
+        print Back.RED + "(x) Error: JSON " + str(err) + ". " + Style.RESET_ALL + "\n"
+        sys.exit(0)
+      return False
+    else:  
+      return True
 
-      # Check if defined the INJECT_TAG
+  if all(symbol in parameter for symbol in settings.JSON_SYMBOLS):
+    parameter = parameter.replace("'", "\"")
+
+  # Check if JSON Object.
+  if is_JSON_check(parameter):
+    settings.IS_JSON = True
+    #Split parameters 
+    settings.PARAMETER_DELIMITER = ","
+    multi_parameters = parameter.split(settings.PARAMETER_DELIMITER)
+
+    # Check if single paramerter is supplied.
+    if len(multi_parameters) == 1:
+
+        # Check if defined the INJECT_TAG
+        if settings.INJECT_TAG not in parameter:
+          if settings.IS_JSON == True:
+            #Grab the value of parameter.
+            value = re.findall(r'\:\"(.*)\"', parameter)
+            value = ''.join(value)
+          else:
+            #Grab the value of parameter.
+            value = re.findall(r'\"(.*)\"', parameter)
+            value = ''.join(value)
+
+          # Replace the value of parameter with INJECT tag
+          inject_value = value.replace(value, settings.INJECT_TAG)
+          parameter = parameter.replace(value, inject_value)
+
+        return parameter
+
+    # Check if multiple paramerters are supplied.
+    else:
+      # Check if defined the "INJECT_HERE" tag
       if settings.INJECT_TAG not in parameter:
+        print Back.RED + "(x) Error: You must set the \"INJECT_HERE\" tag to specify the testable parameter." + Style.RESET_ALL + "\n"
+        os._exit(0)
 
-        #Grab the value of parameter.
-        value = re.findall(r'=(.*)', parameter)
+      all_params = settings.PARAMETER_DELIMITER.join(multi_parameters)
+
+      for i in range(0,len(multi_parameters)):
+        # Grab the value of parameter.
+        value = re.findall(r'\"(.*)\"', multi_parameters[i])
         value = ''.join(value)
-
-        # Replace the value of parameter with INJECT tag
-        inject_value = value.replace(value, settings.INJECT_TAG)
-        parameter = parameter.replace(value, inject_value)
+        parameter = settings.PARAMETER_DELIMITER.join(multi_parameters)
       return parameter
 
-  # Check if multiple paramerters are supplied.
   else:
-    # Check if defined the "INJECT_HERE" tag
-    if settings.INJECT_TAG not in parameter:
-      print "\n" + Back.RED + "(x) Error: You must set the \"INJECT_HERE\" tag to specify the testable parameter." + Style.RESET_ALL + "\n"
-      os._exit(0)
+    multi_parameters = parameter.split(settings.PARAMETER_DELIMITER)
+    # Check if single paramerter is supplied.
+    if len(multi_parameters) == 1:
 
-    all_params = settings.PARAMETER_DELIMITER.join(multi_parameters)
+        # Check if defined the INJECT_TAG
+        if settings.INJECT_TAG not in parameter:
 
-    for i in range(0,len(multi_parameters)):
-      # Grab the value of parameter.
-      value = re.findall(r'=(.*)', multi_parameters[i])
-      value = ''.join(value)
-      parameter = settings.PARAMETER_DELIMITER.join(multi_parameters)
-    return parameter
+          #Grab the value of parameter.
+          value = re.findall(r'=(.*)', parameter)
+          value = ''.join(value)
+
+          # Replace the value of parameter with INJECT tag
+          inject_value = value.replace(value, settings.INJECT_TAG)
+          parameter = parameter.replace(value, inject_value)
+        return parameter
+
+    # Check if multiple paramerters are supplied.
+    else:
+      # Check if defined the "INJECT_HERE" tag
+      if settings.INJECT_TAG not in parameter:
+        print Back.RED + "(x) Error: You must set the \"INJECT_HERE\" tag to specify the testable parameter." + Style.RESET_ALL + "\n"
+        os._exit(0)
+
+      all_params = settings.PARAMETER_DELIMITER.join(multi_parameters)
+
+      for i in range(0,len(multi_parameters)):
+        # Grab the value of parameter.
+        value = re.findall(r'=(.*)', multi_parameters[i])
+        value = ''.join(value)
+        parameter = settings.PARAMETER_DELIMITER.join(multi_parameters)
+      return parameter
 
       ## Multiple paramerters without the "INJECT_HERE" tag.
       #paramerters_list = []
@@ -207,6 +267,15 @@ def vuln_POST_param(parameter, url):
 
     elif re.findall(r"(.*)=" + settings.INJECT_TAG + "", parameter):
       vuln_parameter = re.findall(r"(.*)=" + settings.INJECT_TAG + "", parameter)
+      vuln_parameter = ''.join(vuln_parameter)
+
+    # If JSON format
+    elif re.findall(r""+settings.PARAMETER_DELIMITER +"\"(.*)\"\:\"" + settings.INJECT_TAG + "\"", parameter):
+      vuln_parameter = re.findall(r""+settings.PARAMETER_DELIMITER +"\"(.*)\"\:\"" + settings.INJECT_TAG + "\"", parameter)
+      vuln_parameter = ''.join(vuln_parameter)
+
+    elif re.findall(r"\"(.*)\"\:\"" + settings.INJECT_TAG + "\"", parameter):
+      vuln_parameter = re.findall(r"\"(.*)\"\:\"" + settings.INJECT_TAG + "\"", parameter)
       vuln_parameter = ''.join(vuln_parameter)
 
     else:

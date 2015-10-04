@@ -190,7 +190,7 @@ def do_check(separator, maxlen, TAG, prefix, suffix, delay, http_request_method,
     file_upload(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
     settings.FILE_ACCESS_DONE = True
 
-  if settings.FILE_ACCESS_DONE and not menu.options.verbose:
+  if settings.FILE_ACCESS_DONE :
     print ""
 
 # eof
