@@ -424,7 +424,7 @@ def injection_results(response, TAG):
   shell = re.findall(r"" + TAG + TAG + "(.*)" + TAG + TAG + "", html_data)
   if len(shell) > 1:
     shell = shell[0]
-  shell = shell[0].replace("\/","/")
-
+  shell = [backslash.replace("\/","/") for backslash in shell]
+  
   return shell
 
