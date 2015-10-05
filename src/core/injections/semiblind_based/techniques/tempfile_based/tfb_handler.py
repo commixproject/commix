@@ -269,7 +269,7 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
                 while True:
                   file_access_again = raw_input("(?) Do you want to access files again? [Y/n] > ").lower()
                   if file_access_again in settings.CHOISE_YES:
-                    print ""
+                    #print ""
                     tfb_file_access.do_check(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
                     break
                   elif file_access_again in settings.CHOISE_NO: 

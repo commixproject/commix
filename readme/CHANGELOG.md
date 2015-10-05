@@ -1,4 +1,6 @@
 ## Version 0.2b [2015]
+* Added support for JSON POST data.
+* Added 'enumeration' and 'file-read' results to log file.
 * Added the ability to get the user's approval before re-{enumerate / file-read} target.
 * Added the ability to stop current injection technique and proceed on the next one(s).
 
