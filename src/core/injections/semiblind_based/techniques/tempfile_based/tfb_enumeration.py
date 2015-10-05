@@ -91,6 +91,7 @@ def current_user(separator, maxlen, TAG, prefix, suffix, delay, http_request_met
     check_how_long, output  = tfb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
   cu_account = output
   if cu_account:
+    print ""
     cu_account = "".join(str(p) for p in output)
     # Check if the user have super privilleges.
     if menu.options.is_root:
