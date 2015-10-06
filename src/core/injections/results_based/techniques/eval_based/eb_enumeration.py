@@ -243,13 +243,13 @@ def single_os_cmd_exec(separator, TAG, prefix, suffix, http_request_method, url,
   response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, filename)
   shell = eb_injector.injection_results(response, TAG)
   if shell:
-    if settings.FILE_ACCESS_DONE == False:
-      print""
+    if menu.options.verbose:
+      print ""
     shell = "".join(str(p) for p in shell).replace(" ", "", 1)[:-1]
     if shell != "":
-      print "\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL
+      print Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL
     else:
-      print "\n" + Back.RED + "(x) Error: The '" + cmd + "' command, does not return any output." + Style.RESET_ALL
+      print Back.RED + "(x) Error: The '" + cmd + "' command, does not return any output." + Style.RESET_ALL
     sys.exit(0)
 
 """

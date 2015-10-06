@@ -244,13 +244,13 @@ def single_os_cmd_exec(separator, TAG, prefix, suffix, whitespace, http_request_
   response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
   shell = cb_injector.injection_results(response, TAG)
   if shell:
-    if settings.FILE_ACCESS_DONE == False:
-      print""
+    if menu.options.verbose:
+      print ""
     shell = "".join(str(p) for p in shell)
     if shell != "":
       print Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL
     else:
-      print "\n" + Back.RED + "(x) Error: The '" + cmd + "' command, does not return any output." + Style.RESET_ALL 
+      print Back.RED + "(x) Error: The '" + cmd + "' command, does not return any output." + Style.RESET_ALL 
     sys.exit(0)
 
 """
