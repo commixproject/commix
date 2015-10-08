@@ -252,4 +252,7 @@ IS_JSON = False
 # JSON Symbols
 JSON_SYMBOLS = set("{}:'")
 
+# TFB Decimal
+TFB_DECIMAL = False
+
 #eof

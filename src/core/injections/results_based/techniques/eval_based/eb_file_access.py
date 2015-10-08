@@ -93,7 +93,7 @@ def file_write(separator, TAG, prefix, suffix, http_request_method, url, vuln_pa
   if shell:
     if menu.options.verbose:
       print ""
-    sys.stdout.write(Style.BRIGHT + "(!) The " + Style.UNDERLINE + shell + Style.RESET_ALL + Style.BRIGHT +" file was created successfully!" + Style.RESET_AL + "\n")
+    sys.stdout.write(Style.BRIGHT + "(!) The " + Style.UNDERLINE + shell + Style.RESET_ALL + Style.BRIGHT +" file was created successfully!" + Style.RESET_ALL + "\n")
     sys.stdout.flush()
   else:
    sys.stdout.write(Fore.YELLOW + "(^) Warning: It seems that you can't create the '"+ dest_to_write + "' file." + Style.RESET_ALL + "\n")
@@ -148,9 +148,6 @@ def file_upload(separator, TAG, prefix, suffix, http_request_method, url, vuln_p
 Check the defined options
 """
 def do_check(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, filename):
-  if menu.options.file_read:
-    file_read(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, filename)
-    settings.FILE_ACCESS_DONE = True
 
   if menu.options.file_write:
     file_write(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, filename)
@@ -158,6 +155,10 @@ def do_check(separator, TAG, prefix, suffix, http_request_method, url, vuln_para
 
   if menu.options.file_upload:
     file_upload(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, filename)
+    settings.FILE_ACCESS_DONE = True
+
+  if menu.options.file_read:
+    file_read(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, filename)
     settings.FILE_ACCESS_DONE = True
 
   if settings.FILE_ACCESS_DONE:

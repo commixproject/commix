@@ -55,9 +55,12 @@ def decision_alter_shell(separator, TAG, OUTPUT_TEXTFILE):
 # ---------------------------------------------
 def cmd_execution(separator, cmd, OUTPUT_TEXTFILE):
   
-  payload = (separator +
-             "echo $(" + cmd + " > " + settings.SRV_ROOT_DIR + OUTPUT_TEXTFILE + ")" 
-            )
+  if settings.TFB_DECIMAL == True:
+    payload = (separator + cmd)
+  else:
+    payload = (separator +
+               "echo $(" + cmd + " > " + settings.SRV_ROOT_DIR + OUTPUT_TEXTFILE + ")" 
+              )
 
   return payload
 

