@@ -27,6 +27,20 @@ from src.thirdparty.colorama import Fore, Back, Style, init
  Make a local installation of 'commix' on your system.
 """
 
+def uninstaller():
+
+  sys.stdout.write("(*) Starting the uninstaller... ")
+  sys.stdout.flush()
+  try:
+		subprocess.Popen("rm -rf /usr/bin/" + settings.APPLICATION + " >/dev/null 2>&1", shell=True).wait()
+		subprocess.Popen("rm -rf /usr/share/" + settings.APPLICATION + " >/dev/null 2>&1", shell=True).wait()
+  except:
+    print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
+    sys.exit(0)
+  sys.stdout.write("[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]\n")
+  sys.stdout.flush()
+  print Style.BRIGHT + "(!) The un-installation of commix has finished!" + Style.RESET_ALL
+  
 def installer():
   packages = "build-essential python-dev"
   dependencies = "git python-pip"
@@ -39,15 +53,26 @@ def installer():
     
     # You need to have root privileges to run this script
     if os.geteuid() != 0:
-      print Back.RED + "\n(x) Error:  You need to have root privileges to run this option.\n" + Style.RESET_ALL
+      print Back.RED + "\n(x) Error: You need to have root privileges to run this option!\n" + Style.RESET_ALL
       sys.exit(0)
       
     # Check if commix is already installed.
     if os.path.isdir("/usr/share/"  + settings.APPLICATION + ""):
       print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]" 
-      print Back.RED + "(x) Error: "  + settings.APPLICATION + " is already installed in /usr/share/"  + settings.APPLICATION + ", remove and start again." + Style.RESET_ALL
-      print ""
-      sys.exit(0)
+      print Fore.YELLOW + "(^) Warning: It seems that "  + settings.APPLICATION + " is already installed in your system." + Style.RESET_ALL
+      while True:
+        uninstall = raw_input("(?) Do you want to remove commix? [Y/n/q] > ").lower()
+        if uninstall in settings.CHOISE_YES:
+          uninstaller()
+          sys.exit(0)
+        elif uninstall in settings.CHOISE_NO or \
+        uninstall in settings.CHOISE_QUIT: 
+          sys.exit(0)
+        else:
+          if uninstall == "":
+            uninstall = "enter"
+          print Back.RED + "(x) Error: '" + uninstall + "' is not a valid answer." + Style.RESET_ALL
+          pass
       
     # Check for git.
     if not os.path.isfile("/usr/bin/git") or not os.path.isfile("/usr/bin/pip"):
@@ -84,9 +109,9 @@ def installer():
     
     sys.stdout.write("(*) Installing "  + settings.APPLICATION + " to /usr/bin/"  + settings.APPLICATION + "... ")
     try:    
-      with open('/usr/bin/commix', 'w') as f:
+      with open("/usr/bin/" + settings.APPLICATION, 'w') as f:
         f.write('#!/bin/bash\n')
-        f.write('cd /usr/share/commix/ && ./commix.py "$@"')
+        f.write('cd /usr/share/commix/ && ./commix.py "$@"\n')
         subprocess.Popen("chmod +x /usr/bin/"  + settings.APPLICATION + " >/dev/null 2>&1", shell=True).wait()
     except:
       print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
