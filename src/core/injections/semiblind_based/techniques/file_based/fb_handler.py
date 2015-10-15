@@ -395,6 +395,8 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
             while True:
               # Delete previous shell (text) files (output)
               delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+              if menu.options.verbose:
+                print ""
               if go_back == True:
                 break
               gotshell = raw_input("(?) Do you want a Pseudo-Terminal shell? [Y/n/q] > ").lower()
