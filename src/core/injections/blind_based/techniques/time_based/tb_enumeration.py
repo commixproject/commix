@@ -227,9 +227,8 @@ def system_passwords(separator, maxlen, TAG, prefix, suffix, delay, http_request
 Single os-shell execution
 """
 def single_os_cmd_exec(separator, maxlen, TAG, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename):
-  
-  cmd =  menu.options.os_cmd
-  check_how_long, output  = tb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename)
+  cmd = menu.options.os_cmd
+  check_how_long, output = tb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename)
   return check_how_long, output
 
 

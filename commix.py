@@ -204,10 +204,7 @@ def main():
       filename = logs.create_log_file(url, output_dir)
 
       try:
-        if menu.options.data:
-          request = urllib2.Request(url,"")
-        else:
-          request = urllib2.Request(url)
+        request = urllib2.Request(url)
         # Check if defined extra headers.
         headers.do_check(request)
         response = urllib2.urlopen(request)
