@@ -237,7 +237,7 @@ def main():
           charset = content
         else:
            # Check if HTML5 format
-          charset = re.findall(r"charset=['\"](.*)['\"]", html_data)
+          charset = re.findall(r"charset=['\"](.*?)['\"]", html_data)
         if len(charset) != 0 :
           settings.CHARSET = charset[len(charset)-1]
           if settings.CHARSET.lower() not in settings.CHARSET_LIST:
