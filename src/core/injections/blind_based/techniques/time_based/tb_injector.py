@@ -495,7 +495,10 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_m
 # -------------------------------------
 # False Positive check and evaluation.
 # -------------------------------------
-def false_positive_check(separator, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, randvcalc, alter_shell):
+def false_positive_check(separator, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, randvcalc, alter_shell, how_long):
+  
+  # Log previous 'how_long' for later comparison
+  previous_how_long = how_long
 
   found_chars = False
   if menu.options.verbose: 
@@ -536,8 +539,8 @@ def false_positive_check(separator, TAG, cmd, prefix, suffix, delay, http_reques
 
     else:  
       how_long = examine_requests(payload, vuln_parameter, http_request_method, url)
-
-    if how_long >= delay:
+    
+    if (previous_how_long == how_long) and (how_long >= delay):
       found_chars = True
       break
 
@@ -549,6 +552,9 @@ def false_positive_check(separator, TAG, cmd, prefix, suffix, delay, http_reques
     
     output = []
     percent = 0
+
+    # Log previous 'how_long' for later comparison
+    previous_how_long = how_long
 
     sys.stdout.flush()
     for num_of_chars in range(1, int(num_of_chars)):
@@ -587,8 +593,8 @@ def false_positive_check(separator, TAG, cmd, prefix, suffix, delay, http_reques
 
         else:    
           how_long = examine_requests(payload, vuln_parameter, http_request_method, url)
-                
-        if how_long >= delay:
+
+        if (previous_how_long == how_long) and (how_long >= delay):
           output.append(ascii_char)
           break
       
@@ -597,7 +603,7 @@ def false_positive_check(separator, TAG, cmd, prefix, suffix, delay, http_reques
     output = "".join(str(p) for p in output)
 
     if str(output) == str(randvcalc):
-      return output
+      return how_long, output
 
 
 # -------------------------------
