@@ -264,6 +264,7 @@ def cb_injection_handler(url, delay, filename, http_request_method):
                 while True:
                   try:
                     cmd = raw_input("Shell > ")
+                    cmd = checks.escaped_cmd(cmd)
                     if cmd.lower() in settings.SHELL_OPTIONS:
                       if cmd.lower() == "?":
                         menu.shell_options()
@@ -271,7 +272,7 @@ def cb_injection_handler(url, delay, filename, http_request_method):
                         sys.exit(0)
                       elif cmd.lower() == "back":
                         go_back = True
-                        if checks.check_next_attack_vector(technique, go_back) == True:
+                        if checks.next_attack_vector(technique, go_back) == True:
                           break
                         else:
                           if no_result == True:
@@ -307,7 +308,7 @@ def cb_injection_handler(url, delay, filename, http_request_method):
                     raise
 
               elif gotshell in settings.CHOISE_NO:
-                if checks.check_next_attack_vector(technique, go_back) == True:
+                if checks.next_attack_vector(technique, go_back) == True:
                   break
                 else:
                   if no_result == True:

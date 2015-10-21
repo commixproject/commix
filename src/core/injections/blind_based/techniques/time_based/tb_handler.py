@@ -291,6 +291,7 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                   while True:
                     try:
                       cmd = raw_input("Shell > ")
+                      cmd = checks.escaped_cmd(cmd)
                       if cmd.lower() in settings.SHELL_OPTIONS:
                         if cmd == "?":
                           menu.shell_options()
@@ -299,7 +300,7 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                           sys.exit(0)
                         elif cmd.lower() == "back":
                           go_back = True
-                          if checks.check_next_attack_vector(technique, go_back) == True:
+                          if checks.next_attack_vector(technique, go_back) == True:
                             break
                           else:
                             if no_result == True:
@@ -320,7 +321,7 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                       raise
                   
                 elif gotshell in settings.CHOISE_NO:
-                  if checks.check_next_attack_vector(technique, go_back) == True:
+                  if checks.next_attack_vector(technique, go_back) == True:
                     break
                   else:
                     if no_result == True:
