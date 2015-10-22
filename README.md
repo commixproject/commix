@@ -56,7 +56,8 @@ Do you want to increase the capabilities of the commix tool and/or to adapt it t
 
 ####Command Injection Testbeds
 A collection of pwnable VMs, that includes web apps vulnerable to command injections.
-- [Damn Vulnerable Web App](http://www.dvwa.co.uk/)
+- [Damn Vulnerable Web App (DVWA) ](http://www.dvwa.co.uk/)
+- [Xtreme Vulnerable Web Application (XVWA) ](https://github.com/s4n7h0/xvwa)
 - [OWASP: Mutillidae](https://www.owasp.org/index.php/Category:OWASP_Mutillidae)
 - [bWAPP: bee-box (v1.6)](http://www.itsecgames.com/)
 - [Persistence](https://www.vulnhub.com/entry/persistence-1,103/)
