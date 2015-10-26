@@ -21,7 +21,7 @@ from src.utils import menu
 from src.utils import settings
 
 from src.thirdparty.colorama import Fore, Back, Style, init
-from src.core.injections.semiblind_based.techniques.tempfile_based import tfb_injector
+from src.core.injections.semiblind.techniques.tempfile_based import tfb_injector
 
 """
  The "tempfile-based" injection technique on Semiblind OS Command Injection.

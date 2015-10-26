@@ -20,10 +20,10 @@ from src.utils import menu
 from src.utils import settings
 
 from src.thirdparty.colorama import Fore, Back, Style, init
-from src.core.injections.semiblind_based.techniques.file_based import fb_injector
+from src.core.injections.semiblind.techniques.file_based import fb_injector
 
 """
- The "file-based" technique on Semiblind-based OS Command Injection.
+ The "file-based" technique on Semiblind OS Command Injection.
 """
 
 """

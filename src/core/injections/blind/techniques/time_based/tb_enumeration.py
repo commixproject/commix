@@ -21,7 +21,7 @@ from src.utils import menu
 from src.utils import settings
 
 from src.thirdparty.colorama import Fore, Back, Style, init
-from src.core.injections.blind_based.techniques.time_based import tb_injector
+from src.core.injections.blind.techniques.time_based import tb_injector
 
 """
  The "time-based" injection technique on Blind OS Command Injection.

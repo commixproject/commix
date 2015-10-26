@@ -33,10 +33,10 @@ from src.core.injections.controller import checks
 from src.core.requests import headers
 from src.core.requests import parameters
 
-from src.core.injections.blind_based.techniques.time_based import tb_injector
-from src.core.injections.blind_based.techniques.time_based import tb_payloads
-from src.core.injections.blind_based.techniques.time_based import tb_enumeration
-from src.core.injections.blind_based.techniques.time_based import tb_file_access
+from src.core.injections.blind.techniques.time_based import tb_injector
+from src.core.injections.blind.techniques.time_based import tb_payloads
+from src.core.injections.blind.techniques.time_based import tb_enumeration
+from src.core.injections.blind.techniques.time_based import tb_file_access
 
 """
  The "time-based" injection technique on Blind OS Command Injection.
@@ -56,7 +56,7 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
   is_vulnerable = False
   export_injection_info = False
   how_long = 0
-  injection_type = "Blind-based Command Injection"
+  injection_type = "Blind Command Injection"
   technique = "time-based injection technique"
 
   # Check if defined "--maxlen" option.

@@ -35,10 +35,10 @@ from src.core.requests import proxy
 from src.core.requests import headers
 from src.core.requests import parameters
 
-from src.core.injections.semiblind_based.techniques.file_based import fb_payloads
+from src.core.injections.semiblind.techniques.file_based import fb_payloads
 
 """
- The "file-based" technique on Semiblind-based OS Command Injection.
+ The "file-based" technique on Semiblind OS Command Injection.
 """
 
 # ------------------------------------

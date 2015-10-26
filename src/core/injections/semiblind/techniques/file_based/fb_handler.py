@@ -35,14 +35,14 @@ from src.core.injections.controller import checks
 from src.core.requests import headers
 from src.core.requests import parameters
 
-from src.core.injections.semiblind_based.techniques.file_based import fb_injector
-from src.core.injections.semiblind_based.techniques.file_based import fb_payloads
-from src.core.injections.semiblind_based.techniques.file_based import fb_enumeration
-from src.core.injections.semiblind_based.techniques.file_based import fb_file_access
-from src.core.injections.semiblind_based.techniques.tempfile_based import tfb_handler
+from src.core.injections.semiblind.techniques.file_based import fb_injector
+from src.core.injections.semiblind.techniques.file_based import fb_payloads
+from src.core.injections.semiblind.techniques.file_based import fb_enumeration
+from src.core.injections.semiblind.techniques.file_based import fb_file_access
+from src.core.injections.semiblind.techniques.tempfile_based import tfb_handler
 
 """
- The "file-based" technique on Semiblind-based OS Command Injection.
+ The "file-based" technique on Semiblind OS Command Injection.
 """
 
 """
@@ -80,8 +80,8 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
   call_tmp_based = False
   export_injection_info = False
   
-  injection_type = "Semiblind-based Command Injection"
-  technique = "file-based semiblind injection technique"
+  injection_type = "Semiblind Command Injection"
+  technique = "file-based injection technique"
 
   # Set temp path 
   if menu.options.tmp_path:

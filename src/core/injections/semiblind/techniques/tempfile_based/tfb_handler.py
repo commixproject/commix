@@ -34,12 +34,12 @@ from src.core.injections.controller import checks
 from src.core.requests import headers
 from src.core.requests import parameters
 
-from src.core.injections.semiblind_based.techniques.tempfile_based import tfb_injector
-from src.core.injections.semiblind_based.techniques.tempfile_based import tfb_payloads
-from src.core.injections.semiblind_based.techniques.tempfile_based import tfb_enumeration
-from src.core.injections.semiblind_based.techniques.tempfile_based import tfb_file_access
+from src.core.injections.semiblind.techniques.tempfile_based import tfb_injector
+from src.core.injections.semiblind.techniques.tempfile_based import tfb_payloads
+from src.core.injections.semiblind.techniques.tempfile_based import tfb_enumeration
+from src.core.injections.semiblind.techniques.tempfile_based import tfb_file_access
 
-from src.core.injections.semiblind_based.techniques.file_based import fb_injector
+from src.core.injections.semiblind.techniques.file_based import fb_injector
 
 """
  The "tempfile-based" injection technique on Semiblind OS Command Injection.
@@ -67,7 +67,7 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
   is_vulnerable = False
   export_injection_info = False
   how_long = 0
-  injection_type = "Semiblind-based Command Injection"
+  injection_type = "Semiblind Command Injection"
   technique = "tempfile-based injection technique"
   
   # Check if defined "--maxlen" option.
