@@ -71,7 +71,9 @@ def injection_test(payload, http_request_method, url):
       except urllib2.HTTPError, err:
         print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
         raise SystemExit() 
-
+      except KeyboardInterrupt:
+        response = None
+        
     # Check if defined Tor.
     elif menu.options.tor:
       try:
@@ -79,6 +81,8 @@ def injection_test(payload, http_request_method, url):
       except urllib2.HTTPError, err:
         print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
         raise SystemExit() 
+      except KeyboardInterrupt:
+        response = None
 
     else:
       try:
@@ -86,7 +90,9 @@ def injection_test(payload, http_request_method, url):
       except urllib2.HTTPError, err:
         print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
         raise SystemExit() 
-        
+      except KeyboardInterrupt:
+        response = None
+
   # Check if defined method is POST.
   else:
     parameter = menu.options.data
@@ -118,6 +124,8 @@ def injection_test(payload, http_request_method, url):
       except urllib2.HTTPError, err:
         print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
         raise SystemExit() 
+      except KeyboardInterrupt:
+        response = None
 
     # Check if defined Tor.
     elif menu.options.tor:
@@ -126,6 +134,8 @@ def injection_test(payload, http_request_method, url):
       except urllib2.HTTPError, err:
         print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
         raise SystemExit() 
+      except KeyboardInterrupt:
+        response = None
 
     else:
       try:
@@ -133,7 +143,9 @@ def injection_test(payload, http_request_method, url):
       except urllib2.HTTPError, err:
         print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
         raise SystemExit() 
-      
+      except KeyboardInterrupt:
+        response = None
+
   return response, vuln_parameter
 
 
