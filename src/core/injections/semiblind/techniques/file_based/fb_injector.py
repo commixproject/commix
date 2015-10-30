@@ -418,15 +418,20 @@ def injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method,
 #-----------------------------
 def injection_output(url, OUTPUT_TEXTFILE, delay):
   if menu.options.srv_root_dir:
+    # Check for server's root directory
     if "/var/www/" in menu.options.srv_root_dir:
       path = menu.options.srv_root_dir.replace("/var/www/", "/")
       if "html/" in menu.options.srv_root_dir:
         path = path.replace("html/", "")
       if path not in url:
         path = "/"
-      scheme = urlparse.urlparse(url).scheme
-      netloc = urlparse.urlparse(url).netloc
-      output = scheme + "://" + netloc + path + OUTPUT_TEXTFILE
+    else:
+    	path = "/"
+
+    # Contract again the url.	
+    scheme = urlparse.urlparse(url).scheme
+    netloc = urlparse.urlparse(url).netloc
+    output = scheme + "://" + netloc + path + OUTPUT_TEXTFILE	
       
   else:
     path = urlparse.urlparse(url).path
