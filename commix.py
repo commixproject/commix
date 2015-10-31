@@ -223,6 +223,11 @@ def main():
                   print Style.BRIGHT + "(!) The server was identified as " + Style.UNDERLINE + server_banner + Style.RESET_ALL + "." + Style.RESET_ALL
                 settings.SERVER_BANNER = server_banner
                 found_server_banner = True
+                # Set up default root paths
+                if settings.SERVER_BANNERS[i].lower() == "apache":
+                  settings.SRV_ROOT_DIR = "/var/www"
+                if settings.SERVER_BANNERS[i].lower() == "nginx": 
+                  settings.SRV_ROOT_DIR = "/usr/share/nginx"
                 break
             if found_server_banner != True:
               print  Fore.YELLOW + "(^) Warning: The server which was identified as " + server_banner + " seems unknown." + Style.RESET_ALL

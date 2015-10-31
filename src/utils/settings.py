@@ -93,7 +93,7 @@ DELAY = 1
 TMP_PATH = "/tmp/"
 
 # Default Server's Root Directory
-SRV_ROOT_DIR = "/var/www"
+SRV_ROOT_DIR = ""
 
 # The max help option length.
 MAX_OPTION_LENGTH = 18
