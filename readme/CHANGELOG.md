@@ -1,8 +1,9 @@
 ## Version 0.2b [2015]
+* Added: The ability to check for default root directories (Apache/Nginx).
 * Added: Support for removal of (txt) shell files (File-based/Tempfile-based).
 * Added: Support for JSON POST data.
 * Added: The 'enumeration' and 'file-read' results to log file.
-* Added: The ability to get the user's approval before re-{enumerate / file-read} target.
+* Added: The ability to get the user's approval before re-{enumerate/file-read} target.
 * Added: The ability to stop current injection technique and proceed on the next one(s).
 
 ## Version 0.1b [2015]
