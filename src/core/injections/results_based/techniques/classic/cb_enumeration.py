@@ -197,7 +197,7 @@ def system_users(separator, TAG, prefix, suffix, whitespace, http_request_method
     else:
       sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
       sys.stdout.flush()
-      print "\n" + Back.RED + "(x) Error: Cannot open '" + settings.PASSWD_FILE + "'." + Style.RESET_ALL
+      print "\n" + Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to read '" + settings.PASSWD_FILE + "' to enumerate users entries." + Style.RESET_ALL
 
 
 """
@@ -243,7 +243,7 @@ def system_passwords(separator, TAG, prefix, suffix, whitespace, http_request_me
     else:
       sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
       sys.stdout.flush()
-      print "\n" + Back.RED + "(x) Error: Cannot open '" + settings.SHADOW_FILE + "'." + Style.RESET_ALL
+      print "\n" + Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to read '" + settings.SHADOW_FILE + "' to enumerate users password hashes." + Style.RESET_ALL
 
 """
 Single os-shell execution

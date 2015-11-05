@@ -215,7 +215,7 @@ def enumeration(url, cve, check_header, filename):
           output_file.write("      ("+str(count)+") '" + fields[0]+ "'" + is_privilleged_nh + "(uid=" + fields[1] + "). Home directory is in '" + fields[2] + "'.\n" )
           output_file.close()
       else:
-        print "\n" + Back.RED + "(x) Error: Cannot open '" + settings.PASSWD_FILE + "'." + Style.RESET_ALL
+        print "\n" + Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to read '" + settings.PASSWD_FILE + "' to enumerate users entries." + Style.RESET_ALL
     settings.ENUMERATION_DONE = True
 
   #-------------------------------------
@@ -258,7 +258,7 @@ def enumeration(url, cve, check_header, filename):
             output_file.write("      " + fields[0])
             output_file.close()
       else:
-        print Fore.YELLOW + "(^) Warning: Cannot open '" + settings.SHADOW_FILE + "'." + Style.RESET_ALL
+        print Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to read '" + settings.SHADOW_FILE + "' to enumerate users password hashes." + Style.RESET_ALL
     settings.ENUMERATION_DONE = True  
 
   if settings.ENUMERATION_DONE == True:

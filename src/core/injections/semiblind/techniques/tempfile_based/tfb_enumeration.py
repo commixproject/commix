@@ -191,7 +191,7 @@ def system_users(separator, maxlen, TAG, prefix, suffix, delay, http_request_met
         output_file.close()
     print ""
   else:
-    print Back.RED + "(x) Error: Cannot open '" + settings.PASSWD_FILE + "'." + Style.RESET_ALL
+    print Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to read '" + settings.PASSWD_FILE + "' to enumerate users entries." + Style.RESET_ALL
 
 
 """
@@ -236,7 +236,7 @@ def system_passwords(separator, maxlen, TAG, prefix, suffix, delay, http_request
           output_file.close()
     print ""
   else:
-    print Back.RED + "(x) Error: Cannot open '" + settings.SHADOW_FILE + "' to enumerate users password hashes." + Style.RESET_ALL + "\n"
+    print Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to read '" + settings.SHADOW_FILE + "' to enumerate users password hashes." + Style.RESET_ALL + "\n"
 
 
 """
