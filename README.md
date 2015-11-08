@@ -13,7 +13,7 @@
 [![GPLv3 License](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://github.com/stasinopoulos/commix/blob/master/readme/COPYING)
 [![Twitter](https://img.shields.io/badge/Twitter-commixproject-blue.svg)](http://www.twitter.com/commixproject)
 
-![Logo](http://i.imgur.com/90NsNxV.png)
+![Logo](http://i.imgur.com/xcNYrfv.png)
 
 ####General Information
 Commix (short for [comm]and [i]njection e[x]ploiter) has a simple environment and it can be used, from web developers, penetration testers or even security researchers to test web applications with the view to find bugs, errors or vulnerabilities related to command injection attacks. By using this tool, it is very easy to find and exploit a command injection vulnerability in a certain vulnerable parameter or string. Commix is written in Python programming language.
