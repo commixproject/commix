@@ -162,11 +162,11 @@ def system_users(separator, payload, TAG, delay, prefix, suffix, http_request_me
          sys_users_list.append(sys_users[user : user + 3])
       if len(sys_users_list) != 0 :
         sys.stdout.write("[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]")
-        sys.stdout.write(Style.BRIGHT + "\n(!) Identified " + str(len(sys_users_list)) + " entries in '" + settings.PASSWD_FILE + "'.\n" + Style.RESET_ALL)
+        sys.stdout.write(Style.BRIGHT + "\n(!) Identified " + str(len(sys_users_list)) + " entr" + ('ies', 'y')[len(sys_users_list) == 1] + " in '" +  settings.PASSWD_FILE + "'.\n" + Style.RESET_ALL)
         sys.stdout.flush()
         # Add infos to logs file.   
         output_file = open(filename, "a")
-        output_file.write("    (!) Identified " + str(len(sys_users_list)) + " entries in '" + settings.PASSWD_FILE + "'.\n")
+        output_file.write("    (!) Identified " + str(len(sys_users_list)) + " entr" + ('ies', 'y')[len(sys_users_list) == 1] + " in '" +  settings.PASSWD_FILE + "'.\n")
         output_file.close()
         count = 0
         for user in range(0, len(sys_users_list)):
@@ -238,11 +238,11 @@ def system_passwords(separator, payload, TAG, delay, prefix, suffix, http_reques
     sys_passes = sys_passes.split( )
     if len(sys_passes) != 0 :
       sys.stdout.write("[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]")
-      sys.stdout.write(Style.BRIGHT + "\n(!) Identified " + str(len(sys_passes)) + " entries in '" + settings.SHADOW_FILE + "'.\n" + Style.RESET_ALL)
+      sys.stdout.write(Style.BRIGHT + "\n(!) Identified " + str(len(sys_passes)) + " entr" + ('ies', 'y')[len(sys_passes) == 1] + " in '" +  settings.SHADOW_FILE + "'.\n" + Style.RESET_ALL)
       sys.stdout.flush()
       # Add infos to logs file.   
       output_file = open(filename, "a")
-      output_file.write("    (!) Identified " + str(len(sys_passes)) + " entries in '" + settings.SHADOW_FILE + "'.\n" )
+      output_file.write("    (!) Identified " + str(len(sys_passes)) + " entr" + ('ies', 'y')[len(sys_passes) == 1] + " in '" +  settings.SHADOW_FILE + "'.\n" )
       output_file.close()
       count = 0
       for line in sys_passes:
