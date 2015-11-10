@@ -165,7 +165,7 @@ def system_users(separator, TAG, prefix, suffix, whitespace, http_request_method
         sys.stdout.flush()
         # Add infos to logs file.   
         output_file = open(filename, "a")
-        output_file.write("    (!) Identified " + str(len(sys_users_list)) + " entr" + ('ies', 'y')[len(sys_users_list) == 1] + " in '" +  settings.PASSWD_FILE + "'.\n")
+        output_file.write("\n    (!) Identified " + str(len(sys_users_list)) + " entr" + ('ies', 'y')[len(sys_users_list) == 1] + " in '" +  settings.PASSWD_FILE + "'.\n")
         output_file.close()
         count = 0
         for user in range(0, len(sys_users_list)):
@@ -241,7 +241,7 @@ def system_passwords(separator, TAG, prefix, suffix, whitespace, http_request_me
       sys.stdout.flush()
       # Add infos to logs file.   
       output_file = open(filename, "a")
-      output_file.write("    (!) Identified " + str(len(sys_passes)) + " entr" + ('ies', 'y')[len(sys_passes) == 1] + " in '" +  settings.SHADOW_FILE + "'.\n" )
+      output_file.write("\n    (!) Identified " + str(len(sys_passes)) + " entr" + ('ies', 'y')[len(sys_passes) == 1] + " in '" +  settings.SHADOW_FILE + "'.\n" )
       output_file.close()
       count = 0
       for line in sys_passes:

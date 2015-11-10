@@ -119,7 +119,7 @@ def current_user(separator, maxlen, TAG, prefix, suffix, delay, http_request_met
           output_file.write(" and it is privilleged.\n")
           output_file.close()
     else:
-      sys.stdout.write(Style.BRIGHT + "\n\n  (!) The current user is " + Style.UNDERLINE + cu_account + Style.RESET_ALL + ".\n\n")
+      sys.stdout.write(Style.BRIGHT + "\n  (!) The current user is " + Style.UNDERLINE + cu_account + Style.RESET_ALL + ".\n\n")
       sys.stdout.flush()
       # Add infos to logs file.   
       output_file = open(filename, "a")
@@ -158,7 +158,7 @@ def system_users(separator, maxlen, TAG, prefix, suffix, delay, http_request_met
         sys.stdout.flush()
         # Add infos to logs file.   
         output_file = open(filename, "a")
-        output_file.write("    (!) Identified " + str(len(sys_users_list)) + " entr" + ('ies', 'y')[len(sys_users_list) == 1] + " in '" +  settings.PASSWD_FILE + "'.\n")
+        output_file.write("\n    (!) Identified " + str(len(sys_users_list)) + " entr" + ('ies', 'y')[len(sys_users_list) == 1] + " in '" +  settings.PASSWD_FILE + "'.\n")
         output_file.close()
         count = 0
         for user in range(0, len(sys_users_list)):
@@ -232,7 +232,7 @@ def system_passwords(separator, maxlen, TAG, prefix, suffix, delay, http_request
       sys.stdout.flush()
       # Add infos to logs file.   
       output_file = open(filename, "a")
-      output_file.write("    (!) Identified " + str(len(sys_passes)) + " entr" + ('ies', 'y')[len(sys_passes) == 1] + " in '" +  settings.SHADOW_FILE + "'.\n" )
+      output_file.write("\n    (!) Identified " + str(len(sys_passes)) + " entr" + ('ies', 'y')[len(sys_passes) == 1] + " in '" +  settings.SHADOW_FILE + "'.\n" )
       output_file.close()
       count = 0
       for line in sys_passes:
