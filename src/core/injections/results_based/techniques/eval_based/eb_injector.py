@@ -135,10 +135,7 @@ def warning_detection(url, http_request_method):
 
   # Find the host part
   url_part = url.split("=")[0]
-  if http_request_method == "GET" :
-  	request = urllib2.Request(url_part)
-  else:
-  	request = urllib2.Request(url_part,"")
+  request = urllib2.Request(url_part)
   # Check if defined extra headers.
   headers.do_check(request)
   response = urllib2.urlopen(request)

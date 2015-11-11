@@ -20,10 +20,10 @@ import sys
 from src.utils import settings
 from src.thirdparty.colorama import Fore, Back, Style, init
 
-#-------------------------------------
+# ----------------------------------
 # Procced to the next attack vector.
-#-------------------------------------
-def check_next_attack_vector(technique, go_back):
+# ----------------------------------
+def next_attack_vector(technique, go_back):
   while True:
     next_attack_vector= raw_input("(?) Continue with testing the "+ technique +"? [Y/n/q] > ").lower()
     if next_attack_vector in settings.CHOISE_YES:
@@ -42,5 +42,17 @@ def check_next_attack_vector(technique, go_back):
         next_attack_vector = "enter"
       print Back.RED + "(x) Error: '" + next_attack_vector + "' is not a valid answer." + Style.RESET_ALL + "\n"
       pass
-      
+
+# -------------------------------------
+# Fix single / double quote escaping.
+# -------------------------------------
+def escaped_cmd(cmd):
+  if "\\\"" in cmd :
+    cmd = cmd.replace("\\\"","\"")
+  if "\'" in cmd :
+    cmd = cmd.replace("\'","'")
+  if "\$" in cmd :
+    cmd = cmd.replace("\$","$")
+  return cmd
+
 #eof

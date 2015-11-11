@@ -18,7 +18,7 @@
 import urllib
 from src.utils import settings
 """
-  The "tempfile-based" technique on Semiblind-based OS Command Injection.
+  The "tempfile-based" technique on Semiblind OS Command Injection.
   The available "tempfile-based" payloads.
 """
 

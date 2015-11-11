@@ -15,7 +15,7 @@
 """
 
 """
-  The "file-based" technique on Semiblind-based OS Command Injection.
+  The "file-based" technique on Semiblind OS Command Injection.
   The available "file-based" payloads.
 """
 

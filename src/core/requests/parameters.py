@@ -36,6 +36,11 @@ def do_GET_check(url):
 
   # Find the host part
   url_part = url.split("?")[0]
+  
+  # Remove "/" if "/?" in url
+  if url_part.endswith("/"):
+  	url_part = url_part[:-len("/")]
+  	
   # Find the parameter part
   parameters = url.split("?")[1]
   # Split parameters

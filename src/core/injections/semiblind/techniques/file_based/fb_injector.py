@@ -35,10 +35,10 @@ from src.core.requests import proxy
 from src.core.requests import headers
 from src.core.requests import parameters
 
-from src.core.injections.semiblind_based.techniques.file_based import fb_payloads
+from src.core.injections.semiblind.techniques.file_based import fb_payloads
 
 """
- The "file-based" technique on Semiblind-based OS Command Injection.
+ The "file-based" technique on Semiblind OS Command Injection.
 """
 
 # ------------------------------------
@@ -71,7 +71,9 @@ def injection_test(payload, http_request_method, url):
       except urllib2.HTTPError, err:
         print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
         raise SystemExit() 
-
+      except KeyboardInterrupt:
+        response = None
+        
     # Check if defined Tor.
     elif menu.options.tor:
       try:
@@ -79,6 +81,8 @@ def injection_test(payload, http_request_method, url):
       except urllib2.HTTPError, err:
         print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
         raise SystemExit() 
+      except KeyboardInterrupt:
+        response = None
 
     else:
       try:
@@ -86,7 +90,9 @@ def injection_test(payload, http_request_method, url):
       except urllib2.HTTPError, err:
         print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
         raise SystemExit() 
-        
+      except KeyboardInterrupt:
+        response = None
+
   # Check if defined method is POST.
   else:
     parameter = menu.options.data
@@ -118,6 +124,8 @@ def injection_test(payload, http_request_method, url):
       except urllib2.HTTPError, err:
         print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
         raise SystemExit() 
+      except KeyboardInterrupt:
+        response = None
 
     # Check if defined Tor.
     elif menu.options.tor:
@@ -126,6 +134,8 @@ def injection_test(payload, http_request_method, url):
       except urllib2.HTTPError, err:
         print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
         raise SystemExit() 
+      except KeyboardInterrupt:
+        response = None
 
     else:
       try:
@@ -133,7 +143,9 @@ def injection_test(payload, http_request_method, url):
       except urllib2.HTTPError, err:
         print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
         raise SystemExit() 
-      
+      except KeyboardInterrupt:
+        response = None
+
   return response, vuln_parameter
 
 
@@ -406,16 +418,29 @@ def injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method,
 #-----------------------------
 def injection_output(url, OUTPUT_TEXTFILE, delay):
   if menu.options.srv_root_dir:
+
+    # Check for Apache server root directory.
     if "/var/www/" in menu.options.srv_root_dir:
       path = menu.options.srv_root_dir.replace("/var/www/", "/")
       if "html/" in menu.options.srv_root_dir:
         path = path.replace("html/", "")
-      if path not in url:
-        path = "/"
-      scheme = urlparse.urlparse(url).scheme
-      netloc = urlparse.urlparse(url).netloc
-      output = scheme + "://" + netloc + path + OUTPUT_TEXTFILE
-      
+
+    # Check for Nginx server root directory.  
+    elif "/usr/share/" in menu.options.srv_root_dir:
+      path = menu.options.srv_root_dir.replace("/usr/share/", "/")
+      if "html/" in menu.options.srv_root_dir:
+        path = path.replace("html/", "")
+      elif "www/" in menu.options.srv_root_dir:
+        path = path.replace("www/", "")  
+
+    else:
+    	path = "/"
+
+    # Contract again the url.	
+    scheme = urlparse.urlparse(url).scheme
+    netloc = urlparse.urlparse(url).netloc
+    output = scheme + "://" + netloc + path + OUTPUT_TEXTFILE	
+
   else:
     path = urlparse.urlparse(url).path
     path_parts = path.split('/')
