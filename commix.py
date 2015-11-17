@@ -22,6 +22,8 @@ import httplib
 import urllib2
 import urlparse
 
+from socket import error as SocketError
+
 # Disable SSL verification.
 # For python versions 2.7.9 or above.
 import ssl
@@ -283,15 +285,16 @@ def main():
           raise
 
       except urllib2.URLError, e:
-          print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
-          print Back.RED + "(x) Error: The host seems to be down!" + Style.RESET_ALL
-          sys.exit(0)
+        print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
+        print Back.RED + "(x) Error: The host seems to be down!" + Style.RESET_ALL
+        sys.exit(0)
         
       except httplib.BadStatusLine, e:
-          print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
+        print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
+        if len(e.line) > 2 :
           print e.line, e.message
-          pass
-        
+        pass
+
     else:
       print Back.RED + "(x) Error: You must specify the target URL." + Style.RESET_ALL
       sys.exit(0)
@@ -319,11 +322,21 @@ def main():
   # Accidental stop / restart of the target host server.
   except httplib.BadStatusLine, e:
     if e.line == "" or e.message == "":
-      print "\n" + Back.RED + "(x) Error: The target host is not responding." + \
-            " Ensure that host is up and running and try again." + Style.RESET_ALL
+      print "\n\n" + Back.RED + "(x) Critical: The target host is not responding." + \
+            " Please ensure that is up and try again." + Style.RESET_ALL
+      if settings.SHOW_LOGS_MSG == True:
+        logs.logs_notification(filename)
+      print ""
+      sys.exit(0)      
     else: 
-      print Back.RED + "(x) Error: " + e.line + e.message + Style.RESET_ALL
+      print Back.RED + "(x) Error: " + e.line + e.message + Style.RESET_ALL + "\n"
     sys.exit(0)
+
+  # Connection reset by peer
+  except SocketError, e:
+    print Back.RED + "(x) Critical: The target host is not responding." + \
+          " Please ensure that is up and try again." + Style.RESET_ALL + "\n"
+    sys.exit(0) 
 
 if __name__ == '__main__':
     main()
