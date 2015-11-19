@@ -45,19 +45,19 @@ To get a list of all options and switches use:
 
     python commix.py -h
 
-Do you want to have a quick look of all available options and switches? Check [here](https://github.com/stasinopoulos/commix/wiki/Usage).
+Do you want to have a quick look of all available options and switches? Check the '[usage](https://github.com/stasinopoulos/commix/wiki/Usage)' wiki page.
 
 ####Usage Examples
-So, do you want to get some ideas on how to use commix? Just go and check '[usage examples](https://github.com/stasinopoulos/commix/wiki/Usage-Examples)' wiki page, where there are several test cases and attack scenarios.
+So, do you want to get some ideas on how to use commix? Just go and check the '[usage examples](https://github.com/stasinopoulos/commix/wiki/Usage-Examples)' wiki page, where there are several test cases and attack scenarios.
 
 ####Upload Shells
-Commix enables you to upload web-shells (e.g metasploit PHP meterpreter) easily on target host. For more, check '[upload shells](https://github.com/stasinopoulos/commix/wiki/Upload-shells)' wiki page.
+Commix enables you to upload web-shells (e.g metasploit PHP meterpreter) easily on target host. For more, check the '[upload shells](https://github.com/stasinopoulos/commix/wiki/Upload-shells)' wiki page.
 
 ####Modules Development
-Do you want to increase the capabilities of the commix tool and/or to adapt it to our needs? You can easily develop and import our own modules. For more, check '[module development](https://github.com/stasinopoulos/commix/wiki/Module-Development)' wiki page.
+Do you want to increase the capabilities of the commix tool and/or to adapt it to our needs? You can easily develop and import our own modules. For more, check the '[module development](https://github.com/stasinopoulos/commix/wiki/Module-Development)' wiki page.
 
 ####Command Injection Testbeds
-A collection of pwnable VMs, that includes web apps vulnerable to command injections.
+A collection of pwnable VMs, that includes web applications vulnerable to command injection attacks.
 - [Damn Vulnerable Web App (DVWA) ](http://www.dvwa.co.uk/)
 - [Xtreme Vulnerable Web Application (XVWA) ](https://github.com/s4n7h0/xvwa)
 - [OWASP: Mutillidae](https://www.owasp.org/index.php/Category:OWASP_Mutillidae)
@@ -75,7 +75,8 @@ A collection of pwnable VMs, that includes web apps vulnerable to command inject
 - [w3af-moth](https://github.com/andresriancho/w3af-moth/)
 - [commix-testbed](https://github.com/stasinopoulos/commix-testbed)
 
-####Exploitation Demos
+####Exploitation Demos (Video)
+A collection of video demos, about the exploitation abilities of commix.
 - [Exploiting DVWA (1.0.8) command injection flaws.](https://www.youtube.com/watch?v=PT4uSTCxKJU)
 - [Exploiting bWAPP command injection flaws (normal & blind).](https://www.youtube.com/watch?v=zqI8NcHfboo)
 - [Exploiting 'Persistence' blind command injection flaw.](https://www.youtube.com/watch?v=aVTGqiyVz5o)
@@ -94,3 +95,7 @@ For bug reports or enhancements, please open an issue [here](https://github.com/
 - Linux
 - Mac OS X
 - Windows (experimental)
+
+####Presentations and White Papers
+For presentations and white papers published in conferences, check the '[Presentations](https://github.com/stasinopoulos/commix/wiki/Presentations)' wiki page.
+

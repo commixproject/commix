@@ -40,6 +40,54 @@ from src.core.injections.semiblind.techniques.tempfile_based import tfb_payloads
  __Warning:__ This technique is still experimental, is not yet fully functional and may leads to false-positive resutls.
 """
 
+# -------------------------------------------
+# Get the response of the request
+# -------------------------------------------
+def get_request_response(request):
+
+  # Check if defined any HTTP Proxy.
+  if menu.options.proxy:
+    try:
+      response = proxy.use_proxy(request)
+    except urllib2.HTTPError, err:
+      print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
+      raise SystemExit() 
+    except urllib2.URLError, err:
+      if "Connection refused" in err.reason:
+        print "\n" + Back.RED + "(x) Critical: The target host is not responding." + \
+              " Please ensure that is up and try again." + Style.RESET_ALL
+      raise SystemExit()
+      
+  # Check if defined Tor.
+  elif menu.options.tor:
+    try:
+      response = tor.use_tor(request)
+    except urllib2.HTTPError, err:
+      print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
+      raise SystemExit() 
+    except urllib2.URLError, err:
+      if "Connection refused" in err.reason:
+        print "\n" + Back.RED + "(x) Critical: The target host is not responding." + \
+              " Please ensure that is up and try again." + Style.RESET_ALL
+      raise SystemExit()
+
+  else:
+    try:
+      response = urllib2.urlopen(request)
+    except urllib2.HTTPError, err:
+      print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
+      raise SystemExit() 
+    except urllib2.URLError, err:
+      if "Connection refused" in err.reason:
+        print "\n" + Back.RED + "(x) Critical: The target host is not responding." + \
+              " Please ensure that is up and try again." + Style.RESET_ALL
+      raise SystemExit()
+
+  return response
+
+# ------------------------
+# Examine the requests
+# ------------------------
 def examine_requests(payload, vuln_parameter, http_request_method, url):
 
   start = 0
@@ -80,29 +128,9 @@ def examine_requests(payload, vuln_parameter, http_request_method, url):
   # Check if defined extra headers.
   headers.do_check(request)
 
-  # Check if defined any HTTP Proxy.
-  if menu.options.proxy:
-    try:
-      response = proxy.use_proxy(request)
-    except urllib2.HTTPError, err:
-      print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
-      raise SystemExit() 
+  # Get the response of the request
+  response = get_request_response(request)
 
-  # Check if defined Tor.
-  elif menu.options.tor:
-    try:
-      response = tor.use_tor(request)
-    except urllib2.HTTPError, err:
-      print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
-      raise SystemExit() 
-
-  else:
-    try:
-      response = urllib2.urlopen(request)
-    except urllib2.HTTPError, err:
-      print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
-      raise SystemExit() 
-        
   end  = time.time()
   how_long = int(end - start)
 
@@ -135,29 +163,9 @@ def injection_test(payload, http_request_method, url):
     # Check if defined extra headers.
     headers.do_check(request)
     
-    # Check if defined any HTTP Proxy.
-    if menu.options.proxy:
-      try:
-        response = proxy.use_proxy(request)
-      except urllib2.HTTPError, err:
-        print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
-        raise SystemExit() 
+    # Get the response of the request
+    response = get_request_response(request)
 
-    # Check if defined Tor.
-    elif menu.options.tor:
-      try:
-        response = tor.use_tor(request)
-      except urllib2.HTTPError, err:
-        print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
-        raise SystemExit() 
-
-    else:
-      try:
-        response = urllib2.urlopen(request)
-      except urllib2.HTTPError, err:
-        print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
-        raise SystemExit() 
-      
   # Check if defined method is POST.
   else:
     parameter = menu.options.data
@@ -182,29 +190,9 @@ def injection_test(payload, http_request_method, url):
     # Check if defined extra headers.
     headers.do_check(request)
     
-    # Check if defined any HTTP Proxy.
-    if menu.options.proxy:
-      try:
-        response = proxy.use_proxy(request)
-      except urllib2.HTTPError, err:
-        print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
-        raise SystemExit() 
+    # Get the response of the request
+    response = get_request_response(request)
 
-    # Check if defined Tor.
-    elif menu.options.tor:
-      try:
-        response = tor.use_tor(request)
-      except urllib2.HTTPError, err:
-        print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
-        raise SystemExit() 
-
-    else:
-      try:
-        response = urllib2.urlopen(request)
-      except urllib2.HTTPError, err:
-        print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
-        raise SystemExit()  
-      
   end  = time.time()
   how_long = int(end - start)
 
@@ -245,6 +233,11 @@ def cookie_injection_test(url, vuln_parameter, payload):
     except urllib2.HTTPError, err:
       print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
       raise SystemExit() 
+    except urllib2.URLError, err:
+      if "Connection refused" in err.reason:
+        print "\n" + Back.RED + "(x) Critical: The target host is not responding." + \
+              " Please ensure that is up and try again." + Style.RESET_ALL
+      raise SystemExit()
 
   # Check if defined Tor.
   elif menu.options.tor:
@@ -254,6 +247,11 @@ def cookie_injection_test(url, vuln_parameter, payload):
     except urllib2.HTTPError, err:
       print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
       raise SystemExit() 
+    except urllib2.URLError, err:
+      if "Connection refused" in err.reason:
+        print "\n" + Back.RED + "(x) Critical: The target host is not responding." + \
+              " Please ensure that is up and try again." + Style.RESET_ALL
+      raise SystemExit()
 
   else:
     try:
@@ -261,6 +259,11 @@ def cookie_injection_test(url, vuln_parameter, payload):
     except urllib2.HTTPError, err:
       print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
       raise SystemExit() 
+    except urllib2.URLError, err:
+      if "Connection refused" in err.reason:
+        print "\n" + Back.RED + "(x) Critical: The target host is not responding." + \
+              " Please ensure that is up and try again." + Style.RESET_ALL
+      raise SystemExit()
 
   end  = time.time()
   how_long = int(end - start)
@@ -301,6 +304,11 @@ def user_agent_injection_test(url, vuln_parameter, payload):
     except urllib2.HTTPError, err:
       print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
       raise SystemExit() 
+    except urllib2.URLError, err:
+      if "Connection refused" in err.reason:
+        print "\n" + Back.RED + "(x) Critical: The target host is not responding." + \
+              " Please ensure that is up and try again." + Style.RESET_ALL
+      raise SystemExit()
 
   # Check if defined Tor.
   elif menu.options.tor:
@@ -310,6 +318,11 @@ def user_agent_injection_test(url, vuln_parameter, payload):
     except urllib2.HTTPError, err:
       print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
       raise SystemExit() 
+    except urllib2.URLError, err:
+      if "Connection refused" in err.reason:
+        print "\n" + Back.RED + "(x) Critical: The target host is not responding." + \
+              " Please ensure that is up and try again." + Style.RESET_ALL
+      raise SystemExit()
 
   else:
     try:
@@ -317,6 +330,11 @@ def user_agent_injection_test(url, vuln_parameter, payload):
     except urllib2.HTTPError, err:
       print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
       raise SystemExit() 
+    except urllib2.URLError, err:
+      if "Connection refused" in err.reason:
+        print "\n" + Back.RED + "(x) Critical: The target host is not responding." + \
+              " Please ensure that is up and try again." + Style.RESET_ALL
+      raise SystemExit()
 
   end  = time.time()
   how_long = int(end - start)
@@ -356,6 +374,11 @@ def referer_injection_test(url, vuln_parameter, payload):
     except urllib2.HTTPError, err:
       print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
       raise SystemExit() 
+    except urllib2.URLError, err:
+      if "Connection refused" in err.reason:
+        print "\n" + Back.RED + "(x) Critical: The target host is not responding." + \
+              " Please ensure that is up and try again." + Style.RESET_ALL
+      raise SystemExit()
 
   # Check if defined Tor.
   elif menu.options.tor:
@@ -365,6 +388,11 @@ def referer_injection_test(url, vuln_parameter, payload):
     except urllib2.HTTPError, err:
       print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
       raise SystemExit() 
+    except urllib2.URLError, err:
+      if "Connection refused" in err.reason:
+        print "\n" + Back.RED + "(x) Critical: The target host is not responding." + \
+              " Please ensure that is up and try again." + Style.RESET_ALL
+      raise SystemExit()
 
   else:
     try:
@@ -372,7 +400,12 @@ def referer_injection_test(url, vuln_parameter, payload):
     except urllib2.HTTPError, err:
       print "\n" + Back.RED + "(x) Error : " + str(err) + Style.RESET_ALL
       raise SystemExit() 
-
+    except urllib2.URLError, err:
+      if "Connection refused" in err.reason:
+        print "\n" + Back.RED + "(x) Critical: The target host is not responding." + \
+              " Please ensure that is up and try again." + Style.RESET_ALL
+      raise SystemExit()
+      
   end  = time.time()
   how_long = int(end - start)
 

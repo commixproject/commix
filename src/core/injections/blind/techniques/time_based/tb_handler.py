@@ -181,7 +181,10 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
 
           except KeyboardInterrupt: 
             raise
-        
+
+          except SystemExit:
+            raise
+
           except:
             break
           
@@ -319,7 +322,10 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                         print ""
                     except KeyboardInterrupt: 
                       raise
-                  
+
+                    except SystemExit: 
+                      raise
+                      
                 elif gotshell in settings.CHOISE_NO:
                   if checks.next_attack_vector(technique, go_back) == True:
                     break

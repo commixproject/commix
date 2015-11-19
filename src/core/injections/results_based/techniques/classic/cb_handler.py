@@ -158,7 +158,10 @@ def cb_injection_handler(url, delay, filename, http_request_method):
               
           except KeyboardInterrupt: 
             raise
-          
+
+          except SystemExit: 
+            raise
+
           except:
             continue
           
@@ -305,6 +308,9 @@ def cb_injection_handler(url, delay, filename, http_request_method):
                           print Back.RED + "(x) Error: The '" + cmd + "' command, does not return any output." + Style.RESET_ALL + "\n"
 
                   except KeyboardInterrupt: 
+                    raise
+                    
+                  except SystemExit: 
                     raise
 
               elif gotshell in settings.CHOISE_NO:

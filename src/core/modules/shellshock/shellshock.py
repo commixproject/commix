@@ -561,6 +561,9 @@ def shellshock_handler(url, http_request_method, filename):
                   except KeyboardInterrupt:
                     raise
 
+                  except SystemExit:
+                    raise
+
                   except:
                     print ""
                     sys.exit(0)
@@ -587,12 +590,15 @@ def shellshock_handler(url, http_request_method, filename):
         continue
 
   except urllib2.HTTPError, err:
-    print "\n" + Fore.YELLOW + "(^) Warning: " + str(err) + Style.RESET_ALL
+    print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
+    raise SystemExit() 
 
   except urllib2.URLError, err:
-    print "\n" + Fore.YELLOW + "(^) Warning: " + str(err) + Style.RESET_ALL
-
-
+    if "Connection refused" in err.reason:
+      print Back.RED + "(x) Critical: The target host is not responding." + \
+            " Please ensure that is up and try again." + Style.RESET_ALL
+    raise SystemExit()
+    
 """
 Execute user commands
 """

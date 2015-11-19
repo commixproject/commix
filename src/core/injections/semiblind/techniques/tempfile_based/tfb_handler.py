@@ -189,7 +189,12 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
             # Delete previous shell (text) files (output) from /tmp
             delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
             raise
-          
+
+          except SystemExit: 
+            # Delete previous shell (text) files (output) from /tmp
+            delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+            raise
+
           except:
             percent = ((num_of_chars * 100) / total)
             float_percent = "{0:.1f}".format(round(((num_of_chars*100)/(total*1.0)),2))
@@ -361,6 +366,12 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
                         # Delete previous shell (text) files (output) from /tmp
                         delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
                         raise
+
+                      except SystemExit: 
+                        # Delete previous shell (text) files (output) from /tmp
+                        delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+                        raise
+
                   elif gotshell in settings.CHOISE_NO:
                     if checks.next_attack_vector(technique, go_back) == True:
                       break
@@ -383,7 +394,13 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
               except KeyboardInterrupt: 
                 # Delete previous shell (text) files (output) from /tmp
                 delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-                raise   
+                raise  
+
+              except SystemExit: 
+                # Delete previous shell (text) files (output) from /tmp
+                delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+                raise 
+                
             break
     
   if no_result == True:

@@ -294,7 +294,12 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
           # Delete previous shell (text) files (output)
           delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
           raise
-        
+
+        except SystemExit: 
+          # Delete previous shell (text) files (output)
+          delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+          raise
+
         except urllib2.URLError, e:
           # print "\n" + Back.RED + "(x) Error: " + str(e.reason) + Style.RESET_ALL
           # Delete previous shell (text) files (output)
@@ -476,7 +481,6 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
             # Delete previous shell (text) files (output)
             delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
             raise
-            
             
   if no_result == True:
     print ""
