@@ -674,7 +674,7 @@ def export_injection_results(cmd, separator, output, check_how_long):
   else:
     # Check if exists pipe filtration.
     if output != False :
-       print "\n" + Fore.YELLOW  + "(^) Warning: It appears that '" + cmd + "' command could not return any output" + (', due to pipe (|) filtration on target.', '.')[separator == "||"]  + Style.RESET_ALL
+       print "\n" + Fore.YELLOW  + "(^) Warning: It appears that '" + cmd + "' command could not return any output" + (', due to pipe (|) filtration on target host.', '.')[separator == "||"]  + Style.RESET_ALL
        print Fore.YELLOW  + "             "+ ('To bypass that limitation, u', 'U')[separator == "||"]  +"se '--alter-shell' or try another injection technique (i.e. '--technique=\"f\"')" + Style.RESET_ALL 
        sys.exit(0)
     # Check for fault command.

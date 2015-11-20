@@ -17,22 +17,22 @@
 import os
 import sys
 
+from src.utils import menu
 from src.utils import settings
 from src.thirdparty.colorama import Fore, Back, Style, init
 
-# ----------------------------------
-# Procced to the next attack vector.
-# ----------------------------------
+
+"""
+Procced to the next attack vector.
+"""
 def next_attack_vector(technique, go_back):
   while True:
-    next_attack_vector= raw_input("(?) Continue with testing the "+ technique +"? [Y/n/q] > ").lower()
+    next_attack_vector = raw_input("(?) Continue with testing the "+ technique +"? [Y/n/q] > ").lower()
     if next_attack_vector in settings.CHOISE_YES:
-      go_back = True
-      return go_back
+      return True
 
     elif next_attack_vector in settings.CHOISE_NO:
-      go_back = False
-      return go_back
+      return  False
 
     elif next_attack_vector in settings.CHOISE_QUIT:
       sys.exit(0)
@@ -43,9 +43,10 @@ def next_attack_vector(technique, go_back):
       print Back.RED + "(x) Error: '" + next_attack_vector + "' is not a valid answer." + Style.RESET_ALL + "\n"
       pass
 
-# -------------------------------------
-# Fix single / double quote escaping.
-# -------------------------------------
+
+"""
+Fix single / double quote escaping.
+"""
 def escaped_cmd(cmd):
   if "\\\"" in cmd :
     cmd = cmd.replace("\\\"","\"")
@@ -54,5 +55,33 @@ def escaped_cmd(cmd):
   if "\$" in cmd :
     cmd = cmd.replace("\$","$")
   return cmd
+
+
+"""
+Check 'os_shell' options
+"""
+def check_os_shell_options(cmd, technique, go_back, no_result): 
+  if cmd in settings.SHELL_OPTIONS:
+    if cmd == "?":
+      menu.shell_options()
+    elif cmd == "back":
+      go_back = True
+      if next_attack_vector(technique, go_back) == True:
+        return "back"
+      else:
+        return False
+    else:
+      return cmd
+
+"""
+Check 'reverse_tcp' options
+"""
+def check_reverse_tcp_options(reverse_tcp_option):
+  if reverse_tcp_option == False:
+    return 0
+  elif reverse_tcp_option == "back":
+    return 1
+  elif reverse_tcp_option == "os_shell": 
+    return 2
 
 #eof

