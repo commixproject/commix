@@ -124,10 +124,14 @@ def input_cmd(http_request_method, url, vuln_parameter, ip_src, technique):
                   elif result == 1 or result == 2:
                     go_back_again = True
                     break
+                # Command execution results.    
                 cmd_exec(http_request_method, cmd, url, vuln_parameter, ip_src)
                 if menu.options.verbose:
                   print ""
                 print Back.RED + "(x) Error: The reverse TCP connection to the target host has been failed!" + Style.RESET_ALL
+          else:
+            # Command execution results.
+            cmd_exec(http_request_method, cmd, url, vuln_parameter, ip_src)
 
         except KeyboardInterrupt:
           print ""
