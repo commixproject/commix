@@ -37,6 +37,11 @@ def create_log_file(url, output_dir):
 
   parts = url.split('//', 1)
   host = parts[1].split('/', 1)[0]
+
+  # Check if port is defined to host.
+  if ":" in host:
+    host = host.replace(":","_")
+
   try:
       os.stat(output_dir + host + "/")
   except:
