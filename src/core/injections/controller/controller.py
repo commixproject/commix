@@ -16,6 +16,7 @@
 
 import os
 import sys
+import urllib2
 
 from src.utils import menu
 from src.utils import logs
@@ -23,6 +24,7 @@ from src.utils import settings
 
 from src.thirdparty.colorama import Fore, Back, Style, init
 
+from src.core.requests import headers
 from src.core.requests import requests
 from src.core.requests import parameters
 from src.core.modules import modules_handler
@@ -54,11 +56,16 @@ def do_check(url, filename):
   else:
     delay = settings.DELAY
 
-  # Do authentication if needed.
+  # Check if authentication is needed.
   if menu.options.auth_url and menu.options.auth_data:
-    authentication.auth_process()      
+    # Do the authentication process.
+    authentication.authentication_process()
+    # Check if authentication page is the same with the next (injection) URL
+    if urllib2.urlopen(url).read() == urllib2.urlopen(menu.options.auth_url).read():
+      print Back.RED + "(x) Error: It seems that the authentication procedure has failed." + Style.RESET_ALL
+      sys.exit(0)
   elif menu.options.auth_url or menu.options.auth_data: 
-    print Back.RED + "(x) Error: You must specify both login panel URL and login parameters.\n" + Style.RESET_ALL
+    print Back.RED + "(x) Error: You must specify both login panel URL and login parameters." + Style.RESET_ALL
     sys.exit(0)
   else:
     pass
@@ -70,7 +77,7 @@ def do_check(url, filename):
     if not settings.COOKIE_INJECTION \
     and not settings.USER_AGENT_INJECTION \
     and not settings.REFERER_INJECTION:
-    	url = parameters.do_GET_check(url)
+      url = parameters.do_GET_check(url)
     check_parameter = parameters.vuln_GET_param(url)
     the_type = " parameter "
 
