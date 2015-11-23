@@ -610,8 +610,13 @@ def shellshock_handler(url, http_request_method, filename):
         continue
 
   except urllib2.HTTPError, err:
-    print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
-    raise SystemExit() 
+    if settings.IGNORE_ERR_MSG == False:
+      print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
+      continue_tests = checks.continue_tests(err)
+      if continue_tests == True:
+        settings.IGNORE_ERR_MSG = True
+      else:
+        raise SystemExit()
 
   except urllib2.URLError, err:
     if "Connection refused" in err.reason:

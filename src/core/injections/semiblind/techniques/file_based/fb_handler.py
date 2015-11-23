@@ -43,7 +43,7 @@ from src.core.injections.semiblind.techniques.file_based import fb_file_access
 from src.core.injections.semiblind.techniques.tempfile_based import tfb_handler
 
 """
- The "file-based" technique on Semiblind OS Command Injection.
+The "file-based" technique on Semiblind OS Command Injection.
 """
 
 """
@@ -57,6 +57,7 @@ def tfb_controller(no_result, url, delay, filename, tmp_path, http_request_metho
   else :
     sys.stdout.write("\r")
     sys.stdout.flush()
+
 
 """
 Delete previous shells outputs.
@@ -80,7 +81,6 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
   stop_injection = False
   call_tmp_based = False
   export_injection_info = False
-  
   injection_type = "Semiblind Command Injection"
   technique = "file-based injection technique"
 
@@ -113,8 +113,9 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
           settings.SRV_ROOT_DIR = settings.SRV_ROOT_DIR + "/html"
         else:
           pass
+
       # On more recent versions (>= "1.2.4") the default root path has changed to "/usr/share/nginx/html"
-      if "nginx" in settings.SERVER_BANNER.lower():
+      elif "nginx" in settings.SERVER_BANNER.lower():
         try:
           check_version = re.findall(r"/(.*)\.", settings.SERVER_BANNER.lower())
           if check_version[0] >= "1.2.4":
@@ -125,6 +126,11 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
             settings.SRV_ROOT_DIR = settings.SRV_ROOT_DIR + "/www"
         except IndexError:
           pass
+
+      else:
+        settings.SRV_ROOT_DIR = raw_input("(?) Please provide the host's root directory (e.g. /var/www/) > ")
+        settings.CUSTOM_SRV_ROOT_DIR = True
+
       path = urlparse.urlparse(url).path
       path_parts = path.split('/')
       count = 0
@@ -136,7 +142,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
       settings.SRV_ROOT_DIR = settings.SRV_ROOT_DIR + EXTRA_DIR
 
     if not menu.options.verbose:
-      print "(*) Trying to create a file on " + settings.SRV_ROOT_DIR + "... "
+      print "(*) Trying to create a file on '" + settings.SRV_ROOT_DIR + "'... "
     else:
       print "(*) Testing the "+ technique + "... "
 
@@ -180,7 +186,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
 
           # Check if defined "--verbose" option.
           if menu.options.verbose:
-            print "(*) Trying to upload the '"+ OUTPUT_TEXTFILE +"' on " + settings.SRV_ROOT_DIR + "..."
+            print "(*) Trying to upload the '"+ OUTPUT_TEXTFILE +"' file on '" + settings.SRV_ROOT_DIR + "'..."
             print Fore.GREY + "(~) Payload: " + payload.replace("\n", "\\n") + Style.RESET_ALL
 
           # Cookie Injection
@@ -239,7 +245,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                 elif i == failed_tries and no_result == True :
                   if not menu.options.verbose:
                     print ""
-                  print Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to write on "+ settings.SRV_ROOT_DIR + "." + Style.RESET_ALL
+                  print Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to read and/or write files on '"+ settings.SRV_ROOT_DIR + "'." + Style.RESET_ALL
                   while True:
                     tmp_upload = raw_input("(?) Do you want to try the temporary directory (" + tmp_path + ") [Y/n/q] > ").lower()
                     if tmp_upload in settings.CHOISE_YES:
@@ -510,6 +516,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
   else :
     sys.stdout.write("\r")
     sys.stdout.flush()
+
 
 """
 The exploitation function.

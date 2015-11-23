@@ -104,7 +104,6 @@ def eb_injection_handler(url, delay, filename, http_request_method):
           else:
             payload = re.sub(" ", "%20", payload)
 
-
           # Check if defined "--verbose" option.
           if menu.options.verbose:
             sys.stdout.write("\n" + Fore.GREY + "(~) Payload: " + payload + Style.RESET_ALL)
@@ -139,9 +138,14 @@ def eb_injection_handler(url, delay, filename, http_request_method):
             
           # Evaluate test results.
           shell = eb_injector.injection_test_results(response, TAG, randvcalc)
+
           if not menu.options.verbose:
             percent = ((i*100)/total)
             float_percent = "{0:.1f}".format(round(((i*100)/(total * 1.0)),2))
+
+            if shell == False:
+              sys.stdout.write("\r(*) Testing the "+ technique + "... " +  "[ " + float_percent +"%" + " ]")  
+              sys.stdout.flush()
 
             if percent == 100:
               if no_result == True:
@@ -152,6 +156,7 @@ def eb_injection_handler(url, delay, filename, http_request_method):
               percent = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
             else:
               percent = str(float_percent)+"%"
+
             sys.stdout.write("\r(*) Testing the "+ technique + "... " +  "[ " + percent + " ]")  
             sys.stdout.flush()
             

@@ -193,23 +193,39 @@ def icmp_exfiltration_handler(url, http_request_method):
     try:
       response = proxy.use_proxy(request)
     except urllib2.HTTPError, err:
-      print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
-      os._exit(0)
+      if settings.IGNORE_ERR_MSG == False:
+        print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
+        continue_tests = checks.continue_tests(err)
+        if continue_tests == True:
+          settings.IGNORE_ERR_MSG = True
+        else:
+          os._exit(0)
+
 
   # Check if defined Tor.
   elif menu.options.tor:
     try:
       response = tor.use_tor(request)
     except urllib2.HTTPError, err:
-      print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
-      os._exit(0)
+      if settings.IGNORE_ERR_MSG == False:
+        print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
+        continue_tests = checks.continue_tests(err)
+        if continue_tests == True:
+          settings.IGNORE_ERR_MSG = True
+        else:
+          os._exit(0)
 
   else:
     try:
       response = urllib2.urlopen(request)
     except urllib2.HTTPError, err:
-      print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
-      os._exit(0)
+      if settings.IGNORE_ERR_MSG == False:
+        print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
+        continue_tests = checks.continue_tests(err)
+        if continue_tests == True:
+          settings.IGNORE_ERR_MSG = True
+        else:
+          os._exit(0)
 
   ip_data = menu.options.ip_icmp_data
       

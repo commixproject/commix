@@ -25,8 +25,9 @@ from src.thirdparty.colorama import Fore, Back, Style, init
 from src.core.injections.semiblind.techniques.file_based import fb_injector
 
 """
- The "file-based" technique on Semiblind OS Command Injection.
+The "file-based" technique on Semiblind OS Command Injection.
 """
+
 
 """
 Read a file from the target host.

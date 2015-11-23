@@ -30,13 +30,10 @@ def next_attack_vector(technique, go_back):
     next_attack_vector = raw_input("(?) Continue with testing the "+ technique +"? [Y/n/q] > ").lower()
     if next_attack_vector in settings.CHOISE_YES:
       return True
-
     elif next_attack_vector in settings.CHOISE_NO:
       return  False
-
     elif next_attack_vector in settings.CHOISE_QUIT:
       sys.exit(0)
-
     else:
       if next_attack_vector == "":
         next_attack_vector = "enter"
@@ -83,5 +80,23 @@ def check_reverse_tcp_options(reverse_tcp_option):
     return 1
   elif reverse_tcp_option == "os_shell": 
     return 2
+
+"""
+Ignore error messages and continue the tests.
+"""
+def continue_tests(err):
+  while True:
+    continue_tests = raw_input("(?) Do you want to ignore the error ("+str(err.code)+") message and continue the tests? [Y/n/q] > ").lower()
+    if continue_tests in settings.CHOISE_YES:
+      return True
+    elif continue_tests in settings.CHOISE_NO:
+      return False
+    elif continue_tests in settings.CHOISE_QUIT:
+      return False
+    else:
+      if continue_tests == "":
+        continue_tests = "enter"
+      print Back.RED + "(x) Error: '" + continue_tests + "' is not a valid answer." + Style.RESET_ALL + "\n"
+      pass
 
 #eof

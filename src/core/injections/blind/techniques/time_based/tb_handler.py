@@ -137,7 +137,7 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
             else:
               # Check if target host is vulnerable.
               how_long, vuln_parameter = tb_injector.injection_test(payload, http_request_method, url)
-
+            
             # Injection percentage calculation
             percent = ((num_of_chars * 100) / total)
             float_percent = "{0:.1f}".format(round(((num_of_chars*100)/(total * 1.0)),2))
@@ -147,7 +147,7 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                 percent = Fore.RED + "FAILED" + Style.RESET_ALL
               else:
                 percent = ""
-                
+
             else:
               if how_long == previous_how_long + delay:
                 # Time relative false positive fixation.

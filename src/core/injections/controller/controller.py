@@ -69,7 +69,7 @@ def do_check(url, filename):
     sys.exit(0)
   else:
     pass
-  
+
   # Check if HTTP Method is GET or POST.
   header_name = ""
   if not menu.options.data:

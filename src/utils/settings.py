@@ -94,6 +94,7 @@ TMP_PATH = "/tmp/"
 
 # Default Server's Root Directory
 SRV_ROOT_DIR = ""
+CUSTOM_SRV_ROOT_DIR = False
 
 # The max help option length.
 MAX_OPTION_LENGTH = 18
@@ -260,5 +261,8 @@ JSON_SYMBOLS = set("{}:'")
 
 # TFB Decimal
 TFB_DECIMAL = False
+
+# Ignore Error Message
+IGNORE_ERR_MSG = False
 
 #eof

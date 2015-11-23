@@ -32,9 +32,12 @@ def estimate_response_time(url, http_request_method, delay):
   request = urllib2.Request(url)
   headers.do_check(request)
   start = time.time()
-  response = urllib2.urlopen(request)
-  response.read(1)
-  response.close()
+  try:
+    response = urllib2.urlopen(request)
+    response.read(1)
+    response.close()
+  except urllib2.HTTPError, e:
+    pass
   end = time.time()
   diff = end - start
   if int(diff) < 1:

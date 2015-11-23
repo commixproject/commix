@@ -55,28 +55,48 @@ def authentication_process():
 
   # Check if defined extra headers.
   headers.do_check(request)
+
   # Check if defined any HTTP Proxy.
   if menu.options.proxy:
     try:
       response = proxy.use_proxy(request)
     except urllib2.HTTPError, err:
-      print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
-      raise SystemExit() 
+      if settings.IGNORE_ERR_MSG == False:
+        print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
+        continue_tests = checks.continue_tests(err)
+        if continue_tests == True:
+          settings.IGNORE_ERR_MSG = True
+        else:
+          raise SystemExit()
+      response = False 
 
   # Check if defined Tor.
   elif menu.options.tor:
     try:
       response = tor.use_tor(request)
     except urllib2.HTTPError, err:
-      print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
-      raise SystemExit() 
+      if settings.IGNORE_ERR_MSG == False:
+        print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
+        continue_tests = checks.continue_tests(err)
+        if continue_tests == True:
+          settings.IGNORE_ERR_MSG = True
+        else:
+          raise SystemExit()
+      response = False 
 
   else:
     try:
       response = urllib2.urlopen(request)
     except urllib2.HTTPError, err:
-      print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
-      raise SystemExit() 
+      if settings.IGNORE_ERR_MSG == False:
+        print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
+        continue_tests = checks.continue_tests(err)
+        if continue_tests == True:
+          settings.IGNORE_ERR_MSG = True
+        else:
+          raise SystemExit()
+      response = False 
 
+  return response 
 
 #eof
