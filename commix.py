@@ -2,16 +2,16 @@
 # encoding: UTF-8
 
 """
- This file is part of commix (@commixproject) tool.
- Copyright (c) 2015 Anastasios Stasinopoulos (@ancst).
- https://github.com/stasinopoulos/commix
+This file is part of commix (@commixproject) tool.
+Copyright (c) 2015 Anastasios Stasinopoulos (@ancst).
+https://github.com/stasinopoulos/commix
 
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
  
- For more see the file 'readme/COPYING' for copying permission.
+For more see the file 'readme/COPYING' for copying permission.
 """
 
 import re
@@ -51,16 +51,14 @@ from src.core.requests import headers
 
 from src.core.injections.controller import controller
 
-"""
- The main function.
-"""
-
 # use Colorama to make Termcolor work on Windows too :)
 if settings.IS_WINDOWS:
   init()
 
+"""
+The main function
+"""
 def main():
-
   try:
     # Checkall the banner
     menu.banner()

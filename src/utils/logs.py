@@ -2,16 +2,16 @@
 # encoding: UTF-8
 
 """
- This file is part of commix (@commixproject) tool.
- Copyright (c) 2015 Anastasios Stasinopoulos (@ancst).
- https://github.com/stasinopoulos/commix
+This file is part of commix (@commixproject) tool.
+Copyright (c) 2015 Anastasios Stasinopoulos (@ancst).
+https://github.com/stasinopoulos/commix
 
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
- 
- For more see the file 'doc/COPYING' for copying permission.
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+For more see the file 'doc/COPYING' for copying permission.
 """
 
 import os
@@ -26,12 +26,14 @@ from src.utils import settings
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 """
- 1. Generate injection logs (logs.txt) in "./ouput" file.
- 2. Check for logs updates and apply if any!
+1. Generate injection logs (logs.txt) in "./ouput" file.
+2. Check for logs updates and apply if any!
 """
 
+"""
+Create log files
+"""
 def create_log_file(url, output_dir):
-  
   if not output_dir.endswith("/"):
     output_dir = output_dir + "/"
 
@@ -60,6 +62,9 @@ def create_log_file(url, output_dir):
 
   return filename
 
+"""
+Add the injection type / technique in log files.
+"""
 def add_type_and_technique(export_injection_info, filename, injection_type, technique):
 
   if export_injection_info == False:
@@ -72,7 +77,9 @@ def add_type_and_technique(export_injection_info, filename, injection_type, tech
 
   return export_injection_info
 
-
+"""
+Add the vulnerable parameter in log files.
+"""
 def add_parameter(vp_flag, filename, http_request_method, vuln_parameter, payload):
 
   if vp_flag == True:
@@ -89,7 +96,9 @@ def add_parameter(vp_flag, filename, http_request_method, vuln_parameter, payloa
 
   return vp_flag
 
-
+"""
+Add any payload in log files.
+"""
 def update_payload(filename, counter, payload):
 
   output_file = open(filename, "a")
@@ -99,7 +108,9 @@ def update_payload(filename, counter, payload):
     output_file.write("  ("+str(counter)+") Payload : " + re.sub("%20", " ", payload) + "\n")
   output_file.close()
 
-
+"""
+Log files cration notification
+"""
 def logs_notification(filename):
   print "\n" + Style.BRIGHT + "(!) The results can be found at '" + os.getcwd() + "/" + filename + "'" + Style.RESET_ALL
 

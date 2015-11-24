@@ -2,16 +2,16 @@
 # encoding: UTF-8
 
 """
- This file is part of commix (@commixproject) tool.
- Copyright (c) 2015 Anastasios Stasinopoulos (@ancst).
- https://github.com/stasinopoulos/commix
+This file is part of commix (@commixproject) tool.
+Copyright (c) 2015 Anastasios Stasinopoulos (@ancst).
+https://github.com/stasinopoulos/commix
 
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
  
- For more see the file 'readme/COPYING' for copying permission.
+For more see the file 'readme/COPYING' for copying permission.
 """
 
 import os
@@ -50,7 +50,6 @@ def file_read(separator, TAG, prefix, suffix, http_request_method, url, vuln_par
   else:
    sys.stdout.write(Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to read the '"+ file_to_read + "' file." + Style.RESET_ALL + "\n")
    sys.stdout.flush()
-
 
 """
 Write to a file on the target host.
@@ -99,7 +98,6 @@ def file_write(separator, TAG, prefix, suffix, http_request_method, url, vuln_pa
    sys.stdout.write(Fore.YELLOW + "(^) Warning: It seems that you can't create the '"+ dest_to_write + "' file." + Style.RESET_ALL + "\n")
    sys.stdout.flush()
 
-
 """
 Upload a file on the target host.
 """
@@ -142,7 +140,6 @@ def file_upload(separator, TAG, prefix, suffix, http_request_method, url, vuln_p
   else:
    sys.stdout.write(Fore.YELLOW + "(^) Warning: It seems that you can't upload the '"+ dest_to_upload + "' file." + Style.RESET_ALL + "\n")
    sys.stdout.flush()
-
 
 """
 Check the defined options

@@ -2,16 +2,16 @@
 # encoding: UTF-8
 
 """
- This file is part of commix (@commixproject) tool.
- Copyright (c) 2015 Anastasios Stasinopoulos (@ancst).
- https://github.com/stasinopoulos/commix
+This file is part of commix (@commixproject) tool.
+Copyright (c) 2015 Anastasios Stasinopoulos (@ancst).
+https://github.com/stasinopoulos/commix
 
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
  
- For more see the file 'readme/COPYING' for copying permission.
+For more see the file 'readme/COPYING' for copying permission.
 """
 
 import re
@@ -42,7 +42,7 @@ from src.core.injections.results_based.techniques.classic import cb_enumeration
 from src.core.injections.results_based.techniques.classic import cb_file_access
 
 """
-  The "classic" technique on Result-based OS Command Injection.
+The "classic" technique on Result-based OS Command Injection.
 """
 
 """

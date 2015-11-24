@@ -40,6 +40,7 @@ def netcat_version(lhost, lport):
   Type '""" + Style.BRIGHT + """3""" + Style.RESET_ALL + """' to use Netcat-Traditional on target host. 
 
 commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp_netcat""" + Style.RESET_ALL + """) > """)
+    
     # Default Netcat
     if nc_version == '1':
       nc_alternative = NETCAT_ALTERNATIVES[0]
@@ -126,7 +127,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp_other""" + Style.RESET_ALL
   return other_shell
 
 """
- Choose reverse TCP connection
+Choose type of reverse TCP connection.
 """
 def reverse_tcp_options(lhost, lport):
 
@@ -159,7 +160,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp""" + Style.RESET_ALL + """
   return reverse_tcp_option
 
 """
-Set up The reverse TCP connection
+Set up the reverse TCP connection
 """
 def configure_reverse_tcp():
 

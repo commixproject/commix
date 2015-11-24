@@ -24,14 +24,16 @@ from src.utils import requirments
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 """
- Check if HTTP Proxy.
+Check for TOR HTTP Proxy.
 """
-
 if menu.options.tor_port:
   PRIVOXY_PORT = menu.options.tor_port
 else:
   PRIVOXY_PORT = settings.PRIVOXY_PORT
 
+"""
+Check if HTTP Proxy (tor/privoxy) is defined.
+"""
 def do_check():
   # Check if 'tor' is installed.
   requirment = "tor"
@@ -71,11 +73,15 @@ def do_check():
       print Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
       sys.exit(0)
 
+"""
+Use the TOR HTTP Proxy.
+"""
 def use_tor(request):
   privoxy_proxy = urllib2.ProxyHandler({settings.PROXY_PROTOCOL:settings.PRIVOXY_IP + ":" + PRIVOXY_PORT})
   opener = urllib2.build_opener(privoxy_proxy)
   urllib2.install_opener(opener)
   response = urllib2.urlopen(request)
+  
   return response
   
 #eof 

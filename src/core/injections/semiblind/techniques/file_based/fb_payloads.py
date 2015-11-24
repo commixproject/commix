@@ -2,29 +2,29 @@
 # encoding: UTF-8
 
 """
- This file is part of commix (@commixproject) tool.
- Copyright (c) 2015 Anastasios Stasinopoulos (@ancst).
- https://github.com/stasinopoulos/commix
+This file is part of commix (@commixproject) tool.
+Copyright (c) 2015 Anastasios Stasinopoulos (@ancst).
+https://github.com/stasinopoulos/commix
 
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
  
- For more see the file 'readme/COPYING' for copying permission.
+For more see the file 'readme/COPYING' for copying permission.
 """
 
 """
-  The "file-based" technique on Semiblind OS Command Injection.
-  The available "file-based" payloads.
+The "file-based" technique on Semiblind OS Command Injection.
+The available "file-based" payloads.
 """
 
 from src.utils import menu
 from src.utils import settings
 
-# ----------------------------------------------------------
-# File-based decision payload (check if host is vulnerable). 
-# ----------------------------------------------------------
+"""
+File-based decision payload (check if host is vulnerable). 
+"""
 def decision(separator, TAG, OUTPUT_TEXTFILE):
 
   payload = (separator + " " +
@@ -50,9 +50,9 @@ def decision_alter_shell(separator, TAG, OUTPUT_TEXTFILE):
 
   return payload
 
-# ---------------------------------------------
-# Execute shell commands on vulnerable host.
-# ---------------------------------------------
+"""
+Execute shell commands on vulnerable host.
+"""
 def cmd_execution(separator, cmd, OUTPUT_TEXTFILE):
   
   if settings.TFB_DECIMAL == True:
@@ -81,3 +81,5 @@ def cmd_execution_alter_shell(separator, cmd, OUTPUT_TEXTFILE):
       payload = payload.replace("\n","%0d")
 
   return payload
+
+#eof

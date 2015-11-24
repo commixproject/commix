@@ -2,16 +2,16 @@
 # encoding: UTF-8
 
 """
- This file is part of commix (@commixproject) tool.
- Copyright (c) 2015 Anastasios Stasinopoulos (@ancst).
- https://github.com/stasinopoulos/commix
+This file is part of commix (@commixproject) tool.
+Copyright (c) 2015 Anastasios Stasinopoulos (@ancst).
+https://github.com/stasinopoulos/commix
 
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
  
- For more see the file 'readme/COPYING' for copying permission.
+For more see the file 'readme/COPYING' for copying permission.
 """
 
 import re
@@ -37,13 +37,13 @@ from src.core.injections.controller import checks
 from src.core.injections.semiblind.techniques.tempfile_based import tfb_payloads
 
 """
- The "tempfile-based" injection technique on Semiblind OS Command Injection.
- __Warning:__ This technique is still experimental, is not yet fully functional and may leads to false-positive resutls.
+The "tempfile-based" injection technique on Semiblind OS Command Injection.
+__Warning:__ This technique is still experimental, is not yet fully functional and may leads to false-positive resutls.
 """
 
-# -------------------------------------------
-# Get the response of the request
-# -------------------------------------------
+"""
+Get the response of the request
+"""
 def get_request_response(request):
 
   # Check if defined any HTTP Proxy.
@@ -104,9 +104,9 @@ def get_request_response(request):
 
   return response
 
-# ------------------------
-# Examine the requests
-# ------------------------
+"""
+Examine the GET/POST requests
+"""
 def examine_requests(payload, vuln_parameter, http_request_method, url):
 
   start = 0
@@ -155,10 +155,9 @@ def examine_requests(payload, vuln_parameter, http_request_method, url):
 
   return how_long
 
-
-# ------------------------------------
-# Check if target host is vulnerable.
-# ------------------------------------
+"""
+Check if target host is vulnerable.
+"""
 def injection_test(payload, http_request_method, url):
   start = 0
   end = 0
@@ -217,10 +216,9 @@ def injection_test(payload, http_request_method, url):
 
   return how_long, vuln_parameter
 
-
-# --------------------------------------------------------------
-# Check if target host is vulnerable.(Cookie-based injection)
-# --------------------------------------------------------------
+"""
+Check if target host is vulnerable. (Cookie-based injection)
+"""
 def cookie_injection_test(url, vuln_parameter, payload):
 
   def inject_cookie(url, vuln_parameter, payload, proxy):
@@ -307,9 +305,9 @@ def cookie_injection_test(url, vuln_parameter, payload):
 
   return how_long
 
-# --------------------------------------------------------------
-# Check if target host is vulnerable.(User-Agent-based injection)
-# --------------------------------------------------------------
+"""
+Check if target host is vulnerable. (User-Agent-based injection)
+"""
 def user_agent_injection_test(url, vuln_parameter, payload):
 
   def inject_user_agent(url, vuln_parameter, payload, proxy):
@@ -396,9 +394,9 @@ def user_agent_injection_test(url, vuln_parameter, payload):
 
   return how_long
 
-# ------------------------------------------------------------------
-# Check if target host is vulnerable.(Referer-based injection)
-# ------------------------------------------------------------------
+"""
+Check if target host is vulnerable. (Referer-based injection)
+"""
 def referer_injection_test(url, vuln_parameter, payload):
 
   def inject_referer(url, vuln_parameter, payload, proxy):
@@ -421,6 +419,7 @@ def referer_injection_test(url, vuln_parameter, payload):
 
   proxy = None 
   response = inject_referer(url, vuln_parameter, payload, proxy)
+
   # Check if defined any HTTP Proxy.
   if menu.options.proxy:
     try:
@@ -484,9 +483,9 @@ def referer_injection_test(url, vuln_parameter, payload):
 
   return how_long
 
-# -------------------------------------------
-# The main command injection exploitation.
-# -------------------------------------------
+"""
+The main command injection exploitation.
+"""
 def injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
   if menu.options.file_write or menu.options.file_upload :
     minlen = 0
@@ -617,10 +616,9 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_m
 
   return  check_how_long, output
 
-
-# -------------------------------------
-# False Positive check and evaluation.
-# -------------------------------------
+"""
+False Positive check and evaluation.
+"""
 def false_positive_check(separator, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, randvcalc, alter_shell, how_long):
   
   # Log previous 'how_long' for later comparison
@@ -727,10 +725,9 @@ def false_positive_check(separator, TAG, cmd, prefix, suffix, delay, http_reques
     if str(output) == str(randvcalc):
       return how_long, output
 
-
-# -------------------------------
-# Export the injection results
-# -------------------------------
+"""
+Export the injection results
+"""
 def export_injection_results(cmd, separator, output, check_how_long):
   if menu.options.verbose:
     print ""  

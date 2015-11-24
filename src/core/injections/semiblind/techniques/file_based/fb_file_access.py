@@ -2,16 +2,16 @@
 # encoding: UTF-8
 
 """
- This file is part of commix (@commixproject) tool.
- Copyright (c) 2015 Anastasios Stasinopoulos (@ancst).
- https://github.com/stasinopoulos/commix
+This file is part of commix (@commixproject) tool.
+Copyright (c) 2015 Anastasios Stasinopoulos (@ancst).
+https://github.com/stasinopoulos/commix
 
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
  
- For more see the file 'readme/COPYING' for copying permission.
+For more see the file 'readme/COPYING' for copying permission.
 """
 
 import os
@@ -27,7 +27,6 @@ from src.core.injections.semiblind.techniques.file_based import fb_injector
 """
 The "file-based" technique on Semiblind OS Command Injection.
 """
-
 
 """
 Read a file from the target host.
@@ -51,7 +50,6 @@ def file_read(separator, payload, TAG, delay, prefix, suffix, http_request_metho
   else:
    sys.stdout.write(Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to read the '"+ file_to_read + "' file." + Style.RESET_ALL + "\n")
    sys.stdout.flush()
-     
      
 """
 Write to a file on the target host.
@@ -97,7 +95,6 @@ def file_write(separator, payload, TAG, delay, prefix, suffix, http_request_meth
    sys.stdout.write(Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to write the '"+ dest_to_write + "' file." + Style.RESET_ALL + "\n")
    sys.stdout.flush()
    
-     
 """
 Upload a file on the target host.
 """
@@ -139,7 +136,6 @@ def file_upload(separator, payload, TAG, delay, prefix, suffix, http_request_met
   else:
    sys.stdout.write(Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to write the '"+ dest_to_upload + "' file." + Style.RESET_ALL + "\n")
    sys.stdout.flush()
-
 
 """
 Check the defined options

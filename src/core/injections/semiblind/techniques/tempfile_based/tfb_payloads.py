@@ -3,28 +3,29 @@
 # encoding: UTF-8
 
 """
- This file is part of commix (@commixproject) tool.
- Copyright (c) 2015 Anastasios Stasinopoulos (@ancst).
- https://github.com/stasinopoulos/commix
+This file is part of commix (@commixproject) tool.
+Copyright (c) 2015 Anastasios Stasinopoulos (@ancst).
+https://github.com/stasinopoulos/commix
 
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
  
- For more see the file 'readme/COPYING' for copying permission.
+For more see the file 'readme/COPYING' for copying permission.
 """
 
 import urllib
 from src.utils import settings
+
 """
-  The "tempfile-based" technique on Semiblind OS Command Injection.
-  The available "tempfile-based" payloads.
+The "tempfile-based" technique on Semiblind OS Command Injection.
+The available "tempfile-based" payloads.
 """
 
-# ----------------------------------------------------------------
-# Tempfile-based decision payload (check if host is vulnerable).
-# ----------------------------------------------------------------
+"""
+Tempfile-based decision payload (check if host is vulnerable).
+"""
 def decision(separator, j, TAG, OUTPUT_TEXTFILE, delay, http_request_method):
   if separator == ";" :
     payload = (separator + " "
@@ -139,9 +140,9 @@ def decision_alter_shell(separator, j, TAG, OUTPUT_TEXTFILE, delay, http_request
     
   return payload
 
-#-----------------------------------------------
-# Execute shell commands on vulnerable host.
-#-----------------------------------------------
+"""
+Execute shell commands on vulnerable host.
+"""
 def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, delay, http_request_method):
   if separator == ";" :
     payload = (separator + " "
@@ -269,9 +270,9 @@ def cmd_execution_alter_shell(separator, cmd, j, OUTPUT_TEXTFILE, delay, http_re
 
   return payload
 
-#---------------------------------------------------
-# Get the execution output, of shell execution.
-#---------------------------------------------------
+"""
+Get the execution output, of shell execution.
+"""
 def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, delay, http_request_method):
   if separator == ";" :
     payload = (separator + " " +
@@ -372,9 +373,9 @@ def get_char_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, d
 
   return payload
 
-#---------------------------------------------------
-# Get the execution output, of shell execution.
-#---------------------------------------------------
+"""
+Get the execution output, of shell execution.
+"""
 def fp_result(separator, OUTPUT_TEXTFILE, ascii_char, delay, http_request_method):
   if separator == ";" :
     payload = (separator + " "
@@ -471,4 +472,5 @@ def fp_result_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, 
     payload = payload.replace("\n",";")
 
   return payload
+  
 # eof

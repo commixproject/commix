@@ -2,16 +2,16 @@
 # encoding: UTF-8
 
 """
- This file is part of commix (@commixproject) tool.
- Copyright (c) 2015 Anastasios Stasinopoulos (@ancst).
- https://github.com/stasinopoulos/commix
+This file is part of commix (@commixproject) tool.
+Copyright (c) 2015 Anastasios Stasinopoulos (@ancst).
+https://github.com/stasinopoulos/commix
 
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
- 
- For more see the file 'doc/COPYING' for copying permission.
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+For more see the file 'doc/COPYING' for copying permission.
 """
 
 import os
@@ -23,6 +23,9 @@ from optparse import OptionParser
 from src.utils import settings
 from src.thirdparty.colorama import Fore, Back, Style, init
 
+"""
+The commix's banner.
+"""
 def banner():
   print """                                       __           
    ___    ___     ___ ___     ___ ___ /\_\   __  _  
@@ -330,7 +333,6 @@ parser.add_option_group(enumeration)
 parser.add_option_group(file_access)
 parser.add_option_group(modules)
 parser.add_option_group(injection)
-
 """
 Dirty hack from sqlmap [1], to display longer options without breaking into two lines.
 [1] https://github.com/sqlmapproject/sqlmap/blob/fdc8e664dff305aca19acf143c7767b9a7626881/lib/parse/cmdline.py
@@ -349,7 +351,9 @@ option.help = option.help.capitalize().replace("Show this help message and exit"
 
 (options, args) = parser.parse_args()
 
-
+"""
+The available options.
+"""
 def shell_options():
       print """
   Type '""" + Style.BRIGHT + """?""" + Style.RESET_ALL + """' to get all the available options.

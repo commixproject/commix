@@ -2,16 +2,16 @@
 # encoding: UTF-8
 
 """
- This file is part of commix (@commixproject) tool.
- Copyright (c) 2015 Anastasios Stasinopoulos (@ancst).
- https://github.com/stasinopoulos/commix
+This file is part of commix (@commixproject) tool.
+Copyright (c) 2015 Anastasios Stasinopoulos (@ancst).
+https://github.com/stasinopoulos/commix
 
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
  
- For more see the file 'readme/COPYING' for copying permission.
+For more see the file 'readme/COPYING' for copying permission.
 """
 
 import os
@@ -43,8 +43,8 @@ from src.core.injections.semiblind.techniques.tempfile_based import tfb_file_acc
 from src.core.injections.semiblind.techniques.file_based import fb_injector
 
 """
- The "tempfile-based" injection technique on Semiblind OS Command Injection.
- __Warning:__ This technique is still experimental, is not yet fully functional and may leads to false-positive results.
+The "tempfile-based" injection technique on Semiblind OS Command Injection.
+__Warning:__ This technique is still experimental, is not yet fully functional and may leads to false-positive results.
 """
 
 """

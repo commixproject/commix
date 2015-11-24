@@ -2,16 +2,16 @@
 # encoding: UTF-8
 
 """
- This file is part of commix (@commixproject) tool.
- Copyright (c) 2015 Anastasios Stasinopoulos (@ancst).
- https://github.com/stasinopoulos/commix
+This file is part of commix (@commixproject) tool.
+Copyright (c) 2015 Anastasios Stasinopoulos (@ancst).
+https://github.com/stasinopoulos/commix
 
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
  
- For more see the file 'readme/COPYING' for copying permission.
+For more see the file 'readme/COPYING' for copying permission.
 """
 
 import os
@@ -20,7 +20,6 @@ import sys
 from src.utils import menu
 from src.utils import settings
 from src.thirdparty.colorama import Fore, Back, Style, init
-
 
 """
 Procced to the next attack vector.
@@ -40,7 +39,6 @@ def next_attack_vector(technique, go_back):
       print Back.RED + "(x) Error: '" + next_attack_vector + "' is not a valid answer." + Style.RESET_ALL + "\n"
       pass
 
-
 """
 Fix single / double quote escaping.
 """
@@ -52,7 +50,6 @@ def escaped_cmd(cmd):
   if "\$" in cmd :
     cmd = cmd.replace("\$","$")
   return cmd
-
 
 """
 Check 'os_shell' options
@@ -85,18 +82,21 @@ def check_reverse_tcp_options(reverse_tcp_option):
 Ignore error messages and continue the tests.
 """
 def continue_tests(err):
-  while True:
-    continue_tests = raw_input("(?) Do you want to ignore the error ("+str(err.code)+") message and continue the tests? [Y/n/q] > ").lower()
-    if continue_tests in settings.CHOISE_YES:
-      return True
-    elif continue_tests in settings.CHOISE_NO:
-      return False
-    elif continue_tests in settings.CHOISE_QUIT:
-      return False
-    else:
-      if continue_tests == "":
-        continue_tests = "enter"
-      print Back.RED + "(x) Error: '" + continue_tests + "' is not a valid answer." + Style.RESET_ALL + "\n"
-      pass
-
+  try:
+    while True:
+      continue_tests = raw_input("(?) Do you want to ignore the error ("+str(err.code)+") message and continue the tests? [Y/n/q] > ").lower()
+      if continue_tests in settings.CHOISE_YES:
+        return True
+      elif continue_tests in settings.CHOISE_NO:
+        return False
+      elif continue_tests in settings.CHOISE_QUIT:
+        return False
+      else:
+        if continue_tests == "":
+          continue_tests = "enter"
+        print Back.RED + "(x) Error: '" + continue_tests + "' is not a valid answer." + Style.RESET_ALL + "\n"
+        pass
+  except KeyboardInterrupt:
+    print "\n" + Back.RED + "(x) Aborted: Ctrl-C was pressed!" + Style.RESET_ALL
+    raise SystemExit()
 #eof

@@ -2,16 +2,16 @@
 # encoding: UTF-8
 
 """
- This file is part of commix (@commixproject) tool.
- Copyright (c) 2015 Anastasios Stasinopoulos (@ancst).
- https://github.com/stasinopoulos/commix
+This file is part of commix (@commixproject) tool.
+Copyright (c) 2015 Anastasios Stasinopoulos (@ancst).
+https://github.com/stasinopoulos/commix
 
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
  
- For more see the file 'readme/COPYING' for copying permission.
+For more see the file 'readme/COPYING' for copying permission.
 """
 
 import re
@@ -39,12 +39,12 @@ from src.core.injections.controller import checks
 from src.core.injections.semiblind.techniques.file_based import fb_payloads
 
 """
- The "file-based" technique on Semiblind OS Command Injection.
+The "file-based" technique on Semiblind OS Command Injection.
 """
 
-# -------------------------------------------
-# Get the response of the request
-# -------------------------------------------
+"""
+Get the response of the request
+"""
 def get_request_response(request):
 
   # Check if defined any HTTP Proxy.
@@ -53,7 +53,7 @@ def get_request_response(request):
       response = proxy.use_proxy(request)
     except urllib2.HTTPError, err:
       if settings.IGNORE_ERR_MSG == False:
-        print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
+        print Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
         continue_tests = checks.continue_tests(err)
         if continue_tests == True:
           settings.IGNORE_ERR_MSG = True
@@ -72,7 +72,7 @@ def get_request_response(request):
       response = tor.use_tor(request)
     except urllib2.HTTPError, err:
       if settings.IGNORE_ERR_MSG == False:
-        print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
+        print Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
         continue_tests = checks.continue_tests(err)
         if continue_tests == True:
           settings.IGNORE_ERR_MSG = True
@@ -90,7 +90,7 @@ def get_request_response(request):
       response = urllib2.urlopen(request)
     except urllib2.HTTPError, err:
       if settings.IGNORE_ERR_MSG == False:
-        print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
+        print Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
         continue_tests = checks.continue_tests(err)
         if continue_tests == True:
           settings.IGNORE_ERR_MSG = True
@@ -106,10 +106,9 @@ def get_request_response(request):
 
   return response
 
-
-# ------------------------------------
-# Check if target host is vulnerable.
-# ------------------------------------
+"""
+Check if target host is vulnerable.
+"""
 def injection_test(payload, http_request_method, url):
                       
   # Check if defined method is GET (Default).
@@ -168,10 +167,9 @@ def injection_test(payload, http_request_method, url):
 
   return response, vuln_parameter
 
-
-# --------------------------------------------------------------
-# Check if target host is vulnerable.(Cookie-based injection)
-# --------------------------------------------------------------
+"""
+Check if target host is vulnerable. (Cookie-based injection)
+"""
 def cookie_injection_test(url, vuln_parameter, payload):
 
   def inject_cookie(url, vuln_parameter, payload, proxy):
@@ -196,7 +194,7 @@ def cookie_injection_test(url, vuln_parameter, payload):
       response = inject_cookie(url, vuln_parameter, payload, proxy)
     except urllib2.HTTPError, err:
       if settings.IGNORE_ERR_MSG == False:
-        print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
+        print Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
         continue_tests = checks.continue_tests(err)
         if continue_tests == True:
           settings.IGNORE_ERR_MSG = True
@@ -216,7 +214,7 @@ def cookie_injection_test(url, vuln_parameter, payload):
       response = inject_cookie(url, vuln_parameter, payload, proxy)
     except urllib2.HTTPError, err:
       if settings.IGNORE_ERR_MSG == False:
-        print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
+        print Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
         continue_tests = checks.continue_tests(err)
         if continue_tests == True:
           settings.IGNORE_ERR_MSG = True
@@ -234,7 +232,7 @@ def cookie_injection_test(url, vuln_parameter, payload):
       response = inject_cookie(url, vuln_parameter, payload, proxy)
     except urllib2.HTTPError, err:
       if settings.IGNORE_ERR_MSG == False:
-        print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
+        print Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
         continue_tests = checks.continue_tests(err)
         if continue_tests == True:
           settings.IGNORE_ERR_MSG = True
@@ -249,9 +247,9 @@ def cookie_injection_test(url, vuln_parameter, payload):
 
   return response
 
-# ------------------------------------------------------------------
-# Check if target host is vulnerable.(User-Agent-based injection)
-# ------------------------------------------------------------------
+"""
+Check if target host is vulnerable. (User-Agent-based injection)
+"""
 def user_agent_injection_test(url, vuln_parameter, payload):
 
   def inject_user_agent(url, vuln_parameter, payload, proxy):
@@ -277,7 +275,7 @@ def user_agent_injection_test(url, vuln_parameter, payload):
       response = inject_user_agent(url, vuln_parameter, payload, proxy)
     except urllib2.HTTPError, err:
       if settings.IGNORE_ERR_MSG == False:
-        print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
+        print Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
         continue_tests = checks.continue_tests(err)
         if continue_tests == True:
           settings.IGNORE_ERR_MSG = True
@@ -297,7 +295,7 @@ def user_agent_injection_test(url, vuln_parameter, payload):
       response = inject_user_agent(url, vuln_parameter, payload, proxy)
     except urllib2.HTTPError, err:
       if settings.IGNORE_ERR_MSG == False:
-        print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
+        print Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
         continue_tests = checks.continue_tests(err)
         if continue_tests == True:
           settings.IGNORE_ERR_MSG = True
@@ -315,7 +313,7 @@ def user_agent_injection_test(url, vuln_parameter, payload):
       response = inject_user_agent(url, vuln_parameter, payload, proxy)
     except urllib2.HTTPError, err:
       if settings.IGNORE_ERR_MSG == False:
-        print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
+        print Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
         continue_tests = checks.continue_tests(err)
         if continue_tests == True:
           settings.IGNORE_ERR_MSG = True
@@ -330,9 +328,9 @@ def user_agent_injection_test(url, vuln_parameter, payload):
 
   return response
 
-# ------------------------------------------------------------------
-# Check if target host is vulnerable.(Referer-based injection)
-# ------------------------------------------------------------------
+"""
+Check if target host is vulnerable. (Referer-based injection)
+"""
 def referer_injection_test(url, vuln_parameter, payload):
 
   def inject_referer(url, vuln_parameter, payload, proxy):
@@ -358,7 +356,7 @@ def referer_injection_test(url, vuln_parameter, payload):
       response = inject_referer(url, vuln_parameter, payload, proxy)
     except urllib2.HTTPError, err:
       if settings.IGNORE_ERR_MSG == False:
-        print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
+        print Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
         continue_tests = checks.continue_tests(err)
         if continue_tests == True:
           settings.IGNORE_ERR_MSG = True
@@ -378,7 +376,7 @@ def referer_injection_test(url, vuln_parameter, payload):
       response = inject_referer(url, vuln_parameter, payload, proxy)
     except urllib2.HTTPError, err:
       if settings.IGNORE_ERR_MSG == False:
-        print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
+        print Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
         continue_tests = checks.continue_tests(err)
         if continue_tests == True:
           settings.IGNORE_ERR_MSG = True
@@ -396,7 +394,7 @@ def referer_injection_test(url, vuln_parameter, payload):
       response = inject_referer(url, vuln_parameter, payload, proxy)
     except urllib2.HTTPError, err:
       if settings.IGNORE_ERR_MSG == False:
-        print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
+        print Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
         continue_tests = checks.continue_tests(err)
         if continue_tests == True:
           settings.IGNORE_ERR_MSG = True
@@ -411,9 +409,9 @@ def referer_injection_test(url, vuln_parameter, payload):
 
   return response
 
-# -------------------------------------------
-# The main command injection exploitation.
-# -------------------------------------------
+"""
+The main command injection exploitation.
+"""
 def injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
 
   # Execute shell commands on vulnerable host.
@@ -490,9 +488,9 @@ def injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method,
 
   return response
 
-#-----------------------------
-# Find the directory.
-#-----------------------------
+"""
+Find the URL directory.
+"""
 def injection_output(url, OUTPUT_TEXTFILE, delay):
   if menu.options.srv_root_dir:
 
@@ -528,19 +526,25 @@ def injection_output(url, OUTPUT_TEXTFILE, delay):
 
     else:
       path = urlparse.urlparse(url).path
-      path_parts = path.split('/')
-      count = 0
-      for part in path_parts:        
-       count = count + 1
-      count = count - 1
-      last_param = path_parts[count]
-      output = url.replace(last_param, OUTPUT_TEXTFILE)
+      if path.endswith('/'):
+        # Contract again the url.
+        scheme = urlparse.urlparse(url).scheme
+        netloc = urlparse.urlparse(url).netloc
+        output = scheme + "://" + netloc + path + OUTPUT_TEXTFILE
+      else:
+        path_parts = [non_empty for non_empty in path.split('/') if non_empty]
+        count = 0
+        for part in path_parts:        
+          count = count + 1
+        count = count - 1
+        last_param = path_parts[count]
+        output = url.replace(last_param, OUTPUT_TEXTFILE)
 
   return output
 
-#-----------------------------
-# Command execution results.
-#-----------------------------
+"""
+Command execution results.
+"""
 def injection_results(url, OUTPUT_TEXTFILE, delay):
   #Find the directory.
   output = injection_output(url, OUTPUT_TEXTFILE, delay)

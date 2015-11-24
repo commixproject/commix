@@ -2,16 +2,16 @@
 # encoding: UTF-8
 
 """
- This file is part of commix (@commixproject) tool.
- Copyright (c) 2015 Anastasios Stasinopoulos (@ancst).
- https://github.com/stasinopoulos/commix
+This file is part of commix (@commixproject) tool.
+Copyright (c) 2015 Anastasios Stasinopoulos (@ancst).
+https://github.com/stasinopoulos/commix
 
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
  
- For more see the file 'readme/COPYING' for copying permission.
+For more see the file 'readme/COPYING' for copying permission.
 """
 
 import sys
@@ -23,7 +23,7 @@ from src.thirdparty.colorama import Fore, Back, Style, init
 from src.core.injections.results_based.techniques.classic import cb_injector
 
 """
-  The "classic" technique on Result-based OS Command Injection.
+The "classic" technique on Result-based OS Command Injection.
 """
 
 """
@@ -45,7 +45,6 @@ def hostname(separator, TAG, prefix, suffix, whitespace, http_request_method, ur
     output_file = open(filename, "a")
     output_file.write("    (!) The hostname is " + shell + ".\n")
     output_file.close()
-
 
 """
 Retrieve system information
@@ -128,7 +127,6 @@ def current_user(separator, TAG, prefix, suffix, whitespace, http_request_method
       output_file = open(filename, "a")
       output_file.write("    (!) The current user is " + cu_account + "\n")
       output_file.close()
-
 
 """
 System users enumeration
@@ -221,7 +219,6 @@ def system_users(separator, TAG, prefix, suffix, whitespace, http_request_method
     sys.stdout.flush()
     print "\n" + Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to read '" + settings.PASSWD_FILE + "' to enumerate users entries." + Style.RESET_ALL   
 
-
 """
 System passwords enumeration
 """
@@ -266,7 +263,6 @@ def system_passwords(separator, TAG, prefix, suffix, whitespace, http_request_me
       sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
       sys.stdout.flush()
       print "\n" + Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to read '" + settings.SHADOW_FILE + "' to enumerate users password hashes." + Style.RESET_ALL
-
 """
 Single os-shell execution
 """

@@ -2,16 +2,16 @@
 # encoding: UTF-8
 
 """
- This file is part of commix (@commixproject) tool.
- Copyright (c) 2015 Anastasios Stasinopoulos (@ancst).
- https://github.com/stasinopoulos/commix
+This file is part of commix (@commixproject) tool.
+Copyright (c) 2015 Anastasios Stasinopoulos (@ancst).
+https://github.com/stasinopoulos/commix
 
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
  
- For more see the file 'readme/COPYING' for copying permission.
+For more see the file 'readme/COPYING' for copying permission.
 """
 
 import re
@@ -39,12 +39,12 @@ from src.core.injections.controller import checks
 from src.core.injections.results_based.techniques.classic import cb_payloads
 
 """
-  The "classic" technique on Result-based OS Command Injection.
+The "classic" technique on Result-based OS Command Injection.
 """
 
-# -------------------------------------------
-# Get the response of the request
-# -------------------------------------------
+"""
+Get the response of the request
+"""
 def get_request_response(request):
 
   # Check if defined any HTTP Proxy.
@@ -105,9 +105,9 @@ def get_request_response(request):
 
   return response
 
-# ------------------------------------
-# Check if target host is vulnerable.
-# ------------------------------------
+"""
+Check if target host is vulnerable.
+"""
 def injection_test(payload, http_request_method, url):       
 
   # Check if defined method is GET (Default).
@@ -157,9 +157,9 @@ def injection_test(payload, http_request_method, url):
   return response, vuln_parameter
 
  
-# ------------------------
-# Evaluate test results.
-# ------------------------
+"""
+Evaluate test results.
+"""
 def injection_test_results(response, TAG, randvcalc):
   if response == False:
     return False
@@ -171,9 +171,9 @@ def injection_test_results(response, TAG, randvcalc):
       shell = shell[0]
     return shell
 
-# --------------------------------------------------------------
-# Check if target host is vulnerable.(Cookie-based injection)
-# --------------------------------------------------------------
+"""
+Check if target host is vulnerable. (Cookie-based injection)
+"""
 def cookie_injection_test(url, vuln_parameter, payload):
 
   def inject_cookie(url, vuln_parameter, payload, proxy):
@@ -251,9 +251,9 @@ def cookie_injection_test(url, vuln_parameter, payload):
 
   return response
 
-# ------------------------------------------------------------------
-# Check if target host is vulnerable.(User-Agent-based injection)
-# ------------------------------------------------------------------
+"""
+Check if target host is vulnerable. (User-Agent-based injection)
+"""
 def user_agent_injection_test(url, vuln_parameter, payload):
 
   def inject_user_agent(url, vuln_parameter, payload, proxy):
@@ -332,9 +332,9 @@ def user_agent_injection_test(url, vuln_parameter, payload):
 
   return response
 
-# ------------------------------------------------------------------
-# Check if target host is vulnerable.(Referer-based injection)
-# ------------------------------------------------------------------
+"""
+Check if target host is vulnerable. (Referer-based injection)
+"""
 def referer_injection_test(url, vuln_parameter, payload):
 
   def inject_referer(url, vuln_parameter, payload, proxy):
@@ -411,12 +411,11 @@ def referer_injection_test(url, vuln_parameter, payload):
               " Please ensure that is up and try again." + Style.RESET_ALL
       raise SystemExit()
           
-
   return response
 
-# -------------------------------------------
-# The main command injection exploitation.
-# -------------------------------------------
+"""
+The main command injection exploitation.
+"""
 def injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename):
 
   if alter_shell:
@@ -499,10 +498,9 @@ def injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_meth
 
   return response
 
-
-# --------------------------------
-# The command execution results.
-# --------------------------------
+"""
+The command execution results.
+"""
 def injection_results(response, TAG):
   # Grab execution results
   html_data = response.read()
@@ -513,3 +511,4 @@ def injection_results(response, TAG):
   
   return shell
 
+#eof

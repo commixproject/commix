@@ -2,16 +2,16 @@
 # encoding: UTF-8
 
 """
- This file is part of commix (@commixproject) tool.
- Copyright (c) 2015 Anastasios Stasinopoulos (@ancst).
- https://github.com/stasinopoulos/commix
+This file is part of commix (@commixproject) tool.
+Copyright (c) 2015 Anastasios Stasinopoulos (@ancst).
+https://github.com/stasinopoulos/commix
 
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
  
- For more see the file 'readme/COPYING' for copying permission.
+For more see the file 'readme/COPYING' for copying permission.
 """
 
 import sys
@@ -29,10 +29,13 @@ from src.core.injections.controller import checks
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 """
-  If a dashboard or an administration panel is found (auth_url),
-  do the authentication process using the provided credentials (auth_data).
+If a dashboard or an administration panel is found (auth_url),
+do the authentication process using the provided credentials (auth_data).
 """
 
+"""
+The authentication process
+"""
 def authentication_process():
   auth_url = menu.options.auth_url
   auth_data = menu.options.auth_data

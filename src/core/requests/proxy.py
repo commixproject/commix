@@ -2,16 +2,16 @@
 # encoding: UTF-8
 
 """
- This file is part of commix (@commixproject) tool.
- Copyright (c) 2015 Anastasios Stasinopoulos (@ancst).
- https://github.com/stasinopoulos/commix
+This file is part of commix (@commixproject) tool.
+Copyright (c) 2015 Anastasios Stasinopoulos (@ancst).
+https://github.com/stasinopoulos/commix
 
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
  
- For more see the file 'readme/COPYING' for copying permission.
+For more see the file 'readme/COPYING' for copying permission.
 """
 
 import sys
@@ -24,9 +24,8 @@ from src.thirdparty.colorama import Fore, Back, Style, init
 from src.core.requests import headers
 
 """
- Check if HTTP Proxy.
+ Check if HTTP Proxy is defined.
 """
-
 def do_check(url):
   check_proxy = True
   sys.stdout.write("(*) Testing proxy " + menu.options.proxy + " ... ")
@@ -50,7 +49,10 @@ def do_check(url):
     print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + " ]\n"
     print Back.RED + "(x) Error: Could not connect to proxy." + Style.RESET_ALL
     sys.exit(0)
-
+    
+"""
+Use the defined HTTP Proxy
+"""
 def use_proxy(request):
   proxy = urllib2.ProxyHandler({settings.PROXY_PROTOCOL: menu.options.proxy})
   opener = urllib2.build_opener(proxy)

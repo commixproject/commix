@@ -2,17 +2,18 @@
 # encoding: UTF-8
 
 """
- This file is part of commix (@commixproject) tool.
- Copyright (c) 2015 Anastasios Stasinopoulos (@ancst).
- https://github.com/stasinopoulos/commix
+This file is part of commix (@commixproject) tool.
+Copyright (c) 2015 Anastasios Stasinopoulos (@ancst).
+https://github.com/stasinopoulos/commix
 
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
  
- For more see the file 'readme/COPYING' for copying permission.
+For more see the file 'readme/COPYING' for copying permission.
 """
+
 import re
 import os
 import sys
@@ -22,9 +23,9 @@ from src.utils import menu
 from src.utils import settings
 from src.thirdparty.colorama import Fore, Back, Style, init
 
-# --------------------------------------------------------------
-# Check if the 'INJECT_HERE' tag, is specified on GET Requests.
-# --------------------------------------------------------------
+"""
+Check if the 'INJECT_HERE' tag, is specified on GET Requests.
+"""
 def do_GET_check(url):
 
   # Check for REST-ful URLs format. 
@@ -103,9 +104,9 @@ def do_GET_check(url):
         #urls_list.append(url)
       #return urls_list
 
-# --------------------------------------
-# Define the vulnerable GET parameter.
-# --------------------------------------
+"""
+Define the vulnerable GET parameter.
+"""
 def vuln_GET_param(url):
 
   # Define the vulnerable parameter
@@ -140,10 +141,9 @@ def vuln_GET_param(url):
     
   return vuln_parameter 
 
-
-# --------------------------------------------------------------
-# Check if the 'INJECT_HERE' tag, is specified on POST Requests.
-# --------------------------------------------------------------
+"""
+Check if the 'INJECT_HERE' tag, is specified on POST Requests.
+"""
 def do_POST_check(parameter):
 
   # Check if valid JSON
@@ -258,10 +258,9 @@ def do_POST_check(parameter):
         #paramerters_list.append(parameter)
       #return paramerters_list
 
-
-# --------------------------------------
-# Define the vulnerable POST parameter.
-# --------------------------------------
+"""
+Define the vulnerable POST parameter.
+"""
 def vuln_POST_param(parameter, url):
 
     # Define the vulnerable parameter
@@ -288,10 +287,9 @@ def vuln_POST_param(parameter, url):
 
     return vuln_parameter
  
-
-# --------------------------------
-# Define the injection prefixes.
-# --------------------------------
+"""
+Define the injection prefixes.
+"""
 def prefixes(payload, prefix):
 
   # Check if defined "--prefix" option.
@@ -302,10 +300,9 @@ def prefixes(payload, prefix):
 
   return payload
 
-
-# --------------------------------
-# Define the injection suffixes.
-# --------------------------------
+"""
+Define the injection suffixes.
+"""
 def suffixes(payload, suffix):
 
   # Check if defined "--suffix" option.
@@ -316,10 +313,9 @@ def suffixes(payload, suffix):
 
   return payload
 
-
-# --------------------------------
-# The cookie based injection.
-# --------------------------------
+"""
+The cookie based injection.
+"""
 def specify_cookie_parameter(cookie):
 
   # Specify the vulnerable cookie parameter
@@ -337,25 +333,24 @@ def specify_cookie_parameter(cookie):
 
   return inject_cookie 
 
-
-# --------------------------------
-# The user-agent based injection.
-# --------------------------------
+"""
+The user-agent based injection.
+"""
 def specify_user_agent_parameter(user_agent):
 
    # Specify the vulnerable user-agent parameter
    # Nothing to specify here! :)
 
   return user_agent
-
-  
-# --------------------------------
-# The referer based injection.
-# --------------------------------
+ 
+"""
+The referer based injection.
+"""
 def specify_referer_parameter(referer):
 
    # Specify the vulnerable referer parameter.
    # Nothing to specify here! :)
 
   return referer
+
 #eof

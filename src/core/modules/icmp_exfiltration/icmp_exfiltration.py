@@ -2,16 +2,16 @@
 # encoding: UTF-8
 
 """
- This file is part of commix (@commixproject) tool.
- Copyright (c) 2015 Anastasios Stasinopoulos (@ancst).
- https://github.com/stasinopoulos/commix
+This file is part of commix (@commixproject) tool.
+Copyright (c) 2015 Anastasios Stasinopoulos (@ancst).
+https://github.com/stasinopoulos/commix
 
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
  
- For more see the file 'readme/COPYING' for copying permission.
+For more see the file 'readme/COPYING' for copying permission.
 """
 
 import os
@@ -43,11 +43,11 @@ logging.getLogger("scapy.runtime").setLevel(logging.ERROR)
 from scapy.all import *
 
 """
-  The icmp exfiltration technique: 
-  exfiltrate data using the ping utility.
-  
-  [1] http://blog.ring-zer0.com/2014/02/data-exfiltration-on-linux.html
-  [2] http://blog.curesec.com/article/blog/23.html
+The icmp exfiltration technique: 
+exfiltrate data using the ping utility.
+
+[1] http://blog.ring-zer0.com/2014/02/data-exfiltration-on-linux.html
+[2] http://blog.curesec.com/article/blog/23.html
 """
 
 def packet_handler(Packet):
@@ -155,6 +155,7 @@ def input_cmd(http_request_method, url, vuln_parameter, ip_src, technique):
       print Back.RED + "(x) Error: '" + gotshell + "' is not a valid answer." + Style.RESET_ALL
       pass
 
+
 def exploitation(ip_dst, ip_src, url, http_request_method, vuln_parameter, technique):
   signal.signal(signal.SIGINT, signal_handler)
   sniffer_thread = threading.Thread(target=snif, args=(ip_dst, ip_src, )).start()
@@ -200,7 +201,6 @@ def icmp_exfiltration_handler(url, http_request_method):
           settings.IGNORE_ERR_MSG = True
         else:
           os._exit(0)
-
 
   # Check if defined Tor.
   elif menu.options.tor:

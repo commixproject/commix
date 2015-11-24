@@ -2,16 +2,16 @@
 # encoding: UTF-8
 
 """
- This file is part of commix (@commixproject) tool.
- Copyright (c) 2015 Anastasios Stasinopoulos (@ancst).
- https://github.com/stasinopoulos/commix
+This file is part of commix (@commixproject) tool.
+Copyright (c) 2015 Anastasios Stasinopoulos (@ancst).
+https://github.com/stasinopoulos/commix
 
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
- 
- For more see the file 'doc/COPYING' for copying permission.
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+For more see the file 'doc/COPYING' for copying permission.
 """
 
 import os
@@ -24,11 +24,13 @@ from src.utils import requirments
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 """
- Make a local installation of 'commix' on your system.
+Make a local installation of 'commix' on your system.
 """
 
+"""
+The un-installer.
+"""
 def uninstaller():
-
   sys.stdout.write("(*) Starting the uninstaller... ")
   sys.stdout.flush()
   try:
@@ -41,6 +43,9 @@ def uninstaller():
   sys.stdout.flush()
   print Style.BRIGHT + "(!) The un-installation of commix has finished!" + Style.RESET_ALL
   
+"""
+The installer.
+"""
 def installer():
   packages = "build-essential python-dev"
   dependencies = "git python-pip"

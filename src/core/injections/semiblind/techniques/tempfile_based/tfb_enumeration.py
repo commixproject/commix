@@ -2,16 +2,16 @@
 # encoding: UTF-8
 
 """
- This file is part of commix (@commixproject) tool.
- Copyright (c) 2015 Anastasios Stasinopoulos (@ancst).
- https://github.com/stasinopoulos/commix
+This file is part of commix (@commixproject) tool.
+Copyright (c) 2015 Anastasios Stasinopoulos (@ancst).
+https://github.com/stasinopoulos/commix
 
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
  
- For more see the file 'readme/COPYING' for copying permission.
+For more see the file 'readme/COPYING' for copying permission.
 """
 
 import sys
@@ -24,10 +24,9 @@ from src.thirdparty.colorama import Fore, Back, Style, init
 from src.core.injections.semiblind.techniques.tempfile_based import tfb_injector
 
 """
- The "tempfile-based" injection technique on Semiblind OS Command Injection.
- __Warning:__ This technique is still experimental, is not yet fully functional and may leads to false-positive resutls.
+The "tempfile-based" injection technique on Semiblind OS Command Injection.
+__Warning:__ This technique is still experimental, is not yet fully functional and may leads to false-positive resutls.
 """
-
 
 """
 Hostname enumeration
@@ -45,7 +44,6 @@ def hostname(separator, maxlen, TAG, prefix, suffix, delay, http_request_method,
     output_file.write("    (!) The hostname is " + shell + ".\n")
     output_file.close()
 
-      
 """
 Retrieve system information
 """
@@ -124,8 +122,8 @@ def current_user(separator, maxlen, TAG, prefix, suffix, delay, http_request_met
       # Add infos to logs file.   
       output_file = open(filename, "a")
       output_file.write("    (!) The current user is " + cu_account + "\n")
-      output_file.close()        
-
+      output_file.close()       
+       
 """
 System users enumeration
 """
@@ -212,7 +210,6 @@ def system_users(separator, maxlen, TAG, prefix, suffix, delay, http_request_met
   else:
     print Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to read '" + settings.PASSWD_FILE + "' to enumerate users entries." + Style.RESET_ALL + "\n" 
 
-
 """
 System passwords enumeration
 """
@@ -257,7 +254,6 @@ def system_passwords(separator, maxlen, TAG, prefix, suffix, delay, http_request
   else:
     print Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to read '" + settings.SHADOW_FILE + "' to enumerate users password hashes." + Style.RESET_ALL + "\n"
 
-
 """
 Single os-shell execution
 """
@@ -266,7 +262,6 @@ def single_os_cmd_exec(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_
   cmd =  menu.options.os_cmd
   check_how_long, output = tfb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
   return check_how_long, output
-
 
 """
 Check the defined options
