@@ -52,7 +52,7 @@ then use the "/tmp/" directory for tempfile-based technique.
 """
 def tfb_controller(no_result, url, delay, filename, tmp_path, http_request_method, url_time_response):
   if no_result == True:
-    sys.stdout.write("(*) Trying to create a file, on temporary directory (" + tmp_path + ")...\n")
+    sys.stdout.write("(*) Trying to create a file, in temporary directory (" + tmp_path + ")...\n")
     call_tfb = tfb_handler.exploitation(url, delay, filename, tmp_path, http_request_method, url_time_response)   
     return call_tfb
   else :
@@ -147,7 +147,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
       settings.SRV_ROOT_DIR = settings.SRV_ROOT_DIR + EXTRA_DIR
 
     if not menu.options.verbose:
-      print "(*) Trying to create a file on '" + settings.SRV_ROOT_DIR + "'... "
+      print "(*) Trying to create a file in '" + settings.SRV_ROOT_DIR + "'... "
     else:
       print "(*) Testing the "+ technique + "... "
 
@@ -250,7 +250,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                 elif i == failed_tries and no_result == True :
                   if not menu.options.verbose:
                     print ""
-                  print Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to read and/or write files on '"+ settings.SRV_ROOT_DIR + "'." + Style.RESET_ALL
+                  print Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to read and/or write files in '"+ settings.SRV_ROOT_DIR + "'." + Style.RESET_ALL
                   while True:
                     tmp_upload = raw_input("(?) Do you want to try the temporary directory (" + tmp_path + ") [Y/n/q] > ").lower()
                     if tmp_upload in settings.CHOISE_YES:
@@ -319,7 +319,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
 
         except urllib2.URLError, e:
           # print "\n" + Back.RED + "(x) Error: " + str(e.reason) + Style.RESET_ALL
-          print Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to read and/or write files on '"+ settings.SRV_ROOT_DIR + "'." + Style.RESET_ALL
+          print Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to read and/or write files in '"+ settings.SRV_ROOT_DIR + "'." + Style.RESET_ALL
           # Provide custom server's root directory.
           custom_srv_root_dir()
           continue
