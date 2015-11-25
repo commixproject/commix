@@ -105,18 +105,18 @@ def current_user(separator, TAG, prefix, suffix, whitespace, http_request_method
       if shell:
         shell = "".join(str(p) for p in shell)
         if shell != "0":
-            sys.stdout.write(Style.BRIGHT + " and it is " + Style.UNDERLINE + "not" + Style.RESET_ALL + Style.BRIGHT + " privilleged" + Style.RESET_ALL + ".\n")
+            sys.stdout.write(Style.BRIGHT + " and it is " + Style.UNDERLINE + "not" + Style.RESET_ALL + Style.BRIGHT + " privileged" + Style.RESET_ALL + ".\n")
             sys.stdout.flush()
             # Add infos to logs file.   
             output_file = open(filename, "a")
-            output_file.write(" and it is not privilleged.\n")
+            output_file.write(" and it is not privileged.\n")
             output_file.close()
         else:
-          sys.stdout.write(Style.BRIGHT + " and it is " + Style.UNDERLINE + "" + Style.RESET_ALL + Style.BRIGHT + " privilleged" + Style.RESET_ALL + ".\n")
+          sys.stdout.write(Style.BRIGHT + " and it is " + Style.UNDERLINE + "" + Style.RESET_ALL + Style.BRIGHT + " privileged" + Style.RESET_ALL + ".\n")
           sys.stdout.flush()
           # Add infos to logs file.   
           output_file = open(filename, "a")
-          output_file.write(" and it is privilleged.\n")
+          output_file.write(" and it is privileged.\n")
           output_file.close()
     else:
       if menu.options.verbose:
@@ -180,31 +180,31 @@ def system_users(separator, TAG, prefix, suffix, whitespace, http_request_method
               raise ValueError()
             if menu.options.privileges:
               if int(fields[1]) == 0:
-                is_privilleged = Style.RESET_ALL + " is" +  Style.BRIGHT + " root user "
-                is_privilleged_nh = " is root user "
+                is_privileged = Style.RESET_ALL + " is" +  Style.BRIGHT + " root user "
+                is_privileged_nh = " is root user "
               elif int(fields[1]) > 0 and int(fields[1]) < 99 :
-                is_privilleged = Style.RESET_ALL + " is" +  Style.BRIGHT + " system user "
-                is_privilleged_nh = " is system user "
+                is_privileged = Style.RESET_ALL + " is" +  Style.BRIGHT + " system user "
+                is_privileged_nh = " is system user "
               elif int(fields[1]) >= 99 and int(fields[1]) < 65534 :
                 if int(fields[1]) == 99 or int(fields[1]) == 60001 or int(fields[1]) == 65534:
-                  is_privilleged = Style.RESET_ALL + " is" +  Style.BRIGHT + " anonymous user "
-                  is_privilleged_nh = " is anonymous user "
+                  is_privileged = Style.RESET_ALL + " is" +  Style.BRIGHT + " anonymous user "
+                  is_privileged_nh = " is anonymous user "
                 elif int(fields[1]) == 60002:
-                  is_privilleged = Style.RESET_ALL + " is" +  Style.BRIGHT + " non-trusted user "
-                  is_privilleged_nh = " is non-trusted user "   
+                  is_privileged = Style.RESET_ALL + " is" +  Style.BRIGHT + " non-trusted user "
+                  is_privileged_nh = " is non-trusted user "   
                 else:
-                  is_privilleged = Style.RESET_ALL + " is" +  Style.BRIGHT + " regular user "
-                  is_privilleged_nh = " is regular user "
+                  is_privileged = Style.RESET_ALL + " is" +  Style.BRIGHT + " regular user "
+                  is_privileged_nh = " is regular user "
               else :
-                is_privilleged = ""
-                is_privilleged_nh = ""
+                is_privileged = ""
+                is_privileged_nh = ""
             else :
-              is_privilleged = ""
-              is_privilleged_nh = ""
-            print "  ("+str(count)+") '" + Style.BRIGHT + Style.UNDERLINE + fields[0]+ Style.RESET_ALL + "'" + Style.BRIGHT + is_privilleged + Style.RESET_ALL + "(uid=" + fields[1] + "). Home directory is in '" + Style.BRIGHT + fields[2]+ Style.RESET_ALL + "'." 
+              is_privileged = ""
+              is_privileged_nh = ""
+            print "  ("+str(count)+") '" + Style.BRIGHT + Style.UNDERLINE + fields[0]+ Style.RESET_ALL + "'" + Style.BRIGHT + is_privileged + Style.RESET_ALL + "(uid=" + fields[1] + "). Home directory is in '" + Style.BRIGHT + fields[2]+ Style.RESET_ALL + "'." 
             # Add infos to logs file.   
             output_file = open(filename, "a")
-            output_file.write("      ("+str(count)+") '" + fields[0]+ "'" + is_privilleged_nh + "(uid=" + fields[1] + "). Home directory is in '" + fields[2] + "'.\n" )
+            output_file.write("      ("+str(count)+") '" + fields[0]+ "'" + is_privileged_nh + "(uid=" + fields[1] + "). Home directory is in '" + fields[2] + "'.\n" )
             output_file.close()
           except ValueError:
             if count == 1 :
