@@ -1,4 +1,5 @@
 ## Version 0.2b [2015]
+* Added: The "reverse_tcp" shell option.
 * Added: The ability to check for default root directories (Apache/Nginx).
 * Added: Support for removal of (txt) shell files (File-based/Tempfile-based).
 * Added: Support for JSON POST data.
