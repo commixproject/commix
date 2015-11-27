@@ -356,6 +356,7 @@ The available options.
 """
 def shell_options():
       print """
+  ---[ """+ Style.BRIGHT + Fore.BLUE + """Available options""" + Style.RESET_ALL +""" ]---     
   Type '""" + Style.BRIGHT + """?""" + Style.RESET_ALL + """' to get all the available options.
   Type '""" + Style.BRIGHT + """back""" + Style.RESET_ALL + """' to go back to the injection process.
   Type '""" + Style.BRIGHT + """quit""" + Style.RESET_ALL + """' (or use <Ctrl-C>) to quit commix.
