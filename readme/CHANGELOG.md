@@ -1,9 +1,10 @@
 ## Version 0.2b [2015]
+* Added: Support for PHP/Python meterpreter on "reverse_tcp" shell option.
 * Added: The "reverse_tcp" shell option.
 * Added: The ability to check for default root directories (Apache/Nginx).
 * Added: Support for removal of (txt) shell files (File-based/Tempfile-based).
 * Added: Support for JSON POST data.
-* Added: The 'enumeration' and 'file-read' results to log file.
+* Added: The "enumeration" and "file-read" results to log file.
 * Added: The ability to get the user's approval before re-{enumerate/file-read} target.
 * Added: The ability to stop current injection technique and proceed on the next one(s).
 
@@ -17,12 +18,12 @@
 * Added: A "new-line" separator support, on "time-based" blind & "tempfile-based" semiblind techniques.
 * Added: Support for referer-based command injections.
 * Added: Support for user-agent-based command injections.
-* Added: CVE-2014-6278 support on 'shellshock' module.
+* Added: CVE-2014-6278 support on "shellshock" module.
 * Added: Support for cookie-based command injections.
 * Added: A generic false-positive prevention technique.
 * Removed: The "Base64" detection option.
 * Added: Support for the Tor network.
-* Added: The 'shellshock' (CVE-2014-6271) injection technique (module).
+* Added: The "shellshock" (CVE-2014-6271) injection technique (module).
 * Added: Termcolor support for Windows (colorama).
 * Added: File access options.
 * Added: Enumeration options.
