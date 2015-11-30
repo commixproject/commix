@@ -455,10 +455,13 @@ def referer_injection_test(url, vuln_parameter, payload):
 """
 The main command injection exploitation.
 """
-def injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, filename):
+def injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename):
   
   # Execute shell commands on vulnerable host.
-  payload = eb_payloads.cmd_execution(separator, TAG, cmd)
+  if alter_shell:
+    payload = eb_payloads.cmd_execution_alter_shell(separator, TAG, cmd)
+  else:
+    payload = eb_payloads.cmd_execution(separator, TAG, cmd)
 
   # Fix prefixes / suffixes
   payload = parameters.prefixes(payload, prefix)
