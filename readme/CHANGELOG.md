@@ -1,6 +1,5 @@
 ## Version 0.2b [2015]
-* Added: Support for alternative (python) os-shell in dynamic code evaluation (aka eval-based) technique.
-* Added: Support for PHP/Python meterpreter on "reverse_tcp" shell option
+* Added: Support for alternative (Python) os-shell in dynamic code evaluation (aka eval-based) technique.
 * Added: Support for PHP/Python meterpreter on "reverse_tcp" shell option.
 * Added: The "reverse_tcp" shell option.
 * Added: The ability to check for default root directories (Apache/Nginx).
