@@ -14,7 +14,9 @@ the Free Software Foundation, either version 3 of the License, or
 For more see the file 'readme/COPYING' for copying permission.
 """
 
+import sys
 import time
+import socket
 import urllib2
 
 from src.utils import menu
@@ -27,7 +29,6 @@ from src.thirdparty.colorama import Fore, Back, Style, init
 Estimating the response time (in seconds)
 """
 def estimate_response_time(url, http_request_method, delay):
-  
   request = urllib2.Request(url)
   headers.do_check(request)
   start = time.time()
@@ -37,6 +38,9 @@ def estimate_response_time(url, http_request_method, delay):
     response.close()
   except urllib2.HTTPError, e:
     pass
+  except socket.timeout:
+    print Back.RED + "(x) Error: The connection to taget has timed out." + Style.RESET_ALL + "\n"
+    sys.exit(0)     
   end = time.time()
   diff = end - start
   if int(diff) < 1:
