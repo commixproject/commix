@@ -26,7 +26,7 @@ from src.core.requests import headers
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 """
-Estimating the response time (in seconds)
+Estimating the response time (in seconds).
 """
 def estimate_response_time(url, http_request_method, delay):
   request = urllib2.Request(url)
@@ -39,7 +39,7 @@ def estimate_response_time(url, http_request_method, delay):
   except urllib2.HTTPError, e:
     pass
   except socket.timeout:
-    print Back.RED + "(x) Error: The connection to taget has timed out." + Style.RESET_ALL + "\n"
+    print Back.RED + "(x) Error: The connection to target URL has timed out." + Style.RESET_ALL + "\n"
     sys.exit(0)     
   end = time.time()
   diff = end - start
@@ -47,7 +47,15 @@ def estimate_response_time(url, http_request_method, delay):
     url_time_response = int(diff)
   else:
     url_time_response = int(round(diff))
-    print Fore.YELLOW + "(^) Warning: The estimated response time is " + str(url_time_response) + " second" + "s"[url_time_response == 1:] + " and that may cause delays." + Style.RESET_ALL
+    info_msg = "(^) Warning: The estimated response time is " + str(url_time_response)
+    info_msg += " second" + "s"[url_time_response == 1:] + ". That may cause" 
+    if url_time_response >= 3:
+      info_msg += " serious"
+    info_msg += " delays during the data extraction procedure" 
+    if url_time_response >= 3:
+      info_msg += " and/or possible corruptions over the extracted data"
+    info_msg += "."
+    print Fore.YELLOW + info_msg + Style.RESET_ALL
   delay = int(delay) + int(url_time_response)
 
   return delay, url_time_response
