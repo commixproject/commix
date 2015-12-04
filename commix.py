@@ -332,9 +332,14 @@ def main():
 
   # Connection reset by peer
   except SocketError, e:
+    if menu.options.verbose:
+      print ""
     print Back.RED + "(x) Critical: The target host is not responding." + \
-          " Please ensure that is up and try again." + Style.RESET_ALL + "\n"
-    sys.exit(0) 
+          " Please ensure that is up and try again." + Style.RESET_ALL 
+    if settings.SHOW_LOGS_MSG == True:
+      logs.logs_notification(filename)
+    print ""
+    sys.exit(0)
 
 if __name__ == '__main__':
     main()
