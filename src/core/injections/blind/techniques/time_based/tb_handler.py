@@ -382,7 +382,26 @@ The exploitation function.
 (call the injection handler)
 """
 def exploitation(url, delay, filename, http_request_method, url_time_response):
-  if tb_injection_handler(url, delay, filename, http_request_method, url_time_response) == False:
-    return False
-    
+  if url_time_response >= settings.SLOW_TARGET_RESPONSE:
+    print Fore.YELLOW + "(^) Warning: It is highly recommended, due to serious response delays, to skip the time-based (blind) technique and to continue with the file-based (semiblind) technique." + Style.RESET_ALL 
+    while True:
+      proceed_option = raw_input("(?) How do you want to proceed? [(C)ontinue/(s)kip/(q)uit] > ").lower()
+      if proceed_option.lower() in settings.CHOISE_PROCEED :
+        if proceed_option.lower() == "s":
+          from src.core.injections.semiblind.techniques.file_based import fb_handler
+          fb_handler.exploitation(url, delay, filename, http_request_method, url_time_response)
+        elif proceed_option.lower() == "c":
+          if tb_injection_handler(url, delay, filename, http_request_method, url_time_response) == False:
+            return False
+        elif proceed_option.lower() == "q":
+          raise SystemExit()
+      else:
+        if proceed_option == "":
+          proceed_option = "enter"
+        print Back.RED + "(x) Error: '" + proceed_option + "' is not a valid answer." + Style.RESET_ALL
+        pass
+  else:
+    if tb_injection_handler(url, delay, filename, http_request_method, url_time_response) == False:
+      return False
+#eof
 #eof

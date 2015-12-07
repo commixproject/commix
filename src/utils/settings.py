@@ -59,6 +59,9 @@ OUTPUT_FILE = OUTPUT_FILE_NAME + OUTPUT_FILE_EXT
 # Max Length
 MAXLEN = "10000"
 
+# Slow target response
+SLOW_TARGET_RESPONSE = 3
+
 # The command injection prefixes.
 PREFIXES = ["", "'", "\"", "|", "&", "%27", "%22", "%7C", "%26"] 
 
@@ -136,14 +139,17 @@ SYS_USERS = "awk -F ':' '{print $1}{print $3}{print $6}' " + PASSWD_FILE
 SHADOW_FILE = "/etc/shadow"
 SYS_PASSES = FILE_READ + SHADOW_FILE 
 
-# Accepts YES,YE,Y,yes,ye,y
+# Accepts 'YES','YE','Y','yes','ye','y'
 CHOISE_YES = ['yes','ye','y']
 
-# Accepts NO,N,no,n
+# Accepts 'NO','N','no','n'
 CHOISE_NO = ['no','n']
 
-# Accepts QUIT,Q,quit,q
+# Accepts 'QUIT','Q','quit','q'
 CHOISE_QUIT = ['q','quit']
+
+# Accepts 'C','c','S','s','Q','q'
+CHOISE_PROCEED = ['c','s','q']
 
 # Available alternative shells
 AVAILABLE_SHELLS = ["python"]
