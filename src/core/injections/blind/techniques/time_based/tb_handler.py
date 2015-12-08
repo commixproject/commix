@@ -161,18 +161,20 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                   # Check for false positive resutls
                   how_long, output = tb_injector.false_positive_check(separator, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, randvcalc, alter_shell, how_long)
                   
-                if str(tmp_how_long) == str(how_long) and \
-                   str(output) == str(randvcalc) and \
-                   len(TAG) == output_length:
+                  if str(tmp_how_long) == str(how_long) and \
+                     str(output) == str(randvcalc) and \
+                     len(TAG) == output_length:
 
-                  is_vulnerable = True
-                  if not menu.options.verbose:
-                    percent = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
+                    is_vulnerable = True
+                    if not menu.options.verbose:
+                      percent = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
+                    else:
+                      percent = ""
                   else:
-                    percent = ""
+                    break
+                # False positive
                 else:
-                  break
-                  
+                  continue
               else:
                 percent = str(float_percent)+"%"
                 

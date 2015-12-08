@@ -164,21 +164,24 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
                   randv2 = random.randrange(1, 2)
                   randvcalc = randv1 + randv2
                   cmd = "echo $((" + str(randv1) + "+" + str(randv2) + "))"
+                  
                   # Check for false positive resutls
                   how_long, output = tfb_injector.false_positive_check(separator, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, randvcalc, alter_shell, how_long)
                 
-                if str(tmp_how_long) == str(how_long) and \
-                   str(output) == str(randvcalc) and \
-                   len(TAG) == output_length:
-                   
-                  is_vulnerable = True
-                  if not menu.options.verbose:
-                    percent = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
+                  if str(tmp_how_long) == str(how_long) and \
+                     str(output) == str(randvcalc) and \
+                     len(TAG) == output_length:
+                     
+                    is_vulnerable = True
+                    if not menu.options.verbose:
+                      percent = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
+                    else:
+                      percent = ""
                   else:
-                    percent = ""
+                    break
+                # False positive
                 else:
-                  break
-                    
+                  continue     
               else:
                 percent = str(float_percent)+"%"
                 
