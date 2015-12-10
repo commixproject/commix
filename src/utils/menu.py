@@ -363,5 +363,14 @@ def shell_options():
   Type '""" + Style.BRIGHT + """os_shell""" + Style.RESET_ALL + """' to get into an operating system command shell.
   Type '""" + Style.BRIGHT + """reverse_tcp""" + Style.RESET_ALL + """' to get a reverse TCP connection.
       """
-
+      
+"""
+The tab compliter.
+"""
+def tab_completer(text, state):
+    shell_options = [option for option in settings.SHELL_OPTIONS if option.startswith(text)]
+    try:
+        return shell_options[state]
+    except IndexError:
+        return None
 #eof

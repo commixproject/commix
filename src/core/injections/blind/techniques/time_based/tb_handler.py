@@ -22,6 +22,7 @@ import random
 import base64
 import urllib
 import urllib2
+import readline
 
 from src.utils import menu
 from src.utils import logs
@@ -297,6 +298,9 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                   print "Pseudo-Terminal (type '" + Style.BRIGHT + "?" + Style.RESET_ALL + "' for available options)"
                   while True:
                     try:
+                      # Tab compliter
+                      readline.set_completer(menu.tab_completer)
+                      readline.parse_and_bind("tab: complete")
                       cmd = raw_input("""commix(""" + Style.BRIGHT + Fore.RED + """os_shell""" + Style.RESET_ALL + """) > """)
                       cmd = checks.escaped_cmd(cmd)
                       if cmd.lower() in settings.SHELL_OPTIONS:

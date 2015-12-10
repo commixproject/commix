@@ -23,7 +23,8 @@ import random
 import base64
 import urllib
 import urllib2
-  
+import readline
+
 from src.utils import menu
 from src.utils import logs
 from src.utils import settings
@@ -340,6 +341,9 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
                     print "Pseudo-Terminal (type '" + Style.BRIGHT + "?" + Style.RESET_ALL + "' for available options)"
                     while True:
                       try:
+                        # Tab compliter
+                        readline.set_completer(menu.tab_completer)
+                        readline.parse_and_bind("tab: complete")
                         cmd = raw_input("""commix(""" + Style.BRIGHT + Fore.RED + """os_shell""" + Style.RESET_ALL + """) > """)
                         cmd = checks.escaped_cmd(cmd)
                         if cmd.lower() in settings.SHELL_OPTIONS:

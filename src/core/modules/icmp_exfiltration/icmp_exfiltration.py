@@ -21,6 +21,7 @@ import signal
 import socket
 import urllib
 import urllib2
+import readline
 import threading
 
 from src.utils import menu
@@ -99,6 +100,9 @@ def input_cmd(http_request_method, url, vuln_parameter, ip_src, technique):
       print "\nPseudo-Terminal (type '" + Style.BRIGHT + "?" + Style.RESET_ALL + "' for available options)"
       while True:
         try:
+          # Tab compliter
+          readline.set_completer(menu.tab_completer)
+          readline.parse_and_bind("tab: complete")
           cmd = raw_input("""commix(""" + Style.BRIGHT + Fore.RED + """os_shell""" + Style.RESET_ALL + """) > """)
           cmd = checks.escaped_cmd(cmd)
           if cmd.lower() in settings.SHELL_OPTIONS:

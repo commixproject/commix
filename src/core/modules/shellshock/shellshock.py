@@ -4,6 +4,7 @@ import re
 import os
 import sys
 import urllib2
+import readline
 
 from src.utils import menu
 from src.utils import logs
@@ -535,6 +536,9 @@ def shellshock_handler(url, http_request_method, filename):
                 print "Pseudo-Terminal (type '" + Style.BRIGHT + "?" + Style.RESET_ALL + "' for available options)"
                 while True:
                   try:
+                    # Tab compliter
+                    readline.set_completer(menu.tab_completer)
+                    readline.parse_and_bind("tab: complete")
                     cmd = raw_input("""commix(""" + Style.BRIGHT + Fore.RED + """os_shell""" + Style.RESET_ALL + """) > """)
                     cmd = checks.escaped_cmd(cmd)
                     if cmd.lower() in settings.SHELL_OPTIONS:
