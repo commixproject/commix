@@ -178,7 +178,12 @@ def main():
     # Check if defined "--random-agent" option.
     if menu.options.random_agent:
       menu.options.agent = random.choice(settings.USER_AGENT_LIST)
-            
+    
+    # Check if defined "--proxy" option.
+    if menu.options.proxy:
+      proxyurl = menu.options.proxy
+      proxy.do_check(proxyurl)
+
     # Check if defined "--url" option.
     if menu.options.url:
 
@@ -204,7 +209,13 @@ def main():
       filename = logs.create_log_file(url, output_dir)
 
       try:
-        request = urllib2.Request(url)
+        if menu.options.proxy:
+            proxyhandler = urllib2.ProxyHandler({'http': menu.options.proxy, 'https': menu.options.proxy})
+            opener = urllib2.build_opener(proxyhandler)
+            urllib2.install_opener(opener)
+            request = urllib2.Request(url)
+        else:
+            request = urllib2.Request(url)
         # Check if defined extra headers.
         headers.do_check(request)
         response = urllib2.urlopen(request)
@@ -296,10 +307,6 @@ def main():
     else:
       print Back.RED + "(x) Error: You must specify the target URL." + Style.RESET_ALL
       sys.exit(0)
-
-    # Check if defined "--proxy" option.
-    if menu.options.proxy:
-      proxy.do_check(url)
 
     # Launch injection and exploitation controller.
     controller.do_check(url, filename)
