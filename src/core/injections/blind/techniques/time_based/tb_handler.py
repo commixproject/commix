@@ -390,7 +390,10 @@ The exploitation function.
 def exploitation(url, delay, filename, http_request_method, url_time_response):
   if url_time_response >= settings.SLOW_TARGET_RESPONSE:
     print Fore.YELLOW + "(^) Warning: It is highly recommended, due to serious response delays, to skip the time-based (blind) technique and to continue with the file-based (semiblind) technique." + Style.RESET_ALL 
+    go_back = False
     while True:
+      if go_back == True:
+        return False
       proceed_option = raw_input("(?) How do you want to proceed? [(C)ontinue/(s)kip/(q)uit] > ").lower()
       if proceed_option.lower() in settings.CHOISE_PROCEED :
         if proceed_option.lower() == "s":
