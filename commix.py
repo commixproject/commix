@@ -201,20 +201,25 @@ def main():
       filename = logs.create_log_file(url, output_dir)
       try:
         request = urllib2.Request(url)
-        # Check if defined any HTTP Proxy.
+        # Check if defined any HTTP Proxy (--proxy option).
         if menu.options.proxy:
           proxy.do_check(url)
-          response = proxy.use_proxy(request)
-        # Check if defined Tor.
+        # Check if defined Tor (--tor option).
         elif menu.options.tor:
           tor.do_check()
-          response = tor.use_tor(request)
-        else:
-          response = urllib2.urlopen(request)
-
         sys.stdout.write("(*) Checking connection to the target URL... ")
         sys.stdout.flush()
-
+        try:
+          # Check if defined any HTTP Proxy (--proxy option).
+          if menu.options.proxy:
+            response = urllib2.urlopen(request)
+          # Check if defined Tor (--tor option).  
+          elif menu.options.tor:
+            response = proxy.use_proxy(request)
+          else:
+            response = urllib2.urlopen(request)
+        except:
+          raise
         html_data = response.read()
         content = response.read()
         print "[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]"
