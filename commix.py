@@ -178,14 +178,11 @@ def main():
     # Check if defined "--random-agent" option.
     if menu.options.random_agent:
       menu.options.agent = random.choice(settings.USER_AGENT_LIST)
-            
+
     # Check if defined "--url" option.
     if menu.options.url:
-
-      sys.stdout.write("(*) Checking connection to the target URL... ")
-      sys.stdout.flush()
       url = menu.options.url
-      
+
       # If URL not starts with any URI scheme, add "http://"
       if not urlparse.urlparse(url).scheme:
         url = "http://" + url
@@ -202,14 +199,23 @@ def main():
 
       # The logs filename construction.
       filename = logs.create_log_file(url, output_dir)
-
       try:
         request = urllib2.Request(url)
-        # Check if defined extra headers.
-        headers.do_check(request)
-        response = urllib2.urlopen(request)
-        html_data = response.read()
+        # Check if defined any HTTP Proxy.
+        if menu.options.proxy:
+          proxy.do_check(url)
+          response = proxy.use_proxy(request)
+        # Check if defined Tor.
+        elif menu.options.tor:
+          tor.do_check()
+          response = tor.use_tor(request)
+        else:
+          response = urllib2.urlopen(request)
 
+        sys.stdout.write("(*) Checking connection to the target URL... ")
+        sys.stdout.flush()
+
+        html_data = response.read()
         content = response.read()
         print "[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]"
 
@@ -250,10 +256,6 @@ def main():
           else:
             if menu.options.verbose:
               print Style.BRIGHT + "(!) The indicated web-page charset appears to be "  + Style.UNDERLINE  + settings.CHARSET + Style.RESET_ALL + "." + Style.RESET_ALL
-
-        # Check if defined "--tor" option.
-        if menu.options.tor:
-          tor.do_check()
 
       except urllib2.HTTPError, e:
         print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
@@ -296,10 +298,6 @@ def main():
     else:
       print Back.RED + "(x) Error: You must specify the target URL." + Style.RESET_ALL
       sys.exit(0)
-
-    # Check if defined "--proxy" option.
-    if menu.options.proxy:
-      proxy.do_check(url)
 
     # Launch injection and exploitation controller.
     controller.do_check(url, filename)

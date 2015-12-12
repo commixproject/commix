@@ -46,7 +46,7 @@ def do_check(url):
     sys.stdout.write("[" + Fore.GREEN + "  SUCCEED " + Style.RESET_ALL + " ]\n")
     sys.stdout.flush()
   else:
-    print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + " ]\n"
+    print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
     print Back.RED + "(x) Error: Could not connect to proxy." + Style.RESET_ALL
     sys.exit(0)
     
