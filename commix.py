@@ -212,10 +212,10 @@ def main():
         try:
           # Check if defined any HTTP Proxy (--proxy option).
           if menu.options.proxy:
-            response = urllib2.urlopen(request)
+            response = proxy.use_proxy(request)
           # Check if defined Tor (--tor option).  
           elif menu.options.tor:
-            response = proxy.use_proxy(request)
+            response = tor.use_tor(request)
           else:
             response = urllib2.urlopen(request)
         except:
