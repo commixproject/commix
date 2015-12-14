@@ -159,43 +159,38 @@ def injection_test(payload, http_request_method, url):
 Detection for classic 'warning' messages.
 """
 def warning_detection(url, http_request_method):
+  try:
+    # Find the host part
+    url_part = url.split("=")[0]
+    request = urllib2.Request(url_part)
+    # Check if defined extra headers.
+    headers.do_check(request)
+    response = urllib2.urlopen(request)
+    html_data = response.read()
+    error_msg = ""
+    if "eval()'d code" in html_data:
+      error_msg = "'eval()'"
+    if "Cannot execute a blank command in" in html_data:
+      error_msg = "execution of a blank command,"
+    if "sh: command substitution:" in html_data:
+      error_msg = "command substitution"
+    if "Warning: usort()" in html_data:
+      error_msg = "'usort()'"
+    if re.findall(r"=/(.*)/&", url):
+      if "Warning: preg_replace():" in html_data:
+        error_msg = "'preg_replace()'"
+      url = url.replace("/&","/e&")
+    if "Warning: assert():" in html_data:
+      error_msg = "'assert()'"
+    if "Failure evaluating code:" in html_data:
+      error_msg = "code evaluation"
+    if error_msg != "":
+      print Fore.YELLOW + "(^) Warning: A failure message on " + error_msg + " was detected on page's response." + Style.RESET_ALL
+    return url
 
-  # Find the host part
-  url_part = url.split("=")[0]
-  request = urllib2.Request(url_part)
-  # Check if defined extra headers.
-  headers.do_check(request)
-  response = urllib2.urlopen(request)
-  html_data = response.read()
-
-  error_msg = ""
-  if "eval()'d code" in html_data:
-    error_msg = "'eval()'"
-
-  if "Cannot execute a blank command in" in html_data:
-    error_msg = "execution of a blank command,"
-
-  if "sh: command substitution:" in html_data:
-    error_msg = "command substitution"
-
-  if "Warning: usort()" in html_data:
-    error_msg = "'usort()'"
-
-  if re.findall(r"=/(.*)/&", url):
-    if "Warning: preg_replace():" in html_data:
-      error_msg = "'preg_replace()'"
-    url = url.replace("/&","/e&")
-
-  if "Warning: assert():" in html_data:
-    error_msg = "'assert()'"
-
-  if "Failure evaluating code:" in html_data:
-    error_msg = "code evaluation"
-  
-  if error_msg != "":
-    print Fore.YELLOW + "(^) Warning: A failure message on " + error_msg + " was detected on page's response." + Style.RESET_ALL
-
-  return url
+  except urllib2.HTTPError, err:
+    print Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
+    raise SystemExit()
 
 """
 Evaluate test results.
