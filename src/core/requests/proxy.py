@@ -35,7 +35,7 @@ def do_check(url):
     if menu.options.data:
       request = urllib2.Request(url, menu.options.data)
     else:
-       request = urllib2.Request(url)
+      request = urllib2.Request(url)
     # Check if defined extra headers.
     headers.do_check(request)
     request.set_proxy(menu.options.proxy,settings.PROXY_PROTOCOL)

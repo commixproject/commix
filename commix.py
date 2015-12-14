@@ -201,10 +201,10 @@ def main():
       filename = logs.create_log_file(url, output_dir)
       try:
         # Check if defined POST data
-        if menu.options.data:
+         if menu.options.data:
           request = urllib2.Request(url, menu.options.data)
-        else:
-           request = urllib2.Request(url)
+         else:
+          request = urllib2.Request(url)
         # Check if defined any HTTP Proxy (--proxy option).
         if menu.options.proxy:
           proxy.do_check(url)
