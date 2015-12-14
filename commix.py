@@ -200,10 +200,10 @@ def main():
       # The logs filename construction.
       filename = logs.create_log_file(url, output_dir)
       try:
-        request = urllib2.Request(url)
+        request = urllib2.Request(url, menu.options.data)
         # Check if defined any HTTP Proxy (--proxy option).
         if menu.options.proxy:
-          proxy.do_check(url)
+          proxy.do_check(url, menu.options.data)
         # Check if defined Tor (--tor option).
         elif menu.options.tor:
           tor.do_check()
