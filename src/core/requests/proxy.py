@@ -31,7 +31,11 @@ def do_check(url):
   sys.stdout.write("(*) Testing proxy " + menu.options.proxy + "... ")
   sys.stdout.flush()
   try:
-    request = urllib2.Request(url)
+    # Check if defined POST data
+    if menu.options.data:
+      request = urllib2.Request(url, menu.options.data)
+    else:
+       request = urllib2.Request(url)
     # Check if defined extra headers.
     headers.do_check(request)
     request.set_proxy(menu.options.proxy,settings.PROXY_PROTOCOL)
