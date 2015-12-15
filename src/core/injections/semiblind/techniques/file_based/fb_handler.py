@@ -449,7 +449,10 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                   if cmd.lower() in settings.SHELL_OPTIONS:
                     os_shell_option = checks.check_os_shell_options(cmd.lower(), technique, go_back, no_result) 
                     if os_shell_option == False:
-                      return False
+                      if no_result == True:
+                        return False
+                      else:
+                        return True
                     elif os_shell_option == "quit": 
                       # Delete previous shell (text) files (output)
                       delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)         
