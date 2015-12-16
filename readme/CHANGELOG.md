@@ -17,8 +17,8 @@
 * Added: New option "--base64", that encodes the OS command to Base64 format. 
 * Added: Support for regular preg_replace() injections via "/e" modifier.
 * Added: Support for HTML Charset and HTTP "Server" response-header reconnaissance (on verbose mode).
-* Replaced: Payloads on "tempfile-based" semiblind technique, have been replaced by new (more solid) ones.
-* Added: A "new-line" separator support, on "time-based" blind & "tempfile-based" semiblind techniques.
+* Replaced: Payloads on "tempfile-based" (semiblind) technique, have been replaced by new (more solid) ones.
+* Added: A "new-line" separator support, on "time-based" (blind) & "tempfile-based" (semiblind) techniques.
 * Added: Support for referer-based command injections.
 * Added: Support for user-agent-based command injections.
 * Added: CVE-2014-6278 support on "shellshock" module.
@@ -32,9 +32,9 @@
 * Added: Enumeration options.
 * Added: An alternative option for os-shell (Python).
 * Added: The "ICMP Exfiltration" injection technique (module). 
-* Added: The "tempfile-based" semiblind technique.
-* Added: The "file-based" semiblind technique.
-* Removed: The "boolean-based" blind technique.
+* Added: The "tempfile-based" (semiblind) technique.
+* Added: The "file-based" (semiblind) technique.
+* Removed: The "boolean-based" (blind) technique.
 * Added: More Options.
 
 ## Version 0.1a [2014]
