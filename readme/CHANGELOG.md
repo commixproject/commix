@@ -1,3 +1,6 @@
+## Version 0.3b [2015]
+* Added: Support for Windows-based (cmd / powershell) payloads for every injection technique.
+
 ## Version 0.2b [2015]
 * Added: Support for recalling previous commands.
 * Added: Support for a tab completion in shell options.

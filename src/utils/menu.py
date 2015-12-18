@@ -36,7 +36,7 @@ def banner():
 
 +--
 """ + Style.BRIGHT + settings.DESCRIPTION + Style.RESET_ALL + """
-Copyright (c) """ + settings.YEAR + """ """ + settings.AUTHOR + """ (""" + settings.TWITTER + Style.RESET_ALL +""")
+Copyright (c) """ + settings.YEAR + """ """ + settings.AUTHOR + """ (""" + settings.TWITTER + Style.RESET_ALL + """)
 +--
 """
 
@@ -198,6 +198,12 @@ enumeration.add_option("--is-root",
                 default = False,
                 help="Check if the current user have root privileges.")
 
+enumeration.add_option("--is-admin", 
+                action="store_true",
+                dest="is_admin",
+                default = False,
+                help="Check if the current user have admin privileges.")
+
 enumeration.add_option("--sys-info", 
                 action="store_true",
                 dest="sys_info",
@@ -269,7 +275,7 @@ injection = OptionGroup(parser, Style.BRIGHT + "Injection" + Style.RESET_ALL,
 injection.add_option("--data", 
                 action="store",
                 dest="data",
-                help="POST data to inject (use '"+settings.INJECT_TAG+"' tag to specify the testable parameter).")
+                help="POST data to inject (use '" +settings.INJECT_TAG+ "' tag to specify the testable parameter).")
 
 injection.add_option("--suffix", 
                 action="store",
@@ -290,12 +296,12 @@ injection.add_option("--maxlen",
                 action="store",
                 dest="maxlen",
                 default=settings.MAXLEN,
-                help="The length of the output on time-based technique (Default: "+str(settings.MAXLEN)+" chars).")
+                help="The length of the output on time-based technique (Default: " +str(settings.MAXLEN)+ " chars).")
 
 injection.add_option("--delay", 
                 action="store",
                 dest="delay",
-                help="Set Time-delay for time-based and file-based techniques (Default: "+str(settings.DELAY)+" sec).")
+                help="Set Time-delay for time-based and file-based techniques (Default: " +str(settings.DELAY)+ " sec).")
 
 injection.add_option("--tmp-path", 
                 action="store",
@@ -356,14 +362,15 @@ The available options.
 """
 def shell_options():
       print """
-  ---[ """+ Style.BRIGHT + Fore.BLUE + """Available options""" + Style.RESET_ALL +""" ]---     
+  ---[ """ + Style.BRIGHT + Fore.BLUE + """Available options""" + Style.RESET_ALL + """ ]---     
   Type '""" + Style.BRIGHT + """?""" + Style.RESET_ALL + """' to get all the available options.
   Type '""" + Style.BRIGHT + """back""" + Style.RESET_ALL + """' to go back to the injection process.
   Type '""" + Style.BRIGHT + """quit""" + Style.RESET_ALL + """' (or use <Ctrl-C>) to quit commix.
   Type '""" + Style.BRIGHT + """os_shell""" + Style.RESET_ALL + """' to get into an operating system command shell.
   Type '""" + Style.BRIGHT + """reverse_tcp""" + Style.RESET_ALL + """' to get a reverse TCP connection.
-      """
-      
+
+  """
+  
 """
 The tab compliter.
 """
@@ -373,4 +380,5 @@ def tab_completer(text, state):
         return shell_options[state]
     except IndexError:
         return None
+
 #eof

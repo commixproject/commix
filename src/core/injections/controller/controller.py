@@ -126,7 +126,7 @@ def do_check(url, filename):
     if cb_handler.exploitation(url, delay, filename, http_request_method) != False:
       classic_state = True
 
-    # Check if it is vulnerable to eval-based command injection technique.
+    # Check if it is vulnerable to eval-based code injection technique.
     if eb_handler.exploitation(url, delay, filename, http_request_method) != False:
       eval_based_state = True
 
@@ -149,9 +149,9 @@ def do_check(url, filename):
     else:
       classic_state = False
 
-    # Check if it is vulnerable to eval-based command injection technique.
+    # Check if it is vulnerable to eval-based code injection technique.
     if "eval-based" in menu.options.tech or len(menu.options.tech) <= 4 and "e" in menu.options.tech:
-      # Check if eval-based command injection technique succeeds.
+      # Check if eval-based code injection technique succeeds.
       if eb_handler.exploitation(url, delay, filename, http_request_method) != False:
         eval_based_state = True
     elif menu.options.tech == "eval-based":
@@ -180,7 +180,7 @@ def do_check(url, filename):
       file_based_state = False
 
   if classic_state == False and eval_based_state == False and time_based_state == False and file_based_state == False :
-    info_msg = "(x) Critical: The tested (" + http_request_method + ")" + check_parameter +" parameter appear to be not injectable."
+    info_msg = "(x) Critical: The tested (" + http_request_method + ")" + check_parameter + " parameter appear to be not injectable."
     if not menu.options.alter_shell :
       info_msg += " Use the option '--alter-shell'"
     else:

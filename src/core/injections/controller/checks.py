@@ -26,7 +26,7 @@ Procced to the next attack vector.
 """
 def next_attack_vector(technique, go_back):
   while True:
-    next_attack_vector = raw_input("(?) Continue with testing the "+ technique +"? [Y/n/q] > ").lower()
+    next_attack_vector = raw_input("(?) Continue with testing the " + technique + "? [Y/n/q] > ").lower()
     if next_attack_vector in settings.CHOISE_YES:
       return True
     elif next_attack_vector in settings.CHOISE_NO:
@@ -84,7 +84,7 @@ Ignore error messages and continue the tests.
 def continue_tests(err):
   try:
     while True:
-      continue_tests = raw_input("(?) Do you want to ignore the error ("+str(err.code)+") message and continue the tests? [Y/n/q] > ").lower()
+      continue_tests = raw_input("(?) Do you want to ignore the error (" +str(err.code)+ ") message and continue the tests? [Y/n/q] > ").lower()
       if continue_tests in settings.CHOISE_YES:
         return True
       elif continue_tests in settings.CHOISE_NO:
@@ -99,4 +99,9 @@ def continue_tests(err):
   except KeyboardInterrupt:
     print "\n" + Back.RED + "(x) Aborted: Ctrl-C was pressed!" + Style.RESET_ALL
     raise SystemExit()
+
+def unavailable_option(check_option):
+
+  print Fore.YELLOW + "(^) Warning: The '" +check_option+ "' option is not yet available for windows targets." + Style.RESET_ALL   
+
 #eof

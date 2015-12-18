@@ -103,9 +103,9 @@ def update_payload(filename, counter, payload):
 
   output_file = open(filename, "a")
   if "\n" in payload:
-    output_file.write("  ("+str(counter)+") Payload : " + re.sub("%20", " ", urllib.unquote_plus(payload.replace("\n", "\\n"))) + "\n")
+    output_file.write("  (" +str(counter)+ ") Payload : " + re.sub("%20", " ", urllib.unquote_plus(payload.replace("\n", "\\n"))) + "\n")
   else:
-    output_file.write("  ("+str(counter)+") Payload : " + re.sub("%20", " ", payload) + "\n")
+    output_file.write("  (" +str(counter)+ ") Payload : " + re.sub("%20", " ", payload) + "\n")
   output_file.close()
 
 """

@@ -39,7 +39,7 @@ from src.core.injections.controller import checks
 from src.core.injections.semiblind.techniques.file_based import fb_payloads
 
 """
-The "file-based" technique on Semiblind OS Command Injection.
+The "file-based" technique on semiblind OS command injection.
 """
 
 """
@@ -558,6 +558,10 @@ def injection_results(url, OUTPUT_TEXTFILE, delay):
     output = urllib2.urlopen(request)
     html_data = output.read()
     shell = re.findall(r"(.*)", html_data)
+    if settings.TARGET_OS == "win":
+      shell = [newline.replace("\r","") for newline in shell]
+      shell = [space.strip() for space in shell]
+      shell = [empty for empty in shell if empty]
   except urllib2.HTTPError, e:
     if e.getcode() == 404:
       shell = ""

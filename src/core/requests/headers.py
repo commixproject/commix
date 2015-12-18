@@ -17,7 +17,6 @@ For more see the file 'readme/COPYING' for copying permission.
 import re
 import base64
 import urllib2
-
 from src.utils import menu
 from src.utils import settings
 from src.thirdparty.colorama import Fore, Back, Style, init
@@ -52,7 +51,7 @@ def do_check(request):
   if menu.options.auth_type == "basic":
     if menu.options.auth_cred:
       b64_string = base64.encodestring(menu.options.auth_cred).replace('\n', '')
-      request.add_header("Authorization", "Basic " + b64_string +"")
+      request.add_header("Authorization", "Basic " + b64_string + "")
   
   # The MIME media type for JSON.
   if settings.IS_JSON:

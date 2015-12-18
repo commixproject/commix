@@ -39,7 +39,7 @@ from src.core.injections.controller import checks
 from src.core.injections.results_based.techniques.classic import cb_payloads
 
 """
-The "classic" technique on Result-based OS Command Injection.
+The "classic" technique on result-based OS command injection.
 """
 
 """
@@ -257,7 +257,6 @@ Check if target host is vulnerable. (User-Agent-based injection)
 def user_agent_injection_test(url, vuln_parameter, payload):
 
   def inject_user_agent(url, vuln_parameter, payload, proxy):
-
     if proxy == None:
       opener = urllib2.build_opener()
     else:
@@ -504,11 +503,15 @@ The command execution results.
 def injection_results(response, TAG):
   # Grab execution results
   html_data = response.read()
-  shell = re.findall(r"" + TAG + TAG + "(.*)" + TAG + TAG + "", html_data)
+  shell = re.findall(r"" + TAG + TAG + "(.*)" + TAG + TAG + "", html_data, re.S)
   if len(shell) > 1:
     shell = shell[0]
+  # Clean junks
   shell = [backslash.replace("\/","/") for backslash in shell]
-  
+  shell = [tags.replace(TAG + TAG,"") for tags in shell]
+  if settings.TARGET_OS == "win" and menu.options.alter_shell: 
+    shell = [newline.replace("\n"," ") for newline in shell]
+    shell = [right_space.rstrip() for right_space in shell]
+    shell = [left_space.lstrip() for left_space in shell]
   return shell
 
-#eof

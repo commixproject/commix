@@ -61,7 +61,7 @@ def do_GET_check(url):
       parameters = parameters.replace(value, inject_value)
 
     # Reconstruct the url
-    url = url_part +"?"+ parameters
+    url = url_part + "?" + parameters
     return url
 
   # Check if multiple paramerters are supplied.
@@ -79,7 +79,7 @@ def do_GET_check(url):
       value = ''.join(value)
       parameter = settings.PARAMETER_DELIMITER.join(multi_parameters)
 
-    url = url_part +"?"+ parameter  
+    url = url_part + "?" + parameter  
     return url
 
       ## Multiple paramerters without the "INJECT_HERE" tag.
@@ -99,7 +99,7 @@ def do_GET_check(url):
         #multi_parameters[i-1] = multi_parameters[i-1].replace(inject_value, old)
         #parameter = '&'.join(multi_parameters)
         ## Reconstruct the url
-        #url = url_part +"?"+ parameter
+        #url = url_part + "?" + parameter
         ## Add all urls to url list.
         #urls_list.append(url)
       #return urls_list
@@ -267,15 +267,15 @@ def vuln_POST_param(parameter, url):
     if re.findall(r"" + settings.PARAMETER_DELIMITER + "(.*)=" + settings.INJECT_TAG + "", parameter):
       vuln_parameter = re.findall(r"" + settings.PARAMETER_DELIMITER + "(.*)=" + settings.INJECT_TAG + "", parameter)
       vuln_parameter = ''.join(vuln_parameter)
-      vuln_parameter = re.sub(r"(.*)=(.*)"+ settings.PARAMETER_DELIMITER, "", vuln_parameter)
+      vuln_parameter = re.sub(r"(.*)=(.*)" + settings.PARAMETER_DELIMITER, "", vuln_parameter)
 
     elif re.findall(r"(.*)=" + settings.INJECT_TAG + "", parameter):
       vuln_parameter = re.findall(r"(.*)=" + settings.INJECT_TAG + "", parameter)
       vuln_parameter = ''.join(vuln_parameter)
 
     # If JSON format
-    elif re.findall(r""+settings.PARAMETER_DELIMITER +"\"(.*)\"\:\"" + settings.INJECT_TAG + "\"", parameter):
-      vuln_parameter = re.findall(r""+settings.PARAMETER_DELIMITER +"\"(.*)\"\:\"" + settings.INJECT_TAG + "\"", parameter)
+    elif re.findall(r"" +settings.PARAMETER_DELIMITER + "\"(.*)\"\:\"" + settings.INJECT_TAG + "\"", parameter):
+      vuln_parameter = re.findall(r"" +settings.PARAMETER_DELIMITER + "\"(.*)\"\:\"" + settings.INJECT_TAG + "\"", parameter)
       vuln_parameter = ''.join(vuln_parameter)
 
     elif re.findall(r"\"(.*)\"\:\"" + settings.INJECT_TAG + "\"", parameter):
@@ -322,7 +322,7 @@ def specify_cookie_parameter(cookie):
   if re.findall(r"" + settings.COOKIE_DELIMITER + "(.*)=" + settings.INJECT_TAG + "", cookie):
     inject_cookie = re.findall(r"" + settings.COOKIE_DELIMITER + "(.*)=" + settings.INJECT_TAG + "", cookie)
     inject_cookie = ''.join(inject_cookie)
-    inject_cookie = re.sub(r"(.*)=(.*)"+settings.COOKIE_DELIMITER, "", inject_cookie)
+    inject_cookie = re.sub(r"(.*)=(.*)" +settings.COOKIE_DELIMITER, "", inject_cookie)
 
   elif re.findall(r"(.*)=" + settings.INJECT_TAG + "", cookie):
     inject_cookie = re.findall(r"(.*)=" + settings.INJECT_TAG + "", cookie)

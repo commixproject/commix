@@ -234,7 +234,7 @@ def icmp_exfiltration_handler(url, http_request_method):
   ip_data = menu.options.ip_icmp_data
       
   technique = "icmp exfiltration technique"
-  sys.stdout.write("(*) Testing the "+ technique + "... \n")
+  sys.stdout.write("(*) Testing the " + technique + "... \n")
   sys.stdout.flush()
   
   ip_src =  re.findall(r"ip_src=(.*),", ip_data)
