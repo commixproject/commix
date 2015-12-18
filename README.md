@@ -3,11 +3,11 @@
 	  /'___\ / __`\ /' __` __`\ /' __` __`\/\ \ /\ \/'\
 	 /\ \__//\ \L\ \/\ \/\ \/\ \/\ \/\ \/\ \ \ \\/>  </
 	 \ \____\ \____/\ \_\ \_\ \_\ \_\ \_\ \_\ \_\/\_/\_\
-	  \/____/\/___/  \/_/\/_/\/_/\/_/\/_/\/_/\/_/\//\/_/ { v0.2b }
+	  \/____/\/___/  \/_/\/_/\/_/\/_/\/_/\/_/\/_/\//\/_/ { v0.3b }
 
 	+--
 	Automated All-in-One OS Command Injection and Exploitation Tool
-	Copyright (c) 2015 Anastasios Stasinopoulos (@ancst)
+	Copyright (c) 2014-2015 Anastasios Stasinopoulos (@ancst)
 	+--
 	
 [![GPLv3 License](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://github.com/stasinopoulos/commix/blob/master/readme/COPYING)

@@ -3,7 +3,7 @@
 
 """
 This file is part of commix (@commixproject) tool.
-Copyright (c) 2015 Anastasios Stasinopoulos (@ancst).
+Copyright (c) 2014-2015 Anastasios Stasinopoulos (@ancst).
 https://github.com/stasinopoulos/commix
 
 This program is free software: you can redistribute it and/or modify
@@ -28,7 +28,7 @@ APPLICATION = "commix"
 DESCRIPTION = "Automated All-in-One OS Command Injection and Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION = "v0.3b"
-YEAR    = "2015"
+YEAR    = "2014-2015"
 TWITTER = "@ancst" 
 
 # Inject Tag
