@@ -150,7 +150,7 @@ def system_users(separator, payload, TAG, delay, prefix, suffix, http_request_me
   if settings.TARGET_OS == "win":
     if menu.options.verbose:
       print ""
-    sys.stdout.write("\n(*) Executing 'net users' command to enumerate users entries... ")
+    sys.stdout.write("\n(*) Executing the 'net users' command to enumerate users entries... ")
     sys.stdout.flush()
     if sys_users[0] :
       sys_users = "".join(str(p) for p in sys_users).strip()
@@ -200,6 +200,8 @@ def system_users(separator, payload, TAG, delay, prefix, suffix, http_request_me
       print "\n" + Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to enumerate users entries." + Style.RESET_ALL  
   # Unix-like users enumeration.    
   else:
+    if menu.options.verbose:
+      print ""
     sys.stdout.write("(*) Fetching '" + settings.PASSWD_FILE + "' to enumerate users entries... ")
     sys.stdout.flush()
     if sys_users[0] :
@@ -234,8 +236,6 @@ def system_users(separator, payload, TAG, delay, prefix, suffix, http_request_me
           for user in range(0, len(sys_users_list)):
             sys_users = sys_users_list[user]
             sys_users = ":".join(str(p) for p in sys_users)
-            if menu.options.verbose:
-              print ""
             count = count + 1
             fields = sys_users.split(":")
             fields1 = "".join(str(p) for p in fields)
@@ -296,6 +296,8 @@ def system_passwords(separator, payload, TAG, delay, prefix, suffix, http_reques
     response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
     sys_passes = fb_injector.injection_results(url, OUTPUT_TEXTFILE, delay)
     if sys_passes :
+      if menu.options.verbose:
+        print ""
       sys.stdout.write("(*) Fetching '" + settings.SHADOW_FILE + "' to enumerate users password hashes... ")
       sys.stdout.flush()
       sys_passes = "".join(str(p) for p in sys_passes)
@@ -354,7 +356,8 @@ def single_os_cmd_exec(separator, payload, TAG, delay, prefix, suffix, http_requ
 Check the defined options
 """
 def do_check(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
-
+  if not menu.options.verbose:
+    print ""
   if menu.options.hostname:
     hostname(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
     settings.ENUMERATION_DONE = True

@@ -270,12 +270,11 @@ def main():
                 print Fore.YELLOW + "(^) Warning: Swithing '--is-root' to '--is-admin' because the taget has been identified as windows." + Style.RESET_ALL 
               error_msg = "(^) Warning: The '--passwords' option, is not yet available for Windows targets."
               if menu.options.passwords:
-                flag = "'--passwords'"
                 print Fore.YELLOW + "(^) Warning: The '--passwords' option, is not yet available for Windows targets." + Style.RESET_ALL   
               if menu.options.file_upload :
                 print Fore.YELLOW + "(^) Warning: The '--file-upload' option, is not yet available for windows targets. Instead, use the '--file-write' option." + Style.RESET_ALL   
                 sys.exit(0)
-            elif settings.TARGET_OS == "unix": 
+            else: 
               if menu.options.is_admin : 
                 print Fore.YELLOW + "(^) Warning: Swithing the '--is-admin' to '--is-root' because the taget has been identified as unix-like. " + Style.RESET_ALL   
             if found_os_server == False:

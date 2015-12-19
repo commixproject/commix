@@ -155,7 +155,7 @@ def system_users(separator, TAG, prefix, suffix, http_request_method, url, vuln_
   if settings.TARGET_OS == "win":
     if menu.options.verbose:
       print ""
-    sys.stdout.write("(*) Executing 'net users' command to enumerate users entries... ")
+    sys.stdout.write("(*) Executing the 'net users' command to enumerate users entries... ")
     sys.stdout.flush()
     if sys_users[0] :
       sys_users = "".join(str(p) for p in sys_users).strip()

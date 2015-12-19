@@ -3,7 +3,6 @@
 
 ## Version 0.2b [2015]
 * Added: Support for recalling previous commands.
-* Added: Versions for "nongit" users (vx.xx-nongit-yyyymmdd).
 * Added: Support for a tab completion in shell options.
 * Added: Support for alternative (Python) os-shell in dynamic code evaluation (aka eval-based) technique.
 * Added: Support for PHP/Python meterpreter on "reverse_tcp" shell option.

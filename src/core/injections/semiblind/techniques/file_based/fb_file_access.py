@@ -38,7 +38,7 @@ def file_read(separator, payload, TAG, delay, prefix, suffix, http_request_metho
   if settings.TARGET_OS == "win":
     cmd = settings.WIN_FILE_READ + file_to_read
   else:
-    cmd = "(" + settings.FILE_READ + file_to_read + ")"
+    cmd = settings.FILE_READ + file_to_read 
   response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
   shell = fb_injector.injection_results(url, OUTPUT_TEXTFILE, delay)
   shell = "".join(str(p) for p in shell)

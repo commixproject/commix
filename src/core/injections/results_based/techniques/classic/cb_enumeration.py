@@ -37,7 +37,8 @@ def hostname(separator, TAG, prefix, suffix, whitespace, http_request_method, ur
   response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
   shell = cb_injector.injection_results(response, TAG)
   if shell:
-    print ""
+    if menu.options.verbose:
+      print ""
     shell = "".join(str(p) for p in shell)
     sys.stdout.write(Style.BRIGHT + "(!) The hostname is " + Style.UNDERLINE + shell + Style.RESET_ALL + ".\n")
     sys.stdout.flush()
@@ -147,7 +148,7 @@ def system_users(separator, TAG, prefix, suffix, whitespace, http_request_method
   if settings.TARGET_OS == "win":
     if menu.options.verbose:
       print ""
-    sys.stdout.write("(*) Executing 'net users' command to enumerate users entries... ")
+    sys.stdout.write("(*) Executing the 'net users' command to enumerate users entries... ")
     sys.stdout.flush()
     if sys_users[0] :
       sys_users = "".join(str(p) for p in sys_users).strip()
@@ -199,6 +200,8 @@ def system_users(separator, TAG, prefix, suffix, whitespace, http_request_method
       print "\n" + Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to enumerate users entries." + Style.RESET_ALL  
   # Unix-like users enumeration.    
   else:
+    if menu.options.verbose:
+      print ""
     sys.stdout.write("(*) Fetching '" + settings.PASSWD_FILE + "' to enumerate users entries... ")
     sys.stdout.flush()
     if sys_users[0] :
@@ -233,8 +236,6 @@ def system_users(separator, TAG, prefix, suffix, whitespace, http_request_method
           for user in range(0, len(sys_users_list)):
             sys_users = sys_users_list[user]
             sys_users = ":".join(str(p) for p in sys_users)
-            if menu.options.verbose:
-              print ""
             count = count + 1
             fields = sys_users.split(":")
             fields1 = "".join(str(p) for p in fields)
@@ -295,6 +296,8 @@ def system_passwords(separator, TAG, prefix, suffix, whitespace, http_request_me
     response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
     sys_passes = cb_injector.injection_results(response, TAG)
     if sys_passes :
+      if menu.options.verbose:
+        print ""
       sys.stdout.write("(*) Fetching '" + settings.SHADOW_FILE + "' to enumerate users password hashes... ")
       sys.stdout.flush()
       sys_passes = "".join(str(p) for p in sys_passes)
@@ -353,7 +356,8 @@ def single_os_cmd_exec(separator, TAG, prefix, suffix, whitespace, http_request_
 Check the defined options
 """
 def do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename):
-
+  if not menu.options.verbose:
+    print ""
   if menu.options.hostname:
     hostname(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
     settings.ENUMERATION_DONE = True

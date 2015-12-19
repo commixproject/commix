@@ -38,7 +38,7 @@ def file_read(separator, TAG, prefix, suffix, whitespace, http_request_method, u
   if settings.TARGET_OS == "win":
     cmd = settings.WIN_FILE_READ + file_to_read
   else:
-    cmd = "(" + settings.FILE_READ + file_to_read + ")"
+    cmd = settings.FILE_READ + file_to_read
   response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
   shell = cb_injector.injection_results(response, TAG)
   shell = "".join(str(p) for p in shell)
@@ -190,7 +190,7 @@ def file_upload(separator, TAG, prefix, suffix, whitespace, http_request_method,
 Check the defined options
 """
 def do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename):
-
+ 
   if menu.options.file_write:
     file_write(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
     settings.FILE_ACCESS_DONE = True
