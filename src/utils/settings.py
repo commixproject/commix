@@ -274,7 +274,8 @@ SERVER_OS_BANNERS = [
     "ubuntu",
     "fedora",
     "centos",
-    "freebsd"
+    "freebsd",
+    "unix"
 ]
 
 REVERSE_TCP = False

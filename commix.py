@@ -243,8 +243,6 @@ def main():
                     raise SystemExit()
                 else:
                   identified_os = "Unix-like (" + settings.TARGET_OS + ")"
-            if menu.options.verbose:
-              print Style.BRIGHT + "(!) The server's operating system was identified as " + Style.UNDERLINE + identified_os  + Style.RESET_ALL + "." + Style.RESET_ALL 
             found_server_banner = False
             for i in range(0,len(settings.SERVER_BANNERS)):
               if settings.SERVER_BANNERS[i].lower() in server_banner.lower():
