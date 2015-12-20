@@ -276,22 +276,27 @@ def main():
               if menu.options.is_admin : 
                 print Fore.YELLOW + "(^) Warning: Swithing the '--is-admin' to '--is-root' because the taget has been identified as unix-like. " + Style.RESET_ALL   
             if found_os_server == False:
-              print Fore.YELLOW + "(^) Warning: Heuristics have failed to identify server's operating system." + Style.RESET_ALL 
-              while True:
-                got_os = raw_input("(?) Do you recognise the server's operating system? [(W)indows/(U)nix/(q)uit] > ").lower()
-                if got_os.lower() in settings.CHOISE_OS :
-                  if got_os.lower() == "w":
-                    settings.TARGET_OS == "win"
-                    break
-                  elif got_os.lower() == "u":
-                    break
-                  elif got_os.lower() == "q":
-                    raise SystemExit()
-                else:
-                  if got_os == "":
-                    got_os = "enter"
-                  print Back.RED + "(x) Error: '" + got_os + "' is not a valid answer." + Style.RESET_ALL
-                  pass
+              # If "--shellshock" option is provided then,
+              # by default is a Linux/Unix operating system.
+              if menu.options.shellshock:
+                pass 
+              else:
+                print Fore.YELLOW + "(^) Warning: Heuristics have failed to identify server's operating system." + Style.RESET_ALL 
+                while True:
+                  got_os = raw_input("(?) Do you recognise the server's operating system? [(W)indows/(U)nix/(q)uit] > ").lower()
+                  if got_os.lower() in settings.CHOISE_OS :
+                    if got_os.lower() == "w":
+                      settings.TARGET_OS == "win"
+                      break
+                    elif got_os.lower() == "u":
+                      break
+                    elif got_os.lower() == "q":
+                      raise SystemExit()
+                  else:
+                    if got_os == "":
+                      got_os = "enter"
+                    print Back.RED + "(x) Error: '" + got_os + "' is not a valid answer." + Style.RESET_ALL
+                    pass
             if found_server_banner == False :
               print  Fore.YELLOW + "(^) Warning: The server which was identified as " + server_banner + " seems unknown." + Style.RESET_ALL
         except KeyError:
