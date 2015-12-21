@@ -16,6 +16,7 @@ For more see the file 'readme/COPYING' for copying permission.
 
 import os
 import sys
+import urllib
 
 from src.utils import menu
 from src.utils import settings
@@ -100,8 +101,22 @@ def continue_tests(err):
     print "\n" + Back.RED + "(x) Aborted: Ctrl-C was pressed!" + Style.RESET_ALL
     raise SystemExit()
 
+"""
+Check if option is unavailable
+"""
 def unavailable_option(check_option):
 
   print Fore.YELLOW + "(^) Warning: The '" +check_option+ "' option is not yet available for windows targets." + Style.RESET_ALL   
+
+"""
+Transformation of separators if time-based injection
+"""
+def time_based_separators(separator, http_request_method):
+
+  if separator == "||"  or separator == "&&" :
+    separator = separator[:1]
+    if http_request_method == "POST":
+      separator = urllib.quote(separator)
+  return separator
 
 #eof

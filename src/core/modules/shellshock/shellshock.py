@@ -61,7 +61,6 @@ Enumeration Options
 """
 def enumeration(url, cve, check_header, filename):
 
-  print ""
   #-------------------------------
   # Hostname enumeration
   #-------------------------------
@@ -158,6 +157,8 @@ def enumeration(url, cve, check_header, filename):
   if menu.options.users:
     cmd = settings.SYS_USERS             
     sys_users = cmd_exec(url, cmd, cve, check_header, filename)
+    if menu.options.verbose:
+      print ""
     sys.stdout.write("(*) Fetching '" + settings.PASSWD_FILE + "' to enumerate users entries... ")
     sys.stdout.flush()
     if sys_users[0] :
@@ -192,8 +193,6 @@ def enumeration(url, cve, check_header, filename):
           for user in range(0, len(sys_users_list)):
             sys_users = sys_users_list[user]
             sys_users = ":".join(str(p) for p in sys_users)
-            if menu.options.verbose:
-              print ""
             count = count + 1
             fields = sys_users.split(":")
             fields1 = "".join(str(p) for p in fields)
@@ -255,6 +254,8 @@ def enumeration(url, cve, check_header, filename):
       sys_passes = sys_passes.replace(" ", "\n")
       sys_passes = sys_passes.split( )
       if len(sys_passes) != 0 :
+        if menu.options.verbose:
+          print ""
         sys.stdout.write("(*) Fetching '" + settings.SHADOW_FILE + "' to enumerate users password hashes... ")
         sys.stdout.flush()
         sys.stdout.write("[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]")
@@ -383,9 +384,6 @@ def file_access(url, cve, check_header, filename):
      sys.stdout.flush()
     settings.FILE_ACCESS_DONE = True
 
-  if settings.FILE_ACCESS_DONE == True:
-    print ""
-
   #-------------------------------------
   # Read a file from the target host.
   #-------------------------------------
@@ -475,10 +473,12 @@ def shellshock_handler(url, http_request_method, filename):
           print "  (+) Type : " + Fore.YELLOW + Style.BRIGHT + injection_type.title() + Style.RESET_ALL + ""
           print "  (+) Technique : " + Fore.YELLOW + Style.BRIGHT + technique.title() + Style.RESET_ALL + ""
           print "  (+) Payload : " + Fore.YELLOW + Style.BRIGHT + "\"" + payload + "\"" + Style.RESET_ALL
-          
+          if not menu.options.verbose:
+            print ""
           # Enumeration options.
           if settings.ENUMERATION_DONE == True :
-            print ""
+            if menu.options.verbose:
+              print ""
             while True:
               enumerate_again = raw_input("(?) Do you want to enumerate again? [Y/n/q] > ").lower()
               if enumerate_again in settings.CHOISE_YES:
@@ -529,7 +529,8 @@ def shellshock_handler(url, http_request_method, filename):
               if go_back == True:
                 break
               if settings.ENUMERATION_DONE == False and settings.FILE_ACCESS_DONE == False:
-               	print ""
+                if menu.options.verbose:
+                  print ""
               gotshell = raw_input("(?) Do you want a Pseudo-Terminal? [Y/n/q] > ").lower()
               if gotshell in settings.CHOISE_YES:
                 print ""

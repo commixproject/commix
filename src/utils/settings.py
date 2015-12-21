@@ -310,11 +310,11 @@ WIN_PYTHON_DIR = "C:\\Python27\\"
 WIN_PHP_DIR = "C:\\xampp\\php\\"
 
 # Windows comment
-WIN_COMMENT = "REM"
+WIN_COMMENT = " REM "
 
 #Delete command
-WIN_DEL = "DEL "
-DEL = "rm "
+WIN_DEL = " DEL "
+DEL = " rm "
 
 # Time-based Variables
 FOUND_HOW_LONG = "" 

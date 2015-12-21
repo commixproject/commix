@@ -356,16 +356,14 @@ def single_os_cmd_exec(separator, TAG, prefix, suffix, whitespace, http_request_
 Check the defined options
 """
 def do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename):
+  
   if not menu.options.verbose:
     print ""
+
   if menu.options.hostname:
     hostname(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
     settings.ENUMERATION_DONE = True
-  elif settings.ENUMERATION_DONE == False:
-      print ""
-  else:
-  		print ""
-    
+
   if menu.options.current_user:
     current_user(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
     settings.ENUMERATION_DONE = True

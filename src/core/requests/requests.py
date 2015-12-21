@@ -22,6 +22,7 @@ import urllib2
 from src.utils import menu
 from src.utils import settings
 from src.core.requests import headers
+from src.core.requests import parameters
 
 from src.thirdparty.colorama import Fore, Back, Style, init
 
@@ -29,6 +30,10 @@ from src.thirdparty.colorama import Fore, Back, Style, init
 Estimating the response time (in seconds).
 """
 def estimate_response_time(url, http_request_method, delay):
+
+  if http_request_method == "GET":
+    # Find the host part.
+    url = parameters.get_url_part(url)
   request = urllib2.Request(url)
   headers.do_check(request)
   start = time.time()
@@ -45,6 +50,10 @@ def estimate_response_time(url, http_request_method, delay):
   diff = end - start
   if int(diff) < 1:
     url_time_response = int(diff)
+    if settings.TARGET_OS == "win":
+      info_msg = "(^) Warning: Due to the relatively slow response of 'cmd.exe'"
+      info_msg += " there may be delays during the data extraction procedure."
+      print Fore.YELLOW + info_msg + Style.RESET_ALL
   else:
     url_time_response = int(round(diff))
     info_msg = "(^) Warning: The estimated response time is " + str(url_time_response)
@@ -57,6 +66,9 @@ def estimate_response_time(url, http_request_method, delay):
     info_msg += "."
     print Fore.YELLOW + info_msg + Style.RESET_ALL
   delay = int(delay) + int(url_time_response)
+  # Against windows targets (for more stability), add one extra second delay.
+  if settings.TARGET_OS == "win" :
+    delay = delay + 1
 
   return delay, url_time_response
 

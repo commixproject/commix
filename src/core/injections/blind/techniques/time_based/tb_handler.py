@@ -344,6 +344,7 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                                 break
                             # Command execution results.
                             from src.core.injections.results_based.techniques.classic import cb_injector
+                            separator = checks.time_based_separators(separator, http_request_method)
                             whitespace = settings.WHITESPACES[0]
                             response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
                             # Evaluate injection results.

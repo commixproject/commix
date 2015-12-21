@@ -40,8 +40,6 @@ def hostname(separator, payload, TAG, delay, prefix, suffix, http_request_method
     if menu.options.verbose:
       print ""
     shell = "".join(str(p) for p in shell)
-    if not menu.options.verbose:
-      print ""
     sys.stdout.write(Style.BRIGHT + "(!) The hostname is " + Style.UNDERLINE + shell + Style.RESET_ALL + ".\n")
     sys.stdout.flush()
     # Add infos to logs file. 
@@ -361,10 +359,6 @@ def do_check(separator, payload, TAG, delay, prefix, suffix, http_request_method
   if menu.options.hostname:
     hostname(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
     settings.ENUMERATION_DONE = True
-  elif settings.ENUMERATION_DONE == False:
-      print ""
-  else:
-      print ""
     
   if menu.options.current_user:
     current_user(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
@@ -382,7 +376,7 @@ def do_check(separator, payload, TAG, delay, prefix, suffix, http_request_method
     system_passwords(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
     settings.ENUMERATION_DONE = True
 
-  if settings.ENUMERATION_DONE and not menu.options.verbose:
+  if settings.ENUMERATION_DONE:
     print ""
     
 # eof

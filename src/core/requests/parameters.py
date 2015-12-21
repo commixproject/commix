@@ -24,6 +24,19 @@ from src.utils import settings
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 """
+Get the URL part of the defined URL.
+"""
+def get_url_part(url):
+  
+  # Find the host part
+  url_part = url.split("?")[0]
+  # Remove "/" if "/?" in url
+  if url_part.endswith("/"):
+    url_part = url_part[:-len("/")]
+
+  return url_part
+
+"""
 Check if the 'INJECT_HERE' tag, is specified on GET Requests.
 """
 def do_GET_check(url):
@@ -32,18 +45,15 @@ def do_GET_check(url):
   if "?" not in url:
     if settings.INJECT_TAG not in url and not menu.options.shellshock:
       print Back.RED + "(x) Error: You must set the \"INJECT_HERE\" tag to specify the testable parameter." + Style.RESET_ALL + "\n"
-      os._exit(0)
+      os._exit(0)   
     return url
 
   # Find the host part
-  url_part = url.split("?")[0]
-  
-  # Remove "/" if "/?" in url
-  if url_part.endswith("/"):
-  	url_part = url_part[:-len("/")]
-  	
+  url_part = get_url_part(url)
+
   # Find the parameter part
   parameters = url.split("?")[1]
+
   # Split parameters
   multi_parameters = parameters.split(settings.PARAMETER_DELIMITER)
 
