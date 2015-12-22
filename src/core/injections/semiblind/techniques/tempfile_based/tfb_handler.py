@@ -63,13 +63,14 @@ def delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, http_req
 The "tempfile-based" injection technique handler
 """
 def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, url_time_response):
-  percent = "0.2"
+  # percent = "0.2"
   counter = 1
   num_of_chars = 1
   vp_flag = True
   no_result = True
   is_encoded = False
   is_vulnerable = False
+  how_long_statistic = 0
   export_injection_info = False
   how_long = 0
   injection_type = "Semiblind Command Injection"
@@ -83,9 +84,9 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
   if menu.options.url_reload == True:
     print Back.RED + "(x) Error: The '--url-reload' option is not available in " + technique + "!" + Style.RESET_ALL
   
-  percent = str(percent)+ "%"
-  sys.stdout.write("\r(*) Testing the " + technique + "... " +  "[ " + percent + " ]")  
-  sys.stdout.flush()
+  # percent = str(percent)+ "%"
+  # sys.stdout.write("\r(*) Testing the " + technique + "... " +  "[ " + percent + " ]")  
+  # sys.stdout.flush()
 
   # Calculate all possible combinations
   total = (len(settings.PREFIXES) * len(settings.SEPARATORS) * len(settings.SUFFIXES) - len(settings.JUNK_COMBINATION))
@@ -154,6 +155,11 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
             percent = ((num_of_chars * 100) / total)
             float_percent = "{0:.1f}".format(round(((num_of_chars*100)/(total*1.0)),2))
 
+            # Statistical analysis in .
+            how_long_statistic = how_long_statistic + how_long
+            if output_length == tag_length - 1:
+              how_long_statistic = 0
+
             if percent == 100 and no_result == True:
               if not menu.options.verbose:
                 percent = Fore.RED + "FAILED" + Style.RESET_ALL
@@ -165,7 +171,8 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
                  (url_time_response != 0 and (how_long - delay) > 0 and (how_long >= delay + 1)) :
 
                 # Time relative false positive fixation.
-                if len(TAG) == output_length:
+                if len(TAG) == output_length and \
+                    how_long > (how_long_statistic / output_length):
                   settings.FOUND_HOW_LONG = how_long
                   settings.FOUND_DIFF = how_long - delay
                   randv1 = random.randrange(0, 1)
@@ -189,6 +196,7 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
                     
                     if str(output) == str(randvcalc) and len(TAG) == output_length:
                       is_vulnerable = True
+                      how_long_statistic = 0
                       if not menu.options.verbose:
                         percent = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
                       else:
@@ -197,11 +205,17 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
                     break
                 # False positive
                 else:
-                  continue        
+                  if not menu.options.verbose:
+                    percent = str(float_percent)+ "%"
+                    sys.stdout.write("\r(*) Testing the " + technique + "... " +  "[ " + percent + " ]")  
+                    sys.stdout.flush()
+                  continue    
               else:
-                percent = str(float_percent)+ "%"
+                if not menu.options.verbose:
+                  percent = str(float_percent)+ "%"
+                  sys.stdout.write("\r(*) Testing the " + technique + "... " +  "[ " + percent + " ]")  
+                  sys.stdout.flush()
                 continue
-                
             if not menu.options.verbose:
               sys.stdout.write("\r(*) Testing the " + technique + "... " +  "[ " + percent + " ]")  
               sys.stdout.flush()

