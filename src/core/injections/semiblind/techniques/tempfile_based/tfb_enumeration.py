@@ -352,6 +352,8 @@ Check the defined options
 def do_check(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response):
   if settings.ENUMERATION_DONE == False:
     print ""
+  else:
+    settings.ENUMERATION_DONE = False
   
   if menu.options.hostname:
     hostname(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
