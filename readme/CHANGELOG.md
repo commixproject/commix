@@ -20,11 +20,11 @@
 * Added: New option "--base64", that encodes the OS command to Base64 format. 
 * Added: Support for regular preg_replace() injections via "/e" modifier.
 * Added: Support for HTML Charset and HTTP "Server" response-header reconnaissance (on verbose mode).
-* Replaced: Payloads on "tempfile-based" (semiblind) technique, have been replaced by new (more solid) ones.
-* Added: A "new-line" separator support, on "time-based" (blind) & "tempfile-based" (semiblind) techniques.
+* Replaced: Payloads for "tempfile-based" (semiblind) technique, have been replaced by new (more solid) ones.
+* Added: A "new-line" separator support, for "time-based" (blind) & "tempfile-based" (semiblind) techniques.
 * Added: Support for referer-based command injections.
 * Added: Support for user-agent-based command injections.
-* Added: CVE-2014-6278 support on "shellshock" module.
+* Added: CVE-2014-6278 support for "shellshock" module.
 * Added: Support for cookie-based command injections.
 * Added: A generic false-positive prevention technique.
 * Removed: The "Base64" detection option.
