@@ -1,24 +1,25 @@
 ## Version 0.3b [2015]
+* Added: Statistical checks for time-related ("time-based"/"tempfile-based") techniques.
 * Added: Support for Windows-based (cmd / powershell) payloads for every injection technique.
 
 ## Version 0.2b [2015]
 * Added: Support for recalling previous commands.
 * Added: Support for a tab completion in shell options.
-* Added: Support for alternative (Python) os-shell in dynamic code evaluation (aka eval-based) technique.
+* Added: Support for alternative (Python) os-shell in dynamic code evaluation ("eval-based") technique.
 * Added: Support for PHP/Python meterpreter on "reverse_tcp" shell option.
 * Added: The "reverse_tcp" shell option.
 * Added: The ability to check for default root directories (Apache/Nginx).
-* Added: Support for removal of (txt) shell files (File-based/Tempfile-based).
+* Added: Support for removal of (txt) shell files in semiblind ("file-based"/"tempfile-based") techniques.
 * Added: Support for JSON POST data.
 * Added: The "enumeration" and "file-read" results to log file.
 * Added: The ability to get the user's approval before re-{enumerate/file-read} target.
 * Added: The ability to stop current injection technique and proceed on the next one(s).
 
 ## Version 0.1b [2015]
-* Added: New eval-based payload (str_replace filter bypass).
+* Added: New eval-based payload for "str_replace()" filter bypass.
 * Added: Check for (GET) RESTful URL format.
 * Added: New option "--base64", that encodes the OS command to Base64 format. 
-* Added: Support for regular preg_replace() injections via "/e" modifier.
+* Added: Support for regular "preg_replace()" injections via "/e" modifier.
 * Added: Support for HTML Charset and HTTP "Server" response-header reconnaissance (on verbose mode).
 * Replaced: Payloads for "tempfile-based" (semiblind) technique, have been replaced by new (more solid) ones.
 * Added: A "new-line" separator support, for "time-based" (blind) & "tempfile-based" (semiblind) techniques.
