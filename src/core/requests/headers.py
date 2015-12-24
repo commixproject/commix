@@ -48,10 +48,10 @@ def do_check(request):
 
   # Check if defined any HTTP Authentication credentials.
   # HTTP Authentication: Basic Access Authentication
-  if menu.options.auth_type == "basic":
-    if menu.options.auth_cred:
-      b64_string = base64.encodestring(menu.options.auth_cred).replace('\n', '')
-      request.add_header("Authorization", "Basic " + b64_string + "")
+  # if menu.options.auth_type == "basic":
+  if menu.options.auth_cred:
+    b64_string = base64.encodestring(menu.options.auth_cred).replace('\n', '')
+    request.add_header("Authorization", "Basic " + b64_string + "")
   
   # The MIME media type for JSON.
   if settings.IS_JSON:

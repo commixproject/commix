@@ -206,6 +206,7 @@ def main():
           request = urllib2.Request(url, menu.options.data)
         else:
           request = urllib2.Request(url)
+        headers.do_check(request)  
         # Check if defined any HTTP Proxy (--proxy option).
         if menu.options.proxy:
           proxy.do_check(url)
@@ -321,7 +322,6 @@ def main():
 
       except urllib2.HTTPError, e:
         print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
-
         # Check the codes of responses
         if e.getcode() == 500:
           content = e.read()
