@@ -237,8 +237,9 @@ def main():
               if settings.SERVER_OS_BANNERS[i].lower() in server_banner.lower():
                 found_os_server = True
                 settings.TARGET_OS = settings.SERVER_OS_BANNERS[i].lower()
-                if settings.TARGET_OS == "win":
+                if settings.TARGET_OS == "win" or settings.TARGET_OS == "microsoft" :
                   identified_os = "Windows"
+                  settings.TARGET_OS = identified_os[:3].lower()
                   if menu.options.shellshock:
                     print Back.RED + "(x) Critical: The shellshock module is not available for " + identified_os + " tagets." + Style.RESET_ALL
                     raise SystemExit()
@@ -261,7 +262,6 @@ def main():
                   settings.SRV_ROOT_DIR = "/usr/share/nginx"
                 if settings.SERVER_BANNERS[i].lower() == "microsoft-iis":
                   settings.SRV_ROOT_DIR = "/wwwroot"
-                  settings.TARGET_OS = "win"
                 break
             # Check for wrong flags.
             if settings.TARGET_OS == "win":

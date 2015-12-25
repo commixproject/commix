@@ -1,4 +1,5 @@
 ## Version 0.3b [2015]
+* Added: Ability for identification of "Microsoft-IIS" servers.
 * Added: Statistical checks for time-related ("time-based"/"tempfile-based") techniques.
 * Added: Support for Windows-based (cmd / powershell) payloads for every injection technique.
 

@@ -269,6 +269,7 @@ SERVER_BANNERS = [
 
 # Server banners list
 SERVER_OS_BANNERS = [
+    "microsoft",
     "win",
     "debian",
     "ubuntu",
