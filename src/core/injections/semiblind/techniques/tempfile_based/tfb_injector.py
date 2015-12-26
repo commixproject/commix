@@ -466,7 +466,7 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_m
     if alter_shell:
       cmd = cmd + " > " + OUTPUT_TEXTFILE
     else: 
-      cmd = "powershell.exe write-host ([string](cmd /c " + cmd + ")).trim()"
+      cmd = "powershell.exe -InputFormat none write-host ([string](cmd /c " + cmd + ")).trim()"
 
   if menu.options.file_write or menu.options.file_upload :
     minlen = 0

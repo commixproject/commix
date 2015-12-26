@@ -121,7 +121,7 @@ WIN_HOSTNAME = "echo %computername%"
 # Check if current user is root
 IS_ROOT = "echo $(id -u)"
 # Check if current user is admin
-IS_ADMIN = "powershell.exe [Security.Principal.WindowsBuiltinRole]::Administrator"
+IS_ADMIN = "powershell.exe -InputFormat none [Security.Principal.WindowsBuiltinRole]::Administrator"
 
 # Operation System.
 RECOGNISE_OS = "uname -s"
@@ -147,7 +147,7 @@ PASSWD_FILE = "/etc/passwd"
 SYS_USERS = "awk -F ':' '{print $1}{print $3}{print $6}' " + PASSWD_FILE 
 
 # Exports users of localgroup
-WIN_SYS_USERS = "powershell.exe write-host (([string]$(net user)[4..($(net user).length-3)])"
+WIN_SYS_USERS = "powershell.exe -InputFormat none write-host (([string]$(net user)[4..($(net user).length-3)])"
 
 # /etc/shadow
 SHADOW_FILE = "/etc/shadow"

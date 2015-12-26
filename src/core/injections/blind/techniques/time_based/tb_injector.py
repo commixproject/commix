@@ -467,7 +467,7 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_m
     if alter_shell:
       cmd = settings.WIN_PYTHON_DIR + "python.exe -c \"import os; print len(os.popen('cmd /c " + cmd + "').read().strip())\""
     else: 
-      cmd = "powershell.exe write-host ([string](cmd /c " + cmd + ")).trim().length"
+      cmd = "powershell.exe -InputFormat none write-host ([string](cmd /c " + cmd + ")).trim().length"
 
   if menu.options.file_write or menu.options.file_upload:
     minlen = 0

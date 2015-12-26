@@ -261,7 +261,7 @@ def main():
                 if settings.SERVER_BANNERS[i].lower() == "nginx": 
                   settings.SRV_ROOT_DIR = "/usr/share/nginx"
                 if settings.SERVER_BANNERS[i].lower() == "microsoft-iis":
-                  settings.SRV_ROOT_DIR = "/wwwroot"
+                  settings.SRV_ROOT_DIR = "\inetpub\wwwroot"
                 break
             # Check for wrong flags.
             if settings.TARGET_OS == "win":
