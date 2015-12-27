@@ -51,7 +51,7 @@ def estimate_response_time(url, http_request_method, delay):
   if int(diff) < 1:
     url_time_response = int(diff)
     if settings.TARGET_OS == "win":
-      info_msg = "(^) Warning: Due to the relatively slow response of 'cmd.exe'"
+      info_msg = "(^) Warning: Due to the relatively slow response of 'cmd.exe' in target host,"
       info_msg += " there may be delays during the data extraction procedure."
       print Fore.YELLOW + info_msg + Style.RESET_ALL
   else:

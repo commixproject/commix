@@ -92,8 +92,6 @@ def current_user(separator, payload, TAG, delay, prefix, suffix, http_request_me
     if menu.options.is_root or menu.options.is_admin:
       if settings.TARGET_OS == "win":
         cmd = settings.IS_ADMIN
-        if not alter_shell:
-          cmd = "\"" + cmd + "\"" 
       else:  
         cmd = settings.IS_ROOT       
       response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)

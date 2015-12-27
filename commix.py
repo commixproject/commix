@@ -255,14 +255,18 @@ def main():
                 # Set up default root paths
                 if settings.SERVER_BANNERS[i].lower() == "apache":
                   if settings.TARGET_OS == "win":
-                    settings.SRV_ROOT_DIR = "/htdocs"
+                    settings.SRV_ROOT_DIR = "\\htdocs"
                   else:
                     settings.SRV_ROOT_DIR = "/var/www"
                 if settings.SERVER_BANNERS[i].lower() == "nginx": 
                   settings.SRV_ROOT_DIR = "/usr/share/nginx"
                 if settings.SERVER_BANNERS[i].lower() == "microsoft-iis":
-                  settings.SRV_ROOT_DIR = "\inetpub\wwwroot"
+                  settings.SRV_ROOT_DIR = "\\inetpub\\wwwroot"
                 break
+
+            if menu.options.is_admin or menu.options.is_root and not menu.options.current_user:
+              menu.options.current_user = True
+
             # Check for wrong flags.
             if settings.TARGET_OS == "win":
               if menu.options.is_root :

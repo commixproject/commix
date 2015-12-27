@@ -139,7 +139,8 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
             settings.SRV_ROOT_DIR = settings.SRV_ROOT_DIR + "/www"
         except IndexError:
           pass
-
+      elif "microsoft-iis" in settings.SERVER_BANNER.lower():
+        pass
       else:
         # Provide custom server's root directory.
         custom_srv_root_dir()
@@ -153,6 +154,8 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
       last_param = path_parts[count]
       EXTRA_DIR = path.replace(last_param, "")
       settings.SRV_ROOT_DIR = settings.SRV_ROOT_DIR + EXTRA_DIR
+      if settings.TARGET_OS == "win":
+        settings.SRV_ROOT_DIR = settings.SRV_ROOT_DIR.replace("/","\\")
 
     if not menu.options.verbose:
       print "(*) Trying to create a file in '" + settings.SRV_ROOT_DIR + "'... "
