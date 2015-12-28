@@ -125,7 +125,7 @@ Information message if platform does not have GNU 'readline' module installed
 def no_readline_module():
 
   info_msg =  "(^) Warning: It seems that your platform does not have GNU 'readline' module installed."
-  info_msg += " For history and tab-completion in your shell, download the"
+  info_msg += " For tab-completion support in your shell, download the"
   if settings.IS_WINDOWS:
     info_msg += " 'pyreadline' module (https://pypi.python.org/pypi/pyreadline).\n"
   else:  
