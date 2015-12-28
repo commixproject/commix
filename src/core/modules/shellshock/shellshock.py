@@ -4,7 +4,6 @@ import re
 import os
 import sys
 import urllib2
-import readline
 
 from src.utils import menu
 from src.utils import logs
@@ -16,6 +15,23 @@ from src.core.requests import headers
 from src.core.shells import reverse_tcp
 from src.core.requests import parameters
 from src.core.injections.controller import checks
+
+readline_error = False
+try:
+  import readline
+except ImportError:
+  if settings.IS_WINDOWS:
+    try:
+      import pyreadline as readline
+    except ImportError:
+      readline_error = True
+  else:
+    try:
+      import gnureadline as readline
+    except ImportError:
+      readline_error = True
+  pass
+
 
 """
 This module exploits the vulnerabilities CVE-2014-6271 [1], CVE-2014-6278 [2] in Apache CGI.
@@ -535,11 +551,19 @@ def shellshock_handler(url, http_request_method, filename):
               if gotshell in settings.CHOISE_YES:
                 print ""
                 print "Pseudo-Terminal (type '" + Style.BRIGHT + "?" + Style.RESET_ALL + "' for available options)"
+                if readline_error:
+                  checks.no_readline_module()
                 while True:
                   try:
                     # Tab compliter
-                    readline.set_completer(menu.tab_completer)
-                    readline.parse_and_bind("tab: complete")
+                    if not readline_error:
+                      readline.set_completer(menu.tab_completer)
+                      # MacOSX tab compliter
+                      if 'libedit' in readline.__doc__:
+                        readline.parse_and_bind("bind ^I rl_complete")
+                      # Unix tab compliter
+                      else:
+                        readline.parse_and_bind("tab: complete")
                     cmd = raw_input("""commix(""" + Style.BRIGHT + Fore.RED + """os_shell""" + Style.RESET_ALL + """) > """)
                     cmd = checks.escaped_cmd(cmd)
                     if cmd.lower() in settings.SHELL_OPTIONS:

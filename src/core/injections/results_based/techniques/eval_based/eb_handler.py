@@ -22,7 +22,6 @@ import random
 import base64
 import urllib
 import urllib2
-import readline
 
 from src.utils import menu
 from src.utils import logs
@@ -39,6 +38,23 @@ from src.core.injections.results_based.techniques.eval_based import eb_injector
 from src.core.injections.results_based.techniques.eval_based import eb_payloads
 from src.core.injections.results_based.techniques.eval_based import eb_enumeration
 from src.core.injections.results_based.techniques.eval_based import eb_file_access
+
+readline_error = False
+try:
+  import readline
+except ImportError:
+  if settings.IS_WINDOWS:
+    try:
+      import pyreadline as readline
+    except ImportError:
+      readline_error = True
+  else:
+    try:
+      import gnureadline as readline
+    except ImportError:
+      readline_error = True
+  pass
+
 
 """
 The "eval-based" code injection technique on classic OS command injection.
@@ -278,11 +294,19 @@ def eb_injection_handler(url, delay, filename, http_request_method):
             if gotshell in settings.CHOISE_YES:
               print ""
               print "Pseudo-Terminal (type '" + Style.BRIGHT + "?" + Style.RESET_ALL + "' for available options)"
+              if readline_error:
+                checks.no_readline_module()
               while True:
                 try:
                   # Tab compliter
-                  readline.set_completer(menu.tab_completer)
-                  readline.parse_and_bind("tab: complete")
+                  if not readline_error:
+                    readline.set_completer(menu.tab_completer)
+                    # MacOSX tab compliter
+                    if 'libedit' in readline.__doc__:
+                      readline.parse_and_bind("bind ^I rl_complete")
+                    # Unix tab compliter
+                    else:
+                      readline.parse_and_bind("tab: complete")
                   cmd = raw_input("""commix(""" + Style.BRIGHT + Fore.RED + """os_shell""" + Style.RESET_ALL + """) > """)
                   cmd = checks.escaped_cmd(cmd)
                   if cmd.lower() in settings.SHELL_OPTIONS:

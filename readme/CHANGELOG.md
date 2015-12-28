@@ -1,4 +1,5 @@
 ## Version 0.3b [2015]
+* Added: Support (in MacOSX platforms) for a tab completion in shell options.
 * Added: Undocumented parameter "-InputFormat none" so to avoid "Microsoft-IIS" server's hang.
 * Added: Ability for identification of "Microsoft-IIS" servers.
 * Added: Statistical checks for time-related ("time-based"/"tempfile-based") techniques.
@@ -6,7 +7,7 @@
 
 ## Version 0.2b [2015]
 * Added: Support for recalling previous commands.
-* Added: Support for a tab completion in shell options.
+* Added: Support (in Linux platforms) for tab completion in shell options.
 * Added: Support for alternative (Python) os-shell in dynamic code evaluation ("eval-based") technique.
 * Added: Support for PHP/Python meterpreter on "reverse_tcp" shell option.
 * Added: The "reverse_tcp" shell option.

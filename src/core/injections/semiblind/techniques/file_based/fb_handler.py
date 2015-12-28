@@ -24,7 +24,6 @@ import base64
 import urllib
 import urllib2
 import urlparse 
-import readline
 
 from src.utils import menu
 from src.utils import logs
@@ -42,6 +41,22 @@ from src.core.injections.semiblind.techniques.file_based import fb_payloads
 from src.core.injections.semiblind.techniques.file_based import fb_enumeration
 from src.core.injections.semiblind.techniques.file_based import fb_file_access
 from src.core.injections.semiblind.techniques.tempfile_based import tfb_handler
+
+readline_error = False
+try:
+  import readline
+except ImportError:
+  if settings.IS_WINDOWS:
+    try:
+      import pyreadline as readline
+    except ImportError:
+      readline_error = True
+  else:
+    try:
+      import gnureadline as readline
+    except ImportError:
+      readline_error = True
+  pass
 
 """
 The "file-based" technique on semiblind OS command injection.
@@ -453,10 +468,18 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
               if gotshell in settings.CHOISE_YES:
                 print ""
                 print "Pseudo-Terminal (type '" + Style.BRIGHT + "?" + Style.RESET_ALL + "' for available options)"
+                if readline_error:
+                  checks.no_readline_module()
                 while True:
                   # Tab compliter
-                  readline.set_completer(menu.tab_completer)
-                  readline.parse_and_bind("tab: complete")
+                  if not readline_error:
+                    readline.set_completer(menu.tab_completer)
+                    # MacOSX tab compliter
+                    if 'libedit' in readline.__doc__:
+                      readline.parse_and_bind("bind ^I rl_complete")
+                    # Unix tab compliter
+                    else:
+                      readline.parse_and_bind("tab: complete")
                   cmd = raw_input("""commix(""" + Style.BRIGHT + Fore.RED + """os_shell""" + Style.RESET_ALL + """) > """)
                   cmd = checks.escaped_cmd(cmd)
                   if cmd.lower() in settings.SHELL_OPTIONS:

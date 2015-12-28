@@ -119,4 +119,17 @@ def time_based_separators(separator, http_request_method):
       separator = urllib.quote(separator)
   return separator
 
+"""
+Information message if platform does not have GNU 'readline' module installed
+"""
+def no_readline_module():
+
+  info_msg =  "(^) Warning: It seems that your platform does not have GNU 'readline' module installed."
+  info_msg += " For history and tab-completion in your shell, download the"
+  if settings.IS_WINDOWS:
+    info_msg += " 'pyreadline' module (https://pypi.python.org/pypi/pyreadline).\n"
+  else:  
+    info_msg += " 'gnureadline' module (https://pypi.python.org/pypi/gnureadline).\n" 
+  print Fore.YELLOW + info_msg + Style.RESET_ALL 
+
 #eof

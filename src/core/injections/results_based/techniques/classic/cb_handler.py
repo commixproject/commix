@@ -23,9 +23,8 @@ import random
 import base64
 import urllib
 import urllib2
-import readline
 import HTMLParser
-
+ 
 from src.utils import menu
 from src.utils import logs
 from src.utils import settings
@@ -41,6 +40,23 @@ from src.core.injections.results_based.techniques.classic import cb_injector
 from src.core.injections.results_based.techniques.classic import cb_payloads
 from src.core.injections.results_based.techniques.classic import cb_enumeration
 from src.core.injections.results_based.techniques.classic import cb_file_access
+
+readline_error = False
+try:
+  import readline
+except ImportError:
+  if settings.IS_WINDOWS:
+    try:
+      import pyreadline as readline
+    except ImportError:
+      readline_error = True
+  else:
+    try:
+      import gnureadline as readline
+    except ImportError:
+      readline_error = True
+  pass
+
 
 """
 The "classic" technique on result-based OS command injection.
@@ -274,11 +290,19 @@ def cb_injection_handler(url, delay, filename, http_request_method):
               if gotshell in settings.CHOISE_YES:
                 print ""
                 print "Pseudo-Terminal (type '" + Style.BRIGHT + "?" + Style.RESET_ALL + "' for available options)"
+                if readline_error:
+                  checks.no_readline_module()
                 while True:
                   try:
-                    # Tab compliter
-                    readline.set_completer(menu.tab_completer)
-                    readline.parse_and_bind("tab: complete")
+                    if not readline_error:
+                      # Tab compliter
+                      readline.set_completer(menu.tab_completer)
+                      # MacOSX tab compliter
+                      if 'libedit' in readline.__doc__:
+                        readline.parse_and_bind("bind ^I rl_complete")
+                      # Unix tab compliter
+                      else:
+                        readline.parse_and_bind("tab: complete")
                     cmd = raw_input("""commix(""" + Style.BRIGHT + Fore.RED + """os_shell""" + Style.RESET_ALL + """) > """)
                     cmd = checks.escaped_cmd(cmd)
                     if cmd.lower() in settings.SHELL_OPTIONS :

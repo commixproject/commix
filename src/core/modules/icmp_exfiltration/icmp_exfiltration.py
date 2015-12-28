@@ -21,7 +21,6 @@ import signal
 import socket
 import urllib
 import urllib2
-import readline
 import threading
 
 from src.utils import menu
@@ -42,6 +41,23 @@ import logging
 logging.getLogger("scapy.runtime").setLevel(logging.ERROR)
 
 from scapy.all import *
+
+readline_error = False
+try:
+  import readline
+except ImportError:
+  if settings.IS_WINDOWS:
+    try:
+      import pyreadline as readline
+    except ImportError:
+      readline_error = True
+  else:
+    try:
+      import gnureadline as readline
+    except ImportError:
+      readline_error = True
+  pass
+
 
 """
 The icmp exfiltration technique: 
@@ -98,11 +114,19 @@ def input_cmd(http_request_method, url, vuln_parameter, ip_src, technique):
     gotshell = raw_input("\n(?) Do you want a Pseudo-Terminal shell? [Y/n/q] > ").lower()
     if gotshell in settings.CHOISE_YES:
       print "\nPseudo-Terminal (type '" + Style.BRIGHT + "?" + Style.RESET_ALL + "' for available options)"
+      if readline_error:
+        checks.no_readline_module()
       while True:
         try:
           # Tab compliter
-          readline.set_completer(menu.tab_completer)
-          readline.parse_and_bind("tab: complete")
+          if not readline_error:
+            readline.set_completer(menu.tab_completer)
+            # MacOSX tab compliter
+            if 'libedit' in readline.__doc__:
+              readline.parse_and_bind("bind ^I rl_complete")
+            # Unix tab compliter
+            else:
+              readline.parse_and_bind("tab: complete")
           cmd = raw_input("""commix(""" + Style.BRIGHT + Fore.RED + """os_shell""" + Style.RESET_ALL + """) > """)
           cmd = checks.escaped_cmd(cmd)
           if cmd.lower() in settings.SHELL_OPTIONS:
