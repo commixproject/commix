@@ -464,7 +464,7 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_m
   if settings.TARGET_OS == "win":
     previous_cmd = cmd
     if alter_shell:
-      cmd = cmd + " > " + OUTPUT_TEXTFILE
+      cmd = "\"" + cmd + "\""
     else: 
       cmd = "powershell.exe -InputFormat none write-host ([string](cmd /c " + cmd + ")).trim()"
 

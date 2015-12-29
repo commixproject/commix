@@ -321,4 +321,7 @@ DEL = " rm "
 FOUND_HOW_LONG = "" 
 FOUND_DIFF = ""
 
+# Failed (injection) tries
+FAILED_TRIES = 20
+
 #eof

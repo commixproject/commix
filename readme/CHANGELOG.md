@@ -1,4 +1,5 @@
 ## Version 0.3b [2015]
+* Replaced: Some powershell-based payloads, have been replaced by new (more solid) ones, so to avoid "Microsoft-IIS" server's incompatibilities.
 * Added: Support (in MacOSX platforms) for a tab completion in shell options.
 * Added: Undocumented parameter "-InputFormat none" so to avoid "Microsoft-IIS" server's hang.
 * Added: Ability for identification of "Microsoft-IIS" servers.

@@ -97,7 +97,6 @@ The "file-based" injection technique handler
 """
 def fb_injection_handler(url, delay, filename, http_request_method, url_time_response):
   counter = 1
-  failed_tries = 20
   vp_flag = True
   exit_loops = False
   no_result = True
@@ -110,7 +109,10 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
 
   # Set temp path 
   if settings.TARGET_OS == "win":
-    settings.TMP_PATH = "%temp%\\"
+    if "microsoft-iis" in settings.SERVER_BANNER.lower():
+      settings.TMP_PATH = "C:\\Windows\TEMP\\"
+    else:
+      settings.TMP_PATH = "%temp%\\"
   else:
     settings.TMP_PATH = "/tmp/"
 
@@ -274,9 +276,9 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                   tfb_controller(no_result, url, delay, filename, tmp_path, http_request_method, url_time_response)
                   raise
                   
-                # Show an error message, after 20 failed tries.
+                # Show an error message, after N failed tries.
                 # Use the "/tmp/" directory for tempfile-based technique.
-                elif i == failed_tries and no_result == True :
+                elif i == settings.FAILED_TRIES and no_result == True :
                   if not menu.options.verbose:
                     print ""
                   print Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to read and/or write files in '" + settings.SRV_ROOT_DIR + "'." + Style.RESET_ALL

