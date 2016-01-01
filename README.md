@@ -71,6 +71,6 @@ For bug reports or enhancements, please open an issue [here](https://github.com/
 - Windows (experimental)
 
 ####Presentations and White Papers
-For presentations and white papers published in conferences, check the '[Presentations](https://github.com/stasinopoulos/commix/wiki/Presentations)' wiki page.
+For presentations and white papers published in conferences, check the '[presentations](https://github.com/stasinopoulos/commix/wiki/Presentations)' wiki page.
 
 
