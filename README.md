@@ -7,7 +7,7 @@
 
 	+--
 	Automated All-in-One OS Command Injection and Exploitation Tool
-	Copyright (c) 2014-2015 Anastasios Stasinopoulos (@ancst)
+	Copyright (c) 2014-2016 Anastasios Stasinopoulos (@ancst)
 	+--
 	
 [![GPLv3 License](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://github.com/stasinopoulos/commix/blob/master/readme/COPYING)
