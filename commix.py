@@ -398,7 +398,7 @@ def main():
   except SocketError, e:
     if menu.options.verbose:
       print ""
-    print Back.RED + "(x) Critical: The target host is not responding." + \
+    print "\n" + Back.RED + "(x) Critical: The target host is not responding." + \
           " Please ensure that is up and try again." + Style.RESET_ALL 
     if settings.SHOW_LOGS_MSG == True:
       logs.logs_notification(filename)
