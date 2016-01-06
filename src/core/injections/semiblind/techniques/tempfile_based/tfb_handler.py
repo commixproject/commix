@@ -399,7 +399,7 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
                         if not readline_error:
                           readline.set_completer(menu.tab_completer)
                           # MacOSX tab compliter
-                          if 'libedit' in readline.__doc__:
+                          if getattr(readline, '__doc__', '') is not None and 'libedit' in getattr(readline, '__doc__', ''):
                             readline.parse_and_bind("bind ^I rl_complete")
                           # Unix tab compliter
                           else:
