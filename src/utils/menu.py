@@ -228,6 +228,12 @@ enumeration.add_option("--privileges",
                 default = False,
                 help="Retrieve system users privileges.")
 
+enumeration.add_option("--ps-version", 
+                action="store_true",
+                dest="ps_version",
+                default = False,
+                help="Retrieve PowerShell's version number.")
+
 # File access options
 file_access = OptionGroup(parser, Style.BRIGHT + "File access" + Style.RESET_ALL, 
                         "These options can be used to access files on the target host.")

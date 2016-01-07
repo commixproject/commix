@@ -110,6 +110,9 @@ MAX_OPTION_LENGTH = 18
 PYTHON_VERSION = sys.version.split()[0]
 
 # Enumeration Commands
+# Output PowerShell's version number
+PS_VERSION = "powershell.exe -InputFormat none write-host ([string]$(cmd /c powershell.exe -InputFormat none get-host)[3]).replace('Version','').replace(' ','').substring(1,3)"
+
 # Current user
 CURRENT_USER = "whoami"
 WIN_CURRENT_USER = "echo %username%"

