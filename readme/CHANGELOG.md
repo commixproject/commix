@@ -1,4 +1,5 @@
 ## Version 0.3b [2015]
+* Added: Check if Powershell is enabled in target host, if the applied option's payload is requiring the use of PowerShell.
 * Added: New option "--ps-version", that checks PowerShell's version number
 * Replaced: Some powershell-based payloads, have been replaced by new (more solid) ones, so to avoid "Microsoft-IIS" server's incompatibilities.
 * Added: Support (in MacOSX platforms) for a tab completion in shell options.

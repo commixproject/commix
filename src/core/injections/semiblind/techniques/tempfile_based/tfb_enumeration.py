@@ -41,6 +41,7 @@ def powershell_version(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_
   ps_version = output
   try:
     if float(ps_version):
+      settings.PS_ENABLED = True
       ps_version = "".join(str(p) for p in output)
       if menu.options.verbose:
         print ""
@@ -52,7 +53,8 @@ def powershell_version(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_
       output_file.write("    (!) The PowerShell's version number is " + ps_version + ".\n")
       output_file.close()
   except ValueError:
-    print "\n" + Fore.YELLOW + "(^) Warning: Heuristics have failed to identify PowerShell's version, which means that many attack vector may be failed." + Style.RESET_ALL 
+    print "\n" + Fore.YELLOW + "(^) Warning: Heuristics have failed to identify PowerShell's version, which means that some payloads or injection techniques may be failed." + Style.RESET_ALL 
+    settings.PS_ENABLED = False
 
 """
 Hostname enumeration
@@ -379,7 +381,7 @@ def do_check(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_me
   else:
     settings.ENUMERATION_DONE = False
   
-  if menu.options.ps_version and settings.TARGET_OS == "win":
+  if menu.options.ps_version and settings.TARGET_OS == "win" and settings.PS_ENABLED == None:
     powershell_version(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
     settings.ENUMERATION_DONE = True
 

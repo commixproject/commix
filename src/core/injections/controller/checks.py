@@ -132,4 +132,43 @@ def no_readline_module():
     info_msg += " 'gnureadline' module (https://pypi.python.org/pypi/gnureadline).\n" 
   print Fore.YELLOW + info_msg + Style.RESET_ALL 
 
+"""
+Check if PowerShell is enabled.
+"""
+def ps_check():
+  if settings.PS_ENABLED == None and menu.options.is_admin or menu.options.users or menu.options.passwords:
+    info_msg = "(^) Warning: The payloads in some options that you have chosen, are requiring the use of PowerShell. "
+    print Fore.YELLOW + info_msg + Style.RESET_ALL
+    while True:
+      ps_check = raw_input("(?) Do you want to use the \"--ps-version\" option so ensure that PowerShell is enabled? [Y/n/q] > ").lower()
+      if ps_check in settings.CHOISE_YES:
+        menu.options.ps_version = True
+        break
+      elif ps_check in settings.CHOISE_NO:
+        break
+      elif ps_check in settings.CHOISE_QUIT:
+        print ""
+        os._exit(0)
+      else:  
+        if ps_check == "":
+          ps_check = "enter"
+        print Back.RED + "(x) Error: '" + ps_check + "' is not a valid answer." + Style.RESET_ALL + "\n"
+        pass
+
+"""
+If PowerShell is disabled.
+"""
+def ps_check_failed():
+  while True:
+    ps_check = raw_input("(?) Do you want to ignore the above warning and continue the procedure? [Y/n] > ").lower()
+    if ps_check in settings.CHOISE_YES:
+      break
+    elif ps_check in settings.CHOISE_NO:
+      print ""
+      os._exit(0)
+    else:  
+      if ps_check == "":
+        ps_check = "enter"
+      print Back.RED + "(x) Error: '" + ps_check + "' is not a valid answer." + Style.RESET_ALL + "\n"
+      pass
 #eof

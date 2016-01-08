@@ -20,6 +20,7 @@ import sys
 from src.utils import menu
 from src.utils import settings
 
+from src.core.injections.controller import checks
 from src.thirdparty.colorama import Fore, Back, Style, init
 from src.core.injections.results_based.techniques.classic import cb_injector
 
@@ -43,6 +44,7 @@ def powershell_version(separator, TAG, prefix, suffix, whitespace, http_request_
   try:
     ps_version = "".join(str(p) for p in ps_version)
     if float(ps_version):
+      settings.PS_ENABLED = True
       if menu.options.verbose:
         print ""
       # Output PowerShell's version number
@@ -53,9 +55,9 @@ def powershell_version(separator, TAG, prefix, suffix, whitespace, http_request_
       output_file.write("    (!) The PowerShell's version number is " + ps_version + ".\n")
       output_file.close()
   except ValueError:
-    print Fore.YELLOW + "(^) Warning: Heuristics have failed to identify PowerShell's version, which means that many attack vector may be failed." + Style.RESET_ALL 
-
-
+    print Fore.YELLOW + "(^) Warning: Heuristics have failed to identify PowerShell's version, which means that some payloads or injection techniques may be failed." + Style.RESET_ALL 
+    settings.PS_ENABLED = False
+    checks.ps_check_failed()
 
 """
 Hostname enumeration
@@ -392,7 +394,11 @@ def do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, ur
   if not menu.options.verbose:
     print ""
 
-  if menu.options.ps_version and settings.TARGET_OS == "win":
+  # Check if PowerShell is enabled.
+  if not menu.options.ps_version and settings.TARGET_OS == "win":
+    checks.ps_check()
+
+  if menu.options.ps_version and settings.TARGET_OS == "win" and settings.PS_ENABLED == None:
     powershell_version(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
     settings.ENUMERATION_DONE = True
 

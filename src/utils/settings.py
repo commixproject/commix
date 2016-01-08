@@ -327,4 +327,7 @@ FOUND_DIFF = ""
 # Failed (injection) tries
 FAILED_TRIES = 20
 
+# Check for PowerShell
+PS_ENABLED = None
+
 #eof
