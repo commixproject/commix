@@ -462,7 +462,7 @@ def shellshock_handler(url, http_request_method, filename):
           percent = ((i*100)/total)
           float_percent = "{0:.1f}".format(round(((i*100)/(total*1.0)),2))
           
-          if percent == 100:
+          if str(float_percent) == "100.0":
             if no_result == True:
               percent = Fore.RED + "FAILED" + Style.RESET_ALL
             else:

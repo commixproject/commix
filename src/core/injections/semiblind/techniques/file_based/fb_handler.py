@@ -309,7 +309,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                 else:
                   if exit_loops == False:
                     if not menu.options.verbose:
-                      if percent == 100:
+                      if str(float_percent) == "100.0":
                         if no_result == True:
                           percent = Fore.RED + "FAILED" + Style.RESET_ALL
                         else:

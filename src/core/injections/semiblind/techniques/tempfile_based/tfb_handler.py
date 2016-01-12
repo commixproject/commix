@@ -249,7 +249,7 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
           except:
             percent = ((num_of_chars * 100) / total)
             float_percent = "{0:.1f}".format(round(((num_of_chars*100)/(total*1.0)),2))
-            if percent == 100:
+            if str(float_percent) == "100.0":
               if no_result == True:
                 if not menu.options.verbose:
                   percent = Fore.RED + "FAILED" + Style.RESET_ALL
