@@ -81,7 +81,7 @@ general.add_option("--output-dir",
 target = OptionGroup(parser, Style.BRIGHT + "Target" + Style.RESET_ALL, 
                      "This options has to be provided, to define the target URL. ")
 
-target.add_option("--url",
+target.add_option("-u","--url",
                 action="store",
                 dest="url",
                 help="Target URL.")
@@ -91,6 +91,10 @@ target.add_option("--url-reload",
                 dest="url_reload",
                 default=False,
                 help="Reload target URL after command execution.")
+
+target.add_option("-l",
+                dest="logfile",
+                help="Parse target and data from HTTP proxy log file.")
 
 # Request options
 request = OptionGroup(parser,  Style.BRIGHT + "Request" + Style.RESET_ALL, 

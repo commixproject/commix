@@ -50,6 +50,7 @@ from src.core.requests import proxy
 from src.core.requests import headers
 from src.core.requests import requests
 
+from src.core.injections.controller import parser
 from src.core.injections.controller import controller
 
 # use Colorama to make Termcolor work on Windows too :)
@@ -87,7 +88,11 @@ def main():
       menu.parser.print_help()
       print ""
       sys.exit(0)
-
+    
+    # Parse target / data from HTTP proxy logs (i.e Burp / WebScarab).
+    if menu.options.logfile:
+      parser.logfile_parser()
+      
     # Modification on payload
     if not menu.options.shellshock:
       #settings.CURRENT_USER = "echo $(" + settings.CURRENT_USER + ")"
@@ -158,28 +163,11 @@ def main():
       if not re.match(settings.VALID_URL_FORMAT, menu.options.file_upload):
         print Back.RED + "(x) Error: The '" + menu.options.file_upload + "' is not a valid URL. " + Style.RESET_ALL
         sys.exit(0)
-
-    # # Check if specified file-access options
-    # # Check if not defined "--file-dest" option.
-    # if menu.options.file_dest == None:
-    #   # Check if defined "--file-write" option.
-    #   if menu.options.file_write:
-    #     file_name = os.path.split(menu.options.file_write)[1]
-    #     menu.options.file_dest = settings.SRV_ROOT_DIR + file_name
-        
-    #   # Check if defined "--file-upload" option.
-    #   if menu.options.file_upload:
-    #     file_name = os.path.split(menu.options.file_upload)[1]
-    #     menu.options.file_dest = settings.SRV_ROOT_DIR + file_name
-        
-    # elif menu.options.file_dest and menu.options.file_write == None and menu.options.file_upload == None :
-    #   print Back.RED + "(x) Error: You must enter the '--file-write' or '--file-upload' parameter." + Style.RESET_ALL
-    #   sys.exit(0)
         
     # Check if defined "--random-agent" option.
     if menu.options.random_agent:
       menu.options.agent = random.choice(settings.USER_AGENT_LIST)
-            
+  
     # Check if defined "--url" option.
     if menu.options.url:
       url = menu.options.url
@@ -201,15 +189,18 @@ def main():
       # The logs filename construction.
       filename = logs.create_log_file(url, output_dir)
       try:
+        
         # Check if defined POST data
         if menu.options.data:
           request = urllib2.Request(url, menu.options.data)
         else:
           request = urllib2.Request(url)
         headers.do_check(request)  
+        
         # Check if defined any HTTP Proxy (--proxy option).
         if menu.options.proxy:
           proxy.do_check(url)
+        
         # Check if defined Tor (--tor option).
         elif menu.options.tor:
           tor.do_check()
@@ -226,6 +217,7 @@ def main():
             response = urllib2.urlopen(request)
         except:
           raise
+        
         html_data = response.read()
         content = response.read()
         print "[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]"
@@ -245,6 +237,7 @@ def main():
                     raise SystemExit()
                 else:
                   identified_os = "Unix-like (" + settings.TARGET_OS + ")"
+            
             found_server_banner = False
             for i in range(0,len(settings.SERVER_BANNERS)):
               if settings.SERVER_BANNERS[i].lower() in server_banner.lower():
@@ -280,6 +273,7 @@ def main():
             else: 
               if menu.options.is_admin : 
                 print Fore.YELLOW + "(^) Warning: Swithing the '--is-admin' to '--is-root' because the taget has been identified as unix-like. " + Style.RESET_ALL   
+            
             if found_os_server == False:
               # If "--shellshock" option is provided then,
               # by default is a Linux/Unix operating system.
