@@ -11,7 +11,7 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
-For more see the file 'doc/COPYING' for copying permission.
+For more see the file 'readme/COPYING' for copying permission.
 """
 
 import subprocess
