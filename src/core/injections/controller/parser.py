@@ -111,8 +111,8 @@ def logfile_parser():
         match = "".join([str(i) for i in match]).replace("', '",":")
         match = match.replace("('","")
         match = match.replace("')","\\n")
-        # Ignore the content-length header
-        if "Content-Length" in match: 
+        # Ignore some header.
+        if "Content-Length" or "Accept-Encoding" in match: 
         	extra_headers = extra_headers
       	else:
         	extra_headers = extra_headers + match
