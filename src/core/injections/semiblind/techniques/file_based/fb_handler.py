@@ -103,6 +103,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
   is_encoded= False
   stop_injection = False
   call_tmp_based = False
+  next_attack_vector = False
   export_injection_info = False
   injection_type = "Semiblind Command Injection"
   technique = "file-based injection technique"
@@ -363,7 +364,13 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
         if shell:
           found = True
           no_result = False
-          
+
+          if not menu.options.verbose and \
+             not menu.options.alter_shell and \
+             not next_attack_vector:
+            next_attack_vector = True
+            print ""
+
           if settings.COOKIE_INJECTION == True: 
             header_name = " Cookie"
             found_vuln_parameter = vuln_parameter
@@ -397,9 +404,9 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
             vp_flag = logs.add_parameter(vp_flag, filename, http_request_method, vuln_parameter, payload)
           logs.update_payload(filename, counter, payload) 
           counter = counter + 1
-          
+
           # Print the findings to terminal.
-          print Style.BRIGHT + "\n(!) The (" + http_request_method + ")" + found_vuln_parameter + header_name + the_type + " is vulnerable to " + injection_type + "." + Style.RESET_ALL
+          print Style.BRIGHT + "(!) The (" + http_request_method + ")" + found_vuln_parameter + header_name + the_type + " is vulnerable to " + injection_type + "." + Style.RESET_ALL
           print "  (+) Type : " + Fore.YELLOW + Style.BRIGHT + injection_type + Style.RESET_ALL + ""
           print "  (+) Technique : " + Fore.YELLOW + Style.BRIGHT + technique.title() + Style.RESET_ALL + ""
           print "  (+) Payload : " + Fore.YELLOW + Style.BRIGHT + re.sub("%20", " ", payload.replace("\n", "\\n")) + Style.RESET_ALL
@@ -534,7 +541,9 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                         print "\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n"
 
                     if not shell or shell == "":
-                        print Back.RED + "(x) Error: The '" + cmd + "' command, does not return any output." + Style.RESET_ALL + "\n"
+                      if menu.options.verbose:
+                        print ""
+                      print Back.RED + "(x) Error: The '" + cmd + "' command, does not return any output." + Style.RESET_ALL + "\n"
 
               elif gotshell in settings.CHOISE_NO:
                 if menu.options.verbose:
