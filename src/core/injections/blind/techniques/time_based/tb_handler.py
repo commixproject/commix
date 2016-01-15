@@ -147,8 +147,10 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
               # Check if target host is vulnerable.
               how_long, vuln_parameter = tb_injector.injection_test(payload, http_request_method, url)
 
-            # Statistical analysis in .
+            # Statistical analysis in time responses.
             how_long_statistic = how_long_statistic + how_long
+
+            # Reset the how_long_statistic counter
             if output_length == tag_length - 1:
               how_long_statistic = 0
 
@@ -167,8 +169,21 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                  (url_time_response != 0 and (how_long - delay) > 0 and (how_long >= delay + 1)) :
 
                 # Time relative false positive fixation.
-                if len(TAG) == output_length and \
-                    how_long > (how_long_statistic / output_length):
+                false_positive_fixation = False
+                if settings.TARGET_OS == "win":
+                  if len(TAG) == output_length and \
+                      how_long > (how_long_statistic / output_length):
+                      false_positive_fixation = True
+                else:
+                  if len(TAG) == output_length and \
+                      delay == 1 and (how_long_statistic == delay) or \
+                      delay > 1 and (how_long_statistic == (output_length + delay)) and \
+                      how_long == delay + 1:
+                      false_positive_fixation = True
+
+                # Check if false positive fixation is True.
+                if false_positive_fixation:
+                  false_positive_fixation = False
                   settings.FOUND_HOW_LONG = how_long
                   settings.FOUND_DIFF = how_long - delay
                   randv1 = random.randrange(0, 1)

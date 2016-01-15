@@ -171,8 +171,10 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
             percent = ((num_of_chars * 100) / total)
             float_percent = "{0:.1f}".format(round(((num_of_chars*100)/(total*1.0)),2))
 
-            # Statistical analysis in .
+            # Statistical analysis in time responses.
             how_long_statistic = how_long_statistic + how_long
+
+            # Reset the how_long_statistic counter
             if output_length == tag_length - 1:
               how_long_statistic = 0
 
@@ -187,8 +189,21 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
                  (url_time_response != 0 and (how_long - delay) > 0 and (how_long >= delay + 1)) :
 
                 # Time relative false positive fixation.
-                if len(TAG) == output_length and \
-                    how_long > (how_long_statistic / output_length):
+                false_positive_fixation = False
+                if settings.TARGET_OS == "win":
+                  if len(TAG) == output_length and \
+                      how_long > (how_long_statistic / output_length):
+                      false_positive_fixation = True
+                else:
+                  if len(TAG) == output_length and \
+                      delay == 1 and (how_long_statistic == delay) or \
+                      delay > 1 and (how_long_statistic == (output_length + delay)) and \
+                      how_long == delay + 1:
+                      false_positive_fixation = True
+
+                # Check if false positive fixation is True.
+                if false_positive_fixation:
+                  false_positive_fixation = False
                   settings.FOUND_HOW_LONG = how_long
                   settings.FOUND_DIFF = how_long - delay
                   randv1 = random.randrange(0, 1)
