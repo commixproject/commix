@@ -145,7 +145,7 @@ __Warning__: The alternative shells are still experimental.
 def cmd_execution_alter_shell(separator, TAG, cmd):
   if settings.TARGET_OS == "win":
     if settings.REVERSE_TCP:
-      payload = (separator + " " + cmd + " "
+      payload = (separator + cmd + " "
                 )
     else:
       python_payload = ("for /f \"delims=\" %i in ('cmd /c " + 

