@@ -255,7 +255,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
             html_data = output.read()
             shell = re.findall(r"" + TAG + "", html_data)
 
-            if len(shell) != 0 and shell == TAG and not menu.options.verbose:
+            if len(shell) != 0 and shell[0] == TAG and not menu.options.verbose:
               percent = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
               sys.stdout.write("\r(*) Testing the " + technique + "... [ " + percent + " ]")  
               sys.stdout.flush()
