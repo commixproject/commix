@@ -280,9 +280,10 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                 # Show an error message, after N failed tries.
                 # Use the "/tmp/" directory for tempfile-based technique.
                 elif i == settings.FAILED_TRIES and no_result == True :
-                  if not menu.options.verbose:
-                    print ""
-                  print Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to read and/or write files in '" + settings.SRV_ROOT_DIR + "'." + Style.RESET_ALL
+                  warning_msg = "(^) Warning: It seems that you don't have permissions to "
+                  warning_msg += "read and/or write files in '" + settings.SRV_ROOT_DIR + "'."  
+                  sys.stdout.write("\r" + Fore.YELLOW + warning_msg + Style.RESET_ALL)
+                  print ""
                   while True:
                     tmp_upload = raw_input("(?) Do you want to try the temporary directory (" + tmp_path + ") [Y/n/q] > ").lower()
                     if tmp_upload in settings.CHOISE_YES:
@@ -350,8 +351,10 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
           raise
 
         except urllib2.URLError, e:
-          # print "\n" + Back.RED + "(x) Error: " + str(e.reason) + Style.RESET_ALL
-          print Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to read and/or write files in '" + settings.SRV_ROOT_DIR + "'." + Style.RESET_ALL
+          warning_msg = "(^) Warning: It seems that you don't have permissions to "
+          warning_msg += "read and/or write files in '" + settings.SRV_ROOT_DIR + "'."
+          sys.stdout.write("\r" + Fore.YELLOW + warning_msg + Style.RESET_ALL)
+          print ""
           # Provide custom server's root directory.
           custom_srv_root_dir()
           continue
