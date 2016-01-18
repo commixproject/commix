@@ -1,4 +1,5 @@
 ## Version 0.3b [2015]
+* Added: Time-relative false-positive identification, which identifies unexpected time delays due to unstable requests.
 * Added: New option "-l", that parses target and data from HTTP proxy log file (i.e Burp or WebScarab).
 * Added: Check if Powershell is enabled in target host, if the applied option's payload is requiring the use of PowerShell.
 * Added: New option "--ps-version", that checks PowerShell's version number.

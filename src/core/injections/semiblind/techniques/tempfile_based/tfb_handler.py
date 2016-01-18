@@ -79,13 +79,14 @@ def delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, http_req
 The "tempfile-based" injection technique handler
 """
 def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, url_time_response):
-  # percent = "0.2"
   counter = 1
   num_of_chars = 1
   vp_flag = True
   no_result = True
   is_encoded = False
   is_vulnerable = False
+  again_warning = True
+  false_positive_warning = False
   how_long_statistic = 0
   export_injection_info = False
   how_long = 0
@@ -190,16 +191,29 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
 
                 # Time relative false positive fixation.
                 false_positive_fixation = False
-                if settings.TARGET_OS == "win":
-                  if len(TAG) == output_length and \
-                      how_long > (how_long_statistic / output_length):
-                      false_positive_fixation = True
-                else:
-                  if len(TAG) == output_length and \
-                      delay == 1 and (how_long_statistic == delay) or \
+                if len(TAG) == output_length:
+                  # Windows targets.
+                  if settings.TARGET_OS == "win":
+                    if how_long > (how_long_statistic / output_length):
+                        false_positive_fixation = True
+                    else:
+                        false_positive_warning = True
+                  # Unix-like targets.
+                  else:
+                    if delay == 1 and (how_long_statistic == delay) or \
                       delay > 1 and (how_long_statistic == (output_length + delay)) and \
                       how_long == delay + 1:
-                      false_positive_fixation = True
+                        false_positive_fixation = True
+                    else:
+                        false_positive_warning = True
+
+                # Identified false positive warning message.
+                if false_positive_warning and again_warning:
+                  again_warning = False
+                  warning_msg = "(^) Warning: Unexpected time delays have been identified due to unstable "
+                  warning_msg += "requests. This behavior which may lead to false-positive results."
+                  sys.stdout.write("\r" + Fore.YELLOW + warning_msg + Style.RESET_ALL)
+                  print ""
 
                 # Check if false positive fixation is True.
                 if false_positive_fixation:
