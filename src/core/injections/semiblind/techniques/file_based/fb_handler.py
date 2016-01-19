@@ -344,10 +344,6 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
           if 'vuln_parameter' in locals():
             # Delete previous shell (text) files (output)
             delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-          else:
-            pass
-
-          #delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
           raise
 
         except urllib2.URLError, e:
@@ -372,7 +368,6 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
              not menu.options.alter_shell and \
              not next_attack_vector:
             next_attack_vector = True
-            print ""
 
           if settings.COOKIE_INJECTION == True: 
             header_name = " Cookie"
@@ -409,7 +404,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
           counter = counter + 1
 
           # Print the findings to terminal.
-          print Style.BRIGHT + "(!) The (" + http_request_method + ")" + found_vuln_parameter + header_name + the_type + " is vulnerable to " + injection_type + "." + Style.RESET_ALL
+          print Style.BRIGHT + "\n(!) The (" + http_request_method + ")" + found_vuln_parameter + header_name + the_type + " is vulnerable to " + injection_type + "." + Style.RESET_ALL
           print "  (+) Type : " + Fore.YELLOW + Style.BRIGHT + injection_type + Style.RESET_ALL + ""
           print "  (+) Technique : " + Fore.YELLOW + Style.BRIGHT + technique.title() + Style.RESET_ALL + ""
           print "  (+) Payload : " + Fore.YELLOW + Style.BRIGHT + re.sub("%20", " ", payload.replace("\n", "\\n")) + Style.RESET_ALL
