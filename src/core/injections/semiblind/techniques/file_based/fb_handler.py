@@ -402,9 +402,10 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
             vp_flag = logs.add_parameter(vp_flag, filename, http_request_method, vuln_parameter, payload)
           logs.update_payload(filename, counter, payload) 
           counter = counter + 1
-
+          if not menu.options.verbose:
+            print ""
           # Print the findings to terminal.
-          print Style.BRIGHT + "\n(!) The (" + http_request_method + ")" + found_vuln_parameter + header_name + the_type + " is vulnerable to " + injection_type + "." + Style.RESET_ALL
+          print Style.BRIGHT + "(!) The (" + http_request_method + ")" + found_vuln_parameter + header_name + the_type + " is vulnerable to " + injection_type + "." + Style.RESET_ALL
           print "  (+) Type : " + Fore.YELLOW + Style.BRIGHT + injection_type + Style.RESET_ALL + ""
           print "  (+) Technique : " + Fore.YELLOW + Style.BRIGHT + technique.title() + Style.RESET_ALL + ""
           print "  (+) Payload : " + Fore.YELLOW + Style.BRIGHT + re.sub("%20", " ", payload.replace("\n", "\\n")) + Style.RESET_ALL
@@ -544,8 +545,6 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                       print Back.RED + "(x) Error: The '" + cmd + "' command, does not return any output." + Style.RESET_ALL + "\n"
 
               elif gotshell in settings.CHOISE_NO:
-                if menu.options.verbose:
-                  print ""
                 if checks.next_attack_vector(technique, go_back) == True:
                   break
                 else:
