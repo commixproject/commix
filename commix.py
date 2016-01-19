@@ -294,7 +294,7 @@ def main():
                   else:
                     if got_os == "":
                       got_os = "enter"
-                    print Back.RED + "(x) Error: '" + got_os + "' is not a valid answer." + Style.RESET_ALL
+                    print Back.RED + "(x) Error: '" + got_os + "' is not a valid answer." + Style.RESET_ALL + "\n"
                     pass
             if found_server_banner == False :
               print  Fore.YELLOW + "(^) Warning: The server which was identified as " + server_banner + " seems unknown." + Style.RESET_ALL

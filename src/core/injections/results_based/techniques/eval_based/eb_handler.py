@@ -253,7 +253,7 @@ def eb_injection_handler(url, delay, filename, http_request_method):
               else:
                 if enumerate_again == "":
                   enumerate_again = "enter"
-                print Back.RED + "(x) Error: '" + enumerate_again + "' is not a valid answer." + Style.RESET_ALL
+                print Back.RED + "(x) Error: '" + enumerate_again + "' is not a valid answer." + Style.RESET_ALL + "\n"
                 pass
 
           else:
@@ -275,7 +275,7 @@ def eb_injection_handler(url, delay, filename, http_request_method):
               else:
                 if file_access_again  == "":
                   file_access_again  = "enter"
-                print Back.RED + "(x) Error: '" + file_access_again  + "' is not a valid answer." + Style.RESET_ALL
+                print Back.RED + "(x) Error: '" + file_access_again  + "' is not a valid answer." + Style.RESET_ALL + "\n"
                 pass
           else:
             eb_file_access.do_check(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
@@ -390,7 +390,7 @@ def eb_injection_handler(url, delay, filename, http_request_method):
             else:
               if gotshell == "":
                 gotshell = "enter"
-              print Back.RED + "(x) Error: '" + gotshell + "' is not a valid answer." + Style.RESET_ALL
+              print Back.RED + "(x) Error: '" + gotshell + "' is not a valid answer." + Style.RESET_ALL + "\n"
               pass
             
             

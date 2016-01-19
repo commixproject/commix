@@ -247,7 +247,7 @@ def cb_injection_handler(url, delay, filename, http_request_method):
                 else:
                   if enumerate_again == "":
                     enumerate_again = "enter"
-                  print Back.RED + "(x) Error: '" + enumerate_again + "' is not a valid answer." + Style.RESET_ALL
+                  print Back.RED + "(x) Error: '" + enumerate_again + "' is not a valid answer." + Style.RESET_ALL + "\n"
                   pass
             else:
               cb_enumeration.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
@@ -268,7 +268,7 @@ def cb_injection_handler(url, delay, filename, http_request_method):
                 else:
                   if file_access_again == "":
                     file_access_again  = "enter"
-                  print Back.RED + "(x) Error: '" + file_access_again  + "' is not a valid answer." + Style.RESET_ALL
+                  print Back.RED + "(x) Error: '" + file_access_again  + "' is not a valid answer." + Style.RESET_ALL + "\n"
                   pass
             else:
               cb_file_access.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
@@ -388,7 +388,7 @@ def cb_injection_handler(url, delay, filename, http_request_method):
               else:
                 if gotshell == "":
                   gotshell = "enter"
-                print Back.RED + "(x) Error: '" + gotshell + "' is not a valid answer." + Style.RESET_ALL
+                print Back.RED + "(x) Error: '" + gotshell + "' is not a valid answer." + Style.RESET_ALL + "\n"
                 pass
                 
   if no_result == True:

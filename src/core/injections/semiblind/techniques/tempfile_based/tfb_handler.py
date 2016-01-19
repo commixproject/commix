@@ -371,7 +371,7 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
                   else:
                     if enumerate_again == "":
                       enumerate_again = "enter"
-                    print Back.RED + "(x) Error: '" + enumerate_again + "' is not a valid answer." + Style.RESET_ALL
+                    print Back.RED + "(x) Error: '" + enumerate_again + "' is not a valid answer." + Style.RESET_ALL + "\n"
                     pass
               else:
                 tfb_enumeration.do_check(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
@@ -392,7 +392,7 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
                   else:
                     if file_access_again == "":
                       file_access_again = "enter"
-                    print Back.RED + "(x) Error: '" + file_access_again + "' is not a valid answer." + Style.RESET_ALL
+                    print Back.RED + "(x) Error: '" + file_access_again + "' is not a valid answer." + Style.RESET_ALL + "\n"
                     pass
               else:
                 tfb_file_access.do_check(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
@@ -510,7 +510,7 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
                   else:
                     if gotshell == "":
                       gotshell = "enter"
-                    print Back.RED + "(x) Error: '" + gotshell + "' is not a valid answer." + Style.RESET_ALL
+                    print Back.RED + "(x) Error: '" + gotshell + "' is not a valid answer." + Style.RESET_ALL + "\n"
                     pass
               except KeyboardInterrupt: 
                 # Delete previous shell (text) files (output) from temp.

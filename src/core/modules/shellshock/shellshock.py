@@ -507,7 +507,7 @@ def shellshock_handler(url, http_request_method, filename):
               else:
                 if enumerate_again == "":
                   enumerate_again = "enter"
-                print Back.RED + "(x) Error: '" + enumerate_again + "' is not a valid answer." + Style.RESET_ALL
+                print Back.RED + "(x) Error: '" + enumerate_again + "' is not a valid answer." + Style.RESET_ALL + "\n"
                 pass
           else:
             enumeration(url, cve, check_header, filename)
@@ -526,7 +526,7 @@ def shellshock_handler(url, http_request_method, filename):
               else:
                 if file_access_again == "":
                   file_access_again  = "enter"
-                print Back.RED + "(x) Error: '" + file_access_again  + "' is not a valid answer." + Style.RESET_ALL
+                print Back.RED + "(x) Error: '" + file_access_again  + "' is not a valid answer." + Style.RESET_ALL + "\n"
                 pass
           else:
             file_access(url, cve, check_header, filename)
@@ -632,7 +632,7 @@ def shellshock_handler(url, http_request_method, filename):
               else:
                 if gotshell == "":
                   gotshell = "enter"
-                print Back.RED + "(x) Error: '" + gotshell + "' is not a valid answer." + Style.RESET_ALL
+                print Back.RED + "(x) Error: '" + gotshell + "' is not a valid answer." + Style.RESET_ALL + "\n"
                 continue
               break
       else:

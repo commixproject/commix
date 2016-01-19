@@ -320,7 +320,7 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                   else:
                     if enumerate_again == "":
                       enumerate_again = "enter"
-                    print Back.RED + "(x) Error: '" + enumerate_again + "' is not a valid answer." + Style.RESET_ALL
+                    print Back.RED + "(x) Error: '" + enumerate_again + "' is not a valid answer." + Style.RESET_ALL + "\n"
                     pass
               else:
                 tb_enumeration.do_check(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
@@ -339,7 +339,7 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                   else:
                     if file_access_again == "":
                       file_access_again = "enter"
-                    print Back.RED + "(x) Error: '" + file_access_again  + "' is not a valid answer." + Style.RESET_ALL
+                    print Back.RED + "(x) Error: '" + file_access_again  + "' is not a valid answer." + Style.RESET_ALL + "\n"
                     pass
               else:
                 tb_file_access.do_check(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
@@ -448,7 +448,7 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                 else:
                   if gotshell == "":
                     gotshell = "enter"
-                  print Back.RED + "(x) Error: '" + gotshell + "' is not a valid answer." + Style.RESET_ALL
+                  print Back.RED + "(x) Error: '" + gotshell + "' is not a valid answer." + Style.RESET_ALL + "\n"
                   pass
             break
           
@@ -484,7 +484,7 @@ def exploitation(url, delay, filename, http_request_method, url_time_response):
       else:
         if proceed_option == "":
           proceed_option = "enter"
-        print Back.RED + "(x) Error: '" + proceed_option + "' is not a valid answer." + Style.RESET_ALL
+        print Back.RED + "(x) Error: '" + proceed_option + "' is not a valid answer." + Style.RESET_ALL + "\n"
         pass
   else:
     if tb_injection_handler(url, delay, filename, http_request_method, url_time_response) == False:

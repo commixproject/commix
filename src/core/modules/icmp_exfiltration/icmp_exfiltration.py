@@ -180,7 +180,7 @@ def input_cmd(http_request_method, url, vuln_parameter, ip_src, technique):
     else:
       if gotshell == "":
         gotshell = "enter"
-      print Back.RED + "(x) Error: '" + gotshell + "' is not a valid answer." + Style.RESET_ALL
+      print Back.RED + "(x) Error: '" + gotshell + "' is not a valid answer." + Style.RESET_ALL + "\n"
       pass
 
 

@@ -76,7 +76,7 @@ def installer():
         else:
           if uninstall == "":
             uninstall = "enter"
-          print Back.RED + "(x) Error: '" + uninstall + "' is not a valid answer." + Style.RESET_ALL
+          print Back.RED + "(x) Error: '" + uninstall + "' is not a valid answer." + Style.RESET_ALL + "\n"
           pass
       
     # Check for git.

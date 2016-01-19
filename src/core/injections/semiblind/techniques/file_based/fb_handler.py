@@ -304,7 +304,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                     else:
                       if tmp_upload == "":
                         tmp_upload = "enter"
-                      print Back.RED + "(x) Error: '" + tmp_upload + "' is not a valid answer." + Style.RESET_ALL
+                      print Back.RED + "(x) Error: '" + tmp_upload + "' is not a valid answer." + Style.RESET_ALL + "\n"
                       pass
                   continue
                 
@@ -430,7 +430,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
               else:
                 if enumerate_again == "":
                   enumerate_again = "enter"
-                print Back.RED + "(x) Error: '" + enumerate_again + "' is not a valid answer." + Style.RESET_ALL
+                print Back.RED + "(x) Error: '" + enumerate_again + "' is not a valid answer." + Style.RESET_ALL + "\n"
                 pass
           else:
             fb_enumeration.do_check(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
@@ -453,7 +453,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
               else:
                 if file_access_again == "":
                   file_access_again  = "enter"
-                print Back.RED + "(x) Error: '" + file_access_again  + "' is not a valid answer." + Style.RESET_ALL
+                print Back.RED + "(x) Error: '" + file_access_again  + "' is not a valid answer." + Style.RESET_ALL + "\n"
                 pass
           else:
             fb_file_access.do_check(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
@@ -567,7 +567,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
               else:
                 if gotshell == "":
                   gotshell = "enter"
-                print Back.RED + "(x) Error: '" + gotshell + "' is not a valid answer." + Style.RESET_ALL
+                print Back.RED + "(x) Error: '" + gotshell + "' is not a valid answer." + Style.RESET_ALL + "\n"
                 pass
             
           except KeyboardInterrupt: 
