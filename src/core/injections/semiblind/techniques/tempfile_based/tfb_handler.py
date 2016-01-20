@@ -266,8 +266,9 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
               sys.stdout.flush()
               
           except KeyboardInterrupt: 
-            # Delete previous shell (text) files (output) from temp.
-            delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+            if 'cmd' in locals():
+              # Delete previous shell (text) files (output) from temp.
+              delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
             raise
 
           except SystemExit: 
