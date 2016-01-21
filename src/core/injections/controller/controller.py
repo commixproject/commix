@@ -62,10 +62,10 @@ def do_check(url, filename):
     authentication.authentication_process()
     # Check if authentication page is the same with the next (injection) URL
     if urllib2.urlopen(url).read() == urllib2.urlopen(menu.options.auth_url).read():
-      print Back.RED + "(x) Error: It seems that the authentication procedure has failed." + Style.RESET_ALL
+      print Back.RED + settings.ERROR_SIGN + "It seems that the authentication procedure has failed." + Style.RESET_ALL
       sys.exit(0)
   elif menu.options.auth_url or menu.options.auth_data: 
-    print Back.RED + "(x) Error: You must specify both login panel URL and login parameters." + Style.RESET_ALL
+    print Back.RED + settings.ERROR_SIGN + "You must specify both login panel URL and login parameters." + Style.RESET_ALL
     sys.exit(0)
   else:
     pass
@@ -115,7 +115,7 @@ def do_check(url, filename):
   if len(check_parameter) != 0 :
     check_parameter = " '" + check_parameter + "'"
 
-  print "(*) Setting the " + "(" + http_request_method + ")" + check_parameter + header_name + the_type + "for tests."
+  print settings.INFO_SIGN + "Setting the " + "(" + http_request_method + ")" + check_parameter + header_name + the_type + "for tests."
 
   # Estimating the response time (in seconds)
   delay, url_time_response = requests.estimate_response_time(url, http_request_method, delay)
@@ -180,7 +180,7 @@ def do_check(url, filename):
       file_based_state = False
 
   if classic_state == False and eval_based_state == False and time_based_state == False and file_based_state == False :
-    info_msg = "(x) Critical: The tested (" + http_request_method + ")" + check_parameter + " parameter appear to be not injectable."
+    info_msg = settings.CRITICAL_SIGN + "The tested (" + http_request_method + ")" + check_parameter + " parameter appear to be not injectable."
     if not menu.options.alter_shell :
       info_msg += " Use the option '--alter-shell'"
     else:

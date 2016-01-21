@@ -52,7 +52,7 @@ def powershell_version(separator, payload, TAG, delay, prefix, suffix, http_requ
       output_file.write("    (!) The PowerShell's version number is " + ps_version + ".\n")
       output_file.close()
   except ValueError:
-    print Fore.YELLOW + "(^) Warning: Heuristics have failed to identify PowerShell's version, which means that some payloads or injection techniques may be failed." + Style.RESET_ALL 
+    print Fore.YELLOW + settings.WARNING_SIGN + "Heuristics have failed to identify PowerShell's version, which means that some payloads or injection techniques may be failed." + Style.RESET_ALL 
     settings.PS_ENABLED = False
 
 """
@@ -174,7 +174,7 @@ def system_users(separator, payload, TAG, delay, prefix, suffix, http_request_me
   if settings.TARGET_OS == "win":
     if menu.options.verbose:
       print ""
-    sys.stdout.write("(*) Executing the 'net users' command to enumerate users entries... ")
+    sys.stdout.write(settings.INFO_SIGN + "Executing the 'net users' command to enumerate users entries... ")
     sys.stdout.flush()
     if sys_users[0] :
       sys_users = "".join(str(p) for p in sys_users).strip()
@@ -221,12 +221,12 @@ def system_users(separator, payload, TAG, delay, prefix, suffix, http_request_me
     else:
       sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
       sys.stdout.flush()
-      print "\n" + Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to enumerate users entries." + Style.RESET_ALL  
+      print "\n" + Fore.YELLOW + settings.WARNING_SIGN + "It seems that you don't have permissions to enumerate users entries." + Style.RESET_ALL  
   # Unix-like users enumeration.    
   else:
     if menu.options.verbose:
       print ""
-    sys.stdout.write("(*) Fetching '" + settings.PASSWD_FILE + "' to enumerate users entries... ")
+    sys.stdout.write(settings.INFO_SIGN + "Fetching '" + settings.PASSWD_FILE + "' to enumerate users entries... ")
     sys.stdout.flush()
     if sys_users[0] :
       sys_users = "".join(str(p) for p in sys_users).strip()
@@ -238,7 +238,7 @@ def system_users(separator, payload, TAG, delay, prefix, suffix, http_request_me
       if len(sys_users) % 3 != 0 :
         sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
         sys.stdout.flush()
-        print "\n" + Fore.YELLOW + "(^) Warning: It seems that '" + settings.PASSWD_FILE + "' file is not in the appropriate format. Thus, it is expoted as a text file." + Style.RESET_ALL 
+        print "\n" + Fore.YELLOW + settings.WARNING_SIGN + "It seems that '" + settings.PASSWD_FILE + "' file is not in the appropriate format. Thus, it is expoted as a text file." + Style.RESET_ALL 
         sys_users = " ".join(str(p) for p in sys_users).strip()
         print sys_users
         output_file = open(filename, "a")
@@ -297,7 +297,7 @@ def system_users(separator, payload, TAG, delay, prefix, suffix, http_request_me
               output_file.close()
             except ValueError:
               if count == 1 :
-                print Fore.YELLOW + "(^) Warning: It seems that '" + settings.PASSWD_FILE + "' file is not in the appropriate format. Thus, it is expoted as a text file." + Style.RESET_ALL 
+                print Fore.YELLOW + settings.WARNING_SIGN + "It seems that '" + settings.PASSWD_FILE + "' file is not in the appropriate format. Thus, it is expoted as a text file." + Style.RESET_ALL 
               sys_users = " ".join(str(p) for p in sys_users.split(":"))
               print sys_users 
               output_file = open(filename, "a")
@@ -306,7 +306,7 @@ def system_users(separator, payload, TAG, delay, prefix, suffix, http_request_me
     else:
       sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
       sys.stdout.flush()
-      print "\n" + Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to read '" + settings.PASSWD_FILE + "' to enumerate users entries." + Style.RESET_ALL   
+      print "\n" + Fore.YELLOW + settings.WARNING_SIGN + "It seems that you don't have permissions to read '" + settings.PASSWD_FILE + "' to enumerate users entries." + Style.RESET_ALL   
 
 """
 System passwords enumeration
@@ -322,7 +322,7 @@ def system_passwords(separator, payload, TAG, delay, prefix, suffix, http_reques
     if sys_passes :
       if menu.options.verbose:
         print ""
-      sys.stdout.write("(*) Fetching '" + settings.SHADOW_FILE + "' to enumerate users password hashes... ")
+      sys.stdout.write(settings.INFO_SIGN + "Fetching '" + settings.SHADOW_FILE + "' to enumerate users password hashes... ")
       sys.stdout.flush()
       sys_passes = "".join(str(p) for p in sys_passes)
       sys_passes = sys_passes.replace(" ", "\n")
@@ -349,7 +349,7 @@ def system_passwords(separator, payload, TAG, delay, prefix, suffix, http_reques
           # Check for appropriate '/etc/shadow' format.
           except IndexError:
             if count == 1 :
-              sys.stdout.write(Fore.YELLOW + "(^) Warning: It seems that '" + settings.SHADOW_FILE + "' file is not in the appropriate format. Thus, it is expoted as a text file." + Style.RESET_ALL + "\n")
+              sys.stdout.write(Fore.YELLOW + settings.WARNING_SIGN + "It seems that '" + settings.SHADOW_FILE + "' file is not in the appropriate format. Thus, it is expoted as a text file." + Style.RESET_ALL + "\n")
             print fields[0]
             output_file = open(filename, "a")
             output_file.write("      " + fields[0])
@@ -357,7 +357,7 @@ def system_passwords(separator, payload, TAG, delay, prefix, suffix, http_reques
       else:
         sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
         sys.stdout.flush()
-        print "\n" + Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to read '" + settings.SHADOW_FILE + "' to enumerate users password hashes." + Style.RESET_ALL
+        print "\n" + Fore.YELLOW + settings.WARNING_SIGN + "It seems that you don't have permissions to read '" + settings.SHADOW_FILE + "' to enumerate users password hashes." + Style.RESET_ALL
 
 """
 Single os-shell execution
@@ -373,7 +373,7 @@ def single_os_cmd_exec(separator, payload, TAG, delay, prefix, suffix, http_requ
     if shell != "":
       print Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL
     else:
-      print Back.RED + "(x) Error: The '" + cmd + "' command, does not return any output." + Style.RESET_ALL 
+      print Back.RED + settings.ERROR_SIGN + "The '" + cmd + "' command, does not return any output." + Style.RESET_ALL 
     sys.exit(0)
 
 """

@@ -42,7 +42,7 @@ def do_check():
   requirments.do_check(requirment)
     
   check_privoxy_proxy = True
-  sys.stdout.write("(*) Testing privoxy proxy settings " + settings.PRIVOXY_IP + ":" + PRIVOXY_PORT + "... ")
+  sys.stdout.write(settings.INFO_SIGN + "Testing privoxy proxy settings " + settings.PRIVOXY_IP + ":" + PRIVOXY_PORT + "... ")
   sys.stdout.flush()
 
   try:
@@ -63,12 +63,12 @@ def do_check():
 
     except urllib2.URLError, err:
       print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
-      print Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
+      print Back.RED + settings.ERROR_SIGN + str(err) + Style.RESET_ALL
       sys.exit(0)
       
     except urllib2.HTTPError, err:
       print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
-      print Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
+      print Back.RED + settings.ERROR_SIGN + str(err) + Style.RESET_ALL
       sys.exit(0)
 
 """

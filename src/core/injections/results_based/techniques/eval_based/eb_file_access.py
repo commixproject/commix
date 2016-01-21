@@ -52,7 +52,7 @@ def file_read(separator, TAG, prefix, suffix, http_request_method, url, vuln_par
     output_file.write("    (!) The contents of file '" + file_to_read + "' : " + shell + ".\n")
     output_file.close()
   else:
-   sys.stdout.write(Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to read the '" + file_to_read + "' file." + Style.RESET_ALL + "\n")
+   sys.stdout.write(Fore.YELLOW + settings.WARNING_SIGN + "It seems that you don't have permissions to read the '" + file_to_read + "' file." + Style.RESET_ALL + "\n")
    sys.stdout.flush()
 
 """
@@ -61,7 +61,7 @@ Write to a file on the target host.
 def file_write(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename):
   file_to_write = menu.options.file_write
   if not os.path.exists(file_to_write):
-    sys.stdout.write(Fore.YELLOW + "(^) Warning: It seems that the '" + file_to_write + "' file, does not exists." + Style.RESET_ALL + "\n")
+    sys.stdout.write(Fore.YELLOW + settings.WARNING_SIGN + "It seems that the '" + file_to_write + "' file, does not exists." + Style.RESET_ALL + "\n")
     sys.stdout.flush()
     sys.exit(0)
     
@@ -73,7 +73,7 @@ def file_write(separator, TAG, prefix, suffix, http_request_method, url, vuln_pa
       import base64
       content = base64.b64encode(content)
   else:
-    sys.stdout.write(Fore.YELLOW + "(^) Warning: It seems that '" + file_to_write + "' is not a file." + Style.RESET_ALL + "\n")
+    sys.stdout.write(Fore.YELLOW + settings.WARNING_SIGN + "It seems that '" + file_to_write + "' is not a file." + Style.RESET_ALL + "\n")
     sys.stdout.flush()
     
   if os.path.split(menu.options.file_dest)[1] == "" :
@@ -129,7 +129,7 @@ def file_write(separator, TAG, prefix, suffix, http_request_method, url, vuln_pa
   else:
     if menu.options.verbose:
       print ""
-    sys.stdout.write(Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to write the '" + dest_to_write + "' file." + Style.RESET_ALL + "\n")
+    sys.stdout.write(Fore.YELLOW + settings.WARNING_SIGN + "It seems that you don't have permissions to write the '" + dest_to_write + "' file." + Style.RESET_ALL + "\n")
     sys.stdout.flush()
 
 """
@@ -145,7 +145,7 @@ def file_upload(separator, TAG, prefix, suffix, http_request_method, url, vuln_p
     try:
       urllib2.urlopen(file_to_upload)
     except urllib2.HTTPError, err:
-      sys.stdout.write(Fore.YELLOW + "(^) Warning: It seems that the '" + file_to_upload + "' file, does not exists. (" +str(err)+ ")" + Style.RESET_ALL + "\n")
+      sys.stdout.write(Fore.YELLOW + settings.WARNING_SIGN + "It seems that the '" + file_to_upload + "' file, does not exists. (" +str(err)+ ")" + Style.RESET_ALL + "\n")
       sys.stdout.flush()
       sys.exit(0)
       
@@ -177,7 +177,7 @@ def file_upload(separator, TAG, prefix, suffix, http_request_method, url, vuln_p
       sys.stdout.write(Style.BRIGHT + "(!) The " + Style.UNDERLINE + shell + Style.RESET_ALL + Style.BRIGHT + " file was uploaded successfully!" + Style.RESET_ALL + "\n")
       sys.stdout.flush()
     else:
-     sys.stdout.write(Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to write the '" + dest_to_upload + "' file." + Style.RESET_ALL + "\n")
+     sys.stdout.write(Fore.YELLOW + settings.WARNING_SIGN + "It seems that you don't have permissions to write the '" + dest_to_upload + "' file." + Style.RESET_ALL + "\n")
      sys.stdout.flush()
 
 """

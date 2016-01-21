@@ -120,7 +120,7 @@ def eb_injection_handler(url, delay, filename, http_request_method):
           # Fixation for specific payload.
           if ")%3B" + urllib.quote(")}") in payload:
             payload = payload.replace(")%3B" + urllib.quote(")}"), ")" + urllib.quote(")}"))
-          payload = payload + "" + TAG + ""
+          payload = payload +  TAG + ""
 
           if menu.options.base64:
             payload = urllib.unquote(payload)

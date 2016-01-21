@@ -125,7 +125,7 @@ def main():
               if split_first_letter[j] in settings.AVAILABLE_TECHNIQUES:
                 found_tech = True
           if split_techniques_names[i].replace(' ', '') not in settings.AVAILABLE_TECHNIQUES and found_tech == False:
-            print Back.RED + "(x) Error: You specified wrong '" + split_techniques_names[i] + "' injection technique." + Style.RESET_ALL
+            print Back.RED + settings.ERROR_SIGN + "You specified wrong '" + split_techniques_names[i] + "' injection technique." + Style.RESET_ALL
             print Back.RED + "(x) The available techniques are: classic,eval-based,time-based,file-based or c,e,t,f (with or without commas)." + Style.RESET_ALL
             sys.exit(0)
 
@@ -144,24 +144,24 @@ def main():
     # Check if specified wrong alternative shell
     if menu.options.alter_shell:
       if menu.options.alter_shell.lower() not in settings.AVAILABLE_SHELLS:
-        print Back.RED + "(x) Error: '" + menu.options.alter_shell + "' shell is not supported!" + Style.RESET_ALL
+        print Back.RED + settings.ERROR_SIGN + "'" + menu.options.alter_shell + "' shell is not supported!" + Style.RESET_ALL
         sys.exit(0)
 
     # Check the file-destination
     if menu.options.file_write and not menu.options.file_dest or \
     menu.options.file_upload  and not menu.options.file_dest:
-      print Back.RED + "(x) Error: Host's absolute filepath to write and/or upload, must be specified (--file-dest)." + Style.RESET_ALL
+      print Back.RED + settings.ERROR_SIGN + "Host's absolute filepath to write and/or upload, must be specified (--file-dest)." + Style.RESET_ALL
       sys.exit(0)
 
     if menu.options.file_dest and menu.options.file_write == None and menu.options.file_upload == None :
-       print Back.RED + "(x) Error: You must enter the '--file-write' or '--file-upload' parameter." + Style.RESET_ALL
+       print Back.RED + settings.ERROR_SIGN + "You must enter the '--file-write' or '--file-upload' parameter." + Style.RESET_ALL
        sys.exit(0)
 
     # Check if defined "--file-upload" option.
     if menu.options.file_upload:
       # Check if not defined URL for upload.
       if not re.match(settings.VALID_URL_FORMAT, menu.options.file_upload):
-        print Back.RED + "(x) Error: The '" + menu.options.file_upload + "' is not a valid URL. " + Style.RESET_ALL
+        print Back.RED + settings.ERROR_SIGN + "The '" + menu.options.file_upload + "' is not a valid URL. " + Style.RESET_ALL
         sys.exit(0)
         
     # Check if defined "--random-agent" option.
@@ -204,7 +204,7 @@ def main():
         # Check if defined Tor (--tor option).
         elif menu.options.tor:
           tor.do_check()
-        sys.stdout.write("(*) Checking connection to the target URL... ")
+        sys.stdout.write(settings.INFO_SIGN + "Checking connection to the target URL... ")
         sys.stdout.flush()
         try:
           # Check if defined any HTTP Proxy (--proxy option).
@@ -233,7 +233,7 @@ def main():
                   identified_os = "Windows"
                   settings.TARGET_OS = identified_os[:3].lower()
                   if menu.options.shellshock:
-                    print Back.RED + "(x) Critical: The shellshock module is not available for " + identified_os + " tagets." + Style.RESET_ALL
+                    print Back.RED + settings.CRITICAL_SIGN + "The shellshock module is not available for " + identified_os + " tagets." + Style.RESET_ALL
                     raise SystemExit()
                 else:
                   identified_os = "Unix-like (" + settings.TARGET_OS + ")"
@@ -263,16 +263,16 @@ def main():
             # Check for wrong flags.
             if settings.TARGET_OS == "win":
               if menu.options.is_root :
-                print Fore.YELLOW + "(^) Warning: Swithing '--is-root' to '--is-admin' because the taget has been identified as windows." + Style.RESET_ALL 
-              error_msg = "(^) Warning: The '--passwords' option, is not yet available for Windows targets."
+                print Fore.YELLOW + settings.WARNING_SIGN + "Swithing '--is-root' to '--is-admin' because the taget has been identified as windows." + Style.RESET_ALL 
+              error_msg = settings.WARNING_SIGN + "The '--passwords' option, is not yet available for Windows targets."
               if menu.options.passwords:
-                print Fore.YELLOW + "(^) Warning: The '--passwords' option, is not yet available for Windows targets." + Style.RESET_ALL   
+                print Fore.YELLOW + settings.WARNING_SIGN + "The '--passwords' option, is not yet available for Windows targets." + Style.RESET_ALL   
               if menu.options.file_upload :
-                print Fore.YELLOW + "(^) Warning: The '--file-upload' option, is not yet available for windows targets. Instead, use the '--file-write' option." + Style.RESET_ALL   
+                print Fore.YELLOW + settings.WARNING_SIGN + "The '--file-upload' option, is not yet available for windows targets. Instead, use the '--file-write' option." + Style.RESET_ALL   
                 sys.exit(0)
             else: 
               if menu.options.is_admin : 
-                print Fore.YELLOW + "(^) Warning: Swithing the '--is-admin' to '--is-root' because the taget has been identified as unix-like. " + Style.RESET_ALL   
+                print Fore.YELLOW + settings.WARNING_SIGN + "Swithing the '--is-admin' to '--is-root' because the taget has been identified as unix-like. " + Style.RESET_ALL   
             
             if found_os_server == False:
               # If "--shellshock" option is provided then,
@@ -280,9 +280,9 @@ def main():
               if menu.options.shellshock:
                 pass 
               else:
-                print Fore.YELLOW + "(^) Warning: Heuristics have failed to identify server's operating system." + Style.RESET_ALL 
+                print Fore.YELLOW + settings.WARNING_SIGN + "Heuristics have failed to identify server's operating system." + Style.RESET_ALL 
                 while True:
-                  got_os = raw_input("(?) Do you recognise the server's operating system? [(W)indows/(U)nix/(q)uit] > ").lower()
+                  got_os = raw_input(settings.QUESTION_SIGN + "Do you recognise the server's operating system? [(W)indows/(U)nix/(q)uit] > ").lower()
                   if got_os.lower() in settings.CHOISE_OS :
                     if got_os.lower() == "w":
                       settings.TARGET_OS == "win"
@@ -294,10 +294,10 @@ def main():
                   else:
                     if got_os == "":
                       got_os = "enter"
-                    print Back.RED + "(x) Error: '" + got_os + "' is not a valid answer." + Style.RESET_ALL + "\n"
+                    print Back.RED + settings.ERROR_SIGN + "'" + got_os + "' is not a valid answer." + Style.RESET_ALL + "\n"
                     pass
             if found_server_banner == False :
-              print  Fore.YELLOW + "(^) Warning: The server which was identified as " + server_banner + " seems unknown." + Style.RESET_ALL
+              print  Fore.YELLOW + settings.WARNING_SIGN + "The server which was identified as " + server_banner + " seems unknown." + Style.RESET_ALL
         except KeyError:
           pass
 
@@ -313,7 +313,7 @@ def main():
         if len(charset) != 0 :
           settings.CHARSET = charset[len(charset)-1]
           if settings.CHARSET.lower() not in settings.CHARSET_LIST:
-            print  Fore.YELLOW + "(^) Warning: The indicated web-page charset "  + settings.CHARSET + " seems unknown." + Style.RESET_ALL
+            print  Fore.YELLOW + settings.WARNING_SIGN + "The indicated web-page charset "  + settings.CHARSET + " seems unknown." + Style.RESET_ALL
           else:
             if menu.options.verbose:
               print Style.BRIGHT + "(!) The indicated web-page charset appears to be "  + Style.UNDERLINE  + settings.CHARSET + Style.RESET_ALL + "." + Style.RESET_ALL
@@ -327,18 +327,18 @@ def main():
 
         elif e.getcode() == 401:
           if menu.options.auth_type != "basic":
-            print Back.RED + "(x) Error: Only 'Basic' Access Authentication is supported." + Style.RESET_ALL
+            print Back.RED + settings.ERROR_SIGN + "Only 'Basic' Access Authentication is supported." + Style.RESET_ALL
             sys.exit(0)
           else:
-            print Back.RED + "(x) Error: Authorization required!" + Style.RESET_ALL
+            print Back.RED + settings.ERROR_SIGN + "Authorization required!" + Style.RESET_ALL
             sys.exit(0)
           
         elif e.getcode() == 403:
-          print Back.RED + "(x) Error: You don't have permission to access this page." + Style.RESET_ALL
+          print Back.RED + settings.ERROR_SIGN + "You don't have permission to access this page." + Style.RESET_ALL
           sys.exit(0)
           
         elif e.getcode() == 404:
-          print Back.RED + "(x) Error: The host seems to be down!" + Style.RESET_ALL
+          print Back.RED + settings.ERROR_SIGN + "The host seems to be down!" + Style.RESET_ALL
           sys.exit(0)
 
         else:
@@ -346,7 +346,7 @@ def main():
 
       except urllib2.URLError, e:
         print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
-        print Back.RED + "(x) Error: The host seems to be down!" + Style.RESET_ALL
+        print Back.RED + settings.ERROR_SIGN + "The host seems to be down!" + Style.RESET_ALL
         sys.exit(0)
         
       except httplib.BadStatusLine, e:
@@ -356,14 +356,14 @@ def main():
         pass
 
     else:
-      print Back.RED + "(x) Error: You must specify the target URL." + Style.RESET_ALL
+      print Back.RED + settings.ERROR_SIGN + "You must specify the target URL." + Style.RESET_ALL
       sys.exit(0)
 
     # Launch injection and exploitation controller.
     controller.do_check(url, filename)
 
   except KeyboardInterrupt: 
-    print "\n" + Back.RED + "(x) Aborted: Ctrl-C was pressed!" + Style.RESET_ALL
+    print "\n" + Back.RED + settings.ABORTION_SIGN + "Ctrl-C was pressed!" + Style.RESET_ALL
     if settings.SHOW_LOGS_MSG == True:
       logs.logs_notification(filename)
     print ""
@@ -378,21 +378,21 @@ def main():
   # Accidental stop / restart of the target host server.
   except httplib.BadStatusLine, e:
     if e.line == "" or e.message == "":
-      print "\n\n" + Back.RED + "(x) Critical: The target host is not responding." + \
+      print "\n\n" + Back.RED + settings.CRITICAL_SIGN + "The target host is not responding." + \
             " Please ensure that is up and try again." + Style.RESET_ALL
       if settings.SHOW_LOGS_MSG == True:
         logs.logs_notification(filename)
       print ""
       sys.exit(0)      
     else: 
-      print Back.RED + "(x) Error: " + e.line + e.message + Style.RESET_ALL + "\n"
+      print Back.RED + settings.ERROR_SIGN + e.line + e.message + Style.RESET_ALL + "\n"
     sys.exit(0)
 
   # Connection reset by peer
   except SocketError, e:
     if menu.options.verbose:
       print ""
-    print "\n" + Back.RED + "(x) Critical: The target host is not responding." + \
+    print "\n" + Back.RED + settings.CRITICAL_SIGN + "The target host is not responding." + \
           " Please ensure that is up and try again." + Style.RESET_ALL 
     if settings.SHOW_LOGS_MSG == True:
       logs.logs_notification(filename)

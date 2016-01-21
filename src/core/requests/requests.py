@@ -44,19 +44,19 @@ def estimate_response_time(url, http_request_method, delay):
   except urllib2.HTTPError, e:
     pass
   except socket.timeout:
-    print Back.RED + "(x) Error: The connection to target URL has timed out." + Style.RESET_ALL + "\n"
+    print Back.RED + settings.ERROR_SIGN + "The connection to target URL has timed out." + Style.RESET_ALL + "\n"
     sys.exit(0)     
   end = time.time()
   diff = end - start
   if int(diff) < 1:
     url_time_response = int(diff)
     if settings.TARGET_OS == "win":
-      info_msg = "(^) Warning: Due to the relatively slow response of 'cmd.exe' in target host,"
+      info_msg = settings.WARNING_SIGN + "Due to the relatively slow response of 'cmd.exe' in target host,"
       info_msg += " there may be delays during the data extraction procedure."
       print Fore.YELLOW + info_msg + Style.RESET_ALL
   else:
     url_time_response = int(round(diff))
-    info_msg = "(^) Warning: The estimated response time is " + str(url_time_response)
+    info_msg = settings.WARNING_SIGN + "The estimated response time is " + str(url_time_response)
     info_msg += " second" + "s"[url_time_response == 1:] + ". That may cause" 
     if url_time_response >= 3:
       info_msg += " serious"

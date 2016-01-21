@@ -65,7 +65,7 @@ def authentication_process():
       response = proxy.use_proxy(request)
     except urllib2.HTTPError, err:
       if settings.IGNORE_ERR_MSG == False:
-        print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
+        print "\n" + Back.RED + settings.ERROR_SIGN + str(err) + Style.RESET_ALL
         continue_tests = checks.continue_tests(err)
         if continue_tests == True:
           settings.IGNORE_ERR_MSG = True
@@ -79,7 +79,7 @@ def authentication_process():
       response = tor.use_tor(request)
     except urllib2.HTTPError, err:
       if settings.IGNORE_ERR_MSG == False:
-        print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
+        print "\n" + Back.RED + settings.ERROR_SIGN + str(err) + Style.RESET_ALL
         continue_tests = checks.continue_tests(err)
         if continue_tests == True:
           settings.IGNORE_ERR_MSG = True
@@ -92,7 +92,7 @@ def authentication_process():
       response = urllib2.urlopen(request)
     except urllib2.HTTPError, err:
       if settings.IGNORE_ERR_MSG == False:
-        print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
+        print "\n" + Back.RED + settings.ERROR_SIGN + str(err) + Style.RESET_ALL
         continue_tests = checks.continue_tests(err)
         if continue_tests == True:
           settings.IGNORE_ERR_MSG = True

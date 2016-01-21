@@ -68,7 +68,7 @@ then use the "/tmp/" directory for tempfile-based technique.
 """
 def tfb_controller(no_result, url, delay, filename, tmp_path, http_request_method, url_time_response):
   if no_result == True:
-    sys.stdout.write("(*) Trying to create a file, in temporary directory (" + tmp_path + ")...\n")
+    sys.stdout.write(settings.INFO_SIGN + "Trying to create a file, in temporary directory (" + tmp_path + ")...\n")
     call_tfb = tfb_handler.exploitation(url, delay, filename, tmp_path, http_request_method, url_time_response)   
     return call_tfb
   else :
@@ -89,7 +89,7 @@ def delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_
 Provide custom server's root directory
 """
 def custom_srv_root_dir():
-  settings.SRV_ROOT_DIR = raw_input("(?) Please provide the host's root directory (e.g. /var/www/) > ")
+  settings.SRV_ROOT_DIR = raw_input(settings.QUESTION_SIGN + "Please provide the host's root directory (e.g. /var/www/) > ")
   settings.CUSTOM_SRV_ROOT_DIR = True
 
 """
@@ -176,9 +176,9 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
         settings.SRV_ROOT_DIR = settings.SRV_ROOT_DIR.replace("/","\\")
 
     if not menu.options.verbose:
-      print "(*) Trying to create a file in '" + settings.SRV_ROOT_DIR + "'... "
+      print settings.INFO_SIGN + "Trying to create a file in '" + settings.SRV_ROOT_DIR + "'... "
     else:
-      print "(*) Testing the " + technique + "... "
+      print settings.INFO_SIGN + "Testing the " + technique + "... "
 
   i = 0
   # Calculate all possible combinations
@@ -216,8 +216,8 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
 
           # Check if defined "--verbose" option.
           if menu.options.verbose:
-            print "(*) Trying to upload the '" + OUTPUT_TEXTFILE + "' file on '" + settings.SRV_ROOT_DIR + "'..."
-            print Fore.GREY + "(~) Payload: " + payload.replace("\n", "\\n") + Style.RESET_ALL
+            print settings.INFO_SIGN + "Trying to upload the '" + OUTPUT_TEXTFILE + "' file on '" + settings.SRV_ROOT_DIR + "'..."
+            print Fore.GREY + settings.PAYLOAD_SIGN + payload.replace("\n", "\\n") + Style.RESET_ALL
 
           # Cookie Injection
           if settings.COOKIE_INJECTION == True:
@@ -257,7 +257,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
 
             if len(shell) != 0 and shell[0] == TAG and not menu.options.verbose:
               percent = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
-              sys.stdout.write("\r(*) Testing the " + technique + "... [ " + percent + " ]")  
+              sys.stdout.write("\r" + settings.INFO_SIGN + "Testing the " + technique + "... [ " + percent + " ]")
               sys.stdout.flush()
 
             if len(shell) == 0 :
@@ -280,12 +280,12 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                 # Show an error message, after N failed tries.
                 # Use the "/tmp/" directory for tempfile-based technique.
                 elif i == settings.FAILED_TRIES and no_result == True :
-                  warning_msg = "(^) Warning: It seems that you don't have permissions to "
+                  warning_msg = settings.WARNING_SIGN + "It seems that you don't have permissions to "
                   warning_msg += "read and/or write files in '" + settings.SRV_ROOT_DIR + "'."  
                   sys.stdout.write("\r" + Fore.YELLOW + warning_msg + Style.RESET_ALL)
                   print ""
                   while True:
-                    tmp_upload = raw_input("(?) Do you want to try the temporary directory (" + tmp_path + ") [Y/n/q] > ").lower()
+                    tmp_upload = raw_input(settings.QUESTION_SIGN + "Do you want to try the temporary directory (" + tmp_path + ") [Y/n/q] > ").lower()
                     if tmp_upload in settings.CHOISE_YES:
                       exit_loops = True
                       call_tfb = tfb_controller(no_result, url, delay, filename, tmp_path, http_request_method, url_time_response)
@@ -304,7 +304,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                     else:
                       if tmp_upload == "":
                         tmp_upload = "enter"
-                      print Back.RED + "(x) Error: '" + tmp_upload + "' is not a valid answer." + Style.RESET_ALL + "\n"
+                      print Back.RED + settings.ERROR_SIGN + "'" + tmp_upload + "' is not a valid answer." + Style.RESET_ALL + "\n"
                       pass
                   continue
                 
@@ -319,7 +319,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                       else:
                         percent = str(float_percent)+ "%"
 
-                      sys.stdout.write("\r(*) Testing the " + technique + "... [ " + percent + " ]")  
+                      sys.stdout.write("\r" + settings.INFO_SIGN + "Testing the " + technique + "... [ " + percent + " ]")
                       sys.stdout.flush()
                       continue
                     else:
@@ -328,11 +328,11 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                     raise
                 
               elif e.getcode() == 401:
-                print Back.RED + "(x) Error: Authorization required!" + Style.RESET_ALL + "\n"
+                print Back.RED + settings.ERROR_SIGN + "Authorization required!" + Style.RESET_ALL + "\n"
                 sys.exit(0)
                 
               elif e.getcode() == 403:
-                print Back.RED + "(x) Error: You don't have permission to access this page." + Style.RESET_ALL + "\n"
+                print Back.RED + settings.ERROR_SIGN + "You don't have permission to access this page." + Style.RESET_ALL + "\n"
                 sys.exit(0)
           
         except KeyboardInterrupt:
@@ -347,7 +347,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
           raise
 
         except urllib2.URLError, e:
-          warning_msg = "(^) Warning: It seems that you don't have permissions to "
+          warning_msg = settings.WARNING_SIGN + "It seems that you don't have permissions to "
           warning_msg += "read and/or write files in '" + settings.SRV_ROOT_DIR + "'."
           sys.stdout.write("\r" + Fore.YELLOW + warning_msg + Style.RESET_ALL)
           print ""
@@ -402,8 +402,10 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
             vp_flag = logs.add_parameter(vp_flag, filename, http_request_method, vuln_parameter, payload)
           logs.update_payload(filename, counter, payload) 
           counter = counter + 1
+
           if not menu.options.verbose:
             print ""
+
           # Print the findings to terminal.
           print Style.BRIGHT + "(!) The (" + http_request_method + ")" + found_vuln_parameter + header_name + the_type + " is vulnerable to " + injection_type + "." + Style.RESET_ALL
           print "  (+) Type : " + Fore.YELLOW + Style.BRIGHT + injection_type + Style.RESET_ALL + ""
@@ -426,7 +428,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
               else:
                 if enumerate_again == "":
                   enumerate_again = "enter"
-                print Back.RED + "(x) Error: '" + enumerate_again + "' is not a valid answer." + Style.RESET_ALL + "\n"
+                print Back.RED + settings.ERROR_SIGN + "'" + enumerate_again + "' is not a valid answer." + Style.RESET_ALL + "\n"
                 pass
           else:
             fb_enumeration.do_check(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
@@ -434,7 +436,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
           # Check for any system file access options.
           if settings.FILE_ACCESS_DONE == True :
             while True:
-              file_access_again = raw_input("(?) Do you want to access files again? [Y/n/q] > ").lower()
+              file_access_again = raw_input(settings.QUESTION_SIGN + "Do you want to access files again? [Y/n/q] > ").lower()
               if file_access_again in settings.CHOISE_YES:
                 if not menu.options.verbose:
                   print ""
@@ -449,7 +451,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
               else:
                 if file_access_again == "":
                   file_access_again  = "enter"
-                print Back.RED + "(x) Error: '" + file_access_again  + "' is not a valid answer." + Style.RESET_ALL + "\n"
+                print Back.RED + settings.ERROR_SIGN + "'" + file_access_again  + "' is not a valid answer." + Style.RESET_ALL + "\n"
                 pass
           else:
             fb_file_access.do_check(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
@@ -472,7 +474,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                 print ""
               if go_back == True:
                 break
-              gotshell = raw_input("(?) Do you want a Pseudo-Terminal? [Y/n/q] > ").lower()
+              gotshell = raw_input(settings.QUESTION_SIGN + "Do you want a Pseudo-Terminal? [Y/n/q] > ").lower()
               if gotshell in settings.CHOISE_YES:
                 print ""
                 print "Pseudo-Terminal (type '" + Style.BRIGHT + "?" + Style.RESET_ALL + "' for available options)"
@@ -502,7 +504,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                       go_back = True
                       break
                     elif os_shell_option == "os_shell": 
-                        print Fore.YELLOW + "(^) Warning: You are already into an 'os_shell' mode." + Style.RESET_ALL + "\n"
+                        print Fore.YELLOW + settings.WARNING_SIGN + "You are already into an 'os_shell' mode." + Style.RESET_ALL + "\n"
                     elif os_shell_option == "reverse_tcp":
                       settings.REVERSE_TCP = True
                       # Set up LHOST / LPORT for The reverse TCP connection.
@@ -526,7 +528,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                         shell = fb_injector.injection_results(url, OUTPUT_TEXTFILE, delay)
                         if menu.options.verbose:
                           print ""
-                        print Back.RED + "(x) Error: The reverse TCP connection has been failed!" + Style.RESET_ALL
+                        print Back.RED + settings.ERROR_SIGN + "The reverse TCP connection has been failed!" + Style.RESET_ALL
                     else:
                       pass
                   else:
@@ -542,7 +544,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                     if not shell or shell == "":
                       if menu.options.verbose:
                         print ""
-                      print Back.RED + "(x) Error: The '" + cmd + "' command, does not return any output." + Style.RESET_ALL + "\n"
+                      print Back.RED + settings.ERROR_SIGN + "The '" + cmd + "' command, does not return any output." + Style.RESET_ALL + "\n"
 
               elif gotshell in settings.CHOISE_NO:
                 if checks.next_attack_vector(technique, go_back) == True:
@@ -561,7 +563,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
               else:
                 if gotshell == "":
                   gotshell = "enter"
-                print Back.RED + "(x) Error: '" + gotshell + "' is not a valid answer." + Style.RESET_ALL + "\n"
+                print Back.RED + settings.ERROR_SIGN + "'" + gotshell + "' is not a valid answer." + Style.RESET_ALL + "\n"
                 pass
             
           except KeyboardInterrupt: 

@@ -330,4 +330,13 @@ FAILED_TRIES = 20
 # Check for PowerShell
 PS_ENABLED = None
 
+# Status Signs
+INFO_SIGN = "(*) "
+QUESTION_SIGN = "(?) "
+WARNING_SIGN = "(^) Warning: "
+ERROR_SIGN = "(x) Error: "
+CRITICAL_SIGN = "(x) Critical: "
+ABORTION_SIGN = "(x) Aborted: "
+PAYLOAD_SIGN = "(~) Payload: "
+
 #eof

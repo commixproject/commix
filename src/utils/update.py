@@ -33,12 +33,12 @@ The commix's updater.
 def updater():
   
   time.sleep(1)
-  sys.stdout.write("(*) Checking requirements to update " + settings.APPLICATION + " via GitHub... ")
+  sys.stdout.write(settings.INFO_SIGN + "Checking requirements to update " + settings.APPLICATION + " via GitHub... ")
   sys.stdout.flush()
   # Check if windows
   if settings.IS_WINDOWS:
     print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
-    print Back.RED + "(x) Error: For updating purposes on Windows platform, it's recommended to use a GitHub client for Windows (http://windows.github.com/)." + Style.RESET_ALL
+    print Back.RED + settings.ERROR_SIGN + "For updating purposes on Windows platform, it's recommended to use a GitHub client for Windows (http://windows.github.com/)." + Style.RESET_ALL
     sys.exit(0)
   else:
     try:
@@ -62,16 +62,16 @@ def updater():
           print "---"
           end  = time.time()
           how_long = int(end - start)
-          print "(*) Finished in " + time.strftime('%H:%M:%S', time.gmtime(how_long)) + "."
+          print settings.INFO_SIGN + "Finished in " + time.strftime('%H:%M:%S', time.gmtime(how_long)) + "."
         else:
           print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
-          print Back.RED + "(x) Error: The '.git' directory not found. Do it manually: " + Style.BRIGHT + "'git clone " + settings.GIT_URL + " " + settings.APPLICATION + "' " + Style.RESET_ALL    
+          print Back.RED + settings.ERROR_SIGN + "The '.git' directory not found. Do it manually: " + Style.BRIGHT + "'git clone " + settings.GIT_URL + " " + settings.APPLICATION + "' " + Style.RESET_ALL    
           sys.exit(0)
       else:
           print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
-          print Back.RED + "(x) Error: " + requirment + " not found." + Style.RESET_ALL
+          print Back.RED + settings.ERROR_SIGN + requirment + " not found." + Style.RESET_ALL
           sys.exit(0)
 
     except Exception as error:
-      print Back.RED + "\n(x) Error: " + str(error) + Style.RESET_ALL 
+      print Back.RED + "\n" + settings.ERROR_SIGN + str(error) + Style.RESET_ALL 
     sys.exit(0)

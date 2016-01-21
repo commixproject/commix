@@ -38,7 +38,7 @@ def logfile_parser():
     print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
     error_msg = "Currently " + settings.APPLICATION + " doesn't support "
     error_msg += "multiple targets. Use only one request per log file."
-    sys.stdout.write(Back.RED + "(x) Error: " + error_msg + Style.RESET_ALL + "\n")
+    sys.stdout.write(Back.RED + settings.ERROR_SIGN + error_msg + Style.RESET_ALL + "\n")
     sys.stdout.flush()
     sys.exit(0)
 
@@ -49,16 +49,16 @@ def logfile_parser():
     print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
     error_msg = "Something seems to be wrong with "
     error_msg += "the '" + menu.options.logfile + "' file. "
-    sys.stdout.write(Back.RED + "(x) Error: " + error_msg + Style.RESET_ALL + "\n")
+    sys.stdout.write(Back.RED + settings.ERROR_SIGN + error_msg + Style.RESET_ALL + "\n")
     sys.stdout.flush()
     sys.exit(0)
 
   proxy_log_file = menu.options.logfile
-  sys.stdout.write("(*) Parsing target using the '" + os.path.split(proxy_log_file)[1] + "' file... ")
+  sys.stdout.write(settings.INFO_SIGN + "Parsing target using the '" + os.path.split(proxy_log_file)[1] + "' file... ")
   sys.stdout.flush()
   if not os.path.exists(proxy_log_file):
     print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
-    sys.stdout.write(Back.RED + "(x) Error: It seems that the '" + proxy_log_file + "' file, does not exists." + Style.RESET_ALL + "\n")
+    sys.stdout.write(Back.RED + settings.ERROR_SIGN + "It seems that the '" + proxy_log_file + "' file, does not exists." + Style.RESET_ALL + "\n")
     sys.stdout.flush()
     sys.exit(0)
   else:

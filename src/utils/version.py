@@ -31,5 +31,5 @@ Check python version number.
 """
 def python_version():
   if settings.PYTHON_VERSION >= "3" or settings.PYTHON_VERSION < "2.6":
-    print Back.RED + "(x) Error: Incompatible Python version (" + settings.PYTHON_VERSION + ") detected."
+    print Back.RED + settings.ERROR_SIGN + "Incompatible Python version (" + settings.PYTHON_VERSION + ") detected."
     sys.exit(0)

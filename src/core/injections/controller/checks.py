@@ -27,7 +27,7 @@ Procced to the next attack vector.
 """
 def next_attack_vector(technique, go_back):
   while True:
-    next_attack_vector = raw_input("(?) Continue with testing the " + technique + "? [Y/n/q] > ").lower()
+    next_attack_vector = raw_input(settings.QUESTION_SIGN + "Continue with testing the " + technique + "? [Y/n/q] > ").lower()
     if next_attack_vector in settings.CHOISE_YES:
       return True
     elif next_attack_vector in settings.CHOISE_NO:
@@ -37,7 +37,7 @@ def next_attack_vector(technique, go_back):
     else:
       if next_attack_vector == "":
         next_attack_vector = "enter"
-      print Back.RED + "(x) Error: '" + next_attack_vector + "' is not a valid answer." + Style.RESET_ALL + "\n"
+      print Back.RED + settings.ERROR_SIGN + "'" + next_attack_vector + "' is not a valid answer." + Style.RESET_ALL + "\n"
       pass
 
 """
@@ -85,7 +85,7 @@ Ignore error messages and continue the tests.
 def continue_tests(err):
   try:
     while True:
-      continue_tests = raw_input("(?) Do you want to ignore the error (" +str(err.code)+ ") message and continue the tests? [Y/n/q] > ").lower()
+      continue_tests = raw_input(settings.QUESTION_SIGN + "Do you want to ignore the error (" +str(err.code)+ ") message and continue the tests? [Y/n/q] > ").lower()
       if continue_tests in settings.CHOISE_YES:
         return True
       elif continue_tests in settings.CHOISE_NO:
@@ -95,10 +95,10 @@ def continue_tests(err):
       else:
         if continue_tests == "":
           continue_tests = "enter"
-        print Back.RED + "(x) Error: '" + continue_tests + "' is not a valid answer." + Style.RESET_ALL + "\n"
+        print Back.RED + settings.ERROR_SIGN + "'" + continue_tests + "' is not a valid answer." + Style.RESET_ALL + "\n"
         pass
   except KeyboardInterrupt:
-    print "\n" + Back.RED + "(x) Aborted: Ctrl-C was pressed!" + Style.RESET_ALL
+    print "\n" + Back.RED + settings.ABORTION_SIGN + "Ctrl-C was pressed!" + Style.RESET_ALL
     raise SystemExit()
 
 """
@@ -106,7 +106,7 @@ Check if option is unavailable
 """
 def unavailable_option(check_option):
 
-  print Fore.YELLOW + "(^) Warning: The '" +check_option+ "' option is not yet available for windows targets." + Style.RESET_ALL   
+  print Fore.YELLOW + settings.WARNING_SIGN + "The '" +check_option+ "' option is not yet available for windows targets." + Style.RESET_ALL   
 
 """
 Transformation of separators if time-based injection
@@ -124,7 +124,7 @@ Information message if platform does not have GNU 'readline' module installed
 """
 def no_readline_module():
 
-  info_msg =  "(^) Warning: It seems that your platform does not have GNU 'readline' module installed."
+  info_msg =  settings.WARNING_SIGN + "It seems that your platform does not have GNU 'readline' module installed."
   info_msg += " For tab-completion support in your shell, download the"
   if settings.IS_WINDOWS:
     info_msg += " 'pyreadline' module (https://pypi.python.org/pypi/pyreadline).\n"
@@ -137,10 +137,10 @@ Check if PowerShell is enabled.
 """
 def ps_check():
   if settings.PS_ENABLED == None and menu.options.is_admin or menu.options.users or menu.options.passwords:
-    info_msg = "(^) Warning: The payloads in some options that you have chosen, are requiring the use of PowerShell. "
+    info_msg = settings.WARNING_SIGN + "The payloads in some options that you have chosen, are requiring the use of PowerShell. "
     print Fore.YELLOW + info_msg + Style.RESET_ALL
     while True:
-      ps_check = raw_input("(?) Do you want to use the \"--ps-version\" option so ensure that PowerShell is enabled? [Y/n/q] > ").lower()
+      ps_check = raw_input(settings.QUESTION_SIGN + "Do you want to use the \"--ps-version\" option so ensure that PowerShell is enabled? [Y/n/q] > ").lower()
       if ps_check in settings.CHOISE_YES:
         menu.options.ps_version = True
         break
@@ -152,7 +152,7 @@ def ps_check():
       else:  
         if ps_check == "":
           ps_check = "enter"
-        print Back.RED + "(x) Error: '" + ps_check + "' is not a valid answer." + Style.RESET_ALL + "\n"
+        print Back.RED + settings.ERROR_SIGN + "'" + ps_check + "' is not a valid answer." + Style.RESET_ALL + "\n"
         pass
 
 """
@@ -160,7 +160,7 @@ If PowerShell is disabled.
 """
 def ps_check_failed():
   while True:
-    ps_check = raw_input("(?) Do you want to ignore the above warning and continue the procedure? [Y/n] > ").lower()
+    ps_check = raw_input(settings.QUESTION_SIGN + "Do you want to ignore the above warning and continue the procedure? [Y/n] > ").lower()
     if ps_check in settings.CHOISE_YES:
       break
     elif ps_check in settings.CHOISE_NO:
@@ -169,7 +169,7 @@ def ps_check_failed():
     else:  
       if ps_check == "":
         ps_check = "enter"
-      print Back.RED + "(x) Error: '" + ps_check + "' is not a valid answer." + Style.RESET_ALL + "\n"
+      print Back.RED + settings.ERROR_SIGN + "'" + ps_check + "' is not a valid answer." + Style.RESET_ALL + "\n"
       pass
 
 #eof

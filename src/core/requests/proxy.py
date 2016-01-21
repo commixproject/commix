@@ -28,7 +28,7 @@ from src.thirdparty.colorama import Fore, Back, Style, init
 """
 def do_check(url):
   check_proxy = True
-  sys.stdout.write("(*) Testing proxy " + menu.options.proxy + "... ")
+  sys.stdout.write(settings.INFO_SIGN + "Testing proxy " + menu.options.proxy + "... ")
   sys.stdout.flush()
   try:
     # Check if defined POST data
@@ -51,7 +51,7 @@ def do_check(url):
     sys.stdout.flush()
   else:
     print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
-    print Back.RED + "(x) Error: Could not connect to proxy." + Style.RESET_ALL
+    print Back.RED + settings.ERROR_SIGN + "Could not connect to proxy." + Style.RESET_ALL
     sys.exit(0)
     
 """

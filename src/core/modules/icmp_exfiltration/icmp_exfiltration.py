@@ -136,7 +136,7 @@ def input_cmd(http_request_method, url, vuln_parameter, ip_src, technique):
             elif cmd.lower() == "?": 
               menu.shell_options()
             elif cmd.lower() == "os_shell": 
-              print Fore.YELLOW + "(^) Warning: You are already into the 'os_shell' mode." + Style.RESET_ALL + "\n"
+              print Fore.YELLOW + settings.WARNING_SIGN + "You are already into the 'os_shell' mode." + Style.RESET_ALL + "\n"
             elif cmd.lower() == "reverse_tcp":
               # Set up LHOST / LPORT for The reverse TCP connection.
               lhost, lport = reverse_tcp.configure_reverse_tcp()
@@ -156,7 +156,7 @@ def input_cmd(http_request_method, url, vuln_parameter, ip_src, technique):
                 cmd_exec(http_request_method, cmd, url, vuln_parameter, ip_src)
                 if menu.options.verbose:
                   print ""
-                print Back.RED + "(x) Error: The reverse TCP connection to the target host has been failed!" + Style.RESET_ALL
+                print Back.RED + settings.ERROR_SIGN + "The reverse TCP connection to the target host has been failed!" + Style.RESET_ALL
           else:
             # Command execution results.
             cmd_exec(http_request_method, cmd, url, vuln_parameter, ip_src)
@@ -180,7 +180,7 @@ def input_cmd(http_request_method, url, vuln_parameter, ip_src, technique):
     else:
       if gotshell == "":
         gotshell = "enter"
-      print Back.RED + "(x) Error: '" + gotshell + "' is not a valid answer." + Style.RESET_ALL + "\n"
+      print Back.RED + settings.ERROR_SIGN + "'" + gotshell + "' is not a valid answer." + Style.RESET_ALL + "\n"
       pass
 
 
@@ -200,7 +200,7 @@ def exploitation(ip_dst, ip_src, url, http_request_method, vuln_parameter, techn
 def icmp_exfiltration_handler(url, http_request_method):
   # You need to have root privileges to run this script
   if os.geteuid() != 0:
-    print "\n" + Back.RED + "(x) Error:  You need to have root privileges to run this option." + Style.RESET_ALL
+    print "\n" + Back.RED + settings.ERROR_SIGN + "You need to have root privileges to run this option." + Style.RESET_ALL
     os._exit(0)
 
   if http_request_method == "GET":
@@ -223,7 +223,7 @@ def icmp_exfiltration_handler(url, http_request_method):
       response = proxy.use_proxy(request)
     except urllib2.HTTPError, err:
       if settings.IGNORE_ERR_MSG == False:
-        print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
+        print "\n" + Back.RED + settings.ERROR_SIGN + str(err) + Style.RESET_ALL
         continue_tests = checks.continue_tests(err)
         if continue_tests == True:
           settings.IGNORE_ERR_MSG = True
@@ -236,7 +236,7 @@ def icmp_exfiltration_handler(url, http_request_method):
       response = tor.use_tor(request)
     except urllib2.HTTPError, err:
       if settings.IGNORE_ERR_MSG == False:
-        print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
+        print "\n" + Back.RED + settings.ERROR_SIGN + str(err) + Style.RESET_ALL
         continue_tests = checks.continue_tests(err)
         if continue_tests == True:
           settings.IGNORE_ERR_MSG = True
@@ -248,7 +248,7 @@ def icmp_exfiltration_handler(url, http_request_method):
       response = urllib2.urlopen(request)
     except urllib2.HTTPError, err:
       if settings.IGNORE_ERR_MSG == False:
-        print "\n" + Back.RED + "(x) Error: " + str(err) + Style.RESET_ALL
+        print "\n" + Back.RED + settings.ERROR_SIGN + str(err) + Style.RESET_ALL
         continue_tests = checks.continue_tests(err)
         if continue_tests == True:
           settings.IGNORE_ERR_MSG = True
@@ -258,7 +258,7 @@ def icmp_exfiltration_handler(url, http_request_method):
   ip_data = menu.options.ip_icmp_data
       
   technique = "icmp exfiltration technique"
-  sys.stdout.write("(*) Testing the " + technique + "... \n")
+  sys.stdout.write(settings.INFO_SIGN + "Testing the " + technique + "... \n")
   sys.stdout.flush()
   
   ip_src =  re.findall(r"ip_src=(.*),", ip_data)

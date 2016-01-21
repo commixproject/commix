@@ -285,7 +285,7 @@ injection = OptionGroup(parser, Style.BRIGHT + "Injection" + Style.RESET_ALL,
 injection.add_option("--data", 
                 action="store",
                 dest="data",
-                help="POST data to inject (use '" +settings.INJECT_TAG+ "' tag to specify the testable parameter).")
+                help="POST data to inject (use '" + settings.INJECT_TAG + "' tag to specify the testable parameter).")
 
 injection.add_option("--suffix", 
                 action="store",

