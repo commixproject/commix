@@ -33,15 +33,15 @@ Download commix by cloning the Git repository:
 
     git clone https://github.com/stasinopoulos/commix.git commix
 
-Commix comes packaged on the official repositories of the following Linux distributions, so you can use the package manager to install it!
+Commix comes packaged on the **official repositories** of the following Linux distributions, so you can use the **package manager** to install it!
 
 - [ArchAssault](https://archassault.org/)
 - [BlackArch](http://blackarch.org/)
+- [Kali Linux](https://www.kali.org/)
 
-Commix also comes pre-installed, on the following penetration testing frameworks:
+Commix also comes **pre-installed**, on the following penetration testing frameworks:
 
 - [CTF-Tools](https://github.com/zardus/ctf-tools)
-- [Kali Linux](https://www.kali.org/)
 - [The Penetration Testers Framework (PTF)](https://github.com/trustedsec/ptf)
 - [PentestBox](https://tools.pentestbox.com/)
 - [Weakerthan](http://www.weaknetlabs.com/)
@@ -52,31 +52,31 @@ To get a list of all options and switches use:
 
     python commix.py -h
 
-Do you want to have a quick look of all available options and switches? Check the '[usage](https://github.com/stasinopoulos/commix/wiki/Usage)' wiki page.
+Do you want to have a quick look of all available options and switches? Check the '**[usage](https://github.com/stasinopoulos/commix/wiki/Usage)**' wiki page.
 
 #### Usage Examples
 
-So, do you want to get some ideas on how to use commix? Just go and check the '[usage examples](https://github.com/stasinopoulos/commix/wiki/Usage-Examples)' wiki page, where there are several test cases and attack scenarios.
+So, do you want to get some ideas on how to use commix? Just go and check the '**[usage examples](https://github.com/stasinopoulos/commix/wiki/Usage-Examples)**' wiki page, where there are several test cases and attack scenarios.
 
 #### Upload Shells
 
-Commix enables you to upload web-shells (e.g metasploit PHP meterpreter) easily on target host. For more, check the '[upload shells](https://github.com/stasinopoulos/commix/wiki/Upload-shells)' wiki page.
+Commix enables you to upload web-shells (e.g metasploit PHP meterpreter) easily on target host. For more, check the '**[upload shells](https://github.com/stasinopoulos/commix/wiki/Upload-shells)**' wiki page.
 
 #### Modules Development
 
-Do you want to increase the capabilities of the commix tool and/or to adapt it to our needs? You can easily develop and import our own modules. For more, check the '[module development](https://github.com/stasinopoulos/commix/wiki/Module-Development)' wiki page.
+Do you want to increase the capabilities of the commix tool and/or to adapt it to our needs? You can easily develop and import our own modules. For more, check the '**[module development](https://github.com/stasinopoulos/commix/wiki/Module-Development)**' wiki page.
 
 #### Command Injection Testbeds
 
-Do you want to test or evaluate the exploitation abilities of commix? Cool! Check the '[command injection testbeds](https://github.com/stasinopoulos/commix/wiki/Command-Injection-Testbeds)' wiki page which includes a collection of pwnable web applications and/or VMs (that includes web applications) vulnerable to command injection attacks.
+Do you want to test or evaluate the exploitation abilities of commix? Cool! Check the '**[command injection testbeds](https://github.com/stasinopoulos/commix/wiki/Command-Injection-Testbeds)**' wiki page which includes a collection of pwnable web applications and/or VMs (that includes web applications) vulnerable to command injection attacks.
 
 #### Exploitation Demos
 
-If you want to see a collection of demos, about the exploitation abilities of commix, take a look at the '[exploitation demos](https://github.com/stasinopoulos/commix/wiki/Exploitation-Demos)' wiki page.
+If you want to see a collection of demos, about the exploitation abilities of commix, take a look at the '**[exploitation demos](https://github.com/stasinopoulos/commix/wiki/Exploitation-Demos)**' wiki page.
 
 #### Bugs and Enhancements
 
-For bug reports or enhancements, please open an issue [here](https://github.com/stasinopoulos/commix/issues).
+For bug reports or enhancements, please open an issue **[here](https://github.com/stasinopoulos/commix/issues)**.
 
 #### Supported Platforms
 
@@ -86,4 +86,5 @@ For bug reports or enhancements, please open an issue [here](https://github.com/
 
 #### Presentations and White Papers
 
-For presentations and white papers published in conferences, check the '[presentations](https://github.com/stasinopoulos/commix/wiki/Presentations)' wiki page.
+For presentations and white papers published in conferences, check the '**[presentations](https://github.com/stasinopoulos/commix/wiki/Presentations)**' wiki page.
+
