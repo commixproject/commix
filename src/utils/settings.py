@@ -42,7 +42,8 @@ if os.path.isdir("./.git"):
   with open('.git/refs/heads/master', 'r') as f:
     COMMIT_ID = "-" + "git" + "-" + f.readline()[0:7]
 else:
-    COMMIT_ID = "-" + "nongit" + "-" + time.strftime("%Y%m%d", time.gmtime(os.path.getmtime(min(os.listdir(os.getcwd()), key=os.path.getctime))))
+  os.chdir("src/")
+  COMMIT_ID = "-" + "nongit" + "-" + time.strftime("%Y%m%d", time.gmtime(os.path.getmtime(min(os.listdir(os.getcwd()), key=os.path.getctime))))
 
 # Check if OS is Windows.
 IS_WINDOWS = hasattr(sys, 'getwindowsversion')
