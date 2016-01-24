@@ -317,13 +317,13 @@ injection.add_option("--tmp-path",
                 action="store",
                 dest="tmp_path",
                 default = False,
-                help="Set remote absolute path of temporary files directory (Default: " + settings.TMP_PATH + ").")
+                help="Set the absolute path of web server's temp directory.")
 
 injection.add_option("--root-dir", 
                 action="store",
                 dest="srv_root_dir",
                 default = False,
-                help="Set remote absolute path of web server's root directory (Default: " + settings.SRV_ROOT_DIR + ").")
+                help="Set the absolute path of web server's root directory.")
 
 injection.add_option("--alter-shell", 
                 action="store",
