@@ -80,7 +80,7 @@ def decision(separator, TAG, output_length, delay, http_request_method):
                  "sleep 0 " + separator + 
                  "str=$(echo " + TAG + ") " + separator + 
                  # Find the length of the output.
-                 "str1=${#str} " + separator + 
+                 "str1=${#str}" + separator + 
                  "[ " + str(output_length) + " -eq ${str1} ] " + separator + 
                  "sleep " + str(delay) + " "
                  )

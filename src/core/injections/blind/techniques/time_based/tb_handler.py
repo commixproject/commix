@@ -125,7 +125,7 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
 
             # Check if defined "--verbose" option.
             if menu.options.verbose:
-              sys.stdout.write("\n" + Fore.GREY + settings.PAYLOAD_SIGN + payload.replace("\n", "\\n") + Style.RESET_ALL)
+              print Fore.GREY + settings.PAYLOAD_SIGN + payload.replace("\n", "\\n") + Style.RESET_ALL
 
             # Cookie Injection
             if settings.COOKIE_INJECTION == True:
