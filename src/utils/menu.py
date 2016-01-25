@@ -306,12 +306,12 @@ injection.add_option("--maxlen",
                 action="store",
                 dest="maxlen",
                 default=settings.MAXLEN,
-                help="The length of the output on time-based technique (Default: " +str(settings.MAXLEN)+ " chars).")
+                help="Set the max length of output for time-related injection techniques (Default: " + str(settings.MAXLEN) + " chars).")
 
 injection.add_option("--delay", 
                 action="store",
                 dest="delay",
-                help="Set Time-delay for time-based and file-based techniques (Default: " +str(settings.DELAY)+ " sec).")
+                help="Set custom time delay for time-related injection techniques (Default: " + str(settings.DELAY) + " sec).")
 
 injection.add_option("--tmp-path", 
                 action="store",
