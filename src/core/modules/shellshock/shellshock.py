@@ -342,7 +342,7 @@ def file_access(url, cve, check_header, filename):
       dest_to_write = menu.options.file_dest
       
     # Execute command
-    cmd = settings.FILE_WRITE + " '" + content + "'" + " > " + "'" + dest_to_write + "'"
+    cmd = settings.FILE_WRITE + " '" + content + "'" + ">" + "'" + dest_to_write + "'"
     shell = cmd_exec(url, cmd, cve, check_header, filename)
     
     # Check if file exists!

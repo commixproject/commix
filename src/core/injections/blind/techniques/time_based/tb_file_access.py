@@ -99,7 +99,7 @@ def file_write(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_
     # Find filename
     filname = os.path.basename(dest_to_write)
     tmp_filname = "tmp_" + filname
-    cmd = settings.FILE_WRITE + content + " > " + tmp_filname
+    cmd = settings.FILE_WRITE + content + ">" + tmp_filname
     if not menu.options.alter_shell :
       cmd = "\"" + cmd + "\""
     response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
@@ -122,7 +122,7 @@ def file_write(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_
     dest_to_write = path + "\\" + filname
 
   else:
-    cmd = settings.FILE_WRITE + "'" + content + "'" + " > " + "'" + dest_to_write + "'" + separator + settings.FILE_READ + dest_to_write
+    cmd = settings.FILE_WRITE + "'" + content + "'" + ">" + "'" + dest_to_write + "'" + separator + settings.FILE_READ + dest_to_write
     check_how_long, output = tb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
     shell = output 
     shell = "".join(str(p) for p in shell)

