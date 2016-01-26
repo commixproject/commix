@@ -78,7 +78,7 @@ def eb_injection_handler(url, delay, filename, http_request_method):
 
   url = eb_injector.warning_detection(url, http_request_method)
 
-  sys.stdout.write("(*) Testing the " + technique + "... ")
+  sys.stdout.write(settings.INFO_SIGN + "Testing the " + technique + "... ")
   sys.stdout.flush()
 
   i = 0
@@ -168,7 +168,7 @@ def eb_injection_handler(url, delay, filename, http_request_method):
             float_percent = "{0:.1f}".format(round(((i*100)/(total * 1.0)),2))
 
             if shell == False:
-              sys.stdout.write("\r(*) Testing the " + technique + "... " +  "[ " + float_percent + "%" + " ]")  
+              sys.stdout.write("\r" + settings.INFO_SIGN + "Testing the " + technique + "... " +  "[ " + float_percent + "%" + " ]")  
               sys.stdout.flush()
 
             if str(float_percent) == "100.0":
@@ -181,7 +181,7 @@ def eb_injection_handler(url, delay, filename, http_request_method):
             else:
               percent = str(float_percent)+ "%"
 
-            sys.stdout.write("\r(*) Testing the " + technique + "... " +  "[ " + percent + " ]")  
+            sys.stdout.write("\r" + settings.INFO_SIGN + "Testing the " + technique + "... " +  "[ " + percent + " ]")  
             sys.stdout.flush()
             
         except KeyboardInterrupt: 
@@ -253,7 +253,7 @@ def eb_injection_handler(url, delay, filename, http_request_method):
               else:
                 if enumerate_again == "":
                   enumerate_again = "enter"
-                print Back.RED + "(x) Error: '" + enumerate_again + "' is not a valid answer." + Style.RESET_ALL + "\n"
+                print Back.RED + settings.ERROR_SIGN + "'" + enumerate_again + "' is not a valid answer." + Style.RESET_ALL + "\n"
                 pass
 
           else:
@@ -275,7 +275,7 @@ def eb_injection_handler(url, delay, filename, http_request_method):
               else:
                 if file_access_again  == "":
                   file_access_again  = "enter"
-                print Back.RED + "(x) Error: '" + file_access_again  + "' is not a valid answer." + Style.RESET_ALL + "\n"
+                print Back.RED + settings.ERROR_SIGN + "'" + file_access_again  + "' is not a valid answer." + Style.RESET_ALL + "\n"
                 pass
           else:
             eb_file_access.do_check(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
@@ -347,7 +347,7 @@ def eb_injection_handler(url, delay, filename, http_request_method):
                         print shell
                         if menu.options.verbose:
                           print ""
-                        print Back.RED + "(x) Error: The reverse TCP connection has been failed!" + Style.RESET_ALL
+                        print Back.RED + settings.ERROR_SIGN + "The reverse TCP connection has been failed!" + Style.RESET_ALL
                     else:
                       pass
                       
@@ -367,7 +367,7 @@ def eb_injection_handler(url, delay, filename, http_request_method):
                       if shell != "":
                         print "\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n"
                       else:
-                        print Back.RED + "(x) Error: The '" + cmd + "' command, does not return any output." + Style.RESET_ALL + "\n"
+                        print Back.RED + settings.ERROR_SIGN + "The '" + cmd + "' command, does not return any output." + Style.RESET_ALL + "\n"
                     
                 except KeyboardInterrupt: 
                   raise
@@ -390,7 +390,7 @@ def eb_injection_handler(url, delay, filename, http_request_method):
             else:
               if gotshell == "":
                 gotshell = "enter"
-              print Back.RED + "(x) Error: '" + gotshell + "' is not a valid answer." + Style.RESET_ALL + "\n"
+              print Back.RED + settings.ERROR_SIGN + "'" + gotshell + "' is not a valid answer." + Style.RESET_ALL + "\n"
               pass
             
             
