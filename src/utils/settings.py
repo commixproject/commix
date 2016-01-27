@@ -314,12 +314,13 @@ WIN_PYTHON_DIR = "C:\\Python27\\"
 # Windows PHP installed directory.
 WIN_PHP_DIR = "C:\\xampp\\php\\"
 
-# Windows comment
+# Comment out
 WIN_COMMENT = " REM "
+COMMENT = " # "
 
 #Delete command
-WIN_DEL = " DEL "
-DEL = " rm "
+WIN_DEL = "DEL "
+DEL = "rm "
 
 # Time-based Variables
 FOUND_HOW_LONG = "" 

