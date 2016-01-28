@@ -161,6 +161,8 @@ exec(d,{'s':s})"""
     elif other_shell.lower() == "reverse_tcp": 
       print Fore.YELLOW + settings.WARNING_SIGN + "You are already into the 'reverse_tcp' mode." + Style.RESET_ALL 
       continue
+    elif reverse_tcp_option.lower() == "quit": 
+      sys.exit(0)
     elif other_shell.lower() in settings.SHELL_OPTIONS:
       return other_shell
     else:  
@@ -195,6 +197,8 @@ commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp""" + Style.RESET_ALL + """
     elif reverse_tcp_option.lower() == "?": 
       menu.shell_options()
       continue
+    elif reverse_tcp_option.lower() == "quit": 
+      sys.exit(0)
     elif reverse_tcp_option.lower() in settings.SHELL_OPTIONS:
       return reverse_tcp_option
     else:
@@ -216,6 +220,8 @@ def configure_reverse_tcp():
     elif lhost.lower() == "?": 
       menu.shell_options()
       continue
+    elif lhost.lower() == "quit": 
+      sys.exit(0)
     elif lhost.lower() in settings.SHELL_OPTIONS:
       lport = lhost
       return lhost, lport
@@ -236,6 +242,8 @@ def configure_reverse_tcp():
     elif lport.lower() == "?": 
       menu.shell_options()
       continue
+    elif lhost.lower() == "quit": 
+      sys.exit(0)
     elif lport.lower() in settings.SHELL_OPTIONS:
       lhost = lport
       return lhost, lport
