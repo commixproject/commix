@@ -344,7 +344,6 @@ def eb_injection_handler(url, delay, filename, http_request_method):
                         response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
                         # Evaluate injection results.
                         shell = eb_injector.injection_results(response, TAG)
-                        print shell
                         if menu.options.verbose:
                           print ""
                         print Back.RED + settings.ERROR_SIGN + "The reverse TCP connection has been failed!" + Style.RESET_ALL
