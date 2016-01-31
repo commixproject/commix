@@ -203,6 +203,7 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
                   # Unix-like targets.
                   else:
                     if delay == 1 and (how_long_statistic == delay) or \
+                      delay == 1 and (how_long_statistic == how_long) or \
                       delay > 1 and (how_long_statistic == (output_length + delay)) and \
                       how_long == delay + 1:
                         false_positive_fixation = True
