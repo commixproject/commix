@@ -103,9 +103,8 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
   if menu.options.url_reload == True:
     print Back.RED + settings.ERROR_SIGN + "The '--url-reload' option is not available in " + technique + "!" + Style.RESET_ALL
   
-  # percent = str(percent)+ "%"
-  # sys.stdout.write("\r" + settings.INFO_SIGN + "Testing the " + technique + "... " +  "[ " + percent + " ]")
-  # sys.stdout.flush()
+  if menu.options.verbose:
+    print settings.INFO_SIGN + "Testing the " + technique + "... "
 
   # Calculate all possible combinations
   total = (len(settings.PREFIXES) * len(settings.SEPARATORS) * len(settings.SUFFIXES) - len(settings.JUNK_COMBINATION))

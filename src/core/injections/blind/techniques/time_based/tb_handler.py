@@ -78,6 +78,9 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
   injection_type = "Blind Command Injection"
   technique = "time-based injection technique"
 
+  if menu.options.verbose:
+    print settings.INFO_SIGN + "Testing the " + technique + "... "
+
   # Check if defined "--maxlen" option.
   if menu.options.maxlen:
     maxlen = settings.MAXLEN
