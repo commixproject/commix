@@ -20,7 +20,6 @@ import sys
 import random
 import httplib
 import urllib2
-import urlparse
 
 from socket import error as SocketError
 
@@ -50,6 +49,7 @@ from src.core.requests import proxy
 from src.core.requests import headers
 from src.core.requests import requests
 
+from src.core.injections.controller import checks
 from src.core.injections.controller import parser
 from src.core.injections.controller import controller
 
@@ -170,11 +170,11 @@ def main():
   
     # Check if defined "--url" option.
     if menu.options.url:
-      url = menu.options.url
 
-      # If URL not starts with any URI scheme, add "http://"
-      if not urlparse.urlparse(url).scheme:
-        url = "http://" + url
+      url = menu.options.url
+      
+      # Check if http / https
+      url = checks.check_http_s(url)
 
       if menu.options.output_dir:
         output_dir = menu.options.output_dir

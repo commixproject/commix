@@ -1,3 +1,6 @@
+## Version 0.4b [2016]
+Added: The "--force-ssl" option for forcing usage of SSL/HTTPS requests.
+
 ## Version 0.3b [2015]
 * Added: Time-relative false-positive identification, which identifies unexpected time delays due to unstable requests.
 * Added: New option "-l", that parses target and data from HTTP proxy log file (i.e Burp or WebScarab).

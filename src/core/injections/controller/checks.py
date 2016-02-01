@@ -17,6 +17,7 @@ For more see the file 'readme/COPYING' for copying permission.
 import os
 import sys
 import urllib
+import urlparse
 
 from src.utils import menu
 from src.utils import settings
@@ -172,4 +173,17 @@ def ps_check_failed():
       print Back.RED + settings.ERROR_SIGN + "'" + ps_check + "' is not a valid answer." + Style.RESET_ALL + "\n"
       pass
 
+"""
+Check if http / https.
+"""
+def check_http_s(url):
+  if urlparse.urlparse(url).scheme:
+    if menu.options.force_ssl and urlparse.urlparse(url).scheme != "https":
+      url = re.sub("\Ahttp:", "https:", url, re.I)
+  else:
+    if menu.options.force_ssl:
+      url = "https://" + url
+    else:
+      url = "http://" + url
+  return url
 #eof

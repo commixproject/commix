@@ -180,6 +180,12 @@ request.add_option("--auth-cred",
                 dest="auth_cred",
                 help="HTTP Authentication credentials (e.g. 'admin:admin').")
 
+request.add_option("--force-ssl",
+                action="store_true",
+                dest="force_ssl",
+                default = False,
+                help="Force usage of SSL/HTTPS.")
+
 # Enumeration options
 enumeration = OptionGroup(parser, Style.BRIGHT + "Enumeration" + Style.RESET_ALL, 
                         "These options can be used to enumerate the target host.")
@@ -374,11 +380,10 @@ def shell_options():
       print """
   ---[ """ + Style.BRIGHT + Fore.BLUE + """Available options""" + Style.RESET_ALL + """ ]---     
   Type '""" + Style.BRIGHT + """?""" + Style.RESET_ALL + """' to get all the available options.
-  Type '""" + Style.BRIGHT + """back""" + Style.RESET_ALL + """' to go back to the injection process.
+  Type '""" + Style.BRIGHT + """back""" + Style.RESET_ALL + """' to move back from the current context.
   Type '""" + Style.BRIGHT + """quit""" + Style.RESET_ALL + """' (or use <Ctrl-C>) to quit commix.
   Type '""" + Style.BRIGHT + """os_shell""" + Style.RESET_ALL + """' to get into an operating system command shell.
   Type '""" + Style.BRIGHT + """reverse_tcp""" + Style.RESET_ALL + """' to get a reverse TCP connection.
-
   """
   
 """
@@ -387,8 +392,9 @@ The tab compliter.
 def tab_completer(text, state):
     shell_options = [option for option in settings.SHELL_OPTIONS if option.startswith(text)]
     try:
-        return shell_options[state]
+      return shell_options[state]
     except IndexError:
-        return None
+      return None
+
 
 #eof
