@@ -397,18 +397,21 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                             print Fore.YELLOW + settings.WARNING_SIGN + "You are already into an 'os_shell' mode." + Style.RESET_ALL + "\n"
                         elif os_shell_option == "reverse_tcp":
                           # Set up LHOST / LPORT for The reverse TCP connection.
-                          lhost, lport = reverse_tcp.configure_reverse_tcp()
+                          reverse_tcp.configure_reverse_tcp()
+                          if settings.REVERSE_TCP == False:
+                            continue
                           while True:
-                            if lhost and lport in settings.SHELL_OPTIONS:
-                              result = checks.check_reverse_tcp_options(lhost)
+                            if settings.LHOST and settings.LPORT in settings.SHELL_OPTIONS:
+                              result = checks.check_reverse_tcp_options(settings.LHOST)
                             else:  
-                              cmd = reverse_tcp.reverse_tcp_options(lhost, lport)
+                              cmd = reverse_tcp.reverse_tcp_options()
                               result = checks.check_reverse_tcp_options(cmd)
                             if result != None:
                               if result == 0:
                                 return False
                               elif result == 1 or result == 2:
                                 go_back_again = True
+                                settings.REVERSE_TCP = False
                                 break
                             # Command execution results.
                             from src.core.injections.results_based.techniques.classic import cb_injector

@@ -380,6 +380,7 @@ def shell_options():
       print """
   ---[ """ + Style.BRIGHT + Fore.BLUE + """Available options""" + Style.RESET_ALL + """ ]---     
   Type '""" + Style.BRIGHT + """?""" + Style.RESET_ALL + """' to get all the available options.
+  Type '""" + Style.BRIGHT + """set""" + Style.RESET_ALL + """' to set a context-specific variable to a value.
   Type '""" + Style.BRIGHT + """back""" + Style.RESET_ALL + """' to move back from the current context.
   Type '""" + Style.BRIGHT + """quit""" + Style.RESET_ALL + """' (or use <Ctrl-C>) to quit commix.
   Type '""" + Style.BRIGHT + """os_shell""" + Style.RESET_ALL + """' to get into an operating system command shell.
@@ -387,14 +388,15 @@ def shell_options():
   """
   
 """
-The tab compliter.
+The tab compliter (shell options).
 """
 def tab_completer(text, state):
+    set_options = [option for option in settings.SET_OPTIONS if option.startswith(text)]
     shell_options = [option for option in settings.SHELL_OPTIONS if option.startswith(text)]
+    available_options = shell_options + set_options
     try:
-      return shell_options[state]
+      return available_options[state]
     except IndexError:
       return None
-
 
 #eof

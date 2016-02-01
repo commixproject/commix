@@ -221,7 +221,14 @@ SHELL_OPTIONS = [
         'quit',
         'back',
         'os_shell',
-        'reverse_tcp'
+        'reverse_tcp',
+        'set',
+]
+
+# Accepted reverse tcp shell menu options
+SET_OPTIONS = [
+        'LHOST',
+        'LPORT'
 ]
 
 # Cookie delimiter
@@ -340,5 +347,10 @@ ERROR_SIGN = "(x) Error: "
 CRITICAL_SIGN = "(x) Critical: "
 ABORTION_SIGN = "(x) Aborted: "
 PAYLOAD_SIGN = "(~) Payload: "
+
+# Default LHOST / LPORT setup, 
+# for the reverse TCP connection
+LHOST = ""
+LPORT = ""
 
 #eof
