@@ -1,5 +1,5 @@
 ## Version 0.4b [2016]
-Added: The "--force-ssl" option for forcing usage of SSL/HTTPS requests.
+Added: New option "--force-ssl" for forcing usage of SSL/HTTPS requests.
 
 ## Version 0.3b [2015]
 * Added: Time-relative false-positive identification, which identifies unexpected time delays due to unstable requests.
