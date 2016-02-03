@@ -1,4 +1,6 @@
 ## Version 0.4b [2016]
+Added: Payload mutation if WAF/IPS/IDS protection is detected.
+Added: Check for existence of WAF/IPS/IDS protection (via error pages).
 Added: The "set" option in "reverse_tcp" which sets a context-specific variable to a value.
 Added: New option "--force-ssl" for forcing usage of SSL/HTTPS requests.
 

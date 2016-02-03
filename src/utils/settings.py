@@ -353,4 +353,7 @@ PAYLOAD_SIGN = "(~) Payload: "
 LHOST = ""
 LPORT = ""
 
+# Maybe a WAF/IPS/IDS protection.
+WAF_ENABED = False
+
 #eof

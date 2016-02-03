@@ -85,9 +85,13 @@ def check_reverse_tcp_options(reverse_tcp_option):
 Ignore error messages and continue the tests.
 """
 def continue_tests(err):
+  # WAF/IPS/IDS
+  if str(err.code) == "403" or "406":
+    settings.WAF_ENABED = True
+    print Fore.YELLOW + settings.WARNING_SIGN + "It seems that target is protected by some kind of WAF/IPS/IDS." + Style.RESET_ALL
   try:
     while True:
-      continue_tests = raw_input(settings.QUESTION_SIGN + "Do you want to ignore the error (" +str(err.code)+ ") message and continue the tests? [Y/n/q] > ").lower()
+      continue_tests = raw_input(settings.QUESTION_SIGN + "Do you want to ignore the error (" + str(err.code) + ") message and continue the tests? [Y/n/q] > ").lower()
       if continue_tests in settings.CHOISE_YES:
         return True
       elif continue_tests in settings.CHOISE_NO:
@@ -107,14 +111,12 @@ def continue_tests(err):
 Check if option is unavailable
 """
 def unavailable_option(check_option):
-
   print Fore.YELLOW + settings.WARNING_SIGN + "The '" +check_option+ "' option is not yet available for windows targets." + Style.RESET_ALL   
 
 """
 Transformation of separators if time-based injection
 """
 def time_based_separators(separator, http_request_method):
-
   if separator == "||"  or separator == "&&" :
     separator = separator[:1]
     if http_request_method == "POST":
@@ -125,7 +127,6 @@ def time_based_separators(separator, http_request_method):
 Information message if platform does not have GNU 'readline' module installed
 """
 def no_readline_module():
-
   info_msg =  settings.WARNING_SIGN + "It seems that your platform does not have GNU 'readline' module installed."
   info_msg += " For tab-completion support in your shell, download the"
   if settings.IS_WINDOWS:
@@ -187,4 +188,5 @@ def check_http_s(url):
     else:
       url = "http://" + url
   return url
+
 #eof

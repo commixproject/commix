@@ -208,8 +208,11 @@ def cookie_injection_test(url, vuln_parameter, payload):
     request = urllib2.Request(url)
     # Check if defined extra headers.
     headers.do_check(request)
-    response = opener.open(request)
-    return response
+    try:
+      response = opener.open(request)
+      return response
+    except ValueError:
+      pass
 
   start = 0
   end = 0
@@ -296,8 +299,11 @@ def user_agent_injection_test(url, vuln_parameter, payload):
     headers.do_check(request)
     payload = urllib.unquote(payload)
     request.add_header('User-Agent', payload)
-    response = opener.open(request)
-    return response
+    try:
+      response = opener.open(request)
+      return response
+    except ValueError:
+      pass
 
   start = 0
   end = 0
@@ -384,8 +390,11 @@ def referer_injection_test(url, vuln_parameter, payload):
     #Check if defined extra headers.
     headers.do_check(request)
     request.add_header('Referer', urllib.unquote(payload))
-    response = opener.open(request)
-    return response
+    try:
+      response = opener.open(request)
+      return response
+    except ValueError:
+      pass
 
   start = 0
   end = 0
