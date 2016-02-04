@@ -236,7 +236,7 @@ def cb_injection_handler(url, delay, filename, http_request_method):
             # Check for any enumeration options.
             if settings.ENUMERATION_DONE == True :
               while True:
-                enumerate_again = raw_input("\n(?) Do you want to enumerate again? [Y/n/q] > ").lower()
+                enumerate_again = raw_input("\n" + settings.QUESTION_SIGN + "Do you want to enumerate again? [Y/n/q] > ").lower()
                 if enumerate_again in settings.CHOISE_YES:
                   cb_enumeration.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
                   break
@@ -255,7 +255,7 @@ def cb_injection_handler(url, delay, filename, http_request_method):
             # Check for any system file access options.
             if settings.FILE_ACCESS_DONE == True :
               while True:
-                file_access_again = raw_input("(?) Do you want to access files again? [Y/n/q] > ").lower()
+                file_access_again = raw_input(settings.QUESTION_SIGN + "Do you want to access files again? [Y/n/q] > ").lower()
                 if file_access_again in settings.CHOISE_YES:
                   if not menu.options.verbose:
                     print ""
@@ -286,7 +286,7 @@ def cb_injection_handler(url, delay, filename, http_request_method):
               if settings.ENUMERATION_DONE == False and settings.FILE_ACCESS_DONE == False:
                 if menu.options.verbose:
                   print ""
-              gotshell = raw_input("(?) Do you want a Pseudo-Terminal shell? [Y/n/q] > ").lower()
+              gotshell = raw_input(settings.QUESTION_SIGN + "Do you want a Pseudo-Terminal shell? [Y/n/q] > ").lower()
               if gotshell in settings.CHOISE_YES:
                 print ""
                 print "Pseudo-Terminal (type '" + Style.BRIGHT + "?" + Style.RESET_ALL + "' for available options)"
@@ -318,7 +318,7 @@ def cb_injection_handler(url, delay, filename, http_request_method):
                         go_back = True
                         break
                       elif os_shell_option == "os_shell": 
-                        print Fore.YELLOW + "(^) Warning: You are already into the 'os_shell' mode." + Style.RESET_ALL + "\n"
+                        print Fore.YELLOW + settings.WARNING_SIGN + "You are already into the 'os_shell' mode." + Style.RESET_ALL + "\n"
                       elif os_shell_option == "reverse_tcp":
                         settings.REVERSE_TCP = True
                         # Set up LHOST / LPORT for The reverse TCP connection.

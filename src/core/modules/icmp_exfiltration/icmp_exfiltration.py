@@ -111,7 +111,7 @@ def input_cmd(http_request_method, url, vuln_parameter, ip_src, technique):
   while True:
     if go_back == True:
       break
-    gotshell = raw_input("\n(?) Do you want a Pseudo-Terminal shell? [Y/n/q] > ").lower()
+    gotshell = raw_input("\n" + settings.QUESTION_SIGN + "Do you want a Pseudo-Terminal shell? [Y/n/q] > ").lower()
     if gotshell in settings.CHOISE_YES:
       print "\nPseudo-Terminal (type '" + Style.BRIGHT + "?" + Style.RESET_ALL + "' for available options)"
       if readline_error:

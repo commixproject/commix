@@ -417,7 +417,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
           # Check for any enumeration options.
           if settings.ENUMERATION_DONE == True :
             while True:
-              enumerate_again = raw_input("\n(?) Do you want to enumerate again? [Y/n/q] > ").lower()
+              enumerate_again = raw_input("\n" + settings.QUESTION_SIGN + "Do you want to enumerate again? [Y/n/q] > ").lower()
               if enumerate_again in settings.CHOISE_YES:
                 fb_enumeration.do_check(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
                 break
