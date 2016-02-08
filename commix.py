@@ -124,10 +124,14 @@ def main():
             for j in range(0,len(split_first_letter)):
               if split_first_letter[j] in settings.AVAILABLE_TECHNIQUES:
                 found_tech = True
-          if split_techniques_names[i].replace(' ', '') not in settings.AVAILABLE_TECHNIQUES and found_tech == False:
-            print Back.RED + settings.ERROR_SIGN + "You specified wrong '" + split_techniques_names[i] + "' injection technique." + Style.RESET_ALL
-            print Back.RED + "(x) The available techniques are: classic,eval-based,time-based,file-based or c,e,t,f (with or without commas)." + Style.RESET_ALL
-            sys.exit(0)
+              else:  
+                found_tech = False            
+      if split_techniques_names[i].replace(' ', '') not in settings.AVAILABLE_TECHNIQUES and found_tech == False:
+        error_msg = "You specified wrong value '" + split_techniques_names[i] + "' as injection technique. " \
+                    "The value, must be a string composed by the letters (C)lassic, (E)val-based, " \
+                    "(T)ime-based, (F)ile-based (with or without commas)."
+        print Back.RED + settings.ERROR_SIGN + error_msg + Style.RESET_ALL
+        sys.exit(0)
 
     # Cookie Injection
     if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:

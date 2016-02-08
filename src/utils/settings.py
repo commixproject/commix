@@ -175,13 +175,8 @@ CHOISE_PROCEED = ['c','s','q']
 # Available alternative shells
 AVAILABLE_SHELLS = ["python"]
 
-# Available injectipon techniques
-AVAILABLE_TECHNIQUES = [
-        "classic", "c",
-        "eval-based", "e",
-        "time-based", "t",
-        "file-based", "f",
-]
+# Available injection techniques.
+AVAILABLE_TECHNIQUES = [ "c", "e", "t", "f" ]
 
 # User Agent List
 USER_AGENT_LIST = [
