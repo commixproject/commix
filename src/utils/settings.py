@@ -61,11 +61,17 @@ OUTPUT_FILE_NAME = "logs"
 OUTPUT_FILE_EXT = ".txt"
 OUTPUT_FILE = OUTPUT_FILE_NAME + OUTPUT_FILE_EXT
 
-# Max Length
+# Max Length.
 MAXLEN = "10000"
 
-# Slow target response
+# Slow target response.
 SLOW_TARGET_RESPONSE = 3
+
+# The testable parameter.
+TESTABLE_PARAMETER = "" 
+
+# The HTTP header name.
+HTTP_HEADER = ""
 
 # The command injection prefixes.
 PREFIXES = ["", "'", "\"", "&", "%26", "|", "%7C", "%27", "%22"] 
@@ -169,8 +175,8 @@ CHOISE_QUIT = ['q','quit']
 # Accepts 'W','w','U','u','Q','q'
 CHOISE_OS = ['w','u','q']
 
-# Accepts 'C','c','S','s','Q','q'
-CHOISE_PROCEED = ['c','s','q']
+# Accepts 'C','c','S','s','Q','q','a','A','n','N'
+CHOISE_PROCEED = ['c','s','q','a','n']
 
 # Available alternative shells
 AVAILABLE_SHELLS = ["python"]
@@ -350,5 +356,13 @@ LPORT = ""
 
 # Maybe a WAF/IPS/IDS protection.
 WAF_ENABED = False
+
+# Session Handler
+SESSION_FILE = ""
+LOAD_SESSION = None
+
+# Retest all techniques
+RETEST = False
+
 
 #eof

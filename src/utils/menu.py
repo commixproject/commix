@@ -77,6 +77,11 @@ general.add_option("--output-dir",
                 dest="output_dir",
                 help="Set custom output directory path.")
 
+general.add_option("--flush-session",
+                action="store_true",
+                dest="flush_session",
+                help="Flush session files for current target.")
+
 # Target options
 target = OptionGroup(parser, Style.BRIGHT + "Target" + Style.RESET_ALL, 
                      "This options has to be provided, to define the target URL. ")
@@ -334,6 +339,7 @@ injection.add_option("--root-dir",
 injection.add_option("--alter-shell", 
                 action="store",
                 dest="alter_shell",
+                default = "",
                 help="Use an alternative os-shell (e.g. Python).")
 
 injection.add_option("--os-cmd", 

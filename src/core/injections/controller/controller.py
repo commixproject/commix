@@ -21,6 +21,7 @@ import urllib2
 from src.utils import menu
 from src.utils import logs
 from src.utils import settings
+from src.utils import session_handler
 
 from src.thirdparty.colorama import Fore, Back, Style, init
 
@@ -87,30 +88,40 @@ def do_check(url, filename):
     parameter = parameters.do_POST_check(parameter)
     check_parameter = parameters.vuln_POST_param(parameter, url)
     the_type = " parameter " 
-
+  
   # Load modules
   modules_handler.load_modules(url, http_request_method, filename)
 
   # Cookie Injection
   if settings.COOKIE_INJECTION == True:
     header_name = " Cookie"
+    settings.HTTP_HEADER = header_name[1:].lower()
     check_parameter  = parameters.specify_cookie_parameter(menu.options.cookie)
     the_type = " HTTP header "
             
   # User-Agent Injection
   elif settings.USER_AGENT_INJECTION == True:
     header_name = " User-Agent"
+    settings.HTTP_HEADER = header_name[1:].replace("-","").lower()
     check_parameter  = ""
     the_type = " HTTP header "
 
   # Referer Injection
   elif settings.REFERER_INJECTION == True:
     header_name = " Referer"
+    settings.HTTP_HEADER = header_name[1:].lower()
     check_parameter  = ""
     the_type = " HTTP header "
 
-  else : 
-    pass
+  if len(check_parameter) > 0:
+    settings.TESTABLE_PARAMETER = check_parameter
+
+  # Check for session file 
+  if os.path.isfile(settings.SESSION_FILE):
+    if not menu.options.tech:
+        menu.options.tech = session_handler.applied_techniques(url, http_request_method)
+    if session_handler.check_stored_parameter(url, http_request_method):
+      settings.LOAD_SESSION = True
 
   if len(check_parameter) != 0 :
     check_parameter = " '" + check_parameter + "'"
@@ -158,8 +169,4 @@ def do_check(url, filename):
     print Back.RED + info_msg + Style.RESET_ALL  
 
   sys.exit(0)
-
-#eof
-
-
 #eof

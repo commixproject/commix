@@ -28,6 +28,7 @@ import HTMLParser
 from src.utils import menu
 from src.utils import logs
 from src.utils import settings
+from src.utils import session_handler
 
 from src.thirdparty.colorama import Fore, Back, Style, init
 
@@ -72,13 +73,13 @@ def cb_injection_handler(url, delay, filename, http_request_method):
   no_result = True
   is_encoded= False
   export_injection_info = False
-
   injection_type = "Results-based Command Injection"
   technique = "classic injection technique"
-      
-  sys.stdout.write(settings.INFO_SIGN + "Testing the " + technique + "... ")
-  sys.stdout.flush()
-  
+
+  if not settings.LOAD_SESSION: 
+    sys.stdout.write(settings.INFO_SIGN + "Testing the " + technique + "... ")
+    sys.stdout.flush()
+
   i = 0
   # Calculate all possible combinations
   total = len(settings.WHITESPACES) * len(settings.PREFIXES) * len(settings.SEPARATORS) * len(settings.SUFFIXES)
@@ -86,106 +87,111 @@ def cb_injection_handler(url, delay, filename, http_request_method):
     for prefix in settings.PREFIXES:
       for suffix in settings.SUFFIXES:
         for separator in settings.SEPARATORS:
-          i = i + 1
 
-          # Check for bad combination of prefix and separator
-          combination = prefix + separator
-          if combination in settings.JUNK_COMBINATION:
-            prefix = ""
+          # If a previous session is available.
+          if settings.LOAD_SESSION and session_handler. notification(url, technique):
+            url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response, delay, how_long, output_length, is_vulnerable = session_handler.injection_point_exportation(url, http_request_method)
 
-          # Change TAG on every request to prevent false-positive results.
-          TAG = ''.join(random.choice(string.ascii_uppercase) for i in range(6)) 
-          
-          randv1 = random.randrange(100)
-          randv2 = random.randrange(100)
-          randvcalc = randv1 + randv2
-          
-          # Define alter shell
-          alter_shell = menu.options.alter_shell
-        
-          try:
-            if alter_shell:
-              # Classic -alter shell- decision payload (check if host is vulnerable).
-              payload = cb_payloads.decision_alter_shell(separator, TAG, randv1, randv2)
-            else:
-              # Classic decision payload (check if host is vulnerable).
-              payload = cb_payloads.decision(separator, TAG, randv1, randv2)
+          else:
+            i = i + 1
+            # Check for bad combination of prefix and separator
+            combination = prefix + separator
+            if combination in settings.JUNK_COMBINATION:
+              prefix = ""
+
+            # Change TAG on every request to prevent false-positive results.
+            TAG = ''.join(random.choice(string.ascii_uppercase) for i in range(6)) 
             
-            # Define prefixes & suffixes
-            payload = parameters.prefixes(payload, prefix)
-            payload = parameters.suffixes(payload, suffix)
-
-            if menu.options.base64:
-              payload = urllib.unquote(payload)
-              payload = base64.b64encode(payload)
-            else:
-              if separator == " " :
-                payload = re.sub(" ", "%20", payload)
+            randv1 = random.randrange(100)
+            randv2 = random.randrange(100)
+            randvcalc = randv1 + randv2
+            
+            # Define alter shell
+            alter_shell = menu.options.alter_shell
+            
+            try:
+              if alter_shell:
+                # Classic -alter shell- decision payload (check if host is vulnerable).
+                payload = cb_payloads.decision_alter_shell(separator, TAG, randv1, randv2)
               else:
-                payload = re.sub(" ", whitespace, payload)
-
-            # Check if defined "--verbose" option.
-            if menu.options.verbose:
-              sys.stdout.write("\n" + Fore.GREY + "(~) Payload: " + payload + Style.RESET_ALL)
+                # Classic decision payload (check if host is vulnerable).
+                payload = cb_payloads.decision(separator, TAG, randv1, randv2)
               
-            # if need page reload
-            if menu.options.url_reload:
-              time.sleep(delay)
-              response = urllib.urlopen(url)
+              # Define prefixes & suffixes
+              payload = parameters.prefixes(payload, prefix)
+              payload = parameters.suffixes(payload, suffix)
 
-            # Cookie Injection
-            if settings.COOKIE_INJECTION == True:
-              # Check if target host is vulnerable to cookie injection.
-              vuln_parameter = parameters.specify_cookie_parameter(menu.options.cookie)
-              response = cb_injector.cookie_injection_test(url, vuln_parameter, payload)
+              if menu.options.base64:
+                payload = urllib.unquote(payload)
+                payload = base64.b64encode(payload)
+              else:
+                if separator == " " :
+                  payload = re.sub(" ", "%20", payload)
+                else:
+                  payload = re.sub(" ", whitespace, payload)
+
+              # Check if defined "--verbose" option.
+              if menu.options.verbose:
+                print Fore.GREY + "(~) Payload: " + payload + Style.RESET_ALL
+                
+              # if need page reload
+              if menu.options.url_reload:
+                time.sleep(delay)
+                response = urllib.urlopen(url)
+
+              # Cookie Injection
+              if settings.COOKIE_INJECTION == True:
+                # Check if target host is vulnerable to cookie injection.
+                vuln_parameter = parameters.specify_cookie_parameter(menu.options.cookie)
+                response = cb_injector.cookie_injection_test(url, vuln_parameter, payload)
+                
+              # User-Agent Injection
+              elif settings.USER_AGENT_INJECTION == True:
+                # Check if target host is vulnerable to user-agent injection.
+                vuln_parameter = parameters.specify_user_agent_parameter(menu.options.agent)
+                response = cb_injector.user_agent_injection_test(url, vuln_parameter, payload)
+
+              # Referer Injection
+              elif settings.REFERER_INJECTION == True:
+                # Check if target host is vulnerable to referer injection.
+                vuln_parameter = parameters.specify_referer_parameter(menu.options.referer)
+                response = cb_injector.referer_injection_test(url, vuln_parameter, payload)
+
+              else:
+                # Check if target host is vulnerable.
+                response, vuln_parameter = cb_injector.injection_test(payload, http_request_method, url)
+
+              # Evaluate test results.
+              shell = cb_injector.injection_test_results(response, TAG, randvcalc)
+
+              if not menu.options.verbose:
+                percent = ((i*100)/total)
+                float_percent = "{0:.1f}".format(round(((i*100)/(total*1.0)),2))
               
-            # User-Agent Injection
-            elif settings.USER_AGENT_INJECTION == True:
-              # Check if target host is vulnerable to user-agent injection.
-              vuln_parameter = parameters.specify_user_agent_parameter(menu.options.agent)
-              response = cb_injector.user_agent_injection_test(url, vuln_parameter, payload)
+                if shell == False:
+                  sys.stdout.write("\r" + settings.INFO_SIGN + "Testing the " + technique + "... " +  "[ " + float_percent + "%" + " ]")  
+                  sys.stdout.flush()
 
-            # Referer Injection
-            elif settings.REFERER_INJECTION == True:
-              # Check if target host is vulnerable to referer injection.
-              vuln_parameter = parameters.specify_referer_parameter(menu.options.referer)
-              response = cb_injector.referer_injection_test(url, vuln_parameter, payload)
-
-            else:
-              # Check if target host is vulnerable.
-              response, vuln_parameter = cb_injector.injection_test(payload, http_request_method, url)
-
-            # Evaluate test results.
-            shell = cb_injector.injection_test_results(response, TAG, randvcalc)
-
-            if not menu.options.verbose:
-              percent = ((i*100)/total)
-              float_percent = "{0:.1f}".format(round(((i*100)/(total*1.0)),2))
-            
-              if shell == False:
-                sys.stdout.write("\r" + settings.INFO_SIGN + "Testing the " + technique + "... " +  "[ " + float_percent + "%" + " ]")  
-                sys.stdout.flush()
-
-              if str(float_percent) == "100.0":
-                if no_result == True:
-                  percent = Fore.RED + "FAILED" + Style.RESET_ALL
+                if str(float_percent) == "100.0":
+                  if no_result == True:
+                    percent = Fore.RED + "FAILED" + Style.RESET_ALL
+                  else:
+                    percent = str(float_percent)+ "%"
+                elif len(shell) != 0:
+                  percent = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
                 else:
                   percent = str(float_percent)+ "%"
-              elif len(shell) != 0:
-                percent = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
-              else:
-                percent = str(float_percent)+ "%"
-              sys.stdout.write("\r" + settings.INFO_SIGN + "Testing the " + technique + "... " +  "[ " + percent + " ]")  
-              sys.stdout.flush()
-              
-          except KeyboardInterrupt: 
-            raise
+                sys.stdout.write("\r" + settings.INFO_SIGN + "Testing the " + technique + "... " +  "[ " + percent + " ]")  
+                sys.stdout.flush()
+                
+            except KeyboardInterrupt: 
+              raise
 
-          except SystemExit: 
-            raise
+            except SystemExit: 
+              raise
 
-          except:
-            continue
+            except:
+              continue
           
           # Yaw, got shellz! 
           # Do some magic tricks!
@@ -227,11 +233,20 @@ def cb_injection_handler(url, delay, filename, http_request_method):
             logs.update_payload(filename, counter, payload) 
             counter = counter + 1
             
+            if not menu.options.verbose and not settings.LOAD_SESSION:
+              print ""
+
             # Print the findings to terminal.
-            print Style.BRIGHT + "\n(!) The (" + http_request_method + ")" + found_vuln_parameter + header_name + the_type + " is vulnerable to " + injection_type + "." + Style.RESET_ALL
+            print Style.BRIGHT + "(!) The (" + http_request_method + ")" + found_vuln_parameter + header_name + the_type + " is vulnerable to " + injection_type + "." + Style.RESET_ALL
             print "  (+) Type : " + Fore.YELLOW + Style.BRIGHT + injection_type + Style.RESET_ALL + ""
             print "  (+) Technique : " + Fore.YELLOW + Style.BRIGHT + technique.title() + Style.RESET_ALL + ""
             print "  (+) Payload : " + Fore.YELLOW + Style.BRIGHT + re.sub("%20", " ", re.sub("%2B", "+",payload)) + Style.RESET_ALL
+
+            # Export session
+            if not settings.LOAD_SESSION:
+              session_handler.injection_point_importation(url, technique, injection_type, separator, shell[0], vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response=0, delay=0, how_long=0, output_length=0, is_vulnerable="True")
+            else:
+              settings.LOAD_SESSION = False  
             
             # Check for any enumeration options.
             if settings.ENUMERATION_DONE == True :

@@ -18,6 +18,7 @@ import os
 import re
 import time
 import urllib
+import sqlite3
 import datetime
 
 from src.utils import menu
@@ -49,6 +50,7 @@ def create_log_file(url, output_dir):
   except:
       os.mkdir(output_dir + host + "/") 
 
+  settings.SESSION_FILE = output_dir + host + "/" + "session" + ".db"
   # The logs filename construction.
   filename = output_dir + host + "/" + settings.OUTPUT_FILE
   output_file = open(filename, "a")
@@ -109,10 +111,9 @@ def update_payload(filename, counter, payload):
   output_file.close()
 
 """
-Log files cration notification
+Log files cration notification.
 """
 def logs_notification(filename):
   print "\n" + Style.BRIGHT + "(!) The results can be found at '" + os.getcwd() + "/" + filename + "'" + Style.RESET_ALL
-
 
 # eof

@@ -41,6 +41,7 @@ from src.utils import update
 from src.utils import version
 from src.utils import install
 from src.utils import settings
+from src.utils import session_handler
 
 from src.thirdparty.colorama import Fore, Back, Style, init
 
@@ -371,12 +372,16 @@ def main():
     if settings.SHOW_LOGS_MSG == True:
       logs.logs_notification(filename)
     print ""
+    if menu.options.url:
+      session_handler.clear(url)
     sys.exit(0)
 
   except SystemExit: 
     if settings.SHOW_LOGS_MSG == True:
       logs.logs_notification(filename)
     print ""
+    if menu.options.url:
+      session_handler.clear(url)
     sys.exit(0)
   
   # Accidental stop / restart of the target host server.
@@ -390,6 +395,7 @@ def main():
       sys.exit(0)      
     else: 
       print Back.RED + settings.ERROR_SIGN + e.line + e.message + Style.RESET_ALL + "\n"
+    session_handler.clear(url)  
     sys.exit(0)
 
   # Connection reset by peer
@@ -401,6 +407,7 @@ def main():
     if settings.SHOW_LOGS_MSG == True:
       logs.logs_notification(filename)
     print ""
+    session_handler.clear(url)
     sys.exit(0)
     
 if __name__ == '__main__':
