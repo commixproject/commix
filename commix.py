@@ -373,7 +373,7 @@ def main():
       logs.logs_notification(filename)
     print ""
     if menu.options.url:
-      session_handler.clear(url)
+      session_handler.clear(menu.options.url)
     sys.exit(0)
 
   except SystemExit: 
@@ -381,7 +381,7 @@ def main():
       logs.logs_notification(filename)
     print ""
     if menu.options.url:
-      session_handler.clear(url)
+      session_handler.clear(menu.options.url)
     sys.exit(0)
   
   # Accidental stop / restart of the target host server.
