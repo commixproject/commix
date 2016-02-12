@@ -119,11 +119,13 @@ def do_check(url, filename):
   # Check for session file 
   if not menu.options.ignore_session:
     if os.path.isfile(settings.SESSION_FILE):
+      if not menu.options.tech:
+          menu.options.tech = session_handler.applied_techniques(url, http_request_method)
       if session_handler.check_stored_parameter(url, http_request_method):
         settings.LOAD_SESSION = True
-    else: 
-      print Back.RED + settings.ERROR_SIGN + "Session file ("  + settings.SESSION_FILE + ") does not exist." + Style.RESET_ALL
-      pass
+        
+  if menu.options.flush_session:
+    session_handler.flush(url)
 
   if len(check_parameter) != 0 :
     check_parameter = " '" + check_parameter + "'"
