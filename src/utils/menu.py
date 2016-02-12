@@ -82,6 +82,11 @@ general.add_option("--flush-session",
                 dest="flush_session",
                 help="Flush session files for current target.")
 
+general.add_option("--ignore-session", 
+                action="store_true",
+                dest="ignore_session",
+                help="Ignore results stored in session file.")
+
 # Target options
 target = OptionGroup(parser, Style.BRIGHT + "Target" + Style.RESET_ALL, 
                      "This options has to be provided, to define the target URL. ")

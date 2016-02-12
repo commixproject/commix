@@ -117,11 +117,13 @@ def do_check(url, filename):
     settings.TESTABLE_PARAMETER = check_parameter
 
   # Check for session file 
-  if os.path.isfile(settings.SESSION_FILE):
-    if not menu.options.tech:
-        menu.options.tech = session_handler.applied_techniques(url, http_request_method)
-    if session_handler.check_stored_parameter(url, http_request_method):
-      settings.LOAD_SESSION = True
+  if not menu.options.ignore_session:
+    if os.path.isfile(settings.SESSION_FILE):
+      if session_handler.check_stored_parameter(url, http_request_method):
+        settings.LOAD_SESSION = True
+    else: 
+      print Back.RED + settings.ERROR_SIGN + "Session file ("  + settings.SESSION_FILE + ") does not exist." + Style.RESET_ALL
+      pass
 
   if len(check_parameter) != 0 :
     check_parameter = " '" + check_parameter + "'"

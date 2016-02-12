@@ -1,4 +1,5 @@
 ## Version 0.4b [2016]
+* Added: New option "--ignore-session" for ignoring results stored in session file.
 * Added: New option "--flush-session" for flushing session files for current target.
 * Added: Support to resume to the latest injection points from session file.
 * Added: Payload mutation if WAF/IPS/IDS protection is detected.
