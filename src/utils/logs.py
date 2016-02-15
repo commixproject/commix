@@ -16,6 +16,7 @@ For more see the file 'readme/COPYING' for copying permission.
 
 import os
 import re
+import sys
 import time
 import urllib
 import sqlite3
@@ -50,7 +51,18 @@ def create_log_file(url, output_dir):
   except:
       os.mkdir(output_dir + host + "/") 
 
-  settings.SESSION_FILE = output_dir + host + "/" + "session" + ".db"
+  if menu.options.session_file is not None:
+    if os.path.exists(menu.options.session_file):
+      settings.SESSION_FILE = menu.options.session_file
+    else:
+       error_msg = "The provided session file ('" + \
+                    menu.options.session_file + \
+                    "') does not exists." 
+       print Back.RED + settings.ERROR_SIGN + error_msg + Style.RESET_ALL
+       sys.exit(0)
+  else:  
+    settings.SESSION_FILE = output_dir + host + "/" + "session" + ".db"
+
   # The logs filename construction.
   filename = output_dir + host + "/" + settings.OUTPUT_FILE
   output_file = open(filename, "a")

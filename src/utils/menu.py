@@ -77,6 +77,12 @@ general.add_option("--output-dir",
                 dest="output_dir",
                 help="Set custom output directory path.")
 
+general.add_option("-s", 
+                action="store",
+                dest="session_file",
+                default=None,
+                help="Load session from a stored (.sqlite) file.")
+
 general.add_option("--flush-session",
                 action="store_true",
                 dest="flush_session",
