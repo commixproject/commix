@@ -82,6 +82,7 @@ def delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, http_req
 The "tempfile-based" injection technique handler
 """
 def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, url_time_response):
+
   counter = 1
   num_of_chars = 1
   vp_flag = True
@@ -506,10 +507,18 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
                           pass
                       else:
                         print ""
+                      if menu.options.ignore_session or \
+                         session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
                         # The main command injection exploitation.
                         check_how_long, output = tfb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
                         # Export injection result
                         tfb_injector.export_injection_results(cmd, separator, output, check_how_long)
+                        if not menu.options.ignore_session :
+                          session_handler.store_cmd(url, cmd, output, vuln_parameter)
+                      else:
+                        output = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
+                        print Fore.GREEN + Style.BRIGHT + output + "\n" + Style.RESET_ALL
+                          
                     except KeyboardInterrupt: 
                       # Delete previous shell (text) files (output) from temp.
                       delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
