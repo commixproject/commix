@@ -17,6 +17,7 @@ For more see the file 'readme/COPYING' for copying permission.
 import os
 import sys
 import time
+import base64
 import sqlite3
 import urllib2
 
@@ -28,7 +29,6 @@ from src.thirdparty.colorama import Fore, Back, Style, init
 """
 Session handler via SQLite3 db.
 """
-
 no_such_table = False
 
 """
@@ -145,7 +145,8 @@ def injection_point_exportation(url, http_request_method):
                              table_name(url) + "_ip' AND type = 'table';")
       if result:
         if settings.TESTABLE_PARAMETER:
-          if menu.options.tech[:1] == "c":
+          if menu.options.tech[:1] == "c" or \
+             menu.options.tech[:1] == "e":
             select_injection_type = "R"
           elif menu.options.tech[:1] == "t":
             select_injection_type = "B"
@@ -249,5 +250,42 @@ def check_stored_parameter(url, http_request_method):
       return False
   else:
     return False
+
+"""
+Import successful command execution outputs to session file.
+"""
+def store_cmd(url, cmd, shell, vuln_parameter):
+  try:  
+    conn = sqlite3.connect(settings.SESSION_FILE)
+    conn.execute("CREATE TABLE IF NOT EXISTS " + table_name(url) + "_ir" + \
+                 "(cmd VARCHAR, output VARCHAR, vuln_parameter VARCHAR);")
+    conn.execute("INSERT INTO " + table_name(url) + "_ir(cmd, output, vuln_parameter) \
+                 VALUES(?,?,?)", \
+                 (str(base64.b64encode(cmd)), str(base64.b64encode(shell)), str(vuln_parameter)))
+    conn.commit()
+    conn.close()
+  except sqlite3.OperationalError, err:
+    print Back.RED + settings.ERROR_SIGN + str(err) + Style.RESET_ALL
+
+"""
+Export successful command execution outputs from session file.
+"""
+def export_stored_cmd(url, cmd, vuln_parameter):
+  try:  
+    if not menu.options.flush_session:
+      conn = sqlite3.connect(settings.SESSION_FILE)
+      output = None
+      conn = sqlite3.connect(settings.SESSION_FILE)
+      cursor = conn.execute("SELECT output FROM " + table_name(url) + \
+                            "_ir WHERE cmd='" + base64.b64encode(cmd) + "' AND \
+                            vuln_parameter= '" + vuln_parameter + "';").fetchall()
+      for session in cursor:
+        output = base64.b64decode(session[0])
+      return output
+    else:
+      no_such_table = True
+      pass
+  except sqlite3.OperationalError, err:
+    pass
 
 # eof

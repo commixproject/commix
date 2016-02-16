@@ -1,4 +1,5 @@
 ## Version 0.4b [2016]
+* Added: Support for storing and retrieving executed commands from session file.
 * Added: New option "-s" for loading session from session file.
 * Added: New option "--ignore-session" for ignoring results stored in session file.
 * Added: New option "--flush-session" for flushing session files for current target.

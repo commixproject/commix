@@ -196,7 +196,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
       for separator in settings.SEPARATORS:
 
         # If a previous session is available.
-        if settings.LOAD_SESSION and session_handler. notification(url, technique):
+        if settings.LOAD_SESSION and session_handler.notification(url, technique):
           url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response, delay, how_long, output_length, is_vulnerable = session_handler.injection_point_exportation(url, http_request_method)
           OUTPUT_TEXTFILE = TAG + ".txt"
           if technique == "tempfile-based injection technique":
@@ -561,11 +561,16 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                       pass
                   else:
                     response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-                    # Command execution results.
-                    shell = fb_injector.injection_results(url, OUTPUT_TEXTFILE, delay)
-                    
+                    if menu.options.ignore_session or \
+                       session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
+                      # Command execution results.
+                      shell = fb_injector.injection_results(url, OUTPUT_TEXTFILE, delay)
+                      shell = "".join(str(p) for p in shell)
+                      if not menu.options.ignore_session :
+                        session_handler.store_cmd(url, cmd, shell, vuln_parameter)
+                    else:
+                      shell = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
                     if shell:
-                      shell = " ".join(str(p) for p in shell)
                       if shell != "":
                         print "\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n"
 

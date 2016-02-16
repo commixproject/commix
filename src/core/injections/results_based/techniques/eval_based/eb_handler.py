@@ -91,9 +91,9 @@ def eb_injection_handler(url, delay, filename, http_request_method):
   for prefix in settings.EVAL_PREFIXES:
     for suffix in settings.EVAL_SUFFIXES:
       for separator in settings.EVAL_SEPARATORS:
-        
+
         # If a previous session is available.
-        if settings.LOAD_SESSION and session_handler. notification(url, technique):
+        if settings.LOAD_SESSION and session_handler.notification(url, technique):
           url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response, delay, how_long, output_length, is_vulnerable = session_handler.injection_point_exportation(url, http_request_method)
         
         if settings.RETEST == True:
@@ -382,12 +382,18 @@ def eb_injection_handler(url, delay, filename, http_request_method):
                     if menu.options.url_reload:
                       time.sleep(delay)
                       response = urllib.urlopen(url)
-                      
-                    # Command execution results.
-                    shell = eb_injector.injection_results(response, TAG)
+                    if menu.options.ignore_session or\
+                       session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
+                      # Evaluate injection results.
+                      shell = eb_injector.injection_results(response, TAG)
+                      shell = "".join(str(p) for p in shell).replace(" ", "", 1)
+                      if not menu.options.ignore_session :
+                        session_handler.store_cmd(url, cmd, shell, vuln_parameter)
+                    else:
+                      shell = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
                     if shell:
-                      shell = "".join(str(p) for p in shell).replace(" ", "", 1)[:-1]
                       if shell != "":
+                        shell = "".join(str(p) for p in shell)
                         print "\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n"
                       else:
                         print Back.RED + settings.ERROR_SIGN + "The '" + cmd + "' command, does not return any output." + Style.RESET_ALL + "\n"
