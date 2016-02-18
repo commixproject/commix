@@ -514,12 +514,13 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_m
       how_long = examine_requests(payload, vuln_parameter, http_request_method, url, delay, url_time_response)
     # Examine time-responses
     injection_check = False
-    if settings.TARGET_OS == "win" and alter_shell is not None :
-      if (how_long > settings.FOUND_HOW_LONG and how_long - delay >= settings.FOUND_DIFF):
-        injection_check = True
-    else:
-      if (how_long >= settings.FOUND_HOW_LONG and how_long - delay >= settings.FOUND_DIFF):
-        injection_check = True
+    # if settings.TARGET_OS == "win" and alter_shell is not None :
+    #   if (how_long > settings.FOUND_HOW_LONG and how_long - delay >= settings.FOUND_DIFF):
+    #     injection_check = True
+    # else:
+    if (how_long >= settings.FOUND_HOW_LONG and how_long - delay >= settings.FOUND_DIFF):
+      injection_check = True
+
     if injection_check == True:        
       if output_length > 1:
         if menu.options.verbose:
@@ -580,12 +581,13 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_m
           how_long = examine_requests(payload, vuln_parameter, http_request_method, url, delay, url_time_response)
         # Examine time-responses
         injection_check = False
-        if settings.TARGET_OS == "win" and alter_shell is not None :
-          if (how_long > settings.FOUND_HOW_LONG and how_long - delay >= settings.FOUND_DIFF):
-            injection_check = True
-        else:
-          if (how_long >= settings.FOUND_HOW_LONG and how_long - delay >= settings.FOUND_DIFF):
-            injection_check = True
+        # if settings.TARGET_OS == "win" and alter_shell is not None :
+        #   if (how_long > settings.FOUND_HOW_LONG and how_long - delay >= settings.FOUND_DIFF):
+        #     injection_check = True
+        # else:
+        if (how_long >= settings.FOUND_HOW_LONG and how_long - delay >= settings.FOUND_DIFF):
+          injection_check = True
+          
         if injection_check == True:
           if not menu.options.verbose:
             output.append(chr(ascii_char))
@@ -600,6 +602,7 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_m
     check_end  = time.time()
     check_how_long = int(check_end - check_start)
     output = "".join(str(p) for p in output)
+    
     # Check for empty output.
     if output == (len(output) * " "):
       output = ""
