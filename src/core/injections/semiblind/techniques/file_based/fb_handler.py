@@ -457,15 +457,14 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                 print Back.RED + settings.ERROR_SIGN + "'" + enumerate_again + "' is not a valid answer." + Style.RESET_ALL + "\n"
                 pass
           else:
-            fb_enumeration.do_check(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+            if menu.enumeration_options():
+              fb_enumeration.do_check(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
 
           # Check for any system file access options.
           if settings.FILE_ACCESS_DONE == True :
             while True:
               file_access_again = raw_input(settings.QUESTION_SIGN + "Do you want to access files again? [Y/n/q] > ").lower()
               if file_access_again in settings.CHOISE_YES:
-                if not menu.options.verbose:
-                  print ""
                 fb_file_access.do_check(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
                 break
               elif file_access_again in settings.CHOISE_NO: 
@@ -480,8 +479,15 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                 print Back.RED + settings.ERROR_SIGN + "'" + file_access_again  + "' is not a valid answer." + Style.RESET_ALL + "\n"
                 pass
           else:
+            if menu.file_access_options():
+              if not menu.enumeration_options():
+                print ""
             fb_file_access.do_check(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
           
+          if settings.ENUMERATION_DONE or settings.FILE_ACCESS_DONE or \
+             menu.enumeration_options() or menu.file_access_options():
+            print ""
+
           # Check if defined single cmd.
           if menu.options.os_cmd:
             fb_enumeration.single_os_cmd_exec(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)

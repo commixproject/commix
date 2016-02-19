@@ -401,8 +401,10 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
                   print Back.RED + settings.ERROR_SIGN + "'" + enumerate_again + "' is not a valid answer." + Style.RESET_ALL + "\n"
                   pass
             else:
-              tfb_enumeration.do_check(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
-
+              if menu.enumeration_options():
+                tfb_enumeration.do_check(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
+            
+            print ""
             # Check for any system file access options.
             if settings.FILE_ACCESS_DONE == True :
               while True:
@@ -422,7 +424,14 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
                   print Back.RED + settings.ERROR_SIGN + "'" + file_access_again + "' is not a valid answer." + Style.RESET_ALL + "\n"
                   pass
             else:
+              if not menu.enumeration_options():
+                print ""
               tfb_file_access.do_check(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
+            
+            if settings.ENUMERATION_DONE or settings.FILE_ACCESS_DONE or\
+               menu.enumeration_options() or menu.file_access_options():
+              print ""
+
             # Check if defined single cmd.
             if menu.options.os_cmd:
               check_how_long, output = tfb_enumeration.single_os_cmd_exec(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)

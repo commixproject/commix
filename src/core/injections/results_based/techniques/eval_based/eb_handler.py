@@ -279,15 +279,14 @@ def eb_injection_handler(url, delay, filename, http_request_method):
                 pass
 
           else:
-            eb_enumeration.do_check(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
+            if menu.enumeration_options():
+              eb_enumeration.do_check(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
 
           # Check for any system file access options.
           if settings.FILE_ACCESS_DONE == True :
             while True:
               file_access_again = raw_input(settings.QUESTION_SIGN + "Do you want to access files again? [Y/n/q] > ").lower()
               if file_access_again in settings.CHOISE_YES:
-                if not menu.options.verbose:
-                  print ""
                 eb_file_access.do_check(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
                 break
               elif file_access_again in settings.CHOISE_NO: 
@@ -300,7 +299,14 @@ def eb_injection_handler(url, delay, filename, http_request_method):
                 print Back.RED + settings.ERROR_SIGN + "'" + file_access_again  + "' is not a valid answer." + Style.RESET_ALL + "\n"
                 pass
           else:
-            eb_file_access.do_check(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
+            if menu.file_access_options():
+              if not menu.enumeration_options():
+                print ""
+              eb_file_access.do_check(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
+
+          if settings.ENUMERATION_DONE or settings.FILE_ACCESS_DONE or\
+             menu.enumeration_options() or menu.file_access_options():
+            print ""
 
           # Check if defined single cmd.
           if menu.options.os_cmd:

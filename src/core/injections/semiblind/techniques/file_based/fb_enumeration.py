@@ -429,7 +429,8 @@ def single_os_cmd_exec(separator, payload, TAG, delay, prefix, suffix, http_requ
 Check the defined options
 """
 def do_check(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
-  if not menu.options.verbose:
+  
+  if not menu.options.verbose and not settings.ENUMERATION_DONE:
     print ""
 
   if menu.options.ps_version and settings.TARGET_OS == "win" and settings.PS_ENABLED == None:
@@ -456,7 +457,4 @@ def do_check(separator, payload, TAG, delay, prefix, suffix, http_request_method
     system_passwords(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
     settings.ENUMERATION_DONE = True
 
-  if settings.ENUMERATION_DONE:
-    print ""
-    
 # eof

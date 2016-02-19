@@ -446,7 +446,7 @@ Check the defined options
 """
 def do_check(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename):
   
-  if not menu.options.verbose:
+  if not menu.options.verbose and not settings.ENUMERATION_DONE:
     print ""
 
   # Check if PowerShell is enabled.
@@ -477,7 +477,4 @@ def do_check(separator, TAG, prefix, suffix, http_request_method, url, vuln_para
     system_passwords(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
     settings.ENUMERATION_DONE = True
 
-  if settings.ENUMERATION_DONE:
-    print ""
-    
 # eof

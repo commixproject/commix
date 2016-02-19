@@ -416,4 +416,28 @@ def tab_completer(text, state):
     except IndexError:
       return None
 
+"""
+Check if enumeration options are enabled.
+"""
+def enumeration_options():
+  if options.hostname or \
+     options.current_user or \
+     options.is_root or \
+     options.is_admin or \
+     options.sys_info or \
+     options.users or \
+     options.privileges or \
+     options.passwords or \
+     options.ps_version :
+    return True
+
+"""
+Check if file access options are enabled.
+"""
+def file_access_options():
+  if options.file_write or \
+     options.file_upload or\
+     options.file_read:
+    return True
+
 #eof

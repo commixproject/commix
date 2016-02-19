@@ -745,7 +745,4 @@ def export_injection_results(cmd, separator, output, check_how_long):
     else:
        print Back.RED + settings.ERROR_SIGN + "The '" + cmd + "' command, does not return any output." + Style.RESET_ALL + "\n"
   
-  if settings.ENUMERATION_DONE and not menu.options.verbose:
-    print ""
-
 #eof

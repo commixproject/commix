@@ -422,6 +422,8 @@ def single_os_cmd_exec(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_
     session_handler.store_cmd(url, cmd, output, vuln_parameter)
     return check_how_long, output
   else:
+    if not menu.options.verbose:
+      print ""
     output = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
     print Fore.GREEN + Style.BRIGHT + str(output) + Style.RESET_ALL
     sys.exit(0)
@@ -430,7 +432,6 @@ def single_os_cmd_exec(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_
 Check the defined options
 """
 def do_check(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response):
-
   if settings.ENUMERATION_DONE == False:
     print ""
   else:
@@ -473,8 +474,5 @@ def do_check(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_me
     system_passwords(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
     if settings.ENUMERATION_DONE == False:
       settings.ENUMERATION_DONE = True
-
-  if settings.ENUMERATION_DONE == True:
-    print "\n"
 
 # eof

@@ -357,8 +357,10 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                   print Back.RED + settings.ERROR_SIGN + "'" + enumerate_again + "' is not a valid answer." + Style.RESET_ALL + "\n"
                   pass
             else:
-              tb_enumeration.do_check(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
+              if menu.enumeration_options():
+                tb_enumeration.do_check(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
 
+            print ""
             # Check for any system file access options.
             if settings.FILE_ACCESS_DONE == True:
               while True:
@@ -376,8 +378,10 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                   print Back.RED + settings.ERROR_SIGN + "'" + file_access_again  + "' is not a valid answer." + Style.RESET_ALL + "\n"
                   pass
             else:
+              if not menu.enumeration_options():
+                print ""
               tb_file_access.do_check(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
-
+            
             # Check if defined single cmd.
             if menu.options.os_cmd:
               cmd = menu.options.os_cmd
@@ -385,6 +389,10 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
               # Export injection result
               tb_injector.export_injection_results(cmd, separator, output, check_how_long)
               sys.exit(0)
+
+            if settings.ENUMERATION_DONE or settings.FILE_ACCESS_DONE or\
+               menu.enumeration_options() or menu.file_access_options():
+              print ""
 
             # Pseudo-Terminal shell
             go_back = False
