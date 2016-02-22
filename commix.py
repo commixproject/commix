@@ -238,7 +238,7 @@ def main():
                   identified_os = "Windows"
                   settings.TARGET_OS = identified_os[:3].lower()
                   if menu.options.shellshock:
-                    print Back.RED + settings.CRITICAL_SIGN + "The shellshock module is not available for " + identified_os + " tagets." + Style.RESET_ALL
+                    print Back.RED + settings.CRITICAL_SIGN + "The shellshock module is not available for " + identified_os + " targets." + Style.RESET_ALL
                     raise SystemExit()
                 else:
                   identified_os = "Unix-like (" + settings.TARGET_OS + ")"
@@ -268,7 +268,7 @@ def main():
             # Check for wrong flags.
             if settings.TARGET_OS == "win":
               if menu.options.is_root :
-                print Fore.YELLOW + settings.WARNING_SIGN + "Swithing '--is-root' to '--is-admin' because the taget has been identified as windows." + Style.RESET_ALL 
+                print Fore.YELLOW + settings.WARNING_SIGN + "Swithing '--is-root' to '--is-admin' because the target has been identified as windows." + Style.RESET_ALL 
               error_msg = settings.WARNING_SIGN + "The '--passwords' option, is not yet available for Windows targets."
               if menu.options.passwords:
                 print Fore.YELLOW + settings.WARNING_SIGN + "The '--passwords' option, is not yet available for Windows targets." + Style.RESET_ALL   
@@ -277,7 +277,7 @@ def main():
                 sys.exit(0)
             else: 
               if menu.options.is_admin : 
-                print Fore.YELLOW + settings.WARNING_SIGN + "Swithing the '--is-admin' to '--is-root' because the taget has been identified as unix-like. " + Style.RESET_ALL   
+                print Fore.YELLOW + settings.WARNING_SIGN + "Swithing the '--is-admin' to '--is-root' because the target has been identified as unix-like. " + Style.RESET_ALL   
             
             if found_os_server == False:
               # If "--shellshock" option is provided then,
