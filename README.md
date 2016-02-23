@@ -38,13 +38,13 @@ Commix comes packaged on the **official repositories** of the following Linux di
 - [ArchAssault](https://archassault.org/)
 - [BlackArch](http://blackarch.org/)
 - [Kali Linux](https://www.kali.org/)
+- [Weakerthan](http://www.weaknetlabs.com/)
 
 Commix also comes **pre-installed**, on the following penetration testing frameworks:
 
-- [CTF-Tools](https://github.com/zardus/ctf-tools)
 - [The Penetration Testers Framework (PTF)](https://github.com/trustedsec/ptf)
+- [CTF-Tools](https://github.com/zardus/ctf-tools)
 - [PentestBox](https://tools.pentestbox.com/)
-- [Weakerthan](http://www.weaknetlabs.com/)
 
 #### Usage
 
