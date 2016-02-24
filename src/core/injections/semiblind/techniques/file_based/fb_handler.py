@@ -459,6 +459,9 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
           else:
             if menu.enumeration_options():
               fb_enumeration.do_check(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+          
+          if not menu.file_access_options() and not menu.options.os_cmd:
+            print ""
 
           # Check for any system file access options.
           if settings.FILE_ACCESS_DONE == True :
@@ -483,13 +486,10 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
               if not menu.enumeration_options():
                 print ""
             fb_file_access.do_check(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-          
-          if settings.ENUMERATION_DONE or settings.FILE_ACCESS_DONE or \
-             menu.enumeration_options() or menu.file_access_options():
-            print ""
-
+            
           # Check if defined single cmd.
           if menu.options.os_cmd:
+            print ""
             fb_enumeration.single_os_cmd_exec(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
             # Delete previous shell (text) files (output)
             delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)

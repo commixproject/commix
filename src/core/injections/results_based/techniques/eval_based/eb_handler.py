@@ -281,6 +281,9 @@ def eb_injection_handler(url, delay, filename, http_request_method):
           else:
             if menu.enumeration_options():
               eb_enumeration.do_check(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
+          
+          if not menu.file_access_options() and not menu.options.os_cmd:
+            print ""
 
           # Check for any system file access options.
           if settings.FILE_ACCESS_DONE == True :
@@ -303,13 +306,12 @@ def eb_injection_handler(url, delay, filename, http_request_method):
               if not menu.enumeration_options():
                 print ""
               eb_file_access.do_check(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
-
-          if settings.ENUMERATION_DONE or settings.FILE_ACCESS_DONE or\
-             menu.enumeration_options() or menu.file_access_options():
-            print ""
+              print ""
 
           # Check if defined single cmd.
           if menu.options.os_cmd:
+            if not menu.file_access_options():
+              print ""
             eb_enumeration.single_os_cmd_exec(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
 
           # Pseudo-Terminal shell

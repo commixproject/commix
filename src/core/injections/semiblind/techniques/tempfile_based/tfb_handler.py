@@ -381,15 +381,18 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
             delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)  
             if settings.TARGET_OS == "win":
               time.sleep(1)
-              
+            
+            new_line = False  
             # Check for any enumeration options.
             if settings.ENUMERATION_DONE == True :
               while True:
                 enumerate_again = raw_input("\n" + settings.QUESTION_SIGN + "Do you want to enumerate again? [Y/n/q] > ").lower()
                 if enumerate_again in settings.CHOISE_YES:
                   tfb_enumeration.do_check(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
+                  print ""
                   break
                 elif enumerate_again in settings.CHOISE_NO: 
+                  new_line = True
                   break
                 elif enumerate_again in settings.CHOISE_QUIT:
                   # Delete previous shell (text) files (output) from temp.
@@ -403,8 +406,8 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
             else:
               if menu.enumeration_options():
                 tfb_enumeration.do_check(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
-            
-            print ""
+                print ""
+
             # Check for any system file access options.
             if settings.FILE_ACCESS_DONE == True :
               while True:
@@ -413,6 +416,8 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
                   tfb_file_access.do_check(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
                   break
                 elif file_access_again in settings.CHOISE_NO: 
+                  if not new_line:
+                    new_line = True
                   break
                 elif file_access_again in settings.CHOISE_QUIT:
                   # Delete previous shell (text) files (output) from temp.
@@ -424,14 +429,10 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
                   print Back.RED + settings.ERROR_SIGN + "'" + file_access_again + "' is not a valid answer." + Style.RESET_ALL + "\n"
                   pass
             else:
-              if not menu.enumeration_options():
+              if not menu.enumeration_options() and not menu.options.os_cmd:
                 print ""
               tfb_file_access.do_check(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
             
-            if settings.ENUMERATION_DONE or settings.FILE_ACCESS_DONE or\
-               menu.enumeration_options() or menu.file_access_options():
-              print ""
-
             # Check if defined single cmd.
             if menu.options.os_cmd:
               check_how_long, output = tfb_enumeration.single_os_cmd_exec(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
@@ -439,14 +440,16 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
               tfb_injector.export_injection_results(cmd, separator, output, check_how_long)
               # Delete previous shell (text) files (output) from temp.
               delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-              sys.exit(0)    
+              sys.exit(0)  
+
+            if not new_line :
+              print ""
+
             try:    
               # Pseudo-Terminal shell
               go_back = False
               go_back_again = False
               while True:
-                # if menu.options.verbose:
-                #   print ""
                 if go_back == True:
                   break
                 gotshell = raw_input(settings.QUESTION_SIGN + "Do you want a Pseudo-Terminal? [Y/n/q] > ").lower()

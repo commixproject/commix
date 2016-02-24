@@ -126,7 +126,6 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
           
           for output_length in range(1, int(tag_length)):
             try:
-
               if alter_shell:
                 # Time-based decision payload (check if host is vulnerable).
                 payload = tb_payloads.decision_alter_shell(separator, TAG, output_length, delay, http_request_method)
@@ -339,15 +338,18 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
               is_vulnerable = False
             else:
               settings.LOAD_SESSION = False 
-              
+            
+            new_line = False   
             # Check for any enumeration options.
             if settings.ENUMERATION_DONE == True:
               while True:
                 enumerate_again = raw_input("\n" + settings.QUESTION_SIGN + "Do you want to enumerate again? [Y/n/q] > ").lower()
                 if enumerate_again in settings.CHOISE_YES:
                   tb_enumeration.do_check(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
+                  print  ""
                   break
                 elif enumerate_again in settings.CHOISE_NO: 
+                  new_line = True
                   break
                 elif enumerate_again in settings.CHOISE_QUIT:
                   sys.exit(0)
@@ -359,8 +361,8 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
             else:
               if menu.enumeration_options():
                 tb_enumeration.do_check(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
+                print ""
 
-            print ""
             # Check for any system file access options.
             if settings.FILE_ACCESS_DONE == True:
               while True:
@@ -369,7 +371,9 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                   tb_file_access.do_check(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
                   break
                 elif file_access_again in settings.CHOISE_NO: 
-                  break
+                  if not new_line:
+                    new_line = True
+                  break 
                 elif file_access_again in settings.CHOISE_QUIT:
                   sys.exit(0)
                 else:
@@ -378,10 +382,10 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                   print Back.RED + settings.ERROR_SIGN + "'" + file_access_again  + "' is not a valid answer." + Style.RESET_ALL + "\n"
                   pass
             else:
-              if not menu.enumeration_options():
+              if not menu.enumeration_options() and not menu.options.os_cmd:
                 print ""
               tb_file_access.do_check(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
-            
+
             # Check if defined single cmd.
             if menu.options.os_cmd:
               cmd = menu.options.os_cmd
@@ -390,8 +394,7 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
               tb_injector.export_injection_results(cmd, separator, output, check_how_long)
               sys.exit(0)
 
-            if settings.ENUMERATION_DONE or settings.FILE_ACCESS_DONE or\
-               menu.enumeration_options() or menu.file_access_options():
+            if not new_line :
               print ""
 
             # Pseudo-Terminal shell

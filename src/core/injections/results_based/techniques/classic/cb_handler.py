@@ -78,7 +78,9 @@ def cb_injection_handler(url, delay, filename, http_request_method):
   if not settings.LOAD_SESSION: 
     sys.stdout.write(settings.INFO_SIGN + "Testing the " + technique + "... ")
     sys.stdout.flush()
-
+    if menu.options.verbose:
+      print ""
+      
   i = 0
   # Calculate all possible combinations
   total = len(settings.WHITESPACES) * len(settings.PREFIXES) * len(settings.SEPARATORS) * len(settings.SUFFIXES)
@@ -266,7 +268,10 @@ def cb_injection_handler(url, delay, filename, http_request_method):
             else:
               if menu.enumeration_options():
                 cb_enumeration.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
-
+          
+            if not menu.file_access_options() and not menu.options.os_cmd:
+              print ""
+            
             # Check for any system file access options.
             if settings.FILE_ACCESS_DONE == True :
               while True:
@@ -288,13 +293,12 @@ def cb_injection_handler(url, delay, filename, http_request_method):
                 if not menu.enumeration_options():
                   print ""
                 cb_file_access.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
-
-            if settings.ENUMERATION_DONE or settings.FILE_ACCESS_DONE or\
-               menu.enumeration_options() or menu.file_access_options():
-              print ""
+                print ""
               
             # Check if defined single cmd.
             if menu.options.os_cmd:
+              if not menu.file_access_options():
+                print ""
               cb_enumeration.single_os_cmd_exec(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
 
             # Pseudo-Terminal shell
