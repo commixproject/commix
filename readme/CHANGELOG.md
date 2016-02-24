@@ -1,9 +1,11 @@
-## Version 0.4b [2016]
+## Version 0.4.1b [2016]
 * Added: Support for storing and retrieving executed commands from session file.
 * Added: New option "-s" for loading session from session file.
 * Added: New option "--ignore-session" for ignoring results stored in session file.
 * Added: New option "--flush-session" for flushing session files for current target.
 * Added: Support to resume to the latest injection points from session file.
+
+## Version 0.4b [2016]
 * Added: Payload mutation if WAF/IPS/IDS protection is detected.
 * Added: Check for existence of WAF/IPS/IDS protection (via error pages).
 * Added: The "set" option in "reverse_tcp" which sets a context-specific variable to a value.

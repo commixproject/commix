@@ -27,7 +27,7 @@ The global variables.
 APPLICATION = "commix"
 DESCRIPTION = "Automated All-in-One OS Command Injection and Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION = "v0.4b"
+VERSION = "v0.4.1b"
 YEAR    = "2014-2016"
 TWITTER = "@ancst" 
 
