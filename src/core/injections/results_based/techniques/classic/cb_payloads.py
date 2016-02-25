@@ -32,7 +32,7 @@ def decision(separator, TAG, randv1, randv2):
               "\"') do @set /p = " + TAG + "%i" + TAG + TAG + " <nul"
               )
   else:
-    if not settings.WAF_ENABED:
+    if not settings.WAF_ENABLED:
       math_calc = "$((" + str(randv1) + "%2B" + str(randv2) + "))"
     else:
       math_calc = "$(expr " + str(randv1) + " %2B " + str(randv2) + ")"
@@ -71,7 +71,7 @@ def cmd_execution(separator, TAG, cmd):
               "') do @set /p = " + TAG + TAG + "%i" + TAG + TAG + " <nul"
               )
   else:       
-    if not settings.WAF_ENABED:
+    if not settings.WAF_ENABLED:
       cmd_exec = "$(echo $(" + cmd + "))"
     else:
       cmd_exec = "$(" + cmd + ")"

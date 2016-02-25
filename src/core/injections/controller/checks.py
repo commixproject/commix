@@ -87,7 +87,7 @@ Ignore error messages and continue the tests.
 def continue_tests(err):
   # WAF/IPS/IDS
   if str(err.code) == "403" or "406":
-    settings.WAF_ENABED = True
+    settings.WAF_ENABLED = True
     print Fore.YELLOW + settings.WARNING_SIGN + "It seems that target is protected by some kind of WAF/IPS/IDS." + Style.RESET_ALL
   try:
     while True:

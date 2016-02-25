@@ -355,7 +355,7 @@ LHOST = ""
 LPORT = ""
 
 # Maybe a WAF/IPS/IDS protection.
-WAF_ENABED = False
+WAF_ENABLED = False
 
 # Session Handler
 SESSION_FILE = ""
