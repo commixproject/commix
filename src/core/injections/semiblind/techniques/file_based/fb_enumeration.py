@@ -433,6 +433,10 @@ def do_check(separator, payload, TAG, delay, prefix, suffix, http_request_method
   if not menu.options.verbose and not settings.ENUMERATION_DONE:
     print ""
 
+  # Check if PowerShell is enabled.
+  if not menu.options.ps_version and settings.TARGET_OS == "win":
+    checks.ps_check()
+
   if menu.options.ps_version and settings.TARGET_OS == "win" and settings.PS_ENABLED == None:
     powershell_version(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
     settings.ENUMERATION_DONE = True
