@@ -429,8 +429,8 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
                   print Back.RED + settings.ERROR_SIGN + "'" + file_access_again + "' is not a valid answer." + Style.RESET_ALL + "\n"
                   pass
             else:
-              if not menu.enumeration_options() and not menu.options.os_cmd:
-                print ""
+              # if not menu.enumeration_options() and not menu.options.os_cmd:
+              #   print ""
               tfb_file_access.do_check(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
             
             # Check if defined single cmd.
