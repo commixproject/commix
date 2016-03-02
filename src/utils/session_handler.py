@@ -144,14 +144,14 @@ def injection_point_exportation(url, http_request_method):
       result = conn.execute("SELECT * FROM sqlite_master WHERE name = '" + \
                              table_name(url) + "_ip' AND type = 'table';")
       if result:
+        if menu.options.tech[:1] == "c" or \
+           menu.options.tech[:1] == "e":
+          select_injection_type = "R"
+        elif menu.options.tech[:1] == "t":
+          select_injection_type = "B"
+        else:
+          select_injection_type = "S"
         if settings.TESTABLE_PARAMETER:
-          if menu.options.tech[:1] == "c" or \
-             menu.options.tech[:1] == "e":
-            select_injection_type = "R"
-          elif menu.options.tech[:1] == "t":
-            select_injection_type = "B"
-          else:
-            select_injection_type = "S"
           cursor = conn.execute("SELECT * FROM " + table_name(url) + "_ip WHERE \
                                 url = '" + url + "' AND \
                                 injection_type like '" + select_injection_type + "%' AND \
