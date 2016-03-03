@@ -77,7 +77,8 @@ def do_check(url, filename):
     http_request_method = "GET"
     if not settings.COOKIE_INJECTION \
     and not settings.USER_AGENT_INJECTION \
-    and not settings.REFERER_INJECTION:
+    and not settings.REFERER_INJECTION \
+    and not settings.CUSTOM_HEADER_INJECTION:
       url = parameters.do_GET_check(url)
     check_parameter = parameters.vuln_GET_param(url)
     the_type = " parameter "
@@ -109,6 +110,13 @@ def do_check(url, filename):
   # Referer Injection
   elif settings.REFERER_INJECTION == True:
     header_name = " Referer"
+    settings.HTTP_HEADER = header_name[1:].lower()
+    check_parameter  = ""
+    the_type = " HTTP header "
+
+  # Custom header Injection
+  elif settings.CUSTOM_HEADER_INJECTION == True:
+    header_name = " " + settings.CUSTOM_HEADER_NAME
     settings.HTTP_HEADER = header_name[1:].lower()
     check_parameter  = ""
     the_type = " HTTP header "

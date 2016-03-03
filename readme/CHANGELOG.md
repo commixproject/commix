@@ -1,3 +1,6 @@
+## Version 0.5b [2016]
+* Added: Support for testing custom HTTP headers (via "--headers" parameter).
+
 ## Version 0.4.1b [2016]
 * Added: Support for storing and retrieving executed commands from session file.
 * Added: New option "-s" for loading session from session file.

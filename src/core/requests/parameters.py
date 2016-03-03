@@ -363,4 +363,14 @@ def specify_referer_parameter(referer):
 
   return referer
 
+"""
+The Custom http header based injection.
+"""
+def specify_custom_header_parameter(header_name):
+
+   # Specify the vulnerable referer parameter.
+   # Nothing to specify here! :)
+
+  return header_name
+
 #eof

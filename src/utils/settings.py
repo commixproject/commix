@@ -213,6 +213,10 @@ USER_AGENT_INJECTION = False
 # Referer injection
 REFERER_INJECTION = False
 
+# Custom HTTP Headers injection
+CUSTOM_HEADER_INJECTION = False
+CUSTOM_HEADER_NAME = "" 
+
 # Valid URL format check
 VALID_URL_FORMAT = "https?://(?:www)?(?:[\w-]{2,255}(?:\.\w{2,6}){1,2})(?:/[\w&%?#-]{1,300})?"
 

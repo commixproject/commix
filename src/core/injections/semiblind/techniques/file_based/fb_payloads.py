@@ -56,7 +56,9 @@ def decision_alter_shell(separator, TAG, OUTPUT_TEXTFILE):
               "$(python -c \"f = open('" + settings.SRV_ROOT_DIR + OUTPUT_TEXTFILE + "', 'w')\nf.write('" + TAG + "')\nf.close()\n\")"
                ) 
 
-  if settings.USER_AGENT_INJECTION == True or settings.REFERER_INJECTION == True :
+  if settings.USER_AGENT_INJECTION == True or \
+     settings.REFERER_INJECTION == True or \
+     settings.CUSTOM_HEADER_INJECTION == True :
     payload = payload.replace("\n", separator)
   else:
     if not menu.options.base64:
@@ -108,7 +110,9 @@ def cmd_execution_alter_shell(separator, cmd, OUTPUT_TEXTFILE):
               )
 
   # New line fixation
-  if settings.USER_AGENT_INJECTION == True or settings.REFERER_INJECTION == True :
+  if settings.USER_AGENT_INJECTION == True or \
+     settings.REFERER_INJECTION == True or \
+     settings.CUSTOM_HEADER_INJECTION == True:
     payload = payload.replace("\n", separator)
   else:
     if not menu.options.base64:

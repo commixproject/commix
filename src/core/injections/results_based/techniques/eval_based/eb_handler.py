@@ -163,6 +163,12 @@ def eb_injection_handler(url, delay, filename, http_request_method):
               vuln_parameter = parameters.specify_referer_parameter(menu.options.referer)
               response = eb_injector.referer_injection_test(url, vuln_parameter, payload)
 
+            # Custom HTTP header Injection
+            elif settings.CUSTOM_HEADER_INJECTION == True:
+              # Check if target host is vulnerable to custom http header injection.
+              vuln_parameter = parameters.specify_custom_header_parameter(settings.INJECT_TAG)
+              response = eb_injector.custom_header_injection_test(url, vuln_parameter, payload)
+
             else:
               found_cookie_injection = False
               # Check if target host is vulnerable.
@@ -224,6 +230,11 @@ def eb_injection_handler(url, delay, filename, http_request_method):
             
           elif settings.REFERER_INJECTION == True: 
             header_name = " Referer"
+            found_vuln_parameter = ""
+            the_type = " HTTP header"
+
+          elif settings.CUSTOM_HEADER_INJECTION == True: 
+            header_name = " " + settings.CUSTOM_HEADER_NAME
             found_vuln_parameter = ""
             the_type = " HTTP header"
 

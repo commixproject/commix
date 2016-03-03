@@ -158,6 +158,12 @@ def cb_injection_handler(url, delay, filename, http_request_method):
                 vuln_parameter = parameters.specify_referer_parameter(menu.options.referer)
                 response = cb_injector.referer_injection_test(url, vuln_parameter, payload)
 
+              # Custom HTTP header Injection
+              elif settings.CUSTOM_HEADER_INJECTION == True:
+                # Check if target host is vulnerable to custom http header injection.
+                vuln_parameter = parameters.specify_custom_header_parameter(settings.INJECT_TAG)
+                response = cb_injector.custom_header_injection_test(url, vuln_parameter, payload)
+
               else:
                 # Check if target host is vulnerable.
                 response, vuln_parameter = cb_injector.injection_test(payload, http_request_method, url)
@@ -212,6 +218,11 @@ def cb_injection_handler(url, delay, filename, http_request_method):
 
             elif settings.REFERER_INJECTION == True: 
               header_name = " Referer"
+              found_vuln_parameter = ""
+              the_type = " HTTP header"
+
+            elif settings.CUSTOM_HEADER_INJECTION == True: 
+              header_name = " " + settings.CUSTOM_HEADER_NAME
               found_vuln_parameter = ""
               the_type = " HTTP header"
 
@@ -376,6 +387,7 @@ def cb_injection_handler(url, delay, filename, http_request_method):
                     else:
                       # Command execution results.
                       response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
+
                       # if need page reload
                       if menu.options.url_reload:
                         time.sleep(delay)
