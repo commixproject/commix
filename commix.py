@@ -185,7 +185,12 @@ def main():
         output_dir = menu.options.output_dir
       else:
         output_dir = settings.OUTPUT_DIR
-      dir = os.path.dirname(output_dir)
+      
+      # One directory up (for MacOSX)
+      if sys.platform == "darwin":
+        os.chdir("..")
+
+      output_dir = os.path.dirname(output_dir)
       try:
         os.stat(output_dir)
       except:
