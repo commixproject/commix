@@ -92,7 +92,11 @@ def delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_
 Provide custom server's root directory
 """
 def custom_srv_root_dir():
-  settings.SRV_ROOT_DIR = raw_input(settings.QUESTION_SIGN + "Please provide the host's root directory (e.g. /var/www/) > ")
+  if settings.TARGET_OS == "win" :
+    example_root_dir = "\\inetpub\\wwwroot"
+  else:
+    example_root_dir = "/var/www/"
+  settings.SRV_ROOT_DIR = raw_input(settings.QUESTION_SIGN + "Please provide the host's root directory (e.g. '" + example_root_dir + "') > ")
   settings.CUSTOM_SRV_ROOT_DIR = True
 
 """
