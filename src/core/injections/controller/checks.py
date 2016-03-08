@@ -124,7 +124,8 @@ def time_based_separators(separator, http_request_method):
   return separator
 
 """
-Information message if platform does not have GNU 'readline' module installed
+Information message if platform does not have 
+GNU 'readline' module installed.
 """
 def no_readline_module():
   info_msg =  settings.WARNING_SIGN + "It seems that your platform does not have GNU 'readline' module installed."
@@ -188,5 +189,45 @@ def check_http_s(url):
     else:
       url = "http://" + url
   return url
+
+"""
+Force the user-defined operating system name.
+"""
+def user_defined_os():
+  if menu.options.os:
+    if menu.options.os.lower() == "windows" or \
+       menu.options.os[:1].lower() == "w":
+      settings.TARGET_OS = "win"
+      return True
+    elif menu.options.os.lower() == "unix" or \
+       menu.options.os[:1].lower() == "u":
+      return True
+    else:
+      error_msg = "You specified wrong value '" + menu.options.os + "' as an operation system. " \
+                  "The value, must be (W)indows or (U)nix."
+      print Back.RED + settings.ERROR_SIGN + error_msg + Style.RESET_ALL
+      sys.exit(0)
+
+"""
+Decision if the user-defined operating system name, 
+is different than the one identified by heuristics.
+"""
+def identified_os():
+    warning_msg = "Heuristics have identified different operating system (" + \
+                   settings.TARGET_OS + ") than that you have provided." 
+    print Fore.YELLOW + settings.WARNING_SIGN + warning_msg + Style.RESET_ALL 
+    proceed_option = raw_input(settings.QUESTION_SIGN + "How do you want to proceed? [(C)ontinue/(s)kip/(q)uit] > ").lower()
+    if proceed_option.lower() in settings.CHOISE_PROCEED :
+      if proceed_option.lower() == "s":
+        return False
+      elif proceed_option.lower() == "c":
+        return True
+      elif proceed_option.lower() == "q":
+        raise SystemExit()
+    else:
+      if proceed_option == "":
+        proceed_option = "enter"
+      print Back.RED + settings.ERROR_SIGN + "'" + proceed_option + "' is not a valid answer." + Style.RESET_ALL + "\n"
+      pass
 
 #eof

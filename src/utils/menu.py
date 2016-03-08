@@ -359,6 +359,12 @@ injection.add_option("--os-cmd",
                 default = False,
                 help="Execute a single operating system command.")
 
+injection.add_option("--os",
+                action="store", 
+                dest="os",
+                default = False,
+                help="Force back-end operating system to this value.")
+
 injection.add_option("--base64", 
                 action="store_true",
                 dest="base64",

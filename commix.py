@@ -235,19 +235,29 @@ def main():
           if response.info()['server'] :
             server_banner = response.info()['server']
             found_os_server = False
+            if menu.options.os and checks.user_defined_os():
+              user_defined_os = settings.TARGET_OS
+
             for i in range(0,len(settings.SERVER_OS_BANNERS)):
               if settings.SERVER_OS_BANNERS[i].lower() in server_banner.lower():
                 found_os_server = True
                 settings.TARGET_OS = settings.SERVER_OS_BANNERS[i].lower()
                 if settings.TARGET_OS == "win" or settings.TARGET_OS == "microsoft" :
                   identified_os = "Windows"
+                  if menu.options.os and user_defined_os != "win":
+                    if not checks.identified_os():
+                      settings.TARGET_OS = user_defined_os
+
                   settings.TARGET_OS = identified_os[:3].lower()
                   if menu.options.shellshock:
                     print Back.RED + settings.CRITICAL_SIGN + "The shellshock module is not available for " + identified_os + " targets." + Style.RESET_ALL
                     raise SystemExit()
                 else:
                   identified_os = "Unix-like (" + settings.TARGET_OS + ")"
-            
+                  if menu.options.os and user_defined_os == "win":
+                    if not checks.identified_os():
+                      settings.TARGET_OS = user_defined_os
+
             found_server_banner = False
             for i in range(0,len(settings.SERVER_BANNERS)):
               if settings.SERVER_BANNERS[i].lower() in server_banner.lower():
@@ -284,7 +294,8 @@ def main():
               if menu.options.is_admin : 
                 print Fore.YELLOW + settings.WARNING_SIGN + "Swithing the '--is-admin' to '--is-root' because the target has been identified as unix-like. " + Style.RESET_ALL   
             
-            if found_os_server == False:
+            if found_os_server == False and \
+               not menu.options.os:
               # If "--shellshock" option is provided then,
               # by default is a Linux/Unix operating system.
               if menu.options.shellshock:
@@ -306,8 +317,12 @@ def main():
                       got_os = "enter"
                     print Back.RED + settings.ERROR_SIGN + "'" + got_os + "' is not a valid answer." + Style.RESET_ALL + "\n"
                     pass
-            if found_server_banner == False :
-              print  Fore.YELLOW + settings.WARNING_SIGN + "The server which was identified as " + server_banner + " seems unknown." + Style.RESET_ALL
+
+            if not menu.options.os:
+              if found_server_banner == False:
+                print  Fore.YELLOW + settings.WARNING_SIGN + "The server which was identified as " + server_banner + " seems unknown." + Style.RESET_ALL
+          else:
+            found_os_server = checks.user_defined_os()
         except KeyError:
           pass
 
@@ -327,7 +342,7 @@ def main():
           else:
             if menu.options.verbose:
               print Style.BRIGHT + "(!) The indicated web-page charset appears to be "  + Style.UNDERLINE  + settings.CHARSET + Style.RESET_ALL + "." + Style.RESET_ALL
-
+        
       except urllib2.HTTPError, e:
         print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
         # Check the codes of responses
