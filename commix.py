@@ -230,6 +230,7 @@ def main():
         
         html_data = response.read()
         content = response.read()
+
         print "[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]"
         try:
           if response.info()['server'] :
@@ -306,7 +307,7 @@ def main():
                   got_os = raw_input(settings.QUESTION_SIGN + "Do you recognise the server's operating system? [(W)indows/(U)nix/(q)uit] > ").lower()
                   if got_os.lower() in settings.CHOISE_OS :
                     if got_os.lower() == "w":
-                      settings.TARGET_OS == "win"
+                      settings.TARGET_OS = "win"
                       break
                     elif got_os.lower() == "u":
                       break
