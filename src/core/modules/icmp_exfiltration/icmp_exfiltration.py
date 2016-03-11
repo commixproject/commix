@@ -111,7 +111,8 @@ def input_cmd(http_request_method, url, vuln_parameter, ip_src, technique):
       err_msg = err_msg + " and "
     err_msg = err_msg + "file-access"
 
-  print Fore.YELLOW + settings.WARNING_SIGN + "The " + err_msg + " options are not supported by this module because of the structure of the exfiltrated data. Please try using any unix-like commands manually." + Style.RESET_ALL 
+  if err_msg != "":
+    print Fore.YELLOW + settings.WARNING_SIGN + "The " + err_msg + " options are not supported by this module because of the structure of the exfiltrated data. Please try using any unix-like commands manually." + Style.RESET_ALL 
      
   # Pseudo-Terminal shell
   go_back = False
