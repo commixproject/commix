@@ -60,8 +60,8 @@
 * Added: Termcolor support for Windows (colorama).
 * Added: File access options.
 * Added: Enumeration options.
-* Added: An alternative option for os-shell (Python).
-* Added: The "ICMP Exfiltration" injection technique (module). 
+* Added: New option "--alter-shell" that supports an alternative option for os-shell (e.g. Python).
+* Added: New option "--icmp-exfil" that supports the "ICMP Exfiltration" injection technique (module).
 * Added: The "tempfile-based" (semiblind) technique.
 * Added: The "file-based" (semiblind) technique.
 * Removed: The "boolean-based" (blind) technique.
