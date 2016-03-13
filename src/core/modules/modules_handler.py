@@ -26,24 +26,24 @@ Load modules
 """
 def load_modules(url, http_request_method, filename):
 
-  # Check if defined the icmp exfiltration module
+  # Check if defined the ICMP exfiltration module
   if menu.options.ip_icmp_data :
     try:
-      # The icmp exfiltration module
+      # The ICMP exfiltration module
       from src.core.modules.icmp_exfiltration import icmp_exfiltration
-      # The icmp exfiltration handler
+      # The ICMP exfiltration handler
       icmp_exfiltration.icmp_exfiltration_handler(url, http_request_method)
     except ImportError as e:
       print "\n" + Back.RED + settings.ERROR_SIGN + str(e) + Style.RESET_ALL
       sys.exit(0) 
     sys.exit(0)
 
-  # Check if defined the icmp exfiltration module
+  # Check if defined the shellshock module
   if menu.options.shellshock :
     try:
-      # The Shellshock module
+      # The shellshock module
       from src.core.modules.shellshock import shellshock
-      # The Shellshock handler
+      # The shellshock handler
       shellshock.shellshock_handler(url, http_request_method, filename)
     except ImportError as e:
       print "\n" + Back.RED + settings.ERROR_SIGN + str(e) + Style.RESET_ALL
