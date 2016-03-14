@@ -1,4 +1,5 @@
 ## Version 0.5b [2016]
+* Added: Support for verbose mode in the "ICMP exfiltration" injection technique (module). 
 * Added: Check if the user-defined os name, is different than the one identified by heuristics.
 * Added: New option "--os" that forces a user-defined os name.
 * Added: Support for testing custom HTTP headers (via "--headers" parameter).
