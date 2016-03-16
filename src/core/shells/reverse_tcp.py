@@ -192,8 +192,6 @@ exec(d,{'s':s})"""
     elif other_shell.lower() == "reverse_tcp": 
       print Fore.YELLOW + settings.WARNING_SIGN + "You are already into the 'reverse_tcp' mode." + Style.RESET_ALL 
       continue
-    elif reverse_tcp_option.lower() == "quit": 
-      sys.exit(0)
     elif other_shell.lower() in settings.SHELL_OPTIONS:
       return other_shell
     elif other_shell[0:3].lower() == "set":
@@ -201,6 +199,8 @@ exec(d,{'s':s})"""
         check_lhost(other_shell[10:])
       if other_shell[4:9].lower() == "lport":
         check_lport(other_shell[10:])
+    elif other_shell.lower() == "quit": 
+      sys.exit(0)
     else:  
       print Back.RED + settings.ERROR_SIGN + "The '" + other_shell + "' option, is not valid." + Style.RESET_ALL
       continue
