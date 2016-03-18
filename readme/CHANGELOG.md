@@ -1,3 +1,6 @@
+## Version 0.6b [2016]
+* Added: New option "--dependencies" that checks (non-core) third party dependenices.
+
 ## Version 0.5b [2016]
 * Fixed: The payload(s) for dynamic code evaluation ("eval-based"), if there is not any separator.
 * Added: Support for verbose mode in the "ICMP exfiltration" injection technique (module). 

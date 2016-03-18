@@ -370,6 +370,15 @@ injection.add_option("--base64",
                 default = False,
                 help="Encode the operating system command to Base64 format.")
 
+# Miscellaneous options
+misc = OptionGroup(parser, Style.BRIGHT + "Miscellaneous" + Style.RESET_ALL)
+
+misc.add_option("--dependencies", 
+                action="store_true",
+                dest="noncore_dependencies",
+                default = False,
+                help="Check for third-party (non-core) dependencies.")
+
 parser.add_option_group(general)
 parser.add_option_group(target)
 parser.add_option_group(request)
@@ -377,6 +386,8 @@ parser.add_option_group(enumeration)
 parser.add_option_group(file_access)
 parser.add_option_group(modules)
 parser.add_option_group(injection)
+parser.add_option_group(misc)
+
 """
 Dirty hack from sqlmap [1], to display longer options without breaking into two lines.
 [1] https://github.com/sqlmapproject/sqlmap/blob/fdc8e664dff305aca19acf143c7767b9a7626881/lib/parse/cmdline.py

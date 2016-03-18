@@ -73,7 +73,13 @@ def main():
         
     # Check python version number.
     version.python_version()
-            
+
+    # Check if defined "--dependencies" option. 
+    # For checking (non-core) third party dependenices.
+    if menu.options.noncore_dependencies:
+      checks.third_party_dependencies()
+      sys.exit(0)
+      
     # Check if defined "--update" option.        
     if menu.options.update:
       update.updater()

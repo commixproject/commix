@@ -230,4 +230,48 @@ def identified_os():
       print Back.RED + settings.ERROR_SIGN + "'" + proceed_option + "' is not a valid answer." + Style.RESET_ALL + "\n"
       pass
 
+"""
+Check for third-party (non-core) libraries.
+"""
+def third_party_dependencies():
+  sys.stdout.write(settings.INFO_SIGN + "Checking for third-party (non-core) libraries... ")
+  sys.stdout.flush()
+  
+  try:
+    import sqlite3
+  except ImportError:
+    print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
+    error_msg = settings.APPLICATION + " requires 'sqlite3' third-party library "
+    error_msg += "in order to store previous injection points and commands. "
+    print Back.RED + settings.ERROR_SIGN + error_msg + Style.RESET_ALL
+    sys.exit(0)
+
+  try:
+    import readline
+  except ImportError:
+    if settings.IS_WINDOWS:
+      try:
+        import pyreadline
+      except ImportError:
+        print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
+        error_msg = settings.APPLICATION + " requires 'pyreadline' third-party library "
+        error_msg += "in order to be able to take advantage of the TAB "
+        error_msg += "completion and history support features. "
+        print Back.RED + settings.ERROR_SIGN + error_msg + Style.RESET_ALL 
+        sys.exit(0)
+    else:
+      try:
+        import gnureadline
+      except ImportError:
+        print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
+        error_msg = settings.APPLICATION + " requires 'gnureadline' third-party library "
+        error_msg += "in order to be able to take advantage of the TAB "
+        error_msg += "completion and history support features. "
+        print Back.RED + settings.ERROR_SIGN + error_msg + Style.RESET_ALL
+    pass
+
+  print "[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]"
+  info_msg = "All required third-party (non-core) libraries are seems to be installed."
+  print Style.BRIGHT + "(!) " + info_msg + Style.RESET_ALL
+
 #eof
