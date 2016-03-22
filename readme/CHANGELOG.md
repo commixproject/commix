@@ -1,4 +1,6 @@
 ## Version 0.6b [2016]
+* Added: Support for verbose mode in the "DNS exfiltration" injection technique (module).
+* Added: New option "--dns-server" that supports the "DNS Exfiltration" injection technique (module).
 * Added: New option "--dependencies" that checks (non-core) third party dependenices.
 
 ## Version 0.5b [2016]

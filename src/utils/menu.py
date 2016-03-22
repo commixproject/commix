@@ -293,6 +293,12 @@ modules.add_option("--icmp-exfil",
                 default = False,
                 help="The 'icmp exfiltration' injection module.           (e.g. 'ip_src=192.168.178.1,ip_dst=192.168.178.3').")
 
+modules.add_option("--dns-server", 
+                action="store",
+                dest="dns_server",
+                default = False,
+                help="The 'dns exfiltration' injection module.        (Domain name used for DNS exfiltration attack).")
+
 modules.add_option("--shellshock", 
                 action="store_true",
                 dest="shellshock",

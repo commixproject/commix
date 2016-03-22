@@ -38,6 +38,18 @@ def load_modules(url, http_request_method, filename):
       sys.exit(0) 
     sys.exit(0)
 
+  # Check if defined the DNS exfiltration module
+  if menu.options.dns_server :
+    try:
+      # The DNS exfiltration module
+      from src.core.modules.dns_exfiltration import dns_exfiltration
+      # The DNS exfiltration handler
+      dns_exfiltration.dns_exfiltration_handler(url, http_request_method)
+    except ImportError as e:
+      print "\n" + Back.RED + settings.ERROR_SIGN + str(e) + Style.RESET_ALL
+      sys.exit(0) 
+    sys.exit(0)
+
   # Check if defined the shellshock module
   if menu.options.shellshock :
     try:
