@@ -148,29 +148,7 @@ def input_cmd(dns_server, http_request_method, url, vuln_parameter, technique):
             elif cmd.lower() == "os_shell": 
               print Fore.YELLOW + settings.WARNING_SIGN + "You are already into the 'os_shell' mode." + Style.RESET_ALL + "\n"
             elif cmd.lower() == "reverse_tcp":
-              
-              # Set up LHOST / LPORT for The reverse TCP connection.
-              reverse_tcp.configure_reverse_tcp()
-              if settings.REVERSE_TCP == False:
-                continue
-              while True:
-                if settings.LHOST and settings.LPORT in settings.SHELL_OPTIONS:
-                  result = checks.check_reverse_tcp_options(settings.LHOST)
-                else:  
-                  cmd = reverse_tcp.reverse_tcp_options()
-                  result = checks.check_reverse_tcp_options(cmd)
-                if result != None:
-                  if result == 0:
-                    return False
-                  elif result == 1 or result == 2:
-                    go_back_again = True
-                    settings.REVERSE_TCP = False
-                    break
-                # Command execution results.    
-                cmd_exec(dns_server, http_request_method, cmd, url, vuln_parameter)
-                if menu.options.verbose:
-                  print ""
-                print Back.RED + settings.ERROR_SIGN + "The reverse TCP connection to the target host has been failed!" + Style.RESET_ALL
+              print Fore.YELLOW + settings.WARNING_SIGN + "This option is not supported by this module." + Style.RESET_ALL + "\n"
           else:
             # Command execution results.
             cmd_exec(dns_server, http_request_method, cmd, url, vuln_parameter)
