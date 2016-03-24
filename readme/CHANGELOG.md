@@ -1,6 +1,6 @@
 ## Version 0.6b [2016]
 * Added: Support for verbose mode in the "DNS exfiltration" injection technique (module).
-* Added: New option "--dns-server" that supports the "DNS Exfiltration" injection technique (module).
+* Added: New option "--dns-server" that supports the "DNS exfiltration" injection technique (module).
 * Added: New option "--dependencies" that checks (non-core) third party dependenices.
 
 ## Version 0.5b [2016]
@@ -68,7 +68,7 @@
 * Added: File access options.
 * Added: Enumeration options.
 * Added: New option "--alter-shell" that supports an alternative option for os-shell (e.g. Python).
-* Added: New option "--icmp-exfil" that supports the "ICMP Exfiltration" injection technique (module).
+* Added: New option "--icmp-exfil" that supports the "ICMP exfiltration" injection technique (module).
 * Added: The "tempfile-based" (semiblind) technique.
 * Added: The "file-based" (semiblind) technique.
 * Removed: The "boolean-based" (blind) technique.
