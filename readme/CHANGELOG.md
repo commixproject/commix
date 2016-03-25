@@ -1,4 +1,5 @@
 ## Version 0.6b [2016]
+* Added: New option "--skip-waf" that skips heuristic detection of WAF/IPS/IDS protection.
 * Added: Support for verbose mode in the "DNS exfiltration" injection technique (module).
 * Added: New option "--dns-server" that supports the "DNS exfiltration" injection technique (module).
 * Added: New option "--dependencies" that checks (non-core) third party dependenices.

@@ -385,6 +385,12 @@ misc.add_option("--dependencies",
                 default = False,
                 help="Check for third-party (non-core) dependencies.")
 
+misc.add_option("--skip-waf", 
+                action="store_true",
+                dest="skip_waf",
+                default = False,
+                help="Skip heuristic detection of WAF/IPS/IDS protection.")
+
 parser.add_option_group(general)
 parser.add_option_group(target)
 parser.add_option_group(request)
