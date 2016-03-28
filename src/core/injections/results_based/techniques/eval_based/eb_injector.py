@@ -89,13 +89,13 @@ def get_request_response(request):
       response = urllib2.urlopen(request)
     except urllib2.HTTPError, err:
       if settings.IGNORE_ERR_MSG == False:
-        print "\n" + Back.RED + settings.ERROR_SIGN + str(err) + Style.RESET_ALL
+        print "\n" + Back.RED + settings.ERROR_SIGN + str(err) + "." + Style.RESET_ALL
         continue_tests = checks.continue_tests(err)
         if continue_tests == True:
           settings.IGNORE_ERR_MSG = True
         else:
           raise SystemExit()
-      response = False 
+      response = False  
     except urllib2.URLError, err:
       if "Connection refused" in err.reason:
         print "\n" + Back.RED + settings.CRITICAL_SIGN + "The target host is not responding." + \
@@ -111,7 +111,6 @@ def injection_test(payload, http_request_method, url):
 
   # Check if defined method is GET (Default).
   if http_request_method == "GET":
-    
     # Check if its not specified the 'INJECT_HERE' tag
     #url = parameters.do_GET_check(url)
     
@@ -165,27 +164,29 @@ def warning_detection(url, http_request_method):
     request = urllib2.Request(url_part)
     # Check if defined extra headers.
     headers.do_check(request)
-    response = urllib2.urlopen(request)
-    html_data = response.read()
-    error_msg = ""
-    if "eval()'d code" in html_data:
-      error_msg = "'eval()'"
-    if "Cannot execute a blank command in" in html_data:
-      error_msg = "execution of a blank command,"
-    if "sh: command substitution:" in html_data:
-      error_msg = "command substitution"
-    if "Warning: usort()" in html_data:
-      error_msg = "'usort()'"
-    if re.findall(r"=/(.*)/&", url):
-      if "Warning: preg_replace():" in html_data:
-        error_msg = "'preg_replace()'"
-      url = url.replace("/&","/e&")
-    if "Warning: assert():" in html_data:
-      error_msg = "'assert()'"
-    if "Failure evaluating code:" in html_data:
-      error_msg = "code evaluation"
-    if error_msg != "":
-      print Fore.YELLOW + settings.WARNING_SIGN + "A failure message on " + error_msg + " was detected on page's response." + Style.RESET_ALL
+    response = get_request_response(request)
+    if response:
+      response = urllib2.urlopen(request)
+      html_data = response.read()
+      error_msg = ""
+      if "eval()'d code" in html_data:
+        error_msg = "'eval()'"
+      if "Cannot execute a blank command in" in html_data:
+        error_msg = "execution of a blank command,"
+      if "sh: command substitution:" in html_data:
+        error_msg = "command substitution"
+      if "Warning: usort()" in html_data:
+        error_msg = "'usort()'"
+      if re.findall(r"=/(.*)/&", url):
+        if "Warning: preg_replace():" in html_data:
+          error_msg = "'preg_replace()'"
+        url = url.replace("/&","/e&")
+      if "Warning: assert():" in html_data:
+        error_msg = "'assert()'"
+      if "Failure evaluating code:" in html_data:
+        error_msg = "code evaluation"
+      if error_msg != "":
+        print Fore.YELLOW + settings.WARNING_SIGN + "A failure message on " + error_msg + " was detected on page's response." + Style.RESET_ALL
     return url
   except urllib2.HTTPError, err:
     print Back.RED + settings.ERROR_SIGN + str(err) + Style.RESET_ALL
