@@ -49,6 +49,7 @@ from src.core.requests import tor
 from src.core.requests import proxy
 from src.core.requests import headers
 from src.core.requests import requests
+from src.core.requests import authentication
 
 from src.core.injections.controller import checks
 from src.core.injections.controller import parser
@@ -351,25 +352,56 @@ def main():
               print Style.BRIGHT + "(!) The indicated web-page charset appears to be "  + Style.UNDERLINE  + settings.CHARSET + Style.RESET_ALL + "." + Style.RESET_ALL
         
       except urllib2.HTTPError, e:
-        print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
         # Check the codes of responses
         if e.getcode() == 500:
+          print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
           content = e.read()
           sys.exit(0)
 
+        # Check for Authorization type.
         elif e.getcode() == 401:
-          if menu.options.auth_type != "basic":
-            print Back.RED + settings.ERROR_SIGN + "Only 'Basic' Access Authentication is supported." + Style.RESET_ALL
-            sys.exit(0)
+          print "[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]"
+          authline = e.headers.get('www-authenticate', '').split()[0]
+          if authline.lower() == "basic":
+            if not menu.options.auth_type or menu.options.auth_type != "basic":
+              menu.options.auth_type = "basic"
+            if not menu.options.auth_cred:
+              print Fore.YELLOW + settings.WARNING_SIGN + menu.options.auth_type.capitalize() + " HTTP authentication credentials are required." + Style.RESET_ALL
+              while True:
+                crack_cred = raw_input(settings.QUESTION_SIGN + "Do you want to perform a dictionary-based attack? [Y/n/q] > ").lower()
+                if crack_cred in settings.CHOISE_YES:
+                  auth_creds = authentication.http_basic(url)
+                  if auth_creds != False:
+                    menu.options.auth_cred = auth_creds
+                    break
+                  else:
+                    sys.exit(0)  
+
+                elif crack_cred in settings.CHOISE_NO:
+                  error_msg = "Use the '--auth-cred' option to provide a valid pair of " 
+                  error_msg += "HTTP authentication credentials (i.e --auth-cred=\"admin:admin\")."
+                  print Back.RED + settings.ERROR_SIGN + error_msg + Style.RESET_ALL
+                  sys.exit(0)
+
+                elif crack_cred in settings.CHOISE_QUIT: 
+                  sys.exit(0)
+
+                else:
+                  if crack_cred == "":
+                    crack_cred = "enter"
+                  print Back.RED + settings.ERROR_SIGN + "'" + crack_cred + "' is not a valid answer." + Style.RESET_ALL + "\n"
+                  pass
           else:
-            print Back.RED + settings.ERROR_SIGN + "Authorization required!" + Style.RESET_ALL
+            print Back.RED + settings.ERROR_SIGN + "The identified HTTP authentication type (" + authline + ") is not yet supported." + Style.RESET_ALL + "\n"
             sys.exit(0)
-          
+
         elif e.getcode() == 403:
+          print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
           print Back.RED + settings.ERROR_SIGN + "You don't have permission to access this page." + Style.RESET_ALL
           sys.exit(0)
           
         elif e.getcode() == 404:
+          print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
           print Back.RED + settings.ERROR_SIGN + "The host seems to be down!" + Style.RESET_ALL
           sys.exit(0)
 

@@ -1,4 +1,6 @@
 ## Version 0.6b [2016]
+* Added: Dictionary-based cracker for "Basic" HTTP authentication credentials.
+* Added: Identifier for HTTP authentication type (currently only "Basic" type is supported).
 * Added: New option "--skip-waf" that skips heuristic detection of WAF/IPS/IDS protection.
 * Added: Support for verbose mode in the "DNS exfiltration" injection technique (module).
 * Added: New option "--dns-server" that supports the "DNS exfiltration" injection technique (module).

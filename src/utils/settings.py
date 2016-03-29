@@ -368,5 +368,8 @@ LOAD_SESSION = None
 # Retest all techniques
 RETEST = False
 
+# Define the default credentials files
+USERNAMES_TXT_FILE = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'txt')) + "/" + "usernames.txt"
+PASSWORDS_TXT_FILE = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'txt')) + "/" + "passwords_john.txt"
 
 #eof
