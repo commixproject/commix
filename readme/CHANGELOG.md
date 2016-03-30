@@ -1,4 +1,5 @@
 ## Version 0.6b [2016]
+* Added: New option "--ignore-401" that ignores HTTP Error 401 (Unauthorized) and continues tests without providing valid credentials.
 * Added: Dictionary-based cracker for "Basic" HTTP authentication credentials.
 * Added: Identifier for HTTP authentication type (currently only "Basic" type is supported).
 * Added: New option "--skip-waf" that skips heuristic detection of WAF/IPS/IDS protection.

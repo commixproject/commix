@@ -196,6 +196,12 @@ request.add_option("--auth-cred",
                 dest="auth_cred",
                 help="HTTP Authentication credentials (e.g. 'admin:admin').")
 
+request.add_option("--ignore-401",
+                action="store_true",
+                dest="ignore_401",
+                default=False,
+                help="Ignore HTTP Error 401 (Unauthorized).")
+
 request.add_option("--force-ssl",
                 action="store_true",
                 dest="force_ssl",

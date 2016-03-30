@@ -85,7 +85,13 @@ def check_reverse_tcp_options(reverse_tcp_option):
 Ignore error messages and continue the tests.
 """
 def continue_tests(err):
-  # WAF/IPS/IDS
+  # If defined "--ignore-401" option, ignores HTTP Error 401 (Unauthorized) 
+  # and continues tests without providing valid credentials.
+  if menu.options.ignore_401:
+    settings.WAF_ENABLED = True
+    return True
+
+  # Possible WAF/IPS/IDS
   if (str(err.code) == "403" or "406") and \
     not menu.options.skip_waf:
     # Check if "--skip-waf" option is defined 
