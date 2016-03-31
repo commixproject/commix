@@ -193,7 +193,10 @@ def main():
       else:
         output_dir = settings.OUTPUT_DIR
       
-      os.chdir("..")
+      # One directory up (for Windows)
+      if settings.IS_WINDOWS:
+        os.chdir("..")
+
       output_dir = os.path.dirname(output_dir)
       
       try:
