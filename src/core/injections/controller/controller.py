@@ -45,7 +45,7 @@ Checks if the testable parameter is exploitable.
 General check on every injection technique.
 """
 def do_check(url, filename):
-
+  
   classic_state = False
   eval_based_state = False
   time_based_state = False
@@ -126,9 +126,9 @@ def do_check(url, filename):
 
   # Check for session file 
   if not menu.options.ignore_session:
-    if os.path.isfile(settings.SESSION_FILE):
+    if os.path.isfile(settings.SESSION_FILE) and not settings.REQUIRED_AUTHENTICATION:
       if not menu.options.tech:
-          menu.options.tech = session_handler.applied_techniques(url, http_request_method)
+        menu.options.tech = session_handler.applied_techniques(url, http_request_method)
       if session_handler.check_stored_parameter(url, http_request_method):
         settings.LOAD_SESSION = True
         
@@ -179,6 +179,6 @@ def do_check(url, filename):
       info_msg += " Remove the option '--alter-shell'"
     info_msg += " and/or try to audit the HTTP headers (i.e 'User-Agent', 'Referer', 'Cookie' etc)."
     print Back.RED + info_msg + Style.RESET_ALL  
-
   sys.exit(0)
+
 #eof

@@ -288,4 +288,51 @@ def export_stored_cmd(url, cmd, vuln_parameter):
   except sqlite3.OperationalError, err:
     pass
 
+"""
+Import valid credentials to session file.
+"""
+def import_valid_credentials(url, authentication_type, admin_panel, username, password):
+  try:
+    conn = sqlite3.connect(settings.SESSION_FILE)
+    conn.execute("CREATE TABLE IF NOT EXISTS " + table_name(url) + "_creds" + \
+                 "(id INTEGER PRIMARY KEY, url VARCHAR, authentication_type VARCHAR, admin_panel VARCHAR, \
+                 username VARCHAR, password VARCHAR);")
+
+    conn.execute("INSERT INTO " + table_name(url) + "_creds(url, authentication_type, \
+                  admin_panel, username, password) VALUES(?,?,?,?,?)", \
+                 (str(url), str(authentication_type), str(admin_panel), \
+                 str(username), str(password)))
+    conn.commit()
+    conn.close()
+  except sqlite3.OperationalError, err:
+    print Back.RED + settings.ERROR_SIGN + str(err) + Style.RESET_ALL
+  except sqlite3.DatabaseError, err:
+    error_msg = "An error occurred while accessing session file ('" + \
+                 settings.SESSION_FILE + "'). " + \
+                 "If the problem persists use the '--flush-session' option."
+    print "\n" + Back.RED + settings.ERROR_SIGN + error_msg + Style.RESET_ALL
+    sys.exit(0)
+
+
+"""
+Export valid credentials from session file.
+"""
+def export_valid_credentials(url, authentication_type):
+  try:  
+    if not menu.options.flush_session:
+      conn = sqlite3.connect(settings.SESSION_FILE)
+      output = None
+      conn = sqlite3.connect(settings.SESSION_FILE)
+      cursor = conn.execute("SELECT username, password FROM " + table_name(url) + \
+                            "_creds WHERE url='" + url + "' AND \
+                             authentication_type= '" + authentication_type + "';").fetchall()
+
+      cursor = ":".join(cursor[0])
+      return cursor
+    else:
+      no_such_table = True
+      pass
+  except sqlite3.OperationalError, err:
+    pass
+
 # eof

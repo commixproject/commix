@@ -23,6 +23,7 @@ import cookielib
 
 from src.utils import menu
 from src.utils import settings
+from src.utils import session_handler
 
 from src.core.requests import tor
 from src.core.requests import proxy
@@ -154,6 +155,9 @@ def http_basic(url):
           base64string = base64.encodestring(username + ":" + password)[:-1]
           request.add_header("Authorization", "Basic " + base64string)   
           result = urllib2.urlopen(request)
+          # Store results to session 
+          admin_panel = url 
+          session_handler.import_valid_credentials(url, authentication_type, admin_panel, username, password)
           found = True
         except KeyboardInterrupt :
           raise 
