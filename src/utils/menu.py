@@ -189,18 +189,18 @@ request.add_option("--auth-data",
 request.add_option("--auth-type",
                 action="store",
                 dest="auth_type",
-                help="HTTP authentication type (e.g. 'basic').")
+                help="HTTP authentication type (e.g. 'Basic').")
 
 request.add_option("--auth-cred",
                 action="store",
                 dest="auth_cred",
-                help="HTTP Authentication credentials (e.g. 'admin:admin').")
+                help="HTTP authentication credentials (e.g. 'admin:admin').")
 
 request.add_option("--ignore-401",
                 action="store_true",
                 dest="ignore_401",
                 default=False,
-                help="Ignore HTTP Error 401 (Unauthorized).")
+                help="Ignore HTTP error 401 (Unauthorized).")
 
 request.add_option("--force-ssl",
                 action="store_true",
@@ -362,7 +362,7 @@ injection.add_option("--alter-shell",
                 action="store",
                 dest="alter_shell",
                 default = "",
-                help="Use an alternative os-shell (e.g. Python).")
+                help="Use an alternative os-shell (e.g. 'Python').")
 
 injection.add_option("--os-cmd", 
                 action="store",
