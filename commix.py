@@ -193,8 +193,8 @@ def main():
       else:
         output_dir = settings.OUTPUT_DIR
       
-      # One directory up (for Windows)
-      if settings.IS_WINDOWS:
+      # One directory up, if Windows or if the script is being run under "/src".
+      if settings.IS_WINDOWS or "/src" in os.path.dirname(os.path.abspath(__file__)):
         os.chdir("..")
 
       output_dir = os.path.dirname(output_dir)
