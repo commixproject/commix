@@ -1,5 +1,10 @@
+## Version 0.7b
+* Added: The ability to store valid (Digest) credentials into session files for current target.
+* Added: Dictionary-based cracker for "Digest" HTTP authentication credentials.
+* Added: Support for "Digest" HTTP authentication type.
+
 ## Version 0.6b (2016-04-01)
-* Added: The ability to store valid credentials into session files for current target.
+* Added: The ability to store valid (Basic) credentials into session files for current target.
 * Added: New option "--ignore-401" that ignores HTTP Error 401 (Unauthorized) and continues tests without providing valid credentials.
 * Added: Dictionary-based cracker for "Basic" HTTP authentication credentials.
 * Added: Identifier for HTTP authentication type (currently only "Basic" type is supported).

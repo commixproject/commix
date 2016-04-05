@@ -182,7 +182,6 @@ def main():
   
     # Check if defined "--url" option.
     if menu.options.url:
-
       url = menu.options.url
       
       # Check if http / https
@@ -196,9 +195,9 @@ def main():
       # One directory up, if Windows or if the script is being run under "/src".
       if settings.IS_WINDOWS or "/src" in os.path.dirname(os.path.abspath(__file__)):
         os.chdir("..")
-
+        
       output_dir = os.path.dirname(output_dir)
-      
+     
       try:
         os.stat(output_dir)
       except:
@@ -364,56 +363,105 @@ def main():
           content = e.read()
           sys.exit(0)
 
-        # Check for Authorization type.
+        # Check for HTTP Error 401 (Unauthorized).
         elif e.getcode() == 401:
+          try:
+            # Get the auth header value
+            auth_line = e.headers.get('www-authenticate', '')
+            # Checking for authentication type name.
+            auth_type = auth_line.split()[0]
+            settings.SUPPORTED_HTTP_AUTH_TYPES.index(auth_type.lower())
+            # Checking for the realm attribute.
+            try: 
+              auth_obj = re.match('''(\w*)\s+realm=(.*)''', auth_line).groups()
+              realm = auth_obj[1].split(',')[0].replace("\"", "")
+            except:
+              realm = False
+
+          except ValueError:
+            print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
+            print Back.RED + settings.ERROR_SIGN + "The identified HTTP authentication type (" + auth_type + ") is not yet supported." + Style.RESET_ALL + "\n"
+            sys.exit(0)
+
+          except IndexError:
+            print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
+            error_msg = "The provided pair of " + menu.options.auth_type 
+            error_msg += " HTTP authentication credentials '" + menu.options.auth_cred + "'"
+            error_msg += " seems to be invalid."
+            print Back.RED + settings.ERROR_SIGN + error_msg + Style.RESET_ALL
+            sys.exit(0) 
+
           print "[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]"
-          authline = e.headers.get('www-authenticate', '').split()[0]
+          if menu.options.auth_type and menu.options.auth_type != auth_type.lower():
+            if checks.identified_http_auth_type(auth_type):
+              menu.options.auth_type = auth_type.lower()
+          else:
+            menu.options.auth_type = auth_type.lower()
 
           # Check for stored auth credentials.
           if not menu.options.auth_cred:
-            stored_auth_creds = session_handler.export_valid_credentials(url, authline.lower())
+            try:
+              stored_auth_creds = session_handler.export_valid_credentials(url, auth_type.lower())
+            except:
+              stored_auth_creds = False
             if stored_auth_creds:
               menu.options.auth_cred = stored_auth_creds
               print Style.BRIGHT + "(!) Identified a valid pair of credentials '" + Style.UNDERLINE  + menu.options.auth_cred + Style.RESET_ALL + Style.BRIGHT  + "'." + Style.RESET_ALL
             else:  
-              if authline.lower() == "basic":
-                if not menu.options.auth_type or menu.options.auth_type != "basic":
-                  menu.options.auth_type = "basic"
 
+              # Basic authentication 
+              if menu.options.auth_type == "basic":
                 if not menu.options.ignore_401:
-                  #if not menu.options.auth_cred:
                   print Fore.YELLOW + settings.WARNING_SIGN + "(" + menu.options.auth_type.capitalize() + ")" + " HTTP authentication credentials are required." + Style.RESET_ALL
                   while True:
-                    crack_cred = raw_input(settings.QUESTION_SIGN + "Do you want to perform a dictionary-based attack? [Y/n/q] > ").lower()
-                    
-                    if crack_cred in settings.CHOISE_YES:
-                      auth_creds = authentication.http_basic(url)
+                    crack_creds = raw_input(settings.QUESTION_SIGN + "Do you want to perform a dictionary-based attack? [Y/n/q] > ").lower()
+                    if crack_creds in settings.CHOISE_YES:
+                      auth_creds = authentication.http_auth_cracker(url, realm)
                       if auth_creds != False:
                         menu.options.auth_cred = auth_creds
                         settings.REQUIRED_AUTHENTICATION = True
                         break
                       else:
                         sys.exit(0)
-
-                    elif crack_cred in settings.CHOISE_NO:
-                      error_msg = "Use the '--auth-cred' option to provide a valid pair of " 
-                      error_msg += "HTTP authentication credentials (i.e --auth-cred=\"admin:admin\")" 
-                      error_msg += " or use the '--ignore-401' option to ignore HTTP error 401 (Unauthorized)" 
-                      error_msg += " and continue tests without providing valid credentials."
-                      print Back.RED + settings.ERROR_SIGN + error_msg + Style.RESET_ALL
+                    elif crack_creds in settings.CHOISE_NO:
+                      checks.http_auth_error_msg()
+                    elif crack_creds in settings.CHOISE_QUIT:
                       sys.exit(0)
-
-                    elif crack_cred in settings.CHOISE_QUIT:
-                      sys.exit(0)
-
                     else:
-                      if crack_cred == "":
-                        crack_cred = "enter"
-                      print Back.RED + settings.ERROR_SIGN + "'" + crack_cred + "' is not a valid answer." + Style.RESET_ALL + "\n"
+                      if crack_creds == "":
+                        crack_creds = "enter"
+                      print Back.RED + settings.ERROR_SIGN + "'" + crack_creds + "' is not a valid answer." + Style.RESET_ALL + "\n"
                       pass
-              else:
-                print Back.RED + settings.ERROR_SIGN + "The identified HTTP authentication type (" + authline + ") is not yet supported." + Style.RESET_ALL + "\n"
-                sys.exit(0)
+
+              # Digest authentication         
+              elif menu.options.auth_type == "digest":
+                if not menu.options.ignore_401:
+                  print Fore.YELLOW + settings.WARNING_SIGN + "(" + menu.options.auth_type.capitalize() + ")" + " HTTP authentication credentials are required." + Style.RESET_ALL       
+                  # Check if heuristics have failed to identify the realm attribute.
+                  if not realm:
+                    warn_msg = "Heuristics have failed to identify the realm attribute." 
+                    print Fore.YELLOW + settings.WARNING_SIGN + warn_msg + Style.RESET_ALL 
+                  while True:
+                    crack_creds = raw_input(settings.QUESTION_SIGN + "Do you want to perform a dictionary-based attack? [Y/n/q] > ").lower()
+                    if crack_creds in settings.CHOISE_YES:
+                      auth_creds = authentication.http_auth_cracker(url, realm)
+                      if auth_creds != False:
+                        menu.options.auth_cred = auth_creds
+                        settings.REQUIRED_AUTHENTICATION = True
+                        break
+                      else:
+                        sys.exit(0)
+                    elif crack_creds in settings.CHOISE_NO:
+                      checks.http_auth_error_msg()
+                    elif crack_creds in settings.CHOISE_QUIT:
+                      sys.exit(0)
+                    else:
+                      if crack_creds == "":
+                        crack_creds = "enter"
+                      print Back.RED + settings.ERROR_SIGN + "'" + crack_creds + "' is not a valid answer." + Style.RESET_ALL + "\n"
+                      pass
+                  else:   
+                    checks.http_auth_error_msg()      
           else:
             pass
 

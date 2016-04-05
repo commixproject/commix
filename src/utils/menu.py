@@ -189,7 +189,7 @@ request.add_option("--auth-data",
 request.add_option("--auth-type",
                 action="store",
                 dest="auth_type",
-                help="HTTP authentication type (e.g. 'Basic').")
+                help="HTTP authentication type (e.g. 'Basic' or 'Digest').")
 
 request.add_option("--auth-cred",
                 action="store",

@@ -283,4 +283,38 @@ def third_party_dependencies():
   info_msg = "All required third-party (non-core) libraries are seems to be installed."
   print Style.BRIGHT + "(!) " + info_msg + Style.RESET_ALL
 
+"""
+Print the authentiation error message.
+"""
+def http_auth_error_msg():
+  error_msg = "Use the '--auth-cred' option to provide a valid pair of " 
+  error_msg += "HTTP authentication credentials (i.e --auth-cred=\"admin:admin\")" 
+  error_msg += " or use the '--ignore-401' option to ignore HTTP error 401 (Unauthorized)" 
+  error_msg += " and continue tests without providing valid credentials."
+  print Back.RED + settings.ERROR_SIGN + error_msg + Style.RESET_ALL 
+  sys.exit(0)
+
+"""
+Decision if the user-defined HTTP authenticatiob type, 
+is different than the one identified by heuristics.
+"""
+def identified_http_auth_type(auth_type):
+  warning_msg = "Heuristics have identified different HTTP authentication type (" 
+  warning_msg += auth_type.lower() + ") than that you have provided ("
+  warning_msg += menu.options.auth_type + ")." 
+  print Fore.YELLOW + settings.WARNING_SIGN + warning_msg + Style.RESET_ALL 
+  proceed_option = raw_input(settings.QUESTION_SIGN + "How do you want to proceed? [(C)ontinue/(s)kip/(q)uit] > ").lower()
+  if proceed_option.lower() in settings.CHOISE_PROCEED :
+    if proceed_option.lower() == "s":
+      return False
+    elif proceed_option.lower() == "c":
+      return True
+    elif proceed_option.lower() == "q":
+      raise SystemExit()
+  else:
+    if proceed_option == "":
+      proceed_option = "enter"
+    print Back.RED + settings.ERROR_SIGN + "'" + proceed_option + "' is not a valid answer." + Style.RESET_ALL + "\n"
+    pass
+
 #eof
