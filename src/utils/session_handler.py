@@ -204,14 +204,14 @@ def notification(url, technique):
       print Fore.YELLOW + settings.WARNING_SIGN + "A previously stored session has been held against that host." + Style.RESET_ALL  
       while True:
         settings.LOAD_SESSION = raw_input(settings.QUESTION_SIGN + "Do you want to resume to the "  + technique.rsplit(' ', 2)[0] + " injection point? [Y/n/q] > ").lower()
-        if settings.LOAD_SESSION in settings.CHOISE_YES:
+        if settings.LOAD_SESSION in settings.CHOICE_YES:
           return True
-        elif settings.LOAD_SESSION in settings.CHOISE_NO:
+        elif settings.LOAD_SESSION in settings.CHOICE_NO:
           settings.LOAD_SESSION = False
           if technique[:1] != "c":
             while True:
               proceed_option = raw_input(settings.QUESTION_SIGN + "Which technique do you want to re-evaluate? [(C)urrent/(a)ll/(n)one] > ")
-              if proceed_option.lower() in settings.CHOISE_PROCEED :
+              if proceed_option.lower() in settings.CHOICE_PROCEED :
                 if proceed_option.lower() == "a":
                   settings.RETEST = True
                   break
@@ -228,7 +228,7 @@ def notification(url, technique):
                 print Back.RED + settings.ERROR_SIGN + "'" +  proceed_option + "' is not a valid answer." + Style.RESET_ALL + "\n"
                 pass
           return False
-        elif settings.LOAD_SESSION in settings.CHOISE_QUIT:
+        elif settings.LOAD_SESSION in settings.CHOICE_QUIT:
           raise SystemExit()
         else:
           if settings.LOAD_SESSION == "":

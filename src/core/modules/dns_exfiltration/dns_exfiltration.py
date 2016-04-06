@@ -122,7 +122,7 @@ def input_cmd(dns_server, http_request_method, url, vuln_parameter, technique):
     if go_back == True:
       break
     gotshell = raw_input("\n" + settings.QUESTION_SIGN + "Do you want a Pseudo-Terminal shell? [Y/n/q] > ").lower()
-    if gotshell in settings.CHOISE_YES:
+    if gotshell in settings.CHOICE_YES:
       print "\nPseudo-Terminal (type '" + Style.BRIGHT + "?" + Style.RESET_ALL + "' for available options)"
       if readline_error:
         checks.no_readline_module()
@@ -161,11 +161,11 @@ def input_cmd(dns_server, http_request_method, url, vuln_parameter, technique):
           print ""
           os._exit(0)
 
-    elif gotshell in settings.CHOISE_NO:
+    elif gotshell in settings.CHOICE_NO:
       print ""
       os._exit(0)
 
-    elif gotshell in settings.CHOISE_QUIT:
+    elif gotshell in settings.CHOICE_QUIT:
       print ""
       os._exit(0)
 

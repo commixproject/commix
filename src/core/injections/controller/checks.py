@@ -30,11 +30,11 @@ Procced to the next attack vector.
 def next_attack_vector(technique, go_back):
   while True:
     next_attack_vector = raw_input(settings.QUESTION_SIGN + "Continue with testing the " + technique + "? [Y/n/q] > ").lower()
-    if next_attack_vector in settings.CHOISE_YES:
+    if next_attack_vector in settings.CHOICE_YES:
       return True
-    elif next_attack_vector in settings.CHOISE_NO:
+    elif next_attack_vector in settings.CHOICE_NO:
       return  False
-    elif next_attack_vector in settings.CHOISE_QUIT:
+    elif next_attack_vector in settings.CHOICE_QUIT:
       sys.exit(0)
     else:
       if next_attack_vector == "":
@@ -101,11 +101,11 @@ def continue_tests(err):
   try:
     while True:
       continue_tests = raw_input(settings.QUESTION_SIGN + "Do you want to ignore the error (" + str(err.code) + ") message and continue the tests? [Y/n/q] > ").lower()
-      if continue_tests in settings.CHOISE_YES:
+      if continue_tests in settings.CHOICE_YES:
         return True
-      elif continue_tests in settings.CHOISE_NO:
+      elif continue_tests in settings.CHOICE_NO:
         return False
-      elif continue_tests in settings.CHOISE_QUIT:
+      elif continue_tests in settings.CHOICE_QUIT:
         return False
       else:
         if continue_tests == "":
@@ -154,12 +154,12 @@ def ps_check():
     print Fore.YELLOW + info_msg + Style.RESET_ALL
     while True:
       ps_check = raw_input(settings.QUESTION_SIGN + "Do you want to use the \"--ps-version\" option so ensure that PowerShell is enabled? [Y/n/q] > ").lower()
-      if ps_check in settings.CHOISE_YES:
+      if ps_check in settings.CHOICE_YES:
         menu.options.ps_version = True
         break
-      elif ps_check in settings.CHOISE_NO:
+      elif ps_check in settings.CHOICE_NO:
         break
-      elif ps_check in settings.CHOISE_QUIT:
+      elif ps_check in settings.CHOICE_QUIT:
         print ""
         os._exit(0)
       else:  
@@ -174,9 +174,9 @@ If PowerShell is disabled.
 def ps_check_failed():
   while True:
     ps_check = raw_input(settings.QUESTION_SIGN + "Do you want to ignore the above warning and continue the procedure? [Y/n] > ").lower()
-    if ps_check in settings.CHOISE_YES:
+    if ps_check in settings.CHOICE_YES:
       break
-    elif ps_check in settings.CHOISE_NO:
+    elif ps_check in settings.CHOICE_NO:
       print ""
       os._exit(0)
     else:  
@@ -226,7 +226,7 @@ def identified_os():
                    settings.TARGET_OS + ") than that you have provided." 
     print Fore.YELLOW + settings.WARNING_SIGN + warning_msg + Style.RESET_ALL 
     proceed_option = raw_input(settings.QUESTION_SIGN + "How do you want to proceed? [(C)ontinue/(s)kip/(q)uit] > ").lower()
-    if proceed_option.lower() in settings.CHOISE_PROCEED :
+    if proceed_option.lower() in settings.CHOICE_PROCEED :
       if proceed_option.lower() == "s":
         return False
       elif proceed_option.lower() == "c":
@@ -304,7 +304,7 @@ def identified_http_auth_type(auth_type):
   warning_msg += menu.options.auth_type + ")." 
   print Fore.YELLOW + settings.WARNING_SIGN + warning_msg + Style.RESET_ALL 
   proceed_option = raw_input(settings.QUESTION_SIGN + "How do you want to proceed? [(C)ontinue/(s)kip/(q)uit] > ").lower()
-  if proceed_option.lower() in settings.CHOISE_PROCEED :
+  if proceed_option.lower() in settings.CHOICE_PROCEED :
     if proceed_option.lower() == "s":
       return False
     elif proceed_option.lower() == "c":

@@ -164,19 +164,19 @@ SHADOW_FILE = "/etc/shadow"
 SYS_PASSES = FILE_READ + SHADOW_FILE 
 
 # Accepts 'YES','YE','Y','yes','ye','y'
-CHOISE_YES = ['yes','ye','y']
+CHOICE_YES = ['yes','ye','y']
 
 # Accepts 'NO','N','no','n'
-CHOISE_NO = ['no','n']
+CHOICE_NO = ['no','n']
 
 # Accepts 'QUIT','Q','quit','q'
-CHOISE_QUIT = ['q','quit']
+CHOICE_QUIT = ['q','quit']
 
 # Accepts 'W','w','U','u','Q','q'
-CHOISE_OS = ['w','u','q']
+CHOICE_OS = ['w','u','q']
 
 # Accepts 'C','c','S','s','Q','q','a','A','n','N'
-CHOISE_PROCEED = ['c','s','q','a','n']
+CHOICE_PROCEED = ['c','s','q','a','n']
 
 # Available alternative shells
 AVAILABLE_SHELLS = ["python"]

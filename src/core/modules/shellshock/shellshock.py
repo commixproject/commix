@@ -497,12 +497,12 @@ def shellshock_handler(url, http_request_method, filename):
               print ""
             while True:
               enumerate_again = raw_input(settings.QUESTION_SIGN + "Do you want to enumerate again? [Y/n/q] > ").lower()
-              if enumerate_again in settings.CHOISE_YES:
+              if enumerate_again in settings.CHOICE_YES:
                 enumeration(url, cve, check_header, filename)
                 break
-              elif enumerate_again in settings.CHOISE_NO: 
+              elif enumerate_again in settings.CHOICE_NO: 
                 break
-              elif enumerate_again in settings.CHOISE_QUIT:
+              elif enumerate_again in settings.CHOICE_QUIT:
                 sys.exit(0)
               else:
                 if enumerate_again == "":
@@ -516,12 +516,12 @@ def shellshock_handler(url, http_request_method, filename):
           if settings.FILE_ACCESS_DONE == True :
             while True:
               file_access_again = raw_input(settings.QUESTION_SIGN + "Do you want to access files again? [Y/n/q] > ").lower()
-              if file_access_again in settings.CHOISE_YES:
+              if file_access_again in settings.CHOICE_YES:
                 file_access(url, cve, check_header, filename)
                 break
-              elif file_access_again in settings.CHOISE_NO: 
+              elif file_access_again in settings.CHOICE_NO: 
                 break
-              elif file_access_again in settings.CHOISE_QUIT:
+              elif file_access_again in settings.CHOICE_QUIT:
                 sys.exit(0)
               else:
                 if file_access_again == "":
@@ -548,7 +548,7 @@ def shellshock_handler(url, http_request_method, filename):
                 if menu.options.verbose:
                   print ""
               gotshell = raw_input(settings.QUESTION_SIGN + "Do you want a Pseudo-Terminal? [Y/n/q] > ").lower()
-              if gotshell in settings.CHOISE_YES:
+              if gotshell in settings.CHOICE_YES:
                 print ""
                 print "Pseudo-Terminal (type '" + Style.BRIGHT + "?" + Style.RESET_ALL + "' for available options)"
                 if readline_error:
@@ -618,7 +618,7 @@ def shellshock_handler(url, http_request_method, filename):
                     print ""
                     sys.exit(0)
 
-              elif gotshell in settings.CHOISE_NO:
+              elif gotshell in settings.CHOICE_NO:
                 if checks.next_attack_vector(technique, go_back) == True:
                   break
                 else:
@@ -627,7 +627,7 @@ def shellshock_handler(url, http_request_method, filename):
                   else:
                     return True 
 
-              elif gotshell in settings.CHOISE_QUIT:
+              elif gotshell in settings.CHOICE_QUIT:
                 sys.exit(0)
 
               else:

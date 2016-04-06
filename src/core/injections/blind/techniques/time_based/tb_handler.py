@@ -355,14 +355,14 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
             if settings.ENUMERATION_DONE == True:
               while True:
                 enumerate_again = raw_input("\n" + settings.QUESTION_SIGN + "Do you want to enumerate again? [Y/n/q] > ").lower()
-                if enumerate_again in settings.CHOISE_YES:
+                if enumerate_again in settings.CHOICE_YES:
                   tb_enumeration.do_check(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
                   print  ""
                   break
-                elif enumerate_again in settings.CHOISE_NO: 
+                elif enumerate_again in settings.CHOICE_NO: 
                   new_line = True
                   break
-                elif enumerate_again in settings.CHOISE_QUIT:
+                elif enumerate_again in settings.CHOICE_QUIT:
                   sys.exit(0)
                 else:
                   if enumerate_again == "":
@@ -378,14 +378,14 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
             if settings.FILE_ACCESS_DONE == True:
               while True:
                 file_access_again = raw_input(settings.QUESTION_SIGN + "Do you want to access files again? [Y/n/q] > ").lower()
-                if file_access_again in settings.CHOISE_YES:
+                if file_access_again in settings.CHOICE_YES:
                   tb_file_access.do_check(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
                   break
-                elif file_access_again in settings.CHOISE_NO: 
+                elif file_access_again in settings.CHOICE_NO: 
                   if not new_line:
                     new_line = True
                   break 
-                elif file_access_again in settings.CHOISE_QUIT:
+                elif file_access_again in settings.CHOICE_QUIT:
                   sys.exit(0)
                 else:
                   if file_access_again == "":
@@ -415,7 +415,7 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
               if go_back == True:
                 break 
               gotshell = raw_input(settings.QUESTION_SIGN + "Do you want a Pseudo-Terminal? [Y/n/q] > ").lower()
-              if gotshell in settings.CHOISE_YES:
+              if gotshell in settings.CHOICE_YES:
                 print ""
                 print "Pseudo-Terminal (type '" + Style.BRIGHT + "?" + Style.RESET_ALL + "' for available options)"
                 if readline_error:
@@ -500,7 +500,7 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                   except SystemExit: 
                     raise
                     
-              elif gotshell in settings.CHOISE_NO:
+              elif gotshell in settings.CHOICE_NO:
                 if checks.next_attack_vector(technique, go_back) == True:
                   break
                 else:
@@ -509,7 +509,7 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                   else:
                     return True  
                     
-              elif gotshell in settings.CHOISE_QUIT:
+              elif gotshell in settings.CHOICE_QUIT:
                 sys.exit(0)
 
               else:
@@ -539,7 +539,7 @@ def exploitation(url, delay, filename, http_request_method, url_time_response):
       if go_back == True:
         return False
       proceed_option = raw_input(settings.QUESTION_SIGN + "How do you want to proceed? [(C)ontinue/(s)kip/(q)uit] > ").lower()
-      if proceed_option.lower() in settings.CHOISE_PROCEED :
+      if proceed_option.lower() in settings.CHOICE_PROCEED :
         if proceed_option.lower() == "s":
           from src.core.injections.semiblind.techniques.file_based import fb_handler
           fb_handler.exploitation(url, delay, filename, http_request_method, url_time_response)

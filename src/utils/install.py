@@ -67,11 +67,11 @@ def installer():
       print Fore.YELLOW + settings.WARNING_SIGN + "It seems that "  + settings.APPLICATION + " is already installed in your system." + Style.RESET_ALL
       while True:
         uninstall = raw_input(settings.QUESTION_SIGN + "Do you want to remove commix? [Y/n/q] > ").lower()
-        if uninstall in settings.CHOISE_YES:
+        if uninstall in settings.CHOICE_YES:
           uninstaller()
           sys.exit(0)
-        elif uninstall in settings.CHOISE_NO or \
-        uninstall in settings.CHOISE_QUIT: 
+        elif uninstall in settings.CHOICE_NO or \
+        uninstall in settings.CHOICE_QUIT: 
           sys.exit(0)
         else:
           if uninstall == "":

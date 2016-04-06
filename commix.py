@@ -317,7 +317,7 @@ def main():
                 print Fore.YELLOW + settings.WARNING_SIGN + "Heuristics have failed to identify server's operating system." + Style.RESET_ALL 
                 while True:
                   got_os = raw_input(settings.QUESTION_SIGN + "Do you recognise the server's operating system? [(W)indows/(U)nix/(q)uit] > ").lower()
-                  if got_os.lower() in settings.CHOISE_OS :
+                  if got_os.lower() in settings.CHOICE_OS :
                     if got_os.lower() == "w":
                       settings.TARGET_OS = "win"
                       break
@@ -415,7 +415,7 @@ def main():
                   print Fore.YELLOW + settings.WARNING_SIGN + "(" + menu.options.auth_type.capitalize() + ")" + " HTTP authentication credentials are required." + Style.RESET_ALL
                   while True:
                     crack_creds = raw_input(settings.QUESTION_SIGN + "Do you want to perform a dictionary-based attack? [Y/n/q] > ").lower()
-                    if crack_creds in settings.CHOISE_YES:
+                    if crack_creds in settings.CHOICE_YES:
                       auth_creds = authentication.http_auth_cracker(url, realm)
                       if auth_creds != False:
                         menu.options.auth_cred = auth_creds
@@ -423,9 +423,9 @@ def main():
                         break
                       else:
                         sys.exit(0)
-                    elif crack_creds in settings.CHOISE_NO:
+                    elif crack_creds in settings.CHOICE_NO:
                       checks.http_auth_error_msg()
-                    elif crack_creds in settings.CHOISE_QUIT:
+                    elif crack_creds in settings.CHOICE_QUIT:
                       sys.exit(0)
                     else:
                       if crack_creds == "":
@@ -443,7 +443,7 @@ def main():
                     print Fore.YELLOW + settings.WARNING_SIGN + warn_msg + Style.RESET_ALL 
                   while True:
                     crack_creds = raw_input(settings.QUESTION_SIGN + "Do you want to perform a dictionary-based attack? [Y/n/q] > ").lower()
-                    if crack_creds in settings.CHOISE_YES:
+                    if crack_creds in settings.CHOICE_YES:
                       auth_creds = authentication.http_auth_cracker(url, realm)
                       if auth_creds != False:
                         menu.options.auth_cred = auth_creds
@@ -451,9 +451,9 @@ def main():
                         break
                       else:
                         sys.exit(0)
-                    elif crack_creds in settings.CHOISE_NO:
+                    elif crack_creds in settings.CHOICE_NO:
                       checks.http_auth_error_msg()
-                    elif crack_creds in settings.CHOISE_QUIT:
+                    elif crack_creds in settings.CHOICE_QUIT:
                       sys.exit(0)
                     else:
                       if crack_creds == "":
