@@ -133,7 +133,7 @@ def cb_injection_handler(url, delay, filename, http_request_method):
 
               # Check if defined "--verbose" option.
               if menu.options.verbose:
-                print Fore.GREY + "(~) Payload: " + payload + Style.RESET_ALL
+                print Fore.GREY + settings.PAYLOAD_SIGN + payload + Style.RESET_ALL
                 
               # if need page reload
               if menu.options.url_reload:

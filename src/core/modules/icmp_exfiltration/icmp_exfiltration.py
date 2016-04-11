@@ -90,7 +90,7 @@ def cmd_exec(http_request_method, cmd, url, vuln_parameter, ip_src):
   
   # Check if defined "--verbose" option.
   if menu.options.verbose:
-    sys.stdout.write("\n" + Fore.GREY + "(~) Payload: " + payload + Style.RESET_ALL)
+    sys.stdout.write("\n" + Fore.GREY + settings.PAYLOAD_SIGN + payload + Style.RESET_ALL)
 
   if http_request_method == "GET":
     url = url.replace(settings.INJECT_TAG, "")
