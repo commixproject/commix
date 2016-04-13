@@ -280,11 +280,11 @@ def configure_reverse_tcp():
               break
           else:
             continue
-    elif option.lower() == "os_shell" or "back": 
+    elif option.lower() == "os_shell" or option.lower() == "back": 
       settings.REVERSE_TCP = False   
       break 
     else:
-      print Back.RED + settings.ERROR_SIGN + "The '" + option + "' option, is not valid." + Style.RESET_ALL
+      print Back.RED + settings.ERROR_SIGN + "The '" + option + "' option, is not valid." + Style.RESET_ALL + "\n"
       pass
 
 # eof
