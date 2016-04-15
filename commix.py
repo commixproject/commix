@@ -212,6 +212,7 @@ def main():
           request = urllib2.Request(url, menu.options.data)
         else:
           request = urllib2.Request(url)
+
         headers.do_check(request)  
         
         # Check if defined any HTTP Proxy (--proxy option).
@@ -223,6 +224,7 @@ def main():
           tor.do_check()
         sys.stdout.write(settings.INFO_SIGN + "Checking connection to the target URL... ")
         sys.stdout.flush()
+
         try:
           # Check if defined any HTTP Proxy (--proxy option).
           if menu.options.proxy:
@@ -231,10 +233,17 @@ def main():
           elif menu.options.tor:
             response = tor.use_tor(request)
           else:
-            response = urllib2.urlopen(request)
+            try:
+              response = urllib2.urlopen(request)
+            except ValueError:
+              # Invalid format for the '--headers' option.
+              print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
+              error_msg = "Use '--headers=\"HEADER_NAME:HEADER_VALUE\"' to provide an HTTP header or '--headers=\"HEADER_NAME:" + settings.INJECT_TAG + "\"' if you want to try to exploit the provided HTTP header."
+              print Back.RED + settings.ERROR_SIGN + error_msg + Style.RESET_ALL
+              sys.exit(0)
         except:
           raise
-        
+
         html_data = response.read()
         content = response.read()
 
