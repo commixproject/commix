@@ -18,6 +18,7 @@ import os
 import re
 import sys
 import time
+import base64
 import urllib
 import datetime
 
@@ -71,16 +72,27 @@ def logfile_parser():
     for key in words_dict.keys():
       if words_dict[key] > 1:
         multi_targets()
+
     # Check for GET / POST HTTP Header
     for http_header in ["GET", "POST"]:
       proxy_log_file = open(menu.options.logfile, "r")
       request_url = re.findall(r"" + http_header + " (.*) ", proxy_log_file.readline())
+
       if request_url:
         if http_header == "POST":
           # Check for POST Data.
           result = [item for item in proxy_log_file.read().splitlines() if item]
+          if not any(settings.INJECT_TAG in s for s in result):
+            print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
+            print Back.RED + settings.ERROR_SIGN + "You must set the \"INJECT_HERE\" tag to specify the testable parameter in the '" + menu.options.logfile + "' file." + Style.RESET_ALL
+            sys.exit(0)
           menu.options.data = result[len(result)-1]
-    
+        else:
+          # Check if url ends with "=".
+          if request_url[0].endswith("="):
+            request_url = request_url[0].replace("=","=" + settings.INJECT_TAG, 1)
+        break
+
     # Check if invalid data
     if not request_url:
       invalid_data()
@@ -104,7 +116,20 @@ def logfile_parser():
       elif re.findall(r"Referer: " + "(.*)", line):
         menu.options.referer = "".join([str(i) for i in re.findall(r"Referer: " + "(.*)", line)])
         if menu.options.referer and "https://" in menu.options.referer:
-          prefix = "https://"    
+          prefix = "https://"
+      elif re.findall(r"Authorization: " + "(.*)", line):
+        auth_provided = "".join([str(i) for i in re.findall(r"Authorization: " + "(.*)", line)]).split()
+        menu.options.auth_type = auth_provided[0].lower()
+        if menu.options.auth_type == "basic":
+          menu.options.auth_cred = base64.b64decode(auth_provided[1])
+        elif menu.options.auth_type == "digest":
+          if not menu.options.auth_cred:
+            print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
+            error_msg = "Use the '--auth-cred' option to provide a valid pair of "
+            error_msg += "HTTP authentication credentials (i.e --auth-cred=\"admin:admin\") "
+            print Back.RED + settings.ERROR_SIGN + error_msg + Style.RESET_ALL
+            sys.exit(0)
+
       # Add extra headers
       else:
         match = re.findall(r"(.*): (.*)", line)

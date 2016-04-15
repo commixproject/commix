@@ -1,4 +1,6 @@
 ## Version 0.7b
+* Fixed: HTTP proxy logs parser to accept GET http requests.
+* Fixed: HTTP proxy logs parser to recognise provided HTTP authentication credentials.
 * Added: Support for verbose mode in HTTP authentication (Basic / Digest) dictionary-based cracker.
 * Added: The ability to store valid (Digest) credentials into session files for current target.
 * Added: Dictionary-based cracker for "Digest" HTTP authentication credentials.
