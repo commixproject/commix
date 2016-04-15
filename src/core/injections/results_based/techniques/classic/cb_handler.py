@@ -360,8 +360,6 @@ def cb_injection_handler(url, delay, filename, http_request_method):
                         reverse_tcp.configure_reverse_tcp()
                         if settings.REVERSE_TCP == False:
                           continue
-                        if settings.REVERSE_TCP == False:
-                          continue
                         while True:
                           if settings.LHOST and settings.LPORT in settings.SHELL_OPTIONS:
                             result = checks.check_reverse_tcp_options(settings.LHOST)
