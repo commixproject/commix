@@ -1,4 +1,4 @@
-## Version 0.7b
+## Version 0.7b (2016-04-18)
 * Fixed: HTTP proxy logs parser to accept GET http requests.
 * Fixed: HTTP proxy logs parser to recognise provided HTTP authentication credentials.
 * Added: Support for verbose mode in HTTP authentication (Basic / Digest) dictionary-based cracker.
