@@ -197,7 +197,7 @@ def exploitation(ip_dst, ip_src, url, http_request_method, vuln_parameter, techn
 def icmp_exfiltration_handler(url, http_request_method):
   # You need to have root privileges to run this script
   if os.geteuid() != 0:
-    print "\n" + Back.RED + settings.ERROR_SIGN + "You need to have root privileges to run this option." + Style.RESET_ALL
+    print Back.RED + settings.ERROR_SIGN + "You need to have root privileges to run this option." + Style.RESET_ALL + "\n"
     os._exit(0)
 
   if http_request_method == "GET":
