@@ -364,7 +364,11 @@ def main():
           else:
             if menu.options.verbose:
               print Style.BRIGHT + "(!) The indicated web-page charset appears to be "  + Style.UNDERLINE  + settings.CHARSET + Style.RESET_ALL + "." + Style.RESET_ALL
-        
+
+        # Retrieve everything from the supported enumeration options.
+        if menu.options.enum_all:
+          checks.enable_all_enumeration_options()
+
       except urllib2.HTTPError, e:
         # Check the codes of responses
         if e.getcode() == 500:

@@ -212,6 +212,12 @@ request.add_option("--force-ssl",
 enumeration = OptionGroup(parser, Style.BRIGHT + "Enumeration" + Style.RESET_ALL, 
                         "These options can be used to enumerate the target host.")
 
+enumeration.add_option("--all", 
+                action="store_true",
+                dest="enum_all",
+                default = False,
+                help="Retrieve everything.")
+
 enumeration.add_option("--current-user", 
                 action="store_true",
                 dest="current_user",

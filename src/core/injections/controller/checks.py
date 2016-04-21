@@ -317,4 +317,29 @@ def identified_http_auth_type(auth_type):
     print Back.RED + settings.ERROR_SIGN + "'" + proceed_option + "' is not a valid answer." + Style.RESET_ALL + "\n"
     pass
 
+"""
+Retrieve everything from the supported enumeration options.
+"""
+def enable_all_enumeration_options():
+  # Retrieve current user name.
+  menu.options.current_user = True
+  # Retrieve current hostname.
+  menu.options.hostname = True
+  # Retrieve system information.
+  menu.options.sys_info = True
+  if settings.TARGET_OS == "win":
+    # Check if the current user have admin privileges.
+    menu.options.is_admin = True
+    # Retrieve PowerShell's version number.
+    menu.options.ps_version = True
+  else:
+    # Check if the current user have root privileges.
+    menu.options.is_root = True
+  # Retrieve system users.
+  menu.options.users = True
+  # Retrieve system users privileges.
+  menu.options.privileges = True
+  # Retrieve system users password hashes.
+  menu.options.passwords = True
+
 #eof

@@ -1,3 +1,6 @@
+## Version 0.8b
+* Added: New option "--all" that enables all supported enumeration options.
+
 ## Version 0.7b (2016-04-18)
 * Fixed: HTTP proxy logs parser to accept GET http requests.
 * Fixed: HTTP proxy logs parser to recognise provided HTTP authentication credentials.
