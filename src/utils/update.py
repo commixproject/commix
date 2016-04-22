@@ -2,16 +2,16 @@
 # encoding: UTF-8
 
 """
- This file is part of commix (@commixproject) tool.
- Copyright (c) 2015 Anastasios Stasinopoulos (@ancst).
- https://github.com/stasinopoulos/commix
+This file is part of commix (@commixproject) tool.
+Copyright (c) 2014-2016 Anastasios Stasinopoulos (@ancst).
+https://github.com/stasinopoulos/commix
 
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
- 
- For more see the file 'doc/COPYING' for copying permission.
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+For more see the file 'readme/COPYING' for copying permission.
 """
 
 import os
@@ -24,18 +24,21 @@ from src.utils import requirments
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 """
- Check for updates (apply if any) and exit!
+Check for updates (apply if any) and exit!
 """
 
+"""
+The commix's updater.
+"""
 def updater():
-
+  
   time.sleep(1)
-  sys.stdout.write("(*) Checking requirements to update "+ settings.APPLICATION + " via GitHub... ")
+  sys.stdout.write(settings.INFO_SIGN + "Checking requirements to update " + settings.APPLICATION + " via GitHub... ")
   sys.stdout.flush()
   # Check if windows
   if settings.IS_WINDOWS:
-    print "["+ Fore.RED + " FAILED " + Style.RESET_ALL +"]"
-    print Back.RED + "(x) Error: For updating purposes on Windows platform, it's recommended to use a GitHub client for Windows (http://windows.github.com/)." + Style.RESET_ALL
+    print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
+    print Back.RED + settings.ERROR_SIGN + "For updating purposes on Windows platform, it's recommended to use a GitHub client for Windows (http://windows.github.com/)." + Style.RESET_ALL
     sys.exit(0)
   else:
     try:
@@ -59,16 +62,16 @@ def updater():
           print "---"
           end  = time.time()
           how_long = int(end - start)
-          print "(*) Finished in "+ time.strftime('%H:%M:%S', time.gmtime(how_long)) + "."
+          print settings.INFO_SIGN + "Finished in " + time.strftime('%H:%M:%S', time.gmtime(how_long)) + "."
         else:
-          print "["+ Fore.RED + " FAILED " + Style.RESET_ALL +"]"
-          print Back.RED + "(x) Error: The '.git' directory not found. Do it manually: "+ Style.BRIGHT +"'git clone " + settings.GIT_URL + " " + settings.APPLICATION +"' "+ Style.RESET_ALL    
+          print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
+          print Back.RED + settings.ERROR_SIGN + "The '.git' directory not found. Do it manually: " + Style.BRIGHT + "'git clone " + settings.GIT_URL + " " + settings.APPLICATION + "' " + Style.RESET_ALL    
           sys.exit(0)
       else:
-          print "["+ Fore.RED + " FAILED " + Style.RESET_ALL +"]"
-          print Back.RED + "(x) Error: " + requirment + " not found." + Style.RESET_ALL
+          print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
+          print Back.RED + settings.ERROR_SIGN + requirment + " not found." + Style.RESET_ALL
           sys.exit(0)
 
     except Exception as error:
-      print Back.RED + "\n(x) Error: " + str(error) + Style.RESET_ALL 
+      print Back.RED + "\n" + settings.ERROR_SIGN + str(error) + Style.RESET_ALL 
     sys.exit(0)

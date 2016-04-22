@@ -2,22 +2,22 @@
 # encoding: UTF-8
 
 """
- This file is part of commix (@commixproject) tool.
- Copyright (c) 2015 Anastasios Stasinopoulos (@ancst).
- https://github.com/stasinopoulos/commix
+This file is part of commix (@commixproject) tool.
+Copyright (c) 2014-2016 Anastasios Stasinopoulos (@ancst).
+https://github.com/stasinopoulos/commix
 
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
  
- For more see the file 'readme/COPYING' for copying permission.
+For more see the file 'readme/COPYING' for copying permission.
 """
 
 import re
+import sys
 import base64
 import urllib2
-
 from src.utils import menu
 from src.utils import settings
 from src.thirdparty.colorama import Fore, Back, Style, init
@@ -25,7 +25,6 @@ from src.thirdparty.colorama import Fore, Back, Style, init
 """
  Check for added headers.
 """
-
 def do_check(request):
   
   # Check if defined any HTTP Host header.
@@ -49,12 +48,44 @@ def do_check(request):
     request.add_header('Cookie', Cookie)
 
   # Check if defined any HTTP Authentication credentials.
-  # HTTP Authentication: Basic Access Authentication
-  if menu.options.auth_type == "basic":
-    if menu.options.auth_cred:
-      b64_string = base64.encodestring(menu.options.auth_cred).replace('\n', '')
-      request.add_header("Authorization", "Basic " + b64_string +"")
-  
+  # HTTP Authentication: Basic / Digest Access Authentication.
+  if not menu.options.ignore_401:
+    if menu.options.auth_cred and menu.options.auth_type:
+      try:
+        settings.SUPPORTED_HTTP_AUTH_TYPES.index(menu.options.auth_type)
+        if menu.options.auth_type == "basic":
+          b64_string = base64.encodestring(menu.options.auth_cred).replace('\n', '')
+          request.add_header("Authorization", "Basic " + b64_string + "")
+        elif menu.options.auth_type == "digest":
+          try:
+            url = menu.options.url
+            try:
+              response = urllib2.urlopen(url)
+            except urllib2.HTTPError, e:
+              try:
+                authline = e.headers.get('www-authenticate', '')  
+                authobj = re.match('''(\w*)\s+realm=(.*),''',authline).groups()
+                realm = authobj[1].split(',')[0].replace("\"","")
+                user_pass_pair = menu.options.auth_cred.split(":")
+                username = user_pass_pair[0]
+                password = user_pass_pair[1]
+                authhandler = urllib2.HTTPDigestAuthHandler()
+                authhandler.add_password(realm, url, username, password)
+                opener = urllib2.build_opener(authhandler)
+                urllib2.install_opener(opener)
+                result = urllib2.urlopen(url)
+              except AttributeError:
+                pass
+          except urllib2.HTTPError, e:
+            pass
+      except ValueError:
+        error_msg = "Unsupported / Invalid HTTP authentication type '" + menu.options.auth_type + "'."
+        error_msg += " Try basic or digest HTTP authentication type."
+        print Back.RED + settings.ERROR_SIGN + error_msg + Style.RESET_ALL
+        sys.exit(0)   
+    else:
+      pass        
+    
   # The MIME media type for JSON.
   if settings.IS_JSON:
   	request.add_header("Content-Type", "application/json")
@@ -74,6 +105,11 @@ def do_check(request):
       # Extra HTTP Header value
       http_header_value = re.findall(r":(.*)", extra_header)
       http_header_value = ''.join(http_header_value)
+      # Check if it is a custom header injection.
+      if not settings.CUSTOM_HEADER_INJECTION and \
+         settings.INJECT_TAG in http_header_value:
+        settings.CUSTOM_HEADER_INJECTION = True
+        settings.CUSTOM_HEADER_NAME = http_header_name
       request.add_header(http_header_name, http_header_value)
 
 #eof

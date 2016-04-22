@@ -2,16 +2,16 @@
 # encoding: UTF-8
 
 """
- This file is part of commix (@commixproject) tool.
- Copyright (c) 2015 Anastasios Stasinopoulos (@ancst).
- https://github.com/stasinopoulos/commix
+This file is part of commix (@commixproject) tool.
+Copyright (c) 2014-2016 Anastasios Stasinopoulos (@ancst).
+https://github.com/stasinopoulos/commix
 
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
- 
- For more see the file 'doc/COPYING' for copying permission.
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+For more see the file 'readme/COPYING' for copying permission.
 """
 
 import os
@@ -24,12 +24,14 @@ from src.utils import requirments
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 """
- Make a local installation of 'commix' on your system.
+Make a local installation of 'commix' on your system.
 """
 
+"""
+The un-installer.
+"""
 def uninstaller():
-
-  sys.stdout.write("(*) Starting the uninstaller... ")
+  sys.stdout.write(settings.INFO_SIGN + "Starting the uninstaller... ")
   sys.stdout.flush()
   try:
 		subprocess.Popen("rm -rf /usr/bin/" + settings.APPLICATION + " >/dev/null 2>&1", shell=True).wait()
@@ -41,11 +43,14 @@ def uninstaller():
   sys.stdout.flush()
   print Style.BRIGHT + "(!) The un-installation of commix has finished!" + Style.RESET_ALL
   
+"""
+The installer.
+"""
 def installer():
   packages = "build-essential python-dev"
   dependencies = "git python-pip"
   
-  sys.stdout.write("(*) Starting the installer... ")
+  sys.stdout.write(settings.INFO_SIGN + "Starting the installer... ")
   sys.stdout.flush()
   
   # Check if OS is Linux.
@@ -53,25 +58,25 @@ def installer():
     
     # You need to have root privileges to run this script
     if os.geteuid() != 0:
-      print Back.RED + "\n(x) Error: You need to have root privileges to run this option!\n" + Style.RESET_ALL
+      print Back.RED + "\n" + settings.ERROR_SIGN + "You need to have root privileges to run this option!\n" + Style.RESET_ALL
       sys.exit(0)
       
     # Check if commix is already installed.
     if os.path.isdir("/usr/share/"  + settings.APPLICATION + ""):
       print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]" 
-      print Fore.YELLOW + "(^) Warning: It seems that "  + settings.APPLICATION + " is already installed in your system." + Style.RESET_ALL
+      print Fore.YELLOW + settings.WARNING_SIGN + "It seems that "  + settings.APPLICATION + " is already installed in your system." + Style.RESET_ALL
       while True:
-        uninstall = raw_input("(?) Do you want to remove commix? [Y/n/q] > ").lower()
-        if uninstall in settings.CHOISE_YES:
+        uninstall = raw_input(settings.QUESTION_SIGN + "Do you want to remove commix? [Y/n/q] > ").lower()
+        if uninstall in settings.CHOICE_YES:
           uninstaller()
           sys.exit(0)
-        elif uninstall in settings.CHOISE_NO or \
-        uninstall in settings.CHOISE_QUIT: 
+        elif uninstall in settings.CHOICE_NO or \
+        uninstall in settings.CHOICE_QUIT: 
           sys.exit(0)
         else:
           if uninstall == "":
             uninstall = "enter"
-          print Back.RED + "(x) Error: '" + uninstall + "' is not a valid answer." + Style.RESET_ALL
+          print Back.RED + settings.ERROR_SIGN + "'" + uninstall + "' is not a valid answer." + Style.RESET_ALL + "\n"
           pass
       
     # Check for git.
@@ -86,7 +91,7 @@ def installer():
           requirments.do_check(item)
       else:
         print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
-        print Back.RED + "(x) Error: The installer is not designed for any other Linux distro than Ubuntu / Debian." + Style.RESET_ALL
+        print Back.RED + settings.ERROR_SIGN + "The installer is not designed for any other Linux distro than Ubuntu / Debian." + Style.RESET_ALL
         print Back.RED + "    Please install manually: " + dependencies + Style.RESET_ALL
         print ""
         sys.exit(0)
@@ -96,7 +101,7 @@ def installer():
     sys.stdout.write("[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]\n")
     sys.stdout.flush()
     
-    sys.stdout.write("(*) Installing "  + settings.APPLICATION + " into the /usr/share/"  + settings.APPLICATION + "... ")
+    sys.stdout.write(settings.INFO_SIGN + "Installing "  + settings.APPLICATION + " into the /usr/share/"  + settings.APPLICATION + "... ")
     try:
       current_dir = os.getcwd()
       subprocess.Popen("cp -r " + current_dir + " /usr/share/" + settings.APPLICATION + " >/dev/null 2>&1", shell=True).wait()
@@ -107,7 +112,7 @@ def installer():
     sys.stdout.write("[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]\n")
     sys.stdout.flush()
     
-    sys.stdout.write("(*) Installing "  + settings.APPLICATION + " to /usr/bin/"  + settings.APPLICATION + "... ")
+    sys.stdout.write(settings.INFO_SIGN + "Installing "  + settings.APPLICATION + " to /usr/bin/"  + settings.APPLICATION + "... ")
     try:    
       with open("/usr/bin/" + settings.APPLICATION, 'w') as f:
         f.write('#!/bin/bash\n')
@@ -130,7 +135,7 @@ def installer():
 
   else :
     print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
-    print Back.RED + "(x) Error: The installer is not designed for any other system other than Linux." + Style.RESET_ALL
+    print Back.RED + settings.ERROR_SIGN + "The installer is not designed for any other system other than Linux." + Style.RESET_ALL
     print Back.RED + "    Please install manually: " + packages + dependencies + Style.RESET_ALL
     print ""
     sys.exit(0)

