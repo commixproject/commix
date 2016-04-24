@@ -25,11 +25,13 @@ The global variables.
 
 # About
 APPLICATION = "commix"
-DESCRIPTION = "Automated All-in-One OS Command Injection and Exploitation Tool"
+DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
+DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION = "v0.8b"
 YEAR    = "2014-2016"
-TWITTER = "@ancst" 
+AUTHOR_TWITTER = "@ancst" 
+APPLICATION_TWITTER = "@commixproject" 
 
 # Inject Tag
 INJECT_TAG = "INJECT_HERE"
