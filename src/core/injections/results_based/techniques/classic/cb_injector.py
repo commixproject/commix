@@ -129,6 +129,7 @@ def injection_test(payload, http_request_method, url):
 
   # Check if defined method is POST.
   else:
+
     parameter = menu.options.data
     parameter = urllib2.unquote(parameter)
     
@@ -142,7 +143,10 @@ def injection_test(payload, http_request_method, url):
     else:
       payload = payload.replace("\"", "\\\"")
       data = re.sub(settings.INJECT_TAG, urllib.unquote(payload), parameter)
-      data = json.loads(data, strict = False)
+      try:
+        data = json.loads(data, strict = False)
+      except:
+        pass
       request = urllib2.Request(url, json.dumps(data))
     
     # Check if defined extra headers.
@@ -586,7 +590,10 @@ def injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_meth
       else:
         payload = payload.replace("\"", "\\\"")
         data = re.sub(settings.INJECT_TAG, urllib.unquote(payload), parameter)
-        data = json.loads(data, strict = False)
+        try:
+          data = json.loads(data, strict = False)
+        except:
+          pass
         request = urllib2.Request(url, json.dumps(data))
       
       # Check if defined extra headers.
