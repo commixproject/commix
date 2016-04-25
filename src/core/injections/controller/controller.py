@@ -41,55 +41,31 @@ Command Injection and exploitation controller.
 Checks if the testable parameter is exploitable.
 """
 
+def check_for_stored_sessions(url, http_request_method):
+
+  if not menu.options.ignore_session:
+    if os.path.isfile(settings.SESSION_FILE) and not settings.REQUIRED_AUTHENTICATION:
+      if not menu.options.tech:
+        menu.options.tech = session_handler.applied_techniques(url, http_request_method)
+      if session_handler.check_stored_parameter(url, http_request_method):
+        settings.LOAD_SESSION = True
+        return True
+
+  if menu.options.flush_session:
+    session_handler.flush(url)        
+
 """
-General check on every injection technique.
+Proceed to the injection process for the appropriate parameter.
 """
-def do_check(url, filename):
-  
-  classic_state = False
-  eval_based_state = False
-  time_based_state = False
-  file_based_state = False
+def injection_proccess(url, parameter, http_request_method, filename, delay):
 
-  # Check if defined "--delay" option.
-  if menu.options.delay:
-    delay = menu.options.delay
-  else:
-    delay = settings.DELAY
-
-  # Check if authentication is needed.
-  if menu.options.auth_url and menu.options.auth_data:
-    # Do the authentication process.
-    authentication.authentication_process()
-    # Check if authentication page is the same with the next (injection) URL
-    if urllib2.urlopen(url).read() == urllib2.urlopen(menu.options.auth_url).read():
-      print Back.RED + settings.ERROR_SIGN + "It seems that the authentication procedure has failed." + Style.RESET_ALL
-      sys.exit(0)
-  elif menu.options.auth_url or menu.options.auth_data: 
-    print Back.RED + settings.ERROR_SIGN + "You must specify both login panel URL and login parameters." + Style.RESET_ALL
-    sys.exit(0)
-  else:
-    pass
-
-  # Check if HTTP Method is GET or POST.
-  header_name = ""
-  if not menu.options.data:
-    http_request_method = "GET"
-    if not settings.COOKIE_INJECTION \
-    and not settings.USER_AGENT_INJECTION \
-    and not settings.REFERER_INJECTION \
-    and not settings.CUSTOM_HEADER_INJECTION:
-      url = parameters.do_GET_check(url)
+  if http_request_method == "GET":
     check_parameter = parameters.vuln_GET_param(url)
-    the_type = " parameter "
-
   else:
-    http_request_method = "POST"
-    parameter = menu.options.data
-    parameter = parameters.do_POST_check(parameter)
     check_parameter = parameters.vuln_POST_param(parameter, url)
-    the_type = " parameter " 
-  
+  header_name = ""
+  the_type = " parameter "
+
   # Load modules
   modules_handler.load_modules(url, http_request_method, filename)
 
@@ -123,18 +99,6 @@ def do_check(url, filename):
 
   if len(check_parameter) > 0:
     settings.TESTABLE_PARAMETER = check_parameter
-
-  # Check for session file 
-  if not menu.options.ignore_session:
-    if os.path.isfile(settings.SESSION_FILE) and not settings.REQUIRED_AUTHENTICATION:
-      if not menu.options.tech:
-        menu.options.tech = session_handler.applied_techniques(url, http_request_method)
-      if session_handler.check_stored_parameter(url, http_request_method):
-        settings.LOAD_SESSION = True
-        
-  if menu.options.flush_session:
-    session_handler.flush(url)
-
   if len(check_parameter) != 0 :
     check_parameter = " '" + check_parameter + "'"
 
@@ -146,33 +110,123 @@ def do_check(url, filename):
   # Check if it is vulnerable to classic command injection technique.
   if not menu.options.tech or "c" in menu.options.tech:
     if cb_handler.exploitation(url, delay, filename, http_request_method) != False:
-      classic_state = True
+      settings.CLASSIC_STATE = True
   else:
-    classic_state = False
+    settings.CLASSIC_STATE = False
 
   # Check if it is vulnerable to eval-based code injection technique.
   if not menu.options.tech or "e" in menu.options.tech:
     if eb_handler.exploitation(url, delay, filename, http_request_method) != False:
-      eval_based_state = True
+      settings.EVAL_BASED_STATE = True
   else:
-    eval_based_state = False
+    settings.EVAL_BASED_STATE = False
 
   # Check if it is vulnerable to time-based blind command injection technique.
   if not menu.options.tech or "t" in menu.options.tech:
     if tb_handler.exploitation(url, delay, filename, http_request_method, url_time_response) != False:
-      time_based_state = True
+      settings.TIME_BASED_STATE = True
   else:
-    time_based_state = False
+    settings.TIME_BASED_STATE = False
 
   # Check if it is vulnerable to file-based semiblind command injection technique.
   if not menu.options.tech or "f" in menu.options.tech:
     if fb_handler.exploitation(url, delay, filename, http_request_method, url_time_response) != False:
-      file_based_state = True
+      settings.FILE_BASED_STATE = True
   else:
-    file_based_state = False
+    settings.FILE_BASED_STATE = False
 
-  if classic_state == eval_based_state == time_based_state == file_based_state == False :
-    info_msg = settings.CRITICAL_SIGN + "The tested (" + http_request_method + ")" + check_parameter + " parameter appear to be not injectable."
+  # All injection techniques seems to be failed!
+  if settings.CLASSIC_STATE == settings.EVAL_BASED_STATE == settings.TIME_BASED_STATE == settings.FILE_BASED_STATE == False :
+    info_msg = settings.WARNING_SIGN + "The tested (" + http_request_method + ")" + check_parameter + " parameter seems to be not injectable."
+    print Fore.YELLOW + info_msg + Style.RESET_ALL  
+
+"""
+General check on every injection technique.
+"""
+def do_check(url, filename):
+  # Check if defined "--delay" option.
+  if menu.options.delay:
+    delay = menu.options.delay
+  else:
+    delay = settings.DELAY
+
+  # Check if authentication is needed.
+  if menu.options.auth_url and menu.options.auth_data:
+    # Do the authentication process.
+    authentication.authentication_process()
+    # Check if authentication page is the same with the next (injection) URL
+    if urllib2.urlopen(url).read() == urllib2.urlopen(menu.options.auth_url).read():
+      print Back.RED + settings.ERROR_SIGN + "It seems that the authentication procedure has failed." + Style.RESET_ALL
+      sys.exit(0)
+  elif menu.options.auth_url or menu.options.auth_data: 
+    print Back.RED + settings.ERROR_SIGN + "You must specify both login panel URL and login parameters." + Style.RESET_ALL
+    sys.exit(0)
+  else:
+    pass
+
+  # Check if HTTP Method is GET or POST.
+  if not menu.options.data:
+    parameter = ""
+    http_request_method = "GET"
+    if not settings.COOKIE_INJECTION \
+    and not settings.USER_AGENT_INJECTION \
+    and not settings.REFERER_INJECTION \
+    and not settings.CUSTOM_HEADER_INJECTION:
+      found_url = parameters.do_GET_check(url)
+
+      for i in range(0, len(found_url)):
+        url = found_url[i]
+        # Check for session file 
+        if check_for_stored_sessions(url, http_request_method):
+          injection_proccess(url, parameter, http_request_method, filename, delay)
+
+      if not settings.LOAD_SESSION :
+        for i in range(0, len(found_url)):
+          url = found_url[i]
+          injection_proccess(url, parameter, http_request_method, filename, delay)
+
+    # Cookie Injection
+    if settings.COOKIE_INJECTION == True:
+      injection_proccess(url, parameter, http_request_method, filename, delay)
+              
+    # User-Agent Injection
+    elif settings.USER_AGENT_INJECTION == True:
+      injection_proccess(url, parameter, http_request_method, filename, delay)
+
+    # Referer Injection
+    elif settings.REFERER_INJECTION == True:
+      injection_proccess(url, parameter, http_request_method, filename, delay)
+
+    # Custom header Injection
+    elif settings.CUSTOM_HEADER_INJECTION == True:
+      injection_proccess(url, parameter, http_request_method, filename, delay)
+
+  else:
+    parameter = menu.options.data
+    http_request_method = "POST"
+    found_parameter = parameters.do_POST_check(parameter)
+
+    if type(found_parameter) is str:
+      found_parameter_list = []
+      found_parameter_list.append(found_parameter)
+      found_parameter = found_parameter_list
+
+    for i in range(0, len(found_parameter)):
+      parameter = found_parameter[i]
+      menu.options.data = parameter
+      # Check for session file 
+      if check_for_stored_sessions(url, http_request_method):
+        injection_proccess(url, parameter, http_request_method, filename, delay)
+
+    if not settings.LOAD_SESSION :
+      for i in range(0, len(found_parameter)):
+        parameter = found_parameter[i]
+        menu.options.data = parameter
+        injection_proccess(url, parameter, http_request_method, filename, delay)
+
+  # All injection techniques seems to be failed!
+  if settings.CLASSIC_STATE == settings.EVAL_BASED_STATE == settings.TIME_BASED_STATE == settings.FILE_BASED_STATE == False :
+    info_msg = settings.CRITICAL_SIGN + "All the tested (" + http_request_method + ") parameters appear to be not injectable."
     if not menu.options.alter_shell :
       info_msg += " Use the option '--alter-shell'"
     else:

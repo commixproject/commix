@@ -309,7 +309,7 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
                 else:
                   percent = str(float_percent) + "%"
                 #Print logs notification message
-                percent = Fore.BLUE + "FINISHED" + Style.RESET_ALL
+                #percent = Fore.BLUE + "FINISHED" + Style.RESET_ALL
                 sys.stdout.write("\r" + settings.INFO_SIGN + "Testing the " + technique + "... " +  "[ " + percent + " ]")
                 sys.stdout.flush()
                 print ""

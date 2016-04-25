@@ -39,6 +39,12 @@ INJECT_TAG = "INJECT_HERE"
 # Default target host OS (Unix-like)
 TARGET_OS = "unix"
 
+# Exploitation techniques states
+CLASSIC_STATE = False
+EVAL_BASED_STATE = False
+TIME_BASED_STATE = False
+FILE_BASED_STATE = False
+
 # Check Commit ID
 if os.path.isdir("./.git"):
   with open('.git/refs/heads/master', 'r') as f:

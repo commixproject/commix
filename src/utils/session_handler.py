@@ -243,8 +243,7 @@ Check for specific stored parameter.
 """
 def check_stored_parameter(url, http_request_method): 
   if injection_point_exportation(url, http_request_method):
-    if settings.TESTABLE_PARAMETER == injection_point_exportation(url, http_request_method)[5] or \
-       settings.INJECT_TAG == injection_point_exportation(url, http_request_method)[5]:
+    if injection_point_exportation(url, http_request_method)[16] == "True":
       return True
     else:
       return False

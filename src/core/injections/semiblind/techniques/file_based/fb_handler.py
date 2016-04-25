@@ -130,12 +130,16 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
   else:
     tmp_path = settings.TMP_PATH
 
+  if settings.SRV_ROOT_DIR != "":
+    settings.SRV_ROOT_DIR = ""
+
   if menu.options.file_dest and '/tmp/' in menu.options.file_dest:
     call_tmp_based = True
   else:
     if menu.options.srv_root_dir:
       settings.SRV_ROOT_DIR = menu.options.srv_root_dir
     else:
+
       # Debian/Ubunt have been updated to use /var/www/html as default instead of /var/www.
       if "apache" in settings.SERVER_BANNER.lower():
         if "debian" or "ubuntu" in settings.SERVER_BANNER.lower():
