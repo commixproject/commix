@@ -10,15 +10,15 @@
     Copyright (c) 2014-2016 Anastasios Stasinopoulos (@ancst)
     +--
 
+![Python 2.6|2.7](https://img.shields.io/badge/python-2.6|2.7-yellow.svg)
 [![GPLv3 License](https://img.shields.io/badge/License-GPLv3-red.svg)](https://github.com/stasinopoulos/commix/blob/master/readme/COPYING)
 [![Twitter](https://img.shields.io/badge/Twitter-commixproject-blue.svg)](http://www.twitter.com/commixproject)
-![Python 2.6|2.7](https://img.shields.io/badge/python-2.6|2.7-yellow.svg)
 
 ![Logo](http://i.imgur.com/xcNYrfv.png)
 
 #### General Information
 
-**Commix** (short for [**comm**]and [**i**]njection e[**x**]ploiter) has a simple environment and it can be used, from web developers, penetration testers or even security researchers to test web applications with the view to find bugs, errors or vulnerabilities related to **[command injection](https://www.owasp.org/index.php/Command_Injection)** attacks. By using this tool, it is very easy to find and exploit a command injection vulnerability in a certain vulnerable parameter or string. Commix is written in Python programming language.
+**Commix** (short for [**comm**]and [**i**]njection e[**x**]ploiter) is an automated tool that can be used from web developers, penetration testers or even security researchers in order to test web-based applications with the view to find bugs, errors or vulnerabilities related to operating system **[command injection](https://www.owasp.org/index.php/Command_Injection)**. By using this tool, it is very easy to find and exploit a command injection vulnerability in a certain vulnerable parameter or string.
 
 #### Disclaimer
 
