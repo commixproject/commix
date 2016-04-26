@@ -1,4 +1,5 @@
 ## Version 0.8b
+* Added: The ability to check every parameter in the provided cookie data.
 * Added: The ability to check every GET parameter in the defined URL and/or every POST provided data.
 * Added: New option "--all" that enables all supported enumeration options.
 

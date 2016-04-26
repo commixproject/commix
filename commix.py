@@ -142,7 +142,8 @@ def main():
         sys.exit(0)
 
     # Cookie Injection
-    if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
+    #if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
+    if menu.options.cookie :
       settings.COOKIE_INJECTION = True
 
     # User-Agent Injection

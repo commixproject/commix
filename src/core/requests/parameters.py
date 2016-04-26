@@ -49,7 +49,7 @@ def do_GET_check(url):
     return url
 
   urls_list = []
-  
+
   # Find the host part
   url_part = get_url_part(url)
   # Find the parameter part
@@ -169,6 +169,7 @@ def do_POST_check(parameter):
   if settings.IS_JSON:
     settings.PARAMETER_DELIMITER = ","
 
+  paramerters_list = []
   # Split multiple parameters
   multi_parameters = parameter.split(settings.PARAMETER_DELIMITER)
 
@@ -192,7 +193,7 @@ def do_POST_check(parameter):
 
   # Check if multiple paramerters are supplied.
   else:
-    paramerters_list = []
+    #paramerters_list = []
     all_params = settings.PARAMETER_DELIMITER.join(multi_parameters)
     all_params = all_params.split(settings.PARAMETER_DELIMITER)
     # Check if not defined the "INJECT_HERE" tag in parameter
@@ -239,29 +240,29 @@ Define the vulnerable POST parameter.
 """
 def vuln_POST_param(parameter, url):
 
-    # Define the vulnerable parameter
-    if re.findall(r"" + settings.PARAMETER_DELIMITER + "(.*)=" + settings.INJECT_TAG + "", parameter):
-      vuln_parameter = re.findall(r"" + settings.PARAMETER_DELIMITER + "(.*)=" + settings.INJECT_TAG + "", parameter)
-      vuln_parameter = ''.join(vuln_parameter)
-      vuln_parameter = re.sub(r"(.*)=(.*)" + settings.PARAMETER_DELIMITER, "", vuln_parameter)
+  # Define the vulnerable parameter
+  if re.findall(r"" + settings.PARAMETER_DELIMITER + "(.*)=" + settings.INJECT_TAG + "", parameter):
+    vuln_parameter = re.findall(r"" + settings.PARAMETER_DELIMITER + "(.*)=" + settings.INJECT_TAG + "", parameter)
+    vuln_parameter = ''.join(vuln_parameter)
+    vuln_parameter = re.sub(r"(.*)=(.*)" + settings.PARAMETER_DELIMITER, "", vuln_parameter)
 
-    elif re.findall(r"(.*)=" + settings.INJECT_TAG + "", parameter):
-      vuln_parameter = re.findall(r"(.*)=" + settings.INJECT_TAG + "", parameter)
-      vuln_parameter = ''.join(vuln_parameter)
+  elif re.findall(r"(.*)=" + settings.INJECT_TAG + "", parameter):
+    vuln_parameter = re.findall(r"(.*)=" + settings.INJECT_TAG + "", parameter)
+    vuln_parameter = ''.join(vuln_parameter)
 
-    # If JSON format
-    elif re.findall(r"" + settings.PARAMETER_DELIMITER + "\"(.*)\"\:\"" + settings.INJECT_TAG + "\"", parameter):
-      vuln_parameter = re.findall(r"" + settings.PARAMETER_DELIMITER + "\"(.*)\"\:\"" + settings.INJECT_TAG + "\"", parameter)
-      vuln_parameter = ''.join(vuln_parameter)
+  # If JSON format
+  elif re.findall(r"" + settings.PARAMETER_DELIMITER + "\"(.*)\"\:\"" + settings.INJECT_TAG + "\"", parameter):
+    vuln_parameter = re.findall(r"" + settings.PARAMETER_DELIMITER + "\"(.*)\"\:\"" + settings.INJECT_TAG + "\"", parameter)
+    vuln_parameter = ''.join(vuln_parameter)
 
-    elif re.findall(r"\"(.*)\"\:\"" + settings.INJECT_TAG + "\"", parameter):
-      vuln_parameter = re.findall(r"\"(.*)\"\:\"" + settings.INJECT_TAG + "\"", parameter)
-      vuln_parameter = ''.join(vuln_parameter)
+  elif re.findall(r"\"(.*)\"\:\"" + settings.INJECT_TAG + "\"", parameter):
+    vuln_parameter = re.findall(r"\"(.*)\"\:\"" + settings.INJECT_TAG + "\"", parameter)
+    vuln_parameter = ''.join(vuln_parameter)
 
-    else:
-      vuln_parameter = parameter
+  else:
+    vuln_parameter = parameter
 
-    return vuln_parameter
+  return vuln_parameter
  
 """
 Define the injection prefixes.
@@ -291,6 +292,55 @@ def suffixes(payload, suffix):
 
 """
 The cookie based injection.
+"""
+def do_cookie_check(cookie):
+  multi_parameters = cookie.split(settings.COOKIE_DELIMITER)
+  # Check if single paramerter is supplied.
+  if len(multi_parameters) == 1:
+    # Check if defined the INJECT_TAG
+    if settings.INJECT_TAG not in cookie:
+      #Grab the value of parameter.
+      value = re.findall(r'=(.*)', cookie)
+      value = ''.join(value)
+      # Replace the value of parameter with INJECT tag
+      inject_value = value.replace(value, settings.INJECT_TAG)
+      cookie = cookie.replace(value, inject_value)
+    return cookie
+
+  # Check if multiple paramerters are supplied.
+  else:
+    cookies_list = []
+    all_params = settings.COOKIE_DELIMITER.join(multi_parameters)
+    all_params = all_params.split(settings.COOKIE_DELIMITER)
+    # Check if not defined the "INJECT_HERE" tag in parameter
+    if settings.INJECT_TAG not in cookie:
+      for param in range(0, len(all_params)):
+        if param == 0 :
+            old = re.findall(r'=(.*)', all_params[param])
+            old = ''.join(old)
+        else :
+          old = value
+        # Grab the value of cookie.
+        value = re.findall(r'=(.*)', all_params[param])
+        value = ''.join(value)
+        # Replace the value of cookie with INJECT tag
+        inject_value = value.replace(value, settings.INJECT_TAG)
+        all_params[param] = all_params[param].replace(value, inject_value)
+        all_params[param-1] = all_params[param-1].replace(inject_value, old)
+        cookie = settings.COOKIE_DELIMITER.join(all_params)
+        cookies_list.append(cookie)
+        cookie = cookies_list
+
+    else:
+      for param in range(0, len(multi_parameters)):
+        # Grab the value of parameter.
+        value = re.findall(r'=(.*)', multi_parameters[param])
+        value = ''.join(value)
+      cookie = settings.COOKIE_DELIMITER.join(multi_parameters) 
+    return cookie
+
+"""
+Specify the cookie parameter(s).
 """
 def specify_cookie_parameter(cookie):
 
