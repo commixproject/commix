@@ -116,6 +116,12 @@ target.add_option("-l",
 request = OptionGroup(parser,  Style.BRIGHT + "Request" + Style.RESET_ALL, 
                       "These options can be used to specify how to connect to the target URL.")
 
+
+request.add_option("--data", 
+                action="store",
+                dest="data",
+                help="Data string to be sent through POST.")
+
 request.add_option("--host",
                 action="store",
                 dest="host",
@@ -321,10 +327,10 @@ modules.add_option("--shellshock",
 injection = OptionGroup(parser, Style.BRIGHT + "Injection" + Style.RESET_ALL, 
                         "These options can be used to specify which parameters to inject and to provide custom injection payloads.")
 
-injection.add_option("--data", 
+injection.add_option("-p", 
                 action="store",
-                dest="data",
-                help="POST data to inject (use '" + settings.INJECT_TAG + "' tag to specify the testable parameter).")
+                dest="testparameter",
+                help="Testable parameter(s).")
 
 injection.add_option("--suffix", 
                 action="store",

@@ -36,6 +36,9 @@ APPLICATION_TWITTER = "@commixproject"
 # Inject Tag
 INJECT_TAG = "INJECT_HERE"
 
+# Testable parameter(s) comma separated. 
+TEST_PARAMETER = ""
+
 # Default target host OS (Unix-like)
 TARGET_OS = "unix"
 

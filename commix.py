@@ -107,6 +107,10 @@ def main():
       settings.SYS_USERS  = "echo $(" + settings.SYS_USERS + ")"
       settings.SYS_PASSES  = "echo $(" + settings.SYS_PASSES + ")"
 
+    # Check provided parameters for tests
+    if menu.options.testparameter:
+      settings.TEST_PARAMETER = menu.options.testparameter.split(",")
+
     # Check if defined character used for splitting parameter values.
     if menu.options.pdel:
      settings.PARAMETER_DELIMITER = menu.options.pdel

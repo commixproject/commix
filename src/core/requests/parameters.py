@@ -215,7 +215,7 @@ def do_POST_check(parameter):
           value = ''.join(value)
         else:  
           value = re.findall(r'=(.*)', all_params[param])
-          value = ''.join(value)
+          value = ''.join(value) 
         # Replace the value of parameter with INJECT tag
         inject_value = value.replace(value, settings.INJECT_TAG)
         all_params[param] = all_params[param].replace(value, inject_value)
@@ -232,7 +232,7 @@ def do_POST_check(parameter):
         else:  
           value = re.findall(r'=(.*)', multi_parameters[param])
           value = ''.join(value)
-        parameter = settings.PARAMETER_DELIMITER.join(multi_parameters) 
+        parameter = settings.PARAMETER_DELIMITER.join(multi_parameters)
     return parameter
 
 """
