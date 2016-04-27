@@ -1,24 +1,13 @@
-                                           __
-       ___    ___     ___ ___     ___ ___ /\_\   __  _
-      /'___\ / __`\ /' __` __`\ /' __` __`\/\ \ /\ \/'\  v0.8b-xxx-xxxxxxx
-     /\ \__//\ \L\ \/\ \/\ \/\ \/\ \/\ \/\ \ \ \\/>  </
-     \ \____\ \____/\ \_\ \_\ \_\ \_\ \_\ \_\ \_\/\_/\_\
-      \/____/\/___/  \/_/\/_/\/_/\/_/\/_/\/_/\/_/\//\/_/ (@commixproject) 
-    
-    +--
-    Automated All-in-One OS Command Injection and Exploitation Tool
-    Copyright (c) 2014-2016 Anastasios Stasinopoulos (@ancst)
-    +--
-
-![Python 2.6|2.7](https://img.shields.io/badge/python-2.6|2.7-yellow.svg)
-[![GPLv3 License](https://img.shields.io/badge/License-GPLv3-red.svg)](https://github.com/stasinopoulos/commix/blob/master/readme/COPYING)
-[![Twitter](https://img.shields.io/badge/Twitter-commixproject-blue.svg)](http://www.twitter.com/commixproject)
-
 ![Logo](http://i.imgur.com/xcNYrfv.png)
+
+![Version 0.8b](https://img.shields.io/badge/Version-0.8b-green.svg)
+![Python 2.6-2.7](https://img.shields.io/badge/Python-2.6--2.7-yellow.svg)
+[![GPLv3 License](https://img.shields.io/badge/License-GPLv3-red.svg)](https://github.com/stasinopoulos/commix/blob/master/readme/COPYING)
+[![Twitter](https://img.shields.io/badge/Twitter-@commixproject-blue.svg)](http://www.twitter.com/commixproject)
 
 #### General Information
 
-**Commix** (short for [**comm**]and [**i**]njection e[**x**]ploiter) is an automated tool that can be used from web developers, penetration testers or even security researchers in order to test web-based applications with the view to find bugs, errors or vulnerabilities related to **[command injection](https://www.owasp.org/index.php/Command_Injection)** attacks. By using this tool, it is very easy to find and exploit a command injection vulnerability in a certain vulnerable parameter or HTTP header.
+**Commix** (short for [**comm**]and [**i**]njection e[**x**]ploiter) is an automated tool writen by Anastasios Stasinopoulos ([@ancst](https://twitter.com/ancst)) that can be used from web developers, penetration testers or even security researchers in order to test web-based applications with the view to find bugs, errors or vulnerabilities related to **[command injection](https://www.owasp.org/index.php/Command_Injection)** attacks. By using this tool, it is very easy to find and exploit a command injection vulnerability in a certain vulnerable parameter or HTTP header.
 
 #### Disclaimer
 
