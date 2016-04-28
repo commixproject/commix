@@ -394,6 +394,15 @@ injection.add_option("--base64",
                 default = False,
                 help="Encode the operating system command to Base64 format.")
 
+# Detection options
+detection = OptionGroup(parser, Style.BRIGHT + "Detection" + Style.RESET_ALL, "These options can be "
+                        "used to customize the detection phase.")
+
+detection.add_option("--level", 
+                    dest="level", 
+                    type="int",
+                    help="Level of tests to perform (1-3, Default: " + str(settings.LEVEL) + " chars).")
+
 # Miscellaneous options
 misc = OptionGroup(parser, Style.BRIGHT + "Miscellaneous" + Style.RESET_ALL)
 
@@ -416,6 +425,7 @@ parser.add_option_group(enumeration)
 parser.add_option_group(file_access)
 parser.add_option_group(modules)
 parser.add_option_group(injection)
+parser.add_option_group(detection)
 parser.add_option_group(misc)
 
 """

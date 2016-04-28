@@ -44,12 +44,17 @@ def do_GET_check(url):
   # Check for REST-ful URLs format. 
   if "?" not in url:
     if settings.INJECT_TAG not in url and not menu.options.shellshock:
-      print Back.RED + settings.ERROR_SIGN + "You must set the \"INJECT_HERE\" tag to specify the testable parameter." + Style.RESET_ALL + "\n"
-      os._exit(0)   
+      if menu.options.level == 3 or menu.options.headers:
+        return False
+      else:  
+        error_msg = "No parameter(s) found for testing in the provided data. " + \
+                    "You must specify the testable parameter or " + \
+                    "try to increase '--level' values to perform more tests. " 
+        print Back.RED + settings.ERROR_SIGN + error_msg + Style.RESET_ALL + "\n"
+        os._exit(0)   
     return url
 
   urls_list = []
-
   # Find the host part
   url_part = get_url_part(url)
   # Find the parameter part
@@ -65,7 +70,21 @@ def do_GET_check(url):
       value = ''.join(value)
       # Replace the value of parameter with INJECT tag
       inject_value = value.replace(value, settings.INJECT_TAG)
-      parameters = parameters.replace(value, inject_value)
+      parameters = parameters.replace(value, inject_value) 
+    else:
+
+      # Grab the value of parameter.
+      value = re.findall(r'=(.*)', parameters)
+      value = ''.join(value)
+      # Auto-recognize prefix / suffix
+      if settings.INJECT_TAG in value:
+        if len(value.rsplit(settings.INJECT_TAG, 0)[0]) > 0:
+          menu.options.prefix = value.rsplit(settings.INJECT_TAG, 1)[0]
+        if len(value.rsplit(settings.INJECT_TAG, 1)[1]) > 0:
+          menu.options.suffix = value.rsplit(settings.INJECT_TAG, 1)[1]
+      # Replace the value of parameter with INJECT tag
+      inject_value = value.replace(value, settings.INJECT_TAG)
+      parameters = parameters.replace(value, inject_value) 
     # Reconstruct the url
     url = url_part + "?" + parameters
     urls_list.append(url)

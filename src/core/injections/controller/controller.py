@@ -116,6 +116,38 @@ def injection_proccess(url, check_parameter, http_request_method, filename, dela
     print Fore.YELLOW + info_msg + Style.RESET_ALL  
 
 """
+Inject HTTP headers.
+"""
+def inject_http_headers(url, http_request_method, filename, delay):
+
+  # if check_for_stored_sessions(url, http_request_method):
+  #   injection_proccess(url, check_parameter, http_request_method, filename, delay)
+  # else:  
+
+  # User-Agent Injection
+  if settings.USER_AGENT_INJECTION == True:
+    check_parameter = header_name = " User-Agent"
+    settings.HTTP_HEADER = header_name[1:].replace("-","").lower()
+    if len(settings.TEST_PARAMETER) > 0:
+      if check_parameter.replace(" ","").lower() in settings.TEST_PARAMETER:
+        injection_proccess(url, check_parameter, http_request_method, filename, delay)
+    else:
+      injection_proccess(url, check_parameter, http_request_method, filename, delay)
+  settings.USER_AGENT_INJECTION = False 
+
+  # Referer Injection
+  if settings.REFERER_INJECTION == True:
+    #settings.REFERER_INJECTION = False
+    check_parameter =  header_name = " Referer"
+    settings.HTTP_HEADER = header_name[1:].lower()
+    if len(settings.TEST_PARAMETER) > 0:
+      if check_parameter.replace(" ","").lower() in settings.TEST_PARAMETER:
+        injection_proccess(url, check_parameter, http_request_method, filename, delay)
+    else:    
+      injection_proccess(url, check_parameter, http_request_method, filename, delay)
+  settings.REFERER_INJECTION = False
+
+"""
 General check on every injection technique.
 """
 def do_check(url, filename):
@@ -143,11 +175,8 @@ def do_check(url, filename):
   # Check if HTTP Method is GET.
   if not menu.options.data:
     http_request_method = "GET"
-    if not settings.COOKIE_INJECTION \
-    and not settings.USER_AGENT_INJECTION \
-    and not settings.REFERER_INJECTION \
-    and not settings.CUSTOM_HEADER_INJECTION:
-      found_url = parameters.do_GET_check(url)
+    found_url = parameters.do_GET_check(url)
+    if found_url != False:
       for i in range(0, len(found_url)):
         url = found_url[i]
         check_parameter = parameters.vuln_GET_param(url)
@@ -172,10 +201,11 @@ def do_check(url, filename):
           else:
             injection_proccess(url, check_parameter, http_request_method, filename, delay)
 
+  # Check if HTTP Method is POST.      
   else:
+    http_request_method = "POST"
     # Check if HTTP Method is POST.
     parameter = menu.options.data
-    http_request_method = "POST"
     found_parameter = parameters.do_POST_check(parameter)
     # Remove whitespaces 
     # Check if singe entry parameter
@@ -212,7 +242,12 @@ def do_check(url, filename):
           if check_parameter in settings.TEST_PARAMETER:
             injection_proccess(url, check_parameter, http_request_method, filename, delay)
         else:
-          injection_proccess(url, check_parameter, http_request_method, filename, delay)
+          injection_proccess(url, check_parameter, http_request_method, filename, delay)  
+
+  # Cookie Injection
+  if menu.options.level > 1 :
+    if menu.options.cookie :
+      settings.COOKIE_INJECTION = True
 
   # Cookie Injection
   if settings.COOKIE_INJECTION == True:
@@ -253,19 +288,17 @@ def do_check(url, filename):
         else:
           injection_proccess(url, check_parameter, http_request_method, filename, delay)
 
+  if menu.options.level == 3 :
   # User-Agent Injection
-  if settings.USER_AGENT_INJECTION == True:
-    check_parameter =  header_name = " User-Agent"
-    settings.HTTP_HEADER = header_name[1:].replace("-","").lower()
-    check_for_stored_sessions(url, http_request_method)
-    injection_proccess(url, check_parameter, http_request_method, filename, delay)
+    menu.options.agent = menu.options.referer = settings.INJECT_TAG
+  if menu.options.agent and settings.INJECT_TAG in menu.options.agent:
+    settings.USER_AGENT_INJECTION = True
+    inject_http_headers(url, http_request_method, filename, delay)
 
   # Referer Injection
-  if settings.REFERER_INJECTION == True:
-    check_parameter =  header_name = " Referer"
-    settings.HTTP_HEADER = header_name[1:].lower()
-    check_for_stored_sessions(url, http_request_method)
-    injection_proccess(url, check_parameter, http_request_method, filename, delay)
+  if menu.options.referer and settings.INJECT_TAG in menu.options.referer:
+    settings.REFERER_INJECTION = True
+    inject_http_headers(url, http_request_method, filename, delay)
 
   # Custom header Injection
   if settings.CUSTOM_HEADER_INJECTION == True:
@@ -281,7 +314,7 @@ def do_check(url, filename):
       info_msg += " Use the option '--alter-shell'"
     else:
       info_msg += " Remove the option '--alter-shell'"
-    info_msg += " and/or try to audit the HTTP headers (i.e 'User-Agent', 'Referer', 'Cookie' etc)."
+    info_msg += " and/or try to increase '--level' values to perform more tests (i.e 'User-Agent', 'Referer', 'Cookie' etc)."
     print Back.RED + info_msg + Style.RESET_ALL  
   sys.exit(0)
 

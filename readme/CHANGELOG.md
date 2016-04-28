@@ -1,4 +1,5 @@
 ## Version 0.8b
+* Added: New option "--level" (1-3) that specifies level of tests to perform.
 * Added: New option "-p" that specifies a comma-separated list of GET/POST parameter.
 * Added: The ability to check every parameter in the provided cookie data.
 * Added: The ability to check every GET parameter in the defined URL and/or every POST provided data.

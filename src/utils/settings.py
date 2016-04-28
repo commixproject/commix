@@ -114,6 +114,9 @@ WHITESPACES = ["%20", "$IFS"]
 # Time delay
 DELAY = 1
 
+#Level (Default: 1)
+LEVEL = 1
+
 # Default Temp Directory
 TMP_PATH = ""
 

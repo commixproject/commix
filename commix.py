@@ -97,6 +97,11 @@ def main():
       print ""
       sys.exit(0)
     
+    if menu.options.level > 3:
+      error_msg = "The value for option '--level' must be an integer value from range [1, 3]."
+      print Back.RED + settings.ERROR_SIGN + error_msg + Style.RESET_ALL
+      sys.exit(0)
+
     # Parse target / data from HTTP proxy logs (i.e Burp / WebScarab).
     if menu.options.logfile:
       parser.logfile_parser()
@@ -145,18 +150,17 @@ def main():
         print Back.RED + settings.ERROR_SIGN + error_msg + Style.RESET_ALL
         sys.exit(0)
 
-    # Cookie Injection
-    #if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
-    if menu.options.cookie :
-      settings.COOKIE_INJECTION = True
+    # #Cookie Injection
+    # if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
+    #   settings.COOKIE_INJECTION = True
 
-    # User-Agent Injection
-    if menu.options.agent and settings.INJECT_TAG in menu.options.agent:
-      settings.USER_AGENT_INJECTION = True
+    # # User-Agent Injection
+    # if menu.options.agent and settings.INJECT_TAG in menu.options.agent:
+    #   settings.USER_AGENT_INJECTION = True
 
-    # Referer Injection
-    if menu.options.referer and settings.INJECT_TAG in menu.options.referer:
-      settings.REFERER_INJECTION = True
+    # # Referer Injection
+    # if menu.options.referer and settings.INJECT_TAG in menu.options.referer:
+    #   settings.REFERER_INJECTION = True
 
     # Check if specified wrong alternative shell
     if menu.options.alter_shell:
