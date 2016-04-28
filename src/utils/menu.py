@@ -401,7 +401,7 @@ detection = OptionGroup(parser, Style.BRIGHT + "Detection" + Style.RESET_ALL, "T
 detection.add_option("--level", 
                     dest="level", 
                     type="int",
-                    help="Level of tests to perform (1-3, Default: " + str(settings.LEVEL) + " chars).")
+                    help="Level of tests to perform (1-3, Default: " + str(settings.LEVEL) + ").")
 
 # Miscellaneous options
 misc = OptionGroup(parser, Style.BRIGHT + "Miscellaneous" + Style.RESET_ALL)
