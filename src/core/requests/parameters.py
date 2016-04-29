@@ -21,6 +21,7 @@ import json
 
 from src.utils import menu
 from src.utils import settings
+from src.core.injections.controller import checks
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 """
@@ -41,11 +42,15 @@ Check if the 'INJECT_HERE' tag, is specified on GET Requests.
 """
 def do_GET_check(url):
 
+  # Do replacement with the 'INJECT_HERE' tag, if the wildcard char is provided.
+  url = checks.wildcard_character(url)
+
   # Check for REST-ful URLs format. 
   if "?" not in url:
     if settings.INJECT_TAG not in url and not menu.options.shellshock:
       if menu.options.level == 3 or menu.options.headers:
         return False
+
       else:  
         error_msg = "No parameter(s) found for testing in the provided data. " + \
                     "You must specify the testable parameter or " + \
@@ -165,6 +170,9 @@ def vuln_GET_param(url):
 Check if the 'INJECT_HERE' tag, is specified on POST Requests.
 """
 def do_POST_check(parameter):
+
+    # Do replacement with the 'INJECT_HERE' tag, if the wildcard char is provided.
+  parameter = checks.wildcard_character(parameter)
 
   # Check if valid JSON
   def is_JSON_check(parameter):
@@ -313,6 +321,7 @@ def suffixes(payload, suffix):
 The cookie based injection.
 """
 def do_cookie_check(cookie):
+
   multi_parameters = cookie.split(settings.COOKIE_DELIMITER)
   # Check if single paramerter is supplied.
   if len(multi_parameters) == 1:
@@ -363,6 +372,9 @@ Specify the cookie parameter(s).
 """
 def specify_cookie_parameter(cookie):
 
+  # Do replacement with the 'INJECT_HERE' tag, if the wildcard char is provided.
+  cookie = checks.wildcard_character(cookie)
+  
   # Specify the vulnerable cookie parameter
   if re.findall(r"" + settings.COOKIE_DELIMITER + "(.*)=" + settings.INJECT_TAG + "", cookie):
     inject_cookie = re.findall(r"" + settings.COOKIE_DELIMITER + "(.*)=" + settings.INJECT_TAG + "", cookie)

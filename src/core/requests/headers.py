@@ -18,8 +18,10 @@ import re
 import sys
 import base64
 import urllib2
+
 from src.utils import menu
 from src.utils import settings
+from src.core.injections.controller import checks
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 """
@@ -92,6 +94,8 @@ def do_check(request):
 
   # Check if defined any extra HTTP headers.
   if menu.options.headers:
+    # Do replacement with the 'INJECT_HERE' tag, if the wildcard char is provided.
+    menu.options.headers = checks.wildcard_character(menu.options.headers)
     extra_headers = menu.options.headers
     extra_headers = extra_headers.split(":")
     extra_headers = ':'.join(extra_headers)

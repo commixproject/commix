@@ -22,6 +22,7 @@ import urlparse
 
 from src.utils import menu
 from src.utils import settings
+
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 """
@@ -341,5 +342,21 @@ def enable_all_enumeration_options():
   menu.options.privileges = True
   # Retrieve system users password hashes.
   menu.options.passwords = True
+
+"""
+Do replacement with the 'INJECT_HERE' tag, 
+if the wildcard char is provided.
+"""
+def wildcard_character(data):
+  if settings.WILDCARD_CHAR in data:
+    if data.count(settings.WILDCARD_CHAR) > 1:
+      error_msg = "You specified more than one testable parameters. " 
+      error_msg += "Use the '-p' option to define them (i.e -p \"id1,id2\"). "
+      print Back.RED + settings.ERROR_SIGN + error_msg + Style.RESET_ALL 
+      sys.exit(0)
+    else:  
+      data = data.replace(settings.WILDCARD_CHAR, settings.INJECT_TAG)
+  return data
+  
 
 #eof

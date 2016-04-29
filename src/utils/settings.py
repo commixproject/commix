@@ -36,6 +36,9 @@ APPLICATION_TWITTER = "@commixproject"
 # Inject Tag
 INJECT_TAG = "INJECT_HERE"
 
+# The wildcard character
+WILDCARD_CHAR = "*"
+
 # Testable parameter(s) comma separated. 
 TEST_PARAMETER = ""
 
@@ -390,5 +393,8 @@ REQUIRED_AUTHENTICATION = False
 
 # Supported HTTP Authentication types
 SUPPORTED_HTTP_AUTH_TYPES = [ "basic", "digest" ]
+
+# HTTP Headers
+HTTP_HEADERS = [ "useragent", "referer" ]
 
 #eof
