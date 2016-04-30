@@ -125,6 +125,7 @@ TMP_PATH = ""
 
 # Default Server's Root Directory
 SRV_ROOT_DIR = ""
+DEFAULT_SRV_ROOT_DIR = ""
 CUSTOM_SRV_ROOT_DIR = False
 
 # The max help option length.

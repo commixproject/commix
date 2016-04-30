@@ -113,8 +113,8 @@ def main():
       settings.SYS_PASSES  = "echo $(" + settings.SYS_PASSES + ")"
 
     # Check provided parameters for tests
-    if menu.options.testparameter:
-      settings.TEST_PARAMETER = menu.options.testparameter.split(",")
+    if menu.options.test_parameter:
+      settings.TEST_PARAMETER = menu.options.test_parameter.split(",")
 
     # Check if defined character used for splitting parameter values.
     if menu.options.pdel:
@@ -149,18 +149,6 @@ def main():
                     "(T)ime-based, (F)ile-based (with or without commas)."
         print Back.RED + settings.ERROR_SIGN + error_msg + Style.RESET_ALL
         sys.exit(0)
-
-    # #Cookie Injection
-    # if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
-    #   settings.COOKIE_INJECTION = True
-
-    # # User-Agent Injection
-    # if menu.options.agent and settings.INJECT_TAG in menu.options.agent:
-    #   settings.USER_AGENT_INJECTION = True
-
-    # # Referer Injection
-    # if menu.options.referer and settings.INJECT_TAG in menu.options.referer:
-    #   settings.REFERER_INJECTION = True
 
     # Check if specified wrong alternative shell
     if menu.options.alter_shell:
@@ -307,6 +295,9 @@ def main():
                 if settings.SERVER_BANNERS[i].lower() == "microsoft-iis":
                   settings.SRV_ROOT_DIR = "\\inetpub\\wwwroot"
                 break
+
+            # Store the Server's root dir
+            settings.DEFAULT_SRV_ROOT_DIR = settings.SRV_ROOT_DIR
 
             if menu.options.is_admin or menu.options.is_root and not menu.options.current_user:
               menu.options.current_user = True

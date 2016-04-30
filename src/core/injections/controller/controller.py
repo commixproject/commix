@@ -65,13 +65,11 @@ def injection_proccess(url, check_parameter, http_request_method, filename, dela
     the_type = " HTTP header "
   else:
     if settings.COOKIE_INJECTION: 
-      header_name = " Cookie"
-      the_type = " HTTP header "
-      check_parameter = " '" + check_parameter + "'"
+      header_name = " cookie"
     else:
       header_name = ""
-      the_type = " parameter "
-      check_parameter = " '" + check_parameter + "'"
+    the_type = " parameter "
+    check_parameter = " '" + check_parameter + "'"
 
   # Load modules
   modules_handler.load_modules(url, http_request_method, filename)
@@ -242,6 +240,7 @@ def do_check(url, filename):
     # Check if HTTP Method is POST.
     parameter = menu.options.data
     found_parameter = parameters.do_POST_check(parameter)
+
     # Remove whitespaces 
     # Check if singe entry parameter
     if type(found_parameter) is str:
@@ -291,7 +290,7 @@ def do_check(url, filename):
       check_parameter = ""
       stored_http_header_injection(url, check_parameter, check_http_headers, http_request_method, filename, delay)
 
-    header_name = " Cookie"
+    header_name = " cookie"
     settings.HTTP_HEADER = header_name[1:].lower()
     cookie_parameters = parameters.do_cookie_check(menu.options.cookie)
     if type(cookie_parameters) is str:

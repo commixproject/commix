@@ -50,7 +50,6 @@ def do_GET_check(url):
     if settings.INJECT_TAG not in url and not menu.options.shellshock:
       if menu.options.level == 3 or menu.options.headers:
         return False
-
       else:  
         error_msg = "No parameter(s) found for testing in the provided data. " + \
                     "You must specify the testable parameter or " + \
@@ -77,7 +76,6 @@ def do_GET_check(url):
       inject_value = value.replace(value, settings.INJECT_TAG)
       parameters = parameters.replace(value, inject_value) 
     else:
-
       # Grab the value of parameter.
       value = re.findall(r'=(.*)', parameters)
       value = ''.join(value)
@@ -110,14 +108,21 @@ def do_GET_check(url):
         # Grab the value of parameter.
         value = re.findall(r'=(.*)', all_params[param])
         value = ''.join(value)
-        # Replace the value of parameter with INJECT tag
-        inject_value = value.replace(value, settings.INJECT_TAG)
-        all_params[param] = all_params[param].replace(value, inject_value)
-        all_params[param-1] = all_params[param-1].replace(inject_value, old)
-        parameter = settings.PARAMETER_DELIMITER.join(all_params)
-        # Reconstruct the url
-        url = url_part + "?" + parameter  
-        urls_list.append(url)
+        if not value == "":
+          # Replace the value of parameter with INJECT tag
+          inject_value = value.replace(value, settings.INJECT_TAG)
+          all_params[param] = all_params[param].replace(value, inject_value)
+          all_params[param-1] = all_params[param-1].replace(inject_value, old)
+          parameter = settings.PARAMETER_DELIMITER.join(all_params)
+          # Reconstruct the url
+          url = url_part + "?" + parameter  
+          urls_list.append(url)
+        else:
+          provided_value = re.findall(r'(.*)=', all_params[param])
+          provided_value = ''.join(provided_value)
+          info_msg = settings.WARNING_SIGN + "The '" + provided_value 
+          info_msg += "' parameter has been skipped from testing because the provided value is empty."
+          print Fore.YELLOW + info_msg + Style.RESET_ALL
     else:
       for param in range(0,len(multi_parameters)):
         # Grab the value of parameter.
@@ -220,7 +225,6 @@ def do_POST_check(parameter):
 
   # Check if multiple paramerters are supplied.
   else:
-    #paramerters_list = []
     all_params = settings.PARAMETER_DELIMITER.join(multi_parameters)
     all_params = all_params.split(settings.PARAMETER_DELIMITER)
     # Check if not defined the "INJECT_HERE" tag in parameter
@@ -242,14 +246,27 @@ def do_POST_check(parameter):
           value = ''.join(value)
         else:  
           value = re.findall(r'=(.*)', all_params[param])
-          value = ''.join(value) 
-        # Replace the value of parameter with INJECT tag
-        inject_value = value.replace(value, settings.INJECT_TAG)
-        all_params[param] = all_params[param].replace(value, inject_value)
-        all_params[param-1] = all_params[param-1].replace(inject_value, old)
-        parameter = settings.PARAMETER_DELIMITER.join(all_params)
-        paramerters_list.append(parameter)
-        parameter = paramerters_list
+          value = ''.join(value)
+        if not value == "":
+          # Replace the value of parameter with INJECT tag
+          inject_value = value.replace(value, settings.INJECT_TAG)
+          all_params[param] = all_params[param].replace(value, inject_value)
+          all_params[param-1] = all_params[param-1].replace(inject_value, old)
+          parameter = settings.PARAMETER_DELIMITER.join(all_params)
+          paramerters_list.append(parameter)
+          parameter = paramerters_list
+        else:
+          if settings.IS_JSON:
+            #Grab the value of parameter.
+            provided_value = re.findall(r'\"(.*)\"\:', all_params[param])
+            provided_value = ''.join(provided_value)
+          else:  
+            provided_value = re.findall(r'(.*)=', all_params[param])
+            provided_value = ''.join(provided_value)
+          info_msg = settings.WARNING_SIGN + "The '" + provided_value 
+          info_msg += "' parameter has been skipped from testing because the provided value is empty."
+          print Fore.YELLOW + info_msg + Style.RESET_ALL  
+
     else:
       for param in range(0, len(multi_parameters)):
         # Grab the value of parameter.
@@ -351,13 +368,21 @@ def do_cookie_check(cookie):
         # Grab the value of cookie.
         value = re.findall(r'=(.*)', all_params[param])
         value = ''.join(value)
-        # Replace the value of cookie with INJECT tag
-        inject_value = value.replace(value, settings.INJECT_TAG)
-        all_params[param] = all_params[param].replace(value, inject_value)
-        all_params[param-1] = all_params[param-1].replace(inject_value, old)
-        cookie = settings.COOKIE_DELIMITER.join(all_params)
-        cookies_list.append(cookie)
-        cookie = cookies_list
+        if not value == "":        
+          # Replace the value of cookie with INJECT tag
+          inject_value = value.replace(value, settings.INJECT_TAG)
+          all_params[param] = all_params[param].replace(value, inject_value)
+          all_params[param-1] = all_params[param-1].replace(inject_value, old)
+          cookie = settings.COOKIE_DELIMITER.join(all_params)
+          cookies_list.append(cookie)
+          cookie = cookies_list
+        else:
+          provided_value = re.findall(r'(.*)=', all_params[param])
+          provided_value = ''.join(provided_value)
+          info_msg = settings.WARNING_SIGN + "The '" + provided_value 
+          info_msg += "' parameter has been skipped from testing because the provided value is empty."
+          print Fore.YELLOW + info_msg + Style.RESET_ALL  
+
 
     else:
       for param in range(0, len(multi_parameters)):

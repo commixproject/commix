@@ -329,7 +329,7 @@ injection = OptionGroup(parser, Style.BRIGHT + "Injection" + Style.RESET_ALL,
 
 injection.add_option("-p", 
                 action="store",
-                dest="testparameter",
+                dest="test_parameter",
                 help="Testable parameter(s).")
 
 injection.add_option("--suffix", 

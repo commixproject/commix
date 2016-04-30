@@ -296,9 +296,9 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
               is_vulnerable = False
 
             if settings.COOKIE_INJECTION == True: 
-              header_name = " Cookie"
+              header_name = " cookie"
               found_vuln_parameter = vuln_parameter
-              the_type = " HTTP header"
+              the_type = " parameter"
 
             elif settings.USER_AGENT_INJECTION == True: 
               header_name = " User-Agent"

@@ -130,8 +130,8 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
   else:
     tmp_path = settings.TMP_PATH
 
-  if settings.SRV_ROOT_DIR != "":
-    settings.SRV_ROOT_DIR = ""
+  if settings.DEFAULT_SRV_ROOT_DIR != settings.SRV_ROOT_DIR:
+    settings.SRV_ROOT_DIR = settings.DEFAULT_SRV_ROOT_DIR
 
   if menu.options.file_dest and '/tmp/' in menu.options.file_dest:
     call_tmp_based = True
@@ -404,9 +404,9 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
             next_attack_vector = True
 
           if settings.COOKIE_INJECTION == True: 
-            header_name = " Cookie"
+            header_name = " cookie"
             found_vuln_parameter = vuln_parameter
-            the_type = " HTTP header"
+            the_type = " parameter"
 
           elif settings.USER_AGENT_INJECTION == True: 
             header_name = " User-Agent"
