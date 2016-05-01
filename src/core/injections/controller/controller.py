@@ -201,32 +201,36 @@ def do_check(url, filename):
     if menu.options.cookie:
       settings.COOKIE_INJECTION = True
 
-    if not settings.COOKIE_INJECTION:
-      found_url = parameters.do_GET_check(url)
-      if found_url != False:
-        for i in range(0, len(found_url)):
-          url = found_url[i]
-          check_parameter = parameters.vuln_GET_param(url)
-          # Check if testable parameter(s) are provided
-          if len(settings.TEST_PARAMETER) > 0:
-            if check_parameter in settings.TEST_PARAMETER:
-              # Check for session file 
-              if check_for_stored_sessions(url, http_request_method):
-                injection_proccess(url, check_parameter, http_request_method, filename, delay)
-          else:
-            if check_for_stored_sessions(url, http_request_method):
-              injection_proccess(url, check_parameter, http_request_method, filename, delay)
-
-        if not settings.LOAD_SESSION :
+    if not menu.options.shellshock:
+      if not settings.COOKIE_INJECTION:
+        found_url = parameters.do_GET_check(url)
+        if found_url != False:
           for i in range(0, len(found_url)):
             url = found_url[i]
             check_parameter = parameters.vuln_GET_param(url)
             # Check if testable parameter(s) are provided
             if len(settings.TEST_PARAMETER) > 0:
               if check_parameter in settings.TEST_PARAMETER:
-                injection_proccess(url, check_parameter, http_request_method, filename, delay)
+                # Check for session file 
+                if check_for_stored_sessions(url, http_request_method):
+                  injection_proccess(url, check_parameter, http_request_method, filename, delay)
             else:
-              injection_proccess(url, check_parameter, http_request_method, filename, delay)
+              if check_for_stored_sessions(url, http_request_method):
+                injection_proccess(url, check_parameter, http_request_method, filename, delay)
+
+          if not settings.LOAD_SESSION :
+            for i in range(0, len(found_url)):
+              url = found_url[i]
+              check_parameter = parameters.vuln_GET_param(url)
+              # Check if testable parameter(s) are provided
+              if len(settings.TEST_PARAMETER) > 0:
+                if check_parameter in settings.TEST_PARAMETER:
+                  injection_proccess(url, check_parameter, http_request_method, filename, delay)
+              else:
+                injection_proccess(url, check_parameter, http_request_method, filename, delay)
+
+    else:
+      menu.options.level = 3
 
   # Check if HTTP Method is POST.      
   else:
