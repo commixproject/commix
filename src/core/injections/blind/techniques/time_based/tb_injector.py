@@ -648,7 +648,7 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_m
       cmd = previous_cmd
     output = []
     percent = "0.0"
-    sys.stdout.write("\r" + settings.INFO_SIGN + "Grabbing the output, please wait... [ " +str(percent)+ "% ]")
+    sys.stdout.write("\r" + settings.INFO_SIGN + "Presuming the execution output, please wait... [ " +str(percent)+ "% ]")
     sys.stdout.flush()
     for num_of_chars in range(1, int(num_of_chars)):
       if num_of_chars == 1:
@@ -706,7 +706,7 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_m
             output.append(chr(ascii_char))
             percent = ((num_of_chars*100)/output_length)
             float_percent = "{0:.1f}".format(round(((num_of_chars * 100)/(output_length * 1.0)),2))
-            sys.stdout.write("\r" + settings.INFO_SIGN + "Grabbing the output, please wait... [ " +str(float_percent)+ "% ]")
+            sys.stdout.write("\r" + settings.INFO_SIGN + "Presuming the execution output, please wait... [ " +str(float_percent)+ "% ]")
             sys.stdout.flush()
           else:
             output.append(chr(ascii_char))
@@ -723,7 +723,7 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_m
   else:
     check_start = 0
     if not menu.options.verbose:
-      sys.stdout.write("[" +Fore.RED+ " FAILED " + Style.RESET_ALL+ "]\n")
+      sys.stdout.write("[" +Fore.RED+ " FAILED " + Style.RESET_ALL+ "]")
       sys.stdout.flush()
     else:
       print ""

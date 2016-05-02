@@ -208,9 +208,11 @@ def system_users(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_reques
   if settings.TARGET_OS == "win":
     settings.SYS_USERS = settings.WIN_SYS_USERS
     settings.SYS_USERS = settings.SYS_USERS + "-replace('\s+',' '))"
+
     # URL encode "+ " if POST request and python alternative shell.
     if alter_shell and http_request_method == "POST":
       settings.SYS_USERS = settings.SYS_USERS.replace("+ ","%2B")
+
   cmd = settings.SYS_USERS
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
     # The main command injection exploitation.
@@ -221,6 +223,7 @@ def system_users(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_reques
     output = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
     new_line = ""
   sys_users = output
+  
   # Windows users enumeration.
   if settings.TARGET_OS == "win":
     if menu.options.verbose:

@@ -55,7 +55,7 @@ def do_GET_check(url):
                     "You must specify the testable parameter or " + \
                     "try to increase '--level' values to perform more tests. " 
         print Back.RED + settings.ERROR_SIGN + error_msg + Style.RESET_ALL + "\n"
-        os._exit(0)   
+        os._exit(0) 
     return url
 
   urls_list = []

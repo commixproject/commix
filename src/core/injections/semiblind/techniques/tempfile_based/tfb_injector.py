@@ -715,7 +715,7 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_m
   else:
     check_start = 0
     if not menu.options.verbose:
-      sys.stdout.write("[" +Fore.RED+ " FAILED " + Style.RESET_ALL+ "]\n")
+      sys.stdout.write("[" +Fore.RED+ " FAILED " + Style.RESET_ALL+ "]")
       sys.stdout.flush() 
     else:
       print "" 
