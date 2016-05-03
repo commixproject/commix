@@ -216,8 +216,11 @@ def system_users(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_reques
   cmd = settings.SYS_USERS
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
     # The main command injection exploitation.
-    check_how_long, output = tfb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
-    session_handler.store_cmd(url, cmd, output, vuln_parameter)
+    try:
+      check_how_long, output = tfb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
+      session_handler.store_cmd(url, cmd, output, vuln_parameter)
+    except TypeError:
+      output = ""
     new_line = "\n"
   else:
     output = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
@@ -277,96 +280,117 @@ def system_users(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_reques
         sys.stdout.flush()
         print "\n" + Fore.YELLOW + settings.WARNING_SIGN + "It seems that you don't have permissions to enumerate users entries." + Style.RESET_ALL
     except TypeError:
-      sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]\n")
+      sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
+      sys.stdout.write("\n" + Fore.YELLOW + settings.WARNING_SIGN + "It seems that you don't have permissions to enumerate users entries." + Style.RESET_ALL)
       sys.stdout.flush()
       pass
+
+    except IndexError:
+      sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
+      sys.stdout.write("\n" + Fore.YELLOW + settings.WARNING_SIGN + "It seems that you don't have permissions to enumerate users entries." + Style.RESET_ALL)
+      sys.stdout.flush()
+      pass
+
   # Unix-like users enumeration.
   else:
     sys.stdout.write(new_line + settings.INFO_SIGN + "Fetching '" + settings.PASSWD_FILE + "' to enumerate users entries... ")
     sys.stdout.flush()
-    if sys_users[0] :
-      sys_users = "".join(str(p) for p in sys_users).strip()
-      if len(sys_users.split(" ")) <= 1 :
-        sys_users = sys_users.split("\n")
-      else:
-        sys_users = sys_users.split(" ")
-      # Check for appropriate '/etc/passwd' format.
-      if len(sys_users) % 3 != 0 :
-        sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
-        sys.stdout.flush()
-        print "\n" + Fore.YELLOW + settings.WARNING_SIGN + "It seems that '" + settings.PASSWD_FILE + "' file is not in the appropriate format. Thus, it is expoted as a text file." + Style.RESET_ALL
-        sys_users = " ".join(str(p) for p in sys_users).strip()
-        print sys_users
-        output_file = open(filename, "a")
-        output_file.write("      " + sys_users)
-        output_file.close()
-      else:
-        sys_users_list = []
-        for user in range(0, len(sys_users), 3):
-           sys_users_list.append(sys_users[user : user + 3])
-        if len(sys_users_list) != 0 :
-          sys.stdout.write("[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]")
-          sys.stdout.write(Style.BRIGHT + "\n(!) Identified " + str(len(sys_users_list)) + " entr" + ('ies', 'y')[len(sys_users_list) == 1] + " in '" +  settings.PASSWD_FILE + "'.\n" + Style.RESET_ALL)
+    try:
+      if sys_users[0] :
+        sys_users = "".join(str(p) for p in sys_users).strip()
+        if len(sys_users.split(" ")) <= 1 :
+          sys_users = sys_users.split("\n")
+        else:
+          sys_users = sys_users.split(" ")
+        # Check for appropriate '/etc/passwd' format.
+        if len(sys_users) % 3 != 0 :
+          sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
           sys.stdout.flush()
-          # Add infos to logs file.
+          print "\n" + Fore.YELLOW + settings.WARNING_SIGN + "It seems that '" + settings.PASSWD_FILE + "' file is not in the appropriate format. Thus, it is expoted as a text file." + Style.RESET_ALL
+          sys_users = " ".join(str(p) for p in sys_users).strip()
+          print sys_users
           output_file = open(filename, "a")
-          output_file.write("\n    (!) Identified " + str(len(sys_users_list)) + " entr" + ('ies', 'y')[len(sys_users_list) == 1] + " in '" +  settings.PASSWD_FILE + "'.\n")
+          output_file.write("      " + sys_users)
           output_file.close()
-          count = 0
-          for user in range(0, len(sys_users_list)):
-            sys_users = sys_users_list[user]
-            sys_users = ":".join(str(p) for p in sys_users)
-            if menu.options.verbose:
-              print ""
-            count = count + 1
-            fields = sys_users.split(":")
-            fields1 = "".join(str(p) for p in fields)
-            # System users privileges enumeration
-            try:
-              if not fields[2].startswith("/"):
-                raise ValueError()
-              if menu.options.privileges:
-                if int(fields[1]) == 0:
-                  is_privileged = Style.RESET_ALL + " is" +  Style.BRIGHT + " root user "
-                  is_privileged_nh = " is root user "
-                elif int(fields[1]) > 0 and int(fields[1]) < 99 :
-                  is_privileged = Style.RESET_ALL + " is" +  Style.BRIGHT + " system user "
-                  is_privileged_nh = " is system user "
-                elif int(fields[1]) >= 99 and int(fields[1]) < 65534 :
-                  if int(fields[1]) == 99 or int(fields[1]) == 60001 or int(fields[1]) == 65534:
-                    is_privileged = Style.RESET_ALL + " is" +  Style.BRIGHT + " anonymous user "
-                    is_privileged_nh = " is anonymous user "
-                  elif int(fields[1]) == 60002:
-                    is_privileged = Style.RESET_ALL + " is" +  Style.BRIGHT + " non-trusted user "
-                    is_privileged_nh = " is non-trusted user "
-                  else:
-                    is_privileged = Style.RESET_ALL + " is" +  Style.BRIGHT + " regular user "
-                    is_privileged_nh = " is regular user "
+        else:
+          sys_users_list = []
+          for user in range(0, len(sys_users), 3):
+             sys_users_list.append(sys_users[user : user + 3])
+          if len(sys_users_list) != 0 :
+            sys.stdout.write("[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]")
+            sys.stdout.write(Style.BRIGHT + "\n(!) Identified " + str(len(sys_users_list)) + " entr" + ('ies', 'y')[len(sys_users_list) == 1] + " in '" +  settings.PASSWD_FILE + "'.\n" + Style.RESET_ALL)
+            sys.stdout.flush()
+            # Add infos to logs file.
+            output_file = open(filename, "a")
+            output_file.write("\n    (!) Identified " + str(len(sys_users_list)) + " entr" + ('ies', 'y')[len(sys_users_list) == 1] + " in '" +  settings.PASSWD_FILE + "'.\n")
+            output_file.close()
+            count = 0
+            for user in range(0, len(sys_users_list)):
+              sys_users = sys_users_list[user]
+              sys_users = ":".join(str(p) for p in sys_users)
+              if menu.options.verbose:
+                print ""
+              count = count + 1
+              fields = sys_users.split(":")
+              fields1 = "".join(str(p) for p in fields)
+              # System users privileges enumeration
+              try:
+                if not fields[2].startswith("/"):
+                  raise ValueError()
+                if menu.options.privileges:
+                  if int(fields[1]) == 0:
+                    is_privileged = Style.RESET_ALL + " is" +  Style.BRIGHT + " root user "
+                    is_privileged_nh = " is root user "
+                  elif int(fields[1]) > 0 and int(fields[1]) < 99 :
+                    is_privileged = Style.RESET_ALL + " is" +  Style.BRIGHT + " system user "
+                    is_privileged_nh = " is system user "
+                  elif int(fields[1]) >= 99 and int(fields[1]) < 65534 :
+                    if int(fields[1]) == 99 or int(fields[1]) == 60001 or int(fields[1]) == 65534:
+                      is_privileged = Style.RESET_ALL + " is" +  Style.BRIGHT + " anonymous user "
+                      is_privileged_nh = " is anonymous user "
+                    elif int(fields[1]) == 60002:
+                      is_privileged = Style.RESET_ALL + " is" +  Style.BRIGHT + " non-trusted user "
+                      is_privileged_nh = " is non-trusted user "
+                    else:
+                      is_privileged = Style.RESET_ALL + " is" +  Style.BRIGHT + " regular user "
+                      is_privileged_nh = " is regular user "
+                  else :
+                    is_privileged = ""
+                    is_privileged_nh = ""
                 else :
                   is_privileged = ""
                   is_privileged_nh = ""
-              else :
-                is_privileged = ""
-                is_privileged_nh = ""
-              sys.stdout.write("\n  (" +str(count)+ ") '" + Style.BRIGHT + Style.UNDERLINE + fields[0]+ Style.RESET_ALL + "'" + Style.BRIGHT + is_privileged + Style.RESET_ALL + "(uid=" + fields[1] + "). Home directory is in '" + Style.BRIGHT + fields[2]+ Style.RESET_ALL + "'.")
-              sys.stdout.flush()
-              # Add infos to logs file.
-              output_file = open(filename, "a")
-              output_file.write("      (" +str(count)+ ") '" + fields[0]+ "'" + is_privileged_nh + "(uid=" + fields[1] + "). Home directory is in '" + fields[2] + "'.\n" )
-              output_file.close()
-            except ValueError:
-              if count == 1 :
-                print Fore.YELLOW + settings.WARNING_SIGN + "It seems that '" + settings.PASSWD_FILE + "' file is not in the appropriate format. Thus, it is expoted as a text file." + Style.RESET_ALL
-              sys_users = " ".join(str(p) for p in sys_users.split(":"))
-              print sys_users
-              output_file = open(filename, "a")
-              output_file.write("      " + sys_users)
-              output_file.close()
-    else:
+                sys.stdout.write("\n  (" +str(count)+ ") '" + Style.BRIGHT + Style.UNDERLINE + fields[0]+ Style.RESET_ALL + "'" + Style.BRIGHT + is_privileged + Style.RESET_ALL + "(uid=" + fields[1] + "). Home directory is in '" + Style.BRIGHT + fields[2]+ Style.RESET_ALL + "'.")
+                sys.stdout.flush()
+                # Add infos to logs file.
+                output_file = open(filename, "a")
+                output_file.write("      (" +str(count)+ ") '" + fields[0]+ "'" + is_privileged_nh + "(uid=" + fields[1] + "). Home directory is in '" + fields[2] + "'.\n" )
+                output_file.close()
+              except ValueError:
+                if count == 1 :
+                  print Fore.YELLOW + settings.WARNING_SIGN + "It seems that '" + settings.PASSWD_FILE + "' file is not in the appropriate format. Thus, it is expoted as a text file." + Style.RESET_ALL
+                sys_users = " ".join(str(p) for p in sys_users.split(":"))
+                print sys_users
+                output_file = open(filename, "a")
+                output_file.write("      " + sys_users)
+                output_file.close()
+      else:
+        sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
+        sys.stdout.write("\n" + Fore.YELLOW + settings.WARNING_SIGN + "It seems that you don't have permissions to read '" + settings.PASSWD_FILE + "' o enumerate users entries." + Style.RESET_ALL)
+        sys.stdout.flush()
+    except TypeError:
       sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
-      sys.stdout.write("\n" + Fore.YELLOW + settings.WARNING_SIGN + "It seems that you don't have permissions to read '" + settings.PASSWD_FILE + "' o enumerate users entries." + Style.RESET_ALL)
       sys.stdout.flush()
+      sys.stdout.write("\n" + Fore.YELLOW + settings.WARNING_SIGN + "It seems that you don't have permissions to enumerate users entries." + Style.RESET_ALL)
+      sys.stdout.flush()
+      pass
 
+    except IndexError:
+      sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
+      sys.stdout.flush()  
+      sys.stdout.write("\n" + Fore.YELLOW + settings.WARNING_SIGN + "It seems that you don't have permissions to enumerate users entries." + Style.RESET_ALL)
+      sys.stdout.flush()
+      pass
 """
 System passwords enumeration
 """
