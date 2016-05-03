@@ -299,6 +299,10 @@ def main():
             # Store the Server's root dir
             settings.DEFAULT_SRV_ROOT_DIR = settings.SRV_ROOT_DIR
 
+            # Retrieve everything from the supported enumeration options.
+            if menu.options.enum_all:
+              checks.enable_all_enumeration_options()
+
             if menu.options.is_admin or menu.options.is_root and not menu.options.current_user:
               menu.options.current_user = True
 
@@ -364,10 +368,6 @@ def main():
           else:
             if menu.options.verbose:
               print Style.BRIGHT + "(!) The indicated web-page charset appears to be "  + Style.UNDERLINE  + settings.CHARSET + Style.RESET_ALL + "." + Style.RESET_ALL
-
-        # Retrieve everything from the supported enumeration options.
-        if menu.options.enum_all:
-          checks.enable_all_enumeration_options()
 
       except urllib2.HTTPError, e:
         # Check the codes of responses
