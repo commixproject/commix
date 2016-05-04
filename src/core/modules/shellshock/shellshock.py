@@ -324,7 +324,7 @@ def file_access(url, cve, check_header, filename):
       
     if os.path.isfile(file_to_write):
       with open(file_to_write, 'r') as content_file:
-        content = [line.replace("\n", " ") for line in content_file]
+        content = [line.replace("\r\n", "\n").replace("\r", "\n").replace("\n", " ") for line in content_file]
       content = "".join(str(p) for p in content).replace("'", "\"")
     else:
       sys.stdout.write(Fore.YELLOW + settings.WARNING_SIGN + "It seems that '" + file_to_write + "' is not a file." + Style.RESET_ALL)
@@ -518,6 +518,7 @@ def shellshock_handler(url, http_request_method, filename):
               file_access_again = raw_input(settings.QUESTION_SIGN + "Do you want to access files again? [Y/n/q] > ").lower()
               if file_access_again in settings.CHOICE_YES:
                 file_access(url, cve, check_header, filename)
+                print ""
                 break
               elif file_access_again in settings.CHOICE_NO: 
                 break

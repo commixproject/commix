@@ -73,7 +73,7 @@ def file_write(separator, TAG, prefix, suffix, whitespace, http_request_method, 
     
   if os.path.isfile(file_to_write):
     with open(file_to_write, 'r') as content_file:
-      content = [line.replace("\n", " ") for line in content_file]
+      content = [line.replace("\r\n", "\n").replace("\r", "\n").replace("\n", " ") for line in content_file]
     content = "".join(str(p) for p in content).replace("'", "\"")
     if settings.TARGET_OS == "win":
     	import base64

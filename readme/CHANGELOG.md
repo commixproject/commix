@@ -1,4 +1,5 @@
 ## Version 0.8b
+* Fixed: The "--file-read" option to ignore the carriage return ("\r") character in a text file.
 * Added: The ability to check for empty value(s) in the defined GET/POST/Cookie(s) data and skip.
 * Replaced: The "INJECT_HERE" tag has been replaced with the "*" (asterisk) wildcard character.
 * Added: New option "--level" (1-3) that specifies level of tests to perform.
