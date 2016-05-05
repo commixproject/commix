@@ -421,6 +421,7 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
 
             # Check for any system file access options.
             if settings.FILE_ACCESS_DONE == True :
+              print ""
               while True:
                 file_access_again = raw_input(settings.QUESTION_SIGN + "Do you want to access files again? [Y/n] > ").lower()
                 if file_access_again in settings.CHOICE_YES:

@@ -151,6 +151,8 @@ Check if PowerShell is enabled.
 """
 def ps_check():
   if settings.PS_ENABLED == None and menu.options.is_admin or menu.options.users or menu.options.passwords:
+    if menu.options.verbose:
+      print ""
     info_msg = settings.WARNING_SIGN + "The payloads in some options that you have chosen, are requiring the use of PowerShell. "
     print Fore.YELLOW + info_msg + Style.RESET_ALL
     while True:

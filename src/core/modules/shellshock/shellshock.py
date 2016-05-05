@@ -327,7 +327,7 @@ def file_access(url, cve, check_header, filename):
         content = [line.replace("\r\n", "\n").replace("\r", "\n").replace("\n", " ") for line in content_file]
       content = "".join(str(p) for p in content).replace("'", "\"")
     else:
-      sys.stdout.write(Fore.YELLOW + settings.WARNING_SIGN + "It seems that '" + file_to_write + "' is not a file." + Style.RESET_ALL)
+      sys.stdout.write(Fore.YELLOW + settings.WARNING_SIGN + "It seems that '" + file_to_write + "' is not a file." + Style.RESET_ALL + "\n")
       sys.stdout.flush()
     settings.FILE_ACCESS_DONE = True
 
@@ -352,10 +352,10 @@ def file_access(url, cve, check_header, filename):
     if shell:
       if menu.options.verbose:
         print ""
-      sys.stdout.write(Style.BRIGHT + "(!) The " + Style.UNDERLINE + shell + Style.RESET_ALL + Style.BRIGHT + " file was created successfully!" + Style.RESET_ALL)
+      sys.stdout.write(Style.BRIGHT + "(!) The " + Style.UNDERLINE + shell + Style.RESET_ALL + Style.BRIGHT + " file was created successfully!" + Style.RESET_ALL + "\n")
       sys.stdout.flush()
     else:
-     sys.stdout.write(Fore.YELLOW + settings.WARNING_SIGN + "It seems that you don't have permissions to write the '" + dest_to_write + "' file." + Style.RESET_ALL)
+     sys.stdout.write(Fore.YELLOW + settings.WARNING_SIGN + "It seems that you don't have permissions to write the '" + dest_to_write + "' file." + Style.RESET_ALL + "\n")
      sys.stdout.flush()
     settings.FILE_ACCESS_DONE = True
 
@@ -393,10 +393,10 @@ def file_access(url, cve, check_header, filename):
     if shell:
       if menu.options.verbose:
         print ""
-      sys.stdout.write(Style.BRIGHT + "(!) The " + Style.UNDERLINE + shell + Style.RESET_ALL + Style.BRIGHT + " file was uploaded successfully!" + Style.RESET_ALL)
+      sys.stdout.write(Style.BRIGHT + "(!) The " + Style.UNDERLINE + shell + Style.RESET_ALL + Style.BRIGHT + " file was uploaded successfully!" + Style.RESET_ALL + "\n")
       sys.stdout.flush()
     else:
-     sys.stdout.write(Fore.YELLOW + settings.WARNING_SIGN + "It seems that you don't have permissions to write the '" + dest_to_upload + "' file." + Style.RESET_ALL)
+     sys.stdout.write(Fore.YELLOW + settings.WARNING_SIGN + "It seems that you don't have permissions to write the '" + dest_to_upload + "' file." + Style.RESET_ALL + "\n")
      sys.stdout.flush()
     settings.FILE_ACCESS_DONE = True
 
@@ -418,7 +418,7 @@ def file_access(url, cve, check_header, filename):
       output_file.write("    (!) The contents of file '" + file_to_read + "' : " + shell + ".\n")
       output_file.close()
     else:
-     sys.stdout.write(Fore.YELLOW + settings.WARNING_SIGN + "It seems that you don't have permissions to read the '" + file_to_read + "' file." + Style.RESET_ALL)
+     sys.stdout.write(Fore.YELLOW + settings.WARNING_SIGN + "It seems that you don't have permissions to read the '" + file_to_read + "' file." + Style.RESET_ALL + "\n")
      sys.stdout.flush()
     settings.FILE_ACCESS_DONE = True
 
@@ -518,7 +518,6 @@ def shellshock_handler(url, http_request_method, filename):
               file_access_again = raw_input(settings.QUESTION_SIGN + "Do you want to access files again? [Y/n/q] > ").lower()
               if file_access_again in settings.CHOICE_YES:
                 file_access(url, cve, check_header, filename)
-                print ""
                 break
               elif file_access_again in settings.CHOICE_NO: 
                 break
@@ -535,7 +534,7 @@ def shellshock_handler(url, http_request_method, filename):
           if menu.options.os_cmd:
             cmd = menu.options.os_cmd 
             shell = cmd_exec(url, cmd, cve, check_header, filename)
-            print "\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL 
+            print Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL 
             sys.exit(0)
 
           else:

@@ -463,6 +463,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
               enumerate_again = raw_input("\n" + settings.QUESTION_SIGN + "Do you want to enumerate again? [Y/n/q] > ").lower()
               if enumerate_again in settings.CHOICE_YES:
                 fb_enumeration.do_check(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+                print ""
                 break
               elif enumerate_again in settings.CHOICE_NO: 
                 break
@@ -484,10 +485,13 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
 
           # Check for any system file access options.
           if settings.FILE_ACCESS_DONE == True :
+            if settings.ENUMERATION_DONE != True:
+              print ""          
             while True:
               file_access_again = raw_input(settings.QUESTION_SIGN + "Do you want to access files again? [Y/n/q] > ").lower()
               if file_access_again in settings.CHOICE_YES:
                 fb_file_access.do_check(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+                print ""
                 break
               elif file_access_again in settings.CHOICE_NO: 
                 break
@@ -505,10 +509,12 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
               if not menu.enumeration_options():
                 print ""
             fb_file_access.do_check(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-            
+            print ""
+
           # Check if defined single cmd.
           if menu.options.os_cmd:
-            print ""
+            # if not menu.file_access_options():
+            #   print ""
             fb_enumeration.single_os_cmd_exec(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
             # Delete previous shell (text) files (output)
             delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)

@@ -266,6 +266,7 @@ def cb_injection_handler(url, delay, filename, http_request_method):
                 enumerate_again = raw_input("\n" + settings.QUESTION_SIGN + "Do you want to enumerate again? [Y/n/q] > ").lower()
                 if enumerate_again in settings.CHOICE_YES:
                   cb_enumeration.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
+                  print ""
                   break
                 elif enumerate_again in settings.CHOICE_NO: 
                   break
@@ -285,10 +286,13 @@ def cb_injection_handler(url, delay, filename, http_request_method):
             
             # Check for any system file access options.
             if settings.FILE_ACCESS_DONE == True :
+              if settings.ENUMERATION_DONE != True:
+                print ""
               while True:
                 file_access_again = raw_input(settings.QUESTION_SIGN + "Do you want to access files again? [Y/n/q] > ").lower()
                 if file_access_again in settings.CHOICE_YES:
                   cb_file_access.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
+                  print ""
                   break
                 elif file_access_again in settings.CHOICE_NO: 
                   break

@@ -357,7 +357,7 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                 enumerate_again = raw_input("\n" + settings.QUESTION_SIGN + "Do you want to enumerate again? [Y/n/q] > ").lower()
                 if enumerate_again in settings.CHOICE_YES:
                   tb_enumeration.do_check(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
-                  print  ""
+                  print ""
                   break
                 elif enumerate_again in settings.CHOICE_NO: 
                   new_line = True
@@ -376,6 +376,7 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
 
             # Check for any system file access options.
             if settings.FILE_ACCESS_DONE == True:
+              print ""
               while True:
                 file_access_again = raw_input(settings.QUESTION_SIGN + "Do you want to access files again? [Y/n/q] > ").lower()
                 if file_access_again in settings.CHOICE_YES:
