@@ -1,6 +1,6 @@
 ![Logo](http://i.imgur.com/xcNYrfv.png)
 
-![Version 0.8b](https://img.shields.io/badge/Version-0.8b-green.svg)
+![Version 0.9b](https://img.shields.io/badge/Version-0.9b-green.svg)
 ![Python 2.6-2.7](https://img.shields.io/badge/Python-2.6--2.7-yellow.svg)
 [![GPLv3 License](https://img.shields.io/badge/License-GPLv3-red.svg)](https://github.com/stasinopoulos/commix/blob/master/readme/COPYING)
 [![Twitter](https://img.shields.io/badge/Twitter-@commixproject-blue.svg)](http://www.twitter.com/commixproject)
