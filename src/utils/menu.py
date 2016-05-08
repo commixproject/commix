@@ -29,7 +29,7 @@ The commix's banner.
 def banner():
   print """                                       __           
    ___    ___     ___ ___     ___ ___ /\_\   __  _   
-  /'___\ / __`\ /' __` __`\ /' __` __`\/\ \ /\ \/'\  """ + Style.BRIGHT + Style.UNDERLINE  + Fore.LIGHTBLUE_EX + settings.VERSION  + settings.COMMIT_ID + Style.RESET_ALL + """
+  /'___\ / __`\ /' __` __`\ /' __` __`\/\ \ /\ \/'\  """ + Style.BRIGHT + Style.UNDERLINE  + Fore.MAGENTA + settings.VERSION  + settings.COMMIT_ID + Style.RESET_ALL + """
  /\ \__//\ \L\ \/\ \/\ \/\ \/\ \/\ \/\ \ \ \\\/>  </
  \ \____\ \____/\ \_\ \_\ \_\ \_\ \_\ \_\ \_\\/\_/\\_\\ 
   \/____/\/___/  \/_/\/_/\/_/\/_/\/_/\/_/\/_/\//\/_/ (""" + Fore.LIGHTRED_EX  + settings.APPLICATION_TWITTER + Style.RESET_ALL + """) 
