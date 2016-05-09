@@ -81,9 +81,9 @@ def do_check(request):
           except urllib2.HTTPError, e:
             pass
       except ValueError:
-        error_msg = "Unsupported / Invalid HTTP authentication type '" + menu.options.auth_type + "'."
-        error_msg += " Try basic or digest HTTP authentication type."
-        print Back.RED + settings.ERROR_SIGN + error_msg + Style.RESET_ALL
+        err_msg = "Unsupported / Invalid HTTP authentication type '" + menu.options.auth_type + "'."
+        err_msg += " Try basic or digest HTTP authentication type."
+        print settings.print_error_msg(err_msg)
         sys.exit(0)   
     else:
       pass        

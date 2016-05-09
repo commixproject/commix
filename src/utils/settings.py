@@ -19,6 +19,8 @@ import sys
 import time
 import urllib
 
+from src.thirdparty.colorama import Fore, Back, Style, init
+
 """
 The global variables.
 """
@@ -363,6 +365,7 @@ FAILED_TRIES = 20
 PS_ENABLED = None
 
 # Status Signs
+SUCCESS_SIGN = "(!) "
 INFO_SIGN = "(*) "
 QUESTION_SIGN = "(?) "
 WARNING_SIGN = "(^) Warning: "
@@ -397,5 +400,45 @@ SUPPORTED_HTTP_AUTH_TYPES = [ "basic", "digest" ]
 
 # HTTP Headers
 HTTP_HEADERS = [ "useragent", "referer" ]
+
+# Print error message
+def print_error_msg(err_msg):
+  result = Back.RED + ERROR_SIGN + str(err_msg) + Style.RESET_ALL 
+  return result
+
+# Print critical error message
+def print_critical_msg(err_msg):
+  result = Back.RED + CRITICAL_SIGN + str(err_msg) + Style.RESET_ALL
+  return result
+
+# Print abortion message
+def print_abort_msg(abort_msg):
+  result = Back.RED + ABORTION_SIGN + str(abort_msg) + Style.RESET_ALL
+  return result
+
+# Print warning message
+def print_warning_msg(warn_msg):
+  result = Fore.YELLOW + WARNING_SIGN + str(warn_msg) + Style.RESET_ALL 
+  return result
+
+# Print information message
+def print_info_msg(info_msg):
+  result = INFO_SIGN + str(info_msg)
+  return result
+
+# Print success message
+def print_success_msg(success_msg):
+  result = Style.BRIGHT + SUCCESS_SIGN + str(success_msg) + Style.RESET_ALL
+  return result
+
+# Print payload (verbose mode)
+def print_payload(payload):
+  result = Fore.CYAN + PAYLOAD_SIGN + str(payload) + Style.RESET_ALL
+  return result
+
+# Print question message
+def print_question_msg(question_msg):
+  result = QUESTION_SIGN + question_msg
+  return result
 
 #eof

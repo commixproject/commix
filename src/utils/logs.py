@@ -55,10 +55,10 @@ def create_log_file(url, output_dir):
     if os.path.exists(menu.options.session_file):
       settings.SESSION_FILE = menu.options.session_file
     else:
-       error_msg = "The provided session file ('" + \
+       err_msg = "The provided session file ('" + \
                     menu.options.session_file + \
                     "') does not exists." 
-       print Back.RED + settings.ERROR_SIGN + error_msg + Style.RESET_ALL
+       print settings.print_error_msg(err_msg)
        sys.exit(0)
   else:  
     settings.SESSION_FILE = output_dir + host + "/" + "session" + ".db"
@@ -126,6 +126,7 @@ def update_payload(filename, counter, payload):
 Log files cration notification.
 """
 def logs_notification(filename):
-  print "\n" + Style.BRIGHT + "(!) The results can be found at '" + os.getcwd() + "/" + filename + "'" + Style.RESET_ALL
+  success_msg = "The results can be found at '" + os.getcwd() + "/" + filename + "'"
+  print "\n" + settings.print_success_msg(success_msg)
 
 # eof

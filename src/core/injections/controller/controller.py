@@ -74,8 +74,10 @@ def injection_proccess(url, check_parameter, http_request_method, filename, dela
   # Load modules
   modules_handler.load_modules(url, http_request_method, filename)
 
-  if not settings.LOAD_SESSION:  
-    print settings.INFO_SIGN + "Setting the " + "(" + http_request_method + ")" + check_parameter + header_name + the_type + "for tests."
+  if not settings.LOAD_SESSION:
+    info_msg = "Setting the " + "(" + http_request_method 
+    info_msg += ")" + check_parameter + header_name + the_type + "for tests."
+    print settings.print_info_msg(info_msg)
 
   # Estimating the response time (in seconds)
   delay, url_time_response = requests.estimate_response_time(url, http_request_method, delay)
@@ -110,8 +112,10 @@ def injection_proccess(url, check_parameter, http_request_method, filename, dela
 
   # All injection techniques seems to be failed!
   if settings.CLASSIC_STATE == settings.EVAL_BASED_STATE == settings.TIME_BASED_STATE == settings.FILE_BASED_STATE == False :
-    info_msg = settings.WARNING_SIGN + "The tested (" + http_request_method + ")" + check_parameter + header_name + the_type + "seems to be not injectable."
-    print Fore.YELLOW + info_msg + Style.RESET_ALL  
+    warn_msg = "The tested (" + http_request_method + ")" 
+    warn_msg += check_parameter + header_name + the_type 
+    warn_msg += "seems to be not injectable."
+    print settings.print_warning_msg(warn_msg)  
 
 """
 Inject HTTP headers (User-agent / Referer) (if level > 2).
@@ -175,10 +179,12 @@ def do_check(url, filename):
     authentication.authentication_process()
     # Check if authentication page is the same with the next (injection) URL
     if urllib2.urlopen(url).read() == urllib2.urlopen(menu.options.auth_url).read():
-      print Back.RED + settings.ERROR_SIGN + "It seems that the authentication procedure has failed." + Style.RESET_ALL
+      err_msg = "It seems that the authentication procedure has failed."
+      print settings.print_error_msg(err_msg)
       sys.exit(0)
   elif menu.options.auth_url or menu.options.auth_data: 
-    print Back.RED + settings.ERROR_SIGN + "You must specify both login panel URL and login parameters." + Style.RESET_ALL
+    err_msg = "You must specify both login panel URL and login parameters."
+    print settings.print_error_msg(err_msg)
     sys.exit(0)
   else:
     pass
@@ -354,15 +360,15 @@ def do_check(url, filename):
 
   # All injection techniques seems to be failed!
   if settings.CLASSIC_STATE == settings.EVAL_BASED_STATE == settings.TIME_BASED_STATE == settings.FILE_BASED_STATE == False :
-    info_msg = settings.CRITICAL_SIGN + "All the tested (" + http_request_method + ") parameters appear to be not injectable."
+    err_msg = "All the tested (" + http_request_method + ") parameters appear to be not injectable."
     if not menu.options.alter_shell :
-      info_msg += " Try to use the option '--alter-shell'"
+      err_msg += " Try to use the option '--alter-shell'"
     else:
-      info_msg += " Try to remove the option '--alter-shell'"
+      err_msg += " Try to remove the option '--alter-shell'"
     if menu.options.level < 3 :
-      info_msg += " and/or try to increase '--level' values to perform more tests (i.e 'User-Agent', 'Referer', 'Cookie' etc)"
-    info_msg += "."
-    print Back.RED + info_msg + Style.RESET_ALL  
+      err_msg += " and/or try to increase '--level' values to perform more tests (i.e 'User-Agent', 'Referer', 'Cookie' etc)"
+    err_msg += "."
+    print settings.print_critical_msg(err_msg)  
   sys.exit(0)
 
 #eof

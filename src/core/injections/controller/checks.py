@@ -30,7 +30,8 @@ Procced to the next attack vector.
 """
 def next_attack_vector(technique, go_back):
   while True:
-    next_attack_vector = raw_input(settings.QUESTION_SIGN + "Continue with testing the " + technique + "? [Y/n/q] > ").lower()
+    question_msg = "Continue with testing the " + technique + "? [Y/n/q] > "
+    next_attack_vector = raw_input(settings.print_question_msg(question_msg)).lower()
     if next_attack_vector in settings.CHOICE_YES:
       return True
     elif next_attack_vector in settings.CHOICE_NO:
@@ -40,7 +41,8 @@ def next_attack_vector(technique, go_back):
     else:
       if next_attack_vector == "":
         next_attack_vector = "enter"
-      print Back.RED + settings.ERROR_SIGN + "'" + next_attack_vector + "' is not a valid answer." + Style.RESET_ALL + "\n"
+      err_msg = "'" + next_attack_vector + "' is not a valid answer."  
+      print settings.print_error_msg(err_msg) + "\n"
       pass
 
 """
@@ -98,10 +100,13 @@ def continue_tests(err):
     # Check if "--skip-waf" option is defined 
     # that skips heuristic detection of WAF/IPS/IDS protection.
     settings.WAF_ENABLED = True
-    print Fore.YELLOW + settings.WARNING_SIGN + "It seems that target is protected by some kind of WAF/IPS/IDS." + Style.RESET_ALL
+    warn_msg = "It seems that target is protected by some kind of WAF/IPS/IDS."
+    print settings.print_warning_msg(warn_msg)
   try:
     while True:
-      continue_tests = raw_input(settings.QUESTION_SIGN + "Do you want to ignore the error (" + str(err.code) + ") message and continue the tests? [Y/n/q] > ").lower()
+      question_msg = "Do you want to ignore the error (" + str(err.code) 
+      question_msg += ") message and continue the tests? [Y/n/q] > "
+      continue_tests = raw_input(settings.print_question_msg(question_msg)).lower()
       if continue_tests in settings.CHOICE_YES:
         return True
       elif continue_tests in settings.CHOICE_NO:
@@ -111,7 +116,8 @@ def continue_tests(err):
       else:
         if continue_tests == "":
           continue_tests = "enter"
-        print Back.RED + settings.ERROR_SIGN + "'" + continue_tests + "' is not a valid answer." + Style.RESET_ALL + "\n"
+        err_msg = "'" + continue_tests + "' is not a valid answer."  
+        print settings.print_error_msg(err_msg) + "\n"
         pass
   except KeyboardInterrupt:
     print "\n" + Back.RED + settings.ABORTION_SIGN + "Ctrl-C was pressed!" + Style.RESET_ALL
@@ -121,7 +127,8 @@ def continue_tests(err):
 Check if option is unavailable
 """
 def unavailable_option(check_option):
-  print Fore.YELLOW + settings.WARNING_SIGN + "The '" +check_option+ "' option is not yet available for windows targets." + Style.RESET_ALL   
+  warn_msg = "The '" + check_option + "' option is not yet available for windows targets."
+  print settings.print_warning_msg(warn_msg)  
 
 """
 Transformation of separators if time-based injection
@@ -138,13 +145,14 @@ Information message if platform does not have
 GNU 'readline' module installed.
 """
 def no_readline_module():
-  info_msg =  settings.WARNING_SIGN + "It seems that your platform does not have GNU 'readline' module installed."
-  info_msg += " For tab-completion support in your shell, download the"
+  warn_msg =  "It seems that your platform does "
+  warn_msg += "not have GNU 'readline' module installed."
+  warn_msg += " For tab-completion support in your shell, download the"
   if settings.IS_WINDOWS:
-    info_msg += " 'pyreadline' module (https://pypi.python.org/pypi/pyreadline).\n"
+    warn_msg += " 'pyreadline' module (https://pypi.python.org/pypi/pyreadline).\n"
   else:  
-    info_msg += " 'gnureadline' module (https://pypi.python.org/pypi/gnureadline).\n" 
-  print Fore.YELLOW + info_msg + Style.RESET_ALL 
+    warn_msg += " 'gnureadline' module (https://pypi.python.org/pypi/gnureadline).\n" 
+  print settings.print_warning_msg(warn_msg) 
 
 """
 Check if PowerShell is enabled.
@@ -153,10 +161,13 @@ def ps_check():
   if settings.PS_ENABLED == None and menu.options.is_admin or menu.options.users or menu.options.passwords:
     if menu.options.verbose:
       print ""
-    info_msg = settings.WARNING_SIGN + "The payloads in some options that you have chosen, are requiring the use of PowerShell. "
-    print Fore.YELLOW + info_msg + Style.RESET_ALL
+    warn_msg = "The payloads in some options that you "
+    warn_msg += "have chosen, are requiring the use of PowerShell. "
+    print settings.print_warning_msg(warn_msg)
     while True:
-      ps_check = raw_input(settings.QUESTION_SIGN + "Do you want to use the \"--ps-version\" option so ensure that PowerShell is enabled? [Y/n/q] > ").lower()
+      question_msg = "Do you want to use the \"--ps-version\" option "
+      question_msg += "so ensure that PowerShell is enabled? [Y/n/q] > "
+      ps_check = raw_input(settings.print_question_msg(question_msg)).lower()
       if ps_check in settings.CHOICE_YES:
         menu.options.ps_version = True
         break
@@ -168,7 +179,8 @@ def ps_check():
       else:  
         if ps_check == "":
           ps_check = "enter"
-        print Back.RED + settings.ERROR_SIGN + "'" + ps_check + "' is not a valid answer." + Style.RESET_ALL + "\n"
+        err_msg = "'" + ps_check + "' is not a valid answer."  
+        print settings.print_error_msg(err_msg) + "\n"
         pass
 
 """
@@ -176,7 +188,8 @@ If PowerShell is disabled.
 """
 def ps_check_failed():
   while True:
-    ps_check = raw_input(settings.QUESTION_SIGN + "Do you want to ignore the above warning and continue the procedure? [Y/n] > ").lower()
+    question_msg = "Do you want to ignore the above warning and continue the procedure? [Y/n] > "
+    ps_check = raw_input(settings.print_question_msg(question_msg)).lower()
     if ps_check in settings.CHOICE_YES:
       break
     elif ps_check in settings.CHOICE_NO:
@@ -185,7 +198,8 @@ def ps_check_failed():
     else:  
       if ps_check == "":
         ps_check = "enter"
-      print Back.RED + settings.ERROR_SIGN + "'" + ps_check + "' is not a valid answer." + Style.RESET_ALL + "\n"
+      err_msg = "'" + ps_check + "' is not a valid answer."  
+      print settings.print_error_msg(err_msg) + "\n"
       pass
 
 """
@@ -215,9 +229,9 @@ def user_defined_os():
        menu.options.os[:1].lower() == "u":
       return True
     else:
-      error_msg = "You specified wrong value '" + menu.options.os + "' as an operation system. " \
-                  "The value, must be (W)indows or (U)nix."
-      print Back.RED + settings.ERROR_SIGN + error_msg + Style.RESET_ALL
+      err_msg = "You specified wrong value '" + menu.options.os + "' "
+      err_msg += "as an operation system. The value, must be (W)indows or (U)nix."
+      print settings.print_error_msg(err_msg)
       sys.exit(0)
 
 """
@@ -225,10 +239,11 @@ Decision if the user-defined operating system name,
 is different than the one identified by heuristics.
 """
 def identified_os():
-    warning_msg = "Heuristics have identified different operating system (" + \
-                   settings.TARGET_OS + ") than that you have provided." 
-    print Fore.YELLOW + settings.WARNING_SIGN + warning_msg + Style.RESET_ALL 
-    proceed_option = raw_input(settings.QUESTION_SIGN + "How do you want to proceed? [(C)ontinue/(s)kip/(q)uit] > ").lower()
+    warn_msg = "Heuristics have identified different operating system (" 
+    warn_msg += settings.TARGET_OS + ") than that you have provided." 
+    print settings.print_warning_msg(warn_msg)
+    question_msg = "How do you want to proceed? [(C)ontinue/(s)kip/(q)uit] > "
+    proceed_option = raw_input(settings.print_question_msg(question_msg)).lower()
     if proceed_option.lower() in settings.CHOICE_PROCEED :
       if proceed_option.lower() == "s":
         return False
@@ -239,23 +254,25 @@ def identified_os():
     else:
       if proceed_option == "":
         proceed_option = "enter"
-      print Back.RED + settings.ERROR_SIGN + "'" + proceed_option + "' is not a valid answer." + Style.RESET_ALL + "\n"
+      err_msg = "'" + proceed_option + "' is not a valid answer."  
+      print settings.print_error_msg(err_msg) + "\n"
       pass
 
 """
 Check for third-party (non-core) libraries.
 """
 def third_party_dependencies():
-  sys.stdout.write(settings.INFO_SIGN + "Checking for third-party (non-core) libraries... ")
+  info_msg = "Checking for third-party (non-core) libraries... "
+  sys.stdout.write(settings.print_info_msg(info_msg))
   sys.stdout.flush()
   
   try:
     import sqlite3
   except ImportError:
     print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
-    error_msg = settings.APPLICATION + " requires 'sqlite3' third-party library "
-    error_msg += "in order to store previous injection points and commands. "
-    print Back.RED + settings.ERROR_SIGN + error_msg + Style.RESET_ALL
+    err_msg = settings.APPLICATION + " requires 'sqlite3' third-party library "
+    err_msg += "in order to store previous injection points and commands. "
+    print settings.print_error_msg(err_msg)
     sys.exit(0)
 
   try:
@@ -266,35 +283,35 @@ def third_party_dependencies():
         import pyreadline
       except ImportError:
         print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
-        error_msg = settings.APPLICATION + " requires 'pyreadline' third-party library "
-        error_msg += "in order to be able to take advantage of the TAB "
-        error_msg += "completion and history support features. "
-        print Back.RED + settings.ERROR_SIGN + error_msg + Style.RESET_ALL 
+        err_msg = settings.APPLICATION + " requires 'pyreadline' third-party library "
+        err_msg += "in order to be able to take advantage of the TAB "
+        err_msg += "completion and history support features. "
+        print settings.print_error_msg(err_msg) 
         sys.exit(0)
     else:
       try:
         import gnureadline
       except ImportError:
         print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
-        error_msg = settings.APPLICATION + " requires 'gnureadline' third-party library "
-        error_msg += "in order to be able to take advantage of the TAB "
-        error_msg += "completion and history support features. "
-        print Back.RED + settings.ERROR_SIGN + error_msg + Style.RESET_ALL
+        err_msg = settings.APPLICATION + " requires 'gnureadline' third-party library "
+        err_msg += "in order to be able to take advantage of the TAB "
+        err_msg += "completion and history support features. "
+        print settings.print_error_msg(err_msg)
     pass
 
   print "[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]"
-  info_msg = "All required third-party (non-core) libraries are seems to be installed."
-  print Style.BRIGHT + "(!) " + info_msg + Style.RESET_ALL
+  success_msg = "All required third-party (non-core) libraries are seems to be installed."
+  print settings.print_success_msg(success_msg)
 
 """
 Print the authentiation error message.
 """
-def http_auth_error_msg():
-  error_msg = "Use the '--auth-cred' option to provide a valid pair of " 
-  error_msg += "HTTP authentication credentials (i.e --auth-cred=\"admin:admin\")" 
-  error_msg += " or use the '--ignore-401' option to ignore HTTP error 401 (Unauthorized)" 
-  error_msg += " and continue tests without providing valid credentials."
-  print Back.RED + settings.ERROR_SIGN + error_msg + Style.RESET_ALL 
+def http_auth_err_msg():
+  err_msg = "Use the '--auth-cred' option to provide a valid pair of " 
+  err_msg += "HTTP authentication credentials (i.e --auth-cred=\"admin:admin\")" 
+  err_msg += " or use the '--ignore-401' option to ignore HTTP error 401 (Unauthorized)" 
+  err_msg += " and continue tests without providing valid credentials."
+  print settings.print_error_msg(err_msg) 
   sys.exit(0)
 
 """
@@ -302,11 +319,12 @@ Decision if the user-defined HTTP authenticatiob type,
 is different than the one identified by heuristics.
 """
 def identified_http_auth_type(auth_type):
-  warning_msg = "Heuristics have identified different HTTP authentication type (" 
-  warning_msg += auth_type.lower() + ") than that you have provided ("
-  warning_msg += menu.options.auth_type + ")." 
-  print Fore.YELLOW + settings.WARNING_SIGN + warning_msg + Style.RESET_ALL 
-  proceed_option = raw_input(settings.QUESTION_SIGN + "How do you want to proceed? [(C)ontinue/(s)kip/(q)uit] > ").lower()
+  warn_msg = "Heuristics have identified different HTTP authentication type (" 
+  warn_msg += auth_type.lower() + ") than that you have provided ("
+  warn_msg += menu.options.auth_type + ")." 
+  print settings.print_warning_msg(warn_msg)
+  question_msg = "How do you want to proceed? [(C)ontinue/(s)kip/(q)uit] > "
+  proceed_option = raw_input(settings.print_question_msg(question_msg)).lower()
   if proceed_option.lower() in settings.CHOICE_PROCEED :
     if proceed_option.lower() == "s":
       return False
@@ -317,7 +335,8 @@ def identified_http_auth_type(auth_type):
   else:
     if proceed_option == "":
       proceed_option = "enter"
-    print Back.RED + settings.ERROR_SIGN + "'" + proceed_option + "' is not a valid answer." + Style.RESET_ALL + "\n"
+    err_msg = "'" + proceed_option + "' is not a valid answer." 
+    print settings.print_error_msg(err_msg) + "\n"
     pass
 
 """
@@ -352,9 +371,9 @@ if the wildcard char is provided.
 def wildcard_character(data):
   if settings.WILDCARD_CHAR in data:
     if data.count(settings.WILDCARD_CHAR) > 1:
-      error_msg = "You specified more than one testable parameters. " 
-      error_msg += "Use the '-p' option to define them (i.e -p \"id1,id2\"). "
-      print Back.RED + settings.ERROR_SIGN + error_msg + Style.RESET_ALL 
+      err_msg = "You specified more than one testable parameters. " 
+      err_msg += "Use the '-p' option to define them (i.e -p \"id1,id2\"). "
+      print settings.print_error_msg(err_msg) 
       sys.exit(0)
     else:  
       data = data.replace(settings.WILDCARD_CHAR, settings.INJECT_TAG)

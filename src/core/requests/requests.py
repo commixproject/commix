@@ -44,27 +44,28 @@ def estimate_response_time(url, http_request_method, delay):
   except urllib2.HTTPError, e:
     pass
   except socket.timeout:
-    print Back.RED + settings.ERROR_SIGN + "The connection to target URL has timed out." + Style.RESET_ALL + "\n"
+    err_msg = "The connection to target URL has timed out."
+    print settings.print_error_msg(err_msg)+ "\n"
     sys.exit(0)     
   end = time.time()
   diff = end - start
   if int(diff) < 1:
     url_time_response = int(diff)
     if settings.TARGET_OS == "win":
-      info_msg = settings.WARNING_SIGN + "Due to the relatively slow response of 'cmd.exe' in target host,"
-      info_msg += " there may be delays during the data extraction procedure."
-      print Fore.YELLOW + info_msg + Style.RESET_ALL
+      warn_msg = "Due to the relatively slow response of 'cmd.exe' in target "
+      warn_msg += "host, there may be delays during the data extraction procedure."
+      print settings.print_warning_msg(warn_msg)
   else:
     url_time_response = int(round(diff))
-    info_msg = settings.WARNING_SIGN + "The estimated response time is " + str(url_time_response)
-    info_msg += " second" + "s"[url_time_response == 1:] + ". That may cause" 
+    warn_msg = "The estimated response time is " + str(url_time_response)
+    warn_msg += " second" + "s"[url_time_response == 1:] + ". That may cause" 
     if url_time_response >= 3:
-      info_msg += " serious"
-    info_msg += " delays during the data extraction procedure" 
+      warn_msg += " serious"
+    warn_msg += " delays during the data extraction procedure" 
     if url_time_response >= 3:
-      info_msg += " and/or possible corruptions over the extracted data"
-    info_msg += "."
-    print Fore.YELLOW + info_msg + Style.RESET_ALL
+      warn_msg += " and/or possible corruptions over the extracted data"
+    warn_msg += "."
+    print settings.print_warning_msg(warn_msg)
   delay = int(delay) + int(url_time_response)
   # Against windows targets (for more stability), add one extra second delay.
   if settings.TARGET_OS == "win" :

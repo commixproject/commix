@@ -42,7 +42,9 @@ def do_check():
   requirments.do_check(requirment)
     
   check_privoxy_proxy = True
-  sys.stdout.write(settings.INFO_SIGN + "Testing privoxy proxy settings " + settings.PRIVOXY_IP + ":" + PRIVOXY_PORT + "... ")
+  info_msg = "Testing privoxy proxy settings " 
+  info_msg += settings.PRIVOXY_IP + ":" + PRIVOXY_PORT + "... "
+  sys.stdout.write(settings.print_info_msg(info_msg))
   sys.stdout.flush()
 
   try:
@@ -59,16 +61,17 @@ def do_check():
       new_ip = opener.open("http://icanhazip.com/").read()
       sys.stdout.write("[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]\n")
       sys.stdout.flush()
-      sys.stdout.write(Style.BRIGHT + "(!) Your ip address appears to be " + Style.UNDERLINE + new_ip + Style.RESET_ALL)
+      success_msg = + "Your ip address appears to be " + Style.UNDERLINE + new_ip
+      sys.stdout.write(settings.print_success_msg(success_msg))
 
-    except urllib2.URLError, err:
+    except urllib2.URLError, err_msg:
       print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
-      print Back.RED + settings.ERROR_SIGN + str(err) + Style.RESET_ALL
+      print settings.print_error_msg(err_msg)
       sys.exit(0)
       
-    except urllib2.HTTPError, err:
+    except urllib2.HTTPError, err_msg:
       print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
-      print Back.RED + settings.ERROR_SIGN + str(err) + Style.RESET_ALL
+      print settings.print_error_msg(err_msg)
       sys.exit(0)
 
 """

@@ -51,11 +51,11 @@ def do_GET_check(url):
       if menu.options.level == 3 or menu.options.headers:
         return False
       else:  
-        error_msg = "No parameter(s) found for testing in the provided data. " + \
-                    "You must specify the testable parameter or " + \
-                    "try to increase '--level' values to perform more tests. " 
-        print Back.RED + settings.ERROR_SIGN + error_msg + Style.RESET_ALL + "\n"
-        os._exit(0) 
+        err_msg = "No parameter(s) found for testing in the provided data. "
+        err_msg += "You must specify the testable parameter or "
+        err_msg += "try to increase '--level' values to perform more tests. " 
+        print settings.print_error_msg(err_msg) + "\n"
+        os._exit(0)   
     return url
 
   urls_list = []
@@ -120,9 +120,9 @@ def do_GET_check(url):
         else:
           provided_value = re.findall(r'(.*)=', all_params[param])
           provided_value = ''.join(provided_value)
-          info_msg = settings.WARNING_SIGN + "The '" + provided_value 
-          info_msg += "' parameter has been skipped from testing because the provided value is empty."
-          print Fore.YELLOW + info_msg + Style.RESET_ALL
+          warn_msg = "The '" + provided_value 
+          warn_msg += "' parameter has been skipped from testing because the provided value is empty."
+          print settings.print_warning_msg(warn_msg)
     else:
       for param in range(0,len(multi_parameters)):
         # Grab the value of parameter.
@@ -183,9 +183,10 @@ def do_POST_check(parameter):
   def is_JSON_check(parameter):
     try:
       json_object = json.loads(parameter)
-    except ValueError, err:
-      if not "No JSON object could be decoded" in err:
-        print Back.RED + settings.ERROR_SIGN + "JSON " + str(err) + ". " + Style.RESET_ALL + "\n"
+    except ValueError, err_msg:
+      if not "No JSON object could be decoded" in err_msg:
+        err_msg = "JSON " + str(err_msg) + ". "
+        print settings.print_error_msg(err_msg) + "\n"
         sys.exit(0)
       return False
     else:  
@@ -263,9 +264,9 @@ def do_POST_check(parameter):
           else:  
             provided_value = re.findall(r'(.*)=', all_params[param])
             provided_value = ''.join(provided_value)
-          info_msg = settings.WARNING_SIGN + "The '" + provided_value 
-          info_msg += "' parameter has been skipped from testing because the provided value is empty."
-          print Fore.YELLOW + info_msg + Style.RESET_ALL  
+          warn_msg = "The '" + provided_value 
+          warn_msg += "' parameter has been skipped from testing because the provided value is empty."
+          print settings.print_warning_msg(warn_msg) 
 
     else:
       for param in range(0, len(multi_parameters)):
@@ -379,9 +380,9 @@ def do_cookie_check(cookie):
         else:
           provided_value = re.findall(r'(.*)=', all_params[param])
           provided_value = ''.join(provided_value)
-          info_msg = settings.WARNING_SIGN + "The '" + provided_value 
-          info_msg += "' parameter has been skipped from testing because the provided value is empty."
-          print Fore.YELLOW + info_msg + Style.RESET_ALL  
+          warn_msg = "The '" + provided_value 
+          warn_msg += "' parameter has been skipped from testing because the provided value is empty."
+          print settings.print_warning_msg(warn_msg) 
 
 
     else:

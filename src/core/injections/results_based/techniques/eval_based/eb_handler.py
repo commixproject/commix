@@ -81,7 +81,8 @@ def eb_injection_handler(url, delay, filename, http_request_method):
   url = eb_injector.warning_detection(url, http_request_method)
   
   if not settings.LOAD_SESSION:
-    sys.stdout.write(settings.INFO_SIGN + "Testing the " + technique + "... ")
+    info_msg = "Testing the " + technique + "... "
+    sys.stdout.write(settings.print_info_msg(info_msg))
     sys.stdout.flush()
 
   i = 0
@@ -143,7 +144,7 @@ def eb_injection_handler(url, delay, filename, http_request_method):
 
             # Check if defined "--verbose" option.
             if menu.options.verbose:
-              sys.stdout.write("\n" + Fore.GREY + settings.PAYLOAD_SIGN + payload + Style.RESET_ALL)
+              sys.stdout.write("\n" + settings.print_payload(payload))
 
             # Cookie Injection
             if settings.COOKIE_INJECTION == True:
@@ -187,7 +188,8 @@ def eb_injection_handler(url, delay, filename, http_request_method):
               float_percent = "{0:.1f}".format(round(((i*100)/(total * 1.0)),2))
 
               if shell == False:
-                sys.stdout.write("\r" + settings.INFO_SIGN + "Testing the " + technique + "... " +  "[ " + float_percent + "%" + " ]")  
+                info_msg = "Testing the " + technique + "... " +  "[ " + float_percent + "%" + " ]"
+                sys.stdout.write("\r" + settings.print_info_msg(info_msg))  
                 sys.stdout.flush()
 
               if str(float_percent) == "100.0":
@@ -200,7 +202,8 @@ def eb_injection_handler(url, delay, filename, http_request_method):
               else:
                 percent = str(float_percent)+ "%"
 
-              sys.stdout.write("\r" + settings.INFO_SIGN + "Testing the " + technique + "... " +  "[ " + percent + " ]")  
+              info_msg = "Testing the " + technique + "... " +  "[ " + percent + " ]"
+              sys.stdout.write("\r" + settings.print_info_msg(info_msg))  
               sys.stdout.flush()
               
           except KeyboardInterrupt: 
@@ -261,7 +264,10 @@ def eb_injection_handler(url, delay, filename, http_request_method):
             print ""
 
           # Print the findings to terminal.
-          print Style.BRIGHT + "(!) The (" + http_request_method + ")" + found_vuln_parameter + header_name + the_type + " is vulnerable to " + injection_type + "." + Style.RESET_ALL
+          success_msg = "The (" + http_request_method + ")" 
+          success_msg += found_vuln_parameter + header_name
+          success_msg += the_type + " is vulnerable to " + injection_type + "."
+          print settings.print_success_msg(success_msg)
           print "  (+) Type : " + Fore.YELLOW + Style.BRIGHT + injection_type + Style.RESET_ALL + ""
           print "  (+) Technique : " + Fore.YELLOW + Style.BRIGHT + technique.title() + Style.RESET_ALL + ""
           print "  (+) Payload : " + Fore.YELLOW + Style.BRIGHT + re.sub("%20", " ", payload) + Style.RESET_ALL
@@ -275,7 +281,8 @@ def eb_injection_handler(url, delay, filename, http_request_method):
           # Check for any enumeration options.
           if settings.ENUMERATION_DONE == True :
             while True:
-              enumerate_again = raw_input("\n" + settings.QUESTION_SIGN + "Do you want to enumerate again? [Y/n/q] > ").lower()
+              question_msg = "Do you want to enumerate again? [Y/n/q] > "
+              enumerate_again = raw_input("\n" + settings.print_question_msg(question_msg)).lower()
               if enumerate_again in settings.CHOICE_YES:
                 eb_enumeration.do_check(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
                 print ""
@@ -287,7 +294,8 @@ def eb_injection_handler(url, delay, filename, http_request_method):
               else:
                 if enumerate_again == "":
                   enumerate_again = "enter"
-                print Back.RED + settings.ERROR_SIGN + "'" + enumerate_again + "' is not a valid answer." + Style.RESET_ALL + "\n"
+                err_msg = "'" + enumerate_again + "' is not a valid answer."
+                print settings.print_error_msg(err_msg) + "\n"
                 pass
 
           else:
@@ -302,9 +310,11 @@ def eb_injection_handler(url, delay, filename, http_request_method):
             if settings.ENUMERATION_DONE != True:
               print ""
             while True:
-              file_access_again = raw_input(settings.QUESTION_SIGN + "Do you want to access files again? [Y/n/q] > ").lower()
+              question_msg = "Do you want to access files again? [Y/n/q] > "
+              file_access_again = raw_input(settings.print_question_msg(question_msg)).lower()
               if file_access_again in settings.CHOICE_YES:
                 eb_file_access.do_check(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
+                print ""
                 break
               elif file_access_again in settings.CHOICE_NO: 
                 break
@@ -313,7 +323,8 @@ def eb_injection_handler(url, delay, filename, http_request_method):
               else:
                 if file_access_again  == "":
                   file_access_again  = "enter"
-                print Back.RED + settings.ERROR_SIGN + "'" + file_access_again  + "' is not a valid answer." + Style.RESET_ALL + "\n"
+                err_msg = "'" + file_access_again  + "' is not a valid answer."
+                print settings.print_error_msg(err_msg) + "\n"
                 pass
           else:
             if menu.file_access_options():
@@ -334,7 +345,8 @@ def eb_injection_handler(url, delay, filename, http_request_method):
           while True:
             if go_back == True:
               break
-            gotshell = raw_input(settings.QUESTION_SIGN + "Do you want a Pseudo-Terminal? [Y/n/q] > ").lower()
+            question_msg = "Do you want a Pseudo-Terminal? [Y/n/q] > "  
+            gotshell = raw_input(settings.print_question_msg(question_msg)).lower()
             if gotshell in settings.CHOICE_YES:
               print ""
               print "Pseudo-Terminal (type '" + Style.BRIGHT + "?" + Style.RESET_ALL + "' for available options)"
@@ -366,7 +378,8 @@ def eb_injection_handler(url, delay, filename, http_request_method):
                       go_back = True
                       break
                     elif os_shell_option == "os_shell": 
-                        print Fore.YELLOW + settings.WARNING_SIGN + "You are already into an 'os_shell' mode." + Style.RESET_ALL + "\n"
+                      warn_msg = "You are already into an 'os_shell' mode." 
+                      print settings.print_warning_msg(warn_msg)+ "\n"
                     elif os_shell_option == "reverse_tcp":
                       settings.REVERSE_TCP = True
                       # Set up LHOST / LPORT for The reverse TCP connection.
@@ -389,10 +402,11 @@ def eb_injection_handler(url, delay, filename, http_request_method):
                         # Command execution results.
                         response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
                         # Evaluate injection results.
-                        shell = eb_injector.injection_results(response, TAG)
+                        shell = eb_injector.injection_results(response, TAG, cmd)
                         if menu.options.verbose:
                           print ""
-                        print Back.RED + settings.ERROR_SIGN + "The reverse TCP connection has been failed!" + Style.RESET_ALL
+                        err_msg = "The reverse TCP connection has been failed!"
+                        print settings.print_error_msg(err_msg)
                     else:
                       pass
                       
@@ -407,19 +421,21 @@ def eb_injection_handler(url, delay, filename, http_request_method):
                     if menu.options.ignore_session or\
                        session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
                       # Evaluate injection results.
-                      shell = eb_injector.injection_results(response, TAG)
+                      shell = eb_injector.injection_results(response, TAG, cmd)
                       shell = "".join(str(p) for p in shell).replace(" ", "", 1)
                       if not menu.options.ignore_session :
                         session_handler.store_cmd(url, cmd, shell, vuln_parameter)
                     else:
                       shell = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
-                    if shell:
-                      if shell != "":
-                        shell = "".join(str(p) for p in shell)
-                        print "\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n"
-                      else:
-                        print Back.RED + settings.ERROR_SIGN + "The '" + cmd + "' command, does not return any output." + Style.RESET_ALL + "\n"
                     
+                    #if shell:
+                    if shell != "":
+                      shell = "".join(str(p) for p in shell)
+                      print "\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n"
+                    else:
+                      err_msg = "The '" + cmd + "' command, does not return any output."
+                      print "\n" + settings.print_error_msg(err_msg) + "\n"
+                  
                 except KeyboardInterrupt: 
                   raise
 
@@ -441,7 +457,8 @@ def eb_injection_handler(url, delay, filename, http_request_method):
             else:
               if gotshell == "":
                 gotshell = "enter"
-              print Back.RED + settings.ERROR_SIGN + "'" + gotshell + "' is not a valid answer." + Style.RESET_ALL + "\n"
+              err_msg = "'" + gotshell + "' is not a valid answer."  
+              print settings.print_error_msg(err_msg) + "\n"
               pass
             
             

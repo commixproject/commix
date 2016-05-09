@@ -33,8 +33,8 @@ def load_modules(url, http_request_method, filename):
       from src.core.modules.icmp_exfiltration import icmp_exfiltration
       # The ICMP exfiltration handler
       icmp_exfiltration.icmp_exfiltration_handler(url, http_request_method)
-    except ImportError as e:
-      print "\n" + Back.RED + settings.ERROR_SIGN + str(e) + Style.RESET_ALL
+    except ImportError as err_msg:
+      print "\n" + settings.print_error_msg(err_msg)
       sys.exit(0) 
     sys.exit(0)
 
@@ -45,8 +45,8 @@ def load_modules(url, http_request_method, filename):
       from src.core.modules.dns_exfiltration import dns_exfiltration
       # The DNS exfiltration handler
       dns_exfiltration.dns_exfiltration_handler(url, http_request_method)
-    except ImportError as e:
-      print "\n" + Back.RED + settings.ERROR_SIGN + str(e) + Style.RESET_ALL
+    except ImportError as err_msg:
+      print "\n" + settings.print_error_msg(err_msg)
       sys.exit(0) 
     sys.exit(0)
 
@@ -57,7 +57,7 @@ def load_modules(url, http_request_method, filename):
       from src.core.modules.shellshock import shellshock
       # The shellshock handler
       shellshock.shellshock_handler(url, http_request_method, filename)
-    except ImportError as e:
-      print "\n" + Back.RED + settings.ERROR_SIGN + str(e) + Style.RESET_ALL
+    except ImportError as err_msg:
+      print "\n" + settings.print_error_msg(err_msg)
       sys.exit(0) 
     sys.exit(0) 

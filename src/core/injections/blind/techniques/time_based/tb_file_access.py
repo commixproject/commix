@@ -55,15 +55,22 @@ def file_read(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_m
   if menu.options.verbose:
     print ""
   if shell:
-    sys.stdout.write(Style.BRIGHT + new_line + "(!) The contents of file '" + Style.UNDERLINE + file_to_read + Style.RESET_ALL + Style.BRIGHT + "'" + Style.RESET_ALL + " : ")
+    success_msg = "The contents of file '" + Style.UNDERLINE 
+    success_msg += file_to_read + Style.RESET_ALL + Style.BRIGHT 
+    success_msg += "'" + Style.RESET_ALL + " : "
+    sys.stdout.write(new_line + settings.print_success_msg(success_msg))
     sys.stdout.flush()
     print shell
     output_file = open(filename, "a")
-    output_file.write("    (!) The contents of file '" + file_to_read + "' : " + shell + ".\n")
+    success_msg = "The contents of file '"
+    success_msg += file_to_read + "' : " + shell + ".\n"
+    output_file.write("    " + settings.SUCCESS_SIGN + success_msg)
     output_file.close()
   else:
-   sys.stdout.write(Fore.YELLOW + settings.WARNING_SIGN + "It seems that you don't have permissions to read the '" + file_to_read + "' file." + Style.RESET_ALL + "\n")
-   sys.stdout.flush()
+    warn_msg = "It seems that you don't have permissions "
+    warn_msg += "to read the '" + file_to_read + "' file."
+    sys.stdout.write(settings.print_warning_msg(warn_msg) + "\n")
+    sys.stdout.flush()
 
 """
 Write to a file on the target host.
@@ -71,7 +78,8 @@ Write to a file on the target host.
 def file_write(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response):
   file_to_write = menu.options.file_write
   if not os.path.exists(file_to_write):
-    sys.stdout.write(Fore.YELLOW + settings.WARNING_SIGN + "It seems that the '" + file_to_write + "' file, does not exists." + Style.RESET_ALL + "\n")
+    warn_msg = "It seems that the '" + file_to_write + "' file, does not exists."
+    sys.stdout.write(settings.print_warning_msg(warn_msg) + "\n")
     sys.stdout.flush()
     sys.exit(0)
     
@@ -83,7 +91,8 @@ def file_write(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_
       import base64
       content = base64.b64encode(content)
   else:
-    sys.stdout.write(Fore.YELLOW + settings.WARNING_SIGN + "It seems that '" + file_to_write + "' is not a file." + Style.RESET_ALL + "\n")
+    warn_msg = "It seems that '" + file_to_write + "' is not a file."
+    sys.stdout.write(settings.print_warning_msg(warn_msg) + "\n")
     sys.stdout.flush()
     
   if os.path.split(menu.options.file_dest)[1] == "" :
@@ -116,13 +125,13 @@ def file_write(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_
     if not menu.options.alter_shell :
       cmd = "\"" + cmd + "\""
     response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)  
-    cb_injector.injection_results(response, TAG)
+    cb_injector.injection_results(response, TAG, cmd)
     # Delete tmp file
     cmd = "del " + tmp_filname
     if not menu.options.alter_shell :
       cmd = "\"" + cmd + "\""
     response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)  
-    cb_injector.injection_results(response, TAG)
+    cb_injector.injection_results(response, TAG, cmd)
     # Check if file exists
     cmd = "if exist " + filname + " (echo " + filname + ")" 
     if not menu.options.alter_shell :
@@ -147,11 +156,14 @@ def file_write(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_
   # if menu.options.verbose:
   #   print ""
   if shell:
-    sys.stdout.write(Style.BRIGHT + "\n(!) The '" + Style.UNDERLINE + shell + Style.RESET_ALL + Style.BRIGHT + "' file was created successfully!\n" + Style.RESET_ALL)
+    success_msg = "The '" + Style.UNDERLINE + shell + Style.RESET_ALL 
+    success_msg += Style.BRIGHT + "' file was created successfully!\n" 
+    sys.stdout.write("\n" + settings.print_success_msg(success_msg))
     sys.stdout.flush()
   else:
-   sys.stdout.write(Fore.YELLOW + "\n" + settings.WARNING_SIGN + "It seems that you don't have permissions to write the '" + dest_to_write + "' file." + Style.RESET_ALL + "\n")
-   sys.stdout.flush()
+    warn_msg = "It seems that you don't have permissions to write the '" + dest_to_write + "' file."
+    sys.stdout.write("\n" + settings.print_warning_msg(warn_msg) + "\n")
+    sys.stdout.flush()
 
 """
 Upload a file on the target host.
@@ -165,8 +177,9 @@ def file_upload(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request
     # check if remote file exists.
     try:
       urllib2.urlopen(file_to_upload)
-    except urllib2.HTTPError, err:
-      sys.stdout.write(Fore.YELLOW + "\n" + settings.WARNING_SIGN + "It seems that the '" + file_to_upload + "' file, does not exists. (" +str(err)+ ")" + Style.RESET_ALL + "\n")
+    except urllib2.HTTPError, err_msg:
+      warn_msg = "It seems that the '" + file_to_upload + "' file, does not exists. (" +str(err_msg)+ ")"
+      sys.stdout.write("\n" + settings.print_warning_msg(warn_msg) + "\n")
       sys.stdout.flush()
       sys.exit(0)
       
@@ -197,11 +210,14 @@ def file_upload(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request
     except TypeError:
       pass
     if shell:
-      sys.stdout.write(Style.BRIGHT + "\n(!) The '" + Style.UNDERLINE + shell + Style.RESET_ALL + Style.BRIGHT + "' file was uploaded successfully!" + Style.RESET_ALL + "\n")
+      success_msg = "The '" + Style.UNDERLINE + shell + Style.RESET_ALL 
+      success_msg += Style.BRIGHT + "' file was uploaded successfully!"
+      sys.stdout.write("\n" + settings.print_success_msg(success_msg) + "\n")
       sys.stdout.flush()
     else:
-     sys.stdout.write(Fore.YELLOW + "\n" + settings.WARNING_SIGN + "It seems that you don't have permissions to write the '" + dest_to_upload + "' file." + Style.RESET_ALL + "\n")
-     sys.stdout.flush()
+      warn_msg = "It seems that you don't have permissions to "
+      warn_msg += "write the '" + dest_to_upload + "' file."  
+      sys.stdout.write("\n" + settings.print_warning_msg(warn_msg) + "\n")
 
 """
 Check the defined options

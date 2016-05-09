@@ -51,14 +51,19 @@ def powershell_version(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_
       if menu.options.verbose:
         print ""
       # Output PowerShell's version number
-      sys.stdout.write(Style.BRIGHT + new_line + "(!) The PowerShell's version number is " + Style.UNDERLINE +  ps_version + Style.RESET_ALL + Style.BRIGHT + Style.RESET_ALL + ".")
+      success_msg = "The PowerShell's version number is " + Style.UNDERLINE
+      success_msg += ps_version + Style.RESET_ALL + Style.BRIGHT
+      sys.stdout.write(new_line + settings.print_success_msg(success_msg) + ".")
       sys.stdout.flush()
       # Add infos to logs file. 
       output_file = open(filename, "a")
-      output_file.write("    (!) The PowerShell's version number is " + ps_version + ".\n")
+      success_msg = "The PowerShell's version number is " + ps_version + ".\n"
+      output_file.write("    " + settings.SUCCESS_SIGN + success_msg)
       output_file.close()
   except ValueError:
-    print "\n" + Fore.YELLOW + settings.WARNING_SIGN + "Heuristics have failed to identify PowerShell's version, which means that some payloads or injection techniques may be failed." + Style.RESET_ALL 
+    warn_msg = "Heuristics have failed to identify PowerShell's version, "
+    warn_msg += "which means that some payloads or injection techniques may be failed." 
+    print "\n" + settings.print_warning_msg(warn_msg)
     settings.PS_ENABLED = False
     
 """
@@ -76,11 +81,13 @@ def hostname(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_me
     new_line = ""
   shell = output 
   if shell:
-    sys.stdout.write(Style.BRIGHT + new_line + "(!) The hostname is " + Style.UNDERLINE + shell + Style.RESET_ALL + ".")
+    success_msg = "The hostname is " + Style.UNDERLINE + shell
+    sys.stdout.write(new_line + settings.print_success_msg(success_msg) + ".")
     sys.stdout.flush()
     # Add infos to logs file. 
     output_file = open(filename, "a")
-    output_file.write("    (!) The hostname is " + shell + ".\n")
+    success_msg = "The hostname is " + shell + ".\n"
+    output_file.write("    " + settings.SUCCESS_SIGN + success_msg)
     output_file.close()
 
 """
@@ -115,13 +122,15 @@ def system_information(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_
     if target_arch:
       if menu.options.verbose:
         print ""
-      sys.stdout.write(Style.BRIGHT + new_line +"(!) The target operating system is " + Style.UNDERLINE + target_os + Style.RESET_ALL)
-      sys.stdout.write(Style.BRIGHT + " and the hardware platform is " + Style.UNDERLINE + target_arch + Style.RESET_ALL + ".")
+      success_msg = "The target operating system is " + Style.UNDERLINE + target_os + Style.RESET_ALL  
+      success_msg += Style.BRIGHT + " and the hardware platform is " + Style.UNDERLINE + target_arch
+      sys.stdout.write(new_line + settings.print_success_msg(success_msg) + ".")
       sys.stdout.flush()
       # Add infos to logs file.   
       output_file = open(filename, "a")
-      output_file.write("    (!) The target operating system is " + target_os)
-      output_file.write(" and the hardware platform is " + target_arch + ".\n")
+      success_msg = "The target operating system is " + target_os
+      success_msg += " and the hardware platform is " + target_arch + ".\n"
+      output_file.write("    " + settings.SUCCESS_SIGN + success_msg)
       output_file.close()
 
 """
@@ -158,10 +167,12 @@ def current_user(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_reques
       shell = output 
       if menu.options.verbose:
         print ""
-      sys.stdout.write(Style.BRIGHT + new_line + "(!) The current user is " + Style.UNDERLINE + cu_account + Style.RESET_ALL)
+      success_msg = "The current user is " + Style.UNDERLINE + cu_account  
+      sys.stdout.write(new_line + settings.print_success_msg(success_msg))
       # Add infos to logs file.    
       output_file = open(filename, "a")
-      output_file.write("    (!) The current user is " + cu_account)
+      success_msg = "The current user is " + cu_account
+      output_file.write("    " + settings.SUCCESS_SIGN + success_msg)
       output_file.close()
       if shell:
         shell = "".join(str(p) for p in shell)
@@ -183,11 +194,13 @@ def current_user(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_reques
     else:
       if menu.options.verbose:
         print ""
-      sys.stdout.write(Style.BRIGHT + "(!) The current user is " + Style.UNDERLINE + cu_account + Style.RESET_ALL + ".")
+      success_msg = "The current user is " + Style.UNDERLINE + cu_account
+      sys.stdout.write(settings.print_success_msg(success_msg) + ".")
       sys.stdout.flush()
       # Add infos to logs file.   
       output_file = open(filename, "a")
-      output_file.write("    (!) The current user is " + cu_account + "\n")
+      success_msg = "The current user is " + cu_account + "\n"
+      output_file.write("    " + settings.SUCCESS_SIGN + success_msg)
       output_file.close()
 
 """
@@ -209,13 +222,15 @@ def system_users(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_reques
     new_line = "\n"
   else:
     output = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
-    new_line = ""
+    new_line = "" 
   sys_users = output 
   # Windows users enumeration.
   if settings.TARGET_OS == "win":
     if menu.options.verbose:
       print ""
-    sys.stdout.write(new_line + settings.INFO_SIGN + "Executing the 'net users' command to enumerate users entries... ")
+    info_msg = "Executing the 'net users' command "
+    info_msg += "to enumerate users entries... "  
+    sys.stdout.write(new_line + settings.print_info_msg(info_msg))
     sys.stdout.flush()
     try:
       if sys_users[0] :
@@ -225,17 +240,22 @@ def system_users(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_reques
         sys_users_list = "".join(str(p) for p in sys_users_list).strip()
         sys_users_list = ' '.join(sys_users_list.split())
         sys_users_list = sys_users_list.split()
-        sys.stdout.write(Style.BRIGHT + "\n(!) Identified " + str(len(sys_users_list)) + " entr" + ('ies', 'y')[len(sys_users_list) == 1] + " via 'net users' command.\n" + Style.RESET_ALL)
+        success_msg =  "Identified " + str(len(sys_users_list))
+        success_msg += " entr" + ('ies', 'y')[len(sys_users_list) == 1] 
+        success_msg += " via 'net users' command.\n"
+        sys.stdout.write("\n" + settings.print_success_msg(success_msg))
         sys.stdout.flush()
         # Add infos to logs file.   
         output_file = open(filename, "a")
-        output_file.write("\n    (!) Identified " + str(len(sys_users_list)) + " entr" + ('ies', 'y')[len(sys_users_list) == 1] + " in via 'net users' command.\n")
+        output_file.write("\n    " + settings.SUCCESS_SIGN + success_msg)
         output_file.close()
         count = 0
         for user in range(0, len(sys_users_list)):
           count = count + 1
           if menu.options.privileges:
-            print settings.INFO_SIGN + "Confirming privileges of user '" + sys_users_list[user] + "'... "
+            info_msg = "Confirming privileges of user '" 
+            info_msg += sys_users_list[user] + "'... "
+            print settings.print_info_msg(info_msg)
             cmd = "powershell.exe -InputFormat none write-host (([string]$(net user " + sys_users_list[user] + ")[22..($(net user " + sys_users_list[user] + ").length-3)]).replace('Local Group Memberships','').replace('*','').Trim()).replace(' ','').substring(0,6)"
             if alter_shell:
               cmd = cmd.replace("'","\\'")
@@ -264,21 +284,27 @@ def system_users(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_reques
       else:
         sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
         sys.stdout.flush()
-        print "\n" + Fore.YELLOW + settings.WARNING_SIGN + "It seems that you don't have permissions to enumerate users entries." + Style.RESET_ALL  
+        warn_msg = "It seems that you don't have permissions to enumerate users entries."
+        print "\n" + settings.print_warning_msg(warn_msg)  
+
     except TypeError:
-      sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
-      sys.stdout.write("\n" + Fore.YELLOW + settings.WARNING_SIGN + "It seems that you don't have permissions to enumerate users entries." + Style.RESET_ALL)
+      sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]\n")
       sys.stdout.flush()
       pass
 
     except IndexError:
       sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
-      sys.stdout.write("\n" + Fore.YELLOW + settings.WARNING_SIGN + "It seems that you don't have permissions to enumerate users entries." + Style.RESET_ALL)
+      warn_msg = "It seems that you don't have permissions to read '" 
+      warn_msg += settings.PASSWD_FILE + "' to enumerate users entries." 
+      sys.stdout.write("\n" + settings.print_warning_msg(warn_msg))
       sys.stdout.flush()
       pass
+
   # Unix-like users enumeration.    
   else:
-    sys.stdout.write(new_line + settings.INFO_SIGN + "Fetching '" + settings.PASSWD_FILE + "' to enumerate users entries... ")
+    info_msg = "Fetching '" + settings.PASSWD_FILE 
+    info_msg += "' to enumerate users entries... "
+    sys.stdout.write(new_line + settings.print_info_msg(info_msg))
     sys.stdout.flush()
     try:
       if sys_users[0] :
@@ -291,7 +317,9 @@ def system_users(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_reques
         if len(sys_users) % 3 != 0 :
           sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
           sys.stdout.flush()
-          print "\n" + Fore.YELLOW + settings.WARNING_SIGN + "It seems that '" + settings.PASSWD_FILE + "' file is not in the appropriate format. Thus, it is expoted as a text file." + Style.RESET_ALL 
+          warn_msg = "It seems that '" + settings.PASSWD_FILE + "' file is "
+          warn_msg += "not in the appropriate format. Thus, it is expoted as a text file."
+          print "\n" + settings.print_warning_msg(warn_msg)
           sys_users = " ".join(str(p) for p in sys_users).strip()
           print sys_users
           output_file = open(filename, "a")
@@ -303,11 +331,14 @@ def system_users(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_reques
              sys_users_list.append(sys_users[user : user + 3])
           if len(sys_users_list) != 0 :
             sys.stdout.write("[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]")
-            sys.stdout.write(Style.BRIGHT + "\n(!) Identified " + str(len(sys_users_list)) + " entr" + ('ies', 'y')[len(sys_users_list) == 1] + " in '" +  settings.PASSWD_FILE + "'." + Style.RESET_ALL)
+            success_msg = "Identified " + str(len(sys_users_list)) 
+            success_msg += " entr" + ('ies', 'y')[len(sys_users_list) == 1] 
+            success_msg += " in '" +  settings.PASSWD_FILE + "'."
+            sys.stdout.write("\n" + settings.print_success_msg(success_msg))
             sys.stdout.flush()
             # Add infos to logs file.   
             output_file = open(filename, "a")
-            output_file.write("\n    (!) Identified " + str(len(sys_users_list)) + " entr" + ('ies', 'y')[len(sys_users_list) == 1] + " in '" +  settings.PASSWD_FILE + "'.")
+            output_file.write("\n    " + settings.SUCCESS_SIGN + success_msg)
             output_file.close()
             count = 0
             for user in range(0, len(sys_users_list)):
@@ -345,7 +376,7 @@ def system_users(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_reques
                 else :
                   is_privileged = ""
                   is_privileged_nh = ""
-                sys.stdout.write("\n  (" +str(count)+ ") '" + Style.BRIGHT + Style.UNDERLINE + fields[0]+ Style.RESET_ALL + "'" + Style.BRIGHT + is_privileged + Style.RESET_ALL + "(uid=" + fields[1] + "). Home directory is in '" + Style.BRIGHT + fields[2]+ Style.RESET_ALL + "'.")
+                sys.stdout.write("\n  (" +str(count)+ ") '" + Style.BRIGHT + Style.UNDERLINE + fields[0] + Style.RESET_ALL + "'" + Style.BRIGHT + is_privileged + Style.RESET_ALL + "(uid=" + fields[1] + "). Home directory is in '" + Style.BRIGHT + fields[2]+ Style.RESET_ALL + "'.")
                 sys.stdout.flush()
                 # Add infos to logs file.   
                 output_file = open(filename, "a")
@@ -353,7 +384,9 @@ def system_users(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_reques
                 output_file.close()
               except ValueError:
                 if count == 1 :
-                  print Fore.YELLOW + settings.WARNING_SIGN + "It seems that '" + settings.PASSWD_FILE + "' file is not in the appropriate format. Thus, it is expoted as a text file." + Style.RESET_ALL 
+                  warn_msg = "It seems that '" + settings.PASSWD_FILE + "' file is not in the "
+                  warn_msg += "appropriate format. Thus, it is expoted as a text file." 
+                  print settings.print_warning_msg(warn_msg)
                 sys_users = " ".join(str(p) for p in sys_users.split(":"))
                 print sys_users 
                 output_file = open(filename, "a")
@@ -361,19 +394,21 @@ def system_users(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_reques
                 output_file.close()
       else:
         sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
-        sys.stdout.write("\n" + Fore.YELLOW + settings.WARNING_SIGN + "It seems that you don't have permissions to read '" + settings.PASSWD_FILE + "' o enumerate users entries." + Style.RESET_ALL)
+        warn_msg = "It seems that you don't have permissions to read '" 
+        warn_msg += settings.PASSWD_FILE + "' to enumerate users entries." 
+        sys.stdout.write("\n" + settings.print_warning_msg(warn_msg))
         sys.stdout.flush()
 
     except TypeError:
-      sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
-      sys.stdout.flush()
-      sys.stdout.write("\n" + Fore.YELLOW + settings.WARNING_SIGN + "It seems that you don't have permissions to enumerate users entries." + Style.RESET_ALL)
+      sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]\n")
       sys.stdout.flush()
       pass
 
     except IndexError:
       sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
-      sys.stdout.write("\n" + Fore.YELLOW + settings.WARNING_SIGN + "It seems that you don't have permissions to enumerate users entries." + Style.RESET_ALL)
+      warn_msg = "It seems that you don't have permissions to read '" 
+      warn_msg += settings.PASSWD_FILE + "' to enumerate users entries." 
+      sys.stdout.write("\n" + settings.print_warning_msg(warn_msg))
       sys.stdout.flush()
       pass
 
@@ -399,18 +434,22 @@ def system_passwords(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_re
     if sys_passes == "":
       sys_passes = " "
     if sys_passes :
-      sys.stdout.write(new_line + settings.INFO_SIGN + "Fetching '" + settings.SHADOW_FILE + "' to enumerate users password hashes... ")
+      info_msg = "Fetching '" + settings.SHADOW_FILE + "' to enumerate users password hashes... "
+      sys.stdout.write(new_line + settings.print_info_msg(info_msg))
       sys.stdout.flush()
       sys_passes = "".join(str(p) for p in sys_passes)
       sys_passes = sys_passes.replace(" ", "\n")
       sys_passes = sys_passes.split( )
       if len(sys_passes) != 0 :
         sys.stdout.write("[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]")
-        sys.stdout.write(Style.BRIGHT + "\n(!) Identified " + str(len(sys_passes)) + " entr" + ('ies', 'y')[len(sys_passes) == 1] + " in '" +  settings.SHADOW_FILE + "'." + Style.RESET_ALL)
+        success_msg = "Identified " + str(len(sys_passes))
+        success_msg += " entr" + ('ies', 'y')[len(sys_passes) == 1] 
+        success_msg += " in '" +  settings.SHADOW_FILE + "'.\n"
+        sys.stdout.write("\n" + settings.print_success_msg(success_msg))
         sys.stdout.flush()
         # Add infos to logs file.   
         output_file = open(filename, "a")
-        output_file.write("\n    (!) Identified " + str(len(sys_passes)) + " entr" + ('ies', 'y')[len(sys_passes) == 1] + " in '" +  settings.SHADOW_FILE + "'." )
+        output_file.write("\n    " + settings.SUCCESS_SIGN + success_msg )
         output_file.close()
         count = 0
         for line in sys_passes:
@@ -426,14 +465,19 @@ def system_passwords(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_re
           # Check for appropriate '/etc/shadow' format.
           except IndexError:
             if count == 1 :
-              sys.stdout.write(Fore.YELLOW + settings.WARNING_SIGN + "It seems that '" + settings.SHADOW_FILE + "' file is not in the appropriate format. Thus, it is expoted as a text file." + Style.RESET_ALL)
+              warn_msg = "It seems that '" + settings.SHADOW_FILE 
+              warn_msg += "' file is not in the appropriate format. "
+              warn_msg += "Thus, it is expoted as a text file."
+              sys.stdout.write(settings.print_warning_msg(warn_msg))
             print fields[0]
             output_file = open(filename, "a")
             output_file.write("      " + fields[0])
             output_file.close()
       else:
         sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
-        sys.stdout.write("\n" + Fore.YELLOW + settings.WARNING_SIGN + "It seems that you don't have permissions to read '" + settings.SHADOW_FILE + "' to enumerate users password hashes." + Style.RESET_ALL)
+        warn_msg = "It seems that you don't have permissions to read '" 
+        warn_msg += settings.SHADOW_FILE + "' to enumerate users password hashes."
+        sys.stdout.write("\n" + settings.print_warning_msg(warn_msg))
         sys.stdout.flush()
 
 """

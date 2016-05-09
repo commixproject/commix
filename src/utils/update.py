@@ -33,12 +33,16 @@ The commix's updater.
 def updater():
   
   time.sleep(1)
-  sys.stdout.write(settings.INFO_SIGN + "Checking requirements to update " + settings.APPLICATION + " via GitHub... ")
+  info_msg = "Checking requirements to update " 
+  info_msg += settings.APPLICATION + " via GitHub... "
+  sys.stdout.write(settings.print_info_msg(info_msg))
   sys.stdout.flush()
   # Check if windows
   if settings.IS_WINDOWS:
     print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
-    print Back.RED + settings.ERROR_SIGN + "For updating purposes on Windows platform, it's recommended to use a GitHub client for Windows (http://windows.github.com/)." + Style.RESET_ALL
+    err_msg = "For updating purposes on Windows platform, it's recommended "
+    err_msg += "to use a GitHub client for Windows (http://windows.github.com/)."
+    print settings.print_error_msg(err_msg)
     sys.exit(0)
   else:
     try:
@@ -62,16 +66,21 @@ def updater():
           print "---"
           end  = time.time()
           how_long = int(end - start)
-          print settings.INFO_SIGN + "Finished in " + time.strftime('%H:%M:%S', time.gmtime(how_long)) + "."
+          info_msg = "Finished in " + time.strftime('%H:%M:%S', time.gmtime(how_long)) + "."
+          print settings.print_info_msg(info_msg)
         else:
           print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
-          print Back.RED + settings.ERROR_SIGN + "The '.git' directory not found. Do it manually: " + Style.BRIGHT + "'git clone " + settings.GIT_URL + " " + settings.APPLICATION + "' " + Style.RESET_ALL    
+          err_msg = "The '.git' directory not found. Do it manually: " 
+          err_msg += Style.BRIGHT + "'git clone " + settings.GIT_URL 
+          err_msg += " " + settings.APPLICATION + "' "
+          print settings.print_error_msg(err_msg)    
           sys.exit(0)
       else:
           print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
-          print Back.RED + settings.ERROR_SIGN + requirment + " not found." + Style.RESET_ALL
+          err_msg = requirment + " not found."
+          print settings.print_error_msg(err_msg)
           sys.exit(0)
 
-    except Exception as error:
-      print Back.RED + "\n" + settings.ERROR_SIGN + str(error) + Style.RESET_ALL 
+    except Exception as err_msg:
+      print "\n" + settings.print_error_msg(err_msg)
     sys.exit(0)

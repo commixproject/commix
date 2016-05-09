@@ -37,9 +37,9 @@ def logfile_parser():
   """
   def multi_targets():
     print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
-    error_msg = "Currently " + settings.APPLICATION + " doesn't support "
-    error_msg += "multiple targets. Use only one request per log file."
-    sys.stdout.write(Back.RED + settings.ERROR_SIGN + error_msg + Style.RESET_ALL + "\n")
+    err_msg = "Currently " + settings.APPLICATION + " doesn't support "
+    err_msg += "multiple targets. Use only one request per log file."
+    sys.stdout.write(settings.print_error_msg(err_msg) + "\n")
     sys.stdout.flush()
     sys.exit(0)
 
@@ -48,18 +48,20 @@ def logfile_parser():
   """
   def invalid_data():
     print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
-    error_msg = "Something seems to be wrong with "
-    error_msg += "the '" + menu.options.logfile + "' file. "
-    sys.stdout.write(Back.RED + settings.ERROR_SIGN + error_msg + Style.RESET_ALL + "\n")
+    err_msg = "Something seems to be wrong with "
+    err_msg += "the '" + menu.options.logfile + "' file. "
+    sys.stdout.write(settings.print_error_msg(err_msg) + "\n")
     sys.stdout.flush()
     sys.exit(0)
 
   proxy_log_file = menu.options.logfile
-  sys.stdout.write(settings.INFO_SIGN + "Parsing target using the '" + os.path.split(proxy_log_file)[1] + "' file... ")
+  info_msg = "Parsing target using the '" + os.path.split(proxy_log_file)[1] + "' file... "
+  sys.stdout.write(settings.print_info_msg(info_msg))
   sys.stdout.flush()
   if not os.path.exists(proxy_log_file):
     print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
-    sys.stdout.write(Back.RED + settings.ERROR_SIGN + "It seems that the '" + proxy_log_file + "' file, does not exists." + Style.RESET_ALL + "\n")
+    err_msg = "It seems that the '" + proxy_log_file + "' file, does not exists."
+    sys.stdout.write(settings.print_error_msg(err_msg) + "\n")
     sys.stdout.flush()
     sys.exit(0)
   else:
@@ -84,7 +86,9 @@ def logfile_parser():
           result = [item for item in proxy_log_file.read().splitlines() if item]
           if not any(settings.INJECT_TAG in s for s in result):
             print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
-            print Back.RED + settings.ERROR_SIGN + "You must set the \"INJECT_HERE\" tag to specify the testable parameter in the '" + menu.options.logfile + "' file." + Style.RESET_ALL
+            err_msg = "You must set the '*' to specify the testable "
+            err_msg += "parameter in the '" + menu.options.logfile + "' file."
+            print settings.print_error_msg(err_msg)
             sys.exit(0)
           menu.options.data = result[len(result)-1]
         else:
@@ -125,9 +129,9 @@ def logfile_parser():
         elif menu.options.auth_type == "digest":
           if not menu.options.auth_cred:
             print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
-            error_msg = "Use the '--auth-cred' option to provide a valid pair of "
-            error_msg += "HTTP authentication credentials (i.e --auth-cred=\"admin:admin\") "
-            print Back.RED + settings.ERROR_SIGN + error_msg + Style.RESET_ALL
+            err_msg = "Use the '--auth-cred' option to provide a valid pair of "
+            err_msg += "HTTP authentication credentials (i.e --auth-cred=\"admin:admin\") "
+            print settings.print_error_msg(err_msg)
             sys.exit(0)
 
       # Add extra headers

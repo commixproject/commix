@@ -76,7 +76,8 @@ def cb_injection_handler(url, delay, filename, http_request_method):
   technique = "classic injection technique"
 
   if not settings.LOAD_SESSION: 
-    sys.stdout.write(settings.INFO_SIGN + "Testing the " + technique + "... ")
+    info_msg = "Testing the " + technique + "... "
+    sys.stdout.write(settings.print_info_msg(info_msg))
     sys.stdout.flush()
     if menu.options.verbose:
       print ""
@@ -133,7 +134,7 @@ def cb_injection_handler(url, delay, filename, http_request_method):
 
               # Check if defined "--verbose" option.
               if menu.options.verbose:
-                print Fore.GREY + settings.PAYLOAD_SIGN + payload + Style.RESET_ALL
+                print settings.print_payload(payload)
                 
               # if need page reload
               if menu.options.url_reload:
@@ -176,7 +177,8 @@ def cb_injection_handler(url, delay, filename, http_request_method):
                 float_percent = "{0:.1f}".format(round(((i*100)/(total*1.0)),2))
               
                 if shell == False:
-                  sys.stdout.write("\r" + settings.INFO_SIGN + "Testing the " + technique + "... " +  "[ " + float_percent + "%" + " ]")  
+                  info_msg = "Testing the " + technique + "... " +  "[ " + float_percent + "%" + " ]"
+                  sys.stdout.write("\r" + settings.print_info_msg(info_msg))  
                   sys.stdout.flush()
 
                 if str(float_percent) == "100.0":
@@ -188,7 +190,8 @@ def cb_injection_handler(url, delay, filename, http_request_method):
                   percent = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
                 else:
                   percent = str(float_percent)+ "%"
-                sys.stdout.write("\r" + settings.INFO_SIGN + "Testing the " + technique + "... " +  "[ " + percent + " ]")  
+                info_msg = "Testing the " + technique + "... " +  "[ " + percent + " ]"
+                sys.stdout.write("\r" + settings.print_info_msg(info_msg))  
                 sys.stdout.flush()
                 
             except KeyboardInterrupt: 
@@ -249,7 +252,10 @@ def cb_injection_handler(url, delay, filename, http_request_method):
               print ""
 
             # Print the findings to terminal.
-            print Style.BRIGHT + "(!) The (" + http_request_method + ")" + found_vuln_parameter + header_name + the_type + " is vulnerable to " + injection_type + "." + Style.RESET_ALL
+            success_msg = "The (" + http_request_method + ")" 
+            success_msg += found_vuln_parameter + header_name
+            success_msg += the_type + " is vulnerable to " + injection_type + "."
+            print settings.print_success_msg(success_msg)
             print "  (+) Type : " + Fore.YELLOW + Style.BRIGHT + injection_type + Style.RESET_ALL + ""
             print "  (+) Technique : " + Fore.YELLOW + Style.BRIGHT + technique.title() + Style.RESET_ALL + ""
             print "  (+) Payload : " + Fore.YELLOW + Style.BRIGHT + re.sub("%20", " ", re.sub("%2B", "+",payload)) + Style.RESET_ALL
@@ -263,7 +269,8 @@ def cb_injection_handler(url, delay, filename, http_request_method):
             # Check for any enumeration options.
             if settings.ENUMERATION_DONE == True :
               while True:
-                enumerate_again = raw_input("\n" + settings.QUESTION_SIGN + "Do you want to enumerate again? [Y/n/q] > ").lower()
+                question_msg = "Do you want to enumerate again? [Y/n/q] > "
+                enumerate_again = raw_input("\n" + settings.print_question_msg(question_msg)).lower()
                 if enumerate_again in settings.CHOICE_YES:
                   cb_enumeration.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
                   print ""
@@ -275,7 +282,8 @@ def cb_injection_handler(url, delay, filename, http_request_method):
                 else:
                   if enumerate_again == "":
                     enumerate_again = "enter"
-                  print Back.RED + settings.ERROR_SIGN + "'" + enumerate_again + "' is not a valid answer." + Style.RESET_ALL + "\n"
+                  err_msg = "'" + enumerate_again + "' is not a valid answer."  
+                  print settings.print_error_msg(err_msg) + "\n"
                   pass
             else:
               if menu.enumeration_options():
@@ -289,7 +297,8 @@ def cb_injection_handler(url, delay, filename, http_request_method):
               if settings.ENUMERATION_DONE != True:
                 print ""
               while True:
-                file_access_again = raw_input(settings.QUESTION_SIGN + "Do you want to access files again? [Y/n/q] > ").lower()
+                question_msg = "Do you want to access files again? [Y/n/q] > "
+                file_access_again = raw_input(settings.print_question_msg(question_msg)).lower()
                 if file_access_again in settings.CHOICE_YES:
                   cb_file_access.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
                   print ""
@@ -301,7 +310,8 @@ def cb_injection_handler(url, delay, filename, http_request_method):
                 else:
                   if file_access_again == "":
                     file_access_again  = "enter"
-                  print Back.RED + settings.ERROR_SIGN + "'" + file_access_again  + "' is not a valid answer." + Style.RESET_ALL + "\n"
+                  err_msg = "'" + file_access_again  + "' is not a valid answer."  
+                  print settings.print_error_msg(err_msg) + "\n"
                   pass
             else:
               if menu.file_access_options():
@@ -325,7 +335,8 @@ def cb_injection_handler(url, delay, filename, http_request_method):
               if settings.ENUMERATION_DONE == False and settings.FILE_ACCESS_DONE == False:
                 if menu.options.verbose:
                   print ""
-              gotshell = raw_input(settings.QUESTION_SIGN + "Do you want a Pseudo-Terminal shell? [Y/n/q] > ").lower()
+              question_msg = "Do you want a Pseudo-Terminal shell? [Y/n/q] > "
+              gotshell = raw_input(settings.print_question_msg(question_msg)).lower()
               if gotshell in settings.CHOICE_YES:
                 print ""
                 print "Pseudo-Terminal (type '" + Style.BRIGHT + "?" + Style.RESET_ALL + "' for available options)"
@@ -357,7 +368,8 @@ def cb_injection_handler(url, delay, filename, http_request_method):
                         go_back = True
                         break
                       elif os_shell_option == "os_shell": 
-                        print Fore.YELLOW + settings.WARNING_SIGN + "You are already into the 'os_shell' mode." + Style.RESET_ALL + "\n"
+                        warn_msg = "You are already into the 'os_shell' mode."
+                        print settings.print_warning_msg(warn_msg)+ "\n"
                       elif os_shell_option == "reverse_tcp":
                         settings.REVERSE_TCP = True
                         # Set up LHOST / LPORT for The reverse TCP connection.
@@ -380,10 +392,11 @@ def cb_injection_handler(url, delay, filename, http_request_method):
                           # Command execution results.
                           response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
                           # Evaluate injection results.
-                          shell = cb_injector.injection_results(response, TAG)
+                          shell = cb_injector.injection_results(response, TAG, cmd)
                           if menu.options.verbose:
                             print ""
-                          print Back.RED + settings.ERROR_SIGN + "The reverse TCP connection to the target host has been failed!" + Style.RESET_ALL
+                          err_msg = "The reverse TCP connection to the target host has been failed!"
+                          print settings.print_error_msg(err_msg)
                       else:
                         pass
                     else:
@@ -397,7 +410,7 @@ def cb_injection_handler(url, delay, filename, http_request_method):
                       if menu.options.ignore_session or \
                          session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
                         # Evaluate injection results.
-                        shell = cb_injector.injection_results(response, TAG)
+                        shell = cb_injector.injection_results(response, TAG, cmd)
                         shell = "".join(str(p) for p in shell)
                         if not menu.options.ignore_session :
                           session_handler.store_cmd(url, cmd, shell, vuln_parameter)
@@ -406,12 +419,13 @@ def cb_injection_handler(url, delay, filename, http_request_method):
                       if shell:
                         html_parser = HTMLParser.HTMLParser()
                         shell = html_parser.unescape(shell)
-                        if shell != "":
-                          print "\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n"
-                        else:
-                          if menu.options.verbose:
-                            print ""
-                          print Back.RED + settings.ERROR_SIGN + "The '" + cmd + "' command, does not return any output." + Style.RESET_ALL + "\n"
+                      if shell != "":
+                        print "\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n"
+                      else:
+                        if menu.options.verbose:
+                          print ""
+                        err_msg = "The '" + cmd + "' command, does not return any output."
+                        print settings.print_error_msg(err_msg) + "\n"
 
                   except KeyboardInterrupt: 
                     raise
@@ -434,7 +448,8 @@ def cb_injection_handler(url, delay, filename, http_request_method):
               else:
                 if gotshell == "":
                   gotshell = "enter"
-                print Back.RED + settings.ERROR_SIGN + "'" + gotshell + "' is not a valid answer." + Style.RESET_ALL + "\n"
+                err_msg = "'" + gotshell + "' is not a valid answer."
+                print settings.print_error_msg(err_msg) + "\n"
                 pass
                 
   if no_result == True:

