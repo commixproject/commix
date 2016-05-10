@@ -653,13 +653,16 @@ def injection_output(url, OUTPUT_TEXTFILE, delay):
         netloc = urlparse.urlparse(url).netloc
         output = scheme + "://" + netloc + path + OUTPUT_TEXTFILE
       else:
-        path_parts = [non_empty for non_empty in path.split('/') if non_empty]
-        count = 0
-        for part in path_parts:        
-          count = count + 1
-        count = count - 1
-        last_param = path_parts[count]
-        output = url.replace(last_param, OUTPUT_TEXTFILE)
+        try:
+          path_parts = [non_empty for non_empty in path.split('/') if non_empty]
+          count = 0
+          for part in path_parts:        
+            count = count + 1
+          count = count - 1
+          last_param = path_parts[count]
+          output = url.replace(last_param, OUTPUT_TEXTFILE)
+        except IndexError:
+          output = url + "/" + OUTPUT_TEXTFILE
 
   return output
 
