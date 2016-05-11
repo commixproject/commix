@@ -197,7 +197,6 @@ def do_check(url, filename):
       settings.COOKIE_INJECTION = True
 
     http_request_method = "GET"
-
     # Check for stored injections on User-agent / Referer headers (if level > 2).
     if menu.options.level > 2 :
       check_parameter = ""
