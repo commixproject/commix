@@ -98,7 +98,8 @@ def main():
       sys.exit(0)
     
     if menu.options.level > 3:
-      err_msg = "The value for option '--level' must be an integer value from range [1, 3]."
+      err_msg = "The value for option '--level' "
+      err_msg += "must be an integer value from range [1, 3]."
       print settings.print_error_msg(err_msg)
       sys.exit(0)
 
@@ -114,7 +115,12 @@ def main():
 
     # Check provided parameters for tests
     if menu.options.test_parameter:
+      if menu.options.test_parameter.startswith("="):
+        menu.options.test_parameter = menu.options.test_parameter[1:]
       settings.TEST_PARAMETER = menu.options.test_parameter.split(",")
+      for i in range(0,len(settings.TEST_PARAMETER)):
+        if "=" in settings.TEST_PARAMETER[i]:
+          settings.TEST_PARAMETER[i] = settings.TEST_PARAMETER[i].split("=")[0]
 
     # Check if defined character used for splitting parameter values.
     if menu.options.pdel:
@@ -288,7 +294,7 @@ def main():
 
             found_server_banner = False
             if menu.options.verbose:
-              info_msg = "Identifing the target server..." 
+              info_msg = "Identifying the target server..." 
               print settings.print_info_msg(info_msg)
             for i in range(0,len(settings.SERVER_BANNERS)):
               if settings.SERVER_BANNERS[i].lower() in server_banner.lower():
