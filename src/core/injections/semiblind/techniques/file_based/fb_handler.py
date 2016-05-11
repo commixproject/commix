@@ -84,7 +84,7 @@ Delete previous shells outputs.
 def delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
   if menu.options.verbose:
     info_msg = "Deleting the created (" + OUTPUT_TEXTFILE + ") file..."
-    sys.stdout.write("\n" + settings.print_info_msg(info_msg))
+    sys.stdout.write(settings.print_info_msg(info_msg))
   if settings.TARGET_OS == "win":
     cmd = settings.WIN_DEL + OUTPUT_TEXTFILE
   else:  
@@ -194,13 +194,11 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
         settings.SRV_ROOT_DIR = settings.SRV_ROOT_DIR.replace("/","\\")
 
     if not settings.LOAD_SESSION or settings.RETEST == True: 
-      if not menu.options.verbose:
-        info_msg = "Trying to create a file in '" + settings.SRV_ROOT_DIR + "'... "
-      else:
-        info_msg = "Testing the " + technique + "... "
+      info_msg = "Trying to create a file in '" + settings.SRV_ROOT_DIR + "'... "
       print settings.print_info_msg(info_msg)
 
   i = 0
+  TAG = ''.join(random.choice(string.ascii_uppercase) for i in range(6)) 
   # Calculate all possible combinations
   total = len(settings.PREFIXES) * len(settings.SEPARATORS) * len(settings.SUFFIXES)
   # Check if defined alter shell
@@ -225,8 +223,6 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
  
         if not settings.LOAD_SESSION:
           i = i + 1
-          # Change TAG on every request to prevent false-positive results.
-          TAG = ''.join(random.choice(string.ascii_uppercase) for i in range(6)) 
           # The output file for file-based injection technique.
           OUTPUT_TEXTFILE = TAG + ".txt"    
           # Check for bad combination of prefix and separator
@@ -251,9 +247,6 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
 
             # Check if defined "--verbose" option.
             if menu.options.verbose:
-              info_msg = "Trying to upload the '" + OUTPUT_TEXTFILE
-              info_msg += "' file on '" + settings.SRV_ROOT_DIR + "'..."
-              print settings.print_info_msg(info_msg)
               payload_msg = payload.replace("\n", "\\n")
               print settings.print_payload(payload_msg)
 
@@ -306,9 +299,9 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                 sys.stdout.flush()
 
               if len(shell) == 0 :
-                #delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-                #if menu.options.verbose:
-                  #print ""
+                # delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+                # if menu.options.verbose:
+                #   print ""
                 raise urllib2.HTTPError(url, 404, 'Error', {}, None)
 
             except urllib2.HTTPError, e:
@@ -386,6 +379,8 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                   sys.exit(0)
             
           except KeyboardInterrupt:
+            if menu.options.verbose:
+              print ""
             # Delete previous shell (text) files (output)
             delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
             raise
@@ -475,7 +470,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
             session_handler.injection_point_importation(url, technique, injection_type, separator, shell[0], vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response=0, delay=0, how_long=0, output_length=0, is_vulnerable="True")
           else:
             settings.LOAD_SESSION = False 
-            
+
           # Check for any enumeration options.
           if settings.ENUMERATION_DONE == True :
             while True:
@@ -660,6 +655,8 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                 pass
             
           except KeyboardInterrupt: 
+            if menu.options.verbose:
+              print ""
             # Delete previous shell (text) files (output)
             delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
             raise

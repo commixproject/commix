@@ -34,7 +34,7 @@ def decision(separator, TAG, OUTPUT_TEXTFILE):
               ) 
   else:
     payload = (separator +
-              "echo " + TAG + ">" + settings.SRV_ROOT_DIR + OUTPUT_TEXTFILE + " "
+              "echo " + TAG + ">" + settings.SRV_ROOT_DIR + OUTPUT_TEXTFILE
               ) 
 
   return payload
