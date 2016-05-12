@@ -90,10 +90,10 @@ TESTABLE_PARAMETER = ""
 HTTP_HEADER = ""
 
 # The command injection prefixes.
-PREFIXES = ["", "'", "\"", "&", "%26", "|", "%7C", "%27", "%22"] 
+PREFIXES = ["", " ", "'", "\"", "&", "%26", "|", "%7C", "%27", "%22"] 
 
 # The command injection separators.
-SEPARATORS = ["", " ", ";", "%3B", "&", "%26", "&&", "%26%26", "|", "%7C", "||", "%7C%7C", "%0a"]
+SEPARATORS = [";", "%3B", "&", "%26", "&&", "%26%26", "|", "%7C", "||", "%7C%7C", "%0a"]
 
 # The command injection suffixes.
 SUFFIXES = ["", "'", "\"", "#", "//", "\\\\", "&", "%26", "|", "%7C", "%27", "%22", "%5C%5C", "%2F%2F"]
