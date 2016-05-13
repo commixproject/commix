@@ -1,4 +1,5 @@
 ## Version 0.9b
+* Revised: The "time-based" (blind) technique for *nix targets has been shortly revised.
 * Revised: The source code has been revised to support "print_state_msg" (i.e error, warning, success etc) functions.
 
 ## Version 0.8b (2016-05-06)
