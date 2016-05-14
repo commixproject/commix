@@ -91,7 +91,7 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
   # Check if defined "--url-reload" option.
   if menu.options.url_reload == True:
     warn_msg = "The '--url-reload' option is not available in " + technique + "."
-    printprint_warning_msg(warn_msg)
+    print settings.print_warning_msg(warn_msg)
   
   # Calculate all possible combinations
   total = (len(settings.PREFIXES) * len(settings.SEPARATORS) * len(settings.SUFFIXES) - len(settings.JUNK_COMBINATION))

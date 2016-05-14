@@ -468,7 +468,7 @@ def main():
                 if not menu.options.ignore_401:
                   warn_msg = "(" + menu.options.auth_type.capitalize() + ") " 
                   warn_msg += "HTTP authentication credentials are required."
-                  printprint_warning_msg(warn_msg)
+                  print settings.print_warning_msg(warn_msg)
                   while True:
                     question_msg = "Do you want to perform a dictionary-based attack? [Y/n/q] > "
                     crack_creds = raw_input(settings.print_question_msg(question_msg)).lower()

@@ -72,7 +72,7 @@ def installer():
       print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]" 
       warn_msg = "It seems that "  + settings.APPLICATION 
       warn_msg += " is already installed in your system."
-      printprint_warning_msg(warn_msg)
+      print settings.print_warning_msg(warn_msg)
       while True:
         question_msg = "Do you want to remove commix? [Y/n/q] > "
         uninstall = raw_input(settings.print_question_msg(question_msg)).lower()
