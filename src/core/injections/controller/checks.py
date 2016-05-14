@@ -378,6 +378,24 @@ def wildcard_character(data):
     else:  
       data = data.replace(settings.WILDCARD_CHAR, settings.INJECT_TAG)
   return data
-  
+
+"""
+Print the non-listed parameters.
+"""
+def print_non_listed_params(check_parameters, http_request_method, header_name):
+  if len(check_parameters) > 0:
+    non_exist_param = list(set(settings.TEST_PARAMETER)-set(check_parameters))
+    non_exist_param = ', '.join(non_exist_param)
+    if not len(non_exist_param) == 0 :
+      warn_msg = "The provided parameter" + "s"[len(non_exist_param) == 1:][::-1] + " '" 
+      warn_msg += non_exist_param + "'" + (' are', ' is')[len(non_exist_param) == 1]
+      if menu.options.level >= 2 and header_name != "":
+        warn_msg += " not inside the "
+        warn_msg +=  settings.HTTP_HEADER
+      else:
+        warn_msg += " not inside the "
+        warn_msg += http_request_method   
+      warn_msg += "."
+      print settings.print_warning_msg(warn_msg) 
 
 #eof

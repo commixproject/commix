@@ -50,6 +50,8 @@ def do_GET_check(url):
     if settings.INJECT_TAG not in url and not menu.options.shellshock:
       if menu.options.level == 3 or menu.options.headers:
         return False
+      if menu.options.level == 2 :
+        return False
       else:  
         err_msg = "No parameter(s) found for testing in the provided data. "
         err_msg += "You must specify the testable parameter or "

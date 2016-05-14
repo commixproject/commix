@@ -31,6 +31,8 @@ from src.core.requests import parameters
 from src.core.modules import modules_handler
 from src.core.requests import authentication
 
+from src.core.injections.controller import checks
+
 from src.core.injections.results_based.techniques.classic import cb_handler
 from src.core.injections.results_based.techniques.eval_based import eb_handler
 from src.core.injections.blind.techniques.time_based import tb_handler
@@ -75,8 +77,10 @@ def injection_proccess(url, check_parameter, http_request_method, filename, dela
   modules_handler.load_modules(url, http_request_method, filename)
 
   if not settings.LOAD_SESSION:
-    info_msg = "Setting the " + "(" + http_request_method 
-    info_msg += ")" + check_parameter + header_name + the_type + "for tests."
+    info_msg = "Setting the" 
+    if not header_name == " cookie" and not the_type == " HTTP header ":
+      info_msg += " (" + http_request_method + ")"
+    info_msg += check_parameter + header_name + the_type + "for tests."
     print settings.print_info_msg(info_msg)
 
   # Estimating the response time (in seconds)
@@ -112,7 +116,9 @@ def injection_proccess(url, check_parameter, http_request_method, filename, dela
 
   # All injection techniques seems to be failed!
   if settings.CLASSIC_STATE == settings.EVAL_BASED_STATE == settings.TIME_BASED_STATE == settings.FILE_BASED_STATE == False :
-    warn_msg = "The tested (" + http_request_method + ")" 
+    warn_msg = "The tested"
+    if not header_name == " cookie" and not the_type == " HTTP header ":
+      warn_msg += " (" + http_request_method + ")"
     warn_msg += check_parameter + header_name + the_type 
     warn_msg += "seems to be not injectable."
     print settings.print_warning_msg(warn_msg)  
@@ -192,47 +198,54 @@ def do_check(url, filename):
   # Check if HTTP Method is GET.
   if not menu.options.data:
 
-    # Enable Cookie Injection
-    if menu.options.cookie and menu.options.level > 1:
-      settings.COOKIE_INJECTION = True
-
     http_request_method = "GET"
     # Check for stored injections on User-agent / Referer headers (if level > 2).
     if menu.options.level > 2 :
       check_parameter = ""
       stored_http_header_injection(url, check_parameter, check_http_headers, http_request_method, filename, delay)
 
-    # Enable Cookie Injection
-    if menu.options.cookie:
-      settings.COOKIE_INJECTION = True
-
     if not menu.options.shellshock:
-      if not settings.COOKIE_INJECTION:
-        found_url = parameters.do_GET_check(url)
-        if found_url != False:
+      #if not settings.COOKIE_INJECTION:
+      found_url = parameters.do_GET_check(url)
+      if found_url != False:
+
+        check_parameters = []
+        for i in range(0, len(found_url)):
+          url = found_url[i]
+          check_parameter = parameters.vuln_GET_param(url)
+          check_parameters.append(check_parameter)
+
+        #if not menu.options.level > 1:
+        header_name = ""
+        checks.print_non_listed_params(check_parameters, http_request_method, header_name)
+
+        for i in range(0, len(found_url)):
+          url = found_url[i]
+          check_parameter = parameters.vuln_GET_param(url)
+          # Check if testable parameter(s) are provided
+          if len(settings.TEST_PARAMETER) > 0:
+            if check_parameter in settings.TEST_PARAMETER:
+              # Check for session file 
+              if check_for_stored_sessions(url, http_request_method):
+                injection_proccess(url, check_parameter, http_request_method, filename, delay)
+          else:
+            if check_for_stored_sessions(url, http_request_method):
+              injection_proccess(url, check_parameter, http_request_method, filename, delay)
+
+        if not settings.LOAD_SESSION :
           for i in range(0, len(found_url)):
             url = found_url[i]
             check_parameter = parameters.vuln_GET_param(url)
             # Check if testable parameter(s) are provided
             if len(settings.TEST_PARAMETER) > 0:
               if check_parameter in settings.TEST_PARAMETER:
-                # Check for session file 
-                if check_for_stored_sessions(url, http_request_method):
-                  injection_proccess(url, check_parameter, http_request_method, filename, delay)
+                injection_proccess(url, check_parameter, http_request_method, filename, delay)
             else:
-              if check_for_stored_sessions(url, http_request_method):
-                injection_proccess(url, check_parameter, http_request_method, filename, delay)
-
-          if not settings.LOAD_SESSION :
-            for i in range(0, len(found_url)):
-              url = found_url[i]
-              check_parameter = parameters.vuln_GET_param(url)
-              # Check if testable parameter(s) are provided
-              if len(settings.TEST_PARAMETER) > 0:
-                if check_parameter in settings.TEST_PARAMETER:
-                  injection_proccess(url, check_parameter, http_request_method, filename, delay)
-              else:
-                injection_proccess(url, check_parameter, http_request_method, filename, delay)
+              injection_proccess(url, check_parameter, http_request_method, filename, delay)
+      
+      # Enable Cookie Injection
+      if menu.options.level > 1 and menu.options.cookie:
+        settings.COOKIE_INJECTION = True
 
     else:
       menu.options.level = 3
@@ -261,6 +274,16 @@ def do_check(url, filename):
     found_parameter = [x.replace(" ", "") for x in found_parameter]
 
     # Check if multiple parameters
+    check_parameters = []
+    for i in range(0, len(found_parameter)):
+      parameter = menu.options.data = found_parameter[i]
+      check_parameter = parameters.vuln_POST_param(parameter, url)
+      check_parameters.append(check_parameter)
+
+    #if not menu.options.level > 1:
+    header_name = ""
+    checks.print_non_listed_params(check_parameters, http_request_method, header_name)
+
     for i in range(0, len(found_parameter)):
       parameter = menu.options.data = found_parameter[i]
       check_parameter = parameters.vuln_POST_param(parameter, url)
@@ -294,6 +317,7 @@ def do_check(url, filename):
   # Cookie Injection
   if settings.COOKIE_INJECTION == True:
     cookie_value = menu.options.cookie
+
     # Check for stored injections on User-agent / Referer headers (if level > 2).
     if menu.options.level > 2 :
       check_parameter = ""
@@ -310,6 +334,14 @@ def do_check(url, filename):
     # Remove whitespaces 
     cookie_parameters = [x.replace(" ", "") for x in cookie_parameters]
 
+    check_parameters = []
+    for i in range(0, len(cookie_parameters)):
+      menu.options.cookie = cookie_parameters[i]
+      check_parameter = parameters.specify_cookie_parameter(menu.options.cookie)
+      check_parameters.append(check_parameter)
+
+    checks.print_non_listed_params(check_parameters, http_request_method, header_name)
+
     for i in range(0, len(cookie_parameters)):
       menu.options.cookie = cookie_parameters[i]
       check_parameter = parameters.specify_cookie_parameter(menu.options.cookie)
@@ -325,6 +357,10 @@ def do_check(url, filename):
         if check_for_stored_sessions(url, http_request_method):
           injection_proccess(url, check_parameter, http_request_method, filename, delay)
 
+    else:
+      if check_for_stored_sessions(url, http_request_method):
+        injection_proccess(url, check_parameter, http_request_method, filename, delay)
+
     if not settings.LOAD_SESSION :
       for i in range(0, len(cookie_parameters)):
         menu.options.cookie = cookie_parameters[i]
@@ -335,6 +371,8 @@ def do_check(url, filename):
         if len(settings.TEST_PARAMETER) > 0:
           if check_parameter in settings.TEST_PARAMETER:
             injection_proccess(url, check_parameter, http_request_method, filename, delay)
+          else:
+            pass
         else:
           injection_proccess(url, check_parameter, http_request_method, filename, delay)
   
@@ -359,13 +397,17 @@ def do_check(url, filename):
 
   # All injection techniques seems to be failed!
   if settings.CLASSIC_STATE == settings.EVAL_BASED_STATE == settings.TIME_BASED_STATE == settings.FILE_BASED_STATE == False :
-    err_msg = "All the tested (" + http_request_method + ") parameters appear to be not injectable."
+    err_msg = "All tested parameters "
+    if menu.options.level > 2:
+      err_msg += "and headers "
+    err_msg += "appear to be not injectable."
     if not menu.options.alter_shell :
       err_msg += " Try to use the option '--alter-shell'"
     else:
       err_msg += " Try to remove the option '--alter-shell'"
     if menu.options.level < 3 :
-      err_msg += " and/or try to increase '--level' values to perform more tests (i.e 'User-Agent', 'Referer', 'Cookie' etc)"
+      err_msg += " and/or try to increase '--level' values to perform"
+      err_msg += " more tests (i.e 'User-Agent', 'Referer', 'Cookie' etc)"
     err_msg += "."
     print settings.print_critical_msg(err_msg)  
   sys.exit(0)
