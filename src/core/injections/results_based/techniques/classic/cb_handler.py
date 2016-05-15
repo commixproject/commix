@@ -332,9 +332,9 @@ def cb_injection_handler(url, delay, filename, http_request_method):
             while True:
               if go_back == True:
                 break 
-              if settings.ENUMERATION_DONE == False and settings.FILE_ACCESS_DONE == False:
-                if menu.options.verbose:
-                  print ""
+              # if settings.ENUMERATION_DONE == False and settings.FILE_ACCESS_DONE == False:
+              #   if menu.options.verbose:
+              #     print ""
               question_msg = "Do you want a Pseudo-Terminal shell? [Y/n/q] > "
               gotshell = raw_input(settings.print_question_msg(question_msg)).lower()
               if gotshell in settings.CHOICE_YES:
