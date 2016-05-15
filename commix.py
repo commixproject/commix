@@ -294,10 +294,14 @@ def main():
 
             found_server_banner = False
             if menu.options.verbose:
-              info_msg = "Identifying the target server..." 
-              print settings.print_info_msg(info_msg)
+              info_msg = "Identifying the target server... " 
+              sys.stdout.write(settings.print_info_msg(info_msg))
+              sys.stdout.flush()
+
             for i in range(0,len(settings.SERVER_BANNERS)):
               if settings.SERVER_BANNERS[i].lower() in server_banner.lower():
+                if menu.options.verbose:
+                  print "[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]"
                 if menu.options.verbose:
                   success_msg = "The server was identified as " 
                   success_msg += Style.UNDERLINE + server_banner + Style.RESET_ALL + "."
@@ -317,6 +321,8 @@ def main():
                 break
 
             if not found_server_banner:
+              if menu.options.verbose:
+                print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
               warn_msg = "Heuristics have failed to identify server."
               print settings.print_warning_msg(warn_msg)
 
@@ -385,28 +391,8 @@ def main():
         except KeyError:
           pass
 
-        # Charset detection [1].
-        # [1] http://www.w3schools.com/html/html_charset.asp
-        # Check if HTML4 format
-        if menu.options.verbose:
-          info_msg = "Identifing the indicated web-page charset..." 
-          print settings.print_info_msg(info_msg)
-        content = re.findall(r";charset=(.*)\"", html_data)
-        if len(content) != 0 :
-          charset = content
-        else:
-           # Check if HTML5 format
-          charset = re.findall(r"charset=['\"](.*?)['\"]", html_data)
-        if len(charset) != 0 :
-          settings.CHARSET = charset[len(charset)-1]
-          if settings.CHARSET.lower() not in settings.CHARSET_LIST:
-            warn_msg = "The indicated web-page charset "  + settings.CHARSET + " seems unknown."
-            print settings.print_warning_msg(warn_msg)
-          else:
-            if menu.options.verbose:
-              success_msg = "The indicated web-page charset appears to be " 
-              success_msg += Style.UNDERLINE + settings.CHARSET + Style.RESET_ALL + "."
-              print settings.print_success_msg(success_msg)
+        # Charset detection.
+        requests.charset_detection(response)
 
       except urllib2.HTTPError, e:
         # Check the codes of responses

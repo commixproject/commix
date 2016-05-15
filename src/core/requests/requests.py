@@ -73,4 +73,48 @@ def estimate_response_time(url, http_request_method, delay):
 
   return delay, url_time_response
 
+"""
+Target's charset detection
+"""
+def charset_detection(response):
+  charset_detected = False
+  if menu.options.verbose:
+    info_msg = "Identifing the indicated web-page charset... " 
+    sys.stdout.write(settings.print_info_msg(info_msg))
+    sys.stdout.flush()
+  try:
+    # Detecting charset
+    charset = response.headers.getparam('charset')
+    if len(charset) != 0 :         
+      charset_detected = True
+    else:
+      content = re.findall(r";charset=(.*)\"", html_data)
+      if len(content) != 0 :
+        charset = content
+        charset_detected = True
+      else:
+         # Check if HTML5 format
+        charset = re.findall(r"charset=['\"](.*?)['\"]", html_data) 
+      if len(charset) != 0 :
+        charset_detected = True
+    # Check the identifyied charset
+    if charset_detected :
+      if menu.options.verbose:
+        print "[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]"
+      settings.CHARSET = charset.lower()
+      if settings.CHARSET.lower() not in settings.CHARSET_LIST:
+        warn_msg = "The indicated web-page charset "  + settings.CHARSET + " seems unknown."
+        print settings.print_warning_msg(warn_msg)
+      else:
+        if menu.options.verbose:
+          success_msg = "The indicated web-page charset appears to be " 
+          success_msg += Style.UNDERLINE + settings.CHARSET + Style.RESET_ALL + "."
+          print settings.print_success_msg(success_msg)
+    else:
+      pass
+  except:
+    pass
+  if charset_detected == False and menu.options.verbose:
+    print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
+
 #eof
