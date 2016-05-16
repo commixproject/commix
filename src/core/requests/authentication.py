@@ -28,6 +28,7 @@ from src.utils import session_handler
 from src.core.requests import tor
 from src.core.requests import proxy
 from src.core.requests import headers
+from src.core.requests import requests
 
 
 from src.core.injections.controller import checks
@@ -42,6 +43,7 @@ do the authentication process using the provided credentials (auth_data).
 The authentication process
 """
 def authentication_process():
+
   auth_url = menu.options.auth_url
   auth_data = menu.options.auth_data
   cj = cookielib.CookieJar()
@@ -62,52 +64,11 @@ def authentication_process():
 
   urllib2.install_opener(opener)
   request = urllib2.Request(auth_url, auth_data)
-
   # Check if defined extra headers.
   headers.do_check(request)
-
-  # Check if defined any HTTP Proxy.
-  if menu.options.proxy:
-    try:
-      response = proxy.use_proxy(request)
-    except urllib2.HTTPError, err_msg:
-      if settings.IGNORE_ERR_MSG == False:
-        print "\n" + settings.print_error_msg(err_msg)
-        continue_tests = checks.continue_tests(err)
-        if continue_tests == True:
-          settings.IGNORE_ERR_MSG = True
-        else:
-          raise SystemExit()
-      response = False 
-
-  # Check if defined Tor.
-  elif menu.options.tor:
-    try:
-      response = tor.use_tor(request)
-    except urllib2.HTTPError, err_msg:
-      if settings.IGNORE_ERR_MSG == False:
-        print "\n" + settings.print_error_msg(err_msg)
-        continue_tests = checks.continue_tests(err)
-        if continue_tests == True:
-          settings.IGNORE_ERR_MSG = True
-        else:
-          raise SystemExit()
-      response = False 
-
-  else:
-    try:
-      response = urllib2.urlopen(request)
-    except urllib2.HTTPError, err_msg:
-      if settings.IGNORE_ERR_MSG == False:
-        print "\n" + settings.print_error_msg(err_msg)
-        continue_tests = checks.continue_tests(err)
-        if continue_tests == True:
-          settings.IGNORE_ERR_MSG = True
-        else:
-          raise SystemExit()
-      response = False 
-
-  return response 
+  # Get the response of the request.
+  response = requests.get_request_response(request)
+  return response
 
 """
 Define the HTTP authentication 

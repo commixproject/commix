@@ -33,6 +33,7 @@ from src.thirdparty.colorama import Fore, Back, Style, init
 from src.core.requests import tor
 from src.core.requests import proxy
 from src.core.requests import headers
+from src.core.requests import requests
 from src.core.requests import parameters
 
 from src.core.injections.controller import checks
@@ -41,77 +42,6 @@ from src.core.injections.results_based.techniques.classic import cb_payloads
 """
 The "classic" technique on result-based OS command injection.
 """
-
-"""
-Get the response of the request
-"""
-def get_request_response(request):
-
-  # Check if defined any HTTP Proxy.
-  if menu.options.proxy:
-    try:
-      response = proxy.use_proxy(request)
-    except urllib2.HTTPError, err_msg:
-      if settings.IGNORE_ERR_MSG == False:
-        err_msg = str(err_msg) + "."
-        print "\n" + settings.print_error_msg(err_msg)
-        continue_tests = checks.continue_tests(err)
-        if continue_tests == True:
-          settings.IGNORE_ERR_MSG = True
-        else:
-          raise SystemExit()
-      response = False 
-    except urllib2.URLError, err_msg:
-      if "Connection refused" in err.reason:
-        err_msg =  "The target host is not responding."
-        err_msg += " Please ensure that is up and try again."
-        print "\n" + settings.print_critical_msg(err_msg)
-      raise SystemExit()
-
-  # Check if defined Tor.
-  elif menu.options.tor:
-    try:
-      response = tor.use_tor(request)
-    except urllib2.HTTPError, err_msg:
-      if settings.IGNORE_ERR_MSG == False:
-        err_msg = str(err_msg) + "."
-        print "\n" + settings.print_error_msg(err_msg)
-        continue_tests = checks.continue_tests(err)
-        if continue_tests == True:
-          settings.IGNORE_ERR_MSG = True
-        else:
-          raise SystemExit()
-      response = False 
-    except urllib2.URLError, err_msg:
-      if "Connection refused" in err.reason:
-        err_msg =  "The target host is not responding."
-        err_msg += " Please ensure that is up and try again."
-        print "\n" + settings.print_critical_msg(err_msg)
-      raise SystemExit()
-
-  else:
-    try:
-      response = urllib2.urlopen(request)
-    except urllib2.HTTPError, err:
-      if settings.IGNORE_ERR_MSG == False:
-        err_msg = str(err) + "."
-        if not menu.options.verbose:
-          print ""
-        print settings.print_error_msg(err_msg)
-        continue_tests = checks.continue_tests(err)
-        if continue_tests == True:
-          settings.IGNORE_ERR_MSG = True
-        else:
-          raise SystemExit()
-      response = False  
-    except urllib2.URLError, err:
-      if "Connection refused" in err.reason:
-        err_msg =  "The target host is not responding."
-        err_msg += " Please ensure that is up and try again."
-        print "\n" + settings.print_critical_msg(err_msg)
-      raise SystemExit()
-
-  return response
 
 """
 Check if target host is vulnerable.
@@ -133,7 +63,7 @@ def injection_test(payload, http_request_method, url):
     headers.do_check(request)
 
     # Get the response of the request.
-    response = get_request_response(request)
+    response = requests.get_request_response(request)
 
   # Check if defined method is POST.
   else:
@@ -164,11 +94,10 @@ def injection_test(payload, http_request_method, url):
     vuln_parameter = parameters.vuln_POST_param(parameter, url)
 
     # Get the response of the request.
-    response = get_request_response(request)
+    response = requests.get_request_response(request)
 
   return response, vuln_parameter
 
- 
 """
 Evaluate test results.
 """
@@ -187,361 +116,25 @@ def injection_test_results(response, TAG, randvcalc):
 Check if target host is vulnerable. (Cookie-based injection)
 """
 def cookie_injection_test(url, vuln_parameter, payload):
-
-  def inject_cookie(url, vuln_parameter, payload, proxy):
-    if proxy == None:
-      opener = urllib2.build_opener()
-    else:
-      opener = urllib2.build_opener(proxy)
-    opener.addheaders.append(('Cookie', vuln_parameter + "=" + payload))
-    request = urllib2.Request(url)
-    # Check if defined extra headers.
-    headers.do_check(request)
-    try:
-      response = opener.open(request)
-      return response
-    except ValueError:
-      pass
-
-  proxy = None 
-  response = inject_cookie(url, vuln_parameter, payload, proxy)
-
-  # Check if defined any HTTP Proxy.
-  if menu.options.proxy:
-    try:
-      proxy = urllib2.ProxyHandler({settings.PROXY_PROTOCOL: menu.options.proxy})
-      response = inject_cookie(url, vuln_parameter, payload, proxy)
-    except urllib2.HTTPError, err:
-      if settings.IGNORE_ERR_MSG == False:
-        err_msg = str(err) + "."
-        print "\n" + settings.print_error_msg(err_msg)
-        continue_tests = checks.continue_tests(err)
-        if continue_tests == True:
-          settings.IGNORE_ERR_MSG = True
-        else:
-          raise SystemExit()
-      response = False  
-    except urllib2.URLError, err:
-      if "Connection refused" in err.reason:
-        err_msg =  "The target host is not responding."
-        err_msg += " Please ensure that is up and try again."
-        print "\n" + settings.print_critical_msg(err_msg)
-      raise SystemExit()
-
-  # Check if defined Tor.
-  elif menu.options.tor:
-    try:
-      proxy = urllib2.ProxyHandler({settings.PROXY_PROTOCOL:settings.PRIVOXY_IP + ":" + PRIVOXY_PORT})
-      response = inject_cookie(url, vuln_parameter, payload, proxy)
-    except urllib2.HTTPError, err_msg:
-      if settings.IGNORE_ERR_MSG == False:
-        err_msg = str(err_msg) + "."
-        print "\n" + settings.print_error_msg(err_msg)
-        continue_tests = checks.continue_tests(err)
-        if continue_tests == True:
-          settings.IGNORE_ERR_MSG = True
-        else:
-          raise SystemExit()
-      response = False 
-    except urllib2.URLError, err_msg:
-      if "Connection refused" in err.reason:
-        err_msg =  "The target host is not responding."
-        err_msg += " Please ensure that is up and try again."
-        print "\n" + settings.print_critical_msg(err_msg)
-      raise SystemExit()
-
-  else:
-    try:
-      response = inject_cookie(url, vuln_parameter, payload, proxy)
-    except urllib2.HTTPError, err_msg:
-      if settings.IGNORE_ERR_MSG == False:
-        err_msg = str(err_msg) + "."
-        print "\n" + settings.print_error_msg(err_msg)
-        continue_tests = checks.continue_tests(err)
-        if continue_tests == True:
-          settings.IGNORE_ERR_MSG = True
-        else:
-          raise SystemExit()
-      response = False 
-    except urllib2.URLError, err_msg:
-      if "Connection refused" in err.reason:
-        err_msg =  "The target host is not responding."
-        err_msg += " Please ensure that is up and try again."
-        print "\n" + settings.print_critical_msg(err_msg)
-      raise SystemExit()
-
-  return response
+  return requests.cookie_injection(url, vuln_parameter, payload)
 
 """
 Check if target host is vulnerable. (User-Agent-based injection)
 """
 def user_agent_injection_test(url, vuln_parameter, payload):
-
-  def inject_user_agent(url, vuln_parameter, payload, proxy):
-    if proxy == None:
-      opener = urllib2.build_opener()
-    else:
-      opener = urllib2.build_opener(proxy)
-
-    request = urllib2.Request(url)
-    #Check if defined extra headers.
-    headers.do_check(request)
-    request.add_header('User-Agent', urllib.unquote(payload))
-    try:
-      response = opener.open(request)
-      return response
-    except ValueError:
-      pass
-
-  proxy = None 
-  response = inject_user_agent(url, vuln_parameter, payload, proxy)
-  # Check if defined any HTTP Proxy.
-  if menu.options.proxy:
-    try:
-      proxy = urllib2.ProxyHandler({settings.PROXY_PROTOCOL: menu.options.proxy})
-      response = inject_user_agent(url, vuln_parameter, payload, proxy)
-    except urllib2.HTTPError, err_msg:
-      if settings.IGNORE_ERR_MSG == False:
-        err_msg = str(err_msg) + "."
-        print "\n" + settings.print_error_msg(err_msg)
-        continue_tests = checks.continue_tests(err)
-        if continue_tests == True:
-          settings.IGNORE_ERR_MSG = True
-        else:
-          raise SystemExit()
-      response = False 
-    except urllib2.URLError, err_msg:
-      if "Connection refused" in err.reason:
-        err_msg =  "The target host is not responding."
-        err_msg += " Please ensure that is up and try again."
-        print "\n" + settings.print_critical_msg(err_msg)
-      raise SystemExit()
-
-  # Check if defined Tor.
-  elif menu.options.tor:
-    try:
-      proxy = urllib2.ProxyHandler({settings.PROXY_PROTOCOL:settings.PRIVOXY_IP + ":" + PRIVOXY_PORT})
-      response = inject_user_agent(url, vuln_parameter, payload, proxy)
-    except urllib2.HTTPError, err_msg:
-      if settings.IGNORE_ERR_MSG == False:
-        err_msg = str(err_msg) + "."
-        print "\n" + settings.print_error_msg(err_msg)
-        continue_tests = checks.continue_tests(err)
-        if continue_tests == True:
-          settings.IGNORE_ERR_MSG = True
-        else:
-          raise SystemExit()
-      response = False 
-    except urllib2.URLError, err_msg:
-      if "Connection refused" in err.reason:
-        err_msg =  "The target host is not responding."
-        err_msg += " Please ensure that is up and try again."
-        print "\n" + settings.print_critical_msg(err_msg)
-      raise SystemExit()
-
-  else:
-    try:
-      response = inject_user_agent(url, vuln_parameter, payload, proxy)
-    except urllib2.HTTPError, err_msg:
-      if settings.IGNORE_ERR_MSG == False:
-        err_msg = str(err_msg) + "."
-        print "\n" + settings.print_error_msg(err_msg)
-        continue_tests = checks.continue_tests(err)
-        if continue_tests == True:
-          settings.IGNORE_ERR_MSG = True
-        else:
-          raise SystemExit()
-      response = False 
-    except urllib2.URLError, err_msg:
-      if "Connection refused" in err.reason:
-        err_msg =  "The target host is not responding."
-        err_msg += " Please ensure that is up and try again."
-        print "\n" + settings.print_critical_msg(err_msg)
-      raise SystemExit()
-
-  return response
+  return requests.user_agent_injection(url, vuln_parameter, payload)
 
 """
 Check if target host is vulnerable. (Referer-based injection)
 """
 def referer_injection_test(url, vuln_parameter, payload):
-
-  def inject_referer(url, vuln_parameter, payload, proxy):
-
-    if proxy == None:
-      opener = urllib2.build_opener()
-    else:
-      opener = urllib2.build_opener(proxy)
-
-    request = urllib2.Request(url)
-    #Check if defined extra headers.
-    headers.do_check(request)
-    request.add_header('Referer', urllib.unquote(payload))
-    try:
-      response = opener.open(request)
-      return response
-    except ValueError:
-      pass
-
-  proxy = None 
-  response = inject_referer(url, vuln_parameter, payload, proxy)
-  # Check if defined any HTTP Proxy.
-  if menu.options.proxy:
-    try:
-      proxy = urllib2.ProxyHandler({settings.PROXY_PROTOCOL: menu.options.proxy})
-      response = inject_referer(url, vuln_parameter, payload, proxy)
-    except urllib2.HTTPError, err_msg:
-      if settings.IGNORE_ERR_MSG == False:
-        err_msg = str(err_msg) + "."
-        print "\n" + settings.print_error_msg(err_msg)
-        continue_tests = checks.continue_tests(err)
-        if continue_tests == True:
-          settings.IGNORE_ERR_MSG = True
-        else:
-          raise SystemExit()
-      response = False 
-    except urllib2.URLError, err_msg:
-      if "Connection refused" in err.reason:
-        err_msg =  "The target host is not responding."
-        err_msg += " Please ensure that is up and try again."
-        print "\n" + settings.print_critical_msg(err_msg)
-      raise SystemExit()
-          
-  # Check if defined Tor.
-  elif menu.options.tor:
-    try:
-      proxy = urllib2.ProxyHandler({settings.PROXY_PROTOCOL:settings.PRIVOXY_IP + ":" + PRIVOXY_PORT})
-      response = inject_referer(url, vuln_parameter, payload, proxy)
-    except urllib2.HTTPError, err_msg:
-      if settings.IGNORE_ERR_MSG == False:
-        err_msg = str(err_msg) + "."
-        print "\n" + settings.print_error_msg(err_msg)
-        continue_tests = checks.continue_tests(err)
-        if continue_tests == True:
-          settings.IGNORE_ERR_MSG = True
-        else:
-          raise SystemExit()
-      response = False 
-    except urllib2.URLError, err_msg:
-      if "Connection refused" in err.reason:
-        err_msg =  "The target host is not responding."
-        err_msg += " Please ensure that is up and try again."
-        print "\n" + settings.print_critical_msg(err_msg)
-      raise SystemExit()
-          
-  else:
-    try:
-      response = inject_referer(url, vuln_parameter, payload, proxy)
-
-    except urllib2.HTTPError, err_msg:
-      if settings.IGNORE_ERR_MSG == False:
-        err_msg = str(err_msg) + "."
-        print "\n" + settings.print_error_msg(err_msg)
-        continue_tests = checks.continue_tests(err)
-        if continue_tests == True:
-          settings.IGNORE_ERR_MSG = True
-        else:
-          raise SystemExit()
-      response = False 
-    except urllib2.URLError, err_msg:
-      if "Connection refused" in err.reason:
-        err_msg =  "The target host is not responding."
-        err_msg += " Please ensure that is up and try again."
-        print "\n" + settings.print_critical_msg(err_msg)
-      raise SystemExit()
-          
-  return response
+  return requests.referer_injection(url, vuln_parameter, payload)
 
 """
 Check if target host is vulnerable. (Custom header injection)
 """
 def custom_header_injection_test(url, vuln_parameter, payload):
-
-  def inject_custom_header(url, vuln_parameter, payload, proxy):
-
-    if proxy == None:
-      opener = urllib2.build_opener()
-    else:
-      opener = urllib2.build_opener(proxy)
-
-    request = urllib2.Request(url)
-    #Check if defined extra headers.
-    headers.do_check(request)
-    request.add_header(settings.CUSTOM_HEADER_NAME, urllib.unquote(payload))
-    try:
-      response = opener.open(request)
-      return response
-    except ValueError:
-      pass
-
-  proxy = None 
-  response = inject_custom_header(url, vuln_parameter, payload, proxy)
-
-  # Check if defined any HTTP Proxy.
-  if menu.options.proxy:
-    try:
-      proxy = urllib2.ProxyHandler({settings.PROXY_PROTOCOL: menu.options.proxy})
-      response = inject_custom_header(url, vuln_parameter, payload, proxy)
-    except urllib2.HTTPError, err_msg:
-      if settings.IGNORE_ERR_MSG == False:
-        err_msg = str(err_msg) + "."
-        print "\n" + settings.print_error_msg(err_msg)
-        continue_tests = checks.continue_tests(err)
-        if continue_tests == True:
-          settings.IGNORE_ERR_MSG = True
-        else:
-          raise SystemExit()
-      response = False 
-    except urllib2.URLError, err_msg:
-      if "Connection refused" in err.reason:
-        err_msg =  "The target host is not responding."
-        err_msg += " Please ensure that is up and try again."
-        print "\n" + settings.print_critical_msg(err_msg)
-      raise SystemExit()
-          
-  # Check if defined Tor.
-  elif menu.options.tor:
-    try:
-      proxy = urllib2.ProxyHandler({settings.PROXY_PROTOCOL:settings.PRIVOXY_IP + ":" + PRIVOXY_PORT})
-      response = inject_custom_header(url, vuln_parameter, payload, proxy)
-    except urllib2.HTTPError, err_msg:
-      if settings.IGNORE_ERR_MSG == False:
-        err_msg = str(err_msg) + "."
-        print "\n" + settings.print_error_msg(err_msg)
-        continue_tests = checks.continue_tests(err)
-        if continue_tests == True:
-          settings.IGNORE_ERR_MSG = True
-        else:
-          raise SystemExit()
-      response = False 
-    except urllib2.URLError, err_msg:
-      if "Connection refused" in err.reason:
-        err_msg =  "The target host is not responding."
-        err_msg += " Please ensure that is up and try again."
-        print "\n" + settings.print_critical_msg(err_msg)
-      raise SystemExit()
-          
-  else:
-    try:
-      response = inject_custom_header(url, vuln_parameter, payload, proxy)
-    except urllib2.HTTPError, err_msg:
-      if settings.IGNORE_ERR_MSG == False:
-        err_msg = str(err_msg) + "."
-        print "\n" + settings.print_error_msg(err_msg)
-        continue_tests = checks.continue_tests(err)
-        if continue_tests == True:
-          settings.IGNORE_ERR_MSG = True
-        else:
-          raise SystemExit()
-      response = False 
-    except urllib2.URLError, err_msg:
-      if "Connection refused" in err.reason:
-        err_msg =  "The target host is not responding."
-        err_msg += " Please ensure that is up and try again."
-        print "\n" + settings.print_critical_msg(err_msg)
-      raise SystemExit()
-          
-  return response
+  return requests.custom_header_injection(url, vuln_parameter, payload)
 
 
 """
@@ -605,7 +198,7 @@ def injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_meth
       headers.do_check(request)    
 
       # Get the response of the request.
-      response = get_request_response(request)
+      response = requests.get_request_response(request)
           
     else :
       # Check if defined method is POST.
@@ -632,7 +225,7 @@ def injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_meth
       headers.do_check(request)
 
       # Get the response of the request.
-      response = get_request_response(request)
+      response = requests.get_request_response(request)
 
   return response
 

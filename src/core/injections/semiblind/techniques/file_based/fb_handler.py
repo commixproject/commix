@@ -327,6 +327,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                       tmp_upload = raw_input(settings.print_question_msg(question_msg)).lower()
                       if tmp_upload in settings.CHOICE_YES:
                         exit_loops = True
+                        settings.TEMPFILE_BASED_STATE = True
                         call_tfb = tfb_controller(no_result, url, delay, filename, tmp_path, http_request_method, url_time_response)
                         if call_tfb != False:
                           return True
@@ -545,9 +546,11 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
             go_back_again = False
             while True:
               # Delete previous shell (text) files (output)
-              delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
               if menu.options.verbose:
                 print ""
+              delete_previous_shell(separator, payload, TAG, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+              if menu.options.verbose:
+                print "\n"
               if go_back == True:
                 break
               question_msg = "Do you want a Pseudo-Terminal? [Y/n/q] > "  

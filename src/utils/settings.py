@@ -52,6 +52,7 @@ CLASSIC_STATE = False
 EVAL_BASED_STATE = False
 TIME_BASED_STATE = False
 FILE_BASED_STATE = False
+TEMPFILE_BASED_STATE = False
 
 # Check Commit ID
 if os.path.isdir("./.git"):
