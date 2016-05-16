@@ -392,7 +392,7 @@ injection.add_option("--base64",
                 action="store_true",
                 dest="base64",
                 default = False,
-                help="Encode the operating system command to Base64 format.")
+                help="Encode the payload to Base64 format.")
 
 # Detection options
 detection = OptionGroup(parser, Style.BRIGHT + "Detection" + Style.RESET_ALL, "These options can be "
