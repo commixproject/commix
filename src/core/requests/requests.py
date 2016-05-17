@@ -131,7 +131,7 @@ def get_request_response(request):
     except urllib2.HTTPError, err:
       if settings.IGNORE_ERR_MSG == False:
         err_msg = str(err) + "."
-        if not menu.options.verbose:
+        if not settings.VERBOSITY_LEVEL >= 1:
           print ""
         print settings.print_error_msg(err_msg)
         continue_tests = checks.continue_tests(err)
@@ -554,7 +554,7 @@ Target's charset detection
 """
 def charset_detection(response):
   charset_detected = False
-  if menu.options.verbose:
+  if settings.VERBOSITY_LEVEL >= 1:
     info_msg = "Identifing the indicated web-page charset... " 
     sys.stdout.write(settings.print_info_msg(info_msg))
     sys.stdout.flush()
@@ -575,14 +575,14 @@ def charset_detection(response):
         charset_detected = True
     # Check the identifyied charset
     if charset_detected :
-      if menu.options.verbose:
+      if settings.VERBOSITY_LEVEL >= 1:
         print "[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]"
       settings.CHARSET = charset.lower()
       if settings.CHARSET.lower() not in settings.CHARSET_LIST:
         warn_msg = "The indicated web-page charset "  + settings.CHARSET + " seems unknown."
         print settings.print_warning_msg(warn_msg)
       else:
-        if menu.options.verbose:
+        if settings.VERBOSITY_LEVEL >= 1:
           success_msg = "The indicated web-page charset appears to be " 
           success_msg += Style.UNDERLINE + settings.CHARSET + Style.RESET_ALL + "."
           print settings.print_success_msg(success_msg)
@@ -590,7 +590,7 @@ def charset_detection(response):
       pass
   except:
     pass
-  if charset_detected == False and menu.options.verbose:
+  if charset_detected == False and settings.VERBOSITY_LEVEL >= 1:
     print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
 
 #eof

@@ -57,7 +57,7 @@ def authentication_process():
 
   if len(cookies) != 0 :
     menu.options.cookie = cookies.rstrip()
-    if menu.options.verbose:
+    if settings.VERBOSITY_LEVEL >= 1:
       success_msg = "The received cookie is " + Style.UNDERLINE 
       success_msg += menu.options.cookie + Style.RESET_ALL + "."
       print settings.print_success_msg(success_msg)
@@ -130,7 +130,7 @@ def http_auth_cracker(url, realm):
       for password in passwords:
         float_percent = "{0:.1f}%".format(round(((i*100)/(total*1.0)),2))
         # Check if verbose mode on
-        if menu.options.verbose:
+        if settings.VERBOSITY_LEVEL >= 1:
             sys.stdout.write(Fore.GREY + "(~) Checking: " + username + ":" + password + Style.RESET_ALL + "\n")
         try:
           # Basic authentication 
@@ -155,21 +155,21 @@ def http_auth_cracker(url, realm):
         except:
           pass  
         if found:
-          if not menu.options.verbose:
+          if not settings.VERBOSITY_LEVEL >= 1:
             float_percent = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
         else:
           if str(float_percent) == "100.0%":
-            if not menu.options.verbose:
+            if not settings.VERBOSITY_LEVEL >= 1:
               float_percent = Fore.RED + "FAILED" + Style.RESET_ALL
           else:  
             i = i + 1
-        if not menu.options.verbose:
+        if not settings.VERBOSITY_LEVEL >= 1:
           info_msg = "Checking for a valid pair of credentials... [ " +  float_percent + " ]"
           sys.stdout.write("\r\r" + settings.print_info_msg(info_msg))
           sys.stdout.flush()
         if found:
           valid_pair =  "" + username + ":" + password + ""
-          if not menu.options.verbose:
+          if not settings.VERBOSITY_LEVEL >= 1:
             print ""
           success_msg = "Identified a valid pair of credentials '" 
           success_msg += Style.UNDERLINE  + valid_pair + Style.RESET_ALL + Style.BRIGHT  + "'."  

@@ -47,6 +47,9 @@ TEST_PARAMETER = ""
 # Default target host OS (Unix-like)
 TARGET_OS = "unix"
 
+# Verbosity level: 0-1 (default 0)
+VERBOSITY_LEVEL = 0
+
 # Exploitation techniques states
 CLASSIC_STATE = False
 EVAL_BASED_STATE = False

@@ -96,7 +96,17 @@ def main():
       menu.parser.print_help()
       print ""
       sys.exit(0)
-    
+
+    # Define the level of verbosity.
+    if menu.options.verbose > 1:
+      err_msg = "The value for option '-v' "
+      err_msg += "must be an integer value from range [0, 1]."
+      print settings.print_error_msg(err_msg)
+      sys.exit(0)
+    else:  
+      settings.VERBOSITY_LEVEL = menu.options.verbose
+
+    # Define the level of tests to perform.
     if menu.options.level > 3:
       err_msg = "The value for option '--level' "
       err_msg += "must be an integer value from range [1, 3]."
@@ -148,7 +158,8 @@ def main():
               if split_first_letter[j] in settings.AVAILABLE_TECHNIQUES:
                 found_tech = True
               else:  
-                found_tech = False            
+                found_tech = False  
+                          
       if split_techniques_names[i].replace(' ', '') not in settings.AVAILABLE_TECHNIQUES and found_tech == False:
         err_msg = "You specified wrong value '" + split_techniques_names[i] + "' as injection technique. "
         err_msg += "The value, must be a string composed by the letters (C)lassic, (E)val-based, "
@@ -293,16 +304,16 @@ def main():
                       settings.TARGET_OS = user_defined_os
 
             found_server_banner = False
-            if menu.options.verbose:
+            if settings.VERBOSITY_LEVEL >= 1:
               info_msg = "Identifying the target server... " 
               sys.stdout.write(settings.print_info_msg(info_msg))
               sys.stdout.flush()
 
             for i in range(0,len(settings.SERVER_BANNERS)):
               if settings.SERVER_BANNERS[i].lower() in server_banner.lower():
-                if menu.options.verbose:
+                if settings.VERBOSITY_LEVEL >= 1:
                   print "[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]"
-                if menu.options.verbose:
+                if settings.VERBOSITY_LEVEL >= 1:
                   success_msg = "The server was identified as " 
                   success_msg += Style.UNDERLINE + server_banner + Style.RESET_ALL + "."
                   print settings.print_success_msg(success_msg)
@@ -321,7 +332,7 @@ def main():
                 break
 
             if not found_server_banner:
-              if menu.options.verbose:
+              if settings.VERBOSITY_LEVEL >= 1:
                 print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
               warn_msg = "Heuristics have failed to identify server."
               print settings.print_warning_msg(warn_msg)
@@ -584,7 +595,7 @@ def main():
 
   # Connection reset by peer
   except SocketError, e:
-    if menu.options.verbose:
+    if settings.VERBOSITY_LEVEL >= 1:
       print ""
     err_msg = "The target host is not responding."
     err_msg += " Please ensure that is up and try again."

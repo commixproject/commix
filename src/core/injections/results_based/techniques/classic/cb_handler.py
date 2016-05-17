@@ -79,7 +79,7 @@ def cb_injection_handler(url, delay, filename, http_request_method):
     info_msg = "Testing the " + technique + "... "
     sys.stdout.write(settings.print_info_msg(info_msg))
     sys.stdout.flush()
-    if menu.options.verbose:
+    if settings.VERBOSITY_LEVEL >= 1:
       print ""
       
   i = 0
@@ -133,7 +133,7 @@ def cb_injection_handler(url, delay, filename, http_request_method):
                   payload = re.sub(" ", whitespace, payload)
 
               # Check if defined "--verbose" option.
-              if menu.options.verbose:
+              if settings.VERBOSITY_LEVEL >= 1:
                 print settings.print_payload(payload)
                 
               # if need page reload
@@ -172,7 +172,7 @@ def cb_injection_handler(url, delay, filename, http_request_method):
               # Evaluate test results.
               shell = cb_injector.injection_test_results(response, TAG, randvcalc)
 
-              if not menu.options.verbose:
+              if not settings.VERBOSITY_LEVEL >= 1:
                 percent = ((i*100)/total)
                 float_percent = "{0:.1f}".format(round(((i*100)/(total*1.0)),2))
               
@@ -248,7 +248,7 @@ def cb_injection_handler(url, delay, filename, http_request_method):
             logs.update_payload(filename, counter, payload) 
             counter = counter + 1
             
-            if not menu.options.verbose and not settings.LOAD_SESSION:
+            if not settings.VERBOSITY_LEVEL >= 1 and not settings.LOAD_SESSION:
               print ""
 
             # Print the findings to terminal.
@@ -333,7 +333,7 @@ def cb_injection_handler(url, delay, filename, http_request_method):
               if go_back == True:
                 break 
               # if settings.ENUMERATION_DONE == False and settings.FILE_ACCESS_DONE == False:
-              #   if menu.options.verbose:
+              #   if settings.VERBOSITY_LEVEL >= 1:
               #     print ""
               question_msg = "Do you want a Pseudo-Terminal shell? [Y/n/q] > "
               gotshell = raw_input(settings.print_question_msg(question_msg)).lower()
@@ -393,7 +393,7 @@ def cb_injection_handler(url, delay, filename, http_request_method):
                           response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
                           # Evaluate injection results.
                           shell = cb_injector.injection_results(response, TAG, cmd)
-                          if menu.options.verbose:
+                          if settings.VERBOSITY_LEVEL >= 1:
                             print ""
                           err_msg = "The reverse TCP connection to the target host has been failed!"
                           print settings.print_error_msg(err_msg)
@@ -422,7 +422,7 @@ def cb_injection_handler(url, delay, filename, http_request_method):
                       if shell != "":
                         print "\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n"
                       else:
-                        if menu.options.verbose:
+                        if settings.VERBOSITY_LEVEL >= 1:
                           print ""
                         err_msg = "The '" + cmd + "' command, does not return any output."
                         print settings.print_error_msg(err_msg) + "\n"

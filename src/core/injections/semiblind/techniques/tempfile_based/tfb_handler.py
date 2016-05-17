@@ -69,7 +69,7 @@ __Warning:__ This technique is still experimental, is not yet fully functional a
 Delete previous shells outputs.
 """
 def delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
-  if menu.options.verbose:
+  if settings.VERBOSITY_LEVEL >= 1:
     print "",
   if settings.TARGET_OS == "win":
     cmd = settings.WIN_DEL + OUTPUT_TEXTFILE
@@ -106,7 +106,7 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
     err_msg = "The '--url-reload' option is not available in " + technique + "!"
     print settings.print_error_msg(err_msg)
   
-  if menu.options.verbose:
+  if settings.VERBOSITY_LEVEL >= 1:
     info_msg ="Testing the " + technique + "... "
     print settings.print_info_msg(info_msg) + info_msg
 
@@ -156,7 +156,7 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
                 payload = base64.b64encode(payload)
 
               # Check if defined "--verbose" option.
-              if menu.options.verbose:
+              if settings.VERBOSITY_LEVEL >= 1:
                 payload_msg = payload.replace("\n", "\\n")
                 print settings.print_payload(payload_msg)
                   
@@ -200,7 +200,7 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
                 how_long_statistic = 0
 
               if percent == 100 and no_result == True:
-                if not menu.options.verbose:
+                if not settings.VERBOSITY_LEVEL >= 1:
                   percent = Fore.RED + "FAILED" + Style.RESET_ALL
                 else:
                   percent = ""
@@ -263,7 +263,7 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
                       if str(output) == str(randvcalc) and len(TAG) == output_length:
                         is_vulnerable = True
                         how_long_statistic = 0
-                        if not menu.options.verbose:
+                        if not settings.VERBOSITY_LEVEL >= 1:
                           percent = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
                         else:
                           percent = ""
@@ -272,20 +272,20 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
                       break
                   # False positive
                   else:
-                    if not menu.options.verbose:
+                    if not settings.VERBOSITY_LEVEL >= 1:
                       percent = str(float_percent)+ "%"
                       info_msg =  "Testing the " + technique + "... " +  "[ " + percent + " ]"
                       sys.stdout.write("\r" + settings.print_info_msg(info_msg))
                       sys.stdout.flush()
                     continue    
                 else:
-                  if not menu.options.verbose:
+                  if not settings.VERBOSITY_LEVEL >= 1:
                     percent = str(float_percent)+ "%"
                     info_msg =  "Testing the " + technique + "... " +  "[ " + percent + " ]"
                     sys.stdout.write("\r" + settings.print_info_msg(info_msg))
                     sys.stdout.flush()
                   continue
-              if not menu.options.verbose:
+              if not settings.VERBOSITY_LEVEL >= 1:
                 info_msg =  "Testing the " + technique + "... " +  "[ " + percent + " ]"
                 sys.stdout.write("\r" + settings.print_info_msg(info_msg))
                 sys.stdout.flush()
@@ -306,7 +306,7 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
               float_percent = "{0:.1f}".format(round(((num_of_chars*100)/(total*1.0)),2))
               if str(float_percent) == "100.0":
                 if no_result == True:
-                  if not menu.options.verbose:
+                  if not settings.VERBOSITY_LEVEL >= 1:
                     percent = Fore.RED + "FAILED" + Style.RESET_ALL
                     info_msg =  "Testing the " + technique + "... " +  "[ " + percent + " ]"
                     sys.stdout.write("\r" + settings.print_info_msg(info_msg))
@@ -541,7 +541,7 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
                             response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
                             # Evaluate injection results.
                             shell = cb_injector.injection_results(response, TAG, cmd)
-                            if menu.options.verbose:
+                            if settings.VERBOSITY_LEVEL >= 1:
                               print ""
                             err_msg = "The reverse TCP connection has been failed!"
                             print settings.print_error_msg(err_msg)

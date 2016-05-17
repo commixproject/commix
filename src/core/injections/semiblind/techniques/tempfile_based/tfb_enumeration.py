@@ -50,7 +50,7 @@ def powershell_version(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_
     if float(ps_version):
       settings.PS_ENABLED = True
       ps_version = "".join(str(p) for p in output)
-      if menu.options.verbose:
+      if settings.VERBOSITY_LEVEL >= 1:
         print ""
       # Output PowerShell's version number
       success_msg = "The PowerShell's version number is " + Style.UNDERLINE
@@ -127,7 +127,7 @@ def system_information(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_
       output = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
     target_arch = output
     if target_arch:
-      if menu.options.verbose:
+      if settings.VERBOSITY_LEVEL >= 1:
         print ""
       target_arch = "".join(str(p) for p in target_arch)
       success_msg = "The target operating system is " + Style.UNDERLINE + target_os + Style.RESET_ALL  
@@ -176,7 +176,7 @@ def current_user(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_reques
         output = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
         new_line = ""
       shell = output
-      if menu.options.verbose:
+      if settings.VERBOSITY_LEVEL >= 1:
         print ""
       success_msg = "The current user is " + Style.UNDERLINE + cu_account  
       sys.stdout.write(new_line + settings.print_success_msg(success_msg))
@@ -203,7 +203,7 @@ def current_user(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_reques
           output_file.write(" and it is privileged.\n")
           output_file.close()
     else:
-      if menu.options.verbose:
+      if settings.VERBOSITY_LEVEL >= 1:
         print ""
       success_msg = "The current user is " + Style.UNDERLINE + cu_account
       sys.stdout.write(settings.print_success_msg(success_msg) + ".")
@@ -239,7 +239,7 @@ def system_users(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_reques
   sys_users = output
   # Windows users enumeration.
   if settings.TARGET_OS == "win":
-    if menu.options.verbose:
+    if settings.VERBOSITY_LEVEL >= 1:
       print ""
     info_msg = "Executing the 'net users' command "
     info_msg += "to enumerate users entries... "  
@@ -285,7 +285,7 @@ def system_users(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_reques
           else :
             is_privileged = ""
             is_privileged_nh = ""
-          if menu.options.verbose:
+          if settings.VERBOSITY_LEVEL >= 1:
             print ""
           print "\n  (" +str(count)+ ") '" + Style.BRIGHT + Style.UNDERLINE + sys_users_list[user] + Style.RESET_ALL + "'" + Style.BRIGHT + is_privileged + Style.RESET_ALL + "."
           # Add infos to logs file.
@@ -354,7 +354,7 @@ def system_users(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_reques
             for user in range(0, len(sys_users_list)):
               sys_users = sys_users_list[user]
               sys_users = ":".join(str(p) for p in sys_users)
-              if menu.options.verbose:
+              if settings.VERBOSITY_LEVEL >= 1:
                 print ""
               count = count + 1
               fields = sys_users.split(":")
@@ -502,7 +502,7 @@ def single_os_cmd_exec(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_
     session_handler.store_cmd(url, cmd, output, vuln_parameter)
     return check_how_long, output
   else:
-    if not menu.options.verbose:
+    if not settings.VERBOSITY_LEVEL >= 1:
       print ""
     output = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
     print Fore.GREEN + Style.BRIGHT + str(output) + Style.RESET_ALL

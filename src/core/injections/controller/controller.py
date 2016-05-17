@@ -91,32 +91,33 @@ def injection_proccess(url, check_parameter, http_request_method, filename, dela
     settings.CLASSIC_STATE = None
     if cb_handler.exploitation(url, delay, filename, http_request_method) != False:
       settings.CLASSIC_STATE = True
-  else:
-    settings.CLASSIC_STATE = False
+    else:
+      settings.CLASSIC_STATE = False
 
   # Check if it is vulnerable to eval-based code injection technique.
   if not menu.options.tech or "e" in menu.options.tech:
     settings.EVAL_BASED_STATE = None
     if eb_handler.exploitation(url, delay, filename, http_request_method) != False:
       settings.EVAL_BASED_STATE = True
-  else:
-    settings.EVAL_BASED_STATE = False
+    else:
+      settings.EVAL_BASED_STATE = False
+
 
   # Check if it is vulnerable to time-based blind command injection technique.
   if not menu.options.tech or "t" in menu.options.tech:
     settings.TIME_BASED_STATE = None
     if tb_handler.exploitation(url, delay, filename, http_request_method, url_time_response) != False:
       settings.TIME_BASED_STATE = True
-  else:
-    settings.TIME_BASED_STATE = False
+    else:
+      settings.TIME_BASED_STATE = False
 
   # Check if it is vulnerable to file-based semiblind command injection technique.
   if not menu.options.tech or "f" in menu.options.tech:
     settings.FILE_BASED_STATE = None
     if fb_handler.exploitation(url, delay, filename, http_request_method, url_time_response) != False:
       settings.FILE_BASED_STATE = True
-  else:
-    settings.FILE_BASED_STATE = False
+    else:
+      settings.FILE_BASED_STATE = False
 
   # All injection techniques seems to be failed!
   if settings.CLASSIC_STATE == settings.EVAL_BASED_STATE == settings.TIME_BASED_STATE == settings.FILE_BASED_STATE == False :

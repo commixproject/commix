@@ -48,7 +48,7 @@ def file_read(separator, payload, TAG, delay, prefix, suffix, http_request_metho
     session_handler.store_cmd(url, cmd, shell, vuln_parameter)
   else:
     shell = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
-  if menu.options.verbose:
+  if settings.VERBOSITY_LEVEL >= 1:
     print ""
   if shell:
     success_msg = "The contents of file '" + Style.UNDERLINE 
@@ -134,7 +134,7 @@ def file_write(separator, payload, TAG, delay, prefix, suffix, http_request_meth
   shell = fb_injector.injection_results(url, OUTPUT_TEXTFILE, delay)
   shell = "".join(str(p) for p in shell)
   if shell:
-    if menu.options.verbose:
+    if settings.VERBOSITY_LEVEL >= 1:
       print ""
     success_msg = "The " + Style.UNDERLINE + shell + Style.RESET_ALL
     success_msg += Style.BRIGHT + " file was created successfully!" + "\n" 
@@ -186,7 +186,7 @@ def file_upload(separator, payload, TAG, delay, prefix, suffix, http_request_met
     shell = fb_injector.injection_results(url, OUTPUT_TEXTFILE, delay)
     shell = "".join(str(p) for p in shell)
     if shell:
-      if menu.options.verbose:
+      if settings.VERBOSITY_LEVEL >= 1:
         print ""
       success_msg = "The " + Style.UNDERLINE + shell
       success_msg += Style.RESET_ALL + Style.BRIGHT + " file was uploaded successfully!" 

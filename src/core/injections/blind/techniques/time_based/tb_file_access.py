@@ -52,7 +52,7 @@ def file_read(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_m
     shell = "".join(str(p) for p in shell)
   except TypeError:
     pass
-  if menu.options.verbose:
+  if settings.VERBOSITY_LEVEL >= 1:
     print ""
   if shell:
     success_msg = "The contents of file '" + Style.UNDERLINE 
@@ -153,7 +153,7 @@ def file_write(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_
     shell = "".join(str(p) for p in shell)
   except TypeError:
     pass
-  # if menu.options.verbose:
+  # if settings.VERBOSITY_LEVEL >= 1:
   #   print ""
   if shell:
     success_msg = "The '" + Style.UNDERLINE + shell + Style.RESET_ALL 

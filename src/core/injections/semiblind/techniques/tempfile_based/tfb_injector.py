@@ -193,7 +193,7 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_m
     if menu.options.base64:
       payload = base64.b64encode(payload)
     # Check if defined "--verbose" option.
-    if menu.options.verbose:
+    if settings.VERBOSITY_LEVEL >= 1:
       payload_msg = payload.replace("\n", "\\n") 
       sys.stdout.write("\n" + settings.print_payload(payload_msg))
 
@@ -227,7 +227,7 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_m
 
     if injection_check == True:   
       if output_length > 1:
-        if menu.options.verbose:
+        if settings.VERBOSITY_LEVEL >= 1:
           print "\n"
         else:
           sys.stdout.write("[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL+ "]\n")
@@ -274,7 +274,7 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_m
         if menu.options.base64:
           payload = base64.b64encode(payload)
         # Check if defined "--verbose" option.
-        if menu.options.verbose:
+        if settings.VERBOSITY_LEVEL >= 1:
           payload_msg = payload.replace("\n", "\\n") 
           sys.stdout.write("\n" + settings.print_payload(payload_msg))
 
@@ -306,7 +306,7 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_m
         if (how_long >= settings.FOUND_HOW_LONG and how_long - delay >= settings.FOUND_DIFF):
           injection_check = True
         if injection_check == True:
-          if not menu.options.verbose:
+          if not settings.VERBOSITY_LEVEL >= 1:
             output.append(chr(ascii_char))
             percent = ((num_of_chars*100)/output_length)
             float_percent = "{0:.1f}".format(round(((num_of_chars*100)/(output_length * 1.0)),2))
@@ -326,7 +326,7 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_m
 
   else:
     check_start = 0
-    if not menu.options.verbose:
+    if not settings.VERBOSITY_LEVEL >= 1:
       sys.stdout.write("[" +Fore.RED+ " FAILED " + Style.RESET_ALL+ "]")
       sys.stdout.flush() 
     else:
@@ -342,7 +342,7 @@ False Positive check and evaluation.
 def false_positive_check(separator, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, randvcalc, alter_shell, how_long, url_time_response):
 
   found_chars = False
-  if menu.options.verbose: 
+  if settings.VERBOSITY_LEVEL >= 1: 
     info_msg = "Testing the reliability of used payload... "
     sys.stdout.write(settings.print_info_msg(info_msg))
     sys.stdout.flush()  
@@ -362,7 +362,7 @@ def false_positive_check(separator, TAG, cmd, prefix, suffix, delay, http_reques
       payload = base64.b64encode(payload)
 
     # Check if defined "--verbose" option.
-    if menu.options.verbose:
+    if settings.VERBOSITY_LEVEL >= 1:
       payload_msg = payload.replace("\n", "\\n") 
       sys.stdout.write("\n" + settings.print_payload(payload_msg))
 
@@ -415,7 +415,7 @@ def false_positive_check(separator, TAG, cmd, prefix, suffix, delay, http_reques
           payload = base64.b64encode(payload)
 
         # Check if defined "--verbose" option.
-        if menu.options.verbose:
+        if settings.VERBOSITY_LEVEL >= 1:
           payload_msg = payload.replace("\n", "\\n") 
           sys.stdout.write("\n" + settings.print_payload(payload_msg))
 

@@ -150,7 +150,7 @@ def injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method,
     payload = base64.b64encode(payload)   
 
   # Check if defined "--verbose" option.
-  if menu.options.verbose:
+  if settings.VERBOSITY_LEVEL >= 1:
     payload_msg = payload.replace("\n", "\\n")
     if settings.COMMENT in payload_msg:
       payload_msg = payload_msg.split(settings.COMMENT)[0]

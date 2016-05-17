@@ -143,7 +143,7 @@ def eb_injection_handler(url, delay, filename, http_request_method):
               payload = re.sub(" ", "%20", payload)
 
             # Check if defined "--verbose" option.
-            if menu.options.verbose:
+            if settings.VERBOSITY_LEVEL >= 1:
               sys.stdout.write("\n" + settings.print_payload(payload))
 
             # Cookie Injection
@@ -183,7 +183,7 @@ def eb_injection_handler(url, delay, filename, http_request_method):
             # Evaluate test results.
             shell = eb_injector.injection_test_results(response, TAG, randvcalc)
 
-            if not menu.options.verbose:
+            if not settings.VERBOSITY_LEVEL >= 1:
               percent = ((i*100)/total)
               float_percent = "{0:.1f}".format(round(((i*100)/(total * 1.0)),2))
 
@@ -403,7 +403,7 @@ def eb_injection_handler(url, delay, filename, http_request_method):
                         response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
                         # Evaluate injection results.
                         shell = eb_injector.injection_results(response, TAG, cmd)
-                        if menu.options.verbose:
+                        if settings.VERBOSITY_LEVEL >= 1:
                           print ""
                         err_msg = "The reverse TCP connection has been failed!"
                         print settings.print_error_msg(err_msg)

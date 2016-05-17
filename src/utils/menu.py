@@ -50,11 +50,11 @@ parser = OptionParser(usage=usage)
 general = OptionGroup(parser, Style.BRIGHT + "General" + Style.RESET_ALL, 
                         "These options relate to general matters. ")
 
-general.add_option("--verbose",
-                action="store_true",
+general.add_option("-v",
+                action="store",
+                type="int",
                 dest="verbose",
-                default=False,
-                help="Enable the verbose mode.")
+                help="Verbosity level: 0-1 (default 0)")
 
 general.add_option("--install",
                 action="store_true",
@@ -141,7 +141,7 @@ request.add_option("--user-agent",
 request.add_option("--random-agent",
                 action="store_true",
                 dest="random_agent",
-                default = False,
+                default=False,
                 help="Use a randomly selected HTTP User-Agent header.")
 
 request.add_option("--param-del",
@@ -211,7 +211,7 @@ request.add_option("--ignore-401",
 request.add_option("--force-ssl",
                 action="store_true",
                 dest="force_ssl",
-                default = False,
+                default=False,
                 help="Force usage of SSL/HTTPS.")
 
 # Enumeration options
@@ -221,61 +221,61 @@ enumeration = OptionGroup(parser, Style.BRIGHT + "Enumeration" + Style.RESET_ALL
 enumeration.add_option("--all", 
                 action="store_true",
                 dest="enum_all",
-                default = False,
+                default=False,
                 help="Retrieve everything.")
 
 enumeration.add_option("--current-user", 
                 action="store_true",
                 dest="current_user",
-                default = False,
+                default=False,
                 help="Retrieve current user name.")
 
 enumeration.add_option("--hostname", 
                 action="store_true",
                 dest="hostname",
-                default = False,
+                default=False,
                 help="Retrieve current hostname.")
 
 enumeration.add_option("--is-root", 
                 action="store_true",
                 dest="is_root",
-                default = False,
+                default=False,
                 help="Check if the current user have root privileges.")
 
 enumeration.add_option("--is-admin", 
                 action="store_true",
                 dest="is_admin",
-                default = False,
+                default=False,
                 help="Check if the current user have admin privileges.")
 
 enumeration.add_option("--sys-info", 
                 action="store_true",
                 dest="sys_info",
-                default = False,
+                default=False,
                 help="Retrieve system information.")
 
 enumeration.add_option("--users", 
                 action="store_true",
                 dest="users",
-                default = False,
+                default=False,
                 help="Retrieve system users.")
 
 enumeration.add_option("--passwords", 
                 action="store_true",
                 dest="passwords",
-                default = False,
+                default=False,
                 help="Retrieve system users password hashes.")
 
 enumeration.add_option("--privileges", 
                 action="store_true",
                 dest="privileges",
-                default = False,
+                default=False,
                 help="Retrieve system users privileges.")
 
 enumeration.add_option("--ps-version", 
                 action="store_true",
                 dest="ps_version",
-                default = False,
+                default=False,
                 help="Retrieve PowerShell's version number.")
 
 # File access options
@@ -308,19 +308,19 @@ modules = OptionGroup(parser, Style.BRIGHT + "Modules" + Style.RESET_ALL,
 modules.add_option("--icmp-exfil", 
                 action="store",
                 dest="ip_icmp_data",
-                default = False,
+                default=False,
                 help="The 'ICMP exfiltration' injection module.           (e.g. 'ip_src=192.168.178.1,ip_dst=192.168.178.3').")
 
 modules.add_option("--dns-server", 
                 action="store",
                 dest="dns_server",
-                default = False,
+                default=False,
                 help="The 'DNS exfiltration' injection module.        (Domain name used for DNS exfiltration attack).")
 
 modules.add_option("--shellshock", 
                 action="store_true",
                 dest="shellshock",
-                default = False,
+                default=False,
                 help="The 'shellshock' injection module.")
 
 # Injection options
@@ -361,13 +361,13 @@ injection.add_option("--delay",
 injection.add_option("--tmp-path", 
                 action="store",
                 dest="tmp_path",
-                default = False,
+                default=False,
                 help="Set the absolute path of web server's temp directory.")
 
 injection.add_option("--root-dir", 
                 action="store",
                 dest="srv_root_dir",
-                default = False,
+                default=False,
                 help="Set the absolute path of web server's root directory.")
 
 injection.add_option("--alter-shell", 
@@ -379,13 +379,13 @@ injection.add_option("--alter-shell",
 injection.add_option("--os-cmd", 
                 action="store",
                 dest="os_cmd",
-                default = False,
+                default=False,
                 help="Execute a single operating system command.")
 
 injection.add_option("--os",
                 action="store", 
                 dest="os",
-                default = False,
+                default=False,
                 help="Force back-end operating system to this value.")
 
 injection.add_option("--base64", 
@@ -409,13 +409,13 @@ misc = OptionGroup(parser, Style.BRIGHT + "Miscellaneous" + Style.RESET_ALL)
 misc.add_option("--dependencies", 
                 action="store_true",
                 dest="noncore_dependencies",
-                default = False,
+                default=False,
                 help="Check for third-party (non-core) dependencies.")
 
 misc.add_option("--skip-waf", 
                 action="store_true",
                 dest="skip_waf",
-                default = False,
+                default=False,
                 help="Skip heuristic detection of WAF/IPS/IDS protection.")
 
 parser.add_option_group(general)

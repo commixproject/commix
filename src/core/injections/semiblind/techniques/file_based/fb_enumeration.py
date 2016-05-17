@@ -52,7 +52,7 @@ def powershell_version(separator, payload, TAG, delay, prefix, suffix, http_requ
   try:
     if float(ps_version):
       settings.PS_ENABLED = True
-      if menu.options.verbose:
+      if settings.VERBOSITY_LEVEL >= 1:
         print ""
       # Output PowerShell's version number
       success_msg = "The PowerShell's version number is " + Style.UNDERLINE
@@ -86,7 +86,7 @@ def hostname(separator, payload, TAG, delay, prefix, suffix, http_request_method
   else:
     shell = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
   if shell:
-    if menu.options.verbose:
+    if settings.VERBOSITY_LEVEL >= 1:
       print ""
     success_msg = "The hostname is " + Style.UNDERLINE + shell
     sys.stdout.write(settings.print_success_msg(success_msg) + ".\n")
@@ -126,7 +126,7 @@ def system_information(separator, payload, TAG, delay, prefix, suffix, http_requ
     else:
       target_arch = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
     if target_arch:
-      if menu.options.verbose:
+      if settings.VERBOSITY_LEVEL >= 1:
         print ""
       success_msg = "The target operating system is " + Style.UNDERLINE + target_os + Style.RESET_ALL  
       success_msg += Style.BRIGHT + " and the hardware platform is " + Style.UNDERLINE + target_arch
@@ -169,7 +169,7 @@ def current_user(separator, payload, TAG, delay, prefix, suffix, http_request_me
         session_handler.store_cmd(url, cmd, shell, vuln_parameter)
       else:
         shell = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
-      if menu.options.verbose:
+      if settings.VERBOSITY_LEVEL >= 1:
         print ""
       success_msg = "The current user is " + Style.UNDERLINE + cu_account  
       sys.stdout.write(settings.print_success_msg(success_msg))
@@ -195,7 +195,7 @@ def current_user(separator, payload, TAG, delay, prefix, suffix, http_request_me
           output_file.write(" and it is privileged.\n")
           output_file.close()
     else:
-      if menu.options.verbose:
+      if settings.VERBOSITY_LEVEL >= 1:
         print ""
       success_msg = "The current user is " + Style.UNDERLINE + cu_account  
       sys.stdout.write(settings.print_success_msg(success_msg))
@@ -228,7 +228,7 @@ def system_users(separator, payload, TAG, delay, prefix, suffix, http_request_me
     sys_users = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
   # Windows users enumeration.
   if settings.TARGET_OS == "win":
-    if menu.options.verbose:
+    if settings.VERBOSITY_LEVEL >= 1:
       print ""
     info_msg = "Executing the 'net users' command "
     info_msg += "to enumerate users entries... "  
@@ -275,7 +275,7 @@ def system_users(separator, payload, TAG, delay, prefix, suffix, http_request_me
           else :
             is_privileged = ""
             is_privileged_nh = ""
-          if menu.options.verbose:
+          if settings.VERBOSITY_LEVEL >= 1:
             print ""          
           print "  (" +str(count)+ ") '" + Style.BRIGHT + Style.UNDERLINE + sys_users_list[user] + Style.RESET_ALL + "'" + Style.BRIGHT + is_privileged + Style.RESET_ALL + "." 
           # Add infos to logs file.   
@@ -300,7 +300,7 @@ def system_users(separator, payload, TAG, delay, prefix, suffix, http_request_me
       sys.stdout.flush()
       pass
   else:
-    if menu.options.verbose:
+    if settings.VERBOSITY_LEVEL >= 1:
       print ""
     info_msg = "Fetching '" + settings.PASSWD_FILE 
     info_msg += "' to enumerate users entries... "  
@@ -427,7 +427,7 @@ def system_passwords(separator, payload, TAG, delay, prefix, suffix, http_reques
       sys_passes = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
     if sys_passes == "":
       sys_passes = " "
-      if menu.options.verbose:
+      if settings.VERBOSITY_LEVEL >= 1:
         print ""
       info_msg = "Fetching '" + settings.SHADOW_FILE 
       info_msg += "' to enumerate users password hashes... "  
@@ -489,7 +489,7 @@ def single_os_cmd_exec(separator, payload, TAG, delay, prefix, suffix, http_requ
   else:
     shell = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
   if shell:
-    if menu.options.verbose:
+    if settings.VERBOSITY_LEVEL >= 1:
       print ""
     if shell != "":
       print Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL
@@ -503,7 +503,7 @@ Check the defined options
 """
 def do_check(separator, payload, TAG, delay, prefix, suffix, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
   
-  if not menu.options.verbose and not settings.ENUMERATION_DONE:
+  if not settings.VERBOSITY_LEVEL >= 1 and not settings.ENUMERATION_DONE:
     print ""
 
   # Check if PowerShell is enabled.

@@ -1,4 +1,5 @@
 ## Version 0.9b
+* Added: Support for verbosity levels (currently supported levels: 0,1).
 * Fixed: Minor rearrangement of prefixes and separators has been implemented.
 * Revised: The "time-based" (blind) technique for *nix targets has been shortly revised.
 * Revised: The source code has been revised to support "print_state_msg" (i.e error, warning, success etc) functions.

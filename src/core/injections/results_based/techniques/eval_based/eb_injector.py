@@ -195,7 +195,7 @@ def injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vul
     payload = re.sub(" ", "%20", payload)
 
   # Check if defined "--verbose" option.
-  if menu.options.verbose:
+  if settings.VERBOSITY_LEVEL >= 1:
     sys.stdout.write("\n" + settings.print_payload(payload))
 
   # Check if defined cookie with "INJECT_HERE" tag

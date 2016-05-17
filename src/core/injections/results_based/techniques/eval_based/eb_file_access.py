@@ -48,7 +48,7 @@ def file_read(separator, TAG, prefix, suffix, http_request_method, url, vuln_par
     session_handler.store_cmd(url, cmd, shell, vuln_parameter)
   else:
     shell = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
-  if menu.options.verbose:
+  if settings.VERBOSITY_LEVEL >= 1:
     print ""
   if shell:
     success_msg = "The contents of file '" + Style.UNDERLINE 
@@ -136,14 +136,14 @@ def file_write(separator, TAG, prefix, suffix, http_request_method, url, vuln_pa
   shell = eb_injector.injection_results(response, TAG, cmd)
   shell = "".join(str(p) for p in shell)
   if shell:
-    if menu.options.verbose:
+    if settings.VERBOSITY_LEVEL >= 1:
       print ""
     success_msg = "The " + Style.UNDERLINE + shell + Style.RESET_ALL
     success_msg += Style.BRIGHT + " file was created successfully!" + "\n" 
     sys.stdout.write(settings.print_success_msg(success_msg))
     sys.stdout.flush()
   else:
-    if menu.options.verbose:
+    if settings.VERBOSITY_LEVEL >= 1:
       print ""
     warn_msg = "It seems that you don't have permissions to write the '" + dest_to_write + "' file." 
     sys.stdout.write(settings.print_warning_msg(warn_msg) + "\n")
@@ -190,7 +190,7 @@ def file_upload(separator, TAG, prefix, suffix, http_request_method, url, vuln_p
     response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
     shell = eb_injector.injection_results(response, TAG, cmd)
     shell = "".join(str(p) for p in shell)
-    if menu.options.verbose:
+    if settings.VERBOSITY_LEVEL >= 1:
       print ""
     if shell:
       success_msg = "The " + Style.UNDERLINE + shell
