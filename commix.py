@@ -160,8 +160,10 @@ def main():
               else:  
                 found_tech = False  
                           
-      if split_techniques_names[i].replace(' ', '') not in settings.AVAILABLE_TECHNIQUES and found_tech == False:
-        err_msg = "You specified wrong value '" + split_techniques_names[i] + "' as injection technique. "
+      if split_techniques_names[i].replace(' ', '') not in settings.AVAILABLE_TECHNIQUES and \
+         found_tech == False:
+        err_msg = "You specified wrong value '" + split_techniques_names[i] 
+        err_msg += "' as injection technique. "
         err_msg += "The value, must be a string composed by the letters (C)lassic, (E)val-based, "
         err_msg += "(T)ime-based, (F)ile-based (with or without commas)."
         print settings.print_error_msg(err_msg)
@@ -257,7 +259,8 @@ def main():
             except ValueError:
               # Invalid format for the '--headers' option.
               print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
-              err_msg = "Use '--headers=\"HEADER_NAME:HEADER_VALUE\"' to provide an HTTP header or"
+              err_msg = "Use '--headers=\"HEADER_NAME:HEADER_VALUE\"' "
+              err_msg += "to provide an HTTP header or"
               err_msg += " '--headers=\"HEADER_NAME:" + settings.INJECT_TAG + "\"' "
               err_msg += "if you want to try to exploit the provided HTTP header."
               print settings.print_error_msg(err_msg)
@@ -266,7 +269,6 @@ def main():
           raise
 
         html_data = content = response.read()
-
         print "[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]"
 
         # Used a valid pair of valid credentials
@@ -295,7 +297,8 @@ def main():
 
                   settings.TARGET_OS = identified_os[:3].lower()
                   if menu.options.shellshock:
-                    err_msg = "The shellshock module is not available for " + identified_os + " targets."
+                    err_msg = "The shellshock module is not available for " 
+                    err_msg += identified_os + " targets."
                     print settings.print_critical_msg(err_msg)
                     raise SystemExit()
                 else:
@@ -351,7 +354,8 @@ def main():
             # Check for wrong flags.
             if settings.TARGET_OS == "win":
               if menu.options.is_root :
-                warn_msg = "Swithing '--is-root' to '--is-admin' because the target has been identified as windows."
+                warn_msg = "Swithing '--is-root' to '--is-admin' because the "
+                warn_msg += "target has been identified as windows."
                 print settings.print_warning_msg(warn_msg)
               if menu.options.passwords:
                 warn_msg = "The '--passwords' option, is not yet available for Windows targets."
@@ -396,7 +400,8 @@ def main():
 
             if not menu.options.os:
               if found_server_banner == False:
-                warn_msg = "The server which was identified as " + server_banner + " seems unknown."
+                warn_msg = "The server which was identified as " 
+                warn_msg += server_banner + " seems unknown."
                 print settings.print_warning_msg(warn_msg)
           else:
             found_os_server = checks.user_defined_os()
@@ -430,7 +435,8 @@ def main():
 
           except ValueError:
             print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
-            err_msg = "The identified HTTP authentication type (" + auth_type + ") is not yet supported."
+            err_msg = "The identified HTTP authentication type (" + auth_type + ") "
+            err_msg += "is not yet supported."
             print settings.print_error_msg(err_msg) + "\n"
             sys.exit(0)
 
