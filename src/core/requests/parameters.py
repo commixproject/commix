@@ -185,6 +185,14 @@ def do_POST_check(parameter):
   def is_JSON_check(parameter):
     try:
       json_object = json.loads(parameter)
+      if re.search(settings.JSON_RECOGNITION_REGEX, parameter):
+        if settings.VERBOSITY_LEVEL >= 1 and not settings.IS_JSON:
+          success_msg = Style.BRIGHT + Style.UNDERLINE + "JSON data" 
+          success_msg += Style.RESET_ALL + Style.BRIGHT
+          success_msg += " found in POST data" 
+          success_msg += Style.RESET_ALL + "."
+          print settings.print_success_msg(success_msg)
+    
     except ValueError, err_msg:
       if not "No JSON object could be decoded" in err_msg:
         err_msg = "JSON " + str(err_msg) + ". "
@@ -194,12 +202,10 @@ def do_POST_check(parameter):
     else:  
       return True
 
-  if all(symbol in parameter for symbol in settings.JSON_SYMBOLS):
-    parameter = parameter.replace("'", "\"")
-
   # Check if JSON Object.
   if is_JSON_check(parameter):
     settings.IS_JSON = True
+    
   # Split parameters
   if settings.IS_JSON:
     settings.PARAMETER_DELIMITER = ","

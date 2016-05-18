@@ -263,6 +263,9 @@ SET_OPTIONS = [
 # Cookie delimiter
 COOKIE_DELIMITER = ";"
 
+# Split parameter value
+PARAMETER_SPLITTING_REGEX = r'[,]'
+
 # Cookie delimiter
 PARAMETER_DELIMITER = "&"
 
@@ -336,7 +339,7 @@ FILE_ACCESS_AGAIN = False
 IS_JSON = False
 
 # JSON Symbols
-JSON_SYMBOLS = set("{}:'")
+JSON_RECOGNITION_REGEX = r'(?s)\A(\s*\[)*\s*\{.*"[^"]+"\s*:\s*("[^"]+"|\d+).*\}\s*(\]\s*)*\Z'
 
 # TFB Decimal
 TFB_DECIMAL = False

@@ -127,7 +127,7 @@ def main():
     if menu.options.test_parameter:
       if menu.options.test_parameter.startswith("="):
         menu.options.test_parameter = menu.options.test_parameter[1:]
-      settings.TEST_PARAMETER = menu.options.test_parameter.split(",")
+      settings.TEST_PARAMETER = menu.options.test_parameter.split(settings.PARAMETER_SPLITTING_REGEX)
       for i in range(0,len(settings.TEST_PARAMETER)):
         if "=" in settings.TEST_PARAMETER[i]:
           settings.TEST_PARAMETER[i] = settings.TEST_PARAMETER[i].split("=")[0]
@@ -146,8 +146,8 @@ def main():
       # Convert injection technique(s) to lowercase
       menu.options.tech = menu.options.tech.lower()
       # Check if used the ',' separator
-      if "," in menu.options.tech:
-        split_techniques_names = menu.options.tech.split(",")
+      if settings.PARAMETER_SPLITTING_REGEX in menu.options.tech:
+        split_techniques_names = menu.options.tech.split(settings.PARAMETER_SPLITTING_REGEX)
       else:
         split_techniques_names = menu.options.tech.split()
       if split_techniques_names:
@@ -271,9 +271,10 @@ def main():
 
         # Used a valid pair of valid credentials
         if menu.options.auth_cred:
-          info_msg = "Identified a valid pair of credentials '" + Style.UNDERLINE 
-          info_msg += menu.options.auth_cred + Style.RESET_ALL + Style.BRIGHT  + "'."
-          print Style.BRIGHT + info_msg + Style.RESET_ALL
+          success_msg = Style.BRIGHT + "Identified a valid pair of credentials '" 
+          success_msg += Style.UNDERLINE + menu.options.auth_cred + Style.RESET_ALL 
+          success_msg += Style.BRIGHT + "'." + Style.RESET_ALL
+          print settings.print_success_msg(success_msg)
 
         try:
           if response.info()['server'] :
