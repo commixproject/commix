@@ -146,8 +146,9 @@ def injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method,
   payload = parameters.prefixes(payload, prefix)
   payload = parameters.suffixes(payload, suffix)
 
-  if menu.options.base64:
-    payload = base64.b64encode(payload)   
+  if settings.TAMPER_SCRIPTS['base64encode']:
+    from src.core.tamper import base64encode
+    payload = base64encode.encode(payload)  
 
   # Check if defined "--verbose" option.
   if settings.VERBOSITY_LEVEL >= 1:

@@ -96,7 +96,8 @@ def eb_injection_handler(url, delay, filename, http_request_method):
         # If a previous session is available.
         if settings.LOAD_SESSION and session_handler.notification(url, technique):
           url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response, delay, how_long, output_length, is_vulnerable = session_handler.injection_point_exportation(url, http_request_method)
-        
+          checks.check_for_tamper(payload)
+          
         if settings.RETEST == True:
           settings.RETEST = False
           from src.core.injections.results_based.techniques.classic import cb_handler
@@ -136,9 +137,9 @@ def eb_injection_handler(url, delay, filename, http_request_method):
               payload = payload.replace(")%3B" + urllib.quote(")}"), ")" + urllib.quote(")}"))
             payload = payload +  TAG + ""
 
-            if menu.options.base64:
-              payload = urllib.unquote(payload)
-              payload = base64.b64encode(payload)
+            if settings.TAMPER_SCRIPTS['base64encode']:
+              from src.core.tamper import base64encode
+              payload = base64encode.encode(payload)
             else:
               payload = re.sub(" ", "%20", payload)
 

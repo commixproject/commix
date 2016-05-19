@@ -120,6 +120,7 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
         if settings.LOAD_SESSION:
           cmd = shell = ""
           url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response, delay, how_long, output_length, is_vulnerable = session_handler.injection_point_exportation(url, http_request_method)
+          checks.check_for_tamper(payload)
           settings.FOUND_HOW_LONG = how_long
           settings.FOUND_DIFF = how_long - delay
           OUTPUT_TEXTFILE = tmp_path + TAG + ".txt"
@@ -152,8 +153,9 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
               payload = parameters.suffixes(payload, suffix)
 
               # Encode payload to Base64
-              if menu.options.base64:
-                payload = base64.b64encode(payload)
+              if settings.TAMPER_SCRIPTS['base64encode']:
+                from src.core.tamper import base64encode
+                payload = base64encode.encode(payload)
 
               # Check if defined "--verbose" option.
               if settings.VERBOSITY_LEVEL >= 1:
@@ -537,7 +539,7 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
                             # Command execution results.
                             from src.core.injections.results_based.techniques.classic import cb_injector
                             separator = checks.time_based_separators(separator, http_request_method)
-                            whitespace = settings.WHITESPACES[0]
+                            whitespace = settings.WHITESPACE[0]
                             response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
                             # Evaluate injection results.
                             shell = cb_injector.injection_results(response, TAG, cmd)

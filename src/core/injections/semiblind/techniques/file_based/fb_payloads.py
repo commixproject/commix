@@ -61,7 +61,7 @@ def decision_alter_shell(separator, TAG, OUTPUT_TEXTFILE):
      settings.CUSTOM_HEADER_INJECTION == True :
     payload = payload.replace("\n", separator)
   else:
-    if not menu.options.base64:
+    if not settings.TAMPER_SCRIPTS['base64encode']:
       if settings.TARGET_OS != "win":
         payload = payload.replace("\n","%0d")
 
@@ -120,7 +120,7 @@ def cmd_execution_alter_shell(separator, cmd, OUTPUT_TEXTFILE):
      settings.CUSTOM_HEADER_INJECTION == True:
     payload = payload.replace("\n", separator)
   else:
-    if not menu.options.base64:
+    if not settings.TAMPER_SCRIPTS['base64encode']:
       if settings.TARGET_OS != "win":
         payload = payload.replace("\n","%0d")
 

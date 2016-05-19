@@ -102,7 +102,6 @@ def injection_proccess(url, check_parameter, http_request_method, filename, dela
     else:
       settings.EVAL_BASED_STATE = False
 
-
   # Check if it is vulnerable to time-based blind command injection technique.
   if not menu.options.tech or "t" in menu.options.tech:
     settings.TIME_BASED_STATE = None

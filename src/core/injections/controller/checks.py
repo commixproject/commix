@@ -398,4 +398,52 @@ def print_non_listed_params(check_parameters, http_request_method, header_name):
       warn_msg += "."
       print settings.print_warning_msg(warn_msg) 
 
+"""
+Tamper script checker
+"""
+def tamper_scripts():
+  for tfile in re.split(settings.PARAMETER_SPLITTING_REGEX, menu.options.tamper.lower()):
+    check_tfile = "src/core/tamper/" + tfile + ".py"
+    info_msg = "Loading the tamper script '" + tfile + "'. "
+    print settings.print_info_msg(info_msg)
+    if not os.path.exists(check_tfile.lower()):
+      if not settings.LOAD_SESSION:
+        err_msg = "The '" + tfile + "' tamper script does not exist."
+        print settings.print_error_msg(err_msg)
+    if os.path.isfile(check_tfile):
+      import importlib
+      check_tfile = check_tfile.replace("/",".")
+      importlib.import_module(check_tfile.split(".py")[0])
+
+"""
+Check if the payload output seems to be base64.
+"""
+def base64_output(payload):
+  if (len(payload) % 4 == 0) and re.match(settings.BASE64_RECOGNITION_REGEX, payload):
+    if not settings.TAMPER_SCRIPTS['base64encode']:
+      if menu.options.tamper:
+        menu.options.tamper = menu.options.tamper + ",base64encode"
+      else:
+        menu.options.tamper = "base64encode"
+      tamper_scripts()
+
+"""
+Check if the $IFS variable is in output.
+"""
+def ifs_output(payload):
+  if "$IFS" in payload:
+    if not settings.TAMPER_SCRIPTS['space2ifs']:
+      if menu.options.tamper:
+        menu.options.tamper = menu.options.tamper + ",space2ifs"
+      else:
+        menu.options.tamper = "space2ifs"
+      tamper_scripts()
+
+"""
+Check for stored payloads and enable tamper scripts
+"""
+def check_for_tamper(payload):
+  ifs_output(payload)
+  base64_output(payload)
+
 #eof

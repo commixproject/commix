@@ -118,7 +118,7 @@ EVAL_SEPARATORS = ["", ";", "%0a", "\\\\n"]
 EVAL_SUFFIXES = ["", "\\\\", "//", "#", ".\"", ".'", ")}"]
 
 # The white-spaces
-WHITESPACES = ["%20", "$IFS"]
+WHITESPACE = ["%20"]
 
 # Time delay
 DELAY = 1
@@ -341,6 +341,9 @@ IS_JSON = False
 # JSON Symbols
 JSON_RECOGNITION_REGEX = r'(?s)\A(\s*\[)*\s*\{.*"[^"]+"\s*:\s*("[^"]+"|\d+).*\}\s*(\]\s*)*\Z'
 
+# B64 format recognition
+BASE64_RECOGNITION_REGEX = r'^[A-Za-z0-9+/]+[=]{0,2}$'
+
 # TFB Decimal
 TFB_DECIMAL = False
 
@@ -407,6 +410,12 @@ SUPPORTED_HTTP_AUTH_TYPES = [ "basic", "digest" ]
 
 # HTTP Headers
 HTTP_HEADERS = [ "useragent", "referer" ]
+
+# Tamper scripts dict
+TAMPER_SCRIPTS = {
+                  "space2ifs": False,
+                  "base64encode": False
+                 }
 
 # Print error message
 def print_error_msg(err_msg):

@@ -1,4 +1,7 @@
 ## Version 0.9b
+* Replaced: The "--base64" option has been replaced with "base64encode.py" tamper script.
+* Added: New tamper script "space2ifs.py" that replaces every space with $IFS (bash) variable.
+* Added: New option "--tamper" that supports tamper injection scripts.
 * Added: Support for verbosity levels (currently supported levels: 0,1).
 * Fixed: Minor rearrangement of prefixes and separators has been implemented.
 * Revised: The "time-based" (blind) technique for *nix targets has been shortly revised.

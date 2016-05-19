@@ -188,9 +188,9 @@ def injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vul
   if ")%3B" + urllib.quote(")}") in payload:
     payload = payload.replace(")%3B" + urllib.quote(")}"), ")" + urllib.quote(")}"))
 
-  if menu.options.base64:
-    payload = urllib.unquote(payload)
-    payload = base64.b64encode(payload)
+  if settings.TAMPER_SCRIPTS['base64encode']:
+    from src.core.tamper import base64encode
+    payload = base64encode.encode(payload)
   else:
     payload = re.sub(" ", "%20", payload)
 

@@ -190,7 +190,7 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_m
     # Fix prefixes / suffixes
     payload = parameters.prefixes(payload, prefix)
     payload = parameters.suffixes(payload, suffix)
-    if menu.options.base64:
+    if settings.TAMPER_SCRIPTS['base64encode']:
       payload = base64.b64encode(payload)
     # Check if defined "--verbose" option.
     if settings.VERBOSITY_LEVEL >= 1:
@@ -271,7 +271,7 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_m
         # Fix prefixes / suffixes
         payload = parameters.prefixes(payload, prefix)
         payload = parameters.suffixes(payload, suffix)
-        if menu.options.base64:
+        if settings.TAMPER_SCRIPTS['base64encode']:
           payload = base64.b64encode(payload)
         # Check if defined "--verbose" option.
         if settings.VERBOSITY_LEVEL >= 1:
@@ -358,7 +358,7 @@ def false_positive_check(separator, TAG, cmd, prefix, suffix, delay, http_reques
     payload = parameters.prefixes(payload, prefix)
     payload = parameters.suffixes(payload, suffix)
 
-    if menu.options.base64:
+    if settings.TAMPER_SCRIPTS['base64encode']:
       payload = base64.b64encode(payload)
 
     # Check if defined "--verbose" option.
@@ -411,7 +411,7 @@ def false_positive_check(separator, TAG, cmd, prefix, suffix, delay, http_reques
         payload = parameters.prefixes(payload, prefix)
         payload = parameters.suffixes(payload, suffix)        
 
-        if menu.options.base64:
+        if settings.TAMPER_SCRIPTS['base64encode']:
           payload = base64.b64encode(payload)
 
         # Check if defined "--verbose" option.

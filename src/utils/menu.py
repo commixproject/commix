@@ -388,11 +388,11 @@ injection.add_option("--os",
                 default=False,
                 help="Force back-end operating system to this value.")
 
-injection.add_option("--base64", 
-                action="store_true",
-                dest="base64",
-                default = False,
-                help="Encode the payload to Base64 format.")
+injection.add_option("--tamper", 
+                action="store",
+                dest="tamper",
+                default=False,
+                help="Use given script(s) for tampering injection data.")
 
 # Detection options
 detection = OptionGroup(parser, Style.BRIGHT + "Detection" + Style.RESET_ALL, "These options can be "
