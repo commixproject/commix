@@ -131,7 +131,9 @@ def http_auth_cracker(url, realm):
         float_percent = "{0:.1f}%".format(round(((i*100)/(total*1.0)),2))
         # Check if verbose mode on
         if settings.VERBOSITY_LEVEL >= 1:
-            sys.stdout.write(Fore.GREY + "(~) Checking: " + username + ":" + password + Style.RESET_ALL + "\n")
+          payload = "pair of credentials: " + username + ":" + password
+          sys.stdout.write("\r" + settings.print_checking_msg(payload) + "           ")
+          sys.stdout.flush()
         try:
           # Basic authentication 
           if authentication_type.lower() == "basic":
@@ -169,11 +171,10 @@ def http_auth_cracker(url, realm):
           sys.stdout.flush()
         if found:
           valid_pair =  "" + username + ":" + password + ""
-          if not settings.VERBOSITY_LEVEL >= 1:
-            print ""
+          print ""
           success_msg = "Identified a valid pair of credentials '" 
           success_msg += Style.UNDERLINE  + valid_pair + Style.RESET_ALL + Style.BRIGHT  + "'."  
-          settings.print_success_msg(success_msg)
+          print settings.print_success_msg(success_msg)
           return valid_pair
 
     err_msg = "Use the '--auth-cred' option to provide a valid pair of " 

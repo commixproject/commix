@@ -383,6 +383,7 @@ ERROR_SIGN = "(x) Error: "
 CRITICAL_SIGN = "(x) Critical: "
 ABORTION_SIGN = "(x) Aborted: "
 PAYLOAD_SIGN = "(~) Payload: "
+CHECK_SIGN = "(>) Checking "
 
 # Default LHOST / LPORT setup, 
 # for the reverse TCP connection
@@ -450,6 +451,11 @@ def print_success_msg(success_msg):
 # Print payload (verbose mode)
 def print_payload(payload):
   result = Fore.CYAN + PAYLOAD_SIGN + str(payload) + Style.RESET_ALL
+  return result
+
+# Print checking message (verbose mode)
+def print_checking_msg(payload):
+  result = Fore.BLUE + CHECK_SIGN + str(payload) + Style.RESET_ALL
   return result
 
 # Print question message
