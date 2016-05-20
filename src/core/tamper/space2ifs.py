@@ -17,9 +17,11 @@ For more see the file 'readme/COPYING' for copying permission.
 from src.utils import settings
 
 """
-The internal field separator (abbreviated IFS) refers to a variable 
-which defines the character or characters used to separate a pattern 
-into tokens for some operations.
+Replaces space character (' ') with the internal field separator ('$IFS').
+The internal field separator refers to a variable which defines the character 
+or characters used to separate a pattern into tokens for some operations.
+Notes:
+  * This tamper script works against *nix targets
 """
 
 if settings.TARGET_OS == "unix":

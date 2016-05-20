@@ -18,6 +18,10 @@ import base64
 import urllib
 from src.utils import settings
 
+"""
+Base64 all characters in a given payload.
+"""
+
 if not settings.TAMPER_SCRIPTS['base64encode']:
   settings.TAMPER_SCRIPTS['base64encode'] = True
 
