@@ -271,9 +271,6 @@ def main():
         html_data = content = response.read()
         print "[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]"
 
-        if menu.options.tamper:
-          checks.tamper_scripts()
-
         # Used a valid pair of valid credentials
         if menu.options.auth_cred:
           success_msg = Style.BRIGHT + "Identified a valid pair of credentials '" 
@@ -343,6 +340,10 @@ def main():
                 print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
               warn_msg = "Heuristics have failed to identify server."
               print settings.print_warning_msg(warn_msg)
+            
+            # Load tamper scripts
+            if menu.options.tamper:
+              checks.tamper_scripts()
 
             # Store the Server's root dir
             settings.DEFAULT_SRV_ROOT_DIR = settings.SRV_ROOT_DIR
