@@ -50,7 +50,7 @@ def estimate_response_time(url, http_request_method, delay):
     pass
   except socket.timeout:
     err_msg = "The connection to target URL has timed out."
-    print settings.print_error_msg(err_msg)+ "\n"
+    print settings.print_critical_msg(err_msg)+ "\n"
     sys.exit(0)     
   end = time.time()
   diff = end - start
@@ -90,7 +90,7 @@ def get_request_response(request):
     except urllib2.HTTPError, err_msg:
       if settings.IGNORE_ERR_MSG == False:
         err_msg = str(err_msg) + "."
-        print "\n" + settings.print_error_msg(err_msg)
+        print "\n" + settings.print_critical_msg(err_msg)
         continue_tests = checks.continue_tests(err)
         if continue_tests == True:
           settings.IGNORE_ERR_MSG = True
@@ -111,7 +111,7 @@ def get_request_response(request):
     except urllib2.HTTPError, err_msg:
       if settings.IGNORE_ERR_MSG == False:
         err_msg = str(err_msg) + "."
-        print "\n" + settings.print_error_msg(err_msg)
+        print "\n" + settings.print_critical_msg(err_msg)
         continue_tests = checks.continue_tests(err)
         if continue_tests == True:
           settings.IGNORE_ERR_MSG = True
@@ -133,7 +133,7 @@ def get_request_response(request):
         err_msg = str(err) + "."
         if not settings.VERBOSITY_LEVEL >= 1:
           print ""
-        print settings.print_error_msg(err_msg)
+        print settings.print_critical_msg(err_msg)
         continue_tests = checks.continue_tests(err)
         if continue_tests == True:
           settings.IGNORE_ERR_MSG = True
@@ -185,7 +185,7 @@ def cookie_injection(url, vuln_parameter, payload):
     except urllib2.HTTPError, err:
       if settings.IGNORE_ERR_MSG == False:
         err_msg = str(err) + "."
-        print "\n" + settings.print_error_msg(err_msg)
+        print "\n" + settings.print_critical_msg(err_msg)
         continue_tests = checks.continue_tests(err)
         if continue_tests == True:
           settings.IGNORE_ERR_MSG = True
@@ -207,7 +207,7 @@ def cookie_injection(url, vuln_parameter, payload):
     except urllib2.HTTPError, err_msg:
       if settings.IGNORE_ERR_MSG == False:
         err_msg = str(err_msg) + "."
-        print "\n" + settings.print_error_msg(err_msg)
+        print "\n" + settings.print_critical_msg(err_msg)
         continue_tests = checks.continue_tests(err)
         if continue_tests == True:
           settings.IGNORE_ERR_MSG = True
@@ -227,7 +227,7 @@ def cookie_injection(url, vuln_parameter, payload):
     except urllib2.HTTPError, err_msg:
       if settings.IGNORE_ERR_MSG == False:
         err_msg = str(err_msg) + "."
-        print "\n" + settings.print_error_msg(err_msg)
+        print "\n" + settings.print_critical_msg(err_msg)
         continue_tests = checks.continue_tests(err)
         if continue_tests == True:
           settings.IGNORE_ERR_MSG = True
@@ -284,7 +284,7 @@ def user_agent_injection(url, vuln_parameter, payload):
     except urllib2.HTTPError, err_msg:
       if settings.IGNORE_ERR_MSG == False:
         err_msg = str(err_msg) + "."
-        print "\n" + settings.print_error_msg(err_msg)
+        print "\n" + settings.print_critical_msg(err_msg)
         continue_tests = checks.continue_tests(err)
         if continue_tests == True:
           settings.IGNORE_ERR_MSG = True
@@ -306,7 +306,7 @@ def user_agent_injection(url, vuln_parameter, payload):
     except urllib2.HTTPError, err_msg:
       if settings.IGNORE_ERR_MSG == False:
         err_msg = str(err_msg) + "."
-        print "\n" + settings.print_error_msg(err_msg)
+        print "\n" + settings.print_critical_msg(err_msg)
         continue_tests = checks.continue_tests(err)
         if continue_tests == True:
           settings.IGNORE_ERR_MSG = True
@@ -326,7 +326,7 @@ def user_agent_injection(url, vuln_parameter, payload):
     except urllib2.HTTPError, err_msg:
       if settings.IGNORE_ERR_MSG == False:
         err_msg = str(err_msg) + "."
-        print "\n" + settings.print_error_msg(err_msg)
+        print "\n" + settings.print_critical_msg(err_msg)
         continue_tests = checks.continue_tests(err)
         if continue_tests == True:
           settings.IGNORE_ERR_MSG = True
@@ -384,7 +384,7 @@ def referer_injection(url, vuln_parameter, payload):
     except urllib2.HTTPError, err_msg:
       if settings.IGNORE_ERR_MSG == False:
         err_msg = str(err_msg) + "."
-        print "\n" + settings.print_error_msg(err_msg)
+        print "\n" + settings.print_critical_msg(err_msg)
         continue_tests = checks.continue_tests(err)
         if continue_tests == True:
           settings.IGNORE_ERR_MSG = True
@@ -406,7 +406,7 @@ def referer_injection(url, vuln_parameter, payload):
     except urllib2.HTTPError, err_msg:
       if settings.IGNORE_ERR_MSG == False:
         err_msg = str(err_msg) + "."
-        print "\n" + settings.print_error_msg(err_msg)
+        print "\n" + settings.print_critical_msg(err_msg)
         continue_tests = checks.continue_tests(err)
         if continue_tests == True:
           settings.IGNORE_ERR_MSG = True
@@ -427,7 +427,7 @@ def referer_injection(url, vuln_parameter, payload):
     except urllib2.HTTPError, err_msg:
       if settings.IGNORE_ERR_MSG == False:
         err_msg = str(err_msg) + "."
-        print "\n" + settings.print_error_msg(err_msg)
+        print "\n" + settings.print_critical_msg(err_msg)
         continue_tests = checks.continue_tests(err)
         if continue_tests == True:
           settings.IGNORE_ERR_MSG = True
@@ -486,7 +486,7 @@ def custom_header_injection(url, vuln_parameter, payload):
     except urllib2.HTTPError, err_msg:
       if settings.IGNORE_ERR_MSG == False:
         err_msg = str(err_msg) + "."
-        print "\n" + settings.print_error_msg(err_msg)
+        print "\n" + settings.print_critical_msg(err_msg)
         continue_tests = checks.continue_tests(err)
         if continue_tests == True:
           settings.IGNORE_ERR_MSG = True
@@ -508,7 +508,7 @@ def custom_header_injection(url, vuln_parameter, payload):
     except urllib2.HTTPError, err_msg:
       if settings.IGNORE_ERR_MSG == False:
         err_msg = str(err_msg) + "."
-        print "\n" + settings.print_error_msg(err_msg)
+        print "\n" + settings.print_critical_msg(err_msg)
         continue_tests = checks.continue_tests(err)
         if continue_tests == True:
           settings.IGNORE_ERR_MSG = True
@@ -528,7 +528,7 @@ def custom_header_injection(url, vuln_parameter, payload):
     except urllib2.HTTPError, err_msg:
       if settings.IGNORE_ERR_MSG == False:
         err_msg = str(err_msg) + "."
-        print "\n" + settings.print_error_msg(err_msg)
+        print "\n" + settings.print_critical_msg(err_msg)
         continue_tests = checks.continue_tests(err)
         if continue_tests == True:
           settings.IGNORE_ERR_MSG = True
