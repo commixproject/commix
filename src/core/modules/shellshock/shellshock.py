@@ -673,8 +673,8 @@ def shellshock_handler(url, http_request_method, filename):
                           shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
                           if settings.VERBOSITY_LEVEL >= 1:
                             print ""
-                          err_msg = "The reverse TCP connection to the target host has been failed!"
-                          print settings.print_error_msg(err_msg)
+                          err_msg = "The reverse TCP connection has been failed!"
+                          print settings.print_critical_msg(err_msg)
                       else:
                         pass
 

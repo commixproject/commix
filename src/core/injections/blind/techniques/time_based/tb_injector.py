@@ -61,9 +61,9 @@ def examine_requests(payload, vuln_parameter, http_request_method, url, delay, u
   else :
     parameter = menu.options.data
     parameter = urllib2.unquote(parameter)
+
     # Check if its not specified the 'INJECT_HERE' tag
     parameter = parameters.do_POST_check(parameter)
-    
     # Define the POST data   
     if settings.IS_JSON == False:
       data = re.sub(settings.INJECT_TAG, payload, parameter)
@@ -192,13 +192,18 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_m
     # Fix prefixes / suffixes
     payload = parameters.prefixes(payload, prefix)
     payload = parameters.suffixes(payload, suffix)
+
+    # Whitespace(s) fixation
+    whitespace = settings.WHITESPACE[0]
+    payload = re.sub(" ", whitespace, payload)
+
     if settings.TAMPER_SCRIPTS['base64encode']:
       payload = base64.b64encode(payload)
+
     # Check if defined "--verbose" option.
     if settings.VERBOSITY_LEVEL >= 1:
       payload_msg = payload.replace("\n", "\\n") 
       sys.stdout.write("\n" + settings.print_payload(payload_msg))
-
 
     # Check if defined cookie with "INJECT_HERE" tag
     if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
@@ -218,12 +223,9 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_m
 
     else:  
       how_long = examine_requests(payload, vuln_parameter, http_request_method, url, delay, url_time_response)
+    
     # Examine time-responses
     injection_check = False
-    # if settings.TARGET_OS == "win" and alter_shell is not None :
-    #   if (how_long > settings.FOUND_HOW_LONG and how_long - delay >= settings.FOUND_DIFF):
-    #     injection_check = True
-    # else:
     if (how_long >= settings.FOUND_HOW_LONG and how_long - delay >= settings.FOUND_DIFF):
       injection_check = True
 
@@ -271,13 +273,18 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_m
         # Fix prefixes / suffixes
         payload = parameters.prefixes(payload, prefix)
         payload = parameters.suffixes(payload, suffix)
+
+        # Whitespace(s) fixation
+        whitespace = settings.WHITESPACE[0]
+        payload = re.sub(" ", whitespace, payload)
+
         if settings.TAMPER_SCRIPTS['base64encode']:
           payload = base64.b64encode(payload)
+
         # Check if defined "--verbose" option.
         if settings.VERBOSITY_LEVEL >= 1:
           payload_msg = payload.replace("\n", "\\n") 
           sys.stdout.write("\n" + settings.print_payload(payload_msg))
-
 
         # Check if defined cookie with "INJECT_HERE" tag
         if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
@@ -297,12 +304,9 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_m
           
         else:    
           how_long = examine_requests(payload, vuln_parameter, http_request_method, url, delay, url_time_response)
+        
         # Examine time-responses
         injection_check = False
-        # if settings.TARGET_OS == "win" and alter_shell is not None :
-        #   if (how_long > settings.FOUND_HOW_LONG and how_long - delay >= settings.FOUND_DIFF):
-        #     injection_check = True
-        # else:
         if (how_long >= settings.FOUND_HOW_LONG and how_long - delay >= settings.FOUND_DIFF):
           injection_check = True
           
@@ -318,6 +322,7 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_m
             output.append(chr(ascii_char))
           injection_check = False  
           break
+    
     check_end  = time.time()
     check_how_long = int(check_end - check_start)
     output = "".join(str(p) for p in output)
@@ -361,6 +366,10 @@ def false_positive_check(separator, TAG, cmd, prefix, suffix, delay, http_reques
     payload = parameters.prefixes(payload, prefix)
     payload = parameters.suffixes(payload, suffix)
 
+    # Whitespace(s) fixation
+    whitespace = settings.WHITESPACE[0]
+    payload = re.sub(" ", whitespace, payload)
+
     if settings.TAMPER_SCRIPTS['base64encode']:
       payload = base64.b64encode(payload)
 
@@ -368,7 +377,6 @@ def false_positive_check(separator, TAG, cmd, prefix, suffix, delay, http_reques
     if settings.VERBOSITY_LEVEL >= 1:
       payload_msg = payload.replace("\n", "\\n") 
       sys.stdout.write("\n" + settings.print_payload(payload_msg))
-
 
     # Check if defined cookie with "INJECT_HERE" tag
     if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
@@ -416,6 +424,10 @@ def false_positive_check(separator, TAG, cmd, prefix, suffix, delay, http_reques
         # Fix prefixes / suffixes
         payload = parameters.prefixes(payload, prefix)
         payload = parameters.suffixes(payload, suffix)
+
+        # Whitespace(s) fixation
+        whitespace = settings.WHITESPACE[0]
+        payload = re.sub(" ", whitespace, payload)
 
         if settings.TAMPER_SCRIPTS['base64encode']:
           payload = base64.b64encode(payload)

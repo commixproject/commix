@@ -146,6 +146,10 @@ def injection(separator, payload, TAG, cmd, prefix, suffix, http_request_method,
   payload = parameters.prefixes(payload, prefix)
   payload = parameters.suffixes(payload, suffix)
 
+  # Whitespace fixation
+  whitespace = settings.WHITESPACE[0]
+  payload = re.sub(" ", whitespace, payload)
+
   if settings.TAMPER_SCRIPTS['base64encode']:
     from src.core.tamper import base64encode
     payload = base64encode.encode(payload)  

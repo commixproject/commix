@@ -198,6 +198,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
       print settings.print_info_msg(info_msg)
 
   i = 0
+  whitespace = settings.WHITESPACE[0]
   TAG = ''.join(random.choice(string.ascii_uppercase) for i in range(6)) 
   # Calculate all possible combinations
   total = len(settings.PREFIXES) * len(settings.SEPARATORS) * len(settings.SUFFIXES)
@@ -242,6 +243,9 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
             # Fix prefixes / suffixes
             payload = parameters.prefixes(payload, prefix)
             payload = parameters.suffixes(payload, suffix)
+
+            # Whitespace(s) fixation
+            payload = re.sub(" ", whitespace, payload)
 
             if settings.TAMPER_SCRIPTS['base64encode']:
               from src.core.tamper import base64encode
@@ -614,7 +618,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                         if settings.VERBOSITY_LEVEL >= 1:
                           print ""
                         err_msg = "The reverse TCP connection has been failed!"
-                        print settings.print_error_msg(err_msg)
+                        print settings.print_critical_msg(err_msg)
                     else:
                       pass
                   else:

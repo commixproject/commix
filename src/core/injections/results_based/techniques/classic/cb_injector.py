@@ -149,15 +149,13 @@ def injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_meth
     # Classic decision payload (check if host is vulnerable).
     payload = cb_payloads.cmd_execution(separator, TAG, cmd)
     
-  if not settings.TAMPER_SCRIPTS['base64encode']:
-    if separator == " " :
-      payload = re.sub(" ", "%20", payload)
-    else:
-      payload = re.sub(" ", whitespace, payload)
-
   # Fix prefixes / suffixes
   payload = parameters.prefixes(payload, prefix)
   payload = parameters.suffixes(payload, suffix)
+
+  # Whitespace(s) fixation
+  whitespace = settings.WHITESPACE[0]
+  payload = re.sub(" ", whitespace, payload)
 
   if settings.TAMPER_SCRIPTS['base64encode']:
     from src.core.tamper import base64encode

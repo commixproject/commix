@@ -123,14 +123,12 @@ def cb_injection_handler(url, delay, filename, http_request_method):
             payload = parameters.prefixes(payload, prefix)
             payload = parameters.suffixes(payload, suffix)
 
+            # Whitespace(s) fixation
+            payload = re.sub(" ", whitespace, payload)
+
             if settings.TAMPER_SCRIPTS['base64encode']:
               from src.core.tamper import base64encode
               payload = base64encode.encode(payload)
-            else:
-              if separator == " " :
-                payload = re.sub(" ", "%20", payload)
-              else:
-                payload = re.sub(" ", whitespace, payload)
 
             # Check if defined "--verbose" option.
             if settings.VERBOSITY_LEVEL >= 1:
@@ -395,8 +393,8 @@ def cb_injection_handler(url, delay, filename, http_request_method):
                         shell = cb_injector.injection_results(response, TAG, cmd)
                         if settings.VERBOSITY_LEVEL >= 1:
                           print ""
-                        err_msg = "The reverse TCP connection to the target host has been failed!"
-                        print settings.print_error_msg(err_msg)
+                        err_msg = "The reverse TCP connection has been failed!"
+                        print settings.print_critical_msg(err_msg)
                     else:
                       pass
                   else:

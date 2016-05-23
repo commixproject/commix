@@ -86,6 +86,7 @@ def eb_injection_handler(url, delay, filename, http_request_method):
     sys.stdout.flush()
 
   i = 0
+  whitespace = settings.WHITESPACE[0]  
   # Calculate all possible combinations
   total = len(settings.EVAL_PREFIXES) * len(settings.EVAL_SEPARATORS) * len(settings.EVAL_SUFFIXES)
   
@@ -132,10 +133,14 @@ def eb_injection_handler(url, delay, filename, http_request_method):
             # Fix prefixes / suffixes
             payload = parameters.prefixes(payload, prefix)
             payload = parameters.suffixes(payload, suffix)
+
             # Fixation for specific payload.
             if ")%3B" + urllib.quote(")}") in payload:
               payload = payload.replace(")%3B" + urllib.quote(")}"), ")" + urllib.quote(")}"))
             payload = payload +  TAG + ""
+
+            # Whitespace(s) fixation
+            payload = re.sub(" ", whitespace, payload)
 
             if settings.TAMPER_SCRIPTS['base64encode']:
               from src.core.tamper import base64encode
@@ -407,7 +412,7 @@ def eb_injection_handler(url, delay, filename, http_request_method):
                         if settings.VERBOSITY_LEVEL >= 1:
                           print ""
                         err_msg = "The reverse TCP connection has been failed!"
-                        print settings.print_error_msg(err_msg)
+                        print settings.print_critical_msg(err_msg)
                     else:
                       pass
                       

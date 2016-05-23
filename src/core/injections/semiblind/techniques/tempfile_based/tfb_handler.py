@@ -105,11 +105,22 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
   if menu.options.url_reload == True:
     err_msg = "The '--url-reload' option is not available in " + technique + "!"
     print settings.print_error_msg(err_msg)
-  
+
+  if settings.WHITESPACE[0] != "%20":
+    warn_msg = " Whitespaces are important for time-relative techniques. "
+    warn_msg += "Thus whitespace characters had been reset to default."
+    print settings.print_warning_msg(warn_msg)
+    settings.WHITESPACE[0] = " "
+
   if settings.VERBOSITY_LEVEL >= 1:
     info_msg ="Testing the " + technique + "... "
     print settings.print_info_msg(info_msg) + info_msg
 
+  if settings.WHITESPACE[0] != " ":
+    settings.WHITESPACE[0] = " "
+    
+  whitespace = settings.WHITESPACE[0]
+  
   # Calculate all possible combinations
   total = (len(settings.PREFIXES) * len(settings.SEPARATORS) * len(settings.SUFFIXES) - len(settings.JUNK_COMBINATION))
     
@@ -152,6 +163,10 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
               payload = parameters.prefixes(payload, prefix)
               payload = parameters.suffixes(payload, suffix)
 
+              # Whitespace(s) fixation
+              whitespace = settings.WHITESPACE[0]
+              payload = re.sub(" ", whitespace, payload)
+              
               # Encode payload to Base64
               if settings.TAMPER_SCRIPTS['base64encode']:
                 from src.core.tamper import base64encode
@@ -546,7 +561,7 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
                             if settings.VERBOSITY_LEVEL >= 1:
                               print ""
                             err_msg = "The reverse TCP connection has been failed!"
-                            print settings.print_error_msg(err_msg)
+                            print settings.print_critical_msg(err_msg)
                         else:
                           pass
                       else:
