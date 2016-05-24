@@ -24,7 +24,7 @@ Notes:
   * This tamper script works against *nix targets
 """
 
-if settings.TARGET_OS == "unix":
+if settings.TARGET_OS != "win":
   settings.TAMPER_SCRIPTS['space2ifs'] = True
   settings.WHITESPACE[0] = "${IFS}" 
 else:
