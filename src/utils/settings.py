@@ -415,7 +415,8 @@ HTTP_HEADERS = [ "useragent", "referer" ]
 # Tamper scripts dict
 TAMPER_SCRIPTS = {
                   "space2ifs": False,
-                  "base64encode": False
+                  "base64encode": False,
+                  "space2plus": False
                  }
 
 # Print error message

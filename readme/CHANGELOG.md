@@ -1,4 +1,5 @@
 ## Version 0.9b
+* Added: New tamper script "space2plus.py" that replaces every space (" ") with plus ("+").
 * Added: New state ("checking") and the color of that state has been setted.
 * Replaced: The "--base64" option has been replaced with "base64encode.py" tamper script.
 * Added: New tamper script "space2ifs.py" that replaces every space (" ") with $IFS (bash) variable.

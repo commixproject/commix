@@ -438,6 +438,23 @@ def ifs_output(payload):
       else:
         menu.options.tamper = "space2ifs"
       tamper_scripts()
+  else:
+    settings.WHITESPACE[0] = "%20" 
+
+"""
+Check if plus ("+") replaces spaces in output.
+"""
+def plus_output(payload):
+  count_plus = payload.count("+")
+  if count_plus > 2 and not "%20" in payload:
+    if not settings.TAMPER_SCRIPTS['space2plus']:
+      if menu.options.tamper:
+        menu.options.tamper = menu.options.tamper + ",space2plus"
+      else:
+        menu.options.tamper = "space2plus"
+      tamper_scripts()
+  else:
+    settings.WHITESPACE[0] = "%20"  
 
 """
 Check for stored payloads and enable tamper scripts
@@ -445,5 +462,6 @@ Check for stored payloads and enable tamper scripts
 def check_for_tamper(payload):
   ifs_output(payload)
   base64_output(payload)
+  plus_output(payload)
 
 #eof
