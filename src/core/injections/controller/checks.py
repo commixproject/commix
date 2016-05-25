@@ -127,7 +127,8 @@ def continue_tests(err):
 Check if option is unavailable
 """
 def unavailable_option(check_option):
-  warn_msg = "The '" + check_option + "' option is not yet available for windows targets."
+  warn_msg = "The '" + check_option + "' option "
+  warn_msg += "is not yet available for windows targets."
   print settings.print_warning_msg(warn_msg)  
 
 """
@@ -188,7 +189,8 @@ If PowerShell is disabled.
 """
 def ps_check_failed():
   while True:
-    question_msg = "Do you want to ignore the above warning and continue the procedure? [Y/n] > "
+    question_msg = "Do you want to ignore the above warning "
+    question_msg += "and continue the procedure? [Y/n] > "
     ps_check = raw_input(settings.print_question_msg(question_msg)).lower()
     if ps_check in settings.CHOICE_YES:
       break
