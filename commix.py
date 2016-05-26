@@ -385,7 +385,8 @@ def main():
                 warn_msg = "Heuristics have failed to identify server's operating system."
                 print settings.print_warning_msg(warn_msg)
                 while True:
-                  question_msg = "Do you recognise the server's operating system? [(W)indows/(U)nix/(q)uit] > "
+                  question_msg = "Do you recognise the server's operating system? "
+                  question_msg += "[(W)indows/(U)nix/(q)uit] > "
                   got_os = raw_input(settings.print_question_msg(question_msg)).lower()
                   if got_os.lower() in settings.CHOICE_OS :
                     if got_os.lower() == "w":
