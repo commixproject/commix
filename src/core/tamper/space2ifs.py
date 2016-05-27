@@ -26,7 +26,10 @@ Notes:
 
 if settings.TARGET_OS != "win":
   settings.TAMPER_SCRIPTS['space2ifs'] = True
-  settings.WHITESPACE[0] = "${IFS}" 
+  if settings.WHITESPACE[0] == "%20" or settings.WHITESPACE[0] == " ":
+    settings.WHITESPACE[0] = "${IFS}"
+  else:
+    settings.WHITESPACE.append("${IFS}") 
 else:
   warn_msg = "Windows target host(s), does not support the (Bash) $IFS variable."
   print settings.print_warning_msg(warn_msg)

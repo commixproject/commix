@@ -23,6 +23,9 @@ Notes:
 """
 
 settings.TAMPER_SCRIPTS['space2plus'] = True
-settings.WHITESPACE[0] = "+" 
+if settings.WHITESPACE[0] == "%20" or settings.WHITESPACE[0] == " ":
+  settings.WHITESPACE[0] = "+"
+else:
+  settings.WHITESPACE.append("+") 
 
 #eof 

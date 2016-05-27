@@ -93,13 +93,7 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
     warn_msg = "The '--url-reload' option is not available in " + technique + "."
     print settings.print_warning_msg(warn_msg)
 
-  if settings.WHITESPACE[0] != "%20":
-    warn_msg = "Whitespaces are important for time-relative techniques, "
-    warn_msg += "thus whitespace characters had been reset to default."
-    print settings.print_warning_msg(warn_msg)
-  settings.WHITESPACE[0] = " "
-
-  whitespace = settings.WHITESPACE[0]
+  whitespace = checks.check_whitespaces()
   # Calculate all possible combinations
   total = (len(settings.PREFIXES) * len(settings.SEPARATORS) * len(settings.SUFFIXES) - len(settings.JUNK_COMBINATION))
   for prefix in settings.PREFIXES:
@@ -110,7 +104,7 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
         if settings.LOAD_SESSION and session_handler.notification(url, technique):
           cmd = shell = ""
           url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response, delay, how_long, output_length, is_vulnerable = session_handler.injection_point_exportation(url, http_request_method)
-          checks.check_for_tamper(payload)
+          checks.check_for_stored_tamper(payload)
           settings.FOUND_HOW_LONG = how_long
           settings.FOUND_DIFF = how_long - delay
 
@@ -146,8 +140,7 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
               payload = parameters.prefixes(payload, prefix)
               payload = parameters.suffixes(payload, suffix)
 
-              # Whitespace(s) fixation
-              whitespace = settings.WHITESPACE[0]
+              # Whitespace fixation
               payload = re.sub(" ", whitespace, payload)
 
               if settings.TAMPER_SCRIPTS['base64encode']:
@@ -253,7 +246,7 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                       cmd = "expr " + str(randv1) + " + " + str(randv2) + ""
 
                     # Check for false positive resutls
-                    how_long, output = tb_injector.false_positive_check(separator, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, randvcalc, alter_shell, how_long, url_time_response)
+                    how_long, output = tb_injector.false_positive_check(separator, TAG, cmd, whitespace, prefix, suffix, delay, http_request_method, url, vuln_parameter, randvcalc, alter_shell, how_long, url_time_response)
 
                     if (url_time_response == 0 and (how_long - delay) >= 0) or \
                        (url_time_response != 0 and (how_long - delay) == 0 and (how_long == delay)) or \
@@ -378,7 +371,7 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                 question_msg = "Do you want to enumerate again? [Y/n/q] > "
                 enumerate_again = raw_input("\n" + settings.print_question_msg(question_msg)).lower()
                 if enumerate_again in settings.CHOICE_YES:
-                  tb_enumeration.do_check(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
+                  tb_enumeration.do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, delay, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
                   print ""
                   break
                 elif enumerate_again in settings.CHOICE_NO: 
@@ -394,7 +387,7 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                   pass
             else:
               if menu.enumeration_options():
-                tb_enumeration.do_check(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
+                tb_enumeration.do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, delay, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
                 print ""
 
             # Check for any system file access options.
@@ -404,7 +397,7 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                 question_msg = "Do you want to access files again? [Y/n/q] > "
                 file_access_again = raw_input(settings.print_question_msg(question_msg)).lower()
                 if file_access_again in settings.CHOICE_YES:
-                  tb_file_access.do_check(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
+                  tb_file_access.do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, delay, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
                   break
                 elif file_access_again in settings.CHOICE_NO: 
                   if not new_line:
@@ -421,12 +414,12 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
             else:
               # if not menu.enumeration_options() and not menu.options.os_cmd:
               #   print ""
-              tb_file_access.do_check(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
+              tb_file_access.do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, delay, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
 
             # Check if defined single cmd.
             if menu.options.os_cmd:
               cmd = menu.options.os_cmd
-              check_how_long, output = tb_enumeration.single_os_cmd_exec(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
+              check_how_long, output = tb_enumeration.single_os_cmd_exec(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, delay, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
               # Export injection result
               tb_injector.export_injection_results(cmd, separator, output, check_how_long)
               sys.exit(0)
@@ -497,7 +490,7 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                           # Command execution results.
                           from src.core.injections.results_based.techniques.classic import cb_injector
                           separator = checks.time_based_separators(separator, http_request_method)
-                          whitespace = settings.WHITESPACE[0]
+                          whitespace = urllib.quote(settings.WHITESPACE[0])
                           response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
                           # Evaluate injection results.
                           shell = cb_injector.injection_results(response, TAG, cmd)
@@ -514,7 +507,7 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                       if menu.options.ignore_session or \
                          session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
                         # The main command injection exploitation.
-                        check_how_long, output = tb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
+                        check_how_long, output = tb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, delay, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
                         # Export injection result
                         tb_injector.export_injection_results(cmd, separator, output, check_how_long)
                         if not menu.options.ignore_session :

@@ -164,7 +164,7 @@ def custom_header_injection_test(url, vuln_parameter, payload):
 """
 The main command injection exploitation.
 """
-def injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response):
+def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, delay, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response):
   
   if settings.TARGET_OS == "win":
     previous_cmd = cmd
@@ -193,8 +193,7 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_m
     payload = parameters.prefixes(payload, prefix)
     payload = parameters.suffixes(payload, suffix)
 
-    # Whitespace(s) fixation
-    whitespace = settings.WHITESPACE[0]
+    # Whitespace fixation
     payload = re.sub(" ", whitespace, payload)
 
     if settings.TAMPER_SCRIPTS['base64encode']:
@@ -274,8 +273,7 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_m
         payload = parameters.prefixes(payload, prefix)
         payload = parameters.suffixes(payload, suffix)
 
-        # Whitespace(s) fixation
-        whitespace = settings.WHITESPACE[0]
+        # Whitespace fixation
         payload = re.sub(" ", whitespace, payload)
 
         if settings.TAMPER_SCRIPTS['base64encode']:
@@ -346,7 +344,7 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, delay, http_request_m
 """
 False Positive check and evaluation.
 """
-def false_positive_check(separator, TAG, cmd, prefix, suffix, delay, http_request_method, url, vuln_parameter, randvcalc, alter_shell, how_long, url_time_response):
+def false_positive_check(separator, TAG, cmd, whitespace, prefix, suffix, delay, http_request_method, url, vuln_parameter, randvcalc, alter_shell, how_long, url_time_response):
 
   found_chars = False
   if settings.VERBOSITY_LEVEL >= 1: 
@@ -366,8 +364,7 @@ def false_positive_check(separator, TAG, cmd, prefix, suffix, delay, http_reques
     payload = parameters.prefixes(payload, prefix)
     payload = parameters.suffixes(payload, suffix)
 
-    # Whitespace(s) fixation
-    whitespace = settings.WHITESPACE[0]
+    # Whitespace fixation
     payload = re.sub(" ", whitespace, payload)
 
     if settings.TAMPER_SCRIPTS['base64encode']:
@@ -425,8 +422,7 @@ def false_positive_check(separator, TAG, cmd, prefix, suffix, delay, http_reques
         payload = parameters.prefixes(payload, prefix)
         payload = parameters.suffixes(payload, suffix)
 
-        # Whitespace(s) fixation
-        whitespace = settings.WHITESPACE[0]
+        # Whitespace fixation
         payload = re.sub(" ", whitespace, payload)
 
         if settings.TAMPER_SCRIPTS['base64encode']:

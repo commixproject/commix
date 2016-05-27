@@ -188,8 +188,7 @@ def injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vul
   if ")%3B" + urllib.quote(")}") in payload:
     payload = payload.replace(")%3B" + urllib.quote(")}"), ")" + urllib.quote(")}"))
 
-  # Whitespace(s) fixation
-  whitespace = settings.WHITESPACE[0] 
+  # Whitespace fixation
   payload = re.sub(" ", whitespace, payload)
 
   if settings.TAMPER_SCRIPTS['base64encode']:

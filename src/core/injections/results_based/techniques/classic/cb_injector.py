@@ -153,8 +153,7 @@ def injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_meth
   payload = parameters.prefixes(payload, prefix)
   payload = parameters.suffixes(payload, suffix)
 
-  # Whitespace(s) fixation
-  whitespace = settings.WHITESPACE[0]
+  # Whitespace fixation
   payload = re.sub(" ", whitespace, payload)
 
   if settings.TAMPER_SCRIPTS['base64encode']:
