@@ -236,9 +236,12 @@ def injection_results(response, TAG, cmd):
   if len(shell) > 1:
     shell = shell[0] 
   else:
-    # Clean junks
-    shell = [backslash.replace("\/","/") for backslash in shell]
-    shell = [tags.replace(TAG + TAG,"") for tags in shell]
+    try:
+      # Clean junks
+      shell = [backslash.replace("\/","/") for backslash in shell]
+      shell = [tags.replace(TAG + TAG , "") for tags in shell]
+    except UnicodeDecodeError:
+      pass
     if settings.TARGET_OS == "win" and menu.options.alter_shell: 
       shell = [newline.replace("\n"," ") for newline in shell]
       shell = [right_space.rstrip() for right_space in shell]
