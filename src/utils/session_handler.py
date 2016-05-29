@@ -272,7 +272,9 @@ def store_cmd(url, cmd, shell, vuln_parameter):
     conn.close()
   except sqlite3.OperationalError, err_msg:
     print settings.print_error_msg(err_msg)
-
+  except TypeError, err_msg:
+    pass
+    
 """
 Export successful command execution outputs from session file.
 """
