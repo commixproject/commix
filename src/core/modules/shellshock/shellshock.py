@@ -729,11 +729,12 @@ def shellshock_handler(url, http_request_method, filename):
       else:
         raise SystemExit()
 
-  except urllib2.URLError, err:
-    if "Connection refused" in err.reason:
-      err_msg =  "The target host is not responding."
-      err_msg += " Please ensure that is up and try again."
-      print "\n" + settings.print_critical_msg(err_msg)
+  except urllib2.URLError, err_msg:
+    err_msg = str(err_msg.reason).split(" ")[2:]
+    err_msg = ' '.join(err_msg)+ "."
+    if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
+      print ""
+    print settings.print_critical_msg(err_msg)
     raise SystemExit()
     
 """
