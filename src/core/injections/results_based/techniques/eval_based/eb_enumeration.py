@@ -39,7 +39,7 @@ def powershell_version(separator, TAG, prefix, suffix, http_request_method, url,
   else:
     cmd = "\"" + cmd + "\""
   #Command execution results.
-  response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
+  response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
   # Evaluate injection results.
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
     # Evaluate injection results.
@@ -77,7 +77,7 @@ def hostname(separator, TAG, prefix, suffix, http_request_method, url, vuln_para
   if settings.TARGET_OS == "win":
     settings.HOSTNAME = settings.WIN_HOSTNAME 
   cmd = settings.HOSTNAME
-  response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
+  response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
     # Evaluate injection results.
     shell = eb_injector.injection_results(response, TAG, cmd)
@@ -104,7 +104,7 @@ def system_information(separator, TAG, prefix, suffix, http_request_method, url,
   if settings.TARGET_OS == "win":
     settings.RECOGNISE_OS = settings.WIN_RECOGNISE_OS
   cmd = settings.RECOGNISE_OS        
-  response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
+  response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
     # Evaluate injection results.
     target_os = eb_injector.injection_results(response, TAG, cmd)
@@ -117,7 +117,7 @@ def system_information(separator, TAG, prefix, suffix, http_request_method, url,
       cmd = settings.WIN_RECOGNISE_HP
     else:
       cmd = settings.RECOGNISE_HP
-    response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
+    response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
     if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
       # Evaluate injection results.
       target_arch = eb_injector.injection_results(response, TAG, cmd)
@@ -151,7 +151,7 @@ def current_user(separator, TAG, prefix, suffix, http_request_method, url, vuln_
     else:  
       settings.SYS_USERS = "\"" + settings.SYS_USERS + "\""  
   cmd = settings.CURRENT_USER
-  response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
+  response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
     # Evaluate injection results.
     cu_account = eb_injector.injection_results(response, TAG, cmd)
@@ -168,7 +168,7 @@ def current_user(separator, TAG, prefix, suffix, http_request_method, url, vuln_
           cmd = "\"" + cmd + "\"" 
       else:  
         cmd = settings.IS_ROOT 
-      response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
+      response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
       if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
         # Evaluate injection results.
         shell = eb_injector.injection_results(response, TAG, cmd)
@@ -225,7 +225,7 @@ def system_users(separator, TAG, prefix, suffix, http_request_method, url, vuln_
     else:  
       settings.SYS_USERS = "\"" + settings.SYS_USERS + "\""  
   cmd = settings.SYS_USERS             
-  response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
+  response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
     # Evaluate injection results.
     sys_users = eb_injector.injection_results(response, TAG, cmd)
@@ -267,7 +267,7 @@ def system_users(separator, TAG, prefix, suffix, http_request_method, url, vuln_
               cmd = cmd.replace("'","\\'")
             else:
               cmd = "\"" + cmd + "\""
-            response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
+            response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
             check_privs = eb_injector.injection_results(response, TAG, cmd)
             check_privs = "".join(str(p) for p in check_privs).strip()
             check_privs = re.findall(r"(.*)", check_privs)
@@ -425,7 +425,7 @@ def system_passwords(separator, TAG, prefix, suffix, http_request_method, url, v
     pass 
   else:
     cmd = settings.SYS_PASSES            
-    response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
+    response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
     if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
       # Evaluate injection results.
       sys_passes = eb_injector.injection_results(response, TAG, cmd)
@@ -489,7 +489,7 @@ Single os-shell execution
 """
 def single_os_cmd_exec(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename):
   cmd =  menu.options.os_cmd
-  response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
+  response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
     # Evaluate injection results.
     shell = eb_injector.injection_results(response, TAG, cmd)

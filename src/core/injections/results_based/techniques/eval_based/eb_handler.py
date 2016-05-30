@@ -405,7 +405,7 @@ def eb_injection_handler(url, delay, filename, http_request_method):
                               settings.REVERSE_TCP = False
                               break
                           # Command execution results.
-                          response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
+                          response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
                           # Evaluate injection results.
                           shell = eb_injector.injection_results(response, TAG, cmd)
                           if settings.VERBOSITY_LEVEL >= 1:
@@ -417,7 +417,7 @@ def eb_injection_handler(url, delay, filename, http_request_method):
                         
                     else:
                       # The main command injection exploitation.
-                      response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
+                      response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
                             
                       # if need page reload
                       if menu.options.url_reload:

