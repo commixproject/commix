@@ -67,7 +67,7 @@ def examine_requests(payload, vuln_parameter, http_request_method, url, delay, u
     # Define the POST data   
     if settings.IS_JSON == False:
       data = re.sub(settings.INJECT_TAG, payload, parameter)
-      data = data.replace("+ ","%2B")
+      data = data.replace("+","%2B")
       request = urllib2.Request(url, data)
     else:
       payload = payload.replace("\"", "\\\"")
