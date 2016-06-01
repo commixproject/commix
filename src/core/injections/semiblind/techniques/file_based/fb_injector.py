@@ -295,8 +295,8 @@ def injection_results(url, OUTPUT_TEXTFILE, delay):
   # Evaluate test results.
   try:
     output = urllib2.urlopen(request)
-    html_data = output.read()
-    shell = re.findall(r"(.*)", html_data)
+    shell = output.read()
+    shell = [newline.replace("\n"," ") for newline in shell]
     if settings.TARGET_OS == "win":
       shell = [newline.replace("\r","") for newline in shell]
       shell = [space.strip() for space in shell]

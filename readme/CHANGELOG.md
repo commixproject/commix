@@ -1,4 +1,5 @@
-## Version 0.9b
+## Version 0.9b (upcoming)
+* Fixed: The shell output in semiblind ("file-based") technique has been fixed not to concat new lines.
 * Revised: The ability to execute multiple tamper scripts combined or the one after the other.
 * Added: New tamper script "space2plus.py" that replaces every space (" ") with plus ("+").
 * Added: New state ("checking") and the color of that state has been setted.
