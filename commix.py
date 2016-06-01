@@ -348,10 +348,6 @@ def main():
             # Store the Server's root dir
             settings.DEFAULT_SRV_ROOT_DIR = settings.SRV_ROOT_DIR
 
-            # Retrieve everything from the supported enumeration options.
-            if menu.options.enum_all:
-              checks.enable_all_enumeration_options()
-
             if menu.options.is_admin or menu.options.is_root and not menu.options.current_user:
               menu.options.current_user = True
 
@@ -567,6 +563,10 @@ def main():
       err_msg = "You must specify the target URL."
       print settings.print_error_msg(err_msg)
       sys.exit(0)
+
+    # Retrieve everything from the supported enumeration options.
+    if menu.options.enum_all:
+      checks.enable_all_enumeration_options()
 
     # Launch injection and exploitation controller.
     controller.do_check(url, filename)
