@@ -261,6 +261,7 @@ def cb_injection_handler(url, delay, filename, http_request_method):
             if not settings.LOAD_SESSION:
               session_handler.injection_point_importation(url, technique, injection_type, separator, shell[0], vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response=0, delay=0, how_long=0, output_length=0, is_vulnerable="True")
             else:
+              whitespace = settings.WHITESPACE[0]
               settings.LOAD_SESSION = False  
             
             # Check for any enumeration options.
