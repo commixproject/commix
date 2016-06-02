@@ -227,15 +227,6 @@ def injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_req
 
   # Do the injection check
   response = check_injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-  tries = 0
-  while not response:
-    if tries < (settings.FAILED_TRIES / 2):
-      response = check_injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-      tries = tries + 1
-    else:
-      err_msg = "Something went wrong, the request has failed (" + str(tries) + ") times continuously."
-      sys.stdout.write(settings.print_critical_msg(err_msg)+"\n")
-      sys.exit(0)
   return response
 
 """
