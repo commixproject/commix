@@ -179,7 +179,7 @@ def cookie_injection(url, vuln_parameter, payload):
     except ValueError:
       pass
 
-  if settings.TIME_BASED_STATE != False or settings.TEMPFILE_BASED_STATE != False :
+  if settings.TIME_BASED_ATTACK :
     start = 0
     end = 0
     start = time.time()
@@ -260,7 +260,7 @@ def cookie_injection(url, vuln_parameter, payload):
       print settings.print_critical_msg(err_msg)
       raise SystemExit()
 
-  if settings.TIME_BASED_STATE or settings.TEMPFILE_BASED_STATE:
+  if settings.TIME_BASED_ATTACK :
     end  = time.time()
     how_long = int(end - start)
     return how_long
@@ -288,7 +288,7 @@ def user_agent_injection(url, vuln_parameter, payload):
     except ValueError:
       pass
 
-  if settings.TIME_BASED_STATE != False or settings.TEMPFILE_BASED_STATE != False :
+  if settings.TIME_BASED_ATTACK :
     start = 0
     end = 0
     start = time.time()
@@ -371,7 +371,7 @@ def user_agent_injection(url, vuln_parameter, payload):
       print settings.print_critical_msg(err_msg)
       raise SystemExit()
 
-  if settings.TIME_BASED_STATE != False or settings.TEMPFILE_BASED_STATE != False :
+  if settings.TIME_BASED_ATTACK :
     end = time.time()
     how_long = int(end - start)
     return how_long
@@ -400,7 +400,7 @@ def referer_injection(url, vuln_parameter, payload):
     except ValueError:
       pass
 
-  if settings.TIME_BASED_STATE != False or settings.TEMPFILE_BASED_STATE != False :
+  if settings.TIME_BASED_ATTACK :
     start = 0
     end = 0
     start = time.time()
@@ -484,7 +484,7 @@ def referer_injection(url, vuln_parameter, payload):
       print settings.print_critical_msg(err_msg)
       raise SystemExit()
           
-  if settings.TIME_BASED_STATE != False or settings.TEMPFILE_BASED_STATE != False :
+  if settings.TIME_BASED_ATTACK :
     end  = time.time()
     how_long = int(end - start)
     return how_long
@@ -513,7 +513,7 @@ def custom_header_injection(url, vuln_parameter, payload):
     except ValueError:
       pass
 
-  if settings.TIME_BASED_STATE != False or settings.TEMPFILE_BASED_STATE != False :
+  if settings.TIME_BASED_ATTACK :
     start = 0
     end = 0
     start = time.time()
@@ -597,7 +597,7 @@ def custom_header_injection(url, vuln_parameter, payload):
       print settings.print_critical_msg(err_msg)
       raise SystemExit()
           
-  if settings.TIME_BASED_STATE != False or settings.TEMPFILE_BASED_STATE != False :
+  if settings.TIME_BASED_ATTACK :
     end  = time.time()
     how_long = int(end - start)
     return how_long

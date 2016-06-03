@@ -556,6 +556,9 @@ The exploitation function.
 (call the injection handler)
 """
 def exploitation(url, delay, filename, http_request_method, url_time_response):
+  # Check if attack is based on time delays.
+  if not settings.TIME_BASED_ATTACK :
+    settings.TIME_BASED_ATTACK = True
   if url_time_response >= settings.SLOW_TARGET_RESPONSE:
     warn_msg = "It is highly recommended, due to serious response delays, "
     warn_msg += "to skip the time-based (blind) technique and to continue "
@@ -584,5 +587,6 @@ def exploitation(url, delay, filename, http_request_method, url_time_response):
         pass
   else:
     if tb_injection_handler(url, delay, filename, http_request_method, url_time_response) == False:
+      settings.TIME_BASED_ATTACK = False
       return False
 #eof

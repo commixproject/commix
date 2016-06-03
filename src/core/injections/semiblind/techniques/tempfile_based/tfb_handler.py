@@ -618,7 +618,12 @@ The exploitation function.
 (call the injection handler)
 """
 def exploitation(url, delay, filename, tmp_path, http_request_method, url_time_response):
+  # Check if attack is based on time delays.
+  if not settings.TIME_BASED_ATTACK :
+    settings.TIME_BASED_ATTACK = True
   if tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, url_time_response) == False:
+    settings.TIME_BASED_ATTACK = False
+    settings.TEMPFILE_BASED_STATE = False
     return False
     
 #eof 
