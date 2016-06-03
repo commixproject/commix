@@ -169,6 +169,10 @@ def cookie_injection(url, vuln_parameter, payload):
       opener = urllib2.build_opener()
     else:
       opener = urllib2.build_opener(proxy)
+
+    if settings.TIME_BASED_ATTACK :
+      payload = urllib.quote(payload)
+      
     opener.addheaders.append(('Cookie', vuln_parameter + "=" + payload))
     request = urllib2.Request(url)
     # Check if defined extra headers.
