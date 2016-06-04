@@ -261,7 +261,7 @@ def main():
               print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
               err_msg = "Use '--headers=\"HEADER_NAME:HEADER_VALUE\"' "
               err_msg += "to provide an HTTP header or"
-              err_msg += " '--headers=\"HEADER_NAME:" + settings.INJECT_TAG + "\"' "
+              err_msg += " '--headers=\"HEADER_NAME:" + settings.WILDCARD_CHAR  + "\"' "
               err_msg += "if you want to try to exploit the provided HTTP header."
               print settings.print_error_msg(err_msg)
               sys.exit(0)
