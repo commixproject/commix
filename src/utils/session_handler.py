@@ -94,6 +94,8 @@ def injection_point_importation(url, technique, injection_type, separator, shell
                  int(output_length), str(is_vulnerable)))
     conn.commit()
     conn.close()
+    if settings.INJECTION_CHECKER == False:
+      settings.INJECTION_CHECKER = True
   except sqlite3.OperationalError, err_msg:
     print settings.print_error_msg(err_msg)
   except sqlite3.DatabaseError, err_msg:

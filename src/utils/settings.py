@@ -406,6 +406,9 @@ PASSWORDS_TXT_FILE = os.path.abspath(os.path.join(os.path.dirname(__file__), '..
 
 REQUIRED_AUTHENTICATION = False
 
+INJECTED_HTTP_HEADER = False
+INJECTION_CHECKER = False
+
 # Supported HTTP Authentication types
 SUPPORTED_HTTP_AUTH_TYPES = [ "basic", "digest" ]
 

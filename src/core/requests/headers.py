@@ -110,10 +110,11 @@ def do_check(request):
       http_header_value = re.findall(r":(.*)", extra_header)
       http_header_value = ''.join(http_header_value)
       # Check if it is a custom header injection.
-      if not settings.CUSTOM_HEADER_INJECTION and \
+      if settings.CUSTOM_HEADER_INJECTION == False and \
          settings.INJECT_TAG in http_header_value:
         settings.CUSTOM_HEADER_INJECTION = True
         settings.CUSTOM_HEADER_NAME = http_header_name
       request.add_header(http_header_name, http_header_value)
+
 
 #eof
