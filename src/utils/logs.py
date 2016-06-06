@@ -94,21 +94,17 @@ def add_type_and_technique(export_injection_info, filename, injection_type, tech
 """
 Add the vulnerable parameter in log files.
 """
-def add_parameter(vp_flag, filename, http_request_method, vuln_parameter, payload):
-
-  if vp_flag == True:
-    output_file = open(filename, "a")
-    if settings.COOKIE_INJECTION == True:
-      http_request_method = "cookie"
-    if vuln_parameter == "HTTP Header" :
-      output_file.write("\n(+) Parameter : " + http_request_method + " HTTP Header ")
-    else :
-      vp_flag = False
-      output_file.write("\n(+) Parameter : " + vuln_parameter + "(" + http_request_method + ")")
-    output_file.write("\n")
-    output_file.close()
-
-  return vp_flag
+def add_parameter(vp_flag, filename, the_type, header_name, http_request_method, vuln_parameter, payload):
+  
+  output_file = open(filename, "a")
+  if header_name[1:] == "cookie":
+    header_name = " ("+ header_name[1:] + ") " + vuln_parameter
+  if header_name[1:] == "":
+    header_name = " ("+ http_request_method + ") " + vuln_parameter
+  output_file.write("\n(+) " + the_type[1:].title() + ": " + header_name[1:])
+  vp_flag == False
+  output_file.write("\n")
+  output_file.close()
 
 """
 Add any payload in log files.

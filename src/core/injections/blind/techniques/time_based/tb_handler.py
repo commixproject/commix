@@ -341,7 +341,7 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
             if export_injection_info == False:
               export_injection_info = logs.add_type_and_technique(export_injection_info, filename, injection_type, technique)
             if vp_flag == True:
-              vp_flag = logs.add_parameter(vp_flag, filename, http_request_method, vuln_parameter, payload)
+              vp_flag = logs.add_parameter(vp_flag, filename, the_type, header_name, http_request_method, vuln_parameter, payload)
             logs.update_payload(filename, counter, payload) 
             counter = counter + 1
 
