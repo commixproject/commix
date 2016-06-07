@@ -1,4 +1,4 @@
-## Version 0.9b (upcoming)
+## Version 0.9b (2016-06-07)
 * Added: The ability to re-perform the injection request if it has failed.
 * Fixed: The shell output in semiblind ("file-based") technique has been fixed not to concat new lines.
 * Revised: The ability to execute multiple tamper scripts combined or the one after the other.
