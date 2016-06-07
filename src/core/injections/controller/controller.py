@@ -381,7 +381,7 @@ def do_check(url, filename):
 
   if perform_checks(url,filename) == False:
     scan_level = menu.options.level
-    while scan_level < 3:
+    while scan_level < 3 and settings.LOAD_SESSION == None:
       question_msg = "Do you want to increase to '--level=" + str(scan_level + 1) 
       question_msg += "' in order to perform more tests? [Y/n/q] > "
       sys.stdout.write(settings.print_question_msg(question_msg))
