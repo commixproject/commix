@@ -50,6 +50,11 @@ def do_check(url):
   if check_proxy == True:
     sys.stdout.write("[" + Fore.GREEN + "  SUCCEED " + Style.RESET_ALL + " ]\n")
     sys.stdout.flush()
+
+    # Check if defined "--force-ssl" option AND "--proxy" option.
+    # We then force the proxy to https
+    if menu.options.force_ssl and menu.options.proxy:
+      settings.PROXY_PROTOCOL = 'https'
   else:
     print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
     err_msg = "Could not connect to proxy."
