@@ -211,9 +211,11 @@ def check_http_s(url):
   if urlparse.urlparse(url).scheme:
     if menu.options.force_ssl and urlparse.urlparse(url).scheme != "https":
       url = re.sub("\Ahttp:", "https:", url, re.I)
+      settings.PROXY_PROTOCOL = 'https'
   else:
     if menu.options.force_ssl:
       url = "https://" + url
+      settings.PROXY_PROTOCOL = 'https'
     else:
       url = "http://" + url
   return url
