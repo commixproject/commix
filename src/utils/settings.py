@@ -18,7 +18,6 @@ import os
 import sys
 import time
 import urllib
-
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 """
@@ -30,7 +29,10 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION = "v0.9b"
+MAJOR = "1"
+MINOR = "0"
+COMMIT_ID = "0"
+VERSION = MAJOR + "." + MINOR + "." + COMMIT_ID
 YEAR    = "2014-2016"
 AUTHOR_TWITTER = "@ancst" 
 APPLICATION_TWITTER = "@commixproject" 
@@ -57,14 +59,6 @@ TIME_BASED_STATE = False
 FILE_BASED_STATE = False
 TEMPFILE_BASED_STATE = False
 TIME_BASED_ATTACK = False
-# Check Commit ID
-if os.path.isdir("./.git"):
-  with open('.git/refs/heads/master', 'r') as f:
-    COMMIT_ID = "-" + "git" + "-" + f.readline()[0:7]
-else:
-  os.chdir("src/")
-  COMMIT_ID = "-" + "nongit" + "-" + time.strftime("%Y%m%d", time.gmtime(os.path.getmtime(min(os.listdir(os.getcwd()), key=os.path.getctime))))
-
 # Check if OS is Windows.
 IS_WINDOWS = hasattr(sys, 'getwindowsversion')
 

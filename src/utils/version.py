@@ -23,7 +23,7 @@ from src.thirdparty.colorama import Fore, Back, Style, init
 Show version number and exit.
 """
 def show_version():
-  print settings.VERSION + settings.COMMIT_ID
+  print settings.VERSION
   sys.exit(0)
 
 """
