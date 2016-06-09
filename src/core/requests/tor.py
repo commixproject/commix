@@ -61,17 +61,17 @@ def do_check():
       new_ip = opener.open("http://icanhazip.com/").read()
       sys.stdout.write("[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]\n")
       sys.stdout.flush()
-      success_msg = + "Your ip address appears to be " + Style.UNDERLINE + new_ip
+      success_msg = + "Your ip address appears to be " +  + new_ip
       sys.stdout.write(settings.print_success_msg(success_msg))
 
     except urllib2.URLError, err_msg:
       print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
-      print settings.print_error_msg(err_msg)
+      print settings.print_critical_msg(err_msg)
       sys.exit(0)
       
     except urllib2.HTTPError, err_msg:
       print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
-      print settings.print_error_msg(err_msg)
+      print settings.print_critical_msg(err_msg)
       sys.exit(0)
 
 """

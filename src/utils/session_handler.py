@@ -50,7 +50,7 @@ def flush(url):
     conn.commit()
     conn.close()
   except sqlite3.OperationalError, err_msg:
-    print settings.print_error_msg(err_msg)
+    print settings.print_critical_msg(err_msg)
 
 """
 Clear injection point records 
@@ -66,7 +66,7 @@ def clear(url):
       conn.commit()
       conn.close()
   except sqlite3.OperationalError, err_msg:
-    print settings.print_error_msg(err_msg)
+    print settings.print_critical_msg(err_msg)
   except:
     settings.LOAD_SESSION = False
     return False
@@ -97,12 +97,12 @@ def injection_point_importation(url, technique, injection_type, separator, shell
     if settings.INJECTION_CHECKER == False:
       settings.INJECTION_CHECKER = True
   except sqlite3.OperationalError, err_msg:
-    print settings.print_error_msg(err_msg)
+    print settings.print_critical_msg(err_msg)
   except sqlite3.DatabaseError, err_msg:
     err_msg = "An error occurred while accessing session file ('"
     err_msg += settings.SESSION_FILE + "'). "
     err_msg += "If the problem persists use the '--flush-session' option."
-    print "\n" + settings.print_error_msg(err_msg)
+    print "\n" + settings.print_critical_msg(err_msg)
     sys.exit(0)
 
 """
@@ -129,7 +129,7 @@ def applied_techniques(url, http_request_method):
     applied_techniques = ''.join(list(set(values)))
     return applied_techniques
   except sqlite3.OperationalError, err_msg:
-    print settings.print_error_msg(err_msg)
+    print settings.print_critical_msg(err_msg)
     settings.LOAD_SESSION = False
     return False
   except:
@@ -190,7 +190,7 @@ def injection_point_exportation(url, http_request_method):
       no_such_table = True
       pass
   except sqlite3.OperationalError, err_msg:
-    print settings.print_error_msg(err_msg)
+    print settings.print_critical_msg(err_msg)
     settings.LOAD_SESSION = False
     return False
   except:
@@ -203,13 +203,14 @@ Notification about session.
 def notification(url, technique):
   try:
     if settings.LOAD_SESSION == True:
-      warn_msg = "A previously stored session has been held against that host."
-      print settings.print_warning_msg(warn_msg) 
+      success_msg = "A previously stored session has been held against that host."
+      print settings.print_success_msg(success_msg) 
       while True:
         question_msg = "Do you want to resume to the " 
         question_msg += technique.rsplit(' ', 2)[0] 
         question_msg += " injection point? [Y/n/q] > "
-        settings.LOAD_SESSION = raw_input(settings.print_question_msg(question_msg)).lower()
+        sys.stdout.write(settings.print_question_msg(question_msg))
+        settings.LOAD_SESSION = sys.stdin.readline().replace("\n","").lower()
         if settings.LOAD_SESSION in settings.CHOICE_YES:
           return True
         elif settings.LOAD_SESSION in settings.CHOICE_NO:
@@ -217,7 +218,8 @@ def notification(url, technique):
           if technique[:1] != "c":
             while True:
               question_msg = "Which technique do you want to re-evaluate? [(C)urrent/(a)ll/(n)one] > "
-              proceed_option = raw_input(settings.print_question_msg(question_msg))
+              sys.stdout.write(settings.print_question_msg(question_msg))
+              proceed_option = sys.stdin.readline().replace("\n","").lower()
               if proceed_option.lower() in settings.CHOICE_PROCEED :
                 if proceed_option.lower() == "a":
                   settings.RETEST = True
@@ -233,7 +235,7 @@ def notification(url, technique):
                 if proceed_option.lower()  == "":
                    proceed_option  = "enter"
                 err_msg = "'" +  proceed_option + "' is not a valid answer."   
-                print settings.print_error_msg(err_msg) + "\n"
+                print settings.print_error_msg(err_msg)
                 pass
           return False
         elif settings.LOAD_SESSION in settings.CHOICE_QUIT:
@@ -242,10 +244,10 @@ def notification(url, technique):
           if settings.LOAD_SESSION == "":
             settings.LOAD_SESSION = "enter"
           err_msg = "'" + settings.LOAD_SESSION + "' is not a valid answer."  
-          print settings.print_error_msg(err_msg) + "\n"
+          print settings.print_error_msg(err_msg)
           pass
   except sqlite3.OperationalError, err_msg:
-    print settings.print_error_msg(err_msg)
+    print settings.print_critical_msg(err_msg)
 
 """
 Check for specific stored parameter.
@@ -273,10 +275,10 @@ def store_cmd(url, cmd, shell, vuln_parameter):
     conn.commit()
     conn.close()
   except sqlite3.OperationalError, err_msg:
-    print settings.print_error_msg(err_msg)
+    print settings.print_critical_msg(err_msg)
   except TypeError, err_msg:
     pass
-    
+
 """
 Export successful command execution outputs from session file.
 """
@@ -315,12 +317,12 @@ def import_valid_credentials(url, authentication_type, admin_panel, username, pa
     conn.commit()
     conn.close()
   except sqlite3.OperationalError, err_msg:
-    print settings.print_error_msg(err_msg)
+    print settings.print_critical_msg(err_msg)
   except sqlite3.DatabaseError, err_msg:
     err_msg = "An error occurred while accessing session file ('"
     err_msg += settings.SESSION_FILE + "'). "
     err_msg += "If the problem persists use the '--flush-session' option."
-    print "\n" + settings.print_error_msg(err_msg)
+    print "\n" + settings.print_critical_msg(err_msg)
     sys.exit(0)
 
 

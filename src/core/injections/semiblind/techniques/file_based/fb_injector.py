@@ -135,8 +135,9 @@ def custom_header_injection_test(url, vuln_parameter, payload):
 The main command injection exploitation.
 """
 def injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
-
+  
   def check_injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
+    
     # Execute shell commands on vulnerable host.
     if alter_shell :
       payload = fb_payloads.cmd_execution_alter_shell(separator, cmd, OUTPUT_TEXTFILE) 
@@ -159,8 +160,11 @@ def injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_req
       payload_msg = payload.replace("\n", "\\n")
       if settings.COMMENT in payload_msg:
         payload_msg = payload_msg.split(settings.COMMENT)[0]
-      sys.stdout.write("\n" + settings.print_payload(payload_msg))
-    
+      info_msg = "Executing the '" + cmd.split(settings.COMMENT)[0] + "'command "
+      sys.stdout.write("\n" + settings.print_info_msg(info_msg))
+      sys.stdout.flush()
+      sys.stdout.write("\n" + settings.print_payload(payload).split(settings.COMMENT)[0])
+
     # Check if defined cookie with "INJECT_HERE" tag
     if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
       response = cookie_injection_test(url, vuln_parameter, payload)

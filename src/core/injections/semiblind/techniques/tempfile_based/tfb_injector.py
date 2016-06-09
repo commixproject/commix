@@ -187,6 +187,7 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, delay, ht
       payload = tfb_payloads.cmd_execution_alter_shell(separator, cmd, output_length, OUTPUT_TEXTFILE, delay, http_request_method)
     else:
       payload = tfb_payloads.cmd_execution(separator, cmd, output_length, OUTPUT_TEXTFILE, delay, http_request_method)  
+   
     # Fix prefixes / suffixes
     payload = parameters.prefixes(payload, prefix)
     payload = parameters.suffixes(payload, suffix)
@@ -200,7 +201,6 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, delay, ht
     if settings.VERBOSITY_LEVEL >= 1:
       payload_msg = payload.replace("\n", "\\n") 
       sys.stdout.write("\n" + settings.print_payload(payload_msg))
-
 
     # Check if defined cookie with "INJECT_HERE" tag
     if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
@@ -350,6 +350,7 @@ def false_positive_check(separator, TAG, cmd, prefix, suffix, whitespace, delay,
     sys.stdout.flush()  
 
   for output_length in range(1, 3):
+
     # Execute shell commands on vulnerable host.
     if alter_shell :
       payload = tfb_payloads.cmd_execution_alter_shell(separator, cmd, output_length, OUTPUT_TEXTFILE, delay, http_request_method)
@@ -468,6 +469,6 @@ def export_injection_results(cmd, separator, output, check_how_long):
       print "\n"
   else:
     err_msg = "The '" + cmd + "' command, does not return any output."
-    print "\n" + settings.print_error_msg(err_msg) + "\n"
-  
+    print "\n" + settings.print_critical_msg(err_msg) + "\n"
+
 #eof

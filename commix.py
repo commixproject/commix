@@ -101,7 +101,7 @@ def main():
     if menu.options.verbose > 1:
       err_msg = "The value for option '-v' "
       err_msg += "must be an integer value from range [0, 1]."
-      print settings.print_error_msg(err_msg)
+      print settings.print_critical_msg(err_msg)
       sys.exit(0)
     else:  
       settings.VERBOSITY_LEVEL = menu.options.verbose
@@ -110,7 +110,7 @@ def main():
     if menu.options.level > 3:
       err_msg = "The value for option '--level' "
       err_msg += "must be an integer value from range [1, 3]."
-      print settings.print_error_msg(err_msg)
+      print settings.print_critical_msg(err_msg)
       sys.exit(0)
 
     # Parse target / data from HTTP proxy logs (i.e Burp / WebScarab).
@@ -166,26 +166,26 @@ def main():
         err_msg += "' as injection technique. "
         err_msg += "The value, must be a string composed by the letters (C)lassic, (E)val-based, "
         err_msg += "(T)ime-based, (F)ile-based (with or without commas)."
-        print settings.print_error_msg(err_msg)
+        print settings.print_critical_msg(err_msg)
         sys.exit(0)
 
     # Check if specified wrong alternative shell
     if menu.options.alter_shell:
       if menu.options.alter_shell.lower() not in settings.AVAILABLE_SHELLS:
         err_msg = "'" + menu.options.alter_shell + "' shell is not supported!"
-        print settings.print_error_msg(err_msg)
+        print settings.print_critical_msg(err_msg)
         sys.exit(0)
 
     # Check the file-destination
     if menu.options.file_write and not menu.options.file_dest or \
     menu.options.file_upload  and not menu.options.file_dest:
       err_msg = "Host's absolute filepath to write and/or upload, must be specified (--file-dest)."
-      print settings.print_error_msg(err_msg)
+      print settings.print_critical_msg(err_msg)
       sys.exit(0)
 
     if menu.options.file_dest and menu.options.file_write == None and menu.options.file_upload == None :
       err_msg = "You must enter the '--file-write' or '--file-upload' parameter."
-      print settings.print_error_msg(err_msg)
+      print settings.print_critical_msg(err_msg)
       sys.exit(0)
 
     # Check if defined "--file-upload" option.
@@ -193,7 +193,7 @@ def main():
       # Check if not defined URL for upload.
       if not re.match(settings.VALID_URL_FORMAT, menu.options.file_upload):
         err_msg = "The '" + menu.options.file_upload + "' is not a valid URL. "
-        print settings.print_error_msg(err_msg)
+        print settings.print_critical_msg(err_msg)
         sys.exit(0)
         
     # Check if defined "--random-agent" option.
@@ -263,7 +263,7 @@ def main():
               err_msg += "to provide an HTTP header or"
               err_msg += " '--headers=\"HEADER_NAME:" + settings.WILDCARD_CHAR  + "\"' "
               err_msg += "if you want to try to exploit the provided HTTP header."
-              print settings.print_error_msg(err_msg)
+              print settings.print_critical_msg(err_msg)
               sys.exit(0)
         except:
           raise
@@ -274,7 +274,7 @@ def main():
         # Used a valid pair of valid credentials
         if menu.options.auth_cred:
           success_msg = Style.BRIGHT + "Identified a valid pair of credentials '" 
-          success_msg += Style.UNDERLINE + menu.options.auth_cred + Style.RESET_ALL 
+          success_msg += menu.options.auth_cred + Style.RESET_ALL 
           success_msg += Style.BRIGHT + "'." + Style.RESET_ALL
           print settings.print_success_msg(success_msg)
 
@@ -319,7 +319,7 @@ def main():
                   print "[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]"
                 if settings.VERBOSITY_LEVEL >= 1:
                   success_msg = "The server was identified as " 
-                  success_msg += Style.UNDERLINE + server_banner + Style.RESET_ALL + "."
+                  success_msg += server_banner + Style.RESET_ALL + "."
                   print settings.print_success_msg(success_msg)
                 settings.SERVER_BANNER = server_banner
                 found_server_banner = True
@@ -383,7 +383,8 @@ def main():
                 while True:
                   question_msg = "Do you recognise the server's operating system? "
                   question_msg += "[(W)indows/(U)nix/(q)uit] > "
-                  got_os = raw_input(settings.print_question_msg(question_msg)).lower()
+                  sys.stdout.write(settings.print_question_msg(question_msg))
+                  got_os = sys.stdin.readline().replace("\n","").lower()
                   if got_os.lower() in settings.CHOICE_OS :
                     if got_os.lower() == "w":
                       settings.TARGET_OS = "win"
@@ -396,7 +397,7 @@ def main():
                     if got_os == "":
                       got_os = "enter"
                     err_msg = "'" + got_os + "' is not a valid answer."  
-                    print settings.print_error_msg(err_msg) + "\n"
+                    print settings.print_error_msg(err_msg)
                     pass
 
             if not menu.options.os:
@@ -438,7 +439,7 @@ def main():
             print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
             err_msg = "The identified HTTP authentication type (" + auth_type + ") "
             err_msg += "is not yet supported."
-            print settings.print_error_msg(err_msg) + "\n"
+            print settings.print_critical_msg(err_msg) + "\n"
             sys.exit(0)
 
           except IndexError:
@@ -446,7 +447,7 @@ def main():
             err_msg = "The provided pair of " + menu.options.auth_type 
             err_msg += " HTTP authentication credentials '" + menu.options.auth_cred + "'"
             err_msg += " seems to be invalid."
-            print settings.print_error_msg(err_msg)
+            print settings.print_critical_msg(err_msg)
             sys.exit(0) 
 
           print "[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]"
@@ -464,7 +465,7 @@ def main():
               stored_auth_creds = False
             if stored_auth_creds:
               menu.options.auth_cred = stored_auth_creds
-              success_msg = "Identified a valid pair of credentials '" + Style.UNDERLINE 
+              success_msg = "Identified a valid pair of credentials '"  
               success_msg += menu.options.auth_cred + Style.RESET_ALL + Style.BRIGHT  + "'."
               print settings.print_success_msg(success_msg)
             else:  
@@ -476,7 +477,8 @@ def main():
                   print settings.print_warning_msg(warn_msg)
                   while True:
                     question_msg = "Do you want to perform a dictionary-based attack? [Y/n/q] > "
-                    crack_creds = raw_input(settings.print_question_msg(question_msg)).lower()
+                    sys.stdout.write(settings.print_question_msg(question_msg))
+                    crack_creds = sys.stdin.readline().replace("\n","").lower()
                     if crack_creds in settings.CHOICE_YES:
                       auth_creds = authentication.http_auth_cracker(url, realm)
                       if auth_creds != False:
@@ -493,7 +495,7 @@ def main():
                       if crack_creds == "":
                         crack_creds = "enter"
                       err_msg = "'" + crack_creds + "' is not a valid answer."  
-                      print settings.print_error_msg(err_msg) + "\n"
+                      print settings.print_error_msg(err_msg)
                       pass
 
               # Digest authentication         
@@ -508,7 +510,8 @@ def main():
                     print settings.print_warning_msg(warn_msg)
                   while True:
                     question_msg = "Do you want to perform a dictionary-based attack? [Y/n/q] > "
-                    crack_creds = raw_input(settings.print_question_msg(question_msg)).lower()
+                    sys.stdout.write(settings.print_question_msg(question_msg))
+                    crack_creds = sys.stdin.readline().replace("\n","").lower()
                     if crack_creds in settings.CHOICE_YES:
                       auth_creds = authentication.http_auth_cracker(url, realm)
                       if auth_creds != False:
@@ -525,7 +528,7 @@ def main():
                       if crack_creds == "":
                         crack_creds = "enter"
                       err_msg = "'" + crack_creds + "' is not a valid answer."  
-                      print settings.print_error_msg(err_msg) + "\n"
+                      print settings.print_error_msg(err_msg)
                       pass
                   else:   
                     checks.http_auth_err_msg()      
@@ -535,13 +538,13 @@ def main():
         elif e.getcode() == 403:
           print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
           err_msg = "You don't have permission to access this page."
-          print settings.print_error_msg(err_msg)
+          print settings.print_critical_msg(err_msg)
           sys.exit(0)
           
         elif e.getcode() == 404:
           print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
           err_msg = "The host seems to be down!"
-          print settings.print_error_msg(err_msg)
+          print settings.print_critical_msg(err_msg)
           sys.exit(0)
 
         else:
@@ -550,7 +553,7 @@ def main():
       except urllib2.URLError, e:
         print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
         err_msg = "The host seems to be down!"
-        print settings.print_error_msg(err_msg)
+        print settings.print_critical_msg(err_msg)
         sys.exit(0)
         
       except httplib.BadStatusLine, e:
@@ -561,7 +564,7 @@ def main():
 
     else:
       err_msg = "You must specify the target URL."
-      print settings.print_error_msg(err_msg)
+      print settings.print_critical_msg(err_msg)
       sys.exit(0)
 
     # Retrieve everything from the supported enumeration options.
@@ -601,7 +604,7 @@ def main():
       sys.exit(0)      
     else: 
       err_msg = e.line + e.message
-      print settings.print_error_msg(err_msg) + "\n"
+      print settings.print_critical_msg(err_msg) + "\n"
     session_handler.clear(url)  
     sys.exit(0)
 

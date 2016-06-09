@@ -58,7 +58,7 @@ def authentication_process():
   if len(cookies) != 0 :
     menu.options.cookie = cookies.rstrip()
     if settings.VERBOSITY_LEVEL >= 1:
-      success_msg = "The received cookie is " + Style.UNDERLINE 
+      success_msg = "The received cookie is "  
       success_msg += menu.options.cookie + Style.RESET_ALL + "."
       print settings.print_success_msg(success_msg)
 
@@ -79,11 +79,11 @@ def define_wordlists():
     usernames = []
     if not os.path.isfile(settings.USERNAMES_TXT_FILE):
       err_msg = "The username file (" + settings.USERNAMES_TXT_FILE + ") is not found"
-      print settings.print_error_msg(err_msg)
+      print settings.print_critical_msg(err_msg)
       sys.exit(0) 
     if len(settings.USERNAMES_TXT_FILE) == 0:
       err_msg = "The " + settings.USERNAMES_TXT_FILE + " file is empty."
-      print settings.print_error_msg(err_msg)
+      print settings.print_critical_msg(err_msg)
       sys.exit(0)
     with open(settings.USERNAMES_TXT_FILE, "r") as f: 
       for line in f:
@@ -91,18 +91,18 @@ def define_wordlists():
         usernames.append(line)
   except IOError: 
     err_msg = " Check if the " + settings.USERNAMES_TXT_FILE + " file is readable or corrupted."
-    print settings.print_error_msg(err_msg)
+    print settings.print_critical_msg(err_msg)
     sys.exit(0)
 
   try:
     passwords = []
     if not os.path.isfile(settings.PASSWORDS_TXT_FILE):
       err_msg = "The password file (" + settings.PASSWORDS_TXT_FILE + ") is not found" + Style.RESET_ALL
-      print settings.print_error_msg(err_msg)
+      print settings.print_critical_msg(err_msg)
       sys.exit(0) 
     if len(settings.PASSWORDS_TXT_FILE) == 0:
       err_msg = "The " + settings.PASSWORDS_TXT_FILE + " file is empty."
-      print settings.print_error_msg(err_msg)
+      print settings.print_critical_msg(err_msg)
       sys.exit(0) 
     with open(settings.PASSWORDS_TXT_FILE, "r") as f: 
       for line in f:
@@ -110,7 +110,7 @@ def define_wordlists():
         passwords.append(line)
   except IOError: 
     err_msg = " Check if the " + settings.PASSWORDS_TXT_FILE + " file is readable or corrupted."
-    print settings.print_error_msg(err_msg)
+    print settings.print_critical_msg(err_msg)
     sys.exit(0)
 
   return usernames, passwords
@@ -131,7 +131,7 @@ def http_auth_cracker(url, realm):
         float_percent = "{0:.1f}%".format(round(((i*100)/(total*1.0)),2))
         # Check if verbose mode on
         if settings.VERBOSITY_LEVEL >= 1:
-          payload = "pair of credentials: " + username + ":" + password
+          payload = "pair of credentials '" + username + ":" + password + "'"
           sys.stdout.write("\r" + settings.print_checking_msg(payload) + "           ")
           sys.stdout.flush()
         try:
@@ -173,7 +173,7 @@ def http_auth_cracker(url, realm):
           valid_pair =  "" + username + ":" + password + ""
           print ""
           success_msg = "Identified a valid pair of credentials '" 
-          success_msg += Style.UNDERLINE  + valid_pair + Style.RESET_ALL + Style.BRIGHT  + "'."  
+          success_msg += valid_pair + Style.RESET_ALL + Style.BRIGHT  + "'."  
           print settings.print_success_msg(success_msg)
           return valid_pair
 
@@ -181,7 +181,7 @@ def http_auth_cracker(url, realm):
     err_msg += "HTTP authentication credentials (i.e --auth-cred=\"admin:admin\") " 
     err_msg += "or place an other dictionary into '" 
     err_msg += os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'txt')) + "/' directory."
-    print "\n" + settings.print_error_msg(err_msg)  
+    print "\n" + settings.print_critical_msg(err_msg)  
     return False  
 
 #eof

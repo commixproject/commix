@@ -132,7 +132,7 @@ def input_cmd(http_request_method, url, vuln_parameter, ip_src, technique):
     if go_back == True:
       break
     question_msg = "Do you want a Pseudo-Terminal shell? [Y/n/q] > "  
-    gotshell = raw_input("\n" + settings.print_info_msg(question_msg)).lower()
+    gotshell = raw_input("\n" + settings.print_question_msg(question_msg)).lower()
     if gotshell in settings.CHOICE_YES:
       print "\nPseudo-Terminal (type '" + Style.BRIGHT + "?" + Style.RESET_ALL + "' for available options)"
       if readline_error:
@@ -186,7 +186,7 @@ def input_cmd(http_request_method, url, vuln_parameter, ip_src, technique):
       if gotshell == "":
         gotshell = "enter"
       err_msg = "'" + gotshell + "' is not a valid answer."
-      print settings.print_error_msg(err_msg) + "\n"
+      print settings.print_error_msg(err_msg)
       pass
 
 
@@ -207,7 +207,7 @@ def icmp_exfiltration_handler(url, http_request_method):
   # You need to have root privileges to run this script
   if os.geteuid() != 0:
     err_msg = "You need to have root privileges to run this option."
-    print settings.print_error_msg(err_msg) + "\n"
+    print settings.print_critical_msg(err_msg) + "\n"
     os._exit(0)
 
   if http_request_method == "GET":
@@ -230,7 +230,7 @@ def icmp_exfiltration_handler(url, http_request_method):
       response = proxy.use_proxy(request)
     except urllib2.HTTPError, err_msg:
       if settings.IGNORE_ERR_MSG == False:
-        print "\n" + settings.print_error_msg(err_msg)
+        print "\n" + settings.print_critical_msg(err_msg)
         continue_tests = checks.continue_tests(err)
         if continue_tests == True:
           settings.IGNORE_ERR_MSG = True
@@ -243,7 +243,7 @@ def icmp_exfiltration_handler(url, http_request_method):
       response = tor.use_tor(request)
     except urllib2.HTTPError, err_msg:
       if settings.IGNORE_ERR_MSG == False:
-        print "\n" + settings.print_error_msg(err_msg)
+        print "\n" + settings.print_critical_msg(err_msg)
         continue_tests = checks.continue_tests(err)
         if continue_tests == True:
           settings.IGNORE_ERR_MSG = True
@@ -255,7 +255,7 @@ def icmp_exfiltration_handler(url, http_request_method):
       response = urllib2.urlopen(request)
     except urllib2.HTTPError, err_msg:
       if settings.IGNORE_ERR_MSG == False:
-        print "\n" + settings.print_error_msg(err_msg)
+        print "\n" + settings.print_critical_msg(err_msg)
         continue_tests = checks.continue_tests(err)
         if continue_tests == True:
           settings.IGNORE_ERR_MSG = True
@@ -265,7 +265,7 @@ def icmp_exfiltration_handler(url, http_request_method):
   if settings.TARGET_OS == "win":
     err_msg = "This module's payloads are not suppoted by "
     err_msg += "the identified target operating system."
-    print settings.print_error_msg(err_msg) + "\n"
+    print settings.print_critical_msg(err_msg) + "\n"
     os._exit(0)
 
   else:

@@ -57,7 +57,7 @@ def file_read(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, delay, ht
   if settings.VERBOSITY_LEVEL >= 1:
     print ""
   if shell:
-    success_msg = "The contents of file '" + Style.UNDERLINE 
+    success_msg = "The contents of file '"  
     success_msg += file_to_read + Style.RESET_ALL + Style.BRIGHT 
     success_msg += "'" + Style.RESET_ALL + " : "
     sys.stdout.write(new_line + settings.print_success_msg(success_msg))
@@ -158,7 +158,7 @@ def file_write(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, delay, h
   # if settings.VERBOSITY_LEVEL >= 1:
   #   print ""
   if shell:
-    success_msg = "The '" + Style.UNDERLINE + shell + Style.RESET_ALL 
+    success_msg = "The '" +  shell + Style.RESET_ALL 
     success_msg += Style.BRIGHT + "' file was created successfully!\n" 
     sys.stdout.write("\n" + settings.print_success_msg(success_msg))
     sys.stdout.flush()
@@ -215,7 +215,7 @@ def file_upload(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, delay, 
     # if settings.VERBOSITY_LEVEL >= 1:
     #   print ""
     if shell:
-      success_msg = "The '" + Style.UNDERLINE + shell + Style.RESET_ALL 
+      success_msg = "The '" +  shell + Style.RESET_ALL 
       success_msg += Style.BRIGHT + "' file was uploaded successfully!"
       sys.stdout.write("\n" + settings.print_success_msg(success_msg) + "\n")
       sys.stdout.flush()

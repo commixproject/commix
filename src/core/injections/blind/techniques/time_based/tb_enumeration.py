@@ -51,7 +51,7 @@ def powershell_version(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, 
       if settings.VERBOSITY_LEVEL >= 1:
         print ""
       # Output PowerShell's version number
-      success_msg = "The PowerShell's version number is " + Style.UNDERLINE
+      success_msg = "The PowerShell's version number is " 
       success_msg += ps_version + Style.RESET_ALL + Style.BRIGHT
       sys.stdout.write(new_line + settings.print_success_msg(success_msg) + ".")
       sys.stdout.flush()
@@ -81,7 +81,7 @@ def hostname(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, delay, htt
     new_line = ""
   shell = output 
   if shell:
-    success_msg = "The hostname is " + Style.UNDERLINE + shell
+    success_msg = "The hostname is " +  shell
     sys.stdout.write(new_line + settings.print_success_msg(success_msg) + ".")
     sys.stdout.flush()
     # Add infos to logs file. 
@@ -122,8 +122,8 @@ def system_information(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, 
     if target_arch:
       if settings.VERBOSITY_LEVEL >= 1:
         print ""
-      success_msg = "The target operating system is " + Style.UNDERLINE + target_os + Style.RESET_ALL  
-      success_msg += Style.BRIGHT + " and the hardware platform is " + Style.UNDERLINE + target_arch
+      success_msg = "The target operating system is " +  target_os + Style.RESET_ALL  
+      success_msg += Style.BRIGHT + " and the hardware platform is " +  target_arch
       sys.stdout.write(new_line + settings.print_success_msg(success_msg) + ".")
       sys.stdout.flush()
       # Add infos to logs file.   
@@ -167,7 +167,7 @@ def current_user(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, delay,
       shell = output 
       if settings.VERBOSITY_LEVEL >= 1:
         print ""
-      success_msg = "The current user is " + Style.UNDERLINE + cu_account  
+      success_msg = "The current user is " +  cu_account  
       sys.stdout.write(new_line + settings.print_success_msg(success_msg))
       # Add infos to logs file.    
       output_file = open(filename, "a")
@@ -178,14 +178,14 @@ def current_user(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, delay,
         shell = "".join(str(p) for p in shell)
         if (settings.TARGET_OS == "win" and not "Admin" in shell) or \
            (settings.TARGET_OS != "win" and shell != "0"):
-          sys.stdout.write(Style.BRIGHT + " and it is " + Style.UNDERLINE + "not" + Style.RESET_ALL + Style.BRIGHT + " privileged" + Style.RESET_ALL + ".")
+          sys.stdout.write(Style.BRIGHT + " and it is " +  "not" + Style.RESET_ALL + Style.BRIGHT + " privileged" + Style.RESET_ALL + ".")
           sys.stdout.flush()
           # Add infos to logs file.   
           output_file = open(filename, "a")
           output_file.write(" and it is not privileged.\n")
           output_file.close()
         else:
-          sys.stdout.write(Style.BRIGHT + " and it is " + Style.UNDERLINE + Style.RESET_ALL + Style.BRIGHT + "privileged" + Style.RESET_ALL + ".")
+          sys.stdout.write(Style.BRIGHT + " and it is " +  Style.RESET_ALL + Style.BRIGHT + "privileged" + Style.RESET_ALL + ".")
           sys.stdout.flush()
           # Add infos to logs file.   
           output_file = open(filename, "a")
@@ -194,7 +194,7 @@ def current_user(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, delay,
     else:
       if settings.VERBOSITY_LEVEL >= 1:
         print ""
-      success_msg = "The current user is " + Style.UNDERLINE + cu_account
+      success_msg = "The current user is " +  cu_account
       sys.stdout.write(settings.print_success_msg(success_msg) + ".")
       sys.stdout.flush()
       # Add infos to logs file.   
@@ -276,10 +276,10 @@ def system_users(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, delay,
             is_privileged_nh = ""
           if settings.VERBOSITY_LEVEL >= 1:
             print ""
-          print "\n  (" +str(count)+ ") '" + Style.BRIGHT + Style.UNDERLINE + sys_users_list[user] + Style.RESET_ALL + "'" + Style.BRIGHT + is_privileged + Style.RESET_ALL + "." 
+          print "\n  [" +str(count)+ "] '" + Style.BRIGHT +  sys_users_list[user] + Style.RESET_ALL + "'" + Style.BRIGHT + is_privileged + Style.RESET_ALL + "." 
           # Add infos to logs file.   
           output_file = open(filename, "a")
-          output_file.write("      (" +str(count)+ ") " + sys_users_list[user] + is_privileged + ".\n" )
+          output_file.write("      [" +str(count)+ "] " + sys_users_list[user] + is_privileged + ".\n" )
           output_file.close()
       else:
         sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
@@ -376,11 +376,11 @@ def system_users(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, delay,
                 else :
                   is_privileged = ""
                   is_privileged_nh = ""
-                sys.stdout.write("\n  (" +str(count)+ ") '" + Style.BRIGHT + Style.UNDERLINE + fields[0] + Style.RESET_ALL + "'" + Style.BRIGHT + is_privileged + Style.RESET_ALL + "(uid=" + fields[1] + "). Home directory is in '" + Style.BRIGHT + fields[2]+ Style.RESET_ALL + "'.")
+                sys.stdout.write("\n  [" +str(count)+ "] '" + Style.BRIGHT +  fields[0] + Style.RESET_ALL + "'" + Style.BRIGHT + is_privileged + Style.RESET_ALL + "(uid=" + fields[1] + "). Home directory is in '" + Style.BRIGHT + fields[2]+ Style.RESET_ALL + "'.")
                 sys.stdout.flush()
                 # Add infos to logs file.   
                 output_file = open(filename, "a")
-                output_file.write("      (" +str(count)+ ") '" + fields[0]+ "'" + is_privileged_nh + "(uid=" + fields[1] + "). Home directory is in '" + fields[2] + "'.\n" )
+                output_file.write("      [" +str(count)+ "] '" + fields[0]+ "'" + is_privileged_nh + "(uid=" + fields[1] + "). Home directory is in '" + fields[2] + "'.\n" )
                 output_file.close()
               except ValueError:
                 if count == 1 :
@@ -457,10 +457,10 @@ def system_passwords(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, de
           try:
             fields = line.split(":")
             if fields[1] != "*" and fields[1] != "!" and fields[1] != "":
-              print "  (" +str(count)+ ") " + Style.BRIGHT + fields[0]+ Style.RESET_ALL + " : " + Style.BRIGHT + fields[1]+ Style.RESET_ALL
+              print "  [" +str(count)+ "] " + Style.BRIGHT + fields[0]+ Style.RESET_ALL + " : " + Style.BRIGHT + fields[1]+ Style.RESET_ALL
               # Add infos to logs file.   
               output_file = open(filename, "a")
-              output_file.write("      (" +str(count)+ ") " + fields[0] + " : " + fields[1])
+              output_file.write("      [" +str(count)+ "] " + fields[0] + " : " + fields[1])
               output_file.close()
           # Check for appropriate '/etc/shadow' format.
           except IndexError:

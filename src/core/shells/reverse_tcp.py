@@ -31,8 +31,9 @@ def check_lhost(lhost):
     print "LHOST => " + settings.LHOST
     return True
   else:
-    err_msg = "The IP format is not valid."
-    print settings.print_error_msg(err_msg) + "\n"
+    err_msg = "The provided IP is not in "
+    err_msg += "appropriate format (i.e 192.168.1.5)."
+    print settings.print_error_msg(err_msg)
     return False
 
 """
@@ -45,8 +46,8 @@ def check_lport(lport):
       print "LPORT => " + settings.LPORT
       return True
   except ValueError:
-    err_msg = "The port must be numeric."
-    print settings.print_error_msg(err_msg) + "\n"
+    err_msg = "The provided port must be numeric (i.e. 1234)"
+    print settings.print_error_msg(err_msg)
     return False
 
 
@@ -294,7 +295,7 @@ def configure_reverse_tcp():
       break 
     else:
       err_msg = "The '" + option + "' option, is not valid."
-      print settings.print_error_msg(err_msg) + "\n"
+      print settings.print_error_msg(err_msg)
       pass
 
 # eof

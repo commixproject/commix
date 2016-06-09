@@ -486,6 +486,5 @@ def export_injection_results(cmd, separator, output, check_how_long):
     # Check for fault command.
     else:
       err_msg = "The '" + cmd + "' command, does not return any output."
-      print "\n" + settings.print_error_msg(err_msg)
-    
+      print "\n" + settings.print_critical_msg(err_msg)     
 #eof

@@ -53,7 +53,7 @@ def do_check(url):
   else:
     print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
     err_msg = "Could not connect to proxy."
-    print settings.print_error_msg(err_msg)
+    print settings.print_critical_msg(err_msg)
     sys.exit(0)
     
 """

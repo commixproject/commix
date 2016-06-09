@@ -136,7 +136,6 @@ Check if target host is vulnerable. (Custom header injection)
 def custom_header_injection_test(url, vuln_parameter, payload):
   return requests.custom_header_injection(url, vuln_parameter, payload)
 
-
 """
 The main command injection exploitation.
 """
@@ -163,6 +162,9 @@ def injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_meth
 
     # Check if defined "--verbose" option.
     if settings.VERBOSITY_LEVEL >= 1:
+      info_msg = "Executing the '" + cmd + "' command: "
+      sys.stdout.write("\n"+settings.print_info_msg(info_msg))
+      sys.stdout.flush()
       sys.stdout.write("\n" + settings.print_payload(payload))
 
     # Check if defined cookie with "INJECT_HERE" tag
@@ -232,7 +234,7 @@ def injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_meth
   tries = 0
   while not response:
     if tries < (settings.FAILED_TRIES / 2):
-      #response = check_injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
+      response = check_injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
       tries = tries + 1
     else:
       err_msg = "Something went wrong, the request has failed (" + str(tries) + ") times continuously."

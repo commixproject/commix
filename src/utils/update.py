@@ -42,7 +42,7 @@ def updater():
     print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
     err_msg = "For updating purposes on Windows platform, it's recommended "
     err_msg += "to use a GitHub client for Windows (http://windows.github.com/)."
-    print settings.print_error_msg(err_msg)
+    print settings.print_critical_msg(err_msg)
     sys.exit(0)
   else:
     try:
@@ -73,14 +73,14 @@ def updater():
           err_msg = "The '.git' directory not found. Do it manually: " 
           err_msg += Style.BRIGHT + "'git clone " + settings.GIT_URL 
           err_msg += " " + settings.APPLICATION + "' "
-          print settings.print_error_msg(err_msg)    
+          print settings.print_critical_msg(err_msg)    
           sys.exit(0)
       else:
           print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
           err_msg = requirment + " not found."
-          print settings.print_error_msg(err_msg)
+          print settings.print_critical_msg(err_msg)
           sys.exit(0)
 
     except Exception as err_msg:
-      print "\n" + settings.print_error_msg(err_msg)
+      print "\n" + settings.print_critical_msg(err_msg)
     sys.exit(0)

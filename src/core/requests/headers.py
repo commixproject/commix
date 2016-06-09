@@ -83,7 +83,7 @@ def do_check(request):
       except ValueError:
         err_msg = "Unsupported / Invalid HTTP authentication type '" + menu.options.auth_type + "'."
         err_msg += " Try basic or digest HTTP authentication type."
-        print settings.print_error_msg(err_msg)
+        print settings.print_critical_msg(err_msg)
         sys.exit(0)   
     else:
       pass        
@@ -115,6 +115,5 @@ def do_check(request):
         settings.CUSTOM_HEADER_INJECTION = True
         settings.CUSTOM_HEADER_NAME = http_header_name
       request.add_header(http_header_name, http_header_value)
-
 
 #eof

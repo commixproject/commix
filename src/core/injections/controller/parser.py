@@ -39,7 +39,7 @@ def logfile_parser():
     print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
     err_msg = "Currently " + settings.APPLICATION + " doesn't support "
     err_msg += "multiple targets. Use only one request per log file."
-    sys.stdout.write(settings.print_error_msg(err_msg) + "\n")
+    sys.stdout.write(settings.print_critical_msg(err_msg) + "\n")
     sys.stdout.flush()
     sys.exit(0)
 
@@ -50,7 +50,7 @@ def logfile_parser():
     print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
     err_msg = "Something seems to be wrong with "
     err_msg += "the '" + menu.options.logfile + "' file. "
-    sys.stdout.write(settings.print_error_msg(err_msg) + "\n")
+    sys.stdout.write(settings.print_critical_msg(err_msg) + "\n")
     sys.stdout.flush()
     sys.exit(0)
 
@@ -61,7 +61,7 @@ def logfile_parser():
   if not os.path.exists(proxy_log_file):
     print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
     err_msg = "It seems that the '" + proxy_log_file + "' file, does not exists."
-    sys.stdout.write(settings.print_error_msg(err_msg) + "\n")
+    sys.stdout.write(settings.print_critical_msg(err_msg) + "\n")
     sys.stdout.flush()
     sys.exit(0)
   else:
@@ -88,7 +88,7 @@ def logfile_parser():
             print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
             err_msg = "You must set the '*' to specify the testable "
             err_msg += "parameter in the '" + menu.options.logfile + "' file."
-            print settings.print_error_msg(err_msg)
+            print settings.print_critical_msg(err_msg)
             sys.exit(0)
           menu.options.data = result[len(result)-1]
         else:
@@ -131,7 +131,7 @@ def logfile_parser():
             print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
             err_msg = "Use the '--auth-cred' option to provide a valid pair of "
             err_msg += "HTTP authentication credentials (i.e --auth-cred=\"admin:admin\") "
-            print settings.print_error_msg(err_msg)
+            print settings.print_critical_msg(err_msg)
             sys.exit(0)
 
       # Add extra headers

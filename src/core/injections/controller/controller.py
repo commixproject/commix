@@ -343,6 +343,9 @@ def perform_checks(url, filename):
   else:
     http_request_method = "POST"
 
+  if menu.options.shellshock:
+    menu.options.level = 3
+
   # Check for stored injections on User-agent / Referer headers (if level > 2).
   if menu.options.level >= 3:
     if settings.INJECTED_HTTP_HEADER == False :

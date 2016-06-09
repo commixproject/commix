@@ -64,7 +64,7 @@ def installer():
     if os.geteuid() != 0:
       print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]" 
       err_msg = "You need to have root privileges to run this option!"
-      print settings.print_error_msg(err_msg)
+      print settings.print_critical_msg(err_msg)
       sys.exit(0)
       
     # Check if commix is already installed.
@@ -75,7 +75,8 @@ def installer():
       print settings.print_warning_msg(warn_msg)
       while True:
         question_msg = "Do you want to remove commix? [Y/n/q] > "
-        uninstall = raw_input(settings.print_question_msg(question_msg)).lower()
+        sys.stdout.write(settings.print_question_msg(question_msg))
+        uninstall = sys.stdin.readline().replace("\n","").lower()
         if uninstall in settings.CHOICE_YES:
           uninstaller()
           sys.exit(0)
@@ -86,7 +87,7 @@ def installer():
           if uninstall == "":
             uninstall = "enter"
           err_msg = "'" + uninstall + "' is not a valid answer."
-          print settings.print_error_msg(err_msg) + "\n"
+          print settings.print_error_msg(err_msg)
           pass
       
     # Check for git.
@@ -103,7 +104,7 @@ def installer():
         print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
         err_msg = "The installer is not designed for any "
         err_msg += "other Linux distro than Ubuntu / Debian." 
-        print settings.print_error_msg(err_msg)
+        print settings.print_critical_msg(err_msg)
         err_msg = "    Please install manually: " + dependencies
         print Back.RED + err_msg + Style.RESET_ALL
         print ""
@@ -155,9 +156,9 @@ def installer():
   else :
     print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
     err_msg = "The installer is not designed for any other system other than Linux."
-    print settings.print_error_msg(err_msg)
+    print settings.print_critical_msg(err_msg)
     err_msg = "    Please install manually: " + packages + dependencies
-    print settings.print_error_msg(err_msg)
+    print settings.print_critical_msg(err_msg)
     print ""
     sys.exit(0)
 

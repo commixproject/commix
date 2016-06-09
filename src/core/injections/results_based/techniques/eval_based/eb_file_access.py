@@ -51,8 +51,8 @@ def file_read(separator, TAG, prefix, suffix, http_request_method, url, vuln_par
   if settings.VERBOSITY_LEVEL >= 1:
     print ""
   if shell:
-    success_msg = "The contents of file '" + Style.UNDERLINE 
-    success_msg += file_to_read + Style.RESET_ALL + "' : "
+    success_msg = "The contents of file '"  
+    success_msg += file_to_read + "'" + Style.RESET_ALL + ": "
     sys.stdout.write(settings.print_success_msg(success_msg))
     sys.stdout.flush()
     print shell
@@ -138,7 +138,7 @@ def file_write(separator, TAG, prefix, suffix, http_request_method, url, vuln_pa
   if shell:
     if settings.VERBOSITY_LEVEL >= 1:
       print ""
-    success_msg = "The " + Style.UNDERLINE + shell + Style.RESET_ALL
+    success_msg = "The " +  shell + Style.RESET_ALL
     success_msg += Style.BRIGHT + " file was created successfully!" + "\n" 
     sys.stdout.write(settings.print_success_msg(success_msg))
     sys.stdout.flush()
@@ -193,7 +193,7 @@ def file_upload(separator, TAG, prefix, suffix, http_request_method, url, vuln_p
     if settings.VERBOSITY_LEVEL >= 1:
       print ""
     if shell:
-      success_msg = "The " + Style.UNDERLINE + shell
+      success_msg = "The " +  shell
       success_msg += Style.RESET_ALL + Style.BRIGHT + " file was uploaded successfully!" 
       sys.stdout.write(settings.print_success_msg(success_msg) + "\n")
       sys.stdout.flush()
