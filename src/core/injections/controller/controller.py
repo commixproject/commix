@@ -231,40 +231,36 @@ Check if HTTP Method is GET.
 """ 
 def get_request(url, http_request_method, filename, delay):
 
-  if not menu.options.shellshock:
-    #if not settings.COOKIE_INJECTION:
-    found_url = parameters.do_GET_check(url)
-    if found_url != False:
+  #if not settings.COOKIE_INJECTION:
+  found_url = parameters.do_GET_check(url)
+  if found_url != False:
 
-      check_parameters = []
-      for i in range(0, len(found_url)):
-        url = found_url[i]
-        check_parameter = parameters.vuln_GET_param(url)
-        check_parameters.append(check_parameter)
+    check_parameters = []
+    for i in range(0, len(found_url)):
+      url = found_url[i]
+      check_parameter = parameters.vuln_GET_param(url)
+      check_parameters.append(check_parameter)
 
-      header_name = ""
-      checks.print_non_listed_params(check_parameters, http_request_method, header_name)
+    header_name = ""
+    checks.print_non_listed_params(check_parameters, http_request_method, header_name)
 
-      for i in range(0, len(found_url)):
-        url = found_url[i]
-        check_parameter = parameters.vuln_GET_param(url)
-        # Check if testable parameter(s) are provided
-        if len(settings.TEST_PARAMETER) > 0:
-          if check_parameter in settings.TEST_PARAMETER:
-            # Check for session file 
-            check_for_stored_sessions(url, http_request_method)
-            injection_proccess(url, check_parameter, http_request_method, filename, delay)
-        else:
+    for i in range(0, len(found_url)):
+      url = found_url[i]
+      check_parameter = parameters.vuln_GET_param(url)
+      # Check if testable parameter(s) are provided
+      if len(settings.TEST_PARAMETER) > 0:
+        if check_parameter in settings.TEST_PARAMETER:
           # Check for session file 
           check_for_stored_sessions(url, http_request_method)
           injection_proccess(url, check_parameter, http_request_method, filename, delay)
-    
-    # Enable Cookie Injection
-    if menu.options.level > 1 and menu.options.cookie:
-      settings.COOKIE_INJECTION = True
-
-  else:
-    menu.options.level = 3
+      else:
+        # Check for session file 
+        check_for_stored_sessions(url, http_request_method)
+        injection_proccess(url, check_parameter, http_request_method, filename, delay)
+  
+  # Enable Cookie Injection
+  if menu.options.level > 1 and menu.options.cookie:
+    settings.COOKIE_INJECTION = True
 
 """
 Check if HTTP Method is POST.
@@ -353,10 +349,14 @@ def perform_checks(url, filename):
       stored_http_header_injection(url, check_parameter, http_request_method, filename, delay)
   else:
     # Enable Cookie Injection
-    if menu.options.cookie and menu.options.level > 1:
-      cookie_injection(url, http_request_method, filename, delay)
+    if menu.options.level > 1:
+      if menu.options.cookie:
+        cookie_injection(url, http_request_method, filename, delay)
+      else:
+        warn_msg = "The HTTP Cookie header is not provided, "
+        warn_msg += "so this test is going to be skipped."
+        print settings.print_warning_msg(warn_msg)
     else:
-
       # Custom header Injection
       if settings.CUSTOM_HEADER_INJECTION == True:
         check_parameter =  header_name = " " + settings.CUSTOM_HEADER_NAME
