@@ -386,7 +386,7 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
             logs.update_payload(filename, counter, payload) 
             counter = counter + 1
 
-            if not settings.VERBOSITY_LEVEL >= 1 and not settings.LOAD_SESSION:
+            if not settings.LOAD_SESSION:
               print ""
 
             # Print the findings to terminal.
