@@ -31,7 +31,7 @@ DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 MAJOR = "1"
 MINOR = "0"
-COMMIT_ID = "5"
+COMMIT_ID = "6"
 VERSION = MAJOR + "." + MINOR + "." + COMMIT_ID
 YEAR    = "2014-2016"
 AUTHOR_TWITTER = "@ancst" 
@@ -404,6 +404,9 @@ REQUIRED_AUTHENTICATION = False
 
 INJECTED_HTTP_HEADER = False
 INJECTION_CHECKER = False
+
+# Checks for : /cgi-bin-sdb/, /cgi-mod/, /cgi-sys/, /cgi-bin/
+CGI_SCRIPTS = ["/cgi-",]
 
 # Supported HTTP Authentication types
 SUPPORTED_HTTP_AUTH_TYPES = [ "basic", "digest" ]

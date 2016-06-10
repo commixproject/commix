@@ -208,6 +208,36 @@ def ps_check_failed():
       print settings.print_error_msg(err_msg)
       pass
 
+
+"""
+Check if CGI scripts (shellshock injection).
+"""
+def check_CGI_scripts(url):
+  for cgi_script in settings.CGI_SCRIPTS:
+    if cgi_script in url and menu.options.shellshock == False:
+      warn_msg = "The provided url is probable to contain script(s) "
+      warn_msg += "vulnerable to shellshock. "
+      print settings.print_warning_msg(warn_msg)
+      while True:
+        question_msg = "Do you want to enable the shellshock injection module? [Y/n/q] > "
+        sys.stdout.write(settings.print_question_msg(question_msg))
+        shellshock_check = sys.stdin.readline().replace("\n","").lower()
+        if shellshock_check in settings.CHOICE_YES:
+          menu.options.shellshock = True
+          break
+        elif shellshock_check in settings.CHOICE_NO:
+          menu.options.shellshock = False
+          break
+        elif shellshock_check in settings.CHOICE_QUIT:
+          print ""
+          os._exit(0)
+        else:  
+          if shellshock_check == "":
+            shellshock_check = "enter"
+          err_msg = "'" + shellshock_check + "' is not a valid answer."  
+          print settings.print_error_msg(err_msg)
+          pass
+
 """
 Check if http / https.
 """

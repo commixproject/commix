@@ -271,6 +271,9 @@ def main():
         html_data = content = response.read()
         print "[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]"
 
+        # Check for CGI scripts on url
+        checks.check_CGI_scripts(url)
+
         # Used a valid pair of valid credentials
         if menu.options.auth_cred:
           success_msg = Style.BRIGHT + "Identified a valid pair of credentials '" 
