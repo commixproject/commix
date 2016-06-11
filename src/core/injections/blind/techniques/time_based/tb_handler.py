@@ -224,7 +224,7 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                   if false_positive_warning and again_warning:
                     again_warning = False
                     warn_msg = "Unexpected time delays have been identified due to unstable "
-                    warn_msg += "requests. This behavior which may lead to false-positive results."
+                    warn_msg += "requests. This behavior may lead to false-positive results."
                     sys.stdout.write("\r" + settings.print_warning_msg(warn_msg))
                     print ""
 
