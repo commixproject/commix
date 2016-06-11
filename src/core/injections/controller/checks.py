@@ -213,9 +213,29 @@ def ps_check_failed():
 Check if CGI scripts (shellshock injection).
 """
 def check_CGI_scripts(url):
-  for cgi_script in settings.CGI_SCRIPTS:
+
+  try:
+    CGI_SCRIPTS = []
+    if not os.path.isfile(settings.CGI_SCRIPTS ):
+      err_msg = "The pages / scripts list (" + settings.CGI_SCRIPTS  + ") is not found"
+      print settings.print_critical_msg(err_msg)
+      sys.exit(0) 
+    if len(settings.CGI_SCRIPTS ) == 0:
+      err_msg = "The " + settings.CGI_SCRIPTS  + " list is empty."
+      print settings.print_critical_msg(err_msg)
+      sys.exit(0)
+    with open(settings.CGI_SCRIPTS , "r") as f: 
+      for line in f:
+        line = line.strip()
+        CGI_SCRIPTS.append(line)
+  except IOError: 
+    err_msg = " Check if the " + settings.CGI_SCRIPTS  + " list is readable or corrupted."
+    print settings.print_critical_msg(err_msg)
+    sys.exit(0)
+
+  for cgi_script in CGI_SCRIPTS:
     if cgi_script in url and menu.options.shellshock == False:
-      warn_msg = "The provided url is probable to contain script(s) "
+      warn_msg = "URL is probable to contain a script ('" + cgi_script + "') "
       warn_msg += "vulnerable to shellshock. "
       print settings.print_warning_msg(warn_msg)
       while True:

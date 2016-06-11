@@ -1,5 +1,6 @@
 ## Version 1.0 (upcoming)
-* Added: The ability to check if the provided url is probable to contain script(s) vulnerable to shellshock.
+* Added: A list of pages / scripts potentially vulnerable to shellshock.
+* Added: The ability to check if the url is probable to contain script(s) vulnerable to shellshock.
 * Revised: Multiple eye-candy revisions have been performed.
 * Fixed: HTTPS requests fixation, if the "--proxy" option is enabled.
 * Fixed: Multiple fixes regarding the shellshock module have been performed.

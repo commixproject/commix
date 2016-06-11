@@ -31,7 +31,7 @@ DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 MAJOR = "1"
 MINOR = "0"
-COMMIT_ID = "6"
+COMMIT_ID = "7"
 VERSION = MAJOR + "." + MINOR + "." + COMMIT_ID
 YEAR    = "2014-2016"
 AUTHOR_TWITTER = "@ancst" 
@@ -405,8 +405,8 @@ REQUIRED_AUTHENTICATION = False
 INJECTED_HTTP_HEADER = False
 INJECTION_CHECKER = False
 
-# Checks for : /cgi-bin-sdb/, /cgi-mod/, /cgi-sys/, /cgi-bin/
-CGI_SCRIPTS = ["/cgi-",]
+# List of pages / scripts potentially vulnerable to Shellshock
+CGI_SCRIPTS = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'txt')) + "/" + "shocker-cgi_list.txt"
 
 # Supported HTTP Authentication types
 SUPPORTED_HTTP_AUTH_TYPES = [ "basic", "digest" ]
