@@ -540,9 +540,10 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
                           go_back = True
                           break
                         elif os_shell_option == "os_shell": 
-                          warn_msg = "You are already into an 'os_shell' mode."
-                          print settings.print_warning_msg(warn_msg) + "\n"
+                            warn_msg = "You are already into an 'os_shell' mode."
+                            print settings.print_warning_msg(warn_msg)+ "\n"
                         elif os_shell_option == "reverse_tcp":
+                          settings.REVERSE_TCP = True
                           # Set up LHOST / LPORT for The reverse TCP connection.
                           reverse_tcp.configure_reverse_tcp()
                           if settings.REVERSE_TCP == False:
