@@ -72,11 +72,10 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
   no_result = True
   is_encoded = False
   is_vulnerable = False
-  again_warning = True
   false_positive_warning = False
   export_injection_info = False
   how_long = 0
-  how_long_statistic = 0
+  how_long_statistic = []
   injection_type = "blind command injection"
   technique = "time-based injection technique"
 
@@ -181,11 +180,7 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                 how_long, vuln_parameter = tb_injector.injection_test(payload, http_request_method, url)
 
               # Statistical analysis in time responses.
-              how_long_statistic = how_long_statistic + how_long
-
-              # Reset the how_long_statistic counter
-              if output_length == tag_length - 1:
-                how_long_statistic = 0
+              how_long_statistic.append(how_long)
 
               # Injection percentage calculation
               percent = ((num_of_chars * 100) / total)
@@ -204,35 +199,52 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                   # Time relative false positive fixation.
                   false_positive_fixation = False
                   if len(TAG) == output_length:
-                    # Windows targets.
-                    if settings.TARGET_OS == "win":
-                      if how_long > (how_long_statistic / output_length):
-                          false_positive_fixation = True
-                      else:
-                          false_positive_warning = True
-                    # Unix-like targets.
+
+                    # Simple statical analysis
+                    statistical_anomaly = True
+                    if len(set(how_long_statistic[0:5])) == 1:
+                      if max(xrange(len(how_long_statistic)), key=lambda x: how_long_statistic[x]) == len(TAG) - 1:
+                        statistical_anomaly = False
+                        how_long_statistic = []  
+
+                    if delay <= how_long and not statistical_anomaly:
+                      false_positive_fixation = True
                     else:
-                      if delay == 1 and (how_long_statistic == delay) or \
-                        delay == 1 and (how_long_statistic == how_long) or \
-                        delay > 1 and (how_long_statistic == (output_length + delay)) and \
-                        how_long == delay + 1:
-                          false_positive_fixation = True
-                      else:
-                          false_positive_warning = True
+                      false_positive_warning = True
 
                   # Identified false positive warning message.
-                  if false_positive_warning and again_warning:
-                    again_warning = False
+                  if false_positive_warning:
                     warn_msg = "Unexpected time delays have been identified due to unstable "
-                    warn_msg += "requests. This behavior may lead to false-positive results."
+                    warn_msg += "requests. This behavior may lead to false-positive results.\n"
                     sys.stdout.write("\r" + settings.print_warning_msg(warn_msg))
-                    print ""
+                    while True:
+                      question_msg = "How do you want to proceed? [(C)ontinue/(s)kip/(q)uit] > "
+                      sys.stdout.write(settings.print_question_msg(question_msg))
+                      proceed_option = sys.stdin.readline().replace("\n","").lower()
+                      if proceed_option.lower() in settings.CHOICE_PROCEED :
+                        if proceed_option.lower() == "s":
+                          false_positive_fixation = False
+                          raise
+                        elif proceed_option.lower() == "c":
+                          delay = delay + 1
+                          false_positive_fixation = True
+                          break
+                        elif proceed_option.lower() == "q":
+                          raise SystemExit()
+                      else:
+                        if proceed_option == "":
+                          proceed_option = "enter"
+                        err_msg = "'" + proceed_option + "' is not a valid answer."
+                        print settings.print_error_msg(err_msg)
+                        pass
 
                   # Check if false positive fixation is True.
                   if false_positive_fixation:
                     false_positive_fixation = False
                     settings.FOUND_HOW_LONG = how_long
                     settings.FOUND_DIFF = how_long - delay
+                    if false_positive_warning:
+                      time.sleep(1)
                     randv1 = random.randrange(0, 1)
                     randv2 = random.randrange(1, 2)
                     randvcalc = randv1 + randv2
@@ -444,6 +456,11 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                 if readline_error:
                   checks.no_readline_module()
                 while True:
+                  if false_positive_warning:
+                    warn_msg = "Due to unexpected time delays, it is highly "
+                    warn_msg += "recommended to enable the 'reverse_tcp' option.\n"
+                    sys.stdout.write("\r" + settings.print_warning_msg(warn_msg))
+                    false_positive_warning = False
                   try:
                     # Tab compliter
                     if not readline_error:

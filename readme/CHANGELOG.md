@@ -1,4 +1,5 @@
 ## Version 1.0 (upcoming)
+* Revised: Time-relative statistical analysis for recognition of unexpected time delays due to unstable requests.
 * Added: A list of pages / scripts potentially vulnerable to shellshock.
 * Added: The ability to check if the url is probable to contain script(s) vulnerable to shellshock.
 * Revised: Multiple eye-candy revisions have been performed.
