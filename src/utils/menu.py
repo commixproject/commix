@@ -356,7 +356,7 @@ injection.add_option("--maxlen",
 injection.add_option("--delay", 
                 action="store",
                 dest="delay",
-                help="Set custom time delay for time-related injection techniques (Default: " + str(settings.DELAY) + " sec).")
+                help="Set custom time delay for time-related injection techniques (Default: 1 sec).")
 
 injection.add_option("--tmp-path", 
                 action="store",

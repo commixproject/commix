@@ -31,8 +31,11 @@ DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 MAJOR = "1"
 MINOR = "0"
-COMMIT_ID = "8"
-VERSION = MAJOR + "." + MINOR + "." + COMMIT_ID
+COMMIT_ID = "9"
+VERSION = MAJOR + "." + MINOR
+STABLE_VERSION = False
+if not STABLE_VERSION:
+  VERSION = MAJOR + "." + MINOR + "." + COMMIT_ID
 YEAR    = "2014-2016"
 AUTHOR_TWITTER = "@ancst" 
 APPLICATION_TWITTER = "@commixproject" 

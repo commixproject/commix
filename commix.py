@@ -106,6 +106,11 @@ def main():
     else:  
       settings.VERBOSITY_LEVEL = menu.options.verbose
 
+    # Check if defined "--delay" option.
+    if menu.options.delay:
+      if menu.options.delay > "0":
+        settings.DELAY = menu.options.delay
+
     # Define the level of tests to perform.
     if menu.options.level > 3:
       err_msg = "The value for option '--level' "

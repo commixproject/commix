@@ -71,7 +71,11 @@ def estimate_response_time(url, http_request_method, delay):
       warn_msg += " and/or possible corruptions over the extracted data"
     warn_msg += "."
     print settings.print_warning_msg(warn_msg)
-  delay = int(delay) + int(url_time_response)
+  if int(delay) == int(url_time_response):
+    delay = int(delay) + int(url_time_response)
+  else:
+    delay = int(delay)
+
   # Against windows targets (for more stability), add one extra second delay.
   if settings.TARGET_OS == "win" :
     delay = delay + 1

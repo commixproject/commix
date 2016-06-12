@@ -310,12 +310,7 @@ def post_request(url, http_request_method, filename, delay):
 
 def perform_checks(url, filename):
 
-  # Check if defined "--delay" option.
-  if menu.options.delay:
-    delay = menu.options.delay
-  else:
-    delay = settings.DELAY
-
+  delay = settings.DELAY
   # Check if authentication is needed.
   if menu.options.auth_url and menu.options.auth_data:
     # Do the authentication process.
