@@ -109,7 +109,6 @@ def add_parameter(vp_flag, filename, the_type, header_name, http_request_method,
 Add any payload in log files.
 """
 def update_payload(filename, counter, payload):
-
   output_file = open(filename, "a")
   if "\n" in payload:
     output_file.write("  (" +str(counter)+ ") Payload: " + re.sub("%20", " ", urllib.unquote_plus(payload.replace("\n", "\\n"))) + "\n")

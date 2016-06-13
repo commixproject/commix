@@ -559,7 +559,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                   print ""
                 delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
                 if settings.VERBOSITY_LEVEL >= 1:
-                  print "\n"
+                  print ""
                 if go_back == True:
                   break
                 question_msg = "Do you want a Pseudo-Terminal? [Y/n/q] > "
@@ -640,8 +640,6 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                         shell = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
                       if shell:
                         if shell != "":
-                          if settings.VERBOSITY_LEVEL >= 1:
-                            print ""
                           print "\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n"
 
                       if not shell or shell == "":
@@ -663,7 +661,6 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                   # Delete previous shell (text) files (output)
                   delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
                   sys.exit(0)
-
                 else:
                   if gotshell == "":
                     gotshell = "enter"
