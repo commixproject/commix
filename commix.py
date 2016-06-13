@@ -122,12 +122,6 @@ def main():
     if menu.options.logfile:
       parser.logfile_parser()
  
-    # Modification on payload
-    if not menu.options.shellshock:
-      #settings.CURRENT_USER = "echo $(" + settings.CURRENT_USER + ")"
-      settings.SYS_USERS  = "echo $(" + settings.SYS_USERS + ")"
-      settings.SYS_PASSES  = "echo $(" + settings.SYS_PASSES + ")"
-
     # Check provided parameters for tests
     if menu.options.test_parameter:
       if menu.options.test_parameter.startswith("="):
@@ -278,6 +272,12 @@ def main():
 
         # Check for CGI scripts on url
         checks.check_CGI_scripts(url)
+
+        # Modification on payload
+        if not menu.options.shellshock:
+          #settings.CURRENT_USER = "echo $(" + settings.CURRENT_USER + ")"
+          settings.SYS_USERS  = "echo $(" + settings.SYS_USERS + ")"
+          settings.SYS_PASSES  = "echo $(" + settings.SYS_PASSES + ")"
 
         # Used a valid pair of valid credentials
         if menu.options.auth_cred:
