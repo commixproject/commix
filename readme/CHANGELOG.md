@@ -1,3 +1,6 @@
+## Version 1.1 (upcoming)
+* Fixed: Minor fix for "Python-urllib" User-Agent exposure.
+
 ## Version 1.0 (2016-06-14)
 * Revised: Time-relative statistical analysis for recognition of unexpected time delays due to unstable requests.
 * Added: A list of pages / scripts potentially vulnerable to shellshock.

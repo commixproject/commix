@@ -135,7 +135,7 @@ request.add_option("--referer",
 request.add_option("--user-agent",
                 action="store",
                 dest="agent",
-                default = settings.APPLICATION + "/" + settings.VERSION + settings.COMMIT_ID,
+                default = settings.APPLICATION + "/" + settings.VERSION,
                 help="HTTP User-Agent header.")
 
 request.add_option("--random-agent",
