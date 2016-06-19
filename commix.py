@@ -42,6 +42,7 @@ from src.utils import version
 from src.utils import install
 from src.utils import settings
 from src.utils import session_handler
+from src.utils import simple_http_server
 
 from src.thirdparty.colorama import Fore, Back, Style, init
 
@@ -187,14 +188,6 @@ def main():
       print settings.print_critical_msg(err_msg)
       sys.exit(0)
 
-    # Check if defined "--file-upload" option.
-    if menu.options.file_upload:
-      # Check if not defined URL for upload.
-      if not re.match(settings.VALID_URL_FORMAT, menu.options.file_upload):
-        err_msg = "The '" + menu.options.file_upload + "' is not a valid URL. "
-        print settings.print_critical_msg(err_msg)
-        sys.exit(0)
-        
     # Check if defined "--random-agent" option.
     if menu.options.random_agent:
       menu.options.agent = random.choice(settings.USER_AGENT_LIST)
@@ -278,6 +271,49 @@ def main():
           #settings.CURRENT_USER = "echo $(" + settings.CURRENT_USER + ")"
           settings.SYS_USERS  = "echo $(" + settings.SYS_USERS + ")"
           settings.SYS_PASSES  = "echo $(" + settings.SYS_PASSES + ")"
+
+        # Check if defined "--file-upload" option.
+        if menu.options.file_upload:
+          if not re.match(settings.VALID_URL_FORMAT, menu.options.file_upload):
+            # Check if not defined URL for upload.
+            while True:
+              question_msg = "Do you want to enable an HTTP server? [Y/n/q] > "
+              sys.stdout.write(settings.print_question_msg(question_msg))
+              enable_HTTP_server = sys.stdin.readline().replace("\n","").lower()
+              if enable_HTTP_server in settings.CHOICE_YES:
+                # Check if file exists
+                if not os.path.isfile(menu.options.file_upload):
+                  err_msg = "The '" + menu.options.file_upload + "' file, does not exists."
+                  sys.stdout.write(settings.print_critical_msg(err_msg) + "\n")
+                  sys.exit(0)
+                http_server = "http://" + str(settings.LOCAL_HTTP_IP) + ":" + str(settings.LOCAL_HTTP_PORT) + "/"
+                info_msg = "Setting the HTTP server on '" + http_server + "'. "  
+                print settings.print_info_msg(info_msg)
+                menu.options.file_upload = http_server + menu.options.file_upload
+                simple_http_server.main()
+                break
+              elif enable_HTTP_server in settings.CHOICE_NO:
+                if not re.match(settings.VALID_URL_FORMAT, menu.options.file_upload):
+                  err_msg = "The '" + menu.options.file_upload + "' is not a valid URL. "
+                  print settings.print_critical_msg(err_msg)
+                  sys.exit(0)
+                break  
+              elif enable_HTTP_server in settings.CHOICE_QUIT:
+                sys.exit(0)
+              else:
+                if enable_HTTP_server == "":
+                  enable_HTTP_server = "enter"
+                err_msg = "'" + enable_HTTP_server + "' is not a valid answer."  
+                print settings.print_error_msg(err_msg)
+                pass
+          try:
+            urllib2.urlopen(menu.options.file_upload)
+          except urllib2.HTTPError, err:
+            print settings.print_critical_msg(err)
+            sys.exit(0)
+          except urllib2.URLError, err:
+            print settings.print_critical_msg(err)
+            sys.exit(0)
 
         # Used a valid pair of valid credentials
         if menu.options.auth_cred:

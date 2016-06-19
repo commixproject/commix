@@ -18,6 +18,8 @@ import os
 import sys
 import time
 import urllib
+import socket
+import random
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 """
@@ -31,7 +33,7 @@ DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 MAJOR = "1"
 MINOR = "1"
-COMMIT_ID = "1"
+COMMIT_ID = "2"
 VERSION = MAJOR + "." + MINOR
 STABLE_VERSION = False
 if not STABLE_VERSION:
@@ -54,6 +56,10 @@ TARGET_OS = "unix"
 
 # Verbosity level: 0-1 (default 0)
 VERBOSITY_LEVEL = 0
+
+# Local HTTP Server
+LOCAL_HTTP_IP = socket.gethostbyname(socket.gethostname())
+LOCAL_HTTP_PORT = random.randint(50000,60000)
 
 # Exploitation techniques states
 CLASSIC_STATE = False

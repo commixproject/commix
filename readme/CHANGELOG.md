@@ -1,4 +1,5 @@
 ## Version 1.1 (upcoming)
+* Added: Support for automated enabling of an HTTP server for "--file-upload" option.
 * Fixed: Minor fix for "Python-urllib" User-Agent exposure.
 
 ## Version 1.0 (2016-06-14)
