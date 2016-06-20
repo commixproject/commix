@@ -33,7 +33,7 @@ DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 MAJOR = "1"
 MINOR = "1"
-COMMIT_ID = "2"
+COMMIT_ID = "3"
 VERSION = MAJOR + "." + MINOR
 STABLE_VERSION = False
 if not STABLE_VERSION:
@@ -68,6 +68,10 @@ TIME_BASED_STATE = False
 FILE_BASED_STATE = False
 TEMPFILE_BASED_STATE = False
 TIME_RELATIVE_ATTACK = False
+
+# Stored applied techniques
+SESSION_APPLIED_TECHNIQUES = ""
+
 # Check if OS is Windows.
 IS_WINDOWS = hasattr(sys, 'getwindowsversion')
 

@@ -48,7 +48,8 @@ def check_for_stored_sessions(url, http_request_method):
   if not menu.options.ignore_session:
     if os.path.isfile(settings.SESSION_FILE) and not settings.REQUIRED_AUTHENTICATION:
       if not menu.options.tech:
-        menu.options.tech = session_handler.applied_techniques(url, http_request_method)
+        settings.SESSION_APPLIED_TECHNIQUES = session_handler.applied_techniques(url, http_request_method)
+        menu.options.tech = settings.SESSION_APPLIED_TECHNIQUES
       if session_handler.check_stored_parameter(url, http_request_method):
         settings.LOAD_SESSION = True
         return True

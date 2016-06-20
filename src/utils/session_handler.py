@@ -236,7 +236,9 @@ def notification(url, technique):
                    proceed_option  = "enter"
                 err_msg = "'" +  proceed_option + "' is not a valid answer."   
                 print settings.print_error_msg(err_msg)
-                pass
+                pass   
+          if settings.SESSION_APPLIED_TECHNIQUES:
+            menu.options.tech = ''.join(settings.AVAILABLE_TECHNIQUES)
           return False
         elif settings.LOAD_SESSION in settings.CHOICE_QUIT:
           raise SystemExit()
