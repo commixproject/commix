@@ -33,7 +33,7 @@ DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 MAJOR = "1"
 MINOR = "1"
-COMMIT_ID = "3"
+COMMIT_ID = "4"
 VERSION = MAJOR + "." + MINOR
 STABLE_VERSION = False
 if not STABLE_VERSION:
@@ -58,7 +58,10 @@ TARGET_OS = "unix"
 VERBOSITY_LEVEL = 0
 
 # Local HTTP Server
-LOCAL_HTTP_IP = socket.gethostbyname(socket.gethostname())
+s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+s.connect(("8.8.8.8",53))
+LOCAL_HTTP_IP = (s.getsockname()[0])
+s.close()
 LOCAL_HTTP_PORT = random.randint(50000,60000)
 
 # Exploitation techniques states
