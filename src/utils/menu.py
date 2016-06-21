@@ -402,7 +402,7 @@ detection.add_option("--level",
                     dest="level", 
                     type="int",
                     default=1,
-                    help="Level of tests to perform (1-3, Default: " + str(settings.LEVEL) + ").")
+                    help="Level of tests to perform (1-3, Default: " + str(settings.DEFAULT_INJECTION_LEVEL) + ").")
 
 # Miscellaneous options
 misc = OptionGroup(parser, Style.BRIGHT + "Miscellaneous" + Style.RESET_ALL)

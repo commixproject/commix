@@ -120,7 +120,7 @@ def applied_techniques(url, http_request_method):
     else:
       applied_techniques = conn.execute("SELECT technique FROM " + table_name(url) + "_ip WHERE \
                                         url = '" + url + "' AND \
-                                        http_header = '" + settings.HTTP_HEADER + "' AND \
+                                        vuln_parameter = '" + settings.INJECT_TAG + "' AND \
                                         http_request_method = '" + http_request_method + "' \
                                         ORDER BY id DESC ;")
     values = []
@@ -128,6 +128,36 @@ def applied_techniques(url, http_request_method):
       values += session[0][:1]
     applied_techniques = ''.join(list(set(values)))
     return applied_techniques
+  except sqlite3.OperationalError, err_msg:
+    print settings.print_critical_msg(err_msg)
+    settings.LOAD_SESSION = False
+    return False
+  except:
+    settings.LOAD_SESSION = False
+    return False
+
+"""
+Export successful applied techniques from session file.
+"""
+def applied_levels(url, http_request_method):
+  try:
+    conn = sqlite3.connect(settings.SESSION_FILE)
+    if settings.TESTABLE_PARAMETER: 
+      applied_level = conn.execute("SELECT is_vulnerable FROM " + table_name(url) + "_ip WHERE \
+                                    url = '" + url + "' AND \
+                                    vuln_parameter = '" + settings.TESTABLE_PARAMETER + "' AND \
+                                    http_request_method = '" + http_request_method + "' \
+                                    ORDER BY id DESC ;")
+    else:
+      applied_level = conn.execute("SELECT is_vulnerable FROM " + table_name(url) + "_ip WHERE \
+                                    url = '" + url + "' AND \
+                                    vuln_parameter = '" + settings.INJECT_TAG + "' AND \
+                                    http_request_method = '" + http_request_method + "' \
+                                    ORDER BY id DESC ;")
+    
+    for session in applied_level:
+      return session[0]
+
   except sqlite3.OperationalError, err_msg:
     print settings.print_critical_msg(err_msg)
     settings.LOAD_SESSION = False
@@ -256,7 +286,7 @@ Check for specific stored parameter.
 """
 def check_stored_parameter(url, http_request_method): 
   if injection_point_exportation(url, http_request_method):
-    if injection_point_exportation(url, http_request_method)[16] == "True":
+    if injection_point_exportation(url, http_request_method)[16] == str(menu.options.level):
       return True
     else:
       return False

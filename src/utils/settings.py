@@ -33,7 +33,7 @@ DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 MAJOR = "1"
 MINOR = "1"
-COMMIT_ID = "4"
+COMMIT_ID = "5"
 VERSION = MAJOR + "." + MINOR
 STABLE_VERSION = False
 if not STABLE_VERSION:
@@ -134,7 +134,9 @@ WHITESPACE = ["%20"]
 DELAY = 1
 
 #Level (Default: 1)
-LEVEL = 1
+DEFAULT_INJECTION_LEVEL = 1
+COOKIE_INJECTION_LEVEL = 2
+HTTP_HEADER_INJECTION_LEVEL = 3
 
 # Default Temp Directory
 TMP_PATH = ""

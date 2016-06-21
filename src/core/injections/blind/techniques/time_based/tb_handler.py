@@ -71,7 +71,7 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
   vp_flag = True
   no_result = True
   is_encoded = False
-  is_vulnerable = False
+  possibly_vulnerable = False
   false_positive_warning = False
   export_injection_info = False
   how_long = 0
@@ -265,7 +265,7 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                        (url_time_response != 0 and (how_long - delay) > 0 and (how_long >= delay + 1)) :
                       
                       if str(output) == str(randvcalc) and len(TAG) == output_length:
-                        is_vulnerable = True
+                        possibly_vulnerable = True
                         how_long_statistic = 0
                         if not settings.VERBOSITY_LEVEL >= 1:
                           percent = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
@@ -308,15 +308,14 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
         if (url_time_response == 0 and (how_long - delay) >= 0) or \
            (url_time_response != 0 and (how_long - delay) == 0 and (how_long == delay)) or \
            (url_time_response != 0 and (how_long - delay) > 0 and (how_long >= delay + 1)) :  
-
           if (len(TAG) == output_length) and \
-             (is_vulnerable == True or settings.LOAD_SESSION and is_vulnerable == "True"):
+             (possibly_vulnerable == True or settings.LOAD_SESSION and int(is_vulnerable) == menu.options.level):
 
             found = True
             no_result = False
 
             if settings.LOAD_SESSION:
-              is_vulnerable = False
+              possibly_vulnerable = False
 
             if settings.COOKIE_INJECTION == True: 
               header_name = " cookie"
@@ -372,8 +371,8 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
             # Export session
             if not settings.LOAD_SESSION:
               shell = ""
-              session_handler.injection_point_importation(url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response, delay, how_long, output_length, is_vulnerable)
-              #is_vulnerable = False
+              session_handler.injection_point_importation(url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response, delay, how_long, output_length, is_vulnerable=menu.options.level)
+              #possibly_vulnerable = False
             else:
               settings.LOAD_SESSION = False 
             

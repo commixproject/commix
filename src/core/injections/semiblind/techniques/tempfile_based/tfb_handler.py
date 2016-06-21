@@ -88,7 +88,7 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
   vp_flag = True
   no_result = True
   is_encoded = False
-  is_vulnerable = False
+  possibly_vulnerable = False
   false_positive_warning = False
   how_long_statistic = []
   export_injection_info = False
@@ -279,7 +279,7 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
                        (url_time_response != 0 and (how_long - delay) > 0 and (how_long >= delay + 1)) :
                       
                       if str(output) == str(randvcalc) and len(TAG) == output_length:
-                        is_vulnerable = True
+                        possibly_vulnerable = True
                         how_long_statistic = 0
                         if not settings.VERBOSITY_LEVEL >= 1:
                           percent = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
@@ -351,13 +351,13 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
            (url_time_response != 0 and (how_long - delay) > 0 and (how_long >= delay + 1)) :
 
           if (len(TAG) == output_length) and \
-             (is_vulnerable == True or settings.LOAD_SESSION and is_vulnerable == "True"):
+             (possibly_vulnerable == True or settings.LOAD_SESSION and int(is_vulnerable) == menu.options.level):
 
             found = True
             no_result = False
 
             if settings.LOAD_SESSION:
-              is_vulnerable = False
+              possibly_vulnerable = False
 
             if settings.COOKIE_INJECTION == True: 
               header_name = " cookie"
@@ -413,8 +413,8 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
             # Export session
             if not settings.LOAD_SESSION:
               shell = ""
-              session_handler.injection_point_importation(url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response, delay, how_long, output_length, is_vulnerable)
-              is_vulnerable = False
+              session_handler.injection_point_importation(url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response, delay, how_long, output_length, is_vulnerable=menu.options.level)
+              #possibly_vulnerable = False
             else:
               settings.LOAD_SESSION = False 
               

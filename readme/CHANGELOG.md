@@ -1,4 +1,5 @@
 ## Version 1.1 (upcoming)
+* Added: The ability to store injection level into session files for current target. 
 * Added: Support for automated enabling of an HTTP server for "--file-upload" option.
 * Fixed: Minor fix for "Python-urllib" User-Agent exposure.
 
