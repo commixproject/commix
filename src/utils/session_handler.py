@@ -60,8 +60,8 @@ def clear(url):
   try:
     if no_such_table:
       conn = sqlite3.connect(settings.SESSION_FILE)
-      conn.execute("DELETE FROM " + table_name(url) + "_ip WHERE \
-                   id NOT IN (SELECT MAX(id) FROM " + \
+      conn.execute("DELETE FROM " + table_name(url) + "_ip WHERE "\
+                   "id NOT IN (SELECT MAX(id) FROM " + \
                    table_name(url) + "_ip GROUP BY technique);")
       conn.commit()
       conn.close()
@@ -78,15 +78,15 @@ def injection_point_importation(url, technique, injection_type, separator, shell
   try:  
     conn = sqlite3.connect(settings.SESSION_FILE)
     conn.execute("CREATE TABLE IF NOT EXISTS " + table_name(url) + "_ip" + \
-                 "(id INTEGER PRIMARY KEY, url VARCHAR, technique VARCHAR, injection_type VARCHAR, separator VARCHAR, \
-                 shell VARCHAR, vuln_parameter VARCHAR, prefix VARCHAR, suffix VARCHAR, \
-                 TAG VARCHAR, alter_shell VARCHAR, payload VARCHAR, http_header VARCHAR, http_request_method VARCHAR, url_time_response INTEGER, \
-                 delay INTEGER, how_long INTEGER, output_length INTEGER, is_vulnerable VARCHAR);")
+                 "(id INTEGER PRIMARY KEY, url VARCHAR, technique VARCHAR, injection_type VARCHAR, separator VARCHAR," \
+                 "shell VARCHAR, vuln_parameter VARCHAR, prefix VARCHAR, suffix VARCHAR, "\
+                 "TAG VARCHAR, alter_shell VARCHAR, payload VARCHAR, http_header VARCHAR, http_request_method VARCHAR, url_time_response INTEGER, "\
+                 "delay INTEGER, how_long INTEGER, output_length INTEGER, is_vulnerable VARCHAR);")
 
-    conn.execute("INSERT INTO " + table_name(url) + "_ip(url, technique, injection_type, separator, \
-                 shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_header, http_request_method, \
-                 url_time_response, delay, how_long, output_length, is_vulnerable) \
-                 VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", \
+    conn.execute("INSERT INTO " + table_name(url) + "_ip(url, technique, injection_type, separator, "\
+                 "shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_header, http_request_method, "\
+                 "url_time_response, delay, how_long, output_length, is_vulnerable) "\
+                 "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", \
                  (str(url), str(technique), str(injection_type), \
                  str(separator), str(shell), str(vuln_parameter), str(prefix), str(suffix), \
                  str(TAG), str(alter_shell), str(payload), str(settings.HTTP_HEADER), str(http_request_method), \
@@ -112,24 +112,24 @@ def applied_techniques(url, http_request_method):
   try:
     conn = sqlite3.connect(settings.SESSION_FILE)
     if settings.TESTABLE_PARAMETER: 
-      applied_techniques = conn.execute("SELECT technique FROM " + table_name(url) + "_ip WHERE \
-                                        url = '" + url + "' AND \
-                                        vuln_parameter = '" + settings.TESTABLE_PARAMETER + "' AND \
-                                        http_request_method = '" + http_request_method + "' \
-                                        ORDER BY id DESC ;")
+      applied_techniques = conn.execute("SELECT technique FROM " + table_name(url) + "_ip WHERE "\
+                                        "url = '" + url + "' AND "\
+                                        "vuln_parameter = '" + settings.TESTABLE_PARAMETER + "' AND "\
+                                        "http_request_method = '" + http_request_method + "' "\
+                                        "ORDER BY id DESC ;")
     else:
-      applied_techniques = conn.execute("SELECT technique FROM " + table_name(url) + "_ip WHERE \
-                                        url = '" + url + "' AND \
-                                        vuln_parameter = '" + settings.INJECT_TAG + "' AND \
-                                        http_request_method = '" + http_request_method + "' \
-                                        ORDER BY id DESC ;")
+      applied_techniques = conn.execute("SELECT technique FROM " + table_name(url) + "_ip WHERE "\
+                                        "url = '" + url + "' AND "\
+                                        "vuln_parameter = '" + settings.INJECT_TAG + "' AND "\
+                                        "http_request_method = '" + http_request_method + "' "\
+                                        "ORDER BY id DESC ;")
     values = []
     for session in applied_techniques:
       values += session[0][:1]
     applied_techniques = ''.join(list(set(values)))
     return applied_techniques
   except sqlite3.OperationalError, err_msg:
-    print settings.print_critical_msg(err_msg)
+    #print settings.print_critical_msg(err_msg)
     settings.LOAD_SESSION = False
     return False
   except:
@@ -143,23 +143,23 @@ def applied_levels(url, http_request_method):
   try:
     conn = sqlite3.connect(settings.SESSION_FILE)
     if settings.TESTABLE_PARAMETER: 
-      applied_level = conn.execute("SELECT is_vulnerable FROM " + table_name(url) + "_ip WHERE \
-                                    url = '" + url + "' AND \
-                                    vuln_parameter = '" + settings.TESTABLE_PARAMETER + "' AND \
-                                    http_request_method = '" + http_request_method + "' \
-                                    ORDER BY id DESC ;")
+      applied_level = conn.execute("SELECT is_vulnerable FROM " + table_name(url) + "_ip WHERE "\
+                                    "url = '" + url + "' AND "\
+                                    "vuln_parameter = '" + settings.TESTABLE_PARAMETER + "' AND "\
+                                    "http_request_method = '" + http_request_method + "' "\
+                                    "ORDER BY id DESC ;")
     else:
-      applied_level = conn.execute("SELECT is_vulnerable FROM " + table_name(url) + "_ip WHERE \
-                                    url = '" + url + "' AND \
-                                    vuln_parameter = '" + settings.INJECT_TAG + "' AND \
-                                    http_request_method = '" + http_request_method + "' \
-                                    ORDER BY id DESC ;")
+      applied_level = conn.execute("SELECT is_vulnerable FROM " + table_name(url) + "_ip WHERE "\
+                                    "url = '" + url + "' AND "\
+                                    "vuln_parameter = '" + settings.INJECT_TAG + "' AND "\
+                                    "http_request_method = '" + http_request_method + "' "\
+                                    "ORDER BY id DESC ;")
     
     for session in applied_level:
       return session[0]
 
   except sqlite3.OperationalError, err_msg:
-    print settings.print_critical_msg(err_msg)
+    #print settings.print_critical_msg(err_msg)
     settings.LOAD_SESSION = False
     return False
   except:
@@ -184,19 +184,19 @@ def injection_point_exportation(url, http_request_method):
         else:
           select_injection_type = "S"
         if settings.TESTABLE_PARAMETER:
-          cursor = conn.execute("SELECT * FROM " + table_name(url) + "_ip WHERE \
-                                url = '" + url + "' AND \
-                                injection_type like '" + select_injection_type + "%' AND \
-                                vuln_parameter = '" + settings.TESTABLE_PARAMETER + "' AND \
-                                http_request_method = '" + http_request_method + "' \
-                                ORDER BY id DESC limit 1;")
+          cursor = conn.execute("SELECT * FROM " + table_name(url) + "_ip WHERE "\
+                                "url = '" + url + "' AND "\
+                                "injection_type like '" + select_injection_type + "%' AND "\
+                                "vuln_parameter = '" + settings.TESTABLE_PARAMETER + "' AND "\
+                                "http_request_method = '" + http_request_method + "' "\
+                                "ORDER BY id DESC limit 1;")
         else:
-          cursor = conn.execute("SELECT * FROM " + table_name(url) + "_ip WHERE \
-                                url = '" + url + "' AND \
-                                injection_type like '" + select_injection_type + "%' AND \
-                                http_header = '" + settings.HTTP_HEADER + "' AND \
-                                http_request_method = '" + http_request_method + "' \
-                                ORDER BY id DESC limit 1;")
+          cursor = conn.execute("SELECT * FROM " + table_name(url) + "_ip WHERE "\
+                                "url = '" + url + "' AND "\
+                                "injection_type like '" + select_injection_type + "%' AND "\
+                                "http_header = '" + settings.HTTP_HEADER + "' AND "\
+                                "http_request_method = '" + http_request_method + "' "\
+                                "ORDER BY id DESC limit 1;")
         for session in cursor:
           url = session[1]
           technique = session[2]
@@ -220,7 +220,7 @@ def injection_point_exportation(url, http_request_method):
       no_such_table = True
       pass
   except sqlite3.OperationalError, err_msg:
-    print settings.print_critical_msg(err_msg)
+    #print settings.print_critical_msg(err_msg)
     settings.LOAD_SESSION = False
     return False
   except:
@@ -301,8 +301,8 @@ def store_cmd(url, cmd, shell, vuln_parameter):
     conn = sqlite3.connect(settings.SESSION_FILE)
     conn.execute("CREATE TABLE IF NOT EXISTS " + table_name(url) + "_ir" + \
                  "(cmd VARCHAR, output VARCHAR, vuln_parameter VARCHAR);")
-    conn.execute("INSERT INTO " + table_name(url) + "_ir(cmd, output, vuln_parameter) \
-                 VALUES(?,?,?)", \
+    conn.execute("INSERT INTO " + table_name(url) + "_ir(cmd, output, vuln_parameter) "\
+                 "VALUES(?,?,?)", \
                  (str(base64.b64encode(cmd)), str(base64.b64encode(shell)), str(vuln_parameter)))
     conn.commit()
     conn.close()
@@ -321,8 +321,8 @@ def export_stored_cmd(url, cmd, vuln_parameter):
       output = None
       conn = sqlite3.connect(settings.SESSION_FILE)
       cursor = conn.execute("SELECT output FROM " + table_name(url) + \
-                            "_ir WHERE cmd='" + base64.b64encode(cmd) + "' AND \
-                            vuln_parameter= '" + vuln_parameter + "';").fetchall()
+                            "_ir WHERE cmd='" + base64.b64encode(cmd) + "' AND "\
+                            "vuln_parameter= '" + vuln_parameter + "';").fetchall()
       for session in cursor:
         output = base64.b64decode(session[0])
       return output
@@ -339,11 +339,11 @@ def import_valid_credentials(url, authentication_type, admin_panel, username, pa
   try:
     conn = sqlite3.connect(settings.SESSION_FILE)
     conn.execute("CREATE TABLE IF NOT EXISTS " + table_name(url) + "_creds" + \
-                 "(id INTEGER PRIMARY KEY, url VARCHAR, authentication_type VARCHAR, admin_panel VARCHAR, \
-                 username VARCHAR, password VARCHAR);")
+                 "(id INTEGER PRIMARY KEY, url VARCHAR, authentication_type VARCHAR, admin_panel VARCHAR, "\
+                 "username VARCHAR, password VARCHAR);")
 
-    conn.execute("INSERT INTO " + table_name(url) + "_creds(url, authentication_type, \
-                  admin_panel, username, password) VALUES(?,?,?,?,?)", \
+    conn.execute("INSERT INTO " + table_name(url) + "_creds(url, authentication_type, "\
+                 "admin_panel, username, password) VALUES(?,?,?,?,?)", \
                  (str(url), str(authentication_type), str(admin_panel), \
                  str(username), str(password)))
     conn.commit()
@@ -368,8 +368,8 @@ def export_valid_credentials(url, authentication_type):
       output = None
       conn = sqlite3.connect(settings.SESSION_FILE)
       cursor = conn.execute("SELECT username, password FROM " + table_name(url) + \
-                            "_creds WHERE url='" + url + "' AND \
-                             authentication_type= '" + authentication_type + "';").fetchall()
+                            "_creds WHERE url='" + url + "' AND "\
+                            "authentication_type= '" + authentication_type + "';").fetchall()
 
       cursor = ":".join(cursor[0])
       return cursor
