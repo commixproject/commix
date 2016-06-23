@@ -298,14 +298,17 @@ Import successful command execution outputs to session file.
 """
 def store_cmd(url, cmd, shell, vuln_parameter):
   try:  
-    conn = sqlite3.connect(settings.SESSION_FILE)
-    conn.execute("CREATE TABLE IF NOT EXISTS " + table_name(url) + "_ir" + \
-                 "(cmd VARCHAR, output VARCHAR, vuln_parameter VARCHAR);")
-    conn.execute("INSERT INTO " + table_name(url) + "_ir(cmd, output, vuln_parameter) "\
-                 "VALUES(?,?,?)", \
-                 (str(base64.b64encode(cmd)), str(base64.b64encode(shell)), str(vuln_parameter)))
-    conn.commit()
-    conn.close()
+      conn = sqlite3.connect(settings.SESSION_FILE)
+      conn.execute("CREATE TABLE IF NOT EXISTS " + table_name(url) + "_ir" + \
+                   "(cmd VARCHAR, output VARCHAR, vuln_parameter VARCHAR);")
+      if settings.TESTABLE_PARAMETER:
+        conn.execute("INSERT INTO " + table_name(url) + "_ir(cmd, output, vuln_parameter) "\
+                     "VALUES(?,?,?)", \
+                     (str(base64.b64encode(cmd)), str(base64.b64encode(shell)), str(vuln_parameter)))
+      else:
+        conn.execute("INSERT INTO " + table_name(url) + "_ir(cmd, output, vuln_parameter) "\
+                     "VALUES(?,?,?)", \
+                     (str(base64.b64encode(cmd)), str(base64.b64encode(shell)), str(settings.HTTP_HEADER)))
   except sqlite3.OperationalError, err_msg:
     print settings.print_critical_msg(err_msg)
   except TypeError, err_msg:
