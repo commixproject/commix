@@ -18,7 +18,6 @@ import errno
 import thread
 import socket
 import SocketServer
-
 from os import curdir, sep
 from src.utils import menu
 from src.utils import settings
@@ -42,21 +41,17 @@ class Handler(BaseHTTPRequestHandler):
     def log_message(self, format, *args):
       return
 
-def start_server():
-    httpd = SocketServer.TCPServer(('', settings.LOCAL_HTTP_PORT), Handler)
-    httpd.serve_forever()
+class ReusableTCPServer(SocketServer.TCPServer):
+    allow_reuse_address = True
 
 def main():
   try:
     connection_refused = False
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    s.bind(('', settings.LOCAL_HTTP_PORT))
   except socket_error:
     if errno.ECONNREFUSED:
       connection_refused = True
   if connection_refused == False:
     # Start the server in a background thread.
-    thread.start_new_thread(start_server,())
-
-#eof
+    httpd = ReusableTCPServer(('', settings.LOCAL_HTTP_PORT), Handler)
+    thread.start_new_thread(httpd.serve_forever, ())
