@@ -33,7 +33,7 @@ DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 MAJOR = "1"
 MINOR = "1"
-COMMIT_ID = "8"
+COMMIT_ID = "9"
 VERSION = MAJOR + "." + MINOR
 STABLE_VERSION = False
 if not STABLE_VERSION:
@@ -385,6 +385,9 @@ FAILED_TRIES = 20
 
 # Check for PowerShell
 PS_ENABLED = None
+
+# ANSI colors removal
+ANSI_COLOR_REMOVAL = r'\x1b[^m]*m'
 
 # Status Signs
 SUCCESS_SIGN =  "[" + Fore.GREEN + Style.BRIGHT + "+" + Style.RESET_ALL + "] "

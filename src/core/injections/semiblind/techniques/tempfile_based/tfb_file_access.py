@@ -66,7 +66,7 @@ def file_read(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, delay, ht
     output_file = open(filename, "a")
     success_msg = "The contents of file '"
     success_msg += file_to_read + "' : " + shell + ".\n"
-    output_file.write("    " + settings.SUCCESS_SIGN + success_msg)
+    output_file.write("    " + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
     output_file.close()
   else:
     warn_msg = "It seems that you don't have permissions "

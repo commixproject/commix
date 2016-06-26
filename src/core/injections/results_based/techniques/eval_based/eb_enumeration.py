@@ -61,7 +61,7 @@ def powershell_version(separator, TAG, prefix, suffix, http_request_method, url,
       # Add infos to logs file. 
       output_file = open(filename, "a")
       success_msg = "The PowerShell's version number is " + ps_version + ".\n"
-      output_file.write("    " + settings.SUCCESS_SIGN + success_msg)
+      output_file.write("    " + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
       output_file.close()
   except ValueError:
     warn_msg = "Heuristics have failed to identify PowerShell's version, "
@@ -94,7 +94,7 @@ def hostname(separator, TAG, prefix, suffix, http_request_method, url, vuln_para
     # Add infos to logs file. 
     output_file = open(filename, "a")
     success_msg = "The hostname is " + shell + ".\n"
-    output_file.write("    " + settings.SUCCESS_SIGN + success_msg)
+    output_file.write("    " + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
     output_file.close()
 
 """
@@ -136,7 +136,7 @@ def system_information(separator, TAG, prefix, suffix, http_request_method, url,
     output_file = open(filename, "a")
     success_msg = "The target operating system is " + target_os
     success_msg += " and the hardware platform is " + target_arch + ".\n"
-    output_file.write("    " + settings.SUCCESS_SIGN + success_msg)
+    output_file.write("    " + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
     output_file.close()
 
 """
@@ -183,7 +183,7 @@ def current_user(separator, TAG, prefix, suffix, http_request_method, url, vuln_
       # Add infos to logs file.    
       output_file = open(filename, "a")
       success_msg = "The current user is " + cu_account
-      output_file.write("    " + settings.SUCCESS_SIGN + success_msg)
+      output_file.write("    " + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
       output_file.close()
       if shell:
         if (settings.TARGET_OS == "win" and not "Admin" in shell) or \
@@ -210,7 +210,7 @@ def current_user(separator, TAG, prefix, suffix, http_request_method, url, vuln_
       # Add infos to logs file.   
       output_file = open(filename, "a")
       success_msg = "The current user is " + cu_account + "\n"
-      output_file.write("    " + settings.SUCCESS_SIGN + success_msg)
+      output_file.write("    " + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
       output_file.close()
 
 """
@@ -256,7 +256,7 @@ def system_users(separator, TAG, prefix, suffix, http_request_method, url, vuln_
         sys.stdout.flush()
         # Add infos to logs file.   
         output_file = open(filename, "a")
-        output_file.write("\n    " + settings.SUCCESS_SIGN + success_msg)
+        output_file.write("\n    " + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
         output_file.close()
         count = 0
         for user in range(0, len(sys_users_list)):
@@ -346,7 +346,7 @@ def system_users(separator, TAG, prefix, suffix, http_request_method, url, vuln_
             sys.stdout.flush()
             # Add infos to logs file.   
             output_file = open(filename, "a")
-            output_file.write("\n    " + settings.SUCCESS_SIGN + success_msg)
+            output_file.write("\n    " + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
             output_file.close()
             count = 0
             for user in range(0, len(sys_users_list)):
@@ -454,7 +454,7 @@ def system_passwords(separator, TAG, prefix, suffix, http_request_method, url, v
         sys.stdout.flush()
         # Add infos to logs file.   
         output_file = open(filename, "a")
-        output_file.write("\n    " + settings.SUCCESS_SIGN + success_msg )
+        output_file.write("\n    " + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg )
         output_file.close()
         count = 0
         for line in sys_passes:

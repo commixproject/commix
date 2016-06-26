@@ -91,7 +91,7 @@ def enumeration(url, cve, check_header, filename):
     # Add infos to logs file. 
     output_file = open(filename, "a")
     success_msg = "The hostname is " + shell + ".\n"
-    output_file.write("    " + settings.SUCCESS_SIGN + success_msg)
+    output_file.write("    " + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
     output_file.close()
     settings.ENUMERATION_DONE = True
 
@@ -115,7 +115,7 @@ def enumeration(url, cve, check_header, filename):
         output_file = open(filename, "a")
         success_msg = "The target operating system is " + target_os
         success_msg += " and the hardware platform is " + target_arch + ".\n"
-        output_file.write("    " + settings.SUCCESS_SIGN + success_msg)
+        output_file.write("    " + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
         output_file.close()
     else:
       if settings.VERBOSITY_LEVEL >= 1:
@@ -126,7 +126,7 @@ def enumeration(url, cve, check_header, filename):
       # Add infos to logs file.    
       output_file = open(filename, "a")
       success_msg = "The target operating system is " + target_os + ".\n"
-      output_file.write("    " + settings.SUCCESS_SIGN + success_msg)
+      output_file.write("    " + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
       output_file.close()
     settings.ENUMERATION_DONE = True
 
@@ -147,7 +147,7 @@ def enumeration(url, cve, check_header, filename):
         # Add infos to logs file.    
         output_file = open(filename, "a")
         success_msg = "The current user is " + cu_account
-        output_file.write("    " + settings.SUCCESS_SIGN + success_msg)
+        output_file.write("    " + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
         output_file.close()
         if shell:
           if shell != "0":
@@ -173,7 +173,7 @@ def enumeration(url, cve, check_header, filename):
         # Add infos to logs file.   
         output_file = open(filename, "a")
         success_msg = "The current user is " + cu_account + "\n"
-        output_file.write("    " + settings.SUCCESS_SIGN + success_msg)
+        output_file.write("    " + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
         output_file.close()  
     settings.ENUMERATION_DONE = True
 
@@ -221,7 +221,7 @@ def enumeration(url, cve, check_header, filename):
             sys.stdout.flush()
             # Add infos to logs file.   
             output_file = open(filename, "a")
-            output_file.write("\n    " + settings.SUCCESS_SIGN + success_msg)
+            output_file.write("\n    " + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
             output_file.close()
             count = 0
             for user in range(0, len(sys_users_list)):
@@ -318,7 +318,7 @@ def enumeration(url, cve, check_header, filename):
         sys.stdout.flush()
         # Add infos to logs file.   
         output_file = open(filename, "a")
-        output_file.write("\n    " + settings.SUCCESS_SIGN + success_msg )
+        output_file.write("\n    " + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg )
         output_file.close()
         count = 0
         for line in sys_passes:
@@ -476,7 +476,7 @@ def file_access(url, cve, check_header, filename):
       output_file = open(filename, "a")
       success_msg = "The contents of file '"
       success_msg += file_to_read + "' : " + shell + ".\n"
-      output_file.write("    " + settings.SUCCESS_SIGN + success_msg)
+      output_file.write("    " + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
       output_file.close()
     else:
       warn_msg = "It seems that you don't have permissions "
