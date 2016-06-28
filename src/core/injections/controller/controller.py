@@ -261,6 +261,10 @@ def get_request(url, http_request_method, filename, delay):
       url = found_url[i]
       check_parameter = parameters.vuln_GET_param(url)
       # Check if testable parameter(s) are provided
+
+      if len(check_parameter) > 0:
+        settings.TESTABLE_PARAMETER = check_parameter
+
       if len(settings.TEST_PARAMETER) > 0:
         if check_parameter in settings.TEST_PARAMETER:
           # Check for session file 
