@@ -84,8 +84,8 @@ def add_type_and_technique(export_injection_info, filename, injection_type, tech
   if export_injection_info == False:
     settings.SHOW_LOGS_MSG = True
     output_file = open(filename, "a")
-    output_file.write("\n[+] Type: " + injection_type)
-    output_file.write("\n[+] Technique: " + technique.title())
+    output_file.write("\n" + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + "Type: " + injection_type)
+    output_file.write("\n" + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + "Technique: " + technique.title())
     output_file.close()
     export_injection_info = True
 
@@ -100,7 +100,7 @@ def add_parameter(vp_flag, filename, the_type, header_name, http_request_method,
     header_name = " ("+ header_name[1:] + ") " + vuln_parameter
   if header_name[1:] == "":
     header_name = " ("+ http_request_method + ") " + vuln_parameter
-  output_file.write("\n(+) " + the_type[1:].title() + ": " + header_name[1:])
+  output_file.write("\n" + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + the_type[1:].title() + ": " + header_name[1:])
   vp_flag = False
   output_file.write("\n")
   output_file.close()
@@ -111,9 +111,9 @@ Add any payload in log files.
 def update_payload(filename, counter, payload):
   output_file = open(filename, "a")
   if "\n" in payload:
-    output_file.write("  (" +str(counter)+ ") Payload: " + re.sub("%20", " ", urllib.unquote_plus(payload.replace("\n", "\\n"))) + "\n")
+    output_file.write("    [" +str(counter)+ "] Payload: " + re.sub("%20", " ", urllib.unquote_plus(payload.replace("\n", "\\n"))) + "\n")
   else:
-    output_file.write("  (" +str(counter)+ ") Payload: " + re.sub("%20", " ", payload) + "\n")
+    output_file.write("    [" +str(counter)+ "] Payload: " + re.sub("%20", " ", payload) + "\n")
   output_file.close()
 
 """
