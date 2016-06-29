@@ -68,7 +68,8 @@ def check_for_stored_levels(url, http_request_method):
   if not menu.options.ignore_session:
     if menu.options.level == settings.DEFAULT_INJECTION_LEVEL:
       menu.options.level = session_handler.applied_levels(url, http_request_method)
-
+      if type(menu.options.level) is not int :
+        menu.options.level = settings.DEFAULT_INJECTION_LEVEL
 """
 Proceed to the injection process for the appropriate parameter.
 """
@@ -397,8 +398,6 @@ General check on every injection technique.
 def do_check(url, filename):
 
   if perform_checks(url,filename) == False:
-    if menu.options.level == None:
-      menu.options.level = settings.DEFAULT_INJECTION_LEVEL
     scan_level = menu.options.level
 
     while scan_level < settings.HTTP_HEADER_INJECTION_LEVEL and settings.LOAD_SESSION == None:

@@ -309,6 +309,8 @@ def store_cmd(url, cmd, shell, vuln_parameter):
         conn.execute("INSERT INTO " + table_name(url) + "_ir(cmd, output, vuln_parameter) "\
                      "VALUES(?,?,?)", \
                      (str(base64.b64encode(cmd)), str(base64.b64encode(shell)), str(settings.HTTP_HEADER)))
+      conn.commit()
+      conn.close() 
   except sqlite3.OperationalError, err_msg:
     print settings.print_critical_msg(err_msg)
   except TypeError, err_msg:
@@ -323,9 +325,18 @@ def export_stored_cmd(url, cmd, vuln_parameter):
       conn = sqlite3.connect(settings.SESSION_FILE)
       output = None
       conn = sqlite3.connect(settings.SESSION_FILE)
-      cursor = conn.execute("SELECT output FROM " + table_name(url) + \
+      if settings.TESTABLE_PARAMETER:
+        cursor = conn.execute("SELECT output FROM " + table_name(url) + \
+                              "_ir WHERE cmd='" + base64.b64encode(cmd) + "' AND "\
+                              "vuln_parameter= '" + vuln_parameter + "';").fetchall()
+      else:
+        cursor = conn.execute("SELECT output FROM " + table_name(url) + \
                             "_ir WHERE cmd='" + base64.b64encode(cmd) + "' AND "\
-                            "vuln_parameter= '" + vuln_parameter + "';").fetchall()
+                            "vuln_parameter= '" +  settings.HTTP_HEADER + "';").fetchall()
+
+      conn.commit()
+      conn.close()
+
       for session in cursor:
         output = base64.b64decode(session[0])
       return output
