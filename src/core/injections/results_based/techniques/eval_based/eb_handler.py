@@ -265,7 +265,7 @@ def eb_injection_handler(url, delay, filename, http_request_method):
             logs.update_payload(filename, counter, payload) 
             counter = counter + 1
 
-            if not settings.VERBOSITY_LEVEL >= 1 and not settings.LOAD_SESSION:
+            if not settings.LOAD_SESSION:
               print ""
 
             # Print the findings to terminal.
@@ -441,8 +441,8 @@ def eb_injection_handler(url, delay, filename, http_request_method):
                       #if shell:
                       if shell != "":
                         shell = "".join(str(p) for p in shell)
-                        if settings.VERBOSITY_LEVEL >= 1:
-                          print ""
+                        # if settings.VERBOSITY_LEVEL >= 1:
+                        #   print ""
                         print "\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n"
                       else:
                         err_msg = "The '" + cmd + "' command, does not return any output."
