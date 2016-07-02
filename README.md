@@ -30,12 +30,13 @@ Commix comes packaged on the **official repositories** of the following Linux di
 - [Kali Linux](https://www.kali.org/)
 - [Weakerthan](http://www.weaknetlabs.com/)
 
-Commix also comes **pre-installed**, on the following penetration testing frameworks:
+Commix also comes **as a plugin**, on the following penetration testing frameworks:
 
 - [The Penetration Testers Framework (PTF)](https://github.com/trustedsec/ptf)
 - [CTF-Tools](https://github.com/zardus/ctf-tools)
 - [PentestBox](https://tools.pentestbox.com/)
 - [PenBox](https://github.com/x3omdax/PenBox)
+- [Katoolin](https://github.com/LionSec/katoolin)
 
 #### Usage
 
