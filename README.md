@@ -27,6 +27,7 @@ Commix comes packaged on the **official repositories** of the following Linux di
 
 - [ArchAssault](https://archassault.org/)
 - [BlackArch](http://blackarch.org/)
+- [BackBox](https://backbox.org/)
 - [Kali Linux](https://www.kali.org/)
 - [Weakerthan](http://www.weaknetlabs.com/)
 
