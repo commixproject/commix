@@ -17,15 +17,79 @@ For more see the file 'readme/COPYING' for copying permission.
 import os
 import sys
 import time
+import errno
 import urllib
 import socket
 import random
+from socket import error as socket_error
 from src.thirdparty.colorama import Fore, Back, Style, init
+
+# Status Signs
+SUCCESS_SIGN =  "[" + Fore.GREEN + Style.BRIGHT + "+" + Style.RESET_ALL + "] "
+INFO_SIGN =  Style.RESET_ALL + "[" + Fore.BLUE + Style.BRIGHT + "*" + Style.RESET_ALL + "] "
+QUESTION_SIGN =  Style.RESET_ALL + "[" + Style.BRIGHT + Fore.MAGENTA + "?" + Style.RESET_ALL + "] "
+WARNING_SIGN =  "[" + Fore.YELLOW  + "!" + Style.RESET_ALL + "] " + Fore.YELLOW + "Warning: "
+WARNING_BOLD_SIGN =  "[" + Style.BRIGHT + Fore.YELLOW  + "!" + Style.RESET_ALL + "] " + Style.BRIGHT + Fore.YELLOW + "Warning: "
+ERROR_SIGN =  "[" + Fore.RED + Style.BRIGHT + "x" + Style.RESET_ALL  + "] " + Fore.RED 
+ABORTION_SIGN =  "[" + Fore.RED + Style.BRIGHT + "x" + Style.RESET_ALL  + "] " + Fore.RED 
+CRITICAL_SIGN =  Back.RED + "[x] Critical: "
+PAYLOAD_SIGN =  "    |_ " + Fore.CYAN
+CHECK_SIGN =  "[" + Fore.BLUE + Style.BRIGHT + "*" + Style.RESET_ALL  + "] " + "Checking "
+SUB_CONTENT_SIGN =  "    [" + Fore.GREY + Style.BRIGHT + "~" + Style.RESET_ALL  + "] "
+
+# Print error message
+def print_error_msg(err_msg):
+  result = ERROR_SIGN + str(err_msg) + Style.RESET_ALL
+  return result
+
+# Print critical error message
+def print_critical_msg(err_msg):
+  result = CRITICAL_SIGN + str(err_msg) + Style.RESET_ALL
+  return result
+
+# Print abortion message
+def print_abort_msg(abort_msg):
+  result = ABORTION_SIGN + str(abort_msg) + Style.RESET_ALL
+  return result
+
+# Print warning message
+def print_warning_msg(warn_msg):
+  result = WARNING_SIGN + str(warn_msg)  + Style.RESET_ALL
+  return result
+
+# Print warning message
+def print_bold_warning_msg(warn_msg):
+  result = WARNING_BOLD_SIGN + str(warn_msg)  + Style.RESET_ALL
+  return result
+
+# Print information message
+def print_info_msg(info_msg):
+  result = INFO_SIGN + str(info_msg) + Style.RESET_ALL
+  return result
+
+# Print success message
+def print_success_msg(success_msg):
+  result = SUCCESS_SIGN + Style.BRIGHT + str(success_msg) + Style.RESET_ALL
+  return result
+
+# Print payload (verbose mode)
+def print_payload(payload):
+  result = PAYLOAD_SIGN + str(payload) + Style.RESET_ALL
+  return result
+
+# Print checking message (verbose mode)
+def print_checking_msg(payload):
+  result = CHECK_SIGN + str(payload) + Style.RESET_ALL
+  return result
+
+# Print question message
+def print_question_msg(question_msg):
+  result = QUESTION_SIGN + question_msg 
+  return result
 
 """
 The global variables.
 """
-
 # About
 APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
@@ -33,7 +97,7 @@ DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 MAJOR = "1"
 MINOR = "1"
-COMMIT_ID = "16"
+COMMIT_ID = "17"
 VERSION = MAJOR + "." + MINOR
 STABLE_VERSION = False
 if not STABLE_VERSION:
@@ -58,10 +122,22 @@ TARGET_OS = "unix"
 VERBOSITY_LEVEL = 0
 
 # Local HTTP Server
-s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-s.connect(("8.8.8.8",53))
+try:
+  s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+  s.connect(("8.8.8.8",53))
+except socket_error, err:
+  if errno.ECONNREFUSED:
+    err_msg = "Network is unreachable."
+    print print_critical_msg(err_msg) + "\n"
+  else:
+    err_msg = err
+    print print_critical_msg(err_msg) + "\n"
+  sys.exit(0)
+# Local HTTP server ip
 LOCAL_HTTP_IP = (s.getsockname()[0])
 s.close()
+
+# Local HTTP server port
 LOCAL_HTTP_PORT = random.randint(50000,60000)
 
 # Exploitation techniques states
@@ -389,19 +465,6 @@ PS_ENABLED = None
 # ANSI colors removal
 ANSI_COLOR_REMOVAL = r'\x1b[^m]*m'
 
-# Status Signs
-SUCCESS_SIGN =  "[" + Fore.GREEN + Style.BRIGHT + "+" + Style.RESET_ALL + "] "
-INFO_SIGN =  Style.RESET_ALL + "[" + Fore.BLUE + Style.BRIGHT + "*" + Style.RESET_ALL + "] "
-QUESTION_SIGN =  Style.RESET_ALL + "[" + Style.BRIGHT + Fore.MAGENTA + "?" + Style.RESET_ALL + "] "
-WARNING_SIGN =  "[" + Fore.YELLOW  + "!" + Style.RESET_ALL + "] " + Fore.YELLOW + "Warning: "
-WARNING_BOLD_SIGN =  "[" + Style.BRIGHT + Fore.YELLOW  + "!" + Style.RESET_ALL + "] " + Style.BRIGHT + Fore.YELLOW + "Warning: "
-ERROR_SIGN =  "[" + Fore.RED + Style.BRIGHT + "x" + Style.RESET_ALL  + "] " + Fore.RED 
-ABORTION_SIGN =  "[" + Fore.RED + Style.BRIGHT + "x" + Style.RESET_ALL  + "] " + Fore.RED 
-CRITICAL_SIGN =  Back.RED + "[x] Critical: "
-PAYLOAD_SIGN =  "    |_ " + Fore.CYAN
-CHECK_SIGN =  "[" + Fore.BLUE + Style.BRIGHT + "*" + Style.RESET_ALL  + "] " + "Checking "
-SUB_CONTENT_SIGN =  "    [" + Fore.GREY + Style.BRIGHT + "~" + Style.RESET_ALL  + "] "
-
 # Default LHOST / LPORT setup, 
 # for the reverse TCP connection
 LHOST = ""
@@ -441,55 +504,5 @@ TAMPER_SCRIPTS = {
                   "base64encode": False,
                   "space2plus": False
                  }
-
-# Print error message
-def print_error_msg(err_msg):
-  result = ERROR_SIGN + str(err_msg) + Style.RESET_ALL
-  return result
-
-# Print critical error message
-def print_critical_msg(err_msg):
-  result = CRITICAL_SIGN + str(err_msg) + Style.RESET_ALL
-  return result
-
-# Print abortion message
-def print_abort_msg(abort_msg):
-  result = ABORTION_SIGN + str(abort_msg) + Style.RESET_ALL
-  return result
-
-# Print warning message
-def print_warning_msg(warn_msg):
-  result = WARNING_SIGN + str(warn_msg)  + Style.RESET_ALL
-  return result
-
-# Print warning message
-def print_bold_warning_msg(warn_msg):
-  result = WARNING_BOLD_SIGN + str(warn_msg)  + Style.RESET_ALL
-  return result
-
-# Print information message
-def print_info_msg(info_msg):
-  result = INFO_SIGN + str(info_msg) + Style.RESET_ALL
-  return result
-
-# Print success message
-def print_success_msg(success_msg):
-  result = SUCCESS_SIGN + Style.BRIGHT + str(success_msg) + Style.RESET_ALL
-  return result
-
-# Print payload (verbose mode)
-def print_payload(payload):
-  result = PAYLOAD_SIGN + str(payload) + Style.RESET_ALL
-  return result
-
-# Print checking message (verbose mode)
-def print_checking_msg(payload):
-  result = CHECK_SIGN + str(payload) + Style.RESET_ALL
-  return result
-
-# Print question message
-def print_question_msg(question_msg):
-  result = QUESTION_SIGN + question_msg 
-  return result
 
 #eof
