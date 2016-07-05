@@ -459,7 +459,7 @@ def main():
 
       except urllib2.HTTPError, e:
         # Check the codes of responses
-        if e.getcode() == 500:
+        if str(e.getcode()) == settings.INTERNAL_SERVER_ERROR:
           print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
           content = e.read()
           sys.exit(0)

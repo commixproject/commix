@@ -224,7 +224,9 @@ def dns_exfiltration_handler(url, http_request_method):
     try:
       response = proxy.use_proxy(request)
     except urllib2.HTTPError, err_msg:
-      if settings.IGNORE_ERR_MSG == False:
+      if str(err.code) == settings.INTERNAL_SERVER_ERROR:
+        response = False  
+      elif settings.IGNORE_ERR_MSG == False:
         print "\n" + settings.print_critical_msg(err_msg)
         continue_tests = checks.continue_tests(err)
         if continue_tests == True:
@@ -237,7 +239,9 @@ def dns_exfiltration_handler(url, http_request_method):
     try:
       response = tor.use_tor(request)
     except urllib2.HTTPError, err_msg:
-      if settings.IGNORE_ERR_MSG == False:
+      if str(err.code) == settings.INTERNAL_SERVER_ERROR:
+        response = False  
+      elif settings.IGNORE_ERR_MSG == False:
         print "\n" + settings.print_critical_msg(err_msg)
         continue_tests = checks.continue_tests(err)
         if continue_tests == True:
@@ -249,7 +253,9 @@ def dns_exfiltration_handler(url, http_request_method):
     try:
       response = urllib2.urlopen(request)
     except urllib2.HTTPError, err_msg:
-      if settings.IGNORE_ERR_MSG == False:
+      if str(err.code) == settings.INTERNAL_SERVER_ERROR:
+        response = False  
+      elif settings.IGNORE_ERR_MSG == False:
         print "\n" + settings.print_critical_msg(err_msg)
         continue_tests = checks.continue_tests(err)
         if continue_tests == True:

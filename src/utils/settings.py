@@ -97,7 +97,7 @@ DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 MAJOR = "1"
 MINOR = "1"
-COMMIT_ID = "17"
+COMMIT_ID = "18"
 VERSION = MAJOR + "." + MINOR
 STABLE_VERSION = False
 if not STABLE_VERSION:
@@ -504,5 +504,7 @@ TAMPER_SCRIPTS = {
                   "base64encode": False,
                   "space2plus": False
                  }
+
+INTERNAL_SERVER_ERROR = "500"
 
 #eof
