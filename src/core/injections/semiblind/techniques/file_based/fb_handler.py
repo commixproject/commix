@@ -311,7 +311,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                   raise urllib2.HTTPError(url, 404, 'Error', {}, None)
 
               except urllib2.HTTPError, e:
-                  if e.getcode() == 404:
+                  if str(e.getcode()) == settings.NOT_FOUND_ERROR:
                     percent = ((i*100)/total)
                     float_percent = "{0:.1f}".format(round(((i*100)/(total*1.0)),2))
 
@@ -376,12 +376,12 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                       else:
                         raise
                     
-                  elif e.getcode() == 401:
+                  elif str(e.getcode()) == settings.UNAUTHORIZED_ERROR:
                     err_msg = "Authorization required!"
                     print settings.print_critical_msg(err_msg) + "\n"
                     sys.exit(0)
                     
-                  elif e.getcode() == 403:
+                  elif str(e.getcode()) == settings.FORBIDDEN_ERROR:
                     err_msg = "You don't have permission to access this page."
                     print settings.print_critical_msg(err_msg) + "\n"
                     sys.exit(0)

@@ -96,7 +96,7 @@ def continue_tests(err):
     return True
 
   # Possible WAF/IPS/IDS
-  if (str(err.code) == "403" or "406") and \
+  if (str(err.code) == settings.FORBIDDEN_ERROR or settings.NOT_ACCEPTABLE_ERROR) and \
     not menu.options.skip_waf:
     # Check if "--skip-waf" option is defined 
     # that skips heuristic detection of WAF/IPS/IDS protection.

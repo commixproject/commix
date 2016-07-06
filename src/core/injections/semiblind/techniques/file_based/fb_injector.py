@@ -311,7 +311,7 @@ def injection_results(url, OUTPUT_TEXTFILE, delay):
       shell = [space.strip() for space in shell]
       shell = [empty for empty in shell if empty]
   except urllib2.HTTPError, e:
-    if e.getcode() == 404:
+    if str(e.getcode()) == settings.NOT_FOUND_ERROR:
       shell = ""
   return shell
 

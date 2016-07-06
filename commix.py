@@ -465,7 +465,7 @@ def main():
           sys.exit(0)
 
         # Check for HTTP Error 401 (Unauthorized).
-        elif e.getcode() == 401:
+        elif str(e.getcode()) == settings.UNAUTHORIZED_ERROR:
           try:
             # Get the auth header value
             auth_line = e.headers.get('www-authenticate', '')
@@ -579,13 +579,13 @@ def main():
           else:
             pass
 
-        elif e.getcode() == 403:
+        elif str(e.getcode()) == settings.FORBIDDEN_ERROR:
           print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
           err_msg = "You don't have permission to access this page."
           print settings.print_critical_msg(err_msg)
           sys.exit(0)
           
-        elif e.getcode() == 404:
+        elif str(e.getcode()) == settings.NOT_FOUND_ERROR:
           print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
           err_msg = "The host seems to be down!"
           print settings.print_critical_msg(err_msg)
