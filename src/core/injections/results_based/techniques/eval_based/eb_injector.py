@@ -112,6 +112,8 @@ def warning_detection(url, http_request_method):
       err_msg = ""
       if "eval()'d code" in html_data:
         err_msg = "'eval()'"
+      if "Warning: create_function():" in html_data:
+        err_msg = "create_function()"
       if "Cannot execute a blank command in" in html_data:
         err_msg = "execution of a blank command,"
       if "sh: command substitution:" in html_data:
