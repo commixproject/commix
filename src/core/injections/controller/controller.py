@@ -424,7 +424,6 @@ def do_check(url, filename):
 
   # All injection techniques seems to be failed!
   if settings.CLASSIC_STATE == settings.EVAL_BASED_STATE == settings.TIME_BASED_STATE == settings.FILE_BASED_STATE == False :
-    print menu.options.level
     if settings.INJECTION_CHECKER == False:
       err_msg = "All tested parameters "
       if menu.options.level > 2:
