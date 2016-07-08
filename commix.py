@@ -308,11 +308,11 @@ def main():
                 pass
           try:
             urllib2.urlopen(menu.options.file_upload)
-          except urllib2.HTTPError, err:
-            print settings.print_critical_msg(err)
+          except urllib2.HTTPError, err_msg:
+            print settings.print_critical_msg(err_msg)
             sys.exit(0)
-          except urllib2.URLError, err:
-            print settings.print_critical_msg(err)
+          except urllib2.URLError, err_msg:
+            print settings.print_critical_msg(err_msg)
             sys.exit(0)
 
         # Used a valid pair of valid credentials

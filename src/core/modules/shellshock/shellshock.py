@@ -729,10 +729,11 @@ def shellshock_handler(url, http_request_method, filename):
       else:
         continue
 
-  except urllib2.HTTPError, err:
-    if str(err.code) == settings.INTERNAL_SERVER_ERROR:
+  except urllib2.HTTPError, err_msg:
+    if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
       response = False  
     elif settings.IGNORE_ERR_MSG == False:
+      err_msg = str(err_msg) + "."
       print "\n" + settings.print_critical_msg(err_msg)
       continue_tests = checks.continue_tests(err)
       if continue_tests == True:
