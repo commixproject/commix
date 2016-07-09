@@ -106,6 +106,7 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
     print settings.print_critical_msg(err_msg)
 
   whitespace = checks.check_whitespaces()
+
   if settings.VERBOSITY_LEVEL >= 1:
     info_msg ="Testing the " + technique + "... "
     print settings.print_info_msg(info_msg)
@@ -333,14 +334,10 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
                     percent = ""
                 else:
                   percent = str(float_percent) + "%"
-                #Print logs notification message
-                #percent = Fore.BLUE + "FINISHED" + Style.RESET_ALL
-                info_msg =  "Testing the " + technique + "... " +  "[ " + percent + " ]"
-                sys.stdout.write("\r" + settings.print_info_msg(info_msg))
-                sys.stdout.flush()
-                print ""
-                logs.logs_notification(filename)
-                raise
+                  print ""
+                  # Print logs notification message
+                  logs.logs_notification(filename)
+                #raise
               else:
                 percent = str(float_percent) + "%"
             break
