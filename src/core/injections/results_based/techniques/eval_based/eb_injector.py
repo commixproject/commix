@@ -70,7 +70,8 @@ def injection_test(payload, http_request_method, url):
     
     # Check if its not specified the 'INJECT_HERE' tag
     parameter = parameters.do_POST_check(parameter)
-    
+    parameter = parameter.replace("+","%2B")
+
     # Define the POST data   
     if settings.IS_JSON == False:
       data = re.sub(settings.INJECT_TAG, payload, parameter)
@@ -244,6 +245,7 @@ def injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_meth
         
         # Check if its not specified the 'INJECT_HERE' tag
         parameter = parameters.do_POST_check(parameter)
+        parameter = parameter.replace("+","%2B")
         
         # Define the POST data   
         if settings.IS_JSON == False:

