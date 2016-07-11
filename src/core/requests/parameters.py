@@ -178,9 +178,6 @@ Check if the 'INJECT_HERE' tag, is specified on POST Requests.
 """
 def do_POST_check(parameter):
 
-    # Do replacement with the 'INJECT_HERE' tag, if the wildcard char is provided.
-  parameter = checks.wildcard_character(parameter)
-
   # Check if valid JSON
   def is_JSON_check(parameter):
     try:
@@ -201,6 +198,9 @@ def do_POST_check(parameter):
       return False
     else:  
       return True
+
+  # Do replacement with the 'INJECT_HERE' tag, if the wildcard char is provided.
+  parameter = checks.wildcard_character(parameter).replace("'","\"")
 
   # Check if JSON Object.
   if is_JSON_check(parameter):
