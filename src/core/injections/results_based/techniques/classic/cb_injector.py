@@ -280,5 +280,5 @@ def injection_results(response, TAG, cmd):
         false_result = True  
   if false_result:
     shell = ""
-
+    
   return shell
