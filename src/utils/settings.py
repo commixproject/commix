@@ -97,7 +97,7 @@ DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 MAJOR = "1"
 MINOR = "1"
-COMMIT_ID = "25"
+COMMIT_ID = "26"
 VERSION = MAJOR + "." + MINOR
 STABLE_VERSION = False
 if not STABLE_VERSION:
@@ -511,5 +511,8 @@ FORBIDDEN_ERROR = "403"
 NOT_FOUND_ERROR = "404"
 NOT_ACCEPTABLE_ERROR = "406"
 INTERNAL_SERVER_ERROR = "500"
+
+# End line
+END_LINE = ["\r", "\n", "\r\n"]
 
 #eof

