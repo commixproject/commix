@@ -1,4 +1,5 @@
 ## Version 1.1 (upcoming)
+* Added: The ".gitignore" file has been added.
 * Added: Support for injections against ASP.NET applications.
 * Added: Support for warning detection regarding "create_function()" function.
 * Fixed: Minor improvent of the HTTP server for "--file-upload" option.
