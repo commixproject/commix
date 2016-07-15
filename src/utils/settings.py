@@ -96,10 +96,10 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation T
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 MAJOR = "1"
-MINOR = "1"
-COMMIT_ID = "29"
+MINOR = "2"
+COMMIT_ID = "0"
 VERSION = MAJOR + "." + MINOR
-STABLE_VERSION = True
+STABLE_VERSION = False
 if not STABLE_VERSION:
   VERSION = MAJOR + "." + MINOR + "." + COMMIT_ID
 YEAR    = "2014-2016"
