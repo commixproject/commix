@@ -287,6 +287,9 @@ Check for specific stored parameter.
 def check_stored_parameter(url, http_request_method): 
   if injection_point_exportation(url, http_request_method):
     if injection_point_exportation(url, http_request_method)[16] == str(menu.options.level):
+      # Check for stored alternative shell
+      if injection_point_exportation(url, http_request_method)[9] != "":
+        menu.options.alter_shell = injection_point_exportation(url, http_request_method)[9]
       return True
     else:
       return False

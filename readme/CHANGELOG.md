@@ -1,3 +1,6 @@
+## Version 1.2 (upcoming)
+* Fixed: Minor fix for conflicted shells (i.e regular, alternative) from session file.
+
 ## Version 1.1 (2016-07-14)
 * Added: The ".gitignore" file has been added.
 * Added: Support for injections against ASP.NET applications.

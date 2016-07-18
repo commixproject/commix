@@ -97,7 +97,7 @@ DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 MAJOR = "1"
 MINOR = "2"
-COMMIT_ID = "0"
+COMMIT_ID = "1"
 VERSION = MAJOR + "." + MINOR
 STABLE_VERSION = False
 if not STABLE_VERSION:
