@@ -19,6 +19,8 @@ import os
 import sys
 import json
 
+from urlparse import urlparse
+
 from src.utils import menu
 from src.utils import settings
 from src.core.injections.controller import checks
@@ -29,11 +31,9 @@ Get the URL part of the defined URL.
 """
 def get_url_part(url):
   
-  # Find the host part
-  url_part = url.split("?")[0]
-  # Remove "/" if "/?" in url
-  if url_part.endswith("/"):
-    url_part = url_part[:-len("/")]
+  # Find the URL part (scheme:[//host[:port]][/]path)
+  o = urlparse(url)
+  url_part = o.scheme + "://" + o.netloc + o.path
 
   return url_part
 
