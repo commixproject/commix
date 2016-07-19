@@ -1,4 +1,5 @@
 ## Version 1.2 (upcoming)
+* Added: The ability for target application extension recognition (i.e PHP, ASP etc).
 * Fixed: Minor improvement for finding the URL part (i.e scheme:[//host[:port]][/]path).
 * Fixed: Minor fix for conflicted shells (i.e regular, alternative) from session file.
 

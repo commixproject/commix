@@ -95,13 +95,10 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-MAJOR = "1"
-MINOR = "2"
-COMMIT_ID = "2"
-VERSION = MAJOR + "." + MINOR
+VERSION = "1.2.3"
 STABLE_VERSION = False
-if not STABLE_VERSION:
-  VERSION = MAJOR + "." + MINOR + "." + COMMIT_ID
+if STABLE_VERSION:
+  VERSION = VERSION[:3]
 YEAR    = "2014-2016"
 AUTHOR_TWITTER = "@ancst" 
 APPLICATION_TWITTER = "@commixproject" 
@@ -408,6 +405,13 @@ SERVER_OS_BANNERS = [
     "centos",
     "freebsd",
     "unix"
+]
+
+TARGET_APPLICATION = ""
+# Unsupported target application(s) [1]
+# [1] https://github.com/stasinopoulos/commix/wiki/Target-applications
+UNSUPPORTED_TARGET_APPLICATION = [ 
+    "JSP"
 ]
 
 REVERSE_TCP = False
