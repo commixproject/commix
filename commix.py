@@ -88,7 +88,6 @@ def main():
     # Check if defined "--update" option.        
     if menu.options.update:
       update.updater()
-      sys.exit(0)
         
     # Check if defined "--install" option.        
     if menu.options.install:
@@ -134,6 +133,35 @@ def main():
       for i in range(0,len(settings.TEST_PARAMETER)):
         if "=" in settings.TEST_PARAMETER[i]:
           settings.TEST_PARAMETER[i] = settings.TEST_PARAMETER[i].split("=")[0]
+    
+    # Check if ".git" exists!
+    if os.path.isdir("./.git"):
+      response = urllib2.urlopen('https://raw.githubusercontent.com/stasinopoulos/commix/master/src/utils/settings.py')
+      version_check = response.readlines()
+      for line in version_check:
+        line = line.rstrip()
+        if "VERSION = " in line:
+          update_version = line.replace("VERSION = ", "").replace("\"", "")
+          break      
+      if settings.VERSION < update_version:
+        warn_msg = "Current version seems to be out-of-date."
+        print settings.print_warning_msg(warn_msg)
+        while True:
+          question_msg = "Do you want to update to the latest version now? [Y/n/q] > "
+          sys.stdout.write(settings.print_question_msg(question_msg))
+          do_update = sys.stdin.readline().replace("\n","").lower()
+          if do_update in settings.CHOICE_YES:
+              update.updater()
+          elif do_update in settings.CHOICE_NO:
+            break
+          elif do_update in settings.CHOICE_QUIT:
+            sys.exit(0)
+          else:
+            if do_update == "":
+              do_update = "enter"
+            err_msg = "'" + do_update + "' is not a valid answer."  
+            print settings.print_error_msg(err_msg)
+            pass
 
     # Check if defined character used for splitting parameter values.
     if menu.options.pdel:
@@ -558,8 +586,8 @@ def main():
                   while True:
                     question_msg = "Do you want to perform a dictionary-based attack? [Y/n/q] > "
                     sys.stdout.write(settings.print_question_msg(question_msg))
-                    crack_creds = sys.stdin.readline().replace("\n","").lower()
-                    if crack_creds in settings.CHOICE_YES:
+                    do_update = sys.stdin.readline().replace("\n","").lower()
+                    if do_update in settings.CHOICE_YES:
                       auth_creds = authentication.http_auth_cracker(url, realm)
                       if auth_creds != False:
                         menu.options.auth_cred = auth_creds
@@ -567,14 +595,14 @@ def main():
                         break
                       else:
                         sys.exit(0)
-                    elif crack_creds in settings.CHOICE_NO:
+                    elif do_update in settings.CHOICE_NO:
                       checks.http_auth_err_msg()
-                    elif crack_creds in settings.CHOICE_QUIT:
+                    elif do_update in settings.CHOICE_QUIT:
                       sys.exit(0)
                     else:
-                      if crack_creds == "":
-                        crack_creds = "enter"
-                      err_msg = "'" + crack_creds + "' is not a valid answer."  
+                      if do_update == "":
+                        do_update = "enter"
+                      err_msg = "'" + do_update + "' is not a valid answer."  
                       print settings.print_error_msg(err_msg)
                       pass
 
@@ -591,8 +619,8 @@ def main():
                   while True:
                     question_msg = "Do you want to perform a dictionary-based attack? [Y/n/q] > "
                     sys.stdout.write(settings.print_question_msg(question_msg))
-                    crack_creds = sys.stdin.readline().replace("\n","").lower()
-                    if crack_creds in settings.CHOICE_YES:
+                    do_update = sys.stdin.readline().replace("\n","").lower()
+                    if do_update in settings.CHOICE_YES:
                       auth_creds = authentication.http_auth_cracker(url, realm)
                       if auth_creds != False:
                         menu.options.auth_cred = auth_creds
@@ -600,14 +628,14 @@ def main():
                         break
                       else:
                         sys.exit(0)
-                    elif crack_creds in settings.CHOICE_NO:
+                    elif do_update in settings.CHOICE_NO:
                       checks.http_auth_err_msg()
-                    elif crack_creds in settings.CHOICE_QUIT:
+                    elif do_update in settings.CHOICE_QUIT:
                       sys.exit(0)
                     else:
-                      if crack_creds == "":
-                        crack_creds = "enter"
-                      err_msg = "'" + crack_creds + "' is not a valid answer."  
+                      if do_update == "":
+                        do_update = "enter"
+                      err_msg = "'" + do_update + "' is not a valid answer."  
                       print settings.print_error_msg(err_msg)
                       pass
                   else:   
