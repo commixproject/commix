@@ -95,7 +95,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION = "1.2.4"
+VERSION = "1.2.5"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = VERSION[:3]
@@ -495,6 +495,9 @@ INJECTION_CHECKER = False
 
 # List of pages / scripts potentially vulnerable to Shellshock
 CGI_SCRIPTS = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'txt')) + "/" + "shocker-cgi_list.txt"
+
+# Metasploit Framework Path
+METASPLOIT_PATH = "/usr/share/metasploit-framework/"
 
 # Supported HTTP Authentication types
 SUPPORTED_HTTP_AUTH_TYPES = [ "basic", "digest" ]
