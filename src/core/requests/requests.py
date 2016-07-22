@@ -95,14 +95,14 @@ def get_request_response(request):
       if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
-        err_msg = str(err_msg) + "."
+        err = str(err_msg) + "."
         if not settings.VERBOSITY_LEVEL >= 1 and settings.TIME_BASED_STATE == False or \
-           settings.VERBOSITY_LEVEL >= 1 and settings.EVAL_BASED_STATE == None:
+          settings.VERBOSITY_LEVEL >= 1 and settings.EVAL_BASED_STATE == None:
           print ""
         if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
-          print ""
-        print settings.print_critical_msg(err_msg)
-        continue_tests = checks.continue_tests(err)
+          print "" 
+        print settings.print_critical_msg(err)
+        continue_tests = checks.continue_tests(err_msg)
         if continue_tests == True:
           settings.IGNORE_ERR_MSG = True
         else:
@@ -128,14 +128,14 @@ def get_request_response(request):
       if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
-        err_msg = str(err_msg) + "."
+        err = str(err_msg) + "."
         if not settings.VERBOSITY_LEVEL >= 1 and settings.TIME_BASED_STATE == False or \
-           settings.VERBOSITY_LEVEL >= 1 and settings.EVAL_BASED_STATE == None:
+          settings.VERBOSITY_LEVEL >= 1 and settings.EVAL_BASED_STATE == None:
           print ""
         if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
-          print ""
-        print settings.print_critical_msg(err_msg)
-        continue_tests = checks.continue_tests(err)
+          print "" 
+        print settings.print_critical_msg(err)
+        continue_tests = checks.continue_tests(err_msg)
         if continue_tests == True:
           settings.IGNORE_ERR_MSG = True
         else:
@@ -156,14 +156,14 @@ def get_request_response(request):
       if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
-        err_msg = str(err_msg) + "."
+        err = str(err_msg) + "."
         if not settings.VERBOSITY_LEVEL >= 1 and settings.TIME_BASED_STATE == False or \
-           settings.VERBOSITY_LEVEL >= 1 and settings.EVAL_BASED_STATE == None:
+          settings.VERBOSITY_LEVEL >= 1 and settings.EVAL_BASED_STATE == None:
           print ""
         if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
           print "" 
-        print settings.print_critical_msg(err_msg)
-        continue_tests = checks.continue_tests(err)
+        print settings.print_critical_msg(err)
+        continue_tests = checks.continue_tests(err_msg)
         if continue_tests == True:
           settings.IGNORE_ERR_MSG = True
         else:
@@ -245,14 +245,14 @@ def cookie_injection(url, vuln_parameter, payload):
       if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
-        err_msg = str(err_msg) + "."
+        err = str(err_msg) + "."
         if not settings.VERBOSITY_LEVEL >= 1 and settings.TIME_BASED_STATE == False or \
-           settings.VERBOSITY_LEVEL >= 1 and settings.EVAL_BASED_STATE == None:
+          settings.VERBOSITY_LEVEL >= 1 and settings.EVAL_BASED_STATE == None:
           print ""
         if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
-          print ""
-        print settings.print_critical_msg(err_msg)
-        continue_tests = checks.continue_tests(err)
+          print "" 
+        print settings.print_critical_msg(err)
+        continue_tests = checks.continue_tests(err_msg)
         if continue_tests == True:
           settings.IGNORE_ERR_MSG = True
         else:
@@ -273,14 +273,14 @@ def cookie_injection(url, vuln_parameter, payload):
       if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
-        err_msg = str(err_msg) + "."
+        err = str(err_msg) + "."
         if not settings.VERBOSITY_LEVEL >= 1 and settings.TIME_BASED_STATE == False or \
-           settings.VERBOSITY_LEVEL >= 1 and settings.EVAL_BASED_STATE == None:
+          settings.VERBOSITY_LEVEL >= 1 and settings.EVAL_BASED_STATE == None:
           print ""
         if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
-          print ""
-        print settings.print_critical_msg(err_msg)
-        continue_tests = checks.continue_tests(err)
+          print "" 
+        print settings.print_critical_msg(err)
+        continue_tests = checks.continue_tests(err_msg)
         if continue_tests == True:
           settings.IGNORE_ERR_MSG = True
         else:
@@ -339,14 +339,14 @@ def user_agent_injection(url, vuln_parameter, payload):
       if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
-        err_msg = str(err_msg) + "."
+        err = str(err_msg) + "."
         if not settings.VERBOSITY_LEVEL >= 1 and settings.TIME_BASED_STATE == False or \
-           settings.VERBOSITY_LEVEL >= 1 and settings.EVAL_BASED_STATE == None:
+          settings.VERBOSITY_LEVEL >= 1 and settings.EVAL_BASED_STATE == None:
           print ""
         if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
-          print ""
-        print settings.print_critical_msg(err_msg)
-        continue_tests = checks.continue_tests(err)
+          print "" 
+        print settings.print_critical_msg(err)
+        continue_tests = checks.continue_tests(err_msg)
         if continue_tests == True:
           settings.IGNORE_ERR_MSG = True
         else:
@@ -369,14 +369,14 @@ def user_agent_injection(url, vuln_parameter, payload):
       if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
-        err_msg = str(err_msg) + "."
+        err = str(err_msg) + "."
         if not settings.VERBOSITY_LEVEL >= 1 and settings.TIME_BASED_STATE == False or \
-           settings.VERBOSITY_LEVEL >= 1 and settings.EVAL_BASED_STATE == None:
+          settings.VERBOSITY_LEVEL >= 1 and settings.EVAL_BASED_STATE == None:
           print ""
         if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
-          print ""
-        print settings.print_critical_msg(err_msg)
-        continue_tests = checks.continue_tests(err)
+          print "" 
+        print settings.print_critical_msg(err)
+        continue_tests = checks.continue_tests(err_msg)
         if continue_tests == True:
           settings.IGNORE_ERR_MSG = True
         else:
@@ -397,14 +397,14 @@ def user_agent_injection(url, vuln_parameter, payload):
       if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
-        err_msg = str(err_msg) + "."
+        err = str(err_msg) + "."
         if not settings.VERBOSITY_LEVEL >= 1 and settings.TIME_BASED_STATE == False or \
-           settings.VERBOSITY_LEVEL >= 1 and settings.EVAL_BASED_STATE == None:
+          settings.VERBOSITY_LEVEL >= 1 and settings.EVAL_BASED_STATE == None:
           print ""
         if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
-          print ""
-        print settings.print_critical_msg(err_msg)
-        continue_tests = checks.continue_tests(err)
+          print "" 
+        print settings.print_critical_msg(err)
+        continue_tests = checks.continue_tests(err_msg)
         if continue_tests == True:
           settings.IGNORE_ERR_MSG = True
         else:
@@ -463,14 +463,14 @@ def referer_injection(url, vuln_parameter, payload):
       if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
-        err_msg = str(err_msg) + "."
+        err = str(err_msg) + "."
         if not settings.VERBOSITY_LEVEL >= 1 and settings.TIME_BASED_STATE == False or \
-           settings.VERBOSITY_LEVEL >= 1 and settings.EVAL_BASED_STATE == None:
+          settings.VERBOSITY_LEVEL >= 1 and settings.EVAL_BASED_STATE == None:
           print ""
         if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
-          print ""
-        print settings.print_critical_msg(err_msg)
-        continue_tests = checks.continue_tests(err)
+          print "" 
+        print settings.print_critical_msg(err)
+        continue_tests = checks.continue_tests(err_msg)
         if continue_tests == True:
           settings.IGNORE_ERR_MSG = True
         else:
@@ -493,14 +493,14 @@ def referer_injection(url, vuln_parameter, payload):
       if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
-        err_msg = str(err_msg) + "."
+        err = str(err_msg) + "."
         if not settings.VERBOSITY_LEVEL >= 1 and settings.TIME_BASED_STATE == False or \
-           settings.VERBOSITY_LEVEL >= 1 and settings.EVAL_BASED_STATE == None:
+          settings.VERBOSITY_LEVEL >= 1 and settings.EVAL_BASED_STATE == None:
           print ""
         if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
-          print ""
-        print settings.print_critical_msg(err_msg)
-        continue_tests = checks.continue_tests(err)
+          print "" 
+        print settings.print_critical_msg(err)
+        continue_tests = checks.continue_tests(err_msg)
         if continue_tests == True:
           settings.IGNORE_ERR_MSG = True
         else:
@@ -522,14 +522,14 @@ def referer_injection(url, vuln_parameter, payload):
       if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
-        err_msg = str(err_msg) + "."
+        err = str(err_msg) + "."
         if not settings.VERBOSITY_LEVEL >= 1 and settings.TIME_BASED_STATE == False or \
-           settings.VERBOSITY_LEVEL >= 1 and settings.EVAL_BASED_STATE == None:
+          settings.VERBOSITY_LEVEL >= 1 and settings.EVAL_BASED_STATE == None:
           print ""
         if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
-          print ""
-        print settings.print_critical_msg(err_msg)
-        continue_tests = checks.continue_tests(err)
+          print "" 
+        print settings.print_critical_msg(err)
+        continue_tests = checks.continue_tests(err_msg)
         if continue_tests == True:
           settings.IGNORE_ERR_MSG = True
         else:
@@ -589,14 +589,14 @@ def custom_header_injection(url, vuln_parameter, payload):
       if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
-        err_msg = str(err_msg) + "."
+        err = str(err_msg) + "."
         if not settings.VERBOSITY_LEVEL >= 1 and settings.TIME_BASED_STATE == False or \
-           settings.VERBOSITY_LEVEL >= 1 and settings.EVAL_BASED_STATE == None:
+          settings.VERBOSITY_LEVEL >= 1 and settings.EVAL_BASED_STATE == None:
           print ""
         if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
-          print ""
-        print settings.print_critical_msg(err_msg)
-        continue_tests = checks.continue_tests(err)
+          print "" 
+        print settings.print_critical_msg(err)
+        continue_tests = checks.continue_tests(err_msg)
         if continue_tests == True:
           settings.IGNORE_ERR_MSG = True
         else:
@@ -619,14 +619,14 @@ def custom_header_injection(url, vuln_parameter, payload):
       if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
-        err_msg = str(err_msg) + "."
+        err = str(err_msg) + "."
         if not settings.VERBOSITY_LEVEL >= 1 and settings.TIME_BASED_STATE == False or \
-           settings.VERBOSITY_LEVEL >= 1 and settings.EVAL_BASED_STATE == None:
+          settings.VERBOSITY_LEVEL >= 1 and settings.EVAL_BASED_STATE == None:
           print ""
         if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
-          print ""
-        print settings.print_critical_msg(err_msg)
-        continue_tests = checks.continue_tests(err)
+          print "" 
+        print settings.print_critical_msg(err)
+        continue_tests = checks.continue_tests(err_msg)
         if continue_tests == True:
           settings.IGNORE_ERR_MSG = True
         else:
@@ -647,14 +647,14 @@ def custom_header_injection(url, vuln_parameter, payload):
       if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
-        err_msg = str(err_msg) + "."
+        err = str(err_msg) + "."
         if not settings.VERBOSITY_LEVEL >= 1 and settings.TIME_BASED_STATE == False or \
-           settings.VERBOSITY_LEVEL >= 1 and settings.EVAL_BASED_STATE == None:
+          settings.VERBOSITY_LEVEL >= 1 and settings.EVAL_BASED_STATE == None:
           print ""
         if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
-          print ""
-        print settings.print_critical_msg(err_msg)
-        continue_tests = checks.continue_tests(err)
+          print "" 
+        print settings.print_critical_msg(err)
+        continue_tests = checks.continue_tests(err_msg)
         if continue_tests == True:
           settings.IGNORE_ERR_MSG = True
         else:

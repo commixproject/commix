@@ -227,9 +227,9 @@ def dns_exfiltration_handler(url, http_request_method):
       if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
-        err_msg = str(err_msg) + "."
-        print "\n" + settings.print_critical_msg(err_msg)
-        continue_tests = checks.continue_tests(err)
+        err = str(err_msg) + "."
+        print "\n" + settings.print_critical_msg(err)
+        continue_tests = checks.continue_tests(err_msg)
         if continue_tests == True:
           settings.IGNORE_ERR_MSG = True
         else:
@@ -243,9 +243,9 @@ def dns_exfiltration_handler(url, http_request_method):
       if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
-        err_msg = str(err_msg) + "."
-        print "\n" + settings.print_critical_msg(err_msg)
-        continue_tests = checks.continue_tests(err)
+        err = str(err_msg) + "."
+        print "\n" + settings.print_critical_msg(err)
+        continue_tests = checks.continue_tests(err_msg)
         if continue_tests == True:
           settings.IGNORE_ERR_MSG = True
         else:
@@ -258,9 +258,9 @@ def dns_exfiltration_handler(url, http_request_method):
       if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
-        err_msg = str(err_msg) + "."
-        print "\n" + settings.print_critical_msg(err_msg)
-        continue_tests = checks.continue_tests(err)
+        err = str(err_msg) + "."
+        print "\n" + settings.print_critical_msg(err)
+        continue_tests = checks.continue_tests(err_msg)
         if continue_tests == True:
           settings.IGNORE_ERR_MSG = True
         else:
