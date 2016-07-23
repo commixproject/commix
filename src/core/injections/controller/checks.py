@@ -538,7 +538,16 @@ def whitespace_check(payload):
           menu.options.tamper = "space2plus"
         tamper_scripts()
     else:
-      settings.WHITESPACE[0] = "%20" 
+      count_tabs = payload.count("%09")
+      if count_tabs >= 1 and not "%20" in payload:
+        if not settings.TAMPER_SCRIPTS['space2tab']:
+          if menu.options.tamper:
+            menu.options.tamper = menu.options.tamper + ",space2tab"
+          else:
+            menu.options.tamper = "space2tab"
+          tamper_scripts()
+      else:  
+        settings.WHITESPACE[0] = "%20" 
 
 """
 Check for stored payloads and enable tamper scripts

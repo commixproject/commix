@@ -95,7 +95,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION = "1.2.6"
+VERSION = "1.2.7"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = VERSION[:3]
@@ -509,7 +509,8 @@ HTTP_HEADERS = [ "useragent", "referer" ]
 TAMPER_SCRIPTS = {
                   "space2ifs": False,
                   "base64encode": False,
-                  "space2plus": False
+                  "space2plus": False,
+                  "space2tab": False
                  }
 
 # HTTP Errors
