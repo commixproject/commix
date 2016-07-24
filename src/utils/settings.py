@@ -95,7 +95,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION = "1.2.8"
+VERSION = "1.2.9"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = VERSION[:3]
@@ -356,6 +356,9 @@ PARAMETER_DELIMITER = "&"
 
 # Web-page Charset
 CHARSET = ""
+
+# Page default charset
+DEFAULT_CHARSET = "utf-8"
 
 # Character Sets List (basic)
 CHARSET_LIST = [

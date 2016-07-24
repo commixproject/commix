@@ -251,7 +251,10 @@ def injection_results(response, TAG, cmd):
   false_result = False
   # Grab execution results
   html_data = response.read()
-  html_data = HTMLParser.HTMLParser().unescape(html_data) 
+  # cleanup string / unescape html to string
+  html_data = urllib2.unquote(html_data).decode(settings.DEFAULT_CHARSET)
+  html_data = HTMLParser.HTMLParser().unescape(html_data).encode(sys.getfilesystemencoding())
+
   for end_line in settings.END_LINE:
     if end_line in html_data:
       html_data = html_data.replace(end_line, " ")
