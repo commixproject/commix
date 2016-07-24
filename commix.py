@@ -134,34 +134,9 @@ def main():
         if "=" in settings.TEST_PARAMETER[i]:
           settings.TEST_PARAMETER[i] = settings.TEST_PARAMETER[i].split("=")[0]
     
-    # Check if ".git" exists!
-    if os.path.isdir("./.git"):
-      response = urllib2.urlopen('https://raw.githubusercontent.com/stasinopoulos/commix/master/src/utils/settings.py')
-      version_check = response.readlines()
-      for line in version_check:
-        line = line.rstrip()
-        if "VERSION = " in line:
-          update_version = line.replace("VERSION = ", "").replace("\"", "")
-          break      
-      if settings.VERSION < update_version:
-        warn_msg = "Current version seems to be out-of-date."
-        print settings.print_warning_msg(warn_msg)
-        while True:
-          question_msg = "Do you want to update to the latest version now? [Y/n/q] > "
-          sys.stdout.write(settings.print_question_msg(question_msg))
-          do_update = sys.stdin.readline().replace("\n","").lower()
-          if do_update in settings.CHOICE_YES:
-              update.updater()
-          elif do_update in settings.CHOICE_NO:
-            break
-          elif do_update in settings.CHOICE_QUIT:
-            sys.exit(0)
-          else:
-            if do_update == "":
-              do_update = "enter"
-            err_msg = "'" + do_update + "' is not a valid answer."  
-            print settings.print_error_msg(err_msg)
-            pass
+    # Check if ".git" exists and check for updated version!
+    if os.path.isdir("./.git") and settings.CHECK_FOR_UPDATES_ON_START:
+      update.check_for_update()
 
     # Check if defined character used for splitting parameter values.
     if menu.options.pdel:

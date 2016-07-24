@@ -95,7 +95,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION = "1.2.7"
+VERSION = "1.2.8"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = VERSION[:3]
@@ -522,5 +522,8 @@ INTERNAL_SERVER_ERROR = "500"
 
 # End line
 END_LINE = ["\r", "\n", "\r\n"]
+
+# Check for updates on start up.
+CHECK_FOR_UPDATES_ON_START = True
 
 #eof
