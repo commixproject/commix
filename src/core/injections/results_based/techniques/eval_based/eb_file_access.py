@@ -33,7 +33,7 @@ from src.core.injections.results_based.techniques.eval_based import eb_injector
 """
 Read a file from the target host.
 """
-def file_read(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename):
+def file_read(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename):
   file_to_read = menu.options.file_read
   # Execute command
   if settings.TARGET_OS == "win":
@@ -70,7 +70,7 @@ def file_read(separator, TAG, prefix, suffix, http_request_method, url, vuln_par
 """
 Write to a file on the target host.
 """
-def file_write(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename):
+def file_write(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename):
   file_to_write = menu.options.file_write
   if not os.path.exists(file_to_write):
     warn_msg = "It seems that the '" + file_to_write + "' file, does not exists."
@@ -153,7 +153,7 @@ def file_write(separator, TAG, prefix, suffix, http_request_method, url, vuln_pa
 """
 Upload a file on the target host.
 """
-def file_upload(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename):
+def file_upload(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename):
   if settings.TARGET_OS == "win":
     # Not yet implemented
     pass
@@ -205,18 +205,18 @@ def file_upload(separator, TAG, prefix, suffix, http_request_method, url, vuln_p
 """
 Check the defined options
 """
-def do_check(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename):
+def do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename):
 
   if menu.options.file_write:
-    file_write(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
+    file_write(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
     settings.FILE_ACCESS_DONE = True
 
   if menu.options.file_upload:
-    file_upload(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
+    file_upload(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
     settings.FILE_ACCESS_DONE = True
 
   if menu.options.file_read:
-    file_read(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
+    file_read(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
     settings.FILE_ACCESS_DONE = True 
 
 # eof

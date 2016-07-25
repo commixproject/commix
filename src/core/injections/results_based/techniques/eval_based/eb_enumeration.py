@@ -32,7 +32,7 @@ The "eval-based" code injection technique on classic OS command injection.
 """
 Powershell's version number enumeration (for Windows OS)
 """
-def powershell_version(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename): 
+def powershell_version(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename): 
   cmd = settings.PS_VERSION
   if alter_shell:
     cmd = cmd.replace("'","\\'")
@@ -56,7 +56,7 @@ def powershell_version(separator, TAG, prefix, suffix, http_request_method, url,
       # Output PowerShell's version number
       success_msg = "The PowerShell's version number is " 
       success_msg += ps_version + Style.RESET_ALL + Style.BRIGHT
-      sys.stdout.write(new_line + settings.print_success_msg(success_msg) + ".")
+      sys.stdout.write(settings.print_success_msg(success_msg) + ".\n")
       sys.stdout.flush()
       # Add infos to logs file. 
       output_file = open(filename, "a")
@@ -73,7 +73,7 @@ def powershell_version(separator, TAG, prefix, suffix, http_request_method, url,
 """
 Hostname enumeration
 """
-def hostname(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename):
+def hostname(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename):
   if settings.TARGET_OS == "win":
     settings.HOSTNAME = settings.WIN_HOSTNAME 
   cmd = settings.HOSTNAME
@@ -100,7 +100,7 @@ def hostname(separator, TAG, prefix, suffix, http_request_method, url, vuln_para
 """
 Retrieve system information
 """
-def system_information(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename):     
+def system_information(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename):     
   if settings.TARGET_OS == "win":
     settings.RECOGNISE_OS = settings.WIN_RECOGNISE_OS
   cmd = settings.RECOGNISE_OS        
@@ -142,7 +142,7 @@ def system_information(separator, TAG, prefix, suffix, http_request_method, url,
 """
 The current user enumeration
 """
-def current_user(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename):
+def current_user(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename):
   if settings.TARGET_OS == "win":
     settings.SYS_USERS = settings.WIN_SYS_USERS
     settings.SYS_USERS = settings.SYS_USERS + "-replace('\s+',' '))"
@@ -216,7 +216,7 @@ def current_user(separator, TAG, prefix, suffix, http_request_method, url, vuln_
 """
 System users enumeration
 """
-def system_users(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename): 
+def system_users(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename): 
   if settings.TARGET_OS == "win":
     settings.SYS_USERS = settings.WIN_SYS_USERS
     settings.SYS_USERS = settings.SYS_USERS + "-replace('\s+',' '))"
@@ -284,7 +284,7 @@ def system_users(separator, TAG, prefix, suffix, http_request_method, url, vuln_
             is_privileged_nh = ""
           if settings.VERBOSITY_LEVEL >= 1:
             print ""  
-          print " (" +str(count)+ ") '" + Style.BRIGHT +  sys_users_list[user] + Style.RESET_ALL + "'" + Style.BRIGHT + is_privileged + Style.RESET_ALL + "." 
+          print "  (" +str(count)+ ") '" + Style.BRIGHT +  sys_users_list[user] + Style.RESET_ALL + "'" + Style.BRIGHT + is_privileged + Style.RESET_ALL + "." 
           # Add infos to logs file.   
           output_file = open(filename, "a")
           output_file.write("      (" +str(count)+ ") " + sys_users_list[user] + is_privileged + ".\n" )
@@ -419,7 +419,7 @@ def system_users(separator, TAG, prefix, suffix, http_request_method, url, vuln_
 """
 System passwords enumeration
 """
-def system_passwords(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename):     
+def system_passwords(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename):     
   if settings.TARGET_OS == "win":
     # Not yet implemented!  
     pass 
@@ -487,7 +487,7 @@ def system_passwords(separator, TAG, prefix, suffix, http_request_method, url, v
 """
 Single os-shell execution
 """
-def single_os_cmd_exec(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename):
+def single_os_cmd_exec(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename):
   cmd =  menu.options.os_cmd
   response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
@@ -510,7 +510,7 @@ def single_os_cmd_exec(separator, TAG, prefix, suffix, http_request_method, url,
 """
 Check the defined options
 """
-def do_check(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename):
+def do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename):
   
   if not settings.VERBOSITY_LEVEL >= 1 and not settings.ENUMERATION_DONE:
     print ""
@@ -520,27 +520,27 @@ def do_check(separator, TAG, prefix, suffix, http_request_method, url, vuln_para
     checks.ps_check()
 
   if menu.options.ps_version and settings.TARGET_OS == "win" and settings.PS_ENABLED == None:
-    powershell_version(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
+    powershell_version(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
     settings.ENUMERATION_DONE = True
 
   if menu.options.hostname:
-    hostname(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
+    hostname(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
     settings.ENUMERATION_DONE = True
     
   if menu.options.current_user:
-    current_user(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
+    current_user(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
     settings.ENUMERATION_DONE = True
 
   if menu.options.sys_info:
-    system_information(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
+    system_information(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
     settings.ENUMERATION_DONE = True
 
   if menu.options.users:
-    system_users(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
+    system_users(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
     settings.ENUMERATION_DONE = True
 
   if menu.options.passwords:
-    system_passwords(separator, TAG, prefix, suffix, http_request_method, url, vuln_parameter, alter_shell, filename)
+    system_passwords(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
     settings.ENUMERATION_DONE = True
 
 # eof

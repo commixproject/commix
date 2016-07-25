@@ -1,4 +1,5 @@
 ## Version 1.2 (upcoming)
+* Revised: The dynamic code evaluation ("eval-based") technique has been shortly revised.
 * Added: New tamper script "space2tab.py" that replaces every space (" ") with plus ("%09").
 * Added: The ability for generating powershell attack vectors via TrustedSec's Magic Unicorn.
 * Added: The ability for checking if there is a new version available.

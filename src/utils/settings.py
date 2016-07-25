@@ -95,11 +95,11 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION = "1.2.9"
+VERSION = "1.2.10"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = VERSION[:3]
-YEAR    = "2014-2016"
+YEAR = "2014-2016"
 AUTHOR_TWITTER = "@ancst" 
 APPLICATION_TWITTER = "@commixproject" 
 
@@ -192,10 +192,10 @@ JUNK_COMBINATION = ["&&&", "|||", "|&&", "&|", "&;", "|;", "%7C;", "%26;", "%7C&
 EXECUTION_FUNCTIONS = ["exec", "system", "shell_exec", "passthru", "proc_open", "popen"]
 
 # The code injection prefixes.
-EVAL_PREFIXES = ["", "'", ")", "')", "\")", "\".", "'.", ");}", "');}", "\");}"]
+EVAL_PREFIXES = ["", ";", "'", ")", "')", "\")", "\".", "'.", ");}", "');}", "\");}"]
 
 # The code injection separators.
-EVAL_SEPARATORS = ["", ";", "%0a", "\\\\n"]
+EVAL_SEPARATORS = ["", "%0a", "\\\\n"]
 
 # The code injection suffixes.
 EVAL_SUFFIXES = ["", "\\\\", "//", "#", ".\"", ".'", ")}"]
