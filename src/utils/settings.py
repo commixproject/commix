@@ -95,7 +95,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION = "1.2.11"
+VERSION = "1.2.12"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = VERSION[:3]
@@ -183,7 +183,7 @@ PREFIXES = ["", " ", "'", "\"", "&", "%26", "|", "%7C", "%27", "%22"]
 SEPARATORS = [";", "%3B", "&", "%26", "&&", "%26%26", "|", "%7C", "||", "%7C%7C", "%0a"]
 
 # The command injection suffixes.
-SUFFIXES = ["", "'", "\"", "#", "//", "\\\\", "&", "%26", "|", "%7C", "%27", "%22", "%5C%5C", "%2F%2F"]
+SUFFIXES = ["", "'", "\"", "#", "//", "\\\\", "&&", "%26%26", "|", "%7C", "%27", "%22", "%5C%5C", "%2F%2F"]
 
 # Bad combination of prefix and separator
 JUNK_COMBINATION = ["&&&", "|||", "|&&", "&|", "&;", "|;", "%7C;", "%26;", "%7C&"]
