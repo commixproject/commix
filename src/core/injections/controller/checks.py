@@ -262,7 +262,7 @@ def check_CGI_scripts(url):
 Check if http / https.
 """
 def check_http_s(url):
-  if urlparse.urlparse(url).scheme:
+  if settings.PROXY_PROTOCOL in urlparse.urlparse(url).scheme:
     if menu.options.force_ssl and urlparse.urlparse(url).scheme != "https":
       url = re.sub("\Ahttp:", "https:", url, re.I)
       settings.PROXY_PROTOCOL = 'https'
@@ -271,7 +271,7 @@ def check_http_s(url):
       url = "https://" + url
       settings.PROXY_PROTOCOL = 'https'
     else:
-      url = "http://" + url
+      url = "http://" + url 
   return url
   
 """
