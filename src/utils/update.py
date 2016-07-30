@@ -101,21 +101,18 @@ def check_for_update():
       if "VERSION = " in line:
         update_version = line.replace("VERSION = ", "").replace("\"", "")
         break 
-        
     if float(settings.VERSION.replace(".","")) < float(update_version.replace(".","")):
       warn_msg = "Current version seems to be out-of-date."
       print settings.print_warning_msg(warn_msg)
       while True:
-        question_msg = "Do you want to update to the latest version now? [Y/n/q] > "
+        question_msg = "Do you want to update to the latest version now? [Y/n] > "
         sys.stdout.write(settings.print_question_msg(question_msg))
         do_update = sys.stdin.readline().replace("\n","").lower()
         if do_update in settings.CHOICE_YES:
             updater()
-            sys.exit(0)
+            os._exit(0)
         elif do_update in settings.CHOICE_NO:
           break
-        elif do_update in settings.CHOICE_QUIT:
-          sys.exit(0)
         else:
           if do_update == "":
             do_update = "enter"
