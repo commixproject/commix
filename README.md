@@ -26,14 +26,16 @@ Download commix by cloning the Git repository:
 Commix comes packaged on the **official repositories** of the following Linux distributions, so you can use the **package manager** to install it!
 
 - [ArchAssault](https://archassault.org/)
-- [BlackArch](http://blackarch.org/)
+- [BlackArch Linux](http://blackarch.org/)
 - [BackBox](https://backbox.org/)
 - [Kali Linux](https://www.kali.org/)
-- [Weakerthan](http://www.weaknetlabs.com/)
+- [Parrot Security OS](https://www.parrotsec.org/)
+- [Weakerthan Linux](http://www.weaknetlabs.com/)
 
 Commix also comes **as a plugin**, on the following penetration testing frameworks:
 
-- [The Penetration Testers Framework (PTF)](https://github.com/trustedsec/ptf)
+- [TrustedSec's Penetration Testers Framework (PTF)](https://github.com/trustedsec/ptf)
+- [OWASP Offensive Web Testing Framework (OWTF)](https://github.com/owtf/owtf)
 - [CTF-Tools](https://github.com/zardus/ctf-tools)
 - [PentestBox](https://tools.pentestbox.com/)
 - [PenBox](https://github.com/x3omdax/PenBox)
