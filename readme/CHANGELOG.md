@@ -1,4 +1,5 @@
 ## Version 1.2 (upcoming)
+* Fixed: License file minor inaccurancy issue has been fixed.
 * Revised: The Windows-based payloads for every supported technique, had been shortly revised.
 * Revised: The dynamic code evaluation ("eval-based") technique has been shortly revised.
 * Added: New tamper script "space2tab.py" that replaces every space (" ") with plus ("%09").
