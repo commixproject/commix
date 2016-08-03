@@ -95,10 +95,12 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION = "1.2.18"
+VERSION_NUM = "1.2.19"
 STABLE_VERSION = False
 if STABLE_VERSION:
-  VERSION = VERSION[:3]
+  VERSION = VERSION_NUM[:3]
+else:
+  VERSION = VERSION_NUM + "-dev"
 YEAR = "2014-2016"
 AUTHOR_TWITTER = "@ancst" 
 APPLICATION_TWITTER = "@commixproject" 

@@ -92,7 +92,6 @@ def updater():
 Check for new version of commix
 """
 def check_for_update():
-  
   try:
     response = urllib2.urlopen('https://raw.githubusercontent.com/stasinopoulos/commix/master/src/utils/settings.py')
     version_check = response.readlines()
@@ -101,7 +100,7 @@ def check_for_update():
       if "VERSION = " in line:
         update_version = line.replace("VERSION = ", "").replace("\"", "")
         break 
-    if float(settings.VERSION.replace(".","")) < float(update_version.replace(".","")):
+    if float(settings.VERSION_NUM.replace(".","")) < float(update_version.replace(".","")):
       warn_msg = "Current version seems to be out-of-date."
       print settings.print_warning_msg(warn_msg)
       while True:
@@ -119,8 +118,9 @@ def check_for_update():
           err_msg = "'" + do_update + "' is not a valid answer."  
           print settings.print_error_msg(err_msg)
           pass
+  except KeyboardInterrupt:
+    raise
   except:
-    print ""
     pass
 
 # eof
