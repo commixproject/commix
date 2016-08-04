@@ -1,4 +1,5 @@
 ## Version 1.2 (upcoming)
+* Added: The ability for setting custom (PHP / Python) working directory.
 * Fixed: License file minor inaccurancy issue has been fixed.
 * Revised: The Windows-based payloads for every supported technique, had been shortly revised.
 * Revised: The dynamic code evaluation ("eval-based") technique has been shortly revised.
