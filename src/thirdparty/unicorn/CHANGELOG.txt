@@ -1,4 +1,10 @@
 ~~~~~~~~~~~~~~~~
+version 2.3.4
+~~~~~~~~~~~~~~~~
+
+* added decoded base64 -encodedcommand for better av evasion
+
+~~~~~~~~~~~~~~~~
 version 2.3.3
 ~~~~~~~~~~~~~~~~
 
