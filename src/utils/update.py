@@ -97,8 +97,8 @@ def check_for_update():
     version_check = response.readlines()
     for line in version_check:
       line = line.rstrip()
-      if "VERSION = " in line:
-        update_version = line.replace("VERSION = ", "").replace("\"", "")
+      if "VERSION_NUM = " in line:
+        update_version = line.replace("VERSION_NUM = ", "").replace("\"", "")
         break 
     if float(settings.VERSION_NUM.replace(".","")) < float(update_version.replace(".","")):
       warn_msg = "Current version seems to be out-of-date."
