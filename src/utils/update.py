@@ -69,7 +69,8 @@ def updater():
           how_long = int(end - start)
           info_msg = "Finished in " + time.strftime('%H:%M:%S', time.gmtime(how_long)) + "."
           print settings.print_info_msg(info_msg)
-          sys.exit(0)
+          print ""
+          os._exit(0)
         else:
           print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
           err_msg = "The '.git' directory not found. Do it manually: " 
@@ -109,7 +110,6 @@ def check_for_update():
         do_update = sys.stdin.readline().replace("\n","").lower()
         if do_update in settings.CHOICE_YES:
             updater()
-            os._exit(0)
         elif do_update in settings.CHOICE_NO:
           break
         else:
