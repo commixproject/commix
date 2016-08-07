@@ -434,6 +434,29 @@ def main():
             if menu.options.is_admin or menu.options.is_root and not menu.options.current_user:
               menu.options.current_user = True
 
+            # Define Python working directory.
+            if settings.TARGET_OS == "win" and menu.options.alter_shell:
+              while True:
+                question_msg = "Do you want to use '" + settings.WIN_PYTHON_DIR 
+                question_msg += "' as Python working directory on the target host? [Y/n] > "
+                sys.stdout.write(settings.print_question_msg(question_msg))
+                python_dir = sys.stdin.readline().replace("\n","").lower()
+                if python_dir in settings.CHOICE_YES:
+                  break
+                elif python_dir in settings.CHOICE_NO:
+                  question_msg = "Please provide a custom working directory for Python (e.g. '" 
+                  question_msg += settings.WIN_PYTHON_DIR + "') > "
+                  sys.stdout.write(settings.print_question_msg(question_msg))
+                  settings.WIN_PYTHON_DIR = sys.stdin.readline().replace("\n","").lower()
+                  break
+                else:
+                  if python_dir == "":
+                    python_dir = "enter"
+                  err_msg = "'" + python_dir + "' is not a valid answer."  
+                  print settings.print_error_msg(err_msg)
+                  pass
+              settings.USER_DEFINED_PYTHON_DIR = True
+
             # Check for wrong flags.
             if settings.TARGET_OS == "win":
               if menu.options.is_root :
