@@ -531,8 +531,13 @@ def shellshock_handler(url, http_request_method, filename):
               percent = Fore.RED + "FAILED" + Style.RESET_ALL
             else:
               percent = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
+              no_result = False
           elif cve in response.info():
             percent = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
+            no_result = False
+          elif cve in response.read():
+            percent = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
+            no_result = False
           else:
             percent = str(float_percent )+ "%"
 
@@ -540,9 +545,11 @@ def shellshock_handler(url, http_request_method, filename):
           sys.stdout.write("\r" + settings.print_info_msg(info_msg))
           sys.stdout.flush()
 
+        if no_result == False:
           # Print the findings to log file.
           if export_injection_info == False:
             export_injection_info = logs.add_type_and_technique(export_injection_info, filename, injection_type, technique)
+          
           #if vp_flag == True:
           vuln_parameter = "HTTP Header"
           the_type = " " + vuln_parameter
@@ -551,8 +558,6 @@ def shellshock_handler(url, http_request_method, filename):
           check_header = check_header[1:]
           logs.update_payload(filename, counter, payload) 
 
-        if cve in response.info():
-          no_result = False
           success_msg = "The (" + check_header + ") '"
           success_msg += url + Style.RESET_ALL + Style.BRIGHT 
           success_msg += "' seems vulnerable via " + technique + "."
@@ -726,8 +731,11 @@ def shellshock_handler(url, http_request_method, filename):
                 print settings.print_error_msg(err_msg)
                 continue
               break
-      else:
-        continue
+        else:
+          continue
+          
+    if no_result:
+      print ""
 
   except urllib2.HTTPError, err_msg:
     if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
