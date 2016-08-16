@@ -567,7 +567,7 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
                             shell = cb_injector.injection_results(response, TAG, cmd)
                             if settings.VERBOSITY_LEVEL >= 1:
                               print ""
-                            err_msg = "The reverse TCP connection has been failed!"
+                            err_msg = "The reverse TCP connection has failed!"
                             print settings.print_critical_msg(err_msg)
                         else:
                           pass

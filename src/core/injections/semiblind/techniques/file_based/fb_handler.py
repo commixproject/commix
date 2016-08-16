@@ -623,7 +623,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                           shell = fb_injector.injection_results(url, OUTPUT_TEXTFILE, delay)
                           if settings.VERBOSITY_LEVEL >= 1:
                             print ""
-                          err_msg = "The reverse TCP connection has been failed!"
+                          err_msg = "The reverse TCP connection has failed!"
                           print settings.print_critical_msg(err_msg)
                       else:
                         pass

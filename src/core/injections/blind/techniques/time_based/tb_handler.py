@@ -516,7 +516,7 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                           # Export injection result
                           if settings.VERBOSITY_LEVEL >= 1:
                             print ""
-                          err_msg = "The reverse TCP connection has been failed!"
+                          err_msg = "The reverse TCP connection has failed!"
                           print settings.print_critical_msg(err_msg)
                       else:
                         pass
