@@ -1,4 +1,4 @@
-![Logo](http://i.imgur.com/xcNYrfv.png)
+[![Logo](http://i.imgur.com/xcNYrfv.png)](http://commixproject.com)
 
 [![Version 1.2](https://img.shields.io/badge/Version-1.2-green.svg)](https://github.com/stasinopoulos/commix/releases/tag/v1.2-20160812)
 [![Python 2.6-2.7](https://img.shields.io/badge/Python-2.6--2.7-yellow.svg)](http://www.python.org/download/)
@@ -82,4 +82,5 @@ For bug reports or enhancements, please open an issue **[here](https://github.co
 #### Presentations and White Papers
 
 For presentations and white papers published in conferences, check the '**[presentations](https://github.com/stasinopoulos/commix/wiki/Presentations)**' wiki page.
+
 
