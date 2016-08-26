@@ -701,6 +701,7 @@ def charset_detection(response):
         charset_detected = True
     # Check the identifyied charset
     if charset_detected :
+      settings.DEFAULT_CHARSET = charset
       if settings.VERBOSITY_LEVEL >= 1:
         print "[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]"
       settings.CHARSET = charset.lower()
