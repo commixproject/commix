@@ -1,6 +1,6 @@
 ## Version 1.3 (upcoming)
-Fixed: Minor improvement in Shellshock module for ignoring junk output on response.
-Fixed: Minor improvement in Shellshock module for finding RCE results on page's response.
+* Fixed: Minor improvement in Shellshock module for ignoring junk output on response.
+* Fixed: Minor improvement in Shellshock module for finding RCE results on page's response.
 
 ## Version 1.2 (2016-08-12)
 * Added: The ability for setting custom (PHP / Python) working directory.
