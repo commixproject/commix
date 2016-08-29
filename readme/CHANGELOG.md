@@ -1,4 +1,5 @@
 ## Version 1.3 (upcoming)
+* Added: New option "--skip-calc" that skips the mathematic calculation during the detection phase.
 * Fixed: Minor improvement in Shellshock module for ignoring junk output on response.
 * Fixed: Minor improvement in Shellshock module for finding RCE results on page's response.
 

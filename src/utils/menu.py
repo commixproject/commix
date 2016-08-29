@@ -404,6 +404,12 @@ detection.add_option("--level",
                     default=1,
                     help="Level of tests to perform (1-3, Default: " + str(settings.DEFAULT_INJECTION_LEVEL) + ").")
 
+detection.add_option("--skip-calc", 
+                action="store_true",
+                dest="skip_calc",
+                default=False,
+                help="Skip the mathematic calculation during the detection phase.")
+
 # Miscellaneous options
 misc = OptionGroup(parser, Style.BRIGHT + "Miscellaneous" + Style.RESET_ALL)
 

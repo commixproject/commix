@@ -124,7 +124,11 @@ def main():
     # Parse target / data from HTTP proxy logs (i.e Burp / WebScarab).
     if menu.options.logfile:
       parser.logfile_parser()
- 
+
+    # Ignore the mathematic calculation part (Detection phase).
+    if menu.options.skip_calc:
+      settings.SKIP_CALC = True
+
     # Check provided parameters for tests
     if menu.options.test_parameter:
       if menu.options.test_parameter.startswith("="):

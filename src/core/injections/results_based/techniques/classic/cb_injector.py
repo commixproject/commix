@@ -106,9 +106,21 @@ def injection_test_results(response, TAG, randvcalc):
   if response == False:
     return False
   else:
+
     # Check the execution results
     html_data = response.read()
-    shell = re.findall(r"" + TAG + str(randvcalc) + TAG + TAG + "", html_data)
+
+    # cleanup string / unescape html to string
+    html_data = urllib2.unquote(html_data).decode(settings.DEFAULT_CHARSET)
+    html_data = HTMLParser.HTMLParser().unescape(html_data).encode(sys.getfilesystemencoding())
+
+    # Replace non-ASCII characters with a single space
+    re.sub(r"[^\x00-\x7f]",r" ", html_data)
+
+    if settings.SKIP_CALC:
+      shell = re.findall(r"" + TAG + TAG + TAG, html_data)
+    else:
+      shell = re.findall(r"" + TAG + str(randvcalc) + TAG  + TAG, html_data)
     if len(shell) > 1:
       shell = shell[0]
     return shell
@@ -249,11 +261,16 @@ The command execution results.
 def injection_results(response, TAG, cmd):
 
   false_result = False
+
   # Grab execution results
   html_data = response.read()
+  
   # cleanup string / unescape html to string
   html_data = urllib2.unquote(html_data).decode(settings.DEFAULT_CHARSET)
   html_data = HTMLParser.HTMLParser().unescape(html_data).encode(sys.getfilesystemencoding())
+  
+  # Replace non-ASCII characters with a single space
+  re.sub(r"[^\x00-\x7f]",r" ", html_data)
 
   for end_line in settings.END_LINE:
     if end_line in html_data:

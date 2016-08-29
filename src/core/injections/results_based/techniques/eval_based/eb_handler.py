@@ -181,7 +181,7 @@ def eb_injection_handler(url, delay, filename, http_request_method):
                 response, vuln_parameter = eb_injector.injection_test(payload, http_request_method, url)
       
               # if need page reload
-              if menu.options.url_reload: 
+              if menu.options.url_reload and menu.options.data: 
                 time.sleep(delay)
                 response = urllib.urlopen(url)
                 
@@ -425,7 +425,7 @@ def eb_injection_handler(url, delay, filename, http_request_method):
                       response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
                             
                       # if need page reload
-                      if menu.options.url_reload:
+                      if menu.options.url_reload and menu.options.data:
                         time.sleep(delay)
                         response = urllib.urlopen(url)
                       if menu.options.ignore_session or\

@@ -146,7 +146,10 @@ def injection_test_results(response, TAG, randvcalc):
   else:
     html_data = response.read()
     html_data = re.sub("\n", " ", html_data)
-    shell = re.findall(r"" + TAG + " " + str(randvcalc) + " " + TAG + " " + TAG + " " , html_data)
+    if settings.SKIP_CALC:
+      shell = re.findall(r"" + TAG + " " + TAG + " " + TAG + " " , html_data)
+    else:
+      shell = re.findall(r"" + TAG + " " + str(randvcalc) + " " + TAG + " " + TAG + " " , html_data)
     return shell
 
 """

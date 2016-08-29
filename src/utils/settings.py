@@ -95,7 +95,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "1.3.5"
+VERSION_NUM = "1.3.6"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = VERSION_NUM[:3]
@@ -531,5 +531,8 @@ END_LINE = ["\r", "\n", "\r\n"]
 
 # Check for updates on start up.
 CHECK_FOR_UPDATES_ON_START = True
+
+# Skip the mathematic calculation (Detection Phase)
+SKIP_CALC = False
 
 #eof
