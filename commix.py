@@ -129,6 +129,8 @@ def main():
     if menu.options.skip_calc:
       settings.SKIP_CALC = True
 
+
+
     # Check provided parameters for tests
     if menu.options.test_parameter:
       if menu.options.test_parameter.startswith("="):

