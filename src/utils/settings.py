@@ -95,7 +95,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "1.3.8"
+VERSION_NUM = "1.3.9"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = VERSION_NUM[:3]
@@ -538,6 +538,7 @@ SKIP_CALC = False
 METASPLOIT_ERROR_MSG =  "You need to have Metasploit installed. "
 METASPLOIT_ERROR_MSG += "Please ensure Metasploit is installed in the right path."
 
+# Target URL reload
 URL_RELOAD = False
 
 #eof

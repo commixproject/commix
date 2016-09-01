@@ -110,8 +110,7 @@ def main():
       settings.VERBOSITY_LEVEL = menu.options.verbose
 
     # Check if defined "--delay" option.
-    if menu.options.delay:
-      if menu.options.delay > "0":
+    if menu.options.delay > "0":
         settings.DELAY = menu.options.delay
 
     # Define the level of tests to perform.
@@ -129,7 +128,9 @@ def main():
     if menu.options.skip_calc:
       settings.SKIP_CALC = True
 
-
+    # Target URL reload.
+    if menu.options.url_reload and menu.options.data:
+      settings.URL_RELOAD = True
 
     # Check provided parameters for tests
     if menu.options.test_parameter:

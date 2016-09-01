@@ -162,7 +162,7 @@ def cb_injection_handler(url, delay, filename, http_request_method):
                 # Check if target host is vulnerable.
                 response, vuln_parameter = cb_injector.injection_test(payload, http_request_method, url)
 
-              if menu.options.url_reload and menu.options.data:
+              if settings.URL_RELOAD:
                 time.sleep(delay)
                 response = urllib.urlopen(url)
 
@@ -404,10 +404,12 @@ def cb_injection_handler(url, delay, filename, http_request_method):
                     else:
                       # Command execution results.
                       response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
+                      
                       # if need page reload
-                      if menu.options.url_reload and menu.options.data:
+                      if settings.URL_RELOAD:
                         time.sleep(delay)
                         response = urllib.urlopen(url)
+
                       if menu.options.ignore_session or \
                          session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
                         # Evaluate injection results.
