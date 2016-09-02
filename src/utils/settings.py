@@ -2,9 +2,8 @@
 # encoding: UTF-8
 
 """
-This file is part of commix (@commixproject) tool.
+This file is part of commix project (http://commixproject.com).
 Copyright (c) 2014-2016 Anastasios Stasinopoulos (@ancst).
-https://github.com/stasinopoulos/commix
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -95,7 +94,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "1.3.9"
+VERSION_NUM = "1.3.10"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = VERSION_NUM[:3]
