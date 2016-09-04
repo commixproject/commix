@@ -449,13 +449,14 @@ def system_passwords(separator, payload, TAG, delay, prefix, suffix, whitespace,
         for line in sys_passes:
           count = count + 1
           try:
-            fields = line.split(":")
-            if fields[1] != "*" and fields[1] != "!" and fields[1] != "":
-              print "  (" +str(count)+ ") " + Style.BRIGHT + fields[0]+ Style.RESET_ALL + " : " + Style.BRIGHT + fields[1]+ Style.RESET_ALL
-              # Add infos to logs file.   
-              output_file = open(filename, "a")
-              output_file.write("      (" +str(count)+ ") " + fields[0] + " : " + fields[1])
-              output_file.close()
+            if ":" in line:
+              fields = line.split(":")
+              if not "*" in fields[1] and not "!" in fields[1] and fields[1] != "":
+                print "  (" +str(count)+ ") " + Style.BRIGHT + fields[0]+ Style.RESET_ALL + " : " + Style.BRIGHT + fields[1]+ Style.RESET_ALL
+                # Add infos to logs file.   
+                output_file = open(filename, "a")
+                output_file.write("      (" +str(count)+ ") " + fields[0] + " : " + fields[1])
+                output_file.close()
           # Check for appropriate '/etc/shadow' format.
           except IndexError:
             if count == 1 :

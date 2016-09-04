@@ -719,4 +719,12 @@ def charset_detection(response):
   if charset_detected == False and settings.VERBOSITY_LEVEL >= 1:
     print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
 
+# Perform target page reload (if it is required).
+def url_reload(url, delay):
+  if delay <= "5":
+    delay = 5
+    time.sleep(delay)
+  response = urllib.urlopen(url)
+  return response
+
 #eof

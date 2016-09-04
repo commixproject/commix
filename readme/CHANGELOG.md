@@ -1,4 +1,5 @@
 ## Version 1.3 (upcoming)
+* Fixed: Minor improvements for enumeration options (if "--url-reload" is used).
 * Added: The ability for generating and injecting native x86 shellcode (Powershell).
 * Added: New option "--skip-calc" that skips the mathematic calculation during the detection phase.
 * Fixed: Minor improvement in Shellshock module for ignoring junk output on response.
