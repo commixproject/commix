@@ -333,7 +333,7 @@ def enumeration(url, cve, check_header, filename):
                 print "  (" +str(count)+ ") " + Style.BRIGHT + fields[0]+ Style.RESET_ALL + " : " + Style.BRIGHT + fields[1]+ Style.RESET_ALL
                 # Add infos to logs file.   
                 output_file = open(filename, "a")
-                output_file.write("      (" +str(count)+ ") " + fields[0] + " : " + fields[1])
+                output_file.write("      (" +str(count)+ ") " + fields[0] + " : " + fields[1] + "\n")
                 output_file.close()
           # Check for appropriate (/etc/shadow) format
           except IndexError:
