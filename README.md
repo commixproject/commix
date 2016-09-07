@@ -47,17 +47,19 @@ To get a list of all options and switches use:
 
     python commix.py -h
 
-**Q**: Do you want to have a quick look of all available options and switches? 
+**Q**: Where can I check all the available options and switches? 
 
 **A**: Check the '**[usage](https://github.com/stasinopoulos/commix/wiki/Usage)**' wiki page.
 
 #### Usage Examples
 
-**Q**: So, do you want to get some ideas on how to use commix? 
+**Q**: Can I get some basic ideas on how to use commix? 
 
 **A**: Just go and check the '**[usage examples](https://github.com/stasinopoulos/commix/wiki/Usage-Examples)**' wiki page, where there are several test cases and attack scenarios.
 
 #### Upload Shells
+
+**Q**: How easily can I upload web-shells on a target host via commix? 
 
 **A**: Commix enables you to upload web-shells (e.g metasploit PHP meterpreter) easily on target host. For more, check the '**[upload shells](https://github.com/stasinopoulos/commix/wiki/Upload-shells)**' wiki page.
 
@@ -69,17 +71,21 @@ To get a list of all options and switches use:
 
 #### Command Injection Testbeds
 
-**Q**: Do you want to test or evaluate the exploitation abilities of commix? 
+**Q**: How can I test or evaluate the exploitation abilities of commix?
 
-**A**: Cool! Check the '**[command injection testbeds](https://github.com/stasinopoulos/commix/wiki/Command-Injection-Testbeds)**' wiki page which includes a collection of pwnable web applications and/or VMs (that includes web applications) vulnerable to command injection attacks.
+**A**: Check the '**[command injection testbeds](https://github.com/stasinopoulos/commix/wiki/Command-Injection-Testbeds)**' wiki page which includes a collection of pwnable web applications and/or VMs (that include web applications) vulnerable to command injection attacks.
 
 #### Exploitation Demos
 
-If you want to see a collection of demos, about the exploitation abilities of commix, take a look at the '**[exploitation demos](https://github.com/stasinopoulos/commix/wiki/Exploitation-Demos)**' wiki page.
+**Q**: Is there a place where I can check for demos of commix?
+
+**A**: If you want to see a collection of demos, about the exploitation abilities of commix, take a look at the '**[exploitation demos](https://github.com/stasinopoulos/commix/wiki/Exploitation-Demos)**' wiki page.
 
 #### Bugs and Enhancements
 
-For bug reports or enhancements, please open an issue **[here](https://github.com/stasinopoulos/commix/issues)**.
+**Q**: I found a bug / I have to suggest a new feature! What can I do?
+
+**A**: For bug reports or enhancements, please open an issue **[here](https://github.com/stasinopoulos/commix/issues)**.
 
 #### Supported Platforms
 
