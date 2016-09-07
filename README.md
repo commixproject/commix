@@ -47,23 +47,31 @@ To get a list of all options and switches use:
 
     python commix.py -h
 
-Do you want to have a quick look of all available options and switches? Check the '**[usage](https://github.com/stasinopoulos/commix/wiki/Usage)**' wiki page.
+**Q**: Do you want to have a quick look of all available options and switches? 
+
+**A**: Check the '**[usage](https://github.com/stasinopoulos/commix/wiki/Usage)**' wiki page.
 
 #### Usage Examples
 
-So, do you want to get some ideas on how to use commix? Just go and check the '**[usage examples](https://github.com/stasinopoulos/commix/wiki/Usage-Examples)**' wiki page, where there are several test cases and attack scenarios.
+**Q**: So, do you want to get some ideas on how to use commix? 
+
+**A**: Just go and check the '**[usage examples](https://github.com/stasinopoulos/commix/wiki/Usage-Examples)**' wiki page, where there are several test cases and attack scenarios.
 
 #### Upload Shells
 
-Commix enables you to upload web-shells (e.g metasploit PHP meterpreter) easily on target host. For more, check the '**[upload shells](https://github.com/stasinopoulos/commix/wiki/Upload-shells)**' wiki page.
+**A**: Commix enables you to upload web-shells (e.g metasploit PHP meterpreter) easily on target host. For more, check the '**[upload shells](https://github.com/stasinopoulos/commix/wiki/Upload-shells)**' wiki page.
 
 #### Modules Development
 
-Do you want to increase the capabilities of the commix tool and/or to adapt it to our needs? You can easily develop and import our own modules. For more, check the '**[module development](https://github.com/stasinopoulos/commix/wiki/Module-Development)**' wiki page.
+**Q**: Do you want to increase the capabilities of the commix tool and/or to adapt it to our needs?
+
+**A**: You can easily develop and import our own modules. For more, check the '**[module development](https://github.com/stasinopoulos/commix/wiki/Module-Development)**' wiki page.
 
 #### Command Injection Testbeds
 
-Do you want to test or evaluate the exploitation abilities of commix? Cool! Check the '**[command injection testbeds](https://github.com/stasinopoulos/commix/wiki/Command-Injection-Testbeds)**' wiki page which includes a collection of pwnable web applications and/or VMs (that includes web applications) vulnerable to command injection attacks.
+**Q**: Do you want to test or evaluate the exploitation abilities of commix? 
+
+**A**: Cool! Check the '**[command injection testbeds](https://github.com/stasinopoulos/commix/wiki/Command-Injection-Testbeds)**' wiki page which includes a collection of pwnable web applications and/or VMs (that includes web applications) vulnerable to command injection attacks.
 
 #### Exploitation Demos
 
