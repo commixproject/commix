@@ -1,4 +1,6 @@
 ## Version 1.3 (upcoming)
+* Fixed: Minor improvements in "reverse_tcp" option.
+* Added: Support for the metasploit "web_delivery" script.
 * Added: Support for generating Python/PHP meterpreter reverse TCP payloads via metasploit.
 * Fixed: Minor improvements for enumeration options (if "--url-reload" is used).
 * Added: The ability for generating and injecting native x86 shellcode (Powershell).

