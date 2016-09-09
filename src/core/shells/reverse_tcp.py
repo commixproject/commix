@@ -24,6 +24,14 @@ from src.utils import settings
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 """
+Success msg.
+"""
+def shell_success():
+  success_msg = "Everything is in place, cross your fingers and wait for a shell!\n"
+  sys.stdout.write(settings.print_success_msg(success_msg))
+  sys.stdout.flush()
+
+"""
 Error msg if the attack vector is available only for Windows targets.
 """
 def windows_only_attack_vector():
@@ -495,10 +503,12 @@ commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp""" + Style.RESET_ALL + """
     # Option 1 - Netcat shell
     if reverse_tcp_option == '1' :
       reverse_tcp_option = netcat_version()
+      shell_success()
       break
     # Option 2 - Other (Netcat-Without-Netcat) shells
     elif reverse_tcp_option == '2' :
       reverse_tcp_option = other_reverse_shells()
+      shell_success()
       break
     elif reverse_tcp_option.lower() == "reverse_tcp": 
       warn_msg = "You are already into the 'reverse_tcp' mode."
