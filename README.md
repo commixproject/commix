@@ -41,6 +41,12 @@ Commix also comes **as a plugin**, on the following penetration testing framewor
 - [PenBox](https://github.com/x3omdax/PenBox)
 - [Katoolin](https://github.com/LionSec/katoolin)
 
+#### Supported Platforms
+
+- Linux
+- Mac OS X
+- Windows (experimental)
+
 #### Usage
 
 To get a list of all options and switches use:
@@ -87,14 +93,9 @@ To get a list of all options and switches use:
 
 **A**: For bug reports or enhancements, please open an issue **[here](https://github.com/stasinopoulos/commix/issues)**.
 
-#### Supported Platforms
-
-- Linux
-- Mac OS X
-- Windows (experimental)
-
 #### Presentations and White Papers
+**Q**: Is there a place where I can find presentations and/or white papers regarding commix?
 
-For presentations and white papers published in conferences, check the '**[presentations](https://github.com/stasinopoulos/commix/wiki/Presentations)**' wiki page.
+**A**: Sure! For presentations and/or white papers published in conferences, check the '**[presentations](https://github.com/stasinopoulos/commix/wiki/Presentations)**' wiki page.
 
 
