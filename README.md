@@ -1,6 +1,6 @@
 [![Logo](https://camo.githubusercontent.com/13248473240d36c1b409e2287d65169bf87bc568/687474703a2f2f692e696d6775722e636f6d2f5272734377707a2e706e67)](http://commixproject.com)
 
-[![Version 1.2](https://img.shields.io/badge/Version-1.2-green.svg)](https://github.com/stasinopoulos/commix/releases/tag/v1.2-20160812)
+[![Version 1.3](https://img.shields.io/badge/Version-1.3-green.svg)](https://github.com/stasinopoulos/commix/releases/tag/v1.3-20160914)
 [![Python 2.6-2.7](https://img.shields.io/badge/Python-2.6--2.7-yellow.svg)](http://www.python.org/download/)
 [![GPLv3 License](https://img.shields.io/badge/License-GPLv3-red.svg)](https://github.com/stasinopoulos/commix/blob/master/readme/COPYING)
 [![Twitter](https://img.shields.io/badge/Twitter-@commixproject-blue.svg)](http://www.twitter.com/commixproject)

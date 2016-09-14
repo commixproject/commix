@@ -1,4 +1,4 @@
-## Version 1.3 (upcoming)
+## Version 1.3 (2016-09-14)
 * Fixed: Minor improvements in "reverse_tcp" option.
 * Added: Support for the metasploit "web_delivery" script.
 * Added: Support for generating Python/PHP meterpreter reverse TCP payloads via metasploit.
