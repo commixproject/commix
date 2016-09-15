@@ -67,7 +67,7 @@ def powershell_version(separator, TAG, prefix, suffix, whitespace, http_request_
       output_file.write("    " + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
       output_file.close()
   except ValueError:
-    warn_msg = "Heuristics have failed to identify PowerShell's version, "
+    warn_msg = "Heuristics have failed to identify the version of Powershell, "
     warn_msg += "which means that some payloads or injection techniques may be failed."
     print settings.print_warning_msg(warn_msg)
     settings.PS_ENABLED = False
@@ -103,6 +103,9 @@ def hostname(separator, TAG, prefix, suffix, whitespace, http_request_method, ur
     success_msg = "The hostname is " + shell + ".\n"
     output_file.write("    " + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
     output_file.close()
+  else:
+    warn_msg = "Heuristics have failed to identify the hostname."
+    print settings.print_warning_msg(warn_msg)
 
 """
 Retrieve system information
@@ -154,7 +157,10 @@ def system_information(separator, TAG, prefix, suffix, whitespace, http_request_
       success_msg = "The target operating system is " + target_os
       success_msg += " and the hardware platform is " + target_arch + ".\n"
       output_file.write("    " + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
-    output_file.close()
+      output_file.close()
+  else:
+    warn_msg = "Heuristics have failed to retrieve the system information."
+    print settings.print_warning_msg(warn_msg)
 
 """
 The current user enumeration
@@ -229,6 +235,9 @@ def current_user(separator, TAG, prefix, suffix, whitespace, http_request_method
       success_msg = "The current user is " + cu_account + "\n"
       output_file.write("    " + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
       output_file.close()
+  else:
+    warn_msg = "Heuristics have failed to identify the current user."
+    print settings.print_warning_msg(warn_msg)
 
 """
 System users enumeration

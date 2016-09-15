@@ -1,3 +1,6 @@
+## Version 1.4 (upcoming)
+* Fixed: Minor improvements in enumeration options (added failure messages).
+
 ## Version 1.3 (2016-09-14)
 * Fixed: Minor improvements in "reverse_tcp" option.
 * Added: Support for the metasploit "web_delivery" script.
