@@ -588,7 +588,9 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                     # if settings.VERBOSITY_LEVEL >= 1:
                     #   print ""
                     if cmd.lower() in settings.SHELL_OPTIONS:
-                      shell_options.check_option(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, technique, go_back, no_result)
+                      go_back, go_back_again = shell_options.check_option(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, technique, go_back, no_result, delay, go_back_again)
+                      if go_back:
+                        break
                     else:
                       response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
                       if menu.options.ignore_session or \

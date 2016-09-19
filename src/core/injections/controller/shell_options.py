@@ -31,7 +31,7 @@ from src.core.injections.results_based.techniques.classic import cb_injector
 """
 Check commix shell options
 """
-def check_option(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, technique, go_back, no_result):
+def check_option(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, technique, go_back, no_result, delay, go_back_again):
   os_shell_option = checks.check_os_shell_options(cmd.lower(), technique, go_back, no_result) 
   if os_shell_option == False:
     if no_result == True:
@@ -42,6 +42,10 @@ def check_option(separator, TAG, cmd, prefix, suffix, whitespace, http_request_m
   elif os_shell_option == "quit":                    
     sys.exit(0)
 
+  elif os_shell_option == "back":
+    go_back = True
+    return go_back, go_back_again
+
   if os_shell_option == "os_shell": 
     warn_msg = "You are already into the 'os_shell' mode."
     print settings.print_warning_msg(warn_msg)+ "\n"
@@ -51,7 +55,7 @@ def check_option(separator, TAG, cmd, prefix, suffix, whitespace, http_request_m
     # Set up LHOST / LPORT for The reverse TCP connection.
     reverse_tcp.configure_reverse_tcp()
     if settings.REVERSE_TCP == False:
-      return
+      return go_back, go_back_again
     while True:
       if settings.LHOST and settings.LPORT in settings.SHELL_OPTIONS:
         result = checks.check_reverse_tcp_options(settings.LHOST)
@@ -60,11 +64,12 @@ def check_option(separator, TAG, cmd, prefix, suffix, whitespace, http_request_m
         result = checks.check_reverse_tcp_options(cmd)
       if result != None:
         if result == 0:
-          return False
+          go_back_again = False
         elif result == 1 or result == 2:
           go_back_again = True
           settings.REVERSE_TCP = False
-          return
+        return go_back, go_back_again
+
       # Command execution results.
       whitespace = settings.WHITESPACE[0]
       response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
@@ -76,4 +81,4 @@ def check_option(separator, TAG, cmd, prefix, suffix, whitespace, http_request_m
       err_msg = "The reverse TCP connection has failed!"
       print settings.print_critical_msg(err_msg)
   else:
-    pass
+    return go_back, go_back_again

@@ -360,7 +360,9 @@ def cb_injection_handler(url, delay, filename, http_request_method):
                     cmd = checks.escaped_cmd(cmd)
 
                     if cmd.lower() in settings.SHELL_OPTIONS:
-                      shell_options.check_option(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, technique, go_back, no_result)
+                      go_back, go_back_again = shell_options.check_option(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, technique, go_back, no_result, delay, go_back_again)
+                      if go_back:
+                        break
                     else:
                       # Command execution results.
                       response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
