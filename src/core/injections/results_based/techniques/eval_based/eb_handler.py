@@ -30,11 +30,14 @@ from src.utils import session_handler
 
 from src.thirdparty.colorama import Fore, Back, Style, init
 
-from src.core.requests import headers
 from src.core.shells import reverse_tcp
+
+from src.core.requests import headers
 from src.core.requests import requests
 from src.core.requests import parameters
+
 from src.core.injections.controller import checks
+from src.core.injections.controller import shell_options
 
 from src.core.injections.results_based.techniques.eval_based import eb_injector
 from src.core.injections.results_based.techniques.eval_based import eb_payloads
