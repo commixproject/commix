@@ -50,7 +50,8 @@ def check_option(separator, TAG, cmd, prefix, suffix, whitespace, http_request_m
   if os_shell_option == "os_shell": 
     warn_msg = "You are already into the 'os_shell' mode."
     print settings.print_warning_msg(warn_msg)+ "\n"
-
+    return go_back, go_back_again
+    
   elif os_shell_option == "reverse_tcp":
     settings.REVERSE_TCP = True
     # Set up LHOST / LPORT for The reverse TCP connection.
@@ -77,8 +78,8 @@ def check_option(separator, TAG, cmd, prefix, suffix, whitespace, http_request_m
         # Evaluate injection results.
         shell = eb_injector.injection_results(response, TAG, cmd)
       else:
-        # Command execution results.
         whitespace = settings.WHITESPACE[0]
+        # Command execution results.
         response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
         # Evaluate injection results.
         shell = cb_injector.injection_results(response, TAG, cmd)
