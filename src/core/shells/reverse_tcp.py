@@ -168,7 +168,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp_netcat""" + Style.RESET_AL
       print settings.print_warning_msg(warn_msg)
       continue
     elif nc_version.lower() == "?": 
-      menu.shell_options()
+      menu.os_shell_options()
       continue    
     elif nc_version.lower() in settings.SHELL_OPTIONS:
       return nc_version
@@ -515,7 +515,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp""" + Style.RESET_ALL + """
       print settings.print_warning_msg(warn_msg)
       continue
     elif reverse_tcp_option.lower() == "?": 
-      menu.shell_options()
+      menu.os_shell_options()
       continue
     elif reverse_tcp_option.lower() == "quit": 
       sys.exit(0)
@@ -545,7 +545,7 @@ def configure_reverse_tcp():
       print settings.print_warning_msg(warn_msg)+ "\n"
       continue
     elif option.lower() == "?": 
-      menu.shell_options()
+      menu.reverse_tcp_options()
       continue
     elif option.lower() == "quit": 
       sys.exit(0)

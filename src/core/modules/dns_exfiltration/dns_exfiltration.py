@@ -149,7 +149,7 @@ def input_cmd(dns_server, http_request_method, url, vuln_parameter, technique):
               print ""             
               os._exit(0)
             elif cmd.lower() == "?": 
-              menu.shell_options()
+              menu.os_shell_options()
             elif cmd.lower() == "os_shell": 
               warn_msg = "You are already into the 'os_shell' mode."
               print settings.print_warning_msg(warn_msg)+ "\n"
