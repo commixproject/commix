@@ -1,4 +1,5 @@
 ## Version 1.4 (upcoming)
+* Fixed: Minor improvements in tab completion.
 * Fixed: Minor improvement in the function that checks for updates on start up.
 * Fixed: Minor improvements in enumeration options (added failure messages).
 

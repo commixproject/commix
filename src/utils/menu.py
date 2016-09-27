@@ -481,8 +481,8 @@ def reverse_tcp_options():
 The tab compliter (shell options).
 """
 def tab_completer(text, state):
-    set_options = [option for option in settings.SET_OPTIONS if option.startswith(text)]
-    shell_options = [option for option in settings.SHELL_OPTIONS if option.startswith(text)]
+    set_options = [option.upper() for option in settings.SET_OPTIONS if option.startswith(text.upper())]
+    shell_options = [option for option in settings.SHELL_OPTIONS if option.startswith(text.lower())]
     available_options = shell_options + set_options
     try:
       return available_options[state]
