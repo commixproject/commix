@@ -48,8 +48,8 @@ def check_option(separator, TAG, cmd, prefix, suffix, whitespace, http_request_m
     return go_back, go_back_again
 
   if os_shell_option == "os_shell": 
-    warn_msg = "You are already into the 'os_shell' mode."
-    print settings.print_warning_msg(warn_msg)+ "\n"
+    warn_msg = "You are already into the '" + os_shell_option + "' mode."
+    print settings.print_warning_msg(warn_msg)
     return go_back, go_back_again
     
   elif os_shell_option == "reverse_tcp":

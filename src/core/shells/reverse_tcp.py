@@ -164,7 +164,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp_netcat""" + Style.RESET_AL
       nc_alternative = NETCAT_ALTERNATIVES[2]
       break
     elif nc_version.lower() == "reverse_tcp": 
-      warn_msg = "You are already into the 'reverse_tcp' mode."
+      warn_msg = "You are already into the '" + nc_version.lower() + "' mode."
       print settings.print_warning_msg(warn_msg)
       continue
     elif nc_version.lower() == "?": 
@@ -469,7 +469,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """web_delivery""" + Style.RESET_ALL + ""
       break
 
     elif other_shell.lower() == "reverse_tcp":
-      warn_msg = "You are already into the 'reverse_tcp' mode."
+      warn_msg = "You are already into the '" + other_shell.lower() + "' mode."
       print settings.print_warning_msg(warn_msg)
       continue
     elif other_shell.lower() in settings.SHELL_OPTIONS:
@@ -511,7 +511,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp""" + Style.RESET_ALL + """
       shell_success()
       break
     elif reverse_tcp_option.lower() == "reverse_tcp": 
-      warn_msg = "You are already into the 'reverse_tcp' mode."
+      warn_msg = "You are already into the '" + reverse_tcp_option.lower() + "' mode."
       print settings.print_warning_msg(warn_msg)
       continue
     elif reverse_tcp_option.lower() == "?": 
@@ -541,8 +541,8 @@ def configure_reverse_tcp():
   while True:
     option = raw_input("""commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp""" + Style.RESET_ALL + """) > """)
     if option.lower() == "reverse_tcp": 
-      warn_msg = "You are already into the 'reverse_tcp' mode."
-      print settings.print_warning_msg(warn_msg)+ "\n"
+      warn_msg = "You are already into the '" + option.lower() + "' mode."
+      print settings.print_warning_msg(warn_msg)
       continue
     elif option.lower() == "?": 
       menu.reverse_tcp_options()

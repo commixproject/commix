@@ -676,7 +676,7 @@ def shellshock_handler(url, http_request_method, filename):
                         go_back = True
                         break
                       elif os_shell_option == "os_shell": 
-                          warn_msg = "You are already into an 'os_shell' mode."
+                          warn_msg = "You are already into the '" + os_shell_option + "' mode."
                           print settings.print_warning_msg(warn_msg)+ "\n"
                       elif os_shell_option == "reverse_tcp":
                         # Set up LHOST / LPORT for The reverse TCP connection.

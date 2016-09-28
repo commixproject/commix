@@ -151,7 +151,7 @@ def input_cmd(dns_server, http_request_method, url, vuln_parameter, technique):
             elif cmd.lower() == "?": 
               menu.os_shell_options()
             elif cmd.lower() == "os_shell": 
-              warn_msg = "You are already into the 'os_shell' mode."
+              warn_msg = "You are already into the '" + cmd.lower() + "' mode."
               print settings.print_warning_msg(warn_msg)+ "\n"
             elif cmd.lower() == "reverse_tcp":
               warn_msg = "This option is not supported by this module."
