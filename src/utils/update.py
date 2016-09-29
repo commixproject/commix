@@ -101,9 +101,9 @@ def check_for_update():
         update_version = line.replace("VERSION_NUM = ", "").replace("\"", "")
         break 
 
-    if (settings.VERSION_NUM.replace(".","")[:2] < update_version.replace(".","")[:2]) or \
-       ((settings.VERSION_NUM.replace(".","")[:2] == update_version.replace(".","")[:2]) and \
-         settings.VERSION_NUM.replace(".","")[2:] < update_version.replace(".","")[2:]):
+    if (int(settings.VERSION_NUM.replace(".","")[:2]) < int(update_version.replace(".","")[:2])) or \
+       ((int(settings.VERSION_NUM.replace(".","")[:2]) == int(update_version.replace(".","")[:2])) and \
+         int(settings.VERSION_NUM.replace(".","")[2:]) < int(update_version.replace(".","")[2:])):
 
       warn_msg = "Current version seems to be out-of-date."
       print settings.print_warning_msg(warn_msg)
