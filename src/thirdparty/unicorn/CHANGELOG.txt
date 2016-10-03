@@ -1,4 +1,10 @@
 ~~~~~~~~~~~~~~~~
+version 2.3.5
+~~~~~~~~~~~~~~~~
+
+* added better evasion on encodedcommand
+
+~~~~~~~~~~~~~~~~
 version 2.3.4
 ~~~~~~~~~~~~~~~~
 
