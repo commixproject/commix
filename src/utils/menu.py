@@ -41,7 +41,7 @@ Copyright (c) """ + settings.YEAR + """ """ + settings.AUTHOR + Style.RESET_ALL 
 
 _ = os.path.normpath(sys.argv[0])
 
-usage = "python %prog [options]"
+usage = "python %prog [option(s)]"
 
 parser = OptionParser(usage=usage)
 
@@ -53,7 +53,7 @@ general.add_option("-v",
                 action="store",
                 type="int",
                 dest="verbose",
-                help="Verbosity level: 0-1 (default 0)")
+                help="Verbosity level (0-1, Default: 0).")
 
 general.add_option("--install",
                 action="store_true",
@@ -110,6 +110,12 @@ target.add_option("--url-reload",
 target.add_option("-l",
                 dest="logfile",
                 help="Parse target and data from HTTP proxy log file.")
+
+
+target.add_option("--crawl", 
+                dest="crawldepth",
+                type="int",
+                help="Crawl the website starting from the target URL (1-2, Default: " + str(settings.DEFAULT_CRAWLDEPTH_LEVEL) + ").")
 
 # Request options
 request = OptionGroup(parser,  Style.BRIGHT + "Request" + Style.RESET_ALL, 

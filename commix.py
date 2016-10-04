@@ -42,6 +42,7 @@ from src.utils import logs
 from src.utils import update
 from src.utils import version
 from src.utils import install
+from src.utils import crawler
 from src.utils import settings
 from src.utils import session_handler
 from src.utils import simple_http_server
@@ -210,6 +211,11 @@ def main():
       
       # Check if http / https
       url = checks.check_http_s(url)
+
+      # Load the crawler
+      if menu.options.crawldepth > 0:
+        menu.options.DEFAULT_CRAWLDEPTH_LEVEL = menu.options.crawldepth
+        url = crawler.crawler(url)
 
       if menu.options.output_dir:
         output_dir = menu.options.output_dir
