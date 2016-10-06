@@ -503,13 +503,19 @@ commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp""" + Style.RESET_ALL + """
     # Option 1 - Netcat shell
     if reverse_tcp_option == '1' :
       reverse_tcp_option = netcat_version()
-      shell_success()
-      break
+      if reverse_tcp_option.lower() != "back":
+        shell_success()
+        break
+      else:
+        pass  
     # Option 2 - Other (Netcat-Without-Netcat) shells
     elif reverse_tcp_option == '2' :
       reverse_tcp_option = other_reverse_shells()
-      shell_success()
-      break
+      if reverse_tcp_option.lower() != "back":
+        shell_success()
+        break
+      else:
+        pass 
     elif reverse_tcp_option.lower() == "reverse_tcp": 
       warn_msg = "You are already into the '" + reverse_tcp_option.lower() + "' mode."
       print settings.print_warning_msg(warn_msg)
