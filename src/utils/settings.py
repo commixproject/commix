@@ -94,7 +94,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "1.4.15"
+VERSION_NUM = "1.4.16"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"
@@ -338,13 +338,15 @@ SHELL_OPTIONS = [
         'back',
         'os_shell',
         'reverse_tcp',
+        'bind_tcp',
         'set',
 ]
 
 # Accepted reverse tcp shell menu options
 SET_OPTIONS = [
         'LHOST',
-        'LPORT'
+        'RHOST',
+        'LPORT',
 ]
 
 # Cookie delimiter
@@ -420,6 +422,7 @@ UNSUPPORTED_TARGET_APPLICATION = [
 ]
 
 REVERSE_TCP = False
+BIND_TCP = False
 
 # Injection logs report
 SHOW_LOGS_MSG = False
@@ -476,10 +479,12 @@ PS_ENABLED = None
 # ANSI colors removal
 ANSI_COLOR_REMOVAL = r'\x1b[^m]*m'
 
-# Default LHOST / LPORT setup, 
+# Default LHOST / LPORT / RHOST setup, 
 # for the reverse TCP connection
 LHOST = ""
 LPORT = ""
+# for the bind TCP connection
+RHOST = ""
 
 # Maybe a WAF/IPS/IDS protection.
 WAF_ENABLED = False

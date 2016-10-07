@@ -83,6 +83,21 @@ def check_reverse_tcp_options(reverse_tcp_option):
     return 1
   elif reverse_tcp_option == "os_shell": 
     return 2
+  elif reverse_tcp_option == "bind_tcp": 
+    return 3
+
+"""
+Check 'bind_tcp' options
+"""
+def check_bind_tcp_options(bind_tcp_option):
+  if bind_tcp_option == False:
+    return 0
+  elif bind_tcp_option == "back":
+    return 1
+  elif bind_tcp_option == "os_shell": 
+    return 2
+  elif bind_tcp_option == "reverse_tcp": 
+    return 3
 
 """
 Ignore error messages and continue the tests.

