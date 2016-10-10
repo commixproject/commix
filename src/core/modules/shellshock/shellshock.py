@@ -651,25 +651,28 @@ def shellshock_handler(url, http_request_method, filename):
         request = urllib2.Request(url, None, header)
         response = urllib2.urlopen(request)
 
-        if not settings.VERBOSITY_LEVEL >= 1:
-          percent = ((i*100)/total)
-          float_percent = "{0:.1f}".format(round(((i*100)/(total*1.0)),2))
-          
-          if str(float_percent) == "100.0":
-            if no_result == True:
-              percent = Fore.RED + "FAILED" + Style.RESET_ALL
-            else:
-              percent = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
-              no_result = False
-          elif cve in response.info():
-            percent = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
-            no_result = False
-          elif cve in response.read():
-            percent = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
-            no_result = False
+        percent = ((i*100)/total)
+        float_percent = "{0:.1f}".format(round(((i*100)/(total*1.0)),2))
+        
+        if str(float_percent) == "100.0":
+          if no_result == True:
+            percent = Fore.RED + "FAILED" + Style.RESET_ALL
           else:
-            percent = str(float_percent )+ "%"
+            percent = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
+            no_result = False
 
+        elif len(response.info()) > 0 and cve in response.info():
+          percent = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
+          no_result = False
+
+        elif len(response.read()) > 0 and cve in response.read():
+          percent = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
+          no_result = False
+
+        else:
+          percent = str(float_percent )+ "%"
+
+        if not settings.VERBOSITY_LEVEL >= 1:
           info_msg = "Testing the " + technique + "... " +  "[ " + percent + " ]"
           sys.stdout.write("\r" + settings.print_info_msg(info_msg))
           sys.stdout.flush()
