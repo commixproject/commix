@@ -1,4 +1,5 @@
 ## Version 1.4 (upcoming)
+* Revised: The payload for Ruby reverse-shell has been shortly revised.
 * Added: Support for bind TCP shell (via "bind_tcp" option).
 * Added: New option "--crawl" (1,2) for crawling of a given website, starting from the target url.
 * Updated: The Unicorn tool has been updated to version 2.3.5.
