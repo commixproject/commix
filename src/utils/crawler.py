@@ -25,8 +25,10 @@ from src.core.requests import headers
 from src.thirdparty.colorama import Fore, Back, Style, init
 from src.thirdparty.beautifulsoup.beautifulsoup import BeautifulSoup
 
-def crawling(url):
-
+"""
+Do a request to target URL.
+"""
+def request(url):
   # Check if defined POST data
   if menu.options.data:
     request = urllib2.Request(url, menu.options.data)
@@ -34,9 +36,31 @@ def crawling(url):
     request = urllib2.Request(url)
   headers.do_check(request) 
   response = urllib2.urlopen(request)
-  html_data = response.read()
-  soup = BeautifulSoup(html_data)
+  soup = BeautifulSoup(response)
+  return soup
 
+"""
+Check for URLs in sitemap.xml.
+"""
+def sitemap(url):
+  if not url.endswith(".xml"):
+    url = urlparse.urljoin(url, "/sitemap.xml")
+  try:
+    soup = request(url)
+    href_list = []
+    for match in soup.findAll("loc"):
+        href_list.append(match.text)
+    return href_list  
+  except:
+    warn_msg = "The 'sitemap.xml' not found."
+    print settings.print_warning_msg(warn_msg) 
+    return False 
+
+"""
+Grab the crawled hrefs.
+"""
+def crawling(url):
+  soup = request(url)
   href_list = []
   for tag in soup.findAll('a', href=True):
     tag['href'] = urlparse.urljoin(url, tag['href'])
@@ -45,6 +69,9 @@ def crawling(url):
       href_list.append(tag['href']) 
   return href_list    
  
+"""
+The crawing process.
+"""
 def do_process(url):
   crawled_href = crawling(url)
   if menu.options.DEFAULT_CRAWLDEPTH_LEVEL == 1:
@@ -54,14 +81,68 @@ def do_process(url):
       crawled_href = crawling(url)
       return crawled_href
 
+"""
+The main crawler.
+"""
 def crawler(url):
 
   info_msg = "Starting crawler and searching for "
   info_msg += "links with depth " + str(menu.options.DEFAULT_CRAWLDEPTH_LEVEL) + "." 
   print settings.print_info_msg(info_msg)
 
-  output_href = do_process(url)
-  info_msg = "Checking for usable links with GET parameters... "
+  while True:
+    question_msg = "Do you want to check target for "
+    question_msg += "the existence of 'sitemap.xml'? [Y/n/q] > "
+    sys.stdout.write(settings.print_question_msg(question_msg))
+    sitemap_check = sys.stdin.readline().replace("\n","").lower()
+    if sitemap_check in settings.CHOICE_YES:
+      sitemap_check = True
+      break
+    elif sitemap_check in settings.CHOICE_NO:
+      sitemap_check = False
+      break
+    elif sitemap_check in settings.CHOICE_QUIT:
+      sys.exit(0)
+    else:
+      if sitemap_check == "":
+        sitemap_check = "enter"
+      err_msg = "'" + sitemap_check + "' is not a valid answer."  
+      print settings.print_error_msg(err_msg)
+      pass
+
+  if sitemap_check:
+    output_href = sitemap(url)
+    sitemap_check = output_href
+    for recursion in output_href:
+      if recursion.endswith(".xml") and "sitemap" in recursion.lower():
+        while True:
+          warn_msg = "A sitemap recursion was detected " + "'" + recursion + "'."
+          print settings.print_warning_msg(warn_msg) 
+          question_msg = "Do you want to follow the detected recursion? [Y/n/q] > "
+          sys.stdout.write(settings.print_question_msg(question_msg))
+          sitemap_check = sys.stdin.readline().replace("\n","").lower()
+          if sitemap_check in settings.CHOICE_YES:
+            output_href = sitemap(recursion)
+            sitemap_check = output_href
+            break
+          elif sitemap_check in settings.CHOICE_NO:
+            break
+          elif sitemap_check in settings.CHOICE_QUIT:
+            sys.exit(0)
+          else:
+            if sitemap_check == "":
+              sitemap_check = "enter"
+            err_msg = "'" + sitemap_check + "' is not a valid answer."  
+            print settings.print_error_msg(err_msg)
+            pass
+
+  if not sitemap_check:
+    output_href = do_process(url)
+
+  info_msg = "Checking "
+  if sitemap_check:
+    info_msg += "targets's sitemap.xml "
+  info_msg += "for usable links with GET parameters... "
   sys.stdout.write(settings.print_info_msg(info_msg))
   sys.stdout.flush()
 
@@ -69,7 +150,7 @@ def crawler(url):
   valid_url_found = False
   for check_url in output_href:
     # Check for usable URL with GET parameters
-    if re.search(r"(.*?)\?(.+)", check_url):
+    if re.search(settings.GET_PARAMETERS_REGEX, check_url):
       valid_url_found = True
       if succeed_banner:
         print "[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]"

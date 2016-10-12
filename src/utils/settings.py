@@ -94,7 +94,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "1.4.18"
+VERSION_NUM = "1.4.19"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"
@@ -443,6 +443,9 @@ JSON_RECOGNITION_REGEX = r'(?s)\A(\s*\[)*\s*\{.*"[^"]+"\s*:\s*("[^"]+"|\d+).*\}\
 
 # B64 format recognition
 BASE64_RECOGNITION_REGEX = r'^[A-Za-z0-9+/]+[=]{0,2}$'
+
+# GET parameters recognition
+GET_PARAMETERS_REGEX = r"(.*?)\?(.+)"
 
 # TFB Decimal
 TFB_DECIMAL = False
