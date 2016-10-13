@@ -65,9 +65,8 @@ def check_os_shell_options(cmd, technique, go_back, no_result):
     if cmd == "?":
       menu.os_shell_options()
     elif cmd == "back":
-      go_back = True
       if next_attack_vector(technique, go_back) == True:
-        return "back"
+        return True
       else:
         return False
     else:
