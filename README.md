@@ -96,6 +96,9 @@ To get a list of all options and switches use:
 #### Presentations and White Papers
 **Q**: Is there a place where I can find presentations and/or white papers regarding commix?
 
-**A**: Sure! For presentations and/or white papers published in conferences, check the '**[presentations](https://github.com/stasinopoulos/commix/wiki/Presentations)**' wiki page.
+**A**: For presentations and/or white papers published in conferences, check the '**[presentations](https://github.com/stasinopoulos/commix/wiki/Presentations)**' wiki page.
 
+#### Support and Donations
+**Q**: Except for tech stuff (bug reports or enhancements) is there any other way that I can support the development of commix?
 
+**A**: Sure! Commix is the outcome of many hours of work and total personal dedication. Feel free to '**[donate](https://www.paypal.com/gr/webapps/mpp/send-money-online)**' via PayPal to `donations@commixproject.com` and instantly prove your feelings for it! :).
