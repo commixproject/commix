@@ -60,7 +60,7 @@ def do_check():
       new_ip = opener.open("http://icanhazip.com/").read()
       sys.stdout.write("[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]\n")
       sys.stdout.flush()
-      success_msg = + "Your ip address appears to be " +  + new_ip
+      success_msg = "Your ip address appears to be " + new_ip
       sys.stdout.write(settings.print_success_msg(success_msg))
 
     except urllib2.URLError, err_msg:
