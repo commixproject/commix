@@ -1,4 +1,4 @@
-## Version 1.4 (upcoming)
+## Version 1.4 (2016-10-17)
 * Added: Support on crawler for checking target for the existence of 'sitemap.xml'.
 * Revised: The payload for Ruby reverse-shell has been shortly revised.
 * Added: Support for bind TCP shell (via "bind_tcp" option).
