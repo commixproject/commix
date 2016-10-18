@@ -1,3 +1,6 @@
+## Version 1.5 (upcoming)
+* Added: New verbosity level (2) for printing the performed HTTP requests headers.
+
 ## Version 1.4 (2016-10-17)
 * Added: Support on crawler for checking target for the existence of 'sitemap.xml'.
 * Revised: The payload for Ruby reverse-shell has been shortly revised.

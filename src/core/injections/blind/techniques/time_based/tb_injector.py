@@ -201,9 +201,15 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, delay, ht
       payload = base64.b64encode(payload)
 
     # Check if defined "--verbose" option.
-    if settings.VERBOSITY_LEVEL >= 1:
+    if settings.VERBOSITY_LEVEL == 1:
       payload_msg = payload.replace("\n", "\\n") 
       sys.stdout.write("\n" + settings.print_payload(payload_msg))
+    # Check if defined "--verbose" option.
+    elif settings.VERBOSITY_LEVEL > 1:
+      info_msg = "Generating a payload for injection..."
+      print settings.print_info_msg(info_msg)
+      payload_msg = payload.replace("\n", "\\n") 
+      sys.stdout.write(settings.print_payload(payload_msg) + "\n")
 
     # Check if defined cookie with "INJECT_HERE" tag
     if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
@@ -281,9 +287,15 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, delay, ht
           payload = base64.b64encode(payload)
 
         # Check if defined "--verbose" option.
-        if settings.VERBOSITY_LEVEL >= 1:
+        if settings.VERBOSITY_LEVEL == 1:
           payload_msg = payload.replace("\n", "\\n") 
           sys.stdout.write("\n" + settings.print_payload(payload_msg))
+        # Check if defined "--verbose" option.
+        elif settings.VERBOSITY_LEVEL > 1:
+          info_msg = "Generating a payload for injection..."
+          print settings.print_info_msg(info_msg)
+          payload_msg = payload.replace("\n", "\\n") 
+          sys.stdout.write(settings.print_payload(payload_msg) + "\n")
 
         # Check if defined cookie with "INJECT_HERE" tag
         if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
@@ -348,10 +360,13 @@ False Positive check and evaluation.
 def false_positive_check(separator, TAG, cmd, whitespace, prefix, suffix, delay, http_request_method, url, vuln_parameter, randvcalc, alter_shell, how_long, url_time_response):
 
   found_chars = False
-  if settings.VERBOSITY_LEVEL >= 1: 
-    info_msg = "Testing the reliability of used payload... "
+  info_msg = "Testing the reliability of used payload... "
+  if settings.VERBOSITY_LEVEL == 1: 
     sys.stdout.write(settings.print_info_msg(info_msg))
     sys.stdout.flush()
+  # Check if defined "--verbose" option.
+  elif settings.VERBOSITY_LEVEL > 1:
+    print settings.print_info_msg(info_msg)
 
   for output_length in range(1, 3):
     
@@ -372,9 +387,15 @@ def false_positive_check(separator, TAG, cmd, whitespace, prefix, suffix, delay,
       payload = base64.b64encode(payload)
 
     # Check if defined "--verbose" option.
-    if settings.VERBOSITY_LEVEL >= 1:
+    if settings.VERBOSITY_LEVEL == 1:
       payload_msg = payload.replace("\n", "\\n") 
       sys.stdout.write("\n" + settings.print_payload(payload_msg))
+    # Check if defined "--verbose" option.
+    elif settings.VERBOSITY_LEVEL > 1:
+      info_msg = "Generating a payload for testing the reliability of used payload..."
+      print settings.print_info_msg(info_msg)
+      payload_msg = payload.replace("\n", "\\n") 
+      sys.stdout.write(settings.print_payload(payload_msg) + "\n")
 
     # Check if defined cookie with "INJECT_HERE" tag
     if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
@@ -430,9 +451,15 @@ def false_positive_check(separator, TAG, cmd, whitespace, prefix, suffix, delay,
           payload = base64.b64encode(payload)
 
         # Check if defined "--verbose" option.
-        if settings.VERBOSITY_LEVEL >= 1:
+        if settings.VERBOSITY_LEVEL == 1:
           payload_msg = payload.replace("\n", "\\n") 
           sys.stdout.write("\n" + settings.print_payload(payload_msg))
+        # Check if defined "--verbose" option.
+        elif settings.VERBOSITY_LEVEL > 1:
+          info_msg = "Generating a payload for testing the reliability of used payload..."
+          print settings.print_info_msg(info_msg)
+          payload_msg = payload.replace("\n", "\\n") 
+          sys.stdout.write(settings.print_payload(payload_msg) + "\n")
 
         # Check if defined cookie with "INJECT_HERE" tag
         if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:

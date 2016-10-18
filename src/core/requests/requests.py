@@ -86,6 +86,7 @@ Get the response of the request
 """
 def get_request_response(request):
 
+  headers.check_http_traffic(request)
   # Check if defined any HTTP Proxy.
   if menu.options.proxy:
     try:
@@ -191,12 +192,13 @@ def cookie_injection(url, vuln_parameter, payload):
 
     if settings.TIME_RELATIVE_ATTACK :
       payload = urllib.quote(payload)
-      
-    opener.addheaders.append(('Cookie', vuln_parameter + "=" + payload))
+
     request = urllib2.Request(url)
-    # Check if defined extra headers.
+    #Check if defined extra headers.
     headers.do_check(request)
+    request.add_header('Cookie', vuln_parameter + "=" + payload)
     try:
+      headers.check_http_traffic(request)
       response = opener.open(request)
       return response
     except ValueError:
@@ -208,7 +210,7 @@ def cookie_injection(url, vuln_parameter, payload):
     start = time.time()
 
   proxy = None 
-  response = inject_cookie(url, vuln_parameter, payload, proxy)
+  #response = inject_cookie(url, vuln_parameter, payload, proxy)
 
   # Check if defined any HTTP Proxy.
   if menu.options.proxy:
@@ -317,6 +319,7 @@ def user_agent_injection(url, vuln_parameter, payload):
     headers.do_check(request)
     request.add_header('User-Agent', urllib.unquote(payload))
     try:
+      headers.check_http_traffic(request)
       response = opener.open(request)
       return response
     except ValueError:
@@ -328,7 +331,7 @@ def user_agent_injection(url, vuln_parameter, payload):
     start = time.time()
 
   proxy = None 
-  response = inject_user_agent(url, vuln_parameter, payload, proxy)
+  #response = inject_user_agent(url, vuln_parameter, payload, proxy)
   # Check if defined any HTTP Proxy.
   if menu.options.proxy:
     try:
@@ -441,6 +444,7 @@ def referer_injection(url, vuln_parameter, payload):
     headers.do_check(request)
     request.add_header('Referer', urllib.unquote(payload))
     try:
+      headers.check_http_traffic(request)
       response = opener.open(request)
       return response
     except ValueError:
@@ -452,7 +456,7 @@ def referer_injection(url, vuln_parameter, payload):
     start = time.time()
 
   proxy = None 
-  response = inject_referer(url, vuln_parameter, payload, proxy)
+  #response = inject_referer(url, vuln_parameter, payload, proxy)
   # Check if defined any HTTP Proxy.
   if menu.options.proxy:
     try:
@@ -566,6 +570,7 @@ def custom_header_injection(url, vuln_parameter, payload):
     headers.do_check(request)
     request.add_header(settings.CUSTOM_HEADER_NAME, urllib.unquote(payload))
     try:
+      headers.check_http_traffic(request)
       response = opener.open(request)
       return response
     except ValueError:
@@ -577,7 +582,7 @@ def custom_header_injection(url, vuln_parameter, payload):
     start = time.time()
 
   proxy = None  
-  response = inject_custom_header(url, vuln_parameter, payload, proxy)
+  #response = inject_custom_header(url, vuln_parameter, payload, proxy)
 
   # Check if defined any HTTP Proxy.
   if menu.options.proxy:

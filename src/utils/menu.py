@@ -53,7 +53,7 @@ general.add_option("-v",
                 action="store",
                 type="int",
                 dest="verbose",
-                help="Verbosity level (0-1, Default: 0).")
+                help="Verbosity level (0-3, Default: 0).")
 
 general.add_option("--install",
                 action="store_true",

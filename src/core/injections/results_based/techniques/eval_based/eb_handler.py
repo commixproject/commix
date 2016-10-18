@@ -151,8 +151,12 @@ def eb_injection_handler(url, delay, filename, http_request_method):
                 payload = re.sub(" ", "%20", payload)
 
               # Check if defined "--verbose" option.
-              if settings.VERBOSITY_LEVEL >= 1:
-                sys.stdout.write("\n" + settings.print_payload(payload))
+              if settings.VERBOSITY_LEVEL == 1:
+                print settings.print_payload(payload)
+              elif settings.VERBOSITY_LEVEL > 1:
+                info_msg = "Generating a payload for injection..."
+                print settings.print_info_msg(info_msg)
+                print settings.print_payload(payload) 
 
               # Cookie Injection
               if settings.COOKIE_INJECTION == True:

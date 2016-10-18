@@ -160,7 +160,7 @@ def injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_req
       payload_msg = payload.replace("\n", "\\n")
       if settings.COMMENT in payload_msg:
         payload_msg = payload_msg.split(settings.COMMENT)[0]
-      info_msg = "Executing the '" + cmd.split(settings.COMMENT)[0] + "' command "
+      info_msg = "Executing the '" + cmd.split(settings.COMMENT)[0] + "' command... "
       sys.stdout.write("\n" + settings.print_info_msg(info_msg))
       sys.stdout.flush()
       sys.stdout.write("\n" + settings.print_payload(payload).split(settings.COMMENT)[0] + "\n")
@@ -262,6 +262,7 @@ def injection_output(url, OUTPUT_TEXTFILE, delay):
     output = scheme + "://" + netloc + path + OUTPUT_TEXTFILE	
 
   else:
+
     if settings.CUSTOM_SRV_ROOT_DIR == True:
       path = "/"
       # Contract again the url. 
@@ -285,6 +286,11 @@ def injection_output(url, OUTPUT_TEXTFILE, delay):
           count = count - 1
           last_param = path_parts[count]
           output = url.replace(last_param, OUTPUT_TEXTFILE)
+          if "?" and ".txt" in output:
+            try:
+              output = output.split("?")[0]
+            except:
+              pass  
         except IndexError:
           output = url + "/" + OUTPUT_TEXTFILE
 

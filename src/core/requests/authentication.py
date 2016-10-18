@@ -65,6 +65,7 @@ def authentication_process():
   request = urllib2.Request(auth_url, auth_data)
   # Check if defined extra headers.
   headers.do_check(request)
+  headers.check_http_traffic(request)
   # Get the response of the request.
   response = requests.get_request_response(request)
   return response
@@ -131,14 +132,19 @@ def http_auth_cracker(url, realm):
         # Check if verbose mode on
         if settings.VERBOSITY_LEVEL >= 1:
           payload = "pair of credentials '" + username + ":" + password + "'"
-          sys.stdout.write("\r" + settings.print_checking_msg(payload) + "           ")
-          sys.stdout.flush()
+          if settings.VERBOSITY_LEVEL > 1:
+            print settings.print_checking_msg(payload)
+          else:
+            sys.stdout.write("\r" + settings.print_checking_msg(payload) + "           ")
+            sys.stdout.flush()
         try:
           # Basic authentication 
           if authentication_type.lower() == "basic":
             request = urllib2.Request(url)
             base64string = base64.encodestring(username + ":" + password)[:-1]
-            request.add_header("Authorization", "Basic " + base64string)   
+            request.add_header("Authorization", "Basic " + base64string)
+            headers.do_check(request)
+            headers.check_http_traffic(request)
             result = urllib2.urlopen(request)
           # Digest authentication 
           elif authentication_type.lower() == "digest":

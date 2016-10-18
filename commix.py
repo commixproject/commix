@@ -101,9 +101,9 @@ def main():
       sys.exit(0)
 
     # Define the level of verbosity.
-    if menu.options.verbose > 1:
+    if menu.options.verbose > 2:
       err_msg = "The value for option '-v' "
-      err_msg += "must be an integer value from range [0, 1]."
+      err_msg += "must be an integer value from range [0, 2]."
       print settings.print_critical_msg(err_msg)
       sys.exit(0)
     else:  
@@ -244,7 +244,7 @@ def main():
           request = urllib2.Request(url)
 
         headers.do_check(request)  
-        
+
         # Check if defined any HTTP Proxy (--proxy option).
         if menu.options.proxy:
           proxy.do_check(url)
@@ -252,9 +252,14 @@ def main():
         # Check if defined Tor (--tor option).
         elif menu.options.tor:
           tor.do_check()
-        info_msg = "Checking connection to the target URL... "  
+
+        info_msg = "Checking connection to the target URL... "
         sys.stdout.write(settings.print_info_msg(info_msg))
         sys.stdout.flush()
+        if settings.VERBOSITY_LEVEL >= 2:
+          print ""
+
+        headers.check_http_traffic(request)
 
         try:
           # Check if defined any HTTP Proxy (--proxy option).
@@ -279,8 +284,9 @@ def main():
           raise
 
         html_data = content = response.read()
-        print "[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]"
-
+        if settings.VERBOSITY_LEVEL < 2:
+          print "[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]"
+        
         # Check for CGI scripts on url
         checks.check_CGI_scripts(url)
 
@@ -568,7 +574,8 @@ def main():
             print settings.print_critical_msg(err_msg)
             sys.exit(0) 
 
-          print "[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]"
+          if settings.VERBOSITY_LEVEL < 2:
+            print "[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]"
           if menu.options.auth_type and menu.options.auth_type != auth_type.lower():
             if checks.identified_http_auth_type(auth_type):
               menu.options.auth_type = auth_type.lower()
@@ -654,13 +661,15 @@ def main():
             pass
 
         elif str(e.getcode()) == settings.FORBIDDEN_ERROR:
-          print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
+          if settings.VERBOSITY_LEVEL < 2:
+            print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
           err_msg = "You don't have permission to access this page."
           print settings.print_critical_msg(err_msg)
           sys.exit(0)
           
         elif str(e.getcode()) == settings.NOT_FOUND_ERROR:
-          print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
+          if settings.VERBOSITY_LEVEL < 2:
+            print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
           err_msg = "The host seems to be down!"
           print settings.print_critical_msg(err_msg)
           sys.exit(0)
@@ -669,13 +678,15 @@ def main():
           raise
 
       except urllib2.URLError, e:
-        print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
+        if settings.VERBOSITY_LEVEL < 2:
+          print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
         err_msg = "The host seems to be down!"
         print settings.print_critical_msg(err_msg)
         sys.exit(0)
         
       except httplib.BadStatusLine, e:
-        print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
+        if settings.VERBOSITY_LEVEL < 2:
+          print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
         if len(e.line) > 2 :
           print e.line, e.message
         pass

@@ -33,6 +33,7 @@ ERROR_SIGN =  "[" + Fore.RED + Style.BRIGHT + "x" + Style.RESET_ALL  + "] " + Fo
 ABORTION_SIGN =  "[" + Fore.RED + Style.BRIGHT + "x" + Style.RESET_ALL  + "] " + Fore.RED 
 CRITICAL_SIGN =  Back.RED + "[x] Critical: "
 PAYLOAD_SIGN =  "    |_ " + Fore.CYAN
+TRAFFIC_SIGN =  "    |_ " + Back.MAGENTA
 CHECK_SIGN =  "[" + Fore.BLUE + Style.BRIGHT + "*" + Style.RESET_ALL  + "] " + "Checking "
 SUB_CONTENT_SIGN =  "    [" + Fore.GREY + Style.BRIGHT + "~" + Style.RESET_ALL  + "] "
 
@@ -76,6 +77,11 @@ def print_payload(payload):
   result = PAYLOAD_SIGN + str(payload) + Style.RESET_ALL
   return result
 
+# Print HTTP traffic (verbose mode)
+def print_traffic(traffic):
+  result = TRAFFIC_SIGN + str(traffic) + Style.RESET_ALL
+  return result
+
 # Print checking message (verbose mode)
 def print_checking_msg(payload):
   result = CHECK_SIGN + str(payload) + Style.RESET_ALL
@@ -94,8 +100,8 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "1.4.20"
-STABLE_VERSION = True
+VERSION_NUM = "1.5.1"
+STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"
 else:

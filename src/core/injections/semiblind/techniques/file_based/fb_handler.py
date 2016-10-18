@@ -255,9 +255,14 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                 payload = base64encode.encode(payload)
 
               # Check if defined "--verbose" option.
-              if settings.VERBOSITY_LEVEL >= 1:
+              if settings.VERBOSITY_LEVEL == 1:
                 payload_msg = payload.replace("\n", "\\n")
                 print settings.print_payload(payload_msg)
+              # Check if defined "--verbose" option.
+              elif settings.VERBOSITY_LEVEL > 1:
+                info_msg = "Generating a payload for injection..."
+                print settings.print_info_msg(info_msg)
+                print settings.print_payload(payload) 
 
               # Cookie Injection
               if settings.COOKIE_INJECTION == True:

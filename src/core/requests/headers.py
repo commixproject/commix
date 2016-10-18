@@ -17,6 +17,8 @@ import re
 import sys
 import base64
 import urllib2
+import urlparse
+import httplib
 
 from src.utils import menu
 from src.utils import settings
@@ -24,10 +26,40 @@ from src.core.injections.controller import checks
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 """
- Check for added headers.
+Checking the HTTP Headers.
+"""
+def check_http_traffic(request):
+
+  class MyHTTPConnection(httplib.HTTPConnection):
+    """
+    Checking the HTTP requests.
+    """
+    def request(self, method, url, body, headers):
+      if settings.VERBOSITY_LEVEL >= 2:
+        info_msg = "The provided HTTP request: "
+        print settings.print_info_msg(info_msg)
+        header = method + " " + url
+        print settings.print_traffic(header)
+        for item in headers.items():
+          header = item[0] + ": " + item[1]
+          print settings.print_traffic(header)
+      if body :
+        print settings.print_traffic(body)
+      httplib.HTTPConnection.request(self, method, url, body, headers)
+
+  class MyHTTPHandler(urllib2.HTTPHandler):
+    def http_open(self, req):
+        return self.do_open(MyHTTPConnection, req)
+
+  opener = urllib2.OpenerDirector()
+  opener.add_handler(MyHTTPHandler())
+  response = opener.open(request) 
+
+"""
+Check for added headers.
 """
 def do_check(request):
-  
+
   # Check if defined any HTTP Host header.
   if menu.options.host:
     request.add_header('Host', menu.options.host)

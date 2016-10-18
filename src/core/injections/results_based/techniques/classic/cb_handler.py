@@ -135,8 +135,12 @@ def cb_injection_handler(url, delay, filename, http_request_method):
                 payload = base64encode.encode(payload)
 
               # Check if defined "--verbose" option.
-              if settings.VERBOSITY_LEVEL >= 1:
+              if settings.VERBOSITY_LEVEL == 1:
                 print settings.print_payload(payload)
+              elif settings.VERBOSITY_LEVEL > 1:
+                info_msg = "Generating a payload for injection..."
+                print settings.print_info_msg(info_msg)
+                print settings.print_payload(payload) 
                 
               # Cookie Injection
               if settings.COOKIE_INJECTION == True:
@@ -386,7 +390,7 @@ def cb_injection_handler(url, delay, filename, http_request_method):
                         html_parser = HTMLParser.HTMLParser()
                         shell = html_parser.unescape(shell)
                       if shell != "":
-                        if settings.VERBOSITY_LEVEL >= 1:
+                        if settings.VERBOSITY_LEVEL == 1:
                           print ""
                         print "\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n"
                       else:
