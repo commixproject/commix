@@ -43,8 +43,8 @@ def check_http_traffic(request):
         for item in headers.items():
           header = item[0] + ": " + item[1]
           print settings.print_traffic(header)
-      if body :
-        print settings.print_traffic(body)
+        if body :
+          print settings.print_traffic(body)
       httplib.HTTPConnection.request(self, method, url, body, headers)
 
   class MyHTTPHandler(urllib2.HTTPHandler):
