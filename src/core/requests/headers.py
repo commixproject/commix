@@ -26,6 +26,18 @@ from src.core.injections.controller import checks
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 """
+Checking the HTTP response headers.
+"""
+def http_response(headers):
+  if settings.VERBOSITY_LEVEL >= 3:
+    info_msg = "The target's HTTP response headers:"
+    print settings.print_info_msg(info_msg)
+    response_http_headers = str(headers).split("\r\n")
+    for header in response_http_headers:
+      if len(header) > 1: 
+        print settings.print_traffic(header)
+
+"""
 Checking the HTTP Headers.
 """
 def check_http_traffic(request):
@@ -54,6 +66,9 @@ def check_http_traffic(request):
   opener = urllib2.OpenerDirector()
   opener.add_handler(MyHTTPHandler())
   response = opener.open(request) 
+  # Check the HTTP response headers.
+  http_response(response.info())
+
 
 """
 Check for added headers.

@@ -101,9 +101,9 @@ def main():
       sys.exit(0)
 
     # Define the level of verbosity.
-    if menu.options.verbose > 2:
+    if menu.options.verbose > 3:
       err_msg = "The value for option '-v' "
-      err_msg += "must be an integer value from range [0, 2]."
+      err_msg += "must be an integer value from range [0, 3]."
       print settings.print_critical_msg(err_msg)
       sys.exit(0)
     else:  
@@ -273,7 +273,8 @@ def main():
               response = urllib2.urlopen(request)
             except ValueError:
               # Invalid format for the '--headers' option.
-              print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
+              if settings.VERBOSITY_LEVEL < 2:
+                print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
               err_msg = "Use '--headers=\"HEADER_NAME:HEADER_VALUE\"' "
               err_msg += "to provide an HTTP header or"
               err_msg += " '--headers=\"HEADER_NAME:" + settings.WILDCARD_CHAR  + "\"' "
@@ -546,6 +547,9 @@ def main():
 
         # Check for HTTP Error 401 (Unauthorized).
         elif str(e.getcode()) == settings.UNAUTHORIZED_ERROR:
+
+          # headers.http_response(e.headers)
+          
           try:
             # Get the auth header value
             auth_line = e.headers.get('www-authenticate', '')
@@ -573,7 +577,7 @@ def main():
             err_msg += " seems to be invalid."
             print settings.print_critical_msg(err_msg)
             sys.exit(0) 
-
+            
           if settings.VERBOSITY_LEVEL < 2:
             print "[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]"
           if menu.options.auth_type and menu.options.auth_type != auth_type.lower():

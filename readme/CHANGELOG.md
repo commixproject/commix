@@ -1,4 +1,5 @@
 ## Version 1.5 (upcoming)
+* Added: New verbosity level (3) for printing the HTTP response headers.
 * Added: New verbosity level (2) for printing the performed HTTP requests headers.
 
 ## Version 1.4 (2016-10-17)
