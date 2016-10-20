@@ -549,7 +549,7 @@ def main():
         elif str(e.getcode()) == settings.UNAUTHORIZED_ERROR:
 
           # headers.http_response(e.headers)
-          
+
           try:
             # Get the auth header value
             auth_line = e.headers.get('www-authenticate', '')
