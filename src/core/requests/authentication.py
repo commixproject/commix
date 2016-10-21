@@ -155,6 +155,7 @@ def http_auth_cracker(url, realm):
             request = urllib2.Request(url)
             headers.check_http_traffic(request)
             result = urllib2.urlopen(request)
+
           # Store valid results to session 
           admin_panel = url 
           session_handler.import_valid_credentials(url, authentication_type, admin_panel, username, password)

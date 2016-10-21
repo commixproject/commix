@@ -884,7 +884,8 @@ def cmd_exec(url, cmd, cve, check_header, filename):
       elif settings.VERBOSITY_LEVEL > 1:
         sys.stdout.write(settings.print_info_msg(info_msg))
       sys.stdout.flush()
-      sys.stdout.write("\n" + settings.print_payload(payload)+ "\n")
+      if settings.VERBOSITY_LEVEL != 0:
+        sys.stdout.write("\n" + settings.print_payload(payload)+ "\n")
       header = { check_header : payload }
       request = urllib2.Request(url, None, header)
       log_http_headers.check_http_traffic(request)

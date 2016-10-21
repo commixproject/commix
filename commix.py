@@ -120,6 +120,10 @@ def main():
       print settings.print_critical_msg(err_msg)
       sys.exit(0)
 
+    # Define the local path where Metasploit Framework is installed.
+    if menu.options.msf_path:
+      settings.METASPLOIT_PATH = menu.options.msf_path
+
     # Parse target / data from HTTP proxy logs (i.e Burp / WebScarab).
     if menu.options.logfile:
       parser.logfile_parser()
@@ -244,7 +248,7 @@ def main():
           request = urllib2.Request(url)
 
         headers.do_check(request)  
-
+        #headers.check_http_traffic(request)
         # Check if defined any HTTP Proxy (--proxy option).
         if menu.options.proxy:
           proxy.do_check(url)
@@ -260,7 +264,7 @@ def main():
           print ""
 
         headers.check_http_traffic(request)
-
+        
         try:
           # Check if defined any HTTP Proxy (--proxy option).
           if menu.options.proxy:
@@ -539,6 +543,7 @@ def main():
         requests.charset_detection(response)
 
       except urllib2.HTTPError, e:
+
         # Check the codes of responses
         if str(e.getcode()) == settings.INTERNAL_SERVER_ERROR:
           print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"

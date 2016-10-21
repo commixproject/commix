@@ -399,6 +399,12 @@ injection.add_option("--tamper",
                 default=False,
                 help="Use given script(s) for tampering injection data.")
 
+injection.add_option("--msf-path", 
+                action="store",
+                dest="msf_path",
+                default=False,
+                help="Set a local path where metasploit is installed.")
+
 # Detection options
 detection = OptionGroup(parser, Style.BRIGHT + "Detection" + Style.RESET_ALL, "These options can be "
                         "used to customize the detection phase.")
