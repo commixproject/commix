@@ -21,7 +21,7 @@ This tool is only for testing and academic purposes and can only be used where s
 
 Download commix by cloning the Git repository:
 
-    git clone https://github.com/stasinopoulos/commix.git commix
+    git clone https://github.com/commixproject/commix.git commix
 
 Commix comes packaged on the **official repositories** of the following Linux distributions, so you can use the **package manager** to install it!
 
