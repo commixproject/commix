@@ -92,6 +92,12 @@ general.add_option("--ignore-session",
                 dest="ignore_session",
                 help="Ignore results stored in session file.")
 
+general.add_option("-t",
+                action="store",
+                dest="traffic_file",
+                default=None,
+                help="Log all HTTP traffic into a textual file.")
+
 # Target options
 target = OptionGroup(parser, Style.BRIGHT + "Target" + Style.RESET_ALL, 
                      "This options has to be provided, to define the target URL. ")

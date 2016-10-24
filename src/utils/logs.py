@@ -122,4 +122,12 @@ def logs_notification(filename):
   info_msg = "The results can be found at '" + os.getcwd() + "/" + filename + "'"
   print settings.print_info_msg(info_msg)
 
+"""
+Log all HTTP traffic into a textual file.
+"""
+def log_traffic(header):
+  output_file = open(menu.options.traffic_file, "a")
+  output_file.write(header)
+  output_file.close()
+
 # eof

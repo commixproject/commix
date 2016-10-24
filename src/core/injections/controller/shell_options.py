@@ -141,7 +141,7 @@ def check_option(separator, TAG, cmd, prefix, suffix, whitespace, http_request_m
     go_back, go_back_again = bind_tcp_config(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, os_shell_option, go_back, go_back_again)
     return go_back, go_back_again
 
-  # The "everse_tcp" option
+  # The "reverse_tcp" option
   elif os_shell_option == "reverse_tcp":
     go_back, go_back_again = reverse_tcp_config(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, os_shell_option, go_back, go_back_again)
     return go_back, go_back_again

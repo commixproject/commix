@@ -78,7 +78,6 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
   false_positive_warning = False
   export_injection_info = False
   how_long = 0
-  how_long_statistic = []
   injection_type = "blind command injection"
   technique = "time-based injection technique"
 
@@ -101,7 +100,8 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
   for prefix in settings.PREFIXES:
     for suffix in settings.SUFFIXES:
       for separator in settings.SEPARATORS:
-
+        
+        how_long_statistic = []
         # If a previous session is available.
         if settings.LOAD_SESSION and session_handler.notification(url, technique):
           cmd = shell = ""

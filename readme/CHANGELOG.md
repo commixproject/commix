@@ -1,4 +1,5 @@
 ## Version 1.5 (upcoming)
+* Added: New option "-t" for logging all HTTP traffic into a textual file.
 * Added: New option "--msf-path" for specifying a path where metasploit is installed.
 * Added: New verbosity level (3) for printing the HTTP response headers.
 * Added: New verbosity level (2) for printing the performed HTTP requests headers.

@@ -20,6 +20,7 @@ import urllib2
 import urlparse
 import httplib
 
+from src.utils import logs
 from src.utils import menu
 from src.utils import settings
 
@@ -30,13 +31,20 @@ from src.thirdparty.colorama import Fore, Back, Style, init
 Checking the HTTP response headers.
 """
 def http_response(headers):
+  info_msg = "The target's HTTP response headers:"
   if settings.VERBOSITY_LEVEL >= 3:
-    info_msg = "The target's HTTP response headers:"
     print settings.print_info_msg(info_msg)
-    response_http_headers = str(headers).split("\r\n")
-    for header in response_http_headers:
-      if len(header) > 1: 
+  if menu.options.traffic_file: 
+    logs.log_traffic("-" * 37 + "\n" + info_msg + "\n" + "-" * 37)  
+  response_http_headers = str(headers).split("\r\n")
+  for header in response_http_headers:
+    if len(header) > 1: 
+      if settings.VERBOSITY_LEVEL >= 3:
         print settings.print_traffic(header)
+      if menu.options.traffic_file:
+        logs.log_traffic("\n" + header)
+  if menu.options.traffic_file:
+    logs.log_traffic("\n\n" + "#" * 77 + "\n\n")
 
 """
 Checking the HTTP Headers.
@@ -48,16 +56,30 @@ def check_http_traffic(request):
     Checking the HTTP requests.
     """
     def request(self, method, url, body, headers):
+      info_msg = "The provided HTTP request headers: "
       if settings.VERBOSITY_LEVEL >= 2:
-        info_msg = "The provided HTTP request headers: "
         print settings.print_info_msg(info_msg)
-        header = method + " " + url
+      if menu.options.traffic_file: 
+        logs.log_traffic("-" * 37 + "\n" + info_msg + "\n" + "-" * 37)
+      header = method + " " + url
+      if settings.VERBOSITY_LEVEL >= 2:
         print settings.print_traffic(header)
-        for item in headers.items():
-          header = item[0] + ": " + item[1]
+      if menu.options.traffic_file:
+        logs.log_traffic("\n" + header)
+      for item in headers.items():
+        header = item[0] + ": " + item[1]
+        if settings.VERBOSITY_LEVEL >= 2:
           print settings.print_traffic(header)
-        if body :
-          print settings.print_traffic(body)
+        if menu.options.traffic_file:
+          logs.log_traffic("\n" + header)
+      if body :
+        header = body
+        if settings.VERBOSITY_LEVEL >= 2:
+          print settings.print_traffic(header)
+        if menu.options.traffic_file:
+          logs.log_traffic("\n" + header) 
+      if menu.options.traffic_file:
+        logs.log_traffic("\n\n")  
       httplib.HTTPConnection.request(self, method, url, body, headers)
 
   class MyHTTPHandler(urllib2.HTTPHandler):

@@ -65,7 +65,7 @@ def authentication_process():
   request = urllib2.Request(auth_url, auth_data)
   # Check if defined extra headers.
   headers.do_check(request)
-  headers.check_http_traffic(request)
+  #headers.check_http_traffic(request)
   # Get the response of the request.
   response = requests.get_request_response(request)
   return response

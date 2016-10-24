@@ -93,7 +93,6 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
   is_encoded = False
   possibly_vulnerable = False
   false_positive_warning = False
-  how_long_statistic = []
   export_injection_info = False
   how_long = 0
   injection_type = "semi-blind command injection"
@@ -120,7 +119,8 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
   for prefix in settings.PREFIXES:
     for suffix in settings.SUFFIXES:
       for separator in settings.SEPARATORS:
-
+        # If a previous session is available.
+        how_long_statistic = []
         if settings.LOAD_SESSION:
           cmd = shell = ""
           url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response, delay, how_long, output_length, is_vulnerable = session_handler.injection_point_exportation(url, http_request_method)
