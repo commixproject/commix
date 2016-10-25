@@ -101,9 +101,9 @@ def main():
       sys.exit(0)
 
     # Define the level of verbosity.
-    if menu.options.verbose > 3:
+    if menu.options.verbose > 4:
       err_msg = "The value for option '-v' "
-      err_msg += "must be an integer value from range [0, 3]."
+      err_msg += "must be an integer value from range [0, 4]."
       print settings.print_critical_msg(err_msg)
       sys.exit(0)
     else:  

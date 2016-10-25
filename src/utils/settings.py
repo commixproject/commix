@@ -34,6 +34,7 @@ ABORTION_SIGN =  "[" + Fore.RED + Style.BRIGHT + "x" + Style.RESET_ALL  + "] " +
 CRITICAL_SIGN =  Back.RED + "[x] Critical: "
 PAYLOAD_SIGN =  "    |_ " + Fore.CYAN
 TRAFFIC_SIGN =  "    |_ " + Back.MAGENTA
+HTTP_CONTENT_SIGN = Fore.MAGENTA
 CHECK_SIGN =  "[" + Fore.BLUE + Style.BRIGHT + "*" + Style.RESET_ALL  + "] " + "Checking "
 SUB_CONTENT_SIGN =  "    [" + Fore.GREY + Style.BRIGHT + "~" + Style.RESET_ALL  + "] "
 
@@ -82,6 +83,11 @@ def print_traffic(traffic):
   result = TRAFFIC_SIGN + str(traffic) + Style.RESET_ALL
   return result
 
+# Print HTTP response content (verbose mode)
+def print_http_response_content(content):
+  result = HTTP_CONTENT_SIGN + str(content) + Style.RESET_ALL
+  return result
+
 # Print checking message (verbose mode)
 def print_checking_msg(payload):
   result = CHECK_SIGN + str(payload) + Style.RESET_ALL
@@ -100,7 +106,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "1.5.5"
+VERSION_NUM = "1.5.6"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"

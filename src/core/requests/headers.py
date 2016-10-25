@@ -28,6 +28,22 @@ from src.core.injections.controller import checks
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 """
+Checking the HTTP response content.
+"""
+def http_response_content(content):
+  info_msg = "The target's HTTP response page content:"
+  if settings.VERBOSITY_LEVEL >= 4:
+    print settings.print_info_msg(info_msg)
+  if menu.options.traffic_file: 
+    logs.log_traffic("-" * 42 + "\n" + info_msg + "\n" + "-" * 42)  
+  if settings.VERBOSITY_LEVEL >= 4:
+    print settings.print_http_response_content(content)
+  if menu.options.traffic_file:
+    logs.log_traffic("\n" + content)
+  if menu.options.traffic_file:
+    logs.log_traffic("\n\n" + "#" * 77 + "\n\n")
+
+"""
 Checking the HTTP response headers.
 """
 def http_response(headers):
@@ -44,7 +60,10 @@ def http_response(headers):
       if menu.options.traffic_file:
         logs.log_traffic("\n" + header)
   if menu.options.traffic_file:
-    logs.log_traffic("\n\n" + "#" * 77 + "\n\n")
+    if settings.VERBOSITY_LEVEL <= 3: 
+      logs.log_traffic("\n\n" + "#" * 77 + "\n\n")
+    else:
+      logs.log_traffic("\n\n")    
 
 """
 Checking the HTTP Headers.
@@ -91,6 +110,8 @@ def check_http_traffic(request):
   response = opener.open(request) 
   # Check the HTTP response headers.
   http_response(response.info())
+  # Check the HTTP response content.
+  http_response_content(response.read())
 
 """
 Check for added headers.
