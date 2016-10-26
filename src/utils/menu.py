@@ -53,7 +53,7 @@ general.add_option("-v",
                 action="store",
                 type="int",
                 dest="verbose",
-                help="Verbosity level (0-3, Default: 0).")
+                help="Verbosity level (0-4, Default: 0).")
 
 general.add_option("--install",
                 action="store_true",
@@ -146,7 +146,7 @@ request.add_option("--referer",
 request.add_option("--user-agent",
                 action="store",
                 dest="agent",
-                default = settings.APPLICATION + "/" + settings.VERSION,
+                default = settings.APPLICATION + "/" + settings.VERSION + " (" + settings.APPLICATION_URL + ")",
                 help="HTTP User-Agent header.")
 
 request.add_option("--random-agent",
