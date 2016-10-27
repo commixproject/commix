@@ -106,7 +106,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "1.5.7"
+VERSION_NUM = "1.5.8"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"
@@ -564,5 +564,8 @@ URL_RELOAD = False
 
 # Crawl the website starting from the target URL.
 DEFAULT_CRAWLDEPTH_LEVEL = 0
+
+# Command history
+CLI_HISTORY = ""
 
 #eof

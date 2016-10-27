@@ -20,6 +20,7 @@ import time
 import urllib
 import sqlite3
 import datetime
+import readline
 
 from src.utils import menu
 from src.utils import settings
@@ -30,6 +31,21 @@ from src.thirdparty.colorama import Fore, Back, Style, init
 1. Generate injection logs (logs.txt) in "./ouput" file.
 2. Check for logs updates and apply if any!
 """
+
+"""
+Save command history.
+"""
+def save_cmd_history():
+  cli_history = os.path.expanduser(settings.CLI_HISTORY)
+  readline.write_history_file(cli_history)
+
+"""
+Load commands from history.
+"""
+def load_cmd_history():
+  cli_history= os.path.expanduser(settings.CLI_HISTORY)
+  if os.path.exists(cli_history):
+    readline.read_history_file(cli_history)
 
 """
 Create log files
@@ -61,6 +77,10 @@ def create_log_file(url, output_dir):
        sys.exit(0)
   else:  
     settings.SESSION_FILE = output_dir + host + "/" + "session" + ".db"
+    settings.CLI_HISTORY = output_dir + host + "/" + "cli_history"
+
+  # Load command history
+  load_cmd_history()
 
   # The logs filename construction.
   filename = output_dir + host + "/" + settings.OUTPUT_FILE
@@ -79,7 +99,6 @@ def create_log_file(url, output_dir):
 Add the injection type / technique in log files.
 """
 def add_type_and_technique(export_injection_info, filename, injection_type, technique):
-
   if export_injection_info == False:
     settings.SHOW_LOGS_MSG = True
     output_file = open(filename, "a")
@@ -119,6 +138,8 @@ def update_payload(filename, counter, payload):
 Log files cration notification.
 """
 def logs_notification(filename):
+  # Save command history.
+  save_cmd_history()
   info_msg = "The results can be found at '" + os.getcwd() + "/" + filename + "'"
   print settings.print_info_msg(info_msg)
 
