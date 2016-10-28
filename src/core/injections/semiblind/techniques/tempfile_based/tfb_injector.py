@@ -196,8 +196,9 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, delay, ht
     # Whitespace fixation
     payload = re.sub(" ", whitespace, payload)
 
-    if settings.TAMPER_SCRIPTS['base64encode']:
-      payload = base64.b64encode(payload)
+    # Check for base64 / hex encoding
+    payload = checks.perform_payload_encoding(payload)
+
     # Check if defined "--verbose" option.
     if settings.VERBOSITY_LEVEL == 1:
       payload_msg = payload.replace("\n", "\\n") 
@@ -280,9 +281,9 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, delay, ht
 
         # Whitespace fixation
         payload = re.sub(" ", whitespace, payload)
-
-        if settings.TAMPER_SCRIPTS['base64encode']:
-          payload = base64.b64encode(payload)
+        
+        # Check for base64 / hex encoding
+        payload = checks.perform_payload_encoding(payload)
 
         # Check if defined "--verbose" option.
         if settings.VERBOSITY_LEVEL == 1:
@@ -375,9 +376,9 @@ def false_positive_check(separator, TAG, cmd, prefix, suffix, whitespace, delay,
 
     # Whitespace fixation
     payload = re.sub(" ", whitespace, payload)
-
-    if settings.TAMPER_SCRIPTS['base64encode']:
-      payload = base64.b64encode(payload)
+    
+    # Check for base64 / hex encoding
+    payload = checks.perform_payload_encoding(payload)
 
     # Check if defined "--verbose" option.
     if settings.VERBOSITY_LEVEL == 1:
@@ -437,8 +438,13 @@ def false_positive_check(separator, TAG, cmd, prefix, suffix, whitespace, delay,
         # Whitespace fixation
         payload = re.sub(" ", whitespace, payload)
 
+        # Encode payload to base64 format.
         if settings.TAMPER_SCRIPTS['base64encode']:
           payload = base64.b64encode(payload)
+
+        # Encode payload to hex format.
+        elif settings.TAMPER_SCRIPTS['hexencode']:
+          payload = payload.encode("hex")
 
         # Check if defined "--verbose" option.
         if settings.VERBOSITY_LEVEL == 1:

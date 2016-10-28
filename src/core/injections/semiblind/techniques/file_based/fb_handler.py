@@ -19,7 +19,6 @@ import sys
 import time
 import string
 import random
-import base64
 import urllib
 import urllib2
 import urlparse 
@@ -250,9 +249,8 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
               # Whitespace fixation
               payload = re.sub(" ", whitespace, payload)
 
-              if settings.TAMPER_SCRIPTS['base64encode']:
-                from src.core.tamper import base64encode
-                payload = base64encode.encode(payload)
+              # Check for base64 / hex encoding
+              payload = checks.perform_payload_encoding(payload)
 
               # Check if defined "--verbose" option.
               if settings.VERBOSITY_LEVEL == 1:

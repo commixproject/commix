@@ -159,10 +159,8 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
               # Whitespace fixation
               payload = re.sub(" ", whitespace, payload)
               
-              # Encode payload to Base64
-              if settings.TAMPER_SCRIPTS['base64encode']:
-                from src.core.tamper import base64encode
-                payload = base64encode.encode(payload)
+              # Check for base64 / hex encoding
+              payload = checks.perform_payload_encoding(payload)
 
               # Check if defined "--verbose" option.
               if settings.VERBOSITY_LEVEL == 1:

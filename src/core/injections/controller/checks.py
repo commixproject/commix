@@ -16,6 +16,7 @@ For more see the file 'readme/COPYING' for copying permission.
 import re
 import os
 import sys
+import base64
 import urllib
 import urlparse
 
@@ -484,18 +485,33 @@ def check_whitespaces():
     return whitespace  
 
 """
+Check for loaded tamper scripts
+"""
+def loaded_tamper_scripts():
+  try:
+    menu.options.tamper.lower()
+    info_msg = "Loaded tamper script(s): "
+    print settings.print_info_msg(info_msg)
+    # Check the provided tamper script(s)
+    for tfile in re.split(settings.PARAMETER_SPLITTING_REGEX, menu.options.tamper.lower()):
+      print settings.SUB_CONTENT_SIGN + tfile
+  except:
+    pass
+
+"""
 Tamper script checker
 """
 def tamper_scripts():
-
   info_msg = "Loading tamper script(s): "
   print settings.print_info_msg(info_msg)
 
   # Check the provided tamper script(s)
   tamper_script_counter = 0
   for tfile in re.split(settings.PARAMETER_SPLITTING_REGEX, menu.options.tamper.lower()):
-    check_tfile = "src/core/tamper/" + tfile + ".py"
+    if "hexencode" or "base64encode" == tfile:
+      settings.MULTI_ENCODED_PAYLOAD.append(tfile)
 
+    check_tfile = "src/core/tamper/" + tfile + ".py"
     if not os.path.exists(check_tfile.lower()):
       if not settings.LOAD_SESSION:
         err_msg = "The '" + tfile + "' tamper script does not exist."
@@ -507,30 +523,30 @@ def tamper_scripts():
       check_tfile = check_tfile.replace("/",".")
       importlib.import_module(check_tfile.split(".py")[0])
       print settings.SUB_CONTENT_SIGN + tfile 
+    
 
-  # info_msg = str(tamper_script_counter) + " tamper script" + "s"[tamper_script_counter == 1:] +  " enabled."
-  # print settings.print_info_msg(info_msg)     
+"""
+Check if the payload output seems to be hex.
+"""
+def hex_output(payload):
+  if not settings.TAMPER_SCRIPTS['hexencode']:
+    if menu.options.tamper:
+      menu.options.tamper = menu.options.tamper + ",hexencode"
+    else:
+      menu.options.tamper = "hexencode"
 
 """
 Check if the payload output seems to be base64.
 """
 def base64_output(payload):
-  if (len(payload) % 4 == 0) and re.match(settings.BASE64_RECOGNITION_REGEX, payload):
-    if not settings.TAMPER_SCRIPTS['base64encode']:
-      if menu.options.tamper:
-        menu.options.tamper = menu.options.tamper + ",base64encode"
-      else:
-        menu.options.tamper = "base64encode"
-      tamper_scripts()
-  else:
-    if settings.TAMPER_SCRIPTS['base64encode']:
-      settings.TAMPER_SCRIPTS['base64encode'] = False
-      warn_msg = "The resumed stored session is not in base64 format. "
-      warn_msg += "Rerun with '--flush-session' option."
-      print settings.print_warning_msg(warn_msg)
+  if not settings.TAMPER_SCRIPTS['base64encode']:
+    if menu.options.tamper:
+      menu.options.tamper = menu.options.tamper + ",base64encode"
+    else:
+      menu.options.tamper = "base64encode"
 
 """
-Check for modified whitespaces 
+Check for modified whitespaces.
 """
 def whitespace_check(payload):
   if "${IFS}" in payload:
@@ -540,7 +556,6 @@ def whitespace_check(payload):
         menu.options.tamper = menu.options.tamper + ",space2ifs"
       else:
         menu.options.tamper = "space2ifs"
-      tamper_scripts()
   else:
     count_plus = payload.count("+")
     if count_plus >= 2 and not "%20" in payload:
@@ -549,7 +564,6 @@ def whitespace_check(payload):
           menu.options.tamper = menu.options.tamper + ",space2plus"
         else:
           menu.options.tamper = "space2plus"
-        tamper_scripts()
     else:
       count_tabs = payload.count("%09")
       if count_tabs >= 1 and not "%20" in payload:
@@ -558,15 +572,71 @@ def whitespace_check(payload):
             menu.options.tamper = menu.options.tamper + ",space2tab"
           else:
             menu.options.tamper = "space2tab"
-          tamper_scripts()
       else:  
         settings.WHITESPACE[0] = "%20" 
 
 """
-Check for stored payloads and enable tamper scripts
+Recognise the payload.
+"""
+def recognise_payload(payload):
+  is_decoded = False
+  if (len(payload) % 4 == 0) and \
+    re.match(settings.BASE64_RECOGNITION_REGEX, payload) and \
+    not re.match(settings.HEX_RECOGNITION_REGEX, payload):
+      is_decoded = True
+      settings.MULTI_ENCODED_PAYLOAD.append("base64encode")
+      decoded_payload = base64.b64decode(payload)
+      if re.match(settings.HEX_RECOGNITION_REGEX, payload):
+        settings.MULTI_ENCODED_PAYLOAD.append("hexencode")
+        decoded_payload = decoded_payload.decode("hex")
+
+  elif re.match(settings.HEX_RECOGNITION_REGEX, payload):
+    is_decoded = True
+    settings.MULTI_ENCODED_PAYLOAD.append("hexencode")
+    decoded_payload = payload.decode("hex")
+    if (len(payload) % 4 == 0) and \
+      re.match(settings.BASE64_RECOGNITION_REGEX, decoded_payload) and \
+      not re.match(settings.HEX_RECOGNITION_REGEX, decoded_payload):
+        settings.MULTI_ENCODED_PAYLOAD.append("base64encode")
+        decoded_payload = base64.b64decode(decoded_payload)
+
+  for encode_type in settings.MULTI_ENCODED_PAYLOAD:
+    # Encode payload to base64 format.
+    if encode_type == 'base64encode':
+      base64_output(payload)
+    # Encode payload to hex format.
+    if encode_type == 'hexencode':
+      hex_output(payload)
+
+  if is_decoded:
+    return urllib.quote(decoded_payload)  
+  else:
+    return payload
+
+"""
+Check for stored payloads and enable tamper scripts.
 """
 def check_for_stored_tamper(payload):
-  whitespace_check(payload)
-  base64_output(payload)
+  if not menu.options.tamper:
+    decoded_payload = recognise_payload(payload)
+    whitespace_check(decoded_payload)
+    loaded_tamper_scripts()
+
+"""
+Perform base64 / hex encoding in payload.
+"""
+def perform_payload_encoding(payload):
+  for encode_type in settings.MULTI_ENCODED_PAYLOAD[::-1]:
+    # Encode payload to hex format.    
+    if encode_type == 'base64encode':
+      from src.core.tamper import base64encode
+      payload = base64encode.encode(payload)
+
+    # Encode payload to hex format.
+    if encode_type == 'hexencode':
+      from src.core.tamper import hexencode
+      payload = hexencode.encode(payload)
+
+  return payload
 
 #eof

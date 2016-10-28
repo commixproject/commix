@@ -106,7 +106,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "1.5.8"
+VERSION_NUM = "1.5.9"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"
@@ -453,8 +453,11 @@ IS_JSON = False
 # JSON Symbols
 JSON_RECOGNITION_REGEX = r'(?s)\A(\s*\[)*\s*\{.*"[^"]+"\s*:\s*("[^"]+"|\d+).*\}\s*(\]\s*)*\Z'
 
-# B64 format recognition
+# Base64 format recognition
 BASE64_RECOGNITION_REGEX = r'^[A-Za-z0-9+/]+[=]{0,2}$'
+
+# Hex encoded characters recognition
+HEX_RECOGNITION_REGEX = r'^[0-9a-f]+'
 
 # GET parameters recognition
 GET_PARAMETERS_REGEX = r"(.*?)\?(.+)"
@@ -536,6 +539,7 @@ HTTP_HEADERS = [ "useragent", "referer" ]
 TAMPER_SCRIPTS = {
                   "space2ifs": False,
                   "base64encode": False,
+                  "hexencode": False,
                   "space2plus": False,
                   "space2tab": False
                  }
@@ -567,5 +571,8 @@ DEFAULT_CRAWLDEPTH_LEVEL = 0
 
 # Command history
 CLI_HISTORY = ""
+
+# Check for multi encoded payloads
+MULTI_ENCODED_PAYLOAD = []
 
 #eof

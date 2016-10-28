@@ -19,7 +19,6 @@ import sys
 import time
 import string
 import random
-import base64
 import urllib
 import urllib2
 
@@ -143,11 +142,12 @@ def eb_injection_handler(url, delay, filename, http_request_method):
 
               # Whitespace fixation
               payload = re.sub(" ", whitespace, payload)
+              
+              # Check for base64 / hex encoding
+              payload = checks.perform_payload_encoding(payload)
 
-              if settings.TAMPER_SCRIPTS['base64encode']:
-                from src.core.tamper import base64encode
-                payload = base64encode.encode(payload)
-              else:
+              if not settings.TAMPER_SCRIPTS['base64encode'] and \
+                   not settings.TAMPER_SCRIPTS['hexencode']:
                 payload = re.sub(" ", "%20", payload)
 
               # Check if defined "--verbose" option.

@@ -19,7 +19,6 @@ import time
 import json
 import string
 import random
-import base64
 import urllib
 import urllib2
 import urlparse
@@ -197,9 +196,15 @@ def injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_meth
     # Whitespace fixation
     payload = re.sub(" ", whitespace, payload)
 
+    # Encode payload to base64 format.
     if settings.TAMPER_SCRIPTS['base64encode']:
       from src.core.tamper import base64encode
       payload = base64encode.encode(payload)
+
+    # Encode payload to hex format.
+    elif settings.TAMPER_SCRIPTS['hexencode']:
+      from src.core.tamper import hexencode
+      payload = hexencode.encode(payload)
 
     # Check if defined "--verbose" option.
     if settings.VERBOSITY_LEVEL >= 1:
