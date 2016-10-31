@@ -404,6 +404,8 @@ def do_check(url, filename):
       question_msg += "' in order to perform more tests? [Y/n/q] > "
       sys.stdout.write(settings.print_question_msg(question_msg))
       next_level = sys.stdin.readline().replace("\n","").lower()
+      if len(next_level) == 0:
+         next_level = "y"
       if next_level in settings.CHOICE_YES:
         menu.options.level = int(menu.options.level + scan_level)
         if perform_checks(url,filename) == False and scan_level < settings.HTTP_HEADER_INJECTION_LEVEL :
@@ -415,8 +417,6 @@ def do_check(url, filename):
       elif next_level in settings.CHOICE_QUIT:
         sys.exit(0)
       else:
-        if next_level == "":
-          next_level = "enter"
         err_msg = "'" + next_level + "' is not a valid answer."  
         print settings.print_error_msg(err_msg)
         pass

@@ -338,6 +338,8 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                         question_msg = "Do you want to try the temporary directory (" + tmp_path + ") [Y/n/q] > "
                         sys.stdout.write(settings.print_question_msg(question_msg))
                         tmp_upload = sys.stdin.readline().replace("\n","").lower()
+                        if len(tmp_upload) == 0:
+                           tmp_upload = "y"
                         if tmp_upload in settings.CHOICE_YES:
                           exit_loops = True
                           settings.TEMPFILE_BASED_STATE = True
@@ -355,8 +357,6 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                           print ""
                           raise
                         else:
-                          if tmp_upload == "":
-                            tmp_upload = "enter"
                           err_msg = "'" + tmp_upload + "' is not a valid answer."  
                           print settings.print_error_msg(err_msg)
                           pass
@@ -502,8 +502,6 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                   delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
                   sys.exit(0)
                 else:
-                  if enumerate_again == "":
-                    enumerate_again = "enter"
                   err_msg = "'" + enumerate_again + "' is not a valid answer."
                   print settings.print_error_msg(err_msg)
                   pass
@@ -523,6 +521,8 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                 question_msg = "Do you want to access files again? [Y/n/q] > "
                 sys.stdout.write(settings.print_question_msg(question_msg))
                 file_access_again = sys.stdin.readline().replace("\n","").lower()
+                if len(file_access_again) == 0:
+                   file_access_again= "y"
                 if file_access_again in settings.CHOICE_YES:
                   fb_file_access.do_check(separator, payload, TAG, delay, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
                   print ""
@@ -534,8 +534,6 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                   delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
                   sys.exit(0)
                 else:
-                  if file_access_again == "":
-                    file_access_again  = "enter"
                   err_msg = "'" + enumerate_again + "' is not a valid answer."
                   print settings.print_error_msg(err_msg)
                   pass
@@ -571,6 +569,8 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                 question_msg = "Do you want a Pseudo-Terminal? [Y/n/q] > "
                 sys.stdout.write(settings.print_question_msg(question_msg))
                 gotshell = sys.stdin.readline().replace("\n","").lower()
+                if len(gotshell) == 0:
+                   gotshell = "y"
                 if gotshell in settings.CHOICE_YES:
                   print ""
                   print "Pseudo-Terminal (type '" + Style.BRIGHT + "?" + Style.RESET_ALL + "' for available options)"
@@ -629,8 +629,6 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                   delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
                   sys.exit(0)
                 else:
-                  if gotshell == "":
-                    gotshell = "enter"
                   err_msg = "'" + gotshell + "' is not a valid answer."  
                   print settings.print_error_msg(err_msg)
                   pass

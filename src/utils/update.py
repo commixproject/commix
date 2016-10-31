@@ -111,13 +111,13 @@ def check_for_update():
         question_msg = "Do you want to update to the latest version now? [Y/n] > "
         sys.stdout.write(settings.print_question_msg(question_msg))
         do_update = sys.stdin.readline().replace("\n","").lower()
+        if len(do_update) == 0:
+           do_update = "y"
         if do_update in settings.CHOICE_YES:
             updater()
         elif do_update in settings.CHOICE_NO:
           break
         else:
-          if do_update == "":
-            do_update = "enter"
           err_msg = "'" + do_update + "' is not a valid answer."  
           print settings.print_error_msg(err_msg)
           pass

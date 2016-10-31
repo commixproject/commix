@@ -283,8 +283,6 @@ def cb_injection_handler(url, delay, filename, http_request_method):
                 elif enumerate_again in settings.CHOICE_QUIT:
                   sys.exit(0)
                 else:
-                  if enumerate_again == "":
-                    enumerate_again = "enter"
                   err_msg = "'" + enumerate_again + "' is not a valid answer."  
                   print settings.print_error_msg(err_msg)
                   pass
@@ -303,6 +301,8 @@ def cb_injection_handler(url, delay, filename, http_request_method):
                 question_msg = "Do you want to access files again? [Y/n/q] > "
                 sys.stdout.write(settings.print_question_msg(question_msg))
                 file_access_again = sys.stdin.readline().replace("\n","").lower()
+                if len(file_access_again) == 0:
+                   file_access_again = "y"
                 if file_access_again in settings.CHOICE_YES:
                   cb_file_access.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, delay)
                   print ""
@@ -312,8 +312,6 @@ def cb_injection_handler(url, delay, filename, http_request_method):
                 elif file_access_again in settings.CHOICE_QUIT:
                   sys.exit(0)
                 else:
-                  if file_access_again == "":
-                    file_access_again  = "enter"
                   err_msg = "'" + file_access_again  + "' is not a valid answer."  
                   print settings.print_error_msg(err_msg)
                   pass
@@ -342,6 +340,8 @@ def cb_injection_handler(url, delay, filename, http_request_method):
               question_msg = "Do you want a Pseudo-Terminal shell? [Y/n/q] > "
               sys.stdout.write(settings.print_question_msg(question_msg))
               gotshell = sys.stdin.readline().replace("\n","").lower()
+              if len(gotshell) == 0:
+                 gotshell = "y"
               if gotshell in settings.CHOICE_YES:
                 print ""
                 print "Pseudo-Terminal (type '" + Style.BRIGHT + "?" + Style.RESET_ALL + "' for available options)"
@@ -416,8 +416,6 @@ def cb_injection_handler(url, delay, filename, http_request_method):
                 sys.exit(0)
 
               else:
-                if gotshell == "":
-                  gotshell = "enter"
                 err_msg = "'" + gotshell + "' is not a valid answer."
                 print settings.print_error_msg(err_msg)
                 pass

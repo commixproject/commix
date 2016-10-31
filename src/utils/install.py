@@ -76,6 +76,8 @@ def installer():
         question_msg = "Do you want to remove commix? [Y/n/q] > "
         sys.stdout.write(settings.print_question_msg(question_msg))
         uninstall = sys.stdin.readline().replace("\n","").lower()
+        if len(uninstall) == 0:
+           uninstall = "y"
         if uninstall in settings.CHOICE_YES:
           uninstaller()
           sys.exit(0)
@@ -83,8 +85,6 @@ def installer():
         uninstall in settings.CHOICE_QUIT: 
           sys.exit(0)
         else:
-          if uninstall == "":
-            uninstall = "enter"
           err_msg = "'" + uninstall + "' is not a valid answer."
           print settings.print_error_msg(err_msg)
           pass

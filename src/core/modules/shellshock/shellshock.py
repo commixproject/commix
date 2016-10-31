@@ -710,6 +710,8 @@ def shellshock_handler(url, http_request_method, filename):
               question_msg = "Do you want to enumerate again? [Y/n/q] > "
               sys.stdout.write(settings.print_question_msg(question_msg))
               enumerate_again = sys.stdin.readline().replace("\n","").lower()
+              if len(enumerate_again) == 0:
+                 enumerate_again = "y"
               if enumerate_again in settings.CHOICE_YES:
                 enumeration(url, cve, check_header, filename)
                 break
@@ -718,8 +720,6 @@ def shellshock_handler(url, http_request_method, filename):
               elif enumerate_again in settings.CHOICE_QUIT:
                 sys.exit(0)
               else:
-                if enumerate_again == "":
-                  enumerate_again = "enter"
                 err_msg = "'" + enumerate_again + "' is not a valid answer."  
                 print settings.print_error_msg(err_msg)
                 pass
@@ -732,6 +732,8 @@ def shellshock_handler(url, http_request_method, filename):
               question_msg = "Do you want to access files again? [Y/n/q] > "
               sys.stdout.write(settings.print_question_msg(question_msg))
               file_access_again = sys.stdin.readline().replace("\n","").lower()
+              if len(file_access_again) == 0:
+                 file_access_again= "y"
               if file_access_again in settings.CHOICE_YES:
                 file_access(url, cve, check_header, filename)
                 break
@@ -740,8 +742,6 @@ def shellshock_handler(url, http_request_method, filename):
               elif file_access_again in settings.CHOICE_QUIT:
                 sys.exit(0)
               else:
-                if file_access_again == "":
-                  file_access_again  = "enter"
                 err_msg = "'" + file_access_again  + "' is not a valid answer."  
                 print settings.print_error_msg(err_msg)
                 pass
@@ -767,6 +767,8 @@ def shellshock_handler(url, http_request_method, filename):
               question_msg = "Do you want a Pseudo-Terminal? [Y/n/q] > "
               sys.stdout.write(settings.print_question_msg(question_msg))
               gotshell = sys.stdin.readline().replace("\n","").lower()
+              if len(gotshell) == 0:
+                 gotshell= "y"
               if gotshell in settings.CHOICE_YES:
                 print ""
                 print "Pseudo-Terminal (type '" + Style.BRIGHT + "?" + Style.RESET_ALL + "' for available options)"
@@ -832,8 +834,6 @@ def shellshock_handler(url, http_request_method, filename):
                 sys.exit(0)
 
               else:
-                if gotshell == "":
-                  gotshell = "enter"
                 err_msg = "'" + gotshell + "' is not a valid answer."  
                 print settings.print_error_msg(err_msg)
                 continue

@@ -130,8 +130,11 @@ def input_cmd(http_request_method, url, vuln_parameter, ip_src, technique):
   while True:
     if go_back == True:
       break
-    question_msg = "Do you want a Pseudo-Terminal shell? [Y/n/q] > "  
-    gotshell = raw_input("\n" + settings.print_question_msg(question_msg)).lower()
+    question_msg = "Do you want a Pseudo-Terminal? [Y/n/q] > "
+    sys.stdout.write(settings.print_question_msg(question_msg))
+    gotshell = sys.stdin.readline().replace("\n","").lower()
+    if len(gotshell) == 0:
+       gotshell= "y"
     if gotshell in settings.CHOICE_YES:
       print "\nPseudo-Terminal (type '" + Style.BRIGHT + "?" + Style.RESET_ALL + "' for available options)"
       if readline_error:
@@ -182,8 +185,6 @@ def input_cmd(http_request_method, url, vuln_parameter, ip_src, technique):
       os._exit(0)
 
     else:
-      if gotshell == "":
-        gotshell = "enter"
       err_msg = "'" + gotshell + "' is not a valid answer."
       print settings.print_error_msg(err_msg)
       pass

@@ -33,6 +33,8 @@ def next_attack_vector(technique, go_back):
     question_msg = "Continue with testing the " + technique + "? [Y/n/q] > "
     sys.stdout.write(settings.print_question_msg(question_msg))
     next_attack_vector = sys.stdin.readline().replace("\n","").lower()
+    if len(next_attack_vector) == 0:
+       next_attack_vector = "y"
     if next_attack_vector in settings.CHOICE_YES:
       return True
     elif next_attack_vector in settings.CHOICE_NO:
@@ -40,8 +42,6 @@ def next_attack_vector(technique, go_back):
     elif next_attack_vector in settings.CHOICE_QUIT:
       sys.exit(0)
     else:
-      if next_attack_vector == "":
-        next_attack_vector = "enter"
       err_msg = "'" + next_attack_vector + "' is not a valid answer."  
       print settings.print_error_msg(err_msg)
       pass
@@ -123,6 +123,8 @@ def continue_tests(err):
       question_msg += ") message and continue the tests? [Y/n/q] > "
       sys.stdout.write(settings.print_question_msg(question_msg))
       continue_tests = sys.stdin.readline().replace("\n","").lower()
+      if len(continue_tests) == 0:
+         continue_tests = "y"
       if continue_tests in settings.CHOICE_YES:
         return True
       elif continue_tests in settings.CHOICE_NO:
@@ -130,8 +132,6 @@ def continue_tests(err):
       elif continue_tests in settings.CHOICE_QUIT:
         return False
       else:
-        if continue_tests == "":
-          continue_tests = "enter"
         err_msg = "'" + continue_tests + "' is not a valid answer."  
         print settings.print_error_msg(err_msg)
         pass
@@ -186,6 +186,8 @@ def ps_check():
       question_msg += "so ensure that PowerShell is enabled? [Y/n/q] > "
       sys.stdout.write(settings.print_question_msg(question_msg))
       ps_check = sys.stdin.readline().replace("\n","").lower()
+      if len(ps_check) == 0:
+         ps_check = "y"
       if ps_check in settings.CHOICE_YES:
         menu.options.ps_version = True
         break
@@ -195,8 +197,6 @@ def ps_check():
         print ""
         os._exit(0)
       else:  
-        if ps_check == "":
-          ps_check = "enter"
         err_msg = "'" + ps_check + "' is not a valid answer."  
         print settings.print_error_msg(err_msg)
         pass
@@ -210,14 +210,14 @@ def ps_check_failed():
     question_msg += "and continue the procedure? [Y/n/q] > "
     sys.stdout.write(settings.print_question_msg(question_msg))
     ps_check = sys.stdin.readline().replace("\n","").lower()
+    if len(ps_check) == 0:
+       ps_check = "y"
     if ps_check in settings.CHOICE_YES:
       break
     elif ps_check in settings.CHOICE_NO:
       print ""
       os._exit(0)
     else:  
-      if ps_check == "":
-        ps_check = "enter"
       err_msg = "'" + ps_check + "' is not a valid answer."  
       print settings.print_error_msg(err_msg)
       pass
@@ -256,6 +256,8 @@ def check_CGI_scripts(url):
         question_msg = "Do you want to enable the shellshock injection module? [Y/n/q] > "
         sys.stdout.write(settings.print_question_msg(question_msg))
         shellshock_check = sys.stdin.readline().replace("\n","").lower()
+        if len(shellshock_check) == 0:
+           shellshock_check = "y"
         if shellshock_check in settings.CHOICE_YES:
           menu.options.shellshock = True
           break
@@ -266,8 +268,6 @@ def check_CGI_scripts(url):
           print ""
           os._exit(0)
         else:  
-          if shellshock_check == "":
-            shellshock_check = "enter"
           err_msg = "'" + shellshock_check + "' is not a valid answer."  
           print settings.print_error_msg(err_msg)
           pass
@@ -317,6 +317,8 @@ def identified_os():
     question_msg = "How do you want to proceed? [(C)ontinue/(s)kip/(q)uit] > "
     sys.stdout.write(settings.print_question_msg(question_msg))
     proceed_option = sys.stdin.readline().replace("\n","").lower()
+    if len(proceed_option) == 0:
+       proceed_option = "c"
     if proceed_option.lower() in settings.CHOICE_PROCEED :
       if proceed_option.lower() == "s":
         return False
@@ -325,8 +327,6 @@ def identified_os():
       elif proceed_option.lower() == "q":
         raise SystemExit()
     else:
-      if proceed_option == "":
-        proceed_option = "enter"
       err_msg = "'" + proceed_option + "' is not a valid answer."  
       print settings.print_error_msg(err_msg)
       pass
@@ -399,6 +399,8 @@ def identified_http_auth_type(auth_type):
   question_msg = "How do you want to proceed? [(C)ontinue/(s)kip/(q)uit] > "
   sys.stdout.write(settings.print_question_msg(question_msg))
   proceed_option = sys.stdin.readline().replace("\n","").lower()
+  if len(proceed_option) == 0:
+    proceed_option = "c"
   if proceed_option.lower() in settings.CHOICE_PROCEED :
     if proceed_option.lower() == "s":
       return False
@@ -407,8 +409,6 @@ def identified_http_auth_type(auth_type):
     elif proceed_option.lower() == "q":
       raise SystemExit()
   else:
-    if proceed_option == "":
-      proceed_option = "enter"
     err_msg = "'" + proceed_option + "' is not a valid answer." 
     print settings.print_error_msg(err_msg)
     pass

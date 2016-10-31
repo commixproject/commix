@@ -95,6 +95,8 @@ def crawler(url):
     question_msg += "the existence of 'sitemap.xml'? [Y/n/q] > "
     sys.stdout.write(settings.print_question_msg(question_msg))
     sitemap_check = sys.stdin.readline().replace("\n","").lower()
+    if len(sitemap_check) == 0:
+       sitemap_check = "y"
     if sitemap_check in settings.CHOICE_YES:
       sitemap_check = True
       break
@@ -104,8 +106,6 @@ def crawler(url):
     elif sitemap_check in settings.CHOICE_QUIT:
       sys.exit(0)
     else:
-      if sitemap_check == "":
-        sitemap_check = "enter"
       err_msg = "'" + sitemap_check + "' is not a valid answer."  
       print settings.print_error_msg(err_msg)
       pass
@@ -121,6 +121,8 @@ def crawler(url):
           question_msg = "Do you want to follow the detected recursion? [Y/n/q] > "
           sys.stdout.write(settings.print_question_msg(question_msg))
           sitemap_check = sys.stdin.readline().replace("\n","").lower()
+          if len(sitemap_check) == 0:
+             sitemap_check = "y"
           if sitemap_check in settings.CHOICE_YES:
             output_href = sitemap(recursion)
             sitemap_check = output_href
@@ -130,8 +132,6 @@ def crawler(url):
           elif sitemap_check in settings.CHOICE_QUIT:
             sys.exit(0)
           else:
-            if sitemap_check == "":
-              sitemap_check = "enter"
             err_msg = "'" + sitemap_check + "' is not a valid answer."  
             print settings.print_error_msg(err_msg)
             pass
@@ -158,6 +158,8 @@ def crawler(url):
       question_msg = "Do you want to use this URL to perform tests? [Y/n/q] > "
       sys.stdout.write(settings.print_question_msg(question_msg))
       use_url = sys.stdin.readline().replace("\n","").lower()
+      if len(use_url) == 0:
+         use_url = "y"
       if use_url in settings.CHOICE_YES:
         return check_url
       elif use_url in settings.CHOICE_NO:

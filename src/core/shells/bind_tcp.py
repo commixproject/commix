@@ -60,6 +60,8 @@ def set_php_working_dir():
     question_msg += "' as PHP working directory on the target host? [Y/n] > "
     sys.stdout.write(settings.print_question_msg(question_msg))
     php_dir = sys.stdin.readline().replace("\n","").lower()
+    if len(php_dir) == 0:
+       php_dir = "y"
     if php_dir in settings.CHOICE_YES:
       break
     elif php_dir in settings.CHOICE_NO:
@@ -70,8 +72,6 @@ def set_php_working_dir():
       settings.USER_DEFINED_PHP_DIR = True
       break
     else:
-      if php_dir == "":
-        php_dir = "enter"
       err_msg = "'" + php_dir + "' is not a valid answer."  
       print settings.print_error_msg(err_msg)
       pass
@@ -85,6 +85,8 @@ def set_python_working_dir():
     question_msg += "' as Python working directory on the target host? [Y/n] > "
     sys.stdout.write(settings.print_question_msg(question_msg))
     python_dir = sys.stdin.readline().replace("\n","").lower()
+    if len(python_dir) == 0:
+       python_dir = "y"
     if python_dir in settings.CHOICE_YES:
       break
     elif python_dir in settings.CHOICE_NO:
@@ -95,8 +97,6 @@ def set_python_working_dir():
       settings.USER_DEFINED_PYTHON_DIR = True
       break
     else:
-      if python_dir == "":
-        python_dir = "enter"
       err_msg = "'" + python_dir + "' is not a valid answer."  
       print settings.print_error_msg(err_msg)
       pass

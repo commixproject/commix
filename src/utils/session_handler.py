@@ -240,6 +240,8 @@ def notification(url, technique):
         question_msg += " injection point? [Y/n/q] > "
         sys.stdout.write(settings.print_question_msg(question_msg))
         settings.LOAD_SESSION = sys.stdin.readline().replace("\n","").lower()
+        if len(settings.LOAD_SESSION) == 0:
+           settings.LOAD_SESSION = "y"
         if settings.LOAD_SESSION in settings.CHOICE_YES:
           return True
         elif settings.LOAD_SESSION in settings.CHOICE_NO:
@@ -249,11 +251,13 @@ def notification(url, technique):
               question_msg = "Which technique do you want to re-evaluate? [(C)urrent/(a)ll/(n)one] > "
               sys.stdout.write(settings.print_question_msg(question_msg))
               proceed_option = sys.stdin.readline().replace("\n","").lower()
+              if len(proceed_option) == 0:
+                 proceed_option = "c"
               if proceed_option.lower() in settings.CHOICE_PROCEED :
                 if proceed_option.lower() == "a":
                   settings.RETEST = True
                   break
-                elif proceed_option.lower() == "c":
+                elif proceed_option.lower() == "c" :
                   settings.RETEST = False
                   break
                 elif proceed_option.lower() == "n":
@@ -261,8 +265,6 @@ def notification(url, technique):
                 else:
                   pass  
               else:
-                if proceed_option.lower()  == "":
-                   proceed_option  = "enter"
                 err_msg = "'" +  proceed_option + "' is not a valid answer."   
                 print settings.print_error_msg(err_msg)
                 pass   
@@ -272,8 +274,6 @@ def notification(url, technique):
         elif settings.LOAD_SESSION in settings.CHOICE_QUIT:
           raise SystemExit()
         else:
-          if settings.LOAD_SESSION == "":
-            settings.LOAD_SESSION = "enter"
           err_msg = "'" + settings.LOAD_SESSION + "' is not a valid answer."  
           print settings.print_error_msg(err_msg)
           pass

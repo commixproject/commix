@@ -309,6 +309,8 @@ def main():
               question_msg = "Do you want to enable an HTTP server? [Y/n/q] > "
               sys.stdout.write(settings.print_question_msg(question_msg))
               enable_HTTP_server = sys.stdin.readline().replace("\n","").lower()
+              if len(enable_HTTP_server) == 0:
+                 enable_HTTP_server = "y"              
               if enable_HTTP_server in settings.CHOICE_YES:
                 # Check if file exists
                 if not os.path.isfile(menu.options.file_upload):
@@ -330,8 +332,6 @@ def main():
               elif enable_HTTP_server in settings.CHOICE_QUIT:
                 sys.exit(0)
               else:
-                if enable_HTTP_server == "":
-                  enable_HTTP_server = "enter"
                 err_msg = "'" + enable_HTTP_server + "' is not a valid answer."  
                 print settings.print_error_msg(err_msg)
                 pass
@@ -464,6 +464,8 @@ def main():
                 question_msg += "' as Python working directory on the target host? [Y/n] > "
                 sys.stdout.write(settings.print_question_msg(question_msg))
                 python_dir = sys.stdin.readline().replace("\n","").lower()
+                if len(python_dir) == 0:
+                   python_dir = "y" 
                 if python_dir in settings.CHOICE_YES:
                   break
                 elif python_dir in settings.CHOICE_NO:
@@ -473,8 +475,6 @@ def main():
                   settings.WIN_PYTHON_DIR = sys.stdin.readline().replace("\n","").lower()
                   break
                 else:
-                  if python_dir == "":
-                    python_dir = "enter"
                   err_msg = "'" + python_dir + "' is not a valid answer."  
                   print settings.print_error_msg(err_msg)
                   pass
@@ -524,7 +524,7 @@ def main():
                       raise SystemExit()
                   else:
                     if got_os == "":
-                      got_os = "enter"
+                      got_os = "y"
                     err_msg = "'" + got_os + "' is not a valid answer."  
                     print settings.print_error_msg(err_msg)
                     pass
@@ -613,6 +613,8 @@ def main():
                     question_msg = "Do you want to perform a dictionary-based attack? [Y/n/q] > "
                     sys.stdout.write(settings.print_question_msg(question_msg))
                     do_update = sys.stdin.readline().replace("\n","").lower()
+                    if len(do_update) == 0:
+                       do_update = "y" 
                     if do_update in settings.CHOICE_YES:
                       auth_creds = authentication.http_auth_cracker(url, realm)
                       if auth_creds != False:
@@ -626,8 +628,6 @@ def main():
                     elif do_update in settings.CHOICE_QUIT:
                       sys.exit(0)
                     else:
-                      if do_update == "":
-                        do_update = "enter"
                       err_msg = "'" + do_update + "' is not a valid answer."  
                       print settings.print_error_msg(err_msg)
                       pass
@@ -646,6 +646,8 @@ def main():
                     question_msg = "Do you want to perform a dictionary-based attack? [Y/n/q] > "
                     sys.stdout.write(settings.print_question_msg(question_msg))
                     do_update = sys.stdin.readline().replace("\n","").lower()
+                    if len(do_update) == 0:
+                       do_update = "y" 
                     if do_update in settings.CHOICE_YES:
                       auth_creds = authentication.http_auth_cracker(url, realm)
                       if auth_creds != False:
@@ -659,8 +661,6 @@ def main():
                     elif do_update in settings.CHOICE_QUIT:
                       sys.exit(0)
                     else:
-                      if do_update == "":
-                        do_update = "enter"
                       err_msg = "'" + do_update + "' is not a valid answer."  
                       print settings.print_error_msg(err_msg)
                       pass

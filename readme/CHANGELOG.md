@@ -1,4 +1,5 @@
 ## Version 1.5 (upcoming)
+* Fixed: Minor improvement for choosing default value when pressing enter.
 * Added: New tamper script "hexencode.py" that encodes the payload to hex format.
 * Fixed: Minor improvements in executed commands history.
 * Added: New verbosity level (4) for printing the HTTP response page content.
