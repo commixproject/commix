@@ -99,7 +99,6 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
   for prefix in settings.PREFIXES:
     for suffix in settings.SUFFIXES:
       for separator in settings.SEPARATORS:
-        
         how_long_statistic = []
         # If a previous session is available.
         if settings.LOAD_SESSION and session_handler.notification(url, technique):
@@ -481,8 +480,10 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                     cmd = checks.escaped_cmd(cmd)
                     if cmd.lower() in settings.SHELL_OPTIONS:
                       go_back, go_back_again = shell_options.check_option(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, technique, go_back, no_result, delay, go_back_again)
-                      if go_back:
+                      if go_back and go_back_again == False:
                         break
+                      if go_back and go_back_again:
+                        return True 
                     else:
                       print ""
                       if menu.options.ignore_session or \
@@ -520,7 +521,7 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                 err_msg = "'" + gotshell + "' is not a valid answer."
                 print settings.print_error_msg(err_msg)
                 pass
-              #break
+              break
           
   if no_result == True:
     print ""

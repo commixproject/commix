@@ -92,7 +92,7 @@ def examine_requests(payload, vuln_parameter, http_request_method, url, delay, u
 Check if target host is vulnerable.
 """
 def injection_test(payload, http_request_method, url):
-  
+
   start = 0
   end = 0
   start = time.time()
