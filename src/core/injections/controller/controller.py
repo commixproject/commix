@@ -55,10 +55,7 @@ def check_for_stored_sessions(url, http_request_method):
       if session_handler.check_stored_parameter(url, http_request_method):
         settings.LOAD_SESSION = True
         return True    
-
-  if menu.options.flush_session:
-    session_handler.flush(url)  
-
+        
 """
 Check for previously stored injection level.
 """

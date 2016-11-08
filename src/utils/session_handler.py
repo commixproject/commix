@@ -42,13 +42,19 @@ def table_name(url):
 Flush session.
 """
 def flush(url):
+  info_msg = "Flushing the session file... "
+  sys.stdout.write(settings.print_info_msg(info_msg))
+  sys.stdout.flush()
   try:
     conn = sqlite3.connect(settings.SESSION_FILE)
     tables = list(conn.execute("SELECT name FROM sqlite_master WHERE type is 'table'"))
     conn.executescript(';'.join(["DROP TABLE IF EXISTS %s" %i for i in tables]))
     conn.commit()
     conn.close()
+    print "[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]"
+
   except sqlite3.OperationalError, err_msg:
+    print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
     print settings.print_critical_msg(err_msg)
 
 """

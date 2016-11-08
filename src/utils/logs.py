@@ -43,10 +43,13 @@ def save_cmd_history():
 Load commands from history.
 """
 def load_cmd_history():
-  cli_history= os.path.expanduser(settings.CLI_HISTORY)
-  if os.path.exists(cli_history):
-    readline.read_history_file(cli_history)
-
+  try:
+    cli_history= os.path.expanduser(settings.CLI_HISTORY)
+    if os.path.exists(cli_history):
+      readline.read_history_file(cli_history)
+  except:
+    pass
+    
 """
 Create log files
 """

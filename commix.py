@@ -257,6 +257,9 @@ def main():
         elif menu.options.tor:
           tor.do_check()
 
+        if menu.options.flush_session:
+          session_handler.flush(url) 
+
         info_msg = "Checking connection to the target URL... "
         sys.stdout.write(settings.print_info_msg(info_msg))
         sys.stdout.flush()
