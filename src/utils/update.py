@@ -93,7 +93,7 @@ Check for new version of commix
 """
 def check_for_update():
   try:
-    response = urllib2.urlopen('https://raw.githubusercontent.com/stasinopoulos/commix/master/src/utils/settings.py')
+    response = urllib2.urlopen('https://raw.githubusercontent.com/commixproject/commix/master/src/utils/settings.py')
     version_check = response.readlines()
     for line in version_check:
       line = line.rstrip()

@@ -106,7 +106,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "1.5.13"
+VERSION_NUM = "1.5.14"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"
@@ -166,7 +166,7 @@ SESSION_APPLIED_TECHNIQUES = ""
 IS_WINDOWS = hasattr(sys, 'getwindowsversion')
 
 # Git URL.
-GIT_URL = "https://github.com/stasinopoulos/" + APPLICATION + ".git"
+GIT_URL = "https://github.com/commixproject/" + APPLICATION + ".git"
 
 # Output Directory
 OUTPUT_DIR = ".output/"  
@@ -428,7 +428,7 @@ SERVER_OS_BANNERS = [
 
 TARGET_APPLICATION = ""
 # Unsupported target application(s) [1]
-# [1] https://github.com/stasinopoulos/commix/wiki/Target-applications
+# [1] https://github.com/commixproject/commix/wiki/Target-applications
 UNSUPPORTED_TARGET_APPLICATION = [ 
     "JSP"
 ]

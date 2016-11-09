@@ -56,48 +56,48 @@ To get a list of all options and switches use:
 
 **Q**: Where can I check all the available options and switches? 
 
-**A**: Check the '**[usage](https://github.com/stasinopoulos/commix/wiki/Usage)**' wiki page.
+**A**: Check the '**[usage](https://github.com/commixproject/commix/wiki/Usage)**' wiki page.
 
 #### Usage Examples
 
 **Q**: Can I get some basic ideas on how to use commix? 
 
-**A**: Just go and check the '**[usage examples](https://github.com/stasinopoulos/commix/wiki/Usage-Examples)**' wiki page, where there are several test cases and attack scenarios.
+**A**: Just go and check the '**[usage examples](https://github.com/commixproject/commix/wiki/Usage-Examples)**' wiki page, where there are several test cases and attack scenarios.
 
 #### Upload Shells
 
 **Q**: How easily can I upload web-shells on a target host via commix? 
 
-**A**: Commix enables you to upload web-shells (e.g metasploit PHP meterpreter) easily on target host. For more, check the '**[upload shells](https://github.com/stasinopoulos/commix/wiki/Upload-shells)**' wiki page.
+**A**: Commix enables you to upload web-shells (e.g metasploit PHP meterpreter) easily on target host. For more, check the '**[upload shells](https://github.com/commixproject/commix/wiki/Upload-shells)**' wiki page.
 
 #### Modules Development
 
 **Q**: Do you want to increase the capabilities of the commix tool and/or to adapt it to our needs?
 
-**A**: You can easily develop and import our own modules. For more, check the '**[module development](https://github.com/stasinopoulos/commix/wiki/Module-Development)**' wiki page.
+**A**: You can easily develop and import our own modules. For more, check the '**[module development](https://github.com/commixproject/commix/wiki/Module-Development)**' wiki page.
 
 #### Command Injection Testbeds
 
 **Q**: How can I test or evaluate the exploitation abilities of commix?
 
-**A**: Check the '**[command injection testbeds](https://github.com/stasinopoulos/commix/wiki/Command-Injection-Testbeds)**' wiki page which includes a collection of pwnable web applications and/or VMs (that include web applications) vulnerable to command injection attacks.
+**A**: Check the '**[command injection testbeds](https://github.com/commixproject/commix/wiki/Command-Injection-Testbeds)**' wiki page which includes a collection of pwnable web applications and/or VMs (that include web applications) vulnerable to command injection attacks.
 
 #### Exploitation Demos
 
 **Q**: Is there a place where I can check for demos of commix?
 
-**A**: If you want to see a collection of demos, about the exploitation abilities of commix, take a look at the '**[exploitation demos](https://github.com/stasinopoulos/commix/wiki/Exploitation-Demos)**' wiki page.
+**A**: If you want to see a collection of demos, about the exploitation abilities of commix, take a look at the '**[exploitation demos](https://github.com/commixproject/commix/wiki/Exploitation-Demos)**' wiki page.
 
 #### Bugs and Enhancements
 
 **Q**: I found a bug / I have to suggest a new feature! What can I do?
 
-**A**: For bug reports or enhancements, please open an issue **[here](https://github.com/stasinopoulos/commix/issues)**.
+**A**: For bug reports or enhancements, please open an issue **[here](https://github.com/commixproject/commix/issues)**.
 
 #### Presentations and White Papers
 **Q**: Is there a place where I can find presentations and/or white papers regarding commix?
 
-**A**: For presentations and/or white papers published in conferences, check the '**[presentations](https://github.com/stasinopoulos/commix/wiki/Presentations)**' wiki page.
+**A**: For presentations and/or white papers published in conferences, check the '**[presentations](https://github.com/commixproject/commix/wiki/Presentations)**' wiki page.
 
 #### Support and Donations
 **Q**: Except for tech stuff (bug reports or enhancements) is there any other way that I can support the development of commix?
