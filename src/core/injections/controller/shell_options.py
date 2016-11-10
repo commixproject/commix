@@ -152,5 +152,5 @@ def check_option(separator, TAG, cmd, prefix, suffix, whitespace, http_request_m
   elif os_shell_option == "quit":                    
     sys.exit(0)
 
-  # else:
-  #   return go_back, go_back_again
+  else:
+    return go_back, go_back_again
