@@ -54,7 +54,7 @@ def sitemap(url):
   except:
     warn_msg = "The 'sitemap.xml' not found."
     print settings.print_warning_msg(warn_msg) 
-    return False 
+    return ""
 
 """
 Grab the crawled hrefs.
