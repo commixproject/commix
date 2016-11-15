@@ -288,8 +288,13 @@ def main():
               err_msg += "if you want to try to exploit the provided HTTP header."
               print settings.print_critical_msg(err_msg)
               sys.exit(0)
-        except:
-          raise
+
+        except urllib2.HTTPError, e:
+          if settings.VERBOSITY_LEVEL < 2:
+            print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
+          err_msg = str(e).replace(": "," (") + ")."
+          print settings.print_critical_msg(err_msg)
+          raise SystemExit
 
         html_data = content = response.read()
         if settings.VERBOSITY_LEVEL < 2:

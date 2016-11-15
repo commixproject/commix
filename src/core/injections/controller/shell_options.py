@@ -154,3 +154,4 @@ def check_option(separator, TAG, cmd, prefix, suffix, whitespace, http_request_m
 
   else:
     return go_back, go_back_again
+
