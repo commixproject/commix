@@ -388,6 +388,8 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
               while True:
                 question_msg = "Do you want to enumerate again? [Y/n/q] > "
                 enumerate_again = raw_input("\n" + settings.print_question_msg(question_msg)).lower()
+                if len(enumerate_again) == 0:
+                  enumerate_again = "y"
                 if enumerate_again in settings.CHOICE_YES:
                   tb_enumeration.do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, delay, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
                   print ""
@@ -450,7 +452,7 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
             while True:
               if go_back == True:
                 break 
-              question_msg = "Do you want a Pseudo-Terminal? [Y/n/q] > "
+              question_msg = "Do you want a Pseudo-Terminal shell? [Y/n/q] > "
               sys.stdout.write(settings.print_question_msg(question_msg))
               gotshell = sys.stdin.readline().replace("\n","").lower()
               if len(gotshell) == 0:

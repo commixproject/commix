@@ -314,7 +314,7 @@ def system_users(separator, TAG, prefix, suffix, whitespace, http_request_method
             is_privileged_nh = ""
           if settings.VERBOSITY_LEVEL >= 1:
             print ""  
-          print "  (" +str(count)+ ") '" + Style.BRIGHT +  sys_users_list[user] + Style.RESET_ALL + "'" + Style.BRIGHT + is_privileged + Style.RESET_ALL + "." 
+          print "    (" +str(count)+ ") '" + Style.BRIGHT +  sys_users_list[user] + Style.RESET_ALL + "'" + Style.BRIGHT + is_privileged + Style.RESET_ALL + "." 
           # Add infos to logs file.   
           output_file = open(filename, "a")
           output_file.write("      (" +str(count)+ ") " + sys_users_list[user] + is_privileged + ".\n" )
@@ -411,7 +411,7 @@ def system_users(separator, TAG, prefix, suffix, whitespace, http_request_method
                 else :
                   is_privileged = ""
                   is_privileged_nh = ""
-                print "  (" +str(count)+ ") '" + Style.BRIGHT +  fields[0]+ Style.RESET_ALL + "'" + Style.BRIGHT + is_privileged + Style.RESET_ALL + "(uid=" + fields[1] + "). Home directory is in '" + Style.BRIGHT + fields[2]+ Style.RESET_ALL + "'." 
+                print "    (" +str(count)+ ") '" + Style.BRIGHT +  fields[0]+ Style.RESET_ALL + "'" + Style.BRIGHT + is_privileged + Style.RESET_ALL + "(uid=" + fields[1] + "). Home directory is in '" + Style.BRIGHT + fields[2]+ Style.RESET_ALL + "'." 
                 # Add infos to logs file.   
                 output_file = open(filename, "a")
                 output_file.write("      (" +str(count)+ ") '" + fields[0]+ "'" + is_privileged_nh + "(uid=" + fields[1] + "). Home directory is in '" + fields[2] + "'.\n" )

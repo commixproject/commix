@@ -292,15 +292,19 @@ def eb_injection_handler(url, delay, filename, http_request_method):
               settings.LOAD_SESSION = False 
               
             # Check for any enumeration options.
+            new_line = True
             if settings.ENUMERATION_DONE == True :
               while True:
                 question_msg = "Do you want to enumerate again? [Y/n/q] > "
                 enumerate_again = raw_input("\n" + settings.print_question_msg(question_msg)).lower()
+                if len(enumerate_again) == 0:
+                  enumerate_again = "y"
                 if enumerate_again in settings.CHOICE_YES:
                   eb_enumeration.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, delay)
-                  print ""
+                  # print ""
                   break
-                elif enumerate_again in settings.CHOICE_NO: 
+                elif enumerate_again in settings.CHOICE_NO:
+                  new_line = False
                   break
                 elif enumerate_again in settings.CHOICE_QUIT:
                   sys.exit(0)
@@ -313,7 +317,7 @@ def eb_injection_handler(url, delay, filename, http_request_method):
               if menu.enumeration_options():
                 eb_enumeration.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, delay)
             
-            if not menu.file_access_options() and not menu.options.os_cmd:
+            if not menu.file_access_options() and not menu.options.os_cmd and new_line:
               print ""
 
             # Check for any system file access options.
@@ -357,7 +361,7 @@ def eb_injection_handler(url, delay, filename, http_request_method):
             while True:
               if go_back == True:
                 break
-              question_msg = "Do you want a Pseudo-Terminal? [Y/n/q] > "
+              question_msg = "Do you want a Pseudo-Terminal shell? [Y/n/q] > "
               sys.stdout.write(settings.print_question_msg(question_msg)) 
               gotshell = sys.stdin.readline().replace("\n","").lower()
               if len(gotshell) == 0:
