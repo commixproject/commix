@@ -1,4 +1,4 @@
-## Version 1.5 (upcoming)
+## Version 1.5 (2016-11-17)
 * Fixed: Minor improvement in the "ICMP exfiltration" module.
 * Fixed: Minor improvement for choosing default value when pressing enter.
 * Added: New tamper script "hexencode.py" that encodes the payload to hex format.
