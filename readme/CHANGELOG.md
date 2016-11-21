@@ -1,3 +1,6 @@
+## Version 1.6 (upcoming)
+* Added: The executed command and the execution results output has been added to log file.
+
 ## Version 1.5 (2016-11-17)
 * Fixed: Minor improvement in the "ICMP exfiltration" module.
 * Fixed: Minor improvement for choosing default value when pressing enter.

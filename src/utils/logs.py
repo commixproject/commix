@@ -137,6 +137,18 @@ def update_payload(filename, counter, payload):
     output_file.write("    [" +str(counter)+ "] Payload: " + re.sub("%20", " ", payload) + "\n")
   output_file.close()
 
+
+"""
+Add any executed command and 
+execution output result in log files.
+"""
+def executed_command(filename, cmd, output):
+  output_file = open(filename, "a")
+  output_file.write("[+] Executed command: " +  cmd + "\n")
+  output_file.write("    [*] Execution output: " +  output + "\n")
+  output_file.close()
+
+
 """
 Log files cration notification.
 """

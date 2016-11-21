@@ -392,6 +392,8 @@ def cb_injection_handler(url, delay, filename, http_request_method):
                       if shell:
                         html_parser = HTMLParser.HTMLParser()
                         shell = html_parser.unescape(shell)
+                        # Update logs with executed cmds and execution results.
+                        logs.executed_command(filename, cmd, shell)
                       if shell != "":
                         if settings.VERBOSITY_LEVEL == 1:
                           print ""

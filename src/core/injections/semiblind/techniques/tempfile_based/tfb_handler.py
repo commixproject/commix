@@ -547,8 +547,11 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
                           session_handler.store_cmd(url, cmd, output, vuln_parameter)
                       else:
                         output = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
+                        # Update logs with executed cmds and execution results.
+                        logs.executed_command(filename, cmd, output)
                         print Fore.GREEN + Style.BRIGHT + output + "\n" + Style.RESET_ALL
-                          
+                      # Update logs with executed cmds and execution results.
+                      logs.executed_command(filename, cmd, output)
                     except KeyboardInterrupt: 
                       # Delete previous shell (text) files (output) from temp.
                       delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)

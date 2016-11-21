@@ -411,6 +411,8 @@ def eb_injection_handler(url, delay, filename, http_request_method):
                       #if shell:
                       if shell != "":
                         shell = "".join(str(p) for p in shell)
+                        # Update logs with executed cmds and execution results.
+                        logs.executed_command(filename, cmd, shell)
                         # if settings.VERBOSITY_LEVEL >= 1:
                         #   print ""
                         print "\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n"

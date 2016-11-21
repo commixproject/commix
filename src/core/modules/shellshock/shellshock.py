@@ -797,6 +797,8 @@ def shellshock_handler(url, http_request_method, filename):
                     else: 
                       shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
                       if shell != "":
+                        # Update logs with executed cmds and execution results.
+                        logs.executed_command(filename, cmd, shell)
                         print "\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n"
                       else:
                         info_msg = "Executing the '" + cmd + "' command... "

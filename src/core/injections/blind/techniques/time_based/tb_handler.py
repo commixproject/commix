@@ -499,7 +499,8 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                       else:
                         output = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
                         print Fore.GREEN + Style.BRIGHT + output + Style.RESET_ALL
-
+                      # Update logs with executed cmds and execution results.
+                      logs.executed_command(filename, cmd, output)
                       print ""
                   except KeyboardInterrupt: 
                     raise

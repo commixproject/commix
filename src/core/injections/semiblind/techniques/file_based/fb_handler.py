@@ -613,6 +613,8 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                         shell = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
                       if shell:
                         if shell != "":
+                          # Update logs with executed cmds and execution results.
+                          logs.executed_command(filename, cmd, shell)
                           print "\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n"
 
                       if not shell or shell == "":
