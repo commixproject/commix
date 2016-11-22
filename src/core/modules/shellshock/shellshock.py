@@ -95,7 +95,7 @@ def enumeration(url, cve, check_header, filename):
       # Add infos to logs file. 
       output_file = open(filename, "a")
       success_msg = "The hostname is " + shell + ".\n"
-      output_file.write("    " + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
+      output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
       output_file.close()
     else:
       warn_msg = "Heuristics have failed to identify the hostname."
@@ -123,7 +123,7 @@ def enumeration(url, cve, check_header, filename):
           output_file = open(filename, "a")
           success_msg = "The target operating system is " + target_os
           success_msg += " and the hardware platform is " + target_arch + ".\n"
-          output_file.write("    " + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
+          output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
           output_file.close()
       else:
         if settings.VERBOSITY_LEVEL >= 1:
@@ -134,7 +134,7 @@ def enumeration(url, cve, check_header, filename):
         # Add infos to logs file.    
         output_file = open(filename, "a")
         success_msg = "The target operating system is " + target_os + ".\n"
-        output_file.write("    " + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
+        output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
         output_file.close()
     else:
       warn_msg = "Heuristics have failed to retrieve the system information."
@@ -159,7 +159,7 @@ def enumeration(url, cve, check_header, filename):
         # Add infos to logs file.    
         output_file = open(filename, "a")
         success_msg = "The current user is " + cu_account
-        output_file.write("    " + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
+        output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
         output_file.close()
         if shell:
           if shell != "0":
@@ -185,7 +185,7 @@ def enumeration(url, cve, check_header, filename):
         # Add infos to logs file.   
         output_file = open(filename, "a")
         success_msg = "The current user is " + cu_account + "\n"
-        output_file.write("    " + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
+        output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
         output_file.close()  
     else:
       warn_msg = "Heuristics have failed to identify the current user."
@@ -236,7 +236,7 @@ def enumeration(url, cve, check_header, filename):
             sys.stdout.flush()
             # Add infos to logs file.   
             output_file = open(filename, "a")
-            output_file.write("\n    " + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
+            output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
             output_file.close()
             count = 0
             for user in range(0, len(sys_users_list)):
@@ -275,7 +275,7 @@ def enumeration(url, cve, check_header, filename):
                 print "    (" +str(count)+ ") '" + Style.BRIGHT +  fields[0]+ Style.RESET_ALL + "'" + Style.BRIGHT + is_privileged + Style.RESET_ALL + "(uid=" + fields[1] + "). Home directory is in '" + Style.BRIGHT + fields[2]+ Style.RESET_ALL + "'." 
                 # Add infos to logs file.   
                 output_file = open(filename, "a")
-                output_file.write("      (" +str(count)+ ") '" + fields[0]+ "'" + is_privileged_nh + "(uid=" + fields[1] + "). Home directory is in '" + fields[2] + "'.\n" )
+                output_file.write("    (" +str(count)+ ") '" + fields[0]+ "'" + is_privileged_nh + "(uid=" + fields[1] + "). Home directory is in '" + fields[2] + "'.\n" )
                 output_file.close()
               except ValueError:
                 if count == 1 :
@@ -333,7 +333,7 @@ def enumeration(url, cve, check_header, filename):
         sys.stdout.flush()
         # Add infos to logs file.   
         output_file = open(filename, "a")
-        output_file.write("\n    " + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg )
+        output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg )
         output_file.close()
         count = 0
         for line in sys_passes:
@@ -345,7 +345,7 @@ def enumeration(url, cve, check_header, filename):
                 print "  (" +str(count)+ ") " + Style.BRIGHT + fields[0]+ Style.RESET_ALL + " : " + Style.BRIGHT + fields[1]+ Style.RESET_ALL
                 # Add infos to logs file.   
                 output_file = open(filename, "a")
-                output_file.write("      (" +str(count)+ ") " + fields[0] + " : " + fields[1] + "\n")
+                output_file.write("    (" +str(count)+ ") " + fields[0] + " : " + fields[1] + "\n")
                 output_file.close()
           # Check for appropriate (/etc/shadow) format
           except IndexError:
@@ -492,7 +492,7 @@ def file_access(url, cve, check_header, filename):
       output_file = open(filename, "a")
       success_msg = "The contents of file '"
       success_msg += file_to_read + "' : " + shell + ".\n"
-      output_file.write("    " + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
+      output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
       output_file.close()
     else:
       warn_msg = "It seems that you don't have permissions "

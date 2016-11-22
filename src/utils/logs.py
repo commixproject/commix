@@ -88,12 +88,12 @@ def create_log_file(url, output_dir):
   # The logs filename construction.
   filename = output_dir + host + "/" + settings.OUTPUT_FILE
   output_file = open(filename, "a")
-  output_file.write("\n---")
-  output_file.write("\nTime : " + datetime.datetime.fromtimestamp(time.time()).strftime('%H:%M:%S'))
-  output_file.write("\nDate : " + datetime.datetime.fromtimestamp(time.time()).strftime('%m/%d/%Y'))
-  output_file.write("\n---")
-  output_file.write("\nURL : " + url)
-  output_file.write("\n---")
+  output_file.write("\n" + "=" * 37)
+  output_file.write("\n" + "| Started in " + \
+    datetime.datetime.fromtimestamp(time.time()).strftime('%m/%d/%Y' + \
+    " at " + '%H:%M:%S' + " |"))
+  output_file.write("\n" + "=" * 37)
+  output_file.write("\n" + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + "Tested URL : " + url)
   output_file.close()
 
   return filename
@@ -105,7 +105,7 @@ def add_type_and_technique(export_injection_info, filename, injection_type, tech
   if export_injection_info == False:
     settings.SHOW_LOGS_MSG = True
     output_file = open(filename, "a")
-    output_file.write("\n" + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + "Type: " + injection_type)
+    output_file.write("\n" + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + "Type: " + injection_type.title())
     output_file.write("\n" + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + "Technique: " + technique.title())
     output_file.close()
     export_injection_info = True
@@ -132,9 +132,9 @@ Add any payload in log files.
 def update_payload(filename, counter, payload):
   output_file = open(filename, "a")
   if "\n" in payload:
-    output_file.write("    [" +str(counter)+ "] Payload: " + re.sub("%20", " ", urllib.unquote_plus(payload.replace("\n", "\\n"))) + "\n")
+    output_file.write("    (" +str(counter)+ ") Payload: " + re.sub("%20", " ", urllib.unquote_plus(payload.replace("\n", "\\n"))) + "\n")
   else:
-    output_file.write("    [" +str(counter)+ "] Payload: " + re.sub("%20", " ", payload) + "\n")
+    output_file.write("    (" +str(counter)+ ") Payload: " + re.sub("%20", " ", payload) + "\n")
   output_file.close()
 
 
@@ -144,8 +144,8 @@ execution output result in log files.
 """
 def executed_command(filename, cmd, output):
   output_file = open(filename, "a")
-  output_file.write("[+] Executed command: " +  cmd + "\n")
-  output_file.write("    [*] Execution output: " +  output + "\n")
+  output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + "Executed command: " +  cmd + "\n")
+  output_file.write("    " + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_SIGN) + "Execution output: " +  output + "\n")
   output_file.close()
 
 

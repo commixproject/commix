@@ -64,7 +64,7 @@ def powershell_version(separator, TAG, prefix, suffix, whitespace, http_request_
       # Add infos to logs file. 
       output_file = open(filename, "a")
       success_msg = "The PowerShell's version number is " + ps_version + ".\n"
-      output_file.write("    " + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
+      output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
       output_file.close()
   except ValueError:
     warn_msg = "Heuristics have failed to identify the version of Powershell, "
@@ -101,7 +101,7 @@ def hostname(separator, TAG, prefix, suffix, whitespace, http_request_method, ur
     # Add infos to logs file. 
     output_file = open(filename, "a")
     success_msg = "The hostname is " + shell + ".\n"
-    output_file.write("    " + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
+    output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
     output_file.close()
   else:
     warn_msg = "Heuristics have failed to identify the hostname."
@@ -156,7 +156,7 @@ def system_information(separator, TAG, prefix, suffix, whitespace, http_request_
       output_file = open(filename, "a")
       success_msg = "The target operating system is " + target_os
       success_msg += " and the hardware platform is " + target_arch + ".\n"
-      output_file.write("    " + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
+      output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
       output_file.close()
   else:
     warn_msg = "Heuristics have failed to retrieve the system information."
@@ -206,7 +206,7 @@ def current_user(separator, TAG, prefix, suffix, whitespace, http_request_method
       # Add infos to logs file.    
       output_file = open(filename, "a")
       success_msg = "The current user is " + cu_account
-      output_file.write("    " + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
+      output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
       output_file.close()
       if shell:
         if (settings.TARGET_OS == "win" and not "Admin" in shell) or \
@@ -233,7 +233,7 @@ def current_user(separator, TAG, prefix, suffix, whitespace, http_request_method
       # Add infos to logs file.   
       output_file = open(filename, "a")
       success_msg = "The current user is " + cu_account + "\n"
-      output_file.write("    " + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
+      output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
       output_file.close()
   else:
     warn_msg = "Heuristics have failed to identify the current user."
@@ -287,7 +287,7 @@ def system_users(separator, TAG, prefix, suffix, whitespace, http_request_method
         sys.stdout.flush()
         # Add infos to logs file.   
         output_file = open(filename, "a")
-        output_file.write("\n    " + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
+        output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
         output_file.close()
         count = 0
         for user in range(0, len(sys_users_list)):
@@ -317,7 +317,7 @@ def system_users(separator, TAG, prefix, suffix, whitespace, http_request_method
           print "    (" +str(count)+ ") '" + Style.BRIGHT +  sys_users_list[user] + Style.RESET_ALL + "'" + Style.BRIGHT + is_privileged + Style.RESET_ALL + "." 
           # Add infos to logs file.   
           output_file = open(filename, "a")
-          output_file.write("      (" +str(count)+ ") " + sys_users_list[user] + is_privileged + ".\n" )
+          output_file.write("    (" +str(count)+ ") " + sys_users_list[user] + is_privileged + ".\n" )
           output_file.close()
       else:
         sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
@@ -377,7 +377,7 @@ def system_users(separator, TAG, prefix, suffix, whitespace, http_request_method
             sys.stdout.flush()
             # Add infos to logs file.   
             output_file = open(filename, "a")
-            output_file.write("\n    " + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
+            output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
             output_file.close()
             count = 0
             for user in range(0, len(sys_users_list)):
@@ -416,7 +416,7 @@ def system_users(separator, TAG, prefix, suffix, whitespace, http_request_method
                 print "    (" +str(count)+ ") '" + Style.BRIGHT +  fields[0]+ Style.RESET_ALL + "'" + Style.BRIGHT + is_privileged + Style.RESET_ALL + "(uid=" + fields[1] + "). Home directory is in '" + Style.BRIGHT + fields[2]+ Style.RESET_ALL + "'." 
                 # Add infos to logs file.   
                 output_file = open(filename, "a")
-                output_file.write("      (" +str(count)+ ") '" + fields[0]+ "'" + is_privileged_nh + "(uid=" + fields[1] + "). Home directory is in '" + fields[2] + "'.\n" )
+                output_file.write("    (" +str(count)+ ") '" + fields[0]+ "'" + is_privileged_nh + "(uid=" + fields[1] + "). Home directory is in '" + fields[2] + "'.\n" )
                 output_file.close()
               except ValueError:
                 if count == 1 :
@@ -487,7 +487,7 @@ def system_passwords(separator, TAG, prefix, suffix, whitespace, http_request_me
         sys.stdout.flush()
         # Add infos to logs file.   
         output_file = open(filename, "a")
-        output_file.write("\n    " + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg )
+        output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg )
         output_file.close()
         count = 0
         for line in sys_passes:
@@ -499,7 +499,7 @@ def system_passwords(separator, TAG, prefix, suffix, whitespace, http_request_me
                 print "  (" +str(count)+ ") " + Style.BRIGHT + fields[0]+ Style.RESET_ALL + " : " + Style.BRIGHT + fields[1]+ Style.RESET_ALL
                 # Add infos to logs file.   
                 output_file = open(filename, "a")
-                output_file.write("      (" +str(count)+ ") " + fields[0] + " : " + fields[1] + "\n")
+                output_file.write("    (" +str(count)+ ") " + fields[0] + " : " + fields[1] + "\n")
                 output_file.close()
           # Check for appropriate '/etc/shadow' format.
           except IndexError:

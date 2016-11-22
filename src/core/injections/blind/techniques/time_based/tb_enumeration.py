@@ -57,7 +57,7 @@ def powershell_version(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, 
       # Add infos to logs file. 
       output_file = open(filename, "a")
       success_msg = "The PowerShell's version number is " + ps_version + ".\n"
-      output_file.write("    " + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
+      output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
       output_file.close()
   except ValueError:
     warn_msg = "Heuristics have failed to identify the version of Powershell, "
@@ -86,7 +86,7 @@ def hostname(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, delay, htt
     # Add infos to logs file. 
     output_file = open(filename, "a")
     success_msg = "The hostname is " + shell + ".\n"
-    output_file.write("    " + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
+    output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
     output_file.close()
   else:
     warn_msg = "Heuristics have failed to identify the hostname."
@@ -132,7 +132,7 @@ def system_information(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, 
       output_file = open(filename, "a")
       success_msg = "The target operating system is " + target_os
       success_msg += " and the hardware platform is " + target_arch + ".\n"
-      output_file.write("    " + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
+      output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
       output_file.close()
   else:
     warn_msg = "Heuristics have failed to retrieve the system information."
@@ -177,7 +177,7 @@ def current_user(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, delay,
       # Add infos to logs file.    
       output_file = open(filename, "a")
       success_msg = "The current user is " + cu_account
-      output_file.write("    " + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
+      output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
       output_file.close()
       if shell:
         shell = "".join(str(p) for p in shell)
@@ -205,7 +205,7 @@ def current_user(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, delay,
       # Add infos to logs file.   
       output_file = open(filename, "a")
       success_msg = "The current user is " + cu_account + "\n"
-      output_file.write("    " + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
+      output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
       output_file.close()
   else:
     warn_msg = "Heuristics have failed to identify the current user."
@@ -255,7 +255,7 @@ def system_users(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, delay,
         sys.stdout.flush()
         # Add infos to logs file.   
         output_file = open(filename, "a")
-        output_file.write("\n    " + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
+        output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
         output_file.close()
         count = 0
         for user in range(0, len(sys_users_list)):
@@ -345,7 +345,7 @@ def system_users(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, delay,
             sys.stdout.flush()
             # Add infos to logs file.   
             output_file = open(filename, "a")
-            output_file.write("\n    " + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
+            output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
             output_file.close()
             count = 0
             for user in range(0, len(sys_users_list)):
@@ -456,7 +456,7 @@ def system_passwords(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, de
         sys.stdout.flush()
         # Add infos to logs file.   
         output_file = open(filename, "a")
-        output_file.write("\n    " + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg )
+        output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg )
         output_file.close()
         count = 0
         for line in sys_passes:
