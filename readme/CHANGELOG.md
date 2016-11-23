@@ -1,4 +1,5 @@
 ## Version 1.6 (upcoming)
+* Revised: The dynamic code evaluation ("eval-based") payloads, have been shortly revised.
 * Added: The executed command and the execution results output has been added to log file.
 
 ## Version 1.5 (2016-11-17)

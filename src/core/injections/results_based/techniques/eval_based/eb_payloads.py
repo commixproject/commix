@@ -185,7 +185,7 @@ def cmd_execution(separator, TAG, cmd):
     else:
       payload = ("print(`echo '" + TAG + "'" + 
                   separator + "echo '" + TAG + "'" +
-                  separator +cmd  +
+                  separator + cmd  +
                   separator + "echo '" + TAG + "'" +
                   separator + "echo '" + TAG + "'`)%3B"
                 )
