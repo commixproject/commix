@@ -306,18 +306,19 @@ def injection_output(url, OUTPUT_TEXTFILE, delay):
 Command execution results.
 """
 def injection_results(url, OUTPUT_TEXTFILE, delay):
+
   #Find the directory.
   output = injection_output(url, OUTPUT_TEXTFILE, delay)
 
   # Check if defined extra headers.
   request = urllib2.Request(output)
   headers.do_check(request)
-  
+
   # Evaluate test results.
   try:
     output = urllib2.urlopen(request)
-    shell = output.read()
-    shell = [newline.replace("\n"," ") for newline in shell]
+    shell = output.read().rstrip().lstrip()
+    #shell = [newline.replace("\n"," ") for newline in shell]
     if settings.TARGET_OS == "win":
       shell = [newline.replace("\r","") for newline in shell]
       shell = [space.strip() for space in shell]

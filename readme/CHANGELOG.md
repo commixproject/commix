@@ -1,4 +1,5 @@
 ## Version 1.6 (upcoming)
+* Fixed: Minor fix regarding the newline display in dynamic code evaluation ("eval-based") and semiblind ("file-based") technique.
 * Revised: The dynamic code evaluation ("eval-based") payloads, have been shortly revised.
 * Added: The executed command and the execution results output has been added to log file.
 
