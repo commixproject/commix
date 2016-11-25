@@ -55,8 +55,9 @@ def do_GET_check(url):
         err_msg = "No parameter(s) found for testing in the provided data. "
         err_msg += "You must specify the testable parameter or "
         err_msg += "try to increase '--level' values to perform more tests. " 
-        print settings.print_critical_msg(err_msg) + "\n"
-        os._exit(0)   
+        print settings.print_critical_msg(err_msg)
+        return False
+        #os._exit(0)   
     return url
 
   urls_list = []
