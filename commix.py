@@ -64,69 +64,66 @@ if settings.IS_WINDOWS:
   init()
 
 """
-The main function
+Injection states initiation.
 """
-def main():
-  try:
-    # Check if defined "--version" option.
-    if menu.options.version:
-      version.show_version()
-      sys.exit(0)
+def init_injection():
+  # Initiate injection checker.
+  if settings.INJECTION_CHECKER:
+    settings.INJECTION_CHECKER = False
+  # Initiate exploitation techniques states.
+  if settings.INJECTION_CHECKER:
+    settings.CLASSIC_STATE = False
+  if settings.EVAL_BASED_STATE:
+    settings.EVAL_BASED_STATE = False
+  if settings.TIME_BASED_STATE:
+    settings.TIME_BASED_STATE = False
+  if settings.FILE_BASED_STATE:
+    settings.FILE_BASED_STATE = False
+  if settings.TEMPFILE_BASED_STATE:
+    settings.TEMPFILE_BASED_STATE = False
+  if settings.TIME_RELATIVE_ATTACK:
+    settings.TIME_RELATIVE_ATTACK = False
 
-    # Checkall the banner
-    menu.banner()
-        
-    # Check python version number.
-    version.python_version()
+"""
+Print logs notification.
+"""
+def print_logs_notification(filename, url): 
+  if settings.SHOW_LOGS_MSG == True:
+    logs.logs_notification(filename)
+  print ""
+  if url:
+    session_handler.clear(url)
+  sys.exit(0)
 
-    # Check if defined "--dependencies" option. 
-    # For checking (non-core) third party dependenices.
-    if menu.options.noncore_dependencies:
-      checks.third_party_dependencies()
-      sys.exit(0)
-      
-    # Check if defined "--update" option.        
-    if menu.options.update:
-      update.updater()
-        
-    # Check if defined "--install" option.        
-    if menu.options.install:
-      install.installer()
-      sys.exit(0)
+"""
+Logs filename creation.
+"""
+def logs_filename_creation():
+  if menu.options.output_dir:
+    output_dir = menu.options.output_dir
+  else:
+    output_dir = settings.OUTPUT_DIR
+  
+  # One directory up, if Windows or if the script is being run under "/src".
+  if settings.IS_WINDOWS or "/src" in os.path.dirname(os.path.abspath(__file__)):
+    os.chdir("..")
     
-    # Check arguments
-    if len(sys.argv) == 1:
-      menu.parser.print_help()
-      print ""
-      sys.exit(0)
+  output_dir = os.path.dirname(output_dir)
+ 
+  try:
+    os.stat(output_dir)
+  except:
+    os.mkdir(output_dir)   
 
-    # Define the level of verbosity.
-    if menu.options.verbose > 4:
-      err_msg = "The value for option '-v' "
-      err_msg += "must be an integer value from range [0, 4]."
-      print settings.print_critical_msg(err_msg)
-      sys.exit(0)
-    else:  
-      settings.VERBOSITY_LEVEL = menu.options.verbose
+  # The logs filename construction.
+  filename = logs.create_log_file(url, output_dir)
+  return filename
 
-    # Check if defined "--delay" option.
-    if menu.options.delay > "0":
-        settings.DELAY = menu.options.delay
-
-    # Define the level of tests to perform.
-    if menu.options.level > 3:
-      err_msg = "The value for option '--level' "
-      err_msg += "must be an integer value from range [1, 3]."
-      print settings.print_critical_msg(err_msg)
-      sys.exit(0)
-
-    # Define the local path where Metasploit Framework is installed.
-    if menu.options.msf_path:
-      settings.METASPLOIT_PATH = menu.options.msf_path
-
-    # Parse target / data from HTTP proxy logs (i.e Burp / WebScarab).
-    if menu.options.logfile:
-      parser.logfile_parser()
+"""
+The main function.
+"""
+def main(filename, url):
+  try:
 
     # Ignore the mathematic calculation part (Detection phase).
     if menu.options.skip_calc:
@@ -145,10 +142,6 @@ def main():
         if "=" in settings.TEST_PARAMETER[i]:
           settings.TEST_PARAMETER[i] = settings.TEST_PARAMETER[i].split("=")[0]
     
-    # Check if ".git" exists and check for updated version!
-    if os.path.isdir("./.git") and settings.CHECK_FOR_UPDATES_ON_START:
-      update.check_for_update()
-
     # Check if defined character used for splitting parameter values.
     if menu.options.pdel:
      settings.PARAMETER_DELIMITER = menu.options.pdel
@@ -209,10 +202,8 @@ def main():
     if menu.options.random_agent:
       menu.options.agent = random.choice(settings.USER_AGENT_LIST)
   
-    # Check if defined "--url" option.
-    if menu.options.url:
-      url = menu.options.url
-      
+    # Check if defined "--url" or "-m" option.
+    if url:     
       # Check if http / https
       url = checks.check_http_s(url)
 
@@ -221,26 +212,7 @@ def main():
         menu.options.DEFAULT_CRAWLDEPTH_LEVEL = menu.options.crawldepth
         url = crawler.crawler(url)
 
-      if menu.options.output_dir:
-        output_dir = menu.options.output_dir
-      else:
-        output_dir = settings.OUTPUT_DIR
-      
-      # One directory up, if Windows or if the script is being run under "/src".
-      if settings.IS_WINDOWS or "/src" in os.path.dirname(os.path.abspath(__file__)):
-        os.chdir("..")
-        
-      output_dir = os.path.dirname(output_dir)
-     
       try:
-        os.stat(output_dir)
-      except:
-        os.mkdir(output_dir)   
-
-      # The logs filename construction.
-      filename = logs.create_log_file(url, output_dir)
-      try:
-        
         # Check if defined POST data
         if menu.options.data:
           request = urllib2.Request(url, menu.options.data)
@@ -719,35 +691,15 @@ def main():
 
     # Launch injection and exploitation controller.
     controller.do_check(url, filename)
+    return filename
 
-  except KeyboardInterrupt: 
-    abort_msg = "Ctrl-C was pressed!"
-    print "\n" + settings.print_abort_msg(abort_msg)
-    if settings.SHOW_LOGS_MSG == True:
-      logs.logs_notification(filename)
-    print ""
-    if menu.options.url:
-      session_handler.clear(menu.options.url)
-    sys.exit(0)
-
-  except SystemExit: 
-    if settings.SHOW_LOGS_MSG == True:
-      logs.logs_notification(filename)
-    print ""
-    if menu.options.url:
-      session_handler.clear(menu.options.url)
-    sys.exit(0)
-  
   # Accidental stop / restart of the target host server.
   except httplib.BadStatusLine, e:
     if e.line == "" or e.message == "":
       err_msg = "The target host is not responding."
       err_msg += " Please ensure that is up and try again."
       print "\n\n" + settings.print_critical_msg(err_msg) 
-      if settings.SHOW_LOGS_MSG == True:
-        logs.logs_notification(filename)
-      print ""
-      sys.exit(0)      
+      print_logs_notification(filename, url)      
     else: 
       err_msg = e.line + e.message
       print settings.print_critical_msg(err_msg) + "\n"
@@ -761,13 +713,118 @@ def main():
     err_msg = "The target host is not responding."
     err_msg += " Please ensure that is up and try again."
     print "\n" + settings.print_critical_msg(err_msg) 
-    if settings.SHOW_LOGS_MSG == True:
-      logs.logs_notification(filename)
-    print ""
-    session_handler.clear(url)
-    sys.exit(0)
-    
+    print_logs_notification(filename, url)
 if __name__ == '__main__':
-    main()
+  try:
+    # Check if defined "--version" option.
+    if menu.options.version:
+      version.show_version()
+      sys.exit(0)
+
+    # Checkall the banner
+    menu.banner()
+        
+    # Check python version number.
+    version.python_version()
+
+    # Check if defined "--dependencies" option. 
+    # For checking (non-core) third party dependenices.
+    if menu.options.noncore_dependencies:
+      checks.third_party_dependencies()
+      sys.exit(0)
+      
+    # Check if defined "--update" option.        
+    if menu.options.update:
+      update.updater()
+        
+    # Check if defined "--install" option.        
+    if menu.options.install:
+      install.installer()
+      sys.exit(0)
+    
+    # Check arguments
+    if len(sys.argv) == 1:
+      menu.parser.print_help()
+      print ""
+      sys.exit(0)
+
+    # Define the level of verbosity.
+    if menu.options.verbose > 4:
+      err_msg = "The value for option '-v' "
+      err_msg += "must be an integer value from range [0, 4]."
+      print settings.print_critical_msg(err_msg)
+      sys.exit(0)
+    else:  
+      settings.VERBOSITY_LEVEL = menu.options.verbose
+
+    # Check if defined "--delay" option.
+    if menu.options.delay > "0":
+        settings.DELAY = menu.options.delay
+
+    # Define the level of tests to perform.
+    if menu.options.level > 3:
+      err_msg = "The value for option '--level' "
+      err_msg += "must be an integer value from range [1, 3]."
+      print settings.print_critical_msg(err_msg)
+      sys.exit(0)
+
+    # Define the local path where Metasploit Framework is installed.
+    if menu.options.msf_path:
+      settings.METASPLOIT_PATH = menu.options.msf_path
+
+    # Parse target / data from HTTP proxy logs (i.e Burp / WebScarab).
+    if menu.options.logfile:
+      parser.logfile_parser()
+
+    # Check if ".git" exists and check for updated version!
+    if os.path.isdir("./.git") and settings.CHECK_FOR_UPDATES_ON_START:
+      update.check_for_update()
+
+    # Check if option is "-m" for multiple urls test.
+    if menu.options.bulkfile:
+      bulkfile = menu.options.bulkfile
+      info_msg = "Parsing targets using the '" + os.path.split(bulkfile)[1] + "' file... "
+      sys.stdout.write(settings.print_info_msg(info_msg))
+      sys.stdout.flush()
+      if not os.path.exists(bulkfile):
+        print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
+        err_msg = "It seems that the '" + bulkfile + "' file, does not exists."
+        sys.stdout.write(settings.print_critical_msg(err_msg) + "\n")
+        sys.stdout.flush()
+        sys.exit(0)
+      else:
+        print "[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]"
+        with open(menu.options.bulkfile) as f:
+          bulkfile = [url.strip() for url in f]
+        for url in bulkfile:
+          # Reset the injection level
+          if menu.options.level > 3:
+            menu.options.level = 1
+          init_injection()
+          info_msg = "Setting URL '" + url + "' for tests. "  
+          print settings.print_info_msg(info_msg)
+          filename = logs_filename_creation()
+          main(filename, url)
+    else:
+      # Check if option is "--url" for single url test.
+      url = menu.options.url
+      filename = logs_filename_creation()
+      main(filename, url)
+
+  except KeyboardInterrupt: 
+    abort_msg = "Ctrl-C was pressed!"
+    print "\n" + settings.print_abort_msg(abort_msg)
+    try:
+      print_logs_notification(filename, url)
+    except NameError:
+      sys.exit(0)
+
+  except SystemExit: 
+    try:
+      print_logs_notification(filename, url)
+    except NameError:
+      sys.exit(0)
+  
+  print_logs_notification(filename, url)
     
 #eof

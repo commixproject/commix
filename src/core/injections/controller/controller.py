@@ -434,6 +434,6 @@ def do_check(url, filename):
         err_msg += " more tests (i.e 'User-Agent', 'Referer', 'Cookie' etc)"
       err_msg += "."
       print settings.print_critical_msg(err_msg)  
-  sys.exit(0)
+  #sys.exit(0)
 
 #eof

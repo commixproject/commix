@@ -51,7 +51,7 @@ def do_GET_check(url):
         return False
       if menu.options.level == 2 :
         return False
-      else:  
+      else: 
         err_msg = "No parameter(s) found for testing in the provided data. "
         err_msg += "You must specify the testable parameter or "
         err_msg += "try to increase '--level' values to perform more tests. " 

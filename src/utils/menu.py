@@ -113,10 +113,13 @@ target.add_option("--url-reload",
                 default=False,
                 help="Reload target URL after command execution.")
 
+target.add_option("-m",
+                dest="bulkfile",
+                help="Scan multiple targets given in a textual file.")
+
 target.add_option("-l",
                 dest="logfile",
                 help="Parse target and data from HTTP proxy log file.")
-
 
 target.add_option("--crawl", 
                 dest="crawldepth",
