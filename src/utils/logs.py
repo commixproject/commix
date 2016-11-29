@@ -24,6 +24,7 @@ import readline
 
 from src.utils import menu
 from src.utils import settings
+from src.utils import session_handler
 
 from src.thirdparty.colorama import Fore, Back, Style, init
 
@@ -137,7 +138,6 @@ def update_payload(filename, counter, payload):
     output_file.write("    (" +str(counter)+ ") Payload: " + re.sub("%20", " ", payload) + "\n")
   output_file.close()
 
-
 """
 Add any executed command and 
 execution output result in log files.
@@ -147,7 +147,6 @@ def executed_command(filename, cmd, output):
   output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + "Executed command: " +  cmd + "\n")
   output_file.write("    " + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_SIGN) + "Execution output: " +  output + "\n")
   output_file.close()
-
 
 """
 Log files cration notification.
@@ -165,5 +164,14 @@ def log_traffic(header):
   output_file = open(menu.options.traffic_file, "a")
   output_file.write(header)
   output_file.close()
+
+"""
+Print logs notification.
+"""
+def print_logs_notification(filename, url): 
+  if settings.SHOW_LOGS_MSG == True:
+    logs_notification(filename)
+  if url:
+    session_handler.clear(url)
 
 # eof

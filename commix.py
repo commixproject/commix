@@ -85,17 +85,6 @@ def init_injection():
     settings.TIME_RELATIVE_ATTACK = False
 
 """
-Print logs notification.
-"""
-def print_logs_notification(filename, url): 
-  if settings.SHOW_LOGS_MSG == True:
-    logs.logs_notification(filename)
-  print ""
-  if url:
-    session_handler.clear(url)
-  sys.exit(0)
-
-"""
 Logs filename creation.
 """
 def logs_filename_creation():
@@ -699,7 +688,7 @@ def main(filename, url):
       err_msg = "The target host is not responding."
       err_msg += " Please ensure that is up and try again."
       print "\n\n" + settings.print_critical_msg(err_msg) 
-      print_logs_notification(filename, url)      
+      logs.print_logs_notification(filename, url)      
     else: 
       err_msg = e.line + e.message
       print settings.print_critical_msg(err_msg) + "\n"
@@ -713,7 +702,8 @@ def main(filename, url):
     err_msg = "The target host is not responding."
     err_msg += " Please ensure that is up and try again."
     print "\n" + settings.print_critical_msg(err_msg) 
-    print_logs_notification(filename, url)
+    logs.print_logs_notification(filename, url)
+
 if __name__ == '__main__':
   try:
     # Check if defined "--version" option.
@@ -815,16 +805,13 @@ if __name__ == '__main__':
     abort_msg = "Ctrl-C was pressed!"
     print "\n" + settings.print_abort_msg(abort_msg)
     try:
-      print_logs_notification(filename, url)
+      logs.print_logs_notification(filename, url)
+      print ""
     except NameError:
       sys.exit(0)
 
   except SystemExit: 
-    try:
-      print_logs_notification(filename, url)
-    except NameError:
-      sys.exit(0)
-  
-  print_logs_notification(filename, url)
-    
+    print ""
+    sys.exit(0)
+
 #eof

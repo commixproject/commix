@@ -433,7 +433,9 @@ def do_check(url, filename):
         err_msg += " and/or try to increase '--level' values to perform"
         err_msg += " more tests (i.e 'User-Agent', 'Referer', 'Cookie' etc)"
       err_msg += "."
-      print settings.print_critical_msg(err_msg)  
+      print settings.print_critical_msg(err_msg) + "\n"
+      
+  logs.print_logs_notification(filename, url)     
   #sys.exit(0)
 
 #eof
