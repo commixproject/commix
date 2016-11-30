@@ -33,12 +33,14 @@ from src.core.injections.controller import checks
 """
 Estimating the response time (in seconds).
 """
-def estimate_response_time(url, http_request_method, delay):
-
-  if http_request_method == "GET":
-    # Find the host part.
+def estimate_response_time(url, delay):
+  # Check if defined POST data
+  if menu.options.data:
+    request = urllib2.Request(url, menu.options.data)
+  else:
     url = parameters.get_url_part(url)
-  request = urllib2.Request(url)
+    request = urllib2.Request(url)
+
   headers.do_check(request)
   start = time.time()
   try:

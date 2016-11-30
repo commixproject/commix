@@ -94,7 +94,7 @@ def injection_proccess(url, check_parameter, http_request_method, filename, dela
     print settings.print_info_msg(info_msg)
 
   # Estimating the response time (in seconds)
-  delay, url_time_response = requests.estimate_response_time(url, http_request_method, delay)
+  delay, url_time_response = requests.estimate_response_time(url, delay)
 
   # Check if it is vulnerable to classic command injection technique.
   if not menu.options.tech or "c" in menu.options.tech:

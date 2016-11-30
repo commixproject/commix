@@ -1,4 +1,5 @@
 ## Version 1.6 (upcoming)
+* Fixed: Improvement regarding the response time estimimation, in which the target URL was requested without its POST data.
 * Added: New option "-m" for scanning multiple targets given in a textual file.
 * Fixed: Minor fix regarding the newline display in dynamic code evaluation ("eval-based") and semiblind ("file-based") technique.
 * Revised: The dynamic code evaluation ("eval-based") payloads, have been shortly revised.
