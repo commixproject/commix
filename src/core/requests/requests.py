@@ -34,13 +34,16 @@ from src.core.injections.controller import checks
 Estimating the response time (in seconds).
 """
 def estimate_response_time(url, delay):
+  if settings.VERBOSITY_LEVEL >= 1:
+    info_msg = "Estimating the target URL response time... "
+    sys.stdout.write(settings.print_info_msg(info_msg))
+    sys.stdout.flush()
   # Check if defined POST data
   if menu.options.data:
     request = urllib2.Request(url, menu.options.data)
   else:
     url = parameters.get_url_part(url)
     request = urllib2.Request(url)
-
   headers.do_check(request)
   start = time.time()
   try:
@@ -50,18 +53,24 @@ def estimate_response_time(url, delay):
   except urllib2.HTTPError, e:
     pass
   except socket.timeout:
+    if settings.VERBOSITY_LEVEL >= 1:
+      print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
     err_msg = "The connection to target URL has timed out."
     print settings.print_critical_msg(err_msg)+ "\n"
     sys.exit(0)     
   end = time.time()
   diff = end - start
   if int(diff) < 1:
+    if settings.VERBOSITY_LEVEL >= 1:
+      print "[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]"
     url_time_response = int(diff)
     if settings.TARGET_OS == "win":
       warn_msg = "Due to the relatively slow response of 'cmd.exe' in target "
       warn_msg += "host, there may be delays during the data extraction procedure."
       print settings.print_warning_msg(warn_msg)
   else:
+    if settings.VERBOSITY_LEVEL >= 1:
+      print "[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]"
     url_time_response = int(round(diff))
     warn_msg = "The estimated response time is " + str(url_time_response)
     warn_msg += " second" + "s"[url_time_response == 1:] + ". That may cause" 
