@@ -41,6 +41,7 @@ Commix also comes **as a plugin**, on the following penetration testing framewor
 - [PentestBox](https://tools.pentestbox.com/)
 - [PenBox](https://github.com/x3omdax/PenBox)
 - [Katoolin](https://github.com/LionSec/katoolin)
+- [Aptive's Penetration Testing tools](https://github.com/Aptive/penetration-testing-tools)
 
 #### Supported Platforms
 
