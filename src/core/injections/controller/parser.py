@@ -30,7 +30,6 @@ from src.thirdparty.colorama import Fore, Back, Style, init
 Parse target and data from http proxy logs (i.e Burp or WebScarab)
 """
 def logfile_parser():
-
   """
   Error message for mutiple request in same log file.
   """
@@ -45,50 +44,60 @@ def logfile_parser():
   """
   Error message for invalid data.
   """
-  def invalid_data():
+  def invalid_data(request):
     print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
     err_msg = "Something seems to be wrong with "
-    err_msg += "the '" + menu.options.logfile + "' file. "
+    err_msg += "the '" + request + "' file. "
     sys.stdout.write(settings.print_critical_msg(err_msg) + "\n")
     sys.stdout.flush()
     sys.exit(0)
 
-  proxy_log_file = menu.options.logfile
-  info_msg = "Parsing target using the '" + os.path.split(proxy_log_file)[1] + "' file... "
+  if menu.options.requestfile: 
+    request_file = menu.options.requestfile
+    info_msg = "Parsing HTTP request "
+
+  elif menu.options.logfile: 
+    request_file = menu.options.logfile
+    info_msg = "Parsing target "
+
+  info_msg += "using the '" + os.path.split(request_file)[1] + "' file... "
   sys.stdout.write(settings.print_info_msg(info_msg))
   sys.stdout.flush()
-  if not os.path.exists(proxy_log_file):
+
+  if not os.path.exists(request_file):
     print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
-    err_msg = "It seems that the '" + proxy_log_file + "' file, does not exists."
+    err_msg = "It seems that the '" + request_file + "' file, does not exists."
     sys.stdout.write(settings.print_critical_msg(err_msg) + "\n")
     sys.stdout.flush()
     sys.exit(0)
+
   else:
     # Check for multiple hosts
-    proxy_log_file = open(menu.options.logfile, "r")
+    request = open(request_file, "r")
     words_dict = {}
-    for word in proxy_log_file.read().split():
-      words_dict[word] = words_dict.get(word,0) + 1
+    for word in request.read().strip().splitlines():
+      if word[:4].strip() == "GET" or word[:4].strip() == "POST":
+        words_dict[word[:4].strip()] = words_dict.get(word[:4].strip(), 0) + 1
+
     # Check if same header appears more than once.
+    if len(words_dict.keys()) > 1:
+      multi_targets()
     for key in words_dict.keys():
       if words_dict[key] > 1:
         multi_targets()
 
     # Check for GET / POST HTTP Header
-    for http_header in ["GET", "POST"]:
-      proxy_log_file = open(menu.options.logfile, "r")
-      request_url = re.findall(r"" + http_header + " (.*) ", proxy_log_file.readline())
+    for http_header in ["GET","POST"]:
+      request = open(request_file, "r")
+      request = request.read()
+      if "\\n" in request:
+        request = request.replace("\\n","\n")
+      request_url = re.findall(r"" + http_header + " (.*) ", request)
 
       if request_url:
         if http_header == "POST":
           # Check for POST Data.
-          result = [item for item in proxy_log_file.read().splitlines() if item]
-          if not any(settings.INJECT_TAG in s for s in result):
-            print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
-            err_msg = "You must set the '*' to specify the testable "
-            err_msg += "parameter in the '" + menu.options.logfile + "' file."
-            print settings.print_critical_msg(err_msg)
-            sys.exit(0)
+          result = [item for item in request.splitlines() if item]
           menu.options.data = result[len(result)-1]
         else:
           # Check if url ends with "=".
@@ -98,15 +107,14 @@ def logfile_parser():
 
     # Check if invalid data
     if not request_url:
-      invalid_data()
+      invalid_data(request)
     else:
       request_url = "".join([str(i) for i in request_url])       
     
     # Check for other headers
-    proxy_log_file = open(menu.options.logfile, "r")
     extra_headers = ""
     prefix = "http://"
-    for line in proxy_log_file:
+    for line in request.splitlines():
       if re.findall(r"Host: " + "(.*)", line):
         menu.options.host = "".join([str(i) for i in re.findall(r"Host: " + "(.*)", line)])
       # User-Agent Header
@@ -150,7 +158,7 @@ def logfile_parser():
 
     # Target URL  
     if not menu.options.host:
-      invalid_data()
+      invalid_data(request)
     else:
       menu.options.url = prefix + menu.options.host + request_url
       sys.stdout.write("[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]\n")

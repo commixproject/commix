@@ -762,8 +762,8 @@ if __name__ == '__main__':
     if menu.options.msf_path:
       settings.METASPLOIT_PATH = menu.options.msf_path
 
-    # Parse target / data from HTTP proxy logs (i.e Burp / WebScarab).
-    if menu.options.logfile:
+    # Parse target and data from HTTP proxy logs (i.e Burp / WebScarab).
+    if menu.options.requestfile or menu.options.logfile:
       parser.logfile_parser()
 
     # Check if ".git" exists and check for updated version!
