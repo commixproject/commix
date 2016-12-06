@@ -149,9 +149,9 @@ def logfile_parser():
         match = match.replace("')","\\n")
         # Ignore some header.
         if "Content-Length" or "Accept-Encoding" in match: 
-        	extra_headers = extra_headers
-      	else:
-        	extra_headers = extra_headers + match
+          extra_headers = extra_headers
+        else:
+          extra_headers = extra_headers + match
    
     # Extra headers   
     menu.options.headers = extra_headers
@@ -163,5 +163,10 @@ def logfile_parser():
       menu.options.url = prefix + menu.options.host + request_url
       sys.stdout.write("[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]\n")
       sys.stdout.flush()
-      
+      if menu.options.logfile:
+        info_msg = "Parsed target from '" + os.path.split(request_file)[1] + "' for tests :"
+        print settings.print_info_msg(info_msg)
+        print settings.SUB_CONTENT_SIGN + http_header + " " +  prefix + menu.options.host + request_url
+        if http_header == "POST":
+           print settings.SUB_CONTENT_SIGN + "Data: " + menu.options.data
 #eof
