@@ -70,9 +70,9 @@ Checking the HTTP Headers.
 """
 def check_http_traffic(request):
 
-  class MyHTTPConnection(httplib.HTTPConnection):
+  class do_connection(httplib.HTTPConnection, httplib.HTTPSConnection):
     """
-    Checking the HTTP requests.
+    Checking the HTTP / HTTPS requests.
     """
     def request(self, method, url, body, headers):
       info_msg = "The provided HTTP request headers: "
@@ -98,16 +98,27 @@ def check_http_traffic(request):
         if menu.options.traffic_file:
           logs.log_traffic("\n" + header) 
       if menu.options.traffic_file:
-        logs.log_traffic("\n\n")  
-      httplib.HTTPConnection.request(self, method, url, body, headers)
+        logs.log_traffic("\n\n")
 
-  class MyHTTPHandler(urllib2.HTTPHandler):
+      if settings.PROXY_PROTOCOL == 'https':
+        httplib.HTTPSConnection.request(self, method, url, body, headers)
+      else:
+        httplib.HTTPConnection.request(self, method, url, body, headers)
+
+  class connection_handler(urllib2.HTTPHandler):
     def http_open(self, req):
-        return self.do_open(MyHTTPConnection, req)
+        return self.do_open(do_connection, req)
+
+  class connection_handler(urllib2.HTTPSHandler):
+    def https_open(self, req):
+        return self.do_open(do_connection, req)
 
   opener = urllib2.OpenerDirector()
-  opener.add_handler(MyHTTPHandler())
-  response = opener.open(request) 
+  if settings.PROXY_PROTOCOL == 'https':
+    opener.add_handler(connection_handler())
+  else:
+    opener.add_handler(connection_handler())
+  response = opener.open(request)
   # Check the HTTP response headers.
   http_response(response.info())
   # Check the HTTP response content.
