@@ -105,19 +105,16 @@ def check_http_traffic(request):
       else:
         httplib.HTTPConnection.request(self, method, url, body, headers)
 
-  class connection_handler(urllib2.HTTPHandler):
-    def http_open(self, req):
+  class connection_handler(urllib2.HTTPHandler, urllib2.HTTPSHandler):
+    if settings.PROXY_PROTOCOL == 'https':
+      def https_open(self, req):
         return self.do_open(do_connection, req)
-
-  class connection_handler(urllib2.HTTPSHandler):
-    def https_open(self, req):
-        return self.do_open(do_connection, req)
+    else:      
+      def http_open(self, req):
+        return self.do_open(do_connection, req)      
 
   opener = urllib2.OpenerDirector()
-  if settings.PROXY_PROTOCOL == 'https':
-    opener.add_handler(connection_handler())
-  else:
-    opener.add_handler(connection_handler())
+  opener.add_handler(connection_handler())
   response = opener.open(request)
   # Check the HTTP response headers.
   http_response(response.info())
