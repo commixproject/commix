@@ -31,23 +31,33 @@ Parse target and data from http proxy logs (i.e Burp or WebScarab)
 """
 def logfile_parser():
   """
-  Error message for mutiple request in same log file.
+  Warning message for mutiple request in same log file.
   """
-  def multi_targets():
-    print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
-    err_msg = "Currently " + settings.APPLICATION + " doesn't support "
-    err_msg += "multiple targets. Use only one request per log file."
-    sys.stdout.write(settings.print_critical_msg(err_msg) + "\n")
+  def multi_requests():
+    print "[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]"
+    warn_msg = "Multiple"
+    if menu.options.requestfile: 
+      warn_msg += " requests"
+    elif menu.options.logfile: 
+      warn_msg += " targets"
+    warn_msg += " are not supported, thus all coming"
+    if menu.options.requestfile: 
+      warn_msg += " requests "
+    elif menu.options.logfile: 
+      warn_msg += " targets "
+    warn_msg += "will be ignored."
+    sys.stdout.write(settings.print_warning_msg(warn_msg) + "\n")
     sys.stdout.flush()
-    sys.exit(0)
+    return False
 
   """
   Error message for invalid data.
   """
-  def invalid_data(request):
-    print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
+  def invalid_data(request, single_request):
+    if single_request:
+      print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
     err_msg = "Something seems to be wrong with "
-    err_msg += "the '" + request + "' file. "
+    err_msg += "the '" + os.path.split(request_file)[1] + "' file. "
     sys.stdout.write(settings.print_critical_msg(err_msg) + "\n")
     sys.stdout.flush()
     sys.exit(0)
@@ -80,11 +90,12 @@ def logfile_parser():
         words_dict[word[:4].strip()] = words_dict.get(word[:4].strip(), 0) + 1
 
     # Check if same header appears more than once.
+    single_request = True
     if len(words_dict.keys()) > 1:
-      multi_targets()
+      single_request = multi_requests()
     for key in words_dict.keys():
       if words_dict[key] > 1:
-        multi_targets()
+        single_request = multi_requests()
 
     # Check for GET / POST HTTP Header
     for http_header in ["GET","POST"]:
@@ -95,22 +106,27 @@ def logfile_parser():
       request_url = re.findall(r"" + http_header + " (.*) ", request)
 
       if request_url:
+        if not single_request:
+          request_url = request_url[0]
         if http_header == "POST":
           # Check for POST Data.
           result = [item for item in request.splitlines() if item]
           menu.options.data = result[len(result)-1]
         else:
-          # Check if url ends with "=".
-          if request_url[0].endswith("="):
-            request_url = request_url[0].replace("=","=" + settings.INJECT_TAG, 1)
+          try:
+            # Check if url ends with "=".
+            if request_url[0].endswith("="):
+              request_url = request_url[0].replace("=","=" + settings.INJECT_TAG, 1)
+          except IndexError:
+            invalid_data(request_file, single_request) 
         break
 
     # Check if invalid data
     if not request_url:
-      invalid_data(request)
+      invalid_data(request_file, single_request)
     else:
       request_url = "".join([str(i) for i in request_url])       
-    
+
     # Check for other headers
     extra_headers = ""
     prefix = "http://"
@@ -158,11 +174,12 @@ def logfile_parser():
 
     # Target URL  
     if not menu.options.host:
-      invalid_data(request)
+      invalid_data(request_file, single_request)
     else:
       menu.options.url = prefix + menu.options.host + request_url
-      sys.stdout.write("[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]\n")
-      sys.stdout.flush()
+      if single_request:
+        sys.stdout.write("[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]\n")
+        sys.stdout.flush()
       if menu.options.logfile:
         info_msg = "Parsed target from '" + os.path.split(request_file)[1] + "' for tests :"
         print settings.print_info_msg(info_msg)
