@@ -154,7 +154,7 @@ Log files cration notification.
 def logs_notification(filename):
   # Save command history.
   save_cmd_history()
-  info_msg = "The results can be found at '" + os.getcwd() + "/" + filename + "'"
+  info_msg = "The results can be found at '" + os.getcwd() + "/" + filename + "'\n"
   print settings.print_info_msg(info_msg)
 
 """

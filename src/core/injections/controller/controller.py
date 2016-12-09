@@ -96,37 +96,77 @@ def injection_proccess(url, check_parameter, http_request_method, filename, dela
   # Estimating the response time (in seconds)
   delay, url_time_response = requests.estimate_response_time(url, delay)
 
+  skip_code_injections = False
+  skip_command_injections = False
+
   # Check if it is vulnerable to classic command injection technique.
   if not menu.options.tech or "c" in menu.options.tech:
     settings.CLASSIC_STATE = None
     if cb_handler.exploitation(url, delay, filename, http_request_method) != False:
       settings.CLASSIC_STATE = True
+      question_msg = "Due to resuts "
+      question_msg += "skipping of code injection checks is recommended. "
+      question_msg += "Do you agree? [Y/n/q] > "
+      sys.stdout.write(settings.print_question_msg(question_msg))
+      procced_option = sys.stdin.readline().replace("\n","").lower()
+      if len(procced_option) == 0:
+         procced_option = "y"
+      if procced_option in settings.CHOICE_YES:
+        skip_code_injections = True
+      elif procced_option in settings.CHOICE_NO:
+        pass
+      elif procced_option in settings.CHOICE_QUIT:
+        sys.exit(0)
+      else:
+        err_msg = "'" + procced_option + "' is not a valid answer."  
+        print settings.print_error_msg(err_msg)
+        pass
     else:
       settings.CLASSIC_STATE = False
 
   # Check if it is vulnerable to eval-based code injection technique.
   if not menu.options.tech or "e" in menu.options.tech:
-    settings.EVAL_BASED_STATE = None
-    if eb_handler.exploitation(url, delay, filename, http_request_method) != False:
-      settings.EVAL_BASED_STATE = True
-    else:
-      settings.EVAL_BASED_STATE = False
+    if not skip_code_injections:
+      settings.EVAL_BASED_STATE = None
+      if eb_handler.exploitation(url, delay, filename, http_request_method) != False:
+        settings.EVAL_BASED_STATE = True
+        question_msg = "Due to resuts, "
+        question_msg += "skipping of further command injection checks is recommended. "
+        question_msg += "Do you agree? [Y/n/q] > "
+        sys.stdout.write(settings.print_question_msg(question_msg))
+        procced_option = sys.stdin.readline().replace("\n","").lower()
+        if len(procced_option) == 0:
+           procced_option = "y"
+        if procced_option in settings.CHOICE_YES:
+          skip_command_injections = True
+        elif procced_option in settings.CHOICE_NO:
+          pass
+        elif procced_option in settings.CHOICE_QUIT:
+          sys.exit(0)
+        else:
+          err_msg = "'" + procced_option + "' is not a valid answer."  
+          print settings.print_error_msg(err_msg)
+          pass
+      else:
+        settings.EVAL_BASED_STATE = False
+  
+  if not skip_command_injections:
 
-  # Check if it is vulnerable to time-based blind command injection technique.
-  if not menu.options.tech or "t" in menu.options.tech:
-    settings.TIME_BASED_STATE = None
-    if tb_handler.exploitation(url, delay, filename, http_request_method, url_time_response) != False:
-      settings.TIME_BASED_STATE = True
-    else:
-      settings.TIME_BASED_STATE = False
+    # Check if it is vulnerable to time-based blind command injection technique.
+    if not menu.options.tech or "t" in menu.options.tech:
+      settings.TIME_BASED_STATE = None
+      if tb_handler.exploitation(url, delay, filename, http_request_method, url_time_response) != False:
+        settings.TIME_BASED_STATE = True
+      else:
+        settings.TIME_BASED_STATE = False
 
-  # Check if it is vulnerable to file-based semiblind command injection technique.
-  if not menu.options.tech or "f" in menu.options.tech:
-    settings.FILE_BASED_STATE = None
-    if fb_handler.exploitation(url, delay, filename, http_request_method, url_time_response) != False:
-      settings.FILE_BASED_STATE = True
-    else:
-      settings.FILE_BASED_STATE = False
+    # Check if it is vulnerable to file-based semiblind command injection technique.
+    if not menu.options.tech or "f" in menu.options.tech and not skip_command_injections:
+      settings.FILE_BASED_STATE = None
+      if fb_handler.exploitation(url, delay, filename, http_request_method, url_time_response) != False:
+        settings.FILE_BASED_STATE = True
+      else:
+        settings.FILE_BASED_STATE = False
 
   # All injection techniques seems to be failed!
   if settings.CLASSIC_STATE == settings.EVAL_BASED_STATE == settings.TIME_BASED_STATE == settings.FILE_BASED_STATE == False :
@@ -435,7 +475,7 @@ def do_check(url, filename):
       err_msg += "."
       print settings.print_critical_msg(err_msg) + "\n"
       
-  logs.print_logs_notification(filename, url)     
+  logs.print_logs_notification(filename, url)   
   #sys.exit(0)
 
 #eof
