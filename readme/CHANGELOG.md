@@ -1,4 +1,5 @@
 ## Version 1.6 (upcoming)
+* Fixed: Improvement regarding the IP address grabbing (in case of internet in-accessibility).
 * Fixed: Improvement regarding HTTPS based websites, for which scanning fails.
 * Added: New option "-r" for loading HTTP request from a file.
 * Fixed: Improvement regarding the response time estimimation, in which the target URL was requested without its POST data.

@@ -106,7 +106,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "1.6.14"
+VERSION_NUM = "1.6.15"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"
@@ -132,21 +132,8 @@ TARGET_OS = "unix"
 # Verbosity level: 0-1 (default 0)
 VERBOSITY_LEVEL = 0
 
-# Local HTTP Server
-try:
-  s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-  s.connect(("8.8.8.8",53))
-except socket_error, err:
-  if errno.ECONNREFUSED:
-    err_msg = "Network is unreachable."
-    print print_critical_msg(err_msg) + "\n"
-  else:
-    err_msg = err
-    print print_critical_msg(err_msg) + "\n"
-  sys.exit(0)
 # Local HTTP server ip
-LOCAL_HTTP_IP = (s.getsockname()[0])
-s.close()
+LOCAL_HTTP_IP = ""
 
 # Local HTTP server port
 LOCAL_HTTP_PORT = random.randint(50000,60000)

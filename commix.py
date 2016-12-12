@@ -286,6 +286,23 @@ def main(filename, url):
                   err_msg = "The '" + menu.options.file_upload + "' file, does not exists."
                   sys.stdout.write(settings.print_critical_msg(err_msg) + "\n")
                   sys.exit(0)
+
+                if settings.LOCAL_HTTP_IP == None:
+                  while True:
+                    question_msg = "Please enter your interface IP address > "
+                    sys.stdout.write(settings.print_question_msg(question_msg))
+                    ip_addr = sys.stdin.readline().replace("\n","").lower()
+
+                    # check if IP address is valid
+                    ip_check = simple_http_server.is_valid_ipv4(ip_addr)
+                    if ip_check == False:
+                      err_msg = "The provided IP address seems not valid."  
+                      print settings.print_error_msg(err_msg)
+                      pass
+                    else:
+                      settings.LOCAL_HTTP_IP = ip_addr
+                      break
+
                 http_server = "http://" + str(settings.LOCAL_HTTP_IP) + ":" + str(settings.LOCAL_HTTP_PORT) + "/"
                 info_msg = "Setting the HTTP server on '" + http_server + "'. "  
                 print settings.print_info_msg(info_msg)
@@ -307,10 +324,10 @@ def main(filename, url):
           try:
             urllib2.urlopen(menu.options.file_upload)
           except urllib2.HTTPError, err_msg:
-            print settings.print_critical_msg(err_msg)
+            print settings.print_critical_msg(str(err_msg.code))
             sys.exit(0)
           except urllib2.URLError, err_msg:
-            print settings.print_critical_msg(err_msg)
+            print settings.print_critical_msg(str(err_msg.args[0]).split("] ")[1] + ".")
             sys.exit(0)
 
         # Used a valid pair of valid credentials
@@ -713,7 +730,10 @@ if __name__ == '__main__':
 
     # Checkall the banner
     menu.banner()
-        
+    
+    # Local IP address
+    settings.LOCAL_HTTP_IP = simple_http_server.grab_ip_addr()  
+
     # Check python version number.
     version.python_version()
 
