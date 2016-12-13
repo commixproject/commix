@@ -449,6 +449,12 @@ misc.add_option("--skip-waf",
                 default=False,
                 help="Skip heuristic detection of WAF/IPS/IDS protection.")
 
+misc.add_option("--offline", 
+                action="store_true",
+                dest="offline",
+                default=False,
+                help="Work in offline mode.")
+
 parser.add_option_group(general)
 parser.add_option_group(target)
 parser.add_option_group(request)

@@ -19,6 +19,7 @@ import time
 import urllib2
 import subprocess
 
+from src.utils import menu
 from src.utils import settings
 from src.utils import requirments
 from src.thirdparty.colorama import Fore, Back, Style, init
@@ -37,6 +38,11 @@ def updater():
   info_msg += settings.APPLICATION + " via GitHub... "
   sys.stdout.write(settings.print_info_msg(info_msg))
   sys.stdout.flush()
+  if menu.options.offline:  
+    print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
+    err_msg = "You cannot update commix via GitHub without access on the Internet."
+    print settings.print_critical_msg(err_msg)
+    sys.exit(0)
   # Check if windows
   if settings.IS_WINDOWS:
     print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"

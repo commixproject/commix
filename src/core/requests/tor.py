@@ -77,11 +77,15 @@ def do_check():
 Use the TOR HTTP Proxy.
 """
 def use_tor(request):
+  if menu.options.offline:  
+    err_msg = "You cannot Tor network without access on the Internet."
+    print settings.print_critical_msg(err_msg)
+    sys.exit(0)
+
   privoxy_proxy = urllib2.ProxyHandler({settings.PROXY_PROTOCOL:settings.PRIVOXY_IP + ":" + PRIVOXY_PORT})
   opener = urllib2.build_opener(privoxy_proxy)
   urllib2.install_opener(opener)
   response = urllib2.urlopen(request)
-  
   return response
   
 #eof 

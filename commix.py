@@ -732,7 +732,10 @@ if __name__ == '__main__':
     menu.banner()
     
     # Local IP address
-    settings.LOCAL_HTTP_IP = simple_http_server.grab_ip_addr()  
+    if not menu.options.offline:
+      settings.LOCAL_HTTP_IP = simple_http_server.grab_ip_addr()
+    else:
+      settings.LOCAL_HTTP_IP = None  
 
     # Check python version number.
     version.python_version()
@@ -786,6 +789,9 @@ if __name__ == '__main__':
     if menu.options.requestfile or menu.options.logfile:
       parser.logfile_parser()
 
+    if menu.options.offline:
+      settings.CHECK_FOR_UPDATES_ON_START = False
+      
     # Check if ".git" exists and check for updated version!
     if os.path.isdir("./.git") and settings.CHECK_FOR_UPDATES_ON_START:
       update.check_for_update()
