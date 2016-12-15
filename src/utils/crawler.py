@@ -85,31 +85,35 @@ def do_process(url):
 The main crawler.
 """
 def crawler(url):
-
-  info_msg = "Starting crawler and searching for "
-  info_msg += "links with depth " + str(menu.options.DEFAULT_CRAWLDEPTH_LEVEL) + "." 
-  print settings.print_info_msg(info_msg)
+  if not menu.options.sitemap_url:
+    info_msg = "Starting crawler and searching for "
+    info_msg += "links with depth " + str(menu.options.DEFAULT_CRAWLDEPTH_LEVEL) + "." 
+    print settings.print_info_msg(info_msg)
 
   while True:
-    question_msg = "Do you want to check target for "
-    question_msg += "the existence of 'sitemap.xml'? [Y/n/q] > "
-    sys.stdout.write(settings.print_question_msg(question_msg))
-    sitemap_check = sys.stdin.readline().replace("\n","").lower()
-    if len(sitemap_check) == 0:
-       sitemap_check = "y"
-    if sitemap_check in settings.CHOICE_YES:
+    if not menu.options.sitemap_url:
+      question_msg = "Do you want to check target for "
+      question_msg += "the existence of 'sitemap.xml'? [Y/n/q] > "
+      sys.stdout.write(settings.print_question_msg(question_msg))
+      sitemap_check = sys.stdin.readline().replace("\n","").lower()
+      if len(sitemap_check) == 0:
+         sitemap_check = "y"
+      if sitemap_check in settings.CHOICE_YES:
+        sitemap_check = True
+        break
+      elif sitemap_check in settings.CHOICE_NO:
+        sitemap_check = False
+        break
+      elif sitemap_check in settings.CHOICE_QUIT:
+        sys.exit(0)
+      else:
+        err_msg = "'" + sitemap_check + "' is not a valid answer."  
+        print settings.print_error_msg(err_msg)
+        pass
+    else:
       sitemap_check = True
       break
-    elif sitemap_check in settings.CHOICE_NO:
-      sitemap_check = False
-      break
-    elif sitemap_check in settings.CHOICE_QUIT:
-      sys.exit(0)
-    else:
-      err_msg = "'" + sitemap_check + "' is not a valid answer."  
-      print settings.print_error_msg(err_msg)
-      pass
-
+      
   if sitemap_check:
     output_href = sitemap(url)
     sitemap_check = output_href

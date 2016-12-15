@@ -1,4 +1,5 @@
 ## Version 1.6 (upcoming)
+* Added: New option "-x" for parsing target(s) from remote sitemap(.xml) file. 
 * Added: New option "--offline" for working in offline mode.
 * Fixed: Improvement regarding the IP address grabbing (in case of internet in-accessibility).
 * Fixed: Improvement regarding HTTPS based websites, for which scanning fails.

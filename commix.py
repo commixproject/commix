@@ -197,8 +197,42 @@ def main(filename, url):
       url = checks.check_http_s(url)
 
       # Load the crawler
-      if menu.options.crawldepth > 0:
-        menu.options.DEFAULT_CRAWLDEPTH_LEVEL = menu.options.crawldepth
+      if menu.options.crawldepth > 0 or menu.options.sitemap_url:
+        if menu.options.crawldepth > 0:
+          menu.options.DEFAULT_CRAWLDEPTH_LEVEL = menu.options.crawldepth
+        else:  
+          if menu.options.sitemap_url:
+            while True:
+              question_msg = "Do you want to change the crawling depth level? [Y/n/q] > "
+              sys.stdout.write(settings.print_question_msg(question_msg))
+              change_depth_level = sys.stdin.readline().replace("\n","").lower()
+
+              if len(change_depth_level) == 0:
+                 change_depth_level = "y"              
+              if change_depth_level in settings.CHOICE_YES or change_depth_level in settings.CHOICE_NO:
+                break  
+              elif change_depth_level in settings.CHOICE_QUIT:
+                sys.exit(0)
+              else:
+                err_msg = "'" + change_depth_level + "' is not a valid answer."  
+                print settings.print_error_msg(err_msg)
+                pass
+
+            # Change the crawling depth level.
+            if change_depth_level in settings.CHOICE_YES:
+              while True:
+                question_msg = "Please enter the crawling depth level (1-2) > "
+                sys.stdout.write(settings.print_question_msg(question_msg))
+                depth_level = sys.stdin.readline().replace("\n","").lower()
+                if int(depth_level) >= 3:
+                  err_msg = "Depth level '" + depth_level + "' is not a valid answer."  
+                  print settings.print_error_msg(err_msg)
+                  pass
+                else: 
+                  menu.options.DEFAULT_CRAWLDEPTH_LEVEL = depth_level
+                  break
+
+        # Crawl the url.        
         url = crawler.crawler(url)
 
       try:
@@ -823,7 +857,11 @@ if __name__ == '__main__':
           main(filename, url)
     else:
       # Check if option is "--url" for single url test.
-      url = menu.options.url
+      if menu.options.sitemap_url:
+        url = menu.options.sitemap_url
+      else:  
+        url = menu.options.url
+
       filename = logs_filename_creation()
       main(filename, url)
 

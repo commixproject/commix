@@ -130,6 +130,10 @@ target.add_option("--crawl",
                 type="int",
                 help="Crawl the website starting from the target URL (1-2, Default: " + str(settings.DEFAULT_CRAWLDEPTH_LEVEL) + ").")
 
+target.add_option("-x",
+                dest="sitemap_url",
+                help="Parse target(s) from remote sitemap(.xml) file.")
+
 # Request options
 request = OptionGroup(parser,  Style.BRIGHT + "Request" + Style.RESET_ALL, 
                       "These options can be used to specify how to connect to the target URL.")
