@@ -335,9 +335,12 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                       sys.stdout.write("\r" + settings.print_warning_msg(warn_msg))
                       print ""
                       while True:
-                        question_msg = "Do you want to try the temporary directory (" + tmp_path + ") [Y/n/q] > "
-                        sys.stdout.write(settings.print_question_msg(question_msg))
-                        tmp_upload = sys.stdin.readline().replace("\n","").lower()
+                        if not menu.options.batch:
+                          question_msg = "Do you want to try the temporary directory (" + tmp_path + ") [Y/n/q] > "
+                          sys.stdout.write(settings.print_question_msg(question_msg))
+                          tmp_upload = sys.stdin.readline().replace("\n","").lower()
+                        else:
+                          tmp_upload = ""
                         if len(tmp_upload) == 0:
                            tmp_upload = "y"
                         if tmp_upload in settings.CHOICE_YES:
@@ -490,8 +493,11 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
             new_line = True
             if settings.ENUMERATION_DONE == True :
               while True:
-                question_msg = "Do you want to enumerate again? [Y/n/q] > "
-                enumerate_again = raw_input("\n" + settings.print_question_msg(question_msg)).lower()
+                if not menu.options.batch:
+                  question_msg = "Do you want to enumerate again? [Y/n/q] > "
+                  enumerate_again = raw_input("\n" + settings.print_question_msg(question_msg)).lower()
+                else:
+                  enumerate_again = ""  
                 if len(enumerate_again) == 0:
                   enumerate_again = "y"
                 if enumerate_again in settings.CHOICE_YES:
@@ -522,9 +528,12 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
               if settings.ENUMERATION_DONE != True:
                 print ""
               while True:
-                question_msg = "Do you want to access files again? [Y/n/q] > "
-                sys.stdout.write(settings.print_question_msg(question_msg))
-                file_access_again = sys.stdin.readline().replace("\n","").lower()
+                if not menu.options.batch:
+                  question_msg = "Do you want to access files again? [Y/n/q] > "
+                  sys.stdout.write(settings.print_question_msg(question_msg))
+                  file_access_again = sys.stdin.readline().replace("\n","").lower()
+                else:
+                  file_access_again = ""
                 if len(file_access_again) == 0:
                    file_access_again= "y"
                 if file_access_again in settings.CHOICE_YES:
@@ -570,9 +579,12 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                   print ""
                 if go_back == True:
                   break
-                question_msg = "Do you want a Pseudo-Terminal shell? [Y/n/q] > "
-                sys.stdout.write(settings.print_question_msg(question_msg))
-                gotshell = sys.stdin.readline().replace("\n","").lower()
+                if not menu.options.batch:
+                  question_msg = "Do you want a Pseudo-Terminal shell? [Y/n/q] > "
+                  sys.stdout.write(settings.print_question_msg(question_msg))
+                  gotshell = sys.stdin.readline().replace("\n","").lower()
+                else:
+                  gotshell = ""
                 if len(gotshell) == 0:
                    gotshell = "y"
                 if gotshell in settings.CHOICE_YES:

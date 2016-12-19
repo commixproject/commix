@@ -114,11 +114,14 @@ def check_for_update():
       warn_msg = "Current version seems to be out-of-date."
       print settings.print_warning_msg(warn_msg)
       while True:
-        question_msg = "Do you want to update to the latest version now? [Y/n] > "
-        sys.stdout.write(settings.print_question_msg(question_msg))
-        do_update = sys.stdin.readline().replace("\n","").lower()
+        if not menu.options.batch:
+          question_msg = "Do you want to update to the latest version now? [Y/n] > "
+          sys.stdout.write(settings.print_question_msg(question_msg))
+          do_update = sys.stdin.readline().replace("\n","").lower()
+        else:
+          do_update = ""
         if len(do_update) == 0:
-           do_update = "y"
+          do_update = "y"
         if do_update in settings.CHOICE_YES:
             updater()
         elif do_update in settings.CHOICE_NO:

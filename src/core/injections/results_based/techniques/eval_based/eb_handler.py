@@ -295,8 +295,11 @@ def eb_injection_handler(url, delay, filename, http_request_method):
             new_line = True
             if settings.ENUMERATION_DONE == True :
               while True:
-                question_msg = "Do you want to enumerate again? [Y/n/q] > "
-                enumerate_again = raw_input("\n" + settings.print_question_msg(question_msg)).lower()
+                if not menu.options.batch:
+                  question_msg = "Do you want to enumerate again? [Y/n/q] > "
+                  enumerate_again = raw_input("\n" + settings.print_question_msg(question_msg)).lower()
+                else:
+                  enumerate_again = ""  
                 if len(enumerate_again) == 0:
                   enumerate_again = "y"
                 if enumerate_again in settings.CHOICE_YES:
@@ -325,9 +328,12 @@ def eb_injection_handler(url, delay, filename, http_request_method):
               if settings.ENUMERATION_DONE != True:
                 print ""
               while True:
-                question_msg = "Do you want to access files again? [Y/n/q] > "
-                sys.stdout.write(settings.print_question_msg(question_msg))
-                file_access_again = sys.stdin.readline().replace("\n","").lower()
+                if not menu.options.batch:
+                  question_msg = "Do you want to access files again? [Y/n/q] > "
+                  sys.stdout.write(settings.print_question_msg(question_msg))
+                  file_access_again = sys.stdin.readline().replace("\n","").lower()
+                else:
+                  file_access_again = ""
                 if len(file_access_again) == 0:
                    file_access_again = "y"
                 if file_access_again in settings.CHOICE_YES:
@@ -361,13 +367,17 @@ def eb_injection_handler(url, delay, filename, http_request_method):
             while True:
               if go_back == True:
                 break
-              question_msg = "Do you want a Pseudo-Terminal shell? [Y/n/q] > "
-              sys.stdout.write(settings.print_question_msg(question_msg)) 
-              gotshell = sys.stdin.readline().replace("\n","").lower()
+              if not menu.options.batch:
+                question_msg = "Do you want a Pseudo-Terminal shell? [Y/n/q] > "
+                sys.stdout.write(settings.print_question_msg(question_msg)) 
+                gotshell = sys.stdin.readline().replace("\n","").lower()
+              else:
+                gotshell = ""
               if len(gotshell) == 0:
                  gotshell = "y"
               if gotshell in settings.CHOICE_YES:
-                print ""
+                if not menu.options.batch:
+                  print ""
                 print "Pseudo-Terminal (type '" + Style.BRIGHT + "?" + Style.RESET_ALL + "' for available options)"
                 if readline_error:
                   checks.no_readline_module()

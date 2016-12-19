@@ -144,9 +144,12 @@ def input_cmd(http_request_method, url, vuln_parameter, ip_src, technique):
   while True:
     if go_back == True:
       break
-    question_msg = "Do you want a Pseudo-Terminal shell? [Y/n/q] > "
-    sys.stdout.write(settings.print_question_msg(question_msg))
-    gotshell = sys.stdin.readline().replace("\n","").lower()
+    if not menu.options.batch:  
+      question_msg = "Do you want a Pseudo-Terminal shell? [Y/n/q] > "
+      sys.stdout.write(settings.print_question_msg(question_msg))
+      gotshell = sys.stdin.readline().replace("\n","").lower()
+    else:
+      gotshell = ""  
     if len(gotshell) == 0:
        gotshell= "y"
     if gotshell in settings.CHOICE_YES:

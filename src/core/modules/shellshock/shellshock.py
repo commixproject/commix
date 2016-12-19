@@ -707,9 +707,12 @@ def shellshock_handler(url, http_request_method, filename):
             if settings.VERBOSITY_LEVEL >= 1:
               print ""
             while True:
-              question_msg = "Do you want to enumerate again? [Y/n/q] > "
-              sys.stdout.write(settings.print_question_msg(question_msg))
-              enumerate_again = sys.stdin.readline().replace("\n","").lower()
+              if not menu.options.batch:
+                question_msg = "Do you want to enumerate again? [Y/n/q] > "
+                sys.stdout.write(settings.print_question_msg(question_msg))
+                enumerate_again = sys.stdin.readline().replace("\n","").lower()
+              else:
+                 enumerate_again = "" 
               if len(enumerate_again) == 0:
                  enumerate_again = "y"
               if enumerate_again in settings.CHOICE_YES:
@@ -729,11 +732,14 @@ def shellshock_handler(url, http_request_method, filename):
           # File access options.
           if settings.FILE_ACCESS_DONE == True :
             while True:
-              question_msg = "Do you want to access files again? [Y/n/q] > "
-              sys.stdout.write(settings.print_question_msg(question_msg))
-              file_access_again = sys.stdin.readline().replace("\n","").lower()
+              if not menu.options.batch:
+                question_msg = "Do you want to access files again? [Y/n/q] > "
+                sys.stdout.write(settings.print_question_msg(question_msg))
+                file_access_again = sys.stdin.readline().replace("\n","").lower()
+              else:
+                 file_access_again= "" 
               if len(file_access_again) == 0:
-                 file_access_again= "y"
+                 file_access_again = "y"
               if file_access_again in settings.CHOICE_YES:
                 file_access(url, cve, check_header, filename)
                 break
@@ -764,9 +770,12 @@ def shellshock_handler(url, http_request_method, filename):
               if settings.ENUMERATION_DONE == False and settings.FILE_ACCESS_DONE == False:
                 if settings.VERBOSITY_LEVEL >= 1:
                   print ""
-              question_msg = "Do you want a Pseudo-Terminal shell? [Y/n/q] > "
-              sys.stdout.write(settings.print_question_msg(question_msg))
-              gotshell = sys.stdin.readline().replace("\n","").lower()
+              if not menu.options.batch:
+                question_msg = "Do you want a Pseudo-Terminal shell? [Y/n/q] > "
+                sys.stdout.write(settings.print_question_msg(question_msg))
+                gotshell = sys.stdin.readline().replace("\n","").lower()
+              else:
+                gotshell= ""  
               if len(gotshell) == 0:
                  gotshell= "y"
               if gotshell in settings.CHOICE_YES:

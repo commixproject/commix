@@ -103,12 +103,15 @@ def injection_proccess(url, check_parameter, http_request_method, filename, dela
   if not menu.options.tech or "c" in menu.options.tech:
     settings.CLASSIC_STATE = None
     if cb_handler.exploitation(url, delay, filename, http_request_method) != False:
-      settings.CLASSIC_STATE = True
-      question_msg = "Due to resuts "
-      question_msg += "skipping of code injection checks is recommended. "
-      question_msg += "Do you agree? [Y/n/q] > "
-      sys.stdout.write(settings.print_question_msg(question_msg))
-      procced_option = sys.stdin.readline().replace("\n","").lower()
+      if not menu.options.batch:
+        settings.CLASSIC_STATE = True
+        question_msg = "Due to resuts "
+        question_msg += "skipping of code injection checks is recommended. "
+        question_msg += "Do you agree? [Y/n/q] > "
+        sys.stdout.write(settings.print_question_msg(question_msg))
+        procced_option = sys.stdin.readline().replace("\n","").lower()
+      else:
+        procced_option = ""
       if len(procced_option) == 0:
          procced_option = "y"
       if procced_option in settings.CHOICE_YES:
@@ -129,12 +132,15 @@ def injection_proccess(url, check_parameter, http_request_method, filename, dela
     if not skip_code_injections:
       settings.EVAL_BASED_STATE = None
       if eb_handler.exploitation(url, delay, filename, http_request_method) != False:
-        settings.EVAL_BASED_STATE = True
-        question_msg = "Due to resuts, "
-        question_msg += "skipping of further command injection checks is recommended. "
-        question_msg += "Do you agree? [Y/n/q] > "
-        sys.stdout.write(settings.print_question_msg(question_msg))
-        procced_option = sys.stdin.readline().replace("\n","").lower()
+        if not menu.options.batch:
+          settings.EVAL_BASED_STATE = True
+          question_msg = "Due to resuts, "
+          question_msg += "skipping of further command injection checks is recommended. "
+          question_msg += "Do you agree? [Y/n/q] > "
+          sys.stdout.write(settings.print_question_msg(question_msg))
+          procced_option = sys.stdin.readline().replace("\n","").lower()
+        else:
+          procced_option = ""
         if len(procced_option) == 0:
            procced_option = "y"
         if procced_option in settings.CHOICE_YES:
@@ -437,10 +443,13 @@ def do_check(url, filename):
     scan_level = menu.options.level
 
     while scan_level < settings.HTTP_HEADER_INJECTION_LEVEL and settings.LOAD_SESSION == None:
-      question_msg = "Do you want to increase to '--level=" + str(scan_level + 1) 
-      question_msg += "' in order to perform more tests? [Y/n/q] > "
-      sys.stdout.write(settings.print_question_msg(question_msg))
-      next_level = sys.stdin.readline().replace("\n","").lower()
+      if not menu.options.batch:
+        question_msg = "Do you want to increase to '--level=" + str(scan_level + 1) 
+        question_msg += "' in order to perform more tests? [Y/n/q] > "
+        sys.stdout.write(settings.print_question_msg(question_msg))
+        next_level = sys.stdin.readline().replace("\n","").lower()
+      else:
+        next_level = ""
       if len(next_level) == 0:
          next_level = "y"
       if next_level in settings.CHOICE_YES:

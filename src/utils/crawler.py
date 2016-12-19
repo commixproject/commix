@@ -92,10 +92,13 @@ def crawler(url):
 
   while True:
     if not menu.options.sitemap_url:
-      question_msg = "Do you want to check target for "
-      question_msg += "the existence of 'sitemap.xml'? [Y/n/q] > "
-      sys.stdout.write(settings.print_question_msg(question_msg))
-      sitemap_check = sys.stdin.readline().replace("\n","").lower()
+      if not menu.options.batch:
+        question_msg = "Do you want to check target for "
+        question_msg += "the existence of 'sitemap.xml'? [Y/n/q] > "
+        sys.stdout.write(settings.print_question_msg(question_msg))
+        sitemap_check = sys.stdin.readline().replace("\n","").lower()
+      else:
+        sitemap_check = ""
       if len(sitemap_check) == 0:
          sitemap_check = "y"
       if sitemap_check in settings.CHOICE_YES:
@@ -121,10 +124,13 @@ def crawler(url):
       if recursion.endswith(".xml") and "sitemap" in recursion.lower():
         while True:
           warn_msg = "A sitemap recursion was detected " + "'" + recursion + "'."
-          print settings.print_warning_msg(warn_msg) 
-          question_msg = "Do you want to follow the detected recursion? [Y/n/q] > "
-          sys.stdout.write(settings.print_question_msg(question_msg))
-          sitemap_check = sys.stdin.readline().replace("\n","").lower()
+          print settings.print_warning_msg(warn_msg)
+          if not menu.options.batch:
+            question_msg = "Do you want to follow the detected recursion? [Y/n/q] > "
+            sys.stdout.write(settings.print_question_msg(question_msg))
+            sitemap_check = sys.stdin.readline().replace("\n","").lower()
+          else:
+            sitemap_check = ""
           if len(sitemap_check) == 0:
              sitemap_check = "y"
           if sitemap_check in settings.CHOICE_YES:
@@ -159,9 +165,12 @@ def crawler(url):
       if succeed_banner:
         print "[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]"
       print settings.print_success_msg(check_url)
-      question_msg = "Do you want to use this URL to perform tests? [Y/n/q] > "
-      sys.stdout.write(settings.print_question_msg(question_msg))
-      use_url = sys.stdin.readline().replace("\n","").lower()
+      if not menu.options.batch:
+        question_msg = "Do you want to use this URL to perform tests? [Y/n/q] > "
+        sys.stdout.write(settings.print_question_msg(question_msg))
+        use_url = sys.stdin.readline().replace("\n","").lower()
+      else:
+        use_url = ""
       if len(use_url) == 0:
          use_url = "y"
       if use_url in settings.CHOICE_YES:

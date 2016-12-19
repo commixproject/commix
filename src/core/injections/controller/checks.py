@@ -30,9 +30,12 @@ Procced to the next attack vector.
 """
 def next_attack_vector(technique, go_back):
   while True:
-    question_msg = "Continue with testing the " + technique + "? [Y/n/q] > "
-    sys.stdout.write(settings.print_question_msg(question_msg))
-    next_attack_vector = sys.stdin.readline().replace("\n","").lower()
+    if not menu.options.batch:
+      question_msg = "Continue with testing the " + technique + "? [Y/n/q] > "
+      sys.stdout.write(settings.print_question_msg(question_msg))
+      next_attack_vector = sys.stdin.readline().replace("\n","").lower()
+    else:
+      next_attack_vector = ""
     if len(next_attack_vector) == 0:
        next_attack_vector = "y"
     if next_attack_vector in settings.CHOICE_YES:
@@ -119,10 +122,13 @@ def continue_tests(err):
     print settings.print_warning_msg(warn_msg)
   try:
     while True:
-      question_msg = "Do you want to ignore the error (" + str(err.code) 
-      question_msg += ") message and continue the tests? [Y/n/q] > "
-      sys.stdout.write(settings.print_question_msg(question_msg))
-      continue_tests = sys.stdin.readline().replace("\n","").lower()
+      if not menu.options.batch:
+        question_msg = "Do you want to ignore the error (" + str(err.code) 
+        question_msg += ") message and continue the tests? [Y/n/q] > "
+        sys.stdout.write(settings.print_question_msg(question_msg))
+        continue_tests = sys.stdin.readline().replace("\n","").lower()
+      else:
+        continue_tests = ""
       if len(continue_tests) == 0:
          continue_tests = "y"
       if continue_tests in settings.CHOICE_YES:
@@ -182,10 +188,13 @@ def ps_check():
     warn_msg += "have chosen, are requiring the use of PowerShell. "
     print settings.print_warning_msg(warn_msg)
     while True:
-      question_msg = "Do you want to use the \"--ps-version\" option "
-      question_msg += "so ensure that PowerShell is enabled? [Y/n/q] > "
-      sys.stdout.write(settings.print_question_msg(question_msg))
-      ps_check = sys.stdin.readline().replace("\n","").lower()
+      if not menu.options.batch:
+        question_msg = "Do you want to use the \"--ps-version\" option "
+        question_msg += "so ensure that PowerShell is enabled? [Y/n/q] > "
+        sys.stdout.write(settings.print_question_msg(question_msg))
+        ps_check = sys.stdin.readline().replace("\n","").lower()
+      else:
+        ps_check = ""
       if len(ps_check) == 0:
          ps_check = "y"
       if ps_check in settings.CHOICE_YES:
@@ -206,10 +215,13 @@ If PowerShell is disabled.
 """
 def ps_check_failed():
   while True:
-    question_msg = "Do you want to ignore the above warning "
-    question_msg += "and continue the procedure? [Y/n/q] > "
-    sys.stdout.write(settings.print_question_msg(question_msg))
-    ps_check = sys.stdin.readline().replace("\n","").lower()
+    if not menu.options.batch:
+      question_msg = "Do you want to ignore the above warning "
+      question_msg += "and continue the procedure? [Y/n/q] > "
+      sys.stdout.write(settings.print_question_msg(question_msg))
+      ps_check = sys.stdin.readline().replace("\n","").lower()
+    else:
+      ps_check = ""
     if len(ps_check) == 0:
        ps_check = "y"
     if ps_check in settings.CHOICE_YES:
@@ -253,9 +265,12 @@ def check_CGI_scripts(url):
       warn_msg += "vulnerable to shellshock. "
       print settings.print_warning_msg(warn_msg)
       while True:
-        question_msg = "Do you want to enable the shellshock injection module? [Y/n/q] > "
-        sys.stdout.write(settings.print_question_msg(question_msg))
-        shellshock_check = sys.stdin.readline().replace("\n","").lower()
+        if not menu.options.batch:
+          question_msg = "Do you want to enable the shellshock injection module? [Y/n/q] > "
+          sys.stdout.write(settings.print_question_msg(question_msg))
+          shellshock_check = sys.stdin.readline().replace("\n","").lower()
+        else:
+          shellshock_check = ""   
         if len(shellshock_check) == 0:
            shellshock_check = "y"
         if shellshock_check in settings.CHOICE_YES:
@@ -313,12 +328,15 @@ Decision if the user-defined operating system name,
 is different than the one identified by heuristics.
 """
 def identified_os():
-    warn_msg = "Heuristics have identified different operating system (" 
-    warn_msg += settings.TARGET_OS + ") than that you have provided." 
-    print settings.print_warning_msg(warn_msg)
-    question_msg = "How do you want to proceed? [(C)ontinue/(s)kip/(q)uit] > "
-    sys.stdout.write(settings.print_question_msg(question_msg))
-    proceed_option = sys.stdin.readline().replace("\n","").lower()
+    if not menu.options.batch:
+      warn_msg = "Heuristics have identified different operating system (" 
+      warn_msg += settings.TARGET_OS + ") than that you have provided." 
+      print settings.print_warning_msg(warn_msg)
+      question_msg = "How do you want to proceed? [(C)ontinue/(s)kip/(q)uit] > "
+      sys.stdout.write(settings.print_question_msg(question_msg))
+      proceed_option = sys.stdin.readline().replace("\n","").lower()
+    else:
+      proceed_option = "" 
     if len(proceed_option) == 0:
        proceed_option = "c"
     if proceed_option.lower() in settings.CHOICE_PROCEED :
@@ -394,13 +412,16 @@ Decision if the user-defined HTTP authenticatiob type,
 is different than the one identified by heuristics.
 """
 def identified_http_auth_type(auth_type):
-  warn_msg = "Heuristics have identified different HTTP authentication type (" 
-  warn_msg += auth_type.lower() + ") than that you have provided ("
-  warn_msg += menu.options.auth_type + ")." 
-  print settings.print_warning_msg(warn_msg)
-  question_msg = "How do you want to proceed? [(C)ontinue/(s)kip/(q)uit] > "
-  sys.stdout.write(settings.print_question_msg(question_msg))
-  proceed_option = sys.stdin.readline().replace("\n","").lower()
+  if not menu.options.batch:
+    warn_msg = "Heuristics have identified different HTTP authentication type (" 
+    warn_msg += auth_type.lower() + ") than that you have provided ("
+    warn_msg += menu.options.auth_type + ")." 
+    print settings.print_warning_msg(warn_msg)
+    question_msg = "How do you want to proceed? [(C)ontinue/(s)kip/(q)uit] > "
+    sys.stdout.write(settings.print_question_msg(question_msg))
+    proceed_option = sys.stdin.readline().replace("\n","").lower()
+  else:
+    proceed_option = ""  
   if len(proceed_option) == 0:
     proceed_option = "c"
   if proceed_option.lower() in settings.CHOICE_PROCEED :

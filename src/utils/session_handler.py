@@ -241,11 +241,14 @@ def notification(url, technique):
       success_msg = "A previously stored session has been held against that host."
       print settings.print_success_msg(success_msg) 
       while True:
-        question_msg = "Do you want to resume to the " 
-        question_msg += technique.rsplit(' ', 2)[0] 
-        question_msg += " injection point? [Y/n/q] > "
-        sys.stdout.write(settings.print_question_msg(question_msg))
-        settings.LOAD_SESSION = sys.stdin.readline().replace("\n","").lower()
+        if not menu.options.batch:
+          question_msg = "Do you want to resume to the " 
+          question_msg += technique.rsplit(' ', 2)[0] 
+          question_msg += " injection point? [Y/n/q] > "
+          sys.stdout.write(settings.print_question_msg(question_msg))
+          settings.LOAD_SESSION = sys.stdin.readline().replace("\n","").lower()
+        else:
+          settings.LOAD_SESSION = ""  
         if len(settings.LOAD_SESSION) == 0:
            settings.LOAD_SESSION = "y"
         if settings.LOAD_SESSION in settings.CHOICE_YES:

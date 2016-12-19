@@ -203,10 +203,12 @@ def main(filename, url):
         else:  
           if menu.options.sitemap_url:
             while True:
-              question_msg = "Do you want to change the crawling depth level? [Y/n/q] > "
-              sys.stdout.write(settings.print_question_msg(question_msg))
-              change_depth_level = sys.stdin.readline().replace("\n","").lower()
-
+              if not menu.options.batch:
+                question_msg = "Do you want to change the crawling depth level? [Y/n/q] > "
+                sys.stdout.write(settings.print_question_msg(question_msg))
+                change_depth_level = sys.stdin.readline().replace("\n","").lower()
+              else:
+                change_depth_level = ""
               if len(change_depth_level) == 0:
                  change_depth_level = "y"              
               if change_depth_level in settings.CHOICE_YES or change_depth_level in settings.CHOICE_NO:
@@ -309,9 +311,12 @@ def main(filename, url):
           if not re.match(settings.VALID_URL_FORMAT, menu.options.file_upload):
             # Check if not defined URL for upload.
             while True:
-              question_msg = "Do you want to enable an HTTP server? [Y/n/q] > "
-              sys.stdout.write(settings.print_question_msg(question_msg))
-              enable_HTTP_server = sys.stdin.readline().replace("\n","").lower()
+              if not menu.options.batch:
+                question_msg = "Do you want to enable an HTTP server? [Y/n/q] > "
+                sys.stdout.write(settings.print_question_msg(question_msg))
+                enable_HTTP_server = sys.stdin.readline().replace("\n","").lower()
+              else:
+                enable_HTTP_server == ""
               if len(enable_HTTP_server) == 0:
                  enable_HTTP_server = "y"              
               if enable_HTTP_server in settings.CHOICE_YES:
@@ -480,10 +485,13 @@ def main(filename, url):
             # Define Python working directory.
             if settings.TARGET_OS == "win" and menu.options.alter_shell:
               while True:
-                question_msg = "Do you want to use '" + settings.WIN_PYTHON_DIR 
-                question_msg += "' as Python working directory on the target host? [Y/n] > "
-                sys.stdout.write(settings.print_question_msg(question_msg))
-                python_dir = sys.stdin.readline().replace("\n","").lower()
+                if not menu.options.batch:
+                  question_msg = "Do you want to use '" + settings.WIN_PYTHON_DIR 
+                  question_msg += "' as Python working directory on the target host? [Y/n] > "
+                  sys.stdout.write(settings.print_question_msg(question_msg))
+                  python_dir = sys.stdin.readline().replace("\n","").lower()
+                else:
+                  python_dir = ""  
                 if len(python_dir) == 0:
                    python_dir = "y" 
                 if python_dir in settings.CHOICE_YES:
@@ -543,8 +551,6 @@ def main(filename, url):
                     elif got_os.lower() == "q":
                       raise SystemExit()
                   else:
-                    if got_os == "":
-                      got_os = "y"
                     err_msg = "'" + got_os + "' is not a valid answer."  
                     print settings.print_error_msg(err_msg)
                     pass
@@ -630,9 +636,12 @@ def main(filename, url):
                   warn_msg += "HTTP authentication credentials are required."
                   print settings.print_warning_msg(warn_msg)
                   while True:
-                    question_msg = "Do you want to perform a dictionary-based attack? [Y/n/q] > "
-                    sys.stdout.write(settings.print_question_msg(question_msg))
-                    do_update = sys.stdin.readline().replace("\n","").lower()
+                    if not menu.options.batch:
+                      question_msg = "Do you want to perform a dictionary-based attack? [Y/n/q] > "
+                      sys.stdout.write(settings.print_question_msg(question_msg))
+                      do_update = sys.stdin.readline().replace("\n","").lower()
+                    else:
+                      do_update = ""  
                     if len(do_update) == 0:
                        do_update = "y" 
                     if do_update in settings.CHOICE_YES:
@@ -663,9 +672,12 @@ def main(filename, url):
                     warn_msg = "Heuristics have failed to identify the realm attribute." 
                     print settings.print_warning_msg(warn_msg)
                   while True:
-                    question_msg = "Do you want to perform a dictionary-based attack? [Y/n/q] > "
-                    sys.stdout.write(settings.print_question_msg(question_msg))
-                    do_update = sys.stdin.readline().replace("\n","").lower()
+                    if not menu.options.batch:
+                      question_msg = "Do you want to perform a dictionary-based attack? [Y/n/q] > "
+                      sys.stdout.write(settings.print_question_msg(question_msg))
+                      do_update = sys.stdin.readline().replace("\n","").lower()
+                    else:
+                      do_update = ""
                     if len(do_update) == 0:
                        do_update = "y" 
                     if do_update in settings.CHOICE_YES:

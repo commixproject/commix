@@ -238,9 +238,12 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
                     warn_msg += "requests. This behavior may lead to false-positive results.\n"
                     sys.stdout.write("\r" + settings.print_warning_msg(warn_msg))
                     while True:
-                      question_msg = "How do you want to proceed? [(C)ontinue/(s)kip/(q)uit] > "
-                      sys.stdout.write(settings.print_question_msg(question_msg))
-                      proceed_option = sys.stdin.readline().replace("\n","").lower()
+                      if not menu.options.batch:
+                        question_msg = "How do you want to proceed? [(C)ontinue/(s)kip/(q)uit] > "
+                        sys.stdout.write(settings.print_question_msg(question_msg))
+                        proceed_option = sys.stdin.readline().replace("\n","").lower()
+                      else:
+                        proceed_option = ""  
                       if len(proceed_option) == 0:
                          proceed_option = "c"
                       if proceed_option.lower() in settings.CHOICE_PROCEED :
@@ -429,8 +432,11 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
             # Check for any enumeration options.
             if settings.ENUMERATION_DONE == True :
               while True:
-                question_msg = "Do you want to enumerate again? [Y/n/q] > "
-                enumerate_again = raw_input("\n" + settings.print_question_msg(question_msg)).lower()
+                if not menu.options.batch:
+                  question_msg = "Do you want to enumerate again? [Y/n/q] > "
+                  enumerate_again = raw_input("\n" + settings.print_question_msg(question_msg)).lower()
+                else:
+                  enumerate_again = ""
                 if len(enumerate_again) == 0:
                   enumerate_again = "y"
                 if enumerate_again in settings.CHOICE_YES:
@@ -457,11 +463,14 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
             if settings.FILE_ACCESS_DONE == True :
               print ""
               while True:
-                question_msg = "Do you want to access files again? [Y/n/q] > "
-                sys.stdout.write(settings.print_question_msg(question_msg))
-                file_access_again = sys.stdin.readline().replace("\n","").lower()
+                if not menu.options.batch:
+                  question_msg = "Do you want to access files again? [Y/n/q] > "
+                  sys.stdout.write(settings.print_question_msg(question_msg))
+                  file_access_again = sys.stdin.readline().replace("\n","").lower()
+                else:
+                  file_access_again = ""
                 if len(file_access_again) == 0:
-                   file_access_again= "y"
+                  file_access_again = "y"
                 if file_access_again in settings.CHOICE_YES:
                   tfb_file_access.do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
                   break
@@ -501,11 +510,14 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
               while True:
                 if go_back == True:
                   break
-                question_msg = "Do you want a Pseudo-Terminal shell? [Y/n/q] > "
-                sys.stdout.write(settings.print_question_msg(question_msg))
-                gotshell = sys.stdin.readline().replace("\n","").lower()
+                if not menu.options.batch:
+                  question_msg = "Do you want a Pseudo-Terminal shell? [Y/n/q] > "
+                  sys.stdout.write(settings.print_question_msg(question_msg))
+                  gotshell = sys.stdin.readline().replace("\n","").lower()
+                else:
+                  gotshell = ""
                 if len(gotshell) == 0:
-                   gotshell= "y"
+                   gotshell = "y"
                 if gotshell in settings.CHOICE_YES:
                   print ""
                   print "Pseudo-Terminal (type '" + Style.BRIGHT + "?" + Style.RESET_ALL + "' for available options)"

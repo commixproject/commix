@@ -1,5 +1,6 @@
 ## Version 1.6 (upcoming)
-* Added: New option "-x" for parsing target(s) from remote sitemap(.xml) file. 
+* Added: New option "--batch" that never asking for user input (using the default behaviour).
+* Added: New option "-x" for parsing target(s) from remote sitemap(.xml) file.
 * Added: New option "--offline" for working in offline mode.
 * Fixed: Improvement regarding the IP address grabbing (in case of internet in-accessibility).
 * Fixed: Improvement regarding HTTPS based websites, for which scanning fails.
@@ -7,7 +8,7 @@
 * Fixed: Improvement regarding the response time estimimation, in which the target URL was requested without its POST data.
 * Added: New option "-m" for scanning multiple targets given in a textual file.
 * Fixed: Minor fix regarding the newline display in dynamic code evaluation ("eval-based") and semiblind ("file-based") technique.
-* Revised: The dynamic code evaluation ("eval-based") payloads, have been shortly revised.
+* Revised: The dynamic code evaluation ("eval-based") payloads have been shortly revised.
 * Added: The executed command and the execution results output has been added to log file.
 
 ## Version 1.5 (2016-11-17)

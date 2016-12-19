@@ -98,6 +98,12 @@ general.add_option("-t",
                 default=None,
                 help="Log all HTTP traffic into a textual file.")
 
+general.add_option("--batch",
+                action="store_true",
+                dest="batch",
+                default=False,
+                help="Never ask for user input, use the default behaviour.")
+
 # Target options
 target = OptionGroup(parser, Style.BRIGHT + "Target" + Style.RESET_ALL, 
                      "This options has to be provided, to define the target URL. ")

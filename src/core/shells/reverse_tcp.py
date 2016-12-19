@@ -55,10 +55,13 @@ Set up the PHP working directory on the target host.
 """
 def set_php_working_dir():
   while True:
-    question_msg = "Do you want to use '" + settings.WIN_PHP_DIR 
-    question_msg += "' as PHP working directory on the target host? [Y/n] > "
-    sys.stdout.write(settings.print_question_msg(question_msg))
-    php_dir = sys.stdin.readline().replace("\n","").lower()
+    if not menu.options.batch:
+      question_msg = "Do you want to use '" + settings.WIN_PHP_DIR 
+      question_msg += "' as PHP working directory on the target host? [Y/n] > "
+      sys.stdout.write(settings.print_question_msg(question_msg))
+      php_dir = sys.stdin.readline().replace("\n","").lower()
+    else:
+      php_dir = ""
     if len(php_dir) == 0:
        php_dir = "y"
     if php_dir in settings.CHOICE_YES:
@@ -80,10 +83,13 @@ Set up the Python working directory on the target host.
 """
 def set_python_working_dir():
   while True:
-    question_msg = "Do you want to use '" + settings.WIN_PYTHON_DIR 
-    question_msg += "' as Python working directory on the target host? [Y/n] > "
-    sys.stdout.write(settings.print_question_msg(question_msg))
-    python_dir = sys.stdin.readline().replace("\n","").lower()
+    if not menu.options.batch:
+      question_msg = "Do you want to use '" + settings.WIN_PYTHON_DIR 
+      question_msg += "' as Python working directory on the target host? [Y/n] > "
+      sys.stdout.write(settings.print_question_msg(question_msg))
+      python_dir = sys.stdin.readline().replace("\n","").lower()
+    else:
+      python_dir = ""
     if len(python_dir) == 0:
        python_dir = "y"
     if python_dir in settings.CHOICE_YES:
