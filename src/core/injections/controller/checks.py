@@ -31,7 +31,7 @@ Procced to the next attack vector.
 def next_attack_vector(technique, go_back):
   while True:
     if not menu.options.batch:
-      question_msg = "Continue with testing the " + technique + "? [Y/n/q] > "
+      question_msg = "Continue with testing the " + technique + "? [Y/n] > "
       sys.stdout.write(settings.print_question_msg(question_msg))
       next_attack_vector = sys.stdin.readline().replace("\n","").lower()
     else:
@@ -124,7 +124,7 @@ def continue_tests(err):
     while True:
       if not menu.options.batch:
         question_msg = "Do you want to ignore the error (" + str(err.code) 
-        question_msg += ") message and continue the tests? [Y/n/q] > "
+        question_msg += ") message and continue the tests? [Y/n] > "
         sys.stdout.write(settings.print_question_msg(question_msg))
         continue_tests = sys.stdin.readline().replace("\n","").lower()
       else:
@@ -190,7 +190,7 @@ def ps_check():
     while True:
       if not menu.options.batch:
         question_msg = "Do you want to use the \"--ps-version\" option "
-        question_msg += "so ensure that PowerShell is enabled? [Y/n/q] > "
+        question_msg += "so ensure that PowerShell is enabled? [Y/n] > "
         sys.stdout.write(settings.print_question_msg(question_msg))
         ps_check = sys.stdin.readline().replace("\n","").lower()
       else:
@@ -217,7 +217,7 @@ def ps_check_failed():
   while True:
     if not menu.options.batch:
       question_msg = "Do you want to ignore the above warning "
-      question_msg += "and continue the procedure? [Y/n/q] > "
+      question_msg += "and continue the procedure? [Y/n] > "
       sys.stdout.write(settings.print_question_msg(question_msg))
       ps_check = sys.stdin.readline().replace("\n","").lower()
     else:
@@ -266,7 +266,7 @@ def check_CGI_scripts(url):
       print settings.print_warning_msg(warn_msg)
       while True:
         if not menu.options.batch:
-          question_msg = "Do you want to enable the shellshock injection module? [Y/n/q] > "
+          question_msg = "Do you want to enable the shellshock injection module? [Y/n] > "
           sys.stdout.write(settings.print_question_msg(question_msg))
           shellshock_check = sys.stdin.readline().replace("\n","").lower()
         else:

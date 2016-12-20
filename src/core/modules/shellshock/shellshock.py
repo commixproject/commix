@@ -708,7 +708,7 @@ def shellshock_handler(url, http_request_method, filename):
               print ""
             while True:
               if not menu.options.batch:
-                question_msg = "Do you want to enumerate again? [Y/n/q] > "
+                question_msg = "Do you want to enumerate again? [Y/n] > "
                 sys.stdout.write(settings.print_question_msg(question_msg))
                 enumerate_again = sys.stdin.readline().replace("\n","").lower()
               else:
@@ -733,7 +733,7 @@ def shellshock_handler(url, http_request_method, filename):
           if settings.FILE_ACCESS_DONE == True :
             while True:
               if not menu.options.batch:
-                question_msg = "Do you want to access files again? [Y/n/q] > "
+                question_msg = "Do you want to access files again? [Y/n] > "
                 sys.stdout.write(settings.print_question_msg(question_msg))
                 file_access_again = sys.stdin.readline().replace("\n","").lower()
               else:
@@ -771,7 +771,7 @@ def shellshock_handler(url, http_request_method, filename):
                 if settings.VERBOSITY_LEVEL >= 1:
                   print ""
               if not menu.options.batch:
-                question_msg = "Do you want a Pseudo-Terminal shell? [Y/n/q] > "
+                question_msg = "Do you want a Pseudo-Terminal shell? [Y/n] > "
                 sys.stdout.write(settings.print_question_msg(question_msg))
                 gotshell = sys.stdin.readline().replace("\n","").lower()
               else:

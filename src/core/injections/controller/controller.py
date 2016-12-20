@@ -107,7 +107,7 @@ def injection_proccess(url, check_parameter, http_request_method, filename, dela
         settings.CLASSIC_STATE = True
         question_msg = "Due to resuts "
         question_msg += "skipping of code injection checks is recommended. "
-        question_msg += "Do you agree? [Y/n/q] > "
+        question_msg += "Do you agree? [Y/n] > "
         sys.stdout.write(settings.print_question_msg(question_msg))
         procced_option = sys.stdin.readline().replace("\n","").lower()
       else:
@@ -136,7 +136,7 @@ def injection_proccess(url, check_parameter, http_request_method, filename, dela
           settings.EVAL_BASED_STATE = True
           question_msg = "Due to resuts, "
           question_msg += "skipping of further command injection checks is recommended. "
-          question_msg += "Do you agree? [Y/n/q] > "
+          question_msg += "Do you agree? [Y/n] > "
           sys.stdout.write(settings.print_question_msg(question_msg))
           procced_option = sys.stdin.readline().replace("\n","").lower()
         else:
@@ -445,7 +445,7 @@ def do_check(url, filename):
     while scan_level < settings.HTTP_HEADER_INJECTION_LEVEL and settings.LOAD_SESSION == None:
       if not menu.options.batch:
         question_msg = "Do you want to increase to '--level=" + str(scan_level + 1) 
-        question_msg += "' in order to perform more tests? [Y/n/q] > "
+        question_msg += "' in order to perform more tests? [Y/n] > "
         sys.stdout.write(settings.print_question_msg(question_msg))
         next_level = sys.stdin.readline().replace("\n","").lower()
       else:

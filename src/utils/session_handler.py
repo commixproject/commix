@@ -244,7 +244,7 @@ def notification(url, technique):
         if not menu.options.batch:
           question_msg = "Do you want to resume to the " 
           question_msg += technique.rsplit(' ', 2)[0] 
-          question_msg += " injection point? [Y/n/q] > "
+          question_msg += " injection point? [Y/n] > "
           sys.stdout.write(settings.print_question_msg(question_msg))
           settings.LOAD_SESSION = sys.stdin.readline().replace("\n","").lower()
         else:

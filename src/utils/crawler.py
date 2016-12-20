@@ -94,7 +94,7 @@ def crawler(url):
     if not menu.options.sitemap_url:
       if not menu.options.batch:
         question_msg = "Do you want to check target for "
-        question_msg += "the existence of 'sitemap.xml'? [Y/n/q] > "
+        question_msg += "the existence of 'sitemap.xml'? [Y/n] > "
         sys.stdout.write(settings.print_question_msg(question_msg))
         sitemap_check = sys.stdin.readline().replace("\n","").lower()
       else:
@@ -126,7 +126,7 @@ def crawler(url):
           warn_msg = "A sitemap recursion was detected " + "'" + recursion + "'."
           print settings.print_warning_msg(warn_msg)
           if not menu.options.batch:
-            question_msg = "Do you want to follow the detected recursion? [Y/n/q] > "
+            question_msg = "Do you want to follow the detected recursion? [Y/n] > "
             sys.stdout.write(settings.print_question_msg(question_msg))
             sitemap_check = sys.stdin.readline().replace("\n","").lower()
           else:
@@ -166,7 +166,7 @@ def crawler(url):
         print "[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]"
       print settings.print_success_msg(check_url)
       if not menu.options.batch:
-        question_msg = "Do you want to use this URL to perform tests? [Y/n/q] > "
+        question_msg = "Do you want to use this URL to perform tests? [Y/n] > "
         sys.stdout.write(settings.print_question_msg(question_msg))
         use_url = sys.stdin.readline().replace("\n","").lower()
       else:

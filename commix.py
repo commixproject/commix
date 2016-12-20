@@ -204,7 +204,7 @@ def main(filename, url):
           if menu.options.sitemap_url:
             while True:
               if not menu.options.batch:
-                question_msg = "Do you want to change the crawling depth level? [Y/n/q] > "
+                question_msg = "Do you want to change the crawling depth level? [Y/n] > "
                 sys.stdout.write(settings.print_question_msg(question_msg))
                 change_depth_level = sys.stdin.readline().replace("\n","").lower()
               else:
@@ -312,7 +312,7 @@ def main(filename, url):
             # Check if not defined URL for upload.
             while True:
               if not menu.options.batch:
-                question_msg = "Do you want to enable an HTTP server? [Y/n/q] > "
+                question_msg = "Do you want to enable an HTTP server? [Y/n] > "
                 sys.stdout.write(settings.print_question_msg(question_msg))
                 enable_HTTP_server = sys.stdin.readline().replace("\n","").lower()
               else:
@@ -637,7 +637,7 @@ def main(filename, url):
                   print settings.print_warning_msg(warn_msg)
                   while True:
                     if not menu.options.batch:
-                      question_msg = "Do you want to perform a dictionary-based attack? [Y/n/q] > "
+                      question_msg = "Do you want to perform a dictionary-based attack? [Y/n] > "
                       sys.stdout.write(settings.print_question_msg(question_msg))
                       do_update = sys.stdin.readline().replace("\n","").lower()
                     else:
@@ -673,7 +673,7 @@ def main(filename, url):
                     print settings.print_warning_msg(warn_msg)
                   while True:
                     if not menu.options.batch:
-                      question_msg = "Do you want to perform a dictionary-based attack? [Y/n/q] > "
+                      question_msg = "Do you want to perform a dictionary-based attack? [Y/n] > "
                       sys.stdout.write(settings.print_question_msg(question_msg))
                       do_update = sys.stdin.readline().replace("\n","").lower()
                     else:

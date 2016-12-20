@@ -274,7 +274,7 @@ def cb_injection_handler(url, delay, filename, http_request_method):
             if settings.ENUMERATION_DONE == True :
               while True:
                 if not menu.options.batch:
-                  question_msg = "Do you want to enumerate again? [Y/n/q] > "
+                  question_msg = "Do you want to enumerate again? [Y/n] > "
                   enumerate_again = raw_input("\n" + settings.print_question_msg(question_msg)).lower()
                 else:
                   enumerate_again = ""  
@@ -306,7 +306,7 @@ def cb_injection_handler(url, delay, filename, http_request_method):
                 print ""
               while True:
                 if not menu.options.batch:
-                  question_msg = "Do you want to access files again? [Y/n/q] > "
+                  question_msg = "Do you want to access files again? [Y/n] > "
                   sys.stdout.write(settings.print_question_msg(question_msg))
                   file_access_again = sys.stdin.readline().replace("\n","").lower()
                 else:
@@ -348,7 +348,7 @@ def cb_injection_handler(url, delay, filename, http_request_method):
               #   if settings.VERBOSITY_LEVEL >= 1:
               #     print ""
               if not menu.options.batch:
-                question_msg = "Do you want a Pseudo-Terminal shell? [Y/n/q] > "
+                question_msg = "Do you want a Pseudo-Terminal shell? [Y/n] > "
                 sys.stdout.write(settings.print_question_msg(question_msg))
                 gotshell = sys.stdin.readline().replace("\n","").lower()
               else:

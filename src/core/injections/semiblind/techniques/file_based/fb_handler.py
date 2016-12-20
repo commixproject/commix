@@ -336,7 +336,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                       print ""
                       while True:
                         if not menu.options.batch:
-                          question_msg = "Do you want to try the temporary directory (" + tmp_path + ") [Y/n/q] > "
+                          question_msg = "Do you want to try the temporary directory (" + tmp_path + ") [Y/n] > "
                           sys.stdout.write(settings.print_question_msg(question_msg))
                           tmp_upload = sys.stdin.readline().replace("\n","").lower()
                         else:
@@ -494,7 +494,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
             if settings.ENUMERATION_DONE == True :
               while True:
                 if not menu.options.batch:
-                  question_msg = "Do you want to enumerate again? [Y/n/q] > "
+                  question_msg = "Do you want to enumerate again? [Y/n] > "
                   enumerate_again = raw_input("\n" + settings.print_question_msg(question_msg)).lower()
                 else:
                   enumerate_again = ""  
@@ -529,7 +529,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                 print ""
               while True:
                 if not menu.options.batch:
-                  question_msg = "Do you want to access files again? [Y/n/q] > "
+                  question_msg = "Do you want to access files again? [Y/n] > "
                   sys.stdout.write(settings.print_question_msg(question_msg))
                   file_access_again = sys.stdin.readline().replace("\n","").lower()
                 else:
@@ -580,7 +580,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                 if go_back == True:
                   break
                 if not menu.options.batch:
-                  question_msg = "Do you want a Pseudo-Terminal shell? [Y/n/q] > "
+                  question_msg = "Do you want a Pseudo-Terminal shell? [Y/n] > "
                   sys.stdout.write(settings.print_question_msg(question_msg))
                   gotshell = sys.stdin.readline().replace("\n","").lower()
                 else:
