@@ -1,4 +1,5 @@
 ## Version 1.6 (upcoming)
+* Fixed: Minor fix regarding empty value(s) in provided parameter(s).
 * Added: New option "--batch" that never asking for user input (using the default behaviour).
 * Added: New option "-x" for parsing target(s) from remote sitemap(.xml) file.
 * Added: New option "--offline" for working in offline mode.

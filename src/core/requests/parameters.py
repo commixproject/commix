@@ -25,6 +25,19 @@ from src.utils import settings
 from src.core.injections.controller import checks
 from src.thirdparty.colorama import Fore, Back, Style, init
 
+def skip_empty(provided_value):
+  warn_msg = "The '" + provided_value 
+  warn_msg += "' parameter has been skipped from testing"
+  warn_msg += " because the provided value is empty."
+  print settings.print_warning_msg(warn_msg)
+
+def is_empty(multi_parameters):
+  err_msg = "The provided value for parameter '" 
+  err_msg += multi_parameters[0].split("=")[0] + "' is empty. "
+  err_msg += "Please, always use only valid parameter values."
+  print settings.print_critical_msg(err_msg)
+  sys.exit(0) 
+
 """
 Get the URL part of the defined URL.
 """
@@ -57,7 +70,7 @@ def do_GET_check(url):
         err_msg += "try to increase '--level' values to perform more tests. " 
         print settings.print_critical_msg(err_msg)
         return False
-        #os._exit(0)   
+   
     return url
 
   urls_list = []
@@ -74,6 +87,10 @@ def do_GET_check(url):
       # Grab the value of parameter.
       value = re.findall(r'=(.*)', parameters)
       value = ''.join(value)
+
+      if len(value) == 0:
+        is_empty(multi_parameters)
+
       # Replace the value of parameter with INJECT tag
       inject_value = value.replace(value, settings.INJECT_TAG)
       parameters = parameters.replace(value, inject_value) 
@@ -122,9 +139,8 @@ def do_GET_check(url):
         else:
           provided_value = re.findall(r'(.*)=', all_params[param])
           provided_value = ''.join(provided_value)
-          warn_msg = "The '" + provided_value 
-          warn_msg += "' parameter has been skipped from testing because the provided value is empty."
-          print settings.print_warning_msg(warn_msg)
+          skip_empty(provided_value)
+
     else:
       for param in range(0,len(multi_parameters)):
         # Grab the value of parameter.
@@ -227,6 +243,10 @@ def do_POST_check(parameter):
     else:  
       value = re.findall(r'=(.*)', parameter)
       value = ''.join(value)
+
+    if len(value) == 0:
+      is_empty(multi_parameters)
+
     # Replace the value of parameter with INJECT tag
     inject_value = value.replace(value, settings.INJECT_TAG)
     parameter = parameter.replace(value, inject_value)
@@ -272,9 +292,7 @@ def do_POST_check(parameter):
           else:  
             provided_value = re.findall(r'(.*)=', all_params[param])
             provided_value = ''.join(provided_value)
-          warn_msg = "The '" + provided_value 
-          warn_msg += "' parameter has been skipped from testing because the provided value is empty."
-          print settings.print_warning_msg(warn_msg) 
+          skip_empty(provided_value)  
 
     else:
       for param in range(0, len(multi_parameters)):
@@ -388,9 +406,7 @@ def do_cookie_check(cookie):
         else:
           provided_value = re.findall(r'(.*)=', all_params[param])
           provided_value = ''.join(provided_value)
-          warn_msg = "The '" + provided_value 
-          warn_msg += "' parameter has been skipped from testing because the provided value is empty."
-          print settings.print_warning_msg(warn_msg) 
+          skip_empty(provided_value)
 
 
     else:
