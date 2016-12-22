@@ -238,7 +238,7 @@ def do_POST_check(parameter):
       value = re.findall(r'\"(.*)\"', parameter)
       value = ''.join(value)
       if value != settings.INJECT_TAG:
-        value = re.findall(r'\:\"(.*)\"', parameter)
+        value = re.findall(r'\s*\:\s*\"(.*)\"', parameter)
         value = ''.join(value)
     else:  
       value = re.findall(r'=(.*)', parameter)
