@@ -588,7 +588,8 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                 if len(gotshell) == 0:
                    gotshell = "y"
                 if gotshell in settings.CHOICE_YES:
-                  print ""
+                  if not menu.options.batch:
+                    print ""
                   print "Pseudo-Terminal (type '" + Style.BRIGHT + "?" + Style.RESET_ALL + "' for available options)"
                   if readline_error:
                     checks.no_readline_module()
