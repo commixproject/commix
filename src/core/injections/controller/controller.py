@@ -484,7 +484,8 @@ def do_check(url, filename):
       err_msg += "."
       print settings.print_critical_msg(err_msg) + "\n"
       
-  logs.print_logs_notification(filename, url)   
+  logs.print_logs_notification(filename, url)
+  print ""  
   #sys.exit(0)
 
 #eof
