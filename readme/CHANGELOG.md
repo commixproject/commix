@@ -1,4 +1,4 @@
-## Version 1.6 (upcoming)
+## Version 1.6 (2016-12-28)
 * Fixed: Improvement regarding json-formated POST data, where whitespace before (and/or after) the ":" exists.
 * Fixed: Minor fix regarding empty value(s) in provided parameter(s).
 * Added: New option "--batch" that never asking for user input (using the default behaviour).
