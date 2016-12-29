@@ -97,6 +97,7 @@
 /cgi-bin/cvslog.cgi
 /cgi-bin/cvsquery.cgi
 /cgi-bin/cvsqueryform.cgi
+/cgi-bin/cgiCmdNotify
 /cgi-bin/day5datacopier.cgi
 /cgi-bin/day5datanotifier.cgi
 /cgi-bin/db_manager.cgi

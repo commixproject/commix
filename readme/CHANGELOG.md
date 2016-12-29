@@ -1,3 +1,6 @@
+## Version 1.7 (upcoming)
+* Added: New CGI shellscript path "/cgi-bin/cgiCmdNotify" (vulnerable to shellshock) has been added.
+
 ## Version 1.6 (2016-12-28)
 * Fixed: Improvement regarding json-formated POST data, where whitespace before (and/or after) the ":" exists.
 * Fixed: Minor fix regarding empty value(s) in provided parameter(s).
@@ -7,7 +10,7 @@
 * Fixed: Improvement regarding the IP address grabbing (in case of internet in-accessibility).
 * Fixed: Improvement regarding HTTPS based websites, for which scanning fails.
 * Added: New option "-r" for loading HTTP request from a file.
-* Fixed: Improvement regarding the response time estimimation, in which the target URL was requested without its POST data.
+* Fixed: Improvement regarding the response time estimation, in which the target URL was requested without its POST data.
 * Added: New option "-m" for scanning multiple targets given in a textual file.
 * Fixed: Minor fix regarding the newline display in dynamic code evaluation ("eval-based") and semiblind ("file-based") technique.
 * Revised: The dynamic code evaluation ("eval-based") payloads have been shortly revised.
