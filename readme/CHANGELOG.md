@@ -1,4 +1,5 @@
 ## Version 1.7 (upcoming)
+* Fixed: Improvement regarding filling and testing empty value(s) in provided parameter(s).
 * Added: New CGI shellscript path "/cgi-bin/cgiCmdNotify" (vulnerable to shellshock) has been added.
 
 ## Version 1.6 (2016-12-28)

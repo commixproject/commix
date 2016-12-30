@@ -32,11 +32,11 @@ def skip_empty(provided_value):
   print settings.print_warning_msg(warn_msg)
 
 def is_empty(multi_parameters):
-  err_msg = "The provided value for parameter '" 
-  err_msg += multi_parameters[0].split("=")[0] + "' is empty. "
-  err_msg += "Please, always use only valid parameter values."
-  print settings.print_critical_msg(err_msg)
-  sys.exit(0) 
+  warn_msg = "The provided value for parameter '" 
+  warn_msg += multi_parameters[0].split("=")[0] + "' is empty. "
+  warn_msg += "Please, always use valid parameter "
+  warn_msg += "value(s) to run properly."
+  print settings.print_warning_msg(warn_msg)
 
 """
 Get the URL part of the defined URL.
@@ -70,7 +70,6 @@ def do_GET_check(url):
         err_msg += "try to increase '--level' values to perform more tests. " 
         print settings.print_critical_msg(err_msg)
         return False
-   
     return url
 
   urls_list = []
@@ -88,12 +87,13 @@ def do_GET_check(url):
       value = re.findall(r'=(.*)', parameters)
       value = ''.join(value)
 
-      if len(value) == 0:
-        is_empty(multi_parameters)
-
       # Replace the value of parameter with INJECT tag
       inject_value = value.replace(value, settings.INJECT_TAG)
-      parameters = parameters.replace(value, inject_value) 
+      if len(value) == 0:
+        is_empty(multi_parameters)
+        parameters = parameters + settings.INJECT_TAG
+      else:
+        parameters = parameters.replace(value, inject_value) 
     else:
       # Grab the value of parameter.
       value = re.findall(r'=(.*)', parameters)
@@ -244,12 +244,14 @@ def do_POST_check(parameter):
       value = re.findall(r'=(.*)', parameter)
       value = ''.join(value)
 
-    if len(value) == 0:
-      is_empty(multi_parameters)
-
     # Replace the value of parameter with INJECT tag
     inject_value = value.replace(value, settings.INJECT_TAG)
-    parameter = parameter.replace(value, inject_value)
+
+    if len(value) == 0:
+      is_empty(multi_parameters)
+      parameter = parameter + settings.INJECT_TAG
+    else:
+      parameter = parameter.replace(value, inject_value)
     return parameter
 
   # Check if multiple paramerters are supplied.
