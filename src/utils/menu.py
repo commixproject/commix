@@ -444,6 +444,12 @@ detection.add_option("--skip-calc",
                 default=False,
                 help="Skip the mathematic calculation during the detection phase.")
 
+detection.add_option("--skip-empty", 
+                action="store_true",
+                dest="skip_empty",
+                default=False,
+                help="Skip testing the parameter(s) with empty value(s).")
+
 # Miscellaneous options
 misc = OptionGroup(parser, Style.BRIGHT + "Miscellaneous" + Style.RESET_ALL)
 

@@ -1,5 +1,6 @@
 ## Version 1.7 (upcoming)
-* Fixed: Improvement regarding filling and testing empty value(s) in provided parameter(s).
+* Added: New option "--skip-empty" for skipping the testing of the parameter(s) with empty value(s).
+* Fixed: Improvement regarding testing the parameter(s) with empty value(s).
 * Added: New CGI shellscript path "/cgi-bin/cgiCmdNotify" (vulnerable to shellshock) has been added.
 
 ## Version 1.6 (2016-12-28)

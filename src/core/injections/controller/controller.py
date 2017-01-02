@@ -481,6 +481,9 @@ def do_check(url, filename):
       if menu.options.level < settings.HTTP_HEADER_INJECTION_LEVEL :
         err_msg += " and/or try to increase '--level' values to perform"
         err_msg += " more tests (i.e 'User-Agent', 'Referer', 'Cookie' etc)"
+      else:
+        if menu.options.skip_empty:
+          err_msg += " and/or try to remove the option '--skip-empty'"  
       err_msg += "."
       print settings.print_critical_msg(err_msg) + "\n"
       
