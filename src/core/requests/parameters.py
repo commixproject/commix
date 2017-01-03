@@ -25,12 +25,28 @@ from src.utils import settings
 from src.core.injections.controller import checks
 from src.thirdparty.colorama import Fore, Back, Style, init
 
+"""
+Check if provided parameters are in appropriate format.
+"""
+def inappropriate_format(multi_parameters):
+  err_msg = "The provided parameter" + "s"[len(multi_parameters) == 1:][::-1]
+  err_msg += (' are ', ' is ')[len(multi_parameters) == 1]
+  err_msg += "not in appropriate format."
+  print settings.print_critical_msg(err_msg)
+  sys.exit(0)
+
+"""
+Skip parameters when the provided value is empty.
+"""
 def skip_empty(provided_value):
   warn_msg = "The '" + provided_value 
   warn_msg += "' parameter has been skipped from testing"
-  warn_msg += " because the provided value is empty."
+  warn_msg += " (the provided value is empty)."
   print settings.print_warning_msg(warn_msg)
 
+"""
+Check if the provided value is empty.
+"""
 def is_empty(multi_parameters):
   provided_value = multi_parameters[0].split("=")[0]
   if menu.options.skip_empty:
@@ -72,7 +88,7 @@ def do_GET_check(url):
       else: 
         err_msg = "No parameter(s) found for testing in the provided data. "
         err_msg += "You must specify the testable parameter or "
-        err_msg += "try to increase '--level' values to perform more tests. " 
+        err_msg += "try to increase '--level' values to perform more tests." 
         print settings.print_critical_msg(err_msg)
         return False
     return url
@@ -84,6 +100,10 @@ def do_GET_check(url):
   parameters = url.split("?")[1]
   # Split parameters
   multi_parameters = parameters.split(settings.PARAMETER_DELIMITER)
+  # Check for inappropriate format in provided parameter(s).
+  if len([s for s in multi_parameters if "=" in s]) != (len(multi_parameters)):
+    inappropriate_format(multi_parameters)
+
   # Grab the value of parameter.
   value = re.findall(r'=(.*)', parameters)
   value = ''.join(value)
@@ -173,10 +193,10 @@ def vuln_GET_param(url):
   urls_list = []
   # Define the vulnerable parameter
   if "?" not in url:
-      #Grab the value of parameter.
-      value = re.findall(r'/(.*)/' + settings.INJECT_TAG + "", url)
-      value = ''.join(value)
-      vuln_parameter = re.sub(r"/(.*)/", "", value)
+    #Grab the value of parameter.
+    value = re.findall(r'/(.*)/' + settings.INJECT_TAG + "", url)
+    value = ''.join(value)
+    vuln_parameter = re.sub(r"/(.*)/", "", value)
 
   elif re.findall(r"" + settings.PARAMETER_DELIMITER + "(.*)=" + settings.INJECT_TAG + "", url):
     vuln_parameter = re.findall(r"" + settings.PARAMETER_DELIMITER + "(.*)=" + settings.INJECT_TAG + "", url)
@@ -193,14 +213,14 @@ def vuln_GET_param(url):
 
   # Check if only one parameter supplied but, not defined the INJECT_TAG.
   elif settings.INJECT_TAG not in url:
-      #Grab the value of parameter.
-      value = re.findall(r'\?(.*)=', url)
-      value = ''.join(value)
-      vuln_parameter = value
+    #Grab the value of parameter.
+    value = re.findall(r'\?(.*)=', url)
+    value = ''.join(value)
+    vuln_parameter = value
 
   else:
     vuln_parameter = url
-    
+  
   return vuln_parameter 
 
 """
@@ -243,6 +263,10 @@ def do_POST_check(parameter):
   paramerters_list = []
   # Split multiple parameters
   multi_parameters = parameter.split(settings.PARAMETER_DELIMITER)
+  # Check for inappropriate format in provided parameter(s).
+  if len([s for s in multi_parameters if "=" in s]) != (len(multi_parameters)) and \
+     not settings.IS_JSON:
+    inappropriate_format(multi_parameters)
 
   # Check if single paramerter is supplied.
   if len(multi_parameters) == 1:
@@ -392,16 +416,23 @@ The cookie based injection.
 def do_cookie_check(cookie):
 
   multi_parameters = cookie.split(settings.COOKIE_DELIMITER)
+  # Check for inappropriate format in provided parameter(s).
+  if len([s for s in multi_parameters if "=" in s]) != (len(multi_parameters)):
+    inappropriate_format(multi_parameters)
+  #Grab the value of parameter.
+  value = re.findall(r'=(.*)', cookie)
+  value = ''.join(value)
+  # Replace the value of parameter with INJECT tag
+  inject_value = value.replace(value, settings.INJECT_TAG)
   # Check if single paramerter is supplied.
   if len(multi_parameters) == 1:
     # Check if defined the INJECT_TAG
     if settings.INJECT_TAG not in cookie:
-      #Grab the value of parameter.
-      value = re.findall(r'=(.*)', cookie)
-      value = ''.join(value)
-      # Replace the value of parameter with INJECT tag
-      inject_value = value.replace(value, settings.INJECT_TAG)
-      cookie = cookie.replace(value, inject_value)
+      if len(value) == 0:
+        is_empty(multi_parameters)
+        cookie = cookie + settings.INJECT_TAG
+      else:
+        cookie = cookie.replace(value, inject_value)
     return cookie
 
   # Check if multiple paramerters are supplied.

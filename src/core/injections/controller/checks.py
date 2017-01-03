@@ -480,20 +480,26 @@ def wildcard_character(data):
 Print the non-listed parameters.
 """
 def print_non_listed_params(check_parameters, http_request_method, header_name):
-  if len(check_parameters) > 0:
-    non_exist_param = list(set(settings.TEST_PARAMETER)-set(check_parameters))
-    non_exist_param = ', '.join(non_exist_param)
-    if not len(non_exist_param) == 0 :
-      warn_msg = "The provided parameter" + "s"[len(non_exist_param) == 1:][::-1] + " '" 
-      warn_msg += non_exist_param + "'" + (' are', ' is')[len(non_exist_param) == 1]
-      if menu.options.level >= 2 and header_name != "":
-        warn_msg += " not inside the "
-        warn_msg +=  settings.HTTP_HEADER
-      else:
-        warn_msg += " not inside the "
-        warn_msg += http_request_method   
-      warn_msg += "."
-      print settings.print_warning_msg(warn_msg) 
+  if settings.TEST_PARAMETER:
+    testable_parameters = ",".join(settings.TEST_PARAMETER).replace(" ","")
+    testable_parameters = testable_parameters.split(",")
+    non_exist_param = list(set(testable_parameters)-set(check_parameters))
+    if non_exist_param:
+      non_exist_param = ",".join(non_exist_param).replace(" ","")
+      non_exist_param = non_exist_param.split(",")
+      if non_exist_param:
+        non_exist_param_items = ", ".join(non_exist_param)
+        warn_msg = "The provided parameter" + "s"[len(non_exist_param) == 1:][::-1] + " '" 
+        warn_msg += non_exist_param_items + "'" + (' are', ' is')[len(non_exist_param) == 1]
+        if menu.options.level >= 2 and header_name != "":
+          warn_msg += " not inside the "
+          warn_msg +=  settings.HTTP_HEADER
+        else:
+          warn_msg += " not inside the "
+          warn_msg += http_request_method   
+          warn_msg += (' data', ' request')[http_request_method == "GET"] 
+        warn_msg += "."
+        print settings.print_warning_msg(warn_msg) 
 
 """
 Check for whitespaces

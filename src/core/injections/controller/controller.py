@@ -264,10 +264,10 @@ def cookie_injection(url, http_request_method, filename, delay):
       menu.options.cookie = cookie_parameters[i]
       check_parameter = parameters.specify_cookie_parameter(menu.options.cookie)
       if len(check_parameter) > 0:
-        settings.TESTABLE_PARAMETER = check_parameter 
+        settings.TESTABLE_PARAMETER = check_parameter
       # Check if testable parameter(s) are provided
-      if len(settings.TEST_PARAMETER) > 0:
-        if check_parameter in settings.TEST_PARAMETER:
+      if len(settings.TESTABLE_PARAMETER) > 0:
+        if check_parameter in settings.TESTABLE_PARAMETER:
           # Check for session file 
           check_for_stored_sessions(url, http_request_method)
           injection_proccess(url, check_parameter, http_request_method, filename, delay) 
@@ -303,13 +303,12 @@ def get_request(url, http_request_method, filename, delay):
     for i in range(0, len(found_url)):
       url = found_url[i]
       check_parameter = parameters.vuln_GET_param(url)
-      # Check if testable parameter(s) are provided
-
       if len(check_parameter) > 0:
         settings.TESTABLE_PARAMETER = check_parameter
+      # Check if testable parameter(s) are provided
+      if len(settings.TESTABLE_PARAMETER) > 0:
+        if check_parameter in settings.TESTABLE_PARAMETER:
 
-      if len(settings.TEST_PARAMETER) > 0:
-        if check_parameter in settings.TEST_PARAMETER:
           # Check for session file 
           check_for_stored_sessions(url, http_request_method)
           injection_proccess(url, check_parameter, http_request_method, filename, delay)
@@ -357,8 +356,8 @@ def post_request(url, http_request_method, filename, delay):
     if len(check_parameter) > 0:
       settings.TESTABLE_PARAMETER = check_parameter
     # Check if testable parameter(s) are provided
-    if len(settings.TEST_PARAMETER) > 0:
-      if check_parameter in settings.TEST_PARAMETER:
+    if len(settings.TESTABLE_PARAMETER) > 0:
+      if check_parameter in settings.TESTABLE_PARAMETER:
         # Check for session file 
         check_for_stored_sessions(url, http_request_method)
         injection_proccess(url, check_parameter, http_request_method, filename, delay)
