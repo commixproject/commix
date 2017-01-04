@@ -499,7 +499,7 @@ def print_non_listed_params(check_parameters, http_request_method, header_name):
           warn_msg += http_request_method   
           warn_msg += (' data', ' request')[http_request_method == "GET"] 
         warn_msg += "."
-        print settings.print_warning_msg(warn_msg) 
+        print settings.print_warning_msg(warn_msg)
 
 """
 Check for whitespaces

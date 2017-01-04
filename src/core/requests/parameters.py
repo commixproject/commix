@@ -38,26 +38,37 @@ def inappropriate_format(multi_parameters):
 """
 Skip parameters when the provided value is empty.
 """
-def skip_empty(provided_value):
-  warn_msg = "The '" + provided_value 
-  warn_msg += "' parameter has been skipped from testing"
-  warn_msg += " (the provided value is empty)."
+def skip_empty(provided_value, http_request_method):
+  warn_msg = "The " + http_request_method + " "
+  warn_msg += "parameter" + "s"[len(provided_value.split(",")) == 1:][::-1]
+  warn_msg += " '" + provided_value + "'"
+  warn_msg += (' have ', ' has ')[len(provided_value.split(",")) == 1]
+  warn_msg += "been skipped from testing"
+  warn_msg += " (the provided value" + "s"[len(provided_value.split(",")) == 1:][::-1]
+  warn_msg += (' are ', ' is ')[len(provided_value.split(",")) == 1] + "empty). "
   print settings.print_warning_msg(warn_msg)
 
 """
 Check if the provided value is empty.
 """
-def is_empty(multi_parameters):
-  provided_value = multi_parameters[0].split("=")[0]
-  if menu.options.skip_empty:
-    skip_empty(provided_value)
-    sys.exit(0)
-  else:
-    warn_msg = "The provided value for parameter '" 
-    warn_msg += provided_value + "' is empty. "
-    warn_msg += "Please, always use valid parameter "
-    warn_msg += "value(s) to run properly."
-    print settings.print_warning_msg(warn_msg)  
+def is_empty(multi_parameters, http_request_method):
+  provided_value = []
+  multi_params = [s for s in multi_parameters]
+  for empty in multi_params:
+    if len(empty.split("=")[1]) == 0:
+      provided_value.append(empty.split("=")[0])
+  provided_value = ", ".join(provided_value)
+  if len(provided_value) > 0:
+    if menu.options.skip_empty and len(multi_parameters) > 1:
+      skip_empty(provided_value, http_request_method)
+    else:
+      warn_msg = "The provided value"+ "s"[len(provided_value.split(",")) == 1:][::-1]
+      warn_msg += " for "+ http_request_method + " parameter" + "s"[len(provided_value.split(",")) == 1:][::-1]
+      warn_msg += " '" + provided_value + "'"
+      warn_msg += (' are ', ' is ')[len(provided_value.split(",")) == 1] + "empty. "
+      warn_msg += "Use valid "
+      warn_msg += "values to run properly."
+      print settings.print_warning_msg(warn_msg) 
 
 """
 Get the URL part of the defined URL.
@@ -74,7 +85,7 @@ def get_url_part(url):
 Check if the 'INJECT_HERE' tag, is specified on GET Requests.
 """
 def do_GET_check(url):
-
+  http_request_method = "GET"
   # Do replacement with the 'INJECT_HERE' tag, if the wildcard char is provided.
   url = checks.wildcard_character(url)
 
@@ -103,7 +114,8 @@ def do_GET_check(url):
   # Check for inappropriate format in provided parameter(s).
   if len([s for s in multi_parameters if "=" in s]) != (len(multi_parameters)):
     inappropriate_format(multi_parameters)
-
+  # Check for empty values (in provided parameters).
+  is_empty(multi_parameters, http_request_method)
   # Grab the value of parameter.
   value = re.findall(r'=(.*)', parameters)
   value = ''.join(value)
@@ -114,7 +126,6 @@ def do_GET_check(url):
     # Check if defined the INJECT_TAG
     if settings.INJECT_TAG not in parameters:
       if len(value) == 0:
-        is_empty(multi_parameters)
         parameters = parameters + settings.INJECT_TAG
       else:
         parameters = parameters.replace(value, inject_value) 
@@ -154,7 +165,6 @@ def do_GET_check(url):
           if len(value) == 0:
             provided_value = re.findall(r'(.*)=', all_params[param])
             provided_value = ''.join(provided_value)
-            skip_empty(provided_value)
           else:
             all_params[param] = all_params[param].replace(value, inject_value)
             all_params[param-1] = all_params[param-1].replace(inject_value, old)
@@ -227,7 +237,7 @@ def vuln_GET_param(url):
 Check if the 'INJECT_HERE' tag, is specified on POST Requests.
 """
 def do_POST_check(parameter):
-
+  http_request_method = "POST"
   # Check if valid JSON
   def is_JSON_check(parameter):
     try:
@@ -267,7 +277,7 @@ def do_POST_check(parameter):
   if len([s for s in multi_parameters if "=" in s]) != (len(multi_parameters)) and \
      not settings.IS_JSON:
     inappropriate_format(multi_parameters)
-
+  # Check for empty values (in provided parameters).
   # Check if single paramerter is supplied.
   if len(multi_parameters) == 1:
     #Grab the value of parameter.
@@ -281,10 +291,10 @@ def do_POST_check(parameter):
     else:  
       value = re.findall(r'=(.*)', parameter)
       value = ''.join(value)
+    is_empty(multi_parameters, http_request_method)  
     # Replace the value of parameter with INJECT tag
-    inject_value = value.replace(value, settings.INJECT_TAG)
+    inject_value = value.replace(value, settings.INJECT_TAG) 
     if len(value) == 0:
-      is_empty(multi_parameters)
       parameter = parameter + settings.INJECT_TAG
     else:
       parameter = parameter.replace(value, inject_value)
@@ -296,6 +306,7 @@ def do_POST_check(parameter):
     all_params = all_params.split(settings.PARAMETER_DELIMITER)
     # Check if not defined the "INJECT_HERE" tag in parameter
     if settings.INJECT_TAG not in parameter:
+      is_empty(multi_parameters, http_request_method)
       for param in range(0, len(all_params)):
         if param == 0 :
           if settings.IS_JSON:
@@ -313,7 +324,7 @@ def do_POST_check(parameter):
           value = ''.join(value)
         else:  
           value = re.findall(r'=(.*)', all_params[param])
-          value = ''.join(value)
+          value = ''.join(value)  
         # Replace the value of parameter with INJECT tag
         inject_value = value.replace(value, settings.INJECT_TAG)
         # Skip testing the parameter(s) with empty value(s).
@@ -326,7 +337,6 @@ def do_POST_check(parameter):
             else:  
               provided_value = re.findall(r'(.*)=', all_params[param])
               provided_value = ''.join(provided_value)
-            skip_empty(provided_value) 
           else:
             all_params[param] = all_params[param].replace(value, inject_value)
             all_params[param-1] = all_params[param-1].replace(inject_value, old)
@@ -414,7 +424,7 @@ def suffixes(payload, suffix):
 The cookie based injection.
 """
 def do_cookie_check(cookie):
-
+  http_request_method = "cookie"
   multi_parameters = cookie.split(settings.COOKIE_DELIMITER)
   # Check for inappropriate format in provided parameter(s).
   if len([s for s in multi_parameters if "=" in s]) != (len(multi_parameters)):
@@ -426,10 +436,11 @@ def do_cookie_check(cookie):
   inject_value = value.replace(value, settings.INJECT_TAG)
   # Check if single paramerter is supplied.
   if len(multi_parameters) == 1:
+    # Check for empty values (in provided parameters).
+    is_empty(multi_parameters, http_request_method)
     # Check if defined the INJECT_TAG
     if settings.INJECT_TAG not in cookie:
       if len(value) == 0:
-        is_empty(multi_parameters)
         cookie = cookie + settings.INJECT_TAG
       else:
         cookie = cookie.replace(value, inject_value)
@@ -442,6 +453,8 @@ def do_cookie_check(cookie):
     all_params = all_params.split(settings.COOKIE_DELIMITER)
     # Check if not defined the "INJECT_HERE" tag in parameter
     if settings.INJECT_TAG not in cookie:
+      # Check for empty values (in provided parameters).
+      is_empty(multi_parameters, http_request_method)
       for param in range(0, len(all_params)):
         if param == 0 :
             old = re.findall(r'=(.*)', all_params[param])
@@ -458,7 +471,6 @@ def do_cookie_check(cookie):
           if len(value) == 0:   
             provided_value = re.findall(r'(.*)=', all_params[param])
             provided_value = ''.join(provided_value)
-            skip_empty(provided_value)
           else:
             all_params[param] = all_params[param].replace(value, inject_value)
             all_params[param-1] = all_params[param-1].replace(inject_value, old)
