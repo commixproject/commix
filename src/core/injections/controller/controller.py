@@ -261,17 +261,24 @@ def cookie_injection(url, http_request_method, filename, delay):
     checks.print_non_listed_params(check_parameters, http_request_method, header_name)
 
     for i in range(0, len(cookie_parameters)):
-      menu.options.cookie = cookie_parameters[i]
-      check_parameter = parameters.specify_cookie_parameter(menu.options.cookie)
-      if menu.options.cookie != check_parameter:
+      parameter = menu.options.cookie = cookie_parameters[i]
+      check_parameter = parameters.specify_cookie_parameter(parameter)
+      if check_parameter != parameter:
         if len(check_parameter) > 0:
           settings.TESTABLE_PARAMETER = check_parameter
+
         # Check if testable parameter(s) are provided
-        if len(settings.TESTABLE_PARAMETER) > 0:
-          if check_parameter in settings.TESTABLE_PARAMETER:
-            # Check for session file 
-            check_for_stored_sessions(url, http_request_method)
-            injection_proccess(url, check_parameter, http_request_method, filename, delay) 
+        if len(settings.TEST_PARAMETER) > 0:
+          if menu.options.test_parameter != None:
+            param_counter = 0
+            for check_parameter in check_parameters:
+              if check_parameter in "".join(settings.TEST_PARAMETER).split(","):
+                menu.options.cookie = cookie_parameters[param_counter]
+                # Check for session file 
+                check_for_stored_sessions(url, http_request_method)
+                injection_proccess(url, check_parameter, http_request_method, filename, delay) 
+              param_counter += 1
+            break  
         else:
           # Check for session file 
           check_for_stored_sessions(url, http_request_method)
@@ -307,9 +314,20 @@ def get_request(url, http_request_method, filename, delay):
       if check_parameter != url:
         if len(check_parameter) > 0:
           settings.TESTABLE_PARAMETER = check_parameter
+          
         # Check if testable parameter(s) are provided
         if len(settings.TESTABLE_PARAMETER) > 0:
-          if check_parameter in settings.TESTABLE_PARAMETER:
+          if menu.options.test_parameter != None:
+            url_counter = 0
+            for check_parameter in check_parameters:
+              if check_parameter in "".join(settings.TEST_PARAMETER).split(","):
+                url = found_url[url_counter]
+                # Check for session file 
+                check_for_stored_sessions(url, http_request_method)
+                injection_proccess(url, check_parameter, http_request_method, filename, delay)
+              url_counter += 1
+            break
+          else:
             # Check for session file 
             check_for_stored_sessions(url, http_request_method)
             injection_proccess(url, check_parameter, http_request_method, filename, delay)
@@ -317,7 +335,7 @@ def get_request(url, http_request_method, filename, delay):
           # Check for session file 
           check_for_stored_sessions(url, http_request_method)
           injection_proccess(url, check_parameter, http_request_method, filename, delay)
-  
+    
   # Enable Cookie Injection
   if menu.options.level > settings.DEFAULT_INJECTION_LEVEL and menu.options.cookie:
     settings.COOKIE_INJECTION = True
@@ -351,15 +369,35 @@ def post_request(url, http_request_method, filename, delay):
   header_name = ""
   checks.print_non_listed_params(check_parameters, http_request_method, header_name)
 
+  # Check if multiple parameters
+  check_parameters = []
+  for i in range(0, len(found_parameter)):
+    parameter = menu.options.data = found_parameter[i]
+    check_parameter = parameters.vuln_POST_param(parameter, url)
+    check_parameters.append(check_parameter)
+
+  header_name = ""
+  checks.print_non_listed_params(check_parameters, http_request_method, header_name)
+
   for i in range(0, len(found_parameter)):
     parameter = menu.options.data = found_parameter[i]
     check_parameter = parameters.vuln_POST_param(parameter, url)
     if check_parameter != parameter:
       if len(check_parameter) > 0:
         settings.TESTABLE_PARAMETER = check_parameter
+
       # Check if testable parameter(s) are provided
       if len(settings.TESTABLE_PARAMETER) > 0:
-        if check_parameter in settings.TESTABLE_PARAMETER:
+        if menu.options.test_parameter != None:
+          param_counter = 0
+          for check_parameter in check_parameters:
+            if check_parameter in "".join(settings.TEST_PARAMETER).split(","):
+              menu.options.data = found_parameter[param_counter]           
+              check_for_stored_sessions(url, http_request_method)
+              injection_proccess(url, check_parameter, http_request_method, filename, delay)
+            param_counter += 1
+          break
+        else:
           # Check for session file 
           check_for_stored_sessions(url, http_request_method)
           injection_proccess(url, check_parameter, http_request_method, filename, delay)
@@ -367,6 +405,7 @@ def post_request(url, http_request_method, filename, delay):
         # Check for session file 
         check_for_stored_sessions(url, http_request_method)
         injection_proccess(url, check_parameter, http_request_method, filename, delay)
+
 
 
 def perform_checks(url, filename):
