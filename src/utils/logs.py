@@ -59,7 +59,10 @@ def create_log_file(url, output_dir):
     output_dir = output_dir + "/"
 
   parts = url.split('//', 1)
-  host = parts[1].split('/', 1)[0]
+  try:
+    host = parts[1].split('/', 1)[0]
+  except IndexError:
+    host = parts[0].split('/', 1)[0]
 
   # Check if port is defined to host.
   if ":" in host:

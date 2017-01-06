@@ -283,7 +283,7 @@ def cookie_injection(url, http_request_method, filename, delay):
           # Check for session file 
           check_for_stored_sessions(url, http_request_method)
           injection_proccess(url, check_parameter, http_request_method, filename, delay) 
- 
+          
   if settings.COOKIE_INJECTION == True:
     # Restore cookie value
     menu.options.cookie = cookie_value
@@ -335,7 +335,7 @@ def get_request(url, http_request_method, filename, delay):
           # Check for session file 
           check_for_stored_sessions(url, http_request_method)
           injection_proccess(url, check_parameter, http_request_method, filename, delay)
-    
+
   # Enable Cookie Injection
   if menu.options.level > settings.DEFAULT_INJECTION_LEVEL and menu.options.cookie:
     settings.COOKIE_INJECTION = True

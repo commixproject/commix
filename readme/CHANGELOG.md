@@ -1,4 +1,5 @@
 ## Version 1.7 (upcoming)
+* Fixed: Minor fix regarding the lack of http/s to the user-defined URL(s).
 * Added: New option "--skip-empty" for skipping the testing of the parameter(s) with empty value(s).
 * Fixed: Improvement regarding testing the parameter(s) with empty value(s).
 * Added: New CGI shellscript path "/cgi-bin/cgiCmdNotify" (vulnerable to shellshock) has been added.
