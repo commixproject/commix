@@ -77,6 +77,32 @@ def check_os_shell_options(cmd, technique, go_back, no_result):
       return cmd
 
 """
+Procced with file-based semiblind command injection technique,
+once the user provides the path of web server's root directory.
+"""
+def procced_with_file_based_technique(): 
+  while True:
+    if not menu.options.batch:
+      question_msg = "Do you want to procced with the (semi-blind) "
+      question_msg += "file-based injection technique? [Y/n] > "
+      sys.stdout.write(settings.print_question_msg(question_msg))
+      enable_fb = sys.stdin.readline().replace("\n","").lower()
+    else:
+      enable_fb = ""
+    if len(enable_fb) == 0:
+       enable_fb = "y"
+    if enable_fb in settings.CHOICE_YES:
+      return True
+    elif enable_fb in settings.CHOICE_NO:
+      return False
+    elif enable_fb in settings.CHOICE_QUIT:
+      sys.exit(0)
+    else:
+      err_msg = "'" + enable_fb + "' is not a valid answer."  
+      print settings.print_error_msg(err_msg)
+      pass
+
+"""
 Check 'reverse_tcp' options
 """
 def check_reverse_tcp_options(reverse_tcp_option):

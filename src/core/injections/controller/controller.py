@@ -99,6 +99,12 @@ def injection_proccess(url, check_parameter, http_request_method, filename, dela
   skip_code_injections = False
   skip_command_injections = False
 
+  # Procced with file-based semiblind command injection technique,
+  # once the user provides the path of web server's root directory.
+  if menu.options.srv_root_dir:
+    if checks.procced_with_file_based_technique():
+      menu.options.tech = "f"
+
   # Check if it is vulnerable to classic command injection technique.
   if not menu.options.tech or "c" in menu.options.tech:
     settings.CLASSIC_STATE = None
@@ -283,7 +289,7 @@ def cookie_injection(url, http_request_method, filename, delay):
           # Check for session file 
           check_for_stored_sessions(url, http_request_method)
           injection_proccess(url, check_parameter, http_request_method, filename, delay) 
-          
+ 
   if settings.COOKIE_INJECTION == True:
     # Restore cookie value
     menu.options.cookie = cookie_value
