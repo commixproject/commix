@@ -106,7 +106,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "1.7.8"
+VERSION_NUM = "1.7.9"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"
@@ -490,6 +490,9 @@ LHOST = ""
 LPORT = ""
 # for the bind TCP connection
 RHOST = ""
+# Default settings (web_delivery).
+URIPATH = "/"
+SRVPORT = 8080
 
 # Maybe a WAF/IPS/IDS protection.
 WAF_ENABLED = False
