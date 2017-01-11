@@ -371,17 +371,6 @@ def post_request(url, http_request_method, filename, delay):
     check_parameter = parameters.vuln_POST_param(parameter, url)
     check_parameters.append(check_parameter)
 
-  #if not menu.options.level > 1:
-  header_name = ""
-  checks.print_non_listed_params(check_parameters, http_request_method, header_name)
-
-  # Check if multiple parameters
-  check_parameters = []
-  for i in range(0, len(found_parameter)):
-    parameter = menu.options.data = found_parameter[i]
-    check_parameter = parameters.vuln_POST_param(parameter, url)
-    check_parameters.append(check_parameter)
-
   header_name = ""
   checks.print_non_listed_params(check_parameters, http_request_method, header_name)
 
@@ -412,8 +401,13 @@ def post_request(url, http_request_method, filename, delay):
         check_for_stored_sessions(url, http_request_method)
         injection_proccess(url, check_parameter, http_request_method, filename, delay)
 
+  # Enable Cookie Injection
+  if menu.options.level > settings.DEFAULT_INJECTION_LEVEL and menu.options.cookie:
+    settings.COOKIE_INJECTION = True
 
-
+"""
+Perform checks
+"""
 def perform_checks(url, filename):
 
   delay = settings.DELAY

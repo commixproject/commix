@@ -514,14 +514,15 @@ def print_non_listed_params(check_parameters, http_request_method, header_name):
       non_exist_param = ",".join(non_exist_param).replace(" ","")
       non_exist_param = non_exist_param.split(",")
       if non_exist_param:
-        non_exist_param_items = ", ".join(non_exist_param)
-        warn_msg = "The provided parameter" + "s"[len(non_exist_param) == 1:][::-1] + " '" 
-        warn_msg += non_exist_param_items + "'" + (' are', ' is')[len(non_exist_param) == 1]
+        non_exist_param_items = ",".join(non_exist_param)
+        warn_msg = "Skipping tests for "
+        warn_msg += "the provided parameter" + "s"[len(non_exist_param) == 1:][::-1] + " '" 
+        warn_msg += non_exist_param_items + "' as" + (' they are', ' it is')[len(non_exist_param) == 1]
         if menu.options.level >= 2 and header_name != "":
-          warn_msg += " not inside the "
+          warn_msg += " not part of the "
           warn_msg +=  settings.HTTP_HEADER
         else:
-          warn_msg += " not inside the "
+          warn_msg += " not part of the "
           warn_msg += http_request_method   
           warn_msg += (' data', ' request')[http_request_method == "GET"] 
         warn_msg += "."
