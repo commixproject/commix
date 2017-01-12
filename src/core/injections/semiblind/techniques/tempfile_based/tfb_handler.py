@@ -119,6 +119,9 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
   for prefix in settings.PREFIXES:
     for suffix in settings.SUFFIXES:
       for separator in settings.SEPARATORS:
+        # Check injection state
+        settings.DETECTION_PHASE = True
+        settings.EXPLOITATION_PHASE = False
         # If a previous session is available.
         how_long_statistic = []
         if settings.LOAD_SESSION:
@@ -360,7 +363,9 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
 
             found = True
             no_result = False
-
+            # Check injection state
+            settings.DETECTION_PHASE = False
+            settings.EXPLOITATION_PHASE = True
             if settings.LOAD_SESSION:
               possibly_vulnerable = False
 

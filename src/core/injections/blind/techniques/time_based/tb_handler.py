@@ -99,8 +99,11 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
   for prefix in settings.PREFIXES:
     for suffix in settings.SUFFIXES:
       for separator in settings.SEPARATORS:
-        how_long_statistic = []
+        # Check injection state
+        settings.DETECTION_PHASE = True
+        settings.EXPLOITATION_PHASE = False
         # If a previous session is available.
+        how_long_statistic = []
         if settings.LOAD_SESSION and session_handler.notification(url, technique):
           cmd = shell = ""
           url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response, delay, how_long, output_length, is_vulnerable = session_handler.injection_point_exportation(url, http_request_method)
@@ -322,7 +325,9 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
 
             found = True
             no_result = False
-
+            # Check injection state
+            settings.DETECTION_PHASE = False
+            settings.EXPLOITATION_PHASE = True
             if settings.LOAD_SESSION:
               possibly_vulnerable = False
 

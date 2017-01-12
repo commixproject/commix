@@ -189,6 +189,9 @@ def input_cmd(dns_server, http_request_method, url, vuln_parameter, technique):
 
 
 def exploitation(dns_server, url, http_request_method, vuln_parameter, technique):
+  # Check injection state
+  settings.DETECTION_PHASE = False
+  settings.EXPLOITATION_PHASE = True
   #signal.signal(signal.SIGINT, signal_handler)
   sniffer_thread = threading.Thread(target=snif, args=(dns_server, )).start()
   #time.sleep(2)
@@ -202,6 +205,9 @@ def exploitation(dns_server, url, http_request_method, vuln_parameter, technique
 
 
 def dns_exfiltration_handler(url, http_request_method):
+  # Check injection state
+  settings.DETECTION_PHASE = True
+  settings.EXPLOITATION_PHASE = False
   # You need to have root privileges to run this script
   if os.geteuid() != 0:
     err_msg = "You need to have root privileges to run this option."

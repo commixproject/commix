@@ -106,7 +106,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "1.7.10"
+VERSION_NUM = "1.7.11"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"
@@ -137,6 +137,10 @@ LOCAL_HTTP_IP = ""
 
 # Local HTTP server port
 LOCAL_HTTP_PORT = random.randint(50000,60000)
+
+# Detection / Exploitation phase(s)
+DETECTION_PHASE = False
+EXPLOITATION_PHASE = False
 
 # Exploitation techniques states
 CLASSIC_STATE = False

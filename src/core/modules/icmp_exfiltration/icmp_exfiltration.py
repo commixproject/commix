@@ -202,6 +202,9 @@ def input_cmd(http_request_method, url, vuln_parameter, ip_src, technique):
 
 
 def exploitation(ip_dst, ip_src, url, http_request_method, vuln_parameter, technique):
+  # Check injection state
+  settings.DETECTION_PHASE = False
+  settings.EXPLOITATION_PHASE = True
   signal.signal(signal.SIGINT, signal_handler)
   sniffer_thread = threading.Thread(target=snif, args=(ip_dst, ip_src, )).start()
   time.sleep(2)
@@ -214,6 +217,9 @@ def exploitation(ip_dst, ip_src, url, http_request_method, vuln_parameter, techn
     input_cmd(http_request_method, url, vuln_parameter, ip_src, technique)
 
 def icmp_exfiltration_handler(url, http_request_method):
+  # Check injection state
+  settings.DETECTION_PHASE = True
+  settings.EXPLOITATION_PHASE = False
   # You need to have root privileges to run this script
   if os.geteuid() != 0:
     err_msg = "You need to have root privileges to run this option."

@@ -26,6 +26,15 @@ from src.utils import settings
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 """
+Check current assessment phase.
+"""
+def assessment_phase():
+  if settings.DETECTION_PHASE: 
+    return "detection"
+  else:
+    return "exploitation"
+
+"""
 Procced to the next attack vector.
 """
 def next_attack_vector(technique, go_back):
@@ -39,6 +48,8 @@ def next_attack_vector(technique, go_back):
     if len(next_attack_vector) == 0:
        next_attack_vector = "y"
     if next_attack_vector in settings.CHOICE_YES:
+      # Check injection state
+      assessment_phase()
       return True
     elif next_attack_vector in settings.CHOICE_NO:
       return  False

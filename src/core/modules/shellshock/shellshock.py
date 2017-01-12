@@ -639,6 +639,9 @@ def shellshock_handler(url, http_request_method, filename):
     total = len(shellshock_cves) * len(headers)
     for cve in shellshock_cves:
       for check_header in headers:
+        # Check injection state
+        settings.DETECTION_PHASE = True
+        settings.EXPLOITATION_PHASE = False
         i = i + 1
         attack_vector = "echo " + cve + ":Done;"
         payload = shellshock_payloads(cve, attack_vector)
@@ -683,6 +686,9 @@ def shellshock_handler(url, http_request_method, filename):
           sys.stdout.flush()
 
         if no_result == False:
+          # Check injection state
+          settings.DETECTION_PHASE = False
+          settings.EXPLOITATION_PHASE = True
           # Print the findings to log file.
           if export_injection_info == False:
             export_injection_info = logs.add_type_and_technique(export_injection_info, filename, injection_type, technique)

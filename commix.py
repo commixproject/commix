@@ -831,6 +831,9 @@ if __name__ == '__main__':
     if menu.options.msf_path:
       settings.METASPLOIT_PATH = menu.options.msf_path
 
+    # Enable detection phase
+    settings.DETECTION_PHASE = True
+
     # Parse target and data from HTTP proxy logs (i.e Burp / WebScarab).
     if menu.options.requestfile or menu.options.logfile:
       parser.logfile_parser()
@@ -878,7 +881,9 @@ if __name__ == '__main__':
       main(filename, url)
 
   except KeyboardInterrupt: 
-    abort_msg = "Ctrl-C was pressed!"
+    abort_msg = "User aborted procedure "
+    abort_msg += "during the " + checks.assessment_phase() 
+    abort_msg += " phase (Ctrl-C was pressed)."  
     print "\n" + settings.print_abort_msg(abort_msg)
     try:
       logs.print_logs_notification(filename, url)
