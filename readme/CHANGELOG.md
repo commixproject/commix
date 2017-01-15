@@ -1,6 +1,6 @@
 ## Version 1.7 (upcoming)
 * Fixed: Improvement regarding printing current assessment state in case of user abortion. 
-* Revised: Minor improvement for procceding with semiblind ("file-based") technique, once the user provides the path of web server's root directory.
+* Revised: Minor improvement for proceeding with semiblind ("file-based") technique, once the user provides the path of web server's root directory.
 * Fixed: Minor fix regarding the lack of http/s to the user-defined URL(s).
 * Added: New option "--skip-empty" for skipping the testing of the parameter(s) with empty value(s).
 * Fixed: Improvement regarding testing the parameter(s) with empty value(s).
@@ -9,7 +9,7 @@
 ## Version 1.6 (2016-12-28)
 * Fixed: Improvement regarding json-formated POST data, where whitespace before (and/or after) the ":" exists.
 * Fixed: Minor fix regarding empty value(s) in provided parameter(s).
-* Added: New option "--batch" that never asking for user input (using the default behaviour).
+* Added: New option "--batch" that never asks for user input (using the default behaviour).
 * Added: New option "-x" for parsing target(s) from remote sitemap(.xml) file.
 * Added: New option "--offline" for working in offline mode.
 * Fixed: Improvement regarding the IP address grabbing (in case of internet in-accessibility).
