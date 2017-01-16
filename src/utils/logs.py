@@ -28,6 +28,22 @@ from src.utils import session_handler
 
 from src.thirdparty.colorama import Fore, Back, Style, init
 
+readline_error = False
+try:
+  import readline
+except ImportError:
+  if settings.IS_WINDOWS:
+    try:
+      import pyreadline as readline
+    except ImportError:
+      readline_error = True
+  else:
+    try:
+      import gnureadline as readline
+    except ImportError:
+      readline_error = True
+pass
+
 """
 1. Generate injection logs (logs.txt) in "./ouput" file.
 2. Check for logs updates and apply if any!
