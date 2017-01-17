@@ -16,7 +16,7 @@ For more see the file 'readme/COPYING' for copying permission.
 from src.utils import settings
 
 """
-The "eval-based" code injection technique on classic OS command injection.
+The dynamic code evaluation (aka eval-based) technique.
 The available "eval-based" payloads.
 """
 

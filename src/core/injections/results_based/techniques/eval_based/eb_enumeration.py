@@ -27,7 +27,7 @@ from src.core.requests import requests
 from src.core.injections.results_based.techniques.eval_based import eb_injector
 
 """
-The "eval-based" code injection technique on classic OS command injection.
+The dynamic code evaluation (aka eval-based) technique.
 """
 
 """

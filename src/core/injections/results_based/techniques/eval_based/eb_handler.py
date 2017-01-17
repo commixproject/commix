@@ -61,7 +61,7 @@ except ImportError:
 
 
 """
-The "eval-based" code injection technique on classic OS command injection.
+The dynamic code evaluation (aka eval-based) technique.
 """
 
 """
@@ -73,8 +73,8 @@ def eb_injection_handler(url, delay, filename, http_request_method):
   vp_flag = True
   no_result = True
   export_injection_info = False
-  injection_type = "results-based command injection"
-  technique = "eval-based code injection technique"
+  injection_type = "results-based dynamic code evaluation"
+  technique = "dynamic code evaluation technique"
 
   for item in range(0, len(settings.EXECUTION_FUNCTIONS)):
     settings.EXECUTION_FUNCTIONS[item] = "${" + settings.EXECUTION_FUNCTIONS[item] + "("

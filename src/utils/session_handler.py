@@ -181,6 +181,8 @@ def injection_point_exportation(url, http_request_method):
       result = conn.execute("SELECT * FROM sqlite_master WHERE name = '" + \
                              table_name(url) + "_ip' AND type = 'table';")
       if result:
+        if menu.options.tech[:1] == "d":
+          menu.options.tech = "e"
         if menu.options.tech[:1] == "c" or \
            menu.options.tech[:1] == "e":
           select_injection_type = "R"

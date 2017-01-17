@@ -74,8 +74,8 @@ def cb_injection_handler(url, delay, filename, http_request_method):
   no_result = True
   is_encoded= False
   export_injection_info = False
-  injection_type = "results-based command injection"
-  technique = "classic injection technique"
+  injection_type = "results-based OS command injection"
+  technique = "classic command injection technique"
 
   if not settings.LOAD_SESSION: 
     info_msg = "Testing the " + technique + "... "

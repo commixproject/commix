@@ -77,8 +77,8 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
   false_positive_warning = False
   export_injection_info = False
   how_long = 0
-  injection_type = "blind command injection"
-  technique = "time-based injection technique"
+  injection_type = "blind OS command injection"
+  technique = "time-based command injection technique"
 
   if settings.VERBOSITY_LEVEL >= 1:
     info_msg = "Testing the " + technique + "... "

@@ -121,8 +121,8 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
   call_tmp_based = False
   next_attack_vector = False
   export_injection_info = False
-  injection_type = "semi-blind command injection"
-  technique = "file-based injection technique"
+  injection_type = "semi-blind OS command injection"
+  technique = "file-based command injection technique"
 
   # Set temp path 
   if settings.TARGET_OS == "win":
