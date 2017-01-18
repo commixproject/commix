@@ -1,4 +1,5 @@
 ## Version 1.7 (upcoming)
+* Fixed: Improvement regarding skipping the testing of problematic URL and proceeding with next ones (in case of scanning multiple targets). 
 * Fixed: Improvement regarding printing current assessment state in case of user abortion. 
 * Revised: Minor improvement for proceeding with semiblind ("file-based") technique, once the user provides the path of web server's root directory.
 * Fixed: Minor fix regarding the lack of http/s to the user-defined URL(s).

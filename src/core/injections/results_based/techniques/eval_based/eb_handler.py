@@ -83,7 +83,7 @@ def eb_injection_handler(url, delay, filename, http_request_method):
   url = eb_injector.warning_detection(url, http_request_method)
   
   if not settings.LOAD_SESSION:
-    info_msg = "Testing the " + technique + "... "
+    info_msg = "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "... "
     sys.stdout.write(settings.print_info_msg(info_msg))
     sys.stdout.flush()
   if settings.VERBOSITY_LEVEL >= 1:
@@ -100,7 +100,7 @@ def eb_injection_handler(url, delay, filename, http_request_method):
           settings.DETECTION_PHASE = True
           settings.EXPLOITATION_PHASE = False
           # If a previous session is available.
-          if settings.LOAD_SESSION and session_handler.notification(url, technique):
+          if settings.LOAD_SESSION and session_handler.notification(url, technique, injection_type):
             url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response, delay, how_long, output_length, is_vulnerable = session_handler.injection_point_exportation(url, http_request_method)
             checks.check_for_stored_tamper(payload)
             
@@ -202,7 +202,7 @@ def eb_injection_handler(url, delay, filename, http_request_method):
                 float_percent = "{0:.1f}".format(round(((i*100)/(total * 1.0)),2))
 
                 if shell == False:
-                  info_msg = "Testing the " + technique + "... " +  "[ " + float_percent + "%" + " ]"
+                  info_msg = "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "... " +  "[ " + float_percent + "%" + " ]"
                   sys.stdout.write("\r" + settings.print_info_msg(info_msg))  
                   sys.stdout.flush()
 
@@ -216,7 +216,7 @@ def eb_injection_handler(url, delay, filename, http_request_method):
                 else:
                   percent = str(float_percent)+ "%"
 
-                info_msg = "Testing the " + technique + "... " +  "[ " + percent + " ]"
+                info_msg = "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "... " +  "[ " + percent + " ]"
                 sys.stdout.write("\r" + settings.print_info_msg(info_msg))  
                 sys.stdout.flush()
                 

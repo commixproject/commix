@@ -528,7 +528,8 @@ def do_check(url, filename):
       print settings.print_critical_msg(err_msg) + "\n"
       
   logs.print_logs_notification(filename, url)
-  print ""  
+  if not menu.options.bulkfile or settings.EOF:
+    print ""  
   #sys.exit(0)
 
 #eof

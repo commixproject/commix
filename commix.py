@@ -286,10 +286,10 @@ def main(filename, url):
               print settings.print_critical_msg(err_msg)
               sys.exit(0)
 
-        except urllib2.HTTPError, e:
+        except urllib2.HTTPError, err_msg:
           if settings.VERBOSITY_LEVEL < 2:
             print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
-          err_msg = str(e).replace(": "," (") + ")."
+          err_msg = str(err_msg).replace(": "," (") + ")."
           print settings.print_critical_msg(err_msg)
           raise SystemExit
 
@@ -568,12 +568,12 @@ def main(filename, url):
         # Charset detection.
         requests.charset_detection(response)
 
-      except urllib2.HTTPError, e:
+      except urllib2.HTTPError, err_msg:
 
         # Check the codes of responses
         if str(e.getcode()) == settings.INTERNAL_SERVER_ERROR:
           print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
-          content = e.read()
+          content = err_msg.read()
           sys.exit(0)
 
         # Check for HTTP Error 401 (Unauthorized).
@@ -718,18 +718,18 @@ def main(filename, url):
         else:
           raise
 
-      except urllib2.URLError, e:
+      except urllib2.URLError, err_msg:
         if settings.VERBOSITY_LEVEL < 2:
           print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
         err_msg = "The host seems to be down!"
         print settings.print_critical_msg(err_msg)
         sys.exit(0)
         
-      except httplib.BadStatusLine, e:
+      except httplib.BadStatusLine, err_msg:
         if settings.VERBOSITY_LEVEL < 2:
           print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
-        if len(e.line) > 2 :
-          print e.line, e.message
+        if len(err_msg.line) > 2 :
+          print err_msg.line, err_msg.message
         pass
 
     else:
@@ -746,20 +746,20 @@ def main(filename, url):
     return filename
 
   # Accidental stop / restart of the target host server.
-  except httplib.BadStatusLine, e:
-    if e.line == "" or e.message == "":
+  except httplib.BadStatusLine, err_msg:
+    if err_msg.line == "" or err_msg.message == "":
       err_msg = "The target host is not responding."
       err_msg += " Please ensure that is up and try again."
       print "\n\n" + settings.print_critical_msg(err_msg) 
       logs.print_logs_notification(filename, url)      
     else: 
-      err_msg = e.line + e.message
+      err_msg = err_msg.line + err_msg.message
       print settings.print_critical_msg(err_msg) + "\n"
     session_handler.clear(url)  
     sys.exit(0)
 
   # Connection reset by peer
-  except SocketError, e:
+  except SocketError, err_msg:
     if settings.VERBOSITY_LEVEL >= 1:
       print ""
     err_msg = "The target host is not responding."
@@ -861,15 +861,29 @@ if __name__ == '__main__':
         print "[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]"
         with open(menu.options.bulkfile) as f:
           bulkfile = [url.strip() for url in f]
-        for url in bulkfile:
+        #Removing duplicates in list
+        clean_bulkfile = []
+        [clean_bulkfile.append(x) for x in bulkfile if x not in clean_bulkfile]
+        for url in clean_bulkfile:
+          if url == clean_bulkfile[-1]:
+            settings.EOF = True
           # Reset the injection level
           if menu.options.level > 3:
             menu.options.level = 1
           init_injection()
-          info_msg = "Setting URL '" + url + "' for tests. "  
-          print settings.print_info_msg(info_msg)
-          filename = logs_filename_creation()
-          main(filename, url)
+          try:
+            urllib2.urlopen(url)
+            info_msg = "Setting URL '" + url + "' for tests. "  
+            print settings.print_info_msg(info_msg)
+            filename = logs_filename_creation()
+            main(filename, url)
+          except urllib2.HTTPError, err_msg:
+            err_msg = "Skipping tests for URL '" + url + "' - " + str(err_msg).replace(": "," (") + ")" 
+            print settings.print_critical_msg(err_msg)
+          except urllib2.URLError, err_msg:
+            print settings.print_critical_msg(str(err_msg.args[0]).split("] ")[1] + ".")
+
+
     else:
       # Check if option is "--url" for single url test.
       if menu.options.sitemap_url:

@@ -237,7 +237,7 @@ def injection_point_exportation(url, http_request_method):
 """
 Notification about session.
 """
-def notification(url, technique):
+def notification(url, technique, injection_type):
   try:
     if settings.LOAD_SESSION == True:
       success_msg = "A previously stored session has been held against that host."
@@ -245,6 +245,7 @@ def notification(url, technique):
       while True:
         if not menu.options.batch:
           question_msg = "Do you want to resume to the " 
+          question_msg += "(" + injection_type.split(" ")[0] + ") "
           question_msg += technique.rsplit(' ', 2)[0] 
           question_msg += " injection point? [Y/n] > "
           sys.stdout.write(settings.print_question_msg(question_msg))

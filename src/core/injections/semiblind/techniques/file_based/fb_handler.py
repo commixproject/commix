@@ -121,7 +121,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
   call_tmp_based = False
   next_attack_vector = False
   export_injection_info = False
-  injection_type = "semi-blind OS command injection"
+  injection_type = "semi-blind command injection"
   technique = "file-based command injection technique"
 
   # Set temp path 
@@ -214,10 +214,11 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
           settings.DETECTION_PHASE = True
           settings.EXPLOITATION_PHASE = False
           # If a previous session is available.
-          if settings.LOAD_SESSION and session_handler.notification(url, technique):
+          if settings.LOAD_SESSION:
             url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response, delay, how_long, output_length, is_vulnerable = session_handler.injection_point_exportation(url, http_request_method)
             checks.check_for_stored_tamper(payload)
             OUTPUT_TEXTFILE = TAG + ".txt"
+            session_handler.notification(url, technique, injection_type)
             if technique == "tempfile-based injection technique":
               #settings.LOAD_SESSION = True
               tfb_handler.exploitation(url, delay, filename, tmp_path, http_request_method, url_time_response)
@@ -308,7 +309,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
 
                 if len(shell) != 0 and shell[0] == TAG and not settings.VERBOSITY_LEVEL >= 1:
                   percent = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
-                  info_msg = "Testing the " + technique + "... [ " + percent + " ]"
+                  info_msg = "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "... [ " + percent + " ]"
                   sys.stdout.write("\r" + settings.print_info_msg(info_msg))
                   sys.stdout.flush()
 
@@ -378,7 +379,7 @@ def fb_injection_handler(url, delay, filename, http_request_method, url_time_res
                           else:
                             percent = str(float_percent)+ "%"
 
-                          info_msg = "Testing the " + technique + "... [ " + percent + " ]"
+                          info_msg = "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "... [ " + percent + " ]"
                           sys.stdout.write("\r" + settings.print_info_msg(info_msg))
                           sys.stdout.flush()
                           continue

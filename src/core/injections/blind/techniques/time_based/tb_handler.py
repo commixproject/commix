@@ -81,7 +81,7 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
   technique = "time-based command injection technique"
 
   if settings.VERBOSITY_LEVEL >= 1:
-    info_msg = "Testing the " + technique + "... "
+    info_msg = "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "... "
     print settings.print_info_msg(info_msg)
 
   # Check if defined "--maxlen" option.
@@ -104,7 +104,7 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
         settings.EXPLOITATION_PHASE = False
         # If a previous session is available.
         how_long_statistic = []
-        if settings.LOAD_SESSION and session_handler.notification(url, technique):
+        if settings.LOAD_SESSION and session_handler.notification(url, technique, injection_type):
           cmd = shell = ""
           url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response, delay, how_long, output_length, is_vulnerable = session_handler.injection_point_exportation(url, http_request_method)
           checks.check_for_stored_tamper(payload)
@@ -289,19 +289,19 @@ def tb_injection_handler(url, delay, filename, http_request_method, url_time_res
                   else:
                     if not settings.VERBOSITY_LEVEL >= 1:
                       percent = str(float_percent)+ "%"
-                      info_msg = "Testing the " + technique + "... " +  "[ " + percent + " ]"
+                      info_msg = "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "... " +  "[ " + percent + " ]"
                       sys.stdout.write("\r" + settings.print_info_msg(info_msg))
                       sys.stdout.flush()
                     continue    
                 else:
                   if not settings.VERBOSITY_LEVEL >= 1:
                     percent = str(float_percent)+ "%"
-                    info_msg = "Testing the " + technique + "... " +  "[ " + percent + " ]"
+                    info_msg = "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "... " +  "[ " + percent + " ]"
                     sys.stdout.write("\r" + settings.print_info_msg(info_msg))
                     sys.stdout.flush()
                   continue
               if not settings.VERBOSITY_LEVEL >= 1:
-                info_msg = "Testing the " + technique + "... " +  "[ " + percent + " ]"
+                info_msg = "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "... " +  "[ " + percent + " ]"
                 sys.stdout.write("\r" + settings.print_info_msg(info_msg))
                 sys.stdout.flush()
 

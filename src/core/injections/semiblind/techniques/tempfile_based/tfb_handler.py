@@ -110,7 +110,7 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
   whitespace = checks.check_whitespaces()
 
   if settings.VERBOSITY_LEVEL >= 1:
-    info_msg ="Testing the " + technique + "... "
+    info_msg ="Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "... "
     print settings.print_info_msg(info_msg)
 
   # Calculate all possible combinations
@@ -304,19 +304,19 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
                   else:
                     if not settings.VERBOSITY_LEVEL >= 1:
                       percent = str(float_percent)+ "%"
-                      info_msg =  "Testing the " + technique + "... " +  "[ " + percent + " ]"
+                      info_msg =  "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "... " +  "[ " + percent + " ]"
                       sys.stdout.write("\r" + settings.print_info_msg(info_msg))
                       sys.stdout.flush()
                     continue    
                 else:
                   if not settings.VERBOSITY_LEVEL >= 1:
                     percent = str(float_percent)+ "%"
-                    info_msg =  "Testing the " + technique + "... " +  "[ " + percent + " ]"
+                    info_msg =  "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "... " +  "[ " + percent + " ]"
                     sys.stdout.write("\r" + settings.print_info_msg(info_msg))
                     sys.stdout.flush()
                   continue
               if not settings.VERBOSITY_LEVEL >= 1:
-                info_msg =  "Testing the " + technique + "... " +  "[ " + percent + " ]"
+                info_msg =  "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "... " +  "[ " + percent + " ]"
                 sys.stdout.write("\r" + settings.print_info_msg(info_msg))
                 sys.stdout.flush()
                 
@@ -338,7 +338,7 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
                 if no_result == True:
                   if not settings.VERBOSITY_LEVEL >= 1:
                     percent = Fore.RED + "FAILED" + Style.RESET_ALL
-                    info_msg =  "Testing the " + technique + "... " +  "[ " + percent + " ]"
+                    info_msg =  "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "... " +  "[ " + percent + " ]"
                     sys.stdout.write("\r" + settings.print_info_msg(info_msg))
                     sys.stdout.flush()
                   else:
