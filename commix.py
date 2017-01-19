@@ -861,9 +861,11 @@ if __name__ == '__main__':
         print "[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]"
         with open(menu.options.bulkfile) as f:
           bulkfile = [url.strip() for url in f]
-        #Removing duplicates in list
+        # Removing duplicates from list.
         clean_bulkfile = []
         [clean_bulkfile.append(x) for x in bulkfile if x not in clean_bulkfile]
+        # Removing empty elements from list.
+        clean_bulkfile = [x for x in clean_bulkfile if x]
         for url in clean_bulkfile:
           if url == clean_bulkfile[-1]:
             settings.EOF = True
@@ -878,11 +880,15 @@ if __name__ == '__main__':
             filename = logs_filename_creation()
             main(filename, url)
           except urllib2.HTTPError, err_msg:
-            err_msg = "Skipping tests for URL '" + url + "' - " + str(err_msg).replace(": "," (") + ")" 
-            print settings.print_critical_msg(err_msg)
+            warn_msg = "Skipping URL '" + url + "' - " + str(err_msg).replace(": "," (") + ")." 
+            print settings.print_warning_msg(warn_msg)
+            if settings.EOF:
+              print "" 
           except urllib2.URLError, err_msg:
-            print settings.print_critical_msg(str(err_msg.args[0]).split("] ")[1] + ".")
-
+            warn_msg = "Skipping URL '" + url + "' - " + str(err_msg.args[0]).split("] ")[1] + ")." 
+            print settings.print_critical_msg(warn_msg)
+            if settings.EOF:
+              print ""  
 
     else:
       # Check if option is "--url" for single url test.

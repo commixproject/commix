@@ -244,7 +244,7 @@ def notification(url, technique, injection_type):
       print settings.print_success_msg(success_msg) 
       while True:
         if not menu.options.batch:
-          question_msg = "Do you want to resume to the " 
+          question_msg = "Do you want to resume to the "
           question_msg += "(" + injection_type.split(" ")[0] + ") "
           question_msg += technique.rsplit(' ', 2)[0] 
           question_msg += " injection point? [Y/n] > "

@@ -109,27 +109,28 @@ def injection_proccess(url, check_parameter, http_request_method, filename, dela
   if not menu.options.tech or "c" in menu.options.tech:
     settings.CLASSIC_STATE = None
     if cb_handler.exploitation(url, delay, filename, http_request_method) != False:
-      if not menu.options.batch:
-        settings.CLASSIC_STATE = True
-        question_msg = "Due to resuts "
-        question_msg += "skipping of code injection checks is recommended. "
-        question_msg += "Do you agree? [Y/n] > "
-        sys.stdout.write(settings.print_question_msg(question_msg))
-        procced_option = sys.stdin.readline().replace("\n","").lower()
-      else:
-        procced_option = ""
-      if len(procced_option) == 0:
-         procced_option = "y"
-      if procced_option in settings.CHOICE_YES:
-        skip_code_injections = True
-      elif procced_option in settings.CHOICE_NO:
-        pass
-      elif procced_option in settings.CHOICE_QUIT:
-        sys.exit(0)
-      else:
-        err_msg = "'" + procced_option + "' is not a valid answer."  
-        print settings.print_error_msg(err_msg)
-        pass
+      if not menu.options.tech or "e" in menu.options.tech:
+        if not menu.options.batch:
+          settings.CLASSIC_STATE = True
+          question_msg = "Due to resuts "
+          question_msg += "skipping of code injection checks is recommended. "
+          question_msg += "Do you agree? [Y/n] > "
+          sys.stdout.write(settings.print_question_msg(question_msg))
+          procced_option = sys.stdin.readline().replace("\n","").lower()
+        else:
+          procced_option = ""
+        if len(procced_option) == 0:
+           procced_option = "y"
+        if procced_option in settings.CHOICE_YES:
+          skip_code_injections = True
+        elif procced_option in settings.CHOICE_NO:
+          pass
+        elif procced_option in settings.CHOICE_QUIT:
+          sys.exit(0)
+        else:
+          err_msg = "'" + procced_option + "' is not a valid answer."  
+          print settings.print_error_msg(err_msg)
+          pass
     else:
       settings.CLASSIC_STATE = False
 
@@ -525,8 +526,8 @@ def do_check(url, filename):
         if menu.options.skip_empty:
           err_msg += " and/or try to remove the option '--skip-empty'"  
       err_msg += "."
-      print settings.print_critical_msg(err_msg) + "\n"
-      
+      print settings.print_critical_msg(err_msg)
+
   logs.print_logs_notification(filename, url)
   if not menu.options.bulkfile or settings.EOF:
     print ""  
