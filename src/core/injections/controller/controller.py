@@ -482,8 +482,7 @@ def do_check(url, filename):
 
   if perform_checks(url,filename) == False:
     scan_level = menu.options.level
-
-    while scan_level < settings.HTTP_HEADER_INJECTION_LEVEL and settings.LOAD_SESSION == None:
+    while int(scan_level) < int(settings.HTTP_HEADER_INJECTION_LEVEL) and settings.LOAD_SESSION == None:
       if not menu.options.batch:
         question_msg = "Do you want to increase to '--level=" + str(scan_level + 1) 
         question_msg += "' in order to perform more tests? [Y/n] > "
