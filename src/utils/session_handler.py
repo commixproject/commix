@@ -42,7 +42,7 @@ def table_name(url):
 Flush session.
 """
 def flush(url):
-  info_msg = "Flushing the session file... "
+  info_msg = "Flushing the stored session from the session file... "
   sys.stdout.write(settings.print_info_msg(info_msg))
   sys.stdout.flush()
   try:

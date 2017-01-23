@@ -59,14 +59,103 @@ from src.core.injections.controller import checks
 from src.core.injections.controller import parser
 from src.core.injections.controller import controller
 
-# use Colorama to make Termcolor work on Windows too :)
+# Use Colorama to make Termcolor work on Windows too :)
 if settings.IS_WINDOWS:
   init()
 
 """
+Examine the request
+"""
+def examine_request(request):
+  try:
+    # Check if defined any HTTP Proxy (--proxy option).
+    if menu.options.proxy:
+      response = proxy.use_proxy(request)
+    # Check if defined Tor (--tor option).  
+    elif menu.options.tor:
+      response = tor.use_tor(request)
+    else:
+      try:
+        response = urllib2.urlopen(request)
+      except ValueError:
+        # Invalid format for the '--headers' option.
+        if settings.VERBOSITY_LEVEL < 2:
+          print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
+        err_msg = "Use '--headers=\"HEADER_NAME:HEADER_VALUE\"' "
+        err_msg += "to provide an HTTP header or"
+        err_msg += " '--headers=\"HEADER_NAME:" + settings.WILDCARD_CHAR  + "\"' "
+        err_msg += "if you want to try to exploit the provided HTTP header."
+        print settings.print_critical_msg(err_msg)
+        sys.exit(0)
+    return response
+
+  except urllib2.HTTPError, err_msg:
+    if settings.VERBOSITY_LEVEL < 2:
+      print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
+    err_msg = str(err_msg).replace(": "," (") + ")." 
+    if menu.options.bulkfile:
+      warn_msg = "Skipping URL '" + url + "' - " + err_msg
+      print settings.print_warning_msg(warn_msg)
+      if settings.EOF:
+        print "" 
+      return False  
+    else:
+      print settings.print_critical_msg(err_msg)
+      raise SystemExit 
+
+  except urllib2.URLError, err_msg:
+    if settings.VERBOSITY_LEVEL < 2:
+      print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
+    err_msg = str(err_msg.args[0]).split("] ")[1] + "." 
+    if menu.options.bulkfile:
+      warn_msg = "Skipping URL '" + url + "' - " + err_msg
+      print settings.print_critical_msg(warn_msg)
+      if settings.EOF:
+        print "" 
+      return False 
+    else:
+      print settings.print_critical_msg(err_msg)
+      raise SystemExit  
+
+"""
+The init (URL) request.
+"""
+def init_request(url):
+  # Check if defined POST data
+  if menu.options.data:
+    request = urllib2.Request(url, menu.options.data)
+  else:
+    request = urllib2.Request(url)
+
+  headers.do_check(request)  
+  #headers.check_http_traffic(request)
+  # Check if defined any HTTP Proxy (--proxy option).
+  if menu.options.proxy:
+    proxy.do_check(url)
+  
+  # Check if defined Tor (--tor option).
+  elif menu.options.tor:
+    tor.do_check()
+
+  return request
+
+def url_response(url, init_test):
+  request = init_request(url)
+  if init_test:
+    init_test = False
+    info_msg = "Checking connection to the target URL... "
+    sys.stdout.write(settings.print_info_msg(info_msg))
+    sys.stdout.flush()
+    if settings.VERBOSITY_LEVEL >= 2:
+      print ""
+  headers.check_http_traffic(request)
+  response = examine_request(request)
+  return response, init_test
+
+"""
 Injection states initiation.
 """
-def init_injection():
+def init_injection(url):
   # Initiate injection checker.
   if settings.INJECTION_CHECKER:
     settings.INJECTION_CHECKER = False
@@ -83,6 +172,8 @@ def init_injection():
     settings.TEMPFILE_BASED_STATE = False
   if settings.TIME_RELATIVE_ATTACK:
     settings.TIME_RELATIVE_ATTACK = False
+  info_msg = "Setting URL '" + url + "' for tests. "  
+  print settings.print_info_msg(info_msg)
 
 """
 Logs filename creation.
@@ -111,7 +202,7 @@ def logs_filename_creation():
 """
 The main function.
 """
-def main(filename, url):
+def main(filename, url, init_test):
   try:
 
     # Ignore the mathematic calculation part (Detection phase).
@@ -238,65 +329,14 @@ def main(filename, url):
         url = crawler.crawler(url)
 
       try:
-        # Check if defined POST data
-        if menu.options.data:
-          request = urllib2.Request(url, menu.options.data)
-        else:
-          request = urllib2.Request(url)
-
-        headers.do_check(request)  
-        #headers.check_http_traffic(request)
-        # Check if defined any HTTP Proxy (--proxy option).
-        if menu.options.proxy:
-          proxy.do_check(url)
-        
-        # Check if defined Tor (--tor option).
-        elif menu.options.tor:
-          tor.do_check()
-
-        if menu.options.flush_session:
-          session_handler.flush(url) 
-
-        info_msg = "Checking connection to the target URL... "
-        sys.stdout.write(settings.print_info_msg(info_msg))
-        sys.stdout.flush()
-        if settings.VERBOSITY_LEVEL >= 2:
-          print ""
-
-        headers.check_http_traffic(request)
-        
-        try:
-          # Check if defined any HTTP Proxy (--proxy option).
-          if menu.options.proxy:
-            response = proxy.use_proxy(request)
-          # Check if defined Tor (--tor option).  
-          elif menu.options.tor:
-            response = tor.use_tor(request)
-          else:
-            try:
-              response = urllib2.urlopen(request)
-            except ValueError:
-              # Invalid format for the '--headers' option.
-              if settings.VERBOSITY_LEVEL < 2:
-                print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
-              err_msg = "Use '--headers=\"HEADER_NAME:HEADER_VALUE\"' "
-              err_msg += "to provide an HTTP header or"
-              err_msg += " '--headers=\"HEADER_NAME:" + settings.WILDCARD_CHAR  + "\"' "
-              err_msg += "if you want to try to exploit the provided HTTP header."
-              print settings.print_critical_msg(err_msg)
-              sys.exit(0)
-
-        except urllib2.HTTPError, err_msg:
-          if settings.VERBOSITY_LEVEL < 2:
-            print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
-          err_msg = str(err_msg).replace(": "," (") + ")."
-          print settings.print_critical_msg(err_msg)
-          raise SystemExit
-
+        response, init_test = url_response(url, init_test)
         html_data = content = response.read()
         if settings.VERBOSITY_LEVEL < 2:
           print "[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]"
-        
+
+        if menu.options.flush_session:
+          session_handler.flush(url)
+
         # Check for CGI scripts on url
         checks.check_CGI_scripts(url)
 
@@ -718,10 +758,12 @@ def main(filename, url):
         else:
           raise
 
-      except urllib2.URLError, err_msg:
+      except urllib2.URLError, e:
         if settings.VERBOSITY_LEVEL < 2:
           print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
-        err_msg = "The host seems to be down!"
+        err_msg = "The host seems to be down! (" 
+        err_msg += str(e.args[0]).split("] ")[1] 
+        err_msg += ")."
         print settings.print_critical_msg(err_msg)
         sys.exit(0)
         
@@ -853,7 +895,13 @@ if __name__ == '__main__':
       sys.stdout.flush()
       if not os.path.exists(bulkfile):
         print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
-        err_msg = "It seems that the '" + bulkfile + "' file, does not exists."
+        err_msg = "It seems that the '" + os.path.split(bulkfile)[1] + "' file, does not exists."
+        sys.stdout.write(settings.print_critical_msg(err_msg) + "\n")
+        sys.stdout.flush()
+        sys.exit(0)
+      elif os.stat(bulkfile).st_size == 0:
+        print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
+        err_msg = "It seems that the '" + bulkfile + "' file, is empty."
         sys.stdout.write(settings.print_critical_msg(err_msg) + "\n")
         sys.stdout.flush()
         sys.exit(0)
@@ -867,30 +915,40 @@ if __name__ == '__main__':
         # Removing empty elements from list.
         clean_bulkfile = [x for x in clean_bulkfile if x]
         for url in clean_bulkfile:
+          init_test = True
           if url == clean_bulkfile[-1]:
             settings.EOF = True
           # Reset the injection level
           if menu.options.level > 3:
             menu.options.level = 1
-          init_injection()
+          init_injection(url)
           try:
-            urllib2.urlopen(url)
-            info_msg = "Setting URL '" + url + "' for tests. "  
-            print settings.print_info_msg(info_msg)
-            filename = logs_filename_creation()
-            main(filename, url)
+            response, init_test = url_response(url, init_test)
+            if response != False:
+              init_test = False
+              filename = logs_filename_creation()
+              main(filename, url, init_test)
+
           except urllib2.HTTPError, err_msg:
-            warn_msg = "Skipping URL '" + url + "' - " + str(err_msg).replace(": "," (") + ")." 
+            if settings.VERBOSITY_LEVEL < 2:
+              print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
+            err_msg = str(err_msg).replace(": "," (") + ")." 
+            warn_msg = "Skipping URL '" + url + "' - " + err_msg
             print settings.print_warning_msg(warn_msg)
             if settings.EOF:
               print "" 
+
           except urllib2.URLError, err_msg:
-            warn_msg = "Skipping URL '" + url + "' - " + str(err_msg.args[0]).split("] ")[1] + ")." 
+            if settings.VERBOSITY_LEVEL < 2:
+              print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
+            err_msg = str(err_msg.args[0]).split("] ")[1] + "." 
+            warn_msg = "Skipping URL '" + url + "' - " + err_msg
             print settings.print_critical_msg(warn_msg)
             if settings.EOF:
-              print ""  
+              print "" 
 
     else:
+      init_test = True
       # Check if option is "--url" for single url test.
       if menu.options.sitemap_url:
         url = menu.options.sitemap_url
@@ -898,7 +956,7 @@ if __name__ == '__main__':
         url = menu.options.url
 
       filename = logs_filename_creation()
-      main(filename, url)
+      main(filename, url, init_test)
 
   except KeyboardInterrupt: 
     abort_msg = "User aborted procedure "

