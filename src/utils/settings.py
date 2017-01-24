@@ -29,14 +29,14 @@ INFO_SIGN =  Style.RESET_ALL + "[" + Fore.BLUE + Style.BRIGHT + "*" + Style.RESE
 QUESTION_SIGN =  Style.RESET_ALL + "[" + Style.BRIGHT + Fore.MAGENTA + "?" + Style.RESET_ALL + "] "
 WARNING_SIGN =  "[" + Fore.YELLOW  + "!" + Style.RESET_ALL + "] " + Fore.YELLOW + "Warning: "
 WARNING_BOLD_SIGN =  "[" + Style.BRIGHT + Fore.YELLOW  + "!" + Style.RESET_ALL + "] " + Style.BRIGHT + Fore.YELLOW + "Warning: "
-ERROR_SIGN =  "[" + Fore.RED + Style.BRIGHT + "x" + Style.RESET_ALL  + "] " + Fore.RED 
-ABORTION_SIGN =  "[" + Fore.RED + Style.BRIGHT + "x" + Style.RESET_ALL  + "] " + Fore.RED 
+ERROR_SIGN =  "[" + Fore.RED + Style.BRIGHT + "x" + Style.RESET_ALL  + "] " + Fore.RED + "Error: "
 CRITICAL_SIGN =  Back.RED + "[x] Critical: "
 PAYLOAD_SIGN =  "    |_ " + Fore.CYAN
 TRAFFIC_SIGN =  "    |_ " + Back.MAGENTA
 HTTP_CONTENT_SIGN = Fore.MAGENTA
 CHECK_SIGN =  "[" + Fore.BLUE + Style.BRIGHT + "*" + Style.RESET_ALL  + "] " + "Checking "
 SUB_CONTENT_SIGN =  "    [" + Fore.GREY + Style.BRIGHT + "~" + Style.RESET_ALL  + "] "
+ABORTION_SIGN =  ERROR_SIGN 
 
 # Print error message
 def print_error_msg(err_msg):
@@ -106,7 +106,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "1.7.18"
+VERSION_NUM = "1.7.19"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"

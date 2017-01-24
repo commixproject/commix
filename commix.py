@@ -901,7 +901,7 @@ if __name__ == '__main__':
         sys.exit(0)
       elif os.stat(bulkfile).st_size == 0:
         print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
-        err_msg = "It seems that the '" + bulkfile + "' file, is empty."
+        err_msg = "It seems that the '" + os.path.split(bulkfile)[1] + "' file, is empty."
         sys.stdout.write(settings.print_critical_msg(err_msg) + "\n")
         sys.stdout.flush()
         sys.exit(0)
