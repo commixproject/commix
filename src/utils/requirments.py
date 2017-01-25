@@ -12,7 +12,7 @@ the Free Software Foundation, either version 3 of the License, or
 
 For more see the file 'readme/COPYING' for copying permission.
 """
-
+import os
 import subprocess
 
 """
@@ -20,8 +20,9 @@ Check for requirments.
 """
 def do_check(requirment):
   try:
-    # pipe output to /dev/null for silence
-    null = open("/dev/null", "w")
+    # Pipe output to the file path of the null device, for silence. 
+    # i.e '/dev/null' for POSIX, 'nul' for Windows
+    null = open(os.devnull,"w")
     subprocess.Popen(requirment, stdout=null, stderr=null)
     null.close()
     return True
