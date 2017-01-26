@@ -811,6 +811,7 @@ def main(filename, url, init_test):
 
 if __name__ == '__main__':
   try:
+
     # Check if defined "--version" option.
     if menu.options.version:
       version.show_version()
@@ -818,12 +819,6 @@ if __name__ == '__main__':
 
     # Checkall the banner
     menu.banner()
-    
-    # Local IP address
-    if not menu.options.offline:
-      settings.LOCAL_HTTP_IP = simple_http_server.grab_ip_addr()
-    else:
-      settings.LOCAL_HTTP_IP = None  
 
     # Check python version number.
     version.python_version()
@@ -842,7 +837,21 @@ if __name__ == '__main__':
     if menu.options.install:
       install.installer()
       sys.exit(0)
-    
+
+    # Check for missing mandatory option(s).
+    if not any((menu.options.url, menu.options.logfile, menu.options.bulkfile, menu.options.requestfile, \
+      menu.options.sitemap_url, menu.options.update, menu.options.noncore_dependencies)):
+      err_msg = "Missing a mandatory option (-u, -l, -m, -r or -x). "
+      err_msg += "Use -h for help."
+      print settings.print_critical_msg(err_msg)
+      sys.exit(0)
+
+    # Local IP address
+    if not menu.options.offline:
+      settings.LOCAL_HTTP_IP = simple_http_server.grab_ip_addr()
+    else:
+      settings.LOCAL_HTTP_IP = None  
+
     # Check arguments
     if len(sys.argv) == 1:
       menu.parser.print_help()

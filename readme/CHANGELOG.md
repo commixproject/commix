@@ -1,4 +1,5 @@
 ## Version 1.7 (upcoming)
+* Fixed: Minor improvement for checking missing mandatory option(s).
 * Fixed: Minor improvement regarding the file path of the null device.
 * Fixed: Minor improvement regarding automated scan level increasing.
 * Fixed: Improvement regarding skipping the testing of problematic URL(s) and proceeding with next ones (in case of scanning multiple targets). 
