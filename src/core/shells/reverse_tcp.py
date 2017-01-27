@@ -510,8 +510,14 @@ def reverse_tcp_options():
   Type '""" + Style.BRIGHT + """2""" + Style.RESET_ALL + """' for other reverse TCP shells.
 
 commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp""" + Style.RESET_ALL + """) > """)
+
+    if reverse_tcp_option.lower() == "reverse_tcp": 
+      warn_msg = "You are already into the '" + reverse_tcp_option.lower() + "' mode."
+      print settings.print_warning_msg(warn_msg)
+      continue
+
     # Option 1 - Netcat shell
-    if reverse_tcp_option == '1' :
+    elif reverse_tcp_option == '1' :
       reverse_tcp_option = netcat_version()
       if reverse_tcp_option.lower() not in settings.SHELL_OPTIONS:
         shell_success()
@@ -527,6 +533,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp""" + Style.RESET_ALL + """
         shell_success()
         break
       elif reverse_tcp_option.lower() in settings.SHELL_OPTIONS:
+        print reverse_tcp_option
         return reverse_tcp_option
       else:
         pass 
@@ -565,6 +572,8 @@ def configure_reverse_tcp():
       continue
     elif option.lower() == "quit": 
       sys.exit(0)
+    elif len(settings.LPORT) != 0 and len(settings.LHOST) != 0:
+      break 
     elif option[0:3].lower() == "set":
         if option[4:9].lower() == "lhost":
           if check_lhost(option[10:]):

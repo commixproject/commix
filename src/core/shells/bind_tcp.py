@@ -411,8 +411,14 @@ def bind_tcp_options():
   Type '""" + Style.BRIGHT + """2""" + Style.RESET_ALL + """' for other bind TCP shells.
 
 commix(""" + Style.BRIGHT + Fore.RED + """bind_tcp""" + Style.RESET_ALL + """) > """)
+
+    if bind_tcp_option.lower() == "bind_tcp": 
+      warn_msg = "You are already into the '" + bind_tcp_option.lower() + "' mode."
+      print settings.print_warning_msg(warn_msg)
+      continue
+
     # Option 1 - Netcat shell
-    if bind_tcp_option == '1' :
+    elif bind_tcp_option == '1' :
       bind_tcp_option = netcat_version()
       if bind_tcp_option.lower() not in settings.SHELL_OPTIONS:
         shell_success()
@@ -471,6 +477,8 @@ def configure_bind_tcp():
       continue
     elif option.lower() == "quit": 
       sys.exit(0)
+    elif len(settings.LPORT) != 0 and len(settings.RHOST) != 0:
+      break 
     elif option[0:3].lower() == "set":
         if option[4:9].lower() == "rhost":
           if check_rhost(option[10:]):
