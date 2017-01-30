@@ -114,7 +114,8 @@ def reverse_tcp_config(separator, TAG, cmd, prefix, suffix, whitespace, http_req
         settings.REVERSE_TCP = False
       elif result == 3:
         settings.REVERSE_TCP = False
-        reverse_tcp_config(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, os_shell_option, go_back, go_back_again)  
+        bind_tcp_config(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, os_shell_option, go_back, go_back_again)
+        #reverse_tcp_config(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, os_shell_option, go_back, go_back_again)  
       return go_back, go_back_again
 
     # execute reverse TCP shell  

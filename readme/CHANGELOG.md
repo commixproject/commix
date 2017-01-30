@@ -1,4 +1,5 @@
 ## Version 1.7 (upcoming)
+* Revised: Minor improvements regarding "reverse_tcp" and "bind_tcp" shell options.
 * Fixed: Minor improvement for checking missing mandatory option(s).
 * Fixed: Minor improvement regarding the file path of the null device.
 * Fixed: Minor improvement regarding automated scan level increasing.

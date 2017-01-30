@@ -23,6 +23,28 @@ from src.utils import menu
 from src.utils import settings
 from src.thirdparty.colorama import Fore, Back, Style, init
 
+"""
+Check for available shell options.
+"""
+def shell_options(option):
+  if option.lower() == "bind_tcp":
+    warn_msg = "You are already into the '" + option.lower() + "' mode."
+    print settings.print_warning_msg(warn_msg)
+  elif option.lower() == "?": 
+    menu.reverse_tcp_options()
+  elif option.lower() == "quit": 
+    sys.exit(0)
+  elif option[0:3].lower() == "set":
+    if option[4:9].lower() == "rhost":
+      check_lhost(option[10:])
+    if option[4:9].lower() == "lhost":
+      err_msg =  "The '" + option[4:9].upper() + "' option, is not "
+      err_msg += "usable for 'bind_tcp' mode. Use 'RHOST' option."
+      print settings.print_error_msg(err_msg)  
+    if option[4:9].lower() == "lport":
+      check_lport(option[10:])
+  else:
+    return option
 
 """
 Success msg.
@@ -170,20 +192,11 @@ commix(""" + Style.BRIGHT + Fore.RED + """bind_tcp_netcat""" + Style.RESET_ALL +
     elif nc_version == '3':
       nc_alternative = NETCAT_ALTERNATIVES[2]
       break
-    elif nc_version.lower() == "bind_tcp": 
-      warn_msg = "You are already into the '" + nc_version.lower() + "' mode."
-      print settings.print_warning_msg(warn_msg)
-      continue
-    elif nc_version.lower() == "?": 
-      menu.os_shell_options()
-      continue    
-    elif nc_version.lower() in settings.SHELL_OPTIONS:
-      return nc_version
-    elif nc_version[0:3].lower() == "set":
-      if nc_version[4:9].lower() == "rhost":
-        check_rhost(nc_version[10:])
-      if nc_version[4:9].lower() == "lport":
-        check_lport(nc_version[10:])
+    # Check for available shell options  
+    elif any(option in nc_version.lower() for option in settings.SHELL_OPTIONS):
+      if shell_options(nc_version):
+        return shell_options(nc_version)
+    # Invalid command    
     else:
       err_msg = "The '" + nc_version + "' option, is not valid."  
       print settings.print_error_msg(err_msg)
@@ -378,20 +391,11 @@ commix(""" + Style.BRIGHT + Fore.RED + """bind_tcp_other""" + Style.RESET_ALL + 
       except:
         print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
       break
-
-    elif other_shell.lower() == "bind_tcp":
-      warn_msg = "You are already into the '" + other_shell.lower() + "' mode."
-      print settings.print_warning_msg(warn_msg)
-      continue
-    elif other_shell.lower() in settings.SHELL_OPTIONS:
-      return other_shell
-    elif other_shell[0:3].lower() == "set":
-      if other_shell[4:9].lower() == "rhost":
-        check_rhost(other_shell[10:])
-      if other_shell[4:9].lower() == "lport":
-        check_lport(other_shell[10:])
-    elif other_shell.lower() == "quit": 
-      sys.exit(0)
+    # Check for available shell options  
+    elif any(option in other_shell.lower() for option in settings.SHELL_OPTIONS):
+      if shell_options(other_shell):
+        return shell_options(other_shell)
+    # Invalid option
     else:
       err_msg = "The '" + other_shell + "' option, is not valid."  
       print settings.print_error_msg(err_msg)
@@ -433,30 +437,16 @@ commix(""" + Style.BRIGHT + Fore.RED + """bind_tcp""" + Style.RESET_ALL + """) >
       if bind_tcp_option.lower() not in settings.SHELL_OPTIONS:
         shell_success()
         break
-      elif bind_tcp_option.lower() in settings.SHELL_OPTIONS:
-        return bind_tcp_option
-      else:
-        pass 
-    elif bind_tcp_option.lower() == "bind_tcp": 
-      warn_msg = "You are already into the '" + bind_tcp_option.lower() + "' mode."
-      print settings.print_warning_msg(warn_msg)
-      continue
-    elif bind_tcp_option.lower() == "?": 
-      menu.os_shell_options()
-      continue
-    elif bind_tcp_option.lower() == "quit": 
-      sys.exit(0)
-    elif bind_tcp_option.lower() in settings.SHELL_OPTIONS:
-      return bind_tcp_option
-    elif bind_tcp_option[0:3].lower() == "set":
-      if bind_tcp_option[4:9].lower() == "rhost":
-        check_rhost(bind_tcp_option[10:])
-      if bind_tcp_option[4:9].lower() == "lport":
-        check_lport(bind_tcp_option[10:])
+    # Check for available shell options    
+    elif any(option in bind_tcp_option.lower() for option in settings.SHELL_OPTIONS):
+      if shell_options(bind_tcp_option):
+        return shell_options(bind_tcp_option)
+    # Invalid option
     else:
-      err_msg = "The '" + bind_tcp_option + "' option, is not valid."
+      err_msg = "The '" + bind_tcp_option + "' option, is not valid."  
       print settings.print_error_msg(err_msg)
       continue
+
 
   return bind_tcp_option
 
