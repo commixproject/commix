@@ -14,6 +14,15 @@ For more see the file 'readme/COPYING' for copying permission.
 """
 
 import re
+import ssl
+try:
+  _create_unverified_https_context = ssl._create_unverified_context
+except AttributeError:
+  # Legacy Python that doesn't verify HTTPS certificates by default
+  pass
+else:
+  # Handle target environment that doesn't support HTTPS verification
+  ssl._create_default_https_context = _create_unverified_https_context
 import sys
 import base64
 import urllib2
@@ -115,7 +124,11 @@ def check_http_traffic(request):
 
   opener = urllib2.OpenerDirector()
   opener.add_handler(connection_handler())
-  response = opener.open(request)
+  try:
+    opener.open(request)
+  except:
+    pass  
+  response = urllib2.urlopen(request)
   # Check the HTTP response headers.
   http_response(response.info())
   # Check the HTTP response content.

@@ -22,18 +22,6 @@ import urllib2
 
 from socket import error as SocketError
 
-# Disable SSL verification.
-# For python versions 2.7.9 or above.
-import ssl
-try:
-  _create_unverified_https_context = ssl._create_unverified_context
-except AttributeError:
-  # Legacy Python that doesn't verify HTTPS certificates by default
-  pass
-else:
-  # Handle target environment that doesn't support HTTPS verification
-  ssl._create_default_https_context = _create_unverified_https_context
-
 from urlparse import urlparse
 from os.path import splitext
 
@@ -68,6 +56,7 @@ Examine the request
 """
 def examine_request(request):
   try:
+    headers.check_http_traffic(request)
     # Check if defined any HTTP Proxy (--proxy option).
     if menu.options.proxy:
       response = proxy.use_proxy(request)
@@ -126,17 +115,14 @@ def init_request(url):
     request = urllib2.Request(url, menu.options.data)
   else:
     request = urllib2.Request(url)
-
   headers.do_check(request)  
   #headers.check_http_traffic(request)
   # Check if defined any HTTP Proxy (--proxy option).
   if menu.options.proxy:
     proxy.do_check(url)
-  
   # Check if defined Tor (--tor option).
   elif menu.options.tor:
     tor.do_check()
-
   return request
 
 def url_response(url, init_test):
@@ -148,7 +134,6 @@ def url_response(url, init_test):
     sys.stdout.flush()
     if settings.VERBOSITY_LEVEL >= 2:
       print ""
-  headers.check_http_traffic(request)
   response = examine_request(request)
   return response, init_test
 
