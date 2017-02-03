@@ -1,4 +1,4 @@
-## Version 1.7 (upcoming)
+## Version 1.7 (2017-02-03)
 * Fixed: Minor improvement regarding unverified SSL context(s).
 * Added: New values ("URIPATH", "SRVPORT") have been added to "Set" option.
 * Revised: Minor improvements regarding "reverse_tcp" and "bind_tcp" shell options.
