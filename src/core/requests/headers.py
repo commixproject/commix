@@ -120,19 +120,21 @@ def check_http_traffic(request):
         return self.do_open(do_connection, req)
     else:      
       def http_open(self, req):
-        return self.do_open(do_connection, req)      
-
-  opener = urllib2.OpenerDirector()
-  opener.add_handler(connection_handler())
-  try:
-    opener.open(request)
-  except:
-    pass  
+        return self.do_open(do_connection, req)
+           
+  if settings.REVERSE_TCP == False and settings.BIND_TCP == False:
+    opener = urllib2.OpenerDirector()
+    opener.add_handler(connection_handler())
+    try:
+      opener.open(request)
+    except:
+      pass  
   response = urllib2.urlopen(request)
   # Check the HTTP response headers.
   http_response(response.info())
   # Check the HTTP response content.
   http_response_content(response.read())
+  return response
 
 """
 Check for added headers.

@@ -1,3 +1,6 @@
+## Version 1.8 (upcoming)
+* Fixed: Minor improvement for not reopening meterpreter sessions (in case of user abortion).
+
 ## Version 1.7 (2017-02-03)
 * Fixed: Minor improvement regarding unverified SSL context(s).
 * Added: New values ("URIPATH", "SRVPORT") have been added to "Set" option.
