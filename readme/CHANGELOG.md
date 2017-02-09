@@ -1,4 +1,5 @@
 ## Version 1.8 (upcoming)
+* Fixed: Minor improvement for checking for established TCP connections.
 * Fixed: Minor improvement for not reopening meterpreter sessions (in case of user abortion).
 
 ## Version 1.7 (2017-02-03)

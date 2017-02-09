@@ -16,6 +16,7 @@ For more see the file 'readme/COPYING' for copying permission.
 import re
 import os
 import sys
+import time
 import urllib
 import urlparse
 
@@ -31,25 +32,48 @@ from src.core.injections.results_based.techniques.classic import cb_injector
 from src.core.injections.results_based.techniques.eval_based import eb_injector
 
 """
+Check for established connection
+"""
+def check_established_connection():
+  while True:
+    time.sleep(10)
+    lines = os.popen('netstat -anta').read().split("\n")
+    found = False
+    for line in lines:
+      if "ESTABLISHED" in line and settings.LPORT in line:
+        found = True
+        pass
+    if not found:
+      return 
+
+"""
 Execute the bind / reverse TCP shell
 """
 def execute_shell(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, os_shell_option):
   if settings.EVAL_BASED_STATE != False:
     # Command execution results.
+    start = time.time()
     response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
+    end = time.time()
+    diff = end - start
     # Evaluate injection results.
     shell = eb_injector.injection_results(response, TAG, cmd)
-
   else:
     whitespace = settings.WHITESPACE[0]
     # Command execution results.
+    start = time.time()
     response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
+    end = time.time()
+    diff = end - start
     # Evaluate injection results.
     shell = cb_injector.injection_results(response, TAG, cmd)
 
   if settings.VERBOSITY_LEVEL >= 1:
     print ""
 
+  if settings.REVERSE_TCP and int(diff) <= 5:
+    check_established_connection()
+  
   err_msg = "The " + os_shell_option.split("_")[0] + " "
   err_msg += os_shell_option.split("_")[1].upper() + " connection has failed!"
   print settings.print_critical_msg(err_msg)
