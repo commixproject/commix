@@ -1,4 +1,5 @@
 ## Version 1.8 (upcoming)
+* Added: Support for the Regsvr32.exe Application Whitelisting Bypass technique.
 * Fixed: Minor improvement for checking for established TCP connections.
 * Fixed: Minor improvement for not reopening meterpreter sessions (in case of user abortion).
 
