@@ -1,4 +1,23 @@
 ~~~~~~~~~~~~~~~~
+version 2.4.2
+~~~~~~~~~~~~~~~~
+
+* added shortened version of -window hidden to -w 1 which is shorthand for window hidden
+
+~~~~~~~~~~~~~~~~
+version 2.4.1
+~~~~~~~~~~~~~~~~
+
+* added shortened method for obfsucation
+
+~~~~~~~~~~~~~~~~
+version 2.4
+~~~~~~~~~~~~~~~~
+
+* added better handling if msf or shellcode didn't get formatted properly
+* added a new technique for obfsucation that should not get picked up anymore and removes the need for -e or -ec
+
+~~~~~~~~~~~~~~~~
 version 2.3.5
 ~~~~~~~~~~~~~~~~
 
