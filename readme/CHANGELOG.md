@@ -1,4 +1,5 @@
 ## Version 1.8 (upcoming)
+* Added: New prefix ("'%26") and suffix ("%26'") have been added.
 * Fixed: Removal of unnecessary command substitution in semiblind ("file-based") technique.
 * Updated: The Unicorn tool has been updated to version 2.4.2.
 * Added: Support for the Regsvr32.exe Application Whitelisting Bypass technique.
