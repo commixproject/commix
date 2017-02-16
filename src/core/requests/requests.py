@@ -696,46 +696,55 @@ def custom_header_injection(url, vuln_parameter, payload):
 Target's charset detection
 """
 def charset_detection(response):
-  charset_detected = False
-  if settings.VERBOSITY_LEVEL >= 1:
-    info_msg = "Identifing the indicated web-page charset... " 
-    sys.stdout.write(settings.print_info_msg(info_msg))
-    sys.stdout.flush()
-  try:
-    # Detecting charset
-    charset = response.headers.getparam('charset')
-    if len(charset) != 0 :         
-      charset_detected = True
-    else:
-      content = re.findall(r";charset=(.*)\"", html_data)
-      if len(content) != 0 :
-        charset = content
+  if not menu.options.charset:
+    charset_detected = False
+    if settings.VERBOSITY_LEVEL >= 1:
+      info_msg = "Identifing the indicated web-page charset... " 
+      sys.stdout.write(settings.print_info_msg(info_msg))
+      sys.stdout.flush()
+    try:
+      # Detecting charset
+      charset = response.headers.getparam('charset')
+      if len(charset) != 0 :         
         charset_detected = True
       else:
-         # Check if HTML5 format
-        charset = re.findall(r"charset=['\"](.*?)['\"]", html_data) 
-      if len(charset) != 0 :
-        charset_detected = True
-    # Check the identifyied charset
-    if charset_detected :
-      settings.DEFAULT_CHARSET = charset
-      if settings.VERBOSITY_LEVEL >= 1:
-        print "[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]"
-      settings.CHARSET = charset.lower()
-      if settings.CHARSET.lower() not in settings.CHARSET_LIST:
-        warn_msg = "The indicated web-page charset "  + settings.CHARSET + " seems unknown."
-        print settings.print_warning_msg(warn_msg)
-      else:
+        content = re.findall(r";charset=(.*)\"", html_data)
+        if len(content) != 0 :
+          charset = content
+          charset_detected = True
+        else:
+           # Check if HTML5 format
+          charset = re.findall(r"charset=['\"](.*?)['\"]", html_data) 
+        if len(charset) != 0 :
+          charset_detected = True
+      # Check the identifyied charset
+      if charset_detected :
+        settings.DEFAULT_CHARSET = charset
         if settings.VERBOSITY_LEVEL >= 1:
-          success_msg = "The indicated web-page charset appears to be " 
-          success_msg += settings.CHARSET + Style.RESET_ALL + "."
-          print settings.print_success_msg(success_msg)
-    else:
+          print "[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]"
+        settings.CHARSET = charset.lower()
+        if settings.CHARSET.lower() not in settings.CHARSET_LIST:
+          warn_msg = "The indicated web-page charset "  + settings.CHARSET + " seems unknown."
+          print settings.print_warning_msg(warn_msg)
+        else:
+          if settings.VERBOSITY_LEVEL >= 1:
+            success_msg = "The indicated web-page charset appears to be " 
+            success_msg += settings.CHARSET + Style.RESET_ALL + "."
+            print settings.print_success_msg(success_msg)
+      else:
+        pass
+    except:
       pass
-  except:
-    pass
-  if charset_detected == False and settings.VERBOSITY_LEVEL >= 1:
-    print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
+    if charset_detected == False and settings.VERBOSITY_LEVEL >= 1:
+      print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
+  else:
+    settings.CHARSET = menu.options.charset
+    if settings.CHARSET.lower() not in settings.CHARSET_LIST:
+      err_msg = "The user-defined charset '"  + settings.CHARSET + "' seems unknown. "
+      err_msg += "Please visit 'http://docs.python.org/library/codecs.html#standard-encodings' "
+      err_msg += "to get the full list of supported charsets."
+      print settings.print_critical_msg(err_msg)
+      sys.exit(0)
 
 # Perform target page reload (if it is required).
 def url_reload(url, delay):

@@ -104,6 +104,12 @@ general.add_option("--batch",
                 default=False,
                 help="Never ask for user input, use the default behaviour.")
 
+general.add_option("--charset",
+                action="store",
+                dest="charset",
+                default=None,
+                help="Force character encoding used for data retrieval.")
+
 # Target options
 target = OptionGroup(parser, Style.BRIGHT + "Target" + Style.RESET_ALL, 
                      "This options has to be provided, to define the target URL. ")
