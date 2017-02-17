@@ -47,6 +47,27 @@ from src.core.injections.controller import checks
 from src.core.injections.controller import parser
 from src.core.injections.controller import controller
 
+readline_error = False
+if settings.IS_WINDOWS:
+  try:
+    import readline
+  except ImportError:
+    try:
+      import pyreadline as readline
+    except ImportError:
+      readline_error = True
+else:
+  try:
+    import readline
+    if getattr(readline, '__doc__', '') is not None and 'libedit' in getattr(readline, '__doc__', ''):
+      import gnureadline as readline
+  except ImportError:
+    try:
+      import gnureadline as readline
+    except ImportError:
+      readline_error = True
+pass
+
 # Use Colorama to make Termcolor work on Windows too :)
 if settings.IS_WINDOWS:
   init()
@@ -807,6 +828,10 @@ if __name__ == '__main__':
 
     # Check python version number.
     version.python_version()
+
+    if readline_error :
+      checks.no_readline_module()
+      sys.exit(0)
 
     # Check if defined "--dependencies" option. 
     # For checking (non-core) third party dependenices.

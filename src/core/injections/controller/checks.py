@@ -204,16 +204,19 @@ def time_based_separators(separator, http_request_method):
 Information message if platform does not have 
 GNU 'readline' module installed.
 """
+"""
+Information message if platform does not have 
+GNU 'readline' module installed.
+"""
 def no_readline_module():
-  warn_msg =  "It seems that your platform does "
-  warn_msg += "not have GNU 'readline' module installed."
-  warn_msg += " For tab-completion support in your shell, download the"
+  err_msg =  "It seems that your platform does "
+  err_msg += "not have GNU 'readline' module installed."
+  err_msg += " Download the"
   if settings.IS_WINDOWS:
-    warn_msg += " 'pyreadline' module (https://pypi.python.org/pypi/pyreadline).\n"
+    err_msg += " 'pyreadline' module (https://pypi.python.org/pypi/pyreadline)."
   else:  
-    warn_msg += " 'gnureadline' module (https://pypi.python.org/pypi/gnureadline).\n" 
-  print settings.print_warning_msg(warn_msg) 
-
+    err_msg += " 'gnureadline' module (https://pypi.python.org/pypi/gnureadline)." 
+  print settings.print_critical_msg(err_msg) 
 """
 Check if PowerShell is enabled.
 """

@@ -46,20 +46,27 @@ from src.core.injections.semiblind.techniques.file_based import fb_file_access
 from src.core.injections.semiblind.techniques.tempfile_based import tfb_handler
 
 readline_error = False
-try:
-  import readline
-except ImportError:
-  if settings.IS_WINDOWS:
+if settings.IS_WINDOWS:
+  try:
+    import readline
+  except ImportError:
     try:
       import pyreadline as readline
     except ImportError:
       readline_error = True
-  else:
+else:
+  try:
+    import readline
+    if getattr(readline, '__doc__', '') is not None and 'libedit' in getattr(readline, '__doc__', ''):
+      import gnureadline as readline
+  except ImportError:
     try:
       import gnureadline as readline
     except ImportError:
       readline_error = True
-  pass
+pass
+
+
 
 """
 The "file-based" technique on semiblind OS command injection.

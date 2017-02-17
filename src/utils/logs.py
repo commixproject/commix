@@ -20,7 +20,6 @@ import time
 import urllib
 import sqlite3
 import datetime
-import readline
 
 from src.utils import menu
 from src.utils import settings
@@ -29,15 +28,20 @@ from src.utils import session_handler
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 readline_error = False
-try:
-  import readline
-except ImportError:
-  if settings.IS_WINDOWS:
+if settings.IS_WINDOWS:
+  try:
+    import readline
+  except ImportError:
     try:
       import pyreadline as readline
     except ImportError:
       readline_error = True
-  else:
+else:
+  try:
+    import readline
+    if getattr(readline, '__doc__', '') is not None and 'libedit' in getattr(readline, '__doc__', ''):
+      import gnureadline as readline
+  except ImportError:
     try:
       import gnureadline as readline
     except ImportError:

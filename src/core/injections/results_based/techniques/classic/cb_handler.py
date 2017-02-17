@@ -45,20 +45,27 @@ from src.core.injections.results_based.techniques.classic import cb_enumeration
 from src.core.injections.results_based.techniques.classic import cb_file_access
 
 readline_error = False
-try:
-  import readline
-except ImportError:
-  if settings.IS_WINDOWS:
+if settings.IS_WINDOWS:
+  try:
+    import readline
+  except ImportError:
     try:
       import pyreadline as readline
     except ImportError:
       readline_error = True
-  else:
+else:
+  try:
+    import readline
+    if getattr(readline, '__doc__', '') is not None and 'libedit' in getattr(readline, '__doc__', ''):
+      import gnureadline as readline
+  except ImportError:
     try:
       import gnureadline as readline
     except ImportError:
       readline_error = True
-  pass
+pass
+
+
 
 """
 The "classic" technique on result-based OS command injection.
