@@ -68,6 +68,8 @@ else:
       readline_error = True
 pass
 
+
+
 # Use Colorama to make Termcolor work on Windows too :)
 if settings.IS_WINDOWS:
   init()
@@ -877,9 +879,9 @@ if __name__ == '__main__':
     else:  
       settings.VERBOSITY_LEVEL = menu.options.verbose
 
-    # Check if defined "--delay" option.
-    if menu.options.delay > "0":
-        settings.DELAY = menu.options.delay
+    # Check if defined "--timesec" option.
+    if menu.options.timesec > "0":
+        settings.TIMESEC = menu.options.timesec
 
     # Define the level of tests to perform.
     if menu.options.level > 3:

@@ -79,23 +79,23 @@ def clear(url):
 """
 Import successful injection points to session file.
 """
-def injection_point_importation(url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response, delay, how_long, output_length, is_vulnerable):
+def injection_point_importation(url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response, timesec, how_long, output_length, is_vulnerable):
   try:  
     conn = sqlite3.connect(settings.SESSION_FILE)
     conn.execute("CREATE TABLE IF NOT EXISTS " + table_name(url) + "_ip" + \
                  "(id INTEGER PRIMARY KEY, url VARCHAR, technique VARCHAR, injection_type VARCHAR, separator VARCHAR," \
                  "shell VARCHAR, vuln_parameter VARCHAR, prefix VARCHAR, suffix VARCHAR, "\
                  "TAG VARCHAR, alter_shell VARCHAR, payload VARCHAR, http_header VARCHAR, http_request_method VARCHAR, url_time_response INTEGER, "\
-                 "delay INTEGER, how_long INTEGER, output_length INTEGER, is_vulnerable VARCHAR);")
+                 "timesec INTEGER, how_long INTEGER, output_length INTEGER, is_vulnerable VARCHAR);")
 
     conn.execute("INSERT INTO " + table_name(url) + "_ip(url, technique, injection_type, separator, "\
                  "shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_header, http_request_method, "\
-                 "url_time_response, delay, how_long, output_length, is_vulnerable) "\
+                 "url_time_response, timesec, how_long, output_length, is_vulnerable) "\
                  "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", \
                  (str(url), str(technique), str(injection_type), \
                  str(separator), str(shell), str(vuln_parameter), str(prefix), str(suffix), \
                  str(TAG), str(alter_shell), str(payload), str(settings.HTTP_HEADER), str(http_request_method), \
-                 int(url_time_response), int(delay), int(how_long), \
+                 int(url_time_response), int(timesec), int(how_long), \
                  int(output_length), str(is_vulnerable)))
     conn.commit()
     conn.close()
@@ -218,11 +218,11 @@ def injection_point_exportation(url, http_request_method):
           payload = session[11]
           http_request_method = session[13]
           url_time_response = session[14]
-          delay = session[15]
+          timesec = session[15]
           how_long = session[16]
           output_length = session[17]
           is_vulnerable = session[18]
-          return url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response, delay, how_long, output_length, is_vulnerable
+          return url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response, timesec, how_long, output_length, is_vulnerable
     else:
       no_such_table = True
       pass

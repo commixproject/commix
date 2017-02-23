@@ -242,7 +242,7 @@ def injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_req
 """
 Find the URL directory.
 """
-def injection_output(url, OUTPUT_TEXTFILE, delay):
+def injection_output(url, OUTPUT_TEXTFILE, timesec):
   if menu.options.srv_root_dir:
 
     # Check for Apache server root directory.
@@ -305,10 +305,10 @@ def injection_output(url, OUTPUT_TEXTFILE, delay):
 """
 Command execution results.
 """
-def injection_results(url, OUTPUT_TEXTFILE, delay):
+def injection_results(url, OUTPUT_TEXTFILE, timesec):
 
   #Find the directory.
-  output = injection_output(url, OUTPUT_TEXTFILE, delay)
+  output = injection_output(url, OUTPUT_TEXTFILE, timesec)
 
   # Check if defined extra headers.
   request = urllib2.Request(output)

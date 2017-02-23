@@ -48,6 +48,7 @@ else:
       readline_error = True
 pass
 
+
 """
 1. Generate injection logs (logs.txt) in "./ouput" file.
 2. Check for logs updates and apply if any!

@@ -69,7 +69,7 @@ def check_for_stored_levels(url, http_request_method):
 """
 Proceed to the injection process for the appropriate parameter.
 """
-def injection_proccess(url, check_parameter, http_request_method, filename, delay):
+def injection_proccess(url, check_parameter, http_request_method, filename, timesec):
 
   # User-Agent Injection / Referer Injection / Custom header Injection 
   if check_parameter.startswith(" "):
@@ -94,7 +94,7 @@ def injection_proccess(url, check_parameter, http_request_method, filename, dela
     print settings.print_info_msg(info_msg)
 
   # Estimating the response time (in seconds)
-  delay, url_time_response = requests.estimate_response_time(url, delay)
+  timesec, url_time_response = requests.estimate_response_time(url, timesec)
 
   skip_code_injections = False
   skip_command_injections = False
@@ -108,7 +108,7 @@ def injection_proccess(url, check_parameter, http_request_method, filename, dela
   # Check if it is vulnerable to classic command injection technique.
   if not menu.options.tech or "c" in menu.options.tech:
     settings.CLASSIC_STATE = None
-    if cb_handler.exploitation(url, delay, filename, http_request_method) != False:
+    if cb_handler.exploitation(url, timesec, filename, http_request_method) != False:
       if not menu.options.tech or "e" in menu.options.tech:
         if not menu.options.batch:
           settings.CLASSIC_STATE = True
@@ -138,7 +138,7 @@ def injection_proccess(url, check_parameter, http_request_method, filename, dela
   if not menu.options.tech or "e" in menu.options.tech:
     if not skip_code_injections:
       settings.EVAL_BASED_STATE = None
-      if eb_handler.exploitation(url, delay, filename, http_request_method) != False:
+      if eb_handler.exploitation(url, timesec, filename, http_request_method) != False:
         if not menu.options.batch:
           settings.EVAL_BASED_STATE = True
           question_msg = "Due to resuts, "
@@ -168,7 +168,7 @@ def injection_proccess(url, check_parameter, http_request_method, filename, dela
     # Check if it is vulnerable to time-based blind command injection technique.
     if not menu.options.tech or "t" in menu.options.tech:
       settings.TIME_BASED_STATE = None
-      if tb_handler.exploitation(url, delay, filename, http_request_method, url_time_response) != False:
+      if tb_handler.exploitation(url, timesec, filename, http_request_method, url_time_response) != False:
         settings.TIME_BASED_STATE = True
       else:
         settings.TIME_BASED_STATE = False
@@ -176,7 +176,7 @@ def injection_proccess(url, check_parameter, http_request_method, filename, dela
     # Check if it is vulnerable to file-based semiblind command injection technique.
     if not menu.options.tech or "f" in menu.options.tech and not skip_command_injections:
       settings.FILE_BASED_STATE = None
-      if fb_handler.exploitation(url, delay, filename, http_request_method, url_time_response) != False:
+      if fb_handler.exploitation(url, timesec, filename, http_request_method, url_time_response) != False:
         settings.FILE_BASED_STATE = True
       else:
         settings.FILE_BASED_STATE = False
@@ -193,7 +193,7 @@ def injection_proccess(url, check_parameter, http_request_method, filename, dela
 """
 Inject HTTP headers (User-agent / Referer) (if level > 2).
 """
-def http_headers_injection(url, http_request_method, filename, delay):
+def http_headers_injection(url, http_request_method, filename, timesec):
 
   # User-Agent header injection
   user_agent = menu.options.agent
@@ -203,7 +203,7 @@ def http_headers_injection(url, http_request_method, filename, delay):
     check_parameter = header_name = " User-Agent"
     settings.HTTP_HEADER = header_name[1:].replace("-","").lower()
     check_for_stored_sessions(url, http_request_method)
-    injection_proccess(url, check_parameter, http_request_method, filename, delay)
+    injection_proccess(url, check_parameter, http_request_method, filename, timesec)
   settings.USER_AGENT_INJECTION = False
   menu.options.agent = user_agent
 
@@ -214,13 +214,13 @@ def http_headers_injection(url, http_request_method, filename, delay):
     check_parameter =  header_name = " Referer"
     settings.HTTP_HEADER = header_name[1:].lower()
     check_for_stored_sessions(url, http_request_method)
-    injection_proccess(url, check_parameter, http_request_method, filename, delay)
+    injection_proccess(url, check_parameter, http_request_method, filename, timesec)
     settings.REFERER_INJECTION = False 
 
 """
 Check for stored injections on User-agent / Referer headers (if level > 2).
 """
-def stored_http_header_injection(url, check_parameter, http_request_method, filename, delay):
+def stored_http_header_injection(url, check_parameter, http_request_method, filename, timesec):
 
   for check_parameter in settings.HTTP_HEADERS:
     settings.HTTP_HEADER = check_parameter
@@ -231,16 +231,16 @@ def stored_http_header_injection(url, check_parameter, http_request_method, file
       else:  
         menu.options.agent = settings.INJECT_TAG
         settings.USER_AGENT_INJECTION = True
-      injection_proccess(url, check_parameter, http_request_method, filename, delay)
+      injection_proccess(url, check_parameter, http_request_method, filename, timesec)
 
   if not settings.LOAD_SESSION:
-    http_headers_injection(url, http_request_method, filename, delay)
+    http_headers_injection(url, http_request_method, filename, timesec)
 
 
 """
 Cookie injection 
 """
-def cookie_injection(url, http_request_method, filename, delay):
+def cookie_injection(url, http_request_method, filename, timesec):
 
   settings.COOKIE_INJECTION = True
 
@@ -283,13 +283,13 @@ def cookie_injection(url, http_request_method, filename, delay):
                 menu.options.cookie = cookie_parameters[param_counter]
                 # Check for session file 
                 check_for_stored_sessions(url, http_request_method)
-                injection_proccess(url, check_parameter, http_request_method, filename, delay) 
+                injection_proccess(url, check_parameter, http_request_method, filename, timesec) 
               param_counter += 1
             break  
         else:
           # Check for session file 
           check_for_stored_sessions(url, http_request_method)
-          injection_proccess(url, check_parameter, http_request_method, filename, delay) 
+          injection_proccess(url, check_parameter, http_request_method, filename, timesec) 
  
   if settings.COOKIE_INJECTION == True:
     # Restore cookie value
@@ -300,7 +300,7 @@ def cookie_injection(url, http_request_method, filename, delay):
 """
 Check if HTTP Method is GET.
 """ 
-def get_request(url, http_request_method, filename, delay):
+def get_request(url, http_request_method, filename, timesec):
 
   #if not settings.COOKIE_INJECTION:
   found_url = parameters.do_GET_check(url)
@@ -331,17 +331,17 @@ def get_request(url, http_request_method, filename, delay):
                 url = found_url[url_counter]
                 # Check for session file 
                 check_for_stored_sessions(url, http_request_method)
-                injection_proccess(url, check_parameter, http_request_method, filename, delay)
+                injection_proccess(url, check_parameter, http_request_method, filename, timesec)
               url_counter += 1
             break
           else:
             # Check for session file 
             check_for_stored_sessions(url, http_request_method)
-            injection_proccess(url, check_parameter, http_request_method, filename, delay)
+            injection_proccess(url, check_parameter, http_request_method, filename, timesec)
         else:
           # Check for session file 
           check_for_stored_sessions(url, http_request_method)
-          injection_proccess(url, check_parameter, http_request_method, filename, delay)
+          injection_proccess(url, check_parameter, http_request_method, filename, timesec)
 
   # Enable Cookie Injection
   if menu.options.level > settings.DEFAULT_INJECTION_LEVEL and menu.options.cookie:
@@ -350,7 +350,7 @@ def get_request(url, http_request_method, filename, delay):
 """
 Check if HTTP Method is POST.
 """ 
-def post_request(url, http_request_method, filename, delay):
+def post_request(url, http_request_method, filename, timesec):
 
   # Check if HTTP Method is POST.
   parameter = menu.options.data
@@ -390,17 +390,17 @@ def post_request(url, http_request_method, filename, delay):
             if check_parameter in "".join(settings.TEST_PARAMETER).split(","):
               menu.options.data = found_parameter[param_counter]           
               check_for_stored_sessions(url, http_request_method)
-              injection_proccess(url, check_parameter, http_request_method, filename, delay)
+              injection_proccess(url, check_parameter, http_request_method, filename, timesec)
             param_counter += 1
           break
         else:
           # Check for session file 
           check_for_stored_sessions(url, http_request_method)
-          injection_proccess(url, check_parameter, http_request_method, filename, delay)
+          injection_proccess(url, check_parameter, http_request_method, filename, timesec)
       else:
         # Check for session file 
         check_for_stored_sessions(url, http_request_method)
-        injection_proccess(url, check_parameter, http_request_method, filename, delay)
+        injection_proccess(url, check_parameter, http_request_method, filename, timesec)
 
   # Enable Cookie Injection
   if menu.options.level > settings.DEFAULT_INJECTION_LEVEL and menu.options.cookie:
@@ -411,7 +411,7 @@ Perform checks
 """
 def perform_checks(url, filename):
 
-  delay = settings.DELAY
+  timesec = settings.TIMESEC
   # Check if authentication is needed.
   if menu.options.auth_url and menu.options.auth_data:
     # Do the authentication process.
@@ -444,12 +444,12 @@ def perform_checks(url, filename):
   if menu.options.level >= settings.HTTP_HEADER_INJECTION_LEVEL:
     if settings.INJECTED_HTTP_HEADER == False :
       check_parameter = ""
-      stored_http_header_injection(url, check_parameter, http_request_method, filename, delay)
+      stored_http_header_injection(url, check_parameter, http_request_method, filename, timesec)
   else:
     # Enable Cookie Injection
     if menu.options.level > settings.DEFAULT_INJECTION_LEVEL:
       if menu.options.cookie:
-        cookie_injection(url, http_request_method, filename, delay)
+        cookie_injection(url, http_request_method, filename, timesec)
       else:
         warn_msg = "The HTTP Cookie header is not provided, "
         warn_msg += "so this test is going to be skipped."
@@ -460,15 +460,15 @@ def perform_checks(url, filename):
         check_parameter =  header_name = " " + settings.CUSTOM_HEADER_NAME
         settings.HTTP_HEADER = header_name[1:].lower()
         check_for_stored_sessions(url, http_request_method)
-        injection_proccess(url, check_parameter, http_request_method, filename, delay)
+        injection_proccess(url, check_parameter, http_request_method, filename, timesec)
         settings.CUSTOM_HEADER_INJECTION = None
         
       # Check if HTTP Method is GET.
       if not menu.options.data:
-        get_request(url, http_request_method, filename, delay)
+        get_request(url, http_request_method, filename, timesec)
       # Check if HTTP Method is POST.      
       else:
-        post_request(url, http_request_method, filename, delay)
+        post_request(url, http_request_method, filename, timesec)
 
   if settings.INJECTION_CHECKER == False:
     return False

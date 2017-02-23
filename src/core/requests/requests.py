@@ -33,7 +33,7 @@ from src.core.injections.controller import checks
 """
 Estimating the response time (in seconds).
 """
-def estimate_response_time(url, delay):
+def estimate_response_time(url, timesec):
   if settings.VERBOSITY_LEVEL >= 1:
     info_msg = "Estimating the target URL response time... "
     sys.stdout.write(settings.print_info_msg(info_msg))
@@ -81,16 +81,16 @@ def estimate_response_time(url, delay):
       warn_msg += " and/or possible corruptions over the extracted data"
     warn_msg += "."
     print settings.print_warning_msg(warn_msg)
-  if int(delay) == int(url_time_response):
-    delay = int(delay) + int(url_time_response)
+  if int(timesec) == int(url_time_response):
+    timesec = int(timesec) + int(url_time_response)
   else:
-    delay = int(delay)
+    timesec = int(timesec)
 
   # Against windows targets (for more stability), add one extra second delay.
   if settings.TARGET_OS == "win" :
-    delay = delay + 1
+    timesec = timesec + 1
 
-  return delay, url_time_response
+  return timesec, url_time_response
 
 """
 Get the response of the request
@@ -747,10 +747,10 @@ def charset_detection(response):
       sys.exit(0)
 
 # Perform target page reload (if it is required).
-def url_reload(url, delay):
-  if delay <= "5":
-    delay = 5
-    time.sleep(delay)
+def url_reload(url, timesec):
+  if timesec <= "5":
+    timesec = 5
+    time.sleep(timesec)
   response = urllib.urlopen(url)
   return response
 

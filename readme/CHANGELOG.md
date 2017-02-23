@@ -1,4 +1,5 @@
 ## Version 1.8 (upcoming)
+* Replaced: The "--delay" option has been replaced with "--time-sec" option.
 * Fixed: Minor improvement regarding gnureadline module for better support on MacOS X hosts.
 * Added: New option "--charset" that forces character encoding used for data retrieval.
 * Added: New prefix ("'%26") and suffix ("%26'") have been added.

@@ -74,7 +74,7 @@ The dynamic code evaluation (aka eval-based) technique.
 """
 The "eval-based" injection technique handler.
 """
-def eb_injection_handler(url, delay, filename, http_request_method):
+def eb_injection_handler(url, timesec, filename, http_request_method):
 
   counter = 1
   vp_flag = True
@@ -108,13 +108,13 @@ def eb_injection_handler(url, delay, filename, http_request_method):
           settings.EXPLOITATION_PHASE = False
           # If a previous session is available.
           if settings.LOAD_SESSION and session_handler.notification(url, technique, injection_type):
-            url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response, delay, how_long, output_length, is_vulnerable = session_handler.injection_point_exportation(url, http_request_method)
+            url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response, timesec, how_long, output_length, is_vulnerable = session_handler.injection_point_exportation(url, http_request_method)
             checks.check_for_stored_tamper(payload)
             
           if settings.RETEST == True:
             settings.RETEST = False
             from src.core.injections.results_based.techniques.classic import cb_handler
-            cb_handler.exploitation(url, delay, filename, http_request_method)
+            cb_handler.exploitation(url, timesec, filename, http_request_method)
             
           if not settings.LOAD_SESSION:
             i = i + 1
@@ -200,7 +200,7 @@ def eb_injection_handler(url, delay, filename, http_request_method):
       
               # Try target page reload (if it is required).
               if settings.URL_RELOAD:
-                response = requests.url_reload(url, delay)
+                response = requests.url_reload(url, timesec)
               # Evaluate test results.
               shell = eb_injector.injection_test_results(response, TAG, randvcalc)
 
@@ -297,7 +297,7 @@ def eb_injection_handler(url, delay, filename, http_request_method):
             print settings.SUB_CONTENT_SIGN + "Payload: " + re.sub("%20", " ", payload) + Style.RESET_ALL
             # Export session
             if not settings.LOAD_SESSION:
-              session_handler.injection_point_importation(url, technique, injection_type, separator, shell[0], vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response=0, delay=0, how_long=0, output_length=0, is_vulnerable=menu.options.level)
+              session_handler.injection_point_importation(url, technique, injection_type, separator, shell[0], vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response=0, timesec=0, how_long=0, output_length=0, is_vulnerable=menu.options.level)
             else:
               whitespace = settings.WHITESPACE[0]
               settings.LOAD_SESSION = False 
@@ -314,7 +314,7 @@ def eb_injection_handler(url, delay, filename, http_request_method):
                 if len(enumerate_again) == 0:
                   enumerate_again = "y"
                 if enumerate_again in settings.CHOICE_YES:
-                  eb_enumeration.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, delay)
+                  eb_enumeration.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec)
                   # print ""
                   break
                 elif enumerate_again in settings.CHOICE_NO:
@@ -329,7 +329,7 @@ def eb_injection_handler(url, delay, filename, http_request_method):
 
             else:
               if menu.enumeration_options():
-                eb_enumeration.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, delay)
+                eb_enumeration.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec)
             
             if not menu.file_access_options() and not menu.options.os_cmd and new_line:
               print ""
@@ -348,7 +348,7 @@ def eb_injection_handler(url, delay, filename, http_request_method):
                 if len(file_access_again) == 0:
                    file_access_again = "y"
                 if file_access_again in settings.CHOICE_YES:
-                  eb_file_access.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, delay)
+                  eb_file_access.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec)
                   print ""
                   break
                 elif file_access_again in settings.CHOICE_NO: 
@@ -363,14 +363,14 @@ def eb_injection_handler(url, delay, filename, http_request_method):
               if menu.file_access_options():
                 if not menu.enumeration_options():
                   print ""
-                eb_file_access.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, delay)
+                eb_file_access.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec)
                 print ""
 
             # Check if defined single cmd.
             if menu.options.os_cmd:
               if not menu.file_access_options():
                 print ""
-              eb_enumeration.single_os_cmd_exec(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, delay)
+              eb_enumeration.single_os_cmd_exec(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec)
 
             # Pseudo-Terminal shell
             go_back = False
@@ -408,7 +408,7 @@ def eb_injection_handler(url, delay, filename, http_request_method):
                     # if settings.VERBOSITY_LEVEL >= 1:
                     #   print ""
                     if cmd.lower() in settings.SHELL_OPTIONS:
-                      go_back, go_back_again = shell_options.check_option(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, technique, go_back, no_result, delay, go_back_again)
+                      go_back, go_back_again = shell_options.check_option(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, technique, go_back, no_result, timesec, go_back_again)
                       if go_back and go_back_again == False:
                         break
                       if go_back and go_back_again:
@@ -418,7 +418,7 @@ def eb_injection_handler(url, delay, filename, http_request_method):
                       response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
                       # Try target page reload (if it is required).
                       if settings.URL_RELOAD:
-                        response = requests.url_reload(url, delay)
+                        response = requests.url_reload(url, timesec)
                       if menu.options.ignore_session or\
                          session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
                         # Evaluate injection results.
@@ -477,8 +477,8 @@ def eb_injection_handler(url, delay, filename, http_request_method):
 The exploitation function.
 (call the injection handler)
 """
-def exploitation(url, delay, filename, http_request_method):
-  if eb_injection_handler(url, delay, filename, http_request_method) == False:
+def exploitation(url, timesec, filename, http_request_method):
+  if eb_injection_handler(url, timesec, filename, http_request_method) == False:
     return False
 
 #eof

