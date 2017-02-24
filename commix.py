@@ -858,6 +858,14 @@ if __name__ == '__main__':
       print settings.print_critical_msg(err_msg)
       sys.exit(0)
 
+    # Seconds to delay between each HTTP request.
+    if menu.options.delay > "0":
+      settings.DELAY = menu.options.delay
+      
+    # Check if defined "--timesec" option.
+    if menu.options.timesec > "0":
+        settings.TIMESEC = menu.options.timesec
+
     # Local IP address
     if not menu.options.offline:
       settings.LOCAL_HTTP_IP = simple_http_server.grab_ip_addr()
@@ -878,10 +886,6 @@ if __name__ == '__main__':
       sys.exit(0)
     else:  
       settings.VERBOSITY_LEVEL = menu.options.verbose
-
-    # Check if defined "--timesec" option.
-    if menu.options.timesec > "0":
-        settings.TIMESEC = menu.options.timesec
 
     # Define the level of tests to perform.
     if menu.options.level > 3:

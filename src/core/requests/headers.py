@@ -24,6 +24,7 @@ else:
   # Handle target environment that doesn't support HTTPS verification
   ssl._create_default_https_context = _create_unverified_https_context
 import sys
+import time
 import base64
 import urllib2
 import urlparse
@@ -78,6 +79,9 @@ def http_response(headers):
 Checking the HTTP Headers.
 """
 def check_http_traffic(request):
+
+  # Delay in seconds between each HTTP request
+  time.sleep(int(settings.DELAY))
 
   class do_connection(httplib.HTTPConnection, httplib.HTTPSConnection):
     """

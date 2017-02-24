@@ -387,6 +387,11 @@ injection.add_option("--maxlen",
                 default=settings.MAXLEN,
                 help="Set the max length of output for time-related injection techniques (Default: " + str(settings.MAXLEN) + " chars).")
 
+injection.add_option("--delay", 
+                action="store",
+                dest="delay",
+                help="Seconds to delay between each HTTP request.")
+
 injection.add_option("--time-sec", 
                 action="store",
                 dest="timesec",
