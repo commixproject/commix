@@ -22,6 +22,10 @@ from optparse import OptionParser
 from src.utils import settings
 from src.thirdparty.colorama import Fore, Back, Style, init
 
+# Use Colorama to make Termcolor work on Windows too :)
+if settings.IS_WINDOWS:
+  init()
+
 """
 The commix's banner.
 """
@@ -507,7 +511,8 @@ parser.formatter.format_option_strings = type(parser.formatter.format_option_str
 
 option = parser.get_option("-h")
 option.help = option.help.capitalize().replace("Show this help message and exit", "Show help and exit.")
-
+# Checkall the banner
+banner()
 (options, args) = parser.parse_args()
 
 """

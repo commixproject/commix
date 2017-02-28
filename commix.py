@@ -68,8 +68,6 @@ else:
       readline_error = True
 pass
 
-
-
 # Use Colorama to make Termcolor work on Windows too :)
 if settings.IS_WINDOWS:
   init()
@@ -824,9 +822,6 @@ if __name__ == '__main__':
     if menu.options.version:
       version.show_version()
       sys.exit(0)
-
-    # Checkall the banner
-    menu.banner()
 
     # Check python version number.
     version.python_version()
