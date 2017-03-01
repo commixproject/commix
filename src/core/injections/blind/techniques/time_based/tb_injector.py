@@ -181,6 +181,8 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
 
   found_chars = False
   info_msg = "Retrieving the length of execution output... "
+  if menu.options.verbose > 1 :
+    info_msg +=  "\n"  
   sys.stdout.write(settings.print_info_msg(info_msg))
   sys.stdout.flush()  
   for output_length in range(int(minlen), int(maxlen)):
@@ -258,7 +260,11 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
       cmd = previous_cmd
     output = []
     percent = "0.0"
-    info_msg = "Presuming the execution output, please wait... [ " +str(percent)+ "% ]"
+    info_msg = "Presuming the execution output, please wait... " 
+    if menu.options.verbose < 1 :
+      info_msg +=  "[ " +str(percent)+ "% ]"
+    else:
+      info_msg +=  "\n"  
     sys.stdout.write("\r" + settings.print_info_msg(info_msg))
     sys.stdout.flush()
     for num_of_chars in range(1, int(num_of_chars)):
