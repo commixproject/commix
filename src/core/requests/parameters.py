@@ -55,8 +55,12 @@ def is_empty(multi_parameters, http_request_method):
   provided_value = []
   multi_params = [s for s in multi_parameters]
   for empty in multi_params:
-    if len(empty.split("=")[1]) == 0:
-      provided_value.append(empty.split("=")[0])
+    try:
+      if len(empty.split("=")[1]) == 0:
+        provided_value.append(empty.split("=")[0])
+    except IndexError:
+      err_msg = "No parameter(s) found for testing in the provided data."
+      print settings.print_critical_msg(err_msg)
   provided_value = ", ".join(provided_value)
   if len(provided_value) > 0:
     if menu.options.skip_empty and len(multi_parameters) > 1:
