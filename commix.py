@@ -190,8 +190,8 @@ def logs_filename_creation():
   else:
     output_dir = settings.OUTPUT_DIR
   
-  # One directory up, if Windows or if the script is being run under "/src".
-  if settings.IS_WINDOWS or "/src" in os.path.dirname(os.path.abspath(__file__)):
+  # One directory up, if the script is being run under "/src".
+  if "/src" in os.path.dirname(os.path.abspath(__file__)):
     os.chdir("..")
     
   output_dir = os.path.dirname(output_dir)
