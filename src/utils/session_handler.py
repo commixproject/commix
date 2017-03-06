@@ -55,6 +55,7 @@ def flush(url):
 
   except sqlite3.OperationalError, err_msg:
     print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
+    err_msg = "Unable to flush the session file." + str(err_msg).title()
     print settings.print_critical_msg(err_msg)
 
 """
