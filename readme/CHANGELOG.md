@@ -1,4 +1,5 @@
 ## Version 1.8 (upcoming)
+* Added: New feauture for checking and updating current version of Unicorn tool.
 * Revised: The "--delay" option has been revised to delay between each HTTP request.
 * Replaced: The "--delay" option has been replaced with "--time-sec" option.
 * Fixed: Minor improvement regarding gnureadline module for better support on MacOS X hosts.
