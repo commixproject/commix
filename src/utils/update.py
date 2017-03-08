@@ -138,7 +138,7 @@ def check_for_update():
 """
 The updater for the unicorn tool
 """
-def unicorn_updater():
+def unicorn_updater(current_version):
   info_msg = "Checking requirements to update " 
   info_msg += "TrustedSec's Magic Unicorn via GitHub... "
   sys.stdout.write(settings.print_info_msg(info_msg))
@@ -164,9 +164,22 @@ def unicorn_updater():
       if requirments.do_check(requirment) == True :
         sys.stdout.write("[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]\n")
         sys.stdout.flush()
-        os.chdir("../")
-        subprocess.Popen("rm -rf unicorn", shell=True).wait()
+        if len(current_version) == 0:
+          unicorn_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../', 'thirdparty/'))
+          os.chdir(unicorn_path)
+        else:
+          os.chdir("../")
+          subprocess.Popen("rm -rf unicorn", shell=True).wait()
+        start = 0
+        end = 0
+        start = time.time()
+        print "---"
         subprocess.Popen("git clone https://github.com/trustedsec/unicorn", shell=True).wait()
+        print "---"
+        end  = time.time()
+        how_long = int(end - start)
+        info_msg = "Finished in " + time.strftime('%H:%M:%S', time.gmtime(how_long)) + "."
+        print settings.print_info_msg(info_msg)
         os.chdir("unicorn")
       else:
         print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
@@ -183,21 +196,33 @@ Check the latest version of unicorn
 """
 def check_unicorn_version(current_version):
   try:
-    response = urllib2.urlopen('https://raw.githubusercontent.com/trustedsec/unicorn/master/unicorn.py')
-    latest_version = response.readlines()
-    for line in latest_version:
-      line = line.rstrip()
-      if "Magic Unicorn Attack Vector v" in line:
-        latest_version = line.replace("Magic Unicorn Attack Vector v", "").replace(" ", "").replace("-","").replace("\"","").replace(")","")
-        break 
-    if (int(current_version.replace(".","")[:2]) < int(latest_version.replace(".","")[:2])) or \
+    if len(current_version) != 0: 
+      response = urllib2.urlopen('https://raw.githubusercontent.com/trustedsec/unicorn/master/unicorn.py')
+      latest_version = response.readlines()
+      for line in latest_version:
+        line = line.rstrip()
+        if "Magic Unicorn Attack Vector v" in line:
+          latest_version = line.replace("Magic Unicorn Attack Vector v", "").replace(" ", "").replace("-","").replace("\"","").replace(")","")
+          break
+
+    if len(current_version) == 0 or \
+       (int(current_version.replace(".","")[:2]) < int(latest_version.replace(".","")[:2])) or \
        ((int(current_version.replace(".","")[:2]) == int(latest_version.replace(".","")[:2])) and \
          int(current_version.replace(".","")[2:]) < int(latest_version.replace(".","")[2:])):
-      warn_msg = "Current version of TrustedSec's Magic Unicorn (" + current_version + ") seems to be out-of-date."
-      print settings.print_warning_msg(warn_msg)
+
+      if len(current_version) != 0:
+        warn_msg = "Current version of TrustedSec's Magic Unicorn (" + current_version + ") seems to be out-of-date."
+        print settings.print_warning_msg(warn_msg)
+      else:
+        warn_msg = "TrustedSec's Magic Unicorn seems to be not installed."
+        print settings.print_warning_msg(warn_msg) 
       while True:
         if not menu.options.batch:
-          question_msg = "Do you want to update to the latest version now? [Y/n] > "
+          if len(current_version) == 0:
+            action = "install"
+          else:
+            action = "update to"
+          question_msg = "Do you want to " + action + " the latest version now? [Y/n] > "
           sys.stdout.write(settings.print_question_msg(question_msg))
           do_update = sys.stdin.readline().replace("\n","").lower()
         else:
@@ -205,7 +230,7 @@ def check_unicorn_version(current_version):
         if len(do_update) == 0:
           do_update = "y"
         if do_update in settings.CHOICE_YES:
-            unicorn_updater()
+            unicorn_updater(current_version)
         elif do_update in settings.CHOICE_NO:
           break
         else:

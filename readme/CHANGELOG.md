@@ -1,4 +1,6 @@
 ## Version 1.8 (upcoming)
+* Added: New feauture for installing Unicorn tool (if not installed on host).
+* Removed: The pre-installed version of Unicorn tool has been removed.
 * Added: New feauture for checking and updating current version of Unicorn tool.
 * Revised: The "--delay" option has been revised to delay between each HTTP request.
 * Replaced: The "--delay" option has been replaced with "--time-sec" option.
