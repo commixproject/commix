@@ -68,8 +68,8 @@ def execute_shell(separator, TAG, cmd, prefix, suffix, whitespace, http_request_
     # Evaluate injection results.
     shell = cb_injector.injection_results(response, TAG, cmd)
 
-  if settings.VERBOSITY_LEVEL >= 1:
-    print ""
+  # if settings.VERBOSITY_LEVEL >= 1:
+  #   print ""
 
   if settings.REVERSE_TCP and int(diff) <= 5:
     check_established_connection()
