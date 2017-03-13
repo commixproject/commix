@@ -36,11 +36,16 @@ Check for established connection
 """
 def check_established_connection():
   while True:
+    if settings.VERBOSITY_LEVEL == 1:
+      print ""
+    warn_msg = "Something went wrong with the reverse TCP connection."
+    warn_msg += " Please wait while checking state."
+    print settings.print_warning_msg(warn_msg)
     time.sleep(10)
     lines = os.popen('netstat -anta').read().split("\n")
     found = False
     for line in lines:
-      if "ESTABLISHED" in line and settings.LPORT in line:
+      if "ESTABLISHED" in line and settings.LPORT in line.split():
         found = True
         pass
     if not found:
@@ -68,12 +73,12 @@ def execute_shell(separator, TAG, cmd, prefix, suffix, whitespace, http_request_
     # Evaluate injection results.
     shell = cb_injector.injection_results(response, TAG, cmd)
 
-  # if settings.VERBOSITY_LEVEL >= 1:
-  #   print ""
-
-  if settings.REVERSE_TCP and int(diff) <= 5:
+  if settings.REVERSE_TCP and (int(diff) > 0 and int(diff) < 6):
     check_established_connection()
-  
+  else:
+    if settings.VERBOSITY_LEVEL == 1:
+      print ""
+
   err_msg = "The " + os_shell_option.split("_")[0] + " "
   err_msg += os_shell_option.split("_")[1].upper() + " connection has failed!"
   print settings.print_critical_msg(err_msg)
