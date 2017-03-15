@@ -1,4 +1,4 @@
-## Version 1.8 (upcoming)
+## Version 1.8 (2017-03-15)
 * Added: New feauture for installing Unicorn tool (if not installed on host).
 * Removed: The pre-installed version of Unicorn tool has been removed.
 * Added: New feauture for checking and updating current version of Unicorn tool.
