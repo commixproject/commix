@@ -158,6 +158,7 @@ request = OptionGroup(parser,  Style.BRIGHT + "Request" + Style.RESET_ALL,
 request.add_option("--data", 
                 action="store",
                 dest="data",
+                default=False,
                 help="Data string to be sent through POST.")
 
 request.add_option("--host",
@@ -485,6 +486,12 @@ misc.add_option("--offline",
                 dest="offline",
                 default=False,
                 help="Work in offline mode.")
+
+misc.add_option("--wizard", 
+                action="store_true",
+                dest="wizard",
+                default=False,
+                help="Simple wizard interface for beginner users.")
 
 parser.add_option_group(general)
 parser.add_option_group(target)

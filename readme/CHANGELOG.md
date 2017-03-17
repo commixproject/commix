@@ -1,3 +1,6 @@
+## Version 1.9 (upcoming)
+* Added: New option "--wizard" that shows a simple wizard interface for beginner users.
+
 ## Version 1.8 (2017-03-15)
 * Added: New feauture for installing Unicorn tool (if not installed on host).
 * Removed: The pre-installed version of Unicorn tool has been removed.

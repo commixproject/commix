@@ -845,6 +845,23 @@ if __name__ == '__main__':
       install.installer()
       sys.exit(0)
 
+    if menu.options.wizard:
+      if not menu.options.url:
+        while True:
+          question_msg = "Please enter full target URL (--url) > "
+          sys.stdout.write(settings.print_question_msg(question_msg))
+          menu.options.url = sys.stdin.readline().replace("\n","")
+          if len(menu.options.url) == 0:
+            pass
+          else: 
+            break
+      if not menu.options.data:
+        question_msg = "Please enter POST data (--data) [Enter for none] > "
+        sys.stdout.write(settings.print_question_msg(question_msg))
+        menu.options.data = sys.stdin.readline().replace("\n","")
+        if len(menu.options.data) == 0:
+          menu.options.data = False
+
     # Check for missing mandatory option(s).
     if not any((menu.options.url, menu.options.logfile, menu.options.bulkfile, menu.options.requestfile, \
       menu.options.sitemap_url, menu.options.update, menu.options.noncore_dependencies)):
