@@ -527,41 +527,41 @@ The "os_shell" available options.
 """
 def os_shell_options():
       print """
-  ---[ """ + Style.BRIGHT + Fore.BLUE + """Available options""" + Style.RESET_ALL + """ ]---     
-  Type '""" + Style.BRIGHT + """?""" + Style.RESET_ALL + """' to get all the available options.
-  Type '""" + Style.BRIGHT + """back""" + Style.RESET_ALL + """' to move back from the current context.
-  Type '""" + Style.BRIGHT + """quit""" + Style.RESET_ALL + """' (or use <Ctrl-C>) to quit commix.
-  Type '""" + Style.BRIGHT + """reverse_tcp""" + Style.RESET_ALL + """' to get a reverse TCP connection.
-  Type '""" + Style.BRIGHT + """bind_tcp""" + Style.RESET_ALL + """' to set a bind TCP connection.
-  """
+---[ """ + Style.BRIGHT + Fore.BLUE + """Available options""" + Style.RESET_ALL + """ ]---     
+Type '""" + Style.BRIGHT + """?""" + Style.RESET_ALL + """' to get all the available options.
+Type '""" + Style.BRIGHT + """back""" + Style.RESET_ALL + """' to move back from the current context.
+Type '""" + Style.BRIGHT + """quit""" + Style.RESET_ALL + """' (or use <Ctrl-C>) to quit commix.
+Type '""" + Style.BRIGHT + """reverse_tcp""" + Style.RESET_ALL + """' to get a reverse TCP connection.
+Type '""" + Style.BRIGHT + """bind_tcp""" + Style.RESET_ALL + """' to set a bind TCP connection.
+"""
 
 """
 The "reverse_tcp" available options.
 """
 def reverse_tcp_options():
       print """
-  ---[ """ + Style.BRIGHT + Fore.BLUE + """Available options""" + Style.RESET_ALL + """ ]---     
-  Type '""" + Style.BRIGHT + """?""" + Style.RESET_ALL + """' to get all the available options.
-  Type '""" + Style.BRIGHT + """set""" + Style.RESET_ALL + """' to set a context-specific variable to a value.
-  Type '""" + Style.BRIGHT + """back""" + Style.RESET_ALL + """' to move back from the current context.
-  Type '""" + Style.BRIGHT + """quit""" + Style.RESET_ALL + """' (or use <Ctrl-C>) to quit commix.
-  Type '""" + Style.BRIGHT + """os_shell""" + Style.RESET_ALL + """' to get into an operating system command shell.
-  Type '""" + Style.BRIGHT + """bind_tcp""" + Style.RESET_ALL + """' to set a bind TCP connection.
-  """
+---[ """ + Style.BRIGHT + Fore.BLUE + """Available options""" + Style.RESET_ALL + """ ]---     
+Type '""" + Style.BRIGHT + """?""" + Style.RESET_ALL + """' to get all the available options.
+Type '""" + Style.BRIGHT + """set""" + Style.RESET_ALL + """' to set a context-specific variable to a value.
+Type '""" + Style.BRIGHT + """back""" + Style.RESET_ALL + """' to move back from the current context.
+Type '""" + Style.BRIGHT + """quit""" + Style.RESET_ALL + """' (or use <Ctrl-C>) to quit commix.
+Type '""" + Style.BRIGHT + """os_shell""" + Style.RESET_ALL + """' to get into an operating system command shell.
+Type '""" + Style.BRIGHT + """bind_tcp""" + Style.RESET_ALL + """' to set a bind TCP connection.
+"""
 
 """
 The "bind_tcp" available options.
 """
 def bind_tcp_options():
       print """
-  ---[ """ + Style.BRIGHT + Fore.BLUE + """Available options""" + Style.RESET_ALL + """ ]---     
-  Type '""" + Style.BRIGHT + """?""" + Style.RESET_ALL + """' to get all the available options.
-  Type '""" + Style.BRIGHT + """set""" + Style.RESET_ALL + """' to set a context-specific variable to a value.
-  Type '""" + Style.BRIGHT + """back""" + Style.RESET_ALL + """' to move back from the current context.
-  Type '""" + Style.BRIGHT + """quit""" + Style.RESET_ALL + """' (or use <Ctrl-C>) to quit commix.
-  Type '""" + Style.BRIGHT + """os_shell""" + Style.RESET_ALL + """' to get into an operating system command shell.
-  Type '""" + Style.BRIGHT + """reverse_tcp""" + Style.RESET_ALL + """' to get a reverse TCP connection.
-  """
+---[ """ + Style.BRIGHT + Fore.BLUE + """Available options""" + Style.RESET_ALL + """ ]---     
+Type '""" + Style.BRIGHT + """?""" + Style.RESET_ALL + """' to get all the available options.
+Type '""" + Style.BRIGHT + """set""" + Style.RESET_ALL + """' to set a context-specific variable to a value.
+Type '""" + Style.BRIGHT + """back""" + Style.RESET_ALL + """' to move back from the current context.
+Type '""" + Style.BRIGHT + """quit""" + Style.RESET_ALL + """' (or use <Ctrl-C>) to quit commix.
+Type '""" + Style.BRIGHT + """os_shell""" + Style.RESET_ALL + """' to get into an operating system command shell.
+Type '""" + Style.BRIGHT + """reverse_tcp""" + Style.RESET_ALL + """' to get a reverse TCP connection.
+"""
   
 """
 The tab compliter (shell options).
