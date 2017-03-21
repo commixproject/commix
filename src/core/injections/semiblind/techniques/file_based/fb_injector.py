@@ -243,20 +243,20 @@ def injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_req
 Find the URL directory.
 """
 def injection_output(url, OUTPUT_TEXTFILE, timesec):
-  if menu.options.srv_root_dir:
+  if menu.options.web_root:
 
     # Check for Apache server root directory.
-    if "/var/www/" in menu.options.srv_root_dir:
-      path = menu.options.srv_root_dir.replace("/var/www/", "/")
-      if "html/" in menu.options.srv_root_dir:
+    if "/var/www/" in menu.options.web_root:
+      path = menu.options.web_root.replace("/var/www/", "/")
+      if "html/" in menu.options.web_root:
         path = path.replace("html/", "")
 
     # Check for Nginx server root directory.  
-    elif "/usr/share/" in menu.options.srv_root_dir:
-      path = menu.options.srv_root_dir.replace("/usr/share/", "/")
-      if "html/" in menu.options.srv_root_dir:
+    elif "/usr/share/" in menu.options.web_root:
+      path = menu.options.web_root.replace("/usr/share/", "/")
+      if "html/" in menu.options.web_root:
         path = path.replace("html/", "")
-      elif "www/" in menu.options.srv_root_dir:
+      elif "www/" in menu.options.web_root:
         path = path.replace("www/", "")
 
     else:
@@ -269,7 +269,7 @@ def injection_output(url, OUTPUT_TEXTFILE, timesec):
 
   else:
 
-    if settings.CUSTOM_SRV_ROOT_DIR == True:
+    if settings.CUSTOM_WEB_ROOT == True:
       path = "/"
       # Contract again the url. 
       scheme = urlparse.urlparse(url).scheme

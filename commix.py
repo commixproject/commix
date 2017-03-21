@@ -473,13 +473,13 @@ def main(filename, url, init_test):
                 # Set up default root paths
                 if settings.SERVER_BANNERS[i].lower() == "apache":
                   if settings.TARGET_OS == "win":
-                    settings.SRV_ROOT_DIR = "\\htdocs"
+                    settings.WEB_ROOT = "\\htdocs"
                   else:
-                    settings.SRV_ROOT_DIR = "/var/www"
+                    settings.WEB_ROOT = "/var/www"
                 if settings.SERVER_BANNERS[i].lower() == "nginx": 
-                  settings.SRV_ROOT_DIR = "/usr/share/nginx"
+                  settings.WEB_ROOT = "/usr/share/nginx"
                 if settings.SERVER_BANNERS[i].lower() == "microsoft-iis":
-                  settings.SRV_ROOT_DIR = "\\inetpub\\wwwroot"
+                  settings.WEB_ROOT = "\\inetpub\\wwwroot"
                 break
 
             if not found_server_banner:
@@ -523,7 +523,7 @@ def main(filename, url, init_test):
               checks.tamper_scripts()
 
             # Store the Server's root dir
-            settings.DEFAULT_SRV_ROOT_DIR = settings.SRV_ROOT_DIR
+            settings.DEFAULT_WEB_ROOT= settings.WEB_ROOT
 
             if menu.options.is_admin or menu.options.is_root and not menu.options.current_user:
               menu.options.current_user = True

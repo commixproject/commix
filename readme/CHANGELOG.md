@@ -1,4 +1,5 @@
 ## Version 1.9 (upcoming)
+* Replaced: The "--root-dir" option has been replaced with "--web-root" option.
 * Added: New option "--wizard" that shows a simple wizard interface for beginner users.
 
 ## Version 1.8 (2017-03-15)

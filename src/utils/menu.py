@@ -408,11 +408,11 @@ injection.add_option("--tmp-path",
                 default=False,
                 help="Set the absolute path of web server's temp directory.")
 
-injection.add_option("--root-dir", 
+injection.add_option("--web-root", 
                 action="store",
-                dest="srv_root_dir",
+                dest="web_root",
                 default=False,
-                help="Set the absolute path of web server's root directory.")
+                help="Set the web server document root directory (e.g. \"/var/www\").")
 
 injection.add_option("--alter-shell", 
                 action="store",

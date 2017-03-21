@@ -84,8 +84,8 @@ def delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, whitespa
   if settings.TARGET_OS == "win":
     cmd = settings.WIN_DEL + OUTPUT_TEXTFILE
   else:
-    settings.SRV_ROOT_DIR = ""
-    cmd = settings.DEL + settings.SRV_ROOT_DIR + OUTPUT_TEXTFILE + " " + settings.COMMENT
+    settings.WEB_ROOT = ""
+    cmd = settings.DEL + settings.WEB_ROOT + OUTPUT_TEXTFILE + " " + settings.COMMENT
   response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
 
 """

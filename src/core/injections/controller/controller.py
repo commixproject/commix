@@ -101,7 +101,7 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
 
   # Procced with file-based semiblind command injection technique,
   # once the user provides the path of web server's root directory.
-  if menu.options.srv_root_dir:
+  if menu.options.web_root:
     if checks.procced_with_file_based_technique():
       menu.options.tech = "f"
 

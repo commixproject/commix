@@ -106,7 +106,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "1.9.2"
+VERSION_NUM = "1.9.3"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"
@@ -222,10 +222,10 @@ HTTP_HEADER_INJECTION_LEVEL = 3
 # Default Temp Directory
 TMP_PATH = ""
 
-# Default Server's Root Directory
-SRV_ROOT_DIR = ""
-DEFAULT_SRV_ROOT_DIR = ""
-CUSTOM_SRV_ROOT_DIR = False
+# Default Server's Web-Root Directory
+WEB_ROOT = ""
+DEFAULT_WEB_ROOT = ""
+CUSTOM_WEB_ROOT = False
 
 # The max help option length.
 MAX_OPTION_LENGTH = 18

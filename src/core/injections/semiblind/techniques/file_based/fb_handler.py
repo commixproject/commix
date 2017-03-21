@@ -97,13 +97,13 @@ def delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, h
   if settings.TARGET_OS == "win":
     cmd = settings.WIN_DEL + OUTPUT_TEXTFILE
   else:  
-    cmd = settings.DEL + settings.SRV_ROOT_DIR + OUTPUT_TEXTFILE + " " + settings.COMMENT
+    cmd = settings.DEL + settings.WEB_ROOT + OUTPUT_TEXTFILE + " " + settings.COMMENT
   response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
 
 """
 Provide custom server's root directory
 """
-def custom_srv_root_dir():
+def custom_web_root():
   if settings.TARGET_OS == "win" :
     example_root_dir = "\\inetpub\\wwwroot"
   else:
@@ -111,8 +111,8 @@ def custom_srv_root_dir():
   question_msg = "Please provide the host's root directory (e.g. '" 
   question_msg += example_root_dir + "') > "
   sys.stdout.write(settings.print_question_msg(question_msg))
-  settings.SRV_ROOT_DIR = sys.stdin.readline().replace("\n","").lower()
-  settings.CUSTOM_SRV_ROOT_DIR = True
+  settings.WEB_ROOT = sys.stdin.readline().replace("\n","").lower()
+  settings.CUSTOM_WEB_ROOT = True
 
 """
 The "file-based" injection technique handler
@@ -145,14 +145,14 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
   else:
     tmp_path = settings.TMP_PATH
 
-  if settings.DEFAULT_SRV_ROOT_DIR != settings.SRV_ROOT_DIR:
-    settings.SRV_ROOT_DIR = settings.DEFAULT_SRV_ROOT_DIR
+  if settings.DEFAULT_WEB_ROOT!= settings.WEB_ROOT:
+    settings.WEB_ROOT = settings.DEFAULT_WEB_ROOT
 
   if menu.options.file_dest and '/tmp/' in menu.options.file_dest:
     call_tmp_based = True
   else:
-    if menu.options.srv_root_dir:
-      settings.SRV_ROOT_DIR = menu.options.srv_root_dir
+    if menu.options.web_root:
+      settings.WEB_ROOT = menu.options.web_root
     else:
 
       # Debian/Ubunt have been updated to use /var/www/html as default instead of /var/www.
@@ -162,14 +162,14 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
             check_version = re.findall(r"/(.*)\.", settings.SERVER_BANNER.lower())
             if check_version[0] > "2.3" and not settings.TARGET_OS == "win":
               # Add "/html" to servers root directory
-              settings.SRV_ROOT_DIR = settings.SRV_ROOT_DIR + "/html"
+              settings.WEB_ROOT = settings.WEB_ROOT + "/html"
             else:
-              settings.SRV_ROOT_DIR = settings.SRV_ROOT_DIR 
+              settings.WEB_ROOT = settings.WEB_ROOT 
           except IndexError:
             pass
         # Add "/html" to servers root directory
         elif "fedora" or "centos" in settings.SERVER_BANNER.lower():
-          settings.SRV_ROOT_DIR = settings.SRV_ROOT_DIR + "/html"
+          settings.WEB_ROOT = settings.WEB_ROOT + "/html"
         else:
           pass
 
@@ -179,17 +179,17 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
           check_version = re.findall(r"/(.*)\.", settings.SERVER_BANNER.lower())
           if check_version[0] >= "1.2.4":
             # Add "/html" to servers root directory
-            settings.SRV_ROOT_DIR = settings.SRV_ROOT_DIR + "/html"
+            settings.WEB_ROOT = settings.WEB_ROOT + "/html"
           else:
             # Add "/www" to servers root directory
-            settings.SRV_ROOT_DIR = settings.SRV_ROOT_DIR + "/www"
+            settings.WEB_ROOT = settings.WEB_ROOT + "/www"
         except IndexError:
           pass
       elif "microsoft-iis" in settings.SERVER_BANNER.lower():
         pass
       else:
         # Provide custom server's root directory.
-        custom_srv_root_dir()
+        custom_web_root()
 
       path = urlparse.urlparse(url).path
       path_parts = path.split('/')
@@ -199,12 +199,12 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
       count = count - 1
       last_param = path_parts[count]
       EXTRA_DIR = path.replace(last_param, "")
-      settings.SRV_ROOT_DIR = settings.SRV_ROOT_DIR + EXTRA_DIR
+      settings.WEB_ROOT = settings.WEB_ROOT + EXTRA_DIR
       if settings.TARGET_OS == "win":
-        settings.SRV_ROOT_DIR = settings.SRV_ROOT_DIR.replace("/","\\")
+        settings.WEB_ROOT = settings.WEB_ROOT.replace("/","\\")
 
     if not settings.LOAD_SESSION or settings.RETEST == True: 
-      info_msg = "Trying to create a file in '" + settings.SRV_ROOT_DIR + "'... "
+      info_msg = "Trying to create a file in '" + settings.WEB_ROOT + "'... "
       print settings.print_info_msg(info_msg)
 
   i = 0
@@ -341,7 +341,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                     # Use the "/tmp/" directory for tempfile-based technique.
                     elif i == settings.FAILED_TRIES and no_result == True :
                       warn_msg = "It seems that you don't have permissions to "
-                      warn_msg += "read and/or write files in '" + settings.SRV_ROOT_DIR + "'."  
+                      warn_msg += "read and/or write files in '" + settings.WEB_ROOT + "'."  
                       sys.stdout.write("\r" + settings.print_warning_msg(warn_msg))
                       print ""
                       while True:
@@ -420,11 +420,11 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
 
             except urllib2.URLError, e:
               warn_msg = "It seems that you don't have permissions to "
-              warn_msg += "read and/or write files in '" + settings.SRV_ROOT_DIR + "'."
+              warn_msg += "read and/or write files in '" + settings.WEB_ROOT + "'."
               sys.stdout.write("\r" + settings.print_warning_msg(warn_msg))
               print ""
               # Provide custom server's root directory.
-              custom_srv_root_dir()
+              custom_web_root()
               continue
             
             except:
