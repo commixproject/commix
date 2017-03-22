@@ -65,8 +65,6 @@ else:
       readline_error = True
 pass
 
-
-
 """
 The "classic" technique on result-based OS command injection.
 """
@@ -103,9 +101,16 @@ def cb_injection_handler(url, timesec, filename, http_request_method):
           settings.EXPLOITATION_PHASE = False
           # If a previous session is available.
           if settings.LOAD_SESSION and session_handler.notification(url, technique, injection_type):
-            url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response, timesec, how_long, output_length, is_vulnerable = session_handler.injection_point_exportation(url, http_request_method)
-            checks.check_for_stored_tamper(payload)
-          
+            try:
+              url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response, timesec, how_long, output_length, is_vulnerable = session_handler.injection_point_exportation(url, http_request_method)
+              checks.check_for_stored_tamper(payload)
+            except TypeError:
+              err_msg = "An error occurred while accessing session file ('"
+              err_msg += settings.SESSION_FILE + "'). "
+              err_msg += "Use the '--flush-session' option."
+              print settings.print_critical_msg(err_msg)
+              sys.exit(0)
+
           else:
             i = i + 1
             # Check for bad combination of prefix and separator

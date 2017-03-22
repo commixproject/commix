@@ -222,13 +222,20 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
           settings.EXPLOITATION_PHASE = False
           # If a previous session is available.
           if settings.LOAD_SESSION:
-            url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response, timesec, how_long, output_length, is_vulnerable = session_handler.injection_point_exportation(url, http_request_method)
-            checks.check_for_stored_tamper(payload)
-            OUTPUT_TEXTFILE = TAG + ".txt"
-            session_handler.notification(url, technique, injection_type)
-            if technique == "tempfile-based injection technique":
-              #settings.LOAD_SESSION = True
-              tfb_handler.exploitation(url, timesec, filename, tmp_path, http_request_method, url_time_response)
+            try:
+              url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response, timesec, how_long, output_length, is_vulnerable = session_handler.injection_point_exportation(url, http_request_method)
+              checks.check_for_stored_tamper(payload)
+              OUTPUT_TEXTFILE = TAG + ".txt"
+              session_handler.notification(url, technique, injection_type)
+              if technique == "tempfile-based injection technique":
+                #settings.LOAD_SESSION = True
+                tfb_handler.exploitation(url, timesec, filename, tmp_path, http_request_method, url_time_response)
+            except TypeError:
+              err_msg = "An error occurred while accessing session file ('"
+              err_msg += settings.SESSION_FILE + "'). "
+              err_msg += "Use the '--flush-session' option."
+              print settings.print_critical_msg(err_msg)
+              sys.exit(0)
 
           if settings.RETEST == True:
             settings.RETEST = False

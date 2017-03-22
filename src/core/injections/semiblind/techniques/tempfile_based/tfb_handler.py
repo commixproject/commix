@@ -132,13 +132,20 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
         # If a previous session is available.
         how_long_statistic = []
         if settings.LOAD_SESSION:
-          cmd = shell = ""
-          url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response, timesec, how_long, output_length, is_vulnerable = session_handler.injection_point_exportation(url, http_request_method)
-          checks.check_for_stored_tamper(payload)
-          settings.FOUND_HOW_LONG = how_long
-          settings.FOUND_DIFF = how_long - timesec
-          OUTPUT_TEXTFILE = tmp_path + TAG + ".txt"
-          
+          try:
+            cmd = shell = ""
+            url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response, timesec, how_long, output_length, is_vulnerable = session_handler.injection_point_exportation(url, http_request_method)
+            checks.check_for_stored_tamper(payload)
+            settings.FOUND_HOW_LONG = how_long
+            settings.FOUND_DIFF = how_long - timesec
+            OUTPUT_TEXTFILE = tmp_path + TAG + ".txt"
+          except TypeError:
+            err_msg = "An error occurred while accessing session file ('"
+            err_msg += settings.SESSION_FILE + "'). "
+            err_msg += "Use the '--flush-session' option."
+            print settings.print_critical_msg(err_msg)
+            sys.exit(0)
+
         else:
           num_of_chars = num_of_chars + 1
           # Check for bad combination of prefix and separator
