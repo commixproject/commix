@@ -1,4 +1,5 @@
 ## Version 1.9 (upcoming)
+* Revised: The file-based payload for deleting files with execution output, has been shortly revised.
 * Replaced: The "--root-dir" option has been replaced with "--web-root" option.
 * Added: New option "--wizard" that shows a simple wizard interface for beginner users.
 

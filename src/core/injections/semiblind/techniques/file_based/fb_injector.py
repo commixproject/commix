@@ -165,6 +165,7 @@ def injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_req
     if settings.VERBOSITY_LEVEL >= 1:
       payload_msg = payload.replace("\n", "\\n")
       if settings.COMMENT in payload_msg:
+        payload = payload.split(settings.COMMENT)[0]
         payload_msg = payload_msg.split(settings.COMMENT)[0]
       info_msg = "Executing the '" + cmd.split(settings.COMMENT)[0] + "' command... "
       sys.stdout.write("\n" + settings.print_info_msg(info_msg))
@@ -190,19 +191,14 @@ def injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_req
     else:
       # Check if defined method is GET (Default).
       if http_request_method == "GET":
-
         # Check if its not specified the 'INJECT_HERE' tag
         #url = parameters.do_GET_check(url)
-
         payload = payload.replace(" ","%20")
-
         target = re.sub(settings.INJECT_TAG, payload, url)
         vuln_parameter = ''.join(vuln_parameter)
         request = urllib2.Request(target)
-        
         # Check if defined extra headers.
         headers.do_check(request)        
-          
         # Get the response of the request
         response = requests.get_request_response(request) 
 
@@ -210,10 +206,8 @@ def injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_req
         # Check if defined method is POST.
         parameter = menu.options.data
         parameter = urllib2.unquote(parameter)
-
         # Check if its not specified the 'INJECT_HERE' tag
         parameter = parameters.do_POST_check(parameter)
-        
         # Define the POST data  
         if settings.IS_JSON == False:
           data = re.sub(settings.INJECT_TAG, payload, parameter)
