@@ -145,7 +145,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
   else:
     tmp_path = settings.TMP_PATH
 
-  if settings.DEFAULT_WEB_ROOT!= settings.WEB_ROOT:
+  if settings.DEFAULT_WEB_ROOT != settings.WEB_ROOT:
     settings.WEB_ROOT = settings.DEFAULT_WEB_ROOT
 
   if menu.options.file_dest and '/tmp/' in menu.options.file_dest:
@@ -154,7 +154,6 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
     if menu.options.web_root:
       settings.WEB_ROOT = menu.options.web_root
     else:
-
       # Debian/Ubunt have been updated to use /var/www/html as default instead of /var/www.
       if "apache" in settings.SERVER_BANNER.lower():
         if "debian" or "ubuntu" in settings.SERVER_BANNER.lower():
@@ -172,7 +171,6 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
           settings.WEB_ROOT = settings.WEB_ROOT + "/html"
         else:
           pass
-
       # On more recent versions (>= "1.2.4") the default root path has changed to "/usr/share/nginx/html"
       elif "nginx" in settings.SERVER_BANNER.lower():
         try:
@@ -328,9 +326,6 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                   sys.stdout.flush()
 
                 if len(shell) == 0 :
-                  # delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-                  # if settings.VERBOSITY_LEVEL >= 1:
-                  #   print ""
                   raise urllib2.HTTPError(url, 404, 'Error', {}, None)
 
               except urllib2.HTTPError, e:
