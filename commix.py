@@ -41,6 +41,7 @@ from src.core.requests import tor
 from src.core.requests import proxy
 from src.core.requests import headers
 from src.core.requests import requests
+from src.core.requests import redirection
 from src.core.requests import authentication
 
 from src.core.injections.controller import checks
@@ -289,7 +290,7 @@ def main(filename, url, init_test):
       menu.options.agent = random.choice(settings.USER_AGENT_LIST)
   
     # Check if defined "--url" or "-m" option.
-    if url:     
+    if url:
       # Check if http / https
       url = checks.check_http_s(url)
 
@@ -340,6 +341,9 @@ def main(filename, url, init_test):
         if settings.VERBOSITY_LEVEL < 2:
           print "[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]"
 
+        # Check for URL redirection
+        url = redirection.do_check(url)
+        
         if menu.options.flush_session:
           session_handler.flush(url)
 
