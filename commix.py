@@ -343,7 +343,7 @@ def main(filename, url, init_test):
 
         # Check for URL redirection
         url = redirection.do_check(url)
-        
+
         if menu.options.flush_session:
           session_handler.flush(url)
 

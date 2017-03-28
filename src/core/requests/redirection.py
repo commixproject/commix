@@ -36,12 +36,14 @@ def do_check(url):
       Subclass the HTTPRedirectHandler to make it use our 
       HeadRequest also on the redirected URL
       """
-      def redirect_request(self, req, fp, code, msg, headers, newurl): 
+      def redirect_request(self, req, fp, code, msg, headers, redirected_url): 
           if code in (301, 302, 303, 307):
-            newurl = newurl.replace(' ', '%20') 
+            redirected_url = redirected_url.replace(' ', '%20') 
             newheaders = dict((k,v) for k,v in req.headers.items()
                               if k.lower() not in ("content-length", "content-type"))
-            return HeadRequest(newurl, 
+            warn_msg = "Got a " + str(code) + " redirection (" + redirected_url + ")."
+            print settings.print_warning_msg(warn_msg)
+            return HeadRequest(redirected_url, 
                                headers = newheaders,
                                origin_req_host = req.get_origin_req_host(), 
                                unverifiable = True
@@ -78,4 +80,21 @@ def do_check(url):
 
   response = opener.open(HeadRequest(url))
   redirected_url = response.geturl()
-  return redirected_url
+
+  if redirected_url != url:
+    while True:
+      question_msg = "Do you want to follow the identified redirection? [Y/n] > "
+      sys.stdout.write(settings.print_question_msg(question_msg))
+      redirection_option = sys.stdin.readline().replace("\n","").lower()
+      if len(redirection_option) == 0 or redirection_option in settings.CHOICE_YES:
+        return redirected_url
+      elif redirection_option in settings.CHOICE_NO:
+        return url  
+      elif redirection_option in settings.CHOICE_QUIT:
+        sys.exit(0)
+      else:
+        err_msg = "'" + redirection_option + "' is not a valid answer."  
+        print settings.print_error_msg(err_msg)
+        pass
+  else:
+    return url
