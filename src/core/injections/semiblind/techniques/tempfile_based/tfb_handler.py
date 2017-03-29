@@ -2,7 +2,7 @@
 # encoding: UTF-8
 
 """
-This file is part of commix project (http://commixproject.com).
+This file is part of Commix Project (http://commixproject.com).
 Copyright (c) 2014-2017 Anastasios Stasinopoulos (@ancst).
 
 This program is free software: you can redistribute it and/or modify
