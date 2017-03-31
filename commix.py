@@ -342,7 +342,8 @@ def main(filename, url, init_test):
           print "[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]"
 
         # Check for URL redirection
-        url = redirection.do_check(url)
+        if not menu.options.ignore_redirects:
+          url = redirection.do_check(url)
 
         if menu.options.flush_session:
           session_handler.flush(url)

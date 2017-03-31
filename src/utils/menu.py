@@ -253,6 +253,12 @@ request.add_option("--force-ssl",
                 default=False,
                 help="Force usage of SSL/HTTPS.")
 
+request.add_option("--ignore-redirects",
+                action="store_true",
+                dest="ignore_redirects",
+                default=False,
+                help="Ignore redirection attempts.")
+
 # Enumeration options
 enumeration = OptionGroup(parser, Style.BRIGHT + "Enumeration" + Style.RESET_ALL, 
                         "These options can be used to enumerate the target host.")

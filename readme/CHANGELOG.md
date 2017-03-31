@@ -1,4 +1,5 @@
 ## Version 1.9 (upcoming)
+* Added: New option "--ignore-redirects" that ignoring redirection attempts.
 * Added: New functionality for identifying and following URL redirections.
 * Fixed: Minor improvement for adding "/" at the end of the user provided root dir (in case it does not exist).
 * Revised: The file-based payload for deleting files with execution output, has been shortly revised.
