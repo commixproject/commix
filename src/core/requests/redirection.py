@@ -15,7 +15,7 @@ For more see the file 'readme/COPYING' for copying permission.
 
 import sys
 import urllib2
-
+from src.utils import menu
 from src.utils import settings
 from src.thirdparty.colorama import Fore, Back, Style, init
 
@@ -83,10 +83,16 @@ def do_check(url):
 
   if redirected_url != url:
     while True:
-      question_msg = "Do you want to follow the identified redirection? [Y/n] > "
-      sys.stdout.write(settings.print_question_msg(question_msg))
-      redirection_option = sys.stdin.readline().replace("\n","").lower()
+      if not menu.options.batch:
+        question_msg = "Do you want to follow the identified redirection? [Y/n] > "
+        sys.stdout.write(settings.print_question_msg(question_msg))
+        redirection_option = sys.stdin.readline().replace("\n","").lower()
+      else:
+        redirection_option = ""  
       if len(redirection_option) == 0 or redirection_option in settings.CHOICE_YES:
+        if menu.options.batch:
+          info_msg = "Following redirection to '" + redirected_url + "'. "
+          print settings.print_info_msg(info_msg)
         return redirected_url
       elif redirection_option in settings.CHOICE_NO:
         return url  
