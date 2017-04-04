@@ -622,13 +622,13 @@ def main(filename, url, init_test):
       except urllib2.HTTPError, err_msg:
 
         # Check the codes of responses
-        if str(e.getcode()) == settings.INTERNAL_SERVER_ERROR:
+        if str(err_msg.getcode()) == settings.INTERNAL_SERVER_ERROR:
           print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
           content = err_msg.read()
           sys.exit(0)
 
         # Check for HTTP Error 401 (Unauthorized).
-        elif str(e.getcode()) == settings.UNAUTHORIZED_ERROR:
+        elif str(err_msg.getcode()) == settings.UNAUTHORIZED_ERROR:
 
           # headers.http_response(e.headers)
 
@@ -752,14 +752,14 @@ def main(filename, url, init_test):
           else:
             pass
 
-        elif str(e.getcode()) == settings.FORBIDDEN_ERROR:
+        elif str(err_msg.getcode()) == settings.FORBIDDEN_ERROR:
           if settings.VERBOSITY_LEVEL < 2:
             print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
           err_msg = "You don't have permission to access this page."
           print settings.print_critical_msg(err_msg)
           sys.exit(0)
           
-        elif str(e.getcode()) == settings.NOT_FOUND_ERROR:
+        elif str(err_msg.getcode()) == settings.NOT_FOUND_ERROR:
           if settings.VERBOSITY_LEVEL < 2:
             print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
           err_msg = "The host seems to be down!"
