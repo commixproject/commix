@@ -367,7 +367,7 @@ def main(filename, url, init_test):
                 sys.stdout.write(settings.print_question_msg(question_msg))
                 enable_HTTP_server = sys.stdin.readline().replace("\n","").lower()
               else:
-                enable_HTTP_server == ""
+                enable_HTTP_server = ""
               if len(enable_HTTP_server) == 0:
                  enable_HTTP_server = "y"              
               if enable_HTTP_server in settings.CHOICE_YES:
