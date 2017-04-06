@@ -237,14 +237,42 @@ def injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_req
 Find the URL directory.
 """
 def injection_output(url, OUTPUT_TEXTFILE, timesec):
-  if menu.options.web_root:
 
+  def custom_web_root(url, OUTPUT_TEXTFILE):
+    path = urlparse.urlparse(url).path
+    if path.endswith('/'):
+      # Contract again the url.
+      scheme = urlparse.urlparse(url).scheme
+      netloc = urlparse.urlparse(url).netloc
+      output = scheme + "://" + netloc + path + OUTPUT_TEXTFILE
+    else:
+      try:
+        path_parts = [non_empty for non_empty in path.split('/') if non_empty]
+        count = 0
+        for part in path_parts:        
+          count = count + 1
+        count = count - 1
+        last_param = path_parts[count]
+        output = url.replace(last_param, OUTPUT_TEXTFILE)
+        if "?" and ".txt" in output:
+          try:
+            output = output.split("?")[0]
+          except:
+            pass  
+      except IndexError:
+        output = url + "/" + OUTPUT_TEXTFILE
+      return output
+
+  if menu.options.web_root:
     # Check for Apache server root directory.
     if "/var/www/" in menu.options.web_root:
       path = menu.options.web_root.replace("/var/www/", "/")
       if "html/" in menu.options.web_root:
         path = path.replace("html/", "")
-
+      # Contract again the url. 
+      scheme = urlparse.urlparse(url).scheme
+      netloc = urlparse.urlparse(url).netloc
+      output = scheme + "://" + netloc + path + OUTPUT_TEXTFILE
     # Check for Nginx server root directory.  
     elif "/usr/share/" in menu.options.web_root:
       path = menu.options.web_root.replace("/usr/share/", "/")
@@ -252,47 +280,14 @@ def injection_output(url, OUTPUT_TEXTFILE, timesec):
         path = path.replace("html/", "")
       elif "www/" in menu.options.web_root:
         path = path.replace("www/", "")
-
-    else:
-    	path = "/"
-
-    # Contract again the url.	
-    scheme = urlparse.urlparse(url).scheme
-    netloc = urlparse.urlparse(url).netloc
-    output = scheme + "://" + netloc + path + OUTPUT_TEXTFILE	
-
-  else:
-
-    if settings.CUSTOM_WEB_ROOT == True:
-      path = "/"
       # Contract again the url. 
       scheme = urlparse.urlparse(url).scheme
       netloc = urlparse.urlparse(url).netloc
       output = scheme + "://" + netloc + path + OUTPUT_TEXTFILE
-
     else:
-      path = urlparse.urlparse(url).path
-      if path.endswith('/'):
-        # Contract again the url.
-        scheme = urlparse.urlparse(url).scheme
-        netloc = urlparse.urlparse(url).netloc
-        output = scheme + "://" + netloc + path + OUTPUT_TEXTFILE
-      else:
-        try:
-          path_parts = [non_empty for non_empty in path.split('/') if non_empty]
-          count = 0
-          for part in path_parts:        
-            count = count + 1
-          count = count - 1
-          last_param = path_parts[count]
-          output = url.replace(last_param, OUTPUT_TEXTFILE)
-          if "?" and ".txt" in output:
-            try:
-              output = output.split("?")[0]
-            except:
-              pass  
-        except IndexError:
-          output = url + "/" + OUTPUT_TEXTFILE
+      output = custom_web_root(url, OUTPUT_TEXTFILE)
+  else:
+      output = custom_web_root(url, OUTPUT_TEXTFILE)
 
   return output
 
