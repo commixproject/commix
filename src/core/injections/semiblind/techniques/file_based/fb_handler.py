@@ -628,6 +628,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                       if go_back and go_back_again:
                         return True 
                     else:
+                      time.sleep(timesec)
                       response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
                       if menu.options.ignore_session or \
                          session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:

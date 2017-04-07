@@ -290,7 +290,7 @@ def injection_output(url, OUTPUT_TEXTFILE, timesec):
       output = custom_web_root(url, OUTPUT_TEXTFILE)
 
   return output
-
+  
 """
 Command execution results.
 """

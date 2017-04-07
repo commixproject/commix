@@ -1,4 +1,5 @@
 ## Version 1.9 (upcoming)
+* Revised: Minor improvement in file-based technique, for delaying the OS responses depending on the user-provided time delay.
 * Fixed: Minor improvement in file-based technique, regarding τhe directory path that the output file is saved.
 * Added: New option "--ignore-redirects" that ignoring redirection attempts.
 * Added: New functionality for identifying and following URL redirections.
