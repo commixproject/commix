@@ -106,7 +106,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "1.9.15"
+VERSION_NUM = "1.9.16"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"
@@ -206,7 +206,7 @@ EVAL_SEPARATORS = ["", "%0a", "\\\\n"]
 EVAL_SUFFIXES = ["", "}}","\\\\", "//", "#", ".\"", ".'", ")}"]
 
 # The white-spaces
-WHITESPACE = ["%20"]
+WHITESPACE = [" "]
 
 # Seconds to delay between each HTTP request.
 DELAY = 0

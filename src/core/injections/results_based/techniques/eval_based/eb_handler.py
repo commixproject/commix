@@ -100,6 +100,8 @@ def eb_injection_handler(url, timesec, filename, http_request_method):
     for prefix in settings.EVAL_PREFIXES:
       for suffix in settings.EVAL_SUFFIXES:
         for separator in settings.EVAL_SEPARATORS:
+          if whitespace == " ":
+            whitespace = urllib.quote(whitespace) 
           # Check injection state
           settings.DETECTION_PHASE = True
           settings.EXPLOITATION_PHASE = False

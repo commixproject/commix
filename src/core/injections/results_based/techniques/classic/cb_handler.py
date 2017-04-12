@@ -96,6 +96,8 @@ def cb_injection_handler(url, timesec, filename, http_request_method):
     for prefix in settings.PREFIXES:
       for suffix in settings.SUFFIXES:
         for separator in settings.SEPARATORS:
+          if whitespace == " ":
+            whitespace = urllib.quote(whitespace) 
           # Check injection state
           settings.DETECTION_PHASE = True
           settings.EXPLOITATION_PHASE = False
