@@ -316,16 +316,17 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
               output = fb_injector.injection_output(url, OUTPUT_TEXTFILE, timesec)
               time.sleep(timesec)
               
-              # Check if defined extra headers.
-              request = urllib2.Request(output)
-              headers.do_check(request)
-
-              # Evaluate test results.
-              output = urllib2.urlopen(request)
-              html_data = output.read()
-              shell = re.findall(r"" + TAG + "", html_data)
-
               try:
+
+                # Check if defined extra headers.
+                request = urllib2.Request(output)
+                headers.do_check(request)
+
+                # Evaluate test results.
+                output = urllib2.urlopen(request)
+                html_data = output.read()
+                shell = re.findall(r"" + TAG + "", html_data)
+
                 if len(shell) != 0 and shell[0] == TAG and not settings.VERBOSITY_LEVEL >= 1:
                   percent = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
                   info_msg = "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "... [ " + percent + " ]"
@@ -428,12 +429,13 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
               raise
 
             except urllib2.URLError, e: 
-              err_msg = str(e).replace(": "," (") + ")." 
-              print settings.print_critical_msg(err_msg)
               warn_msg = "It seems that you don't have permissions to "
               warn_msg += "read and/or write files in '" + settings.WEB_ROOT + "'."
               sys.stdout.write("\r" + settings.print_warning_msg(warn_msg))
-              print ""
+              err_msg = str(e).replace(": "," (") + ")."
+              if menu.options.verbose > 1:
+                print ""
+              print settings.print_critical_msg(err_msg)
               # Provide custom server's root directory.
               custom_web_root(url, timesec, filename, http_request_method, url_time_response)
               continue
