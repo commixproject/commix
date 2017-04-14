@@ -106,7 +106,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "1.9.17"
+VERSION_NUM = "1.9.18"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"
@@ -495,7 +495,7 @@ TARGET_APPLICATION = ""
 # Unsupported target application(s) [1]
 # [1] https://github.com/commixproject/commix/wiki/Target-applications
 UNSUPPORTED_TARGET_APPLICATION = [ 
-    "JSP"
+    ""
 ]
 
 REVERSE_TCP = False

