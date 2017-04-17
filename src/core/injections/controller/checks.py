@@ -542,18 +542,18 @@ def print_non_listed_params(check_parameters, http_request_method, header_name):
         warn_msg += "."
         print settings.print_warning_msg(warn_msg)
 
-"""
-Check for whitespaces
-"""
-def check_whitespaces():
-  if settings.WHITESPACE[0] != "%20" and settings.WHITESPACE[0] != urllib.unquote("%20"):
-    warn_msg = "Whitespaces are important for time-relative techniques, "
-    warn_msg += "thus whitespace characters had been reset to default."
-    print settings.print_warning_msg(warn_msg)
-  if settings.WHITESPACE[0] != urllib.unquote("%20"):
-    whitespace = " "
-    return whitespace  
 
+# """
+# Check for whitespaces
+# """
+# def check_whitespaces():
+#   if settings.WHITESPACE[0] != "%20" and settings.WHITESPACE[0] != urllib.unquote("%20"):
+#     warn_msg = "Whitespaces are important for time-relative techniques, "
+#     warn_msg += "thus whitespace characters had been reset to default."
+#     print settings.print_warning_msg(warn_msg)
+#   if settings.WHITESPACE[0] != urllib.unquote("%20"):
+#     whitespace = " "
+#     return whitespace  
 """
 Check for loaded tamper scripts
 """
