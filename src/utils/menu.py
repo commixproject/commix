@@ -406,7 +406,7 @@ injection.add_option("--delay",
 injection.add_option("--time-sec", 
                 action="store",
                 dest="timesec",
-                help="Seconds to delay the OS response for time-related injection techniques (Default 1).")
+                help="Seconds to delay the OS response (Default 1).")
 
 injection.add_option("--tmp-path", 
                 action="store",

@@ -187,7 +187,9 @@ def cb_injection_handler(url, timesec, filename, http_request_method):
               # Try target page reload (if it is required).
               if settings.URL_RELOAD:
                 response = requests.url_reload(url, timesec)
+
               # Evaluate test results.
+              time.sleep(timesec)
               shell = cb_injector.injection_test_results(response, TAG, randvcalc)
 
               if not settings.VERBOSITY_LEVEL >= 1:
@@ -400,6 +402,7 @@ def cb_injection_handler(url, timesec, filename, http_request_method):
                         return True 
                     else:
                       # Command execution results.
+                      time.sleep(timesec)
                       response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
                       # Try target page reload (if it is required).
                       if settings.URL_RELOAD:

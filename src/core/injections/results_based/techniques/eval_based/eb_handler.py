@@ -209,6 +209,7 @@ def eb_injection_handler(url, timesec, filename, http_request_method):
                 response = requests.url_reload(url, timesec)
               # Evaluate test results.
               shell = eb_injector.injection_test_results(response, TAG, randvcalc)
+              time.sleep(timesec)
 
               if not settings.VERBOSITY_LEVEL >= 1:
                 percent = ((i*100)/total)
@@ -421,6 +422,7 @@ def eb_injection_handler(url, timesec, filename, http_request_method):
                         return True 
                     else:
                       # The main command injection exploitation.
+                      time.sleep(timesec)
                       response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
                       # Try target page reload (if it is required).
                       if settings.URL_RELOAD:

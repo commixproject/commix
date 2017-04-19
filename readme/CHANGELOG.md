@@ -1,4 +1,5 @@
 ## Version 1.9 (upcoming)
+* Revised: Minor improvement in results-based techniques, for delaying the OS responses depending on the user-provided time delay.
 * Revised: The time-related ("time-based"/"tempfile-based") payloads, have been shortly revised.
 * Revised: Minor improvement in file-based technique, for delaying the OS responses depending on the user-provided time delay.
 * Fixed: Minor improvement in file-based technique, regarding τhe directory path that the output file is saved.
