@@ -48,10 +48,8 @@ def injection_test(payload, http_request_method, url):
 
   # Check if defined method is GET (Default).
   if http_request_method == "GET":
-    
-    # Check if its not specified the 'INJECT_HERE' tag
-    #url = parameters.do_GET_check(url)
-    
+    if " " in payload:
+      payload = payload.replace(" ","%20")
     # Define the vulnerable parameter
     vuln_parameter = parameters.vuln_GET_param(url)
     target = re.sub(settings.INJECT_TAG, payload, url)
