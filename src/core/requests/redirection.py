@@ -50,8 +50,8 @@ def do_check(url):
                                ) 
           else: 
             err_msg = str(urllib2.HTTPError(req.get_full_url(), code, msg, headers, fp)).replace(": "," (")
-            print settings.print_error_msg(err_msg + ").")
-            sys.exit(0)
+            print settings.print_critical_msg(err_msg + ").")
+            raise SystemExit()
               
   class HTTPMethodFallback(urllib2.BaseHandler):
     """
@@ -77,30 +77,35 @@ def do_check(url):
                   urllib2.HTTPErrorProcessor, 
                   urllib2.HTTPSHandler]:
       opener.add_handler(handler())
+  try:
+    response = opener.open(HeadRequest(url))
+    redirected_url = response.geturl()
 
-  response = opener.open(HeadRequest(url))
-  redirected_url = response.geturl()
+    if redirected_url != url:
+      while True:
+        if not menu.options.batch:
+          question_msg = "Do you want to follow the identified redirection? [Y/n] > "
+          sys.stdout.write(settings.print_question_msg(question_msg))
+          redirection_option = sys.stdin.readline().replace("\n","").lower()
+        else:
+          redirection_option = ""  
+        if len(redirection_option) == 0 or redirection_option in settings.CHOICE_YES:
+          if menu.options.batch:
+            info_msg = "Following redirection to '" + redirected_url + "'. "
+            print settings.print_info_msg(info_msg)
+          return redirected_url
+        elif redirection_option in settings.CHOICE_NO:
+          return url  
+        elif redirection_option in settings.CHOICE_QUIT:
+          sys.exit(0)
+        else:
+          err_msg = "'" + redirection_option + "' is not a valid answer."  
+          print settings.print_error_msg(err_msg)
+          pass
+    else:
+      return url
 
-  if redirected_url != url:
-    while True:
-      if not menu.options.batch:
-        question_msg = "Do you want to follow the identified redirection? [Y/n] > "
-        sys.stdout.write(settings.print_question_msg(question_msg))
-        redirection_option = sys.stdin.readline().replace("\n","").lower()
-      else:
-        redirection_option = ""  
-      if len(redirection_option) == 0 or redirection_option in settings.CHOICE_YES:
-        if menu.options.batch:
-          info_msg = "Following redirection to '" + redirected_url + "'. "
-          print settings.print_info_msg(info_msg)
-        return redirected_url
-      elif redirection_option in settings.CHOICE_NO:
-        return url  
-      elif redirection_option in settings.CHOICE_QUIT:
-        sys.exit(0)
-      else:
-        err_msg = "'" + redirection_option + "' is not a valid answer."  
-        print settings.print_error_msg(err_msg)
-        pass
-  else:
-    return url
+  except urllib2.HTTPError, err:
+    err_msg = str(err).replace(": "," (")
+    print settings.print_critical_msg(err_msg + ").")
+    raise SystemExit()
