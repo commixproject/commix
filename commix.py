@@ -357,6 +357,10 @@ def main(filename, url, init_test):
           settings.SYS_USERS  = "echo $(" + settings.SYS_USERS + ")"
           settings.SYS_PASSES  = "echo $(" + settings.SYS_PASSES + ")"
 
+        # Load tamper scripts
+        if menu.options.tamper:
+          checks.tamper_scripts()
+
         # Check if defined "--file-upload" option.
         if menu.options.file_upload:
           if not re.match(settings.VALID_URL_FORMAT, menu.options.file_upload):
@@ -522,10 +526,6 @@ def main(filename, url, init_test):
                 print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
               warn_msg = "Heuristics have failed to identify target application."
               print settings.print_warning_msg(warn_msg)
-
-            # Load tamper scripts
-            if menu.options.tamper:
-              checks.tamper_scripts()
 
             # Store the Server's root dir
             settings.DEFAULT_WEB_ROOT= settings.WEB_ROOT
