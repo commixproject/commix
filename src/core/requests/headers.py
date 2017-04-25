@@ -133,6 +133,7 @@ def check_http_traffic(request):
       opener.open(request)
     except:
       pass  
+      
   response = urllib2.urlopen(request)
   # Check the HTTP response headers.
   http_response(response.info())

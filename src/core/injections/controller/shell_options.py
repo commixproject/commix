@@ -65,6 +65,8 @@ def execute_shell(separator, TAG, cmd, prefix, suffix, whitespace, http_request_
     shell = eb_injector.injection_results(response, TAG, cmd)
   else:
     whitespace = settings.WHITESPACE[0]
+    if whitespace == " ":
+      whitespace = urllib.quote(whitespace) 
     # Command execution results.
     start = time.time()
     response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
