@@ -133,13 +133,19 @@ def check_http_traffic(request):
       opener.open(request)
     except:
       pass  
-      
-  response = urllib2.urlopen(request)
-  # Check the HTTP response headers.
-  http_response(response.info())
-  # Check the HTTP response content.
-  http_response_content(response.read())
-  return response
+
+  try:
+    response = urllib2.urlopen(request)
+    # Check the HTTP response headers.
+    http_response(response.info())
+    # Check the HTTP response content.
+    http_response_content(response.read())
+    return response
+
+  except urllib2.HTTPError, err:
+    err_msg = str(err).replace(": "," (")
+    print settings.print_critical_msg(err_msg + ").")
+    raise SystemExit()
 
 """
 Check for added headers.
