@@ -169,10 +169,13 @@ Add any executed command and
 execution output result in log files.
 """
 def executed_command(filename, cmd, output):
-  output_file = open(filename, "a")
-  output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + "Executed command: " +  cmd + "\n")
-  output_file.write("    " + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_SIGN) + "Execution output: " +  output + "\n")
-  output_file.close()
+  try:
+    output_file = open(filename, "a")
+    output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + "Executed command: " +  cmd + "\n")
+    output_file.write("    " + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_SIGN) + "Execution output: " +  output + "\n")
+    output_file.close()
+  except TypeError:
+    pass
 
 """
 Log files cration notification.
