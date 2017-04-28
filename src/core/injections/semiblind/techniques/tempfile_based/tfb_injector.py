@@ -499,6 +499,6 @@ def export_injection_results(cmd, separator, output, check_how_long):
       print "\n"
   else:
     err_msg = "The '" + cmd + "' command, does not return any output."
-    print "\n" + settings.print_critical_msg(err_msg) + "\n"
+    print settings.print_critical_msg(err_msg) + "\n"
 
 #eof

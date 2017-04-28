@@ -436,16 +436,15 @@ def eb_injection_handler(url, timesec, filename, http_request_method):
                           session_handler.store_cmd(url, cmd, shell, vuln_parameter)
                       else:
                         shell = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
-                      
-                      #if shell:
+
                       if shell != "":
                         shell = "".join(str(p) for p in shell)
                         # Update logs with executed cmds and execution results.
                         logs.executed_command(filename, cmd, shell)
-                        # if settings.VERBOSITY_LEVEL >= 1:
-                        #   print ""
                         print "\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n"
                       else:
+                        if settings.VERBOSITY_LEVEL >= 1:
+                          print ""
                         err_msg = "The '" + cmd + "' command, does not return any output."
                         print settings.print_critical_msg(err_msg) + "\n"
                     
