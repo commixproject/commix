@@ -193,7 +193,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
           pass
         else:
           # Provide custom server's root directory.
-          custom_web_root()
+          custom_web_root(url, timesec, filename, http_request_method, url_time_response)
 
         path = urlparse.urlparse(url).path
         path_parts = path.split('/')
