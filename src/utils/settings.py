@@ -107,7 +107,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation T
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "1.9.29"
-STABLE_VERSION = False
+STABLE_VERSION = True
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"
 else:
