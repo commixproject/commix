@@ -129,11 +129,21 @@ def check_http_traffic(request):
   if settings.REVERSE_TCP == False and settings.BIND_TCP == False:
     opener = urllib2.OpenerDirector()
     opener.add_handler(connection_handler())
-    try:
-      opener.open(request)
-    except:
-      pass  
-
+    response = False
+    current_attempt = 0
+    while not response and current_attempt <= settings.MAX_RETRIES:
+      try:
+        opener.open(request)
+        response = True
+      except urllib2.URLError, err_msg:
+        if settings.VERBOSITY_LEVEL >= 2:
+          info_msg = str(err_msg.args[0]).split("] ")[1] + ", "
+          info_msg += "please wait while retring the request(s)."
+          print settings.print_info_msg(info_msg)
+        current_attempt = current_attempt + 1
+        time.sleep(3)
+        pass
+        
   try:
     response = urllib2.urlopen(request)
     # Check the HTTP response headers.

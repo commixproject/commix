@@ -259,6 +259,13 @@ request.add_option("--ignore-redirects",
                 default=False,
                 help="Ignore redirection attempts.")
 
+request.add_option("--retries",
+                action="store",
+                dest="retries",
+                default=False,
+                type="int",
+                help="Retries when the connection timeouts (Default: 3).")
+
 # Enumeration options
 enumeration = OptionGroup(parser, Style.BRIGHT + "Enumeration" + Style.RESET_ALL, 
                         "These options can be used to enumerate the target host.")

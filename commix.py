@@ -875,6 +875,10 @@ if __name__ == '__main__':
       print settings.print_critical_msg(err_msg)
       sys.exit(0)
 
+    # Retries when the connection timeouts.
+    if menu.options.retries:
+      settings.MAX_RETRIES = menu.options.retries
+
     # Seconds to delay between each HTTP request.
     if menu.options.delay > "0":
       settings.DELAY = menu.options.delay

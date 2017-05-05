@@ -1,3 +1,6 @@
+## Version 2.0 (upcoming)
+* Added: New option "--retries" that retries request(s) when the connection timeouts.
+
 ## Version 1.9 (2017-05-02)
 * Revised: Minor improvement in results-based techniques, for delaying the OS responses depending on the user-provided time delay.
 * Revised: The time-related ("time-based"/"tempfile-based") payloads, have been shortly revised.
