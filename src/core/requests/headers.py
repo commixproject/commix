@@ -153,6 +153,8 @@ def check_http_traffic(request):
     return response
 
   except urllib2.HTTPError, err:
+    if settings.VERBOSITY_LEVEL < 2:
+      print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
     err_msg = str(err).replace(": "," (")
     print settings.print_critical_msg(err_msg + ").")
     raise SystemExit()
