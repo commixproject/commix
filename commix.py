@@ -115,8 +115,8 @@ def examine_request(request):
       raise SystemExit 
 
   except urllib2.URLError, err_msg:
-    if settings.VERBOSITY_LEVEL < 2:
-      print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
+    # if settings.VERBOSITY_LEVEL < 2:
+    #   print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
     err_msg = str(err_msg.args[0]).split("] ")[1] + "." 
     if menu.options.bulkfile:
       warn_msg = "Skipping URL '" + url + "' - " + err_msg
