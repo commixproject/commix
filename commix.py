@@ -114,12 +114,13 @@ def examine_request(request):
       print settings.print_critical_msg(err_msg)
       raise SystemExit 
 
-  except urllib2.URLError, err_msg:
+  except urllib2.URLError, e:
     # if settings.VERBOSITY_LEVEL < 2:
     #   print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
-    err_msg = str(err_msg.args[0]).split("] ")[1] + "." 
+    err_msg = "Unable to connect to the target URL "
+    err_msg += "(" + str(e.args[0]).split("] ")[1] + ")." 
     if menu.options.bulkfile:
-      warn_msg = "Skipping URL '" + url + "' - " + err_msg
+      warn_msg = "Skipping URL '" + url + "' - " + e
       print settings.print_critical_msg(warn_msg)
       if settings.EOF:
         print "" 

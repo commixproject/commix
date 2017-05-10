@@ -146,6 +146,7 @@ def check_http_traffic(request):
           warn_msg += " the switch '--random-agent' and/or proxy switch."
           print settings.print_warning_msg(warn_msg)
         if settings.VERBOSITY_LEVEL >= 2:
+          #info_msg = str(err_msg.args[0]).split("] ")[1] + ". "
           info_msg = "Please wait while retring the request(s)."
           print settings.print_info_msg(info_msg) 
         current_attempt = current_attempt + 1
