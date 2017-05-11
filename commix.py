@@ -851,6 +851,9 @@ if __name__ == '__main__':
       install.installer()
       sys.exit(0)
 
+    if menu.options.mobile:
+      menu.options.agent = menu.mobile_user_agents()
+
     if menu.options.wizard:
       if not menu.options.url:
         while True:

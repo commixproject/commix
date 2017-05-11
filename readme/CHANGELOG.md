@@ -1,4 +1,5 @@
 ## Version 2.0 (upcoming)
+* Added: New option "--mobile" that imitates smartphone through HTTP User-Agent header.
 * Added: New option "--retries" that retries request(s) when the connection timeouts.
 
 ## Version 1.9 (2017-05-02)

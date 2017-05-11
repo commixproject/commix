@@ -494,6 +494,12 @@ misc.add_option("--skip-waf",
                 default=False,
                 help="Skip heuristic detection of WAF/IPS/IDS protection.")
 
+misc.add_option("--mobile", 
+                action="store_true",
+                dest="mobile",
+                default=False,
+                help="Imitate smartphone through HTTP User-Agent header.")
+
 misc.add_option("--offline", 
                 action="store_true",
                 dest="offline",
@@ -575,7 +581,39 @@ Type '""" + Style.BRIGHT + """quit""" + Style.RESET_ALL + """' (or use <Ctrl-C>)
 Type '""" + Style.BRIGHT + """os_shell""" + Style.RESET_ALL + """' to get into an operating system command shell.
 Type '""" + Style.BRIGHT + """reverse_tcp""" + Style.RESET_ALL + """' to get a reverse TCP connection.
 """
-  
+
+"""
+The available mobile user agents.
+"""
+def mobile_user_agents():
+
+    print """---[ """ + Style.BRIGHT + Fore.BLUE + """Available Mobile HTTP User-Agent headers""" + Style.RESET_ALL + """ ]---     
+Type '""" + Style.BRIGHT + """1""" + Style.RESET_ALL + """' for BlackBerry 9900 HTTP User-Agent header.
+Type '""" + Style.BRIGHT + """2""" + Style.RESET_ALL + """' for Samsung Galaxy S HTTP User-Agent header.
+Type '""" + Style.BRIGHT + """3""" + Style.RESET_ALL + """' for HP iPAQ 6365 HTTP User-Agent header.
+Type '""" + Style.BRIGHT + """4""" + Style.RESET_ALL + """' for HTC Sensation HTTP User-Agent header.
+Type '""" + Style.BRIGHT + """5""" + Style.RESET_ALL + """' for Apple iPhone 4s HTTP User-Agent header.
+Type '""" + Style.BRIGHT + """6""" + Style.RESET_ALL + """' for Google Nexus 7 HTTP User-Agent header.
+Type '""" + Style.BRIGHT + """7""" + Style.RESET_ALL + """' for Nokia N97 HTTP User-Agent header.
+"""
+    while True:
+      question_msg = "Which mobile HTTP User-Agent header do you want to use? "
+      sys.stdout.write(settings.print_question_msg(question_msg))
+      mobile_user_agent = sys.stdin.readline().replace("\n","").lower()
+      try:
+        if int(mobile_user_agent) in range(0,len(settings.MOBILE_USER_AGENT_LIST)):
+          return settings.MOBILE_USER_AGENT_LIST[int(mobile_user_agent)]
+        elif mobile_user_agent.lower() == "q":
+          raise SystemExit()
+        else:
+          err_msg = "'" + mobile_user_agent + "' is not a valid answer."  
+          print settings.print_error_msg(err_msg)
+          pass
+      except ValueError:
+        err_msg = "'" + mobile_user_agent + "' is not a valid answer."  
+        print settings.print_error_msg(err_msg)
+        pass     
+
 """
 The tab compliter (shell options).
 """
