@@ -174,7 +174,7 @@ request.add_option("--referer",
 request.add_option("--user-agent",
                 action="store",
                 dest="agent",
-                default = settings.APPLICATION + "/" + settings.VERSION + " (" + settings.APPLICATION_URL + ")",
+                default = settings.DEFAULT_USER_AGENT,
                 help="HTTP User-Agent header.")
 
 request.add_option("--random-agent",
@@ -596,6 +596,7 @@ Type '""" + Style.BRIGHT + """5""" + Style.RESET_ALL + """' for Apple iPhone 4s 
 Type '""" + Style.BRIGHT + """6""" + Style.RESET_ALL + """' for Google Nexus 7 HTTP User-Agent header.
 Type '""" + Style.BRIGHT + """7""" + Style.RESET_ALL + """' for Nokia N97 HTTP User-Agent header.
 """
+
     while True:
       question_msg = "Which mobile HTTP User-Agent header do you want to use? "
       sys.stdout.write(settings.print_question_msg(question_msg))

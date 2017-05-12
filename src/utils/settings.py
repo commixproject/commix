@@ -106,7 +106,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "2.0.5"
+VERSION_NUM = "2.0.6"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"
@@ -116,6 +116,9 @@ YEAR = "2014-2017"
 AUTHOR_TWITTER = "@ancst" 
 APPLICATION_URL = "http://commixproject.com" 
 APPLICATION_TWITTER = "@commixproject" 
+
+# Default User-Agent
+DEFAULT_USER_AGENT = APPLICATION + "/" + VERSION + " (" + APPLICATION_URL + ")"
 
 # Inject Tag
 INJECT_TAG = "INJECT_HERE"

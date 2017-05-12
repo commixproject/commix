@@ -288,7 +288,12 @@ def main(filename, url, init_test):
 
     # Check if defined "--random-agent" option.
     if menu.options.random_agent:
-      menu.options.agent = random.choice(settings.USER_AGENT_LIST)
+      if (menu.options.agent != settings.DEFAULT_USER_AGENT) or menu.options.mobile:
+        err_msg = "The option '--random-agent' is incompatible with option '--user-agent' or switch '--mobile'."
+        print settings.print_critical_msg(err_msg)
+        sys.exit(0)
+      else:
+        menu.options.agent = random.choice(settings.USER_AGENT_LIST)
   
     # Check if defined "--url" or "-m" option.
     if url:
@@ -851,8 +856,14 @@ if __name__ == '__main__':
       install.installer()
       sys.exit(0)
 
+    # Check if defined "--mobile" option.
     if menu.options.mobile:
-      menu.options.agent = menu.mobile_user_agents()
+      if (menu.options.agent != settings.DEFAULT_USER_AGENT) or menu.options.random_agent:
+        err_msg = "The switch '--mobile' is incompatible with options '--user-agent', '--random-agent'."
+        print settings.print_critical_msg(err_msg)
+        sys.exit(0)
+      else:
+        menu.options.agent = menu.mobile_user_agents()
 
     if menu.options.wizard:
       if not menu.options.url:
