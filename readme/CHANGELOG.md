@@ -1,4 +1,5 @@
 ## Version 2.0 (upcoming)
+* Updated: Minor update in the list of the User-Agents (regarding the "--random-agent" option).
 * Added: New option "--mobile" that imitates smartphone through HTTP User-Agent header.
 * Added: New option "--retries" that retries request(s) when the connection timeouts.
 
