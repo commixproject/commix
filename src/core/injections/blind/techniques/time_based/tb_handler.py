@@ -269,8 +269,8 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                       settings.FOUND_DIFF = how_long - timesec
                       if false_positive_warning:
                         time.sleep(1)
-                      randv1 = random.randrange(0, 1)
-                      randv2 = random.randrange(1, 2)
+                      randv1 = random.randrange(1, 10)
+                      randv2 = random.randrange(1, 10)
                       randvcalc = randv1 + randv2
 
                       if settings.TARGET_OS == "win":

