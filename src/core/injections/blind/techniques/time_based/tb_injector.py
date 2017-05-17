@@ -262,6 +262,8 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
     info_msg = "Presuming the execution output, please wait... " 
     if menu.options.verbose < 1 :
       info_msg +=  "[ " +str(percent)+ "% ]"
+    elif menu.options.verbose == 1 :
+      info_msg +=  ""
     else:
       info_msg +=  "\n"  
     sys.stdout.write("\r" + settings.print_info_msg(info_msg))
@@ -436,9 +438,9 @@ def false_positive_check(separator, TAG, cmd, whitespace, prefix, suffix, timese
       found_chars = True
       break
 
-  if found_chars == True : 
+  if found_chars == True :
     if settings.TARGET_OS == "win":
-      cmd = previous_cmd 
+      cmd = previous_cmd
     num_of_chars = output_length + 1
     check_start = 0
     check_end = 0

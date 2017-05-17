@@ -254,12 +254,15 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
     check_start = time.time()
     output = []
     percent = "0.0"
-
-    info_msg = "Grabbing the output from '" + OUTPUT_TEXTFILE 
-    info_msg += "', please wait... [ " +str(percent)+ "% ]"
+    info_msg = "Grabbing the output from '" + OUTPUT_TEXTFILE + "', please wait... "
+    if menu.options.verbose < 1 :
+      info_msg +=  "[ " +str(percent)+ "% ]"
+    elif menu.options.verbose == 1 :
+      info_msg +=  ""
+    else:
+      info_msg +=  "\n"  
     sys.stdout.write("\r" + settings.print_info_msg(info_msg))
     sys.stdout.flush()
-
     for num_of_chars in range(1, int(num_of_chars)):
       if num_of_chars == 1:
         # Checks {A..Z},{a..z},{0..9},{Symbols}
