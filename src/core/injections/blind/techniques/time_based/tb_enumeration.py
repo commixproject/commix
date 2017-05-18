@@ -413,7 +413,7 @@ def system_users(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timese
 
     except IndexError:
       sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
-      warn_msg = "It seems that you don't have permissions to read '" 
+      warn_msg = "Some kind of WAF/IPS/IDS probably blocks the attempt to read '" 
       warn_msg += settings.PASSWD_FILE + "' to enumerate users entries." 
       sys.stdout.write("\n" + settings.print_warning_msg(warn_msg))
       sys.stdout.flush()
