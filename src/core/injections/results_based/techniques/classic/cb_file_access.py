@@ -41,8 +41,9 @@ def file_read(separator, TAG, prefix, suffix, whitespace, http_request_method, u
     cmd = settings.WIN_FILE_READ + file_to_read
   else:
     cmd = settings.FILE_READ + file_to_read
-  response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
-  if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
+  if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
+    # Command execution results.
+    response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
     # Perform target page reload (if it is required).
     if settings.URL_RELOAD:
       response = requests.url_reload(url, timesec)

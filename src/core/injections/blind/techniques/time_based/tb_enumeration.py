@@ -34,7 +34,7 @@ def powershell_version(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, 
   cmd = settings.PS_VERSION
   if alter_shell:
     cmd = cmd.replace("'","\\'")
-  if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
+  if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
     # The main command injection exploitation.
     check_how_long, output = tb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
     session_handler.store_cmd(url, cmd, output, vuln_parameter)
@@ -70,7 +70,7 @@ Hostname enumeration
 """
 def hostname(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response):
   cmd = settings.HOSTNAME
-  if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
+  if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
     # The main command injection exploitation.
     check_how_long, output = tb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
     session_handler.store_cmd(url, cmd, output, vuln_parameter)
@@ -99,7 +99,7 @@ def system_information(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, 
   if settings.TARGET_OS == "win":
     settings.RECOGNISE_OS = settings.WIN_RECOGNISE_OS
   cmd = settings.RECOGNISE_OS        
-  if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
+  if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
     check_how_long, output = tb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
     session_handler.store_cmd(url, cmd, output, vuln_parameter)
     new_line = "\n"
@@ -114,7 +114,7 @@ def system_information(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, 
       cmd = settings.WIN_RECOGNISE_HP
     else:
       cmd = settings.RECOGNISE_HP
-    if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
+    if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
       # The main command injection exploitation.
       check_how_long, output = tb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
       session_handler.store_cmd(url, cmd, output, vuln_parameter)
@@ -145,7 +145,7 @@ def current_user(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timese
   if settings.TARGET_OS == "win":
     settings.CURRENT_USER = settings.WIN_CURRENT_USER
   cmd = settings.CURRENT_USER
-  if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
+  if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
     check_how_long, output = tb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
     session_handler.store_cmd(url, cmd, output, vuln_parameter)
     new_line = "\n"
@@ -162,7 +162,7 @@ def current_user(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timese
         cmd = settings.IS_ADMIN
       else:  
         cmd = settings.IS_ROOT 
-      if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
+      if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
         check_how_long, output = tb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
         session_handler.store_cmd(url, cmd, output, vuln_parameter)
         new_line = "\n"
@@ -221,7 +221,7 @@ def system_users(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timese
     if alter_shell:
       settings.SYS_USERS = settings.SYS_USERS.replace("'","\\'")
   cmd = settings.SYS_USERS  
-  if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
+  if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
     try:
       check_how_long, output = tb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
       session_handler.store_cmd(url, cmd, output, vuln_parameter)
@@ -428,7 +428,7 @@ def system_passwords(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, ti
     pass
   else:
     cmd = settings.SYS_PASSES           
-    if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
+    if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
       check_how_long, output = tb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
       if output == False:
         output = ""
@@ -494,7 +494,7 @@ Single os-shell execution
 def single_os_cmd_exec(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response):
   cmd = menu.options.os_cmd
   #check_how_long, output = tb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
-  if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
+  if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
     check_how_long, output = tb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
     session_handler.store_cmd(url, cmd, output, vuln_parameter)
     return check_how_long, output

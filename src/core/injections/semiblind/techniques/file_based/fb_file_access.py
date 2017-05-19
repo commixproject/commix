@@ -39,9 +39,10 @@ def file_read(separator, payload, TAG, timesec, prefix, suffix, whitespace, http
   if settings.TARGET_OS == "win":
     cmd = settings.WIN_FILE_READ + file_to_read
   else:
-    cmd = settings.FILE_READ + file_to_read 
-  response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-  if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
+    cmd = settings.FILE_READ + file_to_read
+  if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
+    # Command execution results.
+    response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
     # Evaluate injection results.
     shell = fb_injector.injection_results(url, OUTPUT_TEXTFILE, timesec)
     shell = "".join(str(p) for p in shell)

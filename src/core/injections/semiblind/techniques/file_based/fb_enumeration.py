@@ -38,10 +38,10 @@ def powershell_version(separator, payload, TAG, timesec, prefix, suffix, whitesp
     cmd = cmd.replace("'","\\'")
   else:
     cmd = "\"" + cmd + "\""
-  #Command execution results.
-  response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
   # Evaluate injection results.
-  if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
+  if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
+    # Command execution results.
+    response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
     # Evaluate injection results.
     ps_version = fb_injector.injection_results(url, OUTPUT_TEXTFILE, timesec)
     ps_version = "".join(str(p) for p in ps_version)
@@ -76,8 +76,9 @@ def hostname(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_
   if settings.TARGET_OS == "win":
     settings.HOSTNAME = settings.WIN_HOSTNAME 
   cmd = settings.HOSTNAME
-  response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-  if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
+  if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
+    # Command execution results.
+    response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
     # Evaluate injection results.
     shell = fb_injector.injection_results(url, OUTPUT_TEXTFILE, timesec)
     shell = "".join(str(p) for p in shell)
@@ -106,8 +107,9 @@ def system_information(separator, payload, TAG, timesec, prefix, suffix, whitesp
   if settings.TARGET_OS == "win":
     settings.RECOGNISE_OS = settings.WIN_RECOGNISE_OS
   cmd = settings.RECOGNISE_OS        
-  response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-  if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
+  if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
+    # Command execution results.
+    response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
     # Evaluate injection results.
     target_os = fb_injector.injection_results(url, OUTPUT_TEXTFILE, timesec)
     target_os = "".join(str(p) for p in target_os)
@@ -119,8 +121,9 @@ def system_information(separator, payload, TAG, timesec, prefix, suffix, whitesp
       cmd = settings.WIN_RECOGNISE_HP
     else:
       cmd = settings.RECOGNISE_HP
-    response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-    if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
+    if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
+      # Command execution results.
+      response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
       # Evaluate injection results.
       target_arch = fb_injector.injection_results(url, OUTPUT_TEXTFILE, timesec)
       target_arch = "".join(str(p) for p in target_arch)
@@ -151,8 +154,9 @@ def current_user(separator, payload, TAG, timesec, prefix, suffix, whitespace, h
   if settings.TARGET_OS == "win":
     settings.CURRENT_USER = settings.WIN_CURRENT_USER
   cmd = settings.CURRENT_USER
-  response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-  if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
+  if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
+    # Command execution results.
+    response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
     # Evaluate injection results.
     cu_account = fb_injector.injection_results(url, OUTPUT_TEXTFILE, timesec)
     cu_account = "".join(str(p) for p in cu_account)
@@ -165,9 +169,10 @@ def current_user(separator, payload, TAG, timesec, prefix, suffix, whitespace, h
       if settings.TARGET_OS == "win":
         cmd = settings.IS_ADMIN
       else:  
-        cmd = settings.IS_ROOT       
+        cmd = settings.IS_ROOT  
+      if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
+      # Command execution results.
       response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-      if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
         # Evaluate injection results.
         shell = fb_injector.injection_results(url, OUTPUT_TEXTFILE, timesec)
         shell = "".join(str(p) for p in shell)
@@ -226,8 +231,9 @@ def system_users(separator, payload, TAG, timesec, prefix, suffix, whitespace, h
     else:  
       settings.SYS_USERS = "\"" + settings.SYS_USERS + "\"" 
   cmd = settings.SYS_USERS 
-  response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-  if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
+  if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
+    # Command execution results.
+    response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
     # Evaluate injection results.
     sys_users = fb_injector.injection_results(url, OUTPUT_TEXTFILE, timesec)
     sys_users = "".join(str(p) for p in sys_users)
@@ -424,8 +430,9 @@ def system_passwords(separator, payload, TAG, timesec, prefix, suffix, whitespac
     pass 
   else:
     cmd = settings.SYS_PASSES            
-    response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-    if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
+    if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
+      # Command execution results.
+      response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
       # Evaluate injection results.
       sys_passes = fb_injector.injection_results(url, OUTPUT_TEXTFILE, timesec)
       sys_passes = "".join(str(p) for p in sys_passes)
@@ -488,8 +495,9 @@ Single os-shell execution
 """
 def single_os_cmd_exec(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
   cmd =  menu.options.os_cmd
-  response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-  if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
+  if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
+    # Command execution results.
+    response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
     # Evaluate injection results.
     shell = fb_injector.injection_results(url, OUTPUT_TEXTFILE, timesec)
     shell = "".join(str(p) for p in shell)

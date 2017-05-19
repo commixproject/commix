@@ -38,10 +38,10 @@ def powershell_version(separator, TAG, prefix, suffix, whitespace, http_request_
   cmd = settings.PS_VERSION
   if alter_shell:
     cmd = cmd.replace("'","\\'")
-  #Command execution results.
-  response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
   # Evaluate injection results.
-  if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
+  if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
+    # Command execution results.
+    response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
     # Perform target page reload (if it is required).
     if settings.URL_RELOAD:
       response = requests.url_reload(url, timesec)
@@ -80,8 +80,9 @@ def hostname(separator, TAG, prefix, suffix, whitespace, http_request_method, ur
   if settings.TARGET_OS == "win":
     settings.HOSTNAME = settings.WIN_HOSTNAME 
   cmd = settings.HOSTNAME
-  response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
-  if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
+  if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
+    # Command execution results.
+    response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
     # Perform target page reload (if it is required).
     if settings.URL_RELOAD:
       response = requests.url_reload(url, timesec)
@@ -117,8 +118,9 @@ def system_information(separator, TAG, prefix, suffix, whitespace, http_request_
   if settings.TARGET_OS == "win":
     if alter_shell:
       cmd = "cmd /c " + cmd 
-  response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
-  if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
+  if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
+    # Command execution results.
+    response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
     # Perform target page reload (if it is required).
     if settings.URL_RELOAD:
       response = requests.url_reload(url, timesec)
@@ -134,8 +136,9 @@ def system_information(separator, TAG, prefix, suffix, whitespace, http_request_
       cmd = settings.WIN_RECOGNISE_HP
     else:
       cmd = settings.RECOGNISE_HP
-    response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
-    if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
+    if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
+      # Command execution results.
+      response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
       # Perform target page reload (if it is required).
       if settings.URL_RELOAD:
         response = requests.url_reload(url, timesec)
@@ -169,8 +172,9 @@ def current_user(separator, TAG, prefix, suffix, whitespace, http_request_method
   if settings.TARGET_OS == "win":
     settings.CURRENT_USER = settings.WIN_CURRENT_USER
   cmd = settings.CURRENT_USER
-  response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
-  if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
+  if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
+    # Command execution results.
+    response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
     # Perform target page reload (if it is required).
     if settings.URL_RELOAD:
       response = requests.url_reload(url, timesec)
@@ -188,8 +192,9 @@ def current_user(separator, TAG, prefix, suffix, whitespace, http_request_method
         cmd = settings.IS_ADMIN
       else:  
         cmd = settings.IS_ROOT 
-      response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
-      if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
+      if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
+        # Command execution results.
+        response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
         # Perform target page reload (if it is required).
         if settings.URL_RELOAD:
           response = requests.url_reload(url, timesec)
@@ -253,8 +258,9 @@ def system_users(separator, TAG, prefix, suffix, whitespace, http_request_method
   cmd = settings.SYS_USERS    
   if settings.TARGET_OS == "win":
     cmd = "cmd /c " + cmd 
-  response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
-  if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
+  if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
+    # Command execution results.
+    response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
     # Perform target page reload (if it is required).
     if settings.URL_RELOAD:
       response = requests.url_reload(url, timesec)
@@ -456,8 +462,9 @@ def system_passwords(separator, TAG, prefix, suffix, whitespace, http_request_me
     pass 
   else:
     cmd = settings.SYS_PASSES            
-    response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
-    if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
+    if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
+      # Command execution results.
+      response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
       # Perform target page reload (if it is required).
       if settings.URL_RELOAD:
         response = requests.url_reload(url, timesec)
@@ -523,8 +530,9 @@ Single os-shell execution
 """
 def single_os_cmd_exec(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec):
   cmd =  menu.options.os_cmd
-  response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
-  if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
+  if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
+    # Command execution results.
+    response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
     # Perform target page reload (if it is required).
     if settings.URL_RELOAD:
       response = requests.url_reload(url, timesec)
