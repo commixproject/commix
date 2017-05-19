@@ -171,8 +171,8 @@ def current_user(separator, payload, TAG, timesec, prefix, suffix, whitespace, h
       else:  
         cmd = settings.IS_ROOT  
       if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
-      # Command execution results.
-      response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+        # Command execution results.
+        response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
         # Evaluate injection results.
         shell = fb_injector.injection_results(url, OUTPUT_TEXTFILE, timesec)
         shell = "".join(str(p) for p in shell)
