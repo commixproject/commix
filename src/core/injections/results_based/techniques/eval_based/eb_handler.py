@@ -290,7 +290,7 @@ def eb_injection_handler(url, timesec, filename, http_request_method):
             logs.update_payload(filename, counter, payload) 
             counter = counter + 1
 
-            if not settings.LOAD_SESSION:
+            if not settings.VERBOSITY_LEVEL >= 1 and not settings.LOAD_SESSION:
               print ""
 
             # Print the findings to terminal.
@@ -368,8 +368,8 @@ def eb_injection_handler(url, timesec, filename, http_request_method):
                   pass
             else:
               if menu.file_access_options():
-                if not menu.enumeration_options():
-                  print ""
+                # if not menu.enumeration_options():
+                #   print ""
                 eb_file_access.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec)
                 print ""
 

@@ -54,7 +54,7 @@ def file_read(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
     shell = "".join(str(p) for p in shell)
   except TypeError:
     pass
-  if settings.VERBOSITY_LEVEL >= 1:
+  if settings.VERBOSITY_LEVEL >= 1 and menu.options.ignore_session:
     print ""
   if shell:
     success_msg = "The contents of file '"  

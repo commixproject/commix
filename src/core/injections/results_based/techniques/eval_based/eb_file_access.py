@@ -53,7 +53,7 @@ def file_read(separator, TAG, prefix, suffix, whitespace, http_request_method, u
     session_handler.store_cmd(url, cmd, shell, vuln_parameter)
   else:
     shell = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
-  if settings.VERBOSITY_LEVEL >= 1:
+  if settings.VERBOSITY_LEVEL >= 1 and menu.options.ignore_session:
     print ""
   if shell:
     success_msg = "The contents of file '"  

@@ -168,7 +168,7 @@ def injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_req
         payload = payload.split(settings.COMMENT)[0]
         payload_msg = payload_msg.split(settings.COMMENT)[0]
       info_msg = "Executing the '" + cmd.split(settings.COMMENT)[0] + "' command... "
-      sys.stdout.write("\n" + settings.print_info_msg(info_msg))
+      sys.stdout.write(settings.print_info_msg(info_msg))
       sys.stdout.flush()
       sys.stdout.write("\n" + settings.print_payload(payload).split(settings.COMMENT)[0] + "\n")
 

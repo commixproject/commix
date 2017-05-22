@@ -174,7 +174,7 @@ def injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_meth
       sys.stdout.write(settings.print_info_msg(info_msg))
       sys.stdout.flush()
       sys.stdout.write("\n" + settings.print_payload(payload))
-    if settings.VERBOSITY_LEVEL > 1:
+    if settings.VERBOSITY_LEVEL >= 1 and not menu.options.ignore_session:
       print ""
 
     # Check if defined cookie with "INJECT_HERE" tag

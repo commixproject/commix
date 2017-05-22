@@ -51,8 +51,8 @@ def powershell_version(separator, payload, TAG, timesec, prefix, suffix, whitesp
   try:
     if float(ps_version):
       settings.PS_ENABLED = True
-      if settings.VERBOSITY_LEVEL >= 1:
-        print ""
+      # if settings.VERBOSITY_LEVEL >= 1:
+      #   print ""
       # Output PowerShell's version number
       success_msg = "The PowerShell's version number is " 
       success_msg += ps_version + Style.RESET_ALL + Style.BRIGHT
@@ -86,8 +86,8 @@ def hostname(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_
   else:
     shell = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
   if shell:
-    if settings.VERBOSITY_LEVEL >= 1:
-      print ""
+    # if settings.VERBOSITY_LEVEL >= 1:
+    #   print ""
     success_msg = "The hostname is " +  shell
     sys.stdout.write(settings.print_success_msg(success_msg) + ".\n")
     sys.stdout.flush()
@@ -131,8 +131,8 @@ def system_information(separator, payload, TAG, timesec, prefix, suffix, whitesp
     else:
       target_arch = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
     if target_arch:
-      if settings.VERBOSITY_LEVEL >= 1:
-        print ""
+      # if settings.VERBOSITY_LEVEL >= 1:
+      #   print ""
       success_msg = "The target operating system is " +  target_os + Style.RESET_ALL  
       success_msg += Style.BRIGHT + " and the hardware platform is " +  target_arch
       sys.stdout.write(settings.print_success_msg(success_msg) + ".\n")
@@ -169,7 +169,7 @@ def current_user(separator, payload, TAG, timesec, prefix, suffix, whitespace, h
       if settings.TARGET_OS == "win":
         cmd = settings.IS_ADMIN
       else:  
-        cmd = settings.IS_ROOT  
+        cmd = settings.IS_ROOT       
       if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
         # Command execution results.
         response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
@@ -179,8 +179,8 @@ def current_user(separator, payload, TAG, timesec, prefix, suffix, whitespace, h
         session_handler.store_cmd(url, cmd, shell, vuln_parameter)
       else:
         shell = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
-      if settings.VERBOSITY_LEVEL >= 1:
-        print ""
+      # if settings.VERBOSITY_LEVEL >= 1:
+      #   print ""
       success_msg = "The current user is " +  cu_account  
       sys.stdout.write(settings.print_success_msg(success_msg))
       # Add infos to logs file.    
@@ -205,10 +205,10 @@ def current_user(separator, payload, TAG, timesec, prefix, suffix, whitespace, h
           output_file.write(" and it is privileged.\n")
           output_file.close()
     else:
-      if settings.VERBOSITY_LEVEL >= 1:
-        print ""
-      success_msg = "The current user is " +  cu_account  
-      sys.stdout.write(settings.print_success_msg(success_msg))
+      # if settings.VERBOSITY_LEVEL >= 1:
+      #   print ""
+      success_msg = "The current user is " +  cu_account
+      sys.stdout.write(settings.print_success_msg(success_msg) + ".\n")
       sys.stdout.flush()
       # Add infos to logs file.   
       output_file = open(filename, "a")
@@ -242,8 +242,8 @@ def system_users(separator, payload, TAG, timesec, prefix, suffix, whitespace, h
     sys_users = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
   # Windows users enumeration.
   if settings.TARGET_OS == "win":
-    if settings.VERBOSITY_LEVEL >= 1:
-      print ""
+    # if settings.VERBOSITY_LEVEL >= 1:
+    #   print ""
     info_msg = "Executing the 'net users' command "
     info_msg += "to enumerate users entries... "  
     sys.stdout.write(settings.print_info_msg(info_msg))
@@ -289,8 +289,8 @@ def system_users(separator, payload, TAG, timesec, prefix, suffix, whitespace, h
           else :
             is_privileged = ""
             is_privileged_nh = ""
-          if settings.VERBOSITY_LEVEL >= 1:
-            print ""          
+          # if settings.VERBOSITY_LEVEL >= 1:
+          #   print ""          
           print "    (" +str(count)+ ") '" + Style.BRIGHT +  sys_users_list[user] + Style.RESET_ALL + "'" + Style.BRIGHT + is_privileged + Style.RESET_ALL + "." 
           # Add infos to logs file.   
           output_file = open(filename, "a")
@@ -313,8 +313,8 @@ def system_users(separator, payload, TAG, timesec, prefix, suffix, whitespace, h
       sys.stdout.flush()
       pass
   else:
-    if settings.VERBOSITY_LEVEL >= 1:
-      print ""
+    # if settings.VERBOSITY_LEVEL >= 1:
+    #   print ""
     info_msg = "Fetching '" + settings.PASSWD_FILE 
     info_msg += "' to enumerate users entries... "  
     sys.stdout.write(settings.print_info_msg(info_msg))
@@ -441,8 +441,8 @@ def system_passwords(separator, payload, TAG, timesec, prefix, suffix, whitespac
       sys_passes = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
     if sys_passes == "":
       sys_passes = " "
-      if settings.VERBOSITY_LEVEL >= 1:
-        print ""
+      # if settings.VERBOSITY_LEVEL >= 1:
+      #   print ""
       info_msg = "Fetching '" + settings.SHADOW_FILE 
       info_msg += "' to enumerate users password hashes... "  
       sys.stdout.write(settings.print_info_msg(info_msg))
@@ -505,8 +505,8 @@ def single_os_cmd_exec(separator, payload, TAG, timesec, prefix, suffix, whitesp
   else:
     shell = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
   if shell:
-    if settings.VERBOSITY_LEVEL >= 1:
-      print ""
+    # if settings.VERBOSITY_LEVEL >= 1:
+    #   print ""
     if shell != "":
       print Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL
     else:
@@ -519,8 +519,8 @@ Check the defined options
 """
 def do_check(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
   
-  if not settings.VERBOSITY_LEVEL >= 1 and not settings.ENUMERATION_DONE:
-    print ""
+  # if not settings.VERBOSITY_LEVEL >= 1 and not settings.ENUMERATION_DONE:
+  #   print ""
 
   # Check if PowerShell is enabled.
   if not menu.options.ps_version and settings.TARGET_OS == "win":

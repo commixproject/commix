@@ -209,9 +209,11 @@ def injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_meth
     # Check if defined "--verbose" option.
     if settings.VERBOSITY_LEVEL >= 1:
       info_msg = "Executing the '" + cmd + "' command... "
-      sys.stdout.write("\n" + settings.print_info_msg(info_msg))
+      sys.stdout.write(settings.print_info_msg(info_msg))
       sys.stdout.flush()
-      sys.stdout.write("\n" + settings.print_payload(payload) + "\n")
+      sys.stdout.write("\n" + settings.print_payload(payload))
+    if settings.VERBOSITY_LEVEL >= 1 and not menu.options.ignore_session:
+      print ""
 
     # Check if defined cookie with "INJECT_HERE" tag
     if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
@@ -298,7 +300,7 @@ def injection_results(response, TAG, cmd):
   html_data = response.read()
   html_data = re.sub("\n", new_line, html_data)
   shell = re.findall(r"" + TAG + new_line + TAG + "(.*)" + TAG + new_line + TAG + "", html_data)
-  shell = shell[0].replace(new_line, " \n").rstrip().lstrip()
+  shell = shell[0].replace(new_line, "\n").rstrip().lstrip()
   return shell
 
 #eof
