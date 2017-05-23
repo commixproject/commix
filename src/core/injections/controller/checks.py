@@ -217,6 +217,16 @@ def no_readline_module():
   else:  
     err_msg += " 'gnureadline' module (https://pypi.python.org/pypi/gnureadline)." 
   print settings.print_critical_msg(err_msg) 
+
+"""
+Check for incompatible OS (i.e Unix).
+"""
+def ps_incompatible_os():
+  if not settings.IS_WINDOWS:
+    warn_msg = "The identified OS seems incompatible with the provided '--ps-version' switch."
+    print settings.print_warning_msg(warn_msg)
+    return True
+
 """
 Check if PowerShell is enabled.
 """

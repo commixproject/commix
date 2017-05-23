@@ -526,9 +526,10 @@ def do_check(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_
   if not menu.options.ps_version and settings.TARGET_OS == "win":
     checks.ps_check()
 
-  if menu.options.ps_version and settings.TARGET_OS == "win" and settings.PS_ENABLED == None:
-    powershell_version(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-    settings.ENUMERATION_DONE = True
+  if menu.options.ps_version and settings.PS_ENABLED == None:
+    if not checks.ps_incompatible_os():
+      powershell_version(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+      settings.ENUMERATION_DONE = True
 
   if menu.options.hostname:
     hostname(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)

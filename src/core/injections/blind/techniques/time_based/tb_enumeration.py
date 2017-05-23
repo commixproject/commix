@@ -514,9 +514,10 @@ def do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, h
   # else:
   #   settings.ENUMERATION_DONE = False
 
-  if menu.options.ps_version and settings.TARGET_OS == "win" and settings.PS_ENABLED == None:
-    powershell_version(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
-    settings.ENUMERATION_DONE = True
+  if menu.options.ps_version and settings.PS_ENABLED == None:
+    if not checks.ps_incompatible_os():
+      powershell_version(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
+      settings.ENUMERATION_DONE = True
 
   if menu.options.hostname:
     if settings.ENUMERATION_DONE == True:
