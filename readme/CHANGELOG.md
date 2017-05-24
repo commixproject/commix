@@ -1,4 +1,5 @@
 ## Version 2.0 (upcoming)
+* Fixed: Minor fix regarding not raising the detection phase in the case of 4xx and/or 5xx HTTP error codes.
 * Revised: Minor improvement regarding not re-performing requests in case of stored session.
 * Revised: Minor improvement in time-related techinques for checking the reliability of the used payload (in case of a false positive result).
 * Updated: Minor update in the list of the User-Agents (regarding the "--random-agent" option).

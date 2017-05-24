@@ -162,12 +162,19 @@ def check_http_traffic(request):
     return response
 
   except urllib2.HTTPError, err:
-    if settings.VERBOSITY_LEVEL < 2:
-      print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
-    err_msg = str(err).replace(": "," (")
-    print settings.print_critical_msg(err_msg + ").")
-    raise SystemExit()
-
+    error_msg = "Got " + str(err).replace(": "," (")
+    # Check for 4xx and/or 5xx HTTP error codes.
+    if str(err.code).startswith('4') or \
+       str(err.code).startswith('5'):
+      if settings.VERBOSITY_LEVEL >= 1:
+        warn_msg = error_msg
+        print settings.print_warning_msg(warn_msg + ").")
+      pass
+    else:
+      err_msg = error_msg
+      print settings.print_critical_msg(err_msg + ").")
+      raise SystemExit() 
+       
 """
 Check for added headers.
 """
