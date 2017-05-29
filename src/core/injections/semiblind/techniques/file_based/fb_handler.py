@@ -337,83 +337,83 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                   raise urllib2.HTTPError(url, 404, 'Error', {}, None)
 
               except urllib2.HTTPError, e:
-                  if str(e.getcode()) == settings.NOT_FOUND_ERROR:
-                    percent = ((i*100)/total)
-                    float_percent = "{0:.1f}".format(round(((i*100)/(total*1.0)),2))
+                if str(e.getcode()) == settings.NOT_FOUND_ERROR:
+                  percent = ((i*100)/total)
+                  float_percent = "{0:.1f}".format(round(((i*100)/(total*1.0)),2))
 
-                    if call_tmp_based == True:
-                      exit_loops = True
-                      tmp_path = os.path.split(menu.options.file_dest)[0] + "/"
-                      tfb_controller(no_result, url, timesec, filename, tmp_path, http_request_method, url_time_response)
-                      raise
-                      
-                    # Show an error message, after N failed tries.
-                    # Use the "/tmp/" directory for tempfile-based technique.
-                    elif i == settings.FAILED_TRIES and no_result == True :
-                      warn_msg = "It seems that you don't have permissions to "
-                      warn_msg += "read and/or write files in '" + settings.WEB_ROOT + "'."  
-                      sys.stdout.write("\r" + settings.print_warning_msg(warn_msg))
-                      print ""
-                      while True:
-                        if not menu.options.batch:
-                          question_msg = "Do you want to try the temporary directory (" + tmp_path + ") [Y/n] > "
-                          sys.stdout.write(settings.print_question_msg(question_msg))
-                          tmp_upload = sys.stdin.readline().replace("\n","").lower()
-                        else:
-                          tmp_upload = ""
-                        if len(tmp_upload) == 0:
-                           tmp_upload = "y"
-                        if tmp_upload in settings.CHOICE_YES:
-                          exit_loops = True
-                          settings.TEMPFILE_BASED_STATE = True
-                          call_tfb = tfb_controller(no_result, url, timesec, filename, tmp_path, http_request_method, url_time_response)
-                          if call_tfb != False:
-                            return True
-                          else:
-                            if no_result == True:
-                              return False
-                            else:
-                              return True
-                        elif tmp_upload in settings.CHOICE_NO:
-                          break
-                        elif tmp_upload in settings.CHOICE_QUIT:
-                          print ""
-                          raise
-                        else:
-                          err_msg = "'" + tmp_upload + "' is not a valid answer."  
-                          print settings.print_error_msg(err_msg)
-                          pass
-                      continue
+                  if call_tmp_based == True:
+                    exit_loops = True
+                    tmp_path = os.path.split(menu.options.file_dest)[0] + "/"
+                    tfb_controller(no_result, url, timesec, filename, tmp_path, http_request_method, url_time_response)
+                    raise
                     
-                    else:
-                      if exit_loops == False:
-                        if not settings.VERBOSITY_LEVEL >= 1:
-                          if str(float_percent) == "100.0":
-                            if no_result == True:
-                              percent = Fore.RED + "FAILED" + Style.RESET_ALL
-                            else:
-                              percent = str(float_percent)+ "%"
+                  # Show an error message, after N failed tries.
+                  # Use the "/tmp/" directory for tempfile-based technique.
+                  elif i == settings.FAILED_TRIES and no_result == True :
+                    warn_msg = "It seems that you don't have permissions to "
+                    warn_msg += "read and/or write files in '" + settings.WEB_ROOT + "'."  
+                    sys.stdout.write("\r" + settings.print_warning_msg(warn_msg))
+                    print ""
+                    while True:
+                      if not menu.options.batch:
+                        question_msg = "Do you want to try the temporary directory (" + tmp_path + ") [Y/n] > "
+                        sys.stdout.write(settings.print_question_msg(question_msg))
+                        tmp_upload = sys.stdin.readline().replace("\n","").lower()
+                      else:
+                        tmp_upload = ""
+                      if len(tmp_upload) == 0:
+                         tmp_upload = "y"
+                      if tmp_upload in settings.CHOICE_YES:
+                        exit_loops = True
+                        settings.TEMPFILE_BASED_STATE = True
+                        call_tfb = tfb_controller(no_result, url, timesec, filename, tmp_path, http_request_method, url_time_response)
+                        if call_tfb != False:
+                          return True
+                        else:
+                          if no_result == True:
+                            return False
+                          else:
+                            return True
+                      elif tmp_upload in settings.CHOICE_NO:
+                        break
+                      elif tmp_upload in settings.CHOICE_QUIT:
+                        print ""
+                        raise
+                      else:
+                        err_msg = "'" + tmp_upload + "' is not a valid answer."  
+                        print settings.print_error_msg(err_msg)
+                        pass
+                    continue
+                  
+                  else:
+                    if exit_loops == False:
+                      if not settings.VERBOSITY_LEVEL >= 1:
+                        if str(float_percent) == "100.0":
+                          if no_result == True:
+                            percent = Fore.RED + "FAILED" + Style.RESET_ALL
                           else:
                             percent = str(float_percent)+ "%"
-
-                          info_msg = "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "... [ " + percent + " ]"
-                          sys.stdout.write("\r" + settings.print_info_msg(info_msg))
-                          sys.stdout.flush()
-                          continue
                         else:
-                          continue
+                          percent = str(float_percent)+ "%"
+
+                        info_msg = "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "... [ " + percent + " ]"
+                        sys.stdout.write("\r" + settings.print_info_msg(info_msg))
+                        sys.stdout.flush()
+                        continue
                       else:
-                        raise
-                    
-                  elif str(e.getcode()) == settings.UNAUTHORIZED_ERROR:
-                    err_msg = "Authorization required!"
-                    print settings.print_critical_msg(err_msg) + "\n"
-                    sys.exit(0)
-                    
-                  elif str(e.getcode()) == settings.FORBIDDEN_ERROR:
-                    err_msg = "You don't have permission to access this page."
-                    print settings.print_critical_msg(err_msg) + "\n"
-                    sys.exit(0)
+                        continue
+                    else:
+                      raise
+                  
+                elif str(e.getcode()) == settings.UNAUTHORIZED_ERROR:
+                  err_msg = "Authorization required!"
+                  print settings.print_critical_msg(err_msg) + "\n"
+                  sys.exit(0)
+                  
+                elif str(e.getcode()) == settings.FORBIDDEN_ERROR:
+                  err_msg = "You don't have permission to access this page."
+                  print settings.print_critical_msg(err_msg) + "\n"
+                  sys.exit(0)
               
             except KeyboardInterrupt:
               if settings.VERBOSITY_LEVEL >= 1:

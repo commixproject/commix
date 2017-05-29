@@ -261,7 +261,8 @@ def injection_output(url, OUTPUT_TEXTFILE, timesec):
             pass  
       except IndexError:
         output = url + "/" + OUTPUT_TEXTFILE
-      return output
+        
+    return output
 
   if menu.options.web_root:
     # Check for Apache server root directory.
