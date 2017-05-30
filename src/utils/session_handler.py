@@ -102,8 +102,13 @@ def injection_point_importation(url, technique, injection_type, separator, shell
     conn.close()
     if settings.INJECTION_CHECKER == False:
       settings.INJECTION_CHECKER = True
+      
   except sqlite3.OperationalError, err_msg:
+    err_msg = str(err_msg)[:1].upper() + str(err_msg)[1:] + "."
+    err_msg += " You are advised to rerun with switch '--flush-session'."
     print settings.print_critical_msg(err_msg)
+    sys.exit(0)
+
   except sqlite3.DatabaseError, err_msg:
     err_msg = "An error occurred while accessing session file ('"
     err_msg += settings.SESSION_FILE + "'). "
