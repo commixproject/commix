@@ -70,9 +70,21 @@ def do_check(url):
 
   # Build our opener
   opener = urllib2.OpenerDirector() 
-  for handler in [urllib2.HTTPHandler, 
-                  urllib2.HTTPDefaultErrorHandler,
-                  HTTPMethodFallback, 
+  # Check if defined any HTTP Host header.
+  if menu.options.host:
+    opener.addheaders.append(('Host', menu.options.host))
+  # Check if defined any HTTP User-Agent header.
+  if menu.options.agent:
+    opener.addheaders.append(('User-Agent', menu.options.agent))
+  # Check if defined any HTTP Referer header.
+  if menu.options.referer and settings.REFERER_INJECTION == False:
+    opener.addheaders.append(('Referer', menu.options.referer))
+  # Check if defined any HTTP Cookie header.
+  if menu.options.cookie and settings.COOKIE_INJECTION == False:
+    opener.addheaders.append(('Cookie', menu.options.cookie))
+
+  for handler in [urllib2.HTTPHandler,
+                  HTTPMethodFallback,
                   HEADRedirectHandler,
                   urllib2.HTTPErrorProcessor, 
                   urllib2.HTTPSHandler]:
