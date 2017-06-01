@@ -115,6 +115,10 @@ def enumeration(url, cve, check_header, filename):
     target_os, payload = cmd_exec(url, cmd, cve, check_header, filename)
     if target_os:
       if target_os == "Linux":
+        cmd = settings.DISTRO_INFO
+        distro_name, payload = cmd_exec(url, cmd, cve, check_header, filename)
+        if len(distro_name) != 0:
+          target_os = target_os + " (" + distro_name + ")"
         cmd = settings.RECOGNISE_HP
         target_arch, payload = cmd_exec(url, cmd, cve, check_header, filename)
         if target_arch:

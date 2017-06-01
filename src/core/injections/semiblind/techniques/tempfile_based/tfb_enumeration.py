@@ -116,7 +116,20 @@ def system_information(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, 
   if target_os:
     if new_line == "\n":
       print ""
-    target_os = "".join(str(p) for p in target_os)
+    if settings.TARGET_OS != "win":
+      cmd = settings.DISTRO_INFO
+      if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
+        check_how_long, output = tfb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
+        session_handler.store_cmd(url, cmd, output, vuln_parameter)
+        new_line = "\n"
+      else:
+        output = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
+        new_line = ""
+      distro_name = output
+      if len(distro_name) != 0:
+          target_os = target_os + " (" + distro_name + ")"
+      if new_line == "\n":
+        print ""
     if settings.TARGET_OS == "win":
       cmd = settings.WIN_RECOGNISE_HP
     else:
@@ -131,7 +144,6 @@ def system_information(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, 
     if target_arch:
       if settings.VERBOSITY_LEVEL >= 1 and menu.options.ignore_session:
         print ""
-      target_arch = "".join(str(p) for p in target_arch)
       success_msg = "The target operating system is " +  target_os + Style.RESET_ALL  
       success_msg += Style.BRIGHT + " and the hardware platform is " +  target_arch
       sys.stdout.write(new_line + settings.print_success_msg(success_msg) + ".")

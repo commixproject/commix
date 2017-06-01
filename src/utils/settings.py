@@ -106,7 +106,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "2.0.18"
+VERSION_NUM = "2.0.19"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"
@@ -256,6 +256,9 @@ IS_ADMIN = "powershell.exe -InputFormat none [Security.Principal.WindowsBuiltinR
 # Operation System.
 RECOGNISE_OS = "uname -s"
 WIN_RECOGNISE_OS = "ver"
+
+# Distribution Description / Release 
+DISTRO_INFO = "echo $(lsb_release -sir)"
 
 # Hardware platform.
 RECOGNISE_HP = "uname -m"

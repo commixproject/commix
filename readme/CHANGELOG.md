@@ -1,4 +1,5 @@
 ## Version 2.0 (upcoming)
+* Updated: The '--sys-info' option has been enriched with distribution description and release information.  
 * Revised: Minor improvement in dynamic code evaluation, regarding the users extraction payload. 
 * Fixed: Minor fix regarding not raising the detection phase in the case of 4xx and/or 5xx HTTP error codes.
 * Revised: Minor improvement regarding not re-performing requests in case of stored session.
