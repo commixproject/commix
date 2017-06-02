@@ -135,6 +135,7 @@ The init (URL) request.
 def init_request(url):
   # Check if defined POST data
   if menu.options.data:
+    settings.USER_DEFINED_POST_DATA = menu.options.data
     request = urllib2.Request(url, menu.options.data)
   else:
     request = urllib2.Request(url)

@@ -206,7 +206,13 @@ def cookie_injection(url, vuln_parameter, payload):
     if settings.TIME_RELATIVE_ATTACK :
       payload = urllib.quote(payload)
 
-    request = urllib2.Request(url)
+    # Check if defined POST data
+    if menu.options.data:
+      menu.options.data = settings.USER_DEFINED_POST_DATA
+      request = urllib2.Request(url, menu.options.data)
+    else:
+      url = parameters.get_url_part(url)
+      request = urllib2.Request(url)
     #Check if defined extra headers.
     headers.do_check(request)
     request.add_header('Cookie', vuln_parameter + "=" + payload)
@@ -327,7 +333,13 @@ def user_agent_injection(url, vuln_parameter, payload):
     else:
       opener = urllib2.build_opener(proxy)
 
-    request = urllib2.Request(url)
+    # Check if defined POST data
+    if menu.options.data:
+      menu.options.data = settings.USER_DEFINED_POST_DATA
+      request = urllib2.Request(url, menu.options.data)
+    else:
+      url = parameters.get_url_part(url)
+      request = urllib2.Request(url)
     #Check if defined extra headers.
     headers.do_check(request)
     request.add_header('User-Agent', urllib.unquote(payload))
@@ -452,7 +464,13 @@ def referer_injection(url, vuln_parameter, payload):
     else:
       opener = urllib2.build_opener(proxy)
 
-    request = urllib2.Request(url)
+    # Check if defined POST data
+    if menu.options.data:
+      menu.options.data = settings.USER_DEFINED_POST_DATA
+      request = urllib2.Request(url, menu.options.data)
+    else:
+      url = parameters.get_url_part(url)
+      request = urllib2.Request(url)
     #Check if defined extra headers.
     headers.do_check(request)
     request.add_header('Referer', urllib.unquote(payload))
@@ -578,7 +596,13 @@ def custom_header_injection(url, vuln_parameter, payload):
     else:
       opener = urllib2.build_opener(proxy)
 
-    request = urllib2.Request(url)
+    # Check if defined POST data
+    if menu.options.data:
+      menu.options.data = settings.USER_DEFINED_POST_DATA
+      request = urllib2.Request(url, menu.options.data)
+    else:
+      url = parameters.get_url_part(url)
+      request = urllib2.Request(url)
     #Check if defined extra headers.
     headers.do_check(request)
     request.add_header(settings.CUSTOM_HEADER_NAME, urllib.unquote(payload))
