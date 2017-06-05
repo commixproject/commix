@@ -106,7 +106,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "2.0.20"
+VERSION_NUM = "2.0.21"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"
@@ -224,6 +224,7 @@ TIMESEC = 1
 DEFAULT_INJECTION_LEVEL = 1
 COOKIE_INJECTION_LEVEL = 2
 HTTP_HEADER_INJECTION_LEVEL = 3
+PERFORM_BASIC_SCANS = True
 
 # Default Temp Directory
 TMP_PATH = ""

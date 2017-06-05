@@ -413,6 +413,15 @@ Perform checks
 """
 def perform_checks(url, filename):
 
+  def basic_level_checks():
+    settings.PERFORM_BASIC_SCANS = False
+    # Check if HTTP Method is GET.
+    if not menu.options.data:
+      get_request(url, http_request_method, filename, timesec)
+    # Check if HTTP Method is POST.      
+    else:
+      post_request(url, http_request_method, filename, timesec)
+
   timesec = settings.TIMESEC
   # Check if authentication is needed.
   if menu.options.auth_url and menu.options.auth_data:
@@ -442,6 +451,9 @@ def perform_checks(url, filename):
   else:
     check_for_stored_levels(url, http_request_method)
 
+  if settings.PERFORM_BASIC_SCANS:
+    basic_level_checks()
+
   # Check for stored injections on User-agent / Referer headers (if level > 2).
   if menu.options.level >= settings.HTTP_HEADER_INJECTION_LEVEL:
     if settings.INJECTED_HTTP_HEADER == False :
@@ -464,13 +476,6 @@ def perform_checks(url, filename):
         check_for_stored_sessions(url, http_request_method)
         injection_proccess(url, check_parameter, http_request_method, filename, timesec)
         settings.CUSTOM_HEADER_INJECTION = None
-        
-      # Check if HTTP Method is GET.
-      if not menu.options.data:
-        get_request(url, http_request_method, filename, timesec)
-      # Check if HTTP Method is POST.      
-      else:
-        post_request(url, http_request_method, filename, timesec)
 
   if settings.INJECTION_CHECKER == False:
     return False
@@ -482,33 +487,36 @@ General check on every injection technique.
 """
 def do_check(url, filename):
 
-  if perform_checks(url,filename) == False:
-    scan_level = menu.options.level
-    while int(scan_level) < int(settings.HTTP_HEADER_INJECTION_LEVEL) and settings.LOAD_SESSION != True:
-      if not menu.options.batch:
-        question_msg = "Do you want to increase to '--level=" + str(scan_level + 1) 
-        question_msg += "' in order to perform more tests? [Y/n] > "
-        sys.stdout.write(settings.print_question_msg(question_msg))
-        next_level = sys.stdin.readline().replace("\n","").lower()
-      else:
-        next_level = ""
-      if len(next_level) == 0:
-         next_level = "y"
-      if next_level in settings.CHOICE_YES:
-        menu.options.level = int(menu.options.level + scan_level)
-        if perform_checks(url,filename) == False and scan_level < settings.HTTP_HEADER_INJECTION_LEVEL :
-          scan_level = scan_level + 1
+  if menu.options.wizard:
+    if perform_checks(url,filename) == False:
+      scan_level = menu.options.level
+      while int(scan_level) < int(settings.HTTP_HEADER_INJECTION_LEVEL) and settings.LOAD_SESSION != True:
+        if not menu.options.batch:
+          question_msg = "Do you want to increase to '--level=" + str(scan_level + 1) 
+          question_msg += "' in order to perform more tests? [Y/n] > "
+          sys.stdout.write(settings.print_question_msg(question_msg))
+          next_level = sys.stdin.readline().replace("\n","").lower()
         else:
-          break  
-      elif next_level in settings.CHOICE_NO:
-        break
-      elif next_level in settings.CHOICE_QUIT:
-        sys.exit(0)
-      else:
-        err_msg = "'" + next_level + "' is not a valid answer."  
-        print settings.print_error_msg(err_msg)
-        pass
-
+          next_level = ""
+        if len(next_level) == 0:
+           next_level = "y"
+        if next_level in settings.CHOICE_YES:
+          menu.options.level = int(menu.options.level + scan_level)
+          if perform_checks(url,filename) == False and scan_level < settings.HTTP_HEADER_INJECTION_LEVEL :
+            scan_level = scan_level + 1
+          else:
+            break  
+        elif next_level in settings.CHOICE_NO:
+          break
+        elif next_level in settings.CHOICE_QUIT:
+          sys.exit(0)
+        else:
+          err_msg = "'" + next_level + "' is not a valid answer."  
+          print settings.print_error_msg(err_msg)
+          pass
+  else:
+    perform_checks(url,filename)
+    
   # All injection techniques seems to be failed!
   if settings.CLASSIC_STATE == settings.EVAL_BASED_STATE == settings.TIME_BASED_STATE == settings.FILE_BASED_STATE == False :
     if settings.INJECTION_CHECKER == False:
