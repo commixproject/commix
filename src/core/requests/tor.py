@@ -66,12 +66,7 @@ def do_check():
     except urllib2.URLError, err_msg:
       print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
       print settings.print_critical_msg(err_msg)
-      sys.exit(0)
-      
-    except urllib2.HTTPError, err_msg:
-      print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
-      print settings.print_critical_msg(err_msg)
-      sys.exit(0)
+      sys.exit(0)  
 
 """
 Use the TOR HTTP Proxy.
