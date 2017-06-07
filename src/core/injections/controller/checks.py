@@ -222,7 +222,7 @@ def no_readline_module():
 Check for incompatible OS (i.e Unix).
 """
 def ps_incompatible_os():
-  if not settings.IS_WINDOWS:
+  if not settings.TARGET_OS == "win":
     warn_msg = "The identified OS seems incompatible with the provided '--ps-version' switch."
     print settings.print_warning_msg(warn_msg)
     return True
