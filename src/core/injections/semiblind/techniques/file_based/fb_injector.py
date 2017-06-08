@@ -311,7 +311,7 @@ def injection_results(url, OUTPUT_TEXTFILE, timesec):
     #shell = [newline.replace("\n"," ") for newline in shell]
     if settings.TARGET_OS == "win":
       shell = [newline.replace("\r","") for newline in shell]
-      shell = [space.strip() for space in shell]
+      #shell = [space.strip() for space in shell]
       shell = [empty for empty in shell if empty]
   except urllib2.HTTPError, e:
     if str(e.getcode()) == settings.NOT_FOUND_ERROR:
