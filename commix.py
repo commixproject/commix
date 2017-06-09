@@ -445,6 +445,11 @@ def main(filename, url, init_test):
             if menu.options.os and checks.user_defined_os():
               user_defined_os = settings.TARGET_OS
 
+            if settings.VERBOSITY_LEVEL >= 1:
+              info_msg = "Identifying the target operating system... " 
+              sys.stdout.write(settings.print_info_msg(info_msg))
+              sys.stdout.flush()
+
             # Procedure for target OS identification.
             for i in range(0,len(settings.SERVER_OS_BANNERS)):
               if settings.SERVER_OS_BANNERS[i].lower() in server_banner.lower():
@@ -468,6 +473,12 @@ def main(filename, url, init_test):
                     if not checks.identified_os():
                       settings.TARGET_OS = user_defined_os
 
+            if settings.VERBOSITY_LEVEL >= 1 and found_os_server:
+              print "[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]"
+              success_msg = "The target operating system appears to be " 
+              success_msg += identified_os.title() + Style.RESET_ALL + "."
+              print settings.print_success_msg(success_msg)
+            
             # Procedure for target server identification.
             found_server_banner = False
             if settings.VERBOSITY_LEVEL >= 1:
