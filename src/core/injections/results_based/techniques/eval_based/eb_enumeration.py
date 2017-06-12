@@ -277,7 +277,9 @@ def system_users(separator, TAG, prefix, suffix, whitespace, http_request_method
     if alter_shell:
       settings.SYS_USERS = settings.SYS_USERS.replace("'","\\'")
     else:  
-      settings.SYS_USERS = "\"" + settings.SYS_USERS + "\""  
+      settings.SYS_USERS = "\"" + settings.SYS_USERS + "\""
+  else:
+    settings.SYS_USERS = settings.EVAL_SYS_USERS        
   cmd = settings.SYS_USERS             
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
     # Command execution results.
