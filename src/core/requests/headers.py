@@ -166,7 +166,7 @@ def check_http_traffic(request):
     # Check for 4xx and/or 5xx HTTP error codes.
     if str(err.code).startswith('4') or \
        str(err.code).startswith('5'):
-      if settings.VERBOSITY_LEVEL >= 1:
+      if settings.VERBOSITY_LEVEL > 1:
         warn_msg = error_msg
         print settings.print_warning_msg(warn_msg + ").")
       pass
