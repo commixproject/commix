@@ -522,8 +522,8 @@ def single_os_cmd_exec(separator, payload, TAG, timesec, prefix, suffix, whitesp
   else:
     shell = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
   if shell:
-    # if settings.VERBOSITY_LEVEL >= 1:
-    #   print ""
+    if not settings.VERBOSITY_LEVEL >= 1:
+      print ""
     if shell != "":
       print Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL
     else:

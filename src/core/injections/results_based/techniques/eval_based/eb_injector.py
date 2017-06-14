@@ -211,9 +211,7 @@ def injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_meth
       info_msg = "Executing the '" + cmd + "' command... "
       sys.stdout.write(settings.print_info_msg(info_msg))
       sys.stdout.flush()
-      sys.stdout.write("\n" + settings.print_payload(payload))
-    if settings.VERBOSITY_LEVEL >= 1 and not menu.options.ignore_session:
-      print ""
+      sys.stdout.write("\n" + settings.print_payload(payload) + "\n")
 
     # Check if defined cookie with "INJECT_HERE" tag
     if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:

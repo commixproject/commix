@@ -48,7 +48,7 @@ def file_read(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
     new_line = "\n"
   else:
     output = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
-    new_line = ""
+    
   shell = output
   try:
     shell = "".join(str(p) for p in shell)
@@ -60,7 +60,7 @@ def file_read(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
     success_msg = "The contents of file '"  
     success_msg += file_to_read + Style.RESET_ALL + Style.BRIGHT 
     success_msg += "'" + Style.RESET_ALL + " : "
-    sys.stdout.write(new_line + settings.print_success_msg(success_msg))
+    sys.stdout.write(settings.print_success_msg(success_msg))
     sys.stdout.flush()
     print shell
     output_file = open(filename, "a")

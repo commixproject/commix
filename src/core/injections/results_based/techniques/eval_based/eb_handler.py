@@ -333,7 +333,6 @@ def eb_injection_handler(url, timesec, filename, http_request_method):
                   err_msg = "'" + enumerate_again + "' is not a valid answer."
                   print settings.print_error_msg(err_msg)
                   pass
-
             else:
               if menu.enumeration_options():
                 eb_enumeration.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec)
@@ -412,8 +411,6 @@ def eb_injection_handler(url, timesec, filename, http_request_method):
                         readline.parse_and_bind("tab: complete")
                     cmd = raw_input("""commix(""" + Style.BRIGHT + Fore.RED + """os_shell""" + Style.RESET_ALL + """) > """)
                     cmd = checks.escaped_cmd(cmd)
-                    # if settings.VERBOSITY_LEVEL >= 1:
-                    #   print ""
                     if cmd.lower() in settings.SHELL_OPTIONS:
                       go_back, go_back_again = shell_options.check_option(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, technique, go_back, no_result, timesec, go_back_again)
                       if go_back and go_back_again == False:

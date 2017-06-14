@@ -347,8 +347,8 @@ def cb_injection_handler(url, timesec, filename, http_request_method):
                   pass
             else:
               if menu.file_access_options():
-                if not menu.enumeration_options():
-                  print ""
+                # if not menu.enumeration_options():
+                #   print ""
                 cb_file_access.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec)
                 print ""
               
@@ -364,9 +364,6 @@ def cb_injection_handler(url, timesec, filename, http_request_method):
             while True:
               if go_back == True:
                 break 
-              # if settings.ENUMERATION_DONE == False and settings.FILE_ACCESS_DONE == False:
-              #   if settings.VERBOSITY_LEVEL >= 1:
-              #     print ""
               if not menu.options.batch:
                 question_msg = "Do you want a Pseudo-Terminal shell? [Y/n] > "
                 sys.stdout.write(settings.print_question_msg(question_msg))

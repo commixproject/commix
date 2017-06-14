@@ -55,8 +55,6 @@ def powershell_version(separator, TAG, prefix, suffix, whitespace, http_request_
   try:
     if float(ps_version):
       settings.PS_ENABLED = True
-      if settings.VERBOSITY_LEVEL >= 1 and menu.options.ignore_session:
-        print ""
       # Output PowerShell's version number
       success_msg = "The PowerShell's version number is " 
       success_msg += ps_version + Style.RESET_ALL + Style.BRIGHT
@@ -94,8 +92,6 @@ def hostname(separator, TAG, prefix, suffix, whitespace, http_request_method, ur
   else:
     shell = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
   if shell:
-    if settings.VERBOSITY_LEVEL >= 1 and menu.options.ignore_session:
-      print ""
     success_msg = "The hostname is " +  shell + "."
     sys.stdout.write(settings.print_success_msg(success_msg) + "\n")
     sys.stdout.flush()
@@ -151,8 +147,6 @@ def system_information(separator, TAG, prefix, suffix, whitespace, http_request_
     else:
       cmd = settings.RECOGNISE_HP
     if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
-      if settings.VERBOSITY_LEVEL >= 1 and menu.options.ignore_session:
-        print ""
       # Command execution results.
       response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
       # Perform target page reload (if it is required).
@@ -165,18 +159,16 @@ def system_information(separator, TAG, prefix, suffix, whitespace, http_request_
     else:
       target_arch = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
     if target_arch:
-      if settings.VERBOSITY_LEVEL >= 1 and menu.options.ignore_session:
-        print ""
-    success_msg = "The target operating system is " +  target_os + Style.RESET_ALL  
-    success_msg += Style.BRIGHT + " and the hardware platform is " +  target_arch
-    sys.stdout.write(settings.print_success_msg(success_msg) + ".\n")
-    sys.stdout.flush()
-    # Add infos to logs file.   
-    output_file = open(filename, "a")
-    success_msg = "The target operating system is " + target_os
-    success_msg += " and the hardware platform is " + target_arch + ".\n"
-    output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
-    output_file.close()
+      success_msg = "The target operating system is " +  target_os + Style.RESET_ALL  
+      success_msg += Style.BRIGHT + " and the hardware platform is " +  target_arch
+      sys.stdout.write(settings.print_success_msg(success_msg) + ".\n")
+      sys.stdout.flush()
+      # Add infos to logs file.   
+      output_file = open(filename, "a")
+      success_msg = "The target operating system is " + target_os
+      success_msg += " and the hardware platform is " + target_arch + ".\n"
+      output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
+      output_file.close()
   else:
     warn_msg = "Heuristics have failed to retrieve the system information."
     print settings.print_warning_msg(warn_msg)
@@ -215,8 +207,6 @@ def current_user(separator, TAG, prefix, suffix, whitespace, http_request_method
       else:  
         cmd = settings.IS_ROOT 
       if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
-        if settings.VERBOSITY_LEVEL >= 1 and menu.options.ignore_session:
-          print ""
         # Command execution results.
         response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
         # Perform target page reload (if it is required).
@@ -228,8 +218,6 @@ def current_user(separator, TAG, prefix, suffix, whitespace, http_request_method
         session_handler.store_cmd(url, cmd, shell, vuln_parameter)
       else:
         shell = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
-      if settings.VERBOSITY_LEVEL >= 1 and menu.options.ignore_session:
-        print ""
       success_msg = "The current user is " +  cu_account  
       sys.stdout.write(settings.print_success_msg(success_msg))
       # Add infos to logs file.    
@@ -254,8 +242,6 @@ def current_user(separator, TAG, prefix, suffix, whitespace, http_request_method
           output_file.write(" and it is privileged.\n")
           output_file.close()
     else:
-      if settings.VERBOSITY_LEVEL >= 1 and menu.options.ignore_session:
-        print ""
       success_msg = "The current user is " +  cu_account
       sys.stdout.write(settings.print_success_msg(success_msg) + ".\n")
       sys.stdout.flush()
@@ -295,8 +281,6 @@ def system_users(separator, TAG, prefix, suffix, whitespace, http_request_method
     sys_users = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
   # Windows users enumeration.
   if settings.TARGET_OS == "win":
-    if settings.VERBOSITY_LEVEL >= 1 and menu.options.ignore_session:
-      print ""
     info_msg = "Executing the 'net users' command "
     info_msg += "to enumerate users entries... "  
     sys.stdout.write(settings.print_info_msg(info_msg))
@@ -342,8 +326,6 @@ def system_users(separator, TAG, prefix, suffix, whitespace, http_request_method
           else :
             is_privileged = ""
             is_privileged_nh = ""
-          if settings.VERBOSITY_LEVEL >= 1 and menu.options.ignore_session:
-            print ""  
           print "    (" +str(count)+ ") '" + Style.BRIGHT +  sys_users_list[user] + Style.RESET_ALL + "'" + Style.BRIGHT + is_privileged + Style.RESET_ALL + "." 
           # Add infos to logs file.   
           output_file = open(filename, "a")
@@ -367,8 +349,6 @@ def system_users(separator, TAG, prefix, suffix, whitespace, http_request_method
       pass
        
   else:
-    if settings.VERBOSITY_LEVEL >= 1 and menu.options.ignore_session:
-      print ""
     info_msg = "Fetching '" + settings.PASSWD_FILE 
     info_msg += "' to enumerate users entries... "  
     sys.stdout.write(settings.print_info_msg(info_msg))
@@ -499,8 +479,6 @@ def system_passwords(separator, TAG, prefix, suffix, whitespace, http_request_me
     if sys_passes == "":
       sys_passes = " "
     if sys_passes :
-      if settings.VERBOSITY_LEVEL >= 1 and menu.options.ignore_session:
-        print ""
       info_msg = "Fetching '" + settings.SHADOW_FILE 
       info_msg += "' to enumerate users password hashes... "  
       sys.stdout.write(settings.print_info_msg(info_msg))

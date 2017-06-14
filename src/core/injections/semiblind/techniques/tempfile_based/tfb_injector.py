@@ -234,7 +234,7 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
     if injection_check == True:   
       if output_length > 1:
         if settings.VERBOSITY_LEVEL >= 1:
-          print ""
+          pass
         else:
           sys.stdout.write("[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL+ "]\n")
           sys.stdout.flush()
