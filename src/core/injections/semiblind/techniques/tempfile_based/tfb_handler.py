@@ -111,6 +111,10 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
     err_msg = "The '--url-reload' option is not available in " + technique + "!"
     print settings.print_critical_msg(err_msg)
 
+  if not settings.LOAD_SESSION: 
+    # Change TAG on every request to prevent false-positive resutls.
+    TAG = ''.join(random.choice(string.ascii_uppercase) for num_of_chars in range(6)) 
+
   if settings.VERBOSITY_LEVEL >= 1:
     info_msg ="Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "... "
     print settings.print_info_msg(info_msg)
@@ -148,9 +152,6 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
             combination = prefix + separator
             if combination in settings.JUNK_COMBINATION:
               prefix = ""
-
-            # Change TAG on every request to prevent false-positive resutls.
-            TAG = ''.join(random.choice(string.ascii_uppercase) for num_of_chars in range(6))  
 
             # The output file for file-based injection technique.
             OUTPUT_TEXTFILE = tmp_path + TAG + ".txt"
