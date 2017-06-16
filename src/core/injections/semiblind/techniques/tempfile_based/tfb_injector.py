@@ -179,6 +179,8 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
 
   found_chars = False
   info_msg = "Retrieving the length of execution output... "
+  if menu.options.verbose > 1 :
+    info_msg +=  "\n"  
   sys.stdout.write(settings.print_info_msg(info_msg))
   sys.stdout.flush()  
   for output_length in range(int(minlen), int(maxlen)):
