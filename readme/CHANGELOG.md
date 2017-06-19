@@ -1,4 +1,5 @@
 ## Version 2.0 (upcoming)
+* Revised: Multiple minor eye-candy revisions have been performed.
 * Fixed: Major improvement regarding not sending requests with GET mothod in case of POST method, in injection levels 2, 3.
 * Updated: The '--sys-info' option has been enriched with distribution description and release information.  
 * Revised: Minor improvement in dynamic code evaluation, regarding the users extraction payload. 

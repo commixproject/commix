@@ -243,7 +243,9 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
         else:
           sys.stdout.write("[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL+ "]\n")
           sys.stdout.flush()
-        success_msg = "Retrieved " + str(output_length) + " characters."  
+        if settings.VERBOSITY_LEVEL == 1:
+          print ""
+        success_msg = "Retrieved " + str(output_length) + " characters."
         print settings.print_success_msg(success_msg)
       found_chars = True
       injection_check = False

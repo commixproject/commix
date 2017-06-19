@@ -423,8 +423,6 @@ def cb_injection_handler(url, timesec, filename, http_request_method):
                         # Update logs with executed cmds and execution results.
                         logs.executed_command(filename, cmd, shell)
                       if shell != "":
-                        if settings.VERBOSITY_LEVEL == 1:
-                          print ""
                         print "\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n"
                       else:
                         if settings.VERBOSITY_LEVEL >= 1:

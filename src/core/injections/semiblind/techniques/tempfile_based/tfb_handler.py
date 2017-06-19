@@ -419,7 +419,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
               logs.update_payload(filename, counter, payload) 
               counter = counter + 1
 
-              if not settings.VERBOSITY_LEVEL >= 1 and not settings.LOAD_SESSION:
+              if not settings.VERBOSITY_LEVEL > 1 and not settings.LOAD_SESSION:
                 print ""
 
               # Print the findings to terminal.
