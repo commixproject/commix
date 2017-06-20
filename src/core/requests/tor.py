@@ -13,6 +13,7 @@ the Free Software Foundation, either version 3 of the License, or
 For more see the file 'readme/COPYING' for copying permission.
 """
 
+import re
 import sys
 import urllib2
 from src.utils import menu
@@ -41,7 +42,7 @@ def do_check():
   requirments.do_check(requirment)
     
   check_privoxy_proxy = True
-  info_msg = "Testing privoxy proxy settings " 
+  info_msg = "Testing Tor SOCKS proxy settings " 
   info_msg += settings.PRIVOXY_IP + ":" + PRIVOXY_PORT + "... "
   sys.stdout.write(settings.print_info_msg(info_msg))
   sys.stdout.flush()
@@ -57,15 +58,21 @@ def do_check():
     
   if check_privoxy_proxy:
     try:     
-      new_ip = opener.open("http://icanhazip.com/").read()
+      check_ip = opener.open("https://check.torproject.org/").read()
+      new_ip = re.findall(r":  <strong>" + "(.*)" + "</strong></p>", check_ip)
       sys.stdout.write("[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]\n")
       sys.stdout.flush()
-      success_msg = "Your ip address appears to be " + new_ip
+      success_msg = "Your ip address appears to be " + new_ip[0] + ".\n"
       sys.stdout.write(settings.print_success_msg(success_msg))
 
     except urllib2.URLError, err_msg:
       print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
-      print settings.print_critical_msg(err_msg)
+      warn_msg = "Please make sure that you have "
+      warn_msg += "Tor installed and running so "
+      warn_msg += "you could successfully use "
+      warn_msg += "switch '--tor'."
+      print settings.print_warning_msg(warn_msg)  
+      print settings.print_critical_msg(str(err_msg.args[0]).split("] ")[1] + ".")
       sys.exit(0)  
 
 """
