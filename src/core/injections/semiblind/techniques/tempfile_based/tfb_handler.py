@@ -294,6 +294,9 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                       else:
                         cmd = "echo $((" + str(randv1) + " + " + str(randv2) + "))"
 
+                      # Set the original delay time
+                      original_how_long = how_long
+                      
                       # Check for false positive resutls
                       how_long, output = tfb_injector.false_positive_check(separator, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, randvcalc, alter_shell, how_long, url_time_response)
 
@@ -434,7 +437,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
               # Export session
               if not settings.LOAD_SESSION:
                 shell = ""
-                session_handler.injection_point_importation(url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response, timesec, how_long, output_length, is_vulnerable=menu.options.level)
+                session_handler.injection_point_importation(url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response, timesec, original_how_long, output_length, is_vulnerable=menu.options.level)
                 #possibly_vulnerable = False
               else:
                 settings.LOAD_SESSION = False 
