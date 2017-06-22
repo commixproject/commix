@@ -106,6 +106,8 @@ def do_GET_check(url):
         err_msg += "try to increase '--level' values to perform more tests." 
         print settings.print_critical_msg(err_msg)
         return False
+    elif menu.options.shellshock:
+      return False
     return url
 
   urls_list = []

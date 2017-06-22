@@ -640,6 +640,8 @@ def shellshock_handler(url, http_request_method, filename):
   technique = "shellshock injection technique"
 
   info_msg = "Testing the " + technique + "... "
+  if settings.VERBOSITY_LEVEL > 1:
+    info_msg = info_msg + "\n"
   sys.stdout.write(settings.print_info_msg(info_msg))
   sys.stdout.flush()
 
@@ -660,7 +662,7 @@ def shellshock_handler(url, http_request_method, filename):
           sys.stdout.write("\n" + settings.print_payload(payload))
         elif settings.VERBOSITY_LEVEL > 1:
           info_msg = "Generating a payload for injection..."
-          print "\n" + settings.print_info_msg(info_msg)
+          print settings.print_info_msg(info_msg)
           print settings.print_payload(payload)
 
         header = {check_header : payload}
@@ -867,7 +869,7 @@ def shellshock_handler(url, http_request_method, filename):
         else:
           continue
           
-    if no_result:
+    if no_result and settings.VERBOSITY_LEVEL < 2:
       print ""
 
   except urllib2.HTTPError, err_msg:

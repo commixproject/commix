@@ -159,7 +159,6 @@ def check_http_traffic(request):
     http_response(response.info())
     # Check the HTTP response content.
     http_response_content(response.read())
-    return response
 
   except urllib2.HTTPError, err:
     error_msg = "Got " + str(err).replace(": "," (")
