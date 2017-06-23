@@ -180,10 +180,10 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
 
   found_chars = False
   info_msg = "Retrieving the length of execution output... "
-  if menu.options.verbose > 1 :
-    info_msg +=  "\n"  
   sys.stdout.write(settings.print_info_msg(info_msg))
   sys.stdout.flush()  
+  if settings.VERBOSITY_LEVEL > 1 and menu.options.ignore_session:
+    print ""
   for output_length in range(int(minlen), int(maxlen)):
     if alter_shell:
       # Execute shell commands on vulnerable host.
@@ -361,6 +361,8 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
     check_how_long = 0
     output = False
 
+  if settings.VERBOSITY_LEVEL >= 1 and menu.options.ignore_session:
+    print ""
   return  check_how_long, output
 
 """
@@ -524,7 +526,9 @@ Export the injection results
 def export_injection_results(cmd, separator, output, check_how_long):
 
   if output != "" and check_how_long != 0 :
-    print "\n\n" + Fore.GREEN + Style.BRIGHT + output + Style.RESET_ALL
+    if settings.VERBOSITY_LEVEL < 1:
+      print "\n"
+    print Fore.GREEN + Style.BRIGHT + output + Style.RESET_ALL
     info_msg = "Finished in " + time.strftime('%H:%M:%S', time.gmtime(check_how_long)) + "."
     sys.stdout.write("\n" + settings.print_info_msg(info_msg))
     if not menu.options.os_cmd:

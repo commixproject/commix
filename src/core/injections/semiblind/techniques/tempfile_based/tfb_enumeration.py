@@ -76,10 +76,8 @@ def hostname(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, h
     # The main command injection exploitation.
     check_how_long, output = tfb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
     session_handler.store_cmd(url, cmd, output, vuln_parameter)
-    
   else:
     output = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
-    
   shell = output
   if shell:
     shell = "".join(str(p) for p in output)

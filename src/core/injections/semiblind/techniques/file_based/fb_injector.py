@@ -226,7 +226,6 @@ def injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_req
           
         # Get the response of the request
         response = requests.get_request_response(request)
-
     return response
 
   # Do the injection check

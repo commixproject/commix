@@ -196,8 +196,6 @@ def current_user(separator, payload, TAG, timesec, prefix, suffix, whitespace, h
         session_handler.store_cmd(url, cmd, shell, vuln_parameter)
       else:
         shell = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
-      # if settings.VERBOSITY_LEVEL >= 1:
-      #   print ""
       success_msg = "The current user is " +  cu_account  
       sys.stdout.write(settings.print_success_msg(success_msg))
       # Add infos to logs file.    

@@ -91,14 +91,15 @@ def tfb_controller(no_result, url, timesec, filename, tmp_path, http_request_met
 Delete previous shells outputs.
 """
 def delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
-  if settings.VERBOSITY_LEVEL >= 1:
-    info_msg = "Deleting the created (" + OUTPUT_TEXTFILE + ") file...\n"
-    sys.stdout.write(settings.print_info_msg(info_msg))
-  if settings.TARGET_OS == "win":
-    cmd = settings.WIN_DEL + OUTPUT_TEXTFILE
-  else:  
-    cmd = settings.DEL + settings.WEB_ROOT + OUTPUT_TEXTFILE + " " + settings.COMMENT
-  response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+  if settings.FILE_BASED_STATE != None:
+    if settings.VERBOSITY_LEVEL >= 1:
+      info_msg = "Deleting the created (" + OUTPUT_TEXTFILE + ") file...\n"
+      sys.stdout.write(settings.print_info_msg(info_msg))
+    if settings.TARGET_OS == "win":
+      cmd = settings.WIN_DEL + OUTPUT_TEXTFILE
+    else:  
+      cmd = settings.DEL + settings.WEB_ROOT + OUTPUT_TEXTFILE + " " + settings.COMMENT
+    response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
 
 """
 Provide custom server's root directory
@@ -417,8 +418,6 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                   sys.exit(0)
               
             except KeyboardInterrupt:
-              # if settings.VERBOSITY_LEVEL >= 1:
-              #   print ""
               # Delete previous shell (text) files (output)
               delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
               raise
@@ -683,7 +682,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
               
             except KeyboardInterrupt: 
               if settings.VERBOSITY_LEVEL >= 1:
-                print ""
+                print "",
               # Delete previous shell (text) files (output)
               delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
               raise

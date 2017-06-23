@@ -77,7 +77,8 @@ Delete previous shells outputs.
 """
 def delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
   if settings.VERBOSITY_LEVEL >= 1:
-    print "",
+    info_msg = "Deleting the created (" + OUTPUT_TEXTFILE + ") file...\n"
+    sys.stdout.write(settings.print_info_msg(info_msg))
   if settings.TARGET_OS == "win":
     cmd = settings.WIN_DEL + OUTPUT_TEXTFILE
   else:
@@ -335,6 +336,8 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                   sys.stdout.flush()
                   
               except KeyboardInterrupt: 
+                if settings.VERBOSITY_LEVEL >= 1:
+                  print ""
                 if 'cmd' in locals():
                   # Delete previous shell (text) files (output) from temp.
                   delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
@@ -549,49 +552,43 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                         warn_msg += "recommended to enable the 'reverse_tcp' option.\n"
                         sys.stdout.write("\r" + settings.print_warning_msg(warn_msg))
                         false_positive_warning = False
-                      try:
-                        # Tab compliter
-                        if not readline_error:
-                          readline.set_completer(menu.tab_completer)
-                          # MacOSX tab compliter
-                          if getattr(readline, '__doc__', '') is not None and 'libedit' in getattr(readline, '__doc__', ''):
-                            readline.parse_and_bind("bind ^I rl_complete")
-                          # Unix tab compliter
-                          else:
-                            readline.parse_and_bind("tab: complete")
-                        cmd = raw_input("""commix(""" + Style.BRIGHT + Fore.RED + """os_shell""" + Style.RESET_ALL + """) > """)
-                        cmd = checks.escaped_cmd(cmd)
-                        if cmd.lower() in settings.SHELL_OPTIONS:
-                          go_back, go_back_again = shell_options.check_option(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, technique, go_back, no_result, timesec, go_back_again)
-                          if go_back and go_back_again == False:
-                            break
-                          if go_back and go_back_again:
-                            return True 
+
+                      # Tab compliter
+                      if not readline_error:
+                        readline.set_completer(menu.tab_completer)
+                        # MacOSX tab compliter
+                        if getattr(readline, '__doc__', '') is not None and 'libedit' in getattr(readline, '__doc__', ''):
+                          readline.parse_and_bind("bind ^I rl_complete")
+                        # Unix tab compliter
                         else:
+                          readline.parse_and_bind("tab: complete")
+                      cmd = raw_input("""commix(""" + Style.BRIGHT + Fore.RED + """os_shell""" + Style.RESET_ALL + """) > """)
+                      cmd = checks.escaped_cmd(cmd)
+                      if cmd.lower() in settings.SHELL_OPTIONS:
+                        go_back, go_back_again = shell_options.check_option(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, technique, go_back, no_result, timesec, go_back_again)
+                        if go_back and go_back_again == False:
+                          break
+                        if go_back and go_back_again:
+                          return True 
+                      else:
+                        if settings.VERBOSITY_LEVEL < 1:
                           print ""
-                        if menu.options.ignore_session or \
-                           session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
-                          # The main command injection exploitation.
-                          check_how_long, output = tfb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
-                          # Export injection result
-                          tfb_injector.export_injection_results(cmd, separator, output, check_how_long)
-                          if not menu.options.ignore_session :
-                            session_handler.store_cmd(url, cmd, output, vuln_parameter)
-                        else:
-                          output = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
-                          # Update logs with executed cmds and execution results.
-                          logs.executed_command(filename, cmd, output)
-                          print Fore.GREEN + Style.BRIGHT + output + "\n" + Style.RESET_ALL
+                      if menu.options.ignore_session or \
+                         session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
+                        # The main command injection exploitation.
+                        check_how_long, output = tfb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
+                        # Export injection result
+                        tfb_injector.export_injection_results(cmd, separator, output, check_how_long)
+                        if not menu.options.ignore_session :
+                          session_handler.store_cmd(url, cmd, output, vuln_parameter)
+                      else:
+                        output = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
                         # Update logs with executed cmds and execution results.
                         logs.executed_command(filename, cmd, output)
-                      except KeyboardInterrupt: 
-                        # Delete previous shell (text) files (output) from temp.
-                        delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-                        raise
-                      except SystemExit: 
-                        # Delete previous shell (text) files (output) from temp.
-                        delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-                        raise
+                        print Fore.GREEN + Style.BRIGHT + output + "\n" + Style.RESET_ALL
+                      # Update logs with executed cmds and execution results.
+                      logs.executed_command(filename, cmd, output)
+
                   elif gotshell in settings.CHOICE_NO:
                     if checks.next_attack_vector(technique, go_back) == True:
                       break
@@ -610,7 +607,10 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                     err_msg = "'" + gotshell + "' is not a valid answer."  
                     print settings.print_error_msg(err_msg)
                     pass
-              except KeyboardInterrupt: 
+
+              except KeyboardInterrupt:
+                if settings.VERBOSITY_LEVEL >= 1:
+                  print ""
                 # Delete previous shell (text) files (output) from temp.
                 delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
                 raise  
