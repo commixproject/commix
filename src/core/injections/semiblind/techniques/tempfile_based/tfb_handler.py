@@ -83,7 +83,7 @@ def delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, whitespa
     cmd = settings.WIN_DEL + OUTPUT_TEXTFILE
   else:
     settings.WEB_ROOT = ""
-    cmd = settings.DEL + settings.WEB_ROOT + OUTPUT_TEXTFILE + " " + settings.COMMENT
+    cmd = settings.DEL + settings.WEB_ROOT + OUTPUT_TEXTFILE + " " + settings.COMMENT 
   response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
 
 """
@@ -524,7 +524,8 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
 
               if not new_line :
                 print ""
-
+              if settings.VERBOSITY_LEVEL >= 1:
+                print ""
               try:    
                 # Pseudo-Terminal shell
                 go_back = False

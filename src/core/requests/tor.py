@@ -42,7 +42,7 @@ def do_check():
   requirments.do_check(requirment)
     
   check_privoxy_proxy = True
-  info_msg = "Testing Tor SOCKS proxy settings " 
+  info_msg = "Testing Tor SOCKS proxy (" + requirment + ") settings " 
   info_msg += settings.PRIVOXY_IP + ":" + PRIVOXY_PORT + "... "
   sys.stdout.write(settings.print_info_msg(info_msg))
   sys.stdout.flush()

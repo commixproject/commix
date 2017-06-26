@@ -170,7 +170,10 @@ def injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_req
       info_msg = "Executing the '" + cmd.split(settings.COMMENT)[0] + "' command... "
       sys.stdout.write(settings.print_info_msg(info_msg))
       sys.stdout.flush()
-      sys.stdout.write("\n" + settings.print_payload(payload).split(settings.COMMENT)[0] + "\n")
+      output_payload = "\n" + settings.print_payload(payload).split(settings.COMMENT)[0]
+      # if settings.FILE_BASED_STATE != None:
+      #   output_payload = output_payload + "\n" 
+      sys.stdout.write(output_payload)
 
     # Check if defined cookie with "INJECT_HERE" tag
     if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
