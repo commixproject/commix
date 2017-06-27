@@ -101,8 +101,8 @@ def examine_request(request):
     return response
 
   except urllib2.HTTPError, err_msg:
-    if settings.VERBOSITY_LEVEL < 2:
-      print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
+    # if settings.VERBOSITY_LEVEL < 2:
+    #   print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
     err_msg = str(err_msg).replace(": "," (") + ")." 
     if menu.options.bulkfile:
       warn_msg = "Skipping URL '" + url + "' - " + err_msg
@@ -120,7 +120,7 @@ def examine_request(request):
     err_msg = "Unable to connect to the target URL "
     err_msg += "(" + str(e.args[0]).split("] ")[1] + ")." 
     if menu.options.bulkfile:
-      warn_msg = "Skipping URL '" + url + "' - " + e
+      warn_msg = "Skipping URL '" + url + "' - " + err_msg
       print settings.print_critical_msg(warn_msg)
       if settings.EOF:
         print "" 
