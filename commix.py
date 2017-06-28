@@ -101,8 +101,6 @@ def examine_request(request):
     return response
 
   except urllib2.HTTPError, err_msg:
-    # if settings.VERBOSITY_LEVEL < 2:
-    #   print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
     err_msg = str(err_msg).replace(": "," (") + ")." 
     if menu.options.bulkfile:
       warn_msg = "Skipping URL '" + url + "' - " + err_msg
@@ -149,17 +147,16 @@ def init_request(url):
     tor.do_check()
   return request
 
-def url_response(url, init_test):
+def url_response(url):
   request = init_request(url)
-  if init_test:
-    init_test = False
+  if settings.INIT_TEST == True:
     info_msg = "Checking connection to the target URL... "
     sys.stdout.write(settings.print_info_msg(info_msg))
     sys.stdout.flush()
     if settings.VERBOSITY_LEVEL >= 2:
       print ""
   response = examine_request(request)
-  return response, init_test
+  return response
 
 """
 Injection states initiation.
@@ -211,7 +208,7 @@ def logs_filename_creation():
 """
 The main function.
 """
-def main(filename, url, init_test):
+def main(filename, url):
   try:
 
     # Ignore the mathematic calculation part (Detection phase).
@@ -343,10 +340,8 @@ def main(filename, url, init_test):
         url = crawler.crawler(url)
 
       try:
-        response, init_test = url_response(url, init_test)
+        response = url_response(url)
         html_data = content = response.read()
-        if settings.VERBOSITY_LEVEL < 2:
-          print "[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]"
 
         # Check for URL redirection
         if not menu.options.ignore_redirects:
@@ -422,11 +417,13 @@ def main(filename, url, init_test):
                 err_msg = "'" + enable_HTTP_server + "' is not a valid answer."  
                 print settings.print_error_msg(err_msg)
                 pass
+
           try:
             urllib2.urlopen(menu.options.file_upload)
           except urllib2.HTTPError, err_msg:
             print settings.print_critical_msg(str(err_msg.code))
             sys.exit(0)
+
           except urllib2.URLError, err_msg:
             print settings.print_critical_msg(str(err_msg.args[0]).split("] ")[1] + ".")
             sys.exit(0)
@@ -736,7 +733,7 @@ def main(filename, url, init_test):
                   warn_msg = "(" + menu.options.auth_type.capitalize() + ") " 
                   warn_msg += "HTTP authentication credentials are required."
                   print settings.print_warning_msg(warn_msg)      
-                  # Check if heuristics have failed to identify the realm attribute.
+                  # Check if Heuristics have failed to identify the realm attribute.
                   if not realm:
                     warn_msg = "Heuristics have failed to identify the realm attribute." 
                     print settings.print_warning_msg(warn_msg)
@@ -988,7 +985,7 @@ if __name__ == '__main__':
         # Removing empty elements from list.
         clean_bulkfile = [x for x in clean_bulkfile if x]
         for url in clean_bulkfile:
-          init_test = True
+          settings.INIT_TEST = True
           if url == clean_bulkfile[-1]:
             settings.EOF = True
           # Reset the injection level
@@ -996,11 +993,11 @@ if __name__ == '__main__':
             menu.options.level = 1
           init_injection(url)
           try:
-            response, init_test = url_response(url, init_test)
+            response = url_response(url)
             if response != False:
-              init_test = False
+              settings.INIT_TEST = "BULK_TESTS"
               filename = logs_filename_creation()
-              main(filename, url, init_test)
+              main(filename, url)
 
           except urllib2.HTTPError, err_msg:
             if settings.VERBOSITY_LEVEL < 2:
@@ -1021,7 +1018,7 @@ if __name__ == '__main__':
               print "" 
 
     else:
-      init_test = True
+      settings.INIT_TEST = True
       # Check if option is "--url" for single url test.
       if menu.options.sitemap_url:
         url = menu.options.sitemap_url
@@ -1029,7 +1026,7 @@ if __name__ == '__main__':
         url = menu.options.url
 
       filename = logs_filename_creation()
-      main(filename, url, init_test)
+      main(filename, url)
 
   except KeyboardInterrupt: 
     abort_msg = "User aborted procedure "

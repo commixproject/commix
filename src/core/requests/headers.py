@@ -135,6 +135,15 @@ def check_http_traffic(request):
       try:
         opener.open(request)
         response = True
+        if settings.VERBOSITY_LEVEL < 2:
+          if current_attempt != 0:
+            info_msg = "Checking connection to the target URL... "
+            sys.stdout.write(settings.print_info_msg(info_msg))
+            sys.stdout.flush()
+          if settings.INIT_TEST == True:  
+            print "[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]" 
+            settings.INIT_TEST = False
+
       except urllib2.URLError, err_msg:
         if current_attempt == 0:
           if settings.VERBOSITY_LEVEL < 2:
@@ -145,7 +154,7 @@ def check_http_traffic(request):
           warn_msg = "In case the provided target URL is valid, try to rerun with"
           warn_msg += " the switch '--random-agent' and/or proxy switch."
           print settings.print_warning_msg(warn_msg)
-        if settings.VERBOSITY_LEVEL >= 2:
+        if settings.VERBOSITY_LEVEL >= 2 or current_attempt == 1:
           #info_msg = str(err_msg.args[0]).split("] ")[1] + ". "
           info_msg = "Please wait while retring the request(s)."
           print settings.print_info_msg(info_msg) 

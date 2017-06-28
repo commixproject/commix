@@ -106,7 +106,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "2.0.36"
+VERSION_NUM = "2.0.37"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"
@@ -689,5 +689,7 @@ MAX_RETRIES = 3
 
 # End of file
 EOF = False
+
+INIT_TEST = ""
 
 #eof
