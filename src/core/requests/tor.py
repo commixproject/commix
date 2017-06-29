@@ -42,28 +42,38 @@ def do_check():
   requirments.do_check(requirment)
     
   check_privoxy_proxy = True
-  info_msg = "Testing Tor SOCKS proxy (" + requirment + ") settings " 
-  info_msg += settings.PRIVOXY_IP + ":" + PRIVOXY_PORT + "... "
+  info_msg = "Testing Tor SOCKS proxy settings (" 
+  info_msg += settings.PRIVOXY_IP + ":" + PRIVOXY_PORT 
+  info_msg +=  ")... "
   sys.stdout.write(settings.print_info_msg(info_msg))
   sys.stdout.flush()
-
   try:
     privoxy_proxy = urllib2.ProxyHandler({settings.PROXY_PROTOCOL:settings.PRIVOXY_IP + ":" + PRIVOXY_PORT})
     opener = urllib2.build_opener(privoxy_proxy)
     urllib2.install_opener(opener)
-
   except:
     check_privoxy_proxy = False
     pass
     
   if check_privoxy_proxy:
-    try:     
-      check_ip = opener.open("https://check.torproject.org/").read()
-      new_ip = re.findall(r":  <strong>" + "(.*)" + "</strong></p>", check_ip)
-      sys.stdout.write("[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]\n")
-      sys.stdout.flush()
-      success_msg = "Your ip address appears to be " + new_ip[0] + ".\n"
-      sys.stdout.write(settings.print_success_msg(success_msg))
+    try:
+      check_tor_page = opener.open("https://check.torproject.org/").read()
+      found_ip = re.findall(r":  <strong>" + "(.*)" + "</strong></p>", check_tor_page)
+      if not "You are not using Tor" in check_tor_page:
+        sys.stdout.write("[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]\n")
+        sys.stdout.flush()
+        success_msg = "Your ip address appears to be " + found_ip[0] + ".\n"
+        sys.stdout.write(settings.print_success_msg(success_msg))
+
+      else:
+        print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
+        err_msg = "Can't establish connection with the Tor SOCKS proxy. "
+        err_msg += "Please make sure that you have "
+        err_msg += "Tor installed and running so "
+        err_msg += "you could successfully use "
+        err_msg += "switch '--tor'."
+        print settings.print_critical_msg(err_msg)  
+        sys.exit(0)  
 
     except urllib2.URLError, err_msg:
       print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
