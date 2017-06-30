@@ -142,9 +142,6 @@ def init_request(url):
   # Check if defined any HTTP Proxy (--proxy option).
   if menu.options.proxy:
     proxy.do_check(url)
-  # Check if defined Tor (--tor option).
-  elif menu.options.tor:
-    tor.do_check()
   return request
 
 def url_response(url):
@@ -956,6 +953,10 @@ if __name__ == '__main__':
     # Check if ".git" exists and check for updated version!
     if os.path.isdir("./.git") and settings.CHECK_FOR_UPDATES_ON_START:
       update.check_for_update()
+
+    # Check if defined Tor (--tor option).
+    if menu.options.tor:
+      tor.do_check()
 
     # Check if option is "-m" for multiple urls test.
     if menu.options.bulkfile:

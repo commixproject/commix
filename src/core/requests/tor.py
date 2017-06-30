@@ -33,6 +33,7 @@ else:
 Check if HTTP Proxy (tor/privoxy) is defined.
 """
 def do_check():
+
   # Check if 'tor' is installed.
   requirment = "tor"
   requirments.do_check(requirment)
