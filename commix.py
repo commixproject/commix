@@ -152,6 +152,7 @@ def url_response(url):
     sys.stdout.flush()
     if settings.VERBOSITY_LEVEL >= 2:
       print ""
+      
   response = examine_request(request)
   return response
 

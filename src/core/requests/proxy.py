@@ -27,9 +27,6 @@ from src.thirdparty.colorama import Fore, Back, Style, init
 """
 def do_check(url):
   check_proxy = True
-  info_msg = "Testing proxy " + menu.options.proxy + "... "
-  sys.stdout.write(settings.print_info_msg(info_msg))
-  sys.stdout.flush()
   try:
     # Check if defined POST data
     if menu.options.data:
@@ -47,11 +44,11 @@ def do_check(url):
     check_proxy = False
     pass
   if check_proxy == True:
-    sys.stdout.write("[" + Fore.GREEN + "  SUCCEED " + Style.RESET_ALL + " ]\n")
-    sys.stdout.flush()
+    pass
   else:
-    print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
-    err_msg = "Could not connect to proxy."
+    err_msg = "Unable to connect to proxy ("
+    err_msg += menu.options.proxy
+    err_msg += ")."
     print settings.print_critical_msg(err_msg)
     sys.exit(0)
     
@@ -59,9 +56,7 @@ def do_check(url):
 Use the defined HTTP Proxy
 """
 def use_proxy(request):
-  proxy = urllib2.ProxyHandler({settings.PROXY_PROTOCOL: menu.options.proxy})
-  opener = urllib2.build_opener(proxy)
-  urllib2.install_opener(opener)
+  headers.do_check(request)
+  request.set_proxy(menu.options.proxy,settings.PROXY_PROTOCOL)
   response = urllib2.urlopen(request)
-
-  return response
+  return response  
