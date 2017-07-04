@@ -137,14 +137,20 @@ def init_request(url):
     request = urllib2.Request(url, menu.options.data)
   else:
     request = urllib2.Request(url)
-  headers.do_check(request)  
-  #headers.check_http_traffic(request)
+  headers.do_check(request)
   # Check if defined any HTTP Proxy (--proxy option).
   if menu.options.proxy:
     proxy.do_check(url)
   return request
 
 def url_response(url):
+  # Check if defined Tor (--tor option).
+  if menu.options.tor and settings.TOR_CHECK_AGAIN:
+    tor.do_check()
+  if menu.options.bulkfile:
+    settings.TOR_CHECK_AGAIN = False
+    info_msg = "Setting URL '" + url + "' for tests. "  
+    print settings.print_info_msg(info_msg)
   request = init_request(url)
   if settings.INIT_TEST == True:
     info_msg = "Checking connection to the target URL... "
@@ -152,7 +158,6 @@ def url_response(url):
     sys.stdout.flush()
     if settings.VERBOSITY_LEVEL >= 2:
       print ""
-      
   response = examine_request(request)
   return response
 
@@ -176,8 +181,6 @@ def init_injection(url):
     settings.TEMPFILE_BASED_STATE = False
   if settings.TIME_RELATIVE_ATTACK:
     settings.TIME_RELATIVE_ATTACK = False
-  info_msg = "Setting URL '" + url + "' for tests. "  
-  print settings.print_info_msg(info_msg)
 
 """
 Logs filename creation.
@@ -338,8 +341,8 @@ def main(filename, url):
         url = crawler.crawler(url)
 
       try:
-        response = url_response(url)
-        html_data = content = response.read()
+        #response = url_response(url)
+        #html_data = content = response.read()
 
         # Check for URL redirection
         if not menu.options.ignore_redirects:
@@ -798,6 +801,9 @@ def main(filename, url):
           print err_msg.line, err_msg.message
         pass
 
+      except AttributeError:
+        pass
+
     else:
       err_msg = "You must specify the target URL."
       print settings.print_critical_msg(err_msg)
@@ -955,10 +961,6 @@ if __name__ == '__main__':
     if os.path.isdir("./.git") and settings.CHECK_FOR_UPDATES_ON_START:
       update.check_for_update()
 
-    # Check if defined Tor (--tor option).
-    if menu.options.tor:
-      tor.do_check()
-
     # Check if option is "-m" for multiple urls test.
     if menu.options.bulkfile:
       bulkfile = menu.options.bulkfile
@@ -997,7 +999,6 @@ if __name__ == '__main__':
           try:
             response = url_response(url)
             if response != False:
-              settings.INIT_TEST = "BULK_TESTS"
               filename = logs_filename_creation()
               main(filename, url)
 
@@ -1026,9 +1027,10 @@ if __name__ == '__main__':
         url = menu.options.sitemap_url
       else:  
         url = menu.options.url
-
-      filename = logs_filename_creation()
-      main(filename, url)
+      response = url_response(url)
+      if response != False:
+        filename = logs_filename_creation()
+        main(filename, url)
 
   except KeyboardInterrupt: 
     abort_msg = "User aborted procedure "
