@@ -910,10 +910,16 @@ if __name__ == '__main__':
     # Seconds to delay between each HTTP request.
     if menu.options.delay > "0":
       settings.DELAY = menu.options.delay
-      
+
     # Check if defined "--timesec" option.
     if menu.options.timesec > "0":
-        settings.TIMESEC = menu.options.timesec
+      settings.TIMESEC = menu.options.timesec
+    else:
+      if menu.options.tor:
+        settings.TIMESEC = 10
+        warn_msg = "Increasing default value for option '--time-sec' to"
+        warn_msg += " " + str(settings.TIMESEC) + " because switch '--tor' was provided."
+        print settings.print_warning_msg(warn_msg)  
 
     # Local IP address
     if not menu.options.offline:

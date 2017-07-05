@@ -65,6 +65,9 @@ def do_check():
         sys.stdout.flush()
         success_msg = "Your ip address appears to be " + found_ip[0] + ".\n"
         sys.stdout.write(settings.print_success_msg(success_msg))
+        warn_msg = "Increasing default value for option '--time-sec' to"
+        warn_msg += " " + str(settings.TIMESEC) + " because switch '--tor' was provided."
+        print settings.print_warning_msg(warn_msg)  
 
       else:
         print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"

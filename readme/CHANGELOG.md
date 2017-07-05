@@ -1,4 +1,5 @@
 ## Version 2.0 (upcoming)
+* Revised: Minor improvement for automatically increasing default "--time-sec" value when "--tor" used.
 * Fixed: Minor improvement for not re-testing Tor SOCKS proxy settings (in case of multiple targets).
 * Revised: Multiple minor eye-candy revisions have been performed.
 * Fixed: Major improvement regarding not sending requests with GET mothod in case of POST method, in injection levels 2, 3.
