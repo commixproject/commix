@@ -471,12 +471,17 @@ def main(filename, url):
                     if not checks.identified_os():
                       settings.TARGET_OS = user_defined_os
 
-            if settings.VERBOSITY_LEVEL >= 1 and found_os_server:
-              print "[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]"
-              success_msg = "The target operating system appears to be " 
-              success_msg += identified_os.title() + Style.RESET_ALL + "."
-              print settings.print_success_msg(success_msg)
-            
+            if settings.VERBOSITY_LEVEL >= 1 :
+              if found_os_server:
+                print "[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]"
+                success_msg = "The target operating system appears to be " 
+                success_msg += identified_os.title() + Style.RESET_ALL + "."
+                print settings.print_success_msg(success_msg)
+              else:
+                print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
+                warn_msg = "Heuristics have failed to identify server's operating system."
+                print settings.print_warning_msg(warn_msg)
+
             # Procedure for target server identification.
             found_server_banner = False
             if settings.VERBOSITY_LEVEL >= 1:
@@ -602,8 +607,6 @@ def main(filename, url):
               if menu.options.shellshock:
                 pass 
               else:
-                warn_msg = "Heuristics have failed to identify server's operating system."
-                print settings.print_warning_msg(warn_msg)
                 while True:
                   question_msg = "Do you recognise the server's operating system? "
                   question_msg += "[(W)indows/(U)nix/(q)uit] > "
