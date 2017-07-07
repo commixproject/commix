@@ -101,7 +101,10 @@ def examine_request(request):
     return response
 
   except urllib2.HTTPError, err_msg:
-    err_msg = str(err_msg).replace(": "," (") + ")." 
+    error_description = ""
+    if len(str(err_msg).split(": ")[1]) == 0:
+      error_description = "Non-standard HTTP status code" 
+    err_msg = str(err_msg).replace(": "," (") + error_description + ")." 
     if menu.options.bulkfile:
       warn_msg = "Skipping URL '" + url + "' - " + err_msg
       print settings.print_warning_msg(warn_msg)
@@ -1014,7 +1017,10 @@ if __name__ == '__main__':
           except urllib2.HTTPError, err_msg:
             if settings.VERBOSITY_LEVEL < 2:
               print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
-            err_msg = str(err_msg).replace(": "," (") + ")." 
+            error_description = ""
+            if len(str(err_msg).split(": ")[1]) == 0:
+              error_description = "Non-standard HTTP status code" 
+            err_msg = str(err_msg).replace(": "," (") + error_description + ")." 
             warn_msg = "Skipping URL '" + url + "' - " + err_msg
             print settings.print_warning_msg(warn_msg)
             if settings.EOF:

@@ -175,11 +175,17 @@ def check_http_traffic(request):
     if str(err.code).startswith('4') or \
        str(err.code).startswith('5'):
       if settings.VERBOSITY_LEVEL > 1:
+        if len(str(err).split(": ")[1]) == 0:
+          error_msg = error_msg + "Non-standard HTTP status code" 
         warn_msg = error_msg
         print settings.print_warning_msg(warn_msg + ").")
       pass
     else:
-      err_msg = error_msg
+      error_msg = str(err).replace(": "," (")
+      if len(str(err).split(": ")[1]) == 0:
+        err_msg = error_msg + "Non-standard HTTP status code" 
+      else:
+        err_msg = error_msg
       print settings.print_critical_msg(err_msg + ").")
       raise SystemExit()  
        
