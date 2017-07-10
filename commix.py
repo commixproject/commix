@@ -740,7 +740,7 @@ def main(filename, url):
                   warn_msg = "(" + menu.options.auth_type.capitalize() + ") " 
                   warn_msg += "HTTP authentication credentials are required."
                   print settings.print_warning_msg(warn_msg)      
-                  # Check if Heuristics have failed to identify the realm attribute.
+                  # Check if heuristics have failed to identify the realm attribute.
                   if not realm:
                     warn_msg = "Heuristics have failed to identify the realm attribute." 
                     print settings.print_warning_msg(warn_msg)
