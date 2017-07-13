@@ -110,94 +110,98 @@ def do_GET_check(url):
       return False
     return url
 
-  urls_list = []
-  # Find the host part
-  url_part = get_url_part(url)
-  # Find the parameter part
-  parameters = url.split("?")[1]
-  # Split parameters
-  multi_parameters = parameters.split(settings.PARAMETER_DELIMITER)
-  # Check for inappropriate format in provided parameter(s).
-  if len([s for s in multi_parameters if "=" in s]) != (len(multi_parameters)):
-    inappropriate_format(multi_parameters)
-  # Check for empty values (in provided parameters).
-  is_empty(multi_parameters, http_request_method)
-  # Grab the value of parameter.
-  value = re.findall(r'=(.*)', parameters)
-  value = ''.join(value)
-  # Replace the value of parameter with INJECT tag
-  inject_value = value.replace(value, settings.INJECT_TAG)
-  # Check if single paramerter is supplied.
-  if len(multi_parameters) == 1:
-    # Check if defined the INJECT_TAG
-    if settings.INJECT_TAG not in parameters:
-      if len(value) == 0:
-        parameters = parameters + settings.INJECT_TAG
-      else:
-        parameters = parameters.replace(value, inject_value) 
-    else:
-      # Auto-recognize prefix / suffix
-      if settings.INJECT_TAG in value:
-        if len(value.rsplit(settings.INJECT_TAG, 0)[0]) > 0:
-          menu.options.prefix = value.rsplit(settings.INJECT_TAG, 1)[0]
-        if len(value.rsplit(settings.INJECT_TAG, 1)[1]) > 0:
-          menu.options.suffix = value.rsplit(settings.INJECT_TAG, 1)[1]
-      parameters = parameters.replace(value, inject_value) 
-    # Reconstruct the url
-    url = url_part + "?" + parameters
-    urls_list.append(url)
-    return urls_list 
-
   else:
-    # Check if multiple paramerters are supplied without the "INJECT_HERE" tag.
-    all_params = settings.PARAMETER_DELIMITER.join(multi_parameters)
-    # Check if defined the "INJECT_HERE" tag
-    if settings.INJECT_TAG not in url:
-      all_params = all_params.split(settings.PARAMETER_DELIMITER)
-      for param in range(0,len(all_params)):
-        if param == 0 :
-          old = re.findall(r'=(.*)', all_params[param])
-          old = ''.join(old)
-        else :
-          old = value
-
-        # Grab the value of parameter.
-        value = re.findall(r'=(.*)', all_params[param])
-        value = ''.join(value)
-        # Replace the value of parameter with INJECT tag
-        inject_value = value.replace(value, settings.INJECT_TAG)
-        # Skip testing the parameter(s) with empty value(s).
-        if menu.options.skip_empty:
+    urls_list = []
+    if menu.options.shellshock:
+      urls_list.append(url)
+    else:
+      # Find the host part
+      url_part = get_url_part(url)
+      # Find the parameter part
+      parameters = url.split("?")[1]
+      # Split parameters
+      multi_parameters = parameters.split(settings.PARAMETER_DELIMITER)
+      # Check for inappropriate format in provided parameter(s).
+      if len([s for s in multi_parameters if "=" in s]) != (len(multi_parameters)):
+        inappropriate_format(multi_parameters)
+      # Check for empty values (in provided parameters).
+      is_empty(multi_parameters, http_request_method)
+      # Grab the value of parameter.
+      value = re.findall(r'=(.*)', parameters)
+      value = ''.join(value)
+      # Replace the value of parameter with INJECT tag
+      inject_value = value.replace(value, settings.INJECT_TAG)
+      # Check if single paramerter is supplied.
+      if len(multi_parameters) == 1:
+        # Check if defined the INJECT_TAG
+        if settings.INJECT_TAG not in parameters:
           if len(value) == 0:
-            provided_value = re.findall(r'(.*)=', all_params[param])
-            provided_value = ''.join(provided_value)
+            parameters = parameters + settings.INJECT_TAG
           else:
-            all_params[param] = all_params[param].replace(value, inject_value)
-            all_params[param-1] = all_params[param-1].replace(inject_value, old)
-            parameter = settings.PARAMETER_DELIMITER.join(all_params)
-            # Reconstruct the url
-            url = url_part + "?" + parameter  
-            urls_list.append(url)
+            parameters = parameters.replace(value, inject_value) 
         else:
-          if len(value) == 0:
-            all_params[param] = all_params[param] + settings.INJECT_TAG
-          else:
-            all_params[param] = all_params[param].replace(value, inject_value)
-          all_params[param-1] = all_params[param-1].replace(inject_value, old)
-          parameter = settings.PARAMETER_DELIMITER.join(all_params)
-          # Reconstruct the url
+          # Auto-recognize prefix / suffix
+          if settings.INJECT_TAG in value:
+            if len(value.rsplit(settings.INJECT_TAG, 0)[0]) > 0:
+              menu.options.prefix = value.rsplit(settings.INJECT_TAG, 1)[0]
+            if len(value.rsplit(settings.INJECT_TAG, 1)[1]) > 0:
+              menu.options.suffix = value.rsplit(settings.INJECT_TAG, 1)[1]
+          parameters = parameters.replace(value, inject_value) 
+        # Reconstruct the url
+        url = url_part + "?" + parameters
+        urls_list.append(url)
+        return urls_list 
+
+      else:
+        # Check if multiple paramerters are supplied without the "INJECT_HERE" tag.
+        all_params = settings.PARAMETER_DELIMITER.join(multi_parameters)
+        # Check if defined the "INJECT_HERE" tag
+        if settings.INJECT_TAG not in url:
+          all_params = all_params.split(settings.PARAMETER_DELIMITER)
+          for param in range(0,len(all_params)):
+            if param == 0 :
+              old = re.findall(r'=(.*)', all_params[param])
+              old = ''.join(old)
+            else :
+              old = value
+
+            # Grab the value of parameter.
+            value = re.findall(r'=(.*)', all_params[param])
+            value = ''.join(value)
+            # Replace the value of parameter with INJECT tag
+            inject_value = value.replace(value, settings.INJECT_TAG)
+            # Skip testing the parameter(s) with empty value(s).
+            if menu.options.skip_empty:
+              if len(value) == 0:
+                provided_value = re.findall(r'(.*)=', all_params[param])
+                provided_value = ''.join(provided_value)
+              else:
+                all_params[param] = all_params[param].replace(value, inject_value)
+                all_params[param-1] = all_params[param-1].replace(inject_value, old)
+                parameter = settings.PARAMETER_DELIMITER.join(all_params)
+                # Reconstruct the url
+                url = url_part + "?" + parameter  
+                urls_list.append(url)
+            else:
+              if len(value) == 0:
+                all_params[param] = all_params[param] + settings.INJECT_TAG
+              else:
+                all_params[param] = all_params[param].replace(value, inject_value)
+              all_params[param-1] = all_params[param-1].replace(inject_value, old)
+              parameter = settings.PARAMETER_DELIMITER.join(all_params)
+              # Reconstruct the url
+              url = url_part + "?" + parameter  
+              urls_list.append(url)
+
+        else:
+          for param in range(0,len(multi_parameters)):
+            # Grab the value of parameter.
+            value = re.findall(r'=(.*)', multi_parameters[param])
+            value = ''.join(value)
+            parameter = settings.PARAMETER_DELIMITER.join(multi_parameters)
+          # Reconstruct the url  
           url = url_part + "?" + parameter  
           urls_list.append(url)
-
-    else:
-      for param in range(0,len(multi_parameters)):
-        # Grab the value of parameter.
-        value = re.findall(r'=(.*)', multi_parameters[param])
-        value = ''.join(value)
-        parameter = settings.PARAMETER_DELIMITER.join(multi_parameters)
-      # Reconstruct the url  
-      url = url_part + "?" + parameter  
-      urls_list.append(url)
 
     return urls_list 
 
