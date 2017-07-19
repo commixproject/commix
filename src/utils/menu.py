@@ -488,6 +488,12 @@ misc.add_option("--dependencies",
                 default=False,
                 help="Check for third-party (non-core) dependencies.")
 
+misc.add_option("--purge-output", 
+                action="store_true",
+                dest="purge_output",
+                default=False,
+                help="Safely remove all content from output directory.")
+
 misc.add_option("--skip-waf", 
                 action="store_true",
                 dest="skip_waf",

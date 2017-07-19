@@ -1,3 +1,6 @@
+## Version 2.1 (upcoming)
+* Added: New option "--purge-output" to turn on safe removal of all content(s) from output directory.
+
 ## Version 2.0 (2017-07-14)
 * Revised: Minor improvement for automatically increasing default "--time-sec" value when "--tor" used.
 * Fixed: Minor improvement for not re-testing Tor SOCKS proxy settings (in case of multiple targets).

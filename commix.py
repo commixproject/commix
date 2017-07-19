@@ -27,6 +27,7 @@ from os.path import splitext
 
 from src.utils import menu
 from src.utils import logs
+from src.utils import purge
 from src.utils import update
 from src.utils import version
 from src.utils import install
@@ -847,6 +848,12 @@ def main(filename, url):
 
 if __name__ == '__main__':
   try:
+
+    # Check if defined "--version" option.
+    if menu.options.purge_output:
+      purge.purge_output()
+      sys.exit(0)
+
 
     # Check if defined "--version" option.
     if menu.options.version:
