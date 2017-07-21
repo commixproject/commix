@@ -148,6 +148,8 @@ def init_request(url):
   return request
 
 def url_response(url):
+  # Check if http / https
+  url = checks.check_http_s(url)
   # Check if defined Tor (--tor option).
   if menu.options.tor and settings.TOR_CHECK_AGAIN:
     tor.do_check()
@@ -163,7 +165,7 @@ def url_response(url):
     if settings.VERBOSITY_LEVEL >= 2:
       print ""
   response = examine_request(request)
-  return response
+  return response, url
 
 """
 Injection states initiation.
@@ -300,8 +302,6 @@ def main(filename, url):
   
     # Check if defined "--url" or "-m" option.
     if url:
-      # Check if http / https
-      url = checks.check_http_s(url)
 
       # Load the crawler
       if menu.options.crawldepth > 0 or menu.options.sitemap_url:
@@ -345,9 +345,6 @@ def main(filename, url):
         url = crawler.crawler(url)
 
       try:
-        #response = url_response(url)
-        #html_data = content = response.read()
-
         # Check for URL redirection
         if not menu.options.ignore_redirects:
           url = redirection.do_check(url)
@@ -1016,7 +1013,7 @@ if __name__ == '__main__':
             menu.options.level = 1
           init_injection(url)
           try:
-            response = url_response(url)
+            response, url = url_response(url)
             if response != False:
               filename = logs_filename_creation()
               main(filename, url)
@@ -1049,7 +1046,7 @@ if __name__ == '__main__':
         url = menu.options.sitemap_url
       else:  
         url = menu.options.url
-      response = url_response(url)
+      response, url = url_response(url)
       if response != False:
         filename = logs_filename_creation()
         main(filename, url)

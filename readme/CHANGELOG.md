@@ -1,4 +1,5 @@
 ## Version 2.1 (upcoming)
+* Fixed: Major bug-fix regarding connection problem over HTTPS.
 * Added: New option `--purge-output` to turn on safe removal of all content(s) from output directory.
 
 ## Version 2.0 (2017-07-14)
