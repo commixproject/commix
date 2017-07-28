@@ -1,4 +1,5 @@
 ## Version 2.1 (upcoming)
+* Revised: Minor improvement regarding options `--purge-output` and `--wizard`, were added in the mandatory options list.
 * Fixed: Major bug-fix regarding connection problem over HTTPS.
 * Added: New option `--purge-output` to turn on safe removal of all content(s) from output directory.
 

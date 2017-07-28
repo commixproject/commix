@@ -847,12 +847,6 @@ if __name__ == '__main__':
   try:
 
     # Check if defined "--version" option.
-    if menu.options.purge_output:
-      purge.purge_output()
-      sys.exit(0)
-
-
-    # Check if defined "--version" option.
     if menu.options.version:
       version.show_version()
       sys.exit(0)
@@ -877,6 +871,20 @@ if __name__ == '__main__':
     # Check if defined "--install" option.        
     if menu.options.install:
       install.installer()
+      sys.exit(0)
+
+    # Check for missing mandatory option(s).
+    if not any((menu.options.url, menu.options.logfile, menu.options.bulkfile, \
+                menu.options.requestfile, menu.options.sitemap_url, menu.options.wizard, \
+                menu.options.update, menu.options.purge_output, menu.options.noncore_dependencies)):
+      err_msg = "Missing a mandatory option (-u, -l, -m, -r, -x, --wizard, --update, --purge-output or --dependencies). "
+      err_msg += "Use -h for help."
+      print settings.print_critical_msg(err_msg)
+      sys.exit(0)
+
+    # Check if defined "--purge-output" option.
+    if menu.options.purge_output:
+      purge.purge_output()
       sys.exit(0)
 
     # Check if defined "--mobile" option.
@@ -904,14 +912,6 @@ if __name__ == '__main__':
         menu.options.data = sys.stdin.readline().replace("\n","")
         if len(menu.options.data) == 0:
           menu.options.data = False
-
-    # Check for missing mandatory option(s).
-    if not any((menu.options.url, menu.options.logfile, menu.options.bulkfile, menu.options.requestfile, \
-      menu.options.sitemap_url, menu.options.update, menu.options.noncore_dependencies)):
-      err_msg = "Missing a mandatory option (-u, -l, -m, -r or -x). "
-      err_msg += "Use -h for help."
-      print settings.print_critical_msg(err_msg)
-      sys.exit(0)
 
     # Retries when the connection timeouts.
     if menu.options.retries:
