@@ -882,7 +882,7 @@ if __name__ == '__main__':
       print settings.print_critical_msg(err_msg)
       sys.exit(0)
 
-    # Check if defined "--purge-output" option.
+    # Check if defined "--version" option.
     if menu.options.purge_output:
       purge.purge_output()
       sys.exit(0)
