@@ -75,6 +75,29 @@ if settings.IS_WINDOWS:
   init()
 
 """
+Define HTTP User-Agent header.
+"""
+def user_agent_header():
+  # Check if defined "--random-agent" option.
+  if menu.options.random_agent:
+    if (menu.options.agent != settings.DEFAULT_USER_AGENT) or menu.options.mobile:
+      err_msg = "The option '--random-agent' is incompatible with option '--user-agent' or switch '--mobile'."
+      print settings.print_critical_msg(err_msg)
+      sys.exit(0)
+    else:
+      info_msg = "Fetching random HTTP User-Agent header... "  
+      sys.stdout.write(settings.print_info_msg(info_msg))
+      sys.stdout.flush()
+      try:
+        menu.options.agent = random.choice(settings.USER_AGENT_LIST)
+        print "[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]"
+        success_msg = "The fetched random HTTP User-Agent header is '" + menu.options.agent + "'."  
+        print settings.print_success_msg(success_msg)
+      except:
+        print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
+          
+
+"""
 Examine the request
 """
 def examine_request(request):
@@ -135,6 +158,9 @@ def examine_request(request):
 The init (URL) request.
 """
 def init_request(url):
+  
+  # Define HTTP User-Agent header
+  user_agent_header()
   # Check if defined POST data
   if menu.options.data:
     settings.USER_DEFINED_POST_DATA = menu.options.data
@@ -217,7 +243,6 @@ The main function.
 """
 def main(filename, url):
   try:
-
     # Ignore the mathematic calculation part (Detection phase).
     if menu.options.skip_calc:
       settings.SKIP_CALC = True
@@ -290,19 +315,9 @@ def main(filename, url):
       err_msg = "You must enter the '--file-write' or '--file-upload' parameter."
       print settings.print_critical_msg(err_msg)
       sys.exit(0)
-
-    # Check if defined "--random-agent" option.
-    if menu.options.random_agent:
-      if (menu.options.agent != settings.DEFAULT_USER_AGENT) or menu.options.mobile:
-        err_msg = "The option '--random-agent' is incompatible with option '--user-agent' or switch '--mobile'."
-        print settings.print_critical_msg(err_msg)
-        sys.exit(0)
-      else:
-        menu.options.agent = random.choice(settings.USER_AGENT_LIST)
   
     # Check if defined "--url" or "-m" option.
     if url:
-
       # Load the crawler
       if menu.options.crawldepth > 0 or menu.options.sitemap_url:
         if menu.options.crawldepth > 0:
@@ -882,7 +897,7 @@ if __name__ == '__main__':
       print settings.print_critical_msg(err_msg)
       sys.exit(0)
 
-    # Check if defined "--version" option.
+    # Check if defined "--purge-output" option.
     if menu.options.purge_output:
       purge.purge_output()
       sys.exit(0)
