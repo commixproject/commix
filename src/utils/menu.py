@@ -543,9 +543,11 @@ parser.formatter.format_option_strings = type(parser.formatter.format_option_str
 
 option = parser.get_option("-h")
 option.help = option.help.capitalize().replace("Show this help message and exit", "Show help and exit.")
-# Checkall the banner
-banner()
 (options, args) = parser.parse_args()
+
+# Checkall the banner
+if not options.version:
+    banner()
 
 """
 The "os_shell" available options.
