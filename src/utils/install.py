@@ -105,9 +105,8 @@ def installer():
       else:
         print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
         err_msg = "The installer is not designed for any "
-        err_msg += "other Linux distro than Ubuntu / Debian." 
-        print settings.print_critical_msg(err_msg)
-        err_msg = "    Please install manually: " + dependencies
+        err_msg += "other Linux distro than Ubuntu / Debian. " 
+        err_msg += "Please install manually: " + dependencies
         print Back.RED + err_msg + Style.RESET_ALL
         print ""
         sys.exit(0)
@@ -157,9 +156,8 @@ def installer():
 
   else :
     print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
-    err_msg = "The installer is not designed for any other system other than Linux."
-    print settings.print_critical_msg(err_msg)
-    err_msg = "    Please install manually: " + packages + dependencies
+    err_msg = "The installer is not designed for any other system other than Linux. "
+    err_msg += "Please install manually: " + packages + dependencies
     print settings.print_critical_msg(err_msg)
     print ""
     sys.exit(0)
