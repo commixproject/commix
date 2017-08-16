@@ -63,7 +63,11 @@ def do_check():
       if not "You are not using Tor" in check_tor_page:
         sys.stdout.write("[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]\n")
         sys.stdout.flush()
-        success_msg = "Your ip address appears to be " + found_ip[0] + ".\n"
+        if menu.options.tor_check:
+          success_msg = "Tor connection is properly set."
+        else:
+          success_msg = ""
+        success_msg += "Your ip address appears to be " + found_ip[0] + ".\n"
         sys.stdout.write(settings.print_success_msg(success_msg))
         warn_msg = "Increasing default value for option '--time-sec' to"
         warn_msg += " " + str(settings.TIMESEC) + " because switch '--tor' was provided."
@@ -71,7 +75,11 @@ def do_check():
 
       else:
         print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
-        err_msg = "Can't establish connection with the Tor SOCKS proxy. "
+        if menu.options.tor_check:
+          err_msg = "It seems that your Tor connection is not properly set."
+        else:
+          err_msg = "" 
+        err_msg += "Can't establish connection with the Tor SOCKS proxy. "
         err_msg += "Please make sure that you have "
         err_msg += "Tor installed and running so "
         err_msg += "you could successfully use "
@@ -81,6 +89,10 @@ def do_check():
 
     except urllib2.URLError, err_msg:
       print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
+      if menu.options.tor_check:
+        err_msg = "It seems that your Tor connection is not properly set."
+      else:
+        err_msg = ""
       warn_msg = "Please make sure that you have "
       warn_msg += "Tor installed and running so "
       warn_msg += "you could successfully use "

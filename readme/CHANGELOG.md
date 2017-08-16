@@ -1,4 +1,5 @@
 ## Version 2.1 (upcoming)
+* Added: New option `--check-tor` that checks if Tor is used properly.
 * Fixed: Minor improvement for fetching random HTTP User-Agent header in initial request, when `--random-agent` is used.
 * Revised: Minor improvement regarding options `--purge-output` and `--wizard`, were added in the mandatory options list.
 * Fixed: Major bug-fix regarding connection problem over HTTPS.

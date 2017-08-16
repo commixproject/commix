@@ -221,6 +221,12 @@ request.add_option("--tor-port",
                 default=False,
                 help="Set Tor proxy port (Default: 8118).")
 
+request.add_option("--tor-check",
+                action="store_true",
+                dest="tor_check",
+                default=False,
+                help="Check to see if Tor is used properly.")
+
 request.add_option("--auth-url",
                 action="store",
                 dest="auth_url",

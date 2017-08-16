@@ -902,6 +902,12 @@ if __name__ == '__main__':
       purge.purge_output()
       sys.exit(0)
 
+    # Check if defined "--check-tor" option. 
+    if menu.options.tor_check and not menu.options.tor:
+      err_msg = "The '--check-tor' swich requires usage of switch '--tor'."
+      print settings.print_critical_msg(err_msg)
+      sys.exit(0)
+
     # Check if defined "--mobile" option.
     if menu.options.mobile:
       if (menu.options.agent != settings.DEFAULT_USER_AGENT) or menu.options.random_agent:
