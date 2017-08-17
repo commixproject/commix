@@ -76,7 +76,7 @@ def do_check():
       else:
         print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
         if menu.options.tor_check:
-          err_msg = "It seems that your Tor connection is not properly set."
+          err_msg = "It seems that your Tor connection is not properly set. "
         else:
           err_msg = "" 
         err_msg += "Can't establish connection with the Tor SOCKS proxy. "
@@ -90,7 +90,7 @@ def do_check():
     except urllib2.URLError, err_msg:
       print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
       if menu.options.tor_check:
-        err_msg = "It seems that your Tor connection is not properly set."
+        err_msg = "It seems that your Tor connection is not properly set. "
       else:
         err_msg = ""
       warn_msg = "Please make sure that you have "
