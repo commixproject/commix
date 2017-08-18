@@ -292,8 +292,8 @@ def main(filename, url):
          found_tech == False:
         err_msg = "You specified wrong value '" + split_techniques_names[i] 
         err_msg += "' as injection technique. "
-        err_msg += "The value, must be a string composed by the letters (C)lassic, (E)val-based, "
-        err_msg += "(T)ime-based, (F)ile-based (with or without commas)."
+        err_msg += "The value for '--technique' must be a string composed by the letters C, E, T, F. "
+        err_msg += "Refer to the official wiki for details."
         print settings.print_critical_msg(err_msg)
         sys.exit(0)
 
