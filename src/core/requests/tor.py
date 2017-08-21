@@ -64,7 +64,7 @@ def do_check():
         sys.stdout.write("[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]\n")
         sys.stdout.flush()
         if menu.options.tor_check:
-          success_msg = "Tor connection is properly set."
+          success_msg = "Tor connection is properly set. "
         else:
           success_msg = ""
         success_msg += "Your ip address appears to be " + found_ip[0] + ".\n"

@@ -106,7 +106,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "2.1.8"
+VERSION_NUM = "2.1.9"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"
@@ -160,7 +160,7 @@ TIME_RELATIVE_ATTACK = False
 SESSION_APPLIED_TECHNIQUES = ""
 
 # Check if OS is Windows.
-IS_WINDOWS = hasattr(sys, 'getwindowsversion')
+IS_WINDOWS = hasattr(sys, "getwindowsversion")
 
 # Git URL.
 GIT_URL = "https://github.com/commixproject/" + APPLICATION + ".git"
@@ -379,22 +379,22 @@ VALID_URL_FORMAT = "https?://(?:www)?(?:[\w-]{2,255}(?:\.\w{2,6}){1,2})(?:/[\w&%
 
 # Accepted shell menu options
 SHELL_OPTIONS = [
-        '?',
-        'quit',
-        'back',
-        'os_shell',
-        'reverse_tcp',
-        'bind_tcp',
-        'set',
+        "?",
+        "quit",
+        "back",
+        "os_shell",
+        "reverse_tcp",
+        "bind_tcp",
+        "set",
 ]
 
 # Accepted reverse tcp shell menu options
 SET_OPTIONS = [
-        'LHOST',
-        'RHOST',
-        'LPORT',
-        'SRVPORT',
-        'URIPATH',
+        "LHOST",
+        "RHOST",
+        "LPORT",
+        "SRVPORT",
+        "URIPATH",
 ]
 
 # Cookie delimiter
