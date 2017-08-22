@@ -307,7 +307,7 @@ def main(filename, url):
     # Check the file-destination
     if menu.options.file_write and not menu.options.file_dest or \
     menu.options.file_upload  and not menu.options.file_dest:
-      err_msg = "Host's absolute filepath to write and/or upload, must be specified (--file-dest)."
+      err_msg = "Host's absolute filepath to write and/or upload, must be specified (i.e. '--file-dest')."
       print settings.print_critical_msg(err_msg)
       sys.exit(0)
 
@@ -419,6 +419,12 @@ def main(filename, url):
                 http_server = "http://" + str(settings.LOCAL_HTTP_IP) + ":" + str(settings.LOCAL_HTTP_PORT) + "/"
                 info_msg = "Setting the HTTP server on '" + http_server + "'. "  
                 print settings.print_info_msg(info_msg)
+
+                if settings.LOCAL_HTTP_PORT < 1 or settings.LOCAL_HTTP_PORT > 65535:
+                  err_msg = "Invalid HTTP server's port (" + str(settings.LOCAL_HTTP_PORT) + ")." 
+                  print settings.print_critical_msg(err_msg)
+                  sys.exit(0)
+
                 menu.options.file_upload = http_server + menu.options.file_upload
                 simple_http_server.main()
                 break
