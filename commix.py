@@ -13,6 +13,7 @@ the Free Software Foundation, either version 3 of the License, or
 For more see the file 'readme/COPYING' for copying permission.
 """
 
+
 import re
 import os
 import sys
@@ -74,6 +75,15 @@ pass
 if settings.IS_WINDOWS:
   init()
 
+# Dummy check for missing module(s).
+try:
+  __import__("src.utils.version")
+except ImportError:
+  err_msg = "Wrong installation detected (missing modules). "
+  err_msg = "Visit 'https://github.com/commixproject/commix/' for further details. \n"
+  print settings.print_critical_msg(err_msg)
+  sys.exit(0)
+
 """
 Define HTTP User-Agent header.
 """
@@ -96,7 +106,6 @@ def user_agent_header():
       except:
         print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
           
-
 """
 Examine the request
 """
