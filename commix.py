@@ -182,6 +182,9 @@ def init_request(url):
     proxy.do_check(url)
   return request
 
+"""
+Get the URL response.
+"""
 def url_response(url):
   # Check if http / https
   url = checks.check_http_s(url)
@@ -280,8 +283,10 @@ def main(filename, url):
     # Check if specified wrong injection technique
     if menu.options.tech and menu.options.tech not in settings.AVAILABLE_TECHNIQUES:
       found_tech = False
+
       # Convert injection technique(s) to lowercase
       menu.options.tech = menu.options.tech.lower()
+
       # Check if used the ',' separator
       if settings.PARAMETER_SPLITTING_REGEX in menu.options.tech:
         split_techniques_names = menu.options.tech.split(settings.PARAMETER_SPLITTING_REGEX)
@@ -327,6 +332,7 @@ def main(filename, url):
   
     # Check if defined "--url" or "-m" option.
     if url:
+
       # Load the crawler
       if menu.options.crawldepth > 0 or menu.options.sitemap_url:
         if menu.options.crawldepth > 0:
@@ -381,7 +387,6 @@ def main(filename, url):
 
         # Modification on payload
         if not menu.options.shellshock:
-          #settings.CURRENT_USER = "echo $(" + settings.CURRENT_USER + ")"
           settings.SYS_USERS  = "echo $(" + settings.SYS_USERS + ")"
           settings.SYS_PASSES  = "echo $(" + settings.SYS_PASSES + ")"
 
@@ -392,6 +397,7 @@ def main(filename, url):
         # Check if defined "--file-upload" option.
         if menu.options.file_upload:
           if not re.match(settings.VALID_URL_FORMAT, menu.options.file_upload):
+
             # Check if not defined URL for upload.
             while True:
               if not menu.options.batch:
@@ -403,12 +409,14 @@ def main(filename, url):
               if len(enable_HTTP_server) == 0:
                  enable_HTTP_server = "y"              
               if enable_HTTP_server in settings.CHOICE_YES:
+
                 # Check if file exists
                 if not os.path.isfile(menu.options.file_upload):
                   err_msg = "The '" + menu.options.file_upload + "' file, does not exists."
                   sys.stdout.write(settings.print_critical_msg(err_msg) + "\n")
                   sys.exit(0)
 
+                # Setting the local HTTP server.
                 if settings.LOCAL_HTTP_IP == None:
                   while True:
                     question_msg = "Please enter your interface IP address > "
@@ -425,18 +433,19 @@ def main(filename, url):
                       settings.LOCAL_HTTP_IP = ip_addr
                       break
 
-                http_server = "http://" + str(settings.LOCAL_HTTP_IP) + ":" + str(settings.LOCAL_HTTP_PORT) + "/"
-                info_msg = "Setting the HTTP server on '" + http_server + "'. "  
-                print settings.print_info_msg(info_msg)
-
+                # Check for invalid HTTP server's port.
                 if settings.LOCAL_HTTP_PORT < 1 or settings.LOCAL_HTTP_PORT > 65535:
                   err_msg = "Invalid HTTP server's port (" + str(settings.LOCAL_HTTP_PORT) + ")." 
                   print settings.print_critical_msg(err_msg)
                   sys.exit(0)
-
+                
+                http_server = "http://" + str(settings.LOCAL_HTTP_IP) + ":" + str(settings.LOCAL_HTTP_PORT) + "/"
+                info_msg = "Setting the HTTP server on '" + http_server + "'. "  
+                print settings.print_info_msg(info_msg)
                 menu.options.file_upload = http_server + menu.options.file_upload
                 simple_http_server.main()
                 break
+
               elif enable_HTTP_server in settings.CHOICE_NO:
                 if not re.match(settings.VALID_URL_FORMAT, menu.options.file_upload):
                   err_msg = "The '" + menu.options.file_upload + "' is not a valid URL. "
@@ -631,8 +640,7 @@ def main(filename, url):
                 warn_msg += "the target has been identified as unix-like. "
                 print settings.print_warning_msg(warn_msg)  
             
-            if found_os_server == False and \
-               not menu.options.os:
+            if found_os_server == False and not menu.options.os:
               # If "--shellshock" option is provided then,
               # by default is a Linux/Unix operating system.
               if menu.options.shellshock:
@@ -679,9 +687,6 @@ def main(filename, url):
 
         # Check for HTTP Error 401 (Unauthorized).
         elif str(err_msg.getcode()) == settings.UNAUTHORIZED_ERROR:
-
-          # headers.http_response(e.headers)
-
           try:
             # Get the auth header value
             auth_line = e.headers.get('www-authenticate', '')
@@ -801,14 +806,16 @@ def main(filename, url):
                     checks.http_auth_err_msg()      
           else:
             pass
-
+        
+        # Invalid permission to access target URL page.
         elif str(err_msg.getcode()) == settings.FORBIDDEN_ERROR:
           if settings.VERBOSITY_LEVEL < 2:
             print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
           err_msg = "You don't have permission to access this page."
           print settings.print_critical_msg(err_msg)
           sys.exit(0)
-          
+        
+        # The target host seems to be down!
         elif str(err_msg.getcode()) == settings.NOT_FOUND_ERROR:
           if settings.VERBOSITY_LEVEL < 2:
             print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
@@ -819,6 +826,7 @@ def main(filename, url):
         else:
           raise
 
+      # The target host seems to be down!
       except urllib2.URLError, e:
         if settings.VERBOSITY_LEVEL < 2:
           print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
