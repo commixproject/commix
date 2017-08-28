@@ -923,7 +923,7 @@ if __name__ == '__main__':
     # Check if defined "--purge-output" option.
     if menu.options.purge_output:
       purge.purge_output()
-      sys.exit(0)
+      #sys.exit(0)
 
     # Check if defined "--check-tor" option. 
     if menu.options.tor_check and not menu.options.tor:
