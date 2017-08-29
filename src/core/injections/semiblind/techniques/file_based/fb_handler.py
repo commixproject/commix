@@ -602,7 +602,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                 #   print ""
                 delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
                 if settings.VERBOSITY_LEVEL >= 1:
-                  print "\n"
+                  print ""
                 if go_back == True:
                   break
                 if not menu.options.batch:
