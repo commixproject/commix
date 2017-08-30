@@ -524,6 +524,12 @@ misc.add_option("--wizard",
                 default=False,
                 help="Simple wizard interface for beginner users.")
 
+misc.add_option("--disable-coloring",
+                action="store_true",
+                dest="disable_coloring",
+                default=False,
+                help="Disable console output coloring.")
+
 parser.add_option_group(general)
 parser.add_option_group(target)
 parser.add_option_group(request)

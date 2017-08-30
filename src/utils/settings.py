@@ -21,6 +21,11 @@ import urllib
 import socket
 import random
 from socket import error as socket_error
+
+if "--disable-coloring" in sys.argv:
+  from src.utils import colors
+  colors.ENABLE_COLORING = False
+
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 # Status Signs
@@ -106,7 +111,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "2.1.14"
+VERSION_NUM = "2.1.15"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"
