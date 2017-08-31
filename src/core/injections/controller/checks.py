@@ -360,17 +360,15 @@ Force the user-defined operating system name.
 """
 def user_defined_os():
   if menu.options.os:
-    if menu.options.os.lower() == "windows" or \
-       menu.options.os[:1].lower() == "w":
+    if menu.options.os.lower() == "windows":
       settings.TARGET_OS = "win"
       return True
-    elif menu.options.os.lower() == "unix" or \
-       menu.options.os[:1].lower() == "u":
+    elif menu.options.os.lower() == "unix":
       return True
     else:
       err_msg = "You specified wrong value '" + menu.options.os + "' "
-      err_msg += "as an operation system. The value, must be (W)indows or (U)nix."
-      print settings.print_error_msg(err_msg)
+      err_msg += "as an operation system. The value, must be 'Windows' or 'Unix'."
+      print settings.print_critical_msg(err_msg)
       sys.exit(0)
 
 """

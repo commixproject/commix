@@ -449,7 +449,7 @@ injection.add_option("--os",
                 action="store", 
                 dest="os",
                 default=False,
-                help="Force back-end operating system to this value.")
+                help="Force back-end operating system (e.g. 'Windows' or 'Unix').")
 
 injection.add_option("--tamper", 
                 action="store",
