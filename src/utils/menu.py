@@ -50,7 +50,7 @@ usage = "python %prog [option(s)]"
 parser = OptionParser(usage=usage)
 
 # General options
-general = OptionGroup(parser, Style.BRIGHT + "General" + Style.RESET_ALL, 
+general = OptionGroup(parser, Style.BRIGHT + Style.UNDERLINE + "General" + Style.RESET_ALL, 
                         "These options relate to general matters. ")
 
 general.add_option("-v",
@@ -115,7 +115,7 @@ general.add_option("--charset",
                 help="Force character encoding used for data retrieval.")
 
 # Target options
-target = OptionGroup(parser, Style.BRIGHT + "Target" + Style.RESET_ALL, 
+target = OptionGroup(parser, Style.BRIGHT + Style.UNDERLINE + "Target" + Style.RESET_ALL, 
                      "This options has to be provided, to define the target URL. ")
 
 target.add_option("-u","--url",
@@ -151,7 +151,7 @@ target.add_option("-x",
                 help="Parse target(s) from remote sitemap(.xml) file.")
 
 # Request options
-request = OptionGroup(parser,  Style.BRIGHT + "Request" + Style.RESET_ALL, 
+request = OptionGroup(parser,  Style.BRIGHT + Style.UNDERLINE + "Request" + Style.RESET_ALL, 
                       "These options can be used to specify how to connect to the target URL.")
 
 
@@ -273,7 +273,7 @@ request.add_option("--retries",
                 help="Retries when the connection timeouts (Default: 3).")
 
 # Enumeration options
-enumeration = OptionGroup(parser, Style.BRIGHT + "Enumeration" + Style.RESET_ALL, 
+enumeration = OptionGroup(parser, Style.BRIGHT + Style.UNDERLINE + "Enumeration" + Style.RESET_ALL, 
                         "These options can be used to enumerate the target host.")
 
 enumeration.add_option("--all", 
@@ -337,7 +337,7 @@ enumeration.add_option("--ps-version",
                 help="Retrieve PowerShell's version number.")
 
 # File access options
-file_access = OptionGroup(parser, Style.BRIGHT + "File access" + Style.RESET_ALL, 
+file_access = OptionGroup(parser, Style.BRIGHT + Style.UNDERLINE + "File access" + Style.RESET_ALL, 
                         "These options can be used to access files on the target host.")
 
 file_access.add_option("--file-read", 
@@ -361,7 +361,7 @@ file_access.add_option("--file-dest",
                 help="Host's absolute filepath to write and/or upload to.")
 
 # Modules options
-modules = OptionGroup(parser, Style.BRIGHT + "Modules" + Style.RESET_ALL, 
+modules = OptionGroup(parser, Style.BRIGHT + Style.UNDERLINE + "Modules" + Style.RESET_ALL, 
                         "These options can be used increase the detection and/or injection capabilities.")
 modules.add_option("--icmp-exfil", 
                 action="store",
@@ -382,7 +382,7 @@ modules.add_option("--shellshock",
                 help="The 'shellshock' injection module.")
 
 # Injection options
-injection = OptionGroup(parser, Style.BRIGHT + "Injection" + Style.RESET_ALL, 
+injection = OptionGroup(parser, Style.BRIGHT + Style.UNDERLINE + "Injection" + Style.RESET_ALL, 
                         "These options can be used to specify which parameters to inject and to provide custom injection payloads.")
 
 injection.add_option("-p", 
@@ -431,7 +431,7 @@ injection.add_option("--web-root",
                 action="store",
                 dest="web_root",
                 default=False,
-                help="Set the web server document root directory (e.g. \"/var/www\").")
+                help="Set the web server document root directory (e.g. '/var/www').")
 
 injection.add_option("--alter-shell", 
                 action="store",
@@ -464,7 +464,7 @@ injection.add_option("--msf-path",
                 help="Set a local path where metasploit is installed.")
 
 # Detection options
-detection = OptionGroup(parser, Style.BRIGHT + "Detection" + Style.RESET_ALL, "These options can be "
+detection = OptionGroup(parser, Style.BRIGHT + Style.UNDERLINE + "Detection" + Style.RESET_ALL, "These options can be "
                         "used to customize the detection phase.")
 
 detection.add_option("--level", 
@@ -486,7 +486,7 @@ detection.add_option("--skip-empty",
                 help="Skip testing the parameter(s) with empty value(s).")
 
 # Miscellaneous options
-misc = OptionGroup(parser, Style.BRIGHT + "Miscellaneous" + Style.RESET_ALL)
+misc = OptionGroup(parser, Style.BRIGHT + Style.UNDERLINE + "Miscellaneous" + Style.RESET_ALL)
 
 misc.add_option("--dependencies", 
                 action="store_true",
