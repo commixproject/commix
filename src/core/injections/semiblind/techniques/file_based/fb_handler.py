@@ -121,22 +121,9 @@ def custom_web_root(url, timesec, filename, http_request_method, url_time_respon
   fb_injection_handler(url, timesec, filename, http_request_method, url_time_response)
 
 """
-The "file-based" injection technique handler
+Return TMP path for win / *nix targets.
 """
-def fb_injection_handler(url, timesec, filename, http_request_method, url_time_response):
-
-  counter = 1
-  vp_flag = True
-  exit_loops = False
-  no_result = True
-  is_encoded = False
-  stop_injection = False
-  call_tmp_based = False
-  next_attack_vector = False
-  export_injection_info = False
-  injection_type = "semi-blind command injection"
-  technique = "file-based command injection technique"
-
+def check_tmp_path(url, timesec, filename, http_request_method, url_time_response):
   if not settings.CUSTOM_WEB_ROOT:
     # Set temp path 
     if settings.TARGET_OS == "win":
@@ -207,6 +194,27 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
         settings.WEB_ROOT = settings.WEB_ROOT + EXTRA_DIR
         if settings.TARGET_OS == "win":
           settings.WEB_ROOT = settings.WEB_ROOT.replace("/","\\")
+          
+  return tmp_path
+
+"""
+The "file-based" injection technique handler
+"""
+def fb_injection_handler(url, timesec, filename, http_request_method, url_time_response):
+
+  counter = 1
+  vp_flag = True
+  exit_loops = False
+  no_result = True
+  is_encoded = False
+  stop_injection = False
+  call_tmp_based = False
+  next_attack_vector = False
+  export_injection_info = False
+  injection_type = "semi-blind command injection"
+  technique = "file-based command injection technique"
+
+  tmp_path = check_tmp_path(url, timesec, filename, http_request_method, url_time_response)
 
   if not settings.LOAD_SESSION or settings.RETEST == True: 
     TAG = ''.join(random.choice(string.ascii_uppercase) for i in range(6)) 
@@ -352,6 +360,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                   # Show an error message, after N failed tries.
                   # Use the "/tmp/" directory for tempfile-based technique.
                   elif i == settings.FAILED_TRIES and no_result == True :
+                    tmp_path = check_tmp_path(url, timesec, filename, http_request_method, url_time_response)
                     warn_msg = "It seems that you don't have permissions to "
                     warn_msg += "read and/or write files in '" + settings.WEB_ROOT + "'."  
                     sys.stdout.write("\r" + settings.print_warning_msg(warn_msg))
