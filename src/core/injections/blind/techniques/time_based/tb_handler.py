@@ -514,7 +514,7 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                       cmd = raw_input("""commix(""" + Style.BRIGHT + Fore.RED + """os_shell""" + Style.RESET_ALL + """) > """)
                       cmd = checks.escaped_cmd(cmd)
                       if cmd.lower() in settings.SHELL_OPTIONS:
-                        go_back, go_back_again = shell_options.check_option(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, technique, go_back, no_result, timesec, go_back_again)
+                        go_back, go_back_again = shell_options.check_option(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, technique, go_back, no_result, timesec, go_back_again, payload, OUTPUT_TEXTFILE="")
                         if go_back and go_back_again == False:
                           break
                         if go_back and go_back_again:
