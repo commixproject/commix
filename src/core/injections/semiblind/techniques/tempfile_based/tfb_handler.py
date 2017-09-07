@@ -522,9 +522,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                 delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
                 sys.exit(0)  
 
-              if not new_line :
-                print ""
-              if settings.VERBOSITY_LEVEL >= 1:
+              if settings.VERBOSITY_LEVEL >= 1 or not new_line:
                 print ""
               try:    
                 # Pseudo-Terminal shell
