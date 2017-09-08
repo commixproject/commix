@@ -165,14 +165,13 @@ def injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_req
     if settings.VERBOSITY_LEVEL >= 1:
       payload_msg = payload.replace("\n", "\\n")
       if settings.COMMENT in payload_msg:
-        payload = payload.split(settings.COMMENT)[0]
-        payload_msg = payload_msg.split(settings.COMMENT)[0]
-      info_msg = "Executing the '" + cmd.split(settings.COMMENT)[0] + "' command... "
+        payload = payload.split(settings.COMMENT)[0].strip()
+        payload_msg = payload_msg.split(settings.COMMENT)[0].strip()
+      info_msg = "Executing the '" + cmd.split(settings.COMMENT)[0].strip() + "' command... "
       sys.stdout.write(settings.print_info_msg(info_msg))
       sys.stdout.flush()
-      output_payload = "\n" + settings.print_payload(payload).split(settings.COMMENT)[0]
+      output_payload = "\n" + settings.print_payload(payload)
       if settings.VERBOSITY_LEVEL >= 1:
-      # if settings.FILE_BASED_STATE != None:
         output_payload = output_payload + "\n" 
       sys.stdout.write(output_payload)
 
