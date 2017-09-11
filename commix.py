@@ -1098,11 +1098,17 @@ if __name__ == '__main__':
         filename = logs_filename_creation()
         main(filename, url)
 
-  except KeyboardInterrupt: 
+  except KeyboardInterrupt:
     abort_msg = "User aborted procedure "
     abort_msg += "during the " + checks.assessment_phase() 
-    abort_msg += " phase (Ctrl-C was pressed)."  
-    print "\n" + settings.print_abort_msg(abort_msg)
+    abort_msg += " phase (Ctrl-C was pressed)."
+    new_line = "\n"
+    if settings.FILE_BASED_STATE or \
+       settings.TEMPFILE_BASED_STATE :
+       if not settings.DETECTION_PHASE and \
+          settings.EXPLOITATION_PHASE:
+        new_line = ""
+    print new_line + settings.print_abort_msg(abort_msg)
     try:
       logs.print_logs_notification(filename, url)
       print ""

@@ -238,6 +238,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
           # If a previous session is available.
           if settings.LOAD_SESSION:
             try:
+              settings.FILE_BASED_STATE = True
               url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response, timesec, how_long, output_length, is_vulnerable = session_handler.injection_point_exportation(url, http_request_method)
               checks.check_for_stored_tamper(payload)
               OUTPUT_TEXTFILE = TAG + ".txt"
