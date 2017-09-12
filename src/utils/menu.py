@@ -30,12 +30,12 @@ if settings.IS_WINDOWS:
 The commix's banner.
 """
 def banner():
-  print """                                       __           
-    ___   ___     ___ ___     ___ ___ /\_\   __  _   
-  /`___\ / __`\ /' __` __`\ /' __` __`\/\ \ /\ \/'\  """ + Style.BRIGHT + Style.UNDERLINE + settings.VERSION + Style.RESET_ALL + """
- /\ \__//\ \L\ \/\ \/\ \/\ \/\ \/\ \/\ \ \ \\\/>  </  
- \ \____\ \____/\ \_\ \_\ \_\ \_\ \_\ \_\ \_\\/\_/\\_\\ """ + Fore.GREY + Style.UNDERLINE + settings.APPLICATION_URL + Style.RESET_ALL + """
-  \/____/\/___/  \/_/\/_/\/_/\/_/\/_/\/_/\/_/\//\/_/ (""" + Fore.LIGHTRED_EX + settings.APPLICATION_TWITTER + Style.RESET_ALL + """)
+  print """                                      __           
+   ___   ___     ___ ___     ___ ___ /\_\   __  _   
+ /`___\ / __`\ /' __` __`\ /' __` __`\/\ \ /\ \/'\  """ + Style.BRIGHT + Style.UNDERLINE + settings.VERSION + Style.RESET_ALL + """
+/\ \__//\ \L\ \/\ \/\ \/\ \/\ \/\ \/\ \ \ \\\/>  </  
+\ \____\ \____/\ \_\ \_\ \_\ \_\ \_\ \_\ \_\\/\_/\\_\\ """ + Fore.GREY + Style.UNDERLINE + settings.APPLICATION_URL + Style.RESET_ALL + """
+ \/____/\/___/  \/_/\/_/\/_/\/_/\/_/\/_/\/_/\//\/_/ (""" + Fore.LIGHTRED_EX + settings.APPLICATION_TWITTER + Style.RESET_ALL + """)
 
 +--
 """ + Style.BRIGHT + settings.DESCRIPTION_FULL + Style.RESET_ALL + """

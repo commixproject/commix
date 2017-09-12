@@ -1107,7 +1107,8 @@ if __name__ == '__main__':
        settings.TEMPFILE_BASED_STATE :
        if not settings.DETECTION_PHASE and \
           settings.EXPLOITATION_PHASE:
-        new_line = ""
+        if settings.VERBOSITY_LEVEL != 0: 
+          new_line = ""
     print new_line + settings.print_abort_msg(abort_msg)
     try:
       logs.print_logs_notification(filename, url)
