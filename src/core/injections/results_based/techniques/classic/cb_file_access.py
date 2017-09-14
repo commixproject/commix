@@ -142,7 +142,8 @@ def file_write(separator, TAG, prefix, suffix, whitespace, http_request_method, 
     shell = "".join(str(p) for p in shell)
     # Check if file exists
     cmd = "echo $(ls " + dest_to_write + ")"
-
+    if settings.USE_BACKTICKS:
+      cmd = cmd.replace("echo $(","").replace(")","")
   # Check if defined cookie injection.
   response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
   shell = cb_injector.injection_results(response, TAG, cmd)
@@ -196,7 +197,8 @@ def file_upload(separator, TAG, prefix, suffix, whitespace, http_request_method,
       cmd = "dir " + dest_to_upload + ")"
     else:  
       cmd = "echo $(ls " + dest_to_upload + ")"
-
+      if settings.USE_BACKTICKS:
+        cmd = cmd.replace("echo $(","").replace(")","")
     response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
     shell = cb_injector.injection_results(response, TAG, cmd)
     shell = "".join(str(p) for p in shell)

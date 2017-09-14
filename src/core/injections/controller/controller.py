@@ -487,6 +487,12 @@ General check on every injection technique.
 """
 def do_check(url, filename):
 
+  if menu.options.enable_backticks:
+    if not menu.options.tech or "e" in menu.options.tech or "t" in menu.options.tech or "f" in menu.options.tech:
+      warn_msg = "The '--backticks' switch is only supported by the classic command injection. "
+      warn_msg += "It will be ignored for all other techniques."
+      print settings.print_warning_msg(warn_msg) + Style.RESET_ALL
+
   if menu.options.wizard:
     if perform_checks(url,filename) == False:
       scan_level = menu.options.level

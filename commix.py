@@ -259,6 +259,9 @@ def main(filename, url):
     if menu.options.skip_calc:
       settings.SKIP_CALC = True
 
+    if menu.options.enable_backticks:
+      settings.USE_BACKTICKS = True
+
     # Target URL reload.
     if menu.options.url_reload and menu.options.data:
       settings.URL_RELOAD = True
@@ -387,8 +390,9 @@ def main(filename, url):
 
         # Modification on payload
         if not menu.options.shellshock:
-          settings.SYS_USERS  = "echo $(" + settings.SYS_USERS + ")"
-          settings.SYS_PASSES  = "echo $(" + settings.SYS_PASSES + ")"
+          if not settings.USE_BACKTICKS:
+            settings.SYS_USERS  = "echo $(" + settings.SYS_USERS + ")"
+            settings.SYS_PASSES  = "echo $(" + settings.SYS_PASSES + ")"
 
         # Load tamper scripts
         if menu.options.tamper:

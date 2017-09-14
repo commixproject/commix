@@ -130,6 +130,8 @@ def system_information(separator, TAG, prefix, suffix, whitespace, http_request_
     target_os = "".join(str(p) for p in target_os)
     if settings.TARGET_OS != "win":
       cmd = settings.DISTRO_INFO
+      if settings.USE_BACKTICKS:
+        cmd = cmd.replace("echo $(","").replace(")","")
       if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
         # Command execution results.
         response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
@@ -202,6 +204,8 @@ def current_user(separator, TAG, prefix, suffix, whitespace, http_request_method
         cmd = settings.IS_ADMIN
       else:  
         cmd = settings.IS_ROOT 
+        if settings.USE_BACKTICKS:
+          cmd = cmd.replace("echo $(","").replace(")","")
       if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
         # Command execution results.
         response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
