@@ -1,4 +1,5 @@
 ## Version 2.1 (upcoming)
+* Fixed: Minor bug-fix regarding checking for similarity in provided parameter name and value (GET / POST).
 * Added: New option `--backticks` that uses backticks instead of "$()", for commands substitution.
 * Revised: Minor improvement in Netcat shells, for giving to the end-user the choice of using the "/bin" standard subdirectory.
 * Added: New option `--disable-coloring` that disables console output coloring.

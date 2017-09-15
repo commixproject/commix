@@ -17,6 +17,8 @@ import re
 import os
 import sys
 import json
+import random
+import string
 
 from urlparse import urlparse
 
@@ -86,11 +88,30 @@ def get_url_part(url):
   return url_part
 
 """
+Check for similarity in provided parameter name and value.
+"""
+def check_similarities(all_params):
+  for param in range(0, len(all_params)):
+    if settings.IS_JSON:
+      if re.findall(r'\:\"(.*)\"', all_params[param]) == re.findall(r'\"(.*)\:\"', all_params[param]):
+        parameter_name = re.findall(r'\:\"(.*)\"', all_params[param])
+        parameter_name = ''.join(parameter_name)
+        all_params[param] = parameter_name + ":" + parameter_name.lower() + ''.join([random.choice(string.ascii_letters) for n in xrange(2)]).lower()
+    else:  
+      if re.findall(r'(.*)=', all_params[param]) == re.findall(r'=(.*)', all_params[param]):
+        parameter_name = re.findall(r'=(.*)', all_params[param])
+        parameter_name = ''.join(parameter_name)
+        all_params[param] = parameter_name + "=" + parameter_name.lower() + ''.join([random.choice(string.ascii_letters) for n in xrange(2)]).lower()
+
+  return all_params
+
+
+"""
 Check if the 'INJECT_HERE' tag, is specified on GET Requests.
 """
 def do_GET_check(url):
   http_request_method = "GET"
-  # Do replacement with the 'INJECT_HERE' tag, if the wildcard char is provided.
+  # Do replacement with the 'INJECT_HERE' tag, if the wild card char is provided.
   url = checks.wildcard_character(url)
 
   # Check for REST-ful URLs format. 
@@ -131,7 +152,7 @@ def do_GET_check(url):
       value = ''.join(value)
       # Replace the value of parameter with INJECT tag
       inject_value = value.replace(value, settings.INJECT_TAG)
-      # Check if single paramerter is supplied.
+      # Check if single parameter is supplied.
       if len(multi_parameters) == 1:
         # Check if defined the INJECT_TAG
         if settings.INJECT_TAG not in parameters:
@@ -147,14 +168,16 @@ def do_GET_check(url):
             if len(value.rsplit(settings.INJECT_TAG, 1)[1]) > 0:
               menu.options.suffix = value.rsplit(settings.INJECT_TAG, 1)[1]
           parameters = parameters.replace(value, inject_value) 
-        # Reconstruct the url
+        # Reconstruct the URL
         url = url_part + "?" + parameters
         urls_list.append(url)
         return urls_list 
 
       else:
-        # Check if multiple paramerters are supplied without the "INJECT_HERE" tag.
+        # Check if multiple parameters are supplied without the "INJECT_HERE" tag.
         all_params = settings.PARAMETER_DELIMITER.join(multi_parameters)
+        all_params = check_similarities(all_params)
+
         # Check if defined the "INJECT_HERE" tag
         if settings.INJECT_TAG not in url:
           all_params = all_params.split(settings.PARAMETER_DELIMITER)
@@ -179,7 +202,7 @@ def do_GET_check(url):
                 all_params[param] = all_params[param].replace(value, inject_value)
                 all_params[param-1] = all_params[param-1].replace(inject_value, old)
                 parameter = settings.PARAMETER_DELIMITER.join(all_params)
-                # Reconstruct the url
+                # Reconstruct the URL
                 url = url_part + "?" + parameter  
                 urls_list.append(url)
             else:
@@ -189,7 +212,7 @@ def do_GET_check(url):
                 all_params[param] = all_params[param].replace(value, inject_value)
               all_params[param-1] = all_params[param-1].replace(inject_value, old)
               parameter = settings.PARAMETER_DELIMITER.join(all_params)
-              # Reconstruct the url
+              # Reconstruct the URL
               url = url_part + "?" + parameter  
               urls_list.append(url)
 
@@ -199,7 +222,7 @@ def do_GET_check(url):
             value = re.findall(r'=(.*)', multi_parameters[param])
             value = ''.join(value)
             parameter = settings.PARAMETER_DELIMITER.join(multi_parameters)
-          # Reconstruct the url  
+          # Reconstruct the URL  
           url = url_part + "?" + parameter  
           urls_list.append(url)
 
@@ -269,7 +292,7 @@ def do_POST_check(parameter):
     else:  
       return True
 
-  # Do replacement with the 'INJECT_HERE' tag, if the wildcard char is provided.
+  # Do replacement with the 'INJECT_HERE' tag, if the wild card char is provided.
   parameter = checks.wildcard_character(parameter).replace("'","\"")
 
   # Check if JSON Object.
@@ -280,7 +303,7 @@ def do_POST_check(parameter):
   if settings.IS_JSON:
     settings.PARAMETER_DELIMITER = ","
 
-  paramerters_list = []
+  parameters_list = []
   # Split multiple parameters
   multi_parameters = parameter.split(settings.PARAMETER_DELIMITER)
   # Check for inappropriate format in provided parameter(s).
@@ -288,7 +311,7 @@ def do_POST_check(parameter):
      not settings.IS_JSON:
     inappropriate_format(multi_parameters)
   # Check for empty values (in provided parameters).
-  # Check if single paramerter is supplied.
+  # Check if single parameter is supplied.
   if len(multi_parameters) == 1:
     #Grab the value of parameter.
     if settings.IS_JSON:
@@ -310,10 +333,14 @@ def do_POST_check(parameter):
       parameter = parameter.replace(value, inject_value)
     return parameter
 
-  # Check if multiple paramerters are supplied.
+  # Check if multiple parameters are supplied.
   else:
     all_params = settings.PARAMETER_DELIMITER.join(multi_parameters)
     all_params = all_params.split(settings.PARAMETER_DELIMITER)
+    # Check for similarity in provided parameter name and value.
+    all_params = check_similarities(all_params)
+    check_similarities(all_params)
+
     # Check if not defined the "INJECT_HERE" tag in parameter
     if settings.INJECT_TAG not in parameter:
       is_empty(multi_parameters, http_request_method)
@@ -335,6 +362,7 @@ def do_POST_check(parameter):
         else:  
           value = re.findall(r'=(.*)', all_params[param])
           value = ''.join(value)  
+
         # Replace the value of parameter with INJECT tag
         inject_value = value.replace(value, settings.INJECT_TAG)
         # Skip testing the parameter(s) with empty value(s).
@@ -351,8 +379,8 @@ def do_POST_check(parameter):
             all_params[param] = all_params[param].replace(value, inject_value)
             all_params[param-1] = all_params[param-1].replace(inject_value, old)
             parameter = settings.PARAMETER_DELIMITER.join(all_params)
-            paramerters_list.append(parameter)
-            parameter = paramerters_list
+            parameters_list.append(parameter)
+            parameter = parameters_list
         else:
           if len(value) == 0:
             all_params[param] = all_params[param] + settings.INJECT_TAG
@@ -360,8 +388,8 @@ def do_POST_check(parameter):
             all_params[param] = all_params[param].replace(value, inject_value)
           all_params[param-1] = all_params[param-1].replace(inject_value, old)
           parameter = settings.PARAMETER_DELIMITER.join(all_params)
-          paramerters_list.append(parameter)
-          parameter = paramerters_list
+          parameters_list.append(parameter)
+          parameter = parameters_list
    
     else:
       for param in range(0, len(multi_parameters)):
@@ -456,7 +484,7 @@ def do_cookie_check(cookie):
         cookie = cookie.replace(value, inject_value)
     return cookie
 
-  # Check if multiple paramerters are supplied.
+  # Check if multiple parameters are supplied.
   else:
     cookies_list = []
     all_params = settings.COOKIE_DELIMITER.join(multi_parameters)
