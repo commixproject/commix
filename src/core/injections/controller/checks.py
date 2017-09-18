@@ -643,13 +643,20 @@ def whitespace_check(payload):
         else:
           menu.options.tamper = "space2plus"
     else:
-      count_tabs = payload.count("%09")
-      if count_tabs >= 1 and not "%20" in payload:
-        if not settings.TAMPER_SCRIPTS['space2tab']:
+      count_htabs = payload.count("%09")
+      if count_htabs >= 1 and not "%20" in payload:
+        if not settings.TAMPER_SCRIPTS['space2htab']:
           if menu.options.tamper:
-            menu.options.tamper = menu.options.tamper + ",space2tab"
+            menu.options.tamper = menu.options.tamper + ",space2htab"
           else:
-            menu.options.tamper = "space2tab"
+            menu.options.tamper = "space2htab"  
+      count_vtabs = payload.count("%0b")
+      if count_vtabs >= 1 and not "%20" in payload:
+        if not settings.TAMPER_SCRIPTS['space2vtab']:
+          if menu.options.tamper:
+            menu.options.tamper = menu.options.tamper + ",space2vtab"
+          else:
+            menu.options.tamper = "space2vtab"
       else:  
         settings.WHITESPACE[0] = "%20" 
 

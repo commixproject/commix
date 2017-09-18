@@ -16,15 +16,21 @@ For more see the file 'readme/COPYING' for copying permission.
 from src.utils import settings
 
 """
-Replaces space character (' ') with plus ('%09')
+Replaces space character (' ') with vertical tab ('%0b')
 Notes:
-  * This tamper script works against all targets.
+  * This tamper script works against Windows targets.
 """
 
-settings.TAMPER_SCRIPTS['space2tab'] = True
-if settings.WHITESPACE[0] == "%20" or settings.WHITESPACE[0] == " ":
-  settings.WHITESPACE[0] = "%09"
+if settings.TARGET_OS == "win":
+  settings.TAMPER_SCRIPTS['space2vtab'] = True
+  if settings.WHITESPACE[0] == "%20" or settings.WHITESPACE[0] == " ":
+    settings.WHITESPACE[0] = "%0b"
+  else:
+    settings.WHITESPACE.append("%0b") 
 else:
-  settings.WHITESPACE.append("%09") 
+  warn_msg = "Unix target host(s), does not support the vertical tab."
+  print settings.print_warning_msg(warn_msg)
+
+
 
 #eof 

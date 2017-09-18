@@ -1,4 +1,6 @@
 ## Version 2.1 (upcoming)
+* Added: New tamper script "space2vtab.py" that replaces every space (" ") with vertical tab ("%0b") (for Windows targets).
+* Replaced: The tamper script "space2tab.py" has been replaced with "space2htab.py".
 * Fixed: Minor bug-fix regarding checking for similarity in provided parameter name and value (GET / POST).
 * Added: New option `--backticks` that uses backticks instead of "$()", for commands substitution.
 * Revised: Minor improvement in Netcat shells, for giving to the end-user the choice of using the "/bin" standard subdirectory.
@@ -117,7 +119,7 @@
 * Fixed: License file minor inaccurancy issue has been fixed.
 * Revised: The Windows-based payloads for every supported technique, had been shortly revised.
 * Revised: The dynamic code evaluation ("eval-based") technique has been shortly revised.
-* Added: New tamper script "space2tab.py" that replaces every space (" ") with plus ("%09").
+* Added: New tamper script "space2tab.py" that replaces every space (" ") with horizontal tab ("%09").
 * Added: The ability for generating powershell attack vectors via TrustedSec's Magic Unicorn.
 * Added: The ability for checking if there is a new version available.
 * Added: The ability for target application extension recognition (i.e PHP, ASP etc).
