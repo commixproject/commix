@@ -600,8 +600,6 @@ def tamper_scripts():
       import importlib
       check_tfile = check_tfile.replace("/",".")
       importlib.import_module(check_tfile.split(".py")[0])
-      print settings.SUB_CONTENT_SIGN + tfile 
-    
 
 """
 Check if the payload output seems to be hex.

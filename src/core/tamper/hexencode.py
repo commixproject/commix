@@ -18,10 +18,15 @@ from src.utils import settings
 
 """
 Hex all characters in a given payload.
+Notes:
+  * This tamper script works against all targets.
 """
 
-if not settings.TAMPER_SCRIPTS['hexencode']:
-  settings.TAMPER_SCRIPTS['hexencode'] = True
+script_name = "hexencode"
+print settings.SUB_CONTENT_SIGN + script_name
+
+if not settings.TAMPER_SCRIPTS[script_name]:
+  settings.TAMPER_SCRIPTS[script_name] = True
 
 def encode(payload):
   payload = urllib.unquote(payload)

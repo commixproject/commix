@@ -19,10 +19,15 @@ from src.utils import settings
 
 """
 Base64 all characters in a given payload.
+Notes:
+  * This tamper script works against all targets.
 """
 
-if not settings.TAMPER_SCRIPTS['base64encode']:
-  settings.TAMPER_SCRIPTS['base64encode'] = True
+script_name = "base64encode"
+print settings.SUB_CONTENT_SIGN + script_name
+
+if not settings.TAMPER_SCRIPTS[script_name]:
+  settings.TAMPER_SCRIPTS[script_name] = True
 
 def encode(payload):
   payload = urllib.unquote(payload)

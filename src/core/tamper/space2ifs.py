@@ -23,8 +23,11 @@ Notes:
   * This tamper script works against *nix targets.
 """
 
+script_name = "space2ifs"
+print settings.SUB_CONTENT_SIGN + script_name
+
 if settings.TARGET_OS != "win":
-  settings.TAMPER_SCRIPTS['space2ifs'] = True
+  settings.TAMPER_SCRIPTS[script_name] = True
   if settings.WHITESPACE[0] == "%20" or settings.WHITESPACE[0] == " ":
     settings.WHITESPACE[0] = "${IFS}"
   else:

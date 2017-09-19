@@ -21,7 +21,10 @@ Notes:
   * This tamper script works against all targets.
 """
 
-settings.TAMPER_SCRIPTS['space2htab'] = True
+script_name = "space2htab"
+print settings.SUB_CONTENT_SIGN + script_name
+
+settings.TAMPER_SCRIPTS[script_name] = True
 if settings.WHITESPACE[0] == "%20" or settings.WHITESPACE[0] == " ":
   settings.WHITESPACE[0] = "%09"
 else:

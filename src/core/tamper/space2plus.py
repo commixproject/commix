@@ -16,12 +16,15 @@ For more see the file 'readme/COPYING' for copying permission.
 from src.utils import settings
 
 """
-Replaces space character (' ') with plus ('+')
+Replaces space character (' ') with plus ('+').
 Notes:
   * This tamper script works against all targets.
 """
 
-settings.TAMPER_SCRIPTS['space2plus'] = True
+script_name = "space2plus"
+print settings.SUB_CONTENT_SIGN + script_name
+
+settings.TAMPER_SCRIPTS[script_name] = True
 if settings.WHITESPACE[0] == "%20" or settings.WHITESPACE[0] == " ":
   settings.WHITESPACE[0] = "+"
 else:
