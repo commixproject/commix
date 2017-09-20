@@ -562,44 +562,45 @@ def print_non_listed_params(check_parameters, http_request_method, header_name):
 #   if settings.WHITESPACE[0] != urllib.unquote("%20"):
 #     whitespace = " "
 #     return whitespace  
+
 """
 Check for loaded tamper scripts
 """
-def loaded_tamper_scripts():
-  try:
-    menu.options.tamper.lower()
-    info_msg = "Loaded tamper script(s): "
-    print settings.print_info_msg(info_msg)
-    # Check the provided tamper script(s)
-    for tfile in re.split(settings.PARAMETER_SPLITTING_REGEX, menu.options.tamper.lower()):
-      print settings.SUB_CONTENT_SIGN + tfile
-  except:
-    pass
+# def loaded_tamper_scripts():
+#   try:
+#     menu.options.tamper.lower()
+#     info_msg = "Loaded tamper script(s): "
+#     print settings.print_info_msg(info_msg)
+#     # Check the provided tamper script(s)
+#     for tfile in re.split(settings.PARAMETER_SPLITTING_REGEX, menu.options.tamper.lower()):
+#       print settings.SUB_CONTENT_SIGN + tfile
+#   except:
+#     pass
 
 """
 Tamper script checker
 """
 def tamper_scripts():
-  info_msg = "Loading tamper script(s): "
-  print settings.print_info_msg(info_msg)
+  if menu.options.tamper:
+    info_msg = "Loading tamper script(s): "
+    print settings.print_info_msg(info_msg)
+    # Check the provided tamper script(s)
+    tamper_script_counter = 0
+    for tfile in re.split(settings.PARAMETER_SPLITTING_REGEX, menu.options.tamper.lower()):
+      if "hexencode" or "base64encode" == tfile:
+        settings.MULTI_ENCODED_PAYLOAD.append(tfile)
 
-  # Check the provided tamper script(s)
-  tamper_script_counter = 0
-  for tfile in re.split(settings.PARAMETER_SPLITTING_REGEX, menu.options.tamper.lower()):
-    if "hexencode" or "base64encode" == tfile:
-      settings.MULTI_ENCODED_PAYLOAD.append(tfile)
+      check_tfile = "src/core/tamper/" + tfile + ".py"
+      if not os.path.exists(check_tfile.lower()):
+        if not settings.LOAD_SESSION:
+          err_msg = "The '" + tfile + "' tamper script does not exist."
+          print settings.print_error_msg(err_msg)
 
-    check_tfile = "src/core/tamper/" + tfile + ".py"
-    if not os.path.exists(check_tfile.lower()):
-      if not settings.LOAD_SESSION:
-        err_msg = "The '" + tfile + "' tamper script does not exist."
-        print settings.print_error_msg(err_msg)
-
-    if os.path.isfile(check_tfile):
-      tamper_script_counter =  tamper_script_counter + 1
-      import importlib
-      check_tfile = check_tfile.replace("/",".")
-      importlib.import_module(check_tfile.split(".py")[0])
+      if os.path.isfile(check_tfile):
+        tamper_script_counter =  tamper_script_counter + 1
+        import importlib
+        check_tfile = check_tfile.replace("/",".")
+        importlib.import_module(check_tfile.split(".py")[0])
 
 """
 Check if the payload output seems to be hex.
@@ -642,20 +643,20 @@ def whitespace_check(payload):
           menu.options.tamper = "space2plus"
     else:
       count_htabs = payload.count("%09")
+      count_vtabs = payload.count("%0b")
       if count_htabs >= 1 and not "%20" in payload:
         if not settings.TAMPER_SCRIPTS['space2htab']:
           if menu.options.tamper:
             menu.options.tamper = menu.options.tamper + ",space2htab"
           else:
             menu.options.tamper = "space2htab"  
-      count_vtabs = payload.count("%0b")
-      if count_vtabs >= 1 and not "%20" in payload:
+      elif count_vtabs >= 1 and not "%20" in payload:
         if not settings.TAMPER_SCRIPTS['space2vtab']:
           if menu.options.tamper:
             menu.options.tamper = menu.options.tamper + ",space2vtab"
           else:
             menu.options.tamper = "space2vtab"
-      else:  
+      else:
         settings.WHITESPACE[0] = "%20" 
 
 """
@@ -700,10 +701,10 @@ def recognise_payload(payload):
 Check for stored payloads and enable tamper scripts.
 """
 def check_for_stored_tamper(payload):
-  if not menu.options.tamper:
-    decoded_payload = recognise_payload(payload)
-    whitespace_check(decoded_payload)
-    loaded_tamper_scripts()
+  decoded_payload = recognise_payload(payload)
+  whitespace_check(decoded_payload)
+  tamper_scripts()
+
 
 """
 Perform base64 / hex encoding in payload.

@@ -1,4 +1,5 @@
 ## Version 2.1 (upcoming)
+* Revised: Minor improvement regarding checking stored payloads and enabling appropriate tamper scripts during the exploitation phase.
 * Added: New tamper script "space2vtab.py" that replaces every space (" ") with vertical tab ("%0b") (for Windows targets).
 * Replaced: The tamper script "space2tab.py" has been replaced with "space2htab.py".
 * Fixed: Minor bug-fix regarding checking for similarity in provided parameter name and value (GET / POST).
