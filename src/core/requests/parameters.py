@@ -176,11 +176,13 @@ def do_GET_check(url):
       else:
         # Check if multiple parameters are supplied without the "INJECT_HERE" tag.
         all_params = settings.PARAMETER_DELIMITER.join(multi_parameters)
+        all_params = all_params.split(settings.PARAMETER_DELIMITER)
+        # Check for similarity in provided parameter name and value.
         all_params = check_similarities(all_params)
+        check_similarities(all_params)
 
         # Check if defined the "INJECT_HERE" tag
         if settings.INJECT_TAG not in url:
-          all_params = all_params.split(settings.PARAMETER_DELIMITER)
           for param in range(0,len(all_params)):
             if param == 0 :
               old = re.findall(r'=(.*)', all_params[param])
@@ -333,8 +335,8 @@ def do_POST_check(parameter):
       parameter = parameter.replace(value, inject_value)
     return parameter
 
-  # Check if multiple parameters are supplied.
   else:
+    # Check if multiple parameters are supplied without the "INJECT_HERE" tag.
     all_params = settings.PARAMETER_DELIMITER.join(multi_parameters)
     all_params = all_params.split(settings.PARAMETER_DELIMITER)
     # Check for similarity in provided parameter name and value.
