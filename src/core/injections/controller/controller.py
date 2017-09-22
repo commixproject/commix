@@ -196,7 +196,9 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
 Inject HTTP headers (User-agent / Referer) (if level > 2).
 """
 def http_headers_injection(url, http_request_method, filename, timesec):
-
+  # Disable Cookie Injection 
+  settings.COOKIE_INJECTION = False
+  
   # User-Agent header injection
   user_agent = menu.options.agent
   menu.options.agent = settings.INJECT_TAG

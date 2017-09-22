@@ -203,7 +203,7 @@ def do_check(request):
     request.add_header('User-Agent', menu.options.agent)
 
   # Check if defined any HTTP Referer header.
-  if menu.options.referer and settings.REFERER_INJECTION == False:
+  if menu.options.referer and settings.REFERER_INJECTION == None:
     request.add_header('Referer', menu.options.referer)
         
   # Check if defined any HTTP Cookie header.
