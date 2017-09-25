@@ -256,20 +256,21 @@ def do_check(request):
   # Check if defined any extra HTTP headers.
   if menu.options.headers:
     # Do replacement with the 'INJECT_HERE' tag, if the wildcard char is provided.
-    menu.options.headers = checks.wildcard_character(menu.options.headers)
+    menu.options.headers = checks.wildcard_character(menu.options.headers)   
     extra_headers = menu.options.headers
-    extra_headers = extra_headers.split(":")
-    extra_headers = ':'.join(extra_headers)
+    extra_headers = extra_headers.replace(":",": ")
+    if ": //" in extra_headers:
+      extra_headers = extra_headers.replace(": //" ,"://")
     extra_headers = extra_headers.split("\\n")
     # Remove empty strings
     extra_headers = [x for x in extra_headers if x]
     for extra_header in extra_headers:
       # Extra HTTP Header name 
-      http_header_name = re.findall(r"(.*):", extra_header)
-      http_header_name = ''.join(http_header_name)
+      http_header_name = re.findall(r"(.*): ", extra_header)
+      http_header_name = ''.join(http_header_name).strip()
       # Extra HTTP Header value
       http_header_value = re.findall(r":(.*)", extra_header)
-      http_header_value = ''.join(http_header_value)
+      http_header_value = ''.join(http_header_value).strip()
       # Check if it is a custom header injection.
       if settings.CUSTOM_HEADER_INJECTION == False and \
          settings.INJECT_TAG in http_header_value:
@@ -278,3 +279,4 @@ def do_check(request):
       request.add_header(http_header_name, http_header_value)
 
 #eof
+\
