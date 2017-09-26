@@ -201,7 +201,7 @@ request.add_option("--cookie-del",
 request.add_option("--headers",
                 action="store",
                 dest="headers",
-                help="Extra headers (e.g. 'Header1:Value1\\nHeader2:Value2').")
+                help="Extra headers (e.g. 'Accept-Language: fr\\nETag: 123').")
 
 request.add_option("--proxy",
                 action="store",
