@@ -149,8 +149,6 @@ def examine_request(request):
       raise SystemExit 
 
   except urllib2.URLError, e:
-    # if settings.VERBOSITY_LEVEL < 2:
-    #   print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
     err_msg = "Unable to connect to the target URL "
     err_msg += "(" + str(e.args[0]).split("] ")[1] + ")." 
     if menu.options.bulkfile:
@@ -164,12 +162,38 @@ def examine_request(request):
       raise SystemExit  
 
 """
+Check internet connection before assessing the target.
+"""
+def check_internet(url):
+
+  settings.CHECK_INTERNET = True
+  settings.CHECK_INTERNET_ADDRESS = checks.check_http_s(url)
+  info_msg = "Checking for internet connection... "
+  sys.stdout.write(settings.print_info_msg(info_msg))
+  sys.stdout.flush()
+  if settings.VERBOSITY_LEVEL > 1:
+    print ""
+  try:
+    request = urllib2.Request(settings.CHECK_INTERNET_ADDRESS)
+    headers.do_check(request)
+    # Check if defined any HTTP Proxy (--proxy option).
+    if menu.options.proxy:
+      proxy.do_check(settings.CHECK_INTERNET_ADDRESS)
+    examine_request(request)
+  except:
+    warn_msg = "No internet connection detected."
+    print settings.print_warning_msg(warn_msg)
+
+"""
 The init (URL) request.
 """
 def init_request(url):
-  
+
   # Define HTTP User-Agent header
   user_agent_header()
+  # Check the internet connection (--check-internet switch).
+  if menu.options.check_internet:
+    check_internet(url)
   # Check if defined POST data
   if menu.options.data:
     settings.USER_DEFINED_POST_DATA = menu.options.data
@@ -186,6 +210,7 @@ def init_request(url):
 Get the URL response.
 """
 def url_response(url):
+
   # Check if http / https
   url = checks.check_http_s(url)
   # Check if defined Tor (--tor option).
@@ -196,6 +221,8 @@ def url_response(url):
     info_msg = "Setting URL '" + url + "' for tests. "  
     print settings.print_info_msg(info_msg)
   request = init_request(url)
+  if settings.CHECK_INTERNET:
+    settings.CHECK_INTERNET = False
   if settings.INIT_TEST == True:
     info_msg = "Checking connection to the target URL... "
     sys.stdout.write(settings.print_info_msg(info_msg))

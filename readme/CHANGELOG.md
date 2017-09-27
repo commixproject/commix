@@ -1,4 +1,5 @@
 ## Version 2.1 (upcoming)
+* Added: New option `--check-internet` that checks internet connection before assessing the target.
 * Fixed: Minor bug-fix regarding performing injections through HTTP Headers (i.e Cookie, User-Agent, Referer).
 * Revised: Minor improvement regarding checking stored payloads and enabling appropriate tamper scripts during the exploitation phase.
 * Added: New tamper script "space2vtab.py" that replaces every space (" ") with vertical tab ("%0b") (for Windows targets).

@@ -341,18 +341,24 @@ def check_CGI_scripts(url):
 Check if http / https.
 """
 def check_http_s(url):
-  if settings.PROXY_PROTOCOL in urlparse.urlparse(url).scheme:
-    if menu.options.force_ssl and urlparse.urlparse(url).scheme != "https":
-      url = re.sub("\Ahttp:", "https:", url, re.I)
-      settings.PROXY_PROTOCOL = 'https'
-    if urlparse.urlparse(url).scheme == "https":
-      settings.PROXY_PROTOCOL = "https"
-  else:
-    if menu.options.force_ssl:
-      url = "https://" + url
-      settings.PROXY_PROTOCOL = "https"
+  if settings.CHECK_INTERNET:
+    if "https" in url:
+      url = "https://" + settings.CHECK_INTERNET_ADDRESS
     else:
-      url = "http://" + url   
+      url = "http://" + settings.CHECK_INTERNET_ADDRESS
+  else:
+    if settings.PROXY_PROTOCOL in urlparse.urlparse(url).scheme:
+      if menu.options.force_ssl and urlparse.urlparse(url).scheme != "https":
+        url = re.sub("\Ahttp:", "https:", url, re.I)
+        settings.PROXY_PROTOCOL = 'https'
+      if urlparse.urlparse(url).scheme == "https":
+        settings.PROXY_PROTOCOL = "https"
+    else:
+      if menu.options.force_ssl:
+        url = "https://" + url
+        settings.PROXY_PROTOCOL = "https"
+      else:
+        url = "http://" + url 
   return url
   
 """

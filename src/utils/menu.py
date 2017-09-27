@@ -114,6 +114,11 @@ general.add_option("--charset",
                 default=None,
                 help="Force character encoding used for data retrieval.")
 
+general.add_option("--check-internet", 
+                action="store_true",
+                dest="check_internet",
+                help="Check internet connection before assessing the target.")
+
 # Target options
 target = OptionGroup(parser, Style.BRIGHT + Style.UNDERLINE + "Target" + Style.RESET_ALL, 
                      "This options has to be provided, to define the target URL. ")
