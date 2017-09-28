@@ -203,6 +203,11 @@ request.add_option("--cookie-del",
                 dest="cdel",
                 help="Set character for splitting cookie values.")
 
+request.add_option("-H","--header",
+                action="store",
+                dest="header",
+                help="Extra header (e.g. 'X-Forwarded-For: 127.0.0.1').")
+
 request.add_option("--headers",
                 action="store",
                 dest="headers",

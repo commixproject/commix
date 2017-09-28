@@ -259,16 +259,33 @@ def do_check(request):
     request.add_header("Content-Type", "application/json")
 
   # Check if defined any extra HTTP headers.
-  if menu.options.headers:
+  if menu.options.headers or menu.options.header:
     # Do replacement with the 'INJECT_HERE' tag, if the wildcard char is provided.
-    menu.options.headers = checks.wildcard_character(menu.options.headers)   
-    extra_headers = menu.options.headers
+    if menu.options.headers:
+      menu.options.headers = checks.wildcard_character(menu.options.headers)
+      extra_headers = menu.options.headers 
+    else:
+      menu.options.header = checks.wildcard_character(menu.options.header) 
+      extra_headers = menu.options.header
+  
     extra_headers = extra_headers.replace(":",": ")
     if ": //" in extra_headers:
       extra_headers = extra_headers.replace(": //" ,"://")
-    extra_headers = extra_headers.split("\\n")
-    # Remove empty strings
-    extra_headers = [x for x in extra_headers if x]
+
+    if "\\n" in extra_headers:
+      extra_headers = extra_headers.split("\\n")
+      # Remove empty strings
+      extra_headers = [x for x in extra_headers if x]
+      if menu.options.header and not menu.options.headers and len(extra_headers) > 1:
+        warn_msg = "Swithing '--header' to '--headers' "
+        warn_msg += "due to multiple extra headers."
+        print settings.print_warning_msg(warn_msg)
+
+    else:
+      tmp_extra_header = []
+      tmp_extra_header.append(extra_headers)
+      extra_headers = tmp_extra_header
+
     for extra_header in extra_headers:
       # Extra HTTP Header name 
       http_header_name = re.findall(r"(.*): ", extra_header)
@@ -284,4 +301,3 @@ def do_check(request):
       request.add_header(http_header_name, http_header_value)
 
 #eof
-\
