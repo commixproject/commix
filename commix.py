@@ -122,12 +122,12 @@ def examine_request(request):
       try:
         response = urllib2.urlopen(request)
       except ValueError:
-        # Invalid format for the '--headers' option.
+        # Invalid format for the '--header' option.
         if settings.VERBOSITY_LEVEL < 2:
           print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
-        err_msg = "Use '--headers=\"HEADER_NAME: HEADER_VALUE\"' "
-        err_msg += "to provide an HTTP header or"
-        err_msg += " '--headers=\"HEADER_NAME: " + settings.WILDCARD_CHAR  + "\"' "
+        err_msg = "Use '--header=\"HEADER_NAME: HEADER_VALUE\"'"
+        err_msg += "to provide an extra HTTP header or"
+        err_msg += " '--header=\"HEADER_NAME: " + settings.WILDCARD_CHAR  + "\"' "
         err_msg += "if you want to try to exploit the provided HTTP header."
         print settings.print_critical_msg(err_msg)
         sys.exit(0)

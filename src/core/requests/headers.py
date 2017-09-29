@@ -278,7 +278,7 @@ def do_check(request):
       extra_headers = [x for x in extra_headers if x]
       if menu.options.header and not menu.options.headers and len(extra_headers) > 1:
         warn_msg = "Swithing '--header' to '--headers' "
-        warn_msg += "due to multiple extra headers."
+        warn_msg += "due to multiple extra HTTP headers."
         print settings.print_warning_msg(warn_msg)
 
     else:
