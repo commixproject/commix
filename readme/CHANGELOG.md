@@ -1,4 +1,4 @@
-## Version 2.1 (upcoming)
+## Version 2.1 (2017-10-03)
 * Added: New option `--header` for providing a single extra HTTP header (e.g. 'X-Forwarded-For: 127.0.0.1').
 * Added: New option `--check-internet` that checks internet connection before assessing the target.
 * Fixed: Minor bug-fix regarding performing injections through HTTP Headers (i.e Cookie, User-Agent, Referer).
