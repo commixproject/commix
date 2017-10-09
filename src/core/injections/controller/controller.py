@@ -149,7 +149,6 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
 
   # Check if it is vulnerable to eval-based code injection technique.
   if not menu.options.tech or "e" in menu.options.tech:
-    print "ddd"
     if not skip_code_injections:
       settings.EVAL_BASED_STATE = None
       if eb_handler.exploitation(url, timesec, filename, http_request_method) != False:
