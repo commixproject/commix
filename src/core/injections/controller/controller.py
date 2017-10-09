@@ -71,6 +71,17 @@ Proceed to the injection process for the appropriate parameter.
 """
 def injection_proccess(url, check_parameter, http_request_method, filename, timesec):
 
+  # Skipping specific injection techniques.
+  if settings.SKIP_TECHNIQUES:
+    menu.options.tech = "".join(settings.AVAILABLE_TECHNIQUES)
+    for skip_tech_name in settings.AVAILABLE_TECHNIQUES:
+      if skip_tech_name in menu.options.skip_tech:
+        menu.options.tech = menu.options.tech.replace(skip_tech_name,"")
+    if len(menu.options.tech) == 0:
+      err_msg = "Detection procedure was aborted due to skipping all injection techniques."
+      print settings.print_critical_msg(err_msg)
+      raise SystemExit
+
   # User-Agent Injection / Referer Injection / Custom header Injection 
   if check_parameter.startswith(" "):
     header_name = ""
@@ -138,6 +149,7 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
 
   # Check if it is vulnerable to eval-based code injection technique.
   if not menu.options.tech or "e" in menu.options.tech:
+    print "ddd"
     if not skip_code_injections:
       settings.EVAL_BASED_STATE = None
       if eb_handler.exploitation(url, timesec, filename, http_request_method) != False:

@@ -415,6 +415,11 @@ injection.add_option("--technique",
                 dest="tech",
                 help="Specify injection technique(s) to use.")
 
+injection.add_option("--skip-technique", 
+                action="store",
+                dest="skip_tech",
+                help="Specify injection technique(s) to skip.")
+
 injection.add_option("--maxlen", 
                 action="store",
                 dest="maxlen",

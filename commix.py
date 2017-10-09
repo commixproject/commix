@@ -310,6 +310,11 @@ def main(filename, url):
     if menu.options.cdel:
      settings.COOKIE_DELIMITER = menu.options.cdel
 
+    # Check for skipping injection techniques.
+    if menu.options.skip_tech:
+      settings.SKIP_TECHNIQUES = True
+      menu.options.tech = menu.options.skip_tech
+
     # Check if specified wrong injection technique
     if menu.options.tech and menu.options.tech not in settings.AVAILABLE_TECHNIQUES:
       found_tech = False
@@ -336,7 +341,13 @@ def main(filename, url):
          found_tech == False:
         err_msg = "You specified wrong value '" + split_techniques_names[i] 
         err_msg += "' as injection technique. "
-        err_msg += "The value for '--technique' must be a string composed by the letters C, E, T, F. "
+        err_msg += "The value for '"
+        if not settings.SKIP_TECHNIQUES :
+          err_msg += "--technique"
+        else:
+          err_msg += "--skip-technique"
+          
+        err_msg += "' must be a string composed by the letters C, E, T, F. "
         err_msg += "Refer to the official wiki for details."
         print settings.print_critical_msg(err_msg)
         sys.exit(0)
