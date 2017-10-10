@@ -312,6 +312,12 @@ def main(filename, url):
 
     # Check for skipping injection techniques.
     if menu.options.skip_tech:
+      if menu.options.tech:
+        err_msg = "The options '--technique' and '--skip-technique' cannot be used "
+        err_msg += "simultaneously (i.e. only one option must be set)."
+        print settings.print_critical_msg(err_msg)
+        raise SystemExit
+
       settings.SKIP_TECHNIQUES = True
       menu.options.tech = menu.options.skip_tech
 
