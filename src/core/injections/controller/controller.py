@@ -117,7 +117,7 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
        menu.options.web_root =  menu.options.web_root + "/"
     if checks.procced_with_file_based_technique():
       menu.options.tech = "f"
-
+  
   # Check if it is vulnerable to classic command injection technique.
   if not menu.options.tech or "c" in menu.options.tech:
     settings.CLASSIC_STATE = None
