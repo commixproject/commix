@@ -200,6 +200,7 @@ def injection_point_exportation(url, http_request_method):
           cursor = conn.execute("SELECT * FROM " + table_name(url) + "_ip WHERE "\
                                 "url = '" + url + "' AND "\
                                 "injection_type like '" + select_injection_type + "%' AND "\
+                                "technique like '" + menu.options.tech[:1] + "%' AND "\
                                 "vuln_parameter = '" + settings.TESTABLE_PARAMETER + "' AND "\
                                 "http_request_method = '" + http_request_method + "' "\
                                 "ORDER BY id DESC limit 1;")
@@ -207,6 +208,7 @@ def injection_point_exportation(url, http_request_method):
           cursor = conn.execute("SELECT * FROM " + table_name(url) + "_ip WHERE "\
                                 "url = '" + url + "' AND "\
                                 "injection_type like '" + select_injection_type + "%' AND "\
+                                "technique like '" + menu.options.tech[:1] + "%' AND "\
                                 "http_header = '" + settings.HTTP_HEADER + "' AND "\
                                 "http_request_method = '" + http_request_method + "' "\
                                 "ORDER BY id DESC limit 1;")
