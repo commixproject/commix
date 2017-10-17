@@ -531,13 +531,24 @@ def wildcard_character(data):
   return data
 
 """
+Skip defined
+"""
+def check_skipped_params(check_parameters):
+
+  settings.TEST_PARAMETER = [x + "," for x in settings.TEST_PARAMETER]
+  settings.TEST_PARAMETER = [x for x in check_parameters if x not in ",".join(settings.TEST_PARAMETER).split(",")]
+  settings.TEST_PARAMETER = ",".join(settings.TEST_PARAMETER)
+  menu.options.test_parameter = True
+
+"""
 Print the non-listed parameters.
 """
 def print_non_listed_params(check_parameters, http_request_method, header_name):
+  
   if settings.TEST_PARAMETER:
     testable_parameters = ",".join(settings.TEST_PARAMETER).replace(" ","")
     testable_parameters = testable_parameters.split(",")
-    non_exist_param = list(set(testable_parameters)-set(check_parameters))
+    non_exist_param = list(set(testable_parameters) - set(check_parameters))
     if non_exist_param:
       non_exist_param = ",".join(non_exist_param).replace(" ","")
       non_exist_param = non_exist_param.split(",")
@@ -555,6 +566,9 @@ def print_non_listed_params(check_parameters, http_request_method, header_name):
           warn_msg += (' data', ' request')[http_request_method == "GET"] 
         warn_msg += "."
         print settings.print_warning_msg(warn_msg)
+
+  if menu.options.skip_parameter != None:
+    check_skipped_params(check_parameters)
 
 
 # """

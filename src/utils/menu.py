@@ -400,6 +400,11 @@ injection.add_option("-p",
                 dest="test_parameter",
                 help="Testable parameter(s).")
 
+injection.add_option("--skip", 
+                action="store",
+                dest="skip_parameter",
+                help="Skip testing for given parameter(s).")
+
 injection.add_option("--suffix", 
                 action="store",
                 dest="suffix",

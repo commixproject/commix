@@ -293,15 +293,28 @@ def main(filename, url):
     if menu.options.url_reload and menu.options.data:
       settings.URL_RELOAD = True
 
+    if menu.options.test_parameter and menu.options.skip_parameter:
+      err_msg = "The options '-p' and '--skip' cannot be used "
+      err_msg += "simultaneously (i.e. only one option must be set)."
+      print settings.print_critical_msg(err_msg)
+      raise SystemExit
+
     # Check provided parameters for tests
-    if menu.options.test_parameter:
-      if menu.options.test_parameter.startswith("="):
-        menu.options.test_parameter = menu.options.test_parameter[1:]
-      settings.TEST_PARAMETER = menu.options.test_parameter.split(settings.PARAMETER_SPLITTING_REGEX)
+    elif menu.options.test_parameter or menu.options.skip_parameter:     
+      if menu.options.test_parameter != None :
+        if menu.options.test_parameter.startswith("="):
+          menu.options.test_parameter = menu.options.test_parameter[1:]
+        settings.TEST_PARAMETER = menu.options.test_parameter.split(settings.PARAMETER_SPLITTING_REGEX)  
+      
+      elif menu.options.skip_parameter != None :
+        if menu.options.skip_parameter.startswith("="):
+          menu.options.skip_parameter = menu.options.skip_parameter[1:]
+        settings.TEST_PARAMETER = menu.options.skip_parameter.split(settings.PARAMETER_SPLITTING_REGEX)
+
       for i in range(0,len(settings.TEST_PARAMETER)):
         if "=" in settings.TEST_PARAMETER[i]:
           settings.TEST_PARAMETER[i] = settings.TEST_PARAMETER[i].split("=")[0]
-    
+
     # Check if defined character used for splitting parameter values.
     if menu.options.pdel:
      settings.PARAMETER_DELIMITER = menu.options.pdel

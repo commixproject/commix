@@ -111,7 +111,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "2.2.4"
+VERSION_NUM = "2.2.5"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"
@@ -134,8 +134,11 @@ USER_DEFINED_POST_DATA = ""
 # The wildcard character
 WILDCARD_CHAR = "*"
 
-# Testable parameter(s) comma separated. 
+# Testable parameter(s) - comma separated. 
 TEST_PARAMETER = ""
+
+# Skip testing for given parameter(s) - comma separated. 
+SKIP_PARAMETER = ""
 
 # Default target host OS (Unix-like)
 TARGET_OS = "unix"

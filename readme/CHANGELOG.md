@@ -1,4 +1,5 @@
 ## Version 2.2 (upcoming)
+* Added: New option `--skip` regarding excluding certain parameter(s) from testing.
 * Added: New option `--skip-technique` regarding excluding certain injection technique(s) from testing.
 
 ## Version 2.1 (2017-10-03)
