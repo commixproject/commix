@@ -60,9 +60,12 @@ def updater():
         if os.path.isdir("./.git"):
           sys.stdout.write("[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]\n")
           sys.stdout.flush()
-          start = 0
-          end = 0
-          start = time.time()
+          #start = 0
+          #end = 0
+          #start = time.time()
+          info_msg = "Updating " + settings.APPLICATION + " to the latest (dev) " 
+          info_msg += "version from the GitHub repo.\n"
+          sys.stdout.write(settings.print_info_msg(info_msg))
           print "---"
           subprocess.Popen("git reset --hard HEAD && git pull", shell=True).wait()
           # Delete *.pyc files.
@@ -70,9 +73,9 @@ def updater():
           # Delete empty directories and files.
           subprocess.Popen("find . -empty -type d -delete", shell=True).wait()
           print "---"
-          end  = time.time()
-          how_long = int(end - start)
-          info_msg = "Finished in " + time.strftime('%H:%M:%S', time.gmtime(how_long)) + "."
+          #end  = time.time()
+          #how_long = int(end - start)
+          #info_msg = "Finished in " + time.strftime('%H:%M:%S', time.gmtime(how_long)) + "."
           print settings.print_info_msg(info_msg)
           print ""
           os._exit(0)
@@ -139,8 +142,9 @@ def check_for_update():
 The updater for the unicorn tool
 """
 def unicorn_updater(current_version):
+  APPLICATION_NAME = "TrustedSec's Magic Unicorn"
   info_msg = "Checking requirements to update " 
-  info_msg += "TrustedSec's Magic Unicorn via GitHub... "
+  info_msg += APPLICATION_NAME + " via GitHub... "
   sys.stdout.write(settings.print_info_msg(info_msg))
   sys.stdout.flush()
   if menu.options.offline:  
@@ -170,14 +174,17 @@ def unicorn_updater(current_version):
         else:
           os.chdir("../")
           subprocess.Popen("rm -rf unicorn", shell=True).wait()
-        start = 0
-        end = 0
-        start = time.time()
+        #start = 0
+        #end = 0
+        #start = time.time()
+        info_msg = "Updating " + APPLICATION_NAME + " to the latest (dev) " 
+        info_msg += "version from the GitHub repo.\n"
+        sys.stdout.write(settings.print_info_msg(info_msg))
         print "---"
         subprocess.Popen("git clone https://github.com/trustedsec/unicorn", shell=True).wait()
         print "---"
-        end  = time.time()
-        how_long = int(end - start)
+        #end  = time.time()
+        #how_long = int(end - start)
         info_msg = "Finished in " + time.strftime('%H:%M:%S', time.gmtime(how_long)) + "."
         print settings.print_info_msg(info_msg)
         os.chdir("unicorn")
