@@ -29,6 +29,18 @@ Check for updates (apply if any) and exit!
 """
 
 """
+Returns abbreviated commit hash number as retrieved with "git rev-parse --short HEAD"
+"""
+def revision_num():
+  process = subprocess.Popen("git rev-parse --verify HEAD", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+  stdout, _ = process.communicate()
+  match = re.search(r"(?i)[0-9a-f]{32}", stdout or "")
+  rev_num = match.group(0) if match else None
+  info_msg = ('Already at', 'Updated to')["Already" in stdout]
+  info_msg += " the latest revision '" + str(rev_num[:7]) + "'."
+  print settings.print_info_msg(info_msg)
+
+"""
 The commix's updater.
 """
 def updater():
@@ -76,7 +88,7 @@ def updater():
           #end  = time.time()
           #how_long = int(end - start)
           #info_msg = "Finished in " + time.strftime('%H:%M:%S', time.gmtime(how_long)) + "."
-          print settings.print_info_msg(info_msg)
+          revision_num()
           print ""
           os._exit(0)
         else:
@@ -185,8 +197,9 @@ def unicorn_updater(current_version):
         print "---"
         #end  = time.time()
         #how_long = int(end - start)
-        info_msg = "Finished in " + time.strftime('%H:%M:%S', time.gmtime(how_long)) + "."
-        print settings.print_info_msg(info_msg)
+        # info_msg = "Finished in " + time.strftime('%H:%M:%S', time.gmtime(how_long)) + "."
+        # print settings.print_info_msg(info_msg)
+        revision_num()
         os.chdir("unicorn")
       else:
         print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
