@@ -177,7 +177,6 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
         settings.EVAL_BASED_STATE = False
   
   if not skip_command_injections:
-
     # Check if it is vulnerable to time-based blind command injection technique.
     if not menu.options.tech or "t" in menu.options.tech:
       settings.TIME_BASED_STATE = None
@@ -209,28 +208,32 @@ Inject HTTP headers (User-agent / Referer) (if level > 2).
 def http_headers_injection(url, http_request_method, filename, timesec):
   # Disable Cookie Injection 
   settings.COOKIE_INJECTION = False
-  
-  # User-Agent header injection
-  user_agent = menu.options.agent
-  menu.options.agent = settings.INJECT_TAG
-  settings.USER_AGENT_INJECTION = True
-  if settings.USER_AGENT_INJECTION:
-    check_parameter = header_name = " User-Agent"
-    settings.HTTP_HEADER = header_name[1:].replace("-","").lower()
-    check_for_stored_sessions(url, http_request_method)
-    injection_proccess(url, check_parameter, http_request_method, filename, timesec)
-  settings.USER_AGENT_INJECTION = False
-  menu.options.agent = user_agent
 
+  # User-Agent header injection
+  if menu.options.skip_parameter == None or \
+    "user-agent" not in menu.options.skip_parameter.lower():
+    user_agent = menu.options.agent
+    menu.options.agent = settings.INJECT_TAG
+    settings.USER_AGENT_INJECTION = True
+    if settings.USER_AGENT_INJECTION:
+      check_parameter = header_name = " User-Agent"
+      settings.HTTP_HEADER = header_name[1:].replace("-","").lower()
+      check_for_stored_sessions(url, http_request_method)
+      injection_proccess(url, check_parameter, http_request_method, filename, timesec)
+    settings.USER_AGENT_INJECTION = False
+    menu.options.agent = user_agent
+  
   # Referer header injection
-  menu.options.referer = settings.INJECT_TAG
-  settings.REFERER_INJECTION = True
-  if settings.REFERER_INJECTION:
-    check_parameter =  header_name = " Referer"
-    settings.HTTP_HEADER = header_name[1:].lower()
-    check_for_stored_sessions(url, http_request_method)
-    injection_proccess(url, check_parameter, http_request_method, filename, timesec)
-    settings.REFERER_INJECTION = False 
+  if menu.options.skip_parameter == None or \
+    "referer" not in menu.options.skip_parameter.lower():
+    menu.options.referer = settings.INJECT_TAG
+    settings.REFERER_INJECTION = True
+    if settings.REFERER_INJECTION:
+      check_parameter =  header_name = " Referer"
+      settings.HTTP_HEADER = header_name[1:].lower()
+      check_for_stored_sessions(url, http_request_method)
+      injection_proccess(url, check_parameter, http_request_method, filename, timesec)
+      settings.REFERER_INJECTION = False 
 
 """
 Check for stored injections on User-agent / Referer headers (if level > 2).
