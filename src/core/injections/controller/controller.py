@@ -213,7 +213,8 @@ def http_headers_injection(url, http_request_method, filename, timesec):
   if menu.options.skip_parameter == None or \
     "user-agent" not in menu.options.skip_parameter.lower():
     user_agent = menu.options.agent
-    menu.options.agent = settings.INJECT_TAG
+    if not menu.options.shellshock:
+      menu.options.agent = settings.INJECT_TAG
     settings.USER_AGENT_INJECTION = True
     if settings.USER_AGENT_INJECTION:
       check_parameter = header_name = " User-Agent"
@@ -226,7 +227,8 @@ def http_headers_injection(url, http_request_method, filename, timesec):
   # Referer header injection
   if menu.options.skip_parameter == None or \
     "referer" not in menu.options.skip_parameter.lower():
-    menu.options.referer = settings.INJECT_TAG
+    if not menu.options.shellshock:
+      menu.options.referer = settings.INJECT_TAG
     settings.REFERER_INJECTION = True
     if settings.REFERER_INJECTION:
       check_parameter =  header_name = " Referer"
