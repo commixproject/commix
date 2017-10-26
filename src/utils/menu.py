@@ -160,7 +160,7 @@ request = OptionGroup(parser,  Style.BRIGHT + Style.UNDERLINE + "Request" + Styl
                       "These options can be used to specify how to connect to the target URL.")
 
 
-request.add_option("--data", 
+request.add_option("-d", "--data", 
                 action="store",
                 dest="data",
                 default=False,
