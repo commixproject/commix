@@ -1,4 +1,5 @@
 ## Version 2.2 (upcoming)
+* Revised: Minor improvement regarding Python version check (no more crashes on Python >= "3" and < "2.6").
 * Revised: Minor improvement in "updater", for checking commit hash number.
 * Added: New option `--skip` regarding excluding certain parameter(s) from testing.
 * Added: New option `--skip-technique` regarding excluding certain injection technique(s) from testing.
