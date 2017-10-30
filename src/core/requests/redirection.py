@@ -88,7 +88,7 @@ def do_check(url):
                   HEADRedirectHandler,
                   urllib2.HTTPErrorProcessor, 
                   urllib2.HTTPSHandler]:
-      opener.add_handler(handler())
+      opener.add_handler(handler())   
   try:
     response = opener.open(HeadRequest(url))
     redirected_url = response.geturl()
@@ -121,3 +121,11 @@ def do_check(url):
     err_msg = str(err).replace(": "," (")
     print settings.print_critical_msg(err_msg + ").")
     raise SystemExit()
+
+  # The target host seems to be down!
+  except urllib2.URLError, err:
+    err_msg = "The host seems to be down! (" 
+    err_msg += str(err.args[0]).split("] ")[1] 
+    err_msg += ")."
+    print settings.print_critical_msg(err_msg)
+    sys.exit(0)
