@@ -181,7 +181,7 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
   info_msg = "Retrieving the length of execution output... "
   sys.stdout.write(settings.print_info_msg(info_msg))
   sys.stdout.flush()  
-  if settings.VERBOSITY_LEVEL > 1 and menu.options.ignore_session:
+  if settings.VERBOSITY_LEVEL > 1:
     print ""
   for output_length in range(int(minlen), int(maxlen)):
     # Execute shell commands on vulnerable host.
