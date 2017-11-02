@@ -136,6 +136,9 @@ def applied_techniques(url, http_request_method):
                                         "ORDER BY id DESC ;")
     values = []
     for session in applied_techniques:
+      if "tempfile" in session[0][:8]:
+        settings.TEMPFILE_BASED_STATE = True
+        session = session[0][4:]
       values += session[0][:1]
     applied_techniques = ''.join(list(set(values)))
     return applied_techniques
@@ -158,13 +161,13 @@ def applied_levels(url, http_request_method):
                                     "url = '" + url + "' AND "\
                                     "vuln_parameter = '" + settings.TESTABLE_PARAMETER + "' AND "\
                                     "http_request_method = '" + http_request_method + "' "\
-                                    "ORDER BY id DESC ;")
+                                    "ORDER BY id DESC;")
     else:
       applied_level = conn.execute("SELECT is_vulnerable FROM " + table_name(url) + "_ip WHERE "\
                                     "url = '" + url + "' AND "\
                                     "vuln_parameter = '" + settings.INJECT_TAG + "' AND "\
                                     "http_request_method = '" + http_request_method + "' "\
-                                    "ORDER BY id DESC ;")
+                                    "ORDER BY id DESC;")
     
     for session in applied_level:
       return session[0]
@@ -187,8 +190,6 @@ def injection_point_exportation(url, http_request_method):
       result = conn.execute("SELECT * FROM sqlite_master WHERE name = '" + \
                              table_name(url) + "_ip' AND type = 'table';")
       if result:
-        # if menu.options.tech[:1] == "d":
-        #   menu.options.tech = "e"
         if menu.options.tech[:1] == "c" or \
            menu.options.tech[:1] == "e":
           select_injection_type = "R"
@@ -197,21 +198,39 @@ def injection_point_exportation(url, http_request_method):
         else:
           select_injection_type = "S"
         if settings.TESTABLE_PARAMETER:
-          cursor = conn.execute("SELECT * FROM " + table_name(url) + "_ip WHERE "\
-                                "url = '" + url + "' AND "\
-                                "injection_type like '" + select_injection_type + "%' AND "\
-                                "technique like '" + menu.options.tech[:1] + "%' AND "\
-                                "vuln_parameter = '" + settings.TESTABLE_PARAMETER + "' AND "\
-                                "http_request_method = '" + http_request_method + "' "\
-                                "ORDER BY id DESC limit 1;")
+          if settings.TEMPFILE_BASED_STATE and select_injection_type == "S":
+            cursor = conn.execute("SELECT * FROM " + table_name(url) + "_ip WHERE "\
+                                  "url = '" + url + "' AND "\
+                                  "injection_type like '" + select_injection_type + "%' AND "\
+                                  "technique like 't%' AND "\
+                                  "vuln_parameter = '" + settings.TESTABLE_PARAMETER + "' AND "\
+                                  "http_request_method = '" + http_request_method + "' "\
+                                  "ORDER BY id DESC limit 1;")
+          else:
+            cursor = conn.execute("SELECT * FROM " + table_name(url) + "_ip WHERE "\
+                                  "url = '" + url + "' AND "\
+                                  "injection_type like '" + select_injection_type + "%' AND "\
+                                  "technique like '" + menu.options.tech[:1] + "%' AND "\
+                                  "vuln_parameter = '" + settings.TESTABLE_PARAMETER + "' AND "\
+                                  "http_request_method = '" + http_request_method + "' "\
+                                  "ORDER BY id DESC limit 1;")
         else:
-          cursor = conn.execute("SELECT * FROM " + table_name(url) + "_ip WHERE "\
-                                "url = '" + url + "' AND "\
-                                "injection_type like '" + select_injection_type + "%' AND "\
-                                "technique like '" + menu.options.tech[:1] + "%' AND "\
-                                "http_header = '" + settings.HTTP_HEADER + "' AND "\
-                                "http_request_method = '" + http_request_method + "' "\
-                                "ORDER BY id DESC limit 1;")
+          if settings.TEMPFILE_BASED_STATE and select_injection_type == "S":
+            cursor = conn.execute("SELECT * FROM " + table_name(url) + "_ip WHERE "\
+                                  "url = '" + url + "' AND "\
+                                  "injection_type like '" + select_injection_type + "%' AND "\
+                                  "technique like 't%' AND "\
+                                  "http_header = '" + settings.HTTP_HEADER + "' AND "\
+                                  "http_request_method = '" + http_request_method + "' "\
+                                  "ORDER BY id DESC limit 1;")
+          else:  
+            cursor = conn.execute("SELECT * FROM " + table_name(url) + "_ip WHERE "\
+                                  "url = '" + url + "' AND "\
+                                  "injection_type like '" + select_injection_type + "%' AND "\
+                                  "technique like '" + menu.options.tech[:1] + "%' AND "\
+                                  "http_header = '" + settings.HTTP_HEADER + "' AND "\
+                                  "http_request_method = '" + http_request_method + "' "\
+                                  "ORDER BY id DESC limit 1;")
         for session in cursor:
           url = session[1]
           technique = session[2]
