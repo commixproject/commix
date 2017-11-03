@@ -66,6 +66,7 @@ def check_for_stored_levels(url, http_request_method):
       menu.options.level = session_handler.applied_levels(url, http_request_method)
       if type(menu.options.level) is not int :
         menu.options.level = settings.DEFAULT_INJECTION_LEVEL
+        
 """
 Proceed to the injection process for the appropriate parameter.
 """

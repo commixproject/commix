@@ -520,13 +520,11 @@ Export the injection results
 """
 def export_injection_results(cmd, separator, output, check_how_long):
   if output != "" and check_how_long != 0 :
-    if settings.VERBOSITY_LEVEL < 1:
-      print "\n"
-    print Fore.GREEN + Style.BRIGHT + output + Style.RESET_ALL
+    print "\n\n" + Fore.GREEN + Style.BRIGHT + output + Style.RESET_ALL
     info_msg = "Finished in " + time.strftime('%H:%M:%S', time.gmtime(check_how_long))
     sys.stdout.write("\n" + settings.print_info_msg(info_msg))
     if not menu.options.os_cmd:
-      print "\n"
+      print ""
   else:
     err_msg = "The '" + cmd + "' command, does not return any output."
     print settings.print_critical_msg(err_msg) + "\n"

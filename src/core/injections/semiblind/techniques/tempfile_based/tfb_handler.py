@@ -570,9 +570,6 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                           break
                         if go_back and go_back_again:
                           return True 
-                      else:
-                        if settings.VERBOSITY_LEVEL < 1:
-                          print ""
                       if menu.options.ignore_session or \
                          session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
                         # The main command injection exploitation.
@@ -585,7 +582,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                         output = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
                         # Update logs with executed cmds and execution results.
                         logs.executed_command(filename, cmd, output)
-                        print Fore.GREEN + Style.BRIGHT + output + "\n" + Style.RESET_ALL
+                        print "\n" + Fore.GREEN + Style.BRIGHT + output + Style.RESET_ALL + "\n"
                       # Update logs with executed cmds and execution results.
                       logs.executed_command(filename, cmd, output)
 

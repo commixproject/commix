@@ -521,8 +521,6 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                         if go_back and go_back_again:
                           return True 
                       else:
-                        if settings.VERBOSITY_LEVEL < 1:
-                          print ""
                         if menu.options.ignore_session or \
                            session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
                           # The main command injection exploitation.
@@ -533,6 +531,8 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                             session_handler.store_cmd(url, cmd, output, vuln_parameter)
                         else:
                           output = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
+                          if settings.VERBOSITY_LEVEL >= 1:
+                            print ""
                           print Fore.GREEN + Style.BRIGHT + output + Style.RESET_ALL
                         # Update logs with executed cmds and execution results.
                         logs.executed_command(filename, cmd, output)
