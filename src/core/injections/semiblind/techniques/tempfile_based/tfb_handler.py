@@ -385,6 +385,8 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
               settings.DETECTION_PHASE = False
               settings.EXPLOITATION_PHASE = True
               if settings.LOAD_SESSION:
+                if whitespace == "%20":
+                  whitespace = " "
                 possibly_vulnerable = False
 
               if settings.COOKIE_INJECTION == True: 
