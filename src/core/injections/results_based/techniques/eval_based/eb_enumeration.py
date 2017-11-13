@@ -16,6 +16,7 @@ For more see the file 'readme/COPYING' for copying permission.
 import re
 import sys
 
+from src.utils import logs
 from src.utils import menu
 from src.utils import settings
 from src.utils import session_handler
@@ -544,10 +545,9 @@ def single_os_cmd_exec(separator, TAG, prefix, suffix, whitespace, http_request_
   else:
     shell = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
   if shell:
-    if settings.VERBOSITY_LEVEL >= 1 and menu.options.ignore_session:
-      print ""
     if shell != "":
-      print Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL
+      print "\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n"
+      logs.print_logs_notification(filename, url)
     else:
       err_msg = "The '" + cmd + "' command, does not return any output."
       print settings.print_critical_msg(err_msg) 

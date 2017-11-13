@@ -471,6 +471,8 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                 check_how_long, output = tb_enumeration.single_os_cmd_exec(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
                 # Export injection result
                 tb_injector.export_injection_results(cmd, separator, output, check_how_long)
+                print ""
+                logs.print_logs_notification(filename, url) 
                 sys.exit(0)
 
               if not new_line :

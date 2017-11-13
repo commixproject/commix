@@ -17,6 +17,7 @@ import re
 import sys
 import urllib
 
+from src.utils import logs
 from src.utils import menu
 from src.utils import settings
 from src.utils import session_handler
@@ -531,6 +532,7 @@ def system_passwords(separator, TAG, prefix, suffix, whitespace, http_request_me
 Single os-shell execution
 """
 def single_os_cmd_exec(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec):
+  
   cmd =  menu.options.os_cmd
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
     # Command execution results.
@@ -545,10 +547,9 @@ def single_os_cmd_exec(separator, TAG, prefix, suffix, whitespace, http_request_
   else:
     shell = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
   if shell:
-    if settings.VERBOSITY_LEVEL >= 1 and menu.options.ignore_session:
-      print ""
     if shell != "":
-      print Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL
+      print "\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n"
+      logs.print_logs_notification(filename, url)
     else:
       err_msg = "The '" + cmd + "' command, does not return any output."
       print settings.print_critical_msg(err_msg) 

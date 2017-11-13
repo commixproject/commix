@@ -522,7 +522,10 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                 # Export injection result
                 tfb_injector.export_injection_results(cmd, separator, output, check_how_long)
                 # Delete previous shell (text) files (output) from temp.
+                if settings.VERBOSITY_LEVEL >= 1:
+                  print ""
                 delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+                logs.print_logs_notification(filename, url) 
                 sys.exit(0)  
 
               if settings.VERBOSITY_LEVEL >= 1 or not new_line:
@@ -608,8 +611,8 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                     pass
 
               except KeyboardInterrupt:
-                # if settings.VERBOSITY_LEVEL >= 1:
-                print ""
+                if settings.VERBOSITY_LEVEL >= 1:
+                  print ""
                 # Delete previous shell (text) files (output) from temp.
                 delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
                 raise  
