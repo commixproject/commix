@@ -355,8 +355,8 @@ def cb_injection_handler(url, timesec, filename, http_request_method):
               
             # Check if defined single cmd.
             if menu.options.os_cmd:
-              if not menu.file_access_options():
-                print ""
+              # if not menu.file_access_options():
+              #   print ""
               cb_enumeration.single_os_cmd_exec(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec)
 
             # Pseudo-Terminal shell
