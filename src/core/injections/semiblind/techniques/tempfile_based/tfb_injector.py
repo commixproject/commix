@@ -327,10 +327,11 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
           if not settings.VERBOSITY_LEVEL >= 1:
             output.append(chr(ascii_char))
             percent = ((num_of_chars*100)/output_length)
-            float_percent = "{0:.1f}".format(round(((num_of_chars*100)/(output_length * 1.0)),2))
-
+            float_percent = str("{0:.1f}".format(round(((num_of_chars * 100)/(output_length * 1.0)),2))) + "%"
+            if percent == 100:
+              float_percent = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
             info_msg = "Grabbing the output from '" + OUTPUT_TEXTFILE 
-            info_msg += "', please wait... [ " +str(float_percent)+ "% ]"
+            info_msg += "', please wait... [ " + float_percent + " ]"
             sys.stdout.write("\r" + settings.print_info_msg(info_msg))
             sys.stdout.flush()
 
