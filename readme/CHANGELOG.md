@@ -1,4 +1,5 @@
 ## Version 2.2 (upcoming)
+* Revised: Minor improvement regarding session handler.
 * Revised: Minor improvement regarding checking stored time-related ("time-based"/"tempfile-based") payloads.
 * Revised: Minor improvement regarding Python version check (no more crashes on Python >= "3" and < "2.6").
 * Revised: Minor improvement in "updater", for checking commit hash number.
