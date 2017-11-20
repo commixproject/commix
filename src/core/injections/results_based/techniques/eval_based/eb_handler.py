@@ -84,15 +84,12 @@ def eb_injection_handler(url, timesec, filename, http_request_method):
     settings.EXECUTION_FUNCTIONS[item] = "${" + settings.EXECUTION_FUNCTIONS[item] + "("
   settings.EVAL_PREFIXES = settings.EVAL_PREFIXES + settings.EXECUTION_FUNCTIONS
 
-  url = eb_injector.warning_detection(url, http_request_method)
-  
   if not settings.LOAD_SESSION:
+    url = eb_injector.warning_detection(url, http_request_method)
     info_msg = "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "... "
     sys.stdout.write(settings.print_info_msg(info_msg))
     sys.stdout.flush()
-  if settings.VERBOSITY_LEVEL >= 1:
-    print ""
-      
+          
   i = 0
   # Calculate all possible combinations
   total = len(settings.WHITESPACE) * len(settings.EVAL_PREFIXES) * len(settings.EVAL_SEPARATORS) * len(settings.EVAL_SUFFIXES)
