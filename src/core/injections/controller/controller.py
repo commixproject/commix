@@ -126,7 +126,7 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
       if not menu.options.tech or "e" in menu.options.tech:
         if not menu.options.batch:
           settings.CLASSIC_STATE = True
-          question_msg = "Due to results "
+          question_msg = "Due to results, "
           question_msg += "skipping of code injection checks is recommended. "
           question_msg += "Do you agree? [Y/n] > "
           sys.stdout.write(settings.print_question_msg(question_msg))
