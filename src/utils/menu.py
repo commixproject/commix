@@ -494,10 +494,10 @@ detection = OptionGroup(parser, Style.BRIGHT + Style.UNDERLINE + "Detection" + S
                         "used to customize the detection phase.")
 
 detection.add_option("--level", 
-                    dest="level", 
-                    type="int",
-                    default=1,
-                    help="Level of tests to perform (1-3, Default: " + str(settings.DEFAULT_INJECTION_LEVEL) + ").")
+                dest="level", 
+                type="int",
+                default=1,
+                help="Level of tests to perform (1-3, Default: " + str(settings.DEFAULT_INJECTION_LEVEL) + ").")
 
 detection.add_option("--skip-calc", 
                 action="store_true",
@@ -510,6 +510,12 @@ detection.add_option("--skip-empty",
                 dest="skip_empty",
                 default=False,
                 help="Skip testing the parameter(s) with empty value(s).")
+
+detection.add_option("--failed-tries", 
+                action="store",
+                dest="failed_tries",
+                default=20,
+                help="Set a number of failed injection tries, in file-based technique.")
 
 # Miscellaneous options
 misc = OptionGroup(parser, Style.BRIGHT + Style.UNDERLINE + "Miscellaneous" + Style.RESET_ALL)

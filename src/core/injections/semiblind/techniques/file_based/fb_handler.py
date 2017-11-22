@@ -360,7 +360,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                     
                   # Show an error message, after N failed tries.
                   # Use the "/tmp/" directory for tempfile-based technique.
-                  elif i == settings.FAILED_TRIES and no_result == True :
+                  elif i == int(menu.options.failed_tries) and no_result == True :
                     tmp_path = check_tmp_path(url, timesec, filename, http_request_method, url_time_response)
                     warn_msg = "It seems that you don't have permissions to "
                     warn_msg += "read and/or write files in '" + settings.WEB_ROOT + "'."  
