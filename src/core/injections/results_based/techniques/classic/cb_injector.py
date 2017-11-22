@@ -241,7 +241,7 @@ def injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_meth
   response = check_injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
   tries = 0
   while not response:
-    if tries < (settings.FAILED_TRIES / 2):
+    if tries < (menu.options.failed_tries / 2):
       response = check_injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
       tries = tries + 1
     else:
