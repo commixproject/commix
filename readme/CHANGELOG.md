@@ -1,4 +1,5 @@
 ## Version 2.2 (upcoming)
+* Revised: Minor improvement regarding option `-p` for testing user-defined HTTP headers.
 * Added: New option `--failed-tries` for setting a number of failed injection tries, in file-based technique.
 * Revised: Minor improvement regarding session handler.
 * Revised: Minor improvement regarding checking stored time-related ("time-based"/"tempfile-based") payloads.

@@ -210,9 +210,7 @@ def http_headers_injection(url, http_request_method, filename, timesec):
   # Disable Cookie Injection 
   settings.COOKIE_INJECTION = False
 
-  # User-Agent header injection
-  if menu.options.skip_parameter == None or \
-    "user-agent" not in menu.options.skip_parameter.lower():
+  def user_agent_injection(url, http_request_method, filename, timesec): 
     user_agent = menu.options.agent
     if not menu.options.shellshock:
       menu.options.agent = settings.INJECT_TAG
@@ -224,10 +222,8 @@ def http_headers_injection(url, http_request_method, filename, timesec):
       injection_proccess(url, check_parameter, http_request_method, filename, timesec)
     settings.USER_AGENT_INJECTION = False
     menu.options.agent = user_agent
-  
-  # Referer header injection
-  if menu.options.skip_parameter == None or \
-    "referer" not in menu.options.skip_parameter.lower():
+
+  def referer_injection(url, http_request_method, filename, timesec):
     if not menu.options.shellshock:
       menu.options.referer = settings.INJECT_TAG
     settings.REFERER_INJECTION = True
@@ -237,6 +233,22 @@ def http_headers_injection(url, http_request_method, filename, timesec):
       check_for_stored_sessions(url, http_request_method)
       injection_proccess(url, check_parameter, http_request_method, filename, timesec)
       settings.REFERER_INJECTION = False 
+
+  # User-Agent header injection
+  if menu.options.skip_parameter == None:
+    if menu.options.test_parameter == None or "user-agent" in menu.options.test_parameter.lower():
+      user_agent_injection(url, http_request_method, filename, timesec)
+  else:
+    if "user-agent" not in menu.options.skip_parameter.lower():
+      user_agent_injection(url, http_request_method, filename, timesec)  
+
+  # Referer header injection
+  if menu.options.skip_parameter == None:
+    if menu.options.test_parameter == None or "referer" in menu.options.test_parameter.lower():
+      referer_injection(url, http_request_method, filename, timesec)
+  else:
+    if "referer" not in menu.options.skip_parameter.lower():
+      referer_injection(url, http_request_method, filename, timesec)   
 
 """
 Check for stored injections on User-agent / Referer headers (if level > 2).
