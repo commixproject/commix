@@ -552,6 +552,10 @@ def print_non_listed_params(check_parameters, http_request_method, header_name):
     if non_exist_param:
       non_exist_param = ",".join(non_exist_param).replace(" ","")
       non_exist_param = non_exist_param.split(",")
+      if menu.options.level > 2:
+        for http_header in settings.HTTP_HEADERS:
+          if http_header in non_exist_param: 
+            non_exist_param.remove(http_header)
       if non_exist_param:
         non_exist_param_items = ",".join(non_exist_param)
         warn_msg = "Skipping tests for "
