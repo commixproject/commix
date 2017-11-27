@@ -305,6 +305,11 @@ def main(filename, url):
         if "=" in settings.TEST_PARAMETER[i]:
           settings.TEST_PARAMETER[i] = settings.TEST_PARAMETER[i].split("=")[0]
 
+    if menu.options.level < 3 and menu.options.test_parameter != None:
+      if "user-agent" in menu.options.test_parameter or \
+         "referer" in menu.options.test_parameter:
+        menu.options.level = 3
+
     # Check if defined character used for splitting parameter values.
     if menu.options.pdel:
      settings.PARAMETER_DELIMITER = menu.options.pdel
