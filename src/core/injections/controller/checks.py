@@ -552,7 +552,9 @@ def print_non_listed_params(check_parameters, http_request_method, header_name):
     if non_exist_param:
       non_exist_param = ",".join(non_exist_param).replace(" ","")
       non_exist_param = non_exist_param.split(",")
-      if menu.options.level > 2:
+      if menu.options.level >= 2:
+        if menu.options.cookie.split("=")[0] in menu.options.test_parameter:
+          non_exist_param.remove(menu.options.cookie.split("=")[0])
         for http_header in settings.HTTP_HEADERS:
           if http_header in non_exist_param: 
             non_exist_param.remove(http_header)

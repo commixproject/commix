@@ -306,6 +306,8 @@ def main(filename, url):
           settings.TEST_PARAMETER[i] = settings.TEST_PARAMETER[i].split("=")[0]
 
     if menu.options.level < 3 and menu.options.test_parameter != None:
+      if menu.options.cookie.split("=")[0] in menu.options.test_parameter:
+        menu.options.level = 2
       if "user-agent" in menu.options.test_parameter or \
          "referer" in menu.options.test_parameter:
         menu.options.level = 3
