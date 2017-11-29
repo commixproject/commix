@@ -215,7 +215,7 @@ def cookie_injection(url, vuln_parameter, payload):
       request = urllib2.Request(url)
     #Check if defined extra headers.
     headers.do_check(request)
-    request.add_header('Cookie', vuln_parameter + "=" + payload)
+    request.add_header('Cookie', menu.options.cookie.replace(settings.INJECT_TAG, payload))
     try:
       headers.check_http_traffic(request)
       response = opener.open(request)
