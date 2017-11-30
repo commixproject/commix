@@ -35,6 +35,25 @@ def assessment_phase():
     return "exploitation"
 
 """
+Check current assessment phase.
+"""
+def check_injection_level():
+  # Checking testable parameters for cookies
+  if menu.options.cookie:
+    if settings.COOKIE_DELIMITER in menu.options.cookie:
+      cookies = menu.options.cookie.split(settings.COOKIE_DELIMITER)
+      for cookie in cookies:
+        if cookie.split("=")[0].strip() in menu.options.test_parameter:
+          menu.options.level = 2
+    elif menu.options.cookie.split("=")[0] in menu.options.test_parameter:
+      menu.options.level = 2
+
+  # Checking testable parameters for user-agent / referer  
+  if "user-agent" in menu.options.test_parameter or \
+     "referer" in menu.options.test_parameter:
+    menu.options.level = 3
+
+"""
 Procced to the next attack vector.
 """
 def next_attack_vector(technique, go_back):
@@ -200,10 +219,6 @@ def time_based_separators(separator, http_request_method):
       separator = urllib.quote(separator)
   return separator
 
-"""
-Information message if platform does not have 
-GNU 'readline' module installed.
-"""
 """
 Information message if platform does not have 
 GNU 'readline' module installed.
@@ -553,11 +568,24 @@ def print_non_listed_params(check_parameters, http_request_method, header_name):
       non_exist_param = ",".join(non_exist_param).replace(" ","")
       non_exist_param = non_exist_param.split(",")
       if menu.options.level >= 2:
-        if menu.options.cookie.split("=")[0] in menu.options.test_parameter:
-          non_exist_param.remove(menu.options.cookie.split("=")[0])
+        if settings.COOKIE_DELIMITER in menu.options.cookie:
+          cookies = menu.options.cookie.split(settings.COOKIE_DELIMITER)
+          for cookie in cookies:
+            if cookie.split("=")[0].strip() in menu.options.test_parameter:
+              try:
+                non_exist_param.remove(cookie.split("=")[0].strip())
+              except ValueError:
+                pass 
+        elif menu.options.cookie.split("=")[0] in menu.options.test_parameter:
+          try:
+            non_exist_param.remove(menu.options.cookie.split("=")[0])
+          except ValueError:
+            pass 
+            
         for http_header in settings.HTTP_HEADERS:
           if http_header in non_exist_param: 
             non_exist_param.remove(http_header)
+
       if non_exist_param:
         non_exist_param_items = ",".join(non_exist_param)
         warn_msg = "Skipping tests for "

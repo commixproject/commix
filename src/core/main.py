@@ -307,17 +307,7 @@ def main(filename, url):
 
     # Check injection level, due to the provided testable parameters.
     if menu.options.level < 2 and menu.options.test_parameter != None:
-      if menu.options.cookie:
-        if settings.COOKIE_DELIMITER in menu.options.cookie:
-          cookies = menu.options.cookie.split(settings.COOKIE_DELIMITER)
-          for cookie in cookies:
-            if cookie.split("=")[0].strip() in menu.options.test_parameter:
-              menu.options.level = 2
-        elif menu.options.cookie.split("=")[0] in menu.options.test_parameter:
-          menu.options.level = 2
-      if "user-agent" in menu.options.test_parameter or \
-         "referer" in menu.options.test_parameter:
-        menu.options.level = 3
+      checks.check_injection_level()
 
     # Check if defined character used for splitting parameter values.
     if menu.options.pdel:
