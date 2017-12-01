@@ -623,7 +623,8 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                 raise 
   
   if no_result == True:
-    print ""
+    if settings.VERBOSITY_LEVEL == 0:
+      print ""
     return False
 
   else :

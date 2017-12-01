@@ -455,7 +455,8 @@ def cb_injection_handler(url, timesec, filename, http_request_method):
                 pass
                 
   if no_result == True:
-    print ""
+    if settings.VERBOSITY_LEVEL == 0:
+      print ""
     return False
   else :
     sys.stdout.write("\r")
