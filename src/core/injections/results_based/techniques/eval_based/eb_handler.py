@@ -89,6 +89,8 @@ def eb_injection_handler(url, timesec, filename, http_request_method):
     info_msg = "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "... "
     sys.stdout.write(settings.print_info_msg(info_msg))
     sys.stdout.flush()
+    if settings.VERBOSITY_LEVEL >= 1:
+      print ""
           
   i = 0
   # Calculate all possible combinations
