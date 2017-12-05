@@ -59,7 +59,7 @@ def updater():
   
   time.sleep(1)
   info_msg = "Checking requirements to update " 
-  info_msg += settings.APPLICATION + " via GitHub... "
+  info_msg += settings.APPLICATION + " from GitHub repo... "
   sys.stdout.write(settings.print_info_msg(info_msg))
   sys.stdout.flush()
   if menu.options.offline:  
@@ -85,7 +85,7 @@ def updater():
           sys.stdout.write("[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]\n")
           sys.stdout.flush()
           info_msg = "Updating " + settings.APPLICATION + " to the latest (dev) " 
-          info_msg += "version from the GitHub repo... "
+          info_msg += "version... "
           sys.stdout.write(settings.print_info_msg(info_msg))
           sys.stdout.flush()
           revision_num()
@@ -156,7 +156,7 @@ The updater for the unicorn tool
 def unicorn_updater(current_version):
   APPLICATION_NAME = "TrustedSec's Magic Unicorn"
   info_msg = "Checking requirements to update " 
-  info_msg += APPLICATION_NAME + " via GitHub... "
+  info_msg += APPLICATION_NAME + " from GitHub repo... "
   sys.stdout.write(settings.print_info_msg(info_msg))
   sys.stdout.flush()
   if menu.options.offline:  
@@ -187,7 +187,7 @@ def unicorn_updater(current_version):
           os.chdir("../")
           subprocess.Popen("rm -rf unicorn", shell=True).wait()
         info_msg = "Updating " + APPLICATION_NAME + " to the latest (dev) " 
-        info_msg += "version from the GitHub repo... "
+        info_msg += "version... "
         subprocess.Popen("git clone https://github.com/trustedsec/unicorn", shell=True).wait()
         os.chdir("unicorn")
         sys.stdout.write(settings.print_info_msg(info_msg))
