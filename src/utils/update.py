@@ -34,20 +34,34 @@ Returns abbreviated commit hash number as retrieved with "git rev-parse --short 
 """
 def revision_num():
   try:
-    process = subprocess.Popen("git reset --hard HEAD && git pull", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    stdout, _ = process.communicate()
-    info_msg = ('Updated to', 'Already at')["Already" in stdout]
-    process = subprocess.Popen("git rev-parse --verify HEAD", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    if menu.options.verbose:
+      start = 0
+      end = 0
+      start = time.time()
+      print "\n" + "---"
+      subprocess.Popen("git reset --hard HEAD && git pull", shell=True).wait()
+    else:
+      process = subprocess.Popen("git reset --hard HEAD && git pull", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+      stdout, _ = process.communicate()
+      info_msg = ('Updated to', 'Already at')["Already" in stdout]
+    if not menu.options.verbose:
+      process = subprocess.Popen("git rev-parse --verify HEAD", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     # Delete *.pyc files.
     subprocess.Popen("find . -name \"*.pyc\" -delete", shell=True).wait()
     # Delete empty directories and files.
     subprocess.Popen("find . -empty -type d -delete", shell=True).wait()
-    stdout, _ = process.communicate()
-    match = re.search(r"(?i)[0-9a-f]{32}", stdout or "")
-    rev_num = match.group(0) if match else None
-    info_msg += " the latest revision '" + str(rev_num[:7]) + "'."
-    print "[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]"
-    print settings.print_info_msg(info_msg)
+    if not menu.options.verbose: 
+      stdout, _ = process.communicate()
+      match = re.search(r"(?i)[0-9a-f]{32}", stdout or "")
+      rev_num = match.group(0) if match else None
+      info_msg += " the latest revision '" + str(rev_num[:7]) + "'."
+      print "[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]"
+    else:
+      print "---"
+      end  = time.time()
+      how_long = int(end - start)
+      info_msg = "Finished in " + time.strftime('%H:%M:%S', time.gmtime(how_long)) + "."
+    print settings.print_info_msg(info_msg) 
   except:
     print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]" 
     sys.exit(0)
