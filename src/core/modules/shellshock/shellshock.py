@@ -845,7 +845,7 @@ def shellshock_handler(url, http_request_method, filename):
                       else:
                         info_msg = "Executing the '" + cmd + "' command... "
                         if settings.VERBOSITY_LEVEL == 1:
-                          sys.stdout.write("\n" + settings.print_info_msg(info_msg))
+                          sys.stdout.write(settings.print_info_msg(info_msg))
                           sys.stdout.flush()
                           sys.stdout.write("\n" + settings.print_payload(payload)+ "\n")
 
