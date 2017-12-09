@@ -467,7 +467,7 @@ def main(filename, url):
 
                 # Check if file exists
                 if not os.path.isfile(menu.options.file_upload):
-                  err_msg = "The '" + menu.options.file_upload + "' file, does not exists."
+                  err_msg = "The '" + menu.options.file_upload + "' file, does not exist."
                   sys.stdout.write(settings.print_critical_msg(err_msg) + "\n")
                   sys.exit(0)
 
@@ -1085,7 +1085,7 @@ try:
     sys.stdout.flush()
     if not os.path.exists(bulkfile):
       print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
-      err_msg = "It seems that the '" + os.path.split(bulkfile)[1] + "' file, does not exists."
+      err_msg = "It seems that the '" + os.path.split(bulkfile)[1] + "' file, does not exist."
       sys.stdout.write(settings.print_critical_msg(err_msg) + "\n")
       sys.stdout.flush()
       sys.exit(0)
