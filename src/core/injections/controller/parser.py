@@ -76,7 +76,7 @@ def logfile_parser():
 
   if not os.path.exists(request_file):
     print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
-    err_msg = "It seems that the '" + request_file + "' file, does not exists."
+    err_msg = "It seems that the '" + request_file + "' file, does not exist."
     sys.stdout.write(settings.print_critical_msg(err_msg) + "\n")
     sys.stdout.flush()
     sys.exit(0)
