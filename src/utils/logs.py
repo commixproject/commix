@@ -92,7 +92,7 @@ def create_log_file(url, output_dir):
   except:
       os.mkdir(output_dir + host + "/")
 
-  # Create cli history file if does not exists.
+  # Create cli history file if does not exist.
   settings.CLI_HISTORY = output_dir + host + "/" + "cli_history"
   if not os.path.exists(settings.CLI_HISTORY):
       open(settings.CLI_HISTORY,'a').close()
@@ -103,7 +103,7 @@ def create_log_file(url, output_dir):
     else:
        err_msg = "The provided session file ('" + \
                     menu.options.session_file + \
-                    "') does not exists." 
+                    "') does not exist." 
        print settings.print_critical_msg(err_msg)
        sys.exit(0)
   else:  

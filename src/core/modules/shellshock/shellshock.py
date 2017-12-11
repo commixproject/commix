@@ -389,7 +389,7 @@ def file_access(url, cve, check_header, filename):
   if menu.options.file_write:
     file_to_write = menu.options.file_write
     if not os.path.exists(file_to_write):
-      warn_msg = "It seems that the '" + file_to_write + "' file, does not exists."
+      warn_msg = "It seems that the '" + file_to_write + "' file, does not exist."
       sys.stdout.write(settings.print_warning_msg(warn_msg) + "\n")
       sys.stdout.flush()
       sys.exit(0)
@@ -447,7 +447,7 @@ def file_access(url, cve, check_header, filename):
       urllib2.urlopen(file_to_upload)
     except urllib2.HTTPError, warn_msg:
       warn_msg = "It seems that the '" + file_to_upload + "' file, "
-      warn_msg += "does not exists. (" + str(warn_msg) + ")\n"
+      warn_msg += "does not exist. (" + str(warn_msg) + ")\n"
       sys.stdout.write(settings.print_critical_msg(warn_msg))
       sys.stdout.flush()
       sys.exit(0)

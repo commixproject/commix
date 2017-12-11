@@ -78,7 +78,7 @@ Write to a file on the target host.
 def file_write(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec):
   file_to_write = menu.options.file_write
   if not os.path.exists(file_to_write):
-    warn_msg = "It seems that the '" + file_to_write + "' file, does not exists."
+    warn_msg = "It seems that the '" + file_to_write + "' file, does not exist."
     sys.stdout.write(settings.print_warning_msg(warn_msg) + "\n")
     sys.stdout.flush()
     sys.exit(0)
@@ -168,7 +168,7 @@ def file_upload(separator, TAG, prefix, suffix, whitespace, http_request_method,
     try:
       urllib2.urlopen(file_to_upload)
     except urllib2.HTTPError, err_msg:
-      warn_msg = "It seems that the '" + file_to_upload + "' file, does not exists. (" +str(err_msg)+ ")"
+      warn_msg = "It seems that the '" + file_to_upload + "' file, does not exist. (" +str(err_msg)+ ")"
       sys.stdout.write(settings.print_warning_msg(warn_msg) + "\n")
       sys.stdout.flush()
       sys.exit(0)
