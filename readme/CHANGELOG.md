@@ -1,4 +1,4 @@
-## Version 2.2 (upcoming)
+## Version 2.2 (2017-12-12)
 * Revised: Minor improvement in "updater", for supporting verbose mode.
 * Fixed: Minor bug-fix regarding cookie-based command injections.
 * Revised: Minor improvement regarding option `-p` for bypassing the dependence on value of `--level` (in case of user-defined HTTP headers).
