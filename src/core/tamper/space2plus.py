@@ -30,4 +30,4 @@ if settings.WHITESPACE[0] == "%20" or settings.WHITESPACE[0] == " ":
 else:
   settings.WHITESPACE.append("+") 
 
-#eof 
+# eof 

@@ -776,4 +776,4 @@ def perform_payload_encoding(payload):
 
   return payload
 
-#eof
+# eof

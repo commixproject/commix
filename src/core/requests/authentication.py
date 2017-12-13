@@ -192,4 +192,4 @@ def http_auth_cracker(url, realm):
     print "\n" + settings.print_critical_msg(err_msg)  
     return False  
 
-#eof
+# eof

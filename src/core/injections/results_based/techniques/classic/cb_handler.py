@@ -470,4 +470,4 @@ def exploitation(url, timesec, filename, http_request_method):
   if cb_injection_handler(url, timesec, filename, http_request_method) == False:
     return False
 
-#eof
+# eof

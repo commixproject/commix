@@ -712,4 +712,4 @@ CHECK_INTERNET_ADDRESS = "ipinfo.io/"
 # Check internet connection.
 CHECK_INTERNET = False
 
-#eof
+# eof

@@ -34,4 +34,4 @@ else:
   warn_msg = "Unix target host(s), does not support vertical tab(s)."
   print settings.print_warning_msg(warn_msg)
 
-#eof 
+# eof 

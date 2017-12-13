@@ -613,4 +613,4 @@ def exploitation(url, timesec, filename, http_request_method, url_time_response)
     if tb_injection_handler(url, timesec, filename, http_request_method, url_time_response) == False:
       settings.TIME_RELATIVE_ATTACK = False
       return False
-#eof
+# eof

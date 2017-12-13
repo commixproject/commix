@@ -34,4 +34,4 @@ def encode(payload):
   payload = base64.b64encode(payload)
   return payload
 
-#eof 
+# eof 

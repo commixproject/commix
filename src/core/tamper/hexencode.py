@@ -33,4 +33,4 @@ def encode(payload):
   payload = payload.encode("hex")
   return payload
 
-#eof 
+# eof 

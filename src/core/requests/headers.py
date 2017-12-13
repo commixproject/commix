@@ -300,4 +300,4 @@ def do_check(request):
         settings.CUSTOM_HEADER_NAME = http_header_name
       request.add_header(http_header_name, http_header_value)
 
-#eof
+# eof

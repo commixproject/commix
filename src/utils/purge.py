@@ -162,4 +162,4 @@ def purge_output():
     err_msg = "Problem occurred while removing directory '" + directory + "'."
     print settings.print_critical_msg(err_msg)
 
-#eof
+# eof

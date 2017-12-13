@@ -169,4 +169,4 @@ def cmd_execution_alter_shell(separator, TAG, cmd):
                 )
   return payload
 
-#eof
+# eof

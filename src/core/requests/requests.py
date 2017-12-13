@@ -778,4 +778,4 @@ def url_reload(url, timesec):
   response = urllib.urlopen(url)
   return response
 
-#eof
+# eof

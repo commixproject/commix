@@ -186,4 +186,4 @@ def logfile_parser():
         print settings.SUB_CONTENT_SIGN + http_header + " " +  prefix + menu.options.host + request_url
         if http_header == "POST":
            print settings.SUB_CONTENT_SIGN + "Data: " + menu.options.data
-#eof
+# eof

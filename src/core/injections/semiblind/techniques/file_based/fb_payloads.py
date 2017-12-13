@@ -127,4 +127,4 @@ def cmd_execution_alter_shell(separator, cmd, OUTPUT_TEXTFILE):
 
   return payload
 
-#eof
+# eof

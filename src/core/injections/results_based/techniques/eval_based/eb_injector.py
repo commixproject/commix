@@ -301,4 +301,4 @@ def injection_results(response, TAG, cmd):
   shell = shell[0].replace(new_line, "\n").rstrip().lstrip()
   return shell
 
-#eof
+# eof

@@ -15,4 +15,4 @@ For more see the file 'readme/COPYING' for copying permission.
 
 ENABLE_COLORING = True
 
-#eof
+# eof

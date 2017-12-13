@@ -714,4 +714,4 @@ def exploitation(url, timesec, filename, http_request_method, url_time_response)
   if fb_injection_handler(url, timesec, filename, http_request_method, url_time_response) == False:
     return False
 
-#eof
+# eof

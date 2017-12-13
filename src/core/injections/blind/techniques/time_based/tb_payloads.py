@@ -670,4 +670,4 @@ def fp_result_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, htt
       payload = payload.replace("\n",";")
 
   return payload
-#eof
+# eof
