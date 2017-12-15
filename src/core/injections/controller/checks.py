@@ -92,6 +92,16 @@ def escaped_cmd(cmd):
   return cmd
 
 """
+Removing the first and/or last line of the html content (in case there are/is empty).
+"""
+def remove_empty_lines(content):
+  if content[0] == "\n": 
+    content = content[1:content.rfind("\n")]
+  if content[-1] == "\n":
+    content = content[:content.rfind("\n")]
+  return content
+
+"""
 Check 'os_shell' options
 """
 def check_os_shell_options(cmd, technique, go_back, no_result): 

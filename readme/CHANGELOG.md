@@ -1,3 +1,6 @@
+## Version 2.3 (upcoming)
+* Revised: Minor improvement regarding verbose mode for removing the first and/or last line of the html content (in case there are/is empty).
+
 ## Version 2.2 (2017-12-12)
 * Revised: Minor improvement in "updater", for supporting verbose mode.
 * Fixed: Minor bug-fix regarding cookie-based command injections.

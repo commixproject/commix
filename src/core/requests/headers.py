@@ -47,6 +47,7 @@ def http_response_content(content):
   if menu.options.traffic_file: 
     logs.log_traffic("-" * 42 + "\n" + info_msg + "\n" + "-" * 42)  
   if settings.VERBOSITY_LEVEL >= 4:
+    content = checks.remove_empty_lines(content)
     print settings.print_http_response_content(content)
   if menu.options.traffic_file:
     logs.log_traffic("\n" + content)
