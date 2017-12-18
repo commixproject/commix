@@ -58,7 +58,12 @@ def is_empty(multi_parameters, http_request_method):
   multi_params = [s for s in multi_parameters]
   for empty in multi_params:
     try:
-      if len(empty.split("=")[1]) == 0:
+      if settings.IS_JSON:
+        if re.findall(r'\:\"(.*)\"', empty)[0] == "":
+          provided_value.append(re.findall(r'\"(.*)\"\:\"', empty)[0])
+        else:
+          pass
+      elif len(empty.split("=")[1]) == 0:
         provided_value.append(empty.split("=")[0])
     except IndexError:
       err_msg = "No parameter(s) found for testing in the provided data."
@@ -93,7 +98,7 @@ Check for similarity in provided parameter name and value.
 def check_similarities(all_params):
   for param in range(0, len(all_params)):
     if settings.IS_JSON:
-      if re.findall(r'\:\"(.*)\"', all_params[param]) == re.findall(r'\"(.*)\:\"', all_params[param]):
+      if re.findall(r'\"(.*)\"\:\"', all_params[param]) == re.findall(r'\:\"(.*)\"', all_params[param]):
         parameter_name = re.findall(r'\:\"(.*)\"', all_params[param])
         parameter_name = ''.join(parameter_name)
         all_params[param] = parameter_name + ":" + parameter_name.lower() + ''.join([random.choice(string.ascii_letters) for n in xrange(2)]).lower()
@@ -102,7 +107,6 @@ def check_similarities(all_params):
         parameter_name = re.findall(r'=(.*)', all_params[param])
         parameter_name = ''.join(parameter_name)
         all_params[param] = parameter_name + "=" + parameter_name.lower() + ''.join([random.choice(string.ascii_letters) for n in xrange(2)]).lower()
-
   return all_params
 
 
