@@ -332,9 +332,13 @@ def do_POST_check(parameter):
       value = ''.join(value)
     is_empty(multi_parameters, http_request_method)  
     # Replace the value of parameter with INJECT tag
-    inject_value = value.replace(value, settings.INJECT_TAG) 
+    inject_value = value.replace(value, settings.INJECT_TAG)
+
     if len(value) == 0:
-      parameter = parameter + settings.INJECT_TAG
+      if settings.IS_JSON:
+        parameter = parameter.replace(":\"\"", ":\"" + settings.INJECT_TAG + "\"")
+      else:  
+        parameter = parameter + settings.INJECT_TAG
     else:
       parameter = parameter.replace(value, inject_value)
     return parameter
@@ -346,7 +350,6 @@ def do_POST_check(parameter):
     # Check for similarity in provided parameter name and value.
     all_params = check_similarities(all_params)
     check_similarities(all_params)
-
     # Check if not defined the "INJECT_HERE" tag in parameter
     if settings.INJECT_TAG not in parameter:
       is_empty(multi_parameters, http_request_method)
@@ -389,14 +392,17 @@ def do_POST_check(parameter):
             parameter = parameters_list
         else:
           if len(value) == 0:
-            all_params[param] = all_params[param] + settings.INJECT_TAG
+            if settings.IS_JSON:
+              all_params[param] = all_params[param].replace(":\"\"", ":\"" + settings.INJECT_TAG + "\"")
+            else:  
+              all_params[param] = all_params[param] + settings.INJECT_TAG
           else:
             all_params[param] = all_params[param].replace(value, inject_value)
           all_params[param-1] = all_params[param-1].replace(inject_value, old)
           parameter = settings.PARAMETER_DELIMITER.join(all_params)
           parameters_list.append(parameter)
           parameter = parameters_list
-   
+
     else:
       for param in range(0, len(multi_parameters)):
         # Grab the value of parameter.
