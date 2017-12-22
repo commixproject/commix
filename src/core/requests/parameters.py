@@ -61,8 +61,6 @@ def is_empty(multi_parameters, http_request_method):
       if settings.IS_JSON:
         if re.findall(r'\:\"(.*)\"', empty)[0] == "":
           provided_value.append(re.findall(r'\"(.*)\"\:\"', empty)[0])
-        else:
-          pass
       elif len(empty.split("=")[1]) == 0:
         provided_value.append(empty.split("=")[0])
     except IndexError:
