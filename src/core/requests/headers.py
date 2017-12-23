@@ -77,14 +77,11 @@ def http_response(headers):
       logs.log_traffic("\n\n")    
 
 """
-Checking the HTTP Headers.
+Checking the HTTP Headers & HTTP/S Request.
 """
 def check_http_traffic(request):
   # Delay in seconds between each HTTP request
   time.sleep(int(settings.DELAY))
-  '''
-  Checking the HTTP / HTTPS requests.
-  '''
   if settings.PROXY_PROTOCOL == 'https':
       handle = httplib.HTTPSConnection
   else:
