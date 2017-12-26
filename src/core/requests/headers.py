@@ -77,17 +77,17 @@ def http_response(headers):
       logs.log_traffic("\n\n")    
 
 """
-Checking the HTTP Headers.
+Checking the HTTP Headers & HTTP/S Request.
 """
 def check_http_traffic(request):
-
   # Delay in seconds between each HTTP request
   time.sleep(int(settings.DELAY))
-
-  class do_connection(httplib.HTTPConnection, httplib.HTTPSConnection):
-    """
-    Checking the HTTP / HTTPS requests.
-    """
+  if settings.PROXY_PROTOCOL == 'https':
+      handle = httplib.HTTPSConnection
+  else:
+      handle = httplib.HTTPConnection
+  
+  class do_connection(handle):
     def request(self, method, url, body, headers):
       info_msg = "The provided HTTP request headers: "
       if settings.VERBOSITY_LEVEL >= 2:
@@ -113,12 +113,11 @@ def check_http_traffic(request):
           logs.log_traffic("\n" + header) 
       if menu.options.traffic_file:
         logs.log_traffic("\n\n")
-
       if settings.PROXY_PROTOCOL == 'https':
         httplib.HTTPSConnection.request(self, method, url, body, headers)
       else:
         httplib.HTTPConnection.request(self, method, url, body, headers)
-
+        
   class connection_handler(urllib2.HTTPHandler, urllib2.HTTPSHandler):
     if settings.PROXY_PROTOCOL == 'https':
       def https_open(self, req):
