@@ -28,16 +28,6 @@ from src.core.injections.controller import checks
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 """
-Check if provided parameters are in appropriate format.
-"""
-def inappropriate_format(multi_parameters):
-  err_msg = "The provided parameter" + "s"[len(multi_parameters) == 1:][::-1]
-  err_msg += (' are ', ' is ')[len(multi_parameters) == 1]
-  err_msg += "not in appropriate format."
-  print settings.print_critical_msg(err_msg)
-  sys.exit(0)
-
-"""
 Skip parameters when the provided value is empty.
 """
 def skip_empty(provided_value, http_request_method):
@@ -83,7 +73,6 @@ def is_empty(multi_parameters, http_request_method):
 Get the URL part of the defined URL.
 """
 def get_url_part(url):
-  
   # Find the URL part (scheme:[//host[:port]][/]path)
   o = urlparse(url)
   url_part = o.scheme + "://" + o.netloc + o.path
@@ -146,7 +135,7 @@ def do_GET_check(url):
       multi_parameters = parameters.split(settings.PARAMETER_DELIMITER)
       # Check for inappropriate format in provided parameter(s).
       if len([s for s in multi_parameters if "=" in s]) != (len(multi_parameters)):
-        inappropriate_format(multi_parameters)
+        checks.inappropriate_format(multi_parameters)
       # Check for empty values (in provided parameters).
       is_empty(multi_parameters, http_request_method)
       # Grab the value of parameter.
@@ -236,7 +225,6 @@ def do_GET_check(url):
 Define the vulnerable GET parameter.
 """
 def vuln_GET_param(url):
-
   urls_list = []
   # Define the vulnerable parameter
   if "?" not in url:
@@ -275,34 +263,15 @@ Check if the 'INJECT_HERE' tag, is specified on POST Requests.
 """
 def do_POST_check(parameter):
   http_request_method = "POST"
-  # Check if valid JSON
-  def is_JSON_check(parameter):
-    try:
-      json_object = json.loads(parameter)
-      if re.search(settings.JSON_RECOGNITION_REGEX, parameter):
-        if settings.VERBOSITY_LEVEL >= 1 and not settings.IS_JSON:
-          success_msg = Style.BRIGHT +  "JSON data" 
-          success_msg += Style.RESET_ALL + Style.BRIGHT
-          success_msg += " found in POST data" 
-          success_msg += Style.RESET_ALL + "."
-          print settings.print_success_msg(success_msg)
-    
-    except ValueError, err_msg:
-      if not "No JSON object could be decoded" in err_msg:
-        err_msg = "JSON " + str(err_msg) + ". "
-        print settings.print_critical_msg(err_msg) + "\n"
-        sys.exit(0)
-      return False
-    else:  
-      return True
 
   # Do replacement with the 'INJECT_HERE' tag, if the wild card char is provided.
   parameter = checks.wildcard_character(parameter).replace("'","\"")
 
   # Check if JSON Object.
-  if is_JSON_check(parameter):
-    settings.IS_JSON = True
-    
+  if checks.is_JSON_check(parameter):
+    if not settings.IS_JSON:
+      checks.process_json_data()
+  
   # Split parameters
   if settings.IS_JSON:
     settings.PARAMETER_DELIMITER = ","
@@ -313,7 +282,7 @@ def do_POST_check(parameter):
   # Check for inappropriate format in provided parameter(s).
   if len([s for s in multi_parameters if "=" in s]) != (len(multi_parameters)) and \
      not settings.IS_JSON:
-    inappropriate_format(multi_parameters)
+    checks.inappropriate_format(multi_parameters)
   # Check for empty values (in provided parameters).
   # Check if single parameter is supplied.
   if len(multi_parameters) == 1:
@@ -417,7 +386,6 @@ def do_POST_check(parameter):
 Define the vulnerable POST parameter.
 """
 def vuln_POST_param(parameter, url):
-
   # Define the vulnerable parameter
   if re.findall(r"" + settings.PARAMETER_DELIMITER + "(.*)=" + settings.INJECT_TAG + "", parameter):
     vuln_parameter = re.findall(r"" + settings.PARAMETER_DELIMITER + "(.*)=" + settings.INJECT_TAG + "", parameter)
@@ -446,7 +414,6 @@ def vuln_POST_param(parameter, url):
 Define the injection prefixes.
 """
 def prefixes(payload, prefix):
-
   # Check if defined "--prefix" option.
   if menu.options.prefix:
     payload = menu.options.prefix + prefix + payload
@@ -459,7 +426,6 @@ def prefixes(payload, prefix):
 Define the injection suffixes.
 """
 def suffixes(payload, suffix):
-
   # Check if defined "--suffix" option.
   if menu.options.suffix:
     payload = payload + suffix + menu.options.suffix
@@ -476,7 +442,7 @@ def do_cookie_check(cookie):
   multi_parameters = cookie.split(settings.COOKIE_DELIMITER)
   # Check for inappropriate format in provided parameter(s).
   if len([s for s in multi_parameters if "=" in s]) != (len(multi_parameters)):
-    inappropriate_format(multi_parameters)
+    checks.inappropriate_format(multi_parameters)
   #Grab the value of parameter.
   value = re.findall(r'=(.*)', cookie)
   value = ''.join(value)
@@ -570,7 +536,6 @@ def specify_cookie_parameter(cookie):
 The user-agent based injection.
 """
 def specify_user_agent_parameter(user_agent):
-
    # Specify the vulnerable user-agent parameter
    # Nothing to specify here! :)
 
@@ -580,7 +545,6 @@ def specify_user_agent_parameter(user_agent):
 The referer based injection.
 """
 def specify_referer_parameter(referer):
-
    # Specify the vulnerable referer parameter.
    # Nothing to specify here! :)
 
@@ -590,7 +554,6 @@ def specify_referer_parameter(referer):
 The Custom http header based injection.
 """
 def specify_custom_header_parameter(header_name):
-
    # Specify the vulnerable referer parameter.
    # Nothing to specify here! :)
 

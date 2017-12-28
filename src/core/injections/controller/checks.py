@@ -16,6 +16,7 @@ For more see the file 'readme/COPYING' for copying permission.
 import re
 import os
 import sys
+import json
 import base64
 import urllib
 import urlparse
@@ -314,7 +315,6 @@ def ps_check_failed():
 Check if CGI scripts (shellshock injection).
 """
 def check_CGI_scripts(url):
-
   try:
     CGI_SCRIPTS = []
     if not os.path.isfile(settings.CGI_SCRIPTS ):
@@ -783,7 +783,56 @@ def perform_payload_encoding(payload):
     if encode_type == 'hexencode':
       from src.core.tamper import hexencode
       payload = hexencode.encode(payload)
-
   return payload
+
+# Check if valid JSON
+def is_JSON_check(parameter):
+  try:
+    json_object = json.loads(parameter)
+    if re.search(settings.JSON_RECOGNITION_REGEX, parameter):
+      return True
+  except ValueError, err_msg:
+    if not "No JSON object could be decoded" in err_msg:
+      err_msg = "JSON " + str(err_msg) + ". "
+      print settings.print_critical_msg(err_msg) + "\n"
+      sys.exit(0)
+    return False
+
+# Process with JSON data
+def process_json_data():
+  while True:
+    success_msg = "JSON data found in POST data."
+    if not menu.options.batch:
+      question_msg = success_msg
+      question_msg += " Do you want to process it? [Y/n] > "
+      sys.stdout.write(settings.print_question_msg(question_msg))
+      json_process = sys.stdin.readline().replace("\n","").lower()
+    else:
+      if settings.VERBOSITY_LEVEL >= 1:
+        print settings.print_success_msg(success_msg)
+      json_process = ""
+    if len(json_process) == 0:
+       json_process = "y"              
+    if json_process in settings.CHOICE_YES:
+      settings.IS_JSON = True
+      break
+    elif json_process in settings.CHOICE_NO:
+      break 
+    elif json_process in settings.CHOICE_QUIT:
+      sys.exit(0)
+    else:
+      err_msg = "'" + json_process + "' is not a valid answer."  
+      print settings.print_error_msg(err_msg)
+      pass
+
+"""
+Check if provided parameters are in inappropriate format.
+"""
+def inappropriate_format(multi_parameters):
+  err_msg = "The provided parameter" + "s"[len(multi_parameters) == 1:][::-1]
+  err_msg += (' are ', ' is ')[len(multi_parameters) == 1]
+  err_msg += "not in appropriate format."
+  print settings.print_critical_msg(err_msg)
+  sys.exit(0)
 
 # eof
