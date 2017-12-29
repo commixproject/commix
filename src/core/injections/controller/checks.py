@@ -768,7 +768,6 @@ def check_for_stored_tamper(payload):
   whitespace_check(decoded_payload)
   tamper_scripts()
 
-
 """
 Perform base64 / hex encoding in payload.
 """
@@ -785,11 +784,56 @@ def perform_payload_encoding(payload):
       payload = hexencode.encode(payload)
   return payload
 
+
+"""
+Skip parameters when the provided value is empty.
+"""
+def skip_empty(provided_value, http_request_method):
+  warn_msg = "The " + http_request_method + " "
+  warn_msg += "parameter" + "s"[len(provided_value.split(",")) == 1:][::-1]
+  warn_msg += " '" + provided_value + "'"
+  warn_msg += (' have ', ' has ')[len(provided_value.split(",")) == 1]
+  warn_msg += "been skipped from testing"
+  warn_msg += " (the provided value" + "s"[len(provided_value.split(",")) == 1:][::-1]
+  warn_msg += (' are ', ' is ')[len(provided_value.split(",")) == 1] + "empty). "
+  print settings.print_warning_msg(warn_msg)
+
+"""
+Check if the provided value is empty.
+"""
+def is_empty(multi_parameters, http_request_method):
+  provided_value = []
+  multi_params = [s for s in multi_parameters]
+  for empty in multi_params:
+    try:
+      if settings.IS_JSON:
+        if re.findall(r'\:\"(.*)\"', empty)[0] == "":
+          provided_value.append(re.findall(r'\"(.*)\"\:\"', empty)[0])
+      elif len(empty.split("=")[1]) == 0:
+        provided_value.append(empty.split("=")[0])
+    except IndexError:
+      err_msg = "No parameter(s) found for testing in the provided data."
+      print settings.print_critical_msg(err_msg)
+  provided_value = ", ".join(provided_value)
+  if len(provided_value) > 0:
+    if menu.options.skip_empty and len(multi_parameters) > 1:
+      skip_empty(provided_value, http_request_method)
+    else:
+      warn_msg = "The provided value"+ "s"[len(provided_value.split(",")) == 1:][::-1]
+      warn_msg += " for "+ http_request_method + " parameter" + "s"[len(provided_value.split(",")) == 1:][::-1]
+      warn_msg += " '" + provided_value + "'"
+      warn_msg += (' are ', ' is ')[len(provided_value.split(",")) == 1] + "empty. "
+      warn_msg += "Use valid "
+      warn_msg += "values to run properly."
+      print settings.print_warning_msg(warn_msg)
+      return True
+
 # Check if valid JSON
 def is_JSON_check(parameter):
   try:
     json_object = json.loads(parameter)
-    if re.search(settings.JSON_RECOGNITION_REGEX, parameter):
+    if re.search(settings.JSON_RECOGNITION_REGEX, parameter) or \
+       re.search(settings.JSON_LIKE_RECOGNITION_REGEX, parameter):
       return True
   except ValueError, err_msg:
     if not "No JSON object could be decoded" in err_msg:

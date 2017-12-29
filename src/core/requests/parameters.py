@@ -28,48 +28,6 @@ from src.core.injections.controller import checks
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 """
-Skip parameters when the provided value is empty.
-"""
-def skip_empty(provided_value, http_request_method):
-  warn_msg = "The " + http_request_method + " "
-  warn_msg += "parameter" + "s"[len(provided_value.split(",")) == 1:][::-1]
-  warn_msg += " '" + provided_value + "'"
-  warn_msg += (' have ', ' has ')[len(provided_value.split(",")) == 1]
-  warn_msg += "been skipped from testing"
-  warn_msg += " (the provided value" + "s"[len(provided_value.split(",")) == 1:][::-1]
-  warn_msg += (' are ', ' is ')[len(provided_value.split(",")) == 1] + "empty). "
-  print settings.print_warning_msg(warn_msg)
-
-"""
-Check if the provided value is empty.
-"""
-def is_empty(multi_parameters, http_request_method):
-  provided_value = []
-  multi_params = [s for s in multi_parameters]
-  for empty in multi_params:
-    try:
-      if settings.IS_JSON:
-        if re.findall(r'\:\"(.*)\"', empty)[0] == "":
-          provided_value.append(re.findall(r'\"(.*)\"\:\"', empty)[0])
-      elif len(empty.split("=")[1]) == 0:
-        provided_value.append(empty.split("=")[0])
-    except IndexError:
-      err_msg = "No parameter(s) found for testing in the provided data."
-      print settings.print_critical_msg(err_msg)
-  provided_value = ", ".join(provided_value)
-  if len(provided_value) > 0:
-    if menu.options.skip_empty and len(multi_parameters) > 1:
-      skip_empty(provided_value, http_request_method)
-    else:
-      warn_msg = "The provided value"+ "s"[len(provided_value.split(",")) == 1:][::-1]
-      warn_msg += " for "+ http_request_method + " parameter" + "s"[len(provided_value.split(",")) == 1:][::-1]
-      warn_msg += " '" + provided_value + "'"
-      warn_msg += (' are ', ' is ')[len(provided_value.split(",")) == 1] + "empty. "
-      warn_msg += "Use valid "
-      warn_msg += "values to run properly."
-      print settings.print_warning_msg(warn_msg) 
-
-"""
 Get the URL part of the defined URL.
 """
 def get_url_part(url):
@@ -137,7 +95,7 @@ def do_GET_check(url):
       if len([s for s in multi_parameters if "=" in s]) != (len(multi_parameters)):
         checks.inappropriate_format(multi_parameters)
       # Check for empty values (in provided parameters).
-      is_empty(multi_parameters, http_request_method)
+      checks.is_empty(multi_parameters, http_request_method)
       # Grab the value of parameter.
       value = re.findall(r'=(.*)', parameters)
       value = ''.join(value)
@@ -297,18 +255,19 @@ def do_POST_check(parameter):
     else:  
       value = re.findall(r'=(.*)', parameter)
       value = ''.join(value)
-    is_empty(multi_parameters, http_request_method)  
-    # Replace the value of parameter with INJECT tag
-    inject_value = value.replace(value, settings.INJECT_TAG)
-
-    if len(value) == 0:
-      if settings.IS_JSON:
-        parameter = parameter.replace(":\"\"", ":\"" + settings.INJECT_TAG + "\"")
-      else:  
-        parameter = parameter + settings.INJECT_TAG
-    else:
-      parameter = parameter.replace(value, inject_value)
-    return parameter
+    if checks.is_empty(multi_parameters, http_request_method):
+      return parameter
+    else:  
+      # Replace the value of parameter with INJECT tag
+      inject_value = value.replace(value, settings.INJECT_TAG)
+      if len(value) == 0:
+        if settings.IS_JSON:
+          parameter = parameter.replace(":\"\"", ":\"" + settings.INJECT_TAG + "\"")
+        else:  
+          parameter = parameter + settings.INJECT_TAG
+      else:
+        parameter = parameter.replace(value, inject_value)
+      return parameter
 
   else:
     # Check if multiple parameters are supplied without the "INJECT_HERE" tag.
@@ -319,7 +278,7 @@ def do_POST_check(parameter):
     check_similarities(all_params)
     # Check if not defined the "INJECT_HERE" tag in parameter
     if settings.INJECT_TAG not in parameter:
-      is_empty(multi_parameters, http_request_method)
+      checks.is_empty(multi_parameters, http_request_method)
       for param in range(0, len(all_params)):
         if param == 0 :
           if settings.IS_JSON:
@@ -451,7 +410,7 @@ def do_cookie_check(cookie):
   # Check if single paramerter is supplied.
   if len(multi_parameters) == 1:
     # Check for empty values (in provided parameters).
-    is_empty(multi_parameters, http_request_method)
+    checks.is_empty(multi_parameters, http_request_method)
     # Check if defined the INJECT_TAG
     if settings.INJECT_TAG not in cookie:
       if len(value) == 0:
@@ -468,7 +427,7 @@ def do_cookie_check(cookie):
     # Check if not defined the "INJECT_HERE" tag in parameter
     if settings.INJECT_TAG not in cookie:
       # Check for empty values (in provided parameters).
-      is_empty(multi_parameters, http_request_method)
+      checks.is_empty(multi_parameters, http_request_method)
       for param in range(0, len(all_params)):
         if param == 0 :
             old = re.findall(r'=(.*)', all_params[param])
