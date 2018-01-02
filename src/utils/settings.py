@@ -111,7 +111,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "2.3.8"
+VERSION_NUM = "2.3.9"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"
@@ -561,6 +561,17 @@ ENUMERATE_AGAIN = False
 # FIle access options
 FILE_ACCESS_DONE = False
 FILE_ACCESS_AGAIN = False
+
+# XML Data
+IS_XML = False
+
+# Regular expression for XML POST data
+XML_RECOGNITION_REGEX = r'(?s)\A\s*<[^>]+>(.+>)?\s*\Z'
+
+# XML Data extraction
+XML_VERSION_ENCODING = r'(<\?(.*)\?>)'
+XML_FULL_DATA_EXTRACT = r'<([^?<>]+)>(.*)<(\/[^<>?]+)>'
+XML_DATA_EXTRACT = r'<([^?<>]+)>([^<>]+)<(\/[^<>?]+)>'
 
 # JSON Data
 IS_JSON = False

@@ -809,11 +809,16 @@ def is_empty(multi_parameters, http_request_method):
       if settings.IS_JSON:
         if re.findall(r'\:\"(.*)\"', empty)[0] == "":
           provided_value.append(re.findall(r'\"(.*)\"\:\"', empty)[0])
+      elif settings.IS_XML:
+        if re.findall(r'>(.*)<', empty)[0] == "" or \
+           re.findall(r'>(.*)<', empty)[0] == " ":
+          provided_value.append(re.findall(r'</(.*)>', empty)[0])  
       elif len(empty.split("=")[1]) == 0:
         provided_value.append(empty.split("=")[0])
     except IndexError:
-      err_msg = "No parameter(s) found for testing in the provided data."
-      print settings.print_critical_msg(err_msg)
+      if not settings.IS_XML:
+        err_msg = "No parameter(s) found for testing in the provided data."
+        print settings.print_critical_msg(err_msg)
   provided_value = ", ".join(provided_value)
   if len(provided_value) > 0:
     if menu.options.skip_empty and len(multi_parameters) > 1:
@@ -827,6 +832,41 @@ def is_empty(multi_parameters, http_request_method):
       warn_msg += "values to run properly."
       print settings.print_warning_msg(warn_msg)
       return True
+
+# Check if valid SOAP/XML
+def is_XML_check(parameter):
+  try:
+    if re.search(settings.XML_RECOGNITION_REGEX, parameter):
+      return True
+  except ValueError, err_msg:
+    return False
+
+# Process with SOAP/XML data
+def process_xml_data():
+  while True:
+    success_msg = "SOAP/XML data found in POST data."
+    if not menu.options.batch:
+      question_msg = success_msg
+      question_msg += " Do you want to process it? [Y/n] > "
+      sys.stdout.write(settings.print_question_msg(question_msg))
+      xml_process = sys.stdin.readline().replace("\n","").lower()
+    else:
+      if settings.VERBOSITY_LEVEL >= 1:
+        print settings.print_success_msg(success_msg)
+      xml_process = ""
+    if len(xml_process) == 0:
+       xml_process = "y"              
+    if xml_process in settings.CHOICE_YES:
+      settings.IS_XML = True
+      break
+    elif xml_process in settings.CHOICE_NO:
+      break 
+    elif xml_process in settings.CHOICE_QUIT:
+      sys.exit(0)
+    else:
+      err_msg = "'" + xml_process + "' is not a valid answer."  
+      print settings.print_error_msg(err_msg)
+      pass
 
 # Check if valid JSON
 def is_JSON_check(parameter):

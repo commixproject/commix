@@ -304,7 +304,7 @@ def main(filename, url):
       for i in range(0,len(settings.TEST_PARAMETER)):
         if "=" in settings.TEST_PARAMETER[i]:
           settings.TEST_PARAMETER[i] = settings.TEST_PARAMETER[i].split("=")[0]
-
+          
     # Check injection level, due to the provided testable parameters.
     if menu.options.level < 2 and menu.options.test_parameter != None:
       checks.check_injection_level()

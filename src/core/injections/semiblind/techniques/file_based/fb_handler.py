@@ -513,7 +513,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
             success_msg = "The"
             if found_vuln_parameter == " ": 
               success_msg += http_request_method + "" 
-            success_msg += ('', ' (JSON)')[settings.IS_JSON] + the_type + header_name
+            success_msg += ('', ' (JSON)')[settings.IS_JSON] + ('', ' (SOAP/XML)')[settings.IS_XML]+ the_type + header_name
             success_msg += found_vuln_parameter + " seems injectable via "
             success_msg += "(" + injection_type.split(" ")[0] + ") " + technique + "."
             print settings.print_success_msg(success_msg)

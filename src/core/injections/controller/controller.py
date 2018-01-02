@@ -102,7 +102,8 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
     info_msg = "Setting the" 
     if not header_name == " cookie" and not the_type == " HTTP header":
       info_msg += " " + http_request_method + ""
-    info_msg += ('', ' (JSON)')[settings.IS_JSON] + the_type + header_name + check_parameter + " for tests."
+    info_msg += ('', ' (JSON)')[settings.IS_JSON] + ('', ' (SOAP/XML)')[settings.IS_XML] 
+    info_msg += the_type + header_name + check_parameter + " for tests."
     print settings.print_info_msg(info_msg)
 
   # Estimating the response time (in seconds)
@@ -395,8 +396,9 @@ def post_request(url, http_request_method, filename, timesec):
     found_parameter_list.append(found_parameter)
     found_parameter = found_parameter_list
 
-  # Remove whitespaces   
-  found_parameter = [x.replace(" ", "") for x in found_parameter]
+  if not settings.IS_XML:
+    # Remove whitespaces   
+    found_parameter = [x.replace(" ", "") for x in found_parameter]
 
   # Check if multiple parameters
   check_parameters = []

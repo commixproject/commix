@@ -24,6 +24,7 @@ import datetime
 from src.utils import menu
 from src.utils import settings
 
+from src.core.injections.controller import checks
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 """
@@ -111,7 +112,14 @@ def logfile_parser():
         if http_header == "POST":
           # Check for POST Data.
           result = [item for item in request.splitlines() if item]
-          menu.options.data = result[len(result)-1]
+          multiple_xml = []
+          for item in result:
+            if checks.is_XML_check(item):
+              multiple_xml.append(item)
+          if len(multiple_xml) != 0:
+            menu.options.data = ''.join([str(item) for item in multiple_xml]) 
+          else:  
+            menu.options.data = result[len(result)-1]
         else:
           try:
             # Check if url ends with "=".

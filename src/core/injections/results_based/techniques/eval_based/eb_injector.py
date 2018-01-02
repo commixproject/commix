@@ -71,10 +71,7 @@ def injection_test(payload, http_request_method, url):
     parameter = parameter.replace("+","%2B")
 
     # Define the POST data   
-    if settings.IS_JSON == False:
-      data = re.sub(settings.INJECT_TAG, payload, parameter)
-      request = urllib2.Request(url, data)
-    else:
+    if settings.IS_JSON:
       payload = payload.replace("\"", "\\\"")
       data = re.sub(settings.INJECT_TAG, urllib.unquote(payload), parameter)
       try:
@@ -82,6 +79,12 @@ def injection_test(payload, http_request_method, url):
       except:
         pass
       request = urllib2.Request(url, json.dumps(data))
+    else:
+      if settings.IS_XML:
+        data = re.sub(settings.INJECT_TAG, urllib.unquote(payload), parameter) 
+      else:  
+        data = re.sub(settings.INJECT_TAG, payload, parameter)
+      request = urllib2.Request(url, data)
     
     # Check if defined extra headers.
     headers.do_check(request)
@@ -255,14 +258,20 @@ def injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_meth
         parameter = parameter.replace("+","%2B")
         
         # Define the POST data   
-        if settings.IS_JSON == False:
-          data = re.sub(settings.INJECT_TAG, payload, parameter)
-          request = urllib2.Request(url, data)
-        else:
+        if settings.IS_JSON:
           payload = payload.replace("\"", "\\\"")
           data = re.sub(settings.INJECT_TAG, urllib.unquote(payload), parameter)
-          data = json.loads(data, strict = False)
+          try:
+            data = json.loads(data, strict = False)
+          except:
+            pass
           request = urllib2.Request(url, json.dumps(data))
+        else:
+          if settings.IS_XML:
+            data = re.sub(settings.INJECT_TAG, urllib.unquote(payload), parameter) 
+          else:  
+            data = re.sub(settings.INJECT_TAG, payload, parameter)
+          request = urllib2.Request(url, data)
         
         # Check if defined extra headers.
         headers.do_check(request)

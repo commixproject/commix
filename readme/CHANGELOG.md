@@ -1,4 +1,5 @@
 ## Version 2.3 (upcoming)
+* Added: Support for SOAP/XML POST data.
 * Fixed: Bug-fix regarding the SSL implementation (via @TD4B). 
 * Revised: Improvement regarding testing json-formated POST data with empty value(s).
 * Revised: Minor improvement regarding verbose mode for removing the first and/or last line of the html content (in case there are/is empty).

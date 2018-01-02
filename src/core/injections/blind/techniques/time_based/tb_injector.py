@@ -64,12 +64,8 @@ def examine_requests(payload, vuln_parameter, http_request_method, url, timesec,
     # Check if its not specified the 'INJECT_HERE' tag
     parameter = parameters.do_POST_check(parameter)
     parameter = parameter.replace("+","%2B")
-    # Define the POST data   
-    if settings.IS_JSON == False:
-      data = re.sub(settings.INJECT_TAG, payload, parameter)
-      data = data.replace("+","%2B")
-      request = urllib2.Request(url, data)
-    else:
+
+    if settings.IS_JSON:
       payload = payload.replace("\"", "\\\"")
       data = re.sub(settings.INJECT_TAG, urllib.unquote(payload), parameter)
       try:
@@ -77,6 +73,12 @@ def examine_requests(payload, vuln_parameter, http_request_method, url, timesec,
       except:
         pass
       request = urllib2.Request(url, json.dumps(data))
+    else:
+      if settings.IS_XML:
+        data = re.sub(settings.INJECT_TAG, urllib.unquote(payload), parameter) 
+      else:
+        data = re.sub(settings.INJECT_TAG, payload, parameter)
+      request = urllib2.Request(url, data)
 
   # Check if defined extra headers.
   headers.do_check(request)
@@ -115,10 +117,7 @@ def injection_test(payload, http_request_method, url):
     vuln_parameter = parameters.vuln_POST_param(parameter, url)
     
     # Define the POST data   
-    if settings.IS_JSON == False:
-      data = re.sub(settings.INJECT_TAG, payload, parameter)
-      request = urllib2.Request(url, data)
-    else:
+    if settings.IS_JSON:
       payload = payload.replace("\"", "\\\"")
       data = re.sub(settings.INJECT_TAG, urllib.unquote(payload), parameter)
       try:
@@ -126,6 +125,12 @@ def injection_test(payload, http_request_method, url):
       except:
         pass
       request = urllib2.Request(url, json.dumps(data))
+    else:
+      if settings.IS_XML:
+        data = re.sub(settings.INJECT_TAG, urllib.unquote(payload), parameter) 
+      else:
+        data = re.sub(settings.INJECT_TAG, payload, parameter)
+      request = urllib2.Request(url, data)
     
   # Check if defined extra headers.
   headers.do_check(request)
