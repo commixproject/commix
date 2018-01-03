@@ -17,6 +17,8 @@ import re
 import os
 import sys
 import json
+import random
+import string
 import base64
 import urllib
 import urlparse
@@ -918,5 +920,27 @@ def inappropriate_format(multi_parameters):
   err_msg += "not in appropriate format."
   print settings.print_critical_msg(err_msg)
   sys.exit(0)
+
+"""
+Check for similarity in provided parameter name and value.
+"""
+def check_similarities(all_params):
+  for param in range(0, len(all_params)):
+    if settings.IS_JSON:
+      if re.findall(r'\"(.*)\"\:\"', all_params[param]) == re.findall(r'\:\"(.*)\"', all_params[param]):
+        parameter_name = re.findall(r'\:\"(.*)\"', all_params[param])
+        parameter_name = ''.join(parameter_name)
+        all_params[param] = parameter_name + ":" + parameter_name.lower() + ''.join([random.choice(string.ascii_letters) for n in xrange(2)]).lower()
+    elif settings.IS_XML:
+      if re.findall(r'</(.*)>', all_params[param]) == re.findall(r'>(.*)</', all_params[param]):
+        parameter_name = re.findall(r'>(.*)</', all_params[param])
+        parameter_name = ''.join(parameter_name)
+        all_params[param] = "<" + parameter_name + ">" + parameter_name.lower() + ''.join([random.choice(string.ascii_letters) for n in xrange(2)]).lower() + "</" + parameter_name + ">"
+    else:  
+      if re.findall(r'(.*)=', all_params[param]) == re.findall(r'=(.*)', all_params[param]):
+        parameter_name = re.findall(r'=(.*)', all_params[param])
+        parameter_name = ''.join(parameter_name)
+        all_params[param] = parameter_name + "=" + parameter_name.lower() + ''.join([random.choice(string.ascii_letters) for n in xrange(2)]).lower()
+  return all_params
 
 # eof

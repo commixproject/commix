@@ -16,9 +16,6 @@ For more see the file 'readme/COPYING' for copying permission.
 import re
 import os
 import sys
-import json
-import random
-import string
 
 from urlparse import urlparse
 
@@ -36,29 +33,6 @@ def get_url_part(url):
   url_part = o.scheme + "://" + o.netloc + o.path
 
   return url_part
-
-"""
-Check for similarity in provided parameter name and value.
-"""
-def check_similarities(all_params):
-  for param in range(0, len(all_params)):
-    if settings.IS_JSON:
-      if re.findall(r'\"(.*)\"\:\"', all_params[param]) == re.findall(r'\:\"(.*)\"', all_params[param]):
-        parameter_name = re.findall(r'\:\"(.*)\"', all_params[param])
-        parameter_name = ''.join(parameter_name)
-        all_params[param] = parameter_name + ":" + parameter_name.lower() + ''.join([random.choice(string.ascii_letters) for n in xrange(2)]).lower()
-    elif settings.IS_XML:
-      if re.findall(r'</(.*)>', all_params[param]) == re.findall(r'>(.*)</', all_params[param]):
-        parameter_name = re.findall(r'>(.*)</', all_params[param])
-        parameter_name = ''.join(parameter_name)
-        all_params[param] = "<" + parameter_name + ">" + parameter_name.lower() + ''.join([random.choice(string.ascii_letters) for n in xrange(2)]).lower() + "</" + parameter_name + ">"
-    else:  
-      if re.findall(r'(.*)=', all_params[param]) == re.findall(r'=(.*)', all_params[param]):
-        parameter_name = re.findall(r'=(.*)', all_params[param])
-        parameter_name = ''.join(parameter_name)
-        all_params[param] = parameter_name + "=" + parameter_name.lower() + ''.join([random.choice(string.ascii_letters) for n in xrange(2)]).lower()
-  return all_params
-
 
 """
 Check if the 'INJECT_HERE' tag, is specified on GET Requests.
@@ -132,9 +106,7 @@ def do_GET_check(url):
         all_params = settings.PARAMETER_DELIMITER.join(multi_parameters)
         all_params = all_params.split(settings.PARAMETER_DELIMITER)
         # Check for similarity in provided parameter name and value.
-        all_params = check_similarities(all_params)
-        #check_similarities(all_params)
-
+        all_params = checks.check_similarities(all_params)
         # Check if defined the "INJECT_HERE" tag
         if settings.INJECT_TAG not in url:
           for param in range(0,len(all_params)):
@@ -303,13 +275,15 @@ def do_POST_check(parameter):
       return parameter
 
   else:
+
     # Check if multiple parameters are supplied without the "INJECT_HERE" tag.
     if settings.IS_XML:
       all_params = multi_parameters
     else:
       all_params = settings.PARAMETER_DELIMITER.join(multi_parameters)
       # Check for similarity in provided parameter name and value.
-      all_params = check_similarities(all_params)
+      all_params = all_params.split(settings.PARAMETER_DELIMITER)
+      all_params = checks.check_similarities(all_params)
     # Check if not defined the "INJECT_HERE" tag in parameter
     if settings.INJECT_TAG not in parameter:
       checks.is_empty(multi_parameters, http_request_method)
@@ -387,42 +361,43 @@ def do_POST_check(parameter):
           value = re.findall(r'=(.*)', multi_parameters[param])
           value = ''.join(value)
         parameter = settings.PARAMETER_DELIMITER.join(multi_parameters)
+    
     return parameter
 
 """
 Define the vulnerable POST parameter.
 """
 def vuln_POST_param(parameter, url):
+  # JSON data format
+  if settings.IS_JSON:
+    if re.findall(r"" + settings.PARAMETER_DELIMITER + "\"(.*)\"\:\"" + settings.INJECT_TAG + "\"", parameter):
+      vuln_parameter = re.findall(r"" + settings.PARAMETER_DELIMITER + "\"(.*)\"\:\"" + settings.INJECT_TAG + "\"", parameter)
+      vuln_parameter = ''.join(vuln_parameter)
+    elif re.findall(r"\"(.*)\"\:\"" + settings.INJECT_TAG + "\"", parameter):
+      vuln_parameter = re.findall(r"\"(.*)\"\:\"" + settings.INJECT_TAG + "\"", parameter)
+      vuln_parameter = ''.join(vuln_parameter)
 
-  # Define the vulnerable parameter
-  if re.findall(r"" + settings.PARAMETER_DELIMITER + "(.*)=" + settings.INJECT_TAG + "", parameter):
-    vuln_parameter = re.findall(r"" + settings.PARAMETER_DELIMITER + "(.*)=" + settings.INJECT_TAG + "", parameter)
-    vuln_parameter = ''.join(vuln_parameter)
-    vuln_parameter = re.sub(r"(.*)=(.*)" + settings.PARAMETER_DELIMITER, "", vuln_parameter)
-
-  elif re.findall(r"(.*)=" + settings.INJECT_TAG + "", parameter):
-    vuln_parameter = re.findall(r"(.*)=" + settings.INJECT_TAG + "", parameter)
-    vuln_parameter = ''.join(vuln_parameter)
-
-  # If JSON format
-  elif re.findall(r"" + settings.PARAMETER_DELIMITER + "\"(.*)\"\:\"" + settings.INJECT_TAG + "\"", parameter):
-    vuln_parameter = re.findall(r"" + settings.PARAMETER_DELIMITER + "\"(.*)\"\:\"" + settings.INJECT_TAG + "\"", parameter)
-    vuln_parameter = ''.join(vuln_parameter)
-
-  elif re.findall(r"\"(.*)\"\:\"" + settings.INJECT_TAG + "\"", parameter):
-    vuln_parameter = re.findall(r"\"(.*)\"\:\"" + settings.INJECT_TAG + "\"", parameter)
-    vuln_parameter = ''.join(vuln_parameter)
-
-  # If XML format
-  elif re.findall(r"" + "<([^<>]+)>" + settings.INJECT_TAG, parameter):
-    vuln_parameter = re.findall(r"" + "<([^<>]+)>" + settings.INJECT_TAG, parameter)
-    vuln_parameter = ''.join(vuln_parameter)
+  # XML data format
+  elif settings.IS_XML:
+    if re.findall(r"" + "<([^<>]+)>" + settings.INJECT_TAG, parameter):
+        vuln_parameter = re.findall(r"" + "<([^<>]+)>" + settings.INJECT_TAG, parameter)
+        vuln_parameter = ''.join(vuln_parameter)
 
   else:
-    vuln_parameter = parameter
+    # Regular POST data format.
+    if re.findall(r"" + settings.PARAMETER_DELIMITER + "(.*)=" + settings.INJECT_TAG + "", parameter):
+      vuln_parameter = re.findall(r"" + settings.PARAMETER_DELIMITER + "(.*)=" + settings.INJECT_TAG + "", parameter)
+      vuln_parameter = ''.join(vuln_parameter)
+      vuln_parameter = re.sub(r"(.*)=(.*)" + settings.PARAMETER_DELIMITER, "", vuln_parameter)
+    elif re.findall(r"(.*)=" + settings.INJECT_TAG + "", parameter):
+      vuln_parameter = re.findall(r"(.*)=" + settings.INJECT_TAG + "", parameter)
+      vuln_parameter = ''.join(vuln_parameter)
+
+  if 'vuln_parameter' not in locals():
+    return parameter
 
   return vuln_parameter
- 
+
 """
 Define the injection prefixes.
 """

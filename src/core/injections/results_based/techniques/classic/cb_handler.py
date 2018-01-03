@@ -77,7 +77,7 @@ def cb_injection_handler(url, timesec, filename, http_request_method):
   counter = 1
   vp_flag = True
   no_result = True
-  is_encoded= False
+  is_encoded = False
   export_injection_info = False
   injection_type = "results-based OS command injection"
   technique = "classic command injection technique"
