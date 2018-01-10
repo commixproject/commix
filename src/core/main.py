@@ -156,7 +156,6 @@ def examine_request(request):
 Check internet connection before assessing the target.
 """
 def check_internet(url):
-
   settings.CHECK_INTERNET = True
   settings.CHECK_INTERNET_ADDRESS = checks.check_http_s(url)
   info_msg = "Checking for internet connection... "
@@ -179,7 +178,6 @@ def check_internet(url):
 The init (URL) request.
 """
 def init_request(url):
-
   # Define HTTP User-Agent header
   user_agent_header()
   # Check the internet connection (--check-internet switch).
@@ -201,7 +199,6 @@ def init_request(url):
 Get the URL response.
 """
 def url_response(url):
-
   # Check if http / https
   url = checks.check_http_s(url)
   # Check if defined Tor (--tor option).
