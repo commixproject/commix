@@ -1,4 +1,5 @@
 ## Version 2.3 (upcoming)
+* Revised: Improvement regarding batch mode, for testing the payloads for both OS - if it's not able to identify the target OS.
 * Added: Support for SOAP/XML POST data.
 * Fixed: Bug-fix regarding the SSL implementation (via @TD4B). 
 * Revised: Improvement regarding testing json-formated POST data with empty value(s).

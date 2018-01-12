@@ -558,7 +558,7 @@ def do_check(url, filename):
     
   # All injection techniques seems to be failed!
   if settings.CLASSIC_STATE == settings.EVAL_BASED_STATE == settings.TIME_BASED_STATE == settings.FILE_BASED_STATE == False :
-    if settings.INJECTION_CHECKER == False:
+    if settings.INJECTION_CHECKER == False and not settings.CHECK_BOTH_OS:
       err_msg = "All tested parameters "
       if menu.options.level > 2:
         err_msg += "and headers "
@@ -577,8 +577,9 @@ def do_check(url, filename):
       print settings.print_critical_msg(err_msg)
 
   logs.print_logs_notification(filename, url)
-  if not menu.options.bulkfile or settings.EOF:
-    print ""  
+  if not settings.CHECK_BOTH_OS:
+    if not menu.options.bulkfile or settings.EOF:
+      print ""  
   #sys.exit(0)
 
 # eof

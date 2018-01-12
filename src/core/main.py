@@ -13,7 +13,6 @@ the Free Software Foundation, either version 3 of the License, or
 For more see the file 'readme/COPYING' for copying permission.
 """
 
-
 import re
 import os
 import sys
@@ -691,30 +690,42 @@ def main(filename, url):
                 warn_msg = "Swithing the '--is-admin' to '--is-root' because "
                 warn_msg += "the target has been identified as unix-like. "
                 print settings.print_warning_msg(warn_msg)  
-            
+                
             if found_os_server == False and not menu.options.os:
               # If "--shellshock" option is provided then,
               # by default is a Linux/Unix operating system.
               if menu.options.shellshock:
                 pass 
               else:
-                while True:
-                  question_msg = "Do you recognise the server's operating system? "
-                  question_msg += "[(W)indows/(U)nix/(q)uit] > "
-                  sys.stdout.write(settings.print_question_msg(question_msg))
-                  got_os = sys.stdin.readline().replace("\n","").lower()
-                  if got_os.lower() in settings.CHOICE_OS :
-                    if got_os.lower() == "w":
-                      settings.TARGET_OS = "win"
-                      break
-                    elif got_os.lower() == "u":
-                      break
-                    elif got_os.lower() == "q":
-                      raise SystemExit()
-                  else:
-                    err_msg = "'" + got_os + "' is not a valid answer."  
-                    print settings.print_error_msg(err_msg)
-                    pass
+                if menu.options.batch:
+                  if not settings.CHECK_BOTH_OS:
+                    settings.CHECK_BOTH_OS = True
+                    check_type = "unix-based"
+                  elif settings.CHECK_BOTH_OS:
+                    settings.TARGET_OS = "win"
+                    settings.CHECK_BOTH_OS = False
+                    settings.PERFORM_BASIC_SCANS = True
+                    check_type = "windows-based"
+                  info_msg = "Setting the " + check_type + " payloads."
+                  print settings.print_info_msg(info_msg)
+                else:
+                  while True:
+                    question_msg = "Do you recognise the server's operating system? "
+                    question_msg += "[(W)indows/(U)nix/(q)uit] > "
+                    sys.stdout.write(settings.print_question_msg(question_msg))
+                    got_os = sys.stdin.readline().replace("\n","").lower()
+                    if got_os.lower() in settings.CHOICE_OS :
+                      if got_os.lower() == "w":
+                        settings.TARGET_OS = "win"
+                        break
+                      elif got_os.lower() == "u":
+                        break
+                      elif got_os.lower() == "q":
+                        raise SystemExit()
+                    else:
+                      err_msg = "'" + got_os + "' is not a valid answer."  
+                      print settings.print_error_msg(err_msg)
+                      pass
 
             if not menu.options.os:
               if found_server_banner == False:
@@ -730,7 +741,6 @@ def main(filename, url):
         requests.charset_detection(response)
 
       except urllib2.HTTPError, err_msg:
-
         # Check the codes of responses
         if str(err_msg.getcode()) == settings.INTERNAL_SERVER_ERROR:
           print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
@@ -934,219 +944,223 @@ def main(filename, url):
     logs.print_logs_notification(filename, url)
 
 try:
-  # Check if defined "--version" option.
-  if menu.options.version:
-    version.show_version()
-    sys.exit(0)
+  if not menu.options.batch:
+    settings.OS_CHECKS_NUM = 1
+  for os_checks_num in range(0, int(settings.OS_CHECKS_NUM)):
+    # Check if defined "--version" option.
+    if menu.options.version:
+      version.show_version()
+      sys.exit(0)
 
-  # Check python version number.
-  version.python_version()
+    # Check python version number.
+    version.python_version()
 
-  if readline_error :
-    checks.no_readline_module()
-    sys.exit(0)
+    if readline_error :
+      checks.no_readline_module()
+      sys.exit(0)
 
-  # Check if defined "--dependencies" option. 
-  # For checking (non-core) third party dependenices.
-  if menu.options.noncore_dependencies:
-    checks.third_party_dependencies()
-    sys.exit(0)
-    
-  # Check if defined "--update" option.        
-  if menu.options.update:
-    update.updater()
+    # Check if defined "--dependencies" option. 
+    # For checking (non-core) third party dependenices.
+    if menu.options.noncore_dependencies:
+      checks.third_party_dependencies()
+      sys.exit(0)
       
-  # Check if defined "--install" option.        
-  if menu.options.install:
-    install.installer()
-    sys.exit(0)
+    # Check if defined "--update" option.        
+    if menu.options.update:
+      update.updater()
+        
+    # Check if defined "--install" option.        
+    if menu.options.install:
+      install.installer()
+      sys.exit(0)
 
-  # Check for missing mandatory option(s).
-  if not any((menu.options.url, menu.options.logfile, menu.options.bulkfile, \
-              menu.options.requestfile, menu.options.sitemap_url, menu.options.wizard, \
-              menu.options.update, menu.options.purge_output, menu.options.noncore_dependencies)):
-    err_msg = "Missing a mandatory option (-u, -l, -m, -r, -x, --wizard, --update, --purge-output or --dependencies). "
-    err_msg += "Use -h for help."
-    print settings.print_critical_msg(err_msg)
-    sys.exit(0)
-
-  # Check if defined "--purge-output" option.
-  if menu.options.purge_output:
-    purge.purge_output()
-
-  # Check the user-defined OS.
-  if menu.options.os:
-    checks.user_defined_os()
-
-  # Check if defined "--check-tor" option. 
-  if menu.options.tor_check and not menu.options.tor:
-    err_msg = "The '--check-tor' swich requires usage of switch '--tor'."
-    print settings.print_critical_msg(err_msg)
-    sys.exit(0)
-
-  # Check if defined "--mobile" option.
-  if menu.options.mobile:
-    if (menu.options.agent != settings.DEFAULT_USER_AGENT) or menu.options.random_agent:
-      err_msg = "The switch '--mobile' is incompatible with options '--user-agent', '--random-agent'."
+    # Check for missing mandatory option(s).
+    if not any((menu.options.url, menu.options.logfile, menu.options.bulkfile, \
+                menu.options.requestfile, menu.options.sitemap_url, menu.options.wizard, \
+                menu.options.update, menu.options.purge_output, menu.options.noncore_dependencies)):
+      err_msg = "Missing a mandatory option (-u, -l, -m, -r, -x, --wizard, --update, --purge-output or --dependencies). "
+      err_msg += "Use -h for help."
       print settings.print_critical_msg(err_msg)
       sys.exit(0)
-    else:
-      menu.options.agent = menu.mobile_user_agents()
 
-  if menu.options.wizard:
-    if not menu.options.url:
-      while True:
-        question_msg = "Please enter full target URL (--url) > "
+    # Check if defined "--purge-output" option.
+    if menu.options.purge_output:
+      purge.purge_output()
+
+    # Check the user-defined OS.
+    if menu.options.os:
+      checks.user_defined_os()
+
+    # Check if defined "--check-tor" option. 
+    if menu.options.tor_check and not menu.options.tor:
+      err_msg = "The '--check-tor' swich requires usage of switch '--tor'."
+      print settings.print_critical_msg(err_msg)
+      sys.exit(0)
+
+    # Check if defined "--mobile" option.
+    if menu.options.mobile:
+      if (menu.options.agent != settings.DEFAULT_USER_AGENT) or menu.options.random_agent:
+        err_msg = "The switch '--mobile' is incompatible with options '--user-agent', '--random-agent'."
+        print settings.print_critical_msg(err_msg)
+        sys.exit(0)
+      else:
+        menu.options.agent = menu.mobile_user_agents()
+
+    if menu.options.wizard:
+      if not menu.options.url:
+        while True:
+          question_msg = "Please enter full target URL (--url) > "
+          sys.stdout.write(settings.print_question_msg(question_msg))
+          menu.options.url = sys.stdin.readline().replace("\n","")
+          if len(menu.options.url) == 0:
+            pass
+          else: 
+            break
+      if not menu.options.data:
+        question_msg = "Please enter POST data (--data) [Enter for none] > "
         sys.stdout.write(settings.print_question_msg(question_msg))
-        menu.options.url = sys.stdin.readline().replace("\n","")
-        if len(menu.options.url) == 0:
-          pass
-        else: 
-          break
-    if not menu.options.data:
-      question_msg = "Please enter POST data (--data) [Enter for none] > "
-      sys.stdout.write(settings.print_question_msg(question_msg))
-      menu.options.data = sys.stdin.readline().replace("\n","")
-      if len(menu.options.data) == 0:
-        menu.options.data = False
+        menu.options.data = sys.stdin.readline().replace("\n","")
+        if len(menu.options.data) == 0:
+          menu.options.data = False
 
-  # Retries when the connection timeouts.
-  if menu.options.retries:
-    settings.MAX_RETRIES = menu.options.retries
+    # Retries when the connection timeouts.
+    if menu.options.retries:
+      settings.MAX_RETRIES = menu.options.retries
 
-  # Seconds to delay between each HTTP request.
-  if menu.options.delay > "0":
-    settings.DELAY = menu.options.delay
+    # Seconds to delay between each HTTP request.
+    if menu.options.delay > "0":
+      settings.DELAY = menu.options.delay
 
-  # Check if defined "--timesec" option.
-  if menu.options.timesec > "0":
-    settings.TIMESEC = menu.options.timesec
-  else:
-    if menu.options.tor:
-      settings.TIMESEC = 10
-      warn_msg = "Increasing default value for option '--time-sec' to"
-      warn_msg += " " + str(settings.TIMESEC) + " because switch '--tor' was provided."
-      print settings.print_warning_msg(warn_msg)  
-
-  # Local IP address
-  if not menu.options.offline:
-    settings.LOCAL_HTTP_IP = simple_http_server.grab_ip_addr()
-  else:
-    settings.LOCAL_HTTP_IP = None  
-
-  # Check arguments
-  if len(sys.argv) == 1:
-    menu.parser.print_help()
-    print ""
-    sys.exit(0)
-
-  # Define the level of verbosity.
-  if menu.options.verbose > 4:
-    err_msg = "The value for option '-v' "
-    err_msg += "must be an integer value from range [0, 4]."
-    print settings.print_critical_msg(err_msg)
-    sys.exit(0)
-  else:  
-    settings.VERBOSITY_LEVEL = menu.options.verbose
-
-  # Define the level of tests to perform.
-  if menu.options.level > 3:
-    err_msg = "The value for option '--level' "
-    err_msg += "must be an integer value from range [1, 3]."
-    print settings.print_critical_msg(err_msg)
-    sys.exit(0)
-
-  # Define the local path where Metasploit Framework is installed.
-  if menu.options.msf_path:
-    settings.METASPLOIT_PATH = menu.options.msf_path
-
-  # Enable detection phase
-  settings.DETECTION_PHASE = True
-
-  # Parse target and data from HTTP proxy logs (i.e Burp / WebScarab).
-  if menu.options.requestfile or menu.options.logfile:
-    parser.logfile_parser()
-
-  if menu.options.offline:
-    settings.CHECK_FOR_UPDATES_ON_START = False
-    
-  # Check if ".git" exists and check for updated version!
-  if os.path.isdir("./.git") and settings.CHECK_FOR_UPDATES_ON_START:
-    update.check_for_update()
-
-  # Check if option is "-m" for multiple urls test.
-  if menu.options.bulkfile:
-    bulkfile = menu.options.bulkfile
-    info_msg = "Parsing targets using the '" + os.path.split(bulkfile)[1] + "' file... "
-    sys.stdout.write(settings.print_info_msg(info_msg))
-    sys.stdout.flush()
-    if not os.path.exists(bulkfile):
-      print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
-      err_msg = "It seems that the '" + os.path.split(bulkfile)[1] + "' file, does not exist."
-      sys.stdout.write(settings.print_critical_msg(err_msg) + "\n")
-      sys.stdout.flush()
-      sys.exit(0)
-    elif os.stat(bulkfile).st_size == 0:
-      print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
-      err_msg = "It seems that the '" + os.path.split(bulkfile)[1] + "' file, is empty."
-      sys.stdout.write(settings.print_critical_msg(err_msg) + "\n")
-      sys.stdout.flush()
-      sys.exit(0)
+    # Check if defined "--timesec" option.
+    if menu.options.timesec > "0":
+      settings.TIMESEC = menu.options.timesec
     else:
-      print "[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]"
-      with open(menu.options.bulkfile) as f:
-        bulkfile = [url.strip() for url in f]
-      # Removing duplicates from list.
-      clean_bulkfile = []
-      [clean_bulkfile.append(x) for x in bulkfile if x not in clean_bulkfile]
-      # Removing empty elements from list.
-      clean_bulkfile = [x for x in clean_bulkfile if x]
-      for url in clean_bulkfile:
-        settings.INIT_TEST = True
-        if url == clean_bulkfile[-1]:
-          settings.EOF = True
-        # Reset the injection level
-        if menu.options.level > 3:
-          menu.options.level = 1
-        init_injection(url)
-        try:
-          response, url = url_response(url)
-          if response != False:
-            filename = logs_filename_creation()
-            main(filename, url)
+      if menu.options.tor:
+        settings.TIMESEC = 10
+        warn_msg = "Increasing default value for option '--time-sec' to"
+        warn_msg += " " + str(settings.TIMESEC) + " because switch '--tor' was provided."
+        print settings.print_warning_msg(warn_msg)  
 
-        except urllib2.HTTPError, err_msg:
-          if settings.VERBOSITY_LEVEL < 2:
-            print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
-          error_description = ""
-          if len(str(err_msg).split(": ")[1]) == 0:
-            error_description = "Non-standard HTTP status code" 
-          err_msg = str(err_msg).replace(": "," (") + error_description + ")." 
-          warn_msg = "Skipping URL '" + url + "' - " + err_msg
-          print settings.print_warning_msg(warn_msg)
-          if settings.EOF:
-            print "" 
+    # Local IP address
+    if not menu.options.offline:
+      settings.LOCAL_HTTP_IP = simple_http_server.grab_ip_addr()
+    else:
+      settings.LOCAL_HTTP_IP = None  
 
-        except urllib2.URLError, err_msg:
-          if settings.VERBOSITY_LEVEL < 2:
-            print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
-          err_msg = str(err_msg.args[0]).split("] ")[1] + "." 
-          warn_msg = "Skipping URL '" + url + "' - " + err_msg
-          print settings.print_critical_msg(warn_msg)
-          if settings.EOF:
-            print "" 
+    # Check arguments
+    if len(sys.argv) == 1:
+      menu.parser.print_help()
+      print ""
+      sys.exit(0)
 
-  else:
-    settings.INIT_TEST = True
-    # Check if option is "--url" for single url test.
-    if menu.options.sitemap_url:
-      url = menu.options.sitemap_url
+    # Define the level of verbosity.
+    if menu.options.verbose > 4:
+      err_msg = "The value for option '-v' "
+      err_msg += "must be an integer value from range [0, 4]."
+      print settings.print_critical_msg(err_msg)
+      sys.exit(0)
     else:  
-      url = menu.options.url
-    response, url = url_response(url)
-    if response != False:
-      filename = logs_filename_creation()
-      main(filename, url)
+      settings.VERBOSITY_LEVEL = menu.options.verbose
+
+    # Define the level of tests to perform.
+    if menu.options.level > 3:
+      err_msg = "The value for option '--level' "
+      err_msg += "must be an integer value from range [1, 3]."
+      print settings.print_critical_msg(err_msg)
+      sys.exit(0)
+
+    # Define the local path where Metasploit Framework is installed.
+    if menu.options.msf_path:
+      settings.METASPLOIT_PATH = menu.options.msf_path
+
+    # Enable detection phase
+    settings.DETECTION_PHASE = True
+
+    # Parse target and data from HTTP proxy logs (i.e Burp / WebScarab).
+    if menu.options.requestfile or menu.options.logfile:
+      parser.logfile_parser()
+
+    if menu.options.offline:
+      settings.CHECK_FOR_UPDATES_ON_START = False
+      
+    # Check if ".git" exists and check for updated version!
+    if os.path.isdir("./.git") and settings.CHECK_FOR_UPDATES_ON_START:
+      update.check_for_update()
+
+    # Check if option is "-m" for multiple urls test.
+    if menu.options.bulkfile:
+      bulkfile = menu.options.bulkfile
+      info_msg = "Parsing targets using the '" + os.path.split(bulkfile)[1] + "' file... "
+      sys.stdout.write(settings.print_info_msg(info_msg))
+      sys.stdout.flush()
+      if not os.path.exists(bulkfile):
+        print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
+        err_msg = "It seems that the '" + os.path.split(bulkfile)[1] + "' file, does not exist."
+        sys.stdout.write(settings.print_critical_msg(err_msg) + "\n")
+        sys.stdout.flush()
+        sys.exit(0)
+      elif os.stat(bulkfile).st_size == 0:
+        print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
+        err_msg = "It seems that the '" + os.path.split(bulkfile)[1] + "' file, is empty."
+        sys.stdout.write(settings.print_critical_msg(err_msg) + "\n")
+        sys.stdout.flush()
+        sys.exit(0)
+      else:
+        print "[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]"
+        with open(menu.options.bulkfile) as f:
+          bulkfile = [url.strip() for url in f]
+        # Removing duplicates from list.
+        clean_bulkfile = []
+        [clean_bulkfile.append(x) for x in bulkfile if x not in clean_bulkfile]
+        # Removing empty elements from list.
+        clean_bulkfile = [x for x in clean_bulkfile if x]
+        for url in clean_bulkfile:
+          settings.INIT_TEST = True
+          if url == clean_bulkfile[-1]:
+            settings.EOF = True
+          # Reset the injection level
+          if menu.options.level > 3:
+            menu.options.level = 1
+          init_injection(url)
+          try:
+            response, url = url_response(url)
+            if response != False:
+              filename = logs_filename_creation()
+              main(filename, url)
+
+          except urllib2.HTTPError, err_msg:
+            if settings.VERBOSITY_LEVEL < 2:
+              print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
+            error_description = ""
+            if len(str(err_msg).split(": ")[1]) == 0:
+              error_description = "Non-standard HTTP status code" 
+            err_msg = str(err_msg).replace(": "," (") + error_description + ")." 
+            warn_msg = "Skipping URL '" + url + "' - " + err_msg
+            print settings.print_warning_msg(warn_msg)
+            if settings.EOF:
+              print "" 
+
+          except urllib2.URLError, err_msg:
+            if settings.VERBOSITY_LEVEL < 2:
+              print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
+            err_msg = str(err_msg.args[0]).split("] ")[1] + "." 
+            warn_msg = "Skipping URL '" + url + "' - " + err_msg
+            print settings.print_critical_msg(warn_msg)
+            if settings.EOF:
+              print "" 
+
+    else:
+      if os_checks_num == 0:
+        settings.INIT_TEST = True
+      # Check if option is "--url" for single url test.
+      if menu.options.sitemap_url:
+        url = menu.options.sitemap_url
+      else:  
+        url = menu.options.url
+      response, url = url_response(url)
+      if response != False:
+        filename = logs_filename_creation()
+        main(filename, url)
 
 except KeyboardInterrupt:
   abort_msg = "User aborted procedure "

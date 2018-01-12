@@ -111,7 +111,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "2.3.12"
+VERSION_NUM = "2.3.13"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"
@@ -725,5 +725,9 @@ CHECK_INTERNET_ADDRESS = "ipinfo.io/"
 
 # Check internet connection.
 CHECK_INTERNET = False
+
+# Multiple OS checks
+CHECK_BOTH_OS = False
+OS_CHECKS_NUM = 2
 
 # eof
