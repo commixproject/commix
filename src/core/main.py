@@ -640,7 +640,7 @@ def main(filename, url):
               print settings.print_warning_msg(warn_msg)
 
             # Store the Server's root dir
-            settings.DEFAULT_WEB_ROOT= settings.WEB_ROOT
+            settings.DEFAULT_WEB_ROOT = settings.WEB_ROOT
 
             if menu.options.is_admin or menu.options.is_root and not menu.options.current_user:
               menu.options.current_user = True
@@ -690,7 +690,7 @@ def main(filename, url):
                 warn_msg = "Swithing the '--is-admin' to '--is-root' because "
                 warn_msg += "the target has been identified as unix-like. "
                 print settings.print_warning_msg(warn_msg)  
-                
+
             if found_os_server == False and not menu.options.os:
               # If "--shellshock" option is provided then,
               # by default is a Linux/Unix operating system.

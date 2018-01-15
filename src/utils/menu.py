@@ -54,6 +54,7 @@ general = OptionGroup(parser, Style.BRIGHT + Style.UNDERLINE + "General" + Style
                         "These options relate to general matters. ")
 
 general.add_option("-v",
+                default="0",
                 action="store",
                 type="int",
                 dest="verbose",
