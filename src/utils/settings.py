@@ -111,7 +111,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "2.3.14"
+VERSION_NUM = "2.3.15"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"
@@ -416,15 +416,15 @@ PARAMETER_SPLITTING_REGEX = r'[,]'
 # Cookie delimiter
 PARAMETER_DELIMITER = "&"
 
-# Web-page Charset
-CHARSET = ""
+# Web-page encoding
+ENCODING = ""
 
-# Page default charset
-DEFAULT_CHARSET = "utf-8"
+# Page default encoding
+DEFAULT_ENCODING = "utf-8"
 
 # Character Sets List. 
 # A complete list of the standard encodings Python supports.
-CHARSET_LIST = [
+ENCODING_LIST = [
    "ascii",
    "big5",
    "big5hkscs",

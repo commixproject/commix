@@ -109,11 +109,11 @@ general.add_option("--batch",
                 default=False,
                 help="Never ask for user input, use the default behaviour.")
 
-general.add_option("--charset",
+general.add_option("--encoding",
                 action="store",
-                dest="charset",
+                dest="encoding",
                 default=None,
-                help="Force character encoding used for data retrieval.")
+                help="Force character encoding used for data retrieval (e.g. GBK).")
 
 general.add_option("--check-internet", 
                 action="store_true",

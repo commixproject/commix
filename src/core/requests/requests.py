@@ -717,10 +717,10 @@ def custom_header_injection(url, vuln_parameter, payload):
     return response
 
 """
-Target's charset detection
+Target's encoding detection
 """
-def charset_detection(response):
-  if not menu.options.charset:
+def encoding_detection(response):
+  if not menu.options.encoding:
     charset_detected = False
     if settings.VERBOSITY_LEVEL >= 1:
       info_msg = "Identifing the indicated web-page charset... " 
@@ -743,17 +743,17 @@ def charset_detection(response):
           charset_detected = True
       # Check the identifyied charset
       if charset_detected :
-        settings.DEFAULT_CHARSET = charset
+        settings.DEFAULT_ENCODING = charset
         if settings.VERBOSITY_LEVEL >= 1:
           print "[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]"
-        settings.CHARSET = charset.lower()
-        if settings.CHARSET.lower() not in settings.CHARSET_LIST:
-          warn_msg = "The indicated web-page charset "  + settings.CHARSET + " seems unknown."
+        settings.ENCODING = charset.lower()
+        if settings.ENCODING.lower() not in settings.ENCODING_LIST:
+          warn_msg = "The indicated web-page charset "  + settings.ENCODING + " seems unknown."
           print settings.print_warning_msg(warn_msg)
         else:
           if settings.VERBOSITY_LEVEL >= 1:
             success_msg = "The indicated web-page charset appears to be " 
-            success_msg += settings.CHARSET + Style.RESET_ALL + "."
+            success_msg += settings.ENCODING + Style.RESET_ALL + "."
             print settings.print_success_msg(success_msg)
       else:
         pass
@@ -762,9 +762,9 @@ def charset_detection(response):
     if charset_detected == False and settings.VERBOSITY_LEVEL >= 1:
       print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
   else:
-    settings.CHARSET = menu.options.charset
-    if settings.CHARSET.lower() not in settings.CHARSET_LIST:
-      err_msg = "The user-defined charset '"  + settings.CHARSET + "' seems unknown. "
+    settings.ENCODING = menu.options.encoding
+    if settings.ENCODING.lower() not in settings.ENCODING_LIST:
+      err_msg = "The user-defined charset '"  + settings.ENCODING + "' seems unknown. "
       err_msg += "Please visit 'http://docs.python.org/library/codecs.html#standard-encodings' "
       err_msg += "to get the full list of supported charsets."
       print settings.print_critical_msg(err_msg)

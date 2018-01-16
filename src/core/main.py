@@ -737,8 +737,8 @@ def main(filename, url):
         except KeyError:
           pass
 
-        # Charset detection.
-        requests.charset_detection(response)
+        # Webpage encoding detection.
+        requests.encoding_detection(response)
 
       except urllib2.HTTPError, err_msg:
         # Check the codes of responses

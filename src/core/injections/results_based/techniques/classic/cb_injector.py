@@ -109,7 +109,7 @@ def injection_test_results(response, TAG, randvcalc):
     html_data = response.read()
     html_data = html_data.replace("\n"," ")
     # cleanup string / unescape html to string
-    html_data = urllib2.unquote(html_data).decode(settings.DEFAULT_CHARSET)
+    html_data = urllib2.unquote(html_data).decode(settings.DEFAULT_ENCODING)
     html_data = HTMLParser.HTMLParser().unescape(html_data).encode(sys.getfilesystemencoding())
 
     # Replace non-ASCII characters with a single space
@@ -267,7 +267,7 @@ def injection_results(response, TAG, cmd):
     html_data = response.read()
     html_data = html_data.replace("\n"," ")
     # cleanup string / unescape html to string
-    html_data = urllib2.unquote(html_data).decode(settings.DEFAULT_CHARSET)
+    html_data = urllib2.unquote(html_data).decode(settings.DEFAULT_ENCODING)
     html_data = HTMLParser.HTMLParser().unescape(html_data).encode(sys.getfilesystemencoding())
 
     # Replace non-ASCII characters with a single space
