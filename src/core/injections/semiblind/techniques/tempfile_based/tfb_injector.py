@@ -273,13 +273,7 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
     sys.stdout.write("\r" + settings.print_info_msg(info_msg))
     sys.stdout.flush()
     for num_of_chars in range(1, int(num_of_chars)):
-      if num_of_chars == 1:
-        # Checks {A..Z},{a..z},{0..9},{Symbols}
-        char_pool = range(65, 90) + range(96, 122)
-      else:
-        # Checks {a..z},{A..Z},{0..9},{Symbols}
-        char_pool = range(96, 122) + range(65, 90)
-      char_pool = char_pool + range(48, 57) + range(32, 48) + range(90, 96)  + range(57, 65)  + range(122, 127) 
+      char_pool = checks.generate_char_pool()  
       for ascii_char in char_pool:
         # Get the execution ouput, of shell execution.
         if alter_shell :

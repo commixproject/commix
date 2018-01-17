@@ -1,4 +1,5 @@
 ## Version 2.3 (upcoming)
+* Revised: The `--charset` option has been revised to force the usage of custom charset in order to speed-up the data retrieval process (during time-related injections).
 * Replaced: The `--charset` option has been replaced with `--encoding` option.
 * Revised: Improvement regarding batch mode, for testing the payloads for both OS - if it's not able to identify the target OS.
 * Added: Support for SOAP/XML POST data.

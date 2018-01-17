@@ -943,4 +943,20 @@ def check_similarities(all_params):
         all_params[param] = parameter_name + "=" + parameter_name.lower() + ''.join([random.choice(string.ascii_letters) for n in xrange(2)]).lower()
   return all_params
 
+"""
+Gererate characters pool (for blind command injections)
+"""
+def generate_char_pool():
+  if menu.options.charset:
+    char_pool = [ord(c) for c in menu.options.charset]
+  else:
+    if num_of_chars == 1:
+      # Checks {A..Z},{a..z},{0..9},{Symbols}
+      char_pool = range(65, 90) + range(96, 122)
+    else:
+      # Checks {a..z},{A..Z},{0..9},{Symbols}
+      char_pool = range(96, 122) + range(65, 90)
+    char_pool = char_pool + range(48, 57) + range(32, 48) + range(90, 96)  + range(57, 65)  + range(122, 127)  
+  return char_pool
+
 # eof

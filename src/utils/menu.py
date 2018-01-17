@@ -115,6 +115,12 @@ general.add_option("--encoding",
                 default=None,
                 help="Force character encoding used for data retrieval (e.g. GBK).")
 
+general.add_option("--charset",
+                action="store",
+                dest="charset",
+                default=None,
+                help="Time-related injection charset (e.g. \"0123456789abcdef\")")
+
 general.add_option("--check-internet", 
                 action="store_true",
                 dest="check_internet",
