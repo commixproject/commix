@@ -111,7 +111,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "2.3.16"
+VERSION_NUM = "2.3.17"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"
@@ -172,6 +172,9 @@ IS_WINDOWS = hasattr(sys, "getwindowsversion")
 
 # Git URL.
 GIT_URL = "https://github.com/commixproject/" + APPLICATION + ".git"
+
+# Git issue URL.
+ISSUES_PAGE = "https://github.com/commixproject/" + APPLICATION + "/issues/new"
 
 # Output Directory
 OUTPUT_DIR = ".output/"  

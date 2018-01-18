@@ -25,6 +25,10 @@ except ImportError:
   sys.exit(0)
 
 if __name__ == '__main__':
-  import src.core.main
+  try:
+    import src.core.main
+  except:
+    from src.utils import common
+    common.unhandled_exception()
 
 # eof
