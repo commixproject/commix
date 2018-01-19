@@ -18,15 +18,23 @@ try:
   __import__("src.utils.version")
   from src.utils import version
   version.python_version()
+
 except ImportError:
   err_msg = "Wrong installation detected (missing modules). "
   err_msg = "Visit 'https://github.com/commixproject/commix/' for further details. \n"
   print(settings.print_critical_msg(err_msg))
   sys.exit(0)
 
+# Main
 if __name__ == '__main__':
   try:
     import src.core.main
+
+  except SystemExit:
+    import sys
+    print ""
+    sys.exit(0) 
+
   except:
     from src.utils import common
     common.unhandled_exception()
