@@ -111,7 +111,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "2.3.18"
+VERSION_NUM = "2.3.19"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"
@@ -732,5 +732,8 @@ CHECK_INTERNET = False
 # Multiple OS checks
 CHECK_BOTH_OS = False
 OS_CHECKS_NUM = 2
+
+# Options to explicitly mask in anonymous (unhandled exception) reports.
+SENSITIVE_OPTIONS = ["--data", "-d", "--cookie", "-p", "--url", "-u"]
 
 # eof

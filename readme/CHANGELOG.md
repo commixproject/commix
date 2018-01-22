@@ -1,4 +1,5 @@
 ## Version 2.3 (upcoming)
+* Revised: Improvement for masking sensitive data in the detailed message about occurred unhandled exception.
 * Added: Support for returning detailed message about occurred unhandled exception.
 * Revised: The `--charset` option has been revised to force the usage of custom charset in order to speed-up the data retrieval process (during time-related injections).
 * Replaced: The `--charset` option has been replaced with `--encoding` option.

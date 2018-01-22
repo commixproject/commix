@@ -18,7 +18,16 @@ import os
 import sys
 import traceback
 from src.utils import settings
-from src.thirdparty.colorama import Fore, Back, Style, init
+
+"""
+Masks sensitive data in the supplied message
+"""
+def mask_sensitive_data(err_msg):
+  for item in settings.SENSITIVE_OPTIONS:
+    match = re.search(r"(?i)commix.+("+str(item)+")(\s+|=)([^ ]+)", err_msg)
+    if match:
+      err_msg = err_msg.replace(match.group(3), '*' * len(match.group(3)))
+  return err_msg
 
 """
 Returns detailed message about occurred unhandled exception
@@ -36,6 +45,7 @@ def unhandled_exception():
   err_msg += "Python version: " + settings.PYTHON_VERSION + "\n"
   err_msg += "Operating system: " + os.name + "\n"
   err_msg += "Command line: " + re.sub(r".+?\bcommix\.py\b", "commix.py", " ".join(sys.argv)) + "\n"
+  err_msg = mask_sensitive_data(err_msg)
   exc_msg = str(traceback.format_exc())
   print settings.print_critical_msg(err_msg + "\n" + exc_msg.rstrip()) 
 

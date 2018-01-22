@@ -937,7 +937,7 @@ def check_similarities(all_params):
         parameter_name = re.findall(r'>(.*)</', all_params[param])
         parameter_name = ''.join(parameter_name)
         all_params[param] = "<" + parameter_name + ">" + parameter_name.lower() + ''.join([random.choice(string.ascii_letters) for n in xrange(2)]).lower() + "</" + parameter_name + ">"
-    else:  
+    else:
       if re.findall(r'(.*)=', all_params[param]) == re.findall(r'=(.*)', all_params[param]):
         parameter_name = re.findall(r'=(.*)', all_params[param])
         parameter_name = ''.join(parameter_name)
