@@ -562,7 +562,6 @@ def wildcard_character(data):
 Skip defined
 """
 def check_skipped_params(check_parameters):
-
   settings.TEST_PARAMETER = [x + "," for x in settings.TEST_PARAMETER]
   settings.TEST_PARAMETER = [x for x in check_parameters if x not in ",".join(settings.TEST_PARAMETER).split(",")]
   settings.TEST_PARAMETER = ",".join(settings.TEST_PARAMETER)
@@ -572,7 +571,6 @@ def check_skipped_params(check_parameters):
 Print the non-listed parameters.
 """
 def print_non_listed_params(check_parameters, http_request_method, header_name):
-  
   if settings.TEST_PARAMETER:
     testable_parameters = ",".join(settings.TEST_PARAMETER).replace(" ","")
     testable_parameters = testable_parameters.split(",")

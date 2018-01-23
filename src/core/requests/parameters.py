@@ -76,6 +76,9 @@ def do_GET_check(url):
       # Check for empty values (in provided parameters).
       checks.is_empty(multi_parameters, http_request_method)
       # Grab the value of parameter.
+      _ = []
+      _.append(parameters)
+      parameters = ''.join(checks.check_similarities(_))
       value = re.findall(r'=(.*)', parameters)
       value = ''.join(value)
       # Replace the value of parameter with INJECT tag
@@ -257,7 +260,10 @@ def do_POST_check(parameter):
       #Grab the value of parameter.
       value = re.findall(r'>(.*)</', parameter)
       value = ''.join(value)
-    else:  
+    else:
+      _ = []
+      _.append(parameter)
+      parameter = ''.join(checks.check_similarities(_))
       value = re.findall(r'=(.*)', parameter)
       value = ''.join(value)
     if checks.is_empty(multi_parameters, http_request_method):
@@ -275,7 +281,6 @@ def do_POST_check(parameter):
       return parameter
 
   else:
-
     # Check if multiple parameters are supplied without the "INJECT_HERE" tag.
     if settings.IS_XML:
       all_params = multi_parameters
