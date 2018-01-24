@@ -1,4 +1,5 @@
 ## Version 2.3 (upcoming)
+* Added: Support for automatically creating a Github issue with unhandled exception information.
 * Revised: Improvement for masking sensitive data in the detailed message about occurred unhandled exception.
 * Added: Support for returning detailed message about occurred unhandled exception.
 * Revised: The `--charset` option has been revised to force the usage of custom charset in order to speed-up the data retrieval process (during time-related injections).
