@@ -32,11 +32,16 @@ def create_github_issue(err_msg, exc_msg):
   key = hashlib.md5(exc_msg).hexdigest()[:8]
   while True:
     try:
-      question_msg = "Do you want to automatically create a new (anonymized) issue "
-      question_msg += "with the unhandled exception information at "
-      question_msg += "the official Github repository? [y/N] "
-      sys.stdout.write(settings.print_question_msg(question_msg))
-      choise = sys.stdin.readline().replace("\n","").lower()
+      if not menu.options.batch:
+        question_msg = "Do you want to automatically create a new (anonymized) issue "
+        question_msg += "with the unhandled exception information at "
+        question_msg += "the official Github repository? [y/N] "
+        sys.stdout.write(settings.print_question_msg(question_msg))
+        choise = sys.stdin.readline().replace("\n","").lower()
+      else:
+        choise = ""
+      if len(choise) == 0:
+        choise = "n"
       if choise in settings.CHOICE_YES:
         break
       elif choise in settings.CHOICE_NO:
