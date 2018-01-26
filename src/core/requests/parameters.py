@@ -17,9 +17,8 @@ import re
 import os
 import sys
 
-from urlparse import urlparse
-
 from src.utils import menu
+from urlparse import urlparse
 from src.utils import settings
 from src.core.injections.controller import checks
 from src.thirdparty.colorama import Fore, Back, Style, init
@@ -221,22 +220,10 @@ def do_POST_check(parameter):
   # Split multiple parameters
   if settings.IS_XML:
     _ = []
-    if re.findall(settings.XML_VERSION_ENCODING, parameter):
-      root_tag = re.findall(settings.XML_VERSION_ENCODING, parameter)
-      _.append(root_tag[0][0])
-    parameters = re.findall(settings.XML_FULL_DATA_EXTRACT, parameter.replace(" ",""))
-    xml_child_values = re.findall(settings.XML_DATA_EXTRACT, parameter.replace("><","> <"))
-    parameters = [x for xs in parameters for x in xs]
-    for i in range(0,len(parameters)):
-      if re.findall(settings.XML_DATA_EXTRACT, parameters[i]):
-        for value in range(0,len(xml_child_values)):
-          _.append("<" + 
-            xml_child_values[value][0] + ">" + \
-            xml_child_values[value][1] + "<" + \
-            xml_child_values[value][2] + ">"
-            )
-      else:
-        _.append("<" + parameters[i] + ">")
+    parameters = re.findall(r'(.*)', parameter)
+    parameters = [param + "\n" for param in parameters if param]
+    for value in range(0,len(parameters)):
+      _.append(parameters[value])
     multi_parameters = _
   else:  
     multi_parameters = parameter.split(settings.PARAMETER_DELIMITER)

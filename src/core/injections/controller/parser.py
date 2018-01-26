@@ -117,7 +117,7 @@ def logfile_parser():
             if checks.is_XML_check(item):
               multiple_xml.append(item)
           if len(multiple_xml) != 0:
-            menu.options.data = ''.join([str(item) for item in multiple_xml]) 
+            menu.options.data = '\n'.join([str(item) for item in multiple_xml]) 
           else:  
             menu.options.data = result[len(result)-1]
         else:

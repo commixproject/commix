@@ -1,4 +1,5 @@
 ## Version 2.3 (upcoming)
+* Revised: Minor improvement regarding testing SOAP/XML POST data.
 * Added: Support for automatically creating a Github issue with unhandled exception information.
 * Revised: Improvement for masking sensitive data in the detailed message about occurred unhandled exception.
 * Added: Support for returning detailed message about occurred unhandled exception.
