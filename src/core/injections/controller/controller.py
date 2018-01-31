@@ -83,7 +83,8 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
       print settings.print_critical_msg(err_msg)
       raise SystemExit
 
-  # User-Agent Injection / Referer Injection / Custom header Injection 
+  # User-Agent HTTP header / Referer HTTP header / 
+  # Host HTTP header / Custom HTTP header Injection(s)
   if check_parameter.startswith(" "):
     header_name = ""
     the_type = " HTTP header"
@@ -205,7 +206,7 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
     print settings.print_warning_msg(warn_msg) + Style.RESET_ALL
 
 """
-Inject HTTP headers (User-agent / Referer) (if level > 2).
+Inject HTTP headers (User-agent / Referer / Host) (if level > 2).
 """
 def http_headers_injection(url, http_request_method, filename, timesec):
   # Disable Cookie Injection 
@@ -225,6 +226,7 @@ def http_headers_injection(url, http_request_method, filename, timesec):
     menu.options.agent = user_agent
 
   def referer_injection(url, http_request_method, filename, timesec):
+    referer = menu.options.referer
     if not menu.options.shellshock:
       menu.options.referer = settings.INJECT_TAG
     settings.REFERER_INJECTION = True
@@ -233,9 +235,21 @@ def http_headers_injection(url, http_request_method, filename, timesec):
       settings.HTTP_HEADER = header_name[1:].lower()
       check_for_stored_sessions(url, http_request_method)
       injection_proccess(url, check_parameter, http_request_method, filename, timesec)
-      settings.REFERER_INJECTION = False 
+    settings.REFERER_INJECTION = False 
+    menu.options.agent = referer
 
-  # User-Agent header injection
+  def host_injection(url, http_request_method, filename, timesec):
+    if not menu.options.shellshock:
+      menu.options.host = settings.INJECT_TAG
+    settings.HOST_INJECTION = True
+    if settings.HOST_INJECTION:
+      check_parameter =  header_name = " Host"
+      settings.HTTP_HEADER = header_name[1:].lower()
+      check_for_stored_sessions(url, http_request_method)
+      injection_proccess(url, check_parameter, http_request_method, filename, timesec)
+      settings.HOST_INJECTION = False 
+
+  # User-Agent HTTP header injection
   if menu.options.skip_parameter == None:
     if menu.options.test_parameter == None or "user-agent" in menu.options.test_parameter.lower():
       user_agent_injection(url, http_request_method, filename, timesec)
@@ -243,13 +257,21 @@ def http_headers_injection(url, http_request_method, filename, timesec):
     if "user-agent" not in menu.options.skip_parameter.lower():
       user_agent_injection(url, http_request_method, filename, timesec)  
 
-  # Referer header injection
+  # Referer HTTP header injection
   if menu.options.skip_parameter == None:
     if menu.options.test_parameter == None or "referer" in menu.options.test_parameter.lower():
       referer_injection(url, http_request_method, filename, timesec)
   else:
     if "referer" not in menu.options.skip_parameter.lower():
       referer_injection(url, http_request_method, filename, timesec)   
+
+  # Host HTTP header injection
+  if menu.options.skip_parameter == None:
+    if menu.options.test_parameter == None or "host" in menu.options.test_parameter.lower():
+      host_injection(url, http_request_method, filename, timesec)
+  else:
+    if "host" not in menu.options.skip_parameter.lower():
+      host_injection(url, http_request_method, filename, timesec)   
 
 """
 Check for stored injections on User-agent / Referer headers (if level > 2).
@@ -262,6 +284,9 @@ def stored_http_header_injection(url, check_parameter, http_request_method, file
       if check_parameter == "referer":
         menu.options.referer = settings.INJECT_TAG
         settings.REFERER_INJECTION = True
+      elif check_parameter == "host":
+        menu.options.host= settings.INJECT_TAG
+        settings.HOST_INJECTION = True
       else:  
         menu.options.agent = settings.INJECT_TAG
         settings.USER_AGENT_INJECTION = True
@@ -487,7 +512,7 @@ def perform_checks(url, filename):
   if settings.PERFORM_BASIC_SCANS:
     basic_level_checks()
 
-  # Check for stored injections on User-agent / Referer headers (if level > 2).
+  # Check for stored injections on User-agent / Referer / Host HTTP headers (if level > 2).
   if menu.options.level >= settings.HTTP_HEADER_INJECTION_LEVEL:
     if settings.INJECTED_HTTP_HEADER == False :
       check_parameter = ""
@@ -569,7 +594,7 @@ def do_check(url, filename):
         err_msg += " Try to remove the option '--alter-shell'"
       if menu.options.level < settings.HTTP_HEADER_INJECTION_LEVEL :
         err_msg += " and/or try to increase '--level' values to perform"
-        err_msg += " more tests (i.e 'User-Agent', 'Referer', 'Cookie' etc)"
+        err_msg += " more tests (i.e 'User-Agent', 'Referer', 'Host', 'Cookie' etc)"
       else:
         if menu.options.skip_empty:
           err_msg += " and/or try to remove the option '--skip-empty'"  

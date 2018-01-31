@@ -70,16 +70,16 @@ def do_check(url):
 
   # Build our opener
   opener = urllib2.OpenerDirector() 
-  # Check if defined any HTTP Host header.
-  if menu.options.host:
+  # Check if defined any Host HTTP header.
+  if menu.options.host and settings.HOST_INJECTION == False:
     opener.addheaders.append(('Host', menu.options.host))
-  # Check if defined any HTTP User-Agent header.
+  # Check if defined any User-Agent HTTP header.
   if menu.options.agent:
     opener.addheaders.append(('User-Agent', menu.options.agent))
-  # Check if defined any HTTP Referer header.
+  # Check if defined any Referer HTTP header.
   if menu.options.referer and settings.REFERER_INJECTION == False:
     opener.addheaders.append(('Referer', menu.options.referer))
-  # Check if defined any HTTP Cookie header.
+  # Check if defined any Cookie HTTP header.
   if menu.options.cookie and settings.COOKIE_INJECTION == False:
     opener.addheaders.append(('Cookie', menu.options.cookie))
 

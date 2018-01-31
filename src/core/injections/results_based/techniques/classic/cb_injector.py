@@ -142,6 +142,12 @@ def referer_injection_test(url, vuln_parameter, payload):
   return requests.referer_injection(url, vuln_parameter, payload)
 
 """
+Check if target host is vulnerable. (Host-based injection)
+"""
+def host_injection_test(url, vuln_parameter, payload):
+  return requests.host_injection(url, vuln_parameter, payload)
+
+"""
 Check if target host is vulnerable. (Custom header injection)
 """
 def custom_header_injection_test(url, vuln_parameter, payload):
@@ -188,6 +194,10 @@ def injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_meth
     # Check if defined referer with "INJECT_HERE" tag
     elif menu.options.referer and settings.INJECT_TAG in menu.options.referer:
       response = referer_injection_test(url, vuln_parameter, payload)
+
+    # Check if defined host with "INJECT_HERE" tag
+    elif menu.options.host and settings.INJECT_TAG in menu.options.host:
+      response = host_injection_test(url, vuln_parameter, payload)
 
     # Check if defined custom header with "INJECT_HERE" tag
     elif settings.CUSTOM_HEADER_INJECTION:

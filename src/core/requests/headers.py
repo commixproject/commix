@@ -194,19 +194,19 @@ Check for added headers.
 """
 def do_check(request):
 
-  # Check if defined any HTTP Host header.
-  if menu.options.host:
+  # Check if defined any Host HTTP header.
+  if menu.options.host and settings.HOST_INJECTION == None:
     request.add_header('Host', menu.options.host)
 
-  # Check if defined any HTTP User-Agent header.
+  # Check if defined any User-Agent HTTP header.
   if menu.options.agent:
     request.add_header('User-Agent', menu.options.agent)
 
-  # Check if defined any HTTP Referer header.
+  # Check if defined any Referer HTTP header.
   if menu.options.referer and settings.REFERER_INJECTION == None:
     request.add_header('Referer', menu.options.referer)
-        
-  # Check if defined any HTTP Cookie header.
+   
+  # Check if defined any Cookie HTTP header.
   if menu.options.cookie and settings.COOKIE_INJECTION == False:
     request.add_header('Cookie', menu.options.cookie)
 

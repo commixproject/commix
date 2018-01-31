@@ -157,23 +157,29 @@ def cb_injection_handler(url, timesec, filename, http_request_method):
                 print settings.print_info_msg(info_msg)
                 print settings.print_payload(payload) 
                 
-              # Cookie Injection
+              # Cookie header injection
               if settings.COOKIE_INJECTION == True:
-                # Check if target host is vulnerable to cookie injection.
+                # Check if target host is vulnerable to cookie header injection.
                 vuln_parameter = parameters.specify_cookie_parameter(menu.options.cookie)
                 response = cb_injector.cookie_injection_test(url, vuln_parameter, payload)
                 
-              # User-Agent Injection
+              # User-Agent HTTP header injection
               elif settings.USER_AGENT_INJECTION == True:
-                # Check if target host is vulnerable to user-agent injection.
+                # Check if target host is vulnerable to user-agent HTTP header injection.
                 vuln_parameter = parameters.specify_user_agent_parameter(menu.options.agent)
                 response = cb_injector.user_agent_injection_test(url, vuln_parameter, payload)
 
-              # Referer Injection
+              # Referer HTTP header injection
               elif settings.REFERER_INJECTION == True:
-                # Check if target host is vulnerable to referer injection.
+                # Check if target host is vulnerable to referer HTTP header injection.
                 vuln_parameter = parameters.specify_referer_parameter(menu.options.referer)
                 response = cb_injector.referer_injection_test(url, vuln_parameter, payload)
+
+              # Host HTTP header injection
+              elif settings.HOST_INJECTION == True:
+                # Check if target host is vulnerable to host HTTP header injection.
+                vuln_parameter = parameters.specify_host_parameter(menu.options.host)
+                response = cb_injector.host_injection_test(url, vuln_parameter, payload)
 
               # Custom HTTP header Injection
               elif settings.CUSTOM_HEADER_INJECTION == True:
@@ -244,6 +250,11 @@ def cb_injection_handler(url, timesec, filename, http_request_method):
 
             elif settings.REFERER_INJECTION == True: 
               header_name = " Referer"
+              found_vuln_parameter = ""
+              the_type = " HTTP header"
+
+            elif settings.HOST_INJECTION == True: 
+              header_name = " Host"
               found_vuln_parameter = ""
               the_type = " HTTP header"
 

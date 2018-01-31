@@ -57,6 +57,7 @@ def decision_alter_shell(separator, TAG, OUTPUT_TEXTFILE):
 
   if settings.USER_AGENT_INJECTION == True or \
      settings.REFERER_INJECTION == True or \
+     settings.HOST_INJECTION == True or \
      settings.CUSTOM_HEADER_INJECTION == True :
     payload = payload.replace("\n", separator)
   else:
@@ -85,6 +86,7 @@ def cmd_execution(separator, cmd, OUTPUT_TEXTFILE):
   else:
     # if settings.USER_AGENT_INJECTION == True or \
     #    settings.REFERER_INJECTION == True or \
+    #    settings.HOST_INJECTION == True or \
     #    settings.CUSTOM_HEADER_INJECTION == True:
     #   if not settings.DEL in cmd:
     #     cmd = "echo $(" + cmd + ")"
@@ -117,6 +119,7 @@ def cmd_execution_alter_shell(separator, cmd, OUTPUT_TEXTFILE):
   # New line fixation
   if settings.USER_AGENT_INJECTION == True or \
      settings.REFERER_INJECTION == True or \
+     settings.HOST_INJECTION == True or \
      settings.CUSTOM_HEADER_INJECTION == True:
     payload = payload.replace("\n", separator)
   else:

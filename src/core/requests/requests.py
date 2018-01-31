@@ -585,6 +585,139 @@ def referer_injection(url, vuln_parameter, payload):
     return response
 
 """
+Check if target host is vulnerable. (Host-based injection)
+"""
+def host_injection(url, vuln_parameter, payload):
+
+  def inject_host(url, vuln_parameter, payload, proxy):
+
+    if proxy == None:
+      opener = urllib2.build_opener()
+    else:
+      opener = urllib2.build_opener(proxy)
+
+    # Check if defined POST data
+    if menu.options.data:
+      menu.options.data = settings.USER_DEFINED_POST_DATA
+      request = urllib2.Request(url, menu.options.data)
+    else:
+      url = parameters.get_url_part(url)
+      request = urllib2.Request(url)
+    #Check if defined extra headers.
+    headers.do_check(request)
+    request.add_header('Host', urllib.unquote(payload))
+    try:
+      headers.check_http_traffic(request)
+      response = opener.open(request)
+      return response
+    except ValueError:
+      pass
+
+  if settings.TIME_RELATIVE_ATTACK :
+    start = 0
+    end = 0
+    start = time.time()
+
+  proxy = None 
+  #response = inject_host(url, vuln_parameter, payload, proxy)
+  # Check if defined any HTTP Proxy.
+  if menu.options.proxy:
+    try:
+      proxy = urllib2.ProxyHandler({settings.PROXY_PROTOCOL : menu.options.proxy})
+      response = inject_host(url, vuln_parameter, payload, proxy)
+    except urllib2.HTTPError, err_msg:
+      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
+        response = False  
+      elif settings.IGNORE_ERR_MSG == False:
+        err = str(err_msg) + "."
+        if not settings.VERBOSITY_LEVEL >= 1 and settings.TIME_BASED_STATE == False or \
+          settings.VERBOSITY_LEVEL >= 1 and settings.EVAL_BASED_STATE == None:
+          print ""
+        if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
+          print "" 
+        print settings.print_critical_msg(err)
+        continue_tests = checks.continue_tests(err_msg)
+        if continue_tests == True:
+          settings.IGNORE_ERR_MSG = True
+        else:
+          raise SystemExit()
+      response = False 
+    except urllib2.URLError, err_msg:
+      err_msg = str(err_msg.reason).split(" ")[2:]
+      err_msg = ' '.join(err_msg)+ "."
+      if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
+        print ""
+      print settings.print_critical_msg(err_msg)
+      raise SystemExit()
+          
+  # Check if defined Tor.
+  elif menu.options.tor:
+    try:
+      proxy = urllib2.ProxyHandler({settings.PROXY_PROTOCOL:settings.PRIVOXY_IP + ":" + PRIVOXY_PORT})
+      response = inject_host(url, vuln_parameter, payload, proxy)
+    except urllib2.HTTPError, err_msg:
+      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
+        response = False  
+      elif settings.IGNORE_ERR_MSG == False:
+        err = str(err_msg) + "."
+        if not settings.VERBOSITY_LEVEL >= 1 and settings.TIME_BASED_STATE == False or \
+          settings.VERBOSITY_LEVEL >= 1 and settings.EVAL_BASED_STATE == None:
+          print ""
+        if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
+          print "" 
+        print settings.print_critical_msg(err)
+        continue_tests = checks.continue_tests(err_msg)
+        if continue_tests == True:
+          settings.IGNORE_ERR_MSG = True
+        else:
+          raise SystemExit()
+      response = False 
+    except urllib2.URLError, err_msg:
+      err_msg = str(err_msg.reason).split(" ")[2:]
+      err_msg = ' '.join(err_msg)+ "."
+      if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
+        print ""
+      print settings.print_critical_msg(err_msg)
+      raise SystemExit()
+          
+  else:
+    try:
+      response = inject_host(url, vuln_parameter, payload, proxy)
+
+    except urllib2.HTTPError, err_msg:
+      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
+        response = False  
+      elif settings.IGNORE_ERR_MSG == False:
+        err = str(err_msg) + "."
+        if not settings.VERBOSITY_LEVEL >= 1 and settings.TIME_BASED_STATE == False or \
+          settings.VERBOSITY_LEVEL >= 1 and settings.EVAL_BASED_STATE == None:
+          print ""
+        if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
+          print "" 
+        print settings.print_critical_msg(err)
+        continue_tests = checks.continue_tests(err_msg)
+        if continue_tests == True:
+          settings.IGNORE_ERR_MSG = True
+        else:
+          raise SystemExit()
+      response = False 
+    except urllib2.URLError, err_msg:
+      err_msg = str(err_msg.reason).split(" ")[2:]
+      err_msg = ' '.join(err_msg)+ "."
+      if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
+        print ""
+      print settings.print_critical_msg(err_msg)
+      raise SystemExit()
+          
+  if settings.TIME_RELATIVE_ATTACK :
+    end  = time.time()
+    how_long = int(end - start)
+    return how_long
+  else:
+    return response
+
+
+"""
 Check if target host is vulnerable. (Custom header injection)
 """
 def custom_header_injection(url, vuln_parameter, payload):

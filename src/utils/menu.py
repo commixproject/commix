@@ -402,7 +402,7 @@ modules.add_option("--shellshock",
 injection = OptionGroup(parser, Style.BRIGHT + Style.UNDERLINE + "Injection" + Style.RESET_ALL, 
                         "These options can be used to specify which parameters to inject and to provide custom injection payloads.")
 
-injection.add_option("-p", 
+injection.add_option("-p",
                 action="store",
                 dest="test_parameter",
                 help="Testable parameter(s).")

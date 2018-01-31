@@ -173,23 +173,29 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                   payload_msg = payload.replace("\n", "\\n") 
                   sys.stdout.write(settings.print_payload(payload_msg) + "\n")
 
-                # Cookie Injection
+                # Cookie header injection
                 if settings.COOKIE_INJECTION == True:
-                  # Check if target host is vulnerable to cookie injection.
+                  # Check if target host is vulnerable to cookie header injection.
                   vuln_parameter = parameters.specify_cookie_parameter(menu.options.cookie)
                   how_long = tb_injector.cookie_injection_test(url, vuln_parameter, payload)
 
-                # User-Agent Injection
+                # User-Agent HTTP header injection
                 elif settings.USER_AGENT_INJECTION == True:
-                  # Check if target host is vulnerable to user-agent injection.
+                  # Check if target host is vulnerable to user-agent HTTP header injection.
                   vuln_parameter = parameters.specify_user_agent_parameter(menu.options.agent)
                   how_long = tb_injector.user_agent_injection_test(url, vuln_parameter, payload)
 
-                # Referer Injection
+                # Referer HTTP header injection
                 elif settings.REFERER_INJECTION == True:
-                  # Check if target host is vulnerable to referer injection.
+                  # Check if target host is vulnerable to referer HTTP header injection.
                   vuln_parameter = parameters.specify_referer_parameter(menu.options.referer)
                   how_long = tb_injector.referer_injection_test(url, vuln_parameter, payload)
+
+                # Host HTTP header injection
+                elif settings.HOST_INJECTION == True:
+                  # Check if target host is vulnerable to host HTTP header injection.
+                  vuln_parameter = parameters.specify_host_parameter(menu.options.host)
+                  how_long = tb_injector.host_injection_test(url, vuln_parameter, payload)
 
                 # Custom HTTP header Injection
                 elif settings.CUSTOM_HEADER_INJECTION == True:

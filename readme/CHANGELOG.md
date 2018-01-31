@@ -1,4 +1,5 @@
 ## Version 2.3 (upcoming)
+* Added: Support for Host HTTP header command injections.
 * Revised: Minor improvement regarding testing SOAP/XML POST data.
 * Added: Support for automatically creating a Github issue with unhandled exception information.
 * Revised: Improvement for masking sensitive data in the detailed message about occurred unhandled exception.
@@ -269,8 +270,8 @@
 * Added: Support for HTML Charset and HTTP "Server" response-header reconnaissance (on verbose mode).
 * Replaced: Payloads for "tempfile-based" (semiblind) technique, have been replaced by new (more solid) ones.
 * Added: A "new-line" separator support, for "time-based" (blind) & "tempfile-based" (semiblind) techniques.
-* Added: Support for referer-based command injections.
-* Added: Support for user-agent-based command injections.
+* Added: Support for Referer HTTP header command injections.
+* Added: Support for User-Agent HTTP header command injections.
 * Added: CVE-2014-6278 support for "shellshock" module.
 * Added: Support for cookie-based command injections.
 * Added: A generic false-positive prevention technique.

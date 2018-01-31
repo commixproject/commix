@@ -111,7 +111,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "2.3.24"
+VERSION_NUM = "2.3.25"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"
@@ -382,6 +382,9 @@ USER_AGENT_INJECTION = None
 
 # Referer injection
 REFERER_INJECTION = None
+
+# Host injection
+HOST_INJECTION = None
 
 # Custom HTTP Headers injection
 CUSTOM_HEADER_INJECTION = False
@@ -665,7 +668,7 @@ METASPLOIT_PATH = "/usr/share/metasploit-framework/"
 SUPPORTED_HTTP_AUTH_TYPES = [ "basic", "digest" ]
 
 # HTTP Headers
-HTTP_HEADERS = [ "user-agent", "referer" ]
+HTTP_HEADERS = [ "user-agent", "referer", "host" ]
 
 # Tamper scripts dict
 TAMPER_SCRIPTS = {

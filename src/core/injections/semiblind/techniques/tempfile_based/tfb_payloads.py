@@ -194,6 +194,7 @@ def decision_alter_shell(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_reque
     # New line fixation
     if settings.USER_AGENT_INJECTION == True or \
        settings.REFERER_INJECTION == True or \
+       settings.HOST_INJECTION == True or \
        settings.CUSTOM_HEADER_INJECTION == True:
       payload = payload.replace("\n", ";")
       
@@ -404,6 +405,7 @@ def cmd_execution_alter_shell(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_
     # New line fixation
     if settings.USER_AGENT_INJECTION == True or \
        settings.REFERER_INJECTION == True or \
+       settings.HOST_INJECTION == True or \
        settings.CUSTOM_HEADER_INJECTION == True:
       payload = payload.replace("\n", ";")
 
@@ -564,6 +566,7 @@ def get_char_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, t
 
     if settings.USER_AGENT_INJECTION == True or \
        settings.REFERER_INJECTION == True or \
+       settings.HOST_INJECTION == True or \
        settings.CUSTOM_HEADER_INJECTION == True:
       payload = payload.replace("\n", ";")
 
@@ -719,6 +722,7 @@ def fp_result_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, 
     # New line fixation
     if settings.USER_AGENT_INJECTION == True or \
        settings.REFERER_INJECTION == True or \
+       settings.HOST_INJECTION == True or \
        settings.CUSTOM_HEADER_INJECTION == True:
       payload = payload.replace("\n",";")
 

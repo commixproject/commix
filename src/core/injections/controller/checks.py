@@ -52,9 +52,10 @@ def check_injection_level():
     elif menu.options.cookie.split("=")[0] in menu.options.test_parameter:
       menu.options.level = 2
 
-  # Checking testable parameters for user-agent / referer  
+  # Checking testable HTTP headers for user-agent / referer / host
   if "user-agent" in menu.options.test_parameter or \
-     "referer" in menu.options.test_parameter:
+     "referer" in menu.options.test_parameter or \
+     "host" in menu.options.test_parameter:
     menu.options.level = 3
 
 """
@@ -184,7 +185,8 @@ def continue_tests(err):
 
   # Possible WAF/IPS/IDS
   if (str(err.code) == settings.FORBIDDEN_ERROR or settings.NOT_ACCEPTABLE_ERROR) and \
-    not menu.options.skip_waf:
+    not menu.options.skip_waf and \
+    not settings.HOST_INJECTION :
     # Check if "--skip-waf" option is defined 
     # that skips heuristic detection of WAF/IPS/IDS protection.
     settings.WAF_ENABLED = True
