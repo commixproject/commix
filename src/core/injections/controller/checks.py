@@ -611,7 +611,8 @@ def print_non_listed_params(check_parameters, http_request_method, header_name):
           warn_msg +=  settings.HTTP_HEADER
         else:
           warn_msg += " not part of the "
-          warn_msg += http_request_method   
+          warn_msg += http_request_method
+          warn_msg += ('', ' (JSON)')[settings.IS_JSON] + ('', ' (SOAP/XML)')[settings.IS_XML]  
           warn_msg += (' data', ' request')[http_request_method == "GET"] 
         warn_msg += "."
         print settings.print_warning_msg(warn_msg)
