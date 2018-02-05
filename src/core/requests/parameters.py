@@ -276,6 +276,7 @@ def do_POST_check(parameter):
       # Check for similarity in provided parameter name and value.
       all_params = all_params.split(settings.PARAMETER_DELIMITER)
       all_params = checks.check_similarities(all_params)
+    
     # Check if not defined the "INJECT_HERE" tag in parameter
     if settings.INJECT_TAG not in parameter:
       checks.is_empty(multi_parameters, http_request_method)
@@ -362,19 +363,16 @@ Define the vulnerable POST parameter.
 def vuln_POST_param(parameter, url):
   # JSON data format
   if settings.IS_JSON:
-    if re.findall(r"" + settings.PARAMETER_DELIMITER + "\"(.*)\"\:\"" + settings.INJECT_TAG + "\"", parameter):
-      vuln_parameter = re.findall(r"" + settings.PARAMETER_DELIMITER + "\"(.*)\"\:\"" + settings.INJECT_TAG + "\"", parameter)
-      vuln_parameter = ''.join(vuln_parameter)
-    elif re.findall(r"\"(.*)\"\:\"" + settings.INJECT_TAG + "\"", parameter):
-      vuln_parameter = re.findall(r"\"(.*)\"\:\"" + settings.INJECT_TAG + "\"", parameter)
-      vuln_parameter = ''.join(vuln_parameter)
+    if re.findall(r"" + "\"(.*)\"\:\"", parameter.split(settings.INJECT_TAG)[0]):
+      vuln_parameter = ''.join(re.findall(r"" + "\"(.*)\"\:\"", parameter.split(settings.INJECT_TAG)[0]))
+      vuln_parameter = ''.join(vuln_parameter.split("\"")[-1:])
 
   # XML data format
   elif settings.IS_XML:
     if re.findall(r"" + "<([^<>]+)>" + settings.INJECT_TAG, parameter):
-        vuln_parameter = re.findall(r"" + "<([^<>]+)>" + settings.INJECT_TAG, parameter)
-        vuln_parameter = ''.join(vuln_parameter)
-
+      vuln_parameter = re.findall(r"" + "<([^<>]+)>" + settings.INJECT_TAG, parameter)
+      vuln_parameter = ''.join(vuln_parameter)
+      
   else:
     # Regular POST data format.
     if re.findall(r"" + settings.PARAMETER_DELIMITER + "(.*)=" + settings.INJECT_TAG + "", parameter):

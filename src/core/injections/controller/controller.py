@@ -12,7 +12,7 @@ the Free Software Foundation, either version 3 of the License, or
  
 For more see the file 'readme/COPYING' for copying permission.
 """
-
+import re
 import os
 import sys
 import urllib2
@@ -421,7 +421,10 @@ def post_request(url, http_request_method, filename, timesec):
     found_parameter_list.append(found_parameter)
     found_parameter = found_parameter_list
 
-  if not settings.IS_XML:
+  if settings.IS_XML:
+    # Remove junk data
+    found_parameter = [x for x in found_parameter if settings.INJECT_TAG in x]
+  else:     
     # Remove whitespaces   
     found_parameter = [x.replace(" ", "") for x in found_parameter]
 
@@ -436,31 +439,31 @@ def post_request(url, http_request_method, filename, timesec):
   checks.print_non_listed_params(check_parameters, http_request_method, header_name)
 
   for i in range(0, len(found_parameter)):
-    parameter = menu.options.data = found_parameter[i]
-    check_parameter = parameters.vuln_POST_param(parameter, url)
-    if check_parameter != parameter:
-      if len(check_parameter) > 0:
-        settings.TESTABLE_PARAMETER = check_parameter
-
-      # Check if testable parameter(s) are provided
-      if len(settings.TESTABLE_PARAMETER) > 0:
-        if menu.options.test_parameter != None:
-          param_counter = 0
-          for check_parameter in check_parameters:
-            if check_parameter in "".join(settings.TEST_PARAMETER).split(","):
-              menu.options.data = found_parameter[param_counter]           
-              check_for_stored_sessions(url, http_request_method)
-              injection_proccess(url, check_parameter, http_request_method, filename, timesec)
-            param_counter += 1
-          break
+    if settings.INJECT_TAG in found_parameter[i]:
+      parameter = menu.options.data = found_parameter[i]
+      check_parameter = parameters.vuln_POST_param(parameter, url)
+      if check_parameter != parameter:
+        if len(check_parameter) > 0:
+          settings.TESTABLE_PARAMETER = check_parameter
+        # Check if testable parameter(s) are provided
+        if len(settings.TESTABLE_PARAMETER) > 0:
+          if menu.options.test_parameter != None:
+            param_counter = 0
+            for check_parameter in check_parameters:
+              if check_parameter in "".join(settings.TEST_PARAMETER).split(","):
+                menu.options.data = found_parameter[param_counter]
+                check_for_stored_sessions(url, http_request_method)
+                injection_proccess(url, check_parameter, http_request_method, filename, timesec)
+              param_counter += 1
+            break
+          else:
+            # Check for session file 
+            check_for_stored_sessions(url, http_request_method)
+            injection_proccess(url, check_parameter, http_request_method, filename, timesec)
         else:
           # Check for session file 
           check_for_stored_sessions(url, http_request_method)
           injection_proccess(url, check_parameter, http_request_method, filename, timesec)
-      else:
-        # Check for session file 
-        check_for_stored_sessions(url, http_request_method)
-        injection_proccess(url, check_parameter, http_request_method, filename, timesec)
 
   # Enable Cookie Injection
   if menu.options.level > settings.DEFAULT_INJECTION_LEVEL and menu.options.cookie:

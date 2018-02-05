@@ -566,7 +566,7 @@ Skip defined
 def check_skipped_params(check_parameters):
   settings.TEST_PARAMETER = [x + "," for x in settings.TEST_PARAMETER]
   settings.TEST_PARAMETER = [x for x in check_parameters if x not in ",".join(settings.TEST_PARAMETER).split(",")]
-  settings.TEST_PARAMETER = ",".join(settings.TEST_PARAMETER)
+  settings.TEST_PARAMETER = ",".join(settings.TEST_PARAMETER) 
   menu.options.test_parameter = True
 
 """
