@@ -280,13 +280,16 @@ def main(filename, url):
       settings.URL_RELOAD = True
 
     if menu.options.test_parameter and menu.options.skip_parameter:
-      err_msg = "The options '-p' and '--skip' cannot be used "
-      err_msg += "simultaneously (i.e. only one option must be set)."
-      print settings.print_critical_msg(err_msg)
-      raise SystemExit
+      if type(menu.options.test_parameter) is bool:
+        menu.options.test_parameter = None
+      else:
+        err_msg = "The options '-p' and '--skip' cannot be used "
+        err_msg += "simultaneously (i.e. only one option must be set)."
+        print settings.print_critical_msg(err_msg)
+        raise SystemExit
 
     # Check provided parameters for tests
-    elif menu.options.test_parameter or menu.options.skip_parameter:     
+    if menu.options.test_parameter or menu.options.skip_parameter:     
       if menu.options.test_parameter != None :
         if menu.options.test_parameter.startswith("="):
           menu.options.test_parameter = menu.options.test_parameter[1:]

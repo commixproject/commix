@@ -32,7 +32,6 @@ if __name__ == '__main__':
 
   except SystemExit:
     import sys
-    print ""
     sys.exit(0) 
 
   except:

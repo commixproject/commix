@@ -606,8 +606,8 @@ def do_check(url, filename):
 
   logs.print_logs_notification(filename, url)
   if not settings.CHECK_BOTH_OS:
-    if not menu.options.bulkfile or settings.EOF:
-      print ""  
-  #sys.exit(0)
+    # if not menu.options.bulkfile or settings.EOF:
+    #   print ""
+    sys.exit(0)
 
 # eof
