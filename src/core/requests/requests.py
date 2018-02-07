@@ -18,6 +18,7 @@ import time
 import socket
 import urllib
 import urllib2
+import urlparse
 
 from src.utils import menu
 from src.utils import settings
@@ -588,6 +589,8 @@ def referer_injection(url, vuln_parameter, payload):
 Check if target host is vulnerable. (Host-based injection)
 """
 def host_injection(url, vuln_parameter, payload):
+
+  payload = urlparse.urlparse(url).hostname + payload
 
   def inject_host(url, vuln_parameter, payload, proxy):
 

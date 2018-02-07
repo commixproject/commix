@@ -514,8 +514,8 @@ def specify_cookie_parameter(cookie):
 The user-agent based injection.
 """
 def specify_user_agent_parameter(user_agent):
-   # Specify the vulnerable user-agent HTTP header
-   # Nothing to specify here! :)
+  # Specify the vulnerable user-agent HTTP header
+  # Nothing to specify here! :)
 
   return user_agent
  
@@ -523,8 +523,8 @@ def specify_user_agent_parameter(user_agent):
 The referer based injection.
 """
 def specify_referer_parameter(referer):
-   # Specify the vulnerable referer HTTP header.
-   # Nothing to specify here! :)
+  # Specify the vulnerable referer HTTP header.
+  # Nothing to specify here! :)
 
   return referer
 
@@ -532,8 +532,8 @@ def specify_referer_parameter(referer):
 The host based injection.
 """
 def specify_host_parameter(host):
-   # Specify the vulnerable host HTTP header.
-   # Nothing to specify here! :)
+  # Specify the vulnerable host HTTP header.
+  # Nothing to specify here! :)
 
   return host
 
@@ -541,8 +541,8 @@ def specify_host_parameter(host):
 The Custom http header based injection.
 """
 def specify_custom_header_parameter(header_name):
-   # Specify the vulnerable HTTP header name.
-   # Nothing to specify here! :)
+  # Specify the vulnerable HTTP header name.
+  # Nothing to specify here! :)
 
   return header_name
 

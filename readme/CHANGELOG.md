@@ -1,4 +1,5 @@
 ## Version 2.3 (upcoming)
+* Revised: Minor improvement regarding testing the Host HTTP header.
 * Added: Support for Host HTTP header command injections.
 * Revised: Minor improvement regarding testing SOAP/XML POST data.
 * Added: Support for automatically creating a Github issue with unhandled exception information.
