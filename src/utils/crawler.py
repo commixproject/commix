@@ -155,31 +155,33 @@ def crawler(url):
   info_msg += "for usable links with GET parameters... "
   sys.stdout.write(settings.print_info_msg(info_msg))
   sys.stdout.flush()
-
   succeed_banner = True
   valid_url_found = False
-  for check_url in output_href:
-    # Check for usable URL with GET parameters
-    if re.search(settings.GET_PARAMETERS_REGEX, check_url):
-      valid_url_found = True
-      if succeed_banner:
-        print "[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]"
-      print settings.print_success_msg(check_url)
-      if not menu.options.batch:
-        question_msg = "Do you want to use this URL to perform tests? [Y/n] > "
-        sys.stdout.write(settings.print_question_msg(question_msg))
-        use_url = sys.stdin.readline().replace("\n","").lower()
-      else:
-        use_url = ""
-      if len(use_url) == 0:
-         use_url = "y"
-      if use_url in settings.CHOICE_YES:
-        return check_url
-      elif use_url in settings.CHOICE_NO:
-        succeed_banner = False
-        pass 
-      elif gotshell in settings.CHOICE_QUIT:
-        sys.exit(0)
+  try:
+    for check_url in output_href:
+      # Check for usable URL with GET parameters
+      if re.search(settings.GET_PARAMETERS_REGEX, check_url):
+        valid_url_found = True
+        if succeed_banner:
+          print "[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]"
+        print settings.print_success_msg(check_url)
+        if not menu.options.batch:
+          question_msg = "Do you want to use this URL to perform tests? [Y/n] > "
+          sys.stdout.write(settings.print_question_msg(question_msg))
+          use_url = sys.stdin.readline().replace("\n","").lower()
+        else:
+          use_url = ""
+        if len(use_url) == 0:
+           use_url = "y"
+        if use_url in settings.CHOICE_YES:
+          return check_url
+        elif use_url in settings.CHOICE_NO:
+          succeed_banner = False
+          pass 
+        elif gotshell in settings.CHOICE_QUIT:
+          sys.exit(0)
+  except TypeError:
+    pass
 
   if not valid_url_found:
     print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
