@@ -66,8 +66,6 @@ else:
       readline_error = True
 pass
 
-
-
 """
 The "file-based" technique on semiblind OS command injection.
 """
@@ -121,80 +119,79 @@ def custom_web_root(url, timesec, filename, http_request_method, url_time_respon
   fb_injection_handler(url, timesec, filename, http_request_method, url_time_response)
 
 """
-Return TMP path for win / *nix targets.
+Return TEMP path for win / *nix targets.
 """
 def check_tmp_path(url, timesec, filename, http_request_method, url_time_response):
-  if not settings.CUSTOM_WEB_ROOT:
-    # Set temp path 
-    if settings.TARGET_OS == "win":
-      if "microsoft-iis" in settings.SERVER_BANNER.lower():
-        settings.TMP_PATH = "C:\\Windows\TEMP\\"
-      else:
-        settings.TMP_PATH = "%temp%\\"
+  # Set temp path 
+  if settings.TARGET_OS == "win":
+    if "microsoft-iis" in settings.SERVER_BANNER.lower():
+      settings.TMP_PATH = "C:\\Windows\TEMP\\"
     else:
-      settings.TMP_PATH = "/tmp/"
+      settings.TMP_PATH = "%temp%\\"
+  else:
+    settings.TMP_PATH = "/tmp/"
 
-    if menu.options.tmp_path:
-      tmp_path = menu.options.tmp_path
+  if menu.options.tmp_path:
+    tmp_path = menu.options.tmp_path
+  else:
+    tmp_path = settings.TMP_PATH
+
+  if settings.DEFAULT_WEB_ROOT != settings.WEB_ROOT:
+    settings.WEB_ROOT = settings.DEFAULT_WEB_ROOT
+
+  if menu.options.file_dest and '/tmp/' in menu.options.file_dest:
+    call_tmp_based = True
+  else:
+    if menu.options.web_root:
+      settings.WEB_ROOT = menu.options.web_root
     else:
-      tmp_path = settings.TMP_PATH
-
-    if settings.DEFAULT_WEB_ROOT != settings.WEB_ROOT:
-      settings.WEB_ROOT = settings.DEFAULT_WEB_ROOT
-
-    if menu.options.file_dest and '/tmp/' in menu.options.file_dest:
-      call_tmp_based = True
-    else:
-      if menu.options.web_root:
-        settings.WEB_ROOT = menu.options.web_root
-      else:
-        # Debian/Ubunt have been updated to use /var/www/html as default instead of /var/www.
-        if "apache" in settings.SERVER_BANNER.lower():
-          if "debian" or "ubuntu" in settings.SERVER_BANNER.lower():
-            try:
-              check_version = re.findall(r"/(.*)\.", settings.SERVER_BANNER.lower())
-              if check_version[0] > "2.3" and not settings.TARGET_OS == "win":
-                # Add "/html" to servers root directory
-                settings.WEB_ROOT = settings.WEB_ROOT + "/html"
-              else:
-                settings.WEB_ROOT = settings.WEB_ROOT 
-            except IndexError:
-              pass
-          # Add "/html" to servers root directory
-          elif "fedora" or "centos" in settings.SERVER_BANNER.lower():
-            settings.WEB_ROOT = settings.WEB_ROOT + "/html"
-          else:
-            pass
-        # On more recent versions (>= "1.2.4") the default root path has changed to "/usr/share/nginx/html"
-        elif "nginx" in settings.SERVER_BANNER.lower():
+      # Debian/Ubunt have been updated to use /var/www/html as default instead of /var/www.
+      if "apache" in settings.SERVER_BANNER.lower():
+        if "debian" or "ubuntu" in settings.SERVER_BANNER.lower():
           try:
             check_version = re.findall(r"/(.*)\.", settings.SERVER_BANNER.lower())
-            if check_version[0] >= "1.2.4":
+            if check_version[0] > "2.3" and not settings.TARGET_OS == "win":
               # Add "/html" to servers root directory
               settings.WEB_ROOT = settings.WEB_ROOT + "/html"
             else:
-              # Add "/www" to servers root directory
-              settings.WEB_ROOT = settings.WEB_ROOT + "/www"
+              settings.WEB_ROOT = settings.WEB_ROOT 
           except IndexError:
             pass
-        elif "microsoft-iis" in settings.SERVER_BANNER.lower():
-          pass
+        # Add "/html" to servers root directory
+        elif "fedora" or "centos" in settings.SERVER_BANNER.lower():
+          settings.WEB_ROOT = settings.WEB_ROOT + "/html"
         else:
-          # Provide custom server's root directory.
-          custom_web_root(url, timesec, filename, http_request_method, url_time_response)
+          pass
+      # On more recent versions (>= "1.2.4") the default root path has changed to "/usr/share/nginx/html"
+      elif "nginx" in settings.SERVER_BANNER.lower():
+        try:
+          check_version = re.findall(r"/(.*)\.", settings.SERVER_BANNER.lower())
+          if check_version[0] >= "1.2.4":
+            # Add "/html" to servers root directory
+            settings.WEB_ROOT = settings.WEB_ROOT + "/html"
+          else:
+            # Add "/www" to servers root directory
+            settings.WEB_ROOT = settings.WEB_ROOT + "/www"
+        except IndexError:
+          pass
+      elif "microsoft-iis" in settings.SERVER_BANNER.lower():
+        pass
+      else:
+        # Provide custom server's root directory.
+        custom_web_root(url, timesec, filename, http_request_method, url_time_response)
 
-        path = urlparse.urlparse(url).path
-        path_parts = path.split('/')
-        count = 0
-        for part in path_parts:        
-          count = count + 1
-        count = count - 1
-        last_param = path_parts[count]
-        EXTRA_DIR = path.replace(last_param, "")
-        settings.WEB_ROOT = settings.WEB_ROOT + EXTRA_DIR
-        if settings.TARGET_OS == "win":
-          settings.WEB_ROOT = settings.WEB_ROOT.replace("/","\\")
-          
+      path = urlparse.urlparse(url).path
+      path_parts = path.split('/')
+      count = 0
+      for part in path_parts:        
+        count = count + 1
+      count = count - 1
+      last_param = path_parts[count]
+      EXTRA_DIR = path.replace(last_param, "")
+      settings.WEB_ROOT = settings.WEB_ROOT + EXTRA_DIR
+      if settings.TARGET_OS == "win":
+        settings.WEB_ROOT = settings.WEB_ROOT.replace("/","\\")
+        
   return tmp_path
 
 """
