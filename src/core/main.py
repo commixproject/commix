@@ -257,7 +257,11 @@ def logs_filename_creation():
   try:
     os.stat(output_dir)
   except:
-    os.mkdir(output_dir)   
+    try:
+      os.mkdir(output_dir)   
+    except OSError, err_msg:
+      print settings.print_critical_msg(str(err_msg.args[0]).split("] ")[1] + ".")
+      sys.exit(0)
 
   # The logs filename construction.
   filename = logs.create_log_file(url, output_dir)
