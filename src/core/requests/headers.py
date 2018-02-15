@@ -149,7 +149,10 @@ def check_http_traffic(request):
         if current_attempt == 0:
           if settings.VERBOSITY_LEVEL < 2:
             print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
-          error_msg = str(err_msg.args[0]).split("] ")[1] + ". "
+          try:
+            error_msg = str(err_msg.args[0]).split("] ")[1] + ". "
+          except IndexError:
+            error_msg = ""
           error_msg += "Please wait while retring the request(s)."
           print settings.print_critical_msg(error_msg)
           warn_msg = "In case the provided target URL is valid, try to rerun with"
