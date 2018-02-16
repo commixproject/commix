@@ -34,10 +34,16 @@ def request(url):
     request = urllib2.Request(url, menu.options.data)
   else:
     request = urllib2.Request(url)
-  headers.do_check(request) 
-  response = urllib2.urlopen(request)
-  soup = BeautifulSoup(response)
-  return soup
+  try:
+    headers.do_check(request) 
+    response = urllib2.urlopen(request)
+    soup = BeautifulSoup(response)
+    return soup
+  except urllib2.URLError, e:
+    err_msg = "Unable to connect to the target URL "
+    err_msg += "(" + str(e.args[0]).split("] ")[1] + ")." 
+    print settings.print_critical_msg(err_msg)
+    raise SystemExit
 
 """
 Check for URLs in sitemap.xml.
