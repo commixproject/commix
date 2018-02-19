@@ -420,6 +420,8 @@ def main(filename, url):
                 question_msg = "Please enter the crawling depth level (1-2) > "
                 sys.stdout.write(settings.print_question_msg(question_msg))
                 depth_level = sys.stdin.readline().replace("\n","").lower()
+                if len(depth_level) == 0:
+                   depth_level = 1  
                 if int(depth_level) >= 3:
                   err_msg = "Depth level '" + depth_level + "' is not a valid answer."  
                   print settings.print_error_msg(err_msg)

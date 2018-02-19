@@ -80,7 +80,7 @@ The crawing process.
 """
 def do_process(url):
   crawled_href = crawling(url)
-  if menu.options.DEFAULT_CRAWLDEPTH_LEVEL == 1:
+  if settings.DEFAULT_CRAWLDEPTH_LEVEL == 1:
     return crawled_href
   else:
     for url in crawled_href:
