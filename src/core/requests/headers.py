@@ -163,7 +163,13 @@ def check_http_traffic(request):
           print settings.print_info_msg(info_msg) 
         current_attempt = current_attempt + 1
         time.sleep(3)
-        pass
+        
+      except httplib.BadStatusLine, err_msg:
+        if settings.VERBOSITY_LEVEL < 2:
+          print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
+        if len(err_msg.line) > 2 :
+          print err_msg.line, err_msg.message
+        raise SystemExit()
         
   try:
     response = urllib2.urlopen(request)
