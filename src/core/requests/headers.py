@@ -170,7 +170,10 @@ def check_http_traffic(request):
         if len(err_msg.line) > 2 :
           print err_msg.line, err_msg.message
         raise SystemExit()
-        
+
+      except AttributeError:
+        raise SystemExit() 
+      
   try:
     response = urllib2.urlopen(request)
     # Check the HTTP response headers.
@@ -196,8 +199,8 @@ def check_http_traffic(request):
       else:
         err_msg = error_msg
       print settings.print_critical_msg(err_msg + ").")
-      raise SystemExit()  
-       
+      raise SystemExit()
+
 """
 Check for added headers.
 """
