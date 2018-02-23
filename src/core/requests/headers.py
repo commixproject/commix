@@ -121,11 +121,19 @@ def check_http_traffic(request):
   class connection_handler(urllib2.HTTPHandler, urllib2.HTTPSHandler):
     if settings.PROXY_PROTOCOL == 'https':
       def https_open(self, req):
-        return self.do_open(do_connection, req)
+        try:
+          return self.do_open(do_connection, req)
+        except Exception as err_msg:
+          print settings.print_critical_msg(str(err_msg.args[0]).split("] ")[1] + ".")
+          raise SystemExit()
     else:      
       def http_open(self, req):
-        return self.do_open(do_connection, req)
-           
+        try:
+          return self.do_open(do_connection, req)
+        except Exception as err_msg:
+          print settings.print_critical_msg(str(err_msg.args[0]).split("] ")[1] + ".")
+          raise SystemExit()
+
   if settings.REVERSE_TCP == False and settings.BIND_TCP == False:
     opener = urllib2.OpenerDirector()
     opener.add_handler(connection_handler())
