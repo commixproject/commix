@@ -57,12 +57,17 @@ def estimate_response_time(url, timesec):
     if settings.VERBOSITY_LEVEL >= 1:
       print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
     err_msg = "The connection to target URL has timed out."
-    print settings.print_critical_msg(err_msg)+ "\n"
+    print settings.print_critical_msg(err_msg) + "\n"
     sys.exit(0)
   except urllib2.URLError, err_msg:
     if settings.VERBOSITY_LEVEL >= 1:
       print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
     print settings.print_critical_msg(str(err_msg.args[0]).split("] ")[1] + ".")
+    sys.exit(0)
+  except ValueError, err_msg:
+    if settings.VERBOSITY_LEVEL >= 1:
+      print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
+    print settings.print_critical_msg(str(err_msg) + ".")
     sys.exit(0)
   end = time.time()
   diff = end - start
