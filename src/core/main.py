@@ -995,6 +995,9 @@ try:
     # Check if defined "--purge-output" option.
     if menu.options.purge_output:
       purge.purge_output()
+      if not any((menu.options.url, menu.options.logfile, menu.options.bulkfile, \
+                  menu.options.requestfile, menu.options.sitemap_url, menu.options.wizard)):
+        sys.exit(0)
 
     # Check the user-defined OS.
     if menu.options.os:
