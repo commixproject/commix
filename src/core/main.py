@@ -185,8 +185,14 @@ def init_request(url):
   # Check if defined POST data
   if menu.options.data:
     settings.USER_DEFINED_POST_DATA = menu.options.data
+    # Check if defined character used for splitting parameter values.
+    if menu.options.pdel and menu.options.pdel in settings.USER_DEFINED_POST_DATA:
+      settings.PARAMETER_DELIMITER = menu.options.pdel
     request = urllib2.Request(url, menu.options.data)
   else:
+    # Check if defined character used for splitting parameter values.
+    if menu.options.pdel and menu.options.pdel in url:
+      settings.PARAMETER_DELIMITER = menu.options.pdel
     request = urllib2.Request(url)
   headers.do_check(request)
   # Check if defined any HTTP Proxy (--proxy option).
@@ -311,10 +317,6 @@ def main(filename, url):
     # Check injection level, due to the provided testable parameters.
     if menu.options.level < 2 and menu.options.test_parameter != None:
       checks.check_injection_level()
-
-    # Check if defined character used for splitting parameter values.
-    if menu.options.pdel:
-     settings.PARAMETER_DELIMITER = menu.options.pdel
 
     # Check if defined character used for splitting cookie values.
     if menu.options.cdel:
