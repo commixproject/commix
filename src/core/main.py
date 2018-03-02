@@ -126,7 +126,7 @@ def examine_request(request):
   except urllib2.HTTPError, err_msg:
     error_description = ""
     if len(str(err_msg).split(": ")[1]) == 0:
-      error_description = "Non-standard HTTP status code" 
+      error_description = "Non-standard HTTP status code"
     err_msg = str(err_msg).replace(": "," (") + error_description + ")." 
     if menu.options.bulkfile:
       warn_msg = "Skipping URL '" + url + "' - " + err_msg
@@ -139,8 +139,12 @@ def examine_request(request):
       raise SystemExit 
 
   except urllib2.URLError, e:
-    err_msg = "Unable to connect to the target URL "
-    err_msg += "(" + str(e.args[0]).split("] ")[1] + ")." 
+    err_msg = "Unable to connect to the target URL"
+    try:
+      err_msg += " (" + str(e.args[0]).split("] ")[1] + ")."
+    except IndexError:
+      err_msg += "."
+      pass
     if menu.options.bulkfile:
       warn_msg = "Skipping URL '" + url + "' - " + err_msg
       print settings.print_critical_msg(warn_msg)
