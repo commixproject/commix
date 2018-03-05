@@ -84,7 +84,12 @@ def logfile_parser():
 
   else:
     # Check for multiple hosts
-    request = open(request_file, "r")
+    try:
+      request = open(request_file, "r")
+    except IOError, err_msg:
+      print settings.print_critical_msg(str(err_msg.args[0]).split("] ")[1] + ".")
+      sys.exit(0)
+        
     words_dict = {}
     for word in request.read().strip().splitlines():
       if word[:4].strip() == "GET" or word[:4].strip() == "POST":
