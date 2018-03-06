@@ -1,4 +1,5 @@
 ## Version 2.3 (upcoming)
+* Fixed: Multiple bug-fixes regarding several reported unhandled exceptions. 
 * Revised: Minor improvement regarding testing the Host HTTP header.
 * Added: Support for Host HTTP header command injections.
 * Revised: Minor improvement regarding testing SOAP/XML POST data.
