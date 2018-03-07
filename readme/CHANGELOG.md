@@ -1,4 +1,4 @@
-## Version 2.3 (upcoming)
+## Version 2.3 (2018-03-07)
 * Fixed: Multiple bug-fixes regarding several reported unhandled exceptions. 
 * Revised: Minor improvement regarding testing the Host HTTP header.
 * Added: Support for Host HTTP header command injections.
