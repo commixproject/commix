@@ -951,7 +951,7 @@ def check_similarities(all_params):
 """
 Gererate characters pool (for blind command injections)
 """
-def generate_char_pool():
+def generate_char_pool(num_of_chars):
   if menu.options.charset:
     char_pool = [ord(c) for c in menu.options.charset]
   else:

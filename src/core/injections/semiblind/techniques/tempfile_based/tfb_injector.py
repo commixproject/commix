@@ -283,7 +283,7 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
     sys.stdout.write("\r" + settings.print_info_msg(info_msg))
     sys.stdout.flush()
     for num_of_chars in range(1, int(num_of_chars)):
-      char_pool = checks.generate_char_pool()  
+      char_pool = checks.generate_char_pool(num_of_chars)  
       for ascii_char in char_pool:
         # Get the execution ouput, of shell execution.
         if alter_shell :
