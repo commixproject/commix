@@ -776,9 +776,9 @@ def check_for_stored_tamper(payload):
   tamper_scripts()
 
 """
-Perform base64 / hex encoding in payload.
+Perform payload modification
 """
-def perform_payload_encoding(payload):
+def perform_payload_modification(payload):
   for encode_type in settings.MULTI_ENCODED_PAYLOAD[::-1]:
     # Encode payload to hex format.    
     if encode_type == 'base64encode':

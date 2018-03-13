@@ -160,8 +160,8 @@ def eb_injection_handler(url, timesec, filename, http_request_method):
               # Whitespace fixation
               payload = re.sub(" ", whitespace, payload)
               
-              # Check for base64 / hex encoding
-              payload = checks.perform_payload_encoding(payload)
+              # Perform payload modification
+              payload = checks.perform_payload_modification(payload)
 
               if not settings.TAMPER_SCRIPTS['base64encode'] and \
                    not settings.TAMPER_SCRIPTS['hexencode']:

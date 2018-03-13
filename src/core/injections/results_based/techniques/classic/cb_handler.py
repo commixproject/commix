@@ -146,8 +146,8 @@ def cb_injection_handler(url, timesec, filename, http_request_method):
               # Whitespace fixation
               payload = re.sub(" ", whitespace, payload)
               
-              # Check for base64 / hex encoding
-              payload = checks.perform_payload_encoding(payload)
+              # Perform payload modification
+              payload = checks.perform_payload_modification(payload)
 
               # Check if defined "--verbose" option.
               if settings.VERBOSITY_LEVEL == 1:

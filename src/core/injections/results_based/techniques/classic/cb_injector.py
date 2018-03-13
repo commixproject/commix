@@ -173,8 +173,8 @@ def injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_meth
     # Whitespace fixation
     payload = re.sub(" ", whitespace, payload)
     
-    # Check for base64 / hex encoding
-    payload = checks.perform_payload_encoding(payload)
+    # Perform payload modification
+    payload = checks.perform_payload_modification(payload)
 
     # Check if defined "--verbose" option.
     if settings.VERBOSITY_LEVEL >= 1:
