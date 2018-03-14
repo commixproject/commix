@@ -728,6 +728,21 @@ def whitespace_check(payload):
             menu.options.tamper = "space2vtab"
       else:
         settings.WHITESPACE[0] = "%20" 
+      
+
+"""
+Check for (multiple) added quotes between the characters of the generated payloads.
+"""
+def check_quotes(payload):
+  if payload.count("''") >= 10:
+    if not settings.TAMPER_SCRIPTS['singlequotes']:
+      if menu.options.tamper:
+        menu.options.tamper = menu.options.tamper + ",singlequotes"
+      else:
+        menu.options.tamper = "singlequotes"  
+    from src.core.tamper import singlequotes
+    payload = singlequotes.transform(payload)
+
 
 """
 Recognise the payload.
@@ -773,12 +788,19 @@ Check for stored payloads and enable tamper scripts.
 def check_for_stored_tamper(payload):
   decoded_payload = recognise_payload(payload)
   whitespace_check(decoded_payload)
+  check_quotes(decoded_payload)
   tamper_scripts()
 
 """
 Perform payload modification
 """
 def perform_payload_modification(payload):
+  for encode_type in settings.MULTI_ENCODED_PAYLOAD[::-1]:
+    # Add single quotes.
+    if encode_type == 'singlequotes':
+      from src.core.tamper import singlequotes
+      payload = singlequotes.transform(payload)
+
   for encode_type in settings.MULTI_ENCODED_PAYLOAD[::-1]:
     # Encode payload to hex format.    
     if encode_type == 'base64encode':
@@ -789,6 +811,7 @@ def perform_payload_modification(payload):
     if encode_type == 'hexencode':
       from src.core.tamper import hexencode
       payload = hexencode.encode(payload)
+
   return payload
 
 

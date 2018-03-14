@@ -111,7 +111,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "2.4.2"
+VERSION_NUM = "2.4.3"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"
@@ -677,7 +677,8 @@ TAMPER_SCRIPTS = {
                   "hexencode": False,
                   "space2plus": False,
                   "space2htab": False,
-                  "space2vtab": False
+                  "space2vtab": False,
+                  "singlequotes": False
                  }
 
 # HTTP Errors
@@ -741,5 +742,8 @@ SENSITIVE_OPTIONS = ["--data", "-d", "--cookie", "-p", "--url", "-u", "-x"]
 
 # Github OAuth token used for creating an automatic issue for unhandled exceptions.
 GITHUB_REPORT_OAUTH_TOKEN = "YjNiYjdhZDBlYzM2MmM2NGEzYTAzZTc4ZDg1NmYwZTUyZGZlN2EyZQ=="
+
+# Tranform payloads (via tamper script(s))
+TRANFROM_PAYLOAD = None
 
 # eof
