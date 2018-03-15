@@ -131,7 +131,11 @@ def check_http_traffic(request):
         try:
           return self.do_open(do_connection, req)
         except Exception as err_msg:
-          print settings.print_critical_msg(str(err_msg.args[0]).split("] ")[1] + ".")
+          try:
+            error_msg = str(err_msg.args[0]).split("] ")[1] + "."
+          except IndexError:
+            error_msg = ""
+          print settings.print_critical_msg(error_msg)
           raise SystemExit()
 
   if settings.REVERSE_TCP == False and settings.BIND_TCP == False:
