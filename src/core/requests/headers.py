@@ -124,7 +124,13 @@ def check_http_traffic(request):
         try:
           return self.do_open(do_connection, req)
         except Exception as err_msg:
-          print settings.print_critical_msg(str(err_msg.args[0]).split("] ")[1] + ".")
+          try:
+            error_msg = str(err_msg.args[0]).split("] ")[1] + "."
+          except IndexError:
+            error_msg = str(err_msg.args[0]) + "."
+          if settings.VERBOSITY_LEVEL < 2:
+            print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
+          print settings.print_critical_msg(error_msg)
           raise SystemExit()
     else:      
       def http_open(self, req):
@@ -134,7 +140,9 @@ def check_http_traffic(request):
           try:
             error_msg = str(err_msg.args[0]).split("] ")[1] + "."
           except IndexError:
-            error_msg = ""
+            error_msg = str(err_msg.args[0]) + "."
+          if settings.VERBOSITY_LEVEL < 2:
+            print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
           print settings.print_critical_msg(error_msg)
           raise SystemExit()
 
