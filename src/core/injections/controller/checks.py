@@ -733,7 +733,22 @@ def whitespace_check(payload):
 """
 Check for (multiple) added quotes between the characters of the generated payloads.
 """
+def other_symbols(payload):
+  # Check for symbols
+  if payload.count("^") >= 10:
+    if not settings.TAMPER_SCRIPTS['caret']:
+      if menu.options.tamper:
+        menu.options.tamper = menu.options.tamper + ",caret"
+      else:
+        menu.options.tamper = "caret"  
+    from src.core.tamper import caret
+    payload = caret.transform(payload)
+
+"""
+Check for (multiple) added quotes between the characters of the generated payloads.
+"""
 def check_quotes(payload):
+  # Check for single quotes
   if payload.count("''") >= 10:
     if not settings.TAMPER_SCRIPTS['singlequotes']:
       if menu.options.tamper:
@@ -742,7 +757,6 @@ def check_quotes(payload):
         menu.options.tamper = "singlequotes"  
     from src.core.tamper import singlequotes
     payload = singlequotes.transform(payload)
-
 
 """
 Recognise the payload.
@@ -788,6 +802,7 @@ Check for stored payloads and enable tamper scripts.
 def check_for_stored_tamper(payload):
   decoded_payload = recognise_payload(payload)
   whitespace_check(decoded_payload)
+  other_symbols(decoded_payload)
   check_quotes(decoded_payload)
   tamper_scripts()
 
@@ -800,6 +815,10 @@ def perform_payload_modification(payload):
     if encode_type == 'singlequotes':
       from src.core.tamper import singlequotes
       payload = singlequotes.transform(payload)
+    # Add caret symbol.  
+    elif encode_type == 'caret':
+      from src.core.tamper import caret
+      payload = caret.transform(payload) 
 
   for encode_type in settings.MULTI_ENCODED_PAYLOAD[::-1]:
     # Encode payload to hex format.    
