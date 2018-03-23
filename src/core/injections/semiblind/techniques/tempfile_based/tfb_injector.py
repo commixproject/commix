@@ -480,13 +480,8 @@ def false_positive_check(separator, TAG, cmd, prefix, suffix, whitespace, timese
         # Whitespace fixation
         payload = re.sub(" ", whitespace, payload)
 
-        # Encode payload to base64 format.
-        if settings.TAMPER_SCRIPTS['base64encode']:
-          payload = base64.b64encode(payload)
-
-        # Encode payload to hex format.
-        elif settings.TAMPER_SCRIPTS['hexencode']:
-          payload = payload.encode("hex")
+        # Perform payload modification
+        payload = checks.perform_payload_modification(payload)
 
         # Check if defined "--verbose" option.
         if settings.VERBOSITY_LEVEL == 1:
