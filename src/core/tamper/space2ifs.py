@@ -33,7 +33,9 @@ if settings.TARGET_OS != "win":
   else:
     settings.WHITESPACE.append("${IFS}") 
 else:
-  warn_msg = "Windows target host(s), does not support the (Bash) $IFS variable."
-  print settings.print_warning_msg(warn_msg)
-
+  warn_msg = "Windows target host(s), does not support the '"+ script_name  +".py' tamper script."
+  sys.stdout.write("\r" + settings.print_warning_msg(warn_msg))
+  sys.stdout.flush() 
+  print
+  
 # eof 

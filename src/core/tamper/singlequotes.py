@@ -50,7 +50,7 @@ def transform(payload):
     if settings.EVAL_BASED_STATE != False:
       if settings.TRANFROM_PAYLOAD == None:
         settings.TRANFROM_PAYLOAD = False
-        warn_msg = "The dynamic code evaluation technique, does not support the 'singlequotes.py' tamper script."
+        warn_msg = "The dynamic code evaluation technique, does not support the '"+ script_name  +".py' tamper script."
         sys.stdout.write("\r" + settings.print_warning_msg(warn_msg))
         sys.stdout.flush() 
         print
@@ -62,9 +62,11 @@ def transform(payload):
   else:
     if settings.TRANFROM_PAYLOAD == None:
       settings.TRANFROM_PAYLOAD = False
-      warn_msg = "Windows target host(s), does not support the 'singlequotes.py' tamper script."
-      sys.stdout.write(settings.print_warning_msg(warn_msg))
+      warn_msg = "Windows target host(s), does not support the '"+ script_name  +".py' tamper script."
+      sys.stdout.write("\r" + settings.print_warning_msg(warn_msg))
       sys.stdout.flush() 
       print
 
   return payload
+  
+# eof 
