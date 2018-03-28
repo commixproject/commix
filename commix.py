@@ -34,6 +34,10 @@ if __name__ == '__main__':
     import sys
     sys.exit(0) 
 
+  except KeyboardInterrupt:
+    import sys
+    sys.exit(0) 
+    
   except:
     from src.utils import common
     common.unhandled_exception()
