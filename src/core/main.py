@@ -70,6 +70,10 @@ else:
       readline_error = True
 pass
 
+# Set default encoding (UTF-8)
+reload(sys)
+sys.setdefaultencoding(settings.DEFAULT_ENCODING)
+
 # Use Colorama to make Termcolor work on Windows too :)
 if settings.IS_WINDOWS:
   init()
