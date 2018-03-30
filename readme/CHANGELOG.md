@@ -294,5 +294,5 @@
 * Removed: The "boolean-based" (blind) technique.
 * Added: More Options.
 
-## Version 0.1a (2014-20-12)
+## Version 0.1a (2014-12-20)
 * The initial release {aka the Birth!}.
