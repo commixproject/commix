@@ -315,7 +315,6 @@ def ps_check_failed():
       print settings.print_error_msg(err_msg)
       pass
 
-
 """
 Check if CGI scripts (shellshock injection).
 """
@@ -640,10 +639,12 @@ def tamper_scripts():
           print settings.print_error_msg(err_msg)
 
       if os.path.isfile(check_tfile):
-        tamper_script_counter =  tamper_script_counter + 1
+        tamper_script_counter = tamper_script_counter + 1
         import importlib
         check_tfile = check_tfile.replace("/",".")
-        importlib.import_module(check_tfile.split(".py")[0])
+        import_tamper = check_tfile.split(".py")[0]
+        print settings.SUB_CONTENT_SIGN + import_tamper.split(".")[3]
+        importlib.import_module(import_tamper)
 
 """
 Check if the payload output seems to be hex.
@@ -805,7 +806,6 @@ def perform_payload_modification(payload):
       payload = hexencode.encode(payload)
 
   return payload
-
 
 """
 Skip parameters when the provided value is empty.

@@ -24,7 +24,6 @@ Notes:
 """
 
 script_name = "base64encode"
-print settings.SUB_CONTENT_SIGN + script_name
 
 if not settings.TAMPER_SCRIPTS[script_name]:
   settings.TAMPER_SCRIPTS[script_name] = True

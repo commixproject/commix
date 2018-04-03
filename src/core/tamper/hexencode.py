@@ -23,7 +23,6 @@ Notes:
 """
 
 script_name = "hexencode"
-print settings.SUB_CONTENT_SIGN + script_name
 
 if not settings.TAMPER_SCRIPTS[script_name]:
   settings.TAMPER_SCRIPTS[script_name] = True

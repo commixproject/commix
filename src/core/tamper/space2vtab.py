@@ -22,7 +22,6 @@ Notes:
 """
 
 script_name = "space2vtab"
-print settings.SUB_CONTENT_SIGN + script_name 
 
 if settings.TARGET_OS == "win":
   settings.TAMPER_SCRIPTS[script_name] = True
