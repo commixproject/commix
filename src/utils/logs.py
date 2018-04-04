@@ -58,18 +58,26 @@ pass
 Save command history.
 """
 def save_cmd_history():
-  cli_history = os.path.expanduser(settings.CLI_HISTORY)
-  if os.path.exists(cli_history):
-    readline.write_history_file(cli_history)
+  try:
+    cli_history = os.path.expanduser(settings.CLI_HISTORY)
+    if os.path.exists(cli_history):
+      readline.write_history_file(cli_history)
+  except IOError, err_msg:
+    print settings.print_critical_msg(str(err_msg.args[0]).split("] ")[1] + ".")
+    sys.exit(0)
 
 """
 Load commands from history.
 """
 def load_cmd_history():
-  cli_history = os.path.expanduser(settings.CLI_HISTORY)
-  if os.path.exists(cli_history):
-    readline.read_history_file(cli_history)
-    
+  try:
+    cli_history = os.path.expanduser(settings.CLI_HISTORY)
+    if os.path.exists(cli_history):
+      readline.read_history_file(cli_history)
+  except IOError, err_msg:
+    print settings.print_critical_msg(str(err_msg.args[0]).split("] ")[1] + ".")
+    sys.exit(0)
+   
 """
 Create log files
 """
