@@ -123,7 +123,7 @@ def unhandled_exception():
   err_msg += "Command line: " + re.sub(r".+?\bcommix\.py\b", "commix.py", " ".join(sys.argv)) + "\n"
   err_msg = mask_sensitive_data(err_msg)
   exc_msg = str(traceback.format_exc())
-  exc_msg = re.sub(r'".+?/(\w+\.py)', "\"\g<1>", exc_msg)
+  exc_msg = re.sub(r'".+?[/\\](\w+\.py)', "\"\g<1>", exc_msg)
   print settings.print_critical_msg(err_msg + "\n" + exc_msg.rstrip()) 
   create_github_issue(err_msg, exc_msg[:])
 
