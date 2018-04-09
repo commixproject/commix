@@ -90,7 +90,10 @@ def create_log_file(url, output_dir):
     host = parts[1].split('/', 1)[0]
   except IndexError:
     host = parts[0].split('/', 1)[0]
-
+  except OSError, err_msg:
+    print settings.print_critical_msg(str(err_msg.args[0]).split("] ")[1] + ".")
+    sys.exit(0)
+    
   # Check if port is defined to host.
   if ":" in host:
     host = host.replace(":","_")
