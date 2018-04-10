@@ -91,21 +91,25 @@ def create_log_file(url, output_dir):
   except IndexError:
     host = parts[0].split('/', 1)[0]
   except OSError, err_msg:
-    print settings.print_critical_msg(str(err_msg.args[0]).split("] ")[1] + ".")
-    sys.exit(0)
+    error_msg = str(err_msg.args[0]).split("] ")[1] + "."
+    print settings.print_critical_msg(error_msg)
+    raise SystemExit()
     
   # Check if port is defined to host.
   if ":" in host:
     host = host.replace(":","_")
-
   try:
     os.stat(output_dir + host + "/")
   except:
     try:
       os.mkdir(output_dir + host + "/")
-    except OSError, err_msg:
-      print settings.print_critical_msg(str(err_msg.args[0]).split("] ")[1] + ".")
-      sys.exit(0)
+    except:
+      try:
+        error_msg = str(err_msg.args[0]).split("] ")[1] + "."
+      except:
+        error_msg = str(err_msg.args[0]) + "."
+      print settings.print_critical_msg(error_msg)
+      raise SystemExit()
 
   # Create cli history file if does not exist.
   settings.CLI_HISTORY = output_dir + host + "/" + "cli_history"
