@@ -115,11 +115,11 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
 
   # Procced with file-based semiblind command injection technique,
   # once the user provides the path of web server's root directory.
-  if menu.options.web_root and not "f" in menu.options.tech:
-    if not menu.options.web_root.endswith("/"):
-       menu.options.web_root =  menu.options.web_root + "/"
-    if checks.procced_with_file_based_technique():
-      menu.options.tech = "f"
+  if menu.options.web_root and menu.options.tech and not "f" in menu.options.tech:
+      if not menu.options.web_root.endswith("/"):
+         menu.options.web_root =  menu.options.web_root + "/"
+      if checks.procced_with_file_based_technique():
+        menu.options.tech = "f"
   
   # Check if it is vulnerable to classic command injection technique.
   if not menu.options.tech or "c" in menu.options.tech:
