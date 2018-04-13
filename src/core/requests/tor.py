@@ -90,14 +90,14 @@ def do_check():
     except urllib2.URLError, err_msg:
       print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
       if menu.options.tor_check:
-        err_msg = "It seems that your Tor connection is not properly set. "
+        warn_msg = "It seems that your Tor connection is not properly set. "
       else:
-        err_msg = ""
+        warn_msg = ""
       warn_msg = "Please make sure that you have "
       warn_msg += "Tor installed and running so "
       warn_msg += "you could successfully use "
       warn_msg += "switch '--tor'."
-      print settings.print_warning_msg(warn_msg)  
+      print settings.print_warning_msg(warn_msg)
       print settings.print_critical_msg(str(err_msg.args[0]).split("] ")[1] + ".")
       sys.exit(0)  
 
