@@ -581,19 +581,20 @@ def print_non_listed_params(check_parameters, http_request_method, header_name):
       non_exist_param = non_exist_param.split(",")
       if menu.options.level >= 2 and \
          menu.options.test_parameter != None:
-        if settings.COOKIE_DELIMITER in menu.options.cookie:
-          cookies = menu.options.cookie.split(settings.COOKIE_DELIMITER)
-          for cookie in cookies:
-            if cookie.split("=")[0].strip() in menu.options.test_parameter:
-              try:
-                non_exist_param.remove(cookie.split("=")[0].strip())
-              except ValueError:
-                pass 
-        elif menu.options.cookie.split("=")[0] in menu.options.test_parameter:
-          try:
-            non_exist_param.remove(menu.options.cookie.split("=")[0])
-          except ValueError:
-            pass
+        if menu.options.cookie != None: 
+          if settings.COOKIE_DELIMITER in menu.options.cookie:
+            cookies = menu.options.cookie.split(settings.COOKIE_DELIMITER)
+            for cookie in cookies:
+              if cookie.split("=")[0].strip() in menu.options.test_parameter:
+                try:
+                  non_exist_param.remove(cookie.split("=")[0].strip())
+                except ValueError:
+                  pass 
+          elif menu.options.cookie.split("=")[0] in menu.options.test_parameter:
+            try:
+              non_exist_param.remove(menu.options.cookie.split("=")[0])
+            except ValueError:
+              pass
             
       # Remove the defined HTTP headers      
       for http_header in settings.HTTP_HEADERS:
