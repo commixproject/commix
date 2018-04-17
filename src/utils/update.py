@@ -39,9 +39,9 @@ def revision_num():
       end = 0
       start = time.time()
       print "\n" + "---"
-      subprocess.Popen("git reset --hard HEAD && git pull", shell=True).wait()
+      subprocess.Popen("git reset --hard HEAD && git clean -fd && git pull", shell=True).wait()
     else:
-      process = subprocess.Popen("git reset --hard HEAD && git pull", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+      process = subprocess.Popen("git reset --hard HEAD && git clean -fd && git pull", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
       stdout, _ = process.communicate()
       info_msg = ('Updated to', 'Already at')["Already" in stdout]
     if not menu.options.verbose:
