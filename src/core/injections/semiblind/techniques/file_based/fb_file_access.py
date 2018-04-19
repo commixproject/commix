@@ -163,6 +163,11 @@ def file_upload(separator, payload, TAG, timesec, prefix, suffix, whitespace, ht
       sys.stdout.write(settings.print_warning_msg(warn_msg) + "\n")
       sys.stdout.flush()
       sys.exit(0)
+    except ValueError, err_msg:
+      err_msg = str(err_msg[0]).capitalize() + str(err_msg)[1]
+      sys.stdout.write(settings.print_critical_msg(err_msg) + "\n")
+      sys.stdout.flush()
+      sys.exit(0) 
       
     # Check the file-destination
     if os.path.split(menu.options.file_dest)[1] == "" :
