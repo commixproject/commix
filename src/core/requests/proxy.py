@@ -58,5 +58,12 @@ Use the defined HTTP Proxy
 def use_proxy(request):
   headers.do_check(request)
   request.set_proxy(menu.options.proxy,settings.PROXY_PROTOCOL)
-  response = urllib2.urlopen(request)
-  return response  
+  try:
+    response = urllib2.urlopen(request)
+    return response
+  except:
+    err_msg = "Unable to connect to proxy ("
+    err_msg += menu.options.proxy
+    err_msg += ")."
+    print settings.print_critical_msg(err_msg)
+    sys.exit(0) 
