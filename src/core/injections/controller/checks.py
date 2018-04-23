@@ -624,23 +624,30 @@ def print_non_listed_params(check_parameters, http_request_method, header_name):
 Tamper script checker
 """
 def tamper_scripts():
-  if menu.options.tamper:
-    info_msg = "Loading tamper script(s): "
-    print settings.print_info_msg(info_msg)
-    # Check the provided tamper script(s)
-    tamper_script_counter = 0
-    for tfile in list(set(re.split(settings.PARAMETER_SPLITTING_REGEX, menu.options.tamper.lower()))):
-      if "hexencode" or "base64encode" == tfile:
-        settings.MULTI_ENCODED_PAYLOAD.append(tfile)
 
+  if menu.options.tamper:
+    # Check the provided tamper script(s)
+    tlist = list(set(re.split(settings.PARAMETER_SPLITTING_REGEX, menu.options.tamper.lower())))
+    
+    # Check for invalid tamper scripts.
+    for tfile in tlist:
       check_tfile = "src/core/tamper/" + tfile + ".py"
       if not os.path.exists(check_tfile.lower()):
+        tlist.remove(tfile)
         if not settings.LOAD_SESSION:
           err_msg = "The '" + tfile + "' tamper script does not exist."
-          print settings.print_error_msg(err_msg)
+          print settings.print_critical_msg(err_msg)
+          raise SystemExit()
 
+    info_msg = "Loading tamper script" + ('s', '')[len(tlist) == 1] + ": "
+    print settings.print_info_msg(info_msg)
+
+    # Check for valid tamper scripts.
+    for tfile in tlist:
+      check_tfile = "src/core/tamper/" + tfile + ".py"
+      if "hexencode" or "base64encode" == tfile:
+        settings.MULTI_ENCODED_PAYLOAD.append(tfile)
       if os.path.isfile(check_tfile):
-        tamper_script_counter = tamper_script_counter + 1
         import importlib
         check_tfile = check_tfile.replace("/",".")
         import_tamper = check_tfile.split(".py")[0]
