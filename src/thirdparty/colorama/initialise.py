@@ -1,5 +1,6 @@
 # Copyright Jonathan Hartley 2013. BSD 3-Clause license, see LICENSE file.
 import atexit
+import contextlib
 import sys
 
 from .ansitowin32 import AnsiToWin32
@@ -15,7 +16,8 @@ atexit_done = False
 
 
 def reset_all():
-    AnsiToWin32(orig_stdout).reset_all()
+    if AnsiToWin32 is not None:    # Issue #74: objects might become None at exit
+        AnsiToWin32(orig_stdout).reset_all()
 
 
 def init(autoreset=False, convert=None, strip=None, wrap=True):
@@ -51,6 +53,15 @@ def deinit():
         sys.stdout = orig_stdout
     if orig_stderr is not None:
         sys.stderr = orig_stderr
+
+
+@contextlib.contextmanager
+def colorama_text(*args, **kwargs):
+    init(*args, **kwargs)
+    try:
+        yield
+    finally:
+        deinit()
 
 
 def reinit():

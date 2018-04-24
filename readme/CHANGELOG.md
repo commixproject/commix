@@ -1,4 +1,5 @@
 ## Version 2.4 (upcoming)
+* Updated: Colorama (third party) module has been updated.
 * Revised: Minor improvement regarding keeping the git folder 'clean' (via @g0tmi1k).
 * Fixed: Minor bug-fix regarding loading multiple tamper scripts (during the exploitation phase). 
 * Added: New tamper script "caret.py" that adds the caret symbol (^) between the characters of the generated payloads (for windows targets).

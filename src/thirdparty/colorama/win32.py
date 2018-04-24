@@ -12,6 +12,7 @@ try:
 except (AttributeError, ImportError):
     windll = None
     SetConsoleTextAttribute = lambda *_: None
+    winapi_test = lambda *_: None
 else:
     from ctypes import byref, Structure, c_char, POINTER
 
@@ -82,9 +83,9 @@ else:
     ]
     _FillConsoleOutputAttribute.restype = wintypes.BOOL
 
-    _SetConsoleTitleW = windll.kernel32.SetConsoleTitleA
+    _SetConsoleTitleW = windll.kernel32.SetConsoleTitleW
     _SetConsoleTitleW.argtypes = [
-        wintypes.LPCSTR
+        wintypes.LPCWSTR
     ]
     _SetConsoleTitleW.restype = wintypes.BOOL
 
@@ -92,6 +93,15 @@ else:
         STDOUT: _GetStdHandle(STDOUT),
         STDERR: _GetStdHandle(STDERR),
     }
+
+    def _winapi_test(handle):
+        csbi = CONSOLE_SCREEN_BUFFER_INFO()
+        success = _GetConsoleScreenBufferInfo(
+            handle, byref(csbi))
+        return bool(success)
+
+    def winapi_test():
+        return any(_winapi_test(h) for h in handles.values())
 
     def GetConsoleScreenBufferInfo(stream_id=STDOUT):
         handle = handles[stream_id]
