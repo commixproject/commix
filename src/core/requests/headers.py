@@ -199,7 +199,7 @@ def check_http_traffic(request):
     # Check the HTTP response headers.
     http_response(response.info())
     # Check the HTTP response content.
-    http_response_content(response.read())
+    http_response_content(response.read().decode('utf-8'))
 
   except urllib2.HTTPError, err:
     error_msg = "Got " + str(err).replace(": "," (")
@@ -229,7 +229,11 @@ def check_http_traffic(request):
       err_msg += "."
     print settings.print_critical_msg(err_msg + ").")
     raise SystemExit()
-    
+
+  except httplib.IncompleteRead, err:
+    print settings.print_critical_msg(str(err_msg))
+    raise SystemExit()
+
 """
 Check for added headers.
 """
