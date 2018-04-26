@@ -440,11 +440,13 @@ injection.add_option("--maxlen",
 
 injection.add_option("--delay", 
                 action="store",
+                type="int",
                 dest="delay",
                 help="Seconds to delay between each HTTP request.")
 
 injection.add_option("--time-sec", 
                 action="store",
+                type="int",
                 dest="timesec",
                 help="Seconds to delay the OS response (Default 1).")
 

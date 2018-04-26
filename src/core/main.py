@@ -1054,11 +1054,11 @@ try:
       settings.MAX_RETRIES = menu.options.retries
 
     # Seconds to delay between each HTTP request.
-    if menu.options.delay > "0":
+    if menu.options.delay > 0:
       settings.DELAY = menu.options.delay
 
     # Check if defined "--timesec" option.
-    if menu.options.timesec > "0":
+    if menu.options.timesec > 0:
       settings.TIMESEC = menu.options.timesec
     else:
       if menu.options.tor:
