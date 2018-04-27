@@ -20,6 +20,7 @@ import time
 import urllib
 import urlparse
 
+from src.utils import logs
 from src.utils import menu
 from src.utils import settings
 
@@ -185,7 +186,8 @@ def check_option(separator, TAG, cmd, prefix, suffix, whitespace, http_request_m
     return go_back, go_back_again
 
   # The "quit" option
-  elif os_shell_option == "quit":                    
+  elif os_shell_option == "quit": 
+    logs.print_logs_notification(filename, url)                  
     sys.exit(0)
 
   else:
