@@ -133,15 +133,23 @@ def create_log_file(url, output_dir):
 
   # The logs filename construction.
   filename = output_dir + host + "/" + settings.OUTPUT_FILE
-  output_file = open(filename, "a")
-  output_file.write("\n" + "=" * 37)
-  output_file.write("\n" + "| Started in " + \
-    datetime.datetime.fromtimestamp(time.time()).strftime('%m/%d/%Y' + \
-    " at " + '%H:%M:%S' + " |"))
-  output_file.write("\n" + "=" * 37)
-  output_file.write("\n" + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + "Tested URL : " + url)
-  output_file.close()
-
+  try:
+    output_file = open(filename, "a")
+    output_file.write("\n" + "=" * 37)
+    output_file.write("\n" + "| Started in " + \
+      datetime.datetime.fromtimestamp(time.time()).strftime('%m/%d/%Y' + \
+      " at " + '%H:%M:%S' + " |"))
+    output_file.write("\n" + "=" * 37)
+    output_file.write("\n" + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + "Tested URL : " + url)
+    output_file.close()
+  except IOError, err_msg:
+    try:
+      error_msg = str(err_msg.args[0]).split("] ")[1] + "."
+    except:
+      error_msg = str(err_msg.args[0]) + "."
+    print settings.print_critical_msg(error_msg)
+    raise SystemExit()
+      
   return filename
 
 """
