@@ -75,8 +75,12 @@ def load_cmd_history():
     if os.path.exists(cli_history):
       readline.read_history_file(cli_history)
   except IOError, err_msg:
-    print settings.print_critical_msg(str(err_msg.args[0]).split("] ")[1] + ".")
-    sys.exit(0)
+    try:
+      error_msg = str(err_msg.args[0]).split("] ")[1] + "."
+    except:
+      error_msg = str(err_msg.args[0]) + "."
+    print settings.print_critical_msg(error_msg)
+    raise SystemExit()
    
 """
 Create log files
@@ -91,10 +95,13 @@ def create_log_file(url, output_dir):
   except IndexError:
     host = parts[0].split('/', 1)[0]
   except OSError, err_msg:
-    error_msg = str(err_msg.args[0]).split("] ")[1] + "."
+    try:
+      error_msg = str(err_msg.args[0]).split("] ")[1] + "."
+    except:
+      error_msg = str(err_msg.args[0]) + "."
     print settings.print_critical_msg(error_msg)
     raise SystemExit()
-    
+      
   # Check if port is defined to host.
   if ":" in host:
     host = host.replace(":","_")
