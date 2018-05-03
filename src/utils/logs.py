@@ -110,7 +110,7 @@ def create_log_file(url, output_dir):
   except:
     try:
       os.mkdir(output_dir + host + "/")
-    except:
+    except Exception as err_msg:
       try:
         error_msg = str(err_msg.args[0]).split("] ")[1] + "."
       except:
