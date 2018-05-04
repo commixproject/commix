@@ -16,6 +16,7 @@ For more see the file 'readme/COPYING' for copying permission.
 import re
 import sys
 import urllib2
+import httplib
 from src.utils import menu
 from src.utils import settings
 from src.utils import requirments
@@ -99,7 +100,13 @@ def do_check():
       warn_msg += "switch '--tor'."
       print settings.print_warning_msg(warn_msg)
       print settings.print_critical_msg(str(err_msg.args[0]).split("] ")[1] + ".")
-      sys.exit(0)  
+      sys.exit(0)
+
+    except httplib.BadStatusLine, err_msg:
+        print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
+      if len(err_msg.line) > 2 :
+        print err_msg.line, err_msg.message
+      raise SystemExit()
 
 """
 Use the TOR HTTP Proxy.
