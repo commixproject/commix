@@ -15,6 +15,7 @@ For more see the file 'readme/COPYING' for copying permission.
 
 import sys
 import urllib2
+import httplib
 
 from src.utils import menu
 from src.utils import settings
@@ -61,9 +62,10 @@ def use_proxy(request):
   try:
     response = urllib2.urlopen(request)
     return response
-  except:
+
+  except httplib.BadStatusLine, e:
     err_msg = "Unable to connect to proxy ("
     err_msg += menu.options.proxy
     err_msg += ")."
     print settings.print_critical_msg(err_msg)
-    sys.exit(0) 
+    raise SystemExit() 
