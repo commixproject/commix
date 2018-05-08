@@ -87,8 +87,12 @@ def logfile_parser():
     try:
       request = open(request_file, "r")
     except IOError, err_msg:
-      print settings.print_critical_msg(str(err_msg.args[0]).split("] ")[1] + ".")
-      sys.exit(0)
+      try:
+        error_msg = str(err_msg.args[0]).split("] ")[1] + "."
+      except:
+        error_msg = str(err_msg.args[0]) + "."
+      print settings.print_critical_msg(error_msg)
+      raise SystemExit()
         
     words_dict = {}
     for word in request.read().strip().splitlines():
