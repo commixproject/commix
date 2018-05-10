@@ -115,6 +115,7 @@ def examine_request(request):
     else:
       try:
         response = urllib2.urlopen(request)
+        
       except ValueError:
         # Invalid format for the '--header' option.
         if settings.VERBOSITY_LEVEL < 2:
@@ -124,7 +125,16 @@ def examine_request(request):
         err_msg += " '--header=\"HEADER_NAME: " + settings.WILDCARD_CHAR  + "\"' "
         err_msg += "if you want to try to exploit the provided HTTP header."
         print settings.print_critical_msg(err_msg)
-        sys.exit(0)
+        raise SystemExit()
+
+      except Exception as err_msg:
+        try:
+          error_msg = str(err_msg.args[0]).split("] ")[1] + "."
+        except IndexError:
+          error_msg = str(err_msg.args[0]) + "."
+        print settings.print_critical_msg(error_msg)
+        raise SystemExit()
+
     return response
 
   except urllib2.HTTPError, err_msg:
