@@ -103,7 +103,7 @@ def do_check():
       sys.exit(0)
 
     except httplib.BadStatusLine, err_msg:
-        print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
+      print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
       if len(err_msg.line) > 2 :
         print err_msg.line, err_msg.message
       raise SystemExit()
