@@ -21,10 +21,10 @@ Notes:
   * This tamper script works against Windows targets.
 """
 
-script_name = "space2vtab"
+__tamper__ = "space2vtab"
 
 if settings.TARGET_OS == "win":
-  settings.TAMPER_SCRIPTS[script_name] = True
+  settings.TAMPER_SCRIPTS[__tamper__] = True
   if settings.WHITESPACE[0] == "%20" or settings.WHITESPACE[0] == " ":
     settings.WHITESPACE[0] = "%0b"
   else:

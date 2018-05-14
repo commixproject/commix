@@ -22,10 +22,10 @@ Notes:
   * This tamper script works against all targets.
 """
 
-script_name = "hexencode"
+__tamper__ = "hexencode"
 
-if not settings.TAMPER_SCRIPTS[script_name]:
-  settings.TAMPER_SCRIPTS[script_name] = True
+if not settings.TAMPER_SCRIPTS[__tamper__]:
+  settings.TAMPER_SCRIPTS[__tamper__] = True
 
 def encode(payload):
   payload = urllib.unquote(payload)

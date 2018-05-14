@@ -655,7 +655,13 @@ def tamper_scripts():
         check_tfile = check_tfile.replace("/",".")
         import_tamper = check_tfile.split(".py")[0]
         print settings.SUB_CONTENT_SIGN + import_tamper.split(".")[3]
-        importlib.import_module(import_tamper)
+        
+        module = importlib.import_module(import_tamper)
+        if not hasattr(module, "__tamper__"):
+          err_msg = "Missing variable '__tamper__' "
+          err_msg += "in tamper script '" + import_tamper.split(".")[3] + "'."
+          print settings.print_critical_msg(err_msg)
+          raise SystemExit()
 
 """
 Check if the payload output seems to be hex.

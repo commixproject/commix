@@ -22,14 +22,14 @@ Notes:
   * This tamper script works against *nix targets.
 """
 
-script_name = "singlequotes"
+__tamper__ = "singlequotes"
 
-if not settings.TAMPER_SCRIPTS[script_name]:
-  settings.TAMPER_SCRIPTS[script_name] = True
+if not settings.TAMPER_SCRIPTS[__tamper__]:
+  settings.TAMPER_SCRIPTS[__tamper__] = True
 
 def transform(payload):
   def add_single_quotes(payload):
-    settings.TAMPER_SCRIPTS[script_name] = True
+    settings.TAMPER_SCRIPTS[__tamper__] = True
     rep = {
             "''i''f": "if", 
             "''t''h''e''n": "then",
@@ -49,7 +49,7 @@ def transform(payload):
     if settings.EVAL_BASED_STATE != False:
       if settings.TRANFROM_PAYLOAD == None:
         settings.TRANFROM_PAYLOAD = False
-        warn_msg = "The dynamic code evaluation technique, does not support the '"+ script_name  +".py' tamper script."
+        warn_msg = "The dynamic code evaluation technique, does not support the '"+ __tamper__  +".py' tamper script."
         sys.stdout.write("\r" + settings.print_warning_msg(warn_msg))
         sys.stdout.flush() 
         print
@@ -61,7 +61,7 @@ def transform(payload):
   else:
     if settings.TRANFROM_PAYLOAD == None:
       settings.TRANFROM_PAYLOAD = False
-      warn_msg = "Windows target host(s), does not support the '"+ script_name  +".py' tamper script."
+      warn_msg = "Windows target host(s), does not support the '"+ __tamper__  +".py' tamper script."
       sys.stdout.write("\r" + settings.print_warning_msg(warn_msg))
       sys.stdout.flush() 
       print

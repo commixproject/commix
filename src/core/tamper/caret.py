@@ -22,14 +22,14 @@ Notes:
   * This tamper script works against windows targets.
 """
 
-script_name = "caret"
+__tamper__ = "caret"
 
-if not settings.TAMPER_SCRIPTS[script_name]:
-  settings.TAMPER_SCRIPTS[script_name] = True
+if not settings.TAMPER_SCRIPTS[__tamper__]:
+  settings.TAMPER_SCRIPTS[__tamper__] = True
 
 def transform(payload):
   def add_caret_symbol(payload):
-    settings.TAMPER_SCRIPTS[script_name] = True
+    settings.TAMPER_SCRIPTS[__tamper__] = True
     if re.compile("\w+").findall(payload):
       if str(len(max(re.compile("\w+").findall(payload), key=lambda word: len(word)))) >= 5000:  
         long_string = max(re.compile("\w+").findall(payload), key=lambda word: len(word))
@@ -49,7 +49,7 @@ def transform(payload):
     if settings.EVAL_BASED_STATE != False:
       if settings.TRANFROM_PAYLOAD == None:
         settings.TRANFROM_PAYLOAD = False
-        warn_msg = "The dynamic code evaluation technique, does not support the '"+ script_name  +".py' tamper script."
+        warn_msg = "The dynamic code evaluation technique, does not support the '"+ __tamper__  +".py' tamper script."
         sys.stdout.write("\r" + settings.print_warning_msg(warn_msg))
         sys.stdout.flush() 
         print
@@ -60,7 +60,7 @@ def transform(payload):
   else:
     if settings.TRANFROM_PAYLOAD == None:
       settings.TRANFROM_PAYLOAD = False
-      warn_msg = "*nix target host(s), does not support the '"+ script_name  +".py' tamper script."
+      warn_msg = "*nix target host(s), does not support the '"+ __tamper__  +".py' tamper script."
       sys.stdout.write("\r" + settings.print_warning_msg(warn_msg))
       sys.stdout.flush() 
       print
