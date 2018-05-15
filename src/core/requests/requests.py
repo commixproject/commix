@@ -47,12 +47,24 @@ def estimate_response_time(url, timesec):
     request = urllib2.Request(url)
   headers.do_check(request)
   start = time.time()
+  
   try:
     response = urllib2.urlopen(request)
     response.read(1)
     response.close()
+
+  except urllib2.URLError, err:
+    err_msg = "Unable to connect to the target URL"
+    try:
+      err_msg += " (" + str(err.args[0]).split("] ")[1] + ")."
+    except IndexError:
+      err_msg += "."
+    print settings.print_critical_msg(err_msg + ").")
+    raise SystemExit()
+
   except urllib2.HTTPError, e:
     pass
+
   except socket.timeout:
     if settings.VERBOSITY_LEVEL >= 1:
       print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
