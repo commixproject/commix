@@ -131,7 +131,7 @@ def examine_request(request):
         try:
           error_msg = str(err_msg.args[0]).split("] ")[1] + "."
         except IndexError:
-          error_msg = str(err_msg.args[0]) + "."
+          error_msg = str(err_msg).replace(": "," (") + ")."
         print settings.print_critical_msg(error_msg)
         raise SystemExit()
 
