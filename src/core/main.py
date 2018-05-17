@@ -19,6 +19,7 @@ import sys
 import random
 import httplib
 import urllib2
+import errno
 
 from socket import error as SocketError
 
@@ -115,7 +116,13 @@ def examine_request(request):
     else:
       try:
         response = urllib2.urlopen(request)
-        
+
+      except SocketError as e:
+        if e.errno != errno.ECONNRESET:
+          error_msg = "Connection reset by peer."
+          print settings.print_critical_msg(error_msg)
+          raise SystemExit()
+
       except ValueError:
         # Invalid format for the '--header' option.
         if settings.VERBOSITY_LEVEL < 2:
