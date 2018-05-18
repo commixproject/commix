@@ -1,4 +1,5 @@
 ## Version 2.4 (upcoming)
+* Fixed: Multiple bug-fixes regarding several reported unhandled exceptions. 
 * Fixed: Minor bug-fix regarding ignoring invalid and/or empty tamper scripts. 
 * Updated: Colorama (third party) module has been updated.
 * Revised: Minor improvement regarding keeping the git folder 'clean' (via @g0tmi1k).
