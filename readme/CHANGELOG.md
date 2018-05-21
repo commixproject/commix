@@ -1,4 +1,4 @@
-## Version 2.4 (upcoming)
+## Version 2.4 (2018-05-21)
 * Fixed: Multiple bug-fixes regarding several reported unhandled exceptions. 
 * Fixed: Minor bug-fix regarding ignoring invalid and/or empty tamper scripts. 
 * Updated: Colorama (third party) module has been updated.

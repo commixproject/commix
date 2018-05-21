@@ -2,7 +2,7 @@
   <img alt="CommixProject" src="https://camo.githubusercontent.com/41258687d868cf76951a37f6be7961c4c862dfb3/687474703a2f2f692e696d6775722e636f6d2f6c4b6762336c712e706e67" height="142" />
   <p align="center">
     <a href="https://api.travis-ci.org/commixproject/commix"><img alt="Build Status" src="https://api.travis-ci.org/commixproject/commix.svg?branch=master"></a>
-    <a href="https://github.com/commixproject/commix/releases/tag/v2.3-20180307"><img alt="Version 2.3" src="https://img.shields.io/badge/Version-2.3-green.svg"></a>
+    <a href="https://github.com/commixproject/commix/releases/tag/v2.4-20180521"><img alt="Version 2.4" src="https://img.shields.io/badge/Version-2.4-green.svg"></a>
     <a href="http://www.python.org/download/"><img alt="Python 2.6-2.7" src="https://img.shields.io/badge/Python-2.6--2.7-yellow.svg"></a>
     <a href="https://github.com/commixproject/commix/blob/master/readme/COPYING"><img alt="GPLv3 License" src="https://img.shields.io/badge/License-GPLv3-red.svg"></a>
     <a href="http://www.twitter.com/commixproject"><img alt="Twitter" src="https://img.shields.io/badge/Twitter-@commixproject-blue.svg"></a>
