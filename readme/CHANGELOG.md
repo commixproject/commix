@@ -1,3 +1,6 @@
+## Version 2.5 (upcoming)
+* Added: New tamper script "multiplespaces.py" that adds multiple spaces around OS commands.
+
 ## Version 2.4 (2018-05-21)
 * Fixed: Multiple bug-fixes regarding several reported unhandled exceptions. 
 * Fixed: Minor bug-fix regarding ignoring invalid and/or empty tamper scripts. 

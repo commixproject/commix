@@ -718,9 +718,12 @@ def whitespace_check(payload):
           else:
             menu.options.tamper = "space2vtab"
       else:
-        settings.WHITESPACE[0] = "%20" 
+        count_spaces = payload.count("%20")
+        if count_spaces >= 4:
+          settings.WHITESPACE[0] = "%20" * int(count_spaces / 2)
+        else:
+          settings.WHITESPACE[0] = "%20" 
       
-
 """
 Check for added caret between the characters of the generated payloads.
 """
