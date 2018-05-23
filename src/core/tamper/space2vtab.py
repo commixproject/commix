@@ -25,7 +25,7 @@ __tamper__ = "space2vtab"
 
 if settings.TARGET_OS == "win":
   settings.TAMPER_SCRIPTS[__tamper__] = True
-  if settings.WHITESPACE[0] == "%20" or settings.WHITESPACE[0] == " ":
+  if settings.WHITESPACE[0] == "%20":
     settings.WHITESPACE[0] = "%0b"
   else:
     settings.WHITESPACE.append("%0b") 

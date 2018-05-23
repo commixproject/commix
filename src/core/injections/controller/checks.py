@@ -688,41 +688,45 @@ Check for modified whitespaces.
 """
 def whitespace_check(payload):
   if "${IFS}" in payload:
-    settings.WHITESPACE[0] = "${IFS}"
     if not settings.TAMPER_SCRIPTS['space2ifs']:
       if menu.options.tamper:
         menu.options.tamper = menu.options.tamper + ",space2ifs"
       else:
         menu.options.tamper = "space2ifs"
+    settings.WHITESPACE[0] = "${IFS}"  
+
   else:
-    count_plus = payload.count("+")
-    if count_plus >= 2 and not "%20" in payload:
+    if payload.count("+") >= 2 and not "%20" in payload:
       if not settings.TAMPER_SCRIPTS['space2plus']:
         if menu.options.tamper:
           menu.options.tamper = menu.options.tamper + ",space2plus"
         else:
           menu.options.tamper = "space2plus"
+      settings.WHITESPACE[0] = "+"
+
     else:
-      count_htabs = payload.count("%09")
-      count_vtabs = payload.count("%0b")
-      if count_htabs >= 1 and not "%20" in payload:
+      if payload.count("%09") >= 1 and not "%20" in payload:
         if not settings.TAMPER_SCRIPTS['space2htab']:
           if menu.options.tamper:
             menu.options.tamper = menu.options.tamper + ",space2htab"
           else:
-            menu.options.tamper = "space2htab"  
-      elif count_vtabs >= 1 and not "%20" in payload:
+            menu.options.tamper = "space2htab" 
+        settings.WHITESPACE[0] = "%09"
+
+      elif payload.count("%0b") >= 1 and not "%20" in payload:
         if not settings.TAMPER_SCRIPTS['space2vtab']:
           if menu.options.tamper:
             menu.options.tamper = menu.options.tamper + ",space2vtab"
           else:
             menu.options.tamper = "space2vtab"
-      else:
-        count_spaces = payload.count("%20")
-        if count_spaces >= 4:
-          settings.WHITESPACE[0] = "%20" * int(count_spaces / 2)
-        else:
-          settings.WHITESPACE[0] = "%20" 
+        settings.WHITESPACE[0] = "%0b"
+         
+      else :
+        settings.WHITESPACE[0] = "%20"
+
+  count_spaces = payload.count(settings.WHITESPACE[0])
+  if count_spaces >= 4:
+    settings.WHITESPACE[0] = settings.WHITESPACE[0] * int(count_spaces / 2)
       
 """
 Check for added caret between the characters of the generated payloads.

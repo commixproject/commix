@@ -26,7 +26,6 @@ that has poorly written permissive regular expressions
 __tamper__ = "multiplespaces"
 
 settings.TAMPER_SCRIPTS[__tamper__] = True
-if settings.WHITESPACE[0] == "%20" or settings.WHITESPACE[0] == " ":
-  settings.WHITESPACE[0] = "%20" * random.randrange(2, 8)
+settings.WHITESPACE[0] = settings.WHITESPACE[0] * random.randrange(2, 8)
 
 # eof 

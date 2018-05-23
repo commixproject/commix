@@ -24,7 +24,7 @@ Notes:
 __tamper__ = "space2htab"
 
 settings.TAMPER_SCRIPTS[__tamper__] = True
-if settings.WHITESPACE[0] == "%20" or settings.WHITESPACE[0] == " ":
+if settings.WHITESPACE[0] == "%20":
   settings.WHITESPACE[0] = "%09"
 else:
   settings.WHITESPACE.append("%09") 

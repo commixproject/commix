@@ -27,7 +27,7 @@ __tamper__ = "space2ifs"
 
 if settings.TARGET_OS != "win":
   settings.TAMPER_SCRIPTS[__tamper__] = True
-  if settings.WHITESPACE[0] == "%20" or settings.WHITESPACE[0] == " ":
+  if settings.WHITESPACE[0] == "%20":
     settings.WHITESPACE[0] = "${IFS}"
   else:
     settings.WHITESPACE.append("${IFS}") 
