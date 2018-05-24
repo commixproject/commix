@@ -687,45 +687,60 @@ def base64_output(payload):
 Check for modified whitespaces.
 """
 def whitespace_check(payload):
-  if "${IFS}" in payload:
+
+  _ = []
+  whitespaces = ["${IFS}", "+", "%09", "%0b", "%20"]
+  for whitespace in whitespaces:
+    if whitespace in payload:
+      _.append(whitespace)
+
+  # Enable the "space2ifs" tamper script.
+  if "${IFS}" in _:
     if not settings.TAMPER_SCRIPTS['space2ifs']:
       if menu.options.tamper:
         menu.options.tamper = menu.options.tamper + ",space2ifs"
       else:
         menu.options.tamper = "space2ifs"
     settings.WHITESPACE[0] = "${IFS}"  
+  
+  # Enable the "space2plus" tamper script.
+  elif "+" in _ and payload.count("+") >= 2:
+    if not settings.TAMPER_SCRIPTS['space2plus']:
+      if menu.options.tamper:
+        menu.options.tamper = menu.options.tamper + ",space2plus"
+      else:
+        menu.options.tamper = "space2plus"
+    settings.WHITESPACE[0] = "+"
+  
+  # Enable the "space2htab" tamper script.
+  elif "%09" in _:
+    if not settings.TAMPER_SCRIPTS['space2htab']:
+      if menu.options.tamper:
+        menu.options.tamper = menu.options.tamper + ",space2htab"
+      else:
+        menu.options.tamper = "space2htab" 
+    settings.WHITESPACE[0] = "%09"
 
-  else:
-    if payload.count("+") >= 2 and not "%20" in payload:
-      if not settings.TAMPER_SCRIPTS['space2plus']:
-        if menu.options.tamper:
-          menu.options.tamper = menu.options.tamper + ",space2plus"
-        else:
-          menu.options.tamper = "space2plus"
-      settings.WHITESPACE[0] = "+"
+  # Enable the "space2vtab" tamper script.
+  elif "%0b" in _:
+    if not settings.TAMPER_SCRIPTS['space2vtab']:
+      if menu.options.tamper:
+        menu.options.tamper = menu.options.tamper + ",space2vtab"
+      else:
+        menu.options.tamper = "space2vtab"
+    settings.WHITESPACE[0] = "%0b"
+  
+  # Default whitespace       
+  else :
+    settings.WHITESPACE[0] = "%20"
 
-    else:
-      if payload.count("%09") >= 1 and not "%20" in payload:
-        if not settings.TAMPER_SCRIPTS['space2htab']:
-          if menu.options.tamper:
-            menu.options.tamper = menu.options.tamper + ",space2htab"
-          else:
-            menu.options.tamper = "space2htab" 
-        settings.WHITESPACE[0] = "%09"
-
-      elif payload.count("%0b") >= 1 and not "%20" in payload:
-        if not settings.TAMPER_SCRIPTS['space2vtab']:
-          if menu.options.tamper:
-            menu.options.tamper = menu.options.tamper + ",space2vtab"
-          else:
-            menu.options.tamper = "space2vtab"
-        settings.WHITESPACE[0] = "%0b"
-         
-      else :
-        settings.WHITESPACE[0] = "%20"
-
+  # Enable the "multiplespaces" tamper script.
   count_spaces = payload.count(settings.WHITESPACE[0])
   if count_spaces >= 4:
+    if menu.options.tamper:
+      menu.options.tamper = menu.options.tamper + ",multiplespaces"
+    else:
+      menu.options.tamper = "multiplespaces" 
     settings.WHITESPACE[0] = settings.WHITESPACE[0] * int(count_spaces / 2)
       
 """
