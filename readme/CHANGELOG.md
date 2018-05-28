@@ -1,4 +1,5 @@
 ## Version 2.5 (upcoming)
+* Fixed: Minor bug-fix regarding unicode decode exception error due to invalid codec, during connection on target host.
 * Revised: Improvement regarding combining tamper script "multiplespaces.py" with other space-related tamper script(s).
 * Added: New tamper script "multiplespaces.py" that adds multiple spaces around OS commands.
 
