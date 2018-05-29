@@ -233,8 +233,8 @@ def check_http_traffic(request):
     print settings.print_critical_msg(err_msg + ").")
     raise SystemExit()
 
-  except httplib.IncompleteRead, err:
-    print settings.print_critical_msg(str(err_msg))
+  except httplib.IncompleteRead, err_msg:
+    print settings.print_critical_msg(str(err_msg) + ".")
     raise SystemExit()
 
   except UnicodeDecodeError, err_msg:
