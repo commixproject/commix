@@ -77,7 +77,7 @@ Write to a file on the target host.
 def file_write(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec):
   file_to_write = menu.options.file_write
   if not os.path.exists(file_to_write):
-    warn_msg = "It seems that the '" + file_to_write + "' file, does not exist."
+    warn_msg = "It seems that the provided local file '" + file_to_write + "', does not exist."
     sys.stdout.write(settings.print_warning_msg(warn_msg) + "\n")
     sys.stdout.flush()
     sys.exit(0)
@@ -107,7 +107,7 @@ def file_write(separator, TAG, prefix, suffix, whitespace, http_request_method, 
     # Find path
     path = os.path.dirname(dest_to_write)
     path = path.replace("/","\\")
-    # Chnage directory
+    # Change directory
     cmd = "cd " + path 
     response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
     # Find filename

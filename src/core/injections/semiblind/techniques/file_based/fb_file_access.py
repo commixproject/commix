@@ -73,7 +73,7 @@ Write to a file on the target host.
 def file_write(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
   file_to_write = menu.options.file_write
   if not os.path.exists(file_to_write):
-    warn_msg = "It seems that the '" + file_to_write + "' file, does not exist."
+    warn_msg = "It seems that the provided local file '" + file_to_write + "', does not exist."
     sys.stdout.write(settings.print_warning_msg(warn_msg) + "\n")
     sys.stdout.flush()
     sys.exit(0)
@@ -103,7 +103,7 @@ def file_write(separator, payload, TAG, timesec, prefix, suffix, whitespace, htt
     # Find path
     path = os.path.dirname(dest_to_write)
     path = path.replace("/","\\")
-    # Chnage directory
+    # Change directory
     cmd = "cd " + path + separator +separator + " " + settings.WIN_COMMENT
     response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
     # Find filename

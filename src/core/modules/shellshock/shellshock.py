@@ -389,7 +389,7 @@ def file_access(url, cve, check_header, filename):
   if menu.options.file_write:
     file_to_write = menu.options.file_write
     if not os.path.exists(file_to_write):
-      warn_msg = "It seems that the '" + file_to_write + "' file, does not exist."
+      warn_msg = "It seems that the provided local file '" + file_to_write + "', does not exist."
       sys.stdout.write(settings.print_warning_msg(warn_msg) + "\n")
       sys.stdout.flush()
       sys.exit(0)
