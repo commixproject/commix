@@ -59,7 +59,7 @@ def injection_test(payload, http_request_method, url):
     # Define the vulnerable parameter
     vuln_parameter = parameters.vuln_GET_param(url)
     
-    target = re.sub(settings.INJECT_TAG, payload, url)
+    target = url.replace(settings.INJECT_TAG, payload)
     request = urllib2.Request(target)
     
     # Check if defined extra headers.
@@ -203,7 +203,7 @@ def injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_req
         # Check if its not specified the 'INJECT_HERE' tag
         #url = parameters.do_GET_check(url)
         payload = payload.replace(" ","%20")
-        target = re.sub(settings.INJECT_TAG, payload, url)
+        target = url.replace(settings.INJECT_TAG, payload)
         vuln_parameter = ''.join(vuln_parameter)
         request = urllib2.Request(target)
         # Check if defined extra headers.

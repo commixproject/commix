@@ -52,7 +52,7 @@ def examine_requests(payload, vuln_parameter, http_request_method, url, timesec,
   # Check if defined method is GET (Default).
   if http_request_method == "GET":
     payload = urllib.quote(payload)   
-    target = re.sub(settings.INJECT_TAG, payload, url)
+    target = url.replace(settings.INJECT_TAG, payload)
     vuln_parameter = ''.join(vuln_parameter)
     request = urllib2.Request(target)
 
@@ -103,7 +103,7 @@ def injection_test(payload, http_request_method, url):
     payload = urllib.quote(payload)
     # Define the vulnerable parameter
     vuln_parameter = parameters.vuln_GET_param(url)
-    target = re.sub(settings.INJECT_TAG, payload, url)
+    target = url.replace(settings.INJECT_TAG, payload)
     request = urllib2.Request(target)
               
   # Check if defined method is POST.
