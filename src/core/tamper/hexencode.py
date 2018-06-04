@@ -35,9 +35,10 @@ def encode(payload):
       print ""
     print settings.print_critical_msg(err_msg) 
     raise SystemExit()
-
-  payload = urllib.unquote(payload)
-  payload = payload.encode("hex")
-  return payload
+    
+  else:
+    payload = urllib.unquote(payload)
+    payload = payload.encode("hex")
+    return payload
 
 # eof 
