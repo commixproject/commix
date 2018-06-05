@@ -83,7 +83,7 @@ def injection_test(payload, http_request_method, url):
       if settings.IS_XML:
         data = re.sub(settings.INJECT_TAG, urllib.unquote(payload), parameter)  
       else:
-        data = re.sub(settings.INJECT_TAG, payload, parameter)
+        data = parameter.replace(settings.INJECT_TAG, payload)
       request = urllib2.Request(url, data)
     
     # Check if defined extra headers.
@@ -241,7 +241,7 @@ def injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_meth
           if settings.IS_XML:
             data = re.sub(settings.INJECT_TAG, urllib.unquote(payload), parameter) 
           else:  
-            data = re.sub(settings.INJECT_TAG, payload, parameter)
+            data = parameter.replace(settings.INJECT_TAG, payload)
           request = urllib2.Request(url, data)
         
         # Check if defined extra headers.
