@@ -758,6 +758,20 @@ def other_symbols(payload):
     payload = caret.transform(payload)
 
 """
+Check for (multiple) added back slashes between the characters of the generated payloads.
+"""
+def check_backslashes(payload):
+  # Check for single quotes
+  if payload.count("''") >= 15:
+    if not settings.TAMPER_SCRIPTS['backslashes']:
+      if menu.options.tamper:
+        menu.options.tamper = menu.options.tamper + ",backslashes"
+      else:
+        menu.options.tamper = "backslashes"  
+    from src.core.tamper import backslashes
+    payload = backslashes.transform(payload)
+
+"""
 Check for (multiple) added quotes between the characters of the generated payloads.
 """
 def check_quotes(payload):
@@ -828,6 +842,10 @@ def perform_payload_modification(payload):
     if encode_type == 'singlequotes':
       from src.core.tamper import singlequotes
       payload = singlequotes.transform(payload)
+    # Add caret symbol.  
+    elif encode_type == 'backslashes':
+      from src.core.tamper import backslashes
+      payload = backslashes.transform(payload) 
     # Add caret symbol.  
     elif encode_type == 'caret':
       from src.core.tamper import caret
