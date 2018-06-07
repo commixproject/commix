@@ -286,7 +286,7 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                         else:
                           cmd = "powershell.exe -InputFormat none write (" + str(randv1) + " + " + str(randv2) + ")"
                       else:
-                        cmd = "expr " + str(randv1) + " + " + str(randv2) + ""
+                        cmd = "expr " + str(randv1) + " %2B " + str(randv2) + ""
 
                       # Set the original delay time
                       original_how_long = how_long

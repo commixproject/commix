@@ -49,19 +49,25 @@ def examine_requests(payload, vuln_parameter, http_request_method, url, timesec,
   start = 0
   end = 0
   start = time.time()
+
   # Check if defined method is GET (Default).
   if http_request_method == "GET":
-    payload = urllib.quote(payload)
+    # Encoding non-ASCII characters payload.
+    # payload = urllib.quote(payload)
+
     target = url.replace(settings.INJECT_TAG, payload)
     vuln_parameter = ''.join(vuln_parameter)
     request = urllib2.Request(target)
+
   # Check if defined method is POST.
   else :
     parameter = menu.options.data
     parameter = urllib2.unquote(parameter)
+
     # Check if its not specified the 'INJECT_HERE' tag
     parameter = parameters.do_POST_check(parameter)
     parameter = parameter.replace("+","%2B")
+
     # Define the POST data   
     if settings.IS_JSON:
       payload = payload.replace("\"", "\\\"")
@@ -92,22 +98,22 @@ def examine_requests(payload, vuln_parameter, http_request_method, url, timesec,
 Check if target host is vulnerable.
 """
 def injection_test(payload, http_request_method, url):
+
   start = 0
   end = 0
   start = time.time()
-  
+
   # Check if defined method is GET (Default).
-  if http_request_method == "GET":    
+  if http_request_method == "GET":
+    payload = payload.replace("#","%23")
     # Encoding non-ASCII characters payload.
-    payload = urllib.quote(payload)
+    # payload = urllib.quote(payload)
+
     # Define the vulnerable parameter
     vuln_parameter = parameters.vuln_GET_param(url)
     target = url.replace(settings.INJECT_TAG, payload)
     request = urllib2.Request(target)
-    # Check if defined extra headers.
-    headers.do_check(request)
-    # Get the response of the request
-    response = requests.get_request_response(request)
+              
   # Check if defined method is POST.
   else:
     parameter = menu.options.data
@@ -115,8 +121,10 @@ def injection_test(payload, http_request_method, url):
     # Check if its not specified the 'INJECT_HERE' tag
     parameter = parameters.do_POST_check(parameter)
     parameter = parameter.replace("+","%2B")
+
     # Define the vulnerable parameter
     vuln_parameter = parameters.vuln_POST_param(parameter, url)
+    
     # Define the POST data   
     if settings.IS_JSON:
       payload = payload.replace("\"", "\\\"")
@@ -132,10 +140,11 @@ def injection_test(payload, http_request_method, url):
       else:
         data = parameter.replace(settings.INJECT_TAG, payload)
       request = urllib2.Request(url, data)
-    # Check if defined extra headers.
-    headers.do_check(request)
-    # Get the response of the request
-    response = requests.get_request_response(request)
+    
+  # Check if defined extra headers.
+  headers.do_check(request)
+  # Get the response of the request
+  response = requests.get_request_response(request)
 
   end  = time.time()
   how_long = int(end - start)

@@ -300,7 +300,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                         else:
                           cmd = "powershell.exe -InputFormat none write (" + str(randv1) + " + " + str(randv2) + ")"
                       else:
-                        cmd = "echo $((" + str(randv1) + " + " + str(randv2) + "))"
+                        cmd = "echo $((" + str(randv1) + " %2B " + str(randv2) + "))"
 
                       # Set the original delay time
                       original_how_long = how_long

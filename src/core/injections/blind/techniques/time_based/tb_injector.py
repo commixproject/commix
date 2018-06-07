@@ -51,7 +51,8 @@ def examine_requests(payload, vuln_parameter, http_request_method, url, timesec,
 
   # Check if defined method is GET (Default).
   if http_request_method == "GET":
-    payload = urllib.quote(payload)   
+    # Encoding non-ASCII characters payload.
+    # payload = urllib.quote(payload)   
     target = url.replace(settings.INJECT_TAG, payload)
     vuln_parameter = ''.join(vuln_parameter)
     request = urllib2.Request(target)
@@ -65,6 +66,7 @@ def examine_requests(payload, vuln_parameter, http_request_method, url, timesec,
     parameter = parameters.do_POST_check(parameter)
     parameter = parameter.replace("+","%2B")
 
+    # Define the POST data  
     if settings.IS_JSON:
       payload = payload.replace("\"", "\\\"")
       data = re.sub(settings.INJECT_TAG, urllib.unquote(payload), parameter)
@@ -87,6 +89,7 @@ def examine_requests(payload, vuln_parameter, http_request_method, url, timesec,
 
   end  = time.time()
   how_long = int(end - start)
+
   return how_long
 
 """
@@ -97,10 +100,12 @@ def injection_test(payload, http_request_method, url):
   start = 0
   end = 0
   start = time.time()
+
   # Check if defined method is GET (Default).
-  if http_request_method == "GET":   
+  if http_request_method == "GET":
     # Encoding non-ASCII characters payload.
-    payload = urllib.quote(payload)
+    # payload = urllib.quote(payload)
+
     # Define the vulnerable parameter
     vuln_parameter = parameters.vuln_GET_param(url)
     target = url.replace(settings.INJECT_TAG, payload)
@@ -113,6 +118,7 @@ def injection_test(payload, http_request_method, url):
     # Check if its not specified the 'INJECT_HERE' tag
     parameter = parameters.do_POST_check(parameter)
     parameter = parameter.replace("+","%2B")
+
     # Define the vulnerable parameter
     vuln_parameter = parameters.vuln_POST_param(parameter, url)
     
@@ -134,12 +140,11 @@ def injection_test(payload, http_request_method, url):
     
   # Check if defined extra headers.
   headers.do_check(request)
-  
   # Get the response of the request
   response = requests.get_request_response(request)
+
   end  = time.time()
   how_long = int(end - start)
-
   return how_long, vuln_parameter
 
 """

