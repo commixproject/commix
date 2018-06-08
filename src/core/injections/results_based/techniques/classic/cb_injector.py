@@ -73,7 +73,7 @@ def injection_test(payload, http_request_method, url):
     # Define the POST data 
     if settings.IS_JSON:
       payload = payload.replace("\"", "\\\"")
-      data = re.sub(settings.INJECT_TAG, urllib.unquote(payload), parameter)
+      data = parameter.replace(settings.INJECT_TAG, urllib.unquote(payload))
       try:
         data = json.loads(data, strict = False)
       except:
@@ -81,7 +81,7 @@ def injection_test(payload, http_request_method, url):
       request = urllib2.Request(url, json.dumps(data))
     else:
       if settings.IS_XML:
-        data = re.sub(settings.INJECT_TAG, urllib.unquote(payload), parameter)  
+        data = parameter.replace(settings.INJECT_TAG, urllib.unquote(payload))  
       else:
         data = parameter.replace(settings.INJECT_TAG, payload)
       request = urllib2.Request(url, data)
@@ -171,7 +171,7 @@ def injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_meth
     payload = parameters.suffixes(payload, suffix)
 
     # Whitespace fixation
-    payload = re.sub(" ", whitespace, payload)
+    payload = payload.replace(" ", whitespace)
     
     # Perform payload modification
     payload = checks.perform_payload_modification(payload)
@@ -231,7 +231,7 @@ def injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_meth
 
         if settings.IS_JSON:
           payload = payload.replace("\"", "\\\"")
-          data = re.sub(settings.INJECT_TAG, urllib.unquote(payload), parameter)
+          data = parameter.replace(settings.INJECT_TAG, urllib.unquote(payload))
           try:
             data = json.loads(data, strict = False)
           except:
@@ -239,7 +239,7 @@ def injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_meth
           request = urllib2.Request(url, json.dumps(data))
         else:
           if settings.IS_XML:
-            data = re.sub(settings.INJECT_TAG, urllib.unquote(payload), parameter) 
+            data = parameter.replace(settings.INJECT_TAG, urllib.unquote(payload)) 
           else:  
             data = parameter.replace(settings.INJECT_TAG, payload)
           request = urllib2.Request(url, data)

@@ -173,7 +173,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                 payload = parameters.suffixes(payload, suffix)
 
                 # Whitespace fixation
-                payload = re.sub(" ", whitespace, payload)
+                payload = payload.replace(" ", whitespace)
                 
                 # Perform payload modification
                 payload = checks.perform_payload_modification(payload)

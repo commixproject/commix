@@ -277,7 +277,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
               payload = parameters.suffixes(payload, suffix)
 
               # Whitespace fixation
-              payload = re.sub(" ", whitespace, payload)
+              payload = payload.replace(" ", whitespace)
 
               # Perform payload modification
               payload = checks.perform_payload_modification(payload)

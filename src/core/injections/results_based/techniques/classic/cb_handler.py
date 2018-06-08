@@ -144,7 +144,7 @@ def cb_injection_handler(url, timesec, filename, http_request_method):
               payload = parameters.suffixes(payload, suffix)
 
               # Whitespace fixation
-              payload = re.sub(" ", whitespace, payload)
+              payload = payload.replace(" ", whitespace)
               
               # Perform payload modification
               payload = checks.perform_payload_modification(payload)

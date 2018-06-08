@@ -158,14 +158,14 @@ def eb_injection_handler(url, timesec, filename, http_request_method):
                 #payload = payload + TAG + ""
 
               # Whitespace fixation
-              payload = re.sub(" ", whitespace, payload)
+              payload = payload.replace(" ", whitespace)
               
               # Perform payload modification
               payload = checks.perform_payload_modification(payload)
 
               if not settings.TAMPER_SCRIPTS['base64encode'] and \
                    not settings.TAMPER_SCRIPTS['hexencode']:
-                payload = re.sub(" ", "%20", payload)
+                payload = payload.replace(" ", "%20")
 
               # Check if defined "--verbose" option.
               if settings.VERBOSITY_LEVEL == 1:
