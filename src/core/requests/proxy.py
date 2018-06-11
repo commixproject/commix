@@ -69,3 +69,11 @@ def use_proxy(request):
     err_msg += ")."
     print settings.print_critical_msg(err_msg)
     raise SystemExit() 
+
+  except Exception, e:
+    err_msg = "Unable to connect to proxy ("
+    err_msg += menu.options.proxy
+    err_msg += ")."
+    print settings.print_critical_msg(err_msg)
+    raise SystemExit() 
+
