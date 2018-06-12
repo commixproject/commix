@@ -312,7 +312,7 @@ def eb_injection_handler(url, timesec, filename, http_request_method):
             success_msg += found_vuln_parameter + " seems injectable via "
             success_msg += "(" + injection_type.split(" ")[0] + ") " + technique + "."
             print settings.print_success_msg(success_msg)
-            print settings.SUB_CONTENT_SIGN + "Payload: " + re.sub("%20", " ", payload) + Style.RESET_ALL
+            print settings.SUB_CONTENT_SIGN + "Payload: " + payload.replace("%20", " ") + Style.RESET_ALL
             # Export session
             if not settings.LOAD_SESSION:
               session_handler.injection_point_importation(url, technique, injection_type, separator, shell[0], vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response=0, timesec=0, how_long=0, output_length=0, is_vulnerable=menu.options.level)

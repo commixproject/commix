@@ -199,7 +199,7 @@ def update_payload(filename, counter, payload):
   if "\n" in payload:
     output_file.write("    (" +str(counter)+ ") Payload: " + re.sub("%20", " ", urllib.unquote_plus(payload.replace("\n", "\\n"))) + "\n")
   else:
-    output_file.write("    (" +str(counter)+ ") Payload: " + re.sub("%20", " ", payload) + "\n")
+    output_file.write("    (" +str(counter)+ ") Payload: " + payload.replace("%20", " ") + "\n")
   output_file.close()
 
 """
