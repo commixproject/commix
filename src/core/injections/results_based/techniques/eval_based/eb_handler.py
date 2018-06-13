@@ -461,6 +461,9 @@ def eb_injection_handler(url, timesec, filename, http_request_method):
 
                   except SystemExit: 
                     raise
+                    
+                  except EOFError:
+                    raise
 
               elif gotshell in settings.CHOICE_NO:
                 if checks.next_attack_vector(technique, go_back) == True:

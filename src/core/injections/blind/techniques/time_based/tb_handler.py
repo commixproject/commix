@@ -549,6 +549,9 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                     except SystemExit: 
                       raise
                       
+                    except EOFError:
+                      raise
+
                 elif gotshell in settings.CHOICE_NO:
                   if checks.next_attack_vector(technique, go_back) == True:
                     break
