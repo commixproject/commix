@@ -1,4 +1,5 @@
 ## Version 2.5 (upcoming)
+* Fixed: Minor bug-fix regarding performing injections through HTTP Headers (e.g User-Agent, Referer, Host etc).
 * Fixed: Major bug-fixes regarding testing time-related ("time-based"/"tempfile-based") payloads.
 * Added: New tamper script "backslashes.py" that adds back slashes (\) between the characters of the generated payloads (for *nix targets).
 * Fixed: Minor bug-fix regarding unicode decode exception error due to invalid codec, during connection on target host.

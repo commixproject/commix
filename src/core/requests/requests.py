@@ -365,7 +365,11 @@ def user_agent_injection(url, vuln_parameter, payload):
       request = urllib2.Request(url)
     #Check if defined extra headers.
     headers.do_check(request)
-    request.add_header('User-Agent', urllib.unquote(payload))
+    payload = urllib.unquote(payload)
+    # Fix for %0a separator
+    if payload[:1] == "\n":
+      payload = urllib.quote(payload[:1]) + payload[1:]
+    request.add_header('User-Agent', payload)
     try:
       headers.check_http_traffic(request)
       response = opener.open(request)
@@ -496,7 +500,11 @@ def referer_injection(url, vuln_parameter, payload):
       request = urllib2.Request(url)
     #Check if defined extra headers.
     headers.do_check(request)
-    request.add_header('Referer', urllib.unquote(payload))
+    payload = urllib.unquote(payload)
+    # Fix for %0a separator
+    if payload[:1] == "\n":
+      payload = urllib.quote(payload[:1]) + payload[1:]
+    request.add_header('Referer', payload)
     try:
       headers.check_http_traffic(request)
       response = opener.open(request)
@@ -630,7 +638,11 @@ def host_injection(url, vuln_parameter, payload):
       request = urllib2.Request(url)
     #Check if defined extra headers.
     headers.do_check(request)
-    request.add_header('Host', urllib.unquote(payload))
+    payload = urllib.unquote(payload)
+    # Fix for %0a separator
+    if payload[:1] == "\n":
+      payload = urllib.quote(payload[:1]) + payload[1:]
+    request.add_header('Host', payload)
     try:
       headers.check_http_traffic(request)
       response = opener.open(request)
@@ -763,7 +775,11 @@ def custom_header_injection(url, vuln_parameter, payload):
       request = urllib2.Request(url)
     #Check if defined extra headers.
     headers.do_check(request)
-    request.add_header(settings.CUSTOM_HEADER_NAME, urllib.unquote(payload))
+    payload = urllib.unquote(payload)
+    # Fix for %0a separator
+    if payload[:1] == "\n":
+      payload = urllib.quote(payload[:1]) + payload[1:]
+    request.add_header(settings.CUSTOM_HEADER_NAME, payload)
     try:
       headers.check_http_traffic(request)
       response = opener.open(request)
