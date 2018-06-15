@@ -30,6 +30,20 @@ from src.utils import settings
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 """
+Url decode specific chars of the provided payload.
+"""
+def url_decode(payload):
+  rep = {
+          "%20": " ", 
+          "%2B": "+",
+          "\n": "\\n"
+        }
+  rep = dict((re.escape(k), v) for k, v in rep.iteritems())
+  pattern = re.compile("|".join(rep.keys()))
+  payload = pattern.sub(lambda m: rep[re.escape(m.group(0))], payload)
+  return payload
+
+"""
 Check current assessment phase.
 """
 def assessment_phase():
