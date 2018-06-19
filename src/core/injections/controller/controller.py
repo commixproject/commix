@@ -113,14 +113,22 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
   skip_code_injections = False
   skip_command_injections = False
 
+  if menu.options.failed_tries and \
+     menu.options.tech and not "f" in menu.options.tech:
+    warn_msg = "Due to the provided (unsuitable) injection technique" 
+    warn_msg += "s"[len(menu.options.tech) == 1:][::-1] + ", "
+    warn_msg += "the option '--failed-tries' will be ignored."
+    print settings.print_warning_msg(warn_msg) + Style.RESET_ALL
+
   # Procced with file-based semiblind command injection technique,
   # once the user provides the path of web server's root directory.
-  if menu.options.web_root and menu.options.tech and not "f" in menu.options.tech:
+  if menu.options.web_root and \
+     menu.options.tech and not "f" in menu.options.tech:
       if not menu.options.web_root.endswith("/"):
          menu.options.web_root =  menu.options.web_root + "/"
       if checks.procced_with_file_based_technique():
         menu.options.tech = "f"
-  
+
   # Check if it is vulnerable to classic command injection technique.
   if not menu.options.tech or "c" in menu.options.tech:
     settings.CLASSIC_STATE = None
