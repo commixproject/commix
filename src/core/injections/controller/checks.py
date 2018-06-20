@@ -776,7 +776,7 @@ Check for (multiple) added back slashes between the characters of the generated 
 """
 def check_backslashes(payload):
   # Check for single quotes
-  if payload.count("''") >= 15:
+  if payload.count("\\") >= 15:
     if not settings.TAMPER_SCRIPTS['backslashes']:
       if menu.options.tamper:
         menu.options.tamper = menu.options.tamper + ",backslashes"
