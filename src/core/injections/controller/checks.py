@@ -786,10 +786,20 @@ def check_backslashes(payload):
     payload = backslashes.transform(payload)
 
 """
-Check for (multiple) added quotes between the characters of the generated payloads.
+Check for quotes in the generated payloads.
 """
 def check_quotes(payload):
-  # Check for single quotes
+  # Check for double quotes around of the generated payloads.
+  if payload.endswith("\""):
+    if not settings.TAMPER_SCRIPTS['nested']:
+      if menu.options.tamper:
+        menu.options.tamper = menu.options.tamper + ",nested"
+      else:
+        menu.options.tamper = "nested"  
+    from src.core.tamper import nested
+    payload = nested.transform(payload)
+
+  # Check for (multiple) added quotes between the characters of the generated payloads.
   if payload.count("''") >= 10:
     if not settings.TAMPER_SCRIPTS['singlequotes']:
       if menu.options.tamper:
@@ -864,13 +874,16 @@ def perform_payload_modification(payload):
     elif encode_type == 'caret':
       from src.core.tamper import caret
       payload = caret.transform(payload) 
+    # Transfomation to nested command
+    elif encode_type == 'nested':
+      from src.core.tamper import nested
+      payload = nested.transform(payload) 
 
   for encode_type in list(set(settings.MULTI_ENCODED_PAYLOAD[::-1])):
     # Encode payload to hex format.    
     if encode_type == 'base64encode':
       from src.core.tamper import base64encode
       payload = base64encode.encode(payload)
-
     # Encode payload to hex format.
     if encode_type == 'hexencode':
       from src.core.tamper import hexencode
