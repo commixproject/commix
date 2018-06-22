@@ -645,7 +645,7 @@ def tamper_scripts():
   if menu.options.tamper:
     # Check the provided tamper script(s)
     tlist = list(set(re.split(settings.PARAMETER_SPLITTING_REGEX, menu.options.tamper.lower())))
-    
+
     # Check for invalid tamper scripts.
     for tfile in tlist:
       check_tfile = "src/core/tamper/" + tfile + ".py"
@@ -676,6 +676,12 @@ def tamper_scripts():
           err_msg += "in tamper script '" + import_tamper.split(".")[3] + "'."
           print settings.print_critical_msg(err_msg)
           raise SystemExit()
+
+    # Using too many tamper scripts is usually not a good idea. :P
+    if len(tlist) >= 3 and not settings.LOAD_SESSION:
+      warn_msg = "Using too many tamper scripts "
+      warn_msg += "is usually not a good idea."
+      print settings.print_warning_msg(warn_msg)
 
 """
 Check if the payload output seems to be hex.
