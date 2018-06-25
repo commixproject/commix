@@ -114,7 +114,8 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
   skip_command_injections = False
 
   if menu.options.failed_tries and \
-     menu.options.tech and not "f" in menu.options.tech:
+     menu.options.tech and not "f" in menu.options.tech and not \
+     menu.options.failed_tries:
     warn_msg = "Due to the provided (unsuitable) injection technique" 
     warn_msg += "s"[len(menu.options.tech) == 1:][::-1] + ", "
     warn_msg += "the option '--failed-tries' will be ignored."
