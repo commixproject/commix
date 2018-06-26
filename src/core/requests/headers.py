@@ -26,6 +26,7 @@ else:
 import sys
 import time
 import base64
+import socket
 import urllib2
 import urlparse
 import httplib
@@ -204,6 +205,7 @@ def check_http_traffic(request):
     else:
       http_response_content(response.read().decode(settings.ENCODING))
 
+  # This is useful when handling exotic HTTP errors (i.e requests for authentication).
   except urllib2.HTTPError, err:
     error_msg = "Got " + str(err).replace(": "," (")
     # Check for 4xx and/or 5xx HTTP error codes.
@@ -224,7 +226,8 @@ def check_http_traffic(request):
       print settings.print_critical_msg(err_msg + ").")
       raise SystemExit()
 
-  except urllib2.URLError, err:
+  # The handlers raise this exception when they run into a problem.
+  except (socket.error, httplib.HTTPException, urllib2.URLError), err:
     err_msg = "Unable to connect to the target URL"
     try:
       err_msg += " (" + str(err.args[0]).split("] ")[1] + ")."
