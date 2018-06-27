@@ -58,8 +58,8 @@ def http_response_content(content):
 """
 Checking the HTTP response headers.
 """
-def http_response(headers):
-  info_msg = "The target's HTTP response headers:"
+def http_response(headers, code):
+  info_msg = "The target's HTTP response headers (" + str(code) + "):"
   if settings.VERBOSITY_LEVEL >= 3:
     print settings.print_info_msg(info_msg)
   if menu.options.traffic_file: 
@@ -198,7 +198,11 @@ def check_http_traffic(request):
   try:
     response = urllib2.urlopen(request)
     # Check the HTTP response headers.
-    http_response(response.info())
+    code = response.getcode()
+    response_headers = response.info()
+    response_headers[settings.URI_HTTP_HEADER] = response.geturl()
+    response_headers = str(response_headers).strip("\n")
+    http_response(response_headers, code)
     # Check the HTTP response content.
     if len(settings.ENCODING) == 0:
       http_response_content(response.read())
