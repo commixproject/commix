@@ -118,7 +118,7 @@ def examine_request(request):
         response = urllib2.urlopen(request)
 
       except SocketError as e:
-        if e.errno != errno.ECONNRESET:
+        if e.errno == errno.ECONNRESET:
           error_msg = "Connection reset by peer."
           print settings.print_critical_msg(error_msg)
           raise SystemExit()
