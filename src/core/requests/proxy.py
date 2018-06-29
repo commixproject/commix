@@ -29,6 +29,9 @@ from src.thirdparty.colorama import Fore, Back, Style, init
 def do_check(url):
   check_proxy = True
   try:
+    if settings.VERBOSITY_LEVEL >= 1:
+      info_msg = "Setting the HTTP proxy for all HTTP requests... "
+      print settings.print_info_msg(info_msg) 
     # Check if defined POST data
     if menu.options.data:
       request = urllib2.Request(url, menu.options.data)
@@ -47,7 +50,7 @@ def do_check(url):
   if check_proxy == True:
     pass
   else:
-    err_msg = "Unable to connect to proxy ("
+    err_msg = "Unable to connect to the target URL or proxy ("
     err_msg += menu.options.proxy
     err_msg += ")."
     print settings.print_critical_msg(err_msg)
@@ -64,14 +67,14 @@ def use_proxy(request):
     return response
 
   except httplib.BadStatusLine, e:
-    err_msg = "Unable to connect to proxy ("
+    err_msg = "Unable to connect to the target URL or proxy ("
     err_msg += menu.options.proxy
     err_msg += ")."
     print settings.print_critical_msg(err_msg)
     raise SystemExit() 
 
   except Exception, e:
-    err_msg = "Unable to connect to proxy ("
+    err_msg = "Unable to connect to the target URL or proxy ("
     err_msg += menu.options.proxy
     err_msg += ")."
     print settings.print_critical_msg(err_msg)

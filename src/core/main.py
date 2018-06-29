@@ -195,8 +195,9 @@ def check_internet(url):
       proxy.do_check(settings.CHECK_INTERNET_ADDRESS)
     examine_request(request)
   except:
-    warn_msg = "No internet connection detected."
-    print settings.print_warning_msg(warn_msg)
+    print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
+    error_msg = "No internet connection detected."
+    print settings.print_critical_msg(error_msg)
 
 """
 The init (URL) request.
@@ -223,6 +224,9 @@ def init_request(url):
   # Check if defined any HTTP Proxy (--proxy option).
   if menu.options.proxy:
     proxy.do_check(url)
+  if settings.VERBOSITY_LEVEL >= 1:
+    info_msg = "Creating HTTP requests opener object..."
+    print settings.print_info_msg(info_msg) 
   return request
 
 """
