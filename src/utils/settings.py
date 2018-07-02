@@ -111,7 +111,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "2.5.29"
+VERSION_NUM = "2.5.30"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"
@@ -202,7 +202,7 @@ HTTP_HEADER = ""
 PREFIXES = ["", " ", "'", "\"", "&", "%26", "|", "%7C", "%27", "%22", "'%26"]
 
 # The command injection separators.
-SEPARATORS = ["", ";", "%3B", "&", "%26", "&&", "%26%26", "|", "%7C", "||", "%7C%7C", "%0a"]
+SEPARATORS = ["", ";", "%3B", "&", "%26", "&&", "%26%26", "|", "%7C", "||", "%7C%7C", "\n", "%0a", "\r\n", "%0d%0a"]
 
 # The command injection suffixes.
 SUFFIXES = ["", "'", "\"", "#", "//", "\\\\", "&&", "%26%26", "%26'", "|", "%7C", "%27", "%22", "%5C%5C", "%2F%2F"]
@@ -217,7 +217,7 @@ EXECUTION_FUNCTIONS = ["exec", "system", "shell_exec", "passthru", "proc_open", 
 EVAL_PREFIXES = ["", "{${", ";", "'", ")", "')", "\")", "\".", "'.", ");}", "');}", "\");}"]
 
 # The code injection separators.
-EVAL_SEPARATORS = ["", "%0a", "\\\\n"]
+EVAL_SEPARATORS = ["", "%0a", "\\n", "%0d%0a", "\\r\\n"]
 
 # The code injection suffixes.
 EVAL_SUFFIXES = ["", "}}","\\\\", "//", "#", ".\"", ".'", ")}"]

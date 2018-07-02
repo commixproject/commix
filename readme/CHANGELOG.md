@@ -1,4 +1,5 @@
 ## Version 2.5 (upcoming)
+* Revised: The separators list, has been shortly revised.
 * Revised: Minor improvement regarding the extracted HTTP response headers.
 * Added: New tamper script "nested.py" that adds double quotes around of the generated payloads (for *nix targets).
 * Fixed: Minor bug-fix regarding performing injections through HTTP Headers (e.g User-Agent, Referer, Host etc).
