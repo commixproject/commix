@@ -205,9 +205,11 @@ def check_http_traffic(request):
     http_response(response_headers, code)
     # Check the HTTP response content.
     if len(settings.ENCODING) == 0:
-      http_response_content(response.read())
+      page = response.read()
     else:
-      http_response_content(response.read().decode(settings.ENCODING))
+      page = response.read().decode(settings.ENCODING)
+      
+    http_response_content(page)
 
   # This is useful when handling exotic HTTP errors (i.e requests for authentication).
   except urllib2.HTTPError, err:
