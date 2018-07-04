@@ -210,6 +210,8 @@ def check_http_traffic(request):
       page = response.read().decode(settings.ENCODING)
       
     http_response_content(page)
+    # Checks regarding a potential CAPTCHA protection mechanism.
+    checks.captcha_check(page)
 
   # This is useful when handling exotic HTTP errors (i.e requests for authentication).
   except urllib2.HTTPError, err:

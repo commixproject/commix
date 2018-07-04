@@ -30,6 +30,18 @@ from src.utils import settings
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 """
+Basic checks regarding a potential CAPTCHA protection mechanism.
+"""
+def captcha_check(page):
+  if not settings.CAPTCHA_DETECED and re.search(r"(?i)captcha", page or ""):
+    for match in re.finditer(r"(?si)<form.+?</form>", page):
+      if re.search(r"(?i)captcha", match.group(0)):
+        settings.CAPTCHA_DETECED = True
+        warn_msg = "Potential CAPTCHA protection mechanism detected."
+        print settings.print_warning_msg(warn_msg)
+        break
+
+"""
 Url decode specific chars of the provided payload.
 """
 def url_decode(payload):
