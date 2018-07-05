@@ -1,4 +1,5 @@
 ## Version 2.5 (upcoming)
+* Added: Support regarding checking for potential browser verification protection mechanism.
 * Added: Support regarding checking for potential CAPTCHA protection mechanism.
 * Revised: The separators list, has been shortly revised.
 * Revised: Minor improvement regarding the extracted HTTP response headers.

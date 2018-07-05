@@ -30,7 +30,16 @@ from src.utils import settings
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 """
-Basic checks regarding a potential CAPTCHA protection mechanism.
+Checks regarding a potential browser verification protection mechanism.
+"""
+def browser_verification(page):
+  if not settings.BROWSER_VERIFICATION and re.search(r"(?i)browser.?verification", page or ""):
+    settings.BROWSER_VERIFICATION = True
+    warn_msg = "Potential browser verification protection mechanism detected."
+    print settings.print_warning_msg(warn_msg)
+
+"""
+Checks regarding a potential CAPTCHA protection mechanism.
 """
 def captcha_check(page):
   if not settings.CAPTCHA_DETECED and re.search(r"(?i)captcha", page or ""):
