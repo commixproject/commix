@@ -36,7 +36,7 @@ def browser_verification(page):
   if not settings.BROWSER_VERIFICATION and re.search(r"(?i)browser.?verification", page or ""):
     settings.BROWSER_VERIFICATION = True
     warn_msg = "Potential browser verification protection mechanism detected."
-    print settings.print_warning_msg(warn_msg)
+    print settings.print_bold_warning_msg(warn_msg)
 
 """
 Checks regarding a potential CAPTCHA protection mechanism.
@@ -47,7 +47,7 @@ def captcha_check(page):
       if re.search(r"(?i)captcha", match.group(0)):
         settings.CAPTCHA_DETECED = True
         warn_msg = "Potential CAPTCHA protection mechanism detected."
-        print settings.print_warning_msg(warn_msg)
+        print settings.print_bold_warning_msg(warn_msg)
         break
 
 """
