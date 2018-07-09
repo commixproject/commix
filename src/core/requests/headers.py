@@ -208,12 +208,14 @@ def check_http_traffic(request):
       page = response.read()
     else:
       page = response.read().decode(settings.ENCODING)
-      
+    
     http_response_content(page)
     # Checks regarding a potential CAPTCHA protection mechanism.
     checks.captcha_check(page)
     # Checks regarding a potential browser verification protection mechanism.
     checks.browser_verification(page)
+    # Checks regarding recognition of generic "your ip has been blocked" messages.
+    checks.blocked_ip(page) 
 
   # This is useful when handling exotic HTTP errors (i.e requests for authentication).
   except urllib2.HTTPError, err:

@@ -30,6 +30,14 @@ from src.utils import settings
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 """
+Checks regarding a recognition of generic "your ip has been blocked" messages.
+"""
+def blocked_ip(page):
+  if re.search(settings.BLOCKED_IP_REGEX, page):
+    warn_msg = "It appears that you have been blocked by the target server."
+    print settings.print_bold_warning_msg(warn_msg)
+
+"""
 Checks regarding a potential browser verification protection mechanism.
 """
 def browser_verification(page):
