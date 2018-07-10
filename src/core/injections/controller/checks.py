@@ -43,7 +43,11 @@ Checks regarding a potential browser verification protection mechanism.
 def browser_verification(page):
   if not settings.BROWSER_VERIFICATION and re.search(r"(?i)browser.?verification", page or ""):
     settings.BROWSER_VERIFICATION = True
-    warn_msg = "Potential browser verification protection mechanism detected."
+    warn_msg = "Potential browser verification protection mechanism detected"
+    if re.search(r"(?i)CloudFlare", page):
+      warn_msg += " (CloudFlare)."
+    else:
+      warn_msg += "."
     print settings.print_bold_warning_msg(warn_msg)
 
 """
@@ -54,7 +58,11 @@ def captcha_check(page):
     for match in re.finditer(r"(?si)<form.+?</form>", page):
       if re.search(r"(?i)captcha", match.group(0)):
         settings.CAPTCHA_DETECED = True
-        warn_msg = "Potential CAPTCHA protection mechanism detected."
+        warn_msg = "Potential CAPTCHA protection mechanism detected"
+        if re.search(r"(?i)<title>[^<]*CloudFlare", page):
+          warn_msg += " (CloudFlare)."
+        else:
+          warn_msg += "."
         print settings.print_bold_warning_msg(warn_msg)
         break
 
