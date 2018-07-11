@@ -216,6 +216,7 @@ def do_POST_check(parameter):
       settings.PARAMETER_DELIMITER = ""
   else:
     pass
+
   parameters_list = []
   # Split multiple parameters
   if settings.IS_XML:
@@ -228,9 +229,11 @@ def do_POST_check(parameter):
   else: 
     try:
       multi_parameters = parameter.split(settings.PARAMETER_DELIMITER)
+      multi_parameters = [x for x in multi_parameters if x]
     except ValueError, err_msg:
       print settings.print_critical_msg(err_msg)
       sys.exit(0)
+
   # Check for inappropriate format in provided parameter(s).
   if len([s for s in multi_parameters if "=" in s]) != (len(multi_parameters)) and \
      not settings.IS_JSON and \

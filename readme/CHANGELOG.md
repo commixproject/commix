@@ -1,4 +1,5 @@
 ## Version 2.5 (upcoming)
+* Revised: Improvement regarding identifying the appropriate format parameters, in the provided POST data.
 * Added: Support regarding recognition of generic "your ip has been blocked" messages.
 * Added: Support regarding checking for potential browser verification protection mechanism.
 * Added: Support regarding checking for potential CAPTCHA protection mechanism.
