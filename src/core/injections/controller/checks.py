@@ -968,6 +968,8 @@ def is_empty(multi_parameters, http_request_method):
       if not settings.IS_XML:
         err_msg = "No parameter(s) found for testing in the provided data."
         print settings.print_critical_msg(err_msg)
+        raise SystemExit()
+        
   provided_value = ", ".join(provided_value)
   if len(provided_value) > 0:
     if menu.options.skip_empty and len(multi_parameters) > 1:

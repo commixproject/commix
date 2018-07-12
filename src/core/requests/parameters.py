@@ -53,7 +53,7 @@ def do_GET_check(url):
         err_msg += "You must specify the testable parameter or "
         err_msg += "try to increase '--level' values to perform more tests." 
         print settings.print_critical_msg(err_msg)
-        return False
+        raise SystemExit()
     elif menu.options.shellshock:
       return False
     return url
