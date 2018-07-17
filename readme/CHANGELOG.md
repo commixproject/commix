@@ -1,3 +1,6 @@
+## Version 2.6 (upcoming)
+* Fixed: Minor bug-fix regarding "bind_tcp" shell option.
+
 ## Version 2.5 (2018-07-13)
 * Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
 * Revised: Improvement regarding identifying the appropriate format parameters, in the provided POST data.
