@@ -36,7 +36,7 @@ def shell_options(option):
     sys.exit(0)
   elif option[0:3].lower() == "set":
     if option[4:9].lower() == "rhost":
-      check_lhost(option[10:])
+      check_rhost(option[10:])
     if option[4:9].lower() == "lhost":
       err_msg =  "The '" + option[4:9].upper() + "' option, is not "
       err_msg += "usable for 'bind_tcp' mode. Use 'RHOST' option."
