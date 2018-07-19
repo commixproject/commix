@@ -111,7 +111,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "2.6.2"
+VERSION_NUM = "2.6.3"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"
@@ -759,5 +759,8 @@ BROWSER_VERIFICATION = None
 
 # Regular expression used for recognition of generic "your ip has been blocked" messages.
 BLOCKED_IP_REGEX = r"(?i)(\A|\b)ip\b.*\b(banned|blocked|block list|firewall)"
+
+# Prefix for Google analytics cookie names
+GOOGLE_ANALYTICS_COOKIE_PREFIX = "__UTM"
 
 # eof

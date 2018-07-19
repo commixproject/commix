@@ -425,6 +425,7 @@ The cookie based injection.
 def do_cookie_check(cookie):
   http_request_method = "cookie"
   multi_parameters = cookie.split(settings.COOKIE_DELIMITER)
+
   # Check for inappropriate format in provided parameter(s).
   if len([s for s in multi_parameters if "=" in s]) != (len(multi_parameters)):
     checks.inappropriate_format(multi_parameters)
@@ -455,6 +456,10 @@ def do_cookie_check(cookie):
       # Check for empty values (in provided parameters).
       checks.is_empty(multi_parameters, http_request_method)
       for param in range(0, len(all_params)):
+        if all_params[param].upper().startswith(settings.GOOGLE_ANALYTICS_COOKIE_PREFIX):
+          info_msg = "Ignoring the parameter cookie '" + all_params[param].split("=")[0] + "'."
+          print settings.print_info_msg(info_msg)
+          continue
         if param == 0 :
             old = re.findall(r'=(.*)', all_params[param])
             old = ''.join(old)
@@ -492,6 +497,7 @@ def do_cookie_check(cookie):
         value = re.findall(r'=(.*)', multi_parameters[param])
         value = ''.join(value)
       cookie = settings.COOKIE_DELIMITER.join(multi_parameters) 
+
     return cookie
 
 """
