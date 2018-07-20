@@ -1,4 +1,5 @@
 ## Version 2.6 (upcoming)
+* Fixed: Minor bug-fix regarding performing injections through cookie parameters.
 * Revised: Minor improvement regarding ignoring the Google Analytics cookie in all scanning attempts.
 * Fixed: Minor bug-fix regarding "bind_tcp" shell option.
 

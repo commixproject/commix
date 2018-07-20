@@ -238,6 +238,11 @@ def cookie_injection(url, vuln_parameter, payload):
       request = urllib2.Request(url)
     #Check if defined extra headers.
     headers.do_check(request)
+    # Fix for %0a, %0d%0a separators
+    if payload[:1] == "\n":
+      payload = urllib.quote(payload[:1]) + payload[1:]
+    elif payload[:2] == "\r\n":
+      payload = urllib.quote(payload[:2]) + payload[2:]  
     request.add_header('Cookie', menu.options.cookie.replace(settings.INJECT_TAG, payload))
     try:
       headers.check_http_traffic(request)
