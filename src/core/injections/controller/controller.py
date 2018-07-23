@@ -104,7 +104,10 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
     if not header_name == " cookie" and not the_type == " HTTP header":
       info_msg += " " + http_request_method + ""
     info_msg += ('', ' (JSON)')[settings.IS_JSON] + ('', ' (SOAP/XML)')[settings.IS_XML] 
-    info_msg += the_type + header_name + check_parameter + " for tests."
+    if header_name == " cookie" :
+      info_msg += header_name + the_type + check_parameter + " for tests."
+    else:
+      info_msg += the_type + header_name + check_parameter + " for tests."
     print settings.print_info_msg(info_msg)
 
   # Estimating the response time (in seconds)

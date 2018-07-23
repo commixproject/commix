@@ -457,7 +457,7 @@ def do_cookie_check(cookie):
       checks.is_empty(multi_parameters, http_request_method)
       for param in range(0, len(all_params)):
         if all_params[param].upper().startswith(settings.GOOGLE_ANALYTICS_COOKIE_PREFIX):
-          info_msg = "Ignoring the parameter cookie '" + all_params[param].split("=")[0] + "'."
+          info_msg = "Ignoring the cookie parameter '" + all_params[param].split("=")[0] + "'."
           print settings.print_info_msg(info_msg)
           continue
         if param == 0 :
