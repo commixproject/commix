@@ -46,8 +46,8 @@ class AnsiToWin32(object):
     sequences from the text, and if outputting to a tty, will convert them into
     win32 function calls.
     '''
-    ANSI_CSI_RE = re.compile('\001?\033\\[((?:\\d|;)*)([a-zA-Z])\002?')   # Control Sequence Introducer
-    ANSI_OSC_RE = re.compile('\001?\033\\]((?:.|;)*?)(\x07)\002?')        # Operating System Command
+    ANSI_CSI_RE = re.compile('\001?\033\[((?:\d|;)*)([a-zA-Z])\002?')     # Control Sequence Introducer
+    ANSI_OSC_RE = re.compile('\001?\033\]((?:.|;)*?)(\x07)\002?')         # Operating System Command
 
     def __init__(self, wrapped, convert=None, strip=None, autoreset=False):
         # The wrapped stream (normally sys.stdout or sys.stderr)
@@ -171,9 +171,19 @@ class AnsiToWin32(object):
 
     def write_plain_text(self, text, start, end):
         if start < end:
-            self.wrapped.write(text[start:end])
+            self._write(text[start:end])
             self.wrapped.flush()
 
+    # Reference: https://github.com/robotframework/robotframework/commit/828c67695d85519e4435c556c43ed1b00985df05
+    #  Workaround for Windows 10 console bug:
+    #  https://github.com/robotframework/robotframework/issues/2709
+    def _write(self, text, retry=5):
+        try:
+            self.wrapped.write(text)
+        except IOError, err:
+            if not (err.errno == 0 and retry > 0):
+                raise
+            self._write(text, retry-1)
 
     def convert_ansi(self, paramstring, command):
         if self.convert:
