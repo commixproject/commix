@@ -15,7 +15,7 @@ For more see the file 'readme/COPYING' for copying permission.
 
 """
 Based on "purge.py" script from sqlmap [1].
-[1] https://github.com/sqlmapproject/sqlmap/blob/55272f7a3b5a771b0630b7c8c4a61bab7ba8f27f/lib/utils/purge.py
+[1] https://github.com/sqlmapproject/sqlmap/blob/master/lib/utils/purge.py
 """
 
 import os
@@ -29,7 +29,7 @@ from src.utils import menu
 from src.utils import settings
 from src.thirdparty.colorama import Fore, Back, Style, init
 
-def purge_output():
+def purge():
   directory = settings.OUTPUT_DIR
   if not os.path.isdir(directory):
     warn_msg = "Skipping purging of directory '" + directory + "' as it does not exist."

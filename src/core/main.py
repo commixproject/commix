@@ -1022,15 +1022,15 @@ try:
     # Check for missing mandatory option(s).
     if not any((menu.options.url, menu.options.logfile, menu.options.bulkfile, \
                 menu.options.requestfile, menu.options.sitemap_url, menu.options.wizard, \
-                menu.options.update, menu.options.purge_output, menu.options.noncore_dependencies)):
-      err_msg = "Missing a mandatory option (-u, -l, -m, -r, -x, --wizard, --update, --purge-output or --dependencies). "
+                menu.options.update, menu.options.purge, menu.options.noncore_dependencies)):
+      err_msg = "Missing a mandatory option (-u, -l, -m, -r, -x, --wizard, --update, --purge or --dependencies). "
       err_msg += "Use -h for help."
       print settings.print_critical_msg(err_msg)
       sys.exit(0)
 
-    # Check if defined "--purge-output" option.
-    if menu.options.purge_output:
-      purge.purge_output()
+    # Check if defined "--purge" option.
+    if menu.options.purge:
+      purge.purge()
       if not any((menu.options.url, menu.options.logfile, menu.options.bulkfile, \
                   menu.options.requestfile, menu.options.sitemap_url, menu.options.wizard)):
         sys.exit(0)

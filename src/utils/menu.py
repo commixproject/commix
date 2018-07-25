@@ -535,11 +535,11 @@ misc.add_option("--dependencies",
                 default=False,
                 help="Check for third-party (non-core) dependencies.")
 
-misc.add_option("--purge-output", 
+misc.add_option("--purge", 
                 action="store_true",
-                dest="purge_output",
+                dest="purge",
                 default=False,
-                help="Safely remove all content from output directory.")
+                help="Safely remove all content from commix data directory.")
 
 misc.add_option("--skip-waf", 
                 action="store_true",
