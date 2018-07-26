@@ -1,4 +1,5 @@
 ## Version 2.6 (upcoming)
+* Added: New tamper script "sleep2usleep.py" that replaces "sleep" with "usleep" command in the time-related generated payloads.
 * Replaced: The `--purge-output` option has been replaced with `--purge` option.
 * Fixed: Minor bug-fix regarding performing injections through cookie parameters.
 * Revised: Minor improvement regarding ignoring the Google Analytics cookie in all scanning attempts.
