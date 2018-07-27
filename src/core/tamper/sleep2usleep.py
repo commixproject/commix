@@ -17,7 +17,7 @@ import sys
 from src.utils import settings
 
 """
-Replaces the "sleep" command with "usleep" [1].
+Replaces "sleep" with "usleep" [1] command in the generated payloads.
 [1] http://man7.org/linux/man-pages/man3/usleep.3.html
 Notes:
   * This tamper script works against *nix targets.
@@ -41,10 +41,13 @@ def transform(payload):
     return payload
 
   if settings.TARGET_OS != "win":
-    if settings.EVAL_BASED_STATE != False:
+    if settings.CLASSIC_STATE != False or \
+       settings.EVAL_BASED_STATE != False or \
+       settings.FILE_BASED_STATE != False:
       if settings.TRANFROM_PAYLOAD == None:
         settings.TRANFROM_PAYLOAD = False
-        warn_msg = "The dynamic code evaluation technique, does not support the '" + __tamper__  + ".py' tamper script."
+        warn_msg = "All injection techniques, except for the time-relative ones, "
+        warn_msg += "do not support the '" + __tamper__  + ".py' tamper script."
         sys.stdout.write("\r" + settings.print_warning_msg(warn_msg))
         sys.stdout.flush() 
         print
