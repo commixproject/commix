@@ -334,7 +334,25 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                 raise
 
               except:
-                break
+                percent = ((num_of_chars * 100) / total)
+                float_percent = "{0:.1f}".format(round(((num_of_chars*100)/(total*1.0)),2))
+                if str(float_percent) == "100.0":
+                  if no_result == True:
+                    if not settings.VERBOSITY_LEVEL >= 1:
+                      percent = Fore.RED + "FAILED" + Style.RESET_ALL
+                      info_msg =  "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "... " +  "[ " + percent + " ]"
+                      sys.stdout.write("\r" + settings.print_info_msg(info_msg))
+                      sys.stdout.flush()
+                    else:
+                      percent = ""
+                  else:
+                    percent = str(float_percent) + "%"
+                    print ""
+                    # Print logs notification message
+                    logs.logs_notification(filename)
+                  #raise
+                else:
+                  percent = str(float_percent) + "%"
               break
               
           # Yaw, got shellz! 
