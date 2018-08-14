@@ -129,8 +129,12 @@ def check_http_traffic(request):
             error_msg = str(err_msg.args[0]).split("] ")[1] + "."
           except IndexError:
             error_msg = str(err_msg.args[0]) + "."
-          if settings.VERBOSITY_LEVEL < 2:
-            print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
+          if settings.INIT_TEST == True:
+            if settings.VERBOSITY_LEVEL < 2:
+              print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
+          else:
+            if settings.VERBOSITY_LEVEL < 1:
+              print ""   
           print settings.print_critical_msg(error_msg)
           raise SystemExit()
     else:      
@@ -142,8 +146,12 @@ def check_http_traffic(request):
             error_msg = str(err_msg.args[0]).split("] ")[1] + "."
           except IndexError:
             error_msg = str(err_msg.args[0]) + "."
-          if settings.VERBOSITY_LEVEL < 2:
-            print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
+          if settings.INIT_TEST == True:
+            if settings.VERBOSITY_LEVEL < 2:
+              print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
+          else:
+            if settings.VERBOSITY_LEVEL < 1:
+              print ""  
           print settings.print_critical_msg(error_msg)
           raise SystemExit()
 
