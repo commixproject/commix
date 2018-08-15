@@ -62,9 +62,7 @@ def save_cmd_history():
     cli_history = os.path.expanduser(settings.CLI_HISTORY)
     if os.path.exists(cli_history):
       readline.write_history_file(cli_history)
-  except IOError, e:
-    # print settings.print_critical_msg(str(err_msg.args[0]).split("] ")[1] + ".")
-    # sys.exit(0)
+  except (IOError, AttributeError) as e:
     warn_msg = "There was a problem writing the history file '" + cli_history + "'."
     print settings.print_warning_msg(warn_msg)
 
@@ -76,13 +74,7 @@ def load_cmd_history():
     cli_history = os.path.expanduser(settings.CLI_HISTORY)
     if os.path.exists(cli_history):
       readline.read_history_file(cli_history)
-  except IOError, e:
-    # try:
-    #   error_msg = str(err_msg.args[0]).split("] ")[1] + "."
-    # except:
-    #   error_msg = str(err_msg.args[0]) + "."
-    # print settings.print_critical_msg(error_msg)
-    # raise SystemExit()
+  except (IOError, AttributeError) as e:
     warn_msg = "There was a problem loading the history file '" + cli_history + "'."
     print settings.print_warning_msg(warn_msg)
 
