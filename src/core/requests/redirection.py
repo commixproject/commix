@@ -122,10 +122,17 @@ def do_check(url):
     print settings.print_critical_msg(err_msg + ").")
     raise SystemExit()
 
-  # The target host seems to be down!
+  # The target host seems to be down.
   except urllib2.URLError, err:
     err_msg = "The host seems to be down! (" 
     err_msg += str(err.args[0]).split("] ")[1] 
     err_msg += ")."
     print settings.print_critical_msg(err_msg)
-    sys.exit(0)
+    raise SystemExit()
+
+  # Raise exception regarding infinite loop.
+  except RuntimeError:
+    err_msg = "Infinite redirect loop detected." 
+    err_msg += "Please check all provided parameters and/or provide missing ones."
+    print settings.print_critical_msg(err_msg)
+    raise SystemExit() 
