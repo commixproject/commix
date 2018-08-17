@@ -864,7 +864,16 @@ def recognise_payload(payload):
         menu.options.tamper = "sleep2usleep"  
     from src.core.tamper import sleep2usleep
     payload = sleep2usleep.transform(payload)
-
+  
+  elif "timeout" in payload:
+    if not settings.TAMPER_SCRIPTS['sleep2timeout']:
+      if menu.options.tamper:
+        menu.options.tamper = menu.options.tamper + ",sleep2timeout"
+      else:
+        menu.options.tamper = "sleep2timeout"  
+    from src.core.tamper import sleep2timeout
+    payload = sleep2timeout.transform(payload)
+  
   is_decoded = False
   if (len(payload) % 4 == 0) and \
     re.match(settings.BASE64_RECOGNITION_REGEX, payload) and \
@@ -914,6 +923,10 @@ Perform payload modification
 """
 def perform_payload_modification(payload):
   for encode_type in list(set(settings.MULTI_ENCODED_PAYLOAD[::-1])):
+    # sleep to usleep
+    if encode_type == 'sleep2timeout':
+      from src.core.tamper import sleep2timeout
+      payload = sleep2timeout.transform(payload)
     # sleep to usleep
     if encode_type == 'sleep2usleep':
       from src.core.tamper import sleep2usleep
