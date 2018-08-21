@@ -356,6 +356,14 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                   delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
                 raise
 
+              except EOFError:
+                err_msg = "Exiting, due to EOFError."
+                print settings.print_error_msg(err_msg)
+                if 'cmd' in locals():
+                  # Delete previous shell (text) files (output) from temp.
+                  delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+                raise 
+
               except:
                 percent = ((num_of_chars * 100) / total)
                 float_percent = "{0:.1f}".format(round(((num_of_chars*100)/(total*1.0)),2))
@@ -635,6 +643,8 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                 raise 
   
               except EOFError:
+                err_msg = "Exiting, due to EOFError."
+                print settings.print_error_msg(err_msg)
                 # Delete previous shell (text) files (output) from temp.
                 delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
                 raise 

@@ -227,6 +227,11 @@ def cb_injection_handler(url, timesec, filename, http_request_method):
             except SystemExit: 
               raise
 
+            except EOFError:
+              err_msg = "Exiting, due to EOFError."
+              print settings.print_error_msg(err_msg)
+              raise 
+
             except:
               continue
           
@@ -449,7 +454,9 @@ def cb_injection_handler(url, timesec, filename, http_request_method):
                     raise
 
                   except EOFError:
-                    raise
+                    err_msg = "Exiting, due to EOFError."
+                    print settings.print_error_msg(err_msg)
+                    raise 
 
               elif gotshell in settings.CHOICE_NO:
                 if checks.next_attack_vector(technique, go_back) == True:

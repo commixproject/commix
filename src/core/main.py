@@ -1232,4 +1232,9 @@ except SystemExit:
   print ""
   sys.exit(0)
 
+except EOFError:
+  err_msg = "Exiting, due to EOFError."
+  print settings.print_error_msg(err_msg)
+  sys.exit(0)
+
 # eof

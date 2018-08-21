@@ -333,6 +333,11 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
               except SystemExit:
                 raise
 
+              except EOFError:
+                err_msg = "Exiting, due to EOFError."
+                print settings.print_error_msg(err_msg)
+                raise
+
               except:
                 percent = ((num_of_chars * 100) / total)
                 float_percent = "{0:.1f}".format(round(((num_of_chars*100)/(total*1.0)),2))
@@ -561,13 +566,16 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                         # Update logs with executed cmds and execution results.
                         logs.executed_command(filename, cmd, output)
                         print ""
+
                     except KeyboardInterrupt: 
                       raise
 
                     except SystemExit: 
                       raise
-                      
+
                     except EOFError:
+                      err_msg = "Exiting, due to EOFError."
+                      print settings.print_error_msg(err_msg)
                       raise
 
                 elif gotshell in settings.CHOICE_NO:

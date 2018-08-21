@@ -869,6 +869,11 @@ def shellshock_handler(url, http_request_method, filename):
                   except SystemExit:
                     raise
 
+                  except EOFError:
+                    err_msg = "Exiting, due to EOFError."
+                    print settings.print_error_msg(err_msg)
+                    raise
+
                   except:
                     info_msg = "Testing the " + technique + "... "
                     if settings.VERBOSITY_LEVEL > 1:

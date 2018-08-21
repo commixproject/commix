@@ -245,6 +245,11 @@ def eb_injection_handler(url, timesec, filename, http_request_method):
 
             except SystemExit: 
               raise
+              
+            except EOFError:
+              err_msg = "Exiting, due to EOFError."
+              print settings.print_error_msg(err_msg)
+              raise
 
             except:
               continue
@@ -463,6 +468,8 @@ def eb_injection_handler(url, timesec, filename, http_request_method):
                     raise
                     
                   except EOFError:
+                    err_msg = "Exiting, due to EOFError."
+                    print settings.print_error_msg(err_msg)
                     raise
 
               elif gotshell in settings.CHOICE_NO:
