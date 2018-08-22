@@ -106,7 +106,7 @@ def custom_web_root(url, timesec, filename, http_request_method, url_time_respon
   if settings.TARGET_OS == "win" :
     example_root_dir = "\\inetpub\\wwwroot"
   else:
-    example_root_dir = "/var/www/"
+    example_root_dir = "/var/www"
   question_msg = "Please provide the host's root directory (e.g. '" 
   question_msg += example_root_dir + "') > "
   sys.stdout.write(settings.print_question_msg(question_msg))
@@ -116,7 +116,6 @@ def custom_web_root(url, timesec, filename, http_request_method, url_time_respon
   if menu.options.web_root:
     menu.options.web_root = settings.WEB_ROOT
   settings.CUSTOM_WEB_ROOT = True
-  fb_injection_handler(url, timesec, filename, http_request_method, url_time_response)
 
 """
 Return TEMP path for win / *nix targets.
