@@ -111,6 +111,8 @@ def custom_web_root(url, timesec, filename, http_request_method, url_time_respon
   question_msg += example_root_dir + "') > "
   sys.stdout.write(settings.print_question_msg(question_msg))
   settings.WEB_ROOT = sys.stdin.readline().replace("\n","").lower()
+  if settings.WEB_ROOT.endswith(("\\", "/")):
+    settings.WEB_ROOT = settings.WEB_ROOT[:-1]
   if len(settings.WEB_ROOT) == 0:
     settings.WEB_ROOT = example_root_dir
   if menu.options.web_root:
