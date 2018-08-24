@@ -1,4 +1,5 @@
 ## Version 2.6 (upcoming)
+* Revised: Minor improvement regarding counting the total of HTTP(S) requests, for the identified injection point(s) during the detection phase.
 * Fixed: Minor bug-fix regarding providing the target host's root directory.
 * Added: New tamper script "sleep2timeout.py" that uses "timeout" function for time-based attacks.
 * Added: New tamper script "sleep2usleep.py" that replaces "sleep" with "usleep" command in the time-related generated payloads.

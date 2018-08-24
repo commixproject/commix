@@ -65,6 +65,13 @@ def captcha_check(page):
           warn_msg += "."
         print settings.print_bold_warning_msg(warn_msg)
         break
+"""
+Counting the total of HTTP(S) requests for the identified injection point(s), during the detection phase.
+"""
+def total_of_requests():
+  info_msg = "Identified the following injection point with "
+  info_msg += "a total of " + str(settings.TOTAL_OF_REQUESTS) + " HTTP(S) requests."
+  print settings.print_info_msg(info_msg) 
 
 """
 Url decode specific chars of the provided payload.

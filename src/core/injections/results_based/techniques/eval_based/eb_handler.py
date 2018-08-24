@@ -306,8 +306,11 @@ def eb_injection_handler(url, timesec, filename, http_request_method):
             logs.update_payload(filename, counter, payload) 
             counter = counter + 1
 
-            if not settings.VERBOSITY_LEVEL >= 1 and not settings.LOAD_SESSION:
-              print ""
+            if not settings.LOAD_SESSION:
+              if not settings.VERBOSITY_LEVEL >= 1:
+                print ""
+              else:
+                checks.total_of_requests()
 
             # Print the findings to terminal.
             success_msg = "The"

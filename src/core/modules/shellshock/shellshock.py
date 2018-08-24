@@ -730,6 +730,7 @@ def shellshock_handler(url, http_request_method, filename):
           check_header = check_header[1:]
           logs.update_payload(filename, counter, payload) 
 
+          checks.total_of_requests()
           success_msg = "The (" + check_header + ") '"
           success_msg += url + Style.RESET_ALL + Style.BRIGHT 
           success_msg += "' seems vulnerable via " + technique + "."

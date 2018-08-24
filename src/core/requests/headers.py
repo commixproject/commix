@@ -81,6 +81,8 @@ def http_response(headers, code):
 Checking the HTTP Headers & HTTP/S Request.
 """
 def check_http_traffic(request):
+  settings.TOTAL_OF_REQUESTS = settings.TOTAL_OF_REQUESTS + 1
+  
   # Delay in seconds between each HTTP request
   time.sleep(int(settings.DELAY))
   if settings.PROXY_PROTOCOL == 'https':

@@ -111,7 +111,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "2.6.18"
+VERSION_NUM = "2.6.19"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"
@@ -247,6 +247,9 @@ TMP_PATH = ""
 WEB_ROOT = ""
 DEFAULT_WEB_ROOT = ""
 CUSTOM_WEB_ROOT = False
+
+# Counting the total of HTTP(S) requests
+TOTAL_OF_REQUESTS = 0
 
 # The max help option length.
 MAX_OPTION_LENGTH = 18
