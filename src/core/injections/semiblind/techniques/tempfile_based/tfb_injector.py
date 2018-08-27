@@ -539,6 +539,8 @@ def false_positive_check(separator, TAG, cmd, prefix, suffix, whitespace, timese
     output = "".join(str(p) for p in output)
 
     if str(output) == str(randvcalc):
+      if settings.VERBOSITY_LEVEL == 1:
+        print ""
       return how_long, output
 
 """
