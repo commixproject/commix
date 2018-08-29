@@ -1,4 +1,5 @@
 ## Version 2.6 (upcoming)
+* Added: Support for "Netcat-Openbsd" (nc without -e) on "reverse_tcp" and "bind_tcp" shell options.
 * Added: Support for "Socat" on "reverse_tcp" and "bind_tcp" shell options.
 * Revised: Minor improvement regarding counting the total of HTTP(S) requests, for the identified injection point(s) during the detection phase.
 * Fixed: Minor bug-fix regarding providing the target host's root directory.

