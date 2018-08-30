@@ -162,7 +162,7 @@ def check_lport(lport):
 """
 Set up the netcat bind TCP connection
 """
-def netcat_version():
+def netcat_version(separator):
 
   # Defined shell
   shell = "sh"
@@ -245,7 +245,7 @@ Type '""" + Style.BRIGHT + """4""" + Style.RESET_ALL + """' to use Netcat-Openbs
 
 """
 """
-def other_bind_shells():
+def other_bind_shells(separator):
 
   while True:
     other_shell = raw_input("""
@@ -449,7 +449,7 @@ Type '""" + Style.BRIGHT + """7""" + Style.RESET_ALL + """' to use a Python mete
 """
 Choose type of bind TCP connection.
 """
-def bind_tcp_options():
+def bind_tcp_options(separator):
 
   while True:
     bind_tcp_option = raw_input("""   
@@ -465,7 +465,7 @@ Type '""" + Style.BRIGHT + """2""" + Style.RESET_ALL + """' for other bind TCP s
 
     # Option 1 - Netcat shell
     elif bind_tcp_option == '1' :
-      bind_tcp_option = netcat_version()
+      bind_tcp_option = netcat_version(separator)
       if bind_tcp_option.lower() not in settings.SHELL_OPTIONS:
         shell_success()
         break
@@ -475,7 +475,7 @@ Type '""" + Style.BRIGHT + """2""" + Style.RESET_ALL + """' for other bind TCP s
         pass  
     # Option 2 - Other (Netcat-Without-Netcat) shells
     elif bind_tcp_option == '2' :
-      bind_tcp_option = other_bind_shells()
+      bind_tcp_option = other_bind_shells(separator)
       if bind_tcp_option.lower() not in settings.SHELL_OPTIONS:
         shell_success()
         break
@@ -495,7 +495,7 @@ Type '""" + Style.BRIGHT + """2""" + Style.RESET_ALL + """' for other bind TCP s
 """
 Set up the bind TCP connection
 """
-def configure_bind_tcp():
+def configure_bind_tcp(separator):
 
   # Set up rhost for the bind TCP connection
   while True:

@@ -96,7 +96,7 @@ Configure the bind TCP shell
 def bind_tcp_config(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, os_shell_option, go_back, go_back_again, payload, OUTPUT_TEXTFILE):
   settings.BIND_TCP = True
   # Set up RHOST / LPORT for the bind TCP connection.
-  bind_tcp.configure_bind_tcp()
+  bind_tcp.configure_bind_tcp(separator)
   if settings.BIND_TCP == False:
     if settings.REVERSE_TCP == True:
       os_shell_option = "reverse_tcp"
@@ -107,7 +107,7 @@ def bind_tcp_config(separator, TAG, cmd, prefix, suffix, whitespace, http_reques
     if settings.RHOST and settings.LPORT in settings.SHELL_OPTIONS:
       result = checks.check_bind_tcp_options(settings.RHOST)
     else:  
-      cmd = bind_tcp.bind_tcp_options()
+      cmd = bind_tcp.bind_tcp_options(separator)
       result = checks.check_bind_tcp_options(cmd)
     if result != None:
       if result == 0:
@@ -129,7 +129,7 @@ Configure the reverse TCP shell
 def reverse_tcp_config(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, os_shell_option, go_back, go_back_again, payload, OUTPUT_TEXTFILE):
   settings.REVERSE_TCP = True
   # Set up LHOST / LPORT for the reverse TCP connection.
-  reverse_tcp.configure_reverse_tcp()
+  reverse_tcp.configure_reverse_tcp(separator)
   if settings.REVERSE_TCP == False:
     if settings.BIND_TCP == True:
       os_shell_option = "bind_tcp"
@@ -140,7 +140,7 @@ def reverse_tcp_config(separator, TAG, cmd, prefix, suffix, whitespace, http_req
     if settings.LHOST and settings.LPORT in settings.SHELL_OPTIONS:
       result = checks.check_reverse_tcp_options(settings.LHOST)
     else:  
-      cmd = reverse_tcp.reverse_tcp_options()
+      cmd = reverse_tcp.reverse_tcp_options(separator)
       result = checks.check_reverse_tcp_options(cmd)
     if result != None:
       if result == 0:
