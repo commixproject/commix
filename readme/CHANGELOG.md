@@ -1,4 +1,5 @@
 ## Version 2.6 (upcoming)
+* Added: Support for "Ncat" on "reverse_tcp" and "bind_tcp" shell options.
 * Added: Support for "Bash" (via /dev/tcp) on "reverse_tcp" shell option.
 * Added: Support for "Netcat-Openbsd" (nc without -e) on "reverse_tcp" and "bind_tcp" shell options.
 * Added: Support for "Socat" on "reverse_tcp" and "bind_tcp" shell options.

