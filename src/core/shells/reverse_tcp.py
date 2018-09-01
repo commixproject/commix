@@ -570,7 +570,7 @@ Type '""" + Style.BRIGHT + """3""" + Style.RESET_ALL + """' to use Regsvr32.exe 
       break
     
     # Web delivery script
-    elif other_shell == '10':
+    elif other_shell == '11':
       while True:
         web_delivery = raw_input("""
 ---[ """ + Style.BRIGHT + Fore.BLUE + """Web delivery script""" + Style.RESET_ALL + """ ]---
