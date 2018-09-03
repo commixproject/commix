@@ -17,6 +17,7 @@ import re
 import os
 import sys
 import json
+import socket
 import random
 import string
 import base64
@@ -86,6 +87,27 @@ def url_decode(payload):
   pattern = re.compile("|".join(rep.keys()))
   payload = pattern.sub(lambda m: rep[re.escape(m.group(0))], payload)
   return payload
+
+"""
+Checking connection (resolving hostname).
+"""
+def check_connection(url):
+  hostname = urlparse.urlparse(url).hostname or ''
+  if not re.search(r"\A\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\Z", hostname):
+    if not any((menu.options.proxy, menu.options.tor, menu.options.offline)):
+      try:
+        info_msg = "Resolving hostname '" + hostname + "'."
+        print settings.print_info_msg(info_msg) 
+        socket.getaddrinfo(hostname, None)
+      except socket.gaierror:
+        err_msg = "Host '" + hostname + "' does not exist."
+        print settings.print_critical_msg(err_msg)
+        raise SystemExit()
+      except socket.error, ex:
+        err_msg = "Problem occurred while "
+        err_msg += "resolving a host name '" + hostname + "'"
+        print settings.print_critical_msg(err_msg)
+        raise SystemExit()
 
 """
 Check current assessment phase.

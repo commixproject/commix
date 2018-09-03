@@ -16,15 +16,15 @@ For more see the file 'readme/COPYING' for copying permission.
 import re
 import os
 import sys
+import errno
 import random
 import httplib
 import urllib2
-import errno
 
 from socket import error as SocketError
 
-from urlparse import urlparse
 from os.path import splitext
+from urlparse import urlparse
 
 from src.utils import menu
 from src.utils import logs
@@ -203,6 +203,8 @@ def check_internet(url):
 The init (URL) request.
 """
 def init_request(url):
+  # Check connection(s)
+  checks.check_connection(url)
   # Define HTTP User-Agent header
   user_agent_header()
   # Check the internet connection (--check-internet switch).
