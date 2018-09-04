@@ -86,21 +86,20 @@ def do_check():
         err_msg += "you could successfully use "
         err_msg += "switch '--tor'."
         print settings.print_critical_msg(err_msg)  
-        sys.exit(0)  
+        raise SystemExit() 
 
     except urllib2.URLError, err_msg:
       print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
       if menu.options.tor_check:
-        warn_msg = "It seems that your Tor connection is not properly set. "
+        err_msg = "It seems that your Tor connection is not properly set. "
       else:
-        warn_msg = ""
-      warn_msg = "Please make sure that you have "
-      warn_msg += "Tor installed and running so "
-      warn_msg += "you could successfully use "
-      warn_msg += "switch '--tor'."
-      print settings.print_warning_msg(warn_msg)
-      print settings.print_critical_msg(str(err_msg.args[0]).split("] ")[1] + ".")
-      sys.exit(0)
+        err_msg = ""
+      err_msg = "Please make sure that you have "
+      err_msg += "Tor installed and running so "
+      err_msg += "you could successfully use "
+      err_msg += "switch '--tor'."
+      print settings.print_critical_msg(err_msg)  
+      raise SystemExit()  
 
     except httplib.BadStatusLine, err_msg:
       print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
@@ -115,7 +114,7 @@ def use_tor(request):
   if menu.options.offline:  
     err_msg = "You cannot Tor network without access on the Internet."
     print settings.print_critical_msg(err_msg)
-    sys.exit(0)
+    raise SystemExit()
 
   privoxy_proxy = urllib2.ProxyHandler({settings.PROXY_PROTOCOL:settings.PRIVOXY_IP + ":" + PRIVOXY_PORT})
   opener = urllib2.build_opener(privoxy_proxy)
