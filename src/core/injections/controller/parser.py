@@ -61,7 +61,7 @@ def logfile_parser():
     err_msg += "the '" + os.path.split(request_file)[1] + "' file. "
     sys.stdout.write(settings.print_critical_msg(err_msg) + "\n")
     sys.stdout.flush()
-    sys.exit(0)
+    raise SystemExit()
 
   if menu.options.requestfile: 
     request_file = menu.options.requestfile
@@ -80,7 +80,7 @@ def logfile_parser():
     err_msg = "It seems that the '" + request_file + "' file, does not exist."
     sys.stdout.write(settings.print_critical_msg(err_msg) + "\n")
     sys.stdout.flush()
-    sys.exit(0)
+    raise SystemExit()
 
   else:
     # Check for multiple hosts
@@ -172,7 +172,7 @@ def logfile_parser():
             err_msg = "Use the '--auth-cred' option to provide a valid pair of "
             err_msg += "HTTP authentication credentials (i.e --auth-cred=\"admin:admin\") "
             print settings.print_critical_msg(err_msg)
-            sys.exit(0)
+            raise SystemExit()
 
       # Add extra headers
       else:

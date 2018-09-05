@@ -80,7 +80,7 @@ def grab_ip_addr():
       print settings.print_warning_msg(warn_msg)
     else:
       print settings.print_critical_msg(str(err_msg)) + "\n"
-      sys.exit(0)
+      raise SystemExit()
 
 class Handler(BaseHTTPRequestHandler):
     def do_GET(self):

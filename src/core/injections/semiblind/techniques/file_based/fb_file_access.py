@@ -76,7 +76,7 @@ def file_write(separator, payload, TAG, timesec, prefix, suffix, whitespace, htt
     warn_msg = "It seems that the provided local file '" + file_to_write + "', does not exist."
     sys.stdout.write(settings.print_warning_msg(warn_msg) + "\n")
     sys.stdout.flush()
-    sys.exit(0)
+    raise SystemExit()
     
   if os.path.isfile(file_to_write):
     with open(file_to_write, 'r') as content_file:
@@ -162,12 +162,12 @@ def file_upload(separator, payload, TAG, timesec, prefix, suffix, whitespace, ht
       warn_msg = "It seems that the '" + file_to_upload + "' file, does not exist. (" +str(err_msg)+ ")"
       sys.stdout.write(settings.print_warning_msg(warn_msg) + "\n")
       sys.stdout.flush()
-      sys.exit(0)
+      raise SystemExit()
     except ValueError, err_msg:
       err_msg = str(err_msg[0]).capitalize() + str(err_msg)[1]
       sys.stdout.write(settings.print_critical_msg(err_msg) + "\n")
       sys.stdout.flush()
-      sys.exit(0) 
+      raise SystemExit() 
       
     # Check the file-destination
     if os.path.split(menu.options.file_dest)[1] == "" :

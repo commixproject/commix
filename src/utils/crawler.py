@@ -114,7 +114,7 @@ def crawler(url):
         sitemap_check = False
         break
       elif sitemap_check in settings.CHOICE_QUIT:
-        sys.exit(0)
+        raise SystemExit()
       else:
         err_msg = "'" + sitemap_check + "' is not a valid answer."  
         print settings.print_error_msg(err_msg)
@@ -146,7 +146,7 @@ def crawler(url):
           elif sitemap_check in settings.CHOICE_NO:
             break
           elif sitemap_check in settings.CHOICE_QUIT:
-            sys.exit(0)
+            raise SystemExit()
           else:
             err_msg = "'" + sitemap_check + "' is not a valid answer."  
             print settings.print_error_msg(err_msg)
@@ -185,7 +185,7 @@ def crawler(url):
           succeed_banner = False
           pass 
         elif gotshell in settings.CHOICE_QUIT:
-          sys.exit(0)
+          raise SystemExit()
   except TypeError:
     pass
 

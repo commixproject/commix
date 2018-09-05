@@ -33,7 +33,7 @@ def shell_options(option):
   elif option.lower() == "?": 
     menu.reverse_tcp_options()
   elif option.lower() == "quit": 
-    sys.exit(0)
+    raise SystemExit()
   elif option[0:3].lower() == "set":
     if option[4:9].lower() == "rhost":
       check_rhost(option[10:])
@@ -226,7 +226,7 @@ Type '""" + Style.BRIGHT + """4""" + Style.RESET_ALL + """' to use Netcat-Openbs
       shell = "/bin/" + shell
       break    
     elif enable_bin_dir in settings.CHOICE_QUIT:
-      sys.exit(0)
+      raise SystemExit()
     else:
       err_msg = "'" + enable_bin_dir + "' is not a valid answer."  
       print settings.print_error_msg(err_msg)
@@ -514,7 +514,7 @@ def configure_bind_tcp(separator):
       menu.bind_tcp_options()
       continue
     elif option.lower() == "quit": 
-      sys.exit(0)
+      raise SystemExit()
     elif len(settings.LPORT) != 0 and len(settings.RHOST) != 0:
       break 
     elif option[0:3].lower() == "set":

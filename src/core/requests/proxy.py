@@ -54,7 +54,7 @@ def do_check(url):
     err_msg += menu.options.proxy
     err_msg += ")."
     print settings.print_critical_msg(err_msg)
-    sys.exit(0)
+    raise SystemExit()
     
 """
 Use the defined HTTP Proxy

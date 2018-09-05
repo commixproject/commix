@@ -107,14 +107,14 @@ def injection_point_importation(url, technique, injection_type, separator, shell
     err_msg = str(err_msg)[:1].upper() + str(err_msg)[1:] + "."
     err_msg += " You are advised to rerun with switch '--flush-session'."
     print settings.print_critical_msg(err_msg)
-    sys.exit(0)
+    raise SystemExit()
 
   except sqlite3.DatabaseError, err_msg:
     err_msg = "An error occurred while accessing session file ('"
     err_msg += settings.SESSION_FILE + "'). "
     err_msg += "If the problem persists use the '--flush-session' option."
     print "\n" + settings.print_critical_msg(err_msg)
-    sys.exit(0)
+    raise SystemExit()
 
 """
 Export successful applied techniques from session file.
@@ -405,7 +405,7 @@ def import_valid_credentials(url, authentication_type, admin_panel, username, pa
     err_msg += settings.SESSION_FILE + "'). "
     err_msg += "If the problem persists use the '--flush-session' option."
     print "\n" + settings.print_critical_msg(err_msg)
-    sys.exit(0)
+    raise SystemExit()
 
 
 """

@@ -127,7 +127,7 @@ def create_log_file(url, output_dir):
                     menu.options.session_file + \
                     "') does not exist." 
        print settings.print_critical_msg(err_msg)
-       sys.exit(0)
+       raise SystemExit()
   else:  
     settings.SESSION_FILE = output_dir + host + "/" + "session" + ".db"
 

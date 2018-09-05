@@ -65,7 +65,7 @@ def revision_num():
     print settings.print_info_msg(info_msg) 
   except:
     print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]" 
-    sys.exit(0)
+    raise SystemExit()
 
 """
 The commix's updater.
@@ -81,14 +81,14 @@ def updater():
     print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
     err_msg = "You cannot update commix via GitHub without access on the Internet."
     print settings.print_critical_msg(err_msg)
-    sys.exit(0)
+    raise SystemExit()
   # Check if windows
   if settings.IS_WINDOWS:
     print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
     err_msg = "For updating purposes on Windows platform, it's recommended "
     err_msg += "to use a GitHub client for Windows (http://windows.github.com/)."
     print settings.print_critical_msg(err_msg)
-    sys.exit(0)
+    raise SystemExit()
   else:
     try:
       requirment = "git"
@@ -112,16 +112,16 @@ def updater():
           err_msg += Style.BRIGHT + "'git clone " + settings.GIT_URL 
           err_msg += " " + settings.APPLICATION + "' "
           print settings.print_critical_msg(err_msg)    
-          sys.exit(0)
+          raise SystemExit()
       else:
           print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
           err_msg = requirment + " not found."
           print settings.print_critical_msg(err_msg)
-          sys.exit(0)
+          raise SystemExit()
 
     except Exception as err_msg:
       print "\n" + settings.print_critical_msg(err_msg)
-    sys.exit(0)
+    raise SystemExit()
 
 
 """
@@ -179,14 +179,14 @@ def unicorn_updater(current_version):
     err_msg = "You cannot update TrustedSec's Magic Unicorn "
     err_msg += "via GitHub without access on the Internet."
     print settings.print_critical_msg(err_msg)
-    sys.exit(0)
+    raise SystemExit()
   # Check if windows
   if settings.IS_WINDOWS:
     print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
     err_msg = "For updating purposes on Windows platform, it's recommended "
     err_msg += "to use a GitHub client for Windows (http://windows.github.com/)."
     print settings.print_critical_msg(err_msg)
-    sys.exit(0)
+    raise SystemExit()
   else:
     try:
       requirment = "git"
@@ -212,11 +212,11 @@ def unicorn_updater(current_version):
         print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
         err_msg = requirment + " not found."
         print settings.print_critical_msg(err_msg)
-        sys.exit(0)
+        raise SystemExit()
 
     except Exception as err_msg:
       print settings.print_critical_msg(err_msg)
-    sys.exit(0)
+    raise SystemExit()
 
 """
 Check the latest version of unicorn

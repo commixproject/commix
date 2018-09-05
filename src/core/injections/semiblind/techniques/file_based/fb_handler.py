@@ -249,7 +249,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
               err_msg += settings.SESSION_FILE + "'). "
               err_msg += "Use the '--flush-session' option."
               print settings.print_critical_msg(err_msg)
-              sys.exit(0)
+              raise SystemExit()
 
           if settings.RETEST == True:
             settings.RETEST = False
@@ -424,12 +424,12 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                 elif str(e.getcode()) == settings.UNAUTHORIZED_ERROR:
                   err_msg = "Authorization required!"
                   print settings.print_critical_msg(err_msg) + "\n"
-                  sys.exit(0)
+                  raise SystemExit()
                   
                 elif str(e.getcode()) == settings.FORBIDDEN_ERROR:
                   err_msg = "You don't have permission to access this page."
                   print settings.print_critical_msg(err_msg) + "\n"
-                  sys.exit(0)
+                  raise SystemExit()
               
             except KeyboardInterrupt:
               # Delete previous shell (text) files (output)
@@ -558,7 +558,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                 elif file_access_again in settings.CHOICE_QUIT:
                   # Delete previous shell (text) files (output)
                   delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-                  sys.exit(0)
+                  raise SystemExit()
                 else:
                   err_msg = "'" + enumerate_again + "' is not a valid answer."
                   print settings.print_error_msg(err_msg)
@@ -593,7 +593,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                 elif file_access_again in settings.CHOICE_QUIT:
                   # Delete previous shell (text) files (output)
                   delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-                  sys.exit(0)
+                  raise SystemExit()
                 else:
                   err_msg = "'" + enumerate_again + "' is not a valid answer."
                   print settings.print_error_msg(err_msg)
@@ -612,7 +612,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
               fb_enumeration.single_os_cmd_exec(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
               # Delete previous shell (text) files (output)
               delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-              sys.exit(0)
+              raise SystemExit()
 
             try:
               # Pseudo-Terminal shell
@@ -697,7 +697,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                 elif gotshell in settings.CHOICE_QUIT:
                   # Delete previous shell (text) files (output)
                   delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-                  sys.exit(0)
+                  raise SystemExit()
                 else:
                   err_msg = "'" + gotshell + "' is not a valid answer."  
                   print settings.print_error_msg(err_msg)

@@ -70,17 +70,17 @@ def estimate_response_time(url, timesec):
       print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
     err_msg = "The connection to target URL has timed out."
     print settings.print_critical_msg(err_msg) + "\n"
-    sys.exit(0)
+    raise SystemExit()
   except urllib2.URLError, err_msg:
     if settings.VERBOSITY_LEVEL >= 1:
       print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
     print settings.print_critical_msg(str(err_msg.args[0]).split("] ")[1] + ".")
-    sys.exit(0)
+    raise SystemExit()
   except ValueError, err_msg:
     if settings.VERBOSITY_LEVEL >= 1:
       print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
     print settings.print_critical_msg(str(err_msg) + ".")
-    sys.exit(0)
+    raise SystemExit()
   end = time.time()
   diff = end - start
   if int(diff) < 1:
@@ -955,7 +955,7 @@ def encoding_detection(response):
       err_msg += "Please visit 'http://docs.python.org/library/codecs.html#standard-encodings' "
       err_msg += "to get the full list of supported charsets."
       print settings.print_critical_msg(err_msg)
-      sys.exit(0)
+      raise SystemExit()
 
 # Perform target page reload (if it is required).
 def url_reload(url, timesec):

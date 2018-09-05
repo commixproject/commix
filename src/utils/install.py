@@ -39,7 +39,7 @@ def uninstaller():
 		subprocess.Popen("rm -rf /usr/share/" + settings.APPLICATION + " >/dev/null 2>&1", shell=True).wait()
   except:
     print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
-    sys.exit(0)
+    raise SystemExit()
     
   sys.stdout.write("[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]\n")
   sys.stdout.flush()
@@ -65,7 +65,7 @@ def installer():
       print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]" 
       err_msg = "You need to have root privileges to run this option!"
       print settings.print_critical_msg(err_msg)
-      sys.exit(0)
+      raise SystemExit()
       
     # Check if commix is already installed.
     if os.path.isdir("/usr/share/"  + settings.APPLICATION + ""):
@@ -84,10 +84,10 @@ def installer():
            uninstall = "y"
         if uninstall in settings.CHOICE_YES:
           uninstaller()
-          sys.exit(0)
+          raise SystemExit()
         elif uninstall in settings.CHOICE_NO or \
         uninstall in settings.CHOICE_QUIT: 
-          sys.exit(0)
+          raise SystemExit()
         else:
           err_msg = "'" + uninstall + "' is not a valid answer."
           print settings.print_error_msg(err_msg)
@@ -110,7 +110,7 @@ def installer():
         err_msg += "Please install manually: " + dependencies
         print Back.RED + err_msg + Style.RESET_ALL
         print ""
-        sys.exit(0)
+        raise SystemExit()
         
     # Force install of necessary packages
     subprocess.Popen("apt-get --force-yes -y install " + packages + ">/dev/null 2>&1", shell=True).wait()
@@ -126,7 +126,7 @@ def installer():
       subprocess.Popen("chmod 775 /usr/share/"  + settings.APPLICATION + "/" + settings.APPLICATION + ".py >/dev/null 2>&1", shell=True).wait()
     except:
       print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
-      sys.exit(0)
+      raise SystemExit()
     sys.stdout.write("[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]\n")
     sys.stdout.flush()
     
@@ -140,7 +140,7 @@ def installer():
         subprocess.Popen("chmod +x /usr/bin/"  + settings.APPLICATION + " >/dev/null 2>&1", shell=True).wait()
     except:
       print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
-      sys.exit(0)
+      raise SystemExit()
     sys.stdout.write("[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]\n")
     sys.stdout.flush()
     
@@ -161,6 +161,6 @@ def installer():
     err_msg += "Please install manually: " + packages + dependencies
     print settings.print_critical_msg(err_msg)
     print ""
-    sys.exit(0)
+    raise SystemExit()
 
   # eof

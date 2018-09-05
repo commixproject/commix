@@ -88,7 +88,7 @@ def user_agent_header():
     if (menu.options.agent != settings.DEFAULT_USER_AGENT) or menu.options.mobile:
       err_msg = "The option '--random-agent' is incompatible with option '--user-agent' or switch '--mobile'."
       print settings.print_critical_msg(err_msg)
-      sys.exit(0)
+      raise SystemExit()
     else:
       info_msg = "Fetching random HTTP User-Agent header... "  
       sys.stdout.write(settings.print_info_msg(info_msg))
@@ -403,26 +403,26 @@ def main(filename, url):
         err_msg += "' must be a string composed by the letters C, E, T, F. "
         err_msg += "Refer to the official wiki for details."
         print settings.print_critical_msg(err_msg)
-        sys.exit(0)
+        raise SystemExit()
 
     # Check if specified wrong alternative shell
     if menu.options.alter_shell:
       if menu.options.alter_shell.lower() not in settings.AVAILABLE_SHELLS:
         err_msg = "'" + menu.options.alter_shell + "' shell is not supported!"
         print settings.print_critical_msg(err_msg)
-        sys.exit(0)
+        raise SystemExit()
 
     # Check the file-destination
     if menu.options.file_write and not menu.options.file_dest or \
     menu.options.file_upload  and not menu.options.file_dest:
       err_msg = "Host's absolute filepath to write and/or upload, must be specified (i.e. '--file-dest')."
       print settings.print_critical_msg(err_msg)
-      sys.exit(0)
+      raise SystemExit()
 
     if menu.options.file_dest and menu.options.file_write == None and menu.options.file_upload == None :
       err_msg = "You must enter the '--file-write' or '--file-upload' parameter."
       print settings.print_critical_msg(err_msg)
-      sys.exit(0)
+      raise SystemExit()
   
     # Check if defined "--url" or "-m" option.
     if url:
@@ -445,7 +445,7 @@ def main(filename, url):
               if change_depth_level in settings.CHOICE_YES or change_depth_level in settings.CHOICE_NO:
                 break  
               elif change_depth_level in settings.CHOICE_QUIT:
-                sys.exit(0)
+                raise SystemExit()
               else:
                 err_msg = "'" + change_depth_level + "' is not a valid answer."  
                 print settings.print_error_msg(err_msg)
@@ -512,7 +512,7 @@ def main(filename, url):
                 if not os.path.isfile(menu.options.file_upload):
                   err_msg = "The '" + menu.options.file_upload + "' file, does not exist."
                   sys.stdout.write(settings.print_critical_msg(err_msg) + "\n")
-                  sys.exit(0)
+                  raise SystemExit()
 
                 # Setting the local HTTP server.
                 if settings.LOCAL_HTTP_IP == None:
@@ -535,7 +535,7 @@ def main(filename, url):
                 if settings.LOCAL_HTTP_PORT < 1 or settings.LOCAL_HTTP_PORT > 65535:
                   err_msg = "Invalid HTTP server's port (" + str(settings.LOCAL_HTTP_PORT) + ")." 
                   print settings.print_critical_msg(err_msg)
-                  sys.exit(0)
+                  raise SystemExit()
                 
                 http_server = "http://" + str(settings.LOCAL_HTTP_IP) + ":" + str(settings.LOCAL_HTTP_PORT) + "/"
                 info_msg = "Setting the HTTP server on '" + http_server + "'. "  
@@ -548,10 +548,10 @@ def main(filename, url):
                 if not re.match(settings.VALID_URL_FORMAT, menu.options.file_upload):
                   err_msg = "The '" + menu.options.file_upload + "' is not a valid URL. "
                   print settings.print_critical_msg(err_msg)
-                  sys.exit(0)
+                  raise SystemExit()
                 break  
               elif enable_HTTP_server in settings.CHOICE_QUIT:
-                sys.exit(0)
+                raise SystemExit()
               else:
                 err_msg = "'" + enable_HTTP_server + "' is not a valid answer."  
                 print settings.print_error_msg(err_msg)
@@ -561,11 +561,11 @@ def main(filename, url):
             urllib2.urlopen(menu.options.file_upload)
           except urllib2.HTTPError, err_msg:
             print settings.print_critical_msg(str(err_msg.code))
-            sys.exit(0)
+            raise SystemExit()
 
           except urllib2.URLError, err_msg:
             print settings.print_critical_msg(str(err_msg.args[0]).split("] ")[1] + ".")
-            sys.exit(0)
+            raise SystemExit()
 
         # Used a valid pair of valid credentials
         if menu.options.auth_cred:
@@ -731,7 +731,7 @@ def main(filename, url):
                 warn_msg = "The '--file-upload' option, is not yet available for windows targets. "
                 warn_msg += "Instead, use the '--file-write' option."
                 print settings.print_warning_msg(warn_msg)  
-                sys.exit(0)
+                raise SystemExit()
             else: 
               if menu.options.is_admin : 
                 warn_msg = "Swithing the '--is-admin' to '--is-root' because "
@@ -792,7 +792,7 @@ def main(filename, url):
         if str(err_msg.getcode()) == settings.INTERNAL_SERVER_ERROR:
           print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
           content = err_msg.read()
-          sys.exit(0)
+          raise SystemExit()
 
         # Check for HTTP Error 401 (Unauthorized).
         elif str(err_msg.getcode()) == settings.UNAUTHORIZED_ERROR:
@@ -814,7 +814,7 @@ def main(filename, url):
             err_msg = "The identified HTTP authentication type (" + auth_type + ") "
             err_msg += "is not yet supported."
             print settings.print_critical_msg(err_msg) + "\n"
-            sys.exit(0)
+            raise SystemExit()
 
           except IndexError:
             print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
@@ -822,7 +822,7 @@ def main(filename, url):
             err_msg += " HTTP authentication credentials '" + menu.options.auth_cred + "'"
             err_msg += " seems to be invalid."
             print settings.print_critical_msg(err_msg)
-            sys.exit(0) 
+            raise SystemExit() 
             
           if settings.VERBOSITY_LEVEL < 2:
             print "[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]"
@@ -866,11 +866,11 @@ def main(filename, url):
                         settings.REQUIRED_AUTHENTICATION = True
                         break
                       else:
-                        sys.exit(0)
+                        raise SystemExit()
                     elif do_update in settings.CHOICE_NO:
                       checks.http_auth_err_msg()
                     elif do_update in settings.CHOICE_QUIT:
-                      sys.exit(0)
+                      raise SystemExit()
                     else:
                       err_msg = "'" + do_update + "' is not a valid answer."  
                       print settings.print_error_msg(err_msg)
@@ -902,11 +902,11 @@ def main(filename, url):
                         settings.REQUIRED_AUTHENTICATION = True
                         break
                       else:
-                        sys.exit(0)
+                        raise SystemExit()
                     elif do_update in settings.CHOICE_NO:
                       checks.http_auth_err_msg()
                     elif do_update in settings.CHOICE_QUIT:
-                      sys.exit(0)
+                      raise SystemExit()
                     else:
                       err_msg = "'" + do_update + "' is not a valid answer."  
                       print settings.print_error_msg(err_msg)
@@ -922,7 +922,7 @@ def main(filename, url):
             print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
           err_msg = "You don't have permission to access this page."
           print settings.print_critical_msg(err_msg)
-          sys.exit(0)
+          raise SystemExit()
         
         # The target host seems to be down!
         elif str(err_msg.getcode()) == settings.NOT_FOUND_ERROR:
@@ -930,7 +930,7 @@ def main(filename, url):
             print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
           err_msg = "The host seems to be down!"
           print settings.print_critical_msg(err_msg)
-          sys.exit(0)
+          raise SystemExit()
 
         else:
           raise
@@ -943,7 +943,7 @@ def main(filename, url):
         err_msg += str(e.args[0]).split("] ")[1] 
         err_msg += ")."
         print settings.print_critical_msg(err_msg)
-        sys.exit(0)
+        raise SystemExit()
         
       except httplib.BadStatusLine, err_msg:
         if settings.VERBOSITY_LEVEL < 2:
@@ -958,7 +958,7 @@ def main(filename, url):
     else:
       err_msg = "You must specify the target URL."
       print settings.print_critical_msg(err_msg)
-      sys.exit(0)
+      raise SystemExit()
 
     # Retrieve everything from the supported enumeration options.
     if menu.options.enum_all:
@@ -979,7 +979,7 @@ def main(filename, url):
       err_msg = err_msg.line + err_msg.message
       print settings.print_critical_msg(err_msg) + "\n"
     session_handler.clear(url)  
-    sys.exit(0)
+    raise SystemExit()
 
   # Connection reset by peer
   except SocketError, err_msg:
@@ -997,20 +997,20 @@ try:
     # Check if defined "--version" option.
     if menu.options.version:
       version.show_version()
-      sys.exit(0)
+      raise SystemExit()
 
     # Check python version number.
     version.python_version()
 
     if readline_error :
       checks.no_readline_module()
-      sys.exit(0)
+      raise SystemExit()
 
     # Check if defined "--dependencies" option. 
     # For checking (non-core) third party dependenices.
     if menu.options.noncore_dependencies:
       checks.third_party_dependencies()
-      sys.exit(0)
+      raise SystemExit()
       
     # Check if defined "--update" option.        
     if menu.options.update:
@@ -1019,7 +1019,7 @@ try:
     # Check if defined "--install" option.        
     if menu.options.install:
       install.installer()
-      sys.exit(0)
+      raise SystemExit()
 
     # Check for missing mandatory option(s).
     if not any((menu.options.url, menu.options.logfile, menu.options.bulkfile, \
@@ -1028,14 +1028,14 @@ try:
       err_msg = "Missing a mandatory option (-u, -l, -m, -r, -x, --wizard, --update, --purge or --dependencies). "
       err_msg += "Use -h for help."
       print settings.print_critical_msg(err_msg)
-      sys.exit(0)
+      raise SystemExit()
 
     # Check if defined "--purge" option.
     if menu.options.purge:
       purge.purge()
       if not any((menu.options.url, menu.options.logfile, menu.options.bulkfile, \
                   menu.options.requestfile, menu.options.sitemap_url, menu.options.wizard)):
-        sys.exit(0)
+        raise SystemExit()
 
     # Check the user-defined OS.
     if menu.options.os:
@@ -1045,14 +1045,14 @@ try:
     if menu.options.tor_check and not menu.options.tor:
       err_msg = "The '--check-tor' swich requires usage of switch '--tor'."
       print settings.print_critical_msg(err_msg)
-      sys.exit(0)
+      raise SystemExit()
 
     # Check if defined "--mobile" option.
     if menu.options.mobile:
       if (menu.options.agent != settings.DEFAULT_USER_AGENT) or menu.options.random_agent:
         err_msg = "The switch '--mobile' is incompatible with options '--user-agent', '--random-agent'."
         print settings.print_critical_msg(err_msg)
-        sys.exit(0)
+        raise SystemExit()
       else:
         menu.options.agent = menu.mobile_user_agents()
 
@@ -1101,14 +1101,14 @@ try:
     if len(sys.argv) == 1:
       menu.parser.print_help()
       print ""
-      sys.exit(0)
+      raise SystemExit()
 
     # Define the level of verbosity.
     if menu.options.verbose > 4:
       err_msg = "The value for option '-v' "
       err_msg += "must be an integer value from range [0, 4]."
       print settings.print_critical_msg(err_msg)
-      sys.exit(0)
+      raise SystemExit()
     else:  
       settings.VERBOSITY_LEVEL = menu.options.verbose
 
@@ -1117,7 +1117,7 @@ try:
       err_msg = "The value for option '--level' "
       err_msg += "must be an integer value from range [1, 3]."
       print settings.print_critical_msg(err_msg)
-      sys.exit(0)
+      raise SystemExit()
 
     # Define the local path where Metasploit Framework is installed.
     if menu.options.msf_path:
@@ -1148,13 +1148,13 @@ try:
         err_msg = "It seems that the '" + os.path.split(bulkfile)[1] + "' file, does not exist."
         sys.stdout.write(settings.print_critical_msg(err_msg) + "\n")
         sys.stdout.flush()
-        sys.exit(0)
+        raise SystemExit()
       elif os.stat(bulkfile).st_size == 0:
         print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
         err_msg = "It seems that the '" + os.path.split(bulkfile)[1] + "' file, is empty."
         sys.stdout.write(settings.print_critical_msg(err_msg) + "\n")
         sys.stdout.flush()
-        sys.exit(0)
+        raise SystemExit()
       else:
         print "[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]"
         with open(menu.options.bulkfile) as f:
@@ -1228,15 +1228,15 @@ except KeyboardInterrupt:
     logs.print_logs_notification(filename, url)
     print ""
   except NameError:
-    sys.exit(0)
+    raise SystemExit()
 
 except SystemExit: 
   print ""
-  sys.exit(0)
+  raise SystemExit()
 
 except EOFError:
   err_msg = "Exiting, due to EOFError."
   print settings.print_error_msg(err_msg)
-  sys.exit(0)
+  raise SystemExit()
 
 # eof

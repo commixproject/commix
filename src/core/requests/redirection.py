@@ -109,7 +109,7 @@ def do_check(url):
         elif redirection_option in settings.CHOICE_NO:
           return url  
         elif redirection_option in settings.CHOICE_QUIT:
-          sys.exit(0)
+          raise SystemExit()
         else:
           err_msg = "'" + redirection_option + "' is not a valid answer."  
           print settings.print_error_msg(err_msg)

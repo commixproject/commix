@@ -158,7 +158,7 @@ def next_attack_vector(technique, go_back):
     elif next_attack_vector in settings.CHOICE_NO:
       return  False
     elif next_attack_vector in settings.CHOICE_QUIT:
-      sys.exit(0)
+      raise SystemExit()
     else:
       err_msg = "'" + next_attack_vector + "' is not a valid answer."  
       print settings.print_error_msg(err_msg)
@@ -224,7 +224,7 @@ def procced_with_file_based_technique():
     elif enable_fb in settings.CHOICE_NO:
       return False
     elif enable_fb in settings.CHOICE_QUIT:
-      sys.exit(0)
+      raise SystemExit()
     else:
       err_msg = "'" + enable_fb + "' is not a valid answer."  
       print settings.print_error_msg(err_msg)
@@ -407,11 +407,11 @@ def check_CGI_scripts(url):
     if not os.path.isfile(settings.CGI_SCRIPTS ):
       err_msg = "The pages / scripts list (" + settings.CGI_SCRIPTS  + ") is not found"
       print settings.print_critical_msg(err_msg)
-      sys.exit(0) 
+      raise SystemExit() 
     if len(settings.CGI_SCRIPTS ) == 0:
       err_msg = "The " + settings.CGI_SCRIPTS  + " list is empty."
       print settings.print_critical_msg(err_msg)
-      sys.exit(0)
+      raise SystemExit()
     with open(settings.CGI_SCRIPTS , "r") as f: 
       for line in f:
         line = line.strip()
@@ -419,7 +419,7 @@ def check_CGI_scripts(url):
   except IOError: 
     err_msg = " Check if the " + settings.CGI_SCRIPTS  + " list is readable or corrupted."
     print settings.print_critical_msg(err_msg)
-    sys.exit(0)
+    raise SystemExit()
 
   for cgi_script in CGI_SCRIPTS:
     if cgi_script in url and menu.options.shellshock == False:
@@ -487,7 +487,7 @@ def user_defined_os():
       err_msg = "You specified wrong value '" + menu.options.os + "' "
       err_msg += "as an operation system. The value, must be 'Windows' or 'Unix'."
       print settings.print_critical_msg(err_msg)
-      sys.exit(0)
+      raise SystemExit()
 
 """
 Decision if the user-defined operating system name, 
@@ -532,7 +532,7 @@ def third_party_dependencies():
     err_msg = settings.APPLICATION + " requires 'sqlite3' third-party library "
     err_msg += "in order to store previous injection points and commands. "
     print settings.print_critical_msg(err_msg)
-    sys.exit(0)
+    raise SystemExit()
 
   try:
     import readline
@@ -546,7 +546,7 @@ def third_party_dependencies():
         err_msg += "in order to be able to take advantage of the TAB "
         err_msg += "completion and history support features. "
         print settings.print_critical_msg(err_msg) 
-        sys.exit(0)
+        raise SystemExit()
     else:
       try:
         import gnureadline
@@ -571,7 +571,7 @@ def http_auth_err_msg():
   err_msg += " or use the '--ignore-401' option to ignore HTTP error 401 (Unauthorized)" 
   err_msg += " and continue tests without providing valid credentials."
   print settings.print_critical_msg(err_msg) 
-  sys.exit(0)
+  raise SystemExit()
 
 """
 Decision if the user-defined HTTP authenticatiob type, 
@@ -637,7 +637,7 @@ def wildcard_character(data):
       err_msg = "You specified more than one testable parameters. " 
       err_msg += "Use the '-p' option to define them (i.e -p \"id1,id2\"). "
       print settings.print_critical_msg(err_msg) 
-      sys.exit(0)
+      raise SystemExit()
     else:  
       data = data.replace(settings.WILDCARD_CHAR, settings.INJECT_TAG)
   return data
@@ -1068,7 +1068,7 @@ def process_xml_data():
     elif xml_process in settings.CHOICE_NO:
       break 
     elif xml_process in settings.CHOICE_QUIT:
-      sys.exit(0)
+      raise SystemExit()
     else:
       err_msg = "'" + xml_process + "' is not a valid answer."  
       print settings.print_error_msg(err_msg)
@@ -1085,7 +1085,7 @@ def is_JSON_check(parameter):
     if not "No JSON object could be decoded" in err_msg:
       err_msg = "JSON " + str(err_msg) + ". "
       print settings.print_critical_msg(err_msg) + "\n"
-      sys.exit(0)
+      raise SystemExit()
     return False
 
 # Process with JSON data
@@ -1109,7 +1109,7 @@ def process_json_data():
     elif json_process in settings.CHOICE_NO:
       break 
     elif json_process in settings.CHOICE_QUIT:
-      sys.exit(0)
+      raise SystemExit()
     else:
       err_msg = "'" + json_process + "' is not a valid answer."  
       print settings.print_error_msg(err_msg)
@@ -1123,7 +1123,7 @@ def inappropriate_format(multi_parameters):
   err_msg += (' are ', ' is ')[len(multi_parameters) == 1]
   err_msg += "not in appropriate format."
   print settings.print_critical_msg(err_msg)
-  sys.exit(0)
+  raise SystemExit()
 
 """
 Check for similarity in provided parameter name and value.

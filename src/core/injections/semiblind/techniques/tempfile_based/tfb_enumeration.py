@@ -508,7 +508,7 @@ def single_os_cmd_exec(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, 
     output = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
     print Fore.GREEN + Style.BRIGHT + str(output) + Style.RESET_ALL + "\n"
     logs.print_logs_notification(filename, url) 
-    sys.exit(0)
+    raise SystemExit()
 
 """
 Check the defined options

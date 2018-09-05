@@ -53,7 +53,7 @@ def create_github_issue(err_msg, exc_msg):
         pass
     except: 
       print "\n"
-      sys.exit(0)
+      raise SystemExit()
 
   err_msg = err_msg[err_msg.find("\n"):]
   req = urllib2.Request(url="https://api.github.com/search/issues?q=" + \

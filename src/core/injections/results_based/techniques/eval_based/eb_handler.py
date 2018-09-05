@@ -115,7 +115,7 @@ def eb_injection_handler(url, timesec, filename, http_request_method):
               err_msg += settings.SESSION_FILE + "'). "
               err_msg += "Use the '--flush-session' option."
               print settings.print_critical_msg(err_msg)
-              sys.exit(0)
+              raise SystemExit()
 
           if settings.RETEST == True:
             settings.RETEST = False
@@ -347,7 +347,7 @@ def eb_injection_handler(url, timesec, filename, http_request_method):
                   new_line = False
                   break
                 elif enumerate_again in settings.CHOICE_QUIT:
-                  sys.exit(0)
+                  raise SystemExit()
                 else:
                   err_msg = "'" + enumerate_again + "' is not a valid answer."
                   print settings.print_error_msg(err_msg)
@@ -379,7 +379,7 @@ def eb_injection_handler(url, timesec, filename, http_request_method):
                 elif file_access_again in settings.CHOICE_NO: 
                   break
                 elif file_access_again in settings.CHOICE_QUIT:
-                  sys.exit(0)
+                  raise SystemExit()
                 else:
                   err_msg = "'" + file_access_again  + "' is not a valid answer."
                   print settings.print_error_msg(err_msg)
@@ -485,7 +485,7 @@ def eb_injection_handler(url, timesec, filename, http_request_method):
                     return True  
 
               elif gotshell in settings.CHOICE_QUIT:
-                sys.exit(0)
+                raise SystemExit()
 
               else:
                 err_msg = "'" + gotshell + "' is not a valid answer."  

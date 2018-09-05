@@ -23,7 +23,7 @@ except ImportError:
   err_msg = "Wrong installation detected (missing modules). "
   err_msg = "Visit 'https://github.com/commixproject/commix/' for further details. \n"
   print(settings.print_critical_msg(err_msg))
-  sys.exit(0)
+  raise SystemExit()
 
 # Main
 if __name__ == '__main__':
@@ -32,11 +32,11 @@ if __name__ == '__main__':
 
   except SystemExit:
     import sys
-    sys.exit(0) 
+    raise SystemExit() 
 
   except KeyboardInterrupt:
     import sys
-    sys.exit(0) 
+    raise SystemExit() 
     
   except:
     from src.utils import common

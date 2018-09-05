@@ -122,7 +122,7 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
               err_msg += settings.SESSION_FILE + "'). "
               err_msg += "Use the '--flush-session' option."
               print settings.print_critical_msg(err_msg)
-              sys.exit(0)
+              raise SystemExit()
 
           if settings.RETEST == True:
             settings.RETEST = False
@@ -457,7 +457,7 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                     new_line = True
                     break
                   elif enumerate_again in settings.CHOICE_QUIT:
-                    sys.exit(0)
+                    raise SystemExit()
                   else:
                     err_msg = "'" + enumerate_again + "' is not a valid answer."  
                     print settings.print_error_msg(err_msg)
@@ -487,7 +487,7 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                       new_line = True
                     break 
                   elif file_access_again in settings.CHOICE_QUIT:
-                    sys.exit(0)
+                    raise SystemExit()
                   else:
                     err_msg = "'" + file_access_again  + "' is not a valid answer."  
                     print settings.print_error_msg(err_msg)
@@ -505,7 +505,7 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                 tb_injector.export_injection_results(cmd, separator, output, check_how_long)
                 print ""
                 logs.print_logs_notification(filename, url) 
-                sys.exit(0)
+                raise SystemExit()
 
               if not new_line :
                 print ""
@@ -591,7 +591,7 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                       return True  
                       
                 elif gotshell in settings.CHOICE_QUIT:
-                  sys.exit(0)
+                  raise SystemExit()
 
                 else:
                   err_msg = "'" + gotshell + "' is not a valid answer."

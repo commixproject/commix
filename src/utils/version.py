@@ -22,7 +22,7 @@ from src.thirdparty.colorama import Fore, Back, Style, init
 # """
 def show_version():
   print("\n" + settings.VERSION)
-  sys.exit(0)
+  raise SystemExit()
 
 """
 Check python version number.
@@ -33,4 +33,4 @@ def python_version():
     err_msg += settings.PYTHON_VERSION + ") detected. "
     err_msg += "Use Python version 2.6.x or 2.7.x."
     print(settings.print_critical_msg(err_msg))
-    sys.exit(0)
+    raise SystemExit()

@@ -154,7 +154,7 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
         elif procced_option in settings.CHOICE_NO:
           pass
         elif procced_option in settings.CHOICE_QUIT:
-          sys.exit(0)
+          raise SystemExit()
         else:
           err_msg = "'" + procced_option + "' is not a valid answer."  
           print settings.print_error_msg(err_msg)
@@ -183,7 +183,7 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
         elif procced_option in settings.CHOICE_NO:
           pass
         elif procced_option in settings.CHOICE_QUIT:
-          sys.exit(0)
+          raise SystemExit()
         else:
           err_msg = "'" + procced_option + "' is not a valid answer."  
           print settings.print_error_msg(err_msg)
@@ -505,11 +505,11 @@ def perform_checks(url, filename):
     if urllib2.urlopen(url).read() == urllib2.urlopen(menu.options.auth_url).read():
       err_msg = "It seems that the authentication procedure has failed."
       print settings.print_critical_msg(err_msg)
-      sys.exit(0)
+      raise SystemExit()
   elif menu.options.auth_url or menu.options.auth_data: 
     err_msg = "You must specify both login panel URL and login parameters."
     print settings.print_critical_msg(err_msg)
-    sys.exit(0)
+    raise SystemExit()
   else:
     pass
 
@@ -588,7 +588,7 @@ def do_check(url, filename):
         elif next_level in settings.CHOICE_NO:
           break
         elif next_level in settings.CHOICE_QUIT:
-          sys.exit(0)
+          raise SystemExit()
         else:
           err_msg = "'" + next_level + "' is not a valid answer."  
           print settings.print_error_msg(err_msg)
@@ -620,6 +620,6 @@ def do_check(url, filename):
   if not settings.CHECK_BOTH_OS:
     # if not menu.options.bulkfile or settings.EOF:
     #   print ""
-    sys.exit(0)
+    raise SystemExit()
 
 # eof

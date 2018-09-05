@@ -232,7 +232,7 @@ def do_POST_check(parameter):
       multi_parameters = [x for x in multi_parameters if x]
     except ValueError, err_msg:
       print settings.print_critical_msg(err_msg)
-      sys.exit(0)
+      raise SystemExit()
 
   # Check for inappropriate format in provided parameter(s).
   if len([s for s in multi_parameters if "=" in s]) != (len(multi_parameters)) and \

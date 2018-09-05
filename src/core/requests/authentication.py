@@ -80,11 +80,11 @@ def define_wordlists():
     if not os.path.isfile(settings.USERNAMES_TXT_FILE):
       err_msg = "The username file (" + settings.USERNAMES_TXT_FILE + ") is not found"
       print settings.print_critical_msg(err_msg)
-      sys.exit(0) 
+      raise SystemExit() 
     if len(settings.USERNAMES_TXT_FILE) == 0:
       err_msg = "The " + settings.USERNAMES_TXT_FILE + " file is empty."
       print settings.print_critical_msg(err_msg)
-      sys.exit(0)
+      raise SystemExit()
     with open(settings.USERNAMES_TXT_FILE, "r") as f: 
       for line in f:
         line = line.strip()
@@ -92,18 +92,18 @@ def define_wordlists():
   except IOError: 
     err_msg = " Check if the " + settings.USERNAMES_TXT_FILE + " file is readable or corrupted."
     print settings.print_critical_msg(err_msg)
-    sys.exit(0)
+    raise SystemExit()
 
   try:
     passwords = []
     if not os.path.isfile(settings.PASSWORDS_TXT_FILE):
       err_msg = "The password file (" + settings.PASSWORDS_TXT_FILE + ") is not found" + Style.RESET_ALL
       print settings.print_critical_msg(err_msg)
-      sys.exit(0) 
+      raise SystemExit() 
     if len(settings.PASSWORDS_TXT_FILE) == 0:
       err_msg = "The " + settings.PASSWORDS_TXT_FILE + " file is empty."
       print settings.print_critical_msg(err_msg)
-      sys.exit(0) 
+      raise SystemExit() 
     with open(settings.PASSWORDS_TXT_FILE, "r") as f: 
       for line in f:
         line = line.strip()
@@ -111,7 +111,7 @@ def define_wordlists():
   except IOError: 
     err_msg = " Check if the " + settings.PASSWORDS_TXT_FILE + " file is readable or corrupted."
     print settings.print_critical_msg(err_msg)
-    sys.exit(0)
+    raise SystemExit()
 
   return usernames, passwords
 

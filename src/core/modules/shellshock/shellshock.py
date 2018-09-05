@@ -392,7 +392,7 @@ def file_access(url, cve, check_header, filename):
       warn_msg = "It seems that the provided local file '" + file_to_write + "', does not exist."
       sys.stdout.write(settings.print_warning_msg(warn_msg) + "\n")
       sys.stdout.flush()
-      sys.exit(0)
+      raise SystemExit()
       
     if os.path.isfile(file_to_write):
       with open(file_to_write, 'r') as content_file:
@@ -450,12 +450,12 @@ def file_access(url, cve, check_header, filename):
       warn_msg += "does not exist. (" + str(warn_msg) + ")\n"
       sys.stdout.write(settings.print_critical_msg(warn_msg))
       sys.stdout.flush()
-      sys.exit(0)
+      raise SystemExit()
     except ValueError, err_msg:
       err_msg = str(err_msg[0]).capitalize() + str(err_msg)[1]
       sys.stdout.write(settings.print_critical_msg(err_msg) + "\n")
       sys.stdout.flush()
-      sys.exit(0) 
+      raise SystemExit() 
 
     # Check the file-destination
     if os.path.split(menu.options.file_dest)[1] == "" :
@@ -631,7 +631,7 @@ def check_options(url, cmd, cve, check_header, filename, os_shell_option, http_r
 
   # The "quit" option
   elif os_shell_option == "quit":                    
-    sys.exit(0)
+    raise SystemExit()
 
 """
 The main shellshock handler
@@ -759,7 +759,7 @@ def shellshock_handler(url, http_request_method, filename):
               elif enumerate_again in settings.CHOICE_NO: 
                 break
               elif enumerate_again in settings.CHOICE_QUIT:
-                sys.exit(0)
+                raise SystemExit()
               else:
                 err_msg = "'" + enumerate_again + "' is not a valid answer."  
                 print settings.print_error_msg(err_msg)
@@ -784,7 +784,7 @@ def shellshock_handler(url, http_request_method, filename):
               elif file_access_again in settings.CHOICE_NO: 
                 break
               elif file_access_again in settings.CHOICE_QUIT:
-                sys.exit(0)
+                raise SystemExit()
               else:
                 err_msg = "'" + file_access_again  + "' is not a valid answer."  
                 print settings.print_error_msg(err_msg)
@@ -796,7 +796,7 @@ def shellshock_handler(url, http_request_method, filename):
             cmd = menu.options.os_cmd 
             shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
             print "\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL 
-            sys.exit(0)
+            raise SystemExit()
 
           else:
             # Pseudo-Terminal shell
@@ -882,7 +882,7 @@ def shellshock_handler(url, http_request_method, filename):
                     sys.stdout.write(settings.print_info_msg(info_msg))
                     sys.stdout.flush()
                     #print ""
-                    #sys.exit(0)
+                    #raise SystemExit()
                     break
                     
               elif gotshell in settings.CHOICE_NO:
@@ -895,7 +895,7 @@ def shellshock_handler(url, http_request_method, filename):
                     return True 
 
               elif gotshell in settings.CHOICE_QUIT:
-                sys.exit(0)
+                raise SystemExit()
 
               else:
                 err_msg = "'" + gotshell + "' is not a valid answer."  
@@ -974,7 +974,7 @@ def cmd_exec(url, cmd, cve, check_header, filename):
 
     except urllib2.URLError, err_msg:
       print "\n" + settings.print_critical_msg(err_msg)
-      sys.exit(0)
+      raise SystemExit()
 
   shell, payload = check_for_shell(url, cmd, cve, check_header, filename)
   if len(shell) == 0:

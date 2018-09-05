@@ -295,7 +295,7 @@ def injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_meth
     else:
       err_msg = "Something went wrong, the request has failed (" + str(tries) + ") times continuously."
       sys.stdout.write(settings.print_critical_msg(err_msg)+"\n")
-      sys.exit(0)
+      raise SystemExit()
 
   return response
 

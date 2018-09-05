@@ -572,7 +572,7 @@ def export_injection_results(cmd, separator, output, check_how_long):
       err_msg += "To bypass that limitation, use the '--alter-shell' option "
       err_msg += "or try another injection technique (i.e. '--technique=\"f\"')"
       print "\n" + settings.print_critical_msg(err_msg)
-      sys.exit(0)
+      raise SystemExit()
     # Check for fault command.
     else:
       err_msg = "The '" + cmd + "' command, does not return any output."

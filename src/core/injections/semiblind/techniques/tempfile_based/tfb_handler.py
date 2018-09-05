@@ -146,7 +146,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
               err_msg += settings.SESSION_FILE + "'). "
               err_msg += "Use the '--flush-session' option."
               print settings.print_critical_msg(err_msg)
-              sys.exit(0)
+              raise SystemExit()
 
           else:
             num_of_chars = num_of_chars + 1
@@ -497,7 +497,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                   elif enumerate_again in settings.CHOICE_QUIT:
                     # Delete previous shell (text) files (output) from temp.
                     delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)    
-                    sys.exit(0)
+                    raise SystemExit()
                   else:
                     err_msg = "'" + enumerate_again + "' is not a valid answer."
                     print settings.print_error_msg(err_msg)
@@ -529,7 +529,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                   elif file_access_again in settings.CHOICE_QUIT:
                     # Delete previous shell (text) files (output) from temp.
                     delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-                    sys.exit(0)
+                    raise SystemExit()
                   else:
                     err_msg = "'" + file_access_again + "' is not a valid answer."  
                     print settings.print_error_msg(err_msg)
@@ -549,7 +549,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                   print ""
                 delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
                 logs.print_logs_notification(filename, url) 
-                sys.exit(0)  
+                raise SystemExit()  
 
               if settings.VERBOSITY_LEVEL >= 1 or not new_line:
                 print ""
@@ -627,7 +627,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                   elif gotshell in settings.CHOICE_QUIT:
                     # Delete previous shell (text) files (output) from temp.
                     delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-                    sys.exit(0)
+                    raise SystemExit()
                   else:
                     err_msg = "'" + gotshell + "' is not a valid answer."  
                     print settings.print_error_msg(err_msg)

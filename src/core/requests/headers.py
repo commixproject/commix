@@ -322,7 +322,7 @@ def do_check(request):
         err_msg = "Unsupported / Invalid HTTP authentication type '" + menu.options.auth_type + "'."
         err_msg += " Try basic or digest HTTP authentication type."
         print settings.print_critical_msg(err_msg)
-        sys.exit(0)   
+        raise SystemExit()   
     else:
       pass        
     
