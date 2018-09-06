@@ -262,8 +262,8 @@ Notification about session.
 def notification(url, technique, injection_type):
   try:
     if settings.LOAD_SESSION == True:
-      success_msg = "A previously stored session has been held against that host."
-      print settings.print_success_msg(success_msg) 
+      info_msg = "A previously stored session has been held against that host."
+      print settings.print_info_msg(info_msg)
       while True:
         if not menu.options.batch:
           question_msg = "Do you want to resume to the "

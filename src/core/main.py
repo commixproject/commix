@@ -227,7 +227,7 @@ def init_request(url):
   if menu.options.proxy:
     proxy.do_check(url)
   if settings.VERBOSITY_LEVEL >= 1:
-    info_msg = "Creating HTTP requests opener object..."
+    info_msg = "Creating HTTP requests opener object."
     print settings.print_info_msg(info_msg) 
   return request
 

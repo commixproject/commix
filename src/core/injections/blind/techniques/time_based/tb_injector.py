@@ -265,8 +265,8 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
           sys.stdout.flush()
         if settings.VERBOSITY_LEVEL == 1:
           print ""
-        success_msg = "Retrieved " + str(output_length) + " characters."
-        print settings.print_success_msg(success_msg)
+        info_msg = "Retrieved: " + str(output_length)
+        print settings.print_info_msg(info_msg)
       found_chars = True
       injection_check = False
       break
