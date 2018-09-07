@@ -939,9 +939,12 @@ def main(filename, url):
       except urllib2.URLError, e:
         if settings.VERBOSITY_LEVEL < 2:
           print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
-        err_msg = "The host seems to be down! (" 
-        err_msg += str(e.args[0]).split("] ")[1] 
-        err_msg += ")."
+        err_msg = "The host seems to be down"
+        try:
+          err_msg += " (" + str(e.args[0]).split("] ")[1] + ")."
+        except IndexError:
+          err_msg += "."
+          pass
         print settings.print_critical_msg(err_msg)
         raise SystemExit()
         

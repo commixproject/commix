@@ -41,7 +41,10 @@ def request(url):
     return soup
   except urllib2.URLError, e:
     err_msg = "Unable to connect to the target URL "
-    err_msg += "(" + str(e.args[0]).split("] ")[1] + ")." 
+    try:
+      err_msg += " (" + str(e.args[0]).split("] ")[1] + ")."
+    except IndexError:
+      err_msg += "."
     print settings.print_critical_msg(err_msg)
     raise SystemExit
 
