@@ -459,18 +459,24 @@ def check_http_s(url):
     else:
       url = "http://" + settings.CHECK_INTERNET_ADDRESS
   else:
-    if settings.PROXY_PROTOCOL in urlparse.urlparse(url).scheme:
-      if menu.options.force_ssl and urlparse.urlparse(url).scheme != "https":
-        url = re.sub("\Ahttp:", "https:", url, re.I)
-        settings.PROXY_PROTOCOL = 'https'
-      if urlparse.urlparse(url).scheme == "https":
-        settings.PROXY_PROTOCOL = "https"
-    else:
-      if menu.options.force_ssl:
-        url = "https://" + url
-        settings.PROXY_PROTOCOL = "https"
+    try:
+      if settings.PROXY_PROTOCOL in urlparse.urlparse(url).scheme:
+        if menu.options.force_ssl and urlparse.urlparse(url).scheme != "https":
+          url = re.sub("\Ahttp:", "https:", url, re.I)
+          settings.PROXY_PROTOCOL = 'https'
+        if urlparse.urlparse(url).scheme == "https":
+          settings.PROXY_PROTOCOL = "https"
       else:
-        url = "http://" + url 
+        if menu.options.force_ssl:
+          url = "https://" + url
+          settings.PROXY_PROTOCOL = "https"
+        else:
+          url = "http://" + url 
+    except ValueError, err:
+      err_msg = e.split(":")[1].lstrip() + "."
+      print settings.print_error_msg(err_msg)
+      raise SystemExit()
+
   return url
   
 """
