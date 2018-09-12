@@ -109,20 +109,18 @@ def examine_request(request):
     headers.check_http_traffic(request)
     # Check if defined any HTTP Proxy (--proxy option).
     if menu.options.proxy:
-      response = proxy.use_proxy(request)
+      return proxy.use_proxy(request)
     # Check if defined Tor (--tor option).  
     elif menu.options.tor:
-      response = tor.use_tor(request)
+      return tor.use_tor(request)
     else:
       try:
-        response = urllib2.urlopen(request)
-
+        return urllib2.urlopen(request)
       except SocketError as e:
         if e.errno == errno.ECONNRESET:
           error_msg = "Connection reset by peer."
           print settings.print_critical_msg(error_msg)
           raise SystemExit()
-
       except ValueError:
         # Invalid format for the '--header' option.
         if settings.VERBOSITY_LEVEL < 2:
@@ -133,7 +131,6 @@ def examine_request(request):
         err_msg += "if you want to try to exploit the provided HTTP header."
         print settings.print_critical_msg(err_msg)
         raise SystemExit()
-
       except Exception as err_msg:
         try:
           error_msg = str(err_msg.args[0]).split("] ")[1] + "."
@@ -141,8 +138,6 @@ def examine_request(request):
           error_msg = str(err_msg).replace(": "," (") + ")."
         print settings.print_critical_msg(error_msg)
         raise SystemExit()
-
-    return response
 
   except urllib2.HTTPError, err_msg:
     error_description = ""
