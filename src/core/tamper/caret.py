@@ -17,9 +17,8 @@ import sys
 from src.utils import settings
 
 """
-Adds caret symbol (^) between the characters of the generated payloads.
-Notes:
-  * This tamper script works against windows targets.
+About: Adds caret symbol (^) between the characters of the generated payloads.
+Notes: This tamper script works against windows targets.
 """
 
 __tamper__ = "caret"

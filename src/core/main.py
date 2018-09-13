@@ -992,6 +992,11 @@ try:
   if not menu.options.batch:
     settings.OS_CHECKS_NUM = 1
   for os_checks_num in range(0, int(settings.OS_CHECKS_NUM)):
+
+    if menu.options.list_tampers:
+      checks.list_tamper_scripts()
+      raise SystemExit()
+
     # Check if defined "--version" option.
     if menu.options.version:
       version.show_version()
@@ -1022,7 +1027,7 @@ try:
     # Check for missing mandatory option(s).
     if not any((menu.options.url, menu.options.logfile, menu.options.bulkfile, \
                 menu.options.requestfile, menu.options.sitemap_url, menu.options.wizard, \
-                menu.options.update, menu.options.purge, menu.options.noncore_dependencies)):
+                menu.options.update, menu.options.purge, menu.options.noncore_dependencies, menu.options.list_tampers)):
       err_msg = "Missing a mandatory option (-u, -l, -m, -r, -x, --wizard, --update, --purge or --dependencies). "
       err_msg += "Use -h for help."
       print settings.print_critical_msg(err_msg)

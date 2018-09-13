@@ -111,7 +111,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "2.6.32"
+VERSION_NUM = "2.6.33"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"
@@ -767,5 +767,7 @@ BLOCKED_IP_REGEX = r"(?i)(\A|\b)ip\b.*\b(banned|blocked|block list|firewall)"
 
 # Prefix for Google analytics cookie names
 GOOGLE_ANALYTICS_COOKIE_PREFIX = "__UTM"
+
+TAMPER_SCRIPTS_PATH = "src/core/tamper/"
 
 # eof

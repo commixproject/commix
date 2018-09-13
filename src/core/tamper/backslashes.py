@@ -17,9 +17,8 @@ import sys
 from src.utils import settings
 
 """
-Adds back slashes (\) between the characters of the generated payloads.
-Notes:
-  * This tamper script works against *nix targets.
+About: Adds back slashes (\) between the characters of the generated payloads.
+Notes: This tamper script works against *nix targets.
 """
 
 __tamper__ = "backslashes"

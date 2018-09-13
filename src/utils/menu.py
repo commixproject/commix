@@ -535,6 +535,12 @@ misc.add_option("--dependencies",
                 default=False,
                 help="Check for third-party (non-core) dependencies.")
 
+misc.add_option("--list-tampers", 
+                action="store_true",
+                dest="list_tampers",
+                default=False,
+                help="Display list of available tamper scripts")
+
 misc.add_option("--purge", 
                 action="store_true",
                 dest="purge",

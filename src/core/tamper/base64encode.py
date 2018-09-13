@@ -19,9 +19,8 @@ import urllib
 from src.utils import settings
 
 """
-Base64 all characters in a given payload.
-Notes:
-  * This tamper script works against all targets.
+About: Base64 all characters in a given payload.
+Notes: This tamper script works against all targets.
 """
 
 __tamper__ = "base64encode"

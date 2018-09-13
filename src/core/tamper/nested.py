@@ -19,9 +19,8 @@ from src.utils import menu
 from src.utils import settings
 
 """
-Adds double quotes around of the generated payloads (nested).
-Notes:
-  * This tamper script works against *nix targets.
+About: Adds double quotes around of the generated payloads (nested).
+Notes: This tamper script works against *nix targets.
 """
 
 __tamper__ = "nested"

@@ -18,9 +18,8 @@ import urllib
 from src.utils import settings
 
 """
-Hex all characters in a given payload.
-Notes:
-  * This tamper script works against all targets.
+About: Hex all characters in a given payload.
+Notes: This tamper script works against all targets.
 """
 
 __tamper__ = "hexencode"

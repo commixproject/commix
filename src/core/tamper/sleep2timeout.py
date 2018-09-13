@@ -17,12 +17,10 @@ import sys
 from src.utils import settings
 
 """
-Uses "timeout" function for time-based attacks:
+About: Uses "timeout" function for time-based attacks.
   * Regarding *nix targets, it replaces the "sleep XX" command with "timeout XX ping localhost". 
   * Regarding windows targets, it replaces the "powershell.exe -InputFormat none Start-Sleep -s XX" command with "timeout XX".
-
-Notes:
-  * This tamper script works against all targets.
+Notes: This tamper script works against all targets.
 """
 
 __tamper__ = "sleep2timeout"

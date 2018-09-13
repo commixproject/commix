@@ -16,6 +16,7 @@ For more see the file 'readme/COPYING' for copying permission.
 import re
 import os
 import sys
+import glob
 import json
 import socket
 import random
@@ -710,17 +711,30 @@ def print_non_listed_params(check_parameters, http_request_method, header_name):
     check_skipped_params(check_parameters)
 
 """
+Lists available tamper scripts
+"""
+def list_tamper_scripts():
+  info_msg = "Listing available tamper scripts:"
+  print settings.print_info_msg(info_msg)
+  if menu.options.list_tampers:
+    for script in sorted(glob.glob(os.path.join(settings.TAMPER_SCRIPTS_PATH, "*.py"))):
+      content = open(script, "rb").read()
+      match = re.search(r"About:(.*)\n", content)
+      if match:
+        comment = match.group(1).strip()
+        print settings.SUB_CONTENT_SIGN + os.path.basename(script) + ": " + comment
+
+"""
 Tamper script checker
 """
 def tamper_scripts():
-
   if menu.options.tamper:
     # Check the provided tamper script(s)
     tlist = list(set(re.split(settings.PARAMETER_SPLITTING_REGEX, menu.options.tamper.lower())))
 
     # Check for invalid tamper scripts.
     for tfile in tlist:
-      check_tfile = "src/core/tamper/" + tfile + ".py"
+      check_tfile = settings.TAMPER_SCRIPTS_PATH + tfile + ".py"
       if not os.path.exists(check_tfile.lower()):
         tlist.remove(tfile)
         if not settings.LOAD_SESSION:
@@ -733,7 +747,7 @@ def tamper_scripts():
 
     # Check for valid tamper scripts.
     for tfile in tlist:
-      check_tfile = "src/core/tamper/" + tfile + ".py"
+      check_tfile = settings.TAMPER_SCRIPTS_PATH + tfile + ".py"
       if "hexencode" or "base64encode" == tfile:
         settings.MULTI_ENCODED_PAYLOAD.append(tfile)
       if os.path.isfile(check_tfile):

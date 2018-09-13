@@ -1,4 +1,5 @@
 ## Version 2.6 (upcoming)
+* Added: New option `--list-tampers` for listing available tamper scripts.
 * Revised: Minor improvement regarding resolving target hostname.
 * Added: Support for "Ncat" on "reverse_tcp" and "bind_tcp" shell options.
 * Added: Support for "Bash" (via /dev/tcp) on "reverse_tcp" shell option.
