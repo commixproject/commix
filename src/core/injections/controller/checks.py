@@ -25,6 +25,7 @@ import base64
 import urllib
 import urlparse
 import traceback
+import importlib
 
 from src.utils import menu
 from src.utils import settings
@@ -730,41 +731,38 @@ Tamper script checker
 def tamper_scripts():
   if menu.options.tamper:
     # Check the provided tamper script(s)
-    tlist = list(set(re.split(settings.PARAMETER_SPLITTING_REGEX, menu.options.tamper.lower())))
+    available_scripts = []
+    provided_scripts = list(set(re.split(settings.PARAMETER_SPLITTING_REGEX, menu.options.tamper.lower())))
+    for script in sorted(glob.glob(os.path.join(settings.TAMPER_SCRIPTS_PATH, "*.py"))):
+      available_scripts.append(os.path.basename(script.split(".py")[0]))
+    for script in provided_scripts:
+      if script in available_scripts:
+        pass
+      else:
+        err_msg = "The '" + script + "' tamper script does not exist. "
+        err_msg += "Use the '--list-tampers' option for listing available tamper scripts."
+        print settings.print_critical_msg(err_msg)
+        raise SystemExit()
 
-    # Check for invalid tamper scripts.
-    for tfile in tlist:
-      check_tfile = settings.TAMPER_SCRIPTS_PATH + tfile + ".py"
-      if not os.path.exists(check_tfile.lower()):
-        tlist.remove(tfile)
-        if not settings.LOAD_SESSION:
-          err_msg = "The '" + tfile + "' tamper script does not exist."
-          print settings.print_critical_msg(err_msg)
-          raise SystemExit()
-
-    info_msg = "Loading tamper script" + ('s', '')[len(tlist) == 1] + ": "
+    info_msg = "Loading tamper script" + ('s', '')[len(provided_scripts) == 1] + ": "
     print settings.print_info_msg(info_msg)
-
-    # Check for valid tamper scripts.
-    for tfile in tlist:
-      check_tfile = settings.TAMPER_SCRIPTS_PATH + tfile + ".py"
-      if "hexencode" or "base64encode" == tfile:
-        settings.MULTI_ENCODED_PAYLOAD.append(tfile)
-      if os.path.isfile(check_tfile):
-        import importlib
-        check_tfile = check_tfile.replace("/",".")
-        import_tamper = check_tfile.split(".py")[0]
-        print settings.SUB_CONTENT_SIGN + import_tamper.split(".")[3]
-        
-        module = importlib.import_module(import_tamper)
+    for script in provided_scripts:
+      if "hexencode" or "base64encode" == script:
+        settings.MULTI_ENCODED_PAYLOAD.append(script)
+      import_script = script.replace("/",".").split(".py")[0]
+      print settings.SUB_CONTENT_SIGN + import_script.split(".")[0]
+      try:
+        module = importlib.import_module(import_script)
         if not hasattr(module, "__tamper__"):
           err_msg = "Missing variable '__tamper__' "
-          err_msg += "in tamper script '" + import_tamper.split(".")[3] + "'."
+          err_msg += "in tamper script '" + import_script.split(".")[0] + "'."
           print settings.print_critical_msg(err_msg)
           raise SystemExit()
+      except ImportError:
+        pass
 
     # Using too many tamper scripts is usually not a good idea. :P
-    if len(tlist) >= 3 and not settings.LOAD_SESSION:
+    if len(provided_scripts) >= 3 and not settings.LOAD_SESSION:
       warn_msg = "Using too many tamper scripts "
       warn_msg += "is usually not a good idea."
       print settings.print_warning_msg(warn_msg)

@@ -993,6 +993,7 @@ try:
     settings.OS_CHECKS_NUM = 1
   for os_checks_num in range(0, int(settings.OS_CHECKS_NUM)):
 
+    # Check if defined "--list-tampers" option.
     if menu.options.list_tampers:
       checks.list_tamper_scripts()
       raise SystemExit()
