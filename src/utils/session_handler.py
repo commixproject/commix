@@ -35,7 +35,7 @@ Generate table name for SQLite3 db.
 """
 def table_name(url):
   host = url.split('//', 1)[1].split('/', 1)[0]
-  table_name = "session_" + host.replace(".","_").replace(":","_").replace("-","_")
+  table_name = "session_" + host.replace(".","_").replace(":","_").replace("-","_").replace("[","_").replace("]","_")
   return table_name
 
 """

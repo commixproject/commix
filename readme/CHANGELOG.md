@@ -1,4 +1,5 @@
 ## Version 2.6 (upcoming)
+* Revised: Minor improvement in session handler regarding IPv6 targets.
 * Added: New option `--list-tampers` for listing available tamper scripts.
 * Revised: Minor improvement regarding resolving target hostname.
 * Added: Support for "Ncat" on "reverse_tcp" and "bind_tcp" shell options.
