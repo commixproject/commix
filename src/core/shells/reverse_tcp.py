@@ -147,16 +147,9 @@ def set_python_working_dir():
 check / set lhost option for reverse TCP connection
 """
 def check_lhost(lhost):
-  parts = lhost.split('.')
-  if len(parts) == 4 and all(part.isdigit() for part in parts) and all(0 <= int(part) <= 255 for part in parts):
-    settings.LHOST = lhost
-    print "LHOST => " + settings.LHOST
-    return True
-  else:
-    err_msg = "The provided IP is not in "
-    err_msg += "appropriate format (i.e 192.168.1.5)."
-    print settings.print_error_msg(err_msg)
-    return False
+  settings.LHOST = lhost
+  print "LHOST => " + settings.LHOST
+  return True
 
 """
 check / set lport option for reverse TCP connection
