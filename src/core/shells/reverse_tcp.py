@@ -35,7 +35,7 @@ def shell_options(option):
     warn_msg = "You are already into the '" + option.lower() + "' mode."
     print settings.print_warning_msg(warn_msg)
   elif option.lower() == "?": 
-    menu.reverse_tcp_options(separator)
+    menu.reverse_tcp_options()
   elif option.lower() == "quit": 
     raise SystemExit()
   elif option[0:3].lower() == "set":
@@ -699,7 +699,7 @@ def configure_reverse_tcp(separator):
       print settings.print_warning_msg(warn_msg)
       continue
     if option.lower() == "?": 
-      menu.reverse_tcp_options(separator)
+      menu.reverse_tcp_options()
       continue
     if option.lower() == "quit": 
       raise SystemExit()
