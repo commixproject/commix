@@ -1028,8 +1028,8 @@ try:
     # Check for missing mandatory option(s).
     if not any((menu.options.url, menu.options.logfile, menu.options.bulkfile, \
                 menu.options.requestfile, menu.options.sitemap_url, menu.options.wizard, \
-                menu.options.update, menu.options.purge, menu.options.noncore_dependencies, menu.options.list_tampers)):
-      err_msg = "Missing a mandatory option (-u, -l, -m, -r, -x, --wizard, --update, --purge or --dependencies). "
+                menu.options.update, menu.options.list_tampers, menu.options.purge, menu.options.noncore_dependencies)):
+      err_msg = "Missing a mandatory option (-u, -l, -m, -r, -x, --wizard, --update, --list-tampers, --purge or --dependencies). "
       err_msg += "Use -h for help."
       print settings.print_critical_msg(err_msg)
       raise SystemExit()
