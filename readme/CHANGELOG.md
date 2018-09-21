@@ -1,4 +1,5 @@
 ## Version 2.6 (upcoming)
+* Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
 * Revised: Minor improvement in session handler regarding IPv6 targets.
 * Added: New option `--list-tampers` for listing available tamper scripts.
 * Revised: Minor improvement regarding resolving target hostname.
