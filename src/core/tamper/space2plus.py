@@ -16,7 +16,7 @@ For more see the file 'readme/COPYING' for copying permission.
 from src.utils import settings
 
 """
-About: Replaces space character (' ') with plus ('+').
+About: Replaces space character ('%20') with plus ('+').
 Notes: This tamper script works against all targets.
 """
 

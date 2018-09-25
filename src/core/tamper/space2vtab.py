@@ -16,7 +16,7 @@ For more see the file 'readme/COPYING' for copying permission.
 from src.utils import settings
 
 """
-About: Replaces space character (' ') with vertical tab ('%0b').
+About: Replaces space character ('%20') with vertical tab ('%0b').
 Notes: This tamper script works against Windows targets.
 """
 
