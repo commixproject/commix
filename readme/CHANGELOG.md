@@ -1,3 +1,6 @@
+## Version 2.7 (upcoming)
+* Revised: Minor improvement regarding "INJECT_HERE" tag (i.e. declaring injection position) to be case insensitive.
+
 ## Version 2.6 (2018-09-21)
 * Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
 * Revised: Minor improvement in session handler regarding IPv6 targets.

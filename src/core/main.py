@@ -1106,6 +1106,11 @@ try:
       menu.parser.print_help()
       print ""
       raise SystemExit()
+    else:
+      # Check for INJECT_HERE tag.
+      inject_tag_regex_match = re.search(settings.INJECT_TAG_REGEX, ",".join(str(x) for x in sys.argv))
+      if inject_tag_regex_match:
+        settings.INJECT_TAG = inject_tag_regex_match.group(0)
 
     # Define the level of verbosity.
     if menu.options.verbose > 4:

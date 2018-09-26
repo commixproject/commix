@@ -111,7 +111,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "2.7.1"
+VERSION_NUM = "2.7.2"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"
@@ -127,6 +127,7 @@ DEFAULT_USER_AGENT = APPLICATION + "/" + VERSION + " (" + APPLICATION_URL + ")"
 
 # Inject Tag
 INJECT_TAG = "INJECT_HERE"
+INJECT_TAG_REGEX = r"(?i)INJECT[_]?HERE"
 
 # User-defined stored post data.
 USER_DEFINED_POST_DATA = ""
