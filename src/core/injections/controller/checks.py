@@ -641,13 +641,12 @@ if the wildcard char is provided.
 """
 def wildcard_character(data):
   if settings.WILDCARD_CHAR in data:
-    if data.count(settings.WILDCARD_CHAR) > 1:
-      err_msg = "You specified more than one testable parameters. " 
-      err_msg += "Use the '-p' option to define them (i.e -p \"id1,id2\"). "
-      print settings.print_critical_msg(err_msg) 
-      raise SystemExit()
-    else:  
-      data = data.replace(settings.WILDCARD_CHAR, settings.INJECT_TAG)
+    data = data.replace(settings.WILDCARD_CHAR, settings.INJECT_TAG)
+  if data.count(settings.WILDCARD_CHAR) + data.count(settings.INJECT_TAG) > 1:
+    err_msg = "You specified more than one testable parameters. " 
+    err_msg += "Use the '-p' option to define them (i.e -p \"id1,id2\"). "
+    print settings.print_critical_msg(err_msg) 
+    raise SystemExit()
   return data
 
 """
