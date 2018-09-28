@@ -722,7 +722,7 @@ def list_tamper_scripts():
       match = re.search(r"About:(.*)\n", content)
       if match:
         comment = match.group(1).strip()
-        print settings.SUB_CONTENT_SIGN + os.path.basename(script) + ": " + comment
+        print settings.SUB_CONTENT_SIGN + Fore.MAGENTA + os.path.basename(script) + Style.RESET_ALL +  " - " + comment
 
 """
 Tamper script checker
