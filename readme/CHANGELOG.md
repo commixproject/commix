@@ -78,7 +78,7 @@
 * Added: New option `--check-internet` that checks internet connection before assessing the target.
 * Fixed: Minor bug-fix regarding performing injections through HTTP Headers (i.e Cookie, User-Agent, Referer).
 * Revised: Minor improvement regarding checking stored payloads and enabling appropriate tamper scripts during the exploitation phase.
-* Added: New tamper script "space2vtab.py" that replaces every space (" ") with vertical tab ("%0b") (for Windows targets).
+* Added: New tamper script "space2vtab.py" that replaces every space ("%20") with vertical tab ("%0b") (for Windows targets).
 * Replaced: The tamper script "space2tab.py" has been replaced with "space2htab.py".
 * Fixed: Minor bug-fix regarding checking for similarity in provided parameter name and value (GET / POST).
 * Added: New option `--backticks` that uses backticks instead of "$()", for commands substitution.
@@ -198,7 +198,7 @@
 * Fixed: License file minor inaccurancy issue has been fixed.
 * Revised: The Windows-based payloads for every supported technique, had been shortly revised.
 * Revised: The dynamic code evaluation ("eval-based") technique has been shortly revised.
-* Added: New tamper script "space2tab.py" that replaces every space (" ") with horizontal tab ("%09").
+* Added: New tamper script "space2tab.py" that replaces every space ("%20") with horizontal tab ("%09").
 * Added: The ability for generating powershell attack vectors via TrustedSec's Magic Unicorn.
 * Added: The ability for checking if there is a new version available.
 * Added: The ability for target application extension recognition (i.e PHP, ASP etc).
@@ -227,10 +227,10 @@
 * Added: The ability to re-perform the injection request if it has failed.
 * Fixed: The shell output in semiblind ("file-based") technique has been fixed not to concat new lines.
 * Revised: The ability to execute multiple tamper scripts combined or the one after the other.
-* Added: New tamper script "space2plus.py" that replaces every space (" ") with plus ("+").
+* Added: New tamper script "space2plus.py" that replaces every space ("%20") with plus ("+").
 * Added: New state ("checking") and the color of that state has been setted.
 * Replaced: The `--base64` option has been replaced with "base64encode.py" tamper script.
-* Added: New tamper script "space2ifs.py" that replaces every space (" ") with $IFS (bash) variable.
+* Added: New tamper script "space2ifs.py" that replaces every space ("%20") with $IFS (bash) variable.
 * Added: New option `--tamper` that supports tamper injection scripts.
 * Added: Support for verbosity levels (currently supported levels: 0,1).
 * Fixed: Minor rearrangement of prefixes and separators has been implemented.

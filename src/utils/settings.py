@@ -769,6 +769,7 @@ BLOCKED_IP_REGEX = r"(?i)(\A|\b)ip\b.*\b(banned|blocked|block list|firewall)"
 # Prefix for Google analytics cookie names
 GOOGLE_ANALYTICS_COOKIE_PREFIX = "__UTM"
 
+# Default path for tamper scripts
 TAMPER_SCRIPTS_PATH = "src/core/tamper/"
 
 # eof
