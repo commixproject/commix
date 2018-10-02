@@ -27,6 +27,11 @@ Download commix by cloning the Git repository:
 
     git clone https://github.com/commixproject/commix.git commix
 
+For Docker installation:
+
+    # Build the docker image
+    docker build -t commixproject/commix .
+
 Commix comes packaged on the **official repositories** of the following Linux distributions, so you can use the **package manager** to install it!
 
 - [ArchStrike](https://archstrike.org/)
