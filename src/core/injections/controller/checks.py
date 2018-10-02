@@ -748,8 +748,8 @@ def tamper_scripts():
     for script in provided_scripts:
       if "hexencode" or "base64encode" == script:
         settings.MULTI_ENCODED_PAYLOAD.append(script)
-      import_script = script.replace("/",".").split(".py")[0]
-      print settings.SUB_CONTENT_SIGN + import_script.split(".")[0]
+      import_script = str(settings.TAMPER_SCRIPTS_PATH + script + ".py").replace("/",".").split(".py")[0]
+      print settings.SUB_CONTENT_SIGN + import_script.split(".")[3]
       try:
         module = importlib.import_module(import_script)
         if not hasattr(module, "__tamper__"):

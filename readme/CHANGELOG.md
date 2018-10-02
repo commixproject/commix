@@ -1,4 +1,5 @@
 ## Version 2.7 (upcoming)
+* Fixed: Minor bug-fix regarding loading tamper scripts. 
 * Revised: Minor improvement regarding "INJECT_HERE" tag (i.e. declaring injection position) to be case insensitive.
 
 ## Version 2.6 (2018-09-21)
