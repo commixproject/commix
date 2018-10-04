@@ -1,4 +1,5 @@
 ## Version 2.7 (upcoming)
+* Added: New tamper script "xforwardedfor.py" that appends a fake HTTP header 'X-Forwarded-For'.
 * Fixed: Minor bug-fix regarding loading tamper scripts. 
 * Revised: Minor improvement regarding "INJECT_HERE" tag (i.e. declaring injection position) to be case insensitive.
 

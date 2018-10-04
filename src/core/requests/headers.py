@@ -287,6 +287,11 @@ def do_check(request):
   if menu.options.cookie and settings.COOKIE_INJECTION == False:
     request.add_header('Cookie', menu.options.cookie)
 
+  # Appends a fake HTTP header 'X-Forwarded-For'
+  if settings.TAMPER_SCRIPTS["xforwardedfor"]:
+    from src.core.tamper import xforwardedfor
+    xforwardedfor.transform(request)
+
   # Check if defined any HTTP Authentication credentials.
   # HTTP Authentication: Basic / Digest Access Authentication.
   if not menu.options.ignore_401:
