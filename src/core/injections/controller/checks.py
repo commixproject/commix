@@ -858,7 +858,7 @@ def other_symbols(payload):
       else:
         menu.options.tamper = "caret"  
     from src.core.tamper import caret
-    payload = caret.transform(payload)
+    payload = caret.tamper(payload)
 
 """
 Check for (multiple) added back slashes between the characters of the generated payloads.
@@ -872,7 +872,7 @@ def check_backslashes(payload):
       else:
         menu.options.tamper = "backslashes"  
     from src.core.tamper import backslashes
-    payload = backslashes.transform(payload)
+    payload = backslashes.tamper(payload)
 
 """
 Check for quotes in the generated payloads.
@@ -886,7 +886,7 @@ def check_quotes(payload):
       else:
         menu.options.tamper = "nested"  
     from src.core.tamper import nested
-    payload = nested.transform(payload)
+    payload = nested.tamper(payload)
 
   # Check for (multiple) added quotes between the characters of the generated payloads.
   if payload.count("''") >= 10:
@@ -896,7 +896,7 @@ def check_quotes(payload):
       else:
         menu.options.tamper = "singlequotes"  
     from src.core.tamper import singlequotes
-    payload = singlequotes.transform(payload)
+    payload = singlequotes.tamper(payload)
 
 """
 Recognise the payload.
@@ -909,7 +909,7 @@ def recognise_payload(payload):
       else:
         menu.options.tamper = "sleep2usleep"  
     from src.core.tamper import sleep2usleep
-    payload = sleep2usleep.transform(payload)
+    payload = sleep2usleep.tamper(payload)
   
   elif "timeout" in payload:
     if not settings.TAMPER_SCRIPTS['sleep2timeout']:
@@ -918,7 +918,7 @@ def recognise_payload(payload):
       else:
         menu.options.tamper = "sleep2timeout"  
     from src.core.tamper import sleep2timeout
-    payload = sleep2timeout.transform(payload)
+    payload = sleep2timeout.tamper(payload)
   
   is_decoded = False
   if (len(payload) % 4 == 0) and \
@@ -972,37 +972,37 @@ def perform_payload_modification(payload):
     # sleep to usleep
     if encode_type == 'sleep2timeout':
       from src.core.tamper import sleep2timeout
-      payload = sleep2timeout.transform(payload)
+      payload = sleep2timeout.tamper(payload)
     # sleep to usleep
     if encode_type == 'sleep2usleep':
       from src.core.tamper import sleep2usleep
-      payload = sleep2usleep.transform(payload)
+      payload = sleep2usleep.tamper(payload)
     # Add single quotes.
     if encode_type == 'singlequotes':
       from src.core.tamper import singlequotes
-      payload = singlequotes.transform(payload)
+      payload = singlequotes.tamper(payload)
     # Add caret symbol.  
     elif encode_type == 'backslashes':
       from src.core.tamper import backslashes
-      payload = backslashes.transform(payload) 
+      payload = backslashes.tamper(payload) 
     # Add caret symbol.  
     elif encode_type == 'caret':
       from src.core.tamper import caret
-      payload = caret.transform(payload) 
+      payload = caret.tamper(payload) 
     # Transfomation to nested command
     elif encode_type == 'nested':
       from src.core.tamper import nested
-      payload = nested.transform(payload) 
+      payload = nested.tamper(payload) 
 
   for encode_type in list(set(settings.MULTI_ENCODED_PAYLOAD[::-1])):
     # Encode payload to hex format.    
     if encode_type == 'base64encode':
       from src.core.tamper import base64encode
-      payload = base64encode.encode(payload)
+      payload = base64encode.tamper(payload)
     # Encode payload to hex format.
     if encode_type == 'hexencode':
       from src.core.tamper import hexencode
-      payload = hexencode.encode(payload)
+      payload = hexencode.tamper(payload)
 
   return payload
 

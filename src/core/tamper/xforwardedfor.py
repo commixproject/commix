@@ -23,7 +23,7 @@ About: Appends a fake HTTP header 'X-Forwarded-For'.
 __tamper__ = "xforwardedfor"
 settings.TAMPER_SCRIPTS[__tamper__] = True
 
-def transform(request):
+def tamper(request):
   def randomIP():
     numbers = []
     while not numbers or numbers[0] in (10, 172, 192):

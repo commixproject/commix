@@ -26,7 +26,7 @@ __tamper__ = "caret"
 if not settings.TAMPER_SCRIPTS[__tamper__]:
   settings.TAMPER_SCRIPTS[__tamper__] = True
 
-def transform(payload):
+def tamper(payload):
   def add_caret_symbol(payload):
     settings.TAMPER_SCRIPTS[__tamper__] = True
     if re.compile("\w+").findall(payload):

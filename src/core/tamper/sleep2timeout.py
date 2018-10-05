@@ -28,7 +28,7 @@ __tamper__ = "sleep2timeout"
 if not settings.TAMPER_SCRIPTS[__tamper__]:
   settings.TAMPER_SCRIPTS[__tamper__] = True
 
-def transform(payload):
+def tamper(payload):
   def sleep_to_timeout_ping(payload):
     settings.TAMPER_SCRIPTS[__tamper__] = True
     if settings.TARGET_OS != "win":

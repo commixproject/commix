@@ -27,7 +27,7 @@ __tamper__ = "hexencode"
 if not settings.TAMPER_SCRIPTS[__tamper__]:
   settings.TAMPER_SCRIPTS[__tamper__] = True
 
-def encode(payload):
+def tamper(payload):
   if settings.WHITESPACE[0] == "+":
     err_msg = "Tamper script '" +  __tamper__  + "' is unlikely to work combined with the tamper script 'space2plus'."
     if settings.VERBOSITY_LEVEL == 0:

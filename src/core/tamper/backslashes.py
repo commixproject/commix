@@ -26,7 +26,7 @@ __tamper__ = "backslashes"
 if not settings.TAMPER_SCRIPTS[__tamper__]:
   settings.TAMPER_SCRIPTS[__tamper__] = True
 
-def transform(payload):
+def tamper(payload):
   def add_back_slashes(payload):
     settings.TAMPER_SCRIPTS[__tamper__] = True
     rep = {

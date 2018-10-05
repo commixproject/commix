@@ -27,7 +27,7 @@ __tamper__ = "sleep2usleep"
 if not settings.TAMPER_SCRIPTS[__tamper__]:
   settings.TAMPER_SCRIPTS[__tamper__] = True
 
-def transform(payload):
+def tamper(payload):
   def sleep_to_usleep(payload):
     settings.TAMPER_SCRIPTS[__tamper__] = True
     for match in re.finditer(r"sleep" + settings.WHITESPACE[0] + "([1-9]\d+|[0-9])", payload):

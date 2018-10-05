@@ -28,7 +28,7 @@ if not settings.TAMPER_SCRIPTS[__tamper__]:
   settings.TAMPER_SCRIPTS[__tamper__] = True
 
 double_quote = "\""
-def transform(payload):
+def tamper(payload):
   def nested(payload):
     if settings.TARGET_OS != "win":
       settings.TAMPER_SCRIPTS[__tamper__] = True

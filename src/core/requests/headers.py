@@ -290,7 +290,7 @@ def do_check(request):
   # Appends a fake HTTP header 'X-Forwarded-For'
   if settings.TAMPER_SCRIPTS["xforwardedfor"]:
     from src.core.tamper import xforwardedfor
-    xforwardedfor.transform(request)
+    xforwardedfor.tamper(request)
 
   # Check if defined any HTTP Authentication credentials.
   # HTTP Authentication: Basic / Digest Access Authentication.
