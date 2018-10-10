@@ -273,19 +273,22 @@ def do_check(request):
 
   # Check if defined any Host HTTP header.
   if menu.options.host and settings.HOST_INJECTION == None:
-    request.add_header('Host', menu.options.host)
+    request.add_header(settings.HOST, menu.options.host)
 
   # Check if defined any User-Agent HTTP header.
   if menu.options.agent:
-    request.add_header('User-Agent', menu.options.agent)
+    request.add_header(settings.USER_AGENT, menu.options.agent)
 
   # Check if defined any Referer HTTP header.
   if menu.options.referer and settings.REFERER_INJECTION == None:
-    request.add_header('Referer', menu.options.referer)
+    request.add_header(settings.REFERER, menu.options.referer)
    
   # Check if defined any Cookie HTTP header.
   if menu.options.cookie and settings.COOKIE_INJECTION == False:
-    request.add_header('Cookie', menu.options.cookie)
+    request.add_header(settings.COOKIE, menu.options.cookie)
+  
+  if not checks.get_header(request.headers, settings.HTTP_ACCEPT_HEADER):
+    request.add_header(settings.HTTP_ACCEPT_HEADER, settings.HTTP_ACCEPT_HEADER_VALUE)
 
   # Appends a fake HTTP header 'X-Forwarded-For'
   if settings.TAMPER_SCRIPTS["xforwardedfor"]:

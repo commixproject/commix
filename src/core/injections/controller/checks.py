@@ -33,6 +33,17 @@ from src.utils import settings
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 """
+Returns header value ignoring the letter case
+"""
+def get_header(headers, key):
+  value = None
+  for _ in (headers or {}):
+    if _.upper() == key.upper():
+      value = headers[_]
+      break
+  return value
+
+"""
 Checks regarding a recognition of generic "your ip has been blocked" messages.
 """
 def blocked_ip(page):
