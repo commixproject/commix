@@ -436,6 +436,9 @@ def do_cookie_check(cookie):
   inject_value = value.replace(value, settings.INJECT_TAG)
   # Check if single paramerter is supplied.
   if len(multi_parameters) == 1:
+    # Ignoring the Google analytics cookie parameter.
+    if checks.ignore_google_analytics_cookie(cookie):
+      return cookie
     # Check for empty values (in provided parameters).
     checks.is_empty(multi_parameters, http_request_method)
     # Check if defined the INJECT_TAG
@@ -456,9 +459,8 @@ def do_cookie_check(cookie):
       # Check for empty values (in provided parameters).
       checks.is_empty(multi_parameters, http_request_method)
       for param in range(0, len(all_params)):
-        if all_params[param].upper().startswith(settings.GOOGLE_ANALYTICS_COOKIE_PREFIX):
-          info_msg = "Ignoring the cookie parameter '" + all_params[param].split("=")[0] + "'."
-          print settings.print_info_msg(info_msg)
+        # Ignoring the Google analytics cookie parameter.
+        if checks.ignore_google_analytics_cookie(all_params[param]):
           continue
         if param == 0 :
             old = re.findall(r'=(.*)', all_params[param])
