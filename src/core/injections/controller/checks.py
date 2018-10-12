@@ -32,6 +32,13 @@ from src.utils import settings
 
 from src.thirdparty.colorama import Fore, Back, Style, init
 
+# Ignoring the anti-CSRF parameter(s).
+def ignore_anticsrf_parameter(parameter):
+  if any(parameter.lower().count(token) for token in settings.CSRF_TOKEN_PARAMETER_INFIXES):
+    info_msg = "Ignoring the anti-CSRF parameter '" + parameter.split("=")[0] + "'."
+    print settings.print_info_msg(info_msg)
+    return True
+
 # Ignoring the Google analytics cookie parameter.
 def ignore_google_analytics_cookie(cookie):
   if cookie.upper().startswith(settings.GOOGLE_ANALYTICS_COOKIE_PREFIX):
@@ -86,6 +93,7 @@ def captcha_check(page):
           warn_msg += "."
         print settings.print_bold_warning_msg(warn_msg)
         break
+        
 """
 Counting the total of HTTP(S) requests for the identified injection point(s), during the detection phase.
 """

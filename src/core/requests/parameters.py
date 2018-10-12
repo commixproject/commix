@@ -80,10 +80,13 @@ def do_GET_check(url):
       parameters = ''.join(checks.check_similarities(_))
       value = re.findall(r'=(.*)', parameters)
       value = ''.join(value)
-      # Replace the value of parameter with INJECT tag
-      inject_value = value.replace(value, settings.INJECT_TAG)
       # Check if single parameter is supplied.
       if len(multi_parameters) == 1:
+        # Replace the value of parameter with INJECT tag
+        inject_value = value.replace(value, settings.INJECT_TAG)
+        # Ignoring the anti-CSRF parameter(s).
+        if checks.ignore_anticsrf_parameter(parameters):
+          return urls_list
         # Check if defined the INJECT_TAG
         if settings.INJECT_TAG not in parameters:
           if len(value) == 0:
@@ -121,6 +124,9 @@ def do_GET_check(url):
             # Grab the value of parameter.
             value = re.findall(r'=(.*)', all_params[param])
             value = ''.join(value)
+            # Ignoring the anti-CSRF parameter(s).
+            if checks.ignore_anticsrf_parameter(all_params[param]):
+              continue
             # Replace the value of parameter with INJECT tag
             inject_value = value.replace(value, settings.INJECT_TAG)
             # Skip testing the parameter(s) with empty value(s).
@@ -263,6 +269,9 @@ def do_POST_check(parameter):
     if checks.is_empty(multi_parameters, http_request_method):
       return parameter
     else:
+      # Ignoring the anti-CSRF parameter(s).
+      if checks.ignore_anticsrf_parameter(parameter):
+        return parameter
       # Replace the value of parameter with INJECT tag
       inject_value = value.replace(value, settings.INJECT_TAG)
       if len(value) == 0:
@@ -311,7 +320,9 @@ def do_POST_check(parameter):
         else:  
           value = re.findall(r'=(.*)', all_params[param])
           value = ''.join(value)  
-
+        # Ignoring the anti-CSRF parameter(s)..
+        if checks.ignore_anticsrf_parameter(all_params[param]):
+          continue
         # Replace the value of parameter with INJECT tag
         inject_value = value.replace(value, settings.INJECT_TAG)
         # Skip testing the parameter(s) with empty value(s).
