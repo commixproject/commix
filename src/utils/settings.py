@@ -2,7 +2,7 @@
 # encoding: UTF-8
 
 """
-This file is part of Commix Project (http://commixproject.com).
+This file is part of Commix Project (https://commixproject.com).
 Copyright (c) 2014-2018 Anastasios Stasinopoulos (@ancst).
 
 This program is free software: you can redistribute it and/or modify
@@ -119,7 +119,7 @@ else:
   VERSION = "v" + VERSION_NUM[:3] + "-dev#" + VERSION_NUM[4:]
 YEAR = "2014-2018"
 AUTHOR_TWITTER = "@ancst" 
-APPLICATION_URL = "http://commixproject.com" 
+APPLICATION_URL = "https://commixproject.com" 
 APPLICATION_TWITTER = "@commixproject" 
 
 # Default User-Agent
