@@ -82,11 +82,11 @@ def do_GET_check(url):
       value = ''.join(value)
       # Check if single parameter is supplied.
       if len(multi_parameters) == 1:
-        # Replace the value of parameter with INJECT tag
-        inject_value = value.replace(value, settings.INJECT_TAG)
         # Ignoring the anti-CSRF parameter(s).
         if checks.ignore_anticsrf_parameter(parameters):
           return urls_list
+        # Replace the value of parameter with INJECT tag
+        inject_value = value.replace(value, settings.INJECT_TAG)
         # Check if defined the INJECT_TAG
         if settings.INJECT_TAG not in parameters:
           if len(value) == 0:
@@ -447,6 +447,9 @@ def do_cookie_check(cookie):
   inject_value = value.replace(value, settings.INJECT_TAG)
   # Check if single paramerter is supplied.
   if len(multi_parameters) == 1:
+    # Ignoring the anti-CSRF parameter(s).
+    if checks.ignore_anticsrf_parameter(cookie):
+      return cookie
     # Ignoring the Google analytics cookie parameter.
     if checks.ignore_google_analytics_cookie(cookie):
       return cookie
@@ -470,9 +473,6 @@ def do_cookie_check(cookie):
       # Check for empty values (in provided parameters).
       checks.is_empty(multi_parameters, http_request_method)
       for param in range(0, len(all_params)):
-        # Ignoring the Google analytics cookie parameter.
-        if checks.ignore_google_analytics_cookie(all_params[param]):
-          continue
         if param == 0 :
             old = re.findall(r'=(.*)', all_params[param])
             old = ''.join(old)
@@ -481,6 +481,12 @@ def do_cookie_check(cookie):
         # Grab the value of cookie.
         value = re.findall(r'=(.*)', all_params[param])
         value = ''.join(value)
+        # Ignoring the anti-CSRF parameter(s)..
+        if checks.ignore_anticsrf_parameter(all_params[param]):
+          continue
+        # Ignoring the Google analytics cookie parameter.
+        if checks.ignore_google_analytics_cookie(all_params[param]):
+          continue
         # Replace the value of parameter with INJECT tag
         inject_value = value.replace(value, settings.INJECT_TAG)
         # Skip testing the parameter(s) with empty value(s).
