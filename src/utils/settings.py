@@ -111,7 +111,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "2.7.13"
+VERSION_NUM = "2.7.14"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"
@@ -432,8 +432,12 @@ PARAMETER_DELIMITER = "&"
 # Web-page encoding
 ENCODING = ""
 
-# Page default encoding
-DEFAULT_ENCODING = "utf-8"
+# Reference: http://en.wikipedia.org/wiki/ISO/IEC_8859-1
+DEFAULT_ENCODING = "iso-8859-1"
+try:
+  unicode(DEFAULT_ENCODING, DEFAULT_ENCODING)
+except LookupError:
+  DEFAULT_ENCODING = "utf8"
 
 # Character Sets List. 
 # A complete list of the standard encodings Python supports.
@@ -580,11 +584,6 @@ IS_XML = False
 
 # Regular expression for XML POST data
 XML_RECOGNITION_REGEX = r'(?s)\A\s*<[^>]+>(.+>)?\s*\Z'
-
-# XML Data extraction
-# XML_VERSION_ENCODING = r'(<\?(.*)\?>)'
-# XML_FULL_DATA_EXTRACT = r'<([^?<>]+)>(.*)<(\/[^<>?]+)>'
-# XML_DATA_EXTRACT = r'<([^?<>]+)>([^<>]+)<(\/[^<>?]+)>'
 
 # JSON Data
 IS_JSON = False
