@@ -22,9 +22,22 @@ import socket
 import random
 from socket import error as socket_error
 
-if "--disable-coloring" in sys.argv:
-  from src.utils import colors
-  colors.ENABLE_COLORING = False
+tamper_index = None
+
+for i in xrange(len(sys.argv)):
+  if sys.argv[i] == "--disable-coloring":
+    from src.utils import colors
+    colors.ENABLE_COLORING = False
+  """
+  Dirty hack from sqlmap [1], regarding merging of tamper script arguments (e.g. --tamper A --tamper B -> --tamper=A,B)
+  [1] https://github.com/sqlmapproject/sqlmap/commit/f4a0820dcb5fded8bc4d0363c91276eb9a3445ae
+  """
+  if sys.argv[i].startswith("--tamper"):
+    if tamper_index is None:
+      tamper_index = i if '=' in sys.argv[i] else (i + 1 if i + 1 < len(sys.argv) and not sys.argv[i + 1].startswith('-') else None)
+    else:
+      sys.argv[tamper_index] = "%s,%s" % (sys.argv[tamper_index], sys.argv[i].split('=')[1] if '=' in sys.argv[i] else (sys.argv[i + 1] if i + 1 < len(sys.argv) and not sys.argv[i + 1].startswith('-') else ""))
+      sys.argv[i] = ""
 
 from src.thirdparty.colorama import Fore, Back, Style, init
 
@@ -111,7 +124,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "2.7.15"
+VERSION_NUM = "2.7.16"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"

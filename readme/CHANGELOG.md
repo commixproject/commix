@@ -1,4 +1,5 @@
 ## Version 2.7 (upcoming)
+* Revised: Minor improvement regarding merging of tamper script arguments.
 * Revised: Minor improvement regarding ignoring the parameter(s) that carrying anti-CSRF token(s) in all scanning attempts.
 * Updated: Beautiful Soup (third party) module has been updated.
 * Added: New tamper script "xforwardedfor.py" that appends a fake HTTP header 'X-Forwarded-For'.
