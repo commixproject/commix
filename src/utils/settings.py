@@ -13,6 +13,7 @@ the Free Software Foundation, either version 3 of the License, or
 For more see the file 'readme/COPYING' for copying permission.
 """
 
+import re
 import os
 import sys
 import time
@@ -21,24 +22,7 @@ import urllib
 import socket
 import random
 from socket import error as socket_error
-
-tamper_index = None
-
-for i in xrange(len(sys.argv)):
-  if sys.argv[i] == "--disable-coloring":
-    from src.utils import colors
-    colors.ENABLE_COLORING = False
-  """
-  Dirty hack from sqlmap [1], regarding merging of tamper script arguments (e.g. --tamper A --tamper B -> --tamper=A,B)
-  [1] https://github.com/sqlmapproject/sqlmap/commit/f4a0820dcb5fded8bc4d0363c91276eb9a3445ae
-  """
-  if sys.argv[i].startswith("--tamper"):
-    if tamper_index is None:
-      tamper_index = i if '=' in sys.argv[i] else (i + 1 if i + 1 < len(sys.argv) and not sys.argv[i + 1].startswith('-') else None)
-    else:
-      sys.argv[tamper_index] = "%s,%s" % (sys.argv[tamper_index], sys.argv[i].split('=')[1] if '=' in sys.argv[i] else (sys.argv[i + 1] if i + 1 < len(sys.argv) and not sys.argv[i + 1].startswith('-') else ""))
-      sys.argv[i] = ""
-
+        
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 # Status Signs
@@ -116,6 +100,44 @@ def print_question_msg(question_msg):
   result = QUESTION_SIGN + question_msg 
   return result
 
+# argv checks
+def sys_argv_checks():
+  tamper_index = None
+  for i in xrange(len(sys.argv)):
+    # Disable coloring
+    if sys.argv[i] == "--disable-coloring":
+      from src.utils import colors
+      colors.ENABLE_COLORING = False
+    """
+    Dirty hack from sqlmap [1], regarding merging of tamper script arguments (e.g. --tamper A --tamper B -> --tamper=A,B)
+    [1] https://github.com/sqlmapproject/sqlmap/commit/f4a0820dcb5fded8bc4d0363c91276eb9a3445ae
+    """
+    if sys.argv[i].startswith("--tamper"):
+      if tamper_index is None:
+        tamper_index = i if '=' in sys.argv[i] else (i + 1 if i + 1 < len(sys.argv) and not sys.argv[i + 1].startswith('-') else None)
+      else:
+        sys.argv[tamper_index] = "%s,%s" % (sys.argv[tamper_index], sys.argv[i].split('=')[1] if '=' in sys.argv[i] else (sys.argv[i + 1] if i + 1 < len(sys.argv) and not sys.argv[i + 1].startswith('-') else ""))
+        sys.argv[i] = ""
+
+# argv input errors
+def sys_argv_errors():
+  reload(sys)  
+  sys.setdefaultencoding('utf8')
+  for i in xrange(len(sys.argv)):
+    # Check for illegal (non-console) quote characters.
+    if len(sys.argv[i]) > 1 and all(ord(_) in xrange(0x2018, 0x2020) for _ in ((sys.argv[i].split('=', 1)[-1].strip() or ' ')[0], sys.argv[i][-1])):
+        err_msg = "Illegal (non-console) quote characters ('" + sys.argv[i] + "')."
+        print print_critical_msg(err_msg)
+        raise SystemExit()
+    # Check for illegal (non-console) comma characters.
+    if len(sys.argv[i]) > 1 and u"\uff0c" in sys.argv[i].split('=', 1)[-1]:
+        err_msg = "Illegal (non-console) comma character ('" + sys.argv[i] + "')."
+        print print_critical_msg(err_msg)
+        raise SystemExit()
+
+# argv checks
+sys_argv_checks()
+
 """
 The global variables.
 """
@@ -124,7 +146,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "2.7.16"
+VERSION_NUM = "2.7.17"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"

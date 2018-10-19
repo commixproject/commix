@@ -607,6 +607,9 @@ option.help = option.help.capitalize().replace("Show this help message and exit"
 # Checkall the banner
 if not options.version:
     banner()
+    
+# argv input errors
+settings.sys_argv_errors()
 
 """
 The "os_shell" available options.

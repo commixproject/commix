@@ -71,7 +71,7 @@ else:
       readline_error = True
 pass
 
-# Set default encoding (UTF-8)
+# Set default encoding
 reload(sys)
 sys.setdefaultencoding(settings.DEFAULT_ENCODING)
 
