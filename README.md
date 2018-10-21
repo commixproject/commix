@@ -5,6 +5,7 @@
     <a href="https://github.com/commixproject/commix/releases/tag/v2.6-20180921"><img alt="Version 2.6" src="https://img.shields.io/badge/Version-2.6-green.svg"></a>
     <a href="http://www.python.org/download/"><img alt="Python 2.6-2.7" src="https://img.shields.io/badge/Python-2.6--2.7-yellow.svg"></a>
     <a href="https://github.com/commixproject/commix/blob/master/readme/COPYING"><img alt="GPLv3 License" src="https://img.shields.io/badge/License-GPLv3-red.svg"></a>
+    <a href="https://inventory.rawsec.ml/tools.html#commix"><img src="https://inventory.rawsec.ml/img/badges/Rawsec-inventoried-FF5050_flat.svg" alt="Rawsec's CyberSecurity Inventory" /></a> 
     <a href="http://www.twitter.com/commixproject"><img alt="Twitter" src="https://img.shields.io/badge/Twitter-@commixproject-blue.svg"></a>
   </p>
 </p>
