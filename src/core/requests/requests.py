@@ -239,10 +239,12 @@ def cookie_injection(url, vuln_parameter, payload):
     #Check if defined extra headers.
     headers.do_check(request)
     # Fix for %0a, %0d%0a separators
-    if payload[:1] == "\n":
-      payload = urllib.quote(payload[:1]) + payload[1:]
-    elif payload[:2] == "\r\n":
-      payload = urllib.quote(payload[:2]) + payload[2:]  
+    if "\n" in payload:
+      _ = payload.find("\n") + 1
+      payload = urllib.quote(payload[:_]) + payload[_:]
+    elif "\r\n" in payload:
+      _ = payload.find("\r\n") + 1
+      payload = urllib.quote(payload[:_]) + payload[_:]  
     request.add_header('Cookie', menu.options.cookie.replace(settings.INJECT_TAG, payload))
     try:
       headers.check_http_traffic(request)
@@ -372,10 +374,12 @@ def user_agent_injection(url, vuln_parameter, payload):
     headers.do_check(request)
     payload = urllib.unquote(payload)
     # Fix for %0a, %0d%0a separators
-    if payload[:1] == "\n":
-      payload = urllib.quote(payload[:1]) + payload[1:]
-    elif payload[:2] == "\r\n":
-      payload = urllib.quote(payload[:2]) + payload[2:]   
+    if "\n" in payload:
+      _ = payload.find("\n") + 1
+      payload = urllib.quote(payload[:_]) + payload[_:]
+    elif "\r\n" in payload:
+      _ = payload.find("\r\n") + 1
+      payload = urllib.quote(payload[:_]) + payload[_:]   
     request.add_header('User-Agent', payload)
     try:
       headers.check_http_traffic(request)
@@ -509,10 +513,12 @@ def referer_injection(url, vuln_parameter, payload):
     headers.do_check(request)
     payload = urllib.unquote(payload)
     # Fix for %0a, %0d%0a separators
-    if payload[:1] == "\n":
-      payload = urllib.quote(payload[:1]) + payload[1:]
-    elif payload[:2] == "\r\n":
-      payload = urllib.quote(payload[:2]) + payload[2:]   
+    if "\n" in payload:
+      _ = payload.find("\n") + 1
+      payload = urllib.quote(payload[:_]) + payload[_:]
+    elif "\r\n" in payload:
+      _ = payload.find("\r\n") + 1
+      payload = urllib.quote(payload[:_]) + payload[_:]   
     request.add_header('Referer', payload)
     try:
       headers.check_http_traffic(request)
@@ -649,10 +655,12 @@ def host_injection(url, vuln_parameter, payload):
     headers.do_check(request)
     payload = urllib.unquote(payload)
     # Fix for %0a, %0d%0a separators
-    if payload[:1] == "\n":
-      payload = urllib.quote(payload[:1]) + payload[1:]
-    elif payload[:2] == "\r\n":
-      payload = urllib.quote(payload[:2]) + payload[2:]   
+    if "\n" in payload:
+      _ = payload.find("\n") + 1
+      payload = urllib.quote(payload[:_]) + payload[_:]
+    elif "\r\n" in payload:
+      _ = payload.find("\r\n") + 1
+      payload = urllib.quote(payload[:_]) + payload[_:]   
     request.add_header('Host', payload)
     try:
       headers.check_http_traffic(request)
@@ -788,10 +796,12 @@ def custom_header_injection(url, vuln_parameter, payload):
     headers.do_check(request)
     payload = urllib.unquote(payload)
     # Fix for %0a, %0d%0a separators
-    if payload[:1] == "\n":
-      payload = urllib.quote(payload[:1]) + payload[1:]
-    elif payload[:2] == "\r\n":
-      payload = urllib.quote(payload[:2]) + payload[2:]   
+    if "\n" in payload:
+      _ = payload.find("\n") + 1
+      payload = urllib.quote(payload[:_]) + payload[_:]
+    elif "\r\n" in payload:
+      _ = payload.find("\r\n") + 1
+      payload = urllib.quote(payload[:_]) + payload[_:]   
     request.add_header(settings.CUSTOM_HEADER_NAME, payload)
     try:
       headers.check_http_traffic(request)
