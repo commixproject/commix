@@ -39,7 +39,7 @@ def do_check(url):
        request = urllib2.Request(url)
     # Check if defined extra headers.
     headers.do_check(request)
-    request.set_proxy(menu.options.proxy,settings.PROXY_PROTOCOL)
+    request.set_proxy(menu.options.proxy,settings.PROXY_SCHEME)
     try:
       check = urllib2.urlopen(request)
     except urllib2.HTTPError, error:
@@ -61,7 +61,7 @@ Use the defined HTTP Proxy
 """
 def use_proxy(request):
   headers.do_check(request)
-  request.set_proxy(menu.options.proxy,settings.PROXY_PROTOCOL)
+  request.set_proxy(menu.options.proxy,settings.PROXY_SCHEME)
   try:
     response = urllib2.urlopen(request)
     return response

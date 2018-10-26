@@ -85,7 +85,7 @@ def check_http_traffic(request):
   
   # Delay in seconds between each HTTP request
   time.sleep(int(settings.DELAY))
-  if settings.PROXY_PROTOCOL == 'https':
+  if settings.SCHEME == 'https':
       handle = httplib.HTTPSConnection
   else:
       handle = httplib.HTTPConnection
@@ -116,13 +116,13 @@ def check_http_traffic(request):
           logs.log_traffic("\n" + header) 
       if menu.options.traffic_file:
         logs.log_traffic("\n\n")
-      if settings.PROXY_PROTOCOL == 'https':
+      if settings.SCHEME == 'https':
         httplib.HTTPSConnection.request(self, method, url, body, headers)
       else:
         httplib.HTTPConnection.request(self, method, url, body, headers)
         
   class connection_handler(urllib2.HTTPHandler, urllib2.HTTPSHandler):
-    if settings.PROXY_PROTOCOL == 'https':
+    if settings.SCHEME == 'https':
       def https_open(self, req):
         try:
           return self.do_open(do_connection, req)

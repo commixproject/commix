@@ -224,7 +224,7 @@ request.add_option("--proxy",
                 action="store",
                 dest="proxy",
                 default=False,
-                help="Use a HTTP proxy (e.g. '127.0.0.1:8080').")
+                help="Use a proxy to connect to the target URL.")
                 
 request.add_option("--tor",
                 action="store_true",

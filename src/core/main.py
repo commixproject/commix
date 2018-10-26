@@ -1034,6 +1034,16 @@ try:
       print settings.print_critical_msg(err_msg)
       raise SystemExit()
 
+    # Check if defined "--proxy" option.
+    if menu.options.proxy:
+      if "://" in menu.options.proxy:
+        settings.PROXY_SCHEME = menu.options.proxy.split("://")[0]
+        menu.options.proxy = menu.options.proxy.split("://")[1]
+      else:
+        err_msg = "Proxy value must be in format '(http|https)://address:port'."
+        print settings.print_critical_msg(err_msg)
+        raise SystemExit()
+
     # Check if defined "--purge" option.
     if menu.options.purge:
       purge.purge()

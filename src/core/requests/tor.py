@@ -50,7 +50,7 @@ def do_check():
   sys.stdout.write(settings.print_info_msg(info_msg))
   sys.stdout.flush()
   try:
-    privoxy_proxy = urllib2.ProxyHandler({settings.PROXY_PROTOCOL:settings.PRIVOXY_IP + ":" + PRIVOXY_PORT})
+    privoxy_proxy = urllib2.ProxyHandler({settings.SCHEME:settings.PRIVOXY_IP + ":" + PRIVOXY_PORT})
     opener = urllib2.build_opener(privoxy_proxy)
     urllib2.install_opener(opener)
   except:
@@ -116,7 +116,7 @@ def use_tor(request):
     print settings.print_critical_msg(err_msg)
     raise SystemExit()
 
-  privoxy_proxy = urllib2.ProxyHandler({settings.PROXY_PROTOCOL:settings.PRIVOXY_IP + ":" + PRIVOXY_PORT})
+  privoxy_proxy = urllib2.ProxyHandler({settings.SCHEME:settings.PRIVOXY_IP + ":" + PRIVOXY_PORT})
   opener = urllib2.build_opener(privoxy_proxy)
   urllib2.install_opener(opener)
   response = urllib2.urlopen(request)

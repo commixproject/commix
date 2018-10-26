@@ -151,7 +151,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "2.7.21"
+VERSION_NUM = "2.7.22"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"
@@ -180,6 +180,9 @@ TEST_PARAMETER = ""
 
 # Skip testing for given parameter(s) - comma separated. 
 SKIP_PARAMETER = ""
+
+# Use a proxy to connect to the target URL.
+SCHEME = ""
 
 # Default target host OS (Unix-like)
 TARGET_OS = "unix"
@@ -414,8 +417,8 @@ MOBILE_USER_AGENT_LIST = [
         "Mozilla/5.0 (SymbianOS/9.4; Series60/5.0 NokiaN97-1/10.0.012; Profile/MIDP-2.1 Configuration/CLDC-1.1; en-us) AppleWebKit/525 (KHTML, like Gecko) WicKed/7.1.12344",
 ]
 
-# Proxy Protocol
-PROXY_PROTOCOL = "http"
+# Default Scheme
+SCHEME = ""
 
 # Privoxy Proxy
 PRIVOXY_IP = "127.0.0.1"

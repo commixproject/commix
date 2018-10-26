@@ -1,4 +1,5 @@
 ## Version 2.7 (upcoming)
+* Fixed: Bug-fix regarding proxying SSL/TLS requests.
 * Revised: Minor improvement regarding checking for potentially miswritten (illegal '=') short option.
 * Revised: Minor improvement regarding checking for illegal (non-console) quote and comma characters.
 * Revised: Minor improvement regarding merging of tamper script arguments.
