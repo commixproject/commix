@@ -151,7 +151,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "2.7.23"
+VERSION_NUM = "2.7.24"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"
@@ -737,7 +737,8 @@ TAMPER_SCRIPTS = {
                   "nested": False,
                   "sleep2usleep": False,
                   "sleep2timeout": False,
-                  "xforwardedfor": False
+                  "xforwardedfor": False,
+                  "dollaratsigns": False
                  }
 
 # HTTP Errors

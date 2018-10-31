@@ -877,7 +877,7 @@ def whitespace_check(payload):
 Check for added caret between the characters of the generated payloads.
 """
 def other_symbols(payload):
-  # Check for symbols
+  # Check for caret symbol
   if payload.count("^") >= 10:
     if not settings.TAMPER_SCRIPTS['caret']:
       if menu.options.tamper:
@@ -886,6 +886,16 @@ def other_symbols(payload):
         menu.options.tamper = "caret"  
     from src.core.tamper import caret
     payload = caret.tamper(payload)
+
+  # Check for dollar sign followed by an at-sign
+  if payload.count("$@") >= 10:
+    if not settings.TAMPER_SCRIPTS['dollaratsigns']:
+      if menu.options.tamper:
+        menu.options.tamper = menu.options.tamper + ",dollaratsigns"
+      else:
+        menu.options.tamper = "dollaratsigns"  
+    from src.core.tamper import dollaratsigns
+    payload = dollaratsigns.tamper(payload)
 
 """
 Check for (multiple) added back slashes between the characters of the generated payloads.
@@ -1020,6 +1030,10 @@ def perform_payload_modification(payload):
     elif encode_type == 'nested':
       from src.core.tamper import nested
       payload = nested.tamper(payload) 
+    # Add dollar sign followed by an at-sign.
+    elif encode_type == 'dollaratsigns':
+      from src.core.tamper import dollaratsigns
+      payload = dollaratsigns.tamper(payload) 
 
   for encode_type in list(set(settings.MULTI_ENCODED_PAYLOAD[::-1])):
     # Encode payload to hex format.    
