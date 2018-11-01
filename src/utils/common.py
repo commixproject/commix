@@ -109,22 +109,29 @@ def mask_sensitive_data(err_msg):
 Returns detailed message about occurred unhandled exception.
 """
 def unhandled_exception():
-  err_msg = "Unhandled exception occurred in '" + settings.VERSION[1:] + "'. It is recommended to retry your "
-  err_msg += "run with the latest (dev) version from official GitHub "
-  err_msg += "repository at '" + settings.GIT_URL + "'. If the exception persists, please open a new issue "
-  err_msg += "at '" + settings.ISSUES_PAGE + "' "
-  err_msg += "with the following text and any other information required to "
-  err_msg += "reproduce the bug. The "
-  err_msg += "developers will try to reproduce the bug, fix it accordingly "
-  err_msg += "and get back to you.\n"
-  err_msg += "Commix version: " + settings.VERSION[1:] + "\n"
-  err_msg += "Python version: " + settings.PYTHON_VERSION + "\n"
-  err_msg += "Operating system: " + os.name + "\n"
-  err_msg += "Command line: " + re.sub(r".+?\bcommix\.py\b", "commix.py", " ".join(sys.argv)) + "\n"
-  err_msg = mask_sensitive_data(err_msg)
   exc_msg = str(traceback.format_exc())
-  exc_msg = re.sub(r'".+?[/\\](\w+\.py)', "\"\g<1>", exc_msg)
-  print settings.print_critical_msg(err_msg + "\n" + exc_msg.rstrip()) 
-  create_github_issue(err_msg, exc_msg[:])
+  if "bad marshal data" in exc_msg:
+    match = re.search(r"\s*(.+)\s+ValueError", exc_msg)
+    err_msg = "Identified corrupted .pyc file(s)."
+    err_msg += "Please delete .pyc files on your system to fix the problem."
+    print settings.print_critical_msg(err_msg) 
+    raise SystemExit
+  else:
+    err_msg = "Unhandled exception occurred in '" + settings.VERSION[1:] + "'. It is recommended to retry your "
+    err_msg += "run with the latest (dev) version from official GitHub "
+    err_msg += "repository at '" + settings.GIT_URL + "'. If the exception persists, please open a new issue "
+    err_msg += "at '" + settings.ISSUES_PAGE + "' "
+    err_msg += "with the following text and any other information required to "
+    err_msg += "reproduce the bug. The "
+    err_msg += "developers will try to reproduce the bug, fix it accordingly "
+    err_msg += "and get back to you.\n"
+    err_msg += "Commix version: " + settings.VERSION[1:] + "\n"
+    err_msg += "Python version: " + settings.PYTHON_VERSION + "\n"
+    err_msg += "Operating system: " + os.name + "\n"
+    err_msg += "Command line: " + re.sub(r".+?\bcommix\.py\b", "commix.py", " ".join(sys.argv)) + "\n"
+    err_msg = mask_sensitive_data(err_msg)
+    exc_msg = re.sub(r'".+?[/\\](\w+\.py)', "\"\g<1>", exc_msg)
+    print settings.print_critical_msg(err_msg + "\n" + exc_msg.rstrip()) 
+    create_github_issue(err_msg, exc_msg[:])
 
 # eof

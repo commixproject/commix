@@ -1,4 +1,5 @@
 ## Version 2.7 (upcoming)
+* Revised: Minor improvement regarding identifying corrupted .pyc file(s).
 * Added: New tamper script "dollaratsigns.py" that adds dollar-sign followed by an at-sign ("$@") between the characters of the generated payloads.
 * Fixed: Bug-fix regarding proxying SSL/TLS requests.
 * Revised: Minor improvement regarding checking for potentially miswritten (illegal '=') short option.
