@@ -110,12 +110,21 @@ Returns detailed message about occurred unhandled exception.
 """
 def unhandled_exception():
   exc_msg = str(traceback.format_exc())
+
   if "bad marshal data" in exc_msg:
     match = re.search(r"\s*(.+)\s+ValueError", exc_msg)
     err_msg = "Identified corrupted .pyc file(s)."
     err_msg += "Please delete .pyc files on your system to fix the problem."
     print settings.print_critical_msg(err_msg) 
-    raise SystemExit
+    raise SystemExit()
+
+  elif "must be pinned buffer, not bytearray" in exc_msg:
+    err_msg = "Error occurred at Python interpreter which "
+    err_msg += "is fixed in 2.7.x. Please update accordingly. "
+    err_msg += "(Reference: https://bugs.python.org/issue8104)"
+    print settings.print_critical_msg(err_msg)
+    raise SystemExit()
+
   else:
     err_msg = "Unhandled exception occurred in '" + settings.VERSION[1:] + "'. It is recommended to retry your "
     err_msg += "run with the latest (dev) version from official GitHub "
