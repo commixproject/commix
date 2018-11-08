@@ -135,6 +135,16 @@ def unhandled_exception():
     print settings.print_critical_msg(err_msg)
     raise SystemExit()
 
+  elif "Read-only file system" in exc_msg:
+    errMsg = "Output device is mounted as read-only."
+    print settings.print_critical_msg(err_msg)
+    raise SystemExit()
+
+  elif "OperationalError: disk I/O error" in exc_msg:
+    errMsg = "I/O error on output device."
+    print settings.print_critical_msg(err_msg)
+    raise SystemExit()
+
   else:
     err_msg = "Unhandled exception occurred in '" + settings.VERSION[1:] + "'. It is recommended to retry your "
     err_msg += "run with the latest (dev) version from official GitHub "
