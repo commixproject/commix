@@ -224,6 +224,9 @@ def init_request(url):
   if settings.VERBOSITY_LEVEL >= 1:
     info_msg = "Creating HTTP requests opener object."
     print settings.print_info_msg(info_msg) 
+  # Load tamper scripts
+  if menu.options.tamper:
+    checks.tamper_scripts()
   return request
 
 """
@@ -482,10 +485,6 @@ def main(filename, url):
           if not settings.USE_BACKTICKS:
             settings.SYS_USERS  = "echo $(" + settings.SYS_USERS + ")"
             settings.SYS_PASSES  = "echo $(" + settings.SYS_PASSES + ")"
-
-        # Load tamper scripts
-        if menu.options.tamper:
-          checks.tamper_scripts()
 
         # Check if defined "--file-upload" option.
         if menu.options.file_upload:
