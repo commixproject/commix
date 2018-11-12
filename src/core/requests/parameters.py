@@ -314,7 +314,10 @@ def do_POST_check(parameter):
           value = ''.join(value)
         else:  
           value = re.findall(r'=(.*)', all_params[param])
-          value = ''.join(value)  
+          value = ''.join(value)
+        # Ignoring the anti-CSRF parameter(s).
+        if checks.ignore_anticsrf_parameter(all_params[param]):
+          continue
         # Replace the value of parameter with INJECT tag
         inject_value = value.replace(value, settings.INJECT_TAG)
         # Skip testing the parameter(s) with empty value(s).
