@@ -582,10 +582,12 @@ def main(filename, url):
 
             # Procedure for target OS identification.
             for i in range(0,len(settings.SERVER_OS_BANNERS)):
-              if settings.SERVER_OS_BANNERS[i].lower() in server_banner.lower():
+              match = re.search(settings.SERVER_OS_BANNERS[i].lower(), server_banner.lower())
+              if match:
                 found_os_server = True
-                settings.TARGET_OS = settings.SERVER_OS_BANNERS[i].lower()
-                if settings.TARGET_OS == "win" or settings.TARGET_OS == "microsoft" :
+                settings.TARGET_OS = match.group(0)
+                match = re.search(r"microsoft|win", settings.TARGET_OS)
+                if match:
                   identified_os = "Windows"
                   if menu.options.os and user_defined_os != "win":
                     if not checks.identified_os():
@@ -622,25 +624,25 @@ def main(filename, url):
               sys.stdout.flush()
 
             for i in range(0,len(settings.SERVER_BANNERS)):
-              if settings.SERVER_BANNERS[i].lower() in server_banner.lower():
+              match = re.search(settings.SERVER_BANNERS[i].lower(), server_banner.lower())
+              if match:
                 if settings.VERBOSITY_LEVEL >= 1:
                   print "[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]"
                 if settings.VERBOSITY_LEVEL >= 1:
                   success_msg = "The target server was identified as " 
                   success_msg += server_banner + Style.RESET_ALL + "."
                   print settings.print_success_msg(success_msg)
-                settings.SERVER_BANNER = server_banner
+                settings.SERVER_BANNER = match.group(0)
                 found_server_banner = True
-
                 # Set up default root paths
-                if settings.SERVER_BANNERS[i].lower() == "apache":
+                if "apache" in settings.SERVER_BANNER.lower():
                   if settings.TARGET_OS == "win":
                     settings.WEB_ROOT = "\\htdocs"
                   else:
                     settings.WEB_ROOT = "/var/www"
-                if settings.SERVER_BANNERS[i].lower() == "nginx": 
+                elif "nginx" in settings.SERVER_BANNER.lower(): 
                   settings.WEB_ROOT = "/usr/share/nginx"
-                if settings.SERVER_BANNERS[i].lower() == "microsoft-iis":
+                elif "microsoft-iis" in settings.SERVER_BANNER.lower():
                   settings.WEB_ROOT = "\\inetpub\\wwwroot"
                 break
 

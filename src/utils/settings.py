@@ -151,7 +151,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "2.7.30"
+VERSION_NUM = "2.7.31"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"
@@ -586,19 +586,31 @@ SERVER_BANNER = ""
 SERVER_BANNERS = [
     "Microsoft-IIS",
     "Apache",
-    "Nginx"
+    r"Nginx/([\w\.]+)",
+    r"GWS/([\w\.]+)",
+    r"lighttpd/([\w\.]+)",
+    r"openresty/([\w\.]+)",
+    r"LiteSpeed/([\w\.]+)",
+    r"Sun-ONE-Web-Server/([\w\.]+)"
 ]
 
 # Server banners list
 SERVER_OS_BANNERS = [
-    "microsoft",
-    "win",
-    "debian",
-    "ubuntu",
-    "fedora",
-    "centos",
-    "freebsd",
-    "unix"
+    r"(Microsoft|Windows|Win32)",
+    "Debian",
+    "Ubuntu",
+    "Fedora",
+    "CentOS",
+    "FreeBSD",
+    "NetBSD",
+    "OpenBSD",
+    "Slackware",
+    "SuSE",
+    "Mandrake",
+    "Gentoo",
+    r"Mac[\-\_\ ]?OSX",
+    r"Red[\-\_\ ]?Hat",
+    "Unix"
 ]
 
 TARGET_APPLICATION = ""
