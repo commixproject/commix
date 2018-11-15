@@ -151,7 +151,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "2.7.32"
+VERSION_NUM = "2.7.33"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"
@@ -800,7 +800,7 @@ INIT_TEST = ""
 TOR_CHECK_AGAIN = True
 
 # URL for checking internet connection.
-CHECK_INTERNET_ADDRESS = "ipinfo.io/"
+CHECK_INTERNET_ADDRESS = "http://ipinfo.io"
 
 # Check internet connection.
 CHECK_INTERNET = False

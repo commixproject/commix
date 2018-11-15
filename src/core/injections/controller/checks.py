@@ -483,29 +483,24 @@ Check if http / https.
 """
 def check_http_s(url):
   if settings.CHECK_INTERNET:
-    if "https" in url:
-      url = "https://" + settings.CHECK_INTERNET_ADDRESS
-    else:
-      url = "http://" + settings.CHECK_INTERNET_ADDRESS
+      url = settings.CHECK_INTERNET_ADDRESS
   else:
     try:
-      if settings.SCHEME in urlparse.urlparse(url).scheme:
-        if menu.options.force_ssl and urlparse.urlparse(url).scheme != "https":
-          url = re.sub("\Ahttp:", "https:", url, re.I)
-          settings.SCHEME = 'https'
-        if urlparse.urlparse(url).scheme == "https":
-          settings.SCHEME = "https"
+      if re.search(r'^(?:http)s?://', url, re.I):
+        if not re.search(r"^https?://", url, re.I) and not re.search(r"^wss?://", url, re.I):
+          if re.search(r":443\b", url):
+            url = "https://" + url
+          else:
+            url = "http://" + url
+        settings.SCHEME = (urlparse.urlparse(url).scheme.lower() or "http") if not menu.options.force_ssl else "https"
       else:
-        if menu.options.force_ssl:
-          url = "https://" + url
-          settings.SCHEME = "https"
-        else:
-          url = "http://" + url 
+        err_msg = "Invalid target URL has been given." 
+        print settings.print_critical_msg(err_msg)
+        raise SystemExit()
     except ValueError, err:
-      err_msg = e.split(":")[1].lstrip() + "."
-      print settings.print_error_msg(err_msg)
+      err_msg = "Invalid target URL has been given." 
+      print settings.print_critical_msg(err_msg)
       raise SystemExit()
-
   return url
   
 """
