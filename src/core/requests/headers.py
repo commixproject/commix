@@ -202,6 +202,13 @@ def check_http_traffic(request):
           print err_msg.line, err_msg.message
         raise SystemExit()
 
+      except ValueError, err:
+        if settings.VERBOSITY_LEVEL < 2:
+          print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
+        err_msg = "Invalid target URL has been given." 
+        print settings.print_critical_msg(err_msg)
+        raise SystemExit()
+
       except AttributeError:
         raise SystemExit() 
       
