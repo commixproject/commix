@@ -13,9 +13,9 @@
 
 **Commix** (short for [**comm**]and [**i**]njection e[**x**]ploiter) is an automated tool written by **[Anastasios Stasinopoulos](https://github.com/stasinopoulos)** (**[@ancst](https://twitter.com/ancst)**) that can be used from web developers, penetration testers or even security researchers in order to test web-based applications with the view to find bugs, errors or vulnerabilities related to **[command injection](https://www.owasp.org/index.php/Command_Injection)** attacks. By using this tool, it is very easy to find and exploit a command injection vulnerability in a certain vulnerable parameter or HTTP header.
 
-## Disclaimer
+## Legal Disclaimer
 
-This tool is only for testing and academic purposes and can only be used where strict consent has been given. Do not use it for illegal purposes!
+Usage of commix for attacking targets without prior mutual consent is illegal. It is the end user's responsibility to obey all applicable local, state and federal laws. Developers assume no liability and are not responsible for any misuse or damage caused by this program.
 
 ## Requirements
 
