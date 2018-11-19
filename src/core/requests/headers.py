@@ -262,15 +262,15 @@ def check_http_traffic(request):
       err_msg += " (" + str(err.args[0]).split("] ")[1] + ")."
     except IndexError:
       err_msg += "."
-    print settings.print_critical_msg(err_msg + ").")
+    print settings.print_critical_msg(err_msg)
     raise SystemExit()
 
   except httplib.IncompleteRead, err_msg:
-    print settings.print_critical_msg(str(err_msg) + ".")
+    print settings.print_critical_msg(str(err_msg))
     raise SystemExit()
 
   except UnicodeDecodeError, err_msg:
-    print settings.print_critical_msg(str(err_msg) + ".")
+    print settings.print_critical_msg(str(err_msg))
     raise SystemExit()
 
 """

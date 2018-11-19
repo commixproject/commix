@@ -107,6 +107,7 @@ def do_check():
         print err_msg.line, err_msg.message
       raise SystemExit()
 
+
 """
 Use the TOR HTTP Proxy.
 """
