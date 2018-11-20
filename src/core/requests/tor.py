@@ -116,11 +116,20 @@ def use_tor(request):
     err_msg = "You cannot Tor network without access on the Internet."
     print settings.print_critical_msg(err_msg)
     raise SystemExit()
+    
+  try:
+    privoxy_proxy = urllib2.ProxyHandler({settings.SCHEME:settings.PRIVOXY_IP + ":" + PRIVOXY_PORT})
+    opener = urllib2.build_opener(privoxy_proxy)
+    urllib2.install_opener(opener)
+    response = urllib2.urlopen(request)
+    return response
 
-  privoxy_proxy = urllib2.ProxyHandler({settings.SCHEME:settings.PRIVOXY_IP + ":" + PRIVOXY_PORT})
-  opener = urllib2.build_opener(privoxy_proxy)
-  urllib2.install_opener(opener)
-  response = urllib2.urlopen(request)
-  return response
-  
+  except Exception as err_msg:
+    try:
+      error_msg = str(err_msg.args[0]).split("] ")[1] + "."
+    except IndexError:
+      error_msg = str(err_msg).replace(": "," (") + ")."
+    print settings.print_critical_msg(error_msg)
+    raise SystemExit()
+
 # eof 

@@ -80,3 +80,5 @@ def use_proxy(request):
       error_msg = str(err_msg).replace(": "," (") + ")."
     print settings.print_critical_msg(error_msg)
     raise SystemExit()
+
+# eof 
