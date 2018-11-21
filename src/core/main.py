@@ -224,6 +224,9 @@ def init_request(url):
   if settings.VERBOSITY_LEVEL >= 1:
     info_msg = "Creating HTTP requests opener object."
     print settings.print_info_msg(info_msg) 
+  # Check for URL redirection
+  if not menu.options.ignore_redirects:
+    url = redirection.do_check(url)
   # Load tamper scripts
   if menu.options.tamper:
     checks.tamper_scripts()
@@ -424,7 +427,9 @@ def main(filename, url):
   
     # Check if defined "--url" or "-m" option.
     if url:
-
+      # Check for URL redirection
+      if not menu.options.ignore_redirects:
+        url = redirection.do_check(url)
       # Load the crawler
       if menu.options.crawldepth > 0 or menu.options.sitemap_url:
         if menu.options.crawldepth > 0:
