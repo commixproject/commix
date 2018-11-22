@@ -40,55 +40,52 @@ def request(url):
     soup = BeautifulSoup(response)
     return soup
   except urllib2.URLError, e:
-    err_msg = "Unable to connect to the target URL "
-    try:
-      err_msg += " (" + str(e.args[0]).split("] ")[1] + ")."
-    except IndexError:
-      err_msg += "."
-    print settings.print_critical_msg(err_msg)
-    raise SystemExit
+    pass
 
 """
 Check for URLs in sitemap.xml.
 """
 def sitemap(url):
-  if not url.endswith(".xml"):
-    url = urlparse.urljoin(url, "/sitemap.xml")
   try:
-    soup = request(url)
     href_list = []
+    if not url.endswith(".xml"):
+      url = urlparse.urljoin(url, "/sitemap.xml")
+    soup = request(url)
     for match in soup.findAll("loc"):
-        href_list.append(match.text)
-    return href_list  
+      href_list.append(match.text)
   except:
     warn_msg = "The 'sitemap.xml' not found."
     print settings.print_warning_msg(warn_msg) 
-    return ""
+  return href_list
 
 """
 Grab the crawled hrefs.
 """
 def crawling(url):
-  soup = request(url)
-  href_list = []
-  for tag in soup.findAll('a', href=True):
-    tag['href'] = urlparse.urljoin(url, tag['href'])
-    o = urlparse.urlparse(url)
-    if o.netloc in tag['href'] :
-      href_list.append(tag['href']) 
-  return href_list    
- 
+  try:
+    href_list = []
+    soup = request(url)
+    for tag in soup.findAll('a', href=True):
+      tag['href'] = urlparse.urljoin(url, tag['href'])
+      o = urlparse.urlparse(url)
+      if o.netloc in tag['href'] :
+        href_list.append(tag['href']) 
+    return href_list
+  except:
+    pass
+
 """
 The crawing process.
 """
 def do_process(url):
-  crawled_href = crawling(url)
   if settings.DEFAULT_CRAWLDEPTH_LEVEL == 1:
-    return crawled_href
+    crawled_href = crawling(url)
   else:
-    for url in crawled_href:
-      crawled_href = crawling(url)
-      return crawled_href
+    crawled_href = []
+    for url in crawling(url):
+      crawled_href.append(crawling(url)) 
+    crawled_href = list(set([item for sublist in crawled_href for item in sublist]))
+  return crawled_href
 
 """
 The main crawler.
@@ -103,13 +100,13 @@ def crawler(url):
     if not menu.options.sitemap_url:
       if not menu.options.batch:
         question_msg = "Do you want to check target for "
-        question_msg += "the existence of 'sitemap.xml'? [Y/n] > "
+        question_msg += "the existence of site's sitemap(.xml)? [y/N] > "
         sys.stdout.write(settings.print_question_msg(question_msg))
         sitemap_check = sys.stdin.readline().replace("\n","").lower()
       else:
         sitemap_check = ""
       if len(sitemap_check) == 0:
-         sitemap_check = "y"
+         sitemap_check = "n"
       if sitemap_check in settings.CHOICE_YES:
         sitemap_check = True
         break
@@ -154,10 +151,8 @@ def crawler(url):
             err_msg = "'" + sitemap_check + "' is not a valid answer."  
             print settings.print_error_msg(err_msg)
             pass
-
-  if not sitemap_check:
+  else:
     output_href = do_process(url)
-
   info_msg = "Checking "
   if sitemap_check:
     info_msg += "targets's sitemap.xml "
@@ -167,13 +162,15 @@ def crawler(url):
   succeed_banner = True
   valid_url_found = False
   try:
+    url_num = 0
     for check_url in output_href:
       # Check for usable URL with GET parameters
       if re.search(settings.GET_PARAMETERS_REGEX, check_url):
         valid_url_found = True
+        url_num += 1
         if succeed_banner:
           print "[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]"
-        print settings.print_success_msg(check_url)
+        print settings.print_success_msg("URL " + str(url_num) + " - " + check_url)
         if not menu.options.batch:
           question_msg = "Do you want to use this URL to perform tests? [Y/n] > "
           sys.stdout.write(settings.print_question_msg(question_msg))
@@ -185,15 +182,17 @@ def crawler(url):
         if use_url in settings.CHOICE_YES:
           return check_url
         elif use_url in settings.CHOICE_NO:
+          info_msg = "Skipping '" + check_url + "'.\n"
+          sys.stdout.write(settings.print_info_msg(info_msg))
           succeed_banner = False
           pass 
-        elif gotshell in settings.CHOICE_QUIT:
+        elif use_url in settings.CHOICE_QUIT:
           raise SystemExit()
+    raise SystemExit()
   except TypeError:
     pass
-
   if not valid_url_found:
     print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
-  return url
+  raise SystemExit()
 
 # eof

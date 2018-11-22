@@ -1,4 +1,5 @@
 ## Version 2.7 (upcoming)
+* Revised: Minor improvements regarding crawler.
 * Revised: Minor update of redirection mechanism.
 * Revised: Minor improvement regarding identifying the target web server.
 * Revised: Minor improvement regarding identifying corrupted .pyc file(s).
