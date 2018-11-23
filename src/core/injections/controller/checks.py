@@ -48,6 +48,19 @@ def ignore_google_analytics_cookie(cookie):
     return True
 
 """
+Fix for %0a, %0d%0a separators
+"""
+def newline_fixation(payload):
+  payload = urllib.unquote(payload)
+  if "\n" in payload:
+    _ = payload.find("\n") + 1
+    payload = urllib.quote(payload[:_]) + payload[_:]
+  elif "\r\n" in payload:
+    _ = payload.find("\r\n") + 1
+    payload = urllib.quote(payload[:_]) + payload[_:]  
+  return payload
+
+"""
 Returns header value ignoring the letter case
 """
 def get_header(headers, key):

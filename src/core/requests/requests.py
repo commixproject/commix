@@ -238,13 +238,7 @@ def cookie_injection(url, vuln_parameter, payload):
       request = urllib2.Request(url)
     #Check if defined extra headers.
     headers.do_check(request)
-    # Fix for %0a, %0d%0a separators
-    if "\n" in payload:
-      _ = payload.find("\n") + 1
-      payload = urllib.quote(payload[:_]) + payload[_:]
-    elif "\r\n" in payload:
-      _ = payload.find("\r\n") + 1
-      payload = urllib.quote(payload[:_]) + payload[_:]  
+    payload = checks.newline_fixation(payload)
     request.add_header('Cookie', menu.options.cookie.replace(settings.INJECT_TAG, payload))
     try:
       headers.check_http_traffic(request)
@@ -372,14 +366,7 @@ def user_agent_injection(url, vuln_parameter, payload):
       request = urllib2.Request(url)
     #Check if defined extra headers.
     headers.do_check(request)
-    payload = urllib.unquote(payload)
-    # Fix for %0a, %0d%0a separators
-    if "\n" in payload:
-      _ = payload.find("\n") + 1
-      payload = urllib.quote(payload[:_]) + payload[_:]
-    elif "\r\n" in payload:
-      _ = payload.find("\r\n") + 1
-      payload = urllib.quote(payload[:_]) + payload[_:]   
+    payload = checks.newline_fixation(payload)
     request.add_header('User-Agent', payload)
     try:
       headers.check_http_traffic(request)
@@ -511,14 +498,7 @@ def referer_injection(url, vuln_parameter, payload):
       request = urllib2.Request(url)
     #Check if defined extra headers.
     headers.do_check(request)
-    payload = urllib.unquote(payload)
-    # Fix for %0a, %0d%0a separators
-    if "\n" in payload:
-      _ = payload.find("\n") + 1
-      payload = urllib.quote(payload[:_]) + payload[_:]
-    elif "\r\n" in payload:
-      _ = payload.find("\r\n") + 1
-      payload = urllib.quote(payload[:_]) + payload[_:]   
+    payload = checks.newline_fixation(payload)
     request.add_header('Referer', payload)
     try:
       headers.check_http_traffic(request)
@@ -653,14 +633,7 @@ def host_injection(url, vuln_parameter, payload):
       request = urllib2.Request(url)
     #Check if defined extra headers.
     headers.do_check(request)
-    payload = urllib.unquote(payload)
-    # Fix for %0a, %0d%0a separators
-    if "\n" in payload:
-      _ = payload.find("\n") + 1
-      payload = urllib.quote(payload[:_]) + payload[_:]
-    elif "\r\n" in payload:
-      _ = payload.find("\r\n") + 1
-      payload = urllib.quote(payload[:_]) + payload[_:]   
+    payload = checks.newline_fixation(payload)  
     request.add_header('Host', payload)
     try:
       headers.check_http_traffic(request)
@@ -794,14 +767,7 @@ def custom_header_injection(url, vuln_parameter, payload):
       request = urllib2.Request(url)
     #Check if defined extra headers.
     headers.do_check(request)
-    payload = urllib.unquote(payload)
-    # Fix for %0a, %0d%0a separators
-    if "\n" in payload:
-      _ = payload.find("\n") + 1
-      payload = urllib.quote(payload[:_]) + payload[_:]
-    elif "\r\n" in payload:
-      _ = payload.find("\r\n") + 1
-      payload = urllib.quote(payload[:_]) + payload[_:]   
+    payload = checks.newline_fixation(payload) 
     request.add_header(settings.CUSTOM_HEADER_NAME, payload)
     try:
       headers.check_http_traffic(request)
