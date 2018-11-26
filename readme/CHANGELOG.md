@@ -1,4 +1,5 @@
 ## Version 2.7 (upcoming)
+* Added: A list of extensions to exclude from crawling.
 * Revised: Minor improvements regarding crawler.
 * Revised: Minor update of redirection mechanism.
 * Revised: Minor improvement regarding identifying the target web server.
