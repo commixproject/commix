@@ -92,10 +92,50 @@ def do_process(url):
 The main crawler.
 """
 def crawler(url):
+  if menu.options.crawldepth > 0:
+    menu.options.DEFAULT_CRAWLDEPTH_LEVEL = menu.options.crawldepth
   if not menu.options.sitemap_url:
+    if menu.options.DEFAULT_CRAWLDEPTH_LEVEL > 2:
+      err_msg = "Depth level '" + str(menu.options.DEFAULT_CRAWLDEPTH_LEVEL) + "' is not a valid."  
+      print settings.print_error_msg(err_msg)
+      raise SystemExit()
     info_msg = "Starting crawler and searching for "
     info_msg += "links with depth " + str(menu.options.DEFAULT_CRAWLDEPTH_LEVEL) + "." 
     print settings.print_info_msg(info_msg)
+  else:
+    while True:
+      if not menu.options.batch:
+        question_msg = "Do you want to change the crawling depth level? [Y/n] > "
+        sys.stdout.write(settings.print_question_msg(question_msg))
+        change_depth_level = sys.stdin.readline().replace("\n","").lower()
+      else:
+        change_depth_level = ""
+      if len(change_depth_level) == 0:
+         change_depth_level = "y"
+      if change_depth_level in settings.CHOICE_YES or change_depth_level in settings.CHOICE_NO:
+        break  
+      elif change_depth_level in settings.CHOICE_QUIT:
+        raise SystemExit()
+      else:
+        err_msg = "'" + change_depth_level + "' is not a valid answer."  
+        print settings.print_error_msg(err_msg)
+        pass
+    # Change the crawling depth level.
+    if change_depth_level in settings.CHOICE_YES:
+      while True:
+        question_msg = "Please enter the crawling depth level (1-2) > "
+        sys.stdout.write(settings.print_question_msg(question_msg))
+        depth_level = sys.stdin.readline().replace("\n","").lower()
+        if len(depth_level) == 0:
+          depth_level = 1
+          break
+        elif str(depth_level) != "1" and str(depth_level) != "2":
+          err_msg = "Depth level '" + depth_level + "' is not a valid answer."  
+          print settings.print_error_msg(err_msg)
+          pass
+        else: 
+          menu.options.DEFAULT_CRAWLDEPTH_LEVEL = depth_level
+          break
 
   while True:
     if not menu.options.sitemap_url:

@@ -29,7 +29,7 @@ import importlib
 
 from src.utils import menu
 from src.utils import settings
-
+from src.utils import simple_http_server
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 # Ignoring the anti-CSRF parameter(s).
@@ -1228,5 +1228,123 @@ def generate_char_pool(num_of_chars):
       char_pool = range(96, 122) + range(65, 90)
     char_pool = char_pool + range(48, 57) + range(32, 48) + range(90, 96)  + range(57, 65)  + range(122, 127)  
   return char_pool
+
+"""
+Check if defined "--file-upload" option.
+"""
+def file_upload():
+  if not re.match(settings.VALID_URL_FORMAT, menu.options.file_upload):
+    # Check if not defined URL for upload.
+    while True:
+      if not menu.options.batch:
+        question_msg = "Do you want to enable an HTTP server? [Y/n] > "
+        sys.stdout.write(settings.print_question_msg(question_msg))
+        enable_HTTP_server = sys.stdin.readline().replace("\n","").lower()
+      else:
+        enable_HTTP_server = ""
+      if len(enable_HTTP_server) == 0:
+         enable_HTTP_server = "y"              
+      if enable_HTTP_server in settings.CHOICE_YES:
+
+        # Check if file exists
+        if not os.path.isfile(menu.options.file_upload):
+          err_msg = "The '" + menu.options.file_upload + "' file, does not exist."
+          sys.stdout.write(settings.print_critical_msg(err_msg) + "\n")
+          raise SystemExit()
+
+        # Setting the local HTTP server.
+        if settings.LOCAL_HTTP_IP == None:
+          while True:
+            question_msg = "Please enter your interface IP address > "
+            sys.stdout.write(settings.print_question_msg(question_msg))
+            ip_addr = sys.stdin.readline().replace("\n","").lower()
+
+            # check if IP address is valid
+            ip_check = simple_http_server.is_valid_ipv4(ip_addr)
+            if ip_check == False:
+              err_msg = "The provided IP address seems not valid."  
+              print settings.print_error_msg(err_msg)
+              pass
+            else:
+              settings.LOCAL_HTTP_IP = ip_addr
+              break
+
+        # Check for invalid HTTP server's port.
+        if settings.LOCAL_HTTP_PORT < 1 or settings.LOCAL_HTTP_PORT > 65535:
+          err_msg = "Invalid HTTP server's port (" + str(settings.LOCAL_HTTP_PORT) + ")." 
+          print settings.print_critical_msg(err_msg)
+          raise SystemExit()
+        
+        http_server = "http://" + str(settings.LOCAL_HTTP_IP) + ":" + str(settings.LOCAL_HTTP_PORT) + "/"
+        info_msg = "Setting the HTTP server on '" + http_server + "'. "  
+        print settings.print_info_msg(info_msg)
+        menu.options.file_upload = http_server + menu.options.file_upload
+        simple_http_server.main()
+        break
+
+      elif enable_HTTP_server in settings.CHOICE_NO:
+        if not re.match(settings.VALID_URL_FORMAT, menu.options.file_upload):
+          err_msg = "The '" + menu.options.file_upload + "' is not a valid URL. "
+          print settings.print_critical_msg(err_msg)
+          raise SystemExit()
+        break  
+      elif enable_HTTP_server in settings.CHOICE_QUIT:
+        raise SystemExit()
+      else:
+        err_msg = "'" + enable_HTTP_server + "' is not a valid answer."  
+        print settings.print_error_msg(err_msg)
+        pass
+
+"""
+Check for wrong flags
+"""
+def check_wrong_flags():
+  if settings.TARGET_OS == "win":
+    if menu.options.is_root :
+      warn_msg = "Swithing '--is-root' to '--is-admin' because the "
+      warn_msg += "target has been identified as windows."
+      print settings.print_warning_msg(warn_msg)
+    if menu.options.passwords:
+      warn_msg = "The '--passwords' option, is not yet available for Windows targets."
+      print settings.print_warning_msg(warn_msg)  
+    if menu.options.file_upload :
+      warn_msg = "The '--file-upload' option, is not yet available for windows targets. "
+      warn_msg += "Instead, use the '--file-write' option."
+      print settings.print_warning_msg(warn_msg)  
+      raise SystemExit()
+  else: 
+    if menu.options.is_admin : 
+      warn_msg = "Swithing the '--is-admin' to '--is-root' because "
+      warn_msg += "the target has been identified as unix-like. "
+      print settings.print_warning_msg(warn_msg)
+
+"""
+Define python working dir (for windows targets)
+"""
+def define_py_working_dir():
+  if settings.TARGET_OS == "win" and menu.options.alter_shell:
+    while True:
+      if not menu.options.batch:
+        question_msg = "Do you want to use '" + settings.WIN_PYTHON_DIR 
+        question_msg += "' as Python working directory on the target host? [Y/n] > "
+        sys.stdout.write(settings.print_question_msg(question_msg))
+        python_dir = sys.stdin.readline().replace("\n","").lower()
+      else:
+        python_dir = ""  
+      if len(python_dir) == 0:
+         python_dir = "y" 
+      if python_dir in settings.CHOICE_YES:
+        break
+      elif python_dir in settings.CHOICE_NO:
+        question_msg = "Please provide a custom working directory for Python (e.g. '" 
+        question_msg += settings.WIN_PYTHON_DIR + "') > "
+        sys.stdout.write(settings.print_question_msg(question_msg))
+        settings.WIN_PYTHON_DIR = sys.stdin.readline().replace("\n","").lower()
+        break
+      else:
+        err_msg = "'" + python_dir + "' is not a valid answer."  
+        print settings.print_error_msg(err_msg)
+        pass
+    settings.USER_DEFINED_PYTHON_DIR = True
 
 # eof

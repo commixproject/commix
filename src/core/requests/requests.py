@@ -13,13 +13,15 @@ the Free Software Foundation, either version 3 of the License, or
 For more see the file 'readme/COPYING' for copying permission.
 """
 
+import re
 import sys
 import time
 import socket
 import urllib
 import urllib2
 import urlparse
-
+from os.path import splitext
+from urlparse import urlparse
 from src.utils import menu
 from src.utils import settings
 from src.thirdparty.colorama import Fore, Back, Style, init
@@ -933,7 +935,167 @@ def encoding_detection(response):
       print settings.print_critical_msg(err_msg)
       raise SystemExit()
 
-# Perform target page reload (if it is required).
+"""
+Procedure for target application identification
+"""
+def application_identification(server_banner, url):
+  found_application_extension = False
+  if settings.VERBOSITY_LEVEL >= 1:
+    info_msg = "Identifying the target application ... " 
+    sys.stdout.write(settings.print_info_msg(info_msg))
+    sys.stdout.flush()
+  root, application_extension = splitext(urlparse(url).path)
+  settings.TARGET_APPLICATION = application_extension[1:].upper()
+  
+  if settings.TARGET_APPLICATION:
+    found_application_extension = True
+    if settings.VERBOSITY_LEVEL >= 1:
+      print "[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]"           
+      success_msg = "The target application was identified as " 
+      success_msg += settings.TARGET_APPLICATION + Style.RESET_ALL + "."
+      print settings.print_success_msg(success_msg)
+
+    # Check for unsupported target applications
+    for i in range(0,len(settings.UNSUPPORTED_TARGET_APPLICATION)):
+      if settings.TARGET_APPLICATION.lower() in settings.UNSUPPORTED_TARGET_APPLICATION[i].lower():
+        err_msg = settings.TARGET_APPLICATION + " exploitation is not yet supported."  
+        print settings.print_critical_msg(err_msg)
+        raise SystemExit()
+
+  if not found_application_extension:
+    if settings.VERBOSITY_LEVEL >= 1:
+      print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
+    warn_msg = "Heuristics have failed to identify target application."
+    print settings.print_warning_msg(warn_msg)
+
+"""
+Procedure for target server's identification.
+"""
+def server_identification(server_banner):
+  found_server_banner = False
+  if settings.VERBOSITY_LEVEL >= 1:
+    info_msg = "Identifying the target server... " 
+    sys.stdout.write(settings.print_info_msg(info_msg))
+    sys.stdout.flush()
+
+  for i in range(0,len(settings.SERVER_BANNERS)):
+    match = re.search(settings.SERVER_BANNERS[i].lower(), server_banner.lower())
+    if match:
+      if settings.VERBOSITY_LEVEL >= 1:
+        print "[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]"
+      if settings.VERBOSITY_LEVEL >= 1:
+        success_msg = "The target server was identified as " 
+        success_msg += server_banner + Style.RESET_ALL + "."
+        print settings.print_success_msg(success_msg)
+      settings.SERVER_BANNER = match.group(0)
+      found_server_banner = True
+      # Set up default root paths
+      if "apache" in settings.SERVER_BANNER.lower():
+        if settings.TARGET_OS == "win":
+          settings.WEB_ROOT = "\\htdocs"
+        else:
+          settings.WEB_ROOT = "/var/www"
+      elif "nginx" in settings.SERVER_BANNER.lower(): 
+        settings.WEB_ROOT = "/usr/share/nginx"
+      elif "microsoft-iis" in settings.SERVER_BANNER.lower():
+        settings.WEB_ROOT = "\\inetpub\\wwwroot"
+      break
+  else:
+    if settings.VERBOSITY_LEVEL >= 1:
+      print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
+      warn_msg = "The server which was identified as '" 
+      warn_msg += server_banner + "' seems unknown."
+      print settings.print_warning_msg(warn_msg)
+
+"""
+Procedure for target server's operating system identification.
+"""
+def check_target_os(server_banner):
+
+  found_os_server = False
+  if menu.options.os and checks.user_defined_os():
+    user_defined_os = settings.TARGET_OS
+
+  if settings.VERBOSITY_LEVEL >= 1:
+    info_msg = "Identifying the target operating system... " 
+    sys.stdout.write(settings.print_info_msg(info_msg))
+    sys.stdout.flush()
+
+  # Procedure for target OS identification.
+  for i in range(0,len(settings.SERVER_OS_BANNERS)):
+    match = re.search(settings.SERVER_OS_BANNERS[i].lower(), server_banner.lower())
+    if match:
+      found_os_server = True
+      settings.TARGET_OS = match.group(0)
+      match = re.search(r"microsoft|win", settings.TARGET_OS)
+      if match:
+        identified_os = "Windows"
+        if menu.options.os and user_defined_os != "win":
+          if not checks.identified_os():
+            settings.TARGET_OS = user_defined_os
+
+        settings.TARGET_OS = identified_os[:3].lower()
+        if menu.options.shellshock:
+          err_msg = "The shellshock module is not available for " 
+          err_msg += identified_os + " targets."
+          print settings.print_critical_msg(err_msg)
+          raise SystemExit()
+      else:
+        identified_os = "Unix-like (" + settings.TARGET_OS + ")"
+        if menu.options.os and user_defined_os == "win":
+          if not checks.identified_os():
+            settings.TARGET_OS = user_defined_os
+
+  if settings.VERBOSITY_LEVEL >= 1 :
+    if found_os_server:
+      print "[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]"
+      success_msg = "The target operating system appears to be " 
+      success_msg += identified_os.title() + Style.RESET_ALL + "."
+      print settings.print_success_msg(success_msg)
+    else:
+      print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
+      warn_msg = "Heuristics have failed to identify server's operating system."
+      print settings.print_warning_msg(warn_msg)
+
+  if found_os_server == False and not menu.options.os:
+    # If "--shellshock" option is provided then,
+    # by default is a Linux/Unix operating system.
+    if menu.options.shellshock:
+      pass 
+    else:
+      if menu.options.batch:
+        if not settings.CHECK_BOTH_OS:
+          settings.CHECK_BOTH_OS = True
+          check_type = "unix-based"
+        elif settings.CHECK_BOTH_OS:
+          settings.TARGET_OS = "win"
+          settings.CHECK_BOTH_OS = False
+          settings.PERFORM_BASIC_SCANS = True
+          check_type = "windows-based"
+        info_msg = "Setting the " + check_type + " payloads."
+        print settings.print_info_msg(info_msg)
+      else:
+        while True:
+          question_msg = "Do you recognise the server's operating system? "
+          question_msg += "[(W)indows/(U)nix/(q)uit] > "
+          sys.stdout.write(settings.print_question_msg(question_msg))
+          got_os = sys.stdin.readline().replace("\n","").lower()
+          if got_os.lower() in settings.CHOICE_OS :
+            if got_os.lower() == "w":
+              settings.TARGET_OS = "win"
+              break
+            elif got_os.lower() == "u":
+              break
+            elif got_os.lower() == "q":
+              raise SystemExit()
+          else:
+            err_msg = "'" + got_os + "' is not a valid answer."  
+            print settings.print_error_msg(err_msg)
+            pass
+
+"""
+Perform target page reload (if it is required).
+"""
 def url_reload(url, timesec):
   if timesec <= "5":
     timesec = 5
