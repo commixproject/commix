@@ -86,14 +86,14 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
       try:
         #Open the static file requested and send it
-        f = open(curdir + sep + self.path) 
+        f = open(self.path) 
         self.send_response(200)
         self.end_headers()
         self.wfile.write(f.read())
         f.close()
 
       except IOError:
-        self.wfile.write(settings.APPLICATION + "/v" + settings.VERSION)
+        self.wfile.write(settings.APPLICATION + " " + settings.VERSION + " (https://commixproject.com)")
       
     def log_message(self, format, *args):
       return

@@ -1,4 +1,5 @@
 ## Version 2.7 (upcoming)
+* Fixed: Minor improvent regarding local HTTP server (for `--file-upload` option).
 * Added: A list of extensions to exclude from crawling.
 * Revised: Minor improvements regarding crawler.
 * Revised: Minor update of redirection mechanism.
