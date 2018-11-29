@@ -25,7 +25,6 @@ import base64
 import urllib
 import urlparse
 import traceback
-import importlib
 
 from src.utils import menu
 from src.utils import settings
@@ -786,13 +785,14 @@ def tamper_scripts():
       import_script = str(settings.TAMPER_SCRIPTS_PATH + script + ".py").replace("/",".").split(".py")[0]
       print settings.SUB_CONTENT_SIGN + import_script.split(".")[3]
       try:
-        module = importlib.import_module(import_script)
+        module = __import__(import_script, fromlist=[None])
         if not hasattr(module, "__tamper__"):
           err_msg = "Missing variable '__tamper__' "
           err_msg += "in tamper script '" + import_script.split(".")[0] + "'."
           print settings.print_critical_msg(err_msg)
           raise SystemExit()
-      except ImportError:
+      except ImportError, err_msg:
+        print settings.print_error_msg(str(err_msg) + ".")
         pass
 
     # Using too many tamper scripts is usually not a good idea. :P
