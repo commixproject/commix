@@ -1,4 +1,5 @@
 ## Version 2.7 (upcoming)
+* Updated: With each commix run end users are obligated to agree with the "Legal disclaimer" prelude message.
 * Fixed: Minor improvent regarding local HTTP server (for `--file-upload` option).
 * Added: A list of extensions to exclude from crawling.
 * Revised: Minor improvements regarding crawler.

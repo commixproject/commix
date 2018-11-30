@@ -15,7 +15,12 @@
 
 ## Legal Disclaimer
 
-Usage of commix for attacking targets without prior mutual consent is illegal. It is the end user's responsibility to obey all applicable local, state and federal laws. Developers assume no liability and are not responsible for any misuse or damage caused by this program.
+**With each commix run end users are obligated to agree** with the following prelude message:
+```
+(!) Legal disclaimer: Usage of commix for attacking targets without prior mutual consent is illegal. 
+It is the end user's responsibility to obey all applicable local, state and federal laws. 
+Developers assume no liability and are not responsible for any misuse or damage caused by this program.
+```
 
 ## Requirements
 

@@ -26,19 +26,20 @@ from socket import error as socket_error
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 # Status Signs
-SUCCESS_SIGN =  "[" + Fore.GREEN + Style.BRIGHT + "+" + Style.RESET_ALL + "] "
-INFO_SIGN =  Style.RESET_ALL + "[" + Fore.BLUE + Style.BRIGHT + "*" + Style.RESET_ALL + "] "
-QUESTION_SIGN =  Style.RESET_ALL + "[" + Style.BRIGHT + Fore.MAGENTA + "?" + Style.RESET_ALL + "] "
-WARNING_SIGN =  "[" + Fore.YELLOW  + "!" + Style.RESET_ALL + "] " + Fore.YELLOW + "Warning: "
-WARNING_BOLD_SIGN =  "[" + Style.BRIGHT + Fore.YELLOW  + "!" + Style.RESET_ALL + "] " + Style.BRIGHT + Fore.YELLOW + "Warning: "
-ERROR_SIGN =  "[" + Fore.RED + Style.BRIGHT + "x" + Style.RESET_ALL  + "] " + Fore.RED + "Error: "
-CRITICAL_SIGN =  Back.RED + "[x] Critical: "
-PAYLOAD_SIGN =  "    |_ " + Fore.CYAN
-TRAFFIC_SIGN =  "    |_ " + Back.MAGENTA
+SUCCESS_SIGN = "[" + Fore.GREEN + Style.BRIGHT + "+" + Style.RESET_ALL + "] "
+INFO_SIGN = Style.RESET_ALL + "[" + Fore.BLUE + Style.BRIGHT + "*" + Style.RESET_ALL + "] "
+QUESTION_SIGN = Style.RESET_ALL + "[" + Style.BRIGHT + Fore.MAGENTA + "?" + Style.RESET_ALL + "] "
+WARNING_SIGN = "[" + Fore.YELLOW  + "!" + Style.RESET_ALL + "] " + Fore.YELLOW + "Warning: "
+WARNING_BOLD_SIGN = "[" + Style.BRIGHT + Fore.YELLOW  + "!" + Style.RESET_ALL + "] " + Style.BRIGHT + Fore.YELLOW + "Warning: "
+LEGAL_DISCLAIMER = "(" + Style.BRIGHT + "!" + Style.RESET_ALL + ") " + "Legal disclaimer: "
+ERROR_SIGN = "[" + Fore.RED + Style.BRIGHT + "x" + Style.RESET_ALL  + "] " + Fore.RED + "Error: "
+CRITICAL_SIGN = Back.RED + "[x] Critical: "
+PAYLOAD_SIGN = "    |_ " + Fore.CYAN
+TRAFFIC_SIGN = "    |_ " + Back.MAGENTA
 HTTP_CONTENT_SIGN = Fore.MAGENTA
-CHECK_SIGN =  "[" + Fore.BLUE + Style.BRIGHT + "*" + Style.RESET_ALL  + "] " + "Checking "
-SUB_CONTENT_SIGN =  "    [" + Fore.GREY + Style.BRIGHT + "~" + Style.RESET_ALL  + "] "
-ABORTION_SIGN =  ERROR_SIGN 
+CHECK_SIGN = "[" + Fore.BLUE + Style.BRIGHT + "*" + Style.RESET_ALL  + "] " + "Checking "
+SUB_CONTENT_SIGN = "    [" + Fore.GREY + Style.BRIGHT + "~" + Style.RESET_ALL  + "] "
+ABORTION_SIGN = ERROR_SIGN 
 
 # Print error message
 def print_error_msg(err_msg):
@@ -57,12 +58,17 @@ def print_abort_msg(abort_msg):
 
 # Print warning message
 def print_warning_msg(warn_msg):
-  result = WARNING_SIGN + str(warn_msg)  + Style.RESET_ALL
+  result = WARNING_SIGN + str(warn_msg) + Style.RESET_ALL
   return result
 
 # Print warning message
 def print_bold_warning_msg(warn_msg):
-  result = WARNING_BOLD_SIGN + str(warn_msg)  + Style.RESET_ALL
+  result = WARNING_BOLD_SIGN + str(warn_msg) + Style.RESET_ALL
+  return result
+
+# Print legal disclaimer message
+def print_legal_disclaimer_msg(legal_disclaimer_msg):
+  result = LEGAL_DISCLAIMER + str(legal_disclaimer_msg) + Style.RESET_ALL
   return result
 
 # Print information message
@@ -151,7 +157,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "2.7.43"
+VERSION_NUM = "2.7.44"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"
@@ -164,6 +170,11 @@ APPLICATION_TWITTER = "@commixproject"
 
 # Default User-Agent
 DEFAULT_USER_AGENT = APPLICATION + "/" + VERSION + " (" + APPLICATION_URL + ")"
+
+# Legal Disclaimer
+LEGAL_DISCLAIMER_MSG = "Usage of " + APPLICATION + " for attacking targets without prior mutual consent is illegal. " + \
+                       "It is the end user's responsibility to obey all applicable local, state and federal laws. " + \
+                       "Developers assume no liability and are not responsible for any misuse or damage caused by this program.\n"
 
 # Inject Tag
 INJECT_TAG = "INJECT_HERE"

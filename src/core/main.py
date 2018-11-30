@@ -688,6 +688,9 @@ def main(filename, url):
     logs.print_logs_notification(filename, url)
 
 try:
+
+  print settings.print_legal_disclaimer_msg(settings.LEGAL_DISCLAIMER_MSG)
+
   if not menu.options.batch:
     settings.OS_CHECKS_NUM = 1
   for os_checks_num in range(0, int(settings.OS_CHECKS_NUM)):
