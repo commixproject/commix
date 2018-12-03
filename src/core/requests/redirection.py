@@ -84,10 +84,10 @@ def do_check(url):
                   urllib2.HTTPErrorProcessor, 
                   urllib2.HTTPSHandler]:
       opener.add_handler(handler())   
+
   try:
     response = opener.open(Request(url))
     redirected_url = response.geturl()
-
     if redirected_url != url:
       while True:
         if not menu.options.batch:
@@ -112,6 +112,10 @@ def do_check(url):
     else:
       return url
 
+  except AttributeError:
+    pass
+  
+  # Raise exception regarding urllib2 HTTPError
   except urllib2.HTTPError, err:
     err_msg = str(err).replace(": "," (")
     print settings.print_critical_msg(err_msg + ").")
