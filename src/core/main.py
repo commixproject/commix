@@ -688,7 +688,15 @@ def main(filename, url):
     logs.print_logs_notification(filename, url)
 
 try:
+  # Check python version number.
+  version.python_version()
 
+  # Check if defined "--version" option.
+  if menu.options.version:
+    version.show_version()
+    raise SystemExit()
+
+  # Print the legal disclaimer msg.
   print settings.print_legal_disclaimer_msg(settings.LEGAL_DISCLAIMER_MSG)
 
   if not menu.options.batch:
@@ -699,14 +707,6 @@ try:
     if menu.options.list_tampers:
       checks.list_tamper_scripts()
       raise SystemExit()
-
-    # Check if defined "--version" option.
-    if menu.options.version:
-      version.show_version()
-      raise SystemExit()
-
-    # Check python version number.
-    version.python_version()
 
     if readline_error :
       checks.no_readline_module()
