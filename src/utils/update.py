@@ -34,18 +34,13 @@ Returns abbreviated commit hash number as retrieved with "git rev-parse --short 
 """
 def revision_num():
   try:
-    if menu.options.verbose:
-      start = 0
-      end = 0
-      start = time.time()
-      if menu.options.verbose:
-        print Fore.MAGENTA
-      subprocess.Popen("git reset --hard HEAD && git clean -fd && git pull", shell=True).wait()
-    else:
-      process = subprocess.Popen("git reset --hard HEAD && git clean -fd && git pull", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-      stdout, _ = process.communicate()
-      info_msg = ('Updated to', 'Already at')["Already" in stdout]
+    start = 0
+    end = 0
+    start = time.time()
+    process = subprocess.Popen("git reset --hard HEAD && git clean -fd && git pull", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    stdout, _ = process.communicate()
     if not menu.options.verbose:
+      info_msg = ('Updated to', 'Already at')["Already" in stdout]
       process = subprocess.Popen("git rev-parse --verify HEAD", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     # Delete *.pyc files.
     subprocess.Popen("find . -name \"*.pyc\" -delete", shell=True).wait()
@@ -58,7 +53,7 @@ def revision_num():
       info_msg += " the latest revision '" + str(rev_num[:7]) + "'."
       print "[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]"
     else:
-      sys.stdout.write(Style.RESET_ALL)
+      sys.stdout.write(Fore.MAGENTA + "\n" + stdout + Style.RESET_ALL)
       end  = time.time()
       how_long = int(end - start)
       info_msg = "Finished in " + time.strftime('%H:%M:%S', time.gmtime(how_long)) + "."
