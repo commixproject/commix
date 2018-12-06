@@ -135,3 +135,11 @@ def do_check(url):
     err_msg += "Please check all provided parameters and/or provide missing ones."
     print settings.print_critical_msg(err_msg)
     raise SystemExit() 
+
+  # Raise exception regarding connection aborted.
+  except Exception:
+    err_msg = "Connection aborted."
+    print settings.print_critical_msg(err_msg)
+    raise SystemExit()
+  
+# eof
