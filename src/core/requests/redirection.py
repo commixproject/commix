@@ -123,9 +123,11 @@ def do_check(url):
 
   # The target host seems to be down.
   except urllib2.URLError, err:
-    err_msg = "The host seems to be down! (" 
-    err_msg += str(err.args[0]).split("] ")[1] 
-    err_msg += ")."
+    err_msg = "The host seems to be down"
+    try:
+      err_msg += "(" + str(err.args[0]).split("] ")[1] + ")."
+    except IndexError:
+      err_msg += "."
     print settings.print_critical_msg(err_msg)
     raise SystemExit()
 
