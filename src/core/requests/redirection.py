@@ -114,8 +114,14 @@ def do_check(url):
 
   except AttributeError:
     pass
-  
-  # Raise exception regarding urllib2 HTTPError
+
+  # Raise exception due to ValueError.
+  except ValueError, err:
+    err_msg = str(err).replace(": "," (")
+    print settings.print_critical_msg(err_msg + ").")
+    raise SystemExit()
+
+  # Raise exception regarding urllib2 HTTPError.
   except urllib2.HTTPError, err:
     err_msg = str(err).replace(": "," (")
     print settings.print_critical_msg(err_msg + ").")
