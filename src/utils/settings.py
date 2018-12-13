@@ -157,7 +157,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "2.7.52"
+VERSION_NUM = "2.7.53"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"
@@ -486,12 +486,12 @@ PARAMETER_DELIMITER = "&"
 # Web-page encoding
 ENCODING = ""
 
-# Reference: http://en.wikipedia.org/wiki/ISO/IEC_8859-1
-DEFAULT_ENCODING = "iso-8859-1"
+DEFAULT_ENCODING = "utf-8"
 try:
   unicode(DEFAULT_ENCODING, DEFAULT_ENCODING)
 except LookupError:
-  DEFAULT_ENCODING = "utf8"
+  # Reference: http://en.wikipedia.org/wiki/ISO/IEC_8859-1
+  DEFAULT_ENCODING = "iso-8859-1"
 
 # Character Sets List. 
 # A complete list of the standard encodings Python supports.
