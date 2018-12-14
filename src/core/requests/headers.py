@@ -273,6 +273,10 @@ def check_http_traffic(request):
     print settings.print_critical_msg(str(err_msg))
     raise SystemExit()
 
+  except LookupError, err_msg:
+    print settings.print_critical_msg(str(err_msg))
+    raise SystemExit()
+    
 """
 Check for added headers.
 """
