@@ -72,7 +72,7 @@ The dynamic code evaluation (aka eval-based) technique.
 The "eval-based" injection technique handler.
 """
 def eb_injection_handler(url, timesec, filename, http_request_method):
-
+  shell = False
   counter = 1
   vp_flag = True
   no_result = True

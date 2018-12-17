@@ -199,7 +199,7 @@ def check_tmp_path(url, timesec, filename, http_request_method, url_time_respons
 The "file-based" injection technique handler
 """
 def fb_injection_handler(url, timesec, filename, http_request_method, url_time_response):
-
+  shell = False
   counter = 1
   vp_flag = True
   exit_loops = False

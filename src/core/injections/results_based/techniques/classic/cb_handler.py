@@ -73,7 +73,7 @@ The "classic" technique on result-based OS command injection.
 The "classic" injection technique handler.
 """
 def cb_injection_handler(url, timesec, filename, http_request_method):
-  
+  shell = False
   counter = 1
   vp_flag = True
   no_result = True
