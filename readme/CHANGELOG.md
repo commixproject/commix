@@ -1,4 +1,5 @@
 ## Version 2.7 (upcoming)
+* Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
 * Revised: The suffixes list has been shortly revised.
 * Updated: With each commix run end users are obligated to agree with the "Legal disclaimer" prelude message.
 * Fixed: Minor improvent regarding local HTTP server (for `--file-upload` option).
