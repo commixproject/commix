@@ -1,4 +1,4 @@
-## Version 2.7 (upcoming)
+## Version 2.7 (2018-12-18)
 * Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
 * Revised: The suffixes list has been shortly revised.
 * Updated: With each commix run end users are obligated to agree with the "Legal disclaimer" prelude message.
