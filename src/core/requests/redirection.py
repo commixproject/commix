@@ -26,29 +26,29 @@ def do_check(url):
   [1] https://gist.github.com/FiloSottile/2077115
   """
   class Request(urllib2.Request):
-      def get_method(self):
-          return "GET"
+    def get_method(self):
+        return "GET"
 
   class RedirectHandler(urllib2.HTTPRedirectHandler):
-      """
-      Subclass the HTTPRedirectHandler to make it use our 
-      Request also on the redirected URL
-      """
-      def redirect_request(self, req, fp, code, msg, headers, redirected_url): 
-        if code in (301, 302, 303, 307):
-          redirected_url = redirected_url.replace(' ', '%20') 
-          newheaders = dict((k,v) for k,v in req.headers.items() if k.lower() not in ("content-length", "content-type"))
-          warn_msg = "Got a " + str(code) + " redirection (" + redirected_url + ")."
-          print settings.print_warning_msg(warn_msg)
-          return Request(redirected_url, 
-                             headers = newheaders,
-                             origin_req_host = req.get_origin_req_host(), 
-                             unverifiable = True
-                             ) 
-        else: 
-          err_msg = str(urllib2.HTTPError(req.get_full_url(), code, msg, headers, fp)).replace(": "," (")
-          print settings.print_critical_msg(err_msg + ").")
-          raise SystemExit()
+    """
+    Subclass the HTTPRedirectHandler to make it use our 
+    Request also on the redirected URL
+    """
+    def redirect_request(self, req, fp, code, msg, headers, redirected_url): 
+      if code in (301, 302, 303, 307):
+        redirected_url = redirected_url.replace(' ', '%20') 
+        newheaders = dict((k,v) for k,v in req.headers.items() if k.lower() not in ("content-length", "content-type"))
+        warn_msg = "Got a " + str(code) + " redirection (" + redirected_url + ")."
+        print settings.print_warning_msg(warn_msg)
+        return Request(redirected_url, 
+                           headers = newheaders,
+                           origin_req_host = req.get_origin_req_host(), 
+                           unverifiable = True
+                           ) 
+      else: 
+        err_msg = str(urllib2.HTTPError(req.get_full_url(), code, msg, headers, fp)).replace(": "," (")
+        print settings.print_critical_msg(err_msg + ").")
+        raise SystemExit()
               
   class HTTPMethodFallback(urllib2.BaseHandler):
     """
