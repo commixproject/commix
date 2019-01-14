@@ -85,7 +85,10 @@ def do_process(url):
     crawled_href = []
     for url in crawling(url):
       crawled_href.append(crawling(url)) 
-    crawled_href = list(set([item for sublist in crawled_href for item in sublist]))
+    try:
+      crawled_href = list(set([item for sublist in crawled_href for item in sublist]))
+    except TypeError:
+      pass
   return crawled_href
 
 """
