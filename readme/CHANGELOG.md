@@ -1,3 +1,6 @@
+## Version 2.8 (upcoming)
+* Added: Support for Windows "Python" on "reverse_tcp" shell option. 
+
 ## Version 2.7 (2018-12-18)
 * Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
 * Revised: The suffixes list has been shortly revised.
