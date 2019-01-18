@@ -227,9 +227,6 @@ def init_request(url):
   # Check for URL redirection
   if not menu.options.ignore_redirects:
     url = redirection.do_check(url)
-  # Load tamper scripts
-  if menu.options.tamper:
-    checks.tamper_scripts()
   return request
 
 """
@@ -480,7 +477,9 @@ def main(filename, url):
             found_os_server = checks.user_defined_os()
         except KeyError:
           pass
-
+        # Load tamper scripts
+        if menu.options.tamper:
+          checks.tamper_scripts()
       except urllib2.HTTPError, err_msg:
         # Check the codes of responses
         if str(err_msg.getcode()) == settings.INTERNAL_SERVER_ERROR:
