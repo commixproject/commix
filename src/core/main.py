@@ -745,6 +745,11 @@ try:
         print settings.print_critical_msg(err_msg)
         raise SystemExit()
 
+    if (menu.options.auth_type and not menu.options.auth_cred) or (menu.options.auth_cred and not menu.options.auth_type):
+      err_msg = "You must specify both '--auth-cred' and '--auth-type' parameters."
+      print settings.print_critical_msg(err_msg)
+      raise SystemExit()
+
     # Check if defined "--purge" option.
     if menu.options.purge:
       purge.purge()
