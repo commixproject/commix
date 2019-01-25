@@ -208,11 +208,11 @@ def executed_command(filename, cmd, output):
     pass
 
 """
-Log files cration notification.
+Fetched data logged to text files.
 """
 def logs_notification(filename):
   # Save command history.
-  info_msg = "The results can be found at '" + os.getcwd() + "/" + filename + "'"
+  info_msg = "Fetched data logged to text files under  '" + os.getcwd() + "/" + filename + "'"
   print settings.print_info_msg(info_msg)
 
 """
