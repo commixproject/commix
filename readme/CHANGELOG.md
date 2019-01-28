@@ -1,4 +1,5 @@
 ## Version 2.8 (upcoming)
+* Added: Support for writing crawling results to a temporary file (for eventual further processing with other tools).
 * Added: Support for Windows "Python" on "reverse_tcp" shell option. 
 
 ## Version 2.7 (2018-12-18)

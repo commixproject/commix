@@ -12,18 +12,43 @@ the Free Software Foundation, either version 3 of the License, or
  
 For more see the file 'readme/COPYING' for copying permission.
 """
-
 import re
 import sys
 import urllib
 import urllib2
 import urlparse
+import tempfile
 
 from src.utils import menu
 from src.utils import settings
 from src.core.requests import headers
 from src.thirdparty.colorama import Fore, Back, Style, init
 from src.thirdparty.beautifulsoup.beautifulsoup import BeautifulSoup
+
+def store_crawling():
+  while True:
+    if not menu.options.batch:
+      question_msg = "Do you want to store crawling results to a temporary file "
+      question_msg += "(for eventual further processing with other tools)? [y/N] > "
+      sys.stdout.write(settings.print_question_msg(question_msg))
+      store_crawling = sys.stdin.readline().replace("\n","").lower()
+    else:
+      store_crawling = ""
+    if len(store_crawling) == 0:
+       store_crawling = "n"
+    if store_crawling in settings.CHOICE_YES:
+      filename = tempfile.mkstemp(suffix=".txt")[1]
+      info_msg = "Writing crawling results to a temporary file '" + str(filename) + "'."
+      print settings.print_info_msg(info_msg)
+      return str(filename)
+    elif store_crawling in settings.CHOICE_NO:
+      return None
+    elif store_crawling in settings.CHOICE_QUIT:
+      raise SystemExit()
+    else:
+      err_msg = "'" + store_crawling + "' is not a valid answer."  
+      print settings.print_error_msg(err_msg)
+      pass  
 
 """
 Do a request to target URL.
@@ -197,6 +222,7 @@ def crawler(url):
             pass
   else:
     output_href = do_process(url)
+  filename = store_crawling()
   info_msg = "Checking "
   if sitemap_check:
     info_msg += "targets's sitemap.xml "
@@ -205,8 +231,10 @@ def crawler(url):
   sys.stdout.flush()
   succeed_banner = True
   valid_url_found = False
+
   try:
     url_num = 0
+    valid_urls = []
     for check_url in output_href:
       # Check for usable URL with GET parameters
       if re.search(settings.GET_PARAMETERS_REGEX, check_url):
@@ -215,6 +243,9 @@ def crawler(url):
         if succeed_banner:
           print "[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]"
         print settings.print_success_msg("URL " + str(url_num) + " - " + check_url)
+        if filename is not None:
+          with open(filename, "a") as crawling_results:
+            crawling_results.write(check_url + "\n")
         if not menu.options.batch:
           question_msg = "Do you want to use this URL to perform tests? [Y/n] > "
           sys.stdout.write(settings.print_question_msg(question_msg))
