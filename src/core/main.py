@@ -737,9 +737,12 @@ try:
 
     # Check if defined "--proxy" option.
     if menu.options.proxy:
-      if "://" in menu.options.proxy:
-        settings.PROXY_SCHEME = menu.options.proxy.split("://")[0]
-        menu.options.proxy = menu.options.proxy.split("://")[1]
+      for match in re.finditer(settings.PROXY_REGEX, menu.options.proxy):
+        _, proxy_scheme, proxy_address, proxy_port = match.groups()
+        if proxy_scheme:
+          settings.PROXY_SCHEME = proxy_scheme
+          menu.options.proxy = proxy_address + ":" + proxy_port
+          break
       else:
         err_msg = "Proxy value must be in format '(http|https)://address:port'."
         print settings.print_critical_msg(err_msg)

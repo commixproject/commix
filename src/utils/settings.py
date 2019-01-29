@@ -157,7 +157,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "2.8.13"
+VERSION_NUM = "2.8.14"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"
@@ -175,6 +175,9 @@ DEFAULT_USER_AGENT = APPLICATION + "/" + VERSION + " (" + APPLICATION_URL + ")"
 LEGAL_DISCLAIMER_MSG = "Usage of " + APPLICATION + " for attacking targets without prior mutual consent is illegal. " + \
                        "It is the end user's responsibility to obey all applicable local, state and federal laws. " + \
                        "Developers assume no liability and are not responsible for any misuse or damage caused by this program.\n"
+
+# Proxy
+PROXY_REGEX = r"((http[^:]*)://)?([\w\-.]+):(\d+)"
 
 # Inject Tag
 INJECT_TAG = "INJECT_HERE"
