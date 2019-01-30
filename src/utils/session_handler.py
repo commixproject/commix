@@ -39,6 +39,20 @@ def table_name(url):
   return table_name
 
 """
+Ignore session.
+"""
+def ignore(url):
+  info_msg = "Ignoring the stored session from the session file... "
+  sys.stdout.write(settings.print_info_msg(info_msg))
+  sys.stdout.flush()
+  if os.path.isfile(settings.SESSION_FILE):
+    print "[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]"
+  else:
+    print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
+    err_msg = "The session file does not exist."
+    print settings.print_critical_msg(err_msg)
+
+"""
 Flush session.
 """
 def flush(url):

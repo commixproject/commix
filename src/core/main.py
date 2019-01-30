@@ -331,6 +331,10 @@ def main(filename, url):
         print settings.print_critical_msg(err_msg)
         raise SystemExit
 
+    # Ignore session
+    if menu.options.ignore_session:
+      session_handler.ignore(url)      
+
     # Check provided parameters for tests
     if menu.options.test_parameter or menu.options.skip_parameter:     
       if menu.options.test_parameter != None :
