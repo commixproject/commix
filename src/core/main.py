@@ -331,8 +331,8 @@ def main(filename, url):
         print settings.print_critical_msg(err_msg)
         raise SystemExit
 
-    # Ignore session
     if menu.options.ignore_session:
+      # Ignore session
       session_handler.ignore(url)      
 
     # Check provided parameters for tests
@@ -751,6 +751,11 @@ try:
         err_msg = "Proxy value must be in format '(http|https)://address:port'."
         print settings.print_critical_msg(err_msg)
         raise SystemExit()
+
+    if menu.options.ignore_session and menu.options.flush_session:
+      err_msg = "The '--ignore-session' parameter is unlikely to work combined with the '--flush-session' parameter."
+      print settings.print_critical_msg(err_msg)
+      raise SystemExit()
 
     # Check if defined "--ignore-401", "--auth-cred" and '--auth-type'.
     if menu.options.auth_type or menu.options.auth_cred:
