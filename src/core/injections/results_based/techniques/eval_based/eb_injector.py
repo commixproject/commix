@@ -311,7 +311,10 @@ def injection_results(response, TAG, cmd):
   html_data = response.read()
   html_data = re.sub("\n", new_line, html_data)
   shell = re.findall(r"" + TAG + new_line + TAG + "(.*)" + TAG + new_line + TAG + "", html_data)
-  shell = shell[0].replace(new_line, "\n").rstrip().lstrip()
+  try:
+    shell = shell[0].replace(new_line, "\n").rstrip().lstrip()
+  except IndexError:
+    pass
   return shell
 
 # eof
