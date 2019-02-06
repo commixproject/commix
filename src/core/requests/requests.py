@@ -60,8 +60,8 @@ def estimate_response_time(url, timesec):
     try:
       err_msg += " (" + str(err.args[0]).split("] ")[1] + ")."
     except IndexError:
-      err_msg += "."
-    print settings.print_critical_msg(err_msg + ").")
+      err_msg += " (" + str(err)+ ")."
+    print settings.print_critical_msg(err_msg)
     raise SystemExit()
 
   except urllib2.HTTPError, e:
