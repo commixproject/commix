@@ -132,12 +132,15 @@ def examine_request(request):
         print settings.print_critical_msg(err_msg)
         raise SystemExit()
       except Exception as err_msg:
-        try:
-          error_msg = str(err_msg.args[0]).split("] ")[1] + "."
-        except IndexError:
-          error_msg = str(err_msg).replace(": "," (") + ")."
-        print settings.print_critical_msg(error_msg)
-        raise SystemExit()
+        if "Unauthorized" in str(err_msg) and menu.options.ignore_401:
+          pass
+        else:  
+          try:
+            error_msg = str(err_msg.args[0]).split("] ")[1] + "."
+          except IndexError:
+            error_msg = str(err_msg).replace(": "," (") + ")."
+          print settings.print_critical_msg(error_msg)
+          raise SystemExit()
 
   except urllib2.HTTPError, err_msg:
     error_description = ""

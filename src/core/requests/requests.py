@@ -56,14 +56,17 @@ def estimate_response_time(url, timesec):
     response.close()
 
   except urllib2.URLError, err:
-    err_msg = "Unable to connect to the target URL"
-    try:
-      err_msg += " (" + str(err.args[0]).split("] ")[1] + ")."
-    except IndexError:
-      err_msg += " (" + str(err)+ ")."
-    print settings.print_critical_msg(err_msg)
-    raise SystemExit()
-
+    if "Unauthorized" in str(err) and menu.options.ignore_401:
+      pass
+    else:  
+      err_msg = "Unable to connect to the target URL"
+      try:
+        err_msg += " (" + str(err.args[0]).split("] ")[1] + ")."
+      except IndexError:
+        err_msg += " (" + str(err) + ")."
+      print settings.print_critical_msg(err_msg)
+      raise SystemExit()
+ 
   except urllib2.HTTPError, e:
     pass
 
