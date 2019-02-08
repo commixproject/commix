@@ -440,11 +440,9 @@ def main(filename, url):
         # Check for CGI scripts on url
         checks.check_CGI_scripts(url)
         # Used a valid pair of valid credentials
-        if menu.options.auth_cred:
-          success_msg = Style.BRIGHT + "Identified a valid pair of credentials '" 
-          success_msg += menu.options.auth_cred + Style.RESET_ALL 
-          success_msg += Style.BRIGHT + "'." + Style.RESET_ALL
-          print settings.print_success_msg(success_msg)
+        if menu.options.auth_cred :
+          info_msg = "Used '" + menu.options.auth_cred + "' pair of credentials." 
+          print settings.print_info_msg(info_msg)
         # Modification on payload
         if not menu.options.shellshock:
           if not settings.USE_BACKTICKS:
