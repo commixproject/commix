@@ -308,43 +308,42 @@ def do_check(request):
 
   # Check if defined any HTTP Authentication credentials.
   # HTTP Authentication: Basic / Digest Access Authentication.
-  if not menu.options.ignore_401:
-    if menu.options.auth_cred and menu.options.auth_type:
-      try:
-        settings.SUPPORTED_HTTP_AUTH_TYPES.index(menu.options.auth_type)
-        if menu.options.auth_type == "basic":
-          b64_string = base64.encodestring(menu.options.auth_cred).replace('\n', '')
-          request.add_header("Authorization", "Basic " + b64_string + "")
-        elif menu.options.auth_type == "digest":
+  if menu.options.auth_cred and menu.options.auth_type:
+    try:
+      settings.SUPPORTED_HTTP_AUTH_TYPES.index(menu.options.auth_type)
+      if menu.options.auth_type == "basic":
+        b64_string = base64.encodestring(menu.options.auth_cred).replace('\n', '')
+        request.add_header("Authorization", "Basic " + b64_string + "")
+      elif menu.options.auth_type == "digest":
+        try:
+          url = menu.options.url
           try:
-            url = menu.options.url
-            try:
-              response = urllib2.urlopen(url)
-            except urllib2.HTTPError, e:
-              try:
-                authline = e.headers.get('www-authenticate', '')  
-                authobj = re.match('''(\w*)\s+realm=(.*),''',authline).groups()
-                realm = authobj[1].split(',')[0].replace("\"","")
-                user_pass_pair = menu.options.auth_cred.split(":")
-                username = user_pass_pair[0]
-                password = user_pass_pair[1]
-                authhandler = urllib2.HTTPDigestAuthHandler()
-                authhandler.add_password(realm, url, username, password)
-                opener = urllib2.build_opener(authhandler)
-                urllib2.install_opener(opener)
-                result = urllib2.urlopen(url)
-              except AttributeError:
-                pass
+            response = urllib2.urlopen(url)
           except urllib2.HTTPError, e:
-            pass
-      except ValueError:
-        err_msg = "Unsupported / Invalid HTTP authentication type '" + menu.options.auth_type + "'."
-        err_msg += " Try basic or digest HTTP authentication type."
-        print settings.print_critical_msg(err_msg)
-        raise SystemExit()   
-    else:
-      pass        
-    
+            try:
+              authline = e.headers.get('www-authenticate', '')  
+              authobj = re.match('''(\w*)\s+realm=(.*),''',authline).groups()
+              realm = authobj[1].split(',')[0].replace("\"","")
+              user_pass_pair = menu.options.auth_cred.split(":")
+              username = user_pass_pair[0]
+              password = user_pass_pair[1]
+              authhandler = urllib2.HTTPDigestAuthHandler()
+              authhandler.add_password(realm, url, username, password)
+              opener = urllib2.build_opener(authhandler)
+              urllib2.install_opener(opener)
+              result = urllib2.urlopen(url)
+            except AttributeError:
+              pass
+        except urllib2.HTTPError, e:
+          pass
+    except ValueError:
+      err_msg = "Unsupported / Invalid HTTP authentication type '" + menu.options.auth_type + "'."
+      err_msg += " Try basic or digest HTTP authentication type."
+      print settings.print_critical_msg(err_msg)
+      raise SystemExit()   
+  else:
+    pass        
+  
   # The MIME media type for JSON.
   if settings.IS_JSON:
     request.add_header("Content-Type", "application/json")

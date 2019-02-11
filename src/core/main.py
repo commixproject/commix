@@ -230,6 +230,10 @@ def init_request(url):
   # Check for URL redirection
   if not menu.options.ignore_redirects:
     url = redirection.do_check(url)
+  # Used a valid pair of valid credentials
+  if menu.options.auth_cred :
+    info_msg = "Used '" + menu.options.auth_cred + "' pair of credentials." 
+    print settings.print_info_msg(info_msg)
   return request
 
 """
@@ -439,10 +443,6 @@ def main(filename, url):
           session_handler.flush(url)
         # Check for CGI scripts on url
         checks.check_CGI_scripts(url)
-        # Used a valid pair of valid credentials
-        if menu.options.auth_cred :
-          info_msg = "Used '" + menu.options.auth_cred + "' pair of credentials." 
-          print settings.print_info_msg(info_msg)
         # Modification on payload
         if not menu.options.shellshock:
           if not settings.USE_BACKTICKS:
