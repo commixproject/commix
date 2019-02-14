@@ -496,7 +496,7 @@ def main(filename, url):
         elif str(err_msg.getcode()) == settings.UNAUTHORIZED_ERROR:
           try:
             # Get the auth header value
-            auth_line = e.headers.get('www-authenticate', '')
+            auth_line = err_msg.headers.get('www-authenticate', '')
             # Checking for authentication type name.
             auth_type = auth_line.split()[0]
             settings.SUPPORTED_HTTP_AUTH_TYPES.index(auth_type.lower())
