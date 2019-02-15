@@ -132,8 +132,15 @@ def examine_request(request):
         print settings.print_critical_msg(err_msg)
         raise SystemExit()
       except Exception as err_msg:
-        if "Unauthorized" in str(err_msg) and menu.options.ignore_401:
-          pass
+        if "Unauthorized" in str(err_msg):
+          if menu.options.ignore_401:
+            pass
+          elif menu.options.auth_type and menu.options.auth_cred:
+            err_msg = "The provided pair of " + menu.options.auth_type 
+            err_msg += " HTTP authentication credentials '" + menu.options.auth_cred + "'"
+            err_msg += " seems to be invalid."
+            print settings.print_critical_msg(err_msg)
+            raise SystemExit() 
         else:  
           try:
             error_msg = str(err_msg.args[0]).split("] ")[1] + "."
