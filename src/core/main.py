@@ -238,8 +238,9 @@ def init_request(url):
   if not menu.options.ignore_redirects:
     url = redirection.do_check(url)
   # Used a valid pair of valid credentials
-  if menu.options.auth_cred :
-    info_msg = "Used '" + menu.options.auth_cred + "' pair of credentials." 
+  if menu.options.auth_cred and menu.options.auth_type:
+    info_msg = "Using '" + menu.options.auth_cred + "' pair of " + menu.options.auth_type 
+    info_msg += " HTTP authentication credentials."
     print settings.print_info_msg(info_msg)
   return request
 
@@ -442,6 +443,10 @@ def main(filename, url):
   
     # Check if defined "--url" or "-m" option.
     if url:
+      if menu.options.auth_cred and menu.options.auth_cred and settings.VERBOSITY_LEVEL >= 1:
+        success_msg = "Used a valid pair of " + menu.options.auth_type 
+        success_msg += " HTTP authentication credentials '" + menu.options.auth_cred + "'." 
+        print settings.print_success_msg(success_msg)
       # Load the crawler
       if menu.options.crawldepth > 0 or menu.options.sitemap_url:  
         url = crawler.crawler(url)
