@@ -140,7 +140,7 @@ def examine_request(request):
             err_msg += " HTTP authentication credentials '" + menu.options.auth_cred + "'"
             err_msg += " seems to be invalid."
             print settings.print_critical_msg(err_msg)
-            raise SystemExit() 
+            raise SystemExit()
         else:  
           try:
             error_msg = str(err_msg.args[0]).split("] ")[1] + "."
@@ -497,134 +497,13 @@ def main(filename, url):
         # Load tamper scripts
         if menu.options.tamper:
           checks.tamper_scripts()
+          
       except urllib2.HTTPError, err_msg:
         # Check the codes of responses
         if str(err_msg.getcode()) == settings.INTERNAL_SERVER_ERROR:
           print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
           content = err_msg.read()
           raise SystemExit()
-
-        # Check for HTTP Error 401 (Unauthorized).
-        elif str(err_msg.getcode()) == settings.UNAUTHORIZED_ERROR:
-          try:
-            # Get the auth header value
-            auth_line = err_msg.headers.get('www-authenticate', '')
-            # Checking for authentication type name.
-            auth_type = auth_line.split()[0]
-            settings.SUPPORTED_HTTP_AUTH_TYPES.index(auth_type.lower())
-            # Checking for the realm attribute.
-            try: 
-              auth_obj = re.match('''(\w*)\s+realm=(.*)''', auth_line).groups()
-              realm = auth_obj[1].split(',')[0].replace("\"", "")
-            except:
-              realm = False
-
-          except ValueError:
-            print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
-            err_msg = "The identified HTTP authentication type (" + auth_type + ") "
-            err_msg += "is not yet supported."
-            print settings.print_critical_msg(err_msg) + "\n"
-            raise SystemExit()
-
-          except IndexError:
-            print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
-            err_msg = "The provided pair of " + menu.options.auth_type 
-            err_msg += " HTTP authentication credentials '" + menu.options.auth_cred + "'"
-            err_msg += " seems to be invalid."
-            print settings.print_critical_msg(err_msg)
-            raise SystemExit() 
-            
-          if settings.VERBOSITY_LEVEL < 2:
-            print "[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]"
-          if menu.options.auth_type and menu.options.auth_type != auth_type.lower():
-            if checks.identified_http_auth_type(auth_type):
-              menu.options.auth_type = auth_type.lower()
-          else:
-            menu.options.auth_type = auth_type.lower()
-
-          # Check for stored auth credentials.
-          if not menu.options.auth_cred:
-            try:
-              stored_auth_creds = session_handler.export_valid_credentials(url, auth_type.lower())
-            except:
-              stored_auth_creds = False
-            if stored_auth_creds:
-              menu.options.auth_cred = stored_auth_creds
-              success_msg = "Identified a valid pair of credentials '"  
-              success_msg += menu.options.auth_cred + Style.RESET_ALL + Style.BRIGHT  + "'."
-              print settings.print_success_msg(success_msg)
-            else:  
-              # Basic authentication 
-              if menu.options.auth_type == "basic":
-                if not menu.options.ignore_401:
-                  warn_msg = "(" + menu.options.auth_type.capitalize() + ") " 
-                  warn_msg += "HTTP authentication credentials are required."
-                  print settings.print_warning_msg(warn_msg)
-                  while True:
-                    if not menu.options.batch:
-                      question_msg = "Do you want to perform a dictionary-based attack? [Y/n] > "
-                      sys.stdout.write(settings.print_question_msg(question_msg))
-                      do_update = sys.stdin.readline().replace("\n","").lower()
-                    else:
-                      do_update = ""  
-                    if len(do_update) == 0:
-                       do_update = "y" 
-                    if do_update in settings.CHOICE_YES:
-                      auth_creds = authentication.http_auth_cracker(url, realm)
-                      if auth_creds != False:
-                        menu.options.auth_cred = auth_creds
-                        settings.REQUIRED_AUTHENTICATION = True
-                        break
-                      else:
-                        raise SystemExit()
-                    elif do_update in settings.CHOICE_NO:
-                      checks.http_auth_err_msg()
-                    elif do_update in settings.CHOICE_QUIT:
-                      raise SystemExit()
-                    else:
-                      err_msg = "'" + do_update + "' is not a valid answer."  
-                      print settings.print_error_msg(err_msg)
-                      pass
-
-              # Digest authentication         
-              elif menu.options.auth_type == "digest":
-                if not menu.options.ignore_401:
-                  warn_msg = "(" + menu.options.auth_type.capitalize() + ") " 
-                  warn_msg += "HTTP authentication credentials are required."
-                  print settings.print_warning_msg(warn_msg)      
-                  # Check if heuristics have failed to identify the realm attribute.
-                  if not realm:
-                    warn_msg = "Heuristics have failed to identify the realm attribute." 
-                    print settings.print_warning_msg(warn_msg)
-                  while True:
-                    if not menu.options.batch:
-                      question_msg = "Do you want to perform a dictionary-based attack? [Y/n] > "
-                      sys.stdout.write(settings.print_question_msg(question_msg))
-                      do_update = sys.stdin.readline().replace("\n","").lower()
-                    else:
-                      do_update = ""
-                    if len(do_update) == 0:
-                       do_update = "y" 
-                    if do_update in settings.CHOICE_YES:
-                      auth_creds = authentication.http_auth_cracker(url, realm)
-                      if auth_creds != False:
-                        menu.options.auth_cred = auth_creds
-                        settings.REQUIRED_AUTHENTICATION = True
-                        break
-                      else:
-                        raise SystemExit()
-                    elif do_update in settings.CHOICE_NO:
-                      checks.http_auth_err_msg()
-                    elif do_update in settings.CHOICE_QUIT:
-                      raise SystemExit()
-                    else:
-                      err_msg = "'" + do_update + "' is not a valid answer."  
-                      print settings.print_error_msg(err_msg)
-                      pass
-                  else:   
-                    checks.http_auth_err_msg()      
-          else:
-            pass
         
         # Invalid permission to access target URL page.
         elif str(err_msg.getcode()) == settings.FORBIDDEN_ERROR:

@@ -1,4 +1,5 @@
 ## Version 2.8 (upcoming)
+* Revised: Minor bug-fixes and improvements regarding HTTP authentication dictionary-based cracker.
 * Revised: Minor bug-fixes and improvements regarding HTTP authentication (Basic / Digest).
 * Fixed: Minor bug-fix regarding ignoring HTTP Error 401 (Unauthorized) (for `--ignore-401` option).
 * Added: Support for writing crawling results to a temporary file (for eventual further processing with other tools).

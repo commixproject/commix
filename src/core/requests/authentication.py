@@ -27,7 +27,7 @@ from src.utils import session_handler
 from src.core.requests import tor
 from src.core.requests import proxy
 from src.core.requests import headers
-from src.core.requests import requests
+# from src.core.requests import requests
 
 
 from src.core.injections.controller import checks

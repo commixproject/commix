@@ -20,16 +20,19 @@ import socket
 import urllib
 import urllib2
 import urlparse
+
+from src.utils import menu
 from os.path import splitext
 from urlparse import urlparse
-from src.utils import menu
 from src.utils import settings
+from src.utils import session_handler
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 from src.core.requests import tor
 from src.core.requests import proxy
 from src.core.requests import headers
 from src.core.requests import parameters
+from src.core.requests import authentication
 
 from src.core.injections.controller import checks
 
@@ -47,26 +50,147 @@ def estimate_response_time(url, timesec):
   else:
     url = parameters.get_url_part(url)
     request = urllib2.Request(url)
-  headers.do_check(request)
+  headers.do_check(request) 
   start = time.time()
-  
   try:
     response = urllib2.urlopen(request)
     response.read(1)
     response.close()
 
   except urllib2.URLError, err:
+    ignore_start = time.time()
     if "Unauthorized" in str(err) and menu.options.ignore_401:
       pass
-    else:  
+    else:
+      if settings.VERBOSITY_LEVEL >= 1:
+        print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
       err_msg = "Unable to connect to the target URL"
       try:
         err_msg += " (" + str(err.args[0]).split("] ")[1] + ")."
       except IndexError:
         err_msg += " (" + str(err) + ")."
       print settings.print_critical_msg(err_msg)
-      raise SystemExit()
- 
+      # Check for HTTP Error 401 (Unauthorized).
+      if str(err.getcode()) == settings.UNAUTHORIZED_ERROR:
+        try:
+          # Get the auth header value
+          auth_line = err.headers.get('www-authenticate', '')
+          # Checking for authentication type name.
+          auth_type = auth_line.split()[0]
+          settings.SUPPORTED_HTTP_AUTH_TYPES.index(auth_type.lower())
+          # Checking for the realm attribute.
+          try: 
+            auth_obj = re.match('''(\w*)\s+realm=(.*)''', auth_line).groups()
+            realm = auth_obj[1].split(',')[0].replace("\"", "")
+          except:
+            realm = False
+
+        except ValueError:
+          err_msg = "The identified HTTP authentication type (" + auth_type + ") "
+          err_msg += "is not yet supported."
+          print settings.print_critical_msg(err_msg) + "\n"
+          raise SystemExit()
+
+        except IndexError:
+          err_msg = "The provided pair of " + menu.options.auth_type 
+          err_msg += " HTTP authentication credentials '" + menu.options.auth_cred + "'"
+          err_msg += " seems to be invalid."
+          print settings.print_critical_msg(err_msg)
+          raise SystemExit() 
+
+        if menu.options.auth_type and menu.options.auth_type != auth_type.lower():
+          if checks.identified_http_auth_type(auth_type):
+            menu.options.auth_type = auth_type.lower()
+        else:
+          menu.options.auth_type = auth_type.lower()
+
+        # Check for stored auth credentials.
+        if not menu.options.auth_cred:
+          try:
+            stored_auth_creds = session_handler.export_valid_credentials(url, auth_type.lower())
+          except:
+            stored_auth_creds = False
+          if stored_auth_creds:
+            menu.options.auth_cred = stored_auth_creds
+            success_msg = "Identified a valid (stored) pair of credentials '"  
+            success_msg += menu.options.auth_cred + Style.RESET_ALL + Style.BRIGHT  + "'."
+            print settings.print_success_msg(success_msg)
+          else:  
+            # Basic authentication 
+            if menu.options.auth_type == "basic":
+              if not menu.options.ignore_401:
+                warn_msg = "(" + menu.options.auth_type.capitalize() + ") " 
+                warn_msg += "HTTP authentication credentials are required."
+                print settings.print_warning_msg(warn_msg)
+                while True:
+                  if not menu.options.batch:
+                    question_msg = "Do you want to perform a dictionary-based attack? [Y/n] > "
+                    sys.stdout.write(settings.print_question_msg(question_msg))
+                    do_update = sys.stdin.readline().replace("\n","").lower()
+                  else:
+                    do_update = ""  
+                  if len(do_update) == 0:
+                     do_update = "y" 
+                  if do_update in settings.CHOICE_YES:
+                    auth_creds = authentication.http_auth_cracker(url, realm)
+                    if auth_creds != False:
+                      menu.options.auth_cred = auth_creds
+                      settings.REQUIRED_AUTHENTICATION = True
+                      break
+                    else:
+                      raise SystemExit()
+                  elif do_update in settings.CHOICE_NO:
+                    checks.http_auth_err_msg()
+                  elif do_update in settings.CHOICE_QUIT:
+                    raise SystemExit()
+                  else:
+                    err_msg = "'" + do_update + "' is not a valid answer."  
+                    print settings.print_error_msg(err_msg)
+                    pass
+
+            # Digest authentication         
+            elif menu.options.auth_type == "digest":
+              if not menu.options.ignore_401:
+                warn_msg = "(" + menu.options.auth_type.capitalize() + ") " 
+                warn_msg += "HTTP authentication credentials are required."
+                print settings.print_warning_msg(warn_msg)      
+                # Check if heuristics have failed to identify the realm attribute.
+                if not realm:
+                  warn_msg = "Heuristics have failed to identify the realm attribute." 
+                  print settings.print_warning_msg(warn_msg)
+                while True:
+                  if not menu.options.batch:
+                    question_msg = "Do you want to perform a dictionary-based attack? [Y/n] > "
+                    sys.stdout.write(settings.print_question_msg(question_msg))
+                    do_update = sys.stdin.readline().replace("\n","").lower()
+                  else:
+                    do_update = ""
+                  if len(do_update) == 0:
+                     do_update = "y" 
+                  if do_update in settings.CHOICE_YES:
+                    auth_creds = authentication.http_auth_cracker(url, realm)
+                    if auth_creds != False:
+                      menu.options.auth_cred = auth_creds
+                      settings.REQUIRED_AUTHENTICATION = True
+                      break
+                    else:
+                      raise SystemExit()
+                  elif do_update in settings.CHOICE_NO:
+                    checks.http_auth_err_msg()
+                  elif do_update in settings.CHOICE_QUIT:
+                    raise SystemExit()
+                  else:
+                    err_msg = "'" + do_update + "' is not a valid answer."  
+                    print settings.print_error_msg(err_msg)
+                    pass
+                else:   
+                  checks.http_auth_err_msg()      
+        else:
+          pass
+    
+    ignore_end = time.time()
+    start = start - (ignore_start - ignore_end)
+
   except urllib2.HTTPError, e:
     pass
 
@@ -76,18 +200,27 @@ def estimate_response_time(url, timesec):
     err_msg = "The connection to target URL has timed out."
     print settings.print_critical_msg(err_msg) + "\n"
     raise SystemExit()
+
   except urllib2.URLError, err_msg:
     if settings.VERBOSITY_LEVEL >= 1:
       print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
     print settings.print_critical_msg(str(err_msg.args[0]).split("] ")[1] + ".")
     raise SystemExit()
+
   except ValueError, err_msg:
     if settings.VERBOSITY_LEVEL >= 1:
       print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
     print settings.print_critical_msg(str(err_msg) + ".")
     raise SystemExit()
+
   end = time.time()
-  diff = end - start
+  diff = end - start 
+
+  if settings.VERBOSITY_LEVEL >= 1:
+    info_msg = "Estimating the target URL response time... "
+    sys.stdout.write(settings.print_info_msg(info_msg))
+    sys.stdout.flush()
+
   if int(diff) < 1:
     if settings.VERBOSITY_LEVEL >= 1:
       print "[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]"
@@ -109,6 +242,7 @@ def estimate_response_time(url, timesec):
       warn_msg += " and/or possible corruptions over the extracted data"
     warn_msg += "."
     print settings.print_warning_msg(warn_msg)
+
   if int(timesec) == int(url_time_response):
     timesec = int(timesec) + int(url_time_response)
   else:
