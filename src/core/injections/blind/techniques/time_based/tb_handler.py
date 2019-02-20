@@ -28,8 +28,6 @@ from src.utils import session_handler
 
 from src.thirdparty.colorama import Fore, Back, Style, init
 
-from src.core.shells import reverse_tcp
-
 from src.core.requests import headers
 from src.core.requests import requests
 from src.core.requests import parameters
