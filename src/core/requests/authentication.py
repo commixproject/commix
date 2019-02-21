@@ -42,33 +42,34 @@ do the authentication process using the provided credentials (auth_data).
 The authentication process
 """
 def authentication_process():
+  try:
+    auth_url = menu.options.auth_url
+    auth_data = menu.options.auth_data
+    cj = cookielib.CookieJar()
+    opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
+    request = opener.open(urllib2.Request(auth_url))
+    cookies = ""
+    for cookie in cj:
+        cookie_values = cookie.name + "=" + cookie.value + "; "
+        cookies += cookie_values
+    if len(cookies) != 0 :
+      menu.options.cookie = cookies.rstrip()
+      if settings.VERBOSITY_LEVEL >= 1:
+        success_msg = "The received cookie is "  
+        success_msg += menu.options.cookie + Style.RESET_ALL + "."
+        print settings.print_success_msg(success_msg)
+    urllib2.install_opener(opener)
+    request = urllib2.Request(auth_url, auth_data)
+    # Check if defined extra headers.
+    headers.do_check(request)
+    #headers.check_http_traffic(request)
+    # Get the response of the request.
+    response = requests.get_request_response(request)
+    return response
 
-  auth_url = menu.options.auth_url
-  auth_data = menu.options.auth_data
-  cj = cookielib.CookieJar()
-  opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
-  request = opener.open(urllib2.Request(auth_url))
-
-  cookies = ""
-  for cookie in cj:
-      cookie_values = cookie.name + "=" + cookie.value + "; "
-      cookies += cookie_values
-
-  if len(cookies) != 0 :
-    menu.options.cookie = cookies.rstrip()
-    if settings.VERBOSITY_LEVEL >= 1:
-      success_msg = "The received cookie is "  
-      success_msg += menu.options.cookie + Style.RESET_ALL + "."
-      print settings.print_success_msg(success_msg)
-
-  urllib2.install_opener(opener)
-  request = urllib2.Request(auth_url, auth_data)
-  # Check if defined extra headers.
-  headers.do_check(request)
-  #headers.check_http_traffic(request)
-  # Get the response of the request.
-  response = requests.get_request_response(request)
-  return response
+  except urllib2.HTTPError, err_msg:
+    print settings.print_critical_msg(err_msg)
+    raise SystemExit()
 
 """
 Define the HTTP authentication 
