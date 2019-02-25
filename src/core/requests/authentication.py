@@ -27,8 +27,6 @@ from src.utils import session_handler
 from src.core.requests import tor
 from src.core.requests import proxy
 from src.core.requests import headers
-# from src.core.requests import requests
-
 
 from src.core.injections.controller import checks
 from src.thirdparty.colorama import Fore, Back, Style, init
@@ -64,7 +62,7 @@ def authentication_process():
     headers.do_check(request)
     #headers.check_http_traffic(request)
     # Get the response of the request.
-    response = requests.get_request_response(request)
+    response = urllib2.urlopen(request)
     return response
 
   except urllib2.HTTPError, err_msg:
