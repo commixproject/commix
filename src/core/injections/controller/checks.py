@@ -1278,7 +1278,7 @@ def file_upload():
         http_server = "http://" + str(settings.LOCAL_HTTP_IP) + ":" + str(settings.LOCAL_HTTP_PORT)
         info_msg = "Setting the HTTP server on '" + http_server + "/'. "  
         print settings.print_info_msg(info_msg)
-        menu.options.file_upload = http_server + menu.options.file_upload
+        menu.options.file_upload = http_server + "/" + menu.options.file_upload
         simple_http_server.main()
         break
 

@@ -436,7 +436,7 @@ def main(filename, url):
       print settings.print_critical_msg(err_msg)
       raise SystemExit()
 
-    if menu.options.file_dest and menu.options.file_write == None and menu.options.file_upload == None :
+    if menu.options.file_dest and menu.options.file_write == None and menu.options.file_upload == None:
       err_msg = "You must enter the '--file-write' or '--file-upload' parameter."
       print settings.print_critical_msg(err_msg)
       raise SystemExit()
