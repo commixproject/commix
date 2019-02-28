@@ -1234,6 +1234,8 @@ Check if defined "--file-upload" option.
 """
 def file_upload():
   if not re.match(settings.VALID_URL_FORMAT, menu.options.file_upload):
+    if not menu.options.file_dest.endswith("/"):
+      menu.options.file_dest = menu.options.file_dest + "/"
     # Check if not defined URL for upload.
     while True:
       if not menu.options.batch:
