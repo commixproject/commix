@@ -226,7 +226,13 @@ def init_request(url):
     # Check if defined character used for splitting parameter values.
     if menu.options.pdel and menu.options.pdel in url:
       settings.PARAMETER_DELIMITER = menu.options.pdel
-    request = urllib2.Request(url)
+    try:
+      request = urllib2.Request(url)
+    except SocketError as e:
+      if e.errno == errno.ECONNRESET:
+        error_msg = "Connection reset by peer."
+        print settings.print_critical_msg(error_msg)
+        raise SystemExit()
   headers.do_check(request)
   # Check if defined any HTTP Proxy (--proxy option).
   if menu.options.proxy:

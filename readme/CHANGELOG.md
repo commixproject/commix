@@ -4,7 +4,7 @@
 * Revised: Minor bug-fixes and improvements regarding HTTP authentication (Basic / Digest).
 * Fixed: Minor bug-fix regarding ignoring HTTP Error 401 (Unauthorized) (for `--ignore-401` option).
 * Added: Support for writing crawling results to a temporary file (for eventual further processing with other tools).
-* Added: Support for Windows "Python" on "reverse_tcp" shell option. 
+* Added: Support for Windows "Python" on "reverse_tcp" shell option.
 
 ## Version 2.7 (2018-12-18)
 * Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
