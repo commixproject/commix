@@ -18,11 +18,9 @@ import os
 import sys
 import errno
 import random
-import httplib
 import urllib2
-
+import httplib
 from socket import error as SocketError
-
 from os.path import splitext
 from urlparse import urlparse
 
@@ -75,8 +73,11 @@ pass
 reload(sys)
 sys.setdefaultencoding(settings.DEFAULT_ENCODING)
 
-# Use Colorama to make Termcolor work on Windows too :)
 if settings.IS_WINDOWS:
+  import codecs
+  # Reference: https://github.com/nodejs/node/issues/12786#issuecomment-298652440
+  codecs.register(lambda name: codecs.lookup("utf-8") if name == "cp65001" else None)
+  # Use Colorama to make Termcolor work on Windows too :)
   init()
 
 """
