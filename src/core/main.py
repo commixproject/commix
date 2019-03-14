@@ -20,6 +20,9 @@ import errno
 import random
 import urllib2
 import httplib
+# accept overly long result lines
+httplib._MAXLINE = 1 * 1024 * 1024
+
 from socket import error as SocketError
 from os.path import splitext
 from urlparse import urlparse
