@@ -225,7 +225,13 @@ def init_request(url):
     # Check if defined character used for splitting parameter values.
     if menu.options.pdel and menu.options.pdel in settings.USER_DEFINED_POST_DATA:
       settings.PARAMETER_DELIMITER = menu.options.pdel
-    request = urllib2.Request(url, menu.options.data)
+    try:
+      request = urllib2.Request(url, menu.options.data)
+    except SocketError as e:
+      if e.errno == errno.ECONNRESET:
+        error_msg = "Connection reset by peer."
+        print settings.print_critical_msg(error_msg)
+        raise SystemExit()
   else:
     # Check if defined character used for splitting parameter values.
     if menu.options.pdel and menu.options.pdel in url:
