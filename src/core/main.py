@@ -231,7 +231,7 @@ def init_request(url):
       if e.errno == errno.ECONNRESET:
         error_msg = "Connection reset by peer."
         print settings.print_critical_msg(error_msg)
-        raise SystemExit()
+      raise SystemExit()
   else:
     # Check if defined character used for splitting parameter values.
     if menu.options.pdel and menu.options.pdel in url:
@@ -242,7 +242,7 @@ def init_request(url):
       if e.errno == errno.ECONNRESET:
         error_msg = "Connection reset by peer."
         print settings.print_critical_msg(error_msg)
-        raise SystemExit()
+      raise SystemExit()
   headers.do_check(request)
   # Check if defined any HTTP Proxy (--proxy option).
   if menu.options.proxy:
