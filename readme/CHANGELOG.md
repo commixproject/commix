@@ -1,4 +1,5 @@
 ## Version 2.8 (upcoming)
+* Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
 * Updated: Minor update regarding accepting overly long result lines.
 * Revised: Minor bug-fixes and improvements regarding `--file-upload` option.
 * Revised: Minor bug-fixes and improvements regarding HTTP authentication dictionary-based cracker.
