@@ -57,7 +57,10 @@ def estimate_response_time(url, timesec):
     response.read(1)
     response.close()
 
-  except urllib2.URLError, err:
+  # except urllib2.HTTPError, err:
+  #   pass
+    
+  except urllib2.HTTPError, err:
     ignore_start = time.time()
     if "Unauthorized" in str(err) and menu.options.ignore_401:
       pass
@@ -187,12 +190,9 @@ def estimate_response_time(url, timesec):
                   checks.http_auth_err_msg()      
         else:
           pass
-    
+  
     ignore_end = time.time()
     start = start - (ignore_start - ignore_end)
-
-  except urllib2.HTTPError, e:
-    pass
 
   except socket.timeout:
     if settings.VERBOSITY_LEVEL >= 1:
