@@ -39,6 +39,7 @@ Commix comes packaged on the **official repositories** of the following Linux di
 - [BackBox](https://backbox.org/)
 - [Kali Linux](https://www.kali.org/)
 - [Parrot Security OS](https://www.parrotsec.org/)
+- [Pentoo Linux](https://www.pentoo.ch/)
 - [Weakerthan Linux](http://www.weaknetlabs.com/)
 
 Commix also comes **as a plugin**, on the following penetration testing frameworks:
