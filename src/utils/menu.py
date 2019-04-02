@@ -39,7 +39,7 @@ def banner():
 
 +--
 """ + Style.BRIGHT + settings.DESCRIPTION_FULL + Style.RESET_ALL + """
-Copyright (c) """ + settings.YEAR + """ """ + settings.AUTHOR + Style.RESET_ALL + """ (""" + Fore.LIGHTRED_EX  + settings.AUTHOR_TWITTER + Style.RESET_ALL + """)
+Copyright © """ + settings.YEAR + """ """ + settings.AUTHOR + Style.RESET_ALL + """ (""" + Fore.LIGHTRED_EX  + settings.AUTHOR_TWITTER + Style.RESET_ALL + """)
 +--
 """
 
