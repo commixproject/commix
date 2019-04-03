@@ -216,10 +216,10 @@ def estimate_response_time(url, timesec):
   end = time.time()
   diff = end - start 
 
-  if settings.VERBOSITY_LEVEL >= 1:
-    info_msg = "Estimating the target URL response time... "
-    sys.stdout.write(settings.print_info_msg(info_msg))
-    sys.stdout.flush()
+  # if settings.VERBOSITY_LEVEL >= 1:
+  #   info_msg = "Estimating the target URL response time... "
+  #   sys.stdout.write(settings.print_info_msg(info_msg))
+  #   sys.stdout.flush()
 
   if int(diff) < 1:
     if settings.VERBOSITY_LEVEL >= 1:
