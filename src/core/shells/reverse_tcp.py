@@ -752,12 +752,12 @@ def configure_reverse_tcp(separator):
             break
         else:
           continue
-      if option[4:9].lower() == "rhost":
+      elif option[4:9].lower() == "rhost":
         err_msg =  "The '" + option[4:9].upper() + "' option, is not "
         err_msg += "usable for 'reverse_tcp' mode. Use 'LHOST' option."
         print settings.print_error_msg(err_msg)  
         continue  
-      if option[4:9].lower() == "lport":
+      elif option[4:9].lower() == "lport":
         if check_lport(option[10:]):
           if len(settings.LHOST) == 0:
             pass
@@ -765,10 +765,14 @@ def configure_reverse_tcp(separator):
             break
         else:
           continue
-      if option[4:11].lower() == "srvport":
+      elif option[4:11].lower() == "srvport":
         check_srvport(option[12:])
-      if option[4:11].lower() == "uripath":
+      elif option[4:11].lower() == "uripath":
         check_uripath(option[12:])
+      else:
+        err_msg = "The '" + option + "' option, is not valid."
+        print settings.print_error_msg(err_msg)
+        pass
     else:
       err_msg = "The '" + option + "' option, is not valid."
       print settings.print_error_msg(err_msg)

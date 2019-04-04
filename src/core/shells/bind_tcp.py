@@ -508,30 +508,6 @@ def configure_bind_tcp(separator):
       continue
     elif option.lower() == "quit": 
       raise SystemExit()
-    elif len(settings.LPORT) != 0 and len(settings.RHOST) != 0:
-      break 
-    elif option[0:3].lower() == "set":
-        if option[4:9].lower() == "rhost":
-          if check_rhost(option[10:]):
-            if len(settings.LPORT) == 0:
-              pass
-            else:
-              break
-          else:
-            continue  
-        if option[4:9].lower() == "lhost":
-          err_msg =  "The '" + option[4:9].upper() + "' option, is not "
-          err_msg += "usable for 'bind_tcp' mode. Use 'RHOST' option."
-          print settings.print_error_msg(err_msg)  
-          continue  
-        if option[4:9].lower() == "lport":
-          if check_lport(option[10:]):
-            if len(settings.RHOST) == 0:
-              pass
-            else:
-              break
-          else:
-            continue
     elif option.lower() == "os_shell" or option.lower() == "back": 
       settings.BIND_TCP = False
       break
@@ -539,6 +515,35 @@ def configure_bind_tcp(separator):
       settings.REVERSE_TCP = True
       settings.BIND_TCP = False
       break 
+    elif len(settings.LPORT) != 0 and len(settings.RHOST) != 0:
+      break 
+    elif option[0:3].lower() == "set":
+
+      if option[4:9].lower() == "rhost":
+        if check_rhost(option[10:]):
+          if len(settings.LPORT) == 0:
+            pass
+          else:
+            break
+        else:
+          continue  
+      elif option[4:9].lower() == "lhost":
+        err_msg =  "The '" + option[4:9].upper() + "' option, is not "
+        err_msg += "usable for 'bind_tcp' mode. Use 'RHOST' option."
+        print settings.print_error_msg(err_msg)  
+        continue  
+      elif option[4:9].lower() == "lport":
+        if check_lport(option[10:]):
+          if len(settings.RHOST) == 0:
+            pass
+          else:
+            break
+        else:
+          continue
+      else:
+        err_msg = "The '" + option + "' option, is not valid."
+        print settings.print_error_msg(err_msg)
+        pass
     else:
       err_msg = "The '" + option + "' option, is not valid."
       print settings.print_error_msg(err_msg)
