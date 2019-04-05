@@ -38,18 +38,18 @@ def shell_options(option):
     menu.reverse_tcp_options()
   elif option.lower() == "quit": 
     raise SystemExit()
-  elif option[0:3].lower() == "set":
-    if option[4:9].lower() == "lhost":
+  elif option[0:4].lower() == "set ":
+    if option[4:10].lower() == "lhost ":
       check_lhost(option[10:])
-    if option[4:9].lower() == "rhost":
+    if option[4:10].lower() == "rhost ":
       err_msg =  "The '" + option[4:9].upper() + "' option, is not "
       err_msg += "usable for 'reverse_tcp' mode. Use 'LHOST' option."
       print settings.print_error_msg(err_msg)  
-    if option[4:9].lower() == "lport":
+    if option[4:10].lower() == "lport ":
       check_lport(option[10:])
-    if option[4:11].lower() == "srvport":
+    if option[4:12].lower() == "srvport ":
       check_srvport(option[12:])
-    if option[4:11].lower() == "uripath":
+    if option[4:12].lower() == "uripath ":
       check_uripath(option[12:])
   else:
     return option
@@ -743,8 +743,8 @@ def configure_reverse_tcp(separator):
       break 
     elif len(settings.LPORT) != 0 and len(settings.LHOST) != 0:
       break 
-    elif option[0:3].lower() == "set":
-      if option[4:9].lower() == "lhost":
+    elif option[0:4].lower() == "set ":
+      if option[4:10].lower() == "lhost ":
         if check_lhost(option[10:]):
           if len(settings.LPORT) == 0:
             pass
@@ -752,12 +752,12 @@ def configure_reverse_tcp(separator):
             break
         else:
           continue
-      elif option[4:9].lower() == "rhost":
+      elif option[4:10].lower() == "rhost ":
         err_msg =  "The '" + option[4:9].upper() + "' option, is not "
         err_msg += "usable for 'reverse_tcp' mode. Use 'LHOST' option."
         print settings.print_error_msg(err_msg)  
         continue  
-      elif option[4:9].lower() == "lport":
+      elif option[4:10].lower() == "lport ":
         if check_lport(option[10:]):
           if len(settings.LHOST) == 0:
             pass
@@ -765,9 +765,9 @@ def configure_reverse_tcp(separator):
             break
         else:
           continue
-      elif option[4:11].lower() == "srvport":
+      elif option[4:12].lower() == "srvport ":
         check_srvport(option[12:])
-      elif option[4:11].lower() == "uripath":
+      elif option[4:12].lower() == "uripath ":
         check_uripath(option[12:])
       else:
         err_msg = "The '" + option + "' option, is not valid."

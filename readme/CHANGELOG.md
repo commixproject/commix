@@ -1,3 +1,6 @@
+## Version 2.9 (upcoming)
+* Revised: Minor improvements regarding "reverse_tcp" and "bind_tcp" shell options.
+
 ## Version 2.8 (2019-03-26)
 * Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
 * Updated: Minor update regarding accepting overly long result lines.

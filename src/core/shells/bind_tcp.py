@@ -34,14 +34,14 @@ def shell_options(option):
     menu.reverse_tcp_options()
   elif option.lower() == "quit": 
     raise SystemExit()
-  elif option[0:3].lower() == "set":
-    if option[4:9].lower() == "rhost":
+  elif option[0:4].lower() == "set ":
+    if option[4:10].lower() == "rhost ":
       check_rhost(option[10:])
-    if option[4:9].lower() == "lhost":
+    if option[4:10].lower() == "lhost ":
       err_msg =  "The '" + option[4:9].upper() + "' option, is not "
       err_msg += "usable for 'bind_tcp' mode. Use 'RHOST' option."
       print settings.print_error_msg(err_msg)  
-    if option[4:9].lower() == "lport":
+    if option[4:10].lower() == "lport ":
       check_lport(option[10:])
   else:
     return option
@@ -517,9 +517,8 @@ def configure_bind_tcp(separator):
       break 
     elif len(settings.LPORT) != 0 and len(settings.RHOST) != 0:
       break 
-    elif option[0:3].lower() == "set":
-
-      if option[4:9].lower() == "rhost":
+    elif option[0:4].lower() == "set ":
+      if option[4:10].lower() == "rhost ":
         if check_rhost(option[10:]):
           if len(settings.LPORT) == 0:
             pass
@@ -527,12 +526,12 @@ def configure_bind_tcp(separator):
             break
         else:
           continue  
-      elif option[4:9].lower() == "lhost":
+      elif option[4:10].lower() == "lhost ":
         err_msg =  "The '" + option[4:9].upper() + "' option, is not "
         err_msg += "usable for 'bind_tcp' mode. Use 'RHOST' option."
         print settings.print_error_msg(err_msg)  
         continue  
-      elif option[4:9].lower() == "lport":
+      elif option[4:10].lower() == "lport ":
         if check_lport(option[10:]):
           if len(settings.RHOST) == 0:
             pass
