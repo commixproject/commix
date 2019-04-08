@@ -1,4 +1,5 @@
 ## Version 2.9 (upcoming)
+* Revised: Minor improvements regarding preventing false negative results, due to parameters tampering during the detection phase.
 * Revised: Minor improvements regarding "reverse_tcp" and "bind_tcp" shell options.
 
 ## Version 2.8 (2019-03-26)

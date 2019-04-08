@@ -148,7 +148,7 @@ def do_GET_check(url):
               all_params[param-1] = all_params[param-1].replace(inject_value, old)
               parameter = settings.PARAMETER_DELIMITER.join(all_params)
               # Reconstruct the URL
-              url = url_part + "?" + parameter  
+              url = url_part + "?" + parameter.replace(settings.IGNORE_TAG,"")
               urls_list.append(url)
 
         else:
@@ -287,7 +287,7 @@ def do_POST_check(parameter):
       # Check for similarity in provided parameter name and value.
       all_params = all_params.split(settings.PARAMETER_DELIMITER)
       all_params = checks.check_similarities(all_params)
-    
+
     # Check if not defined the "INJECT_HERE" tag in parameter
     if settings.INJECT_TAG not in parameter:
       checks.is_empty(multi_parameters, http_request_method)
@@ -351,8 +351,9 @@ def do_POST_check(parameter):
             all_params[param] = all_params[param].replace(value, inject_value)
           all_params[param-1] = all_params[param-1].replace(inject_value, old)
           parameter = settings.PARAMETER_DELIMITER.join(all_params)
-          parameters_list.append(parameter)
+          parameters_list.append(parameter.replace(settings.IGNORE_TAG,""))
           parameter = parameters_list
+
 
     else:
       for param in range(0, len(multi_parameters)):

@@ -1200,17 +1200,17 @@ def check_similarities(all_params):
       if re.findall(r'\"(.*)\"\:\"', all_params[param]) == re.findall(r'\:\"(.*)\"', all_params[param]):
         parameter_name = re.findall(r'\:\"(.*)\"', all_params[param])
         parameter_name = ''.join(parameter_name)
-        all_params[param] = parameter_name + ":" + parameter_name.lower() + ''.join([random.choice(string.ascii_letters) for n in xrange(2)]).lower()
+        all_params[param] = parameter_name + ":" + parameter_name + settings.IGNORE_TAG
     elif settings.IS_XML:
       if re.findall(r'</(.*)>', all_params[param]) == re.findall(r'>(.*)</', all_params[param]):
         parameter_name = re.findall(r'>(.*)</', all_params[param])
         parameter_name = ''.join(parameter_name)
-        all_params[param] = "<" + parameter_name + ">" + parameter_name.lower() + ''.join([random.choice(string.ascii_letters) for n in xrange(2)]).lower() + "</" + parameter_name + ">"
+        all_params[param] = "<" + parameter_name + ">" + parameter_name + settings.IGNORE_TAG + "</" + parameter_name + ">"
     else:
       if re.findall(r'(.*)=', all_params[param]) == re.findall(r'=(.*)', all_params[param]):
         parameter_name = re.findall(r'=(.*)', all_params[param])
         parameter_name = ''.join(parameter_name)
-        all_params[param] = parameter_name + "=" + parameter_name.lower() + ''.join([random.choice(string.ascii_letters) for n in xrange(2)]).lower()
+        all_params[param] = parameter_name + "=" + parameter_name + settings.IGNORE_TAG
   return all_params
 
 """
