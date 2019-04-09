@@ -148,8 +148,8 @@ def do_GET_check(url):
               all_params[param-1] = all_params[param-1].replace(inject_value, old)
               parameter = settings.PARAMETER_DELIMITER.join(all_params)
               # Reconstruct the URL
-              url = url_part + "?" + parameter.replace(settings.IGNORE_TAG,"")
-              urls_list.append(url)
+              url = url_part + "?" + parameter
+              urls_list.append(url.replace(settings.IGNORE_TAG,""))
 
         else:
           for param in range(0,len(multi_parameters)):
