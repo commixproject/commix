@@ -14,6 +14,7 @@ For more see the file 'readme/COPYING' for copying permission.
 """
 
 import sys
+import socket
 import urllib2
 from src.utils import menu
 from src.utils import settings
@@ -144,10 +145,17 @@ def do_check(url):
     print settings.print_critical_msg(err_msg)
     raise SystemExit() 
 
+  # Raise exception regarding existing connection was forcibly closed by the remote host.
+  except socket.error as error:
+    if error.errno == errno.WSAECONNRESET:
+      err_msg = "An existing connection was forcibly closed by the remote host."
+      print settings.print_critical_msg(err_msg)
+      raise SystemExit()
+
   # Raise exception regarding connection aborted.
   except Exception:
     err_msg = "Connection aborted."
     print settings.print_critical_msg(err_msg)
     raise SystemExit()
-  
+
 # eof
