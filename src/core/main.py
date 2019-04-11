@@ -124,7 +124,10 @@ def examine_request(request):
         if e.errno == errno.ECONNRESET:
           error_msg = "Connection reset by peer."
           print settings.print_critical_msg(error_msg)
-          raise SystemExit()
+        elif e.errno == errno.WSAECONNRESET:
+          error_msg = "An existing connection was forcibly closed by the remote host."
+          print settings.print_critical_msg(error_msg)
+        raise SystemExit()
       except ValueError:
         # Invalid format for the '--header' option.
         if settings.VERBOSITY_LEVEL < 2:
@@ -231,6 +234,9 @@ def init_request(url):
       if e.errno == errno.ECONNRESET:
         error_msg = "Connection reset by peer."
         print settings.print_critical_msg(error_msg)
+      elif e.errno == errno.WSAECONNRESET:
+        error_msg = "An existing connection was forcibly closed by the remote host."
+        print settings.print_critical_msg(error_msg)
       raise SystemExit()
   else:
     # Check if defined character used for splitting parameter values.
@@ -241,6 +247,9 @@ def init_request(url):
     except SocketError as e:
       if e.errno == errno.ECONNRESET:
         error_msg = "Connection reset by peer."
+        print settings.print_critical_msg(error_msg)
+      elif e.errno == errno.WSAECONNRESET:
+        error_msg = "An existing connection was forcibly closed by the remote host."
         print settings.print_critical_msg(error_msg)
       raise SystemExit()
   headers.do_check(request)
