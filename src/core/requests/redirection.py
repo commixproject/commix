@@ -14,10 +14,10 @@ For more see the file 'readme/COPYING' for copying permission.
 """
 
 import sys
-import socket
 import urllib2
 from src.utils import menu
 from src.utils import settings
+from socket import error as SocketError
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 def do_check(url):
@@ -146,11 +146,14 @@ def do_check(url):
     raise SystemExit() 
 
   # Raise exception regarding existing connection was forcibly closed by the remote host.
-  except socket.error as error:
-    if error.errno == errno.WSAECONNRESET:
-      err_msg = "An existing connection was forcibly closed by the remote host."
-      print settings.print_critical_msg(err_msg)
-      raise SystemExit()
+  except SocketError as e:
+    if e.errno == errno.ECONNRESET:
+      error_msg = "Connection reset by peer."
+      print settings.print_critical_msg(error_msg)
+    elif e.errno == errno.WSAECONNRESET:
+      error_msg = "An existing connection was forcibly closed by the remote host."
+      print settings.print_critical_msg(error_msg)
+    raise SystemExit()
 
   # Raise exception regarding connection aborted.
   except Exception:
