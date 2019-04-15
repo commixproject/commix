@@ -19,9 +19,7 @@ import sys
 import time
 import errno
 import urllib
-import socket
 import random
-from socket import error as socket_error
         
 from src.thirdparty.colorama import Fore, Back, Style, init
 
@@ -157,7 +155,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "2.9.11"
+VERSION_NUM = "2.9.12"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"

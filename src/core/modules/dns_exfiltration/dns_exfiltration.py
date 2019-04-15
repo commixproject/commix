@@ -17,7 +17,6 @@ import os
 import sys
 import time
 import signal
-import socket
 import urllib
 import urllib2
 import threading
