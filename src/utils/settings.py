@@ -20,6 +20,7 @@ import time
 import errno
 import urllib
 import random
+import string
         
 from src.thirdparty.colorama import Fore, Back, Style, init
 
@@ -155,7 +156,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "2.9.12"
+VERSION_NUM = "2.9.13"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"
@@ -174,8 +175,14 @@ LEGAL_DISCLAIMER_MSG = "Usage of " + APPLICATION + " for attacking targets witho
                        "It is the end user's responsibility to obey all applicable local, state and federal laws. " + \
                        "Developers assume no liability and are not responsible for any misuse or damage caused by this program.\n"
 
-# Ignore Tag
-IGNORE_TAG = "IGNORE_TAG"
+# Random string generator
+RANDOM_STRING_GENERATOR = ''.join(random.choice(string.ascii_uppercase + string.digits + string.ascii_lowercase) for _ in range(10))
+
+# Random Tag
+RANDOM_TAG = "" 
+
+if RANDOM_TAG == "" : 
+  RANDOM_TAG = RANDOM_STRING_GENERATOR
 
 # Proxy
 PROXY_REGEX = r"((http[^:]*)://)?([\w\-.]+):(\d+)"

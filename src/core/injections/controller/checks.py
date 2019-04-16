@@ -1200,17 +1200,17 @@ def check_similarities(all_params):
       if re.findall(r'\"(.*)\"\:\"', all_params[param]) == re.findall(r'\:\"(.*)\"', all_params[param]):
         parameter_name = re.findall(r'\:\"(.*)\"', all_params[param])
         parameter_name = ''.join(parameter_name)
-        all_params[param] = parameter_name + ":" + parameter_name + settings.IGNORE_TAG
+        all_params[param] = parameter_name + ":" + parameter_name + settings.RANDOM_TAG
     elif settings.IS_XML:
       if re.findall(r'</(.*)>', all_params[param]) == re.findall(r'>(.*)</', all_params[param]):
         parameter_name = re.findall(r'>(.*)</', all_params[param])
         parameter_name = ''.join(parameter_name)
-        all_params[param] = "<" + parameter_name + ">" + parameter_name + settings.IGNORE_TAG + "</" + parameter_name + ">"
+        all_params[param] = "<" + parameter_name + ">" + parameter_name + settings.RANDOM_TAG + "</" + parameter_name + ">"
     else:
       if re.findall(r'(.*)=', all_params[param]) == re.findall(r'=(.*)', all_params[param]):
         parameter_name = re.findall(r'=(.*)', all_params[param])
         parameter_name = ''.join(parameter_name)
-        all_params[param] = parameter_name + "=" + parameter_name + settings.IGNORE_TAG
+        all_params[param] = parameter_name + "=" + parameter_name + settings.RANDOM_TAG
   return all_params
 
 """
