@@ -14,6 +14,7 @@ For more see the file 'readme/COPYING' for copying permission.
 """
 
 import sys
+import errno
 import urllib2
 from src.utils import menu
 from src.utils import settings
