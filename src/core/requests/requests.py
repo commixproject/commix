@@ -89,14 +89,14 @@ def estimate_response_time(url, timesec):
             realm = False
 
         except ValueError:
-          err_msg = "The identified HTTP authentication type (" + auth_type + ") "
+          err_msg = "The identified HTTP authentication type (" + str(auth_type) + ") "
           err_msg += "is not yet supported."
           print settings.print_critical_msg(err_msg) + "\n"
           raise SystemExit()
 
         except IndexError:
-          err_msg = "The provided pair of " + menu.options.auth_type 
-          err_msg += " HTTP authentication credentials '" + menu.options.auth_cred + "'"
+          err_msg = "The provided pair of " + str(menu.options.auth_type) 
+          err_msg += " HTTP authentication credentials '" + str(menu.options.auth_cred) + "'"
           err_msg += " seems to be invalid."
           print settings.print_critical_msg(err_msg)
           raise SystemExit() 
