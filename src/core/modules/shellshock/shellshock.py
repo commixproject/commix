@@ -6,6 +6,7 @@ import sys
 import string
 import random
 import urllib2
+import httplib
 
 from src.utils import menu
 from src.utils import logs
@@ -897,6 +898,10 @@ def shellshock_handler(url, http_request_method, filename):
       print ""
     print settings.print_critical_msg(err_msg)
     raise SystemExit()
+
+  except httplib.IncompleteRead, err_msg:
+    print settings.print_critical_msg(err_msg + ".")
+    raise SystemExit()  
     
 """
 Execute user commands
