@@ -753,8 +753,8 @@ def referer_injection(url, vuln_parameter, payload):
 Check if target host is vulnerable. (Host-based injection)
 """
 def host_injection(url, vuln_parameter, payload):
-
-  payload = urlparse.urlparse(url).hostname + payload
+  
+  payload = urlparse(url).netloc + payload
 
   def inject_host(url, vuln_parameter, payload, proxy):
 
