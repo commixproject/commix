@@ -23,10 +23,10 @@ import random
 import string
 import base64
 import urllib
-import urlparse
 import traceback
 
 from src.utils import menu
+from urlparse import urlparse
 from src.utils import settings
 from src.utils import simple_http_server
 from src.thirdparty.colorama import Fore, Back, Style, init
@@ -133,7 +133,7 @@ def url_decode(payload):
 Checking connection (resolving hostname).
 """
 def check_connection(url):
-  hostname = urlparse.urlparse(url).hostname or ''
+  hostname = urlparse(url).netloc or ''
   if not re.search(r"\A\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\Z", hostname):
     if not any((menu.options.proxy, menu.options.tor, menu.options.offline)):
       try:
@@ -504,7 +504,7 @@ def check_http_s(url):
             url = "https://" + url
           else:
             url = "http://" + url
-        settings.SCHEME = (urlparse.urlparse(url).scheme.lower() or "http") if not menu.options.force_ssl else "https"
+        settings.SCHEME = (urlparse(url).scheme.lower() or "http") if not menu.options.force_ssl else "https"
       else:
         err_msg = "Invalid target URL has been given." 
         print settings.print_critical_msg(err_msg)
