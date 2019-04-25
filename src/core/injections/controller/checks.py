@@ -52,11 +52,13 @@ Fix for %0a, %0d%0a separators
 def newline_fixation(payload):
   payload = urllib.unquote(payload)
   if "\n" in payload:
-    _ = payload.find("\n") + 1
-    payload = urllib.quote(payload[:_]) + payload[_:]
-  elif "\r\n" in payload:
-    _ = payload.find("\r\n") + 1
-    payload = urllib.quote(payload[:_]) + payload[_:]  
+    #_ = payload.find("\n") + 1
+    #payload = urllib.quote(payload[:_]) + payload[_:]
+    payload = payload.replace("\n","%0a")
+  if "\r" in payload:
+    #_ = payload.find("\r\n") + 1
+    #payload = urllib.quote(payload[:_]) + payload[_:]  
+    payload = payload.replace("\r","%0d")
   return payload
 
 """
