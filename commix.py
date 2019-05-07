@@ -37,7 +37,12 @@ if __name__ == '__main__':
   except KeyboardInterrupt:
     import sys
     raise SystemExit() 
-    
+
+  except IndentationError as err_msg:
+    from src.utils import settings
+    print(settings.print_critical_msg(err_msg) + ".\n")
+    raise SystemExit() 
+
   except:
     from src.utils import common
     common.unhandled_exception()
