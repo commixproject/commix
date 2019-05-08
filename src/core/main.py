@@ -146,6 +146,8 @@ def examine_request(request):
             err_msg = "The provided pair of " + menu.options.auth_type 
             err_msg += " HTTP authentication credentials '" + menu.options.auth_cred + "'"
             err_msg += " seems to be invalid."
+            err_msg += " Try to rerun without providing '--auth-cred' and '--auth-type' parameters,"
+            err_msg += " in order to perform a dictionary-based attack."
             print settings.print_critical_msg(err_msg)
             raise SystemExit()
         else:  
