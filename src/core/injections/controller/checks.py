@@ -1071,16 +1071,40 @@ def skip_empty(provided_value, http_request_method):
   print settings.print_warning_msg(warn_msg)
 
 """
+Flatten nested JSON [1]
+[1] https://towardsdatascience.com/flattening-json-objects-in-python-f5343c794b10
+"""
+def flatten_json(json_data):
+  out = {}
+  def flatten(x, name=''):
+    if type(x) is dict:
+      for a in x:
+        flatten(x[a], name + a + '_')
+    elif type(x) is list:
+      i = 0
+      for a in x:
+        flatten(a, name + '')
+        i += 1
+    else:
+      out[name[:-1]] = x
+  flatten(json_data)
+  return out
+
+"""
 Check if the provided value is empty.
 """
 def is_empty(multi_parameters, http_request_method):
   provided_value = []
   multi_params = [s for s in multi_parameters]
+  if settings.IS_JSON:
+    multi_params = ','.join(multi_params)
+    json_data = json.loads(multi_params)
+    multi_params = flatten_json(json_data)
   for empty in multi_params:
     try:
       if settings.IS_JSON:
-        if re.findall(r'\:\"(.*)\"', empty)[0] == "":
-          provided_value.append(re.findall(r'\"(.*)\"\:\"', empty)[0])
+        if len(multi_params[empty]) == 0:
+          provided_value.append(empty)
       elif settings.IS_XML:
         if re.findall(r'>(.*)<', empty)[0] == "" or \
            re.findall(r'>(.*)<', empty)[0] == " ":
@@ -1091,8 +1115,7 @@ def is_empty(multi_parameters, http_request_method):
       if not settings.IS_XML:
         err_msg = "No parameter(s) found for testing in the provided data."
         print settings.print_critical_msg(err_msg)
-        raise SystemExit()
-        
+        raise SystemExit() 
   provided_value = ", ".join(provided_value)
   if len(provided_value) > 0:
     if menu.options.skip_empty and len(multi_parameters) > 1:
