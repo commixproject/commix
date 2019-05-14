@@ -1122,7 +1122,9 @@ def is_empty(multi_parameters, http_request_method):
       skip_empty(provided_value, http_request_method)
     else:
       warn_msg = "The provided value"+ "s"[len(provided_value.split(",")) == 1:][::-1]
-      warn_msg += " for "+ http_request_method + " parameter" + "s"[len(provided_value.split(",")) == 1:][::-1]
+      warn_msg += " for " + http_request_method 
+      warn_msg += ('', ' (JSON)')[settings.IS_JSON] + ('', ' (SOAP/XML)')[settings.IS_XML] 
+      warn_msg += " parameter" + "s"[len(provided_value.split(",")) == 1:][::-1]
       warn_msg += " '" + provided_value + "'"
       warn_msg += (' are ', ' is ')[len(provided_value.split(",")) == 1] + "empty. "
       warn_msg += "Use valid "
