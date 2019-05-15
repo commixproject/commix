@@ -1061,8 +1061,9 @@ def perform_payload_modification(payload):
 Skip parameters when the provided value is empty.
 """
 def skip_empty(provided_value, http_request_method):
-  warn_msg = "The " + http_request_method + " "
-  warn_msg += "parameter" + "s"[len(provided_value.split(",")) == 1:][::-1]
+  warn_msg = "The " + http_request_method
+  warn_msg += ('', ' (JSON)')[settings.IS_JSON] + ('', ' (SOAP/XML)')[settings.IS_XML]
+  warn_msg += " parameter" + "s"[len(provided_value.split(",")) == 1:][::-1]
   warn_msg += " '" + provided_value + "'"
   warn_msg += (' have ', ' has ')[len(provided_value.split(",")) == 1]
   warn_msg += "been skipped from testing"
