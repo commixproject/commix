@@ -16,6 +16,7 @@ For more see the file 'readme/COPYING' for copying permission.
 import re
 import os
 import sys
+import ast
 import glob
 import json
 import socket
@@ -29,6 +30,8 @@ from src.utils import menu
 from urlparse import urlparse
 from src.utils import settings
 from src.utils import simple_http_server
+
+from src.thirdparty.flatten_json.flatten_json import flatten, unflatten_list
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 # Ignoring the anti-CSRF parameter(s).
@@ -1071,25 +1074,15 @@ def skip_empty(provided_value, http_request_method):
   warn_msg += (' are ', ' is ')[len(provided_value.split(",")) == 1] + "empty). "
   print settings.print_warning_msg(warn_msg)
 
+
 """
-Flatten nested JSON [1]
-[1] https://towardsdatascience.com/flattening-json-objects-in-python-f5343c794b10
+Parsing and unflattening json data.
 """
-def flatten_json(json_data):
-  out = {}
-  def flatten(x, name=''):
-    if type(x) is dict:
-      for a in x:
-        flatten(x[a], name + a + '_')
-    elif type(x) is list:
-      i = 0
-      for a in x:
-        flatten(a, name + '')
-        i += 1
-    else:
-      out[name[:-1]] = x
-  flatten(json_data)
-  return out
+def json_data(data):
+  data = ast.literal_eval(json.loads(json.dumps(data)))
+  data = unflatten_list(data)
+  data = json.dumps(data)
+  return data
 
 """
 Check if the provided value is empty.
@@ -1100,7 +1093,7 @@ def is_empty(multi_parameters, http_request_method):
   if settings.IS_JSON:
     multi_params = ','.join(multi_params)
     json_data = json.loads(multi_params)
-    multi_params = flatten_json(json_data)
+    multi_params = flatten(json_data)
   for empty in multi_params:
     try:
       if settings.IS_JSON:
@@ -1226,7 +1219,7 @@ def check_similarities(all_params):
   if settings.IS_JSON:
     all_params = ','.join(all_params)
     json_data = json.loads(all_params)
-    all_params = flatten_json(json_data)
+    all_params = flatten(json_data)
     for param in all_params:
       if param == all_params[param]:
         parameter_name = param

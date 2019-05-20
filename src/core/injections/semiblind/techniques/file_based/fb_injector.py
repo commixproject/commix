@@ -85,7 +85,7 @@ def injection_test(payload, http_request_method, url):
       payload = payload.replace("\"", "\\\"")
       data = parameter.replace(settings.INJECT_TAG, urllib.unquote(payload))
       try:
-        data = json.loads(data, strict = False)
+        data = json.loads(checks.json_data(data), strict = False)
       except:
         pass
       request = urllib2.Request(url, json.dumps(data))
@@ -222,7 +222,7 @@ def injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_req
           payload = payload.replace("\"", "\\\"")
           data = parameter.replace(settings.INJECT_TAG, urllib.unquote(payload))
           try:
-            data = json.loads(data, strict = False)
+            data = json.loads(checks.json_data(data), strict = False)
           except:
             pass
           request = urllib2.Request(url, json.dumps(data))

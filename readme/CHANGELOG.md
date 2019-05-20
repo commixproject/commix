@@ -1,4 +1,6 @@
 ## Version 2.9 (upcoming)
+* Added: Flatten_json (third party) module has been added.
+* Revised: Bug-fixes and improvements regarding parsing JSON objects.
 * Added: GPL Cooperation Commitment (COMMITMENT.txt) has been added.
 * Updated: Minor update regarding HTTP authentication (Basic / Digest).
 * Revised: Minor improvements regarding preventing false negative results, due to parameters tampering during the detection phase.
