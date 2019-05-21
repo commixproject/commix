@@ -72,8 +72,7 @@ def injection_test(payload, http_request_method, url):
 
     # Define the POST data   
     if settings.IS_JSON:
-      payload = payload.replace("\"", "\\\"")
-      data = parameter.replace(settings.INJECT_TAG, urllib.unquote(payload))
+      data = parameter.replace(settings.INJECT_TAG, urllib.unquote(payload.replace("\"", "\\\"")))
       try:
         data = json.loads(checks.json_data(data), strict = False)
       except:
@@ -263,8 +262,7 @@ def injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_meth
         
         # Define the POST data   
         if settings.IS_JSON:
-          payload = payload.replace("\"", "\\\"")
-          data = parameter.replace(settings.INJECT_TAG, urllib.unquote(payload))
+          data = parameter.replace(settings.INJECT_TAG, urllib.unquote(payload.replace("\"", "\\\"")))
           try:
             data = json.loads(checks.json_data(data), strict = False)
           except:
