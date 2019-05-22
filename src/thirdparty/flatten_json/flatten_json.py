@@ -1,9 +1,24 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from collections import Iterable
-from util import check_if_numbers_are_consecutive
+"""
+Flattens JSON objects in Python. 
+flatten_json flattens the hierarchy in your object which can be useful if you want to force your objects into a table.
 
+https://github.com/amirziai/flatten
+"""
+
+from collections import Iterable
+
+def check_if_numbers_are_consecutive(list_):
+    """
+    Returns True if numbers in the list are consecutive
+
+    :param list_: list of integers
+    :return: Boolean
+    """
+    return all([True if second - first == 1 else False
+                for first, second in zip(list_[:-1], list_[1:])])
 
 def _construct_key(previous_key, separator, new_key):
     """
@@ -19,7 +34,7 @@ def _construct_key(previous_key, separator, new_key):
         return new_key
 
 
-def flatten(nested_dict, separator="_", root_keys_to_ignore=set()):
+def flatten(nested_dict, separator="_", root_keys_to_ignore=""):
     """
     Flattens a dictionary with nested structure to a dictionary with no hierarchy
     Consider ignoring keys that you are not interested in to prevent unnecessary processing
