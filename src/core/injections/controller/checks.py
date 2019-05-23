@@ -1088,6 +1088,9 @@ def json_data(data):
 Check if the provided value is empty.
 """
 def is_empty(multi_parameters, http_request_method):
+  if settings.VERBOSITY_LEVEL >= 1:
+    info_msg = "Checking for empty values in provided data."  
+    print settings.print_info_msg(info_msg)
   provided_value = []
   multi_params = [s for s in multi_parameters]
   if settings.IS_JSON:
