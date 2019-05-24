@@ -1,4 +1,5 @@
 ## Version 2.9 (upcoming)
+* Revised: Improvement regarding parsing nested JSON objects.
 * Added: Flatten_json (third party) module has been added.
 * Revised: Bug-fixes and improvements regarding parsing JSON objects.
 * Added: GPL Cooperation Commitment (COMMITMENT.txt) has been added.

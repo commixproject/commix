@@ -16,7 +16,6 @@ For more see the file 'readme/COPYING' for copying permission.
 import re
 import os
 import sys
-import ast
 import glob
 import json
 import socket
@@ -26,6 +25,7 @@ import base64
 import urllib
 import traceback
 
+from collections import OrderedDict 
 from src.utils import menu
 from urlparse import urlparse
 from src.utils import settings
@@ -1079,7 +1079,7 @@ def skip_empty(provided_value, http_request_method):
 Parsing and unflattening json data.
 """
 def json_data(data):
-  data = ast.literal_eval(json.loads(json.dumps(data)))
+  data = json.loads(data, object_pairs_hook=OrderedDict)
   data = unflatten_list(data)
   data = json.dumps(data)
   return data
@@ -1095,7 +1095,7 @@ def is_empty(multi_parameters, http_request_method):
   multi_params = [s for s in multi_parameters]
   if settings.IS_JSON:
     multi_params = ','.join(multi_params)
-    json_data = json.loads(multi_params)
+    json_data = json.loads(multi_params, object_pairs_hook=OrderedDict)
     multi_params = flatten(json_data)
   for empty in multi_params:
     try:
@@ -1221,7 +1221,7 @@ Check for similarity in provided parameter name and value.
 def check_similarities(all_params):
   if settings.IS_JSON:
     all_params = ','.join(all_params)
-    json_data = json.loads(all_params)
+    json_data = json.loads(all_params, object_pairs_hook=OrderedDict)
     all_params = flatten(json_data)
     for param in all_params:
       if param == all_params[param]:

@@ -7,8 +7,11 @@ flatten_json flattens the hierarchy in your object which can be useful if you wa
 
 https://github.com/amirziai/flatten
 """
+import ast
+import json
 
 from collections import Iterable
+from collections import OrderedDict
 
 def check_if_numbers_are_consecutive(list_):
     """
@@ -49,7 +52,7 @@ def flatten(nested_dict, separator="_", root_keys_to_ignore=""):
     assert isinstance(separator, str), "separator must be a string"
 
     # This global dictionary stores the flattened keys and values and is ultimately returned
-    flattened_dict = dict()
+    flattened_dict = OrderedDict()
 
     def _flatten(object_, key):
         """
@@ -93,7 +96,7 @@ def unflatten(flat_dict, separator='_'):
     _unflatten_asserts(flat_dict, separator)
 
     # This global dictionary is mutated and returned
-    unflattened_dict = dict()
+    unflattened_dict = OrderedDict()
 
     def _unflatten(dic, keys, value):
         for key in keys[:-1]:
@@ -108,6 +111,8 @@ def unflatten(flat_dict, separator='_'):
 
 
 def unflatten_list(flat_dict, separator='_'):
+    for k,v in flat_dict.items():
+        flat_dict[str(k)] = str(v)
     """
     Unflattens a dictionary, first assuming no lists exist and then tries to identify lists and replaces them
     This is probably not very efficient and has not been tested extensively
@@ -144,4 +149,6 @@ def unflatten_list(flat_dict, separator='_'):
                     _convert_dict_to_list(object_[key], object_, key)
 
     _convert_dict_to_list(unflattened_dict, None, None)
+    # for k,v in unflattened_dict.items():
+    #     unflattened_dict[u(k)] = u(v)
     return unflattened_dict

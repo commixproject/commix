@@ -84,10 +84,10 @@ def injection_test(payload, http_request_method, url):
     if settings.IS_JSON:
       data = parameter.replace(settings.INJECT_TAG, urllib.unquote(payload.replace("\"", "\\\"")))
       try:
-        data = json.loads(checks.json_data(data), strict = False)
+        data = checks.json_data(data)
       except:
         pass
-      request = urllib2.Request(url, json.dumps(data))
+      request = urllib2.Request(url, data)
     else:
       if settings.IS_XML:
         data = parameter.replace(settings.INJECT_TAG, urllib.unquote(payload))  
@@ -220,10 +220,10 @@ def injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_req
         if settings.IS_JSON:
           data = parameter.replace(settings.INJECT_TAG, urllib.unquote(payload.replace("\"", "\\\"")))
           try:
-            data = json.loads(checks.json_data(data), strict = False)
+            data = checks.json_data(data)
           except:
             pass
-          request = urllib2.Request(url, json.dumps(data))
+          request = urllib2.Request(url, data)
         else:
           if settings.IS_XML:
             data = parameter.replace(settings.INJECT_TAG, urllib.unquote(payload))  
