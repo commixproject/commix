@@ -65,25 +65,18 @@ def injection_test(payload, http_request_method, url):
   else:
     parameter = menu.options.data
     parameter = urllib2.unquote(parameter)
-    
     # Check if its not specified the 'INJECT_HERE' tag
     parameter = parameters.do_POST_check(parameter)
     parameter = parameter.replace("+","%2B")
-
-    # Define the POST data 
+    # Define the POST data   
     if settings.IS_JSON:
       data = parameter.replace(settings.INJECT_TAG, urllib.unquote(payload.replace("\"", "\\\"")))
-      try:
-        data = checks.json_data(data)
-      except:
-        pass
-      request = urllib2.Request(url, data)
+      data = checks.json_data(data)
+    elif settings.IS_XML:
+      data = parameter.replace(settings.INJECT_TAG, urllib.unquote(payload)) 
     else:
-      if settings.IS_XML:
-        data = parameter.replace(settings.INJECT_TAG, urllib.unquote(payload))  
-      else:
-        data = parameter.replace(settings.INJECT_TAG, payload)
-      request = urllib2.Request(url, data)
+      data = parameter.replace(settings.INJECT_TAG, payload)
+    request = urllib2.Request(url, data)
     
     # Check if defined extra headers.
     headers.do_check(request)
@@ -222,25 +215,18 @@ def injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_meth
         # Check if defined method is POST.
         parameter = menu.options.data
         parameter = urllib2.unquote(parameter)
-        
         # Check if its not specified the 'INJECT_HERE' tag
         parameter = parameters.do_POST_check(parameter)
         parameter = parameter.replace("+","%2B")
-        # Define the POST data  
-
+        # Define the POST data    
         if settings.IS_JSON:
           data = parameter.replace(settings.INJECT_TAG, urllib.unquote(payload.replace("\"", "\\\"")))
-          try:
-            data = checks.json_data(data)
-          except:
-            pass
-          request = urllib2.Request(url, data)
+          data = checks.json_data(data)
+        elif settings.IS_XML:
+          data = parameter.replace(settings.INJECT_TAG, urllib.unquote(payload)) 
         else:
-          if settings.IS_XML:
-            data = parameter.replace(settings.INJECT_TAG, urllib.unquote(payload)) 
-          else:  
-            data = parameter.replace(settings.INJECT_TAG, payload)
-          request = urllib2.Request(url, data)
+          data = parameter.replace(settings.INJECT_TAG, payload)
+        request = urllib2.Request(url, data)
         
         # Check if defined extra headers.
         headers.do_check(request)
