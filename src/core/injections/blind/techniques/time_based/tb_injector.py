@@ -67,7 +67,10 @@ def examine_requests(payload, vuln_parameter, http_request_method, url, timesec,
     # Define the POST data  
     if settings.IS_JSON:
       data = parameter.replace(settings.INJECT_TAG, urllib.unquote(payload.replace("\"", "\\\"")))
-      data = checks.json_data(data)
+      try:
+        data = checks.json_data(data)
+      except ValueError:
+        pass
     elif settings.IS_XML:
       data = parameter.replace(settings.INJECT_TAG, urllib.unquote(payload)) 
     else:
@@ -115,7 +118,10 @@ def injection_test(payload, http_request_method, url):
     # Define the POST data     
     if settings.IS_JSON:
       data = parameter.replace(settings.INJECT_TAG, urllib.unquote(payload.replace("\"", "\\\"")))
-      data = checks.json_data(data)
+      try:
+        data = checks.json_data(data)
+      except ValueError:
+        pass
     elif settings.IS_XML:
       data = parameter.replace(settings.INJECT_TAG, urllib.unquote(payload)) 
     else:
