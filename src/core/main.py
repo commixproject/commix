@@ -682,6 +682,11 @@ try:
         print settings.print_critical_msg(err_msg)
         raise SystemExit()
 
+    if menu.options.requestfile and menu.options.url:
+        err_msg = "The '-r' option is incompatible with option '-u' ('--url')."      
+        print settings.print_critical_msg(err_msg)
+        raise SystemExit()
+
     # Check if defined "--purge" option.
     if menu.options.purge:
       purge.purge()
