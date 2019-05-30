@@ -146,7 +146,7 @@ def examine_request(request):
             err_msg = "The provided pair of " + menu.options.auth_type 
             err_msg += " HTTP authentication credentials '" + menu.options.auth_cred + "'"
             err_msg += " seems to be invalid."
-            err_msg += " Try to rerun without providing '--auth-cred' and '--auth-type' parameters,"
+            err_msg += " Try to rerun without providing '--auth-cred' and '--auth-type' options,"
             err_msg += " in order to perform a dictionary-based attack."
             print settings.print_critical_msg(err_msg)
             raise SystemExit()
@@ -672,13 +672,13 @@ try:
         raise SystemExit()
 
     if menu.options.ignore_session and menu.options.flush_session:
-      err_msg = "The '--ignore-session' parameter is unlikely to work combined with the '--flush-session' parameter."
+      err_msg = "The '--ignore-session' option is unlikely to work combined with the '--flush-session' option."
       print settings.print_critical_msg(err_msg)
       raise SystemExit()
 
     # Check if defined "--auth-cred" and/or '--auth-type'.
     if (menu.options.auth_type and not menu.options.auth_cred) or (menu.options.auth_cred and not menu.options.auth_type):
-        err_msg = "You must specify both '--auth-cred' and '--auth-type' parameters."      
+        err_msg = "You must specify both '--auth-cred' and '--auth-type' options."      
         print settings.print_critical_msg(err_msg)
         raise SystemExit()
 
