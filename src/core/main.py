@@ -254,6 +254,7 @@ def init_request(url):
         error_msg = "An existing connection was forcibly closed by the remote host."
         print settings.print_critical_msg(error_msg)
       raise SystemExit()
+
   headers.do_check(request)
   # Check if defined any HTTP Proxy (--proxy option).
   if menu.options.proxy:

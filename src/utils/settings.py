@@ -155,7 +155,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "2.9.37"
+VERSION_NUM = "2.9.38"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"
@@ -772,6 +772,8 @@ SUPPORTED_HTTP_AUTH_TYPES = [ "basic", "digest" ]
 
 # HTTP Headers
 HTTP_HEADERS = [ "user-agent", "referer", "host" ]
+
+RAW_HTTP_HEADERS = ""
 
 # Tamper scripts dict
 TAMPER_SCRIPTS = {

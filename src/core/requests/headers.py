@@ -349,7 +349,9 @@ def do_check(request):
     request.add_header("Content-Type", "application/json")
 
   # Check if defined any extra HTTP headers.
-  if menu.options.headers or menu.options.header:
+  if menu.options.headers or menu.options.header or len(settings.RAW_HTTP_HEADERS) >= 1:
+    if len(settings.RAW_HTTP_HEADERS) >= 1:
+      menu.options.headers = settings.RAW_HTTP_HEADERS
     # Do replacement with the 'INJECT_HERE' tag, if the wildcard char is provided.
     if menu.options.headers:
       menu.options.headers = checks.wildcard_character(menu.options.headers)
@@ -378,10 +380,10 @@ def do_check(request):
 
     for extra_header in extra_headers:
       # Extra HTTP Header name 
-      http_header_name = re.findall(r"(.*): ", extra_header)
+      http_header_name = extra_header.split(':')[0]
       http_header_name = ''.join(http_header_name).strip()
       # Extra HTTP Header value
-      http_header_value = re.findall(r":(.*)", extra_header)
+      http_header_value = extra_header.split(':')[1]
       http_header_value = ''.join(http_header_value).strip()
       # Check if it is a custom header injection.
       if settings.CUSTOM_HEADER_INJECTION == False and \

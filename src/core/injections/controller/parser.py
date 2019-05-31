@@ -66,6 +66,13 @@ def logfile_parser():
   if menu.options.requestfile: 
     request_file = menu.options.requestfile
     info_msg = "Parsing HTTP request "
+ 
+    with open(request_file, 'r') as f:
+      settings.RAW_HTTP_HEADERS = [line.strip() for line in f]
+    settings.RAW_HTTP_HEADERS = [header for header in settings.RAW_HTTP_HEADERS if header]
+    settings.RAW_HTTP_HEADERS = settings.RAW_HTTP_HEADERS[1:]
+    settings.RAW_HTTP_HEADERS = settings.RAW_HTTP_HEADERS[:-1]
+    settings.RAW_HTTP_HEADERS = '\\n'.join(settings.RAW_HTTP_HEADERS)
 
   elif menu.options.logfile: 
     request_file = menu.options.logfile
