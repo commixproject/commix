@@ -368,11 +368,6 @@ def do_check(request):
       extra_headers = extra_headers.split("\\n")
       # Remove empty strings and "Content-Length"
       extra_headers = [x for x in extra_headers if "Content-Length" not in x]
-      if menu.options.header and not menu.options.headers and len(extra_headers) > 1:
-        warn_msg = "Swithing '--header' to '--headers' "
-        warn_msg += "due to multiple extra HTTP headers."
-        print settings.print_warning_msg(warn_msg)
-
     else:
       tmp_extra_header = []
       tmp_extra_header.append(extra_headers)

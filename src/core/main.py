@@ -659,6 +659,11 @@ try:
       print settings.print_critical_msg(err_msg)
       raise SystemExit()
 
+    if menu.options.header and len(menu.options.header.split("\\n"))> 1:
+        warn_msg = "Swithing '--header' to '--headers' "
+        warn_msg += "due to multiple extra HTTP headers."
+        print settings.print_warning_msg(warn_msg)
+
     # Check if defined "--proxy" option.
     if menu.options.proxy:
       for match in re.finditer(settings.PROXY_REGEX, menu.options.proxy):
