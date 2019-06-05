@@ -1,4 +1,5 @@
 ## Version 2.9 (upcoming)
+* Fixed: Bug-fix regarding parsing HTTP header values that contain multiple ":".
 * Revised: Improvement regarding updating "Content-Length" HTTP header, in case it's provided by user (i.e. `-r`, `--header`, `--header` options).
 * Revised: Improvement regarding parsing raw HTTP headers from a file (i.e. `-r` option).
 * Revised: Improvement regarding parsing nested JSON objects.

@@ -375,10 +375,10 @@ def do_check(request):
 
     for extra_header in extra_headers:
       # Extra HTTP Header name 
-      http_header_name = extra_header.split(':')[0]
+      http_header_name = extra_header.split(':', 1)[0]
       http_header_name = ''.join(http_header_name).strip()
       # Extra HTTP Header value
-      http_header_value = extra_header.split(':')[1]
+      http_header_value = extra_header.split(':', 1)[1]
       http_header_value = ''.join(http_header_value).strip()
       # Check if it is a custom header injection.
       if settings.CUSTOM_HEADER_INJECTION == False and \
