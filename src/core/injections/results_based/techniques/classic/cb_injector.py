@@ -99,7 +99,6 @@ def injection_test_results(response, TAG, randvcalc):
   if response == False:
     return False
   else:
-
     # Check the execution results
     html_data = response.read()
     html_data = html_data.replace("\n"," ")

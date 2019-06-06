@@ -24,6 +24,7 @@ else:
   # Handle target environment that doesn't support HTTPS verification
   ssl._create_default_https_context = _create_unverified_https_context
 import sys
+import gzip
 import time
 import base64
 import socket
@@ -35,6 +36,7 @@ from src.utils import logs
 from src.utils import menu
 from src.utils import settings
 
+from StringIO import StringIO
 from src.core.injections.controller import checks
 from src.thirdparty.colorama import Fore, Back, Style, init
 
@@ -215,17 +217,17 @@ def check_http_traffic(request):
   try:
     response = urllib2.urlopen(request)
     # Check the HTTP response headers.
-    code = response.getcode()
     response_headers = response.info()
+    page = response.read()
+    if response_headers.get('Content-Encoding') == 'gzip':
+      page = gzip.GzipFile(fileobj=StringIO(page)).read()
+      request.add_header('Accept-Encoding', 'deflate')
+    if len(settings.ENCODING) != 0:
+      page = page.decode(settings.ENCODING)
+    code = response.getcode()
     response_headers[settings.URI_HTTP_HEADER] = response.geturl()
     response_headers = str(response_headers).strip("\n")
     http_response(response_headers, code)
-    # Check the HTTP response content.
-    if len(settings.ENCODING) == 0:
-      page = response.read()
-    else:
-      page = response.read().decode(settings.ENCODING)
-    
     http_response_content(page)
     # Checks regarding a potential CAPTCHA protection mechanism.
     checks.captcha_check(page)
