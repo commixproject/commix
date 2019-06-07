@@ -2,10 +2,11 @@
   <img alt="CommixProject" src="https://camo.githubusercontent.com/41258687d868cf76951a37f6be7961c4c862dfb3/687474703a2f2f692e696d6775722e636f6d2f6c4b6762336c712e706e67" height="142" />
   <p align="center">
     <a href="https://api.travis-ci.org/commixproject/commix"><img alt="Build Status" src="https://api.travis-ci.org/commixproject/commix.svg?branch=master"></a>
-    <a href="https://github.com/commixproject/commix/releases/tag/v2.8-20190326"><img alt="Version 2.8" src="https://img.shields.io/badge/Version-2.8-green.svg"></a>
-    <a href="http://www.python.org/download/"><img alt="Python 2.6-2.7" src="https://img.shields.io/badge/Python-2.6--2.7-yellow.svg"></a>
-    <a href="https://github.com/commixproject/commix/blob/master/readme/COPYING"><img alt="GPLv3 License" src="https://img.shields.io/badge/License-GPLv3-red.svg"></a>
-    <a href="http://www.twitter.com/commixproject"><img alt="Twitter" src="https://img.shields.io/badge/Twitter-@commixproject-blue.svg"></a>
+    <a href="https://github.com/commixproject/commix/releases/tag/v2.8-20190326"><img alt="Version 2.8" src="https://img.shields.io/badge/version-2.8-green.svg"></a>
+    <a href="http://www.python.org/download/"><img alt="Python 2.6-2.7" src="https://img.shields.io/badge/python-2.6--2.7-yellow.svg"></a>
+    <a href="https://github.com/commixproject/commix/blob/master/readme/COPYING"><img alt="GPLv3 License" src="https://img.shields.io/badge/license-GPLv3-red.svg"></a>
+    <a href="https://github.com/sqlmapproject/sqlmap/issues?q=is%3Aissue+is%3Aclosed"><img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed-raw/commixproject/commix.svg?colorB=ff0000"></a>
+    <a href="http://www.twitter.com/commixproject"><img alt="Twitter" src="https://img.shields.io/badge/twitter-@commixproject-blue.svg"></a>
   </p>
 </p>
 
