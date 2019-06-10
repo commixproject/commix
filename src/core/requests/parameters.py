@@ -44,7 +44,7 @@ def do_GET_check(url):
   # Check for REST-ful URLs format. 
   if "?" not in url:
     if settings.INJECT_TAG not in url and not menu.options.shellshock:
-      if menu.options.level == 3 or menu.options.headers:
+      if menu.options.level == 3 or menu.options.header or menu.options.headers:
         return False
       if menu.options.level == 2 :
         return False
