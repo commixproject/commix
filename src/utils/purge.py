@@ -149,9 +149,9 @@ def purge():
   if menu.options.verbose >= 1:
     info_msg = "Deleting the whole directory tree... "
     sys.stdout.write(settings.print_info_msg(info_msg))
-  os.chdir(os.path.join(directory, ".."))
-  failed = False
   try:
+    failed = False
+    os.chdir(os.path.join(directory, ".."))
     shutil.rmtree(directory)
   except OSError, ex:
     failed = True  
