@@ -138,7 +138,7 @@ def url_decode(payload):
 Checking connection (resolving hostname).
 """
 def check_connection(url):
-  hostname = urlparse(url).netloc or ''
+  hostname = urlparse(url).hostname or ''
   if not re.search(r"\A\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\Z", hostname):
     if not any((menu.options.proxy, menu.options.tor, menu.options.offline)):
       try:
