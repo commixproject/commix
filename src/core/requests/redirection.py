@@ -147,12 +147,12 @@ def do_check(url):
     raise SystemExit() 
 
   # Raise exception regarding existing connection was forcibly closed by the remote host.
-  except SocketError as e:
-    if e.errno == errno.ECONNRESET:
+  except SocketError as err:
+    if err.errno == errno.ECONNRESET:
       error_msg = "Connection reset by peer."
       print settings.print_critical_msg(error_msg)
-    elif e.errno == errno.WSAECONNRESET:
-      error_msg = "An existing connection was forcibly closed by the remote host."
+    elif err.errno == errno.ECONNREFUSED:
+      error_msg = "Connection refused."
       print settings.print_critical_msg(error_msg)
     raise SystemExit()
 

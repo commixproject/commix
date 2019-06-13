@@ -124,8 +124,8 @@ def examine_request(request):
         if e.errno == errno.ECONNRESET:
           error_msg = "Connection reset by peer."
           print settings.print_critical_msg(error_msg)
-        elif e.errno == errno.WSAECONNRESET:
-          error_msg = "An existing connection was forcibly closed by the remote host."
+        elif e.errno == errno.ECONNREFUSED:
+          error_msg = "Connection refused."
           print settings.print_critical_msg(error_msg)
         raise SystemExit()
       except ValueError:
@@ -236,8 +236,8 @@ def init_request(url):
       if e.errno == errno.ECONNRESET:
         error_msg = "Connection reset by peer."
         print settings.print_critical_msg(error_msg)
-      elif e.errno == errno.WSAECONNRESET:
-        error_msg = "An existing connection was forcibly closed by the remote host."
+      elif e.errno == errno.ECONNREFUSED:
+        error_msg = "Connection refused."
         print settings.print_critical_msg(error_msg)
       raise SystemExit()
   else:
@@ -250,8 +250,8 @@ def init_request(url):
       if e.errno == errno.ECONNRESET:
         error_msg = "Connection reset by peer."
         print settings.print_critical_msg(error_msg)
-      elif e.errno == errno.WSAECONNRESET:
-        error_msg = "An existing connection was forcibly closed by the remote host."
+      elif e.errno == errno.ECONNREFUSED:
+        error_msg = "Connection refused."
         print settings.print_critical_msg(error_msg)
       raise SystemExit()
 
