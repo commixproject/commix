@@ -375,6 +375,9 @@ def do_check(request):
       tmp_extra_header.append(extra_headers)
       extra_headers = tmp_extra_header
 
+    # Remove empty strings
+    extra_headers = [x for x in extra_headers if x]
+    
     for extra_header in extra_headers:
       # Extra HTTP Header name 
       http_header_name = extra_header.split(':', 1)[0]
