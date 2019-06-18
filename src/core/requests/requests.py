@@ -422,7 +422,7 @@ def cookie_injection(url, vuln_parameter, payload):
   # Check if defined Tor.
   elif menu.options.tor:
     try:
-      proxy = urllib2.ProxyHandler({settings.SCHEME:settings.PRIVOXY_IP + ":" + PRIVOXY_PORT})
+      proxy = urllib2.ProxyHandler({settings.SCHEME:settings.PRIVOXY_IP + ":" + settings.PRIVOXY_PORT})
       response = inject_cookie(url, vuln_parameter, payload, proxy)
     except urllib2.HTTPError, err_msg:
       if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
@@ -554,7 +554,7 @@ def user_agent_injection(url, vuln_parameter, payload):
   # Check if defined Tor.
   elif menu.options.tor:
     try:
-      proxy = urllib2.ProxyHandler({settings.SCHEME:settings.PRIVOXY_IP + ":" + PRIVOXY_PORT})
+      proxy = urllib2.ProxyHandler({settings.SCHEME:settings.PRIVOXY_IP + ":" + settings.PRIVOXY_PORT})
       response = inject_user_agent(url, vuln_parameter, payload, proxy)
     except urllib2.HTTPError, err_msg:
       if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
@@ -686,7 +686,7 @@ def referer_injection(url, vuln_parameter, payload):
   # Check if defined Tor.
   elif menu.options.tor:
     try:
-      proxy = urllib2.ProxyHandler({settings.SCHEME:settings.PRIVOXY_IP + ":" + PRIVOXY_PORT})
+      proxy = urllib2.ProxyHandler({settings.SCHEME:settings.PRIVOXY_IP + ":" + settings.PRIVOXY_PORT})
       response = inject_referer(url, vuln_parameter, payload, proxy)
     except urllib2.HTTPError, err_msg:
       if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
@@ -821,7 +821,7 @@ def host_injection(url, vuln_parameter, payload):
   # Check if defined Tor.
   elif menu.options.tor:
     try:
-      proxy = urllib2.ProxyHandler({settings.SCHEME:settings.PRIVOXY_IP + ":" + PRIVOXY_PORT})
+      proxy = urllib2.ProxyHandler({settings.SCHEME:settings.PRIVOXY_IP + ":" + settings.PRIVOXY_PORT})
       response = inject_host(url, vuln_parameter, payload, proxy)
     except urllib2.HTTPError, err_msg:
       if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
@@ -956,7 +956,7 @@ def custom_header_injection(url, vuln_parameter, payload):
   # Check if defined Tor.
   elif menu.options.tor:
     try:
-      proxy = urllib2.ProxyHandler({settings.SCHEME:settings.PRIVOXY_IP + ":" + PRIVOXY_PORT})
+      proxy = urllib2.ProxyHandler({settings.SCHEME:settings.PRIVOXY_IP + ":" + settings.PRIVOXY_PORT})
       response = inject_custom_header(url, vuln_parameter, payload, proxy)
     except urllib2.HTTPError, err_msg:
       if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
