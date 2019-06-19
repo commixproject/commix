@@ -65,8 +65,19 @@ def logfile_parser():
 
   if menu.options.requestfile: 
     request_file = menu.options.requestfile
+
     info_msg = "Parsing HTTP request "
- 
+    info_msg += "using the '" + os.path.split(request_file)[1] + "' file... "
+    sys.stdout.write(settings.print_info_msg(info_msg))
+    sys.stdout.flush()
+
+    if not os.path.exists(request_file):
+      print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
+      err_msg = "It seems that the '" + request_file + "' file, does not exist."
+      sys.stdout.write(settings.print_critical_msg(err_msg) + "\n")
+      sys.stdout.flush()
+      raise SystemExit()
+
     with open(request_file, 'r') as f:
       settings.RAW_HTTP_HEADERS = [line.strip() for line in f]
     settings.RAW_HTTP_HEADERS = [header for header in settings.RAW_HTTP_HEADERS if header]
