@@ -63,32 +63,13 @@ def logfile_parser():
     sys.stdout.flush()
     raise SystemExit()
 
-  if menu.options.requestfile: 
-    request_file = menu.options.requestfile
-
+  if menu.options.requestfile:
     info_msg = "Parsing HTTP request "
-    info_msg += "using the '" + os.path.split(request_file)[1] + "' file... "
-    sys.stdout.write(settings.print_info_msg(info_msg))
-    sys.stdout.flush()
-
-    if not os.path.exists(request_file):
-      print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
-      err_msg = "It seems that the '" + request_file + "' file, does not exist."
-      sys.stdout.write(settings.print_critical_msg(err_msg) + "\n")
-      sys.stdout.flush()
-      raise SystemExit()
-
-    with open(request_file, 'r') as f:
-      settings.RAW_HTTP_HEADERS = [line.strip() for line in f]
-    settings.RAW_HTTP_HEADERS = [header for header in settings.RAW_HTTP_HEADERS if header]
-    settings.RAW_HTTP_HEADERS = settings.RAW_HTTP_HEADERS[1:]
-    settings.RAW_HTTP_HEADERS = settings.RAW_HTTP_HEADERS[:-1]
-    settings.RAW_HTTP_HEADERS = '\\n'.join(settings.RAW_HTTP_HEADERS)
-
+    request_file = menu.options.requestfile
   elif menu.options.logfile: 
-    request_file = menu.options.logfile
     info_msg = "Parsing target "
-
+    request_file = menu.options.logfile
+    
   info_msg += "using the '" + os.path.split(request_file)[1] + "' file... "
   sys.stdout.write(settings.print_info_msg(info_msg))
   sys.stdout.flush()
@@ -101,6 +82,14 @@ def logfile_parser():
     raise SystemExit()
 
   else:
+    if menu.options.requestfile:
+      with open(request_file, 'r') as f:
+        settings.RAW_HTTP_HEADERS = [line.strip() for line in f]
+      settings.RAW_HTTP_HEADERS = [header for header in settings.RAW_HTTP_HEADERS if header]
+      settings.RAW_HTTP_HEADERS = settings.RAW_HTTP_HEADERS[1:]
+      settings.RAW_HTTP_HEADERS = settings.RAW_HTTP_HEADERS[:-1]
+      settings.RAW_HTTP_HEADERS = '\\n'.join(settings.RAW_HTTP_HEADERS)
+
     # Check for multiple hosts
     try:
       request = open(request_file, "r")
