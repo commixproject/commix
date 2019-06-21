@@ -795,7 +795,11 @@ try:
     settings.DETECTION_PHASE = True
 
     # Parse target and data from HTTP proxy logs (i.e Burp / WebScarab).
-    if menu.options.requestfile or menu.options.logfile:
+    if menu.options.requestfile and menu.options.logfile:
+      err_msg = "The '-r' option is unlikely to work combined with the '-l' option."
+      print settings.print_critical_msg(err_msg)
+      raise SystemExit()
+    elif menu.options.requestfile or menu.options.logfile:
       parser.logfile_parser()
 
     if menu.options.offline:
