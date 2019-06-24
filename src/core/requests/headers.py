@@ -379,17 +379,20 @@ def do_check(request):
     extra_headers = [x for x in extra_headers if x]
     
     for extra_header in extra_headers:
-      # Extra HTTP Header name 
-      http_header_name = extra_header.split(':', 1)[0]
-      http_header_name = ''.join(http_header_name).strip()
-      # Extra HTTP Header value
-      http_header_value = extra_header.split(':', 1)[1]
-      http_header_value = ''.join(http_header_value).strip()
-      # Check if it is a custom header injection.
-      if settings.CUSTOM_HEADER_INJECTION == False and \
-         settings.INJECT_TAG in http_header_value:
-        settings.CUSTOM_HEADER_INJECTION = True
-        settings.CUSTOM_HEADER_NAME = http_header_name
-      request.add_header(http_header_name, http_header_value)
-
+      try:
+        # Extra HTTP Header name 
+        http_header_name = extra_header.split(':', 1)[0]
+        http_header_name = ''.join(http_header_name).strip()
+        # Extra HTTP Header value
+        http_header_value = extra_header.split(':', 1)[1]
+        http_header_value = ''.join(http_header_value).strip()
+        # Check if it is a custom header injection.
+        if settings.CUSTOM_HEADER_INJECTION == False and \
+           settings.INJECT_TAG in http_header_value:
+          settings.CUSTOM_HEADER_INJECTION = True
+          settings.CUSTOM_HEADER_NAME = http_header_name
+        request.add_header(http_header_name, http_header_value)
+      except:
+        pass
+        
 # eof
