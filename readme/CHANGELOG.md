@@ -1,4 +1,5 @@
 ## Version 2.9 (upcoming)
+* Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
 * Fixed: Bug-fix regarding parsing hostname and port from URL.
 * Revised: Improvement regarding automatically decoding "deflate" and "gzip" HTTP responses.
 * Fixed: Bug-fix regarding parsing HTTP header values that contain multiple ":".
