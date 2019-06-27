@@ -264,11 +264,11 @@ request.add_option("--auth-cred",
                 dest="auth_cred",
                 help="HTTP authentication credentials (e.g. 'admin:admin').")
 
-request.add_option("--ignore-401",
-                action="store_true",
-                dest="ignore_401",
+request.add_option("--ignore-code",
+                action="store",
+                dest="ignore_code",
                 default=False,
-                help="Ignore HTTP error 401 (Unauthorized).")
+                help="Ignore (problematic) HTTP error code (e.g. 401).")
 
 request.add_option("--force-ssl",
                 action="store_true",

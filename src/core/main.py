@@ -140,7 +140,7 @@ def examine_request(request):
         raise SystemExit()
       except Exception as err_msg:
         if "Unauthorized" in str(err_msg):
-          if menu.options.ignore_401:
+          if menu.options.ignore_code == settings.UNAUTHORIZED_ERROR:
             pass
           elif menu.options.auth_type and menu.options.auth_cred:
             err_msg = "The provided pair of " + menu.options.auth_type 

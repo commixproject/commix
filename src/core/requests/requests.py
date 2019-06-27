@@ -62,7 +62,7 @@ def estimate_response_time(url, timesec):
     
   except urllib2.HTTPError, err:
     ignore_start = time.time()
-    if "Unauthorized" in str(err) and menu.options.ignore_401:
+    if "Unauthorized" in str(err) and menu.options.ignore_code == settings.UNAUTHORIZED_ERROR:
       pass
     else:
       if settings.VERBOSITY_LEVEL >= 1:
@@ -121,7 +121,7 @@ def estimate_response_time(url, timesec):
           else:  
             # Basic authentication 
             if menu.options.auth_type == "basic":
-              if not menu.options.ignore_401:
+              if not menu.options.ignore_code == settings.UNAUTHORIZED_ERROR:
                 warn_msg = "(" + menu.options.auth_type.capitalize() + ") " 
                 warn_msg += "HTTP authentication credentials are required."
                 print settings.print_warning_msg(warn_msg)
@@ -153,7 +153,7 @@ def estimate_response_time(url, timesec):
 
             # Digest authentication         
             elif menu.options.auth_type == "digest":
-              if not menu.options.ignore_401:
+              if not menu.options.ignore_code == settings.UNAUTHORIZED_ERROR:
                 warn_msg = "(" + menu.options.auth_type.capitalize() + ") " 
                 warn_msg += "HTTP authentication credentials are required."
                 print settings.print_warning_msg(warn_msg)      

@@ -1,3 +1,7 @@
+## Version 3.0 (upcoming)
+* Replaced: The `--ignore-401` option has been replaced with `--ignore-code` option.
+* Added: New option ( `--ignore-code`) for ignoring (problematic) HTTP error code (e.g. 401).
+
 ## Version 2.9 (2019-06-26)
 * Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
 * Fixed: Bug-fix regarding parsing hostname and port from URL.

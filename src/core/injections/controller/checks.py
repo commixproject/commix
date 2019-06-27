@@ -306,9 +306,9 @@ def check_bind_tcp_options(bind_tcp_option):
 Ignore error messages and continue the tests.
 """
 def continue_tests(err):
-  # If defined "--ignore-401" option, ignores HTTP Error 401 (Unauthorized) 
+  # If defined "--ignore-code=401" option, ignores HTTP Error 401 (Unauthorized) 
   # and continues tests without providing valid credentials.
-  if menu.options.ignore_401:
+  if menu.options.ignore_code == settings.UNAUTHORIZED_ERROR:
     settings.WAF_ENABLED = True
     return True
 
@@ -615,7 +615,7 @@ Print the authentiation error message.
 def http_auth_err_msg():
   err_msg = "Use the '--auth-cred' option to provide a valid pair of " 
   err_msg += "HTTP authentication credentials (i.e --auth-cred=\"admin:admin\")" 
-  err_msg += " or use the '--ignore-401' option to ignore HTTP error 401 (Unauthorized)" 
+  err_msg += " or use the '--ignore-code=401' option to ignore HTTP error 401 (Unauthorized)" 
   err_msg += " and continue tests without providing valid credentials."
   print settings.print_critical_msg(err_msg) 
   raise SystemExit()
