@@ -1100,7 +1100,7 @@ def is_empty(multi_parameters, http_request_method):
   for empty in multi_params:
     try:
       if settings.IS_JSON:
-        if len(multi_params[empty]) == 0:
+        if len(str(multi_params[empty])) == 0:
           provided_value.append(empty)
       elif settings.IS_XML:
         if re.findall(r'>(.*)<', empty)[0] == "" or \
