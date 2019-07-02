@@ -306,9 +306,9 @@ def check_bind_tcp_options(bind_tcp_option):
 Ignore error messages and continue the tests.
 """
 def continue_tests(err):
-  # If defined "--ignore-code=401" option, ignores HTTP Error 401 (Unauthorized) 
-  # and continues tests without providing valid credentials.
-  if menu.options.ignore_code == settings.UNAUTHORIZED_ERROR:
+  # Ignoring (problematic) HTTP error codes (401, 500).
+  if menu.options.ignore_code == settings.UNAUTHORIZED_ERROR or \
+     menu.options.ignore_code == settings.INTERNAL_SERVER_ERROR:
     settings.WAF_ENABLED = True
     return True
 
@@ -321,6 +321,7 @@ def continue_tests(err):
     settings.WAF_ENABLED = True
     warn_msg = "It seems that target is protected by some kind of WAF/IPS/IDS."
     print settings.print_warning_msg(warn_msg)
+
   try:
     while True:
       if not menu.options.batch:
