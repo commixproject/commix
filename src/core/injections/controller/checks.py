@@ -306,11 +306,12 @@ def check_bind_tcp_options(bind_tcp_option):
 Ignore error messages and continue the tests.
 """
 def continue_tests(err):
-  # Ignoring (problematic) HTTP error codes (401, 500).
-  if menu.options.ignore_code == settings.UNAUTHORIZED_ERROR or \
-     menu.options.ignore_code == settings.INTERNAL_SERVER_ERROR:
-    settings.WAF_ENABLED = True
-    return True
+  # Ignoring (problematic) HTTP error codes.
+  if menu.options.ignore_code:
+    for error_code in settings.HTTP_ERROR_CODES:
+      if menu.options.ignore_code == error_code:
+        settings.WAF_ENABLED = True
+        return True
 
   # Possible WAF/IPS/IDS
   if (str(err.code) == settings.FORBIDDEN_ERROR or settings.NOT_ACCEPTABLE_ERROR) and \

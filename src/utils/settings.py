@@ -155,7 +155,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "3.0.4"
+VERSION_NUM = "3.0.5"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"
@@ -801,6 +801,8 @@ FORBIDDEN_ERROR = "403"
 NOT_FOUND_ERROR = "404"
 NOT_ACCEPTABLE_ERROR = "406"
 INTERNAL_SERVER_ERROR = "500"
+
+HTTP_ERROR_CODES = [ BAD_REQUEST, UNAUTHORIZED_ERROR, FORBIDDEN_ERROR, NOT_FOUND_ERROR, NOT_ACCEPTABLE_ERROR, INTERNAL_SERVER_ERROR ]
 
 # End line
 END_LINE = ["\r", "\n", "\r\n"]
