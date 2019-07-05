@@ -719,6 +719,12 @@ try:
       else:
         menu.options.agent = menu.mobile_user_agents()
 
+    # Check if defined "--ignore-code" option.
+    if "," in menu.options.ignore_code:
+      err_msg = "Ignoring more than one HTTP error code, is not yet supported."
+      print settings.print_critical_msg(err_msg)
+      raise SystemExit()
+
     if menu.options.wizard:
       if not menu.options.url:
         while True:
