@@ -728,7 +728,7 @@ try:
     if menu.options.wizard:
       if not menu.options.url:
         while True:
-          question_msg = "Please enter full target URL (--url) > "
+          question_msg = "Please enter full target URL (-u) > "
           sys.stdout.write(settings.print_question_msg(question_msg))
           menu.options.url = sys.stdin.readline().replace("\n","")
           if len(menu.options.url) == 0:
