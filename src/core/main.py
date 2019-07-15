@@ -353,6 +353,7 @@ def logs_filename_creation():
 The main function.
 """
 def main(filename, url):
+
   try:
     # Ignore the mathematic calculation part (Detection phase).
     if menu.options.skip_calc:
@@ -364,6 +365,11 @@ def main(filename, url):
     # Target URL reload.
     if menu.options.url_reload and menu.options.data:
       settings.URL_RELOAD = True
+
+    if menu.options.header is not None and settings.INJECT_TAG in menu.options.header or \
+       menu.options.headers is not None and settings.INJECT_TAG in menu.options.headers:
+      info_msg = "Injection marker found in option '--header(s)/--user-agent/--referer/--cookie'."
+      print settings.print_info_msg(info_msg)
 
     if menu.options.test_parameter and menu.options.skip_parameter:
       if type(menu.options.test_parameter) is bool:
