@@ -370,6 +370,11 @@ def main(filename, url):
        menu.options.headers is not None and settings.INJECT_TAG in menu.options.headers:
       info_msg = "Injection marker found in option '--header(s)/--user-agent/--referer/--cookie'."
       print settings.print_info_msg(info_msg)
+      if menu.options.test_parameter:
+        err_msg = "The options '-p' and the injection marker cannot be used "
+        err_msg += "simultaneously (i.e. only one option must be set)."
+        print settings.print_critical_msg(err_msg)
+        raise SystemExit
 
     if menu.options.test_parameter and menu.options.skip_parameter:
       if type(menu.options.test_parameter) is bool:
