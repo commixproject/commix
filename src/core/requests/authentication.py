@@ -54,7 +54,7 @@ def authentication_process():
       menu.options.cookie = cookies.rstrip()
       if settings.VERBOSITY_LEVEL >= 1:
         success_msg = "The received cookie is "  
-        success_msg += menu.options.cookie + Style.RESET_ALL + "."
+        success_msg += str(menu.options.cookie) + Style.RESET_ALL + "."
         print settings.print_success_msg(success_msg)
     urllib2.install_opener(opener)
     request = urllib2.Request(auth_url, auth_data)
@@ -77,11 +77,11 @@ def define_wordlists():
   try:
     usernames = []
     if not os.path.isfile(settings.USERNAMES_TXT_FILE):
-      err_msg = "The username file (" + settings.USERNAMES_TXT_FILE + ") is not found"
+      err_msg = "The username file (" + str(settings.USERNAMES_TXT_FILE) + ") is not found"
       print settings.print_critical_msg(err_msg)
       raise SystemExit() 
     if len(settings.USERNAMES_TXT_FILE) == 0:
-      err_msg = "The " + settings.USERNAMES_TXT_FILE + " file is empty."
+      err_msg = "The " + str(settings.USERNAMES_TXT_FILE) + " file is empty."
       print settings.print_critical_msg(err_msg)
       raise SystemExit()
     with open(settings.USERNAMES_TXT_FILE, "r") as f: 
@@ -89,18 +89,18 @@ def define_wordlists():
         line = line.strip()
         usernames.append(line)
   except IOError: 
-    err_msg = " Check if the " + settings.USERNAMES_TXT_FILE + " file is readable or corrupted."
+    err_msg = " Check if the " + str(settings.USERNAMES_TXT_FILE) + " file is readable or corrupted."
     print settings.print_critical_msg(err_msg)
     raise SystemExit()
 
   try:
     passwords = []
     if not os.path.isfile(settings.PASSWORDS_TXT_FILE):
-      err_msg = "The password file (" + settings.PASSWORDS_TXT_FILE + ") is not found" + Style.RESET_ALL
+      err_msg = "The password file (" + str(settings.PASSWORDS_TXT_FILE) + ") is not found" + Style.RESET_ALL
       print settings.print_critical_msg(err_msg)
       raise SystemExit() 
     if len(settings.PASSWORDS_TXT_FILE) == 0:
-      err_msg = "The " + settings.PASSWORDS_TXT_FILE + " file is empty."
+      err_msg = "The " + str(settings.PASSWORDS_TXT_FILE) + " file is empty."
       print settings.print_critical_msg(err_msg)
       raise SystemExit() 
     with open(settings.PASSWORDS_TXT_FILE, "r") as f: 
@@ -108,7 +108,7 @@ def define_wordlists():
         line = line.strip()
         passwords.append(line)
   except IOError: 
-    err_msg = " Check if the " + settings.PASSWORDS_TXT_FILE + " file is readable or corrupted."
+    err_msg = " Check if the " + str(settings.PASSWORDS_TXT_FIL) + " file is readable or corrupted."
     print settings.print_critical_msg(err_msg)
     raise SystemExit()
 

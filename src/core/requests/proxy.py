@@ -51,7 +51,7 @@ def do_check(url):
     pass
   else:
     err_msg = "Unable to connect to the target URL or proxy ("
-    err_msg += menu.options.proxy
+    err_msg += str(menu.options.proxy)
     err_msg += ")."
     print settings.print_critical_msg(err_msg)
     raise SystemExit()
@@ -68,7 +68,7 @@ def use_proxy(request):
 
   except httplib.BadStatusLine, e:
     err_msg = "Unable to connect to the target URL or proxy ("
-    err_msg += menu.options.proxy
+    err_msg += str(menu.options.proxy)
     err_msg += ")."
     print settings.print_critical_msg(err_msg)
     raise SystemExit() 
