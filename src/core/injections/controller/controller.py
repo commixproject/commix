@@ -72,6 +72,10 @@ Proceed to the injection process for the appropriate parameter.
 """
 def injection_proccess(url, check_parameter, http_request_method, filename, timesec):
 
+  if menu.options.ignore_code: 
+    info_msg = "Ignoring '" + str(menu.options.ignore_code) + "' HTTP error code. "
+    print settings.print_info_msg(info_msg)
+
   # Skipping specific injection techniques.
   if settings.SKIP_TECHNIQUES:
     menu.options.tech = "".join(settings.AVAILABLE_TECHNIQUES)
