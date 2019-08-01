@@ -330,13 +330,14 @@ def get_request_response(request):
         if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
           response = False  
         elif settings.IGNORE_ERR_MSG == False:
-          err = str(err_msg) + "."
-          if not settings.VERBOSITY_LEVEL >= 1 and settings.TIME_BASED_STATE == False or \
-            settings.VERBOSITY_LEVEL >= 1 and settings.EVAL_BASED_STATE == None:
-            print ""
-          if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
-            print "" 
-          print settings.print_critical_msg(err)
+          if not str(err_msg.code) == str(menu.options.ignore_code):
+            err = str(err_msg) + "."
+            if not settings.VERBOSITY_LEVEL >= 1 and settings.TIME_BASED_STATE == False or \
+              settings.VERBOSITY_LEVEL >= 1 and settings.EVAL_BASED_STATE == None:
+              print ""
+            if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
+              print "" 
+            print settings.print_critical_msg(err)
           continue_tests = checks.continue_tests(err_msg)
           if continue_tests == True:
             settings.IGNORE_ERR_MSG = True
