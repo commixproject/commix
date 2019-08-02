@@ -332,12 +332,14 @@ def get_request_response(request):
         elif settings.IGNORE_ERR_MSG == False:
           if not str(err_msg.code) == str(menu.options.ignore_code):
             err = str(err_msg) + "."
-            if not settings.VERBOSITY_LEVEL >= 1 and settings.TIME_BASED_STATE == False or \
-              settings.VERBOSITY_LEVEL >= 1 and settings.EVAL_BASED_STATE == None:
-              print ""
-            if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
-              print "" 
-            print settings.print_critical_msg(err)
+            # if not settings.VERBOSITY_LEVEL >= 1 and settings.TIME_BASED_STATE == False or \
+            #   settings.VERBOSITY_LEVEL >= 1 and settings.EVAL_BASED_STATE == None:
+            #   print "f"
+            # elif settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
+            #   print "s"
+            if settings.VERBOSITY_LEVEL < 2:
+              print "\r" + settings.print_critical_msg(err) + 30 * " "
+
           continue_tests = checks.continue_tests(err_msg)
           if continue_tests == True:
             settings.IGNORE_ERR_MSG = True
