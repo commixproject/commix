@@ -40,6 +40,7 @@ from src.core.injections.controller import checks
 Estimating the response time (in seconds).
 """
 def estimate_response_time(url, timesec):
+  stored_auth_creds = False
   if settings.VERBOSITY_LEVEL >= 1:
     info_msg = "Estimating the target URL response time... "
     sys.stdout.write(settings.print_info_msg(info_msg))
@@ -220,9 +221,9 @@ def estimate_response_time(url, timesec):
   #   info_msg = "Estimating the target URL response time... "
   #   sys.stdout.write(settings.print_info_msg(info_msg))
   #   sys.stdout.flush()
-
+  
   if int(diff) < 1:
-    if settings.VERBOSITY_LEVEL >= 1:
+    if settings.VERBOSITY_LEVEL >= 1 and stored_auth_creds == False:
       print "[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]"
     url_time_response = int(diff)
     if settings.TARGET_OS == "win":
