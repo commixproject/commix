@@ -138,7 +138,10 @@ def cmd_exec(http_request_method, cmd, url, vuln_parameter, ip_src):
     print settings.print_critical_msg(str(err_msg.args[0]).split("] ")[1] + ".")
     raise SystemExit()
 
-
+  except InvalidURL:
+    err_msg = "Invalid target URL has been given." 
+    print settings.print_critical_msg(err_msg)
+    raise SystemExit()
 
 def input_cmd(http_request_method, url, vuln_parameter, ip_src, technique):
 
