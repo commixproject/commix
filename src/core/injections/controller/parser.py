@@ -57,8 +57,9 @@ def logfile_parser():
   def invalid_data(request, single_request):
     if single_request:
       print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
-    err_msg = "Something seems to be wrong with "
-    err_msg += "the '" + os.path.split(request_file)[1] + "' file. "
+    err_msg = "Specified file "
+    err_msg += "'" + os.path.split(request_file)[1] + "'"
+    err_msg += " does not contain a valid HTTP request."
     sys.stdout.write(settings.print_critical_msg(err_msg) + "\n")
     sys.stdout.flush()
     raise SystemExit()
