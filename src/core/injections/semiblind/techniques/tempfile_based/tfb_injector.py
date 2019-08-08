@@ -66,7 +66,7 @@ def examine_requests(payload, vuln_parameter, http_request_method, url, timesec,
 
     # Check if its not specified the 'INJECT_HERE' tag
     parameter = parameters.do_POST_check(parameter)
-    parameter = parameter.replace("+","%2B")
+    parameter = ''.join(str(e) for e in parameter).replace("+","%2B")
 
     # Define the POST data    
     if settings.IS_JSON:
@@ -117,7 +117,7 @@ def injection_test(payload, http_request_method, url):
     parameter = urllib2.unquote(parameter)
     # Check if its not specified the 'INJECT_HERE' tag
     parameter = parameters.do_POST_check(parameter)
-    parameter = parameter.replace("+","%2B")
+    parameter = ''.join(str(e) for e in parameter).replace("+","%2B")
 
     # Define the vulnerable parameter
     vuln_parameter = parameters.vuln_POST_param(parameter, url)
