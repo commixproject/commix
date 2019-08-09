@@ -7,8 +7,6 @@ flatten_json flattens the hierarchy in your object which can be useful if you wa
 
 https://github.com/amirziai/flatten
 """
-import ast
-import json
 
 from collections import Iterable
 from collections import OrderedDict
