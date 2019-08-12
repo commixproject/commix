@@ -34,7 +34,6 @@ def _construct_key(previous_key, separator, new_key):
     else:
         return new_key
 
-
 def flatten(nested_dict, separator="_", root_keys_to_ignore=""):
     """
     Flattens a dictionary with nested structure to a dictionary with no hierarchy
@@ -75,13 +74,10 @@ def flatten(nested_dict, separator="_", root_keys_to_ignore=""):
 
 flatten_json = flatten
 
-
 def _unflatten_asserts(flat_dict, separator):
     assert isinstance(flat_dict, dict), "un_flatten requires a dictionary input"
     assert isinstance(separator, str), "separator must be a string"
-    assert all((not isinstance(value, Iterable) or isinstance(value, str)
-                for value in flat_dict.values())), "provided dictionary is not flat"
-
+    assert all((not isinstance(value, str) for value in flat_dict.values())), "provided dictionary is not flat"
 
 def unflatten(flat_dict, separator='_'):
     """
@@ -107,10 +103,7 @@ def unflatten(flat_dict, separator='_'):
 
     return unflattened_dict
 
-
 def unflatten_list(flat_dict, separator='_'):
-    for k,v in flat_dict.items():
-        flat_dict[str(k)] = str(v)
     """
     Unflattens a dictionary, first assuming no lists exist and then tries to identify lists and replaces them
     This is probably not very efficient and has not been tested extensively
@@ -147,6 +140,4 @@ def unflatten_list(flat_dict, separator='_'):
                     _convert_dict_to_list(object_[key], object_, key)
 
     _convert_dict_to_list(unflattened_dict, None, None)
-    # for k,v in unflattened_dict.items():
-    #     unflattened_dict[u(k)] = u(v)
     return unflattened_dict
