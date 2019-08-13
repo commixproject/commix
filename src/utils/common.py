@@ -136,12 +136,12 @@ def unhandled_exception():
     raise SystemExit()
 
   elif "Read-only file system" in exc_msg:
-    errMsg = "Output device is mounted as read-only."
+    err_msg = "Output device is mounted as read-only."
     print settings.print_critical_msg(err_msg)
     raise SystemExit()
 
   elif "OperationalError: disk I/O error" in exc_msg:
-    errMsg = "I/O error on output device."
+    err_msg = "I/O error on output device."
     print settings.print_critical_msg(err_msg)
     raise SystemExit()
 
