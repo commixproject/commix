@@ -35,7 +35,7 @@ def logfile_parser():
   Warning message for mutiple request in same log file.
   """
   def multi_requests():
-    print "[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]"
+    print("[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]")
     warn_msg = "Multiple"
     if menu.options.requestfile: 
       warn_msg += " requests"
@@ -56,7 +56,7 @@ def logfile_parser():
   """
   def invalid_data(request, single_request):
     if single_request:
-      print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
+      print("[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]")
     err_msg = "Specified file "
     err_msg += "'" + os.path.split(request_file)[1] + "'"
     err_msg += " does not contain a valid HTTP request."
@@ -76,7 +76,7 @@ def logfile_parser():
   sys.stdout.flush()
 
   if not os.path.exists(request_file):
-    print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
+    print("[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]")
     err_msg = "It seems that the '" + request_file + "' file, does not exist."
     sys.stdout.write(settings.print_critical_msg(err_msg) + "\n")
     sys.stdout.flush()
@@ -99,7 +99,7 @@ def logfile_parser():
         error_msg = str(err_msg.args[0]).split("] ")[1] + "."
       except:
         error_msg = str(err_msg.args[0]) + "."
-      print settings.print_critical_msg(error_msg)
+      print(settings.print_critical_msg(error_msg))
       raise SystemExit()
         
     words_dict = {}
@@ -176,10 +176,10 @@ def logfile_parser():
           menu.options.auth_cred = base64.b64decode(auth_provided[1])
         elif menu.options.auth_type == "digest":
           if not menu.options.auth_cred:
-            print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
+            print("[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]")
             err_msg = "Use the '--auth-cred' option to provide a valid pair of "
             err_msg += "HTTP authentication credentials (i.e --auth-cred=\"admin:admin\") "
-            print settings.print_critical_msg(err_msg)
+            print(settings.print_critical_msg(err_msg))
             raise SystemExit()
 
       # Add extra headers
@@ -207,8 +207,8 @@ def logfile_parser():
         sys.stdout.flush()
       if menu.options.logfile:
         info_msg = "Parsed target from '" + os.path.split(request_file)[1] + "' for tests :"
-        print settings.print_info_msg(info_msg)
-        print settings.SUB_CONTENT_SIGN + http_header + " " +  prefix + menu.options.host + request_url
+        print(settings.print_info_msg(info_msg))
+        print(settings.SUB_CONTENT_SIGN + http_header + " " +  prefix + menu.options.host + request_url)
         if http_header == "POST":
-           print settings.SUB_CONTENT_SIGN + "Data: " + menu.options.data
+           print(settings.SUB_CONTENT_SIGN + "Data: " + menu.options.data)
 # eof

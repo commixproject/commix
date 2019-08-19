@@ -39,7 +39,7 @@ def store_crawling():
     if store_crawling in settings.CHOICE_YES:
       filename = tempfile.mkstemp(suffix=".txt")[1]
       info_msg = "Writing crawling results to a temporary file '" + str(filename) + "'."
-      print settings.print_info_msg(info_msg)
+      print(settings.print_info_msg(info_msg))
       return str(filename)
     elif store_crawling in settings.CHOICE_NO:
       return None
@@ -47,7 +47,7 @@ def store_crawling():
       raise SystemExit()
     else:
       err_msg = "'" + store_crawling + "' is not a valid answer."  
-      print settings.print_error_msg(err_msg)
+      print(settings.print_error_msg(err_msg))
       pass  
 
 """
@@ -80,7 +80,7 @@ def sitemap(url):
       href_list.append(match.text)
   except:
     warn_msg = "The 'sitemap.xml' not found."
-    print settings.print_warning_msg(warn_msg) 
+    print(settings.print_warning_msg(warn_msg)) 
   return href_list
 
 """
@@ -125,11 +125,11 @@ def crawler(url):
   if not menu.options.sitemap_url:
     if menu.options.DEFAULT_CRAWLDEPTH_LEVEL > 2:
       err_msg = "Depth level '" + str(menu.options.DEFAULT_CRAWLDEPTH_LEVEL) + "' is not a valid."  
-      print settings.print_error_msg(err_msg)
+      print(settings.print_error_msg(err_msg))
       raise SystemExit()
     info_msg = "Starting crawler and searching for "
     info_msg += "links with depth " + str(menu.options.DEFAULT_CRAWLDEPTH_LEVEL) + "." 
-    print settings.print_info_msg(info_msg)
+    print(settings.print_info_msg(info_msg))
   else:
     while True:
       if not menu.options.batch:
@@ -146,7 +146,7 @@ def crawler(url):
         raise SystemExit()
       else:
         err_msg = "'" + change_depth_level + "' is not a valid answer."  
-        print settings.print_error_msg(err_msg)
+        print(settings.print_error_msg(err_msg))
         pass
     # Change the crawling depth level.
     if change_depth_level in settings.CHOICE_YES:
@@ -159,7 +159,7 @@ def crawler(url):
           break
         elif str(depth_level) != "1" and str(depth_level) != "2":
           err_msg = "Depth level '" + depth_level + "' is not a valid answer."  
-          print settings.print_error_msg(err_msg)
+          print(settings.print_error_msg(err_msg))
           pass
         else: 
           menu.options.DEFAULT_CRAWLDEPTH_LEVEL = depth_level
@@ -186,7 +186,7 @@ def crawler(url):
         raise SystemExit()
       else:
         err_msg = "'" + sitemap_check + "' is not a valid answer."  
-        print settings.print_error_msg(err_msg)
+        print(settings.print_error_msg(err_msg))
         pass
     else:
       sitemap_check = True
@@ -199,7 +199,7 @@ def crawler(url):
       if recursion.endswith(".xml") and "sitemap" in recursion.lower():
         while True:
           warn_msg = "A sitemap recursion was detected " + "'" + recursion + "'."
-          print settings.print_warning_msg(warn_msg)
+          print(settings.print_warning_msg(warn_msg))
           if not menu.options.batch:
             question_msg = "Do you want to follow the detected recursion? [Y/n] > "
             sys.stdout.write(settings.print_question_msg(question_msg))
@@ -218,7 +218,7 @@ def crawler(url):
             raise SystemExit()
           else:
             err_msg = "'" + sitemap_check + "' is not a valid answer."  
-            print settings.print_error_msg(err_msg)
+            print(settings.print_error_msg(err_msg))
             pass
   else:
     output_href = do_process(url)
@@ -241,8 +241,8 @@ def crawler(url):
         valid_url_found = True
         url_num += 1
         if succeed_banner:
-          print "[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]"
-        print settings.print_success_msg("URL " + str(url_num) + " - " + check_url)
+          print("[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]")
+        print(settings.print_success_msg("URL " + str(url_num) + " - " + check_url))
         if filename is not None:
           with open(filename, "a") as crawling_results:
             crawling_results.write(check_url + "\n")
@@ -267,7 +267,7 @@ def crawler(url):
   except TypeError:
     pass
   if not valid_url_found:
-    print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
+    print("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
   raise SystemExit()
 
 # eof

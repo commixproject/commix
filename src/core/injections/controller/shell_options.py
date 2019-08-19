@@ -40,10 +40,10 @@ Check for established connection
 def check_established_connection():
   while True:
     if settings.VERBOSITY_LEVEL == 1:
-      print ""
+      print("")
     warn_msg = "Something went wrong with the reverse TCP connection."
     warn_msg += " Please wait while checking state."
-    print settings.print_warning_msg(warn_msg)
+    print(settings.print_warning_msg(warn_msg))
     time.sleep(10)
     lines = os.popen('netstat -anta').read().split("\n")
     found = False
@@ -85,11 +85,11 @@ def execute_shell(separator, TAG, cmd, prefix, suffix, whitespace, http_request_
     check_established_connection()
   else:
     if settings.VERBOSITY_LEVEL == 1:
-      print ""
+      print("")
 
   err_msg = "The " + os_shell_option.split("_")[0] + " "
   err_msg += os_shell_option.split("_")[1].upper() + " connection has failed!"
-  print settings.print_critical_msg(err_msg)
+  print(settings.print_critical_msg(err_msg))
 
 """
 Configure the bind TCP shell
@@ -173,7 +173,7 @@ def check_option(separator, TAG, cmd, prefix, suffix, whitespace, http_request_m
   # The "os_shell" option
   elif os_shell_option == "os_shell": 
     warn_msg = "You are already into the '" + os_shell_option + "' mode."
-    print settings.print_warning_msg(warn_msg)
+    print(settings.print_warning_msg(warn_msg))
     return go_back, go_back_again
 
   # The "bind_tcp" option

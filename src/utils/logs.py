@@ -64,7 +64,7 @@ def save_cmd_history():
       readline.write_history_file(cli_history)
   except (IOError, AttributeError) as e:
     warn_msg = "There was a problem writing the history file '" + cli_history + "'."
-    print settings.print_warning_msg(warn_msg)
+    print(settings.print_warning_msg(warn_msg))
 
 """
 Load commands from history.
@@ -76,7 +76,7 @@ def load_cmd_history():
       readline.read_history_file(cli_history)
   except (IOError, AttributeError) as e:
     warn_msg = "There was a problem loading the history file '" + cli_history + "'."
-    print settings.print_warning_msg(warn_msg)
+    print(settings.print_warning_msg(warn_msg))
 
 """
 Create log files
@@ -95,7 +95,7 @@ def create_log_file(url, output_dir):
       error_msg = str(err_msg.args[0]).split("] ")[1] + "."
     except:
       error_msg = str(err_msg.args[0]) + "."
-    print settings.print_critical_msg(error_msg)
+    print(settings.print_critical_msg(error_msg))
     raise SystemExit()
       
   # Check if port is defined to host.
@@ -111,7 +111,7 @@ def create_log_file(url, output_dir):
         error_msg = str(err_msg.args[0]).split("] ")[1] + "."
       except:
         error_msg = str(err_msg.args[0]) + "."
-      print settings.print_critical_msg(error_msg)
+      print(settings.print_critical_msg(error_msg))
       raise SystemExit()
 
   # Create cli history file if does not exist.
@@ -126,7 +126,7 @@ def create_log_file(url, output_dir):
        err_msg = "The provided session file ('" + \
                     menu.options.session_file + \
                     "') does not exist." 
-       print settings.print_critical_msg(err_msg)
+       print(settings.print_critical_msg(err_msg))
        raise SystemExit()
   else:  
     settings.SESSION_FILE = output_dir + host + "/" + "session" + ".db"
@@ -150,7 +150,7 @@ def create_log_file(url, output_dir):
       error_msg = str(err_msg.args[0]).split("] ")[1] + "."
     except:
       error_msg = str(err_msg.args[0]) + "."
-    print settings.print_critical_msg(error_msg)
+    print(settings.print_critical_msg(error_msg))
     raise SystemExit()
       
   return filename
@@ -213,7 +213,7 @@ Fetched data logged to text files.
 def logs_notification(filename):
   # Save command history.
   info_msg = "Fetched data logged to text files under '" + os.getcwd() + "/" + filename + "'."
-  print settings.print_info_msg(info_msg)
+  print(settings.print_info_msg(info_msg))
 
 """
 Log all HTTP traffic into a textual file.

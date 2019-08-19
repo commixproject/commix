@@ -54,12 +54,12 @@ def file_read(separator, TAG, prefix, suffix, whitespace, http_request_method, u
   else:
     shell = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
   if settings.VERBOSITY_LEVEL >= 1 and menu.options.ignore_session:
-    print ""
+    print("")
   if shell:
     success_msg = "The contents of file '"  
     success_msg += file_to_read + "'" + Style.RESET_ALL + ": "
     sys.stdout.write(settings.print_success_msg(success_msg))
-    print shell
+    print(shell)
     output_file = open(filename, "a")
     success_msg = "The contents of file '"
     success_msg += file_to_read + "' : " + shell + ".\n"
@@ -149,7 +149,7 @@ def file_write(separator, TAG, prefix, suffix, whitespace, http_request_method, 
   shell = cb_injector.injection_results(response, TAG, cmd)
   shell = "".join(str(p) for p in shell)
   if settings.VERBOSITY_LEVEL >= 1:
-    print ""
+    print("")
   if shell:
     success_msg = "The " +  shell + Style.RESET_ALL
     success_msg += Style.BRIGHT + " file was created successfully!" + "\n" 
@@ -208,7 +208,7 @@ def file_upload(separator, TAG, prefix, suffix, whitespace, http_request_method,
     shell = cb_injector.injection_results(response, TAG, cmd)
     shell = "".join(str(p) for p in shell)
     if settings.VERBOSITY_LEVEL >= 1:
-      print ""
+      print("")
     if shell:
       success_msg = "The " +  shell
       success_msg += Style.RESET_ALL + Style.BRIGHT + " file was uploaded successfully!" 

@@ -77,9 +77,9 @@ def grab_ip_addr():
   except socket_error, err_msg:
     if errno.ECONNREFUSED:
       warn_msg = "Internet seems unreachable."
-      print settings.print_warning_msg(warn_msg)
+      print(settings.print_warning_msg(warn_msg))
     else:
-      print settings.print_critical_msg(str(err_msg)) + "\n"
+      print(settings.print_critical_msg(str(err_msg)) + "\n")
       raise SystemExit()
 
 class Handler(BaseHTTPRequestHandler):

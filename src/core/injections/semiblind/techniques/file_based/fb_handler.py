@@ -216,7 +216,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
     TAG = ''.join(random.choice(string.ascii_uppercase) for i in range(6)) 
     info_msg = "Trying to create a file in '" + settings.WEB_ROOT 
     info_msg += "' for command execution results... "
-    print settings.print_info_msg(info_msg)
+    print(settings.print_info_msg(info_msg))
 
   i = 0
   # Calculate all possible combinations
@@ -246,7 +246,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
               err_msg = "An error occurred while accessing session file ('"
               err_msg += settings.SESSION_FILE + "'). "
               err_msg += "Use the '--flush-session' option."
-              print settings.print_critical_msg(err_msg)
+              print(settings.print_critical_msg(err_msg))
               raise SystemExit()
 
           if settings.RETEST == True:
@@ -284,12 +284,12 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
               # Check if defined "--verbose" option.
               if settings.VERBOSITY_LEVEL == 1:
                 payload_msg = payload.replace("\n", "\\n")
-                print settings.print_payload(payload_msg)
+                print(settings.print_payload(payload_msg))
               # Check if defined "--verbose" option.
               elif settings.VERBOSITY_LEVEL > 1:
                 info_msg = "Generating a payload for injection..."
-                print settings.print_info_msg(info_msg)
-                print settings.print_payload(payload) 
+                print(settings.print_info_msg(info_msg))
+                print(settings.print_payload(payload)) 
 
               # Cookie Injection
               if settings.COOKIE_INJECTION == True:
@@ -367,7 +367,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                     warn_msg = "It seems that you don't have permissions to "
                     warn_msg += "read and/or write files in '" + settings.WEB_ROOT + "'."  
                     sys.stdout.write("\r" + settings.print_warning_msg(warn_msg))
-                    print ""
+                    print("")
                     while True:
                       if not menu.options.batch:
                         question_msg = "Do you want to try the temporary directory (" + tmp_path + ") [Y/n] > "
@@ -391,11 +391,11 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                       elif tmp_upload in settings.CHOICE_NO:
                         break
                       elif tmp_upload in settings.CHOICE_QUIT:
-                        print ""
+                        print("")
                         raise
                       else:
                         err_msg = "'" + tmp_upload + "' is not a valid answer."  
-                        print settings.print_error_msg(err_msg)
+                        print(settings.print_error_msg(err_msg))
                         pass
                     continue
                   
@@ -421,12 +421,12 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                   
                 elif str(e.getcode()) == settings.UNAUTHORIZED_ERROR:
                   err_msg = "Authorization required!"
-                  print settings.print_critical_msg(err_msg) + "\n"
+                  print(settings.print_critical_msg(err_msg)) + "\n"
                   raise SystemExit()
                   
                 elif str(e.getcode()) == settings.FORBIDDEN_ERROR:
                   err_msg = "You don't have permission to access this page."
-                  print settings.print_critical_msg(err_msg) + "\n"
+                  print(settings.print_critical_msg(err_msg)) + "\n"
                   raise SystemExit()
               
             except KeyboardInterrupt:
@@ -446,8 +446,8 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
               sys.stdout.write("\r" + settings.print_warning_msg(warn_msg))
               err_msg = str(e).replace(": "," (") + ")."
               if menu.options.verbose > 1:
-                print ""
-              print settings.print_critical_msg(err_msg)
+                print("")
+              print(settings.print_critical_msg(err_msg))
               # Provide custom server's root directory.
               custom_web_root(url, timesec, filename, http_request_method, url_time_response)
               continue
@@ -515,7 +515,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
 
             if not settings.LOAD_SESSION:
               if not settings.VERBOSITY_LEVEL >= 1:
-                print ""
+                print("")
               else:
                 checks.total_of_requests()
 
@@ -526,8 +526,8 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
             success_msg += ('', ' (JSON)')[settings.IS_JSON] + ('', ' (SOAP/XML)')[settings.IS_XML] + the_type + header_name
             success_msg += found_vuln_parameter + " seems injectable via "
             success_msg += "(" + injection_type.split(" ")[0] + ") " + technique + "."
-            print settings.print_success_msg(success_msg)
-            print settings.SUB_CONTENT_SIGN + "Payload: " + str(checks.url_decode(payload)) + Style.RESET_ALL
+            print(settings.print_success_msg(success_msg))
+            print(settings.SUB_CONTENT_SIGN + "Payload: " + str(checks.url_decode(payload)) + Style.RESET_ALL)
             # Export session
             if not settings.LOAD_SESSION:
               session_handler.injection_point_importation(url, technique, injection_type, separator, shell[0], vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response=0, timesec=0, how_long=0, output_length=0, is_vulnerable=menu.options.level)
@@ -548,7 +548,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                   enumerate_again = "y"
                 if enumerate_again in settings.CHOICE_YES:
                   fb_enumeration.do_check(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-                  # print ""
+                  # print("")
                   break
                 elif enumerate_again in settings.CHOICE_NO:
                   new_line = False
@@ -559,7 +559,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                   raise SystemExit()
                 else:
                   err_msg = "'" + enumerate_again + "' is not a valid answer."
-                  print settings.print_error_msg(err_msg)
+                  print(settings.print_error_msg(err_msg))
                   pass
             else:
               if menu.enumeration_options():
@@ -567,12 +567,12 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
            
             if not menu.file_access_options() and not menu.options.os_cmd:
               if not settings.VERBOSITY_LEVEL >= 1 and new_line:
-                print ""
+                print("")
 
             # Check for any system file access options.
             if settings.FILE_ACCESS_DONE == True :
               if settings.ENUMERATION_DONE != True:
-                print ""
+                print("")
               while True:
                 if not menu.options.batch:
                   question_msg = "Do you want to access files again? [Y/n] > "
@@ -584,7 +584,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                    file_access_again= "y"
                 if file_access_again in settings.CHOICE_YES:
                   fb_file_access.do_check(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-                  print ""
+                  print("")
                   break
                 elif file_access_again in settings.CHOICE_NO: 
                   break
@@ -594,19 +594,19 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                   raise SystemExit()
                 else:
                   err_msg = "'" + enumerate_again + "' is not a valid answer."
-                  print settings.print_error_msg(err_msg)
+                  print(settings.print_error_msg(err_msg))
                   pass
             else:
               if menu.file_access_options():
                 # if not menu.enumeration_options():
-                #   print ""
+                #   print("")
                 fb_file_access.do_check(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-                print ""
+                print("")
                
             # Check if defined single cmd.
             if menu.options.os_cmd:
               # if not menu.file_access_options():
-              #   print ""
+              #   print("")
               fb_enumeration.single_os_cmd_exec(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
               # Delete previous shell (text) files (output)
               delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
@@ -619,10 +619,10 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
               while True:
                 # Delete previous shell (text) files (output)
                 # if settings.VERBOSITY_LEVEL >= 1:
-                #   print ""
+                #   print("")
                 delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
                 if settings.VERBOSITY_LEVEL >= 1:
-                  print ""
+                  print("")
                 if go_back == True:
                   break
                 if not menu.options.batch:
@@ -635,8 +635,8 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                    gotshell = "y"
                 if gotshell in settings.CHOICE_YES:
                   if not menu.options.batch:
-                    print ""
-                  print "Pseudo-Terminal (type '" + Style.BRIGHT + "?" + Style.RESET_ALL + "' for available options)"
+                    print("")
+                  print("Pseudo-Terminal (type '" + Style.BRIGHT + "?" + Style.RESET_ALL + "' for available options)")
                   if readline_error:
                     checks.no_readline_module()
                   while True:
@@ -652,7 +652,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                     cmd = raw_input("""commix(""" + Style.BRIGHT + Fore.RED + """os_shell""" + Style.RESET_ALL + """) > """)
                     cmd = checks.escaped_cmd(cmd)
                     # if settings.VERBOSITY_LEVEL >= 1:
-                    #   print ""
+                    #   print("")
                     if cmd.lower() in settings.SHELL_OPTIONS:
                       go_back, go_back_again = shell_options.check_option(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, technique, go_back, no_result, timesec, go_back_again, payload, OUTPUT_TEXTFILE)
                       if go_back and go_back_again == False:
@@ -675,13 +675,13 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                         if shell != "":
                           # Update logs with executed cmds and execution results.
                           logs.executed_command(filename, cmd, shell)
-                          print "\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n"
+                          print("\n") + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n"
 
                       if not shell or shell == "":
                         if settings.VERBOSITY_LEVEL >= 1:
-                          print ""
+                          print("")
                         err_msg = "The '" + cmd + "' command, does not return any output."
-                        print settings.print_critical_msg(err_msg) + "\n"
+                        print(settings.print_critical_msg(err_msg)) + "\n"
 
                 elif gotshell in settings.CHOICE_NO:
                   if checks.next_attack_vector(technique, go_back) == True:
@@ -698,19 +698,19 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                   raise SystemExit()
                 else:
                   err_msg = "'" + gotshell + "' is not a valid answer."  
-                  print settings.print_error_msg(err_msg)
+                  print(settings.print_error_msg(err_msg))
                   pass
               
             except KeyboardInterrupt: 
               # if settings.VERBOSITY_LEVEL >= 1:
-              print ""
+              print("")
               # Delete previous shell (text) files (output)
               delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
               raise
               
   if no_result == True:
     if settings.VERBOSITY_LEVEL == 0:
-      print ""
+      print("")
     return False
   else :
     sys.stdout.write("\r")

@@ -56,14 +56,14 @@ def file_read(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
   except TypeError:
     pass
   if settings.VERBOSITY_LEVEL <= 1 and not menu.options.ignore_session and _:
-    print ""
+    print("")
   if shell:
     success_msg = "The contents of file '"  
     success_msg += file_to_read + Style.RESET_ALL + Style.BRIGHT 
     success_msg += "'" + Style.RESET_ALL + " : "
     sys.stdout.write(settings.print_success_msg(success_msg))
     sys.stdout.flush()
-    print shell
+    print(shell)
     output_file = open(filename, "a")
     success_msg = "The contents of file '"
     success_msg += file_to_read + "' : " + shell + ".\n"
@@ -145,7 +145,7 @@ def file_write(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec,
     shell = "".join(str(p) for p in shell)
     # Check if file exists
     cmd = "echo $(ls " + dest_to_write + ")"
-  print ""
+  print("")
   check_how_long, output = tfb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
   shell = output 
   try:
@@ -153,7 +153,7 @@ def file_write(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec,
   except TypeError:
     pass
   if settings.VERBOSITY_LEVEL <= 1 and not menu.options.ignore_session and _:
-    print ""
+    print("")
   if shell:
     success_msg = "The '" +  shell + Style.RESET_ALL 
     success_msg += Style.BRIGHT + "' file was created successfully!\n" 
@@ -204,7 +204,7 @@ def file_upload(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec
       cmd = "dir " + dest_to_upload + ")"
     else:  
       cmd = "echo $(ls " + dest_to_upload + ")"
-    print ""  
+    print("")  
     check_how_long, output = tfb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
     shell = output 
     try:
@@ -212,7 +212,7 @@ def file_upload(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec
     except TypeError:
       pass
     if settings.VERBOSITY_LEVEL <= 1 and not menu.options.ignore_session and _:
-      print ""
+      print("")
     if shell:
       success_msg = "The '" +  shell + Style.RESET_ALL 
       success_msg += Style.BRIGHT + "' file was uploaded successfully!"

@@ -189,7 +189,7 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
   sys.stdout.write(settings.print_info_msg(info_msg))
   sys.stdout.flush()  
   if settings.VERBOSITY_LEVEL > 1:
-    print ""
+    print("")
   for output_length in range(int(minlen), int(maxlen)):
     if alter_shell:
       # Execute shell commands on vulnerable host.
@@ -214,7 +214,7 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
     # Check if defined "--verbose" option.
     elif settings.VERBOSITY_LEVEL > 1:
       info_msg = "Generating a payload for injection..."
-      print settings.print_info_msg(info_msg)
+      print(settings.print_info_msg(info_msg))
       payload_msg = payload.replace("\n", "\\n") 
       sys.stdout.write(settings.print_payload(payload_msg) + "\n")
 
@@ -254,9 +254,9 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
           sys.stdout.write("[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL+ "]\n")
           sys.stdout.flush()
         if settings.VERBOSITY_LEVEL == 1:
-          print ""
+          print("")
         info_msg = "Retrieved: " + str(output_length)
-        print settings.print_info_msg(info_msg)
+        print(settings.print_info_msg(info_msg))
       found_chars = True
       injection_check = False
       break
@@ -306,7 +306,7 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
         # Check if defined "--verbose" option.
         elif settings.VERBOSITY_LEVEL > 1:
           info_msg = "Generating a payload for injection..."
-          print settings.print_info_msg(info_msg)
+          print(settings.print_info_msg(info_msg))
           payload_msg = payload.replace("\n", "\\n") 
           sys.stdout.write(settings.print_payload(payload_msg) + "\n")
 
@@ -368,12 +368,12 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
       sys.stdout.write("[" +Fore.RED+ " FAILED " + Style.RESET_ALL+ "]")
       sys.stdout.flush()
     else:
-      print ""
+      print("")
     check_how_long = 0
     output = False
 
   if settings.VERBOSITY_LEVEL >= 1 and menu.options.ignore_session:
-    print ""
+    print("")
   return  check_how_long, output
 
 """
@@ -396,7 +396,7 @@ def false_positive_check(separator, TAG, cmd, whitespace, prefix, suffix, timese
     sys.stdout.flush()
   # Check if defined "--verbose" option.
   elif settings.VERBOSITY_LEVEL > 1:
-    print settings.print_info_msg(info_msg)
+    print(settings.print_info_msg(info_msg))
 
   # Varying the sleep time.
   timesec = timesec + random.randint(1, 5)
@@ -426,7 +426,7 @@ def false_positive_check(separator, TAG, cmd, whitespace, prefix, suffix, timese
     # Check if defined "--verbose" option.
     elif settings.VERBOSITY_LEVEL > 1:
       info_msg = "Generating a payload for testing the reliability of used payload..."
-      print settings.print_info_msg(info_msg)
+      print(settings.print_info_msg(info_msg))
       payload_msg = payload.replace("\n", "\\n") 
       sys.stdout.write(settings.print_payload(payload_msg) + "\n")
 
@@ -497,7 +497,7 @@ def false_positive_check(separator, TAG, cmd, whitespace, prefix, suffix, timese
         # Check if defined "--verbose" option.
         elif settings.VERBOSITY_LEVEL > 1:
           info_msg = "Generating a payload for testing the reliability of used payload..."
-          print settings.print_info_msg(info_msg)
+          print(settings.print_info_msg(info_msg))
           payload_msg = payload.replace("\n", "\\n") 
           sys.stdout.write(settings.print_payload(payload_msg) + "\n")
 
@@ -538,7 +538,7 @@ def false_positive_check(separator, TAG, cmd, whitespace, prefix, suffix, timese
 
     if str(output) == str(randvcalc):
       if settings.VERBOSITY_LEVEL == 1:
-        print ""
+        print("")
       return how_long, output
 
 """
@@ -548,10 +548,10 @@ def export_injection_results(cmd, separator, output, check_how_long):
 
   if output != "" and check_how_long != 0 :
     if settings.VERBOSITY_LEVEL == 0:
-      print "\n"
+      print("\n")
     elif settings.VERBOSITY_LEVEL == 1:
-      print ""  
-    print Fore.GREEN + Style.BRIGHT + output + Style.RESET_ALL
+      print("")  
+    print(Fore.GREEN + Style.BRIGHT + output + Style.RESET_ALL)
     info_msg = "Finished in " + time.strftime('%H:%M:%S', time.gmtime(check_how_long)) + "."
     sys.stdout.write("\n" + settings.print_info_msg(info_msg))
   else:
@@ -561,10 +561,10 @@ def export_injection_results(cmd, separator, output, check_how_long):
       err_msg += "any output due to '" + separator + "' filtration on target host. "
       err_msg += "To bypass that limitation, use the '--alter-shell' option "
       err_msg += "or try another injection technique (i.e. '--technique=\"f\"')"
-      print "\n" + settings.print_critical_msg(err_msg)
+      print("\n" + settings.print_critical_msg(err_msg))
       raise SystemExit()
     # Check for fault command.
     else:
       err_msg = "The '" + cmd + "' command, does not return any output."
-      print settings.print_critical_msg(err_msg)     
+      print(settings.print_critical_msg(err_msg))     
 # eof

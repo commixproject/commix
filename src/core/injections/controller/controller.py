@@ -74,7 +74,7 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
 
   if menu.options.ignore_code: 
     info_msg = "Ignoring '" + str(menu.options.ignore_code) + "' HTTP error code. "
-    print settings.print_info_msg(info_msg)
+    print(settings.print_info_msg(info_msg))
 
   # Skipping specific injection techniques.
   if settings.SKIP_TECHNIQUES:
@@ -84,7 +84,7 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
         menu.options.tech = menu.options.tech.replace(skip_tech_name,"")
     if len(menu.options.tech) == 0:
       err_msg = "Detection procedure was aborted due to skipping all injection techniques."
-      print settings.print_critical_msg(err_msg)
+      print(settings.print_critical_msg(err_msg))
       raise SystemExit
 
   # User-Agent HTTP header / Referer HTTP header / 
@@ -112,7 +112,7 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
       info_msg += header_name + the_type + check_parameter + " for tests."
     else:
       info_msg += the_type + header_name + check_parameter + " for tests."
-    print settings.print_info_msg(info_msg)
+    print(settings.print_info_msg(info_msg))
 
   # Estimating the response time (in seconds)
   timesec, url_time_response = requests.estimate_response_time(url, timesec)
@@ -126,7 +126,7 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
     warn_msg = "Due to the provided (unsuitable) injection technique" 
     warn_msg += "s"[len(menu.options.tech) == 1:][::-1] + ", "
     warn_msg += "the option '--failed-tries' will be ignored."
-    print settings.print_warning_msg(warn_msg) + Style.RESET_ALL
+    print(settings.print_warning_msg(warn_msg)) + Style.RESET_ALL
 
   # Procced with file-based semiblind command injection technique,
   # once the user provides the path of web server's root directory.
@@ -161,7 +161,7 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
           raise SystemExit()
         else:
           err_msg = "'" + procced_option + "' is not a valid answer."  
-          print settings.print_error_msg(err_msg)
+          print(settings.print_error_msg(err_msg))
           pass
     else:
       settings.CLASSIC_STATE = False
@@ -190,7 +190,7 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
           raise SystemExit()
         else:
           err_msg = "'" + procced_option + "' is not a valid answer."  
-          print settings.print_error_msg(err_msg)
+          print(settings.print_error_msg(err_msg))
           pass
       else:
         settings.EVAL_BASED_STATE = False
@@ -219,7 +219,7 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
       warn_msg += " " + http_request_method + ""
     warn_msg += the_type + header_name + check_parameter
     warn_msg += " seems to be not injectable."
-    print settings.print_warning_msg(warn_msg) + Style.RESET_ALL
+    print(settings.print_warning_msg(warn_msg)) + Style.RESET_ALL
 
 """
 Inject HTTP headers (User-agent / Referer / Host) (if level > 2).
@@ -508,11 +508,11 @@ def perform_checks(url, filename):
     # Check if authentication page is the same with the next (injection) URL
     if urllib2.urlopen(url).read() == urllib2.urlopen(menu.options.auth_url).read():
       err_msg = "It seems that the authentication procedure has failed."
-      print settings.print_critical_msg(err_msg)
+      print(settings.print_critical_msg(err_msg))
       raise SystemExit()
   elif menu.options.auth_url or menu.options.auth_data: 
     err_msg = "You must specify both login panel URL and login parameters."
-    print settings.print_critical_msg(err_msg)
+    print(settings.print_critical_msg(err_msg))
     raise SystemExit()
   else:
     pass
@@ -544,7 +544,7 @@ def perform_checks(url, filename):
       else:
         warn_msg = "The HTTP Cookie header is not provided, "
         warn_msg += "so this test is going to be skipped."
-        print settings.print_warning_msg(warn_msg)
+        print(settings.print_warning_msg(warn_msg))
     else:
       # Custom header Injection
       if settings.CUSTOM_HEADER_INJECTION == True:
@@ -569,14 +569,14 @@ def do_check(url, filename):
     if not menu.options.tech or "t" in menu.options.tech or "f" in menu.options.tech:
       warn_msg = "It is highly recommended to avoid usage of switch '--tor' for "
       warn_msg += "time-based injections because of inherent high latency time."
-      print settings.print_warning_msg(warn_msg)
+      print(settings.print_warning_msg(warn_msg))
   
   # Check for '--backticks' option.
   if menu.options.enable_backticks:
     if not menu.options.tech or "e" in menu.options.tech or "t" in menu.options.tech or "f" in menu.options.tech:
       warn_msg = "The '--backticks' switch is only supported by the classic command injection. "
       warn_msg += "It will be ignored for all other techniques."
-      print settings.print_warning_msg(warn_msg) + Style.RESET_ALL
+      print(settings.print_warning_msg(warn_msg)) + Style.RESET_ALL
 
   if menu.options.wizard:
     if perform_checks(url,filename) == False:
@@ -603,7 +603,7 @@ def do_check(url, filename):
           raise SystemExit()
         else:
           err_msg = "'" + next_level + "' is not a valid answer."  
-          print settings.print_error_msg(err_msg)
+          print(settings.print_error_msg(err_msg))
           pass
   else:
     perform_checks(url,filename)
@@ -626,12 +626,12 @@ def do_check(url, filename):
         if menu.options.skip_empty:
           err_msg += " and/or try to remove the option '--skip-empty'"  
       err_msg += "."
-      print settings.print_critical_msg(err_msg)
+      print(settings.print_critical_msg(err_msg))
 
   logs.print_logs_notification(filename, url)
   if not settings.CHECK_BOTH_OS:
     # if not menu.options.bulkfile or settings.EOF:
-    #   print ""
+    #   print("")
     raise SystemExit()
 
 # eof

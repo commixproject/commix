@@ -55,7 +55,7 @@ def authentication_process():
       if settings.VERBOSITY_LEVEL >= 1:
         success_msg = "The received cookie is "  
         success_msg += str(menu.options.cookie) + Style.RESET_ALL + "."
-        print settings.print_success_msg(success_msg)
+        print(settings.print_success_msg(success_msg))
     urllib2.install_opener(opener)
     request = urllib2.Request(auth_url, auth_data)
     # Check if defined extra headers.
@@ -66,7 +66,7 @@ def authentication_process():
     return response
 
   except urllib2.HTTPError, err_msg:
-    print settings.print_critical_msg(err_msg)
+    print(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
 """
@@ -78,11 +78,11 @@ def define_wordlists():
     usernames = []
     if not os.path.isfile(settings.USERNAMES_TXT_FILE):
       err_msg = "The username file (" + str(settings.USERNAMES_TXT_FILE) + ") is not found"
-      print settings.print_critical_msg(err_msg)
+      print(settings.print_critical_msg(err_msg))
       raise SystemExit() 
     if len(settings.USERNAMES_TXT_FILE) == 0:
       err_msg = "The " + str(settings.USERNAMES_TXT_FILE) + " file is empty."
-      print settings.print_critical_msg(err_msg)
+      print(settings.print_critical_msg(err_msg))
       raise SystemExit()
     with open(settings.USERNAMES_TXT_FILE, "r") as f: 
       for line in f:
@@ -90,18 +90,18 @@ def define_wordlists():
         usernames.append(line)
   except IOError: 
     err_msg = " Check if the " + str(settings.USERNAMES_TXT_FILE) + " file is readable or corrupted."
-    print settings.print_critical_msg(err_msg)
+    print(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
   try:
     passwords = []
     if not os.path.isfile(settings.PASSWORDS_TXT_FILE):
       err_msg = "The password file (" + str(settings.PASSWORDS_TXT_FILE) + ") is not found" + Style.RESET_ALL
-      print settings.print_critical_msg(err_msg)
+      print(settings.print_critical_msg(err_msg))
       raise SystemExit() 
     if len(settings.PASSWORDS_TXT_FILE) == 0:
       err_msg = "The " + str(settings.PASSWORDS_TXT_FILE) + " file is empty."
-      print settings.print_critical_msg(err_msg)
+      print(settings.print_critical_msg(err_msg))
       raise SystemExit() 
     with open(settings.PASSWORDS_TXT_FILE, "r") as f: 
       for line in f:
@@ -109,7 +109,7 @@ def define_wordlists():
         passwords.append(line)
   except IOError: 
     err_msg = " Check if the " + str(settings.PASSWORDS_TXT_FIL) + " file is readable or corrupted."
-    print settings.print_critical_msg(err_msg)
+    print(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
   return usernames, passwords
@@ -132,7 +132,7 @@ def http_auth_cracker(url, realm):
         if settings.VERBOSITY_LEVEL >= 1:
           payload = "pair of credentials '" + username + ":" + password + "'"
           if settings.VERBOSITY_LEVEL > 1:
-            print settings.print_checking_msg(payload)
+            print(settings.print_checking_msg(payload))
           else:
             sys.stdout.write("\r" + settings.print_checking_msg(payload) + "           ")
             sys.stdout.flush()
@@ -178,17 +178,17 @@ def http_auth_cracker(url, realm):
           sys.stdout.flush()
         if found:
           valid_pair =  "" + username + ":" + password + ""
-          print ""
+          print("")
           success_msg = "Identified a valid pair of credentials '" 
           success_msg += valid_pair + Style.RESET_ALL + Style.BRIGHT  + "'."  
-          print settings.print_success_msg(success_msg)
+          print(settings.print_success_msg(success_msg))
           return valid_pair
 
     err_msg = "Use the '--auth-cred' option to provide a valid pair of " 
     err_msg += "HTTP authentication credentials (i.e --auth-cred=\"admin:admin\") " 
     err_msg += "or place an other dictionary into '" 
     err_msg += os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'txt')) + "/' directory."
-    print "\n" + settings.print_critical_msg(err_msg)  
+    print("\n" + settings.print_critical_msg(err_msg))  
     return False  
 
 # eof

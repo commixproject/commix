@@ -31,8 +31,8 @@ def tamper(payload):
   if settings.WHITESPACE[0] == "+":
     err_msg = "Tamper script '" +  __tamper__  + "' is unlikely to work combined with the tamper script 'space2plus'."
     if settings.VERBOSITY_LEVEL == 0:
-      print ""
-    print settings.print_critical_msg(err_msg) 
+      print("")
+    print(settings.print_critical_msg(err_msg)) 
     raise SystemExit()
     
   else:

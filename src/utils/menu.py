@@ -30,7 +30,7 @@ if settings.IS_WINDOWS:
 The commix's banner.
 """
 def banner():
-  print """                                      __           
+  print("""                                      __           
    ___   ___     ___ ___     ___ ___ /\_\   __  _   
  /`___\ / __`\ /' __` __`\ /' __` __`\/\ \ /\ \/'\  """ + Style.BRIGHT + Style.UNDERLINE + settings.VERSION + Style.RESET_ALL + """
 /\ \__//\ \/\ \/\ \/\ \/\ \/\ \/\ \/\ \ \ \\\/>  </  
@@ -41,7 +41,7 @@ def banner():
 """ + Style.BRIGHT + settings.DESCRIPTION_FULL + Style.RESET_ALL + """
 Copyright © """ + settings.YEAR + """ """ + settings.AUTHOR + Style.RESET_ALL + """ (""" + Fore.LIGHTRED_EX  + settings.AUTHOR_TWITTER + Style.RESET_ALL + """)
 +--
-"""
+""")
 
 _ = os.path.normpath(sys.argv[0])
 
@@ -615,20 +615,20 @@ settings.sys_argv_errors()
 The "os_shell" available options.
 """
 def os_shell_options():
-      print """
+      print("""
 ---[ """ + Style.BRIGHT + Fore.BLUE + """Available options""" + Style.RESET_ALL + """ ]---     
 Type '""" + Style.BRIGHT + """?""" + Style.RESET_ALL + """' to get all the available options.
 Type '""" + Style.BRIGHT + """back""" + Style.RESET_ALL + """' to move back from the current context.
 Type '""" + Style.BRIGHT + """quit""" + Style.RESET_ALL + """' (or use <Ctrl-C>) to quit commix.
 Type '""" + Style.BRIGHT + """reverse_tcp""" + Style.RESET_ALL + """' to get a reverse TCP connection.
 Type '""" + Style.BRIGHT + """bind_tcp""" + Style.RESET_ALL + """' to set a bind TCP connection.
-"""
+""")
 
 """
 The "reverse_tcp" available options.
 """
 def reverse_tcp_options():
-      print """
+      print("""
 ---[ """ + Style.BRIGHT + Fore.BLUE + """Available options""" + Style.RESET_ALL + """ ]---     
 Type '""" + Style.BRIGHT + """?""" + Style.RESET_ALL + """' to get all the available options.
 Type '""" + Style.BRIGHT + """set""" + Style.RESET_ALL + """' to set a context-specific variable to a value.
@@ -636,13 +636,13 @@ Type '""" + Style.BRIGHT + """back""" + Style.RESET_ALL + """' to move back from
 Type '""" + Style.BRIGHT + """quit""" + Style.RESET_ALL + """' (or use <Ctrl-C>) to quit commix.
 Type '""" + Style.BRIGHT + """os_shell""" + Style.RESET_ALL + """' to get into an operating system command shell.
 Type '""" + Style.BRIGHT + """bind_tcp""" + Style.RESET_ALL + """' to set a bind TCP connection.
-"""
+""")
 
 """
 The "bind_tcp" available options.
 """
 def bind_tcp_options():
-      print """
+      print("""
 ---[ """ + Style.BRIGHT + Fore.BLUE + """Available options""" + Style.RESET_ALL + """ ]---     
 Type '""" + Style.BRIGHT + """?""" + Style.RESET_ALL + """' to get all the available options.
 Type '""" + Style.BRIGHT + """set""" + Style.RESET_ALL + """' to set a context-specific variable to a value.
@@ -650,14 +650,13 @@ Type '""" + Style.BRIGHT + """back""" + Style.RESET_ALL + """' to move back from
 Type '""" + Style.BRIGHT + """quit""" + Style.RESET_ALL + """' (or use <Ctrl-C>) to quit commix.
 Type '""" + Style.BRIGHT + """os_shell""" + Style.RESET_ALL + """' to get into an operating system command shell.
 Type '""" + Style.BRIGHT + """reverse_tcp""" + Style.RESET_ALL + """' to get a reverse TCP connection.
-"""
+""")
 
 """
 The available mobile user agents.
 """
 def mobile_user_agents():
-
-    print """---[ """ + Style.BRIGHT + Fore.BLUE + """Available Mobile HTTP User-Agent headers""" + Style.RESET_ALL + """ ]---     
+    print("""---[ """ + Style.BRIGHT + Fore.BLUE + """Available Mobile HTTP User-Agent headers""" + Style.RESET_ALL + """ ]---     
 Type '""" + Style.BRIGHT + """1""" + Style.RESET_ALL + """' for BlackBerry 9900 HTTP User-Agent header.
 Type '""" + Style.BRIGHT + """2""" + Style.RESET_ALL + """' for Samsung Galaxy S HTTP User-Agent header.
 Type '""" + Style.BRIGHT + """3""" + Style.RESET_ALL + """' for HP iPAQ 6365 HTTP User-Agent header.
@@ -665,7 +664,7 @@ Type '""" + Style.BRIGHT + """4""" + Style.RESET_ALL + """' for HTC Sensation HT
 Type '""" + Style.BRIGHT + """5""" + Style.RESET_ALL + """' for Apple iPhone 4s HTTP User-Agent header.
 Type '""" + Style.BRIGHT + """6""" + Style.RESET_ALL + """' for Google Nexus 7 HTTP User-Agent header.
 Type '""" + Style.BRIGHT + """7""" + Style.RESET_ALL + """' for Nokia N97 HTTP User-Agent header.
-"""
+""")
 
     while True:
       question_msg = "Which mobile HTTP User-Agent header do you want to use? "
@@ -678,11 +677,11 @@ Type '""" + Style.BRIGHT + """7""" + Style.RESET_ALL + """' for Nokia N97 HTTP U
           raise SystemExit()
         else:
           err_msg = "'" + mobile_user_agent + "' is not a valid answer."  
-          print settings.print_error_msg(err_msg)
+          print(settings.print_error_msg(err_msg))
           pass
       except ValueError:
         err_msg = "'" + mobile_user_agent + "' is not a valid answer."  
-        print settings.print_error_msg(err_msg)
+        print(settings.print_error_msg(err_msg))
         pass     
 
 """

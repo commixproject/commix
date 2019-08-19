@@ -53,7 +53,7 @@ def powershell_version(separator, payload, TAG, timesec, prefix, suffix, whitesp
     if float(ps_version):
       settings.PS_ENABLED = True
       # if settings.VERBOSITY_LEVEL >= 1:
-      #   print ""
+      #   print("")
       # Output PowerShell's version number
       success_msg = "The PowerShell's version number is " 
       success_msg += ps_version + Style.RESET_ALL + Style.BRIGHT
@@ -67,7 +67,7 @@ def powershell_version(separator, payload, TAG, timesec, prefix, suffix, whitesp
   except ValueError:
     warn_msg = "Heuristics have failed to identify the version of Powershell, "
     warn_msg += "which means that some payloads or injection techniques may be failed."
-    print settings.print_warning_msg(warn_msg)
+    print(settings.print_warning_msg(warn_msg))
     settings.PS_ENABLED = False
 
 """
@@ -88,7 +88,7 @@ def hostname(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_
     shell = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
   if shell:
     # if settings.VERBOSITY_LEVEL >= 1:
-    #   print ""
+    #   print("")
     success_msg = "The hostname is " +  shell
     sys.stdout.write(settings.print_success_msg(success_msg) + ".\n")
     sys.stdout.flush()
@@ -99,7 +99,7 @@ def hostname(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_
     output_file.close()
   else:
     warn_msg = "Heuristics have failed to identify the hostname."
-    print settings.print_warning_msg(warn_msg)
+    print(settings.print_warning_msg(warn_msg))
 
 """
 Retrieve system information
@@ -150,7 +150,7 @@ def system_information(separator, payload, TAG, timesec, prefix, suffix, whitesp
       target_arch = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
     if target_arch:
       # if settings.VERBOSITY_LEVEL >= 1:
-      #   print ""
+      #   print("")
       success_msg = "The target operating system is " +  target_os + Style.RESET_ALL  
       success_msg += Style.BRIGHT + " and the hardware platform is " +  target_arch
       sys.stdout.write(settings.print_success_msg(success_msg) + ".\n")
@@ -163,7 +163,7 @@ def system_information(separator, payload, TAG, timesec, prefix, suffix, whitesp
       output_file.close()
   else:
     warn_msg = "Heuristics have failed to retrieve the system information."
-    print settings.print_warning_msg(warn_msg)
+    print(settings.print_warning_msg(warn_msg))
 
 """
 The current user enumeration
@@ -222,7 +222,7 @@ def current_user(separator, payload, TAG, timesec, prefix, suffix, whitespace, h
           output_file.close()
     else:
       # if settings.VERBOSITY_LEVEL >= 1:
-      #   print ""
+      #   print("")
       success_msg = "The current user is " +  cu_account
       sys.stdout.write(settings.print_success_msg(success_msg) + ".\n")
       sys.stdout.flush()
@@ -233,7 +233,7 @@ def current_user(separator, payload, TAG, timesec, prefix, suffix, whitespace, h
       output_file.close()
   else:
     warn_msg = "Heuristics have failed to identify the current user."
-    print settings.print_warning_msg(warn_msg)
+    print(settings.print_warning_msg(warn_msg))
     
 """
 System users enumeration
@@ -259,7 +259,7 @@ def system_users(separator, payload, TAG, timesec, prefix, suffix, whitespace, h
   # Windows users enumeration.
   if settings.TARGET_OS == "win":
     # if settings.VERBOSITY_LEVEL >= 1:
-    #   print ""
+    #   print("")
     info_msg = "Executing the 'net users' command "
     info_msg += "to enumerate users entries... "  
     sys.stdout.write(settings.print_info_msg(info_msg))
@@ -306,8 +306,8 @@ def system_users(separator, payload, TAG, timesec, prefix, suffix, whitespace, h
             is_privileged = ""
             is_privileged_nh = ""
           # if settings.VERBOSITY_LEVEL >= 1:
-          #   print ""          
-          print "    (" +str(count)+ ") '" + Style.BRIGHT +  sys_users_list[user] + Style.RESET_ALL + "'" + Style.BRIGHT + is_privileged + Style.RESET_ALL + "." 
+          #   print("")          
+          print("    (" +str(count)+ ") '" + Style.BRIGHT +  sys_users_list[user] + Style.RESET_ALL + "'" + Style.BRIGHT + is_privileged + Style.RESET_ALL + ".")
           # Add infos to logs file.   
           output_file = open(filename, "a")
           output_file.write("    (" +str(count)+ ") " + sys_users_list[user] + is_privileged + ".\n" )
@@ -316,7 +316,7 @@ def system_users(separator, payload, TAG, timesec, prefix, suffix, whitespace, h
         sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
         sys.stdout.flush()
         warn_msg = "It seems that you don't have permissions to enumerate users entries."
-        print "\n" + settings.print_warning_msg(warn_msg)  # Unix-like users enumeration.    
+        print("\n" + settings.print_warning_msg(warn_msg))  # Unix-like users enumeration.    
     except TypeError:
       sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]\n")
       sys.stdout.flush()
@@ -330,7 +330,7 @@ def system_users(separator, payload, TAG, timesec, prefix, suffix, whitespace, h
       pass
   else:
     # if settings.VERBOSITY_LEVEL >= 1:
-    #   print ""
+    #   print("")
     info_msg = "Fetching '" + settings.PASSWD_FILE 
     info_msg += "' to enumerate users entries... "  
     sys.stdout.write(settings.print_info_msg(info_msg))
@@ -348,9 +348,9 @@ def system_users(separator, payload, TAG, timesec, prefix, suffix, whitespace, h
           sys.stdout.flush()
           warn_msg = "It seems that '" + settings.PASSWD_FILE + "' file is "
           warn_msg += "not in the appropriate format. Thus, it is expoted as a text file."
-          print "\n" + settings.print_warning_msg(warn_msg)
+          print("\n" + settings.print_warning_msg(warn_msg))
           sys_users = " ".join(str(p) for p in sys_users).strip()
-          print sys_users
+          print(sys_users)
           output_file = open(filename, "a")
           output_file.write("      " + sys_users)
           output_file.close()
@@ -403,7 +403,7 @@ def system_users(separator, payload, TAG, timesec, prefix, suffix, whitespace, h
                 else :
                   is_privileged = ""
                   is_privileged_nh = ""
-                print "    (" +str(count)+ ") '" + Style.BRIGHT +  fields[0]+ Style.RESET_ALL + "'" + Style.BRIGHT + is_privileged + Style.RESET_ALL + "(uid=" + fields[1] + "). Home directory is in '" + Style.BRIGHT + fields[2]+ Style.RESET_ALL + "'." 
+                print("    (" +str(count)+ ") '" + Style.BRIGHT +  fields[0]+ Style.RESET_ALL + "'" + Style.BRIGHT + is_privileged + Style.RESET_ALL + "(uid=" + fields[1] + "). Home directory is in '" + Style.BRIGHT + fields[2]+ Style.RESET_ALL + "'.") 
                 # Add infos to logs file.   
                 output_file = open(filename, "a")
                 output_file.write("    (" +str(count)+ ") '" + fields[0]+ "'" + is_privileged_nh + "(uid=" + fields[1] + "). Home directory is in '" + fields[2] + "'.\n" )
@@ -412,9 +412,9 @@ def system_users(separator, payload, TAG, timesec, prefix, suffix, whitespace, h
                 if count == 1 :
                   warn_msg = "It seems that '" + settings.PASSWD_FILE + "' file is not in the "
                   warn_msg += "appropriate format. Thus, it is expoted as a text file." 
-                  print settings.print_warning_msg(warn_msg)
+                  print(settings.print_warning_msg(warn_msg))
                 sys_users = " ".join(str(p) for p in sys_users.split(":"))
-                print sys_users 
+                print(sys_users) 
                 output_file = open(filename, "a")
                 output_file.write("      " + sys_users)
                 output_file.close()
@@ -423,7 +423,7 @@ def system_users(separator, payload, TAG, timesec, prefix, suffix, whitespace, h
         sys.stdout.flush()
         warn_msg = "It seems that you don't have permissions to read '" 
         warn_msg += settings.PASSWD_FILE + "' to enumerate users entries."
-        print "\n" + settings.print_warning_msg(warn_msg)   
+        print("\n" + settings.print_warning_msg(warn_msg))   
     except TypeError:
       sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]\n")
       sys.stdout.flush()
@@ -458,7 +458,7 @@ def system_passwords(separator, payload, TAG, timesec, prefix, suffix, whitespac
     if sys_passes == "":
       sys_passes = " "
       # if settings.VERBOSITY_LEVEL >= 1:
-      #   print ""
+      #   print("")
       info_msg = "Fetching '" + settings.SHADOW_FILE 
       info_msg += "' to enumerate users password hashes... "  
       sys.stdout.write(settings.print_info_msg(info_msg))
@@ -484,7 +484,7 @@ def system_passwords(separator, payload, TAG, timesec, prefix, suffix, whitespac
             if ":" in line:
               fields = line.split(":")
               if not "*" in fields[1] and not "!" in fields[1] and fields[1] != "":
-                print "  (" +str(count)+ ") " + Style.BRIGHT + fields[0]+ Style.RESET_ALL + " : " + Style.BRIGHT + fields[1]+ Style.RESET_ALL
+                print("  (" +str(count)+ ") " + Style.BRIGHT + fields[0]+ Style.RESET_ALL + " : " + Style.BRIGHT + fields[1]+ Style.RESET_ALL)
                 # Add infos to logs file.   
                 output_file = open(filename, "a")
                 output_file.write("    (" +str(count)+ ") " + fields[0] + " : " + fields[1] + "\n")
@@ -495,7 +495,7 @@ def system_passwords(separator, payload, TAG, timesec, prefix, suffix, whitespac
               warn_msg = "It seems that '" + settings.SHADOW_FILE + "' file is not "
               warn_msg += "in the appropriate format. Thus, it is expoted as a text file."
               sys.stdout.write(settings.print_warning_msg(warn_msg)+ "\n")
-            print fields[0]
+            print(fields[0])
             output_file = open(filename, "a")
             output_file.write("      " + fields[0])
             output_file.close()
@@ -504,7 +504,7 @@ def system_passwords(separator, payload, TAG, timesec, prefix, suffix, whitespac
         sys.stdout.flush()
         warn_msg = "It seems that you don't have permissions to read '" 
         warn_msg += settings.SHADOW_FILE + "' to enumerate users password hashes."
-        print "\n" + settings.print_warning_msg(warn_msg)
+        print("\n" + settings.print_warning_msg(warn_msg))
 
 """
 Single os-shell execution
@@ -522,11 +522,11 @@ def single_os_cmd_exec(separator, payload, TAG, timesec, prefix, suffix, whitesp
     shell = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
   if shell:
     if shell != "":
-      print "\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n"
+      print("\n") + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n"
       logs.print_logs_notification(filename, url) 
     else:
       err_msg = "The '" + cmd + "' command, does not return any output."
-      print settings.print_critical_msg(err_msg) 
+      print(settings.print_critical_msg(err_msg)) 
     raise SystemExit()
 
 """
@@ -535,7 +535,7 @@ Check the defined options
 def do_check(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
   
   # if not settings.VERBOSITY_LEVEL >= 1 and not settings.ENUMERATION_DONE:
-  #   print ""
+  #   print("")
 
   # Check if PowerShell is enabled.
   if not menu.options.ps_version and settings.TARGET_OS == "win":

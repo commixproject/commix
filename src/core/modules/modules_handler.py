@@ -33,7 +33,7 @@ def load_modules(url, http_request_method, filename):
       # The ICMP exfiltration handler
       icmp_exfiltration.icmp_exfiltration_handler(url, http_request_method)
     except ImportError as err_msg:
-      print "\n" + settings.print_critical_msg(err_msg)
+      print("\n" + settings.print_critical_msg(err_msg))
       raise SystemExit() 
     raise SystemExit()
 
@@ -45,7 +45,7 @@ def load_modules(url, http_request_method, filename):
       # The DNS exfiltration handler
       dns_exfiltration.dns_exfiltration_handler(url, http_request_method)
     except ImportError as err_msg:
-      print "\n" + settings.print_critical_msg(err_msg)
+      print("\n" + settings.print_critical_msg(err_msg))
       raise SystemExit() 
     raise SystemExit()
 
@@ -57,6 +57,6 @@ def load_modules(url, http_request_method, filename):
       # The shellshock handler
       shellshock.shellshock_handler(url, http_request_method, filename)
     except ImportError as err_msg:
-      print "\n" + settings.print_critical_msg(err_msg)
+      print("\n" + settings.print_critical_msg(err_msg))
       raise SystemExit() 
     raise SystemExit() 

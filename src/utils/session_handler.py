@@ -46,11 +46,11 @@ def ignore(url):
   sys.stdout.write(settings.print_info_msg(info_msg))
   sys.stdout.flush()
   if os.path.isfile(settings.SESSION_FILE):
-    print "[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]"
+    print("[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]")
   else:
-    print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
+    print("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
     err_msg = "The session file does not exist."
-    print settings.print_critical_msg(err_msg)
+    print(settings.print_critical_msg(err_msg))
 
 """
 Flush session.
@@ -60,9 +60,9 @@ def flush(url):
   sys.stdout.write(settings.print_info_msg(info_msg))
   sys.stdout.flush()
   if not os.path.isfile(settings.SESSION_FILE):
-    print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
+    print("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
     err_msg = "The session file does not exist."
-    print settings.print_critical_msg(err_msg)
+    print(settings.print_critical_msg(err_msg))
   else:
     try:
       conn = sqlite3.connect(settings.SESSION_FILE)
@@ -70,11 +70,11 @@ def flush(url):
       conn.executescript(';'.join(["DROP TABLE IF EXISTS %s" %i for i in tables]))
       conn.commit()
       conn.close()
-      print "[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]"
+      print("[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]")
     except sqlite3.OperationalError, err_msg:
-      print "[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]"
+      print("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
       err_msg = "Unable to flush the session file." + str(err_msg).title()
-      print settings.print_critical_msg(err_msg)    
+      print(settings.print_critical_msg(err_msg))    
 
 """
 Clear injection point records 
@@ -90,7 +90,7 @@ def clear(url):
       conn.commit()
       conn.close()
   except sqlite3.OperationalError, err_msg:
-    print settings.print_critical_msg(err_msg)
+    print(settings.print_critical_msg(err_msg))
   except:
     settings.LOAD_SESSION = False
     return False
@@ -124,14 +124,14 @@ def injection_point_importation(url, technique, injection_type, separator, shell
   except sqlite3.OperationalError, err_msg:
     err_msg = str(err_msg)[:1].upper() + str(err_msg)[1:] + "."
     err_msg += " You are advised to rerun with switch '--flush-session'."
-    print settings.print_critical_msg(err_msg)
+    print(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
   except sqlite3.DatabaseError, err_msg:
     err_msg = "An error occurred while accessing session file ('"
     err_msg += settings.SESSION_FILE + "'). "
     err_msg += "If the problem persists use the '--flush-session' option."
-    print "\n" + settings.print_critical_msg(err_msg)
+    print("\n" + settings.print_critical_msg(err_msg))
     raise SystemExit()
 
 """
@@ -164,7 +164,7 @@ def applied_techniques(url, http_request_method):
     applied_techniques = ''.join(list(set(values)))
     return applied_techniques
   except sqlite3.OperationalError, err_msg:
-    #print settings.print_critical_msg(err_msg)
+    #print(settings.print_critical_msg(err_msg))
     settings.LOAD_SESSION = False
     return False
   except:
@@ -194,7 +194,7 @@ def applied_levels(url, http_request_method):
       return session[0]
 
   except sqlite3.OperationalError, err_msg:
-    #print settings.print_critical_msg(err_msg)
+    #print(settings.print_critical_msg(err_msg))
     settings.LOAD_SESSION = False
     return False
   except:
@@ -267,7 +267,7 @@ def injection_point_exportation(url, http_request_method):
       no_such_table = True
       pass
   except sqlite3.OperationalError, err_msg:
-    #print settings.print_critical_msg(err_msg)
+    #print(settings.print_critical_msg(err_msg))
     settings.LOAD_SESSION = False
     return False
   except:
@@ -281,7 +281,7 @@ def notification(url, technique, injection_type):
   try:
     if settings.LOAD_SESSION == True:
       info_msg = "A previously stored session has been held against that host."
-      print settings.print_info_msg(info_msg)
+      print(settings.print_info_msg(info_msg))
       while True:
         if not menu.options.batch:
           question_msg = "Do you want to resume to the "
@@ -318,7 +318,7 @@ def notification(url, technique, injection_type):
                   pass  
               else:
                 err_msg = "'" +  proceed_option + "' is not a valid answer."   
-                print settings.print_error_msg(err_msg)
+                print(settings.print_error_msg(err_msg))
                 pass   
           if settings.SESSION_APPLIED_TECHNIQUES:
             menu.options.tech = ''.join(settings.AVAILABLE_TECHNIQUES)
@@ -327,10 +327,10 @@ def notification(url, technique, injection_type):
           raise SystemExit()
         else:
           err_msg = "'" + settings.LOAD_SESSION + "' is not a valid answer."  
-          print settings.print_error_msg(err_msg)
+          print(settings.print_error_msg(err_msg))
           pass
   except sqlite3.OperationalError, err_msg:
-    print settings.print_critical_msg(err_msg)
+    print(settings.print_critical_msg(err_msg))
 
 """
 Check for specific stored parameter.
@@ -366,7 +366,7 @@ def store_cmd(url, cmd, shell, vuln_parameter):
       conn.commit()
       conn.close() 
   except sqlite3.OperationalError, err_msg:
-    print settings.print_critical_msg(err_msg)
+    print(settings.print_critical_msg(err_msg))
   except TypeError, err_msg:
     pass
 
@@ -417,12 +417,12 @@ def import_valid_credentials(url, authentication_type, admin_panel, username, pa
     conn.commit()
     conn.close()
   except sqlite3.OperationalError, err_msg:
-    print settings.print_critical_msg(err_msg)
+    print(settings.print_critical_msg(err_msg))
   except sqlite3.DatabaseError, err_msg:
     err_msg = "An error occurred while accessing session file ('"
     err_msg += settings.SESSION_FILE + "'). "
     err_msg += "If the problem persists use the '--flush-session' option."
-    print "\n" + settings.print_critical_msg(err_msg)
+    print("\n" + settings.print_critical_msg(err_msg))
     raise SystemExit()
 
 
