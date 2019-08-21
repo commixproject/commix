@@ -74,7 +74,7 @@ def grab_ip_addr():
     ip_addr = s.getsockname()[0]
     s.close()
     return ip_addr
-  except socket_error, err_msg:
+  except socket_error as err_msg:
     if errno.ECONNREFUSED:
       warn_msg = "Internet seems unreachable."
       print(settings.print_warning_msg(warn_msg))

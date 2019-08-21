@@ -94,7 +94,7 @@ def logfile_parser():
     # Check for multiple hosts
     try:
       request = open(request_file, "r")
-    except IOError, err_msg:
+    except IOError as err_msg:
       try:
         error_msg = str(err_msg.args[0]).split("] ")[1] + "."
       except:

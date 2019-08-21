@@ -172,12 +172,12 @@ def file_upload(separator, TAG, prefix, suffix, whitespace, http_request_method,
     # check if remote file exists.
     try:
       urllib2.urlopen(file_to_upload)
-    except urllib2.HTTPError, err_msg:
+    except urllib2.HTTPError as err_msg:
       warn_msg = "It seems that the '" + file_to_upload + "' file, does not exist. (" +str(err_msg)+ ")"
       sys.stdout.write(settings.print_warning_msg(warn_msg) + "\n")
       sys.stdout.flush()
       raise SystemExit()
-    except ValueError, err_msg:
+    except ValueError as err_msg:
       err_msg = str(err_msg[0]).capitalize() + str(err_msg)[1]
       sys.stdout.write(settings.print_critical_msg(err_msg) + "\n")
       sys.stdout.flush()

@@ -118,19 +118,19 @@ def do_check(url):
     pass
 
   # Raise exception due to ValueError.
-  except ValueError, err:
+  except ValueError as err:
     err_msg = str(err).replace(": "," (")
     print(settings.print_critical_msg(err_msg + ")."))
     raise SystemExit()
 
   # Raise exception regarding urllib2 HTTPError.
-  except urllib2.HTTPError, err:
+  except urllib2.HTTPError as err:
     err_msg = str(err).replace(": "," (")
     print(settings.print_critical_msg(err_msg + ")."))
     raise SystemExit()
 
   # The target host seems to be down.
-  except urllib2.URLError, err:
+  except urllib2.URLError as err:
     err_msg = "The host seems to be down"
     try:
       err_msg += " (" + str(err.args[0]).split("] ")[1] + ")."

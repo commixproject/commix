@@ -81,7 +81,7 @@ def create_github_issue(err_msg, exc_msg):
   
   try:
     content = urllib2.urlopen(req).read()
-  except Exception, err:
+  except Exception as err:
     content = None
 
   issue_url = re.search(r"https://github.com/commixproject/commix/issues/\d+", content or "")

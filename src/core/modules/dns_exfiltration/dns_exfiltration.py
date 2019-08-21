@@ -237,7 +237,7 @@ def dns_exfiltration_handler(url, http_request_method):
   if menu.options.proxy:
     try:
       response = proxy.use_proxy(request)
-    except urllib2.HTTPError, err_msg:
+    except urllib2.HTTPError as err_msg:
       if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
@@ -253,7 +253,7 @@ def dns_exfiltration_handler(url, http_request_method):
   elif menu.options.tor:
     try:
       response = tor.use_tor(request)
-    except urllib2.HTTPError, err_msg:
+    except urllib2.HTTPError as err_msg:
       if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
@@ -268,7 +268,7 @@ def dns_exfiltration_handler(url, http_request_method):
   else:
     try:
       response = urllib2.urlopen(request)
-    except urllib2.HTTPError, err_msg:
+    except urllib2.HTTPError as err_msg:
       if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
         response = False  
       elif settings.IGNORE_ERR_MSG == False:

@@ -178,7 +178,7 @@ def check_http_traffic(request):
             if not settings.CHECK_INTERNET:
               settings.INIT_TEST = False
               
-      except urllib2.URLError, err_msg: 
+      except urllib2.URLError as err_msg: 
         if current_attempt == 0:
           if settings.VERBOSITY_LEVEL < 2:
             print("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
@@ -197,14 +197,14 @@ def check_http_traffic(request):
         current_attempt = current_attempt + 1
         time.sleep(3)
         
-      except httplib.BadStatusLine, err_msg:
+      except httplib.BadStatusLine as err_msg:
         if settings.VERBOSITY_LEVEL < 2:
           print("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
         if len(err_msg.line) > 2 :
           print(err_msg.line, err_msg.message)
         raise SystemExit()
 
-      except ValueError, err:
+      except ValueError as err:
         if settings.VERBOSITY_LEVEL < 2:
           print("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
         err_msg = "Invalid target URL has been given." 
@@ -237,7 +237,7 @@ def check_http_traffic(request):
     checks.blocked_ip(page) 
 
   # This is useful when handling exotic HTTP errors (i.e requests for authentication).
-  except urllib2.HTTPError, err:
+  except urllib2.HTTPError as err:
     error_msg = "Got " + str(err).replace(": "," (")
     # Check for 4xx and/or 5xx HTTP error codes.
     if str(err.code).startswith('4') or \
@@ -258,7 +258,7 @@ def check_http_traffic(request):
       raise SystemExit()
 
   # The handlers raise this exception when they run into a problem.
-  except (socket.error, httplib.HTTPException, urllib2.URLError), err:
+  except (socket.error, httplib.HTTPException, urllib2.URLError) as err:
     err_msg = "Unable to connect to the target URL"
     try:
       err_msg += " (" + str(err.args[0]).split("] ")[1] + ")."
@@ -267,15 +267,15 @@ def check_http_traffic(request):
     print(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
-  except httplib.IncompleteRead, err_msg:
+  except httplib.IncompleteRead as err_msg:
     print(settings.print_critical_msg(str(err_msg)))
     raise SystemExit()
 
-  except UnicodeDecodeError, err_msg:
+  except UnicodeDecodeError as err_msg:
     print(settings.print_critical_msg(str(err_msg)))
     raise SystemExit()
 
-  except LookupError, err_msg:
+  except LookupError as err_msg:
     print(settings.print_critical_msg(str(err_msg)))
     raise SystemExit()
     
@@ -321,7 +321,7 @@ def do_check(request):
           url = menu.options.url
           try:
             response = urllib2.urlopen(url)
-          except urllib2.HTTPError, e:
+          except urllib2.HTTPError as e:
             try:
               authline = e.headers.get('www-authenticate', '')  
               authobj = re.match('''(\w*)\s+realm=(.*),''',authline).groups()
@@ -336,7 +336,7 @@ def do_check(request):
               result = urllib2.urlopen(url)
             except AttributeError:
               pass
-        except urllib2.HTTPError, e:
+        except urllib2.HTTPError as e:
           pass
     except ValueError:
       err_msg = "Unsupported / Invalid HTTP authentication type '" + menu.options.auth_type + "'."

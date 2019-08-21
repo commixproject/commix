@@ -65,7 +65,7 @@ def authentication_process():
     response = urllib2.urlopen(request)
     return response
 
-  except urllib2.HTTPError, err_msg:
+  except urllib2.HTTPError as err_msg:
     print(settings.print_critical_msg(err_msg))
     raise SystemExit()
 

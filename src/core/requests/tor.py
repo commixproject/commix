@@ -88,7 +88,7 @@ def do_check():
         print(settings.print_critical_msg(err_msg))  
         raise SystemExit() 
 
-    except urllib2.URLError, err_msg:
+    except urllib2.URLError as err_msg:
       print("[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]")
       if menu.options.tor_check:
         err_msg = "It seems that your Tor connection is not properly set. "
@@ -101,7 +101,7 @@ def do_check():
       print(settings.print_critical_msg(err_msg))  
       raise SystemExit()  
 
-    except httplib.BadStatusLine, err_msg:
+    except httplib.BadStatusLine as err_msg:
       print("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
       if len(err_msg.line) > 2 :
         print(err_msg.line, err_msg.message)

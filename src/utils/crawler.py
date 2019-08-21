@@ -64,7 +64,7 @@ def request(url):
     response = urllib2.urlopen(request)
     soup = BeautifulSoup(response)
     return soup
-  except urllib2.URLError, e:
+  except urllib2.URLError as e:
     pass
 
 """

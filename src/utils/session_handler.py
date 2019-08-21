@@ -71,7 +71,7 @@ def flush(url):
       conn.commit()
       conn.close()
       print("[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]")
-    except sqlite3.OperationalError, err_msg:
+    except sqlite3.OperationalError as err_msg:
       print("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
       err_msg = "Unable to flush the session file." + str(err_msg).title()
       print(settings.print_critical_msg(err_msg))    
@@ -89,7 +89,7 @@ def clear(url):
                    table_name(url) + "_ip GROUP BY technique);")
       conn.commit()
       conn.close()
-  except sqlite3.OperationalError, err_msg:
+  except sqlite3.OperationalError as err_msg:
     print(settings.print_critical_msg(err_msg))
   except:
     settings.LOAD_SESSION = False
@@ -121,13 +121,13 @@ def injection_point_importation(url, technique, injection_type, separator, shell
     if settings.INJECTION_CHECKER == False:
       settings.INJECTION_CHECKER = True
       
-  except sqlite3.OperationalError, err_msg:
+  except sqlite3.OperationalError as err_msg:
     err_msg = str(err_msg)[:1].upper() + str(err_msg)[1:] + "."
     err_msg += " You are advised to rerun with switch '--flush-session'."
     print(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
-  except sqlite3.DatabaseError, err_msg:
+  except sqlite3.DatabaseError as err_msg:
     err_msg = "An error occurred while accessing session file ('"
     err_msg += settings.SESSION_FILE + "'). "
     err_msg += "If the problem persists use the '--flush-session' option."
@@ -163,7 +163,7 @@ def applied_techniques(url, http_request_method):
       values += session[0][:1]
     applied_techniques = ''.join(list(set(values)))
     return applied_techniques
-  except sqlite3.OperationalError, err_msg:
+  except sqlite3.OperationalError as err_msg:
     #print(settings.print_critical_msg(err_msg))
     settings.LOAD_SESSION = False
     return False
@@ -193,7 +193,7 @@ def applied_levels(url, http_request_method):
     for session in applied_level:
       return session[0]
 
-  except sqlite3.OperationalError, err_msg:
+  except sqlite3.OperationalError as err_msg:
     #print(settings.print_critical_msg(err_msg))
     settings.LOAD_SESSION = False
     return False
@@ -266,7 +266,7 @@ def injection_point_exportation(url, http_request_method):
     else:
       no_such_table = True
       pass
-  except sqlite3.OperationalError, err_msg:
+  except sqlite3.OperationalError as err_msg:
     #print(settings.print_critical_msg(err_msg))
     settings.LOAD_SESSION = False
     return False
@@ -329,7 +329,7 @@ def notification(url, technique, injection_type):
           err_msg = "'" + settings.LOAD_SESSION + "' is not a valid answer."  
           print(settings.print_error_msg(err_msg))
           pass
-  except sqlite3.OperationalError, err_msg:
+  except sqlite3.OperationalError as err_msg:
     print(settings.print_critical_msg(err_msg))
 
 """
@@ -365,9 +365,9 @@ def store_cmd(url, cmd, shell, vuln_parameter):
                      (str(base64.b64encode(cmd)), str(base64.b64encode(shell)), str(settings.HTTP_HEADER)))
       conn.commit()
       conn.close() 
-  except sqlite3.OperationalError, err_msg:
+  except sqlite3.OperationalError as err_msg:
     print(settings.print_critical_msg(err_msg))
-  except TypeError, err_msg:
+  except TypeError as err_msg:
     pass
 
 """
@@ -397,7 +397,7 @@ def export_stored_cmd(url, cmd, vuln_parameter):
     else:
       no_such_table = True
       pass
-  except sqlite3.OperationalError, err_msg:
+  except sqlite3.OperationalError as err_msg:
     pass
 
 """
@@ -416,9 +416,9 @@ def import_valid_credentials(url, authentication_type, admin_panel, username, pa
                  str(username), str(password)))
     conn.commit()
     conn.close()
-  except sqlite3.OperationalError, err_msg:
+  except sqlite3.OperationalError as err_msg:
     print(settings.print_critical_msg(err_msg))
-  except sqlite3.DatabaseError, err_msg:
+  except sqlite3.DatabaseError as err_msg:
     err_msg = "An error occurred while accessing session file ('"
     err_msg += settings.SESSION_FILE + "'). "
     err_msg += "If the problem persists use the '--flush-session' option."
@@ -444,7 +444,7 @@ def export_valid_credentials(url, authentication_type):
     else:
       no_such_table = True
       pass
-  except sqlite3.OperationalError, err_msg:
+  except sqlite3.OperationalError as err_msg:
     pass
 
 # eof

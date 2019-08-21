@@ -90,7 +90,7 @@ def create_log_file(url, output_dir):
     host = parts[1].split('/', 1)[0]
   except IndexError:
     host = parts[0].split('/', 1)[0]
-  except OSError, err_msg:
+  except OSError as err_msg:
     try:
       error_msg = str(err_msg.args[0]).split("] ")[1] + "."
     except:
@@ -145,7 +145,7 @@ def create_log_file(url, output_dir):
     output_file.write("\n" + "=" * 37)
     output_file.write("\n" + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + "Tested URL : " + url)
     output_file.close()
-  except IOError, err_msg:
+  except IOError as err_msg:
     try:
       error_msg = str(err_msg.args[0]).split("] ")[1] + "."
     except:

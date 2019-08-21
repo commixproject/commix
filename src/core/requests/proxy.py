@@ -42,7 +42,7 @@ def do_check(url):
     request.set_proxy(menu.options.proxy,settings.PROXY_SCHEME)
     try:
       check = urllib2.urlopen(request)
-    except urllib2.HTTPError, error:
+    except urllib2.HTTPError as error:
       check = error
   except:
     check_proxy = False
@@ -66,7 +66,7 @@ def use_proxy(request):
     response = urllib2.urlopen(request)
     return response
 
-  except httplib.BadStatusLine, e:
+  except httplib.BadStatusLine as e:
     err_msg = "Unable to connect to the target URL or proxy ("
     err_msg += str(menu.options.proxy)
     err_msg += ")."

@@ -349,7 +349,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                 if len(shell) == 0 :
                   raise urllib2.HTTPError(url, 404, 'Error', {}, None)
 
-              except urllib2.HTTPError, e:
+              except urllib2.HTTPError as e:
                 if str(e.getcode()) == settings.NOT_FOUND_ERROR:
                   percent = ((i*100)/total)
                   float_percent = "{0:.1f}".format(round(((i*100)/(total*1.0)),2))
@@ -440,7 +440,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                 delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
               raise
 
-            except urllib2.URLError, e: 
+            except urllib2.URLError as e: 
               warn_msg = "It seems that you don't have permissions to "
               warn_msg += "read and/or write files in '" + settings.WEB_ROOT + "'."
               sys.stdout.write("\r" + settings.print_warning_msg(warn_msg))

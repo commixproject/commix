@@ -130,11 +130,11 @@ def cmd_exec(http_request_method, cmd, url, vuln_parameter, ip_src):
     else:
       print("")
       
-  except urllib2.HTTPError, err_msg:
+  except urllib2.HTTPError as err_msg:
     print(settings.print_critical_msg(str(err_msg.code)))
     raise SystemExit()
 
-  except urllib2.URLError, err_msg:
+  except urllib2.URLError as err_msg:
     print(settings.print_critical_msg(str(err_msg.args[0]).split("] ")[1] + "."))
     raise SystemExit()
 
@@ -265,7 +265,7 @@ def icmp_exfiltration_handler(url, http_request_method):
   if menu.options.proxy:
     try:
       response = proxy.use_proxy(request)
-    except urllib2.HTTPError, err_msg:
+    except urllib2.HTTPError as err_msg:
       if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
@@ -281,7 +281,7 @@ def icmp_exfiltration_handler(url, http_request_method):
   elif menu.options.tor:
     try:
       response = tor.use_tor(request)
-    except urllib2.HTTPError, err_msg:
+    except urllib2.HTTPError as err_msg:
       if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
@@ -296,7 +296,7 @@ def icmp_exfiltration_handler(url, http_request_method):
   else:
     try:
       response = urllib2.urlopen(request)
-    except urllib2.HTTPError, err_msg:
+    except urllib2.HTTPError as err_msg:
       if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
         response = False  
       elif settings.IGNORE_ERR_MSG == False:

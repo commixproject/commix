@@ -158,7 +158,7 @@ def examine_request(request):
           print(settings.print_critical_msg(error_msg))
           raise SystemExit()
 
-  except urllib2.HTTPError, err_msg:
+  except urllib2.HTTPError as err_msg:
     error_description = ""
     if len(str(err_msg).split(": ")[1]) == 0:
       error_description = "Non-standard HTTP status code"
@@ -173,7 +173,7 @@ def examine_request(request):
       print(settings.print_critical_msg(err_msg))
       raise SystemExit 
 
-  except urllib2.URLError, e:
+  except urllib2.URLError as e:
     err_msg = "Unable to connect to the target URL"
     try:
       err_msg += " (" + str(e.args[0]).split("] ")[1] + ")."
@@ -337,7 +337,7 @@ def logs_filename_creation():
   except:
     try:
       os.mkdir(output_dir)   
-    except OSError, err_msg:
+    except OSError as err_msg:
       try:
         error_msg = str(err_msg.args[0]).split("] ")[1] + "."
       except IndexError:
@@ -504,10 +504,10 @@ def main(filename, url):
           checks.file_upload()
           try:
             urllib2.urlopen(menu.options.file_upload)
-          except urllib2.HTTPError, err_msg:
+          except urllib2.HTTPError as err_msg:
             print(settings.print_critical_msg(str(err_msg.code)))
             raise SystemExit()
-          except urllib2.URLError, err_msg:
+          except urllib2.URLError as err_msg:
             print(settings.print_critical_msg(str(err_msg.args[0]).split("] ")[1] + "."))
             raise SystemExit()
         try:
@@ -537,7 +537,7 @@ def main(filename, url):
         if menu.options.tamper:
           checks.tamper_scripts()
           
-      except urllib2.HTTPError, err_msg:
+      except urllib2.HTTPError as err_msg:
         # Check the codes of responses
         if str(err_msg.getcode()) == settings.INTERNAL_SERVER_ERROR:
           print("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
@@ -564,7 +564,7 @@ def main(filename, url):
           raise
 
       # The target host seems to be down!
-      except urllib2.URLError, e:
+      except urllib2.URLError as e:
         if settings.VERBOSITY_LEVEL < 2:
           print("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
         err_msg = "The host seems to be down"
@@ -576,7 +576,7 @@ def main(filename, url):
         print(settings.print_critical_msg(err_msg))
         raise SystemExit()
         
-      except httplib.BadStatusLine, err_msg:
+      except httplib.BadStatusLine as err_msg:
         if settings.VERBOSITY_LEVEL < 2:
           print("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
         if len(err_msg.line) > 2 :
@@ -600,7 +600,7 @@ def main(filename, url):
     return filename
 
   # Accidental stop / restart of the target host server.
-  except httplib.BadStatusLine, err_msg:
+  except httplib.BadStatusLine as err_msg:
     if err_msg.line == "" or err_msg.message == "":
       err_msg = "The target host is not responding."
       err_msg += " Please ensure that is up and try again."
@@ -613,7 +613,7 @@ def main(filename, url):
     raise SystemExit()
 
   # Connection reset by peer
-  except SocketError, err_msg:
+  except SocketError as err_msg:
     if settings.VERBOSITY_LEVEL >= 1:
       print("")
     err_msg = "The target host is not responding."
@@ -867,7 +867,7 @@ try:
               filename = logs_filename_creation()
               main(filename, url)
 
-          except urllib2.HTTPError, err_msg:
+          except urllib2.HTTPError as err_msg:
             if settings.VERBOSITY_LEVEL < 2:
               print("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
             error_description = ""
@@ -879,7 +879,7 @@ try:
             if settings.EOF:
               print("") 
 
-          except urllib2.URLError, err_msg:
+          except urllib2.URLError as err_msg:
             if settings.VERBOSITY_LEVEL < 2:
               print("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
             err_msg = str(err_msg.args[0]).split("] ")[1] + "." 

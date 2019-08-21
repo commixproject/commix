@@ -432,7 +432,7 @@ def file_access(url, cve, check_header, filename):
       sys.stdout.write(settings.print_critical_msg(warn_msg))
       sys.stdout.flush()
       raise SystemExit()
-    except ValueError, err_msg:
+    except ValueError as err_msg:
       err_msg = str(err_msg[0]).capitalize() + str(err_msg)[1]
       sys.stdout.write(settings.print_critical_msg(err_msg) + "\n")
       sys.stdout.flush()
@@ -879,7 +879,7 @@ def shellshock_handler(url, http_request_method, filename):
     if no_result and settings.VERBOSITY_LEVEL < 2:
       print("")
 
-  except urllib2.HTTPError, err_msg:
+  except urllib2.HTTPError as err_msg:
     if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
       response = False  
     elif settings.IGNORE_ERR_MSG == False:
@@ -891,7 +891,7 @@ def shellshock_handler(url, http_request_method, filename):
       else:
         raise SystemExit()
 
-  except urllib2.URLError, err_msg:
+  except urllib2.URLError as err_msg:
     err_msg = str(err_msg.reason).split(" ")[2:]
     err_msg = ' '.join(err_msg)+ "."
     if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
@@ -899,7 +899,7 @@ def shellshock_handler(url, http_request_method, filename):
     print(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
-  except httplib.IncompleteRead, err_msg:
+  except httplib.IncompleteRead as err_msg:
     print(settings.print_critical_msg(err_msg + "."))
     raise SystemExit()  
     
@@ -947,7 +947,7 @@ def cmd_exec(url, cmd, cve, check_header, filename):
       shell = ''.join(shell)
       return shell, payload
 
-    except urllib2.URLError, err_msg:
+    except urllib2.URLError as err_msg:
       print("\n" + settings.print_critical_msg(err_msg))
       raise SystemExit()
 

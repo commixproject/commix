@@ -58,10 +58,10 @@ def estimate_response_time(url, timesec):
     response.read(1)
     response.close()
 
-  # except urllib2.HTTPError, err:
+  # except urllib2.HTTPError as err:
   #   pass
     
-  except urllib2.HTTPError, err:
+  except urllib2.HTTPError as err:
     ignore_start = time.time()
     if "Unauthorized" in str(err) and menu.options.ignore_code == settings.UNAUTHORIZED_ERROR:
       pass
@@ -202,13 +202,13 @@ def estimate_response_time(url, timesec):
     print(settings.print_critical_msg(err_msg)) + "\n"
     raise SystemExit()
 
-  except urllib2.URLError, err_msg:
+  except urllib2.URLError as err_msg:
     if settings.VERBOSITY_LEVEL >= 1:
       print("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
     print(settings.print_critical_msg(str(err_msg.args[0]).split("] ")[1] + "."))
     raise SystemExit()
 
-  except ValueError, err_msg:
+  except ValueError as err_msg:
     if settings.VERBOSITY_LEVEL >= 1:
       print("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
     print(settings.print_critical_msg(str(err_msg) + "."))
@@ -266,7 +266,7 @@ def get_request_response(request):
     if menu.options.proxy:
       try:
         response = proxy.use_proxy(request)
-      except urllib2.HTTPError, err_msg:
+      except urllib2.HTTPError as err_msg:
         if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
           response = False  
         elif settings.IGNORE_ERR_MSG == False:
@@ -283,7 +283,7 @@ def get_request_response(request):
           else:
             raise SystemExit()
         response = False 
-      except urllib2.URLError, err_msg:
+      except urllib2.URLError as err_msg:
         if "Connection refused" in err_msg.reason:
           err_msg =  "The target host is not responding. "
           err_msg += "Please ensure that is up and try again."
@@ -299,7 +299,7 @@ def get_request_response(request):
     elif menu.options.tor:
       try:
         response = tor.use_tor(request)
-      except urllib2.HTTPError, err_msg:
+      except urllib2.HTTPError as err_msg:
         if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
           response = False  
         elif settings.IGNORE_ERR_MSG == False:
@@ -316,7 +316,7 @@ def get_request_response(request):
           else:
             raise SystemExit()
         response = False 
-      except urllib2.URLError, err_msg:
+      except urllib2.URLError as err_msg:
         err_msg = str(err_msg.reason).split(" ")[2:]
         err_msg = ' '.join(err_msg)+ "."
         if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
@@ -327,7 +327,7 @@ def get_request_response(request):
     else:
       try:
         response = urllib2.urlopen(request)
-      except urllib2.HTTPError, err_msg:
+      except urllib2.HTTPError as err_msg:
         if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
           response = False  
         elif settings.IGNORE_ERR_MSG == False:
@@ -347,7 +347,7 @@ def get_request_response(request):
           else:
             raise SystemExit()
         response = False  
-      except urllib2.URLError, err_msg:
+      except urllib2.URLError as err_msg:
         err_msg = str(err_msg.reason).split(" ")[2:]
         err_msg = ' '.join(err_msg)+ "."
         if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
@@ -403,7 +403,7 @@ def cookie_injection(url, vuln_parameter, payload):
     try:
       proxy = urllib2.ProxyHandler({settings.SCHEME : menu.options.proxy})
       response = inject_cookie(url, vuln_parameter, payload, proxy)
-    except urllib2.HTTPError, err_msg:
+    except urllib2.HTTPError as err_msg:
       if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
@@ -415,7 +415,7 @@ def cookie_injection(url, vuln_parameter, payload):
         else:
           raise SystemExit()
       response = False  
-    except urllib2.URLError, err_msg:
+    except urllib2.URLError as err_msg:
       err_msg = str(err_msg.reason).split(" ")[2:]
       err_msg = ' '.join(err_msg)+ "."
       if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
@@ -428,7 +428,7 @@ def cookie_injection(url, vuln_parameter, payload):
     try:
       proxy = urllib2.ProxyHandler({settings.SCHEME:settings.PRIVOXY_IP + ":" + settings.PRIVOXY_PORT})
       response = inject_cookie(url, vuln_parameter, payload, proxy)
-    except urllib2.HTTPError, err_msg:
+    except urllib2.HTTPError as err_msg:
       if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
@@ -445,7 +445,7 @@ def cookie_injection(url, vuln_parameter, payload):
         else:
           raise SystemExit()
       response = False 
-    except urllib2.URLError, err_msg:
+    except urllib2.URLError as err_msg:
       err_msg = str(err_msg.reason).split(" ")[2:]
       err_msg = ' '.join(err_msg)+ "."
       if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
@@ -456,7 +456,7 @@ def cookie_injection(url, vuln_parameter, payload):
   else:
     try:
       response = inject_cookie(url, vuln_parameter, payload, proxy)
-    except urllib2.HTTPError, err_msg:
+    except urllib2.HTTPError as err_msg:
       if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
@@ -474,7 +474,7 @@ def cookie_injection(url, vuln_parameter, payload):
           raise SystemExit()
       response = False 
 
-    except urllib2.URLError, err_msg:
+    except urllib2.URLError as err_msg:
       err_msg = str(err_msg.reason).split(" ")[2:]
       err_msg = ' '.join(err_msg)+ "."
       if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
@@ -530,7 +530,7 @@ def user_agent_injection(url, vuln_parameter, payload):
     try:
       proxy = urllib2.ProxyHandler({settings.SCHEME : menu.options.proxy})
       response = inject_user_agent(url, vuln_parameter, payload, proxy)
-    except urllib2.HTTPError, err_msg:
+    except urllib2.HTTPError as err_msg:
       if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
@@ -547,7 +547,7 @@ def user_agent_injection(url, vuln_parameter, payload):
         else:
           raise SystemExit()
       response = False 
-    except urllib2.URLError, err_msg:
+    except urllib2.URLError as err_msg:
       err_msg = str(err_msg.reason).split(" ")[2:]
       err_msg = ' '.join(err_msg)+ "."
       if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
@@ -560,7 +560,7 @@ def user_agent_injection(url, vuln_parameter, payload):
     try:
       proxy = urllib2.ProxyHandler({settings.SCHEME:settings.PRIVOXY_IP + ":" + settings.PRIVOXY_PORT})
       response = inject_user_agent(url, vuln_parameter, payload, proxy)
-    except urllib2.HTTPError, err_msg:
+    except urllib2.HTTPError as err_msg:
       if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
@@ -577,7 +577,7 @@ def user_agent_injection(url, vuln_parameter, payload):
         else:
           raise SystemExit()
       response = False 
-    except urllib2.URLError, err_msg:
+    except urllib2.URLError as err_msg:
       err_msg = str(err_msg.reason).split(" ")[2:]
       err_msg = ' '.join(err_msg)+ "."
       if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
@@ -588,7 +588,7 @@ def user_agent_injection(url, vuln_parameter, payload):
   else:
     try:
       response = inject_user_agent(url, vuln_parameter, payload, proxy)
-    except urllib2.HTTPError, err_msg:
+    except urllib2.HTTPError as err_msg:
       if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
@@ -605,7 +605,7 @@ def user_agent_injection(url, vuln_parameter, payload):
         else:
           raise SystemExit()
       response = False 
-    except urllib2.URLError, err_msg:
+    except urllib2.URLError as err_msg:
       err_msg = str(err_msg.reason).split(" ")[2:]
       err_msg = ' '.join(err_msg)+ "."
       if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
@@ -662,7 +662,7 @@ def referer_injection(url, vuln_parameter, payload):
     try:
       proxy = urllib2.ProxyHandler({settings.SCHEME : menu.options.proxy})
       response = inject_referer(url, vuln_parameter, payload, proxy)
-    except urllib2.HTTPError, err_msg:
+    except urllib2.HTTPError as err_msg:
       if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
@@ -679,7 +679,7 @@ def referer_injection(url, vuln_parameter, payload):
         else:
           raise SystemExit()
       response = False 
-    except urllib2.URLError, err_msg:
+    except urllib2.URLError as err_msg:
       err_msg = str(err_msg.reason).split(" ")[2:]
       err_msg = ' '.join(err_msg)+ "."
       if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
@@ -692,7 +692,7 @@ def referer_injection(url, vuln_parameter, payload):
     try:
       proxy = urllib2.ProxyHandler({settings.SCHEME:settings.PRIVOXY_IP + ":" + settings.PRIVOXY_PORT})
       response = inject_referer(url, vuln_parameter, payload, proxy)
-    except urllib2.HTTPError, err_msg:
+    except urllib2.HTTPError as err_msg:
       if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
@@ -709,7 +709,7 @@ def referer_injection(url, vuln_parameter, payload):
         else:
           raise SystemExit()
       response = False 
-    except urllib2.URLError, err_msg:
+    except urllib2.URLError as err_msg:
       err_msg = str(err_msg.reason).split(" ")[2:]
       err_msg = ' '.join(err_msg)+ "."
       if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
@@ -721,7 +721,7 @@ def referer_injection(url, vuln_parameter, payload):
     try:
       response = inject_referer(url, vuln_parameter, payload, proxy)
 
-    except urllib2.HTTPError, err_msg:
+    except urllib2.HTTPError as err_msg:
       if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
@@ -738,7 +738,7 @@ def referer_injection(url, vuln_parameter, payload):
         else:
           raise SystemExit()
       response = False 
-    except urllib2.URLError, err_msg:
+    except urllib2.URLError as err_msg:
       err_msg = str(err_msg.reason).split(" ")[2:]
       err_msg = ' '.join(err_msg)+ "."
       if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
@@ -797,7 +797,7 @@ def host_injection(url, vuln_parameter, payload):
     try:
       proxy = urllib2.ProxyHandler({settings.SCHEME : menu.options.proxy})
       response = inject_host(url, vuln_parameter, payload, proxy)
-    except urllib2.HTTPError, err_msg:
+    except urllib2.HTTPError as err_msg:
       if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
@@ -814,7 +814,7 @@ def host_injection(url, vuln_parameter, payload):
         else:
           raise SystemExit()
       response = False 
-    except urllib2.URLError, err_msg:
+    except urllib2.URLError as err_msg:
       err_msg = str(err_msg.reason).split(" ")[2:]
       err_msg = ' '.join(err_msg)+ "."
       if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
@@ -827,7 +827,7 @@ def host_injection(url, vuln_parameter, payload):
     try:
       proxy = urllib2.ProxyHandler({settings.SCHEME:settings.PRIVOXY_IP + ":" + settings.PRIVOXY_PORT})
       response = inject_host(url, vuln_parameter, payload, proxy)
-    except urllib2.HTTPError, err_msg:
+    except urllib2.HTTPError as err_msg:
       if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
@@ -844,7 +844,7 @@ def host_injection(url, vuln_parameter, payload):
         else:
           raise SystemExit()
       response = False 
-    except urllib2.URLError, err_msg:
+    except urllib2.URLError as err_msg:
       err_msg = str(err_msg.reason).split(" ")[2:]
       err_msg = ' '.join(err_msg)+ "."
       if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
@@ -856,7 +856,7 @@ def host_injection(url, vuln_parameter, payload):
     try:
       response = inject_host(url, vuln_parameter, payload, proxy)
 
-    except urllib2.HTTPError, err_msg:
+    except urllib2.HTTPError as err_msg:
       if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
@@ -873,7 +873,7 @@ def host_injection(url, vuln_parameter, payload):
         else:
           raise SystemExit()
       response = False 
-    except urllib2.URLError, err_msg:
+    except urllib2.URLError as err_msg:
       err_msg = str(err_msg.reason).split(" ")[2:]
       err_msg = ' '.join(err_msg)+ "."
       if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
@@ -932,7 +932,7 @@ def custom_header_injection(url, vuln_parameter, payload):
     try:
       proxy = urllib2.ProxyHandler({settings.SCHEME : menu.options.proxy})
       response = inject_custom_header(url, vuln_parameter, payload, proxy)
-    except urllib2.HTTPError, err_msg:
+    except urllib2.HTTPError as err_msg:
       if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
@@ -949,7 +949,7 @@ def custom_header_injection(url, vuln_parameter, payload):
         else:
           raise SystemExit()
       response = False 
-    except urllib2.URLError, err_msg:
+    except urllib2.URLError as err_msg:
       err_msg = str(err_msg.reason).split(" ")[2:]
       err_msg = ' '.join(err_msg)+ "."
       if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
@@ -962,7 +962,7 @@ def custom_header_injection(url, vuln_parameter, payload):
     try:
       proxy = urllib2.ProxyHandler({settings.SCHEME:settings.PRIVOXY_IP + ":" + settings.PRIVOXY_PORT})
       response = inject_custom_header(url, vuln_parameter, payload, proxy)
-    except urllib2.HTTPError, err_msg:
+    except urllib2.HTTPError as err_msg:
       if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
@@ -979,7 +979,7 @@ def custom_header_injection(url, vuln_parameter, payload):
         else:
           raise SystemExit()
       response = False 
-    except urllib2.URLError, err_msg:
+    except urllib2.URLError as err_msg:
       err_msg = str(err_msg.reason).split(" ")[2:]
       err_msg = ' '.join(err_msg)+ "."
       if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
@@ -990,7 +990,7 @@ def custom_header_injection(url, vuln_parameter, payload):
   else:
     try:
       response = inject_custom_header(url, vuln_parameter, payload, proxy)
-    except urllib2.HTTPError, err_msg:
+    except urllib2.HTTPError as err_msg:
       if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
@@ -1007,7 +1007,7 @@ def custom_header_injection(url, vuln_parameter, payload):
         else:
           raise SystemExit()
       response = False 
-    except urllib2.URLError, err_msg:
+    except urllib2.URLError as err_msg:
       err_msg = str(err_msg.reason).split(" ")[2:]
       err_msg = ' '.join(err_msg)+ "."
       if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:

@@ -149,7 +149,7 @@ def check_connection(url):
         err_msg = "Host '" + hostname + "' does not exist."
         print(settings.print_critical_msg(err_msg))
         raise SystemExit()
-      except socket.error, ex:
+      except socket.error as err:
         err_msg = "Problem occurred while "
         err_msg += "resolving a host name '" + hostname + "'"
         print(settings.print_critical_msg(err_msg))
@@ -516,7 +516,7 @@ def check_http_s(url):
         err_msg = "Invalid target URL has been given." 
         print(settings.print_critical_msg(err_msg))
         raise SystemExit()
-    except ValueError, err:
+    except ValueError as err:
       err_msg = "Invalid target URL has been given." 
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
@@ -798,7 +798,7 @@ def tamper_scripts():
           err_msg += "in tamper script '" + import_script.split(".")[0] + "'."
           print(settings.print_critical_msg(err_msg))
           raise SystemExit()
-      except ImportError, err_msg:
+      except ImportError as err_msg:
         print(settings.print_error_msg(str(err_msg) + "."))
         pass
 
@@ -1136,7 +1136,7 @@ def is_XML_check(parameter):
   try:
     if re.search(settings.XML_RECOGNITION_REGEX, parameter):
       return True
-  except ValueError, err_msg:
+  except ValueError as err_msg:
     return False
 
 # Process with SOAP/XML data
@@ -1173,7 +1173,7 @@ def is_JSON_check(parameter):
     if re.search(settings.JSON_RECOGNITION_REGEX, parameter) or \
        re.search(settings.JSON_LIKE_RECOGNITION_REGEX, parameter):
       return True
-  except ValueError, err_msg:
+  except ValueError as err_msg:
     if not "No JSON object could be decoded" in err_msg:
       err_msg = "JSON " + str(err_msg) + ". "
       print(settings.print_critical_msg(err_msg)) + "\n"
