@@ -17,7 +17,7 @@ import os
 import sys
 import time
 import base64
-import urllib2
+
 import cookielib
 
 from src.utils import menu
@@ -44,8 +44,8 @@ def authentication_process():
     auth_url = menu.options.auth_url
     auth_data = menu.options.auth_data
     cj = cookielib.CookieJar()
-    opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
-    request = opener.open(urllib2.Request(auth_url))
+    opener = _urllib.request.build_opener(_urllib.request.HTTPCookieProcessor(cj))
+    request = opener.open(_urllib.request.Request(auth_url))
     cookies = ""
     for cookie in cj:
         cookie_values = cookie.name + "=" + cookie.value + "; "
@@ -56,16 +56,16 @@ def authentication_process():
         success_msg = "The received cookie is "  
         success_msg += str(menu.options.cookie) + Style.RESET_ALL + "."
         print(settings.print_success_msg(success_msg))
-    urllib2.install_opener(opener)
-    request = urllib2.Request(auth_url, auth_data)
+    _urllib.request.install_opener(opener)
+    request = _urllib.request.Request(auth_url, auth_data)
     # Check if defined extra headers.
     headers.do_check(request)
     #headers.check_http_traffic(request)
     # Get the response of the request.
-    response = urllib2.urlopen(request)
+    response = _urllib.request.urlopen(request)
     return response
 
-  except urllib2.HTTPError as err_msg:
+  except _urllib.error.HTTPError as err_msg:
     print(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
@@ -139,21 +139,21 @@ def http_auth_cracker(url, realm):
         try:
           # Basic authentication 
           if authentication_type.lower() == "basic":
-            request = urllib2.Request(url)
+            request = _urllib.request.Request(url)
             base64string = base64.encodestring(username + ":" + password)[:-1]
             request.add_header("Authorization", "Basic " + base64string)
             headers.do_check(request)
             headers.check_http_traffic(request)
-            result = urllib2.urlopen(request)
+            result = _urllib.request.urlopen(request)
           # Digest authentication 
           elif authentication_type.lower() == "digest":
-            authhandler = urllib2.HTTPDigestAuthHandler()
+            authhandler = _urllib.request.HTTPDigestAuthHandler()
             authhandler.add_password(realm, url, username, password)
-            opener = urllib2.build_opener(authhandler)
-            urllib2.install_opener(opener)
-            request = urllib2.Request(url)
+            opener = _urllib.request.build_opener(authhandler)
+            _urllib.request.install_opener(opener)
+            request = _urllib.request.Request(url)
             headers.check_http_traffic(request)
-            result = urllib2.urlopen(request)
+            result = _urllib.request.urlopen(request)
 
           # Store valid results to session 
           admin_panel = url 

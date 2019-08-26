@@ -13,7 +13,7 @@ the Free Software Foundation, either version 3 of the License, or
 For more see the file 'readme/COPYING' for copying permission.
 """
 
-import urllib
+from src.thirdparty.six.moves import urllib as _urllib
 from src.utils import settings
 
 """
@@ -39,7 +39,7 @@ def decision(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_request_method):
 
     if separator == "&&" :
       if http_request_method == "POST":
-        separator = urllib.quote(separator)
+        separator = _urllib.parse.quote(separator)
         ampersand = "%26"
       else:
         ampersand = "&"
@@ -82,7 +82,7 @@ def decision(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_request_method):
 
     elif separator == "&&" :
       if http_request_method == "POST":
-        separator = urllib.quote(separator)
+        separator = _urllib.parse.quote(separator)
         ampersand = "%26"
       else:
         ampersand = "&"
@@ -96,7 +96,7 @@ def decision(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_request_method):
                 "sleep " + str(timesec)
                 )
       if http_request_method == "POST":
-        separator = urllib.unquote(separator)
+        separator = _urllib.parse.unquote(separator)
 
     elif separator == "||" :
       pipe = "|"
@@ -130,7 +130,7 @@ def decision_alter_shell(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_reque
                 )
     if separator == "&&" :
       if http_request_method == "POST":
-        separator = urllib.quote(separator)
+        separator = _urllib.parse.quote(separator)
         ampersand = "%26"
       else:
         ampersand = "&"
@@ -168,8 +168,8 @@ def decision_alter_shell(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_reque
 
     elif separator == "&&" :
       if http_request_method == "POST":
-        separator = urllib.quote(separator)
-        ampersand = urllib.quote("&")
+        separator = _urllib.parse.quote(separator)
+        ampersand = _urllib.parse.quote("&")
       else:
         ampersand = "&"
       payload = (ampersand +
@@ -181,7 +181,7 @@ def decision_alter_shell(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_reque
                 "$(python -c \"import time\ntime.sleep(" + str(timesec) + ")\") "
                 )
       if http_request_method == "POST":
-        separator = urllib.unquote(separator)
+        separator = _urllib.parse.unquote(separator)
 
     elif separator == "||" :
       pipe = "|"
@@ -228,7 +228,7 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
                 )
     if separator == "&&" :
       if http_request_method == "POST":
-        separator = urllib.quote(separator)
+        separator = _urllib.parse.quote(separator)
         ampersand = "%26"
       else:
         ampersand = "&"
@@ -287,7 +287,7 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
 
     elif separator == "&&" :
       if http_request_method == "POST":
-        separator = urllib.quote(separator)
+        separator = _urllib.parse.quote(separator)
         ampersand = "%26"
       else:
         ampersand = "&"
@@ -306,7 +306,7 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
                 "echo $str1 >" + OUTPUT_TEXTFILE 
                 )
       if http_request_method == "POST":
-        separator = urllib.unquote(separator)
+        separator = _urllib.parse.unquote(separator)
       
     elif separator == "||" :                
       pipe = "|"
@@ -342,7 +342,7 @@ def cmd_execution_alter_shell(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_
                 )
     if separator == "&&" :
       if http_request_method == "POST":
-        separator = urllib.quote(separator)
+        separator = _urllib.parse.quote(separator)
         ampersand = "%26"
       else:
         ampersand = "&"
@@ -383,7 +383,7 @@ def cmd_execution_alter_shell(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_
 
     elif separator == "&&" :
       if http_request_method == "POST":
-        separator = urllib.quote(separator)
+        separator = _urllib.parse.quote(separator)
         ampersand = "%26"
       else:
         ampersand = "&"
@@ -396,7 +396,7 @@ def cmd_execution_alter_shell(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_
                 "$(python -c \"import time\ntime.sleep(" + str(timesec) + ")\") "
                 )
       if http_request_method == "POST":
-        separator = urllib.unquote(separator) 
+        separator = _urllib.parse.unquote(separator) 
 
     elif separator == "||" :     
       pipe = "|"
@@ -433,7 +433,7 @@ def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, timesec, http
 
     if separator == "&&" :
       if http_request_method == "POST":
-        separator = urllib.quote(separator)
+        separator = _urllib.parse.quote(separator)
         ampersand = "%26"
       else:
         ampersand = "&"
@@ -468,7 +468,7 @@ def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, timesec, http
 
     elif separator == "&&" :
       if http_request_method == "POST":
-        separator = urllib.quote(separator)
+        separator = _urllib.parse.quote(separator)
         ampersand = "%26"
       else:
         ampersand = "&"
@@ -480,7 +480,7 @@ def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, timesec, http
                 "sleep " + str(timesec)
                 )
       if http_request_method == "POST":
-        separator = urllib.unquote(separator)
+        separator = _urllib.parse.unquote(separator)
         
     elif separator == "||" :
       pipe = "|"
@@ -515,7 +515,7 @@ def get_char_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, t
                 )
     if separator == "&&" :
       if http_request_method == "POST":
-        separator = urllib.quote(separator)
+        separator = _urllib.parse.quote(separator)
         ampersand = "%26"
       else:
         ampersand = "&"
@@ -548,7 +548,7 @@ def get_char_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, t
 
     elif separator == "&&" :
       if http_request_method == "POST":
-        separator = urllib.quote(separator)
+        separator = _urllib.parse.quote(separator)
         ampersand = "%26"
       else:
         ampersand = "&"
@@ -559,7 +559,7 @@ def get_char_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, t
                 "$(python -c \"import time\ntime.sleep(" + str(timesec) + ")\")"
                 )
       if http_request_method == "POST":
-        separator = urllib.unquote(separator)
+        separator = _urllib.parse.unquote(separator)
 
     elif separator == "||" :
       pipe = "|"
@@ -595,7 +595,7 @@ def fp_result(separator, OUTPUT_TEXTFILE, ascii_char, timesec, http_request_meth
 
     if separator == "&&" :
       if http_request_method == "POST":
-        separator = urllib.quote(separator)
+        separator = _urllib.parse.quote(separator)
         ampersand = "%26"
       else:
         ampersand = "&"
@@ -629,7 +629,7 @@ def fp_result(separator, OUTPUT_TEXTFILE, ascii_char, timesec, http_request_meth
 
     elif separator == "&&" :
       if http_request_method == "POST":
-        separator = urllib.quote(separator)
+        separator = _urllib.parse.quote(separator)
         ampersand = "%26"
       else:
         ampersand = "&"
@@ -640,7 +640,7 @@ def fp_result(separator, OUTPUT_TEXTFILE, ascii_char, timesec, http_request_meth
                 "sleep " + str(timesec)
                 )
       if http_request_method == "POST":
-        separator = urllib.unquote(separator)
+        separator = _urllib.parse.unquote(separator)
         
     elif separator == "||" :
       pipe = "|"
@@ -670,7 +670,7 @@ def fp_result_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, 
                 )
     if separator == "&&" :
       if http_request_method == "POST":
-        separator = urllib.quote(separator)
+        separator = _urllib.parse.quote(separator)
         ampersand = "%26"
       else:
         ampersand = "&"
@@ -703,7 +703,7 @@ def fp_result_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, 
 
     elif separator == "&&" :
       if http_request_method == "POST":
-        separator = urllib.quote(separator)
+        separator = _urllib.parse.quote(separator)
         ampersand = "%26"
       else:
         ampersand = "&"
@@ -714,7 +714,7 @@ def fp_result_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, 
                 "$(python -c \"import time\ntime.sleep(" + str(timesec) + ")\")"
                 )
       if http_request_method == "POST":
-        separator = urllib.unquote(separator)
+        separator = _urllib.parse.unquote(separator)
 
     elif separator == "||" :
       pipe = "|"

@@ -17,7 +17,7 @@ import re
 import os
 import sys
 import time
-import urllib
+from src.thirdparty.six.moves import urllib as _urllib
 import urlparse
 
 from src.utils import logs
@@ -74,7 +74,7 @@ def execute_shell(separator, TAG, cmd, prefix, suffix, whitespace, http_request_
     else:
       whitespace = settings.WHITESPACE[0]
       if whitespace == " ":
-        whitespace = urllib.quote(whitespace) 
+        whitespace = _urllib.parse.quote(whitespace) 
       response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
     end = time.time()
     diff = end - start

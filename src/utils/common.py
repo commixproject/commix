@@ -18,8 +18,8 @@ import os
 import sys
 import json
 import hashlib
-import urllib
-import urllib2
+from src.thirdparty.six.moves import urllib as _urllib
+
 import traceback
 from src.utils import menu
 from src.utils import settings
@@ -56,12 +56,12 @@ def create_github_issue(err_msg, exc_msg):
       raise SystemExit()
 
   err_msg = err_msg[err_msg.find("\n"):]
-  req = urllib2.Request(url="https://api.github.com/search/issues?q=" + \
-        urllib.quote("repo:commixproject/commix" + " " + "Unhandled exception (#" + str(key) + ")")
+  req = _urllib.request.Request(url="https://api.github.com/search/issues?q=" + \
+        _urllib.parse.quote("repo:commixproject/commix" + " " + "Unhandled exception (#" + str(key) + ")")
         )
 
   try:
-    content = urllib2.urlopen(req).read()
+    content = _urllib.request.urlopen(req).read()
     _ = json.loads(content)
     duplicate = _["total_count"] > 0
     closed = duplicate and _["items"][0]["state"] == "closed"
@@ -77,10 +77,10 @@ def create_github_issue(err_msg, exc_msg):
     pass
 
   data = {"title": "Unhandled exception (#" + str(key) + ")", "body": "```" + str(err_msg) + "\n```\n```\n" + str(exc_msg) + "```"}
-  req = urllib2.Request(url="https://api.github.com/repos/commixproject/commix/issues", data=json.dumps(data), headers={"Authorization": "token " + str(settings.GITHUB_REPORT_OAUTH_TOKEN.decode("base64"))})
+  req = _urllib.request.Request(url="https://api.github.com/repos/commixproject/commix/issues", data=json.dumps(data), headers={"Authorization": "token " + str(settings.GITHUB_REPORT_OAUTH_TOKEN.decode("base64"))})
   
   try:
-    content = urllib2.urlopen(req).read()
+    content = _urllib.request.urlopen(req).read()
   except Exception as err:
     content = None
 

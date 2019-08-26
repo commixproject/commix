@@ -15,10 +15,11 @@ For more see the file 'readme/COPYING' for copying permission.
 
 import sys
 import errno
-import urllib2
+
 from src.utils import menu
 from src.utils import settings
 from socket import error as SocketError
+from src.thirdparty.six.moves import urllib as _urllib
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 def do_check(url):
@@ -27,11 +28,11 @@ def do_check(url):
   ---
   [1] https://gist.github.com/FiloSottile/2077115
   """
-  class Request(urllib2.Request):
+  class Request(_urllib.request.Request):
     def get_method(self):
         return "GET"
 
-  class RedirectHandler(urllib2.HTTPRedirectHandler):
+  class RedirectHandler(_urllib.request.HTTPRedirectHandler):
     """
     Subclass the HTTPRedirectHandler to make it use our 
     Request also on the redirected URL
@@ -48,25 +49,25 @@ def do_check(url):
                            unverifiable = True
                            ) 
       else: 
-        err_msg = str(urllib2.HTTPError(req.get_full_url(), code, msg, headers, fp)).replace(": "," (")
+        err_msg = str(_urllib.error.HTTPError(req.get_full_url(), code, msg, headers, fp)).replace(": "," (")
         print(settings.print_critical_msg(err_msg + ")."))
         raise SystemExit()
               
-  class HTTPMethodFallback(urllib2.BaseHandler):
+  class HTTPMethodFallback(_urllib.request.BaseHandler):
     """
     """
     def http_error_405(self, req, fp, code, msg, headers): 
       fp.read()
       fp.close()
       newheaders = dict((k,v) for k,v in req.headers.items() if k.lower() not in ("content-length", "content-type"))
-      return self.parent.open(urllib2.Request(req.get_full_url(), 
+      return self.parent.open(_urllib.request.Request(req.get_full_url(), 
                               headers = newheaders, 
                               origin_req_host = req.get_origin_req_host(), 
                               unverifiable = True)
                               )
 
   # Build our opener
-  opener = urllib2.OpenerDirector() 
+  opener = _urllib.request.OpenerDirector() 
   # Check if defined any Host HTTP header.
   if menu.options.host and settings.HOST_INJECTION == False:
     opener.addheaders.append(('Host', menu.options.host))
@@ -80,11 +81,11 @@ def do_check(url):
   if menu.options.cookie and settings.COOKIE_INJECTION == False:
     opener.addheaders.append(('Cookie', menu.options.cookie))
 
-  for handler in [urllib2.HTTPHandler,
+  for handler in [_urllib.request.HTTPHandler,
                   HTTPMethodFallback,
                   RedirectHandler,
-                  urllib2.HTTPErrorProcessor, 
-                  urllib2.HTTPSHandler]:
+                  _urllib.request.HTTPErrorProcessor, 
+                  _urllib.request.HTTPSHandler]:
       opener.add_handler(handler())   
 
   try:
@@ -124,13 +125,13 @@ def do_check(url):
     raise SystemExit()
 
   # Raise exception regarding urllib2 HTTPError.
-  except urllib2.HTTPError as err:
+  except _urllib.error.HTTPError as err:
     err_msg = str(err).replace(": "," (")
     print(settings.print_critical_msg(err_msg + ")."))
     raise SystemExit()
 
   # The target host seems to be down.
-  except urllib2.URLError as err:
+  except _urllib.error.URLError as err:
     err_msg = "The host seems to be down"
     try:
       err_msg += " (" + str(err.args[0]).split("] ")[1] + ")."

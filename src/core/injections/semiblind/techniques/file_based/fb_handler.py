@@ -19,8 +19,8 @@ import sys
 import time
 import string
 import random
-import urllib
-import urllib2
+from src.thirdparty.six.moves import urllib as _urllib
+
 import urlparse 
 
 from src.utils import menu
@@ -332,11 +332,11 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
               try:
 
                 # Check if defined extra headers.
-                request = urllib2.Request(output)
+                request = _urllib.request.Request(output)
                 headers.do_check(request)
 
                 # Evaluate test results.
-                output = urllib2.urlopen(request)
+                output = _urllib.request.urlopen(request)
                 html_data = output.read()
                 shell = re.findall(r"" + TAG + "", html_data)
 
@@ -347,9 +347,9 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                   sys.stdout.flush()
 
                 if len(shell) == 0 :
-                  raise urllib2.HTTPError(url, 404, 'Error', {}, None)
+                  raise _urllib.error.HTTPError(url, 404, 'Error', {}, None)
 
-              except urllib2.HTTPError as e:
+              except _urllib.error.HTTPError as e:
                 if str(e.getcode()) == settings.NOT_FOUND_ERROR:
                   percent = ((i*100)/total)
                   float_percent = "{0:.1f}".format(round(((i*100)/(total*1.0)),2))
@@ -440,7 +440,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                 delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
               raise
 
-            except urllib2.URLError as e: 
+            except _urllib.error.URLError as e: 
               warn_msg = "It seems that you don't have permissions to "
               warn_msg += "read and/or write files in '" + settings.WEB_ROOT + "'."
               sys.stdout.write("\r" + settings.print_warning_msg(warn_msg))

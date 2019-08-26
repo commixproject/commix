@@ -15,7 +15,7 @@ For more see the file 'readme/COPYING' for copying permission.
 
 import re
 import sys
-import urllib
+from src.thirdparty.six.moves import urllib as _urllib
 
 from src.utils import logs
 from src.utils import menu

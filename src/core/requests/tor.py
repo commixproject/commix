@@ -15,7 +15,7 @@ For more see the file 'readme/COPYING' for copying permission.
 
 import re
 import sys
-import urllib2
+
 import httplib
 from src.utils import menu
 from src.utils import settings
@@ -50,9 +50,9 @@ def do_check():
   sys.stdout.write(settings.print_info_msg(info_msg))
   sys.stdout.flush()
   try:
-    privoxy_proxy = urllib2.ProxyHandler({settings.SCHEME:settings.PRIVOXY_IP + ":" + PRIVOXY_PORT})
-    opener = urllib2.build_opener(privoxy_proxy)
-    urllib2.install_opener(opener)
+    privoxy_proxy = _urllib.request.ProxyHandler({settings.SCHEME:settings.PRIVOXY_IP + ":" + PRIVOXY_PORT})
+    opener = _urllib.request.build_opener(privoxy_proxy)
+    _urllib.request.install_opener(opener)
   except:
     check_privoxy_proxy = False
     pass
@@ -88,7 +88,7 @@ def do_check():
         print(settings.print_critical_msg(err_msg))  
         raise SystemExit() 
 
-    except urllib2.URLError as err_msg:
+    except _urllib.error.URLError as err_msg:
       print("[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]")
       if menu.options.tor_check:
         err_msg = "It seems that your Tor connection is not properly set. "
@@ -118,10 +118,10 @@ def use_tor(request):
     raise SystemExit()
     
   try:
-    privoxy_proxy = urllib2.ProxyHandler({settings.SCHEME:settings.PRIVOXY_IP + ":" + PRIVOXY_PORT})
-    opener = urllib2.build_opener(privoxy_proxy)
-    urllib2.install_opener(opener)
-    response = urllib2.urlopen(request)
+    privoxy_proxy = _urllib.request.ProxyHandler({settings.SCHEME:settings.PRIVOXY_IP + ":" + PRIVOXY_PORT})
+    opener = _urllib.request.build_opener(privoxy_proxy)
+    _urllib.request.install_opener(opener)
+    response = _urllib.request.urlopen(request)
     return response
 
   except Exception as err_msg:

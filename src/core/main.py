@@ -18,7 +18,7 @@ import os
 import sys
 import errno
 import random
-import urllib2
+
 import httplib
 # accept overly long result lines
 httplib._MAXLINE = 1 * 1024 * 1024
@@ -50,6 +50,7 @@ from src.core.requests import authentication
 from src.core.injections.controller import checks
 from src.core.injections.controller import parser
 from src.core.injections.controller import controller
+from src.thirdparty.six.moves import urllib as _urllib
 
 readline_error = False
 if settings.IS_WINDOWS:
@@ -119,7 +120,7 @@ def examine_request(request):
       return tor.use_tor(request)
     else:
       try:
-        return urllib2.urlopen(request)
+        return _urllib.request.urlopen(request)
       except SocketError as e:
         if e.errno == errno.ECONNRESET:
           error_msg = "Connection reset by peer."
@@ -158,7 +159,7 @@ def examine_request(request):
           print(settings.print_critical_msg(error_msg))
           raise SystemExit()
 
-  except urllib2.HTTPError as err_msg:
+  except _urllib.error.HTTPError as err_msg:
     error_description = ""
     if len(str(err_msg).split(": ")[1]) == 0:
       error_description = "Non-standard HTTP status code"
@@ -173,7 +174,7 @@ def examine_request(request):
       print(settings.print_critical_msg(err_msg))
       raise SystemExit 
 
-  except urllib2.URLError as e:
+  except _urllib.error.URLError as e:
     err_msg = "Unable to connect to the target URL"
     try:
       err_msg += " (" + str(e.args[0]).split("] ")[1] + ")."
@@ -202,7 +203,7 @@ def check_internet(url):
   if settings.VERBOSITY_LEVEL > 1:
     print("")
   try:
-    request = urllib2.Request(settings.CHECK_INTERNET_ADDRESS)
+    request = _urllib.request.Request(settings.CHECK_INTERNET_ADDRESS)
     headers.do_check(request)
     # Check if defined any HTTP Proxy (--proxy option).
     if menu.options.proxy:
@@ -231,7 +232,7 @@ def init_request(url):
     if menu.options.pdel and menu.options.pdel in settings.USER_DEFINED_POST_DATA:
       settings.PARAMETER_DELIMITER = menu.options.pdel
     try:
-      request = urllib2.Request(url, menu.options.data)
+      request = _urllib.request.Request(url, menu.options.data)
     except SocketError as e:
       if e.errno == errno.ECONNRESET:
         error_msg = "Connection reset by peer."
@@ -245,7 +246,7 @@ def init_request(url):
     if menu.options.pdel and menu.options.pdel in url:
       settings.PARAMETER_DELIMITER = menu.options.pdel
     try:
-      request = urllib2.Request(url)
+      request = _urllib.request.Request(url)
     except SocketError as e:
       if e.errno == errno.ECONNRESET:
         error_msg = "Connection reset by peer."
@@ -503,11 +504,11 @@ def main(filename, url):
         if menu.options.file_upload:
           checks.file_upload()
           try:
-            urllib2.urlopen(menu.options.file_upload)
-          except urllib2.HTTPError as err_msg:
+            _urllib.request.urlopen(menu.options.file_upload)
+          except _urllib.error.HTTPError as err_msg:
             print(settings.print_critical_msg(str(err_msg.code)))
             raise SystemExit()
-          except urllib2.URLError as err_msg:
+          except _urllib.error.URLError as err_msg:
             print(settings.print_critical_msg(str(err_msg.args[0]).split("] ")[1] + "."))
             raise SystemExit()
         try:
@@ -537,7 +538,7 @@ def main(filename, url):
         if menu.options.tamper:
           checks.tamper_scripts()
           
-      except urllib2.HTTPError as err_msg:
+      except _urllib.error.HTTPError as err_msg:
         # Check the codes of responses
         if str(err_msg.getcode()) == settings.INTERNAL_SERVER_ERROR:
           print("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
@@ -564,7 +565,7 @@ def main(filename, url):
           raise
 
       # The target host seems to be down!
-      except urllib2.URLError as e:
+      except _urllib.error.URLError as e:
         if settings.VERBOSITY_LEVEL < 2:
           print("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
         err_msg = "The host seems to be down"
@@ -867,7 +868,7 @@ try:
               filename = logs_filename_creation()
               main(filename, url)
 
-          except urllib2.HTTPError as err_msg:
+          except _urllib.error.HTTPError as err_msg:
             if settings.VERBOSITY_LEVEL < 2:
               print("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
             error_description = ""
@@ -879,7 +880,7 @@ try:
             if settings.EOF:
               print("") 
 
-          except urllib2.URLError as err_msg:
+          except _urllib.error.URLError as err_msg:
             if settings.VERBOSITY_LEVEL < 2:
               print("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
             err_msg = str(err_msg.args[0]).split("] ")[1] + "." 

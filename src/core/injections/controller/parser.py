@@ -18,7 +18,7 @@ import re
 import sys
 import time
 import base64
-import urllib
+from src.thirdparty.six.moves import urllib as _urllib
 import datetime
 
 from src.utils import menu

@@ -21,8 +21,8 @@ import json
 import string
 import random
 import base64
-import urllib
-import urllib2
+from src.thirdparty.six.moves import urllib as _urllib
+
 import urlparse
 
 from src.utils import menu
@@ -60,7 +60,7 @@ def injection_test(payload, http_request_method, url):
     vuln_parameter = parameters.vuln_GET_param(url)
     
     target = url.replace(settings.INJECT_TAG, payload)
-    request = urllib2.Request(target)
+    request = _urllib.request.Request(target)
     
     # Check if defined extra headers.
     headers.do_check(request)
@@ -74,22 +74,22 @@ def injection_test(payload, http_request_method, url):
   # Check if defined method is POST.
   else:
     parameter = menu.options.data
-    parameter = urllib2.unquote(parameter)
+    parameter = _urllib.parse.unquote(parameter)
     # Check if its not specified the 'INJECT_HERE' tag
     parameter = parameters.do_POST_check(parameter)
     parameter = ''.join(str(e) for e in parameter).replace("+","%2B")
     # Define the POST data    
     if settings.IS_JSON:
-      data = parameter.replace(settings.INJECT_TAG, urllib.unquote(payload.replace("\"", "\\\"")))
+      data = parameter.replace(settings.INJECT_TAG, _urllib.parse.unquote(payload.replace("\"", "\\\"")))
       try:
         data = checks.json_data(data)
       except ValueError:
         pass
     elif settings.IS_XML:
-      data = parameter.replace(settings.INJECT_TAG, urllib.unquote(payload)) 
+      data = parameter.replace(settings.INJECT_TAG, _urllib.parse.unquote(payload)) 
     else:
       data = parameter.replace(settings.INJECT_TAG, payload)
-    request = urllib2.Request(url, data)
+    request = _urllib.request.Request(url, data)
 
     # Check if defined extra headers.
     headers.do_check(request)
@@ -200,7 +200,7 @@ def injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_req
         payload = payload.replace(" ","%20")
         target = url.replace(settings.INJECT_TAG, payload)
         vuln_parameter = ''.join(vuln_parameter)
-        request = urllib2.Request(target)
+        request = _urllib.request.Request(target)
         # Check if defined extra headers.
         headers.do_check(request)        
         # Get the response of the request
@@ -209,21 +209,21 @@ def injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_req
       else :
         # Check if defined method is POST.
         parameter = menu.options.data
-        parameter = urllib2.unquote(parameter)
+        parameter = _urllib.parse.unquote(parameter)
         # Check if its not specified the 'INJECT_HERE' tag
         parameter = parameters.do_POST_check(parameter)
         # Define the POST data  
         if settings.IS_JSON:
-          data = parameter.replace(settings.INJECT_TAG, urllib.unquote(payload.replace("\"", "\\\"")))
+          data = parameter.replace(settings.INJECT_TAG, _urllib.parse.unquote(payload.replace("\"", "\\\"")))
           try:
             data = checks.json_data(data)
           except ValueError:
             pass
         elif settings.IS_XML:
-          data = parameter.replace(settings.INJECT_TAG, urllib.unquote(payload)) 
+          data = parameter.replace(settings.INJECT_TAG, _urllib.parse.unquote(payload)) 
         else:
           data = parameter.replace(settings.INJECT_TAG, payload)
-        request = urllib2.Request(url, data)
+        request = _urllib.request.Request(url, data)
           
         # Check if defined extra headers.
         headers.do_check(request)        
@@ -304,19 +304,19 @@ def injection_results(url, OUTPUT_TEXTFILE, timesec):
   output = injection_output(url, OUTPUT_TEXTFILE, timesec)
 
   # Check if defined extra headers.
-  request = urllib2.Request(output)
+  request = _urllib.request.Request(output)
   headers.do_check(request)
 
   # Evaluate test results.
   try:
-    output = urllib2.urlopen(request)
+    output = _urllib.request.urlopen(request)
     shell = output.read().rstrip().lstrip()
     #shell = [newline.replace("\n"," ") for newline in shell]
     if settings.TARGET_OS == "win":
       shell = [newline.replace("\r","") for newline in shell]
       #shell = [space.strip() for space in shell]
       shell = [empty for empty in shell if empty]
-  except urllib2.HTTPError as e:
+  except _urllib.error.HTTPError as e:
     if str(e.getcode()) == settings.NOT_FOUND_ERROR:
       shell = ""
   return shell

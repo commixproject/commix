@@ -14,7 +14,7 @@ For more see the file 'readme/COPYING' for copying permission.
 """
 
 import sys
-import urllib2
+
 import httplib
 
 from src.utils import menu
@@ -34,15 +34,15 @@ def do_check(url):
       print(settings.print_info_msg(info_msg))
     # Check if defined POST data
     if menu.options.data:
-      request = urllib2.Request(url, menu.options.data)
+      request = _urllib.request.Request(url, menu.options.data)
     else:
-       request = urllib2.Request(url)
+       request = _urllib.request.Request(url)
     # Check if defined extra headers.
     headers.do_check(request)
     request.set_proxy(menu.options.proxy,settings.PROXY_SCHEME)
     try:
-      check = urllib2.urlopen(request)
-    except urllib2.HTTPError as error:
+      check = _urllib.request.urlopen(request)
+    except _urllib.error.HTTPError as error:
       check = error
   except:
     check_proxy = False
@@ -63,7 +63,7 @@ def use_proxy(request):
   headers.do_check(request)
   request.set_proxy(menu.options.proxy,settings.PROXY_SCHEME)
   try:
-    response = urllib2.urlopen(request)
+    response = _urllib.request.urlopen(request)
     return response
 
   except httplib.BadStatusLine as e:

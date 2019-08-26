@@ -22,7 +22,7 @@ import socket
 import random
 import string
 import base64
-import urllib
+from src.thirdparty.six.moves import urllib as _urllib
 import traceback
 
 from collections import OrderedDict 
@@ -53,14 +53,14 @@ def ignore_google_analytics_cookie(cookie):
 Fix for %0a, %0d%0a separators
 """
 def newline_fixation(payload):
-  payload = urllib.unquote(payload)
+  payload = _urllib.parse.unquote(payload)
   if "\n" in payload:
     #_ = payload.find("\n") + 1
-    #payload = urllib.quote(payload[:_]) + payload[_:]
+    #payload = _urllib.parse.quote(payload[:_]) + payload[_:]
     payload = payload.replace("\n","%0a")
   if "\r" in payload:
     #_ = payload.find("\r\n") + 1
-    #payload = urllib.quote(payload[:_]) + payload[_:]  
+    #payload = _urllib.parse.quote(payload[:_]) + payload[_:]  
     payload = payload.replace("\r","%0d")
   return payload
 
@@ -363,7 +363,7 @@ def time_based_separators(separator, http_request_method):
   if separator == "||"  or separator == "&&" :
     separator = separator[:1]
     if http_request_method == "POST":
-      separator = urllib.quote(separator)
+      separator = _urllib.parse.quote(separator)
   return separator
 
 """
@@ -1002,7 +1002,7 @@ def recognise_payload(payload):
       hex_output(payload)
 
   if is_decoded:
-    return urllib.quote(decoded_payload)  
+    return _urllib.parse.quote(decoded_payload)  
   else:
     return payload
 

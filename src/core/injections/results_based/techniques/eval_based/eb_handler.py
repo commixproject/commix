@@ -19,8 +19,8 @@ import sys
 import time
 import string
 import random
-import urllib
-import urllib2
+from src.thirdparty.six.moves import urllib as _urllib
+
 
 from src.utils import menu
 from src.utils import logs
@@ -98,7 +98,7 @@ def eb_injection_handler(url, timesec, filename, http_request_method):
       for suffix in settings.EVAL_SUFFIXES:
         for separator in settings.EVAL_SEPARATORS:
           if whitespace == " ":
-            whitespace = urllib.quote(whitespace) 
+            whitespace = _urllib.parse.quote(whitespace) 
           # Check injection state
           settings.DETECTION_PHASE = True
           settings.EXPLOITATION_PHASE = False
@@ -145,14 +145,14 @@ def eb_injection_handler(url, timesec, filename, http_request_method):
                 # Classic decision payload (check if host is vulnerable).
                 payload = eb_payloads.decision(separator, TAG, randv1, randv2)
 
-              suffix = urllib.quote(suffix)
+              suffix = _urllib.parse.quote(suffix)
               # Fix prefixes / suffixes
               payload = parameters.prefixes(payload, prefix)
               payload = parameters.suffixes(payload, suffix)
 
               # Fixation for specific payload.
-              if ")%3B" + urllib.quote(")}") in payload:
-                payload = payload.replace(")%3B" + urllib.quote(")}"), ")" + urllib.quote(")}"))
+              if ")%3B" + _urllib.parse.quote(")}") in payload:
+                payload = payload.replace(")%3B" + _urllib.parse.quote(")}"), ")" + _urllib.parse.quote(")}"))
                 #payload = payload + TAG + ""
 
               # Whitespace fixation

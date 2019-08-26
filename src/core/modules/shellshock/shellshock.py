@@ -5,7 +5,7 @@ import os
 import sys
 import string
 import random
-import urllib2
+
 import httplib
 
 from src.utils import menu
@@ -425,8 +425,8 @@ def file_access(url, cve, check_header, filename):
     file_to_upload = menu.options.file_upload
     # check if remote file exists.
     try:
-      urllib2.urlopen(file_to_upload)
-    except urllib2.HTTPError, warn_msg:
+      _urllib.request.urlopen(file_to_upload)
+    except _urllib.error.HTTPError, warn_msg:
       warn_msg = "It seems that the '" + file_to_upload + "' file, "
       warn_msg += "does not exist. (" + str(warn_msg) + ")\n"
       sys.stdout.write(settings.print_critical_msg(warn_msg))
@@ -650,7 +650,7 @@ def shellshock_handler(url, http_request_method, filename):
           print(settings.print_payload(payload))
 
         header = {check_header : payload}
-        request = urllib2.Request(url, None, header)
+        request = _urllib.request.Request(url, None, header)
         if check_header == "User-Agent":
           menu.options.agent = payload
         else:
@@ -664,7 +664,7 @@ def shellshock_handler(url, http_request_method, filename):
         elif menu.options.tor:
           response = tor.use_tor(request)
         else:
-          response = urllib2.urlopen(request)
+          response = _urllib.request.urlopen(request)
         percent = ((i*100)/total)
         float_percent = "{0:.1f}".format(round(((i*100)/(total*1.0)),2))
         
@@ -879,7 +879,7 @@ def shellshock_handler(url, http_request_method, filename):
     if no_result and settings.VERBOSITY_LEVEL < 2:
       print("")
 
-  except urllib2.HTTPError as err_msg:
+  except _urllib.error.HTTPError as err_msg:
     if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
       response = False  
     elif settings.IGNORE_ERR_MSG == False:
@@ -891,7 +891,7 @@ def shellshock_handler(url, http_request_method, filename):
       else:
         raise SystemExit()
 
-  except urllib2.URLError as err_msg:
+  except _urllib.error.URLError as err_msg:
     err_msg = str(err_msg.reason).split(" ")[2:]
     err_msg = ' '.join(err_msg)+ "."
     if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
@@ -927,7 +927,7 @@ def cmd_exec(url, cmd, cve, check_header, filename):
         sys.stdout.write("\n" + settings.print_payload(payload)+ "\n")
 
       header = {check_header : payload}
-      request = urllib2.Request(url, None, header)
+      request = _urllib.request.Request(url, None, header)
       if check_header == "User-Agent":
         menu.options.agent = payload
       else:
@@ -941,13 +941,13 @@ def cmd_exec(url, cmd, cve, check_header, filename):
       elif menu.options.tor:
         response = tor.use_tor(request)
       else:
-        response = urllib2.urlopen(request)
+        response = _urllib.request.urlopen(request)
       shell = response.read().rstrip().replace('\n',' ')
       shell = re.findall(r"" + TAG + "(.*)" + TAG, shell)
       shell = ''.join(shell)
       return shell, payload
 
-    except urllib2.URLError as err_msg:
+    except _urllib.error.URLError as err_msg:
       print("\n" + settings.print_critical_msg(err_msg))
       raise SystemExit()
 

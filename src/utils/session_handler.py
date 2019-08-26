@@ -18,7 +18,7 @@ import sys
 import time
 import base64
 import sqlite3
-import urllib2
+
 
 from src.utils import menu
 from src.utils import settings

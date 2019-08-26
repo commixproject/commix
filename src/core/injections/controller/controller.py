@@ -15,7 +15,7 @@ For more see the file 'readme/COPYING' for copying permission.
 import re
 import os
 import sys
-import urllib2
+
 
 from src.utils import menu
 from src.utils import logs
@@ -506,7 +506,7 @@ def perform_checks(url, filename):
     authentication.authentication_process()
 
     # Check if authentication page is the same with the next (injection) URL
-    if urllib2.urlopen(url).read() == urllib2.urlopen(menu.options.auth_url).read():
+    if _urllib.request.urlopen(url).read() == _urllib.request.urlopen(menu.options.auth_url).read():
       err_msg = "It seems that the authentication procedure has failed."
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()

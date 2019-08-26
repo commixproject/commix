@@ -28,7 +28,7 @@ import gzip
 import time
 import base64
 import socket
-import urllib2
+
 import urlparse
 import httplib
 
@@ -39,6 +39,7 @@ from src.utils import settings
 from StringIO import StringIO
 from src.core.injections.controller import checks
 from src.thirdparty.colorama import Fore, Back, Style, init
+from src.thirdparty.six.moves import urllib as _urllib
 
 """
 Checking the HTTP response content.
@@ -123,7 +124,7 @@ def check_http_traffic(request):
       else:
         httplib.HTTPConnection.request(self, method, url, body, headers)
         
-  class connection_handler(urllib2.HTTPHandler, urllib2.HTTPSHandler):
+  class connection_handler(_urllib.request.HTTPHandler, _urllib.request.HTTPSHandler):
     if settings.SCHEME == 'https':
       def https_open(self, req):
         try:
@@ -160,7 +161,7 @@ def check_http_traffic(request):
           raise SystemExit()
 
   if settings.REVERSE_TCP == False and settings.BIND_TCP == False:
-    opener = urllib2.OpenerDirector()
+    opener = _urllib.request.OpenerDirector()
     opener.add_handler(connection_handler())
     response = False
     current_attempt = 0
@@ -178,7 +179,7 @@ def check_http_traffic(request):
             if not settings.CHECK_INTERNET:
               settings.INIT_TEST = False
               
-      except urllib2.URLError as err_msg: 
+      except _urllib.error.URLError as err_msg: 
         if current_attempt == 0:
           if settings.VERBOSITY_LEVEL < 2:
             print("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
@@ -215,7 +216,7 @@ def check_http_traffic(request):
         raise SystemExit() 
       
   try:
-    response = urllib2.urlopen(request)
+    response = _urllib.request.urlopen(request)
     # Check the HTTP response headers.
     response_headers = response.info()
     page = response.read()
@@ -237,7 +238,7 @@ def check_http_traffic(request):
     checks.blocked_ip(page) 
 
   # This is useful when handling exotic HTTP errors (i.e requests for authentication).
-  except urllib2.HTTPError as err:
+  except _urllib.error.HTTPError as err:
     error_msg = "Got " + str(err).replace(": "," (")
     # Check for 4xx and/or 5xx HTTP error codes.
     if str(err.code).startswith('4') or \
@@ -258,7 +259,7 @@ def check_http_traffic(request):
       raise SystemExit()
 
   # The handlers raise this exception when they run into a problem.
-  except (socket.error, httplib.HTTPException, urllib2.URLError) as err:
+  except (socket.error, httplib.HTTPException, _urllib.error.URLError) as err:
     err_msg = "Unable to connect to the target URL"
     try:
       err_msg += " (" + str(err.args[0]).split("] ")[1] + ")."
@@ -320,8 +321,8 @@ def do_check(request):
         try:
           url = menu.options.url
           try:
-            response = urllib2.urlopen(url)
-          except urllib2.HTTPError as e:
+            response = _urllib.request.urlopen(url)
+          except _urllib.error.HTTPError as e:
             try:
               authline = e.headers.get('www-authenticate', '')  
               authobj = re.match('''(\w*)\s+realm=(.*),''',authline).groups()
@@ -329,14 +330,14 @@ def do_check(request):
               user_pass_pair = menu.options.auth_cred.split(":")
               username = user_pass_pair[0]
               password = user_pass_pair[1]
-              authhandler = urllib2.HTTPDigestAuthHandler()
+              authhandler = _urllib.request.HTTPDigestAuthHandler()
               authhandler.add_password(realm, url, username, password)
-              opener = urllib2.build_opener(authhandler)
-              urllib2.install_opener(opener)
-              result = urllib2.urlopen(url)
+              opener = _urllib.request.build_opener(authhandler)
+              _urllib.request.install_opener(opener)
+              result = _urllib.request.urlopen(url)
             except AttributeError:
               pass
-        except urllib2.HTTPError as e:
+        except _urllib.error.HTTPError as e:
           pass
     except ValueError:
       err_msg = "Unsupported / Invalid HTTP authentication type '" + menu.options.auth_type + "'."

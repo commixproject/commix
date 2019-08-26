@@ -19,8 +19,8 @@ import sys
 import time
 import string
 import random
-import urllib
-import urllib2
+from src.thirdparty.six.moves import urllib as _urllib
+
 import HTMLParser
  
 from src.utils import menu
@@ -97,7 +97,7 @@ def cb_injection_handler(url, timesec, filename, http_request_method):
       for suffix in settings.SUFFIXES:
         for separator in settings.SEPARATORS:
           if whitespace == " ":
-            whitespace = urllib.quote(whitespace) 
+            whitespace = _urllib.parse.quote(whitespace) 
           # Check injection state
           settings.DETECTION_PHASE = True
           settings.EXPLOITATION_PHASE = False

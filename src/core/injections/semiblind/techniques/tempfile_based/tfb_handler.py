@@ -20,8 +20,8 @@ import time
 import string
 import random
 import base64
-import urllib
-import urllib2
+from src.thirdparty.six.moves import urllib as _urllib
+
   
 from src.utils import menu
 from src.utils import logs

@@ -17,7 +17,7 @@ import os
 import re
 import sys
 import time
-import urllib
+from src.thirdparty.six.moves import urllib as _urllib
 import sqlite3
 import datetime
 
@@ -189,7 +189,7 @@ Add any payload in log files.
 def update_payload(filename, counter, payload):
   output_file = open(filename, "a")
   if "\n" in payload:
-    output_file.write("    (" +str(counter)+ ") Payload: " + re.sub("%20", " ", urllib.unquote_plus(payload.replace("\n", "\\n"))) + "\n")
+    output_file.write("    (" +str(counter)+ ") Payload: " + re.sub("%20", " ", _urllib.parse.unquote_plus(payload.replace("\n", "\\n"))) + "\n")
   else:
     output_file.write("    (" +str(counter)+ ") Payload: " + payload.replace("%20", " ") + "\n")
   output_file.close()

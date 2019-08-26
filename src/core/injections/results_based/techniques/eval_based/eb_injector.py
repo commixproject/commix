@@ -19,8 +19,8 @@ import time
 import json
 import string
 import random
-import urllib
-import urllib2
+from src.thirdparty.six.moves import urllib as _urllib
+
 import urlparse
 
 from src.utils import menu
@@ -53,7 +53,7 @@ def injection_test(payload, http_request_method, url):
     # Define the vulnerable parameter
     vuln_parameter = parameters.vuln_GET_param(url)
     target = url.replace(settings.INJECT_TAG, payload)
-    request = urllib2.Request(target)
+    request = _urllib.request.Request(target)
     
     # Check if defined extra headers.
     headers.do_check(request)
@@ -64,22 +64,22 @@ def injection_test(payload, http_request_method, url):
   # Check if defined method is POST.
   else:
     parameter = menu.options.data
-    parameter = urllib2.unquote(parameter)
+    parameter = _urllib.parse.unquote(parameter)
     # Check if its not specified the 'INJECT_HERE' tag
     parameter = parameters.do_POST_check(parameter)
     parameter = ''.join(str(e) for e in parameter).replace("+","%2B")
     # Define the POST data     
     if settings.IS_JSON:
-      data = parameter.replace(settings.INJECT_TAG, urllib.unquote(payload.replace("\"", "\\\"")))
+      data = parameter.replace(settings.INJECT_TAG, _urllib.parse.unquote(payload.replace("\"", "\\\"")))
       try:
         data = checks.json_data(data)
       except ValueError:
         pass
     elif settings.IS_XML:
-      data = parameter.replace(settings.INJECT_TAG, urllib.unquote(payload)) 
+      data = parameter.replace(settings.INJECT_TAG, _urllib.parse.unquote(payload)) 
     else:
       data = parameter.replace(settings.INJECT_TAG, payload)
-    request = urllib2.Request(url, data)
+    request = _urllib.request.Request(url, data)
     
     # Check if defined extra headers.
     headers.do_check(request)
@@ -99,12 +99,12 @@ def warning_detection(url, http_request_method):
   try:
     # Find the host part
     url_part = url.split("=")[0]
-    request = urllib2.Request(url_part)
+    request = _urllib.request.Request(url_part)
     # Check if defined extra headers.
     headers.do_check(request)
     response = requests.get_request_response(request)
     if response:
-      response = urllib2.urlopen(request)
+      response = _urllib.request.urlopen(request)
       html_data = response.read()
       err_msg = ""
       if "eval()'d code" in html_data:
@@ -129,7 +129,7 @@ def warning_detection(url, http_request_method):
         warn_msg = "A failure message on " + err_msg + " was detected on page's response."
         print(settings.print_warning_msg(warn_msg))
     return url
-  except urllib2.HTTPError as err_msg:
+  except _urllib.error.HTTPError as err_msg:
     print(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
@@ -195,8 +195,8 @@ def injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_meth
     payload = parameters.prefixes(payload, prefix)
     payload = parameters.suffixes(payload, suffix)
     # Fixation for specific payload.
-    if ")%3B" + urllib.quote(")}") in payload:
-      payload = payload.replace(")%3B" + urllib.quote(")}"), ")" + urllib.quote(")}"))
+    if ")%3B" + _urllib.parse.quote(")}") in payload:
+      payload = payload.replace(")%3B" + _urllib.parse.quote(")}"), ")" + _urllib.parse.quote(")}"))
 
     # Whitespace fixation
     payload = payload.replace(" ", whitespace)
@@ -239,7 +239,7 @@ def injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_meth
         
         target = url.replace(settings.INJECT_TAG, payload)
         vuln_parameter = ''.join(vuln_parameter)
-        request = urllib2.Request(target)
+        request = _urllib.request.Request(target)
         
         # Check if defined extra headers.
         headers.do_check(request)  
@@ -250,22 +250,22 @@ def injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_meth
       else :
         # Check if defined method is POST.
         parameter = menu.options.data
-        parameter = urllib2.unquote(parameter)
+        parameter = _urllib.parse.unquote(parameter)
         # Check if its not specified the 'INJECT_HERE' tag
         parameter = parameters.do_POST_check(parameter)
         parameter = ''.join(str(e) for e in parameter).replace("+","%2B")
         # Define the POST data   
         if settings.IS_JSON:
-          data = parameter.replace(settings.INJECT_TAG, urllib.unquote(payload.replace("\"", "\\\"")))
+          data = parameter.replace(settings.INJECT_TAG, _urllib.parse.unquote(payload.replace("\"", "\\\"")))
           try:
             data = checks.json_data(data)
           except ValueError:
             pass
         elif settings.IS_XML:
-          data = parameter.replace(settings.INJECT_TAG, urllib.unquote(payload)) 
+          data = parameter.replace(settings.INJECT_TAG, _urllib.parse.unquote(payload)) 
         else:
           data = parameter.replace(settings.INJECT_TAG, payload)
-        request = urllib2.Request(url, data)
+        request = _urllib.request.Request(url, data)
         
         # Check if defined extra headers.
         headers.do_check(request)

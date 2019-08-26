@@ -16,7 +16,7 @@ For more see the file 'readme/COPYING' for copying permission.
 import re
 import os
 import sys
-import urllib2
+
 
 from src.utils import menu
 from src.utils import settings
@@ -176,8 +176,8 @@ def file_upload(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec
     file_to_upload = menu.options.file_upload
     # check if remote file exists.
     try:
-      urllib2.urlopen(file_to_upload)
-    except urllib2.HTTPError as err_msg:
+      _urllib.request.urlopen(file_to_upload)
+    except _urllib.error.HTTPError as err_msg:
       warn_msg = "It seems that the '" + file_to_upload + "' file, does not exist. (" +str(err_msg)+ ")"
       sys.stdout.write("\n" + settings.print_warning_msg(warn_msg) + "\n")
       sys.stdout.flush()

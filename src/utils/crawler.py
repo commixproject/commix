@@ -14,8 +14,8 @@ For more see the file 'readme/COPYING' for copying permission.
 """
 import re
 import sys
-import urllib
-import urllib2
+from src.thirdparty.six.moves import urllib as _urllib
+
 import urlparse
 import tempfile
 
@@ -56,15 +56,15 @@ Do a request to target URL.
 def request(url):
   # Check if defined POST data
   if menu.options.data:
-    request = urllib2.Request(url, menu.options.data)
+    request = _urllib.request.Request(url, menu.options.data)
   else:
-    request = urllib2.Request(url)
+    request = _urllib.request.Request(url)
   try:
     headers.do_check(request) 
-    response = urllib2.urlopen(request)
+    response = _urllib.request.urlopen(request)
     soup = BeautifulSoup(response)
     return soup
-  except urllib2.URLError as e:
+  except _urllib.error.URLError as e:
     pass
 
 """
@@ -74,7 +74,7 @@ def sitemap(url):
   try:
     href_list = []
     if not url.endswith(".xml"):
-      url = urlparse.urljoin(url, "/sitemap.xml")
+      url = _urllib.parse.urljoin(url, "/sitemap.xml")
     soup = request(url)
     for match in soup.findAll("loc"):
       href_list.append(match.text)
@@ -91,7 +91,7 @@ def crawling(url):
     href_list = []
     soup = request(url)
     for tag in soup.findAll('a', href=True):
-      tag['href'] = urlparse.urljoin(url, tag['href'])
+      tag['href'] = _urllib.parse.urljoin(url, tag['href'])
       o = urlparse.urlparse(url)
       if o.netloc in tag['href']:
         if tag['href'].split('.')[-1].lower() not in settings.CRAWL_EXCLUDE_EXTENSIONS:

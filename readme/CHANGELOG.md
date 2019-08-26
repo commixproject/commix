@@ -1,4 +1,5 @@
 ## Version 3.0 (upcoming)
+* Added: Six (third party) module has been added.
 * Revised: Improvement regarding parsing nested JSON objects that contain boolean values.
 * Replaced: The `--ignore-401` option has been replaced with `--ignore-code` option.
 * Added: New option ( `--ignore-code`) for ignoring (problematic) HTTP error code (e.g. 401).

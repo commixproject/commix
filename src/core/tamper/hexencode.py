@@ -14,7 +14,7 @@ For more see the file 'readme/COPYING' for copying permission.
 """
 
 import sys
-import urllib
+from src.thirdparty.six.moves import urllib as _urllib
 from src.utils import settings
 
 """
@@ -36,7 +36,7 @@ def tamper(payload):
     raise SystemExit()
     
   else:
-    payload = urllib.unquote(payload)
+    payload = _urllib.parse.unquote(payload)
     payload = payload.encode("hex")
     return payload
 

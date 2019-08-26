@@ -20,8 +20,8 @@ import time
 import json
 import string
 import random
-import urllib
-import urllib2
+from src.thirdparty.six.moves import urllib as _urllib
+
 import HTMLParser
 
 from src.utils import menu
@@ -53,7 +53,7 @@ def injection_test(payload, http_request_method, url):
     # Define the vulnerable parameter
     vuln_parameter = parameters.vuln_GET_param(url)
     target = url.replace(settings.INJECT_TAG, payload)
-    request = urllib2.Request(target)
+    request = _urllib.request.Request(target)
     
     # Check if defined extra headers.
     headers.do_check(request)
@@ -64,22 +64,22 @@ def injection_test(payload, http_request_method, url):
   # Check if defined method is POST.
   else:
     parameter = menu.options.data
-    parameter = urllib2.unquote(parameter)
+    parameter = _urllib.parse.unquote(parameter)
     # Check if its not specified the 'INJECT_HERE' tag
     parameter = parameters.do_POST_check(parameter)
     parameter = ''.join(str(e) for e in parameter).replace("+","%2B")
     # Define the POST data   
     if settings.IS_JSON:
-      data = parameter.replace(settings.INJECT_TAG, urllib.unquote(payload.replace("\"", "\\\"")))
+      data = parameter.replace(settings.INJECT_TAG, _urllib.parse.unquote(payload.replace("\"", "\\\"")))
       try:
         data = checks.json_data(data)
       except ValueError:
         pass
     elif settings.IS_XML:
-      data = parameter.replace(settings.INJECT_TAG, urllib.unquote(payload)) 
+      data = parameter.replace(settings.INJECT_TAG, _urllib.parse.unquote(payload)) 
     else:
       data = parameter.replace(settings.INJECT_TAG, payload)
-    request = urllib2.Request(url, data)
+    request = _urllib.request.Request(url, data)
     
     # Check if defined extra headers.
     headers.do_check(request)
@@ -103,9 +103,8 @@ def injection_test_results(response, TAG, randvcalc):
     html_data = response.read()
     html_data = html_data.replace("\n"," ")
     # cleanup string / unescape html to string
-    html_data = urllib2.unquote(html_data).decode(settings.DEFAULT_ENCODING)
+    html_data = _urllib.parse.unquote(html_data).decode(settings.DEFAULT_ENCODING)
     html_data = HTMLParser.HTMLParser().unescape(html_data).encode(settings.DEFAULT_ENCODING)
-
     # Replace non-ASCII characters with a single space
     re.sub(r"[^\x00-\x7f]",r" ", html_data)
 
@@ -205,7 +204,7 @@ def injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_meth
         #url = parameters.do_GET_check(url)
         target = url.replace(settings.INJECT_TAG, payload)
         vuln_parameter = ''.join(vuln_parameter)
-        request = urllib2.Request(target)
+        request = _urllib.request.Request(target)
         
         # Check if defined extra headers.
         headers.do_check(request)    
@@ -216,22 +215,22 @@ def injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_meth
       else :
         # Check if defined method is POST.
         parameter = menu.options.data
-        parameter = urllib2.unquote(parameter)
+        parameter = _urllib.parse.unquote(parameter)
         # Check if its not specified the 'INJECT_HERE' tag
         parameter = parameters.do_POST_check(parameter)
         parameter = ''.join(str(e) for e in parameter).replace("+","%2B")
         # Define the POST data    
         if settings.IS_JSON:
-          data = parameter.replace(settings.INJECT_TAG, urllib.unquote(payload.replace("\"", "\\\"")))
+          data = parameter.replace(settings.INJECT_TAG, _urllib.parse.unquote(payload.replace("\"", "\\\"")))
           try:
             data = checks.json_data(data)
           except ValueError:
             pass
         elif settings.IS_XML:
-          data = parameter.replace(settings.INJECT_TAG, urllib.unquote(payload)) 
+          data = parameter.replace(settings.INJECT_TAG, _urllib.parse.unquote(payload)) 
         else:
           data = parameter.replace(settings.INJECT_TAG, payload)
-        request = urllib2.Request(url, data)
+        request = _urllib.request.Request(url, data)
         
         # Check if defined extra headers.
         headers.do_check(request)
@@ -265,7 +264,7 @@ def injection_results(response, TAG, cmd):
     html_data = response.read()
     html_data = html_data.replace("\n"," ")
     # cleanup string / unescape html to string
-    html_data = urllib2.unquote(html_data).decode(settings.DEFAULT_ENCODING)
+    html_data = _urllib.parse.unquote(html_data).decode(settings.DEFAULT_ENCODING)
     html_data = HTMLParser.HTMLParser().unescape(html_data).encode(settings.DEFAULT_ENCODING)
 
     # Replace non-ASCII characters with a single space
