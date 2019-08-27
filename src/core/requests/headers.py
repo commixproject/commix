@@ -30,7 +30,7 @@ import base64
 import socket
 
 import urlparse
-import httplib
+from src.thirdparty.six.moves import http_client as _http_client
 
 from src.utils import logs
 from src.utils import menu
@@ -89,9 +89,9 @@ def check_http_traffic(request):
   # Delay in seconds between each HTTP request
   time.sleep(int(settings.DELAY))
   if settings.SCHEME == 'https':
-      handle = httplib.HTTPSConnection
+      handle = _http_client.HTTPSConnection
   else:
-      handle = httplib.HTTPConnection
+      handle = _http_client.HTTPConnection
   
   class do_connection(handle):
     def request(self, method, url, body, headers):
@@ -120,9 +120,9 @@ def check_http_traffic(request):
       if menu.options.traffic_file:
         logs.log_traffic("\n\n")
       if settings.SCHEME == 'https':
-        httplib.HTTPSConnection.request(self, method, url, body, headers)
+        _http_client.HTTPSConnection.request(self, method, url, body, headers)
       else:
-        httplib.HTTPConnection.request(self, method, url, body, headers)
+        _http_client.HTTPConnection.request(self, method, url, body, headers)
         
   class connection_handler(_urllib.request.HTTPHandler, _urllib.request.HTTPSHandler):
     if settings.SCHEME == 'https':
@@ -198,7 +198,7 @@ def check_http_traffic(request):
         current_attempt = current_attempt + 1
         time.sleep(3)
         
-      except httplib.BadStatusLine as err_msg:
+      except _http_client.BadStatusLine as err_msg:
         if settings.VERBOSITY_LEVEL < 2:
           print("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
         if len(err_msg.line) > 2 :
@@ -259,7 +259,7 @@ def check_http_traffic(request):
       raise SystemExit()
 
   # The handlers raise this exception when they run into a problem.
-  except (socket.error, httplib.HTTPException, _urllib.error.URLError) as err:
+  except (socket.error, _http_client.HTTPException, _urllib.error.URLError) as err:
     err_msg = "Unable to connect to the target URL"
     try:
       err_msg += " (" + str(err.args[0]).split("] ")[1] + ")."
@@ -268,7 +268,7 @@ def check_http_traffic(request):
     print(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
-  except httplib.IncompleteRead as err_msg:
+  except _http_client.IncompleteRead as err_msg:
     print(settings.print_critical_msg(str(err_msg)))
     raise SystemExit()
 

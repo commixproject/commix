@@ -6,7 +6,7 @@ import sys
 import string
 import random
 
-import httplib
+from src.thirdparty.six.moves import http_client as _http_client
 
 from src.utils import menu
 from src.utils import logs
@@ -899,7 +899,7 @@ def shellshock_handler(url, http_request_method, filename):
     print(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
-  except httplib.IncompleteRead as err_msg:
+  except _http_client.IncompleteRead as err_msg:
     print(settings.print_critical_msg(err_msg + "."))
     raise SystemExit()  
     

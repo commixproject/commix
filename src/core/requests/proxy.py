@@ -14,12 +14,10 @@ For more see the file 'readme/COPYING' for copying permission.
 """
 
 import sys
-
-import httplib
-
+from src.thirdparty.six.moves import http_client as _http_client
+from src.thirdparty.six.moves import urllib as _urllib
 from src.utils import menu
 from src.utils import settings
-
 from src.core.requests import headers
 from src.thirdparty.colorama import Fore, Back, Style, init
 
@@ -66,7 +64,7 @@ def use_proxy(request):
     response = _urllib.request.urlopen(request)
     return response
 
-  except httplib.BadStatusLine as e:
+  except _http_client.BadStatusLine as e:
     err_msg = "Unable to connect to the target URL or proxy ("
     err_msg += str(menu.options.proxy)
     err_msg += ")."

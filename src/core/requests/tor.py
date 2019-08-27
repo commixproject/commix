@@ -16,7 +16,7 @@ For more see the file 'readme/COPYING' for copying permission.
 import re
 import sys
 
-import httplib
+from src.thirdparty.six.moves import http_client as _http_client
 from src.utils import menu
 from src.utils import settings
 from src.utils import requirments
@@ -101,7 +101,7 @@ def do_check():
       print(settings.print_critical_msg(err_msg))  
       raise SystemExit()  
 
-    except httplib.BadStatusLine as err_msg:
+    except _http_client.BadStatusLine as err_msg:
       print("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
       if len(err_msg.line) > 2 :
         print(err_msg.line, err_msg.message)

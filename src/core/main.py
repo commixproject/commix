@@ -19,9 +19,9 @@ import sys
 import errno
 import random
 
-import httplib
+from src.thirdparty.six.moves import http_client as _http_client
 # accept overly long result lines
-httplib._MAXLINE = 1 * 1024 * 1024
+_http_client._MAXLINE = 1 * 1024 * 1024
 
 from socket import error as SocketError
 from os.path import splitext
@@ -577,7 +577,7 @@ def main(filename, url):
         print(settings.print_critical_msg(err_msg))
         raise SystemExit()
         
-      except httplib.BadStatusLine as err_msg:
+      except _http_client.BadStatusLine as err_msg:
         if settings.VERBOSITY_LEVEL < 2:
           print("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
         if len(err_msg.line) > 2 :
@@ -601,7 +601,7 @@ def main(filename, url):
     return filename
 
   # Accidental stop / restart of the target host server.
-  except httplib.BadStatusLine as err_msg:
+  except _http_client.BadStatusLine as err_msg:
     if err_msg.line == "" or err_msg.message == "":
       err_msg = "The target host is not responding."
       err_msg += " Please ensure that is up and try again."
