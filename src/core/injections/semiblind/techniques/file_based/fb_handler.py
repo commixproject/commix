@@ -12,31 +12,23 @@ the Free Software Foundation, either version 3 of the License, or
  
 For more see the file 'readme/COPYING' for copying permission.
 """
-
 import re
 import os
 import sys
 import time
 import string
 import random
-from src.thirdparty.six.moves import urllib as _urllib
-
-import urlparse 
-
 from src.utils import menu
 from src.utils import logs
 from src.utils import settings
 from src.utils import session_handler
-
-from src.thirdparty.colorama import Fore, Back, Style, init
-
 from src.core.requests import headers
 from src.core.requests import requests
 from src.core.requests import parameters
-
 from src.core.injections.controller import checks
 from src.core.injections.controller import shell_options
-
+from src.thirdparty.six.moves import urllib as _urllib
+from src.thirdparty.colorama import Fore, Back, Style, init
 from src.core.injections.semiblind.techniques.file_based import fb_injector
 from src.core.injections.semiblind.techniques.file_based import fb_payloads
 from src.core.injections.semiblind.techniques.file_based import fb_enumeration
@@ -179,7 +171,7 @@ def check_tmp_path(url, timesec, filename, http_request_method, url_time_respons
         # Provide custom server's root directory.
         custom_web_root(url, timesec, filename, http_request_method, url_time_response)
 
-      path = urlparse.urlparse(url).path
+      path = _urllib.parse.urlparse(url).path
       path_parts = path.split('/')
       count = 0
       for part in path_parts:        

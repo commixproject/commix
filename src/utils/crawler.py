@@ -14,14 +14,11 @@ For more see the file 'readme/COPYING' for copying permission.
 """
 import re
 import sys
-from src.thirdparty.six.moves import urllib as _urllib
-
-import urlparse
 import tempfile
-
 from src.utils import menu
 from src.utils import settings
 from src.core.requests import headers
+from src.thirdparty.six.moves import urllib as _urllib
 from src.thirdparty.colorama import Fore, Back, Style, init
 from src.thirdparty.beautifulsoup.beautifulsoup import BeautifulSoup
 
@@ -92,7 +89,7 @@ def crawling(url):
     soup = request(url)
     for tag in soup.findAll('a', href=True):
       tag['href'] = _urllib.parse.urljoin(url, tag['href'])
-      o = urlparse.urlparse(url)
+      o = _urllib.parse._urllib.parse.urlparse(url)
       if o.netloc in tag['href']:
         if tag['href'].split('.')[-1].lower() not in settings.CRAWL_EXCLUDE_EXTENSIONS:
           href_list.append(tag['href']) 

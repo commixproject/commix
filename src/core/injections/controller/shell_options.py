@@ -17,19 +17,14 @@ import re
 import os
 import sys
 import time
-from src.thirdparty.six.moves import urllib as _urllib
-import urlparse
-
 from src.utils import logs
 from src.utils import menu
 from src.utils import settings
-
-from src.core.injections.controller import checks
-from src.thirdparty.colorama import Fore, Back, Style, init
-
 from src.core.shells import bind_tcp
 from src.core.shells import reverse_tcp
-
+from src.core.injections.controller import checks
+from src.thirdparty.six.moves import urllib as _urllib
+from src.thirdparty.colorama import Fore, Back, Style, init
 from src.core.injections.results_based.techniques.classic import cb_injector
 from src.core.injections.results_based.techniques.eval_based import eb_injector
 from src.core.injections.semiblind.techniques.file_based import fb_injector

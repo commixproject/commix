@@ -12,7 +12,6 @@ the Free Software Foundation, either version 3 of the License, or
  
 For more see the file 'readme/COPYING' for copying permission.
 """
-
 import re
 import os
 import sys
@@ -21,21 +20,16 @@ import json
 import string
 import random
 import base64
-from src.thirdparty.six.moves import urllib as _urllib
-
-import urlparse
-
 from src.utils import menu
 from src.utils import settings
-from src.thirdparty.colorama import Fore, Back, Style, init
-
 from src.core.requests import tor
 from src.core.requests import proxy
 from src.core.requests import headers
 from src.core.requests import requests
 from src.core.requests import parameters
-
 from src.core.injections.controller import checks
+from src.thirdparty.six.moves import urllib as _urllib
+from src.thirdparty.colorama import Fore, Back, Style, init
 from src.core.injections.semiblind.techniques.file_based import fb_payloads
 
 """
@@ -242,11 +236,11 @@ Find the URL directory.
 def injection_output(url, OUTPUT_TEXTFILE, timesec):
 
   def custom_web_root(url, OUTPUT_TEXTFILE):
-    path = urlparse.urlparse(url).path
+    path = _urllib.parse.urlparse(url).path
     if path.endswith('/'):
       # Contract again the url.
-      scheme = urlparse.urlparse(url).scheme
-      netloc = urlparse.urlparse(url).netloc
+      scheme = _urllib.parse._urllib.parse.urlparse(url).scheme
+      netloc = _urllib.parse._urllib.parse.urlparse(url).netloc
       output = scheme + "://" + netloc + path + OUTPUT_TEXTFILE
     else:
       try:
@@ -274,8 +268,8 @@ def injection_output(url, OUTPUT_TEXTFILE, timesec):
       if "html/" in menu.options.web_root:
         path = path.replace("html/", "")
       # Contract again the url. 
-      scheme = urlparse.urlparse(url).scheme
-      netloc = urlparse.urlparse(url).netloc
+      scheme = _urllib.parse._urllib.parse.urlparse(url).scheme
+      netloc = _urllib.parse._urllib.parse.urlparse(url).netloc
       output = scheme + "://" + netloc + path + OUTPUT_TEXTFILE
     # Check for Nginx server root directory.  
     elif "/usr/share/" in menu.options.web_root:
@@ -285,8 +279,8 @@ def injection_output(url, OUTPUT_TEXTFILE, timesec):
       elif "www/" in menu.options.web_root:
         path = path.replace("www/", "")
       # Contract again the url. 
-      scheme = urlparse.urlparse(url).scheme
-      netloc = urlparse.urlparse(url).netloc
+      scheme = _urllib.parse._urllib.parse.urlparse(url).scheme
+      netloc = _urllib.parse._urllib.parse.urlparse(url).netloc
       output = scheme + "://" + netloc + path + OUTPUT_TEXTFILE
     else:
       output = custom_web_root(url, OUTPUT_TEXTFILE)

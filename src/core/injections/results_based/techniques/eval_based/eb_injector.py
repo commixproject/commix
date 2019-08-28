@@ -19,21 +19,16 @@ import time
 import json
 import string
 import random
-from src.thirdparty.six.moves import urllib as _urllib
-
-import urlparse
-
 from src.utils import menu
 from src.utils import settings
-from src.thirdparty.colorama import Fore, Back, Style, init
-
 from src.core.requests import tor
 from src.core.requests import proxy
 from src.core.requests import headers
 from src.core.requests import requests
 from src.core.requests import parameters
-
 from src.core.injections.controller import checks
+from src.thirdparty.six.moves import urllib as _urllib
+from src.thirdparty.colorama import Fore, Back, Style, init
 from src.core.injections.results_based.techniques.eval_based import eb_payloads
 
 """

@@ -12,7 +12,6 @@ the Free Software Foundation, either version 3 of the License, or
  
 For more see the file 'readme/COPYING' for copying permission.
 """
-
 import re
 import ssl
 try:
@@ -28,14 +27,10 @@ import gzip
 import time
 import base64
 import socket
-
-import urlparse
 from src.thirdparty.six.moves import http_client as _http_client
-
 from src.utils import logs
 from src.utils import menu
 from src.utils import settings
-
 from StringIO import StringIO
 from src.core.injections.controller import checks
 from src.thirdparty.colorama import Fore, Back, Style, init

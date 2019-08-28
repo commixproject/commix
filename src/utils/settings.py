@@ -17,10 +17,9 @@ import re
 import os
 import sys
 import time
-from src.thirdparty.six.moves import urllib as _urllib
 import random
 import string
-        
+from src.thirdparty.six.moves import urllib as _urllib
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 # Status Signs
@@ -155,7 +154,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "3.0.29"
+VERSION_NUM = "3.0.30"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"

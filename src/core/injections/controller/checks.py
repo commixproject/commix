@@ -22,15 +22,12 @@ import socket
 import random
 import string
 import base64
-from src.thirdparty.six.moves import urllib as _urllib
 import traceback
-
 from collections import OrderedDict 
 from src.utils import menu
-from urlparse import urlparse
+from src.thirdparty.six.moves import urllib as _urllib
 from src.utils import settings
 from src.utils import simple_http_server
-
 from src.thirdparty.flatten_json.flatten_json import flatten, unflatten_list
 from src.thirdparty.colorama import Fore, Back, Style, init
 
@@ -138,7 +135,7 @@ def url_decode(payload):
 Checking connection (resolving hostname).
 """
 def check_connection(url):
-  hostname = urlparse(url).hostname or ''
+  hostname = _urllib.parse.urlparse(url).hostname or ''
   if not re.search(r"\A\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\Z", hostname):
     if not any((menu.options.proxy, menu.options.tor, menu.options.offline)):
       try:
@@ -511,7 +508,7 @@ def check_http_s(url):
             url = "https://" + url
           else:
             url = "http://" + url
-        settings.SCHEME = (urlparse(url).scheme.lower() or "http") if not menu.options.force_ssl else "https"
+        settings.SCHEME = (_urllib.parse.urlparse(url).scheme.lower() or "http") if not menu.options.force_ssl else "https"
       else:
         err_msg = "Invalid target URL has been given." 
         print(settings.print_critical_msg(err_msg))

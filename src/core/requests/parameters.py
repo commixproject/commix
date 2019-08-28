@@ -16,11 +16,10 @@ For more see the file 'readme/COPYING' for copying permission.
 import re
 import os
 import sys
-
 from src.utils import menu
-from urlparse import urlparse
 from src.utils import settings
 from src.core.injections.controller import checks
+from src.thirdparty.six.moves import urllib as _urllib
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 """
@@ -28,7 +27,7 @@ Get the URL part of the defined URL.
 """
 def get_url_part(url):
   # Find the URL part (scheme:[//host[:port]][/]path)
-  o = urlparse(url)
+  o = _urllib.parse.urlparse(url)
   url_part = o.scheme + "://" + o.netloc + o.path
 
   return url_part

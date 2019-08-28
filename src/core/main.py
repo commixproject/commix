@@ -12,21 +12,17 @@ the Free Software Foundation, either version 3 of the License, or
  
 For more see the file 'readme/COPYING' for copying permission.
 """
-
 import re
 import os
 import sys
 import errno
 import random
-
 from src.thirdparty.six.moves import http_client as _http_client
 # accept overly long result lines
 _http_client._MAXLINE = 1 * 1024 * 1024
-
 from socket import error as SocketError
 from os.path import splitext
-from urlparse import urlparse
-
+from src.thirdparty.six.moves import urllib as _urllib
 from src.utils import menu
 from src.utils import logs
 from src.utils import purge
@@ -37,16 +33,13 @@ from src.utils import crawler
 from src.utils import settings
 from src.utils import session_handler
 from src.utils import simple_http_server
-
 from src.thirdparty.colorama import Fore, Back, Style, init
-
 from src.core.requests import tor
 from src.core.requests import proxy
 from src.core.requests import headers
 from src.core.requests import requests
 from src.core.requests import redirection
 from src.core.requests import authentication
-
 from src.core.injections.controller import checks
 from src.core.injections.controller import parser
 from src.core.injections.controller import controller

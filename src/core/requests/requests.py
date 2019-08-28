@@ -17,24 +17,18 @@ import re
 import sys
 import time
 import socket
-from src.thirdparty.six.moves import urllib as _urllib
-
-import urlparse
-
 from src.utils import menu
 from os.path import splitext
-from urlparse import urlparse
 from src.utils import settings
 from src.utils import session_handler
-from src.thirdparty.colorama import Fore, Back, Style, init
-
 from src.core.requests import tor
 from src.core.requests import proxy
 from src.core.requests import headers
 from src.core.requests import parameters
 from src.core.requests import authentication
-
 from src.core.injections.controller import checks
+from src.thirdparty.six.moves import urllib as _urllib
+from src.thirdparty.colorama import Fore, Back, Style, init
 
 """
 Estimating the response time (in seconds).
@@ -758,7 +752,7 @@ Check if target host is vulnerable. (Host-based injection)
 """
 def host_injection(url, vuln_parameter, payload):
   
-  payload = urlparse(url).netloc + payload
+  payload = _urllib.parse.urlparse(url).netloc + payload
 
   def inject_host(url, vuln_parameter, payload, proxy):
 
@@ -1085,7 +1079,7 @@ def application_identification(server_banner, url):
     info_msg = "Identifying the target application ... " 
     sys.stdout.write(settings.print_info_msg(info_msg))
     sys.stdout.flush()
-  root, application_extension = splitext(urlparse(url).path)
+  root, application_extension = splitext(_urllib.parse.urlparse(url).path)
   settings.TARGET_APPLICATION = application_extension[1:].upper()
   
   if settings.TARGET_APPLICATION:

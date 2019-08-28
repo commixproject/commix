@@ -12,19 +12,16 @@ the Free Software Foundation, either version 3 of the License, or
 
 For more see the file 'readme/COPYING' for copying permission.
 """
-
 import os
 import re
 import sys
 import time
-from src.thirdparty.six.moves import urllib as _urllib
 import sqlite3
 import datetime
-
 from src.utils import menu
 from src.utils import settings
 from src.utils import session_handler
-
+from src.thirdparty.six.moves import urllib as _urllib
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 readline_error = False
@@ -47,7 +44,6 @@ else:
     except ImportError:
       readline_error = True
 pass
-
 
 """
 1. Generate injection logs (logs.txt) in "./ouput" file.
