@@ -20,29 +20,23 @@ import time
 import string
 import random
 import base64
-from src.thirdparty.six.moves import urllib as _urllib
-
-  
 from src.utils import menu
 from src.utils import logs
 from src.utils import settings
+from src.core.compat import xrange
 from src.utils import session_handler
-
-from src.thirdparty.colorama import Fore, Back, Style, init
-
 from src.core.requests import headers
 from src.core.requests import requests
 from src.core.requests import parameters
-
 from src.core.injections.controller import checks
+from src.thirdparty.six.moves import urllib as _urllib
 from src.core.injections.controller import shell_options
-
+from src.thirdparty.colorama import Fore, Back, Style, init
+from src.core.injections.semiblind.techniques.file_based import fb_injector
 from src.core.injections.semiblind.techniques.tempfile_based import tfb_injector
 from src.core.injections.semiblind.techniques.tempfile_based import tfb_payloads
 from src.core.injections.semiblind.techniques.tempfile_based import tfb_enumeration
 from src.core.injections.semiblind.techniques.tempfile_based import tfb_file_access
-
-from src.core.injections.semiblind.techniques.file_based import fb_injector
 
 readline_error = False
 if settings.IS_WINDOWS:

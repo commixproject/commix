@@ -15,6 +15,7 @@ For more see the file 'readme/COPYING' for copying permission.
 
 from random import sample
 from src.utils import settings
+from src.core.compat import xrange
 
 """
 About: Appends a fake HTTP header 'X-Forwarded-For'.

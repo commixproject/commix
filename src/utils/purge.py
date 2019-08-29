@@ -24,9 +24,9 @@ import stat
 import random
 import shutil
 import string
-
 from src.utils import menu
 from src.utils import settings
+from src.core.compat import xrange
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 def purge():

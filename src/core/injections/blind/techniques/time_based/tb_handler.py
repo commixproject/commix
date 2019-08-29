@@ -18,23 +18,18 @@ import sys
 import time
 import string
 import random
-from src.thirdparty.six.moves import urllib as _urllib
-
-
 from src.utils import menu
 from src.utils import logs
 from src.utils import settings
+from src.core.compat import xrange
 from src.utils import session_handler
-
-from src.thirdparty.colorama import Fore, Back, Style, init
-
 from src.core.requests import headers
 from src.core.requests import requests
 from src.core.requests import parameters
-
 from src.core.injections.controller import checks
+from src.thirdparty.six.moves import urllib as _urllib
 from src.core.injections.controller import shell_options
-
+from src.thirdparty.colorama import Fore, Back, Style, init
 from src.core.injections.blind.techniques.time_based import tb_injector
 from src.core.injections.blind.techniques.time_based import tb_payloads
 from src.core.injections.blind.techniques.time_based import tb_enumeration

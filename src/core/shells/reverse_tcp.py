@@ -17,7 +17,6 @@ import os
 import re
 import sys
 import time
-from src.thirdparty.six.moves import urllib as _urllib
 import base64
 import random
 import string
@@ -25,6 +24,8 @@ import subprocess
 from src.utils import menu
 from src.utils import update
 from src.utils import settings
+from src.core.compat import xrange
+from src.thirdparty.six.moves import urllib as _urllib
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 """
