@@ -598,7 +598,7 @@ def _(self, *args):
     return _
 
 parser.formatter._format_option_strings = parser.formatter.format_option_strings
-parser.formatter.format_option_strings = type(parser.formatter.format_option_strings)(_, parser, type(parser))
+parser.formatter.format_option_strings = type(parser.formatter.format_option_strings)(_, parser)
 
 option = parser.get_option("-h")
 option.help = option.help.capitalize().replace("Show this help message and exit", "Show help and exit.")
