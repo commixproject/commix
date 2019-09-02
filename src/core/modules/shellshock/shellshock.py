@@ -5,6 +5,7 @@ import os
 import sys
 import string
 import random
+from src.thirdparty.six.moves import urllib as _urllib
 
 from src.thirdparty.six.moves import http_client as _http_client
 
