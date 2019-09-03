@@ -43,6 +43,7 @@ from src.core.requests import authentication
 from src.core.injections.controller import checks
 from src.core.injections.controller import parser
 from src.core.injections.controller import controller
+from src.thirdparty.six.moves import reload_module as _reload_module
 from src.thirdparty.six.moves import urllib as _urllib
 
 readline_error = False
@@ -67,7 +68,7 @@ else:
 pass
 
 # Set default encoding
-reload(sys)
+_reload_module(sys)
 sys.setdefaultencoding(settings.DEFAULT_ENCODING)
 
 if settings.IS_WINDOWS:
@@ -133,7 +134,7 @@ def examine_request(request):
         print(settings.print_critical_msg(err_msg))
         raise SystemExit()
       except Exception as err_msg:
-        if "Unauthorized" in str(err_msg):
+        if "unauthorized" in str(err_msg).lower():
           if menu.options.ignore_code == settings.UNAUTHORIZED_ERROR:
             pass
           elif menu.options.auth_type and menu.options.auth_cred:

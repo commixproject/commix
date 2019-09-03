@@ -35,7 +35,6 @@ def purge():
     warn_msg = "Skipping purging of directory '" + directory + "' as it does not exist."
     print(settings.print_warning_msg(warn_msg))
     return
-
   info_msg = "Purging content of directory '" + directory + "'"
   if not menu.options.verbose >= 1: 
     info_msg += "... "
@@ -153,7 +152,7 @@ def purge():
     failed = False
     os.chdir(os.path.join(directory, ".."))
     shutil.rmtree(directory)
-  except OSError, ex:
+  except OSError as ex:
     failed = True  
   if not failed:  
     print("[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]")

@@ -21,6 +21,7 @@ import random
 import string
 from src.core.compat import xrange
 from src.thirdparty.six.moves import urllib as _urllib
+from src.thirdparty.six.moves import reload_module as _reload_module
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 # Status Signs
@@ -125,7 +126,7 @@ def sys_argv_checks():
 
 # argv input errors
 def sys_argv_errors():
-  reload(sys)  
+  _reload_module(sys) 
   sys.setdefaultencoding('utf8')
   for i in xrange(len(sys.argv)):
     # Check for illegal (non-console) quote characters.
@@ -155,7 +156,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "3.0.33"
+VERSION_NUM = "3.0.34"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"
@@ -498,7 +499,8 @@ ENCODING = ""
 
 DEFAULT_ENCODING = "utf-8"
 try:
-  unicode(DEFAULT_ENCODING, DEFAULT_ENCODING)
+  pass
+  #unicode(DEFAULT_ENCODING, DEFAULT_ENCODING)
 except LookupError:
   # Reference: http://en.wikipedia.org/wiki/ISO/IEC_8859-1
   DEFAULT_ENCODING = "iso-8859-1"

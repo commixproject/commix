@@ -35,8 +35,8 @@ def uninstaller():
   sys.stdout.write(settings.print_info_msg(info_msg))
   sys.stdout.flush()
   try:
-		subprocess.Popen("rm -rf /usr/bin/" + settings.APPLICATION + " >/dev/null 2>&1", shell=True).wait()
-		subprocess.Popen("rm -rf /usr/share/" + settings.APPLICATION + " >/dev/null 2>&1", shell=True).wait()
+    subprocess.Popen("rm -rf /usr/bin/" + settings.APPLICATION + " >/dev/null 2>&1", shell=True).wait()
+    subprocess.Popen("rm -rf /usr/share/" + settings.APPLICATION + " >/dev/null 2>&1", shell=True).wait()
   except:
     print("[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]")
     raise SystemExit()

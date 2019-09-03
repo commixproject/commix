@@ -29,7 +29,15 @@ Automatically create a Github issue with unhandled exception information.
 PS: Greetz @ sqlmap dev team for that great idea! :)
 """
 def create_github_issue(err_msg, exc_msg):
-  key = hashlib.md5(exc_msg).hexdigest()[:8]
+
+  _ = re.sub(r"'[^']+'", "''", exc_msg)
+  _ = re.sub(r"\s+line \d+", "", _)
+  _ = re.sub(r'File ".+?/(\w+\.py)', r"\g<1>", _)
+  _ = re.sub(r".+\Z", "", _)
+  _ = re.sub(r"(Unicode[^:]*Error:).+", r"\g<1>", _)
+  _ = re.sub(r"= _", "= ", _)
+  
+  key = hashlib.md5(_).hexdigest()[:8]
   while True:
     try:
       if not menu.options.batch:
