@@ -31,7 +31,8 @@ from src.thirdparty.six.moves import http_client as _http_client
 from src.utils import logs
 from src.utils import menu
 from src.utils import settings
-from StringIO import StringIO
+#from StringIO import StringIO
+import io
 from src.core.injections.controller import checks
 from src.thirdparty.colorama import Fore, Back, Style, init
 from src.thirdparty.six.moves import urllib as _urllib
@@ -216,7 +217,7 @@ def check_http_traffic(request):
     response_headers = response.info()
     page = response.read()
     if response_headers.get('Content-Encoding') == 'gzip':
-      page = gzip.GzipFile(fileobj=StringIO(page)).read()
+      page = gzip.GzipFile("", "rb", 9, io.BytesIO(page)).read()
       request.add_header('Accept-Encoding', 'deflate')
     if len(settings.ENCODING) != 0:
       page = page.decode(settings.ENCODING)

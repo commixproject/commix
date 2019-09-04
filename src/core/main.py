@@ -69,7 +69,7 @@ pass
 
 # Set default encoding
 _reload_module(sys)
-sys.setdefaultencoding(settings.DEFAULT_ENCODING)
+#sys.setdefaultencoding(settings.DEFAULT_ENCODING)
 
 if settings.IS_WINDOWS:
   import codecs

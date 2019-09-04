@@ -16,15 +16,15 @@ For more see the file 'readme/COPYING' for copying permission.
 import re
 import sys
 import errno
-import thread
 import socket
-import SocketServer
 from os import curdir, sep
 from src.utils import menu
 from src.utils import settings
 from socket import error as socket_error
 from src.thirdparty.colorama import Fore, Back, Style, init
-from BaseHTTPServer import BaseHTTPRequestHandler,HTTPServer
+from src.thirdparty.six.moves import _thread as thread
+from src.thirdparty.six.moves import socketserver as _socketserver
+from src.thirdparty.six.moves import BaseHTTPServer as _BaseHTTPServer
 
 """
 Validates IPv4 addresses.
@@ -82,7 +82,7 @@ def grab_ip_addr():
       print(settings.print_critical_msg(str(err_msg)) + "\n")
       raise SystemExit()
 
-class Handler(BaseHTTPRequestHandler):
+class Handler(_BaseHTTPServer.BaseHTTPRequestHandler):
     def do_GET(self):
       try:
         #Open the static file requested and send it
@@ -98,7 +98,7 @@ class Handler(BaseHTTPRequestHandler):
     def log_message(self, format, *args):
       return
 
-class ReusableTCPServer(SocketServer.TCPServer):
+class ReusableTCPServer(_socketserver.TCPServer):
     allow_reuse_address = True
 
 def main():
