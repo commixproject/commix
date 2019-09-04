@@ -12,7 +12,6 @@ the Free Software Foundation, either version 3 of the License, or
  
 For more see the file 'readme/COPYING' for copying permission.
 """
-
 import re
 import os
 import sys
@@ -20,25 +19,18 @@ import time
 import string
 import random
 from src.thirdparty.six.moves import urllib as _urllib
-
-import HTMLParser
- 
+from src.thirdparty.six.moves import html_parser as _html_parser
 from src.utils import menu
 from src.utils import logs
 from src.utils import settings
 from src.utils import session_handler
-
 from src.thirdparty.colorama import Fore, Back, Style, init
-
 from src.core.shells import reverse_tcp
-
 from src.core.requests import headers
 from src.core.requests import requests
 from src.core.requests import parameters
-
 from src.core.injections.controller import checks
 from src.core.injections.controller import shell_options
-
 from src.core.injections.results_based.techniques.classic import cb_injector
 from src.core.injections.results_based.techniques.classic import cb_payloads
 from src.core.injections.results_based.techniques.classic import cb_enumeration
@@ -438,7 +430,7 @@ def cb_injection_handler(url, timesec, filename, http_request_method):
                       else:
                         shell = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
                       if shell:
-                        html_parser = HTMLParser.HTMLParser()
+                        html_parser = _html_parser.HTMLParser()
                         shell = html_parser.unescape(shell)
                         # Update logs with executed cmds and execution results.
                         logs.executed_command(filename, cmd, shell)

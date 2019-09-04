@@ -17,19 +17,15 @@ import os
 import sys
 import time
 import base64
-
-import cookielib
-
 from src.utils import menu
 from src.utils import settings
 from src.utils import session_handler
-
 from src.core.requests import tor
 from src.core.requests import proxy
 from src.core.requests import headers
-
 from src.core.injections.controller import checks
 from src.thirdparty.colorama import Fore, Back, Style, init
+from src.thirdparty.six.moves import http_cookiejar as _http_cookiejar
 
 """
 If a dashboard or an administration panel is found (auth_url),
@@ -43,7 +39,8 @@ def authentication_process():
   try:
     auth_url = menu.options.auth_url
     auth_data = menu.options.auth_data
-    cj = cookielib.CookieJar()
+    #cj = cookielib.CookieJar()
+    cj = _http_cookiejar.CookieJar()
     opener = _urllib.request.build_opener(_urllib.request.HTTPCookieProcessor(cj))
     request = opener.open(_urllib.request.Request(auth_url))
     cookies = ""

@@ -12,7 +12,6 @@ the Free Software Foundation, either version 3 of the License, or
  
 For more see the file 'readme/COPYING' for copying permission.
 """
-
 import re
 import os
 import sys
@@ -21,19 +20,15 @@ import json
 import string
 import random
 from src.thirdparty.six.moves import urllib as _urllib
-
-import HTMLParser
-
+from src.thirdparty.six.moves import html_parser as _html_parser
 from src.utils import menu
 from src.utils import settings
 from src.thirdparty.colorama import Fore, Back, Style, init
-
 from src.core.requests import tor
 from src.core.requests import proxy
 from src.core.requests import headers
 from src.core.requests import requests
 from src.core.requests import parameters
-
 from src.core.injections.controller import checks
 from src.core.injections.results_based.techniques.classic import cb_payloads
 
@@ -104,7 +99,7 @@ def injection_test_results(response, TAG, randvcalc):
     html_data = html_data.replace("\n"," ")
     # cleanup string / unescape html to string
     html_data = _urllib.parse.unquote(html_data).decode(settings.DEFAULT_ENCODING)
-    html_data = HTMLParser.HTMLParser().unescape(html_data).encode(settings.DEFAULT_ENCODING)
+    html_data = _html_parser.HTMLParser().unescape(html_data).encode(settings.DEFAULT_ENCODING)
     # Replace non-ASCII characters with a single space
     re.sub(r"[^\x00-\x7f]",r" ", html_data)
 
@@ -265,7 +260,7 @@ def injection_results(response, TAG, cmd):
     html_data = html_data.replace("\n"," ")
     # cleanup string / unescape html to string
     html_data = _urllib.parse.unquote(html_data).decode(settings.DEFAULT_ENCODING)
-    html_data = HTMLParser.HTMLParser().unescape(html_data).encode(settings.DEFAULT_ENCODING)
+    html_data = _html_parser.HTMLParser().unescape(html_data).encode(settings.DEFAULT_ENCODING)
 
     # Replace non-ASCII characters with a single space
     re.sub(r"[^\x00-\x7f]",r" ", html_data)
