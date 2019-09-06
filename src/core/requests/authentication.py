@@ -25,6 +25,7 @@ from src.core.requests import proxy
 from src.core.requests import headers
 from src.core.injections.controller import checks
 from src.thirdparty.colorama import Fore, Back, Style, init
+from src.thirdparty.six.moves import urllib as _urllib
 from src.thirdparty.six.moves import http_cookiejar as _http_cookiejar
 
 """

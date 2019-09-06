@@ -14,12 +14,10 @@ For more see the file 'readme/COPYING' for copying permission.
 """
 
 import sys
-
 from src.thirdparty.six.moves import http_client as _http_client
-
+from src.thirdparty.six.moves import urllib as _urllib
 from src.utils import menu
 from src.utils import settings
-
 from src.core.requests import headers
 from src.thirdparty.colorama import Fore, Back, Style, init
 
