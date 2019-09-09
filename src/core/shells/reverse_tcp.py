@@ -25,6 +25,7 @@ from src.utils import menu
 from src.utils import update
 from src.utils import settings
 from src.core.compat import xrange
+from src.thirdparty.six.moves import input as _input
 from src.thirdparty.six.moves import urllib as _urllib
 from src.thirdparty.colorama import Fore, Back, Style, init
 
@@ -205,7 +206,7 @@ def netcat_version(separator):
   ]
 
   while True:
-    nc_version = raw_input("""
+    nc_version = _input("""
 ---[ """ + Style.BRIGHT + Fore.BLUE + """Unix-like targets""" + Style.RESET_ALL + """ ]--- 
 Type '""" + Style.BRIGHT + """1""" + Style.RESET_ALL + """' to use the default Netcat on target host.
 Type '""" + Style.BRIGHT + """2""" + Style.RESET_ALL + """' to use Netcat for Busybox on target host.
@@ -279,7 +280,7 @@ Set up other [1] reverse tcp shell connections
 def other_reverse_shells(separator):
 
   while True:
-    other_shell = raw_input("""
+    other_shell = _input("""
 ---[ """ + Style.BRIGHT + Fore.BLUE + """Unix-like reverse TCP shells""" + Style.RESET_ALL + """ ]---
 Type '""" + Style.BRIGHT + """1""" + Style.RESET_ALL + """' to use a PHP reverse TCP shell.
 Type '""" + Style.BRIGHT + """2""" + Style.RESET_ALL + """' to use a Perl reverse TCP shell.
@@ -479,7 +480,7 @@ Type '""" + Style.BRIGHT + """12""" + Style.RESET_ALL + """' to use the web deli
         continue
       else:
         while True:
-          windows_reverse_shell = raw_input("""
+          windows_reverse_shell = _input("""
 ---[ """ + Style.BRIGHT + Fore.BLUE + """Powershell injection attacks""" + Style.RESET_ALL + """ ]---
 Type '""" + Style.BRIGHT + """1""" + Style.RESET_ALL + """' to use shellcode injection with native x86 shellcode.
 Type '""" + Style.BRIGHT + """2""" + Style.RESET_ALL + """' to use TrustedSec's Magic Unicorn.
@@ -597,7 +598,7 @@ Type '""" + Style.BRIGHT + """3""" + Style.RESET_ALL + """' to use Regsvr32.exe 
     # Web delivery script
     elif other_shell == '12':
       while True:
-        web_delivery = raw_input("""
+        web_delivery = _input("""
 ---[ """ + Style.BRIGHT + Fore.BLUE + """Web delivery script""" + Style.RESET_ALL + """ ]---
 Type '""" + Style.BRIGHT + """1""" + Style.RESET_ALL + """' to use Python meterpreter reverse TCP shell.
 Type '""" + Style.BRIGHT + """2""" + Style.RESET_ALL + """' to use PHP meterpreter reverse TCP shell.
@@ -680,7 +681,7 @@ Choose type of reverse TCP connection.
 def reverse_tcp_options(separator):
 
   while True:
-    reverse_tcp_option = raw_input("""   
+    reverse_tcp_option = _input("""   
 ---[ """ + Style.BRIGHT + Fore.BLUE + """Reverse TCP shells""" + Style.RESET_ALL + """ ]---     
 Type '""" + Style.BRIGHT + """1""" + Style.RESET_ALL + """' to use a netcat reverse TCP shell.
 Type '""" + Style.BRIGHT + """2""" + Style.RESET_ALL + """' for other reverse TCP shells.
@@ -725,7 +726,7 @@ Set up the reverse TCP connection
 def configure_reverse_tcp(separator):
   # Set up LHOST for the reverse TCP connection
   while True:
-    option = raw_input("""commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp""" + Style.RESET_ALL + """) > """)
+    option = _input("""commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp""" + Style.RESET_ALL + """) > """)
     if option.lower() == "reverse_tcp": 
       warn_msg = "You are already into the '" + option.lower() + "' mode."
       print(settings.print_warning_msg(warn_msg))

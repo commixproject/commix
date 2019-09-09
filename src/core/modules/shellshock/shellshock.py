@@ -6,16 +6,14 @@ import sys
 import string
 import random
 from src.thirdparty.six.moves import urllib as _urllib
-
+from src.thirdparty.six.moves import input as _input
 from src.thirdparty.six.moves import http_client as _http_client
-
 from src.utils import menu
 from src.utils import logs
 from src.utils import settings
 from src.core.requests import tor
 from src.core.requests import proxy
 from src.thirdparty.colorama import Fore, Back, Style, init
-
 from src.core.shells import bind_tcp
 from src.core.shells import reverse_tcp
 from src.core.requests import parameters
@@ -809,7 +807,7 @@ def shellshock_handler(url, http_request_method, filename):
                       # Unix tab compliter
                       else:
                         readline.parse_and_bind("tab: complete")
-                    cmd = raw_input("""commix(""" + Style.BRIGHT + Fore.RED + """os_shell""" + Style.RESET_ALL + """) > """)
+                    cmd = _input("""commix(""" + Style.BRIGHT + Fore.RED + """os_shell""" + Style.RESET_ALL + """) > """)
                     cmd = checks.escaped_cmd(cmd)
                     
                     if cmd.lower() in settings.SHELL_OPTIONS:
@@ -823,7 +821,7 @@ def shellshock_handler(url, http_request_method, filename):
                       if shell != "":
                         # Update logs with executed cmds and execution results.
                         logs.executed_command(filename, cmd, shell)
-                        print("\n") + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n"
+                        print("\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n")
                       else:
                         info_msg = "Executing the '" + cmd + "' command... "
                         if settings.VERBOSITY_LEVEL == 1:

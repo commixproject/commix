@@ -222,6 +222,8 @@ def check_http_traffic(request):
     if len(settings.ENCODING) != 0:
       page = page.decode(settings.ENCODING)
     code = response.getcode()
+    if type(page) != str:
+      page = page.decode(settings.DEFAULT_ENCODING)
     response_headers[settings.URI_HTTP_HEADER] = response.geturl()
     response_headers = str(response_headers).strip("\n")
     http_response(response_headers, code)
@@ -231,7 +233,7 @@ def check_http_traffic(request):
     # Checks regarding a potential browser verification protection mechanism.
     checks.browser_verification(page)
     # Checks regarding recognition of generic "your ip has been blocked" messages.
-    checks.blocked_ip(page) 
+    checks.blocked_ip(page)
 
   # This is useful when handling exotic HTTP errors (i.e requests for authentication).
   except _urllib.error.HTTPError as err:

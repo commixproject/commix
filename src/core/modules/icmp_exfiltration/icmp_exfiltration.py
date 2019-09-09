@@ -18,21 +18,17 @@ import os
 import sys
 import time
 import signal
+from src.thirdparty.six.moves import input as _input
 from src.thirdparty.six.moves import urllib as _urllib
-
 import threading
-
 from src.utils import menu
 from src.utils import logs
 from src.utils import settings
-
 from src.thirdparty.colorama import Fore, Back, Style, init
-
 from src.core.requests import tor
 from src.core.requests import proxy
 from src.core.requests import headers
 from src.core.requests import parameters
-
 from src.core.shells import reverse_tcp
 from src.core.injections.controller import checks
 
@@ -188,7 +184,7 @@ def input_cmd(http_request_method, url, vuln_parameter, ip_src, technique):
             # Unix tab compliter
             else:
               readline.parse_and_bind("tab: complete")
-          cmd = raw_input("""commix(""" + Style.BRIGHT + Fore.RED + """os_shell""" + Style.RESET_ALL + """) > """)
+          cmd = _input("""commix(""" + Style.BRIGHT + Fore.RED + """os_shell""" + Style.RESET_ALL + """) > """)
           cmd = checks.escaped_cmd(cmd)
           if cmd.lower() in settings.SHELL_OPTIONS:
             if cmd.lower() == "quit" or cmd.lower() == "back":       

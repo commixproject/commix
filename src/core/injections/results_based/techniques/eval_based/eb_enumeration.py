@@ -546,7 +546,7 @@ def single_os_cmd_exec(separator, TAG, prefix, suffix, whitespace, http_request_
     shell = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
   if shell:
     if shell != "":
-      print("\n") + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n"
+      print("\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n")
       logs.print_logs_notification(filename, url)
     else:
       err_msg = "The '" + cmd + "' command, does not return any output."

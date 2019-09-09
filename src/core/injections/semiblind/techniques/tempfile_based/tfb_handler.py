@@ -29,6 +29,7 @@ from src.core.requests import headers
 from src.core.requests import requests
 from src.core.requests import parameters
 from src.core.injections.controller import checks
+from src.thirdparty.six.moves import input as _input
 from src.thirdparty.six.moves import urllib as _urllib
 from src.core.injections.controller import shell_options
 from src.thirdparty.colorama import Fore, Back, Style, init
@@ -474,7 +475,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                 while True:
                   if not menu.options.batch:
                     question_msg = "Do you want to enumerate again? [Y/n] > "
-                    enumerate_again = raw_input("\n" + settings.print_question_msg(question_msg)).lower()
+                    enumerate_again = _input("\n" + settings.print_question_msg(question_msg)).lower()
                   else:
                     enumerate_again = ""
                   if len(enumerate_again) == 0:
@@ -582,7 +583,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                         # Unix tab compliter
                         else:
                           readline.parse_and_bind("tab: complete")
-                      cmd = raw_input("""commix(""" + Style.BRIGHT + Fore.RED + """os_shell""" + Style.RESET_ALL + """) > """)
+                      cmd = _input("""commix(""" + Style.BRIGHT + Fore.RED + """os_shell""" + Style.RESET_ALL + """) > """)
                       cmd = checks.escaped_cmd(cmd)
                       if cmd.lower() in settings.SHELL_OPTIONS:
                         go_back, go_back_again = shell_options.check_option(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, technique, go_back, no_result, timesec, go_back_again, payload, OUTPUT_TEXTFILE="")

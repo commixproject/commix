@@ -27,6 +27,7 @@ from src.core.requests import requests
 from src.core.requests import parameters
 from src.core.injections.controller import checks
 from src.core.injections.controller import shell_options
+from src.thirdparty.six.moves import input as _input
 from src.thirdparty.six.moves import urllib as _urllib
 from src.thirdparty.colorama import Fore, Back, Style, init
 from src.core.injections.semiblind.techniques.file_based import fb_injector
@@ -533,7 +534,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
               while True:
                 if not menu.options.batch:
                   question_msg = "Do you want to enumerate again? [Y/n] > "
-                  enumerate_again = raw_input("\n" + settings.print_question_msg(question_msg)).lower()
+                  enumerate_again = _input("\n" + settings.print_question_msg(question_msg)).lower()
                 else:
                   enumerate_again = ""  
                 if len(enumerate_again) == 0:
@@ -641,7 +642,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                       # Unix tab compliter
                       else:
                         readline.parse_and_bind("tab: complete")
-                    cmd = raw_input("""commix(""" + Style.BRIGHT + Fore.RED + """os_shell""" + Style.RESET_ALL + """) > """)
+                    cmd = _input("""commix(""" + Style.BRIGHT + Fore.RED + """os_shell""" + Style.RESET_ALL + """) > """)
                     cmd = checks.escaped_cmd(cmd)
                     # if settings.VERBOSITY_LEVEL >= 1:
                     #   print("")
@@ -667,7 +668,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                         if shell != "":
                           # Update logs with executed cmds and execution results.
                           logs.executed_command(filename, cmd, shell)
-                          print("\n") + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n"
+                          print("\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n")
 
                       if not shell or shell == "":
                         if settings.VERBOSITY_LEVEL >= 1:

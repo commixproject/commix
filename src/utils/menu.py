@@ -153,7 +153,8 @@ target.add_option("-r",
                 dest="requestfile",
                 help="Load HTTP request from a file.")
 
-target.add_option("--crawl", 
+target.add_option("--crawl",
+                default=0,
                 dest="crawldepth",
                 type="int",
                 help="Crawl the website starting from the target URL (1-2, Default: " + str(settings.DEFAULT_CRAWLDEPTH_LEVEL) + ").")
@@ -439,12 +440,14 @@ injection.add_option("--maxlen",
                 help="Set the max length of output for time-related injection techniques (Default: " + str(settings.MAXLEN) + " chars).")
 
 injection.add_option("--delay", 
+                default=0,
                 action="store",
                 type="int",
                 dest="delay",
                 help="Seconds to delay between each HTTP request.")
 
-injection.add_option("--time-sec", 
+injection.add_option("--time-sec",
+                default=1,
                 action="store",
                 type="int",
                 dest="timesec",

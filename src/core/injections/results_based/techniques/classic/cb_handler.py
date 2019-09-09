@@ -18,6 +18,7 @@ import sys
 import time
 import string
 import random
+from src.thirdparty.six.moves import input as _input
 from src.thirdparty.six.moves import urllib as _urllib
 from src.thirdparty.six.moves import html_parser as _html_parser
 from src.utils import menu
@@ -307,7 +308,7 @@ def cb_injection_handler(url, timesec, filename, http_request_method):
               while True:
                 if not menu.options.batch:
                   question_msg = "Do you want to enumerate again? [Y/n] > "
-                  enumerate_again = raw_input("\n" + settings.print_question_msg(question_msg)).lower()
+                  enumerate_again = _input("\n" + settings.print_question_msg(question_msg)).lower()
                 else:
                   enumerate_again = ""  
                 if len(enumerate_again) == 0:
@@ -401,7 +402,7 @@ def cb_injection_handler(url, timesec, filename, http_request_method):
                       # Unix tab compliter
                       else:
                         readline.parse_and_bind("tab: complete")
-                    cmd = raw_input("""commix(""" + Style.BRIGHT + Fore.RED + """os_shell""" + Style.RESET_ALL + """) > """)
+                    cmd = _input("""commix(""" + Style.BRIGHT + Fore.RED + """os_shell""" + Style.RESET_ALL + """) > """)
                     cmd = checks.escaped_cmd(cmd)
                     if cmd.lower() in settings.SHELL_OPTIONS:
                       go_back, go_back_again = shell_options.check_option(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, technique, go_back, no_result, timesec, go_back_again, payload, OUTPUT_TEXTFILE="")
@@ -435,7 +436,7 @@ def cb_injection_handler(url, timesec, filename, http_request_method):
                         # Update logs with executed cmds and execution results.
                         logs.executed_command(filename, cmd, shell)
                       if shell != "":
-                        print("\n") + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n"
+                        print("\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n")
                       else:
                         if settings.VERBOSITY_LEVEL >= 1:
                           print("")

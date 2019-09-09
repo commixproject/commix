@@ -21,6 +21,7 @@ import base64
 import subprocess
 from src.utils import menu
 from src.utils import settings
+from src.thirdparty.six.moves import input as _input
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 """
@@ -169,7 +170,7 @@ def netcat_version(separator):
   ]
 
   while True:
-    nc_version = raw_input("""
+    nc_version = _input("""
 ---[ """ + Style.BRIGHT + Fore.BLUE + """Unix-like targets""" + Style.RESET_ALL + """ ]--- 
 Type '""" + Style.BRIGHT + """1""" + Style.RESET_ALL + """' to use the default Netcat on target host.
 Type '""" + Style.BRIGHT + """2""" + Style.RESET_ALL + """' to use Netcat for Busybox on target host.
@@ -241,7 +242,7 @@ Type '""" + Style.BRIGHT + """4""" + Style.RESET_ALL + """' to use Netcat-Openbs
 def other_bind_shells(separator):
 
   while True:
-    other_shell = raw_input("""
+    other_shell = _input("""
 ---[ """ + Style.BRIGHT + Fore.BLUE + """Unix-like bind TCP shells""" + Style.RESET_ALL + """ ]---
 Type '""" + Style.BRIGHT + """1""" + Style.RESET_ALL + """' to use a PHP bind TCP shell.
 Type '""" + Style.BRIGHT + """2""" + Style.RESET_ALL + """' to use a Perl bind TCP shell.
@@ -451,7 +452,7 @@ Choose type of bind TCP connection.
 def bind_tcp_options(separator):
 
   while True:
-    bind_tcp_option = raw_input("""   
+    bind_tcp_option = _input("""   
 ---[ """ + Style.BRIGHT + Fore.BLUE + """Bind TCP shells""" + Style.RESET_ALL + """ ]---     
 Type '""" + Style.BRIGHT + """1""" + Style.RESET_ALL + """' to use a netcat bind TCP shell.
 Type '""" + Style.BRIGHT + """2""" + Style.RESET_ALL + """' for other bind TCP shells.
@@ -498,7 +499,7 @@ def configure_bind_tcp(separator):
 
   # Set up rhost for the bind TCP connection
   while True:
-    option = raw_input("""commix(""" + Style.BRIGHT + Fore.RED + """bind_tcp""" + Style.RESET_ALL + """) > """)
+    option = _input("""commix(""" + Style.BRIGHT + Fore.RED + """bind_tcp""" + Style.RESET_ALL + """) > """)
     if option.lower() == "bind_tcp": 
       warn_msg = "You are already into the '" + option.lower() + "' mode."
       print(settings.print_warning_msg(warn_msg))

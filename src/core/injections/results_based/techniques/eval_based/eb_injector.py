@@ -100,7 +100,7 @@ def warning_detection(url, http_request_method):
     response = requests.get_request_response(request)
     if response:
       response = _urllib.request.urlopen(request)
-      html_data = response.read()
+      html_data = response.read().decode(settings.DEFAULT_ENCODING)
       err_msg = ""
       if "eval()'d code" in html_data:
         err_msg = "'eval()'"
@@ -135,7 +135,7 @@ def injection_test_results(response, TAG, randvcalc):
   if response == False:
     return False
   else:
-    html_data = response.read()
+    html_data = response.read().decode(settings.DEFAULT_ENCODING)
     html_data = re.sub("\n", " ", html_data)
     if settings.SKIP_CALC:
       shell = re.findall(r"" + TAG + " " + TAG + " " + TAG + " " , html_data)
@@ -177,7 +177,6 @@ def custom_header_injection_test(url, vuln_parameter, payload):
 The main command injection exploitation.
 """
 def injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename):
-  
 
   def check_injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename):
     # Execute shell commands on vulnerable host.
@@ -284,16 +283,13 @@ def injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_meth
 
   return response
 
-
-
 """
 Command execution results.
 """
 def injection_results(response, TAG, cmd):
-  
   new_line = ''.join(random.choice(string.ascii_uppercase) for i in range(6)) 
   # Grab execution results
-  html_data = response.read()
+  html_data = response.read().decode(settings.DEFAULT_ENCODING)
   html_data = re.sub("\n", new_line, html_data)
   shell = re.findall(r"" + TAG + new_line + TAG + "(.*)" + TAG + new_line + TAG + "", html_data)
   try:
