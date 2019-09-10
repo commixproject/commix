@@ -58,12 +58,12 @@ def http_response_content(content):
 Checking the HTTP response headers.
 """
 def http_response(headers, code):
-  info_msg = "The target's HTTP response headers (" + str(code) + "):"
+  info_msg = "The target's response HTTP headers (" + str(code) + "):"
   if settings.VERBOSITY_LEVEL >= 3:
     print(settings.print_info_msg(info_msg))
   if menu.options.traffic_file: 
     logs.log_traffic("-" * 37 + "\n" + info_msg + "\n" + "-" * 37)  
-  response_http_headers = str(headers).split("\r\n")
+  response_http_headers = str(headers).split("\n")
   for header in response_http_headers:
     if len(header) > 1: 
       if settings.VERBOSITY_LEVEL >= 3:
@@ -84,42 +84,36 @@ def check_http_traffic(request):
   
   # Delay in seconds between each HTTP request
   time.sleep(int(settings.DELAY))
-  if settings.SCHEME == 'https':
-      handle = _http_client.HTTPSConnection
-  else:
-      handle = _http_client.HTTPConnection
+  # if settings.SCHEME == 'https':
+  #   handle = _http_client.HTTPSConnection
+  # else:
+  #   handle = _http_client.HTTPConnection
   
-  class do_connection(handle):
-    def request(self, method, url, body, headers):
-      info_msg = "The provided HTTP request headers: "
+  class do_connection(_http_client.HTTPConnection):
+    def send(self, req):
+      headers = req.decode()
+      info_msg = "The target's request HTTP headers:"
       if settings.VERBOSITY_LEVEL >= 2:
         print(settings.print_info_msg(info_msg))
       if menu.options.traffic_file: 
-        logs.log_traffic("-" * 37 + "\n" + info_msg + "\n" + "-" * 37)
-      header = method + " " + url
-      if settings.VERBOSITY_LEVEL >= 2:
-        print(settings.print_traffic(header))
+        logs.log_traffic("-" * 37 + "\n" + info_msg + "\n" + "-" * 37)  
+      request_http_headers = str(headers).split("\r\n")
+      for header in request_http_headers:
+        if len(header) > 1: 
+          if settings.VERBOSITY_LEVEL >= 2:
+            print(settings.print_traffic(header))
+          if menu.options.traffic_file:
+            logs.log_traffic("\n" + header)
       if menu.options.traffic_file:
-        logs.log_traffic("\n" + header)
-      for item in headers.items():
-        header = item[0] + ": " + item[1]
-        if settings.VERBOSITY_LEVEL >= 2:
-          print(settings.print_traffic(header))
-        if menu.options.traffic_file:
-          logs.log_traffic("\n" + header)
-      if body :
-        header = body
-        if settings.VERBOSITY_LEVEL >= 2:
-          print(settings.print_traffic(header))
-        if menu.options.traffic_file:
-          logs.log_traffic("\n" + header) 
-      if menu.options.traffic_file:
-        logs.log_traffic("\n\n")
-      if settings.SCHEME == 'https':
-        _http_client.HTTPSConnection.request(self, method, url, body, headers)
-      else:
-        _http_client.HTTPConnection.request(self, method, url, body, headers)
-        
+        if settings.VERBOSITY_LEVEL <= 2: 
+          logs.log_traffic("\n\n" + "#" * 77 + "\n\n")
+        else:
+          logs.log_traffic("\n\n") 
+      # if settings.SCHEME == 'https':
+      #   _http_client.HTTPSConnection.send(self, req)
+      # else:
+      _http_client.HTTPConnection.send(self, req)
+
   class connection_handler(_urllib.request.HTTPHandler, _urllib.request.HTTPSHandler):
     if settings.SCHEME == 'https':
       def https_open(self, req):
@@ -157,8 +151,7 @@ def check_http_traffic(request):
           raise SystemExit()
 
   if settings.REVERSE_TCP == False and settings.BIND_TCP == False:
-    opener = _urllib.request.OpenerDirector()
-    opener.add_handler(connection_handler())
+    opener = _urllib.request.build_opener(connection_handler())
     response = False
     current_attempt = 0
     while not response and current_attempt <= settings.MAX_RETRIES:
