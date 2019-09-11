@@ -255,8 +255,9 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                       while True:
                         if not menu.options.batch:
                           question_msg = "How do you want to proceed? [(C)ontinue/(s)kip/(q)uit] > "
-                          sys.stdout.write(settings.print_question_msg(question_msg))
-                          proceed_option = sys.stdin.readline().replace("\n","").lower()
+                          # sys.stdout.write(settings.print_question_msg(question_msg))
+                          # proceed_option = sys.stdin.readline().replace("\n","").lower()
+                          proceed_option = _input(settings.print_question_msg(question_msg))
                         else:
                           proceed_option = ""  
                         if len(proceed_option) == 0:
@@ -506,8 +507,9 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                 while True:
                   if not menu.options.batch:
                     question_msg = "Do you want to access files again? [Y/n] > "
-                    sys.stdout.write(settings.print_question_msg(question_msg))
-                    file_access_again = sys.stdin.readline().replace("\n","").lower()
+                    # sys.stdout.write(settings.print_question_msg(question_msg))
+                    # file_access_again = sys.stdin.readline().replace("\n","").lower()
+                    file_access_again = _input(settings.print_question_msg(question_msg))
                   else:
                     file_access_again = ""
                   if len(file_access_again) == 0:
@@ -555,8 +557,9 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                     break
                   if not menu.options.batch:
                     question_msg = "Do you want a Pseudo-Terminal shell? [Y/n] > "
-                    sys.stdout.write(settings.print_question_msg(question_msg))
-                    gotshell = sys.stdin.readline().replace("\n","").lower()
+                    # sys.stdout.write(settings.print_question_msg(question_msg))
+                    # gotshell = sys.stdin.readline().replace("\n","").lower()
+                    gotshell = _input(settings.print_question_msg(question_msg))
                   else:
                     gotshell = ""
                   if len(gotshell) == 0:

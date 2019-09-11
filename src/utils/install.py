@@ -21,6 +21,7 @@ import subprocess
 from src.utils import menu
 from src.utils import settings
 from src.utils import requirments
+from src.thirdparty.six.moves import input as _input
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 """
@@ -76,8 +77,9 @@ def installer():
       while True:
         if not menu.options.batch:
           question_msg = "Do you want to remove commix? [Y/n] > "
-          sys.stdout.write(settings.print_question_msg(question_msg))
-          uninstall = sys.stdin.readline().replace("\n","").lower()
+          # sys.stdout.write(settings.print_question_msg(question_msg))
+          # uninstall = sys.stdin.readline().replace("\n","").lower()
+          uninstall = _input(settings.print_question_msg(question_msg))
         else:
           uninstall = "" 
         if len(uninstall) == 0:

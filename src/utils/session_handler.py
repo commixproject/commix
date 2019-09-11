@@ -22,7 +22,7 @@ import sqlite3
 
 from src.utils import menu
 from src.utils import settings
-
+from src.thirdparty.six.moves import input as _input
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 """
@@ -288,8 +288,9 @@ def notification(url, technique, injection_type):
           question_msg += "(" + injection_type.split(" ")[0] + ") "
           question_msg += technique.rsplit(' ', 2)[0] 
           question_msg += " injection point? [Y/n] > "
-          sys.stdout.write(settings.print_question_msg(question_msg))
-          settings.LOAD_SESSION = sys.stdin.readline().replace("\n","").lower()
+          # sys.stdout.write(settings.print_question_msg(question_msg))
+          # settings.LOAD_SESSION = sys.stdin.readline().replace("\n","").lower()
+          settings.LOAD_SESSION = _input(settings.print_question_msg(question_msg))
         else:
           settings.LOAD_SESSION = ""  
         if len(settings.LOAD_SESSION) == 0:
@@ -301,8 +302,9 @@ def notification(url, technique, injection_type):
           if technique[:1] != "c":
             while True:
               question_msg = "Which technique do you want to re-evaluate? [(C)urrent/(a)ll/(n)one] > "
-              sys.stdout.write(settings.print_question_msg(question_msg))
-              proceed_option = sys.stdin.readline().replace("\n","").lower()
+              # sys.stdout.write(settings.print_question_msg(question_msg))
+              # proceed_option = sys.stdin.readline().replace("\n","").lower()
+              proceed_option = _input(settings.print_question_msg(question_msg))
               if len(proceed_option) == 0:
                  proceed_option = "c"
               if proceed_option.lower() in settings.CHOICE_PROCEED :

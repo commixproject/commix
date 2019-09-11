@@ -88,6 +88,7 @@ def check_http_traffic(request):
   #   handle = _http_client.HTTPSConnection
   # else:
   #   handle = _http_client.HTTPConnection
+
   
   class do_connection(_http_client.HTTPConnection):
     def send(self, req):

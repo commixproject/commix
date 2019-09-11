@@ -19,7 +19,7 @@ import sys
 import json
 import hashlib
 from src.thirdparty.six.moves import urllib as _urllib
-
+from src.thirdparty.six.moves import input as _input
 import traceback
 from src.utils import menu
 from src.utils import settings
@@ -44,8 +44,9 @@ def create_github_issue(err_msg, exc_msg):
         question_msg = "Do you want to automatically create a new (anonymized) issue "
         question_msg += "with the unhandled exception information at "
         question_msg += "the official Github repository? [y/N] "
-        sys.stdout.write(settings.print_question_msg(question_msg))
-        choise = sys.stdin.readline().replace("\n","").lower()
+        # sys.stdout.write(settings.print_question_msg(question_msg))
+        # choise = sys.stdin.readline().replace("\n","").lower()
+        choise = _input(settings.print_question_msg(question_msg))
       else:
         choise = ""
       if len(choise) == 0:

@@ -27,6 +27,7 @@ from src.core.requests import headers
 from src.core.requests import parameters
 from src.core.requests import authentication
 from src.core.injections.controller import checks
+from src.thirdparty.six.moves import input as _input
 from src.thirdparty.six.moves import urllib as _urllib
 from src.thirdparty.colorama import Fore, Back, Style, init
 
@@ -123,8 +124,9 @@ def estimate_response_time(url, timesec):
                 while True:
                   if not menu.options.batch:
                     question_msg = "Do you want to perform a dictionary-based attack? [Y/n] > "
-                    sys.stdout.write(settings.print_question_msg(question_msg))
-                    do_update = sys.stdin.readline().replace("\n","").lower()
+                    # sys.stdout.write(settings.print_question_msg(question_msg))
+                    # do_update = sys.stdin.readline().replace("\n","").lower()
+                    do_update = _input(settings.print_question_msg(question_msg))
                   else:
                     do_update = ""  
                   if len(do_update) == 0:
@@ -159,8 +161,9 @@ def estimate_response_time(url, timesec):
                 while True:
                   if not menu.options.batch:
                     question_msg = "Do you want to perform a dictionary-based attack? [Y/n] > "
-                    sys.stdout.write(settings.print_question_msg(question_msg))
-                    do_update = sys.stdin.readline().replace("\n","").lower()
+                    # sys.stdout.write(settings.print_question_msg(question_msg))
+                    # do_update = sys.stdin.readline().replace("\n","").lower()
+                    do_update = _input(settings.print_question_msg(question_msg))
                   else:
                     do_update = ""
                   if len(do_update) == 0:
@@ -1213,8 +1216,9 @@ def check_target_os(server_banner):
         while True:
           question_msg = "Do you recognise the server's operating system? "
           question_msg += "[(W)indows/(U)nix/(q)uit] > "
-          sys.stdout.write(settings.print_question_msg(question_msg))
-          got_os = sys.stdin.readline().replace("\n","").lower()
+          # sys.stdout.write(settings.print_question_msg(question_msg))
+          # got_os = sys.stdin.readline().replace("\n","").lower()
+          got_os = _input(settings.print_question_msg(question_msg))
           if got_os.lower() in settings.CHOICE_OS :
             if got_os.lower() == "w":
               settings.TARGET_OS = "win"

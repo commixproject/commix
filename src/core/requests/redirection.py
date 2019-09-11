@@ -15,10 +15,10 @@ For more see the file 'readme/COPYING' for copying permission.
 
 import sys
 import errno
-
 from src.utils import menu
 from src.utils import settings
 from socket import error as SocketError
+from src.thirdparty.six.moves import input as _input
 from src.thirdparty.six.moves import urllib as _urllib
 from src.thirdparty.colorama import Fore, Back, Style, init
 
@@ -95,8 +95,9 @@ def do_check(url):
       while True:
         if not menu.options.batch:
           question_msg = "Do you want to follow the identified redirection? [Y/n] > "
-          sys.stdout.write(settings.print_question_msg(question_msg))
-          redirection_option = sys.stdin.readline().replace("\n","").lower()
+          # sys.stdout.write(settings.print_question_msg(question_msg))
+          # redirection_option = sys.stdin.readline().replace("\n","").lower()
+          redirection_option = _input(settings.print_question_msg(question_msg))
         else:
           redirection_option = ""  
         if len(redirection_option) == 0 or redirection_option in settings.CHOICE_YES:

@@ -25,6 +25,7 @@ import base64
 import traceback
 from collections import OrderedDict 
 from src.utils import menu
+from src.thirdparty.six.moves import input as _input
 from src.thirdparty.six.moves import urllib as _urllib
 from src.utils import settings
 from src.utils import simple_http_server
@@ -188,8 +189,9 @@ def next_attack_vector(technique, go_back):
   while True:
     if not menu.options.batch:
       question_msg = "Continue with testing the " + technique + "? [Y/n] > "
-      sys.stdout.write(settings.print_question_msg(question_msg))
-      next_attack_vector = sys.stdin.readline().replace("\n","").lower()
+      # sys.stdout.write(settings.print_question_msg(question_msg))
+      # next_attack_vector = sys.stdin.readline().replace("\n","").lower()
+      next_attack_vector = _input(settings.print_question_msg(question_msg))
     else:
       next_attack_vector = ""
     if len(next_attack_vector) == 0:
@@ -256,8 +258,9 @@ def procced_with_file_based_technique():
     if not menu.options.batch:
       question_msg = "Do you want to procced with the (semi-blind) "
       question_msg += "file-based injection technique? [Y/n] > "
-      sys.stdout.write(settings.print_question_msg(question_msg))
-      enable_fb = sys.stdin.readline().replace("\n","").lower()
+      # sys.stdout.write(settings.print_question_msg(question_msg))
+      # enable_fb = sys.stdin.readline().replace("\n","").lower()
+      enable_fb = _input(settings.print_question_msg(question_msg))
     else:
       enable_fb = ""
     if len(enable_fb) == 0:
@@ -325,8 +328,9 @@ def continue_tests(err):
       if not menu.options.batch:
         question_msg = "Do you want to ignore the error (" + str(err.code) 
         question_msg += ") message and continue the tests? [Y/n] > "
-        sys.stdout.write(settings.print_question_msg(question_msg))
-        continue_tests = sys.stdin.readline().replace("\n","").lower()
+        # sys.stdout.write(settings.print_question_msg(question_msg))
+        # continue_tests = sys.stdin.readline().replace("\n","").lower()
+        continue_tests = _input(settings.print_question_msg(question_msg))
       else:
         continue_tests = ""
       if len(continue_tests) == 0:
@@ -400,8 +404,9 @@ def ps_check():
       if not menu.options.batch:
         question_msg = "Do you want to use the \"--ps-version\" option "
         question_msg += "so ensure that PowerShell is enabled? [Y/n] > "
-        sys.stdout.write(settings.print_question_msg(question_msg))
-        ps_check = sys.stdin.readline().replace("\n","").lower()
+        # sys.stdout.write(settings.print_question_msg(question_msg))
+        # ps_check = sys.stdin.readline().replace("\n","").lower()
+        ps_check = _input(settings.print_question_msg(question_msg))
       else:
         ps_check = ""
       if len(ps_check) == 0:
@@ -427,8 +432,9 @@ def ps_check_failed():
     if not menu.options.batch:
       question_msg = "Do you want to ignore the above warning "
       question_msg += "and continue the procedure? [Y/n] > "
-      sys.stdout.write(settings.print_question_msg(question_msg))
-      ps_check = sys.stdin.readline().replace("\n","").lower()
+      # sys.stdout.write(settings.print_question_msg(question_msg))
+      # ps_check = sys.stdin.readline().replace("\n","").lower()
+      ps_check = _input(settings.print_question_msg(question_msg))
     else:
       ps_check = ""
     if len(ps_check) == 0:
@@ -474,8 +480,9 @@ def check_CGI_scripts(url):
       while True:
         if not menu.options.batch:
           question_msg = "Do you want to enable the shellshock injection module? [Y/n] > "
-          sys.stdout.write(settings.print_question_msg(question_msg))
-          shellshock_check = sys.stdin.readline().replace("\n","").lower()
+          # sys.stdout.write(settings.print_question_msg(question_msg))
+          # shellshock_check = sys.stdin.readline().replace("\n","").lower()
+          shellshock_check = _input(settings.print_question_msg(question_msg))
         else:
           shellshock_check = ""   
         if len(shellshock_check) == 0:
@@ -545,8 +552,9 @@ def identified_os():
       warn_msg += settings.TARGET_OS + ") than that you have provided." 
       print(settings.print_warning_msg(warn_msg))
       question_msg = "How do you want to proceed? [(C)ontinue/(s)kip/(q)uit] > "
-      sys.stdout.write(settings.print_question_msg(question_msg))
-      proceed_option = sys.stdin.readline().replace("\n","").lower()
+      # sys.stdout.write(settings.print_question_msg(question_msg))
+      # proceed_option = sys.stdin.readline().replace("\n","").lower()
+      proceed_option = _input(settings.print_question_msg(question_msg))
     else:
       proceed_option = "" 
     if len(proceed_option) == 0:
@@ -630,8 +638,9 @@ def identified_http_auth_type(auth_type):
     warn_msg += menu.options.auth_type + ")." 
     print(settings.print_warning_msg(warn_msg))
     question_msg = "How do you want to proceed? [(C)ontinue/(s)kip/(q)uit] > "
-    sys.stdout.write(settings.print_question_msg(question_msg))
-    proceed_option = sys.stdin.readline().replace("\n","").lower()
+    # sys.stdout.write(settings.print_question_msg(question_msg))
+    # proceed_option = sys.stdin.readline().replace("\n","").lower()
+    proceed_option = _input(settings.print_question_msg(question_msg))
   else:
     proceed_option = ""  
   if len(proceed_option) == 0:
@@ -1143,8 +1152,9 @@ def process_xml_data():
     if not menu.options.batch:
       question_msg = success_msg
       question_msg += " Do you want to process it? [Y/n] > "
-      sys.stdout.write(settings.print_question_msg(question_msg))
-      xml_process = sys.stdin.readline().replace("\n","").lower()
+      # sys.stdout.write(settings.print_question_msg(question_msg))
+      # xml_process = sys.stdin.readline().replace("\n","").lower()
+      xml_process = _input(settings.print_question_msg(question_msg))
     else:
       if settings.VERBOSITY_LEVEL >= 1:
         print(settings.print_success_msg(success_msg))
@@ -1184,8 +1194,9 @@ def process_json_data():
     if not menu.options.batch:
       question_msg = success_msg
       question_msg += " Do you want to process it? [Y/n] > "
-      sys.stdout.write(settings.print_question_msg(question_msg))
-      json_process = sys.stdin.readline().replace("\n","").lower()
+      # sys.stdout.write(settings.print_question_msg(question_msg))
+      # json_process = sys.stdin.readline().replace("\n","").lower()
+      json_process = _input(settings.print_question_msg(question_msg))
     else:
       if settings.VERBOSITY_LEVEL >= 1:
         print(settings.print_success_msg(success_msg))
@@ -1268,8 +1279,9 @@ def file_upload():
     while True:
       if not menu.options.batch:
         question_msg = "Do you want to enable an HTTP server? [Y/n] > "
-        sys.stdout.write(settings.print_question_msg(question_msg))
-        enable_HTTP_server = sys.stdin.readline().replace("\n","").lower()
+        # sys.stdout.write(settings.print_question_msg(question_msg))
+        # enable_HTTP_server = sys.stdin.readline().replace("\n","").lower()
+        enable_HTTP_server = _input(settings.print_question_msg(question_msg))
       else:
         enable_HTTP_server = ""
       if len(enable_HTTP_server) == 0:
@@ -1286,9 +1298,9 @@ def file_upload():
         if settings.LOCAL_HTTP_IP == None:
           while True:
             question_msg = "Please enter your interface IP address > "
-            sys.stdout.write(settings.print_question_msg(question_msg))
-            ip_addr = sys.stdin.readline().replace("\n","").lower()
-
+            # sys.stdout.write(settings.print_question_msg(question_msg))
+            # ip_addr = sys.stdin.readline().replace("\n","").lower()
+            ip_addr = _input(settings.print_question_msg(question_msg))
             # check if IP address is valid
             ip_check = simple_http_server.is_valid_ipv4(ip_addr)
             if ip_check == False:
@@ -1357,8 +1369,9 @@ def define_py_working_dir():
       if not menu.options.batch:
         question_msg = "Do you want to use '" + settings.WIN_PYTHON_DIR 
         question_msg += "' as Python working directory on the target host? [Y/n] > "
-        sys.stdout.write(settings.print_question_msg(question_msg))
-        python_dir = sys.stdin.readline().replace("\n","").lower()
+        # sys.stdout.write(settings.print_question_msg(question_msg))
+        # python_dir = sys.stdin.readline().replace("\n","").lower()
+        python_dir = _input(settings.print_question_msg(question_msg))
       else:
         python_dir = ""  
       if len(python_dir) == 0:
@@ -1368,8 +1381,9 @@ def define_py_working_dir():
       elif python_dir in settings.CHOICE_NO:
         question_msg = "Please provide a custom working directory for Python (e.g. '" 
         question_msg += settings.WIN_PYTHON_DIR + "') > "
-        sys.stdout.write(settings.print_question_msg(question_msg))
-        settings.WIN_PYTHON_DIR = sys.stdin.readline().replace("\n","").lower()
+        # sys.stdout.write(settings.print_question_msg(question_msg))
+        # settings.WIN_PYTHON_DIR = sys.stdin.readline().replace("\n","").lower()
+        settings.WIN_PYTHON_DIR = _input(settings.print_question_msg(question_msg))
         break
       else:
         err_msg = "'" + python_dir + "' is not a valid answer."  

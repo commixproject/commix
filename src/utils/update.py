@@ -17,9 +17,8 @@ import re
 import os
 import sys
 import time
-
 import subprocess
-
+from src.thirdparty.six.moves import input as _input
 from src.utils import menu
 from src.utils import settings
 from src.utils import requirments
@@ -141,8 +140,9 @@ def check_for_update():
       while True:
         if not menu.options.batch:
           question_msg = "Do you want to update to the latest version now? [Y/n] > "
-          sys.stdout.write(settings.print_question_msg(question_msg))
-          do_update = sys.stdin.readline().replace("\n","").lower()
+          # sys.stdout.write(settings.print_question_msg(question_msg))
+          # do_update = sys.stdin.readline().replace("\n","").lower()
+          do_update = _input(settings.print_question_msg(question_msg))
         else:
           do_update = ""
         if len(do_update) == 0:
@@ -245,8 +245,9 @@ def check_unicorn_version(current_version):
           else:
             action = "update to"
           question_msg = "Do you want to " + action + " the latest version now? [Y/n] > "
-          sys.stdout.write(settings.print_question_msg(question_msg))
-          do_update = sys.stdin.readline().replace("\n","").lower()
+          # sys.stdout.write(settings.print_question_msg(question_msg))
+          # do_update = sys.stdin.readline().replace("\n","").lower()
+          do_update = _input(settings.print_question_msg(question_msg))
         else:
           do_update = ""
         if len(do_update) == 0:

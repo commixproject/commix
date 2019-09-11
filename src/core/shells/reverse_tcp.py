@@ -97,8 +97,9 @@ def set_php_working_dir():
     if not menu.options.batch:
       question_msg = "Do you want to use '" + settings.WIN_PHP_DIR 
       question_msg += "' as PHP working directory on the target host? [Y/n] > "
-      sys.stdout.write(settings.print_question_msg(question_msg))
-      php_dir = sys.stdin.readline().replace("\n","").lower()
+      # sys.stdout.write(settings.print_question_msg(question_msg))
+      # php_dir = sys.stdin.readline().replace("\n","").lower()
+      php_dir = _input(settings.print_question_msg(question_msg))
     else:
       php_dir = ""
     if len(php_dir) == 0:
@@ -108,8 +109,9 @@ def set_php_working_dir():
     elif php_dir in settings.CHOICE_NO:
       question_msg = "Please provide a custom working directory for PHP (e.g. '" 
       question_msg += settings.WIN_PHP_DIR + "') > "
-      sys.stdout.write(settings.print_question_msg(question_msg))
-      settings.WIN_PHP_DIR = sys.stdin.readline().replace("\n","").lower()
+      # sys.stdout.write(settings.print_question_msg(question_msg))
+      # settings.WIN_PHP_DIR = sys.stdin.readline().replace("\n","").lower()
+      settings.WIN_PHP_DIR = _input(settings.print_question_msg(question_msg))
       settings.USER_DEFINED_PHP_DIR = True
       break
     else:
@@ -125,8 +127,9 @@ def set_python_working_dir():
     if not menu.options.batch:
       question_msg = "Do you want to use '" + settings.WIN_PYTHON_DIR 
       question_msg += "' as Python working directory on the target host? [Y/n] > "
-      sys.stdout.write(settings.print_question_msg(question_msg))
-      python_dir = sys.stdin.readline().replace("\n","").lower()
+      # sys.stdout.write(settings.print_question_msg(question_msg))
+      # python_dir = sys.stdin.readline().replace("\n","").lower()
+      python_dir = _input(settings.print_question_msg(question_msg))
     else:
       python_dir = ""
     if len(python_dir) == 0:
@@ -136,8 +139,9 @@ def set_python_working_dir():
     elif python_dir in settings.CHOICE_NO:
       question_msg = "Please provide a custom working directory for Python (e.g. '" 
       question_msg += settings.WIN_PYTHON_DIR + "') > "
-      sys.stdout.write(settings.print_question_msg(question_msg))
-      settings.WIN_PYTHON_DIR = sys.stdin.readline().replace("\n","").lower()
+      # sys.stdout.write(settings.print_question_msg(question_msg))
+      # settings.WIN_PYTHON_DIR = sys.stdin.readline().replace("\n","").lower()
+      settings.WIN_PYTHON_DIR = _input(settings.print_question_msg(question_msg))
       settings.USER_DEFINED_PYTHON_DIR = True
       break
     else:
@@ -243,8 +247,9 @@ Type '""" + Style.BRIGHT + """4""" + Style.RESET_ALL + """' to use Netcat-Openbs
   while True:
     if not menu.options.batch:
       question_msg = "Do you want to use '/bin' standard subdirectory? [y/N] > "
-      sys.stdout.write(settings.print_question_msg(question_msg))
-      enable_bin_dir = sys.stdin.readline().replace("\n","").lower()
+      # sys.stdout.write(settings.print_question_msg(question_msg))
+      # enable_bin_dir = sys.stdin.readline().replace("\n","").lower()
+      enable_bin_dir = _input(settings.print_question_msg(question_msg))
     else:
       enable_bin_dir = ""
     if len(enable_bin_dir) == 0:

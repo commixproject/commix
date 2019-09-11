@@ -723,8 +723,10 @@ def shellshock_handler(url, http_request_method, filename):
             while True:
               if not menu.options.batch:
                 question_msg = "Do you want to enumerate again? [Y/n] > "
-                sys.stdout.write(settings.print_question_msg(question_msg))
-                enumerate_again = sys.stdin.readline().replace("\n","").lower()
+                # sys.stdout.write(settings.print_question_msg(question_msg))
+                # enumerate_again = sys.stdin.readline().replace("\n","").lower()
+                enumerate_again = _input(settings.print_question_msg(question_msg))
+
               else:
                  enumerate_again = "" 
               if len(enumerate_again) == 0:
@@ -748,8 +750,9 @@ def shellshock_handler(url, http_request_method, filename):
             while True:
               if not menu.options.batch:
                 question_msg = "Do you want to access files again? [Y/n] > "
-                sys.stdout.write(settings.print_question_msg(question_msg))
-                file_access_again = sys.stdin.readline().replace("\n","").lower()
+                # sys.stdout.write(settings.print_question_msg(question_msg))
+                # file_access_again = sys.stdin.readline().replace("\n","").lower()
+                file_access_again = _input(settings.print_question_msg(question_msg))
               else:
                  file_access_again= "" 
               if len(file_access_again) == 0:
@@ -784,8 +787,9 @@ def shellshock_handler(url, http_request_method, filename):
                 break
               if not menu.options.batch:
                 question_msg = "Do you want a Pseudo-Terminal shell? [Y/n] > "
-                sys.stdout.write(settings.print_question_msg(question_msg))
-                gotshell = sys.stdin.readline().replace("\n","").lower()
+                # sys.stdout.write(settings.print_question_msg(question_msg))
+                # gotshell = sys.stdin.readline().replace("\n","").lower()
+                gotshell = _input(settings.print_question_msg(question_msg))
               else:
                 gotshell= ""  
               if len(gotshell) == 0:
