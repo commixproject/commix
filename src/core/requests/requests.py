@@ -87,7 +87,7 @@ def estimate_response_time(url, timesec):
         except ValueError:
           err_msg = "The identified HTTP authentication type (" + str(auth_type) + ") "
           err_msg += "is not yet supported."
-          print(settings.print_critical_msg(err_msg)) + "\n"
+          print(settings.print_critical_msg(err_msg) + "\n")
           raise SystemExit()
 
         except IndexError:
@@ -196,7 +196,7 @@ def estimate_response_time(url, timesec):
     if settings.VERBOSITY_LEVEL >= 1:
       print("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
     err_msg = "The connection to target URL has timed out."
-    print(settings.print_critical_msg(err_msg)) + "\n"
+    print(settings.print_critical_msg(err_msg) + "\n")
     raise SystemExit()
 
   except _urllib.error.URLError as err_msg:

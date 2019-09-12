@@ -603,7 +603,7 @@ def main(filename, url):
       logs.print_logs_notification(filename, url)      
     else: 
       err_msg = err_msg.line + err_msg.message
-      print(settings.print_critical_msg(err_msg)) + "\n"
+      print(settings.print_critical_msg(err_msg) + "\n")
     session_handler.clear(url)  
     raise SystemExit()
 

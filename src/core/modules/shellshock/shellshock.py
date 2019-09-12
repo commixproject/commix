@@ -838,7 +838,7 @@ def shellshock_handler(url, http_request_method, filename):
                           sys.stdout.flush()
                           sys.stdout.write("\n" + settings.print_payload(payload)+ "\n")
                         err_msg = "The '" + cmd + "' command, does not return any output."
-                        print(settings.print_critical_msg(err_msg)) + "\n"
+                        print(settings.print_critical_msg(err_msg) + "\n")
 
                   except KeyboardInterrupt:
                     raise

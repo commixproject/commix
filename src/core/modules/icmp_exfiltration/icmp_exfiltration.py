@@ -241,7 +241,7 @@ def icmp_exfiltration_handler(url, http_request_method):
   # You need to have root privileges to run this script
   if os.geteuid() != 0:
     err_msg = "You need to have root privileges to run this option."
-    print(settings.print_critical_msg(err_msg)) + "\n"
+    print(settings.print_critical_msg(err_msg) + "\n")
     os._exit(0)
 
   if http_request_method == "GET":
@@ -308,7 +308,7 @@ def icmp_exfiltration_handler(url, http_request_method):
   if settings.TARGET_OS == "win":
     err_msg = "This module's payloads are not suppoted by "
     err_msg += "the identified target operating system."
-    print(settings.print_critical_msg(err_msg)) + "\n"
+    print(settings.print_critical_msg(err_msg) + "\n")
     os._exit(0)
 
   else:

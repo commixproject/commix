@@ -457,7 +457,7 @@ def eb_injection_handler(url, timesec, filename, http_request_method):
                         if settings.VERBOSITY_LEVEL >= 1:
                           print("")
                         err_msg = "The '" + cmd + "' command, does not return any output."
-                        print(settings.print_critical_msg(err_msg)) + "\n"
+                        print(settings.print_critical_msg(err_msg) + "\n")
                     
                   except KeyboardInterrupt: 
                     raise

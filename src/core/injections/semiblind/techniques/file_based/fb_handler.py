@@ -416,12 +416,12 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                   
                 elif str(e.getcode()) == settings.UNAUTHORIZED_ERROR:
                   err_msg = "Authorization required!"
-                  print(settings.print_critical_msg(err_msg)) + "\n"
+                  print(settings.print_critical_msg(err_msg) + "\n")
                   raise SystemExit()
                   
                 elif str(e.getcode()) == settings.FORBIDDEN_ERROR:
                   err_msg = "You don't have permission to access this page."
-                  print(settings.print_critical_msg(err_msg)) + "\n"
+                  print(settings.print_critical_msg(err_msg) + "\n")
                   raise SystemExit()
               
             except KeyboardInterrupt:
@@ -678,7 +678,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                         if settings.VERBOSITY_LEVEL >= 1:
                           print("")
                         err_msg = "The '" + cmd + "' command, does not return any output."
-                        print(settings.print_critical_msg(err_msg)) + "\n"
+                        print(settings.print_critical_msg(err_msg) + "\n")
 
                 elif gotshell in settings.CHOICE_NO:
                   if checks.next_attack_vector(technique, go_back) == True:

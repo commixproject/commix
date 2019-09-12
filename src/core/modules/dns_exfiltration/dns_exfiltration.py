@@ -280,7 +280,7 @@ def dns_exfiltration_handler(url, http_request_method):
   if settings.TARGET_OS == "win":
     err_msg = "This module's payloads are not suppoted by "
     err_msg += "the identified target operating system."
-    print(settings.print_critical_msg(err_msg)) + "\n"
+    print(settings.print_critical_msg(err_msg) + "\n")
     os._exit(0)
 
   else:
