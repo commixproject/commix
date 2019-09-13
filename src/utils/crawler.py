@@ -91,7 +91,7 @@ def crawling(url):
     soup = request(url)
     for tag in soup.findAll('a', href=True):
       tag['href'] = _urllib.parse.urljoin(url, tag['href'])
-      o = _urllib.parse._urllib.parse.urlparse(url)
+      o = _urllib.parse.urlparse(url)
       if o.netloc in tag['href']:
         if tag['href'].split('.')[-1].lower() not in settings.CRAWL_EXCLUDE_EXTENSIONS:
           href_list.append(tag['href']) 

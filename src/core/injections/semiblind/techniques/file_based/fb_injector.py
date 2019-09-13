@@ -239,8 +239,8 @@ def injection_output(url, OUTPUT_TEXTFILE, timesec):
     path = _urllib.parse.urlparse(url).path
     if path.endswith('/'):
       # Contract again the url.
-      scheme = _urllib.parse._urllib.parse.urlparse(url).scheme
-      netloc = _urllib.parse._urllib.parse.urlparse(url).netloc
+      scheme = _urllib.parse.urlparse(url).scheme
+      netloc = _urllib.parse.urlparse(url).netloc
       output = scheme + "://" + netloc + path + OUTPUT_TEXTFILE
     else:
       try:
@@ -268,8 +268,8 @@ def injection_output(url, OUTPUT_TEXTFILE, timesec):
       if "html/" in menu.options.web_root:
         path = path.replace("html/", "")
       # Contract again the url. 
-      scheme = _urllib.parse._urllib.parse.urlparse(url).scheme
-      netloc = _urllib.parse._urllib.parse.urlparse(url).netloc
+      scheme = _urllib.parse.urlparse(url).scheme
+      netloc = _urllib.parse.urlparse(url).netloc
       output = scheme + "://" + netloc + path + OUTPUT_TEXTFILE
     # Check for Nginx server root directory.  
     elif "/usr/share/" in menu.options.web_root:
@@ -279,8 +279,8 @@ def injection_output(url, OUTPUT_TEXTFILE, timesec):
       elif "www/" in menu.options.web_root:
         path = path.replace("www/", "")
       # Contract again the url. 
-      scheme = _urllib.parse._urllib.parse.urlparse(url).scheme
-      netloc = _urllib.parse._urllib.parse.urlparse(url).netloc
+      scheme = _urllib.parse.urlparse(url).scheme
+      netloc = _urllib.parse.urlparse(url).netloc
       output = scheme + "://" + netloc + path + OUTPUT_TEXTFILE
     else:
       output = custom_web_root(url, OUTPUT_TEXTFILE)
