@@ -226,7 +226,7 @@ def init_request(url):
     if menu.options.pdel and menu.options.pdel in settings.USER_DEFINED_POST_DATA:
       settings.PARAMETER_DELIMITER = menu.options.pdel
     try:
-      request = _urllib.request.Request(url, menu.options.data)
+      request = _urllib.request.Request(url, menu.options.data.encode())
     except SocketError as e:
       if e.errno == errno.ECONNRESET:
         error_msg = "Connection reset by peer."
