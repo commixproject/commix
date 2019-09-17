@@ -41,9 +41,6 @@ from src.thirdparty.six.moves import urllib as _urllib
 Checking the HTTP response content.
 """
 def http_response_content(content):
-  info_msg = "The target's HTTP response page content:"
-  if settings.VERBOSITY_LEVEL >= 4:
-    print(settings.print_info_msg(info_msg))
   if menu.options.traffic_file: 
     logs.log_traffic("-" * 42 + "\n" + info_msg + "\n" + "-" * 42)  
   if settings.VERBOSITY_LEVEL >= 4:
@@ -58,9 +55,6 @@ def http_response_content(content):
 Checking the HTTP response headers.
 """
 def http_response(headers, code):
-  info_msg = "The target's response HTTP headers (" + str(code) + "):"
-  if settings.VERBOSITY_LEVEL >= 3:
-    print(settings.print_info_msg(info_msg))
   if menu.options.traffic_file: 
     logs.log_traffic("-" * 37 + "\n" + info_msg + "\n" + "-" * 37)  
   response_http_headers = str(headers).split("\n")
@@ -81,7 +75,6 @@ Checking the HTTP Headers & HTTP/S Request.
 """
 def check_http_traffic(request):
   settings.TOTAL_OF_REQUESTS = settings.TOTAL_OF_REQUESTS + 1
-  
   # Delay in seconds between each HTTP request
   time.sleep(int(settings.DELAY))
   # if settings.SCHEME == 'https':
@@ -93,9 +86,6 @@ def check_http_traffic(request):
   class do_connection(_http_client.HTTPConnection):
     def send(self, req):
       headers = req.decode()
-      info_msg = "The target's request HTTP headers:"
-      if settings.VERBOSITY_LEVEL >= 2:
-        print(settings.print_info_msg(info_msg))
       if menu.options.traffic_file: 
         logs.log_traffic("-" * 37 + "\n" + info_msg + "\n" + "-" * 37)  
       request_http_headers = str(headers).split("\r\n")
@@ -157,6 +147,9 @@ def check_http_traffic(request):
     current_attempt = 0
     while not response and current_attempt <= settings.MAX_RETRIES:
       try:
+        if settings.VERBOSITY_LEVEL >= 2:
+          info_msg = "The target's request HTTP headers:"
+          print(settings.print_info_msg(info_msg))
         opener.open(request)
         response = True
         if settings.VERBOSITY_LEVEL < 2:
@@ -220,14 +213,20 @@ def check_http_traffic(request):
       page = page.decode(settings.DEFAULT_ENCODING)
     response_headers[settings.URI_HTTP_HEADER] = response.geturl()
     response_headers = str(response_headers).strip("\n")
-    http_response(response_headers, code)
-    http_response_content(page)
+    if settings.VERBOSITY_LEVEL >= 3:
+      info_msg = "The target's response HTTP headers (" + str(code) + "):"
+      print(settings.print_info_msg(info_msg))
+      http_response(response_headers, code)
+    if settings.VERBOSITY_LEVEL >= 4:
+      info_msg = "The target's HTTP response page content:"
+      print(settings.print_info_msg(info_msg))
+      http_response_content(page)
     # Checks regarding a potential CAPTCHA protection mechanism.
     checks.captcha_check(page)
     # Checks regarding a potential browser verification protection mechanism.
     checks.browser_verification(page)
     # Checks regarding recognition of generic "your ip has been blocked" messages.
-    checks.blocked_ip(page)
+    checks.blocked_ip(page) 
 
   # This is useful when handling exotic HTTP errors (i.e requests for authentication).
   except _urllib.error.HTTPError as err:
