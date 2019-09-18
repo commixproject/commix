@@ -74,7 +74,7 @@ def injection_test(payload, http_request_method, url):
       data = parameter.replace(settings.INJECT_TAG, _urllib.parse.unquote(payload)) 
     else:
       data = parameter.replace(settings.INJECT_TAG, payload)
-    request = _urllib.request.Request(url, data.encode(settings.DEFAULT_ENCODING))
+    request = _urllib.request.Request(url, data.encode(settings.UNICODE_ENCODING))
     
     # Check if defined extra headers.
     headers.do_check(request)
@@ -95,7 +95,7 @@ def injection_test_results(response, TAG, randvcalc):
     return False
   else:
     # Check the execution results
-    html_data = response.read().decode(settings.DEFAULT_ENCODING)
+    html_data = response.read().decode(settings.UNICODE_ENCODING)
     html_data = html_data.replace("\n"," ")
     # cleanup string / unescape html to string
     html_data = _urllib.parse.unquote(html_data)
@@ -225,7 +225,7 @@ def injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_meth
           data = parameter.replace(settings.INJECT_TAG, _urllib.parse.unquote(payload)) 
         else:
           data = parameter.replace(settings.INJECT_TAG, payload)
-        request = _urllib.request.Request(url, data.encode(settings.DEFAULT_ENCODING))
+        request = _urllib.request.Request(url, data.encode(settings.UNICODE_ENCODING))
         
         # Check if defined extra headers.
         headers.do_check(request)
@@ -256,7 +256,7 @@ def injection_results(response, TAG, cmd):
   false_result = False
   try:
     # Grab execution results
-    html_data = response.read().decode(settings.DEFAULT_ENCODING)
+    html_data = response.read().decode(settings.UNICODE_ENCODING)
     html_data = html_data.replace("\n"," ")
     # cleanup string / unescape html to string
     html_data = _urllib.parse.unquote(html_data)

@@ -55,7 +55,7 @@ Do a request to target URL.
 def request(url):
   # Check if defined POST data
   if menu.options.data:
-    request = _urllib.request.Request(url, menu.options.data.encode(settings.DEFAULT_ENCODING))
+    request = _urllib.request.Request(url, menu.options.data.encode(settings.UNICODE_ENCODING))
   else:
     request = _urllib.request.Request(url)
   try:

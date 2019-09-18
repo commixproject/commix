@@ -210,7 +210,7 @@ def check_http_traffic(request):
       page = page.decode(settings.ENCODING)
     code = response.getcode()
     if type(page) != str:
-      page = page.decode(settings.DEFAULT_ENCODING)
+      page = page.decode(settings.UNICODE_ENCODING)
     response_headers[settings.URI_HTTP_HEADER] = response.geturl()
     response_headers = str(response_headers).strip("\n")
     if settings.VERBOSITY_LEVEL >= 3:

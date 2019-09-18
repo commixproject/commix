@@ -32,7 +32,7 @@ def do_check(url):
       print(settings.print_info_msg(info_msg))
     # Check if defined POST data
     if menu.options.data:
-      request = _urllib.request.Request(url, menu.options.data.encode(settings.DEFAULT_ENCODING))
+      request = _urllib.request.Request(url, menu.options.data.encode(settings.UNICODE_ENCODING))
     else:
        request = _urllib.request.Request(url)
     # Check if defined extra headers.

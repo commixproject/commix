@@ -94,12 +94,12 @@ def enumeration(url, cve, check_header, filename):
     cmd = settings.HOSTNAME
     shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
     if shell:
-      success_msg = "The hostname is " +  shell
+      success_msg = "The hostname is " +  str(shell)
       sys.stdout.write(settings.print_success_msg(success_msg) + ".\n")
       sys.stdout.flush()
       # Add infos to logs file. 
       output_file = open(filename, "a")
-      success_msg = "The hostname is " + shell + ".\n"
+      success_msg = "The hostname is " + str(shell) + ".\n"
       output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
       output_file.close()
     else:
@@ -122,14 +122,14 @@ def enumeration(url, cve, check_header, filename):
         cmd = settings.RECOGNISE_HP
         target_arch, payload = cmd_exec(url, cmd, cve, check_header, filename)
         if target_arch:
-          success_msg = "The target operating system is " +  target_os + Style.RESET_ALL  
-          success_msg += Style.BRIGHT + " and the hardware platform is " +  target_arch
+          success_msg = "The target operating system is " +  str(target_os) + Style.RESET_ALL  
+          success_msg += Style.BRIGHT + " and the hardware platform is " +  str(target_arch)
           sys.stdout.write(settings.print_success_msg(success_msg) + ".\n")
           sys.stdout.flush()
           # Add infos to logs file.   
           output_file = open(filename, "a")
-          success_msg = "The target operating system is " + target_os
-          success_msg += " and the hardware platform is " + target_arch + ".\n"
+          success_msg = "The target operating system is " + str(target_os)
+          success_msg += " and the hardware platform is " + str(target_arch) + ".\n"
           output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
           output_file.close()
       else:
@@ -138,7 +138,7 @@ def enumeration(url, cve, check_header, filename):
         sys.stdout.flush()
         # Add infos to logs file.    
         output_file = open(filename, "a")
-        success_msg = "The target operating system is " + target_os + ".\n"
+        success_msg = "The target operating system is " + str(target_os) + ".\n"
         output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
         output_file.close()
     else:
@@ -157,11 +157,11 @@ def enumeration(url, cve, check_header, filename):
         cmd = re.findall(r"" + "\$(.*)", settings.IS_ROOT)
         cmd = ''.join(cmd).replace("(","").replace(")","")
         shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
-        success_msg = "The current user is " +  cu_account  
+        success_msg = "The current user is " +  str(cu_account)  
         sys.stdout.write(settings.print_success_msg(success_msg))
         # Add infos to logs file.    
         output_file = open(filename, "a")
-        success_msg = "The current user is " + cu_account
+        success_msg = "The current user is " + str(cu_account)
         output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
         output_file.close()
         if shell:
@@ -180,12 +180,12 @@ def enumeration(url, cve, check_header, filename):
             output_file.write(" and it is privileged.\n")
             output_file.close()
       else:
-        success_msg = "The current user is " +  cu_account  
+        success_msg = "The current user is " +  str(cu_account)  
         sys.stdout.write(settings.print_success_msg(success_msg))
         sys.stdout.flush()
         # Add infos to logs file.   
         output_file = open(filename, "a")
-        success_msg = "The current user is " + cu_account + "\n"
+        success_msg = "The current user is " + str(cu_account) + "\n"
         output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
         output_file.close()  
     else:

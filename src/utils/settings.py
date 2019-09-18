@@ -156,7 +156,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "3.0.44"
+VERSION_NUM = "3.0.45"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"
@@ -498,6 +498,8 @@ PARAMETER_DELIMITER = "&"
 ENCODING = ""
 
 DEFAULT_ENCODING = "utf-8"
+# Encoding used for Unicode data
+UNICODE_ENCODING = "utf-8"
 try:
   pass
   #unicode(DEFAULT_ENCODING, DEFAULT_ENCODING)

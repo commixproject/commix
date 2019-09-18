@@ -376,18 +376,18 @@ def store_cmd(url, cmd, shell, vuln_parameter):
 Export successful command execution outputs from session file.
 """
 def export_stored_cmd(url, cmd, vuln_parameter):
-  try:  
+  try:
     if not menu.options.flush_session:
       conn = sqlite3.connect(settings.SESSION_FILE)
       output = None
       conn = sqlite3.connect(settings.SESSION_FILE)
       if settings.TESTABLE_PARAMETER:
         cursor = conn.execute("SELECT output FROM " + table_name(url) + \
-                              "_ir WHERE cmd='" + base64.b64encode(cmd) + "' AND "\
+                              "_ir WHERE cmd='" + base64.b64encode(cmd.encode(settings.UNICODE_ENCODING)).decode() + "' AND "\
                               "vuln_parameter= '" + vuln_parameter + "';").fetchall()
       else:
         cursor = conn.execute("SELECT output FROM " + table_name(url) + \
-                            "_ir WHERE cmd='" + base64.b64encode(cmd) + "' AND "\
+                            "_ir WHERE cmd='" + base64.b64encode(cmd.encode(settings.UNICODE_ENCODING)).decode() + "' AND "\
                             "vuln_parameter= '" +  settings.HTTP_HEADER + "';").fetchall()
 
       conn.commit()
@@ -395,7 +395,7 @@ def export_stored_cmd(url, cmd, vuln_parameter):
 
       for session in cursor:
         output = base64.b64decode(session[0])
-      return output
+      return output.decode()
     else:
       no_such_table = True
       pass

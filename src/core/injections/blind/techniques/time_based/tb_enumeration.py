@@ -84,12 +84,12 @@ def hostname(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, h
   if shell:
     if settings.VERBOSITY_LEVEL <= 1 and not menu.options.ignore_session and _:
       print("")
-    success_msg = "The hostname is " +  shell
+    success_msg = "The hostname is " +  str(shell)
     sys.stdout.write(settings.print_success_msg(success_msg) + ".")
     sys.stdout.flush()
     # Add infos to logs file. 
     output_file = open(filename, "a")
-    success_msg = "The hostname is " + shell + ".\n"
+    success_msg = "The hostname is " + str(shell) + ".\n"
     output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
     output_file.close()
   else:
@@ -143,14 +143,14 @@ def system_information(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, 
     if target_arch:
       if settings.VERBOSITY_LEVEL <= 1 and not menu.options.ignore_session and _:
         print("")
-      success_msg = "The target operating system is " +  target_os + Style.RESET_ALL  
-      success_msg += Style.BRIGHT + " and the hardware platform is " +  target_arch
+      success_msg = "The target operating system is " +  str(target_os) + Style.RESET_ALL  
+      success_msg += Style.BRIGHT + " and the hardware platform is " +  str(target_arch)
       sys.stdout.write(settings.print_success_msg(success_msg) + ".")
       sys.stdout.flush()
       # Add infos to logs file.   
       output_file = open(filename, "a")
-      success_msg = "The target operating system is " + target_os
-      success_msg += " and the hardware platform is " + target_arch + ".\n"
+      success_msg = "The target operating system is " + str(target_os)
+      success_msg += " and the hardware platform is " + str(target_arch) + ".\n"
       output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
       output_file.close()
   else:
@@ -191,11 +191,11 @@ def current_user(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timese
       shell = output 
       if settings.VERBOSITY_LEVEL <= 1 and not menu.options.ignore_session and _:
         print("")
-      success_msg = "The current user is " +  cu_account  
+      success_msg = "The current user is " +  str(cu_account)  
       sys.stdout.write(settings.print_success_msg(success_msg))
       # Add infos to logs file.    
       output_file = open(filename, "a")
-      success_msg = "The current user is " + cu_account
+      success_msg = "The current user is " + str(cu_account)
       output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
       output_file.close()
       if shell:
@@ -218,12 +218,12 @@ def current_user(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timese
     else:
       if settings.VERBOSITY_LEVEL <= 1 and not menu.options.ignore_session and _:
         print("")
-      success_msg = "The current user is " +  cu_account
+      success_msg = "The current user is " +  str(cu_account)
       sys.stdout.write(settings.print_success_msg(success_msg) + ".")
       sys.stdout.flush()
       # Add infos to logs file.   
       output_file = open(filename, "a")
-      success_msg = "The current user is " + cu_account + "\n"
+      success_msg = "The current user is " + str(cu_account) + "\n"
       output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
       output_file.close()
   else:

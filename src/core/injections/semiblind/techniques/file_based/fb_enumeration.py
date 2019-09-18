@@ -89,12 +89,12 @@ def hostname(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_
   if shell:
     # if settings.VERBOSITY_LEVEL >= 1:
     #   print("")
-    success_msg = "The hostname is " +  shell
+    success_msg = "The hostname is " +  str(shell)
     sys.stdout.write(settings.print_success_msg(success_msg) + ".\n")
     sys.stdout.flush()
     # Add infos to logs file. 
     output_file = open(filename, "a")
-    success_msg = "The hostname is " + shell + ".\n"
+    success_msg = "The hostname is " + str(shell) + ".\n"
     output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
     output_file.close()
   else:
@@ -151,14 +151,14 @@ def system_information(separator, payload, TAG, timesec, prefix, suffix, whitesp
     if target_arch:
       # if settings.VERBOSITY_LEVEL >= 1:
       #   print("")
-      success_msg = "The target operating system is " +  target_os + Style.RESET_ALL  
-      success_msg += Style.BRIGHT + " and the hardware platform is " +  target_arch
+      success_msg = "The target operating system is " +  str(target_os) + Style.RESET_ALL  
+      success_msg += Style.BRIGHT + " and the hardware platform is " +  str(target_arch)
       sys.stdout.write(settings.print_success_msg(success_msg) + ".\n")
       sys.stdout.flush()
       # Add infos to logs file.   
       output_file = open(filename, "a")
-      success_msg = "The target operating system is " + target_os
-      success_msg += " and the hardware platform is " + target_arch + ".\n"
+      success_msg = "The target operating system is " + str(target_os)
+      success_msg += " and the hardware platform is " + str(target_arch) + ".\n"
       output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
       output_file.close()
   else:
@@ -197,11 +197,11 @@ def current_user(separator, payload, TAG, timesec, prefix, suffix, whitespace, h
         session_handler.store_cmd(url, cmd, shell, vuln_parameter)
       else:
         shell = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
-      success_msg = "The current user is " +  cu_account  
+      success_msg = "The current user is " +  str(cu_account)  
       sys.stdout.write(settings.print_success_msg(success_msg))
       # Add infos to logs file.    
       output_file = open(filename, "a")
-      success_msg = "The current user is " + cu_account
+      success_msg = "The current user is " + str(cu_account)
       output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
       output_file.close()
       if shell:
@@ -223,12 +223,12 @@ def current_user(separator, payload, TAG, timesec, prefix, suffix, whitespace, h
     else:
       # if settings.VERBOSITY_LEVEL >= 1:
       #   print("")
-      success_msg = "The current user is " +  cu_account
+      success_msg = "The current user is " +  str(cu_account)
       sys.stdout.write(settings.print_success_msg(success_msg) + ".\n")
       sys.stdout.flush()
       # Add infos to logs file.   
       output_file = open(filename, "a")
-      success_msg = "The current user is " + cu_account + "\n"
+      success_msg = "The current user is " + str(cu_account) + "\n"
       output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
       output_file.close()
   else:

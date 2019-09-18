@@ -74,7 +74,7 @@ def injection_test(payload, http_request_method, url):
       data = parameter.replace(settings.INJECT_TAG, _urllib.parse.unquote(payload)) 
     else:
       data = parameter.replace(settings.INJECT_TAG, payload)
-    request = _urllib.request.Request(url, data.encode(settings.DEFAULT_ENCODING))
+    request = _urllib.request.Request(url, data.encode(settings.UNICODE_ENCODING))
     
     # Check if defined extra headers.
     headers.do_check(request)
@@ -100,7 +100,7 @@ def warning_detection(url, http_request_method):
     response = requests.get_request_response(request)
     if response:
       response = _urllib.request.urlopen(request)
-      html_data = response.read().decode(settings.DEFAULT_ENCODING)
+      html_data = response.read().decode(settings.UNICODE_ENCODING)
       err_msg = ""
       if "eval()'d code" in html_data:
         err_msg = "'eval()'"
@@ -135,7 +135,7 @@ def injection_test_results(response, TAG, randvcalc):
   if response == False:
     return False
   else:
-    html_data = response.read().decode(settings.DEFAULT_ENCODING)
+    html_data = response.read().decode(settings.UNICODE_ENCODING)
     html_data = re.sub("\n", " ", html_data)
     if settings.SKIP_CALC:
       shell = re.findall(r"" + TAG + " " + TAG + " " + TAG + " " , html_data)
@@ -259,7 +259,7 @@ def injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_meth
           data = parameter.replace(settings.INJECT_TAG, _urllib.parse.unquote(payload)) 
         else:
           data = parameter.replace(settings.INJECT_TAG, payload)
-        request = _urllib.request.Request(url, data.encode(settings.DEFAULT_ENCODING))
+        request = _urllib.request.Request(url, data.encode(settings.UNICODE_ENCODING))
         
         # Check if defined extra headers.
         headers.do_check(request)
@@ -289,7 +289,7 @@ Command execution results.
 def injection_results(response, TAG, cmd):
   new_line = ''.join(random.choice(string.ascii_uppercase) for i in range(6)) 
   # Grab execution results
-  html_data = response.read().decode(settings.DEFAULT_ENCODING)
+  html_data = response.read().decode(settings.UNICODE_ENCODING)
   html_data = re.sub("\n", new_line, html_data)
   shell = re.findall(r"" + TAG + new_line + TAG + "(.*)" + TAG + new_line + TAG + "", html_data)
   try:
