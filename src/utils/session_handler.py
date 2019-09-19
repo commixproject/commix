@@ -395,7 +395,10 @@ def export_stored_cmd(url, cmd, vuln_parameter):
 
       for session in cursor:
         output = base64.b64decode(session[0])
-      return output.decode()
+      try:  
+        return output.decode()
+      except AttributeError:
+        return output  
     else:
       no_such_table = True
       pass

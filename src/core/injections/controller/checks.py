@@ -1262,11 +1262,11 @@ def generate_char_pool(num_of_chars):
   else:
     if num_of_chars == 1:
       # Checks {A..Z},{a..z},{0..9},{Symbols}
-      char_pool = range(65, 90) + range(96, 122)
+      char_pool = list(range(65, 90)) + list(range(96, 122))
     else:
       # Checks {a..z},{A..Z},{0..9},{Symbols}
-      char_pool = range(96, 122) + range(65, 90)
-    char_pool = char_pool + range(48, 57) + range(32, 48) + range(90, 96)  + range(57, 65)  + range(122, 127)  
+      char_pool = list(range(96, 122)) + list(range(65, 90))
+    char_pool = char_pool + list(range(48, 57)) + list(range(32, 48)) + list(range(90, 96)) + list(range(57, 65))  + list(range(122, 127))
   return char_pool
 
 """
