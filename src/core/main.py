@@ -617,9 +617,6 @@ def main(filename, url):
     logs.print_logs_notification(filename, url)
 
 try:
-  # Check python version number.
-  version.python_version()
-
   # Check if defined "--version" option.
   if menu.options.version:
     version.show_version()

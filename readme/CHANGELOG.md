@@ -1,4 +1,5 @@
 ## Version 3.0 (upcoming)
+* Added: Support for Python 3.x
 * Updated: Beautiful Soup (third party) module has been updated.
 * Added: Six (third party) module has been added.
 * Revised: Improvement regarding parsing nested JSON objects that contain boolean values.

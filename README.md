@@ -3,7 +3,7 @@
   <p align="center">
     <a href="https://api.travis-ci.org/commixproject/commix"><img alt="Build Status" src="https://api.travis-ci.org/commixproject/commix.svg?branch=master"></a>
     <a href="https://github.com/commixproject/commix/releases/tag/v2.9-20190626"><img alt="Version 2.9" src="https://img.shields.io/badge/version-2.9-green.svg"></a>
-    <a href="http://www.python.org/download/"><img alt="Python 2.6-2.7" src="https://img.shields.io/badge/python-2.6--2.7-yellow.svg"></a>
+    <a href="http://www.python.org/download/"><img alt="Python 2.6|2.7|3.x" src="https://img.shields.io/badge/python-2.6|2.7|3.x-yellow.svg"></a>
     <a href="https://github.com/commixproject/commix/blob/master/readme/COPYING"><img alt="GPLv3 License" src="https://img.shields.io/badge/license-GPLv3-red.svg"></a>
     <a href="https://github.com/sqlmapproject/sqlmap/issues?q=is%3Aissue+is%3Aclosed"><img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed-raw/commixproject/commix.svg?colorB=ff0000"></a>
     <a href="http://www.twitter.com/commixproject"><img alt="Twitter" src="https://img.shields.io/badge/twitter-@commixproject-blue.svg"></a>
@@ -25,7 +25,7 @@ Developers assume no liability and are not responsible for any misuse or damage 
 
 ## Requirements
 
-**[Python](http://www.python.org/download/)** version **2.6.x** or **2.7.x** is required for running this program.
+**[Python](http://www.python.org/download/)** version **2.6**, **2.7** or **3.x**  is required for running this program.
 
 ## Installation
 
