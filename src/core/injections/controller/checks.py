@@ -765,7 +765,7 @@ def list_tamper_scripts():
   print(settings.print_info_msg(info_msg))
   if menu.options.list_tampers:
     for script in sorted(glob.glob(os.path.join(settings.TAMPER_SCRIPTS_PATH, "*.py"))):
-      content = open(script, "rb").read()
+      content = open(script, "rb").read().decode(settings.UNICODE_ENCODING)
       match = re.search(r"About:(.*)\n", content)
       if match:
         comment = match.group(1).strip()
