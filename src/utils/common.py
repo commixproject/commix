@@ -36,6 +36,7 @@ def create_github_issue(err_msg, exc_msg):
   _ = re.sub(r".+\Z", "", _)
   _ = re.sub(r"(Unicode[^:]*Error:).+", r"\g<1>", _)
   _ = re.sub(r"= _", "= ", _)
+  _ = _.encode(settings.UNICODE_ENCODING)
   
   key = hashlib.md5(_).hexdigest()[:8]
   while True:
