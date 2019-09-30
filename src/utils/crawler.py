@@ -106,11 +106,11 @@ def do_process(url):
   if settings.DEFAULT_CRAWLDEPTH_LEVEL == 1:
     crawled_href = crawling(url)
   else:
-    crawled_href = []
-    for url in crawling(url):
-      crawled_href.append(crawling(url)) 
     try:
-      crawled_href = list(set([item for sublist in crawled_href for item in sublist]))
+      crawled_href = []
+      for url in crawling(url):
+        crawled_href.append(crawling(url)) 
+        crawled_href = list(set([item for sublist in crawled_href for item in sublist]))
     except TypeError:
       pass
   return crawled_href
