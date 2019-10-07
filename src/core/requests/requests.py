@@ -1026,12 +1026,16 @@ def encoding_detection(response):
   if not menu.options.encoding:
     charset_detected = False
     if settings.VERBOSITY_LEVEL >= 1:
-      info_msg = "Identifing the indicated web-page charset... " 
+      info_msg = "Identifying the indicated web-page charset... " 
       sys.stdout.write(settings.print_info_msg(info_msg))
       sys.stdout.flush()
     try:
       # Detecting charset
-      charset = response.headers.getparam('charset')
+      try:
+        charset = response.headers.getparam('charset')
+      except AttributeError:
+        # Support for python 3.x
+        charset = response.headers.get_content_charset()
       if len(charset) != 0 :         
         charset_detected = True
       else:

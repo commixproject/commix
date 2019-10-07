@@ -1,4 +1,5 @@
 ## Version 3.0 (upcoming)
+* Revised: Improvement regarding identifying the indicated web-page charset.
 * Added: Support for Python 3.x
 * Updated: Beautiful Soup (third party) module has been updated.
 * Added: Six (third party) module has been added.
