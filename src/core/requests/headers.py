@@ -203,6 +203,11 @@ def check_http_traffic(request):
     # Check the HTTP response headers.
     response_headers = response.info()
     page = response.read()
+    try:
+      # Fix for Python 2.7
+      page = page.encode(settings.DEFAULT_ENCODING)
+    except AttributeError:
+      pass
     if response_headers.get('Content-Encoding') == 'gzip':
       page = gzip.GzipFile("", "rb", 9, io.BytesIO(page)).read()
       request.add_header('Accept-Encoding', 'deflate')
