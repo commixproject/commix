@@ -200,6 +200,7 @@ def check_http_traffic(request):
       
   try:
     response = _urllib.request.urlopen(request)
+    code = response.getcode()
     # Check the HTTP response headers.
     response_headers = response.info()
     page = response.read()
@@ -216,7 +217,6 @@ def check_http_traffic(request):
     else:
       if type(page) != str:
         page = page.decode(settings.DEFAULT_ENCODING)
-    code = response.getcode()
     response_headers[settings.URI_HTTP_HEADER] = response.geturl()
     response_headers = str(response_headers).strip("\n")
     if settings.VERBOSITY_LEVEL >= 3:
