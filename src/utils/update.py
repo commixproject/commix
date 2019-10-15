@@ -20,6 +20,7 @@ import time
 import subprocess
 from src.thirdparty.six.moves import input as _input
 from src.utils import menu
+from src.utils import common
 from src.utils import settings
 from src.utils import requirments
 from src.thirdparty.colorama import Fore, Back, Style, init
@@ -134,8 +135,10 @@ def check_for_update():
     if (int(settings.VERSION_NUM.replace(".","")[:2]) < int(update_version.replace(".","")[:2])) or \
        ((int(settings.VERSION_NUM.replace(".","")[:2]) == int(update_version.replace(".","")[:2])) and \
          int(settings.VERSION_NUM.replace(".","")[2:]) < int(update_version.replace(".","")[2:])):
-
-      warn_msg = "Current version seems to be out-of-date."
+      # Get total number of days from last update 
+      if common.days_from_last_update() >= 1 :
+        _ = common.days_from_last_update()
+      warn_msg = "Current version seems to be out-of-date (more than " + str(_) + " days)."
       print(settings.print_warning_msg(warn_msg))
       while True:
         if not menu.options.batch:

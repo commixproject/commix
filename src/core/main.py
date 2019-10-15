@@ -348,7 +348,6 @@ def logs_filename_creation():
 The main function.
 """
 def main(filename, url):
-
   try:
     # Ignore the mathematic calculation part (Detection phase).
     if menu.options.skip_calc:

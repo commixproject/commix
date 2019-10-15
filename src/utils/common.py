@@ -17,19 +17,25 @@ import re
 import os
 import sys
 import json
+import time
 import hashlib
-from src.thirdparty.six.moves import urllib as _urllib
-from src.thirdparty.six.moves import input as _input
 import traceback
 from src.utils import menu
 from src.utils import settings
+from src.thirdparty.six.moves import input as _input
+from src.thirdparty.six.moves import urllib as _urllib
+
+"""
+Get total number of days from last update
+"""
+def days_from_last_update():
+  return int(time.time() - os.path.getmtime(settings.SETTINGS_PATH)) // (3600 * 24)
 
 """
 Automatically create a Github issue with unhandled exception information.
 PS: Greetz @ sqlmap dev team for that great idea! :)
 """
 def create_github_issue(err_msg, exc_msg):
-
   _ = re.sub(r"'[^']+'", "''", exc_msg)
   _ = re.sub(r"\s+line \d+", "", _)
   _ = re.sub(r'File ".+?/(\w+\.py)', r"\g<1>", _)
