@@ -124,8 +124,6 @@ def estimate_response_time(url, timesec):
                 while True:
                   if not menu.options.batch:
                     question_msg = "Do you want to perform a dictionary-based attack? [Y/n] > "
-                    # sys.stdout.write(settings.print_question_msg(question_msg))
-                    # do_update = sys.stdin.readline().replace("\n","").lower()
                     do_update = _input(settings.print_question_msg(question_msg))
                   else:
                     do_update = ""  
@@ -161,8 +159,6 @@ def estimate_response_time(url, timesec):
                 while True:
                   if not menu.options.batch:
                     question_msg = "Do you want to perform a dictionary-based attack? [Y/n] > "
-                    # sys.stdout.write(settings.print_question_msg(question_msg))
-                    # do_update = sys.stdin.readline().replace("\n","").lower()
                     do_update = _input(settings.print_question_msg(question_msg))
                   else:
                     do_update = ""
@@ -1220,8 +1216,6 @@ def check_target_os(server_banner):
         while True:
           question_msg = "Do you recognise the server's operating system? "
           question_msg += "[(W)indows/(U)nix/(q)uit] > "
-          # sys.stdout.write(settings.print_question_msg(question_msg))
-          # got_os = sys.stdin.readline().replace("\n","").lower()
           got_os = _input(settings.print_question_msg(question_msg))
           if got_os.lower() in settings.CHOICE_OS :
             if got_os.lower() == "w":

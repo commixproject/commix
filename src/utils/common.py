@@ -51,8 +51,6 @@ def create_github_issue(err_msg, exc_msg):
         question_msg = "Do you want to automatically create a new (anonymized) issue "
         question_msg += "with the unhandled exception information at "
         question_msg += "the official Github repository? [y/N] "
-        # sys.stdout.write(settings.print_question_msg(question_msg))
-        # choise = sys.stdin.readline().replace("\n","").lower()
         choise = _input(settings.print_question_msg(question_msg))
       else:
         choise = ""

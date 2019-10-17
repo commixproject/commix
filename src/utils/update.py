@@ -143,8 +143,6 @@ def check_for_update():
       while True:
         if not menu.options.batch:
           question_msg = "Do you want to update to the latest version now? [Y/n] > "
-          # sys.stdout.write(settings.print_question_msg(question_msg))
-          # do_update = sys.stdin.readline().replace("\n","").lower()
           do_update = _input(settings.print_question_msg(question_msg))
         else:
           do_update = ""
@@ -248,8 +246,6 @@ def check_unicorn_version(current_version):
           else:
             action = "update to"
           question_msg = "Do you want to " + action + " the latest version now? [Y/n] > "
-          # sys.stdout.write(settings.print_question_msg(question_msg))
-          # do_update = sys.stdin.readline().replace("\n","").lower()
           do_update = _input(settings.print_question_msg(question_msg))
         else:
           do_update = ""

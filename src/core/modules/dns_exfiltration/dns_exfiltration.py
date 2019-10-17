@@ -128,8 +128,6 @@ def input_cmd(dns_server, http_request_method, url, vuln_parameter, technique):
       break
     if not menu.options.batch:  
       question_msg = "Do you want a Pseudo-Terminal shell? [Y/n] > "
-      # sys.stdout.write(settings.print_question_msg(question_msg))
-      # gotshell = sys.stdin.readline().replace("\n","").lower()
       gotshell = _input(settings.print_question_msg(question_msg))
     else:
       gotshell = ""  

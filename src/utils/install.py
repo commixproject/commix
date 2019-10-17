@@ -77,8 +77,6 @@ def installer():
       while True:
         if not menu.options.batch:
           question_msg = "Do you want to remove commix? [Y/n] > "
-          # sys.stdout.write(settings.print_question_msg(question_msg))
-          # uninstall = sys.stdin.readline().replace("\n","").lower()
           uninstall = _input(settings.print_question_msg(question_msg))
         else:
           uninstall = "" 

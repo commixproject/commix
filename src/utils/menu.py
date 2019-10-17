@@ -671,8 +671,6 @@ Type '""" + Style.BRIGHT + """7""" + Style.RESET_ALL + """' for Nokia N97 HTTP U
 
     while True:
       question_msg = "Which mobile HTTP User-Agent header do you want to use? "
-      # sys.stdout.write(settings.print_question_msg(question_msg))
-      # mobile_user_agent = sys.stdin.readline().replace("\n","").lower()
       mobile_user_agent = _input(settings.print_question_msg(question_msg))
       try:
         if int(mobile_user_agent) in range(0,len(settings.MOBILE_USER_AGENT_LIST)):

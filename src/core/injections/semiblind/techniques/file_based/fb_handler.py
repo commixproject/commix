@@ -100,8 +100,6 @@ def custom_web_root(url, timesec, filename, http_request_method, url_time_respon
     example_root_dir = "/var/www"
   question_msg = "Please provide the host's root directory (e.g. '" 
   question_msg += example_root_dir + "') > "
-  # sys.stdout.write(settings.print_question_msg(question_msg))
-  # settings.WEB_ROOT = sys.stdin.readline().replace("\n","").lower()
   settings.WEB_ROOT = _input(settings.print_question_msg(question_msg))
   if settings.WEB_ROOT.endswith(("\\", "/")):
     settings.WEB_ROOT = settings.WEB_ROOT[:-1]
@@ -365,8 +363,6 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                     while True:
                       if not menu.options.batch:
                         question_msg = "Do you want to try the temporary directory (" + tmp_path + ") [Y/n] > "
-                        # sys.stdout.write(settings.print_question_msg(question_msg))
-                        # tmp_upload = sys.stdin.readline().replace("\n","").lower()
                         tmp_upload = _input(settings.print_question_msg(question_msg))
                       else:
                         tmp_upload = ""
@@ -571,8 +567,6 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
               while True:
                 if not menu.options.batch:
                   question_msg = "Do you want to access files again? [Y/n] > "
-                  # sys.stdout.write(settings.print_question_msg(question_msg))
-                  # file_access_again = sys.stdin.readline().replace("\n","").lower()
                   file_access_again = _input(settings.print_question_msg(question_msg))
                 else:
                   file_access_again = ""
@@ -623,8 +617,6 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                   break
                 if not menu.options.batch:
                   question_msg = "Do you want a Pseudo-Terminal shell? [Y/n] > "
-                  # sys.stdout.write(settings.print_question_msg(question_msg))
-                  # gotshell = sys.stdin.readline().replace("\n","").lower()
                   gotshell = _input(settings.print_question_msg(question_msg))
                 else:
                   gotshell = ""

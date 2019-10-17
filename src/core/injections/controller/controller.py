@@ -142,8 +142,6 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
           question_msg = "Due to results, "
           question_msg += "skipping of code injection checks is recommended. "
           question_msg += "Do you agree? [Y/n] > "
-          # sys.stdout.write(settings.print_question_msg(question_msg))
-          # procced_option = sys.stdin.readline().replace("\n","").lower()
           procced_option = _input(settings.print_question_msg(question_msg))
         else:
           procced_option = ""
@@ -172,8 +170,6 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
           question_msg = "Due to results, "
           question_msg += "skipping of further command injection checks is recommended. "
           question_msg += "Do you agree? [Y/n] > "
-          # sys.stdout.write(settings.print_question_msg(question_msg))
-          # procced_option = sys.stdin.readline().replace("\n","").lower()
           procced_option = _input(settings.print_question_msg(question_msg))
         else:
           procced_option = ""
@@ -582,8 +578,6 @@ def do_check(url, filename):
         if not menu.options.batch:
           question_msg = "Do you want to increase to '--level=" + str(scan_level + 1) 
           question_msg += "' in order to perform more tests? [Y/n] > "
-          # sys.stdout.write(settings.print_question_msg(question_msg))
-          # next_level = sys.stdin.readline().replace("\n","").lower()
           next_level = _input(settings.print_question_msg(question_msg))
         else:
           next_level = ""

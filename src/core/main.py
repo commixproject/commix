@@ -731,8 +731,6 @@ try:
       if not menu.options.url:
         while True:
           question_msg = "Please enter full target URL (-u) > "
-          # sys.stdout.write(settings.print_question_msg(question_msg))
-          # menu.options.url = sys.stdin.readline().replace("\n","")
           menu.options.url = _input(settings.print_question_msg(question_msg))
           if len(menu.options.url) == 0:
             pass
@@ -740,8 +738,6 @@ try:
             break
       if not menu.options.data:
         question_msg = "Please enter POST data (--data) [Enter for none] > "
-        # sys.stdout.write(settings.print_question_msg(question_msg))
-        # menu.options.data = sys.stdin.readline().replace("\n","")
         menu.options.data = _input(settings.print_question_msg(question_msg))
         if len(menu.options.data) == 0:
           menu.options.data = False

@@ -28,8 +28,6 @@ def store_crawling():
     if not menu.options.batch:
       question_msg = "Do you want to store crawling results to a temporary file "
       question_msg += "(for eventual further processing with other tools)? [y/N] > "
-      # sys.stdout.write(settings.print_question_msg(question_msg))
-      # store_crawling = sys.stdin.readline().replace("\n","").lower()
       store_crawling = _input(settings.print_question_msg(question_msg))
     else:
       store_crawling = ""
@@ -133,8 +131,6 @@ def crawler(url):
     while True:
       if not menu.options.batch:
         question_msg = "Do you want to change the crawling depth level? [Y/n] > "
-        # sys.stdout.write(settings.print_question_msg(question_msg))
-        # change_depth_level = sys.stdin.readline().replace("\n","").lower()
         change_depth_level = _input(settings.print_question_msg(question_msg))
       else:
         change_depth_level = ""
@@ -152,8 +148,6 @@ def crawler(url):
     if change_depth_level in settings.CHOICE_YES:
       while True:
         question_msg = "Please enter the crawling depth level (1-2) > "
-        # sys.stdout.write(settings.print_question_msg(question_msg))
-        # depth_level = sys.stdin.readline().replace("\n","").lower()
         depth_level = _input(settings.print_question_msg(question_msg))
         if len(depth_level) == 0:
           depth_level = 1
@@ -171,8 +165,6 @@ def crawler(url):
       if not menu.options.batch:
         question_msg = "Do you want to check target for "
         question_msg += "the existence of site's sitemap(.xml)? [y/N] > "
-        # sys.stdout.write(settings.print_question_msg(question_msg))
-        # sitemap_check = sys.stdin.readline().replace("\n","").lower()
         sitemap_check = _input(settings.print_question_msg(question_msg))
       else:
         sitemap_check = ""
@@ -204,8 +196,6 @@ def crawler(url):
           print(settings.print_warning_msg(warn_msg))
           if not menu.options.batch:
             question_msg = "Do you want to follow the detected recursion? [Y/n] > "
-            # sys.stdout.write(settings.print_question_msg(question_msg))
-            # sitemap_check = sys.stdin.readline().replace("\n","").lower()
             sitemap_check = _input(settings.print_question_msg(question_msg))
           else:
             sitemap_check = ""
@@ -251,8 +241,6 @@ def crawler(url):
             crawling_results.write(check_url + "\n")
         if not menu.options.batch:
           question_msg = "Do you want to use this URL to perform tests? [Y/n] > "
-          # sys.stdout.write(settings.print_question_msg(question_msg))
-          # use_url = sys.stdin.readline().replace("\n","").lower()
           use_url = _input(settings.print_question_msg(question_msg))
         else:
           use_url = ""

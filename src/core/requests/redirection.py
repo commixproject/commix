@@ -95,8 +95,6 @@ def do_check(url):
       while True:
         if not menu.options.batch:
           question_msg = "Do you want to follow the identified redirection? [Y/n] > "
-          # sys.stdout.write(settings.print_question_msg(question_msg))
-          # redirection_option = sys.stdin.readline().replace("\n","").lower()
           redirection_option = _input(settings.print_question_msg(question_msg))
         else:
           redirection_option = ""  
