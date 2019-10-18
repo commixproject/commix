@@ -18,8 +18,6 @@ import sys
 import time
 import base64
 import sqlite3
-
-
 from src.utils import menu
 from src.utils import settings
 from src.thirdparty.six.moves import input as _input

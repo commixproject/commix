@@ -12,6 +12,7 @@ the Free Software Foundation, either version 3 of the License, or
  
 For more see the file 'readme/COPYING' for copying permission.
 """
+
 import re
 import os
 import sys
@@ -19,18 +20,18 @@ from src.utils import menu
 from src.utils import logs
 from src.utils import settings
 from src.utils import session_handler
-from src.thirdparty.colorama import Fore, Back, Style, init
 from src.core.requests import headers
 from src.core.requests import requests
 from src.core.requests import parameters
 from src.core.modules import modules_handler
 from src.core.requests import authentication
-from src.thirdparty.six.moves import input as _input
 from src.core.injections.controller import checks
-from src.core.injections.results_based.techniques.classic import cb_handler
-from src.core.injections.results_based.techniques.eval_based import eb_handler
+from src.thirdparty.six.moves import input as _input
+from src.thirdparty.colorama import Fore, Back, Style, init
 from src.core.injections.blind.techniques.time_based import tb_handler
 from src.core.injections.semiblind.techniques.file_based import fb_handler
+from src.core.injections.results_based.techniques.classic import cb_handler
+from src.core.injections.results_based.techniques.eval_based import eb_handler
 
 """
 Command Injection and exploitation controller.

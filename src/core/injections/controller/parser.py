@@ -18,13 +18,11 @@ import re
 import sys
 import time
 import base64
-from src.thirdparty.six.moves import urllib as _urllib
 import datetime
-
 from src.utils import menu
 from src.utils import settings
-
 from src.core.injections.controller import checks
+from src.thirdparty.six.moves import urllib as _urllib
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 """

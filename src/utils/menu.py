@@ -15,11 +15,10 @@ For more see the file 'readme/COPYING' for copying permission.
 
 import os
 import sys
-
+from src.utils import settings
 from optparse import OptionGroup
 from optparse import OptionParser
 from src.thirdparty.six.moves import input as _input
-from src.utils import settings
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 # Use Colorama to make Termcolor work on Windows too :)
