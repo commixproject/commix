@@ -323,8 +323,6 @@ def logs_filename_creation():
     output_dir = settings.OUTPUT_DIR
   
   # One directory up, if the script is being run under "/src".
-  # if "/src" in os.path.dirname(os.path.abspath(__file__)):
-  #   os.chdir("..")
   output_dir = os.path.dirname(output_dir)
  
   try:
