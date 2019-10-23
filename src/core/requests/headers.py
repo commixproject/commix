@@ -77,11 +77,6 @@ def check_http_traffic(request):
   settings.TOTAL_OF_REQUESTS = settings.TOTAL_OF_REQUESTS + 1
   # Delay in seconds between each HTTP request
   time.sleep(int(settings.DELAY))
-  # if settings.SCHEME == 'https':
-  #   handle = _http_client.HTTPSConnection
-  # else:
-  #   handle = _http_client.HTTPConnection
-
   
   class do_connection(_http_client.HTTPConnection):
     def send(self, req):
@@ -100,9 +95,6 @@ def check_http_traffic(request):
           logs.log_traffic("\n\n" + "#" * 77 + "\n\n")
         else:
           logs.log_traffic("\n\n") 
-      # if settings.SCHEME == 'https':
-      #   _http_client.HTTPSConnection.send(self, req)
-      # else:
       _http_client.HTTPConnection.send(self, req)
 
   class connection_handler(_urllib.request.HTTPHandler, _urllib.request.HTTPSHandler):
