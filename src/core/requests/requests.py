@@ -52,9 +52,6 @@ def estimate_response_time(url, timesec):
     response = _urllib.request.urlopen(request)
     response.read(1)
     response.close()
-
-  # except _urllib.error.HTTPError as err:
-  #   pass
     
   except _urllib.error.HTTPError as err:
     ignore_start = time.time()
@@ -209,11 +206,6 @@ def estimate_response_time(url, timesec):
 
   end = time.time()
   diff = end - start 
-
-  # if settings.VERBOSITY_LEVEL >= 1:
-  #   info_msg = "Estimating the target URL response time... "
-  #   sys.stdout.write(settings.print_info_msg(info_msg))
-  #   sys.stdout.flush()
   
   if int(diff) < 1:
     if settings.VERBOSITY_LEVEL >= 1 and stored_auth_creds == False:
