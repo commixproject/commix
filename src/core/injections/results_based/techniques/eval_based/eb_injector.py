@@ -124,6 +124,9 @@ def warning_detection(url, http_request_method):
         warn_msg = "A failure message on " + err_msg + " was detected on page's response."
         print(settings.print_warning_msg(warn_msg))
     return url
+  except _urllib.error.URLError as err_msg:
+    print(settings.print_critical_msg(err_msg))
+    raise SystemExit()
   except _urllib.error.HTTPError as err_msg:
     print(settings.print_critical_msg(err_msg))
     raise SystemExit()
