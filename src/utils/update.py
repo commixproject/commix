@@ -66,7 +66,6 @@ def revision_num():
 The commix's updater.
 """
 def updater():
-  
   time.sleep(1)
   info_msg = "Checking requirements to update " 
   info_msg += settings.APPLICATION + " from GitHub repo... "
@@ -118,7 +117,6 @@ def updater():
       print("\n" + settings.print_critical_msg(err_msg))
     raise SystemExit()
 
-
 """
 Check for new version of commix
 """
@@ -131,7 +129,6 @@ def check_for_update():
       if "VERSION_NUM = " in line:
         update_version = line.replace("VERSION_NUM = ", "").replace("\"", "")
         break 
-
     if (int(settings.VERSION_NUM.replace(".","")[:2]) < int(update_version.replace(".","")[:2])) or \
        ((int(settings.VERSION_NUM.replace(".","")[:2]) == int(update_version.replace(".","")[:2])) and \
          int(settings.VERSION_NUM.replace(".","")[2:]) < int(update_version.replace(".","")[2:])):

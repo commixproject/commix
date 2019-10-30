@@ -242,8 +242,6 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                       while True:
                         if not menu.options.batch:
                           question_msg = "How do you want to proceed? [(C)ontinue/(s)kip/(q)uit] > "
-                          # sys.stdout.write(settings.print_question_msg(question_msg))
-                          # proceed_option = sys.stdin.readline().replace("\n","").lower()
                           proceed_option = _input(settings.print_question_msg(question_msg))
                         else:
                           proceed_option = ""  
@@ -468,8 +466,6 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                 while True:
                   if not menu.options.batch:
                     question_msg = "Do you want to access files again? [Y/n] > "
-                    # sys.stdout.write(settings.print_question_msg(question_msg))
-                    # file_access_again = sys.stdin.readline().replace("\n","").lower()
                     file_access_again = _input(settings.print_question_msg(question_msg))
                   else:
                     file_access_again = "" 
@@ -514,8 +510,6 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                   break 
                 if not menu.options.batch:  
                   question_msg = "Do you want a Pseudo-Terminal shell? [Y/n] > "
-                  # sys.stdout.write(settings.print_question_msg(question_msg))
-                  # gotshell = sys.stdin.readline().replace("\n","").lower()
                   gotshell = _input(settings.print_question_msg(question_msg))
                 else:
                   gotshell = "" 
@@ -625,8 +619,6 @@ def exploitation(url, timesec, filename, http_request_method, url_time_response)
         return False
       if not menu.options.batch:
         question_msg = "How do you want to proceed? [(C)ontinue/(s)kip/(q)uit] > "
-        # sys.stdout.write(settings.print_question_msg(question_msg))
-        # proceed_option = sys.stdin.readline().replace("\n","").lower()
         proceed_option = _input(settings.print_question_msg(question_msg))
       else:
         proceed_option = ""  
