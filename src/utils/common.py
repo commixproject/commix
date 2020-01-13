@@ -161,6 +161,13 @@ def unhandled_exception():
     print(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
+  elif all(_ in exc_msg for _ in ("SyntaxError: Non-ASCII character", ".py on line", "but no encoding declared")) or \
+       any(_ in exc_msg for _ in ("source code string cannot contain null bytes", "No module named")) or \
+       any(_ in exc_msg for _ in ("ImportError", "ModuleNotFoundError", "Can't find file for module")):
+    err_msg = "Invalid runtime environment ('" + exc_msg.split("Error: ")[-1].strip() + "')."
+    print(settings.print_critical_msg(err_msg))
+    raise SystemExit()
+
   elif any(_ in exc_msg for _ in ("No space left", "Disk quota exceeded")):
     err_msg = "No space left on output device."
     print(settings.print_critical_msg(err_msg))
