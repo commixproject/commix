@@ -161,6 +161,13 @@ def unhandled_exception():
     print(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
+  elif all(_ in exc_msg for _ in ("No such file", "_'")):
+    err_msg = "Corrupted installation detected ('" + exc_msg.strip().split('\n')[-1] + "'). " 
+    err_msg += "You should retrieve the latest (dev) version from official GitHub "
+    err_msg += "repository at '" + settings.GIT_URL + "'."
+    print(settings.print_critical_msg(err_msg))
+    raise SystemExit()
+
   elif all(_ in exc_msg for _ in ("SyntaxError: Non-ASCII character", ".py on line", "but no encoding declared")) or \
        any(_ in exc_msg for _ in ("source code string cannot contain null bytes", "No module named")) or \
        any(_ in exc_msg for _ in ("ImportError", "ModuleNotFoundError", "Can't find file for module")):
