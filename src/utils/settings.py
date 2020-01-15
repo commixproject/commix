@@ -126,8 +126,12 @@ def sys_argv_checks():
 
 # argv input errors
 def sys_argv_errors():
-  _reload_module(sys) 
-  #sys.setdefaultencoding('utf8')
+  _reload_module(sys)
+  try:
+    # Fix for Python 2.7
+    sys.setdefaultencoding('utf8')
+  except AttributeError:
+    pass
   for i in xrange(len(sys.argv)):
     # Check for illegal (non-console) quote characters.
     if len(sys.argv[i]) > 1 and all(ord(_) in xrange(0x2018, 0x2020) for _ in ((sys.argv[i].split('=', 1)[-1].strip() or ' ')[0], sys.argv[i][-1])):
@@ -156,7 +160,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "3.1.4"
+VERSION_NUM = "3.1.5"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"
