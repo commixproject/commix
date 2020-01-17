@@ -139,12 +139,12 @@ def sys_argv_errors():
         print(print_critical_msg(err_msg))
         raise SystemExit()
     # Check for illegal (non-console) comma characters.
-    if len(sys.argv[i]) > 1 and u"\uff0c" in sys.argv[i].split('=', 1)[-1]:
+    elif len(sys.argv[i]) > 1 and u"\uff0c" in sys.argv[i].split('=', 1)[-1]:
         err_msg = "Illegal (non-console) comma character ('" + sys.argv[i] + "')."
         print(print_critical_msg(err_msg))
         raise SystemExit()
     # Check for potentially miswritten (illegal '=') short option.
-    if re.search(r"\A-\w=.+", sys.argv[i]):
+    elif re.search(r"\A-\w=.+", sys.argv[i]):
         err_msg = "Potentially miswritten (illegal '=') short option detected ('" + sys.argv[i] + "')."
         print(print_critical_msg(err_msg))
         raise SystemExit()
@@ -160,7 +160,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "3.1.5"
+VERSION_NUM = "3.1.6"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"
