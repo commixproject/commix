@@ -304,7 +304,7 @@ def do_check(request):
     try:
       settings.SUPPORTED_HTTP_AUTH_TYPES.index(menu.options.auth_type)
       if menu.options.auth_type == "basic":
-        b64_string = base64.encodestring(menu.options.auth_cred).replace('\n', '')
+        b64_string = base64.encodestring(menu.options.auth_cred.encode(settings.UNICODE_ENCODING)).decode().replace('\n', '')
         request.add_header("Authorization", "Basic " + b64_string + "")
       elif menu.options.auth_type == "digest":
         try:
