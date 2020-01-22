@@ -135,9 +135,9 @@ def check_http_traffic(request):
 
   if settings.REVERSE_TCP == False and settings.BIND_TCP == False:
     opener = _urllib.request.build_opener(connection_handler())
-    response = False
+    response = unauthorized = False
     current_attempt = 0
-    while not response and current_attempt <= settings.MAX_RETRIES:
+    while not response and current_attempt <= settings.MAX_RETRIES and not unauthorized:
       try:
         if settings.VERBOSITY_LEVEL >= 2:
           info_msg = "The target's request HTTP headers:"
@@ -153,7 +153,11 @@ def check_http_traffic(request):
             print("[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]")
             if not settings.CHECK_INTERNET:
               settings.INIT_TEST = False
-              
+
+      except _urllib.error.HTTPError as err_msg:
+        if "Unauthorized" in str(err_msg):
+          unauthorized = True
+
       except _urllib.error.URLError as err_msg: 
         if current_attempt == 0:
           if settings.VERBOSITY_LEVEL < 2:

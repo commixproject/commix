@@ -1,3 +1,6 @@
+## Version 3.1 (upcoming)
+* Revised: Minor bug-fixes and improvements regarding HTTP authentication dictionary-based cracker.
+
 ## Version 3.0 (2019-11-11)
 * Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
 * Revised: Improvement regarding identifying the indicated web-page charset.
