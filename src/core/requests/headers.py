@@ -25,8 +25,10 @@ else:
 import sys
 import gzip
 import time
+import errno
 import base64
 import socket
+from socket import error as SocketError
 from src.thirdparty.six.moves import http_client as _http_client
 from src.utils import logs
 from src.utils import menu
@@ -273,6 +275,16 @@ def check_http_traffic(request):
 
   except LookupError as err_msg:
     print(settings.print_critical_msg(str(err_msg)))
+    raise SystemExit()
+
+  # Raise exception regarding existing connection was forcibly closed by the remote host.
+  except SocketError as err:
+    if err.errno == errno.ECONNRESET:
+      error_msg = "Connection reset by peer."
+      print(settings.print_critical_msg(error_msg))
+    elif err.errno == errno.ECONNREFUSED:
+      error_msg = "Connection refused."
+      print(settings.print_critical_msg(error_msg))
     raise SystemExit()
     
 """
