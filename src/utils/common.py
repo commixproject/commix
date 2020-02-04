@@ -168,6 +168,11 @@ def unhandled_exception():
     print(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
+  elif any(_ in exc_msg for _ in ("The paging file is too small",)):
+    err_msg = "No space left for paging file."
+    print(settings.print_critical_msg(err_msg))
+    raise SystemExit()
+
   elif all(_ in exc_msg for _ in ("SyntaxError: Non-ASCII character", ".py on line", "but no encoding declared")) or \
        any(_ in exc_msg for _ in ("source code string cannot contain null bytes", "No module named")) or \
        any(_ in exc_msg for _ in ("ImportError", "ModuleNotFoundError", "Can't find file for module")):
