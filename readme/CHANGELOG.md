@@ -1,4 +1,5 @@
 ## Version 3.1 (upcoming)
+* Revised: Improvements regarding data in the detailed message about occurred unhandled exception.
 * Revised: Minor bug-fixes and improvements regarding HTTP authentication dictionary-based cracker.
 
 ## Version 3.0 (2019-11-11)
