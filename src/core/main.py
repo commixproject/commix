@@ -576,8 +576,9 @@ def main(filename, url):
           print(err_msg.line, err_msg.message)
         pass
 
-      except AttributeError:
-        pass
+      except _http_client.InvalidURL as err:
+        print(settings.print_critical_msg(err_msg))
+        raise SystemExit()
 
     else:
       err_msg = "You must specify the target URL."
