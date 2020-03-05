@@ -20,6 +20,7 @@ import time
 import signal
 from src.thirdparty.six.moves import input as _input
 from src.thirdparty.six.moves import urllib as _urllib
+from src.thirdparty.six.moves import http_client as _http_client
 import threading
 from src.utils import menu
 from src.utils import logs
@@ -134,8 +135,7 @@ def cmd_exec(http_request_method, cmd, url, vuln_parameter, ip_src):
     print(settings.print_critical_msg(str(err_msg.args[0]).split("] ")[1] + "."))
     raise SystemExit()
 
-  except InvalidURL:
-    err_msg = "Invalid target URL has been given." 
+  except _http_client.InvalidURL as err:
     print(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
