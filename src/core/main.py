@@ -526,6 +526,8 @@ def main(filename, url):
             found_os_server = checks.user_defined_os()
         except KeyError:
           pass
+        except AttributeError:
+          pass
         # Load tamper scripts
         if menu.options.tamper:
           checks.tamper_scripts()
