@@ -671,9 +671,14 @@ Do replacement with the 'INJECT_HERE' tag,
 if the wildcard char is provided.
 """
 def wildcard_character(data):
-  if settings.WILDCARD_CHAR in data:
-    data = data.replace(settings.WILDCARD_CHAR, settings.INJECT_TAG)
-  if data.count(settings.WILDCARD_CHAR) + data.count(settings.INJECT_TAG) > 1:
+  _ = ""
+  for data in data.split("\\n"):
+    # Ignore the Accept HTTP Header
+    if not data.startswith("Accept: ") and settings.WILDCARD_CHAR in data :
+      data = data.replace(settings.WILDCARD_CHAR, settings.INJECT_TAG)
+    _ = _ + data + "\\n"
+  data = _.rstrip("\\n")
+  if data.count(settings.INJECT_TAG) > 1:
     err_msg = "You specified more than one injecton markers. " 
     err_msg += "Use the '-p' option to define them (i.e -p \"id1,id2\"). "
     print(settings.print_critical_msg(err_msg)) 
