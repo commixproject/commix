@@ -1,4 +1,5 @@
 ## Version 3.1 (upcoming)
+* Added: New tamper script "doublequotes.py" that adds double-quotes ("") between the characters of the generated payloads (for *nix targets).
 * Fixed: Bug-fix regarding regarding parsing raw HTTP headers from a file (i.e. `-r` option).
 * Revised: Improvements regarding data in the detailed message about occurred unhandled exception.
 * Revised: Minor bug-fixes and improvements regarding HTTP authentication dictionary-based cracker.

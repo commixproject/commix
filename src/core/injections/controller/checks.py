@@ -935,7 +935,17 @@ def check_quotes(payload):
     from src.core.tamper import nested
     payload = nested.tamper(payload)
 
-  # Check for (multiple) added quotes between the characters of the generated payloads.
+  # Check for (multiple) added double-quotes between the characters of the generated payloads.
+  if payload.count("\"") >= 10:
+    if not settings.TAMPER_SCRIPTS['doublequotes']:
+      if menu.options.tamper:
+        menu.options.tamper = menu.options.tamper + ",doublequotes"
+      else:
+        menu.options.tamper = "doublequotes"  
+    from src.core.tamper import doublequotes
+    payload = doublequotes.tamper(payload)
+
+  # Check for (multiple) added single-quotes between the characters of the generated payloads.
   if payload.count("''") >= 10:
     if not settings.TAMPER_SCRIPTS['singlequotes']:
       if menu.options.tamper:
@@ -1024,7 +1034,11 @@ def perform_payload_modification(payload):
     if encode_type == 'sleep2usleep':
       from src.core.tamper import sleep2usleep
       payload = sleep2usleep.tamper(payload)
-    # Add single quotes.
+    # Add double-quotes.
+    if encode_type == 'doublequotes':
+      from src.core.tamper import doublequotes
+      payload = doublequotes.tamper(payload)
+    # Add single-quotes.
     if encode_type == 'singlequotes':
       from src.core.tamper import singlequotes
       payload = singlequotes.tamper(payload)

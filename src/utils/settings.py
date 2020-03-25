@@ -160,7 +160,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "3.1.20"
+VERSION_NUM = "3.1.21"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"
@@ -791,6 +791,7 @@ TAMPER_SCRIPTS = {
                   "space2plus": False,
                   "space2htab": False,
                   "space2vtab": False,
+                  "doublequotes": False,
                   "singlequotes": False,
                   "caret": False,
                   "multiplespaces": False,
