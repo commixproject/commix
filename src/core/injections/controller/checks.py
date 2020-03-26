@@ -798,9 +798,15 @@ def tamper_scripts():
         pass
 
     # Using too many tamper scripts is usually not a good idea. :P
+    _ = False
     if len(provided_scripts) >= 3 and not settings.LOAD_SESSION:
       warn_msg = "Using too many tamper scripts "
-      warn_msg += "is usually not a good idea."
+      _ = True
+    elif len([x for x in provided_scripts if any(y in x for y in ["nested", "doublequotes"])]) == 2 and not settings.LOAD_SESSION:
+      _ = True
+      warn_msg = "The combination of the provided tamper scripts "
+    if _:
+      warn_msg += "is not a good idea (may cause false positive results)."
       print(settings.print_warning_msg(warn_msg))
 
 """
