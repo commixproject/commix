@@ -425,7 +425,7 @@ def file_access(url, cve, check_header, filename):
     # check if remote file exists.
     try:
       _urllib.request.urlopen(file_to_upload)
-    except _urllib.error.HTTPError, warn_msg:
+    except _urllib.error.HTTPError as warn_msg:
       warn_msg = "It seems that the '" + file_to_upload + "' file, "
       warn_msg += "does not exist. (" + str(warn_msg) + ")\n"
       sys.stdout.write(settings.print_critical_msg(warn_msg))
