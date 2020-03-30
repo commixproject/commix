@@ -160,7 +160,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "3.1.24"
+VERSION_NUM = "3.1.25"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"
@@ -897,5 +897,8 @@ HTTP_ACCEPT_HEADER = "Accept"
 
 # HTTP Headers values
 HTTP_ACCEPT_HEADER_VALUE = "*/*"
+
+# Regular expression used for ignoring some special chars
+IGNORE_SPECIAL_CHAR_REGEX = "[^A-Za-z0-9.:,_]+"
 
 # eof

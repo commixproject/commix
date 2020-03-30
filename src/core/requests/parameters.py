@@ -292,8 +292,10 @@ def do_POST_check(parameter):
       for param in range(0, len(all_params)):
         if param == 0 :
           if settings.IS_JSON:
-            old = re.findall(r'\:\"(.*)\"', all_params[param])
-            old = ''.join(old)
+            # old = re.findall(r'\:\"(.*)\"', all_params[param])
+            # old = ''.join(old)
+            old = re.findall(r'\:(.*)', all_params[param])
+            old = re.sub(settings.IGNORE_SPECIAL_CHAR_REGEX, '', ''.join(old))
           elif settings.IS_XML:
             old = re.findall(r'>(.*)</', all_params[param])
             old = ''.join(old)
@@ -304,9 +306,11 @@ def do_POST_check(parameter):
           old = value
         # Grab the value of parameter.
         if settings.IS_JSON:
-          #Grab the value of parameter.
-          value = re.findall(r'\:\"(.*)\"', all_params[param])
-          value = ''.join(value)
+          # Grab the value of parameter.
+          # value = re.findall(r'\:\"(.*)\"', all_params[param])
+          # value = ''.join(value)
+          value = re.findall(r'\:(.*)', all_params[param])
+          value = re.sub(settings.IGNORE_SPECIAL_CHAR_REGEX, '', ''.join(value))
         elif settings.IS_XML:
           value = re.findall(r'>(.*)</', all_params[param])
           value = ''.join(value)
@@ -323,8 +327,10 @@ def do_POST_check(parameter):
           if len(value) == 0:
             if settings.IS_JSON:
               #Grab the value of parameter.
-              provided_value = re.findall(r'\"(.*)\"\:', all_params[param])
-              provided_value = ''.join(provided_value)
+              # provided_value = re.findall(r'\:\"(.*)\"', all_params[param])
+              # provided_value = ''.join(provided_value)
+              provided_value = re.findall(r'\:(.*)', all_params[param])
+              provided_value = re.sub(settings.IGNORE_SPECIAL_CHAR_REGEX, '', ''.join(value))
             elif settings.IS_XML:
               provided_value = re.findall(r'>(.*)</', all_params[param])
               provided_value = ''.join(provided_value)
@@ -374,10 +380,12 @@ Define the vulnerable POST parameter.
 """
 def vuln_POST_param(parameter, url):
   # JSON data format
+  #print parameter
   if settings.IS_JSON:
-    if re.findall(r"" + "\"(.*)\"\:\"", parameter.split(settings.INJECT_TAG)[0]):
-      vuln_parameter = ''.join(re.findall(r"" + "\"(.*)\"\:\"", parameter.split(settings.INJECT_TAG)[0]))
-      vuln_parameter = ''.join(vuln_parameter.split("\"")[-1:])
+    param = re.sub(settings.IGNORE_SPECIAL_CHAR_REGEX, '', parameter.split(settings.INJECT_TAG)[0])
+    if param:
+      vuln_parameter = param.split(",")[-1:]
+      vuln_parameter = ''.join(vuln_parameter).replace(":","")
 
   # XML data format
   elif settings.IS_XML:
