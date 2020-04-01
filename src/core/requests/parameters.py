@@ -353,6 +353,9 @@ def do_POST_check(parameter):
               all_params[param] = all_params[param] + settings.INJECT_TAG
           else:
             all_params[param] = all_params[param].replace(value, inject_value)
+            if not "\"" + settings.INJECT_TAG + "\"" in all_params[param]:
+              all_params[param] = all_params[param].replace(settings.INJECT_TAG, "\"" + settings.INJECT_TAG + "\"")
+
           all_params[param-1] = all_params[param-1].replace(inject_value, old)
           parameter = settings.PARAMETER_DELIMITER.join(all_params)
           parameters_list.append(parameter.replace(settings.RANDOM_TAG,""))
