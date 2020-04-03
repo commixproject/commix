@@ -7,7 +7,7 @@ flatten_json flattens the hierarchy in your object which can be useful if you wa
 
 https://github.com/amirziai/flatten
 """
-
+from src.utils import settings
 from collections import Iterable
 from collections import OrderedDict
 
@@ -45,8 +45,12 @@ def flatten(nested_dict, separator="_", root_keys_to_ignore=""):
     :param root_keys_to_ignore: set of root keys to ignore from flattening
     :return: flattened dictionary
     """
-    assert isinstance(nested_dict, dict), "flatten requires a dictionary input"
-    assert isinstance(separator, str), "separator must be a string"
+    try:
+        assert isinstance(nested_dict, dict), "The flatten() requires a dictionary input."
+        assert isinstance(separator, str), "Separator must be a string"
+    except AssertionError as err_msg:
+        print(settings.print_critical_msg(err_msg))
+        raise SystemExit()
 
     # This global dictionary stores the flattened keys and values and is ultimately returned
     flattened_dict = OrderedDict()
@@ -75,9 +79,13 @@ def flatten(nested_dict, separator="_", root_keys_to_ignore=""):
 flatten_json = flatten
 
 def _unflatten_asserts(flat_dict, separator):
-    assert isinstance(flat_dict, dict), "un_flatten requires a dictionary input"
-    assert isinstance(separator, str), "separator must be a string"
-    assert all((not isinstance(value, str) for value in flat_dict.values())), "provided dictionary is not flat"
+    try:
+        assert isinstance(flat_dict, dict), "The unflatten() requires a dictionary input."
+        assert isinstance(separator, str), "Separator must be a string."
+        # assert all(isinstance(value, (bool, float, int, str)) for value in flat_dict.values()), "The provided dictionary is not flat."
+    except AssertionError as err_msg:
+        print(settings.print_critical_msg(err_msg))
+        raise SystemExit()
 
 def unflatten(flat_dict, separator='_'):
     """
@@ -95,7 +103,7 @@ def unflatten(flat_dict, separator='_'):
     def _unflatten(dic, keys, value):
         for key in keys[:-1]:
             # dic = dic.setdefault(key, {})
-            dic = dic.setdefault(key, OrderedDict())
+            dic = dic.setdefault(key, {})
 
         dic[keys[-1]] = value
 
