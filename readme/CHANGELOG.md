@@ -2,7 +2,7 @@
 * Revised: Minor improvement regarding Flatten_json (third party) module.
 * Revised: Minor improvement regarding parsing nested JSON objects.
 * Added: New tamper script "doublequotes.py" that adds double-quotes ("") between the characters of the generated payloads (for *nix targets).
-* Fixed: Bug-fix regarding regarding parsing raw HTTP headers from a file (i.e. `-r` option).
+* Fixed: Bug-fix regarding parsing raw HTTP headers from a file (i.e. `-r` option).
 * Revised: Improvements regarding data in the detailed message about occurred unhandled exception.
 * Revised: Minor bug-fixes and improvements regarding HTTP authentication dictionary-based cracker.
 
