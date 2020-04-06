@@ -258,9 +258,6 @@ def init_request(url):
   if settings.VERBOSITY_LEVEL >= 1:
     info_msg = "Creating HTTP requests opener object."
     print(settings.print_info_msg(info_msg))
-  # Check for URL redirection
-  if not menu.options.ignore_redirects:
-    url = redirection.do_check(url)
   # Used a valid pair of valid credentials
   if menu.options.auth_cred and menu.options.auth_type:
     info_msg = "Using '" + menu.options.auth_cred + "' pair of " + menu.options.auth_type 
@@ -291,6 +288,9 @@ def url_response(url):
     if settings.VERBOSITY_LEVEL >= 2:
       print("")
   response = examine_request(request)
+  # Check for URL redirection
+  if not menu.options.ignore_redirects:
+    url = redirection.do_check(url)
   return response, url
 
 """
