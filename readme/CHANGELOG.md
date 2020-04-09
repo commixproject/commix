@@ -1,4 +1,5 @@
 ## Version 3.1 (upcoming)
+* Fixed: Bug-fix regarding defining wildcard character "*" in nested JSON objects.
 * Revised: Minor improvement regarding Flatten_json (third party) module.
 * Revised: Minor improvement regarding parsing nested JSON objects.
 * Added: New tamper script "doublequotes.py" that adds double-quotes ("") between the characters of the generated payloads (for *nix targets).

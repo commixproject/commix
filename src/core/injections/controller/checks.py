@@ -1180,6 +1180,12 @@ def process_xml_data():
       print(settings.print_error_msg(err_msg))
       pass
 
+#Check if INJECT_TAG is enclosed in quotes (in json data)
+def check_quotes_json_data(data):
+  if not json.dumps(settings.INJECT_TAG) in data:
+    data = data.replace(settings.INJECT_TAG, json.dumps(settings.INJECT_TAG))
+  return data
+
 # Check if valid JSON
 def is_JSON_check(parameter):
   try:

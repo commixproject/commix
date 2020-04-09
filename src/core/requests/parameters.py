@@ -207,7 +207,8 @@ def do_POST_check(parameter):
   # Do replacement with the 'INJECT_HERE' tag, if the wild card char is provided.
   parameter = checks.wildcard_character(parameter).replace("'","\"")
   # Check if JSON Object.
-  if checks.is_JSON_check(parameter):
+  if checks.is_JSON_check(checks.check_quotes_json_data(parameter)):
+    parameter = checks.check_quotes_json_data(parameter)
     if not settings.IS_JSON:
       checks.process_json_data()
       settings.PARAMETER_DELIMITER = ","
@@ -353,8 +354,8 @@ def do_POST_check(parameter):
               all_params[param] = all_params[param] + settings.INJECT_TAG
           else:
             all_params[param] = all_params[param].replace(value, inject_value)
-            if settings.IS_JSON and not "\"" + settings.INJECT_TAG + "\"" in all_params[param]:
-              all_params[param] = all_params[param].replace(settings.INJECT_TAG, "\"" + settings.INJECT_TAG + "\"")
+            # if settings.IS_JSON and not "\"" + settings.INJECT_TAG + "\"" in all_params[param]:
+            #   all_params[param] = all_params[param].replace(settings.INJECT_TAG, "\"" + settings.INJECT_TAG + "\"")
           all_params[param-1] = all_params[param-1].replace(inject_value, old)
           parameter = settings.PARAMETER_DELIMITER.join(all_params)
           parameters_list.append(parameter.replace(settings.RANDOM_TAG,""))
@@ -374,7 +375,7 @@ def do_POST_check(parameter):
           value = re.findall(r'=(.*)', multi_parameters[param])
           value = ''.join(value)
         parameter = settings.PARAMETER_DELIMITER.join(multi_parameters)
-    
+
     return parameter
 
 """
