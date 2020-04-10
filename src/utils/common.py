@@ -18,6 +18,7 @@ import os
 import sys
 import json
 import time
+import base64
 import hashlib
 import traceback
 from src.utils import menu
@@ -91,15 +92,16 @@ def create_github_issue(err_msg, exc_msg):
     pass
 
   data = {"title": "Unhandled exception (#" + str(key) + ")", "body": "```" + str(err_msg) + "\n```\n```\n" + str(exc_msg) + "```"}
-  req = _urllib.request.Request(url="https://api.github.com/repos/commixproject/commix/issues", data=json.dumps(data), headers={"Authorization": "token " + str(settings.GITHUB_REPORT_OAUTH_TOKEN.decode("base64"))})
-  
+  req = _urllib.request.Request(url = "https://api.github.com/repos/commixproject/commix/issues", 
+                                data = data.encode(json.dumps(data)), 
+                                headers = {"Authorization": "token " + base64.b64decode(settings.GITHUB_REPORT_OAUTH_TOKEN.encode(settings.UNICODE_ENCODING)).decode()}
+                                )
   try:
     content = _urllib.request.urlopen(req).read()
   except Exception as err:
     content = None
 
   issue_url = re.search(r"https://github.com/commixproject/commix/issues/\d+", content or "")
-
   if issue_url:
     info_msg = "The created Github issue can been found at the address '" + str(issue_url.group(0)) + "'.\n"
     print(settings.print_info_msg(info_msg))
