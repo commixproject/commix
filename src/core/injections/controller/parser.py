@@ -171,7 +171,7 @@ def logfile_parser():
         auth_provided = "".join([str(i) for i in re.findall(r"Authorization: " + "(.*)", line)]).split()
         menu.options.auth_type = auth_provided[0].lower()
         if menu.options.auth_type == "basic":
-          menu.options.auth_cred = base64.b64decode(auth_provided[1])
+          menu.options.auth_cred = base64.b64decode(auth_provided[1]).decode()
         elif menu.options.auth_type == "digest":
           if not menu.options.auth_cred:
             print("[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]")
