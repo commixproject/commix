@@ -15,6 +15,7 @@ For more see the file 'readme/COPYING' for copying permission.
 
 import sys
 import errno
+import base64
 from src.utils import menu
 from src.utils import settings
 from socket import error as SocketError
@@ -80,6 +81,43 @@ def do_check(url):
   # Check if defined any Cookie HTTP header.
   if menu.options.cookie and settings.COOKIE_INJECTION == False:
     opener.addheaders.append(('Cookie', menu.options.cookie))
+  # Check if defined any HTTP Authentication credentials.
+  # HTTP Authentication: Basic / Digest Access Authentication.
+  if menu.options.auth_cred and menu.options.auth_type:
+    try:
+      settings.SUPPORTED_HTTP_AUTH_TYPES.index(menu.options.auth_type)
+      if menu.options.auth_type == "basic":
+        b64_string = base64.encodestring(menu.options.auth_cred.encode(settings.UNICODE_ENCODING)).decode().replace('\n', '')
+        opener.addheaders.append(("Authorization", "Basic " + b64_string + ""))
+      elif menu.options.auth_type == "digest":
+        try:
+          url = menu.options.url
+          try:
+            response = _urllib.request.urlopen(url)
+          except _urllib.error.HTTPError as e:
+            try:
+              authline = e.headers.get('www-authenticate', '')  
+              authobj = re.match('''(\w*)\s+realm=(.*),''',authline).groups()
+              realm = authobj[1].split(',')[0].replace("\"","")
+              user_pass_pair = menu.options.auth_cred.split(":")
+              username = user_pass_pair[0]
+              password = user_pass_pair[1]
+              authhandler = _urllib.request.HTTPDigestAuthHandler()
+              authhandler.add_password(realm, url, username, password)
+              opener = _urllib.request.build_opener(authhandler)
+              _urllib.request.install_opener(opener)
+              result = _urllib.request.urlopen(url)
+            except AttributeError:
+              pass
+        except _urllib.error.HTTPError as e:
+          pass
+    except ValueError:
+      err_msg = "Unsupported / Invalid HTTP authentication type '" + menu.options.auth_type + "'."
+      err_msg += " Try basic or digest HTTP authentication type."
+      print(settings.print_critical_msg(err_msg))
+      raise SystemExit()   
+  else:
+    pass  
 
   for handler in [_urllib.request.HTTPHandler,
                   HTTPMethodFallback,
