@@ -1,4 +1,5 @@
 ## Version 3.1 (upcoming)
+* Fixed: Bug-fix regarding Basic HTTP authentication.
 * Revised: Minor improvement regarding redirection mechanism.
 * Fixed: Bug-fix regarding defining wildcard character "*" in nested JSON objects.
 * Revised: Minor improvement regarding Flatten_json (third party) module.

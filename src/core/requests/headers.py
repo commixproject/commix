@@ -157,7 +157,7 @@ def check_http_traffic(request):
               settings.INIT_TEST = False
 
       except _urllib.error.HTTPError as err_msg:
-        if "Unauthorized" in str(err_msg):
+        if settings.UNAUTHORIZED_ERROR in str(err_msg):
           if settings.VERBOSITY_LEVEL < 2 and not settings.UNAUTHORIZED:
             print("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
           settings.UNAUTHORIZED = True

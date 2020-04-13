@@ -135,7 +135,7 @@ def examine_request(request):
         print(settings.print_critical_msg(err_msg))
         raise SystemExit()
       except Exception as err_msg:
-        if "unauthorized" in str(err_msg).lower():
+        if settings.UNAUTHORIZED_ERROR in str(err_msg).lower():
           if menu.options.ignore_code == settings.UNAUTHORIZED_ERROR:
             pass
           elif menu.options.auth_type and menu.options.auth_cred:

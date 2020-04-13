@@ -55,7 +55,7 @@ def estimate_response_time(url, timesec):
     
   except _urllib.error.HTTPError as err:
     ignore_start = time.time()
-    if "Unauthorized" in str(err) and menu.options.ignore_code == settings.UNAUTHORIZED_ERROR:
+    if settings.UNAUTHORIZED_ERROR in str(err) and menu.options.ignore_code == settings.UNAUTHORIZED_ERROR:
       pass
     else:
       if settings.VERBOSITY_LEVEL >= 1:

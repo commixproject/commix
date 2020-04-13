@@ -107,7 +107,7 @@ def create_github_issue(err_msg, exc_msg):
     print(settings.print_info_msg(info_msg))
   else:
     warn_msg = "Something went wrong while creating a Github issue."
-    if "Unauthorized" in str(err):
+    if settings.UNAUTHORIZED_ERROR in str(err):
       warn_msg += " Please update to the latest revision.\n"
     print(settings.print_warning_msg(warn_msg))
 
