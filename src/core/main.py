@@ -146,6 +146,8 @@ def examine_request(request):
             err_msg += " in order to perform a dictionary-based attack."
             print(settings.print_critical_msg(err_msg))
             raise SystemExit()
+          else:
+            pass
         else:  
           try:
             error_msg = str(err_msg.args[0]).split("] ")[1] + "."
