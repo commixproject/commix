@@ -142,6 +142,12 @@ def http_auth_cracker(url, realm):
             request.add_header("Authorization", "Basic " + base64string)
             headers.do_check(request)
             headers.check_http_traffic(request)
+            # Check if defined any HTTP Proxy (--proxy option).
+            if menu.options.proxy:
+              proxy.use_proxy(request)
+            # Check if defined Tor (--tor option).  
+            elif menu.options.tor:
+              tor.use_tor(request)
             result = _urllib.request.urlopen(request)
           # Digest authentication 
           elif authentication_type.lower() == "digest":
@@ -151,6 +157,12 @@ def http_auth_cracker(url, realm):
             _urllib.request.install_opener(opener)
             request = _urllib.request.Request(url)
             headers.check_http_traffic(request)
+            # Check if defined any HTTP Proxy (--proxy option).
+            if menu.options.proxy:
+              proxy.use_proxy(request)
+            # Check if defined Tor (--tor option).  
+            elif menu.options.tor:
+              tor.use_tor(request)
             result = _urllib.request.urlopen(request)
 
           # Store valid results to session 
