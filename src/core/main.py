@@ -265,6 +265,9 @@ def init_request(url):
     info_msg = "Using '" + menu.options.auth_cred + "' pair of " + menu.options.auth_type 
     info_msg += " HTTP authentication credentials."
     print(settings.print_info_msg(info_msg))
+  # Check for URL redirection
+  if not menu.options.ignore_redirects:
+    url = redirection.do_check(url)
   return request
 
 """
@@ -290,9 +293,6 @@ def url_response(url):
     if settings.VERBOSITY_LEVEL >= 2:
       print("")
   response = examine_request(request)
-  # Check for URL redirection
-  if not menu.options.ignore_redirects:
-    url = redirection.do_check(url)
   return response, url
 
 """
