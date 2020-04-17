@@ -127,30 +127,34 @@ def do_check(url):
       opener.add_handler(handler())   
 
   try:
+    # Return a Request or None in response to a redirect.
     response = opener.open(Request(url))
-    redirected_url = response.geturl()
-    if redirected_url != url:
-      while True:
-        if not menu.options.batch:
-          question_msg = "Do you want to follow the identified redirection? [Y/n] > "
-          redirection_option = _input(settings.print_question_msg(question_msg))
-        else:
-          redirection_option = ""  
-        if len(redirection_option) == 0 or redirection_option in settings.CHOICE_YES:
-          if menu.options.batch:
-            info_msg = "Following redirection to '" + redirected_url + "'. "
-            print(settings.print_info_msg(info_msg))
-          return redirected_url
-        elif redirection_option in settings.CHOICE_NO:
-          return url  
-        elif redirection_option in settings.CHOICE_QUIT:
-          raise SystemExit()
-        else:
-          err_msg = "'" + redirection_option + "' is not a valid answer."  
-          print(settings.print_error_msg(err_msg))
-          pass
-    else:
+    if response == None:
       return url
+    else:
+      redirected_url = response.geturl()
+      if redirected_url != url:
+        while True:
+          if not menu.options.batch:
+            question_msg = "Do you want to follow the identified redirection? [Y/n] > "
+            redirection_option = _input(settings.print_question_msg(question_msg))
+          else:
+            redirection_option = ""  
+          if len(redirection_option) == 0 or redirection_option in settings.CHOICE_YES:
+            if menu.options.batch:
+              info_msg = "Following redirection to '" + redirected_url + "'. "
+              print(settings.print_info_msg(info_msg))
+            return redirected_url
+          elif redirection_option in settings.CHOICE_NO:
+            return url  
+          elif redirection_option in settings.CHOICE_QUIT:
+            raise SystemExit()
+          else:
+            err_msg = "'" + redirection_option + "' is not a valid answer."  
+            print(settings.print_error_msg(err_msg))
+            pass
+      else:
+        return url
 
   except AttributeError:
     pass
