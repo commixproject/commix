@@ -714,7 +714,7 @@ def shellshock_handler(url, http_request_method, filename):
           if settings.VERBOSITY_LEVEL <= 1:
             print("")
           print(settings.print_success_msg(success_msg))
-          print(settings.SUB_CONTENT_SIGN + "Payload: " + "\"" + payload + "\"" + Style.RESET_ALL)
+          print(settings.SUB_CONTENT_SIGN  + "\"" + payload + "\"" + Style.RESET_ALL)
 
           # Enumeration options.
           if settings.ENUMERATION_DONE == True :

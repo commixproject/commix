@@ -37,7 +37,7 @@ PAYLOAD_SIGN = "    |_ " + Fore.CYAN
 TRAFFIC_SIGN = "    |_ " + Back.MAGENTA
 HTTP_CONTENT_SIGN = Fore.MAGENTA
 CHECK_SIGN = "[" + Fore.BLUE + Style.BRIGHT + "*" + Style.RESET_ALL  + "] " + "Checking "
-SUB_CONTENT_SIGN = "    [" + Fore.GREY + Style.BRIGHT + "~" + Style.RESET_ALL  + "] "
+SUB_CONTENT_SIGN = "    [" + Fore.GREY + Style.BRIGHT + "~" + Style.RESET_ALL  + "] Payload: "
 ABORTION_SIGN = ERROR_SIGN 
 
 # Print error message
@@ -160,7 +160,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "3.1.42"
+VERSION_NUM = "3.1.43"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"

@@ -454,7 +454,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
               success_msg += found_vuln_parameter + " seems injectable via "
               success_msg += "(" + injection_type.split(" ")[0] + ") " + technique + "."
               print(settings.print_success_msg(success_msg))
-              print(settings.SUB_CONTENT_SIGN + "Payload: " + str(checks.url_decode(payload)) + Style.RESET_ALL)
+              print(settings.SUB_CONTENT_SIGN  + str(checks.url_decode(payload)) + Style.RESET_ALL)
               # Export session
               if not settings.LOAD_SESSION:
                 shell = ""
