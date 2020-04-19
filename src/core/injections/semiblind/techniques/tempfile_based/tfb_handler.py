@@ -176,7 +176,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                   payload_msg = payload.replace("\n", "\\n")
                   print(settings.print_payload(payload_msg))
                 elif settings.VERBOSITY_LEVEL > 1:
-                  info_msg = "Generating a payload for injection..."
+                  info_msg = "Generating payload for the injection..."
                   print(settings.print_info_msg(info_msg))
                   print(settings.print_payload(payload)) 
                   

@@ -213,7 +213,7 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
       sys.stdout.write("\n" + settings.print_payload(payload_msg))
     # Check if defined "--verbose" option.
     elif settings.VERBOSITY_LEVEL > 1:
-      info_msg = "Generating a payload for injection..."
+      info_msg = "Generating payload for the injection..."
       print(settings.print_info_msg(info_msg))
       payload_msg = payload.replace("\n", "\\n") 
       sys.stdout.write(settings.print_payload(payload_msg) + "\n")
@@ -305,7 +305,7 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
           sys.stdout.write("\n" + settings.print_payload(payload_msg))
         # Check if defined "--verbose" option.
         elif settings.VERBOSITY_LEVEL > 1:
-          info_msg = "Generating a payload for injection..."
+          info_msg = "Generating payload for the injection..."
           print(settings.print_info_msg(info_msg))
           payload_msg = payload.replace("\n", "\\n") 
           sys.stdout.write(settings.print_payload(payload_msg) + "\n")
@@ -425,7 +425,7 @@ def false_positive_check(separator, TAG, cmd, whitespace, prefix, suffix, timese
       sys.stdout.write("\n" + settings.print_payload(payload_msg))
     # Check if defined "--verbose" option.
     elif settings.VERBOSITY_LEVEL > 1:
-      info_msg = "Generating a payload for testing the reliability of used payload..."
+      info_msg = "Generating payload for testing the reliability of used payload..."
       print(settings.print_info_msg(info_msg))
       payload_msg = payload.replace("\n", "\\n") 
       sys.stdout.write(settings.print_payload(payload_msg) + "\n")
@@ -496,7 +496,7 @@ def false_positive_check(separator, TAG, cmd, whitespace, prefix, suffix, timese
           sys.stdout.write("\n" + settings.print_payload(payload_msg))
         # Check if defined "--verbose" option.
         elif settings.VERBOSITY_LEVEL > 1:
-          info_msg = "Generating a payload for testing the reliability of used payload..."
+          info_msg = "Generating payload for testing the reliability of used payload..."
           print(settings.print_info_msg(info_msg))
           payload_msg = payload.replace("\n", "\\n") 
           sys.stdout.write(settings.print_payload(payload_msg) + "\n")

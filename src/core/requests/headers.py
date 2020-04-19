@@ -87,11 +87,11 @@ def check_http_traffic(request):
         logs.log_traffic("-" * 37 + "\n" + info_msg + "\n" + "-" * 37)  
       request_http_headers = str(headers).split("\r\n")
       for header in request_http_headers:
-        if len(header) > 1: 
-          if settings.VERBOSITY_LEVEL >= 2:
-            print(settings.print_traffic(header))
-          if menu.options.traffic_file:
-            logs.log_traffic("\n" + header)
+        # if len(header) > 1: 
+        if settings.VERBOSITY_LEVEL >= 2:
+          print(settings.print_traffic(header))
+        if menu.options.traffic_file:
+          logs.log_traffic("\n" + header)
       if menu.options.traffic_file:
         if settings.VERBOSITY_LEVEL <= 2: 
           logs.log_traffic("\n\n" + "#" * 77 + "\n\n")
@@ -142,8 +142,8 @@ def check_http_traffic(request):
     while not response and current_attempt <= settings.MAX_RETRIES and not settings.UNAUTHORIZED:
       try:
         if settings.VERBOSITY_LEVEL >= 2:
-          info_msg = "The target's request HTTP headers:"
-          print(settings.print_info_msg(info_msg))
+          req_msg = "HTTP request:"
+          print(settings.print_request_msg(req_msg))
         opener.open(request)
         response = True
         if settings.VERBOSITY_LEVEL < 2:
@@ -220,12 +220,13 @@ def check_http_traffic(request):
     response_headers[settings.URI_HTTP_HEADER] = response.geturl()
     response_headers = str(response_headers).strip("\n")
     if settings.VERBOSITY_LEVEL >= 3:
-      info_msg = "The target's response HTTP headers (" + str(code) + "):"
-      print(settings.print_info_msg(info_msg))
+      resp_msg = "HTTP response (" + str(code) + "):"
+      print(settings.print_response_msg(resp_msg))
       http_response(response_headers, code)
     if settings.VERBOSITY_LEVEL >= 4:
-      info_msg = "The target's HTTP response page content:"
-      print(settings.print_info_msg(info_msg))
+      print("")
+      # resp_msg = "HTTP response page content:"
+      # print(settings.print_response_msg(resp_msg))
       http_response_content(page)
     # Checks regarding a potential CAPTCHA protection mechanism.
     checks.captcha_check(page)

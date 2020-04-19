@@ -644,7 +644,7 @@ def shellshock_handler(url, http_request_method, filename):
         if settings.VERBOSITY_LEVEL == 1:
           sys.stdout.write("\n" + settings.print_payload(payload))
         elif settings.VERBOSITY_LEVEL > 1:
-          info_msg = "Generating a payload for injection..."
+          info_msg = "Generating payload for the injection..."
           print(settings.print_info_msg(info_msg))
           print(settings.print_payload(payload))
 

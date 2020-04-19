@@ -279,7 +279,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                 print(settings.print_payload(payload_msg))
               # Check if defined "--verbose" option.
               elif settings.VERBOSITY_LEVEL > 1:
-                info_msg = "Generating a payload for injection..."
+                info_msg = "Generating payload for the injection..."
                 print(settings.print_info_msg(info_msg))
                 print(settings.print_payload(payload)) 
 

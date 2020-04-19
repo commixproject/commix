@@ -146,7 +146,7 @@ def cb_injection_handler(url, timesec, filename, http_request_method):
               if settings.VERBOSITY_LEVEL == 1:
                 print(settings.print_payload(payload))
               elif settings.VERBOSITY_LEVEL > 1:
-                info_msg = "Generating a payload for injection..."
+                info_msg = "Generating payload for the injection..."
                 print(settings.print_info_msg(info_msg))
                 print(settings.print_payload(payload)) 
                 

@@ -27,17 +27,19 @@ from src.thirdparty.colorama import Fore, Back, Style, init
 # Status Signs
 SUCCESS_SIGN = "[" + Fore.GREEN + Style.BRIGHT + "+" + Style.RESET_ALL + "] "
 INFO_SIGN = Style.RESET_ALL + "[" + Fore.BLUE + Style.BRIGHT + "*" + Style.RESET_ALL + "] "
+REQUEST_SIGN = Style.RESET_ALL + "[" + Fore.MAGENTA + Style.BRIGHT + ">" + Style.RESET_ALL + "] "
+RESPONSE_SIGN = Style.RESET_ALL + "[" + Fore.MAGENTA + Style.BRIGHT + "<" + Style.RESET_ALL + "] "
 QUESTION_SIGN = Style.RESET_ALL + "[" + Style.BRIGHT + Fore.MAGENTA + "?" + Style.RESET_ALL + "] "
 WARNING_SIGN = "[" + Fore.YELLOW  + "!" + Style.RESET_ALL + "] " + Fore.YELLOW + "Warning: "
 WARNING_BOLD_SIGN = "[" + Style.BRIGHT + Fore.YELLOW  + "!" + Style.RESET_ALL + "] " + Style.BRIGHT + Fore.YELLOW + "Warning: "
 LEGAL_DISCLAIMER = "(" + Style.BRIGHT + Fore.RED + "!" + Style.RESET_ALL + ") " + "Legal disclaimer: "
 ERROR_SIGN = "[" + Fore.RED + Style.BRIGHT + "x" + Style.RESET_ALL  + "] " + Fore.RED + "Error: "
 CRITICAL_SIGN = Back.RED + "[x] Critical: "
-PAYLOAD_SIGN = "    |_ " + Fore.CYAN
-TRAFFIC_SIGN = "    |_ " + Back.MAGENTA
+PAYLOAD_SIGN = "[" + Fore.CYAN + Style.BRIGHT + "~" + Style.RESET_ALL + "] Setting the payload: " + Fore.CYAN
+SUB_CONTENT_SIGN = "    " + Fore.GREY + "|_ " + Style.RESET_ALL
+TRAFFIC_SIGN = "" + Fore.MAGENTA
 HTTP_CONTENT_SIGN = Fore.MAGENTA
 CHECK_SIGN = "[" + Fore.BLUE + Style.BRIGHT + "*" + Style.RESET_ALL  + "] " + "Checking "
-SUB_CONTENT_SIGN = "    [" + Fore.GREY + Style.BRIGHT + "~" + Style.RESET_ALL  + "] Payload: "
 ABORTION_SIGN = ERROR_SIGN 
 
 # Print error message
@@ -68,6 +70,16 @@ def print_bold_warning_msg(warn_msg):
 # Print legal disclaimer message
 def print_legal_disclaimer_msg(legal_disclaimer_msg):
   result = LEGAL_DISCLAIMER + str(legal_disclaimer_msg) + Style.RESET_ALL
+  return result
+
+# Print request HTTP message
+def print_request_msg(req_msg):
+  result = REQUEST_SIGN + str(req_msg) + Style.RESET_ALL
+  return result
+
+# Print response HTTP message
+def print_response_msg(resp_msg):
+  result = RESPONSE_SIGN + str(resp_msg) + Style.RESET_ALL
   return result
 
 # Print information message
@@ -160,7 +172,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "3.1.43"
+VERSION_NUM = "3.1.44"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"
