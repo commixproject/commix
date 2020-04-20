@@ -73,6 +73,18 @@ def http_response(headers, code):
       logs.log_traffic("\n\n")    
 
 """
+Print HTTP response headers / Body.
+"""
+def print_http_response(response_headers, code, page):
+  if settings.VERBOSITY_LEVEL >= 3:
+    resp_msg = "HTTP response (" + str(code) + "):"
+    print(settings.print_response_msg(resp_msg))
+    http_response(response_headers, code)
+  if settings.VERBOSITY_LEVEL >= 4:
+    print("")
+    http_response_content(page)
+
+"""
 Checking the HTTP Headers & HTTP/S Request.
 """
 def check_http_traffic(request):
@@ -139,11 +151,12 @@ def check_http_traffic(request):
     opener = _urllib.request.build_opener(connection_handler())
     response = False
     current_attempt = 0
-    while not response and current_attempt <= settings.MAX_RETRIES and not settings.UNAUTHORIZED:
+    unauthorized = False
+    while not response and current_attempt <= settings.MAX_RETRIES and not unauthorized:
+      if settings.VERBOSITY_LEVEL >= 2:
+        req_msg = "HTTP request:"
+        print(settings.print_request_msg(req_msg))
       try:
-        if settings.VERBOSITY_LEVEL >= 2:
-          req_msg = "HTTP request:"
-          print(settings.print_request_msg(req_msg))
         opener.open(request)
         response = True
         if settings.VERBOSITY_LEVEL < 2:
@@ -160,7 +173,7 @@ def check_http_traffic(request):
         if settings.UNAUTHORIZED_ERROR in str(err_msg):
           if settings.VERBOSITY_LEVEL < 2 and not settings.UNAUTHORIZED:
             print("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
-          settings.UNAUTHORIZED = True
+          settings.UNAUTHORIZED = unauthorized = True
 
       except _urllib.error.URLError as err_msg: 
         if current_attempt == 0:
@@ -219,15 +232,8 @@ def check_http_traffic(request):
         page = page.decode(settings.DEFAULT_ENCODING)
     response_headers[settings.URI_HTTP_HEADER] = response.geturl()
     response_headers = str(response_headers).strip("\n")
-    if settings.VERBOSITY_LEVEL >= 3:
-      resp_msg = "HTTP response (" + str(code) + "):"
-      print(settings.print_response_msg(resp_msg))
-      http_response(response_headers, code)
-    if settings.VERBOSITY_LEVEL >= 4:
-      print("")
-      # resp_msg = "HTTP response page content:"
-      # print(settings.print_response_msg(resp_msg))
-      http_response_content(page)
+    if settings.VERBOSITY_LEVEL > 2:
+      print_http_response(response_headers, code, page)
     # Checks regarding a potential CAPTCHA protection mechanism.
     checks.captcha_check(page)
     # Checks regarding a potential browser verification protection mechanism.
@@ -237,6 +243,8 @@ def check_http_traffic(request):
 
   # This is useful when handling exotic HTTP errors (i.e requests for authentication).
   except _urllib.error.HTTPError as err:
+    if settings.VERBOSITY_LEVEL > 2:
+      print_http_response(err.info(), err.code, err.read())
     error_msg = "Got " + str(err).replace(": "," (")
     # Check for 4xx and/or 5xx HTTP error codes.
     if str(err.code).startswith('4') or \
@@ -258,6 +266,8 @@ def check_http_traffic(request):
 
   # The handlers raise this exception when they run into a problem.
   except (socket.error, _http_client.HTTPException, _urllib.error.URLError) as err:
+    if settings.VERBOSITY_LEVEL > 2:
+      print_http_response(response_headers=err.info(), code=err.code, page=err.read())
     err_msg = "Unable to connect to the target URL"
     try:
       err_msg += " (" + str(err.args[0]).split("] ")[1] + ")."
@@ -266,16 +276,16 @@ def check_http_traffic(request):
     print(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
-  except _http_client.IncompleteRead as err_msg:
-    print(settings.print_critical_msg(str(err_msg)))
+  except _http_client.IncompleteRead as err:
+    print(settings.print_critical_msg(str(err)))
     raise SystemExit()
 
-  except UnicodeDecodeError as err_msg:
-    print(settings.print_critical_msg(str(err_msg)))
+  except UnicodeDecodeError as err:
+    print(settings.print_critical_msg(str(err)))
     raise SystemExit()
 
-  except LookupError as err_msg:
-    print(settings.print_critical_msg(str(err_msg)))
+  except LookupError as err:
+    print(settings.print_critical_msg(str(err)))
     raise SystemExit()
 
   # Raise exception regarding existing connection was forcibly closed by the remote host.

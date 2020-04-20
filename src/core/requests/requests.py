@@ -180,7 +180,8 @@ def estimate_response_time(url, timesec):
                 else:   
                   checks.http_auth_err_msg()      
         else:
-          pass
+          raise SystemExit()
+          #pass
   
     ignore_end = time.time()
     start = start - (ignore_start - ignore_end)

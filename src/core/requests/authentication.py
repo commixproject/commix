@@ -128,7 +128,7 @@ def http_auth_cracker(url, realm):
         float_percent = "{0:.1f}%".format(round(((i*100)/(total*1.0)),2))
         # Check if verbose mode on
         if settings.VERBOSITY_LEVEL >= 1:
-          payload = "pair of credentials '" + username + ":" + password + "'"
+          payload = "" + username + ":" + password + ""
           if settings.VERBOSITY_LEVEL > 1:
             print(settings.print_checking_msg(payload))
           else:
