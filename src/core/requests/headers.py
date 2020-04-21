@@ -95,13 +95,14 @@ def check_http_traffic(request):
   class do_connection(_http_client.HTTPConnection):
     def send(self, req):
       headers = req.decode()
+      http_method = headers[:4].strip()
       if menu.options.traffic_file: 
         logs.log_traffic("-" * 37 + "\n" + info_msg + "\n" + "-" * 37)  
       request_http_headers = str(headers).split("\r\n")
       for header in request_http_headers:
-        # if len(header) > 1: 
         if settings.VERBOSITY_LEVEL >= 2:
-          print(settings.print_traffic(header))
+          if http_method == "GET" and len(header) > 1 or http_method == "POST":
+            print(settings.print_traffic(header))
         if menu.options.traffic_file:
           logs.log_traffic("\n" + header)
       if menu.options.traffic_file:
