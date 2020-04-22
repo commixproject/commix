@@ -165,7 +165,7 @@ def check_http_traffic(request):
             info_msg = "Checking connection to the target URL... "
             sys.stdout.write(settings.print_info_msg(info_msg))
             sys.stdout.flush()
-          if settings.INIT_TEST == True:
+          if settings.INIT_TEST == True and not settings.UNAUTHORIZED:
             print("[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]")
             if not settings.CHECK_INTERNET:
               settings.INIT_TEST = False
