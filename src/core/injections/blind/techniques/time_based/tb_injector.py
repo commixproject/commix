@@ -185,7 +185,7 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
     minlen = 1
 
   found_chars = False
-  info_msg = "Retrieving the length of execution output... "
+  info_msg = "Retrieving the length of execution output. "
   sys.stdout.write(settings.print_info_msg(info_msg))
   sys.stdout.flush()  
   if settings.VERBOSITY_LEVEL > 1:
@@ -251,12 +251,13 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
         if settings.VERBOSITY_LEVEL >= 1:
           pass
         else:
-          sys.stdout.write("[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL+ "]\n")
+          sys.stdout.write(settings.SUCCESS_STATUS + "\n")
           sys.stdout.flush()
         if settings.VERBOSITY_LEVEL == 1:
           print("")
-        info_msg = "Retrieved: " + str(output_length)
-        print(settings.print_info_msg(info_msg))
+        print(settings.SUB_CONTENT_SIGN + "Retrieved: " + str(output_length))
+        # info_msg = "Retrieved: " + str(output_length)
+        # print(settings.print_info_msg(info_msg))
       found_chars = True
       injection_check = False
       break
@@ -270,10 +271,10 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
     check_end = 0
     check_start = time.time()
     output = []
-    percent = "0.0"
-    info_msg = "Presuming the execution output, please wait... " 
+    percent = "0.0%"
+    info_msg = "Presuming the execution output." 
     if menu.options.verbose < 1 :
-      info_msg +=  "[ " +str(percent)+ "% ]"
+      info_msg += ".. (" + str(percent) + ")"
     elif menu.options.verbose == 1 :
       info_msg +=  ""
     else:
@@ -344,9 +345,11 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
             percent = ((num_of_chars*100)/output_length)
             float_percent = str("{0:.1f}".format(round(((num_of_chars * 100)/(output_length * 1.0)),2))) + "%"
             if percent == 100:
-              float_percent = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
-            info_msg = "Presuming the execution output, "
-            info_msg += "please wait... [ " + float_percent + " ]"
+              float_percent = settings.SUCCESS_MSG
+            else:
+              float_percent = ".. (" + str(float_percent) + ")"
+            info_msg = "Presuming the execution output."
+            info_msg += float_percent
             sys.stdout.write("\r" + settings.print_info_msg(info_msg))
             sys.stdout.flush()
           else:
@@ -365,7 +368,7 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
   else:
     check_start = 0
     if not settings.VERBOSITY_LEVEL >= 1:
-      sys.stdout.write("[" +Fore.RED+ " FAILED " + Style.RESET_ALL+ "]")
+      sys.stdout.write(settings.FAIL_STATUS)
       sys.stdout.flush()
     else:
       print("")
@@ -390,7 +393,7 @@ def false_positive_check(separator, TAG, cmd, whitespace, prefix, suffix, timese
 
   found_chars = False
   info_msg = "Checking the reliability of the used payload "
-  info_msg += "in case of a false positive result... "
+  info_msg += "in case of a false positive result. "
   if settings.VERBOSITY_LEVEL == 1: 
     sys.stdout.write(settings.print_info_msg(info_msg))
     sys.stdout.flush()

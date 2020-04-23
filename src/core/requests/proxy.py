@@ -28,7 +28,7 @@ def do_check(url):
   check_proxy = True
   try:
     if settings.VERBOSITY_LEVEL >= 1:
-      info_msg = "Setting the HTTP proxy for all HTTP requests... "
+      info_msg = "Setting the HTTP proxy for all HTTP requests. "
       print(settings.print_info_msg(info_msg))
     # Check if defined POST data
     if menu.options.data:

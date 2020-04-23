@@ -207,7 +207,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
   if not settings.LOAD_SESSION or settings.RETEST == True: 
     TAG = ''.join(random.choice(string.ascii_uppercase) for i in range(6)) 
     info_msg = "Trying to create a file in '" + settings.WEB_ROOT 
-    info_msg += "' for command execution results... "
+    info_msg += "' for command execution results. "
     print(settings.print_info_msg(info_msg))
 
   i = 0
@@ -333,8 +333,8 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                 shell = re.findall(r"" + TAG + "", html_data)
 
                 if len(shell) != 0 and shell[0] == TAG and not settings.VERBOSITY_LEVEL >= 1:
-                  percent = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
-                  info_msg = "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "... [ " + percent + " ]"
+                  percent = settings.SUCCESS_MSG
+                  info_msg = "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "." + "" + percent + ""
                   sys.stdout.write("\r" + settings.print_info_msg(info_msg))
                   sys.stdout.flush()
 
@@ -395,13 +395,13 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                       if not settings.VERBOSITY_LEVEL >= 1:
                         if str(float_percent) == "100.0":
                           if no_result == True:
-                            percent = Fore.RED + "FAILED" + Style.RESET_ALL
+                            percent = settings.FAIL_STATUS
                           else:
-                            percent = str(float_percent)+ "%"
+                            percent = ".. (" + str(float_percent) + "%)"
                         else:
-                          percent = str(float_percent)+ "%"
+                          percent = ".. (" + str(float_percent) + "%)"
 
-                        info_msg = "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "... [ " + percent + " ]"
+                        info_msg = "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "." + "" + percent + ""
                         sys.stdout.write("\r" + settings.print_info_msg(info_msg))
                         sys.stdout.flush()
                         continue

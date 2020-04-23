@@ -46,7 +46,7 @@ def do_check():
   check_privoxy_proxy = True
   info_msg = "Testing Tor SOCKS proxy settings (" 
   info_msg += settings.PRIVOXY_IP + ":" + PRIVOXY_PORT 
-  info_msg +=  ")... "
+  info_msg +=  "). "
   sys.stdout.write(settings.print_info_msg(info_msg))
   sys.stdout.flush()
   try:
@@ -62,7 +62,7 @@ def do_check():
       check_tor_page = opener.open("https://check.torproject.org/").read()
       found_ip = re.findall(r":  <strong>" + "(.*)" + "</strong></p>", check_tor_page)
       if not "You are not using Tor" in check_tor_page:
-        sys.stdout.write("[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]\n")
+        sys.stdout.write(settings.SUCCESS_STATUS + "\n")
         sys.stdout.flush()
         if menu.options.tor_check:
           success_msg = "Tor connection is properly set. "
@@ -75,7 +75,7 @@ def do_check():
         print(settings.print_warning_msg(warn_msg))  
 
       else:
-        print("[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]")
+        print(settings.FAIL_STATUS)
         if menu.options.tor_check:
           err_msg = "It seems that your Tor connection is not properly set. "
         else:
@@ -89,7 +89,7 @@ def do_check():
         raise SystemExit() 
 
     except _urllib.error.URLError as err_msg:
-      print("[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]")
+      print(settings.FAIL_STATUS)
       if menu.options.tor_check:
         err_msg = "It seems that your Tor connection is not properly set. "
       else:
@@ -102,7 +102,7 @@ def do_check():
       raise SystemExit()  
 
     except _http_client.BadStatusLine as err_msg:
-      print("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
+      print(settings.FAIL_STATUS)
       if len(err_msg.line) > 2 :
         print(err_msg.line, err_msg.message)
       raise SystemExit()

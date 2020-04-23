@@ -51,7 +51,7 @@ def revision_num():
       match = re.search(r"(?i)[0-9a-f]{32}", stdout or "")
       rev_num = match.group(0) if match else None
       info_msg += " the latest revision '" + str(rev_num[:7]) + "'."
-      print("[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]")
+      print(settings.SUCCESS_STATUS)
     else:
       sys.stdout.write(Fore.MAGENTA + "\n" + stdout + Style.RESET_ALL)
       end  = time.time()
@@ -59,7 +59,7 @@ def revision_num():
       info_msg = "Finished in " + time.strftime('%H:%M:%S', time.gmtime(how_long)) + "."
     print(settings.print_info_msg(info_msg))
   except:
-    print("[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]") 
+    print(settings.FAIL_STATUS) 
     raise SystemExit()
 
 """
@@ -68,17 +68,17 @@ The commix's updater.
 def updater():
   time.sleep(1)
   info_msg = "Checking requirements to update " 
-  info_msg += settings.APPLICATION + " from GitHub repo... "
+  info_msg += settings.APPLICATION + " from GitHub repo. "
   sys.stdout.write(settings.print_info_msg(info_msg))
   sys.stdout.flush()
   if menu.options.offline:  
-    print("[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]")
+    print(settings.FAIL_STATUS)
     err_msg = "You cannot update commix via GitHub without access on the Internet."
     print(settings.print_critical_msg(err_msg))
     raise SystemExit()
   # Check if windows
   if settings.IS_WINDOWS:
-    print("[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]")
+    print(settings.FAIL_STATUS)
     err_msg = "For updating purposes on Windows platform, it's recommended "
     err_msg += "to use a GitHub client for Windows (http://windows.github.com/)."
     print(settings.print_critical_msg(err_msg))
@@ -91,24 +91,24 @@ def updater():
       if requirments.do_check(requirment) == True :
         # Check if ".git" exists!
         if os.path.isdir("./.git"):
-          sys.stdout.write("[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]\n")
+          sys.stdout.write(settings.SUCCESS_STATUS + "\n")
           sys.stdout.flush()
           info_msg = "Updating " + settings.APPLICATION + " to the latest (dev) " 
-          info_msg += "version... "
+          info_msg += "version. "
           sys.stdout.write(settings.print_info_msg(info_msg))
           sys.stdout.flush()
           revision_num()
           print("")
           os._exit(0)
         else:
-          print("[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]")
+          print(settings.FAIL_STATUS)
           err_msg = "The '.git' directory not found. Do it manually: " 
           err_msg += Style.BRIGHT + "'git clone " + settings.GIT_URL 
           err_msg += " " + settings.APPLICATION + "' "
           print(settings.print_critical_msg(err_msg))    
           raise SystemExit()
       else:
-          print("[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]")
+          print(settings.FAIL_STATUS)
           err_msg = requirment + " not found."
           print(settings.print_critical_msg(err_msg))
           raise SystemExit()
@@ -164,18 +164,18 @@ The updater for the unicorn tool
 def unicorn_updater(current_version):
   APPLICATION_NAME = "TrustedSec's Magic Unicorn"
   info_msg = "Checking requirements to update " 
-  info_msg += APPLICATION_NAME + " from GitHub repo... "
+  info_msg += APPLICATION_NAME + " from GitHub repo. "
   sys.stdout.write(settings.print_info_msg(info_msg))
   sys.stdout.flush()
   if menu.options.offline:  
-    print("[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]")
+    print(settings.FAIL_STATUS)
     err_msg = "You cannot update TrustedSec's Magic Unicorn "
     err_msg += "via GitHub without access on the Internet."
     print(settings.print_critical_msg(err_msg))
     raise SystemExit()
   # Check if windows
   if settings.IS_WINDOWS:
-    print("[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]")
+    print(settings.FAIL_STATUS)
     err_msg = "For updating purposes on Windows platform, it's recommended "
     err_msg += "to use a GitHub client for Windows (http://windows.github.com/)."
     print(settings.print_critical_msg(err_msg))
@@ -186,7 +186,7 @@ def unicorn_updater(current_version):
       # Check if 'git' is installed.
       requirments.do_check(requirment)
       if requirments.do_check(requirment) == True :
-        sys.stdout.write("[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]\n")
+        sys.stdout.write(settings.SUCCESS_STATUS + "\n")
         sys.stdout.flush()
         if len(current_version) == 0:
           unicorn_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../', 'thirdparty/'))
@@ -195,14 +195,14 @@ def unicorn_updater(current_version):
           os.chdir("../")
           subprocess.Popen("rm -rf unicorn", shell=True).wait()
         info_msg = "Updating " + APPLICATION_NAME + " to the latest (dev) " 
-        info_msg += "version... "
+        info_msg += "version. "
         subprocess.Popen("git clone https://github.com/trustedsec/unicorn", shell=True).wait()
         os.chdir("unicorn")
         sys.stdout.write(settings.print_info_msg(info_msg))
         sys.stdout.flush()
         revision_num()
       else:
-        print("[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]")
+        print(settings.FAIL_STATUS)
         err_msg = requirment + " not found."
         print(settings.print_critical_msg(err_msg))
         raise SystemExit()

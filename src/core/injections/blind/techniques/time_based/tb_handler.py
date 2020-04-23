@@ -79,7 +79,7 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
   technique = "time-based command injection technique"
 
   if settings.VERBOSITY_LEVEL >= 1:
-    info_msg = "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "... "
+    info_msg = "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + ". "
     print(settings.print_info_msg(info_msg))
 
   # Check if defined "--maxlen" option.
@@ -210,7 +210,7 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
 
                 if percent == 100 and no_result == True:
                   if not settings.VERBOSITY_LEVEL >= 1:
-                    percent = Fore.RED + "FAILED" + Style.RESET_ALL
+                    percent = settings.FAIL_STATUS
                   else:
                     percent = ""
                 else:
@@ -295,7 +295,7 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                           possibly_vulnerable = True
                           how_long_statistic = 0
                           if not settings.VERBOSITY_LEVEL >= 1:
-                            percent = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
+                            percent = settings.SUCCESS_MSG
                           else:
                             percent = ""
                       else:
@@ -303,20 +303,20 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                     # False positive
                     else:
                       if not settings.VERBOSITY_LEVEL >= 1:
-                        percent = str(float_percent)+ "%"
-                        info_msg = "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "... " +  "[ " + percent + " ]"
+                        percent = ".. (" + str(float_percent) + "%)"
+                        info_msg = "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "." + "" + percent + ""
                         sys.stdout.write("\r" + settings.print_info_msg(info_msg))
                         sys.stdout.flush()
                       continue    
                   else:
                     if not settings.VERBOSITY_LEVEL >= 1:
-                      percent = str(float_percent)+ "%"
-                      info_msg = "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "... " +  "[ " + percent + " ]"
+                      percent = ".. (" + str(float_percent) + "%)"
+                      info_msg = "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "." + "" + percent + ""
                       sys.stdout.write("\r" + settings.print_info_msg(info_msg))
                       sys.stdout.flush()
                     continue
                 if not settings.VERBOSITY_LEVEL >= 1:
-                  info_msg = "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "... " +  "[ " + percent + " ]"
+                  info_msg = "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "." + "" + percent + ""
                   sys.stdout.write("\r" + settings.print_info_msg(info_msg))
                   sys.stdout.flush()
 
@@ -337,20 +337,20 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                 if str(float_percent) == "100.0":
                   if no_result == True:
                     if not settings.VERBOSITY_LEVEL >= 1:
-                      percent = Fore.RED + "FAILED" + Style.RESET_ALL
-                      info_msg =  "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "... " +  "[ " + percent + " ]"
+                      percent = settings.FAIL_STATUS
+                      info_msg =  "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "." + "" + percent + ""
                       sys.stdout.write("\r" + settings.print_info_msg(info_msg))
                       sys.stdout.flush()
                     else:
                       percent = ""
                   else:
-                    percent = str(float_percent) + "%"
+                    percent = ".. (" + str(float_percent) + "%)"
                     print("")
                     # Print logs notification message
                     logs.logs_notification(filename)
                   #raise
                 else:
-                  percent = str(float_percent) + "%"
+                  percent = ".. (" + str(float_percent) + "%)"
               break
               
           # Yaw, got shellz! 

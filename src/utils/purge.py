@@ -37,7 +37,7 @@ def purge():
     return
   info_msg = "Purging content of directory '" + directory + "'"
   if not menu.options.verbose >= 1: 
-    info_msg += "... "
+    info_msg += ". "
   else:
      info_msg += ".\n" 
   sys.stdout.write(settings.print_info_msg(info_msg))
@@ -52,7 +52,7 @@ def purge():
 
   # Changing file attributes.
   if menu.options.verbose >= 1:
-    info_msg = "Changing file attributes... "
+    info_msg = "Changing file attributes. "
     sys.stdout.write(settings.print_info_msg(info_msg))
     sys.stdout.flush() 
   failed = False
@@ -64,13 +64,13 @@ def purge():
       pass
   if menu.options.verbose >= 1:    
     if not failed:  
-      print("[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]")
+      print(settings.SUCCESS_STATUS)
     else:
-      print("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
+      print(settings.FAIL_STATUS)
 
   # Writing random data to files.
   if menu.options.verbose >= 1:
-    info_msg = "Writing random data to files... "
+    info_msg = "Writing random data to files. "
     sys.stdout.write(settings.print_info_msg(info_msg))
     sys.stdout.flush() 
   failed = False
@@ -84,13 +84,13 @@ def purge():
       pass
   if menu.options.verbose >= 1:    
     if not failed:  
-      print("[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]")
+      print(settings.SUCCESS_STATUS)
     else:
-      print("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
+      print(settings.FAIL_STATUS)
 
   # Truncating files.
   if menu.options.verbose >= 1:
-    info_msg = "Truncating files... "
+    info_msg = "Truncating files. "
     sys.stdout.write(settings.print_info_msg(info_msg))
     sys.stdout.flush() 
   failed = False
@@ -103,13 +103,13 @@ def purge():
       pass
   if menu.options.verbose >= 1:    
     if not failed:  
-      print("[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]")
+      print(settings.SUCCESS_STATUS)
     else:
-      print("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
+      print(settings.FAIL_STATUS)
 
   # Renaming filenames to random values.
   if menu.options.verbose >= 1:
-    info_msg = "Renaming filenames to random values... "
+    info_msg = "Renaming filenames to random values. "
     sys.stdout.write(settings.print_info_msg(info_msg))
     sys.stdout.flush() 
   failed = False
@@ -121,13 +121,13 @@ def purge():
       pass
   if menu.options.verbose >= 1:    
     if not failed:  
-      print("[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]")
+      print(settings.SUCCESS_STATUS)
     else:
-      print("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
+      print(settings.FAIL_STATUS)
 
   # Renaming directory names to random values.
   if menu.options.verbose >= 1:
-    info_msg = "Renaming directory names to random values... "
+    info_msg = "Renaming directory names to random values. "
     sys.stdout.write(settings.print_info_msg(info_msg))
     sys.stdout.flush() 
   failed = False
@@ -140,13 +140,13 @@ def purge():
       pass
   if menu.options.verbose >= 1:    
     if not failed:  
-      print("[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]")
+      print(settings.SUCCESS_STATUS)
     else:
-      print("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
+      print(settings.FAIL_STATUS)
 
   # Deleting the whole directory tree. 
   if menu.options.verbose >= 1:
-    info_msg = "Deleting the whole directory tree... "
+    info_msg = "Deleting the whole directory tree. "
     sys.stdout.write(settings.print_info_msg(info_msg))
   try:
     failed = False
@@ -155,9 +155,9 @@ def purge():
   except OSError as ex:
     failed = True  
   if not failed:  
-    print("[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]")
+    print(settings.SUCCESS_STATUS)
   else:
-    print("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")    
+    print(settings.FAIL_STATUS)    
     err_msg = "Problem occurred while removing directory '" + directory + "'."
     print(settings.print_critical_msg(err_msg))
 

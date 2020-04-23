@@ -261,13 +261,13 @@ def system_users(separator, payload, TAG, timesec, prefix, suffix, whitespace, h
     # if settings.VERBOSITY_LEVEL >= 1:
     #   print("")
     info_msg = "Executing the 'net users' command "
-    info_msg += "to enumerate users entries... "  
+    info_msg += "to enumerate users entries. "  
     sys.stdout.write(settings.print_info_msg(info_msg))
     sys.stdout.flush()
     try:
       if sys_users[0] :
         sys_users = "".join(str(p) for p in sys_users).strip()
-        sys.stdout.write("[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]")
+        sys.stdout.write(settings.SUCCESS_STATUS)
         sys_users_list = re.findall(r"(.*)", sys_users)
         sys_users_list = "".join(str(p) for p in sys_users_list).strip()
         sys_users_list = ' '.join(sys_users_list.split())
@@ -313,17 +313,17 @@ def system_users(separator, payload, TAG, timesec, prefix, suffix, whitespace, h
           output_file.write("    (" +str(count)+ ") " + sys_users_list[user] + is_privileged + ".\n" )
           output_file.close()
       else:
-        sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
+        sys.stdout.write(settings.FAIL_STATUS)
         sys.stdout.flush()
         warn_msg = "It seems that you don't have permissions to enumerate users entries."
         print("\n" + settings.print_warning_msg(warn_msg))  # Unix-like users enumeration.    
     except TypeError:
-      sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]\n")
+      sys.stdout.write(settings.FAIL_STATUS + "\n")
       sys.stdout.flush()
       pass
 
     except IndexError:
-      sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
+      sys.stdout.write(settings.FAIL_STATUS)
       warn_msg = "It seems that you don't have permissions to enumerate users entries.\n"
       sys.stdout.write("\n" + settings.print_warning_msg(warn_msg))
       sys.stdout.flush()
@@ -332,7 +332,7 @@ def system_users(separator, payload, TAG, timesec, prefix, suffix, whitespace, h
     # if settings.VERBOSITY_LEVEL >= 1:
     #   print("")
     info_msg = "Fetching '" + settings.PASSWD_FILE 
-    info_msg += "' to enumerate users entries... "  
+    info_msg += "' to enumerate users entries. "  
     sys.stdout.write(settings.print_info_msg(info_msg))
     sys.stdout.flush()
     try:
@@ -344,7 +344,7 @@ def system_users(separator, payload, TAG, timesec, prefix, suffix, whitespace, h
           sys_users = sys_users.split(" ")
         # Check for appropriate '/etc/passwd' format.
         if len(sys_users) % 3 != 0 :
-          sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
+          sys.stdout.write(settings.FAIL_STATUS)
           sys.stdout.flush()
           warn_msg = "It seems that '" + settings.PASSWD_FILE + "' file is "
           warn_msg += "not in the appropriate format. Thus, it is expoted as a text file."
@@ -359,7 +359,7 @@ def system_users(separator, payload, TAG, timesec, prefix, suffix, whitespace, h
           for user in range(0, len(sys_users), 3):
              sys_users_list.append(sys_users[user : user + 3])
           if len(sys_users_list) != 0 :
-            sys.stdout.write("[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]")
+            sys.stdout.write(settings.SUCCESS_STATUS)
             success_msg = "Identified " + str(len(sys_users_list)) 
             success_msg += " entr" + ('ies', 'y')[len(sys_users_list) == 1] 
             success_msg += " in '" +  settings.PASSWD_FILE + "'.\n"
@@ -419,18 +419,18 @@ def system_users(separator, payload, TAG, timesec, prefix, suffix, whitespace, h
                 output_file.write("      " + sys_users)
                 output_file.close()
       else:
-        sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
+        sys.stdout.write(settings.FAIL_STATUS)
         sys.stdout.flush()
         warn_msg = "It seems that you don't have permissions to read '" 
         warn_msg += settings.PASSWD_FILE + "' to enumerate users entries."
         print("\n" + settings.print_warning_msg(warn_msg))   
     except TypeError:
-      sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]\n")
+      sys.stdout.write(settings.FAIL_STATUS + "\n")
       sys.stdout.flush()
       pass
 
     except IndexError:
-      sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
+      sys.stdout.write(settings.FAIL_STATUS)
       warn_msg = "Some kind of WAF/IPS/IDS probably blocks the attempt to read '"
       warn_msg += settings.PASSWD_FILE + "' to enumerate users entries.\n" 
       sys.stdout.write("\n" + settings.print_warning_msg(warn_msg))
@@ -460,14 +460,14 @@ def system_passwords(separator, payload, TAG, timesec, prefix, suffix, whitespac
       # if settings.VERBOSITY_LEVEL >= 1:
       #   print("")
       info_msg = "Fetching '" + settings.SHADOW_FILE 
-      info_msg += "' to enumerate users password hashes... "  
+      info_msg += "' to enumerate users password hashes. "  
       sys.stdout.write(settings.print_info_msg(info_msg))
       sys.stdout.flush()
       sys_passes = "".join(str(p) for p in sys_passes)
       sys_passes = sys_passes.replace(" ", "\n")
       sys_passes = sys_passes.split( )
       if len(sys_passes) != 0 :
-        sys.stdout.write("[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]")
+        sys.stdout.write(settings.SUCCESS_STATUS)
         success_msg = "Identified " + str(len(sys_passes))
         success_msg += " entr" + ('ies', 'y')[len(sys_passes) == 1] 
         success_msg += " in '" +  settings.SHADOW_FILE + "'.\n"
@@ -500,7 +500,7 @@ def system_passwords(separator, payload, TAG, timesec, prefix, suffix, whitespac
             output_file.write("      " + fields[0])
             output_file.close()
       else:
-        sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
+        sys.stdout.write(settings.FAIL_STATUS)
         sys.stdout.flush()
         warn_msg = "It seems that you don't have permissions to read '" 
         warn_msg += settings.SHADOW_FILE + "' to enumerate users password hashes."

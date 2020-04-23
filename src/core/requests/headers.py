@@ -124,7 +124,7 @@ def check_http_traffic(request):
             error_msg = str(err_msg.args[0]) + "."
           if settings.INIT_TEST == True:
             if settings.VERBOSITY_LEVEL < 2:
-              print("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
+              print(settings.FAIL_STATUS)
           else:
             if settings.VERBOSITY_LEVEL < 1:
               print("")   
@@ -141,7 +141,7 @@ def check_http_traffic(request):
             error_msg = str(err_msg.args[0]) + "."
           if settings.INIT_TEST == True:
             if settings.VERBOSITY_LEVEL < 2:
-              print("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
+              print(settings.FAIL_STATUS)
           else:
             if settings.VERBOSITY_LEVEL < 1:
               print("")  
@@ -162,24 +162,24 @@ def check_http_traffic(request):
         response = True
         if settings.VERBOSITY_LEVEL < 2:
           if current_attempt != 0:
-            info_msg = "Checking connection to the target URL... "
+            info_msg = "Checking connection to the target URL. "
             sys.stdout.write(settings.print_info_msg(info_msg))
             sys.stdout.flush()
           if settings.INIT_TEST == True and not settings.UNAUTHORIZED:
-            print("[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]")
+            print(settings.SUCCESS_STATUS)
             if not settings.CHECK_INTERNET:
               settings.INIT_TEST = False
 
       except _urllib.error.HTTPError as err_msg:
         if settings.UNAUTHORIZED_ERROR in str(err_msg):
           if settings.VERBOSITY_LEVEL < 2 and not settings.UNAUTHORIZED:
-            print("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
+            print(settings.FAIL_STATUS)
           settings.UNAUTHORIZED = unauthorized = True
 
       except _urllib.error.URLError as err_msg: 
         if current_attempt == 0:
           if settings.VERBOSITY_LEVEL < 2:
-            print("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
+            print(settings.FAIL_STATUS)
           try:
             error_msg = str(err_msg.args[0]).split("] ")[1] + ". "
           except IndexError:
@@ -197,14 +197,14 @@ def check_http_traffic(request):
         
       except _http_client.BadStatusLine as err_msg:
         if settings.VERBOSITY_LEVEL < 2:
-          print("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
+          print(settings.FAIL_STATUS)
         if len(err_msg.line) > 2 :
           print(err_msg.line, err_msg.message)
         raise SystemExit()
 
       except ValueError as err:
         if settings.VERBOSITY_LEVEL < 2:
-          print("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
+          print(settings.FAIL_STATUS)
         err_msg = "Invalid target URL has been given." 
         print(settings.print_critical_msg(err_msg))
         raise SystemExit()

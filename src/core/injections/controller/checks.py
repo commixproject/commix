@@ -561,14 +561,14 @@ def identified_os():
 Check for third-party (non-core) libraries.
 """
 def third_party_dependencies():
-  info_msg = "Checking for third-party (non-core) libraries... "
+  info_msg = "Checking for third-party (non-core) libraries. "
   sys.stdout.write(settings.print_info_msg(info_msg))
   sys.stdout.flush()
   
   try:
     import sqlite3
   except ImportError:
-    print("[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]")
+    print(settings.FAIL_STATUS)
     err_msg = settings.APPLICATION + " requires 'sqlite3' third-party library "
     err_msg += "in order to store previous injection points and commands. "
     print(settings.print_critical_msg(err_msg))
@@ -581,7 +581,7 @@ def third_party_dependencies():
       try:
         import pyreadline
       except ImportError:
-        print("[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]")
+        print(settings.FAIL_STATUS)
         err_msg = settings.APPLICATION + " requires 'pyreadline' third-party library "
         err_msg += "in order to be able to take advantage of the TAB "
         err_msg += "completion and history support features. "
@@ -591,14 +591,14 @@ def third_party_dependencies():
       try:
         import gnureadline
       except ImportError:
-        print("[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]")
+        print(settings.FAIL_STATUS)
         err_msg = settings.APPLICATION + " requires 'gnureadline' third-party library "
         err_msg += "in order to be able to take advantage of the TAB "
         err_msg += "completion and history support features. "
         print(settings.print_critical_msg(err_msg))
     pass
 
-  print("[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]")
+  print(settings.SUCCESS_STATUS)
   success_msg = "All required third-party (non-core) libraries are seems to be installed."
   print(settings.print_success_msg(success_msg))
 

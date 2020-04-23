@@ -219,7 +219,7 @@ def crawler(url):
   info_msg = "Checking "
   if sitemap_check:
     info_msg += "targets's sitemap.xml "
-  info_msg += "for usable links with GET parameters... "
+  info_msg += "for usable links with GET parameters. "
   sys.stdout.write(settings.print_info_msg(info_msg))
   sys.stdout.flush()
   succeed_banner = True
@@ -234,7 +234,7 @@ def crawler(url):
         valid_url_found = True
         url_num += 1
         if succeed_banner:
-          print("[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]")
+          print(settings.SUCCESS_STATUS)
         print(settings.print_success_msg("URL " + str(url_num) + " - " + check_url))
         if filename is not None:
           with open(filename, "a") as crawling_results:
@@ -259,7 +259,7 @@ def crawler(url):
   except TypeError:
     pass
   if not valid_url_found:
-    print("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
+    print(settings.FAIL_STATUS)
   raise SystemExit()
 
 # eof

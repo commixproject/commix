@@ -181,15 +181,17 @@ def http_auth_cracker(url, realm):
           pass  
         if found:
           if not settings.VERBOSITY_LEVEL >= 1:
-            float_percent = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
+            float_percent = settings.SUCCESS_MSG
         else:
           if str(float_percent) == "100.0%":
             if not settings.VERBOSITY_LEVEL >= 1:
-              float_percent = Fore.RED + "FAILED" + Style.RESET_ALL
+              float_percent = settings.FAIL_STATUS
           else:  
             i = i + 1
+            float_percent = ".. (" + float_percent + ")"
         if not settings.VERBOSITY_LEVEL >= 1:
-          info_msg = "Checking for a valid pair of credentials... [ " +  float_percent + " ]"
+          info_msg = "Checking for a valid pair of credentials." 
+          info_msg += float_percent
           sys.stdout.write("\r\r" + settings.print_info_msg(info_msg))
           sys.stdout.flush()
         if found:

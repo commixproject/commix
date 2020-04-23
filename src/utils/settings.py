@@ -24,6 +24,11 @@ from src.thirdparty.six.moves import urllib as _urllib
 from src.thirdparty.six.moves import reload_module as _reload_module
 from src.thirdparty.colorama import Fore, Back, Style, init
 
+# Status
+FAIL_MSG = Fore.RED + " " * 10 + Style.RESET_ALL
+FAIL_STATUS = "" + FAIL_MSG + ""
+SUCCESS_MSG = Fore.GREEN + " " * 10 + Style.RESET_ALL
+SUCCESS_STATUS = "" + SUCCESS_MSG + ""
 # Status Signs
 SUCCESS_SIGN = "[" + Fore.GREEN + Style.BRIGHT + "+" + Style.RESET_ALL + "] "
 INFO_SIGN = Style.RESET_ALL + "[" + Fore.BLUE + Style.BRIGHT + "*" + Style.RESET_ALL + "] "
@@ -34,7 +39,7 @@ WARNING_SIGN = "[" + Fore.YELLOW  + "!" + Style.RESET_ALL + "] " + Fore.YELLOW +
 WARNING_BOLD_SIGN = "[" + Style.BRIGHT + Fore.YELLOW  + "!" + Style.RESET_ALL + "] " + Style.BRIGHT + Fore.YELLOW + "Warning: "
 LEGAL_DISCLAIMER = "(" + Style.BRIGHT + Fore.RED + "!" + Style.RESET_ALL + ") " + "Legal disclaimer: "
 ERROR_SIGN = "[" + Fore.RED + Style.BRIGHT + "x" + Style.RESET_ALL  + "] " + Fore.RED + "Error: "
-CRITICAL_SIGN = Back.RED + "[x] Critical: "
+CRITICAL_SIGN = "[" + Back.RED + "x" + Style.RESET_ALL  + "] " + Back.RED + "Critical: "
 PAYLOAD_SIGN = "[" + Fore.CYAN + Style.BRIGHT + "~" + Style.RESET_ALL + "] Setting the payload: " + Fore.CYAN
 SUB_CONTENT_SIGN = "    " + Fore.GREY + "|_ " + Style.RESET_ALL
 TRAFFIC_SIGN = "" + Fore.MAGENTA
@@ -172,7 +177,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "3.1.47"
+VERSION_NUM = "3.1.48"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"

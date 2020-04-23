@@ -76,7 +76,7 @@ def cb_injection_handler(url, timesec, filename, http_request_method):
   technique = "classic command injection technique"
 
   if not settings.LOAD_SESSION: 
-    info_msg = "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "... "
+    info_msg = "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + ". "
     sys.stdout.write(settings.print_info_msg(info_msg))
     sys.stdout.flush()
     if settings.VERBOSITY_LEVEL >= 1:
@@ -197,20 +197,20 @@ def cb_injection_handler(url, timesec, filename, http_request_method):
                 float_percent = "{0:.1f}".format(round(((i*100)/(total*1.0)),2))
               
                 if shell == False:
-                  info_msg = "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "... " +  "[ " + float_percent + "%" + " ]"
+                  info_msg = "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "." +  " (" + str(float_percent) + "%)"
                   sys.stdout.write("\r" + settings.print_info_msg(info_msg))  
                   sys.stdout.flush()
 
                 if float(float_percent) >= 99.9:
                   if no_result == True:
-                    percent = Fore.RED + "FAILED" + Style.RESET_ALL
+                    percent = settings.FAIL_STATUS
                   else:
-                    percent = str(float_percent)+ "%"
+                    percent = ".. (" + str(float_percent) + "%)"
                 elif len(shell) != 0:
-                  percent = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
+                  percent = settings.SUCCESS_MSG
                 else:
-                  percent = str(float_percent)+ "%"
-                info_msg = "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "... " +  "[ " + percent + " ]"
+                  percent = ".. (" + str(float_percent) + "%)"
+                info_msg = "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "." + "" + percent + ""
                 sys.stdout.write("\r" + settings.print_info_msg(info_msg))  
                 sys.stdout.flush()
             

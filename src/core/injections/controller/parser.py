@@ -33,7 +33,7 @@ def logfile_parser():
   Warning message for mutiple request in same log file.
   """
   def multi_requests():
-    print("[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]")
+    print(settings.SUCCESS_STATUS)
     warn_msg = "Multiple"
     if menu.options.requestfile: 
       warn_msg += " requests"
@@ -54,7 +54,7 @@ def logfile_parser():
   """
   def invalid_data(request, single_request):
     if single_request:
-      print("[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]")
+      print(settings.FAIL_STATUS)
     err_msg = "Specified file "
     err_msg += "'" + os.path.split(request_file)[1] + "'"
     err_msg += " does not contain a valid HTTP request."
@@ -69,12 +69,12 @@ def logfile_parser():
     info_msg = "Parsing target "
     request_file = menu.options.logfile
     
-  info_msg += "using the '" + os.path.split(request_file)[1] + "' file... "
+  info_msg += "using the '" + os.path.split(request_file)[1] + "' file. "
   sys.stdout.write(settings.print_info_msg(info_msg))
   sys.stdout.flush()
 
   if not os.path.exists(request_file):
-    print("[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]")
+    print(settings.FAIL_STATUS)
     err_msg = "It seems that the '" + request_file + "' file, does not exist."
     sys.stdout.write(settings.print_critical_msg(err_msg) + "\n")
     sys.stdout.flush()
@@ -174,7 +174,7 @@ def logfile_parser():
           menu.options.auth_cred = base64.b64decode(auth_provided[1]).decode()
         elif menu.options.auth_type == "digest":
           if not menu.options.auth_cred:
-            print("[" + Fore.RED + " FAILED " + Style.RESET_ALL + "]")
+            print(settings.FAIL_STATUS)
             err_msg = "Use the '--auth-cred' option to provide a valid pair of "
             err_msg += "HTTP authentication credentials (i.e --auth-cred=\"admin:admin\") "
             print(settings.print_critical_msg(err_msg))
@@ -201,7 +201,7 @@ def logfile_parser():
     else:
       menu.options.url = prefix + menu.options.host + request_url
       if single_request:
-        sys.stdout.write("[" + Fore.GREEN + " SUCCEED " + Style.RESET_ALL + "]\n")
+        sys.stdout.write(settings.SUCCESS_STATUS + "\n")
         sys.stdout.flush()
       if menu.options.logfile:
         info_msg = "Parsed target from '" + os.path.split(request_file)[1] + "' for tests :"
