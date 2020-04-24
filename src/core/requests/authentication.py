@@ -138,7 +138,7 @@ def http_auth_cracker(url, realm):
           if settings.VERBOSITY_LEVEL > 1:
             print(settings.print_checking_msg(payload))
           else:
-            sys.stdout.write("\r" + settings.print_checking_msg(payload) + "           ")
+            sys.stdout.write("\r" + settings.print_checking_msg(payload) + " " * 10)
             sys.stdout.flush()
         try:
           # Basic authentication 

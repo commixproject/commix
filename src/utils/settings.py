@@ -42,7 +42,7 @@ ERROR_SIGN = "[" + Fore.RED + Style.BRIGHT + "x" + Style.RESET_ALL  + "] " + For
 CRITICAL_SIGN = "[" + Back.RED + "x" + Style.RESET_ALL  + "] " + Back.RED + "Critical: "
 PAYLOAD_SIGN = "[" + Fore.CYAN + Style.BRIGHT + "~" + Style.RESET_ALL + "] Setting the payload: " + Fore.CYAN
 SUB_CONTENT_SIGN = "    " + Fore.GREY + "|_ " + Style.RESET_ALL
-TRAFFIC_SIGN = "" + Fore.MAGENTA
+TRAFFIC_SIGN = Fore.MAGENTA
 HTTP_CONTENT_SIGN = Fore.MAGENTA
 CHECK_SIGN = "[" + Fore.CYAN + Style.BRIGHT + "~" + Style.RESET_ALL + "] Checking pair of credentials: " + Fore.CYAN
 ABORTION_SIGN = ERROR_SIGN 
@@ -119,7 +119,12 @@ def print_checking_msg(payload):
 
 # Print question message
 def print_question_msg(question_msg):
-  result = QUESTION_SIGN + question_msg 
+  result = QUESTION_SIGN + question_msg + Style.RESET_ALL
+  return result
+
+# Print sub content message
+def print_sub_content(sub_content):
+  result = SUB_CONTENT_SIGN + sub_content + Style.RESET_ALL
   return result
 
 # argv checks
@@ -177,7 +182,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "3.1.48"
+VERSION_NUM = "3.1.49"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"

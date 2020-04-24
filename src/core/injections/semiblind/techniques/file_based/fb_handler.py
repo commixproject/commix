@@ -68,7 +68,7 @@ then use the "/tmp/" directory for tempfile-based technique.
 def tfb_controller(no_result, url, timesec, filename, tmp_path, http_request_method, url_time_response):
   if no_result == True:
     info_msg = "Trying to create a file, in temporary "
-    info_msg += "directory (" + tmp_path + ") for command execution results...\n"
+    info_msg += "directory (" + tmp_path + ") for command execution results.\n"
     sys.stdout.write(settings.print_info_msg(info_msg))
     call_tfb = tfb_handler.exploitation(url, timesec, filename, tmp_path, http_request_method, url_time_response)   
     return call_tfb
@@ -518,7 +518,8 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
             success_msg += found_vuln_parameter + " seems injectable via "
             success_msg += "(" + injection_type.split(" ")[0] + ") " + technique + "."
             print(settings.print_success_msg(success_msg))
-            print(settings.SUB_CONTENT_SIGN  + str(checks.url_decode(payload)) + Style.RESET_ALL)
+            sub_content = str(checks.url_decode(payload))
+            print(settings.print_sub_content(sub_content))
             # Export session
             if not settings.LOAD_SESSION:
               session_handler.injection_point_importation(url, technique, injection_type, separator, shell[0], vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response=0, timesec=0, how_long=0, output_length=0, is_vulnerable=menu.options.level)

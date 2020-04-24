@@ -206,7 +206,9 @@ def logfile_parser():
       if menu.options.logfile:
         info_msg = "Parsed target from '" + os.path.split(request_file)[1] + "' for tests :"
         print(settings.print_info_msg(info_msg))
-        print(settings.SUB_CONTENT_SIGN + http_header + " " +  prefix + menu.options.host + request_url)
+        sub_content = http_header + " " +  prefix + menu.options.host + request_url
+        print(settings.print_sub_content(sub_content))
         if http_header == "POST":
-           print(settings.SUB_CONTENT_SIGN + "Data: " + menu.options.data)
+           sub_content = "Data: " + menu.options.data
+           print(settings.print_sub_content(sub_content))
 # eof
