@@ -1057,6 +1057,8 @@ def encoding_detection(response):
       pass
     if charset_detected == False and settings.VERBOSITY_LEVEL >= 1:
       print(settings.FAIL_STATUS)
+      warn_msg = "Heuristics have failed to identify indicated web-page charset."
+      print(settings.print_warning_msg(warn_msg))
   else:
     settings.ENCODING = menu.options.encoding
     if settings.ENCODING.lower() not in settings.ENCODING_LIST:
