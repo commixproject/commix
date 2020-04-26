@@ -1015,8 +1015,8 @@ def encoding_detection(response):
   if not menu.options.encoding:
     charset_detected = False
     if settings.VERBOSITY_LEVEL >= 1:
-      info_msg = "Identifying the indicated web-page charset. " 
-      sys.stdout.write(settings.print_info_msg(info_msg))
+      debug_msg = "Identifying the indicated web-page charset. " 
+      sys.stdout.write(settings.print_debug_msg(debug_msg))
       sys.stdout.flush()
     try:
       # Detecting charset
@@ -1048,9 +1048,9 @@ def encoding_detection(response):
           print(settings.print_warning_msg(warn_msg))
         else:
           if settings.VERBOSITY_LEVEL >= 1:
-            success_msg = "The indicated web-page charset appears to be " 
-            success_msg += settings.ENCODING + Style.RESET_ALL + "."
-            print(settings.print_success_msg(success_msg))
+            debug_msg = "The indicated web-page charset appears to be " 
+            debug_msg += settings.ENCODING + Style.RESET_ALL + "."
+            print(settings.print_debug_msg(debug_msg))
       else:
         pass
     except:
@@ -1074,8 +1074,8 @@ Procedure for target application identification
 def application_identification(server_banner, url):
   found_application_extension = False
   if settings.VERBOSITY_LEVEL >= 1:
-    info_msg = "Identifying the target application . " 
-    sys.stdout.write(settings.print_info_msg(info_msg))
+    debug_msg = "Identifying the target application." 
+    sys.stdout.write(settings.print_debug_msg(debug_msg))
     sys.stdout.flush()
   root, application_extension = splitext(_urllib.parse.urlparse(url).path)
   settings.TARGET_APPLICATION = application_extension[1:].upper()
@@ -1084,9 +1084,9 @@ def application_identification(server_banner, url):
     found_application_extension = True
     if settings.VERBOSITY_LEVEL >= 1:
       print(settings.SUCCESS_STATUS)           
-      success_msg = "The target application was identified as " 
-      success_msg += settings.TARGET_APPLICATION + Style.RESET_ALL + "."
-      print(settings.print_success_msg(success_msg))
+      debug_msg = "The target application was identified as " 
+      debug_msg += settings.TARGET_APPLICATION + Style.RESET_ALL + "."
+      print(settings.print_debug_msg(debug_msg))
 
     # Check for unsupported target applications
     for i in range(0,len(settings.UNSUPPORTED_TARGET_APPLICATION)):
@@ -1107,8 +1107,8 @@ Procedure for target server's identification.
 def server_identification(server_banner):
   found_server_banner = False
   if settings.VERBOSITY_LEVEL >= 1:
-    info_msg = "Identifying the target server. " 
-    sys.stdout.write(settings.print_info_msg(info_msg))
+    debug_msg = "Identifying the target server. " 
+    sys.stdout.write(settings.print_debug_msg(debug_msg))
     sys.stdout.flush()
 
   for i in range(0,len(settings.SERVER_BANNERS)):
@@ -1117,9 +1117,9 @@ def server_identification(server_banner):
       if settings.VERBOSITY_LEVEL >= 1:
         print(settings.SUCCESS_STATUS)
       if settings.VERBOSITY_LEVEL >= 1:
-        success_msg = "The target server was identified as " 
-        success_msg += server_banner + Style.RESET_ALL + "."
-        print(settings.print_success_msg(success_msg))
+        debug_msg = "The target server was identified as " 
+        debug_msg += server_banner + Style.RESET_ALL + "."
+        print(settings.print_debug_msg(debug_msg))
       settings.SERVER_BANNER = match.group(0)
       found_server_banner = True
       # Set up default root paths
@@ -1150,8 +1150,8 @@ def check_target_os(server_banner):
     user_defined_os = settings.TARGET_OS
 
   if settings.VERBOSITY_LEVEL >= 1:
-    info_msg = "Identifying the target operating system. " 
-    sys.stdout.write(settings.print_info_msg(info_msg))
+    debug_msg = "Identifying the target operating system. " 
+    sys.stdout.write(settings.print_debug_msg(debug_msg))
     sys.stdout.flush()
 
   # Procedure for target OS identification.
@@ -1182,9 +1182,9 @@ def check_target_os(server_banner):
   if settings.VERBOSITY_LEVEL >= 1 :
     if found_os_server:
       print(settings.SUCCESS_STATUS)
-      success_msg = "The target operating system appears to be " 
-      success_msg += identified_os.title() + Style.RESET_ALL + "."
-      print(settings.print_success_msg(success_msg))
+      debug_msg = "The target operating system appears to be " 
+      debug_msg += identified_os.title() + Style.RESET_ALL + "."
+      print(settings.print_debug_msg(debug_msg))
     else:
       print(settings.FAIL_STATUS)
       warn_msg = "Heuristics have failed to identify server's operating system."

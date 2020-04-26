@@ -31,7 +31,7 @@ SUCCESS_MSG = Fore.GREEN + " " * 10 + Style.RESET_ALL
 SUCCESS_STATUS = "" + SUCCESS_MSG + ""
 # Status Signs
 SUCCESS_SIGN = "[" + Fore.GREEN + Style.BRIGHT + "+" + Style.RESET_ALL + "] "
-INFO_SIGN = Style.RESET_ALL + "[" + Fore.BLUE + Style.BRIGHT + "*" + Style.RESET_ALL + "] "
+INFO_SIGN = Style.RESET_ALL + "[" + Style.BRIGHT + Fore.BLUE + "*" + Style.RESET_ALL + "] "
 REQUEST_SIGN = Style.RESET_ALL + "[" + Fore.MAGENTA + Style.BRIGHT + ">" + Style.RESET_ALL + "] "
 RESPONSE_SIGN = Style.RESET_ALL + "[" + Fore.MAGENTA + Style.BRIGHT + "<" + Style.RESET_ALL + "] "
 QUESTION_SIGN = Style.RESET_ALL + "[" + Style.BRIGHT + Fore.MAGENTA + "?" + Style.RESET_ALL + "] "
@@ -44,8 +44,9 @@ PAYLOAD_SIGN = "[" + Fore.CYAN + Style.BRIGHT + "~" + Style.RESET_ALL + "] Setti
 SUB_CONTENT_SIGN = "    " + Fore.GREY + "|_ " + Style.RESET_ALL
 TRAFFIC_SIGN = Fore.MAGENTA
 HTTP_CONTENT_SIGN = Fore.MAGENTA
-CHECK_SIGN = "[" + Fore.CYAN + Style.BRIGHT + "~" + Style.RESET_ALL + "] Checking pair of credentials: " + Fore.CYAN
 ABORTION_SIGN = ERROR_SIGN 
+DEBUG_SIGN = "[" + Fore.BLUE + "*" + Style.RESET_ALL + "] "
+CHECK_SIGN = DEBUG_SIGN + "Checking pair of credentials: " + Fore.CYAN
 
 # Print error message
 def print_error_msg(err_msg):
@@ -127,6 +128,10 @@ def print_sub_content(sub_content):
   result = SUB_CONTENT_SIGN + sub_content + Style.RESET_ALL
   return result
 
+def print_debug_msg(debug_msg):
+  result = DEBUG_SIGN + debug_msg + Style.RESET_ALL
+  return result  
+
 # argv checks
 def sys_argv_checks():
   tamper_index = None
@@ -182,7 +187,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "3.1.50"
+VERSION_NUM = "3.1.51"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"

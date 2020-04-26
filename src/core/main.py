@@ -258,16 +258,13 @@ def init_request(url):
   if menu.options.proxy:
     proxy.do_check(url)
   if settings.VERBOSITY_LEVEL >= 1:
-    info_msg = "Creating HTTP requests opener object."
-    print(settings.print_info_msg(info_msg))
+    debug_msg = "Creating HTTP requests opener object."
+    print(settings.print_debug_msg(debug_msg))
   # Used a valid pair of valid credentials
   if menu.options.auth_cred and menu.options.auth_type:
     info_msg = "Using '" + menu.options.auth_cred + "' pair of " + menu.options.auth_type 
     info_msg += " HTTP authentication credentials."
     print(settings.print_info_msg(info_msg))
-  # # Check for URL redirection
-  # if not menu.options.ignore_redirects:
-  #   url = redirection.do_check(url)
   return request
 
 """
