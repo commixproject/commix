@@ -367,7 +367,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                       else:
                         tmp_upload = ""
                       if len(tmp_upload) == 0:
-                         tmp_upload = "y"
+                         tmp_upload = "Y"
                       if tmp_upload in settings.CHOICE_YES:
                         exit_loops = True
                         settings.TEMPFILE_BASED_STATE = True
@@ -537,7 +537,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                 else:
                   enumerate_again = ""  
                 if len(enumerate_again) == 0:
-                  enumerate_again = "y"
+                  enumerate_again = "Y"
                 if enumerate_again in settings.CHOICE_YES:
                   fb_enumeration.do_check(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
                   # print("")
@@ -572,7 +572,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                 else:
                   file_access_again = ""
                 if len(file_access_again) == 0:
-                   file_access_again= "y"
+                   file_access_again= "Y"
                 if file_access_again in settings.CHOICE_YES:
                   fb_file_access.do_check(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
                   print("")
@@ -622,7 +622,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                 else:
                   gotshell = ""
                 if len(gotshell) == 0:
-                   gotshell = "y"
+                   gotshell = "Y"
                 if gotshell in settings.CHOICE_YES:
                   if not menu.options.batch:
                     print("")

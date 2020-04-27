@@ -255,8 +255,12 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
           sys.stdout.flush()
         if settings.VERBOSITY_LEVEL == 1:
           print("")
-        sub_content = "Retrieved: " + str(output_length)
-        print(settings.print_sub_content(sub_content))
+        if settings.VERBOSITY_LEVEL >= 1:
+          debug_msg = "Retrieved the length of execution output: " + str(output_length)
+          print(settings.print_bold_debug_msg(debug_msg))
+        else:
+          sub_content = "Retrieved: " + str(output_length)
+          print(settings.print_sub_content(sub_content))
       found_chars = True
       injection_check = False
       break
@@ -391,10 +395,10 @@ def false_positive_check(separator, TAG, cmd, whitespace, prefix, suffix, timese
       cmd = "powershell.exe -InputFormat none write-host ([string](cmd /c " + cmd + ")).trim().length"
 
   found_chars = False
-  info_msg = "Checking the reliability of the used payload "
-  info_msg += "in case of a false positive result. "
+  debug_msg = "Checking the reliability of the used payload "
+  debug_msg += "in case of a false positive result. "
   if settings.VERBOSITY_LEVEL == 1: 
-    sys.stdout.write(settings.print_info_msg(info_msg))
+    sys.stdout.write(settings.print_debug_msg(debug_msg))
     sys.stdout.flush()
   # Check if defined "--verbose" option.
   elif settings.VERBOSITY_LEVEL > 1:
@@ -553,7 +557,7 @@ def export_injection_results(cmd, separator, output, check_how_long):
       print("\n")
     elif settings.VERBOSITY_LEVEL == 1:
       print("")  
-    print(Fore.GREEN + Style.BRIGHT + output + Style.RESET_ALL)
+    print(settings.print_output(output))
     info_msg = "Finished in " + time.strftime('%H:%M:%S', time.gmtime(check_how_long)) + "."
     sys.stdout.write("\n" + settings.print_info_msg(info_msg))
   else:

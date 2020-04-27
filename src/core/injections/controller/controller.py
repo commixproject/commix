@@ -147,7 +147,7 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
         else:
           procced_option = ""
         if len(procced_option) == 0:
-           procced_option = "y"
+           procced_option = "Y"
         if procced_option in settings.CHOICE_YES:
           skip_code_injections = True
         elif procced_option in settings.CHOICE_NO:
@@ -175,7 +175,7 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
         else:
           procced_option = ""
         if len(procced_option) == 0:
-           procced_option = "y"
+           procced_option = "Y"
         if procced_option in settings.CHOICE_YES:
           skip_command_injections = True
         elif procced_option in settings.CHOICE_NO:
@@ -583,7 +583,7 @@ def do_check(url, filename):
         else:
           next_level = ""
         if len(next_level) == 0:
-           next_level = "y"
+           next_level = "Y"
         if next_level in settings.CHOICE_YES:
           menu.options.level = int(menu.options.level + scan_level)
           if perform_checks(url,filename) == False and scan_level < settings.HTTP_HEADER_INJECTION_LEVEL :

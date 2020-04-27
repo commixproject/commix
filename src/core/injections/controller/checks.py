@@ -116,7 +116,7 @@ Counting the total of HTTP(S) requests for the identified injection point(s), du
 def total_of_requests():
   debug_msg = "Identified the following injection point with "
   debug_msg += "a total of " + str(settings.TOTAL_OF_REQUESTS) + " HTTP(S) requests."
-  print(settings.print_debug_msg(debug_msg))
+  print(settings.print_bold_debug_msg(debug_msg))
 
 """
 Url decode specific chars of the provided payload.
@@ -193,7 +193,7 @@ def next_attack_vector(technique, go_back):
     else:
       next_attack_vector = ""
     if len(next_attack_vector) == 0:
-       next_attack_vector = "y"
+       next_attack_vector = "Y"
     if next_attack_vector in settings.CHOICE_YES:
       # Check injection state
       assessment_phase()
@@ -260,7 +260,7 @@ def procced_with_file_based_technique():
     else:
       enable_fb = ""
     if len(enable_fb) == 0:
-       enable_fb = "y"
+       enable_fb = "Y"
     if enable_fb in settings.CHOICE_YES:
       return True
     elif enable_fb in settings.CHOICE_NO:
@@ -328,7 +328,7 @@ def continue_tests(err):
       else:
         continue_tests = ""
       if len(continue_tests) == 0:
-         continue_tests = "y"
+         continue_tests = "Y"
       if continue_tests in settings.CHOICE_YES:
         return True
       elif continue_tests in settings.CHOICE_NO:
@@ -402,7 +402,7 @@ def ps_check():
       else:
         ps_check = ""
       if len(ps_check) == 0:
-         ps_check = "y"
+         ps_check = "Y"
       if ps_check in settings.CHOICE_YES:
         menu.options.ps_version = True
         break
@@ -428,7 +428,7 @@ def ps_check_failed():
     else:
       ps_check = ""
     if len(ps_check) == 0:
-       ps_check = "y"
+       ps_check = "Y"
     if ps_check in settings.CHOICE_YES:
       break
     elif ps_check in settings.CHOICE_NO:
@@ -474,7 +474,7 @@ def check_CGI_scripts(url):
         else:
           shellshock_check = ""   
         if len(shellshock_check) == 0:
-           shellshock_check = "y"
+           shellshock_check = "Y"
         if shellshock_check in settings.CHOICE_YES:
           menu.options.shellshock = True
           break
@@ -1168,7 +1168,7 @@ def process_xml_data():
         print(settings.print_success_msg(success_msg))
       xml_process = ""
     if len(xml_process) == 0:
-       xml_process = "y"              
+       xml_process = "Y"              
     if xml_process in settings.CHOICE_YES:
       settings.IS_XML = True
       break
@@ -1215,7 +1215,7 @@ def process_json_data():
         print(settings.print_success_msg(success_msg))
       json_process = ""
     if len(json_process) == 0:
-       json_process = "y"              
+       json_process = "Y"              
     if json_process in settings.CHOICE_YES:
       settings.IS_JSON = True
       break
@@ -1296,7 +1296,7 @@ def file_upload():
       else:
         enable_HTTP_server = ""
       if len(enable_HTTP_server) == 0:
-         enable_HTTP_server = "y"              
+         enable_HTTP_server = "Y"              
       if enable_HTTP_server in settings.CHOICE_YES:
 
         # Check if file exists
@@ -1382,7 +1382,7 @@ def define_py_working_dir():
       else:
         python_dir = ""  
       if len(python_dir) == 0:
-         python_dir = "y" 
+         python_dir = "Y" 
       if python_dir in settings.CHOICE_YES:
         break
       elif python_dir in settings.CHOICE_NO:

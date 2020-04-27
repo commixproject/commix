@@ -80,7 +80,7 @@ def installer():
         else:
           uninstall = "" 
         if len(uninstall) == 0:
-           uninstall = "y"
+           uninstall = "Y"
         if uninstall in settings.CHOICE_YES:
           uninstaller()
           raise SystemExit()

@@ -102,11 +102,10 @@ def cmd_exec(http_request_method, cmd, url, vuln_parameter, ip_src):
   
   # Check if defined "--verbose" option.
   if settings.VERBOSITY_LEVEL >= 1:
-    info_msg = "Executing the '" + cmd + "' command. "
-    sys.stdout.write(settings.print_info_msg(info_msg))
+    debug_msg = "Executing the '" + cmd + "' command. "
+    sys.stdout.write(settings.print_debug_msg(debug_msg))
     sys.stdout.flush()
     sys.stdout.write("\n" + settings.print_payload(payload) + "\n")
-
   if http_request_method == "GET":
     url = url.replace(settings.INJECT_TAG, "")
     data = payload.replace(" ", "%20")
@@ -167,7 +166,7 @@ def input_cmd(http_request_method, url, vuln_parameter, ip_src, technique):
     else:
       gotshell = ""  
     if len(gotshell) == 0:
-       gotshell= "y"
+       gotshell= "Y"
     if gotshell in settings.CHOICE_YES:
       print("\nPseudo-Terminal (type '" + Style.BRIGHT + "?" + Style.RESET_ALL + "' for available options)")
       if readline_error:

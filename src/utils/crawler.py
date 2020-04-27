@@ -135,7 +135,7 @@ def crawler(url):
       else:
         change_depth_level = ""
       if len(change_depth_level) == 0:
-         change_depth_level = "y"
+         change_depth_level = "Y"
       if change_depth_level in settings.CHOICE_YES or change_depth_level in settings.CHOICE_NO:
         break  
       elif change_depth_level in settings.CHOICE_QUIT:
@@ -200,7 +200,7 @@ def crawler(url):
           else:
             sitemap_check = ""
           if len(sitemap_check) == 0:
-             sitemap_check = "y"
+             sitemap_check = "Y"
           if sitemap_check in settings.CHOICE_YES:
             output_href = sitemap(recursion)
             sitemap_check = output_href
@@ -245,7 +245,7 @@ def crawler(url):
         else:
           use_url = ""
         if len(use_url) == 0:
-           use_url = "y"
+           use_url = "Y"
         if use_url in settings.CHOICE_YES:
           return check_url
         elif use_url in settings.CHOICE_NO:

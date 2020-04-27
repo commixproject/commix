@@ -75,8 +75,8 @@ def define_wordlists():
   try:
     usernames = []
     if settings.VERBOSITY_LEVEL >= 1:
-      info_msg = "Default dictionary file for usernames '" + settings.USERNAMES_TXT_FILE + "' "
-      print(settings.print_info_msg(info_msg))
+      debug_msg = "Parsing '" + settings.USERNAMES_TXT_FILE + "' dictionary file for usernames."
+      print(settings.print_debug_msg(debug_msg))
     if not os.path.isfile(settings.USERNAMES_TXT_FILE):
       err_msg = "The username file (" + str(settings.USERNAMES_TXT_FILE) + ") is not found"
       print(settings.print_critical_msg(err_msg))
@@ -97,8 +97,8 @@ def define_wordlists():
   try:
     passwords = []
     if settings.VERBOSITY_LEVEL >= 1:
-      info_msg = "Default dictionary file for passwords '" + settings.PASSWORDS_TXT_FILE + "'"
-      print(settings.print_info_msg(info_msg))
+      debug_msg = "Parsing '" + settings.PASSWORDS_TXT_FILE + "' dictionary file for passwords."
+      print(settings.print_debug_msg(debug_msg))
     if not os.path.isfile(settings.PASSWORDS_TXT_FILE):
       err_msg = "The password file (" + str(settings.PASSWORDS_TXT_FILE) + ") is not found" + Style.RESET_ALL
       print(settings.print_critical_msg(err_msg))

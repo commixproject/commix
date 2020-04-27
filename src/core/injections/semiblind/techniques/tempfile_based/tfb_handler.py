@@ -479,7 +479,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                   else:
                     enumerate_again = ""
                   if len(enumerate_again) == 0:
-                    enumerate_again = "y"
+                    enumerate_again = "Y"
                   if enumerate_again in settings.CHOICE_YES:
                     tfb_enumeration.do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
                     print("")
@@ -510,7 +510,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                   else:
                     file_access_again = ""
                   if len(file_access_again) == 0:
-                    file_access_again = "y"
+                    file_access_again = "Y"
                   if file_access_again in settings.CHOICE_YES:
                     tfb_file_access.do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
                     break
@@ -558,7 +558,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                   else:
                     gotshell = ""
                   if len(gotshell) == 0:
-                     gotshell = "y"
+                     gotshell = "Y"
                   if gotshell in settings.CHOICE_YES:
                     if not menu.options.batch:
                       print("")
@@ -601,7 +601,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                         output = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
                         # Update logs with executed cmds and execution results.
                         logs.executed_command(filename, cmd, output)
-                        print("\n") + Fore.GREEN + Style.BRIGHT + output + Style.RESET_ALL + "\n"
+                        print("\n") + settings.print_output(output) + "\n"
                       # Update logs with executed cmds and execution results.
                       logs.executed_command(filename, cmd, output)
 

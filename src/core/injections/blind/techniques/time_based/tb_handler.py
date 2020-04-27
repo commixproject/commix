@@ -442,7 +442,7 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                   else:
                     enumerate_again = ""
                   if len(enumerate_again) == 0:
-                    enumerate_again = "y"
+                    enumerate_again = "Y"
                   if enumerate_again in settings.CHOICE_YES:
                     tb_enumeration.do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
                     print("")
@@ -471,7 +471,7 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                   else:
                     file_access_again = "" 
                   if len(file_access_again) == 0:
-                     file_access_again = "y" 
+                     file_access_again = "Y" 
                   if file_access_again in settings.CHOICE_YES:
                     tb_file_access.do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
                     break
@@ -515,7 +515,7 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                 else:
                   gotshell = "" 
                 if len(gotshell) == 0:
-                  gotshell = "y"
+                  gotshell = "Y"
                 if gotshell in settings.CHOICE_YES:
                   if not menu.options.batch:
                     print("")
@@ -557,7 +557,7 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                             session_handler.store_cmd(url, cmd, output, vuln_parameter)
                         else:
                           output = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
-                          print("\n") + Fore.GREEN + Style.BRIGHT + output + Style.RESET_ALL
+                          print("\n") + settings.print_output(output)
                         # Update logs with executed cmds and execution results.
                         logs.executed_command(filename, cmd, output)
                         print("")

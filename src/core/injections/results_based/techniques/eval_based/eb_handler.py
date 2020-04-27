@@ -332,7 +332,7 @@ def eb_injection_handler(url, timesec, filename, http_request_method):
                 else:
                   enumerate_again = ""  
                 if len(enumerate_again) == 0:
-                  enumerate_again = "y"
+                  enumerate_again = "Y"
                 if enumerate_again in settings.CHOICE_YES:
                   eb_enumeration.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec)
                   # print("")
@@ -364,7 +364,7 @@ def eb_injection_handler(url, timesec, filename, http_request_method):
                 else:
                   file_access_again = ""
                 if len(file_access_again) == 0:
-                   file_access_again = "y"
+                   file_access_again = "Y"
                 if file_access_again in settings.CHOICE_YES:
                   eb_file_access.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec)
                   print("")
@@ -402,7 +402,7 @@ def eb_injection_handler(url, timesec, filename, http_request_method):
               else:
                 gotshell = ""
               if len(gotshell) == 0:
-                 gotshell = "y"
+                 gotshell = "Y"
               if gotshell in settings.CHOICE_YES:
                 if not menu.options.batch:
                   print("")

@@ -30,23 +30,24 @@ FAIL_STATUS = "" + FAIL_MSG + ""
 SUCCESS_MSG = Fore.GREEN + " " * 10 + Style.RESET_ALL
 SUCCESS_STATUS = "" + SUCCESS_MSG + ""
 # Status Signs
-SUCCESS_SIGN = "[" + Fore.GREEN + Style.BRIGHT + "+" + Style.RESET_ALL + "] "
-INFO_SIGN = Style.RESET_ALL + "[" + Style.BRIGHT + Fore.BLUE + "*" + Style.RESET_ALL + "] "
-REQUEST_SIGN = Style.RESET_ALL + "[" + Fore.MAGENTA + Style.BRIGHT + ">" + Style.RESET_ALL + "] "
-RESPONSE_SIGN = Style.RESET_ALL + "[" + Fore.MAGENTA + Style.BRIGHT + "<" + Style.RESET_ALL + "] "
-QUESTION_SIGN = Style.RESET_ALL + "[" + Style.BRIGHT + Fore.MAGENTA + "?" + Style.RESET_ALL + "] "
-WARNING_SIGN = "[" + Fore.YELLOW  + "!" + Style.RESET_ALL + "] " + Fore.YELLOW + "Warning: "
-WARNING_BOLD_SIGN = "[" + Style.BRIGHT + Fore.YELLOW  + "!" + Style.RESET_ALL + "] " + Style.BRIGHT + Fore.YELLOW + "Warning: "
 LEGAL_DISCLAIMER = "(" + Style.BRIGHT + Fore.RED + "!" + Style.RESET_ALL + ") " + "Legal disclaimer: "
-ERROR_SIGN = "[" + Fore.RED + Style.BRIGHT + "x" + Style.RESET_ALL  + "] " + Fore.RED + "Error: "
-CRITICAL_SIGN = "[" + Back.RED + "x" + Style.RESET_ALL  + "] " + Back.RED + "Critical: "
-PAYLOAD_SIGN = "[" + Fore.CYAN + Style.BRIGHT + "~" + Style.RESET_ALL + "] Setting the payload: " + Fore.CYAN
-SUB_CONTENT_SIGN = "    " + Fore.GREY + "|_ " + Style.RESET_ALL
-TRAFFIC_SIGN = Fore.MAGENTA
-HTTP_CONTENT_SIGN = Fore.MAGENTA
+INFO_SIGN = Style.RESET_ALL + "[" + Fore.GREEN + "info" + Style.RESET_ALL + "] "
+SUCCESS_SIGN = "[" + Fore.GREEN + Style.BRIGHT + "info" + Style.RESET_ALL + "] " 
+REQUEST_SIGN = Style.RESET_ALL + "[" + Style.BRIGHT + Back.MAGENTA + "traffic" + Style.RESET_ALL + "] " + Style.BRIGHT
+RESPONSE_SIGN = Style.RESET_ALL + "[" + Style.BRIGHT + Back.MAGENTA + "traffic" + Style.RESET_ALL + "] " + Style.BRIGHT
+#QUESTION_SIGN = Style.RESET_ALL + "[" + Fore.MAGENTA + "?" + Style.RESET_ALL + "] "
+QUESTION_SIGN = ""
+WARNING_SIGN = "[" + Fore.LIGHTYELLOW_EX  + "warning" + Style.RESET_ALL + "] "
+WARNING_BOLD_SIGN = "[" + Style.BRIGHT + Fore.YELLOW  + "warning" + Style.RESET_ALL + "] " + Style.BRIGHT
+ERROR_SIGN = "[" + Fore.RED + "error" + Style.RESET_ALL  + "] " 
+CRITICAL_SIGN = "[" + Back.RED + "critical" + Style.RESET_ALL  + "] "
+PAYLOAD_SIGN = "[" + Fore.CYAN + "payload" + Style.RESET_ALL + "] " 
+SUB_CONTENT_SIGN = " " * 7 + Fore.GREY + "|_ " + Style.RESET_ALL
+TRAFFIC_SIGN = HTTP_CONTENT_SIGN = ""
 ABORTION_SIGN = ERROR_SIGN 
-DEBUG_SIGN = "[" + Fore.BLUE + "*" + Style.RESET_ALL + "] "
-CHECK_SIGN = DEBUG_SIGN + "Checking pair of credentials: " + Fore.CYAN
+DEBUG_SIGN = "[" + Back.BLUE + Fore.WHITE + "debug" + Style.RESET_ALL + "] " 
+DEBUG_BOLD_SIGN = "[" + Back.BLUE + Style.BRIGHT + Fore.WHITE + "debug" + Style.RESET_ALL + "] " + Style.BRIGHT
+CHECK_SIGN = DEBUG_SIGN + "Checking pair of credentials: "
 
 # Print error message
 def print_error_msg(err_msg):
@@ -108,6 +109,10 @@ def print_traffic(traffic):
   result = TRAFFIC_SIGN + str(traffic) + Style.RESET_ALL
   return result
 
+def print_output(output):
+  result = Fore.GREEN + Style.BRIGHT + str(output) + Style.RESET_ALL
+  return result
+
 # Print HTTP response content (verbose mode)
 def print_http_response_content(content):
   result = HTTP_CONTENT_SIGN + str(content) + Style.RESET_ALL
@@ -128,8 +133,14 @@ def print_sub_content(sub_content):
   result = SUB_CONTENT_SIGN + sub_content + Style.RESET_ALL
   return result
 
+# Print debug message (verbose mode)
 def print_debug_msg(debug_msg):
   result = DEBUG_SIGN + debug_msg + Style.RESET_ALL
+  return result  
+
+# Print bold debug message (verbose mode)
+def print_bold_debug_msg(debug_msg):
+  result = DEBUG_BOLD_SIGN + debug_msg + Style.RESET_ALL
   return result  
 
 # argv checks
@@ -187,7 +198,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "3.1.51"
+VERSION_NUM = "3.1.52"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"
@@ -407,19 +418,19 @@ SHADOW_FILE = "/etc/shadow"
 SYS_PASSES = FILE_READ + SHADOW_FILE 
 
 # Accepts 'YES','YE','Y','yes','ye','y'
-CHOICE_YES = ['yes','ye','y']
+CHOICE_YES = ['YES','YE','Y','yes','ye','y']
 
 # Accepts 'NO','N','no','n'
-CHOICE_NO = ['no','n']
+CHOICE_NO = ['NO','N','no','n']
 
 # Accepts 'QUIT','Q','quit','q'
-CHOICE_QUIT = ['q','quit']
+CHOICE_QUIT = ['QUIT','Q','quit','q']
 
 # Accepts 'W','w','U','u','Q','q'
-CHOICE_OS = ['w','u','q']
+CHOICE_OS = ['W','w','U','u','Q','q']
 
 # Accepts 'C','c','S','s','Q','q','a','A','n','N'
-CHOICE_PROCEED = ['c','s','q','a','n']
+CHOICE_PROCEED = ['C','c','S','s','Q','q','a','A','n','N']
 
 # Available alternative shells
 AVAILABLE_SHELLS = ["python"]

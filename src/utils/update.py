@@ -144,7 +144,7 @@ def check_for_update():
         else:
           do_update = ""
         if len(do_update) == 0:
-          do_update = "y"
+          do_update = "Y"
         if do_update in settings.CHOICE_YES:
             updater()
         elif do_update in settings.CHOICE_NO:
@@ -247,7 +247,7 @@ def check_unicorn_version(current_version):
         else:
           do_update = ""
         if len(do_update) == 0:
-          do_update = "y"
+          do_update = "Y"
         if do_update in settings.CHOICE_YES:
             unicorn_updater(current_version)
         elif do_update in settings.CHOICE_NO:

@@ -37,8 +37,8 @@ Estimating the response time (in seconds).
 def estimate_response_time(url, timesec):
   stored_auth_creds = False
   if settings.VERBOSITY_LEVEL >= 1:
-    info_msg = "Estimating the target URL response time. "
-    sys.stdout.write(settings.print_info_msg(info_msg))
+    debug_msg = "Estimating the target URL response time. "
+    sys.stdout.write(settings.print_debug_msg(debug_msg))
     sys.stdout.flush()
   # Check if defined POST data
   if menu.options.data:
@@ -108,14 +108,14 @@ def estimate_response_time(url, timesec):
             stored_auth_creds = False
           if stored_auth_creds:
             menu.options.auth_cred = stored_auth_creds
-            success_msg = "Identified a valid (stored) pair of credentials '"  
+            success_msg = "Identified a (stored) valid pair of credentials '"  
             success_msg += menu.options.auth_cred + Style.RESET_ALL + Style.BRIGHT  + "'."
             print(settings.print_success_msg(success_msg))
           else:  
             # Basic authentication 
             if menu.options.auth_type == "basic":
               if not menu.options.ignore_code == settings.UNAUTHORIZED_ERROR:
-                warn_msg = "(" + menu.options.auth_type.capitalize() + ") " 
+                warn_msg = menu.options.auth_type.capitalize() + " " 
                 warn_msg += "HTTP authentication credentials are required."
                 print(settings.print_warning_msg(warn_msg))
                 while True:
@@ -125,7 +125,7 @@ def estimate_response_time(url, timesec):
                   else:
                     do_update = ""  
                   if len(do_update) == 0:
-                     do_update = "y" 
+                     do_update = "Y" 
                   if do_update in settings.CHOICE_YES:
                     auth_creds = authentication.http_auth_cracker(url, realm)
                     if auth_creds != False:
@@ -146,7 +146,7 @@ def estimate_response_time(url, timesec):
             # Digest authentication         
             elif menu.options.auth_type == "digest":
               if not menu.options.ignore_code == settings.UNAUTHORIZED_ERROR:
-                warn_msg = "(" + menu.options.auth_type.capitalize() + ") " 
+                warn_msg = menu.options.auth_type.capitalize() + " " 
                 warn_msg += "HTTP authentication credentials are required."
                 print(settings.print_warning_msg(warn_msg))      
                 # Check if heuristics have failed to identify the realm attribute.
@@ -160,7 +160,7 @@ def estimate_response_time(url, timesec):
                   else:
                     do_update = ""
                   if len(do_update) == 0:
-                     do_update = "y" 
+                     do_update = "Y" 
                   if do_update in settings.CHOICE_YES:
                     auth_creds = authentication.http_auth_cracker(url, realm)
                     if auth_creds != False:
@@ -1050,7 +1050,7 @@ def encoding_detection(response):
           if settings.VERBOSITY_LEVEL >= 1:
             debug_msg = "The indicated web-page charset appears to be " 
             debug_msg += settings.ENCODING + Style.RESET_ALL + "."
-            print(settings.print_debug_msg(debug_msg))
+            print(settings.print_bold_debug_msg(debug_msg))
       else:
         pass
     except:
@@ -1086,7 +1086,7 @@ def application_identification(server_banner, url):
       print(settings.SUCCESS_STATUS)           
       debug_msg = "The target application was identified as " 
       debug_msg += settings.TARGET_APPLICATION + Style.RESET_ALL + "."
-      print(settings.print_debug_msg(debug_msg))
+      print(settings.print_bold_debug_msg(debug_msg))
 
     # Check for unsupported target applications
     for i in range(0,len(settings.UNSUPPORTED_TARGET_APPLICATION)):
@@ -1119,7 +1119,7 @@ def server_identification(server_banner):
       if settings.VERBOSITY_LEVEL >= 1:
         debug_msg = "The target server was identified as " 
         debug_msg += server_banner + Style.RESET_ALL + "."
-        print(settings.print_debug_msg(debug_msg))
+        print(settings.print_bold_debug_msg(debug_msg))
       settings.SERVER_BANNER = match.group(0)
       found_server_banner = True
       # Set up default root paths
@@ -1184,7 +1184,7 @@ def check_target_os(server_banner):
       print(settings.SUCCESS_STATUS)
       debug_msg = "The target operating system appears to be " 
       debug_msg += identified_os.title() + Style.RESET_ALL + "."
-      print(settings.print_debug_msg(debug_msg))
+      print(settings.print_bold_debug_msg(debug_msg))
     else:
       print(settings.FAIL_STATUS)
       warn_msg = "Heuristics have failed to identify server's operating system."

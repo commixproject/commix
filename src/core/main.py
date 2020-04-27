@@ -90,14 +90,14 @@ def user_agent_header():
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
     else:
-      info_msg = "Fetching random HTTP User-Agent header. "  
-      sys.stdout.write(settings.print_info_msg(info_msg))
+      debug_msg = "Fetching random HTTP User-Agent header. "  
+      sys.stdout.write(settings.print_debug_msg(debug_msg))
       sys.stdout.flush()
       try:
         menu.options.agent = random.choice(settings.USER_AGENT_LIST)
         print(settings.SUCCESS_STATUS)
-        success_msg = "The fetched random HTTP User-Agent header is '" + menu.options.agent + "'."  
-        print(settings.print_success_msg(success_msg))
+        info_msg = "The fetched random HTTP User-Agent header value is '" + menu.options.agent + "'."  
+        print(settings.print_info_msg(info_msg))
       except:
         print(settings.FAIL_STATUS)
           

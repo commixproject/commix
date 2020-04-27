@@ -729,7 +729,7 @@ def shellshock_handler(url, http_request_method, filename):
               else:
                  enumerate_again = "" 
               if len(enumerate_again) == 0:
-                 enumerate_again = "y"
+                 enumerate_again = "Y"
               if enumerate_again in settings.CHOICE_YES:
                 enumeration(url, cve, check_header, filename)
                 break
@@ -753,7 +753,7 @@ def shellshock_handler(url, http_request_method, filename):
               else:
                  file_access_again= "" 
               if len(file_access_again) == 0:
-                 file_access_again = "y"
+                 file_access_again = "Y"
               if file_access_again in settings.CHOICE_YES:
                 file_access(url, cve, check_header, filename)
                 break
@@ -788,7 +788,7 @@ def shellshock_handler(url, http_request_method, filename):
               else:
                 gotshell= ""  
               if len(gotshell) == 0:
-                 gotshell= "y"
+                 gotshell= "Y"
               if gotshell in settings.CHOICE_YES:
                 if not menu.options.batch:
                   print("")
@@ -822,14 +822,13 @@ def shellshock_handler(url, http_request_method, filename):
                         logs.executed_command(filename, cmd, shell)
                         print("\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n")
                       else:
-                        info_msg = "Executing the '" + cmd + "' command. "
+                        debug_msg = "Executing the '" + cmd + "' command. "
                         if settings.VERBOSITY_LEVEL == 1:
-                          sys.stdout.write(settings.print_info_msg(info_msg))
+                          sys.stdout.write(settings.print_debug_msg(debug_msg))
                           sys.stdout.flush()
                           sys.stdout.write("\n" + settings.print_payload(payload)+ "\n")
-
                         elif settings.VERBOSITY_LEVEL > 1:
-                          sys.stdout.write(settings.print_info_msg(info_msg))
+                          sys.stdout.write(settings.print_debug_msg(debug_msg))
                           sys.stdout.flush()
                           sys.stdout.write("\n" + settings.print_payload(payload)+ "\n")
                         err_msg = "The '" + cmd + "' command, does not return any output."
@@ -915,11 +914,9 @@ def cmd_exec(url, cmd, cve, check_header, filename):
       TAG = ''.join(random.choice(string.ascii_uppercase) for i in range(6))
       cmd = "echo " + TAG + "$(" + cmd + ")" + TAG
       payload = shellshock_exploitation(cve, cmd)
-      info_msg = "Executing the '" + cmd + "' command. "
-      if settings.VERBOSITY_LEVEL == 1:
-        sys.stdout.write(settings.print_info_msg(info_msg))
-      elif settings.VERBOSITY_LEVEL > 1:
-        sys.stdout.write(settings.print_info_msg(info_msg))
+      debug_msg = "Executing the '" + cmd + "' command. "
+      if settings.VERBOSITY_LEVEL >= 1:
+        sys.stdout.write(settings.print_debug_msg(debug_msg))
       sys.stdout.flush()
       if settings.VERBOSITY_LEVEL >= 1:
         sys.stdout.write("\n" + settings.print_payload(payload)+ "\n")

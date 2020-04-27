@@ -51,8 +51,8 @@ def shell_options(option):
 Success msg.
 """
 def shell_success():
-  success_msg = "Everything is in place, cross your fingers and check for a shell on port " + settings.LPORT + "!\n"
-  sys.stdout.write(settings.print_success_msg(success_msg))
+  info_msg = "Everything is in place, cross your fingers and check for bind shell (on port " + settings.LPORT + ").\n"
+  sys.stdout.write(settings.print_info_msg(info_msg))
   sys.stdout.flush()
 
 """
@@ -86,7 +86,7 @@ def set_php_working_dir():
     else:
       php_dir = ""
     if len(php_dir) == 0:
-       php_dir = "y"
+       php_dir = "Y"
     if php_dir in settings.CHOICE_YES:
       break
     elif php_dir in settings.CHOICE_NO:
@@ -112,7 +112,7 @@ def set_python_working_dir():
     else:
       python_dir = "" 
     if len(python_dir) == 0:
-       python_dir = "y"
+       python_dir = "Y"
     if python_dir in settings.CHOICE_YES:
       break
     elif python_dir in settings.CHOICE_NO:

@@ -132,7 +132,7 @@ def input_cmd(dns_server, http_request_method, url, vuln_parameter, technique):
     else:
       gotshell = ""  
     if len(gotshell) == 0:
-       gotshell= "y"
+       gotshell= "Y"
     if gotshell in settings.CHOICE_YES:
       print("\nPseudo-Terminal (type '" + Style.BRIGHT + "?" + Style.RESET_ALL + "' for available options)")
       if readline_error:
