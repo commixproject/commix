@@ -1025,31 +1025,30 @@ def encoding_detection(response):
       except AttributeError:
         # Support for python 3.x
         charset = response.headers.get_content_charset()
-      if len(charset) != 0 :         
+      if charset != None and len(charset) != 0 :        
         charset_detected = True
       else:
-        content = re.findall(r";charset=(.*)\"", html_data)
+        content = re.findall(r"charset=(.*)\"", response.read())
         if len(content) != 0 :
           charset = content
           charset_detected = True
         else:
            # Check if HTML5 format
-          charset = re.findall(r"charset=['\"](.*?)['\"]", html_data) 
+          charset = re.findall(r"charset=['\"](.*?)['\"]", response.read()) 
         if len(charset) != 0 :
           charset_detected = True
       # Check the identifyied charset
       if charset_detected :
-        settings.UNICODE_ENCODING = charset
+        settings.UNICODE_ENCODING = settings.ENCODING = charset[0].lower()
         if settings.VERBOSITY_LEVEL >= 1:
           print(settings.SUCCESS_STATUS)
-        settings.ENCODING = charset.lower()
         if settings.ENCODING.lower() not in settings.ENCODING_LIST:
           warn_msg = "The indicated web-page charset "  + settings.ENCODING + " seems unknown."
           print(settings.print_warning_msg(warn_msg))
         else:
           if settings.VERBOSITY_LEVEL >= 1:
-            debug_msg = "The indicated web-page charset appears to be " 
-            debug_msg += settings.ENCODING + Style.RESET_ALL + "."
+            debug_msg = "The indicated web-page charset appears to be '" 
+            debug_msg += settings.ENCODING + Style.RESET_ALL + "'."
             print(settings.print_bold_debug_msg(debug_msg))
       else:
         pass

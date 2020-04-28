@@ -1,4 +1,5 @@
 ## Version 3.1 (upcoming)
+* Revised: Improvement regarding identifying the indicated web-page charset.
 * Revised: Minor improvement regarding verbose mode (i.e. debug messages).
 * Fixed: Bug-fix regarding Basic HTTP authentication.
 * Revised: Minor improvement regarding redirection mechanism.
