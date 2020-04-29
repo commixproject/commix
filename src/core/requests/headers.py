@@ -12,6 +12,7 @@ the Free Software Foundation, either version 3 of the License, or
  
 For more see the file 'readme/COPYING' for copying permission.
 """
+
 import re
 import ssl
 try:
@@ -250,7 +251,7 @@ def check_http_traffic(request):
     # Check for 4xx and/or 5xx HTTP error codes.
     if str(err.code).startswith('4') or \
        str(err.code).startswith('5'):
-      if settings.VERBOSITY_LEVEL > 1:
+      if settings.VERBOSITY_LEVEL <= 2:
         if len(str(err).split(": ")[1]) == 0:
           error_msg = error_msg + "Non-standard HTTP status code" 
         warn_msg = error_msg

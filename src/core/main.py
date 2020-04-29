@@ -90,12 +90,16 @@ def user_agent_header():
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
     else:
-      debug_msg = "Fetching random HTTP User-Agent header. "  
-      sys.stdout.write(settings.print_debug_msg(debug_msg))
-      sys.stdout.flush()
+      if settings.VERBOSITY_LEVEL >= 1:
+        debug_msg = "Fetching random HTTP User-Agent header. "  
+        sys.stdout.write(settings.print_debug_msg(debug_msg))
+        sys.stdout.flush()
+      else:
+        pass
       try:
         menu.options.agent = random.choice(settings.USER_AGENT_LIST)
-        print(settings.SUCCESS_STATUS)
+        if settings.VERBOSITY_LEVEL >= 1:
+          print(settings.SUCCESS_STATUS)
         info_msg = "The fetched random HTTP User-Agent header value is '" + menu.options.agent + "'."  
         print(settings.print_info_msg(info_msg))
       except:
@@ -197,7 +201,7 @@ def check_internet(url):
   info_msg = "Checking for internet connection. "
   sys.stdout.write(settings.print_info_msg(info_msg))
   sys.stdout.flush()
-  if settings.VERBOSITY_LEVEL > 1:
+  if settings.VERBOSITY_LEVEL <= 2:
     print("")
   try:
     request = _urllib.request.Request(settings.CHECK_INTERNET_ADDRESS)
@@ -691,6 +695,11 @@ try:
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
 
+    if int(menu.options.failed_tries) == 0:
+      err_msg = "You must specify '--failed-tries' value, greater than zero."      
+      print(settings.print_critical_msg(err_msg))
+      raise SystemExit()
+
     # Check if defined "--auth-cred" and/or '--auth-type'.
     if (menu.options.auth_type and not menu.options.auth_cred) or (menu.options.auth_cred and not menu.options.auth_type):
         err_msg = "You must specify both '--auth-cred' and '--auth-type' options."      
@@ -906,7 +915,7 @@ except KeyboardInterrupt:
      settings.TEMPFILE_BASED_STATE :
      if not settings.DETECTION_PHASE and \
         settings.EXPLOITATION_PHASE:
-      if settings.VERBOSITY_LEVEL != 0: 
+      if settings.VERBOSITY_LEVEL >= 1: 
         new_line = ""
   print(new_line + settings.print_abort_msg(abort_msg))
   try:

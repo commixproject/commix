@@ -92,6 +92,8 @@ Detection for classic 'warning' messages.
 """
 def warning_detection(url, http_request_method):
   try:
+    debug_msg = "Checking for failure messages on page's response."
+    print(settings.print_debug_msg(debug_msg))
     # Find the host part
     url_part = url.split("=")[0]
     request = _urllib.request.Request(url_part)
@@ -122,7 +124,7 @@ def warning_detection(url, http_request_method):
         err_msg = "code evaluation"
       if err_msg != "":
         warn_msg = "A failure message on " + err_msg + " was detected on page's response."
-        print(settings.print_warning_msg(warn_msg))
+        print(settings.print_bold_warning_msg(warn_msg))
     return url
   except _urllib.error.URLError as err_msg:
     print(settings.print_critical_msg(err_msg))

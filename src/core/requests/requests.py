@@ -1028,18 +1028,18 @@ def encoding_detection(response):
       if charset != None and len(charset) != 0 :        
         charset_detected = True
       else:
-        content = re.findall(r"charset=(.*)\"", response.read())
+        content = re.findall(r"charset=(.*)\"", response.read())[0]
         if len(content) != 0 :
           charset = content
           charset_detected = True
         else:
            # Check if HTML5 format
-          charset = re.findall(r"charset=['\"](.*?)['\"]", response.read()) 
+          charset = re.findall(r"charset=['\"](.*?)['\"]", response.read())[0]
         if len(charset) != 0 :
           charset_detected = True
       # Check the identifyied charset
       if charset_detected :
-        settings.UNICODE_ENCODING = settings.ENCODING = charset[0].lower()
+        settings.UNICODE_ENCODING = settings.ENCODING = charset.lower()
         if settings.VERBOSITY_LEVEL >= 1:
           print(settings.SUCCESS_STATUS)
         if settings.ENCODING.lower() not in settings.ENCODING_LIST:

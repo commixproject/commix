@@ -82,8 +82,8 @@ Delete previous shells outputs.
 def delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
   if settings.FILE_BASED_STATE != None:
     if settings.VERBOSITY_LEVEL >= 1:
-      info_msg = "Deleting the created (" + OUTPUT_TEXTFILE + ") file...\n"
-      sys.stdout.write(settings.print_info_msg(info_msg))
+      debug_msg = "Deleting the created (" + OUTPUT_TEXTFILE + ") file.\n"
+      sys.stdout.write(settings.print_debug_msg(debug_msg))
     if settings.TARGET_OS == "win":
       cmd = settings.WIN_DEL + OUTPUT_TEXTFILE
     else:  
@@ -278,9 +278,9 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                 payload_msg = payload.replace("\n", "\\n")
                 print(settings.print_payload(payload_msg))
               # Check if defined "--verbose" option.
-              elif settings.VERBOSITY_LEVEL > 1:
-                info_msg = "Generating payload for the injection..."
-                print(settings.print_info_msg(info_msg))
+              elif settings.VERBOSITY_LEVEL >= 2:
+                debug_msg = "Generating payload for the injection."
+                print(settings.print_debug_msg(debug_msg))
                 print(settings.print_payload(payload)) 
 
               # Cookie Injection
@@ -330,7 +330,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                 # Evaluate test results.
                 output = _urllib.request.urlopen(request)
                 html_data = output.read()
-                shell = re.findall(r"" + TAG + "", html_data)
+                shell = re.findall(r"" + TAG + "", str(html_data))
 
                 if len(shell) != 0 and shell[0] == TAG and not settings.VERBOSITY_LEVEL >= 1:
                   percent = settings.SUCCESS_MSG

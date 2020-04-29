@@ -70,8 +70,8 @@ Delete previous shells outputs.
 """
 def delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
   if settings.VERBOSITY_LEVEL >= 1:
-    info_msg = "Deleting the created (" + OUTPUT_TEXTFILE + ") file...\n"
-    sys.stdout.write(settings.print_info_msg(info_msg))
+    debug_msg = "Deleting the created (" + OUTPUT_TEXTFILE + ") file.\n"
+    sys.stdout.write(settings.print_debug_msg(debug_msg))
   if settings.TARGET_OS == "win":
     cmd = settings.WIN_DEL + OUTPUT_TEXTFILE
   else:
@@ -175,9 +175,9 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                 if settings.VERBOSITY_LEVEL == 1:
                   payload_msg = payload.replace("\n", "\\n")
                   print(settings.print_payload(payload_msg))
-                elif settings.VERBOSITY_LEVEL > 1:
-                  info_msg = "Generating payload for the injection..."
-                  print(settings.print_info_msg(info_msg))
+                elif settings.VERBOSITY_LEVEL >= 2:
+                  debug_msg = "Generating payload for the injection."
+                  print(settings.print_debug_msg(debug_msg))
                   print(settings.print_payload(payload)) 
                   
                 # Cookie header injection

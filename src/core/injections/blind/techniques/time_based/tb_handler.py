@@ -161,9 +161,9 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                   payload_msg = payload.replace("\n", "\\n")
                   print(settings.print_payload(payload_msg))
                 # Check if defined "--verbose" option.
-                elif settings.VERBOSITY_LEVEL > 1:
-                  info_msg = "Generating payload for the injection..."
-                  print(settings.print_info_msg(info_msg))
+                elif settings.VERBOSITY_LEVEL >= 2:
+                  debug_msg = "Generating payload for the injection."
+                  print(settings.print_debug_msg(debug_msg))
                   payload_msg = payload.replace("\n", "\\n") 
                   sys.stdout.write(settings.print_payload(payload_msg) + "\n")
 

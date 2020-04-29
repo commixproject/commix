@@ -135,7 +135,7 @@ def http_auth_cracker(url, realm):
         # Check if verbose mode on
         if settings.VERBOSITY_LEVEL >= 1:
           payload = "" + username + ":" + password + ""
-          if settings.VERBOSITY_LEVEL > 1:
+          if settings.VERBOSITY_LEVEL <= 2:
             print(settings.print_checking_msg(payload))
           else:
             sys.stdout.write("\r" + settings.print_checking_msg(payload) + " " * 10)

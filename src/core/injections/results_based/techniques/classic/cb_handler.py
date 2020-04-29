@@ -145,9 +145,9 @@ def cb_injection_handler(url, timesec, filename, http_request_method):
               # Check if defined "--verbose" option.
               if settings.VERBOSITY_LEVEL == 1:
                 print(settings.print_payload(payload))
-              elif settings.VERBOSITY_LEVEL > 1:
-                info_msg = "Generating payload for the injection..."
-                print(settings.print_info_msg(info_msg))
+              elif settings.VERBOSITY_LEVEL >= 2:
+                debug_msg = "Generating payload for the injection."
+                print(settings.print_debug_msg(debug_msg))
                 print(settings.print_payload(payload)) 
                 
               # Cookie header injection
