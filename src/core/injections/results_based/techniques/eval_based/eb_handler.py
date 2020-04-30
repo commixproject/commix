@@ -78,7 +78,6 @@ def eb_injection_handler(url, timesec, filename, http_request_method):
   settings.EVAL_PREFIXES = settings.EVAL_PREFIXES + settings.EXECUTION_FUNCTIONS
 
   if not settings.LOAD_SESSION:
-    url = eb_injector.warning_detection(url, http_request_method)
     info_msg = "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + ". "
     sys.stdout.write(settings.print_info_msg(info_msg))
     sys.stdout.flush()

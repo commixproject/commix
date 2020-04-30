@@ -88,52 +88,6 @@ def injection_test(payload, http_request_method, url):
   return response, vuln_parameter
 
 """
-Detection for classic 'warning' messages.
-"""
-def warning_detection(url, http_request_method):
-  try:
-    debug_msg = "Checking for failure messages on page's response."
-    print(settings.print_debug_msg(debug_msg))
-    # Find the host part
-    url_part = url.split("=")[0]
-    request = _urllib.request.Request(url_part)
-    # Check if defined extra headers.
-    headers.do_check(request)
-    response = requests.get_request_response(request)
-    if response:
-      response = _urllib.request.urlopen(request)
-      html_data = response.read().decode(settings.UNICODE_ENCODING)
-      err_msg = ""
-      if "eval()'d code" in html_data:
-        err_msg = "'eval()'"
-      if "Warning: create_function():" in html_data:
-        err_msg = "create_function()"
-      if "Cannot execute a blank command in" in html_data:
-        err_msg = "execution of a blank command,"
-      if "sh: command substitution:" in html_data:
-        err_msg = "command substitution"
-      if "Warning: usort()" in html_data:
-        err_msg = "'usort()'"
-      if re.findall(r"=/(.*)/&", url):
-        if "Warning: preg_replace():" in html_data:
-          err_msg = "'preg_replace()'"
-        url = url.replace("/&","/e&")
-      if "Warning: assert():" in html_data:
-        err_msg = "'assert()'"
-      if "Failure evaluating code:" in html_data:
-        err_msg = "code evaluation"
-      if err_msg != "":
-        warn_msg = "A failure message on " + err_msg + " was detected on page's response."
-        print(settings.print_bold_warning_msg(warn_msg))
-    return url
-  except _urllib.error.URLError as err_msg:
-    print(settings.print_critical_msg(err_msg))
-    raise SystemExit()
-  except _urllib.error.HTTPError as err_msg:
-    print(settings.print_critical_msg(err_msg))
-    raise SystemExit()
-
-"""
 Evaluate test results.
 """
 def injection_test_results(response, TAG, randvcalc):
