@@ -192,7 +192,7 @@ def cb_injection_handler(url, timesec, filename, http_request_method):
               time.sleep(timesec)
               shell = cb_injector.injection_test_results(response, TAG, randvcalc)
 
-              if not settings.VERBOSITY_LEVEL >= 1:
+              if settings.VERBOSITY_LEVEL == 0:
                 percent = ((i*100)/total)
                 float_percent = "{0:.1f}".format(round(((i*100)/(total*1.0)),2))
               
@@ -281,7 +281,7 @@ def cb_injection_handler(url, timesec, filename, http_request_method):
             counter = counter + 1
 
             if not settings.LOAD_SESSION:
-              if not settings.VERBOSITY_LEVEL >= 1:
+              if settings.VERBOSITY_LEVEL == 0:
                 print("")
               else:
                 checks.total_of_requests()

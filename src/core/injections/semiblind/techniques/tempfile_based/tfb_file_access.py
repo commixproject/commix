@@ -55,7 +55,7 @@ def file_read(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
     shell = "".join(str(p) for p in shell)
   except TypeError:
     pass
-  if settings.VERBOSITY_LEVEL <= 1 and _:
+  if settings.VERBOSITY_LEVEL < 1 and _:
     print("")
   if shell:
     success_msg = "The contents of file '"  
@@ -152,7 +152,7 @@ def file_write(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec,
     shell = "".join(str(p) for p in shell)
   except TypeError:
     pass
-  if settings.VERBOSITY_LEVEL <= 1 and _:
+  if settings.VERBOSITY_LEVEL < 1 and _:
     print("")
   if shell:
     success_msg = "The '" +  shell + Style.RESET_ALL 
@@ -211,7 +211,7 @@ def file_upload(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec
       shell = "".join(str(p) for p in shell)
     except TypeError:
       pass
-    if settings.VERBOSITY_LEVEL <= 1 and _:
+    if settings.VERBOSITY_LEVEL < 1 and _:
       print("")
     if shell:
       success_msg = "The '" +  shell + Style.RESET_ALL 

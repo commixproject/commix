@@ -623,7 +623,7 @@ def shellshock_handler(url, http_request_method, filename):
   technique = "shellshock injection technique"
 
   info_msg = "Testing the " + technique + ". "
-  if settings.VERBOSITY_LEVEL <= 2:
+  if settings.VERBOSITY_LEVEL > 1:
     info_msg = info_msg + "\n"
   sys.stdout.write(settings.print_info_msg(info_msg))
   sys.stdout.flush()
@@ -685,7 +685,7 @@ def shellshock_handler(url, http_request_method, filename):
         else:
           percent = str(float_percent)+ "%"
 
-        if not settings.VERBOSITY_LEVEL >= 1:
+        if settings.VERBOSITY_LEVEL == 0:
           info_msg = "Testing the " + technique + "." + "" + percent + ""
           sys.stdout.write("\r" + settings.print_info_msg(info_msg))
           sys.stdout.flush()
@@ -827,7 +827,7 @@ def shellshock_handler(url, http_request_method, filename):
                           sys.stdout.write(settings.print_debug_msg(debug_msg))
                           sys.stdout.flush()
                           sys.stdout.write("\n" + settings.print_payload(payload)+ "\n")
-                        elif settings.VERBOSITY_LEVEL <= 2:
+                        elif settings.VERBOSITY_LEVEL > 1:
                           sys.stdout.write(settings.print_debug_msg(debug_msg))
                           sys.stdout.flush()
                           sys.stdout.write("\n" + settings.print_payload(payload)+ "\n")
@@ -847,7 +847,7 @@ def shellshock_handler(url, http_request_method, filename):
 
                   except:
                     info_msg = "Testing the " + technique + ". "
-                    if settings.VERBOSITY_LEVEL <= 2:
+                    if settings.VERBOSITY_LEVEL > 1:
                       info_msg = info_msg + "\n"
                     sys.stdout.write(settings.print_info_msg(info_msg))
                     sys.stdout.flush()

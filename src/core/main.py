@@ -201,7 +201,7 @@ def check_internet(url):
   info_msg = "Checking for internet connection. "
   sys.stdout.write(settings.print_info_msg(info_msg))
   sys.stdout.flush()
-  if settings.VERBOSITY_LEVEL <= 2:
+  if settings.VERBOSITY_LEVEL > 1:
     print("")
   try:
     request = _urllib.request.Request(settings.CHECK_INTERNET_ADDRESS)

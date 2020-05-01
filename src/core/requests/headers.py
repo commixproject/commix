@@ -107,7 +107,7 @@ def check_http_traffic(request):
         if menu.options.traffic_file:
           logs.log_traffic("\n" + header)
       if menu.options.traffic_file:
-        if settings.VERBOSITY_LEVEL <= 2: 
+        if settings.VERBOSITY_LEVEL > 1: 
           logs.log_traffic("\n\n" + "#" * 77 + "\n\n")
         else:
           logs.log_traffic("\n\n") 
@@ -251,7 +251,7 @@ def check_http_traffic(request):
     # Check for 4xx and/or 5xx HTTP error codes.
     if str(err.code).startswith('4') or \
        str(err.code).startswith('5'):
-      if settings.VERBOSITY_LEVEL <= 2:
+      if settings.VERBOSITY_LEVEL > 1:
         if len(str(err).split(": ")[1]) == 0:
           error_msg = error_msg + "Non-standard HTTP status code" 
         warn_msg = error_msg

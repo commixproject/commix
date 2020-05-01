@@ -222,7 +222,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                 float_percent = "{0:.1f}".format(round(((num_of_chars*100)/(total*1.0)),2))
 
                 if percent == 100 and no_result == True:
-                  if not settings.VERBOSITY_LEVEL >= 1:
+                  if settings.VERBOSITY_LEVEL == 0:
                     percent = settings.FAIL_STATUS
                   else:
                     percent = ""
@@ -275,6 +275,12 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                           print(settings.print_error_msg(err_msg))
                           pass
 
+                    if settings.VERBOSITY_LEVEL == 0:
+                      percent = ".. (" + str(float_percent) + "%)"
+                      info_msg = "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "." + "" + percent + ""
+                      sys.stdout.write("\r" + settings.print_info_msg(info_msg))
+                      sys.stdout.flush()
+
                     # Check if false positive fixation is True.
                     if false_positive_fixation:
                       false_positive_fixation = False
@@ -307,7 +313,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                         if str(output) == str(randvcalc) and len(TAG) == output_length:
                           possibly_vulnerable = True
                           how_long_statistic = 0
-                          if not settings.VERBOSITY_LEVEL >= 1:
+                          if settings.VERBOSITY_LEVEL == 0:
                             percent = settings.SUCCESS_MSG
                           else:
                             percent = ""
@@ -316,20 +322,20 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                         break
                     # False positive
                     else:
-                      if not settings.VERBOSITY_LEVEL >= 1:
+                      if settings.VERBOSITY_LEVEL == 0:
                         percent = ".. (" + str(float_percent) + "%)"
                         info_msg =  "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "." + "" + percent + ""
                         sys.stdout.write("\r" + settings.print_info_msg(info_msg))
                         sys.stdout.flush()
                       continue    
                   else:
-                    if not settings.VERBOSITY_LEVEL >= 1:
+                    if settings.VERBOSITY_LEVEL == 0:
                       percent = ".. (" + str(float_percent) + "%)"
                       info_msg =  "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "." + "" + percent + ""
                       sys.stdout.write("\r" + settings.print_info_msg(info_msg))
                       sys.stdout.flush()
                     continue
-                if not settings.VERBOSITY_LEVEL >= 1:
+                if settings.VERBOSITY_LEVEL == 0:
                   info_msg =  "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "." + "" + percent + ""
                   sys.stdout.write("\r" + settings.print_info_msg(info_msg))
                   sys.stdout.flush()
@@ -361,7 +367,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                 float_percent = "{0:.1f}".format(round(((num_of_chars*100)/(total*1.0)),2))
                 if str(float_percent) == "100.0":
                   if no_result == True:
-                    if not settings.VERBOSITY_LEVEL >= 1:
+                    if settings.VERBOSITY_LEVEL == 0:
                       percent = settings.FAIL_STATUS
                       info_msg =  "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "." + "" + percent + ""
                       sys.stdout.write("\r" + settings.print_info_msg(info_msg))
@@ -441,7 +447,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
               counter = counter + 1
 
               if not settings.LOAD_SESSION:
-                if not settings.VERBOSITY_LEVEL >= 1:
+                if settings.VERBOSITY_LEVEL == 0:
                   print("")
                 else:
                   checks.total_of_requests()

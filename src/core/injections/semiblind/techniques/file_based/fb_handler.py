@@ -392,7 +392,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                   
                   else:
                     if exit_loops == False:
-                      if not settings.VERBOSITY_LEVEL >= 1:
+                      if settings.VERBOSITY_LEVEL == 0:
                         if str(float_percent) == "100.0":
                           if no_result == True:
                             percent = settings.FAIL_STATUS
@@ -505,7 +505,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
             counter = counter + 1
 
             if not settings.LOAD_SESSION:
-              if not settings.VERBOSITY_LEVEL >= 1:
+              if settings.VERBOSITY_LEVEL == 0:
                 print("")
               else:
                 checks.total_of_requests()
