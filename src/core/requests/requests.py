@@ -1028,7 +1028,7 @@ def encoding_detection(response):
       if charset != None and len(charset) != 0 :        
         charset_detected = True
       else:
-        content = re.findall(r"charset=(.*)\"", response.read())[0]
+        content = re.findall(r"charset=['\"](.*)['\"]", response.read())[0]
         if len(content) != 0 :
           charset = content
           charset_detected = True

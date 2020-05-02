@@ -198,7 +198,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "3.1.56"
+VERSION_NUM = "3.1.57"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"
@@ -236,7 +236,11 @@ INJECT_TAG_REGEX = r"(?i)INJECT[_]?HERE"
 #Basic heuristic checks for code injection warnings
 BASIC_TEST = "\\\\/{$}\\/\\"
 # Code injection warnings
-CODE_INJECTION_WARNINGS = ["eval()'d code", "runtime-created function", "usort", "assert"]
+CODE_INJECTION_WARNINGS = ["eval()'d code", "runtime-created function", "usort", "assert", "preg_replace"]
+IDENTIFIED_WARNINGS = False
+
+SKIP_CODE_INJECTIONS = False
+SKIP_COMMAND_INJECTIONS = False
 
 # User-defined stored post data.
 USER_DEFINED_POST_DATA = ""
