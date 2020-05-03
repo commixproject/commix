@@ -1,4 +1,5 @@
 ## Version 3.1 (upcoming)
+* Revised: Improvement regarding checking if the provided value has boundaries (e.g. 'param=/value/').
 * Revised: Improvement regarding dynamic code evaluation technique's heurstic checks.
 * Revised: Improvement regarding identifying the indicated web-page charset.
 * Revised: Minor improvement regarding verbose mode (i.e. debug messages).

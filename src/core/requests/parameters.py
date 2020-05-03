@@ -81,7 +81,9 @@ def do_GET_check(url):
       value = ''.join(value)
       # Check if single parameter is supplied.
       if len(multi_parameters) == 1:
-        # Replace the value of parameter with INJECT tag
+        if re.search(settings.VALUE_BOUNDARIES, value):
+          value = checks.value_boundaries(value)
+        # Replace the value of parameter with INJECT_HERE tag
         inject_value = value.replace(value, settings.INJECT_TAG)
         # Check if defined the INJECT_TAG
         if settings.INJECT_TAG not in parameters:
@@ -125,7 +127,9 @@ def do_GET_check(url):
             # Ignoring the anti-CSRF parameter(s).
             if checks.ignore_anticsrf_parameter(all_params[param]):
               continue
-            # Replace the value of parameter with INJECT tag
+            if re.search(settings.VALUE_BOUNDARIES, value):
+              value = checks.value_boundaries(value)
+            # Replace the value of parameter with INJECT_HERE tag
             inject_value = value.replace(value, settings.INJECT_TAG)
             # Skip testing the parameter(s) with empty value(s).
             if menu.options.skip_empty:
@@ -174,25 +178,16 @@ def vuln_GET_param(url):
     value = ''.join(value)
     vuln_parameter = re.sub(r"/(.*)/", "", value)
 
-  elif re.findall(r"" + settings.PARAMETER_DELIMITER + "(.*)=" + settings.INJECT_TAG + "", url):
-    vuln_parameter = re.findall(r"" + settings.PARAMETER_DELIMITER + "(.*)=" + settings.INJECT_TAG + "", url)
-    vuln_parameter = ''.join(vuln_parameter)
-    vuln_parameter = re.sub(r"(.*)=(.*)" + settings.PARAMETER_DELIMITER, "", vuln_parameter)
+  elif re.search(r"" + settings.PARAMETER_DELIMITER + "(.*)=[\S*(\\/)]?" + settings.INJECT_TAG, url):
+    vuln_parameter = re.search(r"" + settings.PARAMETER_DELIMITER + "(.*)=[\S*(\\/)]?" + settings.INJECT_TAG, url).group(1)
 
-  elif re.findall(r"\?(.*)=" + settings.INJECT_TAG + "", url):
-    vuln_parameter = re.findall(r"\?(.*)=" + settings.INJECT_TAG + "", url)
-    vuln_parameter = ''.join(vuln_parameter)
-
-  elif re.findall(r"(.*)=" + settings.INJECT_TAG + "", url):
-    vuln_parameter = re.findall(r"(.*)=" + settings.INJECT_TAG + "", url)
-    vuln_parameter = ''.join(vuln_parameter)
+  elif re.search(r"\?(.*)=[\S*(\\/)]?" + settings.INJECT_TAG , url):
+    vuln_parameter = re.search(r"\?(.*)=[\S*(\\/)]?" + settings.INJECT_TAG , url).group(1)
 
   # Check if only one parameter supplied but, not defined the INJECT_TAG.
   elif settings.INJECT_TAG not in url:
     #Grab the value of parameter.
-    value = re.findall(r'\?(.*)=', url)
-    value = ''.join(value)
-    vuln_parameter = value
+    vuln_parameter = re.search(r'\?(.*)=', url).group(1)
 
   else:
     vuln_parameter = url
@@ -267,7 +262,9 @@ def do_POST_check(parameter):
       # Ignoring the anti-CSRF parameter(s).
       if checks.ignore_anticsrf_parameter(parameter):
         return parameter
-      # Replace the value of parameter with INJECT tag
+      if re.search(settings.VALUE_BOUNDARIES, value):
+        value = checks.value_boundaries(value)
+      # Replace the value of parameter with INJECT_HERE tag
       inject_value = value.replace(value, settings.INJECT_TAG)
       if len(value) == 0:
         if settings.IS_JSON:
@@ -321,15 +318,14 @@ def do_POST_check(parameter):
         # Ignoring the anti-CSRF parameter(s).
         if checks.ignore_anticsrf_parameter(all_params[param]):
           continue
-        # Replace the value of parameter with INJECT tag
+        if re.search(settings.VALUE_BOUNDARIES, value):
+          value = checks.value_boundaries(value)
+        # Replace the value of parameter with INJECT_HERE tag  
         inject_value = value.replace(value, settings.INJECT_TAG)
         # Skip testing the parameter(s) with empty value(s).
         if menu.options.skip_empty:
           if len(value) == 0:
             if settings.IS_JSON:
-              #Grab the value of parameter.
-              # provided_value = re.findall(r'\:\"(.*)\"', all_params[param])
-              # provided_value = ''.join(provided_value)
               provided_value = re.findall(r'\:(.*)', all_params[param])
               provided_value = re.sub(settings.IGNORE_SPECIAL_CHAR_REGEX, '', ''.join(value))
             elif settings.IS_XML:
@@ -383,7 +379,6 @@ Define the vulnerable POST parameter.
 """
 def vuln_POST_param(parameter, url):
   # JSON data format
-  #print parameter
   if settings.IS_JSON:
     param = re.sub(settings.IGNORE_SPECIAL_CHAR_REGEX, '', parameter.split(settings.INJECT_TAG)[0])
     if param:
@@ -398,13 +393,11 @@ def vuln_POST_param(parameter, url):
       
   else:
     # Regular POST data format.
-    if re.findall(r"" + settings.PARAMETER_DELIMITER + "(.*)=" + settings.INJECT_TAG + "", parameter):
-      vuln_parameter = re.findall(r"" + settings.PARAMETER_DELIMITER + "(.*)=" + settings.INJECT_TAG + "", parameter)
-      vuln_parameter = ''.join(vuln_parameter)
-      vuln_parameter = re.sub(r"(.*)=(.*)" + settings.PARAMETER_DELIMITER, "", vuln_parameter)
-    elif re.findall(r"(.*)=" + settings.INJECT_TAG + "", parameter):
-      vuln_parameter = re.findall(r"(.*)=" + settings.INJECT_TAG + "", parameter)
-      vuln_parameter = ''.join(vuln_parameter)
+    if re.search(r"" + settings.PARAMETER_DELIMITER + "(.*)=[\S*(\\/)]?" + settings.INJECT_TAG, parameter):
+      vuln_parameter = re.search(r"" + settings.PARAMETER_DELIMITER + "(.*)=[\S*(\\/)]?" + settings.INJECT_TAG, parameter).group(1)
+
+    elif re.search(r"(.*)=[\S*(\\/)]?" + settings.INJECT_TAG , parameter):
+      vuln_parameter = re.search(r"(.*)=[\S*(\\/)]?" + settings.INJECT_TAG , parameter).group(1)
 
   if 'vuln_parameter' not in locals():
     return parameter

@@ -148,13 +148,11 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
       ce = "code injection technique"
       if not menu.options.batch:
         question_msg = "Do you want to skip test payloads for "
-        question_msg += ci + " ? [Y/n] > "
+        question_msg += ci + "? [Y/n] > "
         procced_option = _input(settings.print_question_msg(question_msg))
       else:
         procced_option = ""
-      if len(procced_option) == 0:
-         procced_option = "Y"
-      if procced_option in settings.CHOICE_YES:
+      if procced_option in settings.CHOICE_YES or len(procced_option) == 0:
         if settings.VERBOSITY_LEVEL >= 1:   
           debug_msg = "Skipping " + ci + "."
           print(settings.print_debug_msg(debug_msg))

@@ -32,6 +32,26 @@ from src.utils import simple_http_server
 from src.thirdparty.flatten_json.flatten_json import flatten, unflatten_list
 from src.thirdparty.colorama import Fore, Back, Style, init
 
+# If the value has boundaries.
+def value_boundaries(value):
+  if not menu.options.batch:
+    question_msg =  "It appears that the value '" + value + "' has boundaries. "
+    question_msg += "Do you want to inject inside? [Y/n] > "
+    procced_option = _input(settings.print_question_msg(question_msg))
+  else:
+    procced_option = ""
+  if procced_option in settings.CHOICE_YES or len(procced_option) == 0:
+    value = value.replace(re.search(settings.VALUE_BOUNDARIES, value).group(0), "")
+  elif procced_option in settings.CHOICE_NO:
+    pass
+  elif procced_option in settings.CHOICE_QUIT:
+    raise SystemExit()
+  else:
+    err_msg = "'" + procced_option + "' is not a valid answer."  
+    print(settings.print_error_msg(err_msg))
+    pass
+  return value
+
 # Ignoring the anti-CSRF parameter(s).
 def ignore_anticsrf_parameter(parameter):
   if any(parameter.lower().count(token) for token in settings.CSRF_TOKEN_PARAMETER_INFIXES):

@@ -911,12 +911,12 @@ except KeyboardInterrupt:
   abort_msg += "during the " + checks.assessment_phase() 
   abort_msg += " phase (Ctrl-C was pressed)."
   new_line = "\n"
-  if settings.FILE_BASED_STATE or \
-     settings.TEMPFILE_BASED_STATE :
-     if not settings.DETECTION_PHASE and \
-        settings.EXPLOITATION_PHASE:
-      if settings.VERBOSITY_LEVEL >= 1: 
-        new_line = ""
+  # if settings.FILE_BASED_STATE or \
+  #    settings.TEMPFILE_BASED_STATE :
+  #    if not settings.DETECTION_PHASE and \
+  #       settings.EXPLOITATION_PHASE:
+  #     if settings.VERBOSITY_LEVEL >= 1: 
+  #       new_line = ""
   print(new_line + settings.print_abort_msg(abort_msg))
   try:
     logs.print_logs_notification(filename, url)
