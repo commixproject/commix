@@ -235,7 +235,7 @@ def crawler(url):
         url_num += 1
         if succeed_banner:
           print(settings.SUCCESS_STATUS)
-        print(settings.print_success_msg("URL " + str(url_num) + " - " + check_url))
+        print(settings.print_bold_info_msg("URL " + str(url_num) + " - " + check_url))
         if filename is not None:
           with open(filename, "a") as crawling_results:
             crawling_results.write(check_url + "\n")

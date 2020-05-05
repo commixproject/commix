@@ -349,7 +349,7 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
             percent = ((num_of_chars*100)/output_length)
             float_percent = str("{0:.1f}".format(round(((num_of_chars * 100)/(output_length * 1.0)),2))) + "%"
             if percent == 100:
-              float_percent = settings.SUCCESS_MSG
+              float_percent = settings.info_msg
             else:
               float_percent = ".. (" + str(float_percent) + ")"
             info_msg = "Grabbing the output from '" + OUTPUT_TEXTFILE +"'."

@@ -301,7 +301,7 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                           possibly_vulnerable = True
                           how_long_statistic = 0
                           if settings.VERBOSITY_LEVEL == 0:
-                            percent = settings.SUCCESS_MSG
+                            percent = settings.info_msg
                           else:
                             percent = ""
                       else:
@@ -421,13 +421,13 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                   checks.total_of_requests()
 
               # Print the findings to terminal.
-              success_msg = "The"
+              info_msg = "The"
               if len(found_vuln_parameter) > 0 and not "cookie" in header_name : 
-                success_msg += " " + http_request_method 
-              success_msg += ('', ' (JSON)')[settings.IS_JSON] + ('', ' (SOAP/XML)')[settings.IS_XML] + the_type + header_name
-              success_msg += found_vuln_parameter + " seems injectable via "
-              success_msg += "(" + injection_type.split(" ")[0] + ") " + technique + "."
-              print(settings.print_success_msg(success_msg))
+                info_msg += " " + http_request_method 
+              info_msg += ('', ' (JSON)')[settings.IS_JSON] + ('', ' (SOAP/XML)')[settings.IS_XML] + the_type + header_name
+              info_msg += found_vuln_parameter + " seems injectable via "
+              info_msg += "(" + injection_type.split(" ")[0] + ") " + technique + "."
+              print(settings.print_bold_info_msg(info_msg))
               sub_content = str(checks.url_decode(payload))
               print(settings.print_sub_content(sub_content))
               # Export session

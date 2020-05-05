@@ -43,8 +43,8 @@ def uninstaller():
     
   sys.stdout.write(settings.SUCCESS_STATUS + "\n")
   sys.stdout.flush()
-  success_msg = "The un-installation of commix has finished!" 
-  print(settings.print_success_msg(success_msg))
+  info_msg = "The un-installation of commix has finished!" 
+  print(settings.print_bold_info_msg(info_msg))
   
 """
 The installer.
@@ -150,9 +150,9 @@ def installer():
     except:
         os.mkdir(OUTPUT_DIR)  
     
-    success_msg = "The installation is finished! Type '"  
-    success_msg += settings.APPLICATION + "' to launch it." 
-    print(settings.print_success_msg(success_msg))
+    info_msg = "The installation is finished! Type '"  
+    info_msg += settings.APPLICATION + "' to launch it." 
+    print(settings.print_bold_info_msg(info_msg))
 
   else :
     print(settings.FAIL_STATUS)

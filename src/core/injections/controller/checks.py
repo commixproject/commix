@@ -619,8 +619,8 @@ def third_party_dependencies():
     pass
 
   print(settings.SUCCESS_STATUS)
-  success_msg = "All required third-party (non-core) libraries are seems to be installed."
-  print(settings.print_success_msg(success_msg))
+  info_msg = "All required third-party (non-core) libraries are seems to be installed."
+  print(settings.print_bold_info_msg(info_msg))
 
 """
 Print the authentiation error message.
@@ -1178,14 +1178,14 @@ def is_XML_check(parameter):
 # Process with SOAP/XML data
 def process_xml_data():
   while True:
-    success_msg = "SOAP/XML data found in POST data."
+    info_msg = "SOAP/XML data found in POST data."
     if not menu.options.batch:
-      question_msg = success_msg
+      question_msg = info_msg
       question_msg += " Do you want to process it? [Y/n] > "
       xml_process = _input(settings.print_question_msg(question_msg))
     else:
       if settings.VERBOSITY_LEVEL >= 1:
-        print(settings.print_success_msg(success_msg))
+        print(settings.print_bold_info_msg(info_msg))
       xml_process = ""
     if len(xml_process) == 0:
        xml_process = "Y"              
@@ -1225,14 +1225,14 @@ def is_JSON_check(parameter):
 # Process with JSON data
 def process_json_data():
   while True:
-    success_msg = "JSON data found in POST data."
+    info_msg = "JSON data found in POST data."
     if not menu.options.batch:
-      question_msg = success_msg
+      question_msg = info_msg
       question_msg += " Do you want to process it? [Y/n] > "
       json_process = _input(settings.print_question_msg(question_msg))
     else:
       if settings.VERBOSITY_LEVEL >= 1:
-        print(settings.print_success_msg(success_msg))
+        print(settings.print_bold_info_msg(info_msg))
       json_process = ""
     if len(json_process) == 0:
        json_process = "Y"              

@@ -56,14 +56,14 @@ def file_read(separator, TAG, prefix, suffix, whitespace, http_request_method, u
   if settings.VERBOSITY_LEVEL >= 1 and menu.options.ignore_session:
     print("")
   if shell:
-    success_msg = "The contents of file '"  
-    success_msg += file_to_read + "'" + Style.RESET_ALL + ": "
-    sys.stdout.write(settings.print_success_msg(success_msg))
+    info_msg = "The contents of file '"  
+    info_msg += file_to_read + "'" + Style.RESET_ALL + ": "
+    sys.stdout.write(settings.print_bold_info_msg(info_msg))
     print(shell)
     output_file = open(filename, "a")
-    success_msg = "The contents of file '"
-    success_msg += file_to_read + "' : " + shell + ".\n"
-    output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
+    info_msg = "The contents of file '"
+    info_msg += file_to_read + "' : " + shell + ".\n"
+    output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
     output_file.close()
   else:
     warn_msg = "It seems that you don't have permissions "
@@ -151,9 +151,9 @@ def file_write(separator, TAG, prefix, suffix, whitespace, http_request_method, 
   if settings.VERBOSITY_LEVEL >= 1:
     print("")
   if shell:
-    success_msg = "The " +  shell + Style.RESET_ALL
-    success_msg += Style.BRIGHT + " file was created successfully!" + "\n" 
-    sys.stdout.write(settings.print_success_msg(success_msg))
+    info_msg = "The " +  shell + Style.RESET_ALL
+    info_msg += Style.BRIGHT + " file was created successfully!" + "\n" 
+    sys.stdout.write(settings.print_bold_info_msg(info_msg))
     sys.stdout.flush()
   else:
     warn_msg = "It seems that you don't have permissions to write the '" + dest_to_write + "' file."
@@ -210,9 +210,9 @@ def file_upload(separator, TAG, prefix, suffix, whitespace, http_request_method,
     if settings.VERBOSITY_LEVEL >= 1:
       print("")
     if shell:
-      success_msg = "The " +  shell
-      success_msg += Style.RESET_ALL + Style.BRIGHT + " file was uploaded successfully!" 
-      sys.stdout.write(settings.print_success_msg(success_msg) + "\n")
+      info_msg = "The " +  shell
+      info_msg += Style.RESET_ALL + Style.BRIGHT + " file was uploaded successfully!" 
+      sys.stdout.write(settings.print_bold_info_msg(info_msg) + "\n")
       sys.stdout.flush()
     else:
       warn_msg = "It seems that you don't have permissions to write the '" + dest_to_upload + "' file."

@@ -55,14 +55,14 @@ def powershell_version(separator, payload, TAG, timesec, prefix, suffix, whitesp
       # if settings.VERBOSITY_LEVEL >= 1:
       #   print("")
       # Output PowerShell's version number
-      success_msg = "The PowerShell's version number is " 
-      success_msg += ps_version + Style.RESET_ALL + Style.BRIGHT
-      sys.stdout.write(settings.print_success_msg(success_msg) + ".\n")
+      info_msg = "The PowerShell's version number is " 
+      info_msg += ps_version + Style.RESET_ALL + Style.BRIGHT
+      sys.stdout.write(settings.print_bold_info_msg(info_msg) + ".\n")
       sys.stdout.flush()
       # Add infos to logs file. 
       output_file = open(filename, "a")
-      success_msg = "The PowerShell's version number is " + ps_version + ".\n"
-      output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
+      info_msg = "The PowerShell's version number is " + ps_version + ".\n"
+      output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
       output_file.close()
   except ValueError:
     warn_msg = "Heuristics have failed to identify the version of Powershell, "
@@ -89,13 +89,13 @@ def hostname(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_
   if shell:
     # if settings.VERBOSITY_LEVEL >= 1:
     #   print("")
-    success_msg = "The hostname is " +  str(shell)
-    sys.stdout.write(settings.print_success_msg(success_msg) + ".\n")
+    info_msg = "The hostname is " +  str(shell)
+    sys.stdout.write(settings.print_bold_info_msg(info_msg) + ".\n")
     sys.stdout.flush()
     # Add infos to logs file. 
     output_file = open(filename, "a")
-    success_msg = "The hostname is " + str(shell) + ".\n"
-    output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
+    info_msg = "The hostname is " + str(shell) + ".\n"
+    output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
     output_file.close()
   else:
     warn_msg = "Heuristics have failed to identify the hostname."
@@ -151,15 +151,15 @@ def system_information(separator, payload, TAG, timesec, prefix, suffix, whitesp
     if target_arch:
       # if settings.VERBOSITY_LEVEL >= 1:
       #   print("")
-      success_msg = "The target operating system is " +  str(target_os) + Style.RESET_ALL  
-      success_msg += Style.BRIGHT + " and the hardware platform is " +  str(target_arch)
-      sys.stdout.write(settings.print_success_msg(success_msg) + ".\n")
+      info_msg = "The target operating system is " +  str(target_os) + Style.RESET_ALL  
+      info_msg += Style.BRIGHT + " and the hardware platform is " +  str(target_arch)
+      sys.stdout.write(settings.print_bold_info_msg(info_msg) + ".\n")
       sys.stdout.flush()
       # Add infos to logs file.   
       output_file = open(filename, "a")
-      success_msg = "The target operating system is " + str(target_os)
-      success_msg += " and the hardware platform is " + str(target_arch) + ".\n"
-      output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
+      info_msg = "The target operating system is " + str(target_os)
+      info_msg += " and the hardware platform is " + str(target_arch) + ".\n"
+      output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
       output_file.close()
   else:
     warn_msg = "Heuristics have failed to retrieve the system information."
@@ -197,12 +197,12 @@ def current_user(separator, payload, TAG, timesec, prefix, suffix, whitespace, h
         session_handler.store_cmd(url, cmd, shell, vuln_parameter)
       else:
         shell = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
-      success_msg = "The current user is " +  str(cu_account)  
-      sys.stdout.write(settings.print_success_msg(success_msg))
+      info_msg = "The current user is " +  str(cu_account)  
+      sys.stdout.write(settings.print_bold_info_msg(info_msg))
       # Add infos to logs file.    
       output_file = open(filename, "a")
-      success_msg = "The current user is " + str(cu_account)
-      output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
+      info_msg = "The current user is " + str(cu_account)
+      output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
       output_file.close()
       if shell:
         if (settings.TARGET_OS == "win" and not "Admin" in shell) or \
@@ -223,13 +223,13 @@ def current_user(separator, payload, TAG, timesec, prefix, suffix, whitespace, h
     else:
       # if settings.VERBOSITY_LEVEL >= 1:
       #   print("")
-      success_msg = "The current user is " +  str(cu_account)
-      sys.stdout.write(settings.print_success_msg(success_msg) + ".\n")
+      info_msg = "The current user is " +  str(cu_account)
+      sys.stdout.write(settings.print_bold_info_msg(info_msg) + ".\n")
       sys.stdout.flush()
       # Add infos to logs file.   
       output_file = open(filename, "a")
-      success_msg = "The current user is " + str(cu_account) + "\n"
-      output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
+      info_msg = "The current user is " + str(cu_account) + "\n"
+      output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
       output_file.close()
   else:
     warn_msg = "Heuristics have failed to identify the current user."
@@ -272,14 +272,14 @@ def system_users(separator, payload, TAG, timesec, prefix, suffix, whitespace, h
         sys_users_list = "".join(str(p) for p in sys_users_list).strip()
         sys_users_list = ' '.join(sys_users_list.split())
         sys_users_list = sys_users_list.split()
-        success_msg =  "Identified " + str(len(sys_users_list))
-        success_msg += " entr" + ('ies', 'y')[len(sys_users_list) == 1] 
-        success_msg += " via 'net users' command.\n"
-        sys.stdout.write("\n" + settings.print_success_msg(success_msg))
+        info_msg =  "Identified " + str(len(sys_users_list))
+        info_msg += " entr" + ('ies', 'y')[len(sys_users_list) == 1] 
+        info_msg += " via 'net users' command.\n"
+        sys.stdout.write("\n" + settings.print_bold_info_msg(info_msg))
         sys.stdout.flush()
         # Add infos to logs file.   
         output_file = open(filename, "a")
-        output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
+        output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
         output_file.close()
         count = 0
         for user in range(0, len(sys_users_list)):
@@ -360,14 +360,14 @@ def system_users(separator, payload, TAG, timesec, prefix, suffix, whitespace, h
              sys_users_list.append(sys_users[user : user + 3])
           if len(sys_users_list) != 0 :
             sys.stdout.write(settings.SUCCESS_STATUS)
-            success_msg = "Identified " + str(len(sys_users_list)) 
-            success_msg += " entr" + ('ies', 'y')[len(sys_users_list) == 1] 
-            success_msg += " in '" +  settings.PASSWD_FILE + "'.\n"
-            sys.stdout.write("\n" + settings.print_success_msg(success_msg))
+            info_msg = "Identified " + str(len(sys_users_list)) 
+            info_msg += " entr" + ('ies', 'y')[len(sys_users_list) == 1] 
+            info_msg += " in '" +  settings.PASSWD_FILE + "'.\n"
+            sys.stdout.write("\n" + settings.print_bold_info_msg(info_msg))
             sys.stdout.flush()
             # Add infos to logs file.   
             output_file = open(filename, "a")
-            output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg)
+            output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
             output_file.close()
             count = 0
             for user in range(0, len(sys_users_list)):
@@ -468,14 +468,14 @@ def system_passwords(separator, payload, TAG, timesec, prefix, suffix, whitespac
       sys_passes = sys_passes.split( )
       if len(sys_passes) != 0 :
         sys.stdout.write(settings.SUCCESS_STATUS)
-        success_msg = "Identified " + str(len(sys_passes))
-        success_msg += " entr" + ('ies', 'y')[len(sys_passes) == 1] 
-        success_msg += " in '" +  settings.SHADOW_FILE + "'.\n"
-        sys.stdout.write("\n" + settings.print_success_msg(success_msg))
+        info_msg = "Identified " + str(len(sys_passes))
+        info_msg += " entr" + ('ies', 'y')[len(sys_passes) == 1] 
+        info_msg += " in '" +  settings.SHADOW_FILE + "'.\n"
+        sys.stdout.write("\n" + settings.print_bold_info_msg(info_msg))
         sys.stdout.flush()
         # Add infos to logs file.   
         output_file = open(filename, "a")
-        output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + success_msg )
+        output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg )
         output_file.close()
         count = 0
         for line in sys_passes:

@@ -87,10 +87,10 @@ def signal_handler(signal, frame):
   exit(0)
 
 def snif(ip_dst, ip_src):
-  success_msg = "Started the sniffer between " + Fore.YELLOW + ip_src
-  success_msg += Style.RESET_ALL + Style.BRIGHT + " and " + Fore.YELLOW 
-  success_msg += ip_dst + Style.RESET_ALL + Style.BRIGHT + "."
-  print(settings.print_success_msg(success_msg))
+  info_msg = "Started the sniffer between " + Fore.YELLOW + ip_src
+  info_msg += Style.RESET_ALL + Style.BRIGHT + " and " + Fore.YELLOW 
+  info_msg += ip_dst + Style.RESET_ALL + Style.BRIGHT + "."
+  print(settings.print_bold_info_msg(info_msg))
   
   while True:
     sniff(filter = "icmp and src " + ip_dst, prn=packet_handler, timeout=settings.TIMESEC)

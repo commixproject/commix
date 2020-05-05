@@ -65,11 +65,11 @@ def do_check():
         sys.stdout.write(settings.SUCCESS_STATUS + "\n")
         sys.stdout.flush()
         if menu.options.tor_check:
-          success_msg = "Tor connection is properly set. "
+          info_msg = "Tor connection is properly set. "
         else:
-          success_msg = ""
-        success_msg += "Your ip address appears to be " + found_ip[0] + ".\n"
-        sys.stdout.write(settings.print_success_msg(success_msg))
+          info_msg = ""
+        info_msg += "Your ip address appears to be " + found_ip[0] + ".\n"
+        sys.stdout.write(settings.print_bold_info_msg(info_msg))
         warn_msg = "Increasing default value for option '--time-sec' to"
         warn_msg += " " + str(settings.TIMESEC) + " because switch '--tor' was provided."
         print(settings.print_warning_msg(warn_msg))  

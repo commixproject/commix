@@ -482,9 +482,9 @@ def main(filename, url):
     # Check if defined "--url" or "-m" option.
     if url:
       if menu.options.auth_cred and menu.options.auth_cred and settings.VERBOSITY_LEVEL >= 1:
-        success_msg = "Used a valid pair of " + menu.options.auth_type 
-        success_msg += " HTTP authentication credentials '" + menu.options.auth_cred + "'." 
-        print(settings.print_success_msg(success_msg))
+        info_msg = "Used a valid pair of " + menu.options.auth_type 
+        info_msg += " HTTP authentication credentials '" + menu.options.auth_cred + "'." 
+        print(settings.print_bold_info_msg(info_msg))
       # Load the crawler
       if menu.options.crawldepth > 0 or menu.options.sitemap_url:  
         url = crawler.crawler(url)

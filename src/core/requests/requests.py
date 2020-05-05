@@ -108,9 +108,9 @@ def estimate_response_time(url, timesec):
             stored_auth_creds = False
           if stored_auth_creds:
             menu.options.auth_cred = stored_auth_creds
-            success_msg = "Identified a (stored) valid pair of credentials '"  
-            success_msg += menu.options.auth_cred + Style.RESET_ALL + Style.BRIGHT  + "'."
-            print(settings.print_success_msg(success_msg))
+            info_msg = "Identified a (stored) valid pair of credentials '"  
+            info_msg += menu.options.auth_cred + Style.RESET_ALL + Style.BRIGHT  + "'."
+            print(settings.print_bold_info_msg(info_msg))
           else:  
             # Basic authentication 
             if menu.options.auth_type == "basic":

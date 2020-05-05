@@ -27,12 +27,12 @@ from src.thirdparty.colorama import Fore, Back, Style, init
 # Status
 FAIL_MSG = Fore.RED + " " * 10 + Style.RESET_ALL
 FAIL_STATUS = "" + FAIL_MSG + ""
-SUCCESS_MSG = Fore.GREEN + " " * 10 + Style.RESET_ALL
-SUCCESS_STATUS = "" + SUCCESS_MSG + ""
+info_msg = Fore.GREEN + " " * 10 + Style.RESET_ALL
+SUCCESS_STATUS = "" + info_msg + ""
 # Status Signs
 LEGAL_DISCLAIMER = "(" + Style.BRIGHT + Fore.RED + "!" + Style.RESET_ALL + ") " + "Legal disclaimer: "
 INFO_SIGN = Style.RESET_ALL + "[" + Fore.GREEN + "info" + Style.RESET_ALL + "] "
-SUCCESS_SIGN = "[" + Fore.GREEN + Style.BRIGHT + "info" + Style.RESET_ALL + "] " 
+INFO_BOLD_SIGN = "[" + Fore.GREEN + Style.BRIGHT + "info" + Style.RESET_ALL + "] " 
 REQUEST_SIGN = Style.RESET_ALL + "[" + Style.BRIGHT + Back.MAGENTA + "traffic" + Style.RESET_ALL + "] " + Style.BRIGHT
 RESPONSE_SIGN = Style.RESET_ALL + "[" + Style.BRIGHT + Back.MAGENTA + "traffic" + Style.RESET_ALL + "] " + Style.BRIGHT
 #QUESTION_SIGN = Style.RESET_ALL + "[" + Fore.MAGENTA + "?" + Style.RESET_ALL + "] "
@@ -94,9 +94,9 @@ def print_info_msg(info_msg):
   result = INFO_SIGN + str(info_msg) + Style.RESET_ALL
   return result
 
-# Print success message
-def print_success_msg(success_msg):
-  result = SUCCESS_SIGN + Style.BRIGHT + str(success_msg) + Style.RESET_ALL
+# Print bold information message
+def print_bold_info_msg(info_msg):
+  result = INFO_BOLD_SIGN + Style.BRIGHT + str(info_msg) + Style.RESET_ALL
   return result
 
 # Print payload (verbose mode)
@@ -198,7 +198,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "3.1.59"
+VERSION_NUM = "3.1.60"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"

@@ -51,9 +51,9 @@ def authentication_process():
     if len(cookies) != 0 :
       menu.options.cookie = cookies.rstrip()
       if settings.VERBOSITY_LEVEL >= 1:
-        success_msg = "The received cookie is "  
-        success_msg += str(menu.options.cookie) + Style.RESET_ALL + "."
-        print(settings.print_success_msg(success_msg))
+        info_msg = "The received cookie is "  
+        info_msg += str(menu.options.cookie) + Style.RESET_ALL + "."
+        print(settings.print_bold_info_msg(info_msg))
     _urllib.request.install_opener(opener)
     request = _urllib.request.Request(auth_url, auth_data)
     # Check if defined extra headers.
@@ -181,7 +181,7 @@ def http_auth_cracker(url, realm):
           pass  
         if found:
           if settings.VERBOSITY_LEVEL == 0:
-            float_percent = settings.SUCCESS_MSG
+            float_percent = settings.info_msg
         else:
           if str(float_percent) == "100.0%":
             if settings.VERBOSITY_LEVEL == 0:
@@ -198,9 +198,9 @@ def http_auth_cracker(url, realm):
           valid_pair =  "" + username + ":" + password + ""
           if not settings.VERBOSITY_LEVEL > 1:
             print("")
-          success_msg = "Identified a valid pair of credentials '" 
-          success_msg += valid_pair + Style.RESET_ALL + Style.BRIGHT  + "'."  
-          print(settings.print_success_msg(success_msg))
+          info_msg = "Identified a valid pair of credentials '" 
+          info_msg += valid_pair + Style.RESET_ALL + Style.BRIGHT  + "'."  
+          print(settings.print_bold_info_msg(info_msg))
           return valid_pair
 
     err_msg = "Use the '--auth-cred' option to provide a valid pair of " 

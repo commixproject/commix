@@ -92,7 +92,7 @@ def heuristic_basic(url, http_request_method):
         if warning in html_data:
           technique = "dynamic code evaluation technique"
           info_msg = "Heuristic (" + test_type + ") test shows that target URL might be injectable." 
-          print(settings.print_success_msg(info_msg))
+          print(settings.print_bold_info_msg(info_msg))
           settings.IDENTIFIED_WARNINGS = True
           break
     return url

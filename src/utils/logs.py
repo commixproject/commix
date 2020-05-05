@@ -139,7 +139,7 @@ def create_log_file(url, output_dir):
       datetime.datetime.fromtimestamp(time.time()).strftime('%m/%d/%Y' + \
       " at " + '%H:%M:%S' + " |"))
     output_file.write("\n" + "=" * 37)
-    output_file.write("\n" + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + "Tested URL : " + url)
+    output_file.write("\n" + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + "Tested URL : " + url)
     output_file.close()
   except IOError as err_msg:
     try:
@@ -158,8 +158,8 @@ def add_type_and_technique(export_injection_info, filename, injection_type, tech
   if export_injection_info == False:
     settings.SHOW_LOGS_MSG = True
     output_file = open(filename, "a")
-    output_file.write("\n" + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + "Type: " + injection_type.title())
-    output_file.write("\n" + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + "Technique: " + technique.title())
+    output_file.write("\n" + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + "Type: " + injection_type.title())
+    output_file.write("\n" + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + "Technique: " + technique.title())
     output_file.close()
     export_injection_info = True
 
@@ -174,7 +174,7 @@ def add_parameter(vp_flag, filename, the_type, header_name, http_request_method,
     header_name = " ("+ header_name[1:] + ") " + vuln_parameter
   if header_name[1:] == "":
     header_name = " ("+ http_request_method + ") " + vuln_parameter
-  output_file.write("\n" + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + the_type[1:].title() + ": " + header_name[1:])
+  output_file.write("\n" + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + the_type[1:].title() + ": " + header_name[1:])
   vp_flag = False
   output_file.write("\n")
   output_file.close()
@@ -197,7 +197,7 @@ execution output result in log files.
 def executed_command(filename, cmd, output):
   try:
     output_file = open(filename, "a")
-    output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.SUCCESS_SIGN) + "Executed command: " +  cmd + "\n")
+    output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + "Executed command: " +  cmd + "\n")
     output_file.write("    " + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_SIGN) + "Execution output: " +  output + "\n")
     output_file.close()
   except TypeError:
