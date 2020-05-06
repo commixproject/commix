@@ -228,7 +228,7 @@ def estimate_response_time(url, timesec):
     if url_time_response >= 3:
       warn_msg += " and/or possible corruptions over the extracted data"
     warn_msg += "."
-    print(settings.print_warning_msg(warn_msg))
+    print(settings.print_bold_warning_msg(warn_msg))
 
   if int(timesec) == int(url_time_response):
     timesec = int(timesec) + int(url_time_response)
