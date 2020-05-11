@@ -68,7 +68,7 @@ The commix's updater.
 def updater():
   time.sleep(1)
   info_msg = "Checking requirements to update " 
-  info_msg += settings.APPLICATION + " from GitHub repo. "
+  info_msg += settings.APPLICATION + " from GitHub repository. "
   sys.stdout.write(settings.print_info_msg(info_msg))
   sys.stdout.flush()
   if menu.options.offline:  
@@ -89,6 +89,9 @@ def updater():
       # Check if 'git' is installed.
       requirments.do_check(requirment)
       if requirments.do_check(requirment) == True :
+        if menu.options.verbose:
+          debug_msg = "commix will try to update itself using '" + requirment + "' command."
+          print(settings.print_debug_msg(debug_msg))
         # Check if ".git" exists!
         if os.path.isdir("./.git"):
           sys.stdout.write(settings.SUCCESS_STATUS + "\n")
@@ -164,7 +167,7 @@ The updater for the unicorn tool
 def unicorn_updater(current_version):
   APPLICATION_NAME = "TrustedSec's Magic Unicorn"
   info_msg = "Checking requirements to update " 
-  info_msg += APPLICATION_NAME + " from GitHub repo. "
+  info_msg += APPLICATION_NAME + " from GitHub repository. "
   sys.stdout.write(settings.print_info_msg(info_msg))
   sys.stdout.flush()
   if menu.options.offline:  
