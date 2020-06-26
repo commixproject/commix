@@ -1,4 +1,4 @@
-## Version 3.1 (upcoming)
+## Version 3.1 (2020-06-26)
 * Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
 * Added: A script "setup.py" has been added (i.e. easier installation).
 * Revised: Improvement regarding checking if the provided value has boundaries (e.g. 'param=/value/').
