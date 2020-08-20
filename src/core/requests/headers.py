@@ -154,7 +154,7 @@ def check_http_traffic(request):
     response = False
     current_attempt = 0
     unauthorized = False
-    while not response and current_attempt <= settings.MAX_RETRIES and not unauthorized:
+    while not response and current_attempt <= settings.MAX_RETRIES and unauthorized:
       if settings.VERBOSITY_LEVEL >= 2:
         req_msg = "HTTP request:"
         print(settings.print_request_msg(req_msg))
