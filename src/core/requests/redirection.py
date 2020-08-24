@@ -46,7 +46,7 @@ def do_check(url):
         print(settings.print_warning_msg(warn_msg))
         return Request(redirected_url, 
                            headers = newheaders,
-                           origin_req_host = req.get_origin_req_host(), 
+                           # origin_req_host = req.get_origin_req_host(), 
                            unverifiable = True
                            ) 
       else: 
@@ -63,7 +63,7 @@ def do_check(url):
       newheaders = dict((k,v) for k,v in req.headers.items() if k.lower() not in ("content-length", "content-type"))
       return self.parent.open(_urllib.request.Request(req.get_full_url(), 
                               headers = newheaders, 
-                              origin_req_host = req.get_origin_req_host(), 
+                              # origin_req_host = req.get_origin_req_host(), 
                               unverifiable = True)
                               )
 
