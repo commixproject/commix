@@ -37,7 +37,7 @@ def do_check(url):
        request = _urllib.request.Request(url)
     # Check if defined extra headers.
     headers.do_check(request)
-    request.set_proxy(menu.options.proxy,settings.PROXY_SCHEME)
+    #request.set_proxy(menu.options.proxy,settings.PROXY_SCHEME)
     try:
       check = _urllib.request.urlopen(request)
     except _urllib.error.HTTPError as error:
