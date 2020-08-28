@@ -524,6 +524,9 @@ def check_http_s(url):
           else:
             url = "http://" + url
         settings.SCHEME = (_urllib.parse.urlparse(url).scheme.lower() or "http") if not menu.options.force_ssl else "https"
+        if menu.options.force_ssl and settings.VERBOSITY_LEVEL >= 1:
+          debug_msg = "Forcing usage of SSL/HTTPS requests."
+          print(settings.print_debug_msg(debug_msg))
       else:
         err_msg = "Invalid target URL has been given." 
         print(settings.print_critical_msg(err_msg))

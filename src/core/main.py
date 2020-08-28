@@ -262,7 +262,7 @@ def init_request(url):
   if menu.options.proxy:
     proxy.do_check(url)
   if settings.VERBOSITY_LEVEL >= 1:
-    debug_msg = "Creating HTTP requests opener object."
+    debug_msg = "Creating " + str(settings.SCHEME).upper() + " requests opener object."
     print(settings.print_debug_msg(debug_msg))
   # Used a valid pair of valid credentials
   if menu.options.auth_cred and menu.options.auth_type:
