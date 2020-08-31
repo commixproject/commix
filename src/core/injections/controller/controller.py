@@ -84,7 +84,8 @@ def heuristic_basic(url, http_request_method):
       if http_request_method == "GET":
         request = _urllib.request.Request(url.replace(settings.INJECT_TAG, settings.BASIC_TEST))
       else:
-        request = _urllib.request.Request(url, menu.options.data.replace(settings.INJECT_TAG, settings.BASIC_TEST))
+        data = menu.options.data.replace(settings.INJECT_TAG, settings.BASIC_TEST)
+        request = _urllib.request.Request(url, data.encode(settings.UNICODE_ENCODING))
       headers.do_check(request)
       response = requests.get_request_response(request)
       html_data = response.read().decode(settings.UNICODE_ENCODING)
