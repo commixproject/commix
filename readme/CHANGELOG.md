@@ -1,4 +1,5 @@
 ## Version 3.2 (upcoming)
+* Fixed: Bug-fix regarding Basic HTTP authentication.
 * Fixed: Bug-fix regarding connection problems.
 
 ## Version 3.1 (2020-06-17)

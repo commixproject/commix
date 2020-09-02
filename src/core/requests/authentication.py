@@ -143,42 +143,31 @@ def http_auth_cracker(url, realm):
         try:
           # Basic authentication 
           if authentication_type.lower() == "basic":
-            request = _urllib.request.Request(url)
-            base64string = base64.encodestring(username + ":" + password)[:-1]
-            request.add_header("Authorization", "Basic " + base64string)
-            headers.do_check(request)
-            headers.check_http_traffic(request)
-            # Check if defined any HTTP Proxy (--proxy option).
-            if menu.options.proxy:
-              proxy.use_proxy(request)
-            # Check if defined Tor (--tor option).  
-            elif menu.options.tor:
-              tor.use_tor(request)
-            result = _urllib.request.urlopen(request)
+            authhandler = _urllib.request.HTTPBasicAuthHandler()
           # Digest authentication 
           elif authentication_type.lower() == "digest":
             authhandler = _urllib.request.HTTPDigestAuthHandler()
-            authhandler.add_password(realm, url, username, password)
-            opener = _urllib.request.build_opener(authhandler)
-            _urllib.request.install_opener(opener)
-            request = _urllib.request.Request(url)
-            headers.check_http_traffic(request)
-            # Check if defined any HTTP Proxy (--proxy option).
-            if menu.options.proxy:
-              proxy.use_proxy(request)
-            # Check if defined Tor (--tor option).  
-            elif menu.options.tor:
-              tor.use_tor(request)
-            result = _urllib.request.urlopen(request)
-
-          # Store valid results to session 
+          authhandler.add_password(realm, url, username, password)
+          opener = _urllib.request.build_opener(authhandler)
+          _urllib.request.install_opener(opener)
+          request = _urllib.request.Request(url)
+          headers.do_check(request)
+          headers.check_http_traffic(request)
+          # Check if defined any HTTP Proxy (--proxy option).
+          if menu.options.proxy:
+            proxy.use_proxy(request)
+          # Check if defined Tor (--tor option).  
+          elif menu.options.tor:
+            tor.use_tor(request)
+          response = _urllib.request.urlopen(request)
+          # Store valid results to session
           admin_panel = url 
           session_handler.import_valid_credentials(url, authentication_type, admin_panel, username, password)
           found = True
         except KeyboardInterrupt :
           raise 
-        except:
-          pass  
+        except _urllib.error.HTTPError:
+          pass
         if found:
           if settings.VERBOSITY_LEVEL == 0:
             float_percent = settings.info_msg
