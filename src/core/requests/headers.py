@@ -96,14 +96,17 @@ def check_http_traffic(request):
   class do_connection(_http_client.HTTPConnection):
     def send(self, req):
       headers = req.decode()
-      http_method = headers[:4].strip()
+      #http_method = headers[:4].strip()
       if menu.options.traffic_file: 
         logs.log_traffic("-" * 37 + "\n" + info_msg + "\n" + "-" * 37)  
       request_http_headers = str(headers).split("\r\n")
+      unique_request_http_headers = []
+      [unique_request_http_headers.append(item) for item in request_http_headers if item not in unique_request_http_headers]
+      request_http_headers = unique_request_http_headers
       for header in request_http_headers:
         if settings.VERBOSITY_LEVEL >= 2:
-          if http_method == "GET" and len(header) > 1 or http_method == "POST":
-            print(settings.print_traffic(header))
+          # if http_method == "GET" and len(header) > 1 or http_method == "POST":
+          print(settings.print_traffic(header))
         if menu.options.traffic_file:
           logs.log_traffic("\n" + header)
       if menu.options.traffic_file:
