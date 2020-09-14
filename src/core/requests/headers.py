@@ -225,7 +225,7 @@ def check_http_traffic(request):
     try:
       # Fix for Python 2.7
       page = page.encode(settings.DEFAULT_ENCODING)
-    except AttributeError:
+    except (UnicodeDecodeError, AttributeError) as err:
       pass
     if response_headers.get('Content-Encoding') == 'gzip':
       page = gzip.GzipFile("", "rb", 9, io.BytesIO(page)).read()
