@@ -93,14 +93,14 @@ def cmd_exec(dns_server, http_request_method, cmd, url, vuln_parameter):
   if http_request_method == "GET":
     url = url.replace(settings.INJECT_TAG, "")
     data = payload.replace(" ", "%20")
-    req = url + data
+    request = url + data
   else:
     values =  {vuln_parameter:payload}
     data = _urllib.parse.urlencode(values)
-    req = _urllib.request.Request(url=url, data=data)
+    request = _urllib.request.Request(url=url, data=data)
     
   sys.stdout.write(Fore.GREEN + Style.BRIGHT + "\n")
-  response = _urllib.request.urlopen(req)
+  response = _urllib.request.urlopen(request)
   time.sleep(2)
   sys.stdout.write("\n" + Style.RESET_ALL)
 
