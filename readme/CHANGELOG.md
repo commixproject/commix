@@ -1,4 +1,5 @@
 ## Version 3.2 (upcoming)
+* Revised: Increased default timeout to 30 seconds.
 * Fixed: Bug-fix regarding Basic HTTP authentication.
 * Fixed: Bug-fix regarding connection problems.
 

@@ -60,7 +60,7 @@ def authentication_process():
     headers.do_check(request)
     #headers.check_http_traffic(request)
     # Get the response of the request.
-    response = _urllib.request.urlopen(request)
+    response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
     return response
 
   except _urllib.error.HTTPError as err_msg:
@@ -159,7 +159,7 @@ def http_auth_cracker(url, realm):
           # Check if defined Tor (--tor option).  
           elif menu.options.tor:
             tor.use_tor(request)
-          response = _urllib.request.urlopen(request)
+          response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
           # Store valid results to session
           admin_panel = url 
           session_handler.import_valid_credentials(url, authentication_type, admin_panel, username, password)

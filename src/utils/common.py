@@ -71,12 +71,12 @@ def create_github_issue(err_msg, exc_msg):
       raise SystemExit()
 
   err_msg = err_msg[err_msg.find("\n"):]
-  req = _urllib.request.Request(url="https://api.github.com/search/issues?q=" + \
+  request = _urllib.request.Request(url="https://api.github.com/search/issues?q=" + \
         _urllib.parse.quote("repo:commixproject/commix" + " " + "Unhandled exception (#" + str(key) + ")")
         )
 
   try:
-    content = _urllib.request.urlopen(req).read()
+    content = _urllib.request.urlopen(request, timeout=settings.TIMEOUT).read()
     _ = json.loads(content)
     duplicate = _["total_count"] > 0
     closed = duplicate and _["items"][0]["state"] == "closed"
@@ -92,12 +92,12 @@ def create_github_issue(err_msg, exc_msg):
     pass
 
   data = {"title": "Unhandled exception (#" + str(key) + ")", "body": "```" + str(err_msg) + "\n```\n```\n" + str(exc_msg) + "```"}
-  req = _urllib.request.Request(url = "https://api.github.com/repos/commixproject/commix/issues", 
+  request = _urllib.request.Request(url = "https://api.github.com/repos/commixproject/commix/issues", 
                                 data = data.encode(json.dumps(data)), 
                                 headers = {"Authorization": "token " + base64.b64decode(settings.GITHUB_REPORT_OAUTH_TOKEN.encode(settings.UNICODE_ENCODING)).decode()}
                                 )
   try:
-    content = _urllib.request.urlopen(req).read()
+    content = _urllib.request.urlopen(request, timeout=settings.TIMEOUT).read()
   except Exception as err:
     content = None
 

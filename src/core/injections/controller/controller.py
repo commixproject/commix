@@ -583,7 +583,7 @@ def perform_checks(url, filename):
     authentication.authentication_process()
 
     # Check if authentication page is the same with the next (injection) URL
-    if _urllib.request.urlopen(url).read() == _urllib.request.urlopen(menu.options.auth_url).read():
+    if _urllib.request.urlopen(url, timeout=settings.TIMEOUT).read() == _urllib.request.urlopen(menu.options.auth_url, timeout=settings.TIMEOUT).read():
       err_msg = "It seems that the authentication procedure has failed."
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()

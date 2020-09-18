@@ -328,7 +328,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                 headers.do_check(request)
 
                 # Evaluate test results.
-                output = _urllib.request.urlopen(request)
+                output = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
                 html_data = output.read()
                 shell = re.findall(r"" + TAG + "", str(html_data))
 

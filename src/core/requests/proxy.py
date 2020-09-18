@@ -39,7 +39,7 @@ def do_check(url):
     headers.do_check(request)
     #request.set_proxy(menu.options.proxy,settings.PROXY_SCHEME)
     try:
-      check = _urllib.request.urlopen(request)
+      check = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
     except _urllib.error.HTTPError as error:
       check = error
   except:
@@ -61,7 +61,7 @@ def use_proxy(request):
   headers.do_check(request)
   request.set_proxy(menu.options.proxy,settings.PROXY_SCHEME)
   try:
-    response = _urllib.request.urlopen(request)
+    response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
     return response
 
   except _http_client.BadStatusLine as e:

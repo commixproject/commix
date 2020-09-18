@@ -125,7 +125,7 @@ Check for new version of commix
 """
 def check_for_update():
   try:
-    response = _urllib.request.urlopen('https://raw.githubusercontent.com/commixproject/commix/master/src/utils/settings.py', timeout=1)
+    response = _urllib.request.urlopen('https://raw.githubusercontent.com/commixproject/commix/master/src/utils/settings.py', timeout=settings.TIMEOUT)
     version_check = response.readlines()
     for line in version_check:
       line = line.rstrip()
@@ -220,7 +220,7 @@ Check the latest version of unicorn
 def check_unicorn_version(current_version):
   try:
     if len(current_version) != 0: 
-      response = _urllib.request.urlopen('https://raw.githubusercontent.com/trustedsec/unicorn/master/unicorn.py', timeout=1)
+      response = _urllib.request.urlopen('https://raw.githubusercontent.com/trustedsec/unicorn/master/unicorn.py', timeout=settings.TIMEOUT)
       latest_version = response.readlines()
       for line in latest_version:
         line = line.rstrip()

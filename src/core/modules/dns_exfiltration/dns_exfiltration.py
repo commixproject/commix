@@ -100,7 +100,7 @@ def cmd_exec(dns_server, http_request_method, cmd, url, vuln_parameter):
     request = _urllib.request.Request(url=url, data=data)
     
   sys.stdout.write(Fore.GREEN + Style.BRIGHT + "\n")
-  response = _urllib.request.urlopen(request)
+  response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
   time.sleep(2)
   sys.stdout.write("\n" + Style.RESET_ALL)
 
@@ -262,7 +262,7 @@ def dns_exfiltration_handler(url, http_request_method):
 
   else:
     try:
-      response = _urllib.request.urlopen(request)
+      response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
     except _urllib.error.HTTPError as err_msg:
       if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
         response = False  

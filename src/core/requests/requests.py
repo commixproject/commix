@@ -49,7 +49,7 @@ def estimate_response_time(url, timesec):
   headers.do_check(request) 
   start = time.time()
   try:
-    response = _urllib.request.urlopen(request)
+    response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
     response.read(1)
     response.close()
     
@@ -312,7 +312,7 @@ def get_request_response(request):
 
     else:
       try:
-        response = _urllib.request.urlopen(request)
+        response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
       except _urllib.error.HTTPError as err_msg:
         if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
           response = False  

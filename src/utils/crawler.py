@@ -58,7 +58,7 @@ def request(url):
     request = _urllib.request.Request(url)
   try:
     headers.do_check(request) 
-    response = _urllib.request.urlopen(request)
+    response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
     soup = BeautifulSoup(response)
     return soup
   except _urllib.error.URLError as e:

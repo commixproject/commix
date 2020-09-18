@@ -424,7 +424,7 @@ def file_access(url, cve, check_header, filename):
     file_to_upload = menu.options.file_upload
     # check if remote file exists.
     try:
-      _urllib.request.urlopen(file_to_upload)
+      _urllib.request.urlopen(file_to_upload, timeout=settings.TIMEOUT)
     except _urllib.error.HTTPError as warn_msg:
       warn_msg = "It seems that the '" + file_to_upload + "' file, "
       warn_msg += "does not exist. (" + str(warn_msg) + ")\n"
@@ -663,7 +663,7 @@ def shellshock_handler(url, http_request_method, filename):
         elif menu.options.tor:
           response = tor.use_tor(request)
         else:
-          response = _urllib.request.urlopen(request)
+          response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
         percent = ((i*100)/total)
         float_percent = "{0:.1f}".format(round(((i*100)/(total*1.0)),2))
         
@@ -936,7 +936,7 @@ def cmd_exec(url, cmd, cve, check_header, filename):
       elif menu.options.tor:
         response = tor.use_tor(request)
       else:
-        response = _urllib.request.urlopen(request)
+        response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
       shell = response.read().rstrip().replace('\n',' ')
       shell = re.findall(r"" + TAG + "(.*)" + TAG, shell)
       shell = ''.join(shell)

@@ -162,7 +162,7 @@ def check_http_traffic(request):
         req_msg = "HTTP request:"
         print(settings.print_request_msg(req_msg))
       try:
-        opener.open(request)
+        opener.open(request, timeout=settings.TIMEOUT)
         response = True
         if settings.VERBOSITY_LEVEL < 2:
           if current_attempt != 0:
@@ -217,7 +217,7 @@ def check_http_traffic(request):
         raise SystemExit() 
       
   try:
-    response = _urllib.request.urlopen(request)
+    response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
     code = response.getcode()
     # Check the HTTP response headers.
     response_headers = response.info()
@@ -344,7 +344,7 @@ def do_check(request):
         try:
           url = menu.options.url
           try:
-            response = _urllib.request.urlopen(url)
+            response = _urllib.request.urlopen(url, timeout=settings.TIMEOUT)
           except _urllib.error.HTTPError as e:
             try:
               authline = e.headers.get('www-authenticate', '')  
@@ -357,7 +357,7 @@ def do_check(request):
               authhandler.add_password(realm, url, username, password)
               opener = _urllib.request.build_opener(authhandler)
               _urllib.request.install_opener(opener)
-              result = _urllib.request.urlopen(url)
+              result = _urllib.request.urlopen(url, timeout=settings.TIMEOUT)
             except AttributeError:
               pass
         except _urllib.error.HTTPError as e:

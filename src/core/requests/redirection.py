@@ -93,7 +93,7 @@ def do_check(url):
         try:
           url = menu.options.url
           try:
-            response = _urllib.request.urlopen(url)
+            response = _urllib.request.urlopen(url, timeout=settings.TIMEOUT)
           except _urllib.error.HTTPError as e:
             try:
               authline = e.headers.get('www-authenticate', '')  
@@ -106,7 +106,7 @@ def do_check(url):
               authhandler.add_password(realm, url, username, password)
               opener = _urllib.request.build_opener(authhandler)
               _urllib.request.install_opener(opener)
-              result = _urllib.request.urlopen(url)
+              result = _urllib.request.urlopen(url, timeout=settings.TIMEOUT)
             except AttributeError:
               pass
         except _urllib.error.HTTPError as e:

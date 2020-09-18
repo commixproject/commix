@@ -119,7 +119,7 @@ def examine_request(request):
       return tor.use_tor(request)
     else:
       try:
-        response = _urllib.request.urlopen(request)
+        response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
         return response
 
       except ValueError:
@@ -506,7 +506,7 @@ def main(filename, url):
         if menu.options.file_upload:
           checks.file_upload()
           try:
-            _urllib.request.urlopen(menu.options.file_upload)
+            _urllib.request.urlopen(menu.options.file_upload, timeout=settings.TIMEOUT)
           except _urllib.error.HTTPError as err_msg:
             print(settings.print_critical_msg(str(err_msg.code)))
             raise SystemExit()

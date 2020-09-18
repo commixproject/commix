@@ -303,7 +303,7 @@ def injection_results(url, OUTPUT_TEXTFILE, timesec):
 
   # Evaluate test results.
   try:
-    output = _urllib.request.urlopen(request)
+    output = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
     shell = output.read().rstrip().lstrip()
     #shell = [newline.replace("\n"," ") for newline in shell]
     if settings.TARGET_OS == "win":

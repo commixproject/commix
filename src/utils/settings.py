@@ -198,7 +198,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "3.2.13"
+VERSION_NUM = "3.2.14"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"
@@ -886,6 +886,9 @@ CLI_HISTORY = ""
 
 # Check for multi encoded payloads
 MULTI_ENCODED_PAYLOAD = []
+
+# Default Timeout
+TIMEOUT = 30
 
 # Retries when the connection timeouts (Default: 3).
 MAX_RETRIES = 3

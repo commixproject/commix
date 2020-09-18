@@ -176,7 +176,7 @@ def file_upload(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec
     file_to_upload = menu.options.file_upload
     # check if remote file exists.
     try:
-      _urllib.request.urlopen(file_to_upload)
+      _urllib.request.urlopen(file_to_upload, timeout=settings.TIMEOUT)
     except _urllib.error.HTTPError as err_msg:
       warn_msg = "It seems that the '" + file_to_upload + "' file, does not exist. (" +str(err_msg)+ ")"
       sys.stdout.write("\n" + settings.print_warning_msg(warn_msg) + "\n")

@@ -121,7 +121,7 @@ def use_tor(request):
     privoxy_proxy = _urllib.request.ProxyHandler({settings.SCHEME:settings.PRIVOXY_IP + ":" + PRIVOXY_PORT})
     opener = _urllib.request.build_opener(privoxy_proxy)
     _urllib.request.install_opener(opener)
-    response = _urllib.request.urlopen(request)
+    response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
     return response
 
   except Exception as err_msg:
