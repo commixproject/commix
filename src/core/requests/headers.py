@@ -121,36 +121,25 @@ def check_http_traffic(request):
       def https_open(self, req):
         try:
           return self.do_open(do_connection, req)
-        except Exception as err_msg:
+        except (_urllib.error.HTTPError, _urllib.error.URLError) as err_msg:
           try:
             error_msg = str(err_msg.args[0]).split("] ")[1] + "."
           except IndexError:
             error_msg = str(err_msg.args[0]) + "."
-          if settings.INIT_TEST == True:
-            if settings.VERBOSITY_LEVEL < 2:
-              print(settings.FAIL_STATUS)
-          else:
-            if settings.VERBOSITY_LEVEL < 1:
-              print("")   
+            error_msg = "Connection to the target URL " + error_msg
           print(settings.print_critical_msg(error_msg))
-          raise SystemExit()
+
     else:      
       def http_open(self, req):
         try:
           return self.do_open(do_connection, req)
-        except Exception as err_msg:
+        except (_urllib.error.HTTPError, _urllib.error.URLError) as err_msg:
           try:
             error_msg = str(err_msg.args[0]).split("] ")[1] + "."
           except IndexError:
             error_msg = str(err_msg.args[0]) + "."
-          if settings.INIT_TEST == True:
-            if settings.VERBOSITY_LEVEL < 2:
-              print(settings.FAIL_STATUS)
-          else:
-            if settings.VERBOSITY_LEVEL < 1:
-              print("")  
+            error_msg = "Connection to the target URL " + error_msg
           print(settings.print_critical_msg(error_msg))
-          raise SystemExit()
 
   if settings.REVERSE_TCP == False and settings.BIND_TCP == False:
     opener = _urllib.request.build_opener(connection_handler())
@@ -166,7 +155,7 @@ def check_http_traffic(request):
         response = True
         if settings.VERBOSITY_LEVEL < 2:
           if current_attempt != 0:
-            info_msg = "Checking connection to the target URL. "
+            info_msg = "Checking connection to the target URL."
             sys.stdout.write(settings.print_info_msg(info_msg))
             sys.stdout.flush()
           if settings.INIT_TEST == True and not settings.UNAUTHORIZED:
@@ -182,20 +171,12 @@ def check_http_traffic(request):
 
       except _urllib.error.URLError as err_msg: 
         if current_attempt == 0:
-          if settings.VERBOSITY_LEVEL < 2:
-            print(settings.FAIL_STATUS)
-          try:
-            error_msg = str(err_msg.args[0]).split("] ")[1] + ". "
-          except IndexError:
-            error_msg = ""
-          error_msg += "Please wait while retring the request(s)."
-          print(settings.print_critical_msg(error_msg))
-          warn_msg = "In case the provided target URL is valid, try to rerun with"
+          warn_msg = "In case the provided target URL is reachable, try to rerun with"
           warn_msg += " the switch '--random-agent' and/or proxy switch."
           print(settings.print_warning_msg(warn_msg))
-        if settings.VERBOSITY_LEVEL >= 2 or current_attempt == 1:
-          info_msg = "Please wait while retring the request(s)."
-          print(settings.print_info_msg(info_msg))
+        if settings.VERBOSITY_LEVEL >= 1:
+          debug_msg = settings.APPLICATION + " is going to retry the request(s)."
+          print(settings.print_debug_msg(debug_msg))
         current_attempt = current_attempt + 1
         time.sleep(3)
         
@@ -270,27 +251,15 @@ def check_http_traffic(request):
       raise SystemExit()
 
   # The handlers raise this exception when they run into a problem.
-  except (socket.error, _http_client.HTTPException, _urllib.error.URLError) as err:
-    if settings.VERBOSITY_LEVEL > 2:
-      print_http_response(response_headers=err.info(), code=err.code, page=err.read())
+  except (_http_client.HTTPException, _urllib.error.URLError, _http_client.IncompleteRead, UnicodeDecodeError, LookupError) as err:
+    # if settings.VERBOSITY_LEVEL > 2:
+    #   print_http_response(response_headers=err.info(), code=err.code, page=err.read())
     err_msg = "Unable to connect to the target URL"
     try:
       err_msg += " (" + str(err.args[0]).split("] ")[1] + ")."
     except IndexError:
       err_msg += "."
     print(settings.print_critical_msg(err_msg))
-    raise SystemExit()
-
-  except _http_client.IncompleteRead as err:
-    print(settings.print_critical_msg(str(err)))
-    raise SystemExit()
-
-  except UnicodeDecodeError as err:
-    print(settings.print_critical_msg(str(err)))
-    raise SystemExit()
-
-  except LookupError as err:
-    print(settings.print_critical_msg(str(err)))
     raise SystemExit()
 
   # Raise exception regarding existing connection was forcibly closed by the remote host.
