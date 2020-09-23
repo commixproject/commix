@@ -155,7 +155,7 @@ def check_http_traffic(request):
         response = True
         if settings.VERBOSITY_LEVEL < 2:
           if current_attempt != 0:
-            info_msg = "Checking connection to the target URL."
+            info_msg = "Testing connection to the target URL."
             sys.stdout.write(settings.print_info_msg(info_msg))
             sys.stdout.flush()
           if settings.INIT_TEST == True and not settings.UNAUTHORIZED:

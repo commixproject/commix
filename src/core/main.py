@@ -292,7 +292,7 @@ def url_response(url):
   if settings.CHECK_INTERNET:
     settings.CHECK_INTERNET = False
   if settings.INIT_TEST == True:
-    info_msg = "Checking connection to the target URL. "
+    info_msg = "Testing connection to the target URL. "
     sys.stdout.write(settings.print_info_msg(info_msg))
     sys.stdout.flush()
     # if settings.VERBOSITY_LEVEL >= 2:
