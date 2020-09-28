@@ -282,6 +282,13 @@ request.add_option("--ignore-redirects",
                 default=False,
                 help="Ignore redirection attempts.")
 
+request.add_option("--timeout",
+                action="store",
+                dest="timeout",
+                default=False,
+                type="int",
+                help="Seconds to wait before timeout connection (default 30).")
+
 request.add_option("--retries",
                 action="store",
                 dest="retries",

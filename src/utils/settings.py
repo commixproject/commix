@@ -198,7 +198,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "3.2.16"
+VERSION_NUM = "3.2.17"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"
@@ -236,6 +236,7 @@ VALUE_BOUNDARIES = r'[\\/]+'
 
 #Basic heuristic checks for code injection warnings
 BASIC_TEST = "\\\\/{$}\\/\\"
+
 # Code injection warnings
 CODE_INJECTION_WARNINGS = ["eval()'d code", "runtime-created function", "usort", "assert", "preg_replace"]
 IDENTIFIED_WARNINGS = False

@@ -766,6 +766,10 @@ try:
     if menu.options.retries:
       settings.MAX_RETRIES = menu.options.retries
 
+    # Retries when the connection timeouts.
+    if menu.options.timeout:
+      settings.TIMEOUT = menu.options.timeout
+
     # Seconds to delay between each HTTP request.
     if menu.options.delay > 0:
       settings.DELAY = menu.options.delay
