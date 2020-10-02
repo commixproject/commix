@@ -223,6 +223,12 @@ def check_internet(url):
 The init (URL) request.
 """
 def init_request(url):
+  # Number of seconds to wait before timeout connection
+  if settings.VERBOSITY_LEVEL >= 1:
+      debug_msg = "Setting the HTTP timeout."
+      print(settings.print_debug_msg(debug_msg))
+  if menu.options.timeout:
+    settings.TIMEOUT = menu.options.timeout
   # Check connection(s)
   checks.check_connection(url)
   # Define HTTP User-Agent header
@@ -765,10 +771,6 @@ try:
     # Retries when the connection timeouts.
     if menu.options.retries:
       settings.MAX_RETRIES = menu.options.retries
-
-    # Retries when the connection timeouts.
-    if menu.options.timeout:
-      settings.TIMEOUT = menu.options.timeout
 
     # Seconds to delay between each HTTP request.
     if menu.options.delay > 0:
