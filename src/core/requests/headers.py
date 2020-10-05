@@ -171,8 +171,11 @@ def check_http_traffic(request):
 
       except _urllib.error.URLError as err_msg: 
         if current_attempt == 0:
-          warn_msg = "In case the provided target URL is reachable, try to rerun with"
-          warn_msg += " the switch '--random-agent' and/or proxy switch."
+          warn_msg = "The provided target URL seems not reachable. "
+          warn_msg += "In case that it is, please try to re-run using "
+          if not menu.options.random_agent:
+              warn_msg += "'--random-agent' switch and/or "
+          warn_msg += "'--proxy' option."
           print(settings.print_warning_msg(warn_msg))
         if settings.VERBOSITY_LEVEL >= 1:
           debug_msg = settings.APPLICATION + " is going to retry the request(s)."

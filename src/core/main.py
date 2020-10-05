@@ -83,9 +83,12 @@ if settings.IS_WINDOWS:
 Define HTTP User-Agent header.
 """
 def user_agent_header():
+  if settings.VERBOSITY_LEVEL >= 1:
+    debug_msg = "Setting the HTTP User-Agent header."
+    print(settings.print_debug_msg(debug_msg))
   # Check if defined "--random-agent" option.
   if menu.options.random_agent:
-    if (menu.options.agent != settings.DEFAULT_USER_AGENT) or menu.options.mobile:
+    if ((menu.options.agent != settings.DEFAULT_USER_AGENT) and not menu.options.requestfile) or menu.options.mobile:
       err_msg = "The option '--random-agent' is incompatible with option '--user-agent' or switch '--mobile'."
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
