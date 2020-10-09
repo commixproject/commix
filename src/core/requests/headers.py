@@ -116,30 +116,27 @@ def check_http_traffic(request):
           logs.log_traffic("\n\n") 
       _http_client.HTTPConnection.send(self, req)
 
-  class connection_handler(_urllib.request.HTTPHandler, _urllib.request.HTTPSHandler):
-    if settings.SCHEME == 'https':
-      def https_open(self, req):
+  class connection_handler(_urllib.request.HTTPSHandler, _urllib.request.HTTPHandler, object):
+    def https_open(self, req):
+      try:
+        return super(connection_handler, self).https_open(req)
+      except (_urllib.error.HTTPError, _urllib.error.URLError) as err_msg:
         try:
-          return self.do_open(do_connection, req)
-        except (_urllib.error.HTTPError, _urllib.error.URLError) as err_msg:
-          try:
-            error_msg = str(err_msg.args[0]).split("] ")[1] + "."
-          except IndexError:
-            error_msg = str(err_msg.args[0]) + "."
-            error_msg = "Connection to the target URL " + error_msg
-          print(settings.print_critical_msg(error_msg))
-
-    else:      
-      def http_open(self, req):
+          error_msg = str(err_msg.args[0]).split("] ")[1] + "."
+        except IndexError:
+          error_msg = str(err_msg.args[0]) + "."
+          error_msg = "Connection to the target URL " + error_msg
+        print(settings.print_critical_msg(error_msg))
+    def http_open(self, req):
+      try:
+        return super(connection_handler, self).http_open(req)
+      except (_urllib.error.HTTPError, _urllib.error.URLError) as err_msg:
         try:
-          return self.do_open(do_connection, req)
-        except (_urllib.error.HTTPError, _urllib.error.URLError) as err_msg:
-          try:
-            error_msg = str(err_msg.args[0]).split("] ")[1] + "."
-          except IndexError:
-            error_msg = str(err_msg.args[0]) + "."
-            error_msg = "Connection to the target URL " + error_msg
-          print(settings.print_critical_msg(error_msg))
+          error_msg = str(err_msg.args[0]).split("] ")[1] + "."
+        except IndexError:
+          error_msg = str(err_msg.args[0]) + "."
+          error_msg = "Connection to the target URL " + error_msg
+        print(settings.print_critical_msg(error_msg))
 
   if settings.REVERSE_TCP == False and settings.BIND_TCP == False:
     opener = _urllib.request.build_opener(connection_handler())
