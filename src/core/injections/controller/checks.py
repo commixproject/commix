@@ -24,6 +24,7 @@ import string
 import base64
 import traceback
 from collections import OrderedDict 
+from src.core.convert import hexdecode
 from src.utils import menu
 from src.thirdparty.six.moves import input as _input
 from src.thirdparty.six.moves import urllib as _urllib
@@ -1016,12 +1017,12 @@ def recognise_payload(payload):
       decoded_payload = base64.b64decode(payload)
       if re.match(settings.HEX_RECOGNITION_REGEX, payload):
         settings.MULTI_ENCODED_PAYLOAD.append("hexencode")
-        decoded_payload = decoded_payload.decode("hex")
+        decoded_payload = hexdecode(decoded_payload)
 
   elif re.match(settings.HEX_RECOGNITION_REGEX, payload):
     is_decoded = True
     settings.MULTI_ENCODED_PAYLOAD.append("hexencode")
-    decoded_payload = payload.decode("hex")
+    decoded_payload = hexdecode(payload)
     if (len(payload) % 4 == 0) and \
       re.match(settings.BASE64_RECOGNITION_REGEX, decoded_payload) and \
       not re.match(settings.HEX_RECOGNITION_REGEX, decoded_payload):

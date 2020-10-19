@@ -14,6 +14,7 @@ For more see the file 'readme/COPYING' for copying permission.
 """
 
 import sys
+from src.core.convert import hexencode
 from src.thirdparty.six.moves import urllib as _urllib
 from src.utils import settings
 
@@ -37,7 +38,7 @@ def tamper(payload):
     
   else:
     payload = _urllib.parse.unquote(payload)
-    payload = payload.encode("hex")
+    payload = hexencode(payload)
     return payload
 
 # eof 

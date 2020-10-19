@@ -28,6 +28,7 @@ from src.core.requests import tor
 from src.core.requests import proxy
 from src.core.requests import headers
 from src.core.requests import parameters
+from src.core.convert import hexdecode
 from src.core.shells import reverse_tcp
 from src.core.injections.controller import checks
 
@@ -70,7 +71,7 @@ exfiltrate data using a user-defined DNS server [1].
 def querysniff(pkt):
   if pkt.haslayer(DNS) and pkt.getlayer(DNS).qr == 0:
     if ".xxx" in pkt.getlayer(DNS).qd.qname:
-      print(pkt.getlayer(DNS).qd.qname.split(".xxx")[0].decode("hex"))
+      print(hexdecode(pkt.getlayer(DNS).qd.qname.split(".xxx")[0]))
 
 def signal_handler(signal, frame):
   os._exit(0)
