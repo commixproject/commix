@@ -304,8 +304,8 @@ def url_response(url):
     info_msg = "Testing connection to the target URL. "
     sys.stdout.write(settings.print_info_msg(info_msg))
     sys.stdout.flush()
-    # if settings.VERBOSITY_LEVEL >= 2:
-    print("")
+    if settings.VERBOSITY_LEVEL >= 2:
+      print("")
   response = examine_request(request)
   # Check for URL redirection
   if not menu.options.ignore_redirects:
