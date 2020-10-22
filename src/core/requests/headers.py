@@ -13,6 +13,7 @@ the Free Software Foundation, either version 3 of the License, or
 For more see the file 'readme/COPYING' for copying permission.
 """
 
+import io
 import re
 import ssl
 try:
@@ -34,8 +35,6 @@ from src.thirdparty.six.moves import http_client as _http_client
 from src.utils import logs
 from src.utils import menu
 from src.utils import settings
-#from StringIO import StringIO
-import io
 from src.core.injections.controller import checks
 from src.thirdparty.colorama import Fore, Back, Style, init
 from src.thirdparty.six.moves import urllib as _urllib
@@ -92,11 +91,15 @@ def check_http_traffic(request):
   settings.TOTAL_OF_REQUESTS = settings.TOTAL_OF_REQUESTS + 1
   # Delay in seconds between each HTTP request
   time.sleep(int(settings.DELAY))
-  
-  class do_connection(_http_client.HTTPConnection):
+
+  if settings.SCHEME == 'https':
+    http_client = _http_client.HTTPSConnection
+  else:
+    http_client = _http_client.HTTPConnection
+
+  class connection(http_client):
     def send(self, req):
       headers = req.decode()
-      #http_method = headers[:4].strip()
       if menu.options.traffic_file: 
         logs.log_traffic("-" * 37 + "\n" + info_msg + "\n" + "-" * 37)  
       request_http_headers = str(headers).split("\r\n")
@@ -114,21 +117,12 @@ def check_http_traffic(request):
           logs.log_traffic("\n\n" + "#" * 77 + "\n\n")
         else:
           logs.log_traffic("\n\n") 
-      _http_client.HTTPConnection.send(self, req)
+      http_client.send(self, req)
 
   class connection_handler(_urllib.request.HTTPSHandler, _urllib.request.HTTPHandler, object):
-    def https_open(self, req):
-      try:
-        return super(connection_handler, self).https_open(req)
-      except (_urllib.error.HTTPError, _urllib.error.URLError) as err_msg:
-        try:
-          error_msg = str(err_msg.args[0]).split("] ")[1] + "."
-        except IndexError:
-          error_msg = str(err_msg.args[0]) + "."
-          error_msg = "Connection to the target URL " + error_msg
-        print(settings.print_critical_msg(error_msg))
     def http_open(self, req):
       try:
+        self.do_open(connection, req)
         return super(connection_handler, self).http_open(req)
       except (_urllib.error.HTTPError, _urllib.error.URLError) as err_msg:
         try:
@@ -137,7 +131,18 @@ def check_http_traffic(request):
           error_msg = str(err_msg.args[0]) + "."
           error_msg = "Connection to the target URL " + error_msg
         print(settings.print_critical_msg(error_msg))
-
+    def https_open(self, req):
+      try:
+        self.do_open(connection, req)
+        return super(connection_handler, self).https_open(req)
+      except (_urllib.error.HTTPError, _urllib.error.URLError) as err_msg:
+        try:
+          error_msg = str(err_msg.args[0]).split("] ")[1] + "."
+        except IndexError:
+          error_msg = str(err_msg.args[0]) + "."
+          error_msg = "Connection to the target URL " + error_msg
+        print(settings.print_critical_msg(error_msg))
+        
   if settings.REVERSE_TCP == False and settings.BIND_TCP == False:
     opener = _urllib.request.build_opener(connection_handler())
     response = False
