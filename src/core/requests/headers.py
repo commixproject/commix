@@ -77,7 +77,7 @@ Print HTTP response headers / Body.
 """
 def print_http_response(response_headers, code, page):
   if settings.VERBOSITY_LEVEL >= 3:
-    resp_msg = "HTTP response (" + str(code) + "):"
+    resp_msg = "HTTP response [" + settings.print_request_num(settings.TOTAL_OF_REQUESTS) + "] (" + str(code) + "):"
     print(settings.print_response_msg(resp_msg))
     http_response(response_headers, code)
   if settings.VERBOSITY_LEVEL >= 4:
@@ -91,7 +91,6 @@ def check_http_traffic(request):
   settings.TOTAL_OF_REQUESTS = settings.TOTAL_OF_REQUESTS + 1
   # Delay in seconds between each HTTP request
   time.sleep(int(settings.DELAY))
-
   if settings.SCHEME == 'https':
     http_client = _http_client.HTTPSConnection
   else:
@@ -108,7 +107,6 @@ def check_http_traffic(request):
       request_http_headers = unique_request_http_headers
       for header in request_http_headers:
         if settings.VERBOSITY_LEVEL >= 2:
-          # if http_method == "GET" and len(header) > 1 or http_method == "POST":
           print(settings.print_traffic(header))
         if menu.options.traffic_file:
           logs.log_traffic("\n" + header)
@@ -150,7 +148,7 @@ def check_http_traffic(request):
     unauthorized = False
     while not response and current_attempt <= settings.MAX_RETRIES and unauthorized is False:
       if settings.VERBOSITY_LEVEL >= 2:
-        req_msg = "HTTP request:"
+        req_msg = "HTTP request [" + settings.print_request_num(settings.TOTAL_OF_REQUESTS) + "]:"
         print(settings.print_request_msg(req_msg))
       try:
         opener.open(request, timeout=settings.TIMEOUT)
