@@ -303,6 +303,9 @@ def do_check(request):
   if settings.TAMPER_SCRIPTS["xforwardedfor"]:
     from src.core.tamper import xforwardedfor
     xforwardedfor.tamper(request)
+  
+  # Default value for "Accept-Encoding" HTTP header
+  request.add_header('Accept-Encoding', 'gzip, deflate')
 
   # Check if defined any HTTP Authentication credentials.
   # HTTP Authentication: Basic / Digest Access Authentication.
