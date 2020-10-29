@@ -178,12 +178,14 @@ def vuln_GET_param(url):
     value = ''.join(value)
     vuln_parameter = re.sub(r"/(.*)/", "", value)
 
-  elif re.search(r"" + settings.PARAMETER_DELIMITER + "(.*)=[\S*(\\/)]?" + settings.INJECT_TAG, url):
-    vuln_parameter = re.search(r"" + settings.PARAMETER_DELIMITER + "(.*)=[\S*(\\/)]?" + settings.INJECT_TAG, url).group(1)
-
-  elif re.search(r"\?(.*)=[\S*(\\/)]?" + settings.INJECT_TAG , url):
-    vuln_parameter = re.search(r"\?(.*)=[\S*(\\/)]?" + settings.INJECT_TAG , url).group(1)
-
+  elif re.search(r"" + settings.PARAMETER_DELIMITER + "(.*)=[\S*(\\/)]?" + settings.INJECT_TAG, url) or \
+       re.search(r"\?(.*)=[\S*(\\/)]?" + settings.INJECT_TAG , url):
+    pairs = url.split("?")[1].split(settings.PARAMETER_DELIMITER)
+    for param in range(0,len(pairs)):
+      if settings.INJECT_TAG in pairs[param]:
+        vuln_parameter = pairs[param].split("=")[0]
+        break
+  
   # Check if only one parameter supplied but, not defined the INJECT_TAG.
   elif settings.INJECT_TAG not in url:
     #Grab the value of parameter.
@@ -393,11 +395,13 @@ def vuln_POST_param(parameter, url):
       
   else:
     # Regular POST data format.
-    if re.search(r"" + settings.PARAMETER_DELIMITER + "(.*)=[\S*(\\/)]?" + settings.INJECT_TAG, parameter):
-      vuln_parameter = re.search(r"" + settings.PARAMETER_DELIMITER + "(.*)=[\S*(\\/)]?" + settings.INJECT_TAG, parameter).group(1)
-
-    elif re.search(r"(.*)=[\S*(\\/)]?" + settings.INJECT_TAG , parameter):
-      vuln_parameter = re.search(r"(.*)=[\S*(\\/)]?" + settings.INJECT_TAG , parameter).group(1)
+    if re.search(r"" + settings.PARAMETER_DELIMITER + "(.*)=[\S*(\\/)]?" + settings.INJECT_TAG, parameter) or \
+       re.search(r"(.*)=[\S*(\\/)]?" + settings.INJECT_TAG , parameter):
+      pairs = parameter.split(settings.PARAMETER_DELIMITER)
+      for param in range(0,len(pairs)):
+        if settings.INJECT_TAG in pairs[param]:
+          vuln_parameter = pairs[param].split("=")[0]
+          break
 
   if 'vuln_parameter' not in locals():
     return parameter
