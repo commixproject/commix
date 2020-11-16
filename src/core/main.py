@@ -83,9 +83,6 @@ if settings.IS_WINDOWS:
 Define HTTP User-Agent header.
 """
 def user_agent_header():
-  if settings.VERBOSITY_LEVEL >= 1:
-    debug_msg = "Setting the HTTP User-Agent header."
-    print(settings.print_debug_msg(debug_msg))
   # Check if defined "--random-agent" option.
   if menu.options.random_agent:
     if ((menu.options.agent != settings.DEFAULT_USER_AGENT) and not menu.options.requestfile) or menu.options.mobile:
@@ -107,7 +104,10 @@ def user_agent_header():
         print(settings.print_info_msg(info_msg))
       except:
         print(settings.FAIL_STATUS)
-          
+  if settings.VERBOSITY_LEVEL >= 1:
+    debug_msg = "Setting the HTTP User-Agent header."
+    print(settings.print_debug_msg(debug_msg))
+
 """
 Examine the request
 """
