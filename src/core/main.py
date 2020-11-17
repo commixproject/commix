@@ -86,7 +86,7 @@ def user_agent_header():
   # Check if defined "--random-agent" option.
   if menu.options.random_agent:
     if ((menu.options.agent != settings.DEFAULT_USER_AGENT) and not menu.options.requestfile) or menu.options.mobile:
-      err_msg = "The option '--random-agent' is incompatible with option '--user-agent' or switch '--mobile'."
+      err_msg = "The switch '--random-agent' is incompatible with option '--user-agent' or switch '--mobile'."
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
     else:
@@ -744,7 +744,7 @@ try:
     # Check if defined "--mobile" option.
     if menu.options.mobile:
       if (menu.options.agent != settings.DEFAULT_USER_AGENT) or menu.options.random_agent:
-        err_msg = "The switch '--mobile' is incompatible with options '--user-agent', '--random-agent'."
+        err_msg = "The switch '--mobile' is incompatible with option '--user-agent' or switch '--random-agent'."
         print(settings.print_critical_msg(err_msg))
         raise SystemExit()
       else:
