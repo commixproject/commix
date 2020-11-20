@@ -157,7 +157,7 @@ def logfile_parser():
       if re.findall(r"Host: " + "(.*)", line):
         menu.options.host = "".join([str(i) for i in re.findall(r"Host: " + "(.*)", line)])
       # User-Agent Header
-      elif re.findall(r"User-Agent: " + "(.*)", line):
+      elif re.findall(r"User-Agent: " + "(.*)", line) and not (menu.options.agent or menu.options.mobile):
         menu.options.agent = "".join([str(i) for i in re.findall(r"User-Agent: " + "(.*)", line)])
       # Cookie Header
       elif re.findall(r"Cookie: " + "(.*)", line):

@@ -390,7 +390,9 @@ def do_check(request):
            settings.INJECT_TAG in http_header_value:
           settings.CUSTOM_HEADER_INJECTION = True
           settings.CUSTOM_HEADER_NAME = http_header_name
-        request.add_header(http_header_name, http_header_value)
+        # Add HTTP Header name / value to the HTTP request
+        if http_header_name not in [settings.HOST, settings.USER_AGENT, settings.REFERER, settings.COOKIE]:
+          request.add_header(http_header_name, http_header_value)
       except:
         pass
         
