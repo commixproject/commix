@@ -672,11 +672,10 @@ Type '""" + Style.BRIGHT + """3""" + Style.RESET_ALL + """' for HP iPAQ 6365 HTT
 Type '""" + Style.BRIGHT + """4""" + Style.RESET_ALL + """' for HTC Sensation HTTP User-Agent header.
 Type '""" + Style.BRIGHT + """5""" + Style.RESET_ALL + """' for Apple iPhone 4s HTTP User-Agent header.
 Type '""" + Style.BRIGHT + """6""" + Style.RESET_ALL + """' for Google Nexus 7 HTTP User-Agent header.
-Type '""" + Style.BRIGHT + """7""" + Style.RESET_ALL + """' for Nokia N97 HTTP User-Agent header.
-""")
+Type '""" + Style.BRIGHT + """7""" + Style.RESET_ALL + """' for Nokia N97 HTTP User-Agent header.""")
 
     while True:
-      question_msg = "Which mobile HTTP User-Agent header do you want to use? "
+      question_msg = "Which smartphone do you want to imitate through HTTP User-Agent header? "
       mobile_user_agent = _input(settings.print_question_msg(question_msg))
       try:
         if int(mobile_user_agent) in range(0,len(settings.MOBILE_USER_AGENT_LIST)):

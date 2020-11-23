@@ -83,6 +83,15 @@ if settings.IS_WINDOWS:
 Define HTTP User-Agent header.
 """
 def user_agent_header():
+  # Check if defined "--mobile" option.
+  if menu.options.mobile:
+    if ((menu.options.agent != settings.DEFAULT_USER_AGENT) and not menu.options.requestfile) or menu.options.random_agent:
+      err_msg = "The switch '--mobile' is incompatible with option '--user-agent' or switch '--random-agent'."
+      print(settings.print_critical_msg(err_msg))
+      raise SystemExit()
+    else:
+      menu.options.agent = menu.mobile_user_agents()
+
   # Check if defined "--random-agent" option.
   if menu.options.random_agent:
     if ((menu.options.agent != settings.DEFAULT_USER_AGENT) and not menu.options.requestfile) or menu.options.mobile:
@@ -740,15 +749,6 @@ try:
       err_msg = "The '--check-tor' swich requires usage of switch '--tor'."
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
-
-    # Check if defined "--mobile" option.
-    if menu.options.mobile:
-      if (menu.options.agent != settings.DEFAULT_USER_AGENT) or menu.options.random_agent:
-        err_msg = "The switch '--mobile' is incompatible with option '--user-agent' or switch '--random-agent'."
-        print(settings.print_critical_msg(err_msg))
-        raise SystemExit()
-      else:
-        menu.options.agent = menu.mobile_user_agents()
 
     # Check if defined "--ignore-code" option.
     if menu.options.ignore_code and "," in menu.options.ignore_code:
