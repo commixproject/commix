@@ -1,4 +1,5 @@
 ## Version 3.2 (upcoming)
+* Updated: Minor update regarding smartphones to imitate, through HTTP User-Agent header.
 * Fixed: Bug-fix regarding setting suitable HTTP header User-Agent, when combining "--random-agent" or "--mobile" switch with "-r" option.
 * Fixed: Bug-fix regarding "hex" encoding/decoding.
 * Added: New option ( `--timeout`) for setting a number of seconds to wait before timeout connection (default 30).

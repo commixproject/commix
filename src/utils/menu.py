@@ -665,14 +665,18 @@ Type '""" + Style.BRIGHT + """reverse_tcp""" + Style.RESET_ALL + """' to get a r
 The available mobile user agents.
 """
 def mobile_user_agents():
-    print("""---[ """ + Style.BRIGHT + Fore.BLUE + """Available Mobile HTTP User-Agent headers""" + Style.RESET_ALL + """ ]---     
-Type '""" + Style.BRIGHT + """1""" + Style.RESET_ALL + """' for BlackBerry 9900 HTTP User-Agent header.
-Type '""" + Style.BRIGHT + """2""" + Style.RESET_ALL + """' for Samsung Galaxy S HTTP User-Agent header.
-Type '""" + Style.BRIGHT + """3""" + Style.RESET_ALL + """' for HP iPAQ 6365 HTTP User-Agent header.
-Type '""" + Style.BRIGHT + """4""" + Style.RESET_ALL + """' for HTC Sensation HTTP User-Agent header.
-Type '""" + Style.BRIGHT + """5""" + Style.RESET_ALL + """' for Apple iPhone 4s HTTP User-Agent header.
-Type '""" + Style.BRIGHT + """6""" + Style.RESET_ALL + """' for Google Nexus 7 HTTP User-Agent header.
-Type '""" + Style.BRIGHT + """7""" + Style.RESET_ALL + """' for Nokia N97 HTTP User-Agent header.""")
+    print("""---[ """ + Style.BRIGHT + Fore.BLUE + """Available smartphones HTTP User-Agent headers""" + Style.RESET_ALL + """ ]---     
+Type '""" + Style.BRIGHT + """1""" + Style.RESET_ALL + """' for BlackBerry Z10.
+Type '""" + Style.BRIGHT + """2""" + Style.RESET_ALL + """' for Samsung Galaxy S7.
+Type '""" + Style.BRIGHT + """3""" + Style.RESET_ALL + """' for HP iPAQ 6365.
+Type '""" + Style.BRIGHT + """4""" + Style.RESET_ALL + """' for HTC 10.
+Type '""" + Style.BRIGHT + """5""" + Style.RESET_ALL + """' for Huawei P8.
+Type '""" + Style.BRIGHT + """6""" + Style.RESET_ALL + """' for Apple iPhone 8.
+Type '""" + Style.BRIGHT + """7""" + Style.RESET_ALL + """' for Microsoft Lumia 950.
+Type '""" + Style.BRIGHT + """8""" + Style.RESET_ALL + """' for Google Nexus 7.
+Type '""" + Style.BRIGHT + """9""" + Style.RESET_ALL + """' for Nokia N97.
+Type '""" + Style.BRIGHT + """10""" + Style.RESET_ALL + """' for Google Pixel".
+Type '""" + Style.BRIGHT + """11""" + Style.RESET_ALL + """' for Xiaomi Mi 3.""")
 
     while True:
       question_msg = "Which smartphone do you want to imitate through HTTP User-Agent header? "
