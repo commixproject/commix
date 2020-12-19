@@ -21,18 +21,14 @@ import string
 import random
 import base64
 from src.thirdparty.six.moves import urllib as _urllib
-
-
 from src.utils import menu
 from src.utils import settings
 from src.thirdparty.colorama import Fore, Back, Style, init
-
 from src.core.requests import tor
 from src.core.requests import proxy
 from src.core.requests import headers
 from src.core.requests import requests
 from src.core.requests import parameters
-
 from src.core.injections.controller import checks
 from src.core.injections.semiblind.techniques.tempfile_based import tfb_payloads
 
@@ -372,7 +368,7 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
       sys.stdout.flush() 
     else:
       pass
-      # print("") 
+
     check_how_long = 0
     output = ""
 
@@ -395,12 +391,10 @@ def false_positive_check(separator, TAG, cmd, prefix, suffix, whitespace, timese
   found_chars = False
   debug_msg = "Checking the reliability of the used payload "
   debug_msg += "in case of a false positive result. "
+  # Check if defined "--verbose" option.
   if settings.VERBOSITY_LEVEL >= 1: 
     sys.stdout.write(settings.print_debug_msg(debug_msg))
     sys.stdout.flush()
-  # Check if defined "--verbose" option.
-  # elif settings.VERBOSITY_LEVEL > 1:
-  #   print(settings.print_info_msg(info_msg))
   
   # Varying the sleep time.
   timesec = timesec + random.randint(1, 5)

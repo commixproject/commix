@@ -21,18 +21,14 @@ import string
 import random
 import base64
 from src.thirdparty.six.moves import urllib as _urllib
-
-
 from src.utils import menu
 from src.utils import settings
 from src.thirdparty.colorama import Fore, Back, Style, init
-
 from src.core.requests import tor
 from src.core.requests import proxy
 from src.core.requests import headers
 from src.core.requests import requests
 from src.core.requests import parameters
-
 from src.core.injections.controller import checks
 from src.core.injections.blind.techniques.time_based import tb_payloads
 
@@ -375,7 +371,7 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
       sys.stdout.flush()
     else:
       pass
-      #print("")
+
     check_how_long = 0
     output = False
 
@@ -544,6 +540,7 @@ def false_positive_check(separator, TAG, cmd, whitespace, prefix, suffix, timese
       if settings.VERBOSITY_LEVEL == 1:
         print("")
       return how_long, output
+    
 
 """
 Export the injection results
