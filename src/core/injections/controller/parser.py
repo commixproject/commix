@@ -30,7 +30,7 @@ Parse target and data from http proxy logs (i.e Burp or WebScarab)
 """
 def logfile_parser():
   """
-  Warning message for mutiple request in same log file.
+  Warning message for multiple request in same log file.
   """
   def multi_requests():
     print(settings.SUCCESS_STATUS)
