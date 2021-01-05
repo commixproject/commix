@@ -3,7 +3,7 @@
 
 """
 This file is part of Commix Project (https://commixproject.com).
-Copyright (c) 2014-2020 Anastasios Stasinopoulos (@ancst).
+Copyright (c) 2014-2021 Anastasios Stasinopoulos (@ancst).
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@ Parse target and data from http proxy logs (i.e Burp or WebScarab)
 """
 def logfile_parser():
   """
-  Warning message for multiple request in same log file.
+  Warning message for mutiple request in same log file.
   """
   def multi_requests():
     print(settings.SUCCESS_STATUS)
