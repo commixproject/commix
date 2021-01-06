@@ -82,7 +82,10 @@ def print_http_response(response_headers, code, page):
     http_response(response_headers, code)
   if settings.VERBOSITY_LEVEL >= 4:
     print("")
-    http_response_content(page.decode())
+    try:
+      http_response_content(page.decode())
+    except AttributeError:
+      http_response_content(page)
 
 """
 Checking the HTTP Headers & HTTP/S Request.
