@@ -537,6 +537,11 @@ def false_positive_check(separator, TAG, cmd, prefix, suffix, whitespace, timese
       if settings.VERBOSITY_LEVEL == 1:
         print("")
       return how_long, output
+  else:
+    if settings.VERBOSITY_LEVEL < 2:
+      print("")
+    warn_msg = "False positive or unexploitable injection point detected."
+    print(settings.print_warning_msg(warn_msg))
 
 """
 Export the injection results
