@@ -31,7 +31,12 @@ from src.core.requests import requests
 from src.core.requests import parameters
 from src.core.injections.controller import checks
 from src.core.injections.results_based.techniques.classic import cb_payloads
-
+try:
+  import html
+  unescape = html.unescape
+except:  # Python 2
+  unescape = _html_parser.HTMLParser().unescape
+  
 """
 The "classic" technique on result-based OS command injection.
 """
@@ -99,7 +104,7 @@ def injection_test_results(response, TAG, randvcalc):
     html_data = html_data.replace("\n"," ")
     # cleanup string / unescape html to string
     html_data = _urllib.parse.unquote(html_data)
-    html_data = _html_parser.HTMLParser().unescape(html_data)
+    html_data = unescape(html_data)
     # Replace non-ASCII characters with a single space
     re.sub(r"[^\x00-\x7f]",r" ", html_data)
 
@@ -260,7 +265,7 @@ def injection_results(response, TAG, cmd):
     html_data = html_data.replace("\n"," ")
     # cleanup string / unescape html to string
     html_data = _urllib.parse.unquote(html_data)
-    html_data = _html_parser.HTMLParser().unescape(html_data)
+    html_data = unescape(html_data)
 
     # Replace non-ASCII characters with a single space
     re.sub(r"[^\x00-\x7f]",r" ", html_data)

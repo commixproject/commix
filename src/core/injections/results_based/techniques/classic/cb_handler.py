@@ -36,6 +36,11 @@ from src.core.injections.results_based.techniques.classic import cb_injector
 from src.core.injections.results_based.techniques.classic import cb_payloads
 from src.core.injections.results_based.techniques.classic import cb_enumeration
 from src.core.injections.results_based.techniques.classic import cb_file_access
+try:
+  import html
+  unescape = html.unescape
+except:  # Python 2
+  unescape = _html_parser.HTMLParser().unescape
 
 readline_error = False
 if settings.IS_WINDOWS:
@@ -430,8 +435,7 @@ def cb_injection_handler(url, timesec, filename, http_request_method):
                       else:
                         shell = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
                       if shell:
-                        html_parser = _html_parser.HTMLParser()
-                        shell = html_parser.unescape(shell)
+                        shell = unescape(shell)
                         # Update logs with executed cmds and execution results.
                         logs.executed_command(filename, cmd, shell)
                       if shell != "":
