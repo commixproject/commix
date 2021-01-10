@@ -55,7 +55,7 @@ def do_GET_check(url):
         raise SystemExit()
     elif menu.options.shellshock:
       return False
-    return url
+    return [url]
 
   else:
     urls_list = []
