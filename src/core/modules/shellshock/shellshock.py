@@ -666,7 +666,7 @@ def shellshock_handler(url, http_request_method, filename):
           response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
         percent = ((i*100)/total)
         float_percent = "{0:.1f}".format(round(((i*100)/(total*1.0)),2))
-        
+
         if str(float_percent) == "100.0":
           if no_result == True:
             percent = settings.FAIL_STATUS
@@ -675,10 +675,6 @@ def shellshock_handler(url, http_request_method, filename):
             no_result = False
 
         elif len(response.info()) > 0 and cve in response.info():
-          percent = settings.info_msg
-          no_result = False
-
-        elif len(response.read()) > 0 and cve in response.read():
           percent = settings.info_msg
           no_result = False
 
@@ -873,9 +869,13 @@ def shellshock_handler(url, http_request_method, filename):
         else:
           continue
           
-    if no_result and settings.VERBOSITY_LEVEL < 2:
-      print("")
-
+    if no_result:
+      if settings.VERBOSITY_LEVEL != 2:
+        print("")
+      err_msg = "All tested HTTP headers appear to be not injectable."
+      print(settings.print_critical_msg(err_msg))
+      raise SystemExit()
+      
   except _urllib.error.HTTPError as err_msg:
     if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
       response = False  
