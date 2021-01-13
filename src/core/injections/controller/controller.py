@@ -689,7 +689,7 @@ def do_check(url, filename):
     if settings.INJECTION_CHECKER == False and not settings.CHECK_BOTH_OS:
       err_msg = "All tested parameters "
       if menu.options.level > 2:
-        err_msg += "and headers "
+        err_msg += "and HTTP headers "
       err_msg += "appear to be not injectable."
       if not menu.options.alter_shell :
         err_msg += " Try to use the option '--alter-shell'"
