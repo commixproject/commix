@@ -93,7 +93,7 @@ def create_github_issue(err_msg, exc_msg):
 
   data = {"title": "Unhandled exception (#" + str(key) + ")", "body": "```" + str(err_msg) + "\n```\n```\n" + str(exc_msg) + "```"}
   request = _urllib.request.Request(url = "https://api.github.com/repos/commixproject/commix/issues", 
-                                data = data.encode(json.dumps(data)), 
+                                data = json.dumps(data).encode(), 
                                 headers = {"Authorization": "token " + base64.b64decode(settings.GITHUB_REPORT_OAUTH_TOKEN.encode(settings.UNICODE_ENCODING)).decode()}
                                 )
   try:
@@ -101,7 +101,7 @@ def create_github_issue(err_msg, exc_msg):
   except Exception as err:
     content = None
 
-  issue_url = re.search(r"https://github.com/commixproject/commix/issues/\d+", content or "")
+  issue_url = re.search(r"https://github.com/commixproject/commix/issues/\d+", content.decode(settings.UNICODE_ENCODING) or "")
   if issue_url:
     info_msg = "The created Github issue can been found at the address '" + str(issue_url.group(0)) + "'.\n"
     print(settings.print_info_msg(info_msg))
