@@ -529,7 +529,7 @@ def bind_tcp_config(url, cmd, cve, check_header, filename, os_shell_option, http
       result = checks.check_bind_tcp_options(settings.RHOST)
 
     else:  
-      cmd = bind_tcp.bind_tcp_options()
+      cmd = bind_tcp.bind_tcp_options(separator = "")
       result = checks.check_bind_tcp_options(cmd)
     if result != None:
       if result == 0:
@@ -561,7 +561,7 @@ def reverse_tcp_config(url, cmd, cve, check_header, filename, os_shell_option, h
     if settings.LHOST and settings.LPORT in settings.SHELL_OPTIONS:
       result = checks.check_reverse_tcp_options(settings.LHOST)
     else:  
-      cmd = reverse_tcp.reverse_tcp_options()
+      cmd = reverse_tcp.reverse_tcp_options(separator = "")
       result = checks.check_reverse_tcp_options(cmd)
     if result != None:
       if result == 0:
@@ -841,12 +841,7 @@ def shellshock_handler(url, http_request_method, filename):
                     print(settings.print_error_msg(err_msg))
                     raise
 
-                  except:
-                    info_msg = "Testing the " + technique + ". "
-                    if settings.VERBOSITY_LEVEL > 1:
-                      info_msg = info_msg + "\n"
-                    sys.stdout.write(settings.print_info_msg(info_msg))
-                    sys.stdout.flush()
+                  except TypeError:
                     break
                     
               elif gotshell in settings.CHOICE_NO:
