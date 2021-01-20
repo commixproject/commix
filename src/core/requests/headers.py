@@ -131,6 +131,8 @@ def check_http_traffic(request):
         except IndexError:
           error_msg = str(err_msg.args[0]) + "."
           error_msg = "Connection to the target URL " + error_msg
+        if current_attempt == 0 and settings.VERBOSITY_LEVEL <= 1:
+          print("")
         print(settings.print_critical_msg(error_msg))
     def https_open(self, req):
       try:
@@ -142,6 +144,8 @@ def check_http_traffic(request):
         except IndexError:
           error_msg = str(err_msg.args[0]) + "."
           error_msg = "Connection to the target URL " + error_msg
+        if current_attempt == 0 and settings.VERBOSITY_LEVEL < 1:
+          print("")
         print(settings.print_critical_msg(error_msg))
         
   if settings.REVERSE_TCP == False and settings.BIND_TCP == False:
