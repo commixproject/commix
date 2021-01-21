@@ -19,7 +19,6 @@ import sys
 import time
 import subprocess
 from src.utils import menu
-from src.utils import common
 from src.utils import settings
 from src.utils import requirments
 from src.thirdparty.six.moves import input as _input
@@ -135,11 +134,6 @@ def check_for_update():
     if (int(settings.VERSION_NUM.replace(".","")[:2]) < int(update_version.replace(".","")[:2])) or \
        ((int(settings.VERSION_NUM.replace(".","")[:2]) == int(update_version.replace(".","")[:2])) and \
          int(settings.VERSION_NUM.replace(".","")[2:]) < int(update_version.replace(".","")[2:])):
-      # Get total number of days from last update 
-      if common.days_from_last_update() >= 1 :
-        _ = common.days_from_last_update()
-        warn_msg = "Current version seems to be out-of-date (more than " + str(_) + " day" + "s"[_ == 1:] + ")."
-        print(settings.print_warning_msg(warn_msg))
       while True:
         if not menu.options.batch:
           question_msg = "Do you want to update to the latest version now? [Y/n] > "

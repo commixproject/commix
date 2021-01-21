@@ -30,7 +30,13 @@ from src.thirdparty.six.moves import urllib as _urllib
 Get total number of days from last update
 """
 def days_from_last_update():
-  return int(time.time() - os.path.getmtime(settings.SETTINGS_PATH)) // (3600 * 24)
+
+  days_from_last_update = int(time.time() - os.path.getmtime(settings.SETTINGS_PATH)) // (3600 * 24)
+  if days_from_last_update > settings.NAGGING_DAYS:
+    warn_msg = "You haven't updated " + settings.APPLICATION + " for more than "
+    warn_msg += str(days_from_last_update) + " day"
+    warn_msg += "s"[days_from_last_update == 1:] + "!"
+    print(settings.print_warning_msg(warn_msg))
 
 """
 Automatically create a Github issue with unhandled exception information.

@@ -29,6 +29,7 @@ from src.utils import menu
 from src.utils import logs
 from src.utils import purge
 from src.utils import update
+from src.utils import common
 from src.utils import version
 from src.utils import install
 from src.utils import crawler
@@ -656,6 +657,9 @@ try:
 
   # Print the legal disclaimer msg.
   print(settings.print_legal_disclaimer_msg(settings.LEGAL_DISCLAIMER_MSG))
+
+  # Get total number of days from last update 
+  common.days_from_last_update()
 
   if not menu.options.batch:
     settings.OS_CHECKS_NUM = 1
