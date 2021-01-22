@@ -628,26 +628,15 @@ def main(filename, url):
     return filename
 
   # Accidental stop / restart of the target host server.
-  except _http_client.BadStatusLine as err_msg:
-    if err_msg.line == "" or err_msg.message == "":
-      err_msg = "The target host is not responding."
-      err_msg += " Please ensure that is up and try again."
-      print("\n\n" + settings.print_critical_msg(err_msg))
-      logs.print_logs_notification(filename, url)      
-    else: 
-      err_msg = err_msg.line + err_msg.message
-      print(settings.print_critical_msg(err_msg) + "\n")
-    session_handler.clear(url)  
-    raise SystemExit()
-
-  # Connection reset by peer
-  except SocketError as err_msg:
+  except (_http_client.BadStatusLine, SocketError) as err_msg:
     if settings.VERBOSITY_LEVEL >= 1:
       print("")
     err_msg = "The target host is not responding."
     err_msg += " Please ensure that is up and try again."
-    print("\n" + settings.print_critical_msg(err_msg)) 
-    logs.print_logs_notification(filename, url)
+    print("\n" + settings.print_critical_msg(err_msg))
+    logs.print_logs_notification(filename, url)      
+    #session_handler.clear(url)  
+    #raise SystemExit()
 
 try:
   # Check if defined "--version" option.
