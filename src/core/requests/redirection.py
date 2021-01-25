@@ -16,12 +16,17 @@ For more see the file 'readme/COPYING' for copying permission.
 import sys
 import errno
 import base64
+try:
+  from base64 import encodebytes
+except ImportError: 
+  from base64 import encodestring as encodebytes
 from src.utils import menu
 from src.utils import settings
 from socket import error as SocketError
 from src.thirdparty.six.moves import input as _input
 from src.thirdparty.six.moves import urllib as _urllib
 from src.thirdparty.colorama import Fore, Back, Style, init
+
 
 def do_check(url):
   """
@@ -87,7 +92,7 @@ def do_check(url):
     try:
       settings.SUPPORTED_HTTP_AUTH_TYPES.index(menu.options.auth_type)
       if menu.options.auth_type == "basic":
-        b64_string = base64.encodestring(menu.options.auth_cred.encode(settings.UNICODE_ENCODING)).decode().replace('\n', '')
+        b64_string = encodebytes(menu.options.auth_cred.encode(settings.UNICODE_ENCODING)).decode().replace('\n', '')
         opener.addheaders.append(("Authorization", "Basic " + b64_string + ""))
       elif menu.options.auth_type == "digest":
         try:

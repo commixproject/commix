@@ -1,4 +1,5 @@
 ## Version 3.2 (upcoming)
+* Fixed: Multiple bug-fixes regarding supporting Python 3.9.
 * Revised: Improvement regarding mechanism which nagging if used version is > 30 days old.
 * Fixed: Multiple bug-fixes regarding the shellshock module.
 * Revised: Improvement regarding Python 3.4+ for using the "html.unescape()" function for converting HTML entities to plain-text representations.
