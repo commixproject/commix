@@ -38,7 +38,8 @@ def tamper(payload):
 
   else:
     payload = _urllib.parse.unquote(payload)
-    payload = base64.b64encode(payload)
+    payload = base64.b64encode(payload.encode())
+    payload = payload.decode(settings.UNICODE_ENCODING)
     return payload
 
 # eof 
