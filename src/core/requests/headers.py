@@ -264,8 +264,11 @@ def check_http_traffic(request):
       print(settings.print_critical_msg(err_msg + ")."))
       raise SystemExit()
 
+  except (UnicodeDecodeError, LookupError) as err:
+    pass
+    
   # The handlers raise this exception when they run into a problem.
-  except (_http_client.HTTPException, _urllib.error.URLError, _http_client.IncompleteRead, UnicodeDecodeError, LookupError) as err:
+  except (_http_client.HTTPException, _urllib.error.URLError, _http_client.IncompleteRead) as err:
     # if settings.VERBOSITY_LEVEL > 2:
     #   print_http_response(response_headers=err.info(), code=err.code, page=err.read())
     err_msg = "Unable to connect to the target URL"
