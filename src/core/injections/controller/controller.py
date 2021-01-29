@@ -88,14 +88,15 @@ def heuristic_basic(url, http_request_method):
         request = _urllib.request.Request(url, data.encode(settings.UNICODE_ENCODING))
       headers.do_check(request)
       response = requests.get_request_response(request)
-      html_data = response.read().decode(settings.UNICODE_ENCODING)
-      for warning in settings.CODE_INJECTION_WARNINGS:
-        if warning in html_data:
-          technique = "dynamic code evaluation technique"
-          info_msg = "Heuristic (" + test_type + ") test shows that target URL might be injectable." 
-          print(settings.print_bold_info_msg(info_msg))
-          settings.IDENTIFIED_WARNINGS = True
-          break
+      if type(response) is not bool:
+        html_data = response.read().decode(settings.UNICODE_ENCODING)
+        for warning in settings.CODE_INJECTION_WARNINGS:
+          if warning in html_data:
+            technique = "dynamic code evaluation technique"
+            info_msg = "Heuristic (" + test_type + ") test shows that target URL might be injectable." 
+            print(settings.print_bold_info_msg(info_msg))
+            settings.IDENTIFIED_WARNINGS = True
+            break
     return url
   except _urllib.error.URLError as err_msg:
     print(settings.print_critical_msg(err_msg))

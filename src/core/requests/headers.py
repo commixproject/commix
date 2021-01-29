@@ -179,6 +179,8 @@ def check_http_traffic(request):
           if settings.VERBOSITY_LEVEL < 2 and not settings.UNAUTHORIZED:
             print(settings.FAIL_STATUS)
           settings.UNAUTHORIZED = unauthorized = True
+        if settings.INTERNAL_SERVER_ERROR in str(err_msg):
+          break
 
       except _urllib.error.URLError as err_msg: 
         if current_attempt == 0:
