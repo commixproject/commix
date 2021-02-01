@@ -23,95 +23,144 @@ from src.thirdparty.six.moves import urllib as _urllib
 from src.thirdparty.colorama import Fore, Back, Style, init
 from src.thirdparty.beautifulsoup.beautifulsoup import BeautifulSoup
 
+SITEMAP_LOC = []
+HREF_LIST = []
+SKIPPED_URLS = 0
+
 def store_crawling():
   while True:
     if not menu.options.batch:
       question_msg = "Do you want to store crawling results to a temporary file "
       question_msg += "(for eventual further processing with other tools)? [y/N] > "
-      store_crawling = _input(settings.print_question_msg(question_msg))
+      message = _input(settings.print_question_msg(question_msg))
     else:
-      store_crawling = ""
-    if len(store_crawling) == 0:
-       store_crawling = "n"
-    if store_crawling in settings.CHOICE_YES:
+      message = ""
+    if len(message) == 0:
+       message = "n"
+    if message in settings.CHOICE_YES:
       filename = tempfile.mkstemp(suffix=".txt")[1]
       info_msg = "Writing crawling results to a temporary file '" + str(filename) + "'."
       print(settings.print_info_msg(info_msg))
       return str(filename)
-    elif store_crawling in settings.CHOICE_NO:
+    elif message in settings.CHOICE_NO:
       return None
-    elif store_crawling in settings.CHOICE_QUIT:
+    elif message in settings.CHOICE_QUIT:
       raise SystemExit()
     else:
-      err_msg = "'" + store_crawling + "' is not a valid answer."  
-      print(settings.print_error_msg(err_msg))
+      err_msg = "'" + message + "' is not a valid answer."  
+      sys.stdout.write(settings.print_error_msg(err_msg))
+      sys.stdout.flush()
       pass  
 
 """
 Do a request to target URL.
 """
 def request(url):
-  # Check if defined POST data
-  if menu.options.data:
-    request = _urllib.request.Request(url, menu.options.data.encode(settings.UNICODE_ENCODING))
-  else:
-    request = _urllib.request.Request(url)
+  global SKIPPED_URLS
   try:
-    headers.do_check(request) 
+    # Check if defined POST data
+    if menu.options.data:
+      request = _urllib.request.Request(url, menu.options.data.encode(settings.UNICODE_ENCODING))
+    else:
+      request = _urllib.request.Request(url)
+    headers.do_check(request)
+    headers.check_http_traffic(request)
     response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
-    soup = BeautifulSoup(response)
-    return soup
-  except _urllib.error.URLError as e:
-    pass
+    return response
+  except _urllib.error.URLError as err_msg:
+    err_msg = str(err_msg) + " - Skipping " + str(url) 
+    print(settings.print_critical_msg(err_msg))
+    SKIPPED_URLS += 1
+
 
 """
 Check for URLs in sitemap.xml.
 """
 def sitemap(url):
   try:
-    href_list = []
     if not url.endswith(".xml"):
-      url = _urllib.parse.urljoin(url, "/sitemap.xml")
-    soup = request(url)
-    for match in soup.findAll("loc"):
-      href_list.append(match.text)
+      if not url.endswith("/"):
+        url = url + "/"
+      url = _urllib.parse.urljoin(url, "sitemap.xml")
+    response = request(url)
+    content = response.read().decode(settings.UNICODE_ENCODING)
+    for match in re.finditer(r"<loc>\s*([^<]+)", content or ""):
+      url = match.group(1).strip()
+      SITEMAP_LOC.append(url)
+      if url.endswith(".xml") and "sitemap" in url.lower():
+        while True:
+          warn_msg = "A sitemap recursion detected."
+          print(settings.print_warning_msg(warn_msg))
+          if not menu.options.batch:
+            question_msg = "Do you want to follow? [Y/n] > "
+            message = _input(settings.print_question_msg(question_msg))
+          else:
+            message = ""
+          if len(message) == 0:
+             message = "Y"
+          if message in settings.CHOICE_YES:
+            sitemap(url)
+            break
+          elif message in settings.CHOICE_NO:
+            break
+          elif message in settings.CHOICE_QUIT:
+            raise SystemExit()
+          else:
+            err_msg = "'" + message + "' is not a valid answer."  
+            print(settings.print_error_msg(err_msg))
+            pass
+    return SITEMAP_LOC
   except:
-    warn_msg = "The 'sitemap.xml' not found."
-    print(settings.print_warning_msg(warn_msg)) 
-  return href_list
+    pass
 
 """
 Grab the crawled hrefs.
 """
 def crawling(url):
   try:
-    href_list = []
-    soup = request(url)
-    for tag in soup.findAll('a', href=True):
-      tag['href'] = _urllib.parse.urljoin(url, tag['href'])
-      o = _urllib.parse.urlparse(url)
-      if o.netloc in tag['href']:
-        if tag['href'].split('.')[-1].lower() not in settings.CRAWL_EXCLUDE_EXTENSIONS:
-          href_list.append(tag['href']) 
-    return href_list
-  except:
+    response = request(url)
+    content = response.read().decode(settings.UNICODE_ENCODING)
+    match = re.search(r"(?si)<html[^>]*>(.+)</html>", content)
+    if match:
+      content = "<html>%s</html>" % match.group(1)
+    soup = BeautifulSoup(content)
+    tags = soup('a')
+    if not tags:
+      tags = []
+      tags += re.finditer(r'(?i)\s(href|src)=["\'](?P<href>[^>"\']+)', content)
+      tags += re.finditer(r'(?i)window\.open\(["\'](?P<href>[^)"\']+)["\']', content)
+    for tag in tags:
+      href = tag.get("href") if hasattr(tag, "get") else tag.group("href")
+      if href:
+        href = _urllib.parse.urljoin(url, href)
+        if _urllib.parse.urlparse(url).netloc in href:
+          if not re.search(r"\?(v=)?\d+\Z", href) and not \
+          re.search(r"(?i)\.(js|css)(\?|\Z)", href) and \
+          href.split('.')[-1].lower() not in settings.CRAWL_EXCLUDE_EXTENSIONS:
+            if request(href): 
+              HREF_LIST.append(href)
+    if len(HREF_LIST) != 0:
+      return list(set(HREF_LIST))
+    else:
+      if not settings.VERBOSITY_LEVEL > 1:
+        print("")
+      warn_msg = "No usable links found."
+      print(settings.print_warning_msg(warn_msg))
+      raise SystemExit()
+  except (UnicodeEncodeError, ValueError) as e:  # for non-HTML files and non-valid links
     pass
 
 """
 The crawing process.
 """
 def do_process(url):
-  if settings.DEFAULT_CRAWLDEPTH_LEVEL == 1:
-    crawled_href = crawling(url)
-  else:
-    try:
-      crawled_href = []
-      for url in crawling(url):
-        crawled_href.append(crawling(url)) 
-        crawled_href = list(set([item for sublist in crawled_href for item in sublist]))
-    except TypeError:
-      pass
-  return crawled_href
+  try:
+    crawled_href = []
+    for url in crawling(url):
+      crawled_href.append(url)
+    return crawled_href
+  except TypeError:
+    pass
 
 """
 The main crawler.
@@ -131,33 +180,33 @@ def crawler(url):
     while True:
       if not menu.options.batch:
         question_msg = "Do you want to change the crawling depth level? [Y/n] > "
-        change_depth_level = _input(settings.print_question_msg(question_msg))
+        message = _input(settings.print_question_msg(question_msg))
       else:
-        change_depth_level = ""
-      if len(change_depth_level) == 0:
-         change_depth_level = "Y"
-      if change_depth_level in settings.CHOICE_YES or change_depth_level in settings.CHOICE_NO:
+        message = ""
+      if len(message) == 0:
+         message = "Y"
+      if message in settings.CHOICE_YES or message in settings.CHOICE_NO:
         break  
-      elif change_depth_level in settings.CHOICE_QUIT:
+      elif message in settings.CHOICE_QUIT:
         raise SystemExit()
       else:
-        err_msg = "'" + change_depth_level + "' is not a valid answer."  
+        err_msg = "'" + message + "' is not a valid answer."  
         print(settings.print_error_msg(err_msg))
         pass
     # Change the crawling depth level.
-    if change_depth_level in settings.CHOICE_YES:
+    if message in settings.CHOICE_YES:
       while True:
         question_msg = "Please enter the crawling depth level (1-2) > "
-        depth_level = _input(settings.print_question_msg(question_msg))
-        if len(depth_level) == 0:
-          depth_level = 1
+        message = _input(settings.print_question_msg(question_msg))
+        if len(message) == 0:
+          message = 1
           break
-        elif str(depth_level) != "1" and str(depth_level) != "2":
-          err_msg = "Depth level '" + depth_level + "' is not a valid answer."  
+        elif str(message) != "1" and str(message) != "2":
+          err_msg = "Depth level '" + message + "' is not a valid answer."  
           print(settings.print_error_msg(err_msg))
           pass
         else: 
-          menu.options.DEFAULT_CRAWLDEPTH_LEVEL = depth_level
+          menu.options.DEFAULT_CRAWLDEPTH_LEVEL = message
           break
 
   while True:
@@ -165,95 +214,77 @@ def crawler(url):
       if not menu.options.batch:
         question_msg = "Do you want to check target for "
         question_msg += "the existence of site's sitemap(.xml)? [y/N] > "
-        sitemap_check = _input(settings.print_question_msg(question_msg))
+        message = _input(settings.print_question_msg(question_msg))
       else:
-        sitemap_check = ""
-      if len(sitemap_check) == 0:
-         sitemap_check = "n"
-      if sitemap_check in settings.CHOICE_YES:
+        message = ""
+      if len(message) == 0:
+         message = "n"
+      if message in settings.CHOICE_YES:
         sitemap_check = True
         break
-      elif sitemap_check in settings.CHOICE_NO:
+      elif message in settings.CHOICE_NO:
         sitemap_check = False
         break
-      elif sitemap_check in settings.CHOICE_QUIT:
+      elif message in settings.CHOICE_QUIT:
         raise SystemExit()
       else:
-        err_msg = "'" + sitemap_check + "' is not a valid answer."  
+        err_msg = "'" + message + "' is not a valid answer."  
         print(settings.print_error_msg(err_msg))
         pass
     else:
       sitemap_check = True
       break
-      
+  
   if sitemap_check:
     output_href = sitemap(url)
-    sitemap_check = output_href
-    for recursion in output_href:
-      if recursion.endswith(".xml") and "sitemap" in recursion.lower():
-        while True:
-          warn_msg = "A sitemap recursion was detected " + "'" + recursion + "'."
-          print(settings.print_warning_msg(warn_msg))
-          if not menu.options.batch:
-            question_msg = "Do you want to follow the detected recursion? [Y/n] > "
-            sitemap_check = _input(settings.print_question_msg(question_msg))
-          else:
-            sitemap_check = ""
-          if len(sitemap_check) == 0:
-             sitemap_check = "Y"
-          if sitemap_check in settings.CHOICE_YES:
-            output_href = sitemap(recursion)
-            sitemap_check = output_href
-            break
-          elif sitemap_check in settings.CHOICE_NO:
-            break
-          elif sitemap_check in settings.CHOICE_QUIT:
-            raise SystemExit()
-          else:
-            err_msg = "'" + sitemap_check + "' is not a valid answer."  
-            print(settings.print_error_msg(err_msg))
-            pass
-  else:
-    output_href = do_process(url)
-  filename = store_crawling()
+    if output_href is None :
+      sitemap_check = False
+
   info_msg = "Checking "
   if sitemap_check:
-    info_msg += "targets's sitemap.xml "
-  info_msg += "for usable links with GET parameters. "
-  sys.stdout.write(settings.print_info_msg(info_msg))
+    info_msg += "identified 'sitemap.xml' "
+  info_msg += "for usable links (with GET parameters). "
+  sys.stdout.write("\r" + settings.print_info_msg(info_msg))
   sys.stdout.flush()
-  succeed_banner = True
-  valid_url_found = False
 
+  if not sitemap_check:
+    output_href = do_process(url)
+    if menu.options.DEFAULT_CRAWLDEPTH_LEVEL > 1:
+      for url in output_href:
+        output_href = do_process(url)
+  if SKIPPED_URLS == 0:
+    print("")
+
+  info_msg = "Visited " + str(len(output_href)) + " link"+ "s"[len(output_href) == 1:] + "."
+  print(settings.print_info_msg(info_msg))
+  filename = store_crawling()
+  valid_url_found = False
   try:
     url_num = 0
     valid_urls = []
     for check_url in output_href:
-      # Check for usable URL with GET parameters
-      if re.search(settings.GET_PARAMETERS_REGEX, check_url):
+      if re.search(r"(.*?)\?(.+)", check_url):
         valid_url_found = True
         url_num += 1
-        if succeed_banner:
-          print(settings.SUCCESS_STATUS)
-        print(settings.print_bold_info_msg("URL " + str(url_num) + " - " + check_url))
+        print(settings.print_info_msg("URL #" + str(url_num) + " - " + check_url) + "")
         if filename is not None:
           with open(filename, "a") as crawling_results:
             crawling_results.write(check_url + "\n")
         if not menu.options.batch:
-          question_msg = "Do you want to use this URL to perform tests? [Y/n] > "
-          use_url = _input(settings.print_question_msg(question_msg))
+          question_msg = "Do you want to use URL #" + str(url_num) + " to perform tests? [Y/n] > "
+          message = _input(settings.print_question_msg(question_msg))
         else:
-          use_url = ""
-        if len(use_url) == 0:
-           use_url = "Y"
-        if use_url in settings.CHOICE_YES:
+          message = ""
+        if len(message) == 0:
+           message = "Y"
+        if message in settings.CHOICE_YES:
           return check_url
-        elif use_url in settings.CHOICE_NO:
-          info_msg = "Skipping '" + check_url + "'.\n"
-          sys.stdout.write(settings.print_info_msg(info_msg))
-          succeed_banner = False
+        elif message in settings.CHOICE_NO:
+          if settings.VERBOSITY_LEVEL >= 1:
+            debug_msg = "Skipping '" + check_url + "'.\n"
+            sys.stdout.write(settings.print_debug_msg(debug_msg))
           pass 
-        elif use_url in settings.CHOICE_QUIT:
+        elif message in settings.CHOICE_QUIT:
           raise SystemExit()
     raise SystemExit()
   except TypeError:

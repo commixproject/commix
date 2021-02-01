@@ -595,7 +595,7 @@ class Tag(PageElement):
         stopNode = self._lastRecursiveChild().next
         strings = []
         current = self.contents[0]
-        while current is not stopNode:
+        while current and current is not stopNode:
             if isinstance(current, NavigableString):
                 strings.append(current.strip())
             current = current.next
@@ -894,10 +894,10 @@ class Tag(PageElement):
 
     def recursiveChildGenerator(self):
         if not len(self.contents):
-            raise StopIteration
+            return  # Note: https://stackoverflow.com/a/30217723 (PEP 479)
         stopNode = self._lastRecursiveChild().next
         current = self.contents[0]
-        while current is not stopNode:
+        while current and current is not stopNode:
             yield current
             current = current.next
 
