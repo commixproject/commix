@@ -176,12 +176,12 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
   if not settings.LOAD_SESSION:
     info_msg = "Setting the" 
     if not header_name == " cookie" and not the_type == " HTTP header":
-      info_msg += " " + http_request_method + ""
+      info_msg += " " + str(http_request_method) + ""
     info_msg += ('', ' (JSON)')[settings.IS_JSON] + ('', ' (SOAP/XML)')[settings.IS_XML] 
     if header_name == " cookie" :
-      info_msg += header_name + the_type + check_parameter + " for tests."
+      info_msg += str(header_name) + str(the_type) + str(check_parameter) + " for tests."
     else:
-      info_msg += the_type + header_name + check_parameter + " for tests."
+      info_msg += str(the_type) + str(header_name) + str(check_parameter) + " for tests."
     print(settings.print_info_msg(info_msg))
 
   if menu.options.failed_tries and \
@@ -293,9 +293,9 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
   # All injection techniques seems to be failed!
   if settings.CLASSIC_STATE == settings.EVAL_BASED_STATE == settings.TIME_BASED_STATE == settings.FILE_BASED_STATE == False :
     warn_msg = "The tested"
-    if not header_name == " cookie" and not the_type == " HTTP header":
-      warn_msg += " " + http_request_method + ""
-    warn_msg += the_type + header_name + check_parameter
+    if header_name != " cookie" and the_type != " HTTP header":
+      warn_msg += " " + str(http_request_method) + ""
+    warn_msg += str(the_type) + str(header_name) + str(check_parameter)
     warn_msg += " seems to be not injectable."
     print(settings.print_warning_msg(warn_msg)) + Style.RESET_ALL
 
