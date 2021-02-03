@@ -47,22 +47,17 @@ from src.thirdparty.six.moves import urllib as _urllib
 Checking the HTTP response content.
 """
 def http_response_content(content):
-  if menu.options.traffic_file: 
-    logs.log_traffic("-" * 42 + "\n" + info_msg + "\n" + "-" * 42)  
   if settings.VERBOSITY_LEVEL >= 4:
     content = checks.remove_empty_lines(content)
     print(settings.print_http_response_content(content))
   if menu.options.traffic_file:
-    logs.log_traffic("\n" + content)
-  if menu.options.traffic_file:
+    logs.log_traffic(content)
     logs.log_traffic("\n\n" + "#" * 77 + "\n\n")
 
 """
 Checking the HTTP response headers.
 """
 def http_response(headers, code):
-  if menu.options.traffic_file: 
-    logs.log_traffic("-" * 37 + "\n" + info_msg + "\n" + "-" * 37)  
   response_http_headers = str(headers).split("\n")
   for header in response_http_headers:
     if len(header) > 1: 
@@ -71,21 +66,23 @@ def http_response(headers, code):
       if menu.options.traffic_file:
         logs.log_traffic("\n" + header)
   if menu.options.traffic_file:
-    if settings.VERBOSITY_LEVEL <= 3: 
-      logs.log_traffic("\n\n" + "#" * 77 + "\n\n")
-    else:
-      logs.log_traffic("\n\n")    
+    logs.log_traffic("\n\n")    
 
 """
 Print HTTP response headers / Body.
 """
 def print_http_response(response_headers, code, page):
-  if settings.VERBOSITY_LEVEL >= 3:
-    resp_msg = "HTTP response [" + settings.print_request_num(settings.TOTAL_OF_REQUESTS) + "] (" + str(code) + "):"
-    print(settings.print_response_msg(resp_msg))
+  if settings.VERBOSITY_LEVEL >= 3 or menu.options.traffic_file:
+    if settings.VERBOSITY_LEVEL >= 3:
+      resp_msg = "HTTP response [" + settings.print_request_num(settings.TOTAL_OF_REQUESTS) + "] (" + str(code) + "):"
+      print(settings.print_response_msg(resp_msg))
+    if menu.options.traffic_file:
+      resp_msg = "HTTP response [#" + str(settings.TOTAL_OF_REQUESTS) + "] (" + str(code) + "):"
+      logs.log_traffic("\n" + resp_msg)
     http_response(response_headers, code)
-  if settings.VERBOSITY_LEVEL >= 4:
-    print("")
+  if settings.VERBOSITY_LEVEL >= 4 or menu.options.traffic_file:
+    if settings.VERBOSITY_LEVEL >= 4:
+      print("")
     try:
       http_response_content(page.decode())
     except AttributeError:
@@ -106,8 +103,6 @@ def check_http_traffic(request):
   class connection(http_client):
     def send(self, req):
       headers = req.decode()
-      if menu.options.traffic_file: 
-        logs.log_traffic("-" * 37 + "\n" + info_msg + "\n" + "-" * 37)  
       request_http_headers = str(headers).split("\r\n")
       unique_request_http_headers = []
       [unique_request_http_headers.append(item) for item in request_http_headers if item not in unique_request_http_headers]
@@ -117,11 +112,6 @@ def check_http_traffic(request):
           print(settings.print_traffic(header))
         if menu.options.traffic_file:
           logs.log_traffic("\n" + header)
-      if menu.options.traffic_file:
-        if settings.VERBOSITY_LEVEL > 1: 
-          logs.log_traffic("\n\n" + "#" * 77 + "\n\n")
-        else:
-          logs.log_traffic("\n\n") 
       http_client.send(self, req)
 
   class connection_handler(_urllib.request.HTTPSHandler, _urllib.request.HTTPHandler, object):
@@ -158,9 +148,13 @@ def check_http_traffic(request):
     current_attempt = 0
     unauthorized = False
     while not response and current_attempt <= settings.MAX_RETRIES and unauthorized is False:
-      if settings.VERBOSITY_LEVEL >= 2:
-        req_msg = "HTTP request [" + settings.print_request_num(settings.TOTAL_OF_REQUESTS) + "]:"
-        print(settings.print_request_msg(req_msg))
+      if settings.VERBOSITY_LEVEL >= 2 or menu.options.traffic_file:
+        if settings.VERBOSITY_LEVEL >= 2:
+          req_msg = "HTTP request [" + settings.print_request_num(settings.TOTAL_OF_REQUESTS) + "]:"
+          print(settings.print_request_msg(req_msg))
+        if menu.options.traffic_file:
+          req_msg = "HTTP request [#" + str(settings.TOTAL_OF_REQUESTS) + "]:"
+          logs.log_traffic(req_msg)
       try:
         opener.open(request, timeout=settings.TIMEOUT)
         response = True
@@ -236,7 +230,7 @@ def check_http_traffic(request):
         page = page.decode(settings.DEFAULT_ENCODING)
     response_headers[settings.URI_HTTP_HEADER] = response.geturl()
     response_headers = str(response_headers).strip("\n")
-    if settings.VERBOSITY_LEVEL > 2:
+    if settings.VERBOSITY_LEVEL > 2 or menu.options.traffic_file:
       print_http_response(response_headers, code, page)
     # Checks regarding a potential CAPTCHA protection mechanism.
     checks.captcha_check(page)

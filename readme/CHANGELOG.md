@@ -1,4 +1,5 @@
 ## Version 3.2 (upcoming)
+* Fixed: Bug-fix regarding logging all HTTP traffic into a textual file.
 * Revised: Improvement regarding crawler.
 * Fixed: Multiple bug-fixes regarding supporting Python 3.9.
 * Revised: Improvement regarding mechanism which nagging if used version is > 30 days old.
