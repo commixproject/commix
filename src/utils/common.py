@@ -51,7 +51,8 @@ def create_github_issue(err_msg, exc_msg):
   _ = re.sub(r"= _", "= ", _)
   _ = _.encode(settings.UNICODE_ENCODING)
   
-  key = hashlib.md5(_).hexdigest()[:8]
+  bug_report =  "Bug Report: Unhandled exception \"" + str([i for i in exc_msg.split('\n') if i][-1]) + "\""
+
   while True:
     try:
       if not menu.options.batch:
@@ -78,7 +79,7 @@ def create_github_issue(err_msg, exc_msg):
 
   err_msg = err_msg[err_msg.find("\n"):]
   request = _urllib.request.Request(url="https://api.github.com/search/issues?q=" + \
-        _urllib.parse.quote("repo:commixproject/commix" + " " + "Unhandled exception (#" + str(key) + ")")
+        _urllib.parse.quote("repo:commixproject/commix" + " " + str(bug_report))
         )
 
   try:
@@ -97,7 +98,7 @@ def create_github_issue(err_msg, exc_msg):
   except:
     pass
 
-  data = {"title": "Unhandled exception (#" + str(key) + ")", "body": "```" + str(err_msg) + "\n```\n```\n" + str(exc_msg) + "```"}
+  data = {"title": str(bug_report), "body": "```" + str(err_msg) + "\n```\n```\n" + str(exc_msg) + "```"}
   request = _urllib.request.Request(url = "https://api.github.com/repos/commixproject/commix/issues", 
                                 data = json.dumps(data).encode(), 
                                 headers = {"Authorization": "token " + base64.b64decode(settings.GITHUB_REPORT_OAUTH_TOKEN.encode(settings.UNICODE_ENCODING)).decode()}
