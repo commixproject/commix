@@ -9,7 +9,7 @@ This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
- 
+
 For more see the file 'readme/COPYING' for copying permission.
 """
 
@@ -18,7 +18,7 @@ import errno
 import base64
 try:
   from base64 import encodebytes
-except ImportError: 
+except ImportError:
   from base64 import encodestring as encodebytes
 from src.utils import menu
 from src.utils import settings
@@ -40,40 +40,40 @@ def do_check(url):
 
   class RedirectHandler(_urllib.request.HTTPRedirectHandler):
     """
-    Subclass the HTTPRedirectHandler to make it use our 
+    Subclass the HTTPRedirectHandler to make it use our
     Request also on the redirected URL
     """
-    def redirect_request(self, req, fp, code, msg, headers, redirected_url): 
+    def redirect_request(self, req, fp, code, msg, headers, redirected_url):
       if code in (301, 302, 303, 307):
-        redirected_url = redirected_url.replace(' ', '%20') 
+        redirected_url = redirected_url.replace(' ', '%20')
         newheaders = dict((k,v) for k,v in req.headers.items() if k.lower() not in ("content-length", "content-type"))
         warn_msg = "Got a " + str(code) + " redirection (" + redirected_url + ")."
         print(settings.print_warning_msg(warn_msg))
-        return Request(redirected_url, 
+        return Request(redirected_url,
                            headers = newheaders,
-                           # origin_req_host = req.get_origin_req_host(), 
+                           # origin_req_host = req.get_origin_req_host(),
                            unverifiable = True
-                           ) 
-      else: 
+                           )
+      else:
         err_msg = str(_urllib.error.HTTPError(req.get_full_url(), code, msg, headers, fp)).replace(": "," (")
         print(settings.print_critical_msg(err_msg + ")."))
         raise SystemExit()
-              
+
   class HTTPMethodFallback(_urllib.request.BaseHandler):
     """
     """
-    def http_error_405(self, req, fp, code, msg, headers): 
+    def http_error_405(self, req, fp, code, msg, headers):
       fp.read()
       fp.close()
       newheaders = dict((k,v) for k,v in req.headers.items() if k.lower() not in ("content-length", "content-type"))
-      return self.parent.open(_urllib.request.Request(req.get_full_url(), 
-                              headers = newheaders, 
-                              # origin_req_host = req.get_origin_req_host(), 
+      return self.parent.open(_urllib.request.Request(req.get_full_url(),
+                              headers = newheaders,
+                              # origin_req_host = req.get_origin_req_host(),
                               unverifiable = True)
                               )
 
   # Build our opener
-  opener = _urllib.request.OpenerDirector() 
+  opener = _urllib.request.OpenerDirector()
   # Check if defined any Host HTTP header.
   if menu.options.host and settings.HOST_INJECTION == False:
     opener.addheaders.append(('Host', menu.options.host))
@@ -101,7 +101,7 @@ def do_check(url):
             response = _urllib.request.urlopen(url, timeout=settings.TIMEOUT)
           except _urllib.error.HTTPError as e:
             try:
-              authline = e.headers.get('www-authenticate', '')  
+              authline = e.headers.get('www-authenticate', '')
               authobj = re.match('''(\w*)\s+realm=(.*),''',authline).groups()
               realm = authobj[1].split(',')[0].replace("\"","")
               user_pass_pair = menu.options.auth_cred.split(":")
@@ -120,16 +120,16 @@ def do_check(url):
       err_msg = "Unsupported / Invalid HTTP authentication type '" + menu.options.auth_type + "'."
       err_msg += " Try basic or digest HTTP authentication type."
       print(settings.print_critical_msg(err_msg))
-      raise SystemExit()   
+      raise SystemExit()
   else:
-    pass  
+    pass
 
   for handler in [_urllib.request.HTTPHandler,
                   HTTPMethodFallback,
                   RedirectHandler,
-                  _urllib.request.HTTPErrorProcessor, 
+                  _urllib.request.HTTPErrorProcessor,
                   _urllib.request.HTTPSHandler]:
-      opener.add_handler(handler())   
+      opener.add_handler(handler())
 
   try:
     # Return a Request or None in response to a redirect.
@@ -144,18 +144,18 @@ def do_check(url):
             question_msg = "Do you want to follow the identified redirection? [Y/n] > "
             redirection_option = _input(settings.print_question_msg(question_msg))
           else:
-            redirection_option = ""  
+            redirection_option = ""
           if len(redirection_option) == 0 or redirection_option in settings.CHOICE_YES:
             if menu.options.batch:
               info_msg = "Following redirection to '" + redirected_url + "'. "
               print(settings.print_info_msg(info_msg))
             return redirected_url
           elif redirection_option in settings.CHOICE_NO:
-            return url  
+            return url
           elif redirection_option in settings.CHOICE_QUIT:
             raise SystemExit()
           else:
-            err_msg = "'" + redirection_option + "' is not a valid answer."  
+            err_msg = "'" + redirection_option + "' is not a valid answer."
             print(settings.print_error_msg(err_msg))
             pass
       else:
@@ -180,7 +180,7 @@ def do_check(url):
   except _urllib.error.URLError as err:
     err_msg = "The host seems to be down"
     try:
-      err_msg += " (" + str(err.args[0]).split("] ")[1] + ")."
+      err_msg += " (" + str(err.args[0]).split("] ")[-1] + ")."
     except IndexError:
       err_msg += "."
     print(settings.print_critical_msg(err_msg))
@@ -188,10 +188,10 @@ def do_check(url):
 
   # Raise exception regarding infinite loop.
   except RuntimeError:
-    err_msg = "Infinite redirect loop detected." 
+    err_msg = "Infinite redirect loop detected."
     err_msg += "Please check all provided parameters and/or provide missing ones."
     print(settings.print_critical_msg(err_msg))
-    raise SystemExit() 
+    raise SystemExit()
 
   # Raise exception regarding existing connection was forcibly closed by the remote host.
   except SocketError as err:

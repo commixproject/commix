@@ -9,7 +9,7 @@ This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
- 
+
 For more see the file 'readme/COPYING' for copying permission.
 """
 
@@ -52,7 +52,7 @@ def estimate_response_time(url, timesec):
     response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
     response.read(1)
     response.close()
-    
+
   except _urllib.error.HTTPError as err:
     ignore_start = time.time()
     if settings.UNAUTHORIZED_ERROR in str(err) and menu.options.ignore_code == settings.UNAUTHORIZED_ERROR:
@@ -62,7 +62,7 @@ def estimate_response_time(url, timesec):
         print(settings.FAIL_STATUS)
       err_msg = "Unable to connect to the target URL"
       try:
-        err_msg += " (" + str(err.args[0]).split("] ")[1] + ")."
+        err_msg += " (" + str(err.args[0]).split("] ")[-1] + ")."
       except IndexError:
         err_msg += " (" + str(err) + ")."
       print(settings.print_critical_msg(err_msg))
@@ -75,7 +75,7 @@ def estimate_response_time(url, timesec):
           auth_type = auth_line.split()[0]
           settings.SUPPORTED_HTTP_AUTH_TYPES.index(auth_type.lower())
           # Checking for the realm attribute.
-          try: 
+          try:
             auth_obj = re.match('''(\w*)\s+realm=(.*)''', auth_line).groups()
             realm = auth_obj[1].split(',')[0].replace("\"", "")
           except:
@@ -92,7 +92,7 @@ def estimate_response_time(url, timesec):
           err_msg += " HTTP authentication credentials '" + str(menu.options.auth_cred) + "'"
           err_msg += " seems to be invalid."
           print(settings.print_critical_msg(err_msg))
-          raise SystemExit() 
+          raise SystemExit()
 
         if menu.options.auth_type and menu.options.auth_type != auth_type.lower():
           if checks.identified_http_auth_type(auth_type):
@@ -108,14 +108,14 @@ def estimate_response_time(url, timesec):
             stored_auth_creds = False
           if stored_auth_creds:
             menu.options.auth_cred = stored_auth_creds
-            info_msg = "Identified a (stored) valid pair of credentials '"  
+            info_msg = "Identified a (stored) valid pair of credentials '"
             info_msg += menu.options.auth_cred + Style.RESET_ALL + Style.BRIGHT  + "'."
             print(settings.print_bold_info_msg(info_msg))
-          else:  
-            # Basic authentication 
+          else:
+            # Basic authentication
             if menu.options.auth_type == "basic":
               if not menu.options.ignore_code == settings.UNAUTHORIZED_ERROR:
-                warn_msg = menu.options.auth_type.capitalize() + " " 
+                warn_msg = menu.options.auth_type.capitalize() + " "
                 warn_msg += "HTTP authentication credentials are required."
                 print(settings.print_warning_msg(warn_msg))
                 while True:
@@ -123,9 +123,9 @@ def estimate_response_time(url, timesec):
                     question_msg = "Do you want to perform a dictionary-based attack? [Y/n] > "
                     do_update = _input(settings.print_question_msg(question_msg))
                   else:
-                    do_update = ""  
+                    do_update = ""
                   if len(do_update) == 0:
-                     do_update = "Y" 
+                     do_update = "Y"
                   if do_update in settings.CHOICE_YES:
                     auth_creds = authentication.http_auth_cracker(url, realm)
                     if auth_creds != False:
@@ -139,19 +139,19 @@ def estimate_response_time(url, timesec):
                   elif do_update in settings.CHOICE_QUIT:
                     raise SystemExit()
                   else:
-                    err_msg = "'" + do_update + "' is not a valid answer."  
+                    err_msg = "'" + do_update + "' is not a valid answer."
                     print(settings.print_error_msg(err_msg))
                     pass
 
-            # Digest authentication         
+            # Digest authentication
             elif menu.options.auth_type == "digest":
               if not menu.options.ignore_code == settings.UNAUTHORIZED_ERROR:
-                warn_msg = menu.options.auth_type.capitalize() + " " 
+                warn_msg = menu.options.auth_type.capitalize() + " "
                 warn_msg += "HTTP authentication credentials are required."
-                print(settings.print_warning_msg(warn_msg))      
+                print(settings.print_warning_msg(warn_msg))
                 # Check if heuristics have failed to identify the realm attribute.
                 if not realm:
-                  warn_msg = "Heuristics have failed to identify the realm attribute." 
+                  warn_msg = "Heuristics have failed to identify the realm attribute."
                   print(settings.print_warning_msg(warn_msg))
                 while True:
                   if not menu.options.batch:
@@ -160,7 +160,7 @@ def estimate_response_time(url, timesec):
                   else:
                     do_update = ""
                   if len(do_update) == 0:
-                     do_update = "Y" 
+                     do_update = "Y"
                   if do_update in settings.CHOICE_YES:
                     auth_creds = authentication.http_auth_cracker(url, realm)
                     if auth_creds != False:
@@ -174,15 +174,15 @@ def estimate_response_time(url, timesec):
                   elif do_update in settings.CHOICE_QUIT:
                     raise SystemExit()
                   else:
-                    err_msg = "'" + do_update + "' is not a valid answer."  
+                    err_msg = "'" + do_update + "' is not a valid answer."
                     print(settings.print_error_msg(err_msg))
                     pass
-                else:   
-                  checks.http_auth_err_msg()      
+                else:
+                  checks.http_auth_err_msg()
         else:
           raise SystemExit()
           #pass
-  
+
     ignore_end = time.time()
     start = start - (ignore_start - ignore_end)
 
@@ -206,8 +206,8 @@ def estimate_response_time(url, timesec):
     raise SystemExit()
 
   end = time.time()
-  diff = end - start 
-  
+  diff = end - start
+
   if int(diff) < 1:
     if settings.VERBOSITY_LEVEL >= 1 and stored_auth_creds == False:
       print(settings.SUCCESS_STATUS)
@@ -221,10 +221,10 @@ def estimate_response_time(url, timesec):
       print(settings.SUCCESS_STATUS)
     url_time_response = int(round(diff))
     warn_msg = "The estimated response time is " + str(url_time_response)
-    warn_msg += " second" + "s"[url_time_response == 1:] + ". That may cause" 
+    warn_msg += " second" + "s"[url_time_response == 1:] + ". That may cause"
     if url_time_response >= 3:
       warn_msg += " serious"
-    warn_msg += " delays during the data extraction procedure" 
+    warn_msg += " delays during the data extraction procedure"
     if url_time_response >= 3:
       warn_msg += " and/or possible corruptions over the extracted data"
     warn_msg += "."
@@ -254,21 +254,21 @@ def get_request_response(request):
         response = proxy.use_proxy(request)
       except _urllib.error.HTTPError as err_msg:
         if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
-          response = False  
+          response = False
         elif settings.IGNORE_ERR_MSG == False:
           err = str(err_msg) + "."
           if not settings.VERBOSITY_LEVEL >= 1 and settings.TIME_BASED_STATE == False or \
             settings.VERBOSITY_LEVEL >= 1 and settings.EVAL_BASED_STATE == None:
             print("")
           if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
-            print("") 
+            print("")
           print(settings.print_critical_msg(err))
           continue_tests = checks.continue_tests(err_msg)
           if continue_tests == True:
             settings.IGNORE_ERR_MSG = True
           else:
             raise SystemExit()
-        response = False 
+        response = False
       except _urllib.error.URLError as err_msg:
         if "Connection refused" in err_msg.reason:
           err_msg =  "The target host is not responding. "
@@ -287,21 +287,21 @@ def get_request_response(request):
         response = tor.use_tor(request)
       except _urllib.error.HTTPError as err_msg:
         if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
-          response = False  
+          response = False
         elif settings.IGNORE_ERR_MSG == False:
           err = str(err_msg) + "."
           if not settings.VERBOSITY_LEVEL >= 1 and settings.TIME_BASED_STATE == False or \
             settings.VERBOSITY_LEVEL >= 1 and settings.EVAL_BASED_STATE == None:
             print("")
           if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
-            print("") 
+            print("")
           print(settings.print_critical_msg(err))
           continue_tests = checks.continue_tests(err_msg)
           if continue_tests == True:
             settings.IGNORE_ERR_MSG = True
           else:
             raise SystemExit()
-        response = False 
+        response = False
       except _urllib.error.URLError as err_msg:
         err_msg = str(err_msg.reason).split(" ")[2:]
         err_msg = ' '.join(err_msg)+ "."
@@ -315,7 +315,7 @@ def get_request_response(request):
         response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
       except _urllib.error.HTTPError as err_msg:
         if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
-          response = False  
+          response = False
         elif settings.IGNORE_ERR_MSG == False:
           if not str(err_msg.code) == str(menu.options.ignore_code):
             err = str(err_msg) + "."
@@ -332,7 +332,7 @@ def get_request_response(request):
             settings.IGNORE_ERR_MSG = True
           else:
             raise SystemExit()
-        response = False  
+        response = False
       except _urllib.error.URLError as err_msg:
         err_msg = str(err_msg.reason).split(" ")[2:]
         err_msg = ' '.join(err_msg)+ "."
@@ -381,7 +381,7 @@ def cookie_injection(url, vuln_parameter, payload):
     end = 0
     start = time.time()
 
-  proxy = None 
+  proxy = None
   #response = inject_cookie(url, vuln_parameter, payload, proxy)
 
   # Check if defined any HTTP Proxy.
@@ -391,7 +391,7 @@ def cookie_injection(url, vuln_parameter, payload):
       response = inject_cookie(url, vuln_parameter, payload, proxy)
     except _urllib.error.HTTPError as err_msg:
       if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
-        response = False  
+        response = False
       elif settings.IGNORE_ERR_MSG == False:
         err_msg = str(err_msg) + "."
         print("\n" + settings.print_critical_msg(err_msg))
@@ -400,7 +400,7 @@ def cookie_injection(url, vuln_parameter, payload):
           settings.IGNORE_ERR_MSG = True
         else:
           raise SystemExit()
-      response = False  
+      response = False
     except _urllib.error.URLError as err_msg:
       err_msg = str(err_msg.reason).split(" ")[2:]
       err_msg = ' '.join(err_msg)+ "."
@@ -416,14 +416,14 @@ def cookie_injection(url, vuln_parameter, payload):
       response = inject_cookie(url, vuln_parameter, payload, proxy)
     except _urllib.error.HTTPError as err_msg:
       if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
-        response = False  
+        response = False
       elif settings.IGNORE_ERR_MSG == False:
         err = str(err_msg) + "."
         if not settings.VERBOSITY_LEVEL >= 1 and settings.TIME_BASED_STATE == False or \
           settings.VERBOSITY_LEVEL >= 1 and settings.EVAL_BASED_STATE == None:
           print("")
         if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
-          print("") 
+          print("")
         print(settings.print_critical_msg(err))
         continue_tests = checks.continue_tests(err_msg)
         if continue_tests == True:

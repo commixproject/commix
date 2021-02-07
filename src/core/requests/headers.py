@@ -9,7 +9,7 @@ This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
- 
+
 For more see the file 'readme/COPYING' for copying permission.
 """
 
@@ -121,13 +121,13 @@ def check_http_traffic(request):
         return super(connection_handler, self).http_open(req)
       except (_urllib.error.HTTPError, _urllib.error.URLError) as err_msg:
         try:
-          error_msg = str(err_msg.args[0]).split("] ")[1] + "."
+          error_msg = str(err_msg.args[0]).split("] ")[-1] + "."
         except IndexError:
           error_msg = str(err_msg.args[0]) + "."
           error_msg = "Connection to the target URL " + error_msg
       except _http_client.InvalidURL as err_msg:
         settings.VALID_URL = False
-        error_msg = err_msg 
+        error_msg = err_msg
       if current_attempt == 0 and settings.VERBOSITY_LEVEL <= 1:
         print("")
       print(settings.print_critical_msg(error_msg))
@@ -147,13 +147,13 @@ def check_http_traffic(request):
           error_msg = "Connection to the target URL " + error_msg
       except _http_client.InvalidURL as err_msg:
         settings.VALID_URL = False
-        error_msg = err_msg 
+        error_msg = err_msg
       if current_attempt == 0 and settings.VERBOSITY_LEVEL <= 1:
         print("")
       print(settings.print_critical_msg(error_msg))
       if not settings.VALID_URL:
         raise SystemExit()
-        
+
   if settings.REVERSE_TCP == False and settings.BIND_TCP == False:
     opener = _urllib.request.build_opener(connection_handler())
     response = False
@@ -190,7 +190,7 @@ def check_http_traffic(request):
         if [True for err_code in http_errors if err_code in str(err_msg)]:
           break
 
-      except _urllib.error.URLError as err_msg: 
+      except _urllib.error.URLError as err_msg:
         if current_attempt == 0:
           warn_msg = "The provided target URL seems not reachable. "
           warn_msg += "In case that it is, please try to re-run using "
@@ -203,7 +203,7 @@ def check_http_traffic(request):
           print(settings.print_debug_msg(debug_msg))
         current_attempt = current_attempt + 1
         time.sleep(3)
-        
+
       except _http_client.BadStatusLine as err_msg:
         if settings.VERBOSITY_LEVEL < 2:
           print(settings.FAIL_STATUS)
@@ -214,13 +214,13 @@ def check_http_traffic(request):
       except ValueError as err:
         if settings.VERBOSITY_LEVEL < 2:
           print(settings.FAIL_STATUS)
-        err_msg = "Invalid target URL has been given." 
+        err_msg = "Invalid target URL has been given."
         print(settings.print_critical_msg(err_msg))
         raise SystemExit()
 
       except AttributeError:
-        raise SystemExit() 
-      
+        raise SystemExit()
+
   try:
     response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
     code = response.getcode()
@@ -249,7 +249,7 @@ def check_http_traffic(request):
     # Checks regarding a potential browser verification protection mechanism.
     checks.browser_verification(page)
     # Checks regarding recognition of generic "your ip has been blocked" messages.
-    checks.blocked_ip(page) 
+    checks.blocked_ip(page)
 
   # This is useful when handling exotic HTTP errors (i.e requests for authentication).
   except _urllib.error.HTTPError as err:
@@ -261,14 +261,14 @@ def check_http_traffic(request):
        str(err.code).startswith('5'):
       if settings.VERBOSITY_LEVEL > 1:
         if len(str(err).split(": ")[1]) == 0:
-          error_msg = error_msg + "Non-standard HTTP status code" 
+          error_msg = error_msg + "Non-standard HTTP status code"
         warn_msg = error_msg
         print(settings.print_warning_msg(warn_msg + ")."))
       pass
     else:
       error_msg = str(err).replace(": "," (")
       if len(str(err).split(": ")[1]) == 0:
-        err_msg = error_msg + "Non-standard HTTP status code" 
+        err_msg = error_msg + "Non-standard HTTP status code"
       else:
         err_msg = error_msg
       print(settings.print_critical_msg(err_msg + ")."))
@@ -276,7 +276,7 @@ def check_http_traffic(request):
 
   except (UnicodeDecodeError, LookupError) as err:
     pass
-    
+
   # The handlers raise this exception when they run into a problem.
   except (_http_client.HTTPException, _urllib.error.URLError, _http_client.IncompleteRead) as err:
     # if settings.VERBOSITY_LEVEL > 2:
@@ -298,7 +298,7 @@ def check_http_traffic(request):
       error_msg = "Connection refused."
       print(settings.print_critical_msg(error_msg))
     raise SystemExit()
-    
+
 """
 Check for added headers.
 """
@@ -315,11 +315,11 @@ def do_check(request):
   # Check if defined any Referer HTTP header.
   if menu.options.referer and settings.REFERER_INJECTION == None:
     request.add_header(settings.REFERER, menu.options.referer)
-   
+
   # Check if defined any Cookie HTTP header.
   if menu.options.cookie and settings.COOKIE_INJECTION == False:
     request.add_header(settings.COOKIE, menu.options.cookie)
-  
+
   if not checks.get_header(request.headers, settings.HTTP_ACCEPT_HEADER):
     request.add_header(settings.HTTP_ACCEPT_HEADER, settings.HTTP_ACCEPT_HEADER_VALUE)
 
@@ -327,7 +327,7 @@ def do_check(request):
   if settings.TAMPER_SCRIPTS["xforwardedfor"]:
     from src.core.tamper import xforwardedfor
     xforwardedfor.tamper(request)
-  
+
   # Default value for "Accept-Encoding" HTTP header
   request.add_header('Accept-Encoding', 'gzip, deflate')
 
@@ -346,7 +346,7 @@ def do_check(request):
             response = _urllib.request.urlopen(url, timeout=settings.TIMEOUT)
           except _urllib.error.HTTPError as e:
             try:
-              authline = e.headers.get('www-authenticate', '')  
+              authline = e.headers.get('www-authenticate', '')
               authobj = re.match('''(\w*)\s+realm=(.*),''',authline).groups()
               realm = authobj[1].split(',')[0].replace("\"","")
               user_pass_pair = menu.options.auth_cred.split(":")
@@ -365,10 +365,10 @@ def do_check(request):
       err_msg = "Unsupported / Invalid HTTP authentication type '" + menu.options.auth_type + "'."
       err_msg += " Try basic or digest HTTP authentication type."
       print(settings.print_critical_msg(err_msg))
-      raise SystemExit()   
+      raise SystemExit()
   else:
-    pass        
-  
+    pass
+
   # The MIME media type for JSON.
   if settings.IS_JSON:
     request.add_header("Content-Type", "application/json")
@@ -380,11 +380,11 @@ def do_check(request):
     # Do replacement with the 'INJECT_HERE' tag, if the wildcard char is provided.
     if menu.options.headers:
       menu.options.headers = checks.wildcard_character(menu.options.headers)
-      extra_headers = menu.options.headers 
+      extra_headers = menu.options.headers
     else:
-      menu.options.header = checks.wildcard_character(menu.options.header) 
+      menu.options.header = checks.wildcard_character(menu.options.header)
       extra_headers = menu.options.header
-  
+
     extra_headers = extra_headers.replace(":",": ")
     if ": //" in extra_headers:
       extra_headers = extra_headers.replace(": //" ,"://")
@@ -400,10 +400,10 @@ def do_check(request):
 
     # Remove empty strings
     extra_headers = [x for x in extra_headers if x]
-    
+
     for extra_header in extra_headers:
       try:
-        # Extra HTTP Header name 
+        # Extra HTTP Header name
         http_header_name = extra_header.split(':', 1)[0]
         http_header_name = ''.join(http_header_name).strip()
         # Extra HTTP Header value
@@ -419,5 +419,5 @@ def do_check(request):
           request.add_header(http_header_name, http_header_value)
       except:
         pass
-        
+
 # eof

