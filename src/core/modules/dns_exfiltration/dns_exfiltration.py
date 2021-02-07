@@ -97,7 +97,7 @@ def cmd_exec(dns_server, http_request_method, cmd, url, vuln_parameter):
     request = url + data
   else:
     values =  {vuln_parameter:payload}
-    data = _urllib.parse.urlencode(values)
+    data = _urllib.parse.urlencode(values).encode("utf-8")
     request = _urllib.request.Request(url=url, data=data)
     
   sys.stdout.write(Fore.GREEN + Style.BRIGHT + "\n")
