@@ -153,73 +153,74 @@ def check_http_traffic(request):
       print(settings.print_critical_msg(error_msg))
       if not settings.VALID_URL:
         raise SystemExit()
+    
+  opener = _urllib.request.build_opener(connection_handler())
+  response = False
+  current_attempt = 0
+  unauthorized = False
+  while not response and current_attempt <= settings.MAX_RETRIES and unauthorized is False:
+    if settings.VERBOSITY_LEVEL >= 2 or menu.options.traffic_file:
+      if settings.VERBOSITY_LEVEL >= 2:
+        req_msg = "HTTP request [" + settings.print_request_num(settings.TOTAL_OF_REQUESTS) + "]:"
+        print(settings.print_request_msg(req_msg))
+      if menu.options.traffic_file:
+        req_msg = "HTTP request [#" + str(settings.TOTAL_OF_REQUESTS) + "]:"
+        logs.log_traffic(req_msg)
+    try:
+      opener.open(request, timeout=settings.TIMEOUT)
+      response = True
+      if settings.VERBOSITY_LEVEL < 2:
+        if current_attempt != 0:
+          info_msg = "Testing connection to the target URL."
+          sys.stdout.write(settings.print_info_msg(info_msg))
+          sys.stdout.flush()
+        if settings.INIT_TEST == True and not settings.UNAUTHORIZED:
+          print(settings.SUCCESS_STATUS)
+          if not settings.CHECK_INTERNET:
+            settings.INIT_TEST = False
 
-  if settings.REVERSE_TCP == False and settings.BIND_TCP == False:
-    opener = _urllib.request.build_opener(connection_handler())
-    response = False
-    current_attempt = 0
-    unauthorized = False
-    while not response and current_attempt <= settings.MAX_RETRIES and unauthorized is False:
-      if settings.VERBOSITY_LEVEL >= 2 or menu.options.traffic_file:
-        if settings.VERBOSITY_LEVEL >= 2:
-          req_msg = "HTTP request [" + settings.print_request_num(settings.TOTAL_OF_REQUESTS) + "]:"
-          print(settings.print_request_msg(req_msg))
-        if menu.options.traffic_file:
-          req_msg = "HTTP request [#" + str(settings.TOTAL_OF_REQUESTS) + "]:"
-          logs.log_traffic(req_msg)
-      try:
-        opener.open(request, timeout=settings.TIMEOUT)
-        response = True
-        if settings.VERBOSITY_LEVEL < 2:
-          if current_attempt != 0:
-            info_msg = "Testing connection to the target URL."
-            sys.stdout.write(settings.print_info_msg(info_msg))
-            sys.stdout.flush()
-          if settings.INIT_TEST == True and not settings.UNAUTHORIZED:
-            print(settings.SUCCESS_STATUS)
-            if not settings.CHECK_INTERNET:
-              settings.INIT_TEST = False
-
-      except _urllib.error.HTTPError as err_msg:
-        if settings.UNAUTHORIZED_ERROR in str(err_msg):
-          if settings.VERBOSITY_LEVEL < 2 and not settings.UNAUTHORIZED:
-            print(settings.FAIL_STATUS)
-          settings.UNAUTHORIZED = unauthorized = True
-        http_errors = [settings.BAD_REQUEST, settings.FORBIDDEN_ERROR, settings.NOT_FOUND_ERROR,\
-                       settings.NOT_ACCEPTABLE_ERROR, settings.INTERNAL_SERVER_ERROR]
-        if [True for err_code in http_errors if err_code in str(err_msg)]:
-          break
-
-      except _urllib.error.URLError as err_msg:
-        if current_attempt == 0:
-          warn_msg = "The provided target URL seems not reachable. "
-          warn_msg += "In case that it is, please try to re-run using "
-          if not menu.options.random_agent:
-              warn_msg += "'--random-agent' switch and/or "
-          warn_msg += "'--proxy' option."
-          print(settings.print_warning_msg(warn_msg))
-        if settings.VERBOSITY_LEVEL >= 1:
-          debug_msg = settings.APPLICATION + " is going to retry the request(s)."
-          print(settings.print_debug_msg(debug_msg))
-        current_attempt = current_attempt + 1
-        time.sleep(3)
-
-      except _http_client.BadStatusLine as err_msg:
+    except _urllib.error.HTTPError as err_msg:
+      if settings.UNAUTHORIZED_ERROR in str(err_msg):
+        if settings.VERBOSITY_LEVEL < 2 and not settings.UNAUTHORIZED:
+          print(settings.FAIL_STATUS)
+        settings.UNAUTHORIZED = unauthorized = True
+      http_errors = [settings.BAD_REQUEST, settings.FORBIDDEN_ERROR, settings.NOT_FOUND_ERROR,\
+                     settings.NOT_ACCEPTABLE_ERROR, settings.INTERNAL_SERVER_ERROR]
+      if [True for err_code in http_errors if err_code in str(err_msg)]:
         if settings.VERBOSITY_LEVEL < 2:
           print(settings.FAIL_STATUS)
-        if len(err_msg.line) > 2 :
-          print(err_msg.line, err_msg.message)
-        raise SystemExit()
+        break
 
-      except ValueError as err:
-        if settings.VERBOSITY_LEVEL < 2:
-          print(settings.FAIL_STATUS)
-        err_msg = "Invalid target URL has been given."
-        print(settings.print_critical_msg(err_msg))
-        raise SystemExit()
+    except _urllib.error.URLError as err_msg: 
+      if current_attempt == 0:
+        warn_msg = "The provided target URL seems not reachable. "
+        warn_msg += "In case that it is, please try to re-run using "
+        if not menu.options.random_agent:
+            warn_msg += "'--random-agent' switch and/or "
+        warn_msg += "'--proxy' option."
+        print(settings.print_warning_msg(warn_msg))
+      if settings.VERBOSITY_LEVEL >= 1:
+        debug_msg = settings.APPLICATION + " is going to retry the request(s)."
+        print(settings.print_debug_msg(debug_msg))
+      current_attempt = current_attempt + 1
+      time.sleep(3)
+      
+    except _http_client.BadStatusLine as err_msg:
+      if settings.VERBOSITY_LEVEL < 2:
+        print(settings.FAIL_STATUS)
+      if len(err_msg.line) > 2 :
+        print(err_msg.line, err_msg.message)
+      raise SystemExit()
 
-      except AttributeError:
-        raise SystemExit()
+    except ValueError as err:
+      if settings.VERBOSITY_LEVEL < 2:
+        print(settings.FAIL_STATUS)
+      err_msg = "Invalid target URL has been given." 
+      print(settings.print_critical_msg(err_msg))
+      raise SystemExit()
+
+    except AttributeError:
+      raise SystemExit() 
 
   try:
     response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
@@ -256,9 +257,8 @@ def check_http_traffic(request):
     if settings.VERBOSITY_LEVEL > 2:
       print_http_response(err.info(), err.code, err.read())
     error_msg = "Got " + str(err).replace(": "," (")
-    # Check for 4xx and/or 5xx HTTP error codes.
-    if str(err.code).startswith('4') or \
-       str(err.code).startswith('5'):
+    # Check for 4xx / 5xx HTTP error codes.
+    if str(err.code).startswith(('4', '5')):
       if settings.VERBOSITY_LEVEL > 1:
         if len(str(err).split(": ")[1]) == 0:
           error_msg = error_msg + "Non-standard HTTP status code"
