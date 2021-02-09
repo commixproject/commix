@@ -203,15 +203,9 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
 
   if not menu.options.tech:
     menu.options.tech = ""
+    
   if len(menu.options.tech) == 0 or "c" in menu.options.tech:
     settings.CLASSIC_STATE = True
-  if len(menu.options.tech) == 0 or "e" in menu.options.tech:
-    settings.EVAL_BASED_STATE = True
-  if len(menu.options.tech) == 0 or "t" in menu.options.tech:
-    settings.TIME_BASED_STATE = True
-  if len(menu.options.tech) == 0 or "f" in menu.options.tech:
-    settings.FILE_BASED_STATE = True
-
   # Check if it is vulnerable to classic command injection technique.
   if not settings.SKIP_COMMAND_INJECTIONS and settings.CLASSIC_STATE:
     settings.CLASSIC_STATE = None
@@ -243,6 +237,8 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
     else:
       settings.CLASSIC_STATE = False
 
+  if len(menu.options.tech) == 0 or "e" in menu.options.tech:
+    settings.EVAL_BASED_STATE = True
   # Check if it is vulnerable to eval-based code injection technique.
   if not settings.SKIP_CODE_INJECTIONS and settings.EVAL_BASED_STATE:
     settings.EVAL_BASED_STATE = None
@@ -274,6 +270,8 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
       settings.EVAL_BASED_STATE = False
   
   if not settings.SKIP_COMMAND_INJECTIONS:
+    if len(menu.options.tech) == 0 or "t" in menu.options.tech:
+      settings.TIME_BASED_STATE = True
     # Check if it is vulnerable to time-based blind command injection technique.
     if settings.TIME_BASED_STATE:
       settings.TIME_BASED_STATE = None
@@ -282,6 +280,8 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
       else:
         settings.TIME_BASED_STATE = False
 
+    if len(menu.options.tech) == 0 or "f" in menu.options.tech:
+      settings.FILE_BASED_STATE = True
     # Check if it is vulnerable to file-based semiblind command injection technique.
     if settings.FILE_BASED_STATE:
       settings.FILE_BASED_STATE = None
