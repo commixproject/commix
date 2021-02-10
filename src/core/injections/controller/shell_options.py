@@ -34,20 +34,18 @@ Check for established connection
 """
 def check_established_connection():
   while True:
+    time.sleep(1)
     if settings.VERBOSITY_LEVEL == 1:
       print("")
     warn_msg = "Something went wrong with the reverse TCP connection."
     warn_msg += " Please wait while checking state."
     print(settings.print_warning_msg(warn_msg))
-    time.sleep(10)
     lines = os.popen('netstat -anta').read().split("\n")
-    found = False
     for line in lines:
-      if "ESTABLISHED" in line and settings.LPORT in line.split():
-        found = True
+      if settings.LHOST + ":" + settings.LPORT in line and "ESTABLISHED" in line:
         pass
-    if not found:
-      return 
+      else:
+        return 
 
 """
 Execute the bind / reverse TCP shell
@@ -83,7 +81,7 @@ def execute_shell(separator, TAG, cmd, prefix, suffix, whitespace, http_request_
       print("")
 
   err_msg = "The " + os_shell_option.split("_")[0] + " "
-  err_msg += os_shell_option.split("_")[1].upper() + " connection has failed!"
+  err_msg += os_shell_option.split("_")[1].upper() + " connection has failed."
   print(settings.print_critical_msg(err_msg))
 
 """

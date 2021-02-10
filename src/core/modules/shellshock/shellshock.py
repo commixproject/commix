@@ -506,7 +506,7 @@ def execute_shell(url, cmd, cve, check_header, filename, os_shell_option):
     print("")
 
   err_msg = "The " + os_shell_option.split("_")[0] + " "
-  err_msg += os_shell_option.split("_")[1].upper() + " connection has failed!"
+  err_msg += os_shell_option.split("_")[1].upper() + " connection has failed."
   print(settings.print_critical_msg(err_msg))
 
 """
