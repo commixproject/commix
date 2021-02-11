@@ -188,8 +188,7 @@ def check_http_traffic(request):
                      settings.NOT_ACCEPTABLE_ERROR, settings.INTERNAL_SERVER_ERROR]
       if [True for err_code in http_errors if err_code in str(err_msg)]:
         if settings.VERBOSITY_LEVEL < 2:
-          print(settings.FAIL_STATUS)
-        break
+          break
 
     except _urllib.error.URLError as err_msg: 
       if current_attempt == 0:
@@ -257,8 +256,8 @@ def check_http_traffic(request):
     if settings.VERBOSITY_LEVEL > 2:
       print_http_response(err.info(), err.code, err.read())
     error_msg = "Got " + str(err).replace(": "," (")
-    # Check for 4xx / 5xx HTTP error codes.
-    if str(err.code).startswith(('4', '5')):
+    # Check for 3xx, 4xx, 5xx HTTP error codes.
+    if str(err.code).startswith(('3', '4', '5')):
       if settings.VERBOSITY_LEVEL > 1:
         if len(str(err).split(": ")[1]) == 0:
           error_msg = error_msg + "Non-standard HTTP status code" 

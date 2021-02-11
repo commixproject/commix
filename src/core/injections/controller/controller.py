@@ -68,7 +68,7 @@ def check_for_stored_levels(url, http_request_method):
 Basic heuristic checks for code injection warnings
 """
 def heuristic_basic(url, http_request_method):
-  test_type = "code injection"
+  technique = "dynamic code evaluation technique"
   try:
     try:
       if re.findall(r"=(.*)&", url):
@@ -79,7 +79,7 @@ def heuristic_basic(url, http_request_method):
       pass
     if not settings.IDENTIFIED_WARNINGS:  
       if settings.VERBOSITY_LEVEL >= 1:   
-        debug_msg = "Performing heuristic (" + test_type + ") test."
+        debug_msg = "Performing heuristic test for " + technique + "."
         print(settings.print_debug_msg(debug_msg))
       if http_request_method == "GET":
         request = _urllib.request.Request(url.replace(settings.INJECT_TAG, settings.BASIC_TEST))
@@ -92,8 +92,7 @@ def heuristic_basic(url, http_request_method):
         html_data = response.read().decode(settings.UNICODE_ENCODING)
         for warning in settings.CODE_INJECTION_WARNINGS:
           if warning in html_data:
-            technique = "dynamic code evaluation technique"
-            info_msg = "Heuristic (" + test_type + ") test shows that target URL might be injectable." 
+            info_msg = "Heuristic test shows that target URL might be injectable via " + technique + "." 
             print(settings.print_bold_info_msg(info_msg))
             settings.IDENTIFIED_WARNINGS = True
             break
