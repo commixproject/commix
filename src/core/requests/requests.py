@@ -36,7 +36,7 @@ Estimating the response time (in seconds).
 """
 def estimate_response_time(url, timesec):
   stored_auth_creds = False
-  if settings.VERBOSITY_LEVEL >= 1:
+  if settings.VERBOSITY_LEVEL != 0:
     debug_msg = "Estimating the target URL response time. "
     sys.stdout.write(settings.print_debug_msg(debug_msg))
     sys.stdout.flush()
@@ -58,7 +58,7 @@ def estimate_response_time(url, timesec):
     if settings.UNAUTHORIZED_ERROR in str(err) and menu.options.ignore_code == settings.UNAUTHORIZED_ERROR:
       pass
     else:
-      if settings.VERBOSITY_LEVEL >= 1:
+      if settings.VERBOSITY_LEVEL != 0:
         print(settings.FAIL_STATUS)
       err_msg = "Unable to connect to the target URL"
       try:
@@ -187,20 +187,20 @@ def estimate_response_time(url, timesec):
     start = start - (ignore_start - ignore_end)
 
   except socket.timeout:
-    if settings.VERBOSITY_LEVEL >= 1:
+    if settings.VERBOSITY_LEVEL != 0:
       print(settings.FAIL_STATUS)
     err_msg = "The connection to target URL has timed out."
     print(settings.print_critical_msg(err_msg) + "\n")
     raise SystemExit()
 
   except _urllib.error.URLError as err_msg:
-    if settings.VERBOSITY_LEVEL >= 1:
+    if settings.VERBOSITY_LEVEL != 0:
       print(settings.FAIL_STATUS)
     print(settings.print_critical_msg(str(err_msg.args[0]).split("] ")[1] + "."))
     raise SystemExit()
 
   except ValueError as err_msg:
-    if settings.VERBOSITY_LEVEL >= 1:
+    if settings.VERBOSITY_LEVEL != 0:
       print(settings.FAIL_STATUS)
     print(settings.print_critical_msg(str(err_msg) + "."))
     raise SystemExit()
@@ -209,7 +209,7 @@ def estimate_response_time(url, timesec):
   diff = end - start 
   
   if int(diff) < 1:
-    if settings.VERBOSITY_LEVEL >= 1 and stored_auth_creds == False:
+    if settings.VERBOSITY_LEVEL != 0 and stored_auth_creds == False:
       print(settings.SUCCESS_STATUS)
     url_time_response = int(diff)
     if settings.TARGET_OS == "win":
@@ -217,7 +217,7 @@ def estimate_response_time(url, timesec):
       warn_msg += "host, there may be delays during the data extraction procedure."
       print(settings.print_warning_msg(warn_msg))
   else:
-    if settings.VERBOSITY_LEVEL >= 1:
+    if settings.VERBOSITY_LEVEL != 0:
       print(settings.SUCCESS_STATUS)
     url_time_response = int(round(diff))
     warn_msg = "The estimated response time is " + str(url_time_response)
@@ -256,10 +256,10 @@ def get_request_response(request):
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
         err = str(err_msg) + "."
-        if not settings.VERBOSITY_LEVEL >= 1 and settings.TIME_BASED_STATE == False or \
-          settings.VERBOSITY_LEVEL >= 1 and settings.EVAL_BASED_STATE == None:
+        if not settings.VERBOSITY_LEVEL != 0 and settings.TIME_BASED_STATE == False or \
+          settings.VERBOSITY_LEVEL != 0 and settings.EVAL_BASED_STATE == None:
           print("")
-        if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
+        if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
           print("") 
         print(settings.print_critical_msg(err))
         continue_tests = checks.continue_tests(err_msg)
@@ -272,10 +272,10 @@ def get_request_response(request):
       if "Connection refused" in err_msg.reason:
         err_msg =  "The target host is not responding. "
         err_msg += "Please ensure that is up and try again."
-        if not settings.VERBOSITY_LEVEL >= 1 and settings.TIME_BASED_STATE == False or \
-           settings.VERBOSITY_LEVEL >= 1 and settings.EVAL_BASED_STATE == None:
+        if not settings.VERBOSITY_LEVEL != 0 and settings.TIME_BASED_STATE == False or \
+           settings.VERBOSITY_LEVEL != 0 and settings.EVAL_BASED_STATE == None:
           print("")
-        if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
+        if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
           print("")
         print(settings.print_critical_msg(err_msg))
       raise SystemExit()
@@ -289,10 +289,10 @@ def get_request_response(request):
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
         err = str(err_msg) + "."
-        if not settings.VERBOSITY_LEVEL >= 1 and settings.TIME_BASED_STATE == False or \
-          settings.VERBOSITY_LEVEL >= 1 and settings.EVAL_BASED_STATE == None:
+        if not settings.VERBOSITY_LEVEL != 0 and settings.TIME_BASED_STATE == False or \
+          settings.VERBOSITY_LEVEL != 0 and settings.EVAL_BASED_STATE == None:
           print("")
-        if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
+        if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
           print("") 
         print(settings.print_critical_msg(err))
         continue_tests = checks.continue_tests(err_msg)
@@ -304,7 +304,7 @@ def get_request_response(request):
     except _urllib.error.URLError as err_msg:
       err_msg = str(err_msg.reason).split(" ")[2:]
       err_msg = ' '.join(err_msg)+ "."
-      if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
+      if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
         print("")
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
@@ -330,7 +330,7 @@ def get_request_response(request):
     except _urllib.error.URLError as err_msg:
       err_msg = str(err_msg.reason).split(" ")[2:]
       err_msg = ' '.join(err_msg)+ "."
-      if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
+      if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
         print("")
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
@@ -396,7 +396,7 @@ def cookie_injection(url, vuln_parameter, payload):
     except _urllib.error.URLError as err_msg:
       err_msg = str(err_msg.reason).split(" ")[2:]
       err_msg = ' '.join(err_msg)+ "."
-      if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
+      if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
         print("")
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
@@ -411,10 +411,10 @@ def cookie_injection(url, vuln_parameter, payload):
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
         err = str(err_msg) + "."
-        if not settings.VERBOSITY_LEVEL >= 1 and settings.TIME_BASED_STATE == False or \
-          settings.VERBOSITY_LEVEL >= 1 and settings.EVAL_BASED_STATE == None:
+        if not settings.VERBOSITY_LEVEL != 0 and settings.TIME_BASED_STATE == False or \
+          settings.VERBOSITY_LEVEL != 0 and settings.EVAL_BASED_STATE == None:
           print("")
-        if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
+        if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
           print("") 
         print(settings.print_critical_msg(err))
         continue_tests = checks.continue_tests(err_msg)
@@ -426,7 +426,7 @@ def cookie_injection(url, vuln_parameter, payload):
     except _urllib.error.URLError as err_msg:
       err_msg = str(err_msg.reason).split(" ")[2:]
       err_msg = ' '.join(err_msg)+ "."
-      if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
+      if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
         print("")
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
@@ -439,10 +439,10 @@ def cookie_injection(url, vuln_parameter, payload):
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
         err = str(err_msg) + "."
-        if not settings.VERBOSITY_LEVEL >= 1 and settings.TIME_BASED_STATE == False or \
-          settings.VERBOSITY_LEVEL >= 1 and settings.EVAL_BASED_STATE == None:
+        if not settings.VERBOSITY_LEVEL != 0 and settings.TIME_BASED_STATE == False or \
+          settings.VERBOSITY_LEVEL != 0 and settings.EVAL_BASED_STATE == None:
           print("")
-        if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
+        if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
           print("") 
         print(settings.print_critical_msg(err))
         continue_tests = checks.continue_tests(err_msg)
@@ -455,7 +455,7 @@ def cookie_injection(url, vuln_parameter, payload):
     except _urllib.error.URLError as err_msg:
       err_msg = str(err_msg.reason).split(" ")[2:]
       err_msg = ' '.join(err_msg)+ "."
-      if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
+      if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
         print("")
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
@@ -513,10 +513,10 @@ def user_agent_injection(url, vuln_parameter, payload):
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
         err = str(err_msg) + "."
-        if not settings.VERBOSITY_LEVEL >= 1 and settings.TIME_BASED_STATE == False or \
-          settings.VERBOSITY_LEVEL >= 1 and settings.EVAL_BASED_STATE == None:
+        if not settings.VERBOSITY_LEVEL != 0 and settings.TIME_BASED_STATE == False or \
+          settings.VERBOSITY_LEVEL != 0 and settings.EVAL_BASED_STATE == None:
           print("")
-        if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
+        if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
           print("") 
         print(settings.print_critical_msg(err))
         continue_tests = checks.continue_tests(err_msg)
@@ -528,7 +528,7 @@ def user_agent_injection(url, vuln_parameter, payload):
     except _urllib.error.URLError as err_msg:
       err_msg = str(err_msg.reason).split(" ")[2:]
       err_msg = ' '.join(err_msg)+ "."
-      if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
+      if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
         print("")
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
@@ -543,10 +543,10 @@ def user_agent_injection(url, vuln_parameter, payload):
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
         err = str(err_msg) + "."
-        if not settings.VERBOSITY_LEVEL >= 1 and settings.TIME_BASED_STATE == False or \
-          settings.VERBOSITY_LEVEL >= 1 and settings.EVAL_BASED_STATE == None:
+        if not settings.VERBOSITY_LEVEL != 0 and settings.TIME_BASED_STATE == False or \
+          settings.VERBOSITY_LEVEL != 0 and settings.EVAL_BASED_STATE == None:
           print("")
-        if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
+        if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
           print("") 
         print(settings.print_critical_msg(err))
         continue_tests = checks.continue_tests(err_msg)
@@ -558,7 +558,7 @@ def user_agent_injection(url, vuln_parameter, payload):
     except _urllib.error.URLError as err_msg:
       err_msg = str(err_msg.reason).split(" ")[2:]
       err_msg = ' '.join(err_msg)+ "."
-      if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
+      if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
         print("")
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
@@ -571,10 +571,10 @@ def user_agent_injection(url, vuln_parameter, payload):
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
         err = str(err_msg) + "."
-        if not settings.VERBOSITY_LEVEL >= 1 and settings.TIME_BASED_STATE == False or \
-          settings.VERBOSITY_LEVEL >= 1 and settings.EVAL_BASED_STATE == None:
+        if not settings.VERBOSITY_LEVEL != 0 and settings.TIME_BASED_STATE == False or \
+          settings.VERBOSITY_LEVEL != 0 and settings.EVAL_BASED_STATE == None:
           print("")
-        if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
+        if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
           print("") 
         print(settings.print_critical_msg(err))
         continue_tests = checks.continue_tests(err_msg)
@@ -586,7 +586,7 @@ def user_agent_injection(url, vuln_parameter, payload):
     except _urllib.error.URLError as err_msg:
       err_msg = str(err_msg.reason).split(" ")[2:]
       err_msg = ' '.join(err_msg)+ "."
-      if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
+      if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
         print("")
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
@@ -645,10 +645,10 @@ def referer_injection(url, vuln_parameter, payload):
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
         err = str(err_msg) + "."
-        if not settings.VERBOSITY_LEVEL >= 1 and settings.TIME_BASED_STATE == False or \
-          settings.VERBOSITY_LEVEL >= 1 and settings.EVAL_BASED_STATE == None:
+        if not settings.VERBOSITY_LEVEL != 0 and settings.TIME_BASED_STATE == False or \
+          settings.VERBOSITY_LEVEL != 0 and settings.EVAL_BASED_STATE == None:
           print("")
-        if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
+        if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
           print("") 
         print(settings.print_critical_msg(err))
         continue_tests = checks.continue_tests(err_msg)
@@ -660,7 +660,7 @@ def referer_injection(url, vuln_parameter, payload):
     except _urllib.error.URLError as err_msg:
       err_msg = str(err_msg.reason).split(" ")[2:]
       err_msg = ' '.join(err_msg)+ "."
-      if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
+      if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
         print("")
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
@@ -675,10 +675,10 @@ def referer_injection(url, vuln_parameter, payload):
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
         err = str(err_msg) + "."
-        if not settings.VERBOSITY_LEVEL >= 1 and settings.TIME_BASED_STATE == False or \
-          settings.VERBOSITY_LEVEL >= 1 and settings.EVAL_BASED_STATE == None:
+        if not settings.VERBOSITY_LEVEL != 0 and settings.TIME_BASED_STATE == False or \
+          settings.VERBOSITY_LEVEL != 0 and settings.EVAL_BASED_STATE == None:
           print("")
-        if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
+        if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
           print("") 
         print(settings.print_critical_msg(err))
         continue_tests = checks.continue_tests(err_msg)
@@ -690,7 +690,7 @@ def referer_injection(url, vuln_parameter, payload):
     except _urllib.error.URLError as err_msg:
       err_msg = str(err_msg.reason).split(" ")[2:]
       err_msg = ' '.join(err_msg)+ "."
-      if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
+      if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
         print("")
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
@@ -704,10 +704,10 @@ def referer_injection(url, vuln_parameter, payload):
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
         err = str(err_msg) + "."
-        if not settings.VERBOSITY_LEVEL >= 1 and settings.TIME_BASED_STATE == False or \
-          settings.VERBOSITY_LEVEL >= 1 and settings.EVAL_BASED_STATE == None:
+        if not settings.VERBOSITY_LEVEL != 0 and settings.TIME_BASED_STATE == False or \
+          settings.VERBOSITY_LEVEL != 0 and settings.EVAL_BASED_STATE == None:
           print("")
-        if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
+        if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
           print("") 
         print(settings.print_critical_msg(err))
         continue_tests = checks.continue_tests(err_msg)
@@ -719,7 +719,7 @@ def referer_injection(url, vuln_parameter, payload):
     except _urllib.error.URLError as err_msg:
       err_msg = str(err_msg.reason).split(" ")[2:]
       err_msg = ' '.join(err_msg)+ "."
-      if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
+      if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
         print("")
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
@@ -780,10 +780,10 @@ def host_injection(url, vuln_parameter, payload):
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
         err = str(err_msg) + "."
-        if not settings.VERBOSITY_LEVEL >= 1 and settings.TIME_BASED_STATE == False or \
-          settings.VERBOSITY_LEVEL >= 1 and settings.EVAL_BASED_STATE == None:
+        if not settings.VERBOSITY_LEVEL != 0 and settings.TIME_BASED_STATE == False or \
+          settings.VERBOSITY_LEVEL != 0 and settings.EVAL_BASED_STATE == None:
           print("")
-        if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
+        if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
           print("") 
         print(settings.print_critical_msg(err))
         continue_tests = checks.continue_tests(err_msg)
@@ -795,7 +795,7 @@ def host_injection(url, vuln_parameter, payload):
     except _urllib.error.URLError as err_msg:
       err_msg = str(err_msg.reason).split(" ")[2:]
       err_msg = ' '.join(err_msg)+ "."
-      if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
+      if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
         print("")
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
@@ -810,10 +810,10 @@ def host_injection(url, vuln_parameter, payload):
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
         err = str(err_msg) + "."
-        if not settings.VERBOSITY_LEVEL >= 1 and settings.TIME_BASED_STATE == False or \
-          settings.VERBOSITY_LEVEL >= 1 and settings.EVAL_BASED_STATE == None:
+        if not settings.VERBOSITY_LEVEL != 0 and settings.TIME_BASED_STATE == False or \
+          settings.VERBOSITY_LEVEL != 0 and settings.EVAL_BASED_STATE == None:
           print("")
-        if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
+        if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
           print("") 
         print(settings.print_critical_msg(err))
         continue_tests = checks.continue_tests(err_msg)
@@ -825,7 +825,7 @@ def host_injection(url, vuln_parameter, payload):
     except _urllib.error.URLError as err_msg:
       err_msg = str(err_msg.reason).split(" ")[2:]
       err_msg = ' '.join(err_msg)+ "."
-      if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
+      if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
         print("")
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
@@ -839,10 +839,10 @@ def host_injection(url, vuln_parameter, payload):
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
         err = str(err_msg) + "."
-        if not settings.VERBOSITY_LEVEL >= 1 and settings.TIME_BASED_STATE == False or \
-          settings.VERBOSITY_LEVEL >= 1 and settings.EVAL_BASED_STATE == None:
+        if not settings.VERBOSITY_LEVEL != 0 and settings.TIME_BASED_STATE == False or \
+          settings.VERBOSITY_LEVEL != 0 and settings.EVAL_BASED_STATE == None:
           print("")
-        if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
+        if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
           print("") 
         print(settings.print_critical_msg(err))
         continue_tests = checks.continue_tests(err_msg)
@@ -854,7 +854,7 @@ def host_injection(url, vuln_parameter, payload):
     except _urllib.error.URLError as err_msg:
       err_msg = str(err_msg.reason).split(" ")[2:]
       err_msg = ' '.join(err_msg)+ "."
-      if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
+      if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
         print("")
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
@@ -915,10 +915,10 @@ def custom_header_injection(url, vuln_parameter, payload):
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
         err = str(err_msg) + "."
-        if not settings.VERBOSITY_LEVEL >= 1 and settings.TIME_BASED_STATE == False or \
-          settings.VERBOSITY_LEVEL >= 1 and settings.EVAL_BASED_STATE == None:
+        if not settings.VERBOSITY_LEVEL != 0 and settings.TIME_BASED_STATE == False or \
+          settings.VERBOSITY_LEVEL != 0 and settings.EVAL_BASED_STATE == None:
           print("")
-        if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
+        if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
           print("") 
         print(settings.print_critical_msg(err))
         continue_tests = checks.continue_tests(err_msg)
@@ -930,7 +930,7 @@ def custom_header_injection(url, vuln_parameter, payload):
     except _urllib.error.URLError as err_msg:
       err_msg = str(err_msg.reason).split(" ")[2:]
       err_msg = ' '.join(err_msg)+ "."
-      if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
+      if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
         print("")
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
@@ -945,10 +945,10 @@ def custom_header_injection(url, vuln_parameter, payload):
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
         err = str(err_msg) + "."
-        if not settings.VERBOSITY_LEVEL >= 1 and settings.TIME_BASED_STATE == False or \
-          settings.VERBOSITY_LEVEL >= 1 and settings.EVAL_BASED_STATE == None:
+        if not settings.VERBOSITY_LEVEL != 0 and settings.TIME_BASED_STATE == False or \
+          settings.VERBOSITY_LEVEL != 0 and settings.EVAL_BASED_STATE == None:
           print("")
-        if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
+        if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
           print("") 
         print(settings.print_critical_msg(err))
         continue_tests = checks.continue_tests(err_msg)
@@ -960,7 +960,7 @@ def custom_header_injection(url, vuln_parameter, payload):
     except _urllib.error.URLError as err_msg:
       err_msg = str(err_msg.reason).split(" ")[2:]
       err_msg = ' '.join(err_msg)+ "."
-      if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
+      if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
         print("")
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
@@ -973,10 +973,10 @@ def custom_header_injection(url, vuln_parameter, payload):
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
         err = str(err_msg) + "."
-        if not settings.VERBOSITY_LEVEL >= 1 and settings.TIME_BASED_STATE == False or \
-          settings.VERBOSITY_LEVEL >= 1 and settings.EVAL_BASED_STATE == None:
+        if not settings.VERBOSITY_LEVEL != 0 and settings.TIME_BASED_STATE == False or \
+          settings.VERBOSITY_LEVEL != 0 and settings.EVAL_BASED_STATE == None:
           print("")
-        if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
+        if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
           print("") 
         print(settings.print_critical_msg(err))
         continue_tests = checks.continue_tests(err_msg)
@@ -988,7 +988,7 @@ def custom_header_injection(url, vuln_parameter, payload):
     except _urllib.error.URLError as err_msg:
       err_msg = str(err_msg.reason).split(" ")[2:]
       err_msg = ' '.join(err_msg)+ "."
-      if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
+      if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
         print("")
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
@@ -1006,7 +1006,7 @@ Target's encoding detection
 def encoding_detection(response):
   if not menu.options.encoding:
     charset_detected = False
-    if settings.VERBOSITY_LEVEL >= 1:
+    if settings.VERBOSITY_LEVEL != 0:
       debug_msg = "Identifying the indicated web-page charset. " 
       sys.stdout.write(settings.print_debug_msg(debug_msg))
       sys.stdout.flush()
@@ -1032,13 +1032,13 @@ def encoding_detection(response):
       # Check the identifyied charset
       if charset_detected :
         settings.UNICODE_ENCODING = settings.ENCODING = charset.lower()
-        if settings.VERBOSITY_LEVEL >= 1:
+        if settings.VERBOSITY_LEVEL != 0:
           print(settings.SUCCESS_STATUS)
         if settings.ENCODING.lower() not in settings.ENCODING_LIST:
           warn_msg = "The indicated web-page charset "  + settings.ENCODING + " seems unknown."
           print(settings.print_warning_msg(warn_msg))
         else:
-          if settings.VERBOSITY_LEVEL >= 1:
+          if settings.VERBOSITY_LEVEL != 0:
             debug_msg = "The indicated web-page charset appears to be '" 
             debug_msg += settings.ENCODING + Style.RESET_ALL + "'."
             print(settings.print_bold_debug_msg(debug_msg))
@@ -1046,7 +1046,7 @@ def encoding_detection(response):
         pass
     except:
       pass
-    if charset_detected == False and settings.VERBOSITY_LEVEL >= 1:
+    if charset_detected == False and settings.VERBOSITY_LEVEL != 0:
       print(settings.FAIL_STATUS)
       warn_msg = "Heuristics have failed to identify indicated web-page charset."
       print(settings.print_warning_msg(warn_msg))
@@ -1064,7 +1064,7 @@ Procedure for target application identification
 """
 def application_identification(server_banner, url):
   found_application_extension = False
-  if settings.VERBOSITY_LEVEL >= 1:
+  if settings.VERBOSITY_LEVEL != 0:
     debug_msg = "Identifying the target application." 
     sys.stdout.write(settings.print_debug_msg(debug_msg))
     sys.stdout.flush()
@@ -1073,7 +1073,7 @@ def application_identification(server_banner, url):
   
   if settings.TARGET_APPLICATION:
     found_application_extension = True
-    if settings.VERBOSITY_LEVEL >= 1:
+    if settings.VERBOSITY_LEVEL != 0:
       print(settings.SUCCESS_STATUS)           
       debug_msg = "The target application was identified as " 
       debug_msg += settings.TARGET_APPLICATION + Style.RESET_ALL + "."
@@ -1087,7 +1087,7 @@ def application_identification(server_banner, url):
         raise SystemExit()
 
   if not found_application_extension:
-    if settings.VERBOSITY_LEVEL >= 1:
+    if settings.VERBOSITY_LEVEL != 0:
       print(settings.FAIL_STATUS)
     warn_msg = "Heuristics have failed to identify target application."
     print(settings.print_warning_msg(warn_msg))
@@ -1097,7 +1097,7 @@ Procedure for target server's identification.
 """
 def server_identification(server_banner):
   found_server_banner = False
-  if settings.VERBOSITY_LEVEL >= 1:
+  if settings.VERBOSITY_LEVEL != 0:
     debug_msg = "Identifying the target server. " 
     sys.stdout.write(settings.print_debug_msg(debug_msg))
     sys.stdout.flush()
@@ -1105,9 +1105,9 @@ def server_identification(server_banner):
   for i in range(0,len(settings.SERVER_BANNERS)):
     match = re.search(settings.SERVER_BANNERS[i].lower(), server_banner.lower())
     if match:
-      if settings.VERBOSITY_LEVEL >= 1:
+      if settings.VERBOSITY_LEVEL != 0:
         print(settings.SUCCESS_STATUS)
-      if settings.VERBOSITY_LEVEL >= 1:
+      if settings.VERBOSITY_LEVEL != 0:
         debug_msg = "The target server was identified as " 
         debug_msg += server_banner + Style.RESET_ALL + "."
         print(settings.print_bold_debug_msg(debug_msg))
@@ -1125,7 +1125,7 @@ def server_identification(server_banner):
         settings.WEB_ROOT = "\\inetpub\\wwwroot"
       break
   else:
-    if settings.VERBOSITY_LEVEL >= 1:
+    if settings.VERBOSITY_LEVEL != 0:
       print(settings.FAIL_STATUS)
       warn_msg = "The server which was identified as '" 
       warn_msg += server_banner + "' seems unknown."
@@ -1140,7 +1140,7 @@ def check_target_os(server_banner):
   if menu.options.os and checks.user_defined_os():
     user_defined_os = settings.TARGET_OS
 
-  if settings.VERBOSITY_LEVEL >= 1:
+  if settings.VERBOSITY_LEVEL != 0:
     debug_msg = "Identifying the target operating system. " 
     sys.stdout.write(settings.print_debug_msg(debug_msg))
     sys.stdout.flush()
@@ -1170,7 +1170,7 @@ def check_target_os(server_banner):
           if not checks.identified_os():
             settings.TARGET_OS = user_defined_os
 
-  if settings.VERBOSITY_LEVEL >= 1 :
+  if settings.VERBOSITY_LEVEL != 0 :
     if found_os_server:
       print(settings.SUCCESS_STATUS)
       debug_msg = "The target operating system appears to be " 

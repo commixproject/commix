@@ -502,7 +502,7 @@ Execute the bind / reverse TCP shell
 def execute_shell(url, cmd, cve, check_header, filename, os_shell_option):
 
   shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
-  if settings.VERBOSITY_LEVEL >= 1:
+  if settings.VERBOSITY_LEVEL != 0:
     print("")
 
   err_msg = "The " + os_shell_option.split("_")[0] + " "
@@ -623,7 +623,7 @@ def shellshock_handler(url, http_request_method, filename):
   technique = "shellshock injection technique"
 
   info_msg = "Testing the " + technique + ". "
-  if settings.VERBOSITY_LEVEL > 1:
+  if settings.VERBOSITY_LEVEL >= 2:
     info_msg = info_msg + "\n"
   sys.stdout.write(settings.print_info_msg(info_msg))
   sys.stdout.flush()
@@ -701,13 +701,13 @@ def shellshock_handler(url, http_request_method, filename):
           check_header = check_header[1:]
           logs.update_payload(filename, counter, payload) 
 
-          if settings.VERBOSITY_LEVEL >= 1:
+          if settings.VERBOSITY_LEVEL != 0:
             checks.total_of_requests()
 
           info_msg = "The (" + check_header + ") '"
           info_msg += url + Style.RESET_ALL + Style.BRIGHT 
           info_msg += "' seems vulnerable via " + technique + "."
-          if settings.VERBOSITY_LEVEL <= 1:
+          if settings.VERBOSITY_LEVEL < 2:
             print("")
           print(settings.print_bold_info_msg(info_msg))
           sub_content = "\"" + payload + "\""
@@ -715,7 +715,7 @@ def shellshock_handler(url, http_request_method, filename):
 
           # Enumeration options.
           if settings.ENUMERATION_DONE == True :
-            if settings.VERBOSITY_LEVEL >= 1:
+            if settings.VERBOSITY_LEVEL != 0:
               print("")
             while True:
               if not menu.options.batch:
@@ -823,7 +823,7 @@ def shellshock_handler(url, http_request_method, filename):
                           sys.stdout.write(settings.print_debug_msg(debug_msg))
                           sys.stdout.flush()
                           sys.stdout.write("\n" + settings.print_payload(payload)+ "\n")
-                        elif settings.VERBOSITY_LEVEL > 1:
+                        elif settings.VERBOSITY_LEVEL >= 2:
                           sys.stdout.write(settings.print_debug_msg(debug_msg))
                           sys.stdout.flush()
                           sys.stdout.write("\n" + settings.print_payload(payload)+ "\n")
@@ -886,7 +886,7 @@ def shellshock_handler(url, http_request_method, filename):
   except _urllib.error.URLError as err_msg:
     err_msg = str(err_msg.reason).split(" ")[2:]
     err_msg = ' '.join(err_msg)+ "."
-    if settings.VERBOSITY_LEVEL >= 1 and settings.LOAD_SESSION == False:
+    if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
       print("")
     print(settings.print_critical_msg(err_msg))
     raise SystemExit()
@@ -910,10 +910,10 @@ def cmd_exec(url, cmd, cve, check_header, filename):
       cmd = "echo " + TAG + "$(" + cmd + ")" + TAG
       payload = shellshock_exploitation(cve, cmd)
       debug_msg = "Executing the '" + cmd + "' command. "
-      if settings.VERBOSITY_LEVEL >= 1:
+      if settings.VERBOSITY_LEVEL != 0:
         sys.stdout.write(settings.print_debug_msg(debug_msg))
       sys.stdout.flush()
-      if settings.VERBOSITY_LEVEL >= 1:
+      if settings.VERBOSITY_LEVEL != 0:
         sys.stdout.write("\n" + settings.print_payload(payload)+ "\n")
 
       header = {check_header : payload}

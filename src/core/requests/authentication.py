@@ -50,7 +50,7 @@ def authentication_process():
         cookies += cookie_values
     if len(cookies) != 0 :
       menu.options.cookie = cookies.rstrip()
-      if settings.VERBOSITY_LEVEL >= 1:
+      if settings.VERBOSITY_LEVEL != 0:
         info_msg = "The received cookie is "  
         info_msg += str(menu.options.cookie) + Style.RESET_ALL + "."
         print(settings.print_bold_info_msg(info_msg))
@@ -74,7 +74,7 @@ wordlists for usernames / passwords.
 def define_wordlists():
   try:
     usernames = []
-    if settings.VERBOSITY_LEVEL >= 1:
+    if settings.VERBOSITY_LEVEL != 0:
       debug_msg = "Parsing '" + settings.USERNAMES_TXT_FILE + "' dictionary file for usernames."
       print(settings.print_debug_msg(debug_msg))
     if not os.path.isfile(settings.USERNAMES_TXT_FILE):
@@ -96,7 +96,7 @@ def define_wordlists():
 
   try:
     passwords = []
-    if settings.VERBOSITY_LEVEL >= 1:
+    if settings.VERBOSITY_LEVEL != 0:
       debug_msg = "Parsing '" + settings.PASSWORDS_TXT_FILE + "' dictionary file for passwords."
       print(settings.print_debug_msg(debug_msg))
     if not os.path.isfile(settings.PASSWORDS_TXT_FILE):
@@ -133,9 +133,9 @@ def http_auth_cracker(url, realm):
       for password in passwords:
         float_percent = "{0:.1f}%".format(round(((i*100)/(total*1.0)),2))
         # Check if verbose mode on
-        if settings.VERBOSITY_LEVEL >= 1:
+        if settings.VERBOSITY_LEVEL != 0:
           payload = "" + username + ":" + password + ""
-          if settings.VERBOSITY_LEVEL > 1:
+          if settings.VERBOSITY_LEVEL >= 2:
             print(settings.print_checking_msg(payload))
           else:
             sys.stdout.write("\r" + settings.print_checking_msg(payload) + " " * 10)
@@ -185,7 +185,7 @@ def http_auth_cracker(url, realm):
           sys.stdout.flush()
         if found:
           valid_pair =  "" + username + ":" + password + ""
-          if not settings.VERBOSITY_LEVEL > 1:
+          if not settings.VERBOSITY_LEVEL >= 2:
             print("")
           info_msg = "Identified a valid pair of credentials '" 
           info_msg += valid_pair + Style.RESET_ALL + Style.BRIGHT  + "'."  

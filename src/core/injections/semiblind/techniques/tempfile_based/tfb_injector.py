@@ -191,7 +191,7 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
   info_msg = "Retrieving the length of execution output. "
   sys.stdout.write(settings.print_info_msg(info_msg))
   sys.stdout.flush()  
-  if settings.VERBOSITY_LEVEL > 1:
+  if settings.VERBOSITY_LEVEL >= 2:
     print("")
   for output_length in range(int(minlen), int(maxlen)):
     # Execute shell commands on vulnerable host.
@@ -249,14 +249,14 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
 
     if injection_check == True:   
       if output_length > 1:
-        if settings.VERBOSITY_LEVEL >= 1:
+        if settings.VERBOSITY_LEVEL != 0:
           pass
         else:
           sys.stdout.write(settings.SUCCESS_STATUS + "\n")
           sys.stdout.flush()
         if settings.VERBOSITY_LEVEL == 1:
           print("")
-        if settings.VERBOSITY_LEVEL >= 1:
+        if settings.VERBOSITY_LEVEL != 0:
           debug_msg = "Retrieved the length of execution output: " + str(output_length)
           print(settings.print_bold_debug_msg(debug_msg))
         else:
@@ -372,7 +372,7 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
     check_how_long = 0
     output = ""
 
-  if settings.VERBOSITY_LEVEL >= 1 and menu.options.ignore_session:
+  if settings.VERBOSITY_LEVEL != 0 and menu.options.ignore_session:
     print("") 
   return check_how_long, output
 
@@ -392,7 +392,7 @@ def false_positive_check(separator, TAG, cmd, prefix, suffix, whitespace, timese
   debug_msg = "Checking the reliability of the used payload "
   debug_msg += "in case of a false positive result. "
   # Check if defined "--verbose" option.
-  if settings.VERBOSITY_LEVEL >= 1: 
+  if settings.VERBOSITY_LEVEL != 0: 
     sys.stdout.write(settings.print_debug_msg(debug_msg))
     sys.stdout.flush()
   
@@ -422,7 +422,7 @@ def false_positive_check(separator, TAG, cmd, prefix, suffix, whitespace, timese
       payload_msg = payload.replace("\n", "\\n") 
       sys.stdout.write("\n" + settings.print_payload(payload_msg))
     # Check if defined "--verbose" option.
-    elif settings.VERBOSITY_LEVEL >= 1:
+    elif settings.VERBOSITY_LEVEL != 0:
       debug_msg = "Generating payload for testing the reliability of used payload."
       print(settings.print_debug_msg(debug_msg))
       payload_msg = payload.replace("\n", "\\n") 
@@ -492,7 +492,7 @@ def false_positive_check(separator, TAG, cmd, prefix, suffix, whitespace, timese
           payload_msg = payload.replace("\n", "\\n") 
           sys.stdout.write("\n" + settings.print_payload(payload_msg))
         # Check if defined "--verbose" option.
-        elif settings.VERBOSITY_LEVEL >= 1:
+        elif settings.VERBOSITY_LEVEL != 0:
           debug_msg = "Generating payload for the injection."
           print(settings.print_debug_msg(debug_msg))
           payload_msg = payload.replace("\n", "\\n") 

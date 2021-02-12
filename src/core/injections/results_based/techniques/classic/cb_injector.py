@@ -170,7 +170,7 @@ def injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_meth
     payload = checks.perform_payload_modification(payload)
 
     # Check if defined "--verbose" option.
-    if settings.VERBOSITY_LEVEL >= 1:
+    if settings.VERBOSITY_LEVEL != 0:
       debug_msg = "Executing the '" + cmd + "' command. "
       sys.stdout.write(settings.print_debug_msg(debug_msg))
       sys.stdout.flush()

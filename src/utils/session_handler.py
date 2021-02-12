@@ -40,11 +40,11 @@ def table_name(url):
 Ignore session.
 """
 def ignore(url):
-  if settings.VERBOSITY_LEVEL >= 1:
+  if settings.VERBOSITY_LEVEL != 0:
     debug_msg = "Ignoring the stored session from the session file."
     print(settings.print_debug_msg(debug_msg))
   if not os.path.isfile(settings.SESSION_FILE):
-    if settings.VERBOSITY_LEVEL >= 1:
+    if settings.VERBOSITY_LEVEL != 0:
       err_msg = "The session file does not exist."
       print(settings.print_critical_msg(err_msg))
 

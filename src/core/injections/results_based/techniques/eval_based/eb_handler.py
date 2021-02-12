@@ -81,7 +81,7 @@ def eb_injection_handler(url, timesec, filename, http_request_method):
     info_msg = "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + ". "
     sys.stdout.write(settings.print_info_msg(info_msg))
     sys.stdout.flush()
-    if settings.VERBOSITY_LEVEL >= 1:
+    if settings.VERBOSITY_LEVEL != 0:
       print("")
           
   i = 0
@@ -450,7 +450,7 @@ def eb_injection_handler(url, timesec, filename, http_request_method):
                         logs.executed_command(filename, cmd, shell)
                         print("\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n")
                       else:
-                        if settings.VERBOSITY_LEVEL >= 1:
+                        if settings.VERBOSITY_LEVEL != 0:
                           print("")
                         err_msg = "The '" + cmd + "' command, does not return any output."
                         print(settings.print_critical_msg(err_msg) + "\n")

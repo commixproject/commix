@@ -558,7 +558,7 @@ Check the defined options
 """
 def do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec):
   
-  # if not settings.VERBOSITY_LEVEL >= 1 and not settings.ENUMERATION_DONE:
+  # if not settings.VERBOSITY_LEVEL != 0 and not settings.ENUMERATION_DONE:
   #   print("")
 
   # Check if PowerShell is enabled.

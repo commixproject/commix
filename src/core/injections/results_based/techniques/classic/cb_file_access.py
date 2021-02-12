@@ -53,7 +53,7 @@ def file_read(separator, TAG, prefix, suffix, whitespace, http_request_method, u
     session_handler.store_cmd(url, cmd, shell, vuln_parameter)
   else:
     shell = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
-  if settings.VERBOSITY_LEVEL >= 1 and menu.options.ignore_session:
+  if settings.VERBOSITY_LEVEL != 0 and menu.options.ignore_session:
     print("")
   if shell:
     info_msg = "The contents of file '"  
@@ -148,7 +148,7 @@ def file_write(separator, TAG, prefix, suffix, whitespace, http_request_method, 
   response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
   shell = cb_injector.injection_results(response, TAG, cmd)
   shell = "".join(str(p) for p in shell)
-  if settings.VERBOSITY_LEVEL >= 1:
+  if settings.VERBOSITY_LEVEL != 0:
     print("")
   if shell:
     info_msg = "The " +  shell + Style.RESET_ALL
@@ -207,7 +207,7 @@ def file_upload(separator, TAG, prefix, suffix, whitespace, http_request_method,
     response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
     shell = cb_injector.injection_results(response, TAG, cmd)
     shell = "".join(str(p) for p in shell)
-    if settings.VERBOSITY_LEVEL >= 1:
+    if settings.VERBOSITY_LEVEL != 0:
       print("")
     if shell:
       info_msg = "The " +  shell

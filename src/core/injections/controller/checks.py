@@ -410,7 +410,7 @@ Check if PowerShell is enabled.
 """
 def ps_check():
   if settings.PS_ENABLED == None and menu.options.is_admin or menu.options.users or menu.options.passwords:
-    if settings.VERBOSITY_LEVEL >= 1:
+    if settings.VERBOSITY_LEVEL != 0:
       print("")
     warn_msg = "The payloads in some options that you "
     warn_msg += "have chosen, are requiring the use of PowerShell. "
@@ -525,7 +525,7 @@ def check_http_s(url):
           else:
             url = "http://" + url
         settings.SCHEME = (_urllib.parse.urlparse(url).scheme.lower() or "http") if not menu.options.force_ssl else "https"
-        if menu.options.force_ssl and settings.VERBOSITY_LEVEL >= 1:
+        if menu.options.force_ssl and settings.VERBOSITY_LEVEL != 0:
           debug_msg = "Forcing usage of SSL/HTTPS requests."
           print(settings.print_debug_msg(debug_msg))
       else:
@@ -1130,7 +1130,7 @@ def json_data(data):
 Check if the provided value is empty.
 """
 def is_empty(multi_parameters, http_request_method):
-  # if settings.VERBOSITY_LEVEL >= 1:
+  # if settings.VERBOSITY_LEVEL != 0:
   #   info_msg = "Checking for empty values in provided data."  
   #   print(settings.print_info_msg(info_msg))
   provided_value = []
@@ -1188,7 +1188,7 @@ def process_xml_data():
       question_msg += " Do you want to process it? [Y/n] > "
       xml_process = _input(settings.print_question_msg(question_msg))
     else:
-      if settings.VERBOSITY_LEVEL >= 1:
+      if settings.VERBOSITY_LEVEL != 0:
         print(settings.print_bold_info_msg(info_msg))
       xml_process = ""
     if len(xml_process) == 0:
@@ -1235,7 +1235,7 @@ def process_json_data():
       question_msg += " Do you want to process it? [Y/n] > "
       json_process = _input(settings.print_question_msg(question_msg))
     else:
-      if settings.VERBOSITY_LEVEL >= 1:
+      if settings.VERBOSITY_LEVEL != 0:
         print(settings.print_bold_info_msg(info_msg))
       json_process = ""
     if len(json_process) == 0:

@@ -69,7 +69,7 @@ __Warning:__ This technique is still experimental, is not yet fully functional a
 Delete previous shells outputs.
 """
 def delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
-  if settings.VERBOSITY_LEVEL >= 1:
+  if settings.VERBOSITY_LEVEL != 0:
     debug_msg = "Deleting the created (" + OUTPUT_TEXTFILE + ") file.\n"
     sys.stdout.write(settings.print_debug_msg(debug_msg))
   if settings.TARGET_OS == "win":
@@ -109,7 +109,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
     # Change TAG on every request to prevent false-positive resutls.
     TAG = ''.join(random.choice(string.ascii_uppercase) for num_of_chars in range(6)) 
 
-  if settings.VERBOSITY_LEVEL >= 1:
+  if settings.VERBOSITY_LEVEL != 0:
     info_msg ="Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + ". "
     print(settings.print_info_msg(info_msg))
 
@@ -341,7 +341,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                   sys.stdout.flush()
                   
               except KeyboardInterrupt: 
-                if settings.VERBOSITY_LEVEL >= 1:
+                if settings.VERBOSITY_LEVEL != 0:
                   print("")
                 if 'cmd' in locals():
                   # Delete previous shell (text) files (output) from temp.
@@ -543,13 +543,13 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                 # Export injection result
                 tfb_injector.export_injection_results(cmd, separator, output, check_how_long)
                 # Delete previous shell (text) files (output) from temp.
-                if settings.VERBOSITY_LEVEL >= 1:
+                if settings.VERBOSITY_LEVEL != 0:
                   print("")
                 delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
                 logs.print_logs_notification(filename, url) 
                 raise SystemExit()  
 
-              if settings.VERBOSITY_LEVEL >= 1 or not new_line:
+              if settings.VERBOSITY_LEVEL != 0 or not new_line:
                 print("")
               try:    
                 # Pseudo-Terminal shell
@@ -631,7 +631,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                     pass
 
               except KeyboardInterrupt:
-                if settings.VERBOSITY_LEVEL >= 1:
+                if settings.VERBOSITY_LEVEL != 0:
                   print("")
                 # Delete previous shell (text) files (output) from temp.
                 delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)

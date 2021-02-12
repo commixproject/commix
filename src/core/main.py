@@ -100,7 +100,7 @@ def user_agent_header():
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
     else:
-      if settings.VERBOSITY_LEVEL >= 1:
+      if settings.VERBOSITY_LEVEL != 0:
         debug_msg = "Fetching random HTTP User-Agent header. "  
         sys.stdout.write(settings.print_debug_msg(debug_msg))
         sys.stdout.flush()
@@ -108,13 +108,13 @@ def user_agent_header():
         pass
       try:
         menu.options.agent = random.choice(settings.USER_AGENT_LIST)
-        if settings.VERBOSITY_LEVEL >= 1:
+        if settings.VERBOSITY_LEVEL != 0:
           print(settings.SUCCESS_STATUS)
         info_msg = "The fetched random HTTP User-Agent header value is '" + menu.options.agent + "'."  
         print(settings.print_info_msg(info_msg))
       except:
         print(settings.FAIL_STATUS)
-  if settings.VERBOSITY_LEVEL >= 1:
+  if settings.VERBOSITY_LEVEL != 0:
     debug_msg = "Setting the HTTP User-Agent header."
     print(settings.print_debug_msg(debug_msg))
 
@@ -218,7 +218,7 @@ def check_internet(url):
   info_msg = "Checking for internet connection. "
   sys.stdout.write(settings.print_info_msg(info_msg))
   sys.stdout.flush()
-  if settings.VERBOSITY_LEVEL > 1:
+  if settings.VERBOSITY_LEVEL >= 2:
     print("")
   try:
     request = _urllib.request.Request(settings.CHECK_INTERNET_ADDRESS)
@@ -237,7 +237,7 @@ The init (URL) request.
 """
 def init_request(url):
   # Number of seconds to wait before timeout connection
-  if settings.VERBOSITY_LEVEL >= 1:
+  if settings.VERBOSITY_LEVEL != 0:
       debug_msg = "Setting the HTTP timeout."
       print(settings.print_debug_msg(debug_msg))
   if menu.options.timeout:
@@ -284,7 +284,7 @@ def init_request(url):
   # Check if defined any HTTP Proxy (--proxy option).
   if menu.options.proxy:
     proxy.do_check(url)
-  if settings.VERBOSITY_LEVEL >= 1:
+  if settings.VERBOSITY_LEVEL != 0:
     debug_msg = "Creating " + str(settings.SCHEME).upper() + " requests opener object."
     print(settings.print_debug_msg(debug_msg))
   # Used a valid pair of valid credentials
@@ -504,7 +504,7 @@ def main(filename, url):
   
     # Check if defined "--url" or "-m" option.
     if url:
-      if menu.options.auth_cred and menu.options.auth_cred and settings.VERBOSITY_LEVEL >= 1:
+      if menu.options.auth_cred and menu.options.auth_cred and settings.VERBOSITY_LEVEL != 0:
         info_msg = "Used a valid pair of " + menu.options.auth_type 
         info_msg += " HTTP authentication credentials '" + menu.options.auth_cred + "'." 
         print(settings.print_bold_info_msg(info_msg))
@@ -629,7 +629,7 @@ def main(filename, url):
 
   # Accidental stop / restart of the target host server.
   except (_http_client.BadStatusLine, SocketError) as err_msg:
-    if settings.VERBOSITY_LEVEL >= 1:
+    if settings.VERBOSITY_LEVEL != 0:
       print("")
     err_msg = "The target host is not responding."
     err_msg += " Please ensure that is up and try again."
@@ -921,7 +921,7 @@ except KeyboardInterrupt:
   #    settings.TEMPFILE_BASED_STATE :
   #    if not settings.DETECTION_PHASE and \
   #       settings.EXPLOITATION_PHASE:
-  #     if settings.VERBOSITY_LEVEL >= 1: 
+  #     if settings.VERBOSITY_LEVEL != 0: 
   #       new_line = ""
   print(new_line + settings.print_abort_msg(abort_msg))
   try:

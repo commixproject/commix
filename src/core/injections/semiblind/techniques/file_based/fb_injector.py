@@ -153,7 +153,7 @@ def injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_req
     payload = checks.perform_payload_modification(payload)
 
     # Check if defined "--verbose" option.
-    if settings.VERBOSITY_LEVEL >= 1:
+    if settings.VERBOSITY_LEVEL != 0:
       payload_msg = payload.replace("\n", "\\n")
       if settings.COMMENT in payload_msg:
         payload = payload.split(settings.COMMENT)[0].strip()
@@ -162,7 +162,7 @@ def injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_req
       sys.stdout.write(settings.print_debug_msg(debug_msg))
       sys.stdout.flush()
       output_payload = "\n" + settings.print_payload(payload)
-      if settings.VERBOSITY_LEVEL >= 1:
+      if settings.VERBOSITY_LEVEL != 0:
         output_payload = output_payload + "\n" 
       sys.stdout.write(output_payload)
 

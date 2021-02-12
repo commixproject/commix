@@ -142,7 +142,7 @@ def crawling(url):
     if len(HREF_LIST) != 0:
       return list(set(HREF_LIST))
     else:
-      if not settings.VERBOSITY_LEVEL > 1:
+      if not settings.VERBOSITY_LEVEL >= 2:
         print("")
       warn_msg = "No usable links found."
       print(settings.print_warning_msg(warn_msg))
@@ -280,7 +280,7 @@ def crawler(url):
         if message in settings.CHOICE_YES:
           return check_url
         elif message in settings.CHOICE_NO:
-          if settings.VERBOSITY_LEVEL >= 1:
+          if settings.VERBOSITY_LEVEL != 0:
             debug_msg = "Skipping '" + check_url + "'.\n"
             sys.stdout.write(settings.print_debug_msg(debug_msg))
           pass 

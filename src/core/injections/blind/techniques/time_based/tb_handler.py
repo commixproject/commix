@@ -78,7 +78,7 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
   injection_type = "blind OS command injection"
   technique = "time-based command injection technique"
 
-  if settings.VERBOSITY_LEVEL >= 1:
+  if settings.VERBOSITY_LEVEL != 0:
     info_msg = "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + ". "
     print(settings.print_info_msg(info_msg))
 

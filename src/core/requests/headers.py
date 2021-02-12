@@ -128,7 +128,7 @@ def check_http_traffic(request):
       except _http_client.InvalidURL as err_msg:
         settings.VALID_URL = False
         error_msg = err_msg 
-      if current_attempt == 0 and settings.VERBOSITY_LEVEL <= 1:
+      if current_attempt == 0 and settings.VERBOSITY_LEVEL < 2:
         print("")
       print(settings.print_critical_msg(error_msg))
       if not settings.VALID_URL:
@@ -148,7 +148,7 @@ def check_http_traffic(request):
       except _http_client.InvalidURL as err_msg:
         settings.VALID_URL = False
         error_msg = err_msg 
-      if current_attempt == 0 and settings.VERBOSITY_LEVEL <= 1:
+      if current_attempt == 0 and settings.VERBOSITY_LEVEL < 2:
         print("")
       print(settings.print_critical_msg(error_msg))
       if not settings.VALID_URL:
@@ -198,7 +198,7 @@ def check_http_traffic(request):
             warn_msg += "'--random-agent' switch and/or "
         warn_msg += "'--proxy' option."
         print(settings.print_warning_msg(warn_msg))
-      if settings.VERBOSITY_LEVEL >= 1:
+      if settings.VERBOSITY_LEVEL != 0:
         debug_msg = settings.APPLICATION + " is going to retry the request(s)."
         print(settings.print_debug_msg(debug_msg))
       current_attempt = current_attempt + 1
@@ -258,7 +258,7 @@ def check_http_traffic(request):
     error_msg = "Got " + str(err).replace(": "," (")
     # Check for 3xx, 4xx, 5xx HTTP error codes.
     if str(err.code).startswith(('3', '4', '5')):
-      if settings.VERBOSITY_LEVEL > 1:
+      if settings.VERBOSITY_LEVEL >= 2:
         if len(str(err).split(": ")[1]) == 0:
           error_msg = error_msg + "Non-standard HTTP status code" 
         warn_msg = error_msg

@@ -81,7 +81,7 @@ Delete previous shells outputs.
 """
 def delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
   if settings.FILE_BASED_STATE != None:
-    if settings.VERBOSITY_LEVEL >= 1:
+    if settings.VERBOSITY_LEVEL != 0:
       debug_msg = "Deleting the created (" + OUTPUT_TEXTFILE + ") file.\n"
       sys.stdout.write(settings.print_debug_msg(debug_msg))
     if settings.TARGET_OS == "win":
@@ -332,7 +332,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                 html_data = output.read()
                 shell = re.findall(r"" + TAG + "", str(html_data))
 
-                if len(shell) != 0 and shell[0] == TAG and not settings.VERBOSITY_LEVEL >= 1:
+                if len(shell) != 0 and shell[0] == TAG and not settings.VERBOSITY_LEVEL != 0:
                   percent = settings.info_msg
                   info_msg = "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "." + "" + percent + ""
                   sys.stdout.write("\r" + settings.print_info_msg(info_msg))
@@ -455,7 +455,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
             # Check injection state
             settings.DETECTION_PHASE = False
             settings.EXPLOITATION_PHASE = True
-            if not settings.VERBOSITY_LEVEL >= 1 and \
+            if not settings.VERBOSITY_LEVEL != 0 and \
                not menu.options.alter_shell and \
                not next_attack_vector:
               next_attack_vector = True
@@ -558,7 +558,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                 fb_enumeration.do_check(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
            
             if not menu.file_access_options() and not menu.options.os_cmd:
-              if not settings.VERBOSITY_LEVEL >= 1 and new_line:
+              if not settings.VERBOSITY_LEVEL != 0 and new_line:
                 print("")
 
             # Check for any system file access options.
@@ -609,10 +609,10 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
               go_back_again = False
               while True:
                 # Delete previous shell (text) files (output)
-                # if settings.VERBOSITY_LEVEL >= 1:
+                # if settings.VERBOSITY_LEVEL != 0:
                 #   print("")
                 delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-                if settings.VERBOSITY_LEVEL >= 1:
+                if settings.VERBOSITY_LEVEL != 0:
                   print("")
                 if go_back == True:
                   break
@@ -641,7 +641,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                         readline.parse_and_bind("tab: complete")
                     cmd = _input("""commix(""" + Style.BRIGHT + Fore.RED + """os_shell""" + Style.RESET_ALL + """) > """)
                     cmd = checks.escaped_cmd(cmd)
-                    # if settings.VERBOSITY_LEVEL >= 1:
+                    # if settings.VERBOSITY_LEVEL != 0:
                     #   print("")
                     if cmd.lower() in settings.SHELL_OPTIONS:
                       go_back, go_back_again = shell_options.check_option(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, technique, go_back, no_result, timesec, go_back_again, payload, OUTPUT_TEXTFILE)
@@ -668,7 +668,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                           print("\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n")
 
                       if not shell or shell == "":
-                        if settings.VERBOSITY_LEVEL >= 1:
+                        if settings.VERBOSITY_LEVEL != 0:
                           print("")
                         err_msg = "The '" + cmd + "' command, does not return any output."
                         print(settings.print_critical_msg(err_msg) + "\n")
@@ -692,7 +692,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                   pass
               
             except KeyboardInterrupt: 
-              # if settings.VERBOSITY_LEVEL >= 1:
+              # if settings.VERBOSITY_LEVEL != 0:
               print("")
               # Delete previous shell (text) files (output)
               delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)

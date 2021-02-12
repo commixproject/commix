@@ -78,7 +78,7 @@ def heuristic_basic(url, http_request_method):
     except TypeError as err_msg:
       pass
     if not settings.IDENTIFIED_WARNINGS:  
-      if settings.VERBOSITY_LEVEL >= 1:   
+      if settings.VERBOSITY_LEVEL != 0:   
         debug_msg = "Performing heuristic test for " + technique + "."
         print(settings.print_debug_msg(debug_msg))
       if http_request_method == "GET":
@@ -154,13 +154,13 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
       else:
         procced_option = ""
       if procced_option in settings.CHOICE_YES or len(procced_option) == 0:
-        if settings.VERBOSITY_LEVEL >= 1:   
+        if settings.VERBOSITY_LEVEL != 0:   
           debug_msg = "Skipping " + ci + "."
           print(settings.print_debug_msg(debug_msg))
         settings.CLASSIC_STATE = settings.TIME_BASED_STATE = settings.FILE_BASED_STATE = False
         settings.EVAL_BASED_STATE = settings.SKIP_COMMAND_INJECTIONS = True
       elif procced_option in settings.CHOICE_NO:
-        if settings.VERBOSITY_LEVEL >= 1:   
+        if settings.VERBOSITY_LEVEL != 0:   
           debug_msg = "Skipping " + ce + "."
           print(settings.print_debug_msg(debug_msg))
         settings.SKIP_CODE_INJECTIONS = True
@@ -221,7 +221,7 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
         if len(procced_option) == 0:
            procced_option = "Y"
         if procced_option in settings.CHOICE_YES:
-          if settings.VERBOSITY_LEVEL >= 1:   
+          if settings.VERBOSITY_LEVEL != 0:   
             debug_msg = "Skipping code injection checks."
             print(settings.print_debug_msg(debug_msg))
           settings.SKIP_CODE_INJECTIONS = True
@@ -253,7 +253,7 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
       if len(procced_option) == 0:
          procced_option = "Y"
       if procced_option in settings.CHOICE_YES:
-        if settings.VERBOSITY_LEVEL >= 1:   
+        if settings.VERBOSITY_LEVEL != 0:   
           debug_msg = "Skipping command injection checks."
           print(settings.print_debug_msg(debug_msg))
         settings.SKIP_COMMAND_INJECTIONS = True

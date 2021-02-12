@@ -25,7 +25,7 @@ from src.thirdparty.six.moves import http_client as _http_client
  Check if HTTP Proxy is defined.
 """
 def do_check(url):
-  if settings.VERBOSITY_LEVEL >= 1:
+  if settings.VERBOSITY_LEVEL != 0:
     info_msg = "Setting the HTTP proxy for all HTTP requests. "
     print(settings.print_info_msg(info_msg))
   if menu.options.data:

@@ -49,7 +49,7 @@ def powershell_version(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, 
     if float(ps_version):
       settings.PS_ENABLED = True
       ps_version = "".join(str(p) for p in output)
-      if settings.VERBOSITY_LEVEL < 1 and _:
+      if settings.VERBOSITY_LEVEL == 0 and _:
         print("")
       # Output PowerShell's version number
       info_msg = "The PowerShell's version number is " 
@@ -82,7 +82,7 @@ def hostname(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, h
     output = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
   shell = output 
   if shell:
-    if settings.VERBOSITY_LEVEL < 1 and _:
+    if settings.VERBOSITY_LEVEL == 0 and _:
       print("")
     info_msg = "The hostname is " +  str(shell)
     sys.stdout.write(settings.print_bold_info_msg(info_msg) + ".")
@@ -112,13 +112,13 @@ def system_information(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, 
   else:
     output = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
   target_os = output
-  if settings.VERBOSITY_LEVEL < 1 and _:
+  if settings.VERBOSITY_LEVEL == 0 and _:
     print("")
   if target_os:
     if settings.TARGET_OS != "win":
       cmd = settings.DISTRO_INFO
       if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
-        if settings.VERBOSITY_LEVEL < 1 and _:
+        if settings.VERBOSITY_LEVEL == 0 and _:
           sys.stdout.write("")
         check_how_long, output = tb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
         session_handler.store_cmd(url, cmd, output, vuln_parameter)
@@ -132,7 +132,7 @@ def system_information(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, 
     else:
       cmd = settings.RECOGNISE_HP
     if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
-      if settings.VERBOSITY_LEVEL < 1 and _:
+      if settings.VERBOSITY_LEVEL == 0 and _:
         sys.stdout.write("\n")
       # The main command injection exploitation.
       check_how_long, output = tb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
@@ -141,7 +141,7 @@ def system_information(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, 
       output = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
     target_arch = output
     if target_arch:
-      if settings.VERBOSITY_LEVEL < 1 and _:
+      if settings.VERBOSITY_LEVEL == 0 and _:
         print("")
       info_msg = "The target operating system is " +  str(target_os) + Style.RESET_ALL  
       info_msg += Style.BRIGHT + " and the hardware platform is " +  str(target_arch)
@@ -181,7 +181,7 @@ def current_user(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timese
       else:  
         cmd = settings.IS_ROOT 
       if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
-        if settings.VERBOSITY_LEVEL < 1 and _:
+        if settings.VERBOSITY_LEVEL == 0 and _:
           sys.stdout.write("\n")
         # The main command injection exploitation.
         check_how_long, output = tb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
@@ -189,7 +189,7 @@ def current_user(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timese
       else:
         output = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
       shell = output 
-      if settings.VERBOSITY_LEVEL < 1 and _:
+      if settings.VERBOSITY_LEVEL == 0 and _:
         print("")
       info_msg = "The current user is " +  str(cu_account)  
       sys.stdout.write(settings.print_bold_info_msg(info_msg))
@@ -216,7 +216,7 @@ def current_user(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timese
           output_file.write(" and it is privileged.\n")
           output_file.close()
     else:
-      if settings.VERBOSITY_LEVEL < 1 and _:
+      if settings.VERBOSITY_LEVEL == 0 and _:
         print("")
       info_msg = "The current user is " +  str(cu_account)
       sys.stdout.write(settings.print_bold_info_msg(info_msg) + ".")
@@ -253,7 +253,7 @@ def system_users(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timese
   sys_users = output 
   # Windows users enumeration.
   if settings.TARGET_OS == "win":
-    if settings.VERBOSITY_LEVEL < 1 and _:
+    if settings.VERBOSITY_LEVEL == 0 and _:
       print("")
     info_msg = "Executing the 'net users' command "
     info_msg += "to enumerate users entries. "  
@@ -301,7 +301,7 @@ def system_users(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timese
           else :
             is_privileged = ""
             is_privileged_nh = ""
-          if settings.VERBOSITY_LEVEL >= 1 and menu.options.ignore_session:
+          if settings.VERBOSITY_LEVEL != 0 and menu.options.ignore_session:
             print("")
           print("\n  [" +str(count)+ "] '" + Style.BRIGHT +  sys_users_list[user] + Style.RESET_ALL + "'" + Style.BRIGHT + is_privileged + Style.RESET_ALL + ".") 
           # Add infos to logs file.   
@@ -325,7 +325,7 @@ def system_users(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timese
       pass
   # Unix-like users enumeration.    
   else:
-    if settings.VERBOSITY_LEVEL < 1 and _:
+    if settings.VERBOSITY_LEVEL == 0 and _:
       print("")
     info_msg = "Fetching '" + settings.PASSWD_FILE 
     info_msg += "' to enumerate users entries. "
@@ -510,7 +510,7 @@ def single_os_cmd_exec(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, 
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
     check_how_long, output = tb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
     session_handler.store_cmd(url, cmd, output, vuln_parameter)
-    if settings.VERBOSITY_LEVEL >= 1:
+    if settings.VERBOSITY_LEVEL != 0:
       print("") 
     return check_how_long, output
   else:
