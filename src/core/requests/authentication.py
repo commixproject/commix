@@ -166,7 +166,7 @@ def http_auth_cracker(url, realm):
           found = True
         except KeyboardInterrupt :
           raise 
-        except _urllib.error.HTTPError:
+        except (_urllib.error.HTTPError, _urllib.error.URLError):
           pass
         if found:
           if settings.VERBOSITY_LEVEL == 0:

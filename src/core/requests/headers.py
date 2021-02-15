@@ -278,15 +278,16 @@ def check_http_traffic(request):
     
   # The handlers raise this exception when they run into a problem.
   except (_http_client.HTTPException, _urllib.error.URLError, _http_client.IncompleteRead) as err:
-    # if settings.VERBOSITY_LEVEL > 2:
-    #   print_http_response(response_headers=err.info(), code=err.code, page=err.read())
-    err_msg = "Unable to connect to the target URL"
-    try:
-      err_msg += " (" + str(err.args[0]).split("] ")[1] + ")."
-    except IndexError:
-      err_msg += "."
-    print(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    if any(_ in str(err) for _ in ("timed out", "IncompleteRead", "Interrupted system call")):
+      pass
+    else:  
+      err_msg = "Unable to connect to the target URL"
+      try:
+        err_msg += " (" + str(err.args[0]).split("] ")[1] + ")."
+      except IndexError:
+        err_msg += "."
+      print(settings.print_critical_msg(err_msg))
+      raise SystemExit()
 
   # Raise exception regarding existing connection was forcibly closed by the remote host.
   except SocketError as err:
