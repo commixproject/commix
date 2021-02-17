@@ -1,4 +1,5 @@
 ## Version 3.2 (upcoming)
+* Revised: Improvements regarding dynamic code evaluation heuristic test.
 * Fixed: Bug-fix regarding HTTP authentication (Basic / Digest) dictionary-based cracker.
 * Fixed: Bug-fix regarding logging all HTTP traffic into a textual file.
 * Revised: Improvement regarding crawler.
@@ -18,7 +19,7 @@
 * Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
 * Added: A script "setup.py" has been added (i.e. easier installation).
 * Revised: Improvement regarding checking if the provided value has boundaries (e.g. 'param=/value/').
-* Revised: Improvement regarding dynamic code evaluation technique's heurstic checks.
+* Revised: Improvement regarding dynamic code evaluation technique's heuristic checks.
 * Revised: Improvement regarding identifying the indicated web-page charset.
 * Revised: Minor improvement regarding verbose mode (i.e. debug messages).
 * Fixed: Bug-fix regarding Basic HTTP authentication.
