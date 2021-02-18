@@ -62,7 +62,7 @@ def estimate_response_time(url, timesec):
         print(settings.FAIL_STATUS)
       err_msg = "Unable to connect to the target URL"
       try:
-        err_msg += " (" + str(err.args[0]).split("] ")[1] + ")."
+        err_msg += " (" + str(err.args[0]).split("] ")[-1] + ")."
       except IndexError:
         err_msg += " (" + str(err) + ")."
       print(settings.print_critical_msg(err_msg))

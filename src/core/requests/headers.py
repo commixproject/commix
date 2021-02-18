@@ -283,7 +283,7 @@ def check_http_traffic(request):
     else:  
       err_msg = "Unable to connect to the target URL"
       try:
-        err_msg += " (" + str(err.args[0]).split("] ")[1] + ")."
+        err_msg += " (" + str(err.args[0]).split("] ")[-1] + ")."
       except IndexError:
         err_msg += "."
       print(settings.print_critical_msg(err_msg))
