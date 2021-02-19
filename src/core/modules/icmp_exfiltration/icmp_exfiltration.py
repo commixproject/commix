@@ -264,7 +264,7 @@ def icmp_exfiltration_handler(url, http_request_method):
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
         err = str(err_msg) + "."
-        print("\n") + settings.print_critical_msg(err)
+        print("\n" + settings.print_critical_msg(err))
         continue_tests = checks.continue_tests(err_msg)
         if continue_tests == True:
           settings.IGNORE_ERR_MSG = True
@@ -280,7 +280,7 @@ def icmp_exfiltration_handler(url, http_request_method):
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
         err = str(err_msg) + "."
-        print("\n") + settings.print_critical_msg(err)
+        print("\n" + settings.print_critical_msg(err))
         continue_tests = checks.continue_tests(err_msg)
         if continue_tests == True:
           settings.IGNORE_ERR_MSG = True
@@ -295,7 +295,7 @@ def icmp_exfiltration_handler(url, http_request_method):
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
         err = str(err_msg) + "."
-        print("\n") + settings.print_critical_msg(err)
+        print("\n" + settings.print_critical_msg(err))
         continue_tests = checks.continue_tests(err_msg)
         if continue_tests == True:
           settings.IGNORE_ERR_MSG = True
