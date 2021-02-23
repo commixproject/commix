@@ -1062,7 +1062,21 @@ def encoding_detection(response):
 """
 Procedure for target application identification
 """
-def application_identification(server_banner, url):
+def technology_detection(response):
+  if response.info()['X-Powered-By']:
+    if settings.VERBOSITY_LEVEL != 0:
+      debug_msg = "Identifying the technology supporting the target application. " 
+      sys.stdout.write(settings.print_debug_msg(debug_msg))
+      sys.stdout.flush()
+      print(settings.SUCCESS_STATUS)           
+      debug_msg = "The target application is powered by " 
+      debug_msg += response.info()['X-Powered-By'] + Style.RESET_ALL + "."
+      print(settings.print_bold_debug_msg(debug_msg))
+
+"""
+Procedure for target application identification
+"""
+def application_identification(url):
   found_application_extension = False
   if settings.VERBOSITY_LEVEL != 0:
     debug_msg = "Identifying the target application." 
@@ -1075,7 +1089,7 @@ def application_identification(server_banner, url):
     found_application_extension = True
     if settings.VERBOSITY_LEVEL != 0:
       print(settings.SUCCESS_STATUS)           
-      debug_msg = "The target application was identified as " 
+      debug_msg = "The target application identified as " 
       debug_msg += settings.TARGET_APPLICATION + Style.RESET_ALL + "."
       print(settings.print_bold_debug_msg(debug_msg))
 
@@ -1108,7 +1122,7 @@ def server_identification(server_banner):
       if settings.VERBOSITY_LEVEL != 0:
         print(settings.SUCCESS_STATUS)
       if settings.VERBOSITY_LEVEL != 0:
-        debug_msg = "The target server was identified as " 
+        debug_msg = "The target server identified as " 
         debug_msg += server_banner + Style.RESET_ALL + "."
         print(settings.print_bold_debug_msg(debug_msg))
       settings.SERVER_BANNER = match.group(0)
@@ -1127,7 +1141,7 @@ def server_identification(server_banner):
   else:
     if settings.VERBOSITY_LEVEL != 0:
       print(settings.FAIL_STATUS)
-      warn_msg = "The server which was identified as '" 
+      warn_msg = "The server which identified as '" 
       warn_msg += server_banner + "' seems unknown."
       print(settings.print_warning_msg(warn_msg))
 

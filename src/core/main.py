@@ -535,14 +535,16 @@ def main(filename, url):
         try:
           # Webpage encoding detection.
           requests.encoding_detection(response)
+          # Procedure for target application identification
+          requests.application_identification(url)
+          # Specifies the technology supporting the web application
+          requests.technology_detection(response)
           if response.info()['server'] :
             server_banner = response.info()['server']
             # Procedure for target server's operating system identification.
             requests.check_target_os(server_banner)
             # Procedure for target server identification.
             requests.server_identification(server_banner)
-            # Procedure for target application identification
-            requests.application_identification(server_banner, url)
             # Store the Server's root dir
             settings.DEFAULT_WEB_ROOT = settings.WEB_ROOT
             if menu.options.is_admin or menu.options.is_root and not menu.options.current_user:
