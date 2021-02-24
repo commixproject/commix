@@ -30,7 +30,6 @@ from src.thirdparty.six.moves import urllib as _urllib
 Get total number of days from last update
 """
 def days_from_last_update():
-
   days_from_last_update = int(time.time() - os.path.getmtime(settings.SETTINGS_PATH)) // (3600 * 24)
   if days_from_last_update > settings.NAGGING_DAYS:
     warn_msg = "You haven't updated " + settings.APPLICATION + " for more than "

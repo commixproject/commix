@@ -202,7 +202,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "3.2.67"
+VERSION_NUM = "3.2.68"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"
@@ -952,7 +952,7 @@ GOOGLE_ANALYTICS_COOKIE_PREFIX = "__UTM"
 TAMPER_SCRIPTS_PATH = "src/core/tamper/"
 
 # Default path for settings.py file
-SETTINGS_PATH = os.path.join("src", "utils", "settings.py")
+SETTINGS_PATH = os.path.abspath("src/utils/settings.py")
 
 # Period after last-update to start nagging (about the old revision).
 NAGGING_DAYS = 30
