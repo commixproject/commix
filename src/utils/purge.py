@@ -24,6 +24,7 @@ import stat
 import random
 import shutil
 import string
+import functools
 from src.utils import menu
 from src.utils import settings
 from src.core.compat import xrange
@@ -131,7 +132,7 @@ def purge():
     sys.stdout.write(settings.print_info_msg(info_msg))
     sys.stdout.flush() 
   failed = False
-  dir_paths.sort(cmp=lambda x, y: y.count(os.path.sep) - x.count(os.path.sep))
+  dir_paths.sort(key=functools.cmp_to_key(lambda x, y: y.count(os.path.sep) - x.count(os.path.sep)))
   for dir_path in dir_paths:
     try:
       os.rename(dir_path, os.path.join(os.path.dirname(dir_path), "".join(random.sample(string.ascii_letters, random.randint(4, 8)))))
