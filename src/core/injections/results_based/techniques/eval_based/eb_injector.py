@@ -94,7 +94,7 @@ def injection_test_results(response, TAG, randvcalc):
   if response == False:
     return False
   else:
-    html_data = response.read().decode(settings.UNICODE_ENCODING)
+    html_data = checks.page_encoding(response, action="decode")
     html_data = re.sub("\n", " ", html_data)
     if settings.SKIP_CALC:
       shell = re.findall(r"" + TAG + " " + TAG + " " + TAG + " " , html_data)
@@ -248,7 +248,7 @@ Command execution results.
 def injection_results(response, TAG, cmd):
   new_line = ''.join(random.choice(string.ascii_uppercase) for i in range(6)) 
   # Grab execution results
-  html_data = response.read().decode(settings.UNICODE_ENCODING)
+  html_data = checks.page_encoding(response, action="decode")
   html_data = re.sub("\n", new_line, html_data)
   shell = re.findall(r"" + TAG + new_line + TAG + "(.*)" + TAG + new_line + TAG + "", html_data)
   try:

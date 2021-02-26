@@ -71,7 +71,7 @@ pass
 
 # Set default encoding
 _reload_module(sys)
-#sys.setdefaultencoding(settings.DEFAULT_ENCODING)
+#sys.setdefaultencoding(settings.UNICODE_ENCODING)
 
 if settings.IS_WINDOWS:
   import codecs
@@ -688,6 +688,16 @@ try:
       err_msg += "Use -h for help."
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
+
+    if menu.options.encoding:
+      if menu.options.encoding.lower() not in settings.ENCODING_LIST:
+        err_msg = "The provided charset '"  + menu.options.encoding + "' is unknown. "
+        err_msg += "Please visit 'http://docs.python.org/library/codecs.html#standard-encodings' "
+        err_msg += "to get the full list of supported charsets."
+        print(settings.print_critical_msg(err_msg))
+        raise SystemExit()
+      else:
+        settings.DEFAULT_PAGE_ENCODING = menu.options.encoding.lower()
 
     if menu.options.header and len(menu.options.header.split("\\n"))> 1:
         warn_msg = "Swithing '--header' to '--headers' "

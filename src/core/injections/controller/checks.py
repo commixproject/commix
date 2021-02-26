@@ -13,6 +13,7 @@ the Free Software Foundation, either version 3 of the License, or
 For more see the file 'readme/COPYING' for copying permission.
 """
 
+import io
 import re
 import os
 import sys
@@ -22,16 +23,17 @@ import socket
 import random
 import string
 import base64
+import gzip
 import traceback
-from collections import OrderedDict 
-from src.core.convert import hexdecode
 from src.utils import menu
-from src.thirdparty.six.moves import input as _input
-from src.thirdparty.six.moves import urllib as _urllib
 from src.utils import settings
 from src.utils import simple_http_server
-from src.thirdparty.flatten_json.flatten_json import flatten, unflatten_list
+from collections import OrderedDict 
+from src.core.convert import hexdecode
+from src.thirdparty.six.moves import input as _input
+from src.thirdparty.six.moves import urllib as _urllib
 from src.thirdparty.colorama import Fore, Back, Style, init
+from src.thirdparty.flatten_json.flatten_json import flatten, unflatten_list
 
 # If the value has boundaries.
 def value_boundaries(value):
@@ -82,6 +84,38 @@ def newline_fixation(payload):
     #payload = _urllib.parse.quote(payload[:_]) + payload[_:]  
     payload = payload.replace("\r","%0d")
   return payload
+
+"""
+Page enc/decoding
+"""
+def page_encoding(response, action):
+  _ = False
+  if response.info().get('Content-Encoding') in ("gzip", "deflate"):
+    if response.info().get('Content-Encoding') == 'deflate':
+      data = io.BytesIO(zlib.decompress(response.read(), -15))
+    elif response.info().get('Content-Encoding') == 'gzip':
+      data = gzip.GzipFile("", "rb", 9, io.BytesIO(response.read()))
+    page = data.read()
+  else:
+    page = response.read()
+  try:
+    if action == "encode" and type(page) == str:
+      return page.encode(settings.UNICODE_ENCODING)
+    else:
+      return page.decode(settings.UNICODE_ENCODING)
+  except (UnicodeEncodeError, UnicodeDecodeError) as err:
+    err_msg = "The " + str(err).split(":")[0] + ". "
+    _ = True
+  except LookupError as err:
+    err_msg = "The '" + settings.DEFAULT_PAGE_ENCODING + "' is " + str(err).split(":")[0] + ". "
+    _ = True
+  except AttributeError:
+    pass
+  if _:
+    err_msg += "You are advised to rerun with"
+    err_msg += ('out', '')[menu.options.encoding == None] + " the option '--encoding'."
+    print(settings.print_critical_msg(str(err_msg)))
+    raise SystemExit()
 
 """
 Returns header value ignoring the letter case

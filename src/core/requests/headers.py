@@ -13,7 +13,6 @@ the Free Software Foundation, either version 3 of the License, or
 For more see the file 'readme/COPYING' for copying permission.
 """
 
-import io
 import re
 import ssl
 try:
@@ -25,7 +24,7 @@ else:
   # Handle target environment that doesn't support HTTPS verification
   ssl._create_default_https_context = _create_unverified_https_context
 import sys
-import gzip
+
 import time
 import errno
 import base64
@@ -84,9 +83,9 @@ def print_http_response(response_headers, code, page):
     if settings.VERBOSITY_LEVEL >= 4:
       print("")
     try:
-      http_response_content(page.decode())
-    except AttributeError:
       http_response_content(page)
+    except AttributeError:
+      http_response_content(page.decode(settings.UNICODE_ENCODING))
 
 """
 Checking the HTTP Headers & HTTP/S Request.
@@ -224,22 +223,8 @@ def check_http_traffic(request):
   try:
     response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
     code = response.getcode()
-    # Check the HTTP response headers.
     response_headers = response.info()
-    page = response.read()
-    try:
-      # Fix for Python 2.7
-      page = page.encode(settings.DEFAULT_ENCODING)
-    except (UnicodeDecodeError, AttributeError) as err:
-      pass
-    if response_headers.get('Content-Encoding') == 'gzip':
-      page = gzip.GzipFile("", "rb", 9, io.BytesIO(page)).read()
-      request.add_header('Accept-Encoding', 'deflate')
-    if len(settings.ENCODING) != 0:
-      page = page.decode(settings.ENCODING)
-    else:
-      if type(page) != str:
-        page = page.decode(settings.DEFAULT_ENCODING)
+    page = checks.page_encoding(response, action="encode")
     response_headers[settings.URI_HTTP_HEADER] = response.geturl()
     response_headers = str(response_headers).strip("\n")
     if settings.VERBOSITY_LEVEL > 2 or menu.options.traffic_file:
@@ -272,9 +257,6 @@ def check_http_traffic(request):
         err_msg = error_msg
       print(settings.print_critical_msg(err_msg + ")."))
       raise SystemExit()
-
-  except (UnicodeDecodeError, LookupError) as err:
-    pass
     
   # The handlers raise this exception when they run into a problem.
   except (_http_client.HTTPException, _urllib.error.URLError, _http_client.IncompleteRead) as err:
@@ -329,7 +311,7 @@ def do_check(request):
     xforwardedfor.tamper(request)
   
   # Default value for "Accept-Encoding" HTTP header
-  request.add_header('Accept-Encoding', 'gzip, deflate')
+  request.add_header('Accept-Encoding', settings.HTTP_ACCEPT_ENCODING_HEADER_VALUE)
 
   # Check if defined any HTTP Authentication credentials.
   # HTTP Authentication: Basic / Digest Access Authentication.

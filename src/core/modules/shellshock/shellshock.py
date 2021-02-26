@@ -932,7 +932,7 @@ def cmd_exec(url, cmd, cve, check_header, filename):
         response = tor.use_tor(request)
       else:
         response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
-      shell = response.read().decode(settings.UNICODE_ENCODING).rstrip().replace('\n',' ')
+      shell = checks.page_encoding(response, action="decode").rstrip().replace('\n',' ')
       shell = re.findall(r"" + TAG + "(.*)" + TAG, shell)
       shell = ''.join(shell)
       return shell, payload

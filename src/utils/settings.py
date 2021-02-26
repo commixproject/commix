@@ -19,6 +19,7 @@ import sys
 import time
 import random
 import string
+import codecs
 from src.core.compat import xrange
 from src.thirdparty.six.moves import urllib as _urllib
 from src.thirdparty.six.moves import reload_module as _reload_module
@@ -171,7 +172,7 @@ def sys_argv_errors():
   _reload_module(sys)
   try:
     # Fix for Python 2.7
-    sys.setdefaultencoding('utf8')
+    sys.setdefaultencoding(UNICODE_ENCODING)
   except AttributeError:
     pass
   for i in xrange(len(sys.argv)):
@@ -202,7 +203,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "3.2.69"
+VERSION_NUM = "3.2.70"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"
@@ -315,6 +316,9 @@ OUTPUT_FILE = OUTPUT_FILE_NAME + OUTPUT_FILE_EXT
 
 # Max Length.
 MAXLEN = "10000"
+
+# Maximum response total page size (trimmed if larger)
+MAX_CONNECTION_TOTAL_SIZE = 100 * 1024 * 1024
 
 # Slow target response.
 SLOW_TARGET_RESPONSE = 3
@@ -561,18 +565,14 @@ PARAMETER_SPLITTING_REGEX = r'[,]'
 # Cookie delimiter
 PARAMETER_DELIMITER = "&"
 
-# Web-page encoding
-ENCODING = ""
+UNICODE_ENCODING = "utf8"
 
-DEFAULT_ENCODING = "utf-8"
-# Encoding used for Unicode data
-UNICODE_ENCODING = "utf-8"
+# Reference: http://en.wikipedia.org/wiki/ISO/IEC_8859-1
+DEFAULT_PAGE_ENCODING = "iso-8859-1"
 try:
-  pass
-  #unicode(DEFAULT_ENCODING, DEFAULT_ENCODING)
+  codecs.lookup(DEFAULT_PAGE_ENCODING)
 except LookupError:
-  # Reference: http://en.wikipedia.org/wiki/ISO/IEC_8859-1
-  DEFAULT_ENCODING = "iso-8859-1"
+  DEFAULT_PAGE_ENCODING = UNICODE_ENCODING
 
 # Character Sets List. 
 # A complete list of the standard encodings Python supports.
@@ -671,6 +671,9 @@ ENCODING_LIST = [
   "utf-8",
   "utf-8-sig"
  ]
+
+# Default value for HTTP Accept-Encoding header
+HTTP_ACCEPT_ENCODING_HEADER_VALUE = "gzip, deflate"
 
 # Default server banner
 SERVER_BANNER = ""

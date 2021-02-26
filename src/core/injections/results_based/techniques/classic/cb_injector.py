@@ -100,7 +100,7 @@ def injection_test_results(response, TAG, randvcalc):
     return False
   else:
     # Check the execution results
-    html_data = response.read().decode(settings.UNICODE_ENCODING)
+    html_data = checks.page_encoding(response, action="decode")
     html_data = html_data.replace("\n"," ")
     # cleanup string / unescape html to string
     html_data = _urllib.parse.unquote(html_data)
@@ -261,7 +261,7 @@ def injection_results(response, TAG, cmd):
   false_result = False
   try:
     # Grab execution results
-    html_data = response.read().decode(settings.UNICODE_ENCODING)
+    html_data = checks.page_encoding(response, action="decode")
     html_data = html_data.replace("\n"," ")
     # cleanup string / unescape html to string
     html_data = _urllib.parse.unquote(html_data)

@@ -181,8 +181,7 @@ def estimate_response_time(url, timesec):
                   checks.http_auth_err_msg()      
         else:
           raise SystemExit()
-          #pass
-  
+   
     ignore_end = time.time()
     start = start - (ignore_start - ignore_end)
 
@@ -1013,6 +1012,7 @@ def encoding_detection(response):
     try:
       # Detecting charset
       try:
+        # Support for python 2.7.x
         charset = response.headers.getparam('charset')
       except AttributeError:
         # Support for python 3.x
@@ -1031,16 +1031,16 @@ def encoding_detection(response):
           charset_detected = True
       # Check the identifyied charset
       if charset_detected :
-        settings.UNICODE_ENCODING = settings.ENCODING = charset.lower()
+        settings.DEFAULT_PAGE_ENCODING = charset
         if settings.VERBOSITY_LEVEL != 0:
           print(settings.SUCCESS_STATUS)
-        if settings.ENCODING.lower() not in settings.ENCODING_LIST:
-          warn_msg = "The indicated web-page charset "  + settings.ENCODING + " seems unknown."
+        if settings.DEFAULT_PAGE_ENCODING.lower() not in settings.ENCODING_LIST:
+          warn_msg = "The indicated web-page charset "  + settings.DEFAULT_PAGE_ENCODING + " seems unknown."
           print(settings.print_warning_msg(warn_msg))
         else:
           if settings.VERBOSITY_LEVEL != 0:
             debug_msg = "The indicated web-page charset appears to be '" 
-            debug_msg += settings.ENCODING + Style.RESET_ALL + "'."
+            debug_msg += settings.DEFAULT_PAGE_ENCODING + Style.RESET_ALL + "'."
             print(settings.print_bold_debug_msg(debug_msg))
       else:
         pass
@@ -1050,14 +1050,6 @@ def encoding_detection(response):
       print(settings.FAIL_STATUS)
       warn_msg = "Heuristics have failed to identify indicated web-page charset."
       print(settings.print_warning_msg(warn_msg))
-  else:
-    settings.ENCODING = menu.options.encoding
-    if settings.ENCODING.lower() not in settings.ENCODING_LIST:
-      err_msg = "The user-defined charset '"  + settings.ENCODING + "' seems unknown. "
-      err_msg += "Please visit 'http://docs.python.org/library/codecs.html#standard-encodings' "
-      err_msg += "to get the full list of supported charsets."
-      print(settings.print_critical_msg(err_msg))
-      raise SystemExit()
 
 """
 Procedure for target application identification
@@ -1149,7 +1141,6 @@ def server_identification(server_banner):
 Procedure for target server's operating system identification.
 """
 def check_target_os(server_banner):
-
   found_os_server = False
   if menu.options.os and checks.user_defined_os():
     user_defined_os = settings.TARGET_OS

@@ -1,4 +1,6 @@
 ## Version 3.2 (upcoming)
+* Revised: Improvement regarding automatically decode `deflate` and `gzip` HTTP responses.
+* Fixed: Bug-fix regarding several charset-related unhandled exceptions.
 * Revised: Improvements regarding dynamic code evaluation heuristic test.
 * Fixed: Bug-fix regarding HTTP authentication (Basic / Digest) dictionary-based cracker.
 * Fixed: Bug-fix regarding logging all HTTP traffic into a textual file.

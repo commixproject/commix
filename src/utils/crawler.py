@@ -17,6 +17,7 @@ import sys
 import tempfile
 from src.utils import menu
 from src.utils import settings
+from src.core.injections.controller import checks
 from src.core.requests import headers
 from src.thirdparty.six.moves import input as _input
 from src.thirdparty.six.moves import urllib as _urllib
@@ -83,7 +84,7 @@ def sitemap(url):
         url = url + "/"
       url = _urllib.parse.urljoin(url, "sitemap.xml")
     response = request(url)
-    content = response.read().decode(settings.UNICODE_ENCODING)
+    content = checks.page_encoding(response, action="decode")
     for match in re.finditer(r"<loc>\s*([^<]+)", content or ""):
       url = match.group(1).strip()
       SITEMAP_LOC.append(url)
@@ -119,7 +120,7 @@ Grab the crawled hrefs.
 def crawling(url):
   try:
     response = request(url)
-    content = response.read().decode(settings.UNICODE_ENCODING)
+    content = checks.page_encoding(response, action="decode")
     match = re.search(r"(?si)<html[^>]*>(.+)</html>", content)
     if match:
       content = "<html>%s</html>" % match.group(1)

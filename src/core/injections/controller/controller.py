@@ -89,7 +89,7 @@ def heuristic_basic(url, http_request_method):
       headers.do_check(request)
       response = requests.get_request_response(request)
       if type(response) is not bool:
-        html_data = response.read().decode(settings.UNICODE_ENCODING)
+        html_data = checks.page_encoding(response, action="decode")
         match = re.search(settings.CODE_INJECTION_PHPINFO, html_data)
         if match:
           technique = technique + " (possible PHP version: '" + match.group(1) + "')"
@@ -102,14 +102,12 @@ def heuristic_basic(url, http_request_method):
         if settings.IDENTIFIED_WARNINGS or settings.IDENTIFIED_PHPINFO:
           info_msg = "Heuristic test shows that target might be injectable via " + technique + "." 
           print(settings.print_bold_info_msg(info_msg))
-
     return url
-  except _urllib.error.URLError as err_msg:
+
+  except (_urllib.error.URLError, _urllib.error.HTTPError) as err_msg:
     print(settings.print_critical_msg(err_msg))
     raise SystemExit()
-  except _urllib.error.HTTPError as err_msg:
-    print(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+
 
 """
 Proceed to the injection process for the appropriate parameter.
