@@ -1039,8 +1039,8 @@ def encoding_detection(response):
           print(settings.print_warning_msg(warn_msg))
         else:
           if settings.VERBOSITY_LEVEL != 0:
-            debug_msg = "The indicated web-page charset appears to be '" 
-            debug_msg += settings.DEFAULT_PAGE_ENCODING + Style.RESET_ALL + "'."
+            debug_msg = "The indicated web-page charset appears to be " 
+            debug_msg += settings.DEFAULT_PAGE_ENCODING + Style.RESET_ALL + "."
             print(settings.print_bold_debug_msg(debug_msg))
       else:
         pass
@@ -1055,15 +1055,18 @@ def encoding_detection(response):
 Procedure for target application identification
 """
 def technology_detection(response):
-  if response.info()['X-Powered-By']:
-    if settings.VERBOSITY_LEVEL != 0:
-      debug_msg = "Identifying the technology supporting the target application. " 
-      sys.stdout.write(settings.print_debug_msg(debug_msg))
-      sys.stdout.flush()
-      print(settings.SUCCESS_STATUS)           
+  if settings.VERBOSITY_LEVEL != 0:
+    debug_msg = "Identifying the technology supporting the target application. " 
+    sys.stdout.write(settings.print_debug_msg(debug_msg))
+    sys.stdout.flush()
+    print(settings.SUCCESS_STATUS) 
+    if response.info()['X-Powered-By']:         
       debug_msg = "The target application is powered by " 
       debug_msg += response.info()['X-Powered-By'] + Style.RESET_ALL + "."
       print(settings.print_bold_debug_msg(debug_msg))
+    else:
+      warn_msg = "Heuristics have failed to identify the technology supporting the target application."
+      print(settings.print_warning_msg(warn_msg))
 
 """
 Procedure for target application identification
@@ -1095,8 +1098,8 @@ def application_identification(url):
   if not found_application_extension:
     if settings.VERBOSITY_LEVEL != 0:
       print(settings.FAIL_STATUS)
-    warn_msg = "Heuristics have failed to identify target application."
-    print(settings.print_warning_msg(warn_msg))
+      warn_msg = "Heuristics have failed to identify target application."
+      print(settings.print_warning_msg(warn_msg))
 
 """
 Procedure for target server's identification.

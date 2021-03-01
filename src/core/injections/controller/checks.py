@@ -941,7 +941,7 @@ def whitespace_check(payload):
 
   # Enable the "multiplespaces" tamper script.
   count_spaces = payload.count(settings.WHITESPACE[0])
-  if count_spaces >= 4:
+  if count_spaces >= 5:
     if menu.options.tamper:
       menu.options.tamper = menu.options.tamper + ",multiplespaces"
     else:

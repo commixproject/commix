@@ -37,7 +37,7 @@ INFO_BOLD_SIGN = "[" + Fore.GREEN + Style.BRIGHT + "info" + Style.RESET_ALL + "]
 REQUEST_SIGN = Style.RESET_ALL + "[" + Style.BRIGHT + Back.MAGENTA + "traffic" + Style.RESET_ALL + "] "
 RESPONSE_SIGN = Style.RESET_ALL + "[" + Style.BRIGHT + Back.MAGENTA + "traffic" + Style.RESET_ALL + "] "
 QUESTION_SIGN = Style.BRIGHT
-TOTAL_OF_REQUESTS_COLOR = ""
+TOTAL_OF_REQUESTS_COLOR = Fore.LIGHTYELLOW_EX 
 WARNING_SIGN = "[" + Fore.LIGHTYELLOW_EX  + "warning" + Style.RESET_ALL + "] "
 WARNING_BOLD_SIGN = "[" + Style.BRIGHT + Fore.YELLOW  + "warning" + Style.RESET_ALL + "] " + Style.BRIGHT
 ERROR_SIGN = "[" + Fore.RED + "error" + Style.RESET_ALL  + "] " 
@@ -203,7 +203,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "3.2.70"
+VERSION_NUM = "3.2.71"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"
@@ -673,7 +673,7 @@ ENCODING_LIST = [
  ]
 
 # Default value for HTTP Accept-Encoding header
-HTTP_ACCEPT_ENCODING_HEADER_VALUE = "gzip, deflate"
+HTTP_ACCEPT_ENCODING_HEADER_VALUE = "deflate"
 
 # Default server banner
 SERVER_BANNER = ""

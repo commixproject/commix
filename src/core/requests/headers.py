@@ -154,10 +154,10 @@ def check_http_traffic(request):
         raise SystemExit()
         
   opener = _urllib.request.build_opener(connection_handler())
-  response = False
+  _ = False
   current_attempt = 0
   unauthorized = False
-  while not response and current_attempt <= settings.MAX_RETRIES and unauthorized is False:
+  while not _ and current_attempt <= settings.MAX_RETRIES and unauthorized is False:
     if settings.VERBOSITY_LEVEL >= 2 or menu.options.traffic_file:
       if settings.VERBOSITY_LEVEL >= 2:
         req_msg = "HTTP request [" + settings.print_request_num(settings.TOTAL_OF_REQUESTS) + "]:"
@@ -166,8 +166,9 @@ def check_http_traffic(request):
         req_msg = "HTTP request [#" + str(settings.TOTAL_OF_REQUESTS) + "]:"
         logs.log_traffic(req_msg)
     try:
-      opener.open(request, timeout=settings.TIMEOUT)
-      response = True
+      response = opener.open(request, timeout=settings.TIMEOUT)
+      page = checks.page_encoding(response, action="encode")
+      _ = True
       if settings.VERBOSITY_LEVEL < 2:
         if current_attempt != 0:
           info_msg = "Testing connection to the target URL."
