@@ -81,22 +81,19 @@ def logfile_parser():
     raise SystemExit()
 
   else:
-    if menu.options.requestfile:
-      with open(request_file, 'r') as f:
-        settings.RAW_HTTP_HEADERS = [line.strip() for line in f]
-      settings.RAW_HTTP_HEADERS = [header for header in settings.RAW_HTTP_HEADERS if header]
-      settings.RAW_HTTP_HEADERS = settings.RAW_HTTP_HEADERS[1:]
-      settings.RAW_HTTP_HEADERS = settings.RAW_HTTP_HEADERS[:-1]
-      settings.RAW_HTTP_HEADERS = '\\n'.join(settings.RAW_HTTP_HEADERS)
-
-    # Check for multiple hosts
     try:
-      request = open(request_file, "r")
+      if menu.options.requestfile:
+        with open(request_file, 'r') as f:
+          settings.RAW_HTTP_HEADERS = [line.strip() for line in f]
+        settings.RAW_HTTP_HEADERS = [header for header in settings.RAW_HTTP_HEADERS if header]
+        settings.RAW_HTTP_HEADERS = settings.RAW_HTTP_HEADERS[1:]
+        settings.RAW_HTTP_HEADERS = settings.RAW_HTTP_HEADERS[:-1]
+        settings.RAW_HTTP_HEADERS = '\\n'.join(settings.RAW_HTTP_HEADERS)
+      request = open(request_file, 'r')
     except IOError as err_msg:
-      try:
-        error_msg = str(err_msg.args[0]).split("] ")[1] + "."
-      except:
-        error_msg = str(err_msg.args[0]) + "."
+      error_msg = "The '" + request_file + "' "
+      error_msg += str(err_msg.args[1]).lower() + "."
+      print(settings.FAIL_STATUS)
       print(settings.print_critical_msg(error_msg))
       raise SystemExit()
         
