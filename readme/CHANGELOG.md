@@ -1,4 +1,5 @@
 ## Version 3.2 (upcoming)
+* Added: New tamper script "uninitializedvariable.py" that adds uninitialized bash variables at the end of each command of the generated payloads (for *nix targets).
 * Revised: Improvement regarding automatically decode `deflate` and `gzip` HTTP responses.
 * Fixed: Bug-fix regarding several charset-related unhandled exceptions.
 * Revised: Improvements regarding dynamic code evaluation heuristic test.

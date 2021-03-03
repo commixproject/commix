@@ -972,6 +972,16 @@ def other_symbols(payload):
     from src.core.tamper import dollaratsigns
     payload = dollaratsigns.tamper(payload)
 
+  # Check for uninitialized variable
+  if payload.count("$u") >= 2:
+    if not settings.TAMPER_SCRIPTS['uninitializedvariable']:
+      if menu.options.tamper:
+        menu.options.tamper = menu.options.tamper + ",uninitializedvariable"
+      else:
+        menu.options.tamper = "uninitializedvariable"  
+    from src.core.tamper import uninitializedvariable
+    payload = uninitializedvariable.tamper(payload)
+
 """
 Check for (multiple) added back slashes between the characters of the generated payloads.
 """
@@ -1099,6 +1109,10 @@ def perform_payload_modification(payload):
     if encode_type == 'sleep2usleep':
       from src.core.tamper import sleep2usleep
       payload = sleep2usleep.tamper(payload)
+    # Add uninitialized variable.
+    elif encode_type == 'uninitializedvariable':
+      from src.core.tamper import uninitializedvariable
+      payload = uninitializedvariable.tamper(payload) 
     # Add double-quotes.
     if encode_type == 'doublequotes':
       from src.core.tamper import doublequotes
