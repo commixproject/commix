@@ -29,6 +29,7 @@ from src.core.requests import requests
 from src.core.requests import parameters
 from src.core.injections.controller import checks
 from src.thirdparty.six.moves import urllib as _urllib
+from src.thirdparty.six.moves import input as _input
 from src.thirdparty.colorama import Fore, Back, Style, init
 from src.core.injections.semiblind.techniques.file_based import fb_payloads
 
@@ -258,34 +259,53 @@ def injection_output(url, OUTPUT_TEXTFILE, timesec):
             pass  
       except IndexError:
         output = url + "/" + OUTPUT_TEXTFILE
-        
+    settings.DEFINED_WEBROOT = output
     return output
 
-  if menu.options.web_root:
-    # Check for Apache server root directory.
-    if "/var/www/" in menu.options.web_root:
-      path = menu.options.web_root.replace("/var/www/", "/")
-      if "html/" in menu.options.web_root:
-        path = path.replace("html/", "")
-      # Contract again the url. 
+  if not settings.DEFINED_WEBROOT:
+    if menu.options.web_root:
+      _ = "/"
+      if not menu.options.web_root.endswith(_):
+        menu.options.web_root = menu.options.web_root + _
       scheme = _urllib.parse.urlparse(url).scheme
       netloc = _urllib.parse.urlparse(url).netloc
-      output = scheme + "://" + netloc + path + OUTPUT_TEXTFILE
-    # Check for Nginx server root directory.  
-    elif "/usr/share/" in menu.options.web_root:
-      path = menu.options.web_root.replace("/usr/share/", "/")
-      if "html/" in menu.options.web_root:
-        path = path.replace("html/", "")
-      elif "www/" in menu.options.web_root:
-        path = path.replace("www/", "")
-      # Contract again the url. 
-      scheme = _urllib.parse.urlparse(url).scheme
-      netloc = _urllib.parse.urlparse(url).netloc
-      output = scheme + "://" + netloc + path + OUTPUT_TEXTFILE
+      output = scheme + "://" + netloc + _ + OUTPUT_TEXTFILE
+
+      for item in settings.LINUX_DEFAULT_DOC_ROOTS:
+        if item == menu.options.web_root:
+          settings.DEFINED_WEBROOT = output
+          break
+      if not settings.DEFINED_WEBROOT:
+        while True:
+          if not menu.options.batch:
+            question_msg =  "Do you want to use URL '" + output
+            question_msg += "' for command execution results extraction? [Y/n] > "
+            procced_option = _input(settings.print_question_msg(question_msg))
+          else:
+            procced_option = ""
+          if procced_option in settings.CHOICE_YES or len(procced_option) == 0:
+            settings.DEFINED_WEBROOT = output
+            break
+          elif procced_option in settings.CHOICE_NO:
+            output = custom_web_root(url, OUTPUT_TEXTFILE)
+            if not settings.DEFINED_WEBROOT:
+              pass
+            else:
+              break
+          elif procced_option in settings.CHOICE_QUIT:
+            raise SystemExit()
+          else:
+            err_msg = "'" + procced_option + "' is not a valid answer."  
+            print(settings.print_error_msg(err_msg))
+            pass
     else:
-      output = custom_web_root(url, OUTPUT_TEXTFILE)
+        output = custom_web_root(url, OUTPUT_TEXTFILE)
   else:
-      output = custom_web_root(url, OUTPUT_TEXTFILE)
+    output = settings.DEFINED_WEBROOT
+
+  if settings.VERBOSITY_LEVEL != 0:
+    debug_msg = "Checking URL '" + settings.DEFINED_WEBROOT + "' for command execution results extraction."
+    print(settings.print_debug_msg(debug_msg))
 
   return output
   

@@ -203,7 +203,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "3.2.73"
+VERSION_NUM = "3.2.74"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"
@@ -960,6 +960,9 @@ SETTINGS_PATH = os.path.abspath("src/utils/settings.py")
 
 # Period after last-update to start nagging (about the old revision).
 NAGGING_DAYS = 30
+
+LINUX_DEFAULT_DOC_ROOTS = ["/var/www/", "/var/www/html", "/var/www/htdocs", "/usr/local/apache2/htdocs", "/usr/local/www/data", "/var/apache2/htdocs", "/var/www/nginx-default", "/srv/www/htdocs"]  # Reference: https://wiki.apache.org/httpd/DistrosDefaultLayout
+DEFINED_WEBROOT = False
 
 # HTTP Headers
 COOKIE = "Cookie"

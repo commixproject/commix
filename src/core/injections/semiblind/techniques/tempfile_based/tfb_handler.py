@@ -70,7 +70,7 @@ Delete previous shells outputs.
 """
 def delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
   if settings.VERBOSITY_LEVEL != 0:
-    debug_msg = "Deleting the created (" + OUTPUT_TEXTFILE + ") file.\n"
+    debug_msg = "Deleting the generated file '" + OUTPUT_TEXTFILE + "'.\n"
     sys.stdout.write(settings.print_debug_msg(debug_msg))
   if settings.TARGET_OS == "win":
     cmd = settings.WIN_DEL + OUTPUT_TEXTFILE

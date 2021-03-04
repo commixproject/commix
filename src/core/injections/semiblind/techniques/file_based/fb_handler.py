@@ -82,7 +82,7 @@ Delete previous shells outputs.
 def delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
   if settings.FILE_BASED_STATE != None:
     if settings.VERBOSITY_LEVEL != 0:
-      debug_msg = "Deleting the created (" + OUTPUT_TEXTFILE + ") file.\n"
+      debug_msg = "Deleting the generated file '" + OUTPUT_TEXTFILE + "'.\n"
       sys.stdout.write(settings.print_debug_msg(debug_msg))
     if settings.TARGET_OS == "win":
       cmd = settings.WIN_DEL + OUTPUT_TEXTFILE
@@ -656,7 +656,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                          session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
                         # Command execution results.
                         shell = fb_injector.injection_results(url, OUTPUT_TEXTFILE, timesec)
-                        shell = "".join(str(p) for p in shell)
+                        shell = "".join(str(p) for p in shell.decode(settings.UNICODE_ENCODING))
                         if not menu.options.ignore_session :
                           session_handler.store_cmd(url, cmd, shell, vuln_parameter)
                       else:
