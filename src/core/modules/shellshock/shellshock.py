@@ -494,7 +494,7 @@ def file_access(url, cve, check_header, filename):
     settings.FILE_ACCESS_DONE = True
 
   if settings.FILE_ACCESS_DONE == True:
-    print("")
+    print(settings.SPACE)
 
 """
 Execute the bind / reverse TCP shell
@@ -503,7 +503,7 @@ def execute_shell(url, cmd, cve, check_header, filename, os_shell_option):
 
   shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
   if settings.VERBOSITY_LEVEL != 0:
-    print("")
+    print(settings.SPACE)
 
   err_msg = "The " + os_shell_option.split("_")[0] + " "
   err_msg += os_shell_option.split("_")[1].upper() + " connection has failed."
@@ -708,7 +708,7 @@ def shellshock_handler(url, http_request_method, filename):
           info_msg += url + Style.RESET_ALL + Style.BRIGHT 
           info_msg += "' seems vulnerable via " + technique + "."
           if settings.VERBOSITY_LEVEL < 2:
-            print("")
+            print(settings.SPACE)
           print(settings.print_bold_info_msg(info_msg))
           sub_content = "\"" + payload + "\""
           print(settings.print_sub_content(sub_content))
@@ -716,7 +716,7 @@ def shellshock_handler(url, http_request_method, filename):
           # Enumeration options.
           if settings.ENUMERATION_DONE == True :
             if settings.VERBOSITY_LEVEL != 0:
-              print("")
+              print(settings.SPACE)
             while True:
               if not menu.options.batch:
                 question_msg = "Do you want to enumerate again? [Y/n] > "
@@ -772,7 +772,7 @@ def shellshock_handler(url, http_request_method, filename):
 
           else:
             # Pseudo-Terminal shell
-            print("")
+            print(settings.SPACE)
             go_back = False
             go_back_again = False
             while True:
@@ -787,7 +787,7 @@ def shellshock_handler(url, http_request_method, filename):
                  gotshell= "Y"
               if gotshell in settings.CHOICE_YES:
                 if not menu.options.batch:
-                  print("")
+                  print(settings.SPACE)
                 print("Pseudo-Terminal (type '" + Style.BRIGHT + "?" + Style.RESET_ALL + "' for available options)")
                 if readline_error:
                   checks.no_readline_module()
@@ -866,7 +866,7 @@ def shellshock_handler(url, http_request_method, filename):
           
     if no_result:
       if settings.VERBOSITY_LEVEL != 2:
-        print("")
+        print(settings.SPACE)
       err_msg = "All tested HTTP headers appear to be not injectable."
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
@@ -887,7 +887,7 @@ def shellshock_handler(url, http_request_method, filename):
     err_msg = str(err_msg.reason).split(" ")[2:]
     err_msg = ' '.join(err_msg)+ "."
     if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-      print("")
+      print(settings.SPACE)
     print(settings.print_critical_msg(err_msg))
     raise SystemExit()
 

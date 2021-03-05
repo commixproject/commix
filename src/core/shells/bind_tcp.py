@@ -274,7 +274,7 @@ Type '""" + Style.BRIGHT + """8""" + Style.RESET_ALL + """' to use a Python mete
           data = content_file.readlines()
           data = ''.join(data).replace("\n"," ")
 
-        print(settings.SUCCESS_STATUS)
+        print(settings.SPACE)
         # Remove the ouput file.
         os.remove(output)
         with open(output, 'w+') as filewrite:
@@ -291,7 +291,7 @@ Type '""" + Style.BRIGHT + """8""" + Style.RESET_ALL + """' to use a Python mete
           other_shell = "php -r \"" + data + "\""
         msf_launch_msg(output)
       except:
-        print(settings.FAIL_STATUS)
+        print(settings.SPACE)
 
       break
 
@@ -365,7 +365,7 @@ Type '""" + Style.BRIGHT + """8""" + Style.RESET_ALL + """' to use a Python mete
           data = content_file.readlines()
           data = ''.join(data).replace("\n"," ")
 
-        print(settings.SUCCESS_STATUS)
+        print(settings.SPACE)
         # Remove the ouput file.
         os.remove(output)
         with open(output, 'w+') as filewrite:
@@ -382,7 +382,7 @@ Type '""" + Style.BRIGHT + """8""" + Style.RESET_ALL + """' to use a Python mete
           other_shell = "php -r \"" + data + "\""
         msf_launch_msg(output)
       except:
-        print(settings.FAIL_STATUS)
+        print(settings.SPACE)
       break
 
     # Python-bind-shell(meterpreter)
@@ -410,7 +410,7 @@ Type '""" + Style.BRIGHT + """8""" + Style.RESET_ALL + """' to use a Python mete
           data = ''.join(data)
           data = base64.b64encode(data)
 
-        print(settings.SUCCESS_STATUS)
+        print(settings.SPACE)
         # Remove the ouput file.
         os.remove(output)
         with open(output, 'w+') as filewrite:
@@ -427,7 +427,7 @@ Type '""" + Style.BRIGHT + """8""" + Style.RESET_ALL + """' to use a Python mete
           other_shell = "python -c \"exec('" + data + "'.decode('base64'))\""
         msf_launch_msg(output)
       except:
-        print(settings.FAIL_STATUS)
+        print(settings.SPACE)
       break
     # Check for available shell options  
     elif any(option in other_shell.lower() for option in settings.SHELL_OPTIONS):

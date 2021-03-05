@@ -122,6 +122,7 @@ def define_wordlists():
 Simple Basic / Digest HTTP authentication cracker.
 """
 def http_auth_cracker(url, realm):
+    settings.PERFORM_CRACKING = True
     # Define the HTTP authentication type.
     authentication_type = menu.options.auth_type
     # Define the authentication wordlists for usernames / passwords.
@@ -186,7 +187,7 @@ def http_auth_cracker(url, realm):
         if found:
           valid_pair =  "" + username + ":" + password + ""
           if not settings.VERBOSITY_LEVEL >= 2:
-            print("")
+            print(settings.SPACE)
           info_msg = "Identified a valid pair of credentials '" 
           info_msg += valid_pair + Style.RESET_ALL + Style.BRIGHT  + "'."  
           print(settings.print_bold_info_msg(info_msg))

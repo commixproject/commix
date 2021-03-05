@@ -59,10 +59,10 @@ def estimate_response_time(url, timesec):
       pass
     else:
       if settings.VERBOSITY_LEVEL != 0:
-        print(settings.FAIL_STATUS)
+        print(settings.SPACE)
       err_msg = "Unable to connect to the target URL"
       try:
-        err_msg += " (" + str(err.args[0]).split("] ")[-1] + ")."
+        err_msg += " (Reason: " + str(err.args[0]).split("] ")[-1].lower() + ")."
       except IndexError:
         err_msg += " (" + str(err) + ")."
       print(settings.print_critical_msg(err_msg))
@@ -187,20 +187,20 @@ def estimate_response_time(url, timesec):
 
   except socket.timeout:
     if settings.VERBOSITY_LEVEL != 0:
-      print(settings.FAIL_STATUS)
+      print(settings.SPACE)
     err_msg = "The connection to target URL has timed out."
     print(settings.print_critical_msg(err_msg) + "\n")
     raise SystemExit()
 
   except _urllib.error.URLError as err_msg:
     if settings.VERBOSITY_LEVEL != 0:
-      print(settings.FAIL_STATUS)
+      print(settings.SPACE)
     print(settings.print_critical_msg(str(err_msg.args[0]).split("] ")[1] + "."))
     raise SystemExit()
 
   except ValueError as err_msg:
     if settings.VERBOSITY_LEVEL != 0:
-      print(settings.FAIL_STATUS)
+      print(settings.SPACE)
     print(settings.print_critical_msg(str(err_msg) + "."))
     raise SystemExit()
 
@@ -209,7 +209,7 @@ def estimate_response_time(url, timesec):
   
   if int(diff) < 1:
     if settings.VERBOSITY_LEVEL != 0 and stored_auth_creds == False:
-      print(settings.SUCCESS_STATUS)
+      print(settings.SPACE)
     url_time_response = int(diff)
     if settings.TARGET_OS == "win":
       warn_msg = "Due to the relatively slow response of 'cmd.exe' in target "
@@ -217,7 +217,7 @@ def estimate_response_time(url, timesec):
       print(settings.print_warning_msg(warn_msg))
   else:
     if settings.VERBOSITY_LEVEL != 0:
-      print(settings.SUCCESS_STATUS)
+      print(settings.SPACE)
     url_time_response = int(round(diff))
     warn_msg = "The estimated response time is " + str(url_time_response)
     warn_msg += " second" + "s"[url_time_response == 1:] + ". That may cause" 
@@ -257,9 +257,9 @@ def get_request_response(request):
         err = str(err_msg) + "."
         if not settings.VERBOSITY_LEVEL != 0 and settings.TIME_BASED_STATE == False or \
           settings.VERBOSITY_LEVEL != 0 and settings.EVAL_BASED_STATE == None:
-          print("")
+          print(settings.SPACE)
         if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-          print("") 
+          print(settings.SPACE) 
         print(settings.print_critical_msg(err))
         continue_tests = checks.continue_tests(err_msg)
         if continue_tests == True:
@@ -273,9 +273,9 @@ def get_request_response(request):
         err_msg += "Please ensure that is up and try again."
         if not settings.VERBOSITY_LEVEL != 0 and settings.TIME_BASED_STATE == False or \
            settings.VERBOSITY_LEVEL != 0 and settings.EVAL_BASED_STATE == None:
-          print("")
+          print(settings.SPACE)
         if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-          print("")
+          print(settings.SPACE)
         print(settings.print_critical_msg(err_msg))
       raise SystemExit()
 
@@ -290,9 +290,9 @@ def get_request_response(request):
         err = str(err_msg) + "."
         if not settings.VERBOSITY_LEVEL != 0 and settings.TIME_BASED_STATE == False or \
           settings.VERBOSITY_LEVEL != 0 and settings.EVAL_BASED_STATE == None:
-          print("")
+          print(settings.SPACE)
         if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-          print("") 
+          print(settings.SPACE) 
         print(settings.print_critical_msg(err))
         continue_tests = checks.continue_tests(err_msg)
         if continue_tests == True:
@@ -304,7 +304,7 @@ def get_request_response(request):
       err_msg = str(err_msg.reason).split(" ")[2:]
       err_msg = ' '.join(err_msg)+ "."
       if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-        print("")
+        print(settings.SPACE)
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
 
@@ -330,7 +330,7 @@ def get_request_response(request):
       err_msg = str(err_msg.reason).split(" ")[2:]
       err_msg = ' '.join(err_msg)+ "."
       if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-        print("")
+        print(settings.SPACE)
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
   return response
@@ -396,7 +396,7 @@ def cookie_injection(url, vuln_parameter, payload):
       err_msg = str(err_msg.reason).split(" ")[2:]
       err_msg = ' '.join(err_msg)+ "."
       if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-        print("")
+        print(settings.SPACE)
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
 
@@ -412,9 +412,9 @@ def cookie_injection(url, vuln_parameter, payload):
         err = str(err_msg) + "."
         if not settings.VERBOSITY_LEVEL != 0 and settings.TIME_BASED_STATE == False or \
           settings.VERBOSITY_LEVEL != 0 and settings.EVAL_BASED_STATE == None:
-          print("")
+          print(settings.SPACE)
         if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-          print("") 
+          print(settings.SPACE) 
         print(settings.print_critical_msg(err))
         continue_tests = checks.continue_tests(err_msg)
         if continue_tests == True:
@@ -426,7 +426,7 @@ def cookie_injection(url, vuln_parameter, payload):
       err_msg = str(err_msg.reason).split(" ")[2:]
       err_msg = ' '.join(err_msg)+ "."
       if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-        print("")
+        print(settings.SPACE)
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
 
@@ -440,9 +440,9 @@ def cookie_injection(url, vuln_parameter, payload):
         err = str(err_msg) + "."
         if not settings.VERBOSITY_LEVEL != 0 and settings.TIME_BASED_STATE == False or \
           settings.VERBOSITY_LEVEL != 0 and settings.EVAL_BASED_STATE == None:
-          print("")
+          print(settings.SPACE)
         if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-          print("") 
+          print(settings.SPACE) 
         print(settings.print_critical_msg(err))
         continue_tests = checks.continue_tests(err_msg)
         if continue_tests == True:
@@ -455,7 +455,7 @@ def cookie_injection(url, vuln_parameter, payload):
       err_msg = str(err_msg.reason).split(" ")[2:]
       err_msg = ' '.join(err_msg)+ "."
       if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-        print("")
+        print(settings.SPACE)
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
 
@@ -514,9 +514,9 @@ def user_agent_injection(url, vuln_parameter, payload):
         err = str(err_msg) + "."
         if not settings.VERBOSITY_LEVEL != 0 and settings.TIME_BASED_STATE == False or \
           settings.VERBOSITY_LEVEL != 0 and settings.EVAL_BASED_STATE == None:
-          print("")
+          print(settings.SPACE)
         if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-          print("") 
+          print(settings.SPACE) 
         print(settings.print_critical_msg(err))
         continue_tests = checks.continue_tests(err_msg)
         if continue_tests == True:
@@ -528,7 +528,7 @@ def user_agent_injection(url, vuln_parameter, payload):
       err_msg = str(err_msg.reason).split(" ")[2:]
       err_msg = ' '.join(err_msg)+ "."
       if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-        print("")
+        print(settings.SPACE)
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
 
@@ -544,9 +544,9 @@ def user_agent_injection(url, vuln_parameter, payload):
         err = str(err_msg) + "."
         if not settings.VERBOSITY_LEVEL != 0 and settings.TIME_BASED_STATE == False or \
           settings.VERBOSITY_LEVEL != 0 and settings.EVAL_BASED_STATE == None:
-          print("")
+          print(settings.SPACE)
         if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-          print("") 
+          print(settings.SPACE) 
         print(settings.print_critical_msg(err))
         continue_tests = checks.continue_tests(err_msg)
         if continue_tests == True:
@@ -558,7 +558,7 @@ def user_agent_injection(url, vuln_parameter, payload):
       err_msg = str(err_msg.reason).split(" ")[2:]
       err_msg = ' '.join(err_msg)+ "."
       if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-        print("")
+        print(settings.SPACE)
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
 
@@ -572,9 +572,9 @@ def user_agent_injection(url, vuln_parameter, payload):
         err = str(err_msg) + "."
         if not settings.VERBOSITY_LEVEL != 0 and settings.TIME_BASED_STATE == False or \
           settings.VERBOSITY_LEVEL != 0 and settings.EVAL_BASED_STATE == None:
-          print("")
+          print(settings.SPACE)
         if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-          print("") 
+          print(settings.SPACE) 
         print(settings.print_critical_msg(err))
         continue_tests = checks.continue_tests(err_msg)
         if continue_tests == True:
@@ -586,7 +586,7 @@ def user_agent_injection(url, vuln_parameter, payload):
       err_msg = str(err_msg.reason).split(" ")[2:]
       err_msg = ' '.join(err_msg)+ "."
       if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-        print("")
+        print(settings.SPACE)
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
 
@@ -646,9 +646,9 @@ def referer_injection(url, vuln_parameter, payload):
         err = str(err_msg) + "."
         if not settings.VERBOSITY_LEVEL != 0 and settings.TIME_BASED_STATE == False or \
           settings.VERBOSITY_LEVEL != 0 and settings.EVAL_BASED_STATE == None:
-          print("")
+          print(settings.SPACE)
         if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-          print("") 
+          print(settings.SPACE) 
         print(settings.print_critical_msg(err))
         continue_tests = checks.continue_tests(err_msg)
         if continue_tests == True:
@@ -660,7 +660,7 @@ def referer_injection(url, vuln_parameter, payload):
       err_msg = str(err_msg.reason).split(" ")[2:]
       err_msg = ' '.join(err_msg)+ "."
       if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-        print("")
+        print(settings.SPACE)
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
           
@@ -676,9 +676,9 @@ def referer_injection(url, vuln_parameter, payload):
         err = str(err_msg) + "."
         if not settings.VERBOSITY_LEVEL != 0 and settings.TIME_BASED_STATE == False or \
           settings.VERBOSITY_LEVEL != 0 and settings.EVAL_BASED_STATE == None:
-          print("")
+          print(settings.SPACE)
         if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-          print("") 
+          print(settings.SPACE) 
         print(settings.print_critical_msg(err))
         continue_tests = checks.continue_tests(err_msg)
         if continue_tests == True:
@@ -690,7 +690,7 @@ def referer_injection(url, vuln_parameter, payload):
       err_msg = str(err_msg.reason).split(" ")[2:]
       err_msg = ' '.join(err_msg)+ "."
       if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-        print("")
+        print(settings.SPACE)
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
           
@@ -705,9 +705,9 @@ def referer_injection(url, vuln_parameter, payload):
         err = str(err_msg) + "."
         if not settings.VERBOSITY_LEVEL != 0 and settings.TIME_BASED_STATE == False or \
           settings.VERBOSITY_LEVEL != 0 and settings.EVAL_BASED_STATE == None:
-          print("")
+          print(settings.SPACE)
         if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-          print("") 
+          print(settings.SPACE) 
         print(settings.print_critical_msg(err))
         continue_tests = checks.continue_tests(err_msg)
         if continue_tests == True:
@@ -719,7 +719,7 @@ def referer_injection(url, vuln_parameter, payload):
       err_msg = str(err_msg.reason).split(" ")[2:]
       err_msg = ' '.join(err_msg)+ "."
       if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-        print("")
+        print(settings.SPACE)
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
           
@@ -781,9 +781,9 @@ def host_injection(url, vuln_parameter, payload):
         err = str(err_msg) + "."
         if not settings.VERBOSITY_LEVEL != 0 and settings.TIME_BASED_STATE == False or \
           settings.VERBOSITY_LEVEL != 0 and settings.EVAL_BASED_STATE == None:
-          print("")
+          print(settings.SPACE)
         if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-          print("") 
+          print(settings.SPACE) 
         print(settings.print_critical_msg(err))
         continue_tests = checks.continue_tests(err_msg)
         if continue_tests == True:
@@ -795,7 +795,7 @@ def host_injection(url, vuln_parameter, payload):
       err_msg = str(err_msg.reason).split(" ")[2:]
       err_msg = ' '.join(err_msg)+ "."
       if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-        print("")
+        print(settings.SPACE)
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
           
@@ -811,9 +811,9 @@ def host_injection(url, vuln_parameter, payload):
         err = str(err_msg) + "."
         if not settings.VERBOSITY_LEVEL != 0 and settings.TIME_BASED_STATE == False or \
           settings.VERBOSITY_LEVEL != 0 and settings.EVAL_BASED_STATE == None:
-          print("")
+          print(settings.SPACE)
         if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-          print("") 
+          print(settings.SPACE) 
         print(settings.print_critical_msg(err))
         continue_tests = checks.continue_tests(err_msg)
         if continue_tests == True:
@@ -825,7 +825,7 @@ def host_injection(url, vuln_parameter, payload):
       err_msg = str(err_msg.reason).split(" ")[2:]
       err_msg = ' '.join(err_msg)+ "."
       if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-        print("")
+        print(settings.SPACE)
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
           
@@ -840,9 +840,9 @@ def host_injection(url, vuln_parameter, payload):
         err = str(err_msg) + "."
         if not settings.VERBOSITY_LEVEL != 0 and settings.TIME_BASED_STATE == False or \
           settings.VERBOSITY_LEVEL != 0 and settings.EVAL_BASED_STATE == None:
-          print("")
+          print(settings.SPACE)
         if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-          print("") 
+          print(settings.SPACE) 
         print(settings.print_critical_msg(err))
         continue_tests = checks.continue_tests(err_msg)
         if continue_tests == True:
@@ -854,7 +854,7 @@ def host_injection(url, vuln_parameter, payload):
       err_msg = str(err_msg.reason).split(" ")[2:]
       err_msg = ' '.join(err_msg)+ "."
       if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-        print("")
+        print(settings.SPACE)
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
           
@@ -916,9 +916,9 @@ def custom_header_injection(url, vuln_parameter, payload):
         err = str(err_msg) + "."
         if not settings.VERBOSITY_LEVEL != 0 and settings.TIME_BASED_STATE == False or \
           settings.VERBOSITY_LEVEL != 0 and settings.EVAL_BASED_STATE == None:
-          print("")
+          print(settings.SPACE)
         if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-          print("") 
+          print(settings.SPACE) 
         print(settings.print_critical_msg(err))
         continue_tests = checks.continue_tests(err_msg)
         if continue_tests == True:
@@ -930,7 +930,7 @@ def custom_header_injection(url, vuln_parameter, payload):
       err_msg = str(err_msg.reason).split(" ")[2:]
       err_msg = ' '.join(err_msg)+ "."
       if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-        print("")
+        print(settings.SPACE)
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
           
@@ -946,9 +946,9 @@ def custom_header_injection(url, vuln_parameter, payload):
         err = str(err_msg) + "."
         if not settings.VERBOSITY_LEVEL != 0 and settings.TIME_BASED_STATE == False or \
           settings.VERBOSITY_LEVEL != 0 and settings.EVAL_BASED_STATE == None:
-          print("")
+          print(settings.SPACE)
         if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-          print("") 
+          print(settings.SPACE) 
         print(settings.print_critical_msg(err))
         continue_tests = checks.continue_tests(err_msg)
         if continue_tests == True:
@@ -960,7 +960,7 @@ def custom_header_injection(url, vuln_parameter, payload):
       err_msg = str(err_msg.reason).split(" ")[2:]
       err_msg = ' '.join(err_msg)+ "."
       if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-        print("")
+        print(settings.SPACE)
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
           
@@ -974,9 +974,9 @@ def custom_header_injection(url, vuln_parameter, payload):
         err = str(err_msg) + "."
         if not settings.VERBOSITY_LEVEL != 0 and settings.TIME_BASED_STATE == False or \
           settings.VERBOSITY_LEVEL != 0 and settings.EVAL_BASED_STATE == None:
-          print("")
+          print(settings.SPACE)
         if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-          print("") 
+          print(settings.SPACE) 
         print(settings.print_critical_msg(err))
         continue_tests = checks.continue_tests(err_msg)
         if continue_tests == True:
@@ -988,7 +988,7 @@ def custom_header_injection(url, vuln_parameter, payload):
       err_msg = str(err_msg.reason).split(" ")[2:]
       err_msg = ' '.join(err_msg)+ "."
       if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-        print("")
+        print(settings.SPACE)
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
           
@@ -1033,7 +1033,7 @@ def encoding_detection(response):
       if charset_detected :
         settings.DEFAULT_PAGE_ENCODING = charset
         if settings.VERBOSITY_LEVEL != 0:
-          print(settings.SUCCESS_STATUS)
+          print(settings.SPACE)
         if settings.DEFAULT_PAGE_ENCODING.lower() not in settings.ENCODING_LIST:
           warn_msg = "The indicated web-page charset "  + settings.DEFAULT_PAGE_ENCODING + " seems unknown."
           print(settings.print_warning_msg(warn_msg))
@@ -1047,7 +1047,7 @@ def encoding_detection(response):
     except:
       pass
     if charset_detected == False and settings.VERBOSITY_LEVEL != 0:
-      print(settings.FAIL_STATUS)
+      print(settings.SPACE)
       warn_msg = "Heuristics have failed to identify indicated web-page charset."
       print(settings.print_warning_msg(warn_msg))
 
@@ -1059,7 +1059,7 @@ def technology_detection(response):
     debug_msg = "Identifying the technology supporting the target application. " 
     sys.stdout.write(settings.print_debug_msg(debug_msg))
     sys.stdout.flush()
-    print(settings.SUCCESS_STATUS) 
+    print(settings.SPACE) 
     if response.info()['X-Powered-By']:         
       debug_msg = "The target application is powered by " 
       debug_msg += response.info()['X-Powered-By'] + Style.RESET_ALL + "."
@@ -1083,7 +1083,7 @@ def application_identification(url):
   if settings.TARGET_APPLICATION:
     found_application_extension = True
     if settings.VERBOSITY_LEVEL != 0:
-      print(settings.SUCCESS_STATUS)           
+      print(settings.SPACE)           
       debug_msg = "The target application identified as " 
       debug_msg += settings.TARGET_APPLICATION + Style.RESET_ALL + "."
       print(settings.print_bold_debug_msg(debug_msg))
@@ -1097,7 +1097,7 @@ def application_identification(url):
 
   if not found_application_extension:
     if settings.VERBOSITY_LEVEL != 0:
-      print(settings.FAIL_STATUS)
+      print(settings.SPACE)
       warn_msg = "Heuristics have failed to identify target application."
       print(settings.print_warning_msg(warn_msg))
 
@@ -1115,7 +1115,7 @@ def server_identification(server_banner):
     match = re.search(settings.SERVER_BANNERS[i].lower(), server_banner.lower())
     if match:
       if settings.VERBOSITY_LEVEL != 0:
-        print(settings.SUCCESS_STATUS)
+        print(settings.SPACE)
       if settings.VERBOSITY_LEVEL != 0:
         debug_msg = "The target server identified as " 
         debug_msg += server_banner + Style.RESET_ALL + "."
@@ -1135,7 +1135,7 @@ def server_identification(server_banner):
       break
   else:
     if settings.VERBOSITY_LEVEL != 0:
-      print(settings.FAIL_STATUS)
+      print(settings.SPACE)
       warn_msg = "The server which identified as '" 
       warn_msg += server_banner + "' seems unknown."
       print(settings.print_warning_msg(warn_msg))
@@ -1180,12 +1180,12 @@ def check_target_os(server_banner):
 
   if settings.VERBOSITY_LEVEL != 0 :
     if found_os_server:
-      print(settings.SUCCESS_STATUS)
+      print(settings.SPACE)
       debug_msg = "The target operating system appears to be " 
       debug_msg += identified_os.title() + Style.RESET_ALL + "."
       print(settings.print_bold_debug_msg(debug_msg))
     else:
-      print(settings.FAIL_STATUS)
+      print(settings.SPACE)
       warn_msg = "Heuristics have failed to identify server's operating system."
       print(settings.print_warning_msg(warn_msg))
 

@@ -45,8 +45,8 @@ def ignore(url):
     print(settings.print_debug_msg(debug_msg))
   if not os.path.isfile(settings.SESSION_FILE):
     if settings.VERBOSITY_LEVEL != 0:
-      err_msg = "The session file does not exist."
-      print(settings.print_critical_msg(err_msg))
+      warn_msg = "The session file does not exist."
+      print(settings.print_warning_msg(warn_msg))
 
 """
 Flush session.
@@ -56,7 +56,7 @@ def flush(url):
   sys.stdout.write(settings.print_info_msg(info_msg))
   sys.stdout.flush()
   if not os.path.isfile(settings.SESSION_FILE):
-    print(settings.FAIL_STATUS)
+    print(settings.SPACE)
     err_msg = "The session file does not exist."
     print(settings.print_critical_msg(err_msg))
   else:
@@ -66,9 +66,9 @@ def flush(url):
       conn.executescript(';'.join(["DROP TABLE IF EXISTS %s" %i for i in tables]))
       conn.commit()
       conn.close()
-      print(settings.SUCCESS_STATUS)
+      print(settings.SPACE)
     except sqlite3.OperationalError as err_msg:
-      print(settings.FAIL_STATUS)
+      print(settings.SPACE)
       err_msg = "Unable to flush the session file." + str(err_msg).title()
       print(settings.print_critical_msg(err_msg))    
 

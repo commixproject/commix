@@ -144,7 +144,7 @@ def crawling(url):
       return list(set(HREF_LIST))
     else:
       if not settings.VERBOSITY_LEVEL >= 2:
-        print("")
+        print(settings.SPACE)
       warn_msg = "No usable links found."
       print(settings.print_warning_msg(warn_msg))
       raise SystemExit()
@@ -254,7 +254,7 @@ def crawler(url):
       for url in output_href:
         output_href = do_process(url)
   if SKIPPED_URLS == 0:
-    print("")
+    print(settings.SPACE)
 
   info_msg = "Visited " + str(len(output_href)) + " link"+ "s"[len(output_href) == 1:] + "."
   print(settings.print_info_msg(info_msg))
@@ -291,7 +291,7 @@ def crawler(url):
   except TypeError:
     pass
   if not valid_url_found:
-    print(settings.FAIL_STATUS)
+    print(settings.SPACE)
   raise SystemExit()
 
 # eof

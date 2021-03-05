@@ -203,7 +203,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection and Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "3.2.74"
+VERSION_NUM = "3.2.75"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"
@@ -875,10 +875,26 @@ BAD_REQUEST = "400"
 UNAUTHORIZED_ERROR = "401"
 FORBIDDEN_ERROR = "403"
 NOT_FOUND_ERROR = "404"
+NOT_ALLOWED = "405"
 NOT_ACCEPTABLE_ERROR = "406"
 INTERNAL_SERVER_ERROR = "500"
+NOT_IMPLEMENTED = "501"
+BAD_GATEWAY = "502"
+SERVICE_UNAVAILABLE = "503"
+GATEWAY_TIMEOUT = "504"
 
-HTTP_ERROR_CODES = [ BAD_REQUEST, UNAUTHORIZED_ERROR, FORBIDDEN_ERROR, NOT_FOUND_ERROR, NOT_ACCEPTABLE_ERROR, INTERNAL_SERVER_ERROR ]
+HTTP_ERROR_CODES = [  BAD_REQUEST, 
+                      UNAUTHORIZED_ERROR,
+                      FORBIDDEN_ERROR,
+                      NOT_FOUND_ERROR,
+                      NOT_ALLOWED,
+                      NOT_ACCEPTABLE_ERROR,
+                      INTERNAL_SERVER_ERROR,
+                      NOT_IMPLEMENTED,
+                      BAD_GATEWAY,
+                      SERVICE_UNAVAILABLE,
+                      GATEWAY_TIMEOUT
+                    ]
 
 # End line
 END_LINE = ["\r", "\n", "\r\n"]
@@ -977,4 +993,7 @@ HTTP_ACCEPT_HEADER_VALUE = "*/*"
 # Regular expression used for ignoring some special chars
 IGNORE_SPECIAL_CHAR_REGEX = "[^A-Za-z0-9.:,_]+"
 
+PERFORM_CRACKING = False
+
+SPACE = " "
 # eof

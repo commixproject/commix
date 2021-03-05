@@ -38,7 +38,7 @@ def uninstaller():
     subprocess.Popen("rm -rf /usr/bin/" + settings.APPLICATION + " >/dev/null 2>&1", shell=True).wait()
     subprocess.Popen("rm -rf /usr/share/" + settings.APPLICATION + " >/dev/null 2>&1", shell=True).wait()
   except:
-    print(settings.FAIL_STATUS)
+    print(settings.SPACE)
     raise SystemExit()
     
   sys.stdout.write(settings.SUCCESS_STATUS + "\n")
@@ -62,14 +62,14 @@ def installer():
     
     # You need to have root privileges to run this script
     if os.geteuid() != 0:
-      print(settings.FAIL_STATUS) 
+      print(settings.SPACE) 
       err_msg = "You need to have root privileges to run this option!"
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
       
     # Check if commix is already installed.
     if os.path.isdir("/usr/share/"  + settings.APPLICATION + ""):
-      print(settings.FAIL_STATUS) 
+      print(settings.SPACE) 
       warn_msg = "It seems that "  + settings.APPLICATION 
       warn_msg += " is already installed in your system."
       print(settings.print_warning_msg(warn_msg))
@@ -103,12 +103,12 @@ def installer():
         for item in dependencies_items:
           requirments.do_check(item)
       else:
-        print(settings.FAIL_STATUS)
+        print(settings.SPACE)
         err_msg = "The installer is not designed for any "
         err_msg += "other Linux distro than Ubuntu / Debian. " 
         err_msg += "Please install manually: " + dependencies
         print(Back.RED + err_msg + Style.RESET_ALL)
-        print("")
+        print(settings.SPACE)
         raise SystemExit()
         
     # Force install of necessary packages
@@ -124,7 +124,7 @@ def installer():
       subprocess.Popen("cp -r " + current_dir + " /usr/share/" + settings.APPLICATION + " >/dev/null 2>&1", shell=True).wait()
       subprocess.Popen("chmod 775 /usr/share/"  + settings.APPLICATION + "/" + settings.APPLICATION + ".py >/dev/null 2>&1", shell=True).wait()
     except:
-      print(settings.FAIL_STATUS)
+      print(settings.SPACE)
       raise SystemExit()
     sys.stdout.write(settings.SUCCESS_STATUS + "\n")
     sys.stdout.flush()
@@ -138,7 +138,7 @@ def installer():
         f.write('cd /usr/share/commix/ && ./commix.py "$@"\n')
         subprocess.Popen("chmod +x /usr/bin/"  + settings.APPLICATION + " >/dev/null 2>&1", shell=True).wait()
     except:
-      print(settings.FAIL_STATUS)
+      print(settings.SPACE)
       raise SystemExit()
     sys.stdout.write(settings.SUCCESS_STATUS + "\n")
     sys.stdout.flush()
@@ -155,11 +155,11 @@ def installer():
     print(settings.print_bold_info_msg(info_msg))
 
   else :
-    print(settings.FAIL_STATUS)
+    print(settings.SPACE)
     err_msg = "The installer is not designed for any other system other than Linux. "
     err_msg += "Please install manually: " + packages + dependencies
     print(settings.print_critical_msg(err_msg))
-    print("")
+    print(settings.SPACE)
     raise SystemExit()
 
   # eof

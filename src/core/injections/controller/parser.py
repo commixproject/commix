@@ -33,7 +33,7 @@ def logfile_parser():
   Warning message for mutiple request in same log file.
   """
   def multi_requests():
-    print(settings.SUCCESS_STATUS)
+    print(settings.SPACE)
     warn_msg = "Multiple"
     if menu.options.requestfile: 
       warn_msg += " requests"
@@ -54,7 +54,7 @@ def logfile_parser():
   """
   def invalid_data(request, single_request):
     if single_request:
-      print(settings.FAIL_STATUS)
+      print(settings.SPACE)
     err_msg = "Specified file "
     err_msg += "'" + os.path.split(request_file)[1] + "'"
     err_msg += " does not contain a valid HTTP request."
@@ -74,7 +74,7 @@ def logfile_parser():
   sys.stdout.flush()
 
   if not os.path.exists(request_file):
-    print(settings.FAIL_STATUS)
+    print(settings.SPACE)
     err_msg = "It seems that the '" + request_file + "' file, does not exist."
     sys.stdout.write(settings.print_critical_msg(err_msg) + "\n")
     sys.stdout.flush()
@@ -93,7 +93,7 @@ def logfile_parser():
     except IOError as err_msg:
       error_msg = "The '" + request_file + "' "
       error_msg += str(err_msg.args[1]).lower() + "."
-      print(settings.FAIL_STATUS)
+      print(settings.SPACE)
       print(settings.print_critical_msg(error_msg))
       raise SystemExit()
         
@@ -171,7 +171,7 @@ def logfile_parser():
           menu.options.auth_cred = base64.b64decode(auth_provided[1]).decode()
         elif menu.options.auth_type == "digest":
           if not menu.options.auth_cred:
-            print(settings.FAIL_STATUS)
+            print(settings.SPACE)
             err_msg = "Use the '--auth-cred' option to provide a valid pair of "
             err_msg += "HTTP authentication credentials (i.e --auth-cred=\"admin:admin\") "
             print(settings.print_critical_msg(err_msg))

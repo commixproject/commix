@@ -351,7 +351,7 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                       percent = ""
                   else:
                     percent = ".. (" + str(float_percent) + "%)"
-                    print("")
+                    print(settings.SPACE)
                     # Print logs notification message
                     logs.logs_notification(filename)
                   #raise
@@ -416,7 +416,7 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
 
               if not settings.LOAD_SESSION:
                 if settings.VERBOSITY_LEVEL == 0:
-                  print("")
+                  print(settings.SPACE)
                 else:
                   checks.total_of_requests()
 
@@ -451,7 +451,7 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                     enumerate_again = "Y"
                   if enumerate_again in settings.CHOICE_YES:
                     tb_enumeration.do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
-                    print("")
+                    print(settings.SPACE)
                     break
                   elif enumerate_again in settings.CHOICE_NO: 
                     new_line = True
@@ -465,11 +465,11 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
               else:
                 if menu.enumeration_options():
                   tb_enumeration.do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
-                  print("")
+                  print(settings.SPACE)
 
               # Check for any system file access options.
               if settings.FILE_ACCESS_DONE == True:
-                print("")
+                print(settings.SPACE)
                 while True:
                   if not menu.options.batch:
                     question_msg = "Do you want to access files again? [Y/n] > "
@@ -493,7 +493,7 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                     pass
               else:
                 # if not menu.enumeration_options() and not menu.options.os_cmd:
-                #   print("")
+                #   print(settings.SPACE)
                 tb_file_access.do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
 
               # Check if defined single cmd.
@@ -502,12 +502,12 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                 check_how_long, output = tb_enumeration.single_os_cmd_exec(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
                 # Export injection result
                 tb_injector.export_injection_results(cmd, separator, output, check_how_long)
-                print("")
+                print(settings.SPACE)
                 logs.print_logs_notification(filename, url) 
                 raise SystemExit()
 
               if not new_line :
-                print("")
+                print(settings.SPACE)
 
               # Pseudo-Terminal shell
               go_back = False
@@ -524,7 +524,7 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                   gotshell = "Y"
                 if gotshell in settings.CHOICE_YES:
                   if not menu.options.batch:
-                    print("")
+                    print(settings.SPACE)
                   print("Pseudo-Terminal (type '" + Style.BRIGHT + "?" + Style.RESET_ALL + "' for available options)")
                   if readline_error:
                     checks.no_readline_module()
@@ -566,7 +566,7 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                           print("\n") + settings.print_output(output)
                         # Update logs with executed cmds and execution results.
                         logs.executed_command(filename, cmd, output)
-                        print("")
+                        print(settings.SPACE)
 
                     except KeyboardInterrupt: 
                       raise
@@ -600,7 +600,7 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
     
   if no_result == True:
     if settings.VERBOSITY_LEVEL == 0:
-      print("")
+      print(settings.SPACE)
     return False
 
   else :

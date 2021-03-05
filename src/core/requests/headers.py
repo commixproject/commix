@@ -81,7 +81,7 @@ def print_http_response(response_headers, code, page):
     http_response(response_headers, code)
   if settings.VERBOSITY_LEVEL >= 4 or menu.options.traffic_file:
     if settings.VERBOSITY_LEVEL >= 4:
-      print("")
+      print(settings.SPACE)
     try:
       http_response_content(page)
     except AttributeError:
@@ -128,7 +128,7 @@ def check_http_traffic(request):
         settings.VALID_URL = False
         error_msg = err_msg 
       if current_attempt == 0 and settings.VERBOSITY_LEVEL < 2:
-        print("")
+        print(settings.SPACE)
       print(settings.print_critical_msg(error_msg))
       if not settings.VALID_URL:
         raise SystemExit()
@@ -148,7 +148,7 @@ def check_http_traffic(request):
         settings.VALID_URL = False
         error_msg = err_msg 
       if current_attempt == 0 and settings.VERBOSITY_LEVEL < 2:
-        print("")
+        print(settings.SPACE)
       print(settings.print_critical_msg(error_msg))
       if not settings.VALID_URL:
         raise SystemExit()
@@ -175,45 +175,34 @@ def check_http_traffic(request):
           sys.stdout.write(settings.print_info_msg(info_msg))
           sys.stdout.flush()
         if settings.INIT_TEST == True and not settings.UNAUTHORIZED:
-          print(settings.SUCCESS_STATUS)
+          print(settings.SPACE)
           if not settings.CHECK_INTERNET:
             settings.INIT_TEST = False
 
     except _urllib.error.HTTPError as err_msg:
       if settings.UNAUTHORIZED_ERROR in str(err_msg):
-        if settings.VERBOSITY_LEVEL < 2 and not settings.UNAUTHORIZED:
-          print(settings.FAIL_STATUS)
         settings.UNAUTHORIZED = unauthorized = True
-      http_errors = [settings.BAD_REQUEST, settings.FORBIDDEN_ERROR, settings.NOT_FOUND_ERROR,\
-                     settings.NOT_ACCEPTABLE_ERROR, settings.INTERNAL_SERVER_ERROR]
-      if [True for err_code in http_errors if err_code in str(err_msg)]:
-        if settings.VERBOSITY_LEVEL < 2:
-          break
+      if [True for err_code in settings.HTTP_ERROR_CODES if err_code in str(err_msg)]:
+        break
 
-    except _urllib.error.URLError as err_msg: 
+    except (_urllib.error.URLError, _http_client.BadStatusLine) as err_msg:
       if current_attempt == 0:
+        if settings.VERBOSITY_LEVEL < 2 and "has closed the connection" in str(err_msg):
+          print(settings.SPACE)
         warn_msg = "The provided target URL seems not reachable. "
         warn_msg += "In case that it is, please try to re-run using "
         if not menu.options.random_agent:
             warn_msg += "'--random-agent' switch and/or "
         warn_msg += "'--proxy' option."
         print(settings.print_warning_msg(warn_msg))
-      if settings.VERBOSITY_LEVEL != 0:
-        debug_msg = settings.APPLICATION + " is going to retry the request(s)."
-        print(settings.print_debug_msg(debug_msg))
+        info_msg = settings.APPLICATION.capitalize() + " is going to retry the request(s)."
+        print(settings.print_info_msg(info_msg))
       current_attempt = current_attempt + 1
       time.sleep(3)
       
-    except _http_client.BadStatusLine as err_msg:
-      if settings.VERBOSITY_LEVEL < 2:
-        print(settings.FAIL_STATUS)
-      if len(err_msg.line) > 2 :
-        print(err_msg.line, err_msg.message)
-      raise SystemExit()
-
     except ValueError as err:
       if settings.VERBOSITY_LEVEL < 2:
-        print(settings.FAIL_STATUS)
+        print(settings.SPACE)
       err_msg = "Invalid target URL has been given." 
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
@@ -239,16 +228,16 @@ def check_http_traffic(request):
 
   # This is useful when handling exotic HTTP errors (i.e requests for authentication).
   except _urllib.error.HTTPError as err:
-    if settings.VERBOSITY_LEVEL > 2:
+    if settings.VERBOSITY_LEVEL != 0:
       print_http_response(err.info(), err.code, err.read())
-    error_msg = "Got " + str(err).replace(": "," (")
+    if not settings.PERFORM_CRACKING:
+      print(settings.SPACE)
+    # error_msg = "Got " + str(err).replace(": "," (")
     # Check for 3xx, 4xx, 5xx HTTP error codes.
     if str(err.code).startswith(('3', '4', '5')):
       if settings.VERBOSITY_LEVEL >= 2:
         if len(str(err).split(": ")[1]) == 0:
           error_msg = error_msg + "Non-standard HTTP status code" 
-        warn_msg = error_msg
-        print(settings.print_warning_msg(warn_msg + ")."))
       pass
     else:
       error_msg = str(err).replace(": "," (")
@@ -266,7 +255,7 @@ def check_http_traffic(request):
     else:  
       err_msg = "Unable to connect to the target URL"
       try:
-        err_msg += " (" + str(err.args[0]).split("] ")[-1] + ")."
+        err_msg += " (Reason: " + str(err.args[0]).split("] ")[-1].lower() + ")."
       except IndexError:
         err_msg += "."
       print(settings.print_critical_msg(err_msg))

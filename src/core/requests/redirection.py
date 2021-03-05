@@ -180,7 +180,7 @@ def do_check(url):
   except _urllib.error.URLError as err:
     err_msg = "The host seems to be down"
     try:
-      err_msg += " (" + str(err.args[0]).split("] ")[-1] + ")."
+      err_msg += " (Reason: " + str(err.args[0]).split("] ")[-1].lower() + ")."
     except IndexError:
       err_msg += "."
     print(settings.print_critical_msg(err_msg))

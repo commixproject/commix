@@ -75,7 +75,7 @@ def do_check():
         print(settings.print_warning_msg(warn_msg))  
 
       else:
-        print(settings.FAIL_STATUS)
+        print(settings.SPACE)
         if menu.options.tor_check:
           err_msg = "It seems that your Tor connection is not properly set. "
         else:
@@ -89,7 +89,7 @@ def do_check():
         raise SystemExit() 
 
     except _urllib.error.URLError as err_msg:
-      print(settings.FAIL_STATUS)
+      print(settings.SPACE)
       if menu.options.tor_check:
         err_msg = "It seems that your Tor connection is not properly set. "
       else:
@@ -102,7 +102,7 @@ def do_check():
       raise SystemExit()  
 
     except _http_client.BadStatusLine as err_msg:
-      print(settings.FAIL_STATUS)
+      print(settings.SPACE)
       if len(err_msg.line) > 2 :
         print(err_msg.line, err_msg.message)
       raise SystemExit()

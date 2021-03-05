@@ -65,9 +65,9 @@ def purge():
       pass
   if menu.options.verbose >= 1:    
     if not failed:  
-      print(settings.SUCCESS_STATUS)
+      print(settings.SPACE)
     else:
-      print(settings.FAIL_STATUS)
+      print(settings.SPACE)
 
   # Writing random data to files.
   if menu.options.verbose >= 1:
@@ -85,9 +85,9 @@ def purge():
       pass
   if menu.options.verbose >= 1:    
     if not failed:  
-      print(settings.SUCCESS_STATUS)
+      print(settings.SPACE)
     else:
-      print(settings.FAIL_STATUS)
+      print(settings.SPACE)
 
   # Truncating files.
   if menu.options.verbose >= 1:
@@ -104,9 +104,9 @@ def purge():
       pass
   if menu.options.verbose >= 1:    
     if not failed:  
-      print(settings.SUCCESS_STATUS)
+      print(settings.SPACE)
     else:
-      print(settings.FAIL_STATUS)
+      print(settings.SPACE)
 
   # Renaming filenames to random values.
   if menu.options.verbose >= 1:
@@ -122,9 +122,9 @@ def purge():
       pass
   if menu.options.verbose >= 1:    
     if not failed:  
-      print(settings.SUCCESS_STATUS)
+      print(settings.SPACE)
     else:
-      print(settings.FAIL_STATUS)
+      print(settings.SPACE)
 
   # Renaming directory names to random values.
   if menu.options.verbose >= 1:
@@ -141,9 +141,9 @@ def purge():
       pass
   if menu.options.verbose >= 1:    
     if not failed:  
-      print(settings.SUCCESS_STATUS)
+      print(settings.SPACE)
     else:
-      print(settings.FAIL_STATUS)
+      print(settings.SPACE)
 
   # Deleting the whole directory tree. 
   if menu.options.verbose >= 1:
@@ -156,9 +156,9 @@ def purge():
   except OSError as ex:
     failed = True  
   if not failed:  
-    print(settings.SUCCESS_STATUS)
+    print(settings.SPACE)
   else:
-    print(settings.FAIL_STATUS)    
+    print(settings.SPACE)    
     err_msg = "Problem occurred while removing directory '" + directory + "'."
     print(settings.print_critical_msg(err_msg))
 

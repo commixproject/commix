@@ -50,7 +50,7 @@ def revision_num():
       match = re.search(r"(?i)[0-9a-f]{32}", stdout or "")
       rev_num = match.group(0) if match else None
       info_msg += " the latest revision '" + str(rev_num[:7]) + "'."
-      print(settings.SUCCESS_STATUS)
+      print(settings.SPACE)
     else:
       sys.stdout.write(Fore.MAGENTA + "\n" + stdout + Style.RESET_ALL)
       end  = time.time()
@@ -58,7 +58,7 @@ def revision_num():
       info_msg = "Finished in " + time.strftime('%H:%M:%S', time.gmtime(how_long)) + "."
     print(settings.print_info_msg(info_msg))
   except:
-    print(settings.FAIL_STATUS) 
+    print(settings.SPACE) 
     raise SystemExit()
 
 """
@@ -71,13 +71,13 @@ def updater():
   sys.stdout.write(settings.print_info_msg(info_msg))
   sys.stdout.flush()
   if menu.options.offline:  
-    print(settings.FAIL_STATUS)
+    print(settings.SPACE)
     err_msg = "You cannot update commix via GitHub without access on the Internet."
     print(settings.print_critical_msg(err_msg))
     raise SystemExit()
   # Check if windows
   if settings.IS_WINDOWS:
-    print(settings.FAIL_STATUS)
+    print(settings.SPACE)
     err_msg = "For updating purposes on Windows platform, it's recommended "
     err_msg += "to use a GitHub client for Windows (http://windows.github.com/)."
     print(settings.print_critical_msg(err_msg))
@@ -100,17 +100,17 @@ def updater():
           sys.stdout.write(settings.print_info_msg(info_msg))
           sys.stdout.flush()
           revision_num()
-          print("")
+          print(settings.SPACE)
           os._exit(0)
         else:
-          print(settings.FAIL_STATUS)
+          print(settings.SPACE)
           err_msg = "The '.git' directory not found. Do it manually: " 
           err_msg += Style.BRIGHT + "'git clone " + settings.GIT_URL 
           err_msg += " " + settings.APPLICATION + "' "
           print(settings.print_critical_msg(err_msg))    
           raise SystemExit()
       else:
-          print(settings.FAIL_STATUS)
+          print(settings.SPACE)
           err_msg = requirment + " not found."
           print(settings.print_critical_msg(err_msg))
           raise SystemExit()
@@ -165,14 +165,14 @@ def unicorn_updater(current_version):
   sys.stdout.write(settings.print_info_msg(info_msg))
   sys.stdout.flush()
   if menu.options.offline:  
-    print(settings.FAIL_STATUS)
+    print(settings.SPACE)
     err_msg = "You cannot update TrustedSec's Magic Unicorn "
     err_msg += "via GitHub without access on the Internet."
     print(settings.print_critical_msg(err_msg))
     raise SystemExit()
   # Check if windows
   if settings.IS_WINDOWS:
-    print(settings.FAIL_STATUS)
+    print(settings.SPACE)
     err_msg = "For updating purposes on Windows platform, it's recommended "
     err_msg += "to use a GitHub client for Windows (http://windows.github.com/)."
     print(settings.print_critical_msg(err_msg))
@@ -199,7 +199,7 @@ def unicorn_updater(current_version):
         sys.stdout.flush()
         revision_num()
       else:
-        print(settings.FAIL_STATUS)
+        print(settings.SPACE)
         err_msg = requirment + " not found."
         print(settings.print_critical_msg(err_msg))
         raise SystemExit()

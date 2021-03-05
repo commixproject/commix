@@ -82,7 +82,7 @@ def eb_injection_handler(url, timesec, filename, http_request_method):
     sys.stdout.write(settings.print_info_msg(info_msg))
     sys.stdout.flush()
     if settings.VERBOSITY_LEVEL != 0:
-      print("")
+      print(settings.SPACE)
           
   i = 0
   # Calculate all possible combinations
@@ -300,7 +300,7 @@ def eb_injection_handler(url, timesec, filename, http_request_method):
 
             if not settings.LOAD_SESSION:
               if settings.VERBOSITY_LEVEL == 0:
-                print("")
+                print(settings.SPACE)
               else:
                 checks.total_of_requests()
 
@@ -334,7 +334,7 @@ def eb_injection_handler(url, timesec, filename, http_request_method):
                   enumerate_again = "Y"
                 if enumerate_again in settings.CHOICE_YES:
                   eb_enumeration.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec)
-                  # print("")
+                  # print(settings.SPACE)
                   break
                 elif enumerate_again in settings.CHOICE_NO:
                   new_line = False
@@ -350,12 +350,12 @@ def eb_injection_handler(url, timesec, filename, http_request_method):
                 eb_enumeration.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec)
             
             if not menu.file_access_options() and not menu.options.os_cmd and new_line:
-              print("")
+              print(settings.SPACE)
 
             # Check for any system file access options.
             if settings.FILE_ACCESS_DONE == True :
               if settings.ENUMERATION_DONE != True:
-                print("")
+                print(settings.SPACE)
               while True:
                 if not menu.options.batch:
                   question_msg = "Do you want to access files again? [Y/n] > "
@@ -366,7 +366,7 @@ def eb_injection_handler(url, timesec, filename, http_request_method):
                    file_access_again = "Y"
                 if file_access_again in settings.CHOICE_YES:
                   eb_file_access.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec)
-                  print("")
+                  print(settings.SPACE)
                   break
                 elif file_access_again in settings.CHOICE_NO: 
                   break
@@ -379,14 +379,14 @@ def eb_injection_handler(url, timesec, filename, http_request_method):
             else:
               if menu.file_access_options():
                 # if not menu.enumeration_options():
-                #   print("")
+                #   print(settings.SPACE)
                 eb_file_access.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec)
-                print("")
+                print(settings.SPACE)
 
             # Check if defined single cmd.
             if menu.options.os_cmd:
               # if not menu.file_access_options():
-              #   print("")
+              #   print(settings.SPACE)
               eb_enumeration.single_os_cmd_exec(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec)
 
             # Pseudo-Terminal shell
@@ -404,7 +404,7 @@ def eb_injection_handler(url, timesec, filename, http_request_method):
                  gotshell = "Y"
               if gotshell in settings.CHOICE_YES:
                 if not menu.options.batch:
-                  print("")
+                  print(settings.SPACE)
                 print("Pseudo-Terminal (type '" + Style.BRIGHT + "?" + Style.RESET_ALL + "' for available options)")
                 if readline_error:
                   checks.no_readline_module()
@@ -451,7 +451,7 @@ def eb_injection_handler(url, timesec, filename, http_request_method):
                         print("\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n")
                       else:
                         if settings.VERBOSITY_LEVEL != 0:
-                          print("")
+                          print(settings.SPACE)
                         err_msg = "The '" + cmd + "' command, does not return any output."
                         print(settings.print_critical_msg(err_msg) + "\n")
                     
@@ -486,7 +486,7 @@ def eb_injection_handler(url, timesec, filename, http_request_method):
               
   if no_result == True:
     if settings.VERBOSITY_LEVEL == 0:
-      print("")
+      print(settings.SPACE)
     return False
   else :
     sys.stdout.write("\r")

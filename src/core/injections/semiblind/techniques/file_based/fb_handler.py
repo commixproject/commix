@@ -359,7 +359,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                     warn_msg = "It seems that you don't have permissions to "
                     warn_msg += "read and/or write files in '" + settings.WEB_ROOT + "'."  
                     sys.stdout.write("\r" + settings.print_warning_msg(warn_msg))
-                    print("")
+                    print(settings.SPACE)
                     while True:
                       if not menu.options.batch:
                         question_msg = "Do you want to try the temporary directory (" + tmp_path + ") [Y/n] > "
@@ -382,7 +382,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                       elif tmp_upload in settings.CHOICE_NO:
                         break
                       elif tmp_upload in settings.CHOICE_QUIT:
-                        print("")
+                        print(settings.SPACE)
                         raise
                       else:
                         err_msg = "'" + tmp_upload + "' is not a valid answer."  
@@ -437,7 +437,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
               sys.stdout.write("\r" + settings.print_warning_msg(warn_msg))
               err_msg = str(e).replace(": "," (") + ")."
               if menu.options.verbose > 1:
-                print("")
+                print(settings.SPACE)
               print(settings.print_critical_msg(err_msg))
               # Provide custom server's root directory.
               custom_web_root(url, timesec, filename, http_request_method, url_time_response)
@@ -506,7 +506,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
 
             if not settings.LOAD_SESSION:
               if settings.VERBOSITY_LEVEL == 0:
-                print("")
+                print(settings.SPACE)
               else:
                 checks.total_of_requests()
 
@@ -540,7 +540,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                   enumerate_again = "Y"
                 if enumerate_again in settings.CHOICE_YES:
                   fb_enumeration.do_check(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-                  # print("")
+                  # print(settings.SPACE)
                   break
                 elif enumerate_again in settings.CHOICE_NO:
                   new_line = False
@@ -559,12 +559,12 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
            
             if not menu.file_access_options() and not menu.options.os_cmd:
               if not settings.VERBOSITY_LEVEL != 0 and new_line:
-                print("")
+                print(settings.SPACE)
 
             # Check for any system file access options.
             if settings.FILE_ACCESS_DONE == True :
               if settings.ENUMERATION_DONE != True:
-                print("")
+                print(settings.SPACE)
               while True:
                 if not menu.options.batch:
                   question_msg = "Do you want to access files again? [Y/n] > "
@@ -575,7 +575,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                    file_access_again= "Y"
                 if file_access_again in settings.CHOICE_YES:
                   fb_file_access.do_check(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-                  print("")
+                  print(settings.SPACE)
                   break
                 elif file_access_again in settings.CHOICE_NO: 
                   break
@@ -590,14 +590,14 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
             else:
               if menu.file_access_options():
                 # if not menu.enumeration_options():
-                #   print("")
+                #   print(settings.SPACE)
                 fb_file_access.do_check(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-                print("")
+                print(settings.SPACE)
                
             # Check if defined single cmd.
             if menu.options.os_cmd:
               # if not menu.file_access_options():
-              #   print("")
+              #   print(settings.SPACE)
               fb_enumeration.single_os_cmd_exec(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
               # Delete previous shell (text) files (output)
               delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
@@ -610,10 +610,10 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
               while True:
                 # Delete previous shell (text) files (output)
                 # if settings.VERBOSITY_LEVEL != 0:
-                #   print("")
+                #   print(settings.SPACE)
                 delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
                 if settings.VERBOSITY_LEVEL != 0:
-                  print("")
+                  print(settings.SPACE)
                 if go_back == True:
                   break
                 if not menu.options.batch:
@@ -625,7 +625,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                    gotshell = "Y"
                 if gotshell in settings.CHOICE_YES:
                   if not menu.options.batch:
-                    print("")
+                    print(settings.SPACE)
                   print("Pseudo-Terminal (type '" + Style.BRIGHT + "?" + Style.RESET_ALL + "' for available options)")
                   if readline_error:
                     checks.no_readline_module()
@@ -642,7 +642,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                     cmd = _input("""commix(""" + Style.BRIGHT + Fore.RED + """os_shell""" + Style.RESET_ALL + """) > """)
                     cmd = checks.escaped_cmd(cmd)
                     # if settings.VERBOSITY_LEVEL != 0:
-                    #   print("")
+                    #   print(settings.SPACE)
                     if cmd.lower() in settings.SHELL_OPTIONS:
                       go_back, go_back_again = shell_options.check_option(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, technique, go_back, no_result, timesec, go_back_again, payload, OUTPUT_TEXTFILE)
                       if go_back and go_back_again == False:
@@ -669,7 +669,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
 
                       if not shell or shell == "":
                         if settings.VERBOSITY_LEVEL != 0:
-                          print("")
+                          print(settings.SPACE)
                         err_msg = "The '" + cmd + "' command, does not return any output."
                         print(settings.print_critical_msg(err_msg) + "\n")
 
@@ -693,14 +693,14 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
               
             except KeyboardInterrupt: 
               # if settings.VERBOSITY_LEVEL != 0:
-              print("")
+              print(settings.SPACE)
               # Delete previous shell (text) files (output)
               delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
               raise
               
   if no_result == True:
     if settings.VERBOSITY_LEVEL == 0:
-      print("")
+      print(settings.SPACE)
     return False
   else :
     sys.stdout.write("\r")

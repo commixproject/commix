@@ -185,7 +185,7 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
   sys.stdout.write(settings.print_info_msg(info_msg))
   sys.stdout.flush()  
   if settings.VERBOSITY_LEVEL >= 2:
-    print("")
+    print(settings.SPACE)
   for output_length in range(int(minlen), int(maxlen)):
     if alter_shell:
       # Execute shell commands on vulnerable host.
@@ -250,7 +250,7 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
           sys.stdout.write(settings.SUCCESS_STATUS + "\n")
           sys.stdout.flush()
         if settings.VERBOSITY_LEVEL == 1:
-          print("")
+          print(settings.SPACE)
         if settings.VERBOSITY_LEVEL != 0:
           debug_msg = "Retrieved the length of execution output: " + str(output_length)
           print(settings.print_bold_debug_msg(debug_msg))
@@ -376,7 +376,7 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
     output = False
 
   if settings.VERBOSITY_LEVEL != 0 and menu.options.ignore_session:
-    print("")
+    print(settings.SPACE)
   return  check_how_long, output
 
 """
@@ -538,11 +538,11 @@ def false_positive_check(separator, TAG, cmd, whitespace, prefix, suffix, timese
 
     if str(output) == str(randvcalc):
       if settings.VERBOSITY_LEVEL == 1:
-        print("")
+        print(settings.SPACE)
       return how_long, output
   else:
     if settings.VERBOSITY_LEVEL < 2:
-      print("")
+      print(settings.SPACE)
     warn_msg = "False positive or unexploitable injection point detected."
     print(settings.print_warning_msg(warn_msg))
         
@@ -556,7 +556,7 @@ def export_injection_results(cmd, separator, output, check_how_long):
     if settings.VERBOSITY_LEVEL == 0:
       print("\n")
     elif settings.VERBOSITY_LEVEL == 1:
-      print("")  
+      print(settings.SPACE)  
     print(settings.print_output(output))
     info_msg = "Finished in " + time.strftime('%H:%M:%S', time.gmtime(check_how_long)) + "."
     sys.stdout.write("\n" + settings.print_info_msg(info_msg))
@@ -573,6 +573,6 @@ def export_injection_results(cmd, separator, output, check_how_long):
     else:
       err_msg = "The '" + cmd + "' command, does not return any output."
       if settings.VERBOSITY_LEVEL == 0:
-        print("")
+        print(settings.SPACE)
       sys.stdout.write("\r" + settings.print_critical_msg(err_msg))
 # eof

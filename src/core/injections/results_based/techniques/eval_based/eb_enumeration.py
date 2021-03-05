@@ -559,7 +559,7 @@ Check the defined options
 def do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec):
   
   # if not settings.VERBOSITY_LEVEL != 0 and not settings.ENUMERATION_DONE:
-  #   print("")
+  #   print(settings.SPACE)
 
   # Check if PowerShell is enabled.
   if not menu.options.ps_version and settings.TARGET_OS == "win":

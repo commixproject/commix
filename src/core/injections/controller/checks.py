@@ -24,6 +24,7 @@ import random
 import string
 import base64
 import gzip
+import zlib
 import traceback
 from src.utils import menu
 from src.utils import settings
@@ -445,7 +446,7 @@ Check if PowerShell is enabled.
 def ps_check():
   if settings.PS_ENABLED == None and menu.options.is_admin or menu.options.users or menu.options.passwords:
     if settings.VERBOSITY_LEVEL != 0:
-      print("")
+      print(settings.SPACE)
     warn_msg = "The payloads in some options that you "
     warn_msg += "have chosen, are requiring the use of PowerShell. "
     print(settings.print_warning_msg(warn_msg))
@@ -464,7 +465,7 @@ def ps_check():
       elif ps_check in settings.CHOICE_NO:
         break
       elif ps_check in settings.CHOICE_QUIT:
-        print("")
+        print(settings.SPACE)
         os._exit(0)
       else:  
         err_msg = "'" + ps_check + "' is not a valid answer."  
@@ -487,7 +488,7 @@ def ps_check_failed():
     if ps_check in settings.CHOICE_YES:
       break
     elif ps_check in settings.CHOICE_NO:
-      print("")
+      print(settings.SPACE)
       os._exit(0)
     else:  
       err_msg = "'" + ps_check + "' is not a valid answer."  
@@ -537,7 +538,7 @@ def check_CGI_scripts(url):
           menu.options.shellshock = False
           break
         elif shellshock_check in settings.CHOICE_QUIT:
-          print("")
+          print(settings.SPACE)
           os._exit(0)
         else:  
           err_msg = "'" + shellshock_check + "' is not a valid answer."  
@@ -626,7 +627,7 @@ def third_party_dependencies():
   try:
     import sqlite3
   except ImportError:
-    print(settings.FAIL_STATUS)
+    print(settings.SPACE)
     err_msg = settings.APPLICATION + " requires 'sqlite3' third-party library "
     err_msg += "in order to store previous injection points and commands. "
     print(settings.print_critical_msg(err_msg))
@@ -639,7 +640,7 @@ def third_party_dependencies():
       try:
         import pyreadline
       except ImportError:
-        print(settings.FAIL_STATUS)
+        print(settings.SPACE)
         err_msg = settings.APPLICATION + " requires 'pyreadline' third-party library "
         err_msg += "in order to be able to take advantage of the TAB "
         err_msg += "completion and history support features. "
@@ -649,14 +650,14 @@ def third_party_dependencies():
       try:
         import gnureadline
       except ImportError:
-        print(settings.FAIL_STATUS)
+        print(settings.SPACE)
         err_msg = settings.APPLICATION + " requires 'gnureadline' third-party library "
         err_msg += "in order to be able to take advantage of the TAB "
         err_msg += "completion and history support features. "
         print(settings.print_critical_msg(err_msg))
     pass
 
-  print(settings.SUCCESS_STATUS)
+  print(settings.SPACE)
   info_msg = "All required third-party (non-core) libraries are seems to be installed."
   print(settings.print_bold_info_msg(info_msg))
 
