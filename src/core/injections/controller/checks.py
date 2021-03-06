@@ -91,14 +91,17 @@ Page enc/decoding
 """
 def page_encoding(response, action):
   _ = False
+  page = response.read()
   if response.info().get('Content-Encoding') in ("gzip", "deflate"):
-    if response.info().get('Content-Encoding') == 'deflate':
-      data = io.BytesIO(zlib.decompress(response.read(), -15))
-    elif response.info().get('Content-Encoding') == 'gzip':
-      data = gzip.GzipFile("", "rb", 9, io.BytesIO(response.read()))
-    page = data.read()
-  else:
-    page = response.read()
+    try:
+      if response.info().get('Content-Encoding') == 'deflate':
+        data = io.BytesIO(zlib.decompress(response.read(), -15))
+      elif response.info().get('Content-Encoding') == 'gzip':
+        data = gzip.GzipFile("", "rb", 9, io.BytesIO(response.read()))
+      page = data.read()
+    except Exception as ex:
+      warn_msg = "Turning off page compression."
+      print(settings.print_bold_warning_msg(warn_msg))
   try:
     if action == "encode" and type(page) == str:
       return page.encode(settings.UNICODE_ENCODING)
