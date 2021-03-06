@@ -996,4 +996,7 @@ IGNORE_SPECIAL_CHAR_REGEX = "[^A-Za-z0-9.:,_]+"
 PERFORM_CRACKING = False
 
 SPACE = " "
+
+PAGE_COMPRESSION = None
+
 # eof

@@ -99,9 +99,12 @@ def page_encoding(response, action):
       elif response.info().get('Content-Encoding') == 'gzip':
         data = gzip.GzipFile("", "rb", 9, io.BytesIO(response.read()))
       page = data.read()
+      settings.PAGE_COMPRESSION = True
     except Exception as ex:
-      warn_msg = "Turning off page compression."
-      print(settings.print_bold_warning_msg(warn_msg))
+      if settings.PAGE_COMPRESSION is None:
+        warn_msg = "Turning off page compression."
+        sys.stdout.write("\n" + settings.print_warning_msg(warn_msg))
+        settings.PAGE_COMPRESSION = False
   try:
     if action == "encode" and type(page) == str:
       return page.encode(settings.UNICODE_ENCODING)
