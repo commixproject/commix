@@ -40,37 +40,37 @@ def table_name(url):
 Ignore session.
 """
 def ignore(url):
-  if settings.VERBOSITY_LEVEL != 0:
-    debug_msg = "Ignoring the stored session from the session file."
-    print(settings.print_debug_msg(debug_msg))
-  if not os.path.isfile(settings.SESSION_FILE):
+  if os.path.isfile(settings.SESSION_FILE):
     if settings.VERBOSITY_LEVEL != 0:
-      warn_msg = "The session file does not exist."
+      debug_msg = "Ignoring the stored session from the session file."
+      print(settings.print_debug_msg(debug_msg))
+  else:
+    if settings.VERBOSITY_LEVEL != 0:
+      warn_msg = "Skipping ignoring the stored session, as the session file not exist."
       print(settings.print_warning_msg(warn_msg))
 
 """
 Flush session.
 """
 def flush(url):
-  info_msg = "Flushing the stored session from the session file. "
-  sys.stdout.write(settings.print_info_msg(info_msg))
-  sys.stdout.flush()
-  if not os.path.isfile(settings.SESSION_FILE):
-    print(settings.SPACE)
-    err_msg = "The session file does not exist."
-    print(settings.print_critical_msg(err_msg))
-  else:
+  if os.path.isfile(settings.SESSION_FILE):
+    if settings.VERBOSITY_LEVEL != 0:
+      debug_msg = "Flushing the stored session from the session file."
+      print(settings.print_debug_msg(debug_msg))
     try:
       conn = sqlite3.connect(settings.SESSION_FILE)
       tables = list(conn.execute("SELECT name FROM sqlite_master WHERE type is 'table'"))
       conn.executescript(';'.join(["DROP TABLE IF EXISTS %s" %i for i in tables]))
       conn.commit()
       conn.close()
-      print(settings.SPACE)
     except sqlite3.OperationalError as err_msg:
       print(settings.SPACE)
       err_msg = "Unable to flush the session file." + str(err_msg).title()
-      print(settings.print_critical_msg(err_msg))    
+      print(settings.print_critical_msg(err_msg))
+  else:
+    if settings.VERBOSITY_LEVEL != 0:
+      warn_msg = "Skipping flushing the stored session, as the session file not exist."
+      print(settings.print_warning_msg(warn_msg))
 
 """
 Clear injection point records 
@@ -350,13 +350,17 @@ def store_cmd(url, cmd, shell, vuln_parameter):
       conn.execute("CREATE TABLE IF NOT EXISTS " + table_name(url) + "_ir" + \
                    "(cmd VARCHAR, output VARCHAR, vuln_parameter VARCHAR);")
       if settings.TESTABLE_PARAMETER:
-        conn.execute("INSERT INTO " + table_name(url) + "_ir(cmd, output, vuln_parameter) "\
+        conn.execute("INSERT INTO " + table_name(url) + "_ir(cmd, output, vuln_parameter) " \
                      "VALUES(?,?,?)", \
-                     (str(base64.b64encode(cmd)), str(base64.b64encode(shell)), str(vuln_parameter)))
+                     (str(base64.b64encode(cmd.encode(settings.UNICODE_ENCODING)).decode()), \
+                      str(base64.b64encode(shell.encode(settings.UNICODE_ENCODING)).decode()), \
+                      str(vuln_parameter)))
       else:
         conn.execute("INSERT INTO " + table_name(url) + "_ir(cmd, output, vuln_parameter) "\
                      "VALUES(?,?,?)", \
-                     (str(base64.b64encode(cmd)), str(base64.b64encode(shell)), str(settings.HTTP_HEADER)))
+                     (str(base64.b64encode(cmd.encode(settings.UNICODE_ENCODING)).decode()), \
+                      str(base64.b64encode(shell.encode(settings.UNICODE_ENCODING)).decode()), \
+                      str(settings.HTTP_HEADER)))
       conn.commit()
       conn.close() 
   except sqlite3.OperationalError as err_msg:
@@ -388,7 +392,7 @@ def export_stored_cmd(url, cmd, vuln_parameter):
       for session in cursor:
         output = base64.b64decode(session[0])
       try:  
-        return output.decode()
+        return output.decode(settings.UNICODE_ENCODING)
       except AttributeError:
         return output  
     else:

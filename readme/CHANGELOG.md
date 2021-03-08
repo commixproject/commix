@@ -1,4 +1,5 @@
 ## Version 3.2 (upcoming)
+* Revised: Minor improvement regarding session handler for supporting Python 3.4+.
 * Revised: Minor improvement regarding `--web-root` option.
 * Added: New tamper script "uninitializedvariable.py" that adds uninitialized bash variables at the end of each command of the generated payloads (for *nix targets).
 * Revised: Improvement regarding automatically decode `deflate` and `gzip` HTTP responses.

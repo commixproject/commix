@@ -106,9 +106,9 @@ def estimate_response_time(url, timesec):
             stored_auth_creds = session_handler.export_valid_credentials(url, auth_type.lower())
           except:
             stored_auth_creds = False
-          if stored_auth_creds:
+          if stored_auth_creds and not menu.options.ignore_session:
             menu.options.auth_cred = stored_auth_creds
-            info_msg = "Identified a (stored) valid pair of credentials '"  
+            info_msg = "Identified a previously stored valid pair of credentials '"  
             info_msg += menu.options.auth_cred + Style.RESET_ALL + Style.BRIGHT  + "'."
             print(settings.print_bold_info_msg(info_msg))
           else:  

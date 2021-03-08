@@ -563,7 +563,7 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                             session_handler.store_cmd(url, cmd, output, vuln_parameter)
                         else:
                           output = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
-                          print("\n") + settings.print_output(output)
+                          print("\n" + settings.print_output(output))
                         # Update logs with executed cmds and execution results.
                         logs.executed_command(filename, cmd, output)
                         print(settings.SPACE)

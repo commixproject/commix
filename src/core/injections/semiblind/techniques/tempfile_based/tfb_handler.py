@@ -607,7 +607,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                         output = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
                         # Update logs with executed cmds and execution results.
                         logs.executed_command(filename, cmd, output)
-                        print("\n") + settings.print_output(output) + "\n"
+                        print("\n" + settings.print_output(output) + "\n")
                       # Update logs with executed cmds and execution results.
                       logs.executed_command(filename, cmd, output)
 
