@@ -436,7 +436,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
               warn_msg += "read and/or write files in '" + settings.WEB_ROOT + "'."
               sys.stdout.write("\r" + settings.print_warning_msg(warn_msg))
               err_msg = str(e).replace(": "," (") + ")."
-              if menu.options.verbose > 1:
+              if settings.VERBOSITY_LEVEL >= 2:
                 print(settings.SPACE)
               print(settings.print_critical_msg(err_msg))
               # Provide custom server's root directory.

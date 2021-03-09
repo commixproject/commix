@@ -277,9 +277,9 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
     output = []
     percent = "0.0%"
     info_msg = "Grabbing the output from '" + OUTPUT_TEXTFILE + "'."
-    if menu.options.verbose < 1 :
+    if settings.VERBOSITY_LEVEL == 0 :
       info_msg += ".. (" + str(percent) + ")"
-    elif menu.options.verbose == 1 :
+    elif settings.VERBOSITY_LEVEL == 1 :
       info_msg +=  ""
     else:
       info_msg +=  "\n"  

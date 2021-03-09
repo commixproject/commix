@@ -30,6 +30,10 @@ from src.utils import settings
 from src.core.compat import xrange
 from src.thirdparty.colorama import Fore, Back, Style, init
 
+"""
+Safely removes (purges) output directory.
+"""
+
 def purge():
   directory = settings.OUTPUT_DIR
   if not os.path.isdir(directory):
@@ -37,7 +41,7 @@ def purge():
     print(settings.print_warning_msg(warn_msg))
     return
   info_msg = "Purging content of directory '" + directory + "'"
-  if not menu.options.verbose >= 1: 
+  if not settings.VERBOSITY_LEVEL != 0: 
     info_msg += ". "
   else:
      info_msg += ".\n" 
@@ -52,9 +56,9 @@ def purge():
     file_paths.extend([os.path.abspath(os.path.join(rootpath, i)) for i in filenames])
 
   # Changing file attributes.
-  if menu.options.verbose >= 1:
-    info_msg = "Changing file attributes. "
-    sys.stdout.write(settings.print_info_msg(info_msg))
+  if settings.VERBOSITY_LEVEL != 0:
+    debug_msg = "Changing file attributes."
+    sys.stdout.write(settings.print_debug_msg(debug_msg))
     sys.stdout.flush() 
   failed = False
   for file_path in file_paths:
@@ -63,16 +67,16 @@ def purge():
     except:
       failed = True
       pass
-  if menu.options.verbose >= 1:    
+  if settings.VERBOSITY_LEVEL != 0:    
     if not failed:  
       print(settings.SPACE)
     else:
       print(settings.SPACE)
 
   # Writing random data to files.
-  if menu.options.verbose >= 1:
-    info_msg = "Writing random data to files. "
-    sys.stdout.write(settings.print_info_msg(info_msg))
+  if settings.VERBOSITY_LEVEL != 0:
+    debug_msg = "Writing random data to files. "
+    sys.stdout.write(settings.print_debug_msg(debug_msg))
     sys.stdout.flush() 
   failed = False
   for file_path in file_paths:
@@ -83,16 +87,16 @@ def purge():
     except:
       failed = True
       pass
-  if menu.options.verbose >= 1:    
+  if settings.VERBOSITY_LEVEL != 0:    
     if not failed:  
       print(settings.SPACE)
     else:
       print(settings.SPACE)
 
   # Truncating files.
-  if menu.options.verbose >= 1:
-    info_msg = "Truncating files. "
-    sys.stdout.write(settings.print_info_msg(info_msg))
+  if settings.VERBOSITY_LEVEL != 0:
+    debug_msg = "Truncating files."
+    sys.stdout.write(settings.print_debug_msg(debug_msg))
     sys.stdout.flush() 
   failed = False
   for file_path in file_paths:
@@ -102,16 +106,16 @@ def purge():
     except:
       failed = True
       pass
-  if menu.options.verbose >= 1:    
+  if settings.VERBOSITY_LEVEL != 0:    
     if not failed:  
       print(settings.SPACE)
     else:
       print(settings.SPACE)
 
   # Renaming filenames to random values.
-  if menu.options.verbose >= 1:
-    info_msg = "Renaming filenames to random values. "
-    sys.stdout.write(settings.print_info_msg(info_msg))
+  if settings.VERBOSITY_LEVEL != 0:
+    debug_msg = "Renaming filenames to random values."
+    sys.stdout.write(settings.print_debug_msg(debug_msg))
     sys.stdout.flush() 
   failed = False
   for file_path in file_paths:
@@ -120,16 +124,16 @@ def purge():
     except:
       failed = True
       pass
-  if menu.options.verbose >= 1:    
+  if settings.VERBOSITY_LEVEL != 0:    
     if not failed:  
       print(settings.SPACE)
     else:
       print(settings.SPACE)
 
   # Renaming directory names to random values.
-  if menu.options.verbose >= 1:
-    info_msg = "Renaming directory names to random values. "
-    sys.stdout.write(settings.print_info_msg(info_msg))
+  if settings.VERBOSITY_LEVEL != 0:
+    debug_msg = "Renaming directory names to random values."
+    sys.stdout.write(settings.print_debug_msg(debug_msg))
     sys.stdout.flush() 
   failed = False
   dir_paths.sort(key=functools.cmp_to_key(lambda x, y: y.count(os.path.sep) - x.count(os.path.sep)))
@@ -139,16 +143,16 @@ def purge():
     except:
       failed = True
       pass
-  if menu.options.verbose >= 1:    
+  if settings.VERBOSITY_LEVEL != 0:    
     if not failed:  
       print(settings.SPACE)
     else:
       print(settings.SPACE)
 
   # Deleting the whole directory tree. 
-  if menu.options.verbose >= 1:
-    info_msg = "Deleting the whole directory tree. "
-    sys.stdout.write(settings.print_info_msg(info_msg))
+  if settings.VERBOSITY_LEVEL != 0:
+    debug_msg = "Deleting the whole directory tree."
+    sys.stdout.write(settings.print_debug_msg(debug_msg))
   try:
     failed = False
     os.chdir(os.path.join(directory, ".."))

@@ -649,6 +649,15 @@ try:
   # Get total number of days from last update 
   common.days_from_last_update()
 
+  # Define the level of verbosity.
+  if menu.options.verbose > 4:
+    err_msg = "The value for option '-v' "
+    err_msg += "must be an integer value from range [0, 4]."
+    print(settings.print_critical_msg(err_msg))
+    raise SystemExit()
+  else:  
+    settings.VERBOSITY_LEVEL = menu.options.verbose
+
   if not menu.options.batch:
     settings.OS_CHECKS_NUM = 1
   for os_checks_num in range(0, int(settings.OS_CHECKS_NUM)):
@@ -807,15 +816,6 @@ try:
       inject_tag_regex_match = re.search(settings.INJECT_TAG_REGEX, ",".join(str(x) for x in sys.argv))
       if inject_tag_regex_match:
         settings.INJECT_TAG = inject_tag_regex_match.group(0)
-
-    # Define the level of verbosity.
-    if menu.options.verbose > 4:
-      err_msg = "The value for option '-v' "
-      err_msg += "must be an integer value from range [0, 4]."
-      print(settings.print_critical_msg(err_msg))
-      raise SystemExit()
-    else:  
-      settings.VERBOSITY_LEVEL = menu.options.verbose
 
     # Define the level of tests to perform.
     if menu.options.level > 3:

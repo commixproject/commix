@@ -38,14 +38,14 @@ def revision_num():
     start = time.time()
     process = subprocess.Popen("git reset --hard HEAD && git clean -fd && git pull", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, _ = process.communicate()
-    if not menu.options.verbose:
+    if settings.VERBOSITY_LEVEL == 0:
       info_msg = ('Updated to', 'Already at')["Already" in stdout]
       process = subprocess.Popen("git rev-parse --verify HEAD", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     # Delete *.pyc files.
     subprocess.Popen("find . -name \"*.pyc\" -delete", shell=True).wait()
     # Delete empty directories and files.
     subprocess.Popen("find . -empty -type d -delete", shell=True).wait()
-    if not menu.options.verbose: 
+    if settings.VERBOSITY_LEVEL == 0: 
       stdout, _ = process.communicate()
       match = re.search(r"(?i)[0-9a-f]{32}", stdout or "")
       rev_num = match.group(0) if match else None
@@ -88,7 +88,7 @@ def updater():
       # Check if 'git' is installed.
       requirments.do_check(requirment)
       if requirments.do_check(requirment) == True :
-        if menu.options.verbose:
+        if settings.VERBOSITY_LEVEL != 0:
           debug_msg = "commix will try to update itself using '" + requirment + "' command."
           print(settings.print_debug_msg(debug_msg))
         # Check if ".git" exists!
