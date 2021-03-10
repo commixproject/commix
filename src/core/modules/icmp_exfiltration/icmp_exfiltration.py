@@ -84,7 +84,7 @@ def packet_handler(Packet):
 
 def signal_handler(signal, frame):
   sys.stdout.write(Style.RESET_ALL)
-  exit(0)
+  sys.exit(0)
 
 def snif(ip_dst, ip_src):
   info_msg = "Started the sniffer between " + Fore.YELLOW + ip_src

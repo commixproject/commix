@@ -113,7 +113,7 @@ def check_http_traffic(request):
           logs.log_traffic("\n" + header)
       http_client.send(self, req)
 
-  class connection_handler(_urllib.request.HTTPSHandler, _urllib.request.HTTPHandler, object):
+  class connection_handler(_urllib.request.HTTPSHandler, _urllib.request.HTTPHandler, ):
     def http_open(self, req):
       try:
         self.do_open(connection, req)

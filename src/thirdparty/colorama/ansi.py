@@ -15,7 +15,7 @@ def code_to_chars(code):
     return CSI + str(code) + 'm'
 
 
-class AnsiCodes(object):
+class AnsiCodes():
     def __init__(self, codes):
         for name in dir(codes):
             if not name.startswith('_'):
@@ -23,7 +23,7 @@ class AnsiCodes(object):
                 setattr(self, name, code_to_chars(value))
 
 
-class AnsiCursor(object):
+class AnsiCursor():
     def UP(self, n=1):
         return CSI + str(n) + "A"
     def DOWN(self, n=1):

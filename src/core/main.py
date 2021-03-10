@@ -463,11 +463,7 @@ def main(filename, url):
           if len(menu.options.tech) <= 4:
             split_first_letter = list(menu.options.tech)
             for j in range(0,len(split_first_letter)):
-              if split_first_letter[j] in settings.AVAILABLE_TECHNIQUES:
-                found_tech = True
-              else:  
-                found_tech = False  
-                          
+              found_tech = split_first_letter[j] in settings.AVAILABLE_TECHNIQUES
       if split_techniques_names[i].replace(' ', '') not in settings.AVAILABLE_TECHNIQUES and \
          found_tech == False:
         err_msg = "You specified wrong value '" + split_techniques_names[i] 
