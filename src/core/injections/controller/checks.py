@@ -1357,7 +1357,7 @@ def generate_char_pool(num_of_chars):
     else:
       # Checks {a..z},{A..Z},{0..9},{Symbols}
       char_pool = list(range(96, 122)) + list(range(65, 90))
-    char_pool = char_pool + list(range(48, 57)) + list(range(32, 48)) + list(range(90, 96)) + list(range(57, 65))  + list(range(122, 127))
+    char_pool = char_pool + list(range(49, 57)) + list(range(32, 48)) + list(range(91, 95)) + list(range(58, 64))  + list(range(123, 127))
   return char_pool
 
 """
