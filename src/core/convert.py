@@ -19,7 +19,7 @@ from src.thirdparty import six
 
 def hexdecode(value):
   try:
-    value = codecs.decode(value, "hex")
+    value = codecs.decode(''.join(value.split()), "hex")
   except LookupError:
     value = binascii.unhexlify(value)
   value = value.decode(settings.UNICODE_ENCODING)
