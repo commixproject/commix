@@ -33,7 +33,7 @@ To get an overview of commix available options, switches and/or basic ideas on h
 
 ## Donate
 
-Commix is the outcome of many hours of work and total personal dedication. Feel free to **[donate](https://www.paypal.com/gr/webapps/mpp/send-money-online)** via PayPal to `donations@commixproject.com` and instantly prove your ♥ for it!
+Commix is the outcome of many hours of work and total personal dedication. Feel free to **[donate](https://www.paypal.com/donate?hosted_button_id=UGBDUDJRW8U4E)** via PayPal and instantly prove your ♥ for it!
 
 
 ## Links
