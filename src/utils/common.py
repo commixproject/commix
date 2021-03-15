@@ -159,6 +159,12 @@ def unhandled_exception():
     print(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
+  elif "Permission denied: '" in exc_msg:
+    match = re.search(r"Permission denied: '([^']*)", exc_msg)
+    err_msg = "Permission error occurred while accessing file '" + match.group(1) + "'."
+    print(settings.print_critical_msg(err_msg))
+    raise SystemExit()
+
   elif all(_ in exc_msg for _ in ("Access is denied", "subprocess", "metasploit")):
     err_msg = "Permission error occurred while running Metasploit."
     print(settings.print_critical_msg(err_msg))
