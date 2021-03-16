@@ -20,27 +20,6 @@ from src.core.requests import parameters
 from src.core.requests import headers as log_http_headers
 from src.core.injections.controller import checks
 
-readline_error = False
-if settings.IS_WINDOWS:
-  try:
-    import readline
-  except ImportError:
-    try:
-      import pyreadline as readline
-    except ImportError:
-      readline_error = True
-else:
-  try:
-    import readline
-    if getattr(readline, '__doc__', '') is not None and 'libedit' in getattr(readline, '__doc__', ''):
-      import gnureadline as readline
-  except ImportError:
-    try:
-      import gnureadline as readline
-    except ImportError:
-      readline_error = True
-pass
-
 default_user_agent = menu.options.agent
 
 """
@@ -789,19 +768,12 @@ def shellshock_handler(url, http_request_method, filename):
                 if not menu.options.batch:
                   print(settings.SPACE)
                 print("Pseudo-Terminal (type '" + Style.BRIGHT + "?" + Style.RESET_ALL + "' for available options)")
-                if readline_error:
+                if settings.READLINE_ERROR:
                   checks.no_readline_module()
                 while True:
                   try:
-                    if not readline_error:
-                      # Tab compliter
-                      readline.set_completer(menu.tab_completer)
-                      # MacOSX tab compliter
-                      if getattr(readline, '__doc__', '') is not None and 'libedit' in getattr(readline, '__doc__', ''):
-                        readline.parse_and_bind("bind ^I rl_complete")
-                      # Unix tab compliter
-                      else:
-                        readline.parse_and_bind("tab: complete")
+                    if not settings.READLINE_ERROR:
+                      checks.tab_autocompleter()
                     cmd = _input("""commix(""" + Style.BRIGHT + Fore.RED + """os_shell""" + Style.RESET_ALL + """) > """)
                     cmd = checks.escaped_cmd(cmd)
                     

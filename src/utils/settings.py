@@ -203,7 +203,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "3.2.82"
+VERSION_NUM = "3.2.83"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"
@@ -224,6 +224,9 @@ LEGAL_DISCLAIMER_MSG = "Usage of " + APPLICATION + " for attacking targets witho
 
 # Random string generator
 RANDOM_STRING_GENERATOR = ''.join(random.choice(string.ascii_uppercase + string.digits + string.ascii_lowercase) for _ in range(10))
+
+# Readline 
+READLINE_ERROR = False
 
 # Random Tag
 RANDOM_TAG = "" 

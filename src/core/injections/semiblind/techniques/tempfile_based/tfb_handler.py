@@ -39,27 +39,6 @@ from src.core.injections.semiblind.techniques.tempfile_based import tfb_payloads
 from src.core.injections.semiblind.techniques.tempfile_based import tfb_enumeration
 from src.core.injections.semiblind.techniques.tempfile_based import tfb_file_access
 
-readline_error = False
-if settings.IS_WINDOWS:
-  try:
-    import readline
-  except ImportError:
-    try:
-      import pyreadline as readline
-    except ImportError:
-      readline_error = True
-else:
-  try:
-    import readline
-    if getattr(readline, '__doc__', '') is not None and 'libedit' in getattr(readline, '__doc__', ''):
-      import gnureadline as readline
-  except ImportError:
-    try:
-      import gnureadline as readline
-    except ImportError:
-      readline_error = True
-pass
-
 """
 The "tempfile-based" injection technique on semiblind OS command injection.
 __Warning:__ This technique is still experimental, is not yet fully functional and may leads to false-positive results.
@@ -569,7 +548,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                     if not menu.options.batch:
                       print(settings.SPACE)
                     print("Pseudo-Terminal (type '" + Style.BRIGHT + "?" + Style.RESET_ALL + "' for available options)")
-                    if readline_error:
+                    if settings.READLINE_ERROR:
                       checks.no_readline_module()
                     while True:
                       if false_positive_warning:
@@ -577,16 +556,8 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                         warn_msg += "recommended to enable the 'reverse_tcp' option.\n"
                         sys.stdout.write("\r" + settings.print_warning_msg(warn_msg))
                         false_positive_warning = False
-
-                      # Tab compliter
-                      if not readline_error:
-                        readline.set_completer(menu.tab_completer)
-                        # MacOSX tab compliter
-                        if getattr(readline, '__doc__', '') is not None and 'libedit' in getattr(readline, '__doc__', ''):
-                          readline.parse_and_bind("bind ^I rl_complete")
-                        # Unix tab compliter
-                        else:
-                          readline.parse_and_bind("tab: complete")
+                      if not settings.READLINE_ERROR:
+                        checks.tab_autocompleter()
                       cmd = _input("""commix(""" + Style.BRIGHT + Fore.RED + """os_shell""" + Style.RESET_ALL + """) > """)
                       cmd = checks.escaped_cmd(cmd)
                       if cmd.lower() in settings.SHELL_OPTIONS:

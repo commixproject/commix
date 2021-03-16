@@ -48,27 +48,6 @@ from src.core.injections.controller import parser
 from src.core.injections.controller import controller
 from src.thirdparty.six.moves import reload_module as _reload_module
 
-readline_error = False
-if settings.IS_WINDOWS:
-  try:
-    import readline
-  except ImportError:
-    try:
-      import pyreadline as readline
-    except ImportError:
-      readline_error = True
-else:
-  try:
-    import readline
-    if getattr(readline, '__doc__', '') is not None and 'libedit' in getattr(readline, '__doc__', ''):
-      import gnureadline as readline
-  except ImportError:
-    try:
-      import gnureadline as readline
-    except ImportError:
-      readline_error = True
-pass
-
 # Set default encoding
 _reload_module(sys)
 #sys.setdefaultencoding(settings.UNICODE_ENCODING)
@@ -437,12 +416,6 @@ def main(filename, url):
 
     # Check for skipping injection techniques.
     if menu.options.skip_tech:
-      if menu.options.tech:
-        err_msg = "The options '--technique' and '--skip-technique' cannot be used "
-        err_msg += "simultaneously (i.e. only one option must be set)."
-        print(settings.print_critical_msg(err_msg))
-        raise SystemExit
-
       settings.SKIP_TECHNIQUES = True
       menu.options.tech = menu.options.skip_tech
 
@@ -667,7 +640,7 @@ try:
       checks.list_tamper_scripts()
       raise SystemExit()
 
-    if readline_error :
+    if settings.READLINE_ERROR :
       checks.no_readline_module()
       raise SystemExit()
 

@@ -42,27 +42,6 @@ try:
 except:  # Python 2
   unescape = _html_parser.HTMLParser().unescape
 
-readline_error = False
-if settings.IS_WINDOWS:
-  try:
-    import readline
-  except ImportError:
-    try:
-      import pyreadline as readline
-    except ImportError:
-      readline_error = True
-else:
-  try:
-    import readline
-    if getattr(readline, '__doc__', '') is not None and 'libedit' in getattr(readline, '__doc__', ''):
-      import gnureadline as readline
-  except ImportError:
-    try:
-      import gnureadline as readline
-    except ImportError:
-      readline_error = True
-pass
-
 """
 The "classic" technique on result-based OS command injection.
 """
@@ -393,19 +372,12 @@ def cb_injection_handler(url, timesec, filename, http_request_method):
                 if not menu.options.batch:
                   print(settings.SPACE)
                 print("Pseudo-Terminal (type '" + Style.BRIGHT + "?" + Style.RESET_ALL + "' for available options)")
-                if readline_error:
+                if settings.READLINE_ERROR:
                   checks.no_readline_module()
                 while True:
                   try:
-                    if not readline_error:
-                      # Tab compliter
-                      readline.set_completer(menu.tab_completer)
-                      # MacOSX tab compliter
-                      if getattr(readline, '__doc__', '') is not None and 'libedit' in getattr(readline, '__doc__', ''):
-                        readline.parse_and_bind("bind ^I rl_complete")
-                      # Unix tab compliter
-                      else:
-                        readline.parse_and_bind("tab: complete")
+                    if not settings.READLINE_ERROR:
+                      checks.tab_autocompleter()
                     cmd = _input("""commix(""" + Style.BRIGHT + Fore.RED + """os_shell""" + Style.RESET_ALL + """) > """)
                     cmd = checks.escaped_cmd(cmd)
                     if cmd.lower() in settings.SHELL_OPTIONS:

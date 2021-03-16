@@ -36,6 +36,66 @@ from src.thirdparty.six.moves import urllib as _urllib
 from src.thirdparty.colorama import Fore, Back, Style, init
 from src.thirdparty.flatten_json.flatten_json import flatten, unflatten_list
 
+if settings.IS_WINDOWS:
+  try:
+    import readline
+  except ImportError:
+    try:
+      import pyreadline as readline
+    except ImportError:
+      settings.READLINE_ERROR = True
+else:
+  try:
+    import readline
+    if getattr(readline, '__doc__', '') is not None and 'libedit' in getattr(readline, '__doc__', ''):
+      import gnureadline as readline
+  except ImportError:
+    try:
+      import gnureadline as readline
+    except ImportError:
+      settings.READLINE_ERROR = True
+
+"""
+Tab Autocompleter
+"""
+def tab_autocompleter():
+  try:
+    # Tab compliter
+    readline.set_completer(menu.tab_completer)
+    # MacOSX tab compliter
+    if getattr(readline, '__doc__', '') is not None and 'libedit' in getattr(readline, '__doc__', ''):
+      readline.parse_and_bind("bind ^I rl_complete")
+    # Unix tab compliter
+    else:
+      readline.parse_and_bind("tab: complete")
+  except AttributeError:
+    error_msg = "Failed while trying to use platform's readline library."
+    print(settings.print_error_msg(error_msg))
+
+"""
+Save command history.
+"""
+def save_cmd_history():
+  try:
+    cli_history = os.path.expanduser(settings.CLI_HISTORY)
+    if os.path.exists(cli_history):
+      readline.write_history_file(cli_history)
+  except (IOError, AttributeError) as e:
+    warn_msg = "There was a problem writing the history file '" + cli_history + "'."
+    print(settings.print_warning_msg(warn_msg))
+
+"""
+Load commands from history.
+"""
+def load_cmd_history():
+  try:
+    cli_history = os.path.expanduser(settings.CLI_HISTORY)
+    if os.path.exists(cli_history):
+      readline.read_history_file(cli_history)
+  except (IOError, AttributeError) as e:
+    warn_msg = "There was a problem loading the history file '" + cli_history + "'."
+    print(settings.print_warning_msg(warn_msg))
+
 # If the value has boundaries.
 def value_boundaries(value):
   if not menu.options.batch:
