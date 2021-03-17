@@ -43,7 +43,7 @@ The "time-based" injection technique on Blind OS Command Injection.
 """
 The "time-based" injection technique handler.
 """
-def tb_injection_handler(url, timesec, filename, http_request_method, url_time_response):
+def tb_injection_handler(url, timesec, filename, http_request_method, url_time_response, injection_type, technique):
  
   counter = 1
   num_of_chars = 1
@@ -54,8 +54,6 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
   false_positive_warning = False
   export_injection_info = False
   how_long = 0
-  injection_type = "blind OS command injection"
-  technique = "time-based command injection technique"
 
   if settings.VERBOSITY_LEVEL != 0:
     info_msg = "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + ". "
@@ -583,7 +581,7 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
 The exploitation function.
 (call the injection handler)
 """
-def exploitation(url, timesec, filename, http_request_method, url_time_response):
+def exploitation(url, timesec, filename, http_request_method, url_time_response, injection_type, technique):
   # Check if attack is based on time delays.
   if not settings.TIME_RELATIVE_ATTACK :
     settings.TIME_RELATIVE_ATTACK = True
@@ -617,7 +615,7 @@ def exploitation(url, timesec, filename, http_request_method, url_time_response)
         print(settings.print_error_msg(err_msg))
         pass
   else:
-    if tb_injection_handler(url, timesec, filename, http_request_method, url_time_response) == False:
+    if tb_injection_handler(url, timesec, filename, http_request_method, url_time_response, injection_type, technique) == False:
       settings.TIME_RELATIVE_ATTACK = False
       return False
 # eof

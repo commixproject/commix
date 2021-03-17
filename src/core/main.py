@@ -456,6 +456,9 @@ def main(filename, url):
         print(settings.print_critical_msg(err_msg))
         raise SystemExit()
 
+    if not menu.options.tech:
+      menu.options.tech = ""
+    
     # Check if specified wrong alternative shell
     if menu.options.alter_shell:
       if menu.options.alter_shell.lower() not in settings.AVAILABLE_SHELLS:

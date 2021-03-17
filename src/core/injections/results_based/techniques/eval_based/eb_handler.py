@@ -43,14 +43,12 @@ The dynamic code evaluation (aka eval-based) technique.
 """
 The "eval-based" injection technique handler.
 """
-def eb_injection_handler(url, timesec, filename, http_request_method):
+def eb_injection_handler(url, timesec, filename, http_request_method, injection_type, technique):
   shell = False
   counter = 1
   vp_flag = True
   no_result = True
   export_injection_info = False
-  injection_type = "results-based dynamic code evaluation"
-  technique = "dynamic code evaluation technique"
 
   for item in range(0, len(settings.EXECUTION_FUNCTIONS)):
     settings.EXECUTION_FUNCTIONS[item] = "${" + settings.EXECUTION_FUNCTIONS[item] + "("
@@ -468,8 +466,8 @@ def eb_injection_handler(url, timesec, filename, http_request_method):
 The exploitation function.
 (call the injection handler)
 """
-def exploitation(url, timesec, filename, http_request_method):
-  if eb_injection_handler(url, timesec, filename, http_request_method) == False:
+def exploitation(url, timesec, filename, http_request_method, injection_type, technique):
+  if eb_injection_handler(url, timesec, filename, http_request_method, injection_type, technique) == False:
     return False
 
 # eof

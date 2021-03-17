@@ -167,7 +167,7 @@ def check_tmp_path(url, timesec, filename, http_request_method, url_time_respons
 """
 The "file-based" injection technique handler
 """
-def fb_injection_handler(url, timesec, filename, http_request_method, url_time_response):
+def fb_injection_handler(url, timesec, filename, http_request_method, url_time_response, injection_type, technique):
   shell = False
   counter = 1
   vp_flag = True
@@ -178,8 +178,6 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
   call_tmp_based = False
   next_attack_vector = False
   export_injection_info = False
-  injection_type = "semi-blind command injection"
-  technique = "file-based command injection technique"
 
   tmp_path = check_tmp_path(url, timesec, filename, http_request_method, url_time_response)
 
@@ -682,8 +680,8 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
 The exploitation function.
 (call the injection handler)
 """
-def exploitation(url, timesec, filename, http_request_method, url_time_response):
-  if fb_injection_handler(url, timesec, filename, http_request_method, url_time_response) == False:
+def exploitation(url, timesec, filename, http_request_method, url_time_response, injection_type, technique):
+  if fb_injection_handler(url, timesec, filename, http_request_method, url_time_response, injection_type, technique) == False:
     return False
 
 # eof

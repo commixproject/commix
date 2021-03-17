@@ -431,6 +431,7 @@ injection.add_option("--prefix",
 
 injection.add_option("--technique", 
                 action="store",
+                default="cetf",
                 dest="tech",
                 help="Specify injection technique(s) to use.")
 

@@ -49,15 +49,13 @@ The "classic" technique on result-based OS command injection.
 """
 The "classic" injection technique handler.
 """
-def cb_injection_handler(url, timesec, filename, http_request_method):
+def cb_injection_handler(url, timesec, filename, http_request_method, injection_type, technique):
   shell = False
   counter = 1
   vp_flag = True
   no_result = True
   is_encoded = False
   export_injection_info = False
-  injection_type = "results-based OS command injection"
-  technique = "classic command injection technique"
 
   if not settings.LOAD_SESSION: 
     info_msg = "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + ". "
@@ -458,8 +456,8 @@ def cb_injection_handler(url, timesec, filename, http_request_method):
 The exploitation function.
 (call the injection handler)
 """
-def exploitation(url, timesec, filename, http_request_method):
-  if cb_injection_handler(url, timesec, filename, http_request_method) == False:
+def exploitation(url, timesec, filename, http_request_method, injection_type, technique):
+  if cb_injection_handler(url, timesec, filename, http_request_method, injection_type, technique) == False:
     return False
 
 # eof
