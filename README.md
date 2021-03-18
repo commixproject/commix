@@ -31,13 +31,12 @@ To get a list of all options and switches use:
 To get an overview of commix available options, switches and/or basic ideas on how to use commix, check **[usage](https://github.com/commixproject/commix/wiki/Usage)**, **[usage examples](https://github.com/commixproject/commix/wiki/Usage-Examples)** and **[filters bypasses](https://github.com/commixproject/commix/wiki/Filters-Bypasses)** wiki pages.
 
 
-## Donate
-
-Commix is the outcome of many hours of work and total personal dedication. Feel free to **[donate](https://www.paypal.com/donate?hosted_button_id=UGBDUDJRW8U4E)** via PayPal and instantly prove your ♥ for it!
-
-
 ## Links
 
 * User's manual: https://github.com/commixproject/commix/wiki
 * Issues tracker: https://github.com/commixproject/commix/issues
 
+
+## Translations
+
+* [Greek](https://github.com/commixproject/commix/blob/master/doc/translations/README-gr-GR.md)
