@@ -622,8 +622,9 @@ try:
   # Print the legal disclaimer msg.
   print(settings.print_legal_disclaimer_msg(settings.LEGAL_DISCLAIMER_MSG))
 
-  # Get total number of days from last update 
-  common.days_from_last_update()
+  # Get total number of days from last update
+  if os.path.isfile(settings.SETTINGS_PATH):
+    common.days_from_last_update()
 
   # Define the level of verbosity.
   if menu.options.verbose > 4:
