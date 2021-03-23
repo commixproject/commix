@@ -584,7 +584,10 @@ The exploitation function.
 def exploitation(url, timesec, filename, http_request_method, url_time_response, injection_type, technique):
   # Check if attack is based on time delays.
   if not settings.TIME_RELATIVE_ATTACK :
+    warn_msg = "It is very important to not stress the network connection during usage of time-based payloads to prevent potential disruptions."
+    print(settings.print_warning_msg(warn_msg)) + Style.RESET_ALL
     settings.TIME_RELATIVE_ATTACK = True
+    
   if url_time_response >= settings.SLOW_TARGET_RESPONSE:
     warn_msg = "It is highly recommended, due to serious response delays, "
     warn_msg += "to skip the time-based (blind) technique and to continue "
