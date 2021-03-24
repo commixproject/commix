@@ -118,6 +118,7 @@ def classic_command_injection_technique(url, timesec, filename, http_request_met
     if (len(menu.options.tech) == 0 or "c" in menu.options.tech):
       settings.CLASSIC_STATE = None
       if cb_handler.exploitation(url, timesec, filename, http_request_method, injection_type, technique) != False:
+        if (len(menu.options.tech) == 0 or "e" in menu.options.tech):
           if not menu.options.batch:
             settings.CLASSIC_STATE = True
             question_msg = "Skipping of code injection tests is recommended. "
@@ -175,6 +176,10 @@ def dynamic_code_evaluation_technique(url, timesec, filename, http_request_metho
           pass
       else:
         settings.EVAL_BASED_STATE = False
+    else:
+      if settings.VERBOSITY_LEVEL != 0:   
+        debug_msg = "Skipping test the " + "(" + injection_type.split(" ")[0] + ") " + technique + ". "
+        print(settings.print_debug_msg(debug_msg))
   else:
     if settings.VERBOSITY_LEVEL != 0:   
       debug_msg = "Skipping test the " + "(" + injection_type.split(" ")[0] + ") " + technique + ". "
