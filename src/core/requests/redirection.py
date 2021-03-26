@@ -172,8 +172,14 @@ def do_check(url):
 
   # Raise exception regarding urllib2 HTTPError.
   except _urllib.error.HTTPError as err:
-    err_msg = str(err).replace(": "," (")
-    print(settings.print_critical_msg(err_msg + ")."))
+    # Raise exception regarding infinite loop.
+    if "infinite loop" in str(err):
+      err_msg = "Infinite redirect loop detected." 
+      err_msg += "Please check all provided parameters and/or provide missing ones."
+      print(settings.print_critical_msg(err_msg))
+    else:
+      err_msg = str(err).replace(": "," (")
+      print(settings.print_critical_msg(err_msg + ")."))
     raise SystemExit()
 
   # The target host seems to be down.
@@ -185,13 +191,6 @@ def do_check(url):
       err_msg += "."
     print(settings.print_critical_msg(err_msg))
     raise SystemExit()
-
-  # Raise exception regarding infinite loop.
-  except RuntimeError:
-    err_msg = "Infinite redirect loop detected." 
-    err_msg += "Please check all provided parameters and/or provide missing ones."
-    print(settings.print_critical_msg(err_msg))
-    raise SystemExit() 
 
   # Raise exception regarding existing connection was forcibly closed by the remote host.
   except SocketError as err:
