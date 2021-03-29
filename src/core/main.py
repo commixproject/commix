@@ -327,7 +327,14 @@ Logs filename creation.
 """
 def logs_filename_creation():
   if menu.options.output_dir:
-    output_dir = menu.options.output_dir
+    if os.path.isdir(menu.options.output_dir):
+      output_dir = menu.options.output_dir
+      if not output_dir.endswith("/"):
+        output_dir = output_dir + "/"
+    else:
+      error_msg = "The '" + menu.options.output_dir + "' is not directory."
+      print(settings.print_critical_msg(error_msg))
+      raise SystemExit()
   else:
     output_dir = settings.OUTPUT_DIR
   
@@ -341,9 +348,9 @@ def logs_filename_creation():
       os.mkdir(output_dir)   
     except OSError as err_msg:
       try:
-        error_msg = str(err_msg.args[0]).split("] ")[1] + "."
+        error_msg = str(err_msg).split("] ")[1] + "."
       except IndexError:
-        error_msg = str(err_msg.args[0]) + "."
+        error_msg = str(err_msg) + "."
       print(settings.print_critical_msg(error_msg))
       raise SystemExit()
 

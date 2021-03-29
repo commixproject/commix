@@ -44,12 +44,13 @@ def create_log_file(url, output_dir):
     host = parts[0].split('/', 1)[0]
   except OSError as err_msg:
     try:
-      error_msg = str(err_msg.args[0]).split("] ")[1] + "."
-    except:
-      error_msg = str(err_msg.args[0]) + "."
+      error_msg = str(err_msg).split("] ")[1] + "."
+    except IndexError:
+      error_msg = str(err_msg) + "."
     print(settings.print_critical_msg(error_msg))
     raise SystemExit()
-      
+
+
   # Check if port is defined to host.
   if ":" in host:
     host = host.replace(":","_")
@@ -58,11 +59,11 @@ def create_log_file(url, output_dir):
   except:
     try:
       os.mkdir(output_dir + host + "/")
-    except Exception as err_msg:
+    except OSError as err_msg:
       try:
-        error_msg = str(err_msg.args[0]).split("] ")[1] + "."
-      except:
-        error_msg = str(err_msg.args[0]) + "."
+        error_msg = str(err_msg).split("] ")[1] + "."
+      except IndexError:
+        error_msg = str(err_msg) + "."
       print(settings.print_critical_msg(error_msg))
       raise SystemExit()
 
