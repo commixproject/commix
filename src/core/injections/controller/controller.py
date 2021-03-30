@@ -295,7 +295,7 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
     warn_msg = "Due to the provided (unsuitable) injection technique" 
     warn_msg += "s"[len(menu.options.tech) == 1:][::-1] + ", "
     warn_msg += "the option '--failed-tries' will be ignored."
-    print(settings.print_warning_msg(warn_msg)) + Style.RESET_ALL
+    print(settings.print_warning_msg(warn_msg) + Style.RESET_ALL)
 
   # Procced with file-based semiblind command injection technique,
   # once the user provides the path of web server's root directory.
@@ -679,7 +679,7 @@ def do_check(url, filename):
     if not menu.options.tech or "e" in menu.options.tech or "t" in menu.options.tech or "f" in menu.options.tech:
       warn_msg = "The '--backticks' switch is only supported by the classic command injection. "
       warn_msg += "It will be ignored for all other techniques."
-      print(settings.print_warning_msg(warn_msg)) + Style.RESET_ALL
+      print(settings.print_warning_msg(warn_msg) + Style.RESET_ALL)
 
   if menu.options.wizard:
     if perform_checks(url,filename) == False:

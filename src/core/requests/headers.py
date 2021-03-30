@@ -199,7 +199,7 @@ def check_http_traffic(request):
         print(settings.print_info_msg(info_msg))
       current_attempt = current_attempt + 1
       time.sleep(3)
-      
+
     except ValueError as err:
       if settings.VERBOSITY_LEVEL < 2:
         print(settings.SPACE)
