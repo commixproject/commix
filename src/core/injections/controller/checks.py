@@ -152,12 +152,13 @@ Page enc/decoding
 def page_encoding(response, action):
   _ = False
   page = response.read()
-  if response.info().get('Content-Encoding') in ("gzip", "deflate"):
+  if response.info().get('Content-Encoding') in ("gzip", "x-gzip", "deflate"):
     try:
       if response.info().get('Content-Encoding') == 'deflate':
-        data = io.BytesIO(zlib.decompress(response.read(), -15))
-      elif response.info().get('Content-Encoding') == 'gzip':
-        data = gzip.GzipFile("", "rb", 9, io.BytesIO(response.read()))
+        data = io.BytesIO(zlib.decompress(page, -15))
+      elif response.info().get('Content-Encoding') == 'gzip' or \
+           response.info().get('Content-Encoding') == 'x-gzip':
+        data = gzip.GzipFile("", "rb", 9, io.BytesIO(page))
       page = data.read()
       settings.PAGE_COMPRESSION = True
     except Exception as ex:
