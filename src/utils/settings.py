@@ -203,7 +203,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "3.2.92"
+VERSION_NUM = "3.2.93"
 STABLE_VERSION = False
 if STABLE_VERSION:
   VERSION = "v" + VERSION_NUM[:3] + "-stable"
@@ -676,7 +676,7 @@ ENCODING_LIST = [
  ]
 
 # Default value for HTTP Accept-Encoding header
-HTTP_ACCEPT_ENCODING_HEADER_VALUE = "deflate"
+HTTP_ACCEPT_ENCODING_HEADER_VALUE = "gzip, deflate"
 
 # Default server banner
 SERVER_BANNER = ""

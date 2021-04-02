@@ -626,7 +626,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                          session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
                         # Command execution results.
                         shell = fb_injector.injection_results(url, OUTPUT_TEXTFILE, timesec)
-                        shell = "".join(str(p) for p in shell.decode(settings.UNICODE_ENCODING))
+                        shell = "".join(str(p) for p in shell)
                         if not menu.options.ignore_session :
                           session_handler.store_cmd(url, cmd, shell, vuln_parameter)
                       else:

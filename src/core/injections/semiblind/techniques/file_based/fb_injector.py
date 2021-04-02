@@ -313,18 +313,22 @@ def injection_output(url, OUTPUT_TEXTFILE, timesec):
 Command execution results.
 """
 def injection_results(url, OUTPUT_TEXTFILE, timesec):
-
   #Find the directory.
   output = injection_output(url, OUTPUT_TEXTFILE, timesec)
-
   # Check if defined extra headers.
   request = _urllib.request.Request(output)
   headers.do_check(request)
-
-  # Evaluate test results.
+  headers.check_http_traffic(request)
+  # Check if defined any HTTP Proxy (--proxy option).
+  if menu.options.proxy:
+    response = proxy.use_proxy(request)
+  # Check if defined Tor (--tor option).  
+  elif menu.options.tor:
+    response = tor.use_tor(request)
+  else:
+    response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
   try:
-    output = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
-    shell = output.read().rstrip().lstrip()
+    shell = checks.page_encoding(response, action="encode").rstrip().lstrip()
     #shell = [newline.replace("\n"," ") for newline in shell]
     if settings.TARGET_OS == "win":
       shell = [newline.replace("\r","") for newline in shell]
