@@ -388,7 +388,7 @@ def do_check(request):
           settings.CUSTOM_HEADER_NAME = http_header_name
         # Add HTTP Header name / value to the HTTP request
         if http_header_name not in [settings.HOST, settings.USER_AGENT, settings.REFERER, settings.COOKIE]:
-          request.add_header(http_header_name, http_header_value)
+          request.add_header(http_header_name.encode(settings.UNICODE_ENCODING), http_header_value.encode(settings.UNICODE_ENCODING))
       except:
         pass
         
