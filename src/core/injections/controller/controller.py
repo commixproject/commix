@@ -119,25 +119,27 @@ def classic_command_injection_technique(url, timesec, filename, http_request_met
       settings.CLASSIC_STATE = None
       if cb_handler.exploitation(url, timesec, filename, http_request_method, injection_type, technique) != False:
         if (len(menu.options.tech) == 0 or "e" in menu.options.tech):
-          if not menu.options.batch:
-            settings.CLASSIC_STATE = True
-            question_msg = "Skipping of code injection tests is recommended. "
-            question_msg += "Do you agree? [Y/n] > "
-            procced_option = _input(settings.print_question_msg(question_msg))
-          else:
-            procced_option = ""
-          if len(procced_option) == 0:
-             procced_option = "Y"
-          if procced_option in settings.CHOICE_YES:
-            settings.SKIP_CODE_INJECTIONS = True
-          elif procced_option in settings.CHOICE_NO:
-            pass
-          elif procced_option in settings.CHOICE_QUIT:
-            raise SystemExit()
-          else:
-            err_msg = "'" + procced_option + "' is not a valid answer."  
-            print(settings.print_error_msg(err_msg))
-            pass
+          while True:
+            if not menu.options.batch:
+              settings.CLASSIC_STATE = True
+              question_msg = "Skipping of code injection tests is recommended. "
+              question_msg += "Do you agree? [Y/n] > "
+              procced_option = _input(settings.print_question_msg(question_msg))
+            else:
+              procced_option = ""
+            if len(procced_option) == 0:
+               procced_option = "Y"
+            if procced_option in settings.CHOICE_YES:
+              settings.SKIP_CODE_INJECTIONS = True
+              break
+            elif procced_option in settings.CHOICE_NO:
+              break
+            elif procced_option in settings.CHOICE_QUIT:
+              raise SystemExit()
+            else:
+              err_msg = "'" + procced_option + "' is not a valid answer."  
+              print(settings.print_error_msg(err_msg))
+              pass
       else:
         settings.CLASSIC_STATE = False
     else:
@@ -153,27 +155,29 @@ def dynamic_code_evaluation_technique(url, timesec, filename, http_request_metho
     if (len(menu.options.tech) == 0 or "e" in menu.options.tech) or settings.SKIP_COMMAND_INJECTIONS:
       settings.EVAL_BASED_STATE = None
       if eb_handler.exploitation(url, timesec, filename, http_request_method, injection_type, technique) != False:
-        if not menu.options.batch:
-          settings.EVAL_BASED_STATE = True
-          question_msg = "Skipping of further command injection checks is recommended. "
-          question_msg += "Do you agree? [Y/n] > "
-          procced_option = _input(settings.print_question_msg(question_msg))
-        else:
-          procced_option = ""
-        if len(procced_option) == 0:
-           procced_option = "Y"
-        if procced_option in settings.CHOICE_YES:
-          settings.SKIP_COMMAND_INJECTIONS = True
-        elif procced_option in settings.CHOICE_NO:
-          if settings.SKIP_COMMAND_INJECTIONS:
-            settings.SKIP_COMMAND_INJECTIONS = False
-          pass
-        elif procced_option in settings.CHOICE_QUIT:
-          raise SystemExit()
-        else:
-          err_msg = "'" + procced_option + "' is not a valid answer."  
-          print(settings.print_error_msg(err_msg))
-          pass
+        while True:
+          if not menu.options.batch:
+            settings.EVAL_BASED_STATE = True
+            question_msg = "Skipping of further command injection checks is recommended. "
+            question_msg += "Do you agree? [Y/n] > "
+            procced_option = _input(settings.print_question_msg(question_msg))
+          else:
+            procced_option = ""
+          if len(procced_option) == 0:
+             procced_option = "Y"
+          if procced_option in settings.CHOICE_YES:
+            settings.SKIP_COMMAND_INJECTIONS = True
+            break
+          elif procced_option in settings.CHOICE_NO:
+            if settings.SKIP_COMMAND_INJECTIONS:
+              settings.SKIP_COMMAND_INJECTIONS = False
+            break
+          elif procced_option in settings.CHOICE_QUIT:
+            raise SystemExit()
+          else:
+            err_msg = "'" + procced_option + "' is not a valid answer."  
+            print(settings.print_error_msg(err_msg))
+            pass
       else:
         settings.EVAL_BASED_STATE = False
     else:
@@ -261,23 +265,25 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
       # Check for identified warnings
       url = heuristic_basic(url, http_request_method)
       if settings.IDENTIFIED_WARNINGS or settings.IDENTIFIED_PHPINFO:
-        if not menu.options.batch:
-          question_msg = "Skipping of further command injection tests is recommended. "
-          question_msg += "Do you agree? [Y/n] > "
-          procced_option = _input(settings.print_question_msg(question_msg))
-        else:
-          procced_option = ""
-        if procced_option in settings.CHOICE_YES or len(procced_option) == 0:
-          settings.CLASSIC_STATE = settings.TIME_BASED_STATE = settings.FILE_BASED_STATE = False
-          settings.EVAL_BASED_STATE = settings.SKIP_COMMAND_INJECTIONS = True
-        elif procced_option in settings.CHOICE_NO:
-          pass
-        elif procced_option in settings.CHOICE_QUIT:
-          raise SystemExit()
-        else:
-          err_msg = "'" + procced_option + "' is not a valid answer."  
-          print(settings.print_error_msg(err_msg))
-          pass
+        while True:
+          if not menu.options.batch:
+            question_msg = "Skipping of further command injection tests is recommended. "
+            question_msg += "Do you agree? [Y/n] > "
+            procced_option = _input(settings.print_question_msg(question_msg))
+          else:
+            procced_option = ""
+          if procced_option in settings.CHOICE_YES or len(procced_option) == 0:
+            settings.CLASSIC_STATE = settings.TIME_BASED_STATE = settings.FILE_BASED_STATE = False
+            settings.EVAL_BASED_STATE = settings.SKIP_COMMAND_INJECTIONS = True
+            break
+          elif procced_option in settings.CHOICE_NO:
+            break
+          elif procced_option in settings.CHOICE_QUIT:
+            raise SystemExit()
+          else:
+            err_msg = "'" + procced_option + "' is not a valid answer."  
+            print(settings.print_error_msg(err_msg))
+            pass
 
     info_msg = "Setting the" 
     if not header_name == " cookie" and not the_type == " HTTP header":
@@ -685,28 +691,29 @@ def do_check(url, filename):
     if perform_checks(url,filename) == False:
       scan_level = menu.options.level
       while int(scan_level) < int(settings.HTTP_HEADER_INJECTION_LEVEL) and settings.LOAD_SESSION != True:
-        if not menu.options.batch:
-          question_msg = "Do you want to increase to '--level=" + str(scan_level + 1) 
-          question_msg += "' in order to perform more tests? [Y/n] > "
-          next_level = _input(settings.print_question_msg(question_msg))
-        else:
-          next_level = ""
-        if len(next_level) == 0:
-           next_level = "Y"
-        if next_level in settings.CHOICE_YES:
-          menu.options.level = int(menu.options.level + scan_level)
-          if perform_checks(url,filename) == False and scan_level < settings.HTTP_HEADER_INJECTION_LEVEL :
-            scan_level = scan_level + 1
+        while True:
+          if not menu.options.batch:
+            question_msg = "Do you want to increase to '--level=" + str(scan_level + 1) 
+            question_msg += "' in order to perform more tests? [Y/n] > "
+            next_level = _input(settings.print_question_msg(question_msg))
           else:
-            break  
-        elif next_level in settings.CHOICE_NO:
-          break
-        elif next_level in settings.CHOICE_QUIT:
-          raise SystemExit()
-        else:
-          err_msg = "'" + next_level + "' is not a valid answer."  
-          print(settings.print_error_msg(err_msg))
-          pass
+            next_level = ""
+          if len(next_level) == 0:
+             next_level = "Y"
+          if next_level in settings.CHOICE_YES:
+            menu.options.level = int(menu.options.level + scan_level)
+            if perform_checks(url,filename) == False and scan_level < settings.HTTP_HEADER_INJECTION_LEVEL :
+              scan_level = scan_level + 1
+            else:
+              break  
+          elif next_level in settings.CHOICE_NO:
+            break
+          elif next_level in settings.CHOICE_QUIT:
+            raise SystemExit()
+          else:
+            err_msg = "'" + next_level + "' is not a valid answer."  
+            print(settings.print_error_msg(err_msg))
+            pass
   else:
     perform_checks(url,filename)
     

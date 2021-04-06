@@ -765,8 +765,8 @@ def shellshock_handler(url, http_request_method, filename):
               if len(gotshell) == 0:
                  gotshell= "Y"
               if gotshell in settings.CHOICE_YES:
-                if not menu.options.batch:
-                  print(settings.SPACE)
+                # if not menu.options.batch:
+                #   print(settings.SPACE)
                 print("Pseudo-Terminal (type '" + Style.BRIGHT + "?" + Style.RESET_ALL + "' for available options)")
                 if settings.READLINE_ERROR:
                   checks.no_readline_module()
