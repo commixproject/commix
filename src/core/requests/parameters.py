@@ -189,7 +189,10 @@ def vuln_GET_param(url):
   # Check if only one parameter supplied but, not defined the INJECT_TAG.
   elif settings.INJECT_TAG not in url:
     #Grab the value of parameter.
-    vuln_parameter = re.search(r'\?(.*)=', url).group(1)
+    try:
+      vuln_parameter = re.search(r'\?(.*)=', url).group(1)
+    except AttributeError:
+      vuln_parameter = url
 
   else:
     vuln_parameter = url
