@@ -30,6 +30,7 @@ def tamper(payload):
   def add_double_quotes(payload):
     settings.TAMPER_SCRIPTS[__tamper__] = True
     rep = {
+            '""I""F""S': 'IFS', 
             '""i""f': 'if', 
             '""t""h""e""n': 'then',
             '""e""l""s""e': 'else',

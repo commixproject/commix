@@ -17,9 +17,9 @@ import sys
 from src.utils import settings
 
 """
-About: Replaces "sleep" with "usleep" [1] command in the generated payloads.
-  [1] http://man7.org/linux/man-pages/man3/usleep.3.html
+About: Replaces "sleep" with "usleep" command in the generated payloads.
 Notes: This tamper script works against *nix targets.
+Reference: http://man7.org/linux/man-pages/man3/usleep.3.html
 """
 
 __tamper__ = "sleep2usleep"
