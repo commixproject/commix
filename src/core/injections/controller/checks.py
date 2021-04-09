@@ -1050,6 +1050,16 @@ def other_symbols(payload):
     from src.core.tamper import uninitializedvariable
     payload = uninitializedvariable.tamper(payload)
 
+  # Check for environment variable value variable
+  if payload.count("${PATH%%u*}") >= 2:
+    if not settings.TAMPER_SCRIPTS['slash2env']:
+      if menu.options.tamper:
+        menu.options.tamper = menu.options.tamper + ",slash2env"
+      else:
+        menu.options.tamper = "slash2env"  
+    from src.core.tamper import slash2env
+    payload = slash2env.tamper(payload)
+
 """
 Check for (multiple) added back slashes between the characters of the generated payloads.
 """
@@ -1178,9 +1188,12 @@ def perform_payload_modification(payload):
       from src.core.tamper import sleep2usleep
       payload = sleep2usleep.tamper(payload)
     # Add uninitialized variable.
-    elif encode_type == 'uninitializedvariable':
+    if encode_type == 'uninitializedvariable':
       from src.core.tamper import uninitializedvariable
       payload = uninitializedvariable.tamper(payload) 
+    if encode_type == 'slash2env':
+      from src.core.tamper import slash2env
+      payload = slash2env.tamper(payload) 
     # Add double-quotes.
     if encode_type == 'doublequotes':
       from src.core.tamper import doublequotes

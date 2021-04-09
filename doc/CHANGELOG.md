@@ -1,4 +1,5 @@
 ## Version 3.2 (upcoming)
+* Added: New tamper script "slash2env.py" that replaces slashes ("/") with environment variable value "${PATH%%u*}" (for *nix targets).
 * Revised: Minor improvement regarding session handler for supporting Python 3.4+.
 * Revised: Minor improvement regarding `--web-root` option.
 * Added: New tamper script "uninitializedvariable.py" that adds uninitialized bash variables between the characters of each command of the generated payloads (for *nix targets).
