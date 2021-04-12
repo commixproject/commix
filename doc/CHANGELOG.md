@@ -1,4 +1,5 @@
 ## Version 3.2 (upcoming)
+* Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
 * Added: New tamper script "slash2env.py" that replaces slashes ("/") with environment variable value "${PATH%%u*}" (for *nix targets).
 * Revised: Minor improvement regarding session handler for supporting Python 3.4+.
 * Revised: Minor improvement regarding `--web-root` option.
@@ -14,7 +15,7 @@
 * Fixed: Multiple bug-fixes regarding the shellshock module.
 * Revised: Improvement regarding Python 3.4+ for using the "html.unescape()" function for converting HTML entities to plain-text representations.
 * Updated: Minor update regarding smartphones to imitate, through HTTP User-Agent header.
-* Fixed: Bug-fix regarding setting suitable HTTP header User-Agent, when combining "--random-agent" or "--mobile" switch with "-r" option.
+* Fixed: Bug-fix regarding setting suitable HTTP header User-Agent, when combining `--random-agent` or `--mobile` switch with `-r` option.
 * Fixed: Bug-fix regarding "hex" encoding/decoding.
 * Added: New option ( `--timeout`) for setting a number of seconds to wait before timeout connection (default 30).
 * Revised: Increased default timeout to 30 seconds.
