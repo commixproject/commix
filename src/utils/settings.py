@@ -25,6 +25,10 @@ from src.thirdparty.six.moves import urllib as _urllib
 from src.thirdparty.six.moves import reload_module as _reload_module
 from src.thirdparty.colorama import Fore, Back, Style, init
 
+class HTTPMETHOD(object):
+  GET = "GET"
+  POST = "POST"
+
 # Status
 FAIL_MSG = Fore.RED + " " * 10 + Style.RESET_ALL
 FAIL_STATUS = "" + FAIL_MSG + ""
@@ -203,12 +207,13 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "3.2.98"
-STABLE_VERSION = True
-if STABLE_VERSION:
-  VERSION = "v" + VERSION_NUM[:3] + "-stable"
+VERSION_NUM = "3.3"
+REVISION = "1"
+STABLE_RELEASE = False
+if STABLE_RELEASE:
+  VERSION = "v" + VERSION_NUM + "-stable"
 else:
-  VERSION = "v" + VERSION_NUM[:3] + "-dev#" + VERSION_NUM[4:]
+  VERSION = "v" + VERSION_NUM + "-dev#" + REVISION
 YEAR = "2014-2021"
 AUTHOR_TWITTER = "@ancst" 
 APPLICATION_URL = "https://commixproject.com" 

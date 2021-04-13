@@ -43,7 +43,7 @@ Check if target host is vulnerable.
 def injection_test(payload, http_request_method, url):
                       
   # Check if defined method is GET (Default).
-  if http_request_method == "GET":
+  if http_request_method == settings.HTTPMETHOD.GET:
     
     # Check if its not specified the 'INJECT_HERE' tag
     #url = parameters.do_GET_check(url)
@@ -189,7 +189,7 @@ def injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_req
 
     else:
       # Check if defined method is GET (Default).
-      if http_request_method == "GET":
+      if http_request_method == settings.HTTPMETHOD.GET:
         # Check if its not specified the 'INJECT_HERE' tag
         #url = parameters.do_GET_check(url)
         payload = payload.replace(" ","%20")

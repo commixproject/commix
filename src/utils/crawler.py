@@ -131,7 +131,7 @@ def crawling(url):
       tags += re.finditer(r'(?i)\s(href|src)=["\'](?P<href>[^>"\']+)', content)
       tags += re.finditer(r'(?i)window\.open\(["\'](?P<href>[^)"\']+)["\']', content)
     for tag in tags:
-      href = tag.get("href") if hasattr(tag, "get") else tag.group("href")
+      href = tag.get("href") if hasattr(tag, settings.HTTPMETHOD.GET) else tag.group("href")
       if href:
         href = _urllib.parse.urljoin(url, href)
         if _urllib.parse.urlparse(url).netloc in href:

@@ -36,7 +36,7 @@ def get_url_part(url):
 Check if the 'INJECT_HERE' tag, is specified on GET Requests.
 """
 def do_GET_check(url):
-  http_request_method = "GET"
+  http_request_method = settings.HTTPMETHOD.GET
   # Do replacement with the 'INJECT_HERE' tag, if the wild card char is provided.
   url = checks.wildcard_character(url)
 
@@ -203,7 +203,7 @@ def vuln_GET_param(url):
 Check if the 'INJECT_HERE' tag, is specified on POST Requests.
 """
 def do_POST_check(parameter):
-  http_request_method = "POST"
+  http_request_method = settings.HTTPMETHOD.POST
   # Do replacement with the 'INJECT_HERE' tag, if the wild card char is provided.
   parameter = checks.wildcard_character(parameter).replace("'","\"")
   # Check if JSON Object.

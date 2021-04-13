@@ -83,7 +83,7 @@ def heuristic_basic(url, http_request_method):
       if settings.VERBOSITY_LEVEL != 0:   
         debug_msg = "Performing heuristic test for " + technique + "."
         print(settings.print_debug_msg(debug_msg))
-      if http_request_method == "GET":
+      if http_request_method == settings.HTTPMETHOD.GET:
         request = _urllib.request.Request(url.replace(settings.INJECT_TAG, settings.BASIC_TEST))
       else:
         data = menu.options.data.replace(settings.INJECT_TAG, settings.BASIC_TEST)
@@ -628,9 +628,9 @@ def perform_checks(url, filename):
 
   # Check if HTTP Method is GET.
   if not menu.options.data:
-    http_request_method = "GET"      
+    http_request_method = settings.HTTPMETHOD.GET      
   else:
-    http_request_method = "POST"
+    http_request_method = settings.HTTPMETHOD.POST
 
   if menu.options.shellshock:
     menu.options.level = settings.HTTP_HEADER_INJECTION_LEVEL

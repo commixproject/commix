@@ -244,7 +244,7 @@ def system_users(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timese
     settings.SYS_USERS = settings.WIN_SYS_USERS
     settings.SYS_USERS = settings.SYS_USERS + "-replace('\s+',' '))"
     # URL encode "+ " if POST request and python alternative shell.
-    if alter_shell and http_request_method == "POST":
+    if alter_shell and http_request_method == settings.HTTPMETHOD.POST:
       settings.SYS_USERS = settings.SYS_USERS.replace("+ ","%2B")
   cmd = settings.SYS_USERS
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:

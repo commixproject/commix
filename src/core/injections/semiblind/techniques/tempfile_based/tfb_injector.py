@@ -47,7 +47,7 @@ def examine_requests(payload, vuln_parameter, http_request_method, url, timesec,
   start = time.time()
 
   # Check if defined method is GET (Default).
-  if http_request_method == "GET":
+  if http_request_method == settings.HTTPMETHOD.GET:
     # Encoding non-ASCII characters payload.
     # payload = _urllib.parse.quote(payload)
 
@@ -97,7 +97,7 @@ def injection_test(payload, http_request_method, url):
   start = time.time()
 
   # Check if defined method is GET (Default).
-  if http_request_method == "GET":
+  if http_request_method == settings.HTTPMETHOD.GET:
     payload = payload.replace("#","%23")
     # Encoding non-ASCII characters payload.
     # payload = _urllib.parse.quote(payload)

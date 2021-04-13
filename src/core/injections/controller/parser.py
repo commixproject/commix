@@ -99,7 +99,7 @@ def logfile_parser():
         
     words_dict = {}
     for word in request.read().strip().splitlines():
-      if word[:4].strip() == "GET" or word[:4].strip() == "POST":
+      if word[:4].strip() == settings.HTTPMETHOD.GET or word[:4].strip() == settings.HTTPMETHOD.POST:
         words_dict[word[:4].strip()] = words_dict.get(word[:4].strip(), 0) + 1
 
     # Check if same header appears more than once.
@@ -111,7 +111,7 @@ def logfile_parser():
         single_request = multi_requests()
 
     # Check for GET / POST HTTP Header
-    for http_header in ["GET","POST"]:
+    for http_header in [settings.HTTPMETHOD.GET,settings.HTTPMETHOD.POST]:
       request = open(request_file, "r")
       request = request.read()
       if "\\n" in request:
@@ -121,7 +121,7 @@ def logfile_parser():
       if request_url:
         if not single_request:
           request_url = request_url[0]
-        if http_header == "POST":
+        if http_header == settings.HTTPMETHOD.POST:
           # Check for POST Data.
           result = [item for item in request.splitlines() if item]
           multiple_xml = []
@@ -205,7 +205,7 @@ def logfile_parser():
         print(settings.print_info_msg(info_msg))
         sub_content = http_header + " " +  prefix + menu.options.host + request_url
         print(settings.print_sub_content(sub_content))
-        if http_header == "POST":
+        if http_header == settings.HTTPMETHOD.POST:
            sub_content = "Data: " + menu.options.data
            print(settings.print_sub_content(sub_content))
 # eof
