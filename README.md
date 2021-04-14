@@ -15,11 +15,14 @@
 
 ![Screenshot](https://commixproject.com/images/background.png)
 
+
 ## Installation
 
 You can download commix on any platform by cloning the official Git repository :
 
     $ git clone https://github.com/commixproject/commix.git commix
+
+Alternatively, you can retrieve the latest [tarball](https://github.com/commixproject/commix/tarball/master) or [zipball](https://github.com/commixproject/commix/zipball/master).
 
 *__Note:__ **[Python](http://www.python.org/download/)** (version **2.6**, **2.7** or **3.x**)  is required for running commix.*
 
