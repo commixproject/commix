@@ -36,7 +36,7 @@ def do_check(url):
   """
   class Request(_urllib.request.Request):
     def get_method(self):
-        return settings.HTTPMETHOD.GET
+        return settings.HTTPMETHOD.HEAD
 
   class RedirectHandler(_urllib.request.HTTPRedirectHandler):
     """
