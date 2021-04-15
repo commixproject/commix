@@ -21,6 +21,8 @@ To **commix** (συντομογραφία [**comm**]and [**i**]njection e[**x**]
 
     $ git clone https://github.com/commixproject/commix.git commix
 
+Εναλλακτικά, μπορείτε να ανακτήσετε την τελευταία [tarball](https://github.com/commixproject/commix/tarball/master) ή [zipball](https://github.com/commixproject/commix/zipball/master).
+
 *__Σημείωση:__ H **[Python](http://www.python.org/download/)** (έκδοση **2.6**, **2.7** ή **3.x**) απαιτείται για την εκτέλεση του commix.*
 
 
