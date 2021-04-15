@@ -606,7 +606,10 @@ def main(filename, url):
       checks.enable_all_enumeration_options()
 
     # Launch injection and exploitation controller.
-    controller.do_check(url, filename)
+    http_request_method = settings.HTTPMETHOD.GET
+    if menu.options.data:
+      http_request_method = settings.HTTPMETHOD.POST
+    controller.do_check(url, http_request_method, filename)
     return filename
 
   # Accidental stop / restart of the target host server.

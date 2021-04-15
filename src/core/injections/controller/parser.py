@@ -111,7 +111,7 @@ def logfile_parser():
         single_request = multi_requests()
 
     # Check for GET / POST HTTP Header
-    for http_header in [settings.HTTPMETHOD.GET,settings.HTTPMETHOD.POST]:
+    for http_header in [settings.HTTPMETHOD.GET, settings.HTTPMETHOD.POST]:
       request = open(request_file, "r")
       request = request.read()
       if "\\n" in request:

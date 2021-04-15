@@ -597,7 +597,7 @@ def post_request(url, http_request_method, filename, timesec):
 """
 Perform checks
 """
-def perform_checks(url, filename):
+def perform_checks(url, http_request_method, filename):
 
   def basic_level_checks():
     settings.PERFORM_BASIC_SCANS = False
@@ -625,12 +625,6 @@ def perform_checks(url, filename):
     raise SystemExit()
   else:
     pass
-
-  # Check if HTTP Method is GET.
-  if not menu.options.data:
-    http_request_method = settings.HTTPMETHOD.GET      
-  else:
-    http_request_method = settings.HTTPMETHOD.POST
 
   if menu.options.shellshock:
     menu.options.level = settings.HTTP_HEADER_INJECTION_LEVEL
@@ -672,7 +666,7 @@ def perform_checks(url, filename):
 """
 General check on every injection technique.
 """
-def do_check(url, filename):
+def do_check(url, http_request_method, filename):
   # Check for '--tor' option.
   if menu.options.tor: 
     if not menu.options.tech or "t" in menu.options.tech or "f" in menu.options.tech:
@@ -688,7 +682,7 @@ def do_check(url, filename):
       print(settings.print_warning_msg(warn_msg) + Style.RESET_ALL)
 
   if menu.options.wizard:
-    if perform_checks(url,filename) == False:
+    if perform_checks(url, http_request_method, filename) == False:
       scan_level = menu.options.level
       while int(scan_level) < int(settings.HTTP_HEADER_INJECTION_LEVEL) and settings.LOAD_SESSION != True:
         while True:
@@ -702,7 +696,7 @@ def do_check(url, filename):
              next_level = "Y"
           if next_level in settings.CHOICE_YES:
             menu.options.level = int(menu.options.level + scan_level)
-            if perform_checks(url,filename) == False and scan_level < settings.HTTP_HEADER_INJECTION_LEVEL :
+            if perform_checks(url, http_request_method, filename) == False and scan_level < settings.HTTP_HEADER_INJECTION_LEVEL :
               scan_level = scan_level + 1
             else:
               break  
@@ -715,7 +709,7 @@ def do_check(url, filename):
             print(settings.print_error_msg(err_msg))
             pass
   else:
-    perform_checks(url,filename)
+    perform_checks(url, http_request_method, filename)
     
   # All injection techniques seems to be failed!
   if settings.CLASSIC_STATE == settings.EVAL_BASED_STATE == settings.TIME_BASED_STATE == settings.FILE_BASED_STATE == False :

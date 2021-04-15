@@ -36,7 +36,6 @@ def get_url_part(url):
 Check if the 'INJECT_HERE' tag, is specified on GET Requests.
 """
 def do_GET_check(url):
-  http_request_method = settings.HTTPMETHOD.GET
   # Do replacement with the 'INJECT_HERE' tag, if the wild card char is provided.
   url = checks.wildcard_character(url)
 
@@ -72,7 +71,7 @@ def do_GET_check(url):
       if len([s for s in multi_parameters if "=" in s]) != (len(multi_parameters)):
         checks.inappropriate_format(multi_parameters)
       # Check for empty values (in provided parameters).
-      checks.is_empty(multi_parameters, http_request_method)
+      checks.is_empty(multi_parameters, http_request_method = settings.HTTPMETHOD.GET)
       # Grab the value of parameter.
       _ = []
       _.append(parameters)
@@ -203,7 +202,6 @@ def vuln_GET_param(url):
 Check if the 'INJECT_HERE' tag, is specified on POST Requests.
 """
 def do_POST_check(parameter):
-  http_request_method = settings.HTTPMETHOD.POST
   # Do replacement with the 'INJECT_HERE' tag, if the wild card char is provided.
   parameter = checks.wildcard_character(parameter).replace("'","\"")
   # Check if JSON Object.
@@ -261,7 +259,7 @@ def do_POST_check(parameter):
       parameter = ''.join(checks.check_similarities(_))
       value = re.findall(r'=(.*)', parameter)
       value = ''.join(value)
-    if checks.is_empty(multi_parameters, http_request_method):
+    if checks.is_empty(multi_parameters, http_request_method = settings.HTTPMETHOD.POST):
       return parameter
     else:
       # Ignoring the anti-CSRF parameter(s).
@@ -291,7 +289,7 @@ def do_POST_check(parameter):
       all_params = checks.check_similarities(all_params)
     # Check if not defined the "INJECT_HERE" tag in parameter
     if settings.INJECT_TAG not in parameter:
-      checks.is_empty(multi_parameters, http_request_method)
+      checks.is_empty(multi_parameters, http_request_method = settings.HTTPMETHOD.POST)
       for param in range(0, len(all_params)):
         if param == 0 :
           if settings.IS_JSON:
@@ -439,9 +437,7 @@ def suffixes(payload, suffix):
 The cookie based injection.
 """
 def do_cookie_check(cookie):
-  http_request_method = "cookie"
   multi_parameters = cookie.split(settings.COOKIE_DELIMITER)
-
   # Check for inappropriate format in provided parameter(s).
   if len([s for s in multi_parameters if "=" in s]) != (len(multi_parameters)):
     checks.inappropriate_format(multi_parameters)
@@ -459,7 +455,7 @@ def do_cookie_check(cookie):
     if checks.ignore_google_analytics_cookie(cookie):
       return cookie
     # Check for empty values (in provided parameters).
-    checks.is_empty(multi_parameters, http_request_method)
+    checks.is_empty(multi_parameters, http_request_method = "cookie")
     # Check if defined the INJECT_TAG
     if settings.INJECT_TAG not in cookie:
       if len(value) == 0:
@@ -476,7 +472,7 @@ def do_cookie_check(cookie):
     # Check if not defined the "INJECT_HERE" tag in parameter
     if settings.INJECT_TAG not in cookie:
       # Check for empty values (in provided parameters).
-      checks.is_empty(multi_parameters, http_request_method)
+      checks.is_empty(multi_parameters, http_request_method = "cookie")
       for param in range(0, len(all_params)):
         if param == 0 :
             old = re.findall(r'=(.*)', all_params[param])
