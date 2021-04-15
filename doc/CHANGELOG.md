@@ -20,7 +20,7 @@
 * Added: New option ( `--timeout`) for setting a number of seconds to wait before timeout connection (default 30).
 * Revised: Increased default timeout to 30 seconds.
 * Fixed: Bug-fix regarding Basic HTTP authentication.
-* Fixed: Bug-fix regarding connection problems.
+* Fixed: Bug-fix regarding connection problems (via @fuero).
 
 ## Version 3.1 (2020-06-17)
 * Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
