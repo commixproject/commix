@@ -209,7 +209,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.3"
-REVISION = "3"
+REVISION = "4"
 STABLE_RELEASE = False
 if STABLE_RELEASE:
   VERSION = "v" + VERSION_NUM + "-stable"
@@ -1008,5 +1008,7 @@ PERFORM_CRACKING = False
 SPACE = " "
 
 PAGE_COMPRESSION = None
+
+HTTP_METHOD = ""
 
 # eof

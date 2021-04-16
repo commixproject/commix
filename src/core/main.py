@@ -606,9 +606,13 @@ def main(filename, url):
       checks.enable_all_enumeration_options()
 
     # Launch injection and exploitation controller.
-    http_request_method = settings.HTTPMETHOD.GET
-    if menu.options.data:
-      http_request_method = settings.HTTPMETHOD.POST
+    if len(settings.HTTP_METHOD) != 0:
+      http_request_method = settings.HTTP_METHOD
+    else:
+      if menu.options.data:
+        http_request_method = settings.HTTPMETHOD.POST
+      else:
+        http_request_method = settings.HTTPMETHOD.GET
     controller.do_check(url, http_request_method, filename)
     return filename
 

@@ -34,27 +34,26 @@ def logfile_parser():
   """
   def multi_requests():
     print(settings.SPACE)
-    warn_msg = "Multiple"
+    err_msg = "Multiple"
     if menu.options.requestfile: 
-      warn_msg += " requests"
+      err_msg += " requests"
     elif menu.options.logfile: 
-      warn_msg += " targets"
-    warn_msg += " are not supported, thus all coming"
+      err_msg += " targets"
+    err_msg += " are not supported, thus all coming"
     if menu.options.requestfile: 
-      warn_msg += " requests "
+      err_msg += " requests "
     elif menu.options.logfile: 
-      warn_msg += " targets "
-    warn_msg += "will be ignored."
-    sys.stdout.write(settings.print_warning_msg(warn_msg) + "\n")
+      err_msg += " targets "
+    err_msg += "will be ignored."
+    sys.stdout.write(settings.print_critical_msg(err_msg) + "\n")
     sys.stdout.flush()
     return False
 
   """
   Error message for invalid data.
   """
-  def invalid_data(request, single_request):
-    if single_request:
-      print(settings.SPACE)
+  def invalid_data(request):
+    print(settings.SPACE)
     err_msg = "Specified file "
     err_msg += "'" + os.path.split(request_file)[1] + "'"
     err_msg += " does not contain a valid HTTP request."
@@ -83,67 +82,67 @@ def logfile_parser():
   else:
     try:
       if menu.options.requestfile:
-        with open(request_file, 'r') as f:
-          settings.RAW_HTTP_HEADERS = [line.strip() for line in f]
+        with open(request_file, 'r') as file:
+          settings.RAW_HTTP_HEADERS = [line.strip() for line in file]
         settings.RAW_HTTP_HEADERS = [header for header in settings.RAW_HTTP_HEADERS if header]
         settings.RAW_HTTP_HEADERS = settings.RAW_HTTP_HEADERS[1:]
         settings.RAW_HTTP_HEADERS = settings.RAW_HTTP_HEADERS[:-1]
         settings.RAW_HTTP_HEADERS = '\\n'.join(settings.RAW_HTTP_HEADERS)
-      request = open(request_file, 'r')
     except IOError as err_msg:
       error_msg = "The '" + request_file + "' "
       error_msg += str(err_msg.args[1]).lower() + "."
       print(settings.SPACE)
       print(settings.print_critical_msg(error_msg))
       raise SystemExit()
-        
-    words_dict = {}
-    for word in request.read().strip().splitlines():
-      if word[:4].strip() == settings.HTTPMETHOD.GET or word[:4].strip() == settings.HTTPMETHOD.POST:
-        words_dict[word[:4].strip()] = words_dict.get(word[:4].strip(), 0) + 1
 
-    # Check if same header appears more than once.
+    if os.stat(request_file).st_size != 0:
+      with open(request_file, 'r') as file:
+        request = file.read()
+    else:
+      invalid_data(request_file)
+
     single_request = True
-    if len(words_dict.keys()) > 1:
-      single_request = multi_requests()
-    for key in words_dict.keys():
-      if words_dict[key] > 1:
-        single_request = multi_requests()
-
-    # Check for GET / POST HTTP Header
-    for http_header in [settings.HTTPMETHOD.GET, settings.HTTPMETHOD.POST]:
-      request = open(request_file, "r")
-      request = request.read()
-      if "\\n" in request:
-        request = request.replace("\\n","\n")
-      request_url = re.findall(r"" + http_header + " (.*) ", request)
-
-      if request_url:
-        if not single_request:
-          request_url = request_url[0]
-        if http_header == settings.HTTPMETHOD.POST:
-          # Check for POST Data.
-          result = [item for item in request.splitlines() if item]
-          multiple_xml = []
-          for item in result:
-            if checks.is_XML_check(item):
-              multiple_xml.append(item)
-          if len(multiple_xml) != 0:
-            menu.options.data = '\n'.join([str(item) for item in multiple_xml]) 
-          else:  
-            menu.options.data = result[len(result)-1]
-        else:
-          try:
-            # Check if url ends with "=".
-            if request_url[0].endswith("="):
-              request_url = request_url[0].replace("=","=" + settings.INJECT_TAG, 1)
-          except IndexError:
-            invalid_data(request_file, single_request) 
+    pattern = 'HTTP/1.'
+    count = start = 0
+    while single_request:
+      _ = request.find(pattern, start)
+      if _ != -1:
+        count += 1        
+        start = _ + 1
+      elif count > 1:
+        single_request = multi_requests() 
+      else:
         break
+
+    http_method = request.strip().splitlines()[0].split()[0]
+    settings.HTTP_METHOD = http_method
+
+    if "\\n" in request:
+      request = request.replace("\\n","\n")
+    request_url = re.findall(r"" + http_method + " (.*) ", request)
+    if request_url:
+      # Check last line for POST data
+      if len(request.splitlines()[-1]) != 0:
+        result = [item for item in request.splitlines() if item]
+        multiple_xml = []
+        for item in result:
+          if checks.is_XML_check(item):
+            multiple_xml.append(item)
+        if len(multiple_xml) != 0:
+          menu.options.data = '\n'.join([str(item) for item in multiple_xml]) 
+        else:  
+          menu.options.data = result[len(result)-1]
+      else:
+        try:
+          # Check if url ends with "=".
+          if request_url[0].endswith("="):
+            request_url = request_url[0].replace("=","=" + settings.INJECT_TAG, 1)
+        except IndexError:
+          invalid_data(request_file) 
 
     # Check if invalid data
     if not request_url:
-      invalid_data(request_file, single_request)
+      invalid_data(request_file)
     else:
       request_url = "".join([str(i) for i in request_url])       
 
@@ -194,7 +193,7 @@ def logfile_parser():
 
     # Target URL  
     if not menu.options.host:
-      invalid_data(request_file, single_request)
+      invalid_data(request_file)
     else:
       menu.options.url = prefix + menu.options.host + request_url
       if single_request:
@@ -203,9 +202,10 @@ def logfile_parser():
       if menu.options.logfile:
         info_msg = "Parsed target from '" + os.path.split(request_file)[1] + "' for tests :"
         print(settings.print_info_msg(info_msg))
-        sub_content = http_header + " " +  prefix + menu.options.host + request_url
+        sub_content = http_method + " " +  prefix + menu.options.host + request_url
         print(settings.print_sub_content(sub_content))
-        if http_header == settings.HTTPMETHOD.POST:
+        if menu.options.data:
            sub_content = "Data: " + menu.options.data
            print(settings.print_sub_content(sub_content))
+
 # eof
