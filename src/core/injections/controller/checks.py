@@ -480,7 +480,7 @@ Transformation of separators if time-based injection
 def time_based_separators(separator, http_request_method):
   if separator == "||"  or separator == "&&" :
     separator = separator[:1]
-    if http_request_method == settings.HTTPMETHOD.POST:
+    if menu.options.data:
       separator = _urllib.parse.quote(separator)
   return separator
 

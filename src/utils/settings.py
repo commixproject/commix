@@ -26,15 +26,22 @@ from src.thirdparty.six.moves import reload_module as _reload_module
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 class HTTPMETHOD(object):
-  HEAD = "HEAD"
   GET = "GET"
   POST = "POST"
+  HEAD = "HEAD"
+  PUT = "PUT"
+  DELETE = "DELETE"
+  TRACE = "TRACE"
+  OPTIONS = "OPTIONS"
+  CONNECT = "CONNECT"
+  PATCH = "PATCH"
 
 # Status
 FAIL_MSG = Fore.RED + " " * 10 + Style.RESET_ALL
 FAIL_STATUS = "" + FAIL_MSG + ""
 info_msg = Fore.GREEN + " " * 10 + Style.RESET_ALL
 SUCCESS_STATUS = "" + info_msg + ""
+
 # Status Signs
 LEGAL_DISCLAIMER = "(" + Style.BRIGHT + Fore.RED + "!" + Style.RESET_ALL + ") " + "Legal disclaimer: "
 INFO_SIGN = Style.RESET_ALL + "[" + Fore.GREEN + "info" + Style.RESET_ALL + "] "
@@ -209,7 +216,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.3"
-REVISION = "4"
+REVISION = "5"
 STABLE_RELEASE = False
 if STABLE_RELEASE:
   VERSION = "v" + VERSION_NUM + "-stable"
@@ -1009,6 +1016,7 @@ SPACE = " "
 
 PAGE_COMPRESSION = None
 
+# Force usage of given HTTP method (e.g. PUT).
 HTTP_METHOD = ""
 
 # eof

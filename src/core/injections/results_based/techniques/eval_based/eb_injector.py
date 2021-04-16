@@ -41,9 +41,9 @@ Check if target host is vulnerable.
 def injection_test(payload, http_request_method, url):
 
   # Check if defined method is GET (Default).
-  if http_request_method == settings.HTTPMETHOD.GET:
+  if not menu.options.data:
     # Check if its not specified the 'INJECT_HERE' tag
-    #url = parameters.do_GET_check(url)
+    #url = parameters.do_GET_check(url, http_request_method)
     
     # Define the vulnerable parameter
     vuln_parameter = parameters.vuln_GET_param(url)
@@ -61,7 +61,7 @@ def injection_test(payload, http_request_method, url):
     parameter = menu.options.data
     parameter = _urllib.parse.unquote(parameter)
     # Check if its not specified the 'INJECT_HERE' tag
-    parameter = parameters.do_POST_check(parameter)
+    parameter = parameters.do_POST_check(parameter, http_request_method)
     parameter = ''.join(str(e) for e in parameter).replace("+","%2B")
     # Define the POST data     
     if settings.IS_JSON:
@@ -186,9 +186,9 @@ def injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_meth
 
     else:
       # Check if defined method is GET (Default).
-      if http_request_method == settings.HTTPMETHOD.GET:
+      if not menu.options.data:
         # Check if its not specified the 'INJECT_HERE' tag
-        #url = parameters.do_GET_check(url)
+        #url = parameters.do_GET_check(url, http_request_method)
         
         target = url.replace(settings.INJECT_TAG, payload)
         vuln_parameter = ''.join(vuln_parameter)
@@ -205,7 +205,7 @@ def injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_meth
         parameter = menu.options.data
         parameter = _urllib.parse.unquote(parameter)
         # Check if its not specified the 'INJECT_HERE' tag
-        parameter = parameters.do_POST_check(parameter)
+        parameter = parameters.do_POST_check(parameter, http_request_method)
         parameter = ''.join(str(e) for e in parameter).replace("+","%2B")
         # Define the POST data   
         if settings.IS_JSON:

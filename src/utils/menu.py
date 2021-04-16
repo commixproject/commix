@@ -162,6 +162,10 @@ target.add_option("-x",
                 dest="sitemap_url",
                 help="Parse target(s) from remote sitemap(.xml) file.")
 
+target.add_option("--method",
+                dest="method",
+                help="Force usage of given HTTP method (e.g. PUT)")
+
 # Request options
 request = OptionGroup(parser,  Style.BRIGHT + Style.UNDERLINE + "Request" + Style.RESET_ALL, 
                       "These options can be used to specify how to connect to the target URL.")

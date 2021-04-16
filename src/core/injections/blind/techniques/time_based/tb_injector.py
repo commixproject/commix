@@ -46,7 +46,7 @@ def examine_requests(payload, vuln_parameter, http_request_method, url, timesec,
   start = time.time()
 
   # Check if defined method is GET (Default).
-  if http_request_method == settings.HTTPMETHOD.GET:
+  if not menu.options.data:
     # Encoding non-ASCII characters payload.
     # payload = _urllib.parse.quote(payload)   
     target = url.replace(settings.INJECT_TAG, payload)
@@ -58,7 +58,7 @@ def examine_requests(payload, vuln_parameter, http_request_method, url, timesec,
     parameter = menu.options.data
     parameter = _urllib.parse.unquote(parameter)
     # Check if its not specified the 'INJECT_HERE' tag
-    parameter = parameters.do_POST_check(parameter)
+    parameter = parameters.do_POST_check(parameter, http_request_method)
     parameter = ''.join(str(e) for e in parameter).replace("+","%2B")
     # Define the POST data  
     if settings.IS_JSON:
@@ -93,7 +93,7 @@ def injection_test(payload, http_request_method, url):
   start = time.time()
 
   # Check if defined method is GET (Default).
-  if http_request_method == settings.HTTPMETHOD.GET:
+  if not menu.options.data:
     # Encoding non-ASCII characters payload.
     # payload = _urllib.parse.quote(payload)
 
@@ -107,7 +107,7 @@ def injection_test(payload, http_request_method, url):
     parameter = menu.options.data
     parameter = _urllib.parse.unquote(parameter)
     # Check if its not specified the 'INJECT_HERE' tag
-    parameter = parameters.do_POST_check(parameter)
+    parameter = parameters.do_POST_check(parameter, http_request_method)
     parameter = ''.join(str(e) for e in parameter).replace("+","%2B")
     # Define the vulnerable parameter
     vuln_parameter = parameters.vuln_POST_param(parameter, url)

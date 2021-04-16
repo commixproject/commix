@@ -1,3 +1,6 @@
+## Version 3.3 (TBA)
+* Added: New option `--method` to force usage of provided HTTP method (e.g. `PUT`).
+
 ## Version 3.2 (2021-04-12)
 * Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
 * Added: New tamper script "slash2env.py" that replaces slashes ("/") with environment variable value "${PATH%%u*}" (for *nix targets).

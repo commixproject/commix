@@ -701,6 +701,9 @@ try:
         warn_msg += "due to multiple extra HTTP headers."
         print(settings.print_warning_msg(warn_msg))
 
+    if menu.options.method:
+      settings.HTTP_METHOD = menu.options.method
+
     # Check if defined "--proxy" option.
     if menu.options.proxy:
       for match in re.finditer(settings.PROXY_REGEX, menu.options.proxy):

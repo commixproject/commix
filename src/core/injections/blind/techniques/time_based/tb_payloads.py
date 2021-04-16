@@ -80,7 +80,7 @@ def decision(separator, TAG, output_length, timesec, http_request_method):
                  "[ " + str(output_length) + " -eq $str1 ]" + separator + 
                  "sleep " + str(timesec)
                  )
-      #if http_request_method == settings.HTTPMETHOD.POST:
+      #if menu.options.data:
       separator = _urllib.parse.unquote(separator)
 
     elif separator == "||" :
@@ -152,7 +152,7 @@ def decision_alter_shell(separator, TAG, output_length, timesec, http_request_me
                  "[ " + str(output_length) + " -eq ${str1} ] " + separator + 
                  "$(python -c \"import time\ntime.sleep(" + str(timesec) + ")\") "
                  )
-      #if http_request_method == settings.HTTPMETHOD.POST:
+      #if menu.options.data:
       separator = _urllib.parse.unquote(separator)
 
     elif separator == "||" :
@@ -234,7 +234,7 @@ def cmd_execution(separator, cmd, output_length, timesec, http_request_method):
                  "[ " + str(output_length) + " -eq $str1 ]" + separator + 
                  "sleep " + str(timesec)
                  )
-      #if http_request_method == settings.HTTPMETHOD.POST:
+      #if menu.options.data:
       separator = _urllib.parse.unquote(separator)
         
     elif separator == "||" :
@@ -304,7 +304,7 @@ def cmd_execution_alter_shell(separator, cmd, output_length, timesec, http_reque
                  "[ " + str(output_length) + " -eq ${str1} ] " + separator + 
                  "$(python -c \"import time\ntime.sleep(" + str(timesec) + ")\") "
                  )
-      #if http_request_method == settings.HTTPMETHOD.POST:
+      #if menu.options.data:
       separator = _urllib.parse.unquote(separator)
 
     elif separator == "||" :
@@ -393,7 +393,7 @@ def get_char(separator, cmd, num_of_chars, ascii_char, timesec, http_request_met
                 "[ " + str(ascii_char) + " -eq ${str} ] " + separator + 
                 "sleep " + str(timesec)
                 )
-      #if http_request_method == settings.HTTPMETHOD.POST:
+      #if menu.options.data:
       separator = _urllib.parse.unquote(separator)
 
     elif separator == "||" :
@@ -463,7 +463,7 @@ def get_char_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, http
                  "[ " + str(ascii_char) + " -eq ${str} ] " +  separator + 
                  "$(python -c \"import time\ntime.sleep(" + str(timesec) + ")\")"
                  )
-      #if http_request_method == settings.HTTPMETHOD.POST:
+      #if menu.options.data:
       separator = _urllib.parse.unquote(separator)
 
     elif separator == "||" :
@@ -538,7 +538,7 @@ def fp_result(separator, cmd, num_of_chars, ascii_char, timesec, http_request_me
                  "sleep " + str(timesec)
                  )
       
-      #if http_request_method == settings.HTTPMETHOD.POST:
+      #if menu.options.data:
       separator = _urllib.parse.unquote(separator)
 
     elif separator == "||" :
@@ -605,7 +605,7 @@ def fp_result_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, htt
                  "[ " + str(ascii_char) + " -eq ${str} ] " +  separator + 
                  "$(python -c \"import time\ntime.sleep(" + str(timesec) + ")\")"
                  )
-      #if http_request_method == settings.HTTPMETHOD.POST:
+      #if menu.options.data:
       separator = _urllib.parse.unquote(separator)
 
     elif separator == "||" :

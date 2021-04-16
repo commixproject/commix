@@ -414,7 +414,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
               else:
                 header_name = ""
                 the_type = " parameter"
-                if http_request_method == settings.HTTPMETHOD.GET:
+                if not menu.options.data:
                   found_vuln_parameter = parameters.vuln_GET_param(url)
                 else :
                   found_vuln_parameter = vuln_parameter

@@ -102,24 +102,20 @@ def logfile_parser():
       invalid_data(request_file)
 
     single_request = True
-    pattern = 'HTTP/1.'
-    count = start = 0
-    while single_request:
-      _ = request.find(pattern, start)
-      if _ != -1:
-        count += 1        
-        start = _ + 1
-      elif count > 1:
-        single_request = multi_requests() 
-      else:
-        break
+    pattern = r'HTTP/([\d.]+)'
+    if len(re.findall(pattern, request)) > 1:
+      single_request = multi_requests()
 
-    http_method = request.strip().splitlines()[0].split()[0]
-    settings.HTTP_METHOD = http_method
+    if len(settings.HTTP_METHOD) == 0:
+      http_method = request.strip().splitlines()[0].split()[0]
+      settings.HTTP_METHOD = http_method
+    else:
+      http_method = settings.HTTP_METHOD
 
     if "\\n" in request:
       request = request.replace("\\n","\n")
-    request_url = re.findall(r"" + http_method + " (.*) ", request)
+    request_url = re.findall(r"" + " (.*) HTTP/", request)
+
     if request_url:
       # Check last line for POST data
       if len(request.splitlines()[-1]) != 0:

@@ -35,7 +35,7 @@ def get_url_part(url):
 """
 Check if the 'INJECT_HERE' tag, is specified on GET Requests.
 """
-def do_GET_check(url):
+def do_GET_check(url, http_request_method):
   # Do replacement with the 'INJECT_HERE' tag, if the wild card char is provided.
   url = checks.wildcard_character(url)
 
@@ -71,7 +71,7 @@ def do_GET_check(url):
       if len([s for s in multi_parameters if "=" in s]) != (len(multi_parameters)):
         checks.inappropriate_format(multi_parameters)
       # Check for empty values (in provided parameters).
-      checks.is_empty(multi_parameters, http_request_method = settings.HTTPMETHOD.GET)
+      checks.is_empty(multi_parameters, http_request_method)
       # Grab the value of parameter.
       _ = []
       _.append(parameters)
@@ -201,7 +201,7 @@ def vuln_GET_param(url):
 """
 Check if the 'INJECT_HERE' tag, is specified on POST Requests.
 """
-def do_POST_check(parameter):
+def do_POST_check(parameter, http_request_method):
   # Do replacement with the 'INJECT_HERE' tag, if the wild card char is provided.
   parameter = checks.wildcard_character(parameter).replace("'","\"")
   # Check if JSON Object.
@@ -259,7 +259,7 @@ def do_POST_check(parameter):
       parameter = ''.join(checks.check_similarities(_))
       value = re.findall(r'=(.*)', parameter)
       value = ''.join(value)
-    if checks.is_empty(multi_parameters, http_request_method = settings.HTTPMETHOD.POST):
+    if checks.is_empty(multi_parameters, http_request_method):
       return parameter
     else:
       # Ignoring the anti-CSRF parameter(s).
@@ -289,7 +289,7 @@ def do_POST_check(parameter):
       all_params = checks.check_similarities(all_params)
     # Check if not defined the "INJECT_HERE" tag in parameter
     if settings.INJECT_TAG not in parameter:
-      checks.is_empty(multi_parameters, http_request_method = settings.HTTPMETHOD.POST)
+      checks.is_empty(multi_parameters, http_request_method)
       for param in range(0, len(all_params)):
         if param == 0 :
           if settings.IS_JSON:

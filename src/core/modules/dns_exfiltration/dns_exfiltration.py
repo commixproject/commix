@@ -67,7 +67,7 @@ def cmd_exec(dns_server, http_request_method, cmd, url, vuln_parameter):
   if settings.VERBOSITY_LEVEL != 0:
     sys.stdout.write("\n" + settings.print_payload(payload))
 
-  if http_request_method == settings.HTTPMETHOD.GET:
+  if not menu.options.data:
     url = url.replace(settings.INJECT_TAG, "")
     data = payload.replace(" ", "%20")
     request = url + data
@@ -184,8 +184,8 @@ def dns_exfiltration_handler(url, http_request_method):
     print("\n" + settings.print_critical_msg(err_msg))
     os._exit(0)
 
-  if http_request_method == settings.HTTPMETHOD.GET:
-    #url = parameters.do_GET_check(url)
+  if not menu.options.data:
+    #url = parameters.do_GET_check(url, http_request_method)
     vuln_parameter = parameters.vuln_GET_param(url)
     request = _urllib.request.Request(url)
     headers.do_check(request)
@@ -193,7 +193,7 @@ def dns_exfiltration_handler(url, http_request_method):
   else:
     parameter = menu.options.data
     parameter = _urllib.parse.unquote(parameter)
-    parameter = parameters.do_POST_check(parameter)
+    parameter = parameters.do_POST_check(parameter, http_request_method)
     request = _urllib.request.Request(url, parameter)
     headers.do_check(request)
     vuln_parameter = parameters.vuln_POST_param(parameter, url)
