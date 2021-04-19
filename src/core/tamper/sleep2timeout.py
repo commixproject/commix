@@ -32,9 +32,9 @@ def tamper(payload):
   def sleep_to_timeout_ping(payload):
     settings.TAMPER_SCRIPTS[__tamper__] = True
     if settings.TARGET_OS != "win":
-      for match in re.finditer(r"sleep" + settings.WHITESPACE[0] + "([1-9]\d+|[0-9])", payload):
-        payload = payload.replace(match.group(0), match.group(0).replace("sleep", "timeout") + " ping localhost".replace(" ",settings.WHITESPACE[0]))
-        payload = payload.replace("timeout" + settings.WHITESPACE[0] + "0" + settings.WHITESPACE[0] + "ping" + settings.WHITESPACE[0] + "localhost", "timeout" + settings.WHITESPACE[0] + "0")
+      for match in re.finditer(r"sleep" + settings.WHITESPACES[0] + "([1-9]\d+|[0-9])", payload):
+        payload = payload.replace(match.group(0), match.group(0).replace("sleep", "timeout") + " ping localhost".replace(" ",settings.WHITESPACES[0]))
+        payload = payload.replace("timeout" + settings.WHITESPACES[0] + "0" + settings.WHITESPACES[0] + "ping" + settings.WHITESPACES[0] + "localhost", "timeout" + settings.WHITESPACES[0] + "0")
     else:
       payload = payload.replace("powershell.exe -InputFormat none Start-Sleep -s", "timeout")
     return payload

@@ -23,9 +23,9 @@ Notes: This tamper script works against all targets.
 __tamper__ = "space2plus"
 
 settings.TAMPER_SCRIPTS[__tamper__] = True
-if settings.WHITESPACE[0] == "%20":
-  settings.WHITESPACE[0] = "+"
+if settings.WHITESPACES[0] == "%20":
+  settings.WHITESPACES[0] = "+"
 else:
-  settings.WHITESPACE.append("+") 
+  settings.WHITESPACES.append("+") 
 
 # eof 

@@ -27,10 +27,10 @@ __tamper__ = "space2ifs"
 
 if settings.TARGET_OS != "win":
   settings.TAMPER_SCRIPTS[__tamper__] = True
-  if settings.WHITESPACE[0] == "%20":
-    settings.WHITESPACE[0] = "${IFS}"
+  if settings.WHITESPACES[0] == "%20":
+    settings.WHITESPACES[0] = "${IFS}"
   else:
-    settings.WHITESPACE.append("${IFS}") 
+    settings.WHITESPACES.append("${IFS}") 
 else:
   warn_msg = "Windows target host(s), does not support the '"+ __tamper__  +".py' tamper script."
   sys.stdout.write("\r" + settings.print_warning_msg(warn_msg))

@@ -974,7 +974,7 @@ def whitespace_check(payload):
         menu.options.tamper = menu.options.tamper + ",space2ifs"
       else:
         menu.options.tamper = "space2ifs"
-    settings.WHITESPACE[0] = "${IFS}"  
+    settings.WHITESPACES[0] = "${IFS}"  
   
   # Enable the "space2plus" tamper script.
   elif "+" in _ and payload.count("+") >= 2:
@@ -983,7 +983,7 @@ def whitespace_check(payload):
         menu.options.tamper = menu.options.tamper + ",space2plus"
       else:
         menu.options.tamper = "space2plus"
-    settings.WHITESPACE[0] = "+"
+    settings.WHITESPACES[0] = "+"
   
   # Enable the "space2htab" tamper script.
   elif "%09" in _:
@@ -992,7 +992,7 @@ def whitespace_check(payload):
         menu.options.tamper = menu.options.tamper + ",space2htab"
       else:
         menu.options.tamper = "space2htab" 
-    settings.WHITESPACE[0] = "%09"
+    settings.WHITESPACES[0] = "%09"
 
   # Enable the "space2vtab" tamper script.
   elif "%0b" in _:
@@ -1001,20 +1001,20 @@ def whitespace_check(payload):
         menu.options.tamper = menu.options.tamper + ",space2vtab"
       else:
         menu.options.tamper = "space2vtab"
-    settings.WHITESPACE[0] = "%0b"
+    settings.WHITESPACES[0] = "%0b"
   
   # Default whitespace       
   else :
-    settings.WHITESPACE[0] = "%20"
+    settings.WHITESPACES[0] = "%20"
 
   # Enable the "multiplespaces" tamper script.
-  count_spaces = payload.count(settings.WHITESPACE[0])
+  count_spaces = payload.count(settings.WHITESPACES[0])
   if count_spaces >= 5:
     if menu.options.tamper:
       menu.options.tamper = menu.options.tamper + ",multiplespaces"
     else:
       menu.options.tamper = "multiplespaces" 
-    settings.WHITESPACE[0] = settings.WHITESPACE[0] * int(count_spaces / 2)
+    settings.WHITESPACES[0] = settings.WHITESPACES[0] * int(count_spaces / 2)
       
 """
 Check for added caret between the characters of the generated payloads.

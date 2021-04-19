@@ -216,7 +216,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.3"
-REVISION = "5"
+REVISION = "6"
 STABLE_RELEASE = False
 if STABLE_RELEASE:
   VERSION = "v" + VERSION_NUM + "-stable"
@@ -369,8 +369,10 @@ EVAL_SEPARATORS = ["", "%0a", "\\n", "%0d%0a", "\\r\\n"]
 # The code injection suffixes.
 EVAL_SUFFIXES = ["}}", ".\"", ".'", "", "\\\\", "//", "#", ")}"]
 
-# The white-spaces
-WHITESPACE = ["%20"]
+# The default (url-ecoded) white-space.
+WHITESPACES = ["%20"]
+
+SPACE = " "
 
 # Reference: http://www.w3.org/Protocols/HTTP/Object_Headers.html#uri
 URI_HTTP_HEADER = "URI"
@@ -1011,8 +1013,6 @@ HTTP_ACCEPT_HEADER_VALUE = "*/*"
 IGNORE_SPECIAL_CHAR_REGEX = "[^A-Za-z0-9.:,_]+"
 
 PERFORM_CRACKING = False
-
-SPACE = " "
 
 PAGE_COMPRESSION = None
 

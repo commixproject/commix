@@ -189,10 +189,10 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
 
   i = 0
   # Calculate all possible combinations
-  total = len(settings.WHITESPACE) * len(settings.PREFIXES) * len(settings.SEPARATORS) * len(settings.SUFFIXES)
+  total = len(settings.WHITESPACES) * len(settings.PREFIXES) * len(settings.SEPARATORS) * len(settings.SUFFIXES)
   # Check if defined alter shell
   alter_shell = menu.options.alter_shell
-  for whitespace in settings.WHITESPACE:
+  for whitespace in settings.WHITESPACES:
     for prefix in settings.PREFIXES:
       for suffix in settings.SUFFIXES:
         for separator in settings.SEPARATORS:
@@ -501,7 +501,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
             if not settings.LOAD_SESSION:
               session_handler.injection_point_importation(url, technique, injection_type, separator, shell[0], vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response=0, timesec=0, how_long=0, output_length=0, is_vulnerable=menu.options.level)
             else:
-              whitespace = settings.WHITESPACE[0]
+              whitespace = settings.WHITESPACES[0]
               settings.LOAD_SESSION = False 
 
             # Check for any enumeration options.

@@ -70,8 +70,8 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
 
   #whitespace = checks.check_whitespaces()
   # Calculate all possible combinations
-  total = len(settings.WHITESPACE) * len(settings.PREFIXES) * len(settings.SEPARATORS) * len(settings.SUFFIXES)
-  for whitespace in settings.WHITESPACE:
+  total = len(settings.WHITESPACES) * len(settings.PREFIXES) * len(settings.SEPARATORS) * len(settings.SUFFIXES)
+  for whitespace in settings.WHITESPACES:
     for prefix in settings.PREFIXES:
       for suffix in settings.SUFFIXES:
         for separator in settings.SEPARATORS:

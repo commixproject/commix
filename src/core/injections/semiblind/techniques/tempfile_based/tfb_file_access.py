@@ -106,7 +106,7 @@ def file_write(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec,
   # Execute command
   if settings.TARGET_OS == "win":
     from src.core.injections.results_based.techniques.classic import cb_injector
-    whitespace = settings.WHITESPACE[0]
+    whitespace = settings.WHITESPACES[0]
     dest_to_write = dest_to_write.replace("\\","/")
     # Find path
     path = os.path.dirname(dest_to_write)

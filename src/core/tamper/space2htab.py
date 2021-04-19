@@ -23,9 +23,9 @@ Notes: This tamper script works against all targets.
 __tamper__ = "space2htab"
 
 settings.TAMPER_SCRIPTS[__tamper__] = True
-if settings.WHITESPACE[0] == "%20":
-  settings.WHITESPACE[0] = "%09"
+if settings.WHITESPACES[0] == "%20":
+  settings.WHITESPACES[0] = "%09"
 else:
-  settings.WHITESPACE.append("%09") 
+  settings.WHITESPACES.append("%09") 
 
 # eof 

@@ -65,7 +65,7 @@ def execute_shell(separator, TAG, cmd, prefix, suffix, whitespace, http_request_
     if settings.FILE_BASED_STATE == True:
       response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
     else:
-      whitespace = settings.WHITESPACE[0]
+      whitespace = settings.WHITESPACES[0]
       if whitespace == " ":
         whitespace = _urllib.parse.quote(whitespace) 
       response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
