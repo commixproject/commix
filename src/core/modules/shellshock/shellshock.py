@@ -844,7 +844,7 @@ def shellshock_handler(url, http_request_method, filename):
       raise SystemExit()
       
   except _urllib.error.HTTPError as err_msg:
-    if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
+    if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR or str(err_msg.code) == settings.BAD_REQUEST:
       response = False  
     elif settings.IGNORE_ERR_MSG == False:
       err = str(err_msg) + "."

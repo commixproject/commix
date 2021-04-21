@@ -230,7 +230,7 @@ def icmp_exfiltration_handler(url, http_request_method):
     try:
       response = proxy.use_proxy(request)
     except _urllib.error.HTTPError as err_msg:
-      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
+      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR or str(err_msg.code) == settings.BAD_REQUEST:
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
         err = str(err_msg) + "."
@@ -246,7 +246,7 @@ def icmp_exfiltration_handler(url, http_request_method):
     try:
       response = tor.use_tor(request)
     except _urllib.error.HTTPError as err_msg:
-      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
+      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR or str(err_msg.code) == settings.BAD_REQUEST:
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
         err = str(err_msg) + "."
@@ -261,7 +261,7 @@ def icmp_exfiltration_handler(url, http_request_method):
     try:
       response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
     except _urllib.error.HTTPError as err_msg:
-      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
+      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR or str(err_msg.code) == settings.BAD_REQUEST:
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
         err = str(err_msg) + "."

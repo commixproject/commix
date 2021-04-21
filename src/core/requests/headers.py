@@ -233,7 +233,9 @@ def check_http_traffic(request):
   except _urllib.error.HTTPError as err:
     if settings.VERBOSITY_LEVEL != 0:
       print_http_response(err.info(), err.code, err.read())
-    if not settings.PERFORM_CRACKING:
+    if not settings.PERFORM_CRACKING and \
+       not settings.IS_JSON and \
+       not settings.IS_XML:
       print(settings.SPACE)
     # error_msg = "Got " + str(err).replace(": "," (")
     # Check for 3xx, 4xx, 5xx HTTP error codes.

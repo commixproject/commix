@@ -251,7 +251,7 @@ def get_request_response(request):
     try:
       response = proxy.use_proxy(request)
     except _urllib.error.HTTPError as err_msg:
-      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
+      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR or str(err_msg.code) == settings.BAD_REQUEST:
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
         err = str(err_msg) + "."
@@ -284,7 +284,7 @@ def get_request_response(request):
     try:
       response = tor.use_tor(request)
     except _urllib.error.HTTPError as err_msg:
-      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
+      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR or str(err_msg.code) == settings.BAD_REQUEST:
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
         err = str(err_msg) + "."
@@ -312,7 +312,7 @@ def get_request_response(request):
     try:
       response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
     except _urllib.error.HTTPError as err_msg:
-      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
+      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR or str(err_msg.code) == settings.BAD_REQUEST:
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
         if not str(err_msg.code) == str(menu.options.ignore_code):
@@ -381,7 +381,7 @@ def cookie_injection(url, vuln_parameter, payload):
       proxy = _urllib.request.ProxyHandler({settings.SCHEME : menu.options.proxy})
       response = inject_cookie(url, vuln_parameter, payload, proxy)
     except _urllib.error.HTTPError as err_msg:
-      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
+      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR or str(err_msg.code) == settings.BAD_REQUEST:
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
         err_msg = str(err_msg) + "."
@@ -406,7 +406,7 @@ def cookie_injection(url, vuln_parameter, payload):
       proxy = _urllib.request.ProxyHandler({settings.SCHEME:settings.PRIVOXY_IP + ":" + settings.PRIVOXY_PORT})
       response = inject_cookie(url, vuln_parameter, payload, proxy)
     except _urllib.error.HTTPError as err_msg:
-      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
+      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR or str(err_msg.code) == settings.BAD_REQUEST:
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
         err = str(err_msg) + "."
@@ -434,7 +434,7 @@ def cookie_injection(url, vuln_parameter, payload):
     try:
       response = inject_cookie(url, vuln_parameter, payload, proxy)
     except _urllib.error.HTTPError as err_msg:
-      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
+      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR or str(err_msg.code) == settings.BAD_REQUEST:
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
         err = str(err_msg) + "."
@@ -508,7 +508,7 @@ def user_agent_injection(url, vuln_parameter, payload):
       proxy = _urllib.request.ProxyHandler({settings.SCHEME : menu.options.proxy})
       response = inject_user_agent(url, vuln_parameter, payload, proxy)
     except _urllib.error.HTTPError as err_msg:
-      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
+      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR or str(err_msg.code) == settings.BAD_REQUEST:
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
         err = str(err_msg) + "."
@@ -538,7 +538,7 @@ def user_agent_injection(url, vuln_parameter, payload):
       proxy = _urllib.request.ProxyHandler({settings.SCHEME:settings.PRIVOXY_IP + ":" + settings.PRIVOXY_PORT})
       response = inject_user_agent(url, vuln_parameter, payload, proxy)
     except _urllib.error.HTTPError as err_msg:
-      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
+      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR or str(err_msg.code) == settings.BAD_REQUEST:
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
         err = str(err_msg) + "."
@@ -566,7 +566,7 @@ def user_agent_injection(url, vuln_parameter, payload):
     try:
       response = inject_user_agent(url, vuln_parameter, payload, proxy)
     except _urllib.error.HTTPError as err_msg:
-      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
+      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR or str(err_msg.code) == settings.BAD_REQUEST:
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
         err = str(err_msg) + "."
@@ -640,7 +640,7 @@ def referer_injection(url, vuln_parameter, payload):
       proxy = _urllib.request.ProxyHandler({settings.SCHEME : menu.options.proxy})
       response = inject_referer(url, vuln_parameter, payload, proxy)
     except _urllib.error.HTTPError as err_msg:
-      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
+      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR or str(err_msg.code) == settings.BAD_REQUEST:
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
         err = str(err_msg) + "."
@@ -670,7 +670,7 @@ def referer_injection(url, vuln_parameter, payload):
       proxy = _urllib.request.ProxyHandler({settings.SCHEME:settings.PRIVOXY_IP + ":" + settings.PRIVOXY_PORT})
       response = inject_referer(url, vuln_parameter, payload, proxy)
     except _urllib.error.HTTPError as err_msg:
-      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
+      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR or str(err_msg.code) == settings.BAD_REQUEST:
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
         err = str(err_msg) + "."
@@ -699,7 +699,7 @@ def referer_injection(url, vuln_parameter, payload):
       response = inject_referer(url, vuln_parameter, payload, proxy)
 
     except _urllib.error.HTTPError as err_msg:
-      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
+      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR or str(err_msg.code) == settings.BAD_REQUEST:
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
         err = str(err_msg) + "."
@@ -775,7 +775,7 @@ def host_injection(url, vuln_parameter, payload):
       proxy = _urllib.request.ProxyHandler({settings.SCHEME : menu.options.proxy})
       response = inject_host(url, vuln_parameter, payload, proxy)
     except _urllib.error.HTTPError as err_msg:
-      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
+      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR or str(err_msg.code) == settings.BAD_REQUEST:
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
         err = str(err_msg) + "."
@@ -805,7 +805,7 @@ def host_injection(url, vuln_parameter, payload):
       proxy = _urllib.request.ProxyHandler({settings.SCHEME:settings.PRIVOXY_IP + ":" + settings.PRIVOXY_PORT})
       response = inject_host(url, vuln_parameter, payload, proxy)
     except _urllib.error.HTTPError as err_msg:
-      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
+      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR or str(err_msg.code) == settings.BAD_REQUEST:
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
         err = str(err_msg) + "."
@@ -834,7 +834,7 @@ def host_injection(url, vuln_parameter, payload):
       response = inject_host(url, vuln_parameter, payload, proxy)
 
     except _urllib.error.HTTPError as err_msg:
-      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
+      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR or str(err_msg.code) == settings.BAD_REQUEST:
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
         err = str(err_msg) + "."
@@ -910,7 +910,7 @@ def custom_header_injection(url, vuln_parameter, payload):
       proxy = _urllib.request.ProxyHandler({settings.SCHEME : menu.options.proxy})
       response = inject_custom_header(url, vuln_parameter, payload, proxy)
     except _urllib.error.HTTPError as err_msg:
-      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
+      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR or str(err_msg.code) == settings.BAD_REQUEST:
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
         err = str(err_msg) + "."
@@ -940,7 +940,7 @@ def custom_header_injection(url, vuln_parameter, payload):
       proxy = _urllib.request.ProxyHandler({settings.SCHEME:settings.PRIVOXY_IP + ":" + settings.PRIVOXY_PORT})
       response = inject_custom_header(url, vuln_parameter, payload, proxy)
     except _urllib.error.HTTPError as err_msg:
-      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
+      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR or str(err_msg.code) == settings.BAD_REQUEST:
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
         err = str(err_msg) + "."
@@ -968,7 +968,7 @@ def custom_header_injection(url, vuln_parameter, payload):
     try:
       response = inject_custom_header(url, vuln_parameter, payload, proxy)
     except _urllib.error.HTTPError as err_msg:
-      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR:
+      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR or str(err_msg.code) == settings.BAD_REQUEST:
         response = False  
       elif settings.IGNORE_ERR_MSG == False:
         err = str(err_msg) + "."
@@ -1060,11 +1060,13 @@ def technology_detection(response):
     sys.stdout.write(settings.print_debug_msg(debug_msg))
     sys.stdout.flush()
     print(settings.SPACE) 
-    if response.info()['X-Powered-By']:         
+  if response.info()['X-Powered-By']: 
+    if settings.VERBOSITY_LEVEL != 0:        
       debug_msg = "The target application is powered by " 
       debug_msg += response.info()['X-Powered-By'] + Style.RESET_ALL + "."
       print(settings.print_bold_debug_msg(debug_msg))
-    else:
+  else:
+    if settings.VERBOSITY_LEVEL != 0:
       warn_msg = "Heuristics have failed to identify the technology supporting the target application."
       print(settings.print_warning_msg(warn_msg))
 
