@@ -1,4 +1,5 @@
 ## Version 3.3 (TBA)
+* Revised: Minor improvement regarding parsing GraphQL JSON objects.
 * Added: The .bat files command separator (i.e. ["%1a"](http://seclists.org/fulldisclosure/2016/Nov/67)) has been added.
 * Added: New option `--method` to force usage of provided HTTP method (e.g. `PUT`).
 

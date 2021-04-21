@@ -1349,7 +1349,8 @@ def is_JSON_check(parameter):
       return True
   except ValueError as err_msg:
     if not "No JSON object could be decoded" in str(err_msg) and \
-       not "Expecting value" in str(err_msg):
+       not "Expecting value" in str(err_msg) and \
+       not "Expecting , delimiter" in str(err_msg):
       err_msg = "JSON " + str(err_msg) + ". "
       print(settings.print_critical_msg(err_msg) + "\n")
       raise SystemExit()

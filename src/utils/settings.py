@@ -216,7 +216,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.3"
-REVISION = "8"
+REVISION = "9"
 STABLE_RELEASE = False
 if STABLE_RELEASE:
   VERSION = "v" + VERSION_NUM + "-stable"
@@ -253,7 +253,7 @@ PROXY_REGEX = r"((http[^:]*)://)?([\w\-.]+):(\d+)"
 # Inject Tag
 INJECT_TAG = "INJECT_HERE"
 INJECT_TAG_REGEX = r"(?i)INJECT[_]?HERE"
-VALUE_BOUNDARIES = r'[\\/]+' 
+VALUE_BOUNDARIES = r'[\\/](.+?)[\\/]'
 
 #Basic heuristic checks for code injection warnings or... phpinfo page ;)
 BASIC_TEST = "\\\\/{${eval(phpinfo())}}\\/\\"
@@ -1010,7 +1010,7 @@ HTTP_ACCEPT_HEADER = "Accept"
 HTTP_ACCEPT_HEADER_VALUE = "*/*"
 
 # Regular expression used for ignoring some special chars
-IGNORE_SPECIAL_CHAR_REGEX = "[^A-Za-z0-9.:,_]+"
+IGNORE_SPECIAL_CHAR_REGEX = "[^(A-Za-z0-9.:,_]+"
 
 PERFORM_CRACKING = False
 

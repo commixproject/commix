@@ -60,9 +60,9 @@ def use_proxy(request):
     err_msg += ")."
     print(settings.print_critical_msg(err_msg))
     raise SystemExit() 
-  except Exception as err:
-    if settings.UNAUTHORIZED_ERROR in str(err).lower():
-      pass
+  except _urllib.error.HTTPError as err_msg:
+    if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR or str(err_msg.code) == settings.BAD_REQUEST:
+      return False
     elif "Connection refused" in str(err):
       err_msg = "Unable to connect to the target URL or proxy ("
       err_msg += str(menu.options.proxy)

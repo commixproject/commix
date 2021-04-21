@@ -300,6 +300,12 @@ def do_check(request):
   if not checks.get_header(request.headers, settings.HTTP_ACCEPT_HEADER):
     request.add_header(settings.HTTP_ACCEPT_HEADER, settings.HTTP_ACCEPT_HEADER_VALUE)
 
+  # The MIME media type for JSON.
+  if menu.options.data:
+    if re.search(settings.JSON_RECOGNITION_REGEX, menu.options.data) or \
+       re.search(settings.JSON_LIKE_RECOGNITION_REGEX, menu.options.data):
+      request.add_header("Content-Type", "application/json")
+
   # Appends a fake HTTP header 'X-Forwarded-For'
   if settings.TAMPER_SCRIPTS["xforwardedfor"]:
     from src.core.tamper import xforwardedfor
@@ -346,10 +352,6 @@ def do_check(request):
   else:
     pass        
   
-  # The MIME media type for JSON.
-  if settings.IS_JSON:
-    request.add_header("Content-Type", "application/json")
-
   # Check if defined any extra HTTP headers.
   if menu.options.headers or menu.options.header or len(settings.RAW_HTTP_HEADERS) >= 1:
     if len(settings.RAW_HTTP_HEADERS) >= 1:

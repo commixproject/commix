@@ -311,6 +311,8 @@ def do_POST_check(parameter, http_request_method):
           # value = re.findall(r'\:\"(.*)\"', all_params[param])
           # value = ''.join(value)
           value = re.findall(r'\:(.*)', all_params[param])
+          if re.findall(r'\\"(.*)\\"', value[0]):
+            value = re.findall(r'\\"(.*)\\"', value[0])
           value = re.sub(settings.IGNORE_SPECIAL_CHAR_REGEX, '', ''.join(value))
         elif settings.IS_XML:
           value = re.findall(r'>(.*)</', all_params[param])
@@ -385,6 +387,8 @@ def vuln_POST_param(parameter, url):
   if settings.IS_JSON:
     param = re.sub(settings.IGNORE_SPECIAL_CHAR_REGEX, '', parameter.split(settings.INJECT_TAG)[0])
     if param:
+      if "(" in param:
+        param = param.split("(")[1]
       vuln_parameter = param.split(",")[-1:]
       vuln_parameter = ''.join(vuln_parameter).replace(":","")
 
