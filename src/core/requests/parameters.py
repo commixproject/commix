@@ -220,6 +220,7 @@ def do_POST_check(parameter, http_request_method):
   parameters_list = []
   # Split multiple parameters
   if settings.IS_XML:
+    parameter = re.sub(r">\s*<", '>\n<', parameter).replace("\\n","\n")
     _ = []
     parameters = re.findall(r'(.*)', parameter)
     parameters = [param + "\n" for param in parameters if param]
