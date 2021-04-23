@@ -609,7 +609,7 @@ def exploitation(url, timesec, filename, http_request_method, url_time_response,
           from src.core.injections.semiblind.techniques.file_based import fb_handler
           fb_handler.exploitation(url, timesec, filename, http_request_method, url_time_response)
         elif proceed_option.lower() == "c":
-          if tb_injection_handler(url, timesec, filename, http_request_method, url_time_response) == False:
+          if tb_injection_handler(url, timesec, filename, http_request_method, url_time_response, injection_type, technique) == False:
             return False
         elif proceed_option.lower() == "q":
           raise SystemExit()
