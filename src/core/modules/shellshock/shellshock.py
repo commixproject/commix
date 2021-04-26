@@ -681,12 +681,14 @@ def shellshock_handler(url, http_request_method, filename):
           logs.update_payload(filename, counter, payload) 
 
           if settings.VERBOSITY_LEVEL != 0:
+            if settings.VERBOSITY_LEVEL == 1:
+              print(settings.SPACE)
             checks.total_of_requests()
 
           info_msg = "The (" + check_header + ") '"
           info_msg += url + Style.RESET_ALL + Style.BRIGHT 
           info_msg += "' seems vulnerable via " + technique + "."
-          if settings.VERBOSITY_LEVEL < 2:
+          if settings.VERBOSITY_LEVEL == 0:
             print(settings.SPACE)
           print(settings.print_bold_info_msg(info_msg))
           sub_content = "\"" + payload + "\""
