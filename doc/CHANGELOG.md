@@ -1,4 +1,5 @@
 ## Version 3.3 (TBA)
+* Revised: Improvements regarding dynamic code evaluation heuristic test.
 * Fixed: Minor bug-fix regarding parsing SOAP/XML data via `--data` option.
 * Revised: Minor improvement regarding parsing GraphQL JSON objects.
 * Added: The .bat files command separator (i.e. ["%1a"](http://seclists.org/fulldisclosure/2016/Nov/67)) has been added.

