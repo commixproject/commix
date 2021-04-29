@@ -237,8 +237,8 @@ def check_http_traffic(request):
     if not settings.PERFORM_CRACKING and \
        not settings.IS_JSON and \
        not settings.IS_XML and \
-       not str(err_msg.code) == settings.INTERNAL_SERVER_ERROR and \
-       not str(err_msg.code) == settings.BAD_REQUEST:
+       not str(err.code) == settings.INTERNAL_SERVER_ERROR and \
+       not str(err.code) == settings.BAD_REQUEST:
       print(settings.SPACE)
     # error_msg = "Got " + str(err).replace(": "," (")
     # Check for 3xx, 4xx, 5xx HTTP error codes.
