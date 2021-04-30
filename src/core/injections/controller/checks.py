@@ -1234,15 +1234,15 @@ def perform_payload_modification(payload):
 """
 Skip parameters when the provided value is empty.
 """
-def skip_empty(provided_value, http_request_method):
+def skip_empty(empty_parameters, http_request_method):
   warn_msg = "The " + http_request_method
   warn_msg += ('', ' (JSON)')[settings.IS_JSON] + ('', ' (SOAP/XML)')[settings.IS_XML]
-  warn_msg += " parameter" + "s"[len(provided_value.split(",")) == 1:][::-1]
-  warn_msg += " '" + provided_value + "'"
-  warn_msg += (' have ', ' has ')[len(provided_value.split(",")) == 1]
+  warn_msg += " parameter" + "s"[len(empty_parameters.split(",")) == 1:][::-1]
+  warn_msg += " '" + empty_parameters + "'"
+  warn_msg += (' have ', ' has ')[len(empty_parameters.split(",")) == 1]
   warn_msg += "been skipped from testing"
-  warn_msg += " (the provided value" + "s"[len(provided_value.split(",")) == 1:][::-1]
-  warn_msg += (' are ', ' is ')[len(provided_value.split(",")) == 1] + "empty). "
+  warn_msg += " due to provided value" + "s"[len(empty_parameters.split(",")) == 1:][::-1]
+  warn_msg += (' are ', ' is ')[len(empty_parameters.split(",")) == 1] + "empty. "
   print(settings.print_warning_msg(warn_msg))
 
 
@@ -1259,10 +1259,12 @@ def json_data(data):
 Check if the provided value is empty.
 """
 def is_empty(multi_parameters, http_request_method):
-  # if settings.VERBOSITY_LEVEL != 0:
-  #   info_msg = "Checking for empty values in provided data."  
-  #   print(settings.print_info_msg(info_msg))
-  provided_value = []
+  all_empty = False
+
+  if settings.VERBOSITY_LEVEL != 0:
+    debug_msg = "Checking for empty values in provided data."  
+    print(settings.print_debug_msg(debug_msg))
+  empty_parameters = []
   multi_params = [s for s in multi_parameters]
   if settings.IS_JSON:
     multi_params = ','.join(multi_params)
@@ -1272,33 +1274,38 @@ def is_empty(multi_parameters, http_request_method):
     try:
       if settings.IS_JSON:
         if len(str(multi_params[empty])) == 0:
-          provided_value.append(empty)
+          empty_parameters.append(empty)
       elif settings.IS_XML:
         if re.findall(r'>(.*)<', empty)[0] == "" or \
            re.findall(r'>(.*)<', empty)[0] == " ":
-          provided_value.append(re.findall(r'</(.*)>', empty)[0])  
+          empty_parameters.append(re.findall(r'</(.*)>', empty)[0])  
       elif len(empty.split("=")[1]) == 0:
-        provided_value.append(empty.split("=")[0])
+        empty_parameters.append(empty.split("=")[0])
     except IndexError:
       if not settings.IS_XML:
         err_msg = "No parameter(s) found for testing in the provided data."
         print(settings.print_critical_msg(err_msg))
         raise SystemExit() 
-  provided_value = ", ".join(provided_value)
-  if len(provided_value) > 0:
-    if menu.options.skip_empty and len(multi_parameters) > 1:
-      skip_empty(provided_value, http_request_method)
+  
+  if len(empty_parameters) == len(multi_parameters):
+    all_empty = True
+  
+  empty_parameters = ", ".join(empty_parameters)
+  if len(empty_parameters) > 0:
+    if menu.options.skip_empty and all_empty:
+      skip_empty(empty_parameters, http_request_method)
+      return True
     else:
-      warn_msg = "The provided value"+ "s"[len(provided_value.split(",")) == 1:][::-1]
+      warn_msg = "The provided value"+ "s"[len(empty_parameters.split(",")) == 1:][::-1]
       warn_msg += " for " + http_request_method 
       warn_msg += ('', ' (JSON)')[settings.IS_JSON] + ('', ' (SOAP/XML)')[settings.IS_XML] 
-      warn_msg += " parameter" + "s"[len(provided_value.split(",")) == 1:][::-1]
-      warn_msg += " '" + provided_value + "'"
-      warn_msg += (' are ', ' is ')[len(provided_value.split(",")) == 1] + "empty. "
+      warn_msg += " parameter" + "s"[len(empty_parameters.split(",")) == 1:][::-1]
+      warn_msg += " '" + empty_parameters + "'"
+      warn_msg += (' are ', ' is ')[len(empty_parameters.split(",")) == 1] + "empty. "
       warn_msg += "Use valid "
       warn_msg += "values to run properly."
       print(settings.print_warning_msg(warn_msg))
-      return True
+      return False
 
 # Check if valid SOAP/XML
 def is_XML_check(parameter):

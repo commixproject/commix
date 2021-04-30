@@ -216,7 +216,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.3"
-REVISION = "15"
+REVISION = "16"
 STABLE_RELEASE = False
 if STABLE_RELEASE:
   VERSION = "v" + VERSION_NUM + "-stable"
@@ -1016,7 +1016,7 @@ HTTP_ACCEPT_HEADER = "Accept"
 HTTP_ACCEPT_HEADER_VALUE = "*/*"
 
 # Regular expression used for ignoring some special chars
-IGNORE_SPECIAL_CHAR_REGEX = "[^(A-Za-z0-9.:,_]+"
+IGNORE_SPECIAL_CHAR_REGEX = "[^/(A-Za-z0-9.:,_]+"
 
 PERFORM_CRACKING = False
 
