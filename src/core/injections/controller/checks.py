@@ -1241,8 +1241,7 @@ def skip_empty(empty_parameters, http_request_method):
   warn_msg += " '" + empty_parameters + "'"
   warn_msg += (' have ', ' has ')[len(empty_parameters.split(",")) == 1]
   warn_msg += "been skipped from testing"
-  warn_msg += " due to provided value" + "s"[len(empty_parameters.split(",")) == 1:][::-1]
-  warn_msg += (' are ', ' is ')[len(empty_parameters.split(",")) == 1] + "empty. "
+  warn_msg += " due to empty value" + "s"[len(empty_parameters.split(",")) == 1:][::-1] + "."
   print(settings.print_warning_msg(warn_msg))
 
 
@@ -1302,8 +1301,8 @@ def is_empty(multi_parameters, http_request_method):
       warn_msg += " parameter" + "s"[len(empty_parameters.split(",")) == 1:][::-1]
       warn_msg += " '" + empty_parameters + "'"
       warn_msg += (' are ', ' is ')[len(empty_parameters.split(",")) == 1] + "empty. "
-      warn_msg += "Use valid "
-      warn_msg += "values to run properly."
+      warn_msg += "You are advised to use only valid values, so " + settings.APPLICATION
+      warn_msg += " could be able to run properly."
       print(settings.print_warning_msg(warn_msg))
       return False
 
