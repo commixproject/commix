@@ -129,27 +129,17 @@ def do_GET_check(url, http_request_method):
             if re.search(settings.VALUE_BOUNDARIES, value):
               value = checks.value_boundaries(value)
             # Replace the value of parameter with INJECT_HERE tag
-            # Skip testing the parameter(s) with empty value(s).
-            if menu.options.skip_empty:
-              if len(value) != 0:
-                all_params[param] = all_params[param].replace(value, value + settings.INJECT_TAG)
-                all_params[param - 1] = all_params[param - 1].replace(value, "").replace(settings.INJECT_TAG, "")
-                parameter = settings.PARAMETER_DELIMITER.join(all_params)
-                # Reconstruct the URL
-                url = url_part + "?" + parameter  
-                urls_list.append(url)
-            else:
-              if len(value) == 0:
+            if len(value) == 0:
+              if not menu.options.skip_empty:
                 all_params[param] = all_params[param] + settings.INJECT_TAG
-              else:
-                all_params[param] = all_params[param].replace(value, value + settings.INJECT_TAG)
-              all_params[param - 1] = all_params[param - 1].replace(value, "").replace(settings.INJECT_TAG, "")
-              parameter = settings.PARAMETER_DELIMITER.join(all_params)
-              # Reconstruct the URL
-              url = url_part + "?" + parameter
-              url = url.replace(settings.RANDOM_TAG,"")
-              urls_list.append(url)
-
+            else:
+              all_params[param] = all_params[param].replace(value, value + settings.INJECT_TAG)
+            all_params[param - 1] = all_params[param - 1].replace(value, "").replace(settings.INJECT_TAG, "")
+            parameter = settings.PARAMETER_DELIMITER.join(all_params)
+            # Reconstruct the URL
+            url = url_part + "?" + parameter
+            url = url.replace(settings.RANDOM_TAG,"")
+            urls_list.append(url)
         else:
           for param in range(0,len(multi_parameters)):
             # Grab the value of parameter.
@@ -181,18 +171,10 @@ def vuln_GET_param(url):
       if settings.INJECT_TAG in pairs[param]:
         vuln_parameter = pairs[param].split("=")[0]
         break
-  
-  # Check if only one parameter supplied but, not defined the INJECT_TAG.
-  elif settings.INJECT_TAG not in url:
-    # Grab the value of parameter.
-    try:
-      vuln_parameter = re.search(r'\?(.*)=', url).group(1)
-    except AttributeError:
-      vuln_parameter = url
 
   else:
     vuln_parameter = url
-  
+
   return vuln_parameter 
 
 """
@@ -238,41 +220,44 @@ def do_POST_check(parameter, http_request_method):
     checks.inappropriate_format(multi_parameters)
   # Check if single parameter is supplied.
   if len(multi_parameters) == 1:
-    # Grab the value of parameter.
-    if settings.IS_JSON:
+    if settings.INJECT_TAG not in multi_parameters[0]:
       # Grab the value of parameter.
-      value = re.findall(r'\"(.*)\"', parameter)
-      value = ''.join(value)
-      if value != settings.INJECT_TAG:
-        value = re.findall(r'\s*\:\s*\"(.*)\"', parameter)
+      if settings.IS_JSON:
+        # Grab the value of parameter.
+        value = re.findall(r'\"(.*)\"', parameter)
         value = ''.join(value)
-    elif settings.IS_XML:
-      # Grab the value of parameter.
-      value = re.findall(r'>(.*)</', parameter)
-      value = ''.join(value)
-    else:
-      _ = []
-      _.append(parameter)
-      parameter = ''.join(checks.check_similarities(_))
-      value = re.findall(r'=(.*)', parameter)
-      value = ''.join(value)
-    if checks.is_empty(multi_parameters, http_request_method):
-      return parameter
-    else:
-      # Ignoring the anti-CSRF parameter(s).
-      if checks.ignore_anticsrf_parameter(parameter):
-        return parameter
-      if re.search(settings.VALUE_BOUNDARIES, value):
-        value = checks.value_boundaries(value)
-      # Replace the value of parameter with INJECT_HERE tag
-      if len(value) == 0:
-        if settings.IS_JSON:
-          parameter = parameter.replace(":\"\"", ":\"" + settings.INJECT_TAG + "\"")
-        else:  
-          parameter = parameter + settings.INJECT_TAG
+        if value != settings.INJECT_TAG:
+          value = re.findall(r'\s*\:\s*\"(.*)\"', parameter)
+          value = ''.join(value)
+      elif settings.IS_XML:
+        # Grab the value of parameter.
+        value = re.findall(r'>(.*)</', parameter)
+        value = ''.join(value)
       else:
-        parameter = parameter.replace(value, value + settings.INJECT_TAG)
-      return parameter
+        _ = []
+        _.append(parameter)
+        parameter = ''.join(checks.check_similarities(_))
+        value = re.findall(r'=(.*)', parameter)
+        value = ''.join(value)
+      if checks.is_empty(multi_parameters, http_request_method):
+        return parameter
+      else:
+        # Ignoring the anti-CSRF parameter(s).
+        if checks.ignore_anticsrf_parameter(parameter):
+          return parameter
+        if re.search(settings.VALUE_BOUNDARIES, value):
+          value = checks.value_boundaries(value)
+        # Replace the value of parameter with INJECT_HERE tag
+        if len(value) == 0:
+          if settings.IS_JSON:
+            parameter = parameter.replace(":\"\"", ":\"" + settings.INJECT_TAG + "\"")
+          else:  
+            parameter = parameter + settings.INJECT_TAG
+        else:
+          parameter = parameter.replace(value, value + settings.INJECT_TAG)
+        return parameter
+    else:
+      return multi_parameters
 
   else:
     # Check if multiple parameters are supplied without the "INJECT_HERE" tag.
@@ -317,26 +302,21 @@ def do_POST_check(parameter, http_request_method):
         if re.search(settings.VALUE_BOUNDARIES, value):
           value = checks.value_boundaries(value)
         # Replace the value of parameter with INJECT_HERE tag  
-        # Skip testing the parameter(s) with empty value(s).
-        if menu.options.skip_empty:
-          if len(value) != 0:
-            all_params[param] = all_params[param].replace(value, value + settings.INJECT_TAG)
-            all_params[param - 1] = all_params[param - 1].replace(value, "").replace(settings.INJECT_TAG, "")
-            parameter = settings.PARAMETER_DELIMITER.join(all_params)
-        else:
-          if len(value) == 0:
+        if len(value) == 0:
+          if not menu.options.skip_empty:
             if settings.IS_JSON:
-              all_params[param] = all_params[param].replace(":\"\"", ":\"" + settings.INJECT_TAG + "\"")
+              all_params[param] = all_params[param].replace(":\"\"", ":\"" + settings.INJECT_TAG + "\"").replace(":\\\"\\\"", ":\\\"" + settings.INJECT_TAG + "\\\"")
             elif settings.IS_XML: 
               all_params[param] = all_params[param].replace("></", ">" + settings.INJECT_TAG + "</")
             else:  
               all_params[param] = all_params[param] + settings.INJECT_TAG
-          else:
-            all_params[param] = all_params[param].replace(value, value + settings.INJECT_TAG)
-          all_params[param - 1] = all_params[param - 1].replace(value, "").replace(settings.INJECT_TAG, "")
-          parameter = settings.PARAMETER_DELIMITER.join(all_params)
-          parameter = parameter.replace(settings.RANDOM_TAG,"")
-        parameters_list.append(parameter)
+        else:
+          all_params[param] = all_params[param].replace(value, value + settings.INJECT_TAG)
+        all_params[param - 1] = all_params[param - 1].replace(value, "").replace(settings.INJECT_TAG, "")
+        parameter = settings.PARAMETER_DELIMITER.join(all_params)
+        parameter = parameter.replace(settings.RANDOM_TAG,"")
+        if type(parameter) != list:
+          parameters_list.append(parameter)
         parameter = parameters_list
 
     else:
@@ -352,12 +332,14 @@ def do_POST_check(parameter, http_request_method):
           value = re.findall(r'=(.*)', multi_parameters[param])
           value = ''.join(value)
         parameter = settings.PARAMETER_DELIMITER.join(multi_parameters)
+
     return parameter
 
 """
 Define the vulnerable POST parameter.
 """
 def vuln_POST_param(parameter, url):
+
   # JSON data format
   if settings.IS_JSON:
     param = re.sub(settings.IGNORE_SPECIAL_CHAR_REGEX, '', parameter.split(settings.INJECT_TAG)[0])
@@ -472,23 +454,16 @@ def do_cookie_check(cookie):
         if checks.ignore_google_analytics_cookie(all_params[param]):
           continue
         # Replace the value of parameter with INJECT tag
-        # Skip testing the parameter(s) with empty value(s).
-        if menu.options.skip_empty:
-          if len(value) != 0:   
-            all_params[param] = all_params[param].replace(value, value + settings.INJECT_TAG)
-            all_params[param - 1] = all_params[param - 1].replace(value, "").replace(settings.INJECT_TAG, "")
-            cookie = settings.COOKIE_DELIMITER.join(all_params)
-            cookies_list.append(cookie)
-            cookie = cookies_list
-        else:
-          if len(value) == 0:        
+        if len(value) == 0:     
+          if not menu.options.skip_empty:   
             all_params[param] = all_params[param] + settings.INJECT_TAG
-          else:
-            all_params[param] = all_params[param].replace(value, value + settings.INJECT_TAG)  
-          all_params[param - 1] = all_params[param - 1].replace(value, "").replace(settings.INJECT_TAG, "")
-          cookie = settings.COOKIE_DELIMITER.join(all_params)
+        else:
+          all_params[param] = all_params[param].replace(value, value + settings.INJECT_TAG)  
+        all_params[param - 1] = all_params[param - 1].replace(value, "").replace(settings.INJECT_TAG, "")
+        cookie = settings.COOKIE_DELIMITER.join(all_params)
+        if type(cookie) != list:
           cookies_list.append(cookie)
-          cookie = cookies_list
+        cookie = cookies_list
 
     else:
       for param in range(0, len(multi_parameters)):

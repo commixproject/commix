@@ -805,6 +805,8 @@ def wildcard_character(data):
     _ = _ + data + "\\n"
   data = _.rstrip("\\n")
   if data.count(settings.INJECT_TAG) > 1:
+    if settings.VERBOSITY_LEVEL == 0:
+      print(settings.SPACE)
     err_msg = "You specified more than one injecton markers. " 
     err_msg += "Use the '-p' option to define them (i.e -p \"id1,id2\"). "
     print(settings.print_critical_msg(err_msg)) 
@@ -1259,7 +1261,6 @@ Check if the provided value is empty.
 """
 def is_empty(multi_parameters, http_request_method):
   all_empty = False
-
   if settings.VERBOSITY_LEVEL != 0:
     debug_msg = "Checking for empty values in provided data."  
     print(settings.print_debug_msg(debug_msg))
@@ -1272,7 +1273,13 @@ def is_empty(multi_parameters, http_request_method):
   for empty in multi_params:
     try:
       if settings.IS_JSON:
-        if len(str(multi_params[empty])) == 0:
+        param = re.sub("[^/()A-Za-z0-9.:,_]+", '',  multi_params[empty])
+        if "(" and ")" in param:
+          param = re.findall(r'\((.*)\)', param)
+          for value in param[0].split(","):
+            if value.split(":")[1] == "":
+              empty_parameters.append(value.split(":")[0])
+        elif len(str(multi_params[empty])) == 0 :
           empty_parameters.append(empty)
       elif settings.IS_XML:
         if re.findall(r'>(.*)<', empty)[0] == "" or \
