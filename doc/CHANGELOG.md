@@ -1,4 +1,5 @@
 ## Version 3.3 (TBA)
+* Added: Support for parsing custom wordlists regarding HTTP authentication (Basic / Digest) dictionary-based cracker.
 * Revised: Improvements regarding dynamic code evaluation heuristic test.
 * Fixed: Minor bug-fix regarding parsing SOAP/XML data via `--data` option.
 * Revised: Minor improvement regarding parsing GraphQL JSON objects.
