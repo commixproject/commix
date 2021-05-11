@@ -18,6 +18,8 @@ from src.utils import settings
 from src.thirdparty import six
 
 def hexdecode(value):
+  if value.lower().startswith("0x"):
+    value = value[2:]
   try:
     value = codecs.decode(''.join(value.split()), "hex")
   except LookupError:
