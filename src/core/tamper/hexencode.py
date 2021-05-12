@@ -39,6 +39,7 @@ def tamper(payload):
   else:
     payload = _urllib.parse.unquote(payload)
     payload = hexencode(payload)
+    payload = payload.decode(settings.UNICODE_ENCODING)
     return payload
 
 # eof 
