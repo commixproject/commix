@@ -216,7 +216,7 @@ def http_auth_cracker(url, realm):
         if found:
           valid_pair =  "" + username + ":" + password + ""
           if not settings.VERBOSITY_LEVEL >= 2:
-            print(settings.SPACE)
+            print(settings.SINGLE_WHITESPACE)
           info_msg = "Identified a valid pair of credentials '" 
           info_msg += valid_pair + Style.RESET_ALL + Style.BRIGHT  + "'."  
           print(settings.print_bold_info_msg(info_msg))

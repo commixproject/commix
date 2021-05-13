@@ -513,7 +513,7 @@ Check if PowerShell is enabled.
 def ps_check():
   if settings.PS_ENABLED == None and menu.options.is_admin or menu.options.users or menu.options.passwords:
     if settings.VERBOSITY_LEVEL != 0:
-      print(settings.SPACE)
+      print(settings.SINGLE_WHITESPACE)
     warn_msg = "The payloads in some options that you "
     warn_msg += "have chosen, are requiring the use of PowerShell. "
     print(settings.print_warning_msg(warn_msg))
@@ -532,7 +532,7 @@ def ps_check():
       elif ps_check in settings.CHOICE_NO:
         break
       elif ps_check in settings.CHOICE_QUIT:
-        print(settings.SPACE)
+        print(settings.SINGLE_WHITESPACE)
         os._exit(0)
       else:  
         err_msg = "'" + ps_check + "' is not a valid answer."  
@@ -555,7 +555,7 @@ def ps_check_failed():
     if ps_check in settings.CHOICE_YES:
       break
     elif ps_check in settings.CHOICE_NO:
-      print(settings.SPACE)
+      print(settings.SINGLE_WHITESPACE)
       os._exit(0)
     else:  
       err_msg = "'" + ps_check + "' is not a valid answer."  
@@ -605,7 +605,7 @@ def check_CGI_scripts(url):
           menu.options.shellshock = False
           break
         elif shellshock_check in settings.CHOICE_QUIT:
-          print(settings.SPACE)
+          print(settings.SINGLE_WHITESPACE)
           os._exit(0)
         else:  
           err_msg = "'" + shellshock_check + "' is not a valid answer."  
@@ -694,7 +694,7 @@ def third_party_dependencies():
   try:
     import sqlite3
   except ImportError:
-    print(settings.SPACE)
+    print(settings.SINGLE_WHITESPACE)
     err_msg = settings.APPLICATION + " requires 'sqlite3' third-party library "
     err_msg += "in order to store previous injection points and commands. "
     print(settings.print_critical_msg(err_msg))
@@ -707,7 +707,7 @@ def third_party_dependencies():
       try:
         import pyreadline
       except ImportError:
-        print(settings.SPACE)
+        print(settings.SINGLE_WHITESPACE)
         err_msg = settings.APPLICATION + " requires 'pyreadline' third-party library "
         err_msg += "in order to be able to take advantage of the TAB "
         err_msg += "completion and history support features. "
@@ -717,14 +717,14 @@ def third_party_dependencies():
       try:
         import gnureadline
       except ImportError:
-        print(settings.SPACE)
+        print(settings.SINGLE_WHITESPACE)
         err_msg = settings.APPLICATION + " requires 'gnureadline' third-party library "
         err_msg += "in order to be able to take advantage of the TAB "
         err_msg += "completion and history support features. "
         print(settings.print_critical_msg(err_msg))
     pass
 
-  print(settings.SPACE)
+  print(settings.SINGLE_WHITESPACE)
   info_msg = "All required third-party (non-core) libraries are seems to be installed."
   print(settings.print_bold_info_msg(info_msg))
 
@@ -806,7 +806,7 @@ def wildcard_character(data):
   data = _.rstrip("\\n")
   if data.count(settings.INJECT_TAG) > 1:
     if settings.VERBOSITY_LEVEL == 0:
-      print(settings.SPACE)
+      print(settings.SINGLE_WHITESPACE)
     err_msg = "You specified more than one injecton markers. " 
     err_msg += "Use the '-p' option to define them (i.e -p \"id1,id2\"). "
     print(settings.print_critical_msg(err_msg)) 

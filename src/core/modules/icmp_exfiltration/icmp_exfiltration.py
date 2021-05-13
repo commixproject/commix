@@ -101,7 +101,7 @@ def cmd_exec(http_request_method, cmd, url, vuln_parameter, ip_src):
       print("\n")
       add_new_line = True
     else:
-      print(settings.SPACE)
+      print(settings.SINGLE_WHITESPACE)
       
   except _urllib.error.HTTPError as err_msg:
     print(settings.print_critical_msg(str(err_msg.code)))
@@ -156,7 +156,7 @@ def input_cmd(http_request_method, url, vuln_parameter, ip_src, technique):
           cmd = checks.escaped_cmd(cmd)
           if cmd.lower() in settings.SHELL_OPTIONS:
             if cmd.lower() == "quit" or cmd.lower() == "back":       
-              print(settings.SPACE)             
+              print(settings.SINGLE_WHITESPACE)             
               os._exit(0)
             elif cmd.lower() == "?": 
               menu.os_shell_options()
@@ -172,13 +172,13 @@ def input_cmd(http_request_method, url, vuln_parameter, ip_src, technique):
         except KeyboardInterrupt:
           os._exit(1)
         except:
-          print(settings.SPACE)
+          print(settings.SINGLE_WHITESPACE)
           os._exit(0)
     elif gotshell in settings.CHOICE_NO:
-      print(settings.SPACE)
+      print(settings.SINGLE_WHITESPACE)
       os._exit(0)
     elif gotshell in settings.CHOICE_QUIT:
-      print(settings.SPACE)
+      print(settings.SINGLE_WHITESPACE)
       os._exit(0)
     else:
       err_msg = "'" + gotshell + "' is not a valid answer."
@@ -196,7 +196,7 @@ def exploitation(ip_dst, ip_src, url, http_request_method, vuln_parameter, techn
   if menu.options.os_cmd:
     cmd = menu.options.os_cmd
     cmd_exec(http_request_method, cmd, url, vuln_parameter, ip_src)
-    print(settings.SPACE)
+    print(settings.SINGLE_WHITESPACE)
     os._exit(0)
   else:
     input_cmd(http_request_method, url, vuln_parameter, ip_src, technique)

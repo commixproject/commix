@@ -185,7 +185,7 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
   sys.stdout.write(settings.print_info_msg(info_msg))
   sys.stdout.flush()  
   if settings.VERBOSITY_LEVEL >= 2:
-    print(settings.SPACE)
+    print(settings.SINGLE_WHITESPACE)
   for output_length in range(int(minlen), int(maxlen)):
     if alter_shell:
       # Execute shell commands on vulnerable host.
@@ -198,7 +198,7 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
     payload = parameters.suffixes(payload, suffix)
 
     # Whitespace fixation
-    payload = payload.replace(" ", whitespace)
+    payload = payload.replace(settings.SINGLE_WHITESPACE, whitespace)
 
     # Perform payload modification
     payload = checks.perform_payload_modification(payload)
@@ -250,7 +250,7 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
           sys.stdout.write(settings.SUCCESS_STATUS + "\n")
           sys.stdout.flush()
         if settings.VERBOSITY_LEVEL == 1:
-          print(settings.SPACE)
+          print(settings.SINGLE_WHITESPACE)
         if settings.VERBOSITY_LEVEL != 0:
           debug_msg = "Retrieved the length of execution output: " + str(output_length)
           print(settings.print_bold_debug_msg(debug_msg))
@@ -294,7 +294,7 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
         payload = parameters.suffixes(payload, suffix)
 
         # Whitespace fixation
-        payload = payload.replace(" ", whitespace)
+        payload = payload.replace(settings.SINGLE_WHITESPACE, whitespace)
         
         # Perform payload modification
         payload = checks.perform_payload_modification(payload)
@@ -376,7 +376,7 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
     output = False
 
   if settings.VERBOSITY_LEVEL != 0 and menu.options.ignore_session:
-    print(settings.SPACE)
+    print(settings.SINGLE_WHITESPACE)
   return  check_how_long, output
 
 """
@@ -414,7 +414,7 @@ def false_positive_check(separator, TAG, cmd, whitespace, prefix, suffix, timese
     payload = parameters.suffixes(payload, suffix)
 
     # Whitespace fixation
-    payload = payload.replace(" ", whitespace)
+    payload = payload.replace(settings.SINGLE_WHITESPACE, whitespace)
 
     # Perform payload modification
     payload = checks.perform_payload_modification(payload)
@@ -485,7 +485,7 @@ def false_positive_check(separator, TAG, cmd, whitespace, prefix, suffix, timese
         payload = parameters.suffixes(payload, suffix)
 
         # Whitespace fixation
-        payload = payload.replace(" ", whitespace)
+        payload = payload.replace(settings.SINGLE_WHITESPACE, whitespace)
 
         # Perform payload modification
         payload = checks.perform_payload_modification(payload)
@@ -538,11 +538,11 @@ def false_positive_check(separator, TAG, cmd, whitespace, prefix, suffix, timese
 
     if str(output) == str(randvcalc):
       if settings.VERBOSITY_LEVEL == 1:
-        print(settings.SPACE)
+        print(settings.SINGLE_WHITESPACE)
       return how_long, output
   else:
     if settings.VERBOSITY_LEVEL < 2:
-      print(settings.SPACE)
+      print(settings.SINGLE_WHITESPACE)
     warn_msg = "False positive or unexploitable injection point detected."
     print(settings.print_warning_msg(warn_msg))
         
@@ -556,7 +556,7 @@ def export_injection_results(cmd, separator, output, check_how_long):
     if settings.VERBOSITY_LEVEL == 0:
       print("\n")
     elif settings.VERBOSITY_LEVEL == 1:
-      print(settings.SPACE)  
+      print(settings.SINGLE_WHITESPACE)  
     print(settings.print_output(output))
     info_msg = "Finished in " + time.strftime('%H:%M:%S', time.gmtime(check_how_long)) + "."
     sys.stdout.write("\n" + settings.print_info_msg(info_msg))
@@ -573,6 +573,6 @@ def export_injection_results(cmd, separator, output, check_how_long):
     else:
       err_msg = "The '" + cmd + "' command, does not return any output."
       if settings.VERBOSITY_LEVEL == 0:
-        print(settings.SPACE)
+        print(settings.SINGLE_WHITESPACE)
       sys.stdout.write("\r" + settings.print_critical_msg(err_msg))
 # eof

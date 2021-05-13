@@ -51,7 +51,7 @@ def powershell_version(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, 
       settings.PS_ENABLED = True
       ps_version = "".join(str(p) for p in output)
       if settings.VERBOSITY_LEVEL == 0 and _:
-        print(settings.SPACE)
+        print(settings.SINGLE_WHITESPACE)
       # Output PowerShell's version number
       info_msg = "The PowerShell's version number is " 
       info_msg += ps_version + Style.RESET_ALL + Style.BRIGHT
@@ -87,7 +87,7 @@ def hostname(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, h
   if shell:
     shell = "".join(str(p) for p in output)
     if settings.VERBOSITY_LEVEL == 0 and _:
-      print(settings.SPACE)
+      print(settings.SINGLE_WHITESPACE)
     info_msg = "The hostname is " +  str(shell)
     sys.stdout.write(settings.print_bold_info_msg(info_msg) + ".")
     sys.stdout.flush()
@@ -117,7 +117,7 @@ def system_information(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, 
     output = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
   target_os = output
   if settings.VERBOSITY_LEVEL == 0 and _:
-    print(settings.SPACE)
+    print(settings.SINGLE_WHITESPACE)
   if target_os:
     if settings.TARGET_OS != "win":
       cmd = settings.DISTRO_INFO
@@ -146,7 +146,7 @@ def system_information(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, 
     target_arch = output
     if target_arch:
       if settings.VERBOSITY_LEVEL == 0 and _:
-        print(settings.SPACE)
+        print(settings.SINGLE_WHITESPACE)
       info_msg = "The target operating system is " +  str(target_os) + Style.RESET_ALL  
       info_msg += Style.BRIGHT + " and the hardware platform is " +  str(target_arch)
       sys.stdout.write(settings.print_bold_info_msg(info_msg) + ".")
@@ -195,7 +195,7 @@ def current_user(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timese
         output = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
       shell = output
       if settings.VERBOSITY_LEVEL == 0 and _:
-        print(settings.SPACE)
+        print(settings.SINGLE_WHITESPACE)
       info_msg = "The current user is " +  str(cu_account)  
       sys.stdout.write(settings.print_bold_info_msg(info_msg))
       # Add infos to logs file.
@@ -222,7 +222,7 @@ def current_user(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timese
           output_file.close()
     else:
       if settings.VERBOSITY_LEVEL == 0 and _:
-        print(settings.SPACE)
+        print(settings.SINGLE_WHITESPACE)
       info_msg = "The current user is " +  str(cu_account)
       sys.stdout.write(settings.print_bold_info_msg(info_msg) + ".")
       sys.stdout.flush()
@@ -261,7 +261,7 @@ def system_users(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timese
   # Windows users enumeration.
   if settings.TARGET_OS == "win":
     if settings.VERBOSITY_LEVEL == 0 and _:
-      print(settings.SPACE)
+      print(settings.SINGLE_WHITESPACE)
     info_msg = "Executing the 'net users' command "
     info_msg += "to enumerate users entries. "  
     sys.stdout.write(settings.print_info_msg(info_msg))
@@ -329,7 +329,7 @@ def system_users(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timese
   # Unix-like users enumeration.
   else:
     if settings.VERBOSITY_LEVEL == 0 and _:
-      print(settings.SPACE)
+      print(settings.SINGLE_WHITESPACE)
     info_msg = "Fetching '" + settings.PASSWD_FILE 
     info_msg += "' to enumerate users entries. "
     sys.stdout.write(settings.print_info_msg(info_msg))
@@ -446,7 +446,7 @@ def system_passwords(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, ti
     pass
   else:
     cmd = settings.SYS_PASSES
-    #print(settings.SPACE)
+    #print(settings.SINGLE_WHITESPACE)
     if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
       check_how_long, output = tfb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
       _ = True
@@ -460,7 +460,7 @@ def system_passwords(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, ti
       sys_passes = " "
     if sys_passes :
       if settings.VERBOSITY_LEVEL != 0 and menu.options.ignore_session:
-        print(settings.SPACE)
+        print(settings.SINGLE_WHITESPACE)
       info_msg = "Fetching '" + settings.SHADOW_FILE + "' to enumerate users password hashes. "
       sys.stdout.write(settings.print_info_msg(info_msg))
       sys.stdout.flush()
@@ -517,7 +517,7 @@ def single_os_cmd_exec(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, 
     check_how_long, output = tfb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
     session_handler.store_cmd(url, cmd, output, vuln_parameter)
     if settings.VERBOSITY_LEVEL != 0:
-      print(settings.SPACE) 
+      print(settings.SINGLE_WHITESPACE) 
     return check_how_long, output
   else:
     output = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
@@ -537,34 +537,34 @@ def do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, h
 
   if menu.options.hostname:
     if settings.ENUMERATION_DONE == True:
-      print(settings.SPACE)
+      print(settings.SINGLE_WHITESPACE)
     hostname(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
     settings.ENUMERATION_DONE = True
 
   if menu.options.current_user:
     if settings.ENUMERATION_DONE == True:
-      print(settings.SPACE)
+      print(settings.SINGLE_WHITESPACE)
     current_user(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
     if settings.ENUMERATION_DONE == False:
       settings.ENUMERATION_DONE = True
 
   if menu.options.sys_info:
     if settings.ENUMERATION_DONE == True:
-      print(settings.SPACE)
+      print(settings.SINGLE_WHITESPACE)
     system_information(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
     if settings.ENUMERATION_DONE == False:
       settings.ENUMERATION_DONE = True
 
   if menu.options.users:
     if settings.ENUMERATION_DONE == True:
-      print(settings.SPACE)
+      print(settings.SINGLE_WHITESPACE)
     system_users(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
     if settings.ENUMERATION_DONE == False:
       settings.ENUMERATION_DONE = True
 
   if menu.options.passwords:
     if settings.ENUMERATION_DONE == True:
-      print(settings.SPACE)
+      print(settings.SINGLE_WHITESPACE)
     system_passwords(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
     if settings.ENUMERATION_DONE == False:
       settings.ENUMERATION_DONE = True

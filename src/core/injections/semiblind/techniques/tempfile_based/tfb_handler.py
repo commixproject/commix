@@ -150,7 +150,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                 payload = parameters.suffixes(payload, suffix)
 
                 # Whitespace fixation
-                payload = payload.replace(" ", whitespace)
+                payload = payload.replace(settings.SINGLE_WHITESPACE, whitespace)
                 
                 # Perform payload modification
                 payload = checks.perform_payload_modification(payload)
@@ -326,7 +326,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                   
               except KeyboardInterrupt: 
                 if settings.VERBOSITY_LEVEL != 0:
-                  print(settings.SPACE)
+                  print(settings.SINGLE_WHITESPACE)
                 if 'cmd' in locals():
                   # Delete previous shell (text) files (output) from temp.
                   delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
@@ -360,7 +360,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                       percent = ""
                   else:
                     percent = ".. (" + str(float_percent) + "%)"
-                    print(settings.SPACE)
+                    print(settings.SINGLE_WHITESPACE)
                     # Print logs notification message
                     logs.logs_notification(filename)
                   #raise
@@ -432,7 +432,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
 
               if not settings.LOAD_SESSION:
                 if settings.VERBOSITY_LEVEL == 0:
-                  print(settings.SPACE)
+                  print(settings.SINGLE_WHITESPACE)
                 else:
                   checks.total_of_requests()
 
@@ -472,7 +472,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                     enumerate_again = "Y"
                   if enumerate_again in settings.CHOICE_YES:
                     tfb_enumeration.do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
-                    print(settings.SPACE)
+                    print(settings.SINGLE_WHITESPACE)
                     break
                   elif enumerate_again in settings.CHOICE_NO: 
                     new_line = True
@@ -488,11 +488,11 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
               else:
                 if menu.enumeration_options():
                   tfb_enumeration.do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
-                  print(settings.SPACE)
+                  print(settings.SINGLE_WHITESPACE)
 
               # Check for any system file access options.
               if settings.FILE_ACCESS_DONE == True :
-                print(settings.SPACE)
+                print(settings.SINGLE_WHITESPACE)
                 while True:
                   if not menu.options.batch:
                     question_msg = "Do you want to access files again? [Y/n] > "
@@ -518,7 +518,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                     pass
               else:
                 # if not menu.enumeration_options() and not menu.options.os_cmd:
-                #   print(settings.SPACE)
+                #   print(settings.SINGLE_WHITESPACE)
                 tfb_file_access.do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
               
               # Check if defined single cmd.
@@ -528,13 +528,13 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                 tfb_injector.export_injection_results(cmd, separator, output, check_how_long)
                 # Delete previous shell (text) files (output) from temp.
                 if settings.VERBOSITY_LEVEL != 0:
-                  print(settings.SPACE)
+                  print(settings.SINGLE_WHITESPACE)
                 delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
                 logs.print_logs_notification(filename, url) 
                 raise SystemExit()  
 
               if settings.VERBOSITY_LEVEL != 0 or not new_line:
-                print(settings.SPACE)
+                print(settings.SINGLE_WHITESPACE)
               try:    
                 # Pseudo-Terminal shell
                 go_back = False
@@ -551,7 +551,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                      gotshell = "Y"
                   if gotshell in settings.CHOICE_YES:
                     # if not menu.options.batch:
-                    #   print(settings.SPACE)
+                    #   print(settings.SINGLE_WHITESPACE)
                     print("Pseudo-Terminal (type '" + Style.BRIGHT + "?" + Style.RESET_ALL + "' for available options)")
                     if settings.READLINE_ERROR:
                       checks.no_readline_module()
@@ -608,7 +608,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
 
               except KeyboardInterrupt:
                 if settings.VERBOSITY_LEVEL != 0:
-                  print(settings.SPACE)
+                  print(settings.SINGLE_WHITESPACE)
                 # Delete previous shell (text) files (output) from temp.
                 delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
                 raise  
@@ -627,7 +627,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
 
   if no_result == True:
     if settings.VERBOSITY_LEVEL == 0:
-      print(settings.SPACE)
+      print(settings.SINGLE_WHITESPACE)
     return False
 
   else :

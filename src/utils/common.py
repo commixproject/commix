@@ -66,7 +66,7 @@ def create_github_issue(err_msg, exc_msg):
       if choise in settings.CHOICE_YES:
         break
       elif choise in settings.CHOICE_NO:
-        print(settings.SPACE)
+        print(settings.SINGLE_WHITESPACE)
         return
       else:
         err_msg = "'" + choise + "' is not a valid answer."  

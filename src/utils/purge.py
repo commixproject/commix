@@ -69,9 +69,9 @@ def purge():
       pass
   if settings.VERBOSITY_LEVEL != 0:    
     if not failed:  
-      print(settings.SPACE)
+      print(settings.SINGLE_WHITESPACE)
     else:
-      print(settings.SPACE)
+      print(settings.SINGLE_WHITESPACE)
 
   # Writing random data to files.
   if settings.VERBOSITY_LEVEL != 0:
@@ -89,9 +89,9 @@ def purge():
       pass
   if settings.VERBOSITY_LEVEL != 0:    
     if not failed:  
-      print(settings.SPACE)
+      print(settings.SINGLE_WHITESPACE)
     else:
-      print(settings.SPACE)
+      print(settings.SINGLE_WHITESPACE)
 
   # Truncating files.
   if settings.VERBOSITY_LEVEL != 0:
@@ -108,9 +108,9 @@ def purge():
       pass
   if settings.VERBOSITY_LEVEL != 0:    
     if not failed:  
-      print(settings.SPACE)
+      print(settings.SINGLE_WHITESPACE)
     else:
-      print(settings.SPACE)
+      print(settings.SINGLE_WHITESPACE)
 
   # Renaming filenames to random values.
   if settings.VERBOSITY_LEVEL != 0:
@@ -126,9 +126,9 @@ def purge():
       pass
   if settings.VERBOSITY_LEVEL != 0:    
     if not failed:  
-      print(settings.SPACE)
+      print(settings.SINGLE_WHITESPACE)
     else:
-      print(settings.SPACE)
+      print(settings.SINGLE_WHITESPACE)
 
   # Renaming directory names to random values.
   if settings.VERBOSITY_LEVEL != 0:
@@ -145,9 +145,9 @@ def purge():
       pass
   if settings.VERBOSITY_LEVEL != 0:    
     if not failed:  
-      print(settings.SPACE)
+      print(settings.SINGLE_WHITESPACE)
     else:
-      print(settings.SPACE)
+      print(settings.SINGLE_WHITESPACE)
 
   # Deleting the whole directory tree. 
   if settings.VERBOSITY_LEVEL != 0:
@@ -160,9 +160,9 @@ def purge():
   except OSError as ex:
     failed = True  
   if not failed:  
-    print(settings.SPACE)
+    print(settings.SINGLE_WHITESPACE)
   else:
-    print(settings.SPACE)    
+    print(settings.SINGLE_WHITESPACE)    
     err_msg = "Problem occurred while removing directory '" + directory + "'."
     print(settings.print_critical_msg(err_msg))
 

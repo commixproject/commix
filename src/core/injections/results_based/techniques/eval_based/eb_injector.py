@@ -152,7 +152,7 @@ def injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_meth
       payload = payload.replace(")%3B" + _urllib.parse.quote(")}"), ")" + _urllib.parse.quote(")}"))
 
     # Whitespace fixation
-    payload = payload.replace(" ", whitespace)
+    payload = payload.replace(settings.SINGLE_WHITESPACE, whitespace)
 
     # Perform payload modification
     payload = checks.perform_payload_modification(payload)

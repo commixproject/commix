@@ -62,7 +62,7 @@ def cb_injection_handler(url, timesec, filename, http_request_method, injection_
     sys.stdout.write(settings.print_info_msg(info_msg))
     sys.stdout.flush()
     if settings.VERBOSITY_LEVEL != 0:
-      print(settings.SPACE)
+      print(settings.SINGLE_WHITESPACE)
       
   i = 0
   # Calculate all possible combinations
@@ -119,7 +119,7 @@ def cb_injection_handler(url, timesec, filename, http_request_method, injection_
               payload = parameters.suffixes(payload, suffix)
 
               # Whitespace fixation
-              payload = payload.replace(" ", whitespace)
+              payload = payload.replace(settings.SINGLE_WHITESPACE, whitespace)
               
               # Perform payload modification
               payload = checks.perform_payload_modification(payload)
@@ -264,7 +264,7 @@ def cb_injection_handler(url, timesec, filename, http_request_method, injection_
 
             if not settings.LOAD_SESSION:
               if settings.VERBOSITY_LEVEL == 0:
-                print(settings.SPACE)
+                print(settings.SINGLE_WHITESPACE)
               else:
                 checks.total_of_requests()
 
@@ -298,7 +298,7 @@ def cb_injection_handler(url, timesec, filename, http_request_method, injection_
                   enumerate_again = "Y"
                 if enumerate_again in settings.CHOICE_YES:
                   cb_enumeration.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec)
-                  #print(settings.SPACE)
+                  #print(settings.SINGLE_WHITESPACE)
                   break
                 elif enumerate_again in settings.CHOICE_NO:
                   new_line = False
@@ -314,12 +314,12 @@ def cb_injection_handler(url, timesec, filename, http_request_method, injection_
                 cb_enumeration.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec)
           
             if not menu.file_access_options() and not menu.options.os_cmd and new_line:
-              print(settings.SPACE)
+              print(settings.SINGLE_WHITESPACE)
             
             # Check for any system file access options.
             if settings.FILE_ACCESS_DONE == True :
               if settings.ENUMERATION_DONE != True:
-                print(settings.SPACE)
+                print(settings.SINGLE_WHITESPACE)
               while True:
                 if not menu.options.batch:
                   question_msg = "Do you want to access files again? [Y/n] > "
@@ -330,7 +330,7 @@ def cb_injection_handler(url, timesec, filename, http_request_method, injection_
                    file_access_again = "Y"
                 if file_access_again in settings.CHOICE_YES:
                   cb_file_access.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec)
-                  print(settings.SPACE)
+                  print(settings.SINGLE_WHITESPACE)
                   break
                 elif file_access_again in settings.CHOICE_NO: 
                   break
@@ -343,14 +343,14 @@ def cb_injection_handler(url, timesec, filename, http_request_method, injection_
             else:
               if menu.file_access_options():
                 # if not menu.enumeration_options():
-                #   print(settings.SPACE)
+                #   print(settings.SINGLE_WHITESPACE)
                 cb_file_access.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec)
-                print(settings.SPACE)
+                print(settings.SINGLE_WHITESPACE)
               
             # Check if defined single cmd.
             if menu.options.os_cmd:
               # if not menu.file_access_options():
-              #   print(settings.SPACE)
+              #   print(settings.SINGLE_WHITESPACE)
               cb_enumeration.single_os_cmd_exec(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec)
 
             # Pseudo-Terminal shell
@@ -368,7 +368,7 @@ def cb_injection_handler(url, timesec, filename, http_request_method, injection_
                  gotshell = "Y"
               if gotshell in settings.CHOICE_YES:
                 # if not menu.options.batch:
-                #   print(settings.SPACE)
+                #   print(settings.SINGLE_WHITESPACE)
                 print("Pseudo-Terminal (type '" + Style.BRIGHT + "?" + Style.RESET_ALL + "' for available options)")
                 if settings.READLINE_ERROR:
                   checks.no_readline_module()
@@ -398,7 +398,7 @@ def cb_injection_handler(url, timesec, filename, http_request_method, injection_
                           shell = cb_injector.injection_results(response, TAG, cmd)
                           shell = "".join(str(p) for p in shell)
                         except:
-                          print(settings.SPACE)
+                          print(settings.SINGLE_WHITESPACE)
                           continue  
                         if not menu.options.ignore_session :
                           session_handler.store_cmd(url, cmd, shell, vuln_parameter)
@@ -412,7 +412,7 @@ def cb_injection_handler(url, timesec, filename, http_request_method, injection_
                         print("\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n")
                       else:
                         if settings.VERBOSITY_LEVEL != 0:
-                          print(settings.SPACE)
+                          print(settings.SINGLE_WHITESPACE)
                         err_msg = "The '" + cmd + "' command, does not return any output."
                         print(settings.print_critical_msg(err_msg) + "\n")
 
@@ -446,7 +446,7 @@ def cb_injection_handler(url, timesec, filename, http_request_method, injection_
                 
   if no_result == True:
     if settings.VERBOSITY_LEVEL == 0:
-      print(settings.SPACE)
+      print(settings.SINGLE_WHITESPACE)
     return False
   else :
     sys.stdout.write("\r")

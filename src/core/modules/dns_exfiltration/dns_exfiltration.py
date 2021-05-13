@@ -122,7 +122,7 @@ def input_cmd(dns_server, http_request_method, url, vuln_parameter, technique):
           cmd = checks.escaped_cmd(cmd)
           if cmd.lower() in settings.SHELL_OPTIONS:
             if cmd.lower() == "quit" or cmd.lower() == "back":       
-              print(settings.SPACE)             
+              print(settings.SINGLE_WHITESPACE)             
               os._exit(0)
             elif cmd.lower() == "?": 
               menu.os_shell_options()
@@ -137,19 +137,19 @@ def input_cmd(dns_server, http_request_method, url, vuln_parameter, technique):
             cmd_exec(dns_server, http_request_method, cmd, url, vuln_parameter)
 
         except KeyboardInterrupt:
-          print(settings.SPACE)
+          print(settings.SINGLE_WHITESPACE)
           os._exit(0)
           
         except:
-          print(settings.SPACE)
+          print(settings.SINGLE_WHITESPACE)
           os._exit(0)
 
     elif gotshell in settings.CHOICE_NO:
-      print(settings.SPACE)
+      print(settings.SINGLE_WHITESPACE)
       os._exit(0)
 
     elif gotshell in settings.CHOICE_QUIT:
-      print(settings.SPACE)
+      print(settings.SINGLE_WHITESPACE)
       os._exit(0)
 
     else:
@@ -168,7 +168,7 @@ def exploitation(dns_server, url, http_request_method, vuln_parameter, technique
   if menu.options.os_cmd:
     cmd = menu.options.os_cmd
     cmd_exec(dns_server, http_request_method, cmd, url, vuln_parameter)
-    print(settings.SPACE)
+    print(settings.SINGLE_WHITESPACE)
     os._exit(0)
   else:
     input_cmd(dns_server, http_request_method, url, vuln_parameter, technique)

@@ -64,7 +64,7 @@ def flush(url):
       conn.commit()
       conn.close()
     except sqlite3.OperationalError as err_msg:
-      print(settings.SPACE)
+      print(settings.SINGLE_WHITESPACE)
       err_msg = "Unable to flush the session file." + str(err_msg).title()
       print(settings.print_critical_msg(err_msg))
   else:
