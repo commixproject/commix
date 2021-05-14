@@ -68,6 +68,7 @@ def check_for_stored_levels(url, http_request_method):
 Basic heuristic checks for code injection warnings
 """
 def heuristic_basic(url, http_request_method):
+  settings.EVAL_BASED_STATE = True
   injection_type = "results-based dynamic code evaluation"
   technique = "dynamic code evaluation technique"
   technique = "(" + injection_type.split(" ")[0] + ") " + technique + ""
@@ -84,6 +85,7 @@ def heuristic_basic(url, http_request_method):
         debug_msg = "Performing heuristic test for " + technique + "."
         print(settings.print_debug_msg(debug_msg))
       for payload in settings.PHPINFO_CHECK_PAYLOADS:
+        payload = checks.perform_payload_modification(payload)
         if not menu.options.data:
           request = _urllib.request.Request(url.replace(settings.INJECT_TAG, payload))
         else:
@@ -106,6 +108,8 @@ def heuristic_basic(url, http_request_method):
             info_msg = "Heuristic test shows that target might be injectable via " + technique + "." 
             print(settings.print_bold_info_msg(info_msg))
             break
+
+    settings.EVAL_BASED_STATE = False
     return url
 
   except (_urllib.error.URLError, _urllib.error.HTTPError) as err_msg:
