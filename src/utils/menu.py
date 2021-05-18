@@ -108,6 +108,12 @@ general.add_option("--batch",
                 default=False,
                 help="Never ask for user input, use the default behaviour.")
 
+general.add_option("--skip-heuristics",
+                action="store_true",
+                dest="skip_heuristics",
+                default=False,
+                help="Skip heuristic detection for code injection.")
+
 general.add_option("--encoding",
                 action="store",
                 dest="encoding",

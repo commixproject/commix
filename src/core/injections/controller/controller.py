@@ -68,57 +68,64 @@ def check_for_stored_levels(url, http_request_method):
 Basic heuristic checks for code injection warnings
 """
 def heuristic_basic(url, http_request_method):
-  settings.EVAL_BASED_STATE = True
   injection_type = "results-based dynamic code evaluation"
   technique = "dynamic code evaluation technique"
   technique = "(" + injection_type.split(" ")[0] + ") " + technique + ""
-  try:
-    try:
-      if re.findall(r"=(.*)&", url):
-        url = url.replace("/&", "/e&")
-      elif re.findall(r"=(.*)&", menu.options.data):
-        menu.options.data = menu.options.data.replace("/&", "/e&")
-    except TypeError as err_msg:
-      pass
-    if not settings.IDENTIFIED_WARNINGS and not settings.IDENTIFIED_PHPINFO:  
-      if settings.VERBOSITY_LEVEL != 0:   
-        debug_msg = "Performing heuristic test for " + technique + "."
-        print(settings.print_debug_msg(debug_msg))
-      for payload in settings.PHPINFO_CHECK_PAYLOADS:
-        payload = checks.perform_payload_modification(payload)
-        if settings.VERBOSITY_LEVEL >= 2:
-          debug_msg = "Generating payload for heuristic test for " + technique + "."
-          print(settings.print_debug_msg(debug_msg))
-          print(settings.print_payload(payload))
-        if not menu.options.data:
-          request = _urllib.request.Request(url.replace(settings.INJECT_TAG, payload))
-        else:
-          data = menu.options.data.replace(settings.INJECT_TAG, payload)
-          request = _urllib.request.Request(url, data.encode(settings.UNICODE_ENCODING))
-        headers.do_check(request)
-        response = requests.get_request_response(request)
-        if type(response) is not bool:
-          html_data = checks.page_encoding(response, action="decode")
-          match = re.search(settings.CODE_INJECTION_PHPINFO, html_data)
-          if match:
-            technique = technique + " (possible PHP version: '" + match.group(1) + "')"
-            settings.IDENTIFIED_PHPINFO = True
-          else:
-            for warning in settings.CODE_INJECTION_WARNINGS:
-              if warning in html_data:
-                settings.IDENTIFIED_WARNINGS = True
-                break
-          if settings.IDENTIFIED_WARNINGS or settings.IDENTIFIED_PHPINFO:
-            info_msg = "Heuristic test shows that target might be injectable via " + technique + "." 
-            print(settings.print_bold_info_msg(info_msg))
-            break
 
-    settings.EVAL_BASED_STATE = False
+  if menu.options.skip_heuristics:
+    if settings.VERBOSITY_LEVEL != 0:   
+      debug_msg = "Skipping heuristic check for " + technique + "."
+      print(settings.print_debug_msg(debug_msg))
     return url
+  else:
+    settings.EVAL_BASED_STATE = True
+    try:
+      try:
+        if re.findall(r"=(.*)&", url):
+          url = url.replace("/&", "/e&")
+        elif re.findall(r"=(.*)&", menu.options.data):
+          menu.options.data = menu.options.data.replace("/&", "/e&")
+      except TypeError as err_msg:
+        pass
+      if not settings.IDENTIFIED_WARNINGS and not settings.IDENTIFIED_PHPINFO:  
+        if settings.VERBOSITY_LEVEL != 0:   
+          debug_msg = "Performing heuristic check for " + technique + "."
+          print(settings.print_debug_msg(debug_msg))
+        for payload in settings.PHPINFO_CHECK_PAYLOADS:
+          payload = checks.perform_payload_modification(payload)
+          if settings.VERBOSITY_LEVEL >= 2:
+            debug_msg = "Generating payload for heuristic check."
+            print(settings.print_debug_msg(debug_msg))
+            print(settings.print_payload(payload))
+          if not menu.options.data:
+            request = _urllib.request.Request(url.replace(settings.INJECT_TAG, payload))
+          else:
+            data = menu.options.data.replace(settings.INJECT_TAG, payload)
+            request = _urllib.request.Request(url, data.encode(settings.UNICODE_ENCODING))
+          headers.do_check(request)
+          response = requests.get_request_response(request)
+          if type(response) is not bool:
+            html_data = checks.page_encoding(response, action="decode")
+            match = re.search(settings.CODE_INJECTION_PHPINFO, html_data)
+            if match:
+              technique = technique + " (possible PHP version: '" + match.group(1) + "')"
+              settings.IDENTIFIED_PHPINFO = True
+            else:
+              for warning in settings.CODE_INJECTION_WARNINGS:
+                if warning in html_data:
+                  settings.IDENTIFIED_WARNINGS = True
+                  break
+            if settings.IDENTIFIED_WARNINGS or settings.IDENTIFIED_PHPINFO:
+              info_msg = "Heuristic check shows that target might be injectable via " + technique + "." 
+              print(settings.print_bold_info_msg(info_msg))
+              break
 
-  except (_urllib.error.URLError, _urllib.error.HTTPError) as err_msg:
-    print(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+      settings.EVAL_BASED_STATE = False
+      return url
+
+    except (_urllib.error.URLError, _urllib.error.HTTPError) as err_msg:
+      print(settings.print_critical_msg(err_msg))
+      raise SystemExit()
 
 # Check if it's exploitable via classic command injection technique.
 def classic_command_injection_technique(url, timesec, filename, http_request_method):
