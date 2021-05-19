@@ -144,12 +144,19 @@ def installer():
     sys.stdout.flush()
     
     #Create the Output Directory
-    OUTPUT_DIR = ".output/"
     try:
-        os.stat(OUTPUT_DIR)
+      os.stat(settings.OUTPUT_DIR)
     except:
-        os.mkdir(OUTPUT_DIR)  
-    
+      try:
+        os.mkdir(settings.OUTPUT_DIR)   
+      except OSError as err_msg:
+        try:
+          error_msg = str(err_msg).split("] ")[1] + "."
+        except IndexError:
+          error_msg = str(err_msg) + "."
+        print(settings.print_critical_msg(error_msg))
+        raise SystemExit()
+
     info_msg = "The installation is finished! Type '"  
     info_msg += settings.APPLICATION + "' to launch it." 
     print(settings.print_bold_info_msg(info_msg))
