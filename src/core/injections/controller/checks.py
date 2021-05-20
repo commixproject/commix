@@ -1273,14 +1273,19 @@ def is_empty(multi_parameters, http_request_method):
   for empty in multi_params:
     try:
       if settings.IS_JSON:
-        param = re.sub("[^/()A-Za-z0-9.:,_]+", '',  multi_params[empty])
-        if "(" and ")" in param:
-          param = re.findall(r'\((.*)\)', param)
-          for value in param[0].split(","):
-            if value.split(":")[1] == "":
-              empty_parameters.append(value.split(":")[0])
-        elif len(str(multi_params[empty])) == 0 :
-          empty_parameters.append(empty)
+        try:
+          param = re.sub("[^/()A-Za-z0-9.:,_]+", '',  multi_params[empty])
+          if "(" and ")" in param:
+            param = re.findall(r'\((.*)\)', param)
+            for value in param[0].split(","):
+              if value.split(":")[1] == "":
+                empty_parameters.append(value.split(":")[0])
+          elif len(str(multi_params[empty])) == 0 :
+            empty_parameters.append(empty)
+        except TypeError:
+          warn_msg = "The provided value for parameter '" + str(empty) + "' seems unusable."
+          print(settings.print_warning_msg(warn_msg))
+          pass
       elif settings.IS_XML:
         if re.findall(r'>(.*)<', empty)[0] == "" or \
            re.findall(r'>(.*)<', empty)[0] == " ":
@@ -1302,7 +1307,7 @@ def is_empty(multi_parameters, http_request_method):
       skip_empty(empty_parameters, http_request_method)
       return True
     else:
-      warn_msg = "The provided value"+ "s"[len(empty_parameters.split(",")) == 1:][::-1]
+      warn_msg = "The provided value" + "s"[len(empty_parameters.split(",")) == 1:][::-1]
       warn_msg += " for " + http_request_method 
       warn_msg += ('', ' (JSON)')[settings.IS_JSON] + ('', ' (SOAP/XML)')[settings.IS_XML] 
       warn_msg += " parameter" + "s"[len(empty_parameters.split(",")) == 1:][::-1]
