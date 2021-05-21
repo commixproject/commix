@@ -367,9 +367,6 @@ def main(filename, url):
     if menu.options.skip_calc:
       settings.SKIP_CALC = True
 
-    if menu.options.enable_backticks:
-      settings.USE_BACKTICKS = True
-
     # Target URL reload.
     if menu.options.url_reload and menu.options.data:
       settings.URL_RELOAD = True

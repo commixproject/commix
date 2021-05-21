@@ -512,12 +512,6 @@ injection.add_option("--msf-path",
                 default=False,
                 help="Set a local path where metasploit is installed.")
 
-injection.add_option("--backticks", 
-                action="store_true",
-                dest="enable_backticks",
-                default=False,
-                help="Use backticks instead of \"$()\", for commands substitution.")
-
 # Detection options
 detection = OptionGroup(parser, Style.BRIGHT + Style.UNDERLINE + "Detection" + Style.RESET_ALL, "These options can be "
                         "used to customize the detection phase.")

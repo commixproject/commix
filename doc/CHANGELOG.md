@@ -1,4 +1,6 @@
 ## Version 3.3 (TBA)
+* Replaced: The `--backticks` switch has been replaced with "backticks.py" tamper script.
+* Added: New tamper script "backticks.py" that uses backticks instead of "$()", for commands substitution. (for *nix targets).
 * Added: New option ( `--skip-heuristic`) for skipping dynamic code evaluation heuristic check.
 * Added: Support for parsing custom wordlists regarding HTTP authentication (Basic / Digest) dictionary-based cracker.
 * Revised: Improvements regarding dynamic code evaluation heuristic check.

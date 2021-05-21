@@ -1022,6 +1022,14 @@ def whitespace_check(payload):
 Check for added caret between the characters of the generated payloads.
 """
 def other_symbols(payload):
+  # Check for (multiple) backticks (instead of "$()") for commands substitution on the generated payloads.
+  if payload.count("`") >= 2:
+    if menu.options.tamper:
+      menu.options.tamper = menu.options.tamper + ",backticks"
+    else:
+      menu.options.tamper = "backticks"  
+    settings.USE_BACKTICKS == True
+
   # Check for caret symbol
   if payload.count("^") >= 10:
     if not settings.TAMPER_SCRIPTS['caret']:

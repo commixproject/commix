@@ -690,14 +690,14 @@ def do_check(url, http_request_method, filename):
       warn_msg = "It is highly recommended to avoid usage of switch '--tor' for "
       warn_msg += "time-based injections because of inherent high latency time."
       print(settings.print_warning_msg(warn_msg))
-  
-  # Check for '--backticks' option.
-  if menu.options.enable_backticks:
+
+  # Check for "backticks" tamper script.
+  if settings.USE_BACKTICKS == True:
     if not menu.options.tech or "e" in menu.options.tech or "t" in menu.options.tech or "f" in menu.options.tech:
-      warn_msg = "The '--backticks' switch is only supported by the classic command injection. "
-      warn_msg += "It will be ignored for all other techniques."
+      warn_msg = "Commands substitution using backtics is only supported by the (results-based) classic command injection technique. "
       print(settings.print_warning_msg(warn_msg) + Style.RESET_ALL)
 
+  # Check for "wizard" switch.
   if menu.options.wizard:
     if perform_checks(url, http_request_method, filename) == False:
       scan_level = menu.options.level
