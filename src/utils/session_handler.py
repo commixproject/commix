@@ -42,7 +42,7 @@ Ignore session.
 def ignore(url):
   if os.path.isfile(settings.SESSION_FILE):
     if settings.VERBOSITY_LEVEL != 0:
-      debug_msg = "Ignoring the stored session from the session file."
+      debug_msg = "Ignoring the stored session from the session file due to '--ignore-session' switch."
       print(settings.print_debug_msg(debug_msg))
   else:
     if settings.VERBOSITY_LEVEL != 0:
