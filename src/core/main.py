@@ -517,6 +517,8 @@ def main(filename, url):
             print(settings.print_critical_msg(str(err_msg.args[0]).split("] ")[1] + "."))
             raise SystemExit()
         try:
+          info_msg = "Performing identification checks to the target URL."
+          print(settings.print_info_msg(info_msg))
           # Webpage encoding detection.
           requests.encoding_detection(response)
           # Procedure for target application identification

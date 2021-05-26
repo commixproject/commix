@@ -74,7 +74,7 @@ def heuristic_basic(url, http_request_method):
 
   if menu.options.skip_heuristics:
     if settings.VERBOSITY_LEVEL != 0:   
-      debug_msg = "Skipping heuristic check for " + technique + "."
+      debug_msg = "Skipping (basic) heuristic detection for " + technique + "."
       print(settings.print_debug_msg(debug_msg))
     return url
   else:
@@ -89,13 +89,11 @@ def heuristic_basic(url, http_request_method):
         pass
       if not settings.IDENTIFIED_WARNINGS and not settings.IDENTIFIED_PHPINFO:  
         if settings.VERBOSITY_LEVEL != 0:   
-          debug_msg = "Performing heuristic check for " + technique + "."
+          debug_msg = "Starting (basic) heuristic detection for " + technique + "."
           print(settings.print_debug_msg(debug_msg))
         for payload in settings.PHPINFO_CHECK_PAYLOADS:
           payload = checks.perform_payload_modification(payload)
-          if settings.VERBOSITY_LEVEL >= 2:
-            debug_msg = "Generating payload for heuristic check."
-            print(settings.print_debug_msg(debug_msg))
+          if settings.VERBOSITY_LEVEL >= 1:
             print(settings.print_payload(payload))
           if not menu.options.data:
             request = _urllib.request.Request(url.replace(settings.INJECT_TAG, payload))
@@ -116,7 +114,7 @@ def heuristic_basic(url, http_request_method):
                   settings.IDENTIFIED_WARNINGS = True
                   break
             if settings.IDENTIFIED_WARNINGS or settings.IDENTIFIED_PHPINFO:
-              info_msg = "Heuristic check shows that target might be injectable via " + technique + "." 
+              info_msg = "Heuristic detection shows that target might be injectable via " + technique + "." 
               print(settings.print_bold_info_msg(info_msg))
               break
 
