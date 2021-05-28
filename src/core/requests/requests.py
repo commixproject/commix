@@ -1060,15 +1060,18 @@ def technology_detection(response):
     sys.stdout.write(settings.print_debug_msg(debug_msg))
     sys.stdout.flush()
     print(settings.SINGLE_WHITESPACE) 
-  if response.info()['X-Powered-By']: 
-    if settings.VERBOSITY_LEVEL != 0:        
-      debug_msg = "The target application is powered by " 
-      debug_msg += response.info()['X-Powered-By'] + Style.RESET_ALL + "."
-      print(settings.print_bold_debug_msg(debug_msg))
-  else:
+  try:
+    if len(response.info()['X-Powered-By']) != 0: 
+      if settings.VERBOSITY_LEVEL != 0:        
+        debug_msg = "The target application is powered by " 
+        debug_msg += response.info()['X-Powered-By'] + Style.RESET_ALL + "."
+        print(settings.print_bold_debug_msg(debug_msg))
+
+  except Exception as e:
     if settings.VERBOSITY_LEVEL != 0:
       warn_msg = "Heuristics have failed to identify the technology supporting the target application."
       print(settings.print_warning_msg(warn_msg))
+
 
 """
 Procedure for target application identification
