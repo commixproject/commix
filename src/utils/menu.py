@@ -536,6 +536,7 @@ detection.add_option("--skip-empty",
 
 detection.add_option("--failed-tries", 
                 action="store",
+                type="int",
                 dest="failed_tries",
                 default=20,
                 help="Set a number of failed injection tries, in file-based technique.")

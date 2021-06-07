@@ -721,7 +721,7 @@ try:
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
 
-    if int(menu.options.failed_tries) == 0:
+    if menu.options.failed_tries == 0:
       err_msg = "You must specify '--failed-tries' value, greater than zero."      
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
