@@ -167,15 +167,13 @@ def do_process(url):
 The main crawler.
 """
 def crawler(url):
-  if menu.options.crawldepth > 0:
-    menu.options.DEFAULT_CRAWLDEPTH_LEVEL = menu.options.crawldepth
   if not menu.options.sitemap_url:
-    if menu.options.DEFAULT_CRAWLDEPTH_LEVEL > 2:
-      err_msg = "Depth level '" + str(menu.options.DEFAULT_CRAWLDEPTH_LEVEL) + "' is not a valid."  
+    if menu.options.crawldepth > 2:
+      err_msg = "Depth level '" + str(menu.options.crawldepth) + "' is not a valid."  
       print(settings.print_error_msg(err_msg))
       raise SystemExit()
     info_msg = "Starting crawler and searching for "
-    info_msg += "links with depth " + str(menu.options.DEFAULT_CRAWLDEPTH_LEVEL) + "." 
+    info_msg += "links with depth " + str(menu.options.crawldepth) + "." 
     print(settings.print_info_msg(info_msg))
   else:
     while True:
@@ -207,7 +205,7 @@ def crawler(url):
           print(settings.print_error_msg(err_msg))
           pass
         else: 
-          menu.options.DEFAULT_CRAWLDEPTH_LEVEL = message
+          menu.options.crawldepth = message
           break
 
   while True:
@@ -250,7 +248,7 @@ def crawler(url):
 
   if not sitemap_check:
     output_href = do_process(url)
-    if menu.options.DEFAULT_CRAWLDEPTH_LEVEL > 1:
+    if menu.options.crawldepth > 1:
       for url in output_href:
         output_href = do_process(url)
   if SKIPPED_URLS == 0:

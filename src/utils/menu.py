@@ -162,7 +162,7 @@ target.add_option("--crawl",
                 default=0,
                 dest="crawldepth",
                 type="int",
-                help="Crawl the website starting from the target URL (1-2, Default: " + str(settings.DEFAULT_CRAWLDEPTH_LEVEL) + ").")
+                help="Crawl the website starting from the target URL (1-2, Default: 0).")
 
 target.add_option("-x",
                 dest="sitemap_url",

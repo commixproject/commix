@@ -216,7 +216,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.3"
-REVISION = "35"
+REVISION = "36"
 STABLE_RELEASE = False
 if STABLE_RELEASE:
   VERSION = "v" + VERSION_NUM + "-stable"
@@ -938,9 +938,6 @@ METASPLOIT_ERROR_MSG += "Please ensure Metasploit is installed in the right path
 
 # Target URL reload
 URL_RELOAD = False
-
-# Crawl the website starting from the target URL.
-DEFAULT_CRAWLDEPTH_LEVEL = 0
 
 # Command history
 CLI_HISTORY = ""
