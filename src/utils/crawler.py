@@ -90,7 +90,7 @@ def sitemap(url):
       SITEMAP_LOC.append(url)
       if url.endswith(".xml") and "sitemap" in url.lower():
         while True:
-          warn_msg = "A sitemap recursion detected."
+          warn_msg = "A sitemap recursion detected (" + url + ")."
           print(settings.print_warning_msg(warn_msg))
           if not menu.options.batch:
             question_msg = "Do you want to follow? [Y/n] > "
