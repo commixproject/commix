@@ -70,7 +70,9 @@ def request(url):
     return response
   except _urllib.error.URLError as err_msg:
     err_msg = str(err_msg) + " - Skipping " + str(url) 
-    print(settings.print_critical_msg(err_msg))
+    sys.stdout.write(settings.print_critical_msg(err_msg))
+    if settings.VERBOSITY_LEVEL >= 2:
+      print ""
     SKIPPED_URLS += 1
 
 
@@ -254,6 +256,8 @@ def crawler(url):
   if SKIPPED_URLS == 0:
     print(settings.SINGLE_WHITESPACE)
 
+  if not settings.VERBOSITY_LEVEL >= 2:
+    print ""
   info_msg = "Visited " + str(len(output_href)) + " link"+ "s"[len(output_href) == 1:] + "."
   print(settings.print_info_msg(info_msg))
   filename = store_crawling()
