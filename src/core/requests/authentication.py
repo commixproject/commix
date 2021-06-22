@@ -68,6 +68,10 @@ def authentication_process():
     print(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
+  except ValueError as err_msg:
+    print(settings.print_critical_msg(err_msg))
+    raise SystemExit() 
+
 """
 Define the HTTP authentication 
 wordlists for usernames / passwords.
