@@ -1275,9 +1275,13 @@ def is_empty(multi_parameters, http_request_method):
   empty_parameters = []
   multi_params = [s for s in multi_parameters]
   if settings.IS_JSON:
-    multi_params = ','.join(multi_params)
-    json_data = json.loads(multi_params, object_pairs_hook=OrderedDict)
-    multi_params = flatten(json_data)
+    try:
+      multi_params = ','.join(multi_params)
+      json_data = json.loads(multi_params, object_pairs_hook=OrderedDict)
+      multi_params = flatten(json_data)
+    except ValueError as err_msg:
+      print(settings.print_critical_msg(err_msg))
+      raise SystemExit()
   for empty in multi_params:
     try:
       if settings.IS_JSON:
