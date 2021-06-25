@@ -105,7 +105,7 @@ def value_boundaries(value):
   else:
     procced_option = ""
   if procced_option in settings.CHOICE_YES or len(procced_option) == 0:
-    value = value.replace(re.search(settings.VALUE_BOUNDARIES, value).group(0), "")
+    value = re.search(settings.VALUE_BOUNDARIES, value).group(1)
   elif procced_option in settings.CHOICE_NO:
     pass
   elif procced_option in settings.CHOICE_QUIT:
