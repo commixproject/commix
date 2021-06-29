@@ -120,7 +120,7 @@ def decision_alter_shell(separator, TAG, randv1, randv2):
                   )
 
   else:
-    python_payload = "python -c \"print str(int(" + str(int(randv1)) + "%2B" + str(int(randv2)) + "))\""
+    python_payload = settings.LINUX_PYTHON_INTERPRETER + " -c \"print str(int(" + str(int(randv1)) + "%2B" + str(int(randv2)) + "))\""
     if settings.SKIP_CALC: 
       if separator == "":
         payload = ("print(`echo " + TAG + "`." +
