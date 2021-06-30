@@ -1,4 +1,5 @@
 ## Version 3.3 (TBA)
+* Updated: Minor update regarding web delivery script (i.e. Python meterpreter reverse TCP shell).
 * Replaced: The `--backticks` switch has been replaced with "backticks.py" tamper script.
 * Added: New tamper script "backticks.py" that uses backticks instead of "$()", for commands substitution. (for *nix targets).
 * Added: New option ( `--skip-heuristic`) for skipping dynamic code evaluation heuristic check.

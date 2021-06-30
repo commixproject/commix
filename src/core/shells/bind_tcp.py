@@ -408,7 +408,7 @@ Type '""" + Style.BRIGHT + """8""" + Style.RESET_ALL + """' to use a Python mete
         with open (output, "r") as content_file:
           data = content_file.readlines()
           data = ''.join(data)
-          data = base64.b64encode(data.encode(settings.UNICODE_ENCODING)).decode()
+          #data = base64.b64encode(data.encode(settings.UNICODE_ENCODING)).decode()
 
         print(settings.SINGLE_WHITESPACE)
         # Remove the ouput file.
@@ -422,9 +422,9 @@ Type '""" + Style.BRIGHT + """8""" + Style.RESET_ALL + """' to use a Python mete
 
         if settings.TARGET_OS == "win" and not settings.USER_DEFINED_PYTHON_DIR: 
           set_python_working_dir()
-          other_shell = settings.WIN_PYTHON_DIR + " -c exec('" + data + "'.decode('base64'))"
+          other_shell = settings.WIN_PYTHON_DIR + " -c " + data 
         else:
-          other_shell = settings.LINUX_PYTHON_INTERPRETER + " -c \"exec('" + data + "'.decode('base64'))\""
+          other_shell = settings.LINUX_PYTHON_INTERPRETER + " -c " + "\"" + data + "\""
         msf_launch_msg(output)
       except:
         print(settings.SINGLE_WHITESPACE)

