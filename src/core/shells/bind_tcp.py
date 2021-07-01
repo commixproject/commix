@@ -127,6 +127,32 @@ def set_python_working_dir():
       pass
 
 """
+Set up the Python interpreter on linux target host.
+"""
+def set_python_interpreter():
+  while True:
+    if not menu.options.batch:
+      question_msg = "Do you want to use '" + settings.LINUX_PYTHON_INTERPRETER
+      question_msg += "' as Python working interpreter on the target host? [Y/n] > "
+      python_interpreter = _input(settings.print_question_msg(question_msg))
+    else:
+      python_interpreter = ""
+    if len(python_interpreter) == 0:
+       python_interpreter = "Y"
+    if python_interpreter in settings.CHOICE_YES:
+      break
+    elif python_interpreter in settings.CHOICE_NO:
+      question_msg = "Please provide a custom working interpreter for Python (e.g. '" 
+      question_msg += settings.LINUX_PYTHON_INTERPRETER  + "') > "
+      settings.LINUX_PYTHON_INTERPRETER = _input(settings.print_question_msg(question_msg))
+      settings.USER_DEFINED_PYTHON_INTERPRETER = True
+      break
+    else:
+      err_msg = "'" + python_interpreter + "' is not a valid answer."  
+      print(settings.print_error_msg(err_msg))
+      pass
+
+"""
 check / set rhost option for bind TCP connection
 """
 def check_rhost(rhost):
@@ -420,10 +446,13 @@ Type '""" + Style.BRIGHT + """8""" + Style.RESET_ALL + """' to use a Python mete
                           "set lport "+ str(settings.LPORT) + "\n"
                           "exploit\n\n")
 
-        if settings.TARGET_OS == "win" and not settings.USER_DEFINED_PYTHON_DIR: 
-          set_python_working_dir()
+        if settings.TARGET_OS == "win":
+          if not settings.USER_DEFINED_PYTHON_DIR: 
+            set_python_working_dir()
           other_shell = settings.WIN_PYTHON_DIR + " -c " + data 
         else:
+          if not settings.USER_DEFINED_PYTHON_INTERPRETER:
+            set_python_interpreter()
           other_shell = settings.LINUX_PYTHON_INTERPRETER + " -c " + "\"" + data + "\""
         msf_launch_msg(output)
       except:

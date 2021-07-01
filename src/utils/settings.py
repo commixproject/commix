@@ -216,7 +216,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.3"
-REVISION = "45"
+REVISION = "46"
 STABLE_RELEASE = False
 if STABLE_RELEASE:
   VERSION = "v" + VERSION_NUM + "-stable"
@@ -810,6 +810,7 @@ USER_DEFINED_PYTHON_DIR = False
 
 # Default target host's python interpreter
 LINUX_PYTHON_INTERPRETER = "python3"
+USER_DEFINED_PYTHON_INTERPRETER = False
 
 # Windows PHP installed directory.
 WIN_PHP_DIR = "C:\\xampp\\php\\php.exe"
