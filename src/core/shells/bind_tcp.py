@@ -264,14 +264,14 @@ def other_bind_shells(separator):
 
   while True:
     other_shell = _input("""
----[ """ + Style.BRIGHT + Fore.BLUE + """Unix-like bind TCP shells""" + Style.RESET_ALL + """ ]---
+---[ """ + Style.BRIGHT + Fore.BLUE + """Bind TCP shells""" + Style.RESET_ALL + """ ]---
 Type '""" + Style.BRIGHT + """1""" + Style.RESET_ALL + """' to use a PHP bind TCP shell.
 Type '""" + Style.BRIGHT + """2""" + Style.RESET_ALL + """' to use a Perl bind TCP shell.
 Type '""" + Style.BRIGHT + """3""" + Style.RESET_ALL + """' to use a Ruby bind TCP shell. 
 Type '""" + Style.BRIGHT + """4""" + Style.RESET_ALL + """' to use a Python bind TCP shell.
 Type '""" + Style.BRIGHT + """5""" + Style.RESET_ALL + """' to use a Socat bind TCP shell.
 Type '""" + Style.BRIGHT + """6""" + Style.RESET_ALL + """' to use a Ncat bind TCP shell.
-\n---[ """ + Style.BRIGHT + Fore.BLUE  + """Windows bind TCP shells""" + Style.RESET_ALL + """ ]---
+\n---[ """ + Style.BRIGHT + Fore.BLUE  + """Meterpreter bind TCP shells""" + Style.RESET_ALL + """ ]---
 Type '""" + Style.BRIGHT + """7""" + Style.RESET_ALL + """' to use a PHP meterpreter bind TCP shell.
 Type '""" + Style.BRIGHT + """8""" + Style.RESET_ALL + """' to use a Python meterpreter bind TCP shell. 
 \ncommix(""" + Style.BRIGHT + Fore.RED + """bind_tcp_other""" + Style.RESET_ALL + """) > """)
