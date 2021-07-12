@@ -216,7 +216,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.3"
-REVISION = "49"
+REVISION = "50"
 STABLE_RELEASE = False
 if STABLE_RELEASE:
   VERSION = "v" + VERSION_NUM + "-stable"
@@ -804,11 +804,11 @@ TFB_DECIMAL = False
 # Ignore Error Message
 IGNORE_ERR_MSG = False
 
-# Windows Python (2.7) installed directory.
-WIN_PYTHON_DIR = "C:\\Python27\\python.exe"
+# Default (windows) target host's python interpreter
+WIN_PYTHON_DIR = "python.exe"
 USER_DEFINED_PYTHON_DIR = False
 
-# Default target host's python interpreter
+# Default (linux) target host's python interpreter
 LINUX_PYTHON_INTERPRETER = "python3"
 USER_DEFINED_PYTHON_INTERPRETER = False
 

