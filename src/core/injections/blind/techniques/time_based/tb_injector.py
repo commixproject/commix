@@ -171,7 +171,7 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
   if settings.TARGET_OS == "win":
     previous_cmd = cmd
     if alter_shell:
-      cmd = settings.WIN_PYTHON_DIR + " -c \"import os; print len(os.popen('cmd /c " + cmd + "').read().strip())\""
+      cmd = settings.WIN_PYTHON_INTERPRETER + " -c \"import os; print len(os.popen('cmd /c " + cmd + "').read().strip())\""
     else: 
       cmd = "powershell.exe -InputFormat none write-host ([string](cmd /c " + cmd + ")).trim().length"
 
@@ -387,7 +387,7 @@ def false_positive_check(separator, TAG, cmd, whitespace, prefix, suffix, timese
   if settings.TARGET_OS == "win":
     previous_cmd = cmd
     if alter_shell:
-      cmd = settings.WIN_PYTHON_DIR + " -c \"import os; print len(os.popen('cmd /c " + cmd + "').read().strip())\""
+      cmd = settings.WIN_PYTHON_INTERPRETER + " -c \"import os; print len(os.popen('cmd /c " + cmd + "').read().strip())\""
     else: 
       cmd = "powershell.exe -InputFormat none write-host ([string](cmd /c " + cmd + ")).trim().length"
 

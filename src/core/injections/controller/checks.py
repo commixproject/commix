@@ -1560,7 +1560,7 @@ def define_py_working_dir():
   if settings.TARGET_OS == "win" and menu.options.alter_shell:
     while True:
       if not menu.options.batch:
-        question_msg = "Do you want to use '" + settings.WIN_PYTHON_DIR 
+        question_msg = "Do you want to use '" + settings.WIN_PYTHON_INTERPRETER 
         question_msg += "' as Python working directory on the target host? [Y/n] > "
         python_dir = _input(settings.print_question_msg(question_msg))
       else:
@@ -1571,8 +1571,8 @@ def define_py_working_dir():
         break
       elif python_dir in settings.CHOICE_NO:
         question_msg = "Please provide a custom working directory for Python (e.g. '" 
-        question_msg += settings.WIN_PYTHON_DIR + "') > "
-        settings.WIN_PYTHON_DIR = _input(settings.print_question_msg(question_msg))
+        question_msg += settings.WIN_PYTHON_INTERPRETER + "') > "
+        settings.WIN_PYTHON_INTERPRETER = _input(settings.print_question_msg(question_msg))
         break
       else:
         err_msg = "'" + python_dir + "' is not a valid answer."  

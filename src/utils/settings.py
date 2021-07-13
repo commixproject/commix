@@ -216,7 +216,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.3"
-REVISION = "50"
+REVISION = "51"
 STABLE_RELEASE = False
 if STABLE_RELEASE:
   VERSION = "v" + VERSION_NUM + "-stable"
@@ -805,7 +805,7 @@ TFB_DECIMAL = False
 IGNORE_ERR_MSG = False
 
 # Default (windows) target host's python interpreter
-WIN_PYTHON_DIR = "python.exe"
+WIN_PYTHON_INTERPRETER = "python.exe"
 USER_DEFINED_PYTHON_DIR = False
 
 # Default (linux) target host's python interpreter

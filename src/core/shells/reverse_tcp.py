@@ -121,7 +121,7 @@ Set up the Python working directory on the target host.
 def set_python_working_dir():
   while True:
     if not menu.options.batch:
-      question_msg = "Do you want to use '" + settings.WIN_PYTHON_DIR 
+      question_msg = "Do you want to use '" + settings.WIN_PYTHON_INTERPRETER 
       question_msg += "' as Python interpreter on the target host? [Y/n] > "
       python_dir = _input(settings.print_question_msg(question_msg))
     else:
@@ -133,7 +133,7 @@ def set_python_working_dir():
     elif python_dir in settings.CHOICE_NO:
       question_msg = "Please provide a full path directory for Python interpreter (e.g. '" 
       question_msg += "C:\\Python27\\python.exe') > "
-      settings.WIN_PYTHON_DIR = _input(settings.print_question_msg(question_msg))
+      settings.WIN_PYTHON_INTERPRETER = _input(settings.print_question_msg(question_msg))
       settings.USER_DEFINED_PYTHON_DIR = True
       break
     else:
@@ -408,7 +408,7 @@ Type '""" + Style.BRIGHT + """12""" + Style.RESET_ALL + """' to use the web deli
       else:
         if not settings.USER_DEFINED_PYTHON_DIR: 
           set_python_working_dir()
-        other_shell = settings.WIN_PYTHON_DIR + " -c " + "\"" + data + "\""
+        other_shell = settings.WIN_PYTHON_INTERPRETER + " -c " + "\"" + data + "\""
       break
 
     # PHP-reverse-shell (meterpreter)
@@ -491,7 +491,7 @@ Type '""" + Style.BRIGHT + """12""" + Style.RESET_ALL + """' to use the web deli
         if settings.TARGET_OS == "win":
           if not settings.USER_DEFINED_PYTHON_DIR: 
             set_python_working_dir()
-          other_shell = settings.WIN_PYTHON_DIR + " -c " + "\"" + data + "\"" 
+          other_shell = settings.WIN_PYTHON_INTERPRETER + " -c " + "\"" + data + "\"" 
         else:
           if not settings.USER_DEFINED_PYTHON_INTERPRETER:
             set_python_interpreter()
@@ -648,7 +648,7 @@ Type '""" + Style.BRIGHT + """3""" + Style.RESET_ALL + """' to use Windows meter
             if settings.TARGET_OS == "win":
               if not settings.USER_DEFINED_PYTHON_DIR: 
                 set_python_working_dir()
-              other_shell = settings.WIN_PYTHON_DIR + " -c " + "\"" + data + "\""
+              other_shell = settings.WIN_PYTHON_INTERPRETER + " -c " + "\"" + data + "\""
             else:
               if not settings.USER_DEFINED_PYTHON_INTERPRETER:
                 set_python_interpreter()
