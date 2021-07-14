@@ -173,6 +173,8 @@ Log all HTTP traffic into a textual file.
 """
 def log_traffic(header):
   output_file = open(menu.options.traffic_file, "a")
+  if type(header) is bytes:
+    header = header.decode(settings.UNICODE_ENCODING) 
   output_file.write(header)
   output_file.close()
 
