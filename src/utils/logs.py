@@ -155,7 +155,7 @@ def executed_command(filename, cmd, output):
   try:
     output_file = open(filename, "a")
     output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + "Executed command: " +  cmd + "\n")
-    output_file.write("    " + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_SIGN) + "Execution output: " +  output.decode(settings.UNICODE_ENCODING) + "\n")
+    output_file.write("    " + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_SIGN) + "Execution output: " +  output + "\n")
     output_file.close()
   except TypeError:
     pass
