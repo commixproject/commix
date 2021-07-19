@@ -187,6 +187,9 @@ def unhandled_exception():
     print(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
+  elif any(_ in exc_msg for _ in ("Broken pipe",)):
+    raise SystemExit()
+
   elif any(_ in exc_msg for _ in ("The paging file is too small",)):
     err_msg = "No space left for paging file."
     print(settings.print_critical_msg(err_msg))
