@@ -345,7 +345,8 @@ def check_stored_parameter(url, http_request_method):
 Import successful command execution outputs to session file.
 """
 def store_cmd(url, cmd, shell, vuln_parameter):
-  try:  
+  if any(type(_) is str for _ in (url, cmd, shell, vuln_parameter)):
+    try:  
       conn = sqlite3.connect(settings.SESSION_FILE)
       conn.execute("CREATE TABLE IF NOT EXISTS " + table_name(url) + "_ir" + \
                    "(cmd VARCHAR, output VARCHAR, vuln_parameter VARCHAR);")
@@ -363,10 +364,10 @@ def store_cmd(url, cmd, shell, vuln_parameter):
                       str(settings.HTTP_HEADER)))
       conn.commit()
       conn.close() 
-  except sqlite3.OperationalError as err_msg:
-    print(settings.print_critical_msg(err_msg))
-  except TypeError as err_msg:
-    pass
+    except sqlite3.OperationalError as err_msg:
+      print(settings.print_critical_msg(err_msg))
+    except TypeError as err_msg:
+      pass
 
 """
 Export successful command execution outputs from session file.
