@@ -229,7 +229,7 @@ def netcat_version(separator):
 
   while True:
     nc_version = _input("""
----[ """ + Style.BRIGHT + Fore.BLUE + """Unix-like targets""" + Style.RESET_ALL + """ ]--- 
+---[ """ + Style.BRIGHT + Fore.BLUE + """Netcat reverse TCP shells""" + Style.RESET_ALL + """ ]--- 
 Type '""" + Style.BRIGHT + """1""" + Style.RESET_ALL + """' to use the default Netcat on target host.
 Type '""" + Style.BRIGHT + """2""" + Style.RESET_ALL + """' to use Netcat for Busybox on target host.
 Type '""" + Style.BRIGHT + """3""" + Style.RESET_ALL + """' to use Netcat-Traditional on target host. 
@@ -302,7 +302,7 @@ def other_reverse_shells(separator):
 
   while True:
     other_shell = _input("""
----[ """ + Style.BRIGHT + Fore.BLUE + """Reverse TCP shells""" + Style.RESET_ALL + """ ]---
+---[ """ + Style.BRIGHT + Fore.BLUE + """Generic reverse TCP shells""" + Style.RESET_ALL + """ ]---
 Type '""" + Style.BRIGHT + """1""" + Style.RESET_ALL + """' to use a PHP reverse TCP shell.
 Type '""" + Style.BRIGHT + """2""" + Style.RESET_ALL + """' to use a Perl reverse TCP shell.
 Type '""" + Style.BRIGHT + """3""" + Style.RESET_ALL + """' to use a Ruby reverse TCP shell. 
@@ -310,11 +310,11 @@ Type '""" + Style.BRIGHT + """4""" + Style.RESET_ALL + """' to use a Python reve
 Type '""" + Style.BRIGHT + """5""" + Style.RESET_ALL + """' to use a Socat reverse TCP shell.
 Type '""" + Style.BRIGHT + """6""" + Style.RESET_ALL + """' to use a Bash reverse TCP shell.
 Type '""" + Style.BRIGHT + """7""" + Style.RESET_ALL + """' to use a Ncat reverse TCP shell.
-Type '""" + Style.BRIGHT + """8""" + Style.RESET_ALL + """' to use a Windows Python reverse TCP shell.
+Type '""" + Style.BRIGHT + """8""" + Style.RESET_ALL + """' to use a Python reverse TCP shell (windows).
 \n---[ """ + Style.BRIGHT + Fore.BLUE  + """Meterpreter reverse TCP shells""" + Style.RESET_ALL + """ ]---
 Type '""" + Style.BRIGHT + """9""" + Style.RESET_ALL + """' to use a PHP meterpreter reverse TCP shell.
 Type '""" + Style.BRIGHT + """10""" + Style.RESET_ALL + """' to use a Python meterpreter reverse TCP shell. 
-Type '""" + Style.BRIGHT + """11""" + Style.RESET_ALL + """' to use a Windows meterpreter reverse TCP shell. 
+Type '""" + Style.BRIGHT + """11""" + Style.RESET_ALL + """' to use a meterpreter reverse TCP shell (windows). 
 Type '""" + Style.BRIGHT + """12""" + Style.RESET_ALL + """' to use the web delivery script. 
 \ncommix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp_other""" + Style.RESET_ALL + """) > """)
     
@@ -609,7 +609,7 @@ Type '""" + Style.BRIGHT + """2""" + Style.RESET_ALL + """' to use TrustedSec's 
 ---[ """ + Style.BRIGHT + Fore.BLUE + """Web delivery script""" + Style.RESET_ALL + """ ]---
 Type '""" + Style.BRIGHT + """1""" + Style.RESET_ALL + """' to use Python meterpreter reverse TCP shell.
 Type '""" + Style.BRIGHT + """2""" + Style.RESET_ALL + """' to use PHP meterpreter reverse TCP shell.
-Type '""" + Style.BRIGHT + """3""" + Style.RESET_ALL + """' to use Windows meterpreter reverse TCP shell.
+Type '""" + Style.BRIGHT + """3""" + Style.RESET_ALL + """' to use meterpreter reverse TCP shell (windows).
 \ncommix(""" + Style.BRIGHT + Fore.RED + """web_delivery""" + Style.RESET_ALL + """) > """)
 
         if any(option in  web_delivery.lower() for option in settings.SHELL_OPTIONS):  
@@ -692,7 +692,7 @@ def reverse_tcp_options(separator):
   while True:
     reverse_tcp_option = _input("""   
 ---[ """ + Style.BRIGHT + Fore.BLUE + """Reverse TCP shells""" + Style.RESET_ALL + """ ]---     
-Type '""" + Style.BRIGHT + """1""" + Style.RESET_ALL + """' to use a netcat reverse TCP shell.
+Type '""" + Style.BRIGHT + """1""" + Style.RESET_ALL + """' for netcat reverse TCP shells.
 Type '""" + Style.BRIGHT + """2""" + Style.RESET_ALL + """' for other reverse TCP shells.
 \ncommix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp""" + Style.RESET_ALL + """) > """)
 

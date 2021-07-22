@@ -193,7 +193,7 @@ def netcat_version(separator):
 
   while True:
     nc_version = _input("""
----[ """ + Style.BRIGHT + Fore.BLUE + """Unix-like targets""" + Style.RESET_ALL + """ ]--- 
+---[ """ + Style.BRIGHT + Fore.BLUE + """Netcat bind TCP shells""" + Style.RESET_ALL + """ ]--- 
 Type '""" + Style.BRIGHT + """1""" + Style.RESET_ALL + """' to use the default Netcat on target host.
 Type '""" + Style.BRIGHT + """2""" + Style.RESET_ALL + """' to use Netcat for Busybox on target host.
 Type '""" + Style.BRIGHT + """3""" + Style.RESET_ALL + """' to use Netcat-Traditional on target host. 
@@ -264,7 +264,7 @@ def other_bind_shells(separator):
 
   while True:
     other_shell = _input("""
----[ """ + Style.BRIGHT + Fore.BLUE + """Bind TCP shells""" + Style.RESET_ALL + """ ]---
+---[ """ + Style.BRIGHT + Fore.BLUE + """Generic bind TCP shells""" + Style.RESET_ALL + """ ]---
 Type '""" + Style.BRIGHT + """1""" + Style.RESET_ALL + """' to use a PHP bind TCP shell.
 Type '""" + Style.BRIGHT + """2""" + Style.RESET_ALL + """' to use a Perl bind TCP shell.
 Type '""" + Style.BRIGHT + """3""" + Style.RESET_ALL + """' to use a Ruby bind TCP shell. 
@@ -478,7 +478,7 @@ def bind_tcp_options(separator):
   while True:
     bind_tcp_option = _input("""   
 ---[ """ + Style.BRIGHT + Fore.BLUE + """Bind TCP shells""" + Style.RESET_ALL + """ ]---     
-Type '""" + Style.BRIGHT + """1""" + Style.RESET_ALL + """' to use a netcat bind TCP shell.
+Type '""" + Style.BRIGHT + """1""" + Style.RESET_ALL + """' for netcat bind TCP shells.
 Type '""" + Style.BRIGHT + """2""" + Style.RESET_ALL + """' for other bind TCP shells.
 \ncommix(""" + Style.BRIGHT + Fore.RED + """bind_tcp""" + Style.RESET_ALL + """) > """)
 
