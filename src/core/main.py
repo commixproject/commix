@@ -461,7 +461,7 @@ def main(filename, url):
         raise SystemExit()
 
     if not menu.options.tech:
-      menu.options.tech = ""
+      menu.options.tech = "".join(settings.AVAILABLE_TECHNIQUES)
     
     # Check if specified wrong alternative shell
     if menu.options.alter_shell:
