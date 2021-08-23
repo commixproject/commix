@@ -21,6 +21,9 @@ from src.utils import menu
 from os.path import splitext
 from src.utils import settings
 from src.utils import session_handler
+from src.thirdparty.six.moves import http_client as _http_client
+# accept overly long result lines
+_http_client._MAXLINE = 1 * 1024 * 1024
 from src.core.requests import tor
 from src.core.requests import proxy
 from src.core.requests import headers
@@ -52,6 +55,10 @@ def estimate_response_time(url, timesec):
     response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
     response.read(1)
     response.close()
+
+  except _http_client.InvalidURL as err_msg:
+    print(settings.print_critical_msg(err_msg))
+    raise SystemExit()
     
   except _urllib.error.HTTPError as err:
     ignore_start = time.time()
