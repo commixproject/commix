@@ -1,4 +1,5 @@
 ## Version 3.3 (TBA)
+* Fixed: Minor bug-fix regarding scanning multiple targets given in a textual file (i.e. via option `-m`).
 * Removed: The "Regsvr32.exe application whitelisting bypass" attack vector has been removed.
 * Updated: Minor update regarding web delivery script (i.e. Python meterpreter reverse TCP shell).
 * Replaced: The `--backticks` switch has been replaced with "backticks.py" tamper script.

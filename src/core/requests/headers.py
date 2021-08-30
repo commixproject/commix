@@ -266,8 +266,11 @@ def check_http_traffic(request):
         err_msg += " (Reason: " + str(err.args[0]).split("] ")[-1].lower() + ")."
       except IndexError:
         err_msg += "."
-      print(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+      if menu.options.bulkfile:
+        raise
+      else:  
+        print(settings.print_critical_msg(err_msg))
+        raise SystemExit()
 
   # Raise exception regarding existing connection was forcibly closed by the remote host.
   except SocketError as err:
