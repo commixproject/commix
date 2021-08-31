@@ -179,8 +179,8 @@ def examine_request(request):
       err_msg += "."
       pass
     if menu.options.bulkfile:
-      err_msg = "Skipping URL '" + url + "' - " + err_msg
-      print(settings.print_critical_msg(err_msg))
+      warn_msg = "Skipping URL '" + url + "' - " + err_msg
+      print(settings.print_warning_msg(warn_msg))
       if settings.EOF:
         print(settings.SINGLE_WHITESPACE) 
       return False 
@@ -896,8 +896,8 @@ try:
             if settings.VERBOSITY_LEVEL < 2:
               print(settings.SINGLE_WHITESPACE)
             err_msg = str(err_msg.args[0]).split("] ")[1] + "." 
-            err_msg = "Skipping URL '" + url + "' - " + err_msg
-            print(settings.print_critical_msg(err_msg))
+            warn_msg = "Skipping URL '" + url + "' - " + err_msg
+            print(settings.print_warning_msg(warn_msg))
             if settings.EOF:
               print(settings.SINGLE_WHITESPACE) 
 
