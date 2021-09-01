@@ -746,9 +746,8 @@ def do_check(url, http_request_method, filename):
       print(settings.print_critical_msg(err_msg))
 
   logs.print_logs_notification(filename, url)
-  if not settings.CHECK_BOTH_OS:
+  if not settings.CHECK_BOTH_OS and not menu.options.bulkfile:
     # if not menu.options.bulkfile or settings.EOF:
     #   print(settings.SINGLE_WHITESPACE)
     raise SystemExit()
-
 # eof
