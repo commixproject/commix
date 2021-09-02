@@ -615,7 +615,14 @@ Perform checks
 def perform_checks(url, http_request_method, filename):
 
   def basic_level_checks():
-    settings.PERFORM_BASIC_SCANS = False
+    if not menu.options.bulkfile:
+      settings.PERFORM_BASIC_SCANS = False
+    else:
+      settings.PERFORM_BASIC_SCANS = True
+      settings.SKIP_CODE_INJECTIONS = False
+      settings.SKIP_COMMAND_INJECTIONS = False
+      settings.IDENTIFIED_WARNINGS = False
+      settings.IDENTIFIED_PHPINFO = False
     # Check if HTTP Method is GET.
     if not menu.options.data:
       get_request(url, http_request_method, filename, timesec)
