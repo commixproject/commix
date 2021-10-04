@@ -37,44 +37,32 @@ def do_check(url):
   try:
     response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
     return response
-  except Exception as err:
-    if "Connection refused" in str(err):
-      err_msg = "Unable to connect to the target URL or proxy ("
-      err_msg += str(menu.options.proxy)
-      err_msg += ")."
-      print(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+  except (_urllib.error.URLError, _urllib.error.HTTPError, _http_client.BadStatusLine) as err:
+    err_msg = "Unable to connect to the target URL or proxy."
+    print(settings.print_critical_msg(err_msg))
+    raise SystemExit()
 
 """
 Use the defined HTTP Proxy
 """
 def use_proxy(request):
+  _ = True
   headers.do_check(request)
   request.set_proxy(menu.options.proxy, settings.PROXY_SCHEME)
   try:
     response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
     return response
-  except _http_client.BadStatusLine as err:
-    err_msg = "Unable to connect to the target URL or proxy ("
-    err_msg += str(menu.options.proxy)
-    err_msg += ")."
-    print(settings.print_critical_msg(err_msg))
-    raise SystemExit() 
   except _urllib.error.HTTPError as err:
     if str(err.code) == settings.INTERNAL_SERVER_ERROR or str(err.code) == settings.BAD_REQUEST:
-      return False
-    elif "Connection refused" in str(err):
-      err_msg = "Unable to connect to the target URL or proxy ("
-      err_msg += str(menu.options.proxy)
-      err_msg += ")."
-      print(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+      return False 
     else:
-      try:
-        err_msg = str(err.args[0]).split("] ")[1] + "."
-      except IndexError:
-        err_msg = str(err).replace(": "," (") + ")."
-      print(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+      _ = False
+  except (_urllib.error.URLError, _http_client.BadStatusLine) as err:
+     _ = False
+  if not _:
+    err_msg = "Unable to connect to the target URL or proxy."
+    print(settings.print_critical_msg(err_msg))
+    raise SystemExit()
+
 
 # eof 
