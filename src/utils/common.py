@@ -23,8 +23,32 @@ import hashlib
 import traceback
 from src.utils import menu
 from src.utils import settings
+from src.thirdparty import six
 from src.thirdparty.six.moves import input as _input
 from src.thirdparty.six.moves import urllib as _urllib
+
+"""
+Returns True if the current process is run under admin privileges
+"""
+def running_as_admin():
+  is_admin = False
+  if settings.PLATFORM in ("posix", "mac"):
+    _ = os.geteuid()
+    if isinstance(_, (float, six.integer_types)) and _ == 0:
+      is_admin = True  
+
+  elif settings.IS_WINDOWS:
+    import ctypes
+    _ = ctypes.windll.shell32.IsUserAnAdmin()
+    if isinstance(_, (float, six.integer_types)) and _ == 1:
+      is_admin = True
+  else:
+    err_msg = settings.APPLICATION + " is not able to check if you are running it "
+    err_msg += "as an administrator account on this platform. "
+    print(settings.print_error_msg(err_msg))
+    is_admin = True
+
+  return is_admin
 
 """
 Get total number of days from last update

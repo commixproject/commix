@@ -18,6 +18,7 @@ import sys
 import platform
 import subprocess
 from src.utils import menu
+from src.utils import common
 from src.utils import settings
 from src.utils import requirments
 from src.thirdparty.six.moves import input as _input
@@ -58,12 +59,11 @@ def installer():
   sys.stdout.flush()
   
   # Check if OS is Linux.
-  if platform.system() == "Linux":
-    
-    # You need to have root privileges to run this script
-    if os.geteuid() != 0:
+  if settings.PLATFORM == "posix":
+    # You need to have administrative privileges to run this script.
+    if not common.running_as_admin():
       print(settings.SINGLE_WHITESPACE) 
-      err_msg = "You need to have root privileges to run this option!"
+      err_msg = "You need to have administrative privileges to run this option."
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
       
