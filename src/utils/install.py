@@ -107,7 +107,7 @@ def installer():
         err_msg = "The installer is not designed for any "
         err_msg += "other Linux distro than Ubuntu / Debian. " 
         err_msg += "Please install manually: " + dependencies
-        print(Back.RED + err_msg + Style.RESET_ALL)
+        print(settings.print_critical_msg(err_msg))
         print(settings.SINGLE_WHITESPACE)
         raise SystemExit()
         
