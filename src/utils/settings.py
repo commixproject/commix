@@ -216,7 +216,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.4"
-REVISION = "4"
+REVISION = "5"
 STABLE_RELEASE = False
 if STABLE_RELEASE:
   VERSION = "v" + VERSION_NUM + "-stable"
@@ -319,10 +319,10 @@ SESSION_APPLIED_TECHNIQUES = ""
 
 # The name of the operating system dependent module imported. 
 PLATFORM = os.name
-IS_WIN = PLATFORM == "nt"
+IS_WINDOWS = PLATFORM == "nt"
 
 # Check if OS is Windows.
-IS_WINDOWS = hasattr(sys, "getwindowsversion")
+#IS_WINDOWS = hasattr(sys, "getwindowsversion")
 
 # Git URL.
 GIT_URL = "https://github.com/commixproject/" + APPLICATION + ".git"
