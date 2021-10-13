@@ -1010,53 +1010,53 @@ def custom_header_injection(url, vuln_parameter, payload):
 Target's encoding detection
 """
 def encoding_detection(response):
-  if not menu.options.encoding:
-    charset_detected = False
-    if settings.VERBOSITY_LEVEL != 0:
-      debug_msg = "Identifying the indicated web-page charset. " 
-      sys.stdout.write(settings.print_debug_msg(debug_msg))
-      sys.stdout.flush()
+  charset_detected = False
+  if settings.VERBOSITY_LEVEL != 0:
+    debug_msg = "Identifying the indicated web-page charset. " 
+    sys.stdout.write(settings.print_debug_msg(debug_msg))
+    sys.stdout.flush()
+  try:
+    # Detecting charset
     try:
-      # Detecting charset
-      try:
-        # Support for python 2.7.x
-        charset = response.headers.getparam('charset')
-      except AttributeError:
-        # Support for python 3.x
-        charset = response.headers.get_content_charset()
-      if charset != None and len(charset) != 0 :        
+      # Support for python 2.7.x
+      charset = response.headers.getparam('charset')
+    except AttributeError:
+      # Support for python 3.x
+      charset = response.headers.get_content_charset()
+    if charset != None and len(charset) != 0 :        
+      charset_detected = True
+    else:
+      content = re.findall(r"charset=['\"](.*)['\"]", response.read())[0]
+      if len(content) != 0 :
+        charset = content
         charset_detected = True
       else:
-        content = re.findall(r"charset=['\"](.*)['\"]", response.read())[0]
-        if len(content) != 0 :
-          charset = content
-          charset_detected = True
-        else:
-           # Check if HTML5 format
-          charset = re.findall(r"charset=['\"](.*?)['\"]", response.read())[0]
-        if len(charset) != 0 :
-          charset_detected = True
-      # Check the identifyied charset
-      if charset_detected :
+         # Check if HTML5 format
+        charset = re.findall(r"charset=['\"](.*?)['\"]", response.read())[0]
+      if len(charset) != 0 :
+        charset_detected = True
+    # Check the identifyied charset
+    if charset_detected :
+      if not menu.options.encoding:
         settings.DEFAULT_PAGE_ENCODING = charset
-        if settings.VERBOSITY_LEVEL != 0:
-          print(settings.SINGLE_WHITESPACE)
-        if settings.DEFAULT_PAGE_ENCODING.lower() not in settings.ENCODING_LIST:
-          warn_msg = "The indicated web-page charset "  + settings.DEFAULT_PAGE_ENCODING + " seems unknown."
-          print(settings.print_warning_msg(warn_msg))
-        else:
-          if settings.VERBOSITY_LEVEL != 0:
-            debug_msg = "The indicated web-page charset appears to be " 
-            debug_msg += settings.DEFAULT_PAGE_ENCODING + Style.RESET_ALL + "."
-            print(settings.print_bold_debug_msg(debug_msg))
+      if settings.VERBOSITY_LEVEL != 0:
+        print(settings.SINGLE_WHITESPACE)
+      if settings.DEFAULT_PAGE_ENCODING.lower() not in settings.ENCODING_LIST:
+        warn_msg = "The indicated web-page charset "  + settings.DEFAULT_PAGE_ENCODING + " seems unknown."
+        print(settings.print_warning_msg(warn_msg))
       else:
-        pass
-    except:
+        if settings.VERBOSITY_LEVEL != 0:
+          debug_msg = "The indicated web-page charset appears to be " 
+          debug_msg += settings.DEFAULT_PAGE_ENCODING + Style.RESET_ALL + "."
+          print(settings.print_bold_debug_msg(debug_msg))
+    else:
       pass
-    if charset_detected == False and settings.VERBOSITY_LEVEL != 0:
-      print(settings.SINGLE_WHITESPACE)
-      warn_msg = "Heuristics have failed to identify indicated web-page charset."
-      print(settings.print_warning_msg(warn_msg))
+  except:
+    pass
+  if charset_detected == False and settings.VERBOSITY_LEVEL != 0:
+    print(settings.SINGLE_WHITESPACE)
+    warn_msg = "Heuristics have failed to identify indicated web-page charset."
+    print(settings.print_warning_msg(warn_msg))
 
 """
 Procedure for target application identification
