@@ -694,6 +694,7 @@ try:
         raise SystemExit()
       else:
         settings.DEFAULT_PAGE_ENCODING = menu.options.encoding.lower()
+        settings.UNICODE_ENCODING  = menu.options.encoding.lower()
 
     if menu.options.header and len(menu.options.header.split("\\n"))> 1:
         warn_msg = "Swithing '--header' to '--headers' "
