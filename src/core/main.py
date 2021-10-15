@@ -693,7 +693,6 @@ try:
         print(settings.print_critical_msg(err_msg))
         raise SystemExit()
       else:
-        settings.DEFAULT_PAGE_ENCODING = menu.options.encoding.lower()
         settings.UNICODE_ENCODING  = menu.options.encoding.lower()
 
     if menu.options.header and len(menu.options.header.split("\\n"))> 1:

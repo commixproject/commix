@@ -1037,8 +1037,6 @@ def encoding_detection(response):
         charset_detected = True
     # Check the identifyied charset
     if charset_detected :
-      if not menu.options.encoding:
-        settings.DEFAULT_PAGE_ENCODING = charset
       if settings.VERBOSITY_LEVEL != 0:
         print(settings.SINGLE_WHITESPACE)
       if settings.DEFAULT_PAGE_ENCODING.lower() not in settings.ENCODING_LIST:

@@ -168,16 +168,15 @@ def page_encoding(response, action):
         settings.PAGE_COMPRESSION = False
   try:
     if action == "encode" and type(page) == str:
-      return page.encode(settings.UNICODE_ENCODING)
+      return page.encode(settings.UNICODE_ENCODING, errors="ignore")
     else:
-      return page.decode(settings.UNICODE_ENCODING)
+      return page.decode(settings.UNICODE_ENCODING, errors="ignore")
   except (UnicodeEncodeError, UnicodeDecodeError) as err:
     err_msg = "The " + str(err).split(":")[0] + ". "
     _ = True
-  except LookupError as err:
-    err_msg = "The '" + settings.DEFAULT_PAGE_ENCODING + "' is " + str(err).split(":")[0] + ". "
+  except (LookupError, TypeError) as err:
+    err_msg = "The '" + settings.UNICODE_ENCODING + "' is " + str(err).split(":")[0] + ". "
     _ = True
-  except AttributeError:
     pass
   if _:
     err_msg += "You are advised to rerun with"
