@@ -99,7 +99,7 @@ def heuristic_basic(url, http_request_method):
             request = _urllib.request.Request(url.replace(settings.INJECT_TAG, payload))
           else:
             data = menu.options.data.replace(settings.INJECT_TAG, payload)
-            request = _urllib.request.Request(url, data.encode(settings.UNICODE_ENCODING))
+            request = _urllib.request.Request(url, data.encode(settings.DEFAULT_CODEC))
           headers.do_check(request)
           response = requests.get_request_response(request)
           if type(response) is not bool:

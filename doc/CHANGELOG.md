@@ -1,3 +1,6 @@
+## Version 3.4 (TBA)
+* Replaced: The `--encoding` option has been replaced with `--codec`.
+
 ## Version 3.3 (2021-09-13)
 * Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
 * Fixed: Minor bug-fix regarding scanning multiple targets given in a textual file (i.e. via option `-m`).

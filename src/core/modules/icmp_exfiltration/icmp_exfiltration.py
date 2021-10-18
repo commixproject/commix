@@ -90,7 +90,7 @@ def cmd_exec(http_request_method, cmd, url, vuln_parameter, ip_src):
     req = url + data
   else:
     values =  {vuln_parameter:payload}
-    data = _urllib.parse.urlencode(values).encode(settings.UNICODE_ENCODING)
+    data = _urllib.parse.urlencode(values).encode(settings.DEFAULT_CODEC)
     request = _urllib.request.Request(url=url, data=data)
 
   try:

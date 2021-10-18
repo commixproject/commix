@@ -93,7 +93,7 @@ def do_check(url):
     try:
       settings.SUPPORTED_HTTP_AUTH_TYPES.index(menu.options.auth_type)
       if menu.options.auth_type == "basic":
-        b64_string = encodebytes(menu.options.auth_cred.encode(settings.UNICODE_ENCODING)).decode().replace('\n', '')
+        b64_string = encodebytes(menu.options.auth_cred.encode(settings.DEFAULT_CODEC)).decode().replace('\n', '')
         opener.addheaders.append(("Authorization", "Basic " + b64_string + ""))
       elif menu.options.auth_type == "digest":
         try:

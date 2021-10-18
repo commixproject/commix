@@ -184,7 +184,7 @@ def sys_argv_errors():
   _reload_module(sys)
   try:
     # Fix for Python 2.7
-    sys.setdefaultencoding(UNICODE_ENCODING)
+    sys.setdefaultencoding(DEFAULT_CODEC)
   except AttributeError:
     pass
   for i in xrange(len(sys.argv)):
@@ -216,7 +216,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.4"
-REVISION = "8"
+REVISION = "9"
 STABLE_RELEASE = False
 if STABLE_RELEASE:
   VERSION = "v" + VERSION_NUM + "-stable"
@@ -593,14 +593,14 @@ PARAMETER_SPLITTING_REGEX = r'[,]'
 # Cookie delimiter
 PARAMETER_DELIMITER = "&"
 
-UNICODE_ENCODING = "utf8"
+DEFAULT_CODEC = "utf8"
 
 # Reference: http://en.wikipedia.org/wiki/ISO/IEC_8859-1
 DEFAULT_PAGE_ENCODING = "iso-8859-1"
 try:
   codecs.lookup(DEFAULT_PAGE_ENCODING)
 except LookupError:
-  DEFAULT_PAGE_ENCODING = UNICODE_ENCODING
+  DEFAULT_PAGE_ENCODING = DEFAULT_CODEC
 
 # Character Sets List. 
 # A complete list of the standard encodings Python supports.

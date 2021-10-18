@@ -61,7 +61,7 @@ def request(url):
   try:
     # Check if defined POST data
     if menu.options.data:
-      request = _urllib.request.Request(url, menu.options.data.encode(settings.UNICODE_ENCODING))
+      request = _urllib.request.Request(url, menu.options.data.encode(settings.DEFAULT_CODEC))
     else:
       request = _urllib.request.Request(url)
     headers.do_check(request)

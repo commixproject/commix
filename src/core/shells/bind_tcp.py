@@ -434,7 +434,7 @@ Type '""" + Style.BRIGHT + """8""" + Style.RESET_ALL + """' to use a Python mete
         with open (output, "r") as content_file:
           data = content_file.readlines()
           data = ''.join(data)
-          #data = base64.b64encode(data.encode(settings.UNICODE_ENCODING)).decode()
+          #data = base64.b64encode(data.encode(settings.DEFAULT_CODEC)).decode()
 
         print(settings.SINGLE_WHITESPACE)
         # Remove the ouput file.

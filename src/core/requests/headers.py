@@ -85,7 +85,7 @@ def print_http_response(response_headers, code, page):
     try:
       http_response_content(page)
     except AttributeError:
-      http_response_content(page.decode(settings.UNICODE_ENCODING))
+      http_response_content(page.decode(settings.DEFAULT_CODEC))
 
 """
 Checking the HTTP Headers & HTTP/S Request.
@@ -326,7 +326,7 @@ def do_check(request):
     try:
       settings.SUPPORTED_HTTP_AUTH_TYPES.index(menu.options.auth_type)
       if menu.options.auth_type == "basic":
-        b64_string = encodebytes(menu.options.auth_cred.encode(settings.UNICODE_ENCODING)).decode().replace('\n', '')
+        b64_string = encodebytes(menu.options.auth_cred.encode(settings.DEFAULT_CODEC)).decode().replace('\n', '')
         request.add_header("Authorization", "Basic " + b64_string + "")
       elif menu.options.auth_type == "digest":
         try:
@@ -401,7 +401,7 @@ def do_check(request):
           settings.CUSTOM_HEADER_NAME = http_header_name
         # Add HTTP Header name / value to the HTTP request
         if http_header_name not in [settings.HOST, settings.USER_AGENT, settings.REFERER, settings.COOKIE]:
-          request.add_header(http_header_name.encode(settings.UNICODE_ENCODING), http_header_value.encode(settings.UNICODE_ENCODING))
+          request.add_header(http_header_name.encode(settings.DEFAULT_CODEC), http_header_value.encode(settings.DEFAULT_CODEC))
       except:
         pass
         

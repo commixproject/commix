@@ -45,7 +45,7 @@ def estimate_response_time(url, timesec):
     sys.stdout.flush()
   # Check if defined POST data
   if menu.options.data:
-    request = _urllib.request.Request(url, menu.options.data.encode(settings.UNICODE_ENCODING))
+    request = _urllib.request.Request(url, menu.options.data.encode(settings.DEFAULT_CODEC))
   else:
     url = parameters.get_url_part(url)
     request = _urllib.request.Request(url)
@@ -359,7 +359,7 @@ def cookie_injection(url, vuln_parameter, payload):
     # Check if defined POST data
     if menu.options.data:
       menu.options.data = settings.USER_DEFINED_POST_DATA
-      request = _urllib.request.Request(url, menu.options.data.encode(settings.UNICODE_ENCODING))
+      request = _urllib.request.Request(url, menu.options.data.encode(settings.DEFAULT_CODEC))
     else:
       url = parameters.get_url_part(url)
       request = _urllib.request.Request(url)
@@ -487,7 +487,7 @@ def user_agent_injection(url, vuln_parameter, payload):
     # Check if defined POST data
     if menu.options.data:
       menu.options.data = settings.USER_DEFINED_POST_DATA
-      request = _urllib.request.Request(url, menu.options.data.encode(settings.UNICODE_ENCODING))
+      request = _urllib.request.Request(url, menu.options.data.encode(settings.DEFAULT_CODEC))
     else:
       url = parameters.get_url_part(url)
       request = _urllib.request.Request(url)
@@ -619,7 +619,7 @@ def referer_injection(url, vuln_parameter, payload):
     # Check if defined POST data
     if menu.options.data:
       menu.options.data = settings.USER_DEFINED_POST_DATA
-      request = _urllib.request.Request(url, menu.options.data.encode(settings.UNICODE_ENCODING))
+      request = _urllib.request.Request(url, menu.options.data.encode(settings.DEFAULT_CODEC))
     else:
       url = parameters.get_url_part(url)
       request = _urllib.request.Request(url)
@@ -754,7 +754,7 @@ def host_injection(url, vuln_parameter, payload):
     # Check if defined POST data
     if menu.options.data:
       menu.options.data = settings.USER_DEFINED_POST_DATA
-      request = _urllib.request.Request(url, menu.options.data.encode(settings.UNICODE_ENCODING))
+      request = _urllib.request.Request(url, menu.options.data.encode(settings.DEFAULT_CODEC))
     else:
       url = parameters.get_url_part(url)
       request = _urllib.request.Request(url)
@@ -888,7 +888,7 @@ def custom_header_injection(url, vuln_parameter, payload):
     # Check if defined POST data
     if menu.options.data:
       menu.options.data = settings.USER_DEFINED_POST_DATA
-      request = _urllib.request.Request(url, menu.options.data.encode(settings.UNICODE_ENCODING))
+      request = _urllib.request.Request(url, menu.options.data.encode(settings.DEFAULT_CODEC))
     else:
       url = parameters.get_url_part(url)
       request = _urllib.request.Request(url)

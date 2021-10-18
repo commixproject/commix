@@ -353,14 +353,14 @@ def store_cmd(url, cmd, shell, vuln_parameter):
       if settings.TESTABLE_PARAMETER:
         conn.execute("INSERT INTO " + table_name(url) + "_ir(cmd, output, vuln_parameter) " \
                      "VALUES(?,?,?)", \
-                     (str(base64.b64encode(cmd.encode(settings.UNICODE_ENCODING)).decode()), \
-                      str(base64.b64encode(shell.encode(settings.UNICODE_ENCODING)).decode()), \
+                     (str(base64.b64encode(cmd.encode(settings.DEFAULT_CODEC)).decode()), \
+                      str(base64.b64encode(shell.encode(settings.DEFAULT_CODEC)).decode()), \
                       str(vuln_parameter)))
       else:
         conn.execute("INSERT INTO " + table_name(url) + "_ir(cmd, output, vuln_parameter) "\
                      "VALUES(?,?,?)", \
-                     (str(base64.b64encode(cmd.encode(settings.UNICODE_ENCODING)).decode()), \
-                      str(base64.b64encode(shell.encode(settings.UNICODE_ENCODING)).decode()), \
+                     (str(base64.b64encode(cmd.encode(settings.DEFAULT_CODEC)).decode()), \
+                      str(base64.b64encode(shell.encode(settings.DEFAULT_CODEC)).decode()), \
                       str(settings.HTTP_HEADER)))
       conn.commit()
       conn.close() 
@@ -380,11 +380,11 @@ def export_stored_cmd(url, cmd, vuln_parameter):
       conn = sqlite3.connect(settings.SESSION_FILE)
       if settings.TESTABLE_PARAMETER:
         cursor = conn.execute("SELECT output FROM " + table_name(url) + \
-                              "_ir WHERE cmd='" + base64.b64encode(cmd.encode(settings.UNICODE_ENCODING)).decode() + "' AND "\
+                              "_ir WHERE cmd='" + base64.b64encode(cmd.encode(settings.DEFAULT_CODEC)).decode() + "' AND "\
                               "vuln_parameter= '" + vuln_parameter + "';").fetchall()
       else:
         cursor = conn.execute("SELECT output FROM " + table_name(url) + \
-                            "_ir WHERE cmd='" + base64.b64encode(cmd.encode(settings.UNICODE_ENCODING)).decode() + "' AND "\
+                            "_ir WHERE cmd='" + base64.b64encode(cmd.encode(settings.DEFAULT_CODEC)).decode() + "' AND "\
                             "vuln_parameter= '" +  settings.HTTP_HEADER + "';").fetchall()
 
       conn.commit()
@@ -393,7 +393,7 @@ def export_stored_cmd(url, cmd, vuln_parameter):
       for session in cursor:
         output = base64.b64decode(session[0])
       try:  
-        return output.decode(settings.UNICODE_ENCODING)
+        return output.decode(settings.DEFAULT_CODEC)
       except AttributeError:
         return output  
     else:

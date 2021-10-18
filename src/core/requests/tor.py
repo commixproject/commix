@@ -59,7 +59,7 @@ def do_check():
     
   if check_privoxy_proxy:
     try:
-      check_tor_page = opener.open("https://check.torproject.org/").read().decode(settings.UNICODE_ENCODING)
+      check_tor_page = opener.open("https://check.torproject.org/").read().decode(settings.DEFAULT_CODEC)
       found_ip = re.findall(r":  <strong>" + "(.*)" + "</strong></p>", check_tor_page)
       if not "You are not using Tor" in check_tor_page:
         sys.stdout.write(settings.SUCCESS_STATUS + "\n")

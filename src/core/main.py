@@ -50,7 +50,7 @@ from src.thirdparty.six.moves import reload_module as _reload_module
 
 # Set default encoding
 _reload_module(sys)
-#sys.setdefaultencoding(settings.UNICODE_ENCODING)
+#sys.setdefaultencoding(settings.DEFAULT_CODEC)
 
 if settings.IS_WINDOWS:
   import codecs
@@ -685,15 +685,15 @@ try:
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
 
-    if menu.options.encoding:
-      if menu.options.encoding.lower() not in settings.ENCODING_LIST:
-        err_msg = "The provided charset '"  + menu.options.encoding + "' is unknown. "
+    if menu.options.codec:
+      if menu.options.codec.lower() not in settings.ENCODING_LIST:
+        err_msg = "The provided charset '"  + menu.options.codec + "' is unknown. "
         err_msg += "Please visit 'http://docs.python.org/library/codecs.html#standard-encodings' "
         err_msg += "to get the full list of supported charsets."
         print(settings.print_critical_msg(err_msg))
         raise SystemExit()
       else:
-        settings.UNICODE_ENCODING  = menu.options.encoding.lower()
+        settings.DEFAULT_CODEC  = menu.options.codec.lower()
 
     if menu.options.header and len(menu.options.header.split("\\n"))> 1:
         warn_msg = "Swithing '--header' to '--headers' "

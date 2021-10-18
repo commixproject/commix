@@ -114,11 +114,17 @@ general.add_option("--skip-heuristics",
                 default=False,
                 help="Skip heuristic detection for code injection.")
 
-general.add_option("--encoding",
+# general.add_option("--encoding",
+#                 action="store",
+#                 dest="encoding",
+#                 default=None,
+#                 help="Force character encoding used for data retrieval (e.g. GBK).")
+
+general.add_option("--codec",
                 action="store",
-                dest="encoding",
+                dest="codec",
                 default=None,
-                help="Force character encoding used for data retrieval (e.g. GBK).")
+                help="Force codec for character encoding (e.g. 'ascii').")
 
 general.add_option("--charset",
                 action="store",

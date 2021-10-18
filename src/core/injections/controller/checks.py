@@ -168,19 +168,19 @@ def page_encoding(response, action):
         settings.PAGE_COMPRESSION = False
   try:
     if action == "encode" and type(page) == str:
-      return page.encode(settings.UNICODE_ENCODING, errors="ignore")
+      return page.encode(settings.DEFAULT_CODEC, errors="ignore")
     else:
-      return page.decode(settings.UNICODE_ENCODING, errors="ignore")
+      return page.decode(settings.DEFAULT_CODEC, errors="ignore")
   except (UnicodeEncodeError, UnicodeDecodeError) as err:
     err_msg = "The " + str(err).split(":")[0] + ". "
     _ = True
   except (LookupError, TypeError) as err:
-    err_msg = "The '" + settings.UNICODE_ENCODING + "' is " + str(err).split(":")[0] + ". "
+    err_msg = "The '" + settings.DEFAULT_CODEC + "' is " + str(err).split(":")[0] + ". "
     _ = True
     pass
   if _:
     err_msg += "You are advised to rerun with"
-    err_msg += ('out', '')[menu.options.encoding == None] + " the option '--encoding'."
+    err_msg += ('out', '')[menu.options.codec == None] + " the option '--codec'."
     print(settings.print_critical_msg(str(err_msg)))
     raise SystemExit()
 
@@ -881,7 +881,7 @@ def list_tamper_scripts():
   print(settings.print_info_msg(info_msg))
   if menu.options.list_tampers:
     for script in sorted(glob.glob(os.path.join(settings.TAMPER_SCRIPTS_PATH, "*.py"))):
-      content = open(script, "rb").read().decode(settings.UNICODE_ENCODING)
+      content = open(script, "rb").read().decode(settings.DEFAULT_CODEC)
       match = re.search(r"About:(.*)\n", content)
       if match:
         comment = match.group(1).strip()

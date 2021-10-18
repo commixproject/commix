@@ -74,7 +74,7 @@ def cmd_exec(dns_server, http_request_method, cmd, url, vuln_parameter):
     request = url + data
   else:
     values =  {vuln_parameter:payload}
-    data = _urllib.parse.urlencode(values).encode(settings.UNICODE_ENCODING)
+    data = _urllib.parse.urlencode(values).encode(settings.DEFAULT_CODEC)
     request = _urllib.request.Request(url=url, data=data)
     
   sys.stdout.write(Fore.GREEN + Style.BRIGHT + "\n")
