@@ -635,10 +635,13 @@ def perform_checks(url, http_request_method, filename):
   if menu.options.auth_url and menu.options.auth_data:
     # Do the authentication process.
     authentication.authentication_process()
-
-    # Check if authentication page is the same with the next (injection) URL
-    if _urllib.request.urlopen(url, timeout=settings.TIMEOUT).read() == _urllib.request.urlopen(menu.options.auth_url, timeout=settings.TIMEOUT).read():
-      err_msg = "It seems that the authentication procedure has failed."
+    try:
+      # Check if authentication page is the same with the next (injection) URL
+      if _urllib.request.urlopen(url, timeout=settings.TIMEOUT).read() == _urllib.request.urlopen(menu.options.auth_url, timeout=settings.TIMEOUT).read():
+        err_msg = "It seems that the authentication procedure has failed."
+        print(settings.print_critical_msg(err_msg))
+        raise SystemExit()
+    except (_urllib.error.URLError, _urllib.error.HTTPError) as err_msg:
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
   elif menu.options.auth_url or menu.options.auth_data: 
