@@ -1,4 +1,5 @@
 ## Version 3.4 (TBA)
+* Revised: Improvements regarding dynamic code evaluation heuristic check.
 * Replaced: The `--encoding` option has been replaced with `--codec`.
 
 ## Version 3.3 (2021-09-13)

