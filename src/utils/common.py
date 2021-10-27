@@ -178,7 +178,7 @@ def unhandled_exception():
     print(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
-  elif "MemoryError" in exc_msg:
+  elif any(_ in exc_msg for _ in ("MemoryError", "Cannot allocate memory")):
     err_msg = "Memory exhaustion detected."
     print(settings.print_critical_msg(err_msg))
     raise SystemExit()
