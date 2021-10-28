@@ -164,13 +164,6 @@ def unhandled_exception():
     print(settings.print_critical_msg(err_msg)) 
     raise SystemExit()
 
-  elif all(_ in exc_msg for _ in ("No such file", "_'")):
-    err_msg = "Corrupted installation detected ('" + exc_msg.strip().split('\n')[-1] + "'). "
-    err_msg += "You should retrieve the latest development version from official GitHub "
-    err_msg += "repository at '" + settings.GIT_URL + "'."
-    print(settings.print_critical_msg(err_msg))
-    raise SystemExit()
-
   elif "must be pinned buffer, not bytearray" in exc_msg:
     err_msg = "Error occurred at Python interpreter which "
     err_msg += "is fixed in 2.7.x. Please update accordingly. "
@@ -196,6 +189,13 @@ def unhandled_exception():
 
   elif all(_ in exc_msg for _ in ("Permission denied", "metasploit")):
     err_msg = "Permission error occurred while using Metasploit."
+    print(settings.print_critical_msg(err_msg))
+    raise SystemExit()
+
+  elif "Invalid argument" in exc_msg:
+    err_msg = "Corrupted installation detected. "
+    err_msg += "You should retrieve the latest (dev) version from official GitHub "
+    err_msg += "repository at '" + settings.GIT_URL + "'."
     print(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
