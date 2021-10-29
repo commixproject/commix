@@ -1,4 +1,5 @@
 ## Version 3.4 (TBA)
+* Revised: Improvement regarding mechanism which nagging if used "dev" version is > 30 days old.
 * Revised: Improvements regarding dynamic code evaluation heuristic check.
 * Replaced: The `--encoding` option has been replaced with `--codec`.
 

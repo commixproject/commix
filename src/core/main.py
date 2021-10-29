@@ -637,7 +637,8 @@ try:
 
   # Get total number of days from last update
   if os.path.isfile(settings.SETTINGS_PATH):
-    common.days_from_last_update()
+    if settings.STABLE_RELEASE == False:
+      common.days_from_last_update()
 
   # Define the level of verbosity.
   if menu.options.verbose > 4:
