@@ -19,3 +19,5 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Basic import test
         run: python -c "import commix"
+      - name: Basic smoke test
+        run: python commix.py --smoke-test

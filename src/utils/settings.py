@@ -216,7 +216,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.4"
-REVISION = "18"
+REVISION = "19"
 STABLE_RELEASE = False
 if STABLE_RELEASE:
   VERSION = "v" + VERSION_NUM + "-stable"
@@ -339,6 +339,8 @@ GIT_URL = "https://github.com/commixproject/" + APPLICATION + ".git"
 
 # Git issue URL.
 ISSUES_PAGE = "https://github.com/commixproject/" + APPLICATION + "/issues/new"
+
+COMMIX_ROOT_PATH = os.path.abspath(os.curdir)
 
 # Output Directory
 OUTPUT_DIR = ".output/"  

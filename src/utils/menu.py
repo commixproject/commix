@@ -18,6 +18,7 @@ import sys
 from src.utils import settings
 from optparse import OptionGroup
 from optparse import OptionParser
+from optparse import SUPPRESS_HELP as SUPPRESS
 from src.thirdparty.six.moves import input as _input
 from src.thirdparty.colorama import Fore, Back, Style, init
 
@@ -597,6 +598,12 @@ misc.add_option("--disable-coloring",
                 dest="disable_coloring",
                 default=False,
                 help="Disable console output coloring.")
+
+ # Hidden options
+parser.add_option("--smoke-test",
+                    action="store_true",
+                    dest="smoke_test",
+                    help=SUPPRESS)
 
 parser.add_option_group(general)
 parser.add_option_group(target)
