@@ -992,7 +992,7 @@ def whitespace_check(payload):
       if menu.options.tamper:
         menu.options.tamper = menu.options.tamper + ",space2htab"
       else:
-        menu.options.tamper = "space2htab" 
+        menu.options.tamper = "space2htab"
     settings.WHITESPACES[0] = "%09"
 
   # Enable the "space2vtab" tamper script.
@@ -1237,6 +1237,21 @@ def perform_payload_modification(payload):
     if encode_type == 'hexencode':
       from src.core.tamper import hexencode
       payload = hexencode.tamper(payload)
+
+  for encode_type in list(set(settings.MULTI_ENCODED_PAYLOAD[::-1])):
+    # Encode spaces.    
+    if encode_type == 'space2ifs':
+      from src.core.tamper import space2ifs
+      payload = space2ifs.tamper(payload)
+    if encode_type == 'space2plus':
+      from src.core.tamper import space2plus
+      payload = space2plus.tamper(payload)
+    if encode_type == 'space2htab':
+      from src.core.tamper import space2htab
+      payload = space2htab.tamper(payload)
+    if encode_type == 'space2vtab':
+      from src.core.tamper import space2vtab
+      payload = space2vtab.tamper(payload)
 
   return payload
 

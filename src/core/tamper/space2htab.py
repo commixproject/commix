@@ -22,10 +22,12 @@ Notes: This tamper script works against all targets.
 
 __tamper__ = "space2htab"
 
-settings.TAMPER_SCRIPTS[__tamper__] = True
-if settings.WHITESPACES[0] == "%20":
-  settings.WHITESPACES[0] = "%09"
-else:
-  settings.WHITESPACES.append("%09") 
+def tamper(payload):
+  settings.TAMPER_SCRIPTS[__tamper__] = True
+  if settings.WHITESPACES[0] == "%20":
+    settings.WHITESPACES[0] = "%09"
+  else:
+    settings.WHITESPACES.append("%09") 
+  return payload
 
 # eof 
