@@ -22,6 +22,9 @@ from src.utils import settings
 Runs the basic smoke testing
 """
 def smoke_test():
+    info_msg = "Executing smoke test."
+    print(settings.print_info_msg(info_msg))
+
     _ = True
     file_paths = []
     for root, directories, filenames in os.walk(settings.COMMIX_ROOT_PATH):
@@ -35,17 +38,21 @@ def smoke_test():
         if "." in path:
           try:
             __import__(path)
+            if settings.VERBOSITY_LEVEL != 0:
+              debug_msg = "Succeeded importing '" + str(path) + "' module."
+              print(settings.print_debug_msg(debug_msg))
           except Exception as ex:
-            error_msg = "Failed while importing module '" + path + "' (" + str(ex) + ")."
+            error_msg = "Failed importing '" + path + "' module due to '" + str(ex) + "'."
             print(settings.print_error_msg(error_msg))
             _ = False
 
+    result = "Smoke test "
     if _:
-        status = "succeeded without any issues"
+      result = result + "passed."
+      print(settings.print_bold_info_msg(result))
     else:
-        status = "failed"
-    info_msg = "The smoke-test has been " + status + "."
-    print(settings.print_info_msg(info_msg))
+      result = result + "failed."
+      print(settings.print_bold_error_msg(result))
     raise SystemExit()
 
 

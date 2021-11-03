@@ -53,6 +53,7 @@ TOTAL_OF_REQUESTS_COLOR = Fore.LIGHTYELLOW_EX
 WARNING_SIGN = "[" + Fore.LIGHTYELLOW_EX  + "warning" + Style.RESET_ALL + "] "
 WARNING_BOLD_SIGN = "[" + Style.BRIGHT + Fore.YELLOW  + "warning" + Style.RESET_ALL + "] " + Style.BRIGHT
 ERROR_SIGN = "[" + Fore.RED + "error" + Style.RESET_ALL  + "] " 
+ERROR_BOLD_SIGN = "["  + Style.BRIGHT + Fore.RED + "error" + Style.RESET_ALL  + "] " 
 CRITICAL_SIGN = "[" + Back.RED + "critical" + Style.RESET_ALL  + "] "
 PAYLOAD_SIGN = "[" + Fore.CYAN + "payload" + Style.RESET_ALL + "] " 
 SUB_CONTENT_SIGN = " " * 7 + Fore.GREY + "|_ " + Style.RESET_ALL
@@ -65,6 +66,11 @@ CHECK_SIGN = DEBUG_SIGN + "Checking pair of credentials: "
 # Print error message
 def print_error_msg(err_msg):
   result = ERROR_SIGN + str(err_msg) + Style.RESET_ALL
+  return result
+
+# Print error message
+def print_bold_error_msg(err_msg):
+  result = ERROR_BOLD_SIGN + Style.BRIGHT + str(err_msg) + Style.RESET_ALL
   return result
 
 # Print critical error message
@@ -216,7 +222,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.4"
-REVISION = "20"
+REVISION = "21"
 STABLE_RELEASE = False
 if STABLE_RELEASE:
   VERSION = "v" + VERSION_NUM + "-stable"
