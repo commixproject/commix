@@ -630,9 +630,6 @@ def main(filename, url):
 
 try:
 
-  if menu.options.smoke_test:
-    smoke_test()
-
   # Check if defined "--version" option.
   if menu.options.version:
     version.show_version()
@@ -654,6 +651,9 @@ try:
     raise SystemExit()
   else:  
     settings.VERBOSITY_LEVEL = menu.options.verbose
+
+  if menu.options.smoke_test:
+    smoke_test()
 
   if not menu.options.batch:
     settings.OS_CHECKS_NUM = 1
