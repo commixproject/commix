@@ -241,6 +241,9 @@ def filebased_command_injection_technique(url, timesec, filename, http_request_m
 Proceed to the injection process for the appropriate parameter.
 """
 def injection_proccess(url, check_parameter, http_request_method, filename, timesec):
+  inject_http_headers = False
+  if any(x in check_parameter.lower() for x in settings.HTTP_HEADERS):
+    inject_http_headers = True
 
   if menu.options.ignore_code: 
     info_msg = "Ignoring '" + str(menu.options.ignore_code) + "' HTTP error code. "
@@ -278,7 +281,8 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
   if not settings.LOAD_SESSION:
     if (len(menu.options.tech) == 0 or "e" in menu.options.tech):
       # Check for identified warnings
-      url = heuristic_basic(url, http_request_method)
+      if not inject_http_headers:
+        url = heuristic_basic(url, http_request_method)
       if settings.IDENTIFIED_WARNINGS or settings.IDENTIFIED_PHPINFO:
         while True:
           if not menu.options.batch:
