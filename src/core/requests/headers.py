@@ -188,15 +188,21 @@ def check_http_traffic(request):
       if [True for err_code in settings.HTTP_ERROR_CODES if err_code in str(err_msg)]:
         break
 
-    except (_urllib.error.URLError, _http_client.BadStatusLine) as err_msg:
+    except (_urllib.error.URLError, _http_client.BadStatusLine, http.client.IncompleteRead) as err_msg:
       if current_attempt == 0:
         if settings.VERBOSITY_LEVEL < 2 and "has closed the connection" in str(err_msg):
           print(settings.SINGLE_WHITESPACE)
-        warn_msg = "The provided target URL seems not reachable. "
-        warn_msg += "In case that it is, please try to re-run using "
+
+        if "IncompleteRead" in str(err_msg):
+          warn_msg = "There was an incomplete read error while retrieving data "
+          warn_msg += "from the target URL "
+        else:
+          warn_msg = "The provided target URL seems not reachable. "
+          warn_msg += "In case that it is, please try to re-run using "
         if not menu.options.random_agent:
             warn_msg += "'--random-agent' switch and/or "
         warn_msg += "'--proxy' option."
+        
         print(settings.print_warning_msg(warn_msg))
         info_msg = settings.APPLICATION.capitalize() + " is going to retry the request(s)."
         print(settings.print_info_msg(info_msg))
