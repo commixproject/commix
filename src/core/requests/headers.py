@@ -188,7 +188,7 @@ def check_http_traffic(request):
       if [True for err_code in settings.HTTP_ERROR_CODES if err_code in str(err_msg)]:
         break
 
-    except (_urllib.error.URLError, _http_client.BadStatusLine, http.client.IncompleteRead) as err_msg:
+    except (_urllib.error.URLError, _http_client.BadStatusLine, _http_client.IncompleteRead) as err_msg:
       if current_attempt == 0:
         if settings.VERBOSITY_LEVEL < 2 and "has closed the connection" in str(err_msg):
           print(settings.SINGLE_WHITESPACE)
