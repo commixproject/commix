@@ -95,6 +95,11 @@ def load_cmd_history():
   except (IOError, AttributeError) as e:
     warn_msg = "There was a problem loading the history file '" + cli_history + "'."
     print(settings.print_warning_msg(warn_msg))
+  except UnicodeError:
+    if settings.IS_WINDOWS:
+      warn_msg = "There was a problem loading the history file '" + cli_history + "'. "
+      warn_msg += "More info can be found at 'https://github.com/pyreadline/pyreadline/issues/30'"
+      print(settings.print_warning_msg(warn_msg))     
 
 # If the value has boundaries.
 def value_boundaries(value):
