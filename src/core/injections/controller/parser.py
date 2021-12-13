@@ -195,13 +195,14 @@ def logfile_parser():
       if single_request:
         sys.stdout.write(settings.SUCCESS_STATUS + "\n")
         sys.stdout.flush()
-      if menu.options.logfile:
-        info_msg = "Parsed target from '" + os.path.split(request_file)[1] + "' for tests :"
-        print(settings.print_info_msg(info_msg))
+      if menu.options.logfile and settings.VERBOSITY_LEVEL != 0:
         sub_content = http_method + " " +  prefix + menu.options.host + request_url
         print(settings.print_sub_content(sub_content))
+        if menu.options.cookie:
+           sub_content = "Cookie: " + menu.options.cookie
+           print(settings.print_sub_content(sub_content))
         if menu.options.data:
-           sub_content = "Data: " + menu.options.data
+           sub_content = "POST data: " + menu.options.data
            print(settings.print_sub_content(sub_content))
 
 # eof
