@@ -97,14 +97,15 @@ def heuristic_basic(url, http_request_method):
             print(settings.print_payload(payload))
           data = None
           cookie = None
+          tmp_url = url
           if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
             cookie = menu.options.cookie.replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC)
           elif menu.options.data:
             data = menu.options.data.replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC)
           else:
             if settings.INJECT_TAG in url:
-              url = url.replace(settings.INJECT_TAG, payload)
-          request = _urllib.request.Request(url, data, headers={"Cookie": cookie})
+              tmp_url = url.replace(settings.INJECT_TAG, payload)
+          request = _urllib.request.Request(tmp_url, data, headers={"Cookie": cookie})
           headers.do_check(request)
           response = requests.get_request_response(request)
 
