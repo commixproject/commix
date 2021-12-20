@@ -233,7 +233,10 @@ def check_http_traffic(request):
     # Checks regarding a potential browser verification protection mechanism.
     checks.browser_verification(page)
     # Checks regarding recognition of generic "your ip has been blocked" messages.
-    checks.blocked_ip(page) 
+    checks.blocked_ip(page)
+    # Checks for not declared cookie(s), while server wants to set its own.
+    if menu.options.cookie == None:
+      checks.not_declared_cookies(response)
 
   # This is useful when handling exotic HTTP errors (i.e requests for authentication).
   except _urllib.error.HTTPError as err:
