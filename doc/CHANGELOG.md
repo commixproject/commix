@@ -1,4 +1,5 @@
 ## Version 3.4 (TBA)
+* Added: New option ( `--drop-set-cookie`) for ignoring Set-Cookie header from response.
 * Added: Support for checking for not declared cookie(s).
 * Added: New (hidden) option `--smoke-test` that runs the basic smoke testing.
 * Revised: Improvement regarding mechanism which nagging if used "dev" version is > 30 days old.

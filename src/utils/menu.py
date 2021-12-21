@@ -313,6 +313,12 @@ request.add_option("--retries",
                 type="int",
                 help="Retries when the connection timeouts (Default: 3).")
 
+request.add_option("--drop-set-cookie",
+                action="store_true",
+                dest="drop_set_cookie",
+                default=False,
+                help="Ignore Set-Cookie header from response.")
+
 # Enumeration options
 enumeration = OptionGroup(parser, Style.BRIGHT + Style.UNDERLINE + "Enumeration" + Style.RESET_ALL, 
                         "These options can be used to enumerate the target host.")
