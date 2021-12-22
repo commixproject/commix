@@ -100,7 +100,7 @@ def heuristic_basic(url, http_request_method):
           tmp_url = url
           if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
             cookie = menu.options.cookie.replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC)
-          elif menu.options.data:
+          elif menu.options.data and http_request_method == settings.HTTPMETHOD.POST:
             data = menu.options.data.replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC)
           else:
             if settings.INJECT_TAG in url:
@@ -635,7 +635,7 @@ def perform_checks(url, http_request_method, filename):
       settings.IDENTIFIED_WARNINGS = False
       settings.IDENTIFIED_PHPINFO = False
     # Check if HTTP Method is GET.
-    if not menu.options.data:
+    if http_request_method != settings.HTTPMETHOD.POST:
       get_request(url, http_request_method, filename, timesec)
     # Check if HTTP Method is POST.      
     else:

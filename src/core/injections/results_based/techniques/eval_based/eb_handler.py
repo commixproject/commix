@@ -259,7 +259,7 @@ def eb_injection_handler(url, timesec, filename, http_request_method, injection_
             else:    
               header_name = ""
               the_type = " parameter"
-              if not menu.options.data:
+              if http_request_method != settings.HTTPMETHOD.POST:
                 found_vuln_parameter = parameters.vuln_GET_param(url)
               else :
                 found_vuln_parameter = vuln_parameter

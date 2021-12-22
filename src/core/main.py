@@ -606,14 +606,6 @@ def main(filename, url):
     if menu.options.enum_all:
       checks.enable_all_enumeration_options()
 
-    # Launch injection and exploitation controller.
-    if len(settings.HTTP_METHOD) != 0:
-      http_request_method = settings.HTTP_METHOD
-    else:
-      if menu.options.data:
-        http_request_method = settings.HTTPMETHOD.POST
-      else:
-        http_request_method = settings.HTTPMETHOD.GET
     controller.do_check(url, http_request_method, filename)
     return filename
 
@@ -776,7 +768,7 @@ try:
             pass
           else: 
             break
-      if not menu.options.data:
+      if http_request_method != settings.HTTPMETHOD.POST:
         question_msg = "Please enter POST data (--data) [Enter for none] > "
         menu.options.data = _input(settings.print_question_msg(question_msg))
         if len(menu.options.data) == 0:
@@ -816,6 +808,34 @@ try:
       inject_tag_regex_match = re.search(settings.INJECT_TAG_REGEX, ",".join(str(x) for x in sys.argv))
       if inject_tag_regex_match:
         settings.INJECT_TAG = inject_tag_regex_match.group(0)
+
+    # Check provided parameters for tests
+    if menu.options.test_parameter or menu.options.skip_parameter:     
+      if menu.options.test_parameter != None :
+        if menu.options.test_parameter.startswith("="):
+          menu.options.test_parameter = menu.options.test_parameter[1:]
+        settings.TEST_PARAMETER = menu.options.test_parameter.split(settings.PARAMETER_SPLITTING_REGEX)  
+      
+      elif menu.options.skip_parameter != None :
+        if menu.options.skip_parameter.startswith("="):
+          menu.options.skip_parameter = menu.options.skip_parameter[1:]
+        settings.TEST_PARAMETER = menu.options.skip_parameter.split(settings.PARAMETER_SPLITTING_REGEX)
+
+      for i in range(0,len(settings.TEST_PARAMETER)):
+        if "=" in settings.TEST_PARAMETER[i]:
+          settings.TEST_PARAMETER[i] = settings.TEST_PARAMETER[i].split("=")[0]
+
+    # Check for HTTP Method
+    if len(settings.HTTP_METHOD) != 0:
+      http_request_method = settings.HTTP_METHOD.upper()
+    else:
+      if not menu.options.data or \
+         settings.WILDCARD_CHAR in menu.options.url or \
+         settings.INJECT_TAG in menu.options.url or \
+         [x for x in settings.TEST_PARAMETER if(x + "=" in menu.options.url and not x in menu.options.data)]:
+        http_request_method = settings.HTTPMETHOD.GET
+      else:
+        http_request_method = settings.HTTPMETHOD.POST
 
     # Define the level of tests to perform.
     if menu.options.level > 3:
