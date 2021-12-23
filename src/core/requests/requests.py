@@ -202,7 +202,7 @@ def estimate_response_time(url, timesec):
   except _urllib.error.URLError as err_msg:
     if settings.VERBOSITY_LEVEL != 0:
       print(settings.SINGLE_WHITESPACE)
-    print(settings.print_critical_msg(str(err_msg.args[0]).split("] ")[1] + "."))
+    print(settings.print_critical_msg(str(err_msg.reason) + "."))
     raise SystemExit()
 
   except ValueError as err_msg:

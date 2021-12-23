@@ -516,7 +516,7 @@ def main(filename, url):
             print(settings.print_critical_msg(str(err_msg.code)))
             raise SystemExit()
           except _urllib.error.URLError as err_msg:
-            print(settings.print_critical_msg(str(err_msg.args[0]).split("] ")[1] + "."))
+            print(settings.print_critical_msg(str(err_msg.reason) + "."))
             raise SystemExit()
         try:
           info_msg = "Performing identification checks to the target URL."
