@@ -768,11 +768,10 @@ try:
             pass
           else: 
             break
-      if http_request_method != settings.HTTPMETHOD.POST:
-        question_msg = "Please enter POST data (--data) [Enter for none] > "
-        menu.options.data = _input(settings.print_question_msg(question_msg))
-        if len(menu.options.data) == 0:
-          menu.options.data = False
+      question_msg = "Please enter POST data (--data) [Enter for none] > "
+      menu.options.data = _input(settings.print_question_msg(question_msg))
+      if len(menu.options.data) == 0:
+        menu.options.data = False
 
     # Retries when the connection timeouts.
     if menu.options.retries:
