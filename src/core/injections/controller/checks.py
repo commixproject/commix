@@ -83,7 +83,7 @@ def not_declared_cookies(response):
         err_msg = "'" + set_cookies + "' is not a valid answer."  
         print(settings.print_error_msg(err_msg))
         pass
-  except KeyError:
+  except (KeyError, TypeError):
     pass
 
 """
