@@ -105,7 +105,9 @@ def heuristic_basic(url, http_request_method):
           else:
             if settings.INJECT_TAG in url:
               tmp_url = url.replace(settings.INJECT_TAG, payload)
-          request = _urllib.request.Request(tmp_url, data, headers={"Cookie": cookie})
+          request = _urllib.request.Request(tmp_url, data)
+          if cookie:
+            request.add_header(settings.COOKIE, cookie)
           headers.do_check(request)
           response = requests.get_request_response(request)
 
