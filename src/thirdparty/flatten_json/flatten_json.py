@@ -8,8 +8,8 @@ flatten_json flattens the hierarchy in your object which can be useful if you wa
 https://github.com/amirziai/flatten
 """
 from src.utils import settings
-from collections import Iterable
-from collections import OrderedDict
+from src.thirdparty.odict import OrderedDict
+#from collections import Iterable
 
 def check_if_numbers_are_consecutive(list_):
     """

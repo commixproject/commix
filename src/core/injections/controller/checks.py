@@ -29,7 +29,7 @@ import traceback
 from src.utils import menu
 from src.utils import settings
 from src.utils import simple_http_server
-from collections import OrderedDict 
+from src.thirdparty.odict import OrderedDict
 from src.core.convert import hexdecode
 from src.thirdparty.six.moves import input as _input
 from src.thirdparty.six.moves import urllib as _urllib
