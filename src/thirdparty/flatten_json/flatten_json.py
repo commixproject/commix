@@ -9,7 +9,7 @@ https://github.com/amirziai/flatten
 """
 from src.utils import settings
 from src.thirdparty.odict import OrderedDict
-#from collections import Iterable
+from src.thirdparty.six.moves import collections_abc as _collections
 
 def check_if_numbers_are_consecutive(list_):
     """
