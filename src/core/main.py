@@ -829,7 +829,7 @@ try:
       http_request_method = settings.HTTP_METHOD.upper()
     else:
       if not menu.options.data or \
-         settings.WILDCARD_CHAR in menu.options.url or \
+         not settings.WILDCARD_CHAR is None and settings.WILDCARD_CHAR in menu.options.url or \
          settings.INJECT_TAG in menu.options.url or \
          [x for x in settings.TEST_PARAMETER if(x + "=" in menu.options.url and not x in menu.options.data)]:
         http_request_method = settings.HTTPMETHOD.GET
