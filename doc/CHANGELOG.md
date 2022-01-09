@@ -1,4 +1,5 @@
 ## Version 3.4 (TBA)
+* Fixed: Minor bug-fix regarding parsing JSON objects.
 * Added: New option ( `--drop-set-cookie`) for ignoring Set-Cookie header from response.
 * Added: Support for checking for not declared cookie(s).
 * Added: New (hidden) option `--smoke-test` that runs the basic smoke testing.

@@ -1428,9 +1428,11 @@ def is_JSON_check(parameter):
        re.search(settings.JSON_LIKE_RECOGNITION_REGEX, parameter):
       return True
   except ValueError as err_msg:
+    _ = False
+    if "Expecting" in str(err_msg) and any(_ in str(err_msg) for _ in ("value", "delimiter")):
+      _ = True
     if not "No JSON object could be decoded" in str(err_msg) and \
-       not "Expecting value" in str(err_msg) and \
-       not "Expecting , delimiter" in str(err_msg):
+       not _:
       err_msg = "JSON " + str(err_msg) + ". "
       print(settings.print_critical_msg(err_msg) + "\n")
       raise SystemExit()
