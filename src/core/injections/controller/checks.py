@@ -51,10 +51,9 @@ else:
       import gnureadline as readline
   except ImportError:
     try:
-      import gnureadline as readline
+      import readline
     except ImportError:
       settings.READLINE_ERROR = True
-
 
 """
 check for not declared cookie(s)
