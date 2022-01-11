@@ -735,7 +735,8 @@ Set up the reverse TCP connection
 def configure_reverse_tcp(separator):
   # Set up LHOST for the reverse TCP connection
   while True:
-    option = _input("""commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp""" + Style.RESET_ALL + """) > """)
+    sys.stdout.write(settings.REVERSE_TCP_SHELL)
+    option = _input()
     if option.lower() == "reverse_tcp": 
       warn_msg = "You are already into the '" + option.lower() + "' mode."
       print(settings.print_warning_msg(warn_msg))

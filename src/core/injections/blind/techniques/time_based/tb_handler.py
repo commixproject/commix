@@ -514,7 +514,8 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                     try:
                       if not settings.READLINE_ERROR:
                         checks.tab_autocompleter()
-                      cmd = _input("""commix(""" + Style.BRIGHT + Fore.RED + """os_shell""" + Style.RESET_ALL + """) > """)
+                      sys.stdout.write(settings.OS_SHELL)
+                      cmd = _input()
                       cmd = checks.escaped_cmd(cmd)
                       if cmd.lower() in settings.SHELL_OPTIONS:
                         go_back, go_back_again = shell_options.check_option(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, technique, go_back, no_result, timesec, go_back_again, payload, OUTPUT_TEXTFILE="")

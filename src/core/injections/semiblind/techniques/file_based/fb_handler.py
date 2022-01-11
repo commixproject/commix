@@ -609,7 +609,8 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                   while True:
                     if not settings.READLINE_ERROR:
                       checks.tab_autocompleter()
-                    cmd = _input("""commix(""" + Style.BRIGHT + Fore.RED + """os_shell""" + Style.RESET_ALL + """) > """)
+                    sys.stdout.write(settings.OS_SHELL)
+                    cmd = _input()
                     cmd = checks.escaped_cmd(cmd)
                     # if settings.VERBOSITY_LEVEL != 0:
                     #   print(settings.SINGLE_WHITESPACE)

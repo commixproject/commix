@@ -119,7 +119,8 @@ def input_cmd(dns_server, http_request_method, url, vuln_parameter, technique):
         try:
           if not settings.READLINE_ERROR:
             checks.tab_autocompleter()
-          cmd = _input("""commix(""" + Style.BRIGHT + Fore.RED + """os_shell""" + Style.RESET_ALL + """) > """)
+          sys.stdout.write(settings.OS_SHELL)
+          cmd = _input()
           cmd = checks.escaped_cmd(cmd)
           if cmd.lower() in settings.SHELL_OPTIONS:
             if cmd.lower() == "quit" or cmd.lower() == "back":       
