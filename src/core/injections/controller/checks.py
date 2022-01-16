@@ -36,24 +36,18 @@ from src.thirdparty.six.moves import urllib as _urllib
 from src.thirdparty.colorama import Fore, Back, Style, init
 from src.thirdparty.flatten_json.flatten_json import flatten, unflatten_list
 
-if settings.IS_WINDOWS:
-  try:
-    import readline
-  except ImportError:
-    try:
-      import pyreadline as readline
-    except ImportError:
-      settings.READLINE_ERROR = True
-else:
-  try:
-    import readline
+try:
+  from readline import *
+  import readline as readline
+  if settings.PLATFORM == "mac":
     if getattr(readline, '__doc__', '') is not None and 'libedit' in getattr(readline, '__doc__', ''):
       import gnureadline as readline
-  except ImportError:
-    try:
-      import readline
-    except ImportError:
-      settings.READLINE_ERROR = True
+except:
+  try:
+    from pyreadline import *
+    import pyreadline as readline
+  except:
+    settings.READLINE_ERROR = True
 
 """
 check for not declared cookie(s)
@@ -90,14 +84,13 @@ Tab Autocompleter
 """
 def tab_autocompleter():
   try:
-    # Tab compliter
-    readline.set_completer(menu.tab_completer)
     # MacOSX tab compliter
-    if getattr(readline, '__doc__', '') is not None and 'libedit' in getattr(readline, '__doc__', ''):
+    if 'libedit' in readline.__doc__:
       readline.parse_and_bind("bind ^I rl_complete")
-    # Unix tab compliter
     else:
       readline.parse_and_bind("tab: complete")
+    # Tab compliter
+    readline.set_completer(menu.tab_completer)
   except AttributeError:
     error_msg = "Failed while trying to use platform's readline library."
     print(settings.print_error_msg(error_msg))
@@ -528,7 +521,7 @@ def no_readline_module():
   err_msg += " Download the"
   if settings.IS_WINDOWS:
     err_msg += " 'pyreadline' module (https://pypi.python.org/pypi/pyreadline)."
-  else:  
+  elif settings.PLATFORM == "mac":  
     err_msg += " 'gnureadline' module (https://pypi.python.org/pypi/gnureadline)." 
   print(settings.print_critical_msg(err_msg)) 
 
@@ -747,7 +740,7 @@ def third_party_dependencies():
         err_msg += "completion and history support features. "
         print(settings.print_critical_msg(err_msg)) 
         raise SystemExit()
-    else:
+    elif settings.PLATFORM == "mac":
       try:
         import gnureadline
       except ImportError:
