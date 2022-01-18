@@ -54,7 +54,7 @@ def examine_requests(payload, vuln_parameter, http_request_method, url, timesec,
     request = _urllib.request.Request(target)
 
   # Check if defined method is POST.
-  else :
+  else:
     parameter = menu.options.data
     parameter = _urllib.parse.unquote(parameter)
     # Check if its not specified the 'INJECT_HERE' tag
