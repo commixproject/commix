@@ -22,45 +22,33 @@ from src.utils import settings
 from src.utils import requirments
 from src.thirdparty.colorama import Fore, Back, Style, init
 
-"""
-Check for TOR HTTP Proxy.
-"""
+
 if menu.options.tor_port:
-  PRIVOXY_PORT = menu.options.tor_port
+  TOR_HTTP_PROXY_PORT = menu.options.tor_port
 else:
-  PRIVOXY_PORT = settings.PRIVOXY_PORT
+  TOR_HTTP_PROXY_PORT = settings.TOR_HTTP_PROXY_PORT
 
 """
-Check if HTTP Proxy (tor/privoxy) is defined.
+Check if Tor HTTP proxy is defined.
 """
-def do_check():
-
-  # Check if 'tor' is installed.
-  requirment = "tor"
-  requirments.do_check(requirment)
-
-  # Check if 'privoxy' is installed.
-  requirment = "privoxy"
-  requirments.do_check(requirment)
-    
-  check_privoxy_proxy = True
-  info_msg = "Testing Tor SOCKS proxy settings (" 
-  info_msg += settings.PRIVOXY_IP + ":" + PRIVOXY_PORT 
+def do_check():  
+  check_tor_http_proxy = True
+  info_msg = "Testing Tor HTTP proxy settings (" 
+  info_msg += settings.TOR_HTTP_PROXY_SCHEME + "://" + settings.TOR_HTTP_PROXY_IP + ":" + TOR_HTTP_PROXY_PORT 
   info_msg +=  "). "
   sys.stdout.write(settings.print_info_msg(info_msg))
   sys.stdout.flush()
   try:
-    privoxy_proxy = _urllib.request.ProxyHandler({settings.SCHEME:settings.PRIVOXY_IP + ":" + PRIVOXY_PORT})
-    opener = _urllib.request.build_opener(privoxy_proxy)
+    tor_http_proxy = _urllib.request.ProxyHandler({settings.TOR_HTTP_PROXY_SCHEME:settings.TOR_HTTP_PROXY_IP + ":" + TOR_HTTP_PROXY_PORT})
+    opener = _urllib.request.build_opener(tor_http_proxy)
     _urllib.request.install_opener(opener)
   except:
-    check_privoxy_proxy = False
+    check_tor_http_proxy = False
     pass
     
-  if check_privoxy_proxy:
+  if check_tor_http_proxy:
     try:
       check_tor_page = opener.open("https://check.torproject.org/").read().decode(settings.DEFAULT_CODEC)
-      found_ip = re.findall(r":  <strong>" + "(.*)" + "</strong></p>", check_tor_page)
       if not "You are not using Tor" in check_tor_page:
         sys.stdout.write(settings.SUCCESS_STATUS + "\n")
         sys.stdout.flush()
@@ -68,6 +56,7 @@ def do_check():
           info_msg = "Tor connection is properly set. "
         else:
           info_msg = ""
+        found_ip = re.findall(r":  <strong>" + "(.*)" + "</strong></p>", check_tor_page)
         info_msg += "Your ip address appears to be " + found_ip[0] + ".\n"
         sys.stdout.write(settings.print_bold_info_msg(info_msg))
         warn_msg = "Increasing default value for option '--time-sec' to"
@@ -80,9 +69,9 @@ def do_check():
           err_msg = "It seems that your Tor connection is not properly set. "
         else:
           err_msg = "" 
-        err_msg += "Can't establish connection with the Tor SOCKS proxy. "
+        err_msg += "Can't establish connection with the Tor HTTP proxy. "
         err_msg += "Please make sure that you have "
-        err_msg += "Tor installed and running so "
+        err_msg += "Tor bundle installed and running so "
         err_msg += "you could successfully use "
         err_msg += "switch '--tor'."
         print(settings.print_critical_msg(err_msg))  
@@ -95,7 +84,7 @@ def do_check():
       else:
         err_msg = ""
       err_msg = "Please make sure that you have "
-      err_msg += "Tor installed and running so "
+      err_msg += "Tor bundle installed and running so "
       err_msg += "you could successfully use "
       err_msg += "switch '--tor'."
       print(settings.print_critical_msg(err_msg))  
@@ -118,8 +107,8 @@ def use_tor(request):
     raise SystemExit()
     
   try:
-    privoxy_proxy = _urllib.request.ProxyHandler({settings.SCHEME:settings.PRIVOXY_IP + ":" + PRIVOXY_PORT})
-    opener = _urllib.request.build_opener(privoxy_proxy)
+    tor_http_proxy = _urllib.request.ProxyHandler({settings.TOR_HTTP_PROXY_SCHEME:settings.TOR_HTTP_PROXY_IP + ":" + TOR_HTTP_PROXY_PORT})
+    opener = _urllib.request.build_opener(tor_http_proxy)
     _urllib.request.install_opener(opener)
     response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
     return response

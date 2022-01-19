@@ -225,7 +225,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.4"
-REVISION = "48"
+REVISION = "49"
 STABLE_RELEASE = False
 if STABLE_RELEASE:
   VERSION = "v" + VERSION_NUM + "-stable"
@@ -560,9 +560,10 @@ MOBILE_USER_AGENT_LIST = [
 # Default Scheme
 SCHEME = ""
 
-# Privoxy Proxy
-PRIVOXY_IP = "127.0.0.1"
-PRIVOXY_PORT = "8118"
+# TOR HTTP Proxy
+TOR_HTTP_PROXY_IP = "127.0.0.1"
+TOR_HTTP_PROXY_PORT = "8118"
+TOR_HTTP_PROXY_SCHEME = "https"
 
 # Cookie injection
 COOKIE_INJECTION = False
