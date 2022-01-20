@@ -824,18 +824,6 @@ try:
         if "=" in settings.TEST_PARAMETER[i]:
           settings.TEST_PARAMETER[i] = settings.TEST_PARAMETER[i].split("=")[0]
 
-    # Check for HTTP Method
-    if len(settings.HTTP_METHOD) != 0:
-      http_request_method = settings.HTTP_METHOD.upper()
-    else:
-      if not menu.options.data or \
-         not settings.WILDCARD_CHAR is None and settings.WILDCARD_CHAR in menu.options.url or \
-         settings.INJECT_TAG in menu.options.url or \
-         [x for x in settings.TEST_PARAMETER if(x + "=" in menu.options.url and not x in menu.options.data)]:
-        http_request_method = settings.HTTPMETHOD.GET
-      else:
-        http_request_method = settings.HTTPMETHOD.POST
-
     # Define the level of tests to perform.
     if menu.options.level > 3:
       err_msg = "The value for option '--level' "
@@ -857,6 +845,18 @@ try:
       raise SystemExit()
     elif menu.options.requestfile or menu.options.logfile:
       parser.logfile_parser()
+
+    # Check for HTTP Method
+    if len(settings.HTTP_METHOD) != 0:
+      http_request_method = settings.HTTP_METHOD.upper()
+    else:
+      if not menu.options.data or \
+         not settings.WILDCARD_CHAR is None and settings.WILDCARD_CHAR in menu.options.url or \
+         settings.INJECT_TAG in menu.options.url or \
+         [x for x in settings.TEST_PARAMETER if(x + "=" in menu.options.url and not x in menu.options.data)]:
+        http_request_method = settings.HTTPMETHOD.GET
+      else:
+        http_request_method = settings.HTTPMETHOD.POST
 
     if menu.options.offline:
       settings.CHECK_FOR_UPDATES_ON_START = False
