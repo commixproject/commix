@@ -320,6 +320,8 @@ def do_check(request):
     if re.search(settings.JSON_RECOGNITION_REGEX, menu.options.data) or \
        re.search(settings.JSON_LIKE_RECOGNITION_REGEX, menu.options.data):
       request.add_header("Content-Type", "application/json")
+    if re.search(settings.XML_RECOGNITION_REGEX, menu.options.data):
+      request.add_header("Content-Type", "text/xml")
 
   # Appends a fake HTTP header 'X-Forwarded-For'
   if settings.TAMPER_SCRIPTS["xforwardedfor"]:
@@ -327,7 +329,8 @@ def do_check(request):
     xforwardedfor.tamper(request)
   
   # Default value for "Accept-Encoding" HTTP header
-  request.add_header('Accept-Encoding', settings.HTTP_ACCEPT_ENCODING_HEADER_VALUE)
+  if not (menu.options.requestfile or menu.options.logfile):
+    request.add_header('Accept-Encoding', settings.HTTP_ACCEPT_ENCODING_HEADER_VALUE)
 
   # Check if defined any HTTP Authentication credentials.
   # HTTP Authentication: Basic / Digest Access Authentication.
@@ -380,6 +383,7 @@ def do_check(request):
       extra_headers = menu.options.header
   
     extra_headers = extra_headers.replace(":",": ")
+
     if ": //" in extra_headers:
       extra_headers = extra_headers.replace(": //" ,"://")
 
