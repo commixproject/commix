@@ -149,17 +149,17 @@ def logfile_parser():
       if re.findall(r"Host: " + "(.*)", line):
         menu.options.host = "".join([str(i) for i in re.findall(r"Host: " + "(.*)", line)])
       # User-Agent Header
-      elif re.findall(r"User-Agent: " + "(.*)", line) and not (menu.options.agent or menu.options.mobile):
+      if re.findall(r"User-Agent: " + "(.*)", line):
         menu.options.agent = "".join([str(i) for i in re.findall(r"User-Agent: " + "(.*)", line)])
       # Cookie Header
-      elif re.findall(r"Cookie: " + "(.*)", line):
+      if re.findall(r"Cookie: " + "(.*)", line):
         menu.options.cookie = "".join([str(i) for i in re.findall(r"Cookie: " + "(.*)", line)])
       # Referer Header
-      elif re.findall(r"Referer: " + "(.*)", line):
+      if re.findall(r"Referer: " + "(.*)", line):
         menu.options.referer = "".join([str(i) for i in re.findall(r"Referer: " + "(.*)", line)])
         if menu.options.referer and "https://" in menu.options.referer:
           prefix = "https://"
-      elif re.findall(r"Authorization: " + "(.*)", line):
+      if re.findall(r"Authorization: " + "(.*)", line):
         auth_provided = "".join([str(i) for i in re.findall(r"Authorization: " + "(.*)", line)]).split()
         menu.options.auth_type = auth_provided[0].lower()
         if menu.options.auth_type == "basic":
