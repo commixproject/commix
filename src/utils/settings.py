@@ -225,7 +225,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.4"
-REVISION = "52"
+REVISION = "53"
 STABLE_RELEASE = False
 if STABLE_RELEASE:
   VERSION = "v" + VERSION_NUM + "-stable"
@@ -722,8 +722,9 @@ ENCODING_LIST = [
   "utf-8-sig"
  ]
 
-# Default value for HTTP Accept-Encoding header
 HTTP_ACCEPT_ENCODING_HEADER_VALUE = "gzip, deflate"
+HTTP_CONTENT_TYPE_JSON_HEADER_VALUE = "application/json"
+HTTP_CONTENT_TYPE_XML_HEADER_VALUE = "text/xml"
 
 # Default server banner
 SERVER_BANNER = ""

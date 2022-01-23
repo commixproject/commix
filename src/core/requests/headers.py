@@ -301,7 +301,7 @@ def do_check(request):
     request.add_header(settings.HOST, menu.options.host)
 
   # Check if defined any User-Agent HTTP header.
-  if menu.options.agent:
+  if menu.options.agent and settings.USER_AGENT_INJECTION == None:
     request.add_header(settings.USER_AGENT, menu.options.agent)
 
   # Check if defined any Referer HTTP header.
@@ -316,22 +316,22 @@ def do_check(request):
     request.add_header(settings.HTTP_ACCEPT_HEADER, settings.HTTP_ACCEPT_HEADER_VALUE)
 
   # The MIME media type for JSON.
-  if menu.options.data:
+  if menu.options.data and not (menu.options.requestfile or menu.options.logfile):
     if re.search(settings.JSON_RECOGNITION_REGEX, menu.options.data) or \
        re.search(settings.JSON_LIKE_RECOGNITION_REGEX, menu.options.data):
-      request.add_header("Content-Type", "application/json")
-    if re.search(settings.XML_RECOGNITION_REGEX, menu.options.data):
-      request.add_header("Content-Type", "text/xml")
+      request.add_header("Content-Type", settings.HTTP_CONTENT_TYPE_JSON_HEADER_VALUE)
+    elif re.search(settings.XML_RECOGNITION_REGEX, menu.options.data):
+      request.add_header("Content-Type", settings.HTTP_CONTENT_TYPE_XML_HEADER_VALUE)
+
+  # Default value for "Accept-Encoding" HTTP header
+  if not (menu.options.requestfile or menu.options.logfile):
+    request.add_header('Accept-Encoding', settings.HTTP_ACCEPT_ENCODING_HEADER_VALUE)
 
   # Appends a fake HTTP header 'X-Forwarded-For'
   if settings.TAMPER_SCRIPTS["xforwardedfor"]:
     from src.core.tamper import xforwardedfor
     xforwardedfor.tamper(request)
   
-  # Default value for "Accept-Encoding" HTTP header
-  if not (menu.options.requestfile or menu.options.logfile):
-    request.add_header('Accept-Encoding', settings.HTTP_ACCEPT_ENCODING_HEADER_VALUE)
-
   # Check if defined any HTTP Authentication credentials.
   # HTTP Authentication: Basic / Digest Access Authentication.
   if menu.options.auth_cred and menu.options.auth_type:
@@ -398,7 +398,18 @@ def do_check(request):
 
     # Remove empty strings
     extra_headers = [x for x in extra_headers if x]
-    
+    if menu.options.data:
+      # The MIME media type for JSON.
+      if re.search(settings.JSON_RECOGNITION_REGEX, menu.options.data) or \
+         re.search(settings.JSON_LIKE_RECOGNITION_REGEX, menu.options.data):
+         if "Content-Type" not in str(extra_headers):
+          request.add_header("Content-Type", settings.HTTP_CONTENT_TYPE_JSON_HEADER_VALUE)
+      elif re.search(settings.XML_RECOGNITION_REGEX, menu.options.data):
+         if "Content-Type" not in str(extra_headers):
+          request.add_header("Content-Type", settings.HTTP_CONTENT_TYPE_XML_HEADER_VALUE)
+    if "Accept-Encoding" not in str(extra_headers):
+      request.add_header('Accept-Encoding', settings.HTTP_ACCEPT_ENCODING_HEADER_VALUE)
+          
     for extra_header in extra_headers:
       try:
         # Extra HTTP Header name 
@@ -414,7 +425,7 @@ def do_check(request):
           settings.CUSTOM_HEADER_NAME = http_header_name
         # Add HTTP Header name / value to the HTTP request
         if http_header_name not in [settings.HOST, settings.USER_AGENT, settings.REFERER, settings.COOKIE]:
-          request.add_header(http_header_name.encode(settings.DEFAULT_CODEC), http_header_value.encode(settings.DEFAULT_CODEC))
+          request.add_header(http_header_name, http_header_value)
       except:
         pass
         
