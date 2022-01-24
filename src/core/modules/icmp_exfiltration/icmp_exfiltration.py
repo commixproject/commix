@@ -84,7 +84,9 @@ def cmd_exec(http_request_method, cmd, url, vuln_parameter, ip_src):
     sys.stdout.write(settings.print_debug_msg(debug_msg))
     sys.stdout.flush()
     sys.stdout.write("\n" + settings.print_payload(payload) + "\n")
-  if http_request_method != settings.HTTPMETHOD.POST:
+  
+  # Check if defined POST data
+  if not settings.USER_DEFINED_POST_DATA:
     url = url.replace(settings.INJECT_TAG, "")
     data = payload.replace(" ", "%20")
     req = url + data
@@ -213,7 +215,8 @@ def icmp_exfiltration_handler(url, http_request_method):
     print(settings.print_critical_msg(err_msg) + "\n")
     os._exit(0)
 
-  if http_request_method != settings.HTTPMETHOD.POST:
+  # Check if defined POST data
+  if not settings.USER_DEFINED_POST_DATA:
     #url = parameters.do_GET_check(url, http_request_method)
     request = _urllib.request.Request(url)
     headers.do_check(request)

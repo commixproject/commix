@@ -225,7 +225,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.4"
-REVISION = "53"
+REVISION = "54"
 STABLE_RELEASE = False
 if STABLE_RELEASE:
   VERSION = "v" + VERSION_NUM + "-stable"
@@ -295,7 +295,7 @@ SKIP_CODE_INJECTIONS = False
 SKIP_COMMAND_INJECTIONS = False
 
 # User-defined stored post data.
-USER_DEFINED_POST_DATA = ""
+USER_DEFINED_POST_DATA = False
 
 # The wildcard character
 WILDCARD_CHAR = "*"

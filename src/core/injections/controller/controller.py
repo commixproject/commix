@@ -564,7 +564,7 @@ Check if HTTP Method is POST.
 """ 
 def post_request(url, http_request_method, filename, timesec):
 
-  # Check if HTTP Method is POST.
+  
   parameter = menu.options.data
   found_parameter = parameters.do_POST_check(parameter, http_request_method)
 
@@ -636,10 +636,10 @@ def perform_checks(url, http_request_method, filename):
       settings.SKIP_COMMAND_INJECTIONS = False
       settings.IDENTIFIED_WARNINGS = False
       settings.IDENTIFIED_PHPINFO = False
-    # Check if HTTP Method is GET.
-    if http_request_method != settings.HTTPMETHOD.POST:
-      get_request(url, http_request_method, filename, timesec)
-    # Check if HTTP Method is POST.      
+
+    # Check if defined POST data
+    if not settings.USER_DEFINED_POST_DATA:
+      get_request(url, http_request_method, filename, timesec)  
     else:
       post_request(url, http_request_method, filename, timesec)
 
