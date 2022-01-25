@@ -72,7 +72,7 @@ def request(url):
     err_msg = str(err_msg) + " - Skipping " + str(url) 
     sys.stdout.write(settings.print_critical_msg(err_msg))
     if settings.VERBOSITY_LEVEL >= 2:
-      print("")
+      print(settings.SINGLE_WHITESPACE)
     SKIPPED_URLS += 1
 
 
@@ -257,7 +257,7 @@ def crawler(url):
     print(settings.SINGLE_WHITESPACE)
 
   if not settings.VERBOSITY_LEVEL >= 2:
-    print("")
+    print(settings.SINGLE_WHITESPACE)
   info_msg = "Visited " + str(len(output_href)) + " link"+ "s"[len(output_href) == 1:] + "."
   print(settings.print_info_msg(info_msg))
   filename = store_crawling()
