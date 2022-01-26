@@ -245,7 +245,7 @@ def crawler(url):
   if sitemap_check:
     info_msg += "identified 'sitemap.xml' "
   info_msg += "for usable links (with GET parameters). "
-  sys.stdout.write("\r" + settings.print_info_msg(info_msg))
+  sys.stdout.write("\n" + settings.print_info_msg(info_msg))
   sys.stdout.flush()
 
   if not sitemap_check:
