@@ -256,7 +256,7 @@ def crawler(url):
   if SKIPPED_URLS == 0:
     print(settings.SINGLE_WHITESPACE)
 
-  if not settings.VERBOSITY_LEVEL >= 2:
+  if not settings.VERBOSITY_LEVEL >= 2 and not settings.DECLARED_COOKIES:
     print(settings.SINGLE_WHITESPACE)
   info_msg = "Visited " + str(len(output_href)) + " link"+ "s"[len(output_href) == 1:] + "."
   print(settings.print_info_msg(info_msg))

@@ -55,6 +55,8 @@ check for not declared cookie(s)
 def not_declared_cookies(response):
   try:
     candidate = re.search(r'([^;]+);?', response.headers['set-cookie']).group(1)
+    if candidate:
+      settings.DECLARED_COOKIES = True
     while True:
       if not menu.options.batch:
         question_msg = "You have not declared cookie(s), while "
