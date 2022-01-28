@@ -26,7 +26,6 @@ from src.thirdparty.beautifulsoup.beautifulsoup import BeautifulSoup
 
 SITEMAP_LOC = []
 HREF_LIST = []
-SKIPPED_URLS = 0
 
 def store_crawling():
   while True:
@@ -57,7 +56,6 @@ def store_crawling():
 Do a request to target URL.
 """
 def request(url):
-  global SKIPPED_URLS
   try:
     # Check if defined POST data
     if menu.options.data:
@@ -73,8 +71,7 @@ def request(url):
     sys.stdout.write(settings.print_critical_msg(err_msg))
     if settings.VERBOSITY_LEVEL >= 2:
       print(settings.SINGLE_WHITESPACE)
-    SKIPPED_URLS += 1
-
+    settings.CRAWLED_SKIPPED_URLS += 1
 
 """
 Check for URLs in sitemap.xml.
@@ -253,7 +250,7 @@ def crawler(url):
     if menu.options.crawldepth > 1:
       for url in output_href:
         output_href = do_process(url)
-  if SKIPPED_URLS == 0:
+  if settings.CRAWLED_SKIPPED_URLS == 0:
     print(settings.SINGLE_WHITESPACE)
 
   if not settings.VERBOSITY_LEVEL >= 2 and not settings.DECLARED_COOKIES:
