@@ -177,12 +177,12 @@ def crawler(url):
   else:
     while True:
       if not menu.options.batch:
-        question_msg = "Do you want to change the crawling depth level? [Y/n] > "
+        question_msg = "Do you want to change the crawling depth level? [y/N] > "
         message = _input(settings.print_question_msg(question_msg))
       else:
         message = ""
       if len(message) == 0:
-         message = "Y"
+         message = "N"
       if message in settings.CHOICE_YES or message in settings.CHOICE_NO:
         break  
       elif message in settings.CHOICE_QUIT:
