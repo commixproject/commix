@@ -747,6 +747,11 @@ try:
     if menu.options.os:
       checks.user_defined_os()
 
+    if menu.options.crawldepth > 2:
+      err_msg = "Depth level '" + str(menu.options.crawldepth) + "' is not a valid."  
+      print(settings.print_error_msg(err_msg))
+      raise SystemExit()
+
     # Check if defined "--check-tor" option. 
     if menu.options.tor_check and not menu.options.tor:
       err_msg = "The '--check-tor' swich requires usage of switch '--tor'."

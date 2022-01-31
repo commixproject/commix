@@ -111,6 +111,8 @@ def sitemap(url):
             pass
     return SITEMAP_LOC
   except:
+    if not menu.options.crawldepth:
+      raise SystemExit()
     pass
 
 """
@@ -167,47 +169,67 @@ The main crawler.
 """
 def crawler(url):
   if not menu.options.sitemap_url:
-    if menu.options.crawldepth > 2:
-      err_msg = "Depth level '" + str(menu.options.crawldepth) + "' is not a valid."  
-      print(settings.print_error_msg(err_msg))
-      raise SystemExit()
     info_msg = "Starting crawler and searching for "
     info_msg += "links with depth " + str(menu.options.crawldepth) + "." 
     print(settings.print_info_msg(info_msg))
   else:
-    while True:
-      if not menu.options.batch:
-        question_msg = "Do you want to change the crawling depth level? [y/N] > "
-        message = _input(settings.print_question_msg(question_msg))
-      else:
-        message = ""
-      if len(message) == 0:
-         message = "N"
-      if message in settings.CHOICE_YES or message in settings.CHOICE_NO:
-        break  
-      elif message in settings.CHOICE_QUIT:
-        raise SystemExit()
-      else:
-        err_msg = "'" + message + "' is not a valid answer."  
-        print(settings.print_error_msg(err_msg))
-        pass
-    # Change the crawling depth level.
-    if message in settings.CHOICE_YES:
+    message = ""
+    if not menu.options.crawldepth:
       while True:
-        question_msg = "Please enter the crawling depth level (1-2) > "
-        message = _input(settings.print_question_msg(question_msg))
+        if not menu.options.batch:
+          question_msg = "Do you want to enable crawler? [y/N] > "
+          message = _input(settings.print_question_msg(question_msg))
+        else:
+          message = ""
         if len(message) == 0:
-          message = 1
-          break
-        elif str(message) != "1" and str(message) != "2":
-          err_msg = "Depth level '" + message + "' is not a valid answer."  
+           message = "N"
+        if message in settings.CHOICE_YES:
+          menu.options.crawldepth = 1
+          break  
+        if message in settings.CHOICE_NO:
+          break  
+        elif message in settings.CHOICE_QUIT:
+          raise SystemExit()
+        else:
+          err_msg = "'" + message + "' is not a valid answer."  
           print(settings.print_error_msg(err_msg))
           pass
-        else: 
-          menu.options.crawldepth = message
-          break
+
+    if menu.options.crawldepth:
+      while True:
+        if not menu.options.batch:
+          question_msg = "Do you want to change the crawling depth level (" + str(menu.options.crawldepth) + ")? [y/N] > "
+          message = _input(settings.print_question_msg(question_msg))
+        else:
+          message = ""
+        if len(message) == 0:
+           message = "N"
+        if message in settings.CHOICE_YES or message in settings.CHOICE_NO:
+          break  
+        elif message in settings.CHOICE_QUIT:
+          raise SystemExit()
+        else:
+          err_msg = "'" + message + "' is not a valid answer."  
+          print(settings.print_error_msg(err_msg))
+          pass
+      # Change the crawling depth level.
+      if message in settings.CHOICE_YES:
+        while True:
+          question_msg = "Please enter the crawling depth level (1-2) > "
+          message = _input(settings.print_question_msg(question_msg))
+          if len(message) == 0:
+            message = 1
+            break
+          elif str(message) != "1" and str(message) != "2":
+            err_msg = "Depth level '" + message + "' is not a valid answer."  
+            print(settings.print_error_msg(err_msg))
+            pass
+          else: 
+            menu.options.crawldepth = message
+            break
 
   while True:
+    sitemap_check = None
     if not menu.options.sitemap_url:
       if not menu.options.batch:
         question_msg = "Do you want to check target for "
@@ -230,6 +252,7 @@ def crawler(url):
         print(settings.print_error_msg(err_msg))
         pass
     else:
+      message = "n"
       sitemap_check = True
       break
   
@@ -242,12 +265,15 @@ def crawler(url):
   if sitemap_check:
     info_msg += "identified 'sitemap.xml' "
   info_msg += "for usable links (with GET parameters). "
-  sys.stdout.write("\n" + settings.print_info_msg(info_msg))
+  if message in settings.CHOICE_NO and not menu.options.sitemap_url:
+    sys.stdout.write("\r" + settings.print_info_msg(info_msg))
+  else:
+    sys.stdout.write("\n" + settings.print_info_msg(info_msg))
   sys.stdout.flush()
 
   if not sitemap_check:
     output_href = do_process(url)
-    if menu.options.crawldepth > 1:
+    if int(menu.options.crawldepth) > 1:
       for url in output_href:
         output_href = do_process(url)
   if settings.CRAWLED_SKIPPED_URLS == 0:
