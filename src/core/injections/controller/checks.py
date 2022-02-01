@@ -831,7 +831,10 @@ def wildcard_character(data):
   _ = ""
   for data in data.split("\\n"):
     # Ignore the Accept HTTP Header
-    if not data.startswith("Accept: ") and not settings.WILDCARD_CHAR is None and settings.WILDCARD_CHAR in data :
+    if not data.startswith("Accept: ") and \
+       not settings.WILDCARD_CHAR is None and \
+       not settings.INJECT_TAG in data and \
+       settings.WILDCARD_CHAR in data :
       data = data.replace(settings.WILDCARD_CHAR, settings.INJECT_TAG)
     _ = _ + data + "\\n"
   data = _.rstrip("\\n")
