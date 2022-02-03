@@ -224,7 +224,7 @@ def icmp_exfiltration_handler(url, http_request_method):
     
   else:
     parameter = menu.options.data
-    parameter = _urllib.parse.unquote(parameter)
+    #parameter = _urllib.parse.unquote(parameter)
     parameter = parameters.do_POST_check(parameter, http_request_method)
     request = _urllib.request.Request(url, parameter)
     headers.do_check(request)

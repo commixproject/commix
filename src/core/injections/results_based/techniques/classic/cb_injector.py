@@ -64,7 +64,7 @@ def injection_test(payload, http_request_method, url):
   # Check if defined method is POST.
   else:
     parameter = menu.options.data
-    parameter = _urllib.parse.unquote(parameter)
+    #parameter = _urllib.parse.unquote(parameter)
     # Check if its not specified the 'INJECT_HERE' tag
     parameter = parameters.do_POST_check(parameter, http_request_method)
     parameter = ''.join(str(e) for e in parameter).replace("+","%2B")
@@ -215,7 +215,7 @@ def injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_meth
       else :
         # Check if defined method is POST.
         parameter = menu.options.data
-        parameter = _urllib.parse.unquote(parameter)
+        #parameter = _urllib.parse.unquote(parameter)
         # Check if its not specified the 'INJECT_HERE' tag
         parameter = parameters.do_POST_check(parameter, http_request_method)
         parameter = ''.join(str(e) for e in parameter).replace("+","%2B")
