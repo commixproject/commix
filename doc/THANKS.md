@@ -9,18 +9,19 @@
 ## List of individual contributors:
 * Thanks [0x27](https://github.com/0x27) for suggesting an enhancement.
 * Thanks [609496288](https://github.com/609496288) for reporting a bug.
+* Thanks [6kemb0bani](https://github.com/6kemb0bani) for reporting a bug.
 * Thanks [Abdallah-Fouad-X](https://github.com/Abdallah-Fouad-X) for reporting a bug.
 * Thanks [abdoxfox](https://github.com/abdoxfox) for reporting a bug.
 * Thanks [ajinabraham](https://github.com/ajinabraham) for reporting a few bugs and for suggesting some features
 * Thanks [Alan Placidina](https://github.com/Placidina) for contributing code.
-* Thanks [alpha1e0](https://github.com/alpha1e0) for reporting a bug. and for contributing code.
+* Thanks [alpha1e0](https://github.com/alpha1e0) for reporting a bug and for contributing code.
 * Thanks [András Veres-Szentkirályi](https://github.com/dnet) for contributing code.
-* Thanks [Anton Bolshakov](https://github.com/blshkv) for contributing code.and for suggesting an enhancement.
+* Thanks [Anton Bolshakov](https://github.com/blshkv) for contributing code and for suggesting an enhancement.
 * Thanks [apprentice](https://github.com/apprentice) for contributing code.
 * Thanks [arbazkiraak](https://github.com/arbazkiraak) for suggesting a feature.
 * Thanks [ayzikhn18](https://github.com/ayzikhn18) for reporting a bug.
 * Thanks [B4RD4k](https://github.com/B4RD4k) for reporting a few bugs.
-* Thanks [blshkv](https://github.com/blshkv) for reporting a bug.and for suggesting a feature.
+* Thanks [blshkv](https://github.com/blshkv) for reporting a bug and for suggesting a feature.
 * Thanks [botdigit-admin](https://github.com/botdigit-admin) for reporting a bug.
 * Thanks [CaptanLuffy](https://github.com/CaptanLuffy) for reporting a bug.
 * Thanks [Cat0x00](https://github.com/Cat0x00) for reporting a bug.
@@ -61,9 +62,11 @@
 * Thanks [plonibarploni](https://github.com/plonibarploni) for reporting a bug.
 * Thanks [pomil-1969](https://github.com/pomil-1969) for reporting a bug.
 * Thanks [powercrypt](https://github.com/powercrypt) for reporting a few bugs.
+* Thanks [prince74igor](https://github.com/prince74igor) for suggesting an enhancement.
 * Thanks [royharoush](https://github.com/royharoush) for suggesting an enhancement.
 * Thanks [royshum93](https://github.com/royshum93) for reporting a bug.
 * Thanks [SaifSalah](https://github.com/SaifSalah) for reporting a bug.
+* Thanks [saltasatelites](https://github.com/saltasatelites) for reporting a bug.
 * Thanks [scblakely](https://github.com/scblakely) for reporting a bug.
 * Thanks [shaojava](https://github.com/shaojava) for reporting a bug.
 * Thanks [shelld3v](https://github.com/shelld3v) for contributing code.
@@ -72,6 +75,7 @@
 * Thanks [Slavery](https://github.com/Slavery) for reporting a bug.
 * Thanks [sno0ose](https://github.com/sno0ose) for reporting a bug.
 * Thanks [somarrr](https://github.com/somarrr) for reporting a bug.
+* Thanks [Suselz](https://github.com/Suselz) for reporting a few bugs and for suggesting suggesting enhancements.
 * Thanks [td4b](https://github.com/td4b) for contributing code.
 * Thanks [techn0tr0ll](https://github.com/techn0tr0ll) for reporting a bug.
 * Thanks [Tensha](https://github.com/Tensha) for reporting a bug.
@@ -85,6 +89,7 @@
 * Thanks [VolkNwn](https://github.com/VolkNwn) for reporting a bug.
 * Thanks [w9w](https://github.com/w9w) for reporting a bug.
 * Thanks [WangSongsen](https://github.com/WangSongsen) for reporting a bug.
+* Thanks [webideveli](https://github.com/webideveli) for reporting a bug.
 * Thanks [xsuperbug.](https://github.com/xsuperbug.) for suggesting a few features
 * Thanks [XVilka](https://github.com/XVilka) for suggesting an enhancement.
 * Thanks [yournainaidi](https://github.com/yournainaidi) for reporting a few bugs.
