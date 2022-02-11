@@ -356,7 +356,7 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
       warn_msg += " " + str(http_request_method) + ""
     warn_msg += str(the_type) + str(header_name) + str(check_parameter)
     warn_msg += " seems to be not injectable."
-    print(settings.print_warning_msg(warn_msg))
+    print(settings.print_bold_warning_msg(warn_msg))
 
 """
 Inject HTTP headers (User-agent / Referer / Host) (if level > 2).
