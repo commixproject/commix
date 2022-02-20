@@ -55,31 +55,32 @@ check for not declared cookie(s)
 def not_declared_cookies(response):
   try:
     candidate = re.search(r'([^;]+);?', response.headers['set-cookie']).group(1)
-    if candidate:
+    if candidate and settings.DECLARED_COOKIES is not False:
       settings.DECLARED_COOKIES = True
       if settings.CRAWLED_SKIPPED_URLS != 0:
         print(settings.SINGLE_WHITESPACE)
-    while True:
-      if not menu.options.batch:
-        question_msg = "You have not declared cookie(s), while "
-        question_msg += "server wants to set its own ('" + str(candidate) + "'). "
-        question_msg += "Do you want to use those [Y/n] > "
-        set_cookies = _input(settings.print_question_msg(question_msg)).lower()
-      else:
-        set_cookies = ""
-      if len(set_cookies) == 0:
-        set_cookies = "Y"
-      if set_cookies in settings.CHOICE_YES:
-        menu.options.cookie = candidate
-        break
-      elif set_cookies in settings.CHOICE_NO: 
-        break
-      elif set_cookies in settings.CHOICE_QUIT:
-        raise SystemExit()
-      else:
-        err_msg = "'" + set_cookies + "' is not a valid answer."  
-        print(settings.print_error_msg(err_msg))
-        pass
+      while True:
+        if not menu.options.batch:
+          question_msg = "You have not declared cookie(s), while "
+          question_msg += "server wants to set its own ('" + str(candidate) + "'). "
+          question_msg += "Do you want to use those [Y/n] > "
+          set_cookies = _input(settings.print_question_msg(question_msg)).lower()
+        else:
+          set_cookies = ""
+        if len(set_cookies) == 0:
+          set_cookies = "Y"
+        if set_cookies in settings.CHOICE_YES:
+          menu.options.cookie = candidate
+          break
+        elif set_cookies in settings.CHOICE_NO:
+          settings.DECLARED_COOKIES = False 
+          break
+        elif set_cookies in settings.CHOICE_QUIT:
+          raise SystemExit()
+        else:
+          err_msg = "'" + set_cookies + "' is not a valid answer."  
+          print(settings.print_error_msg(err_msg))
+          pass
   except (KeyError, TypeError):
     pass
 
