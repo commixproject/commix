@@ -1,4 +1,5 @@
 ## Version 3.4 (TBA)
+* Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
 * Fixed: Bug-fix regarding forcing usage of provided HTTP method (e.g. `PUT`).
 * Fixed: Bug-fix regarding parsing raw HTTP headers from a file (i.e. `-r` option).
 * Fixed: Minor bug-fix regarding parsing JSON objects.
