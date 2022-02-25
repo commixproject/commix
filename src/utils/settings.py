@@ -226,7 +226,7 @@ DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.4"
 REVISION = "66"
-STABLE_RELEASE = False
+STABLE_RELEASE = True
 if STABLE_RELEASE:
   VERSION = "v" + VERSION_NUM + "-stable"
 else:

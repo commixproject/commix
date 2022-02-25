@@ -17,7 +17,7 @@ from setuptools import setup, find_packages
 
 setup(
       name='commix',
-      version='3.3',
+      version='3.4',
       description='Automated All-in-One OS Command Injection Exploitation Tool',
       long_description=open('README.md').read(),
       long_description_content_type='text/markdown',
