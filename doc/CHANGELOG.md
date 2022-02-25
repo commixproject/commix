@@ -1,4 +1,4 @@
-## Version 3.4 (2022-01-25)
+## Version 3.4 (2022-02-25)
 * Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
 * Fixed: Bug-fix regarding forcing usage of provided HTTP method (e.g. `PUT`).
 * Fixed: Bug-fix regarding parsing raw HTTP headers from a file (i.e. `-r` option).
