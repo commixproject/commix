@@ -224,9 +224,9 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "3.4"
-REVISION = "66"
-STABLE_RELEASE = True
+VERSION_NUM = "3.5"
+REVISION = "1"
+STABLE_RELEASE = False
 if STABLE_RELEASE:
   VERSION = "v" + VERSION_NUM + "-stable"
 else:
@@ -580,6 +580,7 @@ HOST_INJECTION = None
 # Custom HTTP Headers injection
 CUSTOM_HEADER_INJECTION = False
 CUSTOM_HEADER_NAME = "" 
+CUSTOM_HEADER_VALUE = "" 
 
 # Valid URL format check
 VALID_URL_FORMAT = "https?://(?:www)?(?:[\w-]{2,255}(?:\.\w{2,6}){1,2})(?:/[\w&%?#-]{1,310})?"
