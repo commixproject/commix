@@ -274,6 +274,8 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
   if check_parameter.startswith(" "):
     header_name = ""
     the_type = " HTTP header"
+    if settings.CUSTOM_HEADER_INJECTION:
+      check_parameter = " '" + check_parameter.strip() + "'"
   else:
     if settings.COOKIE_INJECTION: 
       header_name = " cookie"
@@ -627,12 +629,6 @@ def perform_checks(url, http_request_method, filename):
       settings.IDENTIFIED_WARNINGS = False
       settings.IDENTIFIED_PHPINFO = False
 
-    # Check if defined POST data
-    if not settings.USER_DEFINED_POST_DATA:
-      get_request(url, http_request_method, filename, timesec)  
-    else:
-      post_request(url, http_request_method, filename, timesec)
-
   timesec = settings.TIMESEC
   # Check if authentication is needed.
   if menu.options.auth_url and menu.options.auth_data:
@@ -684,7 +680,13 @@ def perform_checks(url, http_request_method, filename):
     check_for_stored_sessions(url, http_request_method)
     injection_proccess(url, check_parameter, http_request_method, filename, timesec)
     settings.CUSTOM_HEADER_INJECTION = None
-  
+    
+  # Check if defined POST data
+  if not settings.USER_DEFINED_POST_DATA:
+    get_request(url, http_request_method, filename, timesec)  
+  else:
+    post_request(url, http_request_method, filename, timesec)
+
 
   if settings.INJECTION_CHECKER == False:
     return False
