@@ -250,8 +250,10 @@ def filebased_command_injection_technique(url, timesec, filename, http_request_m
 Proceed to the injection process for the appropriate parameter.
 """
 def injection_proccess(url, check_parameter, http_request_method, filename, timesec):
+  # Skipping basic heuristic detection procedure (regarding specific HTTP headers).
   inject_http_headers = False
-  if any(x in check_parameter.lower() for x in settings.HTTP_HEADERS):
+  if any(x in check_parameter.lower() for x in settings.HTTP_HEADERS) or \
+     any(x in check_parameter.lower() for x in settings.CUSTOM_HEADER_NAME):
     inject_http_headers = True
 
   if menu.options.ignore_code: 
@@ -274,8 +276,7 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
   if check_parameter.startswith(" "):
     header_name = ""
     the_type = " HTTP header"
-    if settings.CUSTOM_HEADER_INJECTION:
-      check_parameter = " '" + check_parameter.strip() + "'"
+    check_parameter = " '" + check_parameter.strip() + "'"
   else:
     if settings.COOKIE_INJECTION: 
       header_name = " cookie"
