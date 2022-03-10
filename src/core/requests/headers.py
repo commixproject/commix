@@ -421,7 +421,7 @@ def do_check(request):
         http_header_value = ''.join(http_header_value).strip().replace(": ",":")
         # Check if it is a custom header injection.
         if settings.CUSTOM_HEADER_INJECTION == False and \
-           settings.INJECT_TAG in http_header_value:
+           (settings.INJECT_TAG in http_header_value or http_header_name in settings.TEST_PARAMETER):
           settings.CUSTOM_HEADER_INJECTION = True
           settings.CUSTOM_HEADER_NAME = http_header_name
           settings.CUSTOM_HEADER_VALUE = http_header_value

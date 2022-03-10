@@ -676,7 +676,7 @@ def perform_checks(url, http_request_method, filename):
 
   # Custom header Injection
   if settings.CUSTOM_HEADER_INJECTION == True:
-    check_parameter =  header_name = " " + settings.CUSTOM_HEADER_NAME
+    check_parameter = header_name = " " + settings.CUSTOM_HEADER_NAME
     settings.HTTP_HEADER = header_name[1:].lower()
     check_for_stored_sessions(url, http_request_method)
     injection_proccess(url, check_parameter, http_request_method, filename, timesec)

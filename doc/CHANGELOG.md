@@ -1,3 +1,6 @@
+## Version 3.5 (TBA)
+* Revised: Improvement regarding injecting into custom HTTP Header(s).
+
 ## Version 3.4 (2022-02-25)
 * Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
 * Fixed: Bug-fix regarding forcing usage of provided HTTP method (e.g. `PUT`).

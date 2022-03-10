@@ -894,8 +894,11 @@ def custom_header_injection(url, vuln_parameter, payload):
       request = _urllib.request.Request(url)
     #Check if defined extra headers.
     headers.do_check(request)
-    payload = checks.newline_fixation(payload) 
-    request.add_header(settings.CUSTOM_HEADER_NAME, settings.CUSTOM_HEADER_VALUE.replace(settings.INJECT_TAG, payload))
+    payload = checks.newline_fixation(payload)
+    if settings.INJECT_TAG in settings.CUSTOM_HEADER_VALUE:
+      request.add_header(settings.CUSTOM_HEADER_NAME, settings.CUSTOM_HEADER_VALUE.replace(settings.INJECT_TAG, payload))
+    else:
+      request.add_header(settings.CUSTOM_HEADER_NAME, settings.CUSTOM_HEADER_VALUE + payload)
     try:
       headers.check_http_traffic(request)
       response = opener.open(request)
