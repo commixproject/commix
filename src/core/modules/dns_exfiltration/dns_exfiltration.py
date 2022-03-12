@@ -22,7 +22,7 @@ from src.thirdparty.six.moves import urllib as _urllib
 import threading
 from src.utils import menu
 from src.utils import logs
-from src.utils import common
+from src.utils import common as _common
 from src.utils import settings
 from src.thirdparty.colorama import Fore, Back, Style, init
 from src.core.requests import tor
@@ -182,9 +182,9 @@ def dns_exfiltration_handler(url, http_request_method):
   settings.DETECTION_PHASE = True
   settings.EXPLOITATION_PHASE = False
   # You need to have administrative privileges to run this module.
-  if not common.running_as_admin():
+  if not _common.running_as_admin():
     err_msg = "You need to have administrative privileges to run this module."
-    print("\n" + settings.print_critical_msg(err_msg))
+    print(settings.print_critical_msg(err_msg))
     os._exit(0)
 
   # Check if defined POST data
