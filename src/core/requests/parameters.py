@@ -49,7 +49,7 @@ def do_GET_check(url, http_request_method):
       else: 
         err_msg = "No parameter(s) found for testing on the provided target URL. "
         err_msg += "You must specify the testable parameter(s) and/or "
-        err_msg += "try to increase '--level' values to perform more tests (i.e 'User-Agent', 'Referer', 'Host', 'Cookie' etc)." 
+        err_msg += "try to increase '--level' value to perform more tests." 
         print(settings.print_critical_msg(err_msg))
         raise SystemExit()
     elif menu.options.shellshock:

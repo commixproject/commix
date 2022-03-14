@@ -754,8 +754,8 @@ def do_check(url, http_request_method, filename):
       else:
         err_msg += " Try to remove the option '--alter-shell'"
       if menu.options.level < settings.HTTP_HEADER_INJECTION_LEVEL :
-        err_msg += " and/or increase '--level' values to perform"
-        err_msg += " more tests (i.e 'User-Agent', 'Referer', 'Host', 'Cookie' etc)"
+        err_msg += " and/or increase '--level' value to perform"
+        err_msg += " more tests "
       if menu.options.skip_empty:
         err_msg += " and/or remove the option '--skip-empty'"  
       err_msg += "."
