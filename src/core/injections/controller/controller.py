@@ -659,6 +659,20 @@ def perform_checks(url, http_request_method, filename):
   if settings.PERFORM_BASIC_SCANS:
     basic_level_checks()
 
+  # Custom header Injection
+  if settings.CUSTOM_HEADER_INJECTION == True:
+    check_parameter = header_name = " " + settings.CUSTOM_HEADER_NAME
+    settings.HTTP_HEADER = header_name[1:].lower()
+    check_for_stored_sessions(url, http_request_method)
+    injection_proccess(url, check_parameter, http_request_method, filename, timesec)
+    settings.CUSTOM_HEADER_INJECTION = None
+
+  # Check if defined POST data
+  if not settings.USER_DEFINED_POST_DATA:
+    get_request(url, http_request_method, filename, timesec)  
+  else:
+    post_request(url, http_request_method, filename, timesec)
+
   if menu.options.level >= settings.COOKIE_INJECTION_LEVEL:
     # Enable Cookie Injection
     if menu.options.cookie:
@@ -673,21 +687,8 @@ def perform_checks(url, http_request_method, filename):
         check_parameter = ""
         # Check for stored injections on User-agent / Referer / Host HTTP headers (if level > 2).
         stored_http_header_injection(url, check_parameter, http_request_method, filename, timesec)
-
-  # Custom header Injection
-  if settings.CUSTOM_HEADER_INJECTION == True:
-    check_parameter = header_name = " " + settings.CUSTOM_HEADER_NAME
-    settings.HTTP_HEADER = header_name[1:].lower()
-    check_for_stored_sessions(url, http_request_method)
-    injection_proccess(url, check_parameter, http_request_method, filename, timesec)
-    settings.CUSTOM_HEADER_INJECTION = None
-    
-  # Check if defined POST data
-  if not settings.USER_DEFINED_POST_DATA:
-    get_request(url, http_request_method, filename, timesec)  
-  else:
-    post_request(url, http_request_method, filename, timesec)
-
+      else:
+        http_headers_injection(url, http_request_method, filename, timesec)
 
   if settings.INJECTION_CHECKER == False:
     return False
@@ -755,7 +756,7 @@ def do_check(url, http_request_method, filename):
         err_msg += " Try to remove the option '--alter-shell'"
       if menu.options.level < settings.HTTP_HEADER_INJECTION_LEVEL :
         err_msg += " and/or increase '--level' value to perform"
-        err_msg += " more tests "
+        err_msg += " more tests"
       if menu.options.skip_empty:
         err_msg += " and/or remove the option '--skip-empty'"  
       err_msg += "."
