@@ -225,7 +225,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.5"
-REVISION = "6"
+REVISION = "7"
 STABLE_RELEASE = False
 if STABLE_RELEASE:
   VERSION = "v" + VERSION_NUM + "-stable"
@@ -376,14 +376,24 @@ TESTABLE_PARAMETER = ""
 # The HTTP header name.
 HTTP_HEADER = ""
 
-# The command injection prefixes.
-PREFIXES = ["", " ", "'", "\"", "&", "%26", "|", "%7C", "%27", "%22", "'%26"]
-
 # The command injection separators.
-SEPARATORS = ["", ";", "%3B", "&", "%26", "%1a", "&&", "%26%26", "|", "%7C", "||", "%7C%7C", "%0a", "%0d%0a"]
+SEPARATORS = []
+SPECIAL_SEPARATORS = ["%0a", "%0d%0a","%1a"]
+DEFAULT_SEPARATORS = ["", ";", "&", "&&", "|", "||"]
+SEPARATORS_LVL1 = DEFAULT_SEPARATORS + SPECIAL_SEPARATORS  
+SEPARATORS_LVL3 = SEPARATORS_LVL2 = DEFAULT_SEPARATORS + SPECIAL_SEPARATORS + [_urllib.parse.quote_plus(x).lower() for x in DEFAULT_SEPARATORS]
+
+# The command injection prefixes.
+PREFIXES = []
+PREFIXES_LVL1 = [""]
+PREFIXES_LVL2  = PREFIXES_LVL1 + [" ", "'", "\"", "&", "|", "'&"]
+PREFIXES_LVL3  = PREFIXES_LVL2 + [_urllib.parse.quote_plus(x).lower() for x in PREFIXES_LVL2]
 
 # The command injection suffixes.
-SUFFIXES = ["", "'", "\"", "&&", "%26%26", "|", "%7C", "||", "%7C%7C", " #", "//", "\\\\", "%26'", "%27", "%22", "%5C%5C", "%2F%2F"]
+SUFFIXES = []
+SUFFIXES_LVL1 = [""]
+SUFFIXES_LVL2 = SUFFIXES_LVL1 + ["'", "\"", "&&", "|", "||", " #", "//", "\\\\", "&'"]
+SUFFIXES_LVL3 = SUFFIXES_LVL2 + [_urllib.parse.quote_plus(x).lower() for x in SUFFIXES_LVL1]
 
 # Bad combination of prefix and separator
 JUNK_COMBINATION = ["&&&", "|||", "|&&", "&|", "&;", "|;", "%7C;", "%26;", "%7C&"]
@@ -391,14 +401,18 @@ JUNK_COMBINATION = ["&&&", "|||", "|&&", "&|", "&;", "|;", "%7C;", "%26;", "%7C&
 # Execution functions
 EXECUTION_FUNCTIONS = ["exec", "system", "shell_exec", "passthru", "proc_open", "popen"]
 
-# The code injection prefixes.
-EVAL_PREFIXES = [".", "{${", "\".", "'.", "", ";", "'", ")", "')", "\")", ");}", "');}", "\");}"]
-
 # The code injection separators.
-EVAL_SEPARATORS = ["", "%0a", "\\n", "%0d%0a", "\\r\\n"]
+EVAL_SEPARATORS = ["", "%0a", "%0d%0a"]
+
+# The code injection prefixes.
+EVAL_PREFIXES = []
+EVAL_PREFIXES_LVL1 = ["{${", "'.", ".", ")'}", "');}"]
+EVAL_PREFIXES_LVL3 = EVAL_PREFIXES_LVL2  =  EVAL_PREFIXES_LVL1 + ["\".", "')", "\")", ");}", "\");}", ")", ";", "'", ""] 
 
 # The code injection suffixes.
-EVAL_SUFFIXES = ["", "}}", ".\"", ".'", "", "\\\\", "//", "#", ")}"]
+EVAL_SUFFIXES = []
+EVAL_SUFFIXES_LVL1 = ["}}", ".'", "'#", ""]
+EVAL_SUFFIXES_LVL3 = EVAL_SUFFIXES_LVL2 = EVAL_SUFFIXES_LVL1 + [".\"", "\\\\", "//", ")}", "#"]
 
 # The default (url-ecoded) white-space.
 WHITESPACES = ["%20"]

@@ -1,4 +1,5 @@
 ## Version 3.5 (TBA)
+* Revised: Ιmprovement regarding `--level` option, which not only adds more injection points (i.e Cookies, HTTP headers) but also performs more tests for each injection point.
 * Revised: Improvement regarding injecting into custom HTTP Header(s).
 
 ## Version 3.4 (2022-02-25)
