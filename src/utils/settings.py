@@ -225,7 +225,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.5"
-REVISION = "7"
+REVISION = "8"
 STABLE_RELEASE = False
 if STABLE_RELEASE:
   VERSION = "v" + VERSION_NUM + "-stable"
@@ -758,7 +758,7 @@ SERVER_BANNERS = [
 
 # Server banners list
 SERVER_OS_BANNERS = [
-    r"(Microsoft|Windows|Win32)",
+    r"(Microsoft|Windows|Win[\w\.]+)",
     "Debian",
     "Ubuntu",
     "Fedora",
