@@ -1186,7 +1186,7 @@ def check_target_os(server_banner):
           print(settings.print_critical_msg(err_msg))
           raise SystemExit()
       else:
-        identified_os = "Unix-like (" + settings.TARGET_OS + ")"
+        identified_os = "unix-like (" + settings.TARGET_OS + ")"
         if menu.options.os and user_defined_os == "win":
           if not checks.identified_os():
             settings.TARGET_OS = user_defined_os
@@ -1211,18 +1211,18 @@ def check_target_os(server_banner):
       if menu.options.batch:
         if not settings.CHECK_BOTH_OS:
           settings.CHECK_BOTH_OS = True
-          check_type = "unix-based"
+          check_type = "unix-like based"
         elif settings.CHECK_BOTH_OS:
           settings.TARGET_OS = "win"
           settings.CHECK_BOTH_OS = False
           settings.PERFORM_BASIC_SCANS = True
-          check_type = "windows-based"
+          check_type = "windows based"
         info_msg = "Setting the " + check_type + " payloads."
         print(settings.print_info_msg(info_msg))
       else:
         while True:
           question_msg = "Do you recognise the server's operating system? "
-          question_msg += "[(W)indows/(U)nix/(q)uit] > "
+          question_msg += "[(W)indows/(U)nix-like/(q)uit] > "
           got_os = _input(settings.print_question_msg(question_msg))
           if got_os.lower() in settings.CHOICE_OS :
             if got_os.lower() == "w":
