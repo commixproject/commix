@@ -114,14 +114,18 @@ def command_injection_heuristic_basic(url, http_request_method, check_parameter,
               info_msg = "Heuristic (basic) detection shows that" + header_name + the_type + check_parameter +" might be injectable (possible OS: '" + ('Unix-like', 'Windows')[_ != 1] + "')." 
               print(settings.print_bold_info_msg(info_msg))
               break
-
+              
+        if not settings.IDENTIFIED_COMMAND_INJECTION:
+          warn_msg = "Heuristic (basic) detection shows that" + header_name + the_type + check_parameter +" might not be injectable."
+          print(settings.print_bold_warning_msg(warn_msg))   
+        
         settings.CLASSIC_STATE = False
         return url
 
     except (_urllib.error.URLError, _urllib.error.HTTPError) as err_msg:
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
-   
+
 """
 Basic heuristic checks for code injection warnings
 """
@@ -418,7 +422,7 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
     if header_name != " cookie" and the_type != " HTTP header":
       warn_msg += " " + str(http_request_method) + ""
     warn_msg += str(the_type) + str(header_name) + str(check_parameter)
-    warn_msg += " seems to be not injectable."
+    warn_msg += " does not seem to be injectable."
     print(settings.print_bold_warning_msg(warn_msg))
 
 """
