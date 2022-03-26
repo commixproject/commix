@@ -68,8 +68,7 @@ def check_for_stored_levels(url, http_request_method):
 """
 Basic heuristic checks for command injection
 """
-def command_injection_heuristic_basic(url, http_request_method, check_parameter, the_type, header_name):
-
+def command_injection_heuristic_basic(url, http_request_method, check_parameter, the_type, header_name, inject_http_headers):
   if menu.options.skip_heuristics:
     if settings.VERBOSITY_LEVEL != 0:   
       debug_msg = "Skipping (basic) heuristic detection."
@@ -86,7 +85,13 @@ def command_injection_heuristic_basic(url, http_request_method, check_parameter,
           print(settings.print_debug_msg(debug_msg))
         _ = 0
         for payload in settings.BASIC_COMMAND_INJECTION_PAYLOADS:
-          _ = _ + 1   
+          if menu.options.prefix:
+            payload = menu.options.prefix + payload
+          if menu.options.suffix:
+            payload = payload + menu.options.suffix
+          _ = _ + 1
+          if not inject_http_headers:
+            payload = _urllib.parse.quote_plus(payload)
           payload = checks.perform_payload_modification(payload)
           if settings.VERBOSITY_LEVEL >= 1:
             print(settings.print_payload(payload))
@@ -103,6 +108,8 @@ def command_injection_heuristic_basic(url, http_request_method, check_parameter,
           request = _urllib.request.Request(tmp_url, data)
           if cookie:
             request.add_header(settings.COOKIE, cookie)
+          if inject_http_headers:
+            request.add_header(check_parameter.replace("'","").strip(), payload.encode(settings.DEFAULT_CODEC))
           headers.do_check(request)
           response = requests.get_request_response(request)
 
@@ -352,7 +359,7 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
   # Load modules
   modules_handler.load_modules(url, http_request_method, filename)
 
-  url = command_injection_heuristic_basic(url, http_request_method, check_parameter, the_type, header_name)
+  url = command_injection_heuristic_basic(url, http_request_method, check_parameter, the_type, header_name, inject_http_headers)
 
   if not settings.LOAD_SESSION:
     if (len(menu.options.tech) == 0 or "e" in menu.options.tech) and not settings.IDENTIFIED_COMMAND_INJECTION:
@@ -441,8 +448,8 @@ def http_headers_injection(url, http_request_method, filename, timesec):
       check_parameter = header_name = " User-Agent"
       settings.HTTP_HEADER = header_name[1:].replace("-","").lower()
       check_for_stored_sessions(url, http_request_method)
-      injection_proccess(url, check_parameter, http_request_method, filename, timesec)
-    settings.USER_AGENT_INJECTION = False
+      if not injection_proccess(url, check_parameter, http_request_method, filename, timesec):
+        settings.USER_AGENT_INJECTION = None
     menu.options.agent = user_agent
 
   def referer_injection(url, http_request_method, filename, timesec):
@@ -454,8 +461,8 @@ def http_headers_injection(url, http_request_method, filename, timesec):
       check_parameter =  header_name = " Referer"
       settings.HTTP_HEADER = header_name[1:].lower()
       check_for_stored_sessions(url, http_request_method)
-      injection_proccess(url, check_parameter, http_request_method, filename, timesec)
-    settings.REFERER_INJECTION = False 
+      if not injection_proccess(url, check_parameter, http_request_method, filename, timesec):
+        settings.REFERER_INJECTION = False 
     menu.options.agent = referer
 
   def host_injection(url, http_request_method, filename, timesec):
@@ -466,8 +473,8 @@ def http_headers_injection(url, http_request_method, filename, timesec):
       check_parameter =  header_name = " Host"
       settings.HTTP_HEADER = header_name[1:].lower()
       check_for_stored_sessions(url, http_request_method)
-      injection_proccess(url, check_parameter, http_request_method, filename, timesec)
-      settings.HOST_INJECTION = False 
+      if not injection_proccess(url, check_parameter, http_request_method, filename, timesec):
+        settings.HOST_INJECTION = False 
 
   # User-Agent HTTP header injection
   if menu.options.skip_parameter == None:
