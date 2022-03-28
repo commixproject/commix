@@ -85,13 +85,13 @@ def command_injection_heuristic_basic(url, http_request_method, check_parameter,
           print(settings.print_debug_msg(debug_msg))
         _ = 0
         for payload in settings.BASIC_COMMAND_INJECTION_PAYLOADS:
+          _ = _ + 1
+          if not inject_http_headers:
+            payload = _urllib.parse.quote(payload)
           if menu.options.prefix:
             payload = menu.options.prefix + payload
           if menu.options.suffix:
             payload = payload + menu.options.suffix
-          _ = _ + 1
-          if not inject_http_headers:
-            payload = _urllib.parse.quote(payload)
           payload = checks.perform_payload_modification(payload)
           if settings.VERBOSITY_LEVEL >= 1:
             print(settings.print_payload(payload))
@@ -416,7 +416,8 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
     classic_command_injection_technique(url, timesec, filename, http_request_method)
   else:
     classic_command_injection_technique(url, timesec, filename, http_request_method)
-    dynamic_code_evaluation_technique(url, timesec, filename, http_request_method)
+    if not settings.IDENTIFIED_COMMAND_INJECTION:
+      dynamic_code_evaluation_technique(url, timesec, filename, http_request_method)
   timebased_command_injection_technique(url, timesec, filename, http_request_method, url_time_response)
   filebased_command_injection_technique(url, timesec, filename, http_request_method, url_time_response)
 
