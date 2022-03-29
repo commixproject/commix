@@ -225,7 +225,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.5"
-REVISION = "16"
+REVISION = "17"
 STABLE_RELEASE = False
 if STABLE_RELEASE:
   VERSION = "v" + VERSION_NUM + "-stable"
@@ -845,7 +845,7 @@ JSON_LIKE_RECOGNITION_REGEX = r"(?s)\A(\s*\[)*\s*\{.*'[^']+'\s*:\s*('[^']+'|\d+)
 BASE64_RECOGNITION_REGEX = r'^[A-Za-z0-9+/]+[=]{0,2}$'
 
 # Hex encoded characters recognition
-HEX_RECOGNITION_REGEX = r'^[0-9a-f]+'
+HEX_RECOGNITION_REGEX = r'^(0[xX])?[0-9a-fA-F]+$'
 
 # GET parameters recognition
 GET_PARAMETERS_REGEX = r"(.*?)\?(.+)"
