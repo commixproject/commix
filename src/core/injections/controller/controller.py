@@ -88,10 +88,8 @@ def command_injection_heuristic_basic(url, http_request_method, check_parameter,
           _ = _ + 1
           if not inject_http_headers:
             payload = _urllib.parse.quote(payload)
-          if menu.options.prefix:
-            payload = menu.options.prefix + payload
-          if menu.options.suffix:
-            payload = payload + menu.options.suffix
+          payload = parameters.prefixes(payload, prefix="")
+          payload = parameters.suffixes(payload, suffix="")
           payload = checks.perform_payload_modification(payload)
           if settings.VERBOSITY_LEVEL >= 1:
             print(settings.print_payload(payload))
