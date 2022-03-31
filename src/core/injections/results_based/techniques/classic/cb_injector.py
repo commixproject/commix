@@ -52,7 +52,7 @@ def injection_test(payload, http_request_method, url):
       payload = payload.replace(" ","%20")
     # Define the vulnerable parameter
     vuln_parameter = parameters.vuln_GET_param(url)
-    target = url.replace(settings.INJECT_TAG, payload)
+    target = url.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload)
     request = _urllib.request.Request(target)
     
     # Check if defined extra headers.
@@ -70,15 +70,15 @@ def injection_test(payload, http_request_method, url):
     parameter = ''.join(str(e) for e in parameter).replace("+","%2B")
     # Define the POST data   
     if settings.IS_JSON:
-      data = parameter.replace(settings.INJECT_TAG, _urllib.parse.unquote(payload.replace("\"", "\\\"")))
+      data = parameter.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, _urllib.parse.unquote(payload.replace("\"", "\\\"")))
       try:
         data = checks.json_data(data)
       except ValueError:
         pass
     elif settings.IS_XML:
-      data = parameter.replace(settings.INJECT_TAG, _urllib.parse.unquote(payload)) 
+      data = parameter.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, _urllib.parse.unquote(payload)) 
     else:
-      data = parameter.replace(settings.INJECT_TAG, payload)
+      data = parameter.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload)
     request = _urllib.request.Request(url, data.encode(settings.DEFAULT_CODEC))
     
     # Check if defined extra headers.
@@ -202,7 +202,7 @@ def injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_meth
         
         # Check if its not specified the 'INJECT_HERE' tag
         #url = parameters.do_GET_check(url, http_request_method)
-        target = url.replace(settings.INJECT_TAG, payload)
+        target = url.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload)
         vuln_parameter = ''.join(vuln_parameter)
         request = _urllib.request.Request(target)
         
@@ -221,15 +221,15 @@ def injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_meth
         parameter = ''.join(str(e) for e in parameter).replace("+","%2B")
         # Define the POST data    
         if settings.IS_JSON:
-          data = parameter.replace(settings.INJECT_TAG, _urllib.parse.unquote(payload.replace("\"", "\\\"")))
+          data = parameter.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, _urllib.parse.unquote(payload.replace("\"", "\\\"")))
           try:
             data = checks.json_data(data)
           except ValueError:
             pass
         elif settings.IS_XML:
-          data = parameter.replace(settings.INJECT_TAG, _urllib.parse.unquote(payload)) 
+          data = parameter.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, _urllib.parse.unquote(payload)) 
         else:
-          data = parameter.replace(settings.INJECT_TAG, payload)
+          data = parameter.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload)
         request = _urllib.request.Request(url, data.encode(settings.DEFAULT_CODEC))
         
         # Check if defined extra headers.

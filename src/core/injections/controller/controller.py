@@ -97,12 +97,12 @@ def command_injection_heuristic_basic(url, http_request_method, check_parameter,
           cookie = None
           tmp_url = url
           if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
-            cookie = menu.options.cookie.replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC)
+            cookie = menu.options.cookie.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC)
           elif menu.options.data and http_request_method == settings.HTTPMETHOD.POST:
-            data = menu.options.data.replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC)
+            data = menu.options.data.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC)
           else:
             if settings.INJECT_TAG in url:
-              tmp_url = url.replace(settings.INJECT_TAG, payload)
+              tmp_url = url.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload)
           request = _urllib.request.Request(tmp_url, data)
           if cookie:
             request.add_header(settings.COOKIE, cookie)
@@ -162,12 +162,12 @@ def code_injections_heuristic_basic(url, http_request_method, check_parameter, t
           cookie = None
           tmp_url = url
           if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
-            cookie = menu.options.cookie.replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC)
+            cookie = menu.options.cookie.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC)
           elif menu.options.data and http_request_method == settings.HTTPMETHOD.POST:
-            data = menu.options.data.replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC)
+            data = menu.options.data.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC)
           else:
             if settings.INJECT_TAG in url:
-              tmp_url = url.replace(settings.INJECT_TAG, payload)
+              tmp_url = url.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload)
           request = _urllib.request.Request(tmp_url, data)
           if cookie:
             request.add_header(settings.COOKIE, cookie)

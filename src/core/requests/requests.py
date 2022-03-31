@@ -896,7 +896,7 @@ def custom_header_injection(url, vuln_parameter, payload):
     headers.do_check(request)
     payload = checks.newline_fixation(payload)
     if settings.INJECT_TAG in settings.CUSTOM_HEADER_VALUE:
-      request.add_header(settings.CUSTOM_HEADER_NAME, settings.CUSTOM_HEADER_VALUE.replace(settings.INJECT_TAG, payload))
+      request.add_header(settings.CUSTOM_HEADER_NAME, settings.CUSTOM_HEADER_VALUE.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload))
     else:
       request.add_header(settings.CUSTOM_HEADER_NAME, settings.CUSTOM_HEADER_VALUE + payload)
     try:

@@ -225,7 +225,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.5"
-REVISION = "18"
+REVISION = "19"
 STABLE_RELEASE = False
 if STABLE_RELEASE:
   VERSION = "v" + VERSION_NUM + "-stable"
@@ -382,6 +382,8 @@ SLOW_TARGET_RESPONSE = 3
 
 # The testable parameter.
 TESTABLE_PARAMETER = "" 
+
+TESTABLE_VALUE = ""
 
 # The HTTP header name.
 HTTP_HEADER = ""
