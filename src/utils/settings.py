@@ -225,7 +225,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.5"
-REVISION = "19"
+REVISION = "20"
 STABLE_RELEASE = False
 if STABLE_RELEASE:
   VERSION = "v" + VERSION_NUM + "-stable"
@@ -408,7 +408,7 @@ SUFFIXES_LVL2 = SEPARATORS_LVL1
 SUFFIXES_LVL3 = ["'", "\"", " #", "//", "\\\\"] + SUFFIXES_LVL2
 
 # Bad combination of prefix and separator
-JUNK_COMBINATION = ["&&&", "|||", "|&&", "&|", "&;", "|;", "%7C;", "%26;", "%7C&"]
+JUNK_COMBINATION = ["&&&", "|||", "|&&", "&|", "&;", "|;", ";;" , "%7C;", "%26;", "%7C&"]
 
 # Execution functions
 EXECUTION_FUNCTIONS = ["exec", "system", "shell_exec", "passthru", "proc_open", "popen"]

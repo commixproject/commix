@@ -134,7 +134,7 @@ def do_GET_check(url, http_request_method):
                 all_params[param] = all_params[param] + settings.INJECT_TAG
             else:
               all_params[param] = all_params[param].replace(value, value + settings.INJECT_TAG)
-            all_params[param - 1] = all_params[param - 1].replace(value, "").replace(settings.INJECT_TAG, "")
+            #all_params[param - 1] = all_params[param - 1].replace(value, "").replace(settings.INJECT_TAG, "")
             parameter = settings.PARAMETER_DELIMITER.join(all_params)
             # Reconstruct the URL
             url = url_part + "?" + parameter
@@ -313,7 +313,9 @@ def do_POST_check(parameter, http_request_method):
               all_params[param] = all_params[param] + settings.INJECT_TAG
         else:
           all_params[param] = all_params[param].replace(value, value + settings.INJECT_TAG)
-        all_params[param - 1] = all_params[param - 1].replace(value, "").replace(settings.INJECT_TAG, "")
+        #all_params[param - 1] = all_params[param - 1].replace(value, "").replace(settings.INJECT_TAG, "")
+        all_params[param - 1] = all_params[param - 1].replace(settings.INJECT_TAG, "")
+        all_params[param - 1] = all_params[param - 1].replace(settings.INJECT_TAG, "")
         parameter = settings.PARAMETER_DELIMITER.join(all_params)
         parameter = parameter.replace(settings.RANDOM_TAG,"")
         if type(parameter) != list:
@@ -461,7 +463,8 @@ def do_cookie_check(cookie):
             all_params[param] = all_params[param] + settings.INJECT_TAG
         else:
           all_params[param] = all_params[param].replace(value, value + settings.INJECT_TAG)  
-        all_params[param - 1] = all_params[param - 1].replace(value, "").replace(settings.INJECT_TAG, "")
+        #all_params[param - 1] = all_params[param - 1].replace(value, "").replace(settings.INJECT_TAG, "")
+        all_params[param - 1] = all_params[param - 1].replace(settings.INJECT_TAG, "")
         cookie = settings.COOKIE_DELIMITER.join(all_params)
         if type(cookie) != list:
           cookies_list.append(cookie)
