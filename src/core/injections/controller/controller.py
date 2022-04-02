@@ -69,63 +69,54 @@ def check_for_stored_levels(url, http_request_method):
 Basic heuristic checks for command injection
 """
 def command_injection_heuristic_basic(url, http_request_method, check_parameter, the_type, header_name, inject_http_headers):
-  if menu.options.skip_heuristics:
-    if settings.VERBOSITY_LEVEL != 0:   
-      debug_msg = "Skipping (basic) heuristic detection."
-      print(settings.print_debug_msg(debug_msg))
+  if not header_name == " cookie" and not the_type == " HTTP header":
+    header_name = " " + str(http_request_method) 
+  settings.CLASSIC_STATE = True
+  try:
+    if not settings.IDENTIFIED_COMMAND_INJECTION:  
+      _ = 0
+      for payload in settings.BASIC_COMMAND_INJECTION_PAYLOADS:
+        _ = _ + 1
+        if not inject_http_headers:
+          payload = _urllib.parse.quote(payload)
+        payload = parameters.prefixes(payload, prefix="")
+        payload = parameters.suffixes(payload, suffix="")
+        payload = checks.perform_payload_modification(payload)
+        if settings.VERBOSITY_LEVEL >= 1:
+          print(settings.print_payload(payload))
+        data = None
+        cookie = None
+        tmp_url = url
+        if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
+          cookie = menu.options.cookie.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC)
+        elif menu.options.data and http_request_method == settings.HTTPMETHOD.POST:
+          data = menu.options.data.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC)
+        else:
+          if settings.INJECT_TAG in url:
+            tmp_url = url.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload)
+        request = _urllib.request.Request(tmp_url, data)
+        if cookie:
+          request.add_header(settings.COOKIE, cookie)
+        if inject_http_headers:
+          request.add_header(check_parameter.replace("'","").strip(), payload.encode(settings.DEFAULT_CODEC))
+        headers.do_check(request)
+        response = requests.get_request_response(request)
+
+        if type(response) is not bool:
+          html_data = checks.page_encoding(response, action="decode")
+          match = re.search(settings.BASIC_COMMAND_INJECTION_RESULT, html_data)
+          if match:
+            settings.IDENTIFIED_COMMAND_INJECTION = True
+            info_msg = "Heuristic (basic) detection shows that" + header_name + the_type + check_parameter +" might be injectable (possible OS: '" + ('Unix-like', 'Windows')[_ != 1] + "')." 
+            print(settings.print_bold_info_msg(info_msg))
+            break
+            
+    settings.CLASSIC_STATE = False
     return url
-  else:
-    if not header_name == " cookie" and not the_type == " HTTP header":
-      header_name = " " + str(http_request_method) 
-    settings.CLASSIC_STATE = True
-    try:
-      if not settings.IDENTIFIED_COMMAND_INJECTION:  
-        if settings.VERBOSITY_LEVEL != 0:   
-          debug_msg = "Starting (basic) heuristic detection."
-          print(settings.print_debug_msg(debug_msg))
-        _ = 0
-        for payload in settings.BASIC_COMMAND_INJECTION_PAYLOADS:
-          _ = _ + 1
-          if not inject_http_headers:
-            payload = _urllib.parse.quote(payload)
-          payload = parameters.prefixes(payload, prefix="")
-          payload = parameters.suffixes(payload, suffix="")
-          payload = checks.perform_payload_modification(payload)
-          if settings.VERBOSITY_LEVEL >= 1:
-            print(settings.print_payload(payload))
-          data = None
-          cookie = None
-          tmp_url = url
-          if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
-            cookie = menu.options.cookie.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC)
-          elif menu.options.data and http_request_method == settings.HTTPMETHOD.POST:
-            data = menu.options.data.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC)
-          else:
-            if settings.INJECT_TAG in url:
-              tmp_url = url.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload)
-          request = _urllib.request.Request(tmp_url, data)
-          if cookie:
-            request.add_header(settings.COOKIE, cookie)
-          if inject_http_headers:
-            request.add_header(check_parameter.replace("'","").strip(), payload.encode(settings.DEFAULT_CODEC))
-          headers.do_check(request)
-          response = requests.get_request_response(request)
 
-          if type(response) is not bool:
-            html_data = checks.page_encoding(response, action="decode")
-            match = re.search(settings.BASIC_COMMAND_INJECTION_RESULT, html_data)
-            if match:
-              settings.IDENTIFIED_COMMAND_INJECTION = True
-              info_msg = "Heuristic (basic) detection shows that" + header_name + the_type + check_parameter +" might be injectable (possible OS: '" + ('Unix-like', 'Windows')[_ != 1] + "')." 
-              print(settings.print_bold_info_msg(info_msg))
-              break
-              
-        settings.CLASSIC_STATE = False
-        return url
-
-    except (_urllib.error.URLError, _urllib.error.HTTPError) as err_msg:
-      print(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+  except (_urllib.error.URLError, _urllib.error.HTTPError) as err_msg:
+    print(settings.print_critical_msg(err_msg))
+    raise SystemExit()
 
 """
 Basic heuristic checks for code injection warnings
@@ -135,69 +126,60 @@ def code_injections_heuristic_basic(url, http_request_method, check_parameter, t
   technique = "dynamic code evaluation technique"
   technique = "(" + injection_type.split(" ")[0] + ") " + technique + ""
 
-  if menu.options.skip_heuristics:
-    if settings.VERBOSITY_LEVEL != 0:   
-      debug_msg = "Skipping (basic) heuristic detection for " + technique + "."
-      print(settings.print_debug_msg(debug_msg))
-    return url
-  else:
-    settings.EVAL_BASED_STATE = True
+  settings.EVAL_BASED_STATE = True
+  try:
     try:
-      try:
-        if re.findall(r"=(.*)&", url):
-          url = url.replace("/&", "/e&")
-        elif re.findall(r"=(.*)&", menu.options.data):
-          menu.options.data = menu.options.data.replace("/&", "/e&")
-      except TypeError as err_msg:
-        pass
-      if not settings.IDENTIFIED_WARNINGS and not settings.IDENTIFIED_PHPINFO:  
-        if settings.VERBOSITY_LEVEL != 0:   
-          debug_msg = "Starting (basic) heuristic detection for " + technique + "."
-          print(settings.print_debug_msg(debug_msg))
-        for payload in settings.PHPINFO_CHECK_PAYLOADS:
-          payload = checks.perform_payload_modification(payload)
-          if settings.VERBOSITY_LEVEL >= 1:
-            print(settings.print_payload(payload))
-          data = None
-          cookie = None
-          tmp_url = url
-          if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
-            cookie = menu.options.cookie.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC)
-          elif menu.options.data and http_request_method == settings.HTTPMETHOD.POST:
-            data = menu.options.data.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC)
+      if re.findall(r"=(.*)&", url):
+        url = url.replace("/&", "/e&")
+      elif re.findall(r"=(.*)&", menu.options.data):
+        menu.options.data = menu.options.data.replace("/&", "/e&")
+    except TypeError as err_msg:
+      pass
+    if not settings.IDENTIFIED_WARNINGS and not settings.IDENTIFIED_PHPINFO:  
+      for payload in settings.PHPINFO_CHECK_PAYLOADS:
+        payload = checks.perform_payload_modification(payload)
+        if settings.VERBOSITY_LEVEL >= 1:
+          print(settings.print_payload(payload))
+        data = None
+        cookie = None
+        tmp_url = url
+        if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
+          cookie = menu.options.cookie.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC)
+        elif menu.options.data and http_request_method == settings.HTTPMETHOD.POST:
+          data = menu.options.data.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC)
+        else:
+          if settings.INJECT_TAG in url:
+            tmp_url = url.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload)
+        request = _urllib.request.Request(tmp_url, data)
+        if cookie:
+          request.add_header(settings.COOKIE, cookie)
+        if inject_http_headers:
+          request.add_header(check_parameter.replace("'","").strip(), payload.encode(settings.DEFAULT_CODEC))
+        headers.do_check(request)
+        response = requests.get_request_response(request)
+
+        if type(response) is not bool:
+          html_data = checks.page_encoding(response, action="decode")
+          match = re.search(settings.CODE_INJECTION_PHPINFO, html_data)
+          if match:
+            technique = technique + " (possible PHP version: '" + match.group(1) + "')"
+            settings.IDENTIFIED_PHPINFO = True
           else:
-            if settings.INJECT_TAG in url:
-              tmp_url = url.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload)
-          request = _urllib.request.Request(tmp_url, data)
-          if cookie:
-            request.add_header(settings.COOKIE, cookie)
-          if inject_http_headers:
-            request.add_header(check_parameter.replace("'","").strip(), payload.encode(settings.DEFAULT_CODEC))
-          headers.do_check(request)
-          response = requests.get_request_response(request)
+            for warning in settings.CODE_INJECTION_WARNINGS:
+              if warning in html_data:
+                settings.IDENTIFIED_WARNINGS = True
+                break
+          if settings.IDENTIFIED_WARNINGS or settings.IDENTIFIED_PHPINFO:
+            info_msg = "Heuristic (basic) detection shows that" + header_name + the_type + check_parameter + " might be injectable via " + technique + "." 
+            print(settings.print_bold_info_msg(info_msg))
+            break
 
-          if type(response) is not bool:
-            html_data = checks.page_encoding(response, action="decode")
-            match = re.search(settings.CODE_INJECTION_PHPINFO, html_data)
-            if match:
-              technique = technique + " (possible PHP version: '" + match.group(1) + "')"
-              settings.IDENTIFIED_PHPINFO = True
-            else:
-              for warning in settings.CODE_INJECTION_WARNINGS:
-                if warning in html_data:
-                  settings.IDENTIFIED_WARNINGS = True
-                  break
-            if settings.IDENTIFIED_WARNINGS or settings.IDENTIFIED_PHPINFO:
-              info_msg = "Heuristic (basic) detection shows that" + header_name + the_type + check_parameter + " might be injectable via " + technique + "." 
-              print(settings.print_bold_info_msg(info_msg))
-              break
+    settings.EVAL_BASED_STATE = False
+    return url
 
-      settings.EVAL_BASED_STATE = False
-      return url
-
-    except (_urllib.error.URLError, _urllib.error.HTTPError) as err_msg:
-      print(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+  except (_urllib.error.URLError, _urllib.error.HTTPError) as err_msg:
+    print(settings.print_critical_msg(err_msg))
+    raise SystemExit()
 
 # Check if it's exploitable via classic command injection technique.
 def classic_command_injection_technique(url, timesec, filename, http_request_method):
@@ -352,35 +334,44 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
   timesec, url_time_response = requests.estimate_response_time(url, timesec)
   # Load modules
   modules_handler.load_modules(url, http_request_method, filename)
-  url = command_injection_heuristic_basic(url, http_request_method, check_parameter, the_type, header_name, inject_http_headers)
-  if not settings.LOAD_SESSION:
-    if (len(menu.options.tech) == 0 or "e" in menu.options.tech) and not settings.IDENTIFIED_COMMAND_INJECTION:
-      # Check for identified warnings
-      url = code_injections_heuristic_basic(url, http_request_method, check_parameter, the_type, header_name, inject_http_headers)
-      if settings.IDENTIFIED_WARNINGS or settings.IDENTIFIED_PHPINFO:
-        while True:
-          if not menu.options.batch:
-            question_msg = "Skipping of further command injection tests is recommended. "
-            question_msg += "Do you agree? [Y/n] > "
-            procced_option = _input(settings.print_question_msg(question_msg))
-          else:
-            procced_option = ""
-          if procced_option in settings.CHOICE_YES or len(procced_option) == 0:
-            settings.CLASSIC_STATE = settings.TIME_BASED_STATE = settings.FILE_BASED_STATE = False
-            settings.EVAL_BASED_STATE = settings.SKIP_COMMAND_INJECTIONS = True
-            break
-          elif procced_option in settings.CHOICE_NO:
-            break
-          elif procced_option in settings.CHOICE_QUIT:
-            raise SystemExit()
-          else:
-            err_msg = "'" + procced_option + "' is not a valid answer."  
-            print(settings.print_error_msg(err_msg))
-            pass
 
-    if not settings.IDENTIFIED_COMMAND_INJECTION and not settings.IDENTIFIED_WARNINGS and not settings.IDENTIFIED_PHPINFO:
-      warn_msg = "Heuristic (basic) detection shows that" + header_name + the_type + check_parameter + " might not be injectable."
-      print(settings.print_bold_warning_msg(warn_msg)) 
+  if menu.options.skip_heuristics:
+    if settings.VERBOSITY_LEVEL != 0:   
+      debug_msg = "Skipping (basic) heuristic detection."
+      print(settings.print_debug_msg(debug_msg))
+  else:
+    if settings.VERBOSITY_LEVEL != 0:   
+      debug_msg = "Starting (basic) heuristic detection."
+      print(settings.print_debug_msg(debug_msg))
+    url = command_injection_heuristic_basic(url, http_request_method, check_parameter, the_type, header_name, inject_http_headers)
+    if not settings.LOAD_SESSION:
+      if (len(menu.options.tech) == 0 or "e" in menu.options.tech) and not settings.IDENTIFIED_COMMAND_INJECTION:
+        # Check for identified warnings
+        url = code_injections_heuristic_basic(url, http_request_method, check_parameter, the_type, header_name, inject_http_headers)
+        if settings.IDENTIFIED_WARNINGS or settings.IDENTIFIED_PHPINFO:
+          while True:
+            if not menu.options.batch:
+              question_msg = "Skipping of further command injection tests is recommended. "
+              question_msg += "Do you agree? [Y/n] > "
+              procced_option = _input(settings.print_question_msg(question_msg))
+            else:
+              procced_option = ""
+            if procced_option in settings.CHOICE_YES or len(procced_option) == 0:
+              settings.CLASSIC_STATE = settings.TIME_BASED_STATE = settings.FILE_BASED_STATE = False
+              settings.EVAL_BASED_STATE = settings.SKIP_COMMAND_INJECTIONS = True
+              break
+            elif procced_option in settings.CHOICE_NO:
+              break
+            elif procced_option in settings.CHOICE_QUIT:
+              raise SystemExit()
+            else:
+              err_msg = "'" + procced_option + "' is not a valid answer."  
+              print(settings.print_error_msg(err_msg))
+              pass
+
+      if not settings.IDENTIFIED_COMMAND_INJECTION and not settings.IDENTIFIED_WARNINGS and not settings.IDENTIFIED_PHPINFO:
+        warn_msg = "Heuristic (basic) detection shows that" + header_name + the_type + check_parameter + " might not be injectable."
+        print(settings.print_bold_warning_msg(warn_msg)) 
 
     info_msg = "Setting the" 
     if not header_name == " cookie" and not the_type == " HTTP header":
