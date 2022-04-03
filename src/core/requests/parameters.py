@@ -383,6 +383,13 @@ def vuln_POST_param(parameter, url):
 Define the injection prefixes.
 """
 def prefixes(payload, prefix):
+  if settings.USER_AGENT_INJECTION == True:
+    specify_user_agent_parameter(menu.options.agent)
+  elif settings.REFERER_INJECTION == True:
+    specify_referer_parameter(menu.options.referer)
+  elif settings.HOST_INJECTION == True:
+    specify_host_parameter(menu.options.host)
+    
   # Check if defined "--prefix" option.
   if menu.options.prefix:
     payload = settings.TESTABLE_VALUE + menu.options.prefix + prefix + payload
@@ -504,8 +511,7 @@ def specify_cookie_parameter(cookie):
 The user-agent based injection.
 """
 def specify_user_agent_parameter(user_agent):
-  # Specify the vulnerable user-agent HTTP header
-  # Nothing to specify here! :)
+  settings.TESTABLE_VALUE = user_agent.replace(settings.INJECT_TAG,"")
 
   return user_agent
  
@@ -513,8 +519,7 @@ def specify_user_agent_parameter(user_agent):
 The referer based injection.
 """
 def specify_referer_parameter(referer):
-  # Specify the vulnerable referer HTTP header.
-  # Nothing to specify here! :)
+  settings.TESTABLE_VALUE = referer.replace(settings.INJECT_TAG,"")
 
   return referer
 
@@ -522,8 +527,7 @@ def specify_referer_parameter(referer):
 The host based injection.
 """
 def specify_host_parameter(host):
-  # Specify the vulnerable host HTTP header.
-  # Nothing to specify here! :)
+  settings.TESTABLE_VALUE = host.replace(settings.INJECT_TAG,"")
 
   return host
 
@@ -531,8 +535,7 @@ def specify_host_parameter(host):
 The Custom http header based injection.
 """
 def specify_custom_header_parameter(header_name):
-  # Specify the vulnerable HTTP header name.
-  # Nothing to specify here! :)
+  settings.TESTABLE_VALUE = header_name.replace(settings.INJECT_TAG,"")
 
   return header_name
 

@@ -77,7 +77,7 @@ def command_injection_heuristic_basic(url, http_request_method, check_parameter,
       _ = 0
       for payload in settings.BASIC_COMMAND_INJECTION_PAYLOADS:
         _ = _ + 1
-        if not inject_http_headers:
+        if not inject_http_headers or (inject_http_headers and "'Host'" in check_parameter):
           payload = _urllib.parse.quote(payload)
         payload = parameters.prefixes(payload, prefix="")
         payload = parameters.suffixes(payload, suffix="")
@@ -90,7 +90,10 @@ def command_injection_heuristic_basic(url, http_request_method, check_parameter,
         if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
           cookie = menu.options.cookie.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC)
         elif menu.options.data and http_request_method == settings.HTTPMETHOD.POST:
-          data = menu.options.data.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC)
+          if inject_http_headers:
+            data = menu.options.data.replace(settings.INJECT_TAG,"").encode(settings.DEFAULT_CODEC)
+          else: 
+            data = menu.options.data.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC)
         else:
           if settings.INJECT_TAG in url:
             tmp_url = url.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload)
@@ -110,7 +113,7 @@ def command_injection_heuristic_basic(url, http_request_method, check_parameter,
             info_msg = "Heuristic (basic) detection shows that" + header_name + the_type + check_parameter +" might be injectable (possible OS: '" + ('Unix-like', 'Windows')[_ != 1] + "')." 
             print(settings.print_bold_info_msg(info_msg))
             break
-            
+
     settings.CLASSIC_STATE = False
     return url
 
@@ -429,7 +432,7 @@ def http_headers_injection(url, http_request_method, filename, timesec):
   def user_agent_injection(url, http_request_method, filename, timesec): 
     user_agent = menu.options.agent
     if not menu.options.shellshock:
-      menu.options.agent = settings.INJECT_TAG
+      menu.options.agent = menu.options.agent  + settings.INJECT_TAG
     settings.USER_AGENT_INJECTION = True
     if settings.USER_AGENT_INJECTION:
       check_parameter = header_name = " User-Agent"
@@ -442,10 +445,12 @@ def http_headers_injection(url, http_request_method, filename, timesec):
   def referer_injection(url, http_request_method, filename, timesec):
     referer = menu.options.referer
     if not menu.options.shellshock:
-      menu.options.referer = settings.INJECT_TAG
+      if menu.options.referer is None:
+        menu.options.referer = ""
+      menu.options.referer = menu.options.referer + settings.INJECT_TAG
     settings.REFERER_INJECTION = True
     if settings.REFERER_INJECTION:
-      check_parameter =  header_name = " Referer"
+      check_parameter = header_name = " Referer"
       settings.HTTP_HEADER = header_name[1:].lower()
       check_for_stored_sessions(url, http_request_method)
       if not injection_proccess(url, check_parameter, http_request_method, filename, timesec):
@@ -453,15 +458,19 @@ def http_headers_injection(url, http_request_method, filename, timesec):
     menu.options.agent = referer
 
   def host_injection(url, http_request_method, filename, timesec):
+    host = menu.options.host
     if not menu.options.shellshock:
-      menu.options.host = settings.INJECT_TAG
+      if menu.options.host is None:
+        menu.options.host = ""
+      menu.options.host = menu.options.host + settings.INJECT_TAG
     settings.HOST_INJECTION = True
     if settings.HOST_INJECTION:
-      check_parameter =  header_name = " Host"
+      check_parameter = header_name = " Host"
       settings.HTTP_HEADER = header_name[1:].lower()
       check_for_stored_sessions(url, http_request_method)
       if not injection_proccess(url, check_parameter, http_request_method, filename, timesec):
         settings.HOST_INJECTION = False 
+    menu.options.host = host
 
   # User-Agent HTTP header injection
   if menu.options.skip_parameter == None:

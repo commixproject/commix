@@ -67,6 +67,7 @@ def create_log_file(url, output_dir):
       print(settings.print_critical_msg(error_msg))
       raise SystemExit()
 
+
   # Create cli history file if does not exist.
   settings.CLI_HISTORY = output_dir + host + "/" + "cli_history"
   if not os.path.exists(settings.CLI_HISTORY):
