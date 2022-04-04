@@ -225,7 +225,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.5"
-REVISION = "22"
+REVISION = "23"
 STABLE_RELEASE = False
 if STABLE_RELEASE:
   VERSION = "v" + VERSION_NUM + "-stable"
@@ -398,8 +398,8 @@ SEPARATORS_LVL3 = SEPARATORS_LVL2 = SEPARATORS_LVL1
 # The command injection prefixes.
 PREFIXES = []
 PREFIXES_LVL1 = [""]
-PREFIXES_LVL2  = SEPARATORS_LVL1
-PREFIXES_LVL3  = ["'", "\""] + PREFIXES_LVL2
+PREFIXES_LVL2 = SEPARATORS_LVL1
+PREFIXES_LVL3 = ["'", "\""] + PREFIXES_LVL2
 
 # The command injection suffixes.
 SUFFIXES = []
@@ -408,7 +408,7 @@ SUFFIXES_LVL2 = SEPARATORS_LVL1
 SUFFIXES_LVL3 = ["'", "\"", " #", "//", "\\\\"] + SUFFIXES_LVL2
 
 # Bad combination of prefix and separator
-JUNK_COMBINATION = ["&&&", "|||", "|&&", "&|", "&;", "|;", ";;" , "%7C;", "%26;", "%7C&"]
+JUNK_COMBINATION = [SEPARATORS_LVL1[i] + SEPARATORS_LVL1[j] for i in range(len(SEPARATORS_LVL1)) for j in range(len(SEPARATORS_LVL1))]
 
 # Execution functions
 EXECUTION_FUNCTIONS = ["exec", "system", "shell_exec", "passthru", "proc_open", "popen"]

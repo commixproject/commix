@@ -66,7 +66,7 @@ def check_for_stored_levels(url, http_request_method):
 
 
 """
-Basic heuristic checks for command injection
+Heuristic (basic) tests for command injection
 """
 def command_injection_heuristic_basic(url, http_request_method, check_parameter, the_type, header_name, inject_http_headers):
   if not header_name == " cookie" and not the_type == " HTTP header":
@@ -110,7 +110,7 @@ def command_injection_heuristic_basic(url, http_request_method, check_parameter,
           match = re.search(settings.BASIC_COMMAND_INJECTION_RESULT, html_data)
           if match:
             settings.IDENTIFIED_COMMAND_INJECTION = True
-            info_msg = "Heuristic (basic) detection shows that" + header_name + the_type + check_parameter +" might be injectable (possible OS: '" + ('Unix-like', 'Windows')[_ != 1] + "')." 
+            info_msg = "Heuristic (basic) tests shows that" + header_name + the_type + check_parameter +" might be injectable (possible OS: '" + ('Unix-like', 'Windows')[_ != 1] + "')." 
             print(settings.print_bold_info_msg(info_msg))
             break
 
@@ -122,7 +122,7 @@ def command_injection_heuristic_basic(url, http_request_method, check_parameter,
     raise SystemExit()
 
 """
-Basic heuristic checks for code injection warnings
+Heuristic (basic) tests for code injection warnings
 """
 def code_injections_heuristic_basic(url, http_request_method, check_parameter, the_type, header_name, inject_http_headers):
   injection_type = "results-based dynamic code evaluation"
@@ -173,7 +173,7 @@ def code_injections_heuristic_basic(url, http_request_method, check_parameter, t
                 settings.IDENTIFIED_WARNINGS = True
                 break
           if settings.IDENTIFIED_WARNINGS or settings.IDENTIFIED_PHPINFO:
-            info_msg = "Heuristic (basic) detection shows that" + header_name + the_type + check_parameter + " might be injectable via " + technique + "." 
+            info_msg = "Heuristic (basic) tests shows that" + header_name + the_type + check_parameter + " might be injectable via " + technique + "." 
             print(settings.print_bold_info_msg(info_msg))
             break
 
@@ -335,16 +335,17 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
 
   # Estimating the response time (in seconds)
   timesec, url_time_response = requests.estimate_response_time(url, timesec)
+
   # Load modules
   modules_handler.load_modules(url, http_request_method, filename)
 
   if menu.options.skip_heuristics:
     if settings.VERBOSITY_LEVEL != 0:   
-      debug_msg = "Skipping (basic) heuristic detection."
+      debug_msg = "Skipping heuristic (basic) tests to the target URL."
       print(settings.print_debug_msg(debug_msg))
   else:
-    if settings.VERBOSITY_LEVEL != 0:   
-      debug_msg = "Starting (basic) heuristic detection."
+    if settings.VERBOSITY_LEVEL != 0:    
+      debug_msg = "Performing heuristic (basic) tests to the target URL."
       print(settings.print_debug_msg(debug_msg))
     url = command_injection_heuristic_basic(url, http_request_method, check_parameter, the_type, header_name, inject_http_headers)
     if not settings.LOAD_SESSION:
@@ -373,7 +374,7 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
               pass
 
       if not settings.IDENTIFIED_COMMAND_INJECTION and not settings.IDENTIFIED_WARNINGS and not settings.IDENTIFIED_PHPINFO:
-        warn_msg = "Heuristic (basic) detection shows that" + header_name + the_type + check_parameter + " might not be injectable."
+        warn_msg = "Heuristic (basic) tests shows that" + header_name + the_type + check_parameter + " might not be injectable."
         print(settings.print_bold_warning_msg(warn_msg)) 
 
     info_msg = "Setting the" 

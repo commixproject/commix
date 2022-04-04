@@ -226,7 +226,7 @@ def estimate_response_time(url, timesec):
     if settings.VERBOSITY_LEVEL != 0:
       print(settings.SINGLE_WHITESPACE)
     url_time_response = int(round(diff))
-    warn_msg = "The estimated response time is " + str(url_time_response)
+    warn_msg = "Target's estimated response time is " + str(url_time_response)
     warn_msg += " second" + "s"[url_time_response == 1:] + ". That may cause" 
     if url_time_response >= 3:
       warn_msg += " serious"
@@ -234,7 +234,7 @@ def estimate_response_time(url, timesec):
     if url_time_response >= 3:
       warn_msg += " and/or possible corruptions over the extracted data"
     warn_msg += "."
-    print(settings.print_bold_warning_msg(warn_msg))
+    print(settings.print_warning_msg(warn_msg))
 
   if int(timesec) == int(url_time_response):
     timesec = int(timesec) + int(url_time_response)
