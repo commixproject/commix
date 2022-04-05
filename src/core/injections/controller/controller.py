@@ -110,7 +110,11 @@ def command_injection_heuristic_basic(url, http_request_method, check_parameter,
           match = re.search(settings.BASIC_COMMAND_INJECTION_RESULT, html_data)
           if match:
             settings.IDENTIFIED_COMMAND_INJECTION = True
-            info_msg = "Heuristic (basic) tests shows that" + header_name + the_type + check_parameter +" might be injectable (possible OS: '" + ('Unix-like', 'Windows')[_ != 1] + "')." 
+            info_msg = "Heuristic (basic) tests shows that"
+            if not header_name == " cookie" and not the_type == " HTTP header":
+              info_msg += " " + str(http_request_method) + ""
+            info_msg += ('', ' (JSON)')[settings.IS_JSON] + ('', ' (SOAP/XML)')[settings.IS_XML]
+            info_msg += the_type + check_parameter + " might be injectable (possible OS: '" + ('Unix-like', 'Windows')[_ != 1] + "')." 
             print(settings.print_bold_info_msg(info_msg))
             break
 
@@ -173,7 +177,11 @@ def code_injections_heuristic_basic(url, http_request_method, check_parameter, t
                 settings.IDENTIFIED_WARNINGS = True
                 break
           if settings.IDENTIFIED_WARNINGS or settings.IDENTIFIED_PHPINFO:
-            info_msg = "Heuristic (basic) tests shows that" + header_name + the_type + check_parameter + " might be injectable via " + technique + "." 
+            info_msg = "Heuristic (basic) tests shows that" + header_name
+            if not header_name == " cookie" and not the_type == " HTTP header":
+              info_msg += " " + str(http_request_method) + ""
+            info_msg += ('', ' (JSON)')[settings.IS_JSON] + ('', ' (SOAP/XML)')[settings.IS_XML]
+            info_msg += the_type + check_parameter + " might be injectable via " + technique + "." 
             print(settings.print_bold_info_msg(info_msg))
             break
 
@@ -339,6 +347,16 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
   # Load modules
   modules_handler.load_modules(url, http_request_method, filename)
 
+  info_msg = "Setting the" 
+  if not header_name == " cookie" and not the_type == " HTTP header":
+    info_msg += " " + str(http_request_method) + ""
+  info_msg += ('', ' (JSON)')[settings.IS_JSON] + ('', ' (SOAP/XML)')[settings.IS_XML] 
+  if header_name == " cookie" :
+    info_msg += str(header_name) + str(the_type) + str(check_parameter) + " for tests."
+  else:
+    info_msg += str(the_type) + str(header_name) + str(check_parameter) + " for tests."
+  print(settings.print_info_msg(info_msg))
+
   if menu.options.skip_heuristics:
     if settings.VERBOSITY_LEVEL != 0:   
       debug_msg = "Skipping heuristic (basic) tests to the target URL."
@@ -374,18 +392,12 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
               pass
 
       if not settings.IDENTIFIED_COMMAND_INJECTION and not settings.IDENTIFIED_WARNINGS and not settings.IDENTIFIED_PHPINFO:
-        warn_msg = "Heuristic (basic) tests shows that" + header_name + the_type + check_parameter + " might not be injectable."
+        warn_msg = "Heuristic (basic) tests shows that" + header_name
+        if not header_name == " cookie" and not the_type == " HTTP header":
+          warn_msg += " " + str(http_request_method) + ""
+        warn_msg +=('', ' (JSON)')[settings.IS_JSON] + ('', ' (SOAP/XML)')[settings.IS_XML]
+        warn_msg += the_type + check_parameter + " might not be injectable."
         print(settings.print_bold_warning_msg(warn_msg)) 
-
-    info_msg = "Setting the" 
-    if not header_name == " cookie" and not the_type == " HTTP header":
-      info_msg += " " + str(http_request_method) + ""
-    info_msg += ('', ' (JSON)')[settings.IS_JSON] + ('', ' (SOAP/XML)')[settings.IS_XML] 
-    if header_name == " cookie" :
-      info_msg += str(header_name) + str(the_type) + str(check_parameter) + " for tests."
-    else:
-      info_msg += str(the_type) + str(header_name) + str(check_parameter) + " for tests."
-    print(settings.print_info_msg(info_msg))
 
   if menu.options.failed_tries and \
      menu.options.tech and not "f" in menu.options.tech and not \
