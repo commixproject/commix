@@ -101,7 +101,8 @@ def command_injection_heuristic_basic(url, http_request_method, check_parameter,
         if cookie:
           request.add_header(settings.COOKIE, cookie)
         if inject_http_headers:
-          request.add_header(check_parameter.replace("'","").strip(), payload.encode(settings.DEFAULT_CODEC))
+          request.add_header(check_parameter.replace("'","").strip(), (settings.CUSTOM_HEADER_VALUE + payload).encode(settings.DEFAULT_CODEC))
+          #request.add_header(check_parameter.replace("'","").strip(), payload.encode(settings.DEFAULT_CODEC))
         headers.do_check(request)
         response = requests.get_request_response(request)
 
@@ -144,6 +145,10 @@ def code_injections_heuristic_basic(url, http_request_method, check_parameter, t
       pass
     if not settings.IDENTIFIED_WARNINGS and not settings.IDENTIFIED_PHPINFO:  
       for payload in settings.PHPINFO_CHECK_PAYLOADS:
+        if not inject_http_headers or (inject_http_headers and "'Host'" in check_parameter):
+          payload = _urllib.parse.quote(payload)
+        payload = parameters.prefixes(payload, prefix="")
+        payload = parameters.suffixes(payload, suffix="")
         payload = checks.perform_payload_modification(payload)
         if settings.VERBOSITY_LEVEL >= 1:
           print(settings.print_payload(payload))
@@ -161,7 +166,7 @@ def code_injections_heuristic_basic(url, http_request_method, check_parameter, t
         if cookie:
           request.add_header(settings.COOKIE, cookie)
         if inject_http_headers:
-          request.add_header(check_parameter.replace("'","").strip(), payload.encode(settings.DEFAULT_CODEC))
+                    request.add_header(check_parameter.replace("'","").strip(), (settings.CUSTOM_HEADER_VALUE + payload).encode(settings.DEFAULT_CODEC))
         headers.do_check(request)
         response = requests.get_request_response(request)
 

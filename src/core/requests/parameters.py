@@ -389,7 +389,7 @@ def prefixes(payload, prefix):
     specify_referer_parameter(menu.options.referer)
   elif settings.HOST_INJECTION == True:
     specify_host_parameter(menu.options.host)
-    
+
   # Check if defined "--prefix" option.
   if menu.options.prefix:
     payload = settings.TESTABLE_VALUE + menu.options.prefix + prefix + payload
@@ -535,7 +535,7 @@ def specify_host_parameter(host):
 The Custom http header based injection.
 """
 def specify_custom_header_parameter(header_name):
-  settings.TESTABLE_VALUE = header_name.replace(settings.INJECT_TAG,"")
+  header_name = settings.CUSTOM_HEADER_NAME
 
   return header_name
 
