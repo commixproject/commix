@@ -88,18 +88,19 @@ def logfile_parser():
         settings.RAW_HTTP_HEADERS = settings.RAW_HTTP_HEADERS[1:]
         settings.RAW_HTTP_HEADERS = settings.RAW_HTTP_HEADERS[:-1]
         settings.RAW_HTTP_HEADERS = '\\n'.join(settings.RAW_HTTP_HEADERS)
+
+      if os.stat(request_file).st_size != 0:
+        with open(request_file, 'r') as file:
+          request = file.read()
+      else:
+        invalid_data(request_file)
+        
     except IOError as err_msg:
       error_msg = "The '" + request_file + "' "
       error_msg += str(err_msg.args[1]).lower() + "."
       print(settings.SINGLE_WHITESPACE)
       print(settings.print_critical_msg(error_msg))
       raise SystemExit()
-
-    if os.stat(request_file).st_size != 0:
-      with open(request_file, 'r') as file:
-        request = file.read()
-    else:
-      invalid_data(request_file)
 
     single_request = True
     pattern = r'HTTP/([\d.]+)'
