@@ -127,7 +127,7 @@ def check_http_traffic(request):
       except _http_client.InvalidURL as err_msg:
         settings.VALID_URL = False
         error_msg = err_msg 
-      if current_attempt == 0 and settings.VERBOSITY_LEVEL < 2:
+      if settings.TOTAL_OF_REQUESTS == 1 and settings.VERBOSITY_LEVEL < 2:
         print(settings.SINGLE_WHITESPACE)
       print(settings.print_critical_msg(error_msg))
       if not settings.VALID_URL:
@@ -147,7 +147,7 @@ def check_http_traffic(request):
       except _http_client.InvalidURL as err_msg:
         settings.VALID_URL = False
         error_msg = err_msg 
-      if current_attempt == 0 and settings.VERBOSITY_LEVEL < 2:
+      if settings.TOTAL_OF_REQUESTS == 1 and settings.VERBOSITY_LEVEL < 2:
         print(settings.SINGLE_WHITESPACE)
       print(settings.print_critical_msg(error_msg))
       if not settings.VALID_URL:
@@ -158,9 +158,8 @@ def check_http_traffic(request):
     request.get_method = lambda: settings.HTTP_METHOD
 
   _ = False
-  current_attempt = 0
   unauthorized = False
-  while not _ and current_attempt <= settings.MAX_RETRIES and unauthorized is False:
+  while not _ and settings.TOTAL_OF_REQUESTS <= settings.MAX_RETRIES and unauthorized is False:
     if settings.VERBOSITY_LEVEL >= 2 or menu.options.traffic_file:
       if settings.VERBOSITY_LEVEL >= 2:
         req_msg = "HTTP request [" + settings.print_request_num(settings.TOTAL_OF_REQUESTS) + "]:"
@@ -172,24 +171,23 @@ def check_http_traffic(request):
       response = opener.open(request, timeout=settings.TIMEOUT)
       page = checks.page_encoding(response, action="encode")
       _ = True
+      settings.MAX_RETRIES = settings.TOTAL_OF_REQUESTS * 2
       if settings.VERBOSITY_LEVEL < 2:
-        if current_attempt != 0:
-          info_msg = "Testing connection to the target URL."
-          sys.stdout.write(settings.print_info_msg(info_msg))
-          sys.stdout.flush()
         if settings.INIT_TEST == True and not settings.UNAUTHORIZED:
           print(settings.SINGLE_WHITESPACE)
           if not settings.CHECK_INTERNET:
             settings.INIT_TEST = False
 
     except _urllib.error.HTTPError as err_msg:
+      if settings.TOTAL_OF_REQUESTS == 1 and settings.VERBOSITY_LEVEL < 2:
+        print(settings.SINGLE_WHITESPACE)
       if settings.UNAUTHORIZED_ERROR in str(err_msg):
         settings.UNAUTHORIZED = unauthorized = True
       if [True for err_code in settings.HTTP_ERROR_CODES if err_code in str(err_msg)]:
         break
 
     except (_urllib.error.URLError, _http_client.BadStatusLine, _http_client.IncompleteRead) as err_msg:
-      if current_attempt == 0:
+      if settings.TOTAL_OF_REQUESTS == 1:
         if settings.VERBOSITY_LEVEL < 2 and "has closed the connection" in str(err_msg):
           print(settings.SINGLE_WHITESPACE)
 
@@ -206,7 +204,7 @@ def check_http_traffic(request):
         print(settings.print_warning_msg(warn_msg))
         info_msg = settings.APPLICATION.capitalize() + " is going to retry the request(s)."
         print(settings.print_info_msg(info_msg))
-      current_attempt = current_attempt + 1
+      settings.TOTAL_OF_REQUESTS = settings.TOTAL_OF_REQUESTS + 1
       time.sleep(3)
 
     except ValueError as err:
