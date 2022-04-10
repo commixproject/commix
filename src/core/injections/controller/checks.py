@@ -295,8 +295,9 @@ def check_connection(url):
   if not re.search(r"\A\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\Z", hostname):
     if not any((menu.options.proxy, menu.options.tor, menu.options.offline)):
       try:
-        info_msg = "Resolving hostname '" + hostname + "'."
-        print(settings.print_info_msg(info_msg))
+        if settings.VERBOSITY_LEVEL != 0:
+          debug_msg = "Resolving hostname '" + hostname + "'."
+          print(settings.print_debug_msg(debug_msg))
         socket.getaddrinfo(hostname, None)
       except socket.gaierror:
         err_msg = "Host '" + hostname + "' does not exist."

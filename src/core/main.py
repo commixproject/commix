@@ -217,14 +217,14 @@ def check_internet(url):
 The init (URL) request.
 """
 def init_request(url):
+  # Check connection(s)
+  checks.check_connection(url)
   # Number of seconds to wait before timeout connection
   if settings.VERBOSITY_LEVEL != 0:
       debug_msg = "Setting the HTTP timeout."
       print(settings.print_debug_msg(debug_msg))
   if menu.options.timeout:
     settings.TIMEOUT = menu.options.timeout
-  # Check connection(s)
-  checks.check_connection(url)
   # Define HTTP User-Agent header
   user_agent_header()
   # Check the internet connection (--check-internet switch).
