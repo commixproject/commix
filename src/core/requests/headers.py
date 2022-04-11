@@ -129,6 +129,9 @@ def check_http_traffic(request):
         error_msg = err_msg 
       if settings.TOTAL_OF_REQUESTS == 1 and settings.VERBOSITY_LEVEL < 2:
         print(settings.SINGLE_WHITESPACE)
+        if "ssl" in str(error_msg):
+          settings.VALID_URL = False
+          error_msg = "Can't establish SSL connection."
       print(settings.print_critical_msg(error_msg))
       if not settings.VALID_URL:
         raise SystemExit()
@@ -149,6 +152,9 @@ def check_http_traffic(request):
         error_msg = err_msg 
       if settings.TOTAL_OF_REQUESTS == 1 and settings.VERBOSITY_LEVEL < 2:
         print(settings.SINGLE_WHITESPACE)
+        if "ssl" in str(error_msg):
+          settings.VALID_URL = False
+          error_msg = "Can't establish SSL connection."
       print(settings.print_critical_msg(error_msg))
       if not settings.VALID_URL:
         raise SystemExit()
