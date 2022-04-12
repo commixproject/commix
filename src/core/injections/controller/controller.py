@@ -362,17 +362,17 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
   else:
     info_msg += str(the_type) + str(header_name) + str(check_parameter) + " for tests."
   print(settings.print_info_msg(info_msg))
-
-  if menu.options.skip_heuristics:
-    if settings.VERBOSITY_LEVEL != 0:   
-      debug_msg = "Skipping heuristic (basic) tests to the target URL."
-      print(settings.print_debug_msg(debug_msg))
-  else:
-    if settings.VERBOSITY_LEVEL != 0:    
-      debug_msg = "Performing heuristic (basic) tests to the target URL."
-      print(settings.print_debug_msg(debug_msg))
-    url = command_injection_heuristic_basic(url, http_request_method, check_parameter, the_type, header_name, inject_http_headers)
-    if not settings.LOAD_SESSION:
+  
+  if not settings.LOAD_SESSION:
+    if menu.options.skip_heuristics:
+      if settings.VERBOSITY_LEVEL != 0:   
+        debug_msg = "Skipping heuristic (basic) tests to the target URL."
+        print(settings.print_debug_msg(debug_msg))
+    else:
+      if settings.VERBOSITY_LEVEL != 0:    
+        debug_msg = "Performing heuristic (basic) tests to the target URL."
+        print(settings.print_debug_msg(debug_msg))
+      url = command_injection_heuristic_basic(url, http_request_method, check_parameter, the_type, header_name, inject_http_headers)
       if (len(menu.options.tech) == 0 or "e" in menu.options.tech) and not settings.IDENTIFIED_COMMAND_INJECTION:
         # Check for identified warnings
         url = code_injections_heuristic_basic(url, http_request_method, check_parameter, the_type, header_name, inject_http_headers)
@@ -397,13 +397,13 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
               print(settings.print_error_msg(err_msg))
               pass
 
-      if not settings.IDENTIFIED_COMMAND_INJECTION and not settings.IDENTIFIED_WARNINGS and not settings.IDENTIFIED_PHPINFO:
-        warn_msg = "Heuristic (basic) tests shows that" + header_name
-        if not header_name == " cookie" and not the_type == " HTTP header":
-          warn_msg += " " + str(http_request_method) + ""
-        warn_msg +=('', ' (JSON)')[settings.IS_JSON] + ('', ' (SOAP/XML)')[settings.IS_XML]
-        warn_msg += the_type + check_parameter + " might not be injectable."
-        print(settings.print_bold_warning_msg(warn_msg)) 
+        if not settings.IDENTIFIED_COMMAND_INJECTION and not settings.IDENTIFIED_WARNINGS and not settings.IDENTIFIED_PHPINFO:
+          warn_msg = "Heuristic (basic) tests shows that" + header_name
+          if not header_name == " cookie" and not the_type == " HTTP header":
+            warn_msg += " " + str(http_request_method) + ""
+          warn_msg +=('', ' (JSON)')[settings.IS_JSON] + ('', ' (SOAP/XML)')[settings.IS_XML]
+          warn_msg += the_type + check_parameter + " might not be injectable."
+          print(settings.print_bold_warning_msg(warn_msg)) 
 
   if menu.options.failed_tries and \
      menu.options.tech and not "f" in menu.options.tech and not \
