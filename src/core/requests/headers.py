@@ -173,6 +173,7 @@ def check_http_traffic(request):
       if menu.options.traffic_file:
         req_msg = "HTTP request [#" + str(settings.TOTAL_OF_REQUESTS) + "]:"
         logs.log_traffic(req_msg)
+        
     try:
       response = opener.open(request, timeout=settings.TIMEOUT)
       page = checks.page_encoding(response, action="encode")

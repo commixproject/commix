@@ -102,7 +102,7 @@ def user_agent_header():
 """
 Examine the request
 """
-def examine_request(request):
+def examine_request(request, url):
   try:
     headers.check_http_traffic(request)
     # Check if defined any HTTP Proxy (--proxy option).
@@ -127,36 +127,27 @@ def examine_request(request):
         print(settings.print_critical_msg(err_msg))
         raise SystemExit()
 
-      except Exception as err_msg:
-        if settings.UNAUTHORIZED_ERROR in str(err_msg).lower():
-          if menu.options.ignore_code == settings.UNAUTHORIZED_ERROR:
-            pass
-          elif menu.options.auth_type and menu.options.auth_cred:
-            err_msg = "The provided pair of " + menu.options.auth_type 
-            err_msg += " HTTP authentication credentials '" + menu.options.auth_cred + "'"
-            err_msg += " seems to be invalid."
-            err_msg += " Try to rerun without providing '--auth-cred' and '--auth-type' options,"
-            err_msg += " in order to perform a dictionary-based attack."
-            print(settings.print_critical_msg(err_msg))
-            raise SystemExit()
-          else:
-            pass
-        else:  
-          try:
-            error_msg = str(err_msg.args[0]).split("] ")[1] + "."
-          except IndexError:
-            error_msg = str(err_msg).replace(": "," (") + ")."
-          print(settings.print_critical_msg(error_msg))
-          raise SystemExit()
 
   except SocketError as e:
     if e.errno == errno.ECONNRESET:
       error_msg = "Connection reset by peer."
-      print(settings.print_critical_msg(error_msg))
     elif e.errno == errno.ECONNREFUSED:
       error_msg = "Connection refused."
-      print(settings.print_critical_msg(error_msg))
-    raise SystemExit()
+    else:  
+      try:
+        err_msg = str(e.args[0]).split("] ")[1] + "."
+      except IndexError:
+        err_msg = str(e).replace(": "," (") + ")."
+    if menu.options.bulkfile:
+      print(settings.print_critical_msg(err_msg)) 
+      warn_msg = "Skipping URL '" + url
+      print(settings.print_warning_msg(warn_msg))
+      if settings.EOF:
+        print(settings.SINGLE_WHITESPACE) 
+      return False 
+    else:
+      print(settings.print_critical_msg(err_msg)) 
+      raise SystemExit()
 
   except _urllib.error.HTTPError as err_msg:
     error_description = ""
@@ -164,14 +155,15 @@ def examine_request(request):
       error_description = "Non-standard HTTP status code"
     err_msg = str(err_msg).replace(": "," (") + error_description + ")." 
     if menu.options.bulkfile:
-      warn_msg = "Skipping URL '" + url + "' - " + err_msg
+      print(settings.print_critical_msg(err_msg)) 
+      warn_msg = "Skipping URL '" + url
       print(settings.print_warning_msg(warn_msg))
       if settings.EOF:
         print(settings.SINGLE_WHITESPACE) 
-      return False  
+      return False 
     else:
-      print(settings.print_critical_msg(err_msg))
-      raise SystemExit 
+      print(settings.print_critical_msg(err_msg)) 
+      raise SystemExit()
 
   except _urllib.error.URLError as e:
     err_msg = "Unable to connect to the target URL"
@@ -181,14 +173,45 @@ def examine_request(request):
       err_msg += "."
       pass
     if menu.options.bulkfile:
-      warn_msg = "Skipping URL '" + url + "' - " + err_msg
+      print(settings.print_critical_msg(err_msg)) 
+      warn_msg = "Skipping URL '" + url
       print(settings.print_warning_msg(warn_msg))
       if settings.EOF:
         print(settings.SINGLE_WHITESPACE) 
       return False 
     else:
-      print(settings.print_critical_msg(err_msg))
-      raise SystemExit  
+      print(settings.print_critical_msg(err_msg)) 
+      raise SystemExit()
+
+  except Exception as err_msg:
+    if settings.UNAUTHORIZED_ERROR in str(err_msg).lower():
+      if menu.options.ignore_code == settings.UNAUTHORIZED_ERROR:
+        pass
+      elif menu.options.auth_type and menu.options.auth_cred:
+        err_msg = "The provided pair of " + menu.options.auth_type 
+        err_msg += " HTTP authentication credentials '" + menu.options.auth_cred + "'"
+        err_msg += " seems to be invalid."
+        err_msg += " Try to rerun without providing '--auth-cred' and '--auth-type' options,"
+        err_msg += " in order to perform a dictionary-based attack."
+        print(settings.print_critical_msg(err_msg))
+        raise SystemExit()
+      else:
+        pass
+    else:  
+      try:
+        error_msg = str(err_msg.args[0]).split("] ")[1] + "."
+      except IndexError:
+        error_msg = str(err_msg).replace(": "," (") + ")."
+    if menu.options.bulkfile:
+      print(settings.print_critical_msg(err_msg)) 
+      warn_msg = "Skipping URL '" + url
+      print(settings.print_warning_msg(warn_msg))
+      if settings.EOF:
+        print(settings.SINGLE_WHITESPACE) 
+      return False 
+    else:
+      print(settings.print_critical_msg(err_msg)) 
+      raise SystemExit() 
 
 """
 Check internet connection before assessing the target.
@@ -207,7 +230,7 @@ def check_internet(url):
     # Check if defined any HTTP Proxy (--proxy option).
     if menu.options.proxy:
       proxy.do_check(settings.CHECK_INTERNET_ADDRESS)
-    examine_request(request)
+    examine_request(request, url)
   except:
     print(settings.SINGLE_WHITESPACE)
     error_msg = "No internet connection detected."
@@ -288,6 +311,9 @@ def url_response(url):
     settings.TOR_CHECK_AGAIN = False
     info_msg = "Setting URL '" + url + "' for tests. "  
     print(settings.print_info_msg(info_msg))
+    # initiate total of requests
+    settings.TOTAL_OF_REQUESTS = 0
+    settings.MAX_RETRIES = 2
   request = init_request(url)
   if settings.CHECK_INTERNET:
     settings.CHECK_INTERNET = False
@@ -297,7 +323,7 @@ def url_response(url):
     sys.stdout.flush()
     if settings.VERBOSITY_LEVEL >= 2:
       print(settings.SINGLE_WHITESPACE)
-  response = examine_request(request)
+  response = examine_request(request, url)
   # Check for URL redirection
   if not menu.options.ignore_redirects:
     url = redirection.do_check(url)
