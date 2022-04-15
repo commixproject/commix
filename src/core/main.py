@@ -138,7 +138,7 @@ def examine_request(request, url):
         err_msg = str(e.args[0]).split("] ")[1] + "."
       except IndexError:
         err_msg = str(e).replace(": "," (") + ")."
-    if menu.options.bulkfile:
+    if settings.MULTI_TARGETS:
       print(settings.print_critical_msg(err_msg)) 
       warn_msg = "Skipping URL '" + url
       print(settings.print_warning_msg(warn_msg))
@@ -154,7 +154,7 @@ def examine_request(request, url):
     if len(str(err_msg).split(": ")[1]) == 0:
       error_description = "Non-standard HTTP status code"
     err_msg = str(err_msg).replace(": "," (") + error_description + ")." 
-    if menu.options.bulkfile:
+    if settings.MULTI_TARGETS:
       print(settings.print_critical_msg(err_msg)) 
       warn_msg = "Skipping URL '" + url
       print(settings.print_warning_msg(warn_msg))
@@ -172,7 +172,7 @@ def examine_request(request, url):
     except IndexError:
       err_msg += "."
       pass
-    if menu.options.bulkfile:
+    if settings.MULTI_TARGETS:
       print(settings.print_critical_msg(err_msg)) 
       warn_msg = "Skipping URL '" + url
       print(settings.print_warning_msg(warn_msg))
@@ -202,7 +202,7 @@ def examine_request(request, url):
         error_msg = str(err_msg.args[0]).split("] ")[1] + "."
       except IndexError:
         error_msg = str(err_msg).replace(": "," (") + ")."
-    if menu.options.bulkfile:
+    if settings.MULTI_TARGETS:
       print(settings.print_critical_msg(err_msg)) 
       warn_msg = "Skipping URL '" + url
       print(settings.print_warning_msg(warn_msg))
@@ -307,7 +307,7 @@ def url_response(url):
   # Check if defined Tor (--tor option).
   if menu.options.tor and settings.TOR_CHECK_AGAIN:
     tor.do_check()
-  if menu.options.bulkfile:
+  if settings.MULTI_TARGETS:
     settings.TOR_CHECK_AGAIN = False
     info_msg = "Setting URL '" + url + "' for tests. "  
     print(settings.print_info_msg(info_msg))
@@ -936,6 +936,7 @@ try:
         print(settings.SINGLE_WHITESPACE)
         with open(menu.options.bulkfile) as f:
           bulkfile = [url.strip() for url in f]
+        settings.MULTI_TARGETS = True
         # Removing duplicates from list.
         clean_bulkfile = []
         [clean_bulkfile.append(x) for x in bulkfile if x not in clean_bulkfile]

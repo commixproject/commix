@@ -190,7 +190,7 @@ def do_check(url):
       err_msg += " (Reason: " + str(err.args[0]).split("] ")[-1].lower() + ")."
     except IndexError:
       err_msg += "."
-    if not menu.options.bulkfile:
+    if not settings.MULTI_TARGETS:
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
 

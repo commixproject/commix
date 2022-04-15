@@ -281,7 +281,7 @@ def check_http_traffic(request):
         err_msg += " (Reason: " + str(err.args[0]).split("] ")[-1].lower() + ")."
       except IndexError:
         err_msg += "."
-      if menu.options.bulkfile:
+      if settings.MULTI_TARGETS:
         raise
       else:  
         print(settings.print_critical_msg(err_msg))
