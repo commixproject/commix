@@ -141,7 +141,6 @@ def examine_request(request, url):
     if settings.MULTI_TARGETS:
       print(settings.print_critical_msg(err_msg)) 
       warn_msg = "Skipping URL '" + url
-      print(settings.print_warning_msg(warn_msg))
       if settings.EOF:
         print(settings.SINGLE_WHITESPACE) 
       return False 
@@ -157,7 +156,6 @@ def examine_request(request, url):
     if settings.MULTI_TARGETS:
       print(settings.print_critical_msg(err_msg)) 
       warn_msg = "Skipping URL '" + url
-      print(settings.print_warning_msg(warn_msg))
       if settings.EOF:
         print(settings.SINGLE_WHITESPACE) 
       return False 
@@ -175,7 +173,6 @@ def examine_request(request, url):
     if settings.MULTI_TARGETS:
       print(settings.print_critical_msg(err_msg)) 
       warn_msg = "Skipping URL '" + url
-      print(settings.print_warning_msg(warn_msg))
       if settings.EOF:
         print(settings.SINGLE_WHITESPACE) 
       return False 
@@ -205,7 +202,6 @@ def examine_request(request, url):
     if settings.MULTI_TARGETS:
       print(settings.print_critical_msg(err_msg)) 
       warn_msg = "Skipping URL '" + url
-      print(settings.print_warning_msg(warn_msg))
       if settings.EOF:
         print(settings.SINGLE_WHITESPACE) 
       return False 
@@ -313,7 +309,6 @@ def url_response(url):
     print(settings.print_info_msg(info_msg))
     # initiate total of requests
     settings.TOTAL_OF_REQUESTS = 0
-    settings.MAX_RETRIES = 2
   request = init_request(url)
   if settings.CHECK_INTERNET:
     settings.CHECK_INTERNET = False
@@ -807,7 +802,9 @@ try:
     # Retries when the connection timeouts.
     if menu.options.retries:
       settings.MAX_RETRIES = menu.options.retries
-
+    else:
+      if menu.options.MULTI_TARGETS:
+        settings.MAX_RETRIES = 2
     # Seconds to delay between each HTTP request.
     if menu.options.delay > 0:
       settings.DELAY = menu.options.delay
