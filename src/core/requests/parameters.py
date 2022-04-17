@@ -134,7 +134,7 @@ def do_GET_check(url, http_request_method):
                 all_params[param] = all_params[param] + settings.INJECT_TAG
             else:
               all_params[param] = all_params[param].replace(value, value + settings.INJECT_TAG)
-            #all_params[param - 1] = all_params[param - 1].replace(value, "").replace(settings.INJECT_TAG, "")
+            all_params[param - 1] = all_params[param - 1].replace(value, "").replace(settings.INJECT_TAG, "")
             parameter = settings.PARAMETER_DELIMITER.join(all_params)
             # Reconstruct the URL
             url = url_part + "?" + parameter

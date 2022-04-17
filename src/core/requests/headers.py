@@ -118,47 +118,16 @@ def check_http_traffic(request):
       try:
         self.do_open(connection, req)
         return super(connection_handler, self).http_open(req)
-      except (_urllib.error.HTTPError, _urllib.error.URLError) as err_msg:
-        try:
-          error_msg = str(err_msg.args[0]).split("] ")[1] + "."
-        except IndexError:
-          error_msg = str(err_msg.args[0]) + "."
-          error_msg = "Connection to the target URL " + error_msg
-      except _http_client.InvalidURL as err_msg:
-        settings.VALID_URL = False
-        error_msg = err_msg 
-      if settings.TOTAL_OF_REQUESTS == 1 and settings.VERBOSITY_LEVEL < 2:
-        print(settings.SINGLE_WHITESPACE)
-        if "ssl" in str(error_msg):
-          settings.VALID_URL = False
-          error_msg = "Can't establish SSL connection."
-      print(settings.print_critical_msg(error_msg))
-      if not settings.VALID_URL:
-        raise SystemExit()
-
+      except (SocketError, _urllib.error.HTTPError, _urllib.error.URLError, _http_client.BadStatusLine, _http_client.InvalidURL, Exception) as err_msg:
+        checks.connection_exceptions(err_msg)
 
     def https_open(self, req):
       try:
         self.do_open(connection, req)
         return super(connection_handler, self).https_open(req)
-      except (_urllib.error.HTTPError, _urllib.error.URLError) as err_msg:
-        try:
-          error_msg = str(err_msg.args[0]).split("] ")[1] + "."
-        except IndexError:
-          error_msg = str(err_msg.args[0]) + "."
-          error_msg = "Connection to the target URL " + error_msg
-      except _http_client.InvalidURL as err_msg:
-        settings.VALID_URL = False
-        error_msg = err_msg 
-      if settings.TOTAL_OF_REQUESTS == 1 and settings.VERBOSITY_LEVEL < 2:
-        print(settings.SINGLE_WHITESPACE)
-        if "ssl" in str(error_msg):
-          settings.VALID_URL = False
-          error_msg = "Can't establish SSL connection."
-      print(settings.print_critical_msg(error_msg))
-      if not settings.VALID_URL:
-        raise SystemExit()
-        
+      except (SocketError, _urllib.error.HTTPError, _urllib.error.URLError, _http_client.BadStatusLine, _http_client.InvalidURL, Exception) as err_msg:
+        checks.connection_exceptions(err_msg)
+
   opener = _urllib.request.build_opener(connection_handler())
   if len(settings.HTTP_METHOD) != 0:
     request.get_method = lambda: settings.HTTP_METHOD
@@ -180,7 +149,8 @@ def check_http_traffic(request):
       _ = True
       settings.MAX_RETRIES = settings.TOTAL_OF_REQUESTS * 2
       if settings.VERBOSITY_LEVEL < 2:
-        if settings.INIT_TEST == True and not settings.UNAUTHORIZED:
+        if (settings.INIT_TEST == True and not settings.UNAUTHORIZED) or \
+           (settings.INIT_TEST == True and settings.MULTI_TARGETS):
           print(settings.SINGLE_WHITESPACE)
           if not settings.CHECK_INTERNET:
             settings.INIT_TEST = False
@@ -209,8 +179,9 @@ def check_http_traffic(request):
         warn_msg += "'--proxy' option."
         
         print(settings.print_warning_msg(warn_msg))
-        info_msg = settings.APPLICATION.capitalize() + " is going to retry the request(s)."
-        print(settings.print_info_msg(info_msg))
+        if settings.MAX_RETRIES > 1:
+          info_msg = settings.APPLICATION.capitalize() + " is going to retry the request(s)."
+          print(settings.print_info_msg(info_msg))
       settings.TOTAL_OF_REQUESTS = settings.TOTAL_OF_REQUESTS + 1
       time.sleep(3)
 
@@ -272,30 +243,8 @@ def check_http_traffic(request):
       raise SystemExit()
     
   # The handlers raise this exception when they run into a problem.
-  except (_http_client.HTTPException, _urllib.error.URLError, _http_client.IncompleteRead) as err:
-    if any(_ in str(err) for _ in ("timed out", "IncompleteRead", "Interrupted system call")):
-      pass
-    else:  
-      err_msg = "Unable to connect to the target URL"
-      try:
-        err_msg += " (Reason: " + str(err.args[0]).split("] ")[-1].lower() + ")."
-      except IndexError:
-        err_msg += "."
-      if settings.MULTI_TARGETS:
-        raise
-      else:  
-        print(settings.print_critical_msg(err_msg))
-        raise SystemExit()
-
-  # Raise exception regarding existing connection was forcibly closed by the remote host.
-  except SocketError as err:
-    if err.errno == errno.ECONNRESET:
-      error_msg = "Connection reset by peer."
-      print(settings.print_critical_msg(error_msg))
-    elif err.errno == errno.ECONNREFUSED:
-      error_msg = "Connection refused."
-      print(settings.print_critical_msg(error_msg))
-    raise SystemExit()
+  except Exception as err_msg:
+    checks.connection_exceptions(err_msg)
     
 """
 Check for added headers.

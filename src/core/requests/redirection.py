@@ -24,6 +24,8 @@ except ImportError:
 from src.utils import menu
 from src.utils import settings
 from socket import error as SocketError
+from src.thirdparty.six.moves import http_client as _http_client
+from src.core.injections.controller import checks
 from src.thirdparty.six.moves import input as _input
 from src.thirdparty.six.moves import urllib as _urllib
 from src.thirdparty.colorama import Fore, Back, Style, init
@@ -162,52 +164,11 @@ def do_check(url):
       else:
         return url
 
+  except (SocketError, _urllib.error.HTTPError, _urllib.error.URLError, _http_client.BadStatusLine, _http_client.InvalidURL, Exception) as err_msg:
+    checks.connection_exceptions(err_msg)
+
   except AttributeError:
     pass
 
-  # Raise exception due to ValueError.
-  except ValueError as err:
-    err_msg = str(err).replace(": "," (")
-    print(settings.print_critical_msg(err_msg + ")."))
-    raise SystemExit()
-
-  # Raise exception regarding urllib2 HTTPError.
-  except _urllib.error.HTTPError as err:
-    # Raise exception regarding infinite loop.
-    if "infinite loop" in str(err):
-      err_msg = "Infinite redirect loop detected." 
-      err_msg += "Please check all provided parameters and/or provide missing ones."
-      print(settings.print_critical_msg(err_msg))
-    else:
-      err_msg = str(err).replace(": "," (")
-      print(settings.print_critical_msg(err_msg + ")."))
-    raise SystemExit()
-
-  # The target host seems to be down.
-  except _urllib.error.URLError as err:
-    err_msg = "The host seems to be down"
-    try:
-      err_msg += " (Reason: " + str(err.args[0]).split("] ")[-1].lower() + ")."
-    except IndexError:
-      err_msg += "."
-    if not settings.MULTI_TARGETS:
-      print(settings.print_critical_msg(err_msg))
-      raise SystemExit()
-
-  # Raise exception regarding existing connection was forcibly closed by the remote host.
-  except SocketError as err:
-    if err.errno == errno.ECONNRESET:
-      error_msg = "Connection reset by peer."
-      print(settings.print_critical_msg(error_msg))
-    elif err.errno == errno.ECONNREFUSED:
-      error_msg = "Connection refused."
-      print(settings.print_critical_msg(error_msg))
-    raise SystemExit()
-
-  # Raise exception regarding connection aborted.
-  except Exception:
-    err_msg = "Connection aborted."
-    print(settings.print_critical_msg(err_msg))
-    raise SystemExit()
 
 # eof

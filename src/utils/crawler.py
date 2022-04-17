@@ -67,11 +67,13 @@ def request(url):
     response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
     return response
   except _urllib.error.URLError as err_msg:
+    settings.CRAWLED_SKIPPED_URLS += 1
+    if settings.CRAWLED_SKIPPED_URLS == 1:
+      print(settings.SINGLE_WHITESPACE)
     err_msg = str(err_msg) + " - Skipping " + str(url) 
     sys.stdout.write(settings.print_critical_msg(err_msg))
     if settings.VERBOSITY_LEVEL >= 2:
       print(settings.SINGLE_WHITESPACE)
-    settings.CRAWLED_SKIPPED_URLS += 1
 
 """
 Check for URLs in sitemap.xml.

@@ -31,6 +31,7 @@ from src.utils import settings
 from src.utils import simple_http_server
 from src.thirdparty.odict import OrderedDict
 from src.core.convert import hexdecode
+from socket import error as SocketError
 from src.thirdparty.six.moves import input as _input
 from src.thirdparty.six.moves import urllib as _urllib
 from src.thirdparty.colorama import Fore, Back, Style, init
@@ -48,6 +49,34 @@ except:
     import pyreadline as readline
   except:
     settings.READLINE_ERROR = True
+
+"""
+Connection exceptions
+"""
+
+def connection_exceptions(err_msg):
+  settings.VALID_URL = False
+  try:
+    error_msg = str(err_msg.args[0]).split("] ")[1] 
+  except IndexError:
+    error_msg = str(err_msg.args[0])
+  if settings.TOTAL_OF_REQUESTS == 1 and settings.VERBOSITY_LEVEL < 2:
+    print(settings.SINGLE_WHITESPACE)
+  if "ssl" in str(error_msg):
+    error_msg = "can't establish SSL connection"
+  elif "infinite loop" in str(error_msg):
+    error_msg = "Infinite redirect loop detected." 
+    error_msg += "Please check all provided parameters and/or provide missing ones."
+  elif "BadStatusLine" in str(error_msg):
+    error_msg = "connection dropped or unknown HTTP "
+    error_msg += "status code received."
+  elif "forcibly closed" in str(error_msg) or "Connection is already closed" in str(error_msg):
+    error_msg = "connection was forcibly closed by the target URL."
+  error_msg = "Unable to connect to the target URL (Reason: " + error_msg.capitalize()  + ")."
+  print(settings.print_critical_msg(error_msg))
+  if not settings.VALID_URL :
+    if not settings.MULTI_TARGETS and settings.TOTAL_OF_REQUESTS == settings.MAX_RETRIES:
+      raise SystemExit()
 
 """
 check for not declared cookie(s)
@@ -301,13 +330,15 @@ def check_connection(url):
         socket.getaddrinfo(hostname, None)
       except socket.gaierror:
         err_msg = "Host '" + hostname + "' does not exist."
-        print(settings.print_critical_msg(err_msg))
-        raise SystemExit()
+        if not settings.MULTI_TARGETS:
+          print(settings.print_critical_msg(err_msg))
+          raise SystemExit()
       except socket.error as err:
         err_msg = "Problem occurred while "
         err_msg += "resolving a host name '" + hostname + "'"
-        print(settings.print_critical_msg(err_msg))
-        raise SystemExit()
+        if not settings.MULTI_TARGETS:
+          print(settings.print_critical_msg(err_msg))
+          raise SystemExit()
 
 """
 Check current assessment phase.

@@ -16,7 +16,6 @@ For more see the file 'readme/COPYING' for copying permission.
 import re
 import os
 import sys
-import errno
 import random
 from src.thirdparty.six.moves import http_client as _http_client
 # accept overly long result lines
@@ -60,7 +59,6 @@ if settings.IS_WINDOWS:
   # Use Colorama to make Termcolor work on Windows too :)
   init()
 
-
 """
 Define HTTP User-Agent header.
 """
@@ -103,6 +101,12 @@ def user_agent_header():
 Examine the request
 """
 def examine_request(request, url):
+  # Retries when the connection timeouts.
+  if menu.options.retries:
+    settings.MAX_RETRIES = menu.options.retries
+  else:
+    if settings.MULTI_TARGETS:
+      settings.MAX_RETRIES = 1
   try:
     headers.check_http_traffic(request)
     # Check if defined any HTTP Proxy (--proxy option).
@@ -127,63 +131,13 @@ def examine_request(request, url):
         print(settings.print_critical_msg(err_msg))
         raise SystemExit()
 
-
-  except SocketError as e:
-    if e.errno == errno.ECONNRESET:
-      error_msg = "Connection reset by peer."
-    elif e.errno == errno.ECONNREFUSED:
-      error_msg = "Connection refused."
-    else:  
-      try:
-        err_msg = str(e.args[0]).split("] ")[1] + "."
-      except IndexError:
-        err_msg = str(e).replace(": "," (") + ")."
-    if settings.MULTI_TARGETS:
-      print(settings.print_critical_msg(err_msg)) 
-      warn_msg = "Skipping URL '" + url
-      if settings.EOF:
-        print(settings.SINGLE_WHITESPACE) 
-      return False 
-    else:
-      print(settings.print_critical_msg(err_msg)) 
-      raise SystemExit()
-
-  except _urllib.error.HTTPError as err_msg:
-    error_description = ""
-    if len(str(err_msg).split(": ")[1]) == 0:
-      error_description = "Non-standard HTTP status code"
-    err_msg = str(err_msg).replace(": "," (") + error_description + ")." 
-    if settings.MULTI_TARGETS:
-      print(settings.print_critical_msg(err_msg)) 
-      warn_msg = "Skipping URL '" + url
-      if settings.EOF:
-        print(settings.SINGLE_WHITESPACE) 
-      return False 
-    else:
-      print(settings.print_critical_msg(err_msg)) 
-      raise SystemExit()
-
-  except _urllib.error.URLError as e:
-    err_msg = "Unable to connect to the target URL"
-    try:
-      err_msg += " (" + str(e.args[0]).split("] ")[1] + ")."
-    except IndexError:
-      err_msg += "."
-      pass
-    if settings.MULTI_TARGETS:
-      print(settings.print_critical_msg(err_msg)) 
-      warn_msg = "Skipping URL '" + url
-      if settings.EOF:
-        print(settings.SINGLE_WHITESPACE) 
-      return False 
-    else:
-      print(settings.print_critical_msg(err_msg)) 
-      raise SystemExit()
-
   except Exception as err_msg:
+    settings.VALID_URL = False
+    reason = ""
     if settings.UNAUTHORIZED_ERROR in str(err_msg).lower():
+      reason = str(err_msg)
       if menu.options.ignore_code == settings.UNAUTHORIZED_ERROR:
-        pass
+        print(settings.print_critical_msg(err_msg))
       elif menu.options.auth_type and menu.options.auth_cred:
         err_msg = "The provided pair of " + menu.options.auth_type 
         err_msg += " HTTP authentication credentials '" + menu.options.auth_cred + "'"
@@ -192,22 +146,25 @@ def examine_request(request, url):
         err_msg += " in order to perform a dictionary-based attack."
         print(settings.print_critical_msg(err_msg))
         raise SystemExit()
-      else:
-        pass
-    else:  
-      try:
-        error_msg = str(err_msg.args[0]).split("] ")[1] + "."
-      except IndexError:
-        error_msg = str(err_msg).replace(": "," (") + ")."
+    if settings.INTERNAL_SERVER_ERROR in str(err_msg).lower() or \
+       settings.FORBIDDEN_ERROR in str(err_msg).lower() or \
+       settings.NOT_FOUND_ERROR in str(err_msg).lower():
+      reason = str(err_msg)    
     if settings.MULTI_TARGETS:
-      print(settings.print_critical_msg(err_msg)) 
-      warn_msg = "Skipping URL '" + url
+      if len(reason) != 0:
+        reason = " (Reason: " + reason + ")."
+      warn_msg = "Skipping URL '" + url + "'" + reason
+      print(settings.print_warning_msg(warn_msg)) 
       if settings.EOF:
         print(settings.SINGLE_WHITESPACE) 
       return False 
     else:
-      print(settings.print_critical_msg(err_msg)) 
-      raise SystemExit() 
+      err_msg = reason
+      if settings.UNAUTHORIZED_ERROR in str(err_msg).lower():
+        pass
+      else:
+        print(settings.print_critical_msg(err_msg)) 
+        raise SystemExit() 
 
 """
 Check internet connection before assessing the target.
@@ -255,31 +212,12 @@ def init_request(url):
     # Check if defined character used for splitting parameter values.
     if menu.options.pdel and menu.options.pdel in settings.USER_DEFINED_POST_DATA:
       settings.PARAMETER_DELIMITER = menu.options.pdel
-    try:
-      request = _urllib.request.Request(url, menu.options.data.encode())
-    except SocketError as e:
-      if e.errno == errno.ECONNRESET:
-        error_msg = "Connection reset by peer."
-        print(settings.print_critical_msg(error_msg))
-      elif e.errno == errno.ECONNREFUSED:
-        error_msg = "Connection refused."
-        print(settings.print_critical_msg(error_msg))
-      raise SystemExit()
+    request = _urllib.request.Request(url, menu.options.data.encode())
   else:
     # Check if defined character used for splitting parameter values.
     if menu.options.pdel and menu.options.pdel in url:
       settings.PARAMETER_DELIMITER = menu.options.pdel
-    try:
-      request = _urllib.request.Request(url)
-    except SocketError as e:
-      if e.errno == errno.ECONNRESET:
-        error_msg = "Connection reset by peer."
-        print(settings.print_critical_msg(error_msg))
-      elif e.errno == errno.ECONNREFUSED:
-        error_msg = "Connection refused."
-        print(settings.print_critical_msg(error_msg))
-      raise SystemExit()
-
+    request = _urllib.request.Request(url)
   headers.do_check(request)
   # Check if defined any HTTP Proxy (--proxy option).
   if menu.options.proxy:
@@ -572,49 +510,6 @@ def main(filename, url):
         if menu.options.tamper:
           checks.tamper_scripts()
           
-      except _urllib.error.HTTPError as err_msg:
-        # Check the codes of responses
-        if str(err_msg.getcode()) == settings.INTERNAL_SERVER_ERROR:
-          print(settings.SINGLE_WHITESPACE)
-          content = err_msg.read()
-          raise SystemExit()
-        
-        # Invalid permission to access target URL page.
-        elif str(err_msg.getcode()) == settings.FORBIDDEN_ERROR:
-          if settings.VERBOSITY_LEVEL < 2:
-            print(settings.SINGLE_WHITESPACE)
-          err_msg = "You don't have permission to access this page."
-          print(settings.print_critical_msg(err_msg))
-          raise SystemExit()
-        
-        # The target host seems to be down!
-        elif str(err_msg.getcode()) == settings.NOT_FOUND_ERROR:
-          if settings.VERBOSITY_LEVEL < 2:
-            print(settings.SINGLE_WHITESPACE)
-          err_msg = "Not found."
-          print(settings.print_critical_msg(err_msg))
-          raise SystemExit()
-
-        else:
-          raise
-
-      # The target host seems to be down!
-      except (_urllib.error.URLError, _http_client.BadStatusLine) as e:
-        if settings.VERBOSITY_LEVEL < 2:
-          print(settings.SINGLE_WHITESPACE)
-        err_msg = "The host seems to be down"
-        try:
-          err_msg += " (" + str(e.args[0]).split("] ")[1] + ")."
-        except IndexError:
-          err_msg += "."
-          pass
-        print(settings.print_critical_msg(err_msg))
-        raise SystemExit()
-
-      except _http_client.InvalidURL as err_msg:
-        print(settings.print_critical_msg(err_msg))
-        raise SystemExit()
-
       except AttributeError:
         pass
 
@@ -638,8 +533,6 @@ def main(filename, url):
     err_msg += " Please ensure that is up and try again."
     print("\n" + settings.print_critical_msg(err_msg))
     logs.print_logs_notification(filename, url)      
-    #session_handler.clear(url)  
-    #raise SystemExit()
 
 try:
 
@@ -799,12 +692,6 @@ try:
       if len(menu.options.data) == 0:
         menu.options.data = False
 
-    # Retries when the connection timeouts.
-    if menu.options.retries:
-      settings.MAX_RETRIES = menu.options.retries
-    else:
-      if menu.options.MULTI_TARGETS:
-        settings.MAX_RETRIES = 2
     # Seconds to delay between each HTTP request.
     if menu.options.delay > 0:
       settings.DELAY = menu.options.delay
@@ -953,22 +840,10 @@ try:
               filename = logs_filename_creation()
               main(filename, url)
 
-          except _urllib.error.HTTPError as err_msg:
+          except (_urllib.error.HTTPError, _urllib.error.URLError) as e:
             if settings.VERBOSITY_LEVEL < 2:
               print(settings.SINGLE_WHITESPACE)
-            error_description = ""
-            if len(str(err_msg).split(": ")[1]) == 0:
-              error_description = "Non-standard HTTP status code" 
-            err_msg = str(err_msg).replace(": "," (") + error_description + ")." 
-            warn_msg = "Skipping URL '" + url + "' - " + err_msg
-            print(settings.print_warning_msg(warn_msg))
-            if settings.EOF:
-              print(settings.SINGLE_WHITESPACE) 
-
-          except _urllib.error.URLError as err_msg:
-            if settings.VERBOSITY_LEVEL < 2:
-              print(settings.SINGLE_WHITESPACE)
-            err_msg = str(err_msg.args[0]).split("] ")[1] + "." 
+            err_msg = "Unable to connect to the target URL."
             warn_msg = "Skipping URL '" + url + "' - " + err_msg
             print(settings.print_warning_msg(warn_msg))
             if settings.EOF:
@@ -992,12 +867,6 @@ except KeyboardInterrupt:
   abort_msg += "during the " + checks.assessment_phase() 
   abort_msg += " phase (Ctrl-C was pressed)."
   new_line = "\n"
-  # if settings.FILE_BASED_STATE or \
-  #    settings.TEMPFILE_BASED_STATE :
-  #    if not settings.DETECTION_PHASE and \
-  #       settings.EXPLOITATION_PHASE:
-  #     if settings.VERBOSITY_LEVEL != 0: 
-  #       new_line = ""
   print(new_line + settings.print_abort_msg(abort_msg))
   try:
     logs.print_logs_notification(filename, url)
