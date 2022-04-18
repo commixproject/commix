@@ -19,6 +19,7 @@ import os
 import sys
 import glob
 import json
+import time
 import socket
 import random
 import string
@@ -63,17 +64,40 @@ def connection_exceptions(err_msg):
   if settings.TOTAL_OF_REQUESTS == 1 and settings.VERBOSITY_LEVEL < 2:
     print(settings.SINGLE_WHITESPACE)
   if "ssl" in str(error_msg):
+    settings.MAX_RETRIES = 1
     error_msg = "can't establish SSL connection"
-  elif "infinite loop" in str(error_msg):
-    error_msg = "Infinite redirect loop detected." 
-    error_msg += "Please check all provided parameters and/or provide missing ones."
-  elif "BadStatusLine" in str(error_msg):
-    error_msg = "connection dropped or unknown HTTP "
-    error_msg += "status code received."
-  elif "forcibly closed" in str(error_msg) or "Connection is already closed" in str(error_msg):
-    error_msg = "connection was forcibly closed by the target URL."
+  else:
+    if settings.TOTAL_OF_REQUESTS == 1:
+      if settings.VERBOSITY_LEVEL < 2 and "has closed the connection" in str(error_msg):
+        print(settings.SINGLE_WHITESPACE)
+      if "IncompleteRead" in str(error_msg):
+        warn_msg = "There was an incomplete read error while retrieving data "
+        warn_msg += "from the target URL "
+      else:
+        warn_msg = "The provided target URL seems not reachable. "
+        warn_msg += "In case that it is, please try to re-run using "
+        if not menu.options.random_agent:
+            warn_msg += "'--random-agent' switch and/or "
+        warn_msg += "'--proxy' option."
+        print(settings.print_warning_msg(warn_msg))
+    elif "infinite loop" in str(error_msg):
+      error_msg = "Infinite redirect loop detected." 
+      error_msg += "Please check all provided parameters and/or provide missing ones."
+    elif "BadStatusLine" in str(error_msg):
+      error_msg = "connection dropped or unknown HTTP "
+      error_msg += "status code received."
+    elif "forcibly closed" in str(error_msg) or "Connection is already closed" in str(error_msg):
+      error_msg = "connection was forcibly closed by the target URL."
+    if settings.MAX_RETRIES > 1:
+      info_msg = settings.APPLICATION.capitalize() + " is going to retry the request(s)."
+      print(settings.print_info_msg(info_msg))
   error_msg = "Unable to connect to the target URL (Reason: " + error_msg.capitalize()  + ")."
+  if settings.MULTI_TARGETS:
+    error_msg = error_msg + " Skipping to the next target."
   print(settings.print_critical_msg(error_msg))
+  settings.TOTAL_OF_REQUESTS = settings.TOTAL_OF_REQUESTS + 1
+  if settings.MAX_RETRIES > 1:
+    time.sleep(settings.DELAY_RETRY)
   if not settings.VALID_URL :
     if not settings.MULTI_TARGETS and settings.TOTAL_OF_REQUESTS == settings.MAX_RETRIES:
       raise SystemExit()

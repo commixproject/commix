@@ -151,6 +151,8 @@ def check_http_traffic(request):
       if settings.VERBOSITY_LEVEL < 2:
         if (settings.INIT_TEST == True and not settings.UNAUTHORIZED) or \
            (settings.INIT_TEST == True and settings.MULTI_TARGETS):
+          if settings.VALID_URL == False:
+            settings.VALID_URL = True
           print(settings.SINGLE_WHITESPACE)
           if not settings.CHECK_INTERNET:
             settings.INIT_TEST = False
@@ -163,27 +165,10 @@ def check_http_traffic(request):
       if [True for err_code in settings.HTTP_ERROR_CODES if err_code in str(err_msg)]:
         break
 
-    except (_urllib.error.URLError, _http_client.BadStatusLine, _http_client.IncompleteRead) as err_msg:
-      if settings.TOTAL_OF_REQUESTS == 1:
-        if settings.VERBOSITY_LEVEL < 2 and "has closed the connection" in str(err_msg):
-          print(settings.SINGLE_WHITESPACE)
-
-        if "IncompleteRead" in str(err_msg):
-          warn_msg = "There was an incomplete read error while retrieving data "
-          warn_msg += "from the target URL "
-        else:
-          warn_msg = "The provided target URL seems not reachable. "
-          warn_msg += "In case that it is, please try to re-run using "
-        if not menu.options.random_agent:
-            warn_msg += "'--random-agent' switch and/or "
-        warn_msg += "'--proxy' option."
-        
-        print(settings.print_warning_msg(warn_msg))
-        if settings.MAX_RETRIES > 1:
-          info_msg = settings.APPLICATION.capitalize() + " is going to retry the request(s)."
-          print(settings.print_info_msg(info_msg))
-      settings.TOTAL_OF_REQUESTS = settings.TOTAL_OF_REQUESTS + 1
-      time.sleep(3)
+    except (SocketError, _urllib.error.HTTPError, _urllib.error.URLError, _http_client.BadStatusLine, _http_client.InvalidURL) as err_msg:
+      pass
+      # settings.TOTAL_OF_REQUESTS = settings.TOTAL_OF_REQUESTS + 1
+      # time.sleep(3)
 
     except ValueError as err:
       if settings.VERBOSITY_LEVEL < 2:
@@ -241,10 +226,6 @@ def check_http_traffic(request):
         err_msg = error_msg
       print(settings.print_critical_msg(err_msg + ")."))
       raise SystemExit()
-    
-  # The handlers raise this exception when they run into a problem.
-  except Exception as err_msg:
-    checks.connection_exceptions(err_msg)
     
 """
 Check for added headers.

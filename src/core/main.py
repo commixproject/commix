@@ -152,9 +152,8 @@ def examine_request(request, url):
       reason = str(err_msg)    
     if settings.MULTI_TARGETS:
       if len(reason) != 0:
-        reason = " (Reason: " + reason + ")."
-      warn_msg = "Skipping URL '" + url + "'" + reason
-      print(settings.print_warning_msg(warn_msg)) 
+        reason = reason + ". Skipping to the next target."
+        print(settings.print_critical_msg(reason))
       if settings.EOF:
         print(settings.SINGLE_WHITESPACE) 
       return False 
@@ -163,7 +162,8 @@ def examine_request(request, url):
       if settings.UNAUTHORIZED_ERROR in str(err_msg).lower():
         pass
       else:
-        print(settings.print_critical_msg(err_msg)) 
+        if len(err_msg) != 0:
+          print(settings.print_critical_msg(err_msg)) 
         raise SystemExit() 
 
 """
@@ -243,8 +243,6 @@ def url_response(url):
     tor.do_check()
   if settings.MULTI_TARGETS:
     settings.TOR_CHECK_AGAIN = False
-    info_msg = "Setting URL '" + url + "' for tests. "  
-    print(settings.print_info_msg(info_msg))
     # initiate total of requests
     settings.TOTAL_OF_REQUESTS = 0
   request = init_request(url)
@@ -826,28 +824,38 @@ try:
         [clean_bulkfile.append(x) for x in bulkfile if x not in clean_bulkfile]
         # Removing empty elements from list.
         clean_bulkfile = [x for x in clean_bulkfile if x]
+        url_num = 0
+        print(settings.print_info_msg("Found a total of " + str(len(clean_bulkfile)) + " targets."))
         for url in clean_bulkfile:
-          settings.INIT_TEST = True
-          if url == clean_bulkfile[-1]:
-            settings.EOF = True
-          # Reset the injection level
-          if menu.options.level > 3:
-            menu.options.level = 1
-          init_injection(url)
-          try:
-            response, url = url_response(url)
-            if response != False:
-              filename = logs_filename_creation()
-              main(filename, url)
+          url_num += 1
+          print(settings.print_question_msg("URL #" + str(url_num) + " - " + url) + "")
+          if not menu.options.batch:
+            question_msg = "Do you want to use URL #" + str(url_num) + " to perform tests? [Y/n] > "
+            message = _input(settings.print_question_msg(question_msg))
+          else:
+            message = ""
+          if len(message) == 0:
+             message = "Y"
+          if message in settings.CHOICE_YES:
+            settings.INIT_TEST = True
+            if url == clean_bulkfile[-1]:
+              settings.EOF = True
+            # Reset the injection level
+            if menu.options.level > 3:
+              menu.options.level = 1
+            init_injection(url)
+            try:
+              response, url = url_response(url)
+              if response != False:
+                filename = logs_filename_creation()
+                main(filename, url)
+            except:
+              pass 
+          elif message in settings.CHOICE_NO:
+            pass 
+          elif message in settings.CHOICE_QUIT:
+            raise SystemExit()
 
-          except (_urllib.error.HTTPError, _urllib.error.URLError) as e:
-            if settings.VERBOSITY_LEVEL < 2:
-              print(settings.SINGLE_WHITESPACE)
-            err_msg = "Unable to connect to the target URL."
-            warn_msg = "Skipping URL '" + url + "' - " + err_msg
-            print(settings.print_warning_msg(warn_msg))
-            if settings.EOF:
-              print(settings.SINGLE_WHITESPACE) 
 
     else:
       if os_checks_num == 0:

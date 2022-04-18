@@ -294,7 +294,7 @@ def crawler(url):
       if re.search(r"(.*?)\?(.+)", check_url):
         valid_url_found = True
         url_num += 1
-        print(settings.print_info_msg("URL #" + str(url_num) + " - " + check_url) + "")
+        print(settings.print_question_msg("URL #" + str(url_num) + " - " + check_url) + "")
         if filename is not None:
           with open(filename, "a") as crawling_results:
             crawling_results.write(check_url + "\n")

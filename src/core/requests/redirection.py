@@ -164,8 +164,11 @@ def do_check(url):
       else:
         return url
 
-  except (SocketError, _urllib.error.HTTPError, _urllib.error.URLError, _http_client.BadStatusLine, _http_client.InvalidURL, Exception) as err_msg:
-    checks.connection_exceptions(err_msg)
+  except (SocketError, _urllib.error.HTTPError, _urllib.error.URLError, _http_client.BadStatusLine, _http_client.InvalidURL) as err_msg:
+    if settings.VALID_URL: 
+      checks.connection_exceptions(err_msg)
+    else:
+      pass
 
   except AttributeError:
     pass

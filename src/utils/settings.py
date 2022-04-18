@@ -225,7 +225,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.5"
-REVISION = "35"
+REVISION = "36"
 STABLE_RELEASE = False
 if STABLE_RELEASE:
   VERSION = "v" + VERSION_NUM + "-stable"
@@ -439,6 +439,9 @@ DELAY = 0
 
 # Seconds to delay the OS response. (Default 1)
 TIMESEC = 1
+
+# Seconds to delay between each HTTP retry.
+DELAY_RETRY = 1
 
 #Level (Default: 1)
 DEFAULT_INJECTION_LEVEL = 1
