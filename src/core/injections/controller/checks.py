@@ -60,7 +60,10 @@ def connection_exceptions(err_msg):
   try:
     error_msg = str(err_msg.args[0]).split("] ")[1] 
   except IndexError:
-    error_msg = str(err_msg.args[0])
+    try:
+      error_msg = str(err_msg.args[0])
+    except IndexError:
+      error_msg = str(err_msg)
   if settings.TOTAL_OF_REQUESTS == 1 and settings.VERBOSITY_LEVEL < 2:
     print(settings.SINGLE_WHITESPACE)
   if "ssl" in str(error_msg):

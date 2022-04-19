@@ -31,7 +31,7 @@ from src.thirdparty.six.moves import urllib as _urllib
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 
-def do_check(url):
+def do_check(request, url):
   """
   This functinality is based on Filippo's Valsorda script [1].
   ---
@@ -41,128 +41,49 @@ def do_check(url):
     def get_method(self):
         return settings.HTTPMETHOD.HEAD
 
-  class RedirectHandler(_urllib.request.HTTPRedirectHandler):
+  class RedirectHandler(_urllib.request.HTTPRedirectHandler, object):
     """
     Subclass the HTTPRedirectHandler to make it use our 
     Request also on the redirected URL
     """
-    def redirect_request(self, req, fp, code, msg, headers, redirected_url): 
+    def redirect_request(self, request, fp, code, msg, headers, newurl): 
       if code in (301, 302, 303, 307):
-        redirected_url = redirected_url.replace(' ', '%20') 
-        newheaders = dict((k,v) for k,v in req.headers.items() if k.lower() not in ("content-length", "content-type"))
-        warn_msg = "Got a " + str(code) + " redirection (" + redirected_url + ")."
-        print(settings.print_warning_msg(warn_msg))
-        return Request(redirected_url, 
-                           headers = newheaders,
-                           # origin_req_host = req.get_origin_req_host(), 
-                           unverifiable = True
-                           ) 
+        settings.REDIRECT_CODE = code
+        return Request(newurl.replace(' ', '%20'), 
+                       data=request.data, 
+                       headers=request.headers
+                       )
       else: 
-        err_msg = str(_urllib.error.HTTPError(req.get_full_url(), code, msg, headers, fp)).replace(": "," (")
+        err_msg = str(_urllib.error.HTTPError(request.get_full_url(), code, msg, headers, fp)).replace(": "," (")
         print(settings.print_critical_msg(err_msg + ")."))
         raise SystemExit()
-              
-  class HTTPMethodFallback(_urllib.request.BaseHandler):
-    """
-    """
-    def http_error_405(self, req, fp, code, msg, headers): 
-      fp.read()
-      fp.close()
-      newheaders = dict((k,v) for k,v in req.headers.items() if k.lower() not in ("content-length", "content-type"))
-      return self.parent.open(_urllib.request.Request(req.get_full_url(), 
-                              headers = newheaders, 
-                              # origin_req_host = req.get_origin_req_host(), 
-                              unverifiable = True)
-                              )
-
-  # Build our opener
-  opener = _urllib.request.OpenerDirector() 
-  # Check if defined any Host HTTP header.
-  if menu.options.host and settings.HOST_INJECTION == False:
-    opener.addheaders.append(('Host', menu.options.host))
-  # Check if defined any User-Agent HTTP header.
-  if menu.options.agent:
-    opener.addheaders.append(('User-Agent', menu.options.agent))
-  # Check if defined any Referer HTTP header.
-  if menu.options.referer and settings.REFERER_INJECTION == False:
-    opener.addheaders.append(('Referer', menu.options.referer))
-  # Check if defined any Cookie HTTP header.
-  if menu.options.cookie and settings.COOKIE_INJECTION == False:
-    opener.addheaders.append(('Cookie', menu.options.cookie))
-  # Check if defined any HTTP Authentication credentials.
-  # HTTP Authentication: Basic / Digest Access Authentication.
-  if menu.options.auth_cred and menu.options.auth_type:
-    try:
-      settings.SUPPORTED_HTTP_AUTH_TYPES.index(menu.options.auth_type)
-      if menu.options.auth_type == "basic":
-        b64_string = encodebytes(menu.options.auth_cred.encode(settings.DEFAULT_CODEC)).decode().replace('\n', '')
-        opener.addheaders.append(("Authorization", "Basic " + b64_string + ""))
-      elif menu.options.auth_type == "digest":
-        try:
-          url = menu.options.url
-          try:
-            response = _urllib.request.urlopen(url, timeout=settings.TIMEOUT)
-          except _urllib.error.HTTPError as e:
-            try:
-              authline = e.headers.get('www-authenticate', '')  
-              authobj = re.match('''(\w*)\s+realm=(.*),''',authline).groups()
-              realm = authobj[1].split(',')[0].replace("\"","")
-              user_pass_pair = menu.options.auth_cred.split(":")
-              username = user_pass_pair[0]
-              password = user_pass_pair[1]
-              authhandler = _urllib.request.HTTPDigestAuthHandler()
-              authhandler.add_password(realm, url, username, password)
-              opener = _urllib.request.build_opener(authhandler)
-              _urllib.request.install_opener(opener)
-              result = _urllib.request.urlopen(url, timeout=settings.TIMEOUT)
-            except AttributeError:
-              pass
-        except _urllib.error.HTTPError as e:
-          pass
-    except ValueError:
-      err_msg = "Unsupported / Invalid HTTP authentication type '" + menu.options.auth_type + "'."
-      err_msg += " Try basic or digest HTTP authentication type."
-      print(settings.print_critical_msg(err_msg))
-      raise SystemExit()   
-  else:
-    pass  
-
-  for handler in [_urllib.request.HTTPHandler,
-                  HTTPMethodFallback,
-                  RedirectHandler,
-                  _urllib.request.HTTPErrorProcessor, 
-                  _urllib.request.HTTPSHandler]:
-      opener.add_handler(handler())   
-
+  
+  opener = _urllib.request.build_opener(RedirectHandler())
   try:
-    # Return a Request or None in response to a redirect.
-    response = opener.open(Request(url))
-    if response == None:
-      return url
+    response = opener.open(request, timeout=settings.TIMEOUT)
+    if url == response.geturl():
+      return response.geturl()
     else:
-      redirected_url = response.geturl()
-      if redirected_url != url:
-        while True:
-          if not menu.options.batch:
-            question_msg = "Do you want to follow the identified redirection? [Y/n] > "
-            redirection_option = _input(settings.print_question_msg(question_msg))
-          else:
-            redirection_option = ""  
-          if len(redirection_option) == 0 or redirection_option in settings.CHOICE_YES:
-            if menu.options.batch:
-              info_msg = "Following redirection to '" + redirected_url + "'. "
-              print(settings.print_info_msg(info_msg))
-            return redirected_url
-          elif redirection_option in settings.CHOICE_NO:
-            return url  
-          elif redirection_option in settings.CHOICE_QUIT:
-            raise SystemExit()
-          else:
-            err_msg = "'" + redirection_option + "' is not a valid answer."  
-            print(settings.print_error_msg(err_msg))
-            pass
-      else:
-        return url
+      while True:
+        if not menu.options.batch:
+          question_msg = "Got a " + str(settings.REDIRECT_CODE) + " redirect to " + response.geturl() + "\n"
+          question_msg += "Do you want to follow the identified redirection? [Y/n] > "
+          redirection_option = _input(settings.print_question_msg(question_msg))
+        else:
+          redirection_option = ""  
+        if len(redirection_option) == 0 or redirection_option in settings.CHOICE_YES:
+          if menu.options.batch:
+            info_msg = "Following redirection to '" + response.geturl() + "'. "
+            print(settings.print_info_msg(info_msg))
+          return checks.check_http_s(response.geturl())
+        elif redirection_option in settings.CHOICE_NO:
+          return url  
+        elif redirection_option in settings.CHOICE_QUIT:
+          raise SystemExit()
+        else:
+          err_msg = "'" + redirection_option + "' is not a valid answer."  
+          print(settings.print_error_msg(err_msg))
+          pass
 
   except (SocketError, _urllib.error.HTTPError, _urllib.error.URLError, _http_client.BadStatusLine, _http_client.InvalidURL) as err_msg:
     if settings.VALID_URL: 

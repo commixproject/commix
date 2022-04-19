@@ -582,6 +582,7 @@ def cookie_injection(url, http_request_method, filename, timesec):
             for check_parameter in check_parameters:
               if check_parameter in "".join(settings.TEST_PARAMETER).split(","):
                 menu.options.cookie = cookie_parameters[param_counter]
+                check_parameter = parameters.specify_cookie_parameter(menu.options.cookie)
                 # Check for session file 
                 check_for_stored_sessions(url, http_request_method)
                 injection_proccess(url, check_parameter, http_request_method, filename, timesec) 
@@ -629,6 +630,7 @@ def get_request(url, http_request_method, filename, timesec):
             for check_parameter in check_parameters:
               if check_parameter in "".join(settings.TEST_PARAMETER).split(","):
                 url = found_url[url_counter]
+                check_parameter = parameters.vuln_GET_param(url)
                 # Check for session file 
                 check_for_stored_sessions(url, http_request_method)
                 injection_proccess(url, check_parameter, http_request_method, filename, timesec)
@@ -688,6 +690,8 @@ def post_request(url, http_request_method, filename, timesec):
           for check_parameter in check_parameters:
             if check_parameter in "".join(settings.TEST_PARAMETER).split(","):
               menu.options.data = found_parameter[param_counter]
+              check_parameter = parameters.vuln_POST_param(menu.options.data, url)
+              # Check for session file 
               check_for_stored_sessions(url, http_request_method)
               injection_proccess(url, check_parameter, http_request_method, filename, timesec)
             param_counter += 1

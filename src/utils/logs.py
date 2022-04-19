@@ -34,6 +34,7 @@ from src.thirdparty.colorama import Fore, Back, Style, init
 Create log files
 """
 def create_log_file(url, output_dir):
+
   if not output_dir.endswith("/"):
     output_dir = output_dir + "/"
 

@@ -65,7 +65,9 @@ def http_response(headers, code):
       if menu.options.traffic_file:
         logs.log_traffic("\n" + header)
   if menu.options.traffic_file:
-    logs.log_traffic("\n\n")    
+    logs.log_traffic("\n\n")
+  if settings.VERBOSITY_LEVEL == 3:
+    print(settings.SINGLE_WHITESPACE)   
 
 """
 Print HTTP response headers / Body.
@@ -91,7 +93,6 @@ def print_http_response(response_headers, code, page):
 Checking the HTTP Headers & HTTP/S Request.
 """
 def check_http_traffic(request):
-  settings.TOTAL_OF_REQUESTS = settings.TOTAL_OF_REQUESTS + 1
   # Delay in seconds between each HTTP request
   time.sleep(int(settings.DELAY))
   if settings.SCHEME == 'https':
@@ -114,8 +115,22 @@ def check_http_traffic(request):
       http_client.send(self, req)
 
   class connection_handler(_urllib.request.HTTPSHandler, _urllib.request.HTTPHandler, object):
+    """
+    Print HTTP request headers.
+    """
+    def print_http_response(self):
+      settings.TOTAL_OF_REQUESTS = settings.TOTAL_OF_REQUESTS + 1
+      if settings.VERBOSITY_LEVEL >= 2 or menu.options.traffic_file:
+        if settings.VERBOSITY_LEVEL >= 2:
+          req_msg = "HTTP request [" + settings.print_request_num(settings.TOTAL_OF_REQUESTS) + "]:"
+          print(settings.print_request_msg(req_msg))
+        if menu.options.traffic_file:
+          req_msg = "HTTP request [#" + str(settings.TOTAL_OF_REQUESTS) + "]:"
+          logs.log_traffic(req_msg)
+
     def http_open(self, req):
       try:
+        self.print_http_response()
         self.do_open(connection, req)
         return super(connection_handler, self).http_open(req)
       except (SocketError, _urllib.error.HTTPError, _urllib.error.URLError, _http_client.BadStatusLine, _http_client.InvalidURL, Exception) as err_msg:
@@ -123,6 +138,7 @@ def check_http_traffic(request):
 
     def https_open(self, req):
       try:
+        self.print_http_response()
         self.do_open(connection, req)
         return super(connection_handler, self).https_open(req)
       except (SocketError, _urllib.error.HTTPError, _urllib.error.URLError, _http_client.BadStatusLine, _http_client.InvalidURL, Exception) as err_msg:
@@ -134,15 +150,7 @@ def check_http_traffic(request):
 
   _ = False
   unauthorized = False
-  while not _ and settings.TOTAL_OF_REQUESTS <= settings.MAX_RETRIES and unauthorized is False:
-    if settings.VERBOSITY_LEVEL >= 2 or menu.options.traffic_file:
-      if settings.VERBOSITY_LEVEL >= 2:
-        req_msg = "HTTP request [" + settings.print_request_num(settings.TOTAL_OF_REQUESTS) + "]:"
-        print(settings.print_request_msg(req_msg))
-      if menu.options.traffic_file:
-        req_msg = "HTTP request [#" + str(settings.TOTAL_OF_REQUESTS) + "]:"
-        logs.log_traffic(req_msg)
-        
+  while not _ and settings.TOTAL_OF_REQUESTS <= settings.MAX_RETRIES and unauthorized is False:      
     try:
       response = opener.open(request, timeout=settings.TIMEOUT)
       page = checks.page_encoding(response, action="encode")
@@ -167,8 +175,6 @@ def check_http_traffic(request):
 
     except (SocketError, _urllib.error.HTTPError, _urllib.error.URLError, _http_client.BadStatusLine, _http_client.InvalidURL) as err_msg:
       pass
-      # settings.TOTAL_OF_REQUESTS = settings.TOTAL_OF_REQUESTS + 1
-      # time.sleep(3)
 
     except ValueError as err:
       if settings.VERBOSITY_LEVEL < 2:
