@@ -178,8 +178,7 @@ def eb_injection_handler(url, timesec, filename, http_request_method, injection_
                 found_cookie_injection = False
                 # Check if target host is vulnerable.
                 response, vuln_parameter = eb_injector.injection_test(payload, http_request_method, url)
-      
-              # Try target page reload (if it is required).
+  # Try target page reload (if it is required).
               if settings.URL_RELOAD:
                 response = requests.url_reload(url, timesec)
               # Evaluate test results.
@@ -419,12 +418,16 @@ def eb_injection_handler(url, timesec, filename, http_request_method, injection_
                         shell = "".join(str(p) for p in shell)
                         # Update logs with executed cmds and execution results.
                         logs.executed_command(filename, cmd, shell)
-                        print("\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n")
+                        if settings.VERBOSITY_LEVEL <= 1:
+                          print(settings.SINGLE_WHITESPACE)
+                        print(settings.command_execution_output(shell))
+                        print(settings.SINGLE_WHITESPACE)
                       else:
-                        if settings.VERBOSITY_LEVEL != 0:
+                        if settings.VERBOSITY_LEVEL == 1:
                           print(settings.SINGLE_WHITESPACE)
                         err_msg = "The '" + cmd + "' command, does not return any output."
-                        print(settings.print_critical_msg(err_msg) + "\n")
+                        print(settings.print_critical_msg(err_msg))
+                        print(settings.SINGLE_WHITESPACE)
                     
                   except KeyboardInterrupt: 
                     raise

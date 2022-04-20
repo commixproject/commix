@@ -314,9 +314,11 @@ Proceed to the injection process for the appropriate parameter.
 """
 def injection_proccess(url, check_parameter, http_request_method, filename, timesec):
   inject_http_headers = False
-  if any(x in check_parameter.lower() for x in settings.HTTP_HEADERS) or \
-     any(x in check_parameter.lower() for x in settings.CUSTOM_HEADER_NAME):
-    inject_http_headers = True
+  if (http_request_method == settings.HTTPMETHOD.GET and check_parameter.lower() not in url) or \
+  (http_request_method == settings.HTTPMETHOD.POST and menu.options.data and check_parameter.lower() not in menu.options.data):
+    if any(x in check_parameter.lower() for x in settings.HTTP_HEADERS) or \
+       any(x in check_parameter.lower() for x in settings.CUSTOM_HEADER_NAME):
+      inject_http_headers = True
 
   if menu.options.ignore_code: 
     info_msg = "Ignoring '" + str(menu.options.ignore_code) + "' HTTP error code. "

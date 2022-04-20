@@ -169,6 +169,11 @@ def print_bold_debug_msg(debug_msg):
   result = DEBUG_BOLD_SIGN + debug_msg + Style.RESET_ALL
   return result  
 
+# Print output of command execution
+def command_execution_output(shell):
+  result = Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL
+  return result 
+
 # argv checks
 def sys_argv_checks():
   tamper_index = None
@@ -225,7 +230,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.5"
-REVISION = "37"
+REVISION = "38"
 STABLE_RELEASE = False
 if STABLE_RELEASE:
   VERSION = "v" + VERSION_NUM + "-stable"

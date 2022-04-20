@@ -411,12 +411,16 @@ def cb_injection_handler(url, timesec, filename, http_request_method, injection_
                         # Update logs with executed cmds and execution results.
                         logs.executed_command(filename, cmd, shell)
                       if shell != "":
-                        print("\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n")
+                        if settings.VERBOSITY_LEVEL <= 1:
+                          print(settings.SINGLE_WHITESPACE)
+                        print(settings.command_execution_output(shell))
+                        print(settings.SINGLE_WHITESPACE)
                       else:
-                        if settings.VERBOSITY_LEVEL != 0:
+                        if settings.VERBOSITY_LEVEL == 1:
                           print(settings.SINGLE_WHITESPACE)
                         err_msg = "The '" + cmd + "' command, does not return any output."
-                        print(settings.print_critical_msg(err_msg) + "\n")
+                        print(settings.print_critical_msg(err_msg))
+                        print(settings.SINGLE_WHITESPACE)
 
                   except KeyboardInterrupt: 
                     raise

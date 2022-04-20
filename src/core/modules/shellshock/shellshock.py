@@ -748,7 +748,9 @@ def shellshock_handler(url, http_request_method, filename):
           if menu.options.os_cmd:
             cmd = menu.options.os_cmd 
             shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
-            print("\n") + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL 
+            if settings.VERBOSITY_LEVEL <= 1:
+              print(settings.SINGLE_WHITESPACE)
+            print(settings.command_execution_output(shell))
             raise SystemExit()
 
           else:
@@ -803,7 +805,8 @@ def shellshock_handler(url, http_request_method, filename):
                           sys.stdout.flush()
                           sys.stdout.write("\n" + settings.print_payload(payload)+ "\n")
                         err_msg = "The '" + cmd + "' command, does not return any output."
-                        print(settings.print_critical_msg(err_msg) + "\n")
+                        print(settings.print_critical_msg(err_msg))
+                        print(settings.SINGLE_WHITESPACE)
 
                   except KeyboardInterrupt:
                     raise

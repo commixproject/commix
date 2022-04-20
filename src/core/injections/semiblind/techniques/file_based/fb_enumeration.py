@@ -522,12 +522,16 @@ def single_os_cmd_exec(separator, payload, TAG, timesec, prefix, suffix, whitesp
     shell = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
   if shell:
     if shell != "":
-      print("\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n")
+      if settings.VERBOSITY_LEVEL <= 1:
+        print(settings.SINGLE_WHITESPACE)
+      print(settings.command_execution_output(shell))
+      print(settings.SINGLE_WHITESPACE)
       logs.print_logs_notification(filename, url) 
-    else:
-      err_msg = "The '" + cmd + "' command, does not return any output."
-      print(settings.print_critical_msg(err_msg)) 
-    raise SystemExit()
+  else:
+    if settings.VERBOSITY_LEVEL <= 1:
+      print(settings.SINGLE_WHITESPACE)
+    err_msg = "The '" + cmd + "' command, does not return any output."
+    print(settings.print_critical_msg(err_msg)) 
 
 """
 Check the defined options
