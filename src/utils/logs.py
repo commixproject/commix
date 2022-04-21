@@ -31,6 +31,43 @@ from src.thirdparty.colorama import Fore, Back, Style, init
 """
 
 """
+Logs filename creation.
+"""
+def logs_filename_creation(url):
+  if menu.options.output_dir:
+    if os.path.isdir(menu.options.output_dir):
+      output_dir = menu.options.output_dir
+      if not output_dir.endswith("/"):
+        output_dir = output_dir + "/"
+    else:
+      error_msg = "The '" + menu.options.output_dir + "' is not directory."
+      print(settings.print_critical_msg(error_msg))
+      raise SystemExit()
+  else:
+    output_dir = settings.OUTPUT_DIR
+  
+  # One directory up, if the script is being run under "/src".
+  output_dir = os.path.dirname(output_dir)
+ 
+  try:
+    os.stat(output_dir)
+  except:
+    try:
+      os.mkdir(output_dir)   
+    except OSError as err_msg:
+      try:
+        error_msg = str(err_msg).split("] ")[1] + "."
+      except IndexError:
+        error_msg = str(err_msg) + "."
+      print(settings.print_critical_msg(error_msg))
+      raise SystemExit()
+
+  # The logs filename construction.
+  filename = create_log_file(url, output_dir)
+
+  return filename
+
+"""
 Create log files
 """
 def create_log_file(url, output_dir):
@@ -93,12 +130,13 @@ def create_log_file(url, output_dir):
   filename = output_dir + host + "/" + settings.OUTPUT_FILE
   try:
     output_file = open(filename, "a")
-    output_file.write("\n" + "=" * 37)
-    output_file.write("\n" + "| Started in " + \
-      datetime.datetime.fromtimestamp(time.time()).strftime('%m/%d/%Y' + \
-      " at " + '%H:%M:%S' + " |"))
-    output_file.write("\n" + "=" * 37)
-    output_file.write("\n" + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + "Tested URL : " + url)
+    if not menu.options.no_logging:
+      output_file.write("\n" + "=" * 37)
+      output_file.write("\n" + "| Started in " + \
+        datetime.datetime.fromtimestamp(time.time()).strftime('%m/%d/%Y' + \
+        " at " + '%H:%M:%S' + " |"))
+      output_file.write("\n" + "=" * 37)
+      output_file.write("\n" + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + "Tested URL : " + url)
     output_file.close()
   except IOError as err_msg:
     try:
@@ -114,11 +152,13 @@ def create_log_file(url, output_dir):
 Add the injection type / technique in log files.
 """
 def add_type_and_technique(export_injection_info, filename, injection_type, technique):
+
   if export_injection_info == False:
     settings.SHOW_LOGS_MSG = True
     output_file = open(filename, "a")
-    output_file.write("\n" + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + "Type: " + injection_type.title())
-    output_file.write("\n" + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + "Technique: " + technique.title())
+    if not menu.options.no_logging:
+      output_file.write("\n" + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + "Type: " + injection_type.title())
+      output_file.write("\n" + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + "Technique: " + technique.title())
     output_file.close()
     export_injection_info = True
 
@@ -129,13 +169,14 @@ Add the vulnerable parameter in log files.
 """
 def add_parameter(vp_flag, filename, the_type, header_name, http_request_method, vuln_parameter, payload):
   output_file = open(filename, "a")
-  if header_name[1:] == "cookie":
-    header_name = " ("+ header_name[1:] + ") " + vuln_parameter
-  if header_name[1:] == "":
-    header_name = " ("+ http_request_method + ") " + vuln_parameter
-  output_file.write("\n" + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + the_type[1:].title() + ": " + header_name[1:])
-  vp_flag = False
-  output_file.write("\n")
+  if not menu.options.no_logging:
+    if header_name[1:] == "cookie":
+      header_name = " ("+ header_name[1:] + ") " + vuln_parameter
+    if header_name[1:] == "":
+      header_name = " ("+ http_request_method + ") " + vuln_parameter
+    output_file.write("\n" + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + the_type[1:].title() + ": " + header_name[1:])
+    vp_flag = False
+    output_file.write("\n")
   output_file.close()
 
 """
@@ -143,10 +184,11 @@ Add any payload in log files.
 """
 def update_payload(filename, counter, payload):
   output_file = open(filename, "a")
-  if "\n" in payload:
-    output_file.write("    (" +str(counter)+ ") Payload: " + re.sub("%20", " ", _urllib.parse.unquote_plus(payload.replace("\n", "\\n"))) + "\n")
-  else:
-    output_file.write("    (" +str(counter)+ ") Payload: " + payload.replace("%20", " ") + "\n")
+  if not menu.options.no_logging:
+    if "\n" in payload:
+      output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + "Used payload: " + re.sub("%20", " ", _urllib.parse.unquote_plus(payload.replace("\n", "\\n"))) + "\n")
+    else:
+      output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + "Used payload: " + payload.replace("%20", " ") + "\n")
   output_file.close()
 
 """
@@ -156,8 +198,9 @@ execution output result in log files.
 def executed_command(filename, cmd, output):
   try:
     output_file = open(filename, "a")
-    output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + "Executed command: " +  cmd + "\n")
-    output_file.write("    " + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_SIGN) + "Execution output: " +  output + "\n")
+    if not menu.options.no_logging:
+      output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + "Executed command: " +  cmd + "\n")
+      output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_SIGN) + "Execution output: " +  output + "\n")
     output_file.close()
   except TypeError:
     pass
@@ -167,17 +210,19 @@ Fetched data logged to text files.
 """
 def logs_notification(filename):
   # Save command history.
-  info_msg = "Fetched data logged to text files under '" + os.getcwd() + "/" + filename + "'."
-  print(settings.print_info_msg(info_msg))
+  if not menu.options.no_logging:
+    info_msg = "Fetched data logged to text files under '" + os.getcwd() + "/" + filename + "'."
+    print(settings.print_info_msg(info_msg))
 
 """
 Log all HTTP traffic into a textual file.
 """
 def log_traffic(header):
   output_file = open(menu.options.traffic_file, "a")
-  if type(header) is bytes:
-    header = header.decode(settings.DEFAULT_CODEC) 
-  output_file.write(header)
+  if not menu.options.no_logging:
+    if type(header) is bytes:
+      header = header.decode(settings.DEFAULT_CODEC) 
+    output_file.write(header)
   output_file.close()
 
 """
@@ -185,7 +230,7 @@ Print logs notification.
 """
 def print_logs_notification(filename, url):
   checks.save_cmd_history()
-  if settings.SHOW_LOGS_MSG == True:
+  if settings.SHOW_LOGS_MSG == True and not menu.options.no_logging:
     logs_notification(filename)
   if url:
     session_handler.clear(url)

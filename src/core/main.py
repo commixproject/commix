@@ -282,42 +282,6 @@ def init_injection(url):
     settings.TIME_RELATIVE_ATTACK = False
 
 """
-Logs filename creation.
-"""
-def logs_filename_creation():
-  if menu.options.output_dir:
-    if os.path.isdir(menu.options.output_dir):
-      output_dir = menu.options.output_dir
-      if not output_dir.endswith("/"):
-        output_dir = output_dir + "/"
-    else:
-      error_msg = "The '" + menu.options.output_dir + "' is not directory."
-      print(settings.print_critical_msg(error_msg))
-      raise SystemExit()
-  else:
-    output_dir = settings.OUTPUT_DIR
-  
-  # One directory up, if the script is being run under "/src".
-  output_dir = os.path.dirname(output_dir)
- 
-  try:
-    os.stat(output_dir)
-  except:
-    try:
-      os.mkdir(output_dir)   
-    except OSError as err_msg:
-      try:
-        error_msg = str(err_msg).split("] ")[1] + "."
-      except IndexError:
-        error_msg = str(err_msg) + "."
-      print(settings.print_critical_msg(error_msg))
-      raise SystemExit()
-
-  # The logs filename construction.
-  filename = logs.create_log_file(url, output_dir)
-  return filename
-
-"""
 The main function.
 """
 def main(filename, url):
@@ -847,7 +811,7 @@ try:
             try:
               response, url = url_response(url)
               if response != False:
-                filename = logs_filename_creation()
+                filename = logs.logs_filename_creation(url)
                 main(filename, url)
             except:
               pass 
@@ -867,7 +831,7 @@ try:
         url = menu.options.url
       response, url = url_response(url)
       if response != False:
-        filename = logs_filename_creation()
+        filename = logs.logs_filename_creation(url)
         main(filename, url)
 
 except KeyboardInterrupt:

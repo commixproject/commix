@@ -1,4 +1,5 @@
 ## Version 3.5 (TBA)
+* Added: New option `--no-logging` for disabling logging to a file.
 * Revised: Minor improvement regarding redirect handler.
 * Updated: Minor update regarding scanning multiple targets given in a textual file (i.e. via option `-m`).
 * Added: Support for heuristic detection regarding command injections. 

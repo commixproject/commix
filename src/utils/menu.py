@@ -567,7 +567,13 @@ misc.add_option("--list-tampers",
                 action="store_true",
                 dest="list_tampers",
                 default=False,
-                help="Display list of available tamper scripts")
+                help="Display list of available tamper scripts.")
+
+misc.add_option("--no-logging", 
+                action="store_true",
+                dest="no_logging",
+                default=False,
+                help="Disable logging to a file.")
 
 misc.add_option("--purge", 
                 action="store_true",
