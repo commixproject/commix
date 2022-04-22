@@ -324,6 +324,7 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
     info_msg = "Ignoring '" + str(menu.options.ignore_code) + "' HTTP error code. "
     print(settings.print_info_msg(info_msg))
 
+
   # Skipping specific injection techniques.
   if settings.SKIP_TECHNIQUES:
     menu.options.tech = "".join(settings.AVAILABLE_TECHNIQUES)
@@ -854,9 +855,10 @@ def do_check(url, http_request_method, filename):
       err_msg += "."
       print(settings.print_critical_msg(err_msg))
 
-  logs.print_logs_notification(filename, url)
+  if not settings.MULTI_TARGETS:
+    logs.print_logs_notification(filename, url)
+
   if not settings.CHECK_BOTH_OS and not settings.MULTI_TARGETS:
-    # if not menu.options.bulkfile or settings.EOF:
-    #   print(settings.SINGLE_WHITESPACE)
     raise SystemExit()
+  
 # eof
