@@ -62,15 +62,15 @@ def file_read(separator, TAG, prefix, suffix, whitespace, http_request_method, u
     sys.stdout.flush()
     print(shell)
     output_file = open(filename, "a")
-    info_msg = "The contents of file '"
-    info_msg += file_to_read + "' : " + shell + ".\n"
-    output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
+    if not menu.options.no_logging:
+      info_msg = "The contents of file '"
+      info_msg += file_to_read + "' : " + shell + ".\n"
+      output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
     output_file.close()
   else:
     warn_msg = "It seems that you don't have permissions "
     warn_msg += "to read the '" + file_to_read + "' file."
-    sys.stdout.write(settings.print_warning_msg(warn_msg) + "\n")
-    sys.stdout.flush()
+    print(settings.print_warning_msg(warn_msg))
    
 """
 Write to a file on the target host.
@@ -79,8 +79,7 @@ def file_write(separator, TAG, prefix, suffix, whitespace, http_request_method, 
   file_to_write = menu.options.file_write
   if not os.path.exists(file_to_write):
     warn_msg = "It seems that the provided local file '" + file_to_write + "', does not exist."
-    sys.stdout.write(settings.print_warning_msg(warn_msg) + "\n")
-    sys.stdout.flush()
+    print(settings.print_warning_msg(warn_msg))
     raise SystemExit()
     
   if os.path.isfile(file_to_write):
@@ -89,11 +88,10 @@ def file_write(separator, TAG, prefix, suffix, whitespace, http_request_method, 
     content = "".join(str(p) for p in content).replace("'", "\"")
     if settings.TARGET_OS == "win":
       import base64
-      content = base64.b64encode(content)
+      content = base64.b64encode(content.encode(settings.DEFAULT_CODEC)).decode()
   else:
     warn_msg = "It seems that '" + file_to_write + "' is not a file."
-    sys.stdout.write(settings.print_warning_msg(warn_msg) + "\n")
-    sys.stdout.flush()
+    print(settings.print_warning_msg(warn_msg))
     
   if os.path.split(menu.options.file_dest)[1] == "" :
     dest_to_write = os.path.split(menu.options.file_dest)[0] + "/" + os.path.split(menu.options.file_write)[1]
@@ -140,20 +138,15 @@ def file_write(separator, TAG, prefix, suffix, whitespace, http_request_method, 
   response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
   shell = eb_injector.injection_results(response, TAG, cmd)
   shell = "".join(str(p) for p in shell)
+  #if settings.VERBOSITY_LEVEL != 0:
+  #  print(settings.SINGLE_WHITESPACE)
   if shell:
-    if settings.VERBOSITY_LEVEL != 0:
-      print(settings.SINGLE_WHITESPACE)
-    info_msg = "The " +  shell + Style.RESET_ALL
-    info_msg += Style.BRIGHT + " file was created successfully!" + "\n" 
-    sys.stdout.write(settings.print_bold_info_msg(info_msg))
-    sys.stdout.flush()
+    info_msg = "The '" +  shell
+    info_msg += Style.RESET_ALL + Style.BRIGHT + "' file was created successfully." 
+    print(settings.print_bold_info_msg(info_msg))
   else:
-    if settings.VERBOSITY_LEVEL != 0:
-      print(settings.SINGLE_WHITESPACE)
-    warn_msg = "It seems that you don't have permissions to write the '" + dest_to_write + "' file." 
-    sys.stdout.write(settings.print_warning_msg(warn_msg) + "\n")
-    sys.stdout.flush()
-
+    warn_msg = "It seems that you don't have permissions to write the '" + dest_to_write + "' file."
+    print(settings.print_warning_msg(warn_msg))
 
 """
 Upload a file on the target host.
@@ -169,13 +162,13 @@ def file_upload(separator, TAG, prefix, suffix, whitespace, http_request_method,
       _urllib.request.urlopen(file_to_upload, timeout=settings.TIMEOUT)
     except _urllib.error.HTTPError as err_msg:
       warn_msg = "It seems that the '" + file_to_upload + "' file, does not exist. (" +str(err_msg)+ ")"
-      sys.stdout.write(settings.print_warning_msg(warn_msg) + "\n")
-      sys.stdout.flush()
+      print(settings.print_warning_msg(warn_msg))
+      print(settings.SINGLE_WHITESPACE)
       raise SystemExit()
     except ValueError as err_msg:
       err_msg = str(err_msg[0]).capitalize() + str(err_msg)[1]
-      sys.stdout.write(settings.print_critical_msg(err_msg) + "\n")
-      sys.stdout.flush()
+      print(settings.print_critical_msg(err_msg))
+      print(settings.SINGLE_WHITESPACE)
       raise SystemExit() 
 
     # Check the file-destination
@@ -203,14 +196,12 @@ def file_upload(separator, TAG, prefix, suffix, whitespace, http_request_method,
     if settings.VERBOSITY_LEVEL != 0:
       print(settings.SINGLE_WHITESPACE)
     if shell:
-      info_msg = "The " +  shell
-      info_msg += Style.RESET_ALL + Style.BRIGHT + " file was uploaded successfully!" 
-      sys.stdout.write(settings.print_bold_info_msg(info_msg) + "\n")
-      sys.stdout.flush()
+      info_msg = "The '" +  shell
+      info_msg += Style.RESET_ALL + Style.BRIGHT + "' file was uploaded successfully." 
+      print(settings.print_bold_info_msg(info_msg))
     else:
       warn_msg = "It seems that you don't have permissions to write the '" + dest_to_upload + "' file."
-      sys.stdout.write(settings.print_warning_msg(warn_msg) + "\n")
-      sys.stdout.flush()
+      print(settings.print_warning_msg(warn_msg))
 
 """
 Check the defined options

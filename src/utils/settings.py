@@ -230,7 +230,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.5"
-REVISION = "40"
+REVISION = "41"
 STABLE_RELEASE = False
 if STABLE_RELEASE:
   VERSION = "v" + VERSION_NUM + "-stable"
@@ -477,11 +477,11 @@ PS_VERSION = "powershell.exe -InputFormat none write-host ([string]$(cmd /c powe
 
 # Current user
 CURRENT_USER = "whoami"
-WIN_CURRENT_USER = "echo %username%"
+WIN_CURRENT_USER = "echo %USERNAME%"
 
 # The hostname
 HOSTNAME = "hostname"
-WIN_HOSTNAME = "echo %computername%"
+WIN_HOSTNAME = "echo %COMPUTERNAME%"
 
 # Check if current user is root
 IS_ROOT = "echo $(id -u)"

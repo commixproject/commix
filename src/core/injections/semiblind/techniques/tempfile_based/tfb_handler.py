@@ -531,8 +531,8 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                 if settings.VERBOSITY_LEVEL != 0:
                   print(settings.SINGLE_WHITESPACE)
                 delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-                logs.print_logs_notification(filename, url) 
-                raise SystemExit()  
+                # logs.print_logs_notification(filename, url) 
+                # raise SystemExit()  
 
               if settings.VERBOSITY_LEVEL != 0 or not new_line:
                 print(settings.SINGLE_WHITESPACE)

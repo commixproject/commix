@@ -111,56 +111,56 @@ def check_tmp_path(url, timesec, filename, http_request_method, url_time_respons
 
   if menu.options.file_dest and '/tmp/' in menu.options.file_dest:
     call_tmp_based = True
+  # else:
+  if menu.options.web_root:
+    settings.WEB_ROOT = menu.options.web_root
   else:
-    if menu.options.web_root:
-      settings.WEB_ROOT = menu.options.web_root
-    else:
-      # Debian/Ubunt have been updated to use /var/www/html as default instead of /var/www.
-      if "apache" in settings.SERVER_BANNER.lower():
-        if "debian" or "ubuntu" in settings.SERVER_BANNER.lower():
-          try:
-            check_version = re.findall(r"/(.*)\.", settings.SERVER_BANNER.lower())
-            if check_version[0] > "2.3" and not settings.TARGET_OS == "win":
-              # Add "/html" to servers root directory
-              settings.WEB_ROOT = settings.WEB_ROOT + "/html"
-            else:
-              settings.WEB_ROOT = settings.WEB_ROOT 
-          except IndexError:
-            pass
-        # Add "/html" to servers root directory
-        elif "fedora" or "centos" in settings.SERVER_BANNER.lower():
-          settings.WEB_ROOT = settings.WEB_ROOT + "/html"
-        else:
-          pass
-      # On more recent versions (>= "1.2.4") the default root path has changed to "/usr/share/nginx/html"
-      elif "nginx" in settings.SERVER_BANNER.lower():
+    # Debian/Ubunt have been updated to use /var/www/html as default instead of /var/www.
+    if "apache" in settings.SERVER_BANNER.lower():
+      if "debian" or "ubuntu" in settings.SERVER_BANNER.lower():
         try:
           check_version = re.findall(r"/(.*)\.", settings.SERVER_BANNER.lower())
-          if check_version[0] >= "1.2.4":
+          if check_version[0] > "2.3" and not settings.TARGET_OS == "win":
             # Add "/html" to servers root directory
             settings.WEB_ROOT = settings.WEB_ROOT + "/html"
           else:
-            # Add "/www" to servers root directory
-            settings.WEB_ROOT = settings.WEB_ROOT + "/www"
+            settings.WEB_ROOT = settings.WEB_ROOT 
         except IndexError:
           pass
-      elif "microsoft-iis" in settings.SERVER_BANNER.lower():
-        pass
+      # Add "/html" to servers root directory
+      elif "fedora" or "centos" in settings.SERVER_BANNER.lower():
+        settings.WEB_ROOT = settings.WEB_ROOT + "/html"
       else:
-        # Provide custom server's root directory.
-        custom_web_root(url, timesec, filename, http_request_method, url_time_response)
+        pass
+    # On more recent versions (>= "1.2.4") the default root path has changed to "/usr/share/nginx/html"
+    elif "nginx" in settings.SERVER_BANNER.lower():
+      try:
+        check_version = re.findall(r"/(.*)\.", settings.SERVER_BANNER.lower())
+        if check_version[0] >= "1.2.4":
+          # Add "/html" to servers root directory
+          settings.WEB_ROOT = settings.WEB_ROOT + "/html"
+        else:
+          # Add "/www" to servers root directory
+          settings.WEB_ROOT = settings.WEB_ROOT + "/www"
+      except IndexError:
+        pass
+    elif "microsoft-iis" in settings.SERVER_BANNER.lower():
+      pass
+    else:
+      # Provide custom server's root directory.
+      custom_web_root(url, timesec, filename, http_request_method, url_time_response)
 
-      path = _urllib.parse.urlparse(url).path
-      path_parts = path.split('/')
-      count = 0
-      for part in path_parts:        
-        count = count + 1
-      count = count - 1
-      last_param = path_parts[count]
-      EXTRA_DIR = path.replace(last_param, "")
-      settings.WEB_ROOT = settings.WEB_ROOT + EXTRA_DIR
-      if settings.TARGET_OS == "win":
-        settings.WEB_ROOT = settings.WEB_ROOT.replace("/","\\")
+    path = _urllib.parse.urlparse(url).path
+    path_parts = path.split('/')
+    count = 0
+    for part in path_parts:        
+      count = count + 1
+    count = count - 1
+    last_param = path_parts[count]
+    EXTRA_DIR = path.replace(last_param, "")
+    settings.WEB_ROOT = settings.WEB_ROOT + EXTRA_DIR
+    if settings.TARGET_OS == "win":
+      settings.WEB_ROOT = settings.WEB_ROOT.replace("/","\\")
         
   return tmp_path
 
@@ -571,7 +571,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                 # if not menu.enumeration_options():
                 #   print(settings.SINGLE_WHITESPACE)
                 fb_file_access.do_check(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-                print(settings.SINGLE_WHITESPACE)
+                # print(settings.SINGLE_WHITESPACE)
                
             # Check if defined single cmd.
             if menu.options.os_cmd:
@@ -580,7 +580,6 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
               fb_enumeration.single_os_cmd_exec(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
               # Delete previous shell (text) files (output)
               delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-              raise SystemExit()
 
             try:
               # Pseudo-Terminal shell

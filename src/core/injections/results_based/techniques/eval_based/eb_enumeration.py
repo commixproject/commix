@@ -63,8 +63,9 @@ def powershell_version(separator, TAG, prefix, suffix, whitespace, http_request_
       sys.stdout.flush()
       # Add infos to logs file. 
       output_file = open(filename, "a")
-      info_msg = "The PowerShell's version number is " + ps_version + ".\n"
-      output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
+      if not menu.options.no_logging:
+        info_msg = "The PowerShell's version number is " + ps_version + ".\n"
+        output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
       output_file.close()
   except ValueError:
     warn_msg = "Heuristics have failed to identify the version of Powershell, "
@@ -94,12 +95,13 @@ def hostname(separator, TAG, prefix, suffix, whitespace, http_request_method, ur
     shell = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
   if shell:
     info_msg = "The hostname is " +  str(shell) + "."
-    sys.stdout.write(settings.print_bold_info_msg(info_msg) + "\n")
+    print(settings.print_bold_info_msg(info_msg) + "\n")
     sys.stdout.flush()
     # Add infos to logs file. 
     output_file = open(filename, "a")
-    info_msg = "The hostname is " + str(shell) + ".\n"
-    output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
+    if not menu.options.no_logging:
+      info_msg = "The hostname is " + str(shell) + ".\n"
+      output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
     output_file.close()
   else:
     warn_msg = "Heuristics have failed to identify the hostname."
@@ -166,9 +168,10 @@ def system_information(separator, TAG, prefix, suffix, whitespace, http_request_
       sys.stdout.flush()
       # Add infos to logs file.   
       output_file = open(filename, "a")
-      info_msg = "The target operating system is " + str(target_os)
-      info_msg += " and the hardware platform is " + str(target_arch) + ".\n"
-      output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
+      if not menu.options.no_logging:
+        info_msg = "The target operating system is " + str(target_os)
+        info_msg += " and the hardware platform is " + str(target_arch) + ".\n"
+        output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
       output_file.close()
   else:
     warn_msg = "Heuristics have failed to retrieve the system information."
@@ -223,8 +226,9 @@ def current_user(separator, TAG, prefix, suffix, whitespace, http_request_method
       sys.stdout.write(settings.print_bold_info_msg(info_msg))
       # Add infos to logs file.    
       output_file = open(filename, "a")
-      info_msg = "The current user is " + str(cu_account)
-      output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
+      if not menu.options.no_logging:
+        info_msg = "The current user is " + str(cu_account)
+        output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
       output_file.close()
       if shell:
         if (settings.TARGET_OS == "win" and not "Admin" in shell) or \
@@ -233,14 +237,16 @@ def current_user(separator, TAG, prefix, suffix, whitespace, http_request_method
           sys.stdout.flush()
           # Add infos to logs file.   
           output_file = open(filename, "a")
-          output_file.write(" and it is not privileged.\n")
+          if not menu.options.no_logging:
+            output_file.write(" and it is not privileged.\n")
           output_file.close()
         else:
           sys.stdout.write(Style.BRIGHT + " and it is " +  Style.RESET_ALL + Style.BRIGHT + "privileged" + Style.RESET_ALL + ".\n")
           sys.stdout.flush()
           # Add infos to logs file.   
           output_file = open(filename, "a")
-          output_file.write(" and it is privileged.\n")
+          if not menu.options.no_logging:
+            output_file.write(" and it is privileged.\n")
           output_file.close()
     else:
       info_msg = "The current user is " +  str(cu_account)
@@ -248,8 +254,9 @@ def current_user(separator, TAG, prefix, suffix, whitespace, http_request_method
       sys.stdout.flush()
       # Add infos to logs file.   
       output_file = open(filename, "a")
-      info_msg = "The current user is " + str(cu_account) + "\n"
-      output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
+      if not menu.options.no_logging:
+        info_msg = "The current user is " + str(cu_account) + "\n"
+        output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
       output_file.close()
   else:
     warn_msg = "Heuristics have failed to identify the current user."
@@ -301,8 +308,9 @@ def system_users(separator, TAG, prefix, suffix, whitespace, http_request_method
         sys.stdout.flush()
         # Add infos to logs file.   
         output_file = open(filename, "a")
-        output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
-        output_file.close()
+        if not menu.options.no_logging:
+          output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
+          output_file.close()
         count = 0
         for user in range(0, len(sys_users_list)):
           count = count + 1
@@ -330,7 +338,8 @@ def system_users(separator, TAG, prefix, suffix, whitespace, http_request_method
           print("    (" +str(count)+ ") '" + Style.BRIGHT +  sys_users_list[user] + Style.RESET_ALL + "'" + Style.BRIGHT + is_privileged + Style.RESET_ALL + ".")
           # Add infos to logs file.   
           output_file = open(filename, "a")
-          output_file.write("    (" +str(count)+ ") " + sys_users_list[user] + is_privileged + ".\n" )
+          if not menu.options.no_logging:
+            output_file.write("    (" +str(count)+ ") " + sys_users_list[user] + is_privileged + ".\n" )
           output_file.close()
       else:
         sys.stdout.write(settings.FAIL_STATUS)
@@ -371,7 +380,8 @@ def system_users(separator, TAG, prefix, suffix, whitespace, http_request_method
           sys_users = " ".join(str(p) for p in sys_users).strip()
           print(sys_users)
           output_file = open(filename, "a")
-          output_file.write("      " + sys_users)
+          if not menu.options.no_logging:
+            output_file.write("      " + sys_users)
           output_file.close()
         else:  
           sys_users_list = []
@@ -386,7 +396,8 @@ def system_users(separator, TAG, prefix, suffix, whitespace, http_request_method
             sys.stdout.flush()
             # Add infos to logs file.   
             output_file = open(filename, "a")
-            output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
+            if not menu.options.no_logging:
+              output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
             output_file.close()
             count = 0
             for user in range(0, len(sys_users_list)):
@@ -425,7 +436,8 @@ def system_users(separator, TAG, prefix, suffix, whitespace, http_request_method
                 print("    (" +str(count)+ ") '" + Style.BRIGHT +  fields[0]+ Style.RESET_ALL + "'" + Style.BRIGHT + is_privileged + Style.RESET_ALL + "(uid=" + fields[1] + "). Home directory is in '" + Style.BRIGHT + fields[2]+ Style.RESET_ALL + "'.") 
                 # Add infos to logs file.   
                 output_file = open(filename, "a")
-                output_file.write("    (" +str(count)+ ") '" + fields[0]+ "'" + is_privileged_nh + "(uid=" + fields[1] + "). Home directory is in '" + fields[2] + "'.\n" )
+                if not menu.options.no_logging:
+                  output_file.write("    (" +str(count)+ ") '" + fields[0]+ "'" + is_privileged_nh + "(uid=" + fields[1] + "). Home directory is in '" + fields[2] + "'.\n" )
                 output_file.close()
               except ValueError:
                 if count == 1 :
@@ -435,7 +447,8 @@ def system_users(separator, TAG, prefix, suffix, whitespace, http_request_method
                 sys_users = " ".join(str(p) for p in sys_users.split(":"))
                 print(sys_users) 
                 output_file = open(filename, "a")
-                output_file.write("      " + sys_users)
+                if not menu.options.no_logging:
+                  output_file.write("      " + sys_users)
                 output_file.close()
       else:
         sys.stdout.write(settings.FAIL_STATUS)
@@ -496,7 +509,8 @@ def system_passwords(separator, TAG, prefix, suffix, whitespace, http_request_me
         sys.stdout.flush()
         # Add infos to logs file.   
         output_file = open(filename, "a")
-        output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg )
+        if not menu.options.no_logging:
+          output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg )
         output_file.close()
         count = 0
         for line in sys_passes:
@@ -508,7 +522,8 @@ def system_passwords(separator, TAG, prefix, suffix, whitespace, http_request_me
                 print("  (" +str(count)+ ") " + Style.BRIGHT + fields[0]+ Style.RESET_ALL + " : " + Style.BRIGHT + fields[1]+ Style.RESET_ALL)
                 # Add infos to logs file.   
                 output_file = open(filename, "a")
-                output_file.write("    (" +str(count)+ ") " + fields[0] + " : " + fields[1] + "\n")
+                if not menu.options.no_logging:
+                  output_file.write("    (" +str(count)+ ") " + fields[0] + " : " + fields[1] + "\n")
                 output_file.close()
           # Check for appropriate '/etc/shadow' format.
           except IndexError:
@@ -518,7 +533,8 @@ def system_passwords(separator, TAG, prefix, suffix, whitespace, http_request_me
               sys.stdout.write(settings.print_warning_msg(warn_msg)+ "\n")
             print(fields[0])
             output_file = open(filename, "a")
-            output_file.write("      " + fields[0])
+            if not menu.options.no_logging:
+              output_file.write("      " + fields[0])
             output_file.close()
       else:
         sys.stdout.write(settings.FAIL_STATUS)
@@ -532,6 +548,8 @@ Single os-shell execution
 """
 def single_os_cmd_exec(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec):
   cmd =  menu.options.os_cmd
+  info_msg =  "Executing '" + cmd + "' command."
+  print(settings.print_info_msg(info_msg))
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
     # Command execution results.
     response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
@@ -550,10 +568,7 @@ def single_os_cmd_exec(separator, TAG, prefix, suffix, whitespace, http_request_
         print(settings.SINGLE_WHITESPACE)
       print(settings.command_execution_output(shell))
       print(settings.SINGLE_WHITESPACE)
-      logs.print_logs_notification(filename, url)
   else:
-    if settings.VERBOSITY_LEVEL <= 1:
-      print(settings.SINGLE_WHITESPACE)
     err_msg = "The '" + cmd + "' command, does not return any output."
     print(settings.print_critical_msg(err_msg)) 
     print(settings.SINGLE_WHITESPACE)

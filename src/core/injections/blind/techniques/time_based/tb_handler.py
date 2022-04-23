@@ -481,8 +481,6 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                 # Export injection result
                 tb_injector.export_injection_results(cmd, separator, output, check_how_long)
                 print(settings.SINGLE_WHITESPACE)
-                logs.print_logs_notification(filename, url) 
-                raise SystemExit()
 
               if not new_line :
                 print(settings.SINGLE_WHITESPACE)
