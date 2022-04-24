@@ -363,7 +363,7 @@ def file_access(url, cve, check_header, filename):
   # Write to a file on the target host.
   #-------------------------------------
   if menu.options.file_write:
-    file_to_write = menu.options.file_write
+    file_to_write = menu.options.file_write.encode(settings.DEFAULT_CODEC).decode()
     if not os.path.exists(file_to_write):
       warn_msg = "It seems that the provided local file '" + file_to_write + "', does not exist."
       print(settings.print_warning_msg(warn_msg))
@@ -414,7 +414,7 @@ def file_access(url, cve, check_header, filename):
   # Upload a file on the target host.
   #-------------------------------------
   if menu.options.file_upload:
-    file_to_upload = menu.options.file_upload
+    file_to_upload = menu.options.file_upload.encode(settings.DEFAULT_CODEC).decode()
     # check if remote file exists.
     try:
       _urllib.request.urlopen(file_to_upload, timeout=settings.TIMEOUT)
@@ -464,7 +464,7 @@ def file_access(url, cve, check_header, filename):
   # Read a file from the target host.
   #-------------------------------------
   if menu.options.file_read:
-    file_to_read = menu.options.file_read
+    file_to_read = menu.options.file_read.encode(settings.DEFAULT_CODEC).decode()
     # Execute command
     cmd = "cat " + settings.FILE_READ + file_to_read
     shell, payload = cmd_exec(url, cmd, cve, check_header, filename)

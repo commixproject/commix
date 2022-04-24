@@ -35,7 +35,7 @@ The "classic" technique on result-based OS command injection.
 Read a file from the target host.
 """
 def file_read(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec):
-  file_to_read = menu.options.file_read
+  file_to_read = menu.options.file_read.encode(settings.DEFAULT_CODEC).decode()
   # Execute command
   if settings.TARGET_OS == "win":
     cmd = settings.WIN_FILE_READ + file_to_read
@@ -74,7 +74,7 @@ def file_read(separator, TAG, prefix, suffix, whitespace, http_request_method, u
 Write to a file on the target host.
 """
 def file_write(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec):
-  file_to_write = menu.options.file_write
+  file_to_write = menu.options.file_write.encode(settings.DEFAULT_CODEC).decode()
   if not os.path.exists(file_to_write):
     warn_msg = "It seems that the provided local file '" + file_to_write + "', does not exist."
     print(settings.print_warning_msg(warn_msg))
@@ -165,7 +165,7 @@ def file_upload(separator, TAG, prefix, suffix, whitespace, http_request_method,
     # Not yet implemented
     pass
   else:
-    file_to_upload = menu.options.file_upload
+    file_to_upload = menu.options.file_upload.encode(settings.DEFAULT_CODEC).decode()
     # check if remote file exists.
     try:
       _urllib.request.urlopen(file_to_upload, timeout=settings.TIMEOUT)
