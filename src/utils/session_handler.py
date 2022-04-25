@@ -366,7 +366,7 @@ def store_cmd(url, cmd, shell, vuln_parameter):
       conn.close() 
     except sqlite3.OperationalError as err_msg:
       print(settings.print_critical_msg(err_msg))
-    except TypeError as err_msg:
+    except (TypeError, AttributeError) as err_msg:
       pass
 
 """

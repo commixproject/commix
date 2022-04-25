@@ -54,7 +54,7 @@ general = OptionGroup(parser, Style.BRIGHT + Style.UNDERLINE + "General" + Style
                         "These options relate to general matters. ")
 
 general.add_option("-v",
-                default="0",
+                default=0,
                 action="store",
                 type="int",
                 dest="verbose",
@@ -64,7 +64,7 @@ general.add_option("--install",
                 action="store_true",
                 dest="install",
                 default=False,
-                help="Install 'commix' to your system.")
+                help="Install " + settings.APPLICATION + " to your system.")
 
 general.add_option("--version",
                 action="store_true",
@@ -114,12 +114,6 @@ general.add_option("--skip-heuristics",
                 dest="skip_heuristics",
                 default=False,
                 help="Skip heuristic detection for code injection.")
-
-# general.add_option("--encoding",
-#                 action="store",
-#                 dest="encoding",
-#                 default=None,
-#                 help="Force character encoding used for data retrieval (e.g. GBK).")
 
 general.add_option("--codec",
                 action="store",
@@ -302,16 +296,16 @@ request.add_option("--ignore-redirects",
 request.add_option("--timeout",
                 action="store",
                 dest="timeout",
-                default=False,
+                default=settings.TIMEOUT,
                 type="int",
-                help="Seconds to wait before timeout connection (default 30).")
+                help="Seconds to wait before timeout connection (Default: " + str(settings.TIMEOUT) + ").")
 
 request.add_option("--retries",
                 action="store",
                 dest="retries",
-                default=False,
+                default=settings.MAX_RETRIES,
                 type="int",
-                help="Retries when the connection timeouts (Default: 3).")
+                help="Retries when the connection timeouts (Default: " + str(settings.MAX_RETRIES) + ").")
 
 request.add_option("--drop-set-cookie",
                 action="store_true",
@@ -481,7 +475,7 @@ injection.add_option("--time-sec",
                 action="store",
                 type="int",
                 dest="timesec",
-                help="Seconds to delay the OS response (Default 1).")
+                help="Seconds to delay the OS response (Default: 1).")
 
 injection.add_option("--tmp-path", 
                 action="store",
@@ -742,24 +736,14 @@ def tab_completer(text, state):
 Check if enumeration options are enabled.
 """
 def enumeration_options():
-  if options.hostname or \
-     options.current_user or \
-     options.is_root or \
-     options.is_admin or \
-     options.sys_info or \
-     options.users or \
-     options.privileges or \
-     options.passwords or \
-     options.ps_version :
+  if any((options.hostname, options.current_user, options.is_root, options.is_admin, options.sys_info, options.users, options.privileges, options.passwords, options.ps_version)):
     return True
 
 """
 Check if file access options are enabled.
 """
 def file_access_options():
-  if options.file_write or \
-     options.file_upload or\
-     options.file_read:
+  if any((options.file_write, options.file_upload, options.file_read)):
     return True
 
 # eof

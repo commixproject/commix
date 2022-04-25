@@ -230,7 +230,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.5"
-REVISION = "42"
+REVISION = "43"
 STABLE_RELEASE = False
 if STABLE_RELEASE:
   VERSION = "v" + VERSION_NUM + "-stable"
@@ -1011,8 +1011,8 @@ CLI_HISTORY = ""
 # Check for multi encoded payloads
 MULTI_ENCODED_PAYLOAD = []
 
-# Default Timeout
-TIMEOUT = 31
+# Default Timeout (Seconds to wait before timeout connection)
+TIMEOUT = 30
 
 # Retries when the connection timeouts (Default: 3).
 MAX_RETRIES = 3
