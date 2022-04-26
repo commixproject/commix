@@ -276,15 +276,16 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
     check_start = time.time()
     output = []
     percent = "0.0%"
-    info_msg = "Grabbing the output from '" + OUTPUT_TEXTFILE + "'."
+    info_msg = "Grabbing the execution output (via '" + OUTPUT_TEXTFILE + "')."
     if settings.VERBOSITY_LEVEL == 0 :
       info_msg += ".. (" + str(percent) + ")"
     elif settings.VERBOSITY_LEVEL == 1 :
       info_msg +=  ""
     else:
       info_msg +=  "\n"  
-    sys.stdout.write("\r" + settings.print_info_msg(info_msg))
-    sys.stdout.flush()
+    if output_length > 1:
+      sys.stdout.write("\r" + settings.print_info_msg(info_msg))
+      sys.stdout.flush()
     for num_of_chars in range(1, int(num_of_chars)):
       char_pool = checks.generate_char_pool(num_of_chars)  
       for ascii_char in char_pool:
@@ -348,7 +349,7 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
               float_percent = settings.info_msg
             else:
               float_percent = ".. (" + str(float_percent) + ")"
-            info_msg = "Grabbing the output from '" + OUTPUT_TEXTFILE +"'."
+            info_msg = "Grabbing the execution output (via '" + OUTPUT_TEXTFILE +"')."
             info_msg += float_percent
             sys.stdout.write("\r" + settings.print_info_msg(info_msg))
             sys.stdout.flush()

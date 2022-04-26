@@ -57,10 +57,8 @@ def file_read(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
   if shell:
     info_msg = "The contents of file '"  
     info_msg += file_to_read + Style.RESET_ALL + Style.BRIGHT 
-    info_msg += "'" + Style.RESET_ALL + " : "
-    sys.stdout.write(settings.print_bold_info_msg(info_msg))
-    sys.stdout.flush()
-    sys.stdout.write(shell)
+    info_msg += "'" + Style.RESET_ALL + " : " + shell
+    print(settings.print_bold_info_msg(info_msg))
     output_file = open(filename, "a")
     if not menu.options.no_logging:
       info_msg = "The contents of file '"
@@ -81,7 +79,6 @@ def file_write(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec,
   if not os.path.exists(file_to_write):
     warn_msg = "It seems that the provided local file '" + file_to_write + "', does not exist."
     print(settings.print_warning_msg(warn_msg))
-    print(settings.SINGLE_WHITESPACE)
     raise SystemExit()
   if os.path.isfile(file_to_write):
     with open(file_to_write, 'r') as content_file:
@@ -93,7 +90,6 @@ def file_write(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec,
   else:
     warn_msg = "It seems that '" + file_to_write + "' is not a file."
     print(settings.print_warning_msg(warn_msg))
-    print(settings.SINGLE_WHITESPACE)
   if os.path.split(menu.options.file_dest)[1] == "" :
     dest_to_write = os.path.split(menu.options.file_dest)[0] + "/" + os.path.split(menu.options.file_write)[1]
   elif os.path.split(menu.options.file_dest)[0] == "/":
@@ -163,7 +159,7 @@ def file_write(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec,
 Upload a file on the target host.
 """
 def file_upload(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response):
-  _ = True
+  _ = False
   if settings.TARGET_OS == "win":
     # Not yet implemented
     pass
@@ -209,10 +205,12 @@ def file_upload(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec
     if settings.VERBOSITY_LEVEL == 0 and _:
       print(settings.SINGLE_WHITESPACE)
     if shell:
+      sys.stdout.flush()
       info_msg = "The '" +  shell
       info_msg += Style.RESET_ALL + Style.BRIGHT + "' file was uploaded successfully." 
       print(settings.print_bold_info_msg(info_msg))
     else:
+      sys.stdout.flush()
       warn_msg = "It seems that you don't have permissions to write the '" + dest_to_upload + "' file."
       print(settings.print_warning_msg(warn_msg))
 

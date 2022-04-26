@@ -61,7 +61,7 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
 
   # Check if defined "--maxlen" option.
   if menu.options.maxlen:
-    maxlen = settings.MAXLEN
+    settings.MAXLEN = maxlen = menu.options.maxlen
     
   # Check if defined "--url-reload" option.
   if menu.options.url_reload == True:
@@ -479,8 +479,8 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                 cmd = menu.options.os_cmd
                 check_how_long, output = tb_enumeration.single_os_cmd_exec(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
                 # Export injection result
-                tb_injector.export_injection_results(cmd, separator, output, check_how_long)
-                print(settings.SINGLE_WHITESPACE)
+                #tb_injector.export_injection_results(cmd, separator, output, check_how_long)
+                #print(settings.SINGLE_WHITESPACE)
 
               if not new_line :
                 print(settings.SINGLE_WHITESPACE)

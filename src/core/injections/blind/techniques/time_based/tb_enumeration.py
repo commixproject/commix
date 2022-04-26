@@ -522,21 +522,24 @@ def system_passwords(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, ti
 Single os-shell execution
 """
 def single_os_cmd_exec(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response):
-  cmd = menu.options.os_cmd
-  info_msg =  "Executing '" + cmd + "' command."
+  info_msg =  "Executing the '" + cmd + "' command."
   print(settings.print_info_msg(info_msg))
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
+    # The main command injection exploitation.
     check_how_long, output = tb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
     session_handler.store_cmd(url, cmd, output, vuln_parameter)
-    if settings.VERBOSITY_LEVEL != 0:
-      print(settings.SINGLE_WHITESPACE) 
-    return check_how_long, output
+    print(settings.SINGLE_WHITESPACE)
   else:
     output = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
+    check_how_long = 0
+  if len(output) > 1:
     if settings.VERBOSITY_LEVEL <= 1:
       print(settings.SINGLE_WHITESPACE)
     print(settings.command_execution_output(output))
-    print(settings.SINGLE_WHITESPACE)
+  else:
+    err_msg = "The '" + cmd + "' command, does not return any output."
+    print(settings.print_critical_msg(err_msg)) 
+  return check_how_long, output
 
 """
 Check the defined options

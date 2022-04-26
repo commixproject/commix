@@ -46,8 +46,8 @@ then use the "/tmp/" directory for tempfile-based technique.
 """
 def tfb_controller(no_result, url, timesec, filename, tmp_path, http_request_method, url_time_response):
   if no_result == True:
-    info_msg = "Trying to create a file, in temporary "
-    info_msg += "directory (" + tmp_path + ") for command execution results.\n"
+    info_msg = "Trying to create a file in temporary "
+    info_msg += "directory (" + tmp_path + ") for command execution output.\n"
     sys.stdout.write(settings.print_info_msg(info_msg))
     call_tfb = tfb_handler.exploitation(url, timesec, filename, tmp_path, http_request_method, url_time_response)   
     return call_tfb
@@ -184,7 +184,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
   if not settings.LOAD_SESSION or settings.RETEST == True: 
     TAG = ''.join(random.choice(string.ascii_uppercase) for i in range(6)) 
     info_msg = "Trying to create a file in '" + settings.WEB_ROOT 
-    info_msg += "' for command execution results. "
+    info_msg += "' for command execution output. "
     print(settings.print_info_msg(info_msg))
 
   i = 0

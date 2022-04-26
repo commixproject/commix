@@ -82,7 +82,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
 
   # Check if defined "--maxlen" option.
   if menu.options.maxlen:
-    maxlen = settings.MAXLEN
+    settings.MAXLEN = maxlen = menu.options.maxlen
     
   # Check if defined "--url-reload" option.
   if menu.options.url_reload == True:
@@ -524,15 +524,17 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
               
               # Check if defined single cmd.
               if menu.options.os_cmd:
+                cmd = menu.options.os_cmd
                 check_how_long, output = tfb_enumeration.single_os_cmd_exec(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
                 # Export injection result
-                tfb_injector.export_injection_results(cmd, separator, output, check_how_long)
-                # Delete previous shell (text) files (output) from temp.
-                if settings.VERBOSITY_LEVEL != 0:
-                  print(settings.SINGLE_WHITESPACE)
-                delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-                # logs.print_logs_notification(filename, url) 
-                # raise SystemExit()  
+                if len(output) > 1:
+                  #tfb_injector.export_injection_results(cmd, separator, output, check_how_long)
+                  # Delete previous shell (text) files (output) from temp.
+                  if settings.VERBOSITY_LEVEL != 0:
+                    print(settings.SINGLE_WHITESPACE)
+                  delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+                  # logs.print_logs_notification(filename, url) 
+                  # raise SystemExit()  
 
               if settings.VERBOSITY_LEVEL != 0 or not new_line:
                 print(settings.SINGLE_WHITESPACE)

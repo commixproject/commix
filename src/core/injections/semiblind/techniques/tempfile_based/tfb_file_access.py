@@ -47,7 +47,6 @@ def file_read(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
     check_how_long, output = tfb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
     session_handler.store_cmd(url, cmd, output, vuln_parameter)
     _ = True
-    # new_line = "\n"
   else:
     output = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
   shell = output
@@ -71,6 +70,7 @@ def file_read(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
       output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
     output_file.close()
   else:
+    sys.stdout.flush()
     warn_msg = "It seems that you don't have permissions "
     warn_msg += "to read the '" + file_to_read + "' file."
     print(settings.print_warning_msg(warn_msg))
@@ -157,6 +157,7 @@ def file_write(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec,
     info_msg += Style.RESET_ALL + Style.BRIGHT + "' file was created successfully." 
     print(settings.print_bold_info_msg(info_msg))
   else:
+    sys.stdout.flush()
     warn_msg = "It seems that you don't have permissions to write the '" + dest_to_write + "' file."
     print(settings.print_warning_msg(warn_msg))
 
@@ -214,6 +215,7 @@ def file_upload(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec
       info_msg += Style.RESET_ALL + Style.BRIGHT + "' file was uploaded successfully." 
       print(settings.print_bold_info_msg(info_msg))
     else:
+      sys.stdout.flush()
       warn_msg = "It seems that you don't have permissions to write the '" + dest_to_upload + "' file."
       print(settings.print_warning_msg(warn_msg))
 
