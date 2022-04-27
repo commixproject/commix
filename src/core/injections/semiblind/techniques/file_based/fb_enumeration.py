@@ -546,7 +546,8 @@ def single_os_cmd_exec(separator, payload, TAG, timesec, prefix, suffix, whitesp
       print(settings.SINGLE_WHITESPACE)
   else:
     err_msg = "The '" + cmd + "' command, does not return any output."
-    print(settings.print_critical_msg(err_msg)) 
+    print(settings.print_critical_msg(err_msg))
+    print(settings.SINGLE_WHITESPACE)
 
 """
 Check the defined options

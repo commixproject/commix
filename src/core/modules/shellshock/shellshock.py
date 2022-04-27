@@ -399,10 +399,8 @@ def file_access(url, cve, check_header, filename):
     # Check if defined cookie injection.
     shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
     if shell:
-      info_msg = "The " +  shell + Style.RESET_ALL 
-      info_msg += Style.BRIGHT + " file was created successfully."  
-      sys.stdout.write(settings.print_bold_info_msg(info_msg))
-      sys.stdout.flush()
+      info_msg = "The file has been successfully created on remote directory '" + dest_to_write + "'." 
+      print(settings.print_bold_info_msg(info_msg))
     else:
       warn_msg = "It seems that you don't have permissions to write the '"
       warn_msg += dest_to_write + "' file." + "\n"
@@ -448,14 +446,11 @@ def file_access(url, cve, check_header, filename):
     shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
     shell = "".join(str(p) for p in shell)
     if shell:
-      info_msg = "The " +  shell 
-      info_msg += Style.RESET_ALL + Style.BRIGHT 
-      info_msg += " file was uploaded successfully.\n"
-      sys.stdout.write(settings.print_bold_info_msg(info_msg))
-      sys.stdout.flush()
+      info_msg = "The file has been successfully uploaded on remote directory '" + dest_to_upload + "'."
+      print(settings.print_bold_info_msg(info_msg))
     else:
       warn_msg = "It seems that you don't have permissions "
-      warn_msg += "to write the '" + dest_to_upload + "' file.\n"
+      warn_msg += "to upload the '" + dest_to_upload + "' file.\n"
       sys.stdout.write(settings.print_warning_msg(warn_msg))
       sys.stdout.flush()
     settings.FILE_ACCESS_DONE = True
@@ -468,15 +463,14 @@ def file_access(url, cve, check_header, filename):
     # Execute command
     cmd = "cat " + settings.FILE_READ + file_to_read
     shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
-    if shell:
-      info_msg = "The contents of file '"  
-      info_msg += file_to_read + "'" + Style.RESET_ALL + ": "  
-      sys.stdout.write(settings.print_bold_info_msg(info_msg))
-      sys.stdout.flush()
-      print(shell)
+    if shell: 
+      info_msg = "Content of file '"  
+      info_msg += file_to_read + "' has been extracted."
+      print(settings.print_bold_info_msg(info_msg))
+      print(settings.print_sub_content(shell))
       output_file = open(filename, "a")
       if not menu.options.no_logging:
-        info_msg = "The contents of file '"
+        info_msg = "Extracted content of file '"
         info_msg += file_to_read + "' : " + shell + ".\n"
         output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
       output_file.close()

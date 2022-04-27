@@ -568,19 +568,18 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                   pass
             else:
               if menu.file_access_options():
-                # if not menu.enumeration_options():
-                #   print(settings.SINGLE_WHITESPACE)
                 fb_file_access.do_check(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-                # print(settings.SINGLE_WHITESPACE)
                
-            # Check if defined single cmd.
-            if menu.options.os_cmd:
-              # if not menu.file_access_options():
-              #   print(settings.SINGLE_WHITESPACE)
-              fb_enumeration.single_os_cmd_exec(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-              # Delete previous shell (text) files (output)
-              delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+              # Check if defined single cmd.
+              if menu.options.os_cmd:
+                fb_enumeration.single_os_cmd_exec(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+                # Delete previous shell (text) files (output)
+                delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
 
+              else:
+                if menu.file_access_options() or menu.options.os_cmd:
+                  print(settings.SINGLE_WHITESPACE)
+                  
             try:
               # Pseudo-Terminal shell
               go_back = False

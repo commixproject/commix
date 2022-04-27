@@ -518,8 +518,6 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                     print(settings.print_error_msg(err_msg))
                     pass
               else:
-                # if not menu.enumeration_options() and not menu.options.os_cmd:
-                #   print(settings.SINGLE_WHITESPACE)
                 tfb_file_access.do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
               
               # Check if defined single cmd.
@@ -533,11 +531,10 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                   if settings.VERBOSITY_LEVEL != 0:
                     print(settings.SINGLE_WHITESPACE)
                   delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-                  # logs.print_logs_notification(filename, url) 
-                  # raise SystemExit()  
 
-              if settings.VERBOSITY_LEVEL != 0 or not new_line:
+              if not new_line :
                 print(settings.SINGLE_WHITESPACE)
+
               try:    
                 # Pseudo-Terminal shell
                 go_back = False

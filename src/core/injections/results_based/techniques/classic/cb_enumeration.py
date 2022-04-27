@@ -545,8 +545,8 @@ Single os-shell execution
 """
 def single_os_cmd_exec(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec):
   cmd =  menu.options.os_cmd
-  if menu.file_access_options():
-    sys.stdout.flush()
+  # if menu.file_access_options():
+  #   sys.stdout.flush()
   info_msg =  "Executing the '" + cmd + "' command."
   print(settings.print_info_msg(info_msg))
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:

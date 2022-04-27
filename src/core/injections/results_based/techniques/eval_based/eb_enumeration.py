@@ -95,8 +95,7 @@ def hostname(separator, TAG, prefix, suffix, whitespace, http_request_method, ur
     shell = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
   if shell:
     info_msg = "The hostname is " +  str(shell) + "."
-    print(settings.print_bold_info_msg(info_msg) + "\n")
-    sys.stdout.flush()
+    print(settings.print_bold_info_msg(info_msg))
     # Add infos to logs file. 
     output_file = open(filename, "a")
     if not menu.options.no_logging:

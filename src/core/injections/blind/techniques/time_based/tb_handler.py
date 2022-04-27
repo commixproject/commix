@@ -470,8 +470,6 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                     print(settings.print_error_msg(err_msg))
                     pass
               else:
-                # if not menu.enumeration_options() and not menu.options.os_cmd:
-                #   print(settings.SINGLE_WHITESPACE)
                 tb_file_access.do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
 
               # Check if defined single cmd.
@@ -480,7 +478,6 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                 check_how_long, output = tb_enumeration.single_os_cmd_exec(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
                 # Export injection result
                 #tb_injector.export_injection_results(cmd, separator, output, check_how_long)
-                #print(settings.SINGLE_WHITESPACE)
 
               if not new_line :
                 print(settings.SINGLE_WHITESPACE)
