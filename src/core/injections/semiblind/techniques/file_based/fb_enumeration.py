@@ -268,7 +268,7 @@ def system_users(separator, payload, TAG, timesec, prefix, suffix, whitespace, h
     # if settings.VERBOSITY_LEVEL != 0:
     #   print(settings.SINGLE_WHITESPACE)
     info_msg = "Executing the 'net users' command "
-    info_msg += "to enumerate users entries. "  
+    info_msg += "in order to enumerate users entries. "  
     sys.stdout.write(settings.print_info_msg(info_msg))
     sys.stdout.flush()
     try:
@@ -340,8 +340,8 @@ def system_users(separator, payload, TAG, timesec, prefix, suffix, whitespace, h
   else:
     # if settings.VERBOSITY_LEVEL != 0:
     #   print(settings.SINGLE_WHITESPACE)
-    info_msg = "Fetching '" + settings.PASSWD_FILE 
-    info_msg += "' to enumerate users entries. "  
+    info_msg = "Fetching the content of the file '" + settings.PASSWD_FILE 
+    info_msg += "' in order to enumerate users entries. "  
     sys.stdout.write(settings.print_info_msg(info_msg))
     sys.stdout.flush()
     try:
@@ -434,8 +434,8 @@ def system_users(separator, payload, TAG, timesec, prefix, suffix, whitespace, h
       else:
         sys.stdout.write(settings.FAIL_STATUS)
         sys.stdout.flush()
-        warn_msg = "It seems that you don't have permissions to read '" 
-        warn_msg += settings.PASSWD_FILE + "' to enumerate users entries."
+        warn_msg = "It seems that you don't have permissions to read the '" 
+        warn_msg += settings.PASSWD_FILE + "'."
         print("\n" + settings.print_warning_msg(warn_msg))   
     except TypeError:
       sys.stdout.write(settings.FAIL_STATUS + "\n")
@@ -472,8 +472,8 @@ def system_passwords(separator, payload, TAG, timesec, prefix, suffix, whitespac
       sys_passes = " "
       # if settings.VERBOSITY_LEVEL != 0:
       #   print(settings.SINGLE_WHITESPACE)
-      info_msg = "Fetching '" + settings.SHADOW_FILE 
-      info_msg += "' to enumerate users password hashes. "  
+      info_msg = "Fetching the content of the file '" + settings.SHADOW_FILE 
+      info_msg += "' in order to enumerate users password hashes. "  
       sys.stdout.write(settings.print_info_msg(info_msg))
       sys.stdout.flush()
       sys_passes = "".join(str(p) for p in sys_passes)
@@ -518,8 +518,8 @@ def system_passwords(separator, payload, TAG, timesec, prefix, suffix, whitespac
       else:
         sys.stdout.write(settings.FAIL_STATUS)
         sys.stdout.flush()
-        warn_msg = "It seems that you don't have permissions to read '" 
-        warn_msg += settings.SHADOW_FILE + "' to enumerate users password hashes."
+        warn_msg = "It seems that you don't have permissions to read the '" 
+        warn_msg += settings.SHADOW_FILE + "' file."
         print("\n" + settings.print_warning_msg(warn_msg))
 
 """
@@ -527,7 +527,7 @@ Single os-shell execution
 """
 def single_os_cmd_exec(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
   cmd =  menu.options.os_cmd
-  info_msg =  "Executing the '" + cmd + "' command."
+  info_msg =  "Executing the user-supplied command '" + cmd + "'."
   print(settings.print_info_msg(info_msg))
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
     # Command execution results.

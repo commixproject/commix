@@ -185,8 +185,8 @@ def enumeration(url, cve, check_header, filename):
   if menu.options.users:
     cmd = settings.SYS_USERS             
     sys_users, payload = cmd_exec(url, cmd, cve, check_header, filename)
-    info_msg = "Fetching '" + settings.PASSWD_FILE 
-    info_msg += "' to enumerate users entries. "  
+    info_msg = "Fetching the content of the file '" + settings.PASSWD_FILE 
+    info_msg += "' in order to enumerate users entries. "  
     sys.stdout.write(settings.print_info_msg(info_msg))
     sys.stdout.flush()
     try:
@@ -280,8 +280,8 @@ def enumeration(url, cve, check_header, filename):
       else:
         sys.stdout.write(settings.FAIL_STATUS)
         sys.stdout.flush()
-        warn_msg = "It seems that you don't have permissions to read '" 
-        warn_msg += settings.PASSWD_FILE + "' to enumerate users entries."
+        warn_msg = "It seems that you don't have permissions to read the '" 
+        warn_msg += settings.PASSWD_FILE + "'."
         print("\n" + settings.print_warning_msg(warn_msg))   
     except TypeError:
       sys.stdout.write(settings.FAIL_STATUS + "\n")
@@ -291,7 +291,7 @@ def enumeration(url, cve, check_header, filename):
     except IndexError:
       sys.stdout.write(settings.FAIL_STATUS)
       warn_msg = "Some kind of WAF/IPS/IDS probably blocks the attempt to read '" 
-      warn_msg += settings.PASSWD_FILE + "' to enumerate users entries." 
+      warn_msg += settings.PASSWD_FILE + "'." 
       sys.stdout.write("\n" + settings.print_warning_msg(warn_msg))
       sys.stdout.flush()
       pass
@@ -308,8 +308,8 @@ def enumeration(url, cve, check_header, filename):
       sys_passes = sys_passes.replace(" ", "\n")
       sys_passes = sys_passes.split( )
       if len(sys_passes) != 0 :
-        info_msg = "Fetching '" + settings.SHADOW_FILE 
-        info_msg += "' to enumerate users password hashes. "  
+        info_msg = "Fetching the content of the file '" + settings.SHADOW_FILE 
+        info_msg += "' in order to enumerate users password hashes. "  
         sys.stdout.write(settings.print_info_msg(info_msg))
         sys.stdout.flush()
         sys.stdout.write(settings.SUCCESS_STATUS)
@@ -349,8 +349,8 @@ def enumeration(url, cve, check_header, filename):
               output_file.write("      " + fields[0])
             output_file.close()
       else:
-        warn_msg = "It seems that you don't have permissions to read '"
-        warn_msg += settings.SHADOW_FILE + "' to enumerate users password hashes."
+        warn_msg = "It seems that you don't have permissions to read the '"
+        warn_msg += settings.SHADOW_FILE + "' file."
         print(settings.print_warning_msg(warn_msg))
     settings.ENUMERATION_DONE = True  
 
@@ -464,13 +464,13 @@ def file_access(url, cve, check_header, filename):
     cmd = "cat " + settings.FILE_READ + file_to_read
     shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
     if shell: 
-      info_msg = "Content of file '"  
-      info_msg += file_to_read + "' has been extracted."
+      info_msg = "Fetched content of the file '"    
+      info_msg += file_to_read + "'."
       print(settings.print_bold_info_msg(info_msg))
       print(settings.print_sub_content(shell))
       output_file = open(filename, "a")
       if not menu.options.no_logging:
-        info_msg = "Extracted content of file '"
+        info_msg = "Extracted content of the file '"
         info_msg += file_to_read + "' : " + shell + ".\n"
         output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
       output_file.close()

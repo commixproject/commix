@@ -468,7 +468,8 @@ once the user provides the path of web server's root directory.
 def procced_with_file_based_technique(): 
   while True:
     if not menu.options.batch:
-      question_msg = "Do you want to procced with the (semi-blind) "
+      question_msg = "Due to the provided '--web-root' option,"
+      question_msg += " do you want to procced with the (semi-blind) "
       question_msg += "file-based injection technique? [Y/n] > "
       enable_fb = _input(settings.print_question_msg(question_msg))
     else:

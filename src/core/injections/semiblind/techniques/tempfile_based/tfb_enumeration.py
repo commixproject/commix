@@ -270,7 +270,7 @@ def system_users(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timese
     if settings.VERBOSITY_LEVEL == 0 and _:
       print(settings.SINGLE_WHITESPACE)
     info_msg = "Executing the 'net users' command "
-    info_msg += "to enumerate users entries. "  
+    info_msg += "in order to enumerate users entries. "  
     sys.stdout.write(settings.print_info_msg(info_msg))
     sys.stdout.flush()
     try:
@@ -339,8 +339,8 @@ def system_users(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timese
   else:
     if settings.VERBOSITY_LEVEL == 0 and _:
       print(settings.SINGLE_WHITESPACE)
-    info_msg = "Fetching '" + settings.PASSWD_FILE 
-    info_msg += "' to enumerate users entries. "
+    info_msg = "Fetching the content of the file '" + settings.PASSWD_FILE 
+    info_msg += "' in order to enumerate users entries. "
     sys.stdout.write(settings.print_info_msg(info_msg))
     sys.stdout.flush()
     try:
@@ -433,8 +433,8 @@ def system_users(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timese
                 output_file.close()
       else:
         sys.stdout.write(settings.FAIL_STATUS)
-        warn_msg = "It seems that you don't have permissions to read '" 
-        warn_msg += settings.PASSWD_FILE + "' to enumerate users entries." 
+        warn_msg = "It seems that you don't have permissions to read the '" 
+        warn_msg += settings.PASSWD_FILE + "'." 
         sys.stdout.write("\n" + settings.print_warning_msg(warn_msg))
         sys.stdout.flush()
     except TypeError:
@@ -444,7 +444,7 @@ def system_users(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timese
     except IndexError:
       sys.stdout.write(settings.FAIL_STATUS)
       warn_msg = "Some kind of WAF/IPS/IDS probably blocks the attempt to read '"
-      warn_msg += settings.PASSWD_FILE + "' to enumerate users entries." 
+      warn_msg += settings.PASSWD_FILE + "'." 
       sys.stdout.write("\n" + settings.print_warning_msg(warn_msg))
       sys.stdout.flush()
       pass
@@ -474,7 +474,7 @@ def system_passwords(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, ti
     if sys_passes :
       if settings.VERBOSITY_LEVEL != 0 and menu.options.ignore_session:
         print(settings.SINGLE_WHITESPACE)
-      info_msg = "Fetching '" + settings.SHADOW_FILE + "' to enumerate users password hashes. "
+      info_msg = "Fetching the content of the file '" + settings.SHADOW_FILE + "' in order to enumerate users password hashes. "
       sys.stdout.write(settings.print_info_msg(info_msg))
       sys.stdout.flush()
       sys_passes = "".join(str(p) for p in sys_passes)
@@ -518,8 +518,8 @@ def system_passwords(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, ti
             output_file.close()
       else:
         sys.stdout.write(settings.FAIL_STATUS)
-        warn_msg = "It seems that you don't have permissions to read '" 
-        warn_msg += settings.SHADOW_FILE + "' to enumerate users password hashes."
+        warn_msg = "It seems that you don't have permissions to read the '" 
+        warn_msg += settings.SHADOW_FILE + "' file."
         sys.stdout.write("\n" + settings.print_warning_msg(warn_msg))
         sys.stdout.flush()
 
@@ -527,7 +527,7 @@ def system_passwords(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, ti
 Single os-shell execution
 """
 def single_os_cmd_exec(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response):
-  info_msg =  "Executing the '" + cmd + "' command."
+  info_msg =  "Executing the user-supplied command '" + cmd + "'."
   print(settings.print_info_msg(info_msg))
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
     # The main command injection exploitation.

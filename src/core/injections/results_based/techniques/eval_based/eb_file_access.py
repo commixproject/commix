@@ -36,7 +36,7 @@ Read a file from the target host.
 """
 def file_read(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec):
   file_to_read = menu.options.file_read.encode(settings.DEFAULT_CODEC).decode()
-  info_msg = "Trying to read the content of file '"  
+  info_msg = "Fetching the content of the file '"  
   info_msg += file_to_read + "'."
   print(settings.print_info_msg(info_msg))
 
@@ -60,19 +60,19 @@ def file_read(separator, TAG, prefix, suffix, whitespace, http_request_method, u
   # if settings.VERBOSITY_LEVEL != 0 and menu.options.ignore_session:
   #   print(settings.SINGLE_WHITESPACE)
   if shell:
-    info_msg = "Content of file '"  
-    info_msg += file_to_read + "' has been extracted."
+    info_msg = "Fetched content of the file '"    
+    info_msg += file_to_read + "'."
     print(settings.print_bold_info_msg(info_msg))
     print(settings.print_sub_content(shell))
     output_file = open(filename, "a")
     if not menu.options.no_logging:
-      info_msg = "Extracted content of file '"
+      info_msg = "Extracted content of the file '"
       info_msg += file_to_read + "' : " + shell + ".\n"
       output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
     output_file.close()
   else:
     warn_msg = "It seems that you don't have permissions "
-    warn_msg += "to read the content of file '" + file_to_read + "'."
+    warn_msg += "to read the content of the file '" + file_to_read + "'."
     print(settings.print_warning_msg(warn_msg))
    
 """
@@ -103,7 +103,7 @@ def file_write(separator, TAG, prefix, suffix, whitespace, http_request_method, 
   else:
     dest_to_write = menu.options.file_dest
 
-  info_msg = "Trying to write content of file '"  
+  info_msg = "Trying to write the content of the file '"  
   info_msg += file_to_write + "' on a remote directory '" + dest_to_write + "'."
   print(settings.print_info_msg(info_msg))
 
