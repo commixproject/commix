@@ -230,7 +230,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.5"
-REVISION = "46"
+REVISION = "47"
 STABLE_RELEASE = False
 if STABLE_RELEASE:
   VERSION = "v" + VERSION_NUM + "-stable"
@@ -1058,7 +1058,7 @@ BLOCKED_IP_REGEX = r"(?i)(\A|\b)ip\b.*\b(banned|blocked|block list|firewall)"
 GOOGLE_ANALYTICS_COOKIE_PREFIX = "__UTM"
 
 # Default path for tamper scripts
-TAMPER_SCRIPTS_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '../',"core/tamper/"))
+TAMPER_SCRIPTS_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '../',"core/tamper/")) + "/"
 
 # Default path for settings.py file
 SETTINGS_PATH = os.path.abspath("src/utils/settings.py")
@@ -1097,4 +1097,6 @@ MULTI_TARGETS = False
 
 # Identified Redirect code
 REDIRECT_CODE = ""
+
+BASE64_PADDING = "=="
 # eof

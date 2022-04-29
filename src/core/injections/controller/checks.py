@@ -1008,16 +1008,15 @@ def tamper_scripts(stored_tamper_scripts):
       if "hexencode" or "base64encode" == script:
         settings.MULTI_ENCODED_PAYLOAD.append(script)
       import_script = str(settings.TAMPER_SCRIPTS_PATH + script + ".py").replace("/",".").split(".py")[0]
-      print(settings.SUB_CONTENT_SIGN + import_script.split(".")[3])
+      print(settings.SUB_CONTENT_SIGN + import_script.split(".")[-1])
       try:
         module = __import__(import_script, fromlist=[None])
         if not hasattr(module, "__tamper__"):
           err_msg = "Missing variable '__tamper__' "
-          err_msg += "in tamper script '" + import_script.split(".")[0] + "'."
+          err_msg += "in tamper script '" + import_script.split(".")[-1] + "'."
           print(settings.print_critical_msg(err_msg))
           raise SystemExit()
       except ImportError as err_msg:
-        print(settings.print_error_msg(str(err_msg) + "."))
         pass
 
     # Using too many tamper scripts is usually not a good idea. :P
@@ -1235,25 +1234,39 @@ def recognise_payload(payload):
     payload = sleep2timeout.tamper(payload)
   
   is_decoded = False
-  if (len(payload) % 4 == 0) and \
-    re.match(settings.BASE64_RECOGNITION_REGEX, payload) and \
-    not re.match(settings.HEX_RECOGNITION_REGEX, payload):
+  encoded_with = ""
+  check_value = payload
+
+  if not re.match(settings.HEX_RECOGNITION_REGEX, check_value):
+    if re.match(settings.BASE64_RECOGNITION_REGEX, check_value + settings.BASE64_PADDING ) and not settings.BASE64_PADDING  in check_value:
+      check_value = payload + settings.BASE64_PADDING 
+
+  if (len(check_value.strip()) % 4 == 0) and \
+    re.match(settings.BASE64_RECOGNITION_REGEX, check_value) and \
+    not re.match(settings.HEX_RECOGNITION_REGEX, check_value):
       is_decoded = True
       settings.MULTI_ENCODED_PAYLOAD.append("base64encode")
-      decoded_payload = base64.b64decode(payload)
-      if re.match(settings.HEX_RECOGNITION_REGEX, payload):
+      decoded_payload = base64.b64decode(check_value)
+      encoded_with = "base64"
+      if re.match(settings.HEX_RECOGNITION_REGEX, check_value):
         settings.MULTI_ENCODED_PAYLOAD.append("hexencode")
         decoded_payload = hexdecode(decoded_payload)
+        encoded_with = "hex"
 
-  elif re.match(settings.HEX_RECOGNITION_REGEX, payload):
+  elif re.match(settings.HEX_RECOGNITION_REGEX, check_value):
     is_decoded = True
     settings.MULTI_ENCODED_PAYLOAD.append("hexencode")
-    decoded_payload = hexdecode(payload)
-    if (len(payload) % 4 == 0) and \
+    decoded_payload = hexdecode(check_value)
+    encoded_with = "hex"
+    if (len(check_value.strip()) % 4 == 0) and \
       re.match(settings.BASE64_RECOGNITION_REGEX, decoded_payload) and \
       not re.match(settings.HEX_RECOGNITION_REGEX, decoded_payload):
         settings.MULTI_ENCODED_PAYLOAD.append("base64encode")
         decoded_payload = base64.b64decode(decoded_payload)
+        encoded_with = "base64"
+
+  else:
+    decoded_payload = payload
 
   for encode_type in settings.MULTI_ENCODED_PAYLOAD:
     # Encode payload to base64 format.
@@ -1264,15 +1277,15 @@ def recognise_payload(payload):
       hex_output(payload)
 
   if is_decoded:
-    return _urllib.parse.quote(decoded_payload)  
+    return _urllib.parse.quote(decoded_payload), encoded_with  
   else:
-    return payload
+    return payload, encoded_with
 
 """
 Check for stored payloads and enable tamper scripts.
 """
 def check_for_stored_tamper(payload):
-  decoded_payload = recognise_payload(payload)
+  decoded_payload, encoded_with = recognise_payload(payload)
   whitespace_check(decoded_payload)
   other_symbols(decoded_payload)
   check_quotes(decoded_payload)

@@ -372,6 +372,11 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
         debug_msg = "Skipping heuristic (basic) tests to the target URL."
         print(settings.print_debug_msg(debug_msg))
     else:
+      decoded_value, decoded_with = checks.recognise_payload(payload=settings.TESTABLE_VALUE)
+      if settings.TESTABLE_VALUE != decoded_value and len(decoded_with) != 0:
+        warn_msg = "The provided parameter appears to be '" + str(decoded_with) + "' encoded."
+        print(settings.print_warning_msg(warn_msg))
+
       if settings.VERBOSITY_LEVEL != 0:    
         debug_msg = "Performing heuristic (basic) tests to the target URL."
         print(settings.print_debug_msg(debug_msg))

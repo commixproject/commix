@@ -1,4 +1,5 @@
 ## Version 3.5 (TBA)
+* Revised: Minor improvement regarding identifying 'hex' and/or 'base64' encoded parameter(s) value(s).
 * Added: New option `--no-logging` for disabling logging to a file.
 * Revised: Minor improvement regarding redirect handler.
 * Updated: Minor update regarding scanning multiple targets given in a textual file (i.e. via option `-m`).

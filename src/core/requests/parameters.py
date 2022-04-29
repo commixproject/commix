@@ -172,6 +172,8 @@ def vuln_GET_param(url):
       if settings.INJECT_TAG in pairs[param]:
         vuln_parameter = pairs[param].split("=")[0]
         settings.TESTABLE_VALUE = pairs[param].split("=")[1].replace(settings.INJECT_TAG,"")
+        if settings.BASE64_PADDING  in pairs[param]:
+          settings.TESTABLE_VALUE = settings.TESTABLE_VALUE + settings.BASE64_PADDING  
         break
 
   else:
@@ -373,6 +375,8 @@ def vuln_POST_param(parameter, url):
         if settings.INJECT_TAG in pairs[param]:
           vuln_parameter = pairs[param].split("=")[0]
           settings.TESTABLE_VALUE = pairs[param].split("=")[1].replace(settings.INJECT_TAG,"")
+          if settings.BASE64_PADDING  in pairs[param]:
+            settings.TESTABLE_VALUE = settings.TESTABLE_VALUE + settings.BASE64_PADDING  
           break
 
   if 'vuln_parameter' not in locals():
