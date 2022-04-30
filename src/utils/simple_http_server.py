@@ -89,12 +89,13 @@ class Handler(_BaseHTTPServer.BaseHTTPRequestHandler):
         f = open(self.path) 
         self.send_response(200)
         self.end_headers()
-        self.wfile.write(f.read())
-        f.close()
+        self.wfile.write(f.read().encode())
+        return
 
-      except IOError:
-        self.wfile.write(settings.APPLICATION + " " + settings.VERSION + " (https://commixproject.com)")
-      
+      except Exception:
+        error_response = settings.APPLICATION + " " + settings.VERSION + " (https://commixproject.com)"
+        self.wfile.write(error_response.encode())  
+
     def log_message(self, format, *args):
       return
 

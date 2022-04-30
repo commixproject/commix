@@ -1,4 +1,5 @@
 ## Version 3.5 (TBA)
+* Revised: Minor bug-fix regarding `--file-upload` option.
 * Revised: Minor improvement regarding identifying 'hex' and/or 'base64' encoded parameter(s) value(s).
 * Added: New option `--no-logging` for disabling logging to a file.
 * Revised: Minor improvement regarding redirect handler.
