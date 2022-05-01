@@ -110,7 +110,7 @@ check for not declared cookie(s)
 """
 def not_declared_cookies(response):
   try:
-    candidate = re.search(r'([^;]+);?', response.headers['set-cookie']).group(1)
+    candidate = re.search(r'([^;]+);?', response.headers[settings.SET_COOKIE]).group(1)
     if candidate and settings.DECLARED_COOKIES is not False:
       settings.DECLARED_COOKIES = True
       if settings.CRAWLED_SKIPPED_URLS != 0:
@@ -1237,36 +1237,45 @@ def recognise_payload(payload):
   encoded_with = ""
   check_value = payload
 
-  if not re.match(settings.HEX_RECOGNITION_REGEX, check_value):
-    if re.match(settings.BASE64_RECOGNITION_REGEX, check_value + settings.BASE64_PADDING ) and not settings.BASE64_PADDING  in check_value:
-      check_value = payload + settings.BASE64_PADDING 
-
   if (len(check_value.strip()) % 4 == 0) and \
     re.match(settings.BASE64_RECOGNITION_REGEX, check_value) and \
     not re.match(settings.HEX_RECOGNITION_REGEX, check_value):
-      is_decoded = True
-      settings.MULTI_ENCODED_PAYLOAD.append("base64encode")
-      decoded_payload = base64.b64decode(check_value)
-      encoded_with = "base64"
-      if re.match(settings.HEX_RECOGNITION_REGEX, check_value):
-        settings.MULTI_ENCODED_PAYLOAD.append("hexencode")
-        decoded_payload = hexdecode(decoded_payload)
-        encoded_with = "hex"
-
+      _payload = base64.b64decode(check_value)
+      try:
+        if not "\\x" in _payload.decode(settings.DEFAULT_CODEC):
+          settings.MULTI_ENCODED_PAYLOAD.append("base64encode")
+          decoded_payload = _payload
+          encoded_with = "base64"
+          if re.match(settings.HEX_RECOGNITION_REGEX, check_value):
+            decoded_payload, _ = hexdecode(decoded_payload)
+            if _:
+              settings.MULTI_ENCODED_PAYLOAD.append("hexencode")
+              encoded_with = "hex"
+      except Exception:
+        pass
+        
   elif re.match(settings.HEX_RECOGNITION_REGEX, check_value):
-    is_decoded = True
-    settings.MULTI_ENCODED_PAYLOAD.append("hexencode")
-    decoded_payload = hexdecode(check_value)
-    encoded_with = "hex"
-    if (len(check_value.strip()) % 4 == 0) and \
-      re.match(settings.BASE64_RECOGNITION_REGEX, decoded_payload) and \
-      not re.match(settings.HEX_RECOGNITION_REGEX, decoded_payload):
-        settings.MULTI_ENCODED_PAYLOAD.append("base64encode")
-        decoded_payload = base64.b64decode(decoded_payload)
-        encoded_with = "base64"
+    decoded_payload, _ = hexdecode(check_value)
+    if _:
+      settings.MULTI_ENCODED_PAYLOAD.append("hexencode")
+      encoded_with = "hex"
+      if (len(check_value.strip()) % 4 == 0) and \
+        re.match(settings.BASE64_RECOGNITION_REGEX, decoded_payload) and \
+        not re.match(settings.HEX_RECOGNITION_REGEX, decoded_payload):
+          _payload = base64.b64decode(check_value)
+          try:
+            if not "\\x" in _payload.decode(settings.DEFAULT_CODEC):
+              settings.MULTI_ENCODED_PAYLOAD.append("base64encode")
+              decoded_payload = _payload
+              encoded_with = "base64"
+          except Exception:
+            pass
 
   else:
     decoded_payload = payload
+
+  if len(encoded_with) != 0:
+    is_decoded = True
 
   for encode_type in settings.MULTI_ENCODED_PAYLOAD:
     # Encode payload to base64 format.
@@ -1637,7 +1646,7 @@ def file_upload():
         http_server = "http://" + str(settings.LOCAL_HTTP_IP) + ":" + str(settings.LOCAL_HTTP_PORT)
         info_msg = "Setting the HTTP server on '" + http_server + "/'. "  
         print(settings.print_info_msg(info_msg))
-        menu.options.file_upload = http_server + "/" + menu.options.file_upload
+        menu.options.file_upload = http_server + menu.options.file_upload
         simple_http_server.main()
         break
 

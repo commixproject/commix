@@ -254,16 +254,16 @@ def do_check(request):
   if menu.options.cookie and settings.COOKIE_INJECTION == False:
     request.add_header(settings.COOKIE, menu.options.cookie)
   
-  if not checks.get_header(request.headers, settings.HTTP_ACCEPT_HEADER):
-    request.add_header(settings.HTTP_ACCEPT_HEADER, settings.HTTP_ACCEPT_HEADER_VALUE)
+  if not checks.get_header(request.headers, settings.ACCEPT):
+    request.add_header(settings.ACCEPT, settings.ACCEPT_VALUE)
 
   # The MIME media type for JSON.
   if menu.options.data and not (menu.options.requestfile or menu.options.logfile):
     if re.search(settings.JSON_RECOGNITION_REGEX, menu.options.data) or \
        re.search(settings.JSON_LIKE_RECOGNITION_REGEX, menu.options.data):
-      request.add_header("Content-Type", settings.HTTP_CONTENT_TYPE_JSON_HEADER_VALUE)
+      request.add_header(settings.CONTENT_TYPE, settings.HTTP_CONTENT_TYPE_JSON_HEADER_VALUE)
     elif re.search(settings.XML_RECOGNITION_REGEX, menu.options.data):
-      request.add_header("Content-Type", settings.HTTP_CONTENT_TYPE_XML_HEADER_VALUE)
+      request.add_header(settings.CONTENT_TYPE, settings.HTTP_CONTENT_TYPE_XML_HEADER_VALUE)
 
   # Default value for "Accept-Encoding" HTTP header
   if not (menu.options.requestfile or menu.options.logfile):
@@ -281,7 +281,7 @@ def do_check(request):
       settings.SUPPORTED_HTTP_AUTH_TYPES.index(menu.options.auth_type)
       if menu.options.auth_type == "basic":
         b64_string = encodebytes(menu.options.auth_cred.encode(settings.DEFAULT_CODEC)).decode().replace('\n', '')
-        request.add_header("Authorization", "Basic " + b64_string + "")
+        request.add_header(settings.AUTHORIZATION, "Basic " + b64_string + "")
       elif menu.options.auth_type == "digest":
         try:
           url = menu.options.url
@@ -344,11 +344,11 @@ def do_check(request):
       # The MIME media type for JSON.
       if re.search(settings.JSON_RECOGNITION_REGEX, menu.options.data) or \
          re.search(settings.JSON_LIKE_RECOGNITION_REGEX, menu.options.data):
-         if "Content-Type" not in str(extra_headers):
-          request.add_header("Content-Type", settings.HTTP_CONTENT_TYPE_JSON_HEADER_VALUE)
+         if settings.CONTENT_TYPE not in str(extra_headers):
+          request.add_header(settings.CONTENT_TYPE, settings.HTTP_CONTENT_TYPE_JSON_HEADER_VALUE)
       elif re.search(settings.XML_RECOGNITION_REGEX, menu.options.data):
-         if "Content-Type" not in str(extra_headers):
-          request.add_header("Content-Type", settings.HTTP_CONTENT_TYPE_XML_HEADER_VALUE)
+         if settings.CONTENT_TYPE not in str(extra_headers):
+          request.add_header(settings.CONTENT_TYPE, settings.HTTP_CONTENT_TYPE_XML_HEADER_VALUE)
     if "Accept-Encoding" not in str(extra_headers):
       request.add_header('Accept-Encoding', settings.HTTP_ACCEPT_ENCODING_HEADER_VALUE)
           

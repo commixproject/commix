@@ -16,12 +16,10 @@ For more see the file 'readme/COPYING' for copying permission.
 import re
 import os
 import sys
-
-
 from src.utils import menu
 from src.utils import settings
 from src.utils import session_handler
-
+from src.thirdparty.six.moves import urllib as _urllib
 from src.thirdparty.colorama import Fore, Back, Style, init
 from src.core.injections.blind.techniques.time_based import tb_injector
 
@@ -78,7 +76,6 @@ def file_read(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
 Write to a file on the target host.
 """
 def file_write(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response):
-  _ = True
   file_to_write = menu.options.file_write.encode(settings.DEFAULT_CODEC).decode()
   if not os.path.exists(file_to_write):
     warn_msg = "It seems that the provided local file '" + file_to_write + "', does not exist."
@@ -154,20 +151,21 @@ def file_write(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec,
     shell = "".join(str(p) for p in shell)
   except TypeError:
     pass
-  if settings.VERBOSITY_LEVEL == 0 and _:
+  if settings.VERBOSITY_LEVEL == 0:
     print(settings.SINGLE_WHITESPACE)
+  # else:
+  #   sys.stdout.flush()
   if shell:
     info_msg = "The file has been successfully created on remote directory '" + dest_to_write + "'." 
     print(settings.print_bold_info_msg(info_msg))
   else:
-    warn_msg = "It seems that you don't have permissions to write the '" + dest_to_write + "' file."
+    warn_msg = "It seems that you don't have permissions to write files on the remote direcoty '" + dest_to_write + "'."
     print(settings.print_warning_msg(warn_msg))
 
 """
 Upload a file on the target host.
 """
 def file_upload(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response):
-  _ = False
   if settings.TARGET_OS == "win":
     # Not yet implemented
     pass
@@ -194,7 +192,7 @@ def file_upload(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec
     else:
       dest_to_upload = menu.options.file_dest
       
-    info_msg = "Trying to upload the file '"  
+    info_msg = "Trying to upload the file from '"  
     info_msg += file_to_upload + "' on a remote directory '" + dest_to_upload + "'."
     print(settings.print_info_msg(info_msg))
 
@@ -215,21 +213,24 @@ def file_upload(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec
       shell = "".join(str(p) for p in shell)
     except TypeError:
       pass
-    if settings.VERBOSITY_LEVEL == 0 and _:
+    if settings.VERBOSITY_LEVEL == 0:
       print(settings.SINGLE_WHITESPACE)
     if shell:
-      sys.stdout.flush()
       info_msg = "The file has been successfully uploaded on remote directory '" + dest_to_upload + "'."
       print(settings.print_bold_info_msg(info_msg))
     else:
-      sys.stdout.flush()
-      warn_msg = "It seems that you don't have permissions to upload the '" + dest_to_upload + "' file."
+      warn_msg = "It seems that you don't have permissions to upload files on the remote direcoty '" + dest_to_upload + "'."
       print(settings.print_warning_msg(warn_msg))
 
 """
 Check the defined options
 """
 def do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response):
+
+  if menu.options.file_upload:
+    file_upload(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
+    if settings.FILE_ACCESS_DONE == False:
+      settings.FILE_ACCESS_DONE = True
 
   if menu.options.file_read:  
     file_read(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
@@ -240,10 +241,4 @@ def do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, h
     file_write(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
     if settings.FILE_ACCESS_DONE == False:
       settings.FILE_ACCESS_DONE = True
-
-  if menu.options.file_upload:
-    file_upload(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
-    if settings.FILE_ACCESS_DONE == False:
-      settings.FILE_ACCESS_DONE = True
-
 # eof

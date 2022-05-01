@@ -16,15 +16,12 @@ For more see the file 'readme/COPYING' for copying permission.
 import re
 import os
 import sys
-from src.thirdparty.six.moves import urllib as _urllib
-
-
 from src.utils import menu
 from src.utils import settings
 from src.utils import session_handler
-from src.thirdparty.colorama import Fore, Back, Style, init
-
 from src.core.requests import requests
+from src.thirdparty.six.moves import urllib as _urllib
+from src.thirdparty.colorama import Fore, Back, Style, init
 from src.core.injections.results_based.techniques.classic import cb_injector
 
 """
@@ -156,13 +153,13 @@ def file_write(separator, TAG, prefix, suffix, whitespace, http_request_method, 
   response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
   shell = cb_injector.injection_results(response, TAG, cmd)
   shell = "".join(str(p) for p in shell)
-  #if settings.VERBOSITY_LEVEL != 0:
+  # if settings.VERBOSITY_LEVEL != 0:
   #  print(settings.SINGLE_WHITESPACE)
   if shell:
     info_msg = "The file has been successfully created on remote directory '" + dest_to_write + "'." 
     print(settings.print_bold_info_msg(info_msg))
   else:
-    warn_msg = "It seems that you don't have permissions to write the '" + dest_to_write + "' file."
+    warn_msg = "It seems that you don't have permissions to write files on the remote direcoty '" + dest_to_write + "'."
     print(settings.print_warning_msg(warn_msg))
 
 """
@@ -196,7 +193,7 @@ def file_upload(separator, TAG, prefix, suffix, whitespace, http_request_method,
     else:
       dest_to_upload = menu.options.file_dest
 
-    info_msg = "Trying to upload the file '"  
+    info_msg = "Trying to upload the file from '"  
     info_msg += file_to_upload + "' on a remote directory '" + dest_to_upload + "'."
     print(settings.print_info_msg(info_msg))
 
@@ -216,13 +213,13 @@ def file_upload(separator, TAG, prefix, suffix, whitespace, http_request_method,
     response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
     shell = cb_injector.injection_results(response, TAG, cmd)
     shell = "".join(str(p) for p in shell)
-    if settings.VERBOSITY_LEVEL != 0:
-      print(settings.SINGLE_WHITESPACE)
+    # if settings.VERBOSITY_LEVEL != 0:
+    #   print(settings.SINGLE_WHITESPACE)
     if shell:
       info_msg = "The file has been successfully uploaded on remote directory '" + dest_to_upload + "'."
       print(settings.print_bold_info_msg(info_msg))
     else:
-      warn_msg = "It seems that you don't have permissions to upload the '" + dest_to_upload + "' file."
+      warn_msg = "It seems that you don't have permissions to upload files on the remote direcoty '" + dest_to_upload + "'."
       print(settings.print_warning_msg(warn_msg))
 
 """
@@ -230,10 +227,6 @@ Check the defined options
 """
 def do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec):
  
-  if menu.options.file_write:
-    file_write(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec)
-    settings.FILE_ACCESS_DONE = True
-
   if menu.options.file_upload:
     file_upload(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec)
     settings.FILE_ACCESS_DONE = True
@@ -242,4 +235,7 @@ def do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, ur
     file_read(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec)
     settings.FILE_ACCESS_DONE = True 
 
+  if menu.options.file_write:
+    file_write(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec)
+    settings.FILE_ACCESS_DONE = True
 # eof

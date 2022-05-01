@@ -230,7 +230,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.5"
-REVISION = "48"
+REVISION = "49"
 STABLE_RELEASE = False
 if STABLE_RELEASE:
   VERSION = "v" + VERSION_NUM + "-stable"
@@ -335,6 +335,9 @@ LOCAL_HTTP_IP = ""
 
 # Local HTTP server port
 LOCAL_HTTP_PORT = random.randint(50000,60000)
+
+HTML_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "data", "html"))
+DISABLED_CONTENT_EXTENSIONS = (".py", ".pyc", ".md", ".txt", ".bak", ".conf", ".zip", "~")
 
 # Detection / Exploitation phase(s)
 DETECTION_PHASE = False
@@ -974,7 +977,6 @@ NOT_IMPLEMENTED = "501"
 BAD_GATEWAY = "502"
 SERVICE_UNAVAILABLE = "503"
 GATEWAY_TIMEOUT = "504"
-
 HTTP_ERROR_CODES = [  BAD_REQUEST, 
                       UNAUTHORIZED_ERROR,
                       FORBIDDEN_ERROR,
@@ -1074,10 +1076,37 @@ COOKIE = "Cookie"
 HOST = "Host"
 USER_AGENT = "User-Agent"
 REFERER = "Referer"
-HTTP_ACCEPT_HEADER = "Accept"
+ACCEPT = "Accept"
+ACCEPT_CHARSET = "Accept-Charset"
+ACCEPT_ENCODING = "Accept-Encoding"
+ACCEPT_LANGUAGE = "Accept-Language"
+AUTHORIZATION = "Authorization"
+CACHE_CONTROL = "Cache-Control"
+CONNECTION = "Connection"
+CONTENT_ENCODING = "Content-Encoding"
+CONTENT_LENGTH = "Content-Length"
+CONTENT_RANGE = "Content-Range"
+CONTENT_TYPE = "Content-Type"
+EXPIRES = "Expires"
+IF_MODIFIED_SINCE = "If-Modified-Since"
+IF_NONE_MATCH = "If-None-Match"
+LAST_MODIFIED = "Last-Modified"
+LOCATION = "Location"
+PRAGMA = "Pragma"
+PROXY_AUTHORIZATION = "Proxy-Authorization"
+PROXY_CONNECTION = "Proxy-Connection"
+RANGE = "Range"
+REFERER = "Referer"
+REFRESH = "Refresh"  # Reference: http://stackoverflow.com/a/283794
+SERVER = "Server"
+SET_COOKIE = "Set-Cookie"
+TRANSFER_ENCODING = "Transfer-Encoding"
+VIA = "Via"
+X_POWERED_BY = "X-Powered-By"
+X_DATA_ORIGIN = "X-Data-Origin"
 
 # HTTP Headers values
-HTTP_ACCEPT_HEADER_VALUE = "*/*"
+ACCEPT_VALUE = "*/*"
 
 # Regular expression used for ignoring some special chars
 IGNORE_SPECIAL_CHAR_REGEX = "[^/(A-Za-z0-9.:,_]+"

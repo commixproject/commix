@@ -23,6 +23,7 @@ from src.utils import settings
 from socket import error as socket_error
 from src.thirdparty.colorama import Fore, Back, Style, init
 from src.thirdparty.six.moves import _thread as thread
+from src.thirdparty.six.moves import http_client as _http_client
 from src.thirdparty.six.moves import socketserver as _socketserver
 from src.thirdparty.six.moves import BaseHTTPServer as _BaseHTTPServer
 
@@ -87,14 +88,15 @@ class Handler(_BaseHTTPServer.BaseHTTPRequestHandler):
       try:
         #Open the static file requested and send it
         f = open(self.path) 
-        self.send_response(200)
+        self.send_response(_http_client.OK)
+        self.send_header(settings.CONNECTION, "close")
         self.end_headers()
         self.wfile.write(f.read().encode())
         return
 
       except Exception:
         error_response = settings.APPLICATION + " " + settings.VERSION + " (https://commixproject.com)"
-        self.wfile.write(error_response.encode())  
+        self.wfile.write(error_response.encode())
 
     def log_message(self, format, *args):
       return

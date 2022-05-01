@@ -188,7 +188,7 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
     minlen = 1
 
   found_chars = False
-  info_msg = "Retrieving the length of execution output. "
+  info_msg = "Retrieving the length of execution output (via '" + OUTPUT_TEXTFILE +"')."
   sys.stdout.write(settings.print_info_msg(info_msg))
   sys.stdout.flush()  
   if settings.VERBOSITY_LEVEL >= 2:
@@ -276,7 +276,7 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
     check_start = time.time()
     output = []
     percent = "0.0%"
-    info_msg = "Grabbing the execution output (via '" + OUTPUT_TEXTFILE + "')."
+    info_msg = "Retrieving the execution output (via '" + OUTPUT_TEXTFILE + "')."
     if settings.VERBOSITY_LEVEL == 0 :
       info_msg += ".. (" + str(percent) + ")"
     elif settings.VERBOSITY_LEVEL == 1 :
@@ -349,7 +349,7 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
               float_percent = settings.info_msg
             else:
               float_percent = ".. (" + str(float_percent) + ")"
-            info_msg = "Grabbing the execution output (via '" + OUTPUT_TEXTFILE +"')."
+            info_msg = "Retrieving the execution output (via '" + OUTPUT_TEXTFILE +"')."
             info_msg += float_percent
             sys.stdout.write("\r" + settings.print_info_msg(info_msg))
             sys.stdout.flush()

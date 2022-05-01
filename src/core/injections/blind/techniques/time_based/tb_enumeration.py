@@ -21,7 +21,7 @@ from src.utils import logs
 from src.utils import menu
 from src.utils import settings
 from src.utils import session_handler
-
+from src.core.injections.controller import checks
 from src.thirdparty.colorama import Fore, Back, Style, init
 from src.core.injections.blind.techniques.time_based import tb_injector
 

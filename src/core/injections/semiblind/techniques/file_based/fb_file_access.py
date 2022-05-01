@@ -16,13 +16,10 @@ For more see the file 'readme/COPYING' for copying permission.
 import re
 import os
 import sys
-from src.thirdparty.six.moves import urllib as _urllib
-
-
 from src.utils import menu
 from src.utils import settings
 from src.utils import session_handler
-
+from src.thirdparty.six.moves import urllib as _urllib
 from src.thirdparty.colorama import Fore, Back, Style, init
 from src.core.injections.semiblind.techniques.file_based import fb_injector
 
@@ -53,8 +50,8 @@ def file_read(separator, payload, TAG, timesec, prefix, suffix, whitespace, http
     session_handler.store_cmd(url, cmd, shell, vuln_parameter)
   else:
     shell = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
-  if settings.VERBOSITY_LEVEL != 0 and menu.options.ignore_session:
-    print(settings.SINGLE_WHITESPACE)
+  # if settings.VERBOSITY_LEVEL != 0 and menu.options.ignore_session:
+  #   print(settings.SINGLE_WHITESPACE)
   if shell:
     info_msg = "Fetched content of the file '"    
     info_msg += file_to_read + "'."
@@ -146,7 +143,7 @@ def file_write(separator, payload, TAG, timesec, prefix, suffix, whitespace, htt
     info_msg = "The file has been successfully created on remote directory '" + dest_to_write + "'." 
     print(settings.print_bold_info_msg(info_msg))
   else:
-    warn_msg = "It seems that you don't have permissions to write the '" + dest_to_write + "' file."
+    warn_msg = "It seems that you don't have permissions to write files on the remote direcoty '" + dest_to_write + "'."
     print(settings.print_warning_msg(warn_msg))
 
 """
@@ -180,7 +177,7 @@ def file_upload(separator, payload, TAG, timesec, prefix, suffix, whitespace, ht
     else:
       dest_to_upload = menu.options.file_dest
       
-    info_msg = "Trying to upload the file '"  
+    info_msg = "Trying to upload the file from '"  
     info_msg += file_to_upload + "' on a remote directory '" + dest_to_upload + "'."
     print(settings.print_info_msg(info_msg))
 
@@ -198,13 +195,13 @@ def file_upload(separator, payload, TAG, timesec, prefix, suffix, whitespace, ht
     response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
     shell = fb_injector.injection_results(url, OUTPUT_TEXTFILE, timesec)
     shell = "".join(str(p) for p in shell)
-    if settings.VERBOSITY_LEVEL != 0:
-      print(settings.SINGLE_WHITESPACE)
+    # if settings.VERBOSITY_LEVEL != 0:
+    #   print(settings.SINGLE_WHITESPACE)
     if shell:
       info_msg = "The file has been successfully uploaded on remote directory '" + dest_to_upload + "'."
       print(settings.print_bold_info_msg(info_msg))
     else:
-      warn_msg = "It seems that you don't have permissions to upload the '" + dest_to_upload + "' file."
+      warn_msg = "It seems that you don't have permissions to upload files on the remote direcoty '" + dest_to_upload + "'."
       print(settings.print_warning_msg(warn_msg))
 
 """
