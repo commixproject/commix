@@ -226,10 +226,10 @@ def init_request(url):
     debug_msg = "Creating " + str(settings.SCHEME).upper() + " requests opener object."
     print(settings.print_debug_msg(debug_msg))
   # Used a valid pair of valid credentials
-  if menu.options.auth_cred and menu.options.auth_type:
-    info_msg = "Using '" + menu.options.auth_cred + "' pair of " + menu.options.auth_type 
-    info_msg += " HTTP authentication credentials."
-    print(settings.print_info_msg(info_msg))
+  if menu.options.auth_cred and menu.options.auth_type and settings.VERBOSITY_LEVEL !=0 :
+    debug_msg = "Using '" + menu.options.auth_cred + "' pair of " + menu.options.auth_type 
+    debug_msg += " HTTP authentication credentials."
+    print(settings.print_debug_msg(debug_msg))
   return request
 
 """
@@ -408,9 +408,10 @@ def main(filename, url):
     # Check if defined "--url" or "-m" option.
     if url:
       if menu.options.auth_cred and menu.options.auth_type:
-        info_msg = "Used a valid pair of " + menu.options.auth_type 
-        info_msg += " HTTP authentication credentials '" + menu.options.auth_cred + "'." 
-        print(settings.print_bold_info_msg(info_msg))
+        if settings.VERBOSITY_LEVEL != 0:
+          debug_msg = "Used a valid pair of " + menu.options.auth_type 
+          debug_msg += " HTTP authentication credentials '" + menu.options.auth_cred + "'." 
+          print(settings.print_bold_debug_msg(debug_msg))
         session_handler.import_valid_credentials(url, authentication_type=menu.options.auth_type, \
                                                  admin_panel=url, username=menu.options.auth_cred.split(":")[0], \
                                                  password=menu.options.auth_cred.split(":")[1]
