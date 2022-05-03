@@ -230,7 +230,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.5"
-REVISION = "50"
+REVISION = "51"
 STABLE_RELEASE = False
 if STABLE_RELEASE:
   VERSION = "v" + VERSION_NUM + "-stable"
@@ -942,6 +942,8 @@ HTTP_HEADERS = [ "user-agent", "referer", "host" ]
 
 RAW_HTTP_HEADERS = ""
 
+USER_SUPPLIED_TAMPER = ""
+
 # Tamper scripts dict
 TAMPER_SCRIPTS = {
                   "space2ifs": False,
@@ -1128,4 +1130,5 @@ MULTI_TARGETS = False
 REDIRECT_CODE = ""
 
 BASE64_PADDING = "=="
+
 # eof

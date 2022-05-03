@@ -471,7 +471,8 @@ def main(filename, url):
           pass
         # Load tamper scripts
         if menu.options.tamper:
-          checks.tamper_scripts(stored_tamper_scripts=False)
+          settings.USER_SUPPLIED_TAMPER = menu.options.tamper
+          # checks.tamper_scripts(stored_tamper_scripts=False)
           
       except AttributeError:
         pass

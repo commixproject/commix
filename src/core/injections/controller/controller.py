@@ -43,7 +43,6 @@ Checks if the testable parameter is exploitable.
 Check for previously stored sessions.
 """
 def check_for_stored_sessions(url, http_request_method):
-
   if not menu.options.ignore_session:
     if os.path.isfile(settings.SESSION_FILE) and not settings.REQUIRED_AUTHENTICATION:
       if not menu.options.tech:
@@ -57,13 +56,11 @@ def check_for_stored_sessions(url, http_request_method):
 Check for previously stored injection level.
 """
 def check_for_stored_levels(url, http_request_method):
-
   if not menu.options.ignore_session:
     if menu.options.level == settings.DEFAULT_INJECTION_LEVEL:
       menu.options.level = session_handler.applied_levels(url, http_request_method)
       if type(menu.options.level) is not int :
         menu.options.level = settings.DEFAULT_INJECTION_LEVEL
-
 
 """
 Heuristic (basic) tests for command injection
@@ -376,7 +373,8 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
       if settings.TESTABLE_VALUE != decoded_value and len(decoded_with) != 0:
         warn_msg = "The provided parameter appears to be '" + str(decoded_with) + "' encoded."
         print(settings.print_warning_msg(warn_msg))
-
+        
+      checks.tamper_scripts(stored_tamper_scripts=False)
       if settings.VERBOSITY_LEVEL != 0:    
         debug_msg = "Performing heuristic (basic) tests to the target URL."
         print(settings.print_debug_msg(debug_msg))
@@ -698,8 +696,6 @@ def post_request(url, http_request_method, filename, timesec):
           for check_parameter in check_parameters:
             if check_parameter in "".join(settings.TEST_PARAMETER).split(","):
               menu.options.data = found_parameter[param_counter]
-              check_parameter = parameters.vuln_POST_param(menu.options.data, url)
-              # Check for session file 
               check_for_stored_sessions(url, http_request_method)
               injection_proccess(url, check_parameter, http_request_method, filename, timesec)
             param_counter += 1

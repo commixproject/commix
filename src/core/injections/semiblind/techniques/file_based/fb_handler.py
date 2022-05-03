@@ -554,7 +554,6 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                    file_access_again= "Y"
                 if file_access_again in settings.CHOICE_YES:
                   fb_file_access.do_check(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-                  print(settings.SINGLE_WHITESPACE)
                   break
                 elif file_access_again in settings.CHOICE_NO: 
                   break
@@ -570,15 +569,15 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
               if menu.file_access_options():
                 fb_file_access.do_check(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
                
-              # Check if defined single cmd.
-              if menu.options.os_cmd:
-                fb_enumeration.single_os_cmd_exec(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-                # Delete previous shell (text) files (output)
-                delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+            # Check if defined single cmd.
+            if menu.options.os_cmd:
+              fb_enumeration.single_os_cmd_exec(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+              # Delete previous shell (text) files (output)
+              delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
 
-              else:
-                if menu.file_access_options() or menu.options.os_cmd:
-                  print(settings.SINGLE_WHITESPACE)
+            else:
+              if menu.file_access_options() or menu.options.os_cmd:
+                print(settings.SINGLE_WHITESPACE)
                   
             try:
               # Pseudo-Terminal shell

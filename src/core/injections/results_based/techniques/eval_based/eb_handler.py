@@ -342,7 +342,6 @@ def eb_injection_handler(url, timesec, filename, http_request_method, injection_
                    file_access_again = "Y"
                 if file_access_again in settings.CHOICE_YES:
                   eb_file_access.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec)
-                  print(settings.SINGLE_WHITESPACE)
                   break
                 elif file_access_again in settings.CHOICE_NO: 
                   break
@@ -355,15 +354,14 @@ def eb_injection_handler(url, timesec, filename, http_request_method, injection_
             else:
               if menu.file_access_options():
                 eb_file_access.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec)
-                # print(settings.SINGLE_WHITESPACE)
 
-              # Check if defined single cmd.
-              if menu.options.os_cmd:
-                eb_enumeration.single_os_cmd_exec(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec)
+            # Check if defined single cmd.
+            if menu.options.os_cmd:
+              eb_enumeration.single_os_cmd_exec(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec)
 
-              else:
-                if menu.file_access_options() or menu.options.os_cmd:
-                  print(settings.SINGLE_WHITESPACE)
+            else:
+              if menu.file_access_options() or menu.options.os_cmd:
+                print(settings.SINGLE_WHITESPACE)
 
             # Pseudo-Terminal shell
             go_back = False

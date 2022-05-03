@@ -282,7 +282,7 @@ def injection_output(url, OUTPUT_TEXTFILE, timesec):
         while True:
           if not menu.options.batch:
             question_msg =  "Do you want to use URL '" + output
-            question_msg += "' for command execution results extraction? [Y/n] > "
+            question_msg += "' as command execution output? [Y/n] > "
             procced_option = _input(settings.print_question_msg(question_msg))
           else:
             procced_option = ""
@@ -307,7 +307,7 @@ def injection_output(url, OUTPUT_TEXTFILE, timesec):
     output = settings.DEFINED_WEBROOT
 
   if settings.VERBOSITY_LEVEL != 0:
-    debug_msg = "Checking URL '" + settings.DEFINED_WEBROOT + "' for command execution results extraction."
+    debug_msg = "Checking URL '" + settings.DEFINED_WEBROOT + "' for command execution output."
     print(settings.print_debug_msg(debug_msg))
 
   return output

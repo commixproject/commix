@@ -150,20 +150,24 @@ def check_http_traffic(request):
 
   _ = False
   unauthorized = False
-  while not _ and settings.TOTAL_OF_REQUESTS <= settings.MAX_RETRIES and unauthorized is False:      
+  while not _ and settings.TOTAL_OF_REQUESTS <= settings.MAX_RETRIES and unauthorized is False: 
+    if settings.MULTI_TARGETS:
+      if settings.INIT_TEST == True and len(settings.MULTI_ENCODED_PAYLOAD) != 0:
+        settings.MULTI_ENCODED_PAYLOAD = []
+        menu.options.tamper = settings.USER_SUPPLIED_TAMPER
     try:
       response = opener.open(request, timeout=settings.TIMEOUT)
       page = checks.page_encoding(response, action="encode")
       _ = True
       settings.MAX_RETRIES = settings.TOTAL_OF_REQUESTS * 2
-      if settings.VERBOSITY_LEVEL < 2:
-        if (settings.INIT_TEST == True and not settings.UNAUTHORIZED) or \
-           (settings.INIT_TEST == True and settings.MULTI_TARGETS):
-          if settings.VALID_URL == False:
-            settings.VALID_URL = True
+      if (settings.INIT_TEST == True and not settings.UNAUTHORIZED) or \
+         (settings.INIT_TEST == True and settings.MULTI_TARGETS):
+        if settings.VALID_URL == False:
+          settings.VALID_URL = True
+        if not settings.CHECK_INTERNET:
+          settings.INIT_TEST = False
+        if settings.VERBOSITY_LEVEL < 2:
           print(settings.SINGLE_WHITESPACE)
-          if not settings.CHECK_INTERNET:
-            settings.INIT_TEST = False
 
     except _urllib.error.HTTPError as err_msg:
       if settings.TOTAL_OF_REQUESTS == 1 and settings.VERBOSITY_LEVEL < 2:
