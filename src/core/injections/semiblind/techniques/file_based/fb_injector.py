@@ -265,7 +265,7 @@ def injection_output(url, OUTPUT_TEXTFILE, timesec):
     settings.DEFINED_WEBROOT = output
     return output
 
-  if not settings.DEFINED_WEBROOT:
+  if not settings.DEFINED_WEBROOT or settings.MULTI_TARGETS:
     if menu.options.web_root:
       _ = "/"
       if not menu.options.web_root.endswith(_):
@@ -278,7 +278,10 @@ def injection_output(url, OUTPUT_TEXTFILE, timesec):
         if item == menu.options.web_root:
           settings.DEFINED_WEBROOT = output
           break
-      if not settings.DEFINED_WEBROOT:
+
+      if not settings.DEFINED_WEBROOT or (settings.MULTI_TARGETS and not settings.RECHECK_FILE_FOR_EXTRACTION):
+        if settings.MULTI_TARGETS:
+          settings.RECHECK_FILE_FOR_EXTRACTION = True
         while True:
           if not menu.options.batch:
             question_msg =  "Do you want to use URL '" + output

@@ -71,7 +71,7 @@ def command_injection_heuristic_basic(url, http_request_method, check_parameter,
   settings.CLASSIC_STATE = True
   try:
     whitespace = settings.WHITESPACES[0]
-    if not settings.IDENTIFIED_COMMAND_INJECTION:  
+    if not settings.IDENTIFIED_COMMAND_INJECTION or settings.MULTI_TARGETS:  
       _ = 0
       for payload in settings.BASIC_COMMAND_INJECTION_PAYLOADS:
         _ = _ + 1
@@ -100,7 +100,6 @@ def command_injection_heuristic_basic(url, http_request_method, check_parameter,
           request.add_header(settings.COOKIE, cookie)
         if inject_http_headers:
           request.add_header(check_parameter.replace("'","").strip(), (settings.CUSTOM_HEADER_VALUE + payload).encode(settings.DEFAULT_CODEC))
-          #request.add_header(check_parameter.replace("'","").strip(), payload.encode(settings.DEFAULT_CODEC))
         headers.do_check(request)
         response = requests.get_request_response(request)
 
@@ -141,7 +140,7 @@ def code_injections_heuristic_basic(url, http_request_method, check_parameter, t
         menu.options.data = menu.options.data.replace("/&", "/e&")
     except TypeError as err_msg:
       pass
-    if not settings.IDENTIFIED_WARNINGS and not settings.IDENTIFIED_PHPINFO:  
+    if (not settings.IDENTIFIED_WARNINGS and not settings.IDENTIFIED_PHPINFO) or settings.MULTI_TARGETS:  
       for payload in settings.PHPINFO_CHECK_PAYLOADS:
         if not inject_http_headers or (inject_http_headers and "'Host'" in check_parameter):
           payload = _urllib.parse.quote(payload)
@@ -696,6 +695,8 @@ def post_request(url, http_request_method, filename, timesec):
           for check_parameter in check_parameters:
             if check_parameter in "".join(settings.TEST_PARAMETER).split(","):
               menu.options.data = found_parameter[param_counter]
+              check_parameter = parameters.vuln_POST_param(menu.options.data, url)
+              # Check for session file 
               check_for_stored_sessions(url, http_request_method)
               injection_proccess(url, check_parameter, http_request_method, filename, timesec)
             param_counter += 1
@@ -793,6 +794,9 @@ def perform_checks(url, http_request_method, filename):
 General check on every injection technique.
 """
 def do_check(url, http_request_method, filename):
+  if settings.RECHECK_FILE_FOR_EXTRACTION:
+    settings.RECHECK_FILE_FOR_EXTRACTION = False
+
   # Check for '--tor' option.
   if menu.options.tor: 
     if not menu.options.tech or "t" in menu.options.tech or "f" in menu.options.tech:
