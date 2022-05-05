@@ -230,7 +230,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.5"
-REVISION = "52"
+REVISION = "53"
 STABLE_RELEASE = False
 if STABLE_RELEASE:
   VERSION = "v" + VERSION_NUM + "-stable"
@@ -1122,13 +1122,22 @@ HTTP_METHOD = ""
 
 DECLARED_COOKIES = ""
 
-CRAWLED_SKIPPED_URLS = 0
-
 MULTI_TARGETS = False
 
 # Identified Redirect code
 REDIRECT_CODE = ""
 
+# Base64 padding
 BASE64_PADDING = "=="
+
+# Crawling state
+CRAWLING = False
+CRAWLED_SKIPPED_URLS = 0
+
+# Skipped crawled hrefs
+HREF_SKIPPED = []
+
+# Default crawling depth
+CRAWLING_DEPTH = 1
 
 # eof

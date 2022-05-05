@@ -241,7 +241,7 @@ def url_response(url):
   # Check if defined Tor (--tor option).
   if menu.options.tor and settings.TOR_CHECK_AGAIN:
     tor.do_check()
-  if settings.MULTI_TARGETS:
+  if settings.MULTI_TARGETS or settings.CRAWLING:
     settings.TOR_CHECK_AGAIN = False
     # initiate total of requests
     settings.TOTAL_OF_REQUESTS = 0
@@ -416,9 +416,6 @@ def main(filename, url):
                                                  admin_panel=url, username=menu.options.auth_cred.split(":")[0], \
                                                  password=menu.options.auth_cred.split(":")[1]
                                                  )
-      # Load the crawler
-      if menu.options.crawldepth > 0 or menu.options.sitemap_url:  
-        url = crawler.crawler(url)
       try:
         if menu.options.flush_session:
           session_handler.flush(url)
@@ -625,11 +622,6 @@ try:
     if menu.options.os:
       checks.user_defined_os()
 
-    if menu.options.crawldepth > 2:
-      err_msg = "Depth level '" + str(menu.options.crawldepth) + "' is not a valid."  
-      print(settings.print_error_msg(err_msg))
-      raise SystemExit()
-
     # Check if defined "--check-tor" option. 
     if menu.options.tor_check and not menu.options.tor:
       err_msg = "The '--check-tor' swich requires usage of switch '--tor'."
@@ -675,6 +667,9 @@ try:
       settings.LOCAL_HTTP_IP = simple_http_server.grab_ip_addr()
     else:
       settings.LOCAL_HTTP_IP = None  
+
+    if menu.options.crawldepth > 0 or menu.options.sitemap_url:
+      settings.CRAWLING = True
 
     # Check arguments
     if len(sys.argv) == 1:
@@ -762,6 +757,54 @@ try:
     if os.path.isdir("./.git") and settings.CHECK_FOR_UPDATES_ON_START:
       update.check_for_update()
 
+    # Load the crawler
+    if settings.CRAWLING:
+      output_href = crawler.crawler(menu.options.url)
+      filename = crawler.store_crawling()
+      # Removing duplicates from list.
+      clean_output_href = []
+      [clean_output_href.append(x) for x in output_href if x not in clean_output_href]
+      # Removing empty elements from list.
+      clean_output_href = [x for x in clean_output_href if x]
+      if len(clean_output_href) != 0:
+        settings.MULTI_TARGETS = True
+        info_msg = "Found a total of " + str(len(clean_output_href)) + " target"+ "s"[len(clean_output_href) == 1:] + "."
+        print(settings.print_info_msg(info_msg))
+      url_num = 0
+      for url in clean_output_href:
+        if re.search(r"(.*?)\?(.+)", url):
+          url_num += 1
+          print(settings.print_question_msg("[" + str(url_num) + "/" + str(len(clean_output_href)) + "] URL - " + url) + "")
+          if filename is not None:
+            with open(filename, "a") as crawling_results:
+              crawling_results.write(url + "\n")
+          if not menu.options.batch:
+            question_msg = "Do you want to use URL #" + str(url_num) + " to perform tests? [Y/n] > "
+            message = _input(settings.print_question_msg(question_msg))
+          else:
+            message = ""
+          if len(message) == 0:
+             message = "Y"
+          if message in settings.CHOICE_YES:
+            settings.INIT_TEST = True
+            if url == clean_output_href[-1]:
+              settings.EOF = True
+            # Reset the injection level
+            if menu.options.level > 3:
+              menu.options.level = 1
+            init_injection(url)
+            try:
+              response, url = url_response(url)
+              if response != False:
+                filename = logs.logs_filename_creation(url)
+                main(filename, url)
+            except:
+              pass 
+          elif message in settings.CHOICE_NO:
+            pass 
+          elif message in settings.CHOICE_QUIT:
+            raise SystemExit()
+
     # Check if option is "-m" for multiple urls test.
     if menu.options.bulkfile:
       bulkfile = menu.options.bulkfile
@@ -794,7 +837,7 @@ try:
         print(settings.print_info_msg("Found a total of " + str(len(clean_bulkfile)) + " targets."))
         for url in clean_bulkfile:
           url_num += 1
-          print(settings.print_question_msg("URL #" + str(url_num) + " - " + url) + "")
+          print(settings.print_question_msg("[" + str(url_num) + "/" + str(len(clean_bulkfile)) + "] URL - " + url) + "")
           if not menu.options.batch:
             question_msg = "Do you want to use URL #" + str(url_num) + " to perform tests? [Y/n] > "
             message = _input(settings.print_question_msg(question_msg))
@@ -821,7 +864,6 @@ try:
             pass 
           elif message in settings.CHOICE_QUIT:
             raise SystemExit()
-
 
     else:
       if os_checks_num == 0:

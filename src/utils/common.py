@@ -27,6 +27,15 @@ from src.thirdparty import six
 from src.thirdparty.six.moves import input as _input
 from src.thirdparty.six.moves import urllib as _urllib
 
+
+def extract_regex_result(regex, content):
+  result = None
+  if regex and content and "?P<result>" in regex:
+    match = re.search(regex, content)
+    if match:
+      result = match.group("result")
+  return result
+
 """
 Returns True if the current process is run under admin privileges
 """

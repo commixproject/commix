@@ -66,13 +66,15 @@ def do_check(request, url):
     else:
       while True:
         if not menu.options.batch:
+          if settings.CRAWLING:
+            print(settings.SINGLE_WHITESPACE)
           question_msg = "Got a " + str(settings.REDIRECT_CODE) + " redirect to " + response.geturl() + "\n"
           question_msg += "Do you want to follow the identified redirection? [Y/n] > "
           redirection_option = _input(settings.print_question_msg(question_msg))
         else:
           redirection_option = ""  
         if len(redirection_option) == 0 or redirection_option in settings.CHOICE_YES:
-          if menu.options.batch:
+          if menu.options.batch and not settings.CRAWLING:
             info_msg = "Following redirection to '" + response.geturl() + "'. "
             print(settings.print_info_msg(info_msg))
           return checks.check_http_s(response.geturl())
@@ -87,7 +89,7 @@ def do_check(request, url):
 
   except (SocketError, _urllib.error.HTTPError, _urllib.error.URLError, _http_client.BadStatusLine, _http_client.InvalidURL) as err_msg:
     if settings.VALID_URL: 
-      checks.connection_exceptions(err_msg)
+      checks.connection_exceptions(err_msg, url)
     else:
       pass
 

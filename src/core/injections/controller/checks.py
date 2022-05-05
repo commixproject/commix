@@ -55,7 +55,7 @@ except:
 Connection exceptions
 """
 
-def connection_exceptions(err_msg):
+def connection_exceptions(err_msg, url):
   settings.VALID_URL = False
   try:
     error_msg = str(err_msg.args[0]).split("] ")[1] 
@@ -84,19 +84,29 @@ def connection_exceptions(err_msg):
         warn_msg += "'--proxy' option."
         print(settings.print_warning_msg(warn_msg))
     elif "infinite loop" in str(error_msg):
-      error_msg = "Infinite redirect loop detected." 
-      error_msg += "Please check all provided parameters and/or provide missing ones."
+      error_msg = "Infinite redirect loop detected. " 
+      error_msg += "Please check all provided parameters and/or provide missing ones"
     elif "BadStatusLine" in str(error_msg):
       error_msg = "connection dropped or unknown HTTP "
       error_msg += "status code received."
     elif "forcibly closed" in str(error_msg) or "Connection is already closed" in str(error_msg):
       error_msg = "connection was forcibly closed by the target URL."
-    if settings.MAX_RETRIES > 1:
+    elif settings.UNAUTHORIZED_ERROR in str(error_msg) and not menu.options.ignore_code:
+      error_msg = "Not authorized, try to provide right HTTP "
+      error_msg += "authentication type and valid credentials."
+      if not menu.options.ignore_code == settings.UNAUTHORIZED_ERROR:
+        error_msg += " If this is intended, try to rerun by providing "
+        error_msg += "a valid value for option '--ignore-code'"
+    if settings.MAX_RETRIES > 1 and not settings.CRAWLING:
       info_msg = settings.APPLICATION.capitalize() + " is going to retry the request(s)."
       print(settings.print_info_msg(info_msg))
-  error_msg = "Unable to connect to the target URL (Reason: " + error_msg.capitalize()  + ")."
-  if settings.MULTI_TARGETS:
-    error_msg = error_msg + " Skipping to the next target."
+  error_msg = "Unable to connect to the target URL (Reason: " + error_msg.replace("Http", "Http".upper())  + ")."
+  if not url:
+    _ = ""
+  else:
+    _ = " '" + url + "'"
+  if settings.MULTI_TARGETS or settings.CRAWLED_SKIPPED_URLS != 0:
+    error_msg = error_msg + " Skipping URL"+ _ +"."
   print(settings.print_critical_msg(error_msg))
   settings.TOTAL_OF_REQUESTS = settings.TOTAL_OF_REQUESTS + 1
   if settings.MAX_RETRIES > 1:
@@ -111,7 +121,7 @@ check for not declared cookie(s)
 def not_declared_cookies(response):
   try:
     candidate = re.search(r'([^;]+);?', response.headers[settings.SET_COOKIE]).group(1)
-    if candidate and settings.DECLARED_COOKIES is not False:
+    if candidate and settings.DECLARED_COOKIES is not False and settings.CRAWLING is False:
       settings.DECLARED_COOKIES = True
       if settings.CRAWLED_SKIPPED_URLS != 0:
         print(settings.SINGLE_WHITESPACE)
@@ -318,6 +328,8 @@ def captcha_check(page):
           warn_msg += " (CloudFlare)."
         else:
           warn_msg += "."
+        if settings.CRAWLING:
+          print(settings.SINGLE_WHITESPACE)
         print(settings.print_bold_warning_msg(warn_msg))
         break
         
