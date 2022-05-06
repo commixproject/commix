@@ -303,7 +303,38 @@ def crawler(url):
         print(settings.SINGLE_WHITESPACE)
       settings.CRAWLING_DEPTH += 1
 
-  output_href = crawled_hrefs    
+  output_href = crawled_hrefs
+  results = []
+  while True:
+    if not menu.options.batch:
+      question_msg = "Do you want to normalize crawling results? [Y/n] > "
+      message = _input(settings.print_question_msg(question_msg))
+    else:
+      message = ""
+    if len(message) == 0:
+       message = "Y"
+    if message in settings.CHOICE_YES:
+      seen = set()
+      for target in output_href:
+        value = "%s%s%s" % (target, '&' if '?' in target else '?', target or "")
+        match = re.search(r"/[^/?]*\?.+\Z", value)
+        if match:
+          key = re.sub(r"=[^=&]*", "=", match.group(0)).strip("&?")
+          if '=' in key and key not in seen:
+            results.append(target)
+            seen.add(key)
+      if len(results) != 0:
+        output_href = results
+      break
+    elif message in settings.CHOICE_NO:
+      break
+    elif message in settings.CHOICE_QUIT:
+      raise SystemExit()
+    else:
+      err_msg = "'" + message + "' is not a valid answer."  
+      print(settings.print_error_msg(err_msg))
+      pass
+      
   return output_href
 
 # eof
