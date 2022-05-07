@@ -794,76 +794,80 @@ def perform_checks(url, http_request_method, filename):
 General check on every injection technique.
 """
 def do_check(url, http_request_method, filename):
-  if settings.RECHECK_FILE_FOR_EXTRACTION:
-    settings.RECHECK_FILE_FOR_EXTRACTION = False
+  try:
+    if settings.RECHECK_FILE_FOR_EXTRACTION:
+      settings.RECHECK_FILE_FOR_EXTRACTION = False
 
-  # Check for '--tor' option.
-  if menu.options.tor: 
-    if not menu.options.tech or "t" in menu.options.tech or "f" in menu.options.tech:
-      warn_msg = "It is highly recommended to avoid usage of switch '--tor' for "
-      warn_msg += "time-based injections because of inherent high latency time."
-      print(settings.print_warning_msg(warn_msg))
+    # Check for '--tor' option.
+    if menu.options.tor: 
+      if not menu.options.tech or "t" in menu.options.tech or "f" in menu.options.tech:
+        warn_msg = "It is highly recommended to avoid usage of switch '--tor' for "
+        warn_msg += "time-based injections because of inherent high latency time."
+        print(settings.print_warning_msg(warn_msg))
 
-  # Check for "backticks" tamper script.
-  if settings.USE_BACKTICKS == True:
-    if not menu.options.tech or "e" in menu.options.tech or "t" in menu.options.tech or "f" in menu.options.tech:
-      warn_msg = "Commands substitution using backtics is only supported by the (results-based) classic command injection technique. "
-      print(settings.print_warning_msg(warn_msg) + Style.RESET_ALL)
+    # Check for "backticks" tamper script.
+    if settings.USE_BACKTICKS == True:
+      if not menu.options.tech or "e" in menu.options.tech or "t" in menu.options.tech or "f" in menu.options.tech:
+        warn_msg = "Commands substitution using backtics is only supported by the (results-based) classic command injection technique. "
+        print(settings.print_warning_msg(warn_msg) + Style.RESET_ALL)
 
-  # Check for "wizard" switch.
-  if menu.options.wizard:
-    if perform_checks(url, http_request_method, filename) == False:
-      scan_level = menu.options.level
-      while int(scan_level) < int(settings.HTTP_HEADER_INJECTION_LEVEL) and settings.LOAD_SESSION != True:
-        while True:
-          if not menu.options.batch:
-            question_msg = "Do you want to increase to '--level=" + str(scan_level + 1) 
-            question_msg += "' in order to perform more tests? [Y/n] > "
-            next_level = _input(settings.print_question_msg(question_msg))
-          else:
-            next_level = ""
-          if len(next_level) == 0:
-             next_level = "Y"
-          if next_level in settings.CHOICE_YES:
-            menu.options.level = int(menu.options.level + scan_level)
-            if perform_checks(url, http_request_method, filename) == False and scan_level < settings.HTTP_HEADER_INJECTION_LEVEL :
-              scan_level = scan_level + 1
+    # Check for "wizard" switch.
+    if menu.options.wizard:
+      if perform_checks(url, http_request_method, filename) == False:
+        scan_level = menu.options.level
+        while int(scan_level) < int(settings.HTTP_HEADER_INJECTION_LEVEL) and settings.LOAD_SESSION != True:
+          while True:
+            if not menu.options.batch:
+              question_msg = "Do you want to increase to '--level=" + str(scan_level + 1) 
+              question_msg += "' in order to perform more tests? [Y/n] > "
+              next_level = _input(settings.print_question_msg(question_msg))
             else:
-              break  
-          elif next_level in settings.CHOICE_NO:
-            break
-          elif next_level in settings.CHOICE_QUIT:
-            raise SystemExit()
-          else:
-            err_msg = "'" + next_level + "' is not a valid answer."  
-            print(settings.print_error_msg(err_msg))
-            pass
-  else:
-    perform_checks(url, http_request_method, filename)
-    
-  # All injection techniques seems to be failed!
-  if settings.CLASSIC_STATE == settings.EVAL_BASED_STATE == settings.TIME_BASED_STATE == settings.FILE_BASED_STATE == False :
-    if settings.INJECTION_CHECKER == False and not settings.CHECK_BOTH_OS:
-      err_msg = "All tested parameters "
-      if menu.options.level > 2:
-        err_msg += "and HTTP headers "
-      err_msg += "appear to be not injectable."
-      if not menu.options.alter_shell :
-        err_msg += " Try to use the option '--alter-shell'"
-      else:
-        err_msg += " Try to remove the option '--alter-shell'"
-      if menu.options.level < settings.HTTP_HEADER_INJECTION_LEVEL :
-        err_msg += " and/or increase '--level' value to perform"
-        err_msg += " more tests"
-      if menu.options.skip_empty:
-        err_msg += " and/or remove the option '--skip-empty'"  
-      err_msg += "."
-      print(settings.print_critical_msg(err_msg))
+              next_level = ""
+            if len(next_level) == 0:
+               next_level = "Y"
+            if next_level in settings.CHOICE_YES:
+              menu.options.level = int(menu.options.level + scan_level)
+              if perform_checks(url, http_request_method, filename) == False and scan_level < settings.HTTP_HEADER_INJECTION_LEVEL :
+                scan_level = scan_level + 1
+              else:
+                break  
+            elif next_level in settings.CHOICE_NO:
+              break
+            elif next_level in settings.CHOICE_QUIT:
+              raise SystemExit()
+            else:
+              err_msg = "'" + next_level + "' is not a valid answer."  
+              print(settings.print_error_msg(err_msg))
+              pass
+    else:
+      perform_checks(url, http_request_method, filename)
+      
+    # All injection techniques seems to be failed!
+    if settings.CLASSIC_STATE == settings.EVAL_BASED_STATE == settings.TIME_BASED_STATE == settings.FILE_BASED_STATE == False :
+      if settings.INJECTION_CHECKER == False and not settings.CHECK_BOTH_OS:
+        err_msg = "All tested parameters "
+        if menu.options.level > 2:
+          err_msg += "and HTTP headers "
+        err_msg += "appear to be not injectable."
+        if not menu.options.alter_shell :
+          err_msg += " Try to use the option '--alter-shell'"
+        else:
+          err_msg += " Try to remove the option '--alter-shell'"
+        if menu.options.level < settings.HTTP_HEADER_INJECTION_LEVEL :
+          err_msg += " and/or increase '--level' value to perform"
+          err_msg += " more tests"
+        if menu.options.skip_empty:
+          err_msg += " and/or remove the option '--skip-empty'"  
+        err_msg += "."
+        print(settings.print_critical_msg(err_msg))
 
-  if not settings.MULTI_TARGETS:
-    logs.print_logs_notification(filename, url)
+    if not settings.MULTI_TARGETS:
+      logs.print_logs_notification(filename, url)
 
-  if not settings.CHECK_BOTH_OS and not settings.MULTI_TARGETS:
-    raise SystemExit()
-  
+    if not settings.CHECK_BOTH_OS and not settings.MULTI_TARGETS:
+      raise SystemExit()
+
+  except KeyboardInterrupt:
+    checks.user_aborted(filename, url)
+
 # eof

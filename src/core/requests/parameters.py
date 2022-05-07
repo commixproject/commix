@@ -407,6 +407,8 @@ Define the injection suffixes.
 """
 def suffixes(payload, suffix):
   # Check if defined "--suffix" option.
+  if settings.COOKIE_INJECTION and suffix == settings.COOKIE_DELIMITER:
+    suffix = ""
   if menu.options.suffix:
     payload = payload + suffix + menu.options.suffix
   else:

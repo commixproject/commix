@@ -27,6 +27,7 @@ import base64
 import gzip
 import zlib
 import traceback
+from src.utils import logs
 from src.utils import menu
 from src.utils import settings
 from src.utils import simple_http_server
@@ -52,9 +53,20 @@ except:
     settings.READLINE_ERROR = True
 
 """
+User aborted procedure
+"""
+def user_aborted(filename, url):
+  abort_msg = "User aborted procedure "
+  abort_msg += "during the " + assessment_phase() 
+  abort_msg += " phase (Ctrl-C was pressed)."
+  print(settings.SINGLE_WHITESPACE)
+  print(settings.print_abort_msg(abort_msg))
+  logs.print_logs_notification(filename, url)
+  os._exit(0)
+
+"""
 Connection exceptions
 """
-
 def connection_exceptions(err_msg, url):
   settings.VALID_URL = False
   try:
@@ -64,7 +76,7 @@ def connection_exceptions(err_msg, url):
       error_msg = str(err_msg.args[0])
     except IndexError:
       error_msg = str(err_msg)
-  if settings.TOTAL_OF_REQUESTS == 1 and settings.VERBOSITY_LEVEL < 2:
+  if settings.TOTAL_OF_REQUESTS == 1 and settings.VERBOSITY_LEVEL < 2 and not settings.CRAWLING:
     print(settings.SINGLE_WHITESPACE)
   if "ssl" in str(error_msg):
     settings.MAX_RETRIES = 1
@@ -83,6 +95,7 @@ def connection_exceptions(err_msg, url):
             warn_msg += "'--random-agent' switch and/or "
         warn_msg += "'--proxy' option."
         print(settings.print_warning_msg(warn_msg))
+        raise SystemExit()
     elif "infinite loop" in str(error_msg):
       error_msg = "Infinite redirect loop detected. " 
       error_msg += "Please check all provided parameters and/or provide missing ones"
@@ -100,7 +113,7 @@ def connection_exceptions(err_msg, url):
     if settings.MAX_RETRIES > 1 and not settings.CRAWLING:
       info_msg = settings.APPLICATION.capitalize() + " is going to retry the request(s)."
       print(settings.print_info_msg(info_msg))
-  error_msg = "Unable to connect to the target URL (Reason: " + error_msg.replace("Http", "Http".upper())  + ")."
+  error_msg = "Unable to connect to the target URL (Reason: " + str(error_msg.replace("Http", "Http".upper()))  + ")."
   if not url:
     _ = ""
   else:
@@ -567,8 +580,7 @@ def continue_tests(err):
         print(settings.print_error_msg(err_msg))
         pass
   except KeyboardInterrupt:
-    print("\n") + Back.RED + settings.ABORTION_SIGN + "Ctrl-C was pressed!" + Style.RESET_ALL
-    raise SystemExit()
+    raise
 
 """
 Check if option is unavailable

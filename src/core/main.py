@@ -59,6 +59,7 @@ if settings.IS_WINDOWS:
   # Use Colorama to make Termcolor work on Windows too :)
   init()
 
+
 """
 Define HTTP User-Agent header.
 """
@@ -496,7 +497,7 @@ def main(filename, url):
     logs.print_logs_notification(filename, url)      
 
 try:
-
+  filename = ""
   # Check if defined "--version" option.
   if menu.options.version:
     version.show_version()
@@ -757,10 +758,78 @@ try:
     if os.path.isdir("./.git") and settings.CHECK_FOR_UPDATES_ON_START:
       update.check_for_update()
 
-    # Load the crawler
+    # Check if option is "-m" for multiple urls test.
+    if menu.options.bulkfile:
+      bulkfile = menu.options.bulkfile
+      info_msg = "Parsing targets using the '" + os.path.split(bulkfile)[1] + "' file. "
+      sys.stdout.write(settings.print_info_msg(info_msg))
+      sys.stdout.flush()
+      if not os.path.exists(bulkfile):
+        print(settings.SINGLE_WHITESPACE)
+        err_msg = "It seems that the '" + os.path.split(bulkfile)[1] + "' file, does not exist."
+        sys.stdout.write(settings.print_critical_msg(err_msg) + "\n")
+        sys.stdout.flush()
+        raise SystemExit()
+      elif os.stat(bulkfile).st_size == 0:
+        print(settings.SINGLE_WHITESPACE)
+        err_msg = "It seems that the '" + os.path.split(bulkfile)[1] + "' file, is empty."
+        sys.stdout.write(settings.print_critical_msg(err_msg) + "\n")
+        sys.stdout.flush()
+        raise SystemExit()
+      else:
+        settings.MULTI_TARGETS = True
+
+    if settings.MULTI_TARGETS:
+      print(settings.SINGLE_WHITESPACE)
+      with open(menu.options.bulkfile) as f:
+        bulkfile = [url.strip() for url in f]
+      # Removing duplicates from list.
+      clean_bulkfile = []
+      [clean_bulkfile.append(x) for x in bulkfile if x not in clean_bulkfile]
+      # Removing empty elements from list.
+      clean_bulkfile = [x for x in clean_bulkfile if x]
+      url_num = 0
+      info_msg = "Found a total of " + str(len(clean_bulkfile)) + " target"+ "s"[len(clean_bulkfile) == 1:] + "."
+      print(settings.print_info_msg(info_msg))
+      for url in clean_bulkfile:
+        url_num += 1
+        print(settings.print_question_msg("[" + str(url_num) + "/" + str(len(clean_bulkfile)) + "] URL - " + url) + "")
+        if not menu.options.batch:
+          question_msg = "Do you want to use URL #" + str(url_num) + " to perform tests? [Y/n] > "
+          message = _input(settings.print_question_msg(question_msg))
+        else:
+          message = ""
+        if len(message) == 0:
+           message = "Y"
+        if message in settings.CHOICE_YES:
+          settings.INIT_TEST = True
+          if url == clean_bulkfile[-1]:
+            settings.EOF = True
+          # Reset the injection level
+          if menu.options.level > 3:
+            menu.options.level = 1
+          init_injection(url)
+          try:
+            response, url = url_response(url)
+            if response != False:
+              filename = logs.logs_filename_creation(url)
+              main(filename, url)
+          except:
+            pass 
+        elif message in settings.CHOICE_NO:
+          pass 
+        elif message in settings.CHOICE_QUIT:
+          raise SystemExit()
+
+    # Check if option "--crawl" is enabled.
     if settings.CRAWLING:
-      output_href = crawler.crawler(menu.options.url)
       filename = crawler.store_crawling()
+      if settings.MULTI_TARGETS:
+        output_href = []
+        for url in bulkfile:
+          output_href.append(url)
+      else:
+        output_href = crawler.crawler(menu.options.url)
       # Removing duplicates from list.
       clean_output_href = []
       [clean_output_href.append(x) for x in output_href if x not in clean_output_href]
@@ -805,66 +874,6 @@ try:
           elif message in settings.CHOICE_QUIT:
             raise SystemExit()
 
-    # Check if option is "-m" for multiple urls test.
-    if menu.options.bulkfile:
-      bulkfile = menu.options.bulkfile
-      info_msg = "Parsing targets using the '" + os.path.split(bulkfile)[1] + "' file. "
-      sys.stdout.write(settings.print_info_msg(info_msg))
-      sys.stdout.flush()
-      if not os.path.exists(bulkfile):
-        print(settings.SINGLE_WHITESPACE)
-        err_msg = "It seems that the '" + os.path.split(bulkfile)[1] + "' file, does not exist."
-        sys.stdout.write(settings.print_critical_msg(err_msg) + "\n")
-        sys.stdout.flush()
-        raise SystemExit()
-      elif os.stat(bulkfile).st_size == 0:
-        print(settings.SINGLE_WHITESPACE)
-        err_msg = "It seems that the '" + os.path.split(bulkfile)[1] + "' file, is empty."
-        sys.stdout.write(settings.print_critical_msg(err_msg) + "\n")
-        sys.stdout.flush()
-        raise SystemExit()
-      else:
-        print(settings.SINGLE_WHITESPACE)
-        with open(menu.options.bulkfile) as f:
-          bulkfile = [url.strip() for url in f]
-        settings.MULTI_TARGETS = True
-        # Removing duplicates from list.
-        clean_bulkfile = []
-        [clean_bulkfile.append(x) for x in bulkfile if x not in clean_bulkfile]
-        # Removing empty elements from list.
-        clean_bulkfile = [x for x in clean_bulkfile if x]
-        url_num = 0
-        print(settings.print_info_msg("Found a total of " + str(len(clean_bulkfile)) + " targets."))
-        for url in clean_bulkfile:
-          url_num += 1
-          print(settings.print_question_msg("[" + str(url_num) + "/" + str(len(clean_bulkfile)) + "] URL - " + url) + "")
-          if not menu.options.batch:
-            question_msg = "Do you want to use URL #" + str(url_num) + " to perform tests? [Y/n] > "
-            message = _input(settings.print_question_msg(question_msg))
-          else:
-            message = ""
-          if len(message) == 0:
-             message = "Y"
-          if message in settings.CHOICE_YES:
-            settings.INIT_TEST = True
-            if url == clean_bulkfile[-1]:
-              settings.EOF = True
-            # Reset the injection level
-            if menu.options.level > 3:
-              menu.options.level = 1
-            init_injection(url)
-            try:
-              response, url = url_response(url)
-              if response != False:
-                filename = logs.logs_filename_creation(url)
-                main(filename, url)
-            except:
-              pass 
-          elif message in settings.CHOICE_NO:
-            pass 
-          elif message in settings.CHOICE_QUIT:
-            raise SystemExit()
-
     else:
       if os_checks_num == 0:
         settings.INIT_TEST = True
@@ -879,16 +888,7 @@ try:
         main(filename, url)
 
 except KeyboardInterrupt:
-  abort_msg = "User aborted procedure "
-  abort_msg += "during the " + checks.assessment_phase() 
-  abort_msg += " phase (Ctrl-C was pressed)."
-  new_line = "\n"
-  print(new_line + settings.print_abort_msg(abort_msg))
-  try:
-    logs.print_logs_notification(filename, url)
-    print(settings.SINGLE_WHITESPACE)
-  except NameError:
-    raise SystemExit()
+  checks.user_aborted(filename, url)
 
 except SystemExit: 
   print(settings.SINGLE_WHITESPACE)

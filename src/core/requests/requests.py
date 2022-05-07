@@ -366,7 +366,11 @@ def cookie_injection(url, vuln_parameter, payload):
     #Check if defined extra headers.
     headers.do_check(request)
     payload = checks.newline_fixation(payload)
-    request.add_header('Cookie', menu.options.cookie.replace(settings.INJECT_TAG, payload.replace("+", "%2B")))
+    payload = payload.replace("+", "%2B")
+    if settings.INJECT_TAG in menu.options.cookie:
+      request.add_header('Cookie', menu.options.cookie.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload))
+    else:
+      request.add_header('Cookie', menu.options.cookie.replace(settings.INJECT_TAG, payload))
     try:
       headers.check_http_traffic(request)
       response = opener.open(request)

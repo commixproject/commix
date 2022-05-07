@@ -135,7 +135,8 @@ def request(url):
       settings.HREF_SKIPPED.append(url)
       settings.CRAWLED_SKIPPED_URLS += 1
       # if settings.CRAWLING_DEPTH == 1:
-      print(settings.SINGLE_WHITESPACE)
+      if settings.TOTAL_OF_REQUESTS != 1:
+        print(settings.SINGLE_WHITESPACE)
       checks.connection_exceptions(err_msg, url)
       if settings.VERBOSITY_LEVEL >= 2:
         print(settings.SINGLE_WHITESPACE)
@@ -194,6 +195,7 @@ The main crawler.
 def crawler(url):
   info_msg = "Starting crawler for target URL '" + url + "'"
   print(settings.print_info_msg(info_msg))
+  response = request(url)
   if menu.options.sitemap_url:
     message = ""
     if not menu.options.crawldepth:
