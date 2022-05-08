@@ -758,6 +758,19 @@ try:
     if os.path.isdir("./.git") and settings.CHECK_FOR_UPDATES_ON_START:
       update.check_for_update()
 
+    if not menu.options.bulkfile and not settings.CRAWLING:
+      if os_checks_num == 0:
+        settings.INIT_TEST = True
+      # Check if option is "--url" for single url test.
+      if menu.options.sitemap_url:
+        url = menu.options.sitemap_url
+      else:  
+        url = menu.options.url
+      response, url = url_response(url)
+      if response != False:
+        filename = logs.logs_filename_creation(url)
+        main(filename, url)
+
     # Check if option is "-m" for multiple urls test.
     if menu.options.bulkfile:
       bulkfile = menu.options.bulkfile
@@ -778,22 +791,46 @@ try:
         raise SystemExit()
       else:
         settings.MULTI_TARGETS = True
+        print(settings.SINGLE_WHITESPACE)
+        with open(menu.options.bulkfile) as f:
+          bulkfile = [url.strip() for url in f]
 
-    if settings.MULTI_TARGETS:
-      print(settings.SINGLE_WHITESPACE)
-      with open(menu.options.bulkfile) as f:
-        bulkfile = [url.strip() for url in f]
-      # Removing duplicates from list.
-      clean_bulkfile = []
-      [clean_bulkfile.append(x) for x in bulkfile if x not in clean_bulkfile]
-      # Removing empty elements from list.
-      clean_bulkfile = [x for x in clean_bulkfile if x]
-      url_num = 0
-      info_msg = "Found a total of " + str(len(clean_bulkfile)) + " target"+ "s"[len(clean_bulkfile) == 1:] + "."
+    # Check if option "--crawl" is enabled.
+    if settings.CRAWLING:
+      url_num = 1
+      if not menu.options.bulkfile:
+        crawling_list = 1
+        output_href = crawler.crawler(menu.options.url, url_num, crawling_list)
+      else:
+        output_href = []
+        crawling_list = len(bulkfile)
+        for url in bulkfile:
+          output_href = (crawler.crawler(url, url_num, crawling_list))
+          url_num += 1
+        output_href = output_href + bulkfile
+        output_href = [x for x in output_href if x not in settings.HREF_SKIPPED]
+      output_href = crawler.normalize_results(output_href)
+      filename = crawler.store_crawling()
+    else:
+      output_href = []
+      output_href = output_href + bulkfile
+      filename = None
+    # Removing duplicates from list.
+    clean_output_href = []
+    [clean_output_href.append(x) for x in output_href if x not in clean_output_href]
+    # Removing empty elements from list.
+    clean_output_href = [x for x in clean_output_href if x]
+    if len(clean_output_href) != 0:
+      info_msg = "Found a total of " + str(len(clean_output_href)) + " target"+ "s"[len(clean_output_href) == 1:] + "."
       print(settings.print_info_msg(info_msg))
-      for url in clean_bulkfile:
+    url_num = 0
+    for url in clean_output_href:
+      if (settings.CRAWLING and re.search(r"(.*?)\?(.+)", url)) or settings.MULTI_TARGETS:
         url_num += 1
-        print(settings.print_question_msg("[" + str(url_num) + "/" + str(len(clean_bulkfile)) + "] URL - " + url) + "")
+        print(settings.print_question_msg("[" + str(url_num) + "/" + str(len(clean_output_href)) + "] URL - " + url) + "")
+        if filename is not None:
+          with open(filename, "a") as crawling_results:
+            crawling_results.write(url + "\n")
         if not menu.options.batch:
           question_msg = "Do you want to use URL #" + str(url_num) + " to perform tests? [Y/n] > "
           message = _input(settings.print_question_msg(question_msg))
@@ -803,7 +840,7 @@ try:
            message = "Y"
         if message in settings.CHOICE_YES:
           settings.INIT_TEST = True
-          if url == clean_bulkfile[-1]:
+          if url == clean_output_href[-1]:
             settings.EOF = True
           # Reset the injection level
           if menu.options.level > 3:
@@ -821,74 +858,11 @@ try:
         elif message in settings.CHOICE_QUIT:
           raise SystemExit()
 
-    # Check if option "--crawl" is enabled.
-    if settings.CRAWLING:
-      filename = crawler.store_crawling()
-      if settings.MULTI_TARGETS:
-        output_href = []
-        for url in bulkfile:
-          output_href.append(url)
-      else:
-        output_href = crawler.crawler(menu.options.url)
-      # Removing duplicates from list.
-      clean_output_href = []
-      [clean_output_href.append(x) for x in output_href if x not in clean_output_href]
-      # Removing empty elements from list.
-      clean_output_href = [x for x in clean_output_href if x]
-      if len(clean_output_href) != 0:
-        settings.MULTI_TARGETS = True
-        info_msg = "Found a total of " + str(len(clean_output_href)) + " target"+ "s"[len(clean_output_href) == 1:] + "."
-        print(settings.print_info_msg(info_msg))
-      url_num = 0
-      for url in clean_output_href:
-        if re.search(r"(.*?)\?(.+)", url):
-          url_num += 1
-          print(settings.print_question_msg("[" + str(url_num) + "/" + str(len(clean_output_href)) + "] URL - " + url) + "")
-          if filename is not None:
-            with open(filename, "a") as crawling_results:
-              crawling_results.write(url + "\n")
-          if not menu.options.batch:
-            question_msg = "Do you want to use URL #" + str(url_num) + " to perform tests? [Y/n] > "
-            message = _input(settings.print_question_msg(question_msg))
-          else:
-            message = ""
-          if len(message) == 0:
-             message = "Y"
-          if message in settings.CHOICE_YES:
-            settings.INIT_TEST = True
-            if url == clean_output_href[-1]:
-              settings.EOF = True
-            # Reset the injection level
-            if menu.options.level > 3:
-              menu.options.level = 1
-            init_injection(url)
-            try:
-              response, url = url_response(url)
-              if response != False:
-                filename = logs.logs_filename_creation(url)
-                main(filename, url)
-            except:
-              pass 
-          elif message in settings.CHOICE_NO:
-            pass 
-          elif message in settings.CHOICE_QUIT:
-            raise SystemExit()
-
-    else:
-      if os_checks_num == 0:
-        settings.INIT_TEST = True
-      # Check if option is "--url" for single url test.
-      if menu.options.sitemap_url:
-        url = menu.options.sitemap_url
-      else:  
-        url = menu.options.url
-      response, url = url_response(url)
-      if response != False:
-        filename = logs.logs_filename_creation(url)
-        main(filename, url)
-
 except KeyboardInterrupt:
-  checks.user_aborted(filename, url)
+  try:
+    checks.user_aborted(filename, url)
+  except NameError:
+    raise SystemExit()
 
 except SystemExit: 
   print(settings.SINGLE_WHITESPACE)

@@ -34,6 +34,77 @@ visited_hrefs = []
 crawled_hrefs = []
 new_crawled_hrefs = []
 
+"""
+Change the crawling depth level.
+"""
+def set_crawling_depth():
+  while True:
+    if not menu.options.batch:
+      question_msg = "Do you want to change the crawling depth level (" + str(menu.options.crawldepth) + ")? [y/N] > "
+      message = _input(settings.print_question_msg(question_msg))
+    else:
+      message = ""
+    if len(message) == 0:
+       message = "N"
+    if message in settings.CHOICE_YES or message in settings.CHOICE_NO:
+      break  
+    elif message in settings.CHOICE_QUIT:
+      raise SystemExit()
+    else:
+      err_msg = "'" + message + "' is not a valid answer."  
+      print(settings.print_error_msg(err_msg))
+      pass
+  # Change the crawling depth level.
+  if message in settings.CHOICE_YES:
+    while True:
+      question_msg = "Please enter the crawling depth level: > "
+      message = _input(settings.print_question_msg(question_msg))
+      if len(message) == 0:
+        message = 1
+        break
+      else: 
+        menu.options.crawldepth = message
+        break
+
+
+"""
+Normalize crawling results.
+"""
+def normalize_results(output_href):
+  results = []
+  while True:
+    if not menu.options.batch:
+      question_msg = "Do you want to normalize crawling results? [Y/n] > "
+      message = _input(settings.print_question_msg(question_msg))
+    else:
+      message = ""
+    if len(message) == 0:
+       message = "Y"
+    if message in settings.CHOICE_YES:
+      seen = set()
+      for target in output_href:
+        value = "%s%s%s" % (target, '&' if '?' in target else '?', target or "")
+        match = re.search(r"/[^/?]*\?.+\Z", value)
+        if match:
+          key = re.sub(r"=[^=&]*", "=", match.group(0)).strip("&?")
+          if '=' in key and key not in seen:
+            results.append(target)
+            seen.add(key)
+      if len(results) != 0:
+        return results
+    elif message in settings.CHOICE_NO:
+      break
+    elif message in settings.CHOICE_QUIT:
+      raise SystemExit()
+    else:
+      err_msg = "'" + message + "' is not a valid answer."  
+      print(settings.print_error_msg(err_msg))
+      pass
+
+
+"""
+Store crawling results to a temporary file.
+"""
 def store_crawling():
   while True:
     if not menu.options.batch:
@@ -58,6 +129,7 @@ def store_crawling():
       sys.stdout.write(settings.print_error_msg(err_msg))
       sys.stdout.flush()
       pass  
+
 
 """
 Check for URLs in sitemap.xml.
@@ -102,16 +174,19 @@ def sitemap(url):
       raise SystemExit()
     pass
 
+
 """
 Store the identified (valid) hrefs.
 """
 def store_hrefs(href, identified_hrefs, redirection):
   if href not in crawled_hrefs:
-    if (settings.CRAWLING_DEPTH != 1 and href not in new_crawled_hrefs) or redirection:
+    if (settings.DEFAULT_CRAWLING_DEPTH != 1 and href not in new_crawled_hrefs) or redirection:
       new_crawled_hrefs.append(href)
     identified_hrefs = True
     crawled_hrefs.append(href)
   return identified_hrefs
+
+
 """
 Do a request to target URL.
 """
@@ -134,12 +209,13 @@ def request(url):
     if url not in settings.HREF_SKIPPED:
       settings.HREF_SKIPPED.append(url)
       settings.CRAWLED_SKIPPED_URLS += 1
-      # if settings.CRAWLING_DEPTH == 1:
-      if settings.TOTAL_OF_REQUESTS != 1:
+      # if settings.DEFAULT_CRAWLING_DEPTH == 1:
+      if settings.TOTAL_OF_REQUESTS != 1 and not settings.MULTI_TARGETS:
         print(settings.SINGLE_WHITESPACE)
       checks.connection_exceptions(err_msg, url)
       if settings.VERBOSITY_LEVEL >= 2:
         print(settings.SINGLE_WHITESPACE)
+
 
 """
 The crawing process.
@@ -151,7 +227,6 @@ def do_process(url):
   else:
     if settings.CRAWLED_SKIPPED_URLS == 0:
       sys.stdout.write("\r")
-
   # Grab the crawled hrefs.
   try:
     response = request(url)
@@ -178,7 +253,7 @@ def do_process(url):
 
     if len(crawled_hrefs) != 0:
       if identified_hrefs:
-        if len(new_crawled_hrefs) != 0 and settings.CRAWLING_DEPTH != 1:
+        if len(new_crawled_hrefs) != 0 and settings.DEFAULT_CRAWLING_DEPTH != 1:
           return list(set(new_crawled_hrefs))
         return list(set(crawled_hrefs))
       return list("")
@@ -189,11 +264,16 @@ def do_process(url):
   except Exception as e:  # for non-HTML files and non-valid links
     pass
   
+
 """
 The main crawler.
 """
-def crawler(url):
-  info_msg = "Starting crawler for target URL '" + url + "'"
+def crawler(url, url_num, crawling_list):
+  if crawling_list > 1:
+    _ = " (" + str(url_num) + "/" + str(crawling_list) + ")"
+  else:
+    _ = ""
+  info_msg = "Starting crawler for target URL '" + url + "'" + _
   print(settings.print_info_msg(info_msg))
   response = request(url)
   if menu.options.sitemap_url:
@@ -218,41 +298,13 @@ def crawler(url):
           err_msg = "'" + message + "' is not a valid answer."  
           print(settings.print_error_msg(err_msg))
           pass
-
-    if menu.options.crawldepth:
-      while True:
-        if not menu.options.batch:
-          question_msg = "Do you want to change the crawling depth level (" + str(menu.options.crawldepth) + ")? [y/N] > "
-          message = _input(settings.print_question_msg(question_msg))
-        else:
-          message = ""
-        if len(message) == 0:
-           message = "N"
-        if message in settings.CHOICE_YES or message in settings.CHOICE_NO:
-          break  
-        elif message in settings.CHOICE_QUIT:
-          raise SystemExit()
-        else:
-          err_msg = "'" + message + "' is not a valid answer."  
-          print(settings.print_error_msg(err_msg))
-          pass
-      # Change the crawling depth level.
-      if message in settings.CHOICE_YES:
-        while True:
-          question_msg = "Please enter the crawling depth level: > "
-          message = _input(settings.print_question_msg(question_msg))
-          if len(message) == 0:
-            message = 1
-            break
-          else: 
-            menu.options.crawldepth = message
-            break
+    else:
+      set_crawling_depth()
 
   while True:
-    sitemap_check = None
-    if not menu.options.sitemap_url:
+    if not menu.options.sitemap_url and settings.SITEMAP_CHECK is None:
       if not menu.options.batch:
-        question_msg = "Do you want to check target for "
+        question_msg = "Do you want to check target"+ ('', 's')[settings.MULTI_TARGETS] + " for "
         question_msg += "the existence of site's sitemap(.xml)? [y/N] > "
         message = _input(settings.print_question_msg(question_msg))
       else:
@@ -260,10 +312,10 @@ def crawler(url):
       if len(message) == 0:
          message = "n"
       if message in settings.CHOICE_YES:
-        sitemap_check = True
+        settings.SITEMAP_CHECK = True
         break
       elif message in settings.CHOICE_NO:
-        sitemap_check = False
+        settings.SITEMAP_CHECK = False
         break
       elif message in settings.CHOICE_QUIT:
         raise SystemExit()
@@ -273,26 +325,30 @@ def crawler(url):
         pass
     else:
       message = "n"
-      sitemap_check = True
+      settings.SITEMAP_CHECK = True
       break
-  if sitemap_check:
+
+  if settings.SITEMAP_CHECK:
     output_href = sitemap(url)
     if output_href is None :
-      sitemap_check = False
+      settings.SITEMAP_CHECK = False
 
-  if not sitemap_check:
+  if not settings.SITEMAP_CHECK:
     output_href = do_process(url)
-    while settings.CRAWLING_DEPTH <= int(menu.options.crawldepth):
+    if settings.MULTI_TARGETS and settings.DEFAULT_CRAWLING_DEPTH != 1:
+      settings.DEFAULT_CRAWLING_DEPTH = 1
+    while settings.DEFAULT_CRAWLING_DEPTH <= int(menu.options.crawldepth):
       info_msg = "Searching for usable "
-      info_msg += "links with depth " + str(settings.CRAWLING_DEPTH) + "." 
+      info_msg += "links with depth " + str(settings.DEFAULT_CRAWLING_DEPTH) + "." 
       print(settings.print_info_msg(info_msg))
-      if settings.CRAWLING_DEPTH != 1:
+      if settings.DEFAULT_CRAWLING_DEPTH != 1:
         output_href = new_crawled_hrefs
       link = 0
       if output_href is not None:
         for url in output_href: 
-          link += 1
           if url not in visited_hrefs:
+            link += 1
+            settings.CRAWLED_URLS = link
             visited_hrefs.append(url)
             do_process(url)
             info_msg = str(link)
@@ -303,40 +359,9 @@ def crawler(url):
             print(settings.SINGLE_WHITESPACE)
       if link != 0:
         print(settings.SINGLE_WHITESPACE)
-      settings.CRAWLING_DEPTH += 1
+      settings.DEFAULT_CRAWLING_DEPTH += 1
 
   output_href = crawled_hrefs
-  results = []
-  while True:
-    if not menu.options.batch:
-      question_msg = "Do you want to normalize crawling results? [Y/n] > "
-      message = _input(settings.print_question_msg(question_msg))
-    else:
-      message = ""
-    if len(message) == 0:
-       message = "Y"
-    if message in settings.CHOICE_YES:
-      seen = set()
-      for target in output_href:
-        value = "%s%s%s" % (target, '&' if '?' in target else '?', target or "")
-        match = re.search(r"/[^/?]*\?.+\Z", value)
-        if match:
-          key = re.sub(r"=[^=&]*", "=", match.group(0)).strip("&?")
-          if '=' in key and key not in seen:
-            results.append(target)
-            seen.add(key)
-      if len(results) != 0:
-        output_href = results
-      break
-    elif message in settings.CHOICE_NO:
-      break
-    elif message in settings.CHOICE_QUIT:
-      raise SystemExit()
-    else:
-      err_msg = "'" + message + "' is not a valid answer."  
-      print(settings.print_error_msg(err_msg))
-      pass
-      
   return output_href
 
 # eof

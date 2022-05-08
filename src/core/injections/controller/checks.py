@@ -78,9 +78,11 @@ def connection_exceptions(err_msg, url):
       error_msg = str(err_msg)
   if settings.TOTAL_OF_REQUESTS == 1 and settings.VERBOSITY_LEVEL < 2 and not settings.CRAWLING:
     print(settings.SINGLE_WHITESPACE)
-  if "ssl" in str(error_msg):
+  if "wrong version number" in str(error_msg).lower():
     settings.MAX_RETRIES = 1
     error_msg = "can't establish SSL connection"
+  elif "connection refused" in str(error_msg).lower():
+    settings.MAX_RETRIES = 1
   else:
     if settings.TOTAL_OF_REQUESTS == 1:
       if settings.VERBOSITY_LEVEL < 2 and "has closed the connection" in str(error_msg):
@@ -95,7 +97,8 @@ def connection_exceptions(err_msg, url):
             warn_msg += "'--random-agent' switch and/or "
         warn_msg += "'--proxy' option."
         print(settings.print_warning_msg(warn_msg))
-        raise SystemExit()
+        if not settings.MULTI_TARGETS:
+          raise SystemExit()
     elif "infinite loop" in str(error_msg):
       error_msg = "Infinite redirect loop detected. " 
       error_msg += "Please check all provided parameters and/or provide missing ones"
@@ -114,12 +117,12 @@ def connection_exceptions(err_msg, url):
       info_msg = settings.APPLICATION.capitalize() + " is going to retry the request(s)."
       print(settings.print_info_msg(info_msg))
   error_msg = "Unable to connect to the target URL (Reason: " + str(error_msg.replace("Http", "Http".upper()))  + ")."
-  if not url:
+  if not isinstance(url, str):
     _ = ""
   else:
-    _ = " '" + url + "'"
-  if settings.MULTI_TARGETS or settings.CRAWLED_SKIPPED_URLS != 0:
-    error_msg = error_msg + " Skipping URL"+ _ +"."
+    _ = " Skipping URL '" + str(url) + "'."
+  if settings.MULTI_TARGETS:
+    error_msg = error_msg + _
   print(settings.print_critical_msg(error_msg))
   settings.TOTAL_OF_REQUESTS = settings.TOTAL_OF_REQUESTS + 1
   if settings.MAX_RETRIES > 1:
