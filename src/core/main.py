@@ -669,7 +669,10 @@ try:
     else:
       settings.LOCAL_HTTP_IP = None  
 
-    if menu.options.crawldepth > 0 or menu.options.sitemap_url:
+    if menu.options.sitemap_url:
+      settings.SITEMAP_CHECK = True
+
+    if menu.options.crawldepth > 0 or settings.SITEMAP_CHECK:
       settings.CRAWLING = True
 
     # Check arguments
@@ -797,12 +800,13 @@ try:
 
     # Check if option "--crawl" is enabled.
     if settings.CRAWLING:
+      output_href = []
       url_num = 1
       if not menu.options.bulkfile:
         crawling_list = 1
         output_href = crawler.crawler(menu.options.url, url_num, crawling_list)
+        output_href.append(menu.options.url)
       else:
-        output_href = []
         crawling_list = len(bulkfile)
         for url in bulkfile:
           output_href = (crawler.crawler(url, url_num, crawling_list))

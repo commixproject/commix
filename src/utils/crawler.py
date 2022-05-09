@@ -93,7 +93,7 @@ def normalize_results(output_href):
       if len(results) != 0:
         return results
     elif message in settings.CHOICE_NO:
-      break
+      return output_href
     elif message in settings.CHOICE_QUIT:
       raise SystemExit()
     else:
@@ -276,9 +276,10 @@ def crawler(url, url_num, crawling_list):
   info_msg = "Starting crawler for target URL '" + url + "'" + _
   print(settings.print_info_msg(info_msg))
   response = request(url)
-  if menu.options.sitemap_url:
+
+  if settings.SITEMAP_CHECK:
     message = ""
-    if not menu.options.crawldepth:
+    if not settings.CRAWLING:
       while True:
         if not menu.options.batch:
           question_msg = "Do you want to enable crawler? [y/N] > "
@@ -298,11 +299,10 @@ def crawler(url, url_num, crawling_list):
           err_msg = "'" + message + "' is not a valid answer."  
           print(settings.print_error_msg(err_msg))
           pass
-    else:
       set_crawling_depth()
 
-  while True:
-    if not menu.options.sitemap_url and settings.SITEMAP_CHECK is None:
+  if settings.SITEMAP_CHECK is None:
+    while True:
       if not menu.options.batch:
         question_msg = "Do you want to check target"+ ('', 's')[settings.MULTI_TARGETS] + " for "
         question_msg += "the existence of site's sitemap(.xml)? [y/N] > "
@@ -323,17 +323,11 @@ def crawler(url, url_num, crawling_list):
         err_msg = "'" + message + "' is not a valid answer."  
         print(settings.print_error_msg(err_msg))
         pass
-    else:
-      message = "n"
-      settings.SITEMAP_CHECK = True
-      break
 
   if settings.SITEMAP_CHECK:
     output_href = sitemap(url)
-    if output_href is None :
-      settings.SITEMAP_CHECK = False
 
-  if not settings.SITEMAP_CHECK:
+  if not settings.SITEMAP_CHECK or (settings.SITEMAP_CHECK and output_href is None):
     output_href = do_process(url)
     if settings.MULTI_TARGETS and settings.DEFAULT_CRAWLING_DEPTH != 1:
       settings.DEFAULT_CRAWLING_DEPTH = 1

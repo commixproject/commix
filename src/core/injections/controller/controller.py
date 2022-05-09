@@ -372,7 +372,6 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
       if settings.TESTABLE_VALUE != decoded_value and len(decoded_with) != 0:
         warn_msg = "The provided parameter appears to be '" + str(decoded_with) + "' encoded."
         print(settings.print_warning_msg(warn_msg))
-        
       checks.tamper_scripts(stored_tamper_scripts=False)
       if settings.VERBOSITY_LEVEL != 0:    
         debug_msg = "Performing heuristic (basic) tests to the target URL."
@@ -579,7 +578,6 @@ def cookie_injection(url, http_request_method, filename, timesec):
       if check_parameter != parameter:
         if len(check_parameter) > 0:
           settings.TESTABLE_PARAMETER = check_parameter
-
         # Check if testable parameter(s) are provided
         if len(settings.TEST_PARAMETER) > 0:
           if menu.options.test_parameter != None:
@@ -627,7 +625,6 @@ def get_request(url, http_request_method, filename, timesec):
       if check_parameter != url:
         if len(check_parameter) > 0:
           settings.TESTABLE_PARAMETER = check_parameter
-          
         # Check if testable parameter(s) are provided
         if len(settings.TESTABLE_PARAMETER) > 0:
           if menu.options.test_parameter != None:
