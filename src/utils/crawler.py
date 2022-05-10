@@ -105,7 +105,7 @@ def normalize_results(output_href):
 """
 Store crawling results to a temporary file.
 """
-def store_crawling():
+def store_crawling(output_href):
   while True:
     if not menu.options.batch:
       question_msg = "Do you want to store crawling results to a temporary file "
@@ -119,9 +119,12 @@ def store_crawling():
       filename = tempfile.mkstemp(suffix=".txt")[1]
       info_msg = "Writing crawling results to a temporary file '" + str(filename) + "'."
       print(settings.print_info_msg(info_msg))
-      return str(filename)
+      with open(filename, "a") as crawling_results:
+        for url in output_href:
+          crawling_results.write(url + "\n")
+      return
     elif message in settings.CHOICE_NO:
-      return None
+      return
     elif message in settings.CHOICE_QUIT:
       raise SystemExit()
     else:

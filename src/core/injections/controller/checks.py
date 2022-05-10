@@ -80,7 +80,7 @@ def connection_exceptions(err_msg, url):
     print(settings.SINGLE_WHITESPACE)
   if "wrong version number" in str(error_msg).lower():
     settings.MAX_RETRIES = 1
-    error_msg = "can't establish SSL connection"
+    error_msg = "Can't establish SSL connection"
   elif "connection refused" in str(error_msg).lower():
     settings.MAX_RETRIES = 1
   else:

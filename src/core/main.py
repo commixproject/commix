@@ -814,7 +814,6 @@ try:
         output_href = output_href + bulkfile
         output_href = [x for x in output_href if x not in settings.HREF_SKIPPED]
       output_href = crawler.normalize_results(output_href)
-      filename = crawler.store_crawling()
     else:
       output_href = []
       output_href = output_href + bulkfile
@@ -824,7 +823,9 @@ try:
     [clean_output_href.append(x) for x in output_href if x not in clean_output_href]
     # Removing empty elements from list.
     clean_output_href = [x for x in clean_output_href if x]
-    if len(clean_output_href) != 0:
+    if len(output_href) >= 0:
+      if filename is not None:
+        filename = crawler.store_crawling(output_href)
       info_msg = "Found a total of " + str(len(clean_output_href)) + " target"+ "s"[len(clean_output_href) == 1:] + "."
       print(settings.print_info_msg(info_msg))
     url_num = 0
@@ -832,9 +833,6 @@ try:
       if (settings.CRAWLING and re.search(r"(.*?)\?(.+)", url)) or settings.MULTI_TARGETS:
         url_num += 1
         print(settings.print_question_msg("[" + str(url_num) + "/" + str(len(clean_output_href)) + "] URL - " + url) + "")
-        if filename is not None:
-          with open(filename, "a") as crawling_results:
-            crawling_results.write(url + "\n")
         if not menu.options.batch:
           question_msg = "Do you want to use URL #" + str(url_num) + " to perform tests? [Y/n] > "
           message = _input(settings.print_question_msg(question_msg))

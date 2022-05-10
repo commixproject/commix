@@ -66,7 +66,7 @@ def do_check(request, url):
     else:
       while True:
         if not menu.options.batch and not settings.FOLLOW_REDIRECT:
-          if settings.CRAWLING and settings.CRAWLED_URLS == 0:
+          if settings.CRAWLED_URLS != 0:
             print(settings.SINGLE_WHITESPACE)
           question_msg = "Got a " + str(settings.REDIRECT_CODE) + " redirect to " + response.geturl() + "\n"
           question_msg += "Do you want to follow the identified redirection? [Y/n] > "

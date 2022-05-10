@@ -164,6 +164,28 @@ def check_tmp_path(url, timesec, filename, http_request_method, url_time_respons
         
   return tmp_path
 
+
+def finalize(exit_loops, no_result, float_percent, injection_type, technique):
+  if exit_loops == False:
+    if settings.VERBOSITY_LEVEL == 0:
+      if str(float_percent) == "100.0":
+        if no_result == True:
+          percent = settings.FAIL_STATUS
+        else:
+          percent = ".. (" + str(float_percent) + "%)"
+      else:
+        percent = ".. (" + str(float_percent) + "%)"
+
+      info_msg = "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "." + "" + percent + ""
+      sys.stdout.write("\r" + settings.print_info_msg(info_msg))
+      sys.stdout.flush()
+      return True
+    else:
+      return True
+  else:
+    return False
+
+
 """
 The "file-based" injection technique handler
 """
@@ -333,6 +355,13 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                   # Use the "/tmp/" directory for tempfile-based technique.
 
                   elif (i == int(menu.options.failed_tries) and no_result == True) or (i == total):
+
+                    if i == total:
+                      if finalize(exit_loops, no_result, float_percent, injection_type, technique):
+                        continue
+                      else:
+                        raise
+
                     tmp_path = check_tmp_path(url, timesec, filename, http_request_method, url_time_response)
                     warn_msg = "It seems that you don't have permissions to "
                     warn_msg += "read and/or write files in '" + settings.WEB_ROOT + "'."  
@@ -369,22 +398,8 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                     continue
                   
                   else:
-                    if exit_loops == False:
-                      if settings.VERBOSITY_LEVEL == 0:
-                        if str(float_percent) == "100.0":
-                          if no_result == True:
-                            percent = settings.FAIL_STATUS
-                          else:
-                            percent = ".. (" + str(float_percent) + "%)"
-                        else:
-                          percent = ".. (" + str(float_percent) + "%)"
-
-                        info_msg = "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "." + "" + percent + ""
-                        sys.stdout.write("\r" + settings.print_info_msg(info_msg))
-                        sys.stdout.flush()
-                        continue
-                      else:
-                        continue
+                    if finalize(exit_loops, no_result, float_percent, injection_type, technique):
+                      continue
                     else:
                       raise
                   
