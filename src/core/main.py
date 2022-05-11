@@ -761,14 +761,15 @@ try:
     if os.path.isdir("./.git") and settings.CHECK_FOR_UPDATES_ON_START:
       update.check_for_update()
 
+    # Check if option is "--url" for single url test.
+    if menu.options.sitemap_url:
+      url = menu.options.sitemap_url
+    else:  
+      url = menu.options.url
+
     if not menu.options.bulkfile and not settings.CRAWLING:
       if os_checks_num == 0:
         settings.INIT_TEST = True
-      # Check if option is "--url" for single url test.
-      if menu.options.sitemap_url:
-        url = menu.options.sitemap_url
-      else:  
-        url = menu.options.url
       response, url = url_response(url)
       if response != False:
         filename = logs.logs_filename_creation(url)
@@ -804,8 +805,8 @@ try:
       url_num = 1
       if not menu.options.bulkfile:
         crawling_list = 1
-        output_href = crawler.crawler(menu.options.url, url_num, crawling_list)
-        output_href.append(menu.options.url)
+        output_href = crawler.crawler(url, url_num, crawling_list)
+        output_href.append(url)
       else:
         crawling_list = len(bulkfile)
         for url in bulkfile:
@@ -864,6 +865,9 @@ except KeyboardInterrupt:
   try:
     checks.user_aborted(filename, url)
   except NameError:
+    abort_msg = "User quit (Ctrl-C was pressed)."
+    print(settings.SINGLE_WHITESPACE)
+    print(settings.print_abort_msg(abort_msg))
     raise SystemExit()
 
 except SystemExit: 

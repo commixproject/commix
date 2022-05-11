@@ -34,6 +34,7 @@ visited_hrefs = []
 crawled_hrefs = []
 new_crawled_hrefs = []
 
+
 """
 Change the crawling depth level.
 """
@@ -54,6 +55,7 @@ def set_crawling_depth():
       err_msg = "'" + message + "' is not a valid answer."  
       print(settings.print_error_msg(err_msg))
       pass
+      
   # Change the crawling depth level.
   if message in settings.CHOICE_YES:
     while True:
@@ -61,10 +63,9 @@ def set_crawling_depth():
       message = _input(settings.print_question_msg(question_msg))
       if len(message) == 0:
         message = 1
-        break
       else: 
         menu.options.crawldepth = message
-        break
+      return
 
 
 """
@@ -90,8 +91,7 @@ def normalize_results(output_href):
           if '=' in key and key not in seen:
             results.append(target)
             seen.add(key)
-      if len(results) != 0:
-        return results
+      return results
     elif message in settings.CHOICE_NO:
       return output_href
     elif message in settings.CHOICE_QUIT:
@@ -171,6 +171,7 @@ def sitemap(url):
             err_msg = "'" + message + "' is not a valid answer."  
             print(settings.print_error_msg(err_msg))
             pass
+    no_usable_links(sitemap_loc)
     return sitemap_loc
   except:
     if not menu.options.crawldepth:
@@ -212,13 +213,71 @@ def request(url):
     if url not in settings.HREF_SKIPPED:
       settings.HREF_SKIPPED.append(url)
       settings.CRAWLED_SKIPPED_URLS += 1
-      # if settings.DEFAULT_CRAWLING_DEPTH == 1:
       if settings.TOTAL_OF_REQUESTS != 1 and not settings.MULTI_TARGETS:
-        print(settings.SINGLE_WHITESPACE)
+        if settings.CRAWLED_URLS != 0 and settings.CRAWLED_SKIPPED_URLS != 0:
+          print(settings.SINGLE_WHITESPACE)
       checks.connection_exceptions(err_msg, url)
       if settings.VERBOSITY_LEVEL >= 2:
         print(settings.SINGLE_WHITESPACE)
 
+"""
+Enable crawler.
+"""
+def enable_crawler():
+  message = ""
+  if not settings.CRAWLING:
+    while True:
+      if not menu.options.batch:
+        question_msg = "Do you want to enable crawler? [y/N] > "
+        message = _input(settings.print_question_msg(question_msg))
+      else:
+        message = ""
+      if len(message) == 0:
+         message = "N"
+      if message in settings.CHOICE_YES:
+        menu.options.crawldepth = 1
+        break  
+      if message in settings.CHOICE_NO:
+        break  
+      elif message in settings.CHOICE_QUIT:
+        raise SystemExit()
+      else:
+        err_msg = "'" + message + "' is not a valid answer."  
+        print(settings.print_error_msg(err_msg))
+        pass
+    set_crawling_depth()
+
+"""
+Check for the existence of site's sitemap
+"""
+def check_sitemap():
+  while True:
+    if not menu.options.batch:
+      question_msg = "Do you want to check target"+ ('', 's')[settings.MULTI_TARGETS] + " for "
+      question_msg += "the existence of site's sitemap(.xml)? [y/N] > "
+      message = _input(settings.print_question_msg(question_msg))
+    else:
+      message = ""
+    if len(message) == 0:
+       message = "n"
+    if message in settings.CHOICE_YES:
+      settings.SITEMAP_CHECK = True
+      return
+    elif message in settings.CHOICE_NO:
+      settings.SITEMAP_CHECK = False
+      return
+    elif message in settings.CHOICE_QUIT:
+      raise SystemExit()
+    else:
+      err_msg = "'" + message + "' is not a valid answer."  
+      print(settings.print_error_msg(err_msg))
+      pass
+
+def no_usable_links(crawled_hrefs):
+  if len(crawled_hrefs) == 0:
+    warn_msg = "No usable links found."
+    print(settings.print_warning_msg(warn_msg))
+    raise SystemExit()
 
 """
 The crawing process.
@@ -254,19 +313,16 @@ def do_process(url):
             not re.search(r"(?i)\.(js|css)(\?|\Z)", href):
               identified_hrefs = store_hrefs(href, identified_hrefs, redirection=False)
 
-    if len(crawled_hrefs) != 0:
-      if identified_hrefs:
-        if len(new_crawled_hrefs) != 0 and settings.DEFAULT_CRAWLING_DEPTH != 1:
-          return list(set(new_crawled_hrefs))
-        return list(set(crawled_hrefs))
-      return list("")
-    else:
-      warn_msg = "No usable links found."
-      print(settings.print_warning_msg(warn_msg))
-      raise SystemExit()
+    no_usable_links(crawled_hrefs)
+    if identified_hrefs:
+      if len(new_crawled_hrefs) != 0 and settings.DEFAULT_CRAWLING_DEPTH != 1:
+        return list(set(new_crawled_hrefs))
+      return list(set(crawled_hrefs))
+    return list("")
+
   except Exception as e:  # for non-HTML files and non-valid links
     pass
-  
+
 
 """
 The main crawler.
@@ -279,57 +335,12 @@ def crawler(url, url_num, crawling_list):
   info_msg = "Starting crawler for target URL '" + url + "'" + _
   print(settings.print_info_msg(info_msg))
   response = request(url)
-
   if settings.SITEMAP_CHECK:
-    message = ""
-    if not settings.CRAWLING:
-      while True:
-        if not menu.options.batch:
-          question_msg = "Do you want to enable crawler? [y/N] > "
-          message = _input(settings.print_question_msg(question_msg))
-        else:
-          message = ""
-        if len(message) == 0:
-           message = "N"
-        if message in settings.CHOICE_YES:
-          menu.options.crawldepth = 1
-          break  
-        if message in settings.CHOICE_NO:
-          break  
-        elif message in settings.CHOICE_QUIT:
-          raise SystemExit()
-        else:
-          err_msg = "'" + message + "' is not a valid answer."  
-          print(settings.print_error_msg(err_msg))
-          pass
-      set_crawling_depth()
-
+    enable_crawler()
   if settings.SITEMAP_CHECK is None:
-    while True:
-      if not menu.options.batch:
-        question_msg = "Do you want to check target"+ ('', 's')[settings.MULTI_TARGETS] + " for "
-        question_msg += "the existence of site's sitemap(.xml)? [y/N] > "
-        message = _input(settings.print_question_msg(question_msg))
-      else:
-        message = ""
-      if len(message) == 0:
-         message = "n"
-      if message in settings.CHOICE_YES:
-        settings.SITEMAP_CHECK = True
-        break
-      elif message in settings.CHOICE_NO:
-        settings.SITEMAP_CHECK = False
-        break
-      elif message in settings.CHOICE_QUIT:
-        raise SystemExit()
-      else:
-        err_msg = "'" + message + "' is not a valid answer."  
-        print(settings.print_error_msg(err_msg))
-        pass
-
+    check_sitemap()
   if settings.SITEMAP_CHECK:
     output_href = sitemap(url)
-
   if not settings.SITEMAP_CHECK or (settings.SITEMAP_CHECK and output_href is None):
     output_href = do_process(url)
     if settings.MULTI_TARGETS and settings.DEFAULT_CRAWLING_DEPTH != 1:
@@ -359,6 +370,7 @@ def crawler(url, url_num, crawling_list):
       settings.DEFAULT_CRAWLING_DEPTH += 1
 
   output_href = crawled_hrefs
+  no_usable_links(crawled_hrefs)
   return output_href
 
 # eof

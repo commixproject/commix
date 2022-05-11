@@ -171,7 +171,9 @@ def check_http_traffic(request):
 
     except _urllib.error.HTTPError as err_msg:
       if settings.TOTAL_OF_REQUESTS == 1 and settings.VERBOSITY_LEVEL < 2:
-        print(settings.SINGLE_WHITESPACE)
+        if (settings.CRAWLING and settings.CRAWLED_URLS != 0 and settings.CRAWLED_SKIPPED_URLS != 0) or \
+        not settings.CRAWLING:
+          print(settings.SINGLE_WHITESPACE)
       if settings.UNAUTHORIZED_ERROR in str(err_msg):
         settings.UNAUTHORIZED = unauthorized = True
       if [True for err_code in settings.HTTP_ERROR_CODES if err_code in str(err_msg)]:
@@ -215,13 +217,12 @@ def check_http_traffic(request):
       print_http_response(err.info(), err.code, err.read())
 
     if (not settings.PERFORM_CRACKING and \
-       not settings.IS_JSON and \
-       not settings.IS_XML and \
-       not str(err.code) == settings.INTERNAL_SERVER_ERROR and \
-       not str(err.code) == settings.BAD_REQUEST and \
-       not settings.CRAWLED_SKIPPED_URLS != 0) and settings.CRAWLED_SKIPPED_URLS != 0:
+    not settings.IS_JSON and \
+    not settings.IS_XML and \
+    not str(err.code) == settings.INTERNAL_SERVER_ERROR and \
+    not str(err.code) == settings.BAD_REQUEST and \
+    not settings.CRAWLED_URLS != 0) and settings.CRAWLED_SKIPPED_URLS != 0:
       print(settings.SINGLE_WHITESPACE)
-    # error_msg = "Got " + str(err).replace(": "," (")
     # Check for 3xx, 4xx, 5xx HTTP error codes.
     if str(err.code).startswith(('3', '4', '5')):
       if settings.VERBOSITY_LEVEL >= 2:

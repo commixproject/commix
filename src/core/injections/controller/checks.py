@@ -117,11 +117,10 @@ def connection_exceptions(err_msg, url):
       info_msg = settings.APPLICATION.capitalize() + " is going to retry the request(s)."
       print(settings.print_info_msg(info_msg))
   error_msg = "Unable to connect to the target URL (Reason: " + str(error_msg.replace("Http", "Http".upper()))  + ")."
-  if not isinstance(url, str):
-    _ = ""
-  else:
+  _ = ""
+  if isinstance(url, str):
     _ = " Skipping URL '" + str(url) + "'."
-  if settings.MULTI_TARGETS:
+  if settings.MULTI_TARGETS or settings.CRAWLING:
     error_msg = error_msg + _
   print(settings.print_critical_msg(error_msg))
   settings.TOTAL_OF_REQUESTS = settings.TOTAL_OF_REQUESTS + 1
