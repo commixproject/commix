@@ -169,19 +169,6 @@ def check_http_traffic(request):
         if settings.VERBOSITY_LEVEL < 2:
           print(settings.SINGLE_WHITESPACE)
 
-    except _urllib.error.HTTPError as err_msg:
-      if settings.TOTAL_OF_REQUESTS == 1 and settings.VERBOSITY_LEVEL < 2:
-        if (settings.CRAWLING and settings.CRAWLED_URLS != 0 and settings.CRAWLED_SKIPPED_URLS != 0) or \
-        not settings.CRAWLING:
-          print(settings.SINGLE_WHITESPACE)
-      if settings.UNAUTHORIZED_ERROR in str(err_msg):
-        settings.UNAUTHORIZED = unauthorized = True
-      if [True for err_code in settings.HTTP_ERROR_CODES if err_code in str(err_msg)]:
-        break
-
-    except (SocketError, _urllib.error.HTTPError, _urllib.error.URLError, _http_client.BadStatusLine, _http_client.InvalidURL) as err_msg:
-      pass
-
     except ValueError as err:
       if settings.VERBOSITY_LEVEL < 2:
         print(settings.SINGLE_WHITESPACE)
@@ -191,7 +178,24 @@ def check_http_traffic(request):
 
     except AttributeError:
       raise SystemExit() 
+
+    except _urllib.error.HTTPError as err_msg:
+      if settings.TOTAL_OF_REQUESTS == 1 and settings.VERBOSITY_LEVEL < 2:
+        if (settings.CRAWLING and settings.CRAWLED_URLS_NUM != 0 and settings.CRAWLED_SKIPPED_URLS_NUM != 0) or \
+        not settings.CRAWLING:
+          print(settings.SINGLE_WHITESPACE)
+      if settings.UNAUTHORIZED_ERROR in str(err_msg):
+        settings.UNAUTHORIZED = unauthorized = True
+      if [True for err_code in settings.HTTP_ERROR_CODES if err_code in str(err_msg)]:
+        break
       
+    except (SocketError, _urllib.error.URLError, _http_client.BadStatusLine, _http_client.InvalidURL, Exception) as err_msg:
+      if not settings.MULTI_TARGETS and not settings.CRAWLING:
+        pass
+      else:
+        checks.connection_exceptions(err_msg, url=request)
+        break
+
   try:
     response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
     code = response.getcode()
@@ -221,7 +225,7 @@ def check_http_traffic(request):
     not settings.IS_XML and \
     not str(err.code) == settings.INTERNAL_SERVER_ERROR and \
     not str(err.code) == settings.BAD_REQUEST and \
-    not settings.CRAWLED_URLS != 0) and settings.CRAWLED_SKIPPED_URLS != 0:
+    not settings.CRAWLED_URLS_NUM != 0) and settings.CRAWLED_SKIPPED_URLS_NUM != 0:
       print(settings.SINGLE_WHITESPACE)
     # Check for 3xx, 4xx, 5xx HTTP error codes.
     if str(err.code).startswith(('3', '4', '5')):

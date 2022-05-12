@@ -66,7 +66,7 @@ def do_check(request, url):
     else:
       while True:
         if not menu.options.batch and not settings.FOLLOW_REDIRECT:
-          if settings.CRAWLED_URLS != 0 and settings.CRAWLED_SKIPPED_URLS != 0:
+          if settings.CRAWLED_URLS_NUM != 0 and settings.CRAWLED_SKIPPED_URLS_NUM != 0:
             print(settings.SINGLE_WHITESPACE)
           question_msg = "Got a " + str(settings.REDIRECT_CODE) + " redirect to " + response.geturl() + "\n"
           question_msg += "Do you want to follow the identified redirection? [Y/n] > "
@@ -90,7 +90,7 @@ def do_check(request, url):
 
   except (SocketError, _urllib.error.HTTPError, _urllib.error.URLError, _http_client.BadStatusLine, _http_client.InvalidURL) as err_msg:
     if settings.VALID_URL: 
-      checks.connection_exceptions(err_msg, url)
+      checks.connection_exceptions(err_msg, request)
     else:
       pass
 

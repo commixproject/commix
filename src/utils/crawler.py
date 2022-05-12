@@ -29,11 +29,16 @@ from src.thirdparty.six.moves import urllib as _urllib
 from src.thirdparty.colorama import Fore, Back, Style, init
 from src.thirdparty.beautifulsoup.beautifulsoup import BeautifulSoup
 
-sitemap_loc = []
-visited_hrefs = []
-crawled_hrefs = []
-new_crawled_hrefs = []
 
+def init_global_vars():
+  global crawled_hrefs
+  crawled_hrefs = []
+  global sitemap_loc
+  sitemap_loc = []
+  global visited_hrefs
+  visited_hrefs = []
+  global new_crawled_hrefs
+  new_crawled_hrefs = []
 
 """
 Change the crawling depth level.
@@ -183,6 +188,8 @@ def sitemap(url):
 Store the identified (valid) hrefs.
 """
 def store_hrefs(href, identified_hrefs, redirection):
+  set(crawled_hrefs)
+  set(new_crawled_hrefs)
   if href not in crawled_hrefs:
     if (settings.DEFAULT_CRAWLING_DEPTH != 1 and href not in new_crawled_hrefs) or redirection:
       new_crawled_hrefs.append(href)
@@ -212,9 +219,9 @@ def request(url):
   except (SocketError, _urllib.error.HTTPError, _urllib.error.URLError, _http_client.BadStatusLine, _http_client.InvalidURL, Exception) as err_msg:
     if url not in settings.HREF_SKIPPED:
       settings.HREF_SKIPPED.append(url)
-      settings.CRAWLED_SKIPPED_URLS += 1
+      settings.CRAWLED_SKIPPED_URLS_NUM += 1
       if settings.TOTAL_OF_REQUESTS != 1 and not settings.MULTI_TARGETS:
-        if settings.CRAWLED_URLS != 0 and settings.CRAWLED_SKIPPED_URLS != 0:
+        if settings.CRAWLED_URLS_NUM != 0 and settings.CRAWLED_SKIPPED_URLS_NUM != 0:
           print(settings.SINGLE_WHITESPACE)
       checks.connection_exceptions(err_msg, url)
       if settings.VERBOSITY_LEVEL >= 2:
@@ -273,11 +280,15 @@ def check_sitemap():
       print(settings.print_error_msg(err_msg))
       pass
 
+"""
+Check if no usable links found.
+"""
 def no_usable_links(crawled_hrefs):
   if len(crawled_hrefs) == 0:
-    warn_msg = "No usable links found."
+    warn_msg = "No usable links found (with GET parameters)."
     print(settings.print_warning_msg(warn_msg))
-    raise SystemExit()
+    if not settings.MULTI_TARGETS:
+      raise SystemExit()
 
 """
 The crawing process.
@@ -287,7 +298,7 @@ def do_process(url):
   if settings.VERBOSITY_LEVEL >= 2:
     print(settings.SINGLE_WHITESPACE)
   else:
-    if settings.CRAWLED_SKIPPED_URLS == 0:
+    if settings.CRAWLED_SKIPPED_URLS_NUM == 0 or settings.CRAWLED_URLS_NUM != 0:
       sys.stdout.write("\r")
   # Grab the crawled hrefs.
   try:
@@ -302,7 +313,6 @@ def do_process(url):
       tags = []
       tags += re.finditer(r'(?i)\s(href|src)=["\'](?P<href>[^>"\']+)', content)
       tags += re.finditer(r'(?i)window\.open\(["\'](?P<href>[^)"\']+)["\']', content)
-
     for tag in tags:
       href = tag.get("href") if hasattr(tag, settings.HTTPMETHOD.GET) else tag.group("href")
       if href:
@@ -328,6 +338,7 @@ def do_process(url):
 The main crawler.
 """
 def crawler(url, url_num, crawling_list):
+  init_global_vars()
   if crawling_list > 1:
     _ = " (" + str(url_num) + "/" + str(crawling_list) + ")"
   else:
@@ -349,28 +360,34 @@ def crawler(url, url_num, crawling_list):
       info_msg = "Searching for usable "
       info_msg += "links with depth " + str(settings.DEFAULT_CRAWLING_DEPTH) + "." 
       print(settings.print_info_msg(info_msg))
-      if settings.DEFAULT_CRAWLING_DEPTH != 1:
+      if settings.DEFAULT_CRAWLING_DEPTH == 2:
         output_href = new_crawled_hrefs
+      elif settings.DEFAULT_CRAWLING_DEPTH > 2:
+        output_href = new_crawled_hrefs + crawled_hrefs
+      try:
+        [output_href.remove(x) for x in visited_hrefs if x in output_href]
+      except TypeError: 
+        pass
       link = 0
       if output_href is not None:
         for url in output_href: 
           if url not in visited_hrefs:
             link += 1
-            settings.CRAWLED_URLS = link
+            settings.CRAWLED_URLS_NUM = link
             visited_hrefs.append(url)
             do_process(url)
             info_msg = str(link)
             info_msg += "/" + str(len(output_href)) + " links visited." 
             sys.stdout.write("\r" + settings.print_info_msg(info_msg))
             sys.stdout.flush()
-          if settings.VERBOSITY_LEVEL != 0:
+          if settings.VERBOSITY_LEVEL > 1:
             print(settings.SINGLE_WHITESPACE)
       if link != 0:
         print(settings.SINGLE_WHITESPACE)
       settings.DEFAULT_CRAWLING_DEPTH += 1
 
   output_href = crawled_hrefs
-  no_usable_links(crawled_hrefs)
+  no_usable_links(output_href)
   return output_href
 
 # eof

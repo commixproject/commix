@@ -29,6 +29,7 @@ import zlib
 import traceback
 from src.utils import logs
 from src.utils import menu
+from src.utils import common
 from src.utils import settings
 from src.utils import simple_http_server
 from src.thirdparty.odict import OrderedDict
@@ -97,7 +98,7 @@ def connection_exceptions(err_msg, url):
             warn_msg += "'--random-agent' switch and/or "
         warn_msg += "'--proxy' option."
         print(settings.print_warning_msg(warn_msg))
-        if not settings.MULTI_TARGETS:
+        if not settings.MULTI_TARGETS and not settings.CRAWLING:
           raise SystemExit()
     elif "infinite loop" in str(error_msg):
       error_msg = "Infinite redirect loop detected. " 
@@ -122,7 +123,8 @@ def connection_exceptions(err_msg, url):
     _ = " Skipping URL '" + str(url) + "'."
   if settings.MULTI_TARGETS or settings.CRAWLING:
     error_msg = error_msg + _
-  print(settings.print_critical_msg(error_msg))
+  if len(_) != 0 or (not settings.MULTI_TARGETS and not settings.CRAWLING):
+    print(settings.print_critical_msg(error_msg))
   settings.TOTAL_OF_REQUESTS = settings.TOTAL_OF_REQUESTS + 1
   if settings.MAX_RETRIES > 1:
     time.sleep(settings.DELAY_RETRY)
@@ -138,18 +140,13 @@ def not_declared_cookies(response):
     candidate = re.search(r'([^;]+);?', response.headers[settings.SET_COOKIE]).group(1)
     if candidate and settings.DECLARED_COOKIES is not False and settings.CRAWLING is False:
       settings.DECLARED_COOKIES = True
-      if settings.CRAWLED_SKIPPED_URLS != 0:
+      if settings.CRAWLED_SKIPPED_URLS_NUM != 0:
         print(settings.SINGLE_WHITESPACE)
       while True:
-        if not menu.options.batch:
-          question_msg = "You have not declared cookie(s), while "
-          question_msg += "server wants to set its own ('" + str(candidate) + "'). "
-          question_msg += "Do you want to use those [Y/n] > "
-          set_cookies = _input(settings.print_question_msg(question_msg)).lower()
-        else:
-          set_cookies = ""
-        if len(set_cookies) == 0:
-          set_cookies = "Y"
+        message = "You have not declared cookie(s), while "
+        message += "server wants to set its own ('" + str(candidate) + "'). "
+        message += "Do you want to use those [Y/n] > "
+        set_cookies = common.read_input(message, default="Y", check_batch=True)
         if set_cookies in settings.CHOICE_YES:
           menu.options.cookie = candidate
           break
@@ -212,13 +209,10 @@ def load_cmd_history():
 
 # If the value has boundaries.
 def value_boundaries(value):
-  if not menu.options.batch:
-    question_msg =  "It appears that the value '" + value + "' has boundaries. "
-    question_msg += "Do you want to inject inside? [Y/n] > "
-    procced_option = _input(settings.print_question_msg(question_msg))
-  else:
-    procced_option = ""
-  if procced_option in settings.CHOICE_YES or len(procced_option) == 0:
+  message =  "It appears that the value '" + value + "' has boundaries. "
+  message += "Do you want to inject inside? [Y/n] > "
+  procced_option = common.read_input(message, default="Y", check_batch=True)
+  if procced_option in settings.CHOICE_YES:
     value = re.search(settings.VALUE_BOUNDARIES, value).group(1)
   elif procced_option in settings.CHOICE_NO:
     pass
@@ -428,13 +422,8 @@ Procced to the next attack vector.
 """
 def next_attack_vector(technique, go_back):
   while True:
-    if not menu.options.batch:
-      question_msg = "Continue with testing the " + technique + "? [Y/n] > "
-      next_attack_vector = _input(settings.print_question_msg(question_msg))
-    else:
-      next_attack_vector = ""
-    if len(next_attack_vector) == 0:
-       next_attack_vector = "Y"
+    message = "Continue with testing the " + technique + "? [Y/n] > "
+    next_attack_vector = common.read_input(message, default="Y", check_batch=True)
     if next_attack_vector in settings.CHOICE_YES:
       # Check injection state
       assessment_phase()
@@ -494,15 +483,10 @@ once the user provides the path of web server's root directory.
 """
 def procced_with_file_based_technique(): 
   while True:
-    if not menu.options.batch:
-      question_msg = "Due to the provided '--web-root' option,"
-      question_msg += " do you want to procced with the (semi-blind) "
-      question_msg += "file-based injection technique? [Y/n] > "
-      enable_fb = _input(settings.print_question_msg(question_msg))
-    else:
-      enable_fb = ""
-    if len(enable_fb) == 0:
-       enable_fb = "Y"
+    message = "Due to the provided '--web-root' option,"
+    message += " do you want to procced with the (semi-blind) "
+    message += "file-based injection technique? [Y/n] > "
+    enable_fb = common.read_input(message, default="Y", check_batch=True)
     if enable_fb in settings.CHOICE_YES:
       return True
     elif enable_fb in settings.CHOICE_NO:
@@ -563,14 +547,9 @@ def continue_tests(err):
 
   try:
     while True:
-      if not menu.options.batch:
-        question_msg = "Do you want to ignore the error (" + str(err.code) 
-        question_msg += ") message and continue the tests? [Y/n] > "
-        continue_tests = _input(settings.print_question_msg(question_msg))
-      else:
-        continue_tests = ""
-      if len(continue_tests) == 0:
-         continue_tests = "Y"
+      message = "Do you want to ignore the error (" + str(err.code) 
+      message += ") message and continue the tests? [Y/n] > "
+      continue_tests = common.read_input(message, default="Y", check_batch=True)
       if continue_tests in settings.CHOICE_YES:
         return True
       elif continue_tests in settings.CHOICE_NO:
@@ -636,14 +615,9 @@ def ps_check():
     warn_msg += "have chosen, are requiring the use of PowerShell. "
     print(settings.print_warning_msg(warn_msg))
     while True:
-      if not menu.options.batch:
-        question_msg = "Do you want to use the \"--ps-version\" option "
-        question_msg += "so ensure that PowerShell is enabled? [Y/n] > "
-        ps_check = _input(settings.print_question_msg(question_msg))
-      else:
-        ps_check = ""
-      if len(ps_check) == 0:
-         ps_check = "Y"
+      message = "Do you want to use the \"--ps-version\" option "
+      message += "so ensure that PowerShell is enabled? [Y/n] > "
+      ps_check = common.read_input(message, default="Y", check_batch=True)
       if ps_check in settings.CHOICE_YES:
         menu.options.ps_version = True
         break
@@ -662,14 +636,9 @@ If PowerShell is disabled.
 """
 def ps_check_failed():
   while True:
-    if not menu.options.batch:
-      question_msg = "Do you want to ignore the above warning "
-      question_msg += "and continue the procedure? [Y/n] > "
-      ps_check = _input(settings.print_question_msg(question_msg))
-    else:
-      ps_check = ""
-    if len(ps_check) == 0:
-       ps_check = "Y"
+    message = "Do you want to ignore the above warning "
+    message += "and continue the procedure? [Y/n] > "
+    ps_check = common.read_input(message, default="Y", check_batch=True)
     if ps_check in settings.CHOICE_YES:
       break
     elif ps_check in settings.CHOICE_NO:
@@ -709,13 +678,8 @@ def check_CGI_scripts(url):
       warn_msg += "vulnerable to shellshock. "
       print(settings.print_warning_msg(warn_msg))
       while True:
-        if not menu.options.batch:
-          question_msg = "Do you want to enable the shellshock injection module? [Y/n] > "
-          shellshock_check = _input(settings.print_question_msg(question_msg))
-        else:
-          shellshock_check = ""   
-        if len(shellshock_check) == 0:
-           shellshock_check = "Y"
+        message = "Do you want to enable the shellshock injection module? [Y/n] > "
+        shellshock_check = common.read_input(message, default="Y", check_batch=True)
         if shellshock_check in settings.CHOICE_YES:
           menu.options.shellshock = True
           break
@@ -779,16 +743,11 @@ Decision if the user-defined operating system name,
 is different than the one identified by heuristics.
 """
 def identified_os():
-    if not menu.options.batch:
-      warn_msg = "Heuristics have identified different operating system (" 
-      warn_msg += settings.TARGET_OS + ") than that you have provided." 
-      print(settings.print_warning_msg(warn_msg))
-      question_msg = "How do you want to proceed? [(C)ontinue/(s)kip/(q)uit] > "
-      proceed_option = _input(settings.print_question_msg(question_msg))
-    else:
-      proceed_option = "" 
-    if len(proceed_option) == 0:
-       proceed_option = "c"
+    warn_msg = "Heuristics have identified different operating system (" 
+    warn_msg += settings.TARGET_OS + ") than that you have provided." 
+    print(settings.print_warning_msg(warn_msg))
+    message = "How do you want to proceed? [(C)ontinue/(s)kip/(q)uit] > "
+    proceed_option = common.read_input(message, default="C", check_batch=True)
     if proceed_option.lower() in settings.CHOICE_PROCEED :
       if proceed_option.lower() == "s":
         return False
@@ -862,17 +821,12 @@ Decision if the user-defined HTTP authenticatiob type,
 is different than the one identified by heuristics.
 """
 def identified_http_auth_type(auth_type):
-  if not menu.options.batch:
-    warn_msg = "Heuristics have identified different HTTP authentication type (" 
-    warn_msg += auth_type.lower() + ") than that you have provided ("
-    warn_msg += menu.options.auth_type + ")." 
-    print(settings.print_warning_msg(warn_msg))
-    question_msg = "How do you want to proceed? [(C)ontinue/(s)kip/(q)uit] > "
-    proceed_option = _input(settings.print_question_msg(question_msg))
-  else:
-    proceed_option = ""  
-  if len(proceed_option) == 0:
-    proceed_option = "c"
+  warn_msg = "Heuristics have identified different HTTP authentication type (" 
+  warn_msg += auth_type.lower() + ") than that you have provided ("
+  warn_msg += menu.options.auth_type + ")." 
+  print(settings.print_warning_msg(warn_msg))
+  message = "How do you want to proceed? [(C)ontinue/(s)kip/(q)uit] > "
+  proceed_option = common.read_input(message, default="C", check_batch=True)
   if proceed_option.lower() in settings.CHOICE_PROCEED :
     if proceed_option.lower() == "s":
       return False
@@ -1499,16 +1453,9 @@ def is_XML_check(parameter):
 def process_xml_data():
   while True:
     info_msg = "SOAP/XML data found in POST data."
-    if not menu.options.batch:
-      question_msg = info_msg
-      question_msg += " Do you want to process it? [Y/n] > "
-      xml_process = _input(settings.print_question_msg(question_msg))
-    else:
-      if settings.VERBOSITY_LEVEL != 0:
-        print(settings.print_bold_info_msg(info_msg))
-      xml_process = ""
-    if len(xml_process) == 0:
-       xml_process = "Y"              
+    message = info_msg
+    message += " Do you want to process it? [Y/n] > "
+    xml_process = common.read_input(message, default="Y", check_batch=True)          
     if xml_process in settings.CHOICE_YES:
       settings.IS_XML = True
       break
@@ -1549,16 +1496,9 @@ def is_JSON_check(parameter):
 def process_json_data():
   while True:
     info_msg = "JSON data found in POST data."
-    if not menu.options.batch:
-      question_msg = info_msg
-      question_msg += " Do you want to process it? [Y/n] > "
-      json_process = _input(settings.print_question_msg(question_msg))
-    else:
-      if settings.VERBOSITY_LEVEL != 0:
-        print(settings.print_bold_info_msg(info_msg))
-      json_process = ""
-    if len(json_process) == 0:
-       json_process = "Y"              
+    message = info_msg
+    message += " Do you want to process it? [Y/n] > "
+    json_process = common.read_input(message, default="Y", check_batch=True)             
     if json_process in settings.CHOICE_YES:
       settings.IS_JSON = True
       break
@@ -1633,15 +1573,9 @@ def file_upload():
       menu.options.file_dest = menu.options.file_dest + "/"
     # Check if not defined URL for upload.
     while True:
-      if not menu.options.batch:
-        question_msg = "Do you want to enable an HTTP server? [Y/n] > "
-        enable_HTTP_server = _input(settings.print_question_msg(question_msg))
-      else:
-        enable_HTTP_server = ""
-      if len(enable_HTTP_server) == 0:
-         enable_HTTP_server = "Y"              
+      message = "Do you want to enable an HTTP server? [Y/n] > "
+      enable_HTTP_server = common.read_input(message, default="Y", check_batch=True)
       if enable_HTTP_server in settings.CHOICE_YES:
-
         # Check if file exists
         if not os.path.isfile(menu.options.file_upload):
           err_msg = "The '" + menu.options.file_upload + "' file, does not exist."
@@ -1651,8 +1585,8 @@ def file_upload():
         # Setting the local HTTP server.
         if settings.LOCAL_HTTP_IP == None:
           while True:
-            question_msg = "Please enter your interface IP address > "
-            ip_addr = _input(settings.print_question_msg(question_msg))
+            message = "Please enter your interface IP address > "
+            ip_addr = common.read_input(message, default=None, check_batch=True)
             # check if IP address is valid
             ip_check = simple_http_server.is_valid_ipv4(ip_addr)
             if ip_check == False:
@@ -1718,20 +1652,15 @@ Define python working dir (for windows targets)
 def define_py_working_dir():
   if settings.TARGET_OS == "win" and menu.options.alter_shell:
     while True:
-      if not menu.options.batch:
-        question_msg = "Do you want to use '" + settings.WIN_PYTHON_INTERPRETER 
-        question_msg += "' as Python working directory on the target host? [Y/n] > "
-        python_dir = _input(settings.print_question_msg(question_msg))
-      else:
-        python_dir = ""  
-      if len(python_dir) == 0:
-         python_dir = "Y" 
+      message = "Do you want to use '" + settings.WIN_PYTHON_INTERPRETER 
+      message += "' as Python working directory on the target host? [Y/n] > "
+      python_dir = common.read_input(message, default="Y" , check_batch=True)
       if python_dir in settings.CHOICE_YES:
         break
       elif python_dir in settings.CHOICE_NO:
-        question_msg = "Please provide a custom working directory for Python (e.g. '" 
-        question_msg += settings.WIN_PYTHON_INTERPRETER + "') > "
-        settings.WIN_PYTHON_INTERPRETER = _input(settings.print_question_msg(question_msg))
+        message = "Please provide a custom working directory for Python (e.g. '" 
+        message += settings.WIN_PYTHON_INTERPRETER + "') > "
+        settings.WIN_PYTHON_INTERPRETER = common.read_input(message, default=None, check_batch=True)
         break
       else:
         err_msg = "'" + python_dir + "' is not a valid answer."  

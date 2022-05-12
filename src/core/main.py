@@ -810,7 +810,7 @@ try:
       else:
         crawling_list = len(bulkfile)
         for url in bulkfile:
-          output_href = (crawler.crawler(url, url_num, crawling_list))
+          output_href += (crawler.crawler(url, url_num, crawling_list))
           url_num += 1
         output_href = output_href + bulkfile
         output_href = [x for x in output_href if x not in settings.HREF_SKIPPED]
