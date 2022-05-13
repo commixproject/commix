@@ -20,6 +20,7 @@ import base64
 import sqlite3
 from src.utils import menu
 from src.utils import settings
+from src.utils import common
 from src.thirdparty.six.moves import input as _input
 from src.thirdparty.colorama import Fore, Back, Style, init
 
@@ -279,26 +280,19 @@ def notification(url, technique, injection_type):
       info_msg = "A previously stored session has been held against that host."
       print(settings.print_info_msg(info_msg))
       while True:
-        if not menu.options.batch:
-          question_msg = "Do you want to resume to the "
-          question_msg += "(" + injection_type.split(" ")[0] + ") "
-          question_msg += technique.rsplit(' ', 2)[0] 
-          question_msg += " injection point? [Y/n] > "
-          settings.LOAD_SESSION = _input(settings.print_question_msg(question_msg))
-        else:
-          settings.LOAD_SESSION = ""  
-        if len(settings.LOAD_SESSION) == 0:
-           settings.LOAD_SESSION = "Y"
+        message = "Do you want to resume to the "
+        message += "(" + injection_type.split(" ")[0] + ") "
+        message += technique.rsplit(' ', 2)[0] 
+        message += " injection point? [Y/n] > "
+        settings.LOAD_SESSION = common.read_input(message, default="Y", check_batch=True)
         if settings.LOAD_SESSION in settings.CHOICE_YES:
           return True
         elif settings.LOAD_SESSION in settings.CHOICE_NO:
           settings.LOAD_SESSION = False
           if technique[:1] != "c":
             while True:
-              question_msg = "Which technique do you want to re-evaluate? [(C)urrent/(a)ll/(n)one] > "
-              proceed_option = _input(settings.print_question_msg(question_msg))
-              if len(proceed_option) == 0:
-                 proceed_option = "c"
+              message = "Which technique do you want to re-evaluate? [(C)urrent/(a)ll/(n)one] > "
+              proceed_option = common.read_input(message, default="C", check_batch=True)
               if proceed_option.lower() in settings.CHOICE_PROCEED :
                 if proceed_option.lower() == "a":
                   settings.RETEST = True

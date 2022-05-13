@@ -18,7 +18,7 @@ import socket
 import tempfile
 from src.utils import menu
 from src.utils import settings
-from src.utils.common import extract_regex_result
+from src.utils import common
 from src.core.injections.controller import checks
 from src.core.requests import headers
 from socket import error as SocketError
@@ -45,13 +45,8 @@ Change the crawling depth level.
 """
 def set_crawling_depth():
   while True:
-    if not menu.options.batch:
-      question_msg = "Do you want to change the crawling depth level (" + str(menu.options.crawldepth) + ")? [y/N] > "
-      message = _input(settings.print_question_msg(question_msg))
-    else:
-      message = ""
-    if len(message) == 0:
-       message = "N"
+    message = "Do you want to change the crawling depth level (" + str(menu.options.crawldepth) + ")? [y/N] > "
+    message = common.read_input(message, default="N", check_batch=True)
     if message in settings.CHOICE_YES or message in settings.CHOICE_NO:
       break  
     elif message in settings.CHOICE_QUIT:
@@ -64,12 +59,9 @@ def set_crawling_depth():
   # Change the crawling depth level.
   if message in settings.CHOICE_YES:
     while True:
-      question_msg = "Please enter the crawling depth level: > "
-      message = _input(settings.print_question_msg(question_msg))
-      if len(message) == 0:
-        message = 1
-      else: 
-        menu.options.crawldepth = message
+      message = "Please enter the crawling depth level: > "
+      message = common.read_input(message, default="1", check_batch=True)
+      menu.options.crawldepth = message
       return
 
 
@@ -79,13 +71,8 @@ Normalize crawling results.
 def normalize_results(output_href):
   results = []
   while True:
-    if not menu.options.batch:
-      question_msg = "Do you want to normalize crawling results? [Y/n] > "
-      message = _input(settings.print_question_msg(question_msg))
-    else:
-      message = ""
-    if len(message) == 0:
-       message = "Y"
+    message = "Do you want to normalize crawling results? [Y/n] > "
+    message = common.read_input(message, default="Y", check_batch=True)
     if message in settings.CHOICE_YES:
       seen = set()
       for target in output_href:
@@ -112,14 +99,9 @@ Store crawling results to a temporary file.
 """
 def store_crawling(output_href):
   while True:
-    if not menu.options.batch:
-      question_msg = "Do you want to store crawling results to a temporary file "
-      question_msg += "(for eventual further processing with other tools)? [y/N] > "
-      message = _input(settings.print_question_msg(question_msg))
-    else:
-      message = ""
-    if len(message) == 0:
-       message = "n"
+    message = "Do you want to store crawling results to a temporary file "
+    message += "(for eventual further processing with other tools)? [y/N] > "
+    message = common.read_input(message, default="N", check_batch=True)
     if message in settings.CHOICE_YES:
       filename = tempfile.mkstemp(suffix=".txt")[1]
       info_msg = "Writing crawling results to a temporary file '" + str(filename) + "'."
@@ -158,13 +140,8 @@ def sitemap(url):
         while True:
           warn_msg = "A sitemap recursion detected (" + url + ")."
           print(settings.print_warning_msg(warn_msg))
-          if not menu.options.batch:
-            question_msg = "Do you want to follow? [Y/n] > "
-            message = _input(settings.print_question_msg(question_msg))
-          else:
-            message = ""
-          if len(message) == 0:
-             message = "Y"
+          message = "Do you want to follow? [Y/n] > "
+          message = common.read_input(message, default="Y", check_batch=True)
           if message in settings.CHOICE_YES:
             sitemap(url)
             break
@@ -234,13 +211,8 @@ def enable_crawler():
   message = ""
   if not settings.CRAWLING:
     while True:
-      if not menu.options.batch:
-        question_msg = "Do you want to enable crawler? [y/N] > "
-        message = _input(settings.print_question_msg(question_msg))
-      else:
-        message = ""
-      if len(message) == 0:
-         message = "N"
+      message = "Do you want to enable crawler? [y/N] > "
+      message = common.read_input(message, default="N", check_batch=True)
       if message in settings.CHOICE_YES:
         menu.options.crawldepth = 1
         break  
@@ -259,14 +231,9 @@ Check for the existence of site's sitemap
 """
 def check_sitemap():
   while True:
-    if not menu.options.batch:
-      question_msg = "Do you want to check target"+ ('', 's')[settings.MULTI_TARGETS] + " for "
-      question_msg += "the existence of site's sitemap(.xml)? [y/N] > "
-      message = _input(settings.print_question_msg(question_msg))
-    else:
-      message = ""
-    if len(message) == 0:
-       message = "n"
+    message = "Do you want to check target"+ ('', 's')[settings.MULTI_TARGETS] + " for "
+    message += "the existence of site's sitemap(.xml)? [y/N] > "
+    message = common.read_input(message, default="N", check_batch=True)
     if message in settings.CHOICE_YES:
       settings.SITEMAP_CHECK = True
       return
@@ -318,7 +285,7 @@ def do_process(url):
       if href:
         href = _urllib.parse.urljoin(url, _urllib.parse.unquote(href))
         if  _urllib.parse.urlparse(url).netloc in href:
-          if (extract_regex_result(r"\A[^?]+\.(?P<result>\w+)(\?|\Z)", href) or "") not in settings.CRAWL_EXCLUDE_EXTENSIONS:
+          if (common.extract_regex_result(r"\A[^?]+\.(?P<result>\w+)(\?|\Z)", href) or "") not in settings.CRAWL_EXCLUDE_EXTENSIONS:
             if not re.search(r"\?(v=)?\d+\Z", href) and \
             not re.search(r"(?i)\.(js|css)(\?|\Z)", href):
               identified_hrefs = store_hrefs(href, identified_hrefs, redirection=False)

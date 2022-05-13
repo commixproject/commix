@@ -150,8 +150,8 @@ def print_checking_msg(payload):
   return result
 
 # Print question message
-def print_question_msg(question_msg):
-  result = QUESTION_SIGN + question_msg + Style.RESET_ALL
+def print_message(message):
+  result = QUESTION_SIGN + message + Style.RESET_ALL
   return result
 
 # Print sub content message
@@ -230,7 +230,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.5"
-REVISION = "60"
+REVISION = "61"
 STABLE_RELEASE = False
 if STABLE_RELEASE:
   VERSION = "v" + VERSION_NUM + "-stable"
@@ -1144,4 +1144,8 @@ DEFAULT_CRAWLING_DEPTH = 1
 SITEMAP_CHECK = None
 
 FOLLOW_REDIRECT = False
+
+# Set predefined answers (e.g. "quit=N,follow=N").
+ANSWERS = ""
+
 # eof

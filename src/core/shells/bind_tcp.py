@@ -20,6 +20,7 @@ import time
 import base64
 import subprocess
 from src.utils import menu
+from src.utils import common
 from src.utils import settings
 from src.thirdparty.six.moves import input as _input
 from src.thirdparty.colorama import Fore, Back, Style, init
@@ -79,20 +80,15 @@ Set up the PHP working directory on the target host.
 """
 def set_php_working_dir():
   while True:
-    if not menu.options.batch:
-      question_msg = "Do you want to use '" + settings.WIN_PHP_DIR 
-      question_msg += "' as PHP working directory on the target host? [Y/n] > "
-      php_dir = _input(settings.print_question_msg(question_msg))
-    else:
-      php_dir = ""
-    if len(php_dir) == 0:
-       php_dir = "Y"
+    message = "Do you want to use '" + settings.WIN_PHP_DIR 
+    message += "' as PHP working directory on the target host? [Y/n] > "
+    php_dir = common.read_input(message, default="Y", check_batch=True)
     if php_dir in settings.CHOICE_YES:
       break
     elif php_dir in settings.CHOICE_NO:
-      question_msg = "Please provide a full path directory for Python interpreter (e.g. '" 
-      question_msg += settings.WIN_PYTHON_INTERPRETER + "') or 'python'> "
-      settings.WIN_PHP_DIR = _input(settings.print_question_msg(question_msg))
+      message = "Please provide a full path directory for Python interpreter (e.g. '" 
+      message += settings.WIN_PYTHON_INTERPRETER + "') or 'python'> "
+      settings.WIN_PHP_DIR = common.read_input(message, default=None, check_batch=True)
       settings.USER_DEFINED_PHP_DIR = True
       break
     else:
@@ -105,20 +101,15 @@ Set up the Python working directory on the target host.
 """
 def set_python_working_dir():
   while True:
-    if not menu.options.batch:
-      question_msg = "Do you want to use '" + settings.WIN_PYTHON_INTERPRETER 
-      question_msg += "' as Python interpreter on the target host? [Y/n] > "
-      python_dir = _input(settings.print_question_msg(question_msg))
-    else:
-      python_dir = "" 
-    if len(python_dir) == 0:
-       python_dir = "Y"
+    message = "Do you want to use '" + settings.WIN_PYTHON_INTERPRETER 
+    message += "' as Python interpreter on the target host? [Y/n] > "
+    python_dir = common.read_input(message, default="Y", check_batch=True)
     if python_dir in settings.CHOICE_YES:
       break
     elif python_dir in settings.CHOICE_NO:
-      question_msg = "Please provide a full path directory for Python interpreter (e.g. '" 
-      question_msg += "C:\\Python27\\python.exe') > "
-      settings.WIN_PYTHON_INTERPRETER = _input(settings.print_question_msg(question_msg))
+      message = "Please provide a full path directory for Python interpreter (e.g. '" 
+      message += "C:\\Python27\\python.exe') > "
+      settings.WIN_PYTHON_INTERPRETER = common.read_input(message, default=None, check_batch=True)
       settings.USER_DEFINED_PYTHON_DIR = True
       break
     else:
@@ -131,20 +122,15 @@ Set up the Python interpreter on linux target host.
 """
 def set_python_interpreter():
   while True:
-    if not menu.options.batch:
-      question_msg = "Do you want to use '" + settings.LINUX_PYTHON_INTERPRETER
-      question_msg += "' as Python interpreter on the target host? [Y/n] > "
-      python_interpreter = _input(settings.print_question_msg(question_msg))
-    else:
-      python_interpreter = ""
-    if len(python_interpreter) == 0:
-       python_interpreter = "Y"
+    message = "Do you want to use '" + settings.LINUX_PYTHON_INTERPRETER
+    message += "' as Python interpreter on the target host? [Y/n] > "
+    python_interpreter = common.read_input(message, default="Y", check_batch=True)
     if python_interpreter in settings.CHOICE_YES:
       break
     elif python_interpreter in settings.CHOICE_NO:
-      question_msg = "Please provide a custom interpreter for Python (e.g. '" 
-      question_msg += "python27') > "
-      settings.LINUX_PYTHON_INTERPRETER = _input(settings.print_question_msg(question_msg))
+      message = "Please provide a custom interpreter for Python (e.g. '" 
+      message += "python27') > "
+      settings.LINUX_PYTHON_INTERPRETER = common.read_input(message, default=None, check_batch=True)
       settings.USER_DEFINED_PYTHON_INTERPRETER = True
       break
     else:
@@ -227,13 +213,8 @@ Type '""" + Style.BRIGHT + """4""" + Style.RESET_ALL + """' to use Netcat-Openbs
       continue
 
   while True:
-    if not menu.options.batch:
-      question_msg = "Do you want to use '/bin' standard subdirectory? [y/N] > "
-      enable_bin_dir = _input(settings.print_question_msg(question_msg))
-    else:
-      enable_bin_dir = ""
-    if len(enable_bin_dir) == 0:
-       enable_bin_dir = "n"              
+    message = "Do you want to use '/bin' standard subdirectory? [y/N] > "
+    enable_bin_dir = common.read_input(message, default="N", check_batch=True)             
     if enable_bin_dir in settings.CHOICE_NO:
       break  
     elif enable_bin_dir in settings.CHOICE_YES :

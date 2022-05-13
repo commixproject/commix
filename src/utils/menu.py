@@ -19,6 +19,7 @@ from src.utils import settings
 from optparse import OptionGroup
 from optparse import OptionParser
 from optparse import SUPPRESS_HELP as SUPPRESS
+from src.utils import common
 from src.thirdparty.six.moves import input as _input
 from src.thirdparty.colorama import Fore, Back, Style, init
 
@@ -131,6 +132,10 @@ general.add_option("--check-internet",
                 action="store_true",
                 dest="check_internet",
                 help="Check internet connection before assessing the target.")
+
+general.add_option("--answers", 
+                dest="answers",
+                help="Set predefined answers (e.g. \"quit=N,follow=N\")")
 
 # Target options
 target = OptionGroup(parser, Style.BRIGHT + Style.UNDERLINE + "Target" + Style.RESET_ALL, 
@@ -704,8 +709,8 @@ Type '""" + Style.BRIGHT + """10""" + Style.RESET_ALL + """' for Google Pixel".
 Type '""" + Style.BRIGHT + """11""" + Style.RESET_ALL + """' for Xiaomi Mi 3.""")
 
     while True:
-      question_msg = "Which smartphone do you want to imitate through HTTP User-Agent header? "
-      mobile_user_agent = _input(settings.print_question_msg(question_msg))
+      message = "Which smartphone do you want to imitate through HTTP User-Agent header? "
+      mobile_user_agent = common.read_input(message, default=None, check_batch=True)
       try:
         if int(mobile_user_agent) in range(0,len(settings.MOBILE_USER_AGENT_LIST)):
           return settings.MOBILE_USER_AGENT_LIST[int(mobile_user_agent)]

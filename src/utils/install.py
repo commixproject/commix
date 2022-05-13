@@ -74,13 +74,8 @@ def installer():
       warn_msg += " is already installed in your system."
       print(settings.print_warning_msg(warn_msg))
       while True:
-        if not menu.options.batch:
-          question_msg = "Do you want to remove commix? [Y/n] > "
-          uninstall = _input(settings.print_question_msg(question_msg))
-        else:
-          uninstall = "" 
-        if len(uninstall) == 0:
-           uninstall = "Y"
+        message = "Do you want to remove commix? [Y/n] > "
+        uninstall = common.read_input(message, default="Y", check_batch=True)
         if uninstall in settings.CHOICE_YES:
           uninstaller()
           raise SystemExit()

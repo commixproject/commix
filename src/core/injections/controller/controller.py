@@ -19,6 +19,7 @@ import sys
 from src.utils import menu
 from src.utils import logs
 from src.utils import settings
+from src.utils import common
 from src.utils import session_handler
 from src.core.requests import headers
 from src.core.requests import requests
@@ -204,15 +205,10 @@ def classic_command_injection_technique(url, timesec, filename, http_request_met
       if cb_handler.exploitation(url, timesec, filename, http_request_method, injection_type, technique) != False:
         if (len(menu.options.tech) == 0 or "e" in menu.options.tech):
           while True:
-            if not menu.options.batch:
-              settings.CLASSIC_STATE = True
-              question_msg = "Skipping of code injection tests is recommended. "
-              question_msg += "Do you agree? [Y/n] > "
-              procced_option = _input(settings.print_question_msg(question_msg))
-            else:
-              procced_option = ""
-            if len(procced_option) == 0:
-               procced_option = "Y"
+            settings.CLASSIC_STATE = True
+            message = "Skipping of code injection tests is recommended. "
+            message += "Do you agree? [Y/n] > "
+            procced_option = common.read_input(message, default="Y", check_batch=True)
             if procced_option in settings.CHOICE_YES:
               settings.SKIP_CODE_INJECTIONS = True
               break
@@ -240,15 +236,10 @@ def dynamic_code_evaluation_technique(url, timesec, filename, http_request_metho
       settings.EVAL_BASED_STATE = None
       if eb_handler.exploitation(url, timesec, filename, http_request_method, injection_type, technique) != False:
         while True:
-          if not menu.options.batch:
-            settings.EVAL_BASED_STATE = True
-            question_msg = "Skipping of further command injection checks is recommended. "
-            question_msg += "Do you agree? [Y/n] > "
-            procced_option = _input(settings.print_question_msg(question_msg))
-          else:
-            procced_option = ""
-          if len(procced_option) == 0:
-             procced_option = "Y"
+          settings.EVAL_BASED_STATE = True
+          message = "Skipping of further command injection checks is recommended. "
+          message += "Do you agree? [Y/n] > "
+          procced_option = common.read_input(message, default="Y", check_batch=True)
           if procced_option in settings.CHOICE_YES:
             settings.SKIP_COMMAND_INJECTIONS = True
             break
@@ -383,13 +374,10 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
         url = code_injections_heuristic_basic(url, http_request_method, check_parameter, the_type, header_name, inject_http_headers)
         if settings.IDENTIFIED_WARNINGS or settings.IDENTIFIED_PHPINFO:
           while True:
-            if not menu.options.batch:
-              question_msg = "Skipping of further command injection tests is recommended. "
-              question_msg += "Do you agree? [Y/n] > "
-              procced_option = _input(settings.print_question_msg(question_msg))
-            else:
-              procced_option = ""
-            if procced_option in settings.CHOICE_YES or len(procced_option) == 0:
+            message = "Skipping of further command injection tests is recommended. "
+            message += "Do you agree? [Y/n] > "
+            procced_option = common.read_input(message, default="Y", check_batch=True)
+            if procced_option in settings.CHOICE_YES:
               settings.CLASSIC_STATE = settings.TIME_BASED_STATE = settings.FILE_BASED_STATE = False
               settings.EVAL_BASED_STATE = settings.SKIP_COMMAND_INJECTIONS = True
               break
@@ -815,14 +803,9 @@ def do_check(url, http_request_method, filename):
         scan_level = menu.options.level
         while int(scan_level) < int(settings.HTTP_HEADER_INJECTION_LEVEL) and settings.LOAD_SESSION != True:
           while True:
-            if not menu.options.batch:
-              question_msg = "Do you want to increase to '--level=" + str(scan_level + 1) 
-              question_msg += "' in order to perform more tests? [Y/n] > "
-              next_level = _input(settings.print_question_msg(question_msg))
-            else:
-              next_level = ""
-            if len(next_level) == 0:
-               next_level = "Y"
+            message = "Do you want to increase to '--level=" + str(scan_level + 1) 
+            message += "' in order to perform more tests? [Y/n] > "
+            next_level = common.read_input(message, default="Y", check_batch=True)
             if next_level in settings.CHOICE_YES:
               menu.options.level = int(menu.options.level + scan_level)
               if perform_checks(url, http_request_method, filename) == False and scan_level < settings.HTTP_HEADER_INJECTION_LEVEL :

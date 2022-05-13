@@ -27,9 +27,9 @@ import base64
 import gzip
 import zlib
 import traceback
+from src.utils import common
 from src.utils import logs
 from src.utils import menu
-from src.utils import common
 from src.utils import settings
 from src.utils import simple_http_server
 from src.thirdparty.odict import OrderedDict
@@ -422,8 +422,8 @@ Procced to the next attack vector.
 """
 def next_attack_vector(technique, go_back):
   while True:
-    message = "Continue with testing the " + technique + "? [Y/n] > "
-    next_attack_vector = common.read_input(message, default="Y", check_batch=True)
+    message = "Continue with testing the " + technique + "? [y/N] > "
+    next_attack_vector = common.read_input(message, default="N", check_batch=True)
     if next_attack_vector in settings.CHOICE_YES:
       # Check injection state
       assessment_phase()
@@ -1498,7 +1498,7 @@ def process_json_data():
     info_msg = "JSON data found in POST data."
     message = info_msg
     message += " Do you want to process it? [Y/n] > "
-    json_process = common.read_input(message, default="Y", check_batch=True)             
+    json_process = common.read_input(message, default="Y", check_batch=True)          
     if json_process in settings.CHOICE_YES:
       settings.IS_JSON = True
       break
@@ -1574,8 +1574,9 @@ def file_upload():
     # Check if not defined URL for upload.
     while True:
       message = "Do you want to enable an HTTP server? [Y/n] > "
-      enable_HTTP_server = common.read_input(message, default="Y", check_batch=True)
+      enable_HTTP_server = common.read_input(message, default="Y", check_batch=True)         
       if enable_HTTP_server in settings.CHOICE_YES:
+
         # Check if file exists
         if not os.path.isfile(menu.options.file_upload):
           err_msg = "The '" + menu.options.file_upload + "' file, does not exist."
@@ -1654,7 +1655,7 @@ def define_py_working_dir():
     while True:
       message = "Do you want to use '" + settings.WIN_PYTHON_INTERPRETER 
       message += "' as Python working directory on the target host? [Y/n] > "
-      python_dir = common.read_input(message, default="Y" , check_batch=True)
+      python_dir = common.read_input(message, default="Y", check_batch=True)
       if python_dir in settings.CHOICE_YES:
         break
       elif python_dir in settings.CHOICE_NO:

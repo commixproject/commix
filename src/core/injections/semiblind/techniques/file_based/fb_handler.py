@@ -25,6 +25,7 @@ from src.utils import session_handler
 from src.core.requests import headers
 from src.core.requests import requests
 from src.core.requests import parameters
+from src.utils import common
 from src.core.injections.controller import checks
 from src.core.injections.controller import shell_options
 from src.thirdparty.six.moves import input as _input
@@ -77,9 +78,9 @@ def custom_web_root(url, timesec, filename, http_request_method, url_time_respon
     example_root_dir = "\\inetpub\\wwwroot"
   else:
     example_root_dir = "/var/www"
-  question_msg = "Please provide the host's root directory (e.g. '" 
-  question_msg += example_root_dir + "') > "
-  settings.WEB_ROOT = _input(settings.print_question_msg(question_msg))
+  message = "Please provide the host's root directory (e.g. '" 
+  message += example_root_dir + "') > "
+  settings.WEB_ROOT = common.read_input(message, default=None, check_batch=True)
   if settings.WEB_ROOT.endswith(("\\", "/")):
     settings.WEB_ROOT = settings.WEB_ROOT[:-1]
   if len(settings.WEB_ROOT) == 0:
@@ -368,13 +369,8 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                     sys.stdout.write("\r" + settings.print_warning_msg(warn_msg))
                     print(settings.SINGLE_WHITESPACE)
                     while True:
-                      if not menu.options.batch:
-                        question_msg = "Do you want to try the temporary directory (" + tmp_path + ") [Y/n] > "
-                        tmp_upload = _input(settings.print_question_msg(question_msg))
-                      else:
-                        tmp_upload = ""
-                      if len(tmp_upload) == 0:
-                         tmp_upload = "Y"
+                      message = "Do you want to try the temporary directory (" + tmp_path + ") [Y/n] > "
+                      tmp_upload = common.read_input(message, default="Y", check_batch=True)
                       if tmp_upload in settings.CHOICE_YES:
                         exit_loops = True
                         settings.TEMPFILE_BASED_STATE = True
@@ -525,13 +521,8 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
             new_line = True
             if settings.ENUMERATION_DONE == True :
               while True:
-                if not menu.options.batch:
-                  question_msg = "Do you want to enumerate again? [Y/n] > "
-                  enumerate_again = _input("\n" + settings.print_question_msg(question_msg)).lower()
-                else:
-                  enumerate_again = ""  
-                if len(enumerate_again) == 0:
-                  enumerate_again = "Y"
+                message = "Do you want to enumerate again? [Y/n] > "
+                enumerate_again = common.read_input(message, default="Y", check_batch=True)
                 if enumerate_again in settings.CHOICE_YES:
                   fb_enumeration.do_check(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
                   # print(settings.SINGLE_WHITESPACE)
@@ -560,13 +551,8 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
               if settings.ENUMERATION_DONE != True:
                 print(settings.SINGLE_WHITESPACE)
               while True:
-                if not menu.options.batch:
-                  question_msg = "Do you want to access files again? [Y/n] > "
-                  file_access_again = _input(settings.print_question_msg(question_msg))
-                else:
-                  file_access_again = ""
-                if len(file_access_again) == 0:
-                   file_access_again= "Y"
+                message = "Do you want to access files again? [Y/n] > "
+                file_access_again = common.read_input(message, default="Y", check_batch=True)
                 if file_access_again in settings.CHOICE_YES:
                   fb_file_access.do_check(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
                   break
@@ -600,23 +586,14 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
               go_back_again = False
               while True:
                 # Delete previous shell (text) files (output)
-                # if settings.VERBOSITY_LEVEL != 0:
-                #   print(settings.SINGLE_WHITESPACE)
                 delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
                 if settings.VERBOSITY_LEVEL != 0:
                   print(settings.SINGLE_WHITESPACE)
                 if go_back == True:
                   break
-                if not menu.options.batch:
-                  question_msg = "Do you want a Pseudo-Terminal shell? [Y/n] > "
-                  gotshell = _input(settings.print_question_msg(question_msg))
-                else:
-                  gotshell = ""
-                if len(gotshell) == 0:
-                   gotshell = "Y"
+                message = "Do you want a Pseudo-Terminal shell? [Y/n] > "
+                gotshell = common.read_input(message, default="Y", check_batch=True)
                 if gotshell in settings.CHOICE_YES:
-                  # if not menu.options.batch:
-                  #   print(settings.SINGLE_WHITESPACE)
                   print("Pseudo-Terminal (type '" + Style.BRIGHT + "?" + Style.RESET_ALL + "' for available options)")
                   if settings.READLINE_ERROR:
                     checks.no_readline_module()
@@ -624,10 +601,8 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                     if not settings.READLINE_ERROR:
                       checks.tab_autocompleter()
                     sys.stdout.write(settings.OS_SHELL)
-                    cmd = _input()
+                    cmd = common.read_input(message="", default=None, check_batch=True)
                     cmd = checks.escaped_cmd(cmd)
-                    # if settings.VERBOSITY_LEVEL != 0:
-                    #   print(settings.SINGLE_WHITESPACE)
                     if cmd.lower() in settings.SHELL_OPTIONS:
                       go_back, go_back_again = shell_options.check_option(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, technique, go_back, no_result, timesec, go_back_again, payload, OUTPUT_TEXTFILE)
                       if go_back and go_back_again == False:
@@ -655,7 +630,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                           print(settings.command_execution_output(shell))
                           print(settings.SINGLE_WHITESPACE)
                       if not shell or shell == "":
-                        if settings.VERBOSITY_LEVEL == 1:
+                        if settings.VERBOSITY_LEVEL == 1 or (len(cmd) == 0 and settings.VERBOSITY_LEVEL <= 1):
                           print(settings.SINGLE_WHITESPACE)
                         err_msg = "The '" + cmd + "' command, does not return any output."
                         print(settings.print_critical_msg(err_msg))

@@ -27,7 +27,58 @@ from src.thirdparty import six
 from src.thirdparty.six.moves import input as _input
 from src.thirdparty.six.moves import urllib as _urllib
 
+"""
+Reads input from terminal
+"""
+def read_input(message, default=None, check_batch=True):
 
+  def is_empty():
+    value = _input(settings.print_message(message))
+    if len(value) == 0:
+      return default
+    else:
+      return value
+
+  value = None
+  if "\n" in message:
+    message += ("\n" if message.count("\n") > 1 else "")
+  elif len(message) == 0:
+    return _input()
+
+  if settings.ANSWERS:
+    if not any(_ in settings.ANSWERS for _ in ",="):
+      return is_empty()
+    else:
+      for item in settings.ANSWERS.split(','):
+        question = item.split('=')[0].strip()
+        answer = item.split('=')[1] if len(item.split('=')) > 1 else None
+        if answer and question.lower() in message.lower():
+          value = answer
+          print(settings.print_message(message + value))
+          return value
+        elif answer is None and value:
+          return is_empty()
+
+  if value:
+    if settings.VERBOSITY_LEVEL != 0:
+      debug_msg = "Used the given answer."
+      print(settings.print_debug_msg(debug_msg))
+    print(settings.print_message(message + value))
+    return value
+
+  elif value is None:
+    if check_batch and menu.options.batch:
+      if settings.VERBOSITY_LEVEL != 0:
+        debug_msg = "Used the default behavior, running in batch mode."
+        print(settings.print_debug_msg(debug_msg))
+      print(settings.print_message(message + default))
+      return default
+    else:
+      return is_empty()
+  
+"""
+Extract regex result
+"""
 def extract_regex_result(regex, content):
   result = None
   if regex and content and "?P<result>" in regex:
@@ -87,15 +138,10 @@ def create_github_issue(err_msg, exc_msg):
 
   while True:
     try:
-      if not menu.options.batch:
-        question_msg = "Do you want to automatically create a new (anonymized) issue "
-        question_msg += "with the unhandled exception information at "
-        question_msg += "the official Github repository? [y/N] "
-        choise = _input(settings.print_question_msg(question_msg))
-      else:
-        choise = ""
-      if len(choise) == 0:
-        choise = "n"
+      message = "Do you want to automatically create a new (anonymized) issue "
+      message += "with the unhandled exception information at "
+      message += "the official Github repository? [y/N] "
+      choise = common.read_input(message, default="N", check_batch=True)
       if choise in settings.CHOICE_YES:
         break
       elif choise in settings.CHOICE_NO:

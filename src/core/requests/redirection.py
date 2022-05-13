@@ -23,6 +23,7 @@ except ImportError:
   from base64 import encodestring as encodebytes
 from src.utils import menu
 from src.utils import settings
+from src.utils import common
 from socket import error as SocketError
 from src.thirdparty.six.moves import http_client as _http_client
 from src.core.injections.controller import checks
@@ -65,17 +66,15 @@ def do_check(request, url):
       return response.geturl()
     else:
       while True:
-        if not menu.options.batch and not settings.FOLLOW_REDIRECT:
+        if not settings.FOLLOW_REDIRECT:
           if settings.CRAWLED_URLS_NUM != 0 and settings.CRAWLED_SKIPPED_URLS_NUM != 0:
             print(settings.SINGLE_WHITESPACE)
-          question_msg = "Got a " + str(settings.REDIRECT_CODE) + " redirect to " + response.geturl() + "\n"
-          question_msg += "Do you want to follow the identified redirection? [Y/n] > "
-          redirection_option = _input(settings.print_question_msg(question_msg))
-        else:
-          redirection_option = ""  
-        if len(redirection_option) == 0 or redirection_option in settings.CHOICE_YES:
+          message = "Got a " + str(settings.REDIRECT_CODE) + " redirect to " + response.geturl() + "\n"
+          message += "Do you want to follow the identified redirection? [Y/n] > "
+          redirection_option = common.read_input(message, default="Y", check_batch=True) 
+        if redirection_option in settings.CHOICE_YES:
           settings.FOLLOW_REDIRECT = True
-          if menu.options.batch and not settings.CRAWLING:
+          if not settings.CRAWLING:
             info_msg = "Following redirection to '" + response.geturl() + "'. "
             print(settings.print_info_msg(info_msg))
           return checks.check_http_s(response.geturl())

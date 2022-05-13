@@ -139,14 +139,9 @@ def input_cmd(http_request_method, url, vuln_parameter, ip_src, technique):
   go_back_again = False
   while True:
     if go_back == True:
-      break
-    if not menu.options.batch:  
-      question_msg = "Do you want a Pseudo-Terminal shell? [Y/n] > "
-      gotshell = _input(settings.print_question_msg(question_msg))
-    else:
-      gotshell = ""  
-    if len(gotshell) == 0:
-       gotshell= "Y"
+      break 
+    message = "Do you want a Pseudo-Terminal shell? [Y/n] > "
+    gotshell = _common.read_input(message, default="Y", check_batch=True)
     if gotshell in settings.CHOICE_YES:
       print("\nPseudo-Terminal (type '" + Style.BRIGHT + "?" + Style.RESET_ALL + "' for available options)")
       if settings.READLINE_ERROR:
@@ -156,7 +151,7 @@ def input_cmd(http_request_method, url, vuln_parameter, ip_src, technique):
           if not settings.READLINE_ERROR:
             checks.tab_autocompleter()
           sys.stdout.write(settings.OS_SHELL)
-          cmd = _input()
+          cmd = common.read_input(message="", default=None, check_batch=True)
           cmd = checks.escaped_cmd(cmd)
           if cmd.lower() in settings.SHELL_OPTIONS:
             if cmd.lower() == "quit" or cmd.lower() == "back":       

@@ -578,6 +578,9 @@ try:
     if menu.options.method:
       settings.HTTP_METHOD = menu.options.method
 
+    if menu.options.answers:
+      settings.ANSWERS = menu.options.answers
+
     # Check if defined "--proxy" option.
     if menu.options.proxy:
       for match in re.finditer(settings.PROXY_REGEX, menu.options.proxy):
@@ -638,14 +641,14 @@ try:
     if menu.options.wizard:
       if not menu.options.url:
         while True:
-          question_msg = "Please enter full target URL (-u) > "
-          menu.options.url = _input(settings.print_question_msg(question_msg))
+          message = "Please enter full target URL (-u) > "
+          menu.options.url = common.read_input(message, default=None, check_batch=True)
           if len(menu.options.url) == 0:
             pass
           else: 
             break
-      question_msg = "Please enter POST data (--data) [Enter for none] > "
-      menu.options.data = _input(settings.print_question_msg(question_msg))
+      message = "Please enter POST data (--data) [Enter for none] > "
+      menu.options.data = common.read_input(message, default=None, check_batch=True)
       if len(menu.options.data) == 0:
         menu.options.data = False
 
@@ -833,14 +836,9 @@ try:
     for url in clean_output_href:
       if (settings.CRAWLING and re.search(r"(.*?)\?(.+)", url)) or settings.MULTI_TARGETS:
         url_num += 1
-        print(settings.print_question_msg("[" + str(url_num) + "/" + str(len(clean_output_href)) + "] URL - " + url) + "")
-        if not menu.options.batch:
-          question_msg = "Do you want to use URL #" + str(url_num) + " to perform tests? [Y/n] > "
-          message = _input(settings.print_question_msg(question_msg))
-        else:
-          message = ""
-        if len(message) == 0:
-           message = "Y"
+        print(settings.print_message("[" + str(url_num) + "/" + str(len(clean_output_href)) + "] URL - " + url) + "")
+        message = "Do you want to use URL #" + str(url_num) + " to perform tests? [Y/n] > "
+        message = common.read_input(message, default="Y", check_batch=True)
         if message in settings.CHOICE_YES:
           settings.INIT_TEST = True
           if url == clean_output_href[-1]:

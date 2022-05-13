@@ -24,6 +24,7 @@ from src.utils import session_handler
 from src.thirdparty.six.moves import http_client as _http_client
 # accept overly long result lines
 _http_client._MAXLINE = 1 * 1024 * 1024
+from src.utils import common
 from src.core.requests import tor
 from src.core.requests import proxy
 from src.core.requests import headers
@@ -126,13 +127,8 @@ def estimate_response_time(url, timesec):
                 warn_msg += "HTTP authentication credentials are required."
                 print(settings.print_warning_msg(warn_msg))
                 while True:
-                  if not menu.options.batch:
-                    question_msg = "Do you want to perform a dictionary-based attack? [Y/n] > "
-                    do_update = _input(settings.print_question_msg(question_msg))
-                  else:
-                    do_update = ""  
-                  if len(do_update) == 0:
-                     do_update = "Y" 
+                  message = "Do you want to perform a dictionary-based attack? [Y/n] > "
+                  do_update = common.read_input(message, default="Y", check_batch=True)
                   if do_update in settings.CHOICE_YES:
                     auth_creds = authentication.http_auth_cracker(url, realm)
                     if auth_creds != False:
@@ -161,13 +157,8 @@ def estimate_response_time(url, timesec):
                   warn_msg = "Heuristics have failed to identify the realm attribute." 
                   print(settings.print_warning_msg(warn_msg))
                 while True:
-                  if not menu.options.batch:
-                    question_msg = "Do you want to perform a dictionary-based attack? [Y/n] > "
-                    do_update = _input(settings.print_question_msg(question_msg))
-                  else:
-                    do_update = ""
-                  if len(do_update) == 0:
-                     do_update = "Y" 
+                  message = "Do you want to perform a dictionary-based attack? [Y/n] > "
+                  do_update = common.read_input(message, default="Y", check_batch=True)
                   if do_update in settings.CHOICE_YES:
                     auth_creds = authentication.http_auth_cracker(url, realm)
                     if auth_creds != False:
@@ -1207,8 +1198,7 @@ def check_target_os(server_banner):
       print(settings.print_warning_msg(warn_msg))
 
   if found_os_server == False and not menu.options.os:
-    # If "--shellshock" option is provided then,
-    # by default is a Linux/Unix operating system.
+    # If "--shellshock" option is provided then, by default is a Linux/Unix operating system.
     if menu.options.shellshock:
       pass 
     else:
@@ -1225,9 +1215,9 @@ def check_target_os(server_banner):
         print(settings.print_info_msg(info_msg))
       else:
         while True:
-          question_msg = "Do you recognise the server's operating system? "
-          question_msg += "[(W)indows/(U)nix-like/(q)uit] > "
-          got_os = _input(settings.print_question_msg(question_msg))
+          message = "Do you recognise the server's operating system? "
+          message += "[(W)indows/(U)nix-like/(q)uit] > "
+          got_os = common.read_input(message, default="", check_batch=True)
           if got_os.lower() in settings.CHOICE_OS :
             if got_os.lower() == "w":
               settings.TARGET_OS = "win"

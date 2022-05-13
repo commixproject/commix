@@ -21,6 +21,7 @@ import random
 from src.utils import menu
 from src.utils import logs
 from src.utils import settings
+from src.utils import common
 from src.core.compat import xrange
 from src.utils import session_handler
 from src.core.requests import headers
@@ -217,13 +218,8 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                       warn_msg += "requests. This behavior may lead to false-positive results.\n"
                       sys.stdout.write("\r" + settings.print_warning_msg(warn_msg))
                       while True:
-                        if not menu.options.batch:
-                          question_msg = "How do you want to proceed? [(C)ontinue/(s)kip/(q)uit] > "
-                          proceed_option = _input(settings.print_question_msg(question_msg))
-                        else:
-                          proceed_option = ""  
-                        if len(proceed_option) == 0:
-                           proceed_option = "c" 
+                        message = "How do you want to proceed? [(C)ontinue/(s)kip/(q)uit] > "
+                        proceed_option = common.read_input(message, default="C", check_batch=True) 
                         if proceed_option.lower() in settings.CHOICE_PROCEED :
                           if proceed_option.lower() == "s":
                             false_positive_fixation = False
@@ -420,13 +416,8 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
               # Check for any enumeration options.
               if settings.ENUMERATION_DONE == True:
                 while True:
-                  if not menu.options.batch:
-                    question_msg = "Do you want to enumerate again? [Y/n] > "
-                    enumerate_again = _input("\n" + settings.print_question_msg(question_msg)).lower()
-                  else:
-                    enumerate_again = ""
-                  if len(enumerate_again) == 0:
-                    enumerate_again = "Y"
+                  message = "Do you want to enumerate again? [Y/n] > "
+                  enumerate_again = common.read_input(message, default="Y", check_batch=True)
                   if enumerate_again in settings.CHOICE_YES:
                     tb_enumeration.do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
                     print(settings.SINGLE_WHITESPACE)
@@ -449,13 +440,8 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
               if settings.FILE_ACCESS_DONE == True:
                 print(settings.SINGLE_WHITESPACE)
                 while True:
-                  if not menu.options.batch:
-                    question_msg = "Do you want to access files again? [Y/n] > "
-                    file_access_again = _input(settings.print_question_msg(question_msg))
-                  else:
-                    file_access_again = "" 
-                  if len(file_access_again) == 0:
-                     file_access_again = "Y" 
+                  message = "Do you want to access files again? [Y/n] > "
+                  file_access_again = common.read_input(message, default="Y", check_batch=True)
                   if file_access_again in settings.CHOICE_YES:
                     tb_file_access.do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
                     break
@@ -487,17 +473,10 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
               go_back_again = False
               while True:
                 if go_back == True:
-                  break 
-                if not menu.options.batch:  
-                  question_msg = "Do you want a Pseudo-Terminal shell? [Y/n] > "
-                  gotshell = _input(settings.print_question_msg(question_msg))
-                else:
-                  gotshell = "" 
-                if len(gotshell) == 0:
-                  gotshell = "Y"
+                  break   
+                message = "Do you want a Pseudo-Terminal shell? [Y/n] > "
+                gotshell = common.read_input(message, default="Y", check_batch=True)
                 if gotshell in settings.CHOICE_YES:
-                  # if not menu.options.batch:
-                  #   print(settings.SINGLE_WHITESPACE)
                   print("Pseudo-Terminal (type '" + Style.BRIGHT + "?" + Style.RESET_ALL + "' for available options)")
                   if settings.READLINE_ERROR:
                     checks.no_readline_module()
@@ -511,7 +490,7 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                       if not settings.READLINE_ERROR:
                         checks.tab_autocompleter()
                       sys.stdout.write(settings.OS_SHELL)
-                      cmd = _input()
+                      cmd = common.read_input(message="", default=None, check_batch=True)
                       cmd = checks.escaped_cmd(cmd)
                       if cmd.lower() in settings.SHELL_OPTIONS:
                         go_back, go_back_again = shell_options.check_option(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, technique, go_back, no_result, timesec, go_back_again, payload, OUTPUT_TEXTFILE="")
@@ -594,13 +573,8 @@ def exploitation(url, timesec, filename, http_request_method, url_time_response,
     while True:
       if go_back == True:
         return False
-      if not menu.options.batch:
-        question_msg = "How do you want to proceed? [(C)ontinue/(s)kip/(q)uit] > "
-        proceed_option = _input(settings.print_question_msg(question_msg))
-      else:
-        proceed_option = ""  
-      if len(proceed_option) == 0:
-         proceed_option = "c"
+      message = "How do you want to proceed? [(C)ontinue/(s)kip/(q)uit] > "
+      proceed_option = common.read_input(message, default="C", check_batch=True)
       if proceed_option.lower() in settings.CHOICE_PROCEED :
         if proceed_option.lower() == "s":
           from src.core.injections.semiblind.techniques.file_based import fb_handler

@@ -23,6 +23,7 @@ from src.utils import session_handler
 from src.core.requests import tor
 from src.core.requests import proxy
 from src.core.requests import headers
+from src.utils import common
 from src.core.injections.controller import checks
 from src.thirdparty.six.moves import input as _input
 from src.thirdparty.colorama import Fore, Back, Style, init
@@ -79,13 +80,8 @@ wordlists for usernames / passwords.
 def define_wordlists():
 
   while True:
-    if not menu.options.batch:
-      question_msg = "Do you want to use default wordlists for dictionary-based attack? [Y/n] > "
-      do_update = _input(settings.print_question_msg(question_msg))
-    else:
-      do_update = ""  
-    if len(do_update) == 0:
-       do_update = "Y" 
+    message = "Do you want to use default wordlists for dictionary-based attack? [Y/n] > "
+    do_update = common.read_input(message, default="Y", check_batch=True)
     if do_update in settings.CHOICE_YES:
       username_txt_file = settings.USERNAMES_TXT_FILE
       passwords_txt_file = settings.PASSWORDS_TXT_FILE
@@ -93,10 +89,10 @@ def define_wordlists():
       print(settings.print_info_msg(info_msg))
       break
     elif do_update in settings.CHOICE_NO:
-      question_msg = "Please enter usernames wordlist > "
-      username_txt_file = _input(settings.print_question_msg(question_msg))
-      question_msg = "Please enter passwords wordlist > "
-      passwords_txt_file = _input(settings.print_question_msg(question_msg))
+      message = "Please enter usernames wordlist > "
+      username_txt_file = common.read_input(message, default=None, check_batch=True)
+      message = "Please enter passwords wordlist > "
+      passwords_txt_file = common.read_input(message, default=None, check_batch=True)
       break
     elif do_update in settings.CHOICE_QUIT:
       raise SystemExit()

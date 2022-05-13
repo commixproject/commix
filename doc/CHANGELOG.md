@@ -1,4 +1,5 @@
 ## Version 3.5 (TBA)
+* Added: New option `--answers` to set user answers to asked questions during commix run.
 * Added: Support regarding combining `--crawl` option with scanning multiple targets given in a textual file (i.e. via option `-m`).
 * Added: Support for normalizing crawling results.
 * Revised: Improvement regarding crawler.

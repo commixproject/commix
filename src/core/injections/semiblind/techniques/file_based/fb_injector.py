@@ -27,6 +27,7 @@ from src.core.requests import proxy
 from src.core.requests import headers
 from src.core.requests import requests
 from src.core.requests import parameters
+from src.utils import common
 from src.core.injections.controller import checks
 from src.thirdparty.six.moves import urllib as _urllib
 from src.thirdparty.six.moves import input as _input
@@ -283,13 +284,10 @@ def injection_output(url, OUTPUT_TEXTFILE, timesec):
         if settings.MULTI_TARGETS:
           settings.RECHECK_FILE_FOR_EXTRACTION = True
         while True:
-          if not menu.options.batch:
-            question_msg =  "Do you want to use URL '" + output
-            question_msg += "' as command execution output? [Y/n] > "
-            procced_option = _input(settings.print_question_msg(question_msg))
-          else:
-            procced_option = ""
-          if procced_option in settings.CHOICE_YES or len(procced_option) == 0:
+          message =  "Do you want to use URL '" + output
+          message += "' as command execution output? [Y/n] > "
+          procced_option = common.read_input(message, default="Y", check_batch=True)
+          if procced_option in settings.CHOICE_YES:
             settings.DEFINED_WEBROOT = output
             break
           elif procced_option in settings.CHOICE_NO:

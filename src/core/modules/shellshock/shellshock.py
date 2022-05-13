@@ -8,6 +8,7 @@ import random
 from src.thirdparty.six.moves import urllib as _urllib
 from src.thirdparty.six.moves import input as _input
 from src.thirdparty.six.moves import http_client as _http_client
+from src.utils import common
 from src.utils import menu
 from src.utils import logs
 from src.utils import settings
@@ -708,14 +709,8 @@ def shellshock_handler(url, http_request_method, filename):
             if settings.VERBOSITY_LEVEL != 0:
               print(settings.SINGLE_WHITESPACE)
             while True:
-              if not menu.options.batch:
-                question_msg = "Do you want to enumerate again? [Y/n] > "
-                enumerate_again = _input(settings.print_question_msg(question_msg))
-
-              else:
-                 enumerate_again = "" 
-              if len(enumerate_again) == 0:
-                 enumerate_again = "Y"
+              message = "Do you want to enumerate again? [Y/n] > "
+              enumerate_again = common.read_input(message, default="Y", check_batch=True)
               if enumerate_again in settings.CHOICE_YES:
                 enumeration(url, cve, check_header, filename)
                 break
@@ -733,13 +728,8 @@ def shellshock_handler(url, http_request_method, filename):
           # File access options.
           if settings.FILE_ACCESS_DONE == True :
             while True:
-              if not menu.options.batch:
-                question_msg = "Do you want to access files again? [Y/n] > "
-                file_access_again = _input(settings.print_question_msg(question_msg))
-              else:
-                 file_access_again= "" 
-              if len(file_access_again) == 0:
-                 file_access_again = "Y"
+              message = "Do you want to access files again? [Y/n] > "
+              file_access_again = common.read_input(message, default="Y", check_batch=True)
               if file_access_again in settings.CHOICE_YES:
                 file_access(url, cve, check_header, filename)
                 break
@@ -770,16 +760,9 @@ def shellshock_handler(url, http_request_method, filename):
             while True:
               if go_back == True:
                 break
-              if not menu.options.batch:
-                question_msg = "Do you want a Pseudo-Terminal shell? [Y/n] > "
-                gotshell = _input(settings.print_question_msg(question_msg))
-              else:
-                gotshell= ""  
-              if len(gotshell) == 0:
-                 gotshell= "Y"
+              message = "Do you want a Pseudo-Terminal shell? [Y/n] > "
+              gotshell = common.read_input(message, default="Y", check_batch=True)
               if gotshell in settings.CHOICE_YES:
-                # if not menu.options.batch:
-                #   print(settings.SINGLE_WHITESPACE)
                 print("Pseudo-Terminal (type '" + Style.BRIGHT + "?" + Style.RESET_ALL + "' for available options)")
                 if settings.READLINE_ERROR:
                   checks.no_readline_module()
@@ -788,7 +771,7 @@ def shellshock_handler(url, http_request_method, filename):
                     if not settings.READLINE_ERROR:
                       checks.tab_autocompleter()
                     sys.stdout.write(settings.OS_SHELL)
-                    cmd = _input()
+                    cmd = common.read_input(message="", default=None, check_batch=True)
                     cmd = checks.escaped_cmd(cmd)
                     
                     if cmd.lower() in settings.SHELL_OPTIONS:

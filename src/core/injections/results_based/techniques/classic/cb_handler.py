@@ -24,6 +24,7 @@ from src.thirdparty.six.moves import html_parser as _html_parser
 from src.utils import menu
 from src.utils import logs
 from src.utils import settings
+from src.utils import common
 from src.utils import session_handler
 from src.thirdparty.colorama import Fore, Back, Style, init
 from src.core.shells import reverse_tcp
@@ -290,16 +291,10 @@ def cb_injection_handler(url, timesec, filename, http_request_method, injection_
             new_line = True
             if settings.ENUMERATION_DONE == True :
               while True:
-                if not menu.options.batch:
-                  question_msg = "Do you want to enumerate again? [Y/n] > "
-                  enumerate_again = _input("\n" + settings.print_question_msg(question_msg)).lower()
-                else:
-                  enumerate_again = ""  
-                if len(enumerate_again) == 0:
-                  enumerate_again = "Y"
+                message = "Do you want to enumerate again? [Y/n] > "
+                enumerate_again = common.read_input(message, default="Y", check_batch=True)
                 if enumerate_again in settings.CHOICE_YES:
                   cb_enumeration.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec)
-                  #print(settings.SINGLE_WHITESPACE)
                   break
                 elif enumerate_again in settings.CHOICE_NO:
                   new_line = False
@@ -322,13 +317,8 @@ def cb_injection_handler(url, timesec, filename, http_request_method, injection_
               if settings.ENUMERATION_DONE != True:
                 print(settings.SINGLE_WHITESPACE)
               while True:
-                if not menu.options.batch:
-                  question_msg = "Do you want to access files again? [Y/n] > "
-                  file_access_again = _input(settings.print_question_msg(question_msg))
-                else:
-                  file_access_again = ""  
-                if len(file_access_again) == 0:
-                   file_access_again = "Y"
+                message = "Do you want to access files again? [Y/n] > "
+                file_access_again = common.read_input(message, default="Y", check_batch=True)
                 if file_access_again in settings.CHOICE_YES:
                   cb_file_access.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec)
                   break
@@ -358,16 +348,9 @@ def cb_injection_handler(url, timesec, filename, http_request_method, injection_
             while True:
               if go_back == True:
                 break 
-              if not menu.options.batch:
-                question_msg = "Do you want a Pseudo-Terminal shell? [Y/n] > "
-                gotshell = _input(settings.print_question_msg(question_msg))
-              else:
-                gotshell = ""  
-              if len(gotshell) == 0:
-                 gotshell = "Y"
+              message = "Do you want a Pseudo-Terminal shell? [Y/n] > "
+              gotshell = common.read_input(message, default="Y", check_batch=True)
               if gotshell in settings.CHOICE_YES:
-                # if not menu.options.batch:
-                #   print(settings.SINGLE_WHITESPACE)
                 print("Pseudo-Terminal (type '" + Style.BRIGHT + "?" + Style.RESET_ALL + "' for available options)")
                 if settings.READLINE_ERROR:
                   checks.no_readline_module()
@@ -376,7 +359,7 @@ def cb_injection_handler(url, timesec, filename, http_request_method, injection_
                     if not settings.READLINE_ERROR:
                       checks.tab_autocompleter()
                     sys.stdout.write(settings.OS_SHELL)
-                    cmd = _input()
+                    cmd = common.read_input(message="", default=None, check_batch=True)
                     cmd = checks.escaped_cmd(cmd)
                     if cmd.lower() in settings.SHELL_OPTIONS:
                       go_back, go_back_again = shell_options.check_option(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, technique, go_back, no_result, timesec, go_back_again, payload, OUTPUT_TEXTFILE="")
@@ -414,7 +397,7 @@ def cb_injection_handler(url, timesec, filename, http_request_method, injection_
                         print(settings.command_execution_output(shell))
                         print(settings.SINGLE_WHITESPACE)
                       else:
-                        if settings.VERBOSITY_LEVEL == 1:
+                        if settings.VERBOSITY_LEVEL == 1 or (len(cmd) == 0 and settings.VERBOSITY_LEVEL <= 1):
                           print(settings.SINGLE_WHITESPACE)
                         err_msg = "The '" + cmd + "' command, does not return any output."
                         print(settings.print_critical_msg(err_msg))
