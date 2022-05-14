@@ -169,7 +169,7 @@ def input_cmd(http_request_method, url, vuln_parameter, ip_src, technique):
             # Command execution results.
             cmd_exec(http_request_method, cmd, url, vuln_parameter, ip_src)
         except KeyboardInterrupt:
-          os._exit(1)
+          os._exit(0)
         except:
           print(settings.SINGLE_WHITESPACE)
           os._exit(0)

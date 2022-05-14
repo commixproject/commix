@@ -230,7 +230,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.5"
-REVISION = "61"
+REVISION = "62"
 STABLE_RELEASE = False
 if STABLE_RELEASE:
   VERSION = "v" + VERSION_NUM + "-stable"
@@ -1130,8 +1130,8 @@ REDIRECT_CODE = ""
 # Base64 padding
 BASE64_PADDING = "=="
 
-# Crawling state
-CRAWLING = False
+# Crawling phase
+CRAWLING = CRAWLING_PHASE = False
 CRAWLED_SKIPPED_URLS_NUM = 0
 CRAWLED_URLS_NUM = 0
 

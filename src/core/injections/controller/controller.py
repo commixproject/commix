@@ -352,43 +352,42 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
   else:
     info_msg += str(the_type) + str(header_name) + str(check_parameter) + " for tests."
   print(settings.print_info_msg(info_msg))
-  
-  if not settings.LOAD_SESSION:
-    if menu.options.skip_heuristics:
-      if settings.VERBOSITY_LEVEL != 0:   
-        debug_msg = "Skipping heuristic (basic) tests to the target URL."
-        print(settings.print_debug_msg(debug_msg))
-    else:
-      decoded_value, decoded_with = checks.recognise_payload(payload=settings.TESTABLE_VALUE)
-      if settings.TESTABLE_VALUE != decoded_value and len(decoded_with) != 0:
-        warn_msg = "The provided parameter appears to be '" + str(decoded_with) + "' encoded."
-        print(settings.print_warning_msg(warn_msg))
-      checks.tamper_scripts(stored_tamper_scripts=False)
-      if settings.VERBOSITY_LEVEL != 0:    
-        debug_msg = "Performing heuristic (basic) tests to the target URL."
-        print(settings.print_debug_msg(debug_msg))
-      url = command_injection_heuristic_basic(url, http_request_method, check_parameter, the_type, header_name, inject_http_headers)
 
-      if (len(menu.options.tech) == 0 or "e" in menu.options.tech) and not settings.IDENTIFIED_COMMAND_INJECTION:
-        # Check for identified warnings
-        url = code_injections_heuristic_basic(url, http_request_method, check_parameter, the_type, header_name, inject_http_headers)
-        if settings.IDENTIFIED_WARNINGS or settings.IDENTIFIED_PHPINFO:
-          while True:
-            message = "Skipping of further command injection tests is recommended. "
-            message += "Do you agree? [Y/n] > "
-            procced_option = common.read_input(message, default="Y", check_batch=True)
-            if procced_option in settings.CHOICE_YES:
-              settings.CLASSIC_STATE = settings.TIME_BASED_STATE = settings.FILE_BASED_STATE = False
-              settings.EVAL_BASED_STATE = settings.SKIP_COMMAND_INJECTIONS = True
-              break
-            elif procced_option in settings.CHOICE_NO:
-              break
-            elif procced_option in settings.CHOICE_QUIT:
-              raise SystemExit()
-            else:
-              err_msg = "'" + procced_option + "' is not a valid answer."  
-              print(settings.print_error_msg(err_msg))
-              pass
+  if menu.options.skip_heuristics:
+    if settings.VERBOSITY_LEVEL != 0:   
+      debug_msg = "Skipping heuristic (basic) tests to the target URL."
+      print(settings.print_debug_msg(debug_msg))
+  else:
+    decoded_value, decoded_with = checks.recognise_payload(payload=settings.TESTABLE_VALUE)
+    if settings.TESTABLE_VALUE != decoded_value and len(decoded_with) != 0:
+      warn_msg = "The provided parameter appears to be '" + str(decoded_with) + "' encoded."
+      print(settings.print_warning_msg(warn_msg))
+    checks.tamper_scripts(stored_tamper_scripts=False)
+    if settings.VERBOSITY_LEVEL != 0:    
+      debug_msg = "Performing heuristic (basic) tests to the target URL."
+      print(settings.print_debug_msg(debug_msg))
+    url = command_injection_heuristic_basic(url, http_request_method, check_parameter, the_type, header_name, inject_http_headers)
+
+    if (len(menu.options.tech) == 0 or "e" in menu.options.tech) and not settings.IDENTIFIED_COMMAND_INJECTION:
+      # Check for identified warnings
+      url = code_injections_heuristic_basic(url, http_request_method, check_parameter, the_type, header_name, inject_http_headers)
+      if settings.IDENTIFIED_WARNINGS or settings.IDENTIFIED_PHPINFO:
+        while True:
+          message = "Skipping of further command injection tests is recommended. "
+          message += "Do you agree? [Y/n] > "
+          procced_option = common.read_input(message, default="Y", check_batch=True)
+          if procced_option in settings.CHOICE_YES:
+            settings.CLASSIC_STATE = settings.TIME_BASED_STATE = settings.FILE_BASED_STATE = False
+            settings.EVAL_BASED_STATE = settings.SKIP_COMMAND_INJECTIONS = True
+            break
+          elif procced_option in settings.CHOICE_NO:
+            break
+          elif procced_option in settings.CHOICE_QUIT:
+            raise SystemExit()
+          else:
+            err_msg = "'" + procced_option + "' is not a valid answer."  
+            print(settings.print_error_msg(err_msg))
+            pass
 
       if not settings.IDENTIFIED_COMMAND_INJECTION and not settings.IDENTIFIED_WARNINGS and not settings.IDENTIFIED_PHPINFO:
         warn_msg = "Heuristic (basic) tests shows that" + header_name

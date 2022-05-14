@@ -463,9 +463,7 @@ def main(filename, url):
             checks.check_wrong_flags() 
           else:
             found_os_server = checks.user_defined_os()
-        except KeyError:
-          pass
-        except AttributeError:
+        except (KeyError, AttributeError):
           pass
         # Load tamper scripts
         if menu.options.tamper:
@@ -778,86 +776,89 @@ try:
         filename = logs.logs_filename_creation(url)
         main(filename, url)
 
-    # Check if option is "-m" for multiple urls test.
-    if menu.options.bulkfile:
-      bulkfile = menu.options.bulkfile
-      info_msg = "Parsing targets using the '" + os.path.split(bulkfile)[1] + "' file. "
-      sys.stdout.write(settings.print_info_msg(info_msg))
-      sys.stdout.flush()
-      if not os.path.exists(bulkfile):
-        print(settings.SINGLE_WHITESPACE)
-        err_msg = "It seems that the '" + os.path.split(bulkfile)[1] + "' file, does not exist."
-        sys.stdout.write(settings.print_critical_msg(err_msg) + "\n")
-        sys.stdout.flush()
-        raise SystemExit()
-      elif os.stat(bulkfile).st_size == 0:
-        print(settings.SINGLE_WHITESPACE)
-        err_msg = "It seems that the '" + os.path.split(bulkfile)[1] + "' file, is empty."
-        sys.stdout.write(settings.print_critical_msg(err_msg) + "\n")
-        sys.stdout.flush()
-        raise SystemExit()
-      else:
-        settings.MULTI_TARGETS = True
-        print(settings.SINGLE_WHITESPACE)
-        with open(menu.options.bulkfile) as f:
-          bulkfile = [url.strip() for url in f]
-
-    # Check if option "--crawl" is enabled.
-    if settings.CRAWLING:
-      output_href = []
-      url_num = 1
-      if not menu.options.bulkfile:
-        crawling_list = 1
-        output_href = crawler.crawler(url, url_num, crawling_list)
-        output_href.append(url)
-      else:
-        crawling_list = len(bulkfile)
-        for url in bulkfile:
-          output_href += (crawler.crawler(url, url_num, crawling_list))
-          url_num += 1
-        output_href = output_href + bulkfile
-        output_href = [x for x in output_href if x not in settings.HREF_SKIPPED]
-      output_href = crawler.normalize_results(output_href)
     else:
-      output_href = []
-      output_href = output_href + bulkfile
-      filename = None
-    # Removing duplicates from list.
-    clean_output_href = []
-    [clean_output_href.append(x) for x in output_href if x not in clean_output_href]
-    # Removing empty elements from list.
-    clean_output_href = [x for x in clean_output_href if x]
-    if len(output_href) >= 0:
-      if filename is not None:
-        filename = crawler.store_crawling(output_href)
-      info_msg = "Found a total of " + str(len(clean_output_href)) + " target"+ "s"[len(clean_output_href) == 1:] + "."
-      print(settings.print_info_msg(info_msg))
-    url_num = 0
-    for url in clean_output_href:
-      if (settings.CRAWLING and re.search(r"(.*?)\?(.+)", url)) or settings.MULTI_TARGETS:
-        url_num += 1
-        print(settings.print_message("[" + str(url_num) + "/" + str(len(clean_output_href)) + "] URL - " + url) + "")
-        message = "Do you want to use URL #" + str(url_num) + " to perform tests? [Y/n] > "
-        message = common.read_input(message, default="Y", check_batch=True)
-        if message in settings.CHOICE_YES:
-          settings.INIT_TEST = True
-          if url == clean_output_href[-1]:
-            settings.EOF = True
-          # Reset the injection level
-          if menu.options.level > 3:
-            menu.options.level = 1
-          init_injection(url)
-          try:
-            response, url = url_response(url)
-            if response != False:
-              filename = logs.logs_filename_creation(url)
-              main(filename, url)
-          except:
-            pass 
-        elif message in settings.CHOICE_NO:
-          pass 
-        elif message in settings.CHOICE_QUIT:
+      # Check if option is "-m" for multiple urls test.
+      if menu.options.bulkfile:
+        bulkfile = menu.options.bulkfile
+        info_msg = "Parsing targets using the '" + os.path.split(bulkfile)[1] + "' file. "
+        sys.stdout.write(settings.print_info_msg(info_msg))
+        sys.stdout.flush()
+        if not os.path.exists(bulkfile):
+          print(settings.SINGLE_WHITESPACE)
+          err_msg = "It seems that the '" + os.path.split(bulkfile)[1] + "' file, does not exist."
+          sys.stdout.write(settings.print_critical_msg(err_msg) + "\n")
+          sys.stdout.flush()
           raise SystemExit()
+        elif os.stat(bulkfile).st_size == 0:
+          print(settings.SINGLE_WHITESPACE)
+          err_msg = "It seems that the '" + os.path.split(bulkfile)[1] + "' file, is empty."
+          sys.stdout.write(settings.print_critical_msg(err_msg) + "\n")
+          sys.stdout.flush()
+          raise SystemExit()
+        else:
+          settings.MULTI_TARGETS = True
+          print(settings.SINGLE_WHITESPACE)
+          with open(menu.options.bulkfile) as f:
+            bulkfile = [url.strip() for url in f]
+
+      # Check if option "--crawl" is enabled.
+      if settings.CRAWLING:
+        settings.CRAWLING_PHASE = True
+        output_href = []
+        url_num = 1
+        if not menu.options.bulkfile:
+          crawling_list = 1
+          output_href = crawler.crawler(url, url_num, crawling_list)
+          output_href.append(url)
+        else:
+          crawling_list = len(bulkfile)
+          for url in bulkfile:
+            output_href += (crawler.crawler(url, url_num, crawling_list))
+            url_num += 1
+          output_href = output_href + bulkfile
+          output_href = [x for x in output_href if x not in settings.HREF_SKIPPED]
+        output_href = crawler.normalize_results(output_href)
+        settings.CRAWLING_PHASE = False
+      else:
+        output_href = []
+        output_href = output_href + bulkfile
+        filename = None
+      # Removing duplicates from list.
+      clean_output_href = []
+      [clean_output_href.append(x) for x in output_href if x not in clean_output_href]
+      # Removing empty elements from list.
+      clean_output_href = [x for x in clean_output_href if x]
+      if len(output_href) >= 0:
+        if filename is not None:
+          filename = crawler.store_crawling(output_href)
+        info_msg = "Found a total of " + str(len(clean_output_href)) + " target"+ "s"[len(clean_output_href) == 1:] + "."
+        print(settings.print_info_msg(info_msg))
+      url_num = 0
+      for url in clean_output_href:
+        if (settings.CRAWLING and re.search(r"(.*?)\?(.+)", url)) or settings.MULTI_TARGETS:
+          url_num += 1
+          print(settings.print_message("[" + str(url_num) + "/" + str(len(clean_output_href)) + "] URL - " + url) + "")
+          message = "Do you want to use URL #" + str(url_num) + " to perform tests? [Y/n] > "
+          message = common.read_input(message, default="Y", check_batch=True)
+          if message in settings.CHOICE_YES:
+            settings.INIT_TEST = True
+            if url == clean_output_href[-1]:
+              settings.EOF = True
+            # Reset the injection level
+            if menu.options.level > 3:
+              menu.options.level = 1
+            init_injection(url)
+            try:
+              response, url = url_response(url)
+              if response != False:
+                filename = logs.logs_filename_creation(url)
+                main(filename, url)
+            except:
+              pass 
+          elif message in settings.CHOICE_NO:
+            pass 
+          elif message in settings.CHOICE_QUIT:
+            raise SystemExit()
 
 except KeyboardInterrupt:
   try:

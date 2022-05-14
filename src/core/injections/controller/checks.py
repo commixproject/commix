@@ -392,8 +392,11 @@ def check_connection(url):
 Check current assessment phase.
 """
 def assessment_phase():
-  if settings.DETECTION_PHASE: 
-    return "detection"
+  if settings.DETECTION_PHASE:
+    if settings.CRAWLING_PHASE:
+      return "crawling"
+    else:
+      return "detection"
   else:
     return "exploitation"
 
