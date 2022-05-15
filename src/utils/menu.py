@@ -708,23 +708,6 @@ Type '""" + Style.BRIGHT + """9""" + Style.RESET_ALL + """' for Nokia N97.
 Type '""" + Style.BRIGHT + """10""" + Style.RESET_ALL + """' for Google Pixel".
 Type '""" + Style.BRIGHT + """11""" + Style.RESET_ALL + """' for Xiaomi Mi 3.""")
 
-    while True:
-      message = "Which smartphone do you want to imitate through HTTP User-Agent header? "
-      mobile_user_agent = common.read_input(message, default=None, check_batch=True)
-      try:
-        if int(mobile_user_agent) in range(0,len(settings.MOBILE_USER_AGENT_LIST)):
-          return settings.MOBILE_USER_AGENT_LIST[int(mobile_user_agent)]
-        elif mobile_user_agent.lower() == "q":
-          raise SystemExit()
-        else:
-          err_msg = "'" + mobile_user_agent + "' is not a valid answer."  
-          print(settings.print_error_msg(err_msg))
-          pass
-      except ValueError:
-        err_msg = "'" + mobile_user_agent + "' is not a valid answer."  
-        print(settings.print_error_msg(err_msg))
-        pass     
-
 """
 The tab compliter (shell options).
 """

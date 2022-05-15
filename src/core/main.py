@@ -59,6 +59,26 @@ if settings.IS_WINDOWS:
   # Use Colorama to make Termcolor work on Windows too :)
   init()
 
+"""
+Check for HTTP Method
+"""
+def check_http_method(url):
+  # Check for HTTP Method
+  if len(settings.HTTP_METHOD) != 0:
+    http_request_method = settings.HTTP_METHOD.upper()
+  else:
+    if not menu.options.data or \
+       not settings.WILDCARD_CHAR is None and settings.WILDCARD_CHAR in url or \
+       settings.INJECT_TAG in url or \
+       [x for x in settings.TEST_PARAMETER if(x + "=" in url and not x in menu.options.data)]:
+      http_request_method = settings.HTTPMETHOD.GET
+    else:
+      http_request_method = settings.HTTPMETHOD.POST
+
+  if menu.options.offline:
+    settings.CHECK_FOR_UPDATES_ON_START = False
+
+  return http_request_method    
 
 """
 Define HTTP User-Agent header.
@@ -67,18 +87,20 @@ def user_agent_header():
   # Check if defined "--mobile" option.
   if menu.options.mobile:
     if ((menu.options.agent != settings.DEFAULT_USER_AGENT) and not menu.options.requestfile) or menu.options.random_agent:
-      err_msg = "The switch '--mobile' is incompatible with option '--user-agent' or switch '--random-agent'."
-      print(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+      if not settings.MULTI_TARGETS or settings.IS_TTY:
+        err_msg = "The switch '--mobile' is incompatible with option '--user-agent' or switch '--random-agent'."
+        print(settings.print_critical_msg(err_msg))
+        raise SystemExit()
     else:
-      menu.options.agent = menu.mobile_user_agents()
+      menu.options.agent = checks.mobile_user_agents()
 
   # Check if defined "--random-agent" option.
   if menu.options.random_agent:
     if ((menu.options.agent != settings.DEFAULT_USER_AGENT) and not menu.options.requestfile) or menu.options.mobile:
-      err_msg = "The switch '--random-agent' is incompatible with option '--user-agent' or switch '--mobile'."
-      print(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+      if not settings.MULTI_TARGETS or settings.IS_TTY:
+        err_msg = "The switch '--random-agent' is incompatible with option '--user-agent' or switch '--mobile'."
+        print(settings.print_critical_msg(err_msg))
+        raise SystemExit()
     else:
       if settings.VERBOSITY_LEVEL != 0:
         debug_msg = "Fetching random HTTP User-Agent header. "  
@@ -97,7 +119,6 @@ def user_agent_header():
   if settings.VERBOSITY_LEVEL != 0:
     debug_msg = "Setting the HTTP User-Agent header."
     print(settings.print_debug_msg(debug_msg))
-
 """
 Examine the request
 """
@@ -496,6 +517,7 @@ def main(filename, url):
 
 try:
   filename = ""
+
   # Check if defined "--version" option.
   if menu.options.version:
     version.show_version()
@@ -549,8 +571,11 @@ try:
       install.installer()
       raise SystemExit()
 
+    if not sys.stdin.isatty():
+      settings.IS_TTY = False
+        
     # Check for missing mandatory option(s).
-    if not any((menu.options.url, menu.options.logfile, menu.options.bulkfile, \
+    if settings.IS_TTY and not any((menu.options.url, menu.options.logfile, menu.options.bulkfile, \
                 menu.options.requestfile, menu.options.sitemap_url, menu.options.wizard, \
                 menu.options.update, menu.options.list_tampers, menu.options.purge, menu.options.noncore_dependencies)):
       err_msg = "Missing a mandatory option (-u, -l, -m, -r, -x, --wizard, --update, --list-tampers, --purge or --dependencies). "
@@ -636,7 +661,7 @@ try:
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
 
-    if menu.options.wizard:
+    if menu.options.wizard and settings.IS_TTY:
       if not menu.options.url:
         while True:
           message = "Please enter full target URL (-u) > "
@@ -677,7 +702,7 @@ try:
       settings.CRAWLING = True
 
     # Check arguments
-    if len(sys.argv) == 1:
+    if len(sys.argv) == 1 and settings.IS_TTY:
       menu.parser.print_help()
       print(settings.SINGLE_WHITESPACE)
       raise SystemExit()
@@ -743,21 +768,6 @@ try:
     elif menu.options.requestfile or menu.options.logfile:
       parser.logfile_parser()
 
-    # Check for HTTP Method
-    if len(settings.HTTP_METHOD) != 0:
-      http_request_method = settings.HTTP_METHOD.upper()
-    else:
-      if not menu.options.data or \
-         not settings.WILDCARD_CHAR is None and settings.WILDCARD_CHAR in menu.options.url or \
-         settings.INJECT_TAG in menu.options.url or \
-         [x for x in settings.TEST_PARAMETER if(x + "=" in menu.options.url and not x in menu.options.data)]:
-        http_request_method = settings.HTTPMETHOD.GET
-      else:
-        http_request_method = settings.HTTPMETHOD.POST
-
-    if menu.options.offline:
-      settings.CHECK_FOR_UPDATES_ON_START = False
-      
     # Check if ".git" exists and check for updated version!
     if os.path.isdir("./.git") and settings.CHECK_FOR_UPDATES_ON_START:
       update.check_for_update()
@@ -768,7 +778,8 @@ try:
     else:  
       url = menu.options.url
 
-    if not menu.options.bulkfile and not settings.CRAWLING:
+    if settings.IS_TTY and not menu.options.bulkfile and not settings.CRAWLING:
+      http_request_method  = check_http_method(url)
       if os_checks_num == 0:
         settings.INIT_TEST = True
       response, url = url_response(url)
@@ -800,9 +811,9 @@ try:
           print(settings.SINGLE_WHITESPACE)
           with open(menu.options.bulkfile) as f:
             bulkfile = [url.strip() for url in f]
-
+      
       # Check if option "--crawl" is enabled.
-      if settings.CRAWLING:
+      if settings.CRAWLING and settings.IS_TTY:
         settings.CRAWLING_PHASE = True
         output_href = []
         url_num = 1
@@ -821,20 +832,32 @@ try:
         settings.CRAWLING_PHASE = False
       else:
         output_href = []
-        output_href = output_href + bulkfile
-        filename = None
+        if settings.IS_TTY:
+          output_href = output_href + bulkfile
+          filename = None
+        else:    
+          info_msg = "Using 'stdin' for parsing targets list."
+          print(settings.print_info_msg(info_msg))
+          menu.options.batch = True
+          bulkfile = sys.stdin
+          settings.MULTI_TARGETS = True
+          for line in bulkfile:
+            if re.search(r"\b(https?://[^\s'\"]+|[\w.]+\.\w{2,3}[/\w+]*\?[^\s'\"]+)", line, re.I):
+              output_href.append(line.rstrip())
+
       # Removing duplicates from list.
       clean_output_href = []
       [clean_output_href.append(x) for x in output_href if x not in clean_output_href]
       # Removing empty elements from list.
       clean_output_href = [x for x in clean_output_href if x]
-      if len(output_href) >= 0:
+      if len(output_href) >= 0 and settings.IS_TTY:
         if filename is not None:
           filename = crawler.store_crawling(output_href)
         info_msg = "Found a total of " + str(len(clean_output_href)) + " target"+ "s"[len(clean_output_href) == 1:] + "."
         print(settings.print_info_msg(info_msg))
       url_num = 0
       for url in clean_output_href:
+        http_request_method = check_http_method(url)
         if (settings.CRAWLING and re.search(r"(.*?)\?(.+)", url)) or settings.MULTI_TARGETS:
           url_num += 1
           print(settings.print_message("[" + str(url_num) + "/" + str(len(clean_output_href)) + "] URL - " + url) + "")

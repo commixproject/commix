@@ -601,7 +601,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                     if not settings.READLINE_ERROR:
                       checks.tab_autocompleter()
                     sys.stdout.write(settings.OS_SHELL)
-                    cmd = common.read_input(message="", default=None, check_batch=True)
+                    cmd = common.read_input(message="", default="os_shell", check_batch=True)
                     cmd = checks.escaped_cmd(cmd)
                     if cmd.lower() in settings.SHELL_OPTIONS:
                       go_back, go_back_again = shell_options.check_option(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, technique, go_back, no_result, timesec, go_back_again, payload, OUTPUT_TEXTFILE)

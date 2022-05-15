@@ -335,6 +335,8 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                 raise
 
               except EOFError:
+                if not settings.IS_TTY:
+                  print(settings.SINGLE_WHITESPACE)
                 err_msg = "Exiting, due to EOFError."
                 print(settings.print_error_msg(err_msg))
                 if 'cmd' in locals():
@@ -529,7 +531,10 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                   if go_back == True:
                     break
                   message = "Do you want a Pseudo-Terminal shell? [Y/n] > "
-                  gotshell = common.read_input(message, default="Y", check_batch=True)
+                  if settings.IS_TTY:
+                    gotshell = common.read_input(message, default="Y", check_batch=True)
+                  else:
+                    gotshell = common.read_input(message, default="n", check_batch=True)
                   if gotshell in settings.CHOICE_YES:
                     print("Pseudo-Terminal (type '" + Style.BRIGHT + "?" + Style.RESET_ALL + "' for available options)")
                     if settings.READLINE_ERROR:
@@ -543,7 +548,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                       if not settings.READLINE_ERROR:
                         checks.tab_autocompleter()
                       sys.stdout.write(settings.OS_SHELL)
-                      cmd = common.read_input(message="", default=None, check_batch=True)
+                      cmd = common.read_input(message="", default="os_shell", check_batch=True)
                       cmd = checks.escaped_cmd(cmd)
                       if cmd.lower() in settings.SHELL_OPTIONS:
                         go_back, go_back_again = shell_options.check_option(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, technique, go_back, no_result, timesec, go_back_again, payload, OUTPUT_TEXTFILE="")
@@ -599,6 +604,8 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                 raise 
   
               except EOFError:
+                if not settings.IS_TTY:
+                  print(settings.SINGLE_WHITESPACE)
                 err_msg = "Exiting, due to EOFError."
                 print(settings.print_error_msg(err_msg))
                 # Delete previous shell (text) files (output) from temp.

@@ -841,8 +841,9 @@ def do_check(url, http_request_method, filename):
         err_msg += "."
         print(settings.print_critical_msg(err_msg))
 
+    logs.print_logs_notification(filename, url)
     if not settings.MULTI_TARGETS:
-      logs.print_logs_notification(filename, url)
+      print(settings.SINGLE_WHITESPACE)
 
     if not settings.CHECK_BOTH_OS and not settings.MULTI_TARGETS:
       raise SystemExit()

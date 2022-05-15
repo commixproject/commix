@@ -54,6 +54,28 @@ except:
     settings.READLINE_ERROR = True
 
 """
+The available mobile user agents.
+"""
+def mobile_user_agents():
+  menu.mobile_user_agents()
+  while True:
+    message = "Which smartphone do you want to imitate through HTTP User-Agent header? > "
+    mobile_user_agent = common.read_input(message, default="1", check_batch=True)
+    try:
+      if int(mobile_user_agent) in range(1,len(settings.MOBILE_USER_AGENT_LIST)):
+        return settings.MOBILE_USER_AGENT_LIST[int(mobile_user_agent)]
+      elif mobile_user_agent.lower() == "q":
+        raise SystemExit()
+      else:
+        err_msg = "'" + mobile_user_agent + "' is not a valid answer."  
+        print(settings.print_error_msg(err_msg))
+        pass
+    except ValueError:
+      err_msg = "'" + mobile_user_agent + "' is not a valid answer."  
+      print(settings.print_error_msg(err_msg))
+      pass     
+
+"""
 User aborted procedure
 """
 def user_aborted(filename, url):
