@@ -840,7 +840,7 @@ def do_check(url, http_request_method, filename):
           err_msg += " and/or remove the option '--skip-empty'"  
         err_msg += "."
         print(settings.print_critical_msg(err_msg))
-
+        
     logs.print_logs_notification(filename, url)
     if not settings.MULTI_TARGETS:
       print(settings.SINGLE_WHITESPACE)

@@ -63,7 +63,6 @@ if settings.IS_WINDOWS:
 Check for HTTP Method
 """
 def check_http_method(url):
-  # Check for HTTP Method
   if len(settings.HTTP_METHOD) != 0:
     http_request_method = settings.HTTP_METHOD.upper()
   else:
@@ -79,6 +78,7 @@ def check_http_method(url):
     settings.CHECK_FOR_UPDATES_ON_START = False
 
   return http_request_method    
+
 
 """
 Define HTTP User-Agent header.
@@ -543,10 +543,10 @@ try:
   if menu.options.smoke_test:
     smoke_test()
 
-  if not menu.options.batch:
+  if not settings.IS_TTY or settings.CRAWLING or menu.options.bulkfile:
     settings.OS_CHECKS_NUM = 1
-  for os_checks_num in range(0, int(settings.OS_CHECKS_NUM)):
 
+  for os_checks_num in range(0, int(settings.OS_CHECKS_NUM)):
     # Check if defined "--list-tampers" option.
     if menu.options.list_tampers:
       checks.list_tamper_scripts()
@@ -832,9 +832,9 @@ try:
         settings.CRAWLING_PHASE = False
       else:
         output_href = []
+        filename = None
         if settings.IS_TTY:
           output_href = output_href + bulkfile
-          filename = None
         else:    
           info_msg = "Using 'stdin' for parsing targets list."
           print(settings.print_info_msg(info_msg))
@@ -850,21 +850,22 @@ try:
       [clean_output_href.append(x) for x in output_href if x not in clean_output_href]
       # Removing empty elements from list.
       clean_output_href = [x for x in clean_output_href if x]
-      if len(output_href) >= 0 and settings.IS_TTY:
+      if len(output_href) != 0 and settings.IS_TTY:
         if filename is not None:
           filename = crawler.store_crawling(output_href)
         info_msg = "Found a total of " + str(len(clean_output_href)) + " target"+ "s"[len(clean_output_href) == 1:] + "."
         print(settings.print_info_msg(info_msg))
       url_num = 0
       for url in clean_output_href:
-        http_request_method = check_http_method(url)
+        http_request_method  = check_http_method(url)
         if (settings.CRAWLING and re.search(r"(.*?)\?(.+)", url)) or settings.MULTI_TARGETS:
           url_num += 1
           print(settings.print_message("[" + str(url_num) + "/" + str(len(clean_output_href)) + "] URL - " + url) + "")
           message = "Do you want to use URL #" + str(url_num) + " to perform tests? [Y/n] > "
           message = common.read_input(message, default="Y", check_batch=True)
           if message in settings.CHOICE_YES:
-            settings.INIT_TEST = True
+            if os_checks_num == 0:
+              settings.INIT_TEST = True
             if url == clean_output_href[-1]:
               settings.EOF = True
             # Reset the injection level

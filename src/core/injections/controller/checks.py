@@ -101,7 +101,7 @@ def connection_exceptions(err_msg, url):
       error_msg = str(err_msg)
   if settings.TOTAL_OF_REQUESTS == 1 and settings.VERBOSITY_LEVEL < 2 and not settings.CRAWLING:
     print(settings.SINGLE_WHITESPACE)
-  if "wrong version number" in str(error_msg).lower():
+  if any(x in str(error_msg).lower() for x in ["wrong version number", "ssl", "https"]):
     settings.MAX_RETRIES = 1
     error_msg = "Can't establish SSL connection"
   elif "connection refused" in str(error_msg).lower():
@@ -145,7 +145,7 @@ def connection_exceptions(err_msg, url):
     _ = " Skipping URL '" + str(url) + "'."
   if settings.MULTI_TARGETS or settings.CRAWLING:
     error_msg = error_msg + _
-  if len(_) != 0 or (not settings.MULTI_TARGETS and not settings.CRAWLING):
+  if len(_) != 0 or not settings.MULTI_TARGETS or not settings.CRAWLING:
     print(settings.print_critical_msg(error_msg))
   settings.TOTAL_OF_REQUESTS = settings.TOTAL_OF_REQUESTS + 1
   if settings.MAX_RETRIES > 1:
@@ -1109,7 +1109,7 @@ def whitespace_check(payload):
 
   # Enable the "multiplespaces" tamper script.
   count_spaces = payload.count(settings.WHITESPACES[0])
-  if count_spaces >= 5:
+  if count_spaces > 15:
     if menu.options.tamper:
       menu.options.tamper = menu.options.tamper + ",multiplespaces"
     else:

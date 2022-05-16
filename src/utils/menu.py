@@ -19,7 +19,6 @@ from src.utils import settings
 from optparse import OptionGroup
 from optparse import OptionParser
 from optparse import SUPPRESS_HELP as SUPPRESS
-from src.utils import common
 from src.thirdparty.six.moves import input as _input
 from src.thirdparty.colorama import Fore, Back, Style, init
 
