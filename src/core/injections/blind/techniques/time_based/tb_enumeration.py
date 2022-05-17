@@ -410,12 +410,12 @@ def system_users(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timese
                 else :
                   is_privileged = ""
                   is_privileged_nh = ""
-                sys.stdout.write("\n    (" +str(count)+ ") '" + Style.BRIGHT +  fields[0] + Style.RESET_ALL + "'" + Style.BRIGHT + is_privileged + Style.RESET_ALL + "(uid=" + fields[1] + "). Home directory is in '" + Style.BRIGHT + fields[2]+ Style.RESET_ALL + "'.")
+                sys.stdout.write("\n" + settings.SUB_CONTENT_SIGN + "(" +str(count)+ ") '" + Style.BRIGHT +  fields[0] + Style.RESET_ALL + "'" + Style.BRIGHT + is_privileged + Style.RESET_ALL + "(uid=" + fields[1] + "). Home directory is in '" + Style.BRIGHT + fields[2]+ Style.RESET_ALL + "'.")
                 sys.stdout.flush()
                 # Add infos to logs file.   
                 output_file = open(filename, "a")
                 if not menu.options.no_logging:
-                  output_file.write("    (" +str(count)+ ") '" + fields[0]+ "'" + is_privileged_nh + "(uid=" + fields[1] + "). Home directory is in '" + fields[2] + "'.\n" )
+                  output_file.write("" + settings.SUB_CONTENT_SIGN + "(" +str(count)+ ") '" + fields[0]+ "'" + is_privileged_nh + "(uid=" + fields[1] + "). Home directory is in '" + fields[2] + "'.\n" )
                 output_file.close()
               except ValueError:
                 if count == 1 :
@@ -497,7 +497,7 @@ def system_passwords(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, ti
                 # Add infos to logs file.   
                 output_file = open(filename, "a")
                 if not menu.options.no_logging:
-                  output_file.write("    (" +str(count)+ ") '" + fields[0] + " : " + fields[1])
+                  output_file.write("" + settings.SUB_CONTENT_SIGN + "(" +str(count)+ ") '" + fields[0] + " : " + fields[1])
                 output_file.close()
           # Check for appropriate '/etc/shadow' format.
           except IndexError:

@@ -260,11 +260,11 @@ def enumeration(url, cve, check_header, filename):
                 else :
                   is_privileged = ""
                   is_privileged_nh = ""
-                print("    (" +str(count)+ ") '" + Style.BRIGHT +  fields[0]+ Style.RESET_ALL + "'" + Style.BRIGHT + is_privileged + Style.RESET_ALL + "(uid=" + fields[1] + "). Home directory is in '" + Style.BRIGHT + fields[2]+ Style.RESET_ALL + "'.") 
+                print("" + settings.SUB_CONTENT_SIGN + "(" +str(count)+ ") '" + Style.BRIGHT +  fields[0]+ Style.RESET_ALL + "'" + Style.BRIGHT + is_privileged + Style.RESET_ALL + "(uid=" + fields[1] + "). Home directory is in '" + Style.BRIGHT + fields[2]+ Style.RESET_ALL + "'.") 
                 # Add infos to logs file.   
                 output_file = open(filename, "a")
                 if not menu.options.no_logging:
-                  output_file.write("    (" +str(count)+ ") '" + fields[0]+ "'" + is_privileged_nh + "(uid=" + fields[1] + "). Home directory is in '" + fields[2] + "'.\n" )
+                  output_file.write("" + settings.SUB_CONTENT_SIGN + "(" +str(count)+ ") '" + fields[0]+ "'" + is_privileged_nh + "(uid=" + fields[1] + "). Home directory is in '" + fields[2] + "'.\n" )
                 output_file.close()
               except ValueError:
                 if count == 1 :
@@ -331,11 +331,11 @@ def enumeration(url, cve, check_header, filename):
             if ":" in line:
               fields = line.split(":")
               if not "*" in fields[1] and not "!" in fields[1] and fields[1] != "":
-                print("    (" +str(count)+ ") " + Style.BRIGHT + fields[0]+ Style.RESET_ALL + " : " + Style.BRIGHT + fields[1] + Style.RESET_ALL)
+                print("" + settings.SUB_CONTENT_SIGN + "(" +str(count)+ ") " + Style.BRIGHT + fields[0]+ Style.RESET_ALL + " : " + Style.BRIGHT + fields[1] + Style.RESET_ALL)
                 # Add infos to logs file.   
                 output_file = open(filename, "a")
                 if not menu.options.no_logging:
-                  output_file.write("    (" +str(count)+ ") " + fields[0] + " : " + fields[1] + "\n")
+                  output_file.write("" + settings.SUB_CONTENT_SIGN + "(" +str(count)+ ") " + fields[0] + " : " + fields[1] + "\n")
                 output_file.close()
           # Check for appropriate (/etc/shadow) format
           except IndexError:

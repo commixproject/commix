@@ -20,6 +20,7 @@ import time
 import random
 import string
 import codecs
+from datetime import datetime
 from src.core.compat import xrange
 from src.thirdparty.six.moves import urllib as _urllib
 from src.thirdparty.six.moves import reload_module as _reload_module
@@ -56,7 +57,7 @@ ERROR_SIGN = "[" + Fore.RED + "error" + Style.RESET_ALL  + "] "
 ERROR_BOLD_SIGN = "["  + Style.BRIGHT + Fore.RED + "error" + Style.RESET_ALL  + "] " 
 CRITICAL_SIGN = "[" + Back.RED + "critical" + Style.RESET_ALL  + "] "
 PAYLOAD_SIGN = "[" + Fore.CYAN + "payload" + Style.RESET_ALL + "] " 
-SUB_CONTENT_SIGN = " " * 7 + Fore.GREY + "|_ " + Style.RESET_ALL
+SUB_CONTENT_SIGN = " " * 11 + Fore.GREY + "|_ " + Style.RESET_ALL
 TRAFFIC_SIGN = HTTP_CONTENT_SIGN = ""
 ABORTION_SIGN = ERROR_SIGN 
 DEBUG_SIGN = "[" + Back.BLUE + Fore.WHITE + "debug" + Style.RESET_ALL + "] " 
@@ -66,64 +67,77 @@ OS_SHELL = """commix(""" + Style.BRIGHT + Fore.RED + """os_shell""" + Style.RESE
 REVERSE_TCP_SHELL = """commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp""" + Style.RESET_ALL + """) > """
 BIND_TCP_SHELL = """commix(""" + Style.BRIGHT + Fore.RED + """bind_tcp""" + Style.RESET_ALL + """) > """
 
-# Print error message
-def print_error_msg(err_msg):
-  result = ERROR_SIGN + str(err_msg) + Style.RESET_ALL
-  return result
-
-# Print error message
-def print_bold_error_msg(err_msg):
-  result = ERROR_BOLD_SIGN + Style.BRIGHT + str(err_msg) + Style.RESET_ALL
-  return result
-
-# Print critical error message
-def print_critical_msg(err_msg):
-  result = CRITICAL_SIGN + str(err_msg) + Style.RESET_ALL
-  return result
-
-# Print abortion message
-def print_abort_msg(abort_msg):
-  result = ABORTION_SIGN + str(abort_msg) + Style.RESET_ALL
-  return result
-
-# Print warning message
-def print_warning_msg(warn_msg):
-  result = WARNING_SIGN + str(warn_msg) + Style.RESET_ALL
-  return result
-
-# Print warning message
-def print_bold_warning_msg(warn_msg):
-  result = WARNING_BOLD_SIGN + str(warn_msg) + Style.RESET_ALL
-  return result
+def print_time():
+  return "[" + Fore.LIGHTBLUE_EX  + datetime.now().strftime("%H:%M:%S") + Style.RESET_ALL + "] "
 
 # Print legal disclaimer message
 def print_legal_disclaimer_msg(legal_disclaimer_msg):
   result = LEGAL_DISCLAIMER + str(legal_disclaimer_msg) + Style.RESET_ALL
   return result
 
+# Print error message
+def print_error_msg(err_msg):
+  result = print_time() + ERROR_SIGN + str(err_msg) + Style.RESET_ALL
+  return result
+
+# Print error message
+def print_bold_error_msg(err_msg):
+  result = print_time() + ERROR_BOLD_SIGN + Style.BRIGHT + str(err_msg) + Style.RESET_ALL
+  return result
+
+# Print critical error message
+def print_critical_msg(err_msg):
+  result = print_time() + CRITICAL_SIGN + str(err_msg) + Style.RESET_ALL
+  return result
+
+# Print abortion message
+def print_abort_msg(abort_msg):
+  result = print_time() + ABORTION_SIGN + str(abort_msg) + Style.RESET_ALL
+  return result
+
+# Print warning message
+def print_warning_msg(warn_msg):
+  result = print_time() + WARNING_SIGN + str(warn_msg) + Style.RESET_ALL
+  return result
+
+# Print warning message
+def print_bold_warning_msg(warn_msg):
+  result = print_time() +  WARNING_BOLD_SIGN + str(warn_msg) + Style.RESET_ALL
+  return result
+
+# Print debug message (verbose mode)
+def print_debug_msg(debug_msg):
+  result = print_time() + DEBUG_SIGN + debug_msg + Style.RESET_ALL
+  return result  
+
+# Print bold debug message (verbose mode)
+def print_bold_debug_msg(debug_msg):
+  result = print_time() + DEBUG_BOLD_SIGN + debug_msg + Style.RESET_ALL
+  return result 
+
 # Print request HTTP message
 def print_request_msg(req_msg):
-  result = REQUEST_SIGN + str(req_msg) + Style.RESET_ALL
+  result = print_time() + REQUEST_SIGN + str(req_msg) + Style.RESET_ALL
   return result
 
 # Print response HTTP message
 def print_response_msg(resp_msg):
-  result = RESPONSE_SIGN + str(resp_msg) + Style.RESET_ALL
+  result = print_time() + RESPONSE_SIGN + str(resp_msg) + Style.RESET_ALL
   return result
 
 # Print information message
 def print_info_msg(info_msg):
-  result = INFO_SIGN + str(info_msg) + Style.RESET_ALL
+  result = print_time() + INFO_SIGN + str(info_msg) + Style.RESET_ALL
   return result
 
 # Print bold information message
 def print_bold_info_msg(info_msg):
-  result = INFO_BOLD_SIGN + Style.BRIGHT + str(info_msg) + Style.RESET_ALL
+  result =  print_time() + INFO_BOLD_SIGN + Style.BRIGHT + str(info_msg) + Style.RESET_ALL
   return result
 
 # Print payload (verbose mode)
 def print_payload(payload):
-  result = PAYLOAD_SIGN + str(payload) + Style.RESET_ALL
+  result = print_time() + PAYLOAD_SIGN + str(payload) + Style.RESET_ALL
   return result
 
 # Print HTTP traffic (verbose mode)
@@ -158,16 +172,6 @@ def print_message(message):
 def print_sub_content(sub_content):
   result = SUB_CONTENT_SIGN + sub_content + Style.RESET_ALL
   return result
-
-# Print debug message (verbose mode)
-def print_debug_msg(debug_msg):
-  result = DEBUG_SIGN + debug_msg + Style.RESET_ALL
-  return result  
-
-# Print bold debug message (verbose mode)
-def print_bold_debug_msg(debug_msg):
-  result = DEBUG_BOLD_SIGN + debug_msg + Style.RESET_ALL
-  return result  
 
 # Print output of command execution
 def command_execution_output(shell):
@@ -230,7 +234,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.5"
-REVISION = "64"
+REVISION = "65"
 STABLE_RELEASE = False
 if STABLE_RELEASE:
   VERSION = "v" + VERSION_NUM + "-stable"
