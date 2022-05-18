@@ -788,12 +788,14 @@ try:
         main(filename, url)
 
     else:
+      output_href = []
       # Check if option is "-m" for multiple urls test.
       if menu.options.bulkfile:
         bulkfile = menu.options.bulkfile
-        info_msg = "Parsing targets using the '" + os.path.split(bulkfile)[1] + "' file. "
-        sys.stdout.write(settings.print_info_msg(info_msg))
-        sys.stdout.flush()
+        if os_checks_num == 0:
+          info_msg = "Parsing targets using the '" + os.path.split(bulkfile)[1] + "' file. "
+          sys.stdout.write(settings.print_info_msg(info_msg))
+          sys.stdout.flush()
         if not os.path.exists(bulkfile):
           print(settings.SINGLE_WHITESPACE)
           err_msg = "It seems that the '" + os.path.split(bulkfile)[1] + "' file, does not exist."
@@ -815,7 +817,6 @@ try:
       # Check if option "--crawl" is enabled.
       if settings.CRAWLING and settings.IS_TTY:
         settings.CRAWLING_PHASE = True
-        output_href = []
         url_num = 1
         if not menu.options.bulkfile:
           crawling_list = 1
@@ -831,19 +832,19 @@ try:
         output_href = crawler.normalize_results(output_href)
         settings.CRAWLING_PHASE = False
       else:
-        output_href = []
         filename = None
         if settings.IS_TTY:
           output_href = output_href + bulkfile
-        else:    
-          info_msg = "Using 'stdin' for parsing targets list."
-          print(settings.print_info_msg(info_msg))
+        else:
+          if os_checks_num == 0:
+            info_msg = "Using 'stdin' for parsing targets list."
+            print(settings.print_info_msg(info_msg))
           menu.options.batch = True
           bulkfile = sys.stdin
           settings.MULTI_TARGETS = True
-          for line in bulkfile:
-            if re.search(r"\b(https?://[^\s'\"]+|[\w.]+\.\w{2,3}[/\w+]*\?[^\s'\"]+)", line, re.I):
-              output_href.append(line.rstrip())
+          for url in bulkfile:
+            if re.search(r"\b(https?://[^\s'\"]+|[\w.]+\.\w{2,3}[/\w+]*\?[^\s'\"]+)", url, re.I):
+              output_href.append(url.rstrip())
 
       # Removing duplicates from list.
       clean_output_href = []

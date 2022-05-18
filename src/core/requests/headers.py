@@ -193,7 +193,8 @@ def check_http_traffic(request):
       if not settings.MULTI_TARGETS and not settings.CRAWLING:
         pass
       else:
-        checks.connection_exceptions(err_msg, url=request)
+        if not settings.INIT_TEST:
+          checks.connection_exceptions(err_msg, url=request)
         break
 
   try:

@@ -144,6 +144,8 @@ def connection_exceptions(err_msg, url):
   if isinstance(url, str):
     _ = " Skipping URL '" + str(url) + "'."
   if settings.MULTI_TARGETS or settings.CRAWLING:
+    if len(_) == 0:
+      _ = " Skipping to the next target."
     error_msg = error_msg + _
   if len(_) != 0 or not settings.MULTI_TARGETS or not settings.CRAWLING:
     print(settings.print_critical_msg(error_msg))
@@ -151,7 +153,7 @@ def connection_exceptions(err_msg, url):
   if settings.MAX_RETRIES > 1:
     time.sleep(settings.DELAY_RETRY)
   if not settings.VALID_URL :
-    if not settings.MULTI_TARGETS and settings.TOTAL_OF_REQUESTS == settings.MAX_RETRIES:
+    if settings.TOTAL_OF_REQUESTS == settings.MAX_RETRIES and not settings.MULTI_TARGETS:
       raise SystemExit()
 
 """
