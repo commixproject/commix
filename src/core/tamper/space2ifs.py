@@ -14,13 +14,14 @@ For more see the file 'readme/COPYING' for copying permission.
 """
 
 import sys
+from src.utils import menu
 from src.utils import settings
 
 """
 About: Replaces space character ('%20') with the internal field separator ('$IFS').
 The internal field separator refers to a variable which defines the character 
 or characters used to separate a pattern into tokens for some operations.
-Notes: This tamper script works against *nix targets.
+Notes: This tamper script works against unix-like target(s).
 """
 
 __tamper__ = "space2ifs"
@@ -32,13 +33,7 @@ def tamper(payload):
       settings.WHITESPACES[0] = "${IFS}"
     else:
       settings.WHITESPACES.append("${IFS}") 
-  else:
-    if settings.TRANFROM_PAYLOAD == None:
-      settings.TRANFROM_PAYLOAD = False
-      warn_msg = "Windows target host(s), does not support the '"+ __tamper__  +".py' tamper script."
-      sys.stdout.write("\r" + settings.print_warning_msg(warn_msg))
-      sys.stdout.flush() 
-      print
-  return payload
 
+  return payload
+  
 # eof 

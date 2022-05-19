@@ -1157,7 +1157,7 @@ def check_target_os(server_banner):
     user_defined_os = settings.TARGET_OS
 
   if settings.VERBOSITY_LEVEL != 0:
-    debug_msg = "Identifying the target operating system. " 
+    debug_msg = "Identifying The underlying operating system. " 
     sys.stdout.write(settings.print_debug_msg(debug_msg))
     sys.stdout.flush()
 
@@ -1189,7 +1189,7 @@ def check_target_os(server_banner):
   if settings.VERBOSITY_LEVEL != 0 :
     if found_os_server:
       print(settings.SINGLE_WHITESPACE)
-      debug_msg = "The target operating system appears to be " 
+      debug_msg = "The underlying operating system appears to be " 
       debug_msg += identified_os.title() + Style.RESET_ALL + "."
       print(settings.print_bold_debug_msg(debug_msg))
     else:

@@ -342,7 +342,8 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
 
   # Load modules
   modules_handler.load_modules(url, http_request_method, filename)
-
+  checks.tamper_scripts(stored_tamper_scripts=False)
+  
   info_msg = "Setting the" 
   if not header_name == " cookie" and not the_type == " HTTP header":
     info_msg += " " + str(http_request_method) + ""
@@ -362,7 +363,6 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
     if settings.TESTABLE_VALUE != decoded_value and len(decoded_with) != 0:
       warn_msg = "The provided parameter appears to be '" + str(decoded_with) + "' encoded."
       print(settings.print_warning_msg(warn_msg))
-    checks.tamper_scripts(stored_tamper_scripts=False)
     if settings.VERBOSITY_LEVEL != 0:    
       debug_msg = "Performing heuristic (basic) tests to the target URL."
       print(settings.print_debug_msg(debug_msg))

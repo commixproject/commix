@@ -14,11 +14,12 @@ For more see the file 'readme/COPYING' for copying permission.
 """
 import re
 import sys
+from src.utils import menu
 from src.utils import settings
 
 """
 About: Replaces "sleep" with "usleep" command in the generated payloads.
-Notes: This tamper script works against *nix targets.
+Notes: This tamper script works against unix-like target(s).
 Reference: http://man7.org/linux/man-pages/man3/usleep.3.html
 """
 
@@ -47,22 +48,13 @@ def tamper(payload):
         settings.TRANFROM_PAYLOAD = False
         warn_msg = "All injection techniques, except for the time-relative ones, "
         warn_msg += "do not support the '" + __tamper__  + ".py' tamper script."
-        sys.stdout.write("\r" + settings.print_warning_msg(warn_msg))
-        sys.stdout.flush() 
-        print
+        if menu.options.skip_heuristics:
+          print(settings.SINGLE_WHITESPACE)
+        print(settings.print_warning_msg(warn_msg))
+        return payload
     else:
-      settings.TRANFROM_PAYLOAD = True
-      if settings.TRANFROM_PAYLOAD:
-        payload = sleep_to_usleep(payload)
-
+      return sleep_to_usleep(payload)
   else:
-    if settings.TRANFROM_PAYLOAD == None:
-      settings.TRANFROM_PAYLOAD = False
-      warn_msg = "Windows target host(s), does not support the '" + __tamper__  + ".py' tamper script."
-      sys.stdout.write("\r" + settings.print_warning_msg(warn_msg))
-      sys.stdout.flush() 
-      print
-
-  return payload
+    return payload
   
 # eof 

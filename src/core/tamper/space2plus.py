@@ -31,5 +31,7 @@ def tamper(payload):
     settings.WHITESPACES[0] = "+"
   else:
     settings.WHITESPACES.append("+") 
-  return payload
+
+  return payload 
+  
 # eof 

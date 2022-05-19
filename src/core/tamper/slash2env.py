@@ -12,11 +12,12 @@ For more see the file 'readme/COPYING' for copying permission.
 """
 
 import sys
+from src.utils import menu
 from src.utils import settings
 
 """
 About: Replaces slashes (/) with environment variable value "${PATH%%u*}".
-Notes: This tamper script works against *nix targets.
+Notes: This tamper script works against unix-like target(s).
 Reference: https://www.secjuice.com/bypass-strict-input-validation-with-remove-suffix-and-prefix-pattern/
 """
 
@@ -33,24 +34,10 @@ def tamper(payload):
 
   if settings.TARGET_OS != "win":
     if settings.EVAL_BASED_STATE != False:
-      if settings.TRANFROM_PAYLOAD == None:
-        settings.TRANFROM_PAYLOAD = False
-        warn_msg = "The dynamic code evaluation technique, does not support the '"+ __tamper__  +".py' tamper script."
-        sys.stdout.write("\r" + settings.print_warning_msg(warn_msg))
-        sys.stdout.flush() 
-        print
+      return payload
     else:
-      settings.TRANFROM_PAYLOAD = True
-      if settings.TRANFROM_PAYLOAD:
-        payload = add_slash2env(payload)
-
+      return add_slash2env(payload)
   else:
-    if settings.TRANFROM_PAYLOAD == None:
-      settings.TRANFROM_PAYLOAD = False
-      warn_msg = "Windows target host(s), does not support the '"+ __tamper__  +".py' tamper script."
-      sys.stdout.write("\r" + settings.print_warning_msg(warn_msg))
-      sys.stdout.flush() 
-      print
-
-  return payload
+    return payload
   
+# eof 

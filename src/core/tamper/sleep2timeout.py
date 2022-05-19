@@ -14,12 +14,13 @@ For more see the file 'readme/COPYING' for copying permission.
 """
 import re
 import sys
+from src.utils import menu
 from src.utils import settings
 
 """
 About: Uses "timeout" function for time-based attacks.
-  * Regarding *nix targets, it replaces the "sleep XX" command with "timeout XX ping localhost". 
-  * Regarding windows targets, it replaces the "powershell.exe -InputFormat none Start-Sleep -s XX" command with "timeout XX".
+  * Regarding unix-like target(s), it replaces the "sleep XX" command with "timeout XX ping localhost". 
+  * Regarding windows target(s), it replaces the "powershell.exe -InputFormat none Start-Sleep -s XX" command with "timeout XX".
 Notes: This tamper script works against all targets.
 """
 
@@ -45,15 +46,14 @@ def tamper(payload):
     if settings.TRANFROM_PAYLOAD == None:
       settings.TRANFROM_PAYLOAD = False
       warn_msg = "All injection techniques, except for the time-relative ones, "
-      warn_msg += "do not support the '" + __tamper__  + ".py' tamper script."
-      sys.stdout.write("\r" + settings.print_warning_msg(warn_msg))
-      sys.stdout.flush() 
-      print
+      warn_msg += "do not support the '" + __tamper__  + ".py' tamper script. Skipping."
+      if menu.options.skip_heuristics:
+        print(settings.SINGLE_WHITESPACE)
+      print(settings.print_warning_msg(warn_msg))
+      return payload
   else:
     settings.TRANFROM_PAYLOAD = True
     if settings.TRANFROM_PAYLOAD:
-      payload = sleep_to_timeout_ping(payload)
+      return sleep_to_timeout_ping(payload)
 
-  return payload
-  
 # eof 

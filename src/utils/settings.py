@@ -234,7 +234,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.5"
-REVISION = "66"
+REVISION = "67"
 STABLE_RELEASE = False
 if STABLE_RELEASE:
   VERSION = "v" + VERSION_NUM + "-stable"
@@ -972,6 +972,34 @@ TAMPER_SCRIPTS = {
                   "slash2env":False,
                   "backticks":False
                  }
+
+UNIX_NOT_SUPPORTED_TAMPER_SCRIPTS = [
+                  "caret",
+                  "space2vtab"
+]
+
+WIN_NOT_SUPPORTED_TAMPER_SCRIPTS = [
+                  "backslashes"
+                  "dollaratsigns",
+                  "backticks",
+                  "nested",
+                  "singlequotes",
+                  "slash2env",
+                  "sleep2usleep",
+                  "space2ifs",
+                  "uninitializedvariable"
+]
+
+EVAL_NOT_SUPPORTED_TAMPER_SCRIPTS = [
+                  "backslashes"
+                  "caret",
+                  "dollaratsigns",
+                  "doublequotes",
+                  "nested",
+                  "singlequotes",
+                  "slash2env",
+                  "uninitializedvariable"
+]
 
 # HTTP Errors
 BAD_REQUEST = "400"

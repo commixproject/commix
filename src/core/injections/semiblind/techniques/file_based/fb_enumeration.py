@@ -153,14 +153,14 @@ def system_information(separator, payload, TAG, timesec, prefix, suffix, whitesp
     if target_arch:
       # if settings.VERBOSITY_LEVEL != 0:
       #   print(settings.SINGLE_WHITESPACE)
-      info_msg = "The target operating system is " +  str(target_os) + Style.RESET_ALL  
+      info_msg = "The underlying operating system is " +  str(target_os) + Style.RESET_ALL  
       info_msg += Style.BRIGHT + " and the hardware platform is " +  str(target_arch)
       sys.stdout.write(settings.print_bold_info_msg(info_msg) + ".\n")
       sys.stdout.flush()
       # Add infos to logs file.   
       output_file = open(filename, "a")
       if not menu.options.no_logging:
-        info_msg = "The target operating system is " + str(target_os)
+        info_msg = "The underlying operating system is " + str(target_os)
         info_msg += " and the hardware platform is " + str(target_arch) + ".\n"
         output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
       output_file.close()

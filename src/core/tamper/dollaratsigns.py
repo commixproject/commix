@@ -14,11 +14,12 @@ For more see the file 'readme/COPYING' for copying permission.
 """
 import re
 import sys
+from src.utils import menu
 from src.utils import settings
 
 """
 About: Adds dollar sign followed by an at-sign ($@) between the characters of the generated payloads.
-Notes: This tamper script works against *nix targets.
+Notes: This tamper script works against unix-like target(s).
 """
 
 __tamper__ = "dollaratsigns"
@@ -47,25 +48,10 @@ def tamper(payload):
 
   if settings.TARGET_OS != "win":
     if settings.EVAL_BASED_STATE != False:
-      if settings.TRANFROM_PAYLOAD == None:
-        settings.TRANFROM_PAYLOAD = False
-        warn_msg = "The dynamic code evaluation technique, does not support the '"+ __tamper__  +".py' tamper script."
-        sys.stdout.write("\r" + settings.print_warning_msg(warn_msg))
-        sys.stdout.flush() 
-        print
+      return payload
     else:
-      settings.TRANFROM_PAYLOAD = True
-      if settings.TRANFROM_PAYLOAD:
-        payload = add_dollar_at_signs(payload)
-
+      return add_dollar_at_signs(payload)
   else:
-    if settings.TRANFROM_PAYLOAD == None:
-      settings.TRANFROM_PAYLOAD = False
-      warn_msg = "Windows target host(s), does not support the '"+ __tamper__  +".py' tamper script."
-      sys.stdout.write("\r" + settings.print_warning_msg(warn_msg))
-      sys.stdout.flush() 
-      print
+    return payload
 
-  return payload
-  
 # eof 

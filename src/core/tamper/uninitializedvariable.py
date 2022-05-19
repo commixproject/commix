@@ -17,12 +17,12 @@ import re
 import sys
 import random
 import string
-
+from src.utils import menu
 from src.utils import settings
 
 """
 About: Adds uninitialized bash variables between the characters of each command of the generated payloads.
-Notes: This tamper script works against *nix targets.
+Notes: This tamper script works against unix-like target(s).
 Reference: https://www.secjuice.com/web-application-firewall-waf-evasion/
 """
 
@@ -52,24 +52,10 @@ def tamper(payload):
 
   if settings.TARGET_OS != "win":
     if settings.EVAL_BASED_STATE != False:
-      if settings.TRANFROM_PAYLOAD == None:
-        settings.TRANFROM_PAYLOAD = False
-        warn_msg = "The dynamic code evaluation technique, does not support the '"+ __tamper__  +".py' tamper script."
-        sys.stdout.write("\r" + settings.print_warning_msg(warn_msg))
-        sys.stdout.flush() 
-        print
+      return payload
     else:
-      settings.TRANFROM_PAYLOAD = True
-      if settings.TRANFROM_PAYLOAD:
-        payload = add_uninitialized_variable(payload)
-
+      return add_uninitialized_variable(payload)
   else:
-    if settings.TRANFROM_PAYLOAD == None:
-      settings.TRANFROM_PAYLOAD = False
-      warn_msg = "Windows target host(s), does not support the '"+ __tamper__  +".py' tamper script."
-      sys.stdout.write("\r" + settings.print_warning_msg(warn_msg))
-      sys.stdout.flush() 
-      print
+    return payload
 
-  return payload
-  
+# eof 

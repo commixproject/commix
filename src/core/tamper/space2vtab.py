@@ -29,10 +29,7 @@ def tamper(payload):
       settings.WHITESPACES[0] = "%0b"
     else:
       settings.WHITESPACES.append("%0b") 
-  else:
-    if settings.TRANFROM_PAYLOAD == None:
-      settings.TRANFROM_PAYLOAD = False
-      warn_msg = "Unix target host(s), does not support vertical tab(s)."
-      print(settings.print_warning_msg(warn_msg))
+
   return payload
+  
 # eof 

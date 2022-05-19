@@ -103,25 +103,25 @@ def enumeration(url, cve, check_header, filename):
         cmd = settings.RECOGNISE_HP
         target_arch, payload = cmd_exec(url, cmd, cve, check_header, filename)
         if target_arch:
-          info_msg = "The target operating system is " +  str(target_os) + Style.RESET_ALL  
+          info_msg = "The underlying operating system is " +  str(target_os) + Style.RESET_ALL  
           info_msg += Style.BRIGHT + " and the hardware platform is " +  str(target_arch)
           sys.stdout.write(settings.print_bold_info_msg(info_msg) + ".\n")
           sys.stdout.flush()
           # Add infos to logs file.   
           output_file = open(filename, "a")
           if not menu.options.no_logging:
-            info_msg = "The target operating system is " + str(target_os)
+            info_msg = "The underlying operating system is " + str(target_os)
             info_msg += " and the hardware platform is " + str(target_arch) + ".\n"
             output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
           output_file.close()
       else:
-        info_msg = "The target operating system is " +  target_os   
+        info_msg = "The underlying operating system is " +  target_os   
         sys.stdout.write(settings.print_bold_info_msg(info_msg) + ".\n")
         sys.stdout.flush()
         # Add infos to logs file.    
         output_file = open(filename, "a")
         if not menu.options.no_logging:
-          info_msg = "The target operating system is " + str(target_os) + ".\n"
+          info_msg = "The underlying operating system is " + str(target_os) + ".\n"
           output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
         output_file.close()
     else:

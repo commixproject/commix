@@ -18,7 +18,7 @@ from src.utils import settings
 
 """
 About: Uses backticks instead of "$()" for commands substitution on the generated payloads.
-Notes: This tamper script works against *nix targets.
+Notes: This tamper script works against unix-like target(s).
 """
 
 __tamper__ = "backticks"
