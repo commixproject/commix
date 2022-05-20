@@ -570,7 +570,7 @@ def single_os_cmd_exec(separator, TAG, prefix, suffix, whitespace, http_request_
   else:
     err_msg = "The '" + cmd + "' command, does not return any output."
     print(settings.print_critical_msg(err_msg)) 
-    print(settings.SINGLE_WHITESPACE)
+
 
 """
 Check the defined options

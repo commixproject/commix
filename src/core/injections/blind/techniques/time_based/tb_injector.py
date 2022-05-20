@@ -378,7 +378,7 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
 
   if settings.VERBOSITY_LEVEL != 0 and menu.options.ignore_session:
     print(settings.SINGLE_WHITESPACE)
-  return  check_how_long, output
+  return check_how_long, output
 
 """
 False Positive check and evaluation.

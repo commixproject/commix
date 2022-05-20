@@ -414,18 +414,19 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
               else:
                 settings.LOAD_SESSION = False 
               
-              new_line = False   
+              new_line = True   
               # Check for any enumeration options.
               if settings.ENUMERATION_DONE == True:
                 while True:
-                  message = "Do you want to enumerate again? [Y/n] > "
+                  message = "Do you want to ignore stored session and enumerate again? [Y/n] > "
                   enumerate_again = common.read_input(message, default="Y", check_batch=True)
                   if enumerate_again in settings.CHOICE_YES:
+                    if not menu.options.ignore_session:
+                      menu.options.ignore_session = True
                     tb_enumeration.do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
-                    print(settings.SINGLE_WHITESPACE)
                     break
-                  elif enumerate_again in settings.CHOICE_NO: 
-                    new_line = True
+                  elif enumerate_again in settings.CHOICE_NO:
+                    new_line = False
                     break
                   elif enumerate_again in settings.CHOICE_QUIT:
                     raise SystemExit()
@@ -436,20 +437,20 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
               else:
                 if menu.enumeration_options():
                   tb_enumeration.do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
-                  print(settings.SINGLE_WHITESPACE)
 
               # Check for any system file access options.
               if settings.FILE_ACCESS_DONE == True:
-                print(settings.SINGLE_WHITESPACE)
+                if settings.ENUMERATION_DONE == True and new_line:
+                  print(settings.SINGLE_WHITESPACE)
                 while True:
-                  message = "Do you want to access files again? [Y/n] > "
+                  message = "Do you want to ignore stored session and access files again? [Y/n] > "
                   file_access_again = common.read_input(message, default="Y", check_batch=True)
                   if file_access_again in settings.CHOICE_YES:
+                    if not menu.options.ignore_session:
+                      menu.options.ignore_session = True
                     tb_file_access.do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
                     break
                   elif file_access_again in settings.CHOICE_NO: 
-                    if not new_line:
-                      new_line = True
                     break 
                   elif file_access_again in settings.CHOICE_QUIT:
                     raise SystemExit()
@@ -467,16 +468,13 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                 # Export injection result
                 #tb_injector.export_injection_results(cmd, separator, output, check_how_long)
 
-              if not new_line :
-                print(settings.SINGLE_WHITESPACE)
-
               # Pseudo-Terminal shell
               go_back = False
               go_back_again = False
               while True:
                 if go_back == True:
                   break   
-                message = "Do you want a Pseudo-Terminal shell? [Y/n] > "
+                message = "The identified injection point has been exploited. Do you want a pseudo-terminal shell? [Y/n] > "
                 if settings.IS_TTY:
                   gotshell = common.read_input(message, default="Y", check_batch=True)
                 else:

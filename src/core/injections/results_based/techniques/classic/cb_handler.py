@@ -293,9 +293,11 @@ def cb_injection_handler(url, timesec, filename, http_request_method, injection_
             new_line = True
             if settings.ENUMERATION_DONE == True :
               while True:
-                message = "Do you want to enumerate again? [Y/n] > "
+                message = "Do you want to ignore stored session and enumerate again? [Y/n] > "
                 enumerate_again = common.read_input(message, default="Y", check_batch=True)
                 if enumerate_again in settings.CHOICE_YES:
+                  if not menu.options.ignore_session:
+                    menu.options.ignore_session = True
                   cb_enumeration.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec)
                   break
                 elif enumerate_again in settings.CHOICE_NO:
@@ -310,18 +312,15 @@ def cb_injection_handler(url, timesec, filename, http_request_method, injection_
             else:
               if menu.enumeration_options():
                 cb_enumeration.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec)
-          
-            if not menu.file_access_options() and not menu.options.os_cmd and new_line:
-              print(settings.SINGLE_WHITESPACE)
-            
+                      
             # Check for any system file access options.
             if settings.FILE_ACCESS_DONE == True :
-              if settings.ENUMERATION_DONE != True:
-                print(settings.SINGLE_WHITESPACE)
               while True:
-                message = "Do you want to access files again? [Y/n] > "
+                message = "Do you want to ignore stored session and access files again? [Y/n] > "
                 file_access_again = common.read_input(message, default="Y", check_batch=True)
                 if file_access_again in settings.CHOICE_YES:
+                  if not menu.options.ignore_session:
+                    menu.options.ignore_session = True
                   cb_file_access.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec)
                   break
                 elif file_access_again in settings.CHOICE_NO: 
@@ -339,10 +338,6 @@ def cb_injection_handler(url, timesec, filename, http_request_method, injection_
             # Check if defined single cmd.
             if menu.options.os_cmd:
               cb_enumeration.single_os_cmd_exec(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec)
-
-            else:
-              if menu.file_access_options() or menu.options.os_cmd:
-                print(settings.SINGLE_WHITESPACE)
               
             # Pseudo-Terminal shell
             go_back = False
@@ -350,7 +345,7 @@ def cb_injection_handler(url, timesec, filename, http_request_method, injection_
             while True :
               if go_back == True:
                 break 
-              message = "Do you want a Pseudo-Terminal shell? [Y/n] > "
+              message = "The identified injection point has been exploited. Do you want a pseudo-terminal shell? [Y/n] > "
               if settings.IS_TTY:
                 gotshell = common.read_input(message, default="Y", check_batch=True)
               else:

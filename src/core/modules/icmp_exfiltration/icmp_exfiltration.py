@@ -140,7 +140,7 @@ def input_cmd(http_request_method, url, vuln_parameter, ip_src, technique):
   while True:
     if go_back == True:
       break 
-    message = "Do you want a Pseudo-Terminal shell? [Y/n] > "
+    message = "The identified injection point has been exploited. Do you want a pseudo-terminal shell? [Y/n] > "
     gotshell = _common.read_input(message, default="Y", check_batch=True)
     if gotshell in settings.CHOICE_YES:
       print("\nPseudo-Terminal (type '" + Style.BRIGHT + "?" + Style.RESET_ALL + "' for available options)")
@@ -160,7 +160,7 @@ def input_cmd(http_request_method, url, vuln_parameter, ip_src, technique):
             elif cmd.lower() == "?": 
               menu.os_shell_options()
             elif cmd.lower() == "os_shell": 
-              warn_msg = "You are already into the '" + cmd.lower() + "' mode."
+              warn_msg = "You are into the '" + cmd.lower() + "' mode."
               print(settings.print_warning_msg(warn_msg))+ "\n"
             elif cmd.lower() == "reverse_tcp":
               warn_msg = "This option is not supported by this module."

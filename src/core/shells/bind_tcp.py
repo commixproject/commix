@@ -30,7 +30,7 @@ Check for available shell options.
 """
 def shell_options(option):
   if option.lower() == "bind_tcp":
-    warn_msg = "You are already into the '" + option.lower() + "' mode."
+    warn_msg = "You are into the '" + option.lower() + "' mode."
     print(settings.print_warning_msg(warn_msg))
   elif option.lower() == "?": 
     menu.reverse_tcp_options()
@@ -464,7 +464,7 @@ Type '""" + Style.BRIGHT + """2""" + Style.RESET_ALL + """' for other bind TCP s
 \ncommix(""" + Style.BRIGHT + Fore.RED + """bind_tcp""" + Style.RESET_ALL + """) > """)
 
     if bind_tcp_option.lower() == "bind_tcp": 
-      warn_msg = "You are already into the '" + bind_tcp_option.lower() + "' mode."
+      warn_msg = "You are into the '" + bind_tcp_option.lower() + "' mode."
       print(settings.print_warning_msg(warn_msg))
       continue
 
@@ -506,7 +506,7 @@ def configure_bind_tcp(separator):
     sys.stdout.write(settings.BIND_TCP_SHELL)
     option = _input()
     if option.lower() == "bind_tcp": 
-      warn_msg = "You are already into the '" + option.lower() + "' mode."
+      warn_msg = "You are into the '" + option.lower() + "' mode."
       print(settings.print_warning_msg(warn_msg))
       continue
     elif option.lower() == "?": 

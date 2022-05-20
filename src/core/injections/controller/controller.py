@@ -131,7 +131,6 @@ def code_injections_heuristic_basic(url, http_request_method, check_parameter, t
   injection_type = "results-based dynamic code evaluation"
   technique = "dynamic code evaluation technique"
   technique = "(" + injection_type.split(" ")[0] + ") " + technique + ""
-
   settings.EVAL_BASED_STATE = True
   try:
     try:
@@ -699,16 +698,20 @@ def post_request(url, http_request_method, filename, timesec):
 Perform checks
 """
 def perform_checks(url, http_request_method, filename):
+  # Initiate whitespaces
+  if settings.MULTI_TARGETS or not settings.IS_TTY and len(settings.WHITESPACES) > 1:
+    settings.WHITESPACES = ["%20"]
 
   def basic_level_checks():
-    if not settings.MULTI_TARGETS:
-      settings.PERFORM_BASIC_SCANS = False
-    else:
+    if settings.MULTI_TARGETS or not settings.IS_TTY:
       settings.PERFORM_BASIC_SCANS = True
-      settings.SKIP_CODE_INJECTIONS = False
-      settings.SKIP_COMMAND_INJECTIONS = False
-      settings.IDENTIFIED_WARNINGS = False
-      settings.IDENTIFIED_PHPINFO = False
+    else:
+      settings.PERFORM_BASIC_SCANS = False
+    settings.SKIP_CODE_INJECTIONS = False
+    settings.SKIP_COMMAND_INJECTIONS = False
+    settings.IDENTIFIED_COMMAND_INJECTION = False
+    settings.IDENTIFIED_WARNINGS = False
+    settings.IDENTIFIED_PHPINFO = False
 
   timesec = settings.TIMESEC
   # Check if authentication is needed.

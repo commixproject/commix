@@ -13,8 +13,6 @@ the Free Software Foundation, either version 3 of the License, or
 For more see the file 'readme/COPYING' for copying permission.
 """
 
-import sys
-from src.utils import menu
 from src.utils import settings
 
 """
@@ -25,15 +23,21 @@ Notes: This tamper script works against unix-like target(s).
 """
 
 __tamper__ = "space2ifs"
+space2ifs = "${IFS}"
 
 def tamper(payload):
+  if space2ifs in settings.WHITESPACES[0] and \
+  settings.EVAL_BASED_STATE != False:
+    settings.WHITESPACES[0] = "\${IFS}"
   if settings.TARGET_OS != "win":
     settings.TAMPER_SCRIPTS[__tamper__] = True
     if settings.WHITESPACES[0] == "%20":
-      settings.WHITESPACES[0] = "${IFS}"
-    else:
-      settings.WHITESPACES.append("${IFS}") 
-
+      settings.WHITESPACES[0] = space2ifs
+    elif space2ifs not in settings.WHITESPACES:
+      settings.WHITESPACES.append(space2ifs) 
+  else:
+    if space2ifs in settings.WHITESPACES:
+      settings.WHITESPACES.remove(space2ifs)
   return payload
   
 # eof 

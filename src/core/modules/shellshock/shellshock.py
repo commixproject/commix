@@ -581,7 +581,7 @@ def check_options(url, cmd, cve, check_header, filename, os_shell_option, http_r
 
   # The "os_shell" option
   elif os_shell_option == "os_shell": 
-    warn_msg = "You are already into the '" + os_shell_option + "' mode."
+    warn_msg = "You are into the '" + os_shell_option + "' mode."
     print(settings.print_warning_msg(warn_msg))+ "\n"
 
   # The "bind_tcp" option
@@ -706,10 +706,10 @@ def shellshock_handler(url, http_request_method, filename):
 
           # Enumeration options.
           if settings.ENUMERATION_DONE == True :
-            if settings.VERBOSITY_LEVEL != 0:
-              print(settings.SINGLE_WHITESPACE)
+            # if settings.VERBOSITY_LEVEL != 0:
+            #   print(settings.SINGLE_WHITESPACE)
             while True:
-              message = "Do you want to enumerate again? [Y/n] > "
+              message = "Do you want to ignore stored session and enumerate again? [Y/n] > "
               enumerate_again = common.read_input(message, default="Y", check_batch=True)
               if enumerate_again in settings.CHOICE_YES:
                 enumeration(url, cve, check_header, filename)
@@ -728,7 +728,7 @@ def shellshock_handler(url, http_request_method, filename):
           # File access options.
           if settings.FILE_ACCESS_DONE == True :
             while True:
-              message = "Do you want to access files again? [Y/n] > "
+              message = "Do you want to ignore stored session and access files again? [Y/n] > "
               file_access_again = common.read_input(message, default="Y", check_batch=True)
               if file_access_again in settings.CHOICE_YES:
                 file_access(url, cve, check_header, filename)
@@ -747,8 +747,8 @@ def shellshock_handler(url, http_request_method, filename):
           if menu.options.os_cmd:
             cmd = menu.options.os_cmd 
             shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
-            if settings.VERBOSITY_LEVEL <= 1:
-              print(settings.SINGLE_WHITESPACE)
+            # if settings.VERBOSITY_LEVEL <= 1:
+            #   print(settings.SINGLE_WHITESPACE)
             print(settings.command_execution_output(shell))
             raise SystemExit()
 
@@ -760,7 +760,7 @@ def shellshock_handler(url, http_request_method, filename):
             while True:
               if go_back == True:
                 break
-              message = "Do you want a Pseudo-Terminal shell? [Y/n] > "
+              message = "The identified injection point has been exploited. Do you want a pseudo-terminal shell? [Y/n] > "
               if settings.IS_TTY:
                 gotshell = common.read_input(message, default="Y", check_batch=True)
               else:

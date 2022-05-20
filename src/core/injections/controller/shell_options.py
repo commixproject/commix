@@ -165,7 +165,7 @@ def check_option(separator, TAG, cmd, prefix, suffix, whitespace, http_request_m
 
   # The "os_shell" option
   elif os_shell_option == "os_shell": 
-    warn_msg = "You are already into the '" + os_shell_option + "' mode."
+    warn_msg = "You are into the '" + os_shell_option + "' mode."
     print(settings.print_warning_msg(warn_msg))
     return go_back, go_back_again
 

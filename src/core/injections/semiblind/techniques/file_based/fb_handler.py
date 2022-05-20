@@ -369,7 +369,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                     sys.stdout.write("\r" + settings.print_warning_msg(warn_msg))
                     print(settings.SINGLE_WHITESPACE)
                     while True:
-                      message = "Do you want to try the temporary directory (" + tmp_path + ") [Y/n] > "
+                      message = "Do you want to use the temporary directory (" + tmp_path + ") [Y/n] > "
                       tmp_upload = common.read_input(message, default="Y", check_batch=True)
                       if tmp_upload in settings.CHOICE_YES:
                         exit_loops = True
@@ -521,11 +521,12 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
             new_line = True
             if settings.ENUMERATION_DONE == True :
               while True:
-                message = "Do you want to enumerate again? [Y/n] > "
+                message = "Do you want to ignore stored session and enumerate again? [Y/n] > "
                 enumerate_again = common.read_input(message, default="Y", check_batch=True)
                 if enumerate_again in settings.CHOICE_YES:
+                  if not menu.options.ignore_session:
+                    menu.options.ignore_session = True 
                   fb_enumeration.do_check(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-                  # print(settings.SINGLE_WHITESPACE)
                   break
                 elif enumerate_again in settings.CHOICE_NO:
                   new_line = False
@@ -542,18 +543,14 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
               if menu.enumeration_options():
                 fb_enumeration.do_check(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
            
-            if not menu.file_access_options() and not menu.options.os_cmd:
-              if not settings.VERBOSITY_LEVEL != 0 and new_line:
-                print(settings.SINGLE_WHITESPACE)
-
             # Check for any system file access options.
             if settings.FILE_ACCESS_DONE == True :
-              if settings.ENUMERATION_DONE != True:
-                print(settings.SINGLE_WHITESPACE)
               while True:
-                message = "Do you want to access files again? [Y/n] > "
+                message = "Do you want to ignore stored session and access files again? [Y/n] > "
                 file_access_again = common.read_input(message, default="Y", check_batch=True)
                 if file_access_again in settings.CHOICE_YES:
+                  if not menu.options.ignore_session:
+                    menu.options.ignore_session = True
                   fb_file_access.do_check(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
                   break
                 elif file_access_again in settings.CHOICE_NO: 
@@ -575,10 +572,6 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
               fb_enumeration.single_os_cmd_exec(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
               # Delete previous shell (text) files (output)
               delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-
-            else:
-              if menu.file_access_options() or menu.options.os_cmd:
-                print(settings.SINGLE_WHITESPACE)
                   
             try:
               # Pseudo-Terminal shell
@@ -591,7 +584,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                   print(settings.SINGLE_WHITESPACE)
                 if go_back == True:
                   break
-                message = "Do you want a Pseudo-Terminal shell? [Y/n] > "
+                message = "The identified injection point has been exploited. Do you want a pseudo-terminal shell? [Y/n] > "
                 gotshell = common.read_input(message, default="Y", check_batch=True)
                 if gotshell in settings.CHOICE_YES:
                   print("Pseudo-Terminal (type '" + Style.BRIGHT + "?" + Style.RESET_ALL + "' for available options)")

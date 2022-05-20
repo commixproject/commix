@@ -35,7 +35,7 @@ Check for available shell options.
 """
 def shell_options(option):
   if option.lower() == "reverse_tcp":
-    warn_msg = "You are already into the '" + option.lower() + "' mode."
+    warn_msg = "You are into the '" + option.lower() + "' mode."
     print(settings.print_warning_msg(warn_msg))
   elif option.lower() == "?": 
     menu.reverse_tcp_options()
@@ -678,7 +678,7 @@ Type '""" + Style.BRIGHT + """2""" + Style.RESET_ALL + """' for other reverse TC
 \ncommix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp""" + Style.RESET_ALL + """) > """)
 
     if reverse_tcp_option.lower() == "reverse_tcp": 
-      warn_msg = "You are already into the '" + reverse_tcp_option.lower() + "' mode."
+      warn_msg = "You are into the '" + reverse_tcp_option.lower() + "' mode."
       print(settings.print_warning_msg(warn_msg))
       continue
 
@@ -719,7 +719,7 @@ def configure_reverse_tcp(separator):
     sys.stdout.write(settings.REVERSE_TCP_SHELL)
     option = _input()
     if option.lower() == "reverse_tcp": 
-      warn_msg = "You are already into the '" + option.lower() + "' mode."
+      warn_msg = "You are into the '" + option.lower() + "' mode."
       print(settings.print_warning_msg(warn_msg))
       continue
     if option.lower() == "?": 

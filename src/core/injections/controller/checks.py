@@ -512,8 +512,8 @@ def procced_with_file_based_technique():
   while True:
     message = "Due to the provided '--web-root' option,"
     message += " do you want to procced with the (semi-blind) "
-    message += "file-based injection technique? [Y/n] > "
-    enable_fb = common.read_input(message, default="Y", check_batch=True)
+    message += "file-based injection technique? [y/N] > "
+    enable_fb = common.read_input(message, default="N", check_batch=True)
     if enable_fb in settings.CHOICE_YES:
       return True
     elif enable_fb in settings.CHOICE_NO:
@@ -1022,18 +1022,19 @@ def tamper_scripts(stored_tamper_scripts):
       elif settings.TARGET_OS == "win" and script in settings.WIN_NOT_SUPPORTED_TAMPER_SCRIPTS:
         warn_msg = "Windows targets do not support the usage of '" + script + ".py' tamper script. Skipping."
       elif settings.TARGET_OS != "win" and script in settings.UNIX_NOT_SUPPORTED_TAMPER_SCRIPTS:
-        warn_msg = "Unix targets do not support the usage of '" + script + ".py' tamper script. Skipping."
+        warn_msg = "Unix-like targets do not support the usage of '" + script + ".py' tamper script. Skipping."
       if len(warn_msg) != 0:
         print(settings.print_warning_msg(warn_msg))
-      try:
-        module = __import__(import_script, fromlist=[None])
-        if not hasattr(module, "__tamper__"):
-          err_msg = "Missing variable '__tamper__' "
-          err_msg += "in tamper script '" + import_script.split(".")[-1] + "'."
-          print(settings.print_critical_msg(err_msg))
-          raise SystemExit()
-      except ImportError as err_msg:
-        pass
+      else:
+        try:
+          module = __import__(import_script, fromlist=[None])
+          if not hasattr(module, "__tamper__"):
+            err_msg = "Missing variable '__tamper__' "
+            err_msg += "in tamper script '" + import_script.split(".")[-1] + "'."
+            print(settings.print_critical_msg(err_msg))
+            raise SystemExit()
+        except ImportError as err_msg:
+          pass
 
     # Using too many tamper scripts is usually not a good idea. :P
     _ = False

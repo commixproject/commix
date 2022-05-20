@@ -138,7 +138,7 @@ def file_write(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec,
       cmd = "'" + cmd + "'"
     dest_to_write = path + "\\" + filname
   else:
-    cmd = settings.FILE_WRITE + "'" + content + "'" + ">" + "'" + dest_to_write + "'" + separator + settings.FILE_READ + dest_to_write
+    cmd = settings.FILE_WRITE + "'" + content + "'" + ">" + "'" + dest_to_write + "'" + _urllib.parse.quote(separator) + settings.FILE_READ + dest_to_write
     check_how_long, output = tb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
     shell = output 
     shell = "".join(str(p) for p in shell)

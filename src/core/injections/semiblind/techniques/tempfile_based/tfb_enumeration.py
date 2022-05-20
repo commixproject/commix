@@ -541,6 +541,7 @@ def single_os_cmd_exec(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, 
     if settings.VERBOSITY_LEVEL <= 1:
       print(settings.SINGLE_WHITESPACE)
     print(settings.command_execution_output(output))
+    print(settings.SINGLE_WHITESPACE)
   else:
     err_msg = "The '" + cmd + "' command, does not return any output."
     print(settings.print_critical_msg(err_msg)) 
@@ -550,17 +551,23 @@ def single_os_cmd_exec(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, 
 Check the defined options
 """
 def do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response):
-
+  if settings.ENUMERATION_DONE:
+    settings.ENUMERATION_DONE = False
+    
   if menu.options.ps_version and settings.PS_ENABLED == None:
     if not checks.ps_incompatible_os():
+      if settings.ENUMERATION_DONE == True:
+        print(settings.SINGLE_WHITESPACE)
       powershell_version(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
-      settings.ENUMERATION_DONE = True
+      if settings.ENUMERATION_DONE == False:
+        settings.ENUMERATION_DONE = True
 
   if menu.options.hostname:
     if settings.ENUMERATION_DONE == True:
       print(settings.SINGLE_WHITESPACE)
     hostname(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
-    settings.ENUMERATION_DONE = True
+    if settings.ENUMERATION_DONE == False:
+      settings.ENUMERATION_DONE = True
 
   if menu.options.current_user:
     if settings.ENUMERATION_DONE == True:

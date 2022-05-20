@@ -277,10 +277,9 @@ Notification about session.
 def notification(url, technique, injection_type):
   try:
     if settings.LOAD_SESSION == True:
-      info_msg = "A previously stored session has been held against that host."
-      print(settings.print_info_msg(info_msg))
       while True:
-        message = "Do you want to resume to the "
+        message = "A previously stored session has been held against that host. "
+        message += "Do you want to resume to the "
         message += "(" + injection_type.split(" ")[0] + ") "
         message += technique.rsplit(' ', 2)[0] 
         message += " injection point? [Y/n] > "
