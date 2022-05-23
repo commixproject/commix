@@ -437,7 +437,7 @@ def cb_injection_handler(url, timesec, filename, http_request_method, injection_
     if settings.VERBOSITY_LEVEL == 0:
       print(settings.SINGLE_WHITESPACE)
     return False
-  else :
+  else:
     sys.stdout.write("\r")
     sys.stdout.flush()
 

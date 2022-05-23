@@ -550,6 +550,7 @@ def configure_bind_tcp(separator):
         print(settings.print_error_msg(err_msg))
         pass
     else:
+      print(settings.SINGLE_WHITESPACE)
       err_msg = "The '" + option + "' option, is not valid."
       print(settings.print_error_msg(err_msg))
       pass

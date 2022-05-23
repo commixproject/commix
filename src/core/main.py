@@ -543,7 +543,7 @@ try:
   if menu.options.smoke_test:
     smoke_test()
 
-  if not settings.IS_TTY or settings.CRAWLING or menu.options.bulkfile:
+  if not settings.IS_TTY or settings.CRAWLING or menu.options.bulkfile or menu.options.shellshock:
     settings.OS_CHECKS_NUM = 1
 
   for os_checks_num in range(0, int(settings.OS_CHECKS_NUM)):
@@ -829,7 +829,8 @@ try:
             url_num += 1
           output_href = output_href + bulkfile
           output_href = [x for x in output_href if x not in settings.HREF_SKIPPED]
-        output_href = crawler.normalize_results(output_href)
+        if not menu.options.shellshock:
+          output_href = crawler.normalize_results(output_href)
         settings.CRAWLING_PHASE = False
       else:
         filename = None
@@ -859,7 +860,7 @@ try:
       url_num = 0
       for url in clean_output_href:
         http_request_method  = check_http_method(url)
-        if (settings.CRAWLING and re.search(r"(.*?)\?(.+)", url)) or settings.MULTI_TARGETS:
+        if (settings.CRAWLING and re.search(r"(.*?)\?(.+)", url) or menu.options.shellshock) or settings.MULTI_TARGETS:
           url_num += 1
           print(settings.print_message("[" + str(url_num) + "/" + str(len(clean_output_href)) + "] URL - " + url) + "")
           message = "Do you want to use URL #" + str(url_num) + " to perform tests? [Y/n] > "
