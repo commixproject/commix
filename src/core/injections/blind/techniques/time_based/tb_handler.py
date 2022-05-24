@@ -450,7 +450,8 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                       menu.options.ignore_session = True
                     tb_file_access.do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
                     break
-                  elif file_access_again in settings.CHOICE_NO: 
+                  elif file_access_again in settings.CHOICE_NO:
+                    new_line = False 
                     break 
                   elif file_access_again in settings.CHOICE_QUIT:
                     raise SystemExit()
@@ -459,6 +460,8 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                     print(settings.print_error_msg(err_msg))
                     pass
               else:
+                if not new_line:
+                  print(settings.SINGLE_WHITESPACE)
                 tb_file_access.do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
 
               # Check if defined single cmd.

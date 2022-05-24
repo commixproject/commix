@@ -585,7 +585,10 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                 if go_back == True:
                   break
                 message = "The identified injection point has been exploited. Do you want a pseudo-terminal shell? [Y/n] > "
-                gotshell = common.read_input(message, default="Y", check_batch=True)
+                if settings.IS_TTY:
+                  gotshell = common.read_input(message, default="Y", check_batch=True)
+                else:
+                  gotshell = common.read_input(message, default="n", check_batch=True)
                 if gotshell in settings.CHOICE_YES:
                   print("Pseudo-Terminal (type '" + Style.BRIGHT + "?" + Style.RESET_ALL + "' for available options)")
                   if settings.READLINE_ERROR:

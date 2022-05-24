@@ -496,7 +496,8 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                       menu.options.ignore_session = True
                     tfb_file_access.do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
                     break
-                  elif file_access_again in settings.CHOICE_NO: 
+                  elif file_access_again in settings.CHOICE_NO:
+                    new_line = False 
                     break
                   elif file_access_again in settings.CHOICE_QUIT:
                     # Delete previous shell (text) files (output) from temp.
@@ -507,7 +508,8 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                     print(settings.print_error_msg(err_msg))
                     pass
               else:
-                print(settings.SINGLE_WHITESPACE)
+                if not new_line:
+                  print(settings.SINGLE_WHITESPACE)
                 tfb_file_access.do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
               
               # Check if defined single cmd.

@@ -595,8 +595,7 @@ def shellshock_handler(url, http_request_method, filename):
   info_msg = "Testing the " + technique + ". "
   if settings.VERBOSITY_LEVEL >= 2:
     info_msg = info_msg + "\n"
-  sys.stdout.write(settings.print_info_msg(info_msg))
-  sys.stdout.flush()
+  print(settings.print_info_msg(info_msg))
 
   try: 
     i = 0
@@ -612,7 +611,6 @@ def shellshock_handler(url, http_request_method, filename):
 
         # Check if defined "--verbose" option.
         if settings.VERBOSITY_LEVEL == 1:
-          print(settings.SINGLE_WHITESPACE)
           print(settings.print_payload(payload))
         elif settings.VERBOSITY_LEVEL >= 2:
           debug_msg = "Generating payload for the injection."
@@ -824,7 +822,8 @@ def shellshock_handler(url, http_request_method, filename):
             break
 
     if no_result == True:
-      print(settings.SINGLE_WHITESPACE)
+      if settings.VERBOSITY_LEVEL == 0:
+        print(settings.SINGLE_WHITESPACE)
       err_msg = "All tested HTTP headers appear to be not injectable."
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
@@ -872,11 +871,10 @@ def cmd_exec(url, cmd, cve, check_header, filename):
       debug_msg = "Executing the '" + cmd + "' command. "
       if settings.VERBOSITY_LEVEL != 0:
         sys.stdout.write(settings.print_debug_msg(debug_msg))
-      sys.stdout.flush()
+
       if settings.VERBOSITY_LEVEL != 0:
         print(settings.SINGLE_WHITESPACE)
         print(settings.print_payload(payload))
-        print(settings.SINGLE_WHITESPACE)
 
       header = {check_header : payload}
       request = _urllib.request.Request(url, None, header)

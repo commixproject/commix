@@ -573,7 +573,11 @@ try:
 
     if not sys.stdin.isatty():
       settings.IS_TTY = False
-        
+
+    # Check if defined "--purge" option.
+    if menu.options.purge:
+      purge.purge()
+
     # Check for missing mandatory option(s).
     if settings.IS_TTY and not any((menu.options.url, menu.options.logfile, menu.options.bulkfile, \
                 menu.options.requestfile, menu.options.sitemap_url, menu.options.wizard, \
@@ -636,13 +640,6 @@ try:
     if menu.options.requestfile and menu.options.url:
         err_msg = "The '-r' option is incompatible with option '-u' ('--url')."      
         print(settings.print_critical_msg(err_msg))
-        raise SystemExit()
-
-    # Check if defined "--purge" option.
-    if menu.options.purge:
-      purge.purge()
-      if not any((menu.options.url, menu.options.logfile, menu.options.bulkfile, \
-                  menu.options.requestfile, menu.options.sitemap_url, menu.options.wizard)):
         raise SystemExit()
 
     # Check the user-defined OS.

@@ -1176,6 +1176,8 @@ def check_target_os(server_banner):
 
         settings.TARGET_OS = identified_os[:3].lower()
         if menu.options.shellshock:
+          if settings.VERBOSITY_LEVEL != 0:
+            print(settings.SINGLE_WHITESPACE)
           err_msg = "The shellshock module is not available for " 
           err_msg += identified_os + " targets."
           print(settings.print_critical_msg(err_msg))
