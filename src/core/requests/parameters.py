@@ -388,7 +388,9 @@ def vuln_POST_param(parameter, url):
 Define the injection prefixes.
 """
 def prefixes(payload, prefix):
-  if settings.USER_AGENT_INJECTION == True:
+  if settings.COOKIE_INJECTION == True:
+    specify_cookie_parameter(menu.options.cookie)
+  elif settings.USER_AGENT_INJECTION == True:
     specify_user_agent_parameter(menu.options.agent)
   elif settings.REFERER_INJECTION == True:
     specify_referer_parameter(menu.options.referer)

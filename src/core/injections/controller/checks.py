@@ -699,13 +699,15 @@ def check_CGI_scripts(url):
     print(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
+  _ = False
   for cgi_script in CGI_SCRIPTS:
-    if cgi_script in url and menu.options.shellshock == False:
-      warn_msg = "URL is probable to contain a script ('" + cgi_script + "') "
+    if cgi_script in url:
+      warn_msg = "The URL is probable to contain a script ('" + cgi_script + "') "
       warn_msg += "vulnerable to shellshock. "
+      _ = True
       print(settings.print_warning_msg(warn_msg))
       while True:
-        message = "Do you want to enable the shellshock injection module? [Y/n] > "
+        message = "Do you want to enable the shellshock module ('--shellshock')? [Y/n] > "
         shellshock_check = common.read_input(message, default="Y", check_batch=True)
         if shellshock_check in settings.CHOICE_YES:
           menu.options.shellshock = True
@@ -720,6 +722,9 @@ def check_CGI_scripts(url):
           err_msg = "'" + shellshock_check + "' is not a valid answer."  
           print(settings.print_error_msg(err_msg))
           pass
+          
+  if not _:
+    menu.options.shellshock = False
 
 """
 Check if http / https.
