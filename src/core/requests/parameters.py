@@ -135,6 +135,7 @@ def do_GET_check(url, http_request_method):
             else:
               all_params[param] = all_params[param].replace(value, value + settings.INJECT_TAG)
             # all_params[param - 1] = all_params[param - 1].replace(value, "").replace(settings.INJECT_TAG, "")
+            # all_params[param - 1] = all_params[param - 1].replace(settings.INJECT_TAG, "")
             all_params[param - 1] = all_params[param - 1].replace(settings.INJECT_TAG, "")
             parameter = settings.PARAMETER_DELIMITER.join(all_params)
             # Reconstruct the URL
@@ -317,7 +318,7 @@ def do_POST_check(parameter, http_request_method):
         else:
           all_params[param] = all_params[param].replace(value, value + settings.INJECT_TAG)
         #all_params[param - 1] = all_params[param - 1].replace(value, "").replace(settings.INJECT_TAG, "")
-        all_params[param - 1] = all_params[param - 1].replace(settings.INJECT_TAG, "")
+        # all_params[param - 1] = all_params[param - 1].replace(settings.INJECT_TAG, "")
         all_params[param - 1] = all_params[param - 1].replace(settings.INJECT_TAG, "")
         parameter = settings.PARAMETER_DELIMITER.join(all_params)
         parameter = parameter.replace(settings.RANDOM_TAG,"")
@@ -398,10 +399,14 @@ def prefixes(payload, prefix):
     specify_host_parameter(menu.options.host)
 
   # Check if defined "--prefix" option.
+  testable_value = settings.TESTABLE_VALUE
+  if settings.WILDCARD_CHAR_APPLIED:
+    testable_value = ""
   if menu.options.prefix:
-    payload = settings.TESTABLE_VALUE + menu.options.prefix + prefix + payload
+    payload = testable_value + menu.options.prefix + prefix + payload
   else:
-    payload = settings.TESTABLE_VALUE + prefix + payload 
+    payload = testable_value + prefix + payload 
+
   return payload
 
 """
@@ -415,12 +420,15 @@ def suffixes(payload, suffix):
     payload = payload + suffix + menu.options.suffix
   else:
     payload = payload + suffix
+    
   return payload
 
 """
 The cookie based injection.
 """
 def do_cookie_check(cookie):
+  # Do replacement with the 'INJECT_HERE' tag, if the wild card char is provided.
+  cookie = checks.wildcard_character(cookie)
   multi_parameters = cookie.split(settings.COOKIE_DELIMITER)
   # Check for inappropriate format in provided parameter(s).
   if len([s for s in multi_parameters if "=" in s]) != (len(multi_parameters)):
@@ -480,6 +488,7 @@ def do_cookie_check(cookie):
         else:
           all_params[param] = all_params[param].replace(value, value + settings.INJECT_TAG)  
         #all_params[param - 1] = all_params[param - 1].replace(value, "").replace(settings.INJECT_TAG, "")
+        # all_params[param - 1] = all_params[param - 1].replace(settings.INJECT_TAG, "")
         all_params[param - 1] = all_params[param - 1].replace(settings.INJECT_TAG, "")
         cookie = settings.COOKIE_DELIMITER.join(all_params)
         if type(cookie) != list:
@@ -500,7 +509,6 @@ Specify the cookie parameter(s).
 """
 def specify_cookie_parameter(cookie):
 
-  cookie = checks.wildcard_character(cookie)
   # Specify the vulnerable cookie parameter
   if re.search(r"" + settings.COOKIE_DELIMITER + "(.*)=[\S*(\\/)]*" + settings.INJECT_TAG, cookie) or \
      re.search(r"(.*)=[\S*(\\/)]*" + settings.INJECT_TAG , cookie):
