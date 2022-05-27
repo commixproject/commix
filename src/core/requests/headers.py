@@ -248,9 +248,9 @@ Check for added headers.
 """
 def do_check(request):
 
-  # Check if defined any Host HTTP header.
-  if menu.options.host and settings.HOST_INJECTION == None:
-    request.add_header(settings.HOST, menu.options.host)
+  # Check if defined any Cookie HTTP header.
+  if menu.options.cookie and settings.COOKIE_INJECTION == None:
+    request.add_header(settings.COOKIE, menu.options.cookie)
 
   # Check if defined any User-Agent HTTP header.
   if menu.options.agent and settings.USER_AGENT_INJECTION == None:
@@ -259,11 +259,11 @@ def do_check(request):
   # Check if defined any Referer HTTP header.
   if menu.options.referer and settings.REFERER_INJECTION == None:
     request.add_header(settings.REFERER, menu.options.referer)
-   
-  # Check if defined any Cookie HTTP header.
-  if menu.options.cookie and settings.COOKIE_INJECTION == False:
-    request.add_header(settings.COOKIE, menu.options.cookie)
-  
+     
+  # Check if defined any Host HTTP header.
+  if menu.options.host and settings.HOST_INJECTION == None:
+    request.add_header(settings.HOST, menu.options.host)
+
   if not checks.get_header(request.headers, settings.ACCEPT):
     request.add_header(settings.ACCEPT, settings.ACCEPT_VALUE)
 

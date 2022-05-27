@@ -44,19 +44,21 @@ Checks if the testable parameter is exploitable.
 Check for previously stored sessions.
 """
 def check_for_stored_sessions(url, http_request_method):
+
   if not menu.options.ignore_session:
     if os.path.isfile(settings.SESSION_FILE) and not settings.REQUIRED_AUTHENTICATION:
       if not menu.options.tech:
         settings.SESSION_APPLIED_TECHNIQUES = session_handler.applied_techniques(url, http_request_method)
         menu.options.tech = settings.SESSION_APPLIED_TECHNIQUES
       if session_handler.check_stored_parameter(url, http_request_method):
-        settings.LOAD_SESSION = True
+        # settings.LOAD_SESSION = True
         return True    
         
 """
 Check for previously stored injection level.
 """
 def check_for_stored_levels(url, http_request_method):
+
   if not menu.options.ignore_session:
     if menu.options.level == settings.DEFAULT_INJECTION_LEVEL:
       menu.options.level = session_handler.applied_levels(url, http_request_method)
@@ -436,7 +438,7 @@ Inject HTTP headers (User-agent / Referer / Host) (if level > 2).
 """
 def http_headers_injection(url, http_request_method, filename, timesec):
   # Disable Cookie Injection 
-  settings.COOKIE_INJECTION = False
+  settings.COOKIE_INJECTION = None
 
   def user_agent_injection(url, http_request_method, filename, timesec): 
     user_agent = menu.options.agent
@@ -735,6 +737,8 @@ def perform_checks(url, http_request_method, filename):
   if menu.options.shellshock:
     menu.options.level = settings.HTTP_HEADER_INJECTION_LEVEL
   else:
+    if menu.options.level != settings.DEFAULT_INJECTION_LEVEL:
+      menu.options.level = settings.USER_SUPPLIED_LEVEL
     check_for_stored_levels(url, http_request_method)
 
   if settings.PERFORM_BASIC_SCANS:
@@ -754,7 +758,9 @@ def perform_checks(url, http_request_method, filename):
   else:
     post_request(url, http_request_method, filename, timesec)
 
-  if menu.options.level >= settings.COOKIE_INJECTION_LEVEL:
+  _ = menu.options.level
+  if _ >= settings.COOKIE_INJECTION_LEVEL:
+    menu.options.level = settings.COOKIE_INJECTION_LEVEL
     # Enable Cookie Injection
     if menu.options.cookie:
       cookie_injection(url, http_request_method, filename, timesec)
@@ -762,8 +768,8 @@ def perform_checks(url, http_request_method, filename):
       warn_msg = "The HTTP Cookie header is not provided, "
       warn_msg += "so this test is going to be skipped."
       print(settings.print_warning_msg(warn_msg))
-
-    if menu.options.level == settings.HTTP_HEADER_INJECTION_LEVEL:
+    if _ == settings.HTTP_HEADER_INJECTION_LEVEL:
+      menu.options.level = settings.HTTP_HEADER_INJECTION_LEVEL
       if settings.INJECTED_HTTP_HEADER == False :
         check_parameter = ""
         # Check for stored injections on User-agent / Referer / Host HTTP headers (if level > 2).
@@ -827,7 +833,7 @@ def do_check(url, http_request_method, filename):
     if settings.CLASSIC_STATE == settings.EVAL_BASED_STATE == settings.TIME_BASED_STATE == settings.FILE_BASED_STATE == False :
       if settings.INJECTION_CHECKER == False and not settings.CHECK_BOTH_OS:
         err_msg = "All tested parameters "
-        if menu.options.level > 2:
+        if menu.options.level > settings.COOKIE_INJECTION_LEVEL:
           err_msg += "and HTTP headers "
         err_msg += "appear to be not injectable."
         if not menu.options.alter_shell :

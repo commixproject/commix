@@ -356,7 +356,7 @@ def main(filename, url):
           settings.TEST_PARAMETER[i] = settings.TEST_PARAMETER[i].split("=")[0]
           
     # Check injection level, due to the provided testable parameters.
-    if menu.options.level < 2 and menu.options.test_parameter != None:
+    if menu.options.level == settings.DEFAULT_INJECTION_LEVEL and menu.options.test_parameter != None:
       checks.check_injection_level()
 
     # Check if defined character used for splitting cookie values.
@@ -725,20 +725,23 @@ try:
         if "=" in settings.TEST_PARAMETER[i]:
           settings.TEST_PARAMETER[i] = settings.TEST_PARAMETER[i].split("=")[0]
 
+    if menu.options.level != settings.DEFAULT_INJECTION_LEVEL:
+      settings.USER_SUPPLIED_LEVEL = menu.options.level
+      
     # Define the level of tests to perform.
-    if menu.options.level == 1:
+    if menu.options.level == settings.DEFAULT_INJECTION_LEVEL:
       settings.SEPARATORS = sorted(set(settings.SEPARATORS_LVL1), key=settings.SEPARATORS_LVL1.index)
       settings.PREFIXES = sorted(set(settings.PREFIXES_LVL1), key=settings.PREFIXES_LVL1.index)
       settings.SUFFIXES = sorted(set(settings.SUFFIXES_LVL1), key=settings.SUFFIXES_LVL1.index)
       settings.EVAL_PREFIXES = sorted(set(settings.EVAL_PREFIXES_LVL1), key=settings.EVAL_PREFIXES_LVL1.index)
       settings.EVAL_SUFFIXES = sorted(set(settings.EVAL_SUFFIXES_LVL1), key=settings.EVAL_SUFFIXES_LVL1.index)
-    elif menu.options.level == 2:
+    elif menu.options.level == settings.COOKIE_INJECTION_LEVEL:
       settings.SEPARATORS = sorted(set(settings.SEPARATORS_LVL2), key=settings.SEPARATORS_LVL2.index)
       settings.PREFIXES = sorted(set(settings.PREFIXES_LVL2), key=settings.PREFIXES_LVL2.index)
       settings.SUFFIXES = sorted(set(settings.SUFFIXES_LVL2), key=settings.SUFFIXES_LVL2.index)
       settings.EVAL_PREFIXES = sorted(set(settings.EVAL_PREFIXES_LVL2), key=settings.EVAL_PREFIXES_LVL2.index)
       settings.EVAL_SUFFIXES = sorted(set(settings.EVAL_SUFFIXES_LVL2), key=settings.EVAL_SUFFIXES_LVL2.index)
-    elif menu.options.level == 3:
+    elif menu.options.level == settings.HTTP_HEADER_INJECTION_LEVEL:
       settings.SEPARATORS = sorted(set(settings.SEPARATORS_LVL3), key=settings.SEPARATORS_LVL3.index)
       settings.PREFIXES = sorted(set(settings.PREFIXES_LVL3), key=settings.PREFIXES_LVL3.index)
       settings.SUFFIXES = sorted(set(settings.SUFFIXES_LVL3), key=settings.SUFFIXES_LVL3.index)
@@ -868,7 +871,7 @@ try:
             if url == clean_output_href[-1]:
               settings.EOF = True
             # Reset the injection level
-            if menu.options.level > 3:
+            if menu.options.level > settings.HTTP_HEADER_INJECTION_LEVEL:
               menu.options.level = 1
             init_injection(url)
             try:

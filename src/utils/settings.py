@@ -234,7 +234,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.5"
-REVISION = "72"
+REVISION = "73"
 STABLE_RELEASE = False
 if STABLE_RELEASE:
   VERSION = "v" + VERSION_NUM + "-stable"
@@ -414,13 +414,13 @@ SEPARATORS_LVL3 = SEPARATORS_LVL2 = SEPARATORS_LVL1
 PREFIXES = []
 PREFIXES_LVL1 = [""]
 PREFIXES_LVL2 = SEPARATORS_LVL1
-PREFIXES_LVL3 = ["'", "\""] + PREFIXES_LVL2
+PREFIXES_LVL3 = PREFIXES_LVL2 + ["'", "\""] 
 
 # The command injection suffixes.
 SUFFIXES = []
 SUFFIXES_LVL1 = DEFAULT_SEPARATORS
 SUFFIXES_LVL2 = SEPARATORS_LVL1
-SUFFIXES_LVL3 = ["'", "\"", " #", "//", "\\\\"] + SUFFIXES_LVL2
+SUFFIXES_LVL3 = SUFFIXES_LVL2 + ["'", "\"", " #", "//", "\\\\"]
 
 # Bad combination of prefix and separator
 JUNK_COMBINATION = [SEPARATORS_LVL1[i] + SEPARATORS_LVL1[j] for i in range(len(SEPARATORS_LVL1)) for j in range(len(SEPARATORS_LVL1))]
@@ -462,6 +462,7 @@ DELAY_RETRY = 1
 DEFAULT_INJECTION_LEVEL = 1
 COOKIE_INJECTION_LEVEL = 2
 HTTP_HEADER_INJECTION_LEVEL = 3
+USER_SUPPLIED_LEVEL = DEFAULT_INJECTION_LEVEL
 PERFORM_BASIC_SCANS = True
 
 # Default Temp Directory
@@ -610,7 +611,7 @@ TOR_HTTP_PROXY_PORT = "8118"
 TOR_HTTP_PROXY_SCHEME = "https"
 
 # Cookie injection
-COOKIE_INJECTION = False
+COOKIE_INJECTION = None
 
 # User-Agent injection
 USER_AGENT_INJECTION = None

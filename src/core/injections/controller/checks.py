@@ -434,15 +434,15 @@ def check_injection_level():
       cookies = menu.options.cookie.split(settings.COOKIE_DELIMITER)
       for cookie in cookies:
         if cookie.split("=")[0].strip() in menu.options.test_parameter:
-          menu.options.level = 2
+          menu.options.level = settings.COOKIE_INJECTION_LEVEL
     elif menu.options.cookie.split("=")[0] in menu.options.test_parameter:
-      menu.options.level = 2
+      menu.options.level = settings.COOKIE_INJECTION_LEVEL
 
   # Checking testable HTTP headers for user-agent / referer / host
   if "user-agent" in menu.options.test_parameter or \
      "referer" in menu.options.test_parameter or \
      "host" in menu.options.test_parameter:
-    menu.options.level = 3
+    menu.options.level = settings.HTTP_HEADER_INJECTION_LEVEL
 
 """
 Procced to the next attack vector.
@@ -702,10 +702,10 @@ def check_CGI_scripts(url):
   _ = False
   for cgi_script in CGI_SCRIPTS:
     if cgi_script in url:
-      warn_msg = "The URL is probable to contain a script ('" + cgi_script + "') "
-      warn_msg += "vulnerable to shellshock. "
+      info_msg = "Heuristic (basic) tests shows that target URL might contain a script "
+      info_msg += "vulnerable to shellshock. "
       _ = True
-      print(settings.print_warning_msg(warn_msg))
+      print(settings.print_bold_info_msg(info_msg))
       while True:
         message = "Do you want to enable the shellshock module ('--shellshock')? [Y/n] > "
         shellshock_check = common.read_input(message, default="Y", check_batch=True)
@@ -938,7 +938,7 @@ def print_non_listed_params(check_parameters, http_request_method, header_name):
     if non_exist_param:
       non_exist_param = ",".join(non_exist_param).replace(" ","")
       non_exist_param = non_exist_param.split(",")
-      if menu.options.level >= 2 and \
+      if menu.options.level >= settings.COOKIE_INJECTION_LEVEL and \
          menu.options.test_parameter != None:
         if menu.options.cookie != None: 
           if settings.COOKIE_DELIMITER in menu.options.cookie:
@@ -965,7 +965,7 @@ def print_non_listed_params(check_parameters, http_request_method, header_name):
         warn_msg = "Skipping tests for "
         warn_msg += "the provided parameter" + "s"[len(non_exist_param) == 1:][::-1] + " '" 
         warn_msg += non_exist_param_items + "' as" + (' they are', ' it is')[len(non_exist_param) == 1]
-        if menu.options.level >= 2 and header_name != "":
+        if menu.options.level >= settings.COOKIE_INJECTION_LEVEL and header_name != "":
           warn_msg += " not part of the "
           warn_msg +=  settings.HTTP_HEADER
         else:

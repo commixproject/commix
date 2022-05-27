@@ -42,9 +42,9 @@ def do_GET_check(url, http_request_method):
   # Check for REST-ful URLs format. 
   if "?" not in url:
     if settings.INJECT_TAG not in url and not menu.options.shellshock:
-      if menu.options.level == 3 or menu.options.header or menu.options.headers:
+      if menu.options.level == settings.HTTP_HEADER_INJECTION_LEVEL or menu.options.header or menu.options.headers:
         return False
-      if menu.options.level == 2 :
+      if menu.options.level == settings.COOKIE_INJECTION_LEVEL :
         return False
       else: 
         err_msg = "No parameter(s) found for testing on the provided target URL. "
