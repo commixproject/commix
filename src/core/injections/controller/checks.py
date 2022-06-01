@@ -910,8 +910,6 @@ def wildcard_character(data):
     _ = _ + data + "\\n"
   data = _.rstrip("\\n")
   if data.count(settings.INJECT_TAG) > 1:
-    if settings.VERBOSITY_LEVEL == 0:
-      print(settings.SINGLE_WHITESPACE)
     err_msg = "You specified more than one injecton markers. " 
     err_msg += "Use the '-p' option to define them (i.e -p \"id1,id2\"). "
     print(settings.print_critical_msg(err_msg)) 

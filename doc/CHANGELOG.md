@@ -1,4 +1,5 @@
 ## Version 3.5 (TBA)
+* Revised: Improvement regarding identifying injection marker (i.e. asterisk) in provided options.
 * Revised: Improvement regarding shellshock module.
 * Added: Support regarding parsing target(s) from piped-input (i.e. stdin).
 * Added: New option `--answers` to set user answers to asked questions during commix run.

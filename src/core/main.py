@@ -33,6 +33,7 @@ from src.utils import version
 from src.utils import install
 from src.utils import crawler
 from src.utils import settings
+from src.core.requests import parameters
 from src.utils import session_handler
 from src.utils import simple_http_server
 from src.thirdparty.colorama import Fore, Back, Style, init
@@ -316,15 +317,73 @@ def main(filename, url):
     if menu.options.url_reload and menu.options.data:
       settings.URL_RELOAD = True
 
-    if menu.options.header is not None and settings.INJECT_TAG in menu.options.header or \
-       menu.options.headers is not None and settings.INJECT_TAG in menu.options.headers:
-      info_msg = "Injection marker found in option '--header(s)/--user-agent/--referer/--cookie'."
-      print(settings.print_info_msg(info_msg))
-      if menu.options.test_parameter:
-        err_msg = "The options '-p' and the injection marker cannot be used "
-        err_msg += "simultaneously (i.e. only one option must be set)."
-        print(settings.print_critical_msg(err_msg))
-        raise SystemExit
+    if settings.WILDCARD_CHAR_APPLIED and settings.MULTI_TARGETS or not settings.IS_TTY:
+      settings.WILDCARD_CHAR_APPLIED = False
+
+    parameter = ""
+    if menu.options.url and settings.WILDCARD_CHAR in menu.options.url:
+      option = "'-u'"
+      settings.WILDCARD_CHAR_APPLIED = True
+      parameter = parameters.do_GET_check(menu.options.url, http_request_method)
+      parameter = parameters.vuln_GET_param(parameter[0])
+    elif menu.options.data and settings.WILDCARD_CHAR in menu.options.data:
+      option = "POST body"
+      settings.WILDCARD_CHAR_APPLIED = True
+      parameter = parameters.do_POST_check(menu.options.data, http_request_method)
+      if len(parameter) == 0:
+        parameter = parameter[0]
+      parameter = parameters.vuln_POST_param(parameter, url="")
+    else:
+      option = "option '--headers/--user-agent/--referer/--cookie'"
+      if menu.options.cookie and settings.WILDCARD_CHAR in menu.options.cookie:
+        settings.WILDCARD_CHAR_APPLIED = True
+        menu.options.level = settings.COOKIE_INJECTION_LEVEL
+        cookie = parameters.do_cookie_check(menu.options.cookie)
+        parameter = parameters.specify_cookie_parameter(cookie)
+
+      elif menu.options.agent and settings.WILDCARD_CHAR in menu.options.agent:
+        settings.WILDCARD_CHAR_APPLIED = True
+        menu.options.level = settings.HTTP_HEADER_INJECTION_LEVEL
+        parameter = "user-agent"
+
+      elif menu.options.referer and settings.WILDCARD_CHAR in menu.options.referer:
+        settings.WILDCARD_CHAR_APPLIED = True
+        menu.options.level = settings.HTTP_HEADER_INJECTION_LEVEL
+        parameter = "referer"
+
+      elif menu.options.headers and settings.WILDCARD_CHAR in menu.options.headers:
+        _ = True
+        for data in menu.options.headers.split("\\n"):
+          # Ignore the Accept HTTP Header
+          if not data.startswith(settings.ACCEPT):
+            _ = False
+        if _:    
+          settings.WILDCARD_CHAR_APPLIED = True
+          menu.options.level = settings.HTTP_HEADER_INJECTION_LEVEL
+          parameter = parameters.specify_custom_header_parameter(settings.WILDCARD_CHAR)
+
+    if menu.options.test_parameter and settings.WILDCARD_CHAR_APPLIED:
+      err_msg = "The options '-p' and the custom injection marker (" + settings.WILDCARD_CHAR + ") "
+      err_msg += "cannot be used simultaneously (i.e. only one option must be set)."
+      print(settings.print_critical_msg(err_msg))
+      raise SystemExit      
+
+    if settings.WILDCARD_CHAR_APPLIED:
+      while True:
+        message = "Custom injection marker (" + settings.WILDCARD_CHAR + ") found in " + option +". "
+        message += "Do you want to process it? [Y/n] > "
+        procced_option = common.read_input(message, default="Y", check_batch=True)
+        if procced_option in settings.CHOICE_YES:
+          menu.options.test_parameter = parameter
+          break
+        elif procced_option in settings.CHOICE_NO:
+          break
+        elif procced_option in settings.CHOICE_QUIT:
+          raise SystemExit()
+        else:
+          err_msg = "'" + procced_option + "' is not a valid answer."  
+          print(settings.print_error_msg(err_msg))
+          pass
 
     if menu.options.test_parameter and menu.options.skip_parameter:
       if type(menu.options.test_parameter) is bool:
@@ -356,7 +415,8 @@ def main(filename, url):
           settings.TEST_PARAMETER[i] = settings.TEST_PARAMETER[i].split("=")[0]
           
     # Check injection level, due to the provided testable parameters.
-    if menu.options.level == settings.DEFAULT_INJECTION_LEVEL and menu.options.test_parameter != None:
+    if menu.options.level == settings.DEFAULT_INJECTION_LEVEL and \
+    menu.options.test_parameter != None:
       checks.check_injection_level()
 
     # Check if defined character used for splitting cookie values.

@@ -51,7 +51,8 @@ def check_for_stored_sessions(url, http_request_method):
         settings.SESSION_APPLIED_TECHNIQUES = session_handler.applied_techniques(url, http_request_method)
         menu.options.tech = settings.SESSION_APPLIED_TECHNIQUES
       if session_handler.check_stored_parameter(url, http_request_method):
-        # settings.LOAD_SESSION = True
+        if not settings.MULTI_TARGETS or settings.IS_TTY:
+          settings.LOAD_SESSION = True
         return True    
         
 """
@@ -737,7 +738,7 @@ def perform_checks(url, http_request_method, filename):
   if menu.options.shellshock:
     menu.options.level = settings.HTTP_HEADER_INJECTION_LEVEL
   else:
-    if menu.options.level != settings.DEFAULT_INJECTION_LEVEL:
+    if menu.options.level != settings.DEFAULT_INJECTION_LEVEL and not settings.WILDCARD_CHAR_APPLIED:
       menu.options.level = settings.USER_SUPPLIED_LEVEL
     check_for_stored_levels(url, http_request_method)
 
