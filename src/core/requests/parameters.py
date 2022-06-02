@@ -346,7 +346,8 @@ def do_POST_check(parameter, http_request_method):
 Define the vulnerable POST parameter.
 """
 def vuln_POST_param(parameter, url):
-
+  if isinstance(parameter, list):
+    parameter = " ".join(parameter)
   # JSON data format
   if settings.IS_JSON:
     param = re.sub(settings.IGNORE_SPECIAL_CHAR_REGEX, '', parameter.split(settings.INJECT_TAG)[0])

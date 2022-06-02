@@ -158,7 +158,10 @@ def code_injections_heuristic_basic(url, http_request_method, check_parameter, t
         if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
           cookie = menu.options.cookie.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC)
         elif menu.options.data and http_request_method == settings.HTTPMETHOD.POST:
-          data = menu.options.data.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC)
+          if inject_http_headers:
+            data = menu.options.data.replace(settings.INJECT_TAG,"").encode(settings.DEFAULT_CODEC)
+          else: 
+            data = menu.options.data.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC)
         else:
           if settings.INJECT_TAG in url:
             tmp_url = url.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload)
@@ -166,7 +169,7 @@ def code_injections_heuristic_basic(url, http_request_method, check_parameter, t
         if cookie:
           request.add_header(settings.COOKIE, cookie)
         if inject_http_headers:
-                    request.add_header(check_parameter.replace("'","").strip(), (settings.CUSTOM_HEADER_VALUE + payload).encode(settings.DEFAULT_CODEC))
+          request.add_header(check_parameter.replace("'","").strip(), (settings.CUSTOM_HEADER_VALUE + payload).encode(settings.DEFAULT_CODEC))
         headers.do_check(request)
         response = requests.get_request_response(request)
 
@@ -738,7 +741,7 @@ def perform_checks(url, http_request_method, filename):
   if menu.options.shellshock:
     menu.options.level = settings.HTTP_HEADER_INJECTION_LEVEL
   else:
-    if menu.options.level != settings.DEFAULT_INJECTION_LEVEL and not settings.WILDCARD_CHAR_APPLIED:
+    if menu.options.level != settings.DEFAULT_INJECTION_LEVEL and settings.WILDCARD_CHAR_APPLIED != True:
       menu.options.level = settings.USER_SUPPLIED_LEVEL
     check_for_stored_levels(url, http_request_method)
 

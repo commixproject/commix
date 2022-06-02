@@ -76,6 +76,44 @@ def mobile_user_agents():
       pass     
 
 """
+The available mobile user agents.
+"""
+def mobile_user_agents():
+  menu.mobile_user_agents()
+  while True:
+    message = "Which smartphone do you want to imitate through HTTP User-Agent header? > "
+    mobile_user_agent = common.read_input(message, default="1", check_batch=True)
+    try:
+      if int(mobile_user_agent) in range(1,len(settings.MOBILE_USER_AGENT_LIST)):
+        return settings.MOBILE_USER_AGENT_LIST[int(mobile_user_agent)]
+      elif mobile_user_agent.lower() == "q":
+        raise SystemExit()
+      else:
+        err_msg = "'" + mobile_user_agent + "' is not a valid answer."  
+        print(settings.print_error_msg(err_msg))
+        pass
+    except ValueError:
+      err_msg = "'" + mobile_user_agent + "' is not a valid answer."  
+      print(settings.print_error_msg(err_msg))
+      pass     
+
+"""
+Check for HTTP Method
+"""
+def check_http_method(url):
+  if len(settings.HTTP_METHOD) != 0:
+    http_request_method = settings.HTTP_METHOD.upper()
+  else:
+    if not menu.options.data or \
+       settings.WILDCARD_CHAR in url or \
+       settings.INJECT_TAG in url or \
+       [x for x in settings.TEST_PARAMETER if(x + "=" in url and not x in menu.options.data)]:
+      http_request_method = settings.HTTPMETHOD.GET
+    else:
+      http_request_method = settings.HTTPMETHOD.POST
+  return http_request_method    
+
+"""
 User aborted procedure
 """
 def user_aborted(filename, url):
@@ -901,19 +939,20 @@ Do replacement with the 'INJECT_HERE' tag,
 if the wildcard char is provided.
 """
 def wildcard_character(data):
-  _ = ""
-  for data in data.split("\\n"):
-    # Ignore the Accept HTTP Header
-    if not data.startswith(settings.ACCEPT) and not settings.WILDCARD_CHAR is None and not settings.INJECT_TAG in data and settings.WILDCARD_CHAR in data :
-      data = data.replace(settings.WILDCARD_CHAR, settings.INJECT_TAG)
-      settings.WILDCARD_CHAR_APPLIED = True
-    _ = _ + data + "\\n"
-  data = _.rstrip("\\n")
-  if data.count(settings.INJECT_TAG) > 1:
-    err_msg = "You specified more than one injecton markers. " 
-    err_msg += "Use the '-p' option to define them (i.e -p \"id1,id2\"). "
-    print(settings.print_critical_msg(err_msg)) 
-    raise SystemExit()
+  if settings.WILDCARD_CHAR_APPLIED != None:
+    _ = ""
+    for data in data.split("\\n"):
+      # Ignore the Accept HTTP Header
+      if not data.startswith(settings.ACCEPT) and not settings.WILDCARD_CHAR is None and not settings.INJECT_TAG in data and settings.WILDCARD_CHAR in data :
+        data = data.replace(settings.WILDCARD_CHAR, settings.INJECT_TAG)
+        settings.WILDCARD_CHAR_APPLIED = True
+      _ = _ + data + "\\n"
+    data = _.rstrip("\\n")
+    if data.count(settings.INJECT_TAG) > 1:
+      err_msg = "You specified more than one injecton markers. " 
+      err_msg += "Use the '-p' option to define them (i.e -p \"id1,id2\"). "
+      print(settings.print_critical_msg(err_msg)) 
+      raise SystemExit()
   return data
 
 """

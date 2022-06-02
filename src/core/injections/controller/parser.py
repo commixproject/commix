@@ -118,8 +118,8 @@ def logfile_parser():
     request_url = re.findall(r"" + " (.*) HTTP/", request)
 
     if request_url:
-      # Check last line for POST data
-      if len(request.splitlines()[-1]) != 0:
+      # Check empty line for POST data.
+      if len(request.splitlines()[-2]) == 0:
         result = [item for item in request.splitlines() if item]
         multiple_xml = []
         for item in result:
@@ -194,8 +194,7 @@ def logfile_parser():
     else:
       menu.options.url = prefix + menu.options.host + request_url
       if single_request:
-        sys.stdout.write(settings.SUCCESS_STATUS + "\n")
-        sys.stdout.flush()
+        print(settings.SINGLE_WHITESPACE)
       if menu.options.logfile and settings.VERBOSITY_LEVEL != 0:
         sub_content = http_method + " " +  prefix + menu.options.host + request_url
         print(settings.print_sub_content(sub_content))

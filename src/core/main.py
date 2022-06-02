@@ -61,24 +61,74 @@ if settings.IS_WINDOWS:
   init()
 
 """
-Check for HTTP Method
+Check for custom injection marker (*)
 """
-def check_http_method(url):
-  if len(settings.HTTP_METHOD) != 0:
-    http_request_method = settings.HTTP_METHOD.upper()
+def check_custom_injection_marker(url):
+
+  parameter = ""
+  if url and settings.WILDCARD_CHAR in url:
+    option = "'-u'"
+    settings.WILDCARD_CHAR_APPLIED = True
+    parameter = parameters.do_GET_check(url, http_request_method)
+    parameter = parameters.vuln_GET_param(parameter[0])
+  elif menu.options.data and settings.WILDCARD_CHAR in menu.options.data:
+    option = "POST body"
+    settings.WILDCARD_CHAR_APPLIED = True
+    parameter = parameters.do_POST_check(menu.options.data, http_request_method)
+    parameter = parameters.vuln_POST_param(parameter, url)
   else:
-    if not menu.options.data or \
-       not settings.WILDCARD_CHAR is None and settings.WILDCARD_CHAR in url or \
-       settings.INJECT_TAG in url or \
-       [x for x in settings.TEST_PARAMETER if(x + "=" in url and not x in menu.options.data)]:
-      http_request_method = settings.HTTPMETHOD.GET
-    else:
-      http_request_method = settings.HTTPMETHOD.POST
+    option = "option '--headers/--user-agent/--referer/--cookie'"
+    if menu.options.cookie and settings.WILDCARD_CHAR in menu.options.cookie:
+      settings.WILDCARD_CHAR_APPLIED = True
+      menu.options.level = settings.COOKIE_INJECTION_LEVEL
+      cookie = parameters.do_cookie_check(menu.options.cookie)
+      parameter = parameters.specify_cookie_parameter(cookie)
 
-  if menu.options.offline:
-    settings.CHECK_FOR_UPDATES_ON_START = False
+    elif menu.options.agent and settings.WILDCARD_CHAR in menu.options.agent:
+      settings.WILDCARD_CHAR_APPLIED = True
+      menu.options.level = settings.HTTP_HEADER_INJECTION_LEVEL
+      parameter = "user-agent"
 
-  return http_request_method    
+    elif menu.options.referer and settings.WILDCARD_CHAR in menu.options.referer:
+      settings.WILDCARD_CHAR_APPLIED = True
+      menu.options.level = settings.HTTP_HEADER_INJECTION_LEVEL
+      parameter = "referer"
+
+    elif menu.options.headers and settings.WILDCARD_CHAR in menu.options.headers:
+      _ = True
+      for data in menu.options.headers.split("\\n"):
+        # Ignore the Accept HTTP Header
+        if not data.startswith(settings.ACCEPT):
+          _ = False
+      if _:    
+        settings.WILDCARD_CHAR_APPLIED = True
+        menu.options.level = settings.HTTP_HEADER_INJECTION_LEVEL
+        parameter = parameters.specify_custom_header_parameter(settings.WILDCARD_CHAR)
+
+  if settings.WILDCARD_CHAR_APPLIED:
+    if menu.options.test_parameter:
+      if not settings.MULTI_TARGETS or not settings.IS_TTY:
+        err_msg = "The options '-p' and the custom injection marker (" + settings.WILDCARD_CHAR + ") "
+        err_msg += "cannot be used simultaneously (i.e. only one option must be set)."
+        print(settings.print_critical_msg(err_msg))
+        raise SystemExit 
+
+    while True:
+      message = "Custom injection marker (" + settings.WILDCARD_CHAR + ") found in " + option +". "
+      message += "Do you want to process it? [Y/n] > "
+      procced_option = common.read_input(message, default="Y", check_batch=True)
+      if procced_option in settings.CHOICE_YES:
+        menu.options.test_parameter = parameter
+        return
+      elif procced_option in settings.CHOICE_NO:
+        settings.WILDCARD_CHAR_APPLIED = None
+        return
+      elif procced_option in settings.CHOICE_QUIT:
+        raise SystemExit()
+      else:
+        err_msg = "'" + procced_option + "' is not a valid answer."  
+        print(settings.print_error_msg(err_msg))
+        pass
 
 
 """
@@ -309,6 +359,9 @@ The main function.
 """
 def main(filename, url):
   try:
+    if menu.options.offline:
+      settings.CHECK_FOR_UPDATES_ON_START = False
+
     # Ignore the mathematic calculation part (Detection phase).
     if menu.options.skip_calc:
       settings.SKIP_CALC = True
@@ -320,70 +373,32 @@ def main(filename, url):
     if settings.WILDCARD_CHAR_APPLIED and settings.MULTI_TARGETS or not settings.IS_TTY:
       settings.WILDCARD_CHAR_APPLIED = False
 
-    parameter = ""
-    if menu.options.url and settings.WILDCARD_CHAR in menu.options.url:
-      option = "'-u'"
-      settings.WILDCARD_CHAR_APPLIED = True
-      parameter = parameters.do_GET_check(menu.options.url, http_request_method)
-      parameter = parameters.vuln_GET_param(parameter[0])
-    elif menu.options.data and settings.WILDCARD_CHAR in menu.options.data:
-      option = "POST body"
-      settings.WILDCARD_CHAR_APPLIED = True
-      parameter = parameters.do_POST_check(menu.options.data, http_request_method)
-      if len(parameter) == 0:
-        parameter = parameter[0]
-      parameter = parameters.vuln_POST_param(parameter, url="")
+    check_custom_injection_marker(url)
+
+    # Define the level of tests to perform.
+    if menu.options.level == settings.DEFAULT_INJECTION_LEVEL:
+      settings.SEPARATORS = sorted(set(settings.SEPARATORS_LVL1), key=settings.SEPARATORS_LVL1.index)
+      settings.PREFIXES = sorted(set(settings.PREFIXES_LVL1), key=settings.PREFIXES_LVL1.index)
+      settings.SUFFIXES = sorted(set(settings.SUFFIXES_LVL1), key=settings.SUFFIXES_LVL1.index)
+      settings.EVAL_PREFIXES = sorted(set(settings.EVAL_PREFIXES_LVL1), key=settings.EVAL_PREFIXES_LVL1.index)
+      settings.EVAL_SUFFIXES = sorted(set(settings.EVAL_SUFFIXES_LVL1), key=settings.EVAL_SUFFIXES_LVL1.index)
+    elif menu.options.level == settings.COOKIE_INJECTION_LEVEL:
+      settings.SEPARATORS = sorted(set(settings.SEPARATORS_LVL2), key=settings.SEPARATORS_LVL2.index)
+      settings.PREFIXES = sorted(set(settings.PREFIXES_LVL2), key=settings.PREFIXES_LVL2.index)
+      settings.SUFFIXES = sorted(set(settings.SUFFIXES_LVL2), key=settings.SUFFIXES_LVL2.index)
+      settings.EVAL_PREFIXES = sorted(set(settings.EVAL_PREFIXES_LVL2), key=settings.EVAL_PREFIXES_LVL2.index)
+      settings.EVAL_SUFFIXES = sorted(set(settings.EVAL_SUFFIXES_LVL2), key=settings.EVAL_SUFFIXES_LVL2.index)
+    elif menu.options.level == settings.HTTP_HEADER_INJECTION_LEVEL:
+      settings.SEPARATORS = sorted(set(settings.SEPARATORS_LVL3), key=settings.SEPARATORS_LVL3.index)
+      settings.PREFIXES = sorted(set(settings.PREFIXES_LVL3), key=settings.PREFIXES_LVL3.index)
+      settings.SUFFIXES = sorted(set(settings.SUFFIXES_LVL3), key=settings.SUFFIXES_LVL3.index)
+      settings.EVAL_PREFIXES = sorted(set(settings.EVAL_PREFIXES_LVL3), key=settings.EVAL_PREFIXES_LVL3.index)
+      settings.EVAL_SUFFIXES = sorted(set(settings.EVAL_SUFFIXES_LVL3), key=settings.EVAL_SUFFIXES_LVL3.index)
     else:
-      option = "option '--headers/--user-agent/--referer/--cookie'"
-      if menu.options.cookie and settings.WILDCARD_CHAR in menu.options.cookie:
-        settings.WILDCARD_CHAR_APPLIED = True
-        menu.options.level = settings.COOKIE_INJECTION_LEVEL
-        cookie = parameters.do_cookie_check(menu.options.cookie)
-        parameter = parameters.specify_cookie_parameter(cookie)
-
-      elif menu.options.agent and settings.WILDCARD_CHAR in menu.options.agent:
-        settings.WILDCARD_CHAR_APPLIED = True
-        menu.options.level = settings.HTTP_HEADER_INJECTION_LEVEL
-        parameter = "user-agent"
-
-      elif menu.options.referer and settings.WILDCARD_CHAR in menu.options.referer:
-        settings.WILDCARD_CHAR_APPLIED = True
-        menu.options.level = settings.HTTP_HEADER_INJECTION_LEVEL
-        parameter = "referer"
-
-      elif menu.options.headers and settings.WILDCARD_CHAR in menu.options.headers:
-        _ = True
-        for data in menu.options.headers.split("\\n"):
-          # Ignore the Accept HTTP Header
-          if not data.startswith(settings.ACCEPT):
-            _ = False
-        if _:    
-          settings.WILDCARD_CHAR_APPLIED = True
-          menu.options.level = settings.HTTP_HEADER_INJECTION_LEVEL
-          parameter = parameters.specify_custom_header_parameter(settings.WILDCARD_CHAR)
-
-    if menu.options.test_parameter and settings.WILDCARD_CHAR_APPLIED:
-      err_msg = "The options '-p' and the custom injection marker (" + settings.WILDCARD_CHAR + ") "
-      err_msg += "cannot be used simultaneously (i.e. only one option must be set)."
+      err_msg = "The value for option '--level' "
+      err_msg += "must be an integer value from range [1, 3]."
       print(settings.print_critical_msg(err_msg))
-      raise SystemExit      
-
-    if settings.WILDCARD_CHAR_APPLIED:
-      while True:
-        message = "Custom injection marker (" + settings.WILDCARD_CHAR + ") found in " + option +". "
-        message += "Do you want to process it? [Y/n] > "
-        procced_option = common.read_input(message, default="Y", check_batch=True)
-        if procced_option in settings.CHOICE_YES:
-          menu.options.test_parameter = parameter
-          break
-        elif procced_option in settings.CHOICE_NO:
-          break
-        elif procced_option in settings.CHOICE_QUIT:
-          raise SystemExit()
-        else:
-          err_msg = "'" + procced_option + "' is not a valid answer."  
-          print(settings.print_error_msg(err_msg))
-          pass
+      raise SystemExit()
 
     if menu.options.test_parameter and menu.options.skip_parameter:
       if type(menu.options.test_parameter) is bool:
@@ -788,31 +803,6 @@ try:
     if menu.options.level != settings.DEFAULT_INJECTION_LEVEL:
       settings.USER_SUPPLIED_LEVEL = menu.options.level
       
-    # Define the level of tests to perform.
-    if menu.options.level == settings.DEFAULT_INJECTION_LEVEL:
-      settings.SEPARATORS = sorted(set(settings.SEPARATORS_LVL1), key=settings.SEPARATORS_LVL1.index)
-      settings.PREFIXES = sorted(set(settings.PREFIXES_LVL1), key=settings.PREFIXES_LVL1.index)
-      settings.SUFFIXES = sorted(set(settings.SUFFIXES_LVL1), key=settings.SUFFIXES_LVL1.index)
-      settings.EVAL_PREFIXES = sorted(set(settings.EVAL_PREFIXES_LVL1), key=settings.EVAL_PREFIXES_LVL1.index)
-      settings.EVAL_SUFFIXES = sorted(set(settings.EVAL_SUFFIXES_LVL1), key=settings.EVAL_SUFFIXES_LVL1.index)
-    elif menu.options.level == settings.COOKIE_INJECTION_LEVEL:
-      settings.SEPARATORS = sorted(set(settings.SEPARATORS_LVL2), key=settings.SEPARATORS_LVL2.index)
-      settings.PREFIXES = sorted(set(settings.PREFIXES_LVL2), key=settings.PREFIXES_LVL2.index)
-      settings.SUFFIXES = sorted(set(settings.SUFFIXES_LVL2), key=settings.SUFFIXES_LVL2.index)
-      settings.EVAL_PREFIXES = sorted(set(settings.EVAL_PREFIXES_LVL2), key=settings.EVAL_PREFIXES_LVL2.index)
-      settings.EVAL_SUFFIXES = sorted(set(settings.EVAL_SUFFIXES_LVL2), key=settings.EVAL_SUFFIXES_LVL2.index)
-    elif menu.options.level == settings.HTTP_HEADER_INJECTION_LEVEL:
-      settings.SEPARATORS = sorted(set(settings.SEPARATORS_LVL3), key=settings.SEPARATORS_LVL3.index)
-      settings.PREFIXES = sorted(set(settings.PREFIXES_LVL3), key=settings.PREFIXES_LVL3.index)
-      settings.SUFFIXES = sorted(set(settings.SUFFIXES_LVL3), key=settings.SUFFIXES_LVL3.index)
-      settings.EVAL_PREFIXES = sorted(set(settings.EVAL_PREFIXES_LVL3), key=settings.EVAL_PREFIXES_LVL3.index)
-      settings.EVAL_SUFFIXES = sorted(set(settings.EVAL_SUFFIXES_LVL3), key=settings.EVAL_SUFFIXES_LVL3.index)
-    else:
-      err_msg = "The value for option '--level' "
-      err_msg += "must be an integer value from range [1, 3]."
-      print(settings.print_critical_msg(err_msg))
-      raise SystemExit()
-
     # Define the local path where Metasploit Framework is installed.
     if menu.options.msf_path:
       settings.METASPLOIT_PATH = menu.options.msf_path
@@ -839,7 +829,7 @@ try:
       url = menu.options.url
 
     if settings.IS_TTY and not menu.options.bulkfile and not settings.CRAWLING:
-      http_request_method  = check_http_method(url)
+      http_request_method  = checks.check_http_method(url)
       if os_checks_num == 0:
         settings.INIT_TEST = True
       response, url = url_response(url)
@@ -919,7 +909,7 @@ try:
         print(settings.print_info_msg(info_msg))
       url_num = 0
       for url in clean_output_href:
-        http_request_method  = check_http_method(url)
+        http_request_method  = checks.check_http_method(url)
         if (settings.CRAWLING and re.search(r"(.*?)\?(.+)", url) or menu.options.shellshock) or settings.MULTI_TARGETS:
           url_num += 1
           print(settings.print_message("[" + str(url_num) + "/" + str(len(clean_output_href)) + "] URL - " + url) + "")
