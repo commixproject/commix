@@ -408,17 +408,6 @@ file_access.add_option("--file-dest",
 # Modules options
 modules = OptionGroup(parser, Style.BRIGHT + Style.UNDERLINE + "Modules" + Style.RESET_ALL, 
                         "These options can be used increase the detection and/or injection capabilities.")
-modules.add_option("--icmp-exfil", 
-                action="store",
-                dest="ip_icmp_data",
-                default=False,
-                help="The 'ICMP exfiltration' injection module.           (e.g. 'ip_src=192.168.178.1,ip_dst=192.168.178.3').")
-
-modules.add_option("--dns-server", 
-                action="store",
-                dest="dns_server",
-                default=False,
-                help="The 'DNS exfiltration' injection module.        (Domain name used for DNS exfiltration attack).")
 
 modules.add_option("--shellshock", 
                 action="store_true",
