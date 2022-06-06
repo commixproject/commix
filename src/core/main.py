@@ -130,7 +130,6 @@ def check_custom_injection_marker(url):
         print(settings.print_error_msg(err_msg))
         pass
 
-
 """
 Define HTTP User-Agent header.
 """
@@ -483,13 +482,6 @@ def main(filename, url):
     if not menu.options.tech:
       menu.options.tech = "".join(settings.AVAILABLE_TECHNIQUES)
     
-    # Check if specified wrong alternative shell
-    if menu.options.alter_shell:
-      if menu.options.alter_shell.lower() not in settings.AVAILABLE_SHELLS:
-        err_msg = "'" + menu.options.alter_shell + "' shell is not supported!"
-        print(settings.print_critical_msg(err_msg))
-        raise SystemExit()
-
     # Check the file-destination
     if menu.options.file_write and not menu.options.file_dest or \
     menu.options.file_upload  and not menu.options.file_dest:
@@ -605,6 +597,13 @@ try:
   if os.path.isfile(settings.SETTINGS_PATH):
     if settings.STABLE_RELEASE == False:
       common.days_from_last_update()
+
+  # Check if specified wrong alternative shell
+  if menu.options.alter_shell:
+    if menu.options.alter_shell.lower() not in settings.AVAILABLE_SHELLS:
+      err_msg = "'" + menu.options.alter_shell + "' shell is not supported!"
+      print(settings.print_critical_msg(err_msg))
+      raise SystemExit()
 
   # Define the level of verbosity.
   if menu.options.verbose > 4:

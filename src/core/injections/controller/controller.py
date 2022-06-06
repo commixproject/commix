@@ -70,6 +70,10 @@ def check_for_stored_levels(url, http_request_method):
 Heuristic (basic) tests for command injection
 """
 def command_injection_heuristic_basic(url, http_request_method, check_parameter, the_type, header_name, inject_http_headers):
+  if menu.options.alter_shell:
+    basic_payloads = settings.ALTER_SHELL_BASIC_COMMAND_INJECTION_PAYLOADS
+  else:
+    basic_payloads = settings.BASIC_COMMAND_INJECTION_PAYLOADS
   if not header_name == " cookie" and not the_type == " HTTP header":
     header_name = " " + str(http_request_method) 
   settings.CLASSIC_STATE = True
@@ -77,7 +81,7 @@ def command_injection_heuristic_basic(url, http_request_method, check_parameter,
     whitespace = settings.WHITESPACES[0]
     if not settings.IDENTIFIED_COMMAND_INJECTION or settings.MULTI_TARGETS:  
       _ = 0
-      for payload in settings.BASIC_COMMAND_INJECTION_PAYLOADS:
+      for payload in basic_payloads:
         _ = _ + 1
         if not inject_http_headers or (inject_http_headers and "'Host'" in check_parameter):
           payload = _urllib.parse.quote(payload)

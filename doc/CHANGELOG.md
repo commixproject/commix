@@ -1,4 +1,5 @@
 ## Version 3.5 (TBA)
+* Revised: Improvement regarding alternative shell (i.e.`--alter-shell`) for generating Python 3x payloads.
 * Removed: The depricated modules "ICMP exfiltration" and "DNS exfiltration" have been removed.
 * Revised: Improvement regarding identifying injection marker (i.e. asterisk) in provided options.
 * Revised: Improvement regarding shellshock module.

