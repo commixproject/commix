@@ -64,7 +64,6 @@ if settings.IS_WINDOWS:
 Check for custom injection marker (*)
 """
 def check_custom_injection_marker(url):
-
   parameter = ""
   if url and settings.WILDCARD_CHAR in url:
     option = "'-u'"
@@ -169,6 +168,7 @@ def user_agent_header():
   if settings.VERBOSITY_LEVEL != 0:
     debug_msg = "Setting the HTTP User-Agent header."
     print(settings.print_debug_msg(debug_msg))
+
 """
 Examine the request
 """
@@ -940,12 +940,10 @@ except KeyboardInterrupt:
     checks.user_aborted(filename, url)
   except NameError:
     abort_msg = "User quit (Ctrl-C was pressed)."
-    print(settings.SINGLE_WHITESPACE)
     print(settings.print_abort_msg(abort_msg))
     raise SystemExit()
 
 except SystemExit: 
-  print(settings.SINGLE_WHITESPACE)
   raise SystemExit()
 
 except EOFError:

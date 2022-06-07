@@ -1183,7 +1183,7 @@ def check_target_os(server_banner):
           print(settings.print_critical_msg(err_msg))
           raise SystemExit()
       else:
-        identified_os = "unix-like (" + settings.TARGET_OS + ")"
+        identified_os = "Unix-like (" + settings.TARGET_OS + ")"
         if menu.options.os and user_defined_os == "win":
           if not checks.identified_os():
             settings.TARGET_OS = user_defined_os
@@ -1207,7 +1207,7 @@ def check_target_os(server_banner):
       if menu.options.batch:
         if not settings.CHECK_BOTH_OS:
           settings.CHECK_BOTH_OS = True
-          check_type = "unix-like based"
+          check_type = "Unix-like based"
         elif settings.CHECK_BOTH_OS:
           settings.TARGET_OS = "win"
           settings.CHECK_BOTH_OS = False

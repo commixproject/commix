@@ -19,7 +19,7 @@ from src.utils import settings
 
 """
 About: Uses "timeout" function for time-based attacks.
-  * Regarding unix-like target(s), it replaces the "sleep XX" command with "timeout XX ping localhost". 
+  * Regarding Unix-like target(s), it replaces the "sleep XX" command with "timeout XX ping localhost". 
   * Regarding windows target(s), it replaces the "powershell.exe -InputFormat none Start-Sleep -s XX" command with "timeout XX".
 Notes: This tamper script works against all targets.
 """

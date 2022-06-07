@@ -76,28 +76,6 @@ def mobile_user_agents():
       pass     
 
 """
-The available mobile user agents.
-"""
-def mobile_user_agents():
-  menu.mobile_user_agents()
-  while True:
-    message = "Which smartphone do you want to imitate through HTTP User-Agent header? > "
-    mobile_user_agent = common.read_input(message, default="1", check_batch=True)
-    try:
-      if int(mobile_user_agent) in range(1,len(settings.MOBILE_USER_AGENT_LIST)):
-        return settings.MOBILE_USER_AGENT_LIST[int(mobile_user_agent)]
-      elif mobile_user_agent.lower() == "q":
-        raise SystemExit()
-      else:
-        err_msg = "'" + mobile_user_agent + "' is not a valid answer."  
-        print(settings.print_error_msg(err_msg))
-        pass
-    except ValueError:
-      err_msg = "'" + mobile_user_agent + "' is not a valid answer."  
-      print(settings.print_error_msg(err_msg))
-      pass     
-
-"""
 Check for HTTP Method
 """
 def check_http_method(url):
@@ -120,7 +98,6 @@ def user_aborted(filename, url):
   abort_msg = "User aborted procedure "
   abort_msg += "during the " + assessment_phase() 
   abort_msg += " phase (Ctrl-C was pressed)."
-  print(settings.SINGLE_WHITESPACE)
   print(settings.print_abort_msg(abort_msg))
   logs.print_logs_notification(filename, url)
   os._exit(0)
@@ -334,7 +311,7 @@ def page_encoding(response, action):
     except Exception as ex:
       if settings.PAGE_COMPRESSION is None:
         warn_msg = "Turning off page compression."
-        sys.stdout.write("\n" + settings.print_warning_msg(warn_msg))
+        print(settings.print_warning_msg(warn_msg))
         settings.PAGE_COMPRESSION = False
   try:
     if action == "encode" and type(page) == str:
@@ -403,7 +380,19 @@ def captcha_check(page):
           print(settings.SINGLE_WHITESPACE)
         print(settings.print_bold_warning_msg(warn_msg))
         break
-        
+
+"""
+Checking the reliability of the used payload message.
+"""
+def check_for_false_positive_result():
+  debug_msg = "A potential injection point has been detected. "
+  debug_msg += "Checking the reliability of the used payload "
+  debug_msg += "in case of a false positive result. "
+  # Check if defined "--verbose" option.
+  if settings.VERBOSITY_LEVEL != 0: 
+    sys.stdout.write(settings.print_bold_debug_msg(debug_msg))
+    print(settings.SINGLE_WHITESPACE) 
+    
 """
 Counting the total of HTTP(S) requests for the identified injection point(s), during the detection phase.
 """
@@ -487,7 +476,7 @@ Procced to the next attack vector.
 """
 def next_attack_vector(technique, go_back):
   while True:
-    message = "Continue with testing the " + technique + "? [y/N] > "
+    message = "Do you want to continue with testing the " + technique + "? [y/N] > "
     next_attack_vector = common.read_input(message, default="N", check_batch=True)
     if next_attack_vector in settings.CHOICE_YES:
       # Check injection state
@@ -632,8 +621,8 @@ def continue_tests(err):
 Check if option is unavailable
 """
 def unavailable_option(check_option):
-  warn_msg = "The '" + check_option + "' option "
-  warn_msg += "is not yet available for windows targets."
+  warn_msg = "The option '" + check_option + "' "
+  warn_msg += "is not yet available for Windows targets."
   print(settings.print_warning_msg(warn_msg))  
 
 """
@@ -1343,6 +1332,23 @@ def recognise_payload(payload):
       hex_output(payload)
 
   if is_decoded:
+    while True:
+      message = "The provided parameter appears to be '" + str(encode_type).split("encode")[0] + "' encoded. "
+      message += "Do you want to process it encoded? [Y/n] > "
+      procced_option = common.read_input(message, default="Y", check_batch=True)
+      if procced_option in settings.CHOICE_YES:
+        break
+      elif procced_option in settings.CHOICE_NO:
+        settings.MULTI_ENCODED_PAYLOAD.remove(encode_type)
+        break
+      elif procced_option in settings.CHOICE_QUIT:
+        raise SystemExit()
+      else:
+        err_msg = "'" + procced_option + "' is not a valid answer."  
+        print(settings.print_error_msg(err_msg))
+        pass
+
+  if is_decoded:
     return _urllib.parse.quote(decoded_payload), encoded_with  
   else:
     return payload, encoded_with
@@ -1638,7 +1644,7 @@ def generate_char_pool(num_of_chars):
     else:
       # Checks {a..z},{A..Z},{0..9},{Symbols}
       char_pool = list(range(96, 122)) + list(range(65, 90))
-    char_pool = char_pool + list(range(49, 57)) + list(range(32, 48)) + list(range(91, 95)) + list(range(58, 64))  + list(range(123, 127))
+    char_pool = char_pool + list(range(49, 57)) + list(range(32, 48)) + list(range(91, 96)) + list(range(58, 64))  + list(range(123, 127))
   return char_pool
 
 """
@@ -1708,20 +1714,20 @@ def check_wrong_flags():
   if settings.TARGET_OS == "win":
     if menu.options.is_root :
       warn_msg = "Swithing '--is-root' to '--is-admin' because the "
-      warn_msg += "target has been identified as windows."
+      warn_msg += "target has been identified as Windows."
       print(settings.print_warning_msg(warn_msg))
     if menu.options.passwords:
       warn_msg = "The '--passwords' option, is not yet available for Windows targets."
       print(settings.print_warning_msg(warn_msg))  
     if menu.options.file_upload :
-      warn_msg = "The '--file-upload' option, is not yet available for windows targets. "
+      warn_msg = "The '--file-upload' option, is not yet available for Windows targets. "
       warn_msg += "Instead, use the '--file-write' option."
       print(settings.print_warning_msg(warn_msg))  
       raise SystemExit()
   else: 
     if menu.options.is_admin : 
       warn_msg = "Swithing the '--is-admin' to '--is-root' because "
-      warn_msg += "the target has been identified as unix-like. "
+      warn_msg += "the target has been identified as Unix-like. "
       print(settings.print_warning_msg(warn_msg))
 
 """

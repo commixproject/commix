@@ -138,11 +138,7 @@ def eb_injection_handler(url, timesec, filename, http_request_method, injection_
                 payload = payload.replace(" ", "%20")
 
               # Check if defined "--verbose" option.
-              if settings.VERBOSITY_LEVEL == 1:
-                print(settings.print_payload(payload))
-              elif settings.VERBOSITY_LEVEL >= 2:
-                debug_msg = "Generating payload for the injection."
-                print(settings.print_debug_msg(debug_msg))
+              if settings.VERBOSITY_LEVEL != 0:
                 print(settings.print_payload(payload)) 
 
               # Cookie header injection
@@ -209,10 +205,8 @@ def eb_injection_handler(url, timesec, filename, http_request_method, injection_
                 sys.stdout.write("\r" + settings.print_info_msg(info_msg))  
                 sys.stdout.flush()
                 
-            except KeyboardInterrupt: 
-              raise
-
-            except SystemExit: 
+            except (KeyboardInterrupt, SystemExit):
+              print(settings.SINGLE_WHITESPACE)
               raise
               
             except EOFError:
@@ -283,12 +277,13 @@ def eb_injection_handler(url, timesec, filename, http_request_method, injection_
               else:
                 checks.total_of_requests()
 
-            # Print the findings to terminal.
-            info_msg = "The"
+            finding = ""
             if len(found_vuln_parameter) > 0 and not "cookie" in header_name : 
-              info_msg += " " + http_request_method 
-            info_msg += ('', ' (JSON)')[settings.IS_JSON] + ('', ' (SOAP/XML)')[settings.IS_XML] + the_type + header_name
-            info_msg += found_vuln_parameter + " seems injectable via "
+              finding += http_request_method 
+            finding += ('', ' (JSON)')[settings.IS_JSON] + ('', ' (SOAP/XML)')[settings.IS_XML] + the_type + header_name + found_vuln_parameter
+
+            # Print the findings to terminal.
+            info_msg = finding + " appears to be injectable via "
             info_msg += "(" + injection_type.split(" ")[0] + ") " + technique + "."
             print(settings.print_bold_info_msg(info_msg))
             sub_content = str(checks.url_decode(payload))
@@ -304,8 +299,8 @@ def eb_injection_handler(url, timesec, filename, http_request_method, injection_
             new_line = True
             if settings.ENUMERATION_DONE == True :
               while True:
-                message = "Do you want to ignore stored session and enumerate again? [Y/n] > "
-                enumerate_again = common.read_input(message, default="Y", check_batch=True)
+                message = "Do you want to ignore stored session and enumerate again? [y/N] > "
+                enumerate_again = common.read_input(message, default="N", check_batch=True)
                 if enumerate_again in settings.CHOICE_YES:
                   if not menu.options.ignore_session:
                     menu.options.ignore_session = True
@@ -327,8 +322,8 @@ def eb_injection_handler(url, timesec, filename, http_request_method, injection_
             # Check for any system file access options.
             if settings.FILE_ACCESS_DONE == True:
               while True:
-                message = "Do you want to ignore stored session and access files again? [Y/n] > "
-                file_access_again = common.read_input(message, default="Y", check_batch=True)
+                message = "Do you want to ignore stored session and access files again? [y/N] > "
+                file_access_again = common.read_input(message, default="N", check_batch=True)
                 if file_access_again in settings.CHOICE_YES:
                   if not menu.options.ignore_session:
                     menu.options.ignore_session = True
@@ -350,23 +345,23 @@ def eb_injection_handler(url, timesec, filename, http_request_method, injection_
             if menu.options.os_cmd:
               eb_enumeration.single_os_cmd_exec(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec)
 
-            # Pseudo-Terminal shell
-            go_back = False
-            go_back_again = False
-            while True:
-              if go_back == True:
-                break
-              message = "The identified injection point has been exploited. Do you want a pseudo-terminal shell? [Y/n] > "
-              if settings.IS_TTY:
-                gotshell = common.read_input(message, default="Y", check_batch=True)
-              else:
-                gotshell = common.read_input(message, default="n", check_batch=True)
-              if gotshell in settings.CHOICE_YES:
-                print("Pseudo-Terminal (type '" + Style.BRIGHT + "?" + Style.RESET_ALL + "' for available options)")
-                if settings.READLINE_ERROR:
-                  checks.no_readline_module()
-                while True:
-                  try:
+            try:
+              # Pseudo-Terminal shell
+              go_back = False
+              go_back_again = False
+              while True:
+                if go_back == True:
+                  break
+                message = finding + " is vulnerable. Do you want to prompt for a pseudo-terminal shell? [Y/n] > "
+                if settings.IS_TTY:
+                  gotshell = common.read_input(message, default="Y", check_batch=True)
+                else:
+                  gotshell = common.read_input(message, default="n", check_batch=True)
+                if gotshell in settings.CHOICE_YES:
+                  print(settings.OS_SHELL_TITLE)
+                  if settings.READLINE_ERROR:
+                    checks.no_readline_module()
+                  while True:
                     if not settings.READLINE_ERROR:
                       checks.tab_autocompleter()
                     sys.stdout.write(settings.OS_SHELL)
@@ -395,51 +390,38 @@ def eb_injection_handler(url, timesec, filename, http_request_method, injection_
                       else:
                         shell = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
 
-                      if shell != "":
+                      if shell or shell != "":
                         shell = "".join(str(p) for p in shell)
                         # Update logs with executed cmds and execution results.
                         logs.executed_command(filename, cmd, shell)
-                        if settings.VERBOSITY_LEVEL <= 1:
-                          print(settings.SINGLE_WHITESPACE)
                         print(settings.command_execution_output(shell))
-                        print(settings.SINGLE_WHITESPACE)
                       else:
-                        if settings.VERBOSITY_LEVEL == 1 or (len(cmd) == 0 and settings.VERBOSITY_LEVEL <= 1):
-                          print(settings.SINGLE_WHITESPACE)
-                        err_msg = "The '" + cmd + "' command, does not return any output."
-                        print(settings.print_critical_msg(err_msg))
-                        print(settings.SINGLE_WHITESPACE)
-                    
-                  except KeyboardInterrupt: 
-                    raise
-
-                  except SystemExit: 
-                    raise
-                    
-                  except EOFError:
-                    if not settings.IS_TTY:
-                      print(settings.SINGLE_WHITESPACE)
-                    err_msg = "Exiting, due to EOFError."
-                    print(settings.print_error_msg(err_msg))
-                    raise
-
-              elif gotshell in settings.CHOICE_NO:
-                if checks.next_attack_vector(technique, go_back) == True:
-                  break
-                else:
-                  if no_result == True:
-                    return False 
+                        err_msg = "The execution of '" + cmd + "' command does not return any output."
+                        print(settings.print_error_msg(err_msg))
+                elif gotshell in settings.CHOICE_NO:
+                  if checks.next_attack_vector(technique, go_back) == True:
+                    break
                   else:
-                    return True  
+                    if no_result == True:
+                      return False 
+                    else:
+                      return True  
+                elif gotshell in settings.CHOICE_QUIT:
+                  raise SystemExit()
+                else:
+                  err_msg = "'" + gotshell + "' is not a valid answer."  
+                  print(settings.print_error_msg(err_msg))
+                  pass
 
-              elif gotshell in settings.CHOICE_QUIT:
-                raise SystemExit()
-
-              else:
-                err_msg = "'" + gotshell + "' is not a valid answer."  
-                print(settings.print_error_msg(err_msg))
-                pass
+            except (KeyboardInterrupt, SystemExit):
+              raise
               
+            except EOFError:
+              if not settings.IS_TTY:
+                print(settings.SINGLE_WHITESPACE)
+              err_msg = "Exiting, due to EOFError."
+              print(settings.print_error_msg(err_msg))
+              raise  
               
   if no_result == True:
     if settings.VERBOSITY_LEVEL == 0:

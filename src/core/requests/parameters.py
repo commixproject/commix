@@ -158,7 +158,7 @@ def do_GET_check(url, http_request_method):
 Define the vulnerable GET parameter.
 """
 def vuln_GET_param(url):
-  urls_list = []
+
   # Define the vulnerable parameter
   if "?" not in url:
     # Grab the value of parameter.

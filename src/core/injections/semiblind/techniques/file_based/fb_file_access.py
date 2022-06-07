@@ -32,7 +32,7 @@ Read a file from the target host.
 """
 def file_read(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
   file_to_read = menu.options.file_read.encode(settings.DEFAULT_CODEC).decode()
-  info_msg = "Fetching the content of the file '"  
+  info_msg = "Fetching content of the file: '"  
   info_msg += file_to_read + "'."
   print(settings.print_info_msg(info_msg))
 
@@ -50,17 +50,13 @@ def file_read(separator, payload, TAG, timesec, prefix, suffix, whitespace, http
     session_handler.store_cmd(url, cmd, shell, vuln_parameter)
   else:
     shell = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
-  # if settings.VERBOSITY_LEVEL != 0 and menu.options.ignore_session:
-  #   print(settings.SINGLE_WHITESPACE)
   if shell:
-    info_msg = "Fetched content of the file '"    
-    info_msg += file_to_read + "'."
-    print(settings.print_bold_info_msg(info_msg))
-    print(settings.print_sub_content(shell))
+    _ = "Fetched file content"
+    print(settings.print_retrieved_data(_, shell))
     output_file = open(filename, "a")
     if not menu.options.no_logging:
       info_msg = "Extracted content of the file '"
-      info_msg += file_to_read + "' : " + shell + ".\n"
+      info_msg += file_to_read + "' : " + shell + "\n"
       output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
     output_file.close()
   else:
@@ -137,8 +133,6 @@ def file_write(separator, payload, TAG, timesec, prefix, suffix, whitespace, htt
   response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
   shell = fb_injector.injection_results(url, OUTPUT_TEXTFILE, timesec)
   shell = "".join(str(p) for p in shell)
-  #if settings.VERBOSITY_LEVEL != 0:
-  #  print(settings.SINGLE_WHITESPACE)
   if shell:
     info_msg = "The file has been successfully created on remote directory '" + dest_to_write + "'." 
     print(settings.print_bold_info_msg(info_msg))
@@ -151,7 +145,8 @@ Upload a file on the target host.
 """
 def file_upload(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
   if settings.TARGET_OS == "win":
-    # Not yet implemented
+    check_option = "--file-upload"
+    checks.unavailable_option(check_option)
     pass
   else:
     file_to_upload = menu.options.file_upload.encode(settings.DEFAULT_CODEC).decode()
@@ -195,8 +190,6 @@ def file_upload(separator, payload, TAG, timesec, prefix, suffix, whitespace, ht
     response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
     shell = fb_injector.injection_results(url, OUTPUT_TEXTFILE, timesec)
     shell = "".join(str(p) for p in shell)
-    # if settings.VERBOSITY_LEVEL != 0:
-    #   print(settings.SINGLE_WHITESPACE)
     if shell:
       info_msg = "The file has been successfully uploaded on remote directory '" + dest_to_upload + "'."
       print(settings.print_bold_info_msg(info_msg))

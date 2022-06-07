@@ -39,44 +39,48 @@ def read_input(message, default=None, check_batch=True):
     else:
       return value
 
-  value = None
-  if "\n" in message:
-    message += ("\n" if message.count("\n") > 1 else "")
+  try:
+    value = None
+    if "\n" in message:
+      message += ("\n" if message.count("\n") > 1 else "")
 
-  elif len(message) == 0:
-    return is_empty()
-
-  if settings.ANSWERS:
-    if not any(_ in settings.ANSWERS for _ in ",="):
-      return is_empty(message, default=None, check_batch=True)
-    else:
-      for item in settings.ANSWERS.split(','):
-        question = item.split('=')[0].strip()
-        answer = item.split('=')[1] if len(item.split('=')) > 1 else None
-        if answer and question.lower() in message.lower():
-          value = answer
-          print(settings.print_message(message + value))
-          return value
-        elif answer is None and value:
-          return is_empty()
-
-  if value:
-    if settings.VERBOSITY_LEVEL != 0:
-      debug_msg = "Used the given answer."
-      print(settings.print_debug_msg(debug_msg))
-    print(settings.print_message(message + value))
-    return value
-
-  elif value is None:
-    if check_batch and menu.options.batch:
-      if settings.VERBOSITY_LEVEL != 0:
-        debug_msg = "Used the default behavior, running in batch mode."
-        print(settings.print_debug_msg(debug_msg))
-      print(settings.print_message(message + default))
-      return default
-    else:
+    elif len(message) == 0:
       return is_empty()
-  
+
+    if settings.ANSWERS:
+      if not any(_ in settings.ANSWERS for _ in ",="):
+        return is_empty(message, default=None, check_batch=True)
+      else:
+        for item in settings.ANSWERS.split(','):
+          question = item.split('=')[0].strip()
+          answer = item.split('=')[1] if len(item.split('=')) > 1 else None
+          if answer and question.lower() in message.lower():
+            value = answer
+            print(settings.print_message(message + value))
+            return value
+          elif answer is None and value:
+            return is_empty()
+
+    if value:
+      if settings.VERBOSITY_LEVEL != 0:
+        debug_msg = "Used the given answer."
+        print(settings.print_debug_msg(debug_msg))
+      print(settings.print_message(message + value))
+      return value
+
+    elif value is None:
+      if check_batch and menu.options.batch:
+        if settings.VERBOSITY_LEVEL != 0:
+          debug_msg = "Used the default behavior, running in batch mode."
+          print(settings.print_debug_msg(debug_msg))
+        print(settings.print_message(message + default))
+        return default
+      else:
+        return is_empty()
+  except KeyboardInterrupt:
+    print(settings.SINGLE_WHITESPACE)
+    raise
+
 """
 Extract regex result
 """

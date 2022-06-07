@@ -22,7 +22,7 @@ from src.utils import settings
 
 """
 About: Adds uninitialized bash variables between the characters of each command of the generated payloads.
-Notes: This tamper script works against unix-like target(s).
+Notes: This tamper script works against Unix-like target(s).
 Reference: https://www.secjuice.com/web-application-firewall-waf-evasion/
 """
 

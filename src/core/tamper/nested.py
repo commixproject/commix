@@ -20,7 +20,7 @@ from src.utils import settings
 
 """
 About: Adds double quotes around of the generated payloads (nested).
-Notes: This tamper script works against unix-like target(s).
+Notes: This tamper script works against Unix-like target(s).
 """
 
 __tamper__ = "nested"

@@ -19,7 +19,7 @@ from src.utils import settings
 
 """
 About: Adds back slashes (\) between the characters of the generated payloads.
-Notes: This tamper script works against unix-like target(s).
+Notes: This tamper script works against Unix-like target(s).
 """
 
 __tamper__ = "backslashes"

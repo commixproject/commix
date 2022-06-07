@@ -19,7 +19,7 @@ from src.utils import settings
 
 """
 About: Replaces "sleep" with "usleep" command in the generated payloads.
-Notes: This tamper script works against unix-like target(s).
+Notes: This tamper script works against Unix-like target(s).
 Reference: http://man7.org/linux/man-pages/man3/usleep.3.html
 """
 

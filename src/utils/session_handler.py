@@ -278,8 +278,8 @@ def notification(url, technique, injection_type):
   try:
     if settings.LOAD_SESSION == True:
       while True:
-        message = "A previously stored session has been held against that host. "
-        message += "Do you want to resume to the "
+        message = "A previously stored session has been held against that target. "
+        message += "Do you want to resume to "
         message += "(" + injection_type.split(" ")[0] + ") "
         message += technique.rsplit(' ', 2)[0] 
         message += " injection point? [Y/n] > "
@@ -318,6 +318,8 @@ def notification(url, technique, injection_type):
           pass
   except sqlite3.OperationalError as err_msg:
     print(settings.print_critical_msg(err_msg))
+  except (KeyboardInterrupt, SystemExit):
+    raise
 
 """
 Check for specific stored parameter.

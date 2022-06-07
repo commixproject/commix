@@ -352,7 +352,7 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
   modules_handler.load_modules(url, http_request_method, filename)
   checks.tamper_scripts(stored_tamper_scripts=False)
   
-  info_msg = "Setting the" 
+  info_msg = "Setting" 
   if not header_name == " cookie" and not the_type == " HTTP header":
     info_msg += " " + str(http_request_method) + ""
   info_msg += ('', ' (JSON)')[settings.IS_JSON] + ('', ' (SOAP/XML)')[settings.IS_XML] 
@@ -367,10 +367,8 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
       debug_msg = "Skipping heuristic (basic) tests to the target URL."
       print(settings.print_debug_msg(debug_msg))
   else:
-    decoded_value, decoded_with = checks.recognise_payload(payload=settings.TESTABLE_VALUE)
-    if settings.TESTABLE_VALUE != decoded_value and len(decoded_with) != 0:
-      warn_msg = "The provided parameter appears to be '" + str(decoded_with) + "' encoded."
-      print(settings.print_warning_msg(warn_msg))
+    if not settings.LOAD_SESSION:
+      checks.recognise_payload(payload=settings.TESTABLE_VALUE)
     if settings.VERBOSITY_LEVEL != 0:    
       debug_msg = "Performing heuristic (basic) tests to the target URL."
       print(settings.print_debug_msg(debug_msg))
@@ -857,9 +855,8 @@ def do_check(url, http_request_method, filename):
         print(settings.print_critical_msg(err_msg))
         
     logs.print_logs_notification(filename, url)
-    if not settings.MULTI_TARGETS:
-      print(settings.SINGLE_WHITESPACE)
-
+    # if not settings.MULTI_TARGETS:
+    #   print(settings.SINGLE_WHITESPACE)
     if not settings.CHECK_BOTH_OS and not settings.MULTI_TARGETS:
       raise SystemExit()
 
