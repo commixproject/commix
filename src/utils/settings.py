@@ -241,7 +241,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.5"
-REVISION = "78"
+REVISION = "79"
 STABLE_RELEASE = False
 if STABLE_RELEASE:
   VERSION = "v" + VERSION_NUM + "-stable"
@@ -534,10 +534,17 @@ WIN_RECOGNISE_HP = "echo %PROCESSOR_ARCHITECTURE%"
 # File System access options
 # Read file
 FILE_READ = "cat "
+FILE_WRITE_OPERATOR = " > "
 WIN_FILE_READ = "type "
 
+# List file
+FILE_LIST = "ls "
+FILE_LIST_WIN = "dir "
+
+CERTUTIL_DECODE_CMD = "certutil -decode "
+
 # Write file
-FILE_WRITE = "echo "
+FILE_WRITE = "printf "
 
 # Write file
 FILE_UPLOAD = "wget "

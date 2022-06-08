@@ -178,7 +178,7 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
   if settings.TARGET_OS == "win":
     previous_cmd = cmd
     if alter_shell:
-      cmd = "\"" + cmd + "\""
+      cmd = cmd = checks.quoted_cmd(cmd)
     else: 
       cmd = "powershell.exe -InputFormat none write-host ([string](cmd /c " + cmd + ")).trim()"
 
@@ -361,7 +361,7 @@ def false_positive_check(separator, TAG, cmd, prefix, suffix, whitespace, timese
   if settings.TARGET_OS == "win":
     previous_cmd = cmd
     if alter_shell:
-      cmd = "\"" + cmd + "\""
+      cmd = cmd = checks.quoted_cmd(cmd)
     else: 
       cmd = "powershell.exe -InputFormat none write-host ([string](cmd /c " + cmd + ")).trim()"
 

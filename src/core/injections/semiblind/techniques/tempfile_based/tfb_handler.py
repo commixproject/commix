@@ -450,10 +450,8 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
               if settings.TARGET_OS == "win":
                 time.sleep(1)
               
-              _ = False 
               # Check for any enumeration options.
               if settings.ENUMERATION_DONE == True :
-                _ = True
                 while True:
                   message = "Do you want to ignore stored session and enumerate again? [y/N] > "
                   enumerate_again = common.read_input(message, default="N", check_batch=True)
@@ -474,12 +472,8 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                     pass
               else:
                 if menu.enumeration_options():
-                  _ = True
                   tfb_enumeration.do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
               
-              if settings.FILE_ACCESS_DONE == False and _ == False:
-                print(settings.SINGLE_WHITESPACE) 
-
               # Check for any system file access options.
               if settings.FILE_ACCESS_DONE == True :
                 while True:
