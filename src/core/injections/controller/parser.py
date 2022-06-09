@@ -196,7 +196,7 @@ def logfile_parser():
       if single_request:
         print(settings.SINGLE_WHITESPACE)
       if menu.options.logfile and settings.VERBOSITY_LEVEL != 0:
-        sub_content = http_method + " " +  prefix + menu.options.host + request_url
+        sub_content = http_method + settings.SINGLE_WHITESPACE +  prefix + menu.options.host + request_url
         print(settings.print_sub_content(sub_content))
         if menu.options.cookie:
            sub_content = "Cookie: " + menu.options.cookie

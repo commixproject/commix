@@ -241,7 +241,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.5"
-REVISION = "79"
+REVISION = "80"
 STABLE_RELEASE = False
 if STABLE_RELEASE:
   VERSION = "v" + VERSION_NUM + "-stable"
@@ -408,7 +408,6 @@ OUTPUT_FILE = OUTPUT_FILE_NAME + OUTPUT_FILE_EXT
 MAXLEN = 10000
 
 IS_TTY = True
-
 # Maximum response total page size (trimmed if larger)
 MAX_CONNECTION_TOTAL_SIZE = 100 * 1024 * 1024
 
@@ -561,6 +560,8 @@ WIN_SYS_USERS = "powershell.exe -InputFormat none write-host (([string]$(net use
 # /etc/shadow
 SHADOW_FILE = "/etc/shadow"
 SYS_PASSES = FILE_READ + SHADOW_FILE 
+
+WIN_REPLACE_WHITESPACE = "-replace('\s+',' '))"
 
 # Accepts 'YES','YE','Y','yes','ye','y'
 CHOICE_YES = ['YES','YE','Y','yes','ye','y']

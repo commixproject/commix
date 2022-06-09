@@ -97,9 +97,9 @@ def injection_test_results(response, TAG, randvcalc):
     html_data = checks.page_encoding(response, action="decode")
     html_data = re.sub("\n", " ", html_data)
     if settings.SKIP_CALC:
-      shell = re.findall(r"" + TAG + " " + TAG + " " + TAG + " " , html_data)
+      shell = re.findall(r"" + TAG + settings.SINGLE_WHITESPACE + TAG + settings.SINGLE_WHITESPACE + TAG + " " , html_data)
     else:
-      shell = re.findall(r"" + TAG + " " + str(randvcalc) + " " + TAG + " " + TAG + " " , html_data)
+      shell = re.findall(r"" + TAG + settings.SINGLE_WHITESPACE + str(randvcalc) + settings.SINGLE_WHITESPACE + TAG + settings.SINGLE_WHITESPACE + TAG + " " , html_data)
     return shell
 
 """

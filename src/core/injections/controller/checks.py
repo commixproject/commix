@@ -246,7 +246,9 @@ def load_cmd_history():
       warn_msg += "More info can be found at 'https://github.com/pyreadline/pyreadline/issues/30'"
       print(settings.print_warning_msg(warn_msg))     
 
-# If the value has boundaries.
+"""
+Check if the value has boundaries.
+"""
 def value_boundaries(value):
   message =  "It appears that the value '" + value + "' has boundaries. "
   message += "Do you want to inject inside? [Y/n] > "
@@ -263,7 +265,9 @@ def value_boundaries(value):
     pass
   return value
 
-# Ignoring the anti-CSRF parameter(s).
+"""
+Ignoring the anti-CSRF parameter(s).
+"""
 def ignore_anticsrf_parameter(parameter):
   if any(parameter.lower().count(token) for token in settings.CSRF_TOKEN_PARAMETER_INFIXES):
     info_msg = "Ignoring the parameter '" + parameter.split("=")[0]
@@ -271,7 +275,9 @@ def ignore_anticsrf_parameter(parameter):
     print(settings.print_info_msg(info_msg))
     return True
 
-# Ignoring the Google analytics cookie parameter.
+"""
+Ignoring the Google analytics cookie parameter.
+"""
 def ignore_google_analytics_cookie(cookie):
   if cookie.upper().startswith(settings.GOOGLE_ANALYTICS_COOKIE_PREFIX):
     info_msg = "Ignoring the Google analytics cookie parameter '" + cookie.split("=")[0] + "'."
@@ -1623,7 +1629,7 @@ def check_similarities(all_params):
         if re.findall(r'</(.*)>', all_params[param]) == re.findall(r'>(.*)</', all_params[param]):
           parameter_name = re.findall(r'>(.*)</', all_params[param])
           parameter_name = ''.join(parameter_name)
-          all_params[param] = "<" + parameter_name + ">" + parameter_name + settings.RANDOM_TAG + "</" + parameter_name + ">"
+          all_params[param] = "<" + parameter_name + settings.FILE_WRITE_OPERATOR + parameter_name + settings.RANDOM_TAG + "</" + parameter_name + ">"
       else:
         if re.findall(r'(.*)=', all_params[param]) == re.findall(r'=(.*)', all_params[param]):
           parameter_name = re.findall(r'=(.*)', all_params[param])
@@ -1672,7 +1678,6 @@ def print_ps_version(ps_version, filename, _):
     print(settings.print_warning_msg(warn_msg))
     settings.PS_ENABLED = False
     ps_check_failed()
-
 
 """
 Print hostname
@@ -1751,6 +1756,46 @@ def print_os_info(target_os, target_arch, filename, _):
     warn_msg = "Heuristics have failed to fetch underlying operating system information."
     print(settings.print_warning_msg(warn_msg))
 
+"""
+Print enumeration info msgs
+"""
+class print_enumenation():
+  def ps_version_msg(self):
+    info_msg = "Fetching powershell version."
+    print(settings.print_info_msg(info_msg))
+
+  def hostname_msg(self):
+    info_msg = "Fetching hostname."
+    print(settings.print_info_msg(info_msg))
+
+  def current_user_msg(self):
+    info_msg = "Fetching current user."
+    print(settings.print_info_msg(info_msg))
+
+  def check_privs_msg(self):
+    info_msg = "Testing if current user has excessive privileges."
+    print(settings.print_info_msg(info_msg))
+
+  def os_info_msg(self):
+    info_msg = "Fetching the underlying operating system information."
+    print(settings.print_info_msg(info_msg))
+
+  def print_users_msg(self):
+    if settings.TARGET_OS == "win":
+      info_msg = "Executing the 'net users' command " 
+    else:
+      info_msg = "Fetching content of the file '" + settings.PASSWD_FILE + "' "
+    info_msg += "in order to enumerate users entries. "
+    print(settings.print_info_msg(info_msg))
+
+  def print_passes_msg(self):
+    info_msg = "Fetching content of the file '" + settings.SHADOW_FILE + "' "
+    info_msg += "in order to enumerate users password hashes. "  
+    print(settings.print_info_msg(info_msg))
+
+  def print_single_os_cmd_msg(self, cmd):
+    info_msg =  "Executing the user-supplied command: '" + cmd + "'."
+    print(settings.print_info_msg(info_msg))
 
 """
 Print users enumeration.
@@ -1759,7 +1804,7 @@ def print_users(sys_users, filename, _):
   # Windows users enumeration.
   if settings.TARGET_OS == "win":
     try:
-      if sys_users[0] :
+      if sys_users:
         sys_users = "".join(str(p) for p in sys_users).strip()
         sys.stdout.write(settings.SUCCESS_STATUS)
         sys_users_list = re.findall(r"(.*)", sys_users)
@@ -1792,10 +1837,10 @@ def print_users(sys_users, filename, _):
             check_privs = "".join(str(p) for p in check_privs).strip()
             check_privs = check_privs.split()
             if "Admin" in check_privs[0]:
-              is_privileged = Style.RESET_ALL + " is" +  Style.BRIGHT + " admin user"
+              is_privileged = Style.RESET_ALL + "is" +  Style.BRIGHT + " admin user"
               is_privileged_nh = " is admin user "
             else:
-              is_privileged = Style.RESET_ALL + " is" +  Style.BRIGHT + " regular user"
+              is_privileged = Style.RESET_ALL + "is" +  Style.BRIGHT + " regular user"
               is_privileged_nh = " is regular user "
           else :
             is_privileged = ""
@@ -1821,7 +1866,7 @@ def print_users(sys_users, filename, _):
   # Unix-like users enumeration.    
   else:
     try:
-      if sys_users[0] :
+      if sys_users:
         sys_users = "".join(str(p) for p in sys_users).strip()
         if len(sys_users.split(" ")) <= 1 :
           sys_users = sys_users.split("\n")
@@ -1867,20 +1912,20 @@ def print_users(sys_users, filename, _):
                   raise ValueError()
                 if menu.options.privileges:
                   if int(fields[1]) == 0:
-                    is_privileged = Style.RESET_ALL + " is" +  Style.BRIGHT + " root user "
+                    is_privileged = Style.RESET_ALL + "is" +  Style.BRIGHT + " root user "
                     is_privileged_nh = " is root user "
                   elif int(fields[1]) > 0 and int(fields[1]) < 99 :
-                    is_privileged = Style.RESET_ALL + " is" +  Style.BRIGHT + " system user "
+                    is_privileged = Style.RESET_ALL + "is" +  Style.BRIGHT + " system user "
                     is_privileged_nh = " is system user "
                   elif int(fields[1]) >= 99 and int(fields[1]) < 65534 :
                     if int(fields[1]) == 99 or int(fields[1]) == 60001 or int(fields[1]) == 65534:
-                      is_privileged = Style.RESET_ALL + " is" +  Style.BRIGHT + " anonymous user "
+                      is_privileged = Style.RESET_ALL + "is" +  Style.BRIGHT + " anonymous user "
                       is_privileged_nh = " is anonymous user "
                     elif int(fields[1]) == 60002:
-                      is_privileged = Style.RESET_ALL + " is" +  Style.BRIGHT + " non-trusted user "
+                      is_privileged = Style.RESET_ALL + "is" +  Style.BRIGHT + " non-trusted user "
                       is_privileged_nh = " is non-trusted user "   
                     else:
-                      is_privileged = Style.RESET_ALL + " is" +  Style.BRIGHT + " regular user "
+                      is_privileged = Style.RESET_ALL + "is" +  Style.BRIGHT + " regular user "
                       is_privileged_nh = " is regular user "
                   else :
                     is_privileged = ""
@@ -1888,11 +1933,11 @@ def print_users(sys_users, filename, _):
                 else :
                   is_privileged = ""
                   is_privileged_nh = ""
-                print("" + settings.SUB_CONTENT_SIGN + "(" +str(count)+ ") '" + Style.BRIGHT + fields[0] + Style.RESET_ALL + "'" + Style.BRIGHT + is_privileged + Style.RESET_ALL + "(uid=" + fields[1] + "). Home directory is in '" + Style.BRIGHT + fields[2]+ Style.RESET_ALL + "'.") 
+                print("" + settings.SUB_CONTENT_SIGN + "(" +str(count)+ ") '" + Style.BRIGHT + fields[0] + Style.RESET_ALL + "' " + Style.BRIGHT + is_privileged + Style.RESET_ALL + "(uid=" + fields[1] + "). Home directory is in '" + Style.BRIGHT + fields[2]+ Style.RESET_ALL + "'.") 
                 # Add infos to logs file.   
                 output_file = open(filename, "a")
                 if not menu.options.no_logging:
-                  output_file.write("" + settings.SUB_CONTENT_SIGN + "(" +str(count)+ ") '" + fields[0] + "'" + is_privileged_nh + "(uid=" + fields[1] + "). Home directory is in '" + fields[2] + "'.\n" )
+                  output_file.write("" + settings.SUB_CONTENT_SIGN + "(" +str(count)+ ") '" + fields[0] + "' " + is_privileged_nh + "(uid=" + fields[1] + "). Home directory is in '" + fields[2] + "'.\n" )
                 output_file.close()
               except ValueError:
                 if count == 1 :
@@ -1925,8 +1970,7 @@ Print users enumeration.
 def print_passes(sys_passes, filename, _):
   if sys_passes == "":
     sys_passes = " "
-    sys_passes = sys_passes.replace(" ", "\n")
-    sys_passes = sys_passes.split()
+    sys_passes = sys_passes.replace(" ", "\n").split()
     if len(sys_passes) != 0 :
       if settings.VERBOSITY_LEVEL == 0 and _:
         print(settings.SINGLE_WHITESPACE)
@@ -1969,10 +2013,28 @@ def print_passes(sys_passes, filename, _):
       print(settings.print_warning_msg(warn_msg))
 
 """
+Print single OS command
+"""
+def print_single_os_cmd(cmd, shell):
+  if len(shell) > 1:
+    _ = "'" + cmd + "' execution output"
+    print(settings.print_retrieved_data(_, shell))
+  else:
+    err_msg = "The execution of '" + cmd + "' command does not return any output."
+    print(settings.print_error_msg(err_msg)) 
+
+"""
 Quote provided cmd
 """
 def quoted_cmd(cmd):
   cmd = "\"" + cmd + "\""
+  return cmd
+
+"""
+Escape single quoted cmd
+"""
+def escape_single_quoted_cmd(cmd):
+  cmd = cmd.replace("'","\\'")
   return cmd
 
 """
@@ -1989,7 +2051,14 @@ def find_filename(dest_to_write, content):
 Decode base 64 encoding
 """
 def win_decode_b64_enc(fname, tmp_fname):
-  cmd = settings.CERTUTIL_DECODE_CMD  + tmp_fname + " " + fname
+  cmd = settings.CERTUTIL_DECODE_CMD  + tmp_fname + settings.SINGLE_WHITESPACE + fname
+  return cmd
+
+"""
+Add command substitution on provided command
+"""
+def add_command_substitution(cmd):
+  cmd = "echo $(" + cmd + ")"
   return cmd
 
 """
@@ -1998,6 +2067,10 @@ Remove command substitution on provided command
 def remove_command_substitution(cmd):
   cmd = cmd.replace("echo $(","").replace(")","")
   return cmd
+
+def remove_parenthesis(cmd):
+  cmd = cmd.replace("(","").replace(")","")
+  return cmd 
 
 """
 Write the file content
@@ -2020,10 +2093,10 @@ Check if file exists.
 def check_file(dest_to_upload):
   if settings.TARGET_OS == "win":
     cmd = settings.FILE_LIST_WIN + dest_to_upload
-  else:  
-    cmd = "echo $(" + settings.FILE_LIST + dest_to_upload + ")"
+  else:
+    cmd = settings.FILE_LIST + dest_to_upload
+    cmd = add_command_substitution(cmd)
   return cmd
-
 
 """
 Change directory

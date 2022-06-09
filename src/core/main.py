@@ -511,10 +511,9 @@ def main(filename, url):
         # Check for CGI scripts on url
         checks.check_CGI_scripts(url)
         # Modification on payload
-        if not menu.options.shellshock:
-          if not settings.USE_BACKTICKS:
-            settings.SYS_USERS  = "echo $(" + settings.SYS_USERS + ")"
-            settings.SYS_PASSES  = "echo $(" + settings.SYS_PASSES + ")"
+        # if not menu.options.shellshock and not settings.USE_BACKTICKS and not settings.MULTI_TARGETS:
+        #   settings.SYS_USERS  = checks.add_command_substitution(settings.SYS_USERS)
+        #   settings.SYS_PASSES = checks.add_command_substitution(settings.SYS_PASSES)
         # Check if defined "--file-upload" option.
         if menu.options.file_upload:
           checks.file_upload()
@@ -737,13 +736,13 @@ try:
         while True:
           message = "Please enter full target URL (-u) > "
           menu.options.url = common.read_input(message, default=None, check_batch=True)
-          if len(menu.options.url) == 0:
+          if menu.options.url is None or len(menu.options.url) == 0:
             pass
           else: 
             break
       message = "Please enter POST data (--data) [Enter for none] > "
       menu.options.data = common.read_input(message, default=None, check_batch=True)
-      if len(menu.options.data) == 0:
+      if menu.options.data is not None and len(menu.options.data) == 0:
         menu.options.data = False
 
     # Seconds to delay between each HTTP request.

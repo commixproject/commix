@@ -162,7 +162,7 @@ def create_github_issue(err_msg, exc_msg):
 
   err_msg = err_msg[err_msg.find("\n"):]
   request = _urllib.request.Request(url="https://api.github.com/search/issues?q=" + \
-        _urllib.parse.quote("repo:commixproject/commix" + " " + str(bug_report))
+        _urllib.parse.quote("repo:commixproject/commix" + settings.SINGLE_WHITESPACE + str(bug_report))
         )
 
   try:

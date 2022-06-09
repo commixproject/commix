@@ -35,7 +35,7 @@ def powershell_version(separator, TAG, prefix, suffix, whitespace, http_request_
   _ = False
   cmd = settings.PS_VERSION
   if alter_shell:
-    cmd = cmd.replace("'","\\'")
+    cmd = checks.escape_single_quoted_cmd(cmd)
   else:
     cmd = cmd = checks.quoted_cmd(cmd)
   # Evaluate injection results.
@@ -109,7 +109,7 @@ def system_information(separator, TAG, prefix, suffix, whitespace, http_request_
         distro_name = eb_injector.injection_results(response, TAG, cmd)
         distro_name = "".join(str(p) for p in distro_name)
         if len(distro_name) != 0:
-          target_os = target_os + " " + distro_name
+          target_os = target_os + settings.SINGLE_WHITESPACE + distro_name
         session_handler.store_cmd(url, cmd, target_os, vuln_parameter)
       else:
         target_os = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
@@ -137,14 +137,14 @@ The current user enumeration
 """
 def current_user(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec):
   _ = False
-  if settings.TARGET_OS == "win":
-    settings.SYS_USERS = settings.WIN_SYS_USERS
-    settings.SYS_USERS = settings.SYS_USERS + "-replace('\s+',' '))"
-    if alter_shell:
-      settings.SYS_USERS = settings.SYS_USERS.replace("'","\\'")
-    else:  
-      settings.SYS_USERS = checks.quoted_cmd(settings.SYS_USERS)  
   cmd = settings.CURRENT_USER
+  if settings.TARGET_OS == "win":
+    cmd = settings.WIN_SYS_USERS
+    cmd = cmd + settings.WIN_REPLACE_WHITESPACE
+    if alter_shell:
+      cmd = checks.escape_single_quoted_cmd(cmd)
+    else:  
+      cmd = checks.quoted_cmd(cmd)  
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
     # Command execution results.
     response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
@@ -189,16 +189,16 @@ System users enumeration
 """
 def system_users(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec): 
   _ = False
+  cmd = settings.SYS_USERS
   if settings.TARGET_OS == "win":
-    settings.SYS_USERS = settings.WIN_SYS_USERS
-    settings.SYS_USERS = settings.SYS_USERS + "-replace('\s+',' '))"
+    cmd = settings.WIN_SYS_USERS
+    cmd = cmd + settings.WIN_REPLACE_WHITESPACE
     if alter_shell:
-      settings.SYS_USERS = settings.SYS_USERS.replace("'","\\'")
+      cmd = checks.escape_single_quoted_cmd(cmd)
     else:  
-      settings.SYS_USERS = checks.quoted_cmd(settings.SYS_USERS)
+      cmd = checks.quoted_cmd(cmd)
   else:
-    settings.SYS_USERS = settings.EVAL_SYS_USERS        
-  cmd = settings.SYS_USERS             
+    cmd = settings.EVAL_SYS_USERS                    
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
     # Command execution results.
     response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
@@ -208,7 +208,7 @@ def system_users(separator, TAG, prefix, suffix, whitespace, http_request_method
     # Evaluate injection results.
     sys_users = eb_injector.injection_results(response, TAG, cmd)
     sys_users = "".join(str(p) for p in sys_users)
-    session_handler.store_cmd(url, cmd, sys_users, vuln_parameter)
+    # session_handler.store_cmd(url, cmd, sys_users, vuln_parameter)
   else:
     sys_users = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
   checks.print_users(sys_users, filename, _)
@@ -238,8 +238,7 @@ Single os-shell execution
 """
 def single_os_cmd_exec(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec):
   cmd = menu.options.os_cmd
-  info_msg =  "Executing the user-supplied command: '" + cmd + "'."
-  print(settings.print_info_msg(info_msg))
+  checks.print_enumenation().print_single_os_cmd_msg(cmd)
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
     # Command execution results.
     response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
@@ -252,12 +251,7 @@ def single_os_cmd_exec(separator, TAG, prefix, suffix, whitespace, http_request_
     session_handler.store_cmd(url, cmd, shell, vuln_parameter)
   else:
     shell = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
-  if shell and shell != "":
-    _ = "'" + cmd + "' execution output"
-    print(settings.print_retrieved_data(_, shell))
-  else:
-    err_msg = "The execution of '" + cmd + "' command does not return any output."
-    print(settings.print_error_msg(err_msg)) 
+  checks.print_single_os_cmd(cmd, shell) 
 
 """
 Check the defined options
@@ -269,43 +263,32 @@ def do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, ur
 
   if menu.options.ps_version and settings.PS_ENABLED == None:
     if not checks.ps_incompatible_os():
-      info_msg = "Fetching powershell version."
-      print(settings.print_info_msg(info_msg))
+      checks.print_enumenation().ps_version_msg()
       powershell_version(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec)
       settings.ENUMERATION_DONE = True
 
   if menu.options.hostname:
-    info_msg = "Fetching hostname."
-    print(settings.print_info_msg(info_msg))
+    checks.print_enumenation().hostname_msg()
     hostname(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec)
     settings.ENUMERATION_DONE = True
     
   if menu.options.current_user:
-    info_msg = "Fetching current user."
-    print(settings.print_info_msg(info_msg))
+    checks.print_enumenation().current_user_msg()
     current_user(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec)
     settings.ENUMERATION_DONE = True
 
   if menu.options.is_root or menu.options.is_admin:
-    info_msg = "Testing if current user has excessive privileges."
-    print(settings.print_info_msg(info_msg))
+    checks.print_enumenation().check_privs_msg()
     check_current_user_privs(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec)
     settings.ENUMERATION_DONE = True
 
   if menu.options.sys_info:
-    info_msg = "Fetching the underlying operating system information."
-    print(settings.print_info_msg(info_msg))
+    checks.print_enumenation().os_info_msg()
     system_information(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec)
     settings.ENUMERATION_DONE = True
 
   if menu.options.users:
-    if settings.TARGET_OS == "win":
-      info_msg = "Executing the 'net users' command "
-      info_msg += "in order to enumerate users entries. "  
-    else:
-      info_msg = "Fetching content of the file '" + settings.PASSWD_FILE 
-      info_msg += "' in order to enumerate users entries. "
-    print(settings.print_info_msg(info_msg))
+    checks.print_enumenation().print_users_msg()
     system_users(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec)
     settings.ENUMERATION_DONE = True
 
@@ -314,9 +297,7 @@ def do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, ur
       check_option = "--passwords"
       checks.unavailable_option(check_option)
     else:
-      info_msg = "Fetching content of the file '" + settings.SHADOW_FILE 
-      info_msg += "' in order to enumerate users password hashes. "  
-      print(settings.print_info_msg(info_msg))
+      checks.print_enumenation().print_passes_msg()
       system_passwords(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec)
     settings.ENUMERATION_DONE = True
 

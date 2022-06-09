@@ -95,7 +95,7 @@ class Handler(_BaseHTTPServer.BaseHTTPRequestHandler):
         return
 
       except Exception:
-        error_response = settings.APPLICATION + " " + settings.VERSION + " (https://commixproject.com)"
+        error_response = settings.APPLICATION + settings.SINGLE_WHITESPACE + settings.VERSION + " (https://commixproject.com)"
         self.wfile.write(error_response.encode())
 
     def log_message(self, format, *args):
