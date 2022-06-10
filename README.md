@@ -13,7 +13,7 @@
 
 
 ![Screenshot](https://commixproject.com/images/background.png)
-
+You can visit the [collection of screenshots](https://github.com/commixproject/commix/wiki/Screenshots) demonstrating some of the features on the wiki.
 
 ## Installation
 
@@ -23,7 +23,7 @@ You can download commix on any platform by cloning the official Git repository :
 
 Alternatively, you can download the latest [tarball](https://github.com/commixproject/commix/tarball/master) or [zipball](https://github.com/commixproject/commix/zipball/master).
 
-*__Note:__ **[Python](http://www.python.org/download/)** (version **2.6**, **2.7** or **3.x**)  is required for running commix.*
+*__Note:__ **[Python](http://www.python.org/download/)** (version **2.6**, **2.7** or **3.x**) is required for running commix.*
 
 
 ## Usage
