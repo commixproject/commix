@@ -83,8 +83,7 @@ def installer():
         uninstall in settings.CHOICE_QUIT: 
           raise SystemExit()
         else:
-          err_msg = "'" + uninstall + "' is not a valid answer."
-          print(settings.print_error_msg(err_msg))
+          common.invalid_option(uninstall)
           pass
       
     # Check for git.

@@ -515,6 +515,6 @@ def export_injection_results(cmd, separator, output, check_how_long):
   else:
     if settings.VERBOSITY_LEVEL == 0:
       print(settings.SINGLE_WHITESPACE) 
-    err_msg = "The execution of '" + cmd + "' command does not return any output."
+    err_msg = common.invalid_cmd_output(cmd)
     sys.stdout.write("\r" + settings.print_error_msg(err_msg) + "\n") 
 # eof

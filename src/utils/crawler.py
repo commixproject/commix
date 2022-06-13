@@ -52,8 +52,7 @@ def set_crawling_depth():
     elif message in settings.CHOICE_QUIT:
       raise SystemExit()
     else:
-      err_msg = "'" + message + "' is not a valid answer."  
-      print(settings.print_error_msg(err_msg))
+      common.invalid_option(message)  
       pass
       
   # Change the crawling depth level.
@@ -89,7 +88,7 @@ def normalize_results(output_href):
     elif message in settings.CHOICE_QUIT:
       raise SystemExit()
     else:
-      err_msg = "'" + message + "' is not a valid answer."  
+      common.invalid_option(message)  
       print(settings.print_error_msg(err_msg))
       pass
 
@@ -115,9 +114,7 @@ def store_crawling(output_href):
     elif message in settings.CHOICE_QUIT:
       raise SystemExit()
     else:
-      err_msg = "'" + message + "' is not a valid answer."  
-      sys.stdout.write(settings.print_error_msg(err_msg))
-      sys.stdout.flush()
+      common.invalid_option(message)  
       pass  
 
 
@@ -150,8 +147,7 @@ def sitemap(url):
           elif message in settings.CHOICE_QUIT:
             raise SystemExit()
           else:
-            err_msg = "'" + message + "' is not a valid answer."  
-            print(settings.print_error_msg(err_msg))
+            common.invalid_option(message)  
             pass
     no_usable_links(sitemap_loc)
     return sitemap_loc
@@ -221,8 +217,7 @@ def enable_crawler():
       elif message in settings.CHOICE_QUIT:
         raise SystemExit()
       else:
-        err_msg = "'" + message + "' is not a valid answer."  
-        print(settings.print_error_msg(err_msg))
+        common.invalid_option(message)  
         pass
     set_crawling_depth()
 
@@ -243,8 +238,7 @@ def check_sitemap():
     elif message in settings.CHOICE_QUIT:
       raise SystemExit()
     else:
-      err_msg = "'" + message + "' is not a valid answer."  
-      print(settings.print_error_msg(err_msg))
+      common.invalid_option(message)  
       pass
 
 """

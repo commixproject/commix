@@ -226,8 +226,7 @@ def classic_command_injection_technique(url, timesec, filename, http_request_met
             elif procced_option in settings.CHOICE_QUIT:
               raise SystemExit()
             else:
-              err_msg = "'" + procced_option + "' is not a valid answer."  
-              print(settings.print_error_msg(err_msg))
+              common.invalid_option(procced_option)  
               pass
       else:
         settings.CLASSIC_STATE = False
@@ -259,8 +258,7 @@ def dynamic_code_evaluation_technique(url, timesec, filename, http_request_metho
           elif procced_option in settings.CHOICE_QUIT:
             raise SystemExit()
           else:
-            err_msg = "'" + procced_option + "' is not a valid answer."  
-            print(settings.print_error_msg(err_msg))
+            common.invalid_option(procced_option)  
             pass
       else:
         settings.EVAL_BASED_STATE = False
@@ -391,8 +389,7 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
           elif procced_option in settings.CHOICE_QUIT:
             raise SystemExit()
           else:
-            err_msg = "'" + procced_option + "' is not a valid answer."  
-            print(settings.print_error_msg(err_msg))
+            common.invalid_option(procced_option)  
             pass
 
       if not settings.IDENTIFIED_COMMAND_INJECTION and not settings.IDENTIFIED_WARNINGS and not settings.IDENTIFIED_PHPINFO:
@@ -829,8 +826,7 @@ def do_check(url, http_request_method, filename):
             elif next_level in settings.CHOICE_QUIT:
               raise SystemExit()
             else:
-              err_msg = "'" + next_level + "' is not a valid answer."  
-              print(settings.print_error_msg(err_msg))
+              common.invalid_option(next_level)  
               pass
     else:
       perform_checks(url, http_request_method, filename)

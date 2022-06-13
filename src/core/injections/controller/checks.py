@@ -67,12 +67,10 @@ def mobile_user_agents():
       elif mobile_user_agent.lower() == "q":
         raise SystemExit()
       else:
-        err_msg = "'" + mobile_user_agent + "' is not a valid answer."  
-        print(settings.print_error_msg(err_msg))
+        common.invalid_option(mobile_user_agent)  
         pass
     except ValueError:
-      err_msg = "'" + mobile_user_agent + "' is not a valid answer."  
-      print(settings.print_error_msg(err_msg))
+      common.invalid_option(mobile_user_agent)  
       pass     
 
 """
@@ -195,8 +193,7 @@ def not_declared_cookies(response):
         elif set_cookies in settings.CHOICE_QUIT:
           raise SystemExit()
         else:
-          err_msg = "'" + set_cookies + "' is not a valid answer."  
-          print(settings.print_error_msg(err_msg))
+          common.invalid_option(set_cookies)  
           pass
   except (KeyError, TypeError):
     pass
@@ -260,8 +257,7 @@ def value_boundaries(value):
   elif procced_option in settings.CHOICE_QUIT:
     raise SystemExit()
   else:
-    err_msg = "'" + procced_option + "' is not a valid answer."  
-    print(settings.print_error_msg(err_msg))
+    common.invalid_option(procced_option)  
     pass
   return value
 
@@ -493,8 +489,7 @@ def next_attack_vector(technique, go_back):
     elif next_attack_vector in settings.CHOICE_QUIT:
       raise SystemExit()
     else:
-      err_msg = "'" + next_attack_vector + "' is not a valid answer."  
-      print(settings.print_error_msg(err_msg))
+      common.invalid_option(next_attack_vector)  
       pass
 
 """
@@ -554,8 +549,7 @@ def procced_with_file_based_technique():
     elif enable_fb in settings.CHOICE_QUIT:
       raise SystemExit()
     else:
-      err_msg = "'" + enable_fb + "' is not a valid answer."  
-      print(settings.print_error_msg(err_msg))
+      common.invalid_option(enable_fb)  
       pass
 
 """
@@ -617,8 +611,7 @@ def continue_tests(err):
       elif continue_tests in settings.CHOICE_QUIT:
         return False
       else:
-        err_msg = "'" + continue_tests + "' is not a valid answer."  
-        print(settings.print_error_msg(err_msg))
+        common.invalid_option(continue_tests)  
         pass
   except KeyboardInterrupt:
     raise
@@ -687,8 +680,7 @@ def ps_check():
         print(settings.SINGLE_WHITESPACE)
         os._exit(0)
       else:  
-        err_msg = "'" + ps_check + "' is not a valid answer."  
-        print(settings.print_error_msg(err_msg))
+        common.invalid_option(ps_check)  
         pass
 
 """
@@ -705,8 +697,7 @@ def ps_check_failed():
       print(settings.SINGLE_WHITESPACE)
       os._exit(0)
     else:  
-      err_msg = "'" + ps_check + "' is not a valid answer."  
-      print(settings.print_error_msg(err_msg))
+      common.invalid_option(ps_check)
       pass
 
 """
@@ -752,8 +743,7 @@ def check_CGI_scripts(url):
           print(settings.SINGLE_WHITESPACE)
           os._exit(0)
         else:  
-          err_msg = "'" + shellshock_check + "' is not a valid answer."  
-          print(settings.print_error_msg(err_msg))
+          common.invalid_option(shellshock_check)  
           pass
           
   if not _:
@@ -821,8 +811,7 @@ def identified_os():
       elif proceed_option.lower() == "q":
         raise SystemExit()
     else:
-      err_msg = "'" + proceed_option + "' is not a valid answer."  
-      print(settings.print_error_msg(err_msg))
+      common.invalid_option(proceed_option)  
       pass
 
 """
@@ -900,8 +889,7 @@ def identified_http_auth_type(auth_type):
     elif proceed_option.lower() == "q":
       raise SystemExit()
   else:
-    err_msg = "'" + proceed_option + "' is not a valid answer." 
-    print(settings.print_error_msg(err_msg))
+    common.invalid_option(proceed_option) 
     pass
 
 """
@@ -1350,8 +1338,7 @@ def recognise_payload(payload):
       elif procced_option in settings.CHOICE_QUIT:
         raise SystemExit()
       else:
-        err_msg = "'" + procced_option + "' is not a valid answer."  
-        print(settings.print_error_msg(err_msg))
+        common.invalid_option(procced_option)  
         pass
 
   if is_decoded:
@@ -1553,8 +1540,7 @@ def process_xml_data():
     elif xml_process in settings.CHOICE_QUIT:
       raise SystemExit()
     else:
-      err_msg = "'" + xml_process + "' is not a valid answer."  
-      print(settings.print_error_msg(err_msg))
+      common.invalid_option(xml_process)  
       pass
 
 #Check if INJECT_TAG is enclosed in quotes (in json data)
@@ -1596,8 +1582,7 @@ def process_json_data():
     elif json_process in settings.CHOICE_QUIT:
       raise SystemExit()
     else:
-      err_msg = "'" + json_process + "' is not a valid answer."  
-      print(settings.print_error_msg(err_msg))
+      common.invalid_option(json_process)  
       pass
 
 """
@@ -2020,7 +2005,7 @@ def print_single_os_cmd(cmd, shell):
     _ = "'" + cmd + "' execution output"
     print(settings.print_retrieved_data(_, shell))
   else:
-    err_msg = "The execution of '" + cmd + "' command does not return any output."
+    err_msg = common.invalid_cmd_output(cmd)
     print(settings.print_error_msg(err_msg)) 
 
 """
@@ -2290,8 +2275,7 @@ def file_upload():
       elif enable_HTTP_server in settings.CHOICE_QUIT:
         raise SystemExit()
       else:
-        err_msg = "'" + enable_HTTP_server + "' is not a valid answer."  
-        print(settings.print_error_msg(err_msg))
+        common.invalid_option(enable_HTTP_server)  
         pass
 
 """
@@ -2334,8 +2318,7 @@ def define_py_working_dir():
         settings.WIN_PYTHON_INTERPRETER = common.read_input(message, default=None, check_batch=True)
         break
       else:
-        err_msg = "'" + python_dir + "' is not a valid answer."  
-        print(settings.print_error_msg(err_msg))
+        common.invalid_option(python_dir)  
         pass
     settings.USER_DEFINED_PYTHON_DIR = True
 

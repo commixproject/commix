@@ -28,6 +28,20 @@ from src.thirdparty.six.moves import input as _input
 from src.thirdparty.six.moves import urllib as _urllib
 
 """
+Invalid option msg
+"""
+def invalid_option(option):
+  err_msg = "'" + option + "' is not a valid answer."
+  print(settings.print_error_msg(err_msg))
+
+"""
+Invalid cmd output
+"""
+def invalid_cmd_output(cmd):
+  err_msg = "The execution of '" + cmd + "' command, does not return any output."
+  return err_msg 
+
+"""
 Reads input from terminal
 """
 def read_input(message, default=None, check_batch=True):
@@ -153,8 +167,7 @@ def create_github_issue(err_msg, exc_msg):
         print(settings.SINGLE_WHITESPACE)
         return
       else:
-        err_msg = "'" + choise + "' is not a valid answer."  
-        print(settings.print_error_msg(err_msg))
+        invalid_option(choise)  
         pass
     except: 
       print("\n")

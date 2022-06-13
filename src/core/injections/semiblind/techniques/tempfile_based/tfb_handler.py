@@ -247,8 +247,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                           elif proceed_option.lower() == "q":
                             raise SystemExit()
                         else:
-                          err_msg = "'" + proceed_option + "' is not a valid answer."
-                          print(settings.print_error_msg(err_msg))
+                          common.invalid_option(proceed_option)
                           pass
 
                     if settings.VERBOSITY_LEVEL == 0:
@@ -467,8 +466,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                     delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)    
                     raise SystemExit()
                   else:
-                    err_msg = "'" + enumerate_again + "' is not a valid answer."
-                    print(settings.print_error_msg(err_msg))
+                    common.invalid_option(enumerate_again)
                     pass
               else:
                 if menu.enumeration_options():
@@ -491,8 +489,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                     delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
                     raise SystemExit()
                   else:
-                    err_msg = "'" + file_access_again + "' is not a valid answer."  
-                    print(settings.print_error_msg(err_msg))
+                    common.invalid_option(file_access_again)  
                     pass
               else:
                 if menu.file_access_options():
@@ -571,8 +568,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                     delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
                     raise SystemExit()
                   else:
-                    err_msg = "'" + gotshell + "' is not a valid answer."  
-                    print(settings.print_error_msg(err_msg))
+                    common.invalid_option(gotshell)  
                     pass
 
               except (KeyboardInterrupt, SystemExit):

@@ -304,8 +304,7 @@ def notification(url, technique, injection_type):
                 else:
                   pass  
               else:
-                err_msg = "'" +  proceed_option + "' is not a valid answer."   
-                print(settings.print_error_msg(err_msg))
+                common.invalid_option(proceed_option)   
                 pass   
           if settings.SESSION_APPLIED_TECHNIQUES:
             menu.options.tech = ''.join(settings.AVAILABLE_TECHNIQUES)
@@ -313,8 +312,7 @@ def notification(url, technique, injection_type):
         elif settings.LOAD_SESSION in settings.CHOICE_QUIT:
           raise SystemExit()
         else:
-          err_msg = "'" + settings.LOAD_SESSION + "' is not a valid answer."  
-          print(settings.print_error_msg(err_msg))
+          common.invalid_option(settings.LOAD_SESSION)  
           pass
   except sqlite3.OperationalError as err_msg:
     print(settings.print_critical_msg(err_msg))

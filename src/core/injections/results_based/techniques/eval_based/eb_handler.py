@@ -312,8 +312,7 @@ def eb_injection_handler(url, timesec, filename, http_request_method, injection_
                 elif enumerate_again in settings.CHOICE_QUIT:
                   raise SystemExit()
                 else:
-                  err_msg = "'" + enumerate_again + "' is not a valid answer."
-                  print(settings.print_error_msg(err_msg))
+                  common.invalid_option(enumerate_again)
                   pass
             else:
               if menu.enumeration_options():
@@ -334,8 +333,7 @@ def eb_injection_handler(url, timesec, filename, http_request_method, injection_
                 elif file_access_again in settings.CHOICE_QUIT:
                   raise SystemExit()
                 else:
-                  err_msg = "'" + file_access_again  + "' is not a valid answer."
-                  print(settings.print_error_msg(err_msg))
+                  common.invalid_option(file_access_again)
                   pass
             else:
               if menu.file_access_options():
@@ -396,7 +394,7 @@ def eb_injection_handler(url, timesec, filename, http_request_method, injection_
                         logs.executed_command(filename, cmd, shell)
                         print(settings.command_execution_output(shell))
                       else:
-                        err_msg = "The execution of '" + cmd + "' command does not return any output."
+                        err_msg = common.invalid_cmd_output(cmd)
                         print(settings.print_error_msg(err_msg))
                 elif gotshell in settings.CHOICE_NO:
                   if checks.next_attack_vector(technique, go_back) == True:
@@ -409,8 +407,7 @@ def eb_injection_handler(url, timesec, filename, http_request_method, injection_
                 elif gotshell in settings.CHOICE_QUIT:
                   raise SystemExit()
                 else:
-                  err_msg = "'" + gotshell + "' is not a valid answer."  
-                  print(settings.print_error_msg(err_msg))
+                  common.invalid_option(gotshell)  
                   pass
 
             except (KeyboardInterrupt, SystemExit):

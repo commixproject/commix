@@ -225,8 +225,7 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                           elif proceed_option.lower() == "q":
                             raise SystemExit()
                         else:
-                          err_msg = "'" + proceed_option + "' is not a valid answer."
-                          print(settings.print_error_msg(err_msg))
+                          common.invalid_option(proceed_option)
                           pass
                     
                     if settings.VERBOSITY_LEVEL == 0:
@@ -422,8 +421,7 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                   elif enumerate_again in settings.CHOICE_QUIT:
                     raise SystemExit()
                   else:
-                    err_msg = "'" + enumerate_again + "' is not a valid answer."  
-                    print(settings.print_error_msg(err_msg))
+                    common.invalid_option(enumerate_again)  
                     pass
               else:
                 if menu.enumeration_options():
@@ -444,8 +442,7 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                   elif file_access_again in settings.CHOICE_QUIT:
                     raise SystemExit()
                   else:
-                    err_msg = "'" + file_access_again  + "' is not a valid answer."  
-                    print(settings.print_error_msg(err_msg))
+                    common.invalid_option(file_access_again)  
                     pass
               else:
                 if menu.file_access_options():      
@@ -517,8 +514,7 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                     raise SystemExit()
 
                   else:
-                    err_msg = "'" + gotshell + "' is not a valid answer."
-                    print(settings.print_error_msg(err_msg))
+                    common.invalid_option(gotshell)
                     pass
                   # break
 
@@ -573,8 +569,7 @@ def exploitation(url, timesec, filename, http_request_method, url_time_response,
         elif proceed_option.lower() == "q":
           raise SystemExit()
       else:
-        err_msg = "'" + proceed_option + "' is not a valid answer."
-        print(settings.print_error_msg(err_msg))
+        common.invalid_option(proceed_option)
         pass
   else:
     if tb_injection_handler(url, timesec, filename, http_request_method, url_time_response, injection_type, technique) == False:

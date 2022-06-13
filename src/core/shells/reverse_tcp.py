@@ -107,8 +107,7 @@ def set_php_working_dir():
       settings.USER_DEFINED_PHP_DIR = True
       break
     else:
-      err_msg = "'" + php_dir + "' is not a valid answer."  
-      print(settings.print_error_msg(err_msg))
+      common.invalid_option(php_dir)  
       pass
 
 """
@@ -128,8 +127,7 @@ def set_python_working_dir():
       settings.USER_DEFINED_PYTHON_DIR = True
       break
     else:
-      err_msg = "'" + python_dir + "' is not a valid answer."  
-      print(settings.print_error_msg(err_msg))
+      common.invalid_option(python_dir)  
       pass
 
 """
@@ -149,8 +147,7 @@ def set_python_interpreter():
       settings.USER_DEFINED_PYTHON_INTERPRETER = True
       break
     else:
-      err_msg = "'" + python_interpreter + "' is not a valid answer."  
-      print(settings.print_error_msg(err_msg))
+      common.invalid_option(python_interpreter)  
       pass
 
 """
@@ -243,8 +240,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp_netcat""" + Style.RESET_AL
         return shell_options(nc_version)
     # Invalid option    
     else:
-      err_msg = "The '" + nc_version + "' option, is not valid."  
-      print(settings.print_error_msg(err_msg))
+      common.invalid_option(nc_version)
       continue
 
   while True:
@@ -259,8 +255,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp_netcat""" + Style.RESET_AL
     elif enable_bin_dir in settings.CHOICE_QUIT:
       raise SystemExit()
     else:
-      err_msg = "'" + enable_bin_dir + "' is not a valid answer."  
-      print(settings.print_error_msg(err_msg))
+      common.invalid_option(enable_bin_dir)  
       pass
 
   if nc_version != '4':
@@ -500,8 +495,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """windows_meterpreter_reverse_tcp""" + S
           elif windows_reverse_shell == '2' :
             output = "powershell_attack.txt"
           else:
-            err_msg = "The '" + windows_reverse_shell + "' option, is not valid."  
-            print(settings.print_error_msg(err_msg))
+            common.invalid_option(windows_reverse_shell)
             continue
 
           if not os.path.exists(settings.METASPLOIT_PATH):
@@ -599,8 +593,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """web_delivery""" + Style.RESET_ALL + ""
         elif web_delivery == '3':
           payload = "windows/meterpreter/reverse_tcp"
         else:
-          err_msg = "The '" + web_delivery + "' option, is not valid."  
-          print(settings.print_error_msg(err_msg))
+          common.invalid_option(web_delivery)
           continue
 
         if not os.path.exists(settings.METASPLOIT_PATH):
@@ -655,8 +648,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """web_delivery""" + Style.RESET_ALL + ""
         return shell_options(other_shell)
     # Invalid option
     else:
-      err_msg = "The '" + other_shell + "' option, is not valid."  
-      print(settings.print_error_msg(err_msg))
+      common.invalid_option(other_shell)
       continue
 
   return other_shell
@@ -699,8 +691,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp""" + Style.RESET_ALL + """
         return shell_options(reverse_tcp_option)
     # Invalid option    
     else:
-      err_msg = "The '" + reverse_tcp_option + "' option, is not valid."  
-      print(settings.print_error_msg(err_msg))
+      common.invalid_option(reverse_tcp_option)
       continue
 
   return reverse_tcp_option
@@ -758,12 +749,10 @@ def configure_reverse_tcp(separator):
       elif option[4:12].lower() == "uripath ":
         check_uripath(option[12:])
       else:
-        err_msg = "The '" + option + "' option, is not valid."
-        print(settings.print_error_msg(err_msg))
+        common.invalid_option(option)
         pass
     else:
-      err_msg = "The '" + option + "' option, is not valid."
-      print(settings.print_error_msg(err_msg))
+      common.invalid_option(option)
       pass
 
 # eof

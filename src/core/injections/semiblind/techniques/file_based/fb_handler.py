@@ -383,8 +383,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                         print(settings.SINGLE_WHITESPACE)
                         raise
                       else:
-                        err_msg = "'" + tmp_upload + "' is not a valid answer."  
-                        print(settings.print_error_msg(err_msg))
+                        common.invalid_option(tmp_upload)
                         pass
                     continue
                   
@@ -528,8 +527,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                   delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
                   raise SystemExit()
                 else:
-                  err_msg = "'" + enumerate_again + "' is not a valid answer."
-                  print(settings.print_error_msg(err_msg))
+                  common.invalid_option(enumerate_again)
                   pass
             else:
               if menu.enumeration_options():
@@ -552,8 +550,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                   delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
                   raise SystemExit()
                 else:
-                  err_msg = "'" + enumerate_again + "' is not a valid answer."
-                  print(settings.print_error_msg(err_msg))
+                  common.invalid_option(enumerate_again)
                   pass
             else:
               if menu.file_access_options():
@@ -612,7 +609,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                         logs.executed_command(filename, cmd, shell)
                         print(settings.command_execution_output(shell))
                       else:
-                        err_msg = "The execution of '" + cmd + "' command does not return any output."
+                        err_msg = common.invalid_cmd_output(cmd)
                         print(settings.print_critical_msg(err_msg))
                 elif gotshell in settings.CHOICE_NO:
                   if checks.next_attack_vector(technique, go_back) == True:
@@ -628,8 +625,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                   delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
                   raise SystemExit()
                 else:
-                  err_msg = "'" + gotshell + "' is not a valid answer."  
-                  print(settings.print_error_msg(err_msg))
+                  common.invalid_option(gotshell)  
                   pass
               
             except KeyboardInterrupt: 

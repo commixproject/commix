@@ -142,8 +142,7 @@ def estimate_response_time(url, timesec):
                   elif do_update in settings.CHOICE_QUIT:
                     raise SystemExit()
                   else:
-                    err_msg = "'" + do_update + "' is not a valid answer."  
-                    print(settings.print_error_msg(err_msg))
+                    common.invalid_option(do_update)  
                     pass
 
             # Digest authentication         
@@ -172,8 +171,7 @@ def estimate_response_time(url, timesec):
                   elif do_update in settings.CHOICE_QUIT:
                     raise SystemExit()
                   else:
-                    err_msg = "'" + do_update + "' is not a valid answer."  
-                    print(settings.print_error_msg(err_msg))
+                    common.invalid_option(do_update)  
                     pass
                 else:   
                   checks.http_auth_err_msg()      
@@ -1229,8 +1227,7 @@ def check_target_os(server_banner):
             elif got_os.lower() == "q":
               raise SystemExit()
           else:
-            err_msg = "'" + got_os + "' is not a valid answer."  
-            print(settings.print_error_msg(err_msg))
+            common.invalid_option(got_os)  
             pass
 
 """

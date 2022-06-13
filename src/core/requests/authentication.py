@@ -97,8 +97,7 @@ def define_wordlists():
     elif do_update in settings.CHOICE_QUIT:
       raise SystemExit()
     else:
-      err_msg = "'" + do_update + "' is not a valid answer."  
-      print(settings.print_error_msg(err_msg))
+      common.invalid_option(do_update)  
       pass
 
   try:

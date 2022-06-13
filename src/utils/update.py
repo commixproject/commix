@@ -143,8 +143,7 @@ def check_for_update():
         elif do_update in settings.CHOICE_NO:
           break
         else:
-          err_msg = "'" + do_update + "' is not a valid answer."  
-          print(settings.print_error_msg(err_msg))
+          common.invalid_option(do_update)  
           pass
   except KeyboardInterrupt:
     raise
@@ -241,8 +240,7 @@ def check_unicorn_version(current_version):
         elif do_update in settings.CHOICE_NO:
           break
         else:
-          err_msg = "'" + do_update + "' is not a valid answer."  
-          print(settings.print_error_msg(err_msg))
+          common.invalid_option(do_update)  
           pass
 
   except KeyboardInterrupt:

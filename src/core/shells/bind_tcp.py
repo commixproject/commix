@@ -92,8 +92,7 @@ def set_php_working_dir():
       settings.USER_DEFINED_PHP_DIR = True
       break
     else:
-      err_msg = "'" + php_dir + "' is not a valid answer."  
-      print(settings.print_error_msg(err_msg))
+      common.invalid_option(php_dir)  
       pass
 
 """
@@ -113,8 +112,7 @@ def set_python_working_dir():
       settings.USER_DEFINED_PYTHON_DIR = True
       break
     else:
-      err_msg = "'" + python_dir + "' is not a valid answer."  
-      print(settings.print_error_msg(err_msg))
+      common.invalid_option(python_dir)  
       pass
 
 """
@@ -134,8 +132,7 @@ def set_python_interpreter():
       settings.USER_DEFINED_PYTHON_INTERPRETER = True
       break
     else:
-      err_msg = "'" + python_interpreter + "' is not a valid answer."  
-      print(settings.print_error_msg(err_msg))
+      common.invalid_option(python_interpreter)  
       pass
 
 """
@@ -207,8 +204,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """bind_tcp_netcat""" + Style.RESET_ALL +
         return shell_options(nc_version)
     # Invalid command    
     else:
-      err_msg = "The '" + nc_version + "' option, is not valid."  
-      print(settings.print_error_msg(err_msg))
+      common.invalid_option(nc_version)
       continue
 
   while True:
@@ -223,8 +219,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """bind_tcp_netcat""" + Style.RESET_ALL +
     elif enable_bin_dir in settings.CHOICE_QUIT:
       raise SystemExit()
     else:
-      err_msg = "'" + enable_bin_dir + "' is not a valid answer."  
-      print(settings.print_error_msg(err_msg))
+      common.invalid_option(enable_bin_dir)  
       pass
 
   if nc_version != '4':
@@ -443,8 +438,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """bind_tcp_other""" + Style.RESET_ALL + 
         return shell_options(other_shell)
     # Invalid option
     else:
-      err_msg = "The '" + other_shell + "' option, is not valid."  
-      print(settings.print_error_msg(err_msg))
+      common.invalid_option(other_shell)
       continue
 
   return other_shell
@@ -487,8 +481,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """bind_tcp""" + Style.RESET_ALL + """) >
         return shell_options(bind_tcp_option)
     # Invalid option
     else:
-      err_msg = "The '" + bind_tcp_option + "' option, is not valid."  
-      print(settings.print_error_msg(err_msg))
+      common.invalid_option(bind_tcp_option)
       continue
 
 
@@ -543,12 +536,10 @@ def configure_bind_tcp(separator):
         else:
           continue
       else:
-        err_msg = "The '" + option + "' option, is not valid."
-        print(settings.print_error_msg(err_msg))
+        common.invalid_option(option)
         pass
     else:
-      err_msg = "The '" + option + "' option, is not valid."
-      print(settings.print_error_msg(err_msg))
+      common.invalid_option(option)
       pass
 
 # eof

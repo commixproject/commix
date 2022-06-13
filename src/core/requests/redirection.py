@@ -83,8 +83,7 @@ def do_check(request, url):
         elif redirection_option in settings.CHOICE_QUIT:
           raise SystemExit()
         else:
-          err_msg = "'" + redirection_option + "' is not a valid answer."  
-          print(settings.print_error_msg(err_msg))
+          common.invalid_option(redirection_option)  
           pass
 
   except (SocketError, _urllib.error.HTTPError, _urllib.error.URLError, _http_client.BadStatusLine, _http_client.InvalidURL) as err_msg:

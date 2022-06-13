@@ -299,8 +299,7 @@ def injection_output(url, OUTPUT_TEXTFILE, timesec):
           elif procced_option in settings.CHOICE_QUIT:
             raise SystemExit()
           else:
-            err_msg = "'" + procced_option + "' is not a valid answer."  
-            print(settings.print_error_msg(err_msg))
+            common.invalid_option(procced_option)  
             pass
     else:
         output = custom_web_root(url, OUTPUT_TEXTFILE)

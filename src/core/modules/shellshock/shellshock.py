@@ -383,8 +383,7 @@ def shellshock_handler(url, http_request_method, filename):
               elif enumerate_again in settings.CHOICE_QUIT:
                 raise SystemExit()
               else:
-                err_msg = "'" + enumerate_again + "' is not a valid answer."  
-                print(settings.print_error_msg(err_msg))
+                common.invalid_option(enumerate_again)  
                 pass
           else:
             enumeration(url, cve, check_header, filename)
@@ -402,8 +401,7 @@ def shellshock_handler(url, http_request_method, filename):
               elif file_access_again in settings.CHOICE_QUIT:
                 raise SystemExit()
               else:
-                err_msg = "'" + file_access_again  + "' is not a valid answer."  
-                print(settings.print_error_msg(err_msg))
+                common.invalid_option(file_access_again)  
                 pass
           else:
             file_access(url, cve, check_header, filename)
@@ -463,7 +461,7 @@ def shellshock_handler(url, http_request_method, filename):
                         sys.stdout.write(settings.print_payload(payload))
                       if settings.VERBOSITY_LEVEL >= 2:
                         print(settings.SINGLE_WHITESPACE)
-                      err_msg = "The execution of '" + cmd + "' command does not return any output."
+                      err_msg = common.invalid_cmd_output(cmd)
                       print(settings.print_error_msg(err_msg))
               elif gotshell in settings.CHOICE_NO:
                 if checks.next_attack_vector(technique, go_back) == True:
@@ -479,8 +477,7 @@ def shellshock_handler(url, http_request_method, filename):
                 raise SystemExit()
 
               else:
-                err_msg = "'" + gotshell + "' is not a valid answer."  
-                print(settings.print_error_msg(err_msg))
+                common.invalid_option(gotshell)  
                 continue
               break
           
