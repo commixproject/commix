@@ -37,7 +37,7 @@ def tamper(payload):
         payload = payload.replace(match.group(0), match.group(0).replace("sleep", "timeout") + " ping localhost".replace(" ",settings.WHITESPACES[0]))
         payload = payload.replace("timeout" + settings.WHITESPACES[0] + "0" + settings.WHITESPACES[0] + "ping" + settings.WHITESPACES[0] + "localhost", "timeout" + settings.WHITESPACES[0] + "0")
     else:
-      payload = payload.replace("powershell.exe -InputFormat none Start-Sleep -s", "timeout")
+      payload = payload.replace("powershell.exe" + settings.WHITESPACES[0] + "-InputFormat" + settings.WHITESPACES[0] + "none" + settings.WHITESPACES[0] + "Start-Sleep" + settings.WHITESPACES[0] + "-s", "timeout")
     return payload
 
   if settings.CLASSIC_STATE != False or \
@@ -55,5 +55,7 @@ def tamper(payload):
     settings.TRANFROM_PAYLOAD = True
     if settings.TRANFROM_PAYLOAD:
       return sleep_to_timeout_ping(payload)
+      
+  return payload
 
 # eof 
