@@ -493,7 +493,7 @@ def false_positive_check(separator, TAG, cmd, whitespace, prefix, suffix, timese
     if str(output) == str(randvcalc):
       return how_long, output
   else:
-    if settings.VERBOSITY_LEVEL < 2:
+    if settings.VERBOSITY_LEVEL == 0:
       print(settings.SINGLE_WHITESPACE)
     warn_msg = "False positive or unexploitable injection point detected."
     print(settings.print_warning_msg(warn_msg))
