@@ -126,7 +126,7 @@ def enumeration(url, cve, check_header, filename):
     cmd = checks.remove_command_substitution(cmd)
     sys_users, payload = cmd_exec(url, cmd, cve, check_header, filename)
     if sys_users:
-      checks.print_users(sys_users, filename, _) 
+      checks.print_users(sys_users, filename, _, alter_shell=False) 
     settings.ENUMERATION_DONE = True
 
   if menu.options.passwords:
@@ -135,7 +135,7 @@ def enumeration(url, cve, check_header, filename):
     cmd = checks.remove_command_substitution(cmd)         
     sys_passes, payload = cmd_exec(url, cmd, cve, check_header, filename)
     if sys_passes :
-      checks.print_passes(sys_passes, filename, _)
+      checks.print_passes(sys_users, filename, _, alter_shell=False)
     settings.ENUMERATION_DONE = True  
 
 """

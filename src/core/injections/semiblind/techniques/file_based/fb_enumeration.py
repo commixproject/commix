@@ -180,7 +180,7 @@ def system_users(separator, payload, TAG, timesec, prefix, suffix, whitespace, h
     session_handler.store_cmd(url, cmd, sys_users, vuln_parameter)
   else:
     sys_users = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
-  checks.print_users(sys_users, filename, _)
+  checks.print_users(sys_users, filename, _, separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell)
 
 """
 System passwords enumeration
@@ -197,7 +197,7 @@ def system_passwords(separator, payload, TAG, timesec, prefix, suffix, whitespac
     session_handler.store_cmd(url, cmd, sys_passes, vuln_parameter)
   else:
     sys_passes = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
-  checks.print_passes(sys_passes, filename, _)
+  checks.print_passes(sys_users, filename, _, alter_shell)
 
 """
 Single os-shell execution
