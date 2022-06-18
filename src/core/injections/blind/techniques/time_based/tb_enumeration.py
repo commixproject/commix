@@ -179,7 +179,7 @@ def system_passwords(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, ti
   else:
     output = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
   sys_passes = output 
-  checks.print_passes(sys_users, filename, _, alter_shell)
+  checks.print_passes(sys_passes, filename, _, alter_shell)
 
 """
 Single os-shell execution

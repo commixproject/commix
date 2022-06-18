@@ -662,6 +662,8 @@ Check if PowerShell is enabled.
 """
 def ps_check():
   if settings.PS_ENABLED == None and menu.options.is_admin or menu.options.users or menu.options.passwords:
+    if settings.VERBOSITY_LEVEL != 0:
+      print(settings.SINGLE_WHITESPACE)
     while True:
       message = "The payloads in some options that you "
       message += "have chosen are requiring the use of powershell. "
@@ -1807,33 +1809,33 @@ def print_users(sys_users, filename, _, separator, TAG, cmd, prefix, suffix, whi
           count = 0
           for user in range(0, len(sys_users_list)):
             count = count + 1
-            if menu.options.privileges:
-              cmd = "powershell.exe -InputFormat none write-host (([string]$(net user " + sys_users_list[user] + ")[22..($(net user " + sys_users_list[user] + ").length-3)]).replace('Local Group Memberships','').replace('*','').Trim()).replace(' ','')"
-              if alter_shell:
-                cmd = escape_single_quoted_cmd(cmd)
-              cmd = "cmd /c " + cmd 
-              response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
-              check_privs = cb_injector.injection_results(response, TAG, cmd)
-              check_privs = "".join(str(p) for p in check_privs).strip()
-              check_privs = re.findall(r"(.*)", check_privs)
-              check_privs = "".join(str(p) for p in check_privs).strip()
-              check_privs = check_privs.split()
-              if "Admin" in check_privs[0]:
-                is_privileged = Style.RESET_ALL + "is" +  Style.BRIGHT + " admin user"
-                is_privileged_nh = " is admin user "
-              else:
-                is_privileged = Style.RESET_ALL + "is" +  Style.BRIGHT + " regular user"
-                is_privileged_nh = " is regular user "
-            else :
-              is_privileged = ""
-              is_privileged_nh = ""
-            print(settings.SUB_CONTENT_SIGN + "(" +str(count)+ ") '" + Style.BRIGHT +  sys_users_list[user] + Style.RESET_ALL + "'" + Style.BRIGHT + is_privileged + Style.RESET_ALL + ".")
+            # if menu.options.privileges:
+            #   cmd = "powershell.exe -InputFormat none write-host (([string]$(net user " + sys_users_list[user] + ")[22..($(net user " + sys_users_list[user] + ").length-3)]).replace('Local Group Memberships','').replace('*','').Trim()).replace(' ','')"
+            #   if alter_shell:
+            #     cmd = escape_single_quoted_cmd(cmd)
+            #   cmd = "cmd /c " + cmd 
+            #   from src.core.injections.results_based.techniques.classic import cb_injector
+            #   response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
+            #   check_privs = cb_injector.injection_results(response, TAG, cmd)
+            #   check_privs = "".join(str(p) for p in check_privs).strip()
+            #   check_privs = re.findall(r"(.*)", check_privs)
+            #   check_privs = "".join(str(p) for p in check_privs).strip()
+            #   check_privs = check_privs.split()
+            #   if "Admin" in check_privs[0]:
+            #     is_privileged = Style.RESET_ALL + "is" +  Style.BRIGHT + " admin user"
+            #     is_privileged_nh = " is admin user "
+            #   else:
+            #     is_privileged = Style.RESET_ALL + "is" +  Style.BRIGHT + " regular user"
+            #     is_privileged_nh = " is regular user "
+            # else :
+            is_privileged = is_privileged = ""
+            print(settings.SUB_CONTENT_SIGN + "(" +str(count)+ ") '" + Style.BRIGHT +  sys_users_list[user] + Style.RESET_ALL + "'" + Style.BRIGHT + is_privileged + Style.RESET_ALL)
             # Add infos to logs file.   
             output_file = open(filename, "a")
             if not menu.options.no_logging:
               if count == 1 :
                 output_file.write("\n")
-              output_file.write("(" +str(count)+ ") " + sys_users_list[user] + is_privileged + "\n" )
+              output_file.write("(" +str(count)+ ") '" + sys_users_list[user] + is_privileged + "'\n" )
             output_file.close()
       else:
         # print(settings.SINGLE_WHITESPACE)
@@ -1953,7 +1955,7 @@ def print_users(sys_users, filename, _, separator, TAG, cmd, prefix, suffix, whi
 """
 Print users enumeration.
 """
-def print_passes(sys_users, filename, _, alter_shell):
+def print_passes(sys_passes, filename, _, alter_shell):
   if sys_passes == "":
     sys_passes = " "
     sys_passes = sys_passes.replace(" ", "\n").split()
@@ -2019,6 +2021,12 @@ def quoted_cmd(cmd):
   return cmd
 
 """
+"""
+def add_new_cmd(cmd):
+  cmd = "cmd /c " + cmd
+  return cmd
+
+"""
 Escape single quoted cmd
 """
 def escape_single_quoted_cmd(cmd):
@@ -2030,7 +2038,8 @@ Find filename
 """
 def find_filename(dest_to_write, content):
   fname = os.path.basename(dest_to_write)
-  tmp_fname = "tmp_" + fname
+  #tmp_fname = "tmp_" + fname
+  tmp_fname = fname
   content = quoted_cmd(content)
   cmd = settings.FILE_WRITE + content + settings.FILE_WRITE_OPERATOR + tmp_fname
   return fname, tmp_fname, cmd

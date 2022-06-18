@@ -49,7 +49,7 @@ def file_write(separator, payload, TAG, timesec, prefix, suffix, whitespace, htt
     # cmd = "cmd /c if exist " + fname + " (echo " + fname + ")" 
     # dest_to_write = dest_to_write + "\\" + fname
     cmd = checks.check_file(dest_to_write)
-    cmd = "cmd /c " + cmd
+    cmd = checks.add_new_cmd(cmd)
     if not menu.options.alter_shell:
       cmd = checks.quoted_cmd(cmd)
   else:

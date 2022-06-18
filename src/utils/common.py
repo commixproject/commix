@@ -63,7 +63,7 @@ def read_input(message, default=None, check_batch=True):
 
     if settings.ANSWERS:
       if not any(_ in settings.ANSWERS for _ in ",="):
-        return is_empty(message, default=None, check_batch=True)
+        return is_empty()
       else:
         for item in settings.ANSWERS.split(','):
           question = item.split('=')[0].strip()

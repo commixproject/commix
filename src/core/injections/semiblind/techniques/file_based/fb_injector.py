@@ -292,6 +292,9 @@ def injection_output(url, OUTPUT_TEXTFILE, timesec):
             break
           elif procced_option in settings.CHOICE_NO:
             output = custom_web_root(url, OUTPUT_TEXTFILE)
+            info_msg = "Using '" + output 
+            info_msg += "' as command execution output."
+            print(settings.print_info_msg(info_msg))
             if not settings.DEFINED_WEBROOT:
               pass
             else:
