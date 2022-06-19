@@ -205,7 +205,7 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
                 "for /f \"tokens=*\" %i in ('cmd /c \"" +
                 cmd + 
                 "\"') do @set /p =%i" +
-                settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + "< nul" + pipe + " "
+                settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + "<nul" + pipe + " "
                 "for /f \"tokens=*\" %i in ('cmd /c \"powershell.exe -InputFormat none "
                 "([string](Get-Content " + OUTPUT_TEXTFILE + ").length)\"')"
                 "do if %i==" +str(j) + " "
@@ -224,7 +224,7 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
                "for /f \"tokens=*\" %i in ('cmd /c \"" +
                 cmd + 
                 "\"') do @set /p =%i" +
-                settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + "< nul" + ampersand + ""
+                settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + "<nul" + ampersand + ""
                 "for /f \"tokens=*\" %i in ('cmd /c \"powershell.exe -InputFormat none "
                 "([string](Get-Content " + OUTPUT_TEXTFILE + ").length)\"')"
                 "do if %i==" +str(j) + " "

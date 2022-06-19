@@ -53,7 +53,7 @@ def delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, whitespa
     debug_msg = "Deleting the generated file '" + OUTPUT_TEXTFILE + "'"
     print(settings.print_debug_msg(debug_msg))
   if settings.TARGET_OS == "win":
-    cmd = settings.WIN_DEL + OUTPUT_TEXTFILE
+    cmd = settings.WIN_DEL + settings.WEB_ROOT + OUTPUT_TEXTFILE
   else:
     settings.WEB_ROOT = ""
     cmd = settings.DEL + settings.WEB_ROOT + OUTPUT_TEXTFILE + settings.SINGLE_WHITESPACE + settings.COMMENT 
