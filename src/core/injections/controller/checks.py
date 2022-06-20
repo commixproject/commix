@@ -1002,7 +1002,7 @@ def print_non_listed_params(check_parameters, http_request_method, header_name):
 Lists available tamper scripts
 """
 def list_tamper_scripts():
-  info_msg = "Listing available tamper scripts:"
+  info_msg = "Listing available tamper scripts."
   print(settings.print_info_msg(info_msg))
   if menu.options.list_tampers:
     for script in sorted(glob.glob(os.path.join(settings.TAMPER_SCRIPTS_PATH, "*.py"))):
@@ -1010,8 +1010,7 @@ def list_tamper_scripts():
       match = re.search(r"About:(.*)\n", content)
       if match:
         comment = match.group(1).strip()
-        sub_content = Fore.MAGENTA + os.path.basename(script) + Style.RESET_ALL +  " - " + comment
-        print(settings.print_sub_content(sub_content))
+        print(settings.SUB_CONTENT_SIGN_TYPE + os.path.basename(script) + Style.RESET_ALL +  " - " + comment)
 
 """
 Tamper script checker
