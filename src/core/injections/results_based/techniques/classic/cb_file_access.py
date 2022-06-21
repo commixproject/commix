@@ -38,32 +38,21 @@ def file_write(separator, TAG, prefix, suffix, whitespace, http_request_method, 
     cmd = checks.change_dir(dest_to_write)
     response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
     fname, tmp_fname, cmd = checks.find_filename(dest_to_write, content)
-    if not menu.options.alter_shell:
-      cmd = checks.quoted_cmd(cmd)
     response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
     cmd = checks.win_decode_b64_enc(fname, tmp_fname)
-    if not menu.options.alter_shell:
-      cmd = checks.quoted_cmd(cmd)
     response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)	
     cb_injector.injection_results(response, TAG, cmd)
     cmd = checks.delete_tmp(tmp_fname)
-    if not menu.options.alter_shell:
-      cmd = checks.quoted_cmd(cmd)
     response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)	
     cb_injector.injection_results(response, TAG, cmd)
-    # cmd = "if exist " + fname + " (echo " + fname + ")" 
-    # dest_to_write = dest_to_write + "\\" + fname
-    cmd = checks.check_file(dest_to_write)
-    if not menu.options.alter_shell:
-      cmd = checks.quoted_cmd(cmd)
   else:
     cmd = checks.write_content(content, dest_to_write)
     response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
     shell = cb_injector.injection_results(response, TAG, cmd)
     shell = "".join(str(p) for p in shell)
-    cmd = checks.check_file(dest_to_write)
-    if settings.USE_BACKTICKS:
-      cmd = checks.remove_command_substitution(cmd)
+  cmd = checks.check_file(dest_to_write)
+  if settings.USE_BACKTICKS:
+    cmd = checks.remove_command_substitution(cmd)
   response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
   shell = cb_injector.injection_results(response, TAG, cmd)
   shell = "".join(str(p) for p in shell)

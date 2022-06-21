@@ -241,7 +241,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.5"
-REVISION = "88"
+REVISION = "89"
 STABLE_RELEASE = False
 if STABLE_RELEASE:
   VERSION = "v" + VERSION_NUM + "-stable"
@@ -534,11 +534,12 @@ WIN_RECOGNISE_HP = "echo %PROCESSOR_ARCHITECTURE%"
 # Read file
 FILE_READ = "cat "
 FILE_WRITE_OPERATOR = " > "
-WIN_FILE_READ = "type "
+WIN_FILE_WRITE_OPERATOR = "powershell.exe Set-Content "
+WIN_FILE_READ = "powershell.exe get-Content "
 
 # List file
 FILE_LIST = "ls "
-FILE_LIST_WIN = "dir "
+FILE_LIST_WIN = "powershell.exe Test-Path -Path "
 
 CERTUTIL_DECODE_CMD = "certutil -decode "
 
@@ -916,7 +917,7 @@ WIN_COMMENT = "REM"
 COMMENT = "#"
 
 #Delete command
-WIN_DEL = "DEL "
+WIN_DEL = "powershell.exe Remove-Item "
 DEL = "rm "
 
 # Time-based Variables

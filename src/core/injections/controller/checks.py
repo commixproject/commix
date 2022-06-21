@@ -2020,6 +2020,7 @@ def quoted_cmd(cmd):
   return cmd
 
 """
+Add new "cmd /c"
 """
 def add_new_cmd(cmd):
   cmd = "cmd /c " + cmd
@@ -2037,17 +2038,20 @@ Find filename
 """
 def find_filename(dest_to_write, content):
   fname = os.path.basename(dest_to_write)
-  #tmp_fname = "tmp_" + fname
-  tmp_fname = fname
-  content = quoted_cmd(content)
-  cmd = settings.FILE_WRITE + content + settings.FILE_WRITE_OPERATOR + tmp_fname
+  tmp_fname = fname + "_tmp"
+  # _ = settings.FILE_WRITE
+  if settings.TARGET_OS == "win":
+    # _ = settings.FILE_WRITE_WIN
+    cmd = settings.WIN_FILE_WRITE_OPERATOR  + tmp_fname.replace("\\","\\\\") + " '" + content + "'"
+  else:
+    cmd = settings.FILE_WRITE + content + settings.FILE_WRITE_OPERATOR + tmp_fname
   return fname, tmp_fname, cmd
 
 """
 Decode base 64 encoding
 """
 def win_decode_b64_enc(fname, tmp_fname):
-  cmd = settings.CERTUTIL_DECODE_CMD  + tmp_fname + settings.SINGLE_WHITESPACE + fname
+  cmd = settings.CERTUTIL_DECODE_CMD + tmp_fname.replace("\\","\\\\") + settings.SINGLE_WHITESPACE + fname.replace("\\","\\\\") 
   return cmd
 
 """
@@ -2073,14 +2077,17 @@ Write the file content
 """
 def write_content(content, dest_to_write):
   content = quoted_cmd(content)
-  cmd = settings.FILE_WRITE + content +  settings.FILE_WRITE_OPERATOR + dest_to_write 
+  if settings.TARGET_OS == "win":
+    cmd = settings.WIN_FILE_WRITE_OPERATOR  + dest_to_write.replace("\\","\\\\") + " '" + content + "'"
+  else:
+    cmd = settings.FILE_WRITE + content + settings.FILE_WRITE_OPERATOR + dest_to_write 
   return cmd
 
 """
 Delete filename
 """
 def delete_tmp(tmp_fname):
-  cmd = settings.WIN_DEL + tmp_fname
+  cmd = settings.WIN_DEL + tmp_fname.replace("\\","\\\\") 
   return cmd
 
 """
@@ -2088,7 +2095,7 @@ Check if file exists.
 """
 def check_file(dest_to_upload):
   if settings.TARGET_OS == "win":
-    cmd = settings.FILE_LIST_WIN + dest_to_upload
+    cmd = settings.FILE_LIST_WIN + dest_to_upload.replace("\\","\\\\")
   else:
     cmd = settings.FILE_LIST + dest_to_upload
     cmd = add_command_substitution(cmd)
@@ -2113,7 +2120,7 @@ def file_content_to_read():
   info_msg += file_to_read + "'."
   print(settings.print_info_msg(info_msg))
   if settings.TARGET_OS == "win":
-    cmd = settings.WIN_FILE_READ + file_to_read
+    cmd = settings.WIN_FILE_READ + file_to_read.replace("\\","\\\\")
   else:
     if settings.EVAL_BASED_STATE:
       cmd = "(" + settings.FILE_READ + file_to_read + ")"
