@@ -34,8 +34,8 @@ Powershell's version number enumeration (for Windows OS)
 def powershell_version(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response): 
   _ = False
   cmd = settings.PS_VERSION
-  if alter_shell:
-    cmd = checks.escape_single_quoted_cmd(cmd)
+  # if alter_shell:
+  #   cmd = checks.escape_single_quoted_cmd(cmd)
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
     # The main command injection exploitation.
     check_how_long, output = tb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)

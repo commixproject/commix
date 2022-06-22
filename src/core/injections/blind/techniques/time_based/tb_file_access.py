@@ -40,30 +40,19 @@ def file_write(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec,
     cmd = checks.change_dir(dest_to_write)
     response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
     fname, tmp_fname, cmd = checks.find_filename(dest_to_write, content)
-    if not menu.options.alter_shell:
-      cmd = checks.quoted_cmd(cmd)
     response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
     cmd = checks.win_decode_b64_enc(fname, tmp_fname)
-    if not menu.options.alter_shell:
-      cmd = checks.quoted_cmd(cmd)
     response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)  
     cb_injector.injection_results(response, TAG, cmd)
     cmd = checks.delete_tmp(tmp_fname)
-    if not menu.options.alter_shell:
-      cmd = checks.quoted_cmd(cmd)
     response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)  
     cb_injector.injection_results(response, TAG, cmd)
-    # cmd = "if exist " + fname + " (echo " + fname + ")" 
-    # dest_to_write = dest_to_write + "\\" + fname
-    cmd = checks.check_file(dest_to_write)
-    if not menu.options.alter_shell:
-      cmd = checks.quoted_cmd(cmd)
   else:
     cmd = checks.write_content(content, dest_to_write) 
     cmd = cmd + _urllib.parse.quote(separator) + settings.FILE_READ + dest_to_write
     check_how_long, shell = tb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
     shell = "".join(str(p) for p in shell)
-    cmd = checks.check_file(dest_to_write)
+  cmd = checks.check_file(dest_to_write)
   if settings.VERBOSITY_LEVEL == 0:
     print(settings.SINGLE_WHITESPACE)
   check_how_long, shell = tb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
