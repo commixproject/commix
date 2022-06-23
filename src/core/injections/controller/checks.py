@@ -1627,12 +1627,12 @@ def generate_char_pool(num_of_chars):
   if menu.options.charset:
     char_pool = [ord(c) for c in menu.options.charset]
   else:
-    if num_of_chars == 1:
-      # Checks {A..Z},{a..z},{0..9},{Symbols}
-      char_pool = list(range(65, 90)) + list(range(96, 122))
-    else:
-      # Checks {a..z},{A..Z},{0..9},{Symbols}
-      char_pool = list(range(96, 122)) + list(range(65, 90))
+    # if num_of_chars == 1:
+    #   # Checks {A..Z},{a..z},{0..9},{Symbols}
+    #   char_pool = list(range(65, 90)) + list(range(96, 122))
+    # else:
+    #   # Checks {a..z},{A..Z},{0..9},{Symbols}
+    char_pool = list(range(96, 122)) + list(range(65, 90))
     char_pool = char_pool + list(range(49, 57)) + list(range(32, 48)) + list(range(91, 96)) + list(range(58, 64))  + list(range(123, 127))
   return char_pool
 
@@ -2042,7 +2042,7 @@ def find_filename(dest_to_write, content):
   # _ = settings.FILE_WRITE
   if settings.TARGET_OS == "win":
     # _ = settings.FILE_WRITE_WIN
-    cmd = settings.WIN_FILE_WRITE_OPERATOR  + tmp_fname.replace("\\","\\\\") + " '" + content + "'"
+    cmd = settings.WIN_FILE_WRITE_OPERATOR  + tmp_fname.replace("\\","\\\\") + settings.SINGLE_WHITESPACE + "'" + content + "'"
   else:
     cmd = settings.FILE_WRITE + content + settings.FILE_WRITE_OPERATOR + tmp_fname
   return fname, tmp_fname, cmd
@@ -2078,7 +2078,7 @@ Write the file content
 def write_content(content, dest_to_write):
   content = quoted_cmd(content)
   if settings.TARGET_OS == "win":
-    cmd = settings.WIN_FILE_WRITE_OPERATOR  + dest_to_write.replace("\\","\\\\") + " '" + content + "'"
+    cmd = settings.WIN_FILE_WRITE_OPERATOR  + dest_to_write.replace("\\","\\\\") + settings.SINGLE_WHITESPACE + "'" + content + "'"
   else:
     cmd = settings.FILE_WRITE + content + settings.FILE_WRITE_OPERATOR + dest_to_write 
   return cmd

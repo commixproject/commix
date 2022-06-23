@@ -28,7 +28,7 @@ File-based decision payload (check if host is vulnerable).
 def decision(separator, TAG, OUTPUT_TEXTFILE):
   if settings.TARGET_OS == "win":
     payload = (separator +
-              settings.WIN_FILE_WRITE_OPERATOR + settings.WEB_ROOT.replace("\\","\\\\") + OUTPUT_TEXTFILE + " '" + TAG + "'\""
+              settings.WIN_FILE_WRITE_OPERATOR + settings.WEB_ROOT.replace("\\","\\\\") + OUTPUT_TEXTFILE + settings.SINGLE_WHITESPACE + "'" + TAG + "'\""
               ) 
   else:
     payload = (separator +
