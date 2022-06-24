@@ -210,7 +210,7 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                     if false_positive_warning:
                       warn_msg = "Unexpected time delays have been identified due to unstable "
                       warn_msg += "requests. This behavior may lead to false-positive results.\n"
-                      sys.stdout.write("\r" + settings.print_warning_msg(warn_msg))
+                      sys.stdout.write("\r" + settings.print_bold_warning_msg(warn_msg))
                       while True:
                         message = "How do you want to proceed? [(C)ontinue/(s)kip/(q)uit] > "
                         proceed_option = common.read_input(message, default="C", check_batch=True) 

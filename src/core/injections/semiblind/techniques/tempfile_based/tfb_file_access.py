@@ -36,6 +36,7 @@ def file_write(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec,
   _ = False
   file_to_write, dest_to_write, content = checks.check_file_to_write()
   if settings.TARGET_OS == "win":
+    _ = True
     from src.core.injections.results_based.techniques.classic import cb_injector
     whitespace = settings.WHITESPACES[0]
     cmd = checks.change_dir(dest_to_write)
@@ -54,7 +55,7 @@ def file_write(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec,
     check_how_long, shell = tfb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
     shell = "".join(str(p) for p in shell)
   cmd = checks.check_file(dest_to_write)
-  if settings.VERBOSITY_LEVEL == 0:
+  if settings.VERBOSITY_LEVEL == 0 and not _:
     print(settings.SINGLE_WHITESPACE)
   check_how_long, shell = tfb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
   shell = "".join(str(p) for p in shell)

