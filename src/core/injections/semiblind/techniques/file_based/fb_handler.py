@@ -349,22 +349,18 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                     
                   # Show an error message, after N failed tries.
                   # Use the "/tmp/" directory for tempfile-based technique.
-
                   elif (i == int(menu.options.failed_tries) and no_result == True) or (i == total):
-
                     if i == total:
                       if finalize(exit_loops, no_result, float_percent, injection_type, technique):
                         continue
                       else:
                         raise
-
                     tmp_path = check_tmp_path(url, timesec, filename, http_request_method, url_time_response)
-                    warn_msg = "It seems that you don't have permissions to "
-                    warn_msg += "read and/or write files in '" + settings.WEB_ROOT + "'."  
-                    sys.stdout.write("\r" + settings.print_warning_msg(warn_msg))
-                    print(settings.SINGLE_WHITESPACE)
+                    sys.stdout.write("\r")
+                    message = "It seems that you don't have permissions to "
+                    message += "read and/or write files in '" + settings.WEB_ROOT + "'. "  
                     while True:
-                      message = "Do you want to use the temporary directory (" + tmp_path + ")? [Y/n] > "
+                      message = message + "Do you want to use the temporary directory (" + tmp_path + ")? [Y/n] > "
                       tmp_upload = common.read_input(message, default="Y", check_batch=True)
                       if tmp_upload in settings.CHOICE_YES:
                         exit_loops = True

@@ -229,11 +229,11 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
 
                     # Identified false positive warning message.
                     if false_positive_warning:
-                      warn_msg = "Unexpected time delays have been identified due to unstable "
-                      warn_msg += "requests. This behavior may lead to false-positive results.\n"
-                      sys.stdout.write("\r" + settings.print_bold_warning_msg(warn_msg))
+                      message = "Unexpected time delays have been identified due to unstable "
+                      message += "requests. This behavior may lead to false-positive results. "
+                      sys.stdout.write("\r")
                       while True:
-                        message = "How do you want to proceed? [(C)ontinue/(s)kip/(q)uit] > "
+                        message = message + "How do you want to proceed? [(C)ontinue/(s)kip/(q)uit] > "
                         proceed_option = common.read_input(message, default="C", check_batch=True)
                         if proceed_option.lower() in settings.CHOICE_PROCEED :
                           if proceed_option.lower() == "s":
@@ -310,10 +310,10 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                       sys.stdout.write("\r" + settings.print_info_msg(info_msg))
                       sys.stdout.flush()
                     continue
-                if settings.VERBOSITY_LEVEL == 0:
-                  info_msg =  "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "." + "" + percent + ""
-                  sys.stdout.write("\r" + settings.print_info_msg(info_msg))
-                  sys.stdout.flush()
+                # if settings.VERBOSITY_LEVEL == 0:
+                #   info_msg =  "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "." + "" + percent + ""
+                #   sys.stdout.write("\r" + settings.print_info_msg(info_msg))
+                #   sys.stdout.flush()
                   
               except (KeyboardInterrupt, SystemExit): 
                 if 'cmd' in locals():

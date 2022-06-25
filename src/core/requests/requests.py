@@ -210,7 +210,7 @@ def estimate_response_time(url, timesec):
     if settings.TARGET_OS == "win":
       warn_msg = "Due to the relatively slow response of 'cmd.exe' in target "
       warn_msg += "host, there might be delays during the data extraction procedure."
-      print(settings.print_bold_warning_msg(warn_msg))
+      print(settings.print_warning_msg(warn_msg))
   else:
     if settings.VERBOSITY_LEVEL != 0:
       print(settings.SINGLE_WHITESPACE)

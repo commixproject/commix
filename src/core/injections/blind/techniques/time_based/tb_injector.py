@@ -368,7 +368,11 @@ def false_positive_check(separator, TAG, cmd, whitespace, prefix, suffix, timese
   timesec = timesec + random.randint(1, 5)
 
   # Checking the output length of the used payload.
+  if settings.VERBOSITY_LEVEL == 0: 
+    sys.stdout.write(".")
   for output_length in range(1, 3):
+    if settings.VERBOSITY_LEVEL == 0: 
+      sys.stdout.write(".")
     # Execute shell commands on vulnerable host.
     if alter_shell:
       payload = tb_payloads.cmd_execution_alter_shell(separator, cmd, output_length, timesec, http_request_method)
@@ -432,7 +436,8 @@ def false_positive_check(separator, TAG, cmd, whitespace, prefix, suffix, timese
     is_valid = False
     for num_of_chars in range(1, int(num_of_chars)):
       for ascii_char in range(1, 20):
-
+        if settings.VERBOSITY_LEVEL == 0:
+          sys.stdout.write(".")
         if alter_shell:
           # Get the execution output, of shell execution.
           payload = tb_payloads.fp_result_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, http_request_method)
@@ -491,12 +496,12 @@ def false_positive_check(separator, TAG, cmd, whitespace, prefix, suffix, timese
     output = "".join(str(p) for p in output)
 
     if str(output) == str(randvcalc):
+      if settings.VERBOSITY_LEVEL == 0: 
+        sys.stdout.write(" (done)")
       return how_long, output
+
   else:
-    if settings.VERBOSITY_LEVEL == 0:
-      print(settings.SINGLE_WHITESPACE)
-    warn_msg = "False positive or unexploitable injection point detected."
-    print(settings.print_warning_msg(warn_msg))
+    checks.unexploitable_point()
         
 
 """

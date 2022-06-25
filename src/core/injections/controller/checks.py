@@ -387,14 +387,24 @@ def captcha_check(page):
 Checking the reliability of the used payload message.
 """
 def check_for_false_positive_result():
-  debug_msg = "A potential injection point has been detected. "
-  debug_msg += "Checking the reliability of the used payload "
-  debug_msg += "in case of a false positive result. "
-  # Check if defined "--verbose" option.
-  if settings.VERBOSITY_LEVEL != 0: 
-    sys.stdout.write(settings.print_bold_debug_msg(debug_msg))
-    print(settings.SINGLE_WHITESPACE) 
-    
+  info_msg = "A potential injection point has been detected. "
+  info_msg += "Checking the reliability of the used payload "
+  info_msg += "in case of a false positive result"
+  if settings.VERBOSITY_LEVEL != 0:
+    info_msg = info_msg + ".\n"
+  else:
+    info_msg = info_msg +", please wait..."    
+  sys.stdout.write("\r" + settings.print_info_msg(info_msg))
+
+"""
+False positive or unexploitable injection point detected.
+"""
+def unexploitable_point():
+  if settings.VERBOSITY_LEVEL == 0:
+    print(settings.SINGLE_WHITESPACE)
+  warn_msg = "False positive or unexploitable injection point has been detected."
+  print(settings.print_bold_warning_msg(warn_msg))
+
 """
 Counting the total of HTTP(S) requests for the identified injection point(s), during the detection phase.
 """
