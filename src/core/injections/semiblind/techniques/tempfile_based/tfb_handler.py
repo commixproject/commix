@@ -310,15 +310,11 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                       sys.stdout.write("\r" + settings.print_info_msg(info_msg))
                       sys.stdout.flush()
                     continue
-                # if settings.VERBOSITY_LEVEL == 0:
-                #   info_msg =  "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "." + "" + percent + ""
-                #   sys.stdout.write("\r" + settings.print_info_msg(info_msg))
-                #   sys.stdout.flush()
                   
               except (KeyboardInterrupt, SystemExit): 
                 if 'cmd' in locals():
                   # Delete previous shell (text) files (output) from temp.
-                  print(settings.SINGLE_WHITESPACE)
+                  # print(settings.SINGLE_WHITESPACE)
                   delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
                 raise
 
@@ -547,9 +543,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                             session_handler.store_cmd(url, cmd, output, vuln_parameter)
                         else:
                           output = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
-                          print(settings.SINGLE_WHITESPACE)
                           print(settings.print_output(output))
-                          print(settings.SINGLE_WHITESPACE)
                         # Update logs with executed cmds and execution results.
                         logs.executed_command(filename, cmd, output)
 
@@ -573,8 +567,8 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
 
               except (KeyboardInterrupt, SystemExit):
                 # Delete previous shell (text) files (output) from temp.
-                print(settings.SINGLE_WHITESPACE)
                 delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+                sys.stdout.write("\r")
                 raise  
   
               except EOFError:
@@ -584,13 +578,13 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                 print(settings.print_error_msg(err_msg))
                 # Delete previous shell (text) files (output) from temp.
                 delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+                sys.stdout.write("\r")
                 raise 
 
   if no_result == True:
     if settings.VERBOSITY_LEVEL == 0:
       print(settings.SINGLE_WHITESPACE)
     return False
-
   else :
     sys.stdout.write("\r")
     sys.stdout.flush()

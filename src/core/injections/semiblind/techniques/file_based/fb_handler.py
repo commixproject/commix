@@ -402,7 +402,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
             except (KeyboardInterrupt, SystemExit):
               # Delete previous shell (text) files (output)
               if 'vuln_parameter' in locals():
-                print(settings.SINGLE_WHITESPACE)
+                # print(settings.SINGLE_WHITESPACE)
                 delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
               raise
 
@@ -626,7 +626,6 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
               
             except KeyboardInterrupt: 
               # Delete previous shell (text) files (output)
-              print(settings.SINGLE_WHITESPACE)
               delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
               raise
               

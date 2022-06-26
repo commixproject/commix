@@ -387,7 +387,7 @@ def captcha_check(page):
 Checking the reliability of the used payload message.
 """
 def check_for_false_positive_result():
-  info_msg = "A potential injection point has been detected. "
+  info_msg = "Potential injection point has been detected. "
   info_msg += "Checking the reliability of the used payload "
   info_msg += "in case of a false positive result"
   if settings.VERBOSITY_LEVEL != 0:

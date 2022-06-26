@@ -23,6 +23,7 @@ import base64
 from src.thirdparty.six.moves import urllib as _urllib
 from src.utils import menu
 from src.utils import settings
+from src.utils import common
 from src.thirdparty.colorama import Fore, Back, Style, init
 from src.core.requests import tor
 from src.core.requests import proxy
@@ -511,14 +512,11 @@ Export the injection results
 def export_injection_results(cmd, separator, output, check_how_long):
   if output != "" and check_how_long != 0 :
     print(settings.SINGLE_WHITESPACE)
-    if settings.VERBOSITY_LEVEL == 0:
-      print(settings.SINGLE_WHITESPACE) 
     print(settings.print_output(output))
     info_msg = "Finished in " + time.strftime('%H:%M:%S', time.gmtime(check_how_long)) + "."
-    sys.stdout.write("\n" + settings.print_info_msg(info_msg) + "\n")
+    print(settings.print_info_msg(info_msg))
   else:
-    if settings.VERBOSITY_LEVEL == 0:
-      print(settings.SINGLE_WHITESPACE) 
     err_msg = common.invalid_cmd_output(cmd)
-    sys.stdout.write("\r" + settings.print_error_msg(err_msg) + "\n") 
+    print(settings.print_error_msg(err_msg))
+
 # eof

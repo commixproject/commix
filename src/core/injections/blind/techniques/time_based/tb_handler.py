@@ -498,9 +498,7 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                             session_handler.store_cmd(url, cmd, output, vuln_parameter)
                         else:
                           output = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
-                          print(settings.SINGLE_WHITESPACE)
                           print(settings.print_output(output))
-                          print(settings.SINGLE_WHITESPACE)
                         # Update logs with executed cmds and execution results.
                         logs.executed_command(filename, cmd, output)
                   elif gotshell in settings.CHOICE_NO:

