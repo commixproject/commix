@@ -70,7 +70,7 @@ def read_input(message, default=None, check_batch=True):
           answer = item.split('=')[1] if len(item.split('=')) > 1 else None
           if answer and question.lower() in message.lower():
             value = answer
-            print(settings.print_message(message + value))
+            print(settings.print_message(message + str(value)))
             return value
           elif answer is None and value:
             return is_empty()
@@ -79,7 +79,7 @@ def read_input(message, default=None, check_batch=True):
       if settings.VERBOSITY_LEVEL != 0:
         debug_msg = "Used the given answer."
         print(settings.print_debug_msg(debug_msg))
-      print(settings.print_message(message + value))
+      print(settings.print_message(message + str(value)))
       return value
 
     elif value is None:
@@ -87,7 +87,7 @@ def read_input(message, default=None, check_batch=True):
         if settings.VERBOSITY_LEVEL != 0:
           debug_msg = "Used the default behavior, running in batch mode."
           print(settings.print_debug_msg(debug_msg))
-        print(settings.print_message(message + default))
+        print(settings.print_message(message + str(default)))
         return default
       else:
         return is_empty()
