@@ -279,7 +279,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                       original_how_long = how_long
                       
                       # Check for false positive resutls
-                      how_long, output = tfb_injector.false_positive_check(separator, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, randvcalc, alter_shell, how_long, url_time_response)
+                      how_long, output = tfb_injector.false_positive_check(separator, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, randvcalc, alter_shell, how_long, url_time_response, false_positive_warning)
 
                       if (url_time_response == 0 and (how_long - timesec) >= 0) or \
                          (url_time_response != 0 and (how_long - timesec) == 0 and (how_long == timesec)) or \

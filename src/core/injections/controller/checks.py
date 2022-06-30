@@ -386,15 +386,16 @@ def captcha_check(page):
 """
 Checking the reliability of the used payload message.
 """
-def check_for_false_positive_result():
-  info_msg = "Potential injection point has been detected. "
-  info_msg += "Checking the reliability of the used payload "
-  info_msg += "in case of a false positive result"
-  if settings.VERBOSITY_LEVEL != 0:
-    info_msg = info_msg + ".\n"
-  else:
-    info_msg = info_msg +", please wait..."    
+def check_for_false_positive_result(false_positive_warning):
+  info_msg = "Checking the reliability of the identified injection point "
+  info_msg += "(in case of false positive result).\n"
   sys.stdout.write("\r" + settings.print_info_msg(info_msg))
+  warn_msg = "Time-based comparison requires " + ('larger', 'reset of')[false_positive_warning] + " statistical model"
+  if settings.VERBOSITY_LEVEL != 0:
+    warn_msg = warn_msg + ".\n"
+  else:
+    warn_msg = warn_msg +", please wait..."    
+  sys.stdout.write("\r" + settings.print_warning_msg(warn_msg))
 
 """
 False positive or unexploitable injection point detected.

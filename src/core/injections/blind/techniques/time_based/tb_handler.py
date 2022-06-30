@@ -209,7 +209,7 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                     # Identified false positive warning message.
                     if false_positive_warning:
                       message = "Unexpected time delays have been identified due to unstable "
-                      message += "requests. This behavior may lead to false-positive results. "
+                      message += "requests. This behavior may lead to false positive results. "
                       sys.stdout.write("\r")
                       while True:
                         message = message + "How do you want to proceed? [(C)ontinue/(s)kip/(q)uit] > "
@@ -258,7 +258,7 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                       original_how_long = how_long
                       
                       # Check for false positive resutls
-                      how_long, output = tb_injector.false_positive_check(separator, TAG, cmd, whitespace, prefix, suffix, timesec, http_request_method, url, vuln_parameter, randvcalc, alter_shell, how_long, url_time_response)
+                      how_long, output = tb_injector.false_positive_check(separator, TAG, cmd, whitespace, prefix, suffix, timesec, http_request_method, url, vuln_parameter, randvcalc, alter_shell, how_long, url_time_response, false_positive_warning)
 
                       if (url_time_response == 0 and (how_long - timesec) >= 0) or \
                          (url_time_response != 0 and (how_long - timesec) == 0 and (how_long == timesec)) or \

@@ -352,7 +352,7 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
 """
 False Positive check and evaluation.
 """
-def false_positive_check(separator, TAG, cmd, whitespace, prefix, suffix, timesec, http_request_method, url, vuln_parameter, randvcalc, alter_shell, how_long, url_time_response):
+def false_positive_check(separator, TAG, cmd, whitespace, prefix, suffix, timesec, http_request_method, url, vuln_parameter, randvcalc, alter_shell, how_long, url_time_response, false_positive_warning):
 
   if settings.TARGET_OS == "win":
     previous_cmd = cmd
@@ -362,10 +362,11 @@ def false_positive_check(separator, TAG, cmd, whitespace, prefix, suffix, timese
       cmd = "powershell.exe -InputFormat none write-host ([string](cmd /c " + cmd + ")).trim().length"
 
   found_chars = False
-  checks.check_for_false_positive_result()
+  checks.check_for_false_positive_result(false_positive_warning)
 
   # Varying the sleep time.
-  timesec = timesec + random.randint(1, 5)
+  if false_positive_warning:
+    timesec = timesec + random.randint(3, 5)
 
   # Checking the output length of the used payload.
   if settings.VERBOSITY_LEVEL == 0: 
