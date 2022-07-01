@@ -74,8 +74,6 @@ def command_injection_heuristic_basic(url, http_request_method, check_parameter,
     basic_payloads = settings.ALTER_SHELL_BASIC_COMMAND_INJECTION_PAYLOADS
   else:
     basic_payloads = settings.BASIC_COMMAND_INJECTION_PAYLOADS
-  if not header_name == " cookie" and not the_type == " HTTP header":
-    header_name = " " + str(http_request_method) 
   settings.CLASSIC_STATE = True
   try:
     whitespace = settings.WHITESPACES[0]
@@ -84,7 +82,8 @@ def command_injection_heuristic_basic(url, http_request_method, check_parameter,
       for payload in basic_payloads:
         _ = _ + 1
         if not inject_http_headers or (inject_http_headers and "'Host'" in check_parameter):
-          payload = _urllib.parse.quote(payload)
+          if not any((settings.IS_JSON, settings.IS_XML)):
+            payload = _urllib.parse.quote(payload)
         payload = parameters.prefixes(payload, prefix="")
         payload = parameters.suffixes(payload, suffix="")
         payload = checks.perform_payload_modification(payload).replace(whitespace, settings.WHITESPACES[0])
@@ -116,11 +115,8 @@ def command_injection_heuristic_basic(url, http_request_method, check_parameter,
           match = re.search(settings.BASIC_COMMAND_INJECTION_RESULT, html_data)
           if match:
             settings.IDENTIFIED_COMMAND_INJECTION = True
-            info_msg = "Heuristic (basic) tests shows that"
-            if not header_name == " cookie" and not the_type == " HTTP header":
-              info_msg += " " + str(http_request_method) + ""
-            info_msg += ('', ' (JSON)')[settings.IS_JSON] + ('', ' (SOAP/XML)')[settings.IS_XML]
-            info_msg += the_type + check_parameter + " might be injectable (possible OS: '" + ('Unix-like', 'Windows')[_ != 1] + "')." 
+            info_msg = "Heuristic (basic) tests shows that "
+            info_msg += settings.CHECKING_PARAMETER + " might be injectable (possible OS: '" + ('Unix-like', 'Windows')[_ != 1] + "')." 
             print(settings.print_bold_info_msg(info_msg))
             break
 
@@ -150,7 +146,8 @@ def code_injections_heuristic_basic(url, http_request_method, check_parameter, t
     if (not settings.IDENTIFIED_WARNINGS and not settings.IDENTIFIED_PHPINFO) or settings.MULTI_TARGETS:  
       for payload in settings.PHPINFO_CHECK_PAYLOADS:
         if not inject_http_headers or (inject_http_headers and "'Host'" in check_parameter):
-          payload = _urllib.parse.quote(payload)
+          if not any((settings.IS_JSON, settings.IS_XML)):
+            payload = _urllib.parse.quote(payload)
         payload = parameters.prefixes(payload, prefix="")
         payload = parameters.suffixes(payload, suffix="")
         payload = checks.perform_payload_modification(payload)
@@ -189,11 +186,8 @@ def code_injections_heuristic_basic(url, http_request_method, check_parameter, t
                 settings.IDENTIFIED_WARNINGS = True
                 break
           if settings.IDENTIFIED_WARNINGS or settings.IDENTIFIED_PHPINFO:
-            info_msg = "Heuristic (basic) tests shows that" + header_name
-            if not header_name == " cookie" and not the_type == " HTTP header":
-              info_msg += " " + str(http_request_method) + ""
-            info_msg += ('', ' (JSON)')[settings.IS_JSON] + ('', ' (SOAP/XML)')[settings.IS_XML]
-            info_msg += the_type + check_parameter + " might be injectable via " + technique + "." 
+            info_msg = "Heuristic (basic) tests shows that "
+            info_msg += settings.CHECKING_PARAMETER + " might be injectable via " + technique + "." 
             print(settings.print_bold_info_msg(info_msg))
             break
 
@@ -333,11 +327,11 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
   # Host HTTP header / Custom HTTP header Injection(s)
   if check_parameter.startswith(" "):
     header_name = ""
-    the_type = " HTTP header"
+    the_type = "HTTP header"
     check_parameter = " '" + check_parameter.strip() + "'"
   else:
     if settings.COOKIE_INJECTION: 
-      header_name = " cookie"
+      header_name = "Cookie"
     else:
       header_name = ""
     the_type = " parameter"
@@ -349,15 +343,17 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
   # Load modules
   modules_handler.load_modules(url, http_request_method, filename)
   checks.tamper_scripts(stored_tamper_scripts=False)
-  
-  info_msg = "Setting" 
-  if not header_name == " cookie" and not the_type == " HTTP header":
-    info_msg += " " + str(http_request_method) + ""
-  info_msg += ('', ' (JSON)')[settings.IS_JSON] + ('', ' (SOAP/XML)')[settings.IS_XML] 
-  if header_name == " cookie" :
-    info_msg += str(header_name) + str(the_type) + str(check_parameter) + " for tests."
+
+  settings.CHECKING_PARAMETER = ""
+  if not header_name == "Cookie" and not the_type == "HTTP header":
+    settings.CHECKING_PARAMETER = str(http_request_method)
+  settings.CHECKING_PARAMETER += ('', ' (JSON)')[settings.IS_JSON] + ('', ' (SOAP/XML)')[settings.IS_XML] 
+  if header_name == "Cookie" :
+     settings.CHECKING_PARAMETER += str(header_name) + str(the_type) + str(check_parameter)
   else:
-    info_msg += str(the_type) + str(header_name) + str(check_parameter) + " for tests."
+     settings.CHECKING_PARAMETER += str(the_type) + str(header_name) + str(check_parameter)
+
+  info_msg = "Setting " + settings.CHECKING_PARAMETER  + " for tests."
   print(settings.print_info_msg(info_msg))
 
   if menu.options.skip_heuristics:
@@ -393,11 +389,8 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
             pass
 
       if not settings.IDENTIFIED_COMMAND_INJECTION and not settings.IDENTIFIED_WARNINGS and not settings.IDENTIFIED_PHPINFO:
-        warn_msg = "Heuristic (basic) tests shows that" + header_name
-        if not header_name == " cookie" and not the_type == " HTTP header":
-          warn_msg += " " + str(http_request_method) + ""
-        warn_msg +=('', ' (JSON)')[settings.IS_JSON] + ('', ' (SOAP/XML)')[settings.IS_XML]
-        warn_msg += the_type + check_parameter + " might not be injectable."
+        warn_msg = "Heuristic (basic) tests shows that "
+        warn_msg += settings.CHECKING_PARAMETER + " might not be injectable."
         print(settings.print_bold_warning_msg(warn_msg)) 
 
   if menu.options.failed_tries and \

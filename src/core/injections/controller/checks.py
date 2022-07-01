@@ -387,8 +387,8 @@ def captcha_check(page):
 Checking the reliability of the used payload message.
 """
 def check_for_false_positive_result(false_positive_warning):
-  info_msg = "Checking the reliability of the identified injection point "
-  info_msg += "(in case of false positive result).\n"
+  info_msg = "Checking if the injection point on "
+  info_msg += settings.CHECKING_PARAMETER + " is a false positive.\n"
   sys.stdout.write("\r" + settings.print_info_msg(info_msg))
   warn_msg = "Time-based comparison requires " + ('larger', 'reset of')[false_positive_warning] + " statistical model"
   if settings.VERBOSITY_LEVEL != 0:

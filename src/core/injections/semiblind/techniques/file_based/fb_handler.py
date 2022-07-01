@@ -486,13 +486,8 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
               else:
                 checks.total_of_requests()
 
-            finding = ""
-            if len(found_vuln_parameter) > 0 and not "cookie" in header_name : 
-              finding += http_request_method 
-            finding += ('', ' (JSON)')[settings.IS_JSON] + ('', ' (SOAP/XML)')[settings.IS_XML] + the_type + header_name + found_vuln_parameter
-
             # Print the findings to terminal.
-            info_msg = finding + " appears to be injectable via "
+            info_msg = settings.CHECKING_PARAMETER + " appears to be injectable via "
             info_msg += "(" + injection_type.split(" ")[0] + ") " + technique + "."
             print(settings.print_bold_info_msg(info_msg))
             sub_content = str(checks.url_decode(payload))
@@ -567,7 +562,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                 delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
                 if go_back == True:
                   break
-                message = finding + " is vulnerable. Do you want to prompt for a pseudo-terminal shell? [Y/n] > "
+                message = settings.CHECKING_PARAMETER + " is vulnerable. Do you want to prompt for a pseudo-terminal shell? [Y/n] > "
                 if settings.IS_TTY:
                   gotshell = common.read_input(message, default="Y", check_batch=True)
                 else:

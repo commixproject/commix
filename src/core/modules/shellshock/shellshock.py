@@ -419,7 +419,7 @@ def shellshock_handler(url, http_request_method, filename):
             while True:
               if go_back == True:
                 break
-              message = finding + " is vulnerable. Do you want to prompt for a pseudo-terminal shell? [Y/n] > "
+              message = settings.CHECKING_PARAMETER + " is vulnerable. Do you want to prompt for a pseudo-terminal shell? [Y/n] > "
               if settings.IS_TTY:
                 gotshell = common.read_input(message, default="Y", check_batch=True)
               else:
