@@ -1,4 +1,5 @@
 ## Version 3.5 (TBA)
+* Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
 * Revised: Improvements regarding Windows-based payloads for every supported technique.
 * Revised: Improvement regarding alternative shell (i.e.`--alter-shell`) for generating Python 3x payloads.
 * Removed: The depricated modules "ICMP exfiltration" and "DNS exfiltration" have been removed.
