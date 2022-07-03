@@ -1,4 +1,4 @@
-## Version 3.5 (TBA)
+## Version 3.5 (2022-07-03)
 * Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
 * Revised: Improvements regarding Windows-based payloads for every supported technique.
 * Revised: Improvement regarding alternative shell (i.e.`--alter-shell`) for generating Python 3x payloads.
