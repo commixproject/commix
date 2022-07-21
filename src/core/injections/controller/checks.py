@@ -210,7 +210,7 @@ def tab_autocompleter():
       readline.parse_and_bind("tab: complete")
     # Tab compliter
     readline.set_completer(menu.tab_completer)
-  except AttributeError:
+  except (TypeError, AttributeError) as e:
     error_msg = "Failed while trying to use platform's readline library."
     print(settings.print_error_msg(error_msg))
 
