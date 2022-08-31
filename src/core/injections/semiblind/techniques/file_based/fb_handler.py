@@ -80,7 +80,7 @@ def custom_web_root(url, timesec, filename, http_request_method, url_time_respon
     example_root_dir = "/var/www"
   message = "Please provide the host's root directory (e.g. '" 
   message += example_root_dir + "') > "
-  settings.WEB_ROOT = common.read_input(message, default=None, check_batch=True)
+  settings.WEB_ROOT = common.read_input(message, default=example_root_dir, check_batch=True)
   if settings.WEB_ROOT.endswith(("\\", "/")):
     settings.WEB_ROOT = settings.WEB_ROOT[:-1]
   if len(settings.WEB_ROOT) == 0:
