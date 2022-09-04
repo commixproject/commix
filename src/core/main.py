@@ -209,12 +209,16 @@ def examine_request(request, url):
       reason = str(err_msg)
       if menu.options.ignore_code == settings.UNAUTHORIZED_ERROR:
         print(settings.print_critical_msg(err_msg))
-      elif menu.options.auth_type and menu.options.auth_cred:
-        err_msg = "The provided pair of " + menu.options.auth_type 
-        err_msg += " HTTP authentication credentials '" + menu.options.auth_cred + "'"
-        err_msg += " seems to be invalid."
-        err_msg += " Try to rerun without providing '--auth-cred' and '--auth-type' options,"
-        err_msg += " in order to perform a dictionary-based attack."
+      else:
+        if menu.options.auth_type and menu.options.auth_cred:
+          err_msg = "The provided pair of " + menu.options.auth_type 
+          err_msg += " HTTP authentication credentials '" + menu.options.auth_cred + "'"
+          err_msg += " seems to be invalid."
+          err_msg += " Try to rerun without providing '--auth-cred' and '--auth-type' options,"
+          err_msg += " in order to perform a dictionary-based attack."
+        else:
+          err_msg = "Not authorized, try to provide right HTTP authentication type and valid credentials (" + settings.UNAUTHORIZED_ERROR + ")."
+          err_msg += " If this is intended, try to rerun by providing a valid value for option '--ignore-code'."
         print(settings.print_critical_msg(err_msg))
         raise SystemExit()
     if settings.INTERNAL_SERVER_ERROR in str(err_msg).lower() or \

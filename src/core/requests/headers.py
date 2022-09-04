@@ -186,6 +186,7 @@ def check_http_traffic(request):
           print(settings.SINGLE_WHITESPACE)
       if settings.UNAUTHORIZED_ERROR in str(err_msg):
         settings.UNAUTHORIZED = unauthorized = True
+        settings.MAX_RETRIES = settings.TOTAL_OF_REQUESTS
       if [True for err_code in settings.HTTP_ERROR_CODES if err_code in str(err_msg)]:
         break
       

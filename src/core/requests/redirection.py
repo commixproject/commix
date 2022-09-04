@@ -90,10 +90,10 @@ def do_check(request, url):
     if settings.VALID_URL: 
       checks.connection_exceptions(err_msg, request)
     else:
-      pass
+      return url
 
   except AttributeError:
-    pass
+    return url
 
 
 # eof

@@ -1,3 +1,6 @@
+## Version 3.6 (TBA)
+* Revised: Minor improvement regarding handling HTTP Error 401 (Unauthorized).
+
 ## Version 3.5 (2022-07-03)
 * Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
 * Revised: Improvements regarding Windows-based payloads for every supported technique.
