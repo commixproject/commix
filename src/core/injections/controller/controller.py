@@ -110,7 +110,7 @@ def command_injection_heuristic_basic(url, http_request_method, check_parameter,
         headers.do_check(request)
         response = requests.get_request_response(request)
 
-        if type(response) is not bool:
+        if type(response) is not bool and response is not None:
           html_data = checks.page_encoding(response, action="decode")
           match = re.search(settings.BASIC_COMMAND_INJECTION_RESULT, html_data)
           if match:
@@ -174,7 +174,7 @@ def code_injections_heuristic_basic(url, http_request_method, check_parameter, t
         headers.do_check(request)
         response = requests.get_request_response(request)
 
-        if type(response) is not bool:
+        if type(response) is not bool and response is not None:
           html_data = checks.page_encoding(response, action="decode")
           match = re.search(settings.CODE_INJECTION_PHPINFO, html_data)
           if match:

@@ -203,43 +203,7 @@ def examine_request(request, url):
         raise SystemExit()
 
   except Exception as err_msg:
-    settings.VALID_URL = False
-    reason = ""
-    if settings.UNAUTHORIZED_ERROR in str(err_msg).lower():
-      reason = str(err_msg)
-      if menu.options.ignore_code == settings.UNAUTHORIZED_ERROR:
-        print(settings.print_critical_msg(err_msg))
-      else:
-        if menu.options.auth_type and menu.options.auth_cred:
-          err_msg = "The provided pair of " + menu.options.auth_type 
-          err_msg += " HTTP authentication credentials '" + menu.options.auth_cred + "'"
-          err_msg += " seems to be invalid."
-          err_msg += " Try to rerun without providing '--auth-cred' and '--auth-type' options,"
-          err_msg += " in order to perform a dictionary-based attack."
-        else:
-          err_msg = "Not authorized, try to provide right HTTP authentication type and valid credentials (" + settings.UNAUTHORIZED_ERROR + ")."
-          err_msg += " If this is intended, try to rerun by providing a valid value for option '--ignore-code'."
-        print(settings.print_critical_msg(err_msg))
-        raise SystemExit()
-    if settings.INTERNAL_SERVER_ERROR in str(err_msg).lower() or \
-       settings.FORBIDDEN_ERROR in str(err_msg).lower() or \
-       settings.NOT_FOUND_ERROR in str(err_msg).lower():
-      reason = str(err_msg)    
-    if settings.MULTI_TARGETS:
-      if len(reason) != 0:
-        reason = reason + ". Skipping to the next target."
-        print(settings.print_critical_msg(reason))
-      if settings.EOF:
-        print(settings.SINGLE_WHITESPACE) 
-      return False 
-    else:
-      err_msg = reason
-      if settings.UNAUTHORIZED_ERROR in str(err_msg).lower():
-        pass
-      else:
-        if len(err_msg) != 0:
-          print(settings.print_critical_msg(err_msg)) 
-        raise SystemExit() 
+    requests.request_failed(err_msg)
 
 """
 Check internet connection before assessing the target.
@@ -294,14 +258,11 @@ def init_request(url):
       settings.PARAMETER_DELIMITER = menu.options.pdel
     request = _urllib.request.Request(url)
   headers.do_check(request)
-  # Check if defined any HTTP Proxy (--proxy option).
-  if menu.options.proxy:
-    proxy.do_check(url)
   if settings.VERBOSITY_LEVEL != 0:
     debug_msg = "Creating " + str(settings.SCHEME).upper() + " requests opener object."
     print(settings.print_debug_msg(debug_msg))
   # Used a valid pair of valid credentials
-  if menu.options.auth_cred and menu.options.auth_type and settings.VERBOSITY_LEVEL !=0 :
+  if menu.options.auth_cred and menu.options.auth_type and settings.VERBOSITY_LEVEL != 0 :
     debug_msg = "Using '" + menu.options.auth_cred + "' pair of " + menu.options.auth_type 
     debug_msg += " HTTP authentication credentials."
     print(settings.print_debug_msg(debug_msg))

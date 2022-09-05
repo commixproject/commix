@@ -1,4 +1,5 @@
 ## Version 3.6 (TBA)
+* Revised: Minor improvement regarding parsing HTTP requests through HTTP proxy (i.e `--proxy` option).
 * Revised: Minor improvement regarding handling HTTP Error 401 (Unauthorized).
 
 ## Version 3.5 (2022-07-03)

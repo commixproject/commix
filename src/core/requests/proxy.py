@@ -18,9 +18,22 @@ import socket
 from src.utils import menu
 from src.utils import settings
 from src.core.requests import headers
+from src.core.requests import requests
 from src.thirdparty.six.moves import urllib as _urllib
 from src.thirdparty.colorama import Fore, Back, Style, init
 from src.thirdparty.six.moves import http_client as _http_client
+
+"""
+Use the defined HTTP Proxy
+"""
+def use_proxy(request):
+  headers.do_check(request)
+  request.set_proxy(menu.options.proxy, settings.PROXY_SCHEME)
+  try:
+    response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
+    return response
+  except Exception as err_msg:
+    return requests.request_failed(err_msg)
 
 """
  Check if HTTP Proxy is defined.
@@ -33,41 +46,6 @@ def do_check(url):
     request = _urllib.request.Request(url, menu.options.data.encode(settings.DEFAULT_CODEC))
   else:
      request = _urllib.request.Request(url)
-  headers.do_check(request)
-  request.set_proxy(menu.options.proxy, settings.PROXY_SCHEME)
-  try:
-    response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
-    return response
-  except (_urllib.error.URLError, _urllib.error.HTTPError, _http_client.BadStatusLine) as err:
-    err_msg = "Unable to connect to the target URL or proxy."
-    print(settings.print_critical_msg(err_msg))
-    raise SystemExit()
-  except socket.timeout:
-    err_msg = "The connection to target URL or proxy has timed out."
-    print(settings.print_critical_msg(err_msg) + "\n")
-    raise SystemExit()
-
-"""
-Use the defined HTTP Proxy
-"""
-def use_proxy(request):
-  _ = True
-  headers.do_check(request)
-  request.set_proxy(menu.options.proxy, settings.PROXY_SCHEME)
-  try:
-    response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
-    return response
-  except _urllib.error.HTTPError as err:
-    if str(err.code) == settings.INTERNAL_SERVER_ERROR or str(err.code) == settings.BAD_REQUEST:
-      return False 
-    else:
-      _ = False
-  except (_urllib.error.URLError, _http_client.BadStatusLine) as err:
-     _ = False
-  if not _:
-    err_msg = "Unable to connect to the target URL or proxy."
-    print(settings.print_critical_msg(err_msg))
-    raise SystemExit()
-
+  use_proxy(request)
 
 # eof 

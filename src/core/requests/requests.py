@@ -332,6 +332,65 @@ def get_request_response(request):
   return response
 
 """
+Exceptions regarding requests failure(s)
+"""
+def request_failed(err_msg):
+  try:
+    error_msg = str(err_msg.args[0]).split("] ")[1] 
+  except IndexError:
+    try:
+      error_msg = str(err_msg.args[0])
+    except IndexError:
+      error_msg = str(err_msg)
+  if any(x in str(error_msg).lower() for x in ["connection refused", "timeout"]):
+    err = "Unable to connect to "
+    if menu.options.proxy:
+      err += "proxy"
+    else:
+      err += "the target URL"
+    err = err + " (Reason: " + str(error_msg)  + ")."
+    print(settings.print_critical_msg(err))
+    raise SystemExit()
+
+  settings.VALID_URL = False
+  reason = ""
+  if settings.UNAUTHORIZED_ERROR in str(err_msg).lower():
+    reason = str(err_msg)
+    if menu.options.ignore_code == settings.UNAUTHORIZED_ERROR:
+      pass
+    else:
+      if menu.options.auth_type and menu.options.auth_cred:
+        err_msg = "The provided pair of " + menu.options.auth_type 
+        err_msg += " HTTP authentication credentials '" + menu.options.auth_cred + "'"
+        err_msg += " seems to be invalid."
+        err_msg += " Try to rerun without providing '--auth-cred' and '--auth-type' options,"
+        err_msg += " in order to perform a dictionary-based attack."
+      else:
+        err_msg = "Not authorized, try to provide right HTTP authentication type and valid credentials (" + settings.UNAUTHORIZED_ERROR + ")."
+        err_msg += " If this is intended, try to rerun by providing a valid value for option '--ignore-code'."
+      print(settings.print_critical_msg(err_msg))
+      raise SystemExit()
+  if settings.INTERNAL_SERVER_ERROR in str(err_msg).lower() or \
+     settings.FORBIDDEN_ERROR in str(err_msg).lower() or \
+     settings.NOT_FOUND_ERROR in str(err_msg).lower():
+    reason = str(err_msg)    
+  if settings.MULTI_TARGETS:
+    if len(reason) != 0:
+      reason = reason + ". Skipping to the next target."
+      print(settings.print_critical_msg(reason))
+    if settings.EOF:
+      print(settings.SINGLE_WHITESPACE) 
+    return False 
+  else:
+    err_msg = reason
+    if settings.UNAUTHORIZED_ERROR in str(err_msg).lower():
+      return True
+    else:
+      if len(err_msg) != 0:
+        print(settings.print_critical_msg(err_msg)) 
+      raise SystemExit() 
+
+"""
 Check if target host is vulnerable. (Cookie-based injection)
 """
 def cookie_injection(url, vuln_parameter, payload):
