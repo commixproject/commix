@@ -375,7 +375,7 @@ def request_failed(err_msg):
      settings.NOT_FOUND_ERROR in str(err_msg).lower():
     reason = str(err_msg)    
   if settings.MULTI_TARGETS:
-    if len(reason) != 0:
+    if len(reason) != 0 and menu.options.ignore_code != settings.UNAUTHORIZED_ERROR:
       reason = reason + ". Skipping to the next target."
       print(settings.print_critical_msg(reason))
     if settings.EOF:
