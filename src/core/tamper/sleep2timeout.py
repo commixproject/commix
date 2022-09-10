@@ -16,6 +16,7 @@ import re
 import sys
 from src.utils import menu
 from src.utils import settings
+from src.core.injections.controller import checks
 
 """
 About: Uses "timeout" function for time-based attacks.
@@ -44,12 +45,9 @@ def tamper(payload):
      settings.EVAL_BASED_STATE != False or \
      settings.FILE_BASED_STATE != False:
     if settings.TRANFROM_PAYLOAD == None:
-      settings.TRANFROM_PAYLOAD = False
-      warn_msg = "All injection techniques, except for the time-relative ones, "
-      warn_msg += "do not support the '" + __tamper__  + ".py' tamper script. Skipping."
-      if menu.options.skip_heuristics:
-        print(settings.SINGLE_WHITESPACE)
-      print(settings.print_warning_msg(warn_msg))
+      if settings.TRANFROM_PAYLOAD == None:
+        checks.time_relative_tamper(__tamper__)
+        settings.TRANFROM_PAYLOAD = False
       return payload
   else:
     settings.TRANFROM_PAYLOAD = True

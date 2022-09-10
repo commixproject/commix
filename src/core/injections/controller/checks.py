@@ -1010,6 +1010,16 @@ def print_non_listed_params(check_parameters, http_request_method, header_name):
     check_skipped_params(check_parameters)
 
 """
+Only time-relative injection techniques support tamper
+"""
+def time_relative_tamper(tamper):
+  warn_msg = "All injection techniques, except for the time-relative ones, "
+  warn_msg += "do not support the '" + tamper  + ".py' tamper script."
+  if menu.options.skip_heuristics:
+    print(settings.SINGLE_WHITESPACE)
+  print(settings.print_warning_msg(warn_msg))
+
+"""
 Lists available tamper scripts
 """
 def list_tamper_scripts():
@@ -1370,7 +1380,7 @@ Perform payload modification
 """
 def perform_payload_modification(payload):
   for encode_type in list(set(settings.MULTI_ENCODED_PAYLOAD[::-1])):
-    # sleep to usleep
+    # sleep to timeout
     if encode_type == 'sleep2timeout':
       from src.core.tamper import sleep2timeout
       payload = sleep2timeout.tamper(payload)

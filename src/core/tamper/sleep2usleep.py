@@ -16,6 +16,7 @@ import re
 import sys
 from src.utils import menu
 from src.utils import settings
+from src.core.injections.controller import checks
 
 """
 About: Replaces "sleep" with "usleep" command in the generated payloads.
@@ -45,15 +46,13 @@ def tamper(payload):
        settings.EVAL_BASED_STATE != False or \
        settings.FILE_BASED_STATE != False:
       if settings.TRANFROM_PAYLOAD == None:
+        checks.time_relative_tamper(__tamper__)
         settings.TRANFROM_PAYLOAD = False
-        warn_msg = "All injection techniques, except for the time-relative ones, "
-        warn_msg += "do not support the '" + __tamper__  + ".py' tamper script."
-        if menu.options.skip_heuristics:
-          print(settings.SINGLE_WHITESPACE)
-        print(settings.print_warning_msg(warn_msg))
-        return payload
+      return payload
     else:
-      return sleep_to_usleep(payload)
+      settings.TRANFROM_PAYLOAD = True
+      if settings.TRANFROM_PAYLOAD:
+        return sleep_to_usleep(payload)
   else:
     return payload
   
