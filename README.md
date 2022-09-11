@@ -20,6 +20,12 @@ You can visit the [collection of screenshots](https://github.com/commixproject/c
 You can download commix on any platform by cloning the official Git repository :
 
     $ git clone https://github.com/commixproject/commix.git commix
+    
+If you're using any Linux distribution with [snapd](https://snapcraft.io/docs/installing-snapd) installed, then you can install commix using:
+
+```
+$ snap install commix
+```
 
 Alternatively, you can download the latest [tarball](https://github.com/commixproject/commix/tarball/master) or [zipball](https://github.com/commixproject/commix/zipball/master).
 
