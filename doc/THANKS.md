@@ -7,6 +7,7 @@
 * Thanks [m3g9tr0n](https://twitter.com/m3g9tr0n) for a donation.
 
 ## List of individual contributors:
+* Thanks [JitPatro](https://github.com/JitPatro) for creating a snap package for commix (i.e. `snap install commix`).
 * Thanks [0x27](https://github.com/0x27) for suggesting an enhancement.
 * Thanks [609496288](https://github.com/609496288) for reporting a bug.
 * Thanks [6kemb0bani](https://github.com/6kemb0bani) for reporting a bug.
