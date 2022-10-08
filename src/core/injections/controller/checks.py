@@ -1380,6 +1380,10 @@ Perform payload modification
 """
 def perform_payload_modification(payload):
   for encode_type in list(set(settings.MULTI_ENCODED_PAYLOAD[::-1])):
+    # printf to echo (for ascii to dec)
+    if encode_type == 'printf2echo':
+      from src.core.tamper import printf2echo
+      payload = printf2echo.tamper(payload)
     # sleep to timeout
     if encode_type == 'sleep2timeout':
       from src.core.tamper import sleep2timeout

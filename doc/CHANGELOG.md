@@ -1,4 +1,5 @@
 ## Version 3.6 (TBA)
+* Added: New tamper script "printf2echo.py" that replaces the printf-based ASCII to Decimal `printf "%d" "'$char'"` with `echo -n $char | od -An -tuC | xargs`.
 * Revised: Minor improvement regarding parsing HTTP requests through HTTP proxy (i.e `--proxy` option).
 * Revised: Minor improvement regarding handling HTTP Error 401 (Unauthorized).
 

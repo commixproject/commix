@@ -241,7 +241,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.6"
-REVISION = "8"
+REVISION = "9"
 STABLE_RELEASE = False
 if STABLE_RELEASE:
   VERSION = "v" + VERSION_NUM + "-stable"
@@ -995,6 +995,7 @@ TAMPER_SCRIPTS = {
                   "sleep2timeout": False,
                   "xforwardedfor": False,
                   "dollaratsigns": False,
+                  "printf2echo": False,
                   "uninitializedvariable": False,
                   "slash2env":False,
                   "backticks":False
@@ -1013,6 +1014,7 @@ WIN_NOT_SUPPORTED_TAMPER_SCRIPTS = [
                   "singlequotes",
                   "slash2env",
                   "sleep2usleep",
+                  "printf2echo",
                   "space2ifs",
                   "uninitializedvariable"
 ]
