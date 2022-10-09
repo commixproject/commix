@@ -538,7 +538,7 @@ detection.add_option("--failed-tries",
                 action="store",
                 type="int",
                 dest="failed_tries",
-                default=20,
+                default=len(settings.SEPARATORS_LVL1) - 1,
                 help="Set a number of failed injection tries, in file-based technique.")
 
 # Miscellaneous options
