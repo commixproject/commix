@@ -510,10 +510,11 @@ Export the injection results
 """
 def export_injection_results(cmd, separator, output, check_how_long):
   if output != "" and check_how_long != 0 :
-    print(settings.SINGLE_WHITESPACE)
-    print(settings.print_output(output))
+    if settings.VERBOSITY_LEVEL == 0:
+      print(settings.SINGLE_WHITESPACE)
     info_msg = "Finished in " + time.strftime('%H:%M:%S', time.gmtime(check_how_long)) + "."
     print(settings.print_info_msg(info_msg))
+    print(settings.print_output(output))
   else:
     # Check if exists pipe filtration.
     if output != False :
