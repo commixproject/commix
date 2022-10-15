@@ -51,7 +51,7 @@ def check_for_stored_sessions(url, http_request_method):
         settings.SESSION_APPLIED_TECHNIQUES = session_handler.applied_techniques(url, http_request_method)
         menu.options.tech = settings.SESSION_APPLIED_TECHNIQUES
       if session_handler.check_stored_parameter(url, http_request_method):
-        if not settings.MULTI_TARGETS or settings.IS_TTY:
+        if not settings.MULTI_TARGETS or not settings.STDIN_PARSING:
           settings.LOAD_SESSION = True
         return True    
         
@@ -695,11 +695,11 @@ Perform checks
 """
 def perform_checks(url, http_request_method, filename):
   # Initiate whitespaces
-  if settings.MULTI_TARGETS or not settings.IS_TTY and len(settings.WHITESPACES) > 1:
+  if settings.MULTI_TARGETS or settings.STDIN_PARSING and len(settings.WHITESPACES) > 1:
     settings.WHITESPACES = ["%20"]
 
   def basic_level_checks():
-    if settings.MULTI_TARGETS or not settings.IS_TTY:
+    if settings.MULTI_TARGETS or settings.STDIN_PARSING:
       settings.PERFORM_BASIC_SCANS = True
     else:
       settings.PERFORM_BASIC_SCANS = False

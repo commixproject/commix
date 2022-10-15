@@ -106,7 +106,7 @@ def check_custom_injection_marker(url):
 
   if settings.WILDCARD_CHAR_APPLIED:
     if menu.options.test_parameter:
-      if not settings.MULTI_TARGETS or not settings.IS_TTY:
+      if not settings.MULTI_TARGETS or settings.STDIN_PARSING:
         err_msg = "The options '-p' and the custom injection marker (" + settings.WILDCARD_CHAR + ") "
         err_msg += "cannot be used simultaneously (i.e. only one option must be set)."
         print(settings.print_critical_msg(err_msg))
@@ -135,7 +135,7 @@ def user_agent_header():
   # Check if defined "--mobile" option.
   if menu.options.mobile:
     if ((menu.options.agent != settings.DEFAULT_USER_AGENT) and not menu.options.requestfile) or menu.options.random_agent:
-      if not settings.MULTI_TARGETS or settings.IS_TTY:
+      if not settings.MULTI_TARGETS or not settings.STDIN_PARSING:
         err_msg = "The switch '--mobile' is incompatible with option '--user-agent' or switch '--random-agent'."
         print(settings.print_critical_msg(err_msg))
         raise SystemExit()
@@ -145,7 +145,7 @@ def user_agent_header():
   # Check if defined "--random-agent" option.
   if menu.options.random_agent:
     if ((menu.options.agent != settings.DEFAULT_USER_AGENT) and not menu.options.requestfile) or menu.options.mobile:
-      if not settings.MULTI_TARGETS or settings.IS_TTY:
+      if not settings.MULTI_TARGETS or not settings.STDIN_PARSING:
         err_msg = "The switch '--random-agent' is incompatible with option '--user-agent' or switch '--mobile'."
         print(settings.print_critical_msg(err_msg))
         raise SystemExit()
@@ -333,7 +333,7 @@ def main(filename, url):
     if menu.options.url_reload and menu.options.data:
       settings.URL_RELOAD = True
 
-    if settings.WILDCARD_CHAR_APPLIED and settings.MULTI_TARGETS or not settings.IS_TTY:
+    if settings.WILDCARD_CHAR_APPLIED and settings.MULTI_TARGETS or settings.STDIN_PARSING:
       settings.WILDCARD_CHAR_APPLIED = False
 
     check_custom_injection_marker(url)
@@ -580,7 +580,7 @@ try:
   if menu.options.smoke_test:
     smoke_test()
 
-  if not settings.IS_TTY or settings.CRAWLING or menu.options.bulkfile or menu.options.shellshock:
+  if settings.STDIN_PARSING or settings.CRAWLING or menu.options.bulkfile or menu.options.shellshock:
     settings.OS_CHECKS_NUM = 1
 
   for os_checks_num in range(0, int(settings.OS_CHECKS_NUM)):
@@ -608,15 +608,12 @@ try:
       install.installer()
       raise SystemExit()
 
-    if not sys.stdin.isatty():
-      settings.IS_TTY = False
-
     # Check if defined "--purge" option.
     if menu.options.purge:
       purge.purge()
-
+    
     # Check for missing mandatory option(s).
-    if settings.IS_TTY and not any((menu.options.url, menu.options.logfile, menu.options.bulkfile, \
+    if not settings.STDIN_PARSING and not any((menu.options.url, menu.options.logfile, menu.options.bulkfile, \
                 menu.options.requestfile, menu.options.sitemap_url, menu.options.wizard, \
                 menu.options.update, menu.options.list_tampers, menu.options.purge, menu.options.noncore_dependencies)):
       err_msg = "Missing a mandatory option (-u, -l, -m, -r, -x, --wizard, --update, --list-tampers, --purge or --dependencies). "
@@ -695,14 +692,14 @@ try:
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
 
-    if menu.options.wizard and settings.IS_TTY:
+    if menu.options.wizard and not settings.STDIN_PARSING:
       if not menu.options.url:
         while True:
           message = "Please enter full target URL (-u) > "
           menu.options.url = common.read_input(message, default=None, check_batch=True)
           if menu.options.url is None or len(menu.options.url) == 0:
             pass
-          else: 
+          else:
             break
       message = "Please enter POST data (--data) [Enter for none] > "
       menu.options.data = common.read_input(message, default=None, check_batch=True)
@@ -736,7 +733,7 @@ try:
       settings.CRAWLING = True
 
     # Check arguments
-    if len(sys.argv) == 1 and settings.IS_TTY:
+    if len(sys.argv) == 1 and not settings.STDIN_PARSING:
       menu.parser.print_help()
       print(settings.SINGLE_WHITESPACE)
       raise SystemExit()
@@ -790,7 +787,7 @@ try:
     else:  
       url = menu.options.url
 
-    if settings.IS_TTY and not menu.options.bulkfile and not settings.CRAWLING:
+    if not settings.STDIN_PARSING and not menu.options.bulkfile and not settings.CRAWLING:
       http_request_method  = checks.check_http_method(url)
       if os_checks_num == 0:
         settings.INIT_TEST = True
@@ -827,7 +824,7 @@ try:
             bulkfile = [url.strip() for url in f]
       
       # Check if option "--crawl" is enabled.
-      if settings.CRAWLING and settings.IS_TTY:
+      if settings.CRAWLING:
         settings.CRAWLING_PHASE = True
         url_num = 1
         if not menu.options.bulkfile:
@@ -846,7 +843,7 @@ try:
         settings.CRAWLING_PHASE = False
       else:
         filename = None
-        if settings.IS_TTY:
+        if not settings.STDIN_PARSING:
           output_href = output_href + bulkfile
         else:
           if os_checks_num == 0:
@@ -864,7 +861,7 @@ try:
       [clean_output_href.append(x) for x in output_href if x not in clean_output_href]
       # Removing empty elements from list.
       clean_output_href = [x for x in clean_output_href if x]
-      if len(output_href) != 0 and settings.IS_TTY:
+      if len(output_href) != 0 and not settings.STDIN_PARSING:
         if filename is not None:
           filename = crawler.store_crawling(output_href)
         info_msg = "Found a total of " + str(len(clean_output_href)) + " target"+ "s"[len(clean_output_href) == 1:] + "."

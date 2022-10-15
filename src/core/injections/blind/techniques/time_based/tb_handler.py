@@ -298,7 +298,7 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                 raise
 
               except EOFError:
-                if not settings.IS_TTY:
+                if settings.STDIN_PARSING:
                   print(settings.SINGLE_WHITESPACE)
                 err_msg = "Exiting, due to EOFError."
                 print(settings.print_error_msg(err_msg))
@@ -457,7 +457,7 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                   if go_back == True:
                     break
                   message = settings.CHECKING_PARAMETER + " is vulnerable. Do you want to prompt for a pseudo-terminal shell? [Y/n] > "
-                  if settings.IS_TTY:
+                  if not settings.STDIN_PARSING:
                     gotshell = common.read_input(message, default="Y", check_batch=True)
                   else:
                     gotshell = common.read_input(message, default="n", check_batch=True)
@@ -516,7 +516,7 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                 raise
 
               except EOFError:
-                if not settings.IS_TTY:
+                if settings.STDIN_PARSING:
                   print(settings.SINGLE_WHITESPACE)
                 err_msg = "Exiting, due to EOFError."
                 print(settings.print_error_msg(err_msg))

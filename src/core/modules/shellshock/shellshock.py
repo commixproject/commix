@@ -33,7 +33,7 @@ This module exploits the vulnerabilities CVE-2014-6271 [1], CVE-2014-6278 [2] in
 [2] CVE-2014-6278: https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-6278
 """
 
-if settings.MULTI_TARGETS or not settings.IS_TTY:
+if settings.MULTI_TARGETS or settings.STDIN_PARSING:
   if settings.USER_AGENT_INJECTION:
     settings.USER_AGENT_INJECTION = None
   if settings.REFERER_INJECTION:
@@ -420,7 +420,7 @@ def shellshock_handler(url, http_request_method, filename):
               if go_back == True:
                 break
               message = settings.CHECKING_PARAMETER + " is vulnerable. Do you want to prompt for a pseudo-terminal shell? [Y/n] > "
-              if settings.IS_TTY:
+              if not settings.STDIN_PARSING:
                 gotshell = common.read_input(message, default="Y", check_batch=True)
               else:
                 gotshell = common.read_input(message, default="n", check_batch=True)
@@ -486,7 +486,7 @@ def shellshock_handler(url, http_request_method, filename):
             raise
 
           except EOFError:
-            if not settings.IS_TTY:
+            if settings.STDIN_PARSING:
               print(settings.SINGLE_WHITESPACE)
             err_msg = "Exiting, due to EOFError."
             print(settings.print_error_msg(err_msg))
