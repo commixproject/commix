@@ -692,19 +692,33 @@ try:
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
 
-    if menu.options.wizard and not settings.STDIN_PARSING:
-      if not menu.options.url:
+    # Check if defined "--wizard" option.
+    if menu.options.wizard:
+      if not menu.options.url and not settings.STDIN_PARSING:
         while True:
-          message = "Please enter full target URL (-u) > "
+          message = "Enter full target URL (-u) > "
           menu.options.url = common.read_input(message, default=None, check_batch=True)
           if menu.options.url is None or len(menu.options.url) == 0:
             pass
           else:
             break
-      message = "Please enter POST data (--data) [Enter for none] > "
-      menu.options.data = common.read_input(message, default=None, check_batch=True)
-      if menu.options.data is not None and len(menu.options.data) == 0:
-        menu.options.data = False
+      message = "Enter POST data (--data) [Enter for none] > "
+      if settings.STDIN_PARSING or menu.options.data:
+        print(settings.print_message(message + menu.options.data))
+      else:
+        menu.options.data = common.read_input(message, default=None, check_batch=True)
+        if menu.options.data is not None and len(menu.options.data) == 0:
+          menu.options.data = False
+      while True:
+        message = "Enter injection level (--level) [1-3, Default: 1] > "
+        if settings.STDIN_PARSING or menu.options.level > settings.DEFAULT_INJECTION_LEVEL:
+          print(settings.print_message(message + str(menu.options.level)))
+          break
+        menu.options.level = int(common.read_input(message, default=settings.DEFAULT_INJECTION_LEVEL, check_batch=True))
+        if menu.options.level > settings.HTTP_HEADER_INJECTION_LEVEL:
+          pass
+        else:
+          break
 
     # Seconds to delay between each HTTP request.
     if menu.options.delay > 0:
