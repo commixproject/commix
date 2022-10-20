@@ -66,8 +66,6 @@ def http_response(headers, code):
         logs.log_traffic("\n" + header)
   if menu.options.traffic_file:
     logs.log_traffic("\n\n")
-  if settings.VERBOSITY_LEVEL == 3:
-    print(settings.SINGLE_WHITESPACE)   
 
 """
 Print HTTP response headers / Body.
@@ -106,7 +104,7 @@ def check_http_traffic(request):
       request_http_headers = str(headers).split("\r\n")
       unique_request_http_headers = []
       [unique_request_http_headers.append(item) for item in request_http_headers if item not in unique_request_http_headers]
-      request_http_headers = unique_request_http_headers
+      request_http_headers = [x for x in unique_request_http_headers if x]
       for header in request_http_headers:
         if settings.VERBOSITY_LEVEL >= 2:
           print(settings.print_traffic(header))
