@@ -556,7 +556,7 @@ def exploitation(url, timesec, filename, http_request_method, url_time_response,
       if proceed_option.lower() in settings.CHOICE_PROCEED :
         if proceed_option.lower() == "s":
           from src.core.injections.semiblind.techniques.file_based import fb_handler
-          fb_handler.exploitation(url, timesec, filename, http_request_method, url_time_response)
+          fb_handler.exploitation(url, timesec, filename, http_request_method, url_time_response, injection_type, technique)
         elif proceed_option.lower() == "c":
           if tb_injection_handler(url, timesec, filename, http_request_method, url_time_response, injection_type, technique) == False:
             return False
