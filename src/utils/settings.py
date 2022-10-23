@@ -241,14 +241,14 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.6"
-REVISION = "17"
+REVISION = "18"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
   VERSION = VERSION + VERSION_NUM + "-stable"
   COLOR_VERSION = Style.BRIGHT + Style.UNDERLINE + Fore.WHITE + VERSION + Style.RESET_ALL
 else:
-  VERSION = VERSION + VERSION_NUM + "-dev#" + REVISION + Style.RESET_ALL
+  VERSION = VERSION + VERSION_NUM + "-dev#" + REVISION
   COLOR_VERSION = Style.UNDERLINE + Fore.WHITE + VERSION + Style.RESET_ALL
 
 YEAR = "2014-2022"
