@@ -363,35 +363,35 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
   else:
     if not settings.LOAD_SESSION:
       checks.recognise_payload(payload=settings.TESTABLE_VALUE)
-    if settings.VERBOSITY_LEVEL != 0:    
-      debug_msg = "Performing heuristic (basic) tests to the target URL."
-      print(settings.print_debug_msg(debug_msg))
-    url = command_injection_heuristic_basic(url, http_request_method, check_parameter, the_type, header_name, inject_http_headers)
+      if settings.VERBOSITY_LEVEL != 0:    
+        debug_msg = "Performing heuristic (basic) tests to the target URL."
+        print(settings.print_debug_msg(debug_msg))
+      url = command_injection_heuristic_basic(url, http_request_method, check_parameter, the_type, header_name, inject_http_headers)
 
-    if (len(menu.options.tech) == 0 or "e" in menu.options.tech) and not settings.IDENTIFIED_COMMAND_INJECTION:
-      # Check for identified warnings
-      url = code_injections_heuristic_basic(url, http_request_method, check_parameter, the_type, header_name, inject_http_headers)
-      if settings.IDENTIFIED_WARNINGS or settings.IDENTIFIED_PHPINFO:
-        while True:
-          message = "Skipping of further command injection tests is recommended. "
-          message += "Do you agree? [Y/n] > "
-          procced_option = common.read_input(message, default="Y", check_batch=True)
-          if procced_option in settings.CHOICE_YES:
-            settings.CLASSIC_STATE = settings.TIME_BASED_STATE = settings.FILE_BASED_STATE = False
-            settings.EVAL_BASED_STATE = settings.SKIP_COMMAND_INJECTIONS = True
-            break
-          elif procced_option in settings.CHOICE_NO:
-            break
-          elif procced_option in settings.CHOICE_QUIT:
-            raise SystemExit()
-          else:
-            common.invalid_option(procced_option)  
-            pass
+      if (len(menu.options.tech) == 0 or "e" in menu.options.tech) and not settings.IDENTIFIED_COMMAND_INJECTION:
+        # Check for identified warnings
+        url = code_injections_heuristic_basic(url, http_request_method, check_parameter, the_type, header_name, inject_http_headers)
+        if settings.IDENTIFIED_WARNINGS or settings.IDENTIFIED_PHPINFO:
+          while True:
+            message = "Skipping of further command injection tests is recommended. "
+            message += "Do you agree? [Y/n] > "
+            procced_option = common.read_input(message, default="Y", check_batch=True)
+            if procced_option in settings.CHOICE_YES:
+              settings.CLASSIC_STATE = settings.TIME_BASED_STATE = settings.FILE_BASED_STATE = False
+              settings.EVAL_BASED_STATE = settings.SKIP_COMMAND_INJECTIONS = True
+              break
+            elif procced_option in settings.CHOICE_NO:
+              break
+            elif procced_option in settings.CHOICE_QUIT:
+              raise SystemExit()
+            else:
+              common.invalid_option(procced_option)  
+              pass
 
-      if not settings.IDENTIFIED_COMMAND_INJECTION and not settings.IDENTIFIED_WARNINGS and not settings.IDENTIFIED_PHPINFO:
-        warn_msg = "Heuristic (basic) tests shows that "
-        warn_msg += settings.CHECKING_PARAMETER + " might not be injectable."
-        print(settings.print_bold_warning_msg(warn_msg)) 
+        if not settings.IDENTIFIED_COMMAND_INJECTION and not settings.IDENTIFIED_WARNINGS and not settings.IDENTIFIED_PHPINFO:
+          warn_msg = "Heuristic (basic) tests shows that "
+          warn_msg += settings.CHECKING_PARAMETER + " might not be injectable."
+          print(settings.print_bold_warning_msg(warn_msg)) 
 
   if menu.options.failed_tries and \
      menu.options.tech and not "f" in menu.options.tech and not \
