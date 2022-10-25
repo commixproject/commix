@@ -90,7 +90,7 @@ def eb_injection_handler(url, timesec, filename, http_request_method, injection_
           if settings.RETEST == True:
             settings.RETEST = False
             from src.core.injections.results_based.techniques.classic import cb_handler
-            cb_handler.exploitation(url, timesec, filename, http_request_method)
+            cb_handler.exploitation(url, timesec, filename, http_request_method, injection_type, technique)
             
           if not settings.LOAD_SESSION:
             i = i + 1
