@@ -401,6 +401,18 @@ def main(filename, url):
     if menu.options.cdel:
      settings.COOKIE_DELIMITER = menu.options.cdel
 
+    if not menu.options.ignore_session and not menu.options.flush_session:
+      if session_handler.applied_techniques(url, http_request_method):
+        if not menu.options.tech:
+          menu.options.tech = session_handler.applied_techniques(url, http_request_method)
+      else:
+        menu.options.tech = list(menu.options.tech)
+        _ = {settings.AVAILABLE_TECHNIQUES[i] : i for i in range(len(settings.AVAILABLE_TECHNIQUES))}
+        menu.options.tech.sort(key=lambda x:_[x])
+        menu.options.tech = ''.join(menu.options.tech)
+    else:
+      menu.options.tech = ''.join([str(x) for x in settings.AVAILABLE_TECHNIQUES]) 
+
     # Check for skipping injection techniques.
     if menu.options.skip_tech:
       settings.SKIP_TECHNIQUES = True

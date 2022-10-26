@@ -137,6 +137,10 @@ Export successful applied techniques from session file.
 def applied_techniques(url, http_request_method):
   try:
     conn = sqlite3.connect(settings.SESSION_FILE)
+    if not menu.options.tech:
+      applied_techniques = conn.execute("SELECT technique FROM " + table_name(url) + "_ip "\
+                                        "ORDER BY id DESC;")
+
     if settings.TESTABLE_PARAMETER: 
       applied_techniques = conn.execute("SELECT technique FROM " + table_name(url) + "_ip WHERE "\
                                         "url = '" + url + "' AND "\
@@ -208,6 +212,11 @@ def injection_point_exportation(url, http_request_method):
       result = conn.execute("SELECT * FROM sqlite_master WHERE name = '" + \
                              table_name(url) + "_ip' AND type = 'table';")
       if result:
+        # if not settings.USER_SUPPLIED_TECHNIQUE:
+        #   for session in result:
+        #     check_injection_technique = menu.options.tech = session[0][:1]
+        #     select_injection_type = session[1][:1].capitalize()
+        # else:
         if menu.options.tech[:1] == "c":
           select_injection_type = "R"
         elif menu.options.tech[:1] == "e":
@@ -223,6 +232,7 @@ def injection_point_exportation(url, http_request_method):
           check_injection_technique = "d"
         else:
           check_injection_technique = menu.options.tech[:1]
+
         if settings.TESTABLE_PARAMETER:
           cursor = conn.execute("SELECT * FROM " + table_name(url) + "_ip WHERE "\
                                 "url = '" + url + "' AND "\

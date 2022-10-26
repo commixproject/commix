@@ -241,7 +241,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.6"
-REVISION = "20"
+REVISION = "21"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -594,7 +594,6 @@ AVAILABLE_SHELLS = ["python"]
 
 # Available injection techniques.
 AVAILABLE_TECHNIQUES = [ "c", "e", "t", "f" ]
-
 SKIP_TECHNIQUES = False
 
 # User Agent List
