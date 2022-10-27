@@ -366,9 +366,11 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
       if settings.VERBOSITY_LEVEL != 0:    
         debug_msg = "Performing heuristic (basic) tests to the target URL."
         print(settings.print_debug_msg(debug_msg))
-      url = command_injection_heuristic_basic(url, http_request_method, check_parameter, the_type, header_name, inject_http_headers)
 
-      if (len(menu.options.tech) == 0 or "e" in menu.options.tech) and not settings.IDENTIFIED_COMMAND_INJECTION:
+      if not (len(menu.options.tech) == 1 and "e" in menu.options.tech):
+        url = command_injection_heuristic_basic(url, http_request_method, check_parameter, the_type, header_name, inject_http_headers)
+
+      if not settings.IDENTIFIED_COMMAND_INJECTION and "e" in menu.options.tech:
         # Check for identified warnings
         url = code_injections_heuristic_basic(url, http_request_method, check_parameter, the_type, header_name, inject_http_headers)
         if settings.IDENTIFIED_WARNINGS or settings.IDENTIFIED_PHPINFO:

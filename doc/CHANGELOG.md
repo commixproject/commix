@@ -1,4 +1,5 @@
 ## Version 3.6 (TBA)
+* Revised: Improvements regarding dynamic code evaluation heuristic check.
 * Revised: Minor improvement regarding session handler.
 * Revised: Minor improvement regarding `--wizard` option.
 * Added: New tamper script "printf2echo.py" that replaces the printf-based ASCII to Decimal `printf "%d" "'$char'"` with `echo -n $char | od -An -tuC | xargs`.
