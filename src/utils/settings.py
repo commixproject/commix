@@ -241,7 +241,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.6"
-REVISION = "22"
+REVISION = "23"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -454,20 +454,28 @@ SUFFIXES_LVL3 = SUFFIXES_LVL2 + ["'", "\"", " #", "//", "\\\\"]
 JUNK_COMBINATION = [SEPARATORS_LVL1[i] + SEPARATORS_LVL1[j] for i in range(len(SEPARATORS_LVL1)) for j in range(len(SEPARATORS_LVL1))]
 
 # Execution functions
-EXECUTION_FUNCTIONS = ["exec", "system", "shell_exec", "passthru", "proc_open", "popen"]
+EXECUTION_FUNCTIONS = []
+EXECUTION_FUNCTIONS_LVL1 = ["exec"]
+EXECUTION_FUNCTIONS_LVL2 = EXECUTION_FUNCTIONS_LVL1 + ["system", "shell_exec"]
+EXECUTION_FUNCTIONS_LVL3 = EXECUTION_FUNCTIONS_LVL2 + ["passthru", "proc_open", "popen"]
 
 # The code injection separators.
-EVAL_SEPARATORS = ["", "%0a", "%0d%0a"]
+EVAL_SEPARATORS = []
+EVAL_SEPARATORS_LVL1 = [""]
+EVAL_SEPARATORS_LVL2 = EVAL_SEPARATORS_LVL1 + ["%0a"]
+EVAL_SEPARATORS_LVL3 = EVAL_SEPARATORS_LVL2 + ["%0d%0a"]
 
 # The code injection prefixes.
 EVAL_PREFIXES = []
-EVAL_PREFIXES_LVL1 = ["{${", "'.", ".", ")'}", "');}"]
-EVAL_PREFIXES_LVL3 = EVAL_PREFIXES_LVL2  =  EVAL_PREFIXES_LVL1 + ["\".", "')", "\")", ");}", "\");}", ")", ";", "'", ""] 
+EVAL_PREFIXES_LVL1 = ["{${", "'.", "."]
+EVAL_PREFIXES_LVL2 = EVAL_PREFIXES_LVL1 + [")'}", "');}"]
+EVAL_PREFIXES_LVL3 = EVAL_PREFIXES_LVL2 + ["\".", "')", "\")", ");}", "\");}", ")", ";", "'", ""] 
 
 # The code injection suffixes.
 EVAL_SUFFIXES = []
-EVAL_SUFFIXES_LVL1 = ["}}", ".'", "'#", ""]
-EVAL_SUFFIXES_LVL3 = EVAL_SUFFIXES_LVL2 = EVAL_SUFFIXES_LVL1 + [".\"", "\\\\", "//", ")}", "#"]
+EVAL_SUFFIXES_LVL1 = ["}}",  ".'", ""]
+EVAL_SUFFIXES_LVL2 = EVAL_SUFFIXES_LVL1 + ["'#"]
+EVAL_SUFFIXES_LVL3 = EVAL_SUFFIXES_LVL2 + [".\"", "\\\\", "//", ")}", "#"]
 
 # The default (url-ecoded) white-space.
 WHITESPACES = ["%20"]
