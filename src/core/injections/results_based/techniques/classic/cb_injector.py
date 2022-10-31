@@ -48,8 +48,8 @@ def injection_test(payload, http_request_method, url):
 
   # Check if defined POST data
   if not settings.USER_DEFINED_POST_DATA:
-    if " " in payload:
-      payload = payload.replace(" ","%20")
+    if settings.SINGLE_WHITESPACE in payload:
+      payload = replace(settings.SINGLE_WHITESPACE, _urllib.parse.quote_plus(settings.SINGLE_WHITESPACE))
     # Define the vulnerable parameter
     vuln_parameter = parameters.vuln_GET_param(url)
     target = url.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload)

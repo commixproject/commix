@@ -255,6 +255,8 @@ def no_usable_links(crawled_hrefs):
 The crawing process.
 """
 def do_process(url):
+  if settings.SINGLE_WHITESPACE in url:
+    url = url.replace(settings.SINGLE_WHITESPACE, _urllib.parse.quote_plus(settings.SINGLE_WHITESPACE))
   identified_hrefs = False
   if settings.VERBOSITY_LEVEL >= 2:
     print(settings.SINGLE_WHITESPACE)
