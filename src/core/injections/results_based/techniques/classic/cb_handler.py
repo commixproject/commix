@@ -176,7 +176,7 @@ def cb_injection_handler(url, timesec, filename, http_request_method, injection_
                 float_percent = "{0:.1f}".format(round(((i*100)/(total*1.0)),2))
               
                 if shell == False:
-                  info_msg = "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "." +  " (" + str(float_percent) + "%)"
+                  info_msg = "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "..." +  " (" + str(float_percent) + "%)"
                   sys.stdout.write("\r" + settings.print_info_msg(info_msg))  
                   sys.stdout.flush()
 
