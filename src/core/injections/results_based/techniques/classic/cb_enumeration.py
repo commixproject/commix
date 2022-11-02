@@ -175,7 +175,7 @@ def check_current_user_privs(separator, TAG, prefix, suffix, whitespace, http_re
       response = requests.url_reload(url, timesec)
     # Evaluate injection results.
     shell = cb_injector.injection_results(response, TAG, cmd)
-    shell = "".join(str(p) for p in shell).replace(" ", "", 1)[:-1]
+    shell = "".join(str(p) for p in shell).replace(settings.SINGLE_WHITESPACE, "", 1)[:-1]
     session_handler.store_cmd(url, cmd, shell, vuln_parameter)
   else:
     shell = session_handler.export_stored_cmd(url, cmd, vuln_parameter)

@@ -50,7 +50,7 @@ def injection_test(payload, http_request_method, url):
     #url = parameters.do_GET_check(url, http_request_method)
     
     # Encoding spaces.
-    payload = payload.replace(" ","%20")
+    payload = payload.replace(settings.SINGLE_WHITESPACE,"%20")
     
     # Define the vulnerable parameter
     vuln_parameter = parameters.vuln_GET_param(url)
@@ -193,7 +193,7 @@ def injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_req
       if not settings.USER_DEFINED_POST_DATA:
         # Check if its not specified the 'INJECT_HERE' tag
         #url = parameters.do_GET_check(url, http_request_method)
-        payload = payload.replace(" ","%20")
+        payload = payload.replace(settings.SINGLE_WHITESPACE,"%20")
         target = url.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload)
         vuln_parameter = ''.join(vuln_parameter)
         request = _urllib.request.Request(target)
@@ -335,7 +335,7 @@ def injection_results(url, OUTPUT_TEXTFILE, timesec):
     response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
   try:
     shell = checks.page_encoding(response, action="encode").rstrip().lstrip()
-    #shell = [newline.replace("\n"," ") for newline in shell]
+    #shell = [newline.replace("\n",settings.SINGLE_WHITESPACE) for newline in shell]
     if settings.TARGET_OS == "win":
       shell = [newline.replace("\r","") for newline in shell]
       #shell = [space.strip() for space in shell]

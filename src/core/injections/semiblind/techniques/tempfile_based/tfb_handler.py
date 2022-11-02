@@ -94,7 +94,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
     TAG = ''.join(random.choice(string.ascii_uppercase) for num_of_chars in range(6)) 
 
   if settings.VERBOSITY_LEVEL != 0:
-    info_msg ="Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + ". "
+    info_msg ="Testing the " + "(" + injection_type.split(settings.SINGLE_WHITESPACE)[0] + ") " + technique + ". "
     print(settings.print_info_msg(info_msg))
 
   #whitespace = checks.check_whitespaces()
@@ -251,7 +251,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
 
                     if settings.VERBOSITY_LEVEL == 0:
                       percent = ".. (" + str(float_percent) + "%)"
-                      info_msg = "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "." + "" + percent + ""
+                      info_msg = "Testing the " + "(" + injection_type.split(settings.SINGLE_WHITESPACE)[0] + ") " + technique + "." + "" + percent + ""
                       sys.stdout.write("\r" + settings.print_info_msg(info_msg))
                       sys.stdout.flush()
 
@@ -299,14 +299,14 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                     else:
                       if settings.VERBOSITY_LEVEL == 0:
                         percent = ".. (" + str(float_percent) + "%)"
-                        info_msg =  "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "." + "" + percent + ""
+                        info_msg =  "Testing the " + "(" + injection_type.split(settings.SINGLE_WHITESPACE)[0] + ") " + technique + "." + "" + percent + ""
                         sys.stdout.write("\r" + settings.print_info_msg(info_msg))
                         sys.stdout.flush()
                       continue    
                   else:
                     if settings.VERBOSITY_LEVEL == 0:
                       percent = ".. (" + str(float_percent) + "%)"
-                      info_msg =  "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "." + "" + percent + ""
+                      info_msg =  "Testing the " + "(" + injection_type.split(settings.SINGLE_WHITESPACE)[0] + ") " + technique + "." + "" + percent + ""
                       sys.stdout.write("\r" + settings.print_info_msg(info_msg))
                       sys.stdout.flush()
                     continue
@@ -335,7 +335,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                   if no_result == True:
                     if settings.VERBOSITY_LEVEL == 0:
                       percent = settings.FAIL_STATUS
-                      info_msg =  "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "." + "" + percent + ""
+                      info_msg =  "Testing the " + "(" + injection_type.split(settings.SINGLE_WHITESPACE)[0] + ") " + technique + "." + "" + percent + ""
                       sys.stdout.write("\r" + settings.print_info_msg(info_msg))
                       sys.stdout.flush()
                     else:
@@ -366,7 +366,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
               settings.EXPLOITATION_PHASE = True
               if settings.LOAD_SESSION:
                 if whitespace == "%20":
-                  whitespace = " "
+                  whitespace = settings.SINGLE_WHITESPACE
                 possibly_vulnerable = False
 
               if settings.COOKIE_INJECTION == True: 
@@ -390,7 +390,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                 the_type = " HTTP header"
 
               elif settings.CUSTOM_HEADER_INJECTION == True: 
-                header_name = " " + settings.CUSTOM_HEADER_NAME
+                header_name = settings.SINGLE_WHITESPACE + settings.CUSTOM_HEADER_NAME
                 found_vuln_parameter = ""
                 the_type = " HTTP header"
 
@@ -422,7 +422,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
 
               # Print the findings to terminal.
               info_msg = settings.CHECKING_PARAMETER + " appears to be injectable via "
-              info_msg += "(" + injection_type.split(" ")[0] + ") " + technique + "."
+              info_msg += "(" + injection_type.split(settings.SINGLE_WHITESPACE)[0] + ") " + technique + "."
               print(settings.print_bold_info_msg(info_msg))
               sub_content = str(checks.url_decode(payload))
               print(settings.print_sub_content(sub_content))

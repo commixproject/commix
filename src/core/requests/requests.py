@@ -297,7 +297,7 @@ def get_request_response(request):
           raise SystemExit()
       response = False 
     except _urllib.error.URLError as err_msg:
-      err_msg = str(err_msg.reason).split(" ")[2:]
+      err_msg = str(err_msg.reason).split(settings.SINGLE_WHITESPACE)[2:]
       err_msg = ' '.join(err_msg)+ "."
       if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
         print(settings.SINGLE_WHITESPACE)
@@ -314,7 +314,7 @@ def get_request_response(request):
         if not str(err_msg.code) == str(menu.options.ignore_code):
           err = str(err_msg) + "."
           if settings.VERBOSITY_LEVEL < 2:
-            print("\r" + settings.print_critical_msg(err) + 30 * " ")
+            print("\r" + settings.print_critical_msg(err) + 30 * settings.SINGLE_WHITESPACE)
 
         continue_tests = checks.continue_tests(err_msg)
         if continue_tests == True:
@@ -323,7 +323,7 @@ def get_request_response(request):
           raise SystemExit()
       response = False  
     except _urllib.error.URLError as err_msg:
-      err_msg = str(err_msg.reason).split(" ")[2:]
+      err_msg = str(err_msg.reason).split(settings.SINGLE_WHITESPACE)[2:]
       err_msg = ' '.join(err_msg)+ "."
       if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
         print(settings.SINGLE_WHITESPACE)
@@ -452,7 +452,7 @@ def cookie_injection(url, vuln_parameter, payload):
           raise SystemExit()
       response = False  
     except _urllib.error.URLError as err_msg:
-      err_msg = str(err_msg.reason).split(" ")[2:]
+      err_msg = str(err_msg.reason).split(settings.SINGLE_WHITESPACE)[2:]
       err_msg = ' '.join(err_msg)+ "."
       if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
         print(settings.SINGLE_WHITESPACE)
@@ -482,7 +482,7 @@ def cookie_injection(url, vuln_parameter, payload):
           raise SystemExit()
       response = False 
     except _urllib.error.URLError as err_msg:
-      err_msg = str(err_msg.reason).split(" ")[2:]
+      err_msg = str(err_msg.reason).split(settings.SINGLE_WHITESPACE)[2:]
       err_msg = ' '.join(err_msg)+ "."
       if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
         print(settings.SINGLE_WHITESPACE)
@@ -511,7 +511,7 @@ def cookie_injection(url, vuln_parameter, payload):
       response = False 
 
     except _urllib.error.URLError as err_msg:
-      err_msg = str(err_msg.reason).split(" ")[2:]
+      err_msg = str(err_msg.reason).split(settings.SINGLE_WHITESPACE)[2:]
       err_msg = ' '.join(err_msg)+ "."
       if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
         print(settings.SINGLE_WHITESPACE)
@@ -584,7 +584,7 @@ def user_agent_injection(url, vuln_parameter, payload):
           raise SystemExit()
       response = False 
     except _urllib.error.URLError as err_msg:
-      err_msg = str(err_msg.reason).split(" ")[2:]
+      err_msg = str(err_msg.reason).split(settings.SINGLE_WHITESPACE)[2:]
       err_msg = ' '.join(err_msg)+ "."
       if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
         print(settings.SINGLE_WHITESPACE)
@@ -614,7 +614,7 @@ def user_agent_injection(url, vuln_parameter, payload):
           raise SystemExit()
       response = False 
     except _urllib.error.URLError as err_msg:
-      err_msg = str(err_msg.reason).split(" ")[2:]
+      err_msg = str(err_msg.reason).split(settings.SINGLE_WHITESPACE)[2:]
       err_msg = ' '.join(err_msg)+ "."
       if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
         print(settings.SINGLE_WHITESPACE)
@@ -642,7 +642,7 @@ def user_agent_injection(url, vuln_parameter, payload):
           raise SystemExit()
       response = False 
     except _urllib.error.URLError as err_msg:
-      err_msg = str(err_msg.reason).split(" ")[2:]
+      err_msg = str(err_msg.reason).split(settings.SINGLE_WHITESPACE)[2:]
       err_msg = ' '.join(err_msg)+ "."
       if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
         print(settings.SINGLE_WHITESPACE)
@@ -716,7 +716,7 @@ def referer_injection(url, vuln_parameter, payload):
           raise SystemExit()
       response = False 
     except _urllib.error.URLError as err_msg:
-      err_msg = str(err_msg.reason).split(" ")[2:]
+      err_msg = str(err_msg.reason).split(settings.SINGLE_WHITESPACE)[2:]
       err_msg = ' '.join(err_msg)+ "."
       if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
         print(settings.SINGLE_WHITESPACE)
@@ -746,7 +746,7 @@ def referer_injection(url, vuln_parameter, payload):
           raise SystemExit()
       response = False 
     except _urllib.error.URLError as err_msg:
-      err_msg = str(err_msg.reason).split(" ")[2:]
+      err_msg = str(err_msg.reason).split(settings.SINGLE_WHITESPACE)[2:]
       err_msg = ' '.join(err_msg)+ "."
       if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
         print(settings.SINGLE_WHITESPACE)
@@ -775,7 +775,7 @@ def referer_injection(url, vuln_parameter, payload):
           raise SystemExit()
       response = False 
     except _urllib.error.URLError as err_msg:
-      err_msg = str(err_msg.reason).split(" ")[2:]
+      err_msg = str(err_msg.reason).split(settings.SINGLE_WHITESPACE)[2:]
       err_msg = ' '.join(err_msg)+ "."
       if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
         print(settings.SINGLE_WHITESPACE)
@@ -851,7 +851,7 @@ def host_injection(url, vuln_parameter, payload):
           raise SystemExit()
       response = False 
     except _urllib.error.URLError as err_msg:
-      err_msg = str(err_msg.reason).split(" ")[2:]
+      err_msg = str(err_msg.reason).split(settings.SINGLE_WHITESPACE)[2:]
       err_msg = ' '.join(err_msg)+ "."
       if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
         print(settings.SINGLE_WHITESPACE)
@@ -881,7 +881,7 @@ def host_injection(url, vuln_parameter, payload):
           raise SystemExit()
       response = False 
     except _urllib.error.URLError as err_msg:
-      err_msg = str(err_msg.reason).split(" ")[2:]
+      err_msg = str(err_msg.reason).split(settings.SINGLE_WHITESPACE)[2:]
       err_msg = ' '.join(err_msg)+ "."
       if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
         print(settings.SINGLE_WHITESPACE)
@@ -910,7 +910,7 @@ def host_injection(url, vuln_parameter, payload):
           raise SystemExit()
       response = False 
     except _urllib.error.URLError as err_msg:
-      err_msg = str(err_msg.reason).split(" ")[2:]
+      err_msg = str(err_msg.reason).split(settings.SINGLE_WHITESPACE)[2:]
       err_msg = ' '.join(err_msg)+ "."
       if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
         print(settings.SINGLE_WHITESPACE)
@@ -989,7 +989,7 @@ def custom_header_injection(url, vuln_parameter, payload):
           raise SystemExit()
       response = False 
     except _urllib.error.URLError as err_msg:
-      err_msg = str(err_msg.reason).split(" ")[2:]
+      err_msg = str(err_msg.reason).split(settings.SINGLE_WHITESPACE)[2:]
       err_msg = ' '.join(err_msg)+ "."
       if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
         print(settings.SINGLE_WHITESPACE)
@@ -1019,7 +1019,7 @@ def custom_header_injection(url, vuln_parameter, payload):
           raise SystemExit()
       response = False 
     except _urllib.error.URLError as err_msg:
-      err_msg = str(err_msg.reason).split(" ")[2:]
+      err_msg = str(err_msg.reason).split(settings.SINGLE_WHITESPACE)[2:]
       err_msg = ' '.join(err_msg)+ "."
       if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
         print(settings.SINGLE_WHITESPACE)
@@ -1047,7 +1047,7 @@ def custom_header_injection(url, vuln_parameter, payload):
           raise SystemExit()
       response = False 
     except _urllib.error.URLError as err_msg:
-      err_msg = str(err_msg.reason).split(" ")[2:]
+      err_msg = str(err_msg.reason).split(settings.SINGLE_WHITESPACE)[2:]
       err_msg = ' '.join(err_msg)+ "."
       if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
         print(settings.SINGLE_WHITESPACE)

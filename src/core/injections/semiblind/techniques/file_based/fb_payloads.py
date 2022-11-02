@@ -93,7 +93,7 @@ __Warning__: The alternative shells are still experimental.
 def cmd_execution_alter_shell(separator, cmd, OUTPUT_TEXTFILE):
   if settings.TARGET_OS == "win":
     if settings.REVERSE_TCP:
-      payload = (separator +cmd + " "
+      payload = (separator + cmd + settings.SINGLE_WHITESPACE
                 )
     else:
       python_payload = settings.WIN_PYTHON_INTERPRETER + " -c \"import os; os.system('" + cmd + settings.FILE_WRITE_OPERATOR + settings.WEB_ROOT + OUTPUT_TEXTFILE + "')\""

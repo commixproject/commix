@@ -101,7 +101,7 @@ def injection_test_results(response, TAG, randvcalc):
   else:
     # Check the execution results
     html_data = checks.page_encoding(response, action="decode")
-    html_data = html_data.replace("\n"," ")
+    html_data = html_data.replace("\n",settings.SINGLE_WHITESPACE)
     # cleanup string / unescape html to string
     html_data = _urllib.parse.unquote(html_data)
     html_data = unescape(html_data)
@@ -262,7 +262,7 @@ def injection_results(response, TAG, cmd):
   try:
     # Grab execution results
     html_data = checks.page_encoding(response, action="decode")
-    html_data = html_data.replace("\n"," ")
+    html_data = html_data.replace("\n",settings.SINGLE_WHITESPACE)
     # cleanup string / unescape html to string
     html_data = _urllib.parse.unquote(html_data)
     html_data = unescape(html_data)
@@ -272,10 +272,10 @@ def injection_results(response, TAG, cmd):
 
     for end_line in settings.END_LINE:
       if end_line in html_data:
-        html_data = html_data.replace(end_line, " ")
+        html_data = html_data.replace(end_line, settings.SINGLE_WHITESPACE)
         break
    
-    shell = re.findall(r"" + TAG + TAG + "(.*)" + TAG + TAG + " ", html_data)
+    shell = re.findall(r"" + TAG + TAG + "(.*)" + TAG + TAG + settings.SINGLE_WHITESPACE, html_data)
     if not shell:
       shell = re.findall(r"" + TAG + TAG + "(.*)" + TAG + TAG + "", html_data)
     if not shell:
@@ -284,7 +284,7 @@ def injection_results(response, TAG, cmd):
       if TAG in shell:
         shell = re.findall(r"" + "(.*)" + TAG + TAG, shell)
       # Clear junks
-      shell = [tags.replace(TAG + TAG , " ") for tags in shell]
+      shell = [tags.replace(TAG + TAG , settings.SINGLE_WHITESPACE) for tags in shell]
       shell = [backslash.replace("\/","/") for backslash in shell]
     except UnicodeDecodeError:
       pass

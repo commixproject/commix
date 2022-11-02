@@ -353,8 +353,8 @@ def shellshock_handler(url, http_request_method, filename):
             export_injection_info = logs.add_type_and_technique(export_injection_info, filename, injection_type, technique)
           
           vuln_parameter = "HTTP Header"
-          the_type = " " + vuln_parameter
-          check_header = " " + check_header
+          the_type = settings.SINGLE_WHITESPACE + vuln_parameter
+          check_header = settings.SINGLE_WHITESPACE + check_header
           vp_flag = logs.add_parameter(vp_flag, filename, the_type, check_header, http_request_method, vuln_parameter, payload)
           check_header = check_header[1:]
           logs.update_payload(filename, counter, payload) 
@@ -518,7 +518,7 @@ def shellshock_handler(url, http_request_method, filename):
         raise SystemExit()
 
   except _urllib.error.URLError as err_msg:
-    err_msg = str(err_msg.reason).split(" ")[2:]
+    err_msg = str(err_msg.reason).split(settings.SINGLE_WHITESPACE)[2:]
     err_msg = ' '.join(err_msg)+ "."
     if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
       print(settings.SINGLE_WHITESPACE)

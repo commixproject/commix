@@ -962,11 +962,11 @@ Print the non-listed parameters.
 """
 def print_non_listed_params(check_parameters, http_request_method, header_name):
   if settings.TEST_PARAMETER:
-    testable_parameters = ",".join(settings.TEST_PARAMETER).replace(" ","")
+    testable_parameters = ",".join(settings.TEST_PARAMETER).replace(settings.SINGLE_WHITESPACE,"")
     testable_parameters = testable_parameters.split(",")
     non_exist_param = list(set(testable_parameters) - set(check_parameters))
     if non_exist_param:
-      non_exist_param = ",".join(non_exist_param).replace(" ","")
+      non_exist_param = ",".join(non_exist_param).replace(settings.SINGLE_WHITESPACE,"")
       non_exist_param = non_exist_param.split(",")
       if menu.options.level >= settings.COOKIE_INJECTION_LEVEL and \
          menu.options.test_parameter != None:
@@ -1510,7 +1510,7 @@ def is_empty(multi_parameters, http_request_method):
           pass
       elif settings.IS_XML:
         if re.findall(r'>(.*)<', empty)[0] == "" or \
-           re.findall(r'>(.*)<', empty)[0] == " ":
+           re.findall(r'>(.*)<', empty)[0] == settings.SINGLE_WHITESPACE:
           empty_parameters.append(re.findall(r'</(.*)>', empty)[0])  
       elif len(empty.split("=")[1]) == 0:
         empty_parameters.append(empty.split("=")[0])
@@ -1630,7 +1630,7 @@ def check_similarities(all_params):
       if param == all_params[param]:
         parameter_name = param
         all_params[param] = param + settings.RANDOM_TAG
-    all_params = [x.replace(" ", "") for x in json.dumps(all_params).split(", ")]
+    all_params = [x.replace(settings.SINGLE_WHITESPACE, "") for x in json.dumps(all_params).split(", ")]
   else:
     for param in range(0, len(all_params)):
       if settings.IS_XML:
@@ -1878,10 +1878,10 @@ def print_users(sys_users, filename, _, separator, TAG, cmd, prefix, suffix, whi
     try:
       if sys_users:
         sys_users = "".join(str(p) for p in sys_users).strip()
-        if len(sys_users.split(" ")) <= 1 :
+        if len(sys_users.split(settings.SINGLE_WHITESPACE)) <= 1 :
           sys_users = sys_users.split("\n")
         else:
-          sys_users = sys_users.split(" ")
+          sys_users = sys_users.split(settings.SINGLE_WHITESPACE)
         # Check for appropriate '/etc/passwd' format.
         if len(sys_users) % 3 != 0 :
           warn_msg = "It seems that '" + settings.PASSWD_FILE + "' file is "
@@ -1981,8 +1981,8 @@ Print users enumeration.
 """
 def print_passes(sys_passes, filename, _, alter_shell):
   if sys_passes == "":
-    sys_passes = " "
-    sys_passes = sys_passes.replace(" ", "\n").split()
+    sys_passes = settings.SINGLE_WHITESPACE
+    sys_passes = sys_passes.replace(settings.SINGLE_WHITESPACE, "\n").split()
     if len(sys_passes) != 0 :
       if settings.VERBOSITY_LEVEL == 0 and _:
         print(settings.SINGLE_WHITESPACE)
@@ -2201,7 +2201,7 @@ def check_file_to_write():
 
   if os.path.isfile(file_to_write):
     with open(file_to_write, 'r') as content_file:
-      content = [line.replace("\r\n", "\n").replace("\r", "\n").replace("\n", " ") for line in content_file]
+      content = [line.replace("\r\n", "\n").replace("\r", "\n").replace("\n", settings.SINGLE_WHITESPACE) for line in content_file]
     content = "".join(str(p) for p in content).replace("'", "\"")
     if settings.TARGET_OS == "win":
       import base64

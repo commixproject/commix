@@ -214,7 +214,7 @@ def check_unicorn_version(current_version):
       for line in latest_version:
         line = line.rstrip()
         if "Magic Unicorn Attack Vector v" in line:
-          latest_version = line.replace("Magic Unicorn Attack Vector v", "").replace(" ", "").replace("-","").replace("\"","").replace(")","")
+          latest_version = line.replace("Magic Unicorn Attack Vector v", "").replace(settings.SINGLE_WHITESPACE, "").replace("-","").replace("\"","").replace(")","")
           break
 
     if len(current_version) == 0 or \

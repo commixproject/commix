@@ -110,7 +110,7 @@ Execute shell commands on vulnerable host.
 def cmd_execution(separator, TAG, cmd):
   if settings.TARGET_OS == "win":
     if settings.REVERSE_TCP:
-      payload = (separator + cmd + " "
+      payload = (separator + cmd + settings.SINGLE_WHITESPACE
                 )
     else:
       payload = (separator +
@@ -148,7 +148,7 @@ __Warning__: The alternative shells are still experimental.
 def cmd_execution_alter_shell(separator, TAG, cmd):
   if settings.TARGET_OS == "win":
     if settings.REVERSE_TCP:
-      payload = (separator + cmd + " "
+      payload = (separator + cmd + settings.SINGLE_WHITESPACE
                 )
     else:
       payload = (separator +

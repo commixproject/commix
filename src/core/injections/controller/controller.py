@@ -133,7 +133,7 @@ Heuristic (basic) tests for code injection warnings
 def code_injections_heuristic_basic(url, http_request_method, check_parameter, the_type, header_name, inject_http_headers):
   injection_type = "results-based dynamic code evaluation"
   technique = "dynamic code evaluation technique"
-  technique = "(" + injection_type.split(" ")[0] + ") " + technique + ""
+  technique = "(" + injection_type.split(settings.SINGLE_WHITESPACE)[0] + ") " + technique + ""
   settings.EVAL_BASED_STATE = True
   try:
     try:
@@ -226,7 +226,7 @@ def classic_command_injection_technique(url, timesec, filename, http_request_met
         settings.CLASSIC_STATE = False
     else:
       if settings.VERBOSITY_LEVEL != 0:   
-        debug_msg = "Skipping test the " + "(" + injection_type.split(" ")[0] + ") " + technique + ". "
+        debug_msg = "Skipping test the " + "(" + injection_type.split(settings.SINGLE_WHITESPACE)[0] + ") " + technique + ". "
         print(settings.print_debug_msg(debug_msg))
 
 # Check if it's exploitable via dynamic code evaluation technique.   
@@ -258,11 +258,11 @@ def dynamic_code_evaluation_technique(url, timesec, filename, http_request_metho
         settings.EVAL_BASED_STATE = False
     else:
       if settings.VERBOSITY_LEVEL != 0:   
-        debug_msg = "Skipping test the " + "(" + injection_type.split(" ")[0] + ") " + technique + ". "
+        debug_msg = "Skipping test the " + "(" + injection_type.split(settings.SINGLE_WHITESPACE)[0] + ") " + technique + ". "
         print(settings.print_debug_msg(debug_msg))
   else:
     if settings.VERBOSITY_LEVEL != 0:   
-      debug_msg = "Skipping test the " + "(" + injection_type.split(" ")[0] + ") " + technique + ". "
+      debug_msg = "Skipping test the " + "(" + injection_type.split(settings.SINGLE_WHITESPACE)[0] + ") " + technique + ". "
       print(settings.print_debug_msg(debug_msg))
 
 # Check if it's exploitable via time-based command injection technique.
@@ -278,7 +278,7 @@ def timebased_command_injection_technique(url, timesec, filename, http_request_m
         settings.TIME_BASED_STATE = False
     else:
       if settings.VERBOSITY_LEVEL != 0:   
-        debug_msg = "Skipping test the " + "(" + injection_type.split(" ")[0] + ") " + technique + ". "
+        debug_msg = "Skipping test the " + "(" + injection_type.split(settings.SINGLE_WHITESPACE)[0] + ") " + technique + ". "
         print(settings.print_debug_msg(debug_msg))
 
 # Check if it's exploitable via file-based command injection technique.
@@ -294,7 +294,7 @@ def filebased_command_injection_technique(url, timesec, filename, http_request_m
         settings.FILE_BASED_STATE = False
     else:
       if settings.VERBOSITY_LEVEL != 0:   
-        debug_msg = "Skipping test the " + "(" + injection_type.split(" ")[0] + ") " + technique + ". "
+        debug_msg = "Skipping test the " + "(" + injection_type.split(settings.SINGLE_WHITESPACE)[0] + ") " + technique + ". "
         print(settings.print_debug_msg(debug_msg))
 
 """
@@ -325,7 +325,7 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
 
   # User-Agent HTTP header / Referer HTTP header / 
   # Host HTTP header / Custom HTTP header Injection(s)
-  if check_parameter.startswith(" "):
+  if check_parameter.startswith(settings.SINGLE_WHITESPACE):
     header_name = ""
     the_type = "HTTP header"
     check_parameter = " '" + check_parameter.strip() + "'"
@@ -547,7 +547,7 @@ def cookie_injection(url, http_request_method, filename, timesec):
       cookie_parameters = cookie_parameters_list
 
     # Remove whitespaces 
-    cookie_parameters = [x.replace(" ", "") for x in cookie_parameters]
+    cookie_parameters = [x.replace(settings.SINGLE_WHITESPACE, "") for x in cookie_parameters]
 
     check_parameters = []
     for i in range(0, len(cookie_parameters)):
@@ -651,7 +651,7 @@ def post_request(url, http_request_method, filename, timesec):
     found_parameter = [x for x in found_parameter if settings.INJECT_TAG in x]
   else:     
     # Remove whitespaces   
-    found_parameter = [x.replace(" ", "") for x in found_parameter]
+    found_parameter = [x.replace(settings.SINGLE_WHITESPACE, "") for x in found_parameter]
 
   # Check if multiple parameters
   check_parameters = []
@@ -744,7 +744,7 @@ def perform_checks(url, http_request_method, filename):
 
   # Custom header Injection
   if settings.CUSTOM_HEADER_INJECTION == True:
-    check_parameter = header_name = " " + settings.CUSTOM_HEADER_NAME
+    check_parameter = header_name = settings.SINGLE_WHITESPACE + settings.CUSTOM_HEADER_NAME
     settings.HTTP_HEADER = header_name[1:].lower()
     check_for_stored_sessions(url, http_request_method)
     injection_proccess(url, check_parameter, http_request_method, filename, timesec)

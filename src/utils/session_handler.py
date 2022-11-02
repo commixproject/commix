@@ -290,7 +290,7 @@ def notification(url, technique, injection_type):
       while True:
         message = "A previously stored session has been held against that target. "
         message += "Do you want to resume to "
-        message += "(" + injection_type.split(" ")[0] + ") "
+        message += "(" + injection_type.split(settings.SINGLE_WHITESPACE)[0] + ") "
         message += technique.rsplit(' ', 2)[0] 
         message += " injection point? [Y/n] > "
         settings.LOAD_SESSION = common.read_input(message, default="Y", check_batch=True)

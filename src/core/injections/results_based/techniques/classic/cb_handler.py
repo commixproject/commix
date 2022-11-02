@@ -59,7 +59,7 @@ def cb_injection_handler(url, timesec, filename, http_request_method, injection_
   export_injection_info = False
 
   if not settings.LOAD_SESSION: 
-    info_msg = "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + ". "
+    info_msg = "Testing the " + "(" + injection_type.split(settings.SINGLE_WHITESPACE)[0] + ") " + technique + ". "
     sys.stdout.write(settings.print_info_msg(info_msg))
     sys.stdout.flush()
     if settings.VERBOSITY_LEVEL != 0:
@@ -72,7 +72,7 @@ def cb_injection_handler(url, timesec, filename, http_request_method, injection_
     for prefix in settings.PREFIXES:
       for suffix in settings.SUFFIXES:
         for separator in settings.SEPARATORS:
-          if whitespace == " ":
+          if whitespace == settings.SINGLE_WHITESPACE:
             whitespace = _urllib.parse.quote(whitespace) 
           # Check injection state
           settings.DETECTION_PHASE = True
@@ -176,7 +176,7 @@ def cb_injection_handler(url, timesec, filename, http_request_method, injection_
                 float_percent = "{0:.1f}".format(round(((i*100)/(total*1.0)),2))
               
                 if shell == False:
-                  info_msg = "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "..." +  " (" + str(float_percent) + "%)"
+                  info_msg = "Testing the " + "(" + injection_type.split(settings.SINGLE_WHITESPACE)[0] + ") " + technique + "..." +  " (" + str(float_percent) + "%)"
                   sys.stdout.write("\r" + settings.print_info_msg(info_msg))  
                   sys.stdout.flush()
 
@@ -189,7 +189,7 @@ def cb_injection_handler(url, timesec, filename, http_request_method, injection_
                   percent = settings.info_msg
                 else:
                   percent = ".. (" + str(float_percent) + "%)"
-                info_msg = "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "." + "" + percent + ""
+                info_msg = "Testing the " + "(" + injection_type.split(settings.SINGLE_WHITESPACE)[0] + ") " + technique + "." + "" + percent + ""
                 sys.stdout.write("\r" + settings.print_info_msg(info_msg))  
                 sys.stdout.flush()
             
@@ -236,7 +236,7 @@ def cb_injection_handler(url, timesec, filename, http_request_method, injection_
               the_type = " HTTP header"
 
             elif settings.CUSTOM_HEADER_INJECTION == True: 
-              header_name = " " + settings.CUSTOM_HEADER_NAME
+              header_name = settings.SINGLE_WHITESPACE + settings.CUSTOM_HEADER_NAME
               found_vuln_parameter = ""
               the_type = " HTTP header"
 
@@ -268,7 +268,7 @@ def cb_injection_handler(url, timesec, filename, http_request_method, injection_
 
             # Print the findings to terminal.
             info_msg = settings.CHECKING_PARAMETER + " appears to be injectable via "
-            info_msg += "(" + injection_type.split(" ")[0] + ") " + technique + "."
+            info_msg += "(" + injection_type.split(settings.SINGLE_WHITESPACE)[0] + ") " + technique + "."
             print(settings.print_bold_info_msg(info_msg))
             sub_content = str(checks.url_decode(payload))
             print(settings.print_sub_content(sub_content))

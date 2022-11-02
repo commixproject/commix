@@ -47,7 +47,7 @@ def powershell_version(separator, TAG, prefix, suffix, whitespace, http_request_
       response = requests.url_reload(url, timesec)
     # Evaluate injection results.
     ps_version = eb_injector.injection_results(response, TAG, cmd)
-    ps_version = "".join(str(p) for p in ps_version).replace(" ", "", 1)
+    ps_version = "".join(str(p) for p in ps_version).replace(settings.SINGLE_WHITESPACE, "", 1)
     session_handler.store_cmd(url, cmd, ps_version, vuln_parameter)
   else:
     ps_version = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
@@ -69,7 +69,7 @@ def hostname(separator, TAG, prefix, suffix, whitespace, http_request_method, ur
       response = requests.url_reload(url, timesec)
     # Evaluate injection results.
     shell = eb_injector.injection_results(response, TAG, cmd)
-    shell = "".join(str(p) for p in shell).replace(" ", "", 1)
+    shell = "".join(str(p) for p in shell).replace(settings.SINGLE_WHITESPACE, "", 1)
     session_handler.store_cmd(url, cmd, shell, vuln_parameter)
   else:
     shell = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
@@ -126,7 +126,7 @@ def system_information(separator, TAG, prefix, suffix, whitespace, http_request_
         response = requests.url_reload(url, timesec)
       # Evaluate injection results.
       target_arch = eb_injector.injection_results(response, TAG, cmd)
-      target_arch = "".join(str(p) for p in target_arch).replace(" ", "", 1)
+      target_arch = "".join(str(p) for p in target_arch).replace(settings.SINGLE_WHITESPACE, "", 1)
       session_handler.store_cmd(url, cmd, target_arch, vuln_parameter)
     else:
       target_arch = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
@@ -153,7 +153,7 @@ def current_user(separator, TAG, prefix, suffix, whitespace, http_request_method
       response = requests.url_reload(url, timesec)
     # Evaluate injection results.
     cu_account = eb_injector.injection_results(response, TAG, cmd)
-    cu_account = "".join(str(p) for p in cu_account).replace(" ", "", 1)
+    cu_account = "".join(str(p) for p in cu_account).replace(settings.SINGLE_WHITESPACE, "", 1)
     session_handler.store_cmd(url, cmd, cu_account, vuln_parameter)
   else:
     cu_account = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
@@ -178,7 +178,7 @@ def check_current_user_privs(separator, TAG, prefix, suffix, whitespace, http_re
       response = requests.url_reload(url, timesec)
     # Evaluate injection results.
     shell = eb_injector.injection_results(response, TAG, cmd)
-    shell = "".join(str(p) for p in shell).replace(" ", "", 1)
+    shell = "".join(str(p) for p in shell).replace(settings.SINGLE_WHITESPACE, "", 1)
     session_handler.store_cmd(url, cmd, shell, vuln_parameter)
   else:
     shell = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
@@ -244,7 +244,7 @@ def single_os_cmd_exec(separator, TAG, prefix, suffix, whitespace, http_request_
       response = requests.url_reload(url, timesec)
     # Evaluate injection results.
     shell = eb_injector.injection_results(response, TAG, cmd)
-    shell = "".join(str(p) for p in shell).replace(" ", "", 1)
+    shell = "".join(str(p) for p in shell).replace(settings.SINGLE_WHITESPACE, "", 1)
     session_handler.store_cmd(url, cmd, shell, vuln_parameter)
   else:
     shell = session_handler.export_stored_cmd(url, cmd, vuln_parameter)

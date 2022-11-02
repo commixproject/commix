@@ -56,7 +56,7 @@ def eb_injection_handler(url, timesec, filename, http_request_method, injection_
   settings.EVAL_PREFIXES = settings.EVAL_PREFIXES + settings.EXECUTION_FUNCTIONS
 
   if not settings.LOAD_SESSION:
-    info_msg = "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + ". "
+    info_msg = "Testing the " + "(" + injection_type.split(settings.SINGLE_WHITESPACE)[0] + ") " + technique + ". "
     sys.stdout.write(settings.print_info_msg(info_msg))
     sys.stdout.flush()
     if settings.VERBOSITY_LEVEL != 0:
@@ -69,7 +69,7 @@ def eb_injection_handler(url, timesec, filename, http_request_method, injection_
     for prefix in settings.EVAL_PREFIXES:
       for suffix in settings.EVAL_SUFFIXES:
         for separator in settings.EVAL_SEPARATORS:
-          if whitespace == " ":
+          if whitespace == settings.SINGLE_WHITESPACE:
             whitespace = _urllib.parse.quote(whitespace) 
           # Check injection state
           settings.DETECTION_PHASE = True
@@ -135,7 +135,7 @@ def eb_injection_handler(url, timesec, filename, http_request_method, injection_
 
               if not settings.TAMPER_SCRIPTS['base64encode'] and \
                    not settings.TAMPER_SCRIPTS['hexencode']:
-                payload = payload.replace(" ", "%20")
+                payload = payload.replace(settings.SINGLE_WHITESPACE, "%20")
 
               # Check if defined "--verbose" option.
               if settings.VERBOSITY_LEVEL != 0:
@@ -187,7 +187,7 @@ def eb_injection_handler(url, timesec, filename, http_request_method, injection_
                 float_percent = "{0:.1f}".format(round(((i*100)/(total * 1.0)),2))
 
                 if shell == False:
-                  info_msg = "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "..." +  " (" + str(float_percent) + "%)"
+                  info_msg = "Testing the " + "(" + injection_type.split(settings.SINGLE_WHITESPACE)[0] + ") " + technique + "..." +  " (" + str(float_percent) + "%)"
                   sys.stdout.write("\r" + settings.print_info_msg(info_msg))  
                   sys.stdout.flush()
 
@@ -201,7 +201,7 @@ def eb_injection_handler(url, timesec, filename, http_request_method, injection_
                 else:
                   percent = ".. (" + str(float_percent) + "%)"
 
-                info_msg = "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "." + "" + percent + ""
+                info_msg = "Testing the " + "(" + injection_type.split(settings.SINGLE_WHITESPACE)[0] + ") " + technique + "." + "" + percent + ""
                 sys.stdout.write("\r" + settings.print_info_msg(info_msg))  
                 sys.stdout.flush()
                 
@@ -248,7 +248,7 @@ def eb_injection_handler(url, timesec, filename, http_request_method, injection_
               the_type = " HTTP header"
 
             elif settings.CUSTOM_HEADER_INJECTION == True: 
-              header_name = " " + settings.CUSTOM_HEADER_NAME
+              header_name = settings.SINGLE_WHITESPACE + settings.CUSTOM_HEADER_NAME
               found_vuln_parameter = ""
               the_type = " HTTP header"
 
@@ -279,7 +279,7 @@ def eb_injection_handler(url, timesec, filename, http_request_method, injection_
 
             # Print the findings to terminal.
             info_msg = settings.CHECKING_PARAMETER + " appears to be injectable via "
-            info_msg += "(" + injection_type.split(" ")[0] + ") " + technique + "."
+            info_msg += "(" + injection_type.split(settings.SINGLE_WHITESPACE)[0] + ") " + technique + "."
             print(settings.print_bold_info_msg(info_msg))
             sub_content = str(checks.url_decode(payload))
             print(settings.print_sub_content(sub_content))
@@ -377,7 +377,7 @@ def eb_injection_handler(url, timesec, filename, http_request_method, injection_
                          session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
                         # Evaluate injection results.
                         shell = eb_injector.injection_results(response, TAG, cmd)
-                        shell = "".join(str(p) for p in shell).replace(" ", "", 1)
+                        shell = "".join(str(p) for p in shell).replace(settings.SINGLE_WHITESPACE, "", 1)
                         if not menu.options.ignore_session :
                           session_handler.store_cmd(url, cmd, shell, vuln_parameter)
                       else:

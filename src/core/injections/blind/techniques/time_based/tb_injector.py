@@ -339,7 +339,7 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
     output = "".join(str(p) for p in output)
     
     # Check for empty output.
-    if output == (len(output) * " "):
+    if output == (len(output) * settings.SINGLE_WHITESPACE):
       output = ""
 
   else:

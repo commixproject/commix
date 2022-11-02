@@ -406,7 +406,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp_other""" + Style.RESET_ALL
 
         with open (output, "r+") as content_file:
           data = content_file.readlines()
-          data = ''.join(data).replace("\n"," ")
+          data = ''.join(data).replace("\n",settings.SINGLE_WHITESPACE)
 
         print(settings.SINGLE_WHITESPACE)
         # Remove the ouput file.
@@ -541,7 +541,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """windows_meterpreter_reverse_tcp""" + S
                   for line in unicorn_file:
                     line = line.rstrip()
                     if "Magic Unicorn Attack Vector v" in line:
-                      unicorn_version = line.replace("Magic Unicorn Attack Vector v", "").replace(" ", "").replace("-","").replace("\"","").replace(")","")
+                      unicorn_version = line.replace("Magic Unicorn Attack Vector v", "").replace(settings.SINGLE_WHITESPACE, "").replace("-","").replace("\"","").replace(")","")
                       break 
               except:
                 unicorn_version = "" 

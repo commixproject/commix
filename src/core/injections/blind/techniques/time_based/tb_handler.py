@@ -57,7 +57,7 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
   how_long = 0
 
   if settings.VERBOSITY_LEVEL != 0:
-    info_msg = "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + ". "
+    info_msg = "Testing the " + "(" + injection_type.split(settings.SINGLE_WHITESPACE)[0] + ") " + technique + ". "
     print(settings.print_info_msg(info_msg))
 
   # Check if defined "--maxlen" option.
@@ -230,7 +230,7 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                     
                     if settings.VERBOSITY_LEVEL == 0:
                       percent = ".. (" + str(float_percent) + "%)"
-                      info_msg = "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "." + "" + percent + ""
+                      info_msg = "Testing the " + "(" + injection_type.split(settings.SINGLE_WHITESPACE)[0] + ") " + technique + "." + "" + percent + ""
                       sys.stdout.write("\r" + settings.print_info_msg(info_msg))
                       sys.stdout.flush()
 
@@ -277,19 +277,19 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                     else:
                       if settings.VERBOSITY_LEVEL == 0:
                         percent = ".. (" + str(float_percent) + "%)"
-                        info_msg = "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "." + "" + percent + ""
+                        info_msg = "Testing the " + "(" + injection_type.split(settings.SINGLE_WHITESPACE)[0] + ") " + technique + "." + "" + percent + ""
                         sys.stdout.write("\r" + settings.print_info_msg(info_msg))
                         sys.stdout.flush()
                       continue    
                   else:
                     if settings.VERBOSITY_LEVEL == 0:
                       percent = ".. (" + str(float_percent) + "%)"
-                      info_msg = "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "." + "" + percent + ""
+                      info_msg = "Testing the " + "(" + injection_type.split(settings.SINGLE_WHITESPACE)[0] + ") " + technique + "." + "" + percent + ""
                       sys.stdout.write("\r" + settings.print_info_msg(info_msg))
                       sys.stdout.flush()
                     continue
                 # if settings.VERBOSITY_LEVEL == 0:
-                #   info_msg = "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "." + "" + percent + ""
+                #   info_msg = "Testing the " + "(" + injection_type.split(settings.SINGLE_WHITESPACE)[0] + ") " + technique + "." + "" + percent + ""
                 #   sys.stdout.write("\r" + settings.print_info_msg(info_msg))
                 #   sys.stdout.flush()
 
@@ -311,7 +311,7 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                   if no_result == True:
                     if settings.VERBOSITY_LEVEL == 0:
                       percent = settings.FAIL_STATUS
-                      info_msg =  "Testing the " + "(" + injection_type.split(" ")[0] + ") " + technique + "." + "" + percent + ""
+                      info_msg =  "Testing the " + "(" + injection_type.split(settings.SINGLE_WHITESPACE)[0] + ") " + technique + "." + "" + percent + ""
                       sys.stdout.write("\r" + settings.print_info_msg(info_msg))
                       sys.stdout.flush()
                     else:
@@ -358,7 +358,7 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                 the_type = " HTTP header"
 
               elif settings.CUSTOM_HEADER_INJECTION == True: 
-                header_name = " " + settings.CUSTOM_HEADER_NAME
+                header_name = settings.SINGLE_WHITESPACE + settings.CUSTOM_HEADER_NAME
                 found_vuln_parameter = ""
                 the_type = " HTTP header"
 
@@ -390,7 +390,7 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
 
               # Print the findings to terminal.
               info_msg = settings.CHECKING_PARAMETER + " appears to be injectable via "
-              info_msg += "(" + injection_type.split(" ")[0] + ") " + technique + "."
+              info_msg += "(" + injection_type.split(settings.SINGLE_WHITESPACE)[0] + ") " + technique + "."
               print(settings.print_bold_info_msg(info_msg))
               sub_content = str(checks.url_decode(payload))
               print(settings.print_sub_content(sub_content))

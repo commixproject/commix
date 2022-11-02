@@ -272,7 +272,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """bind_tcp_other""" + Style.RESET_ALL + 
 
         with open (output, "r+") as content_file:
           data = content_file.readlines()
-          data = ''.join(data).replace("\n"," ")
+          data = ''.join(data).replace("\n",settings.SINGLE_WHITESPACE)
 
         print(settings.SINGLE_WHITESPACE)
         # Remove the ouput file.
@@ -363,7 +363,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """bind_tcp_other""" + Style.RESET_ALL + 
 
         with open (output, "r+") as content_file:
           data = content_file.readlines()
-          data = ''.join(data).replace("\n"," ")
+          data = ''.join(data).replace("\n",settings.SINGLE_WHITESPACE)
 
         print(settings.SINGLE_WHITESPACE)
         # Remove the ouput file.
