@@ -255,8 +255,6 @@ def no_usable_links(crawled_hrefs):
 The crawing process.
 """
 def do_process(url):
-  if settings.SINGLE_WHITESPACE in url:
-    url = url.replace(settings.SINGLE_WHITESPACE, _urllib.parse.quote_plus(settings.SINGLE_WHITESPACE))
   identified_hrefs = False
   if settings.VERBOSITY_LEVEL >= 2:
     print(settings.SINGLE_WHITESPACE)
@@ -337,6 +335,8 @@ def crawler(url, url_num, crawling_list):
           if url not in visited_hrefs:
             link += 1
             settings.CRAWLED_URLS_NUM = link
+            if settings.SINGLE_WHITESPACE in url:
+              url = url.replace(settings.SINGLE_WHITESPACE, _urllib.parse.quote_plus(settings.SINGLE_WHITESPACE))
             visited_hrefs.append(url)
             do_process(url)
             info_msg = str(link)

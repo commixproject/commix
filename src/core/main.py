@@ -854,7 +854,7 @@ try:
           settings.MULTI_TARGETS = True
           print(settings.SINGLE_WHITESPACE)
           with open(menu.options.bulkfile) as f:
-            bulkfile = [url.strip() for url in f]
+            bulkfile = [url.replace(settings.SINGLE_WHITESPACE, _urllib.parse.quote_plus(settings.SINGLE_WHITESPACE)).strip() for url in f]
       
       # Check if option "--crawl" is enabled.
       if settings.CRAWLING:
