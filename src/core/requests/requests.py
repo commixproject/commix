@@ -73,9 +73,10 @@ def estimate_response_time(url, timesec):
         err_msg += " (Reason: " + str(err.args[0]).split("] ")[-1].lower() + ")."
       except IndexError:
         err_msg += " (" + str(err) + ")."
-      print(settings.print_critical_msg(err_msg))
+      if str(err.getcode()) != settings.UNAUTHORIZED_ERROR:
+        print(settings.print_critical_msg(err_msg))
       # Check for HTTP Error 401 (Unauthorized).
-      if str(err.getcode()) == settings.UNAUTHORIZED_ERROR:
+      else:
         try:
           # Get the auth header value
           auth_line = err.headers.get('www-authenticate', '')
@@ -359,17 +360,21 @@ def request_failed(err_msg):
     if menu.options.ignore_code == settings.UNAUTHORIZED_ERROR:
       pass
     else:
+      err_msg = "Not authorized (" + settings.UNAUTHORIZED_ERROR + "). "
+
+      err_msg += "Try to provide right HTTP authentication type ('--auth-type') and valid credentials ('--auth-cred')"
       if menu.options.auth_type and menu.options.auth_cred:
-        err_msg = "The provided pair of " + menu.options.auth_type 
-        err_msg += " HTTP authentication credentials '" + menu.options.auth_cred + "'"
-        err_msg += " seems to be invalid."
-        err_msg += " Try to rerun without providing '--auth-cred' and '--auth-type' options,"
-        err_msg += " in order to perform a dictionary-based attack."
+        if settings.MULTI_TARGETS:
+          err_msg += ". "
+        else:
+          err_msg += " or rerun without providing them, in order to perform a dictionary-based attack. "
       else:
-        err_msg = "Not authorized, try to provide right HTTP authentication type and valid credentials (" + settings.UNAUTHORIZED_ERROR + ")."
-        err_msg += " If this is intended, try to rerun by providing a valid value for option '--ignore-code'."
+        err_msg += " or rerun by providing option '--ignore-code=" +settings.UNAUTHORIZED_ERROR +"'. "
+      if settings.MULTI_TARGETS:
+        err_msg += "Skipping to the next target."
       print(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+      if menu.options.auth_type and menu.options.auth_cred or settings.MULTI_TARGETS:
+        raise SystemExit()
   if settings.INTERNAL_SERVER_ERROR in str(err_msg).lower() or \
      settings.FORBIDDEN_ERROR in str(err_msg).lower() or \
      settings.NOT_FOUND_ERROR in str(err_msg).lower():
@@ -378,6 +383,7 @@ def request_failed(err_msg):
     if len(reason) != 0 and menu.options.ignore_code != settings.UNAUTHORIZED_ERROR:
       reason = reason + ". Skipping to the next target."
       print(settings.print_critical_msg(reason))
+      raise SystemExit()
     if settings.EOF:
       print(settings.SINGLE_WHITESPACE) 
     return False 

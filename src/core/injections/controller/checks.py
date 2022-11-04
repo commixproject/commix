@@ -234,14 +234,11 @@ def load_cmd_history():
     cli_history = os.path.expanduser(settings.CLI_HISTORY)
     if os.path.exists(cli_history):
       readline.read_history_file(cli_history)
-  except (IOError, AttributeError) as e:
+  except (IOError, AttributeError, UnicodeError) as e:
     warn_msg = "There was a problem loading the history file '" + cli_history + "'."
-    print(settings.print_warning_msg(warn_msg))
-  except UnicodeError:
     if settings.IS_WINDOWS:
-      warn_msg = "There was a problem loading the history file '" + cli_history + "'. "
-      warn_msg += "More info can be found at 'https://github.com/pyreadline/pyreadline/issues/30'"
-      print(settings.print_warning_msg(warn_msg))     
+      warn_msg += " More info can be found at 'https://github.com/pyreadline/pyreadline/issues/30'"
+    print(settings.print_warning_msg(warn_msg))     
 
 """
 Check if the value has boundaries.
