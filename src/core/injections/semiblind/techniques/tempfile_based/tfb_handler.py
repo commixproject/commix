@@ -430,8 +430,8 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
               if not settings.LOAD_SESSION:
                 shell = ""
                 session_handler.injection_point_importation(url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response, timesec, original_how_long, output_length, is_vulnerable=menu.options.level)
-                #possibly_vulnerable = False
               else:
+                whitespace = settings.WHITESPACES[0]
                 settings.LOAD_SESSION = False 
                 
               # Delete previous shell (text) files (output) from temp.
