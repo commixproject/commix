@@ -412,6 +412,8 @@ def main(filename, url):
       if session_handler.applied_techniques(url, http_request_method):
         if not menu.options.tech:
           menu.options.tech = session_handler.applied_techniques(url, http_request_method)
+        else:
+          settings.USER_SUPPLIED_TECHNIQUE = True
       else:
         menu.options.tech = list(menu.options.tech)
         _ = {settings.AVAILABLE_TECHNIQUES[i] : i for i in range(len(settings.AVAILABLE_TECHNIQUES))}

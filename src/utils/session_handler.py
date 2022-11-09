@@ -212,11 +212,6 @@ def injection_point_exportation(url, http_request_method):
       result = conn.execute("SELECT * FROM sqlite_master WHERE name = '" + \
                              table_name(url) + "_ip' AND type = 'table';")
       if result:
-        # if not settings.USER_SUPPLIED_TECHNIQUE:
-        #   for session in result:
-        #     check_injection_technique = menu.options.tech = session[0][:1]
-        #     select_injection_type = session[1][:1].capitalize()
-        # else:
         if menu.options.tech[:1] == "c":
           select_injection_type = "R"
         elif menu.options.tech[:1] == "e":
