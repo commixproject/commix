@@ -1620,14 +1620,17 @@ Check for similarity in provided parameter name and value.
 """
 def check_similarities(all_params):
   if settings.IS_JSON:
-    all_params = ','.join(all_params)
-    json_data = json.loads(all_params, object_pairs_hook=OrderedDict)
-    all_params = flatten(json_data)
-    for param in all_params:
-      if param == all_params[param]:
-        parameter_name = param
-        all_params[param] = param + settings.RANDOM_TAG
-    all_params = [x.replace(settings.SINGLE_WHITESPACE, "") for x in json.dumps(all_params).split(", ")]
+    try:
+      all_params = ','.join(all_params)
+      json_data = json.loads(all_params, object_pairs_hook=OrderedDict)
+      all_params = flatten(json_data)
+      for param in all_params:
+        if param == all_params[param]:
+          parameter_name = param
+          all_params[param] = param + settings.RANDOM_TAG
+      all_params = [x.replace(settings.SINGLE_WHITESPACE, "") for x in json.dumps(all_params).split(", ")]
+    except Exception as e:
+      pass
   else:
     for param in range(0, len(all_params)):
       if settings.IS_XML:
