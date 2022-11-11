@@ -219,9 +219,10 @@ Masks sensitive data in the supplied message.
 """
 def mask_sensitive_data(err_msg):
   for item in settings.SENSITIVE_OPTIONS:
-    match = re.search(r"(?i)commix.+("+str(item)+")(\s+|=)([^ ]+)", err_msg)
+    match = re.search(r"(?i)commix.+("+str(item)+")(\s+|=)([^-]+)", err_msg)
     if match:
-      err_msg = err_msg.replace(match.group(3), '*' * len(match.group(3)))
+      err_msg = err_msg.replace(match.group(3), '*' * len(match.group(3)) + settings.SINGLE_WHITESPACE)
+
   return err_msg
 
 """
