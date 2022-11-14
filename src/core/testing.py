@@ -41,7 +41,7 @@ def smoke_test():
             if settings.VERBOSITY_LEVEL != 0:
               debug_msg = "Succeeded importing '" + str(path) + "' module."
               print(settings.print_debug_msg(debug_msg))
-          except Exception as ex:
+          except Exception as e:
             error_msg = "Failed importing '" + path + "' module due to '" + str(ex) + "'."
             print(settings.print_error_msg(error_msg))
             _ = False

@@ -307,7 +307,7 @@ def page_encoding(response, action):
         data = gzip.GzipFile("", "rb", 9, io.BytesIO(page))
       page = data.read()
       settings.PAGE_COMPRESSION = True
-    except Exception as ex:
+    except Exception as e:
       if settings.PAGE_COMPRESSION is None:
         warn_msg = "Turning off page compression."
         print(settings.print_warning_msg(warn_msg))
