@@ -1493,7 +1493,7 @@ def is_empty(multi_parameters, http_request_method):
     try:
       if settings.IS_JSON:
         try:
-          param = re.sub("[^/()A-Za-z0-9.:,_]+", '',  multi_params[empty])
+          param = re.sub("[^/()A-Za-z0-9.:,_]+", '',  str(multi_params[empty]))
           if "(" and ")" in param:
             param = re.findall(r'\((.*)\)', param)
             for value in param[0].split(","):
