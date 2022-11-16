@@ -42,7 +42,7 @@ def smoke_test():
               debug_msg = "Succeeded importing '" + str(path) + "' module."
               print(settings.print_debug_msg(debug_msg))
           except Exception as e:
-            error_msg = "Failed importing '" + path + "' module due to '" + str(ex) + "'."
+            error_msg = "Failed importing '" + path + "' module due to '" + str(e) + "'."
             print(settings.print_error_msg(error_msg))
             _ = False
 
