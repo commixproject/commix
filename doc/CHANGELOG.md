@@ -1,4 +1,5 @@
 ## Version 3.6 (TBA)
+* Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
 * Revised: Improvements regarding dynamic code evaluation heuristic check.
 * Revised: Minor improvement regarding session handler.
 * Revised: Minor improvement regarding `--wizard` option.
