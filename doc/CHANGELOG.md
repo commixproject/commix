@@ -1,4 +1,4 @@
-## Version 3.6 (TBA)
+## Version 3.6 (2022-11-18)
 * Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
 * Revised: Improvements regarding dynamic code evaluation heuristic check.
 * Revised: Minor improvement regarding session handler.
