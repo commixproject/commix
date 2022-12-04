@@ -1,3 +1,6 @@
+## Version 3.7 (TBA)
+* Revised: Minor bug-fix regarding logging all HTTP traffic into a textual file (i.e `-t` option).
+
 ## Version 3.6 (2022-11-18)
 * Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
 * Revised: Improvements regarding dynamic code evaluation heuristic check.
