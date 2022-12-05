@@ -160,7 +160,7 @@ def create_github_issue(err_msg, exc_msg):
       message = "Do you want to automatically create a new (anonymized) issue "
       message += "with the unhandled exception information at "
       message += "the official Github repository? [y/N] "
-      choise = common.read_input(message, default="N", check_batch=True)
+      choise = read_input(message, default="N", check_batch=True)
       if choise in settings.CHOICE_YES:
         break
       elif choise in settings.CHOICE_NO:
