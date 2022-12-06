@@ -153,7 +153,9 @@ def create_github_issue(err_msg, exc_msg):
   _ = re.sub(r"= _", "= ", _)
   _ = _.encode(settings.DEFAULT_CODEC)
   
-  bug_report =  "Bug Report: Unhandled exception \"" + str([i for i in exc_msg.split('\n') if i][-1]) + "\""
+  key = hashlib.md5(_).hexdigest()[:8]
+
+  bug_report =  "Bug Report: Unhandled exception \"" + str([i for i in exc_msg.split('\n') if i][-1]) + "\" " +  "(#" + key + ")"
 
   while True:
     try:
