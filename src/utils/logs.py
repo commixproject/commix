@@ -124,7 +124,8 @@ def create_log_file(url, output_dir):
     settings.SESSION_FILE = output_dir + host + "/" + "session" + ".db"
 
   # Load command history
-  checks.load_cmd_history()
+  if settings.LOAD_SESSION == True:
+    checks.load_cmd_history()
 
   # The logs filename construction.
   filename = output_dir + host + "/" + settings.OUTPUT_FILE
