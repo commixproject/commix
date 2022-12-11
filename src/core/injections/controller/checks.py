@@ -1168,7 +1168,7 @@ def whitespace_check(payload):
     settings.WHITESPACES[0] = settings.WHITESPACES[0] * int(count_spaces / 2)
       
 """
-Check for added caret between the characters of the generated payloads.
+Check for symbols (i.e "`", "^", "$@" etc) between the characters of the generated payloads.
 """
 def other_symbols(payload):
   # Check for (multiple) backticks (instead of "$()") for commands substitution on the generated payloads.
@@ -1404,7 +1404,7 @@ def perform_payload_modification(payload):
     if encode_type == 'singlequotes':
       from src.core.tamper import singlequotes
       payload = singlequotes.tamper(payload)
-    # Add caret symbol.  
+    # Add backslashes.  
     elif encode_type == 'backslashes':
       from src.core.tamper import backslashes
       payload = backslashes.tamper(payload) 
