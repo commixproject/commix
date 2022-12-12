@@ -1652,15 +1652,15 @@ def generate_char_pool(num_of_chars):
   if menu.options.charset:
     char_pool = [ord(c) for c in menu.options.charset]
   else:
-    # if num_of_chars == 1:
-    #   # Checks {A..Z},{a..z},{0..9},{Symbols}
-    #   char_pool = list(range(65, 90)) + list(range(96, 122))
-    # else:
-    #   # Checks {a..z},{A..Z},{0..9},{Symbols}
-    char_pool = list(range(96, 122)) + list(range(65, 90))
+    # Source for letter frequency: http://en.wikipedia.org/wiki/Letter_frequency#Relative_frequencies_of_letters_in_the_English_language
+    if num_of_chars == 1:
+      char_pool = [69, 84, 65, 79, 73, 78, 83, 72, 82, 68, 76, 67, 85, 77, 87, 70, 71, 89, 80, 66, 86, 75, 74, 88, 81, 90] + \
+                  [101, 116, 97, 111, 105, 110, 115, 104, 114, 100, 108, 99, 117, 109, 119, 102, 103, 121, 112, 98, 118, 107, 106, 120, 113, 122]
+    else:
+      char_pool = [101, 116, 97, 111, 105, 110, 115, 104, 114, 100, 108, 99, 117, 109, 119, 102, 103, 121, 112, 98, 118, 107, 106, 120, 113, 122] + \
+                  [69, 84, 65, 79, 73, 78, 83, 72, 82, 68, 76, 67, 85, 77, 87, 70, 71, 89, 80, 66, 86, 75, 74, 88, 81, 90]
     char_pool = char_pool + list(range(49, 57)) + list(range(32, 48)) + list(range(91, 96)) + list(range(58, 64))  + list(range(123, 127))
   return char_pool
-
 """
 Print powershell version
 """
