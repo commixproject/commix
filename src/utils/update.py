@@ -94,6 +94,8 @@ def updater():
           print(settings.SINGLE_WHITESPACE)
           print(settings.print_debug_msg(debug_msg))
         # Check if ".git" exists!
+        else:
+          print(settings.SINGLE_WHITESPACE)
         if os.path.isdir("./.git"):
           info_msg = "Updating " + settings.APPLICATION + " to the latest (dev) " 
           info_msg += "version. "
