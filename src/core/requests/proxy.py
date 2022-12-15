@@ -28,7 +28,6 @@ Use the defined HTTP Proxy
 """
 def use_proxy(request):
   headers.do_check(request)
-  request.set_proxy(menu.options.proxy, settings.PROXY_SCHEME)
   try:
     response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
     return response
@@ -46,6 +45,6 @@ def do_check(url):
     request = _urllib.request.Request(url, menu.options.data.encode(settings.DEFAULT_CODEC))
   else:
      request = _urllib.request.Request(url)
-  use_proxy(request)
+  request.set_proxy(menu.options.proxy, settings.PROXY_SCHEME)
 
 # eof 

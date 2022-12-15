@@ -143,6 +143,7 @@ def check_http_traffic(request):
         checks.connection_exceptions(err_msg, url=req)
 
   opener = _urllib.request.build_opener(connection_handler())
+
   if len(settings.HTTP_METHOD) != 0:
     request.get_method = lambda: settings.HTTP_METHOD
 
@@ -154,6 +155,8 @@ def check_http_traffic(request):
         settings.MULTI_ENCODED_PAYLOAD = []
         menu.options.tamper = settings.USER_SUPPLIED_TAMPER
     try:
+      if menu.options.proxy:
+        request.set_proxy(menu.options.proxy, settings.PROXY_SCHEME)
       response = opener.open(request, timeout=settings.TIMEOUT)
       page = checks.page_encoding(response, action="encode")
       _ = True
