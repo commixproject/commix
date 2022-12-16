@@ -22,6 +22,8 @@ from src.core.requests import headers as log_http_headers
 from src.core.injections.controller import checks
 
 default_user_agent = menu.options.agent
+default_cookie = ""
+
 if menu.options.cookie:
   if settings.INJECT_TAG in menu.options.cookie:
     menu.options.cookie = menu.options.cookie.replace(settings.INJECT_TAG ,"")
