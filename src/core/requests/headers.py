@@ -148,6 +148,7 @@ def check_http_traffic(request):
     request.get_method = lambda: settings.HTTP_METHOD
 
   _ = False
+  response = False
   unauthorized = False
   while not _ and settings.TOTAL_OF_REQUESTS <= settings.MAX_RETRIES and unauthorized is False: 
     if settings.MULTI_TARGETS:
@@ -158,7 +159,6 @@ def check_http_traffic(request):
       if menu.options.proxy:
         request.set_proxy(menu.options.proxy, settings.PROXY_SCHEME)
       response = opener.open(request, timeout=settings.TIMEOUT)
-      page = checks.page_encoding(response, action="encode")
       _ = True
       settings.MAX_RETRIES = settings.TOTAL_OF_REQUESTS * 2
       if (settings.INIT_TEST == True and not settings.UNAUTHORIZED) or \
@@ -200,7 +200,8 @@ def check_http_traffic(request):
         break
 
   try:
-    response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
+    if response is False:
+      response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
     code = response.getcode()
     response_headers = response.info()
     page = checks.page_encoding(response, action="encode")
