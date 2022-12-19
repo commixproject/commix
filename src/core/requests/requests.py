@@ -46,11 +46,10 @@ def estimate_response_time(url, timesec):
     sys.stdout.flush()
   # Check if defined POST data
   if menu.options.data:
-    request = _urllib.request.Request(url, menu.options.data.encode(settings.DEFAULT_CODEC))
+    request = _urllib.request.Request(url, menu.options.data.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.TESTABLE_VALUE).encode(settings.DEFAULT_CODEC))
   else:
-    url = parameters.get_url_part(url)
-    request = _urllib.request.Request(url)
-
+    request = _urllib.request.Request(url.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.TESTABLE_VALUE))
+  
   headers.do_check(request)
   start = time.time()
   try:
