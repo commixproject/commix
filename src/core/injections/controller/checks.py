@@ -760,6 +760,9 @@ def check_CGI_scripts(url):
 Check if http / https.
 """
 def check_http_s(url):
+  if settings.SINGLE_WHITESPACE in url:
+    url = url.replace(settings.SINGLE_WHITESPACE, _urllib.parse.quote_plus(settings.SINGLE_WHITESPACE)) 
+    
   if settings.CHECK_INTERNET:
       url = settings.CHECK_INTERNET_ADDRESS
   else:
