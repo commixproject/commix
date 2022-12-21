@@ -243,6 +243,7 @@ def check_http_traffic(request):
         err_msg = error_msg + "Non-standard HTTP status code" 
       else:
         err_msg = error_msg
+      
       print(settings.print_critical_msg(err_msg + ")."))
       raise SystemExit()
     

@@ -241,6 +241,12 @@ def load_cmd_history():
     print(settings.print_warning_msg(warn_msg))     
 
 """
+Get value inside boundaries.
+"""
+def get_value_boundaries(value):
+  return re.search(settings.VALUE_BOUNDARIES, value).group(1)
+
+"""
 Check if the value has boundaries.
 """
 def value_boundaries(value):
@@ -248,8 +254,9 @@ def value_boundaries(value):
   message += "Do you want to inject inside? [Y/n] > "
   procced_option = common.read_input(message, default="Y", check_batch=True)
   if procced_option in settings.CHOICE_YES:
-    value = re.search(settings.VALUE_BOUNDARIES, value).group(1)
+    value = get_value_boundaries(value)
   elif procced_option in settings.CHOICE_NO:
+    settings.INJECT_INSIDE_BOUNDARIES = False
     pass
   elif procced_option in settings.CHOICE_QUIT:
     raise SystemExit()

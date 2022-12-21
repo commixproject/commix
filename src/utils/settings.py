@@ -241,7 +241,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.7"
-REVISION = "14"
+REVISION = "15"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -283,6 +283,7 @@ PROXY_REGEX = r"((http[^:]*)://)?([\w\-.]+):(\d+)"
 INJECT_TAG = "INJECT_HERE"
 INJECT_TAG_REGEX = r"(?i)INJECT[_]?HERE"
 VALUE_BOUNDARIES = r'[\\/](.+?)[\\/]'
+INJECT_INSIDE_BOUNDARIES = True
 
 # Default (windows) target host's python interpreter
 WIN_PYTHON_INTERPRETER = "python.exe"

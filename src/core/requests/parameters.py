@@ -173,6 +173,8 @@ def vuln_GET_param(url):
       if settings.INJECT_TAG in pairs[param]:
         vuln_parameter = pairs[param].split("=")[0]
         settings.TESTABLE_VALUE = pairs[param].split("=")[1].replace(settings.INJECT_TAG,"")
+        if re.search(settings.VALUE_BOUNDARIES, settings.TESTABLE_VALUE) and settings.INJECT_INSIDE_BOUNDARIES:
+          settings.TESTABLE_VALUE  = checks.get_value_boundaries(settings.TESTABLE_VALUE)
         if settings.BASE64_PADDING  in pairs[param]:
           settings.TESTABLE_VALUE = settings.TESTABLE_VALUE + settings.BASE64_PADDING  
         break
@@ -377,6 +379,8 @@ def vuln_POST_param(parameter, url):
         if settings.INJECT_TAG in pairs[param]:
           vuln_parameter = pairs[param].split("=")[0]
           settings.TESTABLE_VALUE = pairs[param].split("=")[1].replace(settings.INJECT_TAG,"")
+          if re.search(settings.VALUE_BOUNDARIES, settings.TESTABLE_VALUE) and settings.INJECT_INSIDE_BOUNDARIES:
+            settings.TESTABLE_VALUE  = checks.get_value_boundaries(settings.TESTABLE_VALUE)
           if settings.BASE64_PADDING  in pairs[param]:
             settings.TESTABLE_VALUE = settings.TESTABLE_VALUE + settings.BASE64_PADDING  
           break
