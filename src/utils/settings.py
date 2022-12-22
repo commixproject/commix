@@ -241,7 +241,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.7"
-REVISION = "15"
+REVISION = "16"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -468,13 +468,13 @@ EVAL_SEPARATORS_LVL3 = EVAL_SEPARATORS_LVL2 + ["%0d%0a"]
 
 # The code injection prefixes.
 EVAL_PREFIXES = []
-EVAL_PREFIXES_LVL1 = ["{${", "'.", "."]
+EVAL_PREFIXES_LVL1 = [".", "'.", "{${"]
 EVAL_PREFIXES_LVL2 = EVAL_PREFIXES_LVL1 + [")'}", "');}"]
 EVAL_PREFIXES_LVL3 = EVAL_PREFIXES_LVL2 + ["\".", "')", "\")", ");}", "\");}", ")", ";", "'", ""] 
 
 # The code injection suffixes.
 EVAL_SUFFIXES = []
-EVAL_SUFFIXES_LVL1 = ["}}",  ".'", ""]
+EVAL_SUFFIXES_LVL1 = [ "",  ".'", "}}"]
 EVAL_SUFFIXES_LVL2 = EVAL_SUFFIXES_LVL1 + ["'#"]
 EVAL_SUFFIXES_LVL3 = EVAL_SUFFIXES_LVL2 + [".\"", "\\\\", "//", ")}", "#"]
 
@@ -1229,4 +1229,6 @@ FOLLOW_REDIRECT = False
 ANSWERS = ""
 
 CHECKING_PARAMETER = ""
+
+PCRE_REPLACE_EVAL = False
 # eof

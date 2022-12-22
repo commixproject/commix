@@ -391,7 +391,9 @@ def request_failed(err_msg):
     return False 
   else:
     err_msg = reason
-    if settings.UNAUTHORIZED_ERROR in str(err_msg).lower():
+    if settings.IDENTIFIED_WARNINGS or settings.IDENTIFIED_PHPINFO or settings.IDENTIFIED_COMMAND_INJECTION or \
+      (menu.options.ignore_code and menu.options.ignore_code in str(err_msg).lower()) or \
+      settings.UNAUTHORIZED_ERROR in str(err_msg).lower():
       return True
     else:
       if len(err_msg) != 0:

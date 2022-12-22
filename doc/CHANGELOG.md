@@ -1,4 +1,5 @@
 ## Version 3.7 (TBA)
+* Revised: Minor improvement regarding adding PCRE_REPLACE_EVAL `/e` modifier (i.e. dynamic code evaluation technique).
 * Revised: Minor bug-fix regarding logging all HTTP traffic into a textual file (i.e `-t` option).
 
 ## Version 3.6 (2022-11-18)

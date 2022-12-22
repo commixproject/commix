@@ -250,11 +250,12 @@ def get_value_boundaries(value):
 Check if the value has boundaries.
 """
 def value_boundaries(value):
-  message =  "It appears that the value '" + value + "' has boundaries. "
+  _ = get_value_boundaries(value)
+  message =  "It appears that the value '" + str(_) + "' has boundaries. "
   message += "Do you want to inject inside? [Y/n] > "
   procced_option = common.read_input(message, default="Y", check_batch=True)
   if procced_option in settings.CHOICE_YES:
-    value = get_value_boundaries(value)
+    value = _
   elif procced_option in settings.CHOICE_NO:
     settings.INJECT_INSIDE_BOUNDARIES = False
     pass
@@ -762,6 +763,35 @@ def check_CGI_scripts(url):
           
   if not _:
     menu.options.shellshock = False
+
+"""
+Add the PCRE_REPLACE_EVAL (/e) modifier
+"""
+def add_PCRE_REPLACE_EVAL_modifier(url):
+  try:
+    if re.findall(r"=/(.*)/&", url) or re.findall(r"=/(.*)/&", menu.options.data):
+      while True:
+        message = "Do you want to add the PCRE_REPLACE_EVAL (/e) modifier outside boundaries? [Y/n] > "
+        modifier_check = common.read_input(message, default="Y", check_batch=True)
+        settings.PCRE_REPLACE_EVAL = True
+        if modifier_check in settings.CHOICE_YES:
+          if re.findall(r"=(.*)&", url):
+            url = url.replace("/&", "/e&")
+          elif re.findall(r"=(.*)&", menu.options.data):
+            menu.options.data = menu.options.data.replace("/&", "/e&")
+          return url
+        elif modifier_check in settings.CHOICE_NO:
+          return url
+        elif modifier_check in settings.CHOICE_QUIT:
+          print(settings.SINGLE_WHITESPACE)
+          os._exit(0)
+        else:  
+          common.invalid_option(shellshock_check)  
+          pass
+  except TypeError as err_msg:
+    pass
+
+  return url
 
 """
 Check if http / https.
