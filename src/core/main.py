@@ -293,7 +293,9 @@ def url_response(url):
   response = examine_request(request, url)
   # Check for URL redirection
   if not menu.options.ignore_redirects:
-    url = redirection.do_check(request, url)
+    redirect_url = redirection.do_check(request, url)
+    if redirect_url is not None:
+      url = redirect_url
   return response, url
 
 """
