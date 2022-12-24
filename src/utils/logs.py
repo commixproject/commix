@@ -31,29 +31,12 @@ from src.thirdparty.colorama import Fore, Back, Style, init
 """
 
 """
-Logs filename creation.
+Directory creation
 """
-def logs_filename_creation(url):
-  if menu.options.output_dir:
-    if os.path.isdir(menu.options.output_dir):
-      output_dir = menu.options.output_dir
-      if not output_dir.endswith("/"):
-        output_dir = output_dir + "/"
-    else:
-      error_msg = "The '" + menu.options.output_dir + "' is not directory."
-      print(settings.print_critical_msg(error_msg))
-      raise SystemExit()
-  else:
-    output_dir = settings.OUTPUT_DIR
-  
-  # One directory up, if the script is being run under "/src".
-  output_dir = os.path.dirname(output_dir)
- 
-  try:
-    os.stat(output_dir)
-  except:
+def path_creation(path):
+  if not os.path.exists(path):
     try:
-      os.mkdir(output_dir)   
+      os.mkdir(path)   
     except OSError as err_msg:
       try:
         error_msg = str(err_msg).split("] ")[1] + "."
@@ -61,6 +44,26 @@ def logs_filename_creation(url):
         error_msg = str(err_msg) + "."
       print(settings.print_critical_msg(error_msg))
       raise SystemExit()
+
+"""
+Logs filename creation.
+"""
+def logs_filename_creation(url):
+  if menu.options.output_dir:
+    if os.path.isdir(menu.options.output_dir):
+      output_dir = menu.options.output_dir
+    else:
+      error_msg = "The '" + menu.options.output_dir + "' is not directory."
+      print(settings.print_critical_msg(error_msg))
+      raise SystemExit()
+  else:
+    output_dir = settings.OUTPUT_DIR
+ 
+  output_dir = os.path.dirname(output_dir)
+  path_creation(output_dir)
+
+  if not output_dir.endswith("/"):
+    output_dir = output_dir + "/"
 
   # The logs filename construction.
   filename = create_log_file(url, output_dir)
@@ -72,44 +75,15 @@ Create log files
 """
 def create_log_file(url, output_dir):
 
-  if not output_dir.endswith("/"):
-    output_dir = output_dir + "/"
+  host = _urllib.parse.urlparse(url).netloc.replace(":","_") + "/"
+  logs_path = output_dir + host
 
-  parts = url.split('//', 1)
-  try:
-    host = parts[1].split('/', 1)[0]
-  except IndexError:
-    host = parts[0].split('/', 1)[0]
-  except OSError as err_msg:
-    try:
-      error_msg = str(err_msg).split("] ")[1] + "."
-    except IndexError:
-      error_msg = str(err_msg) + "."
-    print(settings.print_critical_msg(error_msg))
-    raise SystemExit()
-
-
-  # Check if port is defined to host.
-  if ":" in host:
-    host = host.replace(":","_")
-  try:
-    os.stat(output_dir + host + "/")
-  except:
-    try:
-      os.mkdir(output_dir + host + "/")
-    except OSError as err_msg:
-      try:
-        error_msg = str(err_msg).split("] ")[1] + "."
-      except IndexError:
-        error_msg = str(err_msg) + "."
-      print(settings.print_critical_msg(error_msg))
-      raise SystemExit()
-
+  path_creation(logs_path)
 
   # Create cli history file if does not exist.
-  settings.CLI_HISTORY = output_dir + host + "/" + "cli_history"
+  settings.CLI_HISTORY = logs_path + "cli_history"
   if not os.path.exists(settings.CLI_HISTORY):
-      open(settings.CLI_HISTORY,'a').close()
+    open(settings.CLI_HISTORY,'a').close()
 
   if menu.options.session_file is not None:
     if os.path.exists(menu.options.session_file):
@@ -119,16 +93,16 @@ def create_log_file(url, output_dir):
                     menu.options.session_file + \
                     "') does not exist." 
        print(settings.print_critical_msg(err_msg))
-       raise SystemExit()
+       raise SystemExit() 
   else:  
-    settings.SESSION_FILE = output_dir + host + "/" + "session" + ".db"
+    settings.SESSION_FILE = logs_path + "session.db"
 
   # Load command history
   if settings.LOAD_SESSION == True:
     checks.load_cmd_history()
 
   # The logs filename construction.
-  filename = output_dir + host + "/" + settings.OUTPUT_FILE
+  filename = logs_path + settings.OUTPUT_FILE
   try:
     output_file = open(filename, "a")
     if not menu.options.no_logging:
