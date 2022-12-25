@@ -105,6 +105,10 @@ def check_http_traffic(request):
       unique_request_http_headers = []
       [unique_request_http_headers.append(item) for item in request_http_headers if item not in unique_request_http_headers]
       request_http_headers = [x for x in unique_request_http_headers if x]
+      if menu.options.data and \
+         len(request_http_headers) == 1 and \
+         settings.VERBOSITY_LEVEL >= 2:
+        print(settings.SINGLE_WHITESPACE)
       for header in request_http_headers:
         if settings.VERBOSITY_LEVEL >= 2:
           print(settings.print_traffic(header))
