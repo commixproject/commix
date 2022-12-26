@@ -118,24 +118,24 @@ def logfile_parser():
     request_url = re.findall(r"" + " (.*) HTTP/", request)
 
     if request_url:
-      # Check empty line for POST data.
-      if len(request.splitlines()[-2]) == 0:
-        result = [item for item in request.splitlines() if item]
-        multiple_xml = []
-        for item in result:
-          if checks.is_XML_check(item):
-            multiple_xml.append(item)
-        if len(multiple_xml) != 0:
-          menu.options.data = '\n'.join([str(item) for item in multiple_xml]) 
-        else:  
-          menu.options.data = result[len(result)-1]
-      else:
-        try:
+      try:
+        # Check empty line for POST data.
+        if len(request.splitlines()[-2]) == 0:
+          result = [item for item in request.splitlines() if item]
+          multiple_xml = []
+          for item in result:
+            if checks.is_XML_check(item):
+              multiple_xml.append(item)
+          if len(multiple_xml) != 0:
+            menu.options.data = '\n'.join([str(item) for item in multiple_xml]) 
+          else:  
+            menu.options.data = result[len(result)-1]
+        else:
           # Check if url ends with "=".
           if request_url[0].endswith("="):
             request_url = request_url[0].replace("=","=" + settings.INJECT_TAG, 1)
-        except IndexError:
-          invalid_data(request_file) 
+      except IndexError:
+        invalid_data(request_file) 
 
     # Check if invalid data
     if not request_url:
