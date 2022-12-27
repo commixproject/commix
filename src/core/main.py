@@ -735,14 +735,17 @@ try:
           menu.options.data = False
       while True:
         message = "Enter injection level (--level) [1-3, Default: 1] > "
-        if settings.STDIN_PARSING or menu.options.level > settings.DEFAULT_INJECTION_LEVEL:
+        if settings.STDIN_PARSING:
           print(settings.print_message(message + str(menu.options.level)))
           break
-        menu.options.level = int(common.read_input(message, default=settings.DEFAULT_INJECTION_LEVEL, check_batch=True))
-        if menu.options.level > settings.HTTP_HEADER_INJECTION_LEVEL:
+        try:
+          menu.options.level = int(common.read_input(message, default=settings.DEFAULT_INJECTION_LEVEL, check_batch=True))
+          if menu.options.level > int(settings.HTTP_HEADER_INJECTION_LEVEL):
+            pass
+          else:
+            break
+        except ValueError:
           pass
-        else:
-          break
 
     # Seconds to delay between each HTTP request.
     if menu.options.delay > 0:
