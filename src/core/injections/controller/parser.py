@@ -138,11 +138,10 @@ def logfile_parser():
         invalid_data(request_file) 
 
     # Check if invalid data
-    if not request_url:
-      invalid_data(request_file)
     else:
-      request_url = "".join([str(i) for i in request_url])       
+      invalid_data(request_file)
 
+    request_url = "".join([str(i) for i in request_url])       
     # Check for other headers
     extra_headers = ""
     prefix = "http://"
