@@ -94,7 +94,8 @@ def command_injection_heuristic_basic(url, http_request_method, check_parameter,
         tmp_url = url
         if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
           cookie = menu.options.cookie.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC)
-        elif menu.options.data and http_request_method == settings.HTTPMETHOD.POST:
+        elif menu.options.data and http_request_method == settings.HTTPMETHOD.POST or \
+             menu.options.data and settings.INJECT_TAG in menu.options.data:
           if inject_http_headers:
             data = menu.options.data.replace(settings.INJECT_TAG,"").encode(settings.DEFAULT_CODEC)
           else: 
@@ -153,7 +154,8 @@ def code_injections_heuristic_basic(url, http_request_method, check_parameter, t
         tmp_url = url
         if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
           cookie = menu.options.cookie.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC)
-        elif menu.options.data and http_request_method == settings.HTTPMETHOD.POST:
+        elif menu.options.data and http_request_method == settings.HTTPMETHOD.POST or \
+             menu.options.data and settings.INJECT_TAG in menu.options.data:
           if inject_http_headers:
             data = menu.options.data.replace(settings.INJECT_TAG,"").encode(settings.DEFAULT_CODEC)
           else: 
