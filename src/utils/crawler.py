@@ -193,12 +193,7 @@ def request(url):
     if url not in settings.HREF_SKIPPED:
       settings.HREF_SKIPPED.append(url)
       settings.CRAWLED_SKIPPED_URLS_NUM += 1
-      if settings.TOTAL_OF_REQUESTS != 1 and not settings.MULTI_TARGETS:
-        if settings.CRAWLED_URLS_NUM != 0 and settings.CRAWLED_SKIPPED_URLS_NUM != 0:
-          print(settings.SINGLE_WHITESPACE)
       checks.connection_exceptions(err_msg, url)
-      if settings.VERBOSITY_LEVEL >= 2:
-        print(settings.SINGLE_WHITESPACE)
 
 """
 Enable crawler.
@@ -256,11 +251,8 @@ The crawing process.
 """
 def do_process(url):
   identified_hrefs = False
-  if settings.VERBOSITY_LEVEL >= 2:
-    print(settings.SINGLE_WHITESPACE)
-  else:
-    if settings.CRAWLED_SKIPPED_URLS_NUM == 0 or settings.CRAWLED_URLS_NUM != 0:
-      sys.stdout.write("\r")
+  if settings.CRAWLED_SKIPPED_URLS_NUM == 0 or settings.CRAWLED_URLS_NUM != 0:
+    sys.stdout.write("\r")
   # Grab the crawled hrefs.
   try:
     response = request(url)
@@ -343,8 +335,6 @@ def crawler(url, url_num, crawling_list):
             info_msg += "/" + str(len(output_href)) + " links visited." 
             sys.stdout.write("\r" + settings.print_info_msg(info_msg))
             sys.stdout.flush()
-          if settings.VERBOSITY_LEVEL > 1:
-            print(settings.SINGLE_WHITESPACE)
       if link != 0:
         print(settings.SINGLE_WHITESPACE)
       settings.DEFAULT_CRAWLING_DEPTH += 1

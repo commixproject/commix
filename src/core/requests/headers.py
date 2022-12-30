@@ -46,6 +46,8 @@ from src.thirdparty.six.moves import urllib as _urllib
 Checking the HTTP response content.
 """
 def http_response_content(content):
+  if type(content) is bytes:
+    content = content.decode(settings.DEFAULT_CODEC)
   if settings.VERBOSITY_LEVEL >= 4:
     content = checks.remove_empty_lines(content)
     print(settings.print_http_response_content(content))
@@ -227,13 +229,14 @@ def check_http_traffic(request):
   except _urllib.error.HTTPError as err:
     if settings.VERBOSITY_LEVEL != 0:
       print_http_response(err.info(), err.code, err.read())
-
+    
     if (not settings.PERFORM_CRACKING and \
     not settings.IS_JSON and \
     not settings.IS_XML and \
     not str(err.code) == settings.INTERNAL_SERVER_ERROR and \
     not str(err.code) == settings.BAD_REQUEST and \
-    not settings.CRAWLED_URLS_NUM != 0) and settings.CRAWLED_SKIPPED_URLS_NUM != 0:
+    not settings.CRAWLED_URLS_NUM != 0 and \
+    not settings.MULTI_TARGETS) and settings.CRAWLED_SKIPPED_URLS_NUM != 0:
       print(settings.SINGLE_WHITESPACE)
     # Check for 3xx, 4xx, 5xx HTTP error codes.
     if str(err.code).startswith(('3', '4', '5')):

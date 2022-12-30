@@ -69,9 +69,10 @@ def do_check(request, url):
         if not settings.FOLLOW_REDIRECT:
           if settings.CRAWLED_URLS_NUM != 0 and settings.CRAWLED_SKIPPED_URLS_NUM != 0:
             print(settings.SINGLE_WHITESPACE)
-          message = "Got a " + str(settings.REDIRECT_CODE) + " redirect to " + response.geturl() + "\n"
-          message += "Do you want to follow the identified redirection? [Y/n] > "
-          redirection_option = common.read_input(message, default="Y", check_batch=True) 
+        message = "Got a " + str(settings.REDIRECT_CODE) + " redirect to " + response.geturl() + "\n"
+        message += "Do you want to follow the identified redirection? [Y/n] > "
+        redirection_option = common.read_input(message, default="Y", check_batch=True) 
+          
         if redirection_option in settings.CHOICE_YES:
           settings.FOLLOW_REDIRECT = True
           if not settings.CRAWLING:
