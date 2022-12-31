@@ -932,7 +932,10 @@ try:
             except:
               pass 
           elif message in settings.CHOICE_NO:
-            pass 
+            if url_num == len(clean_output_href):
+              raise SystemExit()
+            else:
+              pass
           elif message in settings.CHOICE_QUIT:
             raise SystemExit()
 
