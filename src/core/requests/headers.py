@@ -173,8 +173,6 @@ def check_http_traffic(request):
           settings.VALID_URL = True
         if not settings.CHECK_INTERNET:
           settings.INIT_TEST = False
-        if settings.VERBOSITY_LEVEL < 2:
-          print(settings.SINGLE_WHITESPACE)
 
     except ValueError as err:
       if settings.VERBOSITY_LEVEL < 2:
@@ -187,10 +185,6 @@ def check_http_traffic(request):
       raise SystemExit() 
 
     except _urllib.error.HTTPError as err_msg:
-      if settings.TOTAL_OF_REQUESTS == 1 and settings.VERBOSITY_LEVEL < 2:
-        if (settings.CRAWLING and settings.CRAWLED_URLS_NUM != 0 and settings.CRAWLED_SKIPPED_URLS_NUM != 0) or \
-        not settings.CRAWLING:
-          print(settings.SINGLE_WHITESPACE)
       if settings.UNAUTHORIZED_ERROR in str(err_msg):
         settings.UNAUTHORIZED = unauthorized = True
         settings.MAX_RETRIES = settings.TOTAL_OF_REQUESTS

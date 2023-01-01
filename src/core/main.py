@@ -272,6 +272,9 @@ def init_request(url):
 Get the URL response.
 """
 def url_response(url):
+  if settings.INIT_TEST == True:
+    info_msg = "Testing connection to the target URL. "
+    print(settings.print_info_msg(info_msg))
   # Check if http / https
   url = checks.check_http_s(url)
   # Check if defined Tor (--tor option).
@@ -284,12 +287,6 @@ def url_response(url):
   request = init_request(url)
   if settings.CHECK_INTERNET:
     settings.CHECK_INTERNET = False
-  if settings.INIT_TEST == True:
-    info_msg = "Testing connection to the target URL. "
-    sys.stdout.write(settings.print_info_msg(info_msg))
-    sys.stdout.flush()
-    if settings.VERBOSITY_LEVEL >= 2:
-      print(settings.SINGLE_WHITESPACE)
   response = examine_request(request, url)
   # Check for URL redirection
   if not menu.options.ignore_redirects:
@@ -938,6 +935,9 @@ try:
               pass
           elif message in settings.CHOICE_QUIT:
             raise SystemExit()
+            
+        if url_num == len(clean_output_href):
+          raise SystemExit()
 
 except KeyboardInterrupt:
   try:
