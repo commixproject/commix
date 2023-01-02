@@ -299,6 +299,11 @@ def url_response(url):
 Injection states initiation.
 """
 def init_injection(url):
+  # Initiate heuristic checks.
+  if settings.SKIP_CODE_INJECTIONS:
+    settings.SKIP_CODE_INJECTIONS = False
+  if settings.SKIP_COMMAND_INJECTIONS:
+    settings.SKIP_COMMAND_INJECTIONS = False
   # Initiate injection checker.
   if settings.INJECTION_CHECKER:
     settings.INJECTION_CHECKER = False
