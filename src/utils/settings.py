@@ -3,7 +3,7 @@
 
 """
 This file is part of Commix Project (https://commixproject.com).
-Copyright (c) 2014-2022 Anastasios Stasinopoulos (@ancst).
+Copyright (c) 2014-2023 Anastasios Stasinopoulos (@ancst).
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -241,7 +241,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.7"
-REVISION = "27"
+REVISION = "28"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -251,7 +251,7 @@ else:
   VERSION = VERSION + VERSION_NUM + "-dev#" + REVISION
   COLOR_VERSION = Style.UNDERLINE + Fore.WHITE + VERSION + Style.RESET_ALL
 
-YEAR = "2014-2022"
+YEAR = "2014-2023"
 AUTHOR_TWITTER = "@ancst" 
 APPLICATION_URL = "https://commixproject.com" 
 APPLICATION_TWITTER = "@commixproject" 
