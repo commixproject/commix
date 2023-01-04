@@ -322,6 +322,22 @@ def init_injection(url):
     settings.TIME_RELATIVE_ATTACK = False
 
 """
+Using 'stdin' for parsing targets.
+"""
+def stdin_parsing_target(os_checks_num):
+  _ = []
+  if os_checks_num == 0:
+    info_msg = "Using 'stdin' for parsing targets list."
+    print(settings.print_info_msg(info_msg))
+  menu.options.batch = True
+  settings.MULTI_TARGETS = True
+  for url in sys.stdin:
+    if re.search(r"\b(https?://[^\s'\"]+|[\w.]+\.\w{2,3}[/\w+]*\?[^\s'\"]+)", url, re.I):
+      url = url.replace(settings.SINGLE_WHITESPACE, _urllib.parse.quote_plus(settings.SINGLE_WHITESPACE)).strip()
+      _.append(url.rstrip())
+  return _
+
+"""
 The main function.
 """
 def main(filename, url):
@@ -870,11 +886,13 @@ try:
       if settings.CRAWLING:
         settings.CRAWLING_PHASE = True
         url_num = 1
-        if not menu.options.bulkfile:
+        if not menu.options.bulkfile and not settings.STDIN_PARSING:
           crawling_list = 1
           output_href = crawler.crawler(url, url_num, crawling_list)
           output_href.append(url)
         else:
+          if settings.STDIN_PARSING:
+            bulkfile = stdin_parsing_target(os_checks_num)
           crawling_list = len(bulkfile)
           for url in bulkfile:
             output_href += (crawler.crawler(url, url_num, crawling_list))
@@ -889,15 +907,7 @@ try:
         if not settings.STDIN_PARSING:
           output_href = output_href + bulkfile
         else:
-          if os_checks_num == 0:
-            info_msg = "Using 'stdin' for parsing targets list."
-            print(settings.print_info_msg(info_msg))
-          menu.options.batch = True
-          bulkfile = sys.stdin
-          settings.MULTI_TARGETS = True
-          for url in bulkfile:
-            if re.search(r"\b(https?://[^\s'\"]+|[\w.]+\.\w{2,3}[/\w+]*\?[^\s'\"]+)", url, re.I):
-              output_href.append(url.rstrip())
+          output_href = stdin_parsing_target(os_checks_num)
 
       # Removing duplicates from list.
       clean_output_href = []

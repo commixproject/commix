@@ -62,8 +62,10 @@ def do_check(request, url):
   opener = _urllib.request.build_opener(RedirectHandler())
   try:
     response = opener.open(request, timeout=settings.TIMEOUT)
-    if url == response.geturl():
+    if url == response.geturl() or (settings.CRAWLING and response.geturl() in settings.HREF_SKIPPED):
       return response.geturl()
+    elif settings.CRAWLING and url in settings.HREF_SKIPPED:
+      return url    
     else:
       while True:
         if not settings.FOLLOW_REDIRECT:
@@ -72,14 +74,16 @@ def do_check(request, url):
         message = "Got a " + str(settings.REDIRECT_CODE) + " redirect to " + response.geturl() + "\n"
         message += "Do you want to follow the identified redirection? [Y/n] > "
         redirection_option = common.read_input(message, default="Y", check_batch=True) 
-          
         if redirection_option in settings.CHOICE_YES:
           settings.FOLLOW_REDIRECT = True
-          if not settings.CRAWLING:
-            info_msg = "Following redirection to '" + response.geturl() + "'. "
-            print(settings.print_info_msg(info_msg))
+          info_msg = "Following redirection to '" + response.geturl() + "'. "
+          print(settings.print_info_msg(info_msg))
+          if settings.CRAWLING:
+            settings.HREF_SKIPPED.append(response.geturl())
           return checks.check_http_s(response.geturl())
         elif redirection_option in settings.CHOICE_NO:
+          if settings.CRAWLING:
+            settings.HREF_SKIPPED.append(url)
           return url  
         elif redirection_option in settings.CHOICE_QUIT:
           raise SystemExit()
