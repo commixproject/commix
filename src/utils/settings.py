@@ -241,7 +241,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.7"
-REVISION = "29"
+REVISION = "30"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1214,6 +1214,8 @@ BASE64_PADDING = "=="
 CRAWLING = CRAWLING_PHASE = False
 CRAWLED_SKIPPED_URLS_NUM = 0
 CRAWLED_URLS_NUM = 0
+CRAWLED_URLS_INJECTED = []
+SKIP_VULNERABLE_HOST = None
 
 # Skipped crawled hrefs
 HREF_SKIPPED = []
@@ -1231,4 +1233,5 @@ ANSWERS = ""
 CHECKING_PARAMETER = ""
 
 PCRE_REPLACE_EVAL = False
+
 # eof

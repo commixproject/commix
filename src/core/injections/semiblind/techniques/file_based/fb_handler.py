@@ -563,6 +563,8 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                 if go_back == True:
                   break
                 message = settings.CHECKING_PARAMETER + " is vulnerable. Do you want to prompt for a pseudo-terminal shell? [Y/n] > "
+                if settings.CRAWLING:
+                  settings.CRAWLED_URLS_INJECTED.append(_urllib.parse.urlparse(url).netloc)
                 if not settings.STDIN_PARSING:
                   gotshell = common.read_input(message, default="Y", check_batch=True)
                 else:

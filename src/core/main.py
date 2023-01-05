@@ -338,6 +338,15 @@ def stdin_parsing_target(os_checks_num):
   return _
 
 """
+Check if an injection point has already been detected against target.
+"""
+def check_for_injected_url(url):
+  _ = True
+  if _urllib.parse.urlparse(url).netloc not in settings.CRAWLED_URLS_INJECTED:
+    _ = False
+  return _
+
+"""
 The main function.
 """
 def main(filename, url):
@@ -921,36 +930,70 @@ try:
         print(settings.print_info_msg(info_msg))
       url_num = 0
       for url in clean_output_href:
-        http_request_method  = checks.check_http_method(url)
-        if (settings.CRAWLING and re.search(r"(.*?)\?(.+)", url) or menu.options.shellshock) or settings.MULTI_TARGETS:
-          url_num += 1
-          print(settings.print_message("[" + str(url_num) + "/" + str(len(clean_output_href)) + "] URL - " + url) + "")
-          message = "Do you want to use URL #" + str(url_num) + " to perform tests? [Y/n] > "
-          message = common.read_input(message, default="Y", check_batch=True)
-          if message in settings.CHOICE_YES:
-            if os_checks_num == 0:
-              settings.INIT_TEST = True
-            if url == clean_output_href[-1]:
-              settings.EOF = True
-            # Reset the injection level
-            if menu.options.level > settings.HTTP_HEADER_INJECTION_LEVEL:
-              menu.options.level = 1
-            init_injection(url)
-            try:
-              response, url = url_response(url)
-              if response != False:
-                filename = logs.logs_filename_creation(url)
-                main(filename, url)
-            except:
-              pass 
-          elif message in settings.CHOICE_NO:
-            if url_num == len(clean_output_href):
-              raise SystemExit()
-            else:
-              pass
-          elif message in settings.CHOICE_QUIT:
-            raise SystemExit()
-            
+        if check_for_injected_url(url):
+          if settings.SKIP_VULNERABLE_HOST is None:
+            while True:
+              message = "An injection point has already been detected against '" + _urllib.parse.urlparse(url).netloc + "'. "
+              message += "Do you want to skip further tests involving it? [Y/n] > "
+              skip_host = common.read_input(message, default="Y", check_batch=True)
+              if skip_host in settings.CHOICE_YES:
+                settings.SKIP_VULNERABLE_HOST = True
+                break
+              elif skip_host in settings.CHOICE_NO:
+                settings.SKIP_VULNERABLE_HOST = False
+                break
+              elif skip_host in settings.CHOICE_QUIT:
+                raise SystemExit()
+              else:
+                common.invalid_option(skip_host)  
+                pass
+
+          if settings.SKIP_VULNERABLE_HOST:
+            url_num += 1
+            info_msg = "Skipping URL '" + url + "' (" + str(url_num) + "/" + str(len(clean_output_href)) + ")."
+            print(settings.print_info_msg(info_msg))   
+
+        if not check_for_injected_url(url) or settings.SKIP_VULNERABLE_HOST is False:
+          if not check_for_injected_url(url):
+            settings.SKIP_VULNERABLE_HOST = None
+          http_request_method = checks.check_http_method(url)
+          if (settings.CRAWLING and re.search(r"(.*?)\?(.+)", url) or menu.options.shellshock) or settings.MULTI_TARGETS:      
+            url_num += 1
+            perform_check = True
+            while True:
+              print(settings.print_message("[" + str(url_num) + "/" + str(len(clean_output_href)) + "] URL - " + url) + "")
+              message = "Do you want to use URL #" + str(url_num) + " to perform tests? [Y/n] > "
+              next_url = common.read_input(message, default="Y", check_batch=True)
+              if next_url in settings.CHOICE_YES:
+                break
+              elif next_url in settings.CHOICE_NO:
+                perform_check = False
+                if url_num == len(clean_output_href):
+                  raise SystemExit()
+                else:
+                  break
+              elif next_url in settings.CHOICE_QUIT:
+                raise SystemExit()
+              else:
+                common.invalid_option(next_url)  
+                pass
+            if perform_check:
+              if os_checks_num == 0:
+                settings.INIT_TEST = True
+              if url == clean_output_href[-1]:
+                settings.EOF = True
+              # Reset the injection level
+              if menu.options.level > settings.HTTP_HEADER_INJECTION_LEVEL:
+                menu.options.level = 1
+              init_injection(url)
+              try:
+                response, url = url_response(url)
+                if response != False:
+                  filename = logs.logs_filename_creation(url)
+                  main(filename, url)
+              except:
+                pass 
+
         if url_num == len(clean_output_href):
           raise SystemExit()
 
