@@ -89,7 +89,6 @@ def normalize_results(output_href):
       raise SystemExit()
     else:
       common.invalid_option(message)  
-      print(settings.print_error_msg(err_msg))
       pass
 
 
@@ -296,7 +295,7 @@ def crawler(url, url_num, crawling_list):
     _ = " (" + str(url_num) + "/" + str(crawling_list) + ")"
   else:
     _ = ""
-  info_msg = "Starting crawler for target URL '" + url + "'" + _
+  info_msg = "Starting crawler for target URL '" + url + "'" + _ + "."
   print(settings.print_info_msg(info_msg))
   response = request(url)
   if settings.SITEMAP_CHECK:
