@@ -832,17 +832,26 @@ def do_check(url, http_request_method, filename):
         if menu.options.level > settings.COOKIE_INJECTION_LEVEL:
           err_msg += "and HTTP headers "
         err_msg += "appear to be not injectable."
-        if not menu.options.alter_shell :
-          err_msg += " Try to use the option '--alter-shell'"
-        else:
-          err_msg += " Try to remove the option '--alter-shell'"
         if menu.options.level < settings.HTTP_HEADER_INJECTION_LEVEL :
-          err_msg += " and/or increase '--level' value to perform"
-          err_msg += " more tests"
+          err_msg += " Try to increase value for '--level' option"
         if menu.options.skip_empty:
-          err_msg += " and/or remove the option '--skip-empty'"  
+          err_msg += " and/or remove option '--skip-empty'"
+        err_msg += " if you wish to perform more tests."
+        err_msg += " If you suspect that there is some kind of protection mechanism involved, maybe you could try to"
+        if not menu.options.alter_shell :
+          err_msg += " use option '--alter-shell'"
+        else:
+          err_msg += " remove option '--alter-shell'"
+        if not menu.options.tamper:
+          err_msg += " and/or use option '--tamper'"
+        if not menu.options.random_agent:
+          if not menu.options.tamper:
+            err_msg += " and/or"
+          err_msg += " switch '--random-agent'"
         err_msg += "."
-        print(settings.print_critical_msg(err_msg))
+        if settings.MULTI_TARGETS:
+          err_msg += " Skipping to the next target."
+        print(settings.print_error_msg(err_msg))
     else:    
       logs.print_logs_notification(filename, url)
     # if not settings.MULTI_TARGETS:
