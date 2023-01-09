@@ -299,6 +299,9 @@ def url_response(url):
 Injection states initiation.
 """
 def init_injection(url):
+  if settings.VERBOSITY_LEVEL != 0:
+    debug_msg = "Initializing the knowledge base."
+    print(settings.print_debug_msg(debug_msg))
   # Initiate heuristic checks.
   if settings.SKIP_CODE_INJECTIONS:
     settings.SKIP_CODE_INJECTIONS = False
