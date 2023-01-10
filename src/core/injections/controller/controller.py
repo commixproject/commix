@@ -311,17 +311,6 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
     info_msg = "Ignoring '" + str(menu.options.ignore_code) + "' HTTP error code. "
     print(settings.print_info_msg(info_msg))
 
-  # Skipping specific injection techniques.
-  if settings.SKIP_TECHNIQUES:
-    menu.options.tech = "".join(settings.AVAILABLE_TECHNIQUES)
-    for skip_tech_name in settings.AVAILABLE_TECHNIQUES:
-      if skip_tech_name in menu.options.skip_tech:
-        menu.options.tech = menu.options.tech.replace(skip_tech_name,"")
-    if len(menu.options.tech) == 0:
-      err_msg = "Detection procedure was aborted due to skipping all injection techniques."
-      print(settings.print_critical_msg(err_msg))
-      raise SystemExit
-
   # User-Agent HTTP header / Referer HTTP header / 
   # Host HTTP header / Custom HTTP header Injection(s)
   if check_parameter.startswith(settings.SINGLE_WHITESPACE):
@@ -389,10 +378,10 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
               common.invalid_option(procced_option)  
               pass
 
-        if not settings.IDENTIFIED_COMMAND_INJECTION and not settings.IDENTIFIED_WARNINGS and not settings.IDENTIFIED_PHPINFO:
-          warn_msg = "Heuristic (basic) tests shows that "
-          warn_msg += settings.CHECKING_PARAMETER + " might not be injectable."
-          print(settings.print_bold_warning_msg(warn_msg)) 
+      if not settings.IDENTIFIED_COMMAND_INJECTION and not settings.IDENTIFIED_WARNINGS and not settings.IDENTIFIED_PHPINFO:
+        warn_msg = "Heuristic (basic) tests shows that "
+        warn_msg += settings.CHECKING_PARAMETER + " might not be injectable."
+        print(settings.print_bold_warning_msg(warn_msg)) 
 
   if menu.options.failed_tries and \
      menu.options.tech and not "f" in menu.options.tech and not \
@@ -837,6 +826,12 @@ def do_check(url, http_request_method, filename):
         if menu.options.skip_empty:
           err_msg += " and/or remove option '--skip-empty'"
         err_msg += " if you wish to perform more tests."
+        if settings.USER_SUPPLIED_TECHNIQUE or settings.SKIP_TECHNIQUES:
+          err_msg += " Rerun without providing the option "
+          if not settings.SKIP_TECHNIQUES :
+            err_msg += "'--technique'."
+          else:
+            err_msg += "'--skip-technique'."  
         err_msg += " If you suspect that there is some kind of protection mechanism involved, maybe you could try to"
         if not menu.options.alter_shell :
           err_msg += " use option '--alter-shell'"

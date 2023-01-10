@@ -164,6 +164,7 @@ def user_agent_header():
         print(settings.print_info_msg(info_msg))
       except:
         print(settings.SINGLE_WHITESPACE)
+
   if settings.VERBOSITY_LEVEL != 0:
     debug_msg = "Setting the HTTP User-Agent header."
     print(settings.print_debug_msg(debug_msg))
@@ -447,25 +448,39 @@ def main(filename, url):
         else:
           settings.USER_SUPPLIED_TECHNIQUE = True
       else:
-        menu.options.tech = list(menu.options.tech)
+        menu.options.tech = list(menu.options.tech.lower())
         _ = {settings.AVAILABLE_TECHNIQUES[i] : i for i in range(len(settings.AVAILABLE_TECHNIQUES))}
-        menu.options.tech.sort(key=lambda x:_[x])
+        try:
+          menu.options.tech.sort(key=lambda x:_[x])
+        except KeyError:
+          pass
         menu.options.tech = ''.join(menu.options.tech)
     else:
       menu.options.tech = ''.join([str(x) for x in settings.AVAILABLE_TECHNIQUES]) 
 
     # Check for skipping injection techniques.
     if menu.options.skip_tech:
+      # Convert injection technique(s) to lowercase
+      menu.options.skip_tech = menu.options.skip_tech.lower()
       settings.SKIP_TECHNIQUES = True
-      menu.options.tech = menu.options.skip_tech
+      if menu.options.tech:
+        err_msg = "The options '--technique' and '--skip-technique' cannot be used "
+        err_msg += "simultaneously (i.e. only one option must be set)."
+        print(settings.print_critical_msg(err_msg))
+        raise SystemExit
+      else:
+        menu.options.tech = "".join(settings.AVAILABLE_TECHNIQUES)
+      for skip_tech_name in settings.AVAILABLE_TECHNIQUES:
+        if skip_tech_name in menu.options.skip_tech:
+          menu.options.tech = menu.options.tech.replace(skip_tech_name,"")
+      if len(menu.options.tech) == 0:
+        err_msg = "Detection procedure was aborted due to skipping all injection techniques."
+        print(settings.print_critical_msg(err_msg))
+        raise SystemExit
 
     # Check if specified wrong injection technique
     if menu.options.tech and menu.options.tech not in settings.AVAILABLE_TECHNIQUES:
       found_tech = False
-
-      # Convert injection technique(s) to lowercase
-      menu.options.tech = menu.options.tech.lower()
-
       # Check if used the ',' separator
       if settings.PARAMETER_SPLITTING_REGEX in menu.options.tech:
         split_techniques_names = menu.options.tech.split(settings.PARAMETER_SPLITTING_REGEX)
@@ -485,20 +500,22 @@ def main(filename, url):
          found_tech == False:
         err_msg = "You specified wrong value '" + split_techniques_names[i] 
         err_msg += "' as injection technique. "
-        err_msg += "The value for '"
+        err_msg += "The value for option '"
         if not settings.SKIP_TECHNIQUES :
           err_msg += "--technique"
         else:
-          err_msg += "--skip-technique"
-          
-        err_msg += "' must be a string composed by the letters C, E, T, F. "
-        err_msg += "Refer to the official wiki for details."
+          err_msg += "--skip-technique"    
+        err_msg += "' must be a string composed by the letters "
+        err_msg += ', '.join(settings.AVAILABLE_TECHNIQUES).upper()
+        err_msg += ". Refer to the official wiki for details."
         print(settings.print_critical_msg(err_msg))
         raise SystemExit()
 
     if not menu.options.tech:
       menu.options.tech = "".join(settings.AVAILABLE_TECHNIQUES)
-    
+    else:
+      settings.USER_SUPPLIED_TECHNIQUE = True
+
     # Check the file-destination
     if menu.options.file_write and not menu.options.file_dest or \
     menu.options.file_upload  and not menu.options.file_dest:
@@ -527,10 +544,6 @@ def main(filename, url):
           session_handler.flush(url)
         # Check for CGI scripts on url
         checks.check_CGI_scripts(url)
-        # Modification on payload
-        # if not menu.options.shellshock and not settings.USE_BACKTICKS and not settings.MULTI_TARGETS:
-        #   settings.SYS_USERS  = checks.add_command_substitution(settings.SYS_USERS)
-        #   settings.SYS_PASSES = checks.add_command_substitution(settings.SYS_PASSES)
         # Check if defined "--file-upload" option.
         if menu.options.file_upload:
           checks.file_upload()
