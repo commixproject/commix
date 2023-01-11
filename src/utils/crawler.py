@@ -269,12 +269,17 @@ def do_process(url):
       href = tag.get("href") if hasattr(tag, settings.HTTPMETHOD.GET) else tag.group("href")
       if href:
         href = _urllib.parse.urljoin(url, _urllib.parse.unquote(href))
-        if  _urllib.parse.urlparse(url).netloc in href:
+        if _urllib.parse.urlparse(url).netloc in href:
           if (common.extract_regex_result(r"\A[^?]+\.(?P<result>\w+)(\?|\Z)", href) or "") not in settings.CRAWL_EXCLUDE_EXTENSIONS:
-            if not re.search(r"\?(v=)?\d+\Z", href) and \
-            not re.search(r"(?i)\.(js|css)(\?|\Z)", href):
-              identified_hrefs = store_hrefs(href, identified_hrefs, redirection=False)
-
+            if not re.search(r"\?(v=)?\d+\Z", href) and not re.search(r"(?i)\.(js|css)(\?|\Z)", href):
+              if menu.options.crawl_exclude and re.search(menu.options.crawl_exclude, href or ""):
+                if href not in visited_hrefs:
+                  visited_hrefs.append(href)
+                  if settings.VERBOSITY_LEVEL != 0:
+                    debug_msg = "Skipping URL " + href + "."
+                    print(settings.print_debug_msg(debug_msg))
+              else:
+                identified_hrefs = store_hrefs(href, identified_hrefs, redirection=False)
     no_usable_links(crawled_hrefs)
     if identified_hrefs:
       if len(new_crawled_hrefs) != 0 and settings.DEFAULT_CRAWLING_DEPTH != 1:

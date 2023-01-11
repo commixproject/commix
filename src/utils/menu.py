@@ -169,6 +169,11 @@ target.add_option("--crawl",
                 type="int",
                 help="Crawl the website starting from the target URL (Default: 1).")
 
+target.add_option("--crawl-exclude",
+                dest="crawl_exclude",
+                default=None,
+                help="Regexp to exclude pages from crawling (e.g. \"logout\").")
+
 target.add_option("-x",
                 dest="sitemap_url",
                 help="Parse target(s) from remote sitemap(.xml) file.")

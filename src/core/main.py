@@ -816,6 +816,18 @@ try:
     if menu.options.crawldepth > 0 or settings.SITEMAP_CHECK:
       settings.CRAWLING = True
 
+    if menu.options.crawl_exclude:
+      if not settings.CRAWLING:
+        err_msg = "The '--crawl-exclude' option requires usage of option '--crawl'."
+        print(settings.print_critical_msg(err_msg))
+        raise SystemExit()
+      try:
+        re.compile(menu.options.crawl_exclude)
+      except Exception as e:
+        err_msg = "invalid regular expression '" + menu.options.crawl_exclude + "' (" + str(e) + ")."
+        print(settings.print_critical_msg(err_msg))
+        raise SystemExit()
+
     # Check arguments
     if len(sys.argv) == 1 and not settings.STDIN_PARSING:
       menu.parser.print_help()
