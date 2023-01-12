@@ -749,7 +749,7 @@ try:
 
     # Check if defined "--check-tor" option. 
     if menu.options.tor_check and not menu.options.tor:
-      err_msg = "The '--check-tor' swich requires usage of switch '--tor'."
+      err_msg = "The '--check-tor' swich requires usage of '--tor' switch."
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
 
@@ -818,7 +818,7 @@ try:
 
     if menu.options.crawl_exclude:
       if not settings.CRAWLING:
-        err_msg = "The '--crawl-exclude' option requires usage of option '--crawl'."
+        err_msg = "The '--crawl-exclude' option requires usage of '--crawl' option."
         print(settings.print_critical_msg(err_msg))
         raise SystemExit()
       try:
