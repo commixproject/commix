@@ -82,7 +82,7 @@ def do_GET_check(url, http_request_method):
       # Check if single parameter is supplied.
       if len(multi_parameters) == 1:
         if re.search(settings.VALUE_BOUNDARIES, value):
-          value = checks.value_boundaries(value)
+          value = checks.value_boundaries(multi_parameters, value, http_request_method)
         # Replace the value of parameter with INJECT_HERE tag
         # Check if defined the INJECT_TAG
         if settings.INJECT_TAG not in parameters:
@@ -127,7 +127,7 @@ def do_GET_check(url, http_request_method):
             if checks.ignore_anticsrf_parameter(all_params[param]):
               continue
             if re.search(settings.VALUE_BOUNDARIES, value):
-              value = checks.value_boundaries(value)
+              value = checks.value_boundaries(all_params[param], value, http_request_method)
             # Replace the value of parameter with INJECT_HERE tag
             if len(value) == 0:
               if not menu.options.skip_empty:
@@ -253,7 +253,7 @@ def do_POST_check(parameter, http_request_method):
         if checks.ignore_anticsrf_parameter(parameter):
           return parameter
         if re.search(settings.VALUE_BOUNDARIES, value):
-          value = checks.value_boundaries(value)
+          value = checks.value_boundaries(parameter, value, http_request_method)
         # Replace the value of parameter with INJECT_HERE tag
         if len(value) == 0:
           if settings.IS_JSON:
@@ -307,7 +307,7 @@ def do_POST_check(parameter, http_request_method):
         if checks.ignore_anticsrf_parameter(all_params[param]):
           continue
         if re.search(settings.VALUE_BOUNDARIES, value):
-          value = checks.value_boundaries(value)
+          value = checks.value_boundaries(all_params[param], value, http_request_method)
         # Replace the value of parameter with INJECT_HERE tag  
         if len(value) == 0:
           if not menu.options.skip_empty:

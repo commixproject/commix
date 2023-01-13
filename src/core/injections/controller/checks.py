@@ -249,10 +249,10 @@ def get_value_boundaries(value):
 """
 Check if the value has boundaries.
 """
-def value_boundaries(value):
+def value_boundaries(parameter, value, http_request_method):
   _ = get_value_boundaries(value)
-  message =  "It appears that the value '" + str(_) + "' has boundaries. "
-  message += "Do you want to inject inside? [Y/n] > "
+  message =  "It appears that provided value for "+ http_request_method + " parameter '" + parameter.split("=")[0] + "' has boundaries. "
+  message += "Do you want to inject inside? ('" + str(value.replace(_,_+"*")) + "')? [Y/n] > "
   procced_option = common.read_input(message, default="Y", check_batch=True)
   if procced_option in settings.CHOICE_YES:
     value = _
