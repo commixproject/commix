@@ -132,13 +132,11 @@ def command_injection_heuristic_basic(url, http_request_method, check_parameter,
 Heuristic (basic) tests for code injection warnings
 """
 def code_injections_heuristic_basic(url, http_request_method, check_parameter, the_type, header_name, inject_http_headers):
-  settings.PCRE_REPLACE_EVAL = False
   injection_type = "results-based dynamic code evaluation"
   technique = "dynamic code evaluation technique"
   technique = "(" + injection_type.split(settings.SINGLE_WHITESPACE)[0] + ") " + technique + ""
   settings.EVAL_BASED_STATE = True
   try:
-    url = checks.add_PCRE_REPLACE_EVAL_modifier(url)
     if (not settings.IDENTIFIED_WARNINGS and not settings.IDENTIFIED_PHPINFO) or settings.MULTI_TARGETS:  
       for payload in settings.PHPINFO_CHECK_PAYLOADS:
         if not inject_http_headers or (inject_http_headers and "'Host'" in check_parameter):
@@ -228,8 +226,6 @@ def classic_command_injection_technique(url, timesec, filename, http_request_met
 
 # Check if it's exploitable via dynamic code evaluation technique.   
 def dynamic_code_evaluation_technique(url, timesec, filename, http_request_method):
-  if not settings.PCRE_REPLACE_EVAL:
-    url = checks.add_PCRE_REPLACE_EVAL_modifier(url)
   injection_type = "results-based dynamic code evaluation"
   technique = "dynamic code evaluation technique"
   if not settings.SKIP_CODE_INJECTIONS:

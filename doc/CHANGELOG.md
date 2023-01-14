@@ -2,7 +2,7 @@
 * Added: New option ` --crawl-exclude` regarding setting regular expression for excluding pages from crawling (e.g. "logout").
 * Revised: Improvement regarding `--crawl` option, for skipping further tests involving target that an injection point has already been detected.
 * Added: Support regarding combining `--crawl` option with scanning multiple targets given from piped-input (i.e. stdin).
-* Revised: Minor improvement regarding adding PCRE_REPLACE_EVAL `/e` modifier (i.e. dynamic code evaluation technique).
+* Revised: Minor improvement regarding adding PCRE `/e` modifier (i.e. dynamic code evaluation technique).
 * Revised: Minor bug-fix regarding logging all HTTP traffic into a textual file (i.e `-t` option).
 
 ## Version 3.6 (2022-11-18)

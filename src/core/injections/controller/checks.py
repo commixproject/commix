@@ -243,28 +243,67 @@ def load_cmd_history():
 """
 Get value inside boundaries.
 """
-def get_value_boundaries(value):
-  return re.search(settings.VALUE_BOUNDARIES, value).group(1)
+def get_value_inside_boundaries(value):
+  try:
+    value = re.search(settings.VALUE_BOUNDARIES, value).group(1)
+  except Exception as ex:
+    pass
+  return value
 
 """
 Check if the value has boundaries.
 """
 def value_boundaries(parameter, value, http_request_method):
-  _ = get_value_boundaries(value)
-  message =  "It appears that provided value for "+ http_request_method + " parameter '" + parameter.split("=")[0] + "' has boundaries. "
-  message += "Do you want to inject inside? ('" + str(value.replace(_,_+"*")) + "')? [Y/n] > "
-  procced_option = common.read_input(message, default="Y", check_batch=True)
-  if procced_option in settings.CHOICE_YES:
-    value = _
-  elif procced_option in settings.CHOICE_NO:
-    settings.INJECT_INSIDE_BOUNDARIES = False
-    pass
-  elif procced_option in settings.CHOICE_QUIT:
-    raise SystemExit()
+  def check_boundaries_value(parameter, value, http_request_method):
+    _ = get_value_inside_boundaries(value)
+    while True:
+      message = "Do you want to inject inside? ('" + str(value.replace(_ ,_ + settings.WILDCARD_CHAR)) + "')? [Y/n] > "
+      procced_option = common.read_input(message, default="Y", check_batch=True)
+      if procced_option in settings.CHOICE_YES:
+        settings.INJECT_INSIDE_BOUNDARIES = True
+        return _
+      elif procced_option in settings.CHOICE_NO:
+        settings.INJECT_INSIDE_BOUNDARIES = False
+        return ""
+      elif procced_option in settings.CHOICE_QUIT:
+        raise SystemExit()
+      else:
+        common.invalid_option(procced_option)  
+        pass
+
+  message = "It appears that provided value for "+ http_request_method + " parameter '" + parameter.split("=")[0] + "' has boundaries. "
+  sys.stdout.write(settings.print_message(message))
+  if menu.options.skip_parameter != None :
+    for skip_parameter in re.split(settings.PARAMETER_SPLITTING_REGEX, menu.options.skip_parameter):
+      return value
+
+  elif menu.options.test_parameter != None :
+    for test_parameter in re.split(settings.PARAMETER_SPLITTING_REGEX, menu.options.test_parameter):
+      if parameter.split("=")[0] == test_parameter:
+        return check_boundaries_value(test_parameter, value, http_request_method)
+      else:
+        return value
   else:
-    common.invalid_option(procced_option)  
-    pass
-  return value
+    return check_boundaries_value(parameter, value, http_request_method)
+
+"""
+Add the PCRE '/e' modifier outside boundaries.
+"""
+def PCRE_e_modifier(parameter):
+  if not settings.PCRE_MODIFIER in parameter:
+    while True:
+      message = "Do you want to add the PCRE '" + settings.PCRE_MODIFIER + "' modifier ('" + parameter[:-1].split("=")[1] + settings.PCRE_MODIFIER + "')? [Y/n] > "
+      modifier_check = common.read_input(message, default="Y", check_batch=True)
+      if modifier_check in settings.CHOICE_YES:
+        return parameter[:-1] + settings.PCRE_MODIFIER
+      elif modifier_check in settings.CHOICE_NO:
+        return parameter
+      elif modifier_check in settings.CHOICE_QUIT:
+        print(settings.SINGLE_WHITESPACE)
+        os._exit(0)
+      else:  
+        common.invalid_option(modifier_check)  
+        pass
 
 """
 Ignoring the anti-CSRF parameter(s).
@@ -763,35 +802,6 @@ def check_CGI_scripts(url):
           
   if not _:
     menu.options.shellshock = False
-
-"""
-Add the PCRE_REPLACE_EVAL (/e) modifier
-"""
-def add_PCRE_REPLACE_EVAL_modifier(url):
-  try:
-    if re.findall(r"=/(.*)/&", url) or re.findall(r"=/(.*)/&", menu.options.data):
-      while True:
-        message = "Do you want to add the PCRE_REPLACE_EVAL (/e) modifier outside boundaries? [Y/n] > "
-        modifier_check = common.read_input(message, default="Y", check_batch=True)
-        settings.PCRE_REPLACE_EVAL = True
-        if modifier_check in settings.CHOICE_YES:
-          if re.findall(r"=(.*)&", url):
-            url = url.replace("/&", "/e&")
-          elif re.findall(r"=(.*)&", menu.options.data):
-            menu.options.data = menu.options.data.replace("/&", "/e&")
-          return url
-        elif modifier_check in settings.CHOICE_NO:
-          return url
-        elif modifier_check in settings.CHOICE_QUIT:
-          print(settings.SINGLE_WHITESPACE)
-          os._exit(0)
-        else:  
-          common.invalid_option(shellshock_check)  
-          pass
-  except TypeError as err_msg:
-    pass
-
-  return url
 
 """
 Check if http / https.

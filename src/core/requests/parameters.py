@@ -82,7 +82,8 @@ def do_GET_check(url, http_request_method):
       # Check if single parameter is supplied.
       if len(multi_parameters) == 1:
         if re.search(settings.VALUE_BOUNDARIES, value):
-          value = checks.value_boundaries(multi_parameters, value, http_request_method)
+          value = checks.value_boundaries(parameters, value, http_request_method)
+          parameters = checks.PCRE_e_modifier(parameters)
         # Replace the value of parameter with INJECT_HERE tag
         # Check if defined the INJECT_TAG
         if settings.INJECT_TAG not in parameters:
@@ -128,6 +129,7 @@ def do_GET_check(url, http_request_method):
               continue
             if re.search(settings.VALUE_BOUNDARIES, value):
               value = checks.value_boundaries(all_params[param], value, http_request_method)
+              all_params[param] = checks.PCRE_e_modifier(all_params[param])
             # Replace the value of parameter with INJECT_HERE tag
             if len(value) == 0:
               if not menu.options.skip_empty:
@@ -151,7 +153,7 @@ def do_GET_check(url, http_request_method):
           # Reconstruct the URL  
           url = url_part + "?" + parameter  
           urls_list.append(url)
-
+    
     return urls_list 
 
 """
@@ -174,14 +176,14 @@ def vuln_GET_param(url):
         vuln_parameter = pairs[param].split("=")[0]
         settings.TESTABLE_VALUE = pairs[param].split("=")[1].replace(settings.INJECT_TAG,"")
         if re.search(settings.VALUE_BOUNDARIES, settings.TESTABLE_VALUE) and settings.INJECT_INSIDE_BOUNDARIES:
-          settings.TESTABLE_VALUE  = checks.get_value_boundaries(settings.TESTABLE_VALUE)
+          settings.TESTABLE_VALUE  = checks.get_value_inside_boundaries(settings.TESTABLE_VALUE)
         if settings.BASE64_PADDING  in pairs[param]:
           settings.TESTABLE_VALUE = settings.TESTABLE_VALUE + settings.BASE64_PADDING  
         break
 
   else:
     vuln_parameter = url
-
+  
   return vuln_parameter 
 
 """
@@ -254,6 +256,7 @@ def do_POST_check(parameter, http_request_method):
           return parameter
         if re.search(settings.VALUE_BOUNDARIES, value):
           value = checks.value_boundaries(parameter, value, http_request_method)
+          parameter = checks.PCRE_e_modifier(parameter)
         # Replace the value of parameter with INJECT_HERE tag
         if len(value) == 0:
           if settings.IS_JSON:
@@ -275,6 +278,7 @@ def do_POST_check(parameter, http_request_method):
       # Check for similarity in provided parameter name and value.
       all_params = all_params.split(settings.PARAMETER_DELIMITER)
       all_params = checks.check_similarities(all_params)
+
     # Check if not defined the "INJECT_HERE" tag in parameter
     if settings.INJECT_TAG not in parameter:
       if checks.is_empty(multi_parameters, http_request_method):
@@ -308,6 +312,7 @@ def do_POST_check(parameter, http_request_method):
           continue
         if re.search(settings.VALUE_BOUNDARIES, value):
           value = checks.value_boundaries(all_params[param], value, http_request_method)
+          all_params[param] = checks.PCRE_e_modifier(all_params[param])
         # Replace the value of parameter with INJECT_HERE tag  
         if len(value) == 0:
           if not menu.options.skip_empty:
@@ -380,7 +385,7 @@ def vuln_POST_param(parameter, url):
           vuln_parameter = pairs[param].split("=")[0]
           settings.TESTABLE_VALUE = pairs[param].split("=")[1].replace(settings.INJECT_TAG,"")
           if re.search(settings.VALUE_BOUNDARIES, settings.TESTABLE_VALUE) and settings.INJECT_INSIDE_BOUNDARIES:
-            settings.TESTABLE_VALUE  = checks.get_value_boundaries(settings.TESTABLE_VALUE)
+            settings.TESTABLE_VALUE  = checks.get_value_inside_boundaries(settings.TESTABLE_VALUE)
           if settings.BASE64_PADDING  in pairs[param]:
             settings.TESTABLE_VALUE = settings.TESTABLE_VALUE + settings.BASE64_PADDING  
           break
