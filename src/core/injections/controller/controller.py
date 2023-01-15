@@ -44,7 +44,6 @@ Checks if the testable parameter is exploitable.
 Check for previously stored sessions.
 """
 def check_for_stored_sessions(url, http_request_method):
-
   if not menu.options.ignore_session:
     if os.path.isfile(settings.SESSION_FILE) and not settings.REQUIRED_AUTHENTICATION:
       if not menu.options.tech:
@@ -59,7 +58,6 @@ def check_for_stored_sessions(url, http_request_method):
 Check for previously stored injection level.
 """
 def check_for_stored_levels(url, http_request_method):
-
   if not menu.options.ignore_session:
     if menu.options.level == settings.DEFAULT_INJECTION_LEVEL:
       menu.options.level = session_handler.applied_levels(url, http_request_method)

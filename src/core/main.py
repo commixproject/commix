@@ -417,20 +417,7 @@ def main(filename, url):
       session_handler.ignore(url)      
 
     # Check provided parameters for tests
-    if menu.options.test_parameter or menu.options.skip_parameter:     
-      if menu.options.test_parameter != None :
-        if menu.options.test_parameter.startswith("="):
-          menu.options.test_parameter = menu.options.test_parameter[1:]
-        settings.TEST_PARAMETER = menu.options.test_parameter.split(settings.PARAMETER_SPLITTING_REGEX)  
-      
-      elif menu.options.skip_parameter != None :
-        if menu.options.skip_parameter.startswith("="):
-          menu.options.skip_parameter = menu.options.skip_parameter[1:]
-        settings.TEST_PARAMETER = menu.options.skip_parameter.split(settings.PARAMETER_SPLITTING_REGEX)
-
-      for i in range(0,len(settings.TEST_PARAMETER)):
-        if "=" in settings.TEST_PARAMETER[i]:
-          settings.TEST_PARAMETER[i] = settings.TEST_PARAMETER[i].split("=")[0]
+    checks.check_provided_parameters()
           
     # Check injection level, due to the provided testable parameters.
     if menu.options.level == settings.DEFAULT_INJECTION_LEVEL and \
@@ -840,20 +827,7 @@ try:
         settings.INJECT_TAG = inject_tag_regex_match.group(0)
 
     # Check provided parameters for tests
-    if menu.options.test_parameter or menu.options.skip_parameter:     
-      if menu.options.test_parameter != None :
-        if menu.options.test_parameter.startswith("="):
-          menu.options.test_parameter = menu.options.test_parameter[1:]
-        settings.TEST_PARAMETER = menu.options.test_parameter.split(settings.PARAMETER_SPLITTING_REGEX)  
-      
-      elif menu.options.skip_parameter != None :
-        if menu.options.skip_parameter.startswith("="):
-          menu.options.skip_parameter = menu.options.skip_parameter[1:]
-        settings.TEST_PARAMETER = menu.options.skip_parameter.split(settings.PARAMETER_SPLITTING_REGEX)
-
-      for i in range(0,len(settings.TEST_PARAMETER)):
-        if "=" in settings.TEST_PARAMETER[i]:
-          settings.TEST_PARAMETER[i] = settings.TEST_PARAMETER[i].split("=")[0]
+    checks.check_provided_parameters()
 
     if menu.options.level != settings.DEFAULT_INJECTION_LEVEL:
       settings.USER_SUPPLIED_LEVEL = menu.options.level

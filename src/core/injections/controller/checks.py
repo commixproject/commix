@@ -257,7 +257,8 @@ def value_boundaries(parameter, value, http_request_method):
   def check_boundaries_value(parameter, value, http_request_method):
     _ = get_value_inside_boundaries(value)
     while True:
-      message = "Do you want to inject inside? ('" + str(value.replace(_ ,_ + settings.WILDCARD_CHAR)) + "')? [Y/n] > "
+      message = "Do you want to inject the provided value for " + http_request_method + " parameter '" + parameter.split("=")[0] + "' inside boundaries?"
+      message += " ('" + str(value.replace(_ ,_ + settings.WILDCARD_CHAR)) + "') [Y/n] > "
       procced_option = common.read_input(message, default="Y", check_batch=True)
       if procced_option in settings.CHOICE_YES:
         settings.INJECT_INSIDE_BOUNDARIES = True
@@ -271,11 +272,12 @@ def value_boundaries(parameter, value, http_request_method):
         common.invalid_option(procced_option)  
         pass
 
-  message = "It appears that provided value for "+ http_request_method + " parameter '" + parameter.split("=")[0] + "' has boundaries. "
-  sys.stdout.write(settings.print_message(message))
-  if menu.options.skip_parameter != None :
+  if menu.options.skip_parameter != None:
     for skip_parameter in re.split(settings.PARAMETER_SPLITTING_REGEX, menu.options.skip_parameter):
-      return value
+      if parameter.split("=")[0] != skip_parameter:
+        return check_boundaries_value(skip_parameter, value, http_request_method)
+      else:
+        return value
 
   elif menu.options.test_parameter != None :
     for test_parameter in re.split(settings.PARAMETER_SPLITTING_REGEX, menu.options.test_parameter):
@@ -289,21 +291,24 @@ def value_boundaries(parameter, value, http_request_method):
 """
 Add the PCRE '/e' modifier outside boundaries.
 """
-def PCRE_e_modifier(parameter):
+def PCRE_e_modifier(parameter, http_request_method):
   if not settings.PCRE_MODIFIER in parameter:
-    while True:
-      message = "Do you want to add the PCRE '" + settings.PCRE_MODIFIER + "' modifier ('" + parameter[:-1].split("=")[1] + settings.PCRE_MODIFIER + "')? [Y/n] > "
-      modifier_check = common.read_input(message, default="Y", check_batch=True)
-      if modifier_check in settings.CHOICE_YES:
-        return parameter[:-1] + settings.PCRE_MODIFIER
-      elif modifier_check in settings.CHOICE_NO:
-        return parameter
-      elif modifier_check in settings.CHOICE_QUIT:
-        print(settings.SINGLE_WHITESPACE)
-        os._exit(0)
-      else:  
-        common.invalid_option(modifier_check)  
-        pass
+    if get_value_inside_boundaries(parameter.split("=")[1]) != parameter.split("=")[1]:
+      while True:
+        message = "It appears that provided value for " + http_request_method + " parameter '" + parameter.split("=")[0] + "' has boundaries. "
+        message += "Do you want to add the PCRE '" + settings.PCRE_MODIFIER + "' modifier outside boundaries? ('" + parameter[:-1].split("=")[1] + settings.PCRE_MODIFIER + "') [Y/n] > "
+        modifier_check = common.read_input(message, default="Y", check_batch=True)
+        if modifier_check in settings.CHOICE_YES:
+          return parameter[:-1] + settings.PCRE_MODIFIER
+        elif modifier_check in settings.CHOICE_NO:
+          return parameter
+        elif modifier_check in settings.CHOICE_QUIT:
+          print(settings.SINGLE_WHITESPACE)
+          os._exit(0)
+        else:  
+          common.invalid_option(modifier_check)  
+          pass
+  return parameter
 
 """
 Ignoring the anti-CSRF parameter(s).
@@ -996,12 +1001,35 @@ def wildcard_character(data):
   return data
 
 """
-Skip defined
+Check provided parameters for tests
 """
-def check_skipped_params(check_parameters):
+def check_provided_parameters():    
+  if menu.options.test_parameter or menu.options.skip_parameter:     
+    if menu.options.test_parameter != None :
+      if menu.options.test_parameter.startswith("="):
+        menu.options.test_parameter = menu.options.test_parameter[1:]
+      settings.TEST_PARAMETER = menu.options.test_parameter.split(settings.PARAMETER_SPLITTING_REGEX)  
+    
+    elif menu.options.skip_parameter != None :
+      if menu.options.skip_parameter.startswith("="):
+        menu.options.skip_parameter = menu.options.skip_parameter[1:]
+      settings.TEST_PARAMETER = menu.options.skip_parameter.split(settings.PARAMETER_SPLITTING_REGEX)
+
+    for i in range(0,len(settings.TEST_PARAMETER)):
+      if "=" in settings.TEST_PARAMETER[i]:
+        settings.TEST_PARAMETER[i] = settings.TEST_PARAMETER[i].split("=")[0]
+
+"""
+Check defined skipped parameters
+"""
+def check_skipped_params(check_parameters, http_request_method):
   settings.TEST_PARAMETER = [x + "," for x in settings.TEST_PARAMETER]
+  for parameter in check_parameters:
+    if parameter in ",".join(settings.TEST_PARAMETER).split(","):
+      info_msg = "Skipping " + http_request_method + " parameter '" + parameter + "'."
+      print(settings.print_info_msg(info_msg))
   settings.TEST_PARAMETER = [x for x in check_parameters if x not in ",".join(settings.TEST_PARAMETER).split(",")]
-  settings.TEST_PARAMETER = ",".join(settings.TEST_PARAMETER) 
+  settings.TEST_PARAMETER = ",".join(settings.TEST_PARAMETER)
   menu.options.test_parameter = True
 
 """
@@ -1054,7 +1082,7 @@ def print_non_listed_params(check_parameters, http_request_method, header_name):
         print(settings.print_warning_msg(warn_msg))
 
   if menu.options.skip_parameter != None:
-    check_skipped_params(check_parameters)
+    check_skipped_params(check_parameters, http_request_method)
 
 """
 Only time-relative injection techniques support tamper

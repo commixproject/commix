@@ -36,6 +36,14 @@ def get_url_part(url):
 Check if the 'INJECT_HERE' tag, is specified on GET Requests.
 """
 def do_GET_check(url, http_request_method):
+  """
+  Grab the value of parameter.
+  """
+  def multi_params_get_value(param, all_params):
+    value = re.findall(r'=(.*)', all_params[param])
+    value = ''.join(value)
+    return value
+  
   # Do replacement with the 'INJECT_HERE' tag, if the wild card char is provided.
   url = checks.wildcard_character(url)
 
@@ -82,8 +90,8 @@ def do_GET_check(url, http_request_method):
       # Check if single parameter is supplied.
       if len(multi_parameters) == 1:
         if re.search(settings.VALUE_BOUNDARIES, value):
+          parameters = checks.PCRE_e_modifier(parameters, http_request_method)
           value = checks.value_boundaries(parameters, value, http_request_method)
-          parameters = checks.PCRE_e_modifier(parameters)
         # Replace the value of parameter with INJECT_HERE tag
         # Check if defined the INJECT_TAG
         if settings.INJECT_TAG not in parameters:
@@ -116,28 +124,29 @@ def do_GET_check(url, http_request_method):
         # Check if defined the "INJECT_HERE" tag
         if settings.INJECT_TAG not in url:
           for param in range(0,len(all_params)):
+            # Grab the value of parameter.
+            value = multi_params_get_value(param, all_params)
+            if re.search(settings.VALUE_BOUNDARIES, value):
+              all_params[param] = checks.PCRE_e_modifier(all_params[param], http_request_method)
+          for param in range(0,len(all_params)):
             if param == 0 :
               old = re.findall(r'=(.*)', all_params[param])
               old = ''.join(old)
             else :
               old = value
             # Grab the value of parameter.
-            value = re.findall(r'=(.*)', all_params[param])
-            value = ''.join(value)
+            value = multi_params_get_value(param, all_params)
+            if re.search(settings.VALUE_BOUNDARIES, value):
+              value = checks.value_boundaries(all_params[param], value, http_request_method)
             # Ignoring the anti-CSRF parameter(s).
             if checks.ignore_anticsrf_parameter(all_params[param]):
               continue
-            if re.search(settings.VALUE_BOUNDARIES, value):
-              value = checks.value_boundaries(all_params[param], value, http_request_method)
-              all_params[param] = checks.PCRE_e_modifier(all_params[param])
             # Replace the value of parameter with INJECT_HERE tag
             if len(value) == 0:
               if not menu.options.skip_empty:
                 all_params[param] = all_params[param] + settings.INJECT_TAG
             else:
               all_params[param] = all_params[param].replace(value, value + settings.INJECT_TAG)
-            # all_params[param - 1] = all_params[param - 1].replace(value, "").replace(settings.INJECT_TAG, "")
-            # all_params[param - 1] = all_params[param - 1].replace(settings.INJECT_TAG, "")
             all_params[param - 1] = all_params[param - 1].replace(settings.INJECT_TAG, "")
             parameter = settings.PARAMETER_DELIMITER.join(all_params)
             # Reconstruct the URL
@@ -153,14 +162,13 @@ def do_GET_check(url, http_request_method):
           # Reconstruct the URL  
           url = url_part + "?" + parameter  
           urls_list.append(url)
-    
+
     return urls_list 
 
 """
 Define the vulnerable GET parameter.
 """
 def vuln_GET_param(url):
-
   # Define the vulnerable parameter
   if "?" not in url:
     # Grab the value of parameter.
@@ -180,7 +188,6 @@ def vuln_GET_param(url):
         if settings.BASE64_PADDING  in pairs[param]:
           settings.TESTABLE_VALUE = settings.TESTABLE_VALUE + settings.BASE64_PADDING  
         break
-
   else:
     vuln_parameter = url
   
@@ -190,6 +197,23 @@ def vuln_GET_param(url):
 Check if the 'INJECT_HERE' tag, is specified on POST Requests.
 """
 def do_POST_check(parameter, http_request_method):
+  """
+  Grab the value of parameter.
+  """
+  def multi_params_get_value(param, all_params):
+    if settings.IS_JSON:
+      value = re.findall(r'\:(.*)', all_params[param])
+      if re.findall(r'\\"(.*)\\"', value[0]):
+        value = re.findall(r'\\"(.*)\\"', value[0])
+      value = re.sub(settings.IGNORE_SPECIAL_CHAR_REGEX, '', ''.join(value))
+    elif settings.IS_XML:
+      value = re.findall(r'>(.*)</', all_params[param])
+      value = ''.join(value)
+    else:  
+      value = re.findall(r'=(.*)', all_params[param])
+      value = ''.join(value)
+    return value
+
   # Do replacement with the 'INJECT_HERE' tag, if the wild card char is provided.
   parameter = checks.wildcard_character(parameter).replace("'","\"")
   # Check if JSON Object.
@@ -255,8 +279,8 @@ def do_POST_check(parameter, http_request_method):
         if checks.ignore_anticsrf_parameter(parameter):
           return parameter
         if re.search(settings.VALUE_BOUNDARIES, value):
+          parameter = checks.PCRE_e_modifier(parameter, http_request_method)
           value = checks.value_boundaries(parameter, value, http_request_method)
-          parameter = checks.PCRE_e_modifier(parameter)
         # Replace the value of parameter with INJECT_HERE tag
         if len(value) == 0:
           if settings.IS_JSON:
@@ -284,6 +308,11 @@ def do_POST_check(parameter, http_request_method):
       if checks.is_empty(multi_parameters, http_request_method):
         return parameter
       for param in range(0, len(all_params)):
+          # Grab the value of parameter.
+          value = multi_params_get_value(param, all_params)
+          if re.search(settings.VALUE_BOUNDARIES, value):
+            all_params[param] = checks.PCRE_e_modifier(all_params[param], http_request_method)
+      for param in range(0, len(all_params)):
         if param == 0 :
           if settings.IS_JSON:
             old = re.findall(r'\:(.*)', all_params[param])
@@ -296,23 +325,13 @@ def do_POST_check(parameter, http_request_method):
             old = ''.join(old)
         else :
           old = value
-        if settings.IS_JSON:
-          value = re.findall(r'\:(.*)', all_params[param])
-          if re.findall(r'\\"(.*)\\"', value[0]):
-            value = re.findall(r'\\"(.*)\\"', value[0])
-          value = re.sub(settings.IGNORE_SPECIAL_CHAR_REGEX, '', ''.join(value))
-        elif settings.IS_XML:
-          value = re.findall(r'>(.*)</', all_params[param])
-          value = ''.join(value)
-        else:  
-          value = re.findall(r'=(.*)', all_params[param])
-          value = ''.join(value)
+        # Grab the value of parameter.
+        value = multi_params_get_value(param, all_params)
+        if re.search(settings.VALUE_BOUNDARIES, value):
+          value = checks.value_boundaries(all_params[param], value, http_request_method)
         # Ignoring the anti-CSRF parameter(s).
         if checks.ignore_anticsrf_parameter(all_params[param]):
           continue
-        if re.search(settings.VALUE_BOUNDARIES, value):
-          value = checks.value_boundaries(all_params[param], value, http_request_method)
-          all_params[param] = checks.PCRE_e_modifier(all_params[param])
         # Replace the value of parameter with INJECT_HERE tag  
         if len(value) == 0:
           if not menu.options.skip_empty:
@@ -324,8 +343,6 @@ def do_POST_check(parameter, http_request_method):
               all_params[param] = all_params[param] + settings.INJECT_TAG
         else:
           all_params[param] = all_params[param].replace(value, value + settings.INJECT_TAG)
-        #all_params[param - 1] = all_params[param - 1].replace(value, "").replace(settings.INJECT_TAG, "")
-        # all_params[param - 1] = all_params[param - 1].replace(settings.INJECT_TAG, "")
         all_params[param - 1] = all_params[param - 1].replace(settings.INJECT_TAG, "")
         parameter = settings.PARAMETER_DELIMITER.join(all_params)
         parameter = parameter.replace(settings.RANDOM_TAG,"")
