@@ -102,14 +102,14 @@ def do_GET_check(url, http_request_method):
             parameters = parameters + settings.INJECT_TAG
           else:
             parameters = parameters.replace(value, value + settings.INJECT_TAG) 
-        else:
-          # Auto-recognize prefix / suffix
-          if settings.INJECT_TAG in value:
-            if len(value.rsplit(settings.INJECT_TAG, 0)[0]) > 0:
-              menu.options.prefix = value.rsplit(settings.INJECT_TAG, 1)[0]
-            if len(value.rsplit(settings.INJECT_TAG, 1)[1]) > 0:
-              menu.options.suffix = value.rsplit(settings.INJECT_TAG, 1)[1]
-          parameters = parameters.replace(value, value + settings.INJECT_TAG) 
+        # else:
+        #   # Auto-recognize prefix / suffix
+        #   if settings.INJECT_TAG in value:
+        #     if len(value.rsplit(settings.INJECT_TAG, 0)[0]) > 0:
+        #       menu.options.prefix = value.rsplit(settings.INJECT_TAG, 1)[0]
+        #     if len(value.rsplit(settings.INJECT_TAG, 1)[1]) > 0:
+        #       menu.options.suffix = value.rsplit(settings.INJECT_TAG, 1)[1]
+        #   parameters = parameters.replace(value, value + settings.INJECT_TAG) 
         # Reconstruct the URL
         url = url_part + "?" + parameters
         urls_list.append(url)
