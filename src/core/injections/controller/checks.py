@@ -54,6 +54,63 @@ except:
     settings.READLINE_ERROR = True
 
 """
+Check for custom injection marker (*)
+"""
+def check_custom_injection_marker(url):
+  if url and settings.WILDCARD_CHAR in url:
+    option = "'-u'"
+    settings.WILDCARD_CHAR_APPLIED = True
+  elif menu.options.data and settings.WILDCARD_CHAR in menu.options.data:
+    option = "POST body"
+    settings.WILDCARD_CHAR_APPLIED = True
+  else:
+    option = "option '--headers/--user-agent/--referer/--cookie'"
+    if menu.options.cookie and settings.WILDCARD_CHAR in menu.options.cookie:
+      settings.WILDCARD_CHAR_APPLIED = True
+      menu.options.level = settings.COOKIE_INJECTION_LEVEL
+
+    elif menu.options.agent and settings.WILDCARD_CHAR in menu.options.agent:
+      settings.WILDCARD_CHAR_APPLIED = True
+      menu.options.level = settings.HTTP_HEADER_INJECTION_LEVEL
+
+    elif menu.options.referer and settings.WILDCARD_CHAR in menu.options.referer:
+      settings.WILDCARD_CHAR_APPLIED = True
+      menu.options.level = settings.HTTP_HEADER_INJECTION_LEVEL
+
+    elif menu.options.headers and settings.WILDCARD_CHAR in menu.options.headers:
+      _ = True
+      for data in menu.options.headers.split("\\n"):
+        # Ignore the Accept HTTP Header
+        if not data.startswith(settings.ACCEPT):
+          _ = False
+      if _:    
+        settings.WILDCARD_CHAR_APPLIED = True
+        menu.options.level = settings.HTTP_HEADER_INJECTION_LEVEL
+
+  if settings.WILDCARD_CHAR_APPLIED:
+    if menu.options.test_parameter:
+      if not settings.MULTI_TARGETS or settings.STDIN_PARSING:
+        err_msg = "The options '-p' and the custom injection marker (" + settings.WILDCARD_CHAR + ") "
+        err_msg += "cannot be used simultaneously (i.e. only one option must be set)."
+        print(settings.print_critical_msg(err_msg))
+        raise SystemExit 
+
+    while True:
+      message = "Custom injection marker (" + settings.WILDCARD_CHAR + ") found in " + option +". "
+      message += "Do you want to process it? [Y/n] > "
+      procced_option = common.read_input(message, default="Y", check_batch=True)
+      if procced_option in settings.CHOICE_YES:
+        return
+      elif procced_option in settings.CHOICE_NO:
+        settings.WILDCARD_CHAR_APPLIED = None
+        return
+      elif procced_option in settings.CHOICE_QUIT:
+        raise SystemExit()
+      else:
+        common.invalid_option(procced_option)  
+        pass
+
+"""
 The available mobile user agents.
 """
 def mobile_user_agents():
@@ -256,6 +313,13 @@ Check if the value has boundaries.
 def value_boundaries(parameter, value, http_request_method):
   def check_boundaries_value(parameter, value, http_request_method):
     _ = get_value_inside_boundaries(value)
+
+    if settings.INJECT_TAG in _:
+      settings.INJECT_INSIDE_BOUNDARIES = False
+      return ""
+    if settings.INJECT_TAG in value:
+      settings.INJECT_INSIDE_BOUNDARIES = True
+      return _
     while True:
       message = "Do you want to inject the provided value for " + http_request_method + " parameter '" + parameter.split("=")[0] + "' inside boundaries?"
       message += " ('" + str(value.replace(_ ,_ + settings.WILDCARD_CHAR)) + "') [Y/n] > "
@@ -292,16 +356,19 @@ def value_boundaries(parameter, value, http_request_method):
 Add the PCRE '/e' modifier outside boundaries.
 """
 def PCRE_e_modifier(parameter, http_request_method):
+  original_parameter = parameter
+  if settings.INJECT_TAG in parameter:
+    parameter = parameter.replace(settings.INJECT_TAG, settings.WILDCARD_CHAR)
   if not settings.PCRE_MODIFIER in parameter:
     if get_value_inside_boundaries(parameter.split("=")[1]) != parameter.split("=")[1]:
       while True:
         message = "It appears that provided value for " + http_request_method + " parameter '" + parameter.split("=")[0] + "' has boundaries. "
-        message += "Do you want to add the PCRE '" + settings.PCRE_MODIFIER + "' modifier outside boundaries? ('" + parameter[:-1].split("=")[1] + settings.PCRE_MODIFIER + "') [Y/n] > "
+        message += "Do you want to add the PCRE '" + settings.PCRE_MODIFIER + "' modifier outside boundaries? ('" + parameter.split("=")[1] + settings.PCRE_MODIFIER[1:2] + "') [Y/n] > "
         modifier_check = common.read_input(message, default="Y", check_batch=True)
         if modifier_check in settings.CHOICE_YES:
-          return parameter[:-1] + settings.PCRE_MODIFIER
+          return original_parameter + settings.PCRE_MODIFIER[1:2]
         elif modifier_check in settings.CHOICE_NO:
-          return parameter
+          return original_parameter
         elif modifier_check in settings.CHOICE_QUIT:
           print(settings.SINGLE_WHITESPACE)
           os._exit(0)

@@ -731,7 +731,7 @@ def perform_checks(url, http_request_method, filename):
     check_for_stored_sessions(url, http_request_method)
     injection_proccess(url, check_parameter, http_request_method, filename, timesec)
     settings.CUSTOM_HEADER_INJECTION = None
-
+  
   # Check if defined POST data
   if not settings.USER_DEFINED_POST_DATA:
     get_request(url, http_request_method, filename, timesec)  
