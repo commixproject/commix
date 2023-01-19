@@ -241,7 +241,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.7"
-REVISION = "42"
+REVISION = "43"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -346,6 +346,7 @@ USER_DEFINED_POST_DATA = False
 # The wildcard character
 WILDCARD_CHAR = "*"
 WILDCARD_CHAR_APPLIED = False
+POST_WILDCARD_CHAR = ""
 
 # Testable parameter(s) - comma separated. 
 TEST_PARAMETER = ""

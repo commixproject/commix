@@ -155,9 +155,10 @@ def do_GET_check(url, http_request_method):
             urls_list.append(url)
         else:
           for param in range(0,len(multi_parameters)):
-            # Grab the value of parameter.
-            value = re.findall(r'=(.*)', multi_parameters[param])
-            value = ''.join(value)
+            value = multi_params_get_value(param, multi_parameters)
+            if re.search(settings.VALUE_BOUNDARIES, value):
+              multi_parameters[param] = checks.PCRE_e_modifier(multi_parameters[param], http_request_method)
+              value = checks.value_boundaries(multi_parameters[param], value, http_request_method)
             parameter = settings.PARAMETER_DELIMITER.join(multi_parameters)
           # Reconstruct the URL  
           url = url_part + "?" + parameter  
@@ -182,6 +183,7 @@ def vuln_GET_param(url):
     for param in range(0,len(pairs)):
       if settings.INJECT_TAG in pairs[param]:
         vuln_parameter = pairs[param].split("=")[0]
+        settings.POST_WILDCARD_CHAR = pairs[param].split("=")[1].split(settings.INJECT_TAG)[1]
         settings.TESTABLE_VALUE = pairs[param].split("=")[1].replace(settings.INJECT_TAG,"")
         if re.search(settings.VALUE_BOUNDARIES, settings.TESTABLE_VALUE) and settings.INJECT_INSIDE_BOUNDARIES:
           settings.TESTABLE_VALUE  = checks.get_value_inside_boundaries(settings.TESTABLE_VALUE)
@@ -400,6 +402,7 @@ def vuln_POST_param(parameter, url):
       for param in range(0,len(pairs)):
         if settings.INJECT_TAG in pairs[param]:
           vuln_parameter = pairs[param].split("=")[0]
+          settings.POST_WILDCARD_CHAR = pairs[param].split("=")[1].split(settings.INJECT_TAG)[1]
           settings.TESTABLE_VALUE = pairs[param].split("=")[1].replace(settings.INJECT_TAG,"")
           if re.search(settings.VALUE_BOUNDARIES, settings.TESTABLE_VALUE) and settings.INJECT_INSIDE_BOUNDARIES:
             settings.TESTABLE_VALUE  = checks.get_value_inside_boundaries(settings.TESTABLE_VALUE)
@@ -427,7 +430,7 @@ def prefixes(payload, prefix):
 
   # Check if defined "--prefix" option.
   testable_value = settings.TESTABLE_VALUE
-  if settings.WILDCARD_CHAR_APPLIED:
+  if settings.WILDCARD_CHAR_APPLIED and len(settings.POST_WILDCARD_CHAR) != 0:
     testable_value = ""
   if menu.options.prefix:
     payload = testable_value + menu.options.prefix + prefix + payload
