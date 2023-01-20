@@ -357,24 +357,26 @@ Add the PCRE '/e' modifier outside boundaries.
 """
 def PCRE_e_modifier(parameter, http_request_method):
   original_parameter = parameter
-  if settings.INJECT_TAG in parameter:
-    parameter = parameter.replace(settings.INJECT_TAG, settings.WILDCARD_CHAR)
   if not settings.PCRE_MODIFIER in parameter:
-    if get_value_inside_boundaries(parameter.split("=")[1]) != parameter.split("=")[1]:
-      while True:
-        message = "It appears that provided value for " + http_request_method + " parameter '" + parameter.split("=")[0] + "' has boundaries. "
-        message += "Do you want to add the PCRE '" + settings.PCRE_MODIFIER + "' modifier outside boundaries? ('" + parameter.split("=")[1] + settings.PCRE_MODIFIER[1:2] + "') [Y/n] > "
-        modifier_check = common.read_input(message, default="Y", check_batch=True)
-        if modifier_check in settings.CHOICE_YES:
-          return original_parameter + settings.PCRE_MODIFIER[1:2]
-        elif modifier_check in settings.CHOICE_NO:
-          return original_parameter
-        elif modifier_check in settings.CHOICE_QUIT:
-          print(settings.SINGLE_WHITESPACE)
-          os._exit(0)
-        else:  
-          common.invalid_option(modifier_check)  
-          pass
+    try:
+      if get_value_inside_boundaries(parameter.split("=")[1]) != parameter.split("=")[1]:
+        while True:
+          message = "It appears that provided value for " + http_request_method + " parameter '" + parameter.split("=")[0] + "' has boundaries. "
+          message += "Do you want to add the PCRE '" + settings.PCRE_MODIFIER + "' modifier outside boundaries? ('" 
+          message += parameter.split("=")[1].replace(settings.INJECT_TAG, settings.WILDCARD_CHAR) + settings.PCRE_MODIFIER[1:2] + "') [Y/n] > "
+          modifier_check = common.read_input(message, default="Y", check_batch=True)
+          if modifier_check in settings.CHOICE_YES:
+            return original_parameter + settings.PCRE_MODIFIER[1:2]
+          elif modifier_check in settings.CHOICE_NO:
+            return original_parameter
+          elif modifier_check in settings.CHOICE_QUIT:
+            print(settings.SINGLE_WHITESPACE)
+            os._exit(0)
+          else:  
+            common.invalid_option(modifier_check)  
+            pass
+    except Exception as ex:
+      pass
   return parameter
 
 """

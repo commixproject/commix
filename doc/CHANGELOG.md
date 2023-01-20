@@ -1,4 +1,5 @@
 ## Version 3.7 (TBA)
+* Revised: Improvements regarding identifying injection marker (i.e. asterisk `*`) in provided parameter values (e.g. GET, POST or HTTP headers). 
 * Added: New option ` --crawl-exclude` regarding setting regular expression for excluding pages from crawling (e.g. "logout").
 * Revised: Improvement regarding `--crawl` option, for skipping further tests involving target that an injection point has already been detected.
 * Added: Support regarding combining `--crawl` option with scanning multiple targets given from piped-input (i.e. stdin).
@@ -95,7 +96,7 @@
 * Revised: Minor improvement regarding verbose mode (i.e. debug messages).
 * Fixed: Bug-fix regarding Basic HTTP authentication.
 * Revised: Minor improvement regarding redirection mechanism.
-* Fixed: Bug-fix regarding defining wildcard character "*" in nested JSON objects.
+* Fixed: Bug-fix regarding defining wildcard character `*` in nested JSON objects.
 * Revised: Minor improvement regarding Flatten_json (third party) module.
 * Revised: Minor improvement regarding parsing nested JSON objects.
 * Added: New tamper script "doublequotes.py" that adds double-quotes ("") between the characters of the generated payloads (for *nix targets).
@@ -398,7 +399,7 @@
 ## Version 0.8b (2016-05-06)
 * Fixed: The `--file-read` option to ignore the carriage return ("\r") character in a text file.
 * Added: The ability to check for empty value(s) in the defined GET/POST/Cookie(s) data and skip.
-* Replaced: The "INJECT_HERE" tag has been replaced with the "*" (asterisk) wildcard character.
+* Replaced: The "INJECT_HERE" tag has been replaced with the `*` (asterisk) wildcard character.
 * Added: New option `--level` (1-3) that specifies level of tests to perform.
 * Added: New option `-p` that specifies a comma-separated list of GET/POST parameter.
 * Added: The ability to check every parameter in the provided cookie data.
