@@ -170,10 +170,11 @@ def vuln_GET_param(url):
     for param in range(0,len(pairs)):
       if settings.INJECT_TAG in pairs[param]:
         vuln_parameter = pairs[param].split("=")[0]
-        try:
-          settings.POST_WILDCARD_CHAR = pairs[param].split("=")[1].split(settings.INJECT_TAG)[1]
-        except Exception:
-          pass
+        if settings.WILDCARD_CHAR_APPLIED:
+          try:
+            settings.POST_WILDCARD_CHAR = pairs[param].split("=")[1].split(settings.INJECT_TAG)[1]
+          except Exception:
+            pass
         settings.TESTABLE_VALUE = pairs[param].split("=")[1].replace(settings.INJECT_TAG,"")
         if re.search(settings.VALUE_BOUNDARIES, settings.TESTABLE_VALUE) and settings.INJECT_INSIDE_BOUNDARIES:
           settings.TESTABLE_VALUE  = checks.get_value_inside_boundaries(settings.TESTABLE_VALUE)
@@ -374,7 +375,11 @@ def vuln_POST_param(parameter, url):
     if re.findall(r"" + settings.INJECT_TAG + "([^>]+)", parameter):
       vuln_parameter = re.findall(r"" + settings.INJECT_TAG + "([^>]+)", parameter)
       vuln_parameter = re.findall(r"" + "([^</]+)", vuln_parameter[0])
-      settings.TESTABLE_VALUE = re.findall(r"" + "([^>]+)" + settings.INJECT_TAG, parameter)[0]
+      if settings.WILDCARD_CHAR_APPLIED and len(vuln_parameter) != 1 :
+        settings.POST_WILDCARD_CHAR = vuln_parameter[0]
+        settings.TESTABLE_VALUE = vuln_parameter = vuln_parameter[1]
+      else:  
+        settings.TESTABLE_VALUE = re.findall(r"" + "([^>]+)" + settings.INJECT_TAG, parameter)[0]
       vuln_parameter = ''.join(vuln_parameter)
   
   # Regular POST data format.
@@ -385,10 +390,11 @@ def vuln_POST_param(parameter, url):
       for param in range(0,len(pairs)):
         if settings.INJECT_TAG in pairs[param]:
           vuln_parameter = pairs[param].split("=")[0]
-          try:
-            settings.POST_WILDCARD_CHAR = pairs[param].split("=")[1].split(settings.INJECT_TAG)[1]
-          except Exception:
-            pass
+          if settings.WILDCARD_CHAR_APPLIED:
+            try:
+              settings.POST_WILDCARD_CHAR = pairs[param].split("=")[1].split(settings.INJECT_TAG)[1]
+            except Exception:
+              pass
           settings.TESTABLE_VALUE = pairs[param].split("=")[1].replace(settings.INJECT_TAG,"")
           if re.search(settings.VALUE_BOUNDARIES, settings.TESTABLE_VALUE) and settings.INJECT_INSIDE_BOUNDARIES:
             settings.TESTABLE_VALUE  = checks.get_value_inside_boundaries(settings.TESTABLE_VALUE)
