@@ -196,8 +196,6 @@ def do_POST_check(parameter, http_request_method):
   def multi_params_get_value(param, all_params):
     if settings.IS_JSON:
       value = re.findall(r'\:(.*)', all_params[param])
-      if re.findall(r'\\"(.*)\\"', value[0]):
-        value = re.findall(r'\\"(.*)\\"', value[0])
       value = re.sub(settings.IGNORE_SPECIAL_CHAR_REGEX, '', ''.join(value))
     elif settings.IS_XML:
       value = re.findall(r'>(.*)</', all_params[param])
