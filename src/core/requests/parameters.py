@@ -120,8 +120,7 @@ def do_GET_check(url, http_request_method):
             value = multi_params_get_value(all_params[param])
           for param in range(0,len(all_params)):
             if param == 0 :
-              old = re.findall(r'=(.*)', all_params[param])
-              old = ''.join(old)
+              old = multi_params_get_value(all_params[param])
             else :
               old = value
             # Grab the value of parameter.
@@ -306,15 +305,7 @@ def do_POST_check(parameter, http_request_method):
         return parameter
       for param in range(0, len(all_params)):
         if param == 0 :
-          if settings.IS_JSON:
-            old = re.findall(r'\:(.*)', all_params[param])
-            old = re.sub(settings.IGNORE_SPECIAL_CHAR_REGEX, '', ''.join(old))
-          elif settings.IS_XML:
-            old = re.findall(r'>(.*)</', all_params[param])
-            old = ''.join(old)
-          else:  
-            old = re.findall(r'=(.*)', all_params[param])
-            old = ''.join(old)
+          old = multi_params_get_value(param, all_params)
         else :
           old = value
         # Grab the value of parameter.
