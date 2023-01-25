@@ -80,7 +80,7 @@ def command_injection_heuristic_basic(url, http_request_method, check_parameter,
       for payload in basic_payloads:
         _ = _ + 1
         if not inject_http_headers or (inject_http_headers and "'Host'" in check_parameter):
-          if not any((settings.IS_JSON, settings.IS_XML)):
+          if not any((settings.IS_JSON, settings.IS_XML)) or settings.COOKIE_INJECTION:
             payload = _urllib.parse.quote(payload)
         payload = parameters.prefixes(payload, prefix="")
         payload = parameters.suffixes(payload, suffix="")
@@ -138,7 +138,7 @@ def code_injections_heuristic_basic(url, http_request_method, check_parameter, t
     if (not settings.IDENTIFIED_WARNINGS and not settings.IDENTIFIED_PHPINFO) or settings.MULTI_TARGETS:  
       for payload in settings.PHPINFO_CHECK_PAYLOADS:
         if not inject_http_headers or (inject_http_headers and "'Host'" in check_parameter):
-          if not any((settings.IS_JSON, settings.IS_XML)):
+          if not any((settings.IS_JSON, settings.IS_XML)) or settings.COOKIE_INJECTION:
             payload = _urllib.parse.quote(payload)
         payload = parameters.prefixes(payload, prefix="")
         payload = parameters.suffixes(payload, suffix="")
@@ -329,7 +329,7 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
   settings.CHECKING_PARAMETER = ""
   if not header_name == "Cookie" and not the_type == "HTTP header":
     settings.CHECKING_PARAMETER = str(http_request_method)
-  settings.CHECKING_PARAMETER += ('', ' (JSON)')[settings.IS_JSON] + ('', ' (SOAP/XML)')[settings.IS_XML] 
+    settings.CHECKING_PARAMETER += ('', ' (JSON)')[settings.IS_JSON] + ('', ' (SOAP/XML)')[settings.IS_XML] 
   if header_name == "Cookie" :
      settings.CHECKING_PARAMETER += str(header_name) + str(the_type) + str(check_parameter)
   else:
@@ -733,10 +733,11 @@ def perform_checks(url, http_request_method, filename):
     settings.CUSTOM_HEADER_INJECTION = None
   
   # Check if defined POST data
-  if not settings.USER_DEFINED_POST_DATA:
-    get_request(url, http_request_method, filename, timesec)  
-  else:
-    post_request(url, http_request_method, filename, timesec)
+  if not settings.COOKIE_INJECTION:
+    if settings.USER_DEFINED_POST_DATA:
+      post_request(url, http_request_method, filename, timesec)
+    else:
+      get_request(url, http_request_method, filename, timesec)  
 
   _ = menu.options.level
   if _ >= settings.COOKIE_INJECTION_LEVEL:

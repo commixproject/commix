@@ -303,6 +303,11 @@ def main(filename, url):
 
     checks.check_custom_injection_marker(url)
 
+    # Check injection level, due to the provided testable parameters.
+    if menu.options.level == settings.DEFAULT_INJECTION_LEVEL and \
+    menu.options.test_parameter != None:
+      checks.check_injection_level()
+    
     # Define the level of tests to perform.
     if menu.options.level == settings.DEFAULT_INJECTION_LEVEL:
       settings.SEPARATORS = sorted(set(settings.SEPARATORS_LVL1), key=settings.SEPARATORS_LVL1.index)
@@ -351,11 +356,6 @@ def main(filename, url):
     # Check provided parameters for tests
     checks.check_provided_parameters()
           
-    # Check injection level, due to the provided testable parameters.
-    if menu.options.level == settings.DEFAULT_INJECTION_LEVEL and \
-    menu.options.test_parameter != None:
-      checks.check_injection_level()
-
     # Check if defined character used for splitting cookie values.
     if menu.options.cdel:
      settings.COOKIE_DELIMITER = menu.options.cdel
@@ -564,7 +564,7 @@ try:
 
   if menu.options.smoke_test:
     smoke_test()
-
+  
   if settings.STDIN_PARSING or settings.CRAWLING or menu.options.bulkfile or menu.options.shellshock:
     settings.OS_CHECKS_NUM = 1
 

@@ -50,14 +50,15 @@ def do_GET_check(url, http_request_method):
   # Check for REST-ful URLs format. 
   if "?" not in url:
     if settings.INJECT_TAG not in url and not menu.options.shellshock:
+      checks.check_injection_level()
       if menu.options.level == settings.HTTP_HEADER_INJECTION_LEVEL or menu.options.header or menu.options.headers:
         return False
-      if menu.options.level == settings.COOKIE_INJECTION_LEVEL :
+      if menu.options.level == settings.COOKIE_INJECTION_LEVEL:
         return False
       else: 
         err_msg = "No parameter(s) found for testing on the provided target URL. "
-        err_msg += "You must specify the testable parameter(s) and/or "
-        err_msg += "try to increase '--level' value to perform more tests." 
+        if not menu.options.crawldepth:
+          err_msg += "You are advised to rerun with '--crawl=2'."
         print(settings.print_critical_msg(err_msg))
         raise SystemExit()
     elif menu.options.shellshock:
@@ -206,6 +207,7 @@ def do_POST_check(parameter, http_request_method):
 
   # Do replacement with the 'INJECT_HERE' tag, if the wild card char is provided.
   parameter = checks.wildcard_character(parameter).replace("'","\"")
+  checks.check_injection_level()
   # Check if JSON Object.
   if checks.is_JSON_check(parameter) or checks.is_JSON_check(checks.check_quotes_json_data(parameter)):
     if checks.is_JSON_check(checks.check_quotes_json_data(parameter)):
@@ -438,6 +440,15 @@ def suffixes(payload, suffix):
 The cookie based injection.
 """
 def do_cookie_check(cookie):
+
+  """
+  Grab the value of parameter.
+  """
+  def multi_params_get_value(parameter):
+    value = re.findall(r'=(.*)', parameter)
+    value = ''.join(value)
+    return value
+
   # Do replacement with the 'INJECT_HERE' tag, if the wild card char is provided.
   cookie = checks.wildcard_character(cookie)
   multi_parameters = cookie.split(settings.COOKIE_DELIMITER)
@@ -445,8 +456,7 @@ def do_cookie_check(cookie):
   if len([s for s in multi_parameters if "=" in s]) != (len(multi_parameters)):
     checks.inappropriate_format(multi_parameters)
   # Grab the value of parameter.
-  value = re.findall(r'=(.*)', cookie)
-  value = ''.join(value)
+  value = multi_params_get_value(cookie)
   # Replace the value of parameter with INJECT tag
   # Check if single paramerter is supplied.
   if len(multi_parameters) == 1:
@@ -479,14 +489,12 @@ def do_cookie_check(cookie):
         return cookie
       for param in range(0, len(all_params)):
         if param == 0 :
-            old = re.findall(r'=(.*)', all_params[param])
-            old = ''.join(old)
+          old = multi_params_get_value(all_params[param])
         else :
           old = value
         # Grab the value of cookie.
-        value = re.findall(r'=(.*)', all_params[param])
-        value = ''.join(value)
-        # Ignoring the anti-CSRF parameter(s)..
+        value = multi_params_get_value(all_params[param])
+        # Ignoring the anti-CSRF parameter(s).
         if checks.ignore_anticsrf_parameter(all_params[param]):
           continue
         # Ignoring the Google analytics cookie parameter.
@@ -498,14 +506,11 @@ def do_cookie_check(cookie):
             all_params[param] = all_params[param] + settings.INJECT_TAG
         else:
           all_params[param] = all_params[param].replace(value, value + settings.INJECT_TAG)  
-        #all_params[param - 1] = all_params[param - 1].replace(value, "").replace(settings.INJECT_TAG, "")
-        # all_params[param - 1] = all_params[param - 1].replace(settings.INJECT_TAG, "")
         all_params[param - 1] = all_params[param - 1].replace(settings.INJECT_TAG, "")
         cookie = settings.COOKIE_DELIMITER.join(all_params)
         if type(cookie) != list:
           cookies_list.append(cookie)
         cookie = cookies_list
-
     else:
       for param in range(0, len(multi_parameters)):
         # Grab the value of parameter.
@@ -527,9 +532,13 @@ def specify_cookie_parameter(cookie):
     for param in range(0,len(pairs)):
       if settings.INJECT_TAG in pairs[param]:
         inject_cookie = pairs[param].split("=")[0]
+        if settings.WILDCARD_CHAR_APPLIED:
+          try:
+            settings.POST_WILDCARD_CHAR = pairs[param].split("=")[1].split(settings.INJECT_TAG)[1]
+          except Exception:
+            pass
         settings.TESTABLE_VALUE = pairs[param].split("=")[1].replace(settings.INJECT_TAG,"")
         break
-
   else:
     inject_cookie = cookie
 

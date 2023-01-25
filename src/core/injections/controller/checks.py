@@ -66,15 +66,15 @@ def check_custom_injection_marker(url):
   else:
     option = "option '--headers/--user-agent/--referer/--cookie'"
     if menu.options.cookie and settings.WILDCARD_CHAR in menu.options.cookie:
-      settings.WILDCARD_CHAR_APPLIED = True
+      settings.WILDCARD_CHAR_APPLIED = settings.COOKIE_INJECTION = True
       menu.options.level = settings.COOKIE_INJECTION_LEVEL
 
     elif menu.options.agent and settings.WILDCARD_CHAR in menu.options.agent:
-      settings.WILDCARD_CHAR_APPLIED = True
+      settings.WILDCARD_CHAR_APPLIED = settings.USER_AGENT_INJECTION = True
       menu.options.level = settings.HTTP_HEADER_INJECTION_LEVEL
 
     elif menu.options.referer and settings.WILDCARD_CHAR in menu.options.referer:
-      settings.WILDCARD_CHAR_APPLIED = True
+      settings.WILDCARD_CHAR_APPLIED = settings.REFERER_INJECTION = True
       menu.options.level = settings.HTTP_HEADER_INJECTION_LEVEL
 
     elif menu.options.headers and settings.WILDCARD_CHAR in menu.options.headers:
@@ -586,21 +586,24 @@ def assessment_phase():
 Check current assessment phase.
 """
 def check_injection_level():
-  # Checking testable parameters for cookies
-  if menu.options.cookie:
-    if settings.COOKIE_DELIMITER in menu.options.cookie:
-      cookies = menu.options.cookie.split(settings.COOKIE_DELIMITER)
-      for cookie in cookies:
-        if cookie.split("=")[0].strip() in menu.options.test_parameter:
-          menu.options.level = settings.COOKIE_INJECTION_LEVEL
-    elif menu.options.cookie.split("=")[0] in menu.options.test_parameter:
-      menu.options.level = settings.COOKIE_INJECTION_LEVEL
+  try:
+    # Checking testable parameters for cookies
+    if menu.options.cookie:
+      if settings.COOKIE_DELIMITER in menu.options.cookie:
+        cookies = menu.options.cookie.split(settings.COOKIE_DELIMITER)
+        for cookie in cookies:
+          if cookie.split("=")[0].strip() in menu.options.test_parameter:
+            menu.options.level = settings.COOKIE_INJECTION_LEVEL
+      elif menu.options.cookie.split("=")[0] in menu.options.test_parameter:
+        menu.options.level = settings.COOKIE_INJECTION_LEVEL
+    
+    # Checking testable HTTP headers for user-agent / referer / host      
+    if any(x in menu.options.test_parameter for x in settings.HTTP_HEADERS):
+      menu.options.level = settings.HTTP_HEADER_INJECTION_LEVEL
 
-  # Checking testable HTTP headers for user-agent / referer / host
-  if "user-agent" in menu.options.test_parameter or \
-     "referer" in menu.options.test_parameter or \
-     "host" in menu.options.test_parameter:
-    menu.options.level = settings.HTTP_HEADER_INJECTION_LEVEL
+  except Exception as ex:
+    return
+
 
 """
 Procced to the next attack vector.
@@ -1631,8 +1634,9 @@ def is_empty(multi_parameters, http_request_method):
   if settings.IS_JSON:
     try:
       multi_params = ','.join(multi_params)
-      json_data = json.loads(multi_params, object_pairs_hook=OrderedDict)
-      multi_params = flatten(json_data)
+      if is_JSON_check(multi_params):
+        json_data = json.loads(multi_params, object_pairs_hook=OrderedDict)
+        multi_params = flatten(json_data)
     except ValueError as err_msg:
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
@@ -1649,8 +1653,8 @@ def is_empty(multi_parameters, http_request_method):
           elif len(str(multi_params[empty])) == 0 :
             empty_parameters.append(empty)
         except TypeError:
-          warn_msg = "The provided value for parameter '" + str(empty) + "' seems unusable."
-          print(settings.print_warning_msg(warn_msg))
+          # warn_msg = "The provided value for parameter '" + str(empty) + "' seems unusable."
+          # print(settings.print_warning_msg(warn_msg))
           pass
       elif settings.IS_XML:
         if re.findall(r'>(.*)<', empty)[0] == "" or \
