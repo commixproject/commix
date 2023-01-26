@@ -234,24 +234,28 @@ def not_declared_cookies(response):
     candidate = re.search(r'([^;]+);?', response.headers[settings.SET_COOKIE]).group(1)
     if candidate and settings.DECLARED_COOKIES is not False and settings.CRAWLING is False:
       settings.DECLARED_COOKIES = True
-      if settings.CRAWLED_SKIPPED_URLS_NUM != 0:
-        print(settings.SINGLE_WHITESPACE)
-      while True:
-        message = "You have not declared cookie(s), while "
-        message += "server wants to set its own ('" + str(candidate) + "'). "
-        message += "Do you want to use those [Y/n] > "
-        set_cookies = common.read_input(message, default="Y", check_batch=True)
-        if set_cookies in settings.CHOICE_YES:
-          menu.options.cookie = candidate
-          break
-        elif set_cookies in settings.CHOICE_NO:
-          settings.DECLARED_COOKIES = False 
-          break
-        elif set_cookies in settings.CHOICE_QUIT:
-          raise SystemExit()
-        else:
-          common.invalid_option(set_cookies)  
-          pass
+      if menu.options.cookie:
+        menu.options.cookie = menu.options.cookie + settings.COOKIE_DELIMITER + candidate
+        settings.DECLARED_COOKIES = False
+      else:
+        if settings.CRAWLED_SKIPPED_URLS_NUM != 0:
+          print(settings.SINGLE_WHITESPACE)
+        while True:
+          message = "You have not declared cookie(s), while "
+          message += "server wants to set its own ('" + str(candidate) + "'). "
+          message += "Do you want to use those [Y/n] > "
+          set_cookies = common.read_input(message, default="Y", check_batch=True)
+          if set_cookies in settings.CHOICE_YES:
+            menu.options.cookie = candidate
+            break
+          elif set_cookies in settings.CHOICE_NO:
+            settings.DECLARED_COOKIES = False 
+            break
+          elif set_cookies in settings.CHOICE_QUIT:
+            raise SystemExit()
+          else:
+            common.invalid_option(set_cookies)  
+            pass
   except (KeyError, TypeError):
     pass
 
