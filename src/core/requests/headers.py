@@ -221,8 +221,12 @@ def check_http_traffic(request):
 
   # This is useful when handling exotic HTTP errors (i.e requests for authentication).
   except _urllib.error.HTTPError as err:
+    try:
+      page = checks.page_encoding(err, action="encode")
+    except Exception as ex:
+      page = err.read()
     if settings.VERBOSITY_LEVEL != 0:
-      print_http_response(err.info(), err.code, err.read())
+      print_http_response(err.info(), err.code, page)
     
     if (not settings.PERFORM_CRACKING and \
     not settings.IS_JSON and \
