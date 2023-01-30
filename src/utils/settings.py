@@ -241,7 +241,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.7"
-REVISION = "50"
+REVISION = "51"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1072,6 +1072,8 @@ HTTP_ERROR_CODES = [  BAD_REQUEST,
                       SERVICE_UNAVAILABLE,
                       GATEWAY_TIMEOUT
                     ]
+
+HTTP_ERROR_CODES_SUM = []
 
 # End line
 END_LINE = ["\r", "\n", "\r\n"]

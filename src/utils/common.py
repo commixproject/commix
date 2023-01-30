@@ -141,6 +141,16 @@ def days_from_last_update():
     print(settings.print_warning_msg(warn_msg))
 
 """
+Shows all HTTP error codes raised
+"""
+def show_http_error_codes():
+  if settings.HTTP_ERROR_CODES_SUM and settings.VERBOSITY_LEVEL != 0:
+    if any((str(_).startswith('4') or str(_).startswith('5')) and _ != settings.INTERNAL_SERVER_ERROR for _ in settings.HTTP_ERROR_CODES_SUM):
+      debug_msg = "Too many 4xx and/or 5xx HTTP error codes "
+      debug_msg += "could mean that some kind of protection is involved."
+      print(settings.print_bold_debug_msg(debug_msg))
+
+"""
 Automatically create a Github issue with unhandled exception information.
 PS: Greetz @ sqlmap dev team for that great idea! :)
 """

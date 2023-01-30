@@ -155,6 +155,7 @@ def user_aborted(filename, url):
   abort_msg += " phase (Ctrl-C was pressed)."
   print(settings.print_abort_msg(abort_msg))
   logs.print_logs_notification(filename, url)
+  common.show_http_error_codes()
   os._exit(0)
 
 """

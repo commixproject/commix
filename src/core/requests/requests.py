@@ -398,7 +398,7 @@ def request_failed(err_msg):
     else:
       if len(err_msg) != 0:
         print(settings.print_critical_msg(err_msg)) 
-      raise SystemExit() 
+        raise SystemExit() 
 
 """
 Check if target host is vulnerable. (Cookie-based injection)

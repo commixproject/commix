@@ -188,6 +188,11 @@ def check_http_traffic(request):
       if settings.UNAUTHORIZED_ERROR in str(err_msg):
         settings.UNAUTHORIZED = unauthorized = True
         settings.MAX_RETRIES = settings.TOTAL_OF_REQUESTS
+      else:
+        settings.MAX_RETRIES = settings.TOTAL_OF_REQUESTS * 2
+      if settings.VERBOSITY_LEVEL >= 1:
+        debug_msg = "Got " + str(err_msg)
+        print(settings.print_debug_msg(debug_msg))
       if [True for err_code in settings.HTTP_ERROR_CODES if err_code in str(err_msg)]:
         break
       
@@ -238,6 +243,7 @@ def check_http_traffic(request):
       print(settings.SINGLE_WHITESPACE)
     # Check for 3xx, 4xx, 5xx HTTP error codes.
     if str(err.code).startswith(('3', '4', '5')):
+      settings.HTTP_ERROR_CODES_SUM.append(err.code)
       if settings.VERBOSITY_LEVEL >= 2:
         if len(str(err).split(": ")[1]) == 0:
           error_msg = "Non-standard HTTP status code" 

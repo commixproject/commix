@@ -847,6 +847,7 @@ def do_check(url, http_request_method, filename):
     # if not settings.MULTI_TARGETS:
     #   print(settings.SINGLE_WHITESPACE)
     if not settings.CHECK_BOTH_OS and not settings.MULTI_TARGETS:
+      common.show_http_error_codes()
       raise SystemExit()
 
   except KeyboardInterrupt:
