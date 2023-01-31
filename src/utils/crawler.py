@@ -22,6 +22,7 @@ from src.utils import common
 from src.core.injections.controller import checks
 from src.core.requests import headers
 from socket import error as SocketError
+from src.core.requests import proxy
 from src.core.requests import redirection
 from src.thirdparty.six.moves import http_client as _http_client
 from src.thirdparty.six.moves import input as _input
@@ -182,7 +183,10 @@ def request(url):
       request = _urllib.request.Request(url)
     headers.do_check(request)
     headers.check_http_traffic(request)
-    response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
+    if menu.options.proxy: 
+      response = proxy.use_proxy(request)
+    else:
+      response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
     if not menu.options.ignore_redirects:
       href = redirection.do_check(request, url)
       if href != url:

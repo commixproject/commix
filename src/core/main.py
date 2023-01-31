@@ -152,9 +152,6 @@ def check_internet(url):
   try:
     request = _urllib.request.Request(settings.CHECK_INTERNET_ADDRESS)
     headers.do_check(request)
-    # Check if defined any HTTP Proxy (--proxy option).
-    if menu.options.proxy:
-      proxy.do_check(settings.CHECK_INTERNET_ADDRESS)
     examine_request(request, url)
   except:
     print(settings.SINGLE_WHITESPACE)
@@ -190,6 +187,7 @@ def init_request(url):
     if menu.options.pdel and menu.options.pdel in url:
       settings.PARAMETER_DELIMITER = menu.options.pdel
     request = _urllib.request.Request(url)
+    # Check if defined any HTTP Proxy (--proxy option).
   headers.do_check(request)
   if settings.VERBOSITY_LEVEL != 0:
     debug_msg = "Creating " + str(settings.SCHEME).upper() + " requests opener object."
@@ -199,6 +197,8 @@ def init_request(url):
     debug_msg = "Using '" + menu.options.auth_cred + "' pair of " + menu.options.auth_type 
     debug_msg += " HTTP authentication credentials."
     print(settings.print_debug_msg(debug_msg))
+  if menu.options.proxy:
+    proxy.do_check()
   return request
 
 """

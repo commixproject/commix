@@ -19,6 +19,7 @@ from src.utils import menu
 from src.utils import settings
 from src.core.requests import headers
 from src.core.requests import requests
+from src.core.injections.controller import checks
 from src.thirdparty.six.moves import urllib as _urllib
 from src.thirdparty.colorama import Fore, Back, Style, init
 from src.thirdparty.six.moves import http_client as _http_client
@@ -27,24 +28,22 @@ from src.thirdparty.six.moves import http_client as _http_client
 Use the defined HTTP Proxy
 """
 def use_proxy(request):
-  headers.do_check(request)
   try:
+    request.set_proxy(menu.options.proxy, settings.PROXY_SCHEME)
     response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
     return response
   except Exception as err_msg:
-    return requests.request_failed(err_msg)
+    if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR or str(err_msg.code) == settings.BAD_REQUEST:
+      return False 
+    else:
+      return checks.connection_exceptions(err_msg, url=request)
 
 """
  Check if HTTP Proxy is defined.
 """
-def do_check(url):
+def do_check():
   if settings.VERBOSITY_LEVEL != 0:
     info_msg = "Setting the HTTP proxy for all HTTP requests. "
     print(settings.print_info_msg(info_msg))
-  if menu.options.data:
-    request = _urllib.request.Request(url, menu.options.data.encode(settings.DEFAULT_CODEC))
-  else:
-     request = _urllib.request.Request(url)
-  request.set_proxy(menu.options.proxy, settings.PROXY_SCHEME)
 
 # eof 

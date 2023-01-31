@@ -162,8 +162,6 @@ def check_http_traffic(request):
         settings.MULTI_ENCODED_PAYLOAD = []
         menu.options.tamper = settings.USER_SUPPLIED_TAMPER
     try:
-      if menu.options.proxy:
-        request.set_proxy(menu.options.proxy, settings.PROXY_SCHEME)
       response = opener.open(request, timeout=settings.TIMEOUT)
       _ = True
       settings.MAX_RETRIES = settings.TOTAL_OF_REQUESTS * 2

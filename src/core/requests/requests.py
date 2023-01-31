@@ -53,8 +53,6 @@ def estimate_response_time(url, timesec):
   headers.do_check(request)
   start = time.time()
   try:
-    if menu.options.proxy:
-      request.set_proxy(menu.options.proxy, settings.PROXY_SCHEME)
     response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
     response.read(1)
     response.close()
