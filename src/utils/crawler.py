@@ -83,8 +83,10 @@ def normalize_results(output_href):
           if '=' in key and key not in seen:
             results.append(target)
             seen.add(key)
+      no_usable_links(results)
       return results
     elif message in settings.CHOICE_NO:
+      no_usable_links(output_href)
       return output_href
     elif message in settings.CHOICE_QUIT:
       raise SystemExit()

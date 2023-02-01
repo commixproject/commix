@@ -245,36 +245,7 @@ def get_request_response(request):
   headers.check_http_traffic(request)
   # Check if defined any HTTP Proxy.
   if menu.options.proxy:
-    try:
-      response = proxy.use_proxy(request)
-    except _urllib.error.HTTPError as err_msg:
-      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR or str(err_msg.code) == settings.BAD_REQUEST:
-        response = False  
-      elif settings.IGNORE_ERR_MSG == False:
-        err = str(err_msg) + "."
-        if not settings.VERBOSITY_LEVEL != 0 and settings.TIME_BASED_STATE == False or \
-          settings.VERBOSITY_LEVEL != 0 and settings.EVAL_BASED_STATE == None:
-          print(settings.SINGLE_WHITESPACE)
-        if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-          print(settings.SINGLE_WHITESPACE) 
-        print(settings.print_critical_msg(err))
-        continue_tests = checks.continue_tests(err_msg)
-        if continue_tests == True:
-          settings.IGNORE_ERR_MSG = True
-        else:
-          raise SystemExit()
-      response = False 
-    except _urllib.error.URLError as err_msg:
-      if "Connection refused" in err_msg.reason:
-        err_msg =  "The target host is not responding. "
-        err_msg += "Please ensure that is up and try again."
-        if not settings.VERBOSITY_LEVEL != 0 and settings.TIME_BASED_STATE == False or \
-           settings.VERBOSITY_LEVEL != 0 and settings.EVAL_BASED_STATE == None:
-          print(settings.SINGLE_WHITESPACE)
-        if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-          print(settings.SINGLE_WHITESPACE)
-        print(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+    response = proxy.use_proxy(request)
 
   # Check if defined Tor.
   elif menu.options.tor:

@@ -170,8 +170,8 @@ def connection_exceptions(err_msg, url):
       error_msg = str(err_msg.args[0])
     except IndexError:
       error_msg = str(err_msg)
-  if settings.TOTAL_OF_REQUESTS == 1 and settings.VERBOSITY_LEVEL < 2 and not settings.CRAWLING:
-    print(settings.SINGLE_WHITESPACE)
+  # if settings.TOTAL_OF_REQUESTS == 1 and settings.VERBOSITY_LEVEL < 2 and not settings.CRAWLING:
+  #   print(settings.SINGLE_WHITESPACE)
   if any(x in str(error_msg).lower() for x in ["wrong version number", "ssl", "https"]):
     settings.MAX_RETRIES = 1
     error_msg = "Can't establish SSL connection"
@@ -220,6 +220,8 @@ def connection_exceptions(err_msg, url):
     error_msg = error_msg + _
   if len(_) != 0 or not settings.MULTI_TARGETS or not settings.CRAWLING:
     print(settings.print_critical_msg(error_msg))
+    if not settings.MULTI_TARGETS and not settings.CRAWLING:
+      raise SystemExit()
   settings.TOTAL_OF_REQUESTS = settings.TOTAL_OF_REQUESTS + 1
   if settings.MAX_RETRIES > 1:
     time.sleep(settings.DELAY_RETRY)

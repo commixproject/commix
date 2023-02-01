@@ -30,12 +30,14 @@ Use the defined HTTP Proxy
 def use_proxy(request):
   try:
     request.set_proxy(menu.options.proxy, settings.PROXY_SCHEME)
-    response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
-    return response
+    return _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
   except Exception as err_msg:
-    if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR or str(err_msg.code) == settings.BAD_REQUEST:
-      return False 
-    else:
+    try:
+      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR or str(err_msg.code) == settings.BAD_REQUEST:
+        return False
+      else:
+        return checks.connection_exceptions(err_msg, url=request)
+    except:
       return checks.connection_exceptions(err_msg, url=request)
 
 """
