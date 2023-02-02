@@ -210,6 +210,9 @@ def check_http_traffic(request):
     page = checks.page_encoding(response, action="encode")
     response_headers[settings.URI_HTTP_HEADER] = response.geturl()
     response_headers = str(response_headers).strip("\n")
+    # Checks for not declared cookie(s), while server wants to set its own.
+    if not menu.options.drop_set_cookie:
+      checks.not_declared_cookies(response)
     if settings.VERBOSITY_LEVEL > 2 or menu.options.traffic_file:
       print_http_response(response_headers, code, page)
     # Checks regarding a potential CAPTCHA protection mechanism.
@@ -218,12 +221,12 @@ def check_http_traffic(request):
     checks.browser_verification(page)
     # Checks regarding recognition of generic "your ip has been blocked" messages.
     checks.blocked_ip(page)
-    # Checks for not declared cookie(s), while server wants to set its own.
-    if not menu.options.drop_set_cookie:
-      checks.not_declared_cookies(response)
 
   # This is useful when handling exotic HTTP errors (i.e requests for authentication).
   except _urllib.error.HTTPError as err:
+    # Checks for not declared cookie(s), while server wants to set its own.
+    if not menu.options.drop_set_cookie:
+      checks.not_declared_cookies(err)
     try:
       page = checks.page_encoding(err, action="encode")
     except Exception as ex:

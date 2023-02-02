@@ -234,7 +234,12 @@ check for not declared cookie(s)
 """
 def not_declared_cookies(response):
   try:
-    candidate = re.search(r'([^;]+);?', response.headers[settings.SET_COOKIE]).group(1)
+    set_cookie_headers = []
+    for set_cookie_header in response.getheaders():
+      if settings.SET_COOKIE in set_cookie_header:
+        set_cookie_headers.append(re.search(r'([^;]+);?', set_cookie_header[1]).group(1))
+
+    candidate = settings.COOKIE_DELIMITER.join(str(value) for value in set_cookie_headers)
     if candidate and settings.DECLARED_COOKIES is not False and settings.CRAWLING is False:
       settings.DECLARED_COOKIES = True
       if menu.options.cookie:
@@ -245,8 +250,9 @@ def not_declared_cookies(response):
           print(settings.SINGLE_WHITESPACE)
         while True:
           message = "You have not declared cookie(s), while "
-          message += "server wants to set its own ('" + str(candidate) + "'). "
-          message += "Do you want to use those [Y/n] > "
+          message += "server wants to set its own ('" 
+          message += str(re.sub(r"(=[^=;]{10}[^=;])[^=;]+([^=;]{10})", r"\g<1>...\g<2>", candidate))
+          message += "'). Do you want to use those [Y/n] > "
           set_cookies = common.read_input(message, default="Y", check_batch=True)
           if set_cookies in settings.CHOICE_YES:
             menu.options.cookie = candidate
