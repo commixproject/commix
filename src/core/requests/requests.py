@@ -40,6 +40,7 @@ Estimating the response time (in seconds).
 """
 def estimate_response_time(url, timesec):
   stored_auth_creds = False
+  _ = False
   if settings.VERBOSITY_LEVEL != 0:
     debug_msg = "Estimating the target URL response time. "
     sys.stdout.write(settings.print_debug_msg(debug_msg))
@@ -56,7 +57,7 @@ def estimate_response_time(url, timesec):
     response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
     response.read(1)
     response.close()
-
+    _ = True
   except _http_client.InvalidURL as err_msg:
     print(settings.print_critical_msg(err_msg))
     raise SystemExit()
@@ -205,9 +206,9 @@ def estimate_response_time(url, timesec):
   diff = end - start 
   
   if int(diff) < 1:
-    if settings.VERBOSITY_LEVEL != 0 and stored_auth_creds == False:
-      print(settings.SINGLE_WHITESPACE)
     url_time_response = int(diff)
+    if settings.VERBOSITY_LEVEL != 0 and _:
+      print(settings.SINGLE_WHITESPACE)
     if settings.TARGET_OS == "win":
       warn_msg = "Due to the relatively slow response of 'cmd.exe' in target "
       warn_msg += "host, there might be delays during the data extraction procedure."
@@ -344,14 +345,16 @@ def request_failed(err_msg):
       if settings.MULTI_TARGETS:
         err_msg += "Skipping to the next target."
       print(settings.print_critical_msg(err_msg))
-      if menu.options.auth_type and menu.options.auth_cred or settings.MULTI_TARGETS:
+      if (menu.options.auth_type and menu.options.auth_cred) or not settings.MULTI_TARGETS:
         raise SystemExit()
   if settings.INTERNAL_SERVER_ERROR in str(err_msg).lower() or \
      settings.FORBIDDEN_ERROR in str(err_msg).lower() or \
      settings.NOT_FOUND_ERROR in str(err_msg).lower():
     reason = str(err_msg)    
+
   if settings.MULTI_TARGETS:
-    if len(reason) != 0 and menu.options.ignore_code != settings.UNAUTHORIZED_ERROR:
+    if len(reason) != 0 and (not [True for err_code in settings.HTTP_ERROR_CODES if err_code in str(reason)] or \
+      menu.options.ignore_code and menu.options.ignore_code != settings.UNAUTHORIZED_ERROR):
       reason = reason + ". Skipping to the next target."
       print(settings.print_critical_msg(reason))
       raise SystemExit()
@@ -365,7 +368,7 @@ def request_failed(err_msg):
       settings.UNAUTHORIZED_ERROR in str(err_msg).lower():
       return True
     else:
-      if len(err_msg) != 0:
+      if len(err_msg) != 0 and not [True for err_code in settings.HTTP_ERROR_CODES if err_code in str(err_msg)]:
         print(settings.print_critical_msg(err_msg)) 
         raise SystemExit() 
 

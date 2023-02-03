@@ -76,13 +76,16 @@ def normalize_results(output_href):
     if message in settings.CHOICE_YES:
       seen = set()
       for target in output_href:
-        value = "%s%s%s" % (target, '&' if '?' in target else '?', target or "")
-        match = re.search(r"/[^/?]*\?.+\Z", value)
-        if match:
-          key = re.sub(r"=[^=&]*", "=", match.group(0)).strip("&?")
-          if '=' in key and key not in seen:
-            results.append(target)
-            seen.add(key)
+        try:
+          value = "%s%s%s" % (target, '&' if '?' in target else '?', target or "")
+          match = re.search(r"/[^/?]*\?.+\Z", value)
+          if match:
+            key = re.sub(r"=[^=&]*", "=", match.group(0)).strip("&?")
+            if '=' in key and key not in seen:
+              results.append(target)
+              seen.add(key)
+        except TypeError:
+          pass
       no_usable_links(results)
       return results
     elif message in settings.CHOICE_NO:
@@ -334,7 +337,7 @@ def crawler(url, url_num, crawling_list):
       link = 0
       if output_href is not None:
         for url in output_href: 
-          if url not in visited_hrefs:
+          if url not in visited_hrefs and url is not None:
             link += 1
             settings.CRAWLED_URLS_NUM = link
             if settings.SINGLE_WHITESPACE in url:

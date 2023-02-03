@@ -91,7 +91,7 @@ def injection_test(payload, http_request_method, url):
 Evaluate test results.
 """
 def injection_test_results(response, TAG, randvcalc):
-  if response == False:
+  if type(response) is bool and response != True:
     return False
   else:
     html_data = checks.page_encoding(response, action="decode")
