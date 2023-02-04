@@ -333,7 +333,6 @@ def request_failed(err_msg):
       pass
     else:
       err_msg = "Not authorized (" + settings.UNAUTHORIZED_ERROR + "). "
-
       err_msg += "Try to provide right HTTP authentication type ('--auth-type') and valid credentials ('--auth-cred')"
       if menu.options.auth_type and menu.options.auth_cred:
         if settings.MULTI_TARGETS:
@@ -341,12 +340,13 @@ def request_failed(err_msg):
         else:
           err_msg += " or rerun without providing them, in order to perform a dictionary-based attack. "
       else:
-        err_msg += " or rerun by providing option '--ignore-code=" +settings.UNAUTHORIZED_ERROR +"'. "
+        err_msg += " or rerun by providing option '--ignore-code=" + settings.UNAUTHORIZED_ERROR +"'. "
       if settings.MULTI_TARGETS:
         err_msg += "Skipping to the next target."
       print(settings.print_critical_msg(err_msg))
       if (menu.options.auth_type and menu.options.auth_cred) or not settings.MULTI_TARGETS:
         raise SystemExit()
+
   if settings.INTERNAL_SERVER_ERROR in str(err_msg).lower() or \
      settings.FORBIDDEN_ERROR in str(err_msg).lower() or \
      settings.NOT_FOUND_ERROR in str(err_msg).lower():

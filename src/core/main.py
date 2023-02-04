@@ -222,10 +222,11 @@ def url_response(url):
     settings.CHECK_INTERNET = False
   response = examine_request(request, url)
   # Check for URL redirection
-  if not menu.options.ignore_redirects:
-    redirect_url = redirection.do_check(request, url)
-    if redirect_url is not None:
-      url = redirect_url
+  if type(response) is not bool and settings.FOLLOW_REDIRECT:
+    if response.geturl() != url:
+      redirect_url = redirection.do_check(request, url)
+      if redirect_url is not None:
+        url = redirect_url
   return response, url
 
 """
@@ -236,6 +237,8 @@ def init_injection(url):
     debug_msg = "Initializing the knowledge base."
     print(settings.print_debug_msg(debug_msg))
   # Initiate heuristic checks.
+  if not settings.FOLLOW_REDIRECT:
+    settings.FOLLOW_REDIRECT = True
   if settings.SKIP_CODE_INJECTIONS:
     settings.SKIP_CODE_INJECTIONS = False
   if settings.SKIP_COMMAND_INJECTIONS:
@@ -564,7 +567,10 @@ try:
 
   if menu.options.smoke_test:
     smoke_test()
-  
+
+  if menu.options.ignore_redirects:
+    settings.FOLLOW_REDIRECT = False
+
   if settings.STDIN_PARSING or settings.CRAWLING or menu.options.bulkfile or menu.options.shellshock:
     settings.OS_CHECKS_NUM = 1
 

@@ -190,6 +190,8 @@ def request(url):
     headers.check_http_traffic(request)
     if menu.options.proxy: 
       response = proxy.use_proxy(request)
+    elif menu.options.tor:
+      response = tor.use_tor(request)
     else:
       response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
     if not menu.options.ignore_redirects:
