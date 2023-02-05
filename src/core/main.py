@@ -222,9 +222,9 @@ def url_response(url):
     settings.CHECK_INTERNET = False
   response = examine_request(request, url)
   # Check for URL redirection
-  if type(response) is not bool and settings.FOLLOW_REDIRECT:
+  if type(response) is not bool and settings.FOLLOW_REDIRECT and response is not None:
     if response.geturl() != url:
-      redirect_url = redirection.do_check(request, url)
+      redirect_url = redirection.do_check(request, url, response.geturl())
       if redirect_url is not None:
         url = redirect_url
   return response, url
@@ -897,11 +897,11 @@ try:
           if not check_for_injected_url(url):
             settings.SKIP_VULNERABLE_HOST = None
           http_request_method = checks.check_http_method(url)
-          if (settings.CRAWLING and re.search(r"(.*?)\?(.+)", url) or menu.options.shellshock) or settings.MULTI_TARGETS:      
+          if (settings.CRAWLING and re.search(r"(.*?)\?(.+)", url) or menu.options.shellshock) or settings.MULTI_TARGETS:    
             url_num += 1
             perform_check = True
             while True:
-              print(settings.print_message("[" + str(url_num) + "/" + str(len(clean_output_href)) + "] URL - " + url) + "")
+              print(settings.print_message("[" + str(url_num) + "/" + str(len(clean_output_href)) + "] URL - " + url))
               message = "Do you want to use URL #" + str(url_num) + " to perform tests? [Y/n] > "
               next_url = common.read_input(message, default="Y", check_batch=True)
               if next_url in settings.CHOICE_YES:
@@ -933,6 +933,9 @@ try:
                   main(filename, url)
               except:
                 pass 
+          else:
+            url_num += 1
+            print(settings.print_message("[" + str(url_num) + "/" + str(len(clean_output_href)) + "] Skipping URL - " + url))
 
         if url_num == len(clean_output_href):
           raise SystemExit()

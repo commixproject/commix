@@ -35,6 +35,7 @@ from src.utils import simple_http_server
 from src.thirdparty.odict import OrderedDict
 from src.core.convert import hexdecode
 from socket import error as SocketError
+from src.core.requests import requests
 from src.thirdparty.six.moves import input as _input
 from src.thirdparty.six.moves import urllib as _urllib
 from src.thirdparty.colorama import Fore, Back, Style, init
@@ -161,70 +162,14 @@ def user_aborted(filename, url):
 """
 Connection exceptions
 """
-def connection_exceptions(err_msg, url):
-  settings.VALID_URL = False
-  try:
-    error_msg = str(err_msg.args[0]).split("] ")[1] 
-  except IndexError:
-    try:
-      error_msg = str(err_msg.args[0])
-    except IndexError:
-      error_msg = str(err_msg)
-  # if settings.TOTAL_OF_REQUESTS == 1 and settings.VERBOSITY_LEVEL < 2 and not settings.CRAWLING:
-  #   print(settings.SINGLE_WHITESPACE)
-  if any(x in str(error_msg).lower() for x in ["wrong version number", "ssl", "https"]):
-    settings.MAX_RETRIES = 1
-    error_msg = "Can't establish SSL connection"
-  elif "connection refused" in str(error_msg).lower():
-    settings.MAX_RETRIES = 1
-  else:
-    if settings.TOTAL_OF_REQUESTS == 1:
-      if settings.VERBOSITY_LEVEL < 2 and "has closed the connection" in str(error_msg):
-        print(settings.SINGLE_WHITESPACE)
-      if "IncompleteRead" in str(error_msg):
-        warn_msg = "There was an incomplete read error while retrieving data "
-        warn_msg += "from the target URL "
-      else:
-        warn_msg = "The provided target URL seems not reachable. "
-        warn_msg += "In case that it is, please try to re-run using "
-        if not menu.options.random_agent:
-            warn_msg += "'--random-agent' switch and/or "
-        warn_msg += "'--proxy' option."
-        print(settings.print_warning_msg(warn_msg))
-        if not settings.MULTI_TARGETS and not settings.CRAWLING:
-          raise SystemExit()
-    elif "infinite loop" in str(error_msg):
-      error_msg = "Infinite redirect loop detected. " 
-      error_msg += "Please check all provided parameters and/or provide missing ones"
-    elif "BadStatusLine" in str(error_msg):
-      error_msg = "connection dropped or unknown HTTP "
-      error_msg += "status code received."
-    elif "forcibly closed" in str(error_msg) or "Connection is already closed" in str(error_msg):
-      error_msg = "connection was forcibly closed by the target URL."
-    elif settings.UNAUTHORIZED_ERROR in str(error_msg) and not menu.options.ignore_code:
-      error_msg = "Not authorized, try to provide right HTTP "
-      error_msg += "authentication type and valid credentials."
-      if not menu.options.ignore_code == settings.UNAUTHORIZED_ERROR:
-        error_msg += " If this is intended, try to rerun by providing "
-        error_msg += "a valid value for option '--ignore-code'"
-    if settings.MAX_RETRIES > 1 and not settings.CRAWLING:
-      info_msg = settings.APPLICATION.capitalize() + " is going to retry the request(s)."
-      print(settings.print_info_msg(info_msg))
-  error_msg = "Unable to connect to the target URL (Reason: " + str(error_msg.replace("Http", "Http".upper()))  + ")."
-  _ = ""
-  if isinstance(url, str):
-    _ = " Skipping URL '" + str(url) + "'."
-  if settings.MULTI_TARGETS or settings.CRAWLING:
-    if len(_) == 0:
-      _ = " Skipping to the next target."
-    error_msg = error_msg + _
-  if len(_) != 0 or not settings.MULTI_TARGETS or not settings.CRAWLING:
-    print(settings.print_critical_msg(error_msg))
-    if not settings.MULTI_TARGETS and not settings.CRAWLING:
-      raise SystemExit()
+def connection_exceptions(err_msg):
+  requests.request_failed(err_msg)
   settings.TOTAL_OF_REQUESTS = settings.TOTAL_OF_REQUESTS + 1
   if settings.MAX_RETRIES > 1:
     time.sleep(settings.DELAY_RETRY)
+    if not settings.MULTI_TARGETS and not settings.CRAWLING:
+      info_msg = settings.APPLICATION.capitalize() + " is going to retry the request(s)."
+      print(settings.print_info_msg(info_msg))
   if not settings.VALID_URL :
     if settings.TOTAL_OF_REQUESTS == settings.MAX_RETRIES and not settings.MULTI_TARGETS:
       raise SystemExit()
@@ -735,9 +680,10 @@ def continue_tests(err):
         return True
 
   # Possible WAF/IPS/IDS
-  if (str(err.code) == settings.FORBIDDEN_ERROR or settings.NOT_ACCEPTABLE_ERROR) and \
-    not menu.options.skip_waf and \
-    not settings.HOST_INJECTION :
+  if (str(err.code) == settings.FORBIDDEN_ERROR or \
+     str(err.code) == settings.NOT_ACCEPTABLE_ERROR) and \
+     not menu.options.skip_waf and \
+     not settings.HOST_INJECTION :
     # Check if "--skip-waf" option is defined 
     # that skips heuristic detection of WAF/IPS/IDS protection.
     settings.WAF_ENABLED = True
@@ -746,8 +692,8 @@ def continue_tests(err):
 
   try:
     while True:
-      message = "Do you want to ignore the error (" + str(err.code) 
-      message += ") message and continue the tests? [Y/n] > "
+      message = "Do you want to ignore the response HTTP error code (" + str(err.code) 
+      message += ") and continue the tests? [Y/n] > "
       continue_tests = common.read_input(message, default="Y", check_batch=True)
       if continue_tests in settings.CHOICE_YES:
         return True

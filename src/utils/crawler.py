@@ -21,7 +21,7 @@ from src.utils import settings
 from src.utils import common
 from src.core.injections.controller import checks
 from src.core.requests import headers
-from socket import error as SocketError
+from src.core.requests import requests
 from src.core.requests import proxy
 from src.core.requests import redirection
 from src.thirdparty.six.moves import http_client as _http_client
@@ -180,30 +180,7 @@ def store_hrefs(href, identified_hrefs, redirection):
 Do a request to target URL.
 """
 def request(url):
-  try:
-    # Check if defined POST data
-    if menu.options.data:
-      request = _urllib.request.Request(url, menu.options.data.encode(settings.DEFAULT_CODEC))
-    else:
-      request = _urllib.request.Request(url)
-    headers.do_check(request)
-    headers.check_http_traffic(request)
-    if menu.options.proxy: 
-      response = proxy.use_proxy(request)
-    elif menu.options.tor:
-      response = tor.use_tor(request)
-    else:
-      response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
-    if not menu.options.ignore_redirects:
-      href = redirection.do_check(request, url)
-      if href != url:
-        store_hrefs(href, identified_hrefs=True, redirection=True)
-    return response
-  except (SocketError, _urllib.error.HTTPError, _urllib.error.URLError, _http_client.BadStatusLine, _http_client.InvalidURL, Exception) as err_msg:
-    if url not in settings.HREF_SKIPPED:
-      settings.HREF_SKIPPED.append(url)
-      settings.CRAWLED_SKIPPED_URLS_NUM += 1
-      checks.connection_exceptions(err_msg, url)
+  return requests.crawler_request(url)
 
 """
 Enable crawler.

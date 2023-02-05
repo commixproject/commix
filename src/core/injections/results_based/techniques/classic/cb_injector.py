@@ -96,7 +96,7 @@ def injection_test(payload, http_request_method, url):
 Evaluate test results.
 """
 def injection_test_results(response, TAG, randvcalc):
-  if type(response) is bool and response != True:
+  if type(response) is bool and response != True or response is None:
     return False
   else:
     # Check the execution results

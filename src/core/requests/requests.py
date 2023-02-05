@@ -17,6 +17,7 @@ import re
 import sys
 import time
 import socket
+from socket import error as SocketError
 from src.utils import menu
 from os.path import splitext
 from src.utils import settings
@@ -25,15 +26,49 @@ from src.thirdparty.six.moves import http_client as _http_client
 # accept overly long result lines
 _http_client._MAXLINE = 1 * 1024 * 1024
 from src.utils import common
+from src.utils import crawler
 from src.core.requests import tor
 from src.core.requests import proxy
 from src.core.requests import headers
+from src.core.requests import requests
 from src.core.requests import parameters
+from src.core.requests import redirection
 from src.core.requests import authentication
 from src.core.injections.controller import checks
 from src.thirdparty.six.moves import input as _input
 from src.thirdparty.six.moves import urllib as _urllib
+from src.thirdparty.six.moves import http_client as _http_client
 from src.thirdparty.colorama import Fore, Back, Style, init
+
+
+"""
+Do a request to target URL.
+"""
+def crawler_request(url):
+  try:
+    if menu.options.data:
+      request = _urllib.request.Request(url, menu.options.data.encode(settings.DEFAULT_CODEC))
+    else:
+      request = _urllib.request.Request(url)
+    headers.do_check(request)
+    headers.check_http_traffic(request)
+    if menu.options.proxy: 
+      response = proxy.use_proxy(request)
+    elif menu.options.tor:
+      response = tor.use_tor(request)
+    else:
+      response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
+    if type(response) is not bool and settings.FOLLOW_REDIRECT and response is not None:
+      if response.geturl() != url:
+        href = redirection.do_check(request, url, response.geturl())
+        if href != url:
+          crawler.store_hrefs(href, identified_hrefs=True, redirection=True)
+    return response
+  except (SocketError, _urllib.error.HTTPError, _urllib.error.URLError, _http_client.BadStatusLine, _http_client.InvalidURL, Exception) as err_msg:
+    if url not in settings.HREF_SKIPPED:
+      settings.HREF_SKIPPED.append(url)
+      settings.CRAWLED_SKIPPED_URLS_NUM += 1
+      request_failed(err_msg)
 
 """
 Estimating the response time (in seconds).
@@ -308,6 +343,7 @@ def get_request_response(request):
 Exceptions regarding requests failure(s)
 """
 def request_failed(err_msg):
+  settings.VALID_URL = False
   try:
     error_msg = str(err_msg.args[0]).split("] ")[1] 
   except IndexError:
@@ -315,62 +351,95 @@ def request_failed(err_msg):
       error_msg = str(err_msg.args[0])
     except IndexError:
       error_msg = str(err_msg)
-  if any(x in str(error_msg).lower() for x in ["connection refused", "timeout"]):
-    err = "Unable to connect to "
-    if menu.options.proxy:
-      err += "proxy"
-    else:
-      err += "the target URL"
-    err = err + " (Reason: " + str(error_msg)  + ")."
-    print(settings.print_critical_msg(err))
-    raise SystemExit()
 
-  settings.VALID_URL = False
-  reason = ""
-  if settings.UNAUTHORIZED_ERROR in str(err_msg).lower():
-    reason = str(err_msg)
-    if menu.options.ignore_code == settings.UNAUTHORIZED_ERROR:
-      pass
+  if any(x in str(error_msg).lower() for x in ["wrong version number", "ssl", "https"]):
+    settings.MAX_RETRIES = 1
+    error_msg = "Can't establish SSL connection. "
+    if settings.MULTI_TARGETS or settings.CRAWLING:
+      error_msg = error_msg + "Skipping to the next target."
+    print(settings.print_critical_msg(error_msg))
+    if not settings.CRAWLING:
+      raise SystemExit()
+    else:
+      return True
+
+  elif any(x in str(error_msg).lower() for x in ["connection refused", "timeout"]):
+    settings.MAX_RETRIES = 1
+    err = "Unable to connect to the target URL"
+    if menu.options.proxy:
+      err += " or proxy"
+    err = err + " (Reason: " + str(error_msg)  + "). "
+    if settings.MULTI_TARGETS or settings.CRAWLING:
+      err = err + "Skipping to the next target."
+    error_msg = err  
+    print(settings.print_critical_msg(error_msg))
+    if not settings.CRAWLING:
+      raise SystemExit()
+    else:
+      return True
+
+  elif settings.UNAUTHORIZED_ERROR in str(err_msg).lower():
+    if menu.options.ignore_code == settings.UNAUTHORIZED_ERROR or settings.PERFORM_CRACKING:
+      return True
     else:
       err_msg = "Not authorized (" + settings.UNAUTHORIZED_ERROR + "). "
       err_msg += "Try to provide right HTTP authentication type ('--auth-type') and valid credentials ('--auth-cred')"
       if menu.options.auth_type and menu.options.auth_cred:
-        if settings.MULTI_TARGETS:
+        if settings.MULTI_TARGETS or settings.CRAWLING:
           err_msg += ". "
         else:
           err_msg += " or rerun without providing them, in order to perform a dictionary-based attack. "
       else:
         err_msg += " or rerun by providing option '--ignore-code=" + settings.UNAUTHORIZED_ERROR +"'. "
-      if settings.MULTI_TARGETS:
+      if settings.MULTI_TARGETS or settings.CRAWLING:
         err_msg += "Skipping to the next target."
       print(settings.print_critical_msg(err_msg))
-      if (menu.options.auth_type and menu.options.auth_cred) or not settings.MULTI_TARGETS:
+    if not settings.CRAWLING:
+      if menu.options.auth_type and menu.options.auth_cred:
         raise SystemExit()
 
-  if settings.INTERNAL_SERVER_ERROR in str(err_msg).lower() or \
-     settings.FORBIDDEN_ERROR in str(err_msg).lower() or \
-     settings.NOT_FOUND_ERROR in str(err_msg).lower():
-    reason = str(err_msg)    
-
-  if settings.MULTI_TARGETS:
-    if len(reason) != 0 and (not [True for err_code in settings.HTTP_ERROR_CODES if err_code in str(reason)] or \
-      menu.options.ignore_code and menu.options.ignore_code != settings.UNAUTHORIZED_ERROR):
-      reason = reason + ". Skipping to the next target."
-      print(settings.print_critical_msg(reason))
-      raise SystemExit()
-    if settings.EOF:
-      print(settings.SINGLE_WHITESPACE) 
-    return False 
-  else:
-    err_msg = reason
-    if settings.IDENTIFIED_WARNINGS or settings.IDENTIFIED_PHPINFO or settings.IDENTIFIED_COMMAND_INJECTION or \
-      (menu.options.ignore_code and menu.options.ignore_code in str(err_msg).lower()) or \
-      settings.UNAUTHORIZED_ERROR in str(err_msg).lower():
-      return True
+  elif settings.TOTAL_OF_REQUESTS == 1:
+    if "IncompleteRead" in str(error_msg):
+      error_msg = "There was an incomplete read error while retrieving data "
+      error_msg += "from the target URL."
+    elif "infinite loop" in str(error_msg):
+      error_msg = "Infinite redirect loop detected. " 
+      error_msg += "Please check all provided parameters and/or provide missing ones."
+    elif "BadStatusLine" in str(error_msg):
+      error_msg = "Connection dropped or unknown HTTP "
+      error_msg += "status code received."
+    elif "forcibly closed" in str(error_msg) or "Connection is already closed" in str(error_msg):
+      error_msg = "Connection was forcibly closed by the target URL."
+    elif [True for err_code in settings.HTTP_ERROR_CODES if err_code in str(error_msg)]:
+      status_code = [err_code for err_code in settings.HTTP_ERROR_CODES if err_code in str(error_msg)]
+      if not settings.NOT_FOUND_ERROR in str(err_msg).lower():
+        warn_msg = "The web server responded with an HTTP error code (" + str(status_code[0]) + ") which could interfere with the results of the tests."
+        print(settings.print_warning_msg(warn_msg))
+        return True
     else:
-      if len(err_msg) != 0 and not [True for err_code in settings.HTTP_ERROR_CODES if err_code in str(err_msg)]:
-        print(settings.print_critical_msg(err_msg)) 
-        raise SystemExit() 
+      error_msg = "The provided target URL seems not reachable. "
+      error_msg += "In case that it is, please try to re-run using "
+      if not menu.options.random_agent:
+          error_msg += "'--random-agent' switch and/or "
+      error_msg += "'--proxy' option."
+    print(settings.print_critical_msg(error_msg))
+    if not settings.CRAWLING:
+        raise SystemExit()
+    else:
+      return True
+
+  elif settings.IDENTIFIED_WARNINGS or settings.IDENTIFIED_PHPINFO or settings.IDENTIFIED_COMMAND_INJECTION or \
+  (menu.options.ignore_code and menu.options.ignore_code in str(error_msg).lower()):
+    return True
+
+  else:
+    if settings.VERBOSITY_LEVEL >= 1:
+      if [True for err_code in settings.HTTP_ERROR_CODES if err_code in str(error_msg)]:
+        debug_msg = "Got " + str(err_msg)
+        print(settings.print_debug_msg(debug_msg))
+      else:
+        print(settings.print_critical_msg(err_msg))
+    return True
 
 """
 Check if target host is vulnerable. (Cookie-based injection)

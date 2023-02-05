@@ -24,15 +24,16 @@ except ImportError:
 from src.utils import menu
 from src.utils import settings
 from src.utils import common
+from src.core.requests import requests
 from socket import error as SocketError
-from src.thirdparty.six.moves import http_client as _http_client
 from src.core.injections.controller import checks
 from src.thirdparty.six.moves import input as _input
 from src.thirdparty.six.moves import urllib as _urllib
+from src.thirdparty.six.moves import http_client as _http_client
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 
-def do_check(request, url):
+def do_check(request, url, redirect_url):
   """
   This functinality is based on Filippo's Valsorda script [1].
   ---
@@ -58,12 +59,17 @@ def do_check(request, url):
         err_msg = str(_urllib.error.HTTPError(request.get_full_url(), code, msg, headers, fp)).replace(": "," (")
         print(settings.print_critical_msg(err_msg + ")."))
         raise SystemExit()
-  
-  opener = _urllib.request.build_opener(RedirectHandler())
+
   try:
-    response = opener.open(request, timeout=settings.TIMEOUT)
-    if url == response.geturl() or (settings.CRAWLING and response.geturl() in settings.HREF_SKIPPED):
-      return response.geturl()
+    opener = _urllib.request.build_opener(RedirectHandler())
+    _urllib.request.install_opener(opener)  
+    response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
+  except (SocketError, _urllib.error.HTTPError, _urllib.error.URLError, _http_client.BadStatusLine, _http_client.InvalidURL) as err_msg:
+    requests.crawler_request(redirect_url)
+
+  try:
+    if settings.CRAWLING and redirect_url in settings.HREF_SKIPPED:
+      return redirect_url
     elif settings.CRAWLING and url in settings.HREF_SKIPPED:
       return url    
     else:
@@ -71,16 +77,16 @@ def do_check(request, url):
         if not settings.FOLLOW_REDIRECT:
           if settings.CRAWLED_URLS_NUM != 0 and settings.CRAWLED_SKIPPED_URLS_NUM != 0:
             print(settings.SINGLE_WHITESPACE)
-        message = "Got a " + str(settings.REDIRECT_CODE) + " redirect to '" + response.geturl()
+        message = "Got a " + str(settings.REDIRECT_CODE) + " redirect to '" + redirect_url
         message += "'. Do you want to follow? [Y/n] > "
         redirection_option = common.read_input(message, default="Y", check_batch=True) 
         if redirection_option in settings.CHOICE_YES:
           settings.FOLLOW_REDIRECT = True
-          info_msg = "Following redirection to '" + response.geturl() + "'. "
+          info_msg = "Following redirection to '" + redirect_url + "'. "
           print(settings.print_info_msg(info_msg))
           if settings.CRAWLING:
-            settings.HREF_SKIPPED.append(response.geturl())
-          return checks.check_http_s(response.geturl())
+            settings.HREF_SKIPPED.append(url)
+          return checks.check_http_s(redirect_url)
         elif redirection_option in settings.CHOICE_NO:
           settings.FOLLOW_REDIRECT = False
           if settings.CRAWLING:
@@ -91,12 +97,6 @@ def do_check(request, url):
         else:
           common.invalid_option(redirection_option)  
           pass
-
-  except (SocketError, _urllib.error.HTTPError, _urllib.error.URLError, _http_client.BadStatusLine, _http_client.InvalidURL) as err_msg:
-    if settings.VALID_URL: 
-      checks.connection_exceptions(err_msg, request)
-    else:
-      return url
 
   except AttributeError:
     return url

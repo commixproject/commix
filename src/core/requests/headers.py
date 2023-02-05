@@ -138,7 +138,7 @@ def check_http_traffic(request):
         self.do_open(connection, req)
         return super(connection_handler, self).http_open(req)
       except (SocketError, _urllib.error.HTTPError, _urllib.error.URLError, _http_client.BadStatusLine, _http_client.InvalidURL, Exception) as err_msg:
-        checks.connection_exceptions(err_msg, url=req)
+        checks.connection_exceptions(err_msg)
 
     def https_open(self, req):
       try:
@@ -146,7 +146,7 @@ def check_http_traffic(request):
         self.do_open(connection, req)
         return super(connection_handler, self).https_open(req)
       except (SocketError, _urllib.error.HTTPError, _urllib.error.URLError, _http_client.BadStatusLine, _http_client.InvalidURL, Exception) as err_msg:
-        checks.connection_exceptions(err_msg, url=req)
+        checks.connection_exceptions(err_msg)
 
   opener = _urllib.request.build_opener(connection_handler())
 
@@ -188,9 +188,6 @@ def check_http_traffic(request):
         settings.MAX_RETRIES = settings.TOTAL_OF_REQUESTS
       else:
         settings.MAX_RETRIES = settings.TOTAL_OF_REQUESTS * 2
-      if settings.VERBOSITY_LEVEL >= 1:
-        debug_msg = "Got " + str(err_msg)
-        print(settings.print_debug_msg(debug_msg))
       if [True for err_code in settings.HTTP_ERROR_CODES if err_code in str(err_msg)]:
         break
       
@@ -199,7 +196,7 @@ def check_http_traffic(request):
         pass
       else:
         if not settings.INIT_TEST:
-          checks.connection_exceptions(err_msg, url=request)
+          checks.connection_exceptions(err_msg)
         break
 
   try:

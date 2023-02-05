@@ -170,7 +170,6 @@ def cb_injection_handler(url, timesec, filename, http_request_method, injection_
               # Evaluate test results.
               time.sleep(timesec)
               shell = cb_injector.injection_test_results(response, TAG, randvcalc)
-
               if settings.VERBOSITY_LEVEL == 0:
                 percent = ((i*100)/total)
                 float_percent = "{0:.1f}".format(round(((i*100)/(total*1.0)),2))
