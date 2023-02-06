@@ -680,20 +680,19 @@ def continue_tests(err):
         return True
 
   # Possible WAF/IPS/IDS
-  if (str(err.code) == settings.FORBIDDEN_ERROR or \
-     str(err.code) == settings.NOT_ACCEPTABLE_ERROR) and \
-     not menu.options.skip_waf and \
-     not settings.HOST_INJECTION :
-    # Check if "--skip-waf" option is defined 
-    # that skips heuristic detection of WAF/IPS/IDS protection.
-    settings.WAF_ENABLED = True
-    warn_msg = "It seems that target is protected by some kind of WAF/IPS/IDS."
-    print(settings.print_warning_msg(warn_msg))
-
   try:
+    if (str(err.code) == settings.FORBIDDEN_ERROR or \
+       str(err.code) == settings.NOT_ACCEPTABLE_ERROR) and \
+       not menu.options.skip_waf and \
+       not settings.HOST_INJECTION :
+      # Check if "--skip-waf" option is defined (to skip heuristic detection of WAF/IPS/IDS protection).
+      settings.WAF_ENABLED = True
+      warn_msg = "It seems that target is protected by some kind of WAF/IPS/IDS."
+      print(settings.print_warning_msg(warn_msg))
+
     while True:
-      message = "Do you want to ignore the response HTTP error code (" + str(err.code) 
-      message += ") and continue the tests? [Y/n] > "
+      message = "Do you want to ignore the response HTTP error code '" + str(err.code) 
+      message += "' and continue the tests? [Y/n] > "
       continue_tests = common.read_input(message, default="Y", check_batch=True)
       if continue_tests in settings.CHOICE_YES:
         return True
@@ -704,6 +703,8 @@ def continue_tests(err):
       else:
         common.invalid_option(continue_tests)  
         pass
+  except AttributeError:
+    pass
   except KeyboardInterrupt:
     raise
 

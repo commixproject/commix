@@ -218,24 +218,15 @@ def estimate_response_time(url, timesec):
     ignore_end = time.time()
     start = start - (ignore_start - ignore_end)
 
-  except socket.timeout:
-    if settings.VERBOSITY_LEVEL != 0:
-      print(settings.SINGLE_WHITESPACE)
-    err_msg = "The connection to target URL has timed out."
-    print(settings.print_critical_msg(err_msg) + "\n")
-    raise SystemExit()
-
-  except _urllib.error.URLError as err_msg:
-    if settings.VERBOSITY_LEVEL != 0:
-      print(settings.SINGLE_WHITESPACE)
-    print(settings.print_critical_msg(str(err_msg.reason) + "."))
-    raise SystemExit()
 
   except ValueError as err_msg:
     if settings.VERBOSITY_LEVEL != 0:
       print(settings.SINGLE_WHITESPACE)
     print(settings.print_critical_msg(str(err_msg) + "."))
     raise SystemExit()
+
+  except Exception as err_msg:
+    request_failed(err_msg)
 
   end = time.time()
   diff = end - start 
@@ -274,76 +265,11 @@ def estimate_response_time(url, timesec):
   return timesec, url_time_response
 
 """
-Get the response of the request
-"""
-def get_request_response(request):
-
-  headers.check_http_traffic(request)
-  # Check if defined any HTTP Proxy.
-  if menu.options.proxy:
-    response = proxy.use_proxy(request)
-
-  # Check if defined Tor.
-  elif menu.options.tor:
-    try:
-      response = tor.use_tor(request)
-    except _urllib.error.HTTPError as err_msg:
-      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR or str(err_msg.code) == settings.BAD_REQUEST:
-        response = False  
-      elif settings.IGNORE_ERR_MSG == False:
-        err = str(err_msg) + "."
-        if not settings.VERBOSITY_LEVEL != 0 and settings.TIME_BASED_STATE == False or \
-          settings.VERBOSITY_LEVEL != 0 and settings.EVAL_BASED_STATE == None:
-          print(settings.SINGLE_WHITESPACE)
-        if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-          print(settings.SINGLE_WHITESPACE) 
-        print(settings.print_critical_msg(err))
-        continue_tests = checks.continue_tests(err_msg)
-        if continue_tests == True:
-          settings.IGNORE_ERR_MSG = True
-        else:
-          raise SystemExit()
-      response = False 
-    except _urllib.error.URLError as err_msg:
-      err_msg = str(err_msg.reason).split(settings.SINGLE_WHITESPACE)[2:]
-      err_msg = ' '.join(err_msg)+ "."
-      if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-        print(settings.SINGLE_WHITESPACE)
-      print(settings.print_critical_msg(err_msg))
-      raise SystemExit()
-
-  else:
-    try:
-      response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
-    except _urllib.error.HTTPError as err_msg:
-      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR or str(err_msg.code) == settings.BAD_REQUEST:
-        response = False  
-      elif settings.IGNORE_ERR_MSG == False:
-        if not str(err_msg.code) == str(menu.options.ignore_code):
-          err = str(err_msg) + "."
-          if settings.VERBOSITY_LEVEL < 2:
-            print("\r" + settings.print_critical_msg(err) + 30 * settings.SINGLE_WHITESPACE)
-
-        continue_tests = checks.continue_tests(err_msg)
-        if continue_tests == True:
-          settings.IGNORE_ERR_MSG = True
-        else:
-          raise SystemExit()
-      response = False  
-    except _urllib.error.URLError as err_msg:
-      err_msg = str(err_msg.reason).split(settings.SINGLE_WHITESPACE)[2:]
-      err_msg = ' '.join(err_msg)+ "."
-      if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-        print(settings.SINGLE_WHITESPACE)
-      print(settings.print_critical_msg(err_msg))
-      raise SystemExit()
-  return response
-
-"""
 Exceptions regarding requests failure(s)
 """
 def request_failed(err_msg):
   settings.VALID_URL = False
+
   try:
     error_msg = str(err_msg.args[0]).split("] ")[1] 
   except IndexError:
@@ -361,7 +287,7 @@ def request_failed(err_msg):
     if not settings.CRAWLING:
       raise SystemExit()
     else:
-      return True
+      return False
 
   elif any(x in str(error_msg).lower() for x in ["connection refused", "timeout"]):
     settings.MAX_RETRIES = 1
@@ -376,11 +302,11 @@ def request_failed(err_msg):
     if not settings.CRAWLING:
       raise SystemExit()
     else:
-      return True
+      return False
 
   elif settings.UNAUTHORIZED_ERROR in str(err_msg).lower():
     if menu.options.ignore_code == settings.UNAUTHORIZED_ERROR or settings.PERFORM_CRACKING:
-      return True
+      return False
     else:
       err_msg = "Not authorized (" + settings.UNAUTHORIZED_ERROR + "). "
       err_msg += "Try to provide right HTTP authentication type ('--auth-type') and valid credentials ('--auth-cred')"
@@ -412,10 +338,11 @@ def request_failed(err_msg):
       error_msg = "Connection was forcibly closed by the target URL."
     elif [True for err_code in settings.HTTP_ERROR_CODES if err_code in str(error_msg)]:
       status_code = [err_code for err_code in settings.HTTP_ERROR_CODES if err_code in str(error_msg)]
+      warn_msg = "The web server responded with an HTTP error code '" + str(status_code[0]) + "' which could interfere with the results of the tests."
+      print(settings.print_warning_msg(warn_msg))
       if not settings.NOT_FOUND_ERROR in str(err_msg).lower():
-        warn_msg = "The web server responded with an HTTP error code (" + str(status_code[0]) + ") which could interfere with the results of the tests."
-        print(settings.print_warning_msg(warn_msg))
-        return True
+        return False
+      return True
     else:
       error_msg = "The provided target URL seems not reachable. "
       error_msg += "In case that it is, please try to re-run using "
@@ -424,13 +351,26 @@ def request_failed(err_msg):
       error_msg += "'--proxy' option."
     print(settings.print_critical_msg(error_msg))
     if not settings.CRAWLING:
-        raise SystemExit()
+      raise SystemExit()
     else:
-      return True
+      return False
 
   elif settings.IDENTIFIED_WARNINGS or settings.IDENTIFIED_PHPINFO or settings.IDENTIFIED_COMMAND_INJECTION or \
   (menu.options.ignore_code and menu.options.ignore_code in str(error_msg).lower()):
-    return True
+    return False
+
+  elif settings.IGNORE_ERR_MSG == False:
+    if menu.options.skip_heuristics and settings.VERBOSITY_LEVEL == 0:
+      print(settings.SINGLE_WHITESPACE)
+    continue_tests = checks.continue_tests(err_msg)
+    if continue_tests == True:
+      settings.IGNORE_ERR_MSG = True
+      return False
+    else:
+      if not settings.CRAWLING:
+        raise SystemExit()
+      else:
+        return False
 
   else:
     if settings.VERBOSITY_LEVEL >= 1:
@@ -439,7 +379,32 @@ def request_failed(err_msg):
         print(settings.print_debug_msg(debug_msg))
       else:
         print(settings.print_critical_msg(err_msg))
-    return True
+    return False
+
+"""
+Get the response of the request
+"""
+def get_request_response(request):
+
+  headers.check_http_traffic(request)
+  if menu.options.proxy:
+    try:
+      proxy = request.set_proxy(menu.options.proxy, settings.PROXY_SCHEME)
+      response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
+    except Exception as err_msg:
+      response = request_failed(err_msg)
+  elif menu.options.tor:
+    try:
+      response = tor.use_tor(request)
+    except Exception as err_msg:
+      response = request_failed(err_msg)
+  else:
+    try:
+      response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
+    except Exception as err_msg:
+      response = request_failed(err_msg)
+
+  return response
 
 """
 Check if target host is vulnerable. (Cookie-based injection)
@@ -483,91 +448,23 @@ def cookie_injection(url, vuln_parameter, payload):
     start = time.time()
 
   proxy = None 
-  #response = inject_cookie(url, vuln_parameter, payload, proxy)
-
-  # Check if defined any HTTP Proxy.
   if menu.options.proxy:
     try:
       proxy = _urllib.request.ProxyHandler({settings.SCHEME : menu.options.proxy})
       response = inject_cookie(url, vuln_parameter, payload, proxy)
-    except _urllib.error.HTTPError as err_msg:
-      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR or str(err_msg.code) == settings.BAD_REQUEST:
-        response = False  
-      elif settings.IGNORE_ERR_MSG == False:
-        err_msg = str(err_msg) + "."
-        print("\n" + settings.print_critical_msg(err_msg))
-        continue_tests = checks.continue_tests(err)
-        if continue_tests == True:
-          settings.IGNORE_ERR_MSG = True
-        else:
-          raise SystemExit()
-      response = False  
-    except _urllib.error.URLError as err_msg:
-      err_msg = str(err_msg.reason).split(settings.SINGLE_WHITESPACE)[2:]
-      err_msg = ' '.join(err_msg)+ "."
-      if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-        print(settings.SINGLE_WHITESPACE)
-      print(settings.print_critical_msg(err_msg))
-      raise SystemExit()
-
-  # Check if defined Tor.
+    except Exception as err_msg:
+      response = request_failed(err_msg)
   elif menu.options.tor:
     try:
       proxy = _urllib.request.ProxyHandler({settings.TOR_HTTP_PROXY_SCHEME:settings.TOR_HTTP_PROXY_IP + ":" + settings.TOR_HTTP_PROXY_PORT})
       response = inject_cookie(url, vuln_parameter, payload, proxy)
-    except _urllib.error.HTTPError as err_msg:
-      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR or str(err_msg.code) == settings.BAD_REQUEST:
-        response = False  
-      elif settings.IGNORE_ERR_MSG == False:
-        err = str(err_msg) + "."
-        if not settings.VERBOSITY_LEVEL != 0 and settings.TIME_BASED_STATE == False or \
-          settings.VERBOSITY_LEVEL != 0 and settings.EVAL_BASED_STATE == None:
-          print(settings.SINGLE_WHITESPACE)
-        if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-          print(settings.SINGLE_WHITESPACE) 
-        print(settings.print_critical_msg(err))
-        continue_tests = checks.continue_tests(err_msg)
-        if continue_tests == True:
-          settings.IGNORE_ERR_MSG = True
-        else:
-          raise SystemExit()
-      response = False 
-    except _urllib.error.URLError as err_msg:
-      err_msg = str(err_msg.reason).split(settings.SINGLE_WHITESPACE)[2:]
-      err_msg = ' '.join(err_msg)+ "."
-      if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-        print(settings.SINGLE_WHITESPACE)
-      print(settings.print_critical_msg(err_msg))
-      raise SystemExit()
-
+    except Exception as err_msg:
+      response = request_failed(err_msg)
   else:
     try:
       response = inject_cookie(url, vuln_parameter, payload, proxy)
-    except _urllib.error.HTTPError as err_msg:
-      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR or str(err_msg.code) == settings.BAD_REQUEST:
-        response = False  
-      elif settings.IGNORE_ERR_MSG == False:
-        err = str(err_msg) + "."
-        if not settings.VERBOSITY_LEVEL != 0 and settings.TIME_BASED_STATE == False or \
-          settings.VERBOSITY_LEVEL != 0 and settings.EVAL_BASED_STATE == None:
-          print(settings.SINGLE_WHITESPACE)
-        if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-          print(settings.SINGLE_WHITESPACE) 
-        print(settings.print_critical_msg(err))
-        continue_tests = checks.continue_tests(err_msg)
-        if continue_tests == True:
-          settings.IGNORE_ERR_MSG = True
-        else:
-          raise SystemExit()
-      response = False 
-
-    except _urllib.error.URLError as err_msg:
-      err_msg = str(err_msg.reason).split(settings.SINGLE_WHITESPACE)[2:]
-      err_msg = ' '.join(err_msg)+ "."
-      if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-        print(settings.SINGLE_WHITESPACE)
-      print(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+    except Exception as err_msg:
+      response = request_failed(err_msg)
 
   if settings.TIME_RELATIVE_ATTACK :
     end  = time.time()
@@ -611,94 +508,23 @@ def user_agent_injection(url, vuln_parameter, payload):
     start = time.time()
 
   proxy = None 
-  #response = inject_user_agent(url, vuln_parameter, payload, proxy)
-  # Check if defined any HTTP Proxy.
   if menu.options.proxy:
     try:
       proxy = _urllib.request.ProxyHandler({settings.SCHEME : menu.options.proxy})
       response = inject_user_agent(url, vuln_parameter, payload, proxy)
-    except _urllib.error.HTTPError as err_msg:
-      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR or str(err_msg.code) == settings.BAD_REQUEST:
-        response = False  
-      elif settings.IGNORE_ERR_MSG == False:
-        err = str(err_msg) + "."
-        if not settings.VERBOSITY_LEVEL != 0 and settings.TIME_BASED_STATE == False or \
-          settings.VERBOSITY_LEVEL != 0 and settings.EVAL_BASED_STATE == None:
-          print(settings.SINGLE_WHITESPACE)
-        if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-          print(settings.SINGLE_WHITESPACE) 
-        print(settings.print_critical_msg(err))
-        continue_tests = checks.continue_tests(err_msg)
-        if continue_tests == True:
-          settings.IGNORE_ERR_MSG = True
-        else:
-          raise SystemExit()
-      response = False 
-    except _urllib.error.URLError as err_msg:
-      err_msg = str(err_msg.reason).split(settings.SINGLE_WHITESPACE)[2:]
-      err_msg = ' '.join(err_msg)+ "."
-      if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-        print(settings.SINGLE_WHITESPACE)
-      print(settings.print_critical_msg(err_msg))
-      raise SystemExit()
-
-  # Check if defined Tor.
+    except Exception as err_msg:
+      response = request_failed(err_msg)
   elif menu.options.tor:
     try:
       proxy = _urllib.request.ProxyHandler({settings.TOR_HTTP_PROXY_SCHEME:settings.TOR_HTTP_PROXY_IP + ":" + settings.TOR_HTTP_PROXY_PORT})
       response = inject_user_agent(url, vuln_parameter, payload, proxy)
-    except _urllib.error.HTTPError as err_msg:
-      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR or str(err_msg.code) == settings.BAD_REQUEST:
-        response = False  
-      elif settings.IGNORE_ERR_MSG == False:
-        err = str(err_msg) + "."
-        if not settings.VERBOSITY_LEVEL != 0 and settings.TIME_BASED_STATE == False or \
-          settings.VERBOSITY_LEVEL != 0 and settings.EVAL_BASED_STATE == None:
-          print(settings.SINGLE_WHITESPACE)
-        if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-          print(settings.SINGLE_WHITESPACE) 
-        print(settings.print_critical_msg(err))
-        continue_tests = checks.continue_tests(err_msg)
-        if continue_tests == True:
-          settings.IGNORE_ERR_MSG = True
-        else:
-          raise SystemExit()
-      response = False 
-    except _urllib.error.URLError as err_msg:
-      err_msg = str(err_msg.reason).split(settings.SINGLE_WHITESPACE)[2:]
-      err_msg = ' '.join(err_msg)+ "."
-      if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-        print(settings.SINGLE_WHITESPACE)
-      print(settings.print_critical_msg(err_msg))
-      raise SystemExit()
-
+    except Exception as err_msg:
+      response = request_failed(err_msg)
   else:
     try:
       response = inject_user_agent(url, vuln_parameter, payload, proxy)
-    except _urllib.error.HTTPError as err_msg:
-      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR or str(err_msg.code) == settings.BAD_REQUEST:
-        response = False  
-      elif settings.IGNORE_ERR_MSG == False:
-        err = str(err_msg) + "."
-        if not settings.VERBOSITY_LEVEL != 0 and settings.TIME_BASED_STATE == False or \
-          settings.VERBOSITY_LEVEL != 0 and settings.EVAL_BASED_STATE == None:
-          print(settings.SINGLE_WHITESPACE)
-        if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-          print(settings.SINGLE_WHITESPACE) 
-        print(settings.print_critical_msg(err))
-        continue_tests = checks.continue_tests(err_msg)
-        if continue_tests == True:
-          settings.IGNORE_ERR_MSG = True
-        else:
-          raise SystemExit()
-      response = False 
-    except _urllib.error.URLError as err_msg:
-      err_msg = str(err_msg.reason).split(settings.SINGLE_WHITESPACE)[2:]
-      err_msg = ' '.join(err_msg)+ "."
-      if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-        print(settings.SINGLE_WHITESPACE)
-      print(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+    except Exception as err_msg:
+      response = request_failed(err_msg)
 
   if settings.TIME_RELATIVE_ATTACK :
     end = time.time()
@@ -713,7 +539,6 @@ Check if target host is vulnerable. (Referer-based injection)
 def referer_injection(url, vuln_parameter, payload):
 
   def inject_referer(url, vuln_parameter, payload, proxy):
-
     if proxy == None:
       opener = _urllib.request.build_opener()
     else:
@@ -743,95 +568,24 @@ def referer_injection(url, vuln_parameter, payload):
     start = time.time()
 
   proxy = None 
-  #response = inject_referer(url, vuln_parameter, payload, proxy)
   # Check if defined any HTTP Proxy.
   if menu.options.proxy:
     try:
       proxy = _urllib.request.ProxyHandler({settings.SCHEME : menu.options.proxy})
       response = inject_referer(url, vuln_parameter, payload, proxy)
-    except _urllib.error.HTTPError as err_msg:
-      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR or str(err_msg.code) == settings.BAD_REQUEST:
-        response = False  
-      elif settings.IGNORE_ERR_MSG == False:
-        err = str(err_msg) + "."
-        if not settings.VERBOSITY_LEVEL != 0 and settings.TIME_BASED_STATE == False or \
-          settings.VERBOSITY_LEVEL != 0 and settings.EVAL_BASED_STATE == None:
-          print(settings.SINGLE_WHITESPACE)
-        if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-          print(settings.SINGLE_WHITESPACE) 
-        print(settings.print_critical_msg(err))
-        continue_tests = checks.continue_tests(err_msg)
-        if continue_tests == True:
-          settings.IGNORE_ERR_MSG = True
-        else:
-          raise SystemExit()
-      response = False 
-    except _urllib.error.URLError as err_msg:
-      err_msg = str(err_msg.reason).split(settings.SINGLE_WHITESPACE)[2:]
-      err_msg = ' '.join(err_msg)+ "."
-      if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-        print(settings.SINGLE_WHITESPACE)
-      print(settings.print_critical_msg(err_msg))
-      raise SystemExit()
-          
-  # Check if defined Tor.
+    except Exception as err_msg:
+      response = request_failed(err_msg)
   elif menu.options.tor:
     try:
       proxy = _urllib.request.ProxyHandler({settings.TOR_HTTP_PROXY_SCHEME:settings.TOR_HTTP_PROXY_IP + ":" + settings.TOR_HTTP_PROXY_PORT})
       response = inject_referer(url, vuln_parameter, payload, proxy)
-    except _urllib.error.HTTPError as err_msg:
-      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR or str(err_msg.code) == settings.BAD_REQUEST:
-        response = False  
-      elif settings.IGNORE_ERR_MSG == False:
-        err = str(err_msg) + "."
-        if not settings.VERBOSITY_LEVEL != 0 and settings.TIME_BASED_STATE == False or \
-          settings.VERBOSITY_LEVEL != 0 and settings.EVAL_BASED_STATE == None:
-          print(settings.SINGLE_WHITESPACE)
-        if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-          print(settings.SINGLE_WHITESPACE) 
-        print(settings.print_critical_msg(err))
-        continue_tests = checks.continue_tests(err_msg)
-        if continue_tests == True:
-          settings.IGNORE_ERR_MSG = True
-        else:
-          raise SystemExit()
-      response = False 
-    except _urllib.error.URLError as err_msg:
-      err_msg = str(err_msg.reason).split(settings.SINGLE_WHITESPACE)[2:]
-      err_msg = ' '.join(err_msg)+ "."
-      if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-        print(settings.SINGLE_WHITESPACE)
-      print(settings.print_critical_msg(err_msg))
-      raise SystemExit()
-          
+    except Exception as err_msg:
+      response = request_failed(err_msg)
   else:
     try:
       response = inject_referer(url, vuln_parameter, payload, proxy)
-
-    except _urllib.error.HTTPError as err_msg:
-      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR or str(err_msg.code) == settings.BAD_REQUEST:
-        response = False  
-      elif settings.IGNORE_ERR_MSG == False:
-        err = str(err_msg) + "."
-        if not settings.VERBOSITY_LEVEL != 0 and settings.TIME_BASED_STATE == False or \
-          settings.VERBOSITY_LEVEL != 0 and settings.EVAL_BASED_STATE == None:
-          print(settings.SINGLE_WHITESPACE)
-        if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-          print(settings.SINGLE_WHITESPACE) 
-        print(settings.print_critical_msg(err))
-        continue_tests = checks.continue_tests(err_msg)
-        if continue_tests == True:
-          settings.IGNORE_ERR_MSG = True
-        else:
-          raise SystemExit()
-      response = False 
-    except _urllib.error.URLError as err_msg:
-      err_msg = str(err_msg.reason).split(settings.SINGLE_WHITESPACE)[2:]
-      err_msg = ' '.join(err_msg)+ "."
-      if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-        print(settings.SINGLE_WHITESPACE)
-      print(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+    except Exception as err_msg:
+      response = request_failed(err_msg)
           
   if settings.TIME_RELATIVE_ATTACK :
     end  = time.time()
@@ -878,103 +632,30 @@ def host_injection(url, vuln_parameter, payload):
     start = time.time()
 
   proxy = None 
-  #response = inject_host(url, vuln_parameter, payload, proxy)
-  # Check if defined any HTTP Proxy.
   if menu.options.proxy:
     try:
       proxy = _urllib.request.ProxyHandler({settings.SCHEME : menu.options.proxy})
       response = inject_host(url, vuln_parameter, payload, proxy)
-    except _urllib.error.HTTPError as err_msg:
-      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR or str(err_msg.code) == settings.BAD_REQUEST:
-        response = False  
-      elif settings.IGNORE_ERR_MSG == False:
-        err = str(err_msg) + "."
-        if not settings.VERBOSITY_LEVEL != 0 and settings.TIME_BASED_STATE == False or \
-          settings.VERBOSITY_LEVEL != 0 and settings.EVAL_BASED_STATE == None:
-          print(settings.SINGLE_WHITESPACE)
-        if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-          print(settings.SINGLE_WHITESPACE) 
-        print(settings.print_critical_msg(err))
-        continue_tests = checks.continue_tests(err_msg)
-        if continue_tests == True:
-          settings.IGNORE_ERR_MSG = True
-        else:
-          raise SystemExit()
-      response = False 
-    except _urllib.error.URLError as err_msg:
-      err_msg = str(err_msg.reason).split(settings.SINGLE_WHITESPACE)[2:]
-      err_msg = ' '.join(err_msg)+ "."
-      if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-        print(settings.SINGLE_WHITESPACE)
-      print(settings.print_critical_msg(err_msg))
-      raise SystemExit()
-          
-  # Check if defined Tor.
+    except Exception as err_msg:
+      response = request_failed(err_msg)
   elif menu.options.tor:
     try:
       proxy = _urllib.request.ProxyHandler({settings.TOR_HTTP_PROXY_SCHEME:settings.TOR_HTTP_PROXY_IP + ":" + settings.TOR_HTTP_PROXY_PORT})
       response = inject_host(url, vuln_parameter, payload, proxy)
-    except _urllib.error.HTTPError as err_msg:
-      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR or str(err_msg.code) == settings.BAD_REQUEST:
-        response = False  
-      elif settings.IGNORE_ERR_MSG == False:
-        err = str(err_msg) + "."
-        if not settings.VERBOSITY_LEVEL != 0 and settings.TIME_BASED_STATE == False or \
-          settings.VERBOSITY_LEVEL != 0 and settings.EVAL_BASED_STATE == None:
-          print(settings.SINGLE_WHITESPACE)
-        if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-          print(settings.SINGLE_WHITESPACE) 
-        print(settings.print_critical_msg(err))
-        continue_tests = checks.continue_tests(err_msg)
-        if continue_tests == True:
-          settings.IGNORE_ERR_MSG = True
-        else:
-          raise SystemExit()
-      response = False 
-    except _urllib.error.URLError as err_msg:
-      err_msg = str(err_msg.reason).split(settings.SINGLE_WHITESPACE)[2:]
-      err_msg = ' '.join(err_msg)+ "."
-      if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-        print(settings.SINGLE_WHITESPACE)
-      print(settings.print_critical_msg(err_msg))
-      raise SystemExit()
-          
+    except Exception as err_msg:
+      response = request_failed(err_msg)   
   else:
     try:
       response = inject_host(url, vuln_parameter, payload, proxy)
+    except Exception as err_msg:
+      response = request_failed(err_msg)
 
-    except _urllib.error.HTTPError as err_msg:
-      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR or str(err_msg.code) == settings.BAD_REQUEST:
-        response = False  
-      elif settings.IGNORE_ERR_MSG == False:
-        err = str(err_msg) + "."
-        if not settings.VERBOSITY_LEVEL != 0 and settings.TIME_BASED_STATE == False or \
-          settings.VERBOSITY_LEVEL != 0 and settings.EVAL_BASED_STATE == None:
-          print(settings.SINGLE_WHITESPACE)
-        if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-          print(settings.SINGLE_WHITESPACE) 
-        print(settings.print_critical_msg(err))
-        continue_tests = checks.continue_tests(err_msg)
-        if continue_tests == True:
-          settings.IGNORE_ERR_MSG = True
-        else:
-          raise SystemExit()
-      response = False 
-    except _urllib.error.URLError as err_msg:
-      err_msg = str(err_msg.reason).split(settings.SINGLE_WHITESPACE)[2:]
-      err_msg = ' '.join(err_msg)+ "."
-      if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-        print(settings.SINGLE_WHITESPACE)
-      print(settings.print_critical_msg(err_msg))
-      raise SystemExit()
-          
   if settings.TIME_RELATIVE_ATTACK :
     end  = time.time()
     how_long = int(end - start)
     return how_long
   else:
     return response
-
 
 """
 Check if target host is vulnerable. (Custom header injection)
@@ -1015,96 +696,24 @@ def custom_header_injection(url, vuln_parameter, payload):
     start = time.time()
 
   proxy = None  
-  #response = inject_custom_header(url, vuln_parameter, payload, proxy)
-
-  # Check if defined any HTTP Proxy.
   if menu.options.proxy:
     try:
       proxy = _urllib.request.ProxyHandler({settings.SCHEME : menu.options.proxy})
       response = inject_custom_header(url, vuln_parameter, payload, proxy)
-    except _urllib.error.HTTPError as err_msg:
-      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR or str(err_msg.code) == settings.BAD_REQUEST:
-        response = False  
-      elif settings.IGNORE_ERR_MSG == False:
-        err = str(err_msg) + "."
-        if not settings.VERBOSITY_LEVEL != 0 and settings.TIME_BASED_STATE == False or \
-          settings.VERBOSITY_LEVEL != 0 and settings.EVAL_BASED_STATE == None:
-          print(settings.SINGLE_WHITESPACE)
-        if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-          print(settings.SINGLE_WHITESPACE) 
-        print(settings.print_critical_msg(err))
-        continue_tests = checks.continue_tests(err_msg)
-        if continue_tests == True:
-          settings.IGNORE_ERR_MSG = True
-        else:
-          raise SystemExit()
-      response = False 
-    except _urllib.error.URLError as err_msg:
-      err_msg = str(err_msg.reason).split(settings.SINGLE_WHITESPACE)[2:]
-      err_msg = ' '.join(err_msg)+ "."
-      if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-        print(settings.SINGLE_WHITESPACE)
-      print(settings.print_critical_msg(err_msg))
-      raise SystemExit()
-          
-  # Check if defined Tor.
+    except Exception as err_msg:
+      response = request_failed(err_msg)
   elif menu.options.tor:
     try:
       proxy = _urllib.request.ProxyHandler({settings.TOR_HTTP_PROXY_SCHEME:settings.TOR_HTTP_PROXY_IP + ":" + settings.TOR_HTTP_PROXY_PORT})
       response = inject_custom_header(url, vuln_parameter, payload, proxy)
-    except _urllib.error.HTTPError as err_msg:
-      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR or str(err_msg.code) == settings.BAD_REQUEST:
-        response = False  
-      elif settings.IGNORE_ERR_MSG == False:
-        err = str(err_msg) + "."
-        if not settings.VERBOSITY_LEVEL != 0 and settings.TIME_BASED_STATE == False or \
-          settings.VERBOSITY_LEVEL != 0 and settings.EVAL_BASED_STATE == None:
-          print(settings.SINGLE_WHITESPACE)
-        if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-          print(settings.SINGLE_WHITESPACE) 
-        print(settings.print_critical_msg(err))
-        continue_tests = checks.continue_tests(err_msg)
-        if continue_tests == True:
-          settings.IGNORE_ERR_MSG = True
-        else:
-          raise SystemExit()
-      response = False 
-    except _urllib.error.URLError as err_msg:
-      err_msg = str(err_msg.reason).split(settings.SINGLE_WHITESPACE)[2:]
-      err_msg = ' '.join(err_msg)+ "."
-      if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-        print(settings.SINGLE_WHITESPACE)
-      print(settings.print_critical_msg(err_msg))
-      raise SystemExit()
-          
+    except Exception as err_msg:
+      response = request_failed(err_msg)
   else:
     try:
       response = inject_custom_header(url, vuln_parameter, payload, proxy)
-    except _urllib.error.HTTPError as err_msg:
-      if str(err_msg.code) == settings.INTERNAL_SERVER_ERROR or str(err_msg.code) == settings.BAD_REQUEST:
-        response = False  
-      elif settings.IGNORE_ERR_MSG == False:
-        err = str(err_msg) + "."
-        if not settings.VERBOSITY_LEVEL != 0 and settings.TIME_BASED_STATE == False or \
-          settings.VERBOSITY_LEVEL != 0 and settings.EVAL_BASED_STATE == None:
-          print(settings.SINGLE_WHITESPACE)
-        if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-          print(settings.SINGLE_WHITESPACE) 
-        print(settings.print_critical_msg(err))
-        continue_tests = checks.continue_tests(err_msg)
-        if continue_tests == True:
-          settings.IGNORE_ERR_MSG = True
-        else:
-          raise SystemExit()
-      response = False 
-    except _urllib.error.URLError as err_msg:
-      err_msg = str(err_msg.reason).split(settings.SINGLE_WHITESPACE)[2:]
-      err_msg = ' '.join(err_msg)+ "."
-      if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-        print(settings.SINGLE_WHITESPACE)
-      print(settings.print_critical_msg(err_msg))
-      raise SystemExit()
-          
+    except Exception as err_msg:
+      response = request_failed(err_msg)
+   
   if settings.TIME_RELATIVE_ATTACK :
     end  = time.time()
     how_long = int(end - start)

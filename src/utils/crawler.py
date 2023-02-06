@@ -291,45 +291,46 @@ def crawler(url, url_num, crawling_list):
   info_msg = "Starting crawler for target URL '" + url + "'" + _ + "."
   print(settings.print_info_msg(info_msg))
   response = request(url)
-  if settings.SITEMAP_CHECK:
-    enable_crawler()
-  if settings.SITEMAP_CHECK is None:
-    check_sitemap()
-  if settings.SITEMAP_CHECK:
-    output_href = sitemap(url)
-  if not settings.SITEMAP_CHECK or (settings.SITEMAP_CHECK and output_href is None):
-    output_href = do_process(url)
-    if settings.MULTI_TARGETS and settings.DEFAULT_CRAWLING_DEPTH != 1:
-      settings.DEFAULT_CRAWLING_DEPTH = 1
-    while settings.DEFAULT_CRAWLING_DEPTH <= int(menu.options.crawldepth):
-      info_msg = "Searching for usable "
-      info_msg += "links with depth " + str(settings.DEFAULT_CRAWLING_DEPTH) + "." 
-      print(settings.print_info_msg(info_msg))
-      if settings.DEFAULT_CRAWLING_DEPTH == 2:
-        output_href = new_crawled_hrefs
-      elif settings.DEFAULT_CRAWLING_DEPTH > 2:
-        output_href = new_crawled_hrefs + crawled_hrefs
-      try:
-        [output_href.remove(x) for x in visited_hrefs if x in output_href]
-      except TypeError: 
-        pass
-      link = 0
-      if output_href is not None:
-        for url in output_href: 
-          if url not in visited_hrefs and url is not None:
-            link += 1
-            settings.CRAWLED_URLS_NUM = link
-            if settings.SINGLE_WHITESPACE in url:
-              url = url.replace(settings.SINGLE_WHITESPACE, _urllib.parse.quote_plus(settings.SINGLE_WHITESPACE))
-            visited_hrefs.append(url)
-            do_process(url)
-            info_msg = str(link)
-            info_msg += "/" + str(len(output_href)) + " links visited." 
-            sys.stdout.write("\r" + settings.print_info_msg(info_msg))
-            sys.stdout.flush()
-      if link != 0:
-        print(settings.SINGLE_WHITESPACE)
-      settings.DEFAULT_CRAWLING_DEPTH += 1
+  if type(response) is not bool and response is not None:
+    if settings.SITEMAP_CHECK:
+      enable_crawler()
+    if settings.SITEMAP_CHECK is None:
+      check_sitemap()
+    if settings.SITEMAP_CHECK:
+      output_href = sitemap(url)
+    if not settings.SITEMAP_CHECK or (settings.SITEMAP_CHECK and output_href is None):
+      output_href = do_process(url)
+      if settings.MULTI_TARGETS and settings.DEFAULT_CRAWLING_DEPTH != 1:
+        settings.DEFAULT_CRAWLING_DEPTH = 1
+      while settings.DEFAULT_CRAWLING_DEPTH <= int(menu.options.crawldepth):
+        info_msg = "Searching for usable "
+        info_msg += "links with depth " + str(settings.DEFAULT_CRAWLING_DEPTH) + "." 
+        print(settings.print_info_msg(info_msg))
+        if settings.DEFAULT_CRAWLING_DEPTH == 2:
+          output_href = new_crawled_hrefs
+        elif settings.DEFAULT_CRAWLING_DEPTH > 2:
+          output_href = new_crawled_hrefs + crawled_hrefs
+        try:
+          [output_href.remove(x) for x in visited_hrefs if x in output_href]
+        except TypeError: 
+          pass
+        link = 0
+        if output_href is not None:
+          for url in output_href: 
+            if url not in visited_hrefs and url is not None:
+              link += 1
+              settings.CRAWLED_URLS_NUM = link
+              if settings.SINGLE_WHITESPACE in url:
+                url = url.replace(settings.SINGLE_WHITESPACE, _urllib.parse.quote_plus(settings.SINGLE_WHITESPACE))
+              visited_hrefs.append(url)
+              do_process(url)
+              info_msg = str(link)
+              info_msg += "/" + str(len(output_href)) + " links visited." 
+              sys.stdout.write("\r" + settings.print_info_msg(info_msg))
+              sys.stdout.flush()
+        if link != 0:
+          print(settings.SINGLE_WHITESPACE)
+        settings.DEFAULT_CRAWLING_DEPTH += 1
 
   output_href = crawled_hrefs
   no_usable_links(output_href)
