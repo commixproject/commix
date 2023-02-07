@@ -17,7 +17,6 @@ import io
 import re
 import os
 import sys
-import glob
 import json
 import time
 import socket
@@ -27,6 +26,7 @@ import base64
 import gzip
 import zlib
 import traceback
+from glob import glob
 from src.utils import common
 from src.utils import logs
 from src.utils import menu
@@ -1133,7 +1133,7 @@ def list_tamper_scripts():
   info_msg = "Listing available tamper scripts."
   print(settings.print_info_msg(info_msg))
   if menu.options.list_tampers:
-    for script in sorted(glob.glob(os.path.join(settings.TAMPER_SCRIPTS_PATH, "*.py"))):
+    for script in sorted(glob(os.path.join(settings.TAMPER_SCRIPTS_PATH, "*.py"))):
       content = open(script, "rb").read().decode(settings.DEFAULT_CODEC)
       match = re.search(r"About:(.*)\n", content)
       if match:
@@ -1148,7 +1148,7 @@ def tamper_scripts(stored_tamper_scripts):
     # Check the provided tamper script(s)
     available_scripts = []
     provided_scripts = list(set(re.split(settings.PARAMETER_SPLITTING_REGEX, menu.options.tamper.lower())))
-    for script in sorted(glob.glob(os.path.join(settings.TAMPER_SCRIPTS_PATH, "*.py"))):
+    for script in sorted(glob(os.path.join(settings.TAMPER_SCRIPTS_PATH, "*.py"))):
       available_scripts.append(os.path.basename(script.split(".py")[0]))
     for script in provided_scripts:
       if script in available_scripts:
