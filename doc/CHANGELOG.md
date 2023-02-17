@@ -1,4 +1,4 @@
-## Version 3.7 (TBA)
+## Version 3.7 (2023-02-17)
 * Revised: Improvements regarding parsing HTTP requests through HTTP proxy (i.e `--proxy` option).
 * Revised: Improvements regarding identifying injection marker (i.e. asterisk `*`) in provided parameter values (e.g. GET, POST or HTTP headers). 
 * Added: New option ` --crawl-exclude` regarding setting regular expression for excluding pages from crawling (e.g. "logout").
