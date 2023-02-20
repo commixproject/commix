@@ -326,8 +326,9 @@ def cb_injection_handler(url, timesec, filename, http_request_method, injection_
             if menu.options.os_cmd:
               cb_enumeration.single_os_cmd_exec(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec)
             
+            # Pseudo-Terminal shell
             try:
-              # Pseudo-Terminal shell
+              checks.alert()
               go_back = False
               go_back_again = False
               while True :

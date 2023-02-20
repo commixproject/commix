@@ -561,6 +561,12 @@ misc.add_option("--list-tampers",
                 default=False,
                 help="Display list of available tamper scripts.")
 
+misc.add_option("--alert", 
+                action="store",
+                dest="alert",
+                default=False,
+                help="Run host OS command(s) when injection point is found.")
+
 misc.add_option("--no-logging", 
                 action="store_true",
                 dest="no_logging",

@@ -1,3 +1,6 @@
+## Version 3.8 (TBA)
+* Added: New option `--alert` to run host OS command(s) when injection point is found.
+
 ## Version 3.7 (2023-02-17)
 * Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
 * Revised: Improvements regarding parsing HTTP requests through HTTP proxy (i.e `--proxy` option).

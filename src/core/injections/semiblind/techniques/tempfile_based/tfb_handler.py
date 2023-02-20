@@ -495,6 +495,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
               
               # Pseudo-Terminal shell
               try:    
+                checks.alert()
                 go_back = False
                 go_back_again = False
                 while True:

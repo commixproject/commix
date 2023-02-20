@@ -26,6 +26,7 @@ import base64
 import gzip
 import zlib
 import traceback
+import subprocess
 from glob import glob
 from src.utils import common
 from src.utils import logs
@@ -130,6 +131,20 @@ def mobile_user_agents():
     except ValueError:
       common.invalid_option(mobile_user_agent)  
       pass     
+
+"""
+Run host OS command(s) when injection point is found.
+"""
+def alert():
+  if settings.ALERT:
+    info_msg = "Executing alerting shell command(s) '" + str(menu.options.alert) + "'."
+    print(settings.print_info_msg(info_msg))
+    try:
+      process = subprocess.Popen(menu.options.alert, shell=True)
+      process.wait()
+    except Exception as ex:
+      err_msg = "Error occurred while executing command(s) '" + str(menu.options.alert) + "'."
+      print(settings.print_error_msg(err_msg))
 
 """
 Check for HTTP Method

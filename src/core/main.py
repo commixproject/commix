@@ -290,6 +290,13 @@ The main function.
 """
 def main(filename, url):
   try:
+    if menu.options.alert:
+      if menu.options.alert.startswith('-'):
+        err_msg = "Value for option '--alert' must be valid operating system command(s)."
+        print(settings.print_error_msg(err_msg))
+      else:
+        settings.ALERT = True
+
     if menu.options.offline:
       settings.CHECK_FOR_UPDATES_ON_START = False
 

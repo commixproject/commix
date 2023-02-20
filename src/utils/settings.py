@@ -240,9 +240,9 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "3.7"
-REVISION = "61"
-STABLE_RELEASE = True
+VERSION_NUM = "3.8"
+REVISION = "1"
+STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
   VERSION = VERSION + VERSION_NUM + "-stable"
@@ -1234,6 +1234,9 @@ FOLLOW_REDIRECT = True
 ANSWERS = ""
 
 CHECKING_PARAMETER = ""
+
+# Run host OS command(s) when injection point is found.
+ALERT = False
 
 USE_PCRE_E_MODIFIER = None
 PCRE_MODIFIER = "/e"

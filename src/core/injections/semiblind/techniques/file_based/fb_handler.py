@@ -553,8 +553,9 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
               # Delete previous shell (text) files (output)
               delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
                   
+            # Pseudo-Terminal shell
             try:
-              # Pseudo-Terminal shell
+              checks.alert()
               go_back = False
               go_back_again = False
               while True:
