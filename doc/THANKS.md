@@ -7,6 +7,7 @@
 * Thanks [m3g9tr0n](https://twitter.com/m3g9tr0n) for a donation.
 
 ## List of individual contributors:
+* Thanks [daniruiz](https://github.com/daniruiz) for contributing code.
 * Thanks [galihap76](https://github.com/galihap76) for contributing an Indonesian translation of README.md.
 * Thanks [JitPatro](https://github.com/JitPatro) for creating a snap package for commix (i.e. `snap install commix`).
 * Thanks [0x27](https://github.com/0x27) for suggesting an enhancement.
