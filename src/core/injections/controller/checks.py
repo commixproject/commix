@@ -2092,7 +2092,7 @@ def print_users(sys_users, filename, _, separator, TAG, cmd, prefix, suffix, whi
         # print(settings.SINGLE_WHITESPACE)
         warn_msg = "It seems that you don't have permissions to read the '" 
         warn_msg += settings.PASSWD_FILE + "'."
-        ptint(settings.print_warning_msg(warn_msg))  
+        print(settings.print_warning_msg(warn_msg))  
     except TypeError:
       pass
     except IndexError:
