@@ -90,7 +90,7 @@ def do_check():
       print(settings.print_critical_msg(err_msg))  
       raise SystemExit()  
 
-    except _http_client.BadStatusLine as err_msg:
+    except (_http_client.BadStatusLine, _http_client.IncompleteRead) as err_msg:
       print(settings.SINGLE_WHITESPACE)
       if len(err_msg.line) > 2 :
         print(err_msg.line, err_msg.message)

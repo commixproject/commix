@@ -64,7 +64,7 @@ def do_check(request, url, redirect_url):
     opener = _urllib.request.build_opener(RedirectHandler())
     _urllib.request.install_opener(opener)  
     response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
-  except (SocketError, _urllib.error.HTTPError, _urllib.error.URLError, _http_client.BadStatusLine, _http_client.InvalidURL) as err_msg:
+  except (SocketError, _urllib.error.HTTPError, _urllib.error.URLError, _http_client.BadStatusLine, _http_client.IncompleteRead, _http_client.InvalidURL) as err_msg:
     requests.crawler_request(redirect_url)
 
   try:

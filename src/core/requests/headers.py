@@ -137,7 +137,7 @@ def check_http_traffic(request):
         self.print_http_response()
         self.do_open(connection, req)
         return super(connection_handler, self).http_open(req)
-      except (SocketError, _urllib.error.HTTPError, _urllib.error.URLError, _http_client.BadStatusLine, _http_client.InvalidURL, Exception) as err_msg:
+      except (SocketError, _urllib.error.HTTPError, _urllib.error.URLError, _http_client.BadStatusLine, _http_client.IncompleteRead, _http_client.InvalidURL, Exception) as err_msg:
         checks.connection_exceptions(err_msg)
 
     def https_open(self, req):
@@ -145,7 +145,7 @@ def check_http_traffic(request):
         self.print_http_response()
         self.do_open(connection, req)
         return super(connection_handler, self).https_open(req)
-      except (SocketError, _urllib.error.HTTPError, _urllib.error.URLError, _http_client.BadStatusLine, _http_client.InvalidURL, Exception) as err_msg:
+      except (SocketError, _urllib.error.HTTPError, _urllib.error.URLError, _http_client.BadStatusLine, _http_client.IncompleteRead, _http_client.InvalidURL, Exception) as err_msg:
         checks.connection_exceptions(err_msg)
 
   opener = _urllib.request.build_opener(connection_handler())
@@ -191,7 +191,7 @@ def check_http_traffic(request):
       if [True for err_code in settings.HTTP_ERROR_CODES if err_code in str(err_msg)]:
         break
       
-    except (SocketError, _urllib.error.URLError, _http_client.BadStatusLine, _http_client.InvalidURL, Exception) as err_msg:
+    except (SocketError, _urllib.error.URLError, _http_client.BadStatusLine, _http_client.IncompleteRead, _http_client.InvalidURL, Exception) as err_msg:
       if not settings.MULTI_TARGETS and not settings.CRAWLING:
         pass
       else:

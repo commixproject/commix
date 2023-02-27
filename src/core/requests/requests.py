@@ -64,7 +64,7 @@ def crawler_request(url):
         if href != url:
           crawler.store_hrefs(href, identified_hrefs=True, redirection=True)
     return response
-  except (SocketError, _urllib.error.HTTPError, _urllib.error.URLError, _http_client.BadStatusLine, _http_client.InvalidURL, Exception) as err_msg:
+  except (SocketError, _urllib.error.HTTPError, _urllib.error.URLError, _http_client.BadStatusLine, _http_client.IncompleteRead, _http_client.InvalidURL, Exception) as err_msg:
     if url not in settings.HREF_SKIPPED:
       settings.HREF_SKIPPED.append(url)
       settings.CRAWLED_SKIPPED_URLS_NUM += 1
