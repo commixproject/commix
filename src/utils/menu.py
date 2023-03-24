@@ -549,11 +549,11 @@ detection.add_option("--failed-tries",
 # Miscellaneous options
 misc = OptionGroup(parser, Style.BRIGHT + Style.UNDERLINE + "Miscellaneous" + Style.RESET_ALL)
 
-misc.add_option("--dependencies", 
+misc.add_option("--ignore-dependencies", 
                 action="store_true",
-                dest="noncore_dependencies",
+                dest="ignore_dependencies",
                 default=False,
-                help="Check for third-party (non-core) dependencies.")
+                help="Ignore all required third-party library dependencies.")
 
 misc.add_option("--list-tampers", 
                 action="store_true",

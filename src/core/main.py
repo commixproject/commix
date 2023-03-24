@@ -591,11 +591,9 @@ try:
       checks.no_readline_module()
       raise SystemExit()
 
-    # Check if defined "--dependencies" option. 
-    # For checking (non-core) third party dependenices.
-    if menu.options.noncore_dependencies:
+    # Check if defined "--ignore-dependencies" option.
+    if not menu.options.ignore_dependencies:
       checks.third_party_dependencies()
-      raise SystemExit()
       
     # Check if defined "--update" option.        
     if menu.options.update:
@@ -613,9 +611,9 @@ try:
     # Check for missing mandatory option(s).
     if not settings.STDIN_PARSING and not any((menu.options.url, menu.options.logfile, menu.options.bulkfile, \
                 menu.options.requestfile, menu.options.sitemap_url, menu.options.wizard, \
-                menu.options.update, menu.options.list_tampers, menu.options.noncore_dependencies)):
+                menu.options.update, menu.options.list_tampers)):
       if not menu.options.purge:
-        err_msg = "Missing a mandatory option (-u, -l, -m, -r, -x, --wizard, --update, --list-tampers, --purge or --dependencies). "
+        err_msg = "Missing a mandatory option (-u, -l, -m, -r, -x, --wizard, --update, --list-tampers or --purge). "
         err_msg += "Use -h for help."
         print(settings.print_critical_msg(err_msg))
       raise SystemExit()

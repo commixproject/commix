@@ -1,4 +1,5 @@
 ## Version 3.8 (TBA)
+* Replaced: The `--dependencies` option has been replaced with `--ignore-dependencies`, regarding ignoring all required third-party library dependencies.
 * Added: New option `--alert` to run host OS command(s) when injection point is found.
 
 ## Version 3.7 (2023-02-17)

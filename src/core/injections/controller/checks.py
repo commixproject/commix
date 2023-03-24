@@ -924,17 +924,16 @@ def identified_os():
       pass
 
 """
-Check for third-party (non-core) libraries.
+Checking all required third-party library dependencies.
 """
 def third_party_dependencies():
-  info_msg = "Checking for third-party (non-core) libraries. "
-  sys.stdout.write(settings.print_info_msg(info_msg))
-  sys.stdout.flush()
+  if settings.VERBOSITY_LEVEL != 0:
+    debug_msg = "Checking all required third-party library dependencies."
+    print(settings.print_debug_msg(debug_msg))
   
   try:
     import sqlite3
   except ImportError:
-    print(settings.SINGLE_WHITESPACE)
     err_msg = settings.APPLICATION + " requires 'sqlite3' third-party library "
     err_msg += "in order to store previous injection points and commands. "
     print(settings.print_critical_msg(err_msg))
@@ -947,26 +946,19 @@ def third_party_dependencies():
       try:
         import pyreadline
       except ImportError:
-        print(settings.SINGLE_WHITESPACE)
-        err_msg = settings.APPLICATION + " requires 'pyreadline' third-party library "
+        err_msg = "The 'pyreadline' (third-party) library is required "
         err_msg += "in order to be able to take advantage of the TAB "
-        err_msg += "completion and history support features. "
-        print(settings.print_critical_msg(err_msg)) 
-        raise SystemExit()
-    elif settings.PLATFORM == "mac":
+        err_msg += "completion and history support features."
+        print(settings.print_error_msg(err_msg)) 
+    elif settings.PLATFORM == "posix":
       try:
         import gnureadline
       except ImportError:
-        print(settings.SINGLE_WHITESPACE)
-        err_msg = settings.APPLICATION + " requires 'gnureadline' third-party library "
+        err_msg = "The 'gnureadline' (third-party) library is required "
         err_msg += "in order to be able to take advantage of the TAB "
-        err_msg += "completion and history support features. "
-        print(settings.print_critical_msg(err_msg))
+        err_msg += "completion and history support features."
+        print(settings.print_error_msg(err_msg))
     pass
-
-  print(settings.SINGLE_WHITESPACE)
-  info_msg = "All required third-party (non-core) libraries are seems to be installed."
-  print(settings.print_bold_info_msg(info_msg))
 
 """
 Print the authentiation error message.
