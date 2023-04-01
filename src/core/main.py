@@ -475,6 +475,7 @@ def main(filename, url):
         checks.check_CGI_scripts(url)
         # Check if defined "--file-upload" option.
         if menu.options.file_upload:
+          menu.options.file_upload = os.path.abspath(menu.options.file_upload)
           checks.file_upload()
           try:
             _urllib.request.urlopen(menu.options.file_upload, timeout=settings.TIMEOUT)
