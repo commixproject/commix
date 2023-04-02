@@ -2389,7 +2389,7 @@ def file_upload():
     #   menu.options.file_dest = menu.options.file_dest + "/"
     # Check if not defined URL for upload.
     while True:
-      message = "Do you want to enable an HTTP server? [Y/n] > "
+      message = "Do you want to enable a local HTTP server? [Y/n] > "
       enable_HTTP_server = common.read_input(message, default="Y", check_batch=True)         
       if enable_HTTP_server in settings.CHOICE_YES:
 
@@ -2429,7 +2429,7 @@ def file_upload():
 
       elif enable_HTTP_server in settings.CHOICE_NO:
         if not re.match(settings.VALID_URL_FORMAT, menu.options.file_upload):
-          err_msg = "The '" + menu.options.file_upload + "' is not a valid URL. "
+          err_msg = "The provided '--file-upload' option requires the activation of a local HTTP server."
           print(settings.print_critical_msg(err_msg))
           raise SystemExit()
         break  
