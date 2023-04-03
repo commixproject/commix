@@ -750,9 +750,9 @@ def no_readline_module():
   err_msg += "not have GNU 'readline' module installed."
   err_msg += " Download the"
   if settings.IS_WINDOWS:
-    err_msg += " 'pyreadline' module (https://pypi.python.org/pypi/pyreadline)."
+    err_msg += " 'pyreadline' package (https://pypi.python.org/pypi/pyreadline) or the 'pyreadline3' package (https://pypi.python.org/pypi/pyreadline3) instead."
   elif settings.PLATFORM == "mac":  
-    err_msg += " 'gnureadline' module (https://pypi.python.org/pypi/gnureadline)." 
+    err_msg += " 'gnureadline' package (https://pypi.python.org/pypi/gnureadline)." 
   print(settings.print_critical_msg(err_msg)) 
 
 """
@@ -941,7 +941,7 @@ def third_party_dependencies():
 
   try:
     import readline
-  except ImportError:
+  except (ImportError, AttributeError):
     if settings.IS_WINDOWS:
       try:
         import pyreadline
