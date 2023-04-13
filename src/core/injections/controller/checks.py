@@ -536,9 +536,12 @@ def check_connection(url):
         if not settings.MULTI_TARGETS:
           print(settings.print_critical_msg(err_msg))
           raise SystemExit()
-      except socket.error as err:
+      except socket.error:
         err_msg = "Problem occurred while "
         err_msg += "resolving a host name '" + hostname + "'"
+      except UnicodeError:
+        err_msg = "Problem occurred while "
+        err_msg += "handling a host name '" + hostname + "'"
         if not settings.MULTI_TARGETS:
           print(settings.print_critical_msg(err_msg))
           raise SystemExit()
