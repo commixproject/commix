@@ -884,7 +884,7 @@ def check_http_s(url):
         print(settings.print_critical_msg(err_msg))
         raise SystemExit()
     except ValueError as err:
-      err_msg = "Invalid target URL has been given." 
+      err_msg = "Problem occurred while parsing target URL." 
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
   return url
