@@ -45,7 +45,6 @@ def authentication_process():
     #cj = cookielib.CookieJar()
     cj = _http_cookiejar.CookieJar()
     opener = _urllib.request.build_opener(_urllib.request.HTTPCookieProcessor(cj))
-    # request = opener.open(_urllib.request.Request(auth_url))
     cookies = ""
     for cookie in cj:
         cookie_values = cookie.name + "=" + cookie.value + "; "
@@ -57,21 +56,14 @@ def authentication_process():
         info_msg += str(menu.options.cookie) + Style.RESET_ALL + "."
         print(settings.print_bold_info_msg(info_msg))
     _urllib.request.install_opener(opener)
-    request = _urllib.request.Request(auth_url, auth_data)
+    request = _urllib.request.Request(auth_url, auth_data.encode(settings.DEFAULT_CODEC))
     # Check if defined extra headers.
     headers.do_check(request)
-    #headers.check_http_traffic(request)
     # Get the response of the request.
-    response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
-    return response
-
-  except _urllib.error.HTTPError as err_msg:
-    print(settings.print_critical_msg(err_msg))
-    raise SystemExit()
-
-  except ValueError as err_msg:
-    print(settings.print_critical_msg(err_msg))
-    raise SystemExit() 
+    return _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
+    
+  except Exception as err_msg:
+    checks.connection_exceptions(err_msg)
 
 """
 Define the HTTP authentication 
