@@ -191,7 +191,7 @@ def check_http_traffic(request):
       if [True for err_code in settings.HTTP_ERROR_CODES if err_code in str(err_msg)]:
         break
       
-    except (SocketError, _urllib.error.URLError, _http_client.BadStatusLine, _http_client.IncompleteRead, _http_client.InvalidURL, Exception) as err_msg:
+    except (SocketError, _urllib.error.HTTPError, _urllib.error.URLError, _http_client.BadStatusLine, _http_client.IncompleteRead, _http_client.InvalidURL, Exception) as err_msg:
       if not settings.MULTI_TARGETS and not settings.CRAWLING:
         pass
       else:
