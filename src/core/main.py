@@ -385,7 +385,10 @@ def main(filename, url):
           pass
         menu.options.tech = ''.join(menu.options.tech)
     else:
-      menu.options.tech = ''.join([str(x) for x in settings.AVAILABLE_TECHNIQUES]) 
+      if not menu.options.tech:
+        menu.options.tech = ''.join([str(x) for x in settings.AVAILABLE_TECHNIQUES]) 
+      else:
+        settings.USER_SUPPLIED_TECHNIQUE = True
 
     # Check for skipping injection techniques.
     if menu.options.skip_tech:

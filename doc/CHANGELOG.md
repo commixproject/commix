@@ -1,4 +1,5 @@
 ## Version 3.8 (TBA)
+* Revised: Minor bug-fix regarding not ignoring specified injection technique(s) when `--ignore-session` or `--flush-session` options are set.
 * Replaced: The `--dependencies` option has been replaced with `--ignore-dependencies`, regarding ignoring all required third-party library dependencies.
 * Added: New option `--alert` to run host OS command(s) when injection point is found.
 
