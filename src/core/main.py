@@ -395,7 +395,7 @@ def main(filename, url):
       # Convert injection technique(s) to lowercase
       menu.options.skip_tech = menu.options.skip_tech.lower()
       settings.SKIP_TECHNIQUES = True
-      if menu.options.tech:
+      if settings.USER_SUPPLIED_TECHNIQUE:
         err_msg = "The options '--technique' and '--skip-technique' cannot be used "
         err_msg += "simultaneously (i.e. only one option must be set)."
         print(settings.print_critical_msg(err_msg))
