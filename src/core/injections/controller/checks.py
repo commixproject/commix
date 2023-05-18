@@ -1496,6 +1496,11 @@ def check_for_stored_tamper(payload):
 Perform payload modification
 """
 def perform_payload_modification(payload):
+
+  for extra_http_headers in list(set(settings.MULTI_ENCODED_PAYLOAD[::-1])):
+    if extra_http_headers == "xforwardedfor":
+      from src.core.tamper import xforwardedfor
+
   for encode_type in list(set(settings.MULTI_ENCODED_PAYLOAD[::-1])):
     # printf to echo (for ascii to dec)
     if encode_type == 'printf2echo':

@@ -1,4 +1,5 @@
 ## Version 3.8 (TBA)
+* Revised: Minor improvement regarding tamper script "xforwardedfor.py" (that appends a fake HTTP header `X-Forwarded-For`).
 * Revised: Minor bug-fix regarding not ignoring specified injection technique(s) when `--ignore-session` or `--flush-session` options are set.
 * Replaced: The `--dependencies` option has been replaced with `--ignore-dependencies`, regarding ignoring all required third-party library dependencies.
 * Added: New option `--alert` to run host OS command(s) when injection point is found.
@@ -163,7 +164,7 @@
 * Revised: Minor improvement regarding merging of tamper script arguments.
 * Revised: Minor improvement regarding ignoring the parameter(s) that carrying anti-CSRF token(s) in all scanning attempts.
 * Updated: Beautiful Soup (third party) module has been updated.
-* Added: New tamper script "xforwardedfor.py" that appends a fake HTTP header 'X-Forwarded-For'.
+* Added: New tamper script "xforwardedfor.py" that appends a fake HTTP header `X-Forwarded-For`.
 * Fixed: Minor bug-fix regarding loading tamper scripts. 
 * Revised: Minor improvement regarding "INJECT_HERE" tag (i.e. declaring injection position) to be case insensitive.
 
