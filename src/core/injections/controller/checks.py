@@ -368,8 +368,9 @@ Ignoring the Google analytics cookie parameter.
 """
 def ignore_google_analytics_cookie(cookie):
   if cookie.upper().startswith(settings.GOOGLE_ANALYTICS_COOKIE_PREFIX):
-    info_msg = "Ignoring the Google analytics cookie parameter '" + cookie.split("=")[0] + "'."
-    print(settings.print_info_msg(info_msg))
+    if (len(cookie.split("="))) == 2:
+      info_msg = "Ignoring the Google analytics cookie parameter '" + cookie.split("=")[0] + "'."
+      print(settings.print_info_msg(info_msg))
     return True
 
 """
