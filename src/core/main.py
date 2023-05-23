@@ -705,7 +705,7 @@ try:
             break
       message = "Enter POST data (--data) [Enter for none] > "
       if settings.STDIN_PARSING or menu.options.data:
-        print(settings.print_message(message + menu.options.data))
+        print(settings.print_message(message + str(menu.options.data)))
       else:
         menu.options.data = common.read_input(message, default=None, check_batch=True)
         if menu.options.data is not None and len(menu.options.data) == 0:
