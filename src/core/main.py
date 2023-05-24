@@ -672,6 +672,13 @@ try:
         print(settings.print_critical_msg(err_msg))
         raise SystemExit()
 
+    if menu.options.auth_cred and menu.options.auth_type:
+      if not re.search(settings.AUTH_CRED_REGEX, menu.options.auth_cred):
+        error_msg = "HTTP " + str(menu.options.auth_type) 
+        error_msg += " authentication credentials value must be in format 'username:password'."
+        print(settings.print_critical_msg(error_msg))
+        raise SystemExit()
+
     if menu.options.requestfile and menu.options.url:
         err_msg = "The '-r' option is incompatible with option '-u' ('--url')."      
         print(settings.print_critical_msg(err_msg))

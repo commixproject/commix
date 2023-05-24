@@ -241,7 +241,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.8"
-REVISION = "18"
+REVISION = "19"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -278,6 +278,9 @@ if RANDOM_TAG == "" :
 
 # Proxy
 PROXY_REGEX = r"((http[^:]*)://)?([\w\-.]+):(\d+)"
+
+# Auth Credentials format
+AUTH_CRED_REGEX = r"^(.*?):(.*?)$"
 
 # Inject Tag
 INJECT_TAG = "INJECT_HERE"
