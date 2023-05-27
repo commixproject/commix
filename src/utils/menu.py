@@ -277,7 +277,7 @@ request.add_option("--auth-data",
 request.add_option("--auth-type",
                 action="store",
                 dest="auth_type",
-                help="HTTP authentication type (e.g. 'Basic' or 'Digest').")
+                help="HTTP authentication type (Basic, Digest, Bearer).")
 
 request.add_option("--auth-cred",
                 action="store",

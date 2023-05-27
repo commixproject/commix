@@ -118,7 +118,6 @@ def estimate_response_time(url, timesec):
           auth_line = err.headers.get('www-authenticate', '')
           # Checking for authentication type name.
           auth_type = auth_line.split()[0]
-          settings.SUPPORTED_HTTP_AUTH_TYPES.index(auth_type.lower())
           # Checking for the realm attribute.
           try: 
             auth_obj = re.match('''(\w*)\s+realm=(.*)''', auth_line).groups()

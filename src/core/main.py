@@ -192,10 +192,13 @@ def init_request(url):
   if settings.VERBOSITY_LEVEL != 0:
     debug_msg = "Creating " + str(settings.SCHEME).upper() + " requests opener object."
     print(settings.print_debug_msg(debug_msg))
-  # Used a valid pair of valid credentials
   if menu.options.auth_cred and menu.options.auth_type and settings.VERBOSITY_LEVEL != 0 :
-    debug_msg = "Using '" + menu.options.auth_cred + "' pair of " + menu.options.auth_type 
-    debug_msg += " HTTP authentication credentials."
+    if menu.options.auth_type.lower() in ("basic", "digest"):
+      _ = "credentials"
+    else:
+      _ = "token"
+    debug_msg = "Using '" + menu.options.auth_cred + "' " + _ + " for, " + menu.options.auth_type 
+    debug_msg += " HTTP authentication."
     print(settings.print_debug_msg(debug_msg))
   if menu.options.proxy:
     proxy.do_check()
@@ -463,13 +466,15 @@ def main(filename, url):
     # Check if defined "--url" or "-m" option.
     if url:
       if menu.options.auth_cred and menu.options.auth_type:
-        if settings.VERBOSITY_LEVEL != 0:
-          debug_msg = "Used a valid pair of " + menu.options.auth_type 
-          debug_msg += " HTTP authentication credentials '" + menu.options.auth_cred + "'." 
-          print(settings.print_bold_debug_msg(debug_msg))
+        if len(menu.options.auth_cred.split(":")) == 2:
+          username = menu.options.auth_cred.split(":")[0]
+          password = menu.options.auth_cred.split(":")[1]
+        else:
+          username = ""
+          password = menu.options.auth_cred
         session_handler.import_valid_credentials(url, authentication_type=menu.options.auth_type, \
-                                                 admin_panel=url, username=menu.options.auth_cred.split(":")[0], \
-                                                 password=menu.options.auth_cred.split(":")[1]
+                                                 admin_panel=url, username=username, \
+                                                 password=password
                                                  )
       try:
         if menu.options.flush_session:
@@ -673,7 +678,7 @@ try:
         raise SystemExit()
 
     if menu.options.auth_cred and menu.options.auth_type:
-      if not re.search(settings.AUTH_CRED_REGEX, menu.options.auth_cred):
+      if menu.options.auth_type.lower() in ("basic", "digest") and not re.search(settings.AUTH_CRED_REGEX, menu.options.auth_cred):
         error_msg = "HTTP " + str(menu.options.auth_type) 
         error_msg += " authentication credentials value must be in format 'username:password'."
         print(settings.print_critical_msg(error_msg))

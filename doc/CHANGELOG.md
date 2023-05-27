@@ -1,4 +1,5 @@
 ## Version 3.8 (TBA)
+* Added: Support for "Bearer" HTTP authentication type.
 * Revised: Minor improvement regarding tamper script "xforwardedfor.py" (that appends a fake HTTP header `X-Forwarded-For`).
 * Revised: Minor bug-fix regarding not ignoring specified injection technique(s) when `--ignore-session` or `--flush-session` options are set.
 * Replaced: The `--dependencies` option has been replaced with `--ignore-dependencies`, regarding ignoring all required third-party library dependencies.

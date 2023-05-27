@@ -298,14 +298,16 @@ def do_check(request):
     xforwardedfor.tamper(request)
   
   # Check if defined any HTTP Authentication credentials.
-  # HTTP Authentication: Basic / Digest Access Authentication.
+  # HTTP Authentication: Basic, Digest, Bearer Access Authentication.
   if menu.options.auth_cred and menu.options.auth_type:
     try:
-      settings.SUPPORTED_HTTP_AUTH_TYPES.index(menu.options.auth_type)
-      if menu.options.auth_type == "basic":
+      settings.SUPPORTED_HTTP_AUTH_TYPES.index(menu.options.auth_type.lower())
+      if menu.options.auth_type.lower() == "bearer":
+        request.add_header(settings.AUTHORIZATION, "Bearer " + menu.options.auth_cred.strip())
+      elif menu.options.auth_type.lower() == "basic":
         b64_string = encodebytes(menu.options.auth_cred.encode(settings.DEFAULT_CODEC)).decode().replace('\n', '')
-        request.add_header(settings.AUTHORIZATION, "Basic " + b64_string + "")
-      elif menu.options.auth_type == "digest":
+        request.add_header(settings.AUTHORIZATION, "Basic " + b64_string)
+      elif menu.options.auth_type.lower() == "digest":
         try:
           url = menu.options.url
           try:
@@ -328,8 +330,7 @@ def do_check(request):
         except _urllib.error.HTTPError as e:
           pass
     except ValueError:
-      err_msg = "Unsupported / Invalid HTTP authentication type '" + menu.options.auth_type + "'."
-      err_msg += " Try basic or digest HTTP authentication type."
+      err_msg = "HTTP authentication type value must be Basic, Digest or Bearer."
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()   
   else:
