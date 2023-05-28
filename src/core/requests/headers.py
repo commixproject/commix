@@ -300,39 +300,38 @@ def do_check(request):
   # Check if defined any HTTP Authentication credentials.
   # HTTP Authentication: Basic, Digest, Bearer Access Authentication.
   if menu.options.auth_cred and menu.options.auth_type:
-    try:
-      settings.SUPPORTED_HTTP_AUTH_TYPES.index(menu.options.auth_type.lower())
-      if menu.options.auth_type.lower() == "bearer":
-        request.add_header(settings.AUTHORIZATION, "Bearer " + menu.options.auth_cred.strip())
-      elif menu.options.auth_type.lower() == "basic":
-        b64_string = encodebytes(menu.options.auth_cred.encode(settings.DEFAULT_CODEC)).decode().replace('\n', '')
-        request.add_header(settings.AUTHORIZATION, "Basic " + b64_string)
-      elif menu.options.auth_type.lower() == "digest":
-        try:
-          url = menu.options.url
-          try:
-            response = _urllib.request.urlopen(url, timeout=settings.TIMEOUT)
-          except _urllib.error.HTTPError as e:
-            try:
-              authline = e.headers.get('www-authenticate', '')  
-              authobj = re.match('''(\w*)\s+realm=(.*),''',authline).groups()
-              realm = authobj[1].split(',')[0].replace("\"","")
-              user_pass_pair = menu.options.auth_cred.split(":")
-              username = user_pass_pair[0]
-              password = user_pass_pair[1]
-              authhandler = _urllib.request.HTTPDigestAuthHandler()
-              authhandler.add_password(realm, url, username, password)
-              opener = _urllib.request.build_opener(authhandler)
-              _urllib.request.install_opener(opener)
-              result = _urllib.request.urlopen(url, timeout=settings.TIMEOUT)
-            except AttributeError:
-              pass
-        except _urllib.error.HTTPError as e:
-          pass
-    except ValueError:
+    if menu.options.auth_type.lower() not in (settings.AUTH_TYPE.BASIC, settings.AUTH_TYPE.DIGEST, settings.AUTH_TYPE.BEARER):
       err_msg = "HTTP authentication type value must be Basic, Digest or Bearer."
       print(settings.print_critical_msg(err_msg))
-      raise SystemExit()   
+      raise SystemExit()
+    if menu.options.auth_type.lower() == settings.AUTH_TYPE.BEARER:
+      request.add_header(settings.AUTHORIZATION, "Bearer " + menu.options.auth_cred.strip())
+    elif menu.options.auth_type.lower() == settings.AUTH_TYPE.BASIC:
+      b64_string = encodebytes(menu.options.auth_cred.encode(settings.DEFAULT_CODEC)).decode().replace('\n', '')
+      request.add_header(settings.AUTHORIZATION, "Basic " + b64_string)
+    elif menu.options.auth_type.lower() == settings.AUTH_TYPE.DIGEST:
+      try:
+        url = menu.options.url
+        try:
+          response = _urllib.request.urlopen(url, timeout=settings.TIMEOUT)
+        except _urllib.error.HTTPError as e:
+          try:
+            authline = e.headers.get('www-authenticate', '')  
+            authobj = re.match('''(\w*)\s+realm=(.*),''',authline).groups()
+            realm = authobj[1].split(',')[0].replace("\"","")
+            user_pass_pair = menu.options.auth_cred.split(":")
+            username = user_pass_pair[0]
+            password = user_pass_pair[1]
+            authhandler = _urllib.request.HTTPDigestAuthHandler()
+            authhandler.add_password(realm, url, username, password)
+            opener = _urllib.request.build_opener(authhandler)
+            _urllib.request.install_opener(opener)
+            result = _urllib.request.urlopen(url, timeout=settings.TIMEOUT)
+          except AttributeError:
+            pass
+      except _urllib.error.HTTPError as e:
+        pass
+ 
   else:
     pass        
   

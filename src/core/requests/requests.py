@@ -157,7 +157,7 @@ def estimate_response_time(url, timesec):
             print(settings.print_bold_info_msg(info_msg))
           else:  
             # Basic authentication 
-            if menu.options.auth_type == "basic":
+            if menu.options.auth_type.lower() == settings.AUTH_TYPE.BASIC:
               if not menu.options.ignore_code == settings.UNAUTHORIZED_ERROR:
                 warn_msg = menu.options.auth_type.capitalize() + " " 
                 warn_msg += "HTTP authentication credentials are required."
@@ -182,7 +182,7 @@ def estimate_response_time(url, timesec):
                     pass
 
             # Digest authentication         
-            elif menu.options.auth_type == "digest":
+            elif menu.options.auth_type.lower() == settings.AUTH_TYPE.DIGEST:
               if not menu.options.ignore_code == settings.UNAUTHORIZED_ERROR:
                 warn_msg = menu.options.auth_type.capitalize() + " " 
                 warn_msg += "HTTP authentication credentials are required."

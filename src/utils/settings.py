@@ -241,7 +241,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.8"
-REVISION = "20"
+REVISION = "21"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -988,7 +988,10 @@ CGI_SCRIPTS = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'txt
 METASPLOIT_PATH = "/usr/share/metasploit-framework/"
 
 # Supported HTTP Authentication types
-SUPPORTED_HTTP_AUTH_TYPES = [ "basic", "digest", "bearer" ]
+class AUTH_TYPE(object):
+  BASIC = "basic"
+  DIGEST = "digest"
+  BEARER = "bearer"
 
 # HTTP Headers
 HTTP_HEADERS = [ "user-agent", "referer", "host" ]

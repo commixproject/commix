@@ -163,10 +163,10 @@ def http_auth_cracker(url, realm):
             sys.stdout.flush()
         try:
           # Basic authentication 
-          if authentication_type.lower() == "basic":
+          if authentication_type.lower() == settings.AUTH_TYPE.BASIC:
             authhandler = _urllib.request.HTTPBasicAuthHandler()
           # Digest authentication 
-          elif authentication_type.lower() == "digest":
+          elif authentication_type.lower() == settings.AUTH_TYPE.DIGEST:
             authhandler = _urllib.request.HTTPDigestAuthHandler()
           authhandler.add_password(realm, url, username, password)
           opener = _urllib.request.build_opener(authhandler)

@@ -192,12 +192,13 @@ def init_request(url):
   if settings.VERBOSITY_LEVEL != 0:
     debug_msg = "Creating " + str(settings.SCHEME).upper() + " requests opener object."
     print(settings.print_debug_msg(debug_msg))
+  # Used a valid pair of valid credentials
   if menu.options.auth_cred and menu.options.auth_type and settings.VERBOSITY_LEVEL != 0 :
-    if menu.options.auth_type.lower() in ("basic", "digest"):
+    if menu.options.auth_type.lower() in (settings.AUTH_TYPE.BASIC, settings.AUTH_TYPE.DIGEST):
       _ = "credentials"
     else:
       _ = "token"
-    debug_msg = "Using '" + menu.options.auth_cred + "' " + _ + " for, " + menu.options.auth_type 
+    debug_msg = "Using '" + menu.options.auth_cred + "' " + _ + ", for " + menu.options.auth_type 
     debug_msg += " HTTP authentication."
     print(settings.print_debug_msg(debug_msg))
   if menu.options.proxy:
@@ -678,7 +679,7 @@ try:
         raise SystemExit()
 
     if menu.options.auth_cred and menu.options.auth_type:
-      if menu.options.auth_type.lower() in ("basic", "digest") and not re.search(settings.AUTH_CRED_REGEX, menu.options.auth_cred):
+      if menu.options.auth_type.lower() in (settings.AUTH_TYPE.BASIC, settings.AUTH_TYPE.DIGEST) and not re.search(settings.AUTH_CRED_REGEX, menu.options.auth_cred):
         error_msg = "HTTP " + str(menu.options.auth_type) 
         error_msg += " authentication credentials value must be in format 'username:password'."
         print(settings.print_critical_msg(error_msg))
