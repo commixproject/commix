@@ -155,7 +155,7 @@ def http_auth_cracker(url, realm):
         float_percent = "{0:.1f}%".format(round(((i*100)/(total*1.0)),2))
         # Check if verbose mode on
         if settings.VERBOSITY_LEVEL != 0:
-          payload = "" + username + ":" + password + ""
+          payload = "'" + username + ":" + password + "'"
           if settings.VERBOSITY_LEVEL >= 2:
             print(settings.print_checking_msg(payload))
           else:
@@ -200,7 +200,7 @@ def http_auth_cracker(url, realm):
             i = i + 1
             float_percent = ".. (" + float_percent + ")"
         if settings.VERBOSITY_LEVEL == 0:
-          info_msg = "Checking for a valid pair of credentials." 
+          info_msg = "Checking for valid pair of HTTP authentication credentials." 
           info_msg += float_percent
           sys.stdout.write("\r\r" + settings.print_info_msg(info_msg))
           sys.stdout.flush()
@@ -208,7 +208,7 @@ def http_auth_cracker(url, realm):
           valid_pair =  "" + username + ":" + password + ""
           if not settings.VERBOSITY_LEVEL >= 2:
             print(settings.SINGLE_WHITESPACE)
-          info_msg = "Identified a valid pair of credentials '" 
+          info_msg = "Identified valid pair of HTTP authentication credentials: '" 
           info_msg += valid_pair + Style.RESET_ALL + Style.BRIGHT  + "'."  
           print(settings.print_bold_info_msg(info_msg))
           return valid_pair
