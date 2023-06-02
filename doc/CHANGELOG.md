@@ -15,6 +15,8 @@
 * Revised: Minor improvement regarding adding PCRE `/e` modifier (i.e. dynamic code evaluation technique).
 * Revised: Minor bug-fix regarding logging all HTTP traffic into a textual file (i.e `-t` option).
 
+_Note: For more check the [detailed changeset](https://github.com/commixproject/commix/compare/v3.6...v3.7)._
+
 ## Version 3.6 (2022-11-18)
 * Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
 * Revised: Improvements regarding dynamic code evaluation heuristic check.
@@ -23,6 +25,8 @@
 * Added: New tamper script "printf2echo.py" that replaces the printf-based ASCII to Decimal `printf "%d" "'$char'"` with `echo -n $char | od -An -tuC | xargs`.
 * Revised: Minor improvement regarding parsing HTTP requests through HTTP proxy (i.e `--proxy` option).
 * Revised: Minor improvement regarding handling HTTP Error 401 (Unauthorized).
+
+_Note: For more check the [detailed changeset](https://github.com/commixproject/commix/compare/v3.5...v3.6)._
 
 ## Version 3.5 (2022-07-03)
 * Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
@@ -45,6 +49,8 @@
 * Revised: Ιmprovement regarding `--level` option, which not only adds more injection points (i.e Cookies, HTTP headers) but also performs more tests for each injection point.
 * Revised: Improvement regarding injecting into custom HTTP Header(s).
 
+_Note: For more check the [detailed changeset](https://github.com/commixproject/commix/compare/v3.4...v3.5)._
+
 ## Version 3.4 (2022-02-25)
 * Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
 * Fixed: Bug-fix regarding forcing usage of provided HTTP method (e.g. `PUT`).
@@ -56,6 +62,8 @@
 * Revised: Improvement regarding mechanism which nagging if used "dev" version is > 30 days old.
 * Revised: Improvements regarding dynamic code evaluation heuristic check.
 * Replaced: The `--encoding` option has been replaced with `--codec`.
+
+_Note: For more check the [detailed changeset](https://github.com/commixproject/commix/compare/v3.3...v3.4)._
 
 ## Version 3.3 (2021-09-13)
 * Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
@@ -71,6 +79,8 @@
 * Revised: Minor improvement regarding parsing GraphQL JSON objects.
 * Added: The .bat files command separator (i.e. ["%1a"](http://seclists.org/fulldisclosure/2016/Nov/67)) has been added.
 * Added: New option `--method` to force usage of provided HTTP method (e.g. `PUT`).
+
+_Note: For more check the [detailed changeset](https://github.com/commixproject/commix/compare/v3.2...v3.3)._
 
 ## Version 3.2 (2021-04-12)
 * Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
@@ -96,6 +106,8 @@
 * Fixed: Bug-fix regarding Basic HTTP authentication.
 * Fixed: Bug-fix regarding connection problems (via @fuero).
 
+_Note: For more check the [detailed changeset](https://github.com/commixproject/commix/compare/v3.1...v3.2)._
+
 ## Version 3.1 (2020-06-17)
 * Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
 * Added: A script "setup.py" has been added (i.e. easier installation).
@@ -113,6 +125,8 @@
 * Revised: Improvements regarding data in the detailed message about occurred unhandled exception.
 * Revised: Minor bug-fixes and improvements regarding HTTP authentication dictionary-based cracker.
 
+_Note: For more check the [detailed changeset](https://github.com/commixproject/commix/compare/v3.0-20191111...v3.1)._
+
 ## Version 3.0 (2019-11-11)
 * Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
 * Revised: Improvement regarding identifying the indicated web-page charset.
@@ -122,6 +136,8 @@
 * Revised: Improvement regarding parsing nested JSON objects that contain boolean values.
 * Replaced: The `--ignore-401` option has been replaced with `--ignore-code` option.
 * Added: New option ( `--ignore-code`) for ignoring (problematic) HTTP error code (e.g. 401).
+
+_Note: For more check the [detailed changeset](https://github.com/commixproject/commix/compare/v2.9-20190626...v3.0-20191111)._
 
 ## Version 2.9 (2019-06-26)
 * Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
@@ -138,6 +154,8 @@
 * Revised: Minor improvements regarding preventing false negative results, due to parameters tampering during the detection phase.
 * Revised: Minor improvements regarding "reverse_tcp" and "bind_tcp" shell options.
 
+_Note: For more check the [detailed changeset](https://github.com/commixproject/commix/compare/v2.8-20190326...v2.9-20190626)._
+
 ## Version 2.8 (2019-03-26)
 * Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
 * Updated: Minor update regarding accepting overly long result lines.
@@ -147,6 +165,8 @@
 * Fixed: Minor bug-fix regarding ignoring HTTP Error 401 (Unauthorized) (for `--ignore-401` option).
 * Added: Support for writing crawling results to a temporary file (for eventual further processing with other tools).
 * Added: Support for Windows "Python" on "reverse_tcp" shell option.
+
+_Note: For more check the [detailed changeset](https://github.com/commixproject/commix/compare/v2.7-20181218...v2.8-20190326)._
 
 ## Version 2.7 (2018-12-18)
 * Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
@@ -169,6 +189,8 @@
 * Fixed: Minor bug-fix regarding loading tamper scripts. 
 * Revised: Minor improvement regarding "INJECT_HERE" tag (i.e. declaring injection position) to be case insensitive.
 
+_Note: For more check the [detailed changeset](https://github.com/commixproject/commix/compare/v2.6-20180921...v2.7-20181218)._
+
 ## Version 2.6 (2018-09-21)
 * Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
 * Revised: Minor improvement in session handler regarding IPv6 targets.
@@ -187,6 +209,8 @@
 * Revised: Minor improvement regarding ignoring the Google Analytics cookie in all scanning attempts.
 * Fixed: Minor bug-fix regarding "bind_tcp" shell option.
 
+_Note: For more check the [detailed changeset](https://github.com/commixproject/commix/compare/v2.5-20180713...v2.6-20180921)._
+
 ## Version 2.5 (2018-07-13)
 * Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
 * Revised: Improvement regarding identifying the appropriate format parameters, in the provided POST data.
@@ -203,6 +227,8 @@
 * Revised: Improvement regarding combining tamper script "multiplespaces.py" with other space-related tamper script(s).
 * Added: New tamper script "multiplespaces.py" that adds multiple spaces around OS commands.
 
+_Note: For more check the [detailed changeset](https://github.com/commixproject/commix/compare/v2.4-20180521...v2.5-20180713)._
+
 ## Version 2.4 (2018-05-21)
 * Fixed: Multiple bug-fixes regarding several reported unhandled exceptions. 
 * Fixed: Minor bug-fix regarding ignoring invalid and/or empty tamper scripts. 
@@ -211,6 +237,8 @@
 * Fixed: Minor bug-fix regarding loading multiple tamper scripts (during the exploitation phase). 
 * Added: New tamper script "caret.py" that adds the caret symbol (^) between the characters of the generated payloads (for windows targets).
 * Added: New tamper script "singlequotes.py" that adds single quotes (') between the characters of the generated payloads (for *nix targets).
+
+_Note: For more check the [detailed changeset](https://github.com/commixproject/commix/compare/v2.3-20180307...v2.4-20180521)._
 
 ## Version 2.3 (2018-03-07)
 * Fixed: Multiple bug-fixes regarding several reported unhandled exceptions. 
@@ -228,6 +256,8 @@
 * Revised: Improvement regarding testing json-formated POST data with empty value(s).
 * Revised: Minor improvement regarding verbose mode for removing the first and/or last line of the html content (in case there are/is empty).
 
+_Note: For more check the [detailed changeset](https://github.com/commixproject/commix/compare/v2.2-20171212...v2.3-20180307)._
+
 ## Version 2.2 (2017-12-12)
 * Revised: Minor improvement in "updater", for supporting verbose mode.
 * Fixed: Minor bug-fix regarding cookie-based command injections.
@@ -240,6 +270,8 @@
 * Revised: Minor improvement in "updater", for checking commit hash number.
 * Added: New option `--skip` regarding excluding certain parameter(s) from testing.
 * Added: New option `--skip-technique` regarding excluding certain injection technique(s) from testing.
+
+_Note: For more check the [detailed changeset](https://github.com/commixproject/commix/compare/v2.1-20171003...v2.2-20171212)._
 
 ## Version 2.1 (2017-10-03)
 * Added: New option `--header` for providing a single extra HTTP header (e.g. 'X-Forwarded-For: 127.0.0.1').
@@ -258,6 +290,8 @@
 * Fixed: Major bug-fix regarding connection problem over HTTPS.
 * Added: New option `--purge-output` to turn on safe removal of all content(s) from output directory.
 
+_Note: For more check the [detailed changeset](https://github.com/commixproject/commix/compare/v2.0-20170714...v2.1-20171003)._
+
 ## Version 2.0 (2017-07-14)
 * Revised: Minor improvement for automatically increasing default `--time-sec` value when `--tor` used.
 * Fixed: Minor improvement for not re-testing Tor SOCKS proxy settings (in case of multiple targets).
@@ -272,6 +306,8 @@
 * Added: New option `--mobile` that imitates smartphone through HTTP User-Agent header.
 * Added: New option `--retries` that retries request(s) when the connection timeouts.
 
+_Note: For more check the [detailed changeset](https://github.com/commixproject/commix/compare/v1.9-20170502...v2.0-20170714)._
+
 ## Version 1.9 (2017-05-02)
 * Revised: Minor improvement in results-based techniques, for delaying the OS responses depending on the user-supplied time delay.
 * Revised: The time-related ("time-based"/"tempfile-based") payloads, have been shortly revised.
@@ -283,6 +319,8 @@
 * Revised: The file-based payload for deleting files with execution output, has been shortly revised.
 * Replaced: The `--root-dir` option has been replaced with `--web-root` option.
 * Added: New option `--wizard` that shows a simple wizard interface for beginner users.
+
+_Note: For more check the [detailed changeset](https://github.com/commixproject/commix/compare/v1.8-20170315...v1.9-20170502)._
 
 ## Version 1.8 (2017-03-15)
 * Added: New feauture for installing Unicorn tool (if not installed on host).
@@ -299,6 +337,8 @@
 * Fixed: Minor improvement for checking for established TCP connections.
 * Fixed: Minor improvement for not reopening meterpreter sessions (in case of user abortion).
 
+_Note: For more check the [detailed changeset](https://github.com/commixproject/commix/compare/v1.7-20170203...v1.8-20170315)._
+
 ## Version 1.7 (2017-02-03)
 * Fixed: Minor improvement regarding unverified SSL context(s).
 * Added: New values ("URIPATH", "SRVPORT") have been added to "Set" option.
@@ -313,6 +353,8 @@
 * Added: New option `--skip-empty` for skipping the testing of the parameter(s) with empty value(s).
 * Fixed: Improvement regarding testing the parameter(s) with empty value(s).
 * Added: New CGI shellscript path "/cgi-bin/cgiCmdNotify" (vulnerable to shellshock) has been added.
+
+_Note: For more check the [detailed changeset](https://github.com/commixproject/commix/compare/v1.6-20161228...v1.7-20170203)._
 
 ## Version 1.6 (2016-12-28)
 * Fixed: Improvement regarding json-formated POST data, where whitespace before (and/or after) the ":" exists.
@@ -329,6 +371,8 @@
 * Revised: The dynamic code evaluation ("eval-based") payloads have been shortly revised.
 * Added: The executed command and the execution results output has been added to log file.
 
+_Note: For more check the [detailed changeset](https://github.com/commixproject/commix/compare/v1.5-20161117...v1.6-20161228)._
+
 ## Version 1.5 (2016-11-17)
 * Fixed: Minor improvement in the "ICMP exfiltration" module.
 * Fixed: Minor improvement for choosing default value when pressing enter.
@@ -339,6 +383,8 @@
 * Added: New option `--msf-path` for specifying a path where metasploit is installed.
 * Added: New verbosity level (3) for printing the HTTP response headers.
 * Added: New verbosity level (2) for printing the performed HTTP requests headers.
+
+_Note: For more check the [detailed changeset](https://github.com/commixproject/commix/compare/v1.4-20161017...v1.5-20161117)._
 
 ## Version 1.4 (2016-10-17)
 * Added: Support on crawler for checking target for the existence of 'sitemap.xml'.
@@ -351,6 +397,8 @@
 * Fixed: Minor improvement in the function that checks for updates on start up.
 * Fixed: Minor improvements in enumeration options (added failure messages).
 
+_Note: For more check the [detailed changeset](https://github.com/commixproject/commix/compare/v1.3-20160914...v1.4-20161017)._
+
 ## Version 1.3 (2016-09-14)
 * Fixed: Minor improvements in "reverse_tcp" option.
 * Added: Support for the metasploit "web_delivery" script.
@@ -360,6 +408,8 @@
 * Added: New option `--skip-calc` that skips the mathematic calculation during the detection phase.
 * Fixed: Minor improvement in Shellshock module for ignoring junk output on response.
 * Fixed: Minor improvement in Shellshock module for finding RCE results on page's response.
+
+_Note: For more check the [detailed changeset](https://github.com/commixproject/commix/compare/v1.2-20160812...v1.3-20160914)._
 
 ## Version 1.2 (2016-08-12)
 * Added: The ability for setting custom (PHP / Python) working directory.
@@ -373,6 +423,8 @@
 * Fixed: Minor improvement for finding the URL part (i.e scheme:[//host[:port]][/]path).
 * Fixed: Minor fix for conflicted shells (i.e regular, alternative) from session file.
 
+_Note: For more check the [detailed changeset](https://github.com/commixproject/commix/compare/v1.1-20160714...v1.2-20160812)._
+
 ## Version 1.1 (2016-07-14)
 * Added: The ".gitignore" file has been added.
 * Added: Support for injections against ASP.NET applications.
@@ -383,6 +435,8 @@
 * Added: Support for automated enabling of an HTTP server for `--file-upload` option.
 * Fixed: Minor fix for "Python-urllib" User-Agent exposure.
 
+_Note: For more check the [detailed changeset](https://github.com/commixproject/commix/compare/v1.0-20160614...v1.1-20160714)._
+
 ## Version 1.0 (2016-06-14)
 * Revised: Time-relative statistical analysis for recognition of unexpected time delays due to unstable requests.
 * Added: A list of pages / scripts potentially vulnerable to shellshock.
@@ -390,6 +444,8 @@
 * Revised: Multiple eye-candy revisions have been performed.
 * Fixed: HTTPS requests fixation, if the `--proxy` option is enabled.
 * Fixed: Multiple fixes regarding the shellshock module have been performed.
+
+_Note: For more check the [detailed changeset](https://github.com/commixproject/commix/compare/v0.9b-20160607...v1.0-20160614)._
 
 ## Version 0.9b (2016-06-07)
 * Added: The ability to re-perform the injection request if it has failed.
@@ -405,6 +461,8 @@
 * Revised: The "time-based" (blind) technique for *nix targets has been shortly revised.
 * Revised: The source code has been revised to support "print_state_msg" (i.e error, warning, success etc) functions.
 
+_Note: For more check the [detailed changeset](https://github.com/commixproject/commix/compare/v0.8b-20160506...v0.9b-20160607)._
+
 ## Version 0.8b (2016-05-06)
 * Fixed: The `--file-read` option to ignore the carriage return ("\r") character in a text file.
 * Added: The ability to check for empty value(s) in the defined GET/POST/Cookie(s) data and skip.
@@ -415,6 +473,8 @@
 * Added: The ability to check every GET parameter in the defined URL and/or every POST provided data.
 * Added: New option `--all` that enables all supported enumeration options.
 
+_Note: For more check the [detailed changeset](https://github.com/commixproject/commix/compare/v0.7b-20160418...v0.8b-20160506)._
+
 ## Version 0.7b (2016-04-18)
 * Fixed: HTTP proxy logs parser to accept GET http requests.
 * Fixed: HTTP proxy logs parser to recognise provided HTTP authentication credentials.
@@ -422,6 +482,8 @@
 * Added: The ability to store valid (Digest) credentials into session files for current target.
 * Added: Dictionary-based cracker for "Digest" HTTP authentication credentials.
 * Added: Support for "Digest" HTTP authentication type.
+
+_Note: For more check the [detailed changeset](https://github.com/commixproject/commix/compare/v0.6b-20160401...v0.7b-20160418)._
 
 ## Version 0.6b (2016-04-01)
 * Added: The ability to store valid (Basic) credentials into session files for current target.
@@ -433,12 +495,16 @@
 * Added: New option `--dns-server` that supports the "DNS exfiltration" injection technique (module).
 * Added: New option `--dependencies` that checks (non-core) third party dependenices.
 
+_Note: For more check the [detailed changeset](https://github.com/commixproject/commix/compare/v0.5b-20160316...v0.6b-20160401)._
+
 ## Version 0.5b (2016-03-16)
 * Fixed: The payload(s) for dynamic code evaluation ("eval-based"), if there is not any separator.
 * Added: Support for verbose mode in the "ICMP exfiltration" injection technique (module). 
 * Added: Check if the user-defined os name, is different than the one identified by heuristics.
 * Added: New option `--os` that forces a user-defined os name.
 * Added: Support for testing custom HTTP headers (via `--headers` parameter).
+
+_Note: For more check the [detailed changeset](https://github.com/commixproject/commix/compare/v0.4.1b-20160226...v0.5b-20160316)._
 
 ## Version 0.4.1b (2016-02-26)
 * Added: Support for storing and retrieving executed commands from session file.
@@ -447,11 +513,15 @@
 * Added: New option `--flush-session` for flushing session files for current target.
 * Added: Support to resume to the latest injection points from session file.
 
+_Note: For more check the [detailed changeset](https://github.com/commixproject/commix/compare/v0.4b-20160204...v0.4.1b-20160226)._
+
 ## Version 0.4b (2016-02-04)
 * Added: Payload mutation if WAF/IPS/IDS protection is detected.
 * Added: Check for existence of WAF/IPS/IDS protection (via error pages).
 * Added: The "set" option in "reverse_tcp" which sets a context-specific variable to a value.
 * Added: New option `--force-ssl` for forcing usage of SSL/HTTPS requests.
+
+_Note: For more check the [detailed changeset](https://github.com/commixproject/commix/compare/v0.3b-20160115...v0.4b-20160204)._
 
 ## Version 0.3b (2016-01-15)
 * Added: Time-relative false-positive identification, which identifies unexpected time delays due to unstable requests.
