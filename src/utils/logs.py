@@ -50,6 +50,7 @@ Logs filename creation.
 """
 def logs_filename_creation(url):
   if menu.options.output_dir:
+    menu.options.output_dir = os.path.abspath(menu.options.output_dir)
     if os.path.isdir(menu.options.output_dir):
       output_dir = menu.options.output_dir
     else:
@@ -58,13 +59,11 @@ def logs_filename_creation(url):
       raise SystemExit()
   else:
     output_dir = settings.OUTPUT_DIR
- 
-  output_dir = os.path.dirname(output_dir)
-  path_creation(output_dir)
+    path_creation(os.path.dirname(settings.OUTPUT_DIR))
 
   if not output_dir.endswith("/"):
     output_dir = output_dir + "/"
-
+    
   # The logs filename construction.
   filename = create_log_file(url, output_dir)
 
