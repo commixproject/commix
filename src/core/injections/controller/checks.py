@@ -866,7 +866,7 @@ Check if http / https.
 def check_http_s(url):
   if settings.SINGLE_WHITESPACE in url:
     url = url.replace(settings.SINGLE_WHITESPACE, _urllib.parse.quote_plus(settings.SINGLE_WHITESPACE)) 
-    
+  
   if settings.CHECK_INTERNET:
       url = settings.CHECK_INTERNET_ADDRESS
   else:
@@ -878,9 +878,6 @@ def check_http_s(url):
           else:
             url = "http://" + url
         settings.SCHEME = (_urllib.parse.urlparse(url).scheme.lower() or "http") if not menu.options.force_ssl else "https"
-        if menu.options.force_ssl and settings.VERBOSITY_LEVEL != 0:
-          debug_msg = "Forcing usage of SSL/HTTPS requests."
-          print(settings.print_debug_msg(debug_msg))
       else:
         err_msg = "Invalid target URL has been given." 
         print(settings.print_critical_msg(err_msg))
@@ -889,6 +886,13 @@ def check_http_s(url):
       err_msg = "Problem occurred while parsing target URL." 
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
+
+  if _urllib.parse.urlparse(url).scheme != settings.SCHEME:
+    if menu.options.force_ssl and settings.VERBOSITY_LEVEL != 0:
+      debug_msg = "Forcing usage of SSL/HTTPS requests."
+      print(settings.print_debug_msg(debug_msg))
+    url = url.replace(_urllib.parse.urlparse(url).scheme, settings.SCHEME)
+
   return url
   
 """
