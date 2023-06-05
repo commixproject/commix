@@ -1757,24 +1757,28 @@ def check_similarities(all_params):
       json_data = json.loads(all_params, object_pairs_hook=OrderedDict)
       all_params = flatten(json_data)
       for param in all_params:
-        if param == all_params[param]:
-          parameter_name = param
-          all_params[param] = param + settings.RANDOM_TAG
+        if all_params[param] in param:
+          all_params[param] = all_params[param] + settings.RANDOM_TAG
       all_params = [x.replace(settings.SINGLE_WHITESPACE, "") for x in json.dumps(all_params).split(", ")]
     except Exception as e:
       pass
   else:
     for param in range(0, len(all_params)):
       if settings.IS_XML:
-        if re.findall(r'</(.*)>', all_params[param]) == re.findall(r'>(.*)</', all_params[param]):
-          parameter_name = re.findall(r'>(.*)</', all_params[param])
-          parameter_name = ''.join(parameter_name)
-          all_params[param] = "<" + parameter_name + settings.FILE_WRITE_OPERATOR + parameter_name + settings.RANDOM_TAG + "</" + parameter_name + ">"
+        if re.findall(r'>(.*)</', all_params[param]):
+          if re.findall(r'>(.*)</', all_params[param])[0] in re.findall(r'</(.*)>', all_params[param])[0]:
+            parameter_name = ''.join(re.findall(r'</(.*)>', all_params[param]))
+            parameter_value = ''.join(re.findall(r'>(.*)</', all_params[param]))
+            all_params[param] = "<" + parameter_name + ">" + parameter_value + settings.RANDOM_TAG + "</" + parameter_name + ">"
       else:
         if re.findall(r'(.*)=', all_params[param]) == re.findall(r'=(.*)', all_params[param]):
-          parameter_name = re.findall(r'=(.*)', all_params[param])
-          parameter_name = ''.join(parameter_name)
+          parameter_name = ''.join(re.findall(r'=(.*)', all_params[param]))
           all_params[param] = parameter_name + "=" + parameter_name + settings.RANDOM_TAG
+        elif re.findall(r'=(.*)', all_params[param])[0] in re.findall(r'(.*)=', all_params[param])[0]:
+          parameter_name = ''.join(re.findall(r'(.*)=', all_params[param]))
+          parameter_value = ''.join(re.findall(r'=(.*)', all_params[param]))
+          all_params[param] = parameter_name + "=" + parameter_value + settings.RANDOM_TAG
+
   return all_params
 
 """

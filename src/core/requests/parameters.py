@@ -106,6 +106,7 @@ def do_GET_check(url, http_request_method):
             parameters = parameters.replace(value, value + settings.INJECT_TAG) 
         # Reconstruct the URL
         url = url_part + "?" + parameters
+        url = url.replace(settings.RANDOM_TAG,"")
         urls_list.append(url)
         return urls_list 
       else:
@@ -148,7 +149,8 @@ def do_GET_check(url, http_request_method):
             value = multi_params_get_value(multi_parameters[param])
             parameter = settings.PARAMETER_DELIMITER.join(multi_parameters)
           # Reconstruct the URL  
-          url = url_part + "?" + parameter  
+          url = url_part + "?" + parameter
+          url = url.replace(settings.RANDOM_TAG,"")
           urls_list.append(url)
 
     return urls_list 
@@ -249,6 +251,9 @@ def do_POST_check(parameter, http_request_method):
   for param in range(len(multi_parameters)):
     multi_parameters[param] = checks.PCRE_e_modifier(multi_parameters[param], http_request_method)
 
+  _ = []
+  _.append(parameter)
+  parameter = ''.join(checks.check_similarities(_))
   # Check if single parameter is supplied.
   if len(multi_parameters) == 1:
     if settings.INJECT_TAG not in multi_parameters[0]:
@@ -265,9 +270,6 @@ def do_POST_check(parameter, http_request_method):
         value = re.findall(r'>(.*)</', parameter)
         value = ''.join(value)
       else:
-        _ = []
-        _.append(parameter)
-        parameter = ''.join(checks.check_similarities(_))
         value = re.findall(r'=(.*)', parameter)
         value = ''.join(value)
 
@@ -287,6 +289,7 @@ def do_POST_check(parameter, http_request_method):
             parameter = parameter + settings.INJECT_TAG
         else:
           parameter = parameter.replace(value, value + settings.INJECT_TAG)
+        parameter = parameter.replace(settings.RANDOM_TAG,"")
         return parameter
     else:
       return multi_parameters
@@ -299,8 +302,7 @@ def do_POST_check(parameter, http_request_method):
       all_params = settings.PARAMETER_DELIMITER.join(multi_parameters)
       # Check for similarity in provided parameter name and value.
       all_params = all_params.split(settings.PARAMETER_DELIMITER)
-      all_params = checks.check_similarities(all_params)
-
+    all_params = checks.check_similarities(all_params)
     # Check if not defined the "INJECT_HERE" tag in parameter
     if settings.INJECT_TAG not in parameter:
       if checks.is_empty(multi_parameters, http_request_method):
@@ -340,6 +342,7 @@ def do_POST_check(parameter, http_request_method):
         # Grab the value of parameter.
         value = multi_params_get_value(param, multi_parameters)
         parameter = settings.PARAMETER_DELIMITER.join(multi_parameters)
+        parameter = parameter.replace(settings.RANDOM_TAG,"")
 
     return parameter
 
@@ -455,6 +458,10 @@ def do_cookie_check(cookie):
   # Check for inappropriate format in provided parameter(s).
   if len([s for s in multi_parameters if "=" in s]) != (len(multi_parameters)):
     checks.inappropriate_format(multi_parameters)
+
+  _ = []
+  _.append(cookie)
+  cookie = ''.join(checks.check_similarities(_))
   # Grab the value of parameter.
   value = multi_params_get_value(cookie)
   # Replace the value of parameter with INJECT tag
@@ -475,6 +482,7 @@ def do_cookie_check(cookie):
         cookie = cookie + settings.INJECT_TAG
       else:
         cookie = cookie.replace(value, value + settings.INJECT_TAG)
+    cookie = cookie.replace(settings.RANDOM_TAG,"")
     return cookie
 
   # Check if multiple parameters are supplied.
@@ -482,6 +490,7 @@ def do_cookie_check(cookie):
     cookies_list = []
     all_params = settings.COOKIE_DELIMITER.join(multi_parameters)
     all_params = all_params.split(settings.COOKIE_DELIMITER)
+    all_params = checks.check_similarities(all_params)
     # Check if not defined the "INJECT_HERE" tag in parameter
     if settings.INJECT_TAG not in cookie:
       # Check for empty values (in provided parameters).
@@ -508,6 +517,7 @@ def do_cookie_check(cookie):
           all_params[param] = all_params[param].replace(value, value + settings.INJECT_TAG)  
         all_params[param - 1] = all_params[param - 1].replace(settings.INJECT_TAG, "")
         cookie = settings.COOKIE_DELIMITER.join(all_params)
+        cookie = cookie.replace(settings.RANDOM_TAG,"")
         if type(cookie) != list:
           cookies_list.append(cookie)
         cookie = cookies_list
@@ -517,6 +527,7 @@ def do_cookie_check(cookie):
         value = re.findall(r'=(.*)', multi_parameters[param])
         value = ''.join(value)
       cookie = settings.COOKIE_DELIMITER.join(multi_parameters) 
+      cookie = cookie.replace(settings.RANDOM_TAG,"")
 
     return cookie
 
