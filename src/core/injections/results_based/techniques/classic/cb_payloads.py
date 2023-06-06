@@ -119,11 +119,6 @@ def cmd_execution(separator, TAG, cmd):
                 "\"') do @set /p = " + TAG + TAG + "%i" + TAG + TAG + settings.CMD_NUL
                 )
   else:
-     
-    # if not settings.WAF_ENABLED:
-    #   cmd_exec = "$(echo $(" + cmd + "))"
-    # else:
-
     if settings.USE_BACKTICKS:
       cmd_exec = "`" + cmd + "`"
       payload = (separator +

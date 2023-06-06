@@ -84,14 +84,11 @@ def user_agent_header():
     else:
       if settings.VERBOSITY_LEVEL != 0:
         debug_msg = "Fetching random HTTP User-Agent header. "  
-        sys.stdout.write(settings.print_debug_msg(debug_msg))
-        sys.stdout.flush()
+        print(settings.print_debug_msg(debug_msg))
       else:
         pass
       try:
         menu.options.agent = random.choice(settings.USER_AGENT_LIST)
-        if settings.VERBOSITY_LEVEL != 0:
-          print(settings.SINGLE_WHITESPACE)
         info_msg = "The fetched random HTTP User-Agent header value is '" + menu.options.agent + "'."  
         print(settings.print_info_msg(info_msg))
       except:
@@ -166,8 +163,8 @@ def init_request(url):
   checks.check_connection(url)
   # Number of seconds to wait before timeout connection
   if settings.VERBOSITY_LEVEL != 0:
-      debug_msg = "Setting the HTTP timeout."
-      print(settings.print_debug_msg(debug_msg))
+    debug_msg = "Setting the HTTP timeout."
+    print(settings.print_debug_msg(debug_msg))
   if menu.options.timeout:
     settings.TIMEOUT = menu.options.timeout
   # Define HTTP User-Agent header
