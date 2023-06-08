@@ -241,7 +241,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.8"
-REVISION = "26"
+REVISION = "27"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -269,6 +269,9 @@ RANDOM_STRING_GENERATOR = ''.join(random.choice(string.ascii_uppercase + string.
 
 # Readline 
 READLINE_ERROR = False
+
+# User-supplied operating system command
+USER_SUPPLIED_CMD = ""
 
 # Random Tag
 RANDOM_TAG = "" 
@@ -481,6 +484,9 @@ EVAL_SUFFIXES = []
 EVAL_SUFFIXES_LVL1 = [ "",  ".'", "}}"]
 EVAL_SUFFIXES_LVL2 = EVAL_SUFFIXES_LVL1 + ["'#"]
 EVAL_SUFFIXES_LVL3 = EVAL_SUFFIXES_LVL2 + [".\"", "\\\\", "//", ")}", "#"]
+
+# Raw payload (without tampering)
+RAW_PAYLOAD = ""
 
 # The default (url-ecoded) white-space.
 WHITESPACES = ["%20"]
@@ -1021,7 +1027,8 @@ TAMPER_SCRIPTS = {
                   "printf2echo": False,
                   "uninitializedvariable": False,
                   "slash2env":False,
-                  "backticks":False
+                  "backticks":False,
+                  "rev":False
                  }
 
 UNIX_NOT_SUPPORTED_TAMPER_SCRIPTS = [
@@ -1039,7 +1046,8 @@ WIN_NOT_SUPPORTED_TAMPER_SCRIPTS = [
                   "sleep2usleep",
                   "printf2echo",
                   "space2ifs",
-                  "uninitializedvariable"
+                  "uninitializedvariable",
+                  "rev"
 ]
 
 EVAL_NOT_SUPPORTED_TAMPER_SCRIPTS = [

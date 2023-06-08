@@ -204,6 +204,8 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
                 )
 
   else:
+
+    settings.USER_SUPPLIED_CMD = cmd
     if separator == ";"  or separator == "%0a" :
       payload = (separator +
                 "str=$(" + cmd + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + separator + " tr '\\n' ' ' < " + OUTPUT_TEXTFILE + " )" + separator +

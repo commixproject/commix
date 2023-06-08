@@ -1297,6 +1297,16 @@ def whitespace_check(payload):
 Check for symbols (i.e "`", "^", "$@" etc) between the characters of the generated payloads.
 """
 def other_symbols(payload):
+  # Check for reversed (characterwise) user-supplied operating system commands.
+  if payload.count("|rev") >= 1 and settings.TARGET_OS == "unix":
+    if not settings.TAMPER_SCRIPTS['rev']:
+      if menu.options.tamper:
+        menu.options.tamper = menu.options.tamper + ",rev"
+      else:
+        menu.options.tamper = "rev"  
+    from src.core.tamper import rev
+    payload = rev.tamper(payload)
+    
   # Check for (multiple) backticks (instead of "$()") for commands substitution on the generated payloads.
   if payload.count("`") >= 2 and settings.TARGET_OS == "unix":
     if menu.options.tamper:
@@ -1503,9 +1513,17 @@ Perform payload modification
 """
 def perform_payload_modification(payload):
 
+  settings.RAW_PAYLOAD = payload.replace(settings.WHITESPACES[0], settings.SINGLE_WHITESPACE)
+
   for extra_http_headers in list(set(settings.MULTI_ENCODED_PAYLOAD[::-1])):
     if extra_http_headers == "xforwardedfor":
       from src.core.tamper import xforwardedfor
+
+  for encode_type in list(set(settings.MULTI_ENCODED_PAYLOAD[::-1])):
+    # Reverses (characterwise) the user-supplied operating system commands
+    if encode_type == 'rev':
+      from src.core.tamper import rev
+      payload = rev.tamper(payload)
 
   for encode_type in list(set(settings.MULTI_ENCODED_PAYLOAD[::-1])):
     # printf to echo (for ascii to dec)

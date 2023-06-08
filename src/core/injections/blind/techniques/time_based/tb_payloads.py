@@ -178,6 +178,7 @@ def cmd_execution(separator, cmd, output_length, timesec, http_request_method):
                 )
 
   else: 
+    settings.USER_SUPPLIED_CMD = cmd
     if separator == ";" or separator == "%0a":
       payload = (separator + 
                  "str=\"$(echo $(" + cmd + "))\"" + separator + 
@@ -307,6 +308,7 @@ def get_char(separator, cmd, num_of_chars, ascii_char, timesec, http_request_met
                 )
 
   else: 
+    settings.USER_SUPPLIED_CMD = cmd
     if separator == ";" or separator == "%0a" :
       payload = (separator + 
                 # Grab the execution output.

@@ -119,6 +119,7 @@ def cmd_execution(separator, TAG, cmd):
                 "\"') do @set /p = " + TAG + TAG + "%i" + TAG + TAG + settings.CMD_NUL
                 )
   else:
+    settings.USER_SUPPLIED_CMD = cmd  
     if settings.USE_BACKTICKS:
       cmd_exec = "`" + cmd + "`"
       payload = (separator +
@@ -135,6 +136,7 @@ def cmd_execution(separator, TAG, cmd):
                 cmd_exec +
                 "$(echo " + TAG + ")" + TAG + ""
                 )
+
   return payload
 
 """

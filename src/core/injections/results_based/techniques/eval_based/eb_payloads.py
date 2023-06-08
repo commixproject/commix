@@ -175,6 +175,7 @@ def cmd_execution(separator, TAG, cmd):
                   separator + "echo '" + TAG + "'`)%3B"
                 )
   else:  
+    settings.USER_SUPPLIED_CMD = cmd
     if separator == "":
       payload = ("print(`echo " + TAG + "`." + 
                   "`echo " + TAG + "`." +

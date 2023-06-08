@@ -81,6 +81,7 @@ def cmd_execution(separator, cmd, OUTPUT_TEXTFILE):
               "\")\"') do " + settings.WIN_FILE_WRITE_OPERATOR + settings.WEB_ROOT.replace("\\","\\\\") + OUTPUT_TEXTFILE + " '%i'" + settings.CMD_NUL
               ) 
   else:
+    settings.USER_SUPPLIED_CMD = cmd
     payload = (separator +
               cmd + settings.FILE_WRITE_OPERATOR + settings.WEB_ROOT + OUTPUT_TEXTFILE
               )
