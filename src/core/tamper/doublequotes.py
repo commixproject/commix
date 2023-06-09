@@ -24,6 +24,7 @@ Notes: This tamper script works against Unix-like target(s).
 """
 
 __tamper__ = "doublequotes"
+
 if settings.TRANFROM_PAYLOAD != None:
   settings.TRANFROM_PAYLOAD = None
 

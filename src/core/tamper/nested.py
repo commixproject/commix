@@ -24,6 +24,7 @@ Notes: This tamper script works against Unix-like target(s).
 """
 
 __tamper__ = "nested"
+
 if not settings.TAMPER_SCRIPTS[__tamper__]:
   settings.TAMPER_SCRIPTS[__tamper__] = True
 

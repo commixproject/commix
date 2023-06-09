@@ -21,6 +21,7 @@ Notes: This tamper script works against Unix-like target(s)
 """
 
 __tamper__ = "printf2echo"
+
 settings.TAMPER_SCRIPTS[__tamper__] = True
 
 def tamper(payload):

@@ -1210,7 +1210,7 @@ def tamper_scripts(stored_tamper_scripts):
       _ = True
       warn_msg = "The combination of the provided tamper scripts "
     if _:
-      warn_msg += "is not a good idea (may cause false positive results)."
+      warn_msg += "is not a good idea (may cause false positive / negative results)."
       print(settings.print_warning_msg(warn_msg))
 
 """
@@ -1514,61 +1514,82 @@ Perform payload modification
 def perform_payload_modification(payload):
 
   settings.RAW_PAYLOAD = payload.replace(settings.WHITESPACES[0], settings.SINGLE_WHITESPACE)
-
+  
   for extra_http_headers in list(set(settings.MULTI_ENCODED_PAYLOAD[::-1])):
     if extra_http_headers == "xforwardedfor":
       from src.core.tamper import xforwardedfor
 
-  for encode_type in list(set(settings.MULTI_ENCODED_PAYLOAD[::-1])):
+  for mod_type in list(set(settings.MULTI_ENCODED_PAYLOAD[::-1])):
     # Reverses (characterwise) the user-supplied operating system commands
-    if encode_type == 'rev':
+    if mod_type == 'rev':
       from src.core.tamper import rev
       payload = rev.tamper(payload)
 
-  for encode_type in list(set(settings.MULTI_ENCODED_PAYLOAD[::-1])):
+  for print_type in list(set(settings.MULTI_ENCODED_PAYLOAD[::-1])):
     # printf to echo (for ascii to dec)
-    if encode_type == 'printf2echo':
+    if print_type == 'printf2echo':
       from src.core.tamper import printf2echo
       payload = printf2echo.tamper(payload)
+
+  for sleep_type in list(set(settings.MULTI_ENCODED_PAYLOAD[::-1])):   
     # sleep to timeout
-    if encode_type == 'sleep2timeout':
+    if sleep_type == 'sleep2timeout':
       from src.core.tamper import sleep2timeout
       payload = sleep2timeout.tamper(payload)
     # sleep to usleep
-    if encode_type == 'sleep2usleep':
+    if sleep_type == 'sleep2usleep':
       from src.core.tamper import sleep2usleep
       payload = sleep2usleep.tamper(payload)
-    # Add uninitialized variable.
-    if encode_type == 'uninitializedvariable':
-      from src.core.tamper import uninitializedvariable
-      payload = uninitializedvariable.tamper(payload) 
-    if encode_type == 'slash2env':
-      from src.core.tamper import slash2env
-      payload = slash2env.tamper(payload) 
+
+  for quotes_type in list(set(settings.MULTI_ENCODED_PAYLOAD[::-1])):
     # Add double-quotes.
-    if encode_type == 'doublequotes':
+    if quotes_type == 'doublequotes':
       from src.core.tamper import doublequotes
       payload = doublequotes.tamper(payload)
     # Add single-quotes.
-    if encode_type == 'singlequotes':
+    if quotes_type == 'singlequotes':
       from src.core.tamper import singlequotes
       payload = singlequotes.tamper(payload)
+      
+  for mod_type in list(set(settings.MULTI_ENCODED_PAYLOAD[::-1])):
+    # Add uninitialized variable.
+    if mod_type == 'uninitializedvariable':
+      from src.core.tamper import uninitializedvariable
+      payload = uninitializedvariable.tamper(payload) 
+    if mod_type == 'slash2env':
+      from src.core.tamper import slash2env
+      payload = slash2env.tamper(payload) 
     # Add backslashes.  
-    elif encode_type == 'backslashes':
+    if mod_type == 'backslashes':
       from src.core.tamper import backslashes
       payload = backslashes.tamper(payload) 
     # Add caret symbol.  
-    elif encode_type == 'caret':
+    if mod_type == 'caret':
       from src.core.tamper import caret
       payload = caret.tamper(payload) 
     # Transfomation to nested command
-    elif encode_type == 'nested':
+    if mod_type == 'nested':
       from src.core.tamper import nested
       payload = nested.tamper(payload) 
     # Add dollar sign followed by an at-sign.
-    elif encode_type == 'dollaratsigns':
+    if mod_type == 'dollaratsigns':
       from src.core.tamper import dollaratsigns
       payload = dollaratsigns.tamper(payload) 
+
+  for space_mod in list(set(settings.MULTI_ENCODED_PAYLOAD[::-1])):
+    # Encode spaces.    
+    if space_mod == 'space2ifs':
+      from src.core.tamper import space2ifs
+      payload = space2ifs.tamper(payload)
+    if space_mod == 'space2plus':
+      from src.core.tamper import space2plus
+      payload = space2plus.tamper(payload)
+    if space_mod == 'space2htab':
+      from src.core.tamper import space2htab
+      payload = space2htab.tamper(payload)
+    if space_mod == 'space2vtab':
+      from src.core.tamper import space2vtab
+      payload = space2vtab.tamper(payload)
 
   for encode_type in list(set(settings.MULTI_ENCODED_PAYLOAD[::-1])):
     # Encode payload to hex format.    
@@ -1579,21 +1600,6 @@ def perform_payload_modification(payload):
     if encode_type == 'hexencode':
       from src.core.tamper import hexencode
       payload = hexencode.tamper(payload)
-
-  for encode_type in list(set(settings.MULTI_ENCODED_PAYLOAD[::-1])):
-    # Encode spaces.    
-    if encode_type == 'space2ifs':
-      from src.core.tamper import space2ifs
-      payload = space2ifs.tamper(payload)
-    if encode_type == 'space2plus':
-      from src.core.tamper import space2plus
-      payload = space2plus.tamper(payload)
-    if encode_type == 'space2htab':
-      from src.core.tamper import space2htab
-      payload = space2htab.tamper(payload)
-    if encode_type == 'space2vtab':
-      from src.core.tamper import space2vtab
-      payload = space2vtab.tamper(payload)
 
   return payload
 
