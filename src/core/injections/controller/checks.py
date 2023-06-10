@@ -1306,7 +1306,7 @@ def other_symbols(payload):
         menu.options.tamper = "rev"  
     from src.core.tamper import rev
     payload = rev.tamper(payload)
-    
+
   # Check for (multiple) backticks (instead of "$()") for commands substitution on the generated payloads.
   if payload.count("`") >= 2 and settings.TARGET_OS == "unix":
     if menu.options.tamper:

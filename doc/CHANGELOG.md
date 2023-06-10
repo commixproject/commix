@@ -1,4 +1,5 @@
 ## Version 3.8 (TBA)
+* Revised: Minor code refactoring regarding multiple tamper scripts (i.e. "backslashes.py", "dollaratsigns.py", "doublequotes.py", "singlequotes.py", "uninitializedvariable.py").
 * Added: New tamper script "rev.py" that reverses (characterwise) the user-supplied operating system commands (for *nix targets).
 * Fixed: Minor bug-fix regarding checking for similarity in provided parameter(s) name(s) and value(s).
 * Fixed: Minor bug-fix regarding forcing usage of SSL/HTTPS requests toward the target (i.e. `--force-ssl` flag).

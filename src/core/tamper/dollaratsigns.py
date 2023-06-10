@@ -14,8 +14,6 @@ For more see the file 'readme/COPYING' for copying permission.
 """
 
 import re
-import sys
-from src.utils import menu
 from src.utils import settings
 
 """
@@ -31,20 +29,12 @@ if not settings.TAMPER_SCRIPTS[__tamper__]:
 def tamper(payload):
   def add_dollar_at_signs(payload):
     settings.TAMPER_SCRIPTS[__tamper__] = True
-    rep = {
-            "$@I$@F$@S": "IFS", 
-            "$@i$@f": "if", 
-            "$@t$@h$@e$@n": "then",
-            "$@e$@l$@s$@e": "else",
-            "$@f$@i": "fi",
-            "$@s$@t$@r": "str",
-            "$@c$@m$@d": "cmd",
-            "$@c$@ha$@r": "char"
-          }
+    obf_char = "$@"
     payload = re.sub(r'([b-zD-Z])', r"$@\1", payload)
-    rep = dict((re.escape(k), v) for k, v in rep.items())
-    pattern = re.compile("|".join(rep.keys()))
-    payload = pattern.sub(lambda m: rep[re.escape(m.group(0))], payload)
+    for word in settings.IGNORE_TAMPER_TRANSFORMATION:
+      _ = obf_char.join(word[i:i+1] for i in range(-1, len(word), 1))
+      if _ in payload:
+        payload = payload.replace(_,_.replace(obf_char,""))
     return payload
 
   if settings.TARGET_OS != "win":

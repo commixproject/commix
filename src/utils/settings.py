@@ -241,7 +241,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.8"
-REVISION = "28"
+REVISION = "29"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1060,6 +1060,17 @@ EVAL_NOT_SUPPORTED_TAMPER_SCRIPTS = [
                   "slash2env",
                   "printf2echo",
                   "uninitializedvariable"
+]
+
+IGNORE_TAMPER_TRANSFORMATION = [
+                  "IFS", 
+                  "if", 
+                  "then", 
+                  "else", 
+                  "fi", 
+                  "str", 
+                  "cmd", 
+                  "char"
 ]
 
 # HTTP Errors
