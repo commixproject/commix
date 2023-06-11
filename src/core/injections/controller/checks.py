@@ -112,6 +112,56 @@ def check_custom_injection_marker(url):
         common.invalid_option(procced_option)  
         pass
 
+
+def skipping_technique(technique, injection_type, state):
+  if settings.VERBOSITY_LEVEL != 0 and state != True:   
+    debug_msg = "Skipping test the " + "(" + injection_type.split(settings.SINGLE_WHITESPACE)[0] + ") " + technique + ". "
+    print(settings.print_debug_msg(debug_msg))
+
+"""
+Skipping of code injection tests.
+"""
+def skip_code_injection_tests():
+  while True:
+    message = "Skipping of code injection tests is recommended. "
+    message += "Do you agree? [Y/n] > "
+    procced_option = common.read_input(message, default="Y", check_batch=True)
+    if procced_option in settings.CHOICE_YES:
+      settings.SKIP_CODE_INJECTIONS = True
+      return
+    elif procced_option in settings.CHOICE_NO:
+      return
+    elif procced_option in settings.CHOICE_QUIT:
+      raise SystemExit()
+    else:
+      common.invalid_option(procced_option)  
+      pass
+
+"""
+Skipping of further command injection tests.
+"""
+def skip_command_injection_tests():
+  if settings.IDENTIFIED_WARNINGS or settings.IDENTIFIED_PHPINFO:
+    _ = ""
+  else:
+    _ = "further "
+  while True:
+    message = "Skipping of "+ _ +"command injection tests is recommended. "
+    message += "Do you agree? [Y/n] > "
+    procced_option = common.read_input(message, default="Y", check_batch=True)
+    if procced_option in settings.CHOICE_YES:
+      settings.SKIP_COMMAND_INJECTIONS = True
+      return
+    elif procced_option in settings.CHOICE_NO:
+      if settings.SKIP_COMMAND_INJECTIONS:
+        settings.SKIP_COMMAND_INJECTIONS = False
+      return
+    elif procced_option in settings.CHOICE_QUIT:
+      raise SystemExit()
+    else:
+      common.invalid_option(procced_option)  
+      pass
+
 """
 The available mobile user agents.
 """
