@@ -1386,7 +1386,7 @@ def other_symbols(payload):
     payload = dollaratsigns.tamper(payload)
 
   # Check for uninitialized variable
-  if payload.count("${uv}") >= 2 and settings.TARGET_OS == "unix":
+  if len(re.findall(r'\${.*?}', payload)) >= 10 and settings.TARGET_OS == "unix":
     if not settings.TAMPER_SCRIPTS['uninitializedvariable']:
       if menu.options.tamper:
         menu.options.tamper = menu.options.tamper + ",uninitializedvariable"

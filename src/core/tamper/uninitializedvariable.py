@@ -14,10 +14,12 @@ For more see the file 'readme/COPYING' for copying permission.
 """
 
 import re
+import random
+import string
 from src.utils import settings
 
 """
-About: Adds uninitialized bash variables between the characters of each command of the generated payloads.
+About: Adds (randomly generated) uninitialized bash variables, between the characters of each command of the generated payloads.
 Notes: This tamper script works against Unix-like target(s).
 Reference: https://www.secjuice.com/web-application-firewall-waf-evasion/
 """
@@ -30,8 +32,9 @@ if not settings.TAMPER_SCRIPTS[__tamper__]:
 def tamper(payload):
   def add_uninitialized_variable(payload):
     settings.TAMPER_SCRIPTS[__tamper__] = True
-    obf_char = "${uv}"
-    payload = re.sub(r'([b-zD-Z])', r"${uv}\1", payload)
+    num = 2
+    obf_char = "${" + ''.join(random.choice(string.ascii_letters) for x in range(num)) + "}"
+    payload = re.sub(r'([b-zD-Z])', lambda x: obf_char + x[0], payload)
     for word in settings.IGNORE_TAMPER_TRANSFORMATION:
       _ = obf_char.join(word[i:i+1] for i in range(-1, len(word), 1))
       if _ in payload:

@@ -1,4 +1,5 @@
 ## Version 3.8 (TBA)
+* Revised: Minor improvement regarding tamper script "uninitializedvariable.py", for adding randomly generated uninitialized bash variables between the characters of each command of the generated payloads.
 * Revised: Minor improvement regarding skipping further tests involving target that an injection point has already been detected.
 * Revised: Minor code refactoring regarding multiple tamper scripts (i.e. "backslashes.py", "dollaratsigns.py", "doublequotes.py", "singlequotes.py", "uninitializedvariable.py").
 * Added: New tamper script "rev.py" that reverses (characterwise) the user-supplied operating system commands (for *nix targets).
