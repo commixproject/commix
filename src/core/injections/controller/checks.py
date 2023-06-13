@@ -1210,7 +1210,7 @@ def list_tamper_scripts():
 Tamper script checker
 """
 def tamper_scripts(stored_tamper_scripts):
-  if menu.options.tamper and stored_tamper_scripts is False:
+  if menu.options.tamper:
     # Check the provided tamper script(s)
     available_scripts = []
     provided_scripts = list(set(re.split(settings.PARAMETER_SPLITTING_REGEX, menu.options.tamper.lower())))
@@ -1348,17 +1348,15 @@ Check for symbols (i.e "`", "^", "$@" etc) between the characters of the generat
 """
 def other_symbols(payload):
   # Check for reversed (characterwise) user-supplied operating system commands.
-  if payload.count("|rev") >= 1 and settings.TARGET_OS == "unix":
+  if payload.count("|rev") >= 1 and settings.TARGET_OS != "win":
     if not settings.TAMPER_SCRIPTS['rev']:
       if menu.options.tamper:
         menu.options.tamper = menu.options.tamper + ",rev"
       else:
         menu.options.tamper = "rev"  
-    from src.core.tamper import rev
-    payload = rev.tamper(payload)
 
   # Check for (multiple) backticks (instead of "$()") for commands substitution on the generated payloads.
-  if payload.count("`") >= 2 and settings.TARGET_OS == "unix":
+  if payload.count("`") >= 2 and settings.TARGET_OS != "win":
     if menu.options.tamper:
       menu.options.tamper = menu.options.tamper + ",backticks"
     else:
@@ -1372,99 +1370,81 @@ def other_symbols(payload):
         menu.options.tamper = menu.options.tamper + ",caret"
       else:
         menu.options.tamper = "caret"  
-    from src.core.tamper import caret
-    payload = caret.tamper(payload)
 
   # Check for dollar sign followed by an at-sign
-  if payload.count("$@") >= 10 and settings.TARGET_OS == "unix":
+  if payload.count("$@") >= 10 and settings.TARGET_OS != "win":
     if not settings.TAMPER_SCRIPTS['dollaratsigns']:
       if menu.options.tamper:
         menu.options.tamper = menu.options.tamper + ",dollaratsigns"
       else:
         menu.options.tamper = "dollaratsigns"  
-    from src.core.tamper import dollaratsigns
-    payload = dollaratsigns.tamper(payload)
 
   # Check for uninitialized variable
-  if len(re.findall(r'\${.*?}', payload)) >= 10 and settings.TARGET_OS == "unix":
+  if len(re.findall(r'\${.*?}', payload)) >= 10 and settings.TARGET_OS != "win":
     if not settings.TAMPER_SCRIPTS['uninitializedvariable']:
       if menu.options.tamper:
         menu.options.tamper = menu.options.tamper + ",uninitializedvariable"
       else:
         menu.options.tamper = "uninitializedvariable"  
-    from src.core.tamper import uninitializedvariable
-    payload = uninitializedvariable.tamper(payload)
 
   # Check for environment variable value variable
-  if payload.count("${PATH%%u*}") >= 2 and settings.TARGET_OS == "unix":
+  if payload.count("${PATH%%u*}") >= 2 and settings.TARGET_OS != "win":
     if not settings.TAMPER_SCRIPTS['slash2env']:
       if menu.options.tamper:
         menu.options.tamper = menu.options.tamper + ",slash2env"
       else:
         menu.options.tamper = "slash2env"  
-    from src.core.tamper import slash2env
-    payload = slash2env.tamper(payload)
 
 """
 Check for (multiple) added back slashes between the characters of the generated payloads.
 """
 def check_backslashes(payload):
   # Check for single quotes
-  if payload.count("\\") >= 15 and settings.TARGET_OS == "unix":
+  if payload.count("\\") >= 15 and settings.TARGET_OS != "win":
     if not settings.TAMPER_SCRIPTS['backslashes']:
       if menu.options.tamper:
         menu.options.tamper = menu.options.tamper + ",backslashes"
       else:
         menu.options.tamper = "backslashes"  
-    from src.core.tamper import backslashes
-    payload = backslashes.tamper(payload)
 
 """
 Check for quotes in the generated payloads.
 """
 def check_quotes(payload):
   # Check for double quotes around of the generated payloads.
-  if payload.endswith("\"") and settings.TARGET_OS == "unix":
+  if payload.endswith("\"") and settings.TARGET_OS != "win":
     if not settings.TAMPER_SCRIPTS['nested']:
       if menu.options.tamper:
         menu.options.tamper = menu.options.tamper + ",nested"
       else:
         menu.options.tamper = "nested"  
-    from src.core.tamper import nested
-    payload = nested.tamper(payload)
 
   # Check for (multiple) added double-quotes between the characters of the generated payloads.
-  if payload.count("\"") >= 10 and settings.TARGET_OS == "unix":
+  if payload.count("\"") >= 10 and settings.TARGET_OS != "win":
     if not settings.TAMPER_SCRIPTS['doublequotes']:
       if menu.options.tamper:
         menu.options.tamper = menu.options.tamper + ",doublequotes"
       else:
         menu.options.tamper = "doublequotes"  
-    from src.core.tamper import doublequotes
-    payload = doublequotes.tamper(payload)
 
   # Check for (multiple) added single-quotes between the characters of the generated payloads.
-  if payload.count("''") >= 10 and settings.TARGET_OS == "unix":
+  if payload.count("''") >= 10 and settings.TARGET_OS != "win":
     if not settings.TAMPER_SCRIPTS['singlequotes']:
       if menu.options.tamper:
         menu.options.tamper = menu.options.tamper + ",singlequotes"
       else:
         menu.options.tamper = "singlequotes"  
-    from src.core.tamper import singlequotes
-    payload = singlequotes.tamper(payload)
 
 """
 Recognise the payload.
 """
 def recognise_payload(payload):
-  if "usleep" in payload and settings.TARGET_OS == "unix":
+  if "usleep" in payload and settings.TARGET_OS != "win":
     if not settings.TAMPER_SCRIPTS['sleep2usleep']:
       if menu.options.tamper:
         menu.options.tamper = menu.options.tamper + ",sleep2usleep"
       else:
         menu.options.tamper = "sleep2usleep"  
-    from src.core.tamper import sleep2usleep
-    payload = sleep2usleep.tamper(payload)
   
   elif "timeout" in payload:
     if not settings.TAMPER_SCRIPTS['sleep2timeout']:
@@ -1472,8 +1452,6 @@ def recognise_payload(payload):
         menu.options.tamper = menu.options.tamper + ",sleep2timeout"
       else:
         menu.options.tamper = "sleep2timeout"  
-    from src.core.tamper import sleep2timeout
-    payload = sleep2timeout.tamper(payload)
   
   is_decoded = False
   encoded_with = ""
@@ -1562,9 +1540,8 @@ def check_for_stored_tamper(payload):
 Perform payload modification
 """
 def perform_payload_modification(payload):
-
   settings.RAW_PAYLOAD = payload.replace(settings.WHITESPACES[0], settings.SINGLE_WHITESPACE)
-  
+
   for extra_http_headers in list(set(settings.MULTI_ENCODED_PAYLOAD[::-1])):
     if extra_http_headers == "xforwardedfor":
       from src.core.tamper import xforwardedfor
