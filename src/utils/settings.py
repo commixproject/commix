@@ -241,7 +241,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.8"
-REVISION = "32"
+REVISION = "33"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -363,8 +363,12 @@ SKIP_PARAMETER = ""
 # Use a proxy to connect to the target URL.
 SCHEME = ""
 
+class OS(object):
+  UNIX = "unix"
+  WINDOWS = "win"
+
 # Default target host OS (Unix-like)
-TARGET_OS = "unix"
+TARGET_OS = OS.UNIX
 
 # Verbosity level: 0-1 (default 0)
 VERBOSITY_LEVEL = 0

@@ -288,7 +288,7 @@ def injection_results(response, TAG, cmd):
       shell = [backslash.replace("\/","/") for backslash in shell]
     except UnicodeDecodeError:
       pass
-    if settings.TARGET_OS == "win":
+    if settings.TARGET_OS == settings.OS.WINDOWS:
       if menu.options.alter_shell: 
         shell = [right_space.rstrip() for right_space in shell]
         shell = [left_space.lstrip() for left_space in shell]

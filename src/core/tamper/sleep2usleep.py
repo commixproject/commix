@@ -42,7 +42,7 @@ def tamper(payload):
       payload = payload.replace(match.group(0), sleep_to_usleep + settings.WHITESPACES[0] + usleep_delay) 
     return payload
 
-  if settings.TARGET_OS != "win":
+  if settings.TARGET_OS != settings.OS.WINDOWS:
     if settings.CLASSIC_STATE != False or \
        settings.EVAL_BASED_STATE != False or \
        settings.FILE_BASED_STATE != False:

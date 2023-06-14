@@ -34,7 +34,7 @@ def tamper(payload):
     payload = payload.replace("/", "${PATH%%u*}")
     return payload
 
-  if settings.TARGET_OS != "win":
+  if settings.TARGET_OS != settings.OS.WINDOWS:
     if settings.EVAL_BASED_STATE != False:
       return payload
     else:

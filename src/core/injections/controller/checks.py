@@ -814,7 +814,7 @@ def no_readline_module():
 Check for incompatible OS (i.e Unix).
 """
 def ps_incompatible_os():
-  if not settings.TARGET_OS == "win":
+  if not settings.TARGET_OS == settings.OS.WINDOWS:
     warn_msg = "The identified OS seems incompatible with the provided '--ps-version' switch."
     print(settings.print_warning_msg(warn_msg))
     return True
@@ -951,7 +951,7 @@ Force the user-defined operating system name.
 def user_defined_os():
   if menu.options.os:
     if menu.options.os.lower() == "windows":
-      settings.TARGET_OS = "win"
+      settings.TARGET_OS = settings.OS.WINDOWS
       return True
     elif menu.options.os.lower() == "unix":
       return True
@@ -1062,7 +1062,7 @@ def enable_all_enumeration_options():
   menu.options.hostname = True
   # Retrieve system information.
   menu.options.sys_info = True
-  if settings.TARGET_OS == "win":
+  if settings.TARGET_OS == settings.OS.WINDOWS:
     # Check if the current user have admin privileges.
     menu.options.is_admin = True
     # Retrieve PowerShell's version number.
@@ -1234,9 +1234,9 @@ def tamper_scripts(stored_tamper_scripts):
       warn_msg = ""
       if settings.EVAL_BASED_STATE != False and script in settings.EVAL_NOT_SUPPORTED_TAMPER_SCRIPTS:
         warn_msg = "The dynamic code evaluation technique does not support the usage of '" + script + ".py' tamper script. Skipping."
-      elif settings.TARGET_OS == "win" and script in settings.WIN_NOT_SUPPORTED_TAMPER_SCRIPTS:
+      elif settings.TARGET_OS == settings.OS.WINDOWS and script in settings.WIN_NOT_SUPPORTED_TAMPER_SCRIPTS:
         warn_msg = "Windows targets do not support the usage of '" + script + ".py' tamper script. Skipping."
-      elif settings.TARGET_OS != "win" and script in settings.UNIX_NOT_SUPPORTED_TAMPER_SCRIPTS:
+      elif settings.TARGET_OS != settings.OS.WINDOWS and script in settings.UNIX_NOT_SUPPORTED_TAMPER_SCRIPTS:
         warn_msg = "Unix-like targets do not support the usage of '" + script + ".py' tamper script. Skipping."
       if len(warn_msg) != 0:
         print(settings.print_warning_msg(warn_msg))
@@ -1348,7 +1348,7 @@ Check for symbols (i.e "`", "^", "$@" etc) between the characters of the generat
 """
 def other_symbols(payload):
   # Check for reversed (characterwise) user-supplied operating system commands.
-  if payload.count("|rev") >= 1 and settings.TARGET_OS != "win":
+  if payload.count("|rev") >= 1 and settings.TARGET_OS != settings.OS.WINDOWS:
     if not settings.TAMPER_SCRIPTS['rev']:
       if menu.options.tamper:
         menu.options.tamper = menu.options.tamper + ",rev"
@@ -1356,7 +1356,7 @@ def other_symbols(payload):
         menu.options.tamper = "rev"  
 
   # Check for (multiple) backticks (instead of "$()") for commands substitution on the generated payloads.
-  if payload.count("`") >= 2 and settings.TARGET_OS != "win":
+  if payload.count("`") >= 2 and settings.TARGET_OS != settings.OS.WINDOWS:
     if menu.options.tamper:
       menu.options.tamper = menu.options.tamper + ",backticks"
     else:
@@ -1372,7 +1372,7 @@ def other_symbols(payload):
         menu.options.tamper = "caret"  
 
   # Check for dollar sign followed by an at-sign
-  if payload.count("$@") >= 10 and settings.TARGET_OS != "win":
+  if payload.count("$@") >= 10 and settings.TARGET_OS != settings.OS.WINDOWS:
     if not settings.TAMPER_SCRIPTS['dollaratsigns']:
       if menu.options.tamper:
         menu.options.tamper = menu.options.tamper + ",dollaratsigns"
@@ -1380,7 +1380,7 @@ def other_symbols(payload):
         menu.options.tamper = "dollaratsigns"  
 
   # Check for uninitialized variable
-  if len(re.findall(r'\${.*?}', payload)) >= 10 and settings.TARGET_OS != "win":
+  if len(re.findall(r'\${.*?}', payload)) >= 10 and settings.TARGET_OS != settings.OS.WINDOWS:
     if not settings.TAMPER_SCRIPTS['uninitializedvariable']:
       if menu.options.tamper:
         menu.options.tamper = menu.options.tamper + ",uninitializedvariable"
@@ -1388,7 +1388,7 @@ def other_symbols(payload):
         menu.options.tamper = "uninitializedvariable"  
 
   # Check for environment variable value variable
-  if payload.count("${PATH%%u*}") >= 2 and settings.TARGET_OS != "win":
+  if payload.count("${PATH%%u*}") >= 2 and settings.TARGET_OS != settings.OS.WINDOWS:
     if not settings.TAMPER_SCRIPTS['slash2env']:
       if menu.options.tamper:
         menu.options.tamper = menu.options.tamper + ",slash2env"
@@ -1400,7 +1400,7 @@ Check for (multiple) added back slashes between the characters of the generated 
 """
 def check_backslashes(payload):
   # Check for single quotes
-  if payload.count("\\") >= 15 and settings.TARGET_OS != "win":
+  if payload.count("\\") >= 15 and settings.TARGET_OS != settings.OS.WINDOWS:
     if not settings.TAMPER_SCRIPTS['backslashes']:
       if menu.options.tamper:
         menu.options.tamper = menu.options.tamper + ",backslashes"
@@ -1412,7 +1412,7 @@ Check for quotes in the generated payloads.
 """
 def check_quotes(payload):
   # Check for double quotes around of the generated payloads.
-  if payload.endswith("\"") and settings.TARGET_OS != "win":
+  if payload.endswith("\"") and settings.TARGET_OS != settings.OS.WINDOWS:
     if not settings.TAMPER_SCRIPTS['nested']:
       if menu.options.tamper:
         menu.options.tamper = menu.options.tamper + ",nested"
@@ -1420,7 +1420,7 @@ def check_quotes(payload):
         menu.options.tamper = "nested"  
 
   # Check for (multiple) added double-quotes between the characters of the generated payloads.
-  if payload.count("\"") >= 10 and settings.TARGET_OS != "win":
+  if payload.count("\"") >= 10 and settings.TARGET_OS != settings.OS.WINDOWS:
     if not settings.TAMPER_SCRIPTS['doublequotes']:
       if menu.options.tamper:
         menu.options.tamper = menu.options.tamper + ",doublequotes"
@@ -1428,7 +1428,7 @@ def check_quotes(payload):
         menu.options.tamper = "doublequotes"  
 
   # Check for (multiple) added single-quotes between the characters of the generated payloads.
-  if payload.count("''") >= 10 and settings.TARGET_OS != "win":
+  if payload.count("''") >= 10 and settings.TARGET_OS != settings.OS.WINDOWS:
     if not settings.TAMPER_SCRIPTS['singlequotes']:
       if menu.options.tamper:
         menu.options.tamper = menu.options.tamper + ",singlequotes"
@@ -1439,7 +1439,7 @@ def check_quotes(payload):
 Recognise the payload.
 """
 def recognise_payload(payload):
-  if "usleep" in payload and settings.TARGET_OS != "win":
+  if "usleep" in payload and settings.TARGET_OS != settings.OS.WINDOWS:
     if not settings.TAMPER_SCRIPTS['sleep2usleep']:
       if menu.options.tamper:
         menu.options.tamper = menu.options.tamper + ",sleep2usleep"
@@ -1916,8 +1916,8 @@ Print current user privs
 """
 def print_current_user_privs(shell, filename, _):
   priv = "True"
-  if (settings.TARGET_OS == "win" and not "Admin" in shell) or \
-     (settings.TARGET_OS != "win" and shell != "0"):
+  if (settings.TARGET_OS == settings.OS.WINDOWS and not "Admin" in shell) or \
+     (settings.TARGET_OS != settings.OS.WINDOWS and shell != "0"):
     priv = "False"
 
   if settings.VERBOSITY_LEVEL == 0 and _:
@@ -1976,7 +1976,7 @@ class print_enumenation():
     print(settings.print_info_msg(info_msg))
 
   def print_users_msg(self):
-    if settings.TARGET_OS == "win":
+    if settings.TARGET_OS == settings.OS.WINDOWS:
       info_msg = "Executing the 'net user' command " 
     else:
       info_msg = "Fetching content of the file '" + settings.PASSWD_FILE + "' "
@@ -1997,7 +1997,7 @@ Print users enumeration.
 """
 def print_users(sys_users, filename, _, separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell):
   # Windows users enumeration.
-  if settings.TARGET_OS == "win":
+  if settings.TARGET_OS == settings.OS.WINDOWS:
     try:
       if sys_users and any(account in sys_users for account in settings.DEFAULT_WIN_USERS):
         sys_users = "".join(str(p) for p in sys_users).strip()
@@ -2252,7 +2252,7 @@ def find_filename(dest_to_write, content):
   fname = os.path.basename(dest_to_write)
   tmp_fname = fname + "_tmp"
   # _ = settings.FILE_WRITE
-  if settings.TARGET_OS == "win":
+  if settings.TARGET_OS == settings.OS.WINDOWS:
     # _ = settings.FILE_WRITE_WIN
     cmd = settings.WIN_FILE_WRITE_OPERATOR  + tmp_fname.replace("\\","\\\\") + settings.SINGLE_WHITESPACE + "'" + content + "'"
   else:
@@ -2289,7 +2289,7 @@ Write the file content
 """
 def write_content(content, dest_to_write):
   content = quoted_cmd(content)
-  if settings.TARGET_OS == "win":
+  if settings.TARGET_OS == settings.OS.WINDOWS:
     cmd = settings.WIN_FILE_WRITE_OPERATOR  + dest_to_write.replace("\\","\\\\") + settings.SINGLE_WHITESPACE + "'" + content + "'"
   else:
     cmd = settings.FILE_WRITE + content + settings.FILE_WRITE_OPERATOR + dest_to_write 
@@ -2306,7 +2306,7 @@ def delete_tmp(tmp_fname):
 Check if file exists.
 """
 def check_file(dest_to_upload):
-  if settings.TARGET_OS == "win":
+  if settings.TARGET_OS == settings.OS.WINDOWS:
     cmd = settings.FILE_LIST_WIN + dest_to_upload.replace("\\","\\\\")
   else:
     cmd = settings.FILE_LIST + dest_to_upload
@@ -2331,7 +2331,7 @@ def file_content_to_read():
   info_msg = "Fetching content of the file: '"  
   info_msg += file_to_read + "'."
   print(settings.print_info_msg(info_msg))
-  if settings.TARGET_OS == "win":
+  if settings.TARGET_OS == settings.OS.WINDOWS:
     cmd = settings.WIN_FILE_READ + file_to_read.replace("\\","\\\\")
   else:
     if settings.EVAL_BASED_STATE:
@@ -2390,7 +2390,7 @@ def check_file_to_write():
     with open(file_to_write, 'r') as content_file:
       content = [line.replace("\r\n", "\n").replace("\r", "\n").replace("\n", settings.SINGLE_WHITESPACE) for line in content_file]
     content = "".join(str(p) for p in content).replace("'", "\"")
-    if settings.TARGET_OS == "win":
+    if settings.TARGET_OS == settings.OS.WINDOWS:
       import base64
       content = base64.b64encode(content.encode(settings.DEFAULT_CODEC)).decode()
   else:
@@ -2512,7 +2512,7 @@ def file_upload():
 Check for wrong flags
 """
 def check_wrong_flags():
-  if settings.TARGET_OS == "win":
+  if settings.TARGET_OS == settings.OS.WINDOWS:
     if menu.options.is_root :
       warn_msg = "Swithing '--is-root' to '--is-admin' because the "
       warn_msg += "target has been identified as Windows."
@@ -2535,7 +2535,7 @@ def check_wrong_flags():
 Define python working dir (for windows targets)
 """
 def define_py_working_dir():
-  if settings.TARGET_OS == "win" and menu.options.alter_shell:
+  if settings.TARGET_OS == settings.OS.WINDOWS and menu.options.alter_shell:
     while True:
       message = "Do you want to use '" + settings.WIN_PYTHON_INTERPRETER 
       message += "' as Python working directory on the target host? [Y/n] > "

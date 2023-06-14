@@ -41,7 +41,7 @@ def tamper(payload):
         payload = payload.replace(_,_.replace(obf_char,""))
     return payload
 
-  if settings.TARGET_OS != "win":
+  if settings.TARGET_OS != settings.OS.WINDOWS:
     if settings.EVAL_BASED_STATE != False:
       return payload
     else:

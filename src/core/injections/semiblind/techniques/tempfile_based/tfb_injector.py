@@ -176,7 +176,7 @@ The main command injection exploitation.
 """
 def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response):
   
-  if settings.TARGET_OS == "win":
+  if settings.TARGET_OS == settings.OS.WINDOWS:
     previous_cmd = cmd
     if alter_shell:
       cmd = cmd = checks.quoted_cmd(cmd)
@@ -255,7 +255,7 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
 
   # Proceed with the next (injection) step!
   if found_chars == True :
-    if settings.TARGET_OS == "win":
+    if settings.TARGET_OS == settings.OS.WINDOWS:
       cmd = previous_cmd
     num_of_chars = output_length + 1
     check_start = 0
@@ -359,7 +359,7 @@ False Positive check and evaluation.
 """
 def false_positive_check(separator, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, randvcalc, alter_shell, how_long, url_time_response, false_positive_warning):
 
-  if settings.TARGET_OS == "win":
+  if settings.TARGET_OS == settings.OS.WINDOWS:
     previous_cmd = cmd
     if alter_shell:
       cmd = cmd = checks.quoted_cmd(cmd)
@@ -428,7 +428,7 @@ def false_positive_check(separator, TAG, cmd, prefix, suffix, whitespace, timese
       break
 
   if found_chars == True :
-    if settings.TARGET_OS == "win":
+    if settings.TARGET_OS == settings.OS.WINDOWS:
       cmd = previous_cmd
     num_of_chars = output_length + 1
     check_start = 0

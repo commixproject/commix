@@ -27,7 +27,7 @@ if not settings.TAMPER_SCRIPTS[__tamper__]:
   settings.TAMPER_SCRIPTS[__tamper__] = True
 
 def tamper(payload):
-  if settings.TARGET_OS == "win":
+  if settings.TARGET_OS == settings.OS.WINDOWS:
     settings.TAMPER_SCRIPTS[__tamper__] = True
     if settings.WHITESPACES[0] == "%20":
       settings.WHITESPACES[0] = space2vtab

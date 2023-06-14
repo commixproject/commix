@@ -52,7 +52,7 @@ def delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, whitespa
   if settings.VERBOSITY_LEVEL != 0:
     debug_msg = "Deleting the generated file '" + OUTPUT_TEXTFILE + "'"
     print(settings.print_debug_msg(debug_msg))
-  if settings.TARGET_OS == "win":
+  if settings.TARGET_OS == settings.OS.WINDOWS:
     cmd = settings.WIN_DEL + OUTPUT_TEXTFILE
   else:
     cmd = settings.DEL + OUTPUT_TEXTFILE + settings.SINGLE_WHITESPACE + settings.COMMENT 
@@ -266,7 +266,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                       randv2 = random.randrange(1, 5)
                       randvcalc = randv1 + randv2
 
-                      if settings.TARGET_OS == "win":
+                      if settings.TARGET_OS == settings.OS.WINDOWS:
                         if alter_shell:
                           cmd = settings.WIN_PYTHON_INTERPRETER + " -c \"print (" + str(randv1) + " + " + str(randv2) + ")\""
                         else:
@@ -436,7 +436,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                 
               # Delete previous shell (text) files (output) from temp.
               delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)  
-              if settings.TARGET_OS == "win":
+              if settings.TARGET_OS == settings.OS.WINDOWS:
                 time.sleep(1)
               
               # Check for any enumeration options.

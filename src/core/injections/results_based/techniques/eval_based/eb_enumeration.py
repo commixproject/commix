@@ -58,7 +58,7 @@ Hostname enumeration
 """
 def hostname(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec):
   _ = False
-  if settings.TARGET_OS == "win":
+  if settings.TARGET_OS == settings.OS.WINDOWS:
     settings.HOSTNAME = settings.WIN_HOSTNAME 
   cmd = settings.HOSTNAME
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
@@ -80,7 +80,7 @@ Retrieve system information
 """
 def system_information(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec):
   _ = False     
-  if settings.TARGET_OS == "win":
+  if settings.TARGET_OS == settings.OS.WINDOWS:
     settings.RECOGNISE_OS = settings.WIN_RECOGNISE_OS
   cmd = settings.RECOGNISE_OS        
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
@@ -97,7 +97,7 @@ def system_information(separator, TAG, prefix, suffix, whitespace, http_request_
     target_os = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
   if target_os:
     target_os = "".join(str(p) for p in target_os)
-    if settings.TARGET_OS != "win":
+    if settings.TARGET_OS != settings.OS.WINDOWS:
       cmd = settings.DISTRO_INFO
       if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
         # Command execution results.
@@ -114,7 +114,7 @@ def system_information(separator, TAG, prefix, suffix, whitespace, http_request_
       else:
         target_os = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
 
-    if settings.TARGET_OS == "win":
+    if settings.TARGET_OS == settings.OS.WINDOWS:
       cmd = settings.WIN_RECOGNISE_HP
     else:
       cmd = settings.RECOGNISE_HP
@@ -138,7 +138,7 @@ The current user enumeration
 def current_user(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec):
   _ = False
   cmd = settings.CURRENT_USER
-  if settings.TARGET_OS == "win":
+  if settings.TARGET_OS == settings.OS.WINDOWS:
     cmd = settings.WIN_CURRENT_USER
     # cmd = cmd + settings.WIN_REPLACE_WHITESPACE
     if alter_shell:
@@ -164,7 +164,7 @@ Check if the current user has excessive privileges.
 """
 def check_current_user_privs(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec):
   _ = False
-  if settings.TARGET_OS == "win":
+  if settings.TARGET_OS == settings.OS.WINDOWS:
     cmd = settings.IS_ADMIN
     if not alter_shell:
       cmd = cmd = checks.quoted_cmd(cmd) 
@@ -190,7 +190,7 @@ System users enumeration
 def system_users(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec): 
   _ = False
   cmd = settings.EVAL_SYS_USERS     
-  if settings.TARGET_OS == "win":
+  if settings.TARGET_OS == settings.OS.WINDOWS:
     cmd = settings.WIN_SYS_USERS
     if alter_shell:
       cmd = checks.escape_single_quoted_cmd(cmd)
@@ -255,7 +255,7 @@ Check the defined options
 """
 def do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec):
   # Check if PowerShell is enabled.
-  if not menu.options.ps_version and settings.TARGET_OS == "win":
+  if not menu.options.ps_version and settings.TARGET_OS == settings.OS.WINDOWS:
     checks.ps_check()
 
   if menu.options.ps_version and settings.PS_ENABLED == None:
@@ -290,7 +290,7 @@ def do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, ur
     settings.ENUMERATION_DONE = True
 
   if menu.options.passwords:
-    if settings.TARGET_OS == "win":
+    if settings.TARGET_OS == settings.OS.WINDOWS:
       check_option = "--passwords"
       checks.unavailable_option(check_option)
     else:

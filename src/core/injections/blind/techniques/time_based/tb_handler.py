@@ -245,7 +245,7 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                       randv2 = random.randrange(1, 10)
                       randvcalc = randv1 + randv2
 
-                      if settings.TARGET_OS == "win":
+                      if settings.TARGET_OS == settings.OS.WINDOWS:
                         if alter_shell:
                           cmd = settings.WIN_PYTHON_INTERPRETER + "python.exe -c \"print (" + str(randv1) + " + " + str(randv2) + ")\""
                         else:

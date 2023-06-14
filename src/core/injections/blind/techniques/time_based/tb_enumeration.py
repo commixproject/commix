@@ -66,7 +66,7 @@ Retrieve system information
 """
 def system_information(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response):
   _ = False  
-  if settings.TARGET_OS == "win":
+  if settings.TARGET_OS == settings.OS.WINDOWS:
     settings.RECOGNISE_OS = settings.WIN_RECOGNISE_OS
   cmd = settings.RECOGNISE_OS        
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
@@ -80,7 +80,7 @@ def system_information(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, 
   if settings.VERBOSITY_LEVEL == 0 and _:
     print(settings.SINGLE_WHITESPACE)
   if target_os:
-    if settings.TARGET_OS != "win":
+    if settings.TARGET_OS != settings.OS.WINDOWS:
       cmd = settings.DISTRO_INFO
       if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
         if settings.VERBOSITY_LEVEL == 0 and _:
@@ -92,7 +92,7 @@ def system_information(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, 
       distro_name = output
       if len(distro_name) != 0:
           target_os = target_os + settings.SINGLE_WHITESPACE + distro_name
-    if settings.TARGET_OS == "win":
+    if settings.TARGET_OS == settings.OS.WINDOWS:
       cmd = settings.WIN_RECOGNISE_HP
     else:
       cmd = settings.RECOGNISE_HP
@@ -112,7 +112,7 @@ The current user enumeration
 """
 def current_user(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response):
   _ = False
-  if settings.TARGET_OS == "win":
+  if settings.TARGET_OS == settings.OS.WINDOWS:
     settings.CURRENT_USER = settings.WIN_CURRENT_USER
   cmd = settings.CURRENT_USER
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
@@ -129,7 +129,7 @@ Check if the current user has excessive privileges.
 """
 def check_current_user_privs(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response):
   _ = False
-  if settings.TARGET_OS == "win":
+  if settings.TARGET_OS == settings.OS.WINDOWS:
     cmd = settings.IS_ADMIN
   else:  
     cmd = settings.IS_ROOT 
@@ -147,7 +147,7 @@ System users enumeration
 def system_users(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response):
   _ = False
   cmd = settings.SYS_USERS  
-  if settings.TARGET_OS == "win":
+  if settings.TARGET_OS == settings.OS.WINDOWS:
     cmd = settings.WIN_SYS_USERS
     cmd = cmd + settings.WIN_REPLACE_WHITESPACE
     if alter_shell:
@@ -253,7 +253,7 @@ def do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, h
   if menu.options.passwords:
     if settings.ENUMERATION_DONE:
       print(settings.SINGLE_WHITESPACE)
-    if settings.TARGET_OS == "win":
+    if settings.TARGET_OS == settings.OS.WINDOWS:
       check_option = "--passwords"
       checks.unavailable_option(check_option)
     else:

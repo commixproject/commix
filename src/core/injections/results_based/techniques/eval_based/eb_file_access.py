@@ -33,7 +33,7 @@ Write to a file on the target host.
 """
 def file_write(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec):
   file_to_write, dest_to_write, content = checks.check_file_to_write()
-  if settings.TARGET_OS == "win":
+  if settings.TARGET_OS == settings.OS.WINDOWS:
     cmd = checks.change_dir(dest_to_write)
     response = eb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
     fname, tmp_fname, cmd = checks.find_filename(dest_to_write, content)
@@ -94,7 +94,7 @@ def do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, ur
     settings.FILE_ACCESS_DONE = True
 
   if menu.options.file_upload:
-    if settings.TARGET_OS == "win":
+    if settings.TARGET_OS == settings.OS.WINDOWS:
       check_option = "--file-upload"
       checks.unavailable_option(check_option)
     else:

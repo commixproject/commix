@@ -33,7 +33,7 @@ Write to a file on the target host.
 """
 def file_write(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
   file_to_write, dest_to_write, content = checks.check_file_to_write()
-  if settings.TARGET_OS == "win":
+  if settings.TARGET_OS == settings.OS.WINDOWS:
     cmd = checks.change_dir(dest_to_write)
     response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
     fname, tmp_fname, cmd = checks.find_filename(dest_to_write, content)
@@ -91,7 +91,7 @@ def do_check(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_
     settings.FILE_ACCESS_DONE = True
 
   if menu.options.file_upload:
-    if settings.TARGET_OS == "win":
+    if settings.TARGET_OS == settings.OS.WINDOWS:
       check_option = "--file-upload"
       checks.unavailable_option(check_option)
     else:

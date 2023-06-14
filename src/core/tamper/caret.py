@@ -47,7 +47,7 @@ def tamper(payload):
     payload = pattern.sub(lambda m: rep[re.escape(m.group(0))], payload)
     return payload
 
-  if settings.TARGET_OS == "win":
+  if settings.TARGET_OS == settings.OS.WINDOWS:
     if settings.EVAL_BASED_STATE != False:
       return payload
     else:

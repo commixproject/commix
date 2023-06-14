@@ -64,7 +64,7 @@ def delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, h
     if settings.VERBOSITY_LEVEL != 0:
       debug_msg = "Deleting the generated file '" + OUTPUT_TEXTFILE + "'."
       print(settings.print_debug_msg(debug_msg))
-    if settings.TARGET_OS == "win":
+    if settings.TARGET_OS == settings.OS.WINDOWS:
       cmd = settings.WIN_DEL + settings.WEB_ROOT + OUTPUT_TEXTFILE
     else:  
       cmd = settings.DEL + settings.WEB_ROOT + OUTPUT_TEXTFILE + settings.SINGLE_WHITESPACE + settings.COMMENT
@@ -74,7 +74,7 @@ def delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, h
 Provide custom server's root directory
 """
 def custom_web_root(url, timesec, filename, http_request_method, url_time_response):
-  if settings.TARGET_OS == "win" :
+  if settings.TARGET_OS == settings.OS.WINDOWS :
     example_root_dir = "\\inetpub\\wwwroot"
   else:
     example_root_dir = "/var/www"
@@ -94,7 +94,7 @@ Return TEMP path for win / *nix targets.
 """
 def check_tmp_path(url, timesec, filename, http_request_method, url_time_response):
   # Set temp path 
-  if settings.TARGET_OS == "win":
+  if settings.TARGET_OS == settings.OS.WINDOWS:
     if "microsoft-iis" in settings.SERVER_BANNER.lower():
       settings.TMP_PATH = "C:\\Windows\TEMP\\"
     else:
@@ -121,7 +121,7 @@ def check_tmp_path(url, timesec, filename, http_request_method, url_time_respons
       if "debian" or "ubuntu" in settings.SERVER_BANNER.lower():
         try:
           check_version = re.findall(r"/(.*)\.", settings.SERVER_BANNER.lower())
-          if check_version[0] > "2.3" and not settings.TARGET_OS == "win":
+          if check_version[0] > "2.3" and not settings.TARGET_OS == settings.OS.WINDOWS:
             # Add "/html" to servers root directory
             settings.WEB_ROOT = settings.WEB_ROOT + "/html"
           else:
@@ -160,7 +160,7 @@ def check_tmp_path(url, timesec, filename, http_request_method, url_time_respons
     last_param = path_parts[count]
     EXTRA_DIR = path.replace(last_param, "")
     settings.WEB_ROOT = settings.WEB_ROOT + EXTRA_DIR
-    if settings.TARGET_OS == "win":
+    if settings.TARGET_OS == settings.OS.WINDOWS:
       settings.WEB_ROOT = settings.WEB_ROOT.replace("/","\\")
         
   return tmp_path

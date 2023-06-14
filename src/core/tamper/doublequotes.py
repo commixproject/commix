@@ -33,7 +33,7 @@ def tamper(payload):
   def add_double_quotes(payload):
     settings.TAMPER_SCRIPTS[__tamper__] = True
     obf_char = '""'
-    if settings.TARGET_OS != "win":
+    if settings.TARGET_OS != settings.OS.WINDOWS:
       payload = re.sub(r'([b-zD-Z])', r'""\1', payload)
     else:
       word = "tokens"

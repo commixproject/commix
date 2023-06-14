@@ -234,7 +234,7 @@ def estimate_response_time(url, timesec):
     url_time_response = int(diff)
     if settings.VERBOSITY_LEVEL != 0 and _:
       print(settings.SINGLE_WHITESPACE)
-    if settings.TARGET_OS == "win":
+    if settings.TARGET_OS == settings.OS.WINDOWS:
       warn_msg = "Due to the relatively slow response of 'cmd.exe' in target "
       warn_msg += "host, there might be delays during the data extraction procedure."
       print(settings.print_warning_msg(warn_msg))
@@ -258,7 +258,7 @@ def estimate_response_time(url, timesec):
     timesec = int(timesec)
 
   # Against windows targets (for more stability), add one extra second delay.
-  if settings.TARGET_OS == "win" :
+  if settings.TARGET_OS == settings.OS.WINDOWS :
     timesec = timesec + 1
 
   return timesec, url_time_response
@@ -848,7 +848,7 @@ def server_identification(server_banner):
       found_server_banner = True
       # Set up default root paths
       if "apache" in settings.SERVER_BANNER.lower():
-        if settings.TARGET_OS == "win":
+        if settings.TARGET_OS == settings.OS.WINDOWS:
           settings.WEB_ROOT = "\\htdocs"
         else:
           settings.WEB_ROOT = "/var/www"
@@ -925,7 +925,7 @@ def check_target_os(server_banner):
           settings.CHECK_BOTH_OS = True
           check_type = "Unix-like based"
         elif settings.CHECK_BOTH_OS:
-          settings.TARGET_OS = "win"
+          settings.TARGET_OS = settings.OS.WINDOWS
           settings.CHECK_BOTH_OS = False
           settings.PERFORM_BASIC_SCANS = True
           check_type = "windows based"
@@ -938,7 +938,7 @@ def check_target_os(server_banner):
           got_os = common.read_input(message, default="", check_batch=True)
           if got_os.lower() in settings.CHOICE_OS :
             if got_os.lower() == "w":
-              settings.TARGET_OS = "win"
+              settings.TARGET_OS = settings.OS.WINDOWS
               break
             elif got_os.lower() == "u":
               break

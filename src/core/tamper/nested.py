@@ -31,7 +31,7 @@ if not settings.TAMPER_SCRIPTS[__tamper__]:
 double_quote = "\""
 def tamper(payload):
   def nested(payload):
-    if settings.TARGET_OS != "win":
+    if settings.TARGET_OS != settings.OS.WINDOWS:
       settings.TAMPER_SCRIPTS[__tamper__] = True
       if not menu.options.prefix and not menu.options.suffix:
         payload = double_quote + payload + double_quote
@@ -47,7 +47,7 @@ def tamper(payload):
           menu.options.suffix = double_quote
       return payload  
       
-  if settings.TARGET_OS != "win":
+  if settings.TARGET_OS != settings.OS.WINDOWS:
     if settings.EVAL_BASED_STATE != False:
       return payload
     else:

