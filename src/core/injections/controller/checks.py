@@ -1808,7 +1808,7 @@ def check_similarities(all_params):
       json_data = json.loads(all_params, object_pairs_hook=OrderedDict)
       all_params = flatten(json_data)
       for param in all_params:
-        if all_params[param] in param:
+        if type(all_params[param]) is str and all_params[param] in param:
           all_params[param] = all_params[param] + settings.RANDOM_TAG
       all_params = [x.replace(settings.SINGLE_WHITESPACE, "") for x in json.dumps(all_params).split(", ")]
     except Exception as e:
