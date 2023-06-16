@@ -206,7 +206,7 @@ def classic_command_injection_technique(url, timesec, filename, http_request_met
   if not settings.SKIP_COMMAND_INJECTIONS:
     if (len(menu.options.tech) == 0 or "c" in menu.options.tech):
       if cb_handler.exploitation(url, timesec, filename, http_request_method, injection_type, technique) != False:
-        settings.CLASSIC_STATE = True
+        settings.CLASSIC_STATE = settings.IDENTIFIED_COMMAND_INJECTION = True
         checks.skip_command_injection_tests()
       else:
         settings.CLASSIC_STATE = False
@@ -237,7 +237,7 @@ def timebased_command_injection_technique(url, timesec, filename, http_request_m
   if not settings.SKIP_COMMAND_INJECTIONS:
     if (len(menu.options.tech) == 0 or "t" in menu.options.tech):
       if tb_handler.exploitation(url, timesec, filename, http_request_method, url_time_response, injection_type, technique) != False:
-        settings.TIME_BASED_STATE = True
+        settings.TIME_BASED_STATE = settings.IDENTIFIED_COMMAND_INJECTION = True
         checks.skip_command_injection_tests()
       else:
         settings.TIME_BASED_STATE = False
@@ -252,7 +252,7 @@ def filebased_command_injection_technique(url, timesec, filename, http_request_m
   if not settings.SKIP_COMMAND_INJECTIONS:
     if (len(menu.options.tech) == 0 or "f" in menu.options.tech):
       if fb_handler.exploitation(url, timesec, filename, http_request_method, url_time_response, injection_type, technique) != False:
-        settings.FILE_BASED_STATE = True
+        settings.FILE_BASED_STATE = settings.IDENTIFIED_COMMAND_INJECTION = True
       else:
         settings.FILE_BASED_STATE = False
   if settings.FILE_BASED_STATE == None:     
