@@ -84,10 +84,10 @@ def read_input(message, default=None, check_batch=True):
 
     elif value is None:
       if check_batch and menu.options.batch:
+        print(settings.print_message(message + str(default)))
         if settings.VERBOSITY_LEVEL != 0:
           debug_msg = "Used the default behavior, running in batch mode."
           print(settings.print_debug_msg(debug_msg))
-        print(settings.print_message(message + str(default)))
         return default
       else:
         return is_empty()
