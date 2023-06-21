@@ -1224,23 +1224,27 @@ def tamper_scripts(stored_tamper_scripts):
         err_msg += "Use the '--list-tampers' option for listing available tamper scripts."
         print(settings.print_critical_msg(err_msg))
         raise SystemExit()
-    info_msg = "Loading tamper script" + ('s', '')[len(provided_scripts) == 1] + ": "
-    print(settings.print_info_msg(info_msg))
+    if not stored_tamper_scripts:    
+      info_msg = "Loading tamper script" + ('s', '')[len(provided_scripts) == 1] + ": "
+      print(settings.print_info_msg(info_msg))
     for script in provided_scripts:
       if "hexencode" or "base64encode" == script:
         settings.MULTI_ENCODED_PAYLOAD.append(script)
       import_script = str(settings.TAMPER_SCRIPTS_PATH + script + ".py").replace("/",".").split(".py")[0]
-      print(settings.SUB_CONTENT_SIGN + import_script.split(".")[-1])
       warn_msg = ""
       if settings.EVAL_BASED_STATE != False and script in settings.EVAL_NOT_SUPPORTED_TAMPER_SCRIPTS:
-        warn_msg = "The dynamic code evaluation technique does not support the usage of '" + script + ".py' tamper script. Skipping."
+        warn_msg = "The dynamic code evaluation technique does "
       elif settings.TARGET_OS == settings.OS.WINDOWS and script in settings.WIN_NOT_SUPPORTED_TAMPER_SCRIPTS:
-        warn_msg = "Windows targets do not support the usage of '" + script + ".py' tamper script. Skipping."
+        warn_msg = "Windows targets do "
       elif settings.TARGET_OS != settings.OS.WINDOWS and script in settings.UNIX_NOT_SUPPORTED_TAMPER_SCRIPTS:
-        warn_msg = "Unix-like targets do not support the usage of '" + script + ".py' tamper script. Skipping."
+        warn_msg = "Unix-like targets do "
       if len(warn_msg) != 0:
-        print(settings.print_warning_msg(warn_msg))
+        if not stored_tamper_scripts:
+          warn_msg = warn_msg + "not support the usage of '" + script + ".py'. Skipping tamper script."
+          print(settings.print_warning_msg(warn_msg))
       else:
+        if not stored_tamper_scripts:
+          print(settings.SUB_CONTENT_SIGN + import_script.split(".")[-1])
         try:
           module = __import__(import_script, fromlist=[None])
           if not hasattr(module, "__tamper__"):
