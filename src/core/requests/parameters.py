@@ -75,7 +75,11 @@ def do_GET_check(url, http_request_method):
       # Find the parameter part
       parameters = url.split("?")[1]
       # Split parameters
-      multi_parameters = parameters.split(settings.PARAMETER_DELIMITER)
+      try:
+        multi_parameters = parameters.split(settings.PARAMETER_DELIMITER)
+      except ValueError as err_msg:
+        print(settings.print_critical_msg(err_msg))
+        raise SystemExit()      
       # Check for inappropriate format in provided parameter(s).
       if len([s for s in multi_parameters if "=" in s]) != (len(multi_parameters)):
         checks.inappropriate_format(multi_parameters)
@@ -237,7 +241,6 @@ def do_POST_check(parameter, http_request_method):
   else: 
     try:
       multi_parameters = parameter.split(settings.PARAMETER_DELIMITER)
-      multi_parameters = [x for x in multi_parameters if x]
     except ValueError as err_msg:
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
@@ -454,7 +457,11 @@ def do_cookie_check(cookie):
 
   # Do replacement with the 'INJECT_HERE' tag, if the wild card char is provided.
   cookie = checks.wildcard_character(cookie)
-  multi_parameters = cookie.split(settings.COOKIE_DELIMITER)
+  try:
+    multi_parameters = cookie.split(settings.COOKIE_DELIMITER)
+  except ValueError as err_msg:
+    print(settings.print_critical_msg(err_msg))
+    raise SystemExit()
   # Check for inappropriate format in provided parameter(s).
   if len([s for s in multi_parameters if "=" in s]) != (len(multi_parameters)):
     checks.inappropriate_format(multi_parameters)
