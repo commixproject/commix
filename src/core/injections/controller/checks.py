@@ -1644,7 +1644,7 @@ def skip_empty(empty_parameters, http_request_method):
   warn_msg += " '" + empty_parameters + "'"
   warn_msg += (' have ', ' has ')[len(empty_parameters.split(",")) == 1]
   warn_msg += "been skipped from testing"
-  warn_msg += " due to empty value" + "s"[len(empty_parameters.split(",")) == 1:][::-1] + "."
+  warn_msg += " because user specified testing of only parameter(s) with non-empty value" + "s"[len(empty_parameters.split(",")) == 1:][::-1] + "."
   print(settings.print_warning_msg(warn_msg))
 
 
@@ -1706,12 +1706,17 @@ def is_empty(multi_parameters, http_request_method):
   
   if len(empty_parameters) == len(multi_parameters):
     all_empty = True
-  
+  if menu.options.skip_empty:
+    settings.SKIP_PARAMETER = empty_parameters
+    
   empty_parameters = ", ".join(empty_parameters)
   if len(empty_parameters) > 0:
-    if menu.options.skip_empty and all_empty:
+    if menu.options.skip_empty:
       skip_empty(empty_parameters, http_request_method)
-      return True
+      if all_empty:
+        return all_empty
+      else:
+        return False
     else:
       warn_msg = "The provided value" + "s"[len(empty_parameters.split(",")) == 1:][::-1]
       warn_msg += " for " + http_request_method 

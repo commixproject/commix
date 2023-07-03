@@ -545,7 +545,7 @@ def get_request(url, http_request_method, filename, timesec):
     for i in range(0, len(found_url)):
       url = found_url[i]
       check_parameter = parameters.vuln_GET_param(url)
-      if check_parameter != url:
+      if check_parameter != url and check_parameter not in settings.SKIP_PARAMETER:
         if len(check_parameter) > 0:
           settings.TESTABLE_PARAMETER = check_parameter
         # Check if testable parameter(s) are provided
@@ -605,7 +605,7 @@ def post_request(url, http_request_method, filename, timesec):
     #if settings.INJECT_TAG in found_parameter[i]:
     parameter = menu.options.data = found_parameter[i]
     check_parameter = parameters.vuln_POST_param(parameter, url)
-    if check_parameter != parameter:
+    if check_parameter != parameter and check_parameter not in settings.SKIP_PARAMETER:
       if len(check_parameter) > 0:
         settings.TESTABLE_PARAMETER = check_parameter
       # Check if testable parameter(s) are provided
