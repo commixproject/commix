@@ -914,6 +914,15 @@ def check_CGI_scripts(url):
 Check if http / https.
 """
 def check_http_s(url):
+  # fix edge case (this should be fixed before check_http_s is called but python is a nested mess and i am not going to put in the work to find the root cause to this)
+  # for some reason when using -r the url is passed here in the format http://domain.tldhttps://domain.tld/
+  if re.search(r'^([Hh][Tt][Tt][Pp][Ss]?|[Ww][Ss][Ss])://.+\.([a-zA-Z]){2,10}([Hh][Tt][Tt][Pp][Ss])://', url, re.I):
+    url = re.sub(r'^([Hh][Tt][Tt][Pp][Ss]?|[Ww][Ss][Ss])://.+\.([a-zA-Z]){2,10}([Hh][Tt][Tt][Pp][Ss])://', 'https://', url)
+  elif re.search(r'^([Hh][Tt][Tt][Pp][Ss]?|[Ww][Ss][Ss])://.+\.([a-zA-Z]){2,10}([Hh][Tt][Tt][Pp])://', url, re.I):
+    url = re.sub(r'^([Hh][Tt][Tt][Pp])://.+\.([a-zA-Z]){2,10}([Hh][Tt][Tt][Pp])', 'http://', url)
+  elif re.search(r'^([Hh][Tt][Tt][Pp][Ss]?|[Ww][Ss][Ss])://.+\.([a-zA-Z]){2,10}([Ww][Ss][Ss])://', url, re.I):
+    url = re.sub(r'^([Ww][Ss][Ss])://.+\.([a-zA-Z]){2,10}([Ww][Ss][Ss])', 'wss://', url)
+
   if settings.SINGLE_WHITESPACE in url:
     url = url.replace(settings.SINGLE_WHITESPACE, _urllib.parse.quote_plus(settings.SINGLE_WHITESPACE))
 
