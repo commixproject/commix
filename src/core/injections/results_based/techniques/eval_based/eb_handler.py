@@ -380,7 +380,7 @@ def eb_injection_handler(url, timesec, filename, http_request_method, injection_
                          session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
                         # Evaluate injection results.
                         shell = eb_injector.injection_results(response, TAG, cmd)
-                        shell = "".join(str(p) for p in shell).replace(settings.SINGLE_WHITESPACE, "", 1)
+                        shell = "".join(str(p) for p in shell)
                         if not menu.options.ignore_session :
                           session_handler.store_cmd(url, cmd, shell, vuln_parameter)
                       else:

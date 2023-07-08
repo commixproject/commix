@@ -252,6 +252,10 @@ def injection_results(response, TAG, cmd):
   html_data = re.sub("\n", new_line, html_data)
   shell = re.findall(r"" + TAG + new_line + TAG + "(.*)" + TAG + new_line + TAG + "", html_data)
   try:
+    if len(re.split(TAG  + "(.*)" + TAG, shell[0])) != 0:
+      shell = re.findall(r"" + new_line + "(.*)" + new_line + "", \
+                         re.split(TAG  + "(.*)" + TAG, \
+                         re.split(TAG  + "(.*)" + TAG, shell[0])[0])[0])
     shell = shell[0].replace(new_line, "\n").rstrip().lstrip()
   except IndexError:
     pass
