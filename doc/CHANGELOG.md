@@ -1,4 +1,5 @@
 ## Version 3.8 (TBA)
+* Revised: Minor improvement regarding parsing raw HTTP request from a file (i.e. `-r` option).
 * Revised: Minor improvement regarding dynamic code evaluation technique (i.e. command execution output).
 * Fixed: Minor bug-fix regarding `--skip-empty` flag, for skipping the testing of the parameter(s) with empty value(s).
 * Revised: Minor improvement regarding tamper script "uninitializedvariable.py", for adding randomly generated uninitialized bash variables between the characters of each command of the generated payloads.

@@ -68,10 +68,6 @@ def logfile_parser():
     info_msg = "Parsing target "
     request_file = menu.options.logfile
     
-  info_msg += "using the '" + os.path.split(request_file)[1] + "' file. "
-  sys.stdout.write(settings.print_info_msg(info_msg))
-  sys.stdout.flush()
-
   if not os.path.exists(request_file):
     print(settings.SINGLE_WHITESPACE)
     err_msg = "It seems that the '" + request_file + "' file, does not exist."
@@ -141,10 +137,10 @@ def logfile_parser():
     else:
       invalid_data(request_file)
 
-    request_url = "".join([str(i) for i in request_url])       
+    request_url = "".join([str(i) for i in request_url])
     # Check for other headers
     extra_headers = ""
-    prefix = "http://"
+    scheme = "http://"
     for line in request.splitlines():
       if re.findall(r"Host: " + "(.*)", line):
         menu.options.host = "".join([str(i) for i in re.findall(r"Host: " + "(.*)", line)])
@@ -158,7 +154,7 @@ def logfile_parser():
       if re.findall(r"Referer: " + "(.*)", line):
         menu.options.referer = "".join([str(i) for i in re.findall(r"Referer: " + "(.*)", line)])
         if menu.options.referer and "https://" in menu.options.referer:
-          prefix = "https://"
+          scheme = "https://"
       if re.findall(r"Authorization: " + "(.*)", line):
         auth_provided = "".join([str(i) for i in re.findall(r"Authorization: " + "(.*)", line)]).split()
         menu.options.auth_type = auth_provided[0].lower()
@@ -186,16 +182,23 @@ def logfile_parser():
    
     # Extra headers   
     menu.options.headers = extra_headers
-
     # Target URL  
     if not menu.options.host:
       invalid_data(request_file)
     else:
-      menu.options.url = prefix + menu.options.host + request_url
+      if len(_urllib.parse.urlparse(request_url).scheme) == 0:
+        request_url = scheme + request_url 
+      if not menu.options.host in request_url:
+        request_url = request_url.replace(scheme, scheme + menu.options.host)
+      request_url = checks.check_http_s(request_url)
+      info_msg += "using the '" + os.path.split(request_file)[1] + "' file. "
+      sys.stdout.write(settings.print_info_msg(info_msg))
+      sys.stdout.flush()
+      menu.options.url = request_url
       if single_request:
         print(settings.SINGLE_WHITESPACE)
       if menu.options.logfile and settings.VERBOSITY_LEVEL != 0:
-        sub_content = http_method + settings.SINGLE_WHITESPACE +  prefix + menu.options.host + request_url
+        sub_content = http_method + settings.SINGLE_WHITESPACE + menu.options.url
         print(settings.print_sub_content(sub_content))
         if menu.options.cookie:
            sub_content = "Cookie: " + menu.options.cookie
