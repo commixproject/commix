@@ -25,5 +25,5 @@ __tamper__ = "backticks"
 
 settings.TAMPER_SCRIPTS[__tamper__] = True
 settings.USE_BACKTICKS = True
-  
-# eof 
+
+# eof

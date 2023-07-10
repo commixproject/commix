@@ -44,5 +44,5 @@ def tamper(payload):
       return add_single_quotes(payload)
   else:
     return payload
-  
-# eof 
+
+# eof

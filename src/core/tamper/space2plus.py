@@ -31,7 +31,7 @@ def tamper(payload):
   if settings.WHITESPACES[0] == "%20":
     settings.WHITESPACES[0] = space2plus
   elif space2plus not in settings.WHITESPACES:
-    settings.WHITESPACES.append(space2plus) 
-  return payload 
-  
-# eof 
+    settings.WHITESPACES.append(space2plus)
+  return payload
+
+# eof

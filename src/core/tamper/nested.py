@@ -45,8 +45,8 @@ def tamper(payload):
           menu.options.suffix = menu.options.suffix + double_quote
         else:
           menu.options.suffix = double_quote
-      return payload  
-      
+      return payload
+
   if settings.TARGET_OS != settings.OS.WINDOWS:
     if settings.EVAL_BASED_STATE != False:
       return payload
@@ -55,4 +55,4 @@ def tamper(payload):
   else:
     return payload
 
-# eof 
+# eof

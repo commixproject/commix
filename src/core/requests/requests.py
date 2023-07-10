@@ -9,7 +9,7 @@ This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
- 
+
 For more see the file 'readme/COPYING' for copying permission.
 """
 
@@ -52,7 +52,7 @@ def crawler_request(url):
       request = _urllib.request.Request(url)
     headers.do_check(request)
     headers.check_http_traffic(request)
-    if menu.options.proxy: 
+    if menu.options.proxy:
       response = proxy.use_proxy(request)
     elif menu.options.tor:
       response = tor.use_tor(request)
@@ -85,7 +85,7 @@ def estimate_response_time(url, timesec):
     request = _urllib.request.Request(url, menu.options.data.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.TESTABLE_VALUE).encode(settings.DEFAULT_CODEC))
   else:
     request = _urllib.request.Request(url.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.TESTABLE_VALUE))
-  
+
   headers.do_check(request)
   start = time.time()
   try:
@@ -96,7 +96,7 @@ def estimate_response_time(url, timesec):
   except _http_client.InvalidURL as err_msg:
     print(settings.print_critical_msg(err_msg))
     raise SystemExit()
-    
+
   except _urllib.error.HTTPError as err:
     ignore_start = time.time()
     if settings.UNAUTHORIZED_ERROR in str(err) and menu.options.ignore_code == settings.UNAUTHORIZED_ERROR:
@@ -119,7 +119,7 @@ def estimate_response_time(url, timesec):
           # Checking for authentication type name.
           auth_type = auth_line.split()[0]
           # Checking for the realm attribute.
-          try: 
+          try:
             auth_obj = re.match('''(\w*)\s+realm=(.*)''', auth_line).groups()
             realm = auth_obj[1].split(',')[0].replace("\"", "")
           except:
@@ -132,11 +132,11 @@ def estimate_response_time(url, timesec):
           raise SystemExit()
 
         except IndexError:
-          err_msg = "The provided pair of " + str(menu.options.auth_type) 
+          err_msg = "The provided pair of " + str(menu.options.auth_type)
           err_msg += " HTTP authentication credentials '" + str(menu.options.auth_cred) + "'"
           err_msg += " seems to be invalid."
           print(settings.print_critical_msg(err_msg))
-          raise SystemExit() 
+          raise SystemExit()
 
         if menu.options.auth_type and menu.options.auth_type != auth_type.lower():
           if checks.identified_http_auth_type(auth_type):
@@ -152,14 +152,14 @@ def estimate_response_time(url, timesec):
             stored_auth_creds = False
           if stored_auth_creds and not menu.options.ignore_session:
             menu.options.auth_cred = stored_auth_creds
-            info_msg = "Identified a previously stored valid pair of credentials '"  
+            info_msg = "Identified a previously stored valid pair of credentials '"
             info_msg += menu.options.auth_cred + Style.RESET_ALL + Style.BRIGHT  + "'."
             print(settings.print_bold_info_msg(info_msg))
-          else:  
-            # Basic authentication 
+          else:
+            # Basic authentication
             if menu.options.auth_type.lower() == settings.AUTH_TYPE.BASIC:
               if not menu.options.ignore_code == settings.UNAUTHORIZED_ERROR:
-                warn_msg = menu.options.auth_type.capitalize() + " " 
+                warn_msg = menu.options.auth_type.capitalize() + " "
                 warn_msg += "HTTP authentication credentials are required."
                 print(settings.print_warning_msg(warn_msg))
                 while True:
@@ -178,18 +178,18 @@ def estimate_response_time(url, timesec):
                   elif do_update in settings.CHOICE_QUIT:
                     raise SystemExit()
                   else:
-                    common.invalid_option(do_update)  
+                    common.invalid_option(do_update)
                     pass
 
-            # Digest authentication         
+            # Digest authentication
             elif menu.options.auth_type.lower() == settings.AUTH_TYPE.DIGEST:
               if not menu.options.ignore_code == settings.UNAUTHORIZED_ERROR:
-                warn_msg = menu.options.auth_type.capitalize() + " " 
+                warn_msg = menu.options.auth_type.capitalize() + " "
                 warn_msg += "HTTP authentication credentials are required."
-                print(settings.print_warning_msg(warn_msg))      
+                print(settings.print_warning_msg(warn_msg))
                 # Check if heuristics have failed to identify the realm attribute.
                 if not realm:
-                  warn_msg = "Heuristics have failed to identify the realm attribute." 
+                  warn_msg = "Heuristics have failed to identify the realm attribute."
                   print(settings.print_warning_msg(warn_msg))
                 while True:
                   message = "Do you want to perform a dictionary-based attack? [Y/n] > "
@@ -207,13 +207,13 @@ def estimate_response_time(url, timesec):
                   elif do_update in settings.CHOICE_QUIT:
                     raise SystemExit()
                   else:
-                    common.invalid_option(do_update)  
+                    common.invalid_option(do_update)
                     pass
-                else:   
-                  checks.http_auth_err_msg()      
+                else:
+                  checks.http_auth_err_msg()
         else:
           raise SystemExit()
-   
+
     ignore_end = time.time()
     start = start - (ignore_start - ignore_end)
 
@@ -228,8 +228,8 @@ def estimate_response_time(url, timesec):
     request_failed(err_msg)
 
   end = time.time()
-  diff = end - start 
-  
+  diff = end - start
+
   if int(diff) < 1:
     url_time_response = int(diff)
     if settings.VERBOSITY_LEVEL != 0 and _:
@@ -243,10 +243,10 @@ def estimate_response_time(url, timesec):
       print(settings.SINGLE_WHITESPACE)
     url_time_response = int(round(diff))
     warn_msg = "Target's estimated response time is " + str(url_time_response)
-    warn_msg += " second" + "s"[url_time_response == 1:] + ". That may cause" 
+    warn_msg += " second" + "s"[url_time_response == 1:] + ". That may cause"
     if url_time_response >= 3:
       warn_msg += " serious"
-    warn_msg += " delays during the data extraction procedure" 
+    warn_msg += " delays during the data extraction procedure"
     if url_time_response >= 3:
       warn_msg += " and/or possible corruptions over the extracted data"
     warn_msg += "."
@@ -270,7 +270,7 @@ def request_failed(err_msg):
   settings.VALID_URL = False
 
   try:
-    error_msg = str(err_msg.args[0]).split("] ")[1] 
+    error_msg = str(err_msg.args[0]).split("] ")[1]
   except IndexError:
     try:
       error_msg = str(err_msg.args[0])
@@ -296,7 +296,7 @@ def request_failed(err_msg):
     err = err + " (Reason: " + str(error_msg)  + "). "
     if settings.MULTI_TARGETS or settings.CRAWLING:
       err = err + "Skipping to the next target."
-    error_msg = err  
+    error_msg = err
     print(settings.print_critical_msg(error_msg))
     if not settings.CRAWLING:
       raise SystemExit()
@@ -328,7 +328,7 @@ def request_failed(err_msg):
       error_msg = "There was an incomplete read error while retrieving data "
       error_msg += "from the target URL."
     elif "infinite loop" in str(error_msg):
-      error_msg = "Infinite redirect loop detected. " 
+      error_msg = "Infinite redirect loop detected. "
       error_msg += "Please check all provided parameters and/or provide missing ones."
     elif "BadStatusLine" in str(error_msg):
       error_msg = "Connection dropped or unknown HTTP "
@@ -446,7 +446,7 @@ def cookie_injection(url, vuln_parameter, payload):
     end = 0
     start = time.time()
 
-  proxy = None 
+  proxy = None
   if menu.options.proxy:
     try:
       proxy = _urllib.request.ProxyHandler({settings.SCHEME : menu.options.proxy})
@@ -506,7 +506,7 @@ def user_agent_injection(url, vuln_parameter, payload):
     end = 0
     start = time.time()
 
-  proxy = None 
+  proxy = None
   if menu.options.proxy:
     try:
       proxy = _urllib.request.ProxyHandler({settings.SCHEME : menu.options.proxy})
@@ -566,7 +566,7 @@ def referer_injection(url, vuln_parameter, payload):
     end = 0
     start = time.time()
 
-  proxy = None 
+  proxy = None
   # Check if defined any HTTP Proxy.
   if menu.options.proxy:
     try:
@@ -585,7 +585,7 @@ def referer_injection(url, vuln_parameter, payload):
       response = inject_referer(url, vuln_parameter, payload, proxy)
     except Exception as err_msg:
       response = request_failed(err_msg)
-          
+
   if settings.TIME_RELATIVE_ATTACK :
     end  = time.time()
     how_long = int(end - start)
@@ -597,7 +597,7 @@ def referer_injection(url, vuln_parameter, payload):
 Check if target host is vulnerable. (Host-based injection)
 """
 def host_injection(url, vuln_parameter, payload):
-  
+
   payload = _urllib.parse.urlparse(url).netloc + payload
 
   def inject_host(url, vuln_parameter, payload, proxy):
@@ -616,7 +616,7 @@ def host_injection(url, vuln_parameter, payload):
       request = _urllib.request.Request(url)
     #Check if defined extra headers.
     headers.do_check(request)
-    payload = checks.newline_fixation(payload)  
+    payload = checks.newline_fixation(payload)
     request.add_header('Host', payload)
     try:
       headers.check_http_traffic(request)
@@ -630,7 +630,7 @@ def host_injection(url, vuln_parameter, payload):
     end = 0
     start = time.time()
 
-  proxy = None 
+  proxy = None
   if menu.options.proxy:
     try:
       proxy = _urllib.request.ProxyHandler({settings.SCHEME : menu.options.proxy})
@@ -642,7 +642,7 @@ def host_injection(url, vuln_parameter, payload):
       proxy = _urllib.request.ProxyHandler({settings.TOR_HTTP_PROXY_SCHEME:settings.TOR_HTTP_PROXY_IP + ":" + settings.TOR_HTTP_PROXY_PORT})
       response = inject_host(url, vuln_parameter, payload, proxy)
     except Exception as err_msg:
-      response = request_failed(err_msg)   
+      response = request_failed(err_msg)
   else:
     try:
       response = inject_host(url, vuln_parameter, payload, proxy)
@@ -694,7 +694,7 @@ def custom_header_injection(url, vuln_parameter, payload):
     end = 0
     start = time.time()
 
-  proxy = None  
+  proxy = None
   if menu.options.proxy:
     try:
       proxy = _urllib.request.ProxyHandler({settings.SCHEME : menu.options.proxy})
@@ -712,7 +712,7 @@ def custom_header_injection(url, vuln_parameter, payload):
       response = inject_custom_header(url, vuln_parameter, payload, proxy)
     except Exception as err_msg:
       response = request_failed(err_msg)
-   
+
   if settings.TIME_RELATIVE_ATTACK :
     end  = time.time()
     how_long = int(end - start)
@@ -726,7 +726,7 @@ Target's encoding detection
 def encoding_detection(response):
   charset_detected = False
   if settings.VERBOSITY_LEVEL != 0:
-    debug_msg = "Identifying the indicated web-page charset. " 
+    debug_msg = "Identifying the indicated web-page charset. "
     sys.stdout.write(settings.print_debug_msg(debug_msg))
     sys.stdout.flush()
   try:
@@ -737,7 +737,7 @@ def encoding_detection(response):
     except AttributeError:
       # Support for python 3.x
       charset = response.headers.get_content_charset()
-    if charset != None and len(charset) != 0 :        
+    if charset != None and len(charset) != 0 :
       charset_detected = True
     else:
       content = re.findall(r"charset=['\"](.*)['\"]", response.read())[0]
@@ -758,7 +758,7 @@ def encoding_detection(response):
         print(settings.print_warning_msg(warn_msg))
       else:
         if settings.VERBOSITY_LEVEL != 0:
-          debug_msg = "The indicated web-page charset appears to be " 
+          debug_msg = "The indicated web-page charset appears to be "
           debug_msg += settings.DEFAULT_PAGE_ENCODING + Style.RESET_ALL + "."
           print(settings.print_bold_debug_msg(debug_msg))
     else:
@@ -775,14 +775,14 @@ Procedure for target application identification
 """
 def technology_detection(response):
   if settings.VERBOSITY_LEVEL != 0:
-    debug_msg = "Identifying the technology supporting the target application. " 
+    debug_msg = "Identifying the technology supporting the target application. "
     sys.stdout.write(settings.print_debug_msg(debug_msg))
     sys.stdout.flush()
-    print(settings.SINGLE_WHITESPACE) 
+    print(settings.SINGLE_WHITESPACE)
   try:
-    if len(response.info()['X-Powered-By']) != 0: 
-      if settings.VERBOSITY_LEVEL != 0:        
-        debug_msg = "The target application is powered by " 
+    if len(response.info()['X-Powered-By']) != 0:
+      if settings.VERBOSITY_LEVEL != 0:
+        debug_msg = "The target application is powered by "
         debug_msg += response.info()['X-Powered-By'] + Style.RESET_ALL + "."
         print(settings.print_bold_debug_msg(debug_msg))
 
@@ -798,24 +798,24 @@ Procedure for target application identification
 def application_identification(url):
   found_application_extension = False
   if settings.VERBOSITY_LEVEL != 0:
-    debug_msg = "Identifying the target application." 
+    debug_msg = "Identifying the target application."
     sys.stdout.write(settings.print_debug_msg(debug_msg))
     sys.stdout.flush()
   root, application_extension = splitext(_urllib.parse.urlparse(url).path)
   settings.TARGET_APPLICATION = application_extension[1:].upper()
-  
+
   if settings.TARGET_APPLICATION:
     found_application_extension = True
     if settings.VERBOSITY_LEVEL != 0:
-      print(settings.SINGLE_WHITESPACE)           
-      debug_msg = "The target application identified as " 
+      print(settings.SINGLE_WHITESPACE)
+      debug_msg = "The target application identified as "
       debug_msg += settings.TARGET_APPLICATION + Style.RESET_ALL + "."
       print(settings.print_bold_debug_msg(debug_msg))
 
     # Check for unsupported target applications
     for i in range(0,len(settings.UNSUPPORTED_TARGET_APPLICATION)):
       if settings.TARGET_APPLICATION.lower() in settings.UNSUPPORTED_TARGET_APPLICATION[i].lower():
-        err_msg = settings.TARGET_APPLICATION + " exploitation is not yet supported."  
+        err_msg = settings.TARGET_APPLICATION + " exploitation is not yet supported."
         print(settings.print_critical_msg(err_msg))
         raise SystemExit()
 
@@ -831,7 +831,7 @@ Procedure for target server's identification.
 def server_identification(server_banner):
   found_server_banner = False
   if settings.VERBOSITY_LEVEL != 0:
-    debug_msg = "Identifying the target server. " 
+    debug_msg = "Identifying the target server. "
     sys.stdout.write(settings.print_debug_msg(debug_msg))
     sys.stdout.flush()
 
@@ -841,7 +841,7 @@ def server_identification(server_banner):
       if settings.VERBOSITY_LEVEL != 0:
         print(settings.SINGLE_WHITESPACE)
       if settings.VERBOSITY_LEVEL != 0:
-        debug_msg = "The target server identified as " 
+        debug_msg = "The target server identified as "
         debug_msg += server_banner + Style.RESET_ALL + "."
         print(settings.print_bold_debug_msg(debug_msg))
       settings.SERVER_BANNER = match.group(0)
@@ -852,7 +852,7 @@ def server_identification(server_banner):
           settings.WEB_ROOT = "\\htdocs"
         else:
           settings.WEB_ROOT = "/var/www"
-      elif "nginx" in settings.SERVER_BANNER.lower(): 
+      elif "nginx" in settings.SERVER_BANNER.lower():
         settings.WEB_ROOT = "/usr/share/nginx"
       elif "microsoft-iis" in settings.SERVER_BANNER.lower():
         settings.WEB_ROOT = "\\inetpub\\wwwroot"
@@ -860,7 +860,7 @@ def server_identification(server_banner):
   else:
     if settings.VERBOSITY_LEVEL != 0:
       print(settings.SINGLE_WHITESPACE)
-      warn_msg = "The server which identified as '" 
+      warn_msg = "The server which identified as '"
       warn_msg += server_banner + "' seems unknown."
       print(settings.print_warning_msg(warn_msg))
 
@@ -873,7 +873,7 @@ def check_target_os(server_banner):
     user_defined_os = settings.TARGET_OS
 
   if settings.VERBOSITY_LEVEL != 0:
-    debug_msg = "Identifying The underlying operating system. " 
+    debug_msg = "Identifying The underlying operating system. "
     sys.stdout.write(settings.print_debug_msg(debug_msg))
     sys.stdout.flush()
 
@@ -894,7 +894,7 @@ def check_target_os(server_banner):
         if menu.options.shellshock:
           if settings.VERBOSITY_LEVEL != 0:
             print(settings.SINGLE_WHITESPACE)
-          err_msg = "The shellshock module ('--shellshock') is not available for " 
+          err_msg = "The shellshock module ('--shellshock') is not available for "
           err_msg += identified_os + " targets."
           print(settings.print_critical_msg(err_msg))
           raise SystemExit()
@@ -907,7 +907,7 @@ def check_target_os(server_banner):
   if settings.VERBOSITY_LEVEL != 0 :
     if found_os_server:
       print(settings.SINGLE_WHITESPACE)
-      debug_msg = "The underlying operating system appears to be " 
+      debug_msg = "The underlying operating system appears to be "
       debug_msg += identified_os.title() + Style.RESET_ALL + "."
       print(settings.print_bold_debug_msg(debug_msg))
     else:
@@ -918,7 +918,7 @@ def check_target_os(server_banner):
   if found_os_server == False and not menu.options.os:
     # If "--shellshock" option is provided then, by default is a Linux/Unix operating system.
     if menu.options.shellshock:
-      pass 
+      pass
     else:
       if menu.options.batch:
         if not settings.CHECK_BOTH_OS:
@@ -945,7 +945,7 @@ def check_target_os(server_banner):
             elif got_os.lower() == "q":
               raise SystemExit()
           else:
-            common.invalid_option(got_os)  
+            common.invalid_option(got_os)
             pass
 
 """

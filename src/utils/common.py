@@ -9,7 +9,7 @@ This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
- 
+
 For more see the file 'readme/COPYING' for copying permission.
 """
 
@@ -39,7 +39,7 @@ Invalid cmd output
 """
 def invalid_cmd_output(cmd):
   err_msg = "The execution of '" + cmd + "' command, does not return any output."
-  return err_msg 
+  return err_msg
 
 """
 Reads input from terminal
@@ -114,7 +114,7 @@ def running_as_admin():
   if settings.PLATFORM in ("posix", "mac"):
     _ = os.geteuid()
     if isinstance(_, (float, six.integer_types)) and _ == 0:
-      is_admin = True  
+      is_admin = True
 
   elif settings.IS_WINDOWS:
     import ctypes
@@ -162,7 +162,7 @@ def create_github_issue(err_msg, exc_msg):
   _ = re.sub(r"(Unicode[^:]*Error:).+", r"\g<1>", _)
   _ = re.sub(r"= _", "= ", _)
   _ = _.encode(settings.DEFAULT_CODEC)
-  
+
   key = hashlib.md5(_).hexdigest()[:8]
 
   bug_report =  "Bug Report: Unhandled exception \"" + str([i for i in exc_msg.split('\n') if i][-1]) + "\" " +  "(#" + key + ")"
@@ -179,9 +179,9 @@ def create_github_issue(err_msg, exc_msg):
         print(settings.SINGLE_WHITESPACE)
         return
       else:
-        invalid_option(choise)  
+        invalid_option(choise)
         pass
-    except: 
+    except:
       print("\n")
       raise SystemExit()
 
@@ -200,15 +200,15 @@ def create_github_issue(err_msg, exc_msg):
       if closed:
           warn_msg += " and resolved. Please update to the latest "
           warn_msg += "(dev) version from official GitHub repository at '" + settings.GIT_URL + "'"
-      warn_msg += ".\n"   
+      warn_msg += ".\n"
       print(settings.print_warning_msg(warn_msg))
       return
   except:
     pass
 
   data = {"title": str(bug_report), "body": "```" + str(err_msg) + "\n```\n```\n" + str(exc_msg) + "```"}
-  request = _urllib.request.Request(url = "https://api.github.com/repos/commixproject/commix/issues", 
-                                data = json.dumps(data).encode(), 
+  request = _urllib.request.Request(url = "https://api.github.com/repos/commixproject/commix/issues",
+                                data = json.dumps(data).encode(),
                                 headers = {"Authorization": "token " + base64.b64decode(settings.GITHUB_REPORT_OAUTH_TOKEN.encode(settings.DEFAULT_CODEC)).decode()}
                                 )
   try:
@@ -247,7 +247,7 @@ def unhandled_exception():
     match = re.search(r"\s*(.+)\s+ValueError", exc_msg)
     err_msg = "Identified corrupted .pyc file(s)."
     err_msg += "Please delete .pyc files on your system to fix the problem."
-    print(settings.print_critical_msg(err_msg)) 
+    print(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
   elif "must be pinned buffer, not bytearray" in exc_msg:
@@ -286,7 +286,7 @@ def unhandled_exception():
     raise SystemExit()
 
   elif all(_ in exc_msg for _ in ("No such file", "_'")):
-    err_msg = "Corrupted installation detected ('" + exc_msg.strip().split('\n')[-1] + "'). " 
+    err_msg = "Corrupted installation detected ('" + exc_msg.strip().split('\n')[-1] + "'). "
     err_msg += "You should retrieve the latest (dev) version from official GitHub "
     err_msg += "repository at '" + settings.GIT_URL + "'."
     print(settings.print_critical_msg(err_msg))

@@ -9,7 +9,7 @@ This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
- 
+
 For more see the file 'readme/COPYING' for copying permission.
 """
 
@@ -30,7 +30,7 @@ The "file-based" technique on semiblind OS command injection.
 """
 Powershell's version number enumeration (for Windows OS)
 """
-def powershell_version(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename): 
+def powershell_version(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
   _ = False
   cmd = settings.PS_VERSION
   if alter_shell:
@@ -55,7 +55,7 @@ Hostname enumeration
 def hostname(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
   _ = False
   if settings.TARGET_OS == settings.OS.WINDOWS:
-    settings.HOSTNAME = settings.WIN_HOSTNAME 
+    settings.HOSTNAME = settings.WIN_HOSTNAME
   cmd = settings.HOSTNAME
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
     # Command execution results.
@@ -71,11 +71,11 @@ def hostname(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_
 """
 Retrieve system information
 """
-def system_information(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):    
+def system_information(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
   _ = False
   if settings.TARGET_OS == settings.OS.WINDOWS:
     settings.RECOGNISE_OS = settings.WIN_RECOGNISE_OS
-  cmd = settings.RECOGNISE_OS        
+  cmd = settings.RECOGNISE_OS
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
     # Command execution results.
     response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
@@ -145,8 +145,8 @@ def check_current_user_privs(separator, payload, TAG, timesec, prefix, suffix, w
   _ = False
   if settings.TARGET_OS == settings.OS.WINDOWS:
     cmd = settings.IS_ADMIN
-  else:  
-    cmd = settings.IS_ROOT       
+  else:
+    cmd = settings.IS_ROOT
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
     # Command execution results.
     response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
@@ -163,13 +163,13 @@ System users enumeration
 """
 def system_users(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
   _ = False
-  cmd = settings.SYS_USERS 
+  cmd = settings.SYS_USERS
   if settings.TARGET_OS == settings.OS.WINDOWS:
     cmd = settings.WIN_SYS_USERS
     if alter_shell:
       cmd = checks.escape_single_quoted_cmd(cmd)
-    else:  
-      cmd = checks.quoted_cmd(cmd) 
+    else:
+      cmd = checks.quoted_cmd(cmd)
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
     # Command execution results.
     response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
@@ -185,8 +185,8 @@ def system_users(separator, payload, TAG, timesec, prefix, suffix, whitespace, h
 System passwords enumeration
 """
 def system_passwords(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
-  _ = False    
-  cmd = settings.SYS_PASSES            
+  _ = False
+  cmd = settings.SYS_PASSES
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
     # Command execution results.
     response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
@@ -213,7 +213,7 @@ def single_os_cmd_exec(separator, payload, TAG, timesec, prefix, suffix, whitesp
     session_handler.store_cmd(url, cmd, shell, vuln_parameter)
   else:
     shell = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
-  checks.print_single_os_cmd(cmd, shell) 
+  checks.print_single_os_cmd(cmd, shell)
 
 """
 Check the defined options
@@ -233,7 +233,7 @@ def do_check(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_
     checks.print_enumenation().hostname_msg()
     hostname(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
     settings.ENUMERATION_DONE = True
-    
+
   if menu.options.current_user:
     checks.print_enumenation().current_user_msg()
     current_user(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)

@@ -46,7 +46,7 @@ def revision_num():
     subprocess.Popen("find . -name \"*.pyc\" -delete", shell=True).wait()
     # Delete empty directories and files.
     subprocess.Popen("find . -empty -type d -delete", shell=True).wait()
-    if settings.VERBOSITY_LEVEL == 0: 
+    if settings.VERBOSITY_LEVEL == 0:
       stdout, _ = process.communicate()
       match = re.search(r"(?i)[0-9a-f]{32}", stdout or "")
       rev_num = match.group(0) if match else None
@@ -59,7 +59,7 @@ def revision_num():
       info_msg = "Finished in " + time.strftime('%H:%M:%S', time.gmtime(how_long)) + "."
     print(settings.print_info_msg(info_msg))
   except:
-    print(settings.SINGLE_WHITESPACE) 
+    print(settings.SINGLE_WHITESPACE)
     raise SystemExit()
 
 """
@@ -67,11 +67,11 @@ The commix's updater.
 """
 def updater():
   time.sleep(1)
-  info_msg = "Checking requirements to update " 
+  info_msg = "Checking requirements to update "
   info_msg += settings.APPLICATION + " from GitHub repository. "
   sys.stdout.write(settings.print_info_msg(info_msg))
   sys.stdout.flush()
-  if menu.options.offline:  
+  if menu.options.offline:
     print(settings.SINGLE_WHITESPACE)
     err_msg = "You cannot update commix via GitHub without access on the Internet."
     print(settings.print_critical_msg(err_msg))
@@ -97,7 +97,7 @@ def updater():
         else:
           print(settings.SINGLE_WHITESPACE)
         if os.path.isdir("./.git"):
-          info_msg = "Updating " + settings.APPLICATION + " to the latest (dev) " 
+          info_msg = "Updating " + settings.APPLICATION + " to the latest (dev) "
           info_msg += "version. "
           sys.stdout.write(settings.print_info_msg(info_msg))
           sys.stdout.flush()
@@ -106,10 +106,10 @@ def updater():
           os._exit(0)
         else:
           print(settings.SINGLE_WHITESPACE)
-          err_msg = "The '.git' directory not found. Do it manually: " 
-          err_msg += Style.BRIGHT + "'git clone " + settings.GIT_URL 
+          err_msg = "The '.git' directory not found. Do it manually: "
+          err_msg += Style.BRIGHT + "'git clone " + settings.GIT_URL
           err_msg += " " + settings.APPLICATION + "' "
-          print(settings.print_critical_msg(err_msg))    
+          print(settings.print_critical_msg(err_msg))
           raise SystemExit()
       else:
           print(settings.SINGLE_WHITESPACE)
@@ -132,7 +132,7 @@ def check_for_update():
       line = line.rstrip()
       if "VERSION_NUM = " in line:
         update_version = line.replace("VERSION_NUM = ", "").replace("\"", "")
-        break 
+        break
     if (int(settings.VERSION_NUM.replace(".","")[:2]) < int(update_version.replace(".","")[:2])) or \
        ((int(settings.VERSION_NUM.replace(".","")[:2]) == int(update_version.replace(".","")[:2])) and \
          int(settings.VERSION_NUM.replace(".","")[2:]) < int(update_version.replace(".","")[2:])):
@@ -144,7 +144,7 @@ def check_for_update():
         elif do_update in settings.CHOICE_NO:
           break
         else:
-          common.invalid_option(do_update)  
+          common.invalid_option(do_update)
           pass
   except KeyboardInterrupt:
     raise
@@ -156,11 +156,11 @@ The updater for the unicorn tool
 """
 def unicorn_updater(current_version):
   APPLICATION_NAME = "TrustedSec's Magic Unicorn"
-  info_msg = "Checking requirements to update " 
+  info_msg = "Checking requirements to update "
   info_msg += APPLICATION_NAME + " from GitHub repository. "
   sys.stdout.write(settings.print_info_msg(info_msg))
   sys.stdout.flush()
-  if menu.options.offline:  
+  if menu.options.offline:
     print(settings.SINGLE_WHITESPACE)
     err_msg = "You cannot update TrustedSec's Magic Unicorn "
     err_msg += "via GitHub without access on the Internet."
@@ -187,7 +187,7 @@ def unicorn_updater(current_version):
         else:
           os.chdir("../")
           subprocess.Popen("rm -rf unicorn", shell=True).wait()
-        info_msg = "Updating " + APPLICATION_NAME + " to the latest (dev) " 
+        info_msg = "Updating " + APPLICATION_NAME + " to the latest (dev) "
         info_msg += "version. "
         subprocess.Popen("git clone https://github.com/trustedsec/unicorn", shell=True).wait()
         os.chdir("unicorn")
@@ -209,7 +209,7 @@ Check the latest version of unicorn
 """
 def check_unicorn_version(current_version):
   try:
-    if len(current_version) != 0: 
+    if len(current_version) != 0:
       response = _urllib.request.urlopen('https://raw.githubusercontent.com/trustedsec/unicorn/master/unicorn.py', timeout=settings.TIMEOUT)
       latest_version = response.readlines()
       for line in latest_version:
@@ -228,7 +228,7 @@ def check_unicorn_version(current_version):
         print(settings.print_warning_msg(warn_msg))
       else:
         warn_msg = "TrustedSec's Magic Unicorn seems to be not installed."
-        print(settings.print_warning_msg(warn_msg)) 
+        print(settings.print_warning_msg(warn_msg))
       while True:
         if len(current_version) == 0:
           action = "install"
@@ -241,7 +241,7 @@ def check_unicorn_version(current_version):
         elif do_update in settings.CHOICE_NO:
           break
         else:
-          common.invalid_option(do_update)  
+          common.invalid_option(do_update)
           pass
 
   except KeyboardInterrupt:

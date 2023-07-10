@@ -33,9 +33,9 @@ def tamper(payload):
     err_msg = "Tamper script '" +  __tamper__  + "' is unlikely to work combined with the tamper script 'space2plus'."
     if settings.VERBOSITY_LEVEL == 0:
       print(settings.SINGLE_WHITESPACE)
-    print(settings.print_critical_msg(err_msg)) 
+    print(settings.print_critical_msg(err_msg))
     raise SystemExit()
-    
+
   else:
     payload = _urllib.parse.unquote(payload)
     encoded_payload, _ = hexencode(payload)
@@ -43,4 +43,4 @@ def tamper(payload):
       payload = encoded_payload
     return payload
 
-# eof 
+# eof

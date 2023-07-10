@@ -33,7 +33,7 @@ def tamper(payload):
     settings.TAMPER_SCRIPTS[__tamper__] = True
     if re.compile("\w+").findall(payload):
       long_string = ""
-      if len(max(re.compile("\w+").findall(payload), key=lambda word: len(word))) >= 5000:  
+      if len(max(re.compile("\w+").findall(payload), key=lambda word: len(word))) >= 5000:
         long_string = max(re.compile("\w+").findall(payload), key=lambda word: len(word))
     rep = {
             "^^": "^",
@@ -54,5 +54,5 @@ def tamper(payload):
       return add_caret_symbol(payload)
   else:
     return payload
-    
-# eof 
+
+# eof

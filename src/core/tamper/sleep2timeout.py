@@ -21,7 +21,7 @@ from src.core.injections.controller import checks
 
 """
 About: Uses "timeout" function for time-based attacks.
-  * Regarding Unix-like target(s), it replaces the "sleep XX" command with "timeout XX ping localhost". 
+  * Regarding Unix-like target(s), it replaces the "sleep XX" command with "timeout XX ping localhost".
   * Regarding windows target(s), it replaces the "powershell.exe -InputFormat none Start-Sleep -s XX" command with "timeout XX".
 Notes: This tamper script works against all targets.
 """
@@ -54,7 +54,7 @@ def tamper(payload):
     settings.TRANFROM_PAYLOAD = True
     if settings.TRANFROM_PAYLOAD:
       return sleep_to_timeout_ping(payload)
-      
+
   return payload
 
-# eof 
+# eof

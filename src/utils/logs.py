@@ -36,7 +36,7 @@ Directory creation
 def path_creation(path):
   if not os.path.exists(path):
     try:
-      os.mkdir(path)   
+      os.mkdir(path)
     except OSError as err_msg:
       try:
         error_msg = str(err_msg).split("] ")[1] + "."
@@ -63,7 +63,7 @@ def logs_filename_creation(url):
 
   if not output_dir.endswith("/"):
     output_dir = output_dir + "/"
-    
+
   # The logs filename construction.
   filename = create_log_file(url, output_dir)
 
@@ -90,10 +90,10 @@ def create_log_file(url, output_dir):
     else:
        err_msg = "The provided session file ('" + \
                     menu.options.session_file + \
-                    "') does not exist." 
+                    "') does not exist."
        print(settings.print_critical_msg(err_msg))
-       raise SystemExit() 
-  else:  
+       raise SystemExit()
+  else:
     settings.SESSION_FILE = logs_path + "session.db"
 
   # Load command history
@@ -119,7 +119,7 @@ def create_log_file(url, output_dir):
       error_msg = str(err_msg.args[0]) + "."
     print(settings.print_critical_msg(error_msg))
     raise SystemExit()
-      
+
   return filename
 
 """
@@ -166,7 +166,7 @@ def update_payload(filename, counter, payload):
   output_file.close()
 
 """
-Add any executed command and 
+Add any executed command and
 execution output result in log files.
 """
 def executed_command(filename, cmd, output):

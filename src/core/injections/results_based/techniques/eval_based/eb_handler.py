@@ -9,7 +9,7 @@ This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
- 
+
 For more see the file 'readme/COPYING' for copying permission.
 """
 
@@ -61,7 +61,7 @@ def eb_injection_handler(url, timesec, filename, http_request_method, injection_
     sys.stdout.flush()
     if settings.VERBOSITY_LEVEL != 0:
       print(settings.SINGLE_WHITESPACE)
-          
+
   i = 0
   # Calculate all possible combinations
   total = len(settings.WHITESPACES) * len(settings.EVAL_PREFIXES) * len(settings.EVAL_SEPARATORS) * len(settings.EVAL_SUFFIXES)
@@ -70,7 +70,7 @@ def eb_injection_handler(url, timesec, filename, http_request_method, injection_
       for suffix in settings.EVAL_SUFFIXES:
         for separator in settings.EVAL_SEPARATORS:
           if whitespace == settings.SINGLE_WHITESPACE:
-            whitespace = _urllib.parse.quote(whitespace) 
+            whitespace = _urllib.parse.quote(whitespace)
           # Check injection state
           settings.DETECTION_PHASE = True
           settings.EXPLOITATION_PHASE = False
@@ -91,7 +91,7 @@ def eb_injection_handler(url, timesec, filename, http_request_method, injection_
             settings.RETEST = False
             from src.core.injections.results_based.techniques.classic import cb_handler
             cb_handler.exploitation(url, timesec, filename, http_request_method, injection_type, technique)
-            
+
           if not settings.LOAD_SESSION:
             i = i + 1
             # Check for bad combination of prefix and separator
@@ -129,7 +129,7 @@ def eb_injection_handler(url, timesec, filename, http_request_method, injection_
 
               # Whitespace fixation
               payload = payload.replace(settings.SINGLE_WHITESPACE, whitespace)
-              
+
               # Perform payload modification
               payload = checks.perform_payload_modification(payload)
 
@@ -139,7 +139,7 @@ def eb_injection_handler(url, timesec, filename, http_request_method, injection_
 
               # Check if defined "--verbose" option.
               if settings.VERBOSITY_LEVEL != 0:
-                print(settings.print_payload(payload)) 
+                print(settings.print_payload(payload))
 
               # Cookie header injection
               if settings.COOKIE_INJECTION == True:
@@ -188,7 +188,7 @@ def eb_injection_handler(url, timesec, filename, http_request_method, injection_
 
                 if shell == False:
                   info_msg = "Testing the " + "(" + injection_type.split(settings.SINGLE_WHITESPACE)[0] + ") " + technique + "..." +  " (" + str(float_percent) + "%)"
-                  sys.stdout.write("\r" + settings.print_info_msg(info_msg))  
+                  sys.stdout.write("\r" + settings.print_info_msg(info_msg))
                   sys.stdout.flush()
 
                 if str(float_percent) == "100.0":
@@ -202,13 +202,13 @@ def eb_injection_handler(url, timesec, filename, http_request_method, injection_
                   percent = ".. (" + str(float_percent) + "%)"
 
                 info_msg = "Testing the " + "(" + injection_type.split(settings.SINGLE_WHITESPACE)[0] + ") " + technique + "." + "" + percent + ""
-                sys.stdout.write("\r" + settings.print_info_msg(info_msg))  
+                sys.stdout.write("\r" + settings.print_info_msg(info_msg))
                 sys.stdout.flush()
-                
+
             except (KeyboardInterrupt, SystemExit):
               print(settings.SINGLE_WHITESPACE)
               raise
-              
+
             except EOFError:
               if settings.STDIN_PARSING:
                 print(settings.SINGLE_WHITESPACE)
@@ -218,8 +218,8 @@ def eb_injection_handler(url, timesec, filename, http_request_method, injection_
 
             except:
               continue
-          
-          # Yaw, got shellz! 
+
+          # Yaw, got shellz!
           # Do some magic tricks!
           if shell:
             found = True
@@ -227,32 +227,32 @@ def eb_injection_handler(url, timesec, filename, http_request_method, injection_
             # Check injection state
             settings.DETECTION_PHASE = False
             settings.EXPLOITATION_PHASE = True
-            if settings.COOKIE_INJECTION == True: 
+            if settings.COOKIE_INJECTION == True:
               header_name = " cookie"
               found_vuln_parameter = vuln_parameter
               the_type = " parameter"
 
-            elif settings.USER_AGENT_INJECTION == True: 
+            elif settings.USER_AGENT_INJECTION == True:
               header_name = " User-Agent"
               found_vuln_parameter = ""
               the_type = " HTTP header"
 
-            elif settings.REFERER_INJECTION == True: 
+            elif settings.REFERER_INJECTION == True:
               header_name = " Referer"
               found_vuln_parameter = ""
               the_type = " HTTP header"
 
-            elif settings.HOST_INJECTION == True: 
+            elif settings.HOST_INJECTION == True:
               header_name = " Host"
               found_vuln_parameter = ""
               the_type = " HTTP header"
 
-            elif settings.CUSTOM_HEADER_INJECTION == True: 
+            elif settings.CUSTOM_HEADER_INJECTION == True:
               header_name = settings.SINGLE_WHITESPACE + settings.CUSTOM_HEADER_NAME
               found_vuln_parameter = ""
               the_type = " HTTP header"
 
-            else:    
+            else:
               header_name = ""
               the_type = " parameter"
               if not settings.USER_DEFINED_POST_DATA:
@@ -268,7 +268,7 @@ def eb_injection_handler(url, timesec, filename, http_request_method, injection_
               export_injection_info = logs.add_type_and_technique(export_injection_info, filename, injection_type, technique)
             if vp_flag == True:
               vp_flag = logs.add_parameter(vp_flag, filename, the_type, header_name, http_request_method, vuln_parameter, payload)
-            logs.update_payload(filename, counter, payload) 
+            logs.update_payload(filename, counter, payload)
             counter = counter + 1
 
             if not settings.LOAD_SESSION:
@@ -288,8 +288,8 @@ def eb_injection_handler(url, timesec, filename, http_request_method, injection_
               session_handler.injection_point_importation(url, technique, injection_type, separator, shell[0], vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response=0, timesec=0, how_long=0, output_length=0, is_vulnerable=menu.options.level)
             else:
               whitespace = settings.WHITESPACES[0]
-              settings.LOAD_SESSION = False 
-              
+              settings.LOAD_SESSION = False
+
             # Check for any enumeration options.
             new_line = True
             if settings.ENUMERATION_DONE == True :
@@ -312,7 +312,7 @@ def eb_injection_handler(url, timesec, filename, http_request_method, injection_
             else:
               if menu.enumeration_options():
                 eb_enumeration.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec)
-            
+
             # Check for any system file access options.
             if settings.FILE_ACCESS_DONE == True:
               while True:
@@ -323,7 +323,7 @@ def eb_injection_handler(url, timesec, filename, http_request_method, injection_
                     menu.options.ignore_session = True
                   eb_file_access.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec)
                   break
-                elif file_access_again in settings.CHOICE_NO: 
+                elif file_access_again in settings.CHOICE_NO:
                   break
                 elif file_access_again in settings.CHOICE_QUIT:
                   raise SystemExit()
@@ -368,7 +368,7 @@ def eb_injection_handler(url, timesec, filename, http_request_method, injection_
                       if go_back and go_back_again == False:
                         break
                       if go_back and go_back_again:
-                        return True 
+                        return True
                     else:
                       # The main command injection exploitation.
                       time.sleep(timesec)
@@ -399,25 +399,25 @@ def eb_injection_handler(url, timesec, filename, http_request_method, injection_
                     break
                   else:
                     if no_result == True:
-                      return False 
+                      return False
                     else:
-                      return True  
+                      return True
                 elif gotshell in settings.CHOICE_QUIT:
                   raise SystemExit()
                 else:
-                  common.invalid_option(gotshell)  
+                  common.invalid_option(gotshell)
                   pass
 
             except (KeyboardInterrupt, SystemExit):
               raise
-              
+
             except EOFError:
               if settings.STDIN_PARSING:
                 print(settings.SINGLE_WHITESPACE)
               err_msg = "Exiting, due to EOFError."
               print(settings.print_error_msg(err_msg))
-              raise  
-              
+              raise
+
   if no_result == True:
     if settings.VERBOSITY_LEVEL == 0:
       print(settings.SINGLE_WHITESPACE)
@@ -425,7 +425,7 @@ def eb_injection_handler(url, timesec, filename, http_request_method, injection_
   else :
     sys.stdout.write("\r")
     sys.stdout.flush()
-    
+
 """
 The exploitation function.
 (call the injection handler)

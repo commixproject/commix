@@ -35,14 +35,14 @@ def logfile_parser():
   def multi_requests():
     print(settings.SINGLE_WHITESPACE)
     err_msg = "Multiple"
-    if menu.options.requestfile: 
+    if menu.options.requestfile:
       err_msg += " requests"
-    elif menu.options.logfile: 
+    elif menu.options.logfile:
       err_msg += " targets"
     err_msg += " are not supported, thus all coming"
-    if menu.options.requestfile: 
+    if menu.options.requestfile:
       err_msg += " requests "
-    elif menu.options.logfile: 
+    elif menu.options.logfile:
       err_msg += " targets "
     err_msg += "will be ignored."
     sys.stdout.write(settings.print_critical_msg(err_msg) + "\n")
@@ -64,10 +64,10 @@ def logfile_parser():
   if menu.options.requestfile:
     info_msg = "Parsing HTTP request "
     request_file = menu.options.requestfile
-  elif menu.options.logfile: 
+  elif menu.options.logfile:
     info_msg = "Parsing target "
     request_file = menu.options.logfile
-    
+
   if not os.path.exists(request_file):
     print(settings.SINGLE_WHITESPACE)
     err_msg = "It seems that the '" + request_file + "' file, does not exist."
@@ -90,7 +90,7 @@ def logfile_parser():
           request = file.read()
       else:
         invalid_data(request_file)
-        
+
     except IOError as err_msg:
       error_msg = "The '" + request_file + "' "
       error_msg += str(err_msg.args[1]).lower() + "."
@@ -123,15 +123,15 @@ def logfile_parser():
             if checks.is_XML_check(item):
               multiple_xml.append(item)
           if len(multiple_xml) != 0:
-            menu.options.data = '\n'.join([str(item) for item in multiple_xml]) 
-          else:  
+            menu.options.data = '\n'.join([str(item) for item in multiple_xml])
+          else:
             menu.options.data = result[len(result)-1]
         else:
           # Check if url ends with "=".
           if request_url[0].endswith("="):
             request_url = request_url[0].replace("=","=" + settings.INJECT_TAG, 1)
       except IndexError:
-        invalid_data(request_file) 
+        invalid_data(request_file)
 
     # Check if invalid data
     else:
@@ -175,19 +175,19 @@ def logfile_parser():
         match = match.replace("('","")
         match = match.replace("')","\\n")
         # Ignore some header.
-        if "Content-Length" or "Accept-Encoding" in match: 
+        if "Content-Length" or "Accept-Encoding" in match:
           extra_headers = extra_headers
         else:
           extra_headers = extra_headers + match
-   
-    # Extra headers   
+
+    # Extra headers
     menu.options.headers = extra_headers
-    # Target URL  
+    # Target URL
     if not menu.options.host:
       invalid_data(request_file)
     else:
       if len(_urllib.parse.urlparse(request_url).scheme) == 0:
-        request_url = scheme + request_url 
+        request_url = scheme + request_url
       if not menu.options.host in request_url:
         request_url = request_url.replace(scheme, scheme + menu.options.host)
       request_url = checks.check_http_s(request_url)

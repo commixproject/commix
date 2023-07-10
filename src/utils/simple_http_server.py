@@ -87,7 +87,7 @@ class Handler(_BaseHTTPServer.BaseHTTPRequestHandler):
     def do_GET(self):
       try:
         #Open the static file requested and send it
-        f = open(self.path) 
+        f = open(self.path)
         self.send_response(_http_client.OK)
         self.send_header(settings.CONNECTION, "close")
         self.end_headers()

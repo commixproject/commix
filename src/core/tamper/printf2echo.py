@@ -32,4 +32,4 @@ def tamper(payload):
 
   return printf_to_echo(payload)
 
-# eof 
+# eof

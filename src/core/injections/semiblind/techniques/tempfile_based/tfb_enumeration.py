@@ -143,7 +143,7 @@ def check_current_user_privs(separator, maxlen, TAG, cmd, prefix, suffix, whites
   else:
     shell = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
   checks.print_current_user_privs(shell, filename, _)
-    
+
 """
 System users enumeration
 """
@@ -181,7 +181,7 @@ def system_passwords(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, ti
     _ = True
     if output == False:
       output = ""
-    session_handler.store_cmd(url, cmd, output, vuln_parameter)  
+    session_handler.store_cmd(url, cmd, output, vuln_parameter)
   else:
     output = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
   sys_passes = output
@@ -211,8 +211,8 @@ def do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, h
   def reset():
     if settings.ENUMERATION_DONE:
       settings.ENUMERATION_DONE = False
-  
-  reset()  
+
+  reset()
   if menu.options.ps_version and settings.PS_ENABLED == None:
     if not checks.ps_incompatible_os():
       if settings.ENUMERATION_DONE:

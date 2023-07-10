@@ -9,7 +9,7 @@ This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
- 
+
 For more see the file 'readme/COPYING' for copying permission.
 """
 
@@ -40,10 +40,10 @@ def file_write(separator, TAG, prefix, suffix, whitespace, http_request_method, 
     fname, tmp_fname, cmd = checks.find_filename(dest_to_write, content)
     response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
     cmd = checks.win_decode_b64_enc(fname, tmp_fname)
-    response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)	
+    response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
     cb_injector.injection_results(response, TAG, cmd)
     cmd = checks.delete_tmp(tmp_fname)
-    response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)	
+    response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
     cb_injector.injection_results(response, TAG, cmd)
   else:
     cmd = checks.write_content(content, dest_to_write)
@@ -78,7 +78,7 @@ def file_upload(separator, TAG, prefix, suffix, whitespace, http_request_method,
 Read a file from the target host.
 """
 def file_read(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec):
-  cmd, file_to_read = checks.file_content_to_read() 
+  cmd, file_to_read = checks.file_content_to_read()
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
     response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
     if settings.URL_RELOAD:
@@ -108,6 +108,6 @@ def do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, ur
 
   if menu.options.file_read:
     file_read(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec)
-    settings.FILE_ACCESS_DONE = True 
+    settings.FILE_ACCESS_DONE = True
 
 # eof
