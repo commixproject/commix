@@ -41,5 +41,5 @@ def tamper(payload):
       return add_slash2env(payload)
   else:
     return payload
-  
-# eof 
+
+# eof

@@ -9,7 +9,7 @@ This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
- 
+
 For more see the file 'readme/COPYING' for copying permission.
 """
 import re
@@ -49,13 +49,13 @@ def set_crawling_depth():
     message = "Do you want to change the crawling depth level (" + str(menu.options.crawldepth) + ")? [y/N] > "
     message = common.read_input(message, default="N", check_batch=True)
     if message in settings.CHOICE_YES or message in settings.CHOICE_NO:
-      break  
+      break
     elif message in settings.CHOICE_QUIT:
       raise SystemExit()
     else:
-      common.invalid_option(message)  
+      common.invalid_option(message)
       pass
-      
+
   # Change the crawling depth level.
   if message in settings.CHOICE_YES:
     while True:
@@ -94,7 +94,7 @@ def normalize_results(output_href):
     elif message in settings.CHOICE_QUIT:
       raise SystemExit()
     else:
-      common.invalid_option(message)  
+      common.invalid_option(message)
       pass
 
 
@@ -119,8 +119,8 @@ def store_crawling(output_href):
     elif message in settings.CHOICE_QUIT:
       raise SystemExit()
     else:
-      common.invalid_option(message)  
-      pass  
+      common.invalid_option(message)
+      pass
 
 
 """
@@ -152,7 +152,7 @@ def sitemap(url):
           elif message in settings.CHOICE_QUIT:
             raise SystemExit()
           else:
-            common.invalid_option(message)  
+            common.invalid_option(message)
             pass
     no_usable_links(sitemap_loc)
     return sitemap_loc
@@ -193,13 +193,13 @@ def enable_crawler():
       message = common.read_input(message, default="N", check_batch=True)
       if message in settings.CHOICE_YES:
         menu.options.crawldepth = 1
-        break  
+        break
       if message in settings.CHOICE_NO:
-        break  
+        break
       elif message in settings.CHOICE_QUIT:
         raise SystemExit()
       else:
-        common.invalid_option(message)  
+        common.invalid_option(message)
         pass
     set_crawling_depth()
 
@@ -220,7 +220,7 @@ def check_sitemap():
     elif message in settings.CHOICE_QUIT:
       raise SystemExit()
     else:
-      common.invalid_option(message)  
+      common.invalid_option(message)
       pass
 
 """
@@ -304,7 +304,7 @@ def crawler(url, url_num, crawling_list):
         settings.DEFAULT_CRAWLING_DEPTH = 1
       while settings.DEFAULT_CRAWLING_DEPTH <= int(menu.options.crawldepth):
         info_msg = "Searching for usable "
-        info_msg += "links with depth " + str(settings.DEFAULT_CRAWLING_DEPTH) + "." 
+        info_msg += "links with depth " + str(settings.DEFAULT_CRAWLING_DEPTH) + "."
         print(settings.print_info_msg(info_msg))
         if settings.DEFAULT_CRAWLING_DEPTH == 2:
           output_href = new_crawled_hrefs
@@ -312,11 +312,11 @@ def crawler(url, url_num, crawling_list):
           output_href = new_crawled_hrefs + crawled_hrefs
         try:
           [output_href.remove(x) for x in visited_hrefs if x in output_href]
-        except TypeError: 
+        except TypeError:
           pass
         link = 0
         if output_href is not None:
-          for url in output_href: 
+          for url in output_href:
             if url not in visited_hrefs and url is not None:
               link += 1
               settings.CRAWLED_URLS_NUM = link
@@ -325,7 +325,7 @@ def crawler(url, url_num, crawling_list):
               visited_hrefs.append(url)
               do_process(url)
               info_msg = str(link)
-              info_msg += "/" + str(len(output_href)) + " links visited." 
+              info_msg += "/" + str(len(output_href)) + " links visited."
               sys.stdout.write("\r" + settings.print_info_msg(info_msg))
               sys.stdout.flush()
         if link != 0:

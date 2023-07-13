@@ -41,12 +41,12 @@ def purge():
     print(settings.print_warning_msg(warn_msg))
     return
   info_msg = "Purging content of directory '" + directory + "'"
-  if not settings.VERBOSITY_LEVEL != 0: 
+  if not settings.VERBOSITY_LEVEL != 0:
     info_msg += "."
   else:
-     info_msg += ".\n" 
+     info_msg += ".\n"
   sys.stdout.write(settings.print_info_msg(info_msg))
-  sys.stdout.flush()  
+  sys.stdout.flush()
 
   # Purging content of target directory.
   dir_paths = []
@@ -59,7 +59,7 @@ def purge():
   if settings.VERBOSITY_LEVEL != 0:
     debug_msg = "Changing file attributes."
     sys.stdout.write(settings.print_debug_msg(debug_msg))
-    sys.stdout.flush() 
+    sys.stdout.flush()
   failed = False
   for file_path in file_paths:
     try:
@@ -67,8 +67,8 @@ def purge():
     except:
       failed = True
       pass
-  if settings.VERBOSITY_LEVEL != 0:    
-    if not failed:  
+  if settings.VERBOSITY_LEVEL != 0:
+    if not failed:
       print(settings.SINGLE_WHITESPACE)
     else:
       print(settings.SINGLE_WHITESPACE)
@@ -77,7 +77,7 @@ def purge():
   if settings.VERBOSITY_LEVEL != 0:
     debug_msg = "Writing random data to files. "
     sys.stdout.write(settings.print_debug_msg(debug_msg))
-    sys.stdout.flush() 
+    sys.stdout.flush()
   failed = False
   for file_path in file_paths:
     try:
@@ -87,8 +87,8 @@ def purge():
     except:
       failed = True
       pass
-  if settings.VERBOSITY_LEVEL != 0:    
-    if not failed:  
+  if settings.VERBOSITY_LEVEL != 0:
+    if not failed:
       print(settings.SINGLE_WHITESPACE)
     else:
       print(settings.SINGLE_WHITESPACE)
@@ -97,7 +97,7 @@ def purge():
   if settings.VERBOSITY_LEVEL != 0:
     debug_msg = "Truncating files."
     sys.stdout.write(settings.print_debug_msg(debug_msg))
-    sys.stdout.flush() 
+    sys.stdout.flush()
   failed = False
   for file_path in file_paths:
     try:
@@ -106,8 +106,8 @@ def purge():
     except:
       failed = True
       pass
-  if settings.VERBOSITY_LEVEL != 0:    
-    if not failed:  
+  if settings.VERBOSITY_LEVEL != 0:
+    if not failed:
       print(settings.SINGLE_WHITESPACE)
     else:
       print(settings.SINGLE_WHITESPACE)
@@ -116,7 +116,7 @@ def purge():
   if settings.VERBOSITY_LEVEL != 0:
     debug_msg = "Renaming filenames to random values."
     sys.stdout.write(settings.print_debug_msg(debug_msg))
-    sys.stdout.flush() 
+    sys.stdout.flush()
   failed = False
   for file_path in file_paths:
     try:
@@ -124,8 +124,8 @@ def purge():
     except:
       failed = True
       pass
-  if settings.VERBOSITY_LEVEL != 0:    
-    if not failed:  
+  if settings.VERBOSITY_LEVEL != 0:
+    if not failed:
       print(settings.SINGLE_WHITESPACE)
     else:
       print(settings.SINGLE_WHITESPACE)
@@ -134,7 +134,7 @@ def purge():
   if settings.VERBOSITY_LEVEL != 0:
     debug_msg = "Renaming directory names to random values."
     sys.stdout.write(settings.print_debug_msg(debug_msg))
-    sys.stdout.flush() 
+    sys.stdout.flush()
   failed = False
   dir_paths.sort(key=functools.cmp_to_key(lambda x, y: y.count(os.path.sep) - x.count(os.path.sep)))
   for dir_path in dir_paths:
@@ -143,13 +143,13 @@ def purge():
     except:
       failed = True
       pass
-  if settings.VERBOSITY_LEVEL != 0:    
-    if not failed:  
+  if settings.VERBOSITY_LEVEL != 0:
+    if not failed:
       print(settings.SINGLE_WHITESPACE)
     else:
       print(settings.SINGLE_WHITESPACE)
 
-  # Deleting the whole directory tree. 
+  # Deleting the whole directory tree.
   if settings.VERBOSITY_LEVEL != 0:
     debug_msg = "Deleting the whole directory tree."
     sys.stdout.write(settings.print_debug_msg(debug_msg))
@@ -158,11 +158,11 @@ def purge():
     os.chdir(os.path.join(directory, ".."))
     shutil.rmtree(directory)
   except OSError as ex:
-    failed = True  
-  if not failed:  
+    failed = True
+  if not failed:
     print(settings.SINGLE_WHITESPACE)
   else:
-    print(settings.SINGLE_WHITESPACE)    
+    print(settings.SINGLE_WHITESPACE)
     err_msg = "Problem occurred while removing directory '" + directory + "'."
     print(settings.print_critical_msg(err_msg))
 

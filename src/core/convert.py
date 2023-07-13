@@ -15,7 +15,7 @@ For more see the file 'readme/COPYING' for copying permission.
 
 import codecs
 import binascii
-from src.utils import settings 
+from src.utils import settings
 from src.thirdparty import six
 
 """

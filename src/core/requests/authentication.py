@@ -9,7 +9,7 @@ This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
- 
+
 For more see the file 'readme/COPYING' for copying permission.
 """
 
@@ -52,7 +52,7 @@ def authentication_process():
     if len(cookies) != 0 :
       menu.options.cookie = cookies.rstrip()
       if settings.VERBOSITY_LEVEL != 0:
-        info_msg = "The received cookie is "  
+        info_msg = "The received cookie is "
         info_msg += str(menu.options.cookie) + Style.RESET_ALL + "."
         print(settings.print_bold_info_msg(info_msg))
     _urllib.request.install_opener(opener)
@@ -61,12 +61,12 @@ def authentication_process():
     headers.do_check(request)
     # Get the response of the request.
     return _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
-    
+
   except Exception as err_msg:
     checks.connection_exceptions(err_msg)
 
 """
-Define the HTTP authentication 
+Define the HTTP authentication
 wordlists for usernames / passwords.
 """
 def define_wordlists():
@@ -89,7 +89,7 @@ def define_wordlists():
     elif do_update in settings.CHOICE_QUIT:
       raise SystemExit()
     else:
-      common.invalid_option(do_update)  
+      common.invalid_option(do_update)
       pass
 
   try:
@@ -100,16 +100,16 @@ def define_wordlists():
     if not os.path.isfile(username_txt_file):
       err_msg = "The specified file '" + str(username_txt_file) + "' does not exist."
       print(settings.print_critical_msg(err_msg))
-      raise SystemExit() 
+      raise SystemExit()
     if len(username_txt_file) == 0:
       err_msg = "The specified file '" + str(username_txt_file) + "' seems empty."
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
-    with open(username_txt_file, "r") as f: 
+    with open(username_txt_file, "r") as f:
       for line in f:
         line = line.strip()
         usernames.append(line)
-  except IOError: 
+  except IOError:
     err_msg = " Check if file '" + str(username_txt_file) + "' is readable or corrupted."
     print(settings.print_critical_msg(err_msg))
     raise SystemExit()
@@ -122,16 +122,16 @@ def define_wordlists():
     if not os.path.isfile(passwords_txt_file):
       err_msg = "The specified file '" + str(passwords_txt_file) + "' does not exist."
       print(settings.print_critical_msg(err_msg))
-      raise SystemExit() 
+      raise SystemExit()
     if len(passwords_txt_file) == 0:
       err_msg = "The specified file '" + str(passwords_txt_file) + "' seems empty."
       print(settings.print_critical_msg(err_msg))
-      raise SystemExit() 
-    with open(passwords_txt_file, "r") as f: 
+      raise SystemExit()
+    with open(passwords_txt_file, "r") as f:
       for line in f:
         line = line.strip()
         passwords.append(line)
-  except IOError: 
+  except IOError:
     err_msg = " Check if file '" + str(passwords_txt_file) + "' is readable or corrupted."
     print(settings.print_critical_msg(err_msg))
     raise SystemExit()
@@ -147,9 +147,9 @@ def http_auth_cracker(url, realm):
     authentication_type = menu.options.auth_type
     # Define the authentication wordlists for usernames / passwords.
     usernames, passwords = define_wordlists()
-    i = 1 
+    i = 1
     found = False
-    total = len(usernames) * len(passwords)   
+    total = len(usernames) * len(passwords)
     for username in usernames:
       for password in passwords:
         float_percent = "{0:.1f}%".format(round(((i*100)/(total*1.0)),2))
@@ -162,10 +162,10 @@ def http_auth_cracker(url, realm):
             sys.stdout.write("\r" + settings.print_checking_msg(payload) + settings.SINGLE_WHITESPACE * 10)
             sys.stdout.flush()
         try:
-          # Basic authentication 
+          # Basic authentication
           if authentication_type.lower() == settings.AUTH_TYPE.BASIC:
             authhandler = _urllib.request.HTTPBasicAuthHandler()
-          # Digest authentication 
+          # Digest authentication
           elif authentication_type.lower() == settings.AUTH_TYPE.DIGEST:
             authhandler = _urllib.request.HTTPDigestAuthHandler()
           authhandler.add_password(realm, url, username, password)
@@ -177,16 +177,16 @@ def http_auth_cracker(url, realm):
           # Check if defined any HTTP Proxy (--proxy option).
           if menu.options.proxy:
             proxy.use_proxy(request)
-          # Check if defined Tor (--tor option).  
+          # Check if defined Tor (--tor option).
           elif menu.options.tor:
             tor.use_tor(request)
           response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
           # Store valid results to session
-          admin_panel = url 
+          admin_panel = url
           session_handler.import_valid_credentials(url, authentication_type, admin_panel, username, password)
           found = True
         except KeyboardInterrupt :
-          raise 
+          raise
         except (_urllib.error.HTTPError, _urllib.error.URLError):
           pass
         if found:
@@ -196,11 +196,11 @@ def http_auth_cracker(url, realm):
           if str(float_percent) == "100.0%":
             if settings.VERBOSITY_LEVEL == 0:
               float_percent = settings.FAIL_STATUS
-          else:  
+          else:
             i = i + 1
             float_percent = ".. (" + float_percent + ")"
         if settings.VERBOSITY_LEVEL == 0:
-          info_msg = "Checking for valid pair of HTTP authentication credentials." 
+          info_msg = "Checking for valid pair of HTTP authentication credentials."
           info_msg += float_percent
           sys.stdout.write("\r\r" + settings.print_info_msg(info_msg))
           sys.stdout.flush()
@@ -208,16 +208,16 @@ def http_auth_cracker(url, realm):
           valid_pair =  "" + username + ":" + password + ""
           if not settings.VERBOSITY_LEVEL >= 2:
             print(settings.SINGLE_WHITESPACE)
-          info_msg = "Identified valid pair of HTTP authentication credentials: '" 
-          info_msg += valid_pair + Style.RESET_ALL + Style.BRIGHT  + "'."  
+          info_msg = "Identified valid pair of HTTP authentication credentials: '"
+          info_msg += valid_pair + Style.RESET_ALL + Style.BRIGHT  + "'."
           print(settings.print_bold_info_msg(info_msg))
           return valid_pair
 
-    err_msg = "Use the '--auth-cred' option to provide a valid pair of " 
-    err_msg += "HTTP authentication credentials (i.e --auth-cred=\"admin:admin\") " 
-    err_msg += "or place an other dictionary into '" 
+    err_msg = "Use the '--auth-cred' option to provide a valid pair of "
+    err_msg += "HTTP authentication credentials (i.e --auth-cred=\"admin:admin\") "
+    err_msg += "or place an other dictionary into '"
     err_msg += os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'txt')) + "/' directory."
-    print("\n" + settings.print_critical_msg(err_msg))  
-    return False  
+    print("\n" + settings.print_critical_msg(err_msg))
+    return False
 
 # eof

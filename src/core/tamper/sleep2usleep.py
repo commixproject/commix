@@ -38,8 +38,8 @@ def tamper(payload):
       if match.group(0).split(settings.WHITESPACES[0])[1] != "0":
         usleep_delay = match.group(0).split(settings.WHITESPACES[0])[1] + "0" * 6
       else:
-        usleep_delay = match.group(0).split(settings.WHITESPACES[0])[1]  
-      payload = payload.replace(match.group(0), sleep_to_usleep + settings.WHITESPACES[0] + usleep_delay) 
+        usleep_delay = match.group(0).split(settings.WHITESPACES[0])[1]
+      payload = payload.replace(match.group(0), sleep_to_usleep + settings.WHITESPACES[0] + usleep_delay)
     return payload
 
   if settings.TARGET_OS != settings.OS.WINDOWS:
@@ -56,5 +56,5 @@ def tamper(payload):
         return sleep_to_usleep(payload)
   else:
     return payload
-  
-# eof 
+
+# eof

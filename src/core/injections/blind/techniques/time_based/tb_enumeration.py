@@ -9,7 +9,7 @@ This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
- 
+
 For more see the file 'readme/COPYING' for copying permission.
 """
 
@@ -31,7 +31,7 @@ The "time-based" injection technique on Blind OS Command Injection.
 """
 Powershell's version number enumeration (for Windows OS)
 """
-def powershell_version(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response): 
+def powershell_version(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response):
   _ = False
   cmd = settings.PS_VERSION
   # if alter_shell:
@@ -45,7 +45,7 @@ def powershell_version(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, 
     output = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
   ps_version = output
   checks.print_ps_version(ps_version, filename, _)
-    
+
 """
 Hostname enumeration
 """
@@ -65,10 +65,10 @@ def hostname(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, h
 Retrieve system information
 """
 def system_information(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response):
-  _ = False  
+  _ = False
   if settings.TARGET_OS == settings.OS.WINDOWS:
     settings.RECOGNISE_OS = settings.WIN_RECOGNISE_OS
-  cmd = settings.RECOGNISE_OS        
+  cmd = settings.RECOGNISE_OS
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
     # The main command injection exploitation.
     check_how_long, output = tb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
@@ -131,8 +131,8 @@ def check_current_user_privs(separator, maxlen, TAG, cmd, prefix, suffix, whites
   _ = False
   if settings.TARGET_OS == settings.OS.WINDOWS:
     cmd = settings.IS_ADMIN
-  else:  
-    cmd = settings.IS_ROOT 
+  else:
+    cmd = settings.IS_ROOT
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
     check_how_long, shell = tb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
     session_handler.store_cmd(url, cmd, shell, vuln_parameter)
@@ -146,7 +146,7 @@ System users enumeration
 """
 def system_users(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response):
   _ = False
-  cmd = settings.SYS_USERS  
+  cmd = settings.SYS_USERS
   if settings.TARGET_OS == settings.OS.WINDOWS:
     cmd = settings.WIN_SYS_USERS
     cmd = cmd + settings.WIN_REPLACE_WHITESPACE
@@ -161,7 +161,7 @@ def system_users(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timese
       output = ""
   else:
     output = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
-  sys_users = output 
+  sys_users = output
   checks.print_users(sys_users, filename, _, separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell)
 
 """
@@ -169,16 +169,16 @@ System passwords enumeration
 """
 def system_passwords(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response):
   _ = False
-  cmd = settings.SYS_PASSES           
+  cmd = settings.SYS_PASSES
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
     check_how_long, output = tb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
     _ = True
     if output == False:
       output = ""
-    session_handler.store_cmd(url, cmd, output, vuln_parameter)  
+    session_handler.store_cmd(url, cmd, output, vuln_parameter)
   else:
     output = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
-  sys_passes = output 
+  sys_passes = output
   checks.print_passes(sys_passes, filename, _, alter_shell)
 
 """
@@ -195,7 +195,7 @@ def single_os_cmd_exec(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, 
   else:
     output = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
     check_how_long = 0
-  checks.print_single_os_cmd(cmd, output) 
+  checks.print_single_os_cmd(cmd, output)
   return check_how_long, output
 
 """
@@ -205,7 +205,7 @@ def do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, h
   def reset():
     if settings.ENUMERATION_DONE:
       settings.ENUMERATION_DONE = False
-  
+
   reset()
   if menu.options.ps_version and settings.PS_ENABLED == None:
     if not checks.ps_incompatible_os():
@@ -222,7 +222,7 @@ def do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, h
     hostname(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
     reset()
 
-  if menu.options.current_user: 
+  if menu.options.current_user:
     if settings.ENUMERATION_DONE:
       print(settings.SINGLE_WHITESPACE)
     checks.print_enumenation().current_user_msg()

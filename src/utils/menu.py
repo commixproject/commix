@@ -30,10 +30,10 @@ if settings.IS_WINDOWS:
 The commix's banner.
 """
 def banner():
-  print("""                                      __           
-   ___   ___     ___ ___     ___ ___ /\_\   __  _   
+  print("""                                      __
+   ___   ___     ___ ___     ___ ___ /\_\   __  _
  /`___\ / __`\ /' __` __`\ /' __` __`\/\ \ /\ \/'\  """ + settings.COLOR_VERSION + """
-/\ \__//\ \/\ \/\ \/\ \/\ \/\ \/\ \/\ \ \ \\\/>  </  
+/\ \__//\ \/\ \/\ \/\ \/\ \/\ \/\ \/\ \ \ \\\/>  </
 \ \____\ \____/\ \_\ \_\ \_\ \_\ \_\ \_\ \_\\/\_/\\_\\ """ + Fore.GREY + Style.UNDERLINE + settings.APPLICATION_URL + Style.RESET_ALL + """
  \/____/\/___/  \/_/\/_/\/_/\/_/\/_/\/_/\/_/\//\/_/ (""" + Fore.LIGHTRED_EX + settings.APPLICATION_TWITTER + Style.RESET_ALL + """)
 
@@ -50,7 +50,7 @@ usage = "python %prog [option(s)]"
 parser = OptionParser(usage=usage)
 
 # General options
-general = OptionGroup(parser, Style.BRIGHT + Style.UNDERLINE + "General" + Style.RESET_ALL, 
+general = OptionGroup(parser, Style.BRIGHT + Style.UNDERLINE + "General" + Style.RESET_ALL,
                         "These options relate to general matters. ")
 
 general.add_option("-v",
@@ -71,17 +71,17 @@ general.add_option("--version",
                 dest="version",
                 help="Show version number and exit.")
 
-general.add_option("--update", 
+general.add_option("--update",
                 action="store_true",
                 dest="update",
                 help="Check for updates (apply if any) and exit.")
 
-general.add_option("--output-dir", 
+general.add_option("--output-dir",
                 action="store",
                 dest="output_dir",
                 help="Set custom output directory path.")
 
-general.add_option("-s", 
+general.add_option("-s",
                 action="store",
                 dest="session_file",
                 default=None,
@@ -92,7 +92,7 @@ general.add_option("--flush-session",
                 dest="flush_session",
                 help="Flush session files for current target.")
 
-general.add_option("--ignore-session", 
+general.add_option("--ignore-session",
                 action="store_true",
                 dest="ignore_session",
                 help="Ignore results stored in session file.")
@@ -127,24 +127,24 @@ general.add_option("--charset",
                 default=None,
                 help="Time-related injection charset (e.g. \"0123456789abcdef\")")
 
-general.add_option("--check-internet", 
+general.add_option("--check-internet",
                 action="store_true",
                 dest="check_internet",
                 help="Check internet connection before assessing the target.")
 
-general.add_option("--answers", 
+general.add_option("--answers",
                 dest="answers",
                 help="Set predefined answers (e.g. \"quit=N,follow=N\")")
 
 # Target options
-target = OptionGroup(parser, Style.BRIGHT + Style.UNDERLINE + "Target" + Style.RESET_ALL, 
+target = OptionGroup(parser, Style.BRIGHT + Style.UNDERLINE + "Target" + Style.RESET_ALL,
                      "This options has to be provided, to define the target URL. ")
 
 target.add_option("-u","--url",
                 action="store",
                 dest="url",
                 help="Target URL.")
-                
+
 target.add_option("--url-reload",
                 action="store_true",
                 dest="url_reload",
@@ -183,11 +183,11 @@ target.add_option("--method",
                 help="Force usage of given HTTP method (e.g. PUT)")
 
 # Request options
-request = OptionGroup(parser,  Style.BRIGHT + Style.UNDERLINE + "Request" + Style.RESET_ALL, 
+request = OptionGroup(parser,  Style.BRIGHT + Style.UNDERLINE + "Request" + Style.RESET_ALL,
                       "These options can be used to specify how to connect to the target URL.")
 
 
-request.add_option("-d", "--data", 
+request.add_option("-d", "--data",
                 action="store",
                 dest="data",
                 default=False,
@@ -245,7 +245,7 @@ request.add_option("--proxy",
                 dest="proxy",
                 default=False,
                 help="Use a proxy to connect to the target URL.")
-                
+
 request.add_option("--tor",
                 action="store_true",
                 dest="tor",
@@ -323,105 +323,105 @@ request.add_option("--drop-set-cookie",
                 help="Ignore Set-Cookie header from response.")
 
 # Enumeration options
-enumeration = OptionGroup(parser, Style.BRIGHT + Style.UNDERLINE + "Enumeration" + Style.RESET_ALL, 
+enumeration = OptionGroup(parser, Style.BRIGHT + Style.UNDERLINE + "Enumeration" + Style.RESET_ALL,
                         "These options can be used to enumerate the target host.")
 
-enumeration.add_option("--all", 
+enumeration.add_option("--all",
                 action="store_true",
                 dest="enum_all",
                 default=False,
                 help="Retrieve everything.")
 
-enumeration.add_option("--current-user", 
+enumeration.add_option("--current-user",
                 action="store_true",
                 dest="current_user",
                 default=False,
                 help="Retrieve current user name.")
 
-enumeration.add_option("--hostname", 
+enumeration.add_option("--hostname",
                 action="store_true",
                 dest="hostname",
                 default=False,
                 help="Retrieve current hostname.")
 
-enumeration.add_option("--is-root", 
+enumeration.add_option("--is-root",
                 action="store_true",
                 dest="is_root",
                 default=False,
                 help="Check if the current user have root privileges.")
 
-enumeration.add_option("--is-admin", 
+enumeration.add_option("--is-admin",
                 action="store_true",
                 dest="is_admin",
                 default=False,
                 help="Check if the current user have admin privileges.")
 
-enumeration.add_option("--sys-info", 
+enumeration.add_option("--sys-info",
                 action="store_true",
                 dest="sys_info",
                 default=False,
                 help="Retrieve system information.")
 
-enumeration.add_option("--users", 
+enumeration.add_option("--users",
                 action="store_true",
                 dest="users",
                 default=False,
                 help="Retrieve system users.")
 
-enumeration.add_option("--passwords", 
+enumeration.add_option("--passwords",
                 action="store_true",
                 dest="passwords",
                 default=False,
                 help="Retrieve system users password hashes.")
 
-enumeration.add_option("--privileges", 
+enumeration.add_option("--privileges",
                 action="store_true",
                 dest="privileges",
                 default=False,
                 help="Retrieve system users privileges.")
 
-enumeration.add_option("--ps-version", 
+enumeration.add_option("--ps-version",
                 action="store_true",
                 dest="ps_version",
                 default=False,
                 help="Retrieve PowerShell's version number.")
 
 # File access options
-file_access = OptionGroup(parser, Style.BRIGHT + Style.UNDERLINE + "File access" + Style.RESET_ALL, 
+file_access = OptionGroup(parser, Style.BRIGHT + Style.UNDERLINE + "File access" + Style.RESET_ALL,
                         "These options can be used to access files on the target host.")
 
-file_access.add_option("--file-read", 
+file_access.add_option("--file-read",
                 action="store",
                 dest="file_read",
                 help="Read a file from the target host.")
 
-file_access.add_option("--file-write", 
+file_access.add_option("--file-write",
                 action="store",
                 dest="file_write",
                 help="Write to a file on the target host.")
 
-file_access.add_option("--file-upload", 
+file_access.add_option("--file-upload",
                 action="store",
                 dest="file_upload",
                 help="Upload a file on the target host.")
 
-file_access.add_option("--file-dest", 
+file_access.add_option("--file-dest",
                 action="store",
                 dest="file_dest",
                 help="Host's absolute filepath to write and/or upload to.")
 
 # Modules options
-modules = OptionGroup(parser, Style.BRIGHT + Style.UNDERLINE + "Modules" + Style.RESET_ALL, 
+modules = OptionGroup(parser, Style.BRIGHT + Style.UNDERLINE + "Modules" + Style.RESET_ALL,
                         "These options can be used increase the detection and/or injection capabilities.")
 
-modules.add_option("--shellshock", 
+modules.add_option("--shellshock",
                 action="store_true",
                 dest="shellshock",
                 default=False,
                 help="The 'shellshock' injection module.")
 
 # Injection options
-injection = OptionGroup(parser, Style.BRIGHT + Style.UNDERLINE + "Injection" + Style.RESET_ALL, 
+injection = OptionGroup(parser, Style.BRIGHT + Style.UNDERLINE + "Injection" + Style.RESET_ALL,
                         "These options can be used to specify which parameters to inject and to provide custom injection payloads.")
 
 injection.add_option("-p",
@@ -429,39 +429,39 @@ injection.add_option("-p",
                 dest="test_parameter",
                 help="Testable parameter(s).")
 
-injection.add_option("--skip", 
+injection.add_option("--skip",
                 action="store",
                 dest="skip_parameter",
                 help="Skip testing for given parameter(s).")
 
-injection.add_option("--suffix", 
+injection.add_option("--suffix",
                 action="store",
                 dest="suffix",
                 help="Injection payload suffix string.")
 
-injection.add_option("--prefix", 
+injection.add_option("--prefix",
                 action="store",
                 dest="prefix",
                 help="Injection payload prefix string.")
 
-injection.add_option("--technique", 
+injection.add_option("--technique",
                 action="store",
                 default="",
                 dest="tech",
                 help="Specify injection technique(s) to use.")
 
-injection.add_option("--skip-technique", 
+injection.add_option("--skip-technique",
                 action="store",
                 dest="skip_tech",
                 help="Specify injection technique(s) to skip.")
 
-injection.add_option("--maxlen", 
+injection.add_option("--maxlen",
                 action="store",
                 dest="maxlen",
                 default=settings.MAXLEN,
                 help="Set the max length of output for time-related injection techniques (Default: " + str(settings.MAXLEN) + " chars).")
 
-injection.add_option("--delay", 
+injection.add_option("--delay",
                 default=0,
                 action="store",
                 type="int",
@@ -475,43 +475,43 @@ injection.add_option("--time-sec",
                 dest="timesec",
                 help="Seconds to delay the OS response (Default: 1).")
 
-injection.add_option("--tmp-path", 
+injection.add_option("--tmp-path",
                 action="store",
                 dest="tmp_path",
                 default=False,
                 help="Set the absolute path of web server's temp directory.")
 
-injection.add_option("--web-root", 
+injection.add_option("--web-root",
                 action="store",
                 dest="web_root",
                 default=False,
                 help="Set the web server document root directory (e.g. '/var/www').")
 
-injection.add_option("--alter-shell", 
+injection.add_option("--alter-shell",
                 action="store",
                 dest="alter_shell",
                 default = "",
                 help="Use an alternative os-shell (e.g. 'Python').")
 
-injection.add_option("--os-cmd", 
+injection.add_option("--os-cmd",
                 action="store",
                 dest="os_cmd",
                 default=False,
                 help="Execute a single operating system command.")
 
 injection.add_option("--os",
-                action="store", 
+                action="store",
                 dest="os",
                 default=False,
                 help="Force back-end operating system (e.g. 'Windows' or 'Unix').")
 
-injection.add_option("--tamper", 
+injection.add_option("--tamper",
                 action="store",
                 dest="tamper",
                 default=False,
                 help="Use given script(s) for tampering injection data.")
 
-injection.add_option("--msf-path", 
+injection.add_option("--msf-path",
                 action="store",
                 dest="msf_path",
                 default=False,
@@ -521,25 +521,25 @@ injection.add_option("--msf-path",
 detection = OptionGroup(parser, Style.BRIGHT + Style.UNDERLINE + "Detection" + Style.RESET_ALL, "These options can be "
                         "used to customize the detection phase.")
 
-detection.add_option("--level", 
-                dest="level", 
+detection.add_option("--level",
+                dest="level",
                 type="int",
                 default=1,
                 help="Level of tests to perform (1-3, Default: " + str(settings.DEFAULT_INJECTION_LEVEL) + ").")
 
-detection.add_option("--skip-calc", 
+detection.add_option("--skip-calc",
                 action="store_true",
                 dest="skip_calc",
                 default=False,
                 help="Skip the mathematic calculation during the detection phase.")
 
-detection.add_option("--skip-empty", 
+detection.add_option("--skip-empty",
                 action="store_true",
                 dest="skip_empty",
                 default=False,
                 help="Skip testing the parameter(s) with empty value(s).")
 
-detection.add_option("--failed-tries", 
+detection.add_option("--failed-tries",
                 action="store",
                 type="int",
                 dest="failed_tries",
@@ -549,55 +549,55 @@ detection.add_option("--failed-tries",
 # Miscellaneous options
 misc = OptionGroup(parser, Style.BRIGHT + Style.UNDERLINE + "Miscellaneous" + Style.RESET_ALL)
 
-misc.add_option("--ignore-dependencies", 
+misc.add_option("--ignore-dependencies",
                 action="store_true",
                 dest="ignore_dependencies",
                 default=False,
                 help="Ignore all required third-party library dependencies.")
 
-misc.add_option("--list-tampers", 
+misc.add_option("--list-tampers",
                 action="store_true",
                 dest="list_tampers",
                 default=False,
                 help="Display list of available tamper scripts.")
 
-misc.add_option("--alert", 
+misc.add_option("--alert",
                 action="store",
                 dest="alert",
                 default=False,
                 help="Run host OS command(s) when injection point is found.")
 
-misc.add_option("--no-logging", 
+misc.add_option("--no-logging",
                 action="store_true",
                 dest="no_logging",
                 default=False,
                 help="Disable logging to a file.")
 
-misc.add_option("--purge", 
+misc.add_option("--purge",
                 action="store_true",
                 dest="purge",
                 default=False,
                 help="Safely remove all content from commix data directory.")
 
-misc.add_option("--skip-waf", 
+misc.add_option("--skip-waf",
                 action="store_true",
                 dest="skip_waf",
                 default=False,
                 help="Skip heuristic detection of WAF/IPS/IDS protection.")
 
-misc.add_option("--mobile", 
+misc.add_option("--mobile",
                 action="store_true",
                 dest="mobile",
                 default=False,
                 help="Imitate smartphone through HTTP User-Agent header.")
 
-misc.add_option("--offline", 
+misc.add_option("--offline",
                 action="store_true",
                 dest="offline",
                 default=False,
                 help="Work in offline mode.\n")
 
-misc.add_option("--wizard", 
+misc.add_option("--wizard",
                 action="store_true",
                 dest="wizard",
                 default=False,
@@ -645,7 +645,7 @@ option.help = option.help.capitalize().replace("Show this help message and exit"
 # Checkall the banner
 if not options.version:
     banner()
-    
+
 # argv input errors
 settings.sys_argv_errors()
 
@@ -653,7 +653,7 @@ settings.sys_argv_errors()
 The "os_shell" available options.
 """
 def os_shell_options():
-    print("""""" + Style.BRIGHT + """Available 'os_shell' options:""" + Style.RESET_ALL + """    
+    print("""""" + Style.BRIGHT + """Available 'os_shell' options:""" + Style.RESET_ALL + """
 """ + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """?""" + Style.RESET_ALL + """' to get all the available options.
 """ + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """back""" + Style.RESET_ALL + """' to move back from the current context.
 """ + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """quit""" + Style.RESET_ALL + """' (or use <Ctrl-C>) to quit commix.
@@ -664,7 +664,7 @@ def os_shell_options():
 The "reverse_tcp" available options.
 """
 def reverse_tcp_options():
-    print("""""" + Style.BRIGHT + """Available 'reverse_tcp' options:""" + Style.RESET_ALL + """     
+    print("""""" + Style.BRIGHT + """Available 'reverse_tcp' options:""" + Style.RESET_ALL + """
 """ + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """?""" + Style.RESET_ALL + """' to get all the available options.
 """ + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """set""" + Style.RESET_ALL + """' to set a context-specific variable to a value.
 """ + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """back""" + Style.RESET_ALL + """' to move back from the current context.
@@ -676,7 +676,7 @@ def reverse_tcp_options():
 The "bind_tcp" available options.
 """
 def bind_tcp_options():
-    print("""""" + Style.BRIGHT + """Available 'bind_tcp' options:""" + Style.RESET_ALL + """     
+    print("""""" + Style.BRIGHT + """Available 'bind_tcp' options:""" + Style.RESET_ALL + """
 """ + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """?""" + Style.RESET_ALL + """' to get all the available options.
 """ + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """set""" + Style.RESET_ALL + """' to set a context-specific variable to a value.
 """ + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """back""" + Style.RESET_ALL + """' to move back from the current context.
@@ -688,7 +688,7 @@ def bind_tcp_options():
 The available mobile user agents.
 """
 def mobile_user_agents():
-    print("""""" + Style.BRIGHT + """Available smartphones HTTP User-Agent headers:""" + Style.RESET_ALL + """     
+    print("""""" + Style.BRIGHT + """Available smartphones HTTP User-Agent headers:""" + Style.RESET_ALL + """
 """ + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """1""" + Style.RESET_ALL + """' for BlackBerry Z10.
 """ + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """2""" + Style.RESET_ALL + """' for Samsung Galaxy S7.
 """ + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """3""" + Style.RESET_ALL + """' for HP iPAQ 6365.

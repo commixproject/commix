@@ -46,22 +46,22 @@ SUCCESS_STATUS = "" + info_msg + ""
 # Status Signs
 LEGAL_DISCLAIMER = "(" + Style.BRIGHT + Fore.RED + "!" + Style.RESET_ALL + ") " + "Legal disclaimer: "
 INFO_SIGN = Style.RESET_ALL + "[" + Fore.GREEN + "info" + Style.RESET_ALL + "] "
-INFO_BOLD_SIGN = "[" + Fore.GREEN + Style.BRIGHT + "info" + Style.RESET_ALL + "] " 
+INFO_BOLD_SIGN = "[" + Fore.GREEN + Style.BRIGHT + "info" + Style.RESET_ALL + "] "
 REQUEST_SIGN = Style.RESET_ALL + "[" + Style.BRIGHT + Back.MAGENTA + "traffic" + Style.RESET_ALL + "] "
 RESPONSE_SIGN = Style.RESET_ALL + "[" + Style.BRIGHT + Back.MAGENTA + "traffic" + Style.RESET_ALL + "] "
 QUESTION_SIGN = Style.BRIGHT
-TOTAL_OF_REQUESTS_COLOR = Fore.LIGHTYELLOW_EX 
+TOTAL_OF_REQUESTS_COLOR = Fore.LIGHTYELLOW_EX
 WARNING_SIGN = "[" + Fore.LIGHTYELLOW_EX  + "warning" + Style.RESET_ALL + "] "
 WARNING_BOLD_SIGN = "[" + Style.BRIGHT + Fore.YELLOW  + "warning" + Style.RESET_ALL + "] " + Style.BRIGHT
-ERROR_SIGN = "[" + Fore.RED + "error" + Style.RESET_ALL  + "] " 
-ERROR_BOLD_SIGN = "["  + Style.BRIGHT + Fore.RED + "error" + Style.RESET_ALL  + "] " 
+ERROR_SIGN = "[" + Fore.RED + "error" + Style.RESET_ALL  + "] "
+ERROR_BOLD_SIGN = "["  + Style.BRIGHT + Fore.RED + "error" + Style.RESET_ALL  + "] "
 CRITICAL_SIGN = "[" + Back.RED + "critical" + Style.RESET_ALL  + "] "
-PAYLOAD_SIGN = "[" + Fore.CYAN + "payload" + Style.RESET_ALL + "] " 
+PAYLOAD_SIGN = "[" + Fore.CYAN + "payload" + Style.RESET_ALL + "] "
 SUB_CONTENT_SIGN = " " * 11 + Fore.GREY + "|_ " + Style.RESET_ALL
 SUB_CONTENT_SIGN_TYPE = Fore.LIGHTRED_EX + " * " + Style.RESET_ALL
 TRAFFIC_SIGN = HTTP_CONTENT_SIGN = ""
-ABORTION_SIGN = ERROR_SIGN 
-DEBUG_SIGN = "[" + Back.BLUE + Fore.WHITE + "debug" + Style.RESET_ALL + "] " 
+ABORTION_SIGN = ERROR_SIGN
+DEBUG_SIGN = "[" + Back.BLUE + Fore.WHITE + "debug" + Style.RESET_ALL + "] "
 DEBUG_BOLD_SIGN = "[" + Back.BLUE + Style.BRIGHT + Fore.WHITE + "debug" + Style.RESET_ALL + "] " + Style.BRIGHT
 CHECK_SIGN = DEBUG_SIGN + "Checking pair of HTTP authentication credentials: "
 OS_SHELL_TITLE = Style.BRIGHT + "Pseudo-Terminal Shell (type '?' for available options)" + Style.RESET_ALL
@@ -110,12 +110,12 @@ def print_bold_warning_msg(warn_msg):
 # Print debug message (verbose mode)
 def print_debug_msg(debug_msg):
   result = print_time() + DEBUG_SIGN + debug_msg + Style.RESET_ALL
-  return result  
+  return result
 
 # Print bold debug message (verbose mode)
 def print_bold_debug_msg(debug_msg):
   result = print_time() + DEBUG_BOLD_SIGN + debug_msg + Style.RESET_ALL
-  return result 
+  return result
 
 # Print request HTTP message
 def print_request_msg(req_msg):
@@ -183,7 +183,7 @@ def print_retrieved_data(cmd, retrieved):
 # Print output of command execution
 def command_execution_output(shell):
   result = Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL
-  return result 
+  return result
 
 # argv checks
 def sys_argv_checks():
@@ -252,9 +252,9 @@ else:
   COLOR_VERSION = Style.UNDERLINE + Fore.WHITE + VERSION + Style.RESET_ALL
 
 YEAR = "2014-2023"
-AUTHOR_TWITTER = "@ancst" 
-APPLICATION_URL = "https://commixproject.com" 
-APPLICATION_TWITTER = "@commixproject" 
+AUTHOR_TWITTER = "@ancst"
+APPLICATION_URL = "https://commixproject.com"
+APPLICATION_TWITTER = "@commixproject"
 
 # Default User-Agent
 DEFAULT_USER_AGENT = APPLICATION + "/" + VERSION + " (" + APPLICATION_URL + ")"
@@ -267,16 +267,16 @@ LEGAL_DISCLAIMER_MSG = "Usage of " + APPLICATION + " for attacking targets witho
 # Random string generator
 RANDOM_STRING_GENERATOR = ''.join(random.choice(string.ascii_uppercase + string.digits + string.ascii_lowercase) for _ in range(10))
 
-# Readline 
+# Readline
 READLINE_ERROR = False
 
 # User-supplied operating system command
 USER_SUPPLIED_CMD = ""
 
 # Random Tag
-RANDOM_TAG = "" 
+RANDOM_TAG = ""
 
-if RANDOM_TAG == "" : 
+if RANDOM_TAG == "" :
   RANDOM_TAG = RANDOM_STRING_GENERATOR
 
 # Proxy
@@ -319,14 +319,14 @@ IDENTIFIED_COMMAND_INJECTION = False
 #Basic heuristic checks for code injection warnings or... phpinfo page ;)
 PHPINFO_PAYLOAD = "phpinfo()"
 
-PHP_EXEC_FUNCTIONS = [ "" + PHPINFO_PAYLOAD + "", 
-  "exec(" + PHPINFO_PAYLOAD + ")", 
-  "eval(" + PHPINFO_PAYLOAD + ")", 
-  "system(" + PHPINFO_PAYLOAD + ")" 
+PHP_EXEC_FUNCTIONS = [ "" + PHPINFO_PAYLOAD + "",
+  "exec(" + PHPINFO_PAYLOAD + ")",
+  "eval(" + PHPINFO_PAYLOAD + ")",
+  "system(" + PHPINFO_PAYLOAD + ")"
 ]
 
-PHPINFO_CHECK_PAYLOADS = [ 
-  [".print(" + x + ")" for x in PHP_EXEC_FUNCTIONS], 
+PHPINFO_CHECK_PAYLOADS = [
+  [".print(" + x + ")" for x in PHP_EXEC_FUNCTIONS],
   [")'}" + x + "'#" for x in PHP_EXEC_FUNCTIONS],
   ["'." + x + ".'" for x in PHP_EXEC_FUNCTIONS],
   ["{${" + x + "}}" for x in PHP_EXEC_FUNCTIONS],
@@ -354,10 +354,10 @@ WILDCARD_CHAR = "*"
 WILDCARD_CHAR_APPLIED = False
 POST_WILDCARD_CHAR = ""
 
-# Testable parameter(s) - comma separated. 
+# Testable parameter(s) - comma separated.
 TEST_PARAMETER = ""
 
-# Skip testing for given parameter(s) - comma separated. 
+# Skip testing for given parameter(s) - comma separated.
 SKIP_PARAMETER = ""
 
 # Use a proxy to connect to the target URL.
@@ -397,7 +397,7 @@ TIME_RELATIVE_ATTACK = False
 # Stored applied techniques
 SESSION_APPLIED_TECHNIQUES = ""
 
-# The name of the operating system dependent module imported. 
+# The name of the operating system dependent module imported.
 PLATFORM = os.name
 IS_WINDOWS = PLATFORM == "nt"
 
@@ -413,7 +413,7 @@ ISSUES_PAGE = "https://github.com/commixproject/" + APPLICATION + "/issues/new"
 COMMIX_ROOT_PATH = os.path.abspath(os.curdir)
 
 # Output Directory
-OUTPUT_DIR = ".output/"  
+OUTPUT_DIR = ".output/"
 
 # Output file name
 OUTPUT_FILE_NAME = "logs"
@@ -436,7 +436,7 @@ MAX_CONNECTION_TOTAL_SIZE = 100 * 1024 * 1024
 SLOW_TARGET_RESPONSE = 3
 
 # The testable parameter.
-TESTABLE_PARAMETER = "" 
+TESTABLE_PARAMETER = ""
 
 TESTABLE_VALUE = ""
 
@@ -447,14 +447,14 @@ HTTP_HEADER = ""
 SEPARATORS = []
 DEFAULT_SEPARATORS = ["", ";", "%26", "|"]
 SPECIAL_SEPARATORS = ["%26%26", "||", "%0a", "%0d%0a", "%1a"]
-SEPARATORS_LVL1 = DEFAULT_SEPARATORS + SPECIAL_SEPARATORS  
+SEPARATORS_LVL1 = DEFAULT_SEPARATORS + SPECIAL_SEPARATORS
 SEPARATORS_LVL3 = SEPARATORS_LVL2 = SEPARATORS_LVL1
 
 # The command injection prefixes.
 PREFIXES = []
 PREFIXES_LVL1 = [""]
 PREFIXES_LVL2 = SEPARATORS_LVL1
-PREFIXES_LVL3 = PREFIXES_LVL2 + ["'", "\""] 
+PREFIXES_LVL3 = PREFIXES_LVL2 + ["'", "\""]
 
 # The command injection suffixes.
 SUFFIXES = []
@@ -481,7 +481,7 @@ EVAL_SEPARATORS_LVL3 = EVAL_SEPARATORS_LVL2 + ["%0d%0a"]
 EVAL_PREFIXES = []
 EVAL_PREFIXES_LVL1 = [".", "'.", "{${"]
 EVAL_PREFIXES_LVL2 = EVAL_PREFIXES_LVL1 + [")'}", "');}"]
-EVAL_PREFIXES_LVL3 = EVAL_PREFIXES_LVL2 + ["\".", "')", "\")", ");}", "\");}", ")", ";", "'", ""] 
+EVAL_PREFIXES_LVL3 = EVAL_PREFIXES_LVL2 + ["\".", "')", "\")", ");}", "\");}", ")", ";", "'", ""]
 
 # The code injection suffixes.
 EVAL_SUFFIXES = []
@@ -555,7 +555,7 @@ IS_ADMIN = "powershell.exe -InputFormat none [Security.Principal.WindowsBuiltinR
 RECOGNISE_OS = "uname -s"
 WIN_RECOGNISE_OS = "ver"
 
-# Distribution Description / Release 
+# Distribution Description / Release
 DISTRO_INFO = "echo $(lsb_release -sir)"
 
 # Hardware platform.
@@ -584,8 +584,8 @@ FILE_UPLOAD = "wget "
 # /etc/passwd
 PASSWD_FILE = "/etc/passwd"
 
-SYS_USERS = "awk -F ':' '{print $1}{print $3}{print $6}' " + PASSWD_FILE 
-EVAL_SYS_USERS = "awk -F ':' '{print \$1}{print \$3}{print \$6}' " + PASSWD_FILE 
+SYS_USERS = "awk -F ':' '{print $1}{print $3}{print $6}' " + PASSWD_FILE
+EVAL_SYS_USERS = "awk -F ':' '{print \$1}{print \$3}{print \$6}' " + PASSWD_FILE
 
 # Exports users of localgroup
 WIN_SYS_USERS = "powershell.exe -InputFormat none write-host (([string]$(net user)[4..($(net user).length-3)]))"
@@ -593,7 +593,7 @@ DEFAULT_WIN_USERS = ["Administrator", "DefaultAccount", "Guest"]
 
 # /etc/shadow
 SHADOW_FILE = "/etc/shadow"
-SYS_PASSES = FILE_READ + SHADOW_FILE 
+SYS_PASSES = FILE_READ + SHADOW_FILE
 
 WIN_REPLACE_WHITESPACE = "-replace('\s+',' '))"
 
@@ -643,7 +643,7 @@ USER_AGENT_LIST = [
         "Mozilla/5.0 (X11; U; Linux i686 (x86_64); en-US; rv:1.9.1b3) Gecko/20090315 Firefox/3.1b3",
         "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:21.0) Gecko/20131401 Firefox/31.0",
         "Mozilla/5.0 (Windows NT 5.1) AppleWebKit/534.34 (KHTML, like Gecko) Dooble/1.40 Safari/534.34",
-        # Oldies 
+        # Oldies
         "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0; de) Opera 8.0",
         "Mozilla/4.0 (compatible; MSIE 7.0b; Windows NT 6.0)",
         "Mozilla/4.0 (compatible; MSIE 7.0b; Windows NT 5.1; .NET CLR 1.1.4322; InfoPath.1; .NET CLR 2.0.50727)",
@@ -687,8 +687,8 @@ HOST_INJECTION = None
 
 # Custom HTTP Headers injection
 CUSTOM_HEADER_INJECTION = False
-CUSTOM_HEADER_NAME = "" 
-CUSTOM_HEADER_VALUE = "" 
+CUSTOM_HEADER_NAME = ""
+CUSTOM_HEADER_VALUE = ""
 
 # Valid URL format check
 VALID_URL_FORMAT = "https?://(?:www)?(?:[\w-]{2,255}(?:\.\w{2,6}){1,2})(?:/[\w&%?#-]{1,310})?"
@@ -733,7 +733,7 @@ try:
 except LookupError:
   DEFAULT_PAGE_ENCODING = DEFAULT_CODEC
 
-# Character Sets List. 
+# Character Sets List.
 # A complete list of the standard encodings Python supports.
 ENCODING_LIST = [
   "iso-8859-1",
@@ -871,25 +871,25 @@ SERVER_OS_BANNERS = [
 
 # Extensions skipped by crawler
 CRAWL_EXCLUDE_EXTENSIONS = [
-  "3ds", "3g2", "3gp", "7z", "DS_Store", "a", "aac", "adp", "ai", "aif", "aiff", "apk", "ar", 
-  "asf", "au", "avi", "bak", "bin", "bk", "bmp", "btif", "bz2", "cab", "caf", "cgm", "cmx", "cpio", "cr2", "dat", "deb", 
-  "djvu", "dll", "dmg", "dmp", "dng", "doc", "docx", "dot", "dotx", "dra", "dsk", "dts", "dtshd", "dvb", "dwg", "dxf", 
-  "ear", "ecelp4800", "ecelp7470", "ecelp9600", "egg", "eol", "eot", "epub", "exe", "f4v", "fbs", "fh", "fla", "flac", 
-  "fli", "flv", "fpx", "fst", "fvt", "g3", "gif", "gz", "h261", "h263", "h264", "ico", "ief", "image", "img", "ipa", 
-  "iso", "jar", "jpeg", "jpg", "jpgv", "jpm", "jxr", "ktx", "lvp", "lz", "lzma", "lzo", "m3u", "m4a", "m4v", "mar", 
-  "mdi", "mid", "mj2", "mka", "mkv", "mmr", "mng", "mov", "movie", "mp3", "mp4", "mp4a", "mpeg", "mpg", "mpga", "mxu", 
-  "nef", "npx", "o", "oga", "ogg", "ogv", "otf", "pbm", "pcx", "pdf", "pea", "pgm", "pic", "png", "pnm", "ppm", "pps", 
-  "ppt", "pptx", "ps", "psd", "pya", "pyc", "pyo", "pyv", "qt", "rar", "ras", "raw", "rgb", "rip", "rlc", "rz", "s3m", 
-  "s7z", "scm", "scpt", "sgi", "shar", "sil", "smv", "so", "sub", "swf", "tar", "tbz2", "tga", "tgz", "tif", "tiff", 
-  "tlz", "ts", "ttf", "uvh", "uvi", "uvm", "uvp", "uvs", "uvu", "viv", "vob", "war", "wav", "wax", "wbmp", "wdp", "weba", 
-  "webm", "webp", "whl", "wm", "wma", "wmv", "wmx", "woff", "woff2", "wvx", "xbm", "xif", "xls", "xlsx", "xlt", "xm", "xpi", 
+  "3ds", "3g2", "3gp", "7z", "DS_Store", "a", "aac", "adp", "ai", "aif", "aiff", "apk", "ar",
+  "asf", "au", "avi", "bak", "bin", "bk", "bmp", "btif", "bz2", "cab", "caf", "cgm", "cmx", "cpio", "cr2", "dat", "deb",
+  "djvu", "dll", "dmg", "dmp", "dng", "doc", "docx", "dot", "dotx", "dra", "dsk", "dts", "dtshd", "dvb", "dwg", "dxf",
+  "ear", "ecelp4800", "ecelp7470", "ecelp9600", "egg", "eol", "eot", "epub", "exe", "f4v", "fbs", "fh", "fla", "flac",
+  "fli", "flv", "fpx", "fst", "fvt", "g3", "gif", "gz", "h261", "h263", "h264", "ico", "ief", "image", "img", "ipa",
+  "iso", "jar", "jpeg", "jpg", "jpgv", "jpm", "jxr", "ktx", "lvp", "lz", "lzma", "lzo", "m3u", "m4a", "m4v", "mar",
+  "mdi", "mid", "mj2", "mka", "mkv", "mmr", "mng", "mov", "movie", "mp3", "mp4", "mp4a", "mpeg", "mpg", "mpga", "mxu",
+  "nef", "npx", "o", "oga", "ogg", "ogv", "otf", "pbm", "pcx", "pdf", "pea", "pgm", "pic", "png", "pnm", "ppm", "pps",
+  "ppt", "pptx", "ps", "psd", "pya", "pyc", "pyo", "pyv", "qt", "rar", "ras", "raw", "rgb", "rip", "rlc", "rz", "s3m",
+  "s7z", "scm", "scpt", "sgi", "shar", "sil", "smv", "so", "sub", "swf", "tar", "tbz2", "tga", "tgz", "tif", "tiff",
+  "tlz", "ts", "ttf", "uvh", "uvi", "uvm", "uvp", "uvs", "uvu", "viv", "vob", "war", "wav", "wax", "wbmp", "wdp", "weba",
+  "webm", "webp", "whl", "wm", "wma", "wmv", "wmx", "woff", "woff2", "wvx", "xbm", "xif", "xls", "xlsx", "xlt", "xm", "xpi",
   "xpm", "xwd", "xz", "z", "zip", "zipx"
 ]
 
 TARGET_APPLICATION = ""
 # Unsupported target application(s) [1]
 # [1] https://github.com/commixproject/commix/wiki/Target-applications
-UNSUPPORTED_TARGET_APPLICATION = [ 
+UNSUPPORTED_TARGET_APPLICATION = [
     ""
 ]
 
@@ -953,7 +953,7 @@ WIN_DEL = "powershell.exe Remove-Item "
 DEL = "rm "
 
 # Time-based Variables
-FOUND_HOW_LONG = "" 
+FOUND_HOW_LONG = ""
 FOUND_DIFF = ""
 
 # Check for PowerShell
@@ -962,7 +962,7 @@ PS_ENABLED = None
 # ANSI colors removal
 ANSI_COLOR_REMOVAL = r'\x1b[^m]*m'
 
-# Default LHOST / LPORT / RHOST setup, 
+# Default LHOST / LPORT / RHOST setup,
 # for the reverse TCP connection
 LHOST = ""
 LPORT = ""
@@ -1067,13 +1067,13 @@ EVAL_NOT_SUPPORTED_TAMPER_SCRIPTS = [
 ]
 
 IGNORE_TAMPER_TRANSFORMATION = [
-                  "IFS", 
-                  "if", 
-                  "then", 
-                  "else", 
-                  "fi", 
-                  "str", 
-                  "cmd", 
+                  "IFS",
+                  "if",
+                  "then",
+                  "else",
+                  "fi",
+                  "str",
+                  "cmd",
                   "char"
 ]
 
@@ -1089,7 +1089,7 @@ NOT_IMPLEMENTED = "501"
 BAD_GATEWAY = "502"
 SERVICE_UNAVAILABLE = "503"
 GATEWAY_TIMEOUT = "504"
-HTTP_ERROR_CODES = [  BAD_REQUEST, 
+HTTP_ERROR_CODES = [  BAD_REQUEST,
                       UNAUTHORIZED_ERROR,
                       FORBIDDEN_ERROR,
                       NOT_FOUND_ERROR,

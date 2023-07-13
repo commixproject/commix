@@ -9,7 +9,7 @@ This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
- 
+
 For more see the file 'readme/COPYING' for copying permission.
 """
 
@@ -30,7 +30,7 @@ import errno
 import base64
 try:
   from base64 import encodebytes
-except ImportError: 
+except ImportError:
   from base64 import encodestring as encodebytes
 import socket
 from socket import error as SocketError
@@ -61,7 +61,7 @@ Checking the HTTP response headers.
 def http_response(headers, code):
   response_http_headers = str(headers).split("\n")
   for header in response_http_headers:
-    if len(header) > 1: 
+    if len(header) > 1:
       if settings.VERBOSITY_LEVEL >= 3:
         print(settings.print_traffic(header))
       if menu.options.traffic_file:
@@ -156,7 +156,7 @@ def check_http_traffic(request):
   _ = False
   response = False
   unauthorized = False
-  while not _ and settings.TOTAL_OF_REQUESTS <= settings.MAX_RETRIES and unauthorized is False: 
+  while not _ and settings.TOTAL_OF_REQUESTS <= settings.MAX_RETRIES and unauthorized is False:
     if settings.MULTI_TARGETS:
       if settings.INIT_TEST == True and len(settings.MULTI_ENCODED_PAYLOAD) != 0:
         settings.MULTI_ENCODED_PAYLOAD = []
@@ -175,12 +175,12 @@ def check_http_traffic(request):
     except ValueError as err:
       if settings.VERBOSITY_LEVEL < 2:
         print(settings.SINGLE_WHITESPACE)
-      err_msg = "Invalid target URL has been given." 
+      err_msg = "Invalid target URL has been given."
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
 
     except AttributeError:
-      raise SystemExit() 
+      raise SystemExit()
 
     except _urllib.error.HTTPError as err_msg:
       if settings.UNAUTHORIZED_ERROR in str(err_msg):
@@ -190,7 +190,7 @@ def check_http_traffic(request):
         settings.MAX_RETRIES = settings.TOTAL_OF_REQUESTS * 2
       if [True for err_code in settings.HTTP_ERROR_CODES if err_code in str(err_msg)]:
         break
-      
+
     except (SocketError, _urllib.error.HTTPError, _urllib.error.URLError, _http_client.BadStatusLine, _http_client.RemoteDisconnected, _http_client.IncompleteRead, _http_client.InvalidURL, Exception) as err_msg:
       if not settings.MULTI_TARGETS and not settings.CRAWLING:
         pass
@@ -230,7 +230,7 @@ def check_http_traffic(request):
       page = err.read()
     if settings.VERBOSITY_LEVEL != 0:
       print_http_response(err.info(), err.code, page)
-    
+
     if (not settings.PERFORM_CRACKING and \
     not settings.IS_JSON and \
     not settings.IS_XML and \
@@ -244,18 +244,18 @@ def check_http_traffic(request):
       settings.HTTP_ERROR_CODES_SUM.append(err.code)
       if settings.VERBOSITY_LEVEL >= 2:
         if len(str(err).split(": ")[1]) == 0:
-          error_msg = "Non-standard HTTP status code" 
+          error_msg = "Non-standard HTTP status code"
       pass
     else:
       error_msg = str(err).replace(": "," (")
       if len(str(err).split(": ")[1]) == 0:
-        err_msg = error_msg + "Non-standard HTTP status code" 
+        err_msg = error_msg + "Non-standard HTTP status code"
       else:
         err_msg = error_msg
-      
+
       print(settings.print_critical_msg(err_msg + ")."))
       raise SystemExit()
-    
+
 """
 Check for added headers.
 """
@@ -272,7 +272,7 @@ def do_check(request):
   # Check if defined any Referer HTTP header.
   if menu.options.referer and settings.REFERER_INJECTION == None:
     request.add_header(settings.REFERER, menu.options.referer)
-     
+
   # Check if defined any Host HTTP header.
   if menu.options.host and settings.HOST_INJECTION == None:
     request.add_header(settings.HOST, menu.options.host)
@@ -296,7 +296,7 @@ def do_check(request):
   if settings.TAMPER_SCRIPTS["xforwardedfor"]:
     from src.core.tamper import xforwardedfor
     xforwardedfor.tamper(request)
-  
+
   # Check if defined any HTTP Authentication credentials.
   # HTTP Authentication: Basic, Digest, Bearer Access Authentication.
   if menu.options.auth_cred and menu.options.auth_type:
@@ -316,7 +316,7 @@ def do_check(request):
           response = _urllib.request.urlopen(url, timeout=settings.TIMEOUT)
         except _urllib.error.HTTPError as e:
           try:
-            authline = e.headers.get('www-authenticate', '')  
+            authline = e.headers.get('www-authenticate', '')
             authobj = re.match('''(\w*)\s+realm=(.*),''',authline).groups()
             realm = authobj[1].split(',')[0].replace("\"","")
             user_pass_pair = menu.options.auth_cred.split(":")
@@ -331,10 +331,10 @@ def do_check(request):
             pass
       except _urllib.error.HTTPError as e:
         pass
- 
+
   else:
-    pass        
-  
+    pass
+
   # Check if defined any extra HTTP headers.
   if menu.options.headers or menu.options.header or len(settings.RAW_HTTP_HEADERS) >= 1:
     if len(settings.RAW_HTTP_HEADERS) >= 1:
@@ -342,11 +342,11 @@ def do_check(request):
     # Do replacement with the 'INJECT_HERE' tag, if the wildcard char is provided.
     if menu.options.headers:
       menu.options.headers = checks.wildcard_character(menu.options.headers)
-      extra_headers = menu.options.headers 
+      extra_headers = menu.options.headers
     else:
-      menu.options.header = checks.wildcard_character(menu.options.header) 
+      menu.options.header = checks.wildcard_character(menu.options.header)
       extra_headers = menu.options.header
-  
+
     extra_headers = extra_headers.replace(":",": ")
 
     if ": //" in extra_headers:
@@ -374,10 +374,10 @@ def do_check(request):
           request.add_header(settings.CONTENT_TYPE, settings.HTTP_CONTENT_TYPE_XML_HEADER_VALUE)
     if "Accept-Encoding" not in str(extra_headers):
       request.add_header('Accept-Encoding', settings.HTTP_ACCEPT_ENCODING_HEADER_VALUE)
-          
+
     for extra_header in extra_headers:
       try:
-        # Extra HTTP Header name 
+        # Extra HTTP Header name
         http_header_name = extra_header.split(':', 1)[0]
         http_header_name = ''.join(http_header_name).strip()
         # Extra HTTP Header value
@@ -393,5 +393,5 @@ def do_check(request):
           request.add_header(http_header_name, http_header_value)
       except:
         pass
-        
+
 # eof

@@ -9,7 +9,7 @@ This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
- 
+
 For more see the file 'readme/COPYING' for copying permission.
 """
 import re
@@ -58,13 +58,13 @@ def cb_injection_handler(url, timesec, filename, http_request_method, injection_
   is_encoded = False
   export_injection_info = False
 
-  if not settings.LOAD_SESSION: 
+  if not settings.LOAD_SESSION:
     info_msg = "Testing the " + "(" + injection_type.split(settings.SINGLE_WHITESPACE)[0] + ") " + technique + ". "
     sys.stdout.write(settings.print_info_msg(info_msg))
     sys.stdout.flush()
     if settings.VERBOSITY_LEVEL != 0:
       print(settings.SINGLE_WHITESPACE)
-      
+
   i = 0
   # Calculate all possible combinations
   total = len(settings.WHITESPACES) * len(settings.PREFIXES) * len(settings.SEPARATORS) * len(settings.SUFFIXES)
@@ -73,7 +73,7 @@ def cb_injection_handler(url, timesec, filename, http_request_method, injection_
       for suffix in settings.SUFFIXES:
         for separator in settings.SEPARATORS:
           if whitespace == settings.SINGLE_WHITESPACE:
-            whitespace = _urllib.parse.quote(whitespace) 
+            whitespace = _urllib.parse.quote(whitespace)
           # Check injection state
           settings.DETECTION_PHASE = True
           settings.EXPLOITATION_PHASE = False
@@ -98,15 +98,15 @@ def cb_injection_handler(url, timesec, filename, http_request_method, injection_
               prefix = ""
 
             # Change TAG on every request to prevent false-positive results.
-            TAG = ''.join(random.choice(string.ascii_uppercase) for i in range(6)) 
-            
+            TAG = ''.join(random.choice(string.ascii_uppercase) for i in range(6))
+
             randv1 = random.randrange(100)
             randv2 = random.randrange(100)
             randvcalc = randv1 + randv2
-            
+
             # Define alter shell
             alter_shell = menu.options.alter_shell
-            
+
             try:
               if alter_shell:
                 # Classic -alter shell- decision payload (check if host is vulnerable).
@@ -114,27 +114,27 @@ def cb_injection_handler(url, timesec, filename, http_request_method, injection_
               else:
                 # Classic decision payload (check if host is vulnerable).
                 payload = cb_payloads.decision(separator, TAG, randv1, randv2)
-              
+
               # Define prefixes & suffixes
               payload = parameters.prefixes(payload, prefix)
               payload = parameters.suffixes(payload, suffix)
 
               # Whitespace fixation
               payload = payload.replace(settings.SINGLE_WHITESPACE, whitespace)
-              
+
               # Perform payload modification
               payload = checks.perform_payload_modification(payload)
 
               # Check if defined "--verbose" option.
               if settings.VERBOSITY_LEVEL != 0:
                 print(settings.print_payload(payload))
-                
+
               # Cookie header injection
               if settings.COOKIE_INJECTION == True:
                 # Check if target host is vulnerable to cookie header injection.
                 vuln_parameter = parameters.specify_cookie_parameter(menu.options.cookie)
                 response = cb_injector.cookie_injection_test(url, vuln_parameter, payload)
-                
+
               # User-Agent HTTP header injection
               elif settings.USER_AGENT_INJECTION == True:
                 # Check if target host is vulnerable to user-agent HTTP header injection.
@@ -173,10 +173,10 @@ def cb_injection_handler(url, timesec, filename, http_request_method, injection_
               if settings.VERBOSITY_LEVEL == 0:
                 percent = ((i*100)/total)
                 float_percent = "{0:.1f}".format(round(((i*100)/(total*1.0)),2))
-              
+
                 if shell == False:
                   info_msg = "Testing the " + "(" + injection_type.split(settings.SINGLE_WHITESPACE)[0] + ") " + technique + "..." +  " (" + str(float_percent) + "%)"
-                  sys.stdout.write("\r" + settings.print_info_msg(info_msg))  
+                  sys.stdout.write("\r" + settings.print_info_msg(info_msg))
                   sys.stdout.flush()
 
                 if float(float_percent) >= 99.9:
@@ -189,9 +189,9 @@ def cb_injection_handler(url, timesec, filename, http_request_method, injection_
                 else:
                   percent = ".. (" + str(float_percent) + "%)"
                 info_msg = "Testing the " + "(" + injection_type.split(settings.SINGLE_WHITESPACE)[0] + ") " + technique + "." + "" + percent + ""
-                sys.stdout.write("\r" + settings.print_info_msg(info_msg))  
+                sys.stdout.write("\r" + settings.print_info_msg(info_msg))
                 sys.stdout.flush()
-            
+
             except (KeyboardInterrupt, SystemExit):
               print(settings.SINGLE_WHITESPACE)
               raise
@@ -201,12 +201,12 @@ def cb_injection_handler(url, timesec, filename, http_request_method, injection_
                 print(settings.SINGLE_WHITESPACE)
               err_msg = "Exiting, due to EOFError."
               print(settings.print_error_msg(err_msg))
-              raise 
+              raise
 
             except:
               continue
-          
-          # Yaw, got shellz! 
+
+          # Yaw, got shellz!
           # Do some magic tricks!
           if shell:
             found = True
@@ -214,32 +214,32 @@ def cb_injection_handler(url, timesec, filename, http_request_method, injection_
             # Check injection state
             settings.DETECTION_PHASE = False
             settings.EXPLOITATION_PHASE = True
-            if settings.COOKIE_INJECTION == True: 
+            if settings.COOKIE_INJECTION == True:
               header_name = " cookie"
               found_vuln_parameter = vuln_parameter
               the_type = " parameter"
 
-            elif settings.USER_AGENT_INJECTION == True: 
+            elif settings.USER_AGENT_INJECTION == True:
               header_name = " User-Agent"
               found_vuln_parameter = ""
               the_type = " HTTP header"
 
-            elif settings.REFERER_INJECTION == True: 
+            elif settings.REFERER_INJECTION == True:
               header_name = " Referer"
               found_vuln_parameter = ""
               the_type = " HTTP header"
 
-            elif settings.HOST_INJECTION == True: 
+            elif settings.HOST_INJECTION == True:
               header_name = " Host"
               found_vuln_parameter = ""
               the_type = " HTTP header"
 
-            elif settings.CUSTOM_HEADER_INJECTION == True: 
+            elif settings.CUSTOM_HEADER_INJECTION == True:
               header_name = settings.SINGLE_WHITESPACE + settings.CUSTOM_HEADER_NAME
               found_vuln_parameter = ""
               the_type = " HTTP header"
 
-            else:    
+            else:
               header_name = ""
               the_type = " parameter"
               # Check if defined POST data
@@ -249,14 +249,14 @@ def cb_injection_handler(url, timesec, filename, http_request_method, injection_
                 found_vuln_parameter = vuln_parameter
 
             if len(found_vuln_parameter) != 0 :
-              found_vuln_parameter = " '" +  found_vuln_parameter + Style.RESET_ALL  + Style.BRIGHT + "'" 
+              found_vuln_parameter = " '" +  found_vuln_parameter + Style.RESET_ALL  + Style.BRIGHT + "'"
 
             # Print the findings to log file.
             if export_injection_info == False:
               export_injection_info = logs.add_type_and_technique(export_injection_info, filename, injection_type, technique)
             if vp_flag == True:
               vp_flag = logs.add_parameter(vp_flag, filename, the_type, header_name, http_request_method, vuln_parameter, payload)
-            logs.update_payload(filename, counter, payload) 
+            logs.update_payload(filename, counter, payload)
             counter = counter + 1
 
             if not settings.LOAD_SESSION:
@@ -276,8 +276,8 @@ def cb_injection_handler(url, timesec, filename, http_request_method, injection_
               session_handler.injection_point_importation(url, technique, injection_type, separator, shell[0], vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response=0, timesec=0, how_long=0, output_length=0, is_vulnerable=menu.options.level)
             else:
               whitespace = settings.WHITESPACES[0]
-              settings.LOAD_SESSION = False  
-            
+              settings.LOAD_SESSION = False
+
             # Check for any enumeration options.
             new_line = True
             if settings.ENUMERATION_DONE == True :
@@ -295,12 +295,12 @@ def cb_injection_handler(url, timesec, filename, http_request_method, injection_
                 elif enumerate_again in settings.CHOICE_QUIT:
                   raise SystemExit()
                 else:
-                  common.invalid_option(enumerate_again)  
+                  common.invalid_option(enumerate_again)
                   pass
             else:
               if menu.enumeration_options():
                 cb_enumeration.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec)
-                      
+
             # Check for any system file access options.
             if settings.FILE_ACCESS_DONE == True :
               while True:
@@ -311,21 +311,21 @@ def cb_injection_handler(url, timesec, filename, http_request_method, injection_
                     menu.options.ignore_session = True
                   cb_file_access.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec)
                   break
-                elif file_access_again in settings.CHOICE_NO: 
+                elif file_access_again in settings.CHOICE_NO:
                   break
                 elif file_access_again in settings.CHOICE_QUIT:
                   raise SystemExit()
                 else:
-                  common.invalid_option(file_access_again)  
+                  common.invalid_option(file_access_again)
                   pass
             else:
               if menu.file_access_options():
                 cb_file_access.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec)
-              
+
             # Check if defined single cmd.
             if menu.options.os_cmd:
               cb_enumeration.single_os_cmd_exec(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec)
-            
+
             # Pseudo-Terminal shell
             try:
               checks.alert()
@@ -333,7 +333,7 @@ def cb_injection_handler(url, timesec, filename, http_request_method, injection_
               go_back_again = False
               while True :
                 if go_back == True:
-                  break 
+                  break
                 message = settings.CHECKING_PARAMETER + " is vulnerable. Do you want to prompt for a pseudo-terminal shell? [Y/n] > "
                 if settings.CRAWLING:
                   settings.CRAWLED_URLS_INJECTED.append(_urllib.parse.urlparse(url).netloc)
@@ -356,7 +356,7 @@ def cb_injection_handler(url, timesec, filename, http_request_method, injection_
                       if go_back and go_back_again == False:
                         break
                       if go_back and go_back_again:
-                        return True 
+                        return True
                     else:
                       # Command execution results.
                       time.sleep(timesec)
@@ -372,7 +372,7 @@ def cb_injection_handler(url, timesec, filename, http_request_method, injection_
                           shell = "".join(str(p) for p in shell)
                         except:
                           print(settings.SINGLE_WHITESPACE)
-                          continue  
+                          continue
                         if not menu.options.ignore_session :
                           session_handler.store_cmd(url, cmd, shell, vuln_parameter)
                       else:
@@ -390,9 +390,9 @@ def cb_injection_handler(url, timesec, filename, http_request_method, injection_
                     break
                   else:
                     if no_result == True:
-                      return False 
+                      return False
                     else:
-                      return True  
+                      return True
                 elif gotshell in settings.CHOICE_QUIT:
                   raise SystemExit()
                 else:
@@ -407,7 +407,7 @@ def cb_injection_handler(url, timesec, filename, http_request_method, injection_
                 print(settings.SINGLE_WHITESPACE)
               err_msg = "Exiting, due to EOFError."
               print(settings.print_error_msg(err_msg))
-              raise 
+              raise
 
   if no_result == True:
     if settings.VERBOSITY_LEVEL == 0:

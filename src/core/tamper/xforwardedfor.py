@@ -26,7 +26,7 @@ __tamper__ = "xforwardedfor"
 
 if not settings.TAMPER_SCRIPTS[__tamper__]:
   settings.TAMPER_SCRIPTS[__tamper__] = True
-  
+
 def tamper(request):
   def randomIP():
     numbers = []
@@ -44,4 +44,4 @@ def tamper(request):
   request.add_header('CF-IPCountry', random.sample(('GB', 'US', 'FR', 'AU', 'CA', 'NZ', 'BE', 'DK', 'FI', 'IE', 'AT', 'IT', 'LU', 'NL', 'NO', 'PT', 'SE', 'ES', 'CH'), 1)[0])
 
 
-# eof 
+# eof

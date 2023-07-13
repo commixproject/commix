@@ -9,7 +9,7 @@ This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
- 
+
 For more see the file 'readme/COPYING' for copying permission.
 """
 
@@ -39,9 +39,9 @@ def file_write(separator, payload, TAG, timesec, prefix, suffix, whitespace, htt
     fname, tmp_fname, cmd = checks.find_filename(dest_to_write, content)
     response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
     cmd = checks.win_decode_b64_enc(fname, tmp_fname)
-    response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)  
+    response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
     cmd = checks.delete_tmp(tmp_fname)
-    response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)  
+    response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
   else:
     cmd = checks.write_content(content, dest_to_write)
     cmd = cmd + settings.COMMENT
@@ -72,7 +72,7 @@ def file_upload(separator, payload, TAG, timesec, prefix, suffix, whitespace, ht
 Read a file from the target host.
 """
 def file_read(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
-  cmd, file_to_read = checks.file_content_to_read() 
+  cmd, file_to_read = checks.file_content_to_read()
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
     response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
     shell = fb_injector.injection_results(url, OUTPUT_TEXTFILE, timesec)
@@ -100,6 +100,6 @@ def do_check(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_
 
   if menu.options.file_read:
     file_read(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-    settings.FILE_ACCESS_DONE = True 
+    settings.FILE_ACCESS_DONE = True
 
 # eof

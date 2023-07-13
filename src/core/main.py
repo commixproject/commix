@@ -9,7 +9,7 @@ This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
- 
+
 For more see the file 'readme/COPYING' for copying permission.
 """
 
@@ -83,13 +83,13 @@ def user_agent_header():
         raise SystemExit()
     else:
       if settings.VERBOSITY_LEVEL != 0:
-        debug_msg = "Fetching random HTTP User-Agent header. "  
+        debug_msg = "Fetching random HTTP User-Agent header. "
         print(settings.print_debug_msg(debug_msg))
       else:
         pass
       try:
         menu.options.agent = random.choice(settings.USER_AGENT_LIST)
-        info_msg = "The fetched random HTTP User-Agent header value is '" + menu.options.agent + "'."  
+        info_msg = "The fetched random HTTP User-Agent header value is '" + menu.options.agent + "'."
         print(settings.print_info_msg(info_msg))
       except:
         print(settings.SINGLE_WHITESPACE)
@@ -113,7 +113,7 @@ def examine_request(request, url):
     # Check if defined any HTTP Proxy (--proxy option).
     if menu.options.proxy:
       return proxy.use_proxy(request)
-    # Check if defined Tor (--tor option).  
+    # Check if defined Tor (--tor option).
     elif menu.options.tor:
       return tor.use_tor(request)
     else:
@@ -313,7 +313,7 @@ def main(filename, url):
     if menu.options.level == settings.DEFAULT_INJECTION_LEVEL and \
     menu.options.test_parameter != None:
       checks.check_injection_level()
-    
+
     # Define the level of tests to perform.
     if menu.options.level == settings.DEFAULT_INJECTION_LEVEL:
       settings.SEPARATORS = sorted(set(settings.SEPARATORS_LVL1), key=settings.SEPARATORS_LVL1.index)
@@ -357,11 +357,11 @@ def main(filename, url):
 
     if menu.options.ignore_session:
       # Ignore session
-      session_handler.ignore(url)      
+      session_handler.ignore(url)
 
     # Check provided parameters for tests
     checks.check_provided_parameters()
-          
+
     # Check if defined character used for splitting cookie values.
     if menu.options.cdel:
      settings.COOKIE_DELIMITER = menu.options.cdel
@@ -382,7 +382,7 @@ def main(filename, url):
         menu.options.tech = ''.join(menu.options.tech)
     else:
       if not menu.options.tech:
-        menu.options.tech = ''.join([str(x) for x in settings.AVAILABLE_TECHNIQUES]) 
+        menu.options.tech = ''.join([str(x) for x in settings.AVAILABLE_TECHNIQUES])
       else:
         settings.USER_SUPPLIED_TECHNIQUE = True
 
@@ -421,18 +421,18 @@ def main(filename, url):
             for j in range(0,len(split_first_letter)):
               if split_first_letter[j] in settings.AVAILABLE_TECHNIQUES:
                 found_tech = True
-              else:  
-                found_tech = False  
-                          
+              else:
+                found_tech = False
+
       if split_techniques_names[i].replace(' ', '') not in settings.AVAILABLE_TECHNIQUES and \
          found_tech == False:
-        err_msg = "You specified wrong value '" + split_techniques_names[i] 
+        err_msg = "You specified wrong value '" + split_techniques_names[i]
         err_msg += "' as injection technique. "
         err_msg += "The value for option '"
         if not settings.SKIP_TECHNIQUES :
           err_msg += "--technique"
         else:
-          err_msg += "--skip-technique"    
+          err_msg += "--skip-technique"
         err_msg += "' must be a string composed by the letters "
         err_msg += ', '.join(settings.AVAILABLE_TECHNIQUES).upper()
         err_msg += ". Refer to the official wiki for details."
@@ -455,7 +455,7 @@ def main(filename, url):
       err_msg = "You must enter the '--file-write' or '--file-upload' parameter."
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
-  
+
     # Check if defined "--url" or "-m" option.
     if url:
       if menu.options.auth_cred and menu.options.auth_type:
@@ -508,7 +508,7 @@ def main(filename, url):
             # Define Python working directory.
             checks.define_py_working_dir()
             # Check for wrong flags.
-            checks.check_wrong_flags() 
+            checks.check_wrong_flags()
           else:
             found_os_server = checks.user_defined_os()
         except (KeyError, AttributeError):
@@ -517,7 +517,7 @@ def main(filename, url):
         if menu.options.tamper:
           settings.USER_SUPPLIED_TAMPER = menu.options.tamper
           # checks.tamper_scripts(stored_tamper_scripts=False)
-          
+
       except AttributeError:
         pass
 
@@ -540,7 +540,7 @@ def main(filename, url):
     err_msg = "The target host is not responding."
     err_msg += " Please ensure that is up and try again."
     print("\n" + settings.print_critical_msg(err_msg))
-    logs.print_logs_notification(filename, url)      
+    logs.print_logs_notification(filename, url)
 
 try:
   filename = ""
@@ -571,7 +571,7 @@ try:
     err_msg += "must be an integer value from range [0, 4]."
     print(settings.print_critical_msg(err_msg))
     raise SystemExit()
-  else:  
+  else:
     settings.VERBOSITY_LEVEL = menu.options.verbose
 
   if menu.options.smoke_test:
@@ -596,12 +596,12 @@ try:
     # Check if defined "--ignore-dependencies" option.
     if not menu.options.ignore_dependencies:
       checks.third_party_dependencies()
-      
-    # Check if defined "--update" option.        
+
+    # Check if defined "--update" option.
     if menu.options.update:
       update.updater()
-        
-    # Check if defined "--install" option.        
+
+    # Check if defined "--install" option.
     if menu.options.install:
       install.installer()
       raise SystemExit()
@@ -660,25 +660,25 @@ try:
       raise SystemExit()
 
     if menu.options.failed_tries == 0:
-      err_msg = "You must specify '--failed-tries' value, greater than zero."      
+      err_msg = "You must specify '--failed-tries' value, greater than zero."
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
 
     # Check if defined "--auth-cred" and/or '--auth-type'.
     if (menu.options.auth_type and not menu.options.auth_cred) or (menu.options.auth_cred and not menu.options.auth_type):
-        err_msg = "You must specify both '--auth-cred' and '--auth-type' options."      
+        err_msg = "You must specify both '--auth-cred' and '--auth-type' options."
         print(settings.print_critical_msg(err_msg))
         raise SystemExit()
 
     if menu.options.auth_cred and menu.options.auth_type:
       if menu.options.auth_type.lower() in (settings.AUTH_TYPE.BASIC, settings.AUTH_TYPE.DIGEST) and not re.search(settings.AUTH_CRED_REGEX, menu.options.auth_cred):
-        error_msg = "HTTP " + str(menu.options.auth_type) 
+        error_msg = "HTTP " + str(menu.options.auth_type)
         error_msg += " authentication credentials value must be in format 'username:password'."
         print(settings.print_critical_msg(error_msg))
         raise SystemExit()
 
     if menu.options.requestfile and menu.options.url:
-        err_msg = "The '-r' option is incompatible with option '-u' ('--url')."      
+        err_msg = "The '-r' option is incompatible with option '-u' ('--url')."
         print(settings.print_critical_msg(err_msg))
         raise SystemExit()
 
@@ -686,7 +686,7 @@ try:
     if menu.options.os:
       checks.user_defined_os()
 
-    # Check if defined "--check-tor" option. 
+    # Check if defined "--check-tor" option.
     if menu.options.tor_check and not menu.options.tor:
       err_msg = "The '--check-tor' swich requires usage of '--tor' switch."
       print(settings.print_critical_msg(err_msg))
@@ -741,13 +741,13 @@ try:
         settings.TIMESEC = 10
         warn_msg = "Increasing default value for option '--time-sec' to"
         warn_msg += " " + str(settings.TIMESEC) + ", because switch '--tor' was provided."
-        print(settings.print_warning_msg(warn_msg))  
+        print(settings.print_warning_msg(warn_msg))
 
     # Local IP address
     if not menu.options.offline:
       settings.LOCAL_HTTP_IP = simple_http_server.grab_ip_addr()
     else:
-      settings.LOCAL_HTTP_IP = None  
+      settings.LOCAL_HTTP_IP = None
 
     if menu.options.sitemap_url:
       settings.SITEMAP_CHECK = True
@@ -783,7 +783,7 @@ try:
 
     if menu.options.level != settings.DEFAULT_INJECTION_LEVEL:
       settings.USER_SUPPLIED_LEVEL = menu.options.level
-      
+
     # Define the local path where Metasploit Framework is installed.
     if menu.options.msf_path:
       settings.METASPLOIT_PATH = menu.options.msf_path
@@ -806,7 +806,7 @@ try:
     # Check if option is "--url" for single url test.
     if menu.options.sitemap_url:
       url = menu.options.sitemap_url
-    else:  
+    else:
       url = menu.options.url
 
     if not settings.STDIN_PARSING and not menu.options.bulkfile and not settings.CRAWLING:
@@ -844,7 +844,7 @@ try:
           print(settings.SINGLE_WHITESPACE)
           with open(menu.options.bulkfile) as f:
             bulkfile = [url.replace(settings.SINGLE_WHITESPACE, _urllib.parse.quote_plus(settings.SINGLE_WHITESPACE)).strip() for url in f]
-      
+
       # Check if option "--crawl" is enabled.
       if settings.CRAWLING:
         settings.CRAWLING_PHASE = True
@@ -899,19 +899,19 @@ try:
               elif skip_host in settings.CHOICE_QUIT:
                 raise SystemExit()
               else:
-                common.invalid_option(skip_host)  
+                common.invalid_option(skip_host)
                 pass
 
           if settings.SKIP_VULNERABLE_HOST:
             url_num += 1
             info_msg = "Skipping URL '" + url + "' (" + str(url_num) + "/" + str(len(clean_output_href)) + ")."
-            print(settings.print_info_msg(info_msg))   
+            print(settings.print_info_msg(info_msg))
 
         if not check_for_injected_url(url) or settings.SKIP_VULNERABLE_HOST is False:
           if not check_for_injected_url(url):
             settings.SKIP_VULNERABLE_HOST = None
           http_request_method = checks.check_http_method(url)
-          if (settings.CRAWLING and re.search(r"(.*?)\?(.+)", url) or menu.options.shellshock) or settings.MULTI_TARGETS:    
+          if (settings.CRAWLING and re.search(r"(.*?)\?(.+)", url) or menu.options.shellshock) or settings.MULTI_TARGETS:
             url_num += 1
             perform_check = True
             while True:
@@ -929,7 +929,7 @@ try:
               elif next_url in settings.CHOICE_QUIT:
                 raise SystemExit()
               else:
-                common.invalid_option(next_url)  
+                common.invalid_option(next_url)
                 pass
             if perform_check:
               if os_checks_num == 0:
@@ -946,7 +946,7 @@ try:
                   filename = logs.logs_filename_creation(url)
                   main(filename, url)
               except:
-                pass 
+                pass
           else:
             url_num += 1
             print(settings.print_message("[" + str(url_num) + "/" + str(len(clean_output_href)) + "] Skipping URL - " + url))
@@ -962,7 +962,7 @@ except KeyboardInterrupt:
     print(settings.print_abort_msg(abort_msg))
     raise SystemExit()
 
-except SystemExit: 
+except SystemExit:
   raise SystemExit()
 
 except EOFError:
