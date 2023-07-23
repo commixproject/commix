@@ -101,9 +101,8 @@ def set_php_working_dir():
     if php_dir in settings.CHOICE_YES:
       break
     elif php_dir in settings.CHOICE_NO:
-      message = "Please provide a custom working directory for PHP (e.g. '"
-      message += settings.WIN_PHP_DIR + "') > "
-      settings.WIN_PHP_DIR = common.read_input(message, default=None, check_batch=True)
+      message = "Please provide a custom working directory for PHP (e.g. '" + settings.WIN_PHP_DIR + "') > "
+      settings.WIN_PHP_DIR = common.read_input(message, default=settings.WIN_PHP_DIR, check_batch=True)
       settings.USER_DEFINED_PHP_DIR = True
       break
     else:
@@ -121,9 +120,8 @@ def set_python_working_dir():
     if python_dir in settings.CHOICE_YES:
       break
     elif python_dir in settings.CHOICE_NO:
-      message = "Please provide a full path directory for Python interpreter (e.g. '"
-      message += "C:\\Python27\\python.exe') > "
-      settings.WIN_PYTHON_INTERPRETER = common.read_input(message, default=None, check_batch=True)
+      message = "Please provide a full path directory for Python interpreter (e.g. '" + settings.WIN_CUSTOM_PYTHON_INTERPRETER  + "') > "
+      settings.WIN_PYTHON_INTERPRETER = common.read_input(message, default=settings.WIN_CUSTOM_PYTHON_INTERPRETER, check_batch=True)
       settings.USER_DEFINED_PYTHON_DIR = True
       break
     else:
@@ -141,9 +139,8 @@ def set_python_interpreter():
     if python_interpreter in settings.CHOICE_YES:
       break
     elif python_interpreter in settings.CHOICE_NO:
-      message = "Please provide a custom working interpreter for Python (e.g. '"
-      message += "python27') > "
-      settings.LINUX_PYTHON_INTERPRETER = common.read_input(message, default=None, check_batch=True)
+      message = "Please provide a custom working interpreter for Python (e.g. '" + settings.LINUX_CUSTOM_PYTHON_INTERPRETER + "') > "
+      settings.LINUX_PYTHON_INTERPRETER = common.read_input(message, default=settings.LINUX_CUSTOM_PYTHON_INTERPRETER, check_batch=True)
       settings.USER_DEFINED_PYTHON_INTERPRETER = True
       break
     else:
