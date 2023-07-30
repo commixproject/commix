@@ -91,7 +91,8 @@ def command_injection_heuristic_basic(url, http_request_method, check_parameter,
             payload = _urllib.parse.quote(payload)
         payload = parameters.prefixes(payload, prefix="")
         payload = parameters.suffixes(payload, suffix="")
-        payload = checks.perform_payload_modification(payload).replace(whitespace, settings.WHITESPACES[0])
+        payload = payload.replace(settings.SINGLE_WHITESPACE, whitespace)
+        payload = checks.perform_payload_modification(payload)
         if settings.VERBOSITY_LEVEL >= 1:
           print(settings.print_payload(payload))
         data = None
