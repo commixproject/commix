@@ -28,14 +28,14 @@ Atau, Anda dapat mengunduh [tarball](https://github.com/commixproject/commix/tar
 
 ## Penggunaan
 
-Untuk mendapatkan daftar semua opsi dan sakelar gunakan:
+Untuk mendapatkan daftar semua opsi dan beralih gunakan:
 
     $ python commix.py -h
 
-Untuk mendapatkan gambaran umum tentang opsi commix yang tersedia, sakelar dan / atau ide dasar tentang cara menggunakan commix, periksa **[penggunaan](https://github.com/commixproject/commix/wiki/Usage)**, **[contoh penggunaan](https://github.com/commixproject/commix/wiki/Usage-Examples)** dan **[bypass filter](https://github.com/commixproject/commix/wiki/Filters-Bypasses)** halaman wiki.
+Untuk mendapatkan gambaran umum tentang opsi commix yang tersedia, beralih dan / atau ide dasar tentang cara menggunakan commix, periksa **[penggunaan](https://github.com/commixproject/commix/wiki/Usage)**, **[contoh penggunaan](https://github.com/commixproject/commix/wiki/Usage-Examples)** dan **[bypass filter](https://github.com/commixproject/commix/wiki/Filters-Bypasses)** halaman wiki.
 
 
 ## Link
 
-* Panduan: https://github.com/commixproject/commix/wiki
+* Panduan : https://github.com/commixproject/commix/wiki
 * Pelacak masalah : https://github.com/commixproject/commix/issues
