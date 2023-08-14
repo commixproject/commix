@@ -1,4 +1,4 @@
-## Version 3.8 (TBA)
+## Version 3.8 (2023-08-14)
 * Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
 * Revised: Minor improvement regarding parsing raw HTTP request from a file (i.e. `-r` option).
 * Revised: Minor improvement regarding dynamic code evaluation technique (i.e. command execution output).
@@ -15,6 +15,8 @@
 * Fixed: Minor bug-fix regarding not ignoring specified injection technique(s) when `--ignore-session` or `--flush-session` options are set.
 * Replaced: The `--dependencies` option has been replaced with `--ignore-dependencies`, regarding ignoring all required third-party library dependencies.
 * Added: New option `--alert` to run host OS command(s) when injection point is found.
+
+_Note: For more check the [detailed changeset](https://github.com/commixproject/commix/compare/v3.7...v3.8)._
 
 ## Version 3.7 (2023-02-17)
 * Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
