@@ -345,7 +345,7 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
   else:
     check_start = 0
     check_how_long = 0
-    output = False
+    output = ""
 
   return check_how_long, output
 
