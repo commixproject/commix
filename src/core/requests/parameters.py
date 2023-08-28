@@ -139,10 +139,10 @@ def do_GET_check(url, http_request_method):
             # Replace the value of parameter with INJECT_HERE tag
             if len(value) == 0:
               if not menu.options.skip_empty:
-                all_params[param] = all_params[param] + settings.INJECT_TAG
+                all_params[param] = ''.join(all_params[param]) + settings.INJECT_TAG
             else:
-              all_params[param] = all_params[param].replace(value, value + settings.INJECT_TAG)
-            all_params[param - 1] = all_params[param - 1].replace(settings.INJECT_TAG, "")
+              all_params[param] = ''.join(all_params[param]).replace(value, value + settings.INJECT_TAG)
+            all_params[param - 1] = ''.join(all_params[param - 1]).replace(settings.INJECT_TAG, "")
             parameter = settings.PARAMETER_DELIMITER.join(all_params)
             # Reconstruct the URL
             url = url_part + "?" + parameter
@@ -326,14 +326,14 @@ def do_POST_check(parameter, http_request_method):
         if len(value) == 0:
           if not menu.options.skip_empty:
             if settings.IS_JSON:
-              all_params[param] = all_params[param].replace(":\"\"", ":\"" + settings.INJECT_TAG + "\"").replace(":\\\"\\\"", ":\\\"" + settings.INJECT_TAG + "\\\"")
+              all_params[param] = ''.join(all_params[param]).replace(":\"\"", ":\"" + settings.INJECT_TAG + "\"").replace(":\\\"\\\"", ":\\\"" + settings.INJECT_TAG + "\\\"")
             elif settings.IS_XML:
-              all_params[param] = all_params[param].replace("></", ">" + settings.INJECT_TAG + "</")
+              all_params[param] = ''.join(all_params[param]).replace("></", ">" + settings.INJECT_TAG + "</")
             else:
-              all_params[param] = all_params[param] + settings.INJECT_TAG
+              all_params[param] = ''.join(all_params[param]) + settings.INJECT_TAG
         else:
-          all_params[param] = all_params[param].replace(value, value + settings.INJECT_TAG)
-        all_params[param - 1] = all_params[param - 1].replace(settings.INJECT_TAG, "")
+          all_params[param] = ''.join(all_params[param]).replace(value, value + settings.INJECT_TAG)
+        all_params[param - 1] = ''.join(all_params[param - 1]).replace(settings.INJECT_TAG, "")
         parameter = settings.PARAMETER_DELIMITER.join(all_params)
         parameter = parameter.replace(settings.RANDOM_TAG,"")
         if type(parameter) != list:
@@ -519,10 +519,10 @@ def do_cookie_check(cookie):
         # Replace the value of parameter with INJECT tag
         if len(value) == 0:
           if not menu.options.skip_empty:
-            all_params[param] = all_params[param] + settings.INJECT_TAG
+            all_params[param] = ''.join(all_params[param]) + settings.INJECT_TAG
         else:
-          all_params[param] = all_params[param].replace(value, value + settings.INJECT_TAG)
-        all_params[param - 1] = all_params[param - 1].replace(settings.INJECT_TAG, "")
+          all_params[param] = ''.join(all_params[param]).replace(value, value + settings.INJECT_TAG)
+        all_params[param - 1] = ''.join(all_params[param - 1]).replace(settings.INJECT_TAG, "")
         cookie = settings.COOKIE_DELIMITER.join(all_params)
         cookie = cookie.replace(settings.RANDOM_TAG,"")
         if type(cookie) != list:
