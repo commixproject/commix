@@ -86,7 +86,7 @@ def msf_launch_msg(output):
     print(settings.print_info_msg(info_msg))
     info_msg = "Once the loading is done, press here any key to continue..."
     sys.stdout.write(settings.print_info_msg(info_msg))
-    sys.stdin.readline().replace("\n","")
+    sys.stdin.readline().replace("\n", "")
     # Remove the ouput file.
     os.remove(output)
 
@@ -538,7 +538,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """windows_meterpreter_reverse_tcp""" + S
                   for line in unicorn_file:
                     line = line.rstrip()
                     if "Magic Unicorn Attack Vector v" in line:
-                      unicorn_version = line.replace("Magic Unicorn Attack Vector v", "").replace(settings.SINGLE_WHITESPACE, "").replace("-","").replace("\"","").replace(")","")
+                      unicorn_version = line.replace("Magic Unicorn Attack Vector v", "").replace(settings.SINGLE_WHITESPACE, "").replace("-", "").replace("\"", "").replace(")", "")
                       break
               except:
                 unicorn_version = ""

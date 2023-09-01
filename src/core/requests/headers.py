@@ -318,7 +318,7 @@ def do_check(request):
           try:
             authline = e.headers.get('www-authenticate', '')
             authobj = re.match('''(\w*)\s+realm=(.*),''',authline).groups()
-            realm = authobj[1].split(',')[0].replace("\"","")
+            realm = authobj[1].split(',')[0].replace("\"", "")
             user_pass_pair = menu.options.auth_cred.split(":")
             username = user_pass_pair[0]
             password = user_pass_pair[1]

@@ -400,7 +400,7 @@ def main(filename, url):
         menu.options.tech = "".join(settings.AVAILABLE_TECHNIQUES)
       for skip_tech_name in settings.AVAILABLE_TECHNIQUES:
         if skip_tech_name in menu.options.skip_tech:
-          menu.options.tech = menu.options.tech.replace(skip_tech_name,"")
+          menu.options.tech = menu.options.tech.replace(skip_tech_name, "")
       if len(menu.options.tech) == 0:
         err_msg = "Detection procedure was aborted due to skipping all injection techniques."
         print(settings.print_critical_msg(err_msg))

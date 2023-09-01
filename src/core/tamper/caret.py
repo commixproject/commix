@@ -39,7 +39,7 @@ def tamper(payload):
             "^^": "^",
             '"^t""^o""^k""^e""^n""^s"': '"t"^"o"^"k"^"e"^"n"^"s"',
             '^t^o^k^e^n^s': '"t"^"o"^"k"^"e"^"n"^"s"',
-            re.sub(r'([b-zD-Z])', r'^\1', long_string) : long_string.replace("^","")
+            re.sub(r'([b-zD-Z])', r'^\1', long_string) : long_string.replace("^", "")
           }
     payload = re.sub(r'([b-zD-Z])', r'^\1', payload)
     rep = dict((re.escape(k), v) for k, v in rep.items())

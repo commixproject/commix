@@ -172,7 +172,7 @@ def logfile_parser():
       else:
         match = re.findall(r"(.*): (.*)", line)
         match = "".join([str(i) for i in match]).replace("', '",":")
-        match = match.replace("('","")
+        match = match.replace("('", "")
         match = match.replace("')","\\n")
         # Ignore some header.
         if "Content-Length" or "Accept-Encoding" in match:

@@ -110,7 +110,7 @@ def do_GET_check(url, http_request_method):
             parameters = parameters.replace(value, value + settings.INJECT_TAG)
         # Reconstruct the URL
         url = url_part + "?" + parameters
-        url = url.replace(settings.RANDOM_TAG,"")
+        url = url.replace(settings.RANDOM_TAG, "")
         urls_list.append(url)
         return urls_list
       else:
@@ -146,7 +146,7 @@ def do_GET_check(url, http_request_method):
             parameter = settings.PARAMETER_DELIMITER.join(all_params)
             # Reconstruct the URL
             url = url_part + "?" + parameter
-            url = url.replace(settings.RANDOM_TAG,"")
+            url = url.replace(settings.RANDOM_TAG, "")
             urls_list.append(url)
         else:
           for param in range(0,len(multi_parameters)):
@@ -154,7 +154,7 @@ def do_GET_check(url, http_request_method):
             parameter = settings.PARAMETER_DELIMITER.join(multi_parameters)
           # Reconstruct the URL
           url = url_part + "?" + parameter
-          url = url.replace(settings.RANDOM_TAG,"")
+          url = url.replace(settings.RANDOM_TAG, "")
           urls_list.append(url)
 
     return urls_list
@@ -181,7 +181,7 @@ def vuln_GET_param(url):
             settings.POST_WILDCARD_CHAR = pairs[param].split("=")[1].split(settings.INJECT_TAG)[1]
           except Exception:
             pass
-        settings.TESTABLE_VALUE = pairs[param].split("=")[1].replace(settings.INJECT_TAG,"")
+        settings.TESTABLE_VALUE = pairs[param].split("=")[1].replace(settings.INJECT_TAG, "")
         if re.search(settings.VALUE_BOUNDARIES, settings.TESTABLE_VALUE) and settings.INJECT_INSIDE_BOUNDARIES:
           settings.TESTABLE_VALUE  = checks.get_value_inside_boundaries(settings.TESTABLE_VALUE)
         if settings.BASE64_PADDING  in pairs[param]:
@@ -292,7 +292,7 @@ def do_POST_check(parameter, http_request_method):
             parameter = parameter + settings.INJECT_TAG
         else:
           parameter = parameter.replace(value, value + settings.INJECT_TAG)
-        parameter = parameter.replace(settings.RANDOM_TAG,"")
+        parameter = parameter.replace(settings.RANDOM_TAG, "")
         return parameter
     else:
       return multi_parameters
@@ -335,7 +335,7 @@ def do_POST_check(parameter, http_request_method):
           all_params[param] = ''.join(all_params[param]).replace(value, value + settings.INJECT_TAG)
         all_params[param - 1] = ''.join(all_params[param - 1]).replace(settings.INJECT_TAG, "")
         parameter = settings.PARAMETER_DELIMITER.join(all_params)
-        parameter = parameter.replace(settings.RANDOM_TAG,"")
+        parameter = parameter.replace(settings.RANDOM_TAG, "")
         if type(parameter) != list:
           parameters_list.append(parameter)
         parameter = parameters_list
@@ -345,7 +345,7 @@ def do_POST_check(parameter, http_request_method):
         # Grab the value of parameter.
         value = multi_params_get_value(param, multi_parameters)
         parameter = settings.PARAMETER_DELIMITER.join(multi_parameters)
-        parameter = parameter.replace(settings.RANDOM_TAG,"")
+        parameter = parameter.replace(settings.RANDOM_TAG, "")
 
     return parameter
 
@@ -392,7 +392,7 @@ def vuln_POST_param(parameter, url):
               settings.POST_WILDCARD_CHAR = pairs[param].split("=")[1].split(settings.INJECT_TAG)[1]
             except Exception:
               pass
-          settings.TESTABLE_VALUE = pairs[param].split("=")[1].replace(settings.INJECT_TAG,"")
+          settings.TESTABLE_VALUE = pairs[param].split("=")[1].replace(settings.INJECT_TAG, "")
           if re.search(settings.VALUE_BOUNDARIES, settings.TESTABLE_VALUE) and settings.INJECT_INSIDE_BOUNDARIES:
             settings.TESTABLE_VALUE  = checks.get_value_inside_boundaries(settings.TESTABLE_VALUE)
           if settings.BASE64_PADDING  in pairs[param]:
@@ -489,7 +489,7 @@ def do_cookie_check(cookie):
         cookie = cookie + settings.INJECT_TAG
       else:
         cookie = cookie.replace(value, value + settings.INJECT_TAG)
-    cookie = cookie.replace(settings.RANDOM_TAG,"")
+    cookie = cookie.replace(settings.RANDOM_TAG, "")
     return cookie
 
   # Check if multiple parameters are supplied.
@@ -524,7 +524,7 @@ def do_cookie_check(cookie):
           all_params[param] = ''.join(all_params[param]).replace(value, value + settings.INJECT_TAG)
         all_params[param - 1] = ''.join(all_params[param - 1]).replace(settings.INJECT_TAG, "")
         cookie = settings.COOKIE_DELIMITER.join(all_params)
-        cookie = cookie.replace(settings.RANDOM_TAG,"")
+        cookie = cookie.replace(settings.RANDOM_TAG, "")
         if type(cookie) != list:
           cookies_list.append(cookie)
         cookie = cookies_list
@@ -534,7 +534,7 @@ def do_cookie_check(cookie):
         value = re.findall(r'=(.*)', multi_parameters[param])
         value = ''.join(value)
       cookie = settings.COOKIE_DELIMITER.join(multi_parameters)
-      cookie = cookie.replace(settings.RANDOM_TAG,"")
+      cookie = cookie.replace(settings.RANDOM_TAG, "")
 
     return cookie
 
@@ -555,7 +555,7 @@ def specify_cookie_parameter(cookie):
             settings.POST_WILDCARD_CHAR = pairs[param].split("=")[1].split(settings.INJECT_TAG)[1]
           except Exception:
             pass
-        settings.TESTABLE_VALUE = pairs[param].split("=")[1].replace(settings.INJECT_TAG,"")
+        settings.TESTABLE_VALUE = pairs[param].split("=")[1].replace(settings.INJECT_TAG, "")
         break
   else:
     inject_cookie = cookie
@@ -566,7 +566,7 @@ def specify_cookie_parameter(cookie):
 The user-agent based injection.
 """
 def specify_user_agent_parameter(user_agent):
-  settings.TESTABLE_VALUE = user_agent.replace(settings.INJECT_TAG,"")
+  settings.TESTABLE_VALUE = user_agent.replace(settings.INJECT_TAG, "")
 
   return user_agent
 
@@ -574,7 +574,7 @@ def specify_user_agent_parameter(user_agent):
 The referer based injection.
 """
 def specify_referer_parameter(referer):
-  settings.TESTABLE_VALUE = referer.replace(settings.INJECT_TAG,"")
+  settings.TESTABLE_VALUE = referer.replace(settings.INJECT_TAG, "")
 
   return referer
 
@@ -582,7 +582,7 @@ def specify_referer_parameter(referer):
 The host based injection.
 """
 def specify_host_parameter(host):
-  settings.TESTABLE_VALUE = host.replace(settings.INJECT_TAG,"")
+  settings.TESTABLE_VALUE = host.replace(settings.INJECT_TAG, "")
 
   return host
 

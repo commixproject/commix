@@ -1135,11 +1135,11 @@ Print the non-listed parameters.
 """
 def print_non_listed_params(check_parameters, http_request_method, header_name):
   if settings.TEST_PARAMETER:
-    testable_parameters = ",".join(settings.TEST_PARAMETER).replace(settings.SINGLE_WHITESPACE,"")
+    testable_parameters = ",".join(settings.TEST_PARAMETER).replace(settings.SINGLE_WHITESPACE, "")
     testable_parameters = testable_parameters.split(",")
     non_exist_param = list(set(testable_parameters) - set(check_parameters))
     if non_exist_param:
-      non_exist_param = ",".join(non_exist_param).replace(settings.SINGLE_WHITESPACE,"")
+      non_exist_param = ",".join(non_exist_param).replace(settings.SINGLE_WHITESPACE, "")
       non_exist_param = non_exist_param.split(",")
       if menu.options.level >= settings.COOKIE_INJECTION_LEVEL and \
          menu.options.test_parameter != None:
@@ -2286,11 +2286,11 @@ def add_command_substitution(cmd):
 Remove command substitution on provided command
 """
 def remove_command_substitution(cmd):
-  cmd = cmd.replace("echo $(","").replace(")","")
+  cmd = cmd.replace("echo $(", "").replace(")", "")
   return cmd
 
 def remove_parenthesis(cmd):
-  cmd = cmd.replace("(","").replace(")","")
+  cmd = cmd.replace("(", "").replace(")", "")
   return cmd
 
 """

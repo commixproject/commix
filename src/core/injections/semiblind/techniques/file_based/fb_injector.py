@@ -337,7 +337,7 @@ def injection_results(url, OUTPUT_TEXTFILE, timesec):
     shell = checks.page_encoding(response, action="encode").rstrip().lstrip()
     #shell = [newline.replace("\n",settings.SINGLE_WHITESPACE) for newline in shell]
     if settings.TARGET_OS == settings.OS.WINDOWS:
-      shell = [newline.replace("\r","") for newline in shell]
+      shell = [newline.replace("\r", "") for newline in shell]
       #shell = [space.strip() for space in shell]
       shell = [empty for empty in shell if empty]
   except _urllib.error.HTTPError as e:

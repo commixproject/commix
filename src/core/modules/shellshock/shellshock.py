@@ -26,7 +26,7 @@ default_cookie = ""
 
 if menu.options.cookie:
   if settings.INJECT_TAG in menu.options.cookie:
-    menu.options.cookie = menu.options.cookie.replace(settings.INJECT_TAG ,"")
+    menu.options.cookie = menu.options.cookie.replace(settings.INJECT_TAG , "")
   default_cookie = menu.options.cookie
 
 """

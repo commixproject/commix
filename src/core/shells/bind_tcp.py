@@ -71,7 +71,7 @@ def msf_launch_msg(output):
     print(settings.print_info_msg(info_msg))
     info_msg = "Once the loading is done, press here any key to continue..."
     sys.stdout.write(settings.print_info_msg(info_msg))
-    sys.stdin.readline().replace("\n","")
+    sys.stdin.readline().replace("\n", "")
     # Remove the ouput file.
     os.remove(output)
 

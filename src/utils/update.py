@@ -133,9 +133,9 @@ def check_for_update():
       if "VERSION_NUM = " in line:
         update_version = line.replace("VERSION_NUM = ", "").replace("\"", "")
         break
-    if (int(settings.VERSION_NUM.replace(".","")[:2]) < int(update_version.replace(".","")[:2])) or \
-       ((int(settings.VERSION_NUM.replace(".","")[:2]) == int(update_version.replace(".","")[:2])) and \
-         int(settings.VERSION_NUM.replace(".","")[2:]) < int(update_version.replace(".","")[2:])):
+    if (int(settings.VERSION_NUM.replace(".", "")[:2]) < int(update_version.replace(".", "")[:2])) or \
+       ((int(settings.VERSION_NUM.replace(".", "")[:2]) == int(update_version.replace(".", "")[:2])) and \
+         int(settings.VERSION_NUM.replace(".", "")[2:]) < int(update_version.replace(".", "")[2:])):
       while True:
         message = "Do you want to update to the latest version now? [Y/n] > "
         do_update = common.read_input(message, default="Y", check_batch=True)
@@ -215,13 +215,13 @@ def check_unicorn_version(current_version):
       for line in latest_version:
         line = line.rstrip()
         if "Magic Unicorn Attack Vector v" in line:
-          latest_version = line.replace("Magic Unicorn Attack Vector v", "").replace(settings.SINGLE_WHITESPACE, "").replace("-","").replace("\"","").replace(")","")
+          latest_version = line.replace("Magic Unicorn Attack Vector v", "").replace(settings.SINGLE_WHITESPACE, "").replace("-", "").replace("\"", "").replace(")", "")
           break
 
     if len(current_version) == 0 or \
-       (int(current_version.replace(".","")[:2]) < int(latest_version.replace(".","")[:2])) or \
-       ((int(current_version.replace(".","")[:2]) == int(latest_version.replace(".","")[:2])) and \
-         int(current_version.replace(".","")[2:]) < int(latest_version.replace(".","")[2:])):
+       (int(current_version.replace(".", "")[:2]) < int(latest_version.replace(".", "")[:2])) or \
+       ((int(current_version.replace(".", "")[:2]) == int(latest_version.replace(".", "")[:2])) and \
+         int(current_version.replace(".", "")[2:]) < int(latest_version.replace(".", "")[2:])):
 
       if len(current_version) != 0:
         warn_msg = "Current version of TrustedSec's Magic Unicorn (" + current_version + ") seems to be out-of-date."

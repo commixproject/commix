@@ -103,7 +103,7 @@ def command_injection_heuristic_basic(url, http_request_method, check_parameter,
         elif menu.options.data and http_request_method == settings.HTTPMETHOD.POST or \
              menu.options.data and settings.INJECT_TAG in menu.options.data:
           if inject_http_headers:
-            data = menu.options.data.replace(settings.INJECT_TAG,"").encode(settings.DEFAULT_CODEC)
+            data = menu.options.data.replace(settings.INJECT_TAG, "").encode(settings.DEFAULT_CODEC)
           else:
             data = menu.options.data.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC)
         else:
@@ -113,7 +113,7 @@ def command_injection_heuristic_basic(url, http_request_method, check_parameter,
         if cookie:
           request.add_header(settings.COOKIE, cookie)
         if inject_http_headers:
-          request.add_header(check_parameter.replace("'","").strip(), (settings.CUSTOM_HEADER_VALUE + payload).encode(settings.DEFAULT_CODEC))
+          request.add_header(check_parameter.replace("'", "").strip(), (settings.CUSTOM_HEADER_VALUE + payload).encode(settings.DEFAULT_CODEC))
         headers.do_check(request)
         response = requests.get_request_response(request)
 
@@ -161,7 +161,7 @@ def code_injections_heuristic_basic(url, http_request_method, check_parameter, t
         elif menu.options.data and http_request_method == settings.HTTPMETHOD.POST or \
              menu.options.data and settings.INJECT_TAG in menu.options.data:
           if inject_http_headers:
-            data = menu.options.data.replace(settings.INJECT_TAG,"").encode(settings.DEFAULT_CODEC)
+            data = menu.options.data.replace(settings.INJECT_TAG, "").encode(settings.DEFAULT_CODEC)
           else:
             data = menu.options.data.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC)
         else:
@@ -171,7 +171,7 @@ def code_injections_heuristic_basic(url, http_request_method, check_parameter, t
         if cookie:
           request.add_header(settings.COOKIE, cookie)
         if inject_http_headers:
-          request.add_header(check_parameter.replace("'","").strip(), (settings.CUSTOM_HEADER_VALUE + payload).encode(settings.DEFAULT_CODEC))
+          request.add_header(check_parameter.replace("'", "").strip(), (settings.CUSTOM_HEADER_VALUE + payload).encode(settings.DEFAULT_CODEC))
         headers.do_check(request)
         response = requests.get_request_response(request)
 
@@ -384,7 +384,7 @@ def http_headers_injection(url, http_request_method, filename, timesec):
     settings.USER_AGENT_INJECTION = True
     if settings.USER_AGENT_INJECTION:
       check_parameter = header_name = " User-Agent"
-      settings.HTTP_HEADER = header_name[1:].replace("-","").lower()
+      settings.HTTP_HEADER = header_name[1:].replace("-", "").lower()
       check_for_stored_sessions(url, http_request_method)
       if not injection_proccess(url, check_parameter, http_request_method, filename, timesec):
         settings.USER_AGENT_INJECTION = None
