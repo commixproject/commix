@@ -43,7 +43,7 @@ Seçeneklerinizi görmek ve yardım almak için aşağıdaki komutu girin:
 Mevcut commix seçenekleri veya commix'in nasıl kullanılacağına dair temel fikirler hakkında bilgi edinmek amacıyla **[kullanım kılavuzu](https://github.com/commixproject/commix/wiki/Usage)**, **[kullanım örnekleri](https://github.com/commixproject/commix/wiki/Usage-Examples)** ve **[filtre bypassları](https://github.com/commixproject/commix/wiki/Filters-Bypasses)**  wiki sayfalarını ziyaret edebilirsiniz.
 
 
-## Links
+## Linkler
 
 * Kullanım kılavuzu: https://github.com/commixproject/commix/wiki
 * Sorun takibi: https://github.com/commixproject/commix/issues
