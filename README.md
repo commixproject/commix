@@ -43,6 +43,7 @@ To get an overview of commix available options, switches and/or basic ideas on h
 
 ## Translations
 
+* [Farsi(Persian)](https://github.com/commixproject/commix/blob/master/doc/translations/README-fa-FA.md)
 * [Greek](https://github.com/commixproject/commix/blob/master/doc/translations/README-gr-GR.md)
 * [Indonesian](https://github.com/commixproject/commix/blob/master/doc/translations/README-idn-IDN.md)
-* [Farsi(Persian)](https://github.com/commixproject/commix/blob/master/doc/translations/README-fa-FA.md)
+* [Turkish](https://github.com/commixproject/commix/blob/master/doc/translations/README-tr-TR.md)

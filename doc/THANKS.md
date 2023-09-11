@@ -7,6 +7,7 @@
 * Thanks [m3g9tr0n](https://twitter.com/m3g9tr0n) for a donation.
 
 ## List of individual contributors:
+* Thanks [Kazgangap](https://github.com/Kazgangap) for contributing a Turkish translation of README.md.
 * Thanks [0xFred](https://github.com/0xFred) for contributing code.
 * Thanks [verfosec](https://github.com/verfosec) for contributing a Farsi(Persian) translation of README.md.
 * Thanks [daniruiz](https://github.com/daniruiz) for contributing code.
