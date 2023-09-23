@@ -355,7 +355,8 @@ Define the vulnerable POST parameter.
 def vuln_POST_param(parameter, url):
   if isinstance(parameter, list):
     parameter = " ".join(parameter)
-  # JSON data format
+
+  # JSON data format.
   if settings.IS_JSON:
     param = re.sub(settings.IGNORE_SPECIAL_CHAR_REGEX, '', parameter.split(settings.INJECT_TAG)[0])
     if param:
@@ -367,17 +368,16 @@ def vuln_POST_param(parameter, url):
         vuln_parameter = vuln_parameter[0].split(":")[0]
       vuln_parameter = ''.join(vuln_parameter)
 
-  # XML data format
+  # XML data format.
   elif settings.IS_XML:
-    if re.findall(r"" + settings.INJECT_TAG + "([^>]+)", parameter):
-      vuln_parameter = re.findall(r"" + settings.INJECT_TAG + "([^>]+)", parameter)
-      vuln_parameter = re.findall(r"" + "([^</]+)", vuln_parameter[0])
-      if settings.WILDCARD_CHAR_APPLIED and len(vuln_parameter) != 1 :
-        settings.POST_WILDCARD_CHAR = vuln_parameter[0]
-        settings.TESTABLE_VALUE = vuln_parameter = vuln_parameter[1]
-      else:
-        settings.TESTABLE_VALUE = re.findall(r"" + "([^>]+)" + settings.INJECT_TAG, parameter)[0]
-      vuln_parameter = ''.join(vuln_parameter)
+    parameters = list(parameter.replace("></",">" + settings.END_LINE[1] + "</").split(settings.END_LINE[1]))
+    for item in parameters:
+      if settings.INJECT_TAG in item:
+        result = re.sub(re.compile('<.*?>'), '', item)
+        _ = (re.search('<(.*)>' + result + '</(.*)>', item))
+        if (_.groups()[0]) == (_.groups()[1]):
+          vuln_parameter = ''.join(_.groups()[0])
+          settings.TESTABLE_VALUE = result.split(settings.INJECT_TAG)[0]
 
   # Regular POST data format.
   else:

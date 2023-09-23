@@ -1,3 +1,6 @@
+## Version 3.9 (TBA)
+* Revised: Minor improvement regarding parsing SOAP/XML POST data.
+
 ## Version 3.8 (2023-08-14)
 * Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
 * Revised: Minor improvement regarding parsing raw HTTP request from a file (i.e. `-r` option).
