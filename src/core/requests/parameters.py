@@ -377,6 +377,11 @@ def vuln_POST_param(parameter, url):
         _ = (re.search('<(.*)>' + result + '</(.*)>', item))
         if (_.groups()[0]) == (_.groups()[1]):
           vuln_parameter = ''.join(_.groups()[0])
+          if settings.WILDCARD_CHAR_APPLIED:
+            try:
+              settings.POST_WILDCARD_CHAR = result.split(settings.INJECT_TAG)[1]
+            except Exception:
+              pass
           settings.TESTABLE_VALUE = result.split(settings.INJECT_TAG)[0]
 
   # Regular POST data format.
