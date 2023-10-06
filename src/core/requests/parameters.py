@@ -364,9 +364,14 @@ def vuln_POST_param(parameter, url):
         param = param.split("(")[1]
       vuln_parameter = param.split(",")[-1:]
       if ":" in vuln_parameter[0]:
+        result = vuln_parameter[0].split(":")[0]
+        if settings.WILDCARD_CHAR_APPLIED:
+          try:
+            settings.POST_WILDCARD_CHAR = re.sub(settings.IGNORE_SPECIAL_CHAR_REGEX, '', parameter.split(settings.INJECT_TAG)[1]).split(",")[0]
+          except Exception:
+            pass
         settings.TESTABLE_VALUE = vuln_parameter[0].split(":")[1]
-        vuln_parameter = vuln_parameter[0].split(":")[0]
-      vuln_parameter = ''.join(vuln_parameter)
+      vuln_parameter = ''.join(result)
 
   # XML data format.
   elif settings.IS_XML:
