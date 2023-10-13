@@ -77,6 +77,7 @@ def do_GET_check(url, http_request_method):
       # Split parameters
       try:
         multi_parameters = parameters.split(settings.PARAMETER_DELIMITER)
+        multi_parameters = [x for x in multi_parameters if x]
       except ValueError as err_msg:
         print(settings.print_critical_msg(err_msg))
         raise SystemExit()
