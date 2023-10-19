@@ -546,6 +546,12 @@ detection.add_option("--failed-tries",
                 default=len(settings.SEPARATORS_LVL1) - 1,
                 help="Set a number of failed injection tries, in file-based technique.")
 
+detection.add_option("--smart",
+                action="store_true",
+                dest="smart",
+                default=False,
+                help="Perform thorough tests only if positive heuristic(s).")
+
 # Miscellaneous options
 misc = OptionGroup(parser, Style.BRIGHT + Style.UNDERLINE + "Miscellaneous" + Style.RESET_ALL)
 

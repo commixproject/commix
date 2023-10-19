@@ -241,7 +241,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.9"
-REVISION = "7"
+REVISION = "8"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -302,6 +302,9 @@ LINUX_CUSTOM_PYTHON_INTERPRETER = "python27"
 USER_DEFINED_PYTHON_INTERPRETER = False
 
 CMD_NUL = ""
+
+class HEURISTIC_TEST(object):
+  POSITIVE = True
 
 #Basic heuristic checks for command injections
 RAND_A = random.randint(1,10000)

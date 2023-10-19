@@ -1,4 +1,5 @@
 ## Version 3.9 (TBA)
+* Added: New switch `--smart` for conducting through tests only in case of positive heuristic(s).
 * Revised: Minor improvement regarding parsing SOAP/XML POST data.
 
 ## Version 3.8 (2023-08-14)

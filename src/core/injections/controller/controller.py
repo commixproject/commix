@@ -309,7 +309,7 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
 
   info_msg = "Setting " + settings.CHECKING_PARAMETER  + " for tests."
   print(settings.print_info_msg(info_msg))
-
+  
   if menu.options.skip_heuristics:
     if settings.VERBOSITY_LEVEL != 0:
       debug_msg = "Skipping heuristic (basic) tests to the " + settings.CHECKING_PARAMETER + "."
@@ -331,44 +331,51 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
           checks.skip_command_injection_tests()
 
       if not settings.IDENTIFIED_COMMAND_INJECTION and not settings.IDENTIFIED_WARNINGS and not settings.IDENTIFIED_PHPINFO:
+        settings.HEURISTIC_TEST.POSITIVE = False
         warn_msg = "Heuristic (basic) tests shows that "
         warn_msg += settings.CHECKING_PARAMETER + " might not be injectable."
         print(settings.print_bold_warning_msg(warn_msg))
 
-  if menu.options.failed_tries and \
-     menu.options.tech and not "f" in menu.options.tech and not \
-     menu.options.failed_tries:
-    warn_msg = "Due to the provided (unsuitable) injection technique"
-    warn_msg += "s"[len(menu.options.tech) == 1:][::-1] + ", "
-    warn_msg += "the option '--failed-tries' will be ignored."
-    print(settings.print_warning_msg(warn_msg) + Style.RESET_ALL)
-
-  # Procced with file-based semiblind command injection technique,
-  # once the user provides the path of web server's root directory.
-  if menu.options.web_root and \
-     menu.options.tech and not "f" in menu.options.tech:
-      if not menu.options.web_root.endswith("/"):
-         menu.options.web_root =  menu.options.web_root + "/"
-      if checks.procced_with_file_based_technique():
-        menu.options.tech = "f"
-
-  if settings.SKIP_COMMAND_INJECTIONS:
-    dynamic_code_evaluation_technique(url, timesec, filename, http_request_method)
+  if (menu.options.smart and not settings.HEURISTIC_TEST.POSITIVE) or (menu.options.smart and menu.options.skip_heuristics):
+    info_msg = "Skipping "
+    info_msg += settings.CHECKING_PARAMETER + "."
+    print(settings.print_info_msg(info_msg))
+    settings.HEURISTIC_TEST.POSITIVE = True
   else:
-    classic_command_injection_technique(url, timesec, filename, http_request_method)
-    if not settings.IDENTIFIED_COMMAND_INJECTION:
-      dynamic_code_evaluation_technique(url, timesec, filename, http_request_method)
-    timebased_command_injection_technique(url, timesec, filename, http_request_method, url_time_response)
-    filebased_command_injection_technique(url, timesec, filename, http_request_method, url_time_response)
+    if menu.options.failed_tries and \
+       menu.options.tech and not "f" in menu.options.tech and not \
+       menu.options.failed_tries:
+      warn_msg = "Due to the provided (unsuitable) injection technique"
+      warn_msg += "s"[len(menu.options.tech) == 1:][::-1] + ", "
+      warn_msg += "the option '--failed-tries' will be ignored."
+      print(settings.print_warning_msg(warn_msg) + Style.RESET_ALL)
 
-  # All injection techniques seems to be failed!
-  if settings.CLASSIC_STATE == settings.EVAL_BASED_STATE == settings.TIME_BASED_STATE == settings.FILE_BASED_STATE == False :
-    warn_msg = "The tested"
-    if header_name != " cookie" and the_type != " HTTP header":
-      warn_msg += " " + str(http_request_method) + ""
-    warn_msg += str(the_type) + str(header_name) + str(check_parameter)
-    warn_msg += " does not seem to be injectable."
-    print(settings.print_bold_warning_msg(warn_msg))
+    # Procced with file-based semiblind command injection technique,
+    # once the user provides the path of web server's root directory.
+    if menu.options.web_root and \
+       menu.options.tech and not "f" in menu.options.tech:
+        if not menu.options.web_root.endswith("/"):
+           menu.options.web_root =  menu.options.web_root + "/"
+        if checks.procced_with_file_based_technique():
+          menu.options.tech = "f"
+
+    if settings.SKIP_COMMAND_INJECTIONS:
+      dynamic_code_evaluation_technique(url, timesec, filename, http_request_method)
+    else:
+      classic_command_injection_technique(url, timesec, filename, http_request_method)
+      if not settings.IDENTIFIED_COMMAND_INJECTION:
+        dynamic_code_evaluation_technique(url, timesec, filename, http_request_method)
+      timebased_command_injection_technique(url, timesec, filename, http_request_method, url_time_response)
+      filebased_command_injection_technique(url, timesec, filename, http_request_method, url_time_response)
+
+    # All injection techniques seems to be failed!
+    if settings.CLASSIC_STATE == settings.EVAL_BASED_STATE == settings.TIME_BASED_STATE == settings.FILE_BASED_STATE == False :
+      warn_msg = "The tested"
+      if header_name != " cookie" and the_type != " HTTP header":
+        warn_msg += " " + str(http_request_method) + ""
+      warn_msg += str(the_type) + str(header_name) + str(check_parameter)
+      warn_msg += " does not seem to be injectable."
+      print(settings.print_bold_warning_msg(warn_msg))
 
 """
 Inject HTTP headers (User-agent / Referer / Host) (if level > 2).
