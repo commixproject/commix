@@ -643,6 +643,11 @@ try:
 
     # Check if defined "--proxy" option.
     if menu.options.proxy:
+      if menu.options.tor:
+        err_msg = "The switch '--tor' is incompatible with option '--proxy'."
+        print(settings.print_critical_msg(err_msg))
+        raise SystemExit()
+
       for match in re.finditer(settings.PROXY_REGEX, menu.options.proxy):
         _, proxy_scheme, proxy_address, proxy_port = match.groups()
         if proxy_scheme:
