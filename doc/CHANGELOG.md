@@ -1,4 +1,5 @@
 ## Version 3.9 (TBA)
+* Revised: Minor improvement regarding parsing HTTP requests through HTTP proxy (i.e `--proxy` option).
 * Added: New switch `--smart` for conducting through tests only in case of positive heuristic(s).
 * Revised: Minor improvement regarding parsing SOAP/XML POST data.
 

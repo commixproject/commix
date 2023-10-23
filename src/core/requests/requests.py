@@ -388,8 +388,7 @@ def get_request_response(request):
   headers.check_http_traffic(request)
   if menu.options.proxy:
     try:
-      proxy = request.set_proxy(menu.options.proxy, settings.PROXY_SCHEME)
-      response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
+      response = proxy.use_proxy(request)
     except Exception as err_msg:
       response = request_failed(err_msg)
   elif menu.options.tor:
@@ -410,12 +409,7 @@ Check if target host is vulnerable. (Cookie-based injection)
 """
 def cookie_injection(url, vuln_parameter, payload):
 
-  def inject_cookie(url, vuln_parameter, payload, proxy):
-    if proxy == None:
-      opener = _urllib.request.build_opener()
-    else:
-      opener = _urllib.request.build_opener(proxy)
-
+  def inject_cookie(url, vuln_parameter, payload):
     if settings.TIME_RELATIVE_ATTACK :
       payload = _urllib.parse.quote(payload)
 
@@ -436,7 +430,13 @@ def cookie_injection(url, vuln_parameter, payload):
       request.add_header('Cookie', menu.options.cookie.replace(settings.INJECT_TAG, payload))
     try:
       headers.check_http_traffic(request)
-      response = opener.open(request)
+      if menu.options.proxy:
+        response = proxy.use_proxy(request)
+      # Check if defined Tor (--tor option).
+      elif menu.options.tor:
+        response = tor.use_tor(request)
+      else:
+        response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
       return response
     except ValueError:
       pass
@@ -446,24 +446,10 @@ def cookie_injection(url, vuln_parameter, payload):
     end = 0
     start = time.time()
 
-  proxy = None
-  if menu.options.proxy:
-    try:
-      proxy = _urllib.request.ProxyHandler({settings.SCHEME : menu.options.proxy})
-      response = inject_cookie(url, vuln_parameter, payload, proxy)
-    except Exception as err_msg:
-      response = request_failed(err_msg)
-  elif menu.options.tor:
-    try:
-      proxy = _urllib.request.ProxyHandler({settings.TOR_HTTP_PROXY_SCHEME:settings.TOR_HTTP_PROXY_IP + ":" + settings.TOR_HTTP_PROXY_PORT})
-      response = inject_cookie(url, vuln_parameter, payload, proxy)
-    except Exception as err_msg:
-      response = request_failed(err_msg)
-  else:
-    try:
-      response = inject_cookie(url, vuln_parameter, payload, proxy)
-    except Exception as err_msg:
-      response = request_failed(err_msg)
+  try:
+    response = inject_cookie(url, vuln_parameter, payload)
+  except Exception as err_msg:
+    response = request_failed(err_msg)
 
   if settings.TIME_RELATIVE_ATTACK :
     end  = time.time()
@@ -477,12 +463,7 @@ Check if target host is vulnerable. (User-Agent-based injection)
 """
 def user_agent_injection(url, vuln_parameter, payload):
 
-  def inject_user_agent(url, vuln_parameter, payload, proxy):
-    if proxy == None:
-      opener = _urllib.request.build_opener()
-    else:
-      opener = _urllib.request.build_opener(proxy)
-
+  def inject_user_agent(url, vuln_parameter, payload):
     # Check if defined POST data
     if menu.options.data:
       menu.options.data = settings.USER_DEFINED_POST_DATA
@@ -496,7 +477,13 @@ def user_agent_injection(url, vuln_parameter, payload):
     request.add_header('User-Agent', payload)
     try:
       headers.check_http_traffic(request)
-      response = opener.open(request)
+      if menu.options.proxy:
+        response = proxy.use_proxy(request)
+      # Check if defined Tor (--tor option).
+      elif menu.options.tor:
+        response = tor.use_tor(request)
+      else:
+        response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
       return response
     except ValueError:
       pass
@@ -506,24 +493,10 @@ def user_agent_injection(url, vuln_parameter, payload):
     end = 0
     start = time.time()
 
-  proxy = None
-  if menu.options.proxy:
-    try:
-      proxy = _urllib.request.ProxyHandler({settings.SCHEME : menu.options.proxy})
-      response = inject_user_agent(url, vuln_parameter, payload, proxy)
-    except Exception as err_msg:
-      response = request_failed(err_msg)
-  elif menu.options.tor:
-    try:
-      proxy = _urllib.request.ProxyHandler({settings.TOR_HTTP_PROXY_SCHEME:settings.TOR_HTTP_PROXY_IP + ":" + settings.TOR_HTTP_PROXY_PORT})
-      response = inject_user_agent(url, vuln_parameter, payload, proxy)
-    except Exception as err_msg:
-      response = request_failed(err_msg)
-  else:
-    try:
-      response = inject_user_agent(url, vuln_parameter, payload, proxy)
-    except Exception as err_msg:
-      response = request_failed(err_msg)
+  try:
+    response = inject_user_agent(url, vuln_parameter, payload)
+  except Exception as err_msg:
+    response = request_failed(err_msg)
 
   if settings.TIME_RELATIVE_ATTACK :
     end = time.time()
@@ -537,12 +510,7 @@ Check if target host is vulnerable. (Referer-based injection)
 """
 def referer_injection(url, vuln_parameter, payload):
 
-  def inject_referer(url, vuln_parameter, payload, proxy):
-    if proxy == None:
-      opener = _urllib.request.build_opener()
-    else:
-      opener = _urllib.request.build_opener(proxy)
-
+  def inject_referer(url, vuln_parameter, payload):
     # Check if defined POST data
     if menu.options.data:
       menu.options.data = settings.USER_DEFINED_POST_DATA
@@ -556,7 +524,13 @@ def referer_injection(url, vuln_parameter, payload):
     request.add_header('Referer', payload)
     try:
       headers.check_http_traffic(request)
-      response = opener.open(request)
+      if menu.options.proxy:
+        response = proxy.use_proxy(request)
+      # Check if defined Tor (--tor option).
+      elif menu.options.tor:
+        response = tor.use_tor(request)
+      else:
+        response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
       return response
     except ValueError:
       pass
@@ -566,25 +540,10 @@ def referer_injection(url, vuln_parameter, payload):
     end = 0
     start = time.time()
 
-  proxy = None
-  # Check if defined any HTTP Proxy.
-  if menu.options.proxy:
-    try:
-      proxy = _urllib.request.ProxyHandler({settings.SCHEME : menu.options.proxy})
-      response = inject_referer(url, vuln_parameter, payload, proxy)
-    except Exception as err_msg:
-      response = request_failed(err_msg)
-  elif menu.options.tor:
-    try:
-      proxy = _urllib.request.ProxyHandler({settings.TOR_HTTP_PROXY_SCHEME:settings.TOR_HTTP_PROXY_IP + ":" + settings.TOR_HTTP_PROXY_PORT})
-      response = inject_referer(url, vuln_parameter, payload, proxy)
-    except Exception as err_msg:
-      response = request_failed(err_msg)
-  else:
-    try:
-      response = inject_referer(url, vuln_parameter, payload, proxy)
-    except Exception as err_msg:
-      response = request_failed(err_msg)
+  try:
+    response = inject_referer(url, vuln_parameter, payload)
+  except Exception as err_msg:
+    response = request_failed(err_msg)
 
   if settings.TIME_RELATIVE_ATTACK :
     end  = time.time()
@@ -600,7 +559,7 @@ def host_injection(url, vuln_parameter, payload):
 
   payload = _urllib.parse.urlparse(url).netloc + payload
 
-  def inject_host(url, vuln_parameter, payload, proxy):
+  def inject_host(url, vuln_parameter, payload):
 
     if proxy == None:
       opener = _urllib.request.build_opener()
@@ -620,7 +579,13 @@ def host_injection(url, vuln_parameter, payload):
     request.add_header('Host', payload)
     try:
       headers.check_http_traffic(request)
-      response = opener.open(request)
+      if menu.options.proxy:
+        response = proxy.use_proxy(request)
+      # Check if defined Tor (--tor option).
+      elif menu.options.tor:
+        response = tor.use_tor(request)
+      else:
+        response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
       return response
     except ValueError:
       pass
@@ -630,24 +595,10 @@ def host_injection(url, vuln_parameter, payload):
     end = 0
     start = time.time()
 
-  proxy = None
-  if menu.options.proxy:
-    try:
-      proxy = _urllib.request.ProxyHandler({settings.SCHEME : menu.options.proxy})
-      response = inject_host(url, vuln_parameter, payload, proxy)
-    except Exception as err_msg:
-      response = request_failed(err_msg)
-  elif menu.options.tor:
-    try:
-      proxy = _urllib.request.ProxyHandler({settings.TOR_HTTP_PROXY_SCHEME:settings.TOR_HTTP_PROXY_IP + ":" + settings.TOR_HTTP_PROXY_PORT})
-      response = inject_host(url, vuln_parameter, payload, proxy)
-    except Exception as err_msg:
-      response = request_failed(err_msg)
-  else:
-    try:
-      response = inject_host(url, vuln_parameter, payload, proxy)
-    except Exception as err_msg:
-      response = request_failed(err_msg)
+  try:
+    response = inject_host(url, vuln_parameter, payload)
+  except Exception as err_msg:
+    response = request_failed(err_msg)
 
   if settings.TIME_RELATIVE_ATTACK :
     end  = time.time()
@@ -661,13 +612,7 @@ Check if target host is vulnerable. (Custom header injection)
 """
 def custom_header_injection(url, vuln_parameter, payload):
 
-  def inject_custom_header(url, vuln_parameter, payload, proxy):
-
-    if proxy == None:
-      opener = _urllib.request.build_opener()
-    else:
-      opener = _urllib.request.build_opener(proxy)
-
+  def inject_custom_header(url, vuln_parameter, payload):
     # Check if defined POST data
     if menu.options.data:
       menu.options.data = settings.USER_DEFINED_POST_DATA
@@ -684,7 +629,13 @@ def custom_header_injection(url, vuln_parameter, payload):
       request.add_header(settings.CUSTOM_HEADER_NAME, settings.CUSTOM_HEADER_VALUE + payload)
     try:
       headers.check_http_traffic(request)
-      response = opener.open(request)
+      if menu.options.proxy:
+        response = proxy.use_proxy(request)
+      # Check if defined Tor (--tor option).
+      elif menu.options.tor:
+        response = tor.use_tor(request)
+      else:
+        response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
       return response
     except ValueError:
       pass
@@ -694,24 +645,10 @@ def custom_header_injection(url, vuln_parameter, payload):
     end = 0
     start = time.time()
 
-  proxy = None
-  if menu.options.proxy:
-    try:
-      proxy = _urllib.request.ProxyHandler({settings.SCHEME : menu.options.proxy})
-      response = inject_custom_header(url, vuln_parameter, payload, proxy)
-    except Exception as err_msg:
-      response = request_failed(err_msg)
-  elif menu.options.tor:
-    try:
-      proxy = _urllib.request.ProxyHandler({settings.TOR_HTTP_PROXY_SCHEME:settings.TOR_HTTP_PROXY_IP + ":" + settings.TOR_HTTP_PROXY_PORT})
-      response = inject_custom_header(url, vuln_parameter, payload, proxy)
-    except Exception as err_msg:
-      response = request_failed(err_msg)
-  else:
-    try:
-      response = inject_custom_header(url, vuln_parameter, payload, proxy)
-    except Exception as err_msg:
-      response = request_failed(err_msg)
+  try:
+    response = inject_custom_header(url, vuln_parameter, payload)
+  except Exception as err_msg:
+    response = request_failed(err_msg)
 
   if settings.TIME_RELATIVE_ATTACK :
     end  = time.time()
