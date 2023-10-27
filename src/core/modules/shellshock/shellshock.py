@@ -313,7 +313,7 @@ def shellshock_handler(url, http_request_method, filename):
         log_http_headers.do_check(request)
         log_http_headers.check_http_traffic(request)
         # Check if defined any HTTP Proxy.
-        if menu.options.proxy:
+        if menu.options.proxy or menu.options.ignore_proxy: 
           response = proxy.use_proxy(request)
         # Check if defined Tor.
         elif menu.options.tor:
@@ -562,7 +562,7 @@ def cmd_exec(url, cmd, cve, check_header, filename):
       log_http_headers.do_check(request)
       log_http_headers.check_http_traffic(request)
       # Check if defined any HTTP Proxy.
-      if menu.options.proxy:
+      if menu.options.proxy or menu.options.ignore_proxy: 
         response = proxy.use_proxy(request)
       # Check if defined Tor.
       elif menu.options.tor:

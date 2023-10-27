@@ -29,7 +29,12 @@ Use the defined HTTP Proxy
 """
 def use_proxy(request):
   try:
-    request.set_proxy(menu.options.proxy, settings.PROXY_SCHEME)
+    if menu.options.ignore_proxy:
+      proxy = _urllib.request.ProxyHandler({})
+      opener = _urllib.request.build_opener(proxy)
+      _urllib.request.install_opener(opener)
+    else:
+      request.set_proxy(menu.options.proxy, settings.PROXY_SCHEME)
     return _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
   except Exception as err_msg:
     return requests.request_failed(err_msg)

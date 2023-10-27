@@ -175,7 +175,7 @@ def http_auth_cracker(url, realm):
           headers.do_check(request)
           headers.check_http_traffic(request)
           # Check if defined any HTTP Proxy (--proxy option).
-          if menu.options.proxy:
+          if menu.options.proxy or menu.options.ignore_proxy: 
             proxy.use_proxy(request)
           # Check if defined Tor (--tor option).
           elif menu.options.tor:

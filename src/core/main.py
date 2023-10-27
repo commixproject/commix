@@ -111,7 +111,7 @@ def examine_request(request, url):
   try:
     headers.check_http_traffic(request)
     # Check if defined any HTTP Proxy (--proxy option).
-    if menu.options.proxy:
+    if menu.options.proxy or menu.options.ignore_proxy: 
       return proxy.use_proxy(request)
     # Check if defined Tor (--tor option).
     elif menu.options.tor:
@@ -190,7 +190,7 @@ def init_request(url):
   if menu.options.auth_cred and menu.options.auth_type and settings.VERBOSITY_LEVEL != 0 :
     debug_msg = "Setting the HTTP authentication type and credentials."
     print(settings.print_debug_msg(debug_msg))
-  if menu.options.proxy:
+  if menu.options.proxy: 
     proxy.do_check()
   if settings.VERBOSITY_LEVEL != 0:
     debug_msg = "Creating " + str(settings.SCHEME).upper() + " requests opener object."
@@ -645,6 +645,11 @@ try:
     if menu.options.proxy:
       if menu.options.tor:
         err_msg = "The switch '--tor' is incompatible with option '--proxy'."
+        print(settings.print_critical_msg(err_msg))
+        raise SystemExit()
+
+      if menu.options.ignore_proxy:
+        err_msg = "The option '--proxy' is incompatible with switch '--ignore-proxy'."
         print(settings.print_critical_msg(err_msg))
         raise SystemExit()
 

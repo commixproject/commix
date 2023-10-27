@@ -52,7 +52,7 @@ def crawler_request(url):
       request = _urllib.request.Request(url)
     headers.do_check(request)
     headers.check_http_traffic(request)
-    if menu.options.proxy:
+    if menu.options.proxy or menu.options.ignore_proxy: 
       response = proxy.use_proxy(request)
     elif menu.options.tor:
       response = tor.use_tor(request)
@@ -291,7 +291,7 @@ def request_failed(err_msg):
   elif any(x in str(error_msg).lower() for x in ["connection refused", "timeout"]):
     settings.MAX_RETRIES = 1
     err = "Unable to connect to the target URL"
-    if menu.options.proxy:
+    if menu.options.proxy or menu.options.ignore_proxy: 
       err += " or proxy"
     err = err + " (Reason: " + str(error_msg)  + "). "
     if settings.MULTI_TARGETS or settings.CRAWLING:
@@ -386,7 +386,7 @@ Get the response of the request
 def get_request_response(request):
 
   headers.check_http_traffic(request)
-  if menu.options.proxy:
+  if menu.options.proxy or menu.options.ignore_proxy: 
     try:
       response = proxy.use_proxy(request)
     except Exception as err_msg:
@@ -430,7 +430,7 @@ def cookie_injection(url, vuln_parameter, payload):
       request.add_header('Cookie', menu.options.cookie.replace(settings.INJECT_TAG, payload))
     try:
       headers.check_http_traffic(request)
-      if menu.options.proxy:
+      if menu.options.proxy or menu.options.ignore_proxy: 
         response = proxy.use_proxy(request)
       # Check if defined Tor (--tor option).
       elif menu.options.tor:
@@ -477,7 +477,7 @@ def user_agent_injection(url, vuln_parameter, payload):
     request.add_header('User-Agent', payload)
     try:
       headers.check_http_traffic(request)
-      if menu.options.proxy:
+      if menu.options.proxy or menu.options.ignore_proxy: 
         response = proxy.use_proxy(request)
       # Check if defined Tor (--tor option).
       elif menu.options.tor:
@@ -524,7 +524,7 @@ def referer_injection(url, vuln_parameter, payload):
     request.add_header('Referer', payload)
     try:
       headers.check_http_traffic(request)
-      if menu.options.proxy:
+      if menu.options.proxy or menu.options.ignore_proxy: 
         response = proxy.use_proxy(request)
       # Check if defined Tor (--tor option).
       elif menu.options.tor:
@@ -579,7 +579,7 @@ def host_injection(url, vuln_parameter, payload):
     request.add_header('Host', payload)
     try:
       headers.check_http_traffic(request)
-      if menu.options.proxy:
+      if menu.options.proxy or menu.options.ignore_proxy: 
         response = proxy.use_proxy(request)
       # Check if defined Tor (--tor option).
       elif menu.options.tor:
@@ -629,7 +629,7 @@ def custom_header_injection(url, vuln_parameter, payload):
       request.add_header(settings.CUSTOM_HEADER_NAME, settings.CUSTOM_HEADER_VALUE + payload)
     try:
       headers.check_http_traffic(request)
-      if menu.options.proxy:
+      if menu.options.proxy or menu.options.ignore_proxy: 
         response = proxy.use_proxy(request)
       # Check if defined Tor (--tor option).
       elif menu.options.tor:

@@ -296,6 +296,12 @@ request.add_option("--force-ssl",
                 default=False,
                 help="Force usage of SSL/HTTPS.")
 
+request.add_option("--ignore-proxy",
+                action="store_true",
+                dest="ignore_proxy",
+                default=False,
+                help="Ignore system default proxy settings.")
+
 request.add_option("--ignore-redirects",
                 action="store_true",
                 dest="ignore_redirects",
