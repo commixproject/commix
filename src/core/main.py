@@ -641,6 +641,10 @@ try:
     if menu.options.answers:
       settings.ANSWERS = menu.options.answers
 
+    if not menu.options.proxy:
+      if _urllib.parse.urlparse(menu.options.url).hostname in ("localhost", "127.0.0.1") or menu.options.ignore_proxy:
+        menu.options.ignore_proxy = True
+
     # Check if defined "--proxy" option.
     if menu.options.proxy:
       if menu.options.tor:
