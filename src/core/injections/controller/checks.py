@@ -39,6 +39,7 @@ from socket import error as SocketError
 from src.core.requests import requests
 from src.thirdparty.six.moves import input as _input
 from src.thirdparty.six.moves import urllib as _urllib
+from src.thirdparty.six.moves import http_client as _http_client
 from src.thirdparty.colorama import Fore, Back, Style, init
 from src.thirdparty.flatten_json.flatten_json import flatten, unflatten_list
 
@@ -442,8 +443,11 @@ def newline_fixation(payload):
 Page enc/decoding
 """
 def page_encoding(response, action):
-  _ = False
-  page = response.read()
+  try:
+    page = response.read()
+  except _http_client.IncompleteRead as err_msg:
+    requests.request_failed(err_msg)
+    page = err_msg.partial
   if response.info().get('Content-Encoding') in ("gzip", "x-gzip", "deflate"):
     try:
       if response.info().get('Content-Encoding') == 'deflate':
@@ -458,6 +462,7 @@ def page_encoding(response, action):
         warn_msg = "Turning off page compression."
         print(settings.print_warning_msg(warn_msg))
         settings.PAGE_COMPRESSION = False
+  _ = False
   try:
     if action == "encode" and type(page) == str:
       return page.encode(settings.DEFAULT_CODEC, errors="ignore")
