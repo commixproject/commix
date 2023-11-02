@@ -337,17 +337,23 @@ def request_failed(err_msg):
       error_msg = "Connection was forcibly closed by the target URL."
     elif [True for err_code in settings.HTTP_ERROR_CODES if err_code in str(error_msg)]:
       status_code = [err_code for err_code in settings.HTTP_ERROR_CODES if err_code in str(error_msg)]
-      warn_msg = "The web server responded with an HTTP error code '" + str(status_code[0]) + "' which could interfere with the results of the tests."
+      warn_msg = "The web server responded with an HTTP error code '" + str(status_code[0]) 
+      warn_msg += "' which could interfere with the results of the tests."
       print(settings.print_warning_msg(warn_msg))
       if not settings.NOT_FOUND_ERROR in str(err_msg).lower():
         return False
       return True
     else:
-      error_msg = "The provided target URL seems not reachable. "
-      error_msg += "In case that it is, please try to re-run using "
+      error_msg = "The provided target URL seems not reachable."
+      items = []
       if not menu.options.random_agent:
-          error_msg += "'--random-agent' switch and/or "
-      error_msg += "'--proxy' option."
+          items.append("'--random-agent' switch")
+      if not any((menu.options.proxy, menu.options.ignore_proxy, menu.options.tor)):
+        items.append("proxy switches ('--proxy', '--ignore-proxy'...).")
+      if items:
+        error_msg += "In case that it is, "
+        error_msg += "you can try to rerun with "
+        error_msg += " and/or ".join(items)
     print(settings.print_critical_msg(error_msg))
     if not settings.CRAWLING:
       raise SystemExit()
