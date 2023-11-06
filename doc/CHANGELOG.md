@@ -1,22 +1,24 @@
 ## Version 3.9 (TBA)
 * Added: New switch `--ignore-proxy` to ignore the system default HTTP proxy.
-* Revised: Minor improvement regarding parsing HTTP requests through HTTP proxy (i.e `--proxy` option).
+* Revised: Minor improvement regarding parsing HTTP requests through HTTP proxy (i.e. `--proxy` option).
 * Added: New switch `--smart` for conducting through tests only in case of positive heuristic(s).
+* Added: Translation for [README.md](https://github.com/commixproject/commix/blob/master/doc/translations/README-tr-TR.md) in Turkish (via @Kazgangap)
 * Revised: Minor improvement regarding parsing SOAP/XML POST data.
 
 ## Version 3.8 (2023-08-14)
 * Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
 * Revised: Minor improvement regarding parsing raw HTTP request from a file (i.e. `-r` option).
 * Revised: Minor improvement regarding dynamic code evaluation technique (i.e. command execution output).
+* Added: Translation for [README.md](https://github.com/commixproject/commix/blob/master/doc/translations/README-fa-FA.md) in Farsi(Persian) (via @verfosec)
 * Fixed: Minor bug-fix regarding `--skip-empty` flag, for skipping the testing of the parameter(s) with empty value(s).
 * Revised: Minor improvement regarding tamper script "uninitializedvariable.py", for adding randomly generated uninitialized bash variables between the characters of each command of the generated payloads.
 * Revised: Minor improvement regarding skipping further tests involving target that an injection point has already been detected.
 * Revised: Minor code refactoring regarding multiple tamper scripts (i.e. "backslashes.py", "dollaratsigns.py", "doublequotes.py", "singlequotes.py", "uninitializedvariable.py").
-* Added: New tamper script "rev.py" that reverses (characterwise) the user-supplied operating system commands (for *nix targets).
+* Added: New tamper script "rev.py" that reverses (characterwise) the user-supplied operating system commands (for \*nix targets).
 * Fixed: Minor bug-fix regarding checking for similarity in provided parameter(s) name(s) and value(s).
 * Fixed: Minor bug-fix regarding forcing usage of SSL/HTTPS requests toward the target (i.e. `--force-ssl` flag).
-* Fixed: Minor bug-fix regarding setting custom output directory path (i.e `--output-dir` option).
-* Added: Support for "Bearer" HTTP authentication type.
+* Fixed: Minor bug-fix regarding setting custom output directory path (i.e. `--output-dir` option).
+* Added: Support for `Bearer` HTTP authentication type.
 * Revised: Minor improvement regarding tamper script "xforwardedfor.py" (that appends a fake HTTP header `X-Forwarded-For`).
 * Fixed: Minor bug-fix regarding not ignoring specified injection technique(s) when `--ignore-session` or `--flush-session` options are set.
 * Replaced: The `--dependencies` option has been replaced with `--ignore-dependencies`, regarding ignoring all required third-party library dependencies.
@@ -26,13 +28,14 @@ _Note: For more check the [detailed changeset](https://github.com/commixproject/
 
 ## Version 3.7 (2023-02-17)
 * Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
-* Revised: Improvements regarding parsing HTTP requests through HTTP proxy (i.e `--proxy` option).
+* Added: Translation for [README.md](https://github.com/commixproject/commix/blob/master/doc/translations/README-idn-IDN.md) in Indonesian (via @galihap76)
+* Revised: Improvements regarding parsing HTTP requests through HTTP proxy (i.e. `--proxy` option).
 * Revised: Improvements regarding identifying injection marker (i.e. asterisk `*`) in provided parameter values (e.g. GET, POST or HTTP headers). 
-* Added: New option ` --crawl-exclude` regarding setting regular expression for excluding pages from crawling (e.g. "logout").
+* Added: New option ` --crawl-exclude` regarding setting regular expression for excluding pages from crawling (e.g. `logout`).
 * Revised: Improvement regarding `--crawl` option, for skipping further tests involving target that an injection point has already been detected.
-* Added: Support regarding combining `--crawl` option with scanning multiple targets given from piped-input (i.e. stdin).
+* Added: Support regarding combining `--crawl` option with scanning multiple targets given from piped-input (i.e. `stdin`).
 * Revised: Minor improvement regarding adding PCRE `/e` modifier (i.e. dynamic code evaluation technique).
-* Revised: Minor bug-fix regarding logging all HTTP traffic into a textual file (i.e `-t` option).
+* Revised: Minor bug-fix regarding logging all HTTP traffic into a textual file (i.e. `-t` option).
 
 _Note: For more check the [detailed changeset](https://github.com/commixproject/commix/compare/v3.6...v3.7)._
 
@@ -42,7 +45,7 @@ _Note: For more check the [detailed changeset](https://github.com/commixproject/
 * Revised: Minor improvement regarding session handler.
 * Revised: Minor improvement regarding `--wizard` option.
 * Added: New tamper script "printf2echo.py" that replaces the printf-based ASCII to Decimal `printf "%d" "'$char'"` with `echo -n $char | od -An -tuC | xargs`.
-* Revised: Minor improvement regarding parsing HTTP requests through HTTP proxy (i.e `--proxy` option).
+* Revised: Minor improvement regarding parsing HTTP requests through HTTP proxy (i.e. `--proxy` option).
 * Revised: Minor improvement regarding handling HTTP Error 401 (Unauthorized).
 
 _Note: For more check the [detailed changeset](https://github.com/commixproject/commix/compare/v3.5...v3.6)._
@@ -54,18 +57,18 @@ _Note: For more check the [detailed changeset](https://github.com/commixproject/
 * Removed: The depricated modules "ICMP exfiltration" and "DNS exfiltration" have been removed.
 * Revised: Improvement regarding identifying injection marker (i.e. asterisk) in provided options.
 * Revised: Improvement regarding shellshock module.
-* Added: Support regarding parsing target(s) from piped-input (i.e. stdin).
+* Added: Support regarding parsing target(s) from piped-input (i.e. `stdin`).
 * Added: New option `--answers` to set user answers to asked questions during commix run.
 * Added: Support regarding combining `--crawl` option with scanning multiple targets given in a textual file (i.e. via option `-m`).
 * Added: Support for normalizing crawling results.
 * Revised: Improvement regarding crawler.
 * Revised: Minor bug-fix regarding `--file-upload` option.
-* Revised: Minor improvement regarding identifying 'hex' and/or 'base64' encoded parameter(s) value(s).
+* Revised: Minor improvement regarding identifying `Hex` and/or `Base64` encoded parameter(s) value(s).
 * Added: New option `--no-logging` for disabling logging to a file.
 * Revised: Minor improvement regarding redirect handler.
 * Updated: Minor update regarding scanning multiple targets given in a textual file (i.e. via option `-m`).
 * Added: Support for heuristic detection regarding command injections. 
-* Revised: Ιmprovement regarding `--level` option, which not only adds more injection points (i.e Cookies, HTTP headers) but also performs more tests for each injection point.
+* Revised: Ιmprovement regarding `--level` option, which not only adds more injection points (i.e. Cookies, HTTP headers) but also performs more tests for each injection point.
 * Revised: Improvement regarding injecting into custom HTTP Header(s).
 
 _Note: For more check the [detailed changeset](https://github.com/commixproject/commix/compare/v3.4...v3.5)._
@@ -75,7 +78,7 @@ _Note: For more check the [detailed changeset](https://github.com/commixproject/
 * Fixed: Bug-fix regarding forcing usage of provided HTTP method (e.g. `PUT`).
 * Fixed: Bug-fix regarding parsing raw HTTP headers from a file (i.e. `-r` option).
 * Fixed: Minor bug-fix regarding parsing JSON objects.
-* Added: New option ( `--drop-set-cookie`) for ignoring Set-Cookie header from response.
+* Added: New option `--drop-set-cookie` for ignoring `Set-Cookie` HTTP header from response.
 * Added: Support for checking for not declared cookie(s).
 * Added: New (hidden) option `--smoke-test` that runs the basic smoke testing.
 * Revised: Improvement regarding mechanism which nagging if used "dev" version is > 30 days old.
@@ -90,36 +93,36 @@ _Note: For more check the [detailed changeset](https://github.com/commixproject/
 * Removed: The "Regsvr32.exe application whitelisting bypass" attack vector has been removed.
 * Updated: Minor update regarding web delivery script (i.e. Python meterpreter reverse TCP shell).
 * Replaced: The `--backticks` switch has been replaced with "backticks.py" tamper script.
-* Added: New tamper script "backticks.py" that uses backticks instead of "$()", for commands substitution. (for *nix targets).
+* Added: New tamper script "backticks.py" that uses backticks instead of `$()`, for commands substitution (for \*nix targets).
 * Added: New option ( `--skip-heuristic`) for skipping dynamic code evaluation heuristic check.
-* Added: Support for parsing custom wordlists regarding HTTP authentication (Basic / Digest) dictionary-based cracker.
+* Added: Support for parsing custom wordlists regarding HTTP authentication (i.e. `Basic`, `Digest`) dictionary-based cracker.
 * Revised: Improvements regarding dynamic code evaluation heuristic check.
 * Fixed: Minor bug-fix regarding parsing SOAP/XML data via `--data` option.
 * Revised: Minor improvement regarding parsing GraphQL JSON objects.
-* Added: The .bat files command separator (i.e. ["%1a"](http://seclists.org/fulldisclosure/2016/Nov/67)) has been added.
+* Added: The .bat files command separator (i.e. [`%1a`](http://seclists.org/fulldisclosure/2016/Nov/67)) has been added.
 * Added: New option `--method` to force usage of provided HTTP method (e.g. `PUT`).
 
 _Note: For more check the [detailed changeset](https://github.com/commixproject/commix/compare/v3.2...v3.3)._
 
 ## Version 3.2 (2021-04-12)
 * Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
-* Added: New tamper script "slash2env.py" that replaces slashes ("/") with environment variable value "${PATH%%u*}" (for *nix targets).
+* Added: New tamper script "slash2env.py" that replaces slashes (`/`) with environment variable value `${PATH%%u*}` (for \*nix targets).
 * Revised: Minor improvement regarding session handler for supporting Python 3.4+.
 * Revised: Minor improvement regarding `--web-root` option.
-* Added: New tamper script "uninitializedvariable.py" that adds uninitialized bash variables between the characters of each command of the generated payloads (for *nix targets).
+* Added: New tamper script "uninitializedvariable.py" that adds uninitialized bash variables between the characters of each command of the generated payloads (for \*nix targets).
 * Revised: Improvement regarding decompressing `deflate`, `x-gzip` and `gzip` HTTP responses.
 * Fixed: Bug-fix regarding several charset-related unhandled exceptions.
 * Revised: Improvements regarding dynamic code evaluation heuristic check.
-* Fixed: Bug-fix regarding HTTP authentication (Basic / Digest) dictionary-based cracker.
+* Fixed: Bug-fix regarding HTTP authentication (i.e. `Basic`, `Digest`) dictionary-based cracker.
 * Fixed: Bug-fix regarding logging all HTTP traffic into a textual file.
 * Revised: Improvement regarding crawler.
 * Fixed: Multiple bug-fixes regarding supporting Python 3.9.
 * Revised: Improvement regarding mechanism which nagging if used version is > 30 days old.
 * Fixed: Multiple bug-fixes regarding the shellshock module.
-* Revised: Improvement regarding Python 3.4+ for using the "html.unescape()" function for converting HTML entities to plain-text representations.
+* Revised: Improvement regarding Python 3.4+ for using the `html.unescape()` function for converting HTML entities to plain-text representations.
 * Updated: Minor update regarding smartphones to imitate, through HTTP User-Agent header.
 * Fixed: Bug-fix regarding setting suitable HTTP header User-Agent, when combining `--random-agent` or `--mobile` switch with `-r` option.
-* Fixed: Bug-fix regarding "hex" encoding/decoding.
+* Fixed: Bug-fix regarding `Hex` encoding/decoding.
 * Added: New option ( `--timeout`) for setting a number of seconds to wait before timeout connection (default 30).
 * Revised: Increased default timeout to 30 seconds.
 * Fixed: Bug-fix regarding Basic HTTP authentication.
@@ -130,7 +133,7 @@ _Note: For more check the [detailed changeset](https://github.com/commixproject/
 ## Version 3.1 (2020-06-17)
 * Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
 * Added: A script "setup.py" has been added (i.e. easier installation).
-* Revised: Improvement regarding checking if the provided value has boundaries (e.g. 'param=/value/').
+* Revised: Improvement regarding checking if the provided value has boundaries (e.g. `param=/value/`).
 * Revised: Improvement regarding dynamic code evaluation technique's heuristic checks.
 * Revised: Improvement regarding identifying the indicated web-page charset.
 * Revised: Minor improvement regarding verbose mode (i.e. debug messages).
@@ -139,7 +142,7 @@ _Note: For more check the [detailed changeset](https://github.com/commixproject/
 * Fixed: Bug-fix regarding defining wildcard character `*` in nested JSON objects.
 * Revised: Minor improvement regarding Flatten_json (third party) module.
 * Revised: Minor improvement regarding parsing nested JSON objects.
-* Added: New tamper script "doublequotes.py" that adds double-quotes ("") between the characters of the generated payloads (for *nix targets).
+* Added: New tamper script "doublequotes.py" that adds double-quotes (`""`) between the characters of the generated payloads (for \*nix targets).
 * Fixed: Bug-fix regarding parsing raw HTTP headers from a file (i.e. `-r` option).
 * Revised: Improvements regarding data in the detailed message about occurred unhandled exception.
 * Revised: Minor bug-fixes and improvements regarding HTTP authentication dictionary-based cracker.
@@ -161,15 +164,15 @@ _Note: For more check the [detailed changeset](https://github.com/commixproject/
 ## Version 2.9 (2019-06-26)
 * Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
 * Fixed: Bug-fix regarding parsing hostname and port from URL.
-* Revised: Improvement regarding automatically decoding "deflate" and "gzip" HTTP responses.
-* Fixed: Bug-fix regarding parsing HTTP header values that contain multiple ":".
+* Revised: Improvement regarding automatically decoding `deflate` and `gzip` HTTP responses.
+* Fixed: Bug-fix regarding parsing HTTP header values that contain multiple `":"`.
 * Revised: Improvement regarding updating "Content-Length" HTTP header, in case it's provided by user (i.e. `-r`, `--header`, `--header` options).
 * Revised: Improvement regarding parsing raw HTTP headers from a file (i.e. `-r` option).
 * Revised: Improvement regarding parsing nested JSON objects.
 * Added: Flatten_json (third party) module has been added.
 * Revised: Bug-fixes and improvements regarding parsing JSON objects.
-* Added: GPL Cooperation Commitment (COMMITMENT.txt) has been added.
-* Updated: Minor update regarding HTTP authentication (Basic / Digest).
+* Added: GPL Cooperation Commitment ([COMMITMENT.txt](https://github.com/commixproject/commix/blob/master/COMMITMENT.txt)) has been added.
+* Updated: Minor update regarding HTTP authentication (i.e. `Basic`, `Digest`).
 * Revised: Minor improvements regarding preventing false negative results, due to parameters tampering during the detection phase.
 * Revised: Minor improvements regarding "reverse_tcp" and "bind_tcp" shell options.
 
@@ -180,7 +183,7 @@ _Note: For more check the [detailed changeset](https://github.com/commixproject/
 * Updated: Minor update regarding accepting overly long result lines.
 * Revised: Minor bug-fixes and improvements regarding `--file-upload` option.
 * Revised: Minor bug-fixes and improvements regarding HTTP authentication dictionary-based cracker.
-* Revised: Minor bug-fixes and improvements regarding HTTP authentication (Basic / Digest).
+* Revised: Minor bug-fixes and improvements regarding HTTP authentication (i.e. `Basic`, `Digest`).
 * Fixed: Minor bug-fix regarding ignoring HTTP Error 401 (Unauthorized) (for `--ignore-401` option).
 * Added: Support for writing crawling results to a temporary file (for eventual further processing with other tools).
 * Added: Support for Windows "Python" on "reverse_tcp" shell option.
@@ -197,7 +200,7 @@ _Note: For more check the [detailed changeset](https://github.com/commixproject/
 * Revised: Minor update of redirection mechanism.
 * Revised: Minor improvement regarding identifying the target web server.
 * Revised: Minor improvement regarding identifying corrupted .pyc file(s).
-* Added: New tamper script "dollaratsigns.py" that adds dollar-sign followed by an at-sign ("$@") between the characters of the generated payloads.
+* Added: New tamper script "dollaratsigns.py" that adds dollar-sign followed by an at-sign (`$@`) between the characters of the generated payloads.
 * Fixed: Bug-fix regarding proxying SSL/TLS requests.
 * Revised: Minor improvement regarding checking for potentially miswritten (illegal '=') short option.
 * Revised: Minor improvement regarding checking for illegal (non-console) quote and comma characters.
@@ -206,7 +209,7 @@ _Note: For more check the [detailed changeset](https://github.com/commixproject/
 * Updated: Beautiful Soup (third party) module has been updated.
 * Added: New tamper script "xforwardedfor.py" that appends a fake HTTP header `X-Forwarded-For`.
 * Fixed: Minor bug-fix regarding loading tamper scripts. 
-* Revised: Minor improvement regarding "INJECT_HERE" tag (i.e. declaring injection position) to be case insensitive.
+* Revised: Minor improvement regarding `INJECT_HERE` tag (i.e. declaring injection position) to be case insensitive.
 
 _Note: For more check the [detailed changeset](https://github.com/commixproject/commix/compare/v2.6-20180921...v2.7-20181218)._
 
@@ -216,13 +219,13 @@ _Note: For more check the [detailed changeset](https://github.com/commixproject/
 * Added: New option `--list-tampers` for listing available tamper scripts.
 * Revised: Minor improvement regarding resolving target hostname.
 * Added: Support for "Ncat" on "reverse_tcp" and "bind_tcp" shell options.
-* Added: Support for "Bash" (via /dev/tcp) on "reverse_tcp" shell option.
-* Added: Support for "Netcat-Openbsd" (nc without -e) on "reverse_tcp" and "bind_tcp" shell options.
+* Added: Support for "Bash" (via `/dev/tcp`) on "reverse_tcp" shell option.
+* Added: Support for "Netcat-Openbsd" (i.e. nc without -e) on "reverse_tcp" and "bind_tcp" shell options.
 * Added: Support for "Socat" on "reverse_tcp" and "bind_tcp" shell options.
 * Revised: Minor improvement regarding counting the total of HTTP(S) requests, for the identified injection point(s) during the detection phase.
 * Fixed: Minor bug-fix regarding providing the target host's root directory.
 * Added: New tamper script "sleep2timeout.py" that uses "timeout" function for time-based attacks.
-* Added: New tamper script "sleep2usleep.py" that replaces "sleep" with "usleep" command in the time-related generated payloads.
+* Added: New tamper script "sleep2usleep.py" that replaces `sleep` with `usleep` command in the time-related generated payloads.
 * Replaced: The `--purge-output` option has been replaced with `--purge` option.
 * Fixed: Minor bug-fix regarding performing injections through cookie parameters.
 * Revised: Minor improvement regarding ignoring the Google Analytics cookie in all scanning attempts.
@@ -238,10 +241,10 @@ _Note: For more check the [detailed changeset](https://github.com/commixproject/
 * Added: Support regarding checking for potential CAPTCHA protection mechanism.
 * Revised: The separators list, has been shortly revised.
 * Revised: Minor improvement regarding the extracted HTTP response headers.
-* Added: New tamper script "nested.py" that adds double quotes around of the generated payloads (for *nix targets).
-* Fixed: Minor bug-fix regarding performing injections through HTTP Headers (e.g User-Agent, Referer, Host etc).
-* Fixed: Major bug-fixes regarding testing time-related ("time-based"/"tempfile-based") payloads.
-* Added: New tamper script "backslashes.py" that adds back slashes (\) between the characters of the generated payloads (for *nix targets).
+* Added: New tamper script "nested.py" that adds double quotes around of the generated payloads (for \*nix targets).
+* Fixed: Minor bug-fix regarding performing injections through HTTP Headers (e.g. User-Agent, Referer, Host etc).
+* Fixed: Major bug-fixes regarding testing time-related payloads (i.e. "time-based", "tempfile-based").
+* Added: New tamper script "backslashes.py" that adds back slashes (`\`) between the characters of the generated payloads (for \*nix targets).
 * Fixed: Minor bug-fix regarding unicode decode exception error due to invalid codec, during connection on target host.
 * Revised: Improvement regarding combining tamper script "multiplespaces.py" with other space-related tamper script(s).
 * Added: New tamper script "multiplespaces.py" that adds multiple spaces around OS commands.
@@ -254,8 +257,8 @@ _Note: For more check the [detailed changeset](https://github.com/commixproject/
 * Updated: Colorama (third party) module has been updated.
 * Revised: Minor improvement regarding keeping the git folder 'clean' (via @g0tmi1k).
 * Fixed: Minor bug-fix regarding loading multiple tamper scripts (during the exploitation phase). 
-* Added: New tamper script "caret.py" that adds the caret symbol (^) between the characters of the generated payloads (for windows targets).
-* Added: New tamper script "singlequotes.py" that adds single quotes (') between the characters of the generated payloads (for *nix targets).
+* Added: New tamper script "caret.py" that adds the caret symbol (`^`) between the characters of the generated payloads (for windows targets).
+* Added: New tamper script "singlequotes.py" that adds single quotes (`'`) between the characters of the generated payloads (for \*nix targets).
 
 _Note: For more check the [detailed changeset](https://github.com/commixproject/commix/compare/v2.3-20180307...v2.4-20180521)._
 
@@ -282,9 +285,9 @@ _Note: For more check the [detailed changeset](https://github.com/commixproject/
 * Fixed: Minor bug-fix regarding cookie-based command injections.
 * Revised: Minor improvement regarding option `-p` for bypassing the dependence on value of `--level` (in case of user-defined HTTP headers).
 * Revised: Minor improvement regarding option `-p` for testing user-defined HTTP headers.
-* Added: New option `--failed-tries` for setting a number of failed injection tries, in file-based technique.
+* Added: New option `--failed-tries` for setting a number of failed injection tries, in semiblind (i.e. "file-based") technique.
 * Revised: Minor improvement regarding session handler.
-* Revised: Minor improvement regarding checking stored time-related ("time-based"/"tempfile-based") payloads.
+* Revised: Minor improvement regarding checking stored time-related payloads (i.e. "time-based", "tempfile-based").
 * Revised: Minor improvement regarding Python version check (no more crashes on Python >= "3" and < "2.6").
 * Revised: Minor improvement in "updater", for checking commit hash number.
 * Added: New option `--skip` regarding excluding certain parameter(s) from testing.
@@ -293,15 +296,15 @@ _Note: For more check the [detailed changeset](https://github.com/commixproject/
 _Note: For more check the [detailed changeset](https://github.com/commixproject/commix/compare/v2.1-20171003...v2.2-20171212)._
 
 ## Version 2.1 (2017-10-03)
-* Added: New option `--header` for providing a single extra HTTP header (e.g. 'X-Forwarded-For: 127.0.0.1').
+* Added: New option `--header` for providing a single extra HTTP header (e.g. `X-Forwarded-For: 127.0.0.1`).
 * Added: New option `--check-internet` that checks internet connection before assessing the target.
-* Fixed: Minor bug-fix regarding performing injections through HTTP Headers (i.e Cookie, User-Agent, Referer).
+* Fixed: Minor bug-fix regarding performing injections through HTTP Headers (i.e. Cookie, User-Agent, Referer).
 * Revised: Minor improvement regarding checking stored payloads and enabling appropriate tamper scripts during the exploitation phase.
-* Added: New tamper script "space2vtab.py" that replaces every space ("%20") with vertical tab ("%0b") (for Windows targets).
+* Added: New tamper script "space2vtab.py" that replaces every space (`%20`) with vertical tab (`%0b`) (for Windows targets).
 * Replaced: The tamper script "space2tab.py" has been replaced with "space2htab.py".
-* Fixed: Minor bug-fix regarding checking for similarity in provided parameter name and value (GET / POST).
-* Added: New option `--backticks` that uses backticks instead of "$()", for commands substitution.
-* Revised: Minor improvement in Netcat shells, for giving to the end-user the choice of using the "/bin" standard subdirectory.
+* Fixed: Minor bug-fix regarding checking for similarity in provided parameter name and value (GET, POST).
+* Added: New option `--backticks` that uses backticks instead of `$()`, for commands substitution.
+* Revised: Minor improvement in Netcat shells, for giving to the end-user the choice of using the `/bin` standard subdirectory.
 * Added: New option `--disable-coloring` that disables console output coloring.
 * Added: New option `--check-tor` that checks if Tor is used properly.
 * Fixed: Minor improvement for fetching random HTTP User-Agent header in initial request, when `--random-agent` is used.
@@ -315,7 +318,7 @@ _Note: For more check the [detailed changeset](https://github.com/commixproject/
 * Revised: Minor improvement for automatically increasing default `--time-sec` value when `--tor` used.
 * Fixed: Minor improvement for not re-testing Tor SOCKS proxy settings (in case of multiple targets).
 * Revised: Multiple minor eye-candy revisions have been performed.
-* Fixed: Major improvement regarding not sending requests with GET mothod in case of POST method, in injection levels 2, 3.
+* Fixed: Major improvement regarding not sending requests with GET HTTP mothod in case of POST HTTP method, in injection levels 2, 3.
 * Updated: The `--sys-info` option has been enriched with distribution description and release information.  
 * Revised: Minor improvement in dynamic code evaluation, regarding the users extraction payload. 
 * Fixed: Minor fix regarding not raising the detection phase in the case of 4xx and/or 5xx HTTP error codes.
@@ -329,13 +332,13 @@ _Note: For more check the [detailed changeset](https://github.com/commixproject/
 
 ## Version 1.9 (2017-05-02)
 * Revised: Minor improvement in results-based techniques, for delaying the OS responses depending on the user-supplied time delay.
-* Revised: The time-related ("time-based"/"tempfile-based") payloads, have been shortly revised.
-* Revised: Minor improvement in file-based technique, for delaying the OS responses depending on the user-supplied time delay.
-* Fixed: Minor improvement in file-based technique, regarding τhe directory path that the output file is saved.
+* Revised: The time-related payloads (i.e. "time-based", "tempfile-based"), have been shortly revised.
+* Revised: Minor improvement in semiblind (i.e. "file-based") technique, for delaying the OS responses depending on the user-supplied time delay.
+* Fixed: Minor improvement in semiblind (i.e. "file-based") technique, regarding τhe directory path that the output file is saved.
 * Added: New option `--ignore-redirects` that ignoring redirection attempts.
 * Added: New functionality for identifying and following URL redirections.
-* Fixed: Minor improvement for adding "/" at the end of the user provided root dir (in case it does not exist).
-* Revised: The file-based payload for deleting files with execution output, has been shortly revised.
+* Fixed: Minor improvement for adding `/` at the end of the user provided root dir (in case it does not exist).
+* Revised: The semiblind (i.e. "file-based") payload for deleting files with execution output, has been shortly revised.
 * Replaced: The `--root-dir` option has been replaced with `--web-root` option.
 * Added: New option `--wizard` that shows a simple wizard interface for beginner users.
 
@@ -349,8 +352,8 @@ _Note: For more check the [detailed changeset](https://github.com/commixproject/
 * Replaced: The `--delay` option has been replaced with `--time-sec` option.
 * Fixed: Minor improvement regarding gnureadline module for better support on MacOS X hosts.
 * Added: New option `--charset` that forces character encoding used for data retrieval.
-* Added: New prefix ("'%26") and suffix ("%26'") have been added.
-* Fixed: Removal of unnecessary command substitution in semiblind ("file-based") technique.
+* Added: New prefix (`'%26`) and suffix (`%26'`) have been added.
+* Fixed: Removal of unnecessary command substitution in semiblind technique (i.e. "file-based").
 * Updated: The Unicorn tool has been updated to version 2.4.2.
 * Added: Support for the Regsvr32.exe Application Whitelisting Bypass technique.
 * Fixed: Minor improvement for checking for established TCP connections.
@@ -367,16 +370,16 @@ _Note: For more check the [detailed changeset](https://github.com/commixproject/
 * Fixed: Minor improvement regarding automated scan level increasing.
 * Fixed: Improvement regarding skipping the testing of problematic URL(s) and proceeding with next ones (in case of scanning multiple targets). 
 * Fixed: Improvement regarding printing current assessment state in case of user abortion. 
-* Revised: Minor improvement for proceeding with semiblind ("file-based") technique, once the user provides the path of web server's root directory.
+* Revised: Minor improvement for proceeding with semiblind technique (i.e. "file-based"), once the user provides the path of web server's root directory.
 * Fixed: Minor fix regarding the lack of http/s to the user-defined URL(s).
 * Added: New option `--skip-empty` for skipping the testing of the parameter(s) with empty value(s).
 * Fixed: Improvement regarding testing the parameter(s) with empty value(s).
-* Added: New CGI shellscript path "/cgi-bin/cgiCmdNotify" (vulnerable to shellshock) has been added.
+* Added: New CGI shellscript path `/cgi-bin/cgiCmdNotify` (vulnerable to shellshock) has been added.
 
 _Note: For more check the [detailed changeset](https://github.com/commixproject/commix/compare/v1.6-20161228...v1.7-20170203)._
 
 ## Version 1.6 (2016-12-28)
-* Fixed: Improvement regarding json-formated POST data, where whitespace before (and/or after) the ":" exists.
+* Fixed: Improvement regarding json-formated POST data, where whitespace before (and/or after) the `":"` exists.
 * Fixed: Minor fix regarding empty value(s) in provided parameter(s).
 * Added: New option `--batch` that never asks for user input (using the default behaviour).
 * Added: New option `-x` for parsing target(s) from remote sitemap(.xml) file.
@@ -386,8 +389,8 @@ _Note: For more check the [detailed changeset](https://github.com/commixproject/
 * Added: New option `-r` for loading HTTP request from a file.
 * Fixed: Improvement regarding the response time estimimation, in which the target URL was requested without its POST data.
 * Added: New option `-m` for scanning multiple targets given in a textual file.
-* Fixed: Minor fix regarding the newline display in dynamic code evaluation ("eval-based") and semiblind ("file-based") technique.
-* Revised: The dynamic code evaluation ("eval-based") payloads have been shortly revised.
+* Fixed: Minor fix regarding the newline display in dynamic code evaluation (i.e. "eval-based") and semiblind technique (i.e. "file-based").
+* Revised: The dynamic code evaluation (i.e. "eval-based") payloads have been shortly revised.
 * Added: The executed command and the execution results output has been added to log file.
 
 _Note: For more check the [detailed changeset](https://github.com/commixproject/commix/compare/v1.5-20161117...v1.6-20161228)._
@@ -395,7 +398,7 @@ _Note: For more check the [detailed changeset](https://github.com/commixproject/
 ## Version 1.5 (2016-11-17)
 * Fixed: Minor improvement in the "ICMP exfiltration" module.
 * Fixed: Minor improvement for choosing default value when pressing enter.
-* Added: New tamper script "hexencode.py" that encodes the payload to hex format.
+* Added: New tamper script "hexencode.py" that encodes the payload to `Hex` format.
 * Fixed: Minor improvements in executed commands history.
 * Added: New verbosity level (4) for printing the HTTP response page content.
 * Added: New option `-t` for logging all HTTP traffic into a textual file.
@@ -434,20 +437,20 @@ _Note: For more check the [detailed changeset](https://github.com/commixproject/
 * Added: The ability for setting custom (PHP / Python) working directory.
 * Fixed: License file minor inaccurancy issue has been fixed.
 * Revised: The Windows-based payloads for every supported technique, had been shortly revised.
-* Revised: The dynamic code evaluation ("eval-based") technique has been shortly revised.
-* Added: New tamper script "space2tab.py" that replaces every space ("%20") with horizontal tab ("%09").
+* Revised: The dynamic code evaluation technique (i.e. "eval-based") has been shortly revised.
+* Added: New tamper script "space2tab.py" that replaces every space (`%20`) with horizontal tab (`%09`).
 * Added: The ability for generating powershell attack vectors via TrustedSec's Magic Unicorn.
 * Added: The ability for checking if there is a new version available.
-* Added: The ability for target application extension recognition (i.e PHP, ASP etc).
-* Fixed: Minor improvement for finding the URL part (i.e scheme:[//host[:port]][/]path).
-* Fixed: Minor fix for conflicted shells (i.e regular, alternative) from session file.
+* Added: The ability for target application extension recognition (i.e. PHP, ASP etc).
+* Fixed: Minor improvement for finding the URL part (i.e. scheme:[//host[:port]][/]path).
+* Fixed: Minor fix for conflicted shells (i.e. regular, alternative) from session file.
 
 _Note: For more check the [detailed changeset](https://github.com/commixproject/commix/compare/v1.1-20160714...v1.2-20160812)._
 
 ## Version 1.1 (2016-07-14)
 * Added: The ".gitignore" file has been added.
 * Added: Support for injections against ASP.NET applications.
-* Added: Support for warning detection regarding "create_function()" function.
+* Added: Support for warning detection regarding `create_function()` function.
 * Fixed: Minor improvent of the HTTP server for `--file-upload` option.
 * Fixed: Minor fix for conflicted executed commands from session file in HTTP Headers.
 * Added: The ability to store injection level into session files for current target. 
@@ -468,26 +471,26 @@ _Note: For more check the [detailed changeset](https://github.com/commixproject/
 
 ## Version 0.9b (2016-06-07)
 * Added: The ability to re-perform the injection request if it has failed.
-* Fixed: The shell output in semiblind ("file-based") technique has been fixed not to concat new lines.
+* Fixed: The shell output in semiblind technique (i.e. "file-based") has been fixed not to concat new lines.
 * Revised: The ability to execute multiple tamper scripts combined or the one after the other.
-* Added: New tamper script "space2plus.py" that replaces every space ("%20") with plus ("+").
+* Added: New tamper script "space2plus.py" that replaces every space (`%20`) with plus (`+`).
 * Added: New state ("checking") and the color of that state has been setted.
 * Replaced: The `--base64` option has been replaced with "base64encode.py" tamper script.
-* Added: New tamper script "space2ifs.py" that replaces every space ("%20") with $IFS (bash) variable.
+* Added: New tamper script "space2ifs.py" that replaces every space (`%20`) with `$IFS` (bash) variable.
 * Added: New option `--tamper` that supports tamper injection scripts.
 * Added: Support for verbosity levels (currently supported levels: 0,1).
 * Fixed: Minor rearrangement of prefixes and separators has been implemented.
-* Revised: The "time-based" (blind) technique for *nix targets has been shortly revised.
-* Revised: The source code has been revised to support "print_state_msg" (i.e error, warning, success etc) functions.
+* Revised: The "time-based" (blind) technique for \*nix targets has been shortly revised.
+* Revised: The source code has been revised to support `print_state_msg` (i.e. error, warning, success etc) functions.
 
 _Note: For more check the [detailed changeset](https://github.com/commixproject/commix/compare/v0.8b-20160506...v0.9b-20160607)._
 
 ## Version 0.8b (2016-05-06)
-* Fixed: The `--file-read` option to ignore the carriage return ("\r") character in a text file.
-* Added: The ability to check for empty value(s) in the defined GET/POST/Cookie(s) data and skip.
-* Replaced: The "INJECT_HERE" tag has been replaced with the `*` (asterisk) wildcard character.
+* Fixed: The `--file-read` option to ignore the carriage return (`\r`) character in a text file.
+* Added: The ability to check for empty value(s) in the defined GET, POST, `Cookie` data and skip.
+* Replaced: The `INJECT_HERE` tag has been replaced with the `*` (asterisk) wildcard character.
 * Added: New option `--level` (1-3) that specifies level of tests to perform.
-* Added: New option `-p` that specifies a comma-separated list of GET/POST parameter.
+* Added: New option `-p` that specifies a comma-separated list of GET and POST parameter.
 * Added: The ability to check every parameter in the provided cookie data.
 * Added: The ability to check every GET parameter in the defined URL and/or every POST provided data.
 * Added: New option `--all` that enables all supported enumeration options.
@@ -495,20 +498,20 @@ _Note: For more check the [detailed changeset](https://github.com/commixproject/
 _Note: For more check the [detailed changeset](https://github.com/commixproject/commix/compare/v0.7b-20160418...v0.8b-20160506)._
 
 ## Version 0.7b (2016-04-18)
-* Fixed: HTTP proxy logs parser to accept GET http requests.
+* Fixed: HTTP proxy logs parser to accept GET HTTP requests.
 * Fixed: HTTP proxy logs parser to recognise provided HTTP authentication credentials.
-* Added: Support for verbose mode in HTTP authentication (Basic / Digest) dictionary-based cracker.
+* Added: Support for verbose mode in HTTP authentication (i.e. `Basic`, `Digest`) dictionary-based cracker.
 * Added: The ability to store valid (Digest) credentials into session files for current target.
-* Added: Dictionary-based cracker for "Digest" HTTP authentication credentials.
-* Added: Support for "Digest" HTTP authentication type.
+* Added: Dictionary-based cracker for `Digest` HTTP authentication credentials.
+* Added: Support for `Digest` HTTP authentication type.
 
 _Note: For more check the [detailed changeset](https://github.com/commixproject/commix/compare/v0.6b-20160401...v0.7b-20160418)._
 
 ## Version 0.6b (2016-04-01)
-* Added: The ability to store valid (Basic) credentials into session files for current target.
+* Added: The ability to store valid (`Basic`) credentials into session files for current target.
 * Added: New option `--ignore-401` that ignores HTTP Error 401 (Unauthorized) and continues tests without providing valid credentials.
-* Added: Dictionary-based cracker for "Basic" HTTP authentication credentials.
-* Added: Identifier for HTTP authentication type (currently only "Basic" type is supported).
+* Added: Dictionary-based cracker for `Basic` HTTP authentication credentials.
+* Added: Identifier for HTTP authentication type (currently only `Basic` type is supported).
 * Added: New option `--skip-waf` that skips heuristic detection of WAF/IPS/IDS protection.
 * Added: Support for verbose mode in the "DNS exfiltration" injection technique (module).
 * Added: New option `--dns-server` that supports the "DNS exfiltration" injection technique (module).
@@ -517,7 +520,7 @@ _Note: For more check the [detailed changeset](https://github.com/commixproject/
 _Note: For more check the [detailed changeset](https://github.com/commixproject/commix/compare/v0.5b-20160316...v0.6b-20160401)._
 
 ## Version 0.5b (2016-03-16)
-* Fixed: The payload(s) for dynamic code evaluation ("eval-based"), if there is not any separator.
+* Fixed: The payload(s) for dynamic code evaluation (i.e. "eval-based"), if there is not any separator.
 * Added: Support for verbose mode in the "ICMP exfiltration" injection technique (module). 
 * Added: Check if the user-defined os name, is different than the one identified by heuristics.
 * Added: New option `--os` that forces a user-defined os name.
@@ -544,53 +547,53 @@ _Note: For more check the [detailed changeset](https://github.com/commixproject/
 
 ## Version 0.3b (2016-01-15)
 * Added: Time-relative false-positive identification, which identifies unexpected time delays due to unstable requests.
-* Added: New option `-l`, that parses target and data from HTTP proxy log file (i.e Burp or WebScarab).
+* Added: New option `-l`, that parses target and data from HTTP proxy log file (i.e. Burp or WebScarab).
 * Added: Check if Powershell is enabled in target host, if the applied option's payload is requiring the use of PowerShell.
 * Added: New option `--ps-version`, that checks PowerShell's version number.
 * Replaced: Some powershell-based payloads, have been replaced by new (more solid) ones, so to avoid "Microsoft-IIS" server's incompatibilities.
 * Added: Support (in MacOSX platforms) for a tab completion in shell options.
-* Added: Undocumented parameter "-InputFormat none" so to avoid "Microsoft-IIS" server's hang.
+* Added: Undocumented parameter `-InputFormat none` so to avoid "Microsoft-IIS" server's hang.
 * Added: Ability for identification of "Microsoft-IIS" servers.
-* Added: Statistical checks for time-related ("time-based"/"tempfile-based") techniques.
+* Added: Statistical checks for time-related techniques (i.e. "time-based", "tempfile-based").
 * Added: Support for Windows-based (cmd / powershell) payloads for every injection technique.
 
 ## Version 0.2b (2015-12-18)
 * Added: Support for recalling previous commands.
 * Added: Support (in Linux platforms) for tab completion in shell options.
-* Added: Support for alternative (Python) os-shell in dynamic code evaluation ("eval-based") technique.
+* Added: Support for alternative (Python) os-shell in dynamic code evaluation technique (i.e. "eval-based").
 * Added: Support for PHP/Python meterpreter on "reverse_tcp" shell option.
 * Added: The "reverse_tcp" shell option.
 * Added: The ability to check for default root directories (Apache/Nginx).
-* Added: Support for removal of (txt) shell files in semiblind ("file-based"/"tempfile-based") techniques.
-* Added: Support for JSON POST data.
+* Added: Support for removal of (txt) shell files in semiblind techniques (i.e. "file-based", "tempfile-based").
+* Added: Support for `JSON POST` data.
 * Added: The "enumeration" and "file-read" results to log file.
 * Added: The ability to get the user's approval before re-{enumerate/file-read} target.
 * Added: The ability to stop current injection technique and proceed on the next one(s).
 
 ## Version 0.1b (2015-09-20)
-* Added: New eval-based payload for "str_replace()" filter bypass.
+* Added: New eval-based payload for `str_replace()` filter bypass.
 * Added: Check for (GET) RESTful URL format.
-* Added: New option `--base64`, that encodes the OS command to Base64 format. 
-* Added: Support for regular "preg_replace()" injections via "/e" modifier.
+* Added: New option `--base64`, that encodes the OS command to `Base64` format. 
+* Added: Support for regular `preg_replace()` injections via `/e` modifier.
 * Added: Support for HTML Charset and HTTP "Server" response-header reconnaissance (on verbose mode).
-* Replaced: Payloads for "tempfile-based" (semiblind) technique, have been replaced by new (more solid) ones.
-* Added: A "new-line" separator support, for "time-based" (blind) & "tempfile-based" (semiblind) techniques.
+* Replaced: Payloads for semiblind (i.e. "tempfile-based") technique, have been replaced by new (more solid) ones.
+* Added: A "new-line" separator support, for blind (i.e. "time-based") and semiblind (i.e. "tempfile-based") techniques.
 * Added: Support for Referer HTTP header command injections.
 * Added: Support for User-Agent HTTP header command injections.
-* Added: CVE-2014-6278 support for "shellshock" module.
+* Added: [CVE-2014-6278](https://nvd.nist.gov/vuln/detail/CVE-2014-6278) support for "shellshock" module.
 * Added: Support for cookie-based command injections.
 * Added: A generic false-positive prevention technique.
-* Removed: The "Base64" detection option.
+* Removed: The `Base64` detection option.
 * Added: Support for the Tor network.
-* Added: The "shellshock" (CVE-2014-6271) injection technique (module).
+* Added: The "shellshock" [CVE-2014-6271](https://nvd.nist.gov/vuln/detail/cve-2014-6271) injection technique (module).
 * Added: Termcolor support for Windows (colorama).
 * Added: File access options.
 * Added: Enumeration options.
 * Added: New option `--alter-shell` that supports an alternative option for os-shell (e.g. Python).
 * Added: New option `--icmp-exfil` that supports the "ICMP exfiltration" injection technique (module).
-* Added: The "tempfile-based" (semiblind) technique.
-* Added: The "file-based" (semiblind) technique.
-* Removed: The "boolean-based" (blind) technique.
+* Added: The semiblind (i.e. "tempfile-based") technique.
+* Added: The semiblind (i.e. "file-based") technique.
+* Removed: The blind (i.e. “boolean-based”) technique.
 * Added: More Options.
 
 ## Version 0.1a (2014-12-20)
