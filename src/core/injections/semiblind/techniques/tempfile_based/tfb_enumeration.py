@@ -106,6 +106,8 @@ def system_information(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, 
     else:
       output = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
     target_arch = output
+  else:
+    target_arch = None
   checks.print_os_info(target_os, target_arch, filename, _)
 
 """
