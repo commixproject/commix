@@ -334,7 +334,7 @@ _Note: For more check the [detailed changeset](https://github.com/commixproject/
 * Revised: Minor improvement in results-based techniques, for delaying the OS responses depending on the user-supplied time delay.
 * Revised: The time-related payloads (i.e. "time-based", "tempfile-based"), have been shortly revised.
 * Revised: Minor improvement in semiblind (i.e. "file-based") technique, for delaying the OS responses depending on the user-supplied time delay.
-* Fixed: Minor improvement in semiblind (i.e. "file-based") technique, regarding τhe directory path that the output file is saved.
+* Fixed: Minor improvement in semiblind (i.e. "file-based") technique, regarding the directory path that the output file is saved.
 * Added: New option `--ignore-redirects` that ignoring redirection attempts.
 * Added: New functionality for identifying and following URL redirections.
 * Fixed: Minor improvement for adding `/` at the end of the user provided root dir (in case it does not exist).
