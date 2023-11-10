@@ -150,8 +150,8 @@ def check_http_traffic(request):
 
   opener = _urllib.request.build_opener(connection_handler())
 
-  if len(settings.HTTP_METHOD) != 0:
-    request.get_method = lambda: settings.HTTP_METHOD
+  # if len(settings.HTTP_METHOD) != 0:
+  #   request.get_method = lambda: settings.HTTP_METHOD
 
   _ = False
   response = False

@@ -285,15 +285,18 @@ def injection_output(url, OUTPUT_TEXTFILE, timesec):
           settings.RECHECK_FILE_FOR_EXTRACTION = True
         while True:
           message =  "Do you want to use URL '" + output
-          message += "' as command execution output? [Y/n] > "
+          message += "' for command execution output? [Y/n] > "
           procced_option = common.read_input(message, default="Y", check_batch=True)
           if procced_option in settings.CHOICE_YES:
             settings.DEFINED_WEBROOT = output
             break
           elif procced_option in settings.CHOICE_NO:
-            output = custom_web_root(url, OUTPUT_TEXTFILE)
+            message =  "Please enter URL to use "
+            message += "for command execution output: > "
+            message = common.read_input(message, default=output, check_batch=True)
+            output = settings.DEFINED_WEBROOT = message
             info_msg = "Using '" + output
-            info_msg += "' as command execution output."
+            info_msg += "' for command execution output."
             print(settings.print_info_msg(info_msg))
             if not settings.DEFINED_WEBROOT:
               pass
@@ -310,7 +313,7 @@ def injection_output(url, OUTPUT_TEXTFILE, timesec):
     output = settings.DEFINED_WEBROOT
 
   if settings.VERBOSITY_LEVEL != 0:
-    debug_msg = "Checking URL '" + settings.DEFINED_WEBROOT + "' for command execution output."
+    debug_msg = "Checking URL '" + output + "' for command execution output."
     print(settings.print_debug_msg(debug_msg))
 
   return output
@@ -324,7 +327,6 @@ def injection_results(url, OUTPUT_TEXTFILE, timesec):
   # Check if defined extra headers.
   request = _urllib.request.Request(output)
   headers.do_check(request)
-  headers.check_http_traffic(request)
   # Check if defined any HTTP Proxy (--proxy option).
   if menu.options.proxy or menu.options.ignore_proxy: 
     response = proxy.use_proxy(request)

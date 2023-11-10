@@ -22,6 +22,8 @@ from src.utils import menu
 from src.utils import logs
 from src.utils import settings
 from src.utils import session_handler
+from src.core.requests import tor
+from src.core.requests import proxy
 from src.core.requests import headers
 from src.core.requests import requests
 from src.core.requests import parameters
@@ -317,14 +319,23 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
               time.sleep(timesec)
 
               try:
-
                 # Check if defined extra headers.
                 request = _urllib.request.Request(output)
                 headers.do_check(request)
+                headers.check_http_traffic(request)
+                # Check if defined any HTTP Proxy (--proxy option).
+                if menu.options.proxy or menu.options.ignore_proxy: 
+                  response = proxy.use_proxy(request)
+                # Check if defined Tor (--tor option).
+                elif menu.options.tor:
+                  response = tor.use_tor(request)
+                else:
+                  response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
 
-                # Evaluate test results.
-                output = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
-                html_data = output.read()
+                if type(response) is bool:
+                  html_data = ""
+                else:
+                  html_data = checks.page_encoding(response, action="decode")
                 shell = re.findall(r"" + TAG + "", str(html_data))
 
                 if len(shell) != 0 and shell[0] == TAG and not settings.VERBOSITY_LEVEL != 0:

