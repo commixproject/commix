@@ -49,8 +49,11 @@ then use the "/tmp/" directory for tempfile-based technique.
 """
 def tfb_controller(no_result, url, timesec, filename, tmp_path, http_request_method, url_time_response):
   if no_result == True:
+    if settings.VERBOSITY_LEVEL != 0:
+      debug_msg = "Using '" + tmp_path + "' as temporary directory."
+      print(settings.print_debug_msg(debug_msg))
     info_msg = "Trying to create a file in temporary "
-    info_msg += "directory (" + tmp_path + ") for command execution output.\n"
+    info_msg += "directory ('" + tmp_path + "') for command execution output.\n"
     sys.stdout.write(settings.print_info_msg(info_msg))
     call_tfb = tfb_handler.exploitation(url, timesec, filename, tmp_path, http_request_method, url_time_response)
     return call_tfb
@@ -80,7 +83,7 @@ def custom_web_root(url, timesec, filename, http_request_method, url_time_respon
     example_root_dir = "\\inetpub\\wwwroot"
   else:
     example_root_dir = "/var/www"
-  message = "Please provide the host's root directory (e.g. '"
+  message = "Please provide web server document root directory (e.g. '"
   message += example_root_dir + "') > "
   settings.WEB_ROOT = common.read_input(message, default=example_root_dir, check_batch=True)
   if settings.WEB_ROOT.endswith(("\\", "/")):
@@ -208,6 +211,9 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
 
   if not settings.LOAD_SESSION or settings.RETEST == True:
     TAG = ''.join(random.choice(string.ascii_uppercase) for i in range(6))
+    if settings.VERBOSITY_LEVEL != 0:
+      debug_msg = "Using '" + settings.WEB_ROOT + "' as web server document root."
+      print(settings.print_debug_msg(debug_msg))
     info_msg = "Trying to create a file in '" + settings.WEB_ROOT
     info_msg += "' for command execution output. "
     print(settings.print_info_msg(info_msg))
@@ -369,9 +375,11 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                     tmp_path = check_tmp_path(url, timesec, filename, http_request_method, url_time_response)
                     sys.stdout.write("\r")
                     message = "It seems that you don't have permissions to "
-                    message += "read and/or write files in '" + settings.WEB_ROOT + "'. "
+                    message += "read and/or write files in '" + settings.WEB_ROOT + "'."
+                    if not menu.options.web_root:
+                      message += " You are advised to rerun with option '--web-root'."
                     while True:
-                      message = message + "Do you want to use the temporary directory (" + tmp_path + ")? [Y/n] > "
+                      message = message + "\nDo you want to use the temporary directory ('" + tmp_path + "')? [Y/n] > "
                       tmp_upload = common.read_input(message, default="Y", check_batch=True)
                       if tmp_upload in settings.CHOICE_YES:
                         exit_loops = True
@@ -426,9 +434,9 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                 print(settings.SINGLE_WHITESPACE)
               print(settings.print_critical_msg(err_msg))
               # Provide custom server's root directory.
-              custom_web_root(url, timesec, filename, http_request_method, url_time_response)
+              if not menu.options.web_root:
+                custom_web_root(url, timesec, filename, http_request_method, url_time_response)
               continue
-
             except:
               raise
 
