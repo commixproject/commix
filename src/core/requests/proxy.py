@@ -34,7 +34,7 @@ def use_proxy(request):
       opener = _urllib.request.build_opener(proxy)
       _urllib.request.install_opener(opener)
     else:
-      request.set_proxy(menu.options.proxy, settings.PROXY_SCHEME)
+      request.set_proxy(menu.options.proxy, settings.SCHEME)
     return _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
   except Exception as err_msg:
     return requests.request_failed(err_msg)

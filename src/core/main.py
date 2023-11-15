@@ -659,8 +659,9 @@ try:
 
       for match in re.finditer(settings.PROXY_REGEX, menu.options.proxy):
         _, proxy_scheme, proxy_address, proxy_port = match.groups()
-        if proxy_scheme:
-          settings.PROXY_SCHEME = proxy_scheme
+        if settings.SCHEME or proxy_scheme:
+          if not settings.SCHEME:
+            settings.SCHEME = proxy_scheme
           menu.options.proxy = proxy_address + ":" + proxy_port
           break
       else:

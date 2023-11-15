@@ -370,7 +370,7 @@ def request_failed(err_msg):
     continue_tests = checks.continue_tests(err_msg)
     if continue_tests == True:
       settings.IGNORE_ERR_MSG = True
-      return False
+      return True
     else:
       if not settings.CRAWLING:
         raise SystemExit()
