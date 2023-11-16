@@ -1,4 +1,5 @@
 ## Version 3.9 (TBA)
+* Revised: Minor improvement regarding Windows-based payloads for semiblind (i.e. "file-based") technique (i.e. command execution output).
 * Revised: Minor improvement in semiblind (i.e. "file-based") technique, regarding defining the URL where the execution output of an injected payload is shown.
 * Added: New switch `--ignore-proxy` to ignore the system default HTTP proxy.
 * Revised: Minor improvement regarding parsing HTTP requests through HTTP proxy (i.e. `--proxy` option).

