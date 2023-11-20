@@ -117,8 +117,12 @@ def check_tmp_path(url, timesec, filename, http_request_method, url_time_respons
 
   if menu.options.file_dest and '/tmp/' in menu.options.file_dest:
     call_tmp_based = True
-  # else:
+
   if menu.options.web_root:
+    if settings.TARGET_OS == settings.OS.WINDOWS and not menu.options.web_root.endswith("\\"):
+      menu.options.web_root = menu.options.web_root + "\\"
+    elif not menu.options.web_root.endswith("/"):
+      menu.options.web_root = menu.options.web_root + "/"
     settings.WEB_ROOT = menu.options.web_root
   else:
     # Debian/Ubunt have been updated to use /var/www/html as default instead of /var/www.

@@ -268,12 +268,9 @@ def injection_output(url, OUTPUT_TEXTFILE, timesec):
 
   if not settings.DEFINED_WEBROOT or settings.MULTI_TARGETS:
     if menu.options.web_root:
-      _ = "/"
-      if not menu.options.web_root.endswith(_):
-        menu.options.web_root = menu.options.web_root + _
       scheme = _urllib.parse.urlparse(url).scheme
       netloc = _urllib.parse.urlparse(url).netloc
-      output = scheme + "://" + netloc + _ + OUTPUT_TEXTFILE
+      output = scheme + "://" + netloc + "/" + OUTPUT_TEXTFILE
 
       for item in settings.LINUX_DEFAULT_DOC_ROOTS:
         if item == menu.options.web_root:
