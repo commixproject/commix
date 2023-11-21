@@ -230,15 +230,16 @@ def estimate_response_time(url, timesec):
   end = time.time()
   diff = end - start
 
+  if settings.VERBOSITY_LEVEL != 0 and _:
+    print(settings.SINGLE_WHITESPACE)
+    
   if int(diff) < 1:
     url_time_response = int(diff)
-    if settings.VERBOSITY_LEVEL != 0 and _:
-      print(settings.SINGLE_WHITESPACE)
+  else:
     if settings.TARGET_OS == settings.OS.WINDOWS:
       warn_msg = "Due to the relatively slow response of 'cmd.exe' in target "
       warn_msg += "host, there might be delays during the data extraction procedure."
       print(settings.print_warning_msg(warn_msg))
-  else:
     if settings.VERBOSITY_LEVEL != 0:
       print(settings.SINGLE_WHITESPACE)
     url_time_response = int(round(diff))
