@@ -50,7 +50,7 @@ Delete previous shells outputs.
 """
 def delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
   if settings.VERBOSITY_LEVEL != 0:
-    debug_msg = "Deleting the generated file '" + OUTPUT_TEXTFILE + "'"
+    debug_msg = "Cleaning up the target operating system (i.e. deleting file '" + OUTPUT_TEXTFILE + "')."
     print(settings.print_debug_msg(debug_msg))
   if settings.TARGET_OS == settings.OS.WINDOWS:
     cmd = settings.WIN_DEL + OUTPUT_TEXTFILE
