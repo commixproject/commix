@@ -34,7 +34,7 @@ def shell_options(option):
     print(settings.print_warning_msg(warn_msg))
   elif option.lower() == "?":
     menu.reverse_tcp_options()
-  elif option.lower() == "quit":
+  elif any(("quit", "exit")):
     raise SystemExit()
   elif option[0:4].lower() == "set ":
     if option[4:10].lower() == "rhost ":
@@ -502,7 +502,7 @@ def configure_bind_tcp(separator):
     elif option.lower() == "?":
       menu.bind_tcp_options()
       continue
-    elif option.lower() == "quit":
+    elif  any(("quit", "exit")):
       raise SystemExit()
     elif option.lower() == "os_shell" or option.lower() == "back":
       settings.BIND_TCP = False

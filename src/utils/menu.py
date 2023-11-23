@@ -668,7 +668,7 @@ def os_shell_options():
     print("""""" + Style.BRIGHT + """Available 'os_shell' options:""" + Style.RESET_ALL + """
 """ + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """?""" + Style.RESET_ALL + """' to get all the available options.
 """ + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """back""" + Style.RESET_ALL + """' to move back from the current context.
-""" + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """quit""" + Style.RESET_ALL + """' (or use <Ctrl-C>) to quit commix.
+""" + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """quit""" + Style.RESET_ALL + """' / '""" + Style.BRIGHT + """exit""" + Style.RESET_ALL + """' (or use <Ctrl-C>) to quit commix.
 """ + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """reverse_tcp""" + Style.RESET_ALL + """' to get a reverse TCP connection.
 """ + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """bind_tcp""" + Style.RESET_ALL + """' to set a bind TCP connection.""")
 
@@ -680,7 +680,7 @@ def reverse_tcp_options():
 """ + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """?""" + Style.RESET_ALL + """' to get all the available options.
 """ + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """set""" + Style.RESET_ALL + """' to set a context-specific variable to a value.
 """ + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """back""" + Style.RESET_ALL + """' to move back from the current context.
-""" + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """quit""" + Style.RESET_ALL + """' (or use <Ctrl-C>) to quit commix.
+""" + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """quit""" + Style.RESET_ALL + """' / '""" + Style.BRIGHT + """exit""" + Style.RESET_ALL + """' (or use <Ctrl-C>) to quit commix.
 """ + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """os_shell""" + Style.RESET_ALL + """' to get into an operating system command shell.
 """ + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """bind_tcp""" + Style.RESET_ALL + """' to set a bind TCP connection.""")
 
@@ -692,7 +692,7 @@ def bind_tcp_options():
 """ + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """?""" + Style.RESET_ALL + """' to get all the available options.
 """ + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """set""" + Style.RESET_ALL + """' to set a context-specific variable to a value.
 """ + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """back""" + Style.RESET_ALL + """' to move back from the current context.
-""" + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """quit""" + Style.RESET_ALL + """' (or use <Ctrl-C>) to quit commix.
+""" + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """quit""" + Style.RESET_ALL + """' / '""" + Style.BRIGHT + """exit""" + Style.RESET_ALL + """' (or use <Ctrl-C>) to quit commix.
 """ + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """os_shell""" + Style.RESET_ALL + """' to get into an operating system command shell.
 """ + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """reverse_tcp""" + Style.RESET_ALL + """' to get a reverse TCP connection.""")
 

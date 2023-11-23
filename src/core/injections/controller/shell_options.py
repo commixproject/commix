@@ -180,7 +180,7 @@ def check_option(separator, TAG, cmd, prefix, suffix, whitespace, http_request_m
     return go_back, go_back_again
 
   # The "quit" option
-  elif os_shell_option == "quit":
+  elif any(("quit", "exit")):
     logs.print_logs_notification(filename, url)
     raise SystemExit()
 

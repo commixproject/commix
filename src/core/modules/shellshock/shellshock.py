@@ -273,7 +273,7 @@ def check_options(url, cmd, cve, check_header, filename, os_shell_option, http_r
     return go_back, go_back_again
 
   # The "quit" option
-  elif os_shell_option == "quit":                    
+  elif  any(("quit", "exit")):                    
     raise SystemExit()
 
 """
