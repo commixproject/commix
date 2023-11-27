@@ -57,7 +57,7 @@ _Note: For more check the [detailed changeset](https://github.com/commixproject/
 * Revised: Improvements regarding Windows-based payloads for every supported technique.
 * Revised: Improvement regarding alternative shell (i.e.`--alter-shell`) for generating Python 3x payloads.
 * Removed: The depricated modules "ICMP exfiltration" and "DNS exfiltration" have been removed.
-* Revised: Improvement regarding identifying injection marker (i.e. asterisk) in provided options.
+* Revised: Improvement regarding identifying injection marker (i.e. asterisk `*`) in provided options.
 * Revised: Improvement regarding shellshock module.
 * Added: Support regarding parsing target(s) from piped-input (i.e. `stdin`).
 * Added: New option `--answers` to set user answers to asked questions during commix run.
@@ -444,7 +444,7 @@ _Note: For more check the [detailed changeset](https://github.com/commixproject/
 * Added: The ability for generating powershell attack vectors via TrustedSec's Magic Unicorn.
 * Added: The ability for checking if there is a new version available.
 * Added: The ability for target application extension recognition (i.e. PHP, ASP etc).
-* Fixed: Minor improvement for finding the URL part (i.e. scheme:[//host[:port]][/]path).
+* Fixed: Minor improvement for finding the URL part (i.e. `scheme:[//host[:port]][/]path`).
 * Fixed: Minor fix for conflicted shells (i.e. regular, alternative) from session file.
 
 _Note: For more check the [detailed changeset](https://github.com/commixproject/commix/compare/v1.1-20160714...v1.2-20160812)._
@@ -489,8 +489,8 @@ _Note: For more check the [detailed changeset](https://github.com/commixproject/
 
 ## Version 0.8b (2016-05-06)
 * Fixed: The `--file-read` option to ignore the carriage return (`\r`) character in a text file.
-* Added: The ability to check for empty value(s) in the defined GET, POST, `Cookie` data and skip.
-* Replaced: The `INJECT_HERE` tag has been replaced with the `*` (asterisk) wildcard character.
+* Added: The ability to check for empty value(s) in the defined GET, POST, Cookie data and skip.
+* Replaced: The `INJECT_HERE` tag has been replaced with the asterisk (`*`) wildcard character.
 * Added: New option `--level` (1-3) that specifies level of tests to perform.
 * Added: New option `-p` that specifies a comma-separated list of GET and POST parameter.
 * Added: The ability to check every parameter in the provided cookie data.
@@ -567,7 +567,7 @@ _Note: For more check the [detailed changeset](https://github.com/commixproject/
 * Added: The "reverse_tcp" shell option.
 * Added: The ability to check for default root directories (Apache/Nginx).
 * Added: Support for removal of (txt) shell files in semiblind techniques (i.e. "file-based", "tempfile-based").
-* Added: Support for `JSON POST` data.
+* Added: Support for JSON POST data.
 * Added: The "enumeration" and "file-read" results to log file.
 * Added: The ability to get the user's approval before re-{enumerate/file-read} target.
 * Added: The ability to stop current injection technique and proceed on the next one(s).
