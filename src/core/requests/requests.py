@@ -793,13 +793,13 @@ def server_identification(server_banner):
       # Set up default root paths
       if "apache" in settings.SERVER_BANNER.lower():
         if settings.TARGET_OS == settings.OS.WINDOWS:
-          settings.WEB_ROOT = "\\htdocs"
+          settings.WEB_ROOT = settings.WINDOWS_DEFAULT_DOC_ROOTS[1]
         else:
-          settings.WEB_ROOT = "/var/www"
+          settings.WEB_ROOT = settings.LINUX_DEFAULT_DOC_ROOTS[0].replace(settings.DOC_ROOT_TARGET_MARK,settings.TARGET_URL)
       elif "nginx" in settings.SERVER_BANNER.lower():
-        settings.WEB_ROOT = "/usr/share/nginx"
+        settings.WEB_ROOT = settings.WINDOWS_DEFAULT_DOC_ROOTS[6]
       elif "microsoft-iis" in settings.SERVER_BANNER.lower():
-        settings.WEB_ROOT = "\\inetpub\\wwwroot"
+        settings.WEB_ROOT = settings.WINDOWS_DEFAULT_DOC_ROOTS[0]
       break
   else:
     if settings.VERBOSITY_LEVEL != 0:

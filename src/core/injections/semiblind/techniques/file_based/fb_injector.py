@@ -269,10 +269,12 @@ def injection_output(url, OUTPUT_TEXTFILE, timesec):
   if not settings.DEFINED_WEBROOT or settings.MULTI_TARGETS:
     if menu.options.web_root:
       scheme = _urllib.parse.urlparse(url).scheme
+      hostname = _urllib.parse.urlparse(url).hostname
       netloc = _urllib.parse.urlparse(url).netloc
       output = scheme + "://" + netloc + "/" + OUTPUT_TEXTFILE
 
       for item in settings.LINUX_DEFAULT_DOC_ROOTS:
+        item = item.replace(settings.DOC_ROOT_TARGET_MARK, hostname)
         if item == menu.options.web_root:
           settings.DEFINED_WEBROOT = output
           break
@@ -310,7 +312,7 @@ def injection_output(url, OUTPUT_TEXTFILE, timesec):
     output = settings.DEFINED_WEBROOT
 
   if settings.VERBOSITY_LEVEL != 0:
-    debug_msg = "Checking URL '" + output + "' for command execution output."
+    debug_msg = "Checking if the file is accessible from '" + output + "'."
     print(settings.print_debug_msg(debug_msg))
 
   return output

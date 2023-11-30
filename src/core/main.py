@@ -206,6 +206,7 @@ def url_response(url):
     print(settings.print_info_msg(info_msg))
   # Check if http / https
   url = checks.check_http_s(url)
+  settings.TARGET_URL = _urllib.parse.urlparse(url).hostname
   # Check if defined Tor (--tor option).
   if menu.options.tor and settings.TOR_CHECK_AGAIN:
     tor.do_check()
