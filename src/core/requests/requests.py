@@ -797,7 +797,7 @@ def server_identification(server_banner):
         else:
           settings.WEB_ROOT = settings.LINUX_DEFAULT_DOC_ROOTS[0].replace(settings.DOC_ROOT_TARGET_MARK,settings.TARGET_URL)
       elif "nginx" in settings.SERVER_BANNER.lower():
-        settings.WEB_ROOT = settings.WINDOWS_DEFAULT_DOC_ROOTS[6]
+        settings.WEB_ROOT = settings.LINUX_DEFAULT_DOC_ROOTS[6]
       elif "microsoft-iis" in settings.SERVER_BANNER.lower():
         settings.WEB_ROOT = settings.WINDOWS_DEFAULT_DOC_ROOTS[0]
       break

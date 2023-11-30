@@ -241,7 +241,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.9"
-REVISION = "25"
+REVISION = "26"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1191,7 +1191,7 @@ NAGGING_DAYS = 31
 TARGET_URL = ""
 DOC_ROOT_TARGET_MARK = "%TARGET%"
 WINDOWS_DEFAULT_DOC_ROOTS = ["C:\\\\Inetpub\\wwwroot", "C:\\\\xampp\\htdocs", "C:\\\\wamp\\www"]
-LINUX_DEFAULT_DOC_ROOTS = ["/var/www/" + DOC_ROOT_TARGET_MARK + "/public_html", "/var/www", "/var/www/html", "/var/www/htdocs", "/usr/local/apache2/htdocs", "/usr/local/www/data", "/var/apache2/htdocs", "/var/www/nginx-default", "/srv/www/htdocs"]  # Reference: https://wiki.apache.org/httpd/DistrosDefaultLayout
+LINUX_DEFAULT_DOC_ROOTS = ["/var/www/" + DOC_ROOT_TARGET_MARK + "/public_html", "/var/www", "/var/www/html", "/var/www/htdocs", "/usr/local/apache2/htdocs", "/usr/local/www/data", "/usr/share/nginx", "/var/apache2/htdocs", "/var/www/nginx-default", "/srv/www/htdocs"]  # Reference: https://wiki.apache.org/httpd/DistrosDefaultLayout
 
 DEFINED_WEBROOT = RECHECK_FILE_FOR_EXTRACTION = False
 
