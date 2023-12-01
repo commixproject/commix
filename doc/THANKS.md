@@ -7,6 +7,7 @@
 * Thanks [m3g9tr0n](https://twitter.com/m3g9tr0n) for a donation.
 
 ## List of individual contributors:
+* Thanks [xerxoria](https://github.com/xerxoria) for reporting a bug and for suggesting a relevant fix.
 * Thanks [Kazgangap](https://github.com/Kazgangap) for contributing a Turkish translation of README.md.
 * Thanks [0xFred](https://github.com/0xFred) for contributing code.
 * Thanks [verfosec](https://github.com/verfosec) for contributing a Farsi(Persian) translation of README.md.
@@ -81,7 +82,7 @@
 * Thanks [Slavery](https://github.com/Slavery) for reporting a bug.
 * Thanks [sno0ose](https://github.com/sno0ose) for reporting a bug.
 * Thanks [somarrr](https://github.com/somarrr) for reporting a bug.
-* Thanks [Suselz](https://github.com/Suselz) for reporting a few bugs and for suggesting suggesting enhancements.
+* Thanks [Suselz](https://github.com/Suselz) for reporting a few bugs and for suggesting enhancements.
 * Thanks [td4b](https://github.com/td4b) for contributing code.
 * Thanks [techn0tr0ll](https://github.com/techn0tr0ll) for reporting a bug.
 * Thanks [Tensha](https://github.com/Tensha) for reporting a bug.

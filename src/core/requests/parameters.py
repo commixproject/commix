@@ -136,6 +136,7 @@ def do_GET_check(url, http_request_method):
               value = checks.value_boundaries(all_params[param], value, http_request_method)
             # Ignoring the anti-CSRF parameter(s).
             if checks.ignore_anticsrf_parameter(all_params[param]):
+              all_params[param - 1] = ''.join(all_params[param - 1]).replace(settings.INJECT_TAG, "")
               continue
             # Replace the value of parameter with INJECT_HERE tag
             if len(value) == 0:
@@ -322,6 +323,7 @@ def do_POST_check(parameter, http_request_method):
           value = checks.value_boundaries(all_params[param], value, http_request_method)
         # Ignoring the anti-CSRF parameter(s).
         if checks.ignore_anticsrf_parameter(all_params[param]):
+          all_params[param - 1] = ''.join(all_params[param - 1]).replace(settings.INJECT_TAG, "")
           continue
         # Replace the value of parameter with INJECT_HERE tag
         if len(value) == 0:
@@ -523,6 +525,7 @@ def do_cookie_check(cookie):
         value = multi_params_get_value(all_params[param])
         # Ignoring the anti-CSRF parameter(s).
         if checks.ignore_anticsrf_parameter(all_params[param]):
+          all_params[param - 1] = ''.join(all_params[param - 1]).replace(settings.INJECT_TAG, "")
           continue
         # Ignoring the Google analytics cookie parameter.
         if checks.ignore_google_analytics_cookie(all_params[param]):
