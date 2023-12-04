@@ -408,11 +408,12 @@ Ignoring the anti-CSRF parameter(s).
 """
 def ignore_anticsrf_parameter(parameter):
   if any(parameter.lower().count(token) for token in settings.CSRF_TOKEN_PARAMETER_INFIXES):
-    if (len(parameter.split("="))) == 2:
-      info_msg = "Ignoring the parameter '" + parameter.split("=")[0]
-      info_msg += "' that appears to hold anti-CSRF token '" + parameter.split("=")[1] +  "'."
-      print(settings.print_info_msg(info_msg))
-    return True
+    if not any(parameter for token in settings.TEST_PARAMETER):
+      if (len(parameter.split("="))) == 2:
+        info_msg = "Ignoring the parameter '" + parameter.split("=")[0]
+        info_msg += "' that appears to hold anti-CSRF token '" + parameter.split("=")[1] +  "'."
+        print(settings.print_info_msg(info_msg))
+      return True
 
 """
 Ignoring the Google analytics cookie parameter.
