@@ -369,7 +369,7 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
       filebased_command_injection_technique(url, timesec, filename, http_request_method, url_time_response)
 
     # All injection techniques seems to be failed!
-    if settings.CLASSIC_STATE == settings.EVAL_BASED_STATE == settings.TIME_BASED_STATE == settings.FILE_BASED_STATE == False :
+    if checks.injection_techniques_status() == False:
       warn_msg = "The tested"
       if header_name != " cookie" and the_type != " HTTP header":
         warn_msg += " " + str(http_request_method) + ""
@@ -758,45 +758,42 @@ def do_check(url, http_request_method, filename):
               pass
     else:
       perform_checks(url, http_request_method, filename)
-
+      
     # All injection techniques seems to be failed!
-    if settings.CLASSIC_STATE == settings.EVAL_BASED_STATE == settings.TIME_BASED_STATE == settings.FILE_BASED_STATE == False :
-      if settings.INJECTION_CHECKER == False and not settings.CHECK_BOTH_OS:
-        err_msg = "All tested parameters "
-        if menu.options.level > settings.COOKIE_INJECTION_LEVEL:
-          err_msg += "and HTTP headers "
-        err_msg += "appear to be not injectable."
-        if menu.options.level < settings.HTTP_HEADER_INJECTION_LEVEL :
-          err_msg += " Try to increase value for '--level' option"
-        if menu.options.skip_empty:
-          err_msg += " and/or remove option '--skip-empty'"
-        err_msg += " if you wish to perform more tests."
-        if settings.USER_SUPPLIED_TECHNIQUE or settings.SKIP_TECHNIQUES:
-          err_msg += " Rerun without providing the option "
-          if not settings.SKIP_TECHNIQUES :
-            err_msg += "'--technique'."
-          else:
-            err_msg += "'--skip-technique'."
-        err_msg += " If you suspect that there is some kind of protection mechanism involved, maybe you could try to"
-        if not menu.options.alter_shell :
-          err_msg += " use option '--alter-shell'"
+    if not settings.INJECTION_CHECKER:
+      err_msg = "All tested parameters "
+      if menu.options.level > settings.COOKIE_INJECTION_LEVEL:
+        err_msg += "and HTTP headers "
+      err_msg += "appear to be not injectable."
+      if menu.options.level < settings.HTTP_HEADER_INJECTION_LEVEL :
+        err_msg += " Try to increase value for '--level' option"
+      if menu.options.skip_empty:
+        err_msg += " and/or remove option '--skip-empty'"
+      err_msg += " if you wish to perform more tests."
+      if settings.USER_SUPPLIED_TECHNIQUE or settings.SKIP_TECHNIQUES:
+        err_msg += " Rerun without providing the option "
+        if not settings.SKIP_TECHNIQUES :
+          err_msg += "'--technique'."
         else:
-          err_msg += " remove option '--alter-shell'"
+          err_msg += "'--skip-technique'."
+      err_msg += " If you suspect that there is some kind of protection mechanism involved, maybe you could try to"
+      if not menu.options.alter_shell :
+        err_msg += " use option '--alter-shell'"
+      else:
+        err_msg += " remove option '--alter-shell'"
+      if not menu.options.tamper:
+        err_msg += " and/or use option '--tamper'"
+      if not menu.options.random_agent:
         if not menu.options.tamper:
-          err_msg += " and/or use option '--tamper'"
-        if not menu.options.random_agent:
-          if not menu.options.tamper:
-            err_msg += " and/or"
-          err_msg += " switch '--random-agent'"
-        err_msg += "."
-        if settings.MULTI_TARGETS:
-          err_msg += " Skipping to the next target."
-        print(settings.print_error_msg(err_msg))
+          err_msg += " and/or"
+        err_msg += " switch '--random-agent'"
+      err_msg += "."
+      if settings.MULTI_TARGETS:
+        err_msg += " Skipping to the next target."
+      print(settings.print_error_msg(err_msg))
     else:
       logs.print_logs_notification(filename, url)
-    # if not settings.MULTI_TARGETS:
-    #   print(settings.SINGLE_WHITESPACE)
-    if not settings.CHECK_BOTH_OS and not settings.MULTI_TARGETS:
+    if not settings.MULTI_TARGETS:
       common.show_http_error_codes()
       raise SystemExit()
 

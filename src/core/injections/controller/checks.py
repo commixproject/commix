@@ -57,6 +57,15 @@ except:
     settings.READLINE_ERROR = True
 
 """
+Check injection technique(s) status.
+"""
+def injection_techniques_status():
+  if settings.CLASSIC_STATE != True and settings.EVAL_BASED_STATE != True and settings.TIME_BASED_STATE != True and settings.FILE_BASED_STATE != True:
+    return False
+  else:
+    return True
+
+"""
 Check for custom injection marker (*)
 """
 def check_custom_injection_marker(url):

@@ -290,6 +290,7 @@ def notification(url, technique, injection_type):
         message += " injection point? [Y/n] > "
         settings.LOAD_SESSION = common.read_input(message, default="Y", check_batch=True)
         if settings.LOAD_SESSION in settings.CHOICE_YES:
+          settings.INJECTION_CHECKER = True
           return True
         elif settings.LOAD_SESSION in settings.CHOICE_NO:
           settings.LOAD_SESSION = False
