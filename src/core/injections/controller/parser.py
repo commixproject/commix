@@ -53,12 +53,10 @@ def logfile_parser():
   Error message for invalid data.
   """
   def invalid_data(request):
-    print(settings.SINGLE_WHITESPACE)
     err_msg = "Specified file "
     err_msg += "'" + os.path.split(request_file)[1] + "'"
     err_msg += " does not contain a valid HTTP request."
-    sys.stdout.write(settings.print_critical_msg(err_msg) + "\n")
-    sys.stdout.flush()
+    print(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
   if menu.options.requestfile:
@@ -69,142 +67,139 @@ def logfile_parser():
     request_file = menu.options.logfile
 
   if not os.path.exists(request_file):
-    print(settings.SINGLE_WHITESPACE)
     err_msg = "It seems that the '" + request_file + "' file, does not exist."
-    sys.stdout.write(settings.print_critical_msg(err_msg) + "\n")
-    sys.stdout.flush()
+    print(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
+  try:
+    if menu.options.requestfile:
+      with open(request_file, 'r') as file:
+        settings.RAW_HTTP_HEADERS = [line.strip() for line in file]
+      settings.RAW_HTTP_HEADERS = [header for header in settings.RAW_HTTP_HEADERS if header]
+      settings.RAW_HTTP_HEADERS = settings.RAW_HTTP_HEADERS[1:]
+      settings.RAW_HTTP_HEADERS = settings.RAW_HTTP_HEADERS[:-1]
+      settings.RAW_HTTP_HEADERS = '\\n'.join(settings.RAW_HTTP_HEADERS)
+
+    if os.stat(request_file).st_size != 0:
+      with open(request_file, 'r') as file:
+        request = file.read()
+    else:
+      invalid_data(request_file)
+
+  except IOError as err_msg:
+    error_msg = "The '" + request_file + "' "
+    error_msg += str(err_msg.args[1]).lower() + "."
+    print(settings.SINGLE_WHITESPACE)
+    print(settings.print_critical_msg(error_msg))
+    raise SystemExit()
+
+  single_request = True
+  pattern = r'HTTP/([\d.]+)'
+  if len(re.findall(pattern, request)) > 1:
+    single_request = multi_requests()
+
+  if len(settings.HTTP_METHOD) == 0:
+    http_method = request.strip().splitlines()[0].split()[0]
+    settings.HTTP_METHOD = http_method
   else:
+    http_method = settings.HTTP_METHOD
+
+  if "\\n" in request:
+    request = request.replace("\\n","\n")
+  request_url = re.findall(r"" + " (.*) HTTP/", request)
+
+  if request_url:
     try:
-      if menu.options.requestfile:
-        with open(request_file, 'r') as file:
-          settings.RAW_HTTP_HEADERS = [line.strip() for line in file]
-        settings.RAW_HTTP_HEADERS = [header for header in settings.RAW_HTTP_HEADERS if header]
-        settings.RAW_HTTP_HEADERS = settings.RAW_HTTP_HEADERS[1:]
-        settings.RAW_HTTP_HEADERS = settings.RAW_HTTP_HEADERS[:-1]
-        settings.RAW_HTTP_HEADERS = '\\n'.join(settings.RAW_HTTP_HEADERS)
-
-      if os.stat(request_file).st_size != 0:
-        with open(request_file, 'r') as file:
-          request = file.read()
+      # Check empty line for POST data.
+      if len(request.splitlines()[-2]) == 0:
+        result = [item for item in request.splitlines() if item]
+        multiple_xml = []
+        for item in result:
+          if checks.is_XML_check(item):
+            multiple_xml.append(item)
+        if len(multiple_xml) != 0:
+          menu.options.data = '\n'.join([str(item) for item in multiple_xml])
+        else:
+          menu.options.data = result[len(result)-1]
       else:
-        invalid_data(request_file)
+        # Check if url ends with "=".
+        if request_url[0].endswith("="):
+          request_url = request_url[0].replace("=","=" + settings.INJECT_TAG, 1)
+    except IndexError:
+      invalid_data(request_file)
 
-    except IOError as err_msg:
-      error_msg = "The '" + request_file + "' "
-      error_msg += str(err_msg.args[1]).lower() + "."
+  # Check if invalid data
+  else:
+    invalid_data(request_file)
+
+  request_url = "".join([str(i) for i in request_url])
+  # Check for other headers
+  extra_headers = ""
+  scheme = "http://"
+  for line in request.splitlines():
+    if re.findall(r"Host: " + "(.*)", line):
+      menu.options.host = "".join([str(i) for i in re.findall(r"Host: " + "(.*)", line)])
+    # User-Agent Header
+    if re.findall(r"User-Agent: " + "(.*)", line):
+      menu.options.agent = "".join([str(i) for i in re.findall(r"User-Agent: " + "(.*)", line)])
+    # Cookie Header
+    if re.findall(r"Cookie: " + "(.*)", line):
+      menu.options.cookie = "".join([str(i) for i in re.findall(r"Cookie: " + "(.*)", line)])
+    # Referer Header
+    if re.findall(r"Referer: " + "(.*)", line):
+      menu.options.referer = "".join([str(i) for i in re.findall(r"Referer: " + "(.*)", line)])
+      if menu.options.referer and "https://" in menu.options.referer:
+        scheme = "https://"
+    if re.findall(r"Authorization: " + "(.*)", line):
+      auth_provided = "".join([str(i) for i in re.findall(r"Authorization: " + "(.*)", line)]).split()
+      menu.options.auth_type = auth_provided[0].lower()
+      if menu.options.auth_type.lower() == settings.AUTH_TYPE.BASIC:
+        menu.options.auth_cred = base64.b64decode(auth_provided[1]).decode()
+      elif menu.options.auth_type.lower() == settings.AUTH_TYPE.DIGEST:
+        if not menu.options.auth_cred:
+          print(settings.SINGLE_WHITESPACE)
+          err_msg = "Use the '--auth-cred' option to provide a valid pair of "
+          err_msg += "HTTP authentication credentials (i.e --auth-cred=\"admin:admin\") "
+          print(settings.print_critical_msg(err_msg))
+          raise SystemExit()
+
+    # Add extra headers
+    else:
+      match = re.findall(r"(.*): (.*)", line)
+      match = "".join([str(i) for i in match]).replace("', '",":")
+      match = match.replace("('", "")
+      match = match.replace("')","\\n")
+      # Ignore some header.
+      if "Content-Length" or "Accept-Encoding" in match:
+        extra_headers = extra_headers
+      else:
+        extra_headers = extra_headers + match
+
+  # Extra headers
+  menu.options.headers = extra_headers
+  # Target URL
+  if not menu.options.host:
+    invalid_data(request_file)
+  else:
+    if len(_urllib.parse.urlparse(request_url).scheme) == 0:
+      request_url = scheme + request_url
+    if not menu.options.host in request_url:
+      request_url = request_url.replace(scheme, scheme + menu.options.host)
+    request_url = checks.check_http_s(request_url)
+    info_msg += "using the '" + os.path.split(request_file)[1] + "' file. "
+    sys.stdout.write(settings.print_info_msg(info_msg))
+    sys.stdout.flush()
+    menu.options.url = request_url
+    if single_request:
       print(settings.SINGLE_WHITESPACE)
-      print(settings.print_critical_msg(error_msg))
-      raise SystemExit()
-
-    single_request = True
-    pattern = r'HTTP/([\d.]+)'
-    if len(re.findall(pattern, request)) > 1:
-      single_request = multi_requests()
-
-    if len(settings.HTTP_METHOD) == 0:
-      http_method = request.strip().splitlines()[0].split()[0]
-      settings.HTTP_METHOD = http_method
-    else:
-      http_method = settings.HTTP_METHOD
-
-    if "\\n" in request:
-      request = request.replace("\\n","\n")
-    request_url = re.findall(r"" + " (.*) HTTP/", request)
-
-    if request_url:
-      try:
-        # Check empty line for POST data.
-        if len(request.splitlines()[-2]) == 0:
-          result = [item for item in request.splitlines() if item]
-          multiple_xml = []
-          for item in result:
-            if checks.is_XML_check(item):
-              multiple_xml.append(item)
-          if len(multiple_xml) != 0:
-            menu.options.data = '\n'.join([str(item) for item in multiple_xml])
-          else:
-            menu.options.data = result[len(result)-1]
-        else:
-          # Check if url ends with "=".
-          if request_url[0].endswith("="):
-            request_url = request_url[0].replace("=","=" + settings.INJECT_TAG, 1)
-      except IndexError:
-        invalid_data(request_file)
-
-    # Check if invalid data
-    else:
-      invalid_data(request_file)
-
-    request_url = "".join([str(i) for i in request_url])
-    # Check for other headers
-    extra_headers = ""
-    scheme = "http://"
-    for line in request.splitlines():
-      if re.findall(r"Host: " + "(.*)", line):
-        menu.options.host = "".join([str(i) for i in re.findall(r"Host: " + "(.*)", line)])
-      # User-Agent Header
-      if re.findall(r"User-Agent: " + "(.*)", line):
-        menu.options.agent = "".join([str(i) for i in re.findall(r"User-Agent: " + "(.*)", line)])
-      # Cookie Header
-      if re.findall(r"Cookie: " + "(.*)", line):
-        menu.options.cookie = "".join([str(i) for i in re.findall(r"Cookie: " + "(.*)", line)])
-      # Referer Header
-      if re.findall(r"Referer: " + "(.*)", line):
-        menu.options.referer = "".join([str(i) for i in re.findall(r"Referer: " + "(.*)", line)])
-        if menu.options.referer and "https://" in menu.options.referer:
-          scheme = "https://"
-      if re.findall(r"Authorization: " + "(.*)", line):
-        auth_provided = "".join([str(i) for i in re.findall(r"Authorization: " + "(.*)", line)]).split()
-        menu.options.auth_type = auth_provided[0].lower()
-        if menu.options.auth_type.lower() == settings.AUTH_TYPE.BASIC:
-          menu.options.auth_cred = base64.b64decode(auth_provided[1]).decode()
-        elif menu.options.auth_type.lower() == settings.AUTH_TYPE.DIGEST:
-          if not menu.options.auth_cred:
-            print(settings.SINGLE_WHITESPACE)
-            err_msg = "Use the '--auth-cred' option to provide a valid pair of "
-            err_msg += "HTTP authentication credentials (i.e --auth-cred=\"admin:admin\") "
-            print(settings.print_critical_msg(err_msg))
-            raise SystemExit()
-
-      # Add extra headers
-      else:
-        match = re.findall(r"(.*): (.*)", line)
-        match = "".join([str(i) for i in match]).replace("', '",":")
-        match = match.replace("('", "")
-        match = match.replace("')","\\n")
-        # Ignore some header.
-        if "Content-Length" or "Accept-Encoding" in match:
-          extra_headers = extra_headers
-        else:
-          extra_headers = extra_headers + match
-
-    # Extra headers
-    menu.options.headers = extra_headers
-    # Target URL
-    if not menu.options.host:
-      invalid_data(request_file)
-    else:
-      if len(_urllib.parse.urlparse(request_url).scheme) == 0:
-        request_url = scheme + request_url
-      if not menu.options.host in request_url:
-        request_url = request_url.replace(scheme, scheme + menu.options.host)
-      request_url = checks.check_http_s(request_url)
-      info_msg += "using the '" + os.path.split(request_file)[1] + "' file. "
-      sys.stdout.write(settings.print_info_msg(info_msg))
-      sys.stdout.flush()
-      menu.options.url = request_url
-      if single_request:
-        print(settings.SINGLE_WHITESPACE)
-      if menu.options.logfile and settings.VERBOSITY_LEVEL != 0:
-        sub_content = http_method + settings.SINGLE_WHITESPACE + menu.options.url
-        print(settings.print_sub_content(sub_content))
-        if menu.options.cookie:
-           sub_content = "Cookie: " + menu.options.cookie
-           print(settings.print_sub_content(sub_content))
-        if menu.options.data:
-           sub_content = "POST data: " + menu.options.data
-           print(settings.print_sub_content(sub_content))
+    if menu.options.logfile and settings.VERBOSITY_LEVEL != 0:
+      sub_content = http_method + settings.SINGLE_WHITESPACE + menu.options.url
+      print(settings.print_sub_content(sub_content))
+      if menu.options.cookie:
+         sub_content = "Cookie: " + menu.options.cookie
+         print(settings.print_sub_content(sub_content))
+      if menu.options.data:
+         sub_content = "POST data: " + menu.options.data
+         print(settings.print_sub_content(sub_content))
 
 # eof
