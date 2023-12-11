@@ -203,7 +203,7 @@ Get the URL response.
 def url_response(url):
   if settings.INIT_TEST == True:
     info_msg = "Testing connection to the target URL. "
-    print(settings.print_info_msg(info_msg))
+    print(settings.print_bold_info_msg(info_msg))
   # Check if http / https
   url = checks.check_http_s(url)
   settings.TARGET_URL = _urllib.parse.urlparse(url).hostname
