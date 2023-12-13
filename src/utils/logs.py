@@ -17,7 +17,7 @@ import re
 import sys
 import time
 import sqlite3
-import datetime
+from datetime import datetime, date
 from src.utils import menu
 from src.utils import settings
 from src.utils import session_handler
@@ -107,8 +107,8 @@ def create_log_file(url, output_dir):
     if not menu.options.no_logging:
       output_file.write("\n" + "=" * 37)
       output_file.write("\n" + "| Started in " + \
-        datetime.datetime.fromtimestamp(time.time()).strftime('%m/%d/%Y' + \
-        " at " + '%H:%M:%S' + " |"))
+        str(date.today()) + \
+        " at " + datetime.now().strftime("%H:%M:%S") + " |")
       output_file.write("\n" + "=" * 37)
       output_file.write("\n" + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + "Tested URL : " + url)
     output_file.close()

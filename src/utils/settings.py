@@ -20,7 +20,7 @@ import time
 import random
 import string
 import codecs
-from datetime import datetime
+from datetime import datetime, date
 from src.core.compat import xrange
 from src.thirdparty.six.moves import urllib as _urllib
 from src.thirdparty.six.moves import reload_module as _reload_module
@@ -71,6 +71,11 @@ BIND_TCP_SHELL = """commix(""" + Style.BRIGHT + Fore.RED + """bind_tcp""" + Styl
 
 def print_time():
   return "[" + Fore.LIGHTBLUE_EX  + datetime.now().strftime("%H:%M:%S") + Style.RESET_ALL + "] "
+
+# Print execution status
+def execution(status):
+  debug_msg = status + " " + APPLICATION + " " + VERSION + " at " + datetime.now().strftime("%H:%M:%S") + " (" + str(date.today()) + ")."
+  return print_time() + DEBUG_SIGN + str(debug_msg) + Style.RESET_ALL
 
 # Print legal disclaimer message
 def print_legal_disclaimer_msg(legal_disclaimer_msg):
@@ -241,7 +246,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.9"
-REVISION = "31"
+REVISION = "32"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:

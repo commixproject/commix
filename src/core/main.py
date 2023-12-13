@@ -575,6 +575,9 @@ try:
   else:
     settings.VERBOSITY_LEVEL = menu.options.verbose
 
+  if settings.VERBOSITY_LEVEL != 0:
+    print(settings.execution("Starting"))
+
   if menu.options.smoke_test:
     smoke_test()
 
@@ -978,12 +981,13 @@ except KeyboardInterrupt:
     print(settings.print_abort_msg(abort_msg))
     raise SystemExit()
 
-except SystemExit:
-  raise SystemExit()
-
 except EOFError:
   err_msg = "Exiting, due to EOFError."
   print(settings.print_error_msg(err_msg))
   raise SystemExit()
 
+except SystemExit:
+  if settings.VERBOSITY_LEVEL != 0:
+    print(settings.execution("Ending"))
+  raise SystemExit()
 # eof
