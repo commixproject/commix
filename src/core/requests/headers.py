@@ -225,9 +225,12 @@ def check_http_traffic(request):
     if not menu.options.drop_set_cookie:
       checks.not_declared_cookies(err)
     try:
+      if err.fp is None:
+        raise AttributeError
       page = checks.page_encoding(err, action="encode")
     except Exception as ex:
-      page = err.read()
+      page = ''
+      
     if settings.VERBOSITY_LEVEL != 0:
       print_http_response(err.info(), err.code, page)
 

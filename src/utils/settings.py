@@ -74,7 +74,7 @@ def print_time():
 
 # Print execution status
 def execution(status):
-  debug_msg = status + " " + APPLICATION + " " + VERSION + " at " + datetime.now().strftime("%H:%M:%S") + " (" + str(date.today()) + ")."
+  debug_msg = status + " " + APPLICATION + " at " + datetime.now().strftime("%H:%M:%S") + " (" + str(date.today()) + ")."
   return print_time() + DEBUG_SIGN + str(debug_msg) + Style.RESET_ALL
 
 # Print legal disclaimer message
@@ -246,7 +246,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.9"
-REVISION = "32"
+REVISION = "33"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
