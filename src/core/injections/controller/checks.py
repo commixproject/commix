@@ -56,6 +56,11 @@ except:
   except:
     settings.READLINE_ERROR = True
 
+def exit():
+  if settings.VERBOSITY_LEVEL != 0:
+    print(settings.execution("Ending"))
+  os._exit(0)
+
 """
 Check injection technique(s) status.
 """
@@ -232,7 +237,7 @@ def user_aborted(filename, url):
   print(settings.print_abort_msg(abort_msg))
   logs.print_logs_notification(filename, url)
   common.show_http_error_codes()
-  os._exit(0)
+  raise exit()
 
 """
 Connection exceptions

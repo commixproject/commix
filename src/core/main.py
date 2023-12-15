@@ -60,6 +60,7 @@ if settings.IS_WINDOWS:
   # Use Colorama to make Termcolor work on Windows too :)
   init()
 
+
 """
 Define HTTP User-Agent header.
 """
@@ -979,15 +980,14 @@ except KeyboardInterrupt:
   except NameError:
     abort_msg = "User quit (Ctrl-C was pressed)."
     print(settings.print_abort_msg(abort_msg))
-    raise SystemExit()
+  raise checks.exit()
 
 except EOFError:
   err_msg = "Exiting, due to EOFError."
   print(settings.print_error_msg(err_msg))
-  raise SystemExit()
+  raise checks.exit()
 
 except SystemExit:
-  if settings.VERBOSITY_LEVEL != 0:
-    print(settings.execution("Ending"))
-  raise SystemExit()
+  raise checks.exit()
+
 # eof
