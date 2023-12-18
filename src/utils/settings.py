@@ -20,7 +20,8 @@ import time
 import random
 import string
 import codecs
-from datetime import datetime, date
+from datetime import date
+from datetime import datetime
 from src.core.compat import xrange
 from src.thirdparty.six.moves import urllib as _urllib
 from src.thirdparty.six.moves import reload_module as _reload_module
@@ -246,7 +247,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.9"
-REVISION = "34"
+REVISION = "35"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:

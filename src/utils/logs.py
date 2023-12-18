@@ -17,7 +17,8 @@ import re
 import sys
 import time
 import sqlite3
-from datetime import datetime, date
+from datetime import date
+from datetime import datetime
 from src.utils import menu
 from src.utils import settings
 from src.utils import session_handler
