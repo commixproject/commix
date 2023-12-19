@@ -603,6 +603,12 @@ misc.add_option("--mobile",
                 default=False,
                 help="Imitate smartphone through HTTP User-Agent header.")
 
+misc.add_option("--ignoreStdin",
+                action="store_true",
+                dest="ignoreStdin",
+                default=False,
+                help="Ignore STDIN.")
+
 misc.add_option("--offline",
                 action="store_true",
                 dest="offline",

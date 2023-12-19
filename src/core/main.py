@@ -560,6 +560,9 @@ try:
     if settings.STABLE_RELEASE == False:
       common.days_from_last_update()
 
+  if menu.options.ignoreStdin:
+    settings.STDIN_PARSING = False
+
   # Check if specified wrong alternative shell
   if menu.options.alter_shell:
     if menu.options.alter_shell.lower() not in settings.AVAILABLE_SHELLS:
