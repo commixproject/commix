@@ -1890,11 +1890,10 @@ def print_ps_version(ps_version, filename, _):
     info_msg = "Powershell version: " + ps_version
     print(settings.print_bold_info_msg(info_msg))
     # Add infos to logs file.
-    output_file = open(filename, "a")
-    if not menu.options.no_logging:
-      info_msg = "Powershell version: " + ps_version + "\n"
-      output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
-    output_file.close()
+    with open(filename, 'a') as output_file:
+      if not menu.options.no_logging:
+        info_msg = "Powershell version: " + ps_version + "\n"
+        output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
   except ValueError:
     warn_msg = "Heuristics have failed to identify the version of Powershell, "
     warn_msg += "which means that some payloads or injection techniques may be failed."
