@@ -560,9 +560,6 @@ try:
     if settings.STABLE_RELEASE == False:
       common.days_from_last_update()
 
-  if menu.options.ignoreStdin:
-    settings.STDIN_PARSING = False
-
   # Check if specified wrong alternative shell
   if menu.options.alter_shell:
     if menu.options.alter_shell.lower() not in settings.AVAILABLE_SHELLS:
@@ -584,6 +581,9 @@ try:
 
   if menu.options.smoke_test:
     smoke_test()
+
+  if hasattr(sys.stdin, "fileno") and not any((os.isatty(sys.stdin.fileno()), menu.options.ignore_stdin)):
+    settings.STDIN_PARSING = True
 
   if menu.options.ignore_redirects:
     settings.FOLLOW_REDIRECT = False

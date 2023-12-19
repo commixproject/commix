@@ -7,6 +7,7 @@
 * Thanks [m3g9tr0n](https://twitter.com/m3g9tr0n) for a donation.
 
 ## List of individual contributors:
+* Thanks [n00b-bot](https://github.com/n00b-bot) for suggesting a feature.
 * Thanks [xerxoria](https://github.com/xerxoria) for reporting a bug and for suggesting a relevant fix.
 * Thanks [Kazgangap](https://github.com/Kazgangap) for contributing a Turkish translation of README.md.
 * Thanks [0xFred](https://github.com/0xFred) for contributing code.

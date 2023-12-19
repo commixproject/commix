@@ -603,12 +603,6 @@ misc.add_option("--mobile",
                 default=False,
                 help="Imitate smartphone through HTTP User-Agent header.")
 
-misc.add_option("--ignoreStdin",
-                action="store_true",
-                dest="ignoreStdin",
-                default=False,
-                help="Ignore STDIN.")
-
 misc.add_option("--offline",
                 action="store_true",
                 dest="offline",
@@ -631,6 +625,12 @@ misc.add_option("--disable-coloring",
 parser.add_option("--smoke-test",
                     action="store_true",
                     dest="smoke_test",
+                    help=SUPPRESS)
+
+parser.add_option("--ignore-stdin",
+                    action="store_true",
+                    dest="ignore_stdin",
+                    default=False,
                     help=SUPPRESS)
 
 parser.add_option_group(general)

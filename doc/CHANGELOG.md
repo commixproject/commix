@@ -1,4 +1,5 @@
 ## Version 3.9 (TBA)
+* Added: New (hidden) option `--ignore-stdin` regarding ignoring STDIN input. (via @n00b-bot)
 * Revised: Minor improvement regarding successfully completing the scanning process (i.e. in case that parameters with anti-CSRF tokens are omitted). (via @xerxoria)
 * Revised: Minor improvement regarding Windows-based payloads for semiblind (i.e. "file-based") technique (i.e. command execution output).
 * Revised: Minor improvement in semiblind (i.e. "file-based") technique, regarding defining the URL where the execution output of an injected payload is shown.
