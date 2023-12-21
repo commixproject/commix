@@ -20,26 +20,32 @@ from src.thirdparty.six.moves import http_client as _http_client
 from src.utils import menu
 from src.utils import settings
 from src.utils import requirments
+from src.core.requests import requests
 from src.thirdparty.colorama import Fore, Back, Style, init
 
-
-if menu.options.tor_port:
-  TOR_HTTP_PROXY_PORT = menu.options.tor_port
-else:
-  TOR_HTTP_PROXY_PORT = settings.TOR_HTTP_PROXY_PORT
+def tor_bandle_error():
+  print(settings.SINGLE_WHITESPACE)
+  err_msg = "Can't establish connection with the Tor HTTP proxy. "  
+  err_msg += "Please make sure that you have "
+  err_msg += "Tor bundle (https://www.torproject.org/download/) or Tor and Privoxy installed and setup "
+  err_msg += "so you could be able to successfully use switch '--tor'."
+  print(settings.print_critical_msg(err_msg))
+  raise SystemExit()
 
 """
 Check if Tor HTTP proxy is defined.
 """
 def do_check():
+  if menu.options.tor_port:
+    settings.TOR_HTTP_PROXY_PORT = menu.options.tor_port
   check_tor_http_proxy = True
   info_msg = "Testing Tor HTTP proxy settings ("
-  info_msg += settings.TOR_HTTP_PROXY_SCHEME + "://" + settings.TOR_HTTP_PROXY_IP + ":" + TOR_HTTP_PROXY_PORT
+  info_msg += settings.TOR_HTTP_PROXY_SCHEME + "://" + settings.TOR_HTTP_PROXY_IP + ":" + settings.TOR_HTTP_PROXY_PORT 
   info_msg +=  "). "
   sys.stdout.write(settings.print_info_msg(info_msg))
   sys.stdout.flush()
   try:
-    tor_http_proxy = _urllib.request.ProxyHandler({settings.TOR_HTTP_PROXY_SCHEME:settings.TOR_HTTP_PROXY_IP + ":" + TOR_HTTP_PROXY_PORT})
+    tor_http_proxy = _urllib.request.ProxyHandler({settings.TOR_HTTP_PROXY_SCHEME:settings.TOR_HTTP_PROXY_IP + ":" + settings.TOR_HTTP_PROXY_PORT})
     opener = _urllib.request.build_opener(tor_http_proxy)
     _urllib.request.install_opener(opener)
   except:
@@ -53,7 +59,7 @@ def do_check():
         sys.stdout.write(settings.SUCCESS_STATUS + "\n")
         sys.stdout.flush()
         if menu.options.tor_check:
-          info_msg = "Tor connection is properly set. "
+          info_msg = "Connection with the Tor HTTP proxy is properly set. "
         else:
           info_msg = ""
         found_ip = re.findall(r":  <strong>" + "(.*)" + "</strong></p>", check_tor_page)
@@ -62,39 +68,14 @@ def do_check():
         warn_msg = "Increasing default value for option '--time-sec' to"
         warn_msg += " " + str(settings.TIMESEC) + " because switch '--tor' was provided."
         print(settings.print_warning_msg(warn_msg))
-
       else:
-        print(settings.SINGLE_WHITESPACE)
-        if menu.options.tor_check:
-          err_msg = "It seems that your Tor connection is not properly set. "
-        else:
-          err_msg = ""
-        err_msg += "Can't establish connection with the Tor HTTP proxy. "
-        err_msg += "Please make sure that you have "
-        err_msg += "Tor bundle installed and running so "
-        err_msg += "you could successfully use "
-        err_msg += "switch '--tor'."
-        print(settings.print_critical_msg(err_msg))
-        raise SystemExit()
+        tor_bandle_error()
 
     except _urllib.error.URLError as err_msg:
-      print(settings.SINGLE_WHITESPACE)
-      if menu.options.tor_check:
-        err_msg = "It seems that your Tor connection is not properly set. "
-      else:
-        err_msg = ""
-      err_msg = "Please make sure that you have "
-      err_msg += "Tor bundle installed and running so "
-      err_msg += "you could successfully use "
-      err_msg += "switch '--tor'."
-      print(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+      tor_bandle_error()
 
-    except (_http_client.BadStatusLine, _http_client.IncompleteRead) as err_msg:
-      print(settings.SINGLE_WHITESPACE)
-      if len(err_msg.line) > 2 :
-        print(err_msg.line, err_msg.message)
-      raise SystemExit()
+    except Exception as err_msg:
+      return requests.request_failed(err_msg)
 
 
 """
@@ -102,23 +83,18 @@ Use the TOR HTTP Proxy.
 """
 def use_tor(request):
   if menu.options.offline:
-    err_msg = "You cannot Tor network without access on the Internet."
+    err_msg = "You cannot use Tor network while offline."
     print(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
   try:
-    tor_http_proxy = _urllib.request.ProxyHandler({settings.TOR_HTTP_PROXY_SCHEME:settings.TOR_HTTP_PROXY_IP + ":" + TOR_HTTP_PROXY_PORT})
+    tor_http_proxy = _urllib.request.ProxyHandler({settings.TOR_HTTP_PROXY_SCHEME:settings.TOR_HTTP_PROXY_IP + ":" + settings.TOR_HTTP_PROXY_PORT})
     opener = _urllib.request.build_opener(tor_http_proxy)
     _urllib.request.install_opener(opener)
     response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
     return response
 
   except Exception as err_msg:
-    try:
-      error_msg = str(err_msg.args[0]).split("] ")[1] + "."
-    except IndexError:
-      error_msg = str(err_msg).replace(": "," (") + ")."
-    print(settings.print_critical_msg(error_msg))
-    raise SystemExit()
+    return requests.request_failed(err_msg)
 
 # eof
