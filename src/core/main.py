@@ -202,9 +202,6 @@ def init_request(url):
 Get the URL response.
 """
 def url_response(url):
-  if settings.INIT_TEST == True:
-    info_msg = "Testing connection to the target URL. "
-    print(settings.print_bold_info_msg(info_msg))
   # Check if http / https
   url = checks.check_http_s(url)
   settings.TARGET_URL = _urllib.parse.urlparse(url).hostname
@@ -215,6 +212,9 @@ def url_response(url):
     settings.TOR_CHECK_AGAIN = False
     # initiate total of requests
     settings.TOTAL_OF_REQUESTS = 0
+  if settings.INIT_TEST == True:
+    info_msg = "Testing connection to the target URL. "
+    print(settings.print_bold_info_msg(info_msg))
   request = init_request(url)
   if settings.CHECK_INTERNET:
     settings.CHECK_INTERNET = False
