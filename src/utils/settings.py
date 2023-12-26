@@ -247,7 +247,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "3.9"
-REVISION = "39"
+REVISION = "40"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -681,6 +681,7 @@ SCHEME = ""
 TOR_HTTP_PROXY_IP = "127.0.0.1"
 TOR_HTTP_PROXY_PORT = "8118"
 TOR_HTTP_PROXY_SCHEME = "https"
+CHECK_TOR_PAGE = "https://check.torproject.org/"
 
 # Cookie injection
 COOKIE_INJECTION = None

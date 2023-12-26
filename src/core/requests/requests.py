@@ -27,7 +27,6 @@ from src.thirdparty.six.moves import http_client as _http_client
 _http_client._MAXLINE = 1 * 1024 * 1024
 from src.utils import common
 from src.utils import crawler
-from src.core.requests import tor
 from src.core.requests import proxy
 from src.core.requests import headers
 from src.core.requests import requests
@@ -52,10 +51,8 @@ def crawler_request(url):
       request = _urllib.request.Request(url)
     headers.do_check(request)
     headers.check_http_traffic(request)
-    if menu.options.proxy or menu.options.ignore_proxy: 
+    if menu.options.proxy or menu.options.ignore_proxy or menu.options.tor: 
       response = proxy.use_proxy(request)
-    elif menu.options.tor:
-      response = tor.use_tor(request)
     else:
       response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
     if type(response) is not bool and settings.FOLLOW_REDIRECT and response is not None:
@@ -278,7 +275,15 @@ def request_failed(err_msg):
     except IndexError:
       error_msg = str(err_msg)
 
-  if any(x in str(error_msg).lower() for x in ["wrong version number", "ssl", "https"]):
+  if "Tunnel connection failed" in str(error_msg) and menu.options.tor:
+      err_msg = "Can't establish connection with the Tor network. "  
+      err_msg += "Please make sure that you have "
+      err_msg += "Tor bundle (https://www.torproject.org/download/) or Tor and Privoxy installed and setup "
+      err_msg += "so you could be able to successfully use switch '--tor'."
+      print(settings.print_critical_msg(err_msg))
+      raise SystemExit()
+
+  elif any(x in str(error_msg).lower() for x in ["wrong version number", "ssl", "https"]):
     settings.MAX_RETRIES = 1
     error_msg = "Can't establish SSL connection. "
     if settings.MULTI_TARGETS or settings.CRAWLING:
@@ -292,9 +297,15 @@ def request_failed(err_msg):
   elif any(x in str(error_msg).lower() for x in ["connection refused", "timeout"]):
     settings.MAX_RETRIES = 1
     err = "Unable to connect to the target URL"
-    if menu.options.proxy or menu.options.ignore_proxy: 
+    if menu.options.tor:
+      err += " or Tor HTTP proxy."
+    elif menu.options.proxy or menu.options.ignore_proxy: 
       err += " or proxy"
     err = err + " (Reason: " + str(error_msg)  + "). "
+    if menu.options.tor:
+      err += "Please make sure that you have "
+      err += "Tor bundle (https://www.torproject.org/download/) or Tor and Privoxy installed and setup "
+      err += "so you could be able to successfully use switch '--tor'."
     if settings.MULTI_TARGETS or settings.CRAWLING:
       err = err + "Skipping to the next target."
     error_msg = err
@@ -393,14 +404,9 @@ Get the response of the request
 def get_request_response(request):
 
   headers.check_http_traffic(request)
-  if menu.options.proxy or menu.options.ignore_proxy: 
+  if menu.options.proxy or menu.options.ignore_proxy or menu.options.tor: 
     try:
       response = proxy.use_proxy(request)
-    except Exception as err_msg:
-      response = request_failed(err_msg)
-  elif menu.options.tor:
-    try:
-      response = tor.use_tor(request)
     except Exception as err_msg:
       response = request_failed(err_msg)
   else:
@@ -437,11 +443,8 @@ def cookie_injection(url, vuln_parameter, payload):
       request.add_header('Cookie', menu.options.cookie.replace(settings.INJECT_TAG, payload))
     try:
       headers.check_http_traffic(request)
-      if menu.options.proxy or menu.options.ignore_proxy: 
+      if menu.options.proxy or menu.options.ignore_proxy or menu.options.tor: 
         response = proxy.use_proxy(request)
-      # Check if defined Tor (--tor option).
-      elif menu.options.tor:
-        response = tor.use_tor(request)
       else:
         response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
       return response
@@ -484,11 +487,8 @@ def user_agent_injection(url, vuln_parameter, payload):
     request.add_header('User-Agent', payload)
     try:
       headers.check_http_traffic(request)
-      if menu.options.proxy or menu.options.ignore_proxy: 
+      if menu.options.proxy or menu.options.ignore_proxy or menu.options.tor: 
         response = proxy.use_proxy(request)
-      # Check if defined Tor (--tor option).
-      elif menu.options.tor:
-        response = tor.use_tor(request)
       else:
         response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
       return response
@@ -531,11 +531,8 @@ def referer_injection(url, vuln_parameter, payload):
     request.add_header('Referer', payload)
     try:
       headers.check_http_traffic(request)
-      if menu.options.proxy or menu.options.ignore_proxy: 
+      if menu.options.proxy or menu.options.ignore_proxy or menu.options.tor: 
         response = proxy.use_proxy(request)
-      # Check if defined Tor (--tor option).
-      elif menu.options.tor:
-        response = tor.use_tor(request)
       else:
         response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
       return response
@@ -586,11 +583,8 @@ def host_injection(url, vuln_parameter, payload):
     request.add_header('Host', payload)
     try:
       headers.check_http_traffic(request)
-      if menu.options.proxy or menu.options.ignore_proxy: 
+      if menu.options.proxy or menu.options.ignore_proxy or menu.options.tor: 
         response = proxy.use_proxy(request)
-      # Check if defined Tor (--tor option).
-      elif menu.options.tor:
-        response = tor.use_tor(request)
       else:
         response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
       return response
@@ -636,11 +630,8 @@ def custom_header_injection(url, vuln_parameter, payload):
       request.add_header(settings.CUSTOM_HEADER_NAME, settings.CUSTOM_HEADER_VALUE + payload)
     try:
       headers.check_http_traffic(request)
-      if menu.options.proxy or menu.options.ignore_proxy: 
+      if menu.options.proxy or menu.options.ignore_proxy or menu.options.tor: 
         response = proxy.use_proxy(request)
-      # Check if defined Tor (--tor option).
-      elif menu.options.tor:
-        response = tor.use_tor(request)
       else:
         response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
       return response

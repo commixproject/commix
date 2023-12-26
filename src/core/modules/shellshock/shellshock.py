@@ -12,7 +12,6 @@ from src.utils import common
 from src.utils import menu
 from src.utils import logs
 from src.utils import settings
-from src.core.requests import tor
 from src.core.requests import proxy
 from src.thirdparty.colorama import Fore, Back, Style, init
 from src.core.shells import bind_tcp
@@ -313,11 +312,8 @@ def shellshock_handler(url, http_request_method, filename):
         log_http_headers.do_check(request)
         log_http_headers.check_http_traffic(request)
         # Check if defined any HTTP Proxy.
-        if menu.options.proxy or menu.options.ignore_proxy: 
+        if menu.options.proxy or menu.options.ignore_proxy or menu.options.tor: 
           response = proxy.use_proxy(request)
-        # Check if defined Tor.
-        elif menu.options.tor:
-          response = tor.use_tor(request)
         else:
           response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
         if check_header == "Cookie":
@@ -562,11 +558,8 @@ def cmd_exec(url, cmd, cve, check_header, filename):
       log_http_headers.do_check(request)
       log_http_headers.check_http_traffic(request)
       # Check if defined any HTTP Proxy.
-      if menu.options.proxy or menu.options.ignore_proxy: 
+      if menu.options.proxy or menu.options.ignore_proxy or menu.options.tor: 
         response = proxy.use_proxy(request)
-      # Check if defined Tor.
-      elif menu.options.tor:
-        response = tor.use_tor(request)
       else:
         response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
       if check_header == "User-Agent":

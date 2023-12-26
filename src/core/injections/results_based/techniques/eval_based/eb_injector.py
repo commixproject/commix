@@ -21,7 +21,6 @@ import string
 import random
 from src.utils import menu
 from src.utils import settings
-from src.core.requests import tor
 from src.core.requests import proxy
 from src.core.requests import headers
 from src.core.requests import requests

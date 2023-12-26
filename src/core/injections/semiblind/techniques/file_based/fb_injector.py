@@ -22,7 +22,6 @@ import random
 import base64
 from src.utils import menu
 from src.utils import settings
-from src.core.requests import tor
 from src.core.requests import proxy
 from src.core.requests import headers
 from src.core.requests import requests
@@ -327,11 +326,8 @@ def injection_results(url, OUTPUT_TEXTFILE, timesec):
   request = _urllib.request.Request(output)
   headers.do_check(request)
   # Check if defined any HTTP Proxy (--proxy option).
-  if menu.options.proxy or menu.options.ignore_proxy: 
+  if menu.options.proxy or menu.options.ignore_proxy or menu.options.tor: 
     response = proxy.use_proxy(request)
-  # Check if defined Tor (--tor option).
-  elif menu.options.tor:
-    response = tor.use_tor(request)
   else:
     response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
     

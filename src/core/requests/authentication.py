@@ -20,7 +20,6 @@ import base64
 from src.utils import menu
 from src.utils import settings
 from src.utils import session_handler
-from src.core.requests import tor
 from src.core.requests import proxy
 from src.core.requests import headers
 from src.utils import common
@@ -175,11 +174,8 @@ def http_auth_cracker(url, realm):
           headers.do_check(request)
           headers.check_http_traffic(request)
           # Check if defined any HTTP Proxy (--proxy option).
-          if menu.options.proxy or menu.options.ignore_proxy: 
+          if menu.options.proxy or menu.options.ignore_proxy or menu.options.tor: 
             proxy.use_proxy(request)
-          # Check if defined Tor (--tor option).
-          elif menu.options.tor:
-            tor.use_tor(request)
           response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
           # Store valid results to session
           admin_panel = url

@@ -114,9 +114,6 @@ def examine_request(request, url):
     # Check if defined any HTTP Proxy (--proxy option).
     if menu.options.proxy or menu.options.ignore_proxy: 
       return proxy.use_proxy(request)
-    # Check if defined Tor (--tor option).
-    elif menu.options.tor:
-      return tor.use_tor(request)
     else:
       try:
         response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
@@ -205,9 +202,6 @@ def url_response(url):
   # Check if http / https
   url = checks.check_http_s(url)
   settings.TARGET_URL = _urllib.parse.urlparse(url).hostname
-  # Check if defined Tor (--tor option).
-  if menu.options.tor and settings.TOR_CHECK_AGAIN:
-    tor.do_check()
   if settings.MULTI_TARGETS or settings.CRAWLING:
     settings.TOR_CHECK_AGAIN = False
     # initiate total of requests
@@ -649,10 +643,6 @@ try:
     if menu.options.answers:
       settings.ANSWERS = menu.options.answers
 
-    if not menu.options.proxy:
-      if _urllib.parse.urlparse(menu.options.url).hostname in ("localhost", "127.0.0.1") or menu.options.ignore_proxy:
-        menu.options.ignore_proxy = True
-
     # Check if defined "--proxy" option.
     if menu.options.proxy:
       if menu.options.tor:
@@ -676,6 +666,16 @@ try:
         err_msg = "Proxy value must be in format '(http|https)://address:port'."
         print(settings.print_critical_msg(err_msg))
         raise SystemExit()
+
+    if not menu.options.proxy:
+      if _urllib.parse.urlparse(menu.options.url).hostname in ("localhost", "127.0.0.1") or menu.options.ignore_proxy:
+        menu.options.ignore_proxy = True
+      # Check if defined Tor (--tor option).
+      elif menu.options.tor:
+        if menu.options.tor_port:
+          settings.TOR_HTTP_PROXY_PORT = menu.options.tor_port
+        menu.options.proxy = settings.TOR_HTTP_PROXY_IP + ":" + settings.TOR_HTTP_PROXY_PORT
+        tor.do_check()
 
     if menu.options.ignore_session and menu.options.flush_session:
       err_msg = "The '--ignore-session' option is unlikely to work combined with the '--flush-session' option."
@@ -757,14 +757,14 @@ try:
       settings.DELAY = menu.options.delay
 
     # Check if defined "--timesec" option.
-    if menu.options.timesec > 0:
+    if menu.options.timesec != 0:
       settings.TIMESEC = menu.options.timesec
-    else:
-      if menu.options.tor:
-        settings.TIMESEC = 10
-        warn_msg = "Increasing default value for option '--time-sec' to"
-        warn_msg += " " + str(settings.TIMESEC) + ", because switch '--tor' was provided."
-        print(settings.print_warning_msg(warn_msg))
+
+    if menu.options.tor:
+      settings.TIMESEC = settings.TIMESEC * 2
+      warn_msg = "Increasing default value for option '--time-sec' to"
+      warn_msg += " " + str(settings.TIMESEC) + ", because switch '--tor' was provided."
+      print(settings.print_warning_msg(warn_msg))
 
     # Local IP address
     if not menu.options.offline:

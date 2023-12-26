@@ -22,7 +22,6 @@ from src.utils import menu
 from src.utils import logs
 from src.utils import settings
 from src.utils import session_handler
-from src.core.requests import tor
 from src.core.requests import proxy
 from src.core.requests import headers
 from src.core.requests import requests
@@ -334,11 +333,8 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                 headers.do_check(request)
                 headers.check_http_traffic(request)
                 # Check if defined any HTTP Proxy (--proxy option).
-                if menu.options.proxy or menu.options.ignore_proxy: 
+                if menu.options.proxy or menu.options.ignore_proxy or menu.options.tor: 
                   response = proxy.use_proxy(request)
-                # Check if defined Tor (--tor option).
-                elif menu.options.tor:
-                  response = tor.use_tor(request)
                 else:
                   response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
 
