@@ -104,15 +104,14 @@ def create_log_file(url, output_dir):
   # The logs filename construction.
   filename = logs_path + settings.OUTPUT_FILE
   try:
-    output_file = open(filename, "a")
-    if not menu.options.no_logging:
-      output_file.write("\n" + "=" * 37)
-      output_file.write("\n" + "| Started in " + \
-        str(date.today()) + \
-        " at " + datetime.now().strftime("%H:%M:%S") + " |")
-      output_file.write("\n" + "=" * 37)
-      output_file.write("\n" + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + "Tested URL : " + url)
-    output_file.close()
+    with open(filename, 'a') as output_file:
+      if not menu.options.no_logging:
+        output_file.write("\n" + "=" * 37)
+        output_file.write("\n" + "| Started in " + \
+          str(date.today()) + \
+          " at " + datetime.now().strftime("%H:%M:%S") + " |")
+        output_file.write("\n" + "=" * 37)
+        output_file.write("\n" + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + "Tested URL : " + url)
   except IOError as err_msg:
     try:
       error_msg = str(err_msg.args[0]).split("] ")[1] + "."
@@ -120,7 +119,6 @@ def create_log_file(url, output_dir):
       error_msg = str(err_msg.args[0]) + "."
     print(settings.print_critical_msg(error_msg))
     raise SystemExit()
-
   return filename
 
 """
@@ -130,41 +128,38 @@ def add_type_and_technique(export_injection_info, filename, injection_type, tech
 
   if export_injection_info == False:
     settings.SHOW_LOGS_MSG = True
-    output_file = open(filename, "a")
-    if not menu.options.no_logging:
-      output_file.write("\n" + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + "Type: " + injection_type.title())
-      output_file.write("\n" + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + "Technique: " + technique.title())
-    output_file.close()
-    export_injection_info = True
-
+    with open(filename, 'a') as output_file:
+      if not menu.options.no_logging:
+        output_file.write("\n" + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + "Type: " + injection_type.title())
+        output_file.write("\n" + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + "Technique: " + technique.title())
+      export_injection_info = True
   return export_injection_info
 
 """
 Add the vulnerable parameter in log files.
 """
 def add_parameter(vp_flag, filename, the_type, header_name, http_request_method, vuln_parameter, payload):
-  output_file = open(filename, "a")
-  if not menu.options.no_logging:
-    if header_name[1:] == "cookie":
-      header_name = " ("+ header_name[1:] + ") " + vuln_parameter
-    if header_name[1:] == "":
-      header_name = " ("+ http_request_method + ") " + vuln_parameter
-    output_file.write("\n" + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + the_type[1:].title() + ": " + header_name[1:])
-    vp_flag = False
-    output_file.write("\n")
-  output_file.close()
+  with open(filename, 'a') as output_file:
+    if not menu.options.no_logging:
+      if header_name[1:] == "cookie":
+        header_name = " ("+ header_name[1:] + ") " + vuln_parameter
+      if header_name[1:] == "":
+        header_name = " ("+ http_request_method + ") " + vuln_parameter
+      output_file.write("\n" + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + the_type[1:].title() + ": " + header_name[1:])
+      vp_flag = False
+      output_file.write("\n")
+
 
 """
 Add any payload in log files.
 """
 def update_payload(filename, counter, payload):
-  output_file = open(filename, "a")
-  if not menu.options.no_logging:
-    if "\n" in payload:
-      output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + "Used payload: " + re.sub("%20", settings.SINGLE_WHITESPACE, _urllib.parse.unquote_plus(payload.replace("\n", "\\n"))) + "\n")
-    else:
-      output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + "Used payload: " + payload.replace("%20", settings.SINGLE_WHITESPACE) + "\n")
-  output_file.close()
+  with open(filename, 'a') as output_file:
+    if not menu.options.no_logging:
+      if "\n" in payload:
+        output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + "Used payload: " + re.sub("%20", settings.SINGLE_WHITESPACE, _urllib.parse.unquote_plus(payload.replace("\n", "\\n"))) + "\n")
+      else:
+        output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + "Used payload: " + payload.replace("%20", settings.SINGLE_WHITESPACE) + "\n")
 
 """
 Add any executed command and
@@ -172,11 +167,10 @@ execution output result in log files.
 """
 def executed_command(filename, cmd, output):
   try:
-    output_file = open(filename, "a")
-    if not menu.options.no_logging:
-      output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + "Executed command: " +  cmd + "\n")
-      output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_SIGN) + "Execution output: " + output.encode(settings.DEFAULT_CODEC).decode() + "\n")
-    output_file.close()
+    with open(filename, 'a') as output_file:
+      if not menu.options.no_logging:
+        output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + "Executed command: " +  cmd + "\n")
+        output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_SIGN) + "Execution output: " + output.encode(settings.DEFAULT_CODEC).decode() + "\n")
   except TypeError:
     pass
 

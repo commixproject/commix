@@ -1911,11 +1911,10 @@ def print_hostname(shell, filename, _):
     info_msg = "Hostname: " +  str(shell)
     print(settings.print_bold_info_msg(info_msg))
     # Add infos to logs file.
-    output_file = open(filename, "a")
-    if not menu.options.no_logging:
-      info_msg = info_msg + "\n"
-      output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
-    output_file.close()
+    with open(filename, 'a') as output_file:
+      if not menu.options.no_logging:
+        info_msg = info_msg + "\n"
+        output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
   else:
     warn_msg = "Heuristics have failed to identify the hostname."
     print(settings.print_warning_msg(warn_msg))
@@ -1930,11 +1929,10 @@ def print_current_user(cu_account, filename, _):
     info_msg = "Current user: " +  str(cu_account)
     print(settings.print_bold_info_msg(info_msg))
     # Add infos to logs file.
-    output_file = open(filename, "a")
-    if not menu.options.no_logging:
-      info_msg = info_msg + "\n"
-      output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
-    output_file.close()
+    with open(filename, 'a') as output_file:
+      if not menu.options.no_logging:
+        info_msg = info_msg + "\n"
+        output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
   else:
     warn_msg = "Heuristics have failed to fetch the current user."
     print(settings.print_warning_msg(warn_msg))
@@ -1954,12 +1952,10 @@ def print_current_user_privs(shell, filename, _):
   info_msg = "Current user has excessive privileges: " +  str(priv)
   print(settings.print_bold_info_msg(info_msg))
   # Add infos to logs file.
-  output_file = open(filename, "a")
-  if not menu.options.no_logging:
-    info_msg = info_msg + "\n"
-    output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
-  output_file.close()
-
+  with open(filename, 'a') as output_file:
+    if not menu.options.no_logging:
+      info_msg = info_msg + "\n"
+      output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
 """
 Print OS info
 """
@@ -1970,11 +1966,10 @@ def print_os_info(target_os, target_arch, filename, _):
     info_msg = "Operating system: " +  str(target_os) + settings.SINGLE_WHITESPACE + str(target_arch)
     print(settings.print_bold_info_msg(info_msg))
     # Add infos to logs file.
-    output_file = open(filename, "a")
-    if not menu.options.no_logging:
-      info_msg = info_msg + "\n"
-      output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
-    output_file.close()
+    with open(filename, 'a') as output_file:
+      if not menu.options.no_logging:
+        info_msg = info_msg + "\n"
+        output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
   else:
     warn_msg = "Heuristics have failed to fetch underlying operating system information."
     print(settings.print_warning_msg(warn_msg))
@@ -2041,41 +2036,20 @@ def print_users(sys_users, filename, _, separator, TAG, cmd, prefix, suffix, whi
           info_msg += " [" + str(len(sys_users_list)) + "]:"
           print(settings.print_bold_info_msg(info_msg))
           # Add infos to logs file.
-          output_file = open(filename, "a")
-          if not menu.options.no_logging:
-            output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
-          output_file.close()
+          with open(filename, 'a') as output_file:
+            if not menu.options.no_logging:
+              output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
           count = 0
           for user in range(0, len(sys_users_list)):
             count = count + 1
-            # if menu.options.privileges:
-            #   cmd = "powershell.exe -InputFormat none write-host (([string]$(net user " + sys_users_list[user] + ")[22..($(net user " + sys_users_list[user] + ").length-3)]).replace('Local Group Memberships','').replace('*','').Trim()).replace(' ','')"
-            #   if alter_shell:
-            #     cmd = escape_single_quoted_cmd(cmd)
-            #   cmd = "cmd /c " + cmd
-            #   from src.core.injections.results_based.techniques.classic import cb_injector
-            #   response = cb_injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename)
-            #   check_privs = cb_injector.injection_results(response, TAG, cmd)
-            #   check_privs = "".join(str(p) for p in check_privs).strip()
-            #   check_privs = re.findall(r"(.*)", check_privs)
-            #   check_privs = "".join(str(p) for p in check_privs).strip()
-            #   check_privs = check_privs.split()
-            #   if "Admin" in check_privs[0]:
-            #     is_privileged = Style.RESET_ALL + "is" +  Style.BRIGHT + " admin user"
-            #     is_privileged_nh = " is admin user "
-            #   else:
-            #     is_privileged = Style.RESET_ALL + "is" +  Style.BRIGHT + " regular user"
-            #     is_privileged_nh = " is regular user "
-            # else :
             is_privileged = is_privileged = ""
             print(settings.SUB_CONTENT_SIGN + "(" +str(count)+ ") '" + Style.BRIGHT +  sys_users_list[user] + Style.RESET_ALL + "'" + Style.BRIGHT + is_privileged + Style.RESET_ALL)
             # Add infos to logs file.
-            output_file = open(filename, "a")
-            if not menu.options.no_logging:
-              if count == 1 :
-                output_file.write("\n")
-              output_file.write("(" +str(count)+ ") '" + sys_users_list[user] + is_privileged + "'\n" )
-            output_file.close()
+            with open(filename, 'a') as output_file:
+              if not menu.options.no_logging:
+                if count == 1 :
+                  output_file.write("\n")
+                output_file.write("(" +str(count)+ ") '" + sys_users_list[user] + is_privileged + "'\n" )
       else:
         # print(settings.SINGLE_WHITESPACE)
         warn_msg = "It seems that you don't have permissions to enumerate operating system users."
@@ -2104,10 +2078,9 @@ def print_users(sys_users, filename, _, separator, TAG, cmd, prefix, suffix, whi
           print(settings.print_warning_msg(warn_msg))
           sys_users = " ".join(str(p) for p in sys_users).strip()
           print(sys_users)
-          output_file = open(filename, "a")
-          if not menu.options.no_logging:
-            output_file.write("      " + sys_users)
-          output_file.close()
+          with open(filename, 'a') as output_file:
+            if not menu.options.no_logging:
+              output_file.write("      " + sys_users)
         else:
           sys_users_list = []
           for user in range(0, len(sys_users), 3):
@@ -2120,10 +2093,9 @@ def print_users(sys_users, filename, _, separator, TAG, cmd, prefix, suffix, whi
             info_msg += " [" + str(len(sys_users_list)) + "]:"
             print(settings.print_bold_info_msg(info_msg))
             # Add infos to logs file.
-            output_file = open(filename, "a")
-            if not menu.options.no_logging:
-              output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
-            output_file.close()
+            with open(filename, 'a') as output_file:
+              if not menu.options.no_logging:
+                output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
             count = 0
             for user in range(0, len(sys_users_list)):
               sys_users = sys_users_list[user]
@@ -2160,12 +2132,11 @@ def print_users(sys_users, filename, _, separator, TAG, cmd, prefix, suffix, whi
                   is_privileged_nh = ""
                 print(settings.SUB_CONTENT_SIGN + "(" +str(count)+ ") '" + Style.BRIGHT + fields[0] + Style.RESET_ALL + "' " + Style.BRIGHT + is_privileged + Style.RESET_ALL + "(uid=" + fields[1] + "). Home directory is in '" + Style.BRIGHT + fields[2]+ Style.RESET_ALL + "'.")
                 # Add infos to logs file.
-                output_file = open(filename, "a")
-                if not menu.options.no_logging:
-                  if count == 1 :
-                    output_file.write("\n")
-                  output_file.write("(" +str(count)+ ") '" + fields[0] + "' " + is_privileged_nh + "(uid=" + fields[1] + "). Home directory is in '" + fields[2] + "'.\n" )
-                output_file.close()
+                with open(filename, 'a') as output_file:
+                  if not menu.options.no_logging:
+                    if count == 1 :
+                      output_file.write("\n")
+                    output_file.write("(" +str(count)+ ") '" + fields[0] + "' " + is_privileged_nh + "(uid=" + fields[1] + "). Home directory is in '" + fields[2] + "'.\n" )
               except ValueError:
                 if count == 1 :
                   warn_msg = "It seems that '" + settings.PASSWD_FILE + "' file is not in the "
@@ -2173,10 +2144,9 @@ def print_users(sys_users, filename, _, separator, TAG, cmd, prefix, suffix, whi
                   print(settings.print_warning_msg(warn_msg))
                 sys_users = " ".join(str(p) for p in sys_users.split(":"))
                 print(sys_users)
-                output_file = open(filename, "a")
-                if not menu.options.no_logging:
-                  output_file.write("      " + sys_users)
-                output_file.close()
+                with open(filename, 'a') as output_file:
+                  if not menu.options.no_logging:
+                    output_file.write("      " + sys_users)
       else:
         # print(settings.SINGLE_WHITESPACE)
         warn_msg = "It seems that you don't have permissions to read the '"
@@ -2206,10 +2176,9 @@ def print_passes(sys_passes, filename, _, alter_shell):
       info_msg += " password hashes [" + str(len(sys_passes)) + "]:"
       print(settings.print_bold_info_msg(info_msg))
       # Add infos to logs file.
-      output_file = open(filename, "a")
-      if not menu.options.no_logging:
-        output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg )
-      output_file.close()
+      with open(filename, 'a') as output_file:
+        if not menu.options.no_logging:
+          output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg )
       count = 0
       for line in sys_passes:
         count = count + 1
@@ -2219,12 +2188,11 @@ def print_passes(sys_passes, filename, _, alter_shell):
             if not "*" in fields[1] and not "!" in fields[1] and fields[1] != "":
               print("  (" +str(count)+ ") " + Style.BRIGHT + fields[0] + Style.RESET_ALL + " : " + Style.BRIGHT + fields[1]+ Style.RESET_ALL)
               # Add infos to logs file.
-              output_file = open(filename, "a")
-              if not menu.options.no_logging:
-                if count == 1 :
-                  output_file.write("\n")
-                output_file.write("(" +str(count)+ ") " + fields[0] + " : " + fields[1] + "\n")
-              output_file.close()
+              with open(filename, 'a') as output_file:
+                if not menu.options.no_logging:
+                  if count == 1 :
+                    output_file.write("\n")
+                  output_file.write("(" +str(count)+ ") " + fields[0] + " : " + fields[1] + "\n")
         # Check for appropriate '/etc/shadow' format.
         except IndexError:
           if count == 1 :
@@ -2232,10 +2200,9 @@ def print_passes(sys_passes, filename, _, alter_shell):
             warn_msg += "in the appropriate format. Thus, it is expoted as a text file."
             print(settings.print_warning_msg(warn_msg))
           print(fields[0])
-          output_file = open(filename, "a")
-          if not menu.options.no_logging:
-            output_file.write("      " + fields[0])
-          output_file.close()
+          with open(filename, 'a') as output_file:
+            if not menu.options.no_logging:
+              output_file.write("      " + fields[0])
     else:
       warn_msg = "It seems that you don't have permissions to read the '"
       warn_msg += settings.SHADOW_FILE + "' file."
@@ -2375,12 +2342,11 @@ def file_read_status(shell, file_to_read, filename):
   if shell:
     _ = "Fetched file content"
     print(settings.print_retrieved_data(_, shell))
-    output_file = open(filename, "a")
-    if not menu.options.no_logging:
-      info_msg = "Extracted content of the file '"
-      info_msg += file_to_read + "' : " + shell + "\n"
-      output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
-    output_file.close()
+    with open(filename, 'a') as output_file:
+      if not menu.options.no_logging:
+        info_msg = "Extracted content of the file '"
+        info_msg += file_to_read + "' : " + shell + "\n"
+        output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
   else:
     warn_msg = "It seems that you don't have permissions "
     warn_msg += "to read the content of the file '" + file_to_read + "'."
