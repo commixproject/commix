@@ -197,7 +197,7 @@ def single_os_cmd_exec(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, 
   else:
     output = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
     check_how_long = 0
-  checks.print_single_os_cmd(cmd, output)
+  checks.print_single_os_cmd(cmd, output, filename)
   return check_how_long, output
 
 """

@@ -408,7 +408,7 @@ def shellshock_handler(url, http_request_method, filename):
             cmd = menu.options.os_cmd 
             checks.print_enumenation().print_single_os_cmd_msg(cmd)
             shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
-            checks.print_single_os_cmd(cmd, shell)
+            checks.print_single_os_cmd(cmd, shell, filename)
 
           # Pseudo-Terminal shell
           try:

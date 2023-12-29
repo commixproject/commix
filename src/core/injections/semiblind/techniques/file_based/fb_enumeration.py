@@ -215,7 +215,7 @@ def single_os_cmd_exec(separator, payload, TAG, timesec, prefix, suffix, whitesp
     session_handler.store_cmd(url, cmd, shell, vuln_parameter)
   else:
     shell = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
-  checks.print_single_os_cmd(cmd, shell)
+  checks.print_single_os_cmd(cmd, shell, filename)
 
 """
 Check the defined options

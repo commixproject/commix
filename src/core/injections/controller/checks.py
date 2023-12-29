@@ -2211,10 +2211,16 @@ def print_passes(sys_passes, filename, _, alter_shell):
 """
 Print single OS command
 """
-def print_single_os_cmd(cmd, shell):
-  if len(shell) > 1:
+def print_single_os_cmd(cmd, output, filename):
+  if len(output) > 1:
     _ = "'" + cmd + "' execution output"
-    print(settings.print_retrieved_data(_, shell))
+    print(settings.print_retrieved_data(_, output))
+    try:
+      with open(filename, 'a') as output_file:
+        if not menu.options.no_logging:
+          output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + "User-supplied command " + _ + ": " + output.encode(settings.DEFAULT_CODEC).decode() + "\n")
+    except TypeError:
+      pass
   else:
     err_msg = common.invalid_cmd_output(cmd)
     print(settings.print_error_msg(err_msg))
