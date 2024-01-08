@@ -1,5 +1,5 @@
 ## Version 3.9 (TBA)
-* Revised: Minor improvement regarding logging user-supplied commands (i.e. `--os-cmd` option) to a file.
+* Revised: Minor improvement regarding logging user-supplied command(s) (i.e. `--os-cmd` option) to a file.
 * Revised: Improvement regarding parsing HTTP requests through Tor HTTP proxy (i.e. `--tor` switch).
 * Added: New (hidden) option `--ignore-stdin` regarding ignoring STDIN input. (via @n00b-bot)
 * Revised: Minor improvement regarding successfully completing the scanning process (i.e. in case that parameters with anti-CSRF tokens are omitted). (via @xerxoria)
