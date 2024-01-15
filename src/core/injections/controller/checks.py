@@ -1272,7 +1272,7 @@ def tamper_scripts(stored_tamper_scripts):
             err_msg += "in tamper script '" + import_script.split(".")[-1] + "'."
             print(settings.print_critical_msg(err_msg))
             raise SystemExit()
-        except ImportError as err_msg:
+        except (ImportError, ValueError) as err_msg:
           pass
 
     # Using too many tamper scripts is usually not a good idea. :P
