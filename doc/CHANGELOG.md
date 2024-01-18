@@ -1,4 +1,5 @@
 ## Version 3.9 (TBA)
+* Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
 * Revised: Minor improvement regarding logging user-supplied command(s) (i.e. `--os-cmd` option) to a file.
 * Revised: Improvement regarding parsing HTTP requests through Tor HTTP proxy (i.e. `--tor` switch).
 * Added: New (hidden) option `--ignore-stdin` regarding ignoring STDIN input. (via @n00b-bot)
