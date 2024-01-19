@@ -1,4 +1,4 @@
-## Version 3.9 (TBA)
+## Version 3.9 (2024-01-19)
 * Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
 * Revised: Minor improvement regarding logging user-supplied command(s) (i.e. `--os-cmd` option) to a file.
 * Revised: Improvement regarding parsing HTTP requests through Tor HTTP proxy (i.e. `--tor` switch).
@@ -11,6 +11,8 @@
 * Added: New switch `--smart` for conducting through tests only in case of positive heuristic(s).
 * Added: Translation for [README.md](https://github.com/commixproject/commix/blob/master/doc/translations/README-tr-TR.md) in Turkish (via @Kazgangap)
 * Revised: Minor improvement regarding parsing SOAP/XML POST data.
+
+_Note: For more check the [detailed changeset](https://github.com/commixproject/commix/compare/v3.8...v3.9)._
 
 ## Version 3.8 (2023-08-14)
 * Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
