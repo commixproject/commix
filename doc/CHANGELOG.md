@@ -1,3 +1,6 @@
+## Version 4.0 (TBA)
+* Added: New option `--time-limit` for running with a time limit in seconds (e.g. 3600).
+
 ## Version 3.9 (2024-01-19)
 * Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
 * Revised: Minor improvement regarding logging user-supplied command(s) (i.e. `--os-cmd` option) to a file.

@@ -150,8 +150,9 @@ def check_http_traffic(request):
 
   opener = _urllib.request.build_opener(connection_handler())
 
-  # if len(settings.HTTP_METHOD) != 0:
-  #   request.get_method = lambda: settings.HTTP_METHOD
+  # Time limit mechanism.
+  if menu.options.time_limit and (time.time() - settings.START_TIME > menu.options.time_limit):
+    raise SystemExit()
 
   _ = False
   response = False

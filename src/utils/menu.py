@@ -103,6 +103,11 @@ general.add_option("-t",
                 default=None,
                 help="Log all HTTP traffic into a textual file.")
 
+general.add_option("--time-limit",
+                dest="time_limit",
+                type=float,
+                help="Run with a time limit in seconds (e.g. 3600).")
+
 general.add_option("--batch",
                 action="store_true",
                 dest="batch",
