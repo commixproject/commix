@@ -130,7 +130,7 @@ general.add_option("--charset",
                 action="store",
                 dest="charset",
                 default=None,
-                help="Time-related injection charset (e.g. \"0123456789abcdef\")")
+                help="Time-related injection charset (e.g. '0123456789abcdef').")
 
 general.add_option("--check-internet",
                 action="store_true",
@@ -139,7 +139,7 @@ general.add_option("--check-internet",
 
 general.add_option("--answers",
                 dest="answers",
-                help="Set predefined answers (e.g. \"quit=N,follow=N\")")
+                help="Set predefined answers (e.g. 'quit=N,follow=N').")
 
 # Target options
 target = OptionGroup(parser, Style.BRIGHT + Style.UNDERLINE + "Target" + Style.RESET_ALL,
@@ -177,7 +177,7 @@ target.add_option("--crawl",
 target.add_option("--crawl-exclude",
                 dest="crawl_exclude",
                 default=None,
-                help="Regexp to exclude pages from crawling (e.g. \"logout\").")
+                help="Regexp to exclude pages from crawling (e.g. 'logout').")
 
 target.add_option("-x",
                 dest="sitemap_url",
@@ -185,7 +185,7 @@ target.add_option("-x",
 
 target.add_option("--method",
                 dest="method",
-                help="Force usage of given HTTP method (e.g. PUT)")
+                help="Force usage of given HTTP method (e.g. 'PUT').")
 
 # Request options
 request = OptionGroup(parser,  Style.BRIGHT + Style.UNDERLINE + "Request" + Style.RESET_ALL,
@@ -612,7 +612,7 @@ misc.add_option("--offline",
                 action="store_true",
                 dest="offline",
                 default=False,
-                help="Work in offline mode.\n")
+                help="Work in offline mode.")
 
 misc.add_option("--wizard",
                 action="store_true",
