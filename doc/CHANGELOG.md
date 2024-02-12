@@ -169,7 +169,7 @@ _Note: For more check the [detailed changeset](https://github.com/commixproject/
 * Added: Six (third party) module has been added.
 * Revised: Improvement regarding parsing nested JSON objects that contain boolean values.
 * Replaced: The `--ignore-401` option has been replaced with `--ignore-code` option.
-* Added: New option ( `--ignore-code`) for ignoring (problematic) HTTP error code (e.g. 401).
+* Added: New option `--ignore-code` for ignoring (problematic) HTTP error code (e.g. 401).
 
 _Note: For more check the [detailed changeset](https://github.com/commixproject/commix/compare/v2.9-20190626...v3.0-20191111)._
 
