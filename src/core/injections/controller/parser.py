@@ -152,16 +152,17 @@ def logfile_parser():
         scheme = "https://"
     if re.findall(r"Authorization: " + "(.*)", line):
       auth_provided = "".join([str(i) for i in re.findall(r"Authorization: " + "(.*)", line)]).split()
-      menu.options.auth_type = auth_provided[0].lower()
-      if menu.options.auth_type.lower() == settings.AUTH_TYPE.BASIC:
-        menu.options.auth_cred = base64.b64decode(auth_provided[1]).decode()
-      elif menu.options.auth_type.lower() == settings.AUTH_TYPE.DIGEST:
-        if not menu.options.auth_cred:
-          print(settings.SINGLE_WHITESPACE)
-          err_msg = "Use the '--auth-cred' option to provide a valid pair of "
-          err_msg += "HTTP authentication credentials (i.e --auth-cred=\"admin:admin\") "
-          print(settings.print_critical_msg(err_msg))
-          raise SystemExit()
+      if auth_provided:
+        menu.options.auth_type = auth_provided[0].lower()
+        if menu.options.auth_type.lower() == settings.AUTH_TYPE.BASIC:
+          menu.options.auth_cred = base64.b64decode(auth_provided[1]).decode()
+        elif menu.options.auth_type.lower() == settings.AUTH_TYPE.DIGEST:
+          if not menu.options.auth_cred:
+            print(settings.SINGLE_WHITESPACE)
+            err_msg = "Use the '--auth-cred' option to provide a valid pair of "
+            err_msg += "HTTP authentication credentials (i.e --auth-cred=\"admin:admin\") "
+            print(settings.print_critical_msg(err_msg))
+            raise SystemExit()
 
     # Add extra headers
     else:
