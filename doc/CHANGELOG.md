@@ -1,4 +1,5 @@
 ## Version 4.0 (TBA)
+* Added: New option `--abort-code` for aborting on (problematic) HTTP error code(s) (e.g. 401)
 * Added: New option `--time-limit` for running with a time limit in seconds (e.g. 3600).
 
 ## Version 3.9 (2024-01-19)

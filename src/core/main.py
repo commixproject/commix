@@ -715,6 +715,15 @@ try:
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
 
+    # Check if defined "--abort-code" option.
+    if menu.options.abort_code:
+      try:
+        settings.ABORT_CODE = [int(_) for _ in re.split(settings.PARAMETER_SPLITTING_REGEX, menu.options.abort_code)]
+      except ValueError:
+        err_msg = "The option '--abort-code' should contain a list of integer values."
+        print(settings.print_critical_msg(err_msg))
+        raise SystemExit()
+
     # Check if defined "--ignore-code" option.
     if menu.options.ignore_code and "," in menu.options.ignore_code:
       err_msg = "Ignoring more than one HTTP error code, is not yet supported."

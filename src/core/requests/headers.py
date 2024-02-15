@@ -73,6 +73,11 @@ def http_response(headers, code):
 Print HTTP response headers / Body.
 """
 def print_http_response(response_headers, code, page):
+  if int(code) in settings.ABORT_CODE:
+    err_msg = "Aborting due to detected HTTP code '" + str(code) + "'. "
+    print(settings.print_critical_msg(err_msg))
+    raise SystemExit()
+
   if settings.VERBOSITY_LEVEL >= 3 or menu.options.traffic_file:
     if settings.VERBOSITY_LEVEL >= 3:
       resp_msg = "HTTP response [" + settings.print_request_num(settings.TOTAL_OF_REQUESTS) + "] (" + str(code) + "):"
@@ -211,8 +216,7 @@ def check_http_traffic(request):
     # Checks for not declared cookie(s), while server wants to set its own.
     if not menu.options.drop_set_cookie:
       checks.not_declared_cookies(response)
-    if settings.VERBOSITY_LEVEL > 2 or menu.options.traffic_file:
-      print_http_response(response_headers, code, page)
+    print_http_response(response_headers, code, page)
     # Checks regarding a potential CAPTCHA protection mechanism.
     checks.captcha_check(page)
     # Checks regarding a potential browser verification protection mechanism.
@@ -232,9 +236,8 @@ def check_http_traffic(request):
     except Exception as ex:
       page = ''
       
-    if settings.VERBOSITY_LEVEL != 0:
-      print_http_response(err.info(), err.code, page)
-
+    print_http_response(err.info(), err.code, page)
+    
     if (not settings.PERFORM_CRACKING and \
     not settings.IS_JSON and \
     not settings.IS_XML and \

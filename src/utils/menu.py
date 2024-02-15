@@ -289,6 +289,12 @@ request.add_option("--auth-cred",
                 dest="auth_cred",
                 help="HTTP authentication credentials (e.g. 'admin:admin').")
 
+request.add_option("--abort-code",
+                action="store",
+                dest="abort_code",
+                default=False,
+                help="Abort on (problematic) HTTP error code(s) (e.g. 401).")
+
 request.add_option("--ignore-code",
                 action="store",
                 dest="ignore_code",
