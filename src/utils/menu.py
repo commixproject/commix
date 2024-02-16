@@ -299,7 +299,7 @@ request.add_option("--ignore-code",
                 action="store",
                 dest="ignore_code",
                 default=False,
-                help="Ignore (problematic) HTTP error code (e.g. 401).")
+                help="Ignore (problematic) HTTP error code(s) (e.g. 401).")
 
 request.add_option("--force-ssl",
                 action="store_true",

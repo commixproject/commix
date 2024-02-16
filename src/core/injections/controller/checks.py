@@ -763,11 +763,8 @@ Ignore error messages and continue the tests.
 """
 def continue_tests(err):
   # Ignoring (problematic) HTTP error codes.
-  if menu.options.ignore_code:
-    for error_code in settings.HTTP_ERROR_CODES:
-      if menu.options.ignore_code == error_code:
-        settings.WAF_ENABLED = True
-        return True
+  if len(settings.IGNORE_CODE) != 0 and any(str(x) in str(err).lower() for x in settings.IGNORE_CODE):
+    return True
 
   # Possible WAF/IPS/IDS
   try:
@@ -785,6 +782,7 @@ def continue_tests(err):
       message += "' and continue the tests? [Y/n] > "
       continue_tests = common.read_input(message, default="Y", check_batch=True)
       if continue_tests in settings.CHOICE_YES:
+        settings.IGNORE_CODE.append(err.code)
         return True
       elif continue_tests in settings.CHOICE_NO:
         return False

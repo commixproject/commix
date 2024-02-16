@@ -247,7 +247,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.0"
-REVISION = "4"
+REVISION = "5"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1271,6 +1271,9 @@ HREF_SKIPPED = []
 
 # Abort on (problematic) HTTP error code (e.g. 401).
 ABORT_CODE = []
+
+# Ignore on (problematic) HTTP error code (e.g. 401).
+IGNORE_CODE = []
 
 # Default crawling depth
 DEFAULT_CRAWLING_DEPTH = 1

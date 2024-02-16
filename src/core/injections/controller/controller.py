@@ -273,10 +273,6 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
        any(x in check_parameter.lower() for x in settings.CUSTOM_HEADER_NAME):
       inject_http_headers = True
 
-  if menu.options.ignore_code:
-    info_msg = "Ignoring '" + str(menu.options.ignore_code) + "' HTTP error code. "
-    print(settings.print_info_msg(info_msg))
-
   # User-Agent HTTP header / Referer HTTP header /
   # Host HTTP header / Custom HTTP header Injection(s)
   if check_parameter.startswith(settings.SINGLE_WHITESPACE):

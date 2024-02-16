@@ -725,10 +725,16 @@ try:
         raise SystemExit()
 
     # Check if defined "--ignore-code" option.
-    if menu.options.ignore_code and "," in menu.options.ignore_code:
-      err_msg = "Ignoring more than one HTTP error code, is not yet supported."
-      print(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+    if menu.options.ignore_code:
+      try:
+        settings.IGNORE_CODE = [int(_) for _ in re.split(settings.PARAMETER_SPLITTING_REGEX, menu.options.ignore_code)]
+        if settings.VERBOSITY_LEVEL != 0:
+          debug_msg = "Ignoring '" + str(', '.join(str(x) for x in settings.IGNORE_CODE)) + "' HTTP error code"+('', 's')[len(settings.IGNORE_CODE) > 1]+ "."
+          print(settings.print_debug_msg(debug_msg))
+      except ValueError:
+        err_msg = "The option '--ignore-code' should contain a list of integer values."
+        print(settings.print_critical_msg(err_msg))
+        raise SystemExit()
 
     # Check if defined "--wizard" option.
     if menu.options.wizard:

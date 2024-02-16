@@ -96,7 +96,7 @@ def estimate_response_time(url, timesec):
 
   except _urllib.error.HTTPError as err:
     ignore_start = time.time()
-    if settings.UNAUTHORIZED_ERROR in str(err) and menu.options.ignore_code == settings.UNAUTHORIZED_ERROR:
+    if settings.UNAUTHORIZED_ERROR in str(err) and int(settings.UNAUTHORIZED_ERROR) in settings.IGNORE_CODE:
       pass
     else:
       if settings.VERBOSITY_LEVEL != 0:
@@ -155,7 +155,7 @@ def estimate_response_time(url, timesec):
           else:
             # Basic authentication
             if menu.options.auth_type.lower() == settings.AUTH_TYPE.BASIC:
-              if not menu.options.ignore_code == settings.UNAUTHORIZED_ERROR:
+              if not int(settings.UNAUTHORIZED_ERROR) in settings.IGNORE_CODE:
                 warn_msg = menu.options.auth_type.capitalize() + " "
                 warn_msg += "HTTP authentication credentials are required."
                 print(settings.print_warning_msg(warn_msg))
@@ -180,7 +180,7 @@ def estimate_response_time(url, timesec):
 
             # Digest authentication
             elif menu.options.auth_type.lower() == settings.AUTH_TYPE.DIGEST:
-              if not menu.options.ignore_code == settings.UNAUTHORIZED_ERROR:
+              if not int(settings.UNAUTHORIZED_ERROR) in settings.IGNORE_CODE:
                 warn_msg = menu.options.auth_type.capitalize() + " "
                 warn_msg += "HTTP authentication credentials are required."
                 print(settings.print_warning_msg(warn_msg))
@@ -316,7 +316,7 @@ def request_failed(err_msg):
       return False
 
   elif settings.UNAUTHORIZED_ERROR in str(err_msg).lower():
-    if menu.options.ignore_code == settings.UNAUTHORIZED_ERROR or settings.PERFORM_CRACKING:
+    if int(settings.UNAUTHORIZED_ERROR) in settings.IGNORE_CODE or settings.PERFORM_CRACKING:
       return False
     else:
       err_msg = "Not authorized (" + settings.UNAUTHORIZED_ERROR + "). "
@@ -373,7 +373,7 @@ def request_failed(err_msg):
       return False
 
   elif settings.IDENTIFIED_WARNINGS or settings.IDENTIFIED_PHPINFO or settings.IDENTIFIED_COMMAND_INJECTION or \
-  (menu.options.ignore_code and menu.options.ignore_code in str(error_msg).lower()):
+  (len(settings.IGNORE_CODE) != 0 and any(str(x) in str(error_msg).lower() for x in settings.IGNORE_CODE)):
     return False
 
   elif settings.IGNORE_ERR_MSG == False:

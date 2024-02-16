@@ -1,4 +1,5 @@
 ## Version 4.0 (TBA)
+* Revised: Improvement regarding option `--ignore-code` for ignoring multiple (problematic) HTTP error codes.
 * Added: New option `--abort-code` for aborting on (problematic) HTTP error code(s) (e.g. 401)
 * Added: New option `--time-limit` for running with a time limit in seconds (e.g. 3600).
 
