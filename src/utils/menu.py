@@ -606,7 +606,7 @@ misc.add_option("--skip-waf",
                 action="store_true",
                 dest="skip_waf",
                 default=False,
-                help="Skip heuristic detection of WAF/IPS/IDS protection.")
+                help="Skip heuristic detection of WAF/IPS protection.")
 
 misc.add_option("--mobile",
                 action="store_true",

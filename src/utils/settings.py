@@ -247,7 +247,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.0"
-REVISION = "5"
+REVISION = "6"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -310,6 +310,10 @@ LINUX_CUSTOM_PYTHON_INTERPRETER = "python27"
 USER_DEFINED_PYTHON_INTERPRETER = False
 
 CMD_NUL = ""
+
+# Maybe a WAF/IPS protection.
+WAF_CHECK_PAYLOAD = "cat /etc/passwd|uname&&ping -c3 localhost;ls ../"
+WAF_ENABLED = False
 
 class HEURISTIC_TEST(object):
   POSITIVE = True
@@ -984,9 +988,6 @@ RHOST = ""
 # Default settings (web_delivery).
 URIPATH = "/"
 SRVPORT = 8080
-
-# Maybe a WAF/IPS/IDS protection.
-WAF_ENABLED = False
 
 # Session Handler
 SESSION_FILE = ""

@@ -194,7 +194,7 @@ def init_request(url):
     debug_msg = "Creating " + str(settings.SCHEME).upper() + " requests opener object."
     print(settings.print_debug_msg(debug_msg))
   return request
-
+  
 """
 Get the URL response.
 """
@@ -219,6 +219,10 @@ def url_response(url):
       redirect_url = redirection.do_check(request, url, response.geturl())
       if redirect_url is not None:
         url = redirect_url
+  if not menu.options.skip_waf:
+    waf_request, waf_url = checks.check_waf(url)
+    headers.do_check(waf_request)
+    examine_request(waf_request, waf_url)
   return response, url
 
 """

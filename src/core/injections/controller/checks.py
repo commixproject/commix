@@ -62,6 +62,28 @@ def exit():
   os._exit(0)
 
 """
+Detection of WAF/IPS protection.
+"""
+def check_waf(url):
+  payload = _urllib.parse.quote(settings.WAF_CHECK_PAYLOAD)
+  info_msg = "Checking if the target is protected by some kind of WAF/IPS."
+  print(settings.print_info_msg(info_msg))
+  if settings.VERBOSITY_LEVEL >= 1:
+    print(settings.print_payload(payload))
+  payload = "".join(random.choices(string.ascii_uppercase, k=4)) + "=" + payload
+  if not "?" in url:
+    payload = "?" + payload
+  else:
+    payload = settings.PARAMETER_DELIMITER + payload
+  url = url + payload
+  if menu.options.data:
+    settings.USER_DEFINED_POST_DATA = menu.options.data
+    request = _urllib.request.Request(url, menu.options.data.encode())
+  else:
+    request = _urllib.request.Request(url)
+  return request, url
+
+"""
 Check injection technique(s) status.
 """
 def injection_techniques_status():
@@ -765,17 +787,16 @@ def continue_tests(err):
   # Ignoring (problematic) HTTP error codes.
   if len(settings.IGNORE_CODE) != 0 and any(str(x) in str(err).lower() for x in settings.IGNORE_CODE):
     return True
-
+    
   # Possible WAF/IPS/IDS
   try:
     if (str(err.code) == settings.FORBIDDEN_ERROR or \
        str(err.code) == settings.NOT_ACCEPTABLE_ERROR) and \
        not menu.options.skip_waf and \
        not settings.HOST_INJECTION :
-      # Check if "--skip-waf" option is defined (to skip heuristic detection of WAF/IPS/IDS protection).
-      settings.WAF_ENABLED = True
-      warn_msg = "It seems that target is protected by some kind of WAF/IPS/IDS."
+      warn_msg = "It seems that target is protected by some kind of WAF/IPS."
       print(settings.print_warning_msg(warn_msg))
+      settings.WAF_ENABLED = True
 
     while True:
       message = "Do you want to ignore the response HTTP error code '" + str(err.code)
@@ -2154,7 +2175,7 @@ def print_users(sys_users, filename, _, separator, TAG, cmd, prefix, suffix, whi
       pass
     except IndexError:
       # print(settings.SINGLE_WHITESPACE)
-      warn_msg = "Some kind of WAF/IPS/IDS probably blocks the attempt to read '"
+      warn_msg = "Some kind of WAF/IPS probably blocks the attempt to read '"
       warn_msg += settings.PASSWD_FILE + "' to enumerate operating system users."
       print(settings.print_warning_msg(warn_msg))
       pass
