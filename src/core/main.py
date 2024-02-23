@@ -157,8 +157,6 @@ def check_internet(url):
 The init (URL) request.
 """
 def init_request(url):
-  # Check connection(s)
-  checks.check_connection(url)
   # Number of seconds to wait before timeout connection
   if settings.VERBOSITY_LEVEL != 0:
     debug_msg = "Setting the HTTP timeout."
@@ -193,6 +191,8 @@ def init_request(url):
   if settings.VERBOSITY_LEVEL != 0:
     debug_msg = "Creating " + str(settings.SCHEME).upper() + " requests opener object."
     print(settings.print_debug_msg(debug_msg))
+  # Check connection(s)
+  checks.check_connection(url)
   return request
   
 """
@@ -206,12 +206,12 @@ def url_response(url):
     settings.TOR_CHECK_AGAIN = False
     # initiate total of requests
     settings.TOTAL_OF_REQUESTS = 0
-  if settings.INIT_TEST == True:
-    info_msg = "Testing connection to the target URL. "
-    print(settings.print_bold_info_msg(info_msg))
   request = init_request(url)
   if settings.CHECK_INTERNET:
     settings.CHECK_INTERNET = False
+  if settings.INIT_TEST == True:
+    info_msg = "Testing connection to the target URL. "
+    print(settings.print_bold_info_msg(info_msg))
   response = examine_request(request, url)
   # Check for URL redirection
   if type(response) is not bool and settings.FOLLOW_REDIRECT and response is not None:
