@@ -96,11 +96,11 @@ def estimate_response_time(url, timesec):
 
   except _urllib.error.HTTPError as err:
     ignore_start = time.time()
+    if settings.VERBOSITY_LEVEL != 0:
+      print(settings.SINGLE_WHITESPACE)
     if settings.UNAUTHORIZED_ERROR in str(err) and int(settings.UNAUTHORIZED_ERROR) in settings.IGNORE_CODE:
       pass
     else:
-      if settings.VERBOSITY_LEVEL != 0:
-        print(settings.SINGLE_WHITESPACE)
       err_msg = "Unable to connect to the target URL"
       try:
         err_msg += " (Reason: " + str(err.args[0]).split("] ")[-1].lower() + ")."
