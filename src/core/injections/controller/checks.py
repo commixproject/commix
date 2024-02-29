@@ -788,7 +788,7 @@ def continue_tests(err):
   if len(settings.IGNORE_CODE) != 0 and any(str(x) in str(err).lower() for x in settings.IGNORE_CODE):
     return True
     
-  # Possible WAF/IPS/IDS
+  # Possible WAF/IPS
   try:
     if (str(err.code) == settings.FORBIDDEN_ERROR or \
        str(err.code) == settings.NOT_ACCEPTABLE_ERROR) and \

@@ -220,9 +220,11 @@ def url_response(url):
       if redirect_url is not None:
         url = redirect_url
   if not menu.options.skip_waf:
+    settings.WAF_DETECTION_PHASE = True
     waf_request, waf_url = checks.check_waf(url)
     headers.do_check(waf_request)
     examine_request(waf_request, waf_url)
+    settings.WAF_DETECTION_PHASE = False
   return response, url
 
 """

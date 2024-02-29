@@ -247,7 +247,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.0"
-REVISION = "8"
+REVISION = "9"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -400,6 +400,7 @@ HTML_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "
 DISABLED_CONTENT_EXTENSIONS = (".py", ".pyc", ".md", ".txt", ".bak", ".conf", ".zip", "~")
 
 # Detection / Exploitation phase(s)
+WAF_DETECTION_PHASE = False
 DETECTION_PHASE = False
 EXPLOITATION_PHASE = False
 

@@ -316,7 +316,9 @@ def request_failed(err_msg):
       return False
 
   elif settings.UNAUTHORIZED_ERROR in str(err_msg).lower():
-    if int(settings.UNAUTHORIZED_ERROR) in settings.IGNORE_CODE or settings.PERFORM_CRACKING:
+    if int(settings.UNAUTHORIZED_ERROR) in settings.IGNORE_CODE or \
+       settings.PERFORM_CRACKING or \
+       settings.WAF_DETECTION_PHASE:
       return False
     else:
       err_msg = "Not authorized (" + settings.UNAUTHORIZED_ERROR + "). "
