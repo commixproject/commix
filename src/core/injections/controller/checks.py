@@ -229,7 +229,7 @@ def alert():
     try:
       process = subprocess.Popen(menu.options.alert, shell=True)
       process.wait()
-    except Exception as ex:
+    except Exception as e:
       err_msg = "Error occurred while executing command(s) '" + str(menu.options.alert) + "'."
       print(settings.print_error_msg(err_msg))
 
@@ -363,7 +363,7 @@ Get value inside boundaries.
 def get_value_inside_boundaries(value):
   try:
     value = re.search(settings.VALUE_BOUNDARIES, value).group(1)
-  except Exception as ex:
+  except Exception as e:
     pass
   return value
 
@@ -435,7 +435,7 @@ def PCRE_e_modifier(parameter, http_request_method):
           else:
             common.invalid_option(modifier_check)
             pass
-    except Exception as ex:
+    except Exception as e:
       pass
   return parameter
 
@@ -671,7 +671,7 @@ def check_injection_level():
     if any(x in menu.options.test_parameter for x in settings.HTTP_HEADERS):
       menu.options.level = settings.HTTP_HEADER_INJECTION_LEVEL
 
-  except Exception as ex:
+  except Exception as e:
     return
 
 

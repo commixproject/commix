@@ -233,7 +233,7 @@ def check_http_traffic(request):
       if err.fp is None:
         raise AttributeError
       page = checks.page_encoding(err, action="encode")
-    except Exception as ex:
+    except Exception as e:
       page = ''
       
     print_http_response(err.info(), err.code, page)

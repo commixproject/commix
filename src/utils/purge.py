@@ -157,7 +157,7 @@ def purge():
     failed = False
     os.chdir(os.path.join(directory, ".."))
     shutil.rmtree(directory)
-  except OSError as ex:
+  except OSError as e:
     failed = True
   if not failed:
     print(settings.SINGLE_WHITESPACE)
