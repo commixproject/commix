@@ -374,7 +374,7 @@ def vuln_POST_param(parameter, url):
           except Exception:
             pass
         settings.TESTABLE_VALUE = vuln_parameter[0].split(":")[1]
-      vuln_parameter = ''.join(result)
+        vuln_parameter = ''.join(result)
 
   # XML data format.
   elif settings.IS_XML:
