@@ -204,7 +204,7 @@ def do_POST_check(parameter, http_request_method):
   def multi_params_get_value(param, all_params):
     if settings.IS_JSON:
       value = re.findall(r'\:(.*)', all_params[param])
-      value = re.sub(settings.IGNORE_SPECIAL_CHAR_REGEX, '', ''.join(value))
+      value = re.sub(settings.IGNORE_JSON_CHAR_REGEX, '', ''.join(value))
     elif settings.IS_XML:
       value = re.findall(r'>(.*)</', all_params[param])
       value = ''.join(value)
@@ -361,20 +361,17 @@ def vuln_POST_param(parameter, url):
 
   # JSON data format.
   if settings.IS_JSON:
-    param = re.sub(settings.IGNORE_SPECIAL_CHAR_REGEX, '', parameter.split(settings.INJECT_TAG)[0])
-    if param:
-      if "(" in param:
-        param = param.split("(")[1]
-      vuln_parameter = param.split(",")[-1:]
-      if ":" in vuln_parameter[0]:
-        result = vuln_parameter[0].split(":")[0]
+    parameters = re.sub(settings.IGNORE_JSON_CHAR_REGEX, '', parameter.replace(",\"", settings.RANDOM_TAG + "\"").split(settings.INJECT_TAG)[0])
+    if parameters:
+      parameter = ''.join(parameters.split(settings.RANDOM_TAG)[-1:])
+      vuln_parameter = ''.join(parameter.split(":")[0])
+      try:
         if settings.WILDCARD_CHAR_APPLIED:
-          try:
-            settings.POST_WILDCARD_CHAR = re.sub(settings.IGNORE_SPECIAL_CHAR_REGEX, '', parameter.split(settings.INJECT_TAG)[1]).split(",")[0]
-          except Exception:
-            pass
-        settings.TESTABLE_VALUE = vuln_parameter[0].split(":")[1]
-        vuln_parameter = ''.join(result)
+          settings.POST_WILDCARD_CHAR = re.sub(settings.IGNORE_JSON_CHAR_REGEX, '', parameter.split(settings.INJECT_TAG)[1]).split(settings.RANDOM_TAG)[0]
+        else:
+          settings.TESTABLE_VALUE = parameter.split(settings.INJECT_TAG)[1]
+      except Exception:
+        pass
 
   # XML data format.
   elif settings.IS_XML:

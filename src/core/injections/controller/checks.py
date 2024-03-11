@@ -1718,19 +1718,8 @@ def is_empty(multi_parameters, http_request_method):
   for empty in multi_params:
     try:
       if settings.IS_JSON:
-        try:
-          param = re.sub("[^/()A-Za-z0-9.:,_]+", '',  str(multi_params[empty]))
-          if "(" and ")" in param:
-            param = re.findall(r'\((.*)\)', param)
-            for value in param[0].split(","):
-              if value.split(":")[1] == "":
-                empty_parameters.append(value.split(":")[0])
-          elif len(str(multi_params[empty])) == 0 :
-            empty_parameters.append(empty)
-        except TypeError:
-          # warn_msg = "The provided value for parameter '" + str(empty) + "' seems unusable."
-          # print(settings.print_warning_msg(warn_msg))
-          pass
+        if len(str(multi_params[empty])) == 0 :
+          empty_parameters.append(empty)
       elif settings.IS_XML:
         if re.findall(r'>(.*)<', empty)[0] == "" or \
            re.findall(r'>(.*)<', empty)[0] == settings.SINGLE_WHITESPACE:
@@ -1738,7 +1727,7 @@ def is_empty(multi_parameters, http_request_method):
       elif len(empty.split("=")[1]) == 0:
         empty_parameters.append(empty.split("=")[0])
     except IndexError:
-      if not settings.IS_XML:
+      if not settings.IS_XML and not settings.IS_JSON:
         err_msg = "No parameter(s) found for testing in the provided data."
         print(settings.print_critical_msg(err_msg))
         raise SystemExit()
@@ -1804,9 +1793,7 @@ def check_quotes_json_data(data):
 def is_JSON_check(parameter):
   try:
     json_object = json.loads(parameter)
-    if re.search(settings.JSON_RECOGNITION_REGEX, parameter) or \
-       re.search(settings.JSON_LIKE_RECOGNITION_REGEX, parameter):
-      return True
+    return True
   except ValueError as err_msg:
     _ = False
     if "Expecting" in str(err_msg) and any(_ in str(err_msg) for _ in ("value", "delimiter")):
