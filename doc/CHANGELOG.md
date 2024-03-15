@@ -1,4 +1,5 @@
 ## Version 4.0 (TBA)
+* Revised: Improvement regarding parsing JSON nested objects.
 * Revised: Improvement regarding (basic) heuristic detection of WAF/IPS protection.
 * Revised: Improvement regarding option `--ignore-code` for ignoring multiple (problematic) HTTP error codes.
 * Added: New option `--abort-code` for aborting on (problematic) HTTP error code(s) (e.g. 401)

@@ -16,11 +16,14 @@ For more see the file 'readme/COPYING' for copying permission.
 import re
 import os
 import sys
+import json
 from src.utils import menu
 from src.utils import settings
 from src.core.injections.controller import checks
 from src.thirdparty.six.moves import urllib as _urllib
 from src.thirdparty.colorama import Fore, Back, Style, init
+from src.thirdparty.flatten_json.flatten_json import flatten, unflatten_list
+from src.thirdparty.odict import OrderedDict
 
 """
 Get the URL part of the defined URL.
@@ -204,7 +207,15 @@ def do_POST_check(parameter, http_request_method):
   def multi_params_get_value(param, all_params):
     if settings.IS_JSON:
       value = re.findall(r'\:(.*)', all_params[param])
-      value = re.sub(settings.IGNORE_JSON_CHAR_REGEX, '', ''.join(value))
+      if not value:
+        value = all_params[param]
+      value = ''.join(value) 
+      if value.endswith("\"}"):
+        value = (value[:-len("}")])
+      if checks.quoted_value(value) and any(_ in "[]{}" for _ in value):
+        value = value.replace("\"","")
+      else:
+        value = re.sub(settings.IGNORE_JSON_CHAR_REGEX, '', value)
     elif settings.IS_XML:
       value = re.findall(r'>(.*)</', all_params[param])
       value = ''.join(value)
@@ -213,11 +224,53 @@ def do_POST_check(parameter, http_request_method):
       value = ''.join(value)
     return value
 
+  """
+  Check for int value inside JSON objects.
+  """
+  def json_int_check(parameter, value):
+    """
+    Check JSON objects format.
+    """
+    def json_format(parameter):
+      return json.loads(parameter, object_pairs_hook=OrderedDict)
+
+    try:
+      parameter = json_format(parameter)
+    except:
+      if not checks.quoted_value(value + settings.INJECT_TAG) in parameter:
+        if any(_ in "[]{}" for _ in value):
+          v = re.sub(settings.IGNORE_JSON_CHAR_REGEX, '', value.lstrip())
+          parameter = parameter.replace(value + settings.INJECT_TAG, value.replace(v, checks.quoted_value(v + settings.INJECT_TAG)))
+        else:
+          parameter = parameter.replace(value + settings.INJECT_TAG, checks.quoted_value(value + settings.INJECT_TAG))        
+      if settings.INJECT_TAG in value and not checks.quoted_value(value) in parameter:
+        value = re.sub(settings.IGNORE_JSON_CHAR_REGEX, '', value.lstrip())
+        parameter = parameter.replace(value, checks.quoted_value(value))
+      parameter = json_format(parameter)
+
+    _ = True
+
+    if isinstance(parameter, list):
+      parameter = parameter[(len(parameter) - 1)]
+
+    if isinstance(parameter, OrderedDict):
+      for keys,values in parameter.items():
+        if settings.INJECT_TAG in keys:
+          _ = False
+          break
+
+    if _ and isinstance(parameter, OrderedDict):
+      parameter = unflatten_list(parameter)
+
+    parameter = json.dumps(parameter)
+    return parameter
+
   # Do replacement with the 'INJECT_HERE' tag, if the wild card char is provided.
-  parameter = checks.wildcard_character(parameter).replace("'","\"")
+  parameter = checks.wildcard_character(parameter).replace("'","\"").replace(", ",",").replace(",\"", ", \"")
   checks.check_injection_level()
   # Check if JSON Object.
   if checks.is_JSON_check(parameter) or checks.is_JSON_check(checks.check_quotes_json_data(parameter)):
+
     if checks.is_JSON_check(checks.check_quotes_json_data(parameter)):
       parameter = checks.check_quotes_json_data(parameter)
     if not settings.IS_JSON:
@@ -265,11 +318,7 @@ def do_POST_check(parameter, http_request_method):
       # Grab the value of parameter.
       if settings.IS_JSON:
         # Grab the value of parameter.
-        value = re.findall(r'\"(.*)\"', parameter)
-        value = ''.join(value)
-        if value != settings.INJECT_TAG:
-          value = re.findall(r'\s*\:\s*\"(.*)\"', parameter)
-          value = ''.join(value)
+        value = multi_params_get_value(0, checks.check_similarities(_))
       elif settings.IS_XML:
         # Grab the value of parameter.
         value = re.findall(r'>(.*)</', parameter)
@@ -294,10 +343,20 @@ def do_POST_check(parameter, http_request_method):
             parameter = parameter + settings.INJECT_TAG
         else:
           parameter = parameter.replace(value, value + settings.INJECT_TAG)
+        if settings.IS_JSON:
+          parameter = json_int_check(parameter, value)
         parameter = parameter.replace(settings.RANDOM_TAG, "")
         return parameter
     else:
-      return multi_parameters
+      for param in range(0, len(multi_parameters)):
+        # Grab the value of parameter.
+        value = multi_params_get_value(param, multi_parameters)
+        parameter = settings.PARAMETER_DELIMITER.join(multi_parameters)
+        parameter = parameter.replace(settings.RANDOM_TAG, "")
+        if settings.IS_JSON and settings.INJECT_TAG in value:
+          parameter = json_int_check(parameter, value)
+          break
+      return parameter
 
   else:
     # Check if multiple parameters are supplied without the "INJECT_HERE" tag.
@@ -336,9 +395,18 @@ def do_POST_check(parameter, http_request_method):
               all_params[param] = ''.join(all_params[param]) + settings.INJECT_TAG
         else:
           all_params[param] = ''.join(all_params[param]).replace(value, value + settings.INJECT_TAG)
+          if settings.IS_JSON and len(all_params[param].split("\":")) == 2:
+            check_parameter = all_params[param].split("\":")[0] 
+            if settings.INJECT_TAG in check_parameter:
+              all_params[param] = all_params[param].replace(check_parameter,check_parameter.replace(settings.INJECT_TAG, ""))
+              
         all_params[param - 1] = ''.join(all_params[param - 1]).replace(settings.INJECT_TAG, "")
         parameter = settings.PARAMETER_DELIMITER.join(all_params)
         parameter = parameter.replace(settings.RANDOM_TAG, "")
+        if settings.IS_JSON:
+          if (len(all_params)) == 1 and settings.INJECT_TAG not in all_params[param]:
+            parameter = parameter.replace(value, value + settings.INJECT_TAG)
+          parameter = json_int_check(parameter, value)
         if type(parameter) != list:
           parameters_list.append(parameter)
         parameter = parameters_list
@@ -349,7 +417,9 @@ def do_POST_check(parameter, http_request_method):
         value = multi_params_get_value(param, multi_parameters)
         parameter = settings.PARAMETER_DELIMITER.join(multi_parameters)
         parameter = parameter.replace(settings.RANDOM_TAG, "")
-
+        if settings.IS_JSON and settings.INJECT_TAG in multi_parameters[param]:
+          parameter = json_int_check(parameter, value)
+          break
     return parameter
 
 """
@@ -361,17 +431,13 @@ def vuln_POST_param(parameter, url):
 
   # JSON data format.
   if settings.IS_JSON:
-    parameters = re.sub(settings.IGNORE_JSON_CHAR_REGEX, '', parameter.replace(",\"", settings.RANDOM_TAG + "\"").split(settings.INJECT_TAG)[0])
-    if parameters:
-      parameter = ''.join(parameters.split(settings.RANDOM_TAG)[-1:])
-      vuln_parameter = ''.join(parameter.split(":")[0])
-      try:
-        if settings.WILDCARD_CHAR_APPLIED:
-          settings.POST_WILDCARD_CHAR = re.sub(settings.IGNORE_JSON_CHAR_REGEX, '', parameter.split(settings.INJECT_TAG)[1]).split(settings.RANDOM_TAG)[0]
-        else:
-          settings.TESTABLE_VALUE = parameter.split(settings.INJECT_TAG)[1]
-      except Exception:
-        pass
+    parameter = json.loads(parameter, object_pairs_hook=OrderedDict)
+    parameter = flatten(parameter)
+    parameter = json.dumps(parameter)
+    parameters = re.sub(settings.IGNORE_JSON_CHAR_REGEX, '', parameter.split(settings.INJECT_TAG)[0].replace(",\"", settings.RANDOM_TAG + "\""))
+    parameters = ''.join(parameters.split(", ")[-1:]).strip()
+    parameters = ''.join(parameters.split(":")[0]).strip()
+    vuln_parameter = ''.join(parameters.split(settings.RANDOM_TAG)[:1])
 
   # XML data format.
   elif settings.IS_XML:

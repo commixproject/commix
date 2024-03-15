@@ -93,6 +93,12 @@ def injection_techniques_status():
     return True
 
 """
+Check for quoted values
+"""
+def quoted_value(value):
+  return '"{}"'.format(value)
+
+"""
 Check for custom injection marker (*)
 """
 def check_custom_injection_marker(url):
@@ -1792,7 +1798,7 @@ def check_quotes_json_data(data):
 # Check if valid JSON
 def is_JSON_check(parameter):
   try:
-    json_object = json.loads(parameter)
+    json_object = json.loads(parameter.replace(settings.INJECT_TAG,""))
     return True
   except ValueError as err_msg:
     _ = False

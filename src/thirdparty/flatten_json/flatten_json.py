@@ -46,8 +46,8 @@ def flatten(nested_dict, separator="_", root_keys_to_ignore=""):
     :return: flattened dictionary
     """
     try:
-        assert isinstance(nested_dict, dict), "The flatten() requires a dictionary input."
         assert isinstance(separator, str), "Separator must be a string"
+        # assert isinstance(nested_dict, dict), "The flatten() requires a dictionary input."
     except AssertionError as err_msg:
         print(settings.print_critical_msg(err_msg))
         raise SystemExit()
@@ -80,8 +80,8 @@ flatten_json = flatten
 
 def _unflatten_asserts(flat_dict, separator):
     try:
-        assert isinstance(flat_dict, dict), "The unflatten() requires a dictionary input."
         assert isinstance(separator, str), "Separator must be a string."
+        # assert isinstance(flat_dict, dict), "The unflatten() requires a dictionary input."
         # assert all(isinstance(value, (bool, float, int, str)) for value in flat_dict.values()), "The provided dictionary is not flat."
     except AssertionError as err_msg:
         print(settings.print_critical_msg(err_msg))
