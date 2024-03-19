@@ -1724,8 +1724,11 @@ def is_empty(multi_parameters, http_request_method):
   for empty in multi_params:
     try:
       if settings.IS_JSON:
-        if len(str(multi_params[empty])) == 0 :
-          empty_parameters.append(empty)
+        try:
+          if len(str(multi_params[empty])) == 0 :
+            empty_parameters.append(empty)
+        except TypeError:
+          pass
       elif settings.IS_XML:
         if re.findall(r'>(.*)<', empty)[0] == "" or \
            re.findall(r'>(.*)<', empty)[0] == settings.SINGLE_WHITESPACE:

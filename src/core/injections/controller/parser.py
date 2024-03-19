@@ -72,19 +72,25 @@ def logfile_parser():
     raise SystemExit()
 
   try:
-    if menu.options.requestfile:
-      with open(request_file, 'r') as file:
-        settings.RAW_HTTP_HEADERS = [line.strip() for line in file]
-      settings.RAW_HTTP_HEADERS = [header for header in settings.RAW_HTTP_HEADERS if header]
-      settings.RAW_HTTP_HEADERS = settings.RAW_HTTP_HEADERS[1:]
-      settings.RAW_HTTP_HEADERS = settings.RAW_HTTP_HEADERS[:-1]
-      settings.RAW_HTTP_HEADERS = '\\n'.join(settings.RAW_HTTP_HEADERS)
-
     if os.stat(request_file).st_size != 0:
       with open(request_file, 'r') as file:
         request = file.read()
     else:
       invalid_data(request_file)
+
+    if menu.options.requestfile:
+      c = 1
+      request_headers = []
+      request_lines = request.split("\n")
+      while c < len(request_lines) and len(request_lines[c]) > 0:
+        x = request_lines[c].find(':')
+        header_name = request_lines[c][:x]
+        header_value = request_lines[c][x + 1:]
+        request_headers.append(header_name + ": " + header_value)
+        c += 1
+      c += 1  
+      menu.options.data = "".join(request_lines[c:] if c < len(request_lines) else invalid_data(request_file))
+      settings.RAW_HTTP_HEADERS = '\\n'.join(request_headers)
 
   except IOError as err_msg:
     error_msg = "The '" + request_file + "' "
@@ -108,28 +114,7 @@ def logfile_parser():
     request = request.replace("\\n","\n")
   request_url = re.findall(r"" + " (.*) HTTP/", request)
 
-  if request_url:
-    try:
-      # Check empty line for POST data.
-      if len(request.splitlines()[-2]) == 0:
-        result = [item for item in request.splitlines() if item]
-        multiple_xml = []
-        for item in result:
-          if checks.is_XML_check(item):
-            multiple_xml.append(item)
-        if len(multiple_xml) != 0:
-          menu.options.data = '\n'.join([str(item) for item in multiple_xml])
-        else:
-          menu.options.data = result[len(result)-1]
-      else:
-        # Check if url ends with "=".
-        if request_url[0].endswith("="):
-          request_url = request_url[0].replace("=","=" + settings.INJECT_TAG, 1)
-    except IndexError:
-      invalid_data(request_file)
-
-  # Check if invalid data
-  else:
+  if not request_url:
     invalid_data(request_file)
 
   request_url = "".join([str(i) for i in request_url])
