@@ -588,7 +588,7 @@ def post_request(url, http_request_method, filename, timesec):
     found_parameter_list.append(found_parameter)
     found_parameter = found_parameter_list
 
-  if settings.IS_XML:
+  if settings.IS_XML or settings.IS_JSON:
     # Remove junk data
     found_parameter = [x for x in found_parameter if settings.INJECT_TAG in x]
   else:

@@ -1848,13 +1848,17 @@ Check for similarity in provided parameter name and value.
 def check_similarities(all_params):
   if settings.IS_JSON:
     try:
+      _ = "".join(random.choices(string.ascii_uppercase, k=6))
       all_params = ','.join(all_params)
       json_data = json.loads(all_params, object_pairs_hook=OrderedDict)
       all_params = flatten(json_data)
       for param in all_params:
-        if type(all_params[param]) is str and all_params[param] in param:
-          all_params[param] = all_params[param] + settings.RANDOM_TAG
-      all_params = [x.replace(settings.SINGLE_WHITESPACE, "") for x in json.dumps(all_params).split(", ")]
+        if isinstance(all_params[param], str):
+          if all_params[param] in param:
+            all_params[param] = all_params[param] + settings.RANDOM_TAG
+          if settings.SINGLE_WHITESPACE in all_params[param]:
+            all_params[param] = all_params[param].replace(settings.SINGLE_WHITESPACE, _)
+      all_params = [x.replace(settings.SINGLE_WHITESPACE, "").replace(_ ,settings.SINGLE_WHITESPACE) for x in json.dumps(all_params).split(", ")]
     except Exception as e:
       pass
   else:
