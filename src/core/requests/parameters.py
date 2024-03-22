@@ -270,16 +270,15 @@ def do_POST_check(parameter, http_request_method):
   checks.check_injection_level()
   # Check if JSON Object.
   if checks.is_JSON_check(parameter) or checks.is_JSON_check(checks.check_quotes_json_data(parameter)):
-
     if checks.is_JSON_check(checks.check_quotes_json_data(parameter)):
       parameter = checks.check_quotes_json_data(parameter)
     if not settings.IS_JSON:
-      checks.process_json_data()
+      settings.IS_JSON = checks.process_json_data()
       settings.PARAMETER_DELIMITER = ","
   # Check if XML Object.
   elif checks.is_XML_check(parameter):
     if not settings.IS_XML:
-      checks.process_xml_data()
+      settings.IS_XML = checks.process_xml_data()
       settings.PARAMETER_DELIMITER = ""
   else:
     pass
@@ -304,7 +303,7 @@ def do_POST_check(parameter, http_request_method):
   if len([s for s in multi_parameters if "=" in s]) != (len(multi_parameters)) and \
      not settings.IS_JSON and \
      not settings.IS_XML:
-    checks.inappropriate_format(multi_parameters)
+    raise SystemExit()
 
   for param in range(len(multi_parameters)):
     multi_parameters[param] = checks.PCRE_e_modifier(multi_parameters[param], http_request_method)

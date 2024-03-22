@@ -1782,10 +1782,9 @@ def process_xml_data():
     message += " Do you want to process it? [Y/n] > "
     xml_process = common.read_input(message, default="Y", check_batch=True)
     if xml_process in settings.CHOICE_YES:
-      settings.IS_XML = True
-      break
+      return True
     elif xml_process in settings.CHOICE_NO:
-      break
+      return False
     elif xml_process in settings.CHOICE_QUIT:
       raise SystemExit()
     else:
@@ -1822,10 +1821,9 @@ def process_json_data():
     message += " Do you want to process it? [Y/n] > "
     json_process = common.read_input(message, default="Y", check_batch=True)
     if json_process in settings.CHOICE_YES:
-      settings.IS_JSON = True
-      break
+      return True
     elif json_process in settings.CHOICE_NO:
-      break
+      return False
     elif json_process in settings.CHOICE_QUIT:
       raise SystemExit()
     else:
