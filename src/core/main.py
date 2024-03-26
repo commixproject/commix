@@ -582,8 +582,12 @@ try:
   if menu.options.smoke_test:
     smoke_test()
 
-  if hasattr(sys.stdin, "fileno") and not any((os.isatty(sys.stdin.fileno()), menu.options.ignore_stdin)):
-    settings.STDIN_PARSING = True
+  try:
+    if hasattr(sys.stdin, "fileno") and not any((os.isatty(sys.stdin.fileno()), menu.options.ignore_stdin)):
+      settings.STDIN_PARSING = True
+  except Exception as ex:
+    if "fileno" in str(ex) and settings.STDIN_PARSING:
+      settings.STDIN_PARSING = False
 
   if menu.options.ignore_redirects:
     settings.FOLLOW_REDIRECT = False
