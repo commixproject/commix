@@ -95,7 +95,10 @@ def command_injection_heuristic_basic(url, http_request_method, check_parameter,
         payload = checks.perform_payload_modification(payload)
         if settings.VERBOSITY_LEVEL >= 1:
           print(settings.print_payload(payload))
-        data = None
+        if len(settings.USER_DEFINED_POST_DATA) != 0:
+          data = settings.USER_DEFINED_POST_DATA.encode(settings.DEFAULT_CODEC)
+        else:
+          data = None
         cookie = None
         tmp_url = url
         if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
@@ -153,7 +156,10 @@ def code_injections_heuristic_basic(url, http_request_method, check_parameter, t
         payload = checks.perform_payload_modification(payload)
         if settings.VERBOSITY_LEVEL >= 1:
           print(settings.print_payload(payload))
-        data = None
+        if len(settings.USER_DEFINED_POST_DATA) != 0:
+          data = settings.USER_DEFINED_POST_DATA.encode(settings.DEFAULT_CODEC)
+        else:
+          data = None
         cookie = None
         tmp_url = url
         if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
@@ -267,6 +273,12 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
     basic_level_checks()
 
   inject_http_headers = False
+
+  if check_parameter.lower() in url :
+    http_request_method = settings.HTTPMETHOD.GET
+  elif check_parameter.lower() not in menu.options.data:
+    http_request_method = settings.HTTPMETHOD.POST
+
   if (http_request_method == settings.HTTPMETHOD.GET and check_parameter.lower() not in url) or \
   (http_request_method == settings.HTTPMETHOD.POST and menu.options.data and check_parameter.lower() not in menu.options.data):
     if any(x in check_parameter.lower() for x in settings.HTTP_HEADERS) or \
@@ -636,6 +648,7 @@ def post_request(url, http_request_method, filename, timesec):
 Perform checks
 """
 def perform_checks(url, http_request_method, filename):
+
   # Initiate whitespaces
   if settings.MULTI_TARGETS or settings.STDIN_PARSING and len(settings.WHITESPACES) > 1:
     settings.WHITESPACES = ["%20"]
@@ -678,8 +691,9 @@ def perform_checks(url, http_request_method, filename):
 
   # Check if defined POST data
   if not settings.COOKIE_INJECTION:
-    if settings.USER_DEFINED_POST_DATA:
-      post_request(url, http_request_method, filename, timesec)
+    if len(settings.USER_DEFINED_POST_DATA) != 0 and not settings.IGNORE_USER_DEFINED_POST_DATA:
+      if post_request(url, http_request_method, filename, timesec) is None:
+        get_request(url, http_request_method, filename, timesec)
     else:
       get_request(url, http_request_method, filename, timesec)
 

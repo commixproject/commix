@@ -247,7 +247,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.0"
-REVISION = "17"
+REVISION = "18"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -363,8 +363,11 @@ CODE_INJECTION_WARNINGS = ["eval()'d code", "runtime-created function", "usort()
 SKIP_CODE_INJECTIONS = False
 SKIP_COMMAND_INJECTIONS = False
 
-# User-defined stored post data.
-USER_DEFINED_POST_DATA = False
+# User-defined stored POST data.
+USER_DEFINED_POST_DATA = ""
+
+# Ignore user-defined stored POST data.
+IGNORE_USER_DEFINED_POST_DATA = False
 
 # The wildcard character
 WILDCARD_CHAR = "*"

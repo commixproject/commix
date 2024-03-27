@@ -76,9 +76,8 @@ def check_waf(url):
   else:
     payload = settings.PARAMETER_DELIMITER + payload
   url = url + payload
-  if menu.options.data:
-    settings.USER_DEFINED_POST_DATA = menu.options.data
-    request = _urllib.request.Request(url, menu.options.data.encode())
+  if len(settings.USER_DEFINED_POST_DATA) != 0:
+    request = _urllib.request.Request(url, settings.USER_DEFINED_POST_DATA.encode())
   else:
     request = _urllib.request.Request(url)
   return request, url
@@ -1784,6 +1783,7 @@ def process_xml_data():
     if xml_process in settings.CHOICE_YES:
       return True
     elif xml_process in settings.CHOICE_NO:
+      settings.IGNORE_USER_DEFINED_POST_DATA = True
       return False
     elif xml_process in settings.CHOICE_QUIT:
       raise SystemExit()
@@ -1823,6 +1823,7 @@ def process_json_data():
     if json_process in settings.CHOICE_YES:
       return True
     elif json_process in settings.CHOICE_NO:
+      settings.IGNORE_USER_DEFINED_POST_DATA = True
       return False
     elif json_process in settings.CHOICE_QUIT:
       raise SystemExit()

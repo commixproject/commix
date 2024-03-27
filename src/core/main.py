@@ -856,7 +856,7 @@ try:
       url = menu.options.sitemap_url
     else:
       url = menu.options.url
-
+    
     if not settings.STDIN_PARSING and not menu.options.bulkfile and not settings.CRAWLING:
       http_request_method  = checks.check_http_method(url)
       if os_checks_num == 0:

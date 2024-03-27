@@ -366,7 +366,7 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                 header_name = ""
                 the_type = " parameter"
                 # Check if defined POST data
-                if not settings.USER_DEFINED_POST_DATA:
+                if len(settings.USER_DEFINED_POST_DATA) == 0 or settings.IGNORE_USER_DEFINED_POST_DATA:
                   found_vuln_parameter = parameters.vuln_GET_param(url)
                 else :
                   found_vuln_parameter = vuln_parameter

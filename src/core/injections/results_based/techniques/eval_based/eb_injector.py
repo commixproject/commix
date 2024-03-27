@@ -40,14 +40,17 @@ Check if target host is vulnerable.
 def injection_test(payload, http_request_method, url):
 
   # Check if defined POST data
-  if not settings.USER_DEFINED_POST_DATA:
+  if len(settings.USER_DEFINED_POST_DATA) == 0 or settings.IGNORE_USER_DEFINED_POST_DATA:
     # Check if its not specified the 'INJECT_HERE' tag
     #url = parameters.do_GET_check(url, http_request_method)
 
     # Define the vulnerable parameter
     vuln_parameter = parameters.vuln_GET_param(url)
     target = url.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload)
-    request = _urllib.request.Request(target)
+    if len(settings.USER_DEFINED_POST_DATA) != 0:
+      request = _urllib.request.Request(target, settings.USER_DEFINED_POST_DATA.encode(settings.DEFAULT_CODEC))
+    else:
+      request = _urllib.request.Request(target)
 
     # Check if defined extra headers.
     headers.do_check(request)
@@ -185,13 +188,16 @@ def injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_meth
 
     else:
       # Check if defined POST data
-      if not settings.USER_DEFINED_POST_DATA:
+      if len(settings.USER_DEFINED_POST_DATA) == 0 or settings.IGNORE_USER_DEFINED_POST_DATA:
         # Check if its not specified the 'INJECT_HERE' tag
         #url = parameters.do_GET_check(url, http_request_method)
 
         target = url.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload)
         vuln_parameter = ''.join(vuln_parameter)
-        request = _urllib.request.Request(target)
+        if len(settings.USER_DEFINED_POST_DATA) != 0:
+          request = _urllib.request.Request(target, settings.USER_DEFINED_POST_DATA.encode(settings.DEFAULT_CODEC))
+        else:
+          request = _urllib.request.Request(target)
 
         # Check if defined extra headers.
         headers.do_check(request)

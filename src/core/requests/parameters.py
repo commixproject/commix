@@ -303,7 +303,7 @@ def do_POST_check(parameter, http_request_method):
   if len([s for s in multi_parameters if "=" in s]) != (len(multi_parameters)) and \
      not settings.IS_JSON and \
      not settings.IS_XML:
-    raise SystemExit()
+    return ""
 
   for param in range(len(multi_parameters)):
     multi_parameters[param] = checks.PCRE_e_modifier(multi_parameters[param], http_request_method)
