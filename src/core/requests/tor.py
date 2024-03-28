@@ -45,7 +45,7 @@ def do_check():
     print(settings.print_critical_msg(err_msg))
     raise SystemExit()
   try:
-    request = _urllib.request.Request(settings.CHECK_TOR_PAGE)
+    request = _urllib.request.Request(settings.CHECK_TOR_PAGE, method=settings.HTTPMETHOD.GET)
     response = proxy.use_proxy(request)
     page = response.read().decode(settings.DEFAULT_CODEC)
   except Exception as err_msg:

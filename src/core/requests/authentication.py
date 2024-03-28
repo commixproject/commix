@@ -37,7 +37,7 @@ do the authentication process using the provided credentials (auth_data).
 """
 The authentication process
 """
-def authentication_process():
+def authentication_process(http_request_method):
   try:
     auth_url = menu.options.auth_url
     auth_data = menu.options.auth_data
@@ -55,7 +55,7 @@ def authentication_process():
         info_msg += str(menu.options.cookie) + Style.RESET_ALL + "."
         print(settings.print_bold_info_msg(info_msg))
     _urllib.request.install_opener(opener)
-    request = _urllib.request.Request(auth_url, auth_data.encode(settings.DEFAULT_CODEC))
+    request = _urllib.request.Request(auth_url, auth_data.encode(settings.DEFAULT_CODEC), method=http_request_method)
     # Check if defined extra headers.
     headers.do_check(request)
     # Get the response of the request.
@@ -140,7 +140,7 @@ def define_wordlists():
 """
 Simple Basic / Digest HTTP authentication cracker.
 """
-def http_auth_cracker(url, realm):
+def http_auth_cracker(url, realm, http_request_method):
     settings.PERFORM_CRACKING = True
     # Define the HTTP authentication type.
     authentication_type = menu.options.auth_type
@@ -170,7 +170,7 @@ def http_auth_cracker(url, realm):
           authhandler.add_password(realm, url, username, password)
           opener = _urllib.request.build_opener(authhandler)
           _urllib.request.install_opener(opener)
-          request = _urllib.request.Request(url)
+          request = _urllib.request.Request(url, method=http_request_method)
           headers.do_check(request)
           headers.check_http_traffic(request)
           # Check if defined any HTTP Proxy (--proxy option).

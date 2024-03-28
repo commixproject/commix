@@ -46,9 +46,9 @@ Do a request to target URL.
 def crawler_request(url):
   try:
     if menu.options.data:
-      request = _urllib.request.Request(url, menu.options.data.encode(settings.DEFAULT_CODEC))
+      request = _urllib.request.Request(url, menu.options.data.encode(settings.DEFAULT_CODEC), method=http_request_method)
     else:
-      request = _urllib.request.Request(url)
+      request = _urllib.request.Request(url, method=http_request_method)
     headers.do_check(request)
     headers.check_http_traffic(request)
     if menu.options.proxy or menu.options.ignore_proxy or menu.options.tor: 
@@ -70,7 +70,7 @@ def crawler_request(url):
 """
 Estimating the response time (in seconds).
 """
-def estimate_response_time(url, timesec):
+def estimate_response_time(url, timesec, http_request_method):
   stored_auth_creds = False
   _ = False
   if settings.VERBOSITY_LEVEL != 0:
@@ -79,9 +79,9 @@ def estimate_response_time(url, timesec):
     sys.stdout.flush()
   # Check if defined POST data
   if menu.options.data:
-    request = _urllib.request.Request(url, menu.options.data.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.TESTABLE_VALUE).encode(settings.DEFAULT_CODEC))
+    request = _urllib.request.Request(url, menu.options.data.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.TESTABLE_VALUE).encode(settings.DEFAULT_CODEC), method=http_request_method)
   else:
-    request = _urllib.request.Request(url.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.TESTABLE_VALUE))
+    request = _urllib.request.Request(url.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.TESTABLE_VALUE), method=http_request_method)
 
   headers.do_check(request)
   start = time.time()
@@ -163,7 +163,7 @@ def estimate_response_time(url, timesec):
                   message = "Do you want to perform a dictionary-based attack? [Y/n] > "
                   do_update = common.read_input(message, default="Y", check_batch=True)
                   if do_update in settings.CHOICE_YES:
-                    auth_creds = authentication.http_auth_cracker(url, realm)
+                    auth_creds = authentication.http_auth_cracker(url, realm, http_request_method)
                     if auth_creds != False:
                       menu.options.auth_cred = auth_creds
                       settings.REQUIRED_AUTHENTICATION = True
@@ -192,7 +192,7 @@ def estimate_response_time(url, timesec):
                   message = "Do you want to perform a dictionary-based attack? [Y/n] > "
                   do_update = common.read_input(message, default="Y", check_batch=True)
                   if do_update in settings.CHOICE_YES:
-                    auth_creds = authentication.http_auth_cracker(url, realm)
+                    auth_creds = authentication.http_auth_cracker(url, realm, http_request_method)
                     if auth_creds != False:
                       menu.options.auth_cred = auth_creds
                       settings.REQUIRED_AUTHENTICATION = True
@@ -422,19 +422,18 @@ def get_request_response(request):
 """
 Check if target host is vulnerable. (Cookie-based injection)
 """
-def cookie_injection(url, vuln_parameter, payload):
+def cookie_injection(url, vuln_parameter, payload, http_request_method):
 
-  def inject_cookie(url, vuln_parameter, payload):
+  def inject_cookie(url, vuln_parameter, payload, http_request_method):
     if settings.TIME_RELATIVE_ATTACK :
       payload = _urllib.parse.quote(payload)
 
     # Check if defined POST data
-    if menu.options.data:
-      menu.options.data = settings.USER_DEFINED_POST_DATA
-      request = _urllib.request.Request(url, menu.options.data.encode(settings.DEFAULT_CODEC))
+    if len(settings.USER_DEFINED_POST_DATA) != 0:
+      data = settings.USER_DEFINED_POST_DATA.encode(settings.DEFAULT_CODEC)
     else:
-      url = parameters.get_url_part(url)
-      request = _urllib.request.Request(url)
+      data = None
+    request = _urllib.request.Request(url, data, method=http_request_method)
     #Check if defined extra headers.
     headers.do_check(request)
     payload = checks.newline_fixation(payload)
@@ -459,7 +458,7 @@ def cookie_injection(url, vuln_parameter, payload):
     start = time.time()
 
   try:
-    response = inject_cookie(url, vuln_parameter, payload)
+    response = inject_cookie(url, vuln_parameter, payload, http_request_method)
   except Exception as err_msg:
     response = request_failed(err_msg)
 
@@ -473,16 +472,15 @@ def cookie_injection(url, vuln_parameter, payload):
 """
 Check if target host is vulnerable. (User-Agent-based injection)
 """
-def user_agent_injection(url, vuln_parameter, payload):
+def user_agent_injection(url, vuln_parameter, payload, http_request_method):
 
-  def inject_user_agent(url, vuln_parameter, payload):
+  def inject_user_agent(url, vuln_parameter, payload, http_request_method):
     # Check if defined POST data
-    if menu.options.data:
-      menu.options.data = settings.USER_DEFINED_POST_DATA
-      request = _urllib.request.Request(url, menu.options.data.encode(settings.DEFAULT_CODEC))
+    if len(settings.USER_DEFINED_POST_DATA) != 0:
+      data = settings.USER_DEFINED_POST_DATA.encode(settings.DEFAULT_CODEC)
     else:
-      url = parameters.get_url_part(url)
-      request = _urllib.request.Request(url)
+      data = None
+    request = _urllib.request.Request(url, data, method=http_request_method)
     #Check if defined extra headers.
     headers.do_check(request)
     payload = checks.newline_fixation(payload)
@@ -503,7 +501,7 @@ def user_agent_injection(url, vuln_parameter, payload):
     start = time.time()
 
   try:
-    response = inject_user_agent(url, vuln_parameter, payload)
+    response = inject_user_agent(url, vuln_parameter, payload, http_request_method)
   except Exception as err_msg:
     response = request_failed(err_msg)
 
@@ -517,16 +515,15 @@ def user_agent_injection(url, vuln_parameter, payload):
 """
 Check if target host is vulnerable. (Referer-based injection)
 """
-def referer_injection(url, vuln_parameter, payload):
+def referer_injection(url, vuln_parameter, payload, http_request_method):
 
-  def inject_referer(url, vuln_parameter, payload):
+  def inject_referer(url, vuln_parameter, payload, http_request_method):
     # Check if defined POST data
-    if menu.options.data:
-      menu.options.data = settings.USER_DEFINED_POST_DATA
-      request = _urllib.request.Request(url, menu.options.data.encode(settings.DEFAULT_CODEC))
+    if len(settings.USER_DEFINED_POST_DATA) != 0:
+      data = settings.USER_DEFINED_POST_DATA.encode(settings.DEFAULT_CODEC)
     else:
-      url = parameters.get_url_part(url)
-      request = _urllib.request.Request(url)
+      data = None
+    request = _urllib.request.Request(url, data, method=http_request_method)
     #Check if defined extra headers.
     headers.do_check(request)
     payload = checks.newline_fixation(payload)
@@ -547,7 +544,7 @@ def referer_injection(url, vuln_parameter, payload):
     start = time.time()
 
   try:
-    response = inject_referer(url, vuln_parameter, payload)
+    response = inject_referer(url, vuln_parameter, payload, http_request_method)
   except Exception as err_msg:
     response = request_failed(err_msg)
 
@@ -561,11 +558,11 @@ def referer_injection(url, vuln_parameter, payload):
 """
 Check if target host is vulnerable. (Host-based injection)
 """
-def host_injection(url, vuln_parameter, payload):
+def host_injection(url, vuln_parameter, payload, http_request_method):
 
   payload = _urllib.parse.urlparse(url).netloc + payload
 
-  def inject_host(url, vuln_parameter, payload):
+  def inject_host(url, vuln_parameter, payload, http_request_method):
 
     if proxy == None:
       opener = _urllib.request.build_opener()
@@ -573,12 +570,11 @@ def host_injection(url, vuln_parameter, payload):
       opener = _urllib.request.build_opener(proxy)
 
     # Check if defined POST data
-    if menu.options.data:
-      menu.options.data = settings.USER_DEFINED_POST_DATA
-      request = _urllib.request.Request(url, menu.options.data.encode(settings.DEFAULT_CODEC))
+    if len(settings.USER_DEFINED_POST_DATA) != 0:
+      data = settings.USER_DEFINED_POST_DATA.encode(settings.DEFAULT_CODEC)
     else:
-      url = parameters.get_url_part(url)
-      request = _urllib.request.Request(url)
+      data = None
+    request = _urllib.request.Request(url, data, method=http_request_method)
     #Check if defined extra headers.
     headers.do_check(request)
     payload = checks.newline_fixation(payload)
@@ -599,7 +595,7 @@ def host_injection(url, vuln_parameter, payload):
     start = time.time()
 
   try:
-    response = inject_host(url, vuln_parameter, payload)
+    response = inject_host(url, vuln_parameter, payload, http_request_method)
   except Exception as err_msg:
     response = request_failed(err_msg)
 
@@ -613,16 +609,15 @@ def host_injection(url, vuln_parameter, payload):
 """
 Check if target host is vulnerable. (Custom header injection)
 """
-def custom_header_injection(url, vuln_parameter, payload):
+def custom_header_injection(url, vuln_parameter, payload, http_request_method):
 
-  def inject_custom_header(url, vuln_parameter, payload):
+  def inject_custom_header(url, vuln_parameter, payload, http_request_method):
     # Check if defined POST data
-    if menu.options.data:
-      menu.options.data = settings.USER_DEFINED_POST_DATA
-      request = _urllib.request.Request(url, menu.options.data.encode(settings.DEFAULT_CODEC))
+    if len(settings.USER_DEFINED_POST_DATA) != 0:
+      data = settings.USER_DEFINED_POST_DATA.encode(settings.DEFAULT_CODEC)
     else:
-      url = parameters.get_url_part(url)
-      request = _urllib.request.Request(url)
+      data = None
+    request = _urllib.request.Request(url, data, method=http_request_method)
     #Check if defined extra headers.
     headers.do_check(request)
     payload = checks.newline_fixation(payload)
@@ -646,7 +641,7 @@ def custom_header_injection(url, vuln_parameter, payload):
     start = time.time()
 
   try:
-    response = inject_custom_header(url, vuln_parameter, payload)
+    response = inject_custom_header(url, vuln_parameter, payload, http_request_method)
   except Exception as err_msg:
     response = request_failed(err_msg)
 

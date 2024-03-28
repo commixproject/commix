@@ -54,9 +54,9 @@ def examine_requests(payload, vuln_parameter, http_request_method, url, timesec,
     target = url.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload)
     vuln_parameter = ''.join(vuln_parameter)
     if len(settings.USER_DEFINED_POST_DATA) != 0:
-      request = _urllib.request.Request(target, settings.USER_DEFINED_POST_DATA.encode(settings.DEFAULT_CODEC))
+      request = _urllib.request.Request(target, settings.USER_DEFINED_POST_DATA.encode(settings.DEFAULT_CODEC), method=http_request_method)
     else:
-      request = _urllib.request.Request(target)
+      request = _urllib.request.Request(target, method=http_request_method)
 
   # Check if defined method is POST.
   else :
@@ -78,7 +78,7 @@ def examine_requests(payload, vuln_parameter, http_request_method, url, timesec,
       data = parameter.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, _urllib.parse.unquote(payload))
     else:
       data = parameter.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload)
-    request = _urllib.request.Request(url, data.encode(settings.DEFAULT_CODEC))
+    request = _urllib.request.Request(url, data.encode(settings.DEFAULT_CODEC), method=http_request_method)
 
   # Check if defined extra headers.
   headers.do_check(request)
@@ -109,9 +109,9 @@ def injection_test(payload, http_request_method, url):
     vuln_parameter = parameters.vuln_GET_param(url)
     target = url.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload)
     if len(settings.USER_DEFINED_POST_DATA) != 0:
-      request = _urllib.request.Request(target, settings.USER_DEFINED_POST_DATA.encode(settings.DEFAULT_CODEC))
+      request = _urllib.request.Request(target, settings.USER_DEFINED_POST_DATA.encode(settings.DEFAULT_CODEC), method=http_request_method)
     else:
-      request = _urllib.request.Request(target)
+      request = _urllib.request.Request(target, method=http_request_method)
 
   # Check if defined method is POST.
   else:
@@ -135,7 +135,7 @@ def injection_test(payload, http_request_method, url):
       data = parameter.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, _urllib.parse.unquote(payload))
     else:
       data = parameter.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload)
-    request = _urllib.request.Request(url, data.encode(settings.DEFAULT_CODEC))
+    request = _urllib.request.Request(url, data.encode(settings.DEFAULT_CODEC), method=http_request_method)
 
   # Check if defined extra headers.
   headers.do_check(request)
@@ -149,32 +149,32 @@ def injection_test(payload, http_request_method, url):
 """
 Check if target host is vulnerable. (Cookie-based injection)
 """
-def cookie_injection_test(url, vuln_parameter, payload):
-  return requests.cookie_injection(url, vuln_parameter, payload)
+def cookie_injection_test(url, vuln_parameter, payload, http_request_method):
+  return requests.cookie_injection(url, vuln_parameter, payload, http_request_method)
 
 """
 Check if target host is vulnerable. (User-Agent-based injection)
 """
-def user_agent_injection_test(url, vuln_parameter, payload):
-  return requests.user_agent_injection(url, vuln_parameter, payload)
+def user_agent_injection_test(url, vuln_parameter, payload, http_request_method):
+  return requests.user_agent_injection(url, vuln_parameter, payload, http_request_method)
 
 """
 Check if target host is vulnerable. (Referer-based injection)
 """
-def referer_injection_test(url, vuln_parameter, payload):
-  return requests.referer_injection(url, vuln_parameter, payload)
+def referer_injection_test(url, vuln_parameter, payload, http_request_method):
+  return requests.referer_injection(url, vuln_parameter, payload, http_request_method)
 
 """
 Check if target host is vulnerable. (Referer-based injection)
 """
-def host_injection_test(url, vuln_parameter, payload):
-  return requests.host_injection(url, vuln_parameter, payload)
+def host_injection_test(url, vuln_parameter, payload, http_request_method):
+  return requests.host_injection(url, vuln_parameter, payload, http_request_method)
 
 """
 Check if target host is vulnerable. (Custom header injection)
 """
-def custom_header_injection_test(url, vuln_parameter, payload):
-  return requests.custom_header_injection(url, vuln_parameter, payload)
+def custom_header_injection_test(url, vuln_parameter, payload, http_request_method):
+  return requests.custom_header_injection(url, vuln_parameter, payload, http_request_method)
 
 """
 The main command injection exploitation.
@@ -220,23 +220,23 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
 
     # Check if defined cookie with "INJECT_HERE" tag
     if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
-      how_long = cookie_injection_test(url, vuln_parameter, payload)
+      how_long = cookie_injection_test(url, vuln_parameter, payload, http_request_method)
 
     # Check if defined user-agent with "INJECT_HERE" tag
     elif menu.options.agent and settings.INJECT_TAG in menu.options.agent:
-      how_long = user_agent_injection_test(url, vuln_parameter, payload)
+      how_long = user_agent_injection_test(url, vuln_parameter, payload, http_request_method)
 
     # Check if defined referer with "INJECT_HERE" tag
     elif menu.options.referer and settings.INJECT_TAG in menu.options.referer:
-      how_long = referer_injection_test(url, vuln_parameter, payload)
+      how_long = referer_injection_test(url, vuln_parameter, payload, http_request_method)
 
     # Check if defined host with "INJECT_HERE" tag
     elif menu.options.host and settings.INJECT_TAG in menu.options.host:
-      how_long = host_injection_test(url, vuln_parameter, payload)
+      how_long = host_injection_test(url, vuln_parameter, payload, http_request_method)
 
     # Check if defined custom header with "INJECT_HERE" tag
     elif settings.CUSTOM_HEADER_INJECTION:
-      how_long = custom_header_injection_test(url, vuln_parameter, payload)
+      how_long = custom_header_injection_test(url, vuln_parameter, payload, http_request_method)
 
     else:
       how_long = examine_requests(payload, vuln_parameter, http_request_method, url, timesec, url_time_response)
@@ -301,23 +301,23 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
 
         # Check if defined cookie with "INJECT_HERE" tag
         if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
-          how_long = cookie_injection_test(url, vuln_parameter, payload)
+          how_long = cookie_injection_test(url, vuln_parameter, payload, http_request_method)
 
         # Check if defined user-agent with "INJECT_HERE" tag
         elif menu.options.agent and settings.INJECT_TAG in menu.options.agent:
-          how_long = user_agent_injection_test(url, vuln_parameter, payload)
+          how_long = user_agent_injection_test(url, vuln_parameter, payload, http_request_method)
 
         # Check if defined referer with "INJECT_HERE" tag
         elif menu.options.referer and settings.INJECT_TAG in menu.options.referer:
-          how_long = referer_injection_test(url, vuln_parameter, payload)
+          how_long = referer_injection_test(url, vuln_parameter, payload, http_request_method)
 
         # Check if defined host with "INJECT_HERE" tag
         elif menu.options.host and settings.INJECT_TAG in menu.options.host:
-          how_long = host_injection_test(url, vuln_parameter, payload)
+          how_long = host_injection_test(url, vuln_parameter, payload, http_request_method)
 
         # Check if defined custom header with "INJECT_HERE" tag
         elif settings.CUSTOM_HEADER_INJECTION:
-          how_long = custom_header_injection_test(url, vuln_parameter, payload)
+          how_long = custom_header_injection_test(url, vuln_parameter, payload, http_request_method)
 
         else:
           how_long = examine_requests(payload, vuln_parameter, http_request_method, url, timesec, url_time_response)
@@ -407,23 +407,23 @@ def false_positive_check(separator, TAG, cmd, prefix, suffix, whitespace, timese
 
     # Check if defined cookie with "INJECT_HERE" tag
     if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
-      how_long = cookie_injection_test(url, vuln_parameter, payload)
+      how_long = cookie_injection_test(url, vuln_parameter, payload, http_request_method)
 
     # Check if defined user-agent with "INJECT_HERE" tag
     elif menu.options.agent and settings.INJECT_TAG in menu.options.agent:
-      how_long = user_agent_injection_test(url, vuln_parameter, payload)
+      how_long = user_agent_injection_test(url, vuln_parameter, payload, http_request_method)
 
     # Check if defined referer with "INJECT_HERE" tag
     elif menu.options.referer and settings.INJECT_TAG in menu.options.referer:
-      how_long = referer_injection_test(url, vuln_parameter, payload)
+      how_long = referer_injection_test(url, vuln_parameter, payload, http_request_method)
 
     # Check if defined host with "INJECT_HERE" tag
     elif menu.options.host and settings.INJECT_TAG in menu.options.host:
-      how_long = host_injection_test(url, vuln_parameter, payload)
+      how_long = host_injection_test(url, vuln_parameter, payload, http_request_method)
 
     # Check if defined custom header with "INJECT_HERE" tag
     elif settings.CUSTOM_HEADER_INJECTION:
-      how_long = custom_header_injection_test(url, vuln_parameter, payload)
+      how_long = custom_header_injection_test(url, vuln_parameter, payload, http_request_method)
 
     else:
       how_long = examine_requests(payload, vuln_parameter, http_request_method, url, timesec, url_time_response)
@@ -472,23 +472,23 @@ def false_positive_check(separator, TAG, cmd, prefix, suffix, whitespace, timese
 
         # Check if defined cookie with "INJECT_HERE" tag
         if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
-          how_long = cookie_injection_test(url, vuln_parameter, payload)
+          how_long = cookie_injection_test(url, vuln_parameter, payload, http_request_method)
 
         # Check if defined user-agent with "INJECT_HERE" tag
         elif menu.options.agent and settings.INJECT_TAG in menu.options.agent:
-          how_long = user_agent_injection_test(url, vuln_parameter, payload)
+          how_long = user_agent_injection_test(url, vuln_parameter, payload, http_request_method)
 
         # Check if defined referer with "INJECT_HERE" tag
         elif menu.options.referer and settings.INJECT_TAG in menu.options.referer:
-          how_long = referer_injection_test(url, vuln_parameter, payload)
+          how_long = referer_injection_test(url, vuln_parameter, payload, http_request_method)
 
         # Check if defined host with "INJECT_HERE" tag
         elif menu.options.host and settings.INJECT_TAG in menu.options.host:
-          how_long = host_injection_test(url, vuln_parameter, payload)
+          how_long = host_injection_test(url, vuln_parameter, payload, http_request_method)
 
         # Check if defined custom header with "INJECT_HERE" tag
         elif settings.CUSTOM_HEADER_INJECTION:
-          how_long = custom_header_injection_test(url, vuln_parameter, payload)
+          how_long = custom_header_injection_test(url, vuln_parameter, payload, http_request_method)
 
         else:
           how_long = examine_requests(payload, vuln_parameter, http_request_method, url, timesec, url_time_response)

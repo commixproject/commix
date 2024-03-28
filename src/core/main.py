@@ -139,13 +139,13 @@ Check internet connection before assessing the target.
 def check_internet(url):
   settings.CHECK_INTERNET = True
   settings.CHECK_INTERNET_ADDRESS = checks.check_http_s(url)
-  info_msg = "Checking for internet connection. "
+  info_msg = "Checking for internet connection."
   sys.stdout.write(settings.print_info_msg(info_msg))
   sys.stdout.flush()
   if settings.VERBOSITY_LEVEL >= 2:
     print(settings.SINGLE_WHITESPACE)
   try:
-    request = _urllib.request.Request(settings.CHECK_INTERNET_ADDRESS)
+    request = _urllib.request.Request(settings.CHECK_INTERNET_ADDRESS, method=settings.HTTPMETHOD.GET)
     headers.do_check(request)
     examine_request(request, url)
   except:
@@ -156,7 +156,7 @@ def check_internet(url):
 """
 The init (URL) request.
 """
-def init_request(url):
+def init_request(url, http_request_method):
   # Number of seconds to wait before timeout connection
   if settings.VERBOSITY_LEVEL != 0:
     debug_msg = "Setting the HTTP timeout."
@@ -174,12 +174,12 @@ def init_request(url):
     # Check if defined character used for splitting parameter values.
     if menu.options.pdel and menu.options.pdel in settings.USER_DEFINED_POST_DATA:
       settings.PARAMETER_DELIMITER = menu.options.pdel
-    request = _urllib.request.Request(url, menu.options.data.encode())
+    request = _urllib.request.Request(url, menu.options.data.encode(), method=http_request_method)
   else:
     # Check if defined character used for splitting parameter values.
     if menu.options.pdel and menu.options.pdel in url:
       settings.PARAMETER_DELIMITER = menu.options.pdel
-    request = _urllib.request.Request(url)
+    request = _urllib.request.Request(url, method=http_request_method)
     # Check if defined any HTTP Proxy (--proxy option).
   headers.do_check(request)
   # Used a valid pair of valid credentials
@@ -198,7 +198,7 @@ def init_request(url):
 """
 Get the URL response.
 """
-def url_response(url):
+def url_response(url, http_request_method):
   # Check if http / https
   url = checks.check_http_s(url)
   settings.TARGET_URL = _urllib.parse.urlparse(url).hostname
@@ -206,7 +206,7 @@ def url_response(url):
     settings.TOR_CHECK_AGAIN = False
     # initiate total of requests
     settings.TOTAL_OF_REQUESTS = 0
-  request = init_request(url)
+  request = init_request(url, http_request_method)
   if settings.CHECK_INTERNET:
     settings.CHECK_INTERNET = False
   if settings.INIT_TEST == True:
@@ -221,7 +221,7 @@ def url_response(url):
         url = redirect_url
   if not menu.options.skip_waf:
     settings.WAF_DETECTION_PHASE = True
-    waf_request, waf_url = checks.check_waf(url)
+    waf_request, waf_url = checks.check_waf(url, http_request_method)
     headers.do_check(waf_request)
     examine_request(waf_request, waf_url)
     settings.WAF_DETECTION_PHASE = False
@@ -861,7 +861,7 @@ try:
       http_request_method  = checks.check_http_method(url)
       if os_checks_num == 0:
         settings.INIT_TEST = True
-      response, url = url_response(url)
+      response, url = url_response(url, http_request_method)
       if response != False:
         filename = logs.logs_filename_creation(url)
         main(filename, url)
@@ -989,7 +989,7 @@ try:
                 menu.options.level = 1
               init_injection(url)
               try:
-                response, url = url_response(url)
+                response, url = url_response(url, http_request_method)
                 if response != False:
                   filename = logs.logs_filename_creation(url)
                   main(filename, url)

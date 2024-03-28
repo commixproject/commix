@@ -293,31 +293,31 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
               if settings.COOKIE_INJECTION == True:
                 # Check if target host is vulnerable to cookie header injection.
                 vuln_parameter = parameters.specify_cookie_parameter(menu.options.cookie)
-                response = fb_injector.cookie_injection_test(url, vuln_parameter, payload)
+                response = fb_injector.cookie_injection_test(url, vuln_parameter, payload, http_request_method)
 
               # User-Agent HTTP Header Injection
               elif settings.USER_AGENT_INJECTION == True:
                 # Check if target host is vulnerable to user-agent HTTP header injection.
                 vuln_parameter = parameters.specify_user_agent_parameter(menu.options.agent)
-                response = fb_injector.user_agent_injection_test(url, vuln_parameter, payload)
+                response = fb_injector.user_agent_injection_test(url, vuln_parameter, payload, http_request_method)
 
               # Referer HTTP Header Injection
               elif settings.REFERER_INJECTION == True:
                 # Check if target host is vulnerable to Referer HTTP header injection.
                 vuln_parameter = parameters.specify_referer_parameter(menu.options.referer)
-                response = fb_injector.referer_injection_test(url, vuln_parameter, payload)
+                response = fb_injector.referer_injection_test(url, vuln_parameter, payload, http_request_method)
 
               # Host HTTP Header Injection
               elif settings.HOST_INJECTION == True:
                 # Check if target host is vulnerable to Host HTTP header injection.
                 vuln_parameter = parameters.specify_host_parameter(menu.options.host)
-                response = fb_injector.host_injection_test(url, vuln_parameter, payload)
+                response = fb_injector.host_injection_test(url, vuln_parameter, payload, http_request_method)
 
               # Custom HTTP header Injection
               elif settings.CUSTOM_HEADER_INJECTION == True:
                 # Check if target host is vulnerable to custom HTTP header injection.
                 vuln_parameter = parameters.specify_custom_header_parameter(settings.INJECT_TAG)
-                response = fb_injector.custom_header_injection_test(url, vuln_parameter, payload)
+                response = fb_injector.custom_header_injection_test(url, vuln_parameter, payload, http_request_method)
 
               else:
                 # Check if target host is vulnerable.

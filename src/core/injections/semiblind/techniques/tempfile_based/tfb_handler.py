@@ -164,31 +164,31 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                 if settings.COOKIE_INJECTION == True:
                   # Check if target host is vulnerable to cookie header injection.
                   vuln_parameter = parameters.specify_cookie_parameter(menu.options.cookie)
-                  how_long = tfb_injector.cookie_injection_test(url, vuln_parameter, payload)
+                  how_long = tfb_injector.cookie_injection_test(url, vuln_parameter, payload, http_request_method)
 
                 # User-Agent HTTP header injection
                 elif settings.USER_AGENT_INJECTION == True:
                   # Check if target host is vulnerable to user-agent HTTP header injection.
                   vuln_parameter = parameters.specify_user_agent_parameter(menu.options.agent)
-                  how_long = tfb_injector.user_agent_injection_test(url, vuln_parameter, payload)
+                  how_long = tfb_injector.user_agent_injection_test(url, vuln_parameter, payload, http_request_method)
 
                 # Referer HTTP header injection
                 elif settings.REFERER_INJECTION == True:
                   # Check if target host is vulnerable to referer HTTP header injection.
                   vuln_parameter = parameters.specify_referer_parameter(menu.options.referer)
-                  how_long = tfb_injector.referer_injection_test(url, vuln_parameter, payload)
+                  how_long = tfb_injector.referer_injection_test(url, vuln_parameter, payload, http_request_method)
 
                 # Host HTTP header injection
                 elif settings.HOST_INJECTION == True:
                   # Check if target host is vulnerable to host HTTP header injection.
                   vuln_parameter = parameters.specify_host_parameter(menu.options.host)
-                  how_long = tfb_injector.host_injection_test(url, vuln_parameter, payload)
+                  how_long = tfb_injector.host_injection_test(url, vuln_parameter, payload, http_request_method)
 
                 # Custom HTTP header injection
                 elif settings.CUSTOM_HEADER_INJECTION == True:
                   # Check if target host is vulnerable to custom HTTP header injection.
                   vuln_parameter = parameters.specify_custom_header_parameter(settings.INJECT_TAG)
-                  how_long = tfb_injector.custom_header_injection_test(url, vuln_parameter, payload)
+                  how_long = tfb_injector.custom_header_injection_test(url, vuln_parameter, payload, http_request_method)
 
                 else:
                   # Check if target host is vulnerable.

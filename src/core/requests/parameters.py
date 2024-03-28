@@ -273,12 +273,14 @@ def do_POST_check(parameter, http_request_method):
     if checks.is_JSON_check(checks.check_quotes_json_data(parameter)):
       parameter = checks.check_quotes_json_data(parameter)
     if not settings.IS_JSON:
-      settings.IS_JSON = checks.process_json_data()
+      data_type = "JSON"
+      settings.IS_JSON = checks.process_data(data_type, http_request_method)
       settings.PARAMETER_DELIMITER = ","
   # Check if XML Object.
   elif checks.is_XML_check(parameter):
     if not settings.IS_XML:
-      settings.IS_XML = checks.process_xml_data()
+      data_type = "XML/SOAP"
+      settings.IS_XML = checks.process_data(data_type, http_request_method)
       settings.PARAMETER_DELIMITER = ""
   else:
     pass

@@ -112,7 +112,7 @@ def command_injection_heuristic_basic(url, http_request_method, check_parameter,
         else:
           if settings.INJECT_TAG in url:
             tmp_url = url.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload)
-        request = _urllib.request.Request(tmp_url, data)
+        request = _urllib.request.Request(tmp_url, data, method=http_request_method)
         if cookie:
           request.add_header(settings.COOKIE, cookie)
         if inject_http_headers:
@@ -173,7 +173,7 @@ def code_injections_heuristic_basic(url, http_request_method, check_parameter, t
         else:
           if settings.INJECT_TAG in url:
             tmp_url = url.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload)
-        request = _urllib.request.Request(tmp_url, data)
+        request = _urllib.request.Request(tmp_url, data, method=http_request_method)
         if cookie:
           request.add_header(settings.COOKIE, cookie)
         if inject_http_headers:
@@ -273,8 +273,9 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
     basic_level_checks()
 
   inject_http_headers = False
-
-  if check_parameter.lower() in url :
+  if menu.options.method:
+    http_request_method = menu.options.method
+  elif check_parameter.lower() in url :
     http_request_method = settings.HTTPMETHOD.GET
   elif check_parameter.lower() not in menu.options.data:
     http_request_method = settings.HTTPMETHOD.POST
@@ -300,7 +301,7 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
     check_parameter = " '" + check_parameter + "'"
 
   # Estimating the response time (in seconds)
-  timesec, url_time_response = requests.estimate_response_time(url, timesec)
+  timesec, url_time_response = requests.estimate_response_time(url, timesec, http_request_method)
 
   # Load modules
   modules_handler.load_modules(url, http_request_method, filename)
@@ -657,7 +658,7 @@ def perform_checks(url, http_request_method, filename):
   # Check if authentication is needed.
   if menu.options.auth_url and menu.options.auth_data:
     # Do the authentication process.
-    authentication.authentication_process()
+    authentication.authentication_process(http_request_method)
     try:
       # Check if authentication page is the same with the next (injection) URL
       if _urllib.request.urlopen(url, timeout=settings.TIMEOUT).read() == _urllib.request.urlopen(menu.options.auth_url, timeout=settings.TIMEOUT).read():

@@ -64,7 +64,7 @@ def exit():
 """
 Detection of WAF/IPS protection.
 """
-def check_waf(url):
+def check_waf(url, http_request_method):
   payload = _urllib.parse.quote(settings.WAF_CHECK_PAYLOAD)
   info_msg = "Checking if the target is protected by some kind of WAF/IPS."
   print(settings.print_info_msg(info_msg))
@@ -77,9 +77,9 @@ def check_waf(url):
     payload = settings.PARAMETER_DELIMITER + payload
   url = url + payload
   if len(settings.USER_DEFINED_POST_DATA) != 0:
-    request = _urllib.request.Request(url, settings.USER_DEFINED_POST_DATA.encode())
+    request = _urllib.request.Request(url, settings.USER_DEFINED_POST_DATA.encode(), method=http_request_method)
   else:
-    request = _urllib.request.Request(url)
+    request = _urllib.request.Request(url, method=http_request_method)
   return request, url
 
 """
@@ -1773,24 +1773,6 @@ def is_XML_check(parameter):
   except ValueError as err_msg:
     return False
 
-# Process with SOAP/XML data
-def process_xml_data():
-  while True:
-    info_msg = "SOAP/XML data found in POST data."
-    message = info_msg
-    message += " Do you want to process it? [Y/n] > "
-    xml_process = common.read_input(message, default="Y", check_batch=True)
-    if xml_process in settings.CHOICE_YES:
-      return True
-    elif xml_process in settings.CHOICE_NO:
-      settings.IGNORE_USER_DEFINED_POST_DATA = True
-      return False
-    elif xml_process in settings.CHOICE_QUIT:
-      raise SystemExit()
-    else:
-      common.invalid_option(xml_process)
-      pass
-
 #Check if INJECT_TAG is enclosed in quotes (in json data)
 def check_quotes_json_data(data):
   if not json.dumps(settings.INJECT_TAG) in data:
@@ -1814,15 +1796,15 @@ def is_JSON_check(parameter):
     return False
 
 # Process with JSON data
-def process_json_data():
+def process_data(data_type, http_request_method):
   while True:
-    info_msg = "JSON data found in POST data."
+    info_msg = str(data_type) + " data found in " + str(http_request_method) + " body."
     message = info_msg
     message += " Do you want to process it? [Y/n] > "
-    json_process = common.read_input(message, default="Y", check_batch=True)
-    if json_process in settings.CHOICE_YES:
+    process = common.read_input(message, default="Y", check_batch=True)
+    if process in settings.CHOICE_YES:
       return True
-    elif json_process in settings.CHOICE_NO:
+    elif process in settings.CHOICE_NO:
       settings.IGNORE_USER_DEFINED_POST_DATA = True
       return False
     elif json_process in settings.CHOICE_QUIT:

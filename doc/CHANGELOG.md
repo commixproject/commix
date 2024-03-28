@@ -1,4 +1,5 @@
 ## Version 4.0 (TBA)
+* Revised: Improvement regarding forcing usage of provided HTTP method (e.g. `PUT`).
 * Revised: Improvement regarding parsing raw HTTP request from a file (i.e. `-r` option).
 * Revised: Improvement regarding parsing JSON nested objects.
 * Revised: Improvement regarding (basic) heuristic detection of WAF/IPS protection.
