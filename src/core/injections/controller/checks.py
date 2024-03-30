@@ -1807,7 +1807,7 @@ def process_data(data_type, http_request_method):
     elif process in settings.CHOICE_NO:
       settings.IGNORE_USER_DEFINED_POST_DATA = True
       return False
-    elif json_process in settings.CHOICE_QUIT:
+    elif process in settings.CHOICE_QUIT:
       raise SystemExit()
     else:
       common.invalid_option(json_process)

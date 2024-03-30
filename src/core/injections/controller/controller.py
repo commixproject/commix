@@ -91,7 +91,6 @@ def command_injection_heuristic_basic(url, http_request_method, check_parameter,
             payload = _urllib.parse.quote(payload)
         payload = parameters.prefixes(payload, prefix="")
         payload = parameters.suffixes(payload, suffix="")
-        payload = payload.replace(settings.SINGLE_WHITESPACE, whitespace)
         payload = checks.perform_payload_modification(payload)
         if settings.VERBOSITY_LEVEL >= 1:
           print(settings.print_payload(payload))
@@ -273,18 +272,17 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
     basic_level_checks()
 
   inject_http_headers = False
+
   if menu.options.method:
-    http_request_method = menu.options.method
+    http_request_method = menu.options.method.upper()
   elif check_parameter.lower() in url :
     http_request_method = settings.HTTPMETHOD.GET
-  elif check_parameter.lower() not in menu.options.data:
+  elif check_parameter.lower() in settings.USER_DEFINED_POST_DATA:
     http_request_method = settings.HTTPMETHOD.POST
 
-  if (http_request_method == settings.HTTPMETHOD.GET and check_parameter.lower() not in url) or \
-  (http_request_method == settings.HTTPMETHOD.POST and menu.options.data and check_parameter.lower() not in menu.options.data):
-    if any(x in check_parameter.lower() for x in settings.HTTP_HEADERS) or \
-       any(x in check_parameter.lower() for x in settings.CUSTOM_HEADER_NAME):
-      inject_http_headers = True
+  if any(x in check_parameter.lower() for x in settings.HTTP_HEADERS) or \
+     any(x in check_parameter.lower() for x in settings.CUSTOM_HEADER_NAME):
+    inject_http_headers = True
 
   # User-Agent HTTP header / Referer HTTP header /
   # Host HTTP header / Custom HTTP header Injection(s)
