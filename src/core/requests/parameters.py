@@ -54,9 +54,9 @@ def do_GET_check(url, http_request_method):
   if "?" not in url:
     if settings.INJECT_TAG not in url and not menu.options.shellshock:
       checks.check_injection_level()
-      if menu.options.level == settings.HTTP_HEADER_INJECTION_LEVEL or menu.options.header or menu.options.headers:
-        return False
-      if menu.options.level == settings.COOKIE_INJECTION_LEVEL:
+      if menu.options.level == settings.HTTP_HEADER_INJECTION_LEVEL or \
+         menu.options.level == settings.COOKIE_INJECTION_LEVEL or \
+         settings.USER_DEFINED_POST_DATA and not settings.IGNORE_USER_DEFINED_POST_DATA:
         return False
       else:
         err_msg = "No parameter(s) found for testing on the provided target URL. "
@@ -265,6 +265,7 @@ def do_POST_check(parameter, http_request_method):
     parameter = json.dumps(parameter)
     return parameter
 
+  process_body_data = True
   # Do replacement with the 'INJECT_HERE' tag, if the wild card char is provided.
   parameter = checks.wildcard_character(parameter).replace("'","\"").replace(", ",",").replace(",\"", ", \"")
   checks.check_injection_level()
@@ -274,19 +275,24 @@ def do_POST_check(parameter, http_request_method):
       parameter = checks.check_quotes_json_data(parameter)
     if not settings.IS_JSON:
       data_type = "JSON"
-      settings.IS_JSON = checks.process_data(data_type, http_request_method)
+      settings.IS_JSON = process_body_data = checks.process_data(data_type, http_request_method)
       settings.PARAMETER_DELIMITER = ","
   # Check if XML Object.
   elif checks.is_XML_check(parameter):
     if not settings.IS_XML:
       data_type = "XML/SOAP"
-      settings.IS_XML = checks.process_data(data_type, http_request_method)
-      settings.PARAMETER_DELIMITER = ""
+      settings.IS_XML = process_body_data = checks.process_data(data_type, http_request_method)
+
   else:
     pass
+
+  if process_body_data is not True:
+    return ""
+
   parameters_list = []
   # Split multiple parameters
   if settings.IS_XML:
+    settings.PARAMETER_DELIMITER = ""
     parameter = re.sub(r">\s*<", '>\n<', parameter).replace("\\n","\n")
     _ = []
     parameters = re.findall(r'(.*)', parameter)

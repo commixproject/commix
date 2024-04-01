@@ -76,6 +76,7 @@ def logfile_parser():
       with open(request_file, 'r') as file:
         request = file.read()
     else:
+      r
       invalid_data(request_file)
 
     if menu.options.requestfile:
@@ -86,10 +87,14 @@ def logfile_parser():
         x = request_lines[c].find(':')
         header_name = request_lines[c][:x]
         header_value = request_lines[c][x + 1:]
+        if menu.options.header:
+          request_headers.append(menu.options.header)
+        elif menu.options.headers:
+          request_headers.extend(menu.options.headers.split("\\n"))
         request_headers.append(header_name + ": " + header_value)
         c += 1
       c += 1  
-      menu.options.data = "".join(request_lines[c:] if c < len(request_lines) else invalid_data(request_file))
+      menu.options.data = "".join(request_lines[c:] if c < len(request_lines) else "")
       settings.RAW_HTTP_HEADERS = '\\n'.join(request_headers)
 
   except IOError as err_msg:
@@ -163,6 +168,7 @@ def logfile_parser():
 
   # Extra headers
   menu.options.headers = extra_headers
+  
   # Target URL
   if not menu.options.host:
     invalid_data(request_file)

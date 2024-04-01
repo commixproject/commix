@@ -1810,7 +1810,7 @@ def process_data(data_type, http_request_method):
     elif process in settings.CHOICE_QUIT:
       raise SystemExit()
     else:
-      common.invalid_option(json_process)
+      common.invalid_option(process)
       pass
 
 """
