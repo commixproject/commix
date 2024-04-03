@@ -100,12 +100,12 @@ def quoted_value(value):
 """
 Check for custom injection marker (*)
 """
-def check_custom_injection_marker(url):
+def check_custom_injection_marker(url, http_request_method):
   if url and settings.WILDCARD_CHAR in url:
     option = "'-u'"
     settings.WILDCARD_CHAR_APPLIED = True
   elif menu.options.data and settings.WILDCARD_CHAR in menu.options.data:
-    option = "POST body"
+    option = str(http_request_method) + " body"
     settings.WILDCARD_CHAR_APPLIED = True
   else:
     option = "option '--headers/--user-agent/--referer/--cookie'"
@@ -132,22 +132,20 @@ def check_custom_injection_marker(url):
         menu.options.level = settings.HTTP_HEADER_INJECTION_LEVEL
 
   if settings.WILDCARD_CHAR_APPLIED:
-    if menu.options.test_parameter:
-      if not settings.MULTI_TARGETS or settings.STDIN_PARSING:
-        err_msg = "The options '-p' and the custom injection marker (" + settings.WILDCARD_CHAR + ") "
-        err_msg += "cannot be used simultaneously (i.e. only one option must be set)."
-        print(settings.print_critical_msg(err_msg))
-        raise SystemExit
-
     while True:
       message = "Custom injection marker (" + settings.WILDCARD_CHAR + ") found in " + option +". "
       message += "Do you want to process it? [Y/n] > "
       procced_option = common.read_input(message, default="Y", check_batch=True)
       if procced_option in settings.CHOICE_YES:
-        return
+        if menu.options.test_parameter:
+          if not settings.MULTI_TARGETS or settings.STDIN_PARSING:
+            err_msg = "The custom injection marker (" + settings.WILDCARD_CHAR + ") "
+            err_msg += "and the option '-p', cannot be used simultaneously."
+            print(settings.print_critical_msg(err_msg))
+            raise SystemExit
+        return True
       elif procced_option in settings.CHOICE_NO:
-        settings.WILDCARD_CHAR_APPLIED = None
-        return
+        return False
       elif procced_option in settings.CHOICE_QUIT:
         raise SystemExit()
       else:
@@ -1131,8 +1129,8 @@ def wildcard_character(data):
     for data in data.split("\\n"):
       # Ignore the Accept HTTP Header
       if not data.startswith(settings.ACCEPT) and not settings.WILDCARD_CHAR is None and not settings.INJECT_TAG in data and settings.WILDCARD_CHAR in data :
-        data = data.replace(settings.WILDCARD_CHAR, settings.INJECT_TAG)
-        settings.WILDCARD_CHAR_APPLIED = True
+        if settings.WILDCARD_CHAR_APPLIED:
+          data = data.replace(settings.WILDCARD_CHAR, settings.INJECT_TAG)
       _ = _ + data + "\\n"
     data = _.rstrip("\\n")
     if data.count(settings.INJECT_TAG) > 1:

@@ -452,6 +452,8 @@ def vuln_POST_param(parameter, url):
     for item in parameters:
       if settings.INJECT_TAG in item:
         result = re.sub(re.compile('<.*?>'), '', item)
+        if not settings.WILDCARD_CHAR_APPLIED and settings.WILDCARD_CHAR in item:
+          item = item.replace(settings.WILDCARD_CHAR,"")
         _ = (re.search('<(.*)>' + result + '</(.*)>', item))
         if (_.groups()[0]) == (_.groups()[1]):
           vuln_parameter = ''.join(_.groups()[0])

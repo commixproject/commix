@@ -286,7 +286,7 @@ def check_for_injected_url(url):
 """
 The main function.
 """
-def main(filename, url):
+def main(filename, url, http_request_method):
   try:
     if menu.options.alert:
       if menu.options.alert.startswith('-'):
@@ -309,7 +309,7 @@ def main(filename, url):
     if settings.WILDCARD_CHAR_APPLIED and settings.MULTI_TARGETS or settings.STDIN_PARSING:
       settings.WILDCARD_CHAR_APPLIED = False
 
-    checks.check_custom_injection_marker(url)
+    settings.WILDCARD_CHAR_APPLIED = checks.check_custom_injection_marker(url, http_request_method)
 
     # Check injection level, due to the provided testable parameters.
     if menu.options.level == settings.DEFAULT_INJECTION_LEVEL and \
@@ -863,7 +863,7 @@ try:
       response, url = url_response(url, http_request_method)
       if response != False:
         filename = logs.logs_filename_creation(url)
-        main(filename, url)
+        main(filename, url, http_request_method)
 
     else:
       output_href = []
@@ -991,7 +991,7 @@ try:
                 response, url = url_response(url, http_request_method)
                 if response != False:
                   filename = logs.logs_filename_creation(url)
-                  main(filename, url)
+                  main(filename, url, http_request_method)
               except:
                 pass
           else:
