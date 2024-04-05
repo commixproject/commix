@@ -271,21 +271,19 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
   if settings.PERFORM_BASIC_SCANS:
     basic_level_checks()
 
-  inject_http_headers = False
-
   if menu.options.method:
     http_request_method = menu.options.method.upper()
-  elif check_parameter.lower() in url :
-    http_request_method = settings.HTTPMETHOD.GET
-  elif check_parameter.lower() in settings.USER_DEFINED_POST_DATA:
+  elif check_parameter.lower() in settings.USER_DEFINED_POST_DATA and not settings.IGNORE_USER_DEFINED_POST_DATA:
     http_request_method = settings.HTTPMETHOD.POST
+  elif check_parameter.lower() in url:
+    http_request_method = settings.HTTPMETHOD.GET
 
+  inject_http_headers = False
   if any(x in check_parameter.lower() for x in settings.HTTP_HEADERS) or \
      any(x in check_parameter.lower() for x in settings.CUSTOM_HEADER_NAME):
     inject_http_headers = True
 
-  # User-Agent HTTP header / Referer HTTP header /
-  # Host HTTP header / Custom HTTP header Injection(s)
+  # User-Agent/Referer/Host/Custom HTTP header Injection(s)
   if check_parameter.startswith(settings.SINGLE_WHITESPACE):
     header_name = ""
     the_type = "HTTP header"
@@ -597,7 +595,7 @@ def post_request(url, http_request_method, filename, timesec):
     found_parameter_list.append(found_parameter)
     found_parameter = found_parameter_list
 
-  if settings.IS_XML or settings.IS_JSON:
+  if settings.IS_JSON or settings.IS_XML:
     # Remove junk data
     found_parameter = [x for x in found_parameter if settings.INJECT_TAG in x]
   else:

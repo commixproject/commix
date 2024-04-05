@@ -59,7 +59,7 @@ def do_GET_check(url, http_request_method):
          settings.USER_DEFINED_POST_DATA and not settings.IGNORE_USER_DEFINED_POST_DATA:
         return False
       else:
-        err_msg = "No parameter(s) found for testing on the provided target URL. "
+        err_msg = "No parameter(s) found for testing in the provided data. "
         if not menu.options.crawldepth:
           err_msg += "You are advised to rerun with '--crawl=2'."
         print(settings.print_critical_msg(err_msg))
@@ -265,7 +265,6 @@ def do_POST_check(parameter, http_request_method):
     parameter = json.dumps(parameter)
     return parameter
 
-  process_body_data = True
   # Do replacement with the 'INJECT_HERE' tag, if the wild card char is provided.
   parameter = checks.wildcard_character(parameter).replace("'","\"").replace(", ",",").replace(",\"", ", \"")
   checks.check_injection_level()
@@ -275,20 +274,17 @@ def do_POST_check(parameter, http_request_method):
       parameter = checks.check_quotes_json_data(parameter)
     if not settings.IS_JSON:
       data_type = "JSON"
-      settings.IS_JSON = process_body_data = checks.process_data(data_type, http_request_method)
+      settings.IS_JSON = checks.process_data(data_type, http_request_method)
       settings.PARAMETER_DELIMITER = ","
   # Check if XML Object.
   elif checks.is_XML_check(parameter):
     if not settings.IS_XML:
       data_type = "XML/SOAP"
-      settings.IS_XML = process_body_data = checks.process_data(data_type, http_request_method)
+      settings.IS_XML = checks.process_data(data_type, http_request_method)
 
-  else:
-    pass
-
-  if process_body_data is not True:
+  if settings.IGNORE_USER_DEFINED_POST_DATA:
     return ""
-
+    
   parameters_list = []
   # Split multiple parameters
   if settings.IS_XML:
