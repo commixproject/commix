@@ -747,7 +747,10 @@ try:
 
     # Check if defined "--wizard" option.
     if menu.options.wizard:
-      if not menu.options.url and not settings.STDIN_PARSING:
+      message = "Enter full target URL (-u) > "
+      if menu.options.url:
+        print(settings.print_message(message + str(menu.options.url)))
+      elif not menu.options.url and not settings.STDIN_PARSING:
         while True:
           message = "Enter full target URL (-u) > "
           menu.options.url = common.read_input(message, default=None, check_batch=True)
