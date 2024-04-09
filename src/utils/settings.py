@@ -247,7 +247,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.0"
-REVISION = "24"
+REVISION = "25"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -376,6 +376,7 @@ POST_WILDCARD_CHAR = ""
 
 # Testable parameter(s) - comma separated.
 TEST_PARAMETER = ""
+TESTABLE_PARAMETERS = None
 
 # Skip testing for given parameter(s) - comma separated.
 SKIP_PARAMETER = ""
@@ -740,7 +741,7 @@ SET_OPTIONS = [
 COOKIE_DELIMITER = ";"
 
 # Split parameter value
-PARAMETER_SPLITTING_REGEX = r'[,]'
+PARAMETER_SPLITTING_REGEX = ","
 
 # Cookie delimiter
 PARAMETER_DELIMITER = "&"

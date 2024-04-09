@@ -49,6 +49,8 @@ def do_GET_check(url, http_request_method):
 
   # Do replacement with the 'INJECT_HERE' tag, if the wild card char is provided.
   url = checks.wildcard_character(url)
+  if settings.USER_DEFINED_POST_DATA and settings.INJECT_TAG in url:
+    settings.IGNORE_USER_DEFINED_POST_DATA = True
 
   # Check for REST-ful URLs format.
   if "?" not in url:
@@ -195,6 +197,9 @@ def vuln_GET_param(url):
   else:
     vuln_parameter = url
 
+  if settings.USER_DEFINED_POST_DATA and vuln_parameter:
+    settings.IGNORE_USER_DEFINED_POST_DATA = True
+
   return vuln_parameter
 
 """
@@ -266,6 +271,7 @@ def do_POST_check(parameter, http_request_method):
     return parameter
 
   # Do replacement with the 'INJECT_HERE' tag, if the wild card char is provided.
+
   parameter = checks.wildcard_character(parameter).replace("'","\"").replace(", ",",").replace(",\"", ", \"")
   checks.check_injection_level()
   # Check if JSON Object.
@@ -282,9 +288,12 @@ def do_POST_check(parameter, http_request_method):
       data_type = "XML/SOAP"
       settings.IS_XML = checks.process_data(data_type, http_request_method)
 
+  elif settings.TEST_PARAMETER and not any(ext in parameter for ext in settings.TEST_PARAMETER):
+    settings.IGNORE_USER_DEFINED_POST_DATA = True
+
   if settings.IGNORE_USER_DEFINED_POST_DATA:
     return ""
-    
+
   parameters_list = []
   # Split multiple parameters
   if settings.IS_XML:
@@ -562,7 +571,7 @@ def do_cookie_check(cookie):
     if checks.ignore_google_analytics_cookie(cookie):
       return cookie
     # Check for empty values (in provided parameters).
-    if checks.is_empty(multi_parameters, http_request_method = "cookie"):
+    if checks.is_empty(multi_parameters, http_request_method=settings.COOKIE):
       return cookie
     # Check if defined the INJECT_TAG
     if settings.INJECT_TAG not in cookie:
@@ -582,7 +591,7 @@ def do_cookie_check(cookie):
     # Check if not defined the "INJECT_HERE" tag in parameter
     if settings.INJECT_TAG not in cookie:
       # Check for empty values (in provided parameters).
-      if checks.is_empty(multi_parameters, http_request_method = "cookie"):
+      if checks.is_empty(multi_parameters, http_request_method=settings.COOKIE):
         return cookie
       for param in range(0, len(all_params)):
         if param == 0 :

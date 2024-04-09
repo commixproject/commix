@@ -169,18 +169,10 @@ def init_request(url, http_request_method):
   if menu.options.check_internet:
     check_internet(url)
   # Check if defined POST data
-  if menu.options.data:
-    settings.USER_DEFINED_POST_DATA = menu.options.data
-    # Check if defined character used for splitting parameter values.
-    if menu.options.pdel and menu.options.pdel in settings.USER_DEFINED_POST_DATA:
-      settings.PARAMETER_DELIMITER = menu.options.pdel
-    request = _urllib.request.Request(url, menu.options.data.encode(), method=http_request_method)
+  if settings.USER_DEFINED_POST_DATA:
+    request = _urllib.request.Request(url, settings.USER_DEFINED_POST_DATA.encode(), method=http_request_method)
   else:
-    # Check if defined character used for splitting parameter values.
-    if menu.options.pdel and menu.options.pdel in url:
-      settings.PARAMETER_DELIMITER = menu.options.pdel
     request = _urllib.request.Request(url, method=http_request_method)
-    # Check if defined any HTTP Proxy (--proxy option).
   headers.do_check(request)
   # Used a valid pair of valid credentials
   if menu.options.auth_cred and menu.options.auth_type and settings.VERBOSITY_LEVEL != 0 :
@@ -858,7 +850,17 @@ try:
       url = menu.options.sitemap_url
     else:
       url = menu.options.url
-    
+
+    if menu.options.data:
+      settings.USER_DEFINED_POST_DATA = menu.options.data
+      # Check if defined character used for splitting parameter values.
+      if menu.options.pdel and menu.options.pdel in settings.USER_DEFINED_POST_DATA:
+        settings.PARAMETER_DELIMITER = menu.options.pdel
+    else:
+      # Check if defined character used for splitting parameter values.
+      if menu.options.pdel and menu.options.pdel in url:
+        settings.PARAMETER_DELIMITER = menu.options.pdel
+
     if not settings.STDIN_PARSING and not menu.options.bulkfile and not settings.CRAWLING:
       http_request_method  = checks.check_http_method(url)
       if os_checks_num == 0:

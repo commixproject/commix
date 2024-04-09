@@ -104,6 +104,8 @@ def check_custom_injection_marker(url, http_request_method):
   if url and settings.WILDCARD_CHAR in url:
     option = "'-u'"
     settings.WILDCARD_CHAR_APPLIED = True
+    if menu.options.data:
+      settings.IGNORE_USER_DEFINED_POST_DATA = True
   elif menu.options.data and settings.WILDCARD_CHAR in menu.options.data:
     option = str(http_request_method) + " body"
     settings.WILDCARD_CHAR_APPLIED = True
@@ -240,16 +242,15 @@ def alert():
 Check for HTTP Method
 """
 def check_http_method(url):
-  if len(settings.HTTP_METHOD) != 0:
-    http_request_method = settings.HTTP_METHOD.upper()
+  if menu.options.method:
+    http_request_method = menu.options.method.upper()
+  elif any((settings.INJECT_TAG in url, settings.WILDCARD_CHAR in url)):
+    http_request_method = settings.HTTPMETHOD.GET
   else:
-    if not menu.options.data or \
-       settings.WILDCARD_CHAR in url or \
-       settings.INJECT_TAG in url or \
-       [x for x in settings.TEST_PARAMETER if(x + "=" in url and not x in menu.options.data)]:
-      http_request_method = settings.HTTPMETHOD.GET
-    else:
+    if settings.USER_DEFINED_POST_DATA:
       http_request_method = settings.HTTPMETHOD.POST
+    else:
+      http_request_method = settings.HTTPMETHOD.GET
   return http_request_method
 
 """
@@ -1144,6 +1145,7 @@ def wildcard_character(data):
 Check provided parameters for tests
 """
 def check_provided_parameters():
+
   if menu.options.test_parameter or menu.options.skip_parameter:
     if menu.options.test_parameter != None :
       if menu.options.test_parameter.startswith("="):
@@ -1165,24 +1167,32 @@ Check defined skipped parameters
 def check_skipped_params(check_parameters, http_request_method):
   settings.TEST_PARAMETER = [x + "," for x in settings.TEST_PARAMETER]
   for parameter in check_parameters:
-    if parameter in ",".join(settings.TEST_PARAMETER).split(","):
+    if parameter in settings.PARAMETER_SPLITTING_REGEX.join(settings.TEST_PARAMETER).split(settings.PARAMETER_SPLITTING_REGEX):
       info_msg = "Skipping " + http_request_method + " parameter '" + parameter + "'."
       print(settings.print_info_msg(info_msg))
-  settings.TEST_PARAMETER = [x for x in check_parameters if x not in ",".join(settings.TEST_PARAMETER).split(",")]
-  settings.TEST_PARAMETER = ",".join(settings.TEST_PARAMETER)
+  settings.TEST_PARAMETER = [x for x in check_parameters if x not in settings.PARAMETER_SPLITTING_REGEX.join(settings.TEST_PARAMETER).split(settings.PARAMETER_SPLITTING_REGEX)]
+  settings.TEST_PARAMETER = settings.PARAMETER_SPLITTING_REGEX.join(settings.TEST_PARAMETER)
   menu.options.test_parameter = True
 
 """
 Print the non-listed parameters.
 """
-def print_non_listed_params(check_parameters, http_request_method, header_name):
+def testable_parameters(check_parameters, http_request_method, header_name):
+  _ = False
+  if len([i for i in settings.TEST_PARAMETER if i in check_parameters]) == 0:
+    _ = True
+
   if settings.TEST_PARAMETER:
-    testable_parameters = ",".join(settings.TEST_PARAMETER).replace(settings.SINGLE_WHITESPACE, "")
-    testable_parameters = testable_parameters.split(",")
+    testable_parameters = settings.PARAMETER_SPLITTING_REGEX.join(settings.TEST_PARAMETER).replace(settings.SINGLE_WHITESPACE, "")
+    testable_parameters = testable_parameters.split(settings.PARAMETER_SPLITTING_REGEX)
     non_exist_param = list(set(testable_parameters) - set(check_parameters))
+    if _ and settings.TESTABLE_PARAMETERS != False:
+      settings.TESTABLE_PARAMETERS = _
+    else:
+      settings.TESTABLE_PARAMETERS = False
     if non_exist_param:
-      non_exist_param = ",".join(non_exist_param).replace(settings.SINGLE_WHITESPACE, "")
-      non_exist_param = non_exist_param.split(",")
+      non_exist_param = settings.PARAMETER_SPLITTING_REGEX.join(non_exist_param).replace(settings.SINGLE_WHITESPACE, "")
+      non_exist_param = non_exist_param.split(settings.PARAMETER_SPLITTING_REGEX)
       if menu.options.level >= settings.COOKIE_INJECTION_LEVEL and \
          menu.options.test_parameter != None:
         if menu.options.cookie != None:
@@ -1205,22 +1215,18 @@ def print_non_listed_params(check_parameters, http_request_method, header_name):
         if http_header in non_exist_param:
           non_exist_param.remove(http_header)
 
-      if non_exist_param:
-        non_exist_param_items = ",".join(non_exist_param)
-        warn_msg = "Skipping tests for "
-        warn_msg += "the provided parameter" + "s"[len(non_exist_param) == 1:][::-1] + " '"
-        warn_msg += non_exist_param_items + "' as" + (' they are', ' it is')[len(non_exist_param) == 1]
+      if non_exist_param and _:
+        non_exist_param_items = ", ".join(non_exist_param)
+        warn_msg = "Provided parameter" + "s"[len(non_exist_param) == 1:][::-1] + " '"
+        warn_msg += non_exist_param_items + "'" + (' are', ' is')[len(non_exist_param) == 1]
+        warn_msg += " not inside the "
         if menu.options.level >= settings.COOKIE_INJECTION_LEVEL and header_name != "":
-          warn_msg += " not part of the "
-          warn_msg +=  settings.HTTP_HEADER
+          warn_msg += settings.HTTP_HEADER.capitalize()
         else:
-          warn_msg += " not part of the "
           warn_msg += http_request_method
-          warn_msg += ('', ' (JSON)')[settings.IS_JSON] + ('', ' (SOAP/XML)')[settings.IS_XML]
-          warn_msg += (' data', ' request')[http_request_method == settings.HTTPMETHOD.GET]
         warn_msg += "."
         print(settings.print_warning_msg(warn_msg))
-
+  
   if menu.options.skip_parameter != None:
     check_skipped_params(check_parameters, http_request_method)
 

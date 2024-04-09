@@ -102,8 +102,7 @@ def command_injection_heuristic_basic(url, http_request_method, check_parameter,
         tmp_url = url
         if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
           cookie = menu.options.cookie.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC)
-        elif menu.options.data and http_request_method == settings.HTTPMETHOD.POST or \
-             menu.options.data and settings.INJECT_TAG in menu.options.data:
+        elif not settings.IGNORE_USER_DEFINED_POST_DATA and menu.options.data and settings.INJECT_TAG in menu.options.data:
           if inject_http_headers:
             data = menu.options.data.replace(settings.INJECT_TAG, "").encode(settings.DEFAULT_CODEC)
           else:
@@ -163,8 +162,7 @@ def code_injections_heuristic_basic(url, http_request_method, check_parameter, t
         tmp_url = url
         if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
           cookie = menu.options.cookie.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC)
-        elif menu.options.data and http_request_method == settings.HTTPMETHOD.POST or \
-             menu.options.data and settings.INJECT_TAG in menu.options.data:
+        elif settings.IGNORE_USER_DEFINED_POST_DATA and menu.options.data and settings.INJECT_TAG in menu.options.data:
           if inject_http_headers:
             data = menu.options.data.replace(settings.INJECT_TAG, "").encode(settings.DEFAULT_CODEC)
           else:
@@ -273,9 +271,9 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
 
   if menu.options.method:
     http_request_method = menu.options.method.upper()
-  elif check_parameter.lower() in settings.USER_DEFINED_POST_DATA and not settings.IGNORE_USER_DEFINED_POST_DATA:
+  elif check_parameter in settings.USER_DEFINED_POST_DATA and not settings.IGNORE_USER_DEFINED_POST_DATA:
     http_request_method = settings.HTTPMETHOD.POST
-  elif check_parameter.lower() in url:
+  elif check_parameter in url:
     http_request_method = settings.HTTPMETHOD.GET
 
   inject_http_headers = False
@@ -290,7 +288,7 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
     check_parameter = " '" + check_parameter.strip() + "'"
   else:
     if settings.COOKIE_INJECTION:
-      header_name = "Cookie"
+      header_name = settings.COOKIE
     else:
       header_name = ""
     the_type = " parameter"
@@ -304,10 +302,10 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
   checks.tamper_scripts(stored_tamper_scripts=False)
 
   settings.CHECKING_PARAMETER = ""
-  if not header_name == "Cookie" and not the_type == "HTTP header":
+  if not header_name == settings.COOKIE and not the_type == "HTTP header":
     settings.CHECKING_PARAMETER = str(http_request_method)
     settings.CHECKING_PARAMETER += ('', ' JSON')[settings.IS_JSON] + ('', ' SOAP/XML')[settings.IS_XML]
-  if header_name == "Cookie" :
+  if header_name == settings.COOKIE :
      settings.CHECKING_PARAMETER += str(header_name) + str(the_type) + str(check_parameter)
   else:
      settings.CHECKING_PARAMETER += str(the_type) + str(header_name) + str(check_parameter)
@@ -504,7 +502,7 @@ def cookie_injection(url, http_request_method, filename, timesec):
       check_parameter = parameters.specify_cookie_parameter(menu.options.cookie)
       check_parameters.append(check_parameter)
 
-    checks.print_non_listed_params(check_parameters, http_request_method, header_name)
+    checks.testable_parameters(check_parameters, http_request_method, header_name)
 
     for i in range(0, len(cookie_parameters)):
       parameter = menu.options.cookie = cookie_parameters[i]
@@ -517,7 +515,7 @@ def cookie_injection(url, http_request_method, filename, timesec):
           if menu.options.test_parameter != None:
             param_counter = 0
             for check_parameter in check_parameters:
-              if check_parameter in "".join(settings.TEST_PARAMETER).split(","):
+              if settings.TEST_PARAMETER.count(check_parameter) != 0:
                 menu.options.cookie = cookie_parameters[param_counter]
                 check_parameter = parameters.specify_cookie_parameter(menu.options.cookie)
                 # Check for session file
@@ -551,7 +549,8 @@ def get_request(url, http_request_method, filename, timesec):
       check_parameters.append(check_parameter)
 
     header_name = ""
-    checks.print_non_listed_params(check_parameters, http_request_method, header_name)
+    http_request_method = checks.check_http_method(url)
+    checks.testable_parameters(check_parameters, http_request_method, header_name)
 
     for i in range(0, len(found_url)):
       url = found_url[i]
@@ -564,7 +563,7 @@ def get_request(url, http_request_method, filename, timesec):
           if menu.options.test_parameter != None:
             url_counter = 0
             for check_parameter in check_parameters:
-              if check_parameter in "".join(settings.TEST_PARAMETER).split(","):
+              if settings.TEST_PARAMETER.count(check_parameter) != 0:
                 url = found_url[url_counter]
                 check_parameter = parameters.vuln_GET_param(url)
                 # Check for session file
@@ -588,12 +587,13 @@ def post_request(url, http_request_method, filename, timesec):
 
   parameter = menu.options.data
   found_parameter = parameters.do_POST_check(parameter, http_request_method)
-
+  
   # Check if singe entry parameter
   if type(found_parameter) is str:
     found_parameter_list = []
     found_parameter_list.append(found_parameter)
     found_parameter = found_parameter_list
+
 
   if settings.IS_JSON or settings.IS_XML:
     # Remove junk data
@@ -610,7 +610,8 @@ def post_request(url, http_request_method, filename, timesec):
     check_parameters.append(check_parameter)
 
   header_name = ""
-  checks.print_non_listed_params(check_parameters, http_request_method, header_name)
+  http_request_method = checks.check_http_method(url)
+  checks.testable_parameters(check_parameters, http_request_method, header_name)
 
   for i in range(0, len(found_parameter)):
     #if settings.INJECT_TAG in found_parameter[i]:
@@ -624,7 +625,7 @@ def post_request(url, http_request_method, filename, timesec):
         if menu.options.test_parameter != None:
           param_counter = 0
           for check_parameter in check_parameters:
-            if check_parameter in "".join(settings.TEST_PARAMETER).split(","):
+            if settings.TEST_PARAMETER.count(check_parameter) != 0:
               menu.options.data = found_parameter[param_counter]
               check_parameter = parameters.vuln_POST_param(menu.options.data, url)
               # Check for session file
@@ -766,36 +767,39 @@ def do_check(url, http_request_method, filename):
       
     # All injection techniques seems to be failed!
     if not settings.INJECTION_CHECKER:
-      err_msg = "All tested parameters "
-      if menu.options.level > settings.COOKIE_INJECTION_LEVEL:
-        err_msg += "and HTTP headers "
-      err_msg += "appear to be not injectable."
-      if menu.options.level < settings.HTTP_HEADER_INJECTION_LEVEL :
-        err_msg += " Try to increase value for '--level' option"
-      if menu.options.skip_empty:
-        err_msg += " and/or remove option '--skip-empty'"
-      err_msg += " if you wish to perform more tests."
-      if settings.USER_SUPPLIED_TECHNIQUE or settings.SKIP_TECHNIQUES:
-        err_msg += " Rerun without providing the option "
-        if not settings.SKIP_TECHNIQUES :
-          err_msg += "'--technique'."
-        else:
-          err_msg += "'--skip-technique'."
-      err_msg += " If you suspect that there is some kind of protection mechanism involved, maybe you could try to"
-      if not menu.options.alter_shell :
-        err_msg += " use option '--alter-shell'"
+      if settings.TESTABLE_PARAMETERS:
+        err_msg = "All testable parameters you provided are not present within the given request data."
       else:
-        err_msg += " remove option '--alter-shell'"
-      if not menu.options.tamper:
-        err_msg += " and/or use option '--tamper'"
-      if not menu.options.random_agent:
+        err_msg = "All tested parameters "
+        if menu.options.level > settings.COOKIE_INJECTION_LEVEL:
+          err_msg += "and HTTP headers "
+        err_msg += "appear to be not injectable."
+        if menu.options.level < settings.HTTP_HEADER_INJECTION_LEVEL :
+          err_msg += " Try to increase value for '--level' option"
+        if menu.options.skip_empty:
+          err_msg += " and/or remove option '--skip-empty'"
+        err_msg += " if you wish to perform more tests."
+        if settings.USER_SUPPLIED_TECHNIQUE or settings.SKIP_TECHNIQUES:
+          err_msg += " Rerun without providing the option "
+          if not settings.SKIP_TECHNIQUES :
+            err_msg += "'--technique'."
+          else:
+            err_msg += "'--skip-technique'."
+        err_msg += " If you suspect that there is some kind of protection mechanism involved, maybe you could try to"
+        if not menu.options.alter_shell :
+          err_msg += " use option '--alter-shell'"
+        else:
+          err_msg += " remove option '--alter-shell'"
         if not menu.options.tamper:
-          err_msg += " and/or"
-        err_msg += " switch '--random-agent'"
-      err_msg += "."
-      if settings.MULTI_TARGETS:
-        err_msg += " Skipping to the next target."
-      print(settings.print_error_msg(err_msg))
+          err_msg += " and/or use option '--tamper'"
+        if not menu.options.random_agent:
+          if not menu.options.tamper:
+            err_msg += " and/or"
+          err_msg += " switch '--random-agent'"
+        err_msg += "."
+        if settings.MULTI_TARGETS:
+          err_msg += " Skipping to the next target."
+      print(settings.print_critical_msg(err_msg))
     else:
       logs.print_logs_notification(filename, url)
     if not settings.MULTI_TARGETS:
