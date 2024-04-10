@@ -439,9 +439,9 @@ def cookie_injection(url, vuln_parameter, payload, http_request_method):
     payload = checks.newline_fixation(payload)
     payload = payload.replace("+", "%2B")
     if settings.INJECT_TAG in menu.options.cookie:
-      request.add_header('Cookie', menu.options.cookie.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload))
+      request.add_header(settings.COOKIE, menu.options.cookie.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload))
     else:
-      request.add_header('Cookie', menu.options.cookie.replace(settings.INJECT_TAG, payload))
+      request.add_header(settings.COOKIE, menu.options.cookie.replace(settings.INJECT_TAG, payload))
     try:
       headers.check_http_traffic(request)
       if menu.options.proxy or menu.options.ignore_proxy or menu.options.tor: 
@@ -484,7 +484,7 @@ def user_agent_injection(url, vuln_parameter, payload, http_request_method):
     #Check if defined extra headers.
     headers.do_check(request)
     payload = checks.newline_fixation(payload)
-    request.add_header('User-Agent', payload)
+    request.add_header(settings.USER_AGENT, payload)
     try:
       headers.check_http_traffic(request)
       if menu.options.proxy or menu.options.ignore_proxy or menu.options.tor: 
@@ -527,7 +527,7 @@ def referer_injection(url, vuln_parameter, payload, http_request_method):
     #Check if defined extra headers.
     headers.do_check(request)
     payload = checks.newline_fixation(payload)
-    request.add_header('Referer', payload)
+    request.add_header(settings.REFERER, payload)
     try:
       headers.check_http_traffic(request)
       if menu.options.proxy or menu.options.ignore_proxy or menu.options.tor: 
@@ -578,7 +578,7 @@ def host_injection(url, vuln_parameter, payload, http_request_method):
     #Check if defined extra headers.
     headers.do_check(request)
     payload = checks.newline_fixation(payload)
-    request.add_header('Host', payload)
+    request.add_header(settings.HOST, payload)
     try:
       headers.check_http_traffic(request)
       if menu.options.proxy or menu.options.ignore_proxy or menu.options.tor: 

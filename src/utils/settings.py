@@ -247,7 +247,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.0"
-REVISION = "25"
+REVISION = "26"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1022,9 +1022,6 @@ class AUTH_TYPE(object):
   DIGEST = "digest"
   BEARER = "bearer"
 
-# HTTP Headers
-HTTP_HEADERS = [ "user-agent", "referer", "host" ]
-
 RAW_HTTP_HEADERS = ""
 
 USER_SUPPLIED_TAMPER = ""
@@ -1241,9 +1238,11 @@ TRANSFER_ENCODING = "Transfer-Encoding"
 VIA = "Via"
 X_POWERED_BY = "X-Powered-By"
 X_DATA_ORIGIN = "X-Data-Origin"
-
 # HTTP Headers values
 ACCEPT_VALUE = "*/*"
+
+# HTTP Headers
+HTTP_HEADERS = [ USER_AGENT.lower(), REFERER.lower(), HOST.lower() ]
 
 # Regular expression used for ignoring some special chars
 IGNORE_SPECIAL_CHAR_REGEX = "[^/()A-Za-z0-9.:,_+]"

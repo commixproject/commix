@@ -141,7 +141,7 @@ Add the vulnerable parameter in log files.
 def add_parameter(vp_flag, filename, the_type, header_name, http_request_method, vuln_parameter, payload):
   with open(filename, 'a') as output_file:
     if not menu.options.no_logging:
-      if header_name[1:] == "cookie":
+      if header_name[1:] == settings.COOKIE.lower():
         header_name = " ("+ header_name[1:] + ") " + vuln_parameter
       if header_name[1:] == "":
         header_name = " ("+ http_request_method + ") " + vuln_parameter

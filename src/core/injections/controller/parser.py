@@ -127,16 +127,16 @@ def logfile_parser():
   extra_headers = ""
   scheme = "http://"
   for line in request.splitlines():
-    if re.findall(r"Host: " + "(.*)", line):
+    if re.findall(r"" + settings.HOST + ": " + "(.*)", line):
       menu.options.host = "".join([str(i) for i in re.findall(r"Host: " + "(.*)", line)])
     # User-Agent Header
-    if re.findall(r"User-Agent: " + "(.*)", line):
+    if re.findall(r"" + settings.USER_AGENT + ": " + "(.*)", line):
       menu.options.agent = "".join([str(i) for i in re.findall(r"User-Agent: " + "(.*)", line)])
     # Cookie Header
-    if re.findall(r"Cookie: " + "(.*)", line):
+    if re.findall(r"" + settings.COOKIE + ": " + "(.*)", line):
       menu.options.cookie = "".join([str(i) for i in re.findall(r"Cookie: " + "(.*)", line)])
     # Referer Header
-    if re.findall(r"Referer: " + "(.*)", line):
+    if re.findall(r"" + settings.REFERER + ": " + "(.*)", line):
       menu.options.referer = "".join([str(i) for i in re.findall(r"Referer: " + "(.*)", line)])
       if menu.options.referer and "https://" in menu.options.referer:
         scheme = "https://"

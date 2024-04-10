@@ -391,7 +391,7 @@ def http_headers_injection(url, http_request_method, filename, timesec):
       menu.options.agent = menu.options.agent + settings.INJECT_TAG
     settings.USER_AGENT_INJECTION = True
     if settings.USER_AGENT_INJECTION:
-      check_parameter = header_name = " User-Agent"
+      check_parameter = header_name = settings.SINGLE_WHITESPACE + settings.USER_AGENT
       settings.HTTP_HEADER = header_name[1:].replace("-", "").lower()
       check_for_stored_sessions(url, http_request_method)
       if not injection_proccess(url, check_parameter, http_request_method, filename, timesec):
@@ -406,7 +406,7 @@ def http_headers_injection(url, http_request_method, filename, timesec):
       menu.options.referer = menu.options.referer + settings.INJECT_TAG
     settings.REFERER_INJECTION = True
     if settings.REFERER_INJECTION:
-      check_parameter = header_name = " Referer"
+      check_parameter = header_name = settings.SINGLE_WHITESPACE + settings.REFERER
       settings.HTTP_HEADER = header_name[1:].lower()
       check_for_stored_sessions(url, http_request_method)
       if not injection_proccess(url, check_parameter, http_request_method, filename, timesec):
@@ -420,7 +420,7 @@ def http_headers_injection(url, http_request_method, filename, timesec):
     menu.options.host = menu.options.host + settings.INJECT_TAG
     settings.HOST_INJECTION = True
     if settings.HOST_INJECTION:
-      check_parameter = header_name = " Host"
+      check_parameter = header_name = settings.SINGLE_WHITESPACE + settings.HOST
       settings.HTTP_HEADER = header_name[1:].lower()
       check_for_stored_sessions(url, http_request_method)
       if not injection_proccess(url, check_parameter, http_request_method, filename, timesec):
@@ -429,26 +429,26 @@ def http_headers_injection(url, http_request_method, filename, timesec):
 
   # User-Agent HTTP header injection
   if menu.options.skip_parameter == None:
-    if menu.options.test_parameter == None or "user-agent" in menu.options.test_parameter.lower():
+    if menu.options.test_parameter == None or settings.USER_AGENT.lower() in menu.options.test_parameter.lower():
       user_agent_injection(url, http_request_method, filename, timesec)
   else:
-    if "user-agent" not in menu.options.skip_parameter.lower():
+    if settings.USER_AGENT.lower() not in menu.options.skip_parameter.lower():
       user_agent_injection(url, http_request_method, filename, timesec)
 
   # Referer HTTP header injection
   if menu.options.skip_parameter == None:
-    if menu.options.test_parameter == None or "referer" in menu.options.test_parameter.lower():
+    if menu.options.test_parameter == None or settings.REFERER.lower() in menu.options.test_parameter.lower():
       referer_injection(url, http_request_method, filename, timesec)
   else:
-    if "referer" not in menu.options.skip_parameter.lower():
+    if settings.REFERER not in menu.options.skip_parameter.lower():
       referer_injection(url, http_request_method, filename, timesec)
 
   # Host HTTP header injection
   if menu.options.skip_parameter == None:
-    if menu.options.test_parameter == None or "host" in menu.options.test_parameter.lower():
+    if menu.options.test_parameter == None or settings.HOST.lower() in menu.options.test_parameter.lower():
       host_injection(url, http_request_method, filename, timesec)
   else:
-    if "host" not in menu.options.skip_parameter.lower():
+    if settings.HOST.lower() not in menu.options.skip_parameter.lower():
       host_injection(url, http_request_method, filename, timesec)
 
 """
@@ -459,10 +459,10 @@ def stored_http_header_injection(url, check_parameter, http_request_method, file
   for check_parameter in settings.HTTP_HEADERS:
     settings.HTTP_HEADER = check_parameter
     if check_for_stored_sessions(url, http_request_method):
-      if check_parameter == "referer":
+      if check_parameter == settings.REFERER:
         menu.options.referer = settings.INJECT_TAG
         settings.REFERER_INJECTION = True
-      elif check_parameter == "host":
+      elif check_parameter == settings.HOST.lower():
         menu.options.host= settings.INJECT_TAG
         settings.HOST_INJECTION = True
       else:
@@ -485,7 +485,7 @@ def cookie_injection(url, http_request_method, filename, timesec):
   if settings.COOKIE_INJECTION == True:
     cookie_value = menu.options.cookie
 
-    header_name = " cookie"
+    header_name = settings.SINGLE_WHITESPACE + settings.COOKIE
     settings.HTTP_HEADER = header_name[1:].lower()
     cookie_parameters = parameters.do_cookie_check(menu.options.cookie)
     if type(cookie_parameters) is str:

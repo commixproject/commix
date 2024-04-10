@@ -343,17 +343,17 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                 possibly_vulnerable = False
 
               if settings.COOKIE_INJECTION == True:
-                header_name = " cookie"
+                header_name = settings.SINGLE_WHITESPACE + settings.COOKIE
                 found_vuln_parameter = vuln_parameter
                 the_type = " parameter"
 
               elif settings.USER_AGENT_INJECTION == True:
-                header_name = " User-Agent"
+                header_name = settings.SINGLE_WHITESPACE + settings.USER_AGENT
                 found_vuln_parameter = ""
                 the_type = " HTTP header"
 
               elif settings.REFERER_INJECTION == True:
-                header_name = " Referer"
+                header_name = settings.SINGLE_WHITESPACE + settings.REFERER
                 found_vuln_parameter = ""
                 the_type = " HTTP header"
 
