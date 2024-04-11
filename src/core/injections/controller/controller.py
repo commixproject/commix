@@ -86,7 +86,8 @@ def command_injection_heuristic_basic(url, http_request_method, check_parameter,
       _ = 0
       for payload in basic_payloads:
         _ = _ + 1
-        if not inject_http_headers or (inject_http_headers and "'Host'" in check_parameter):
+
+        if not inject_http_headers or (inject_http_headers and settings.HOST.capitalize() in check_parameter):
           if not any((settings.IS_JSON, settings.IS_XML)) or settings.COOKIE_INJECTION:
             payload = _urllib.parse.quote(payload)
         payload = parameters.prefixes(payload, prefix="")
@@ -146,7 +147,7 @@ def code_injections_heuristic_basic(url, http_request_method, check_parameter, t
   try:
     if (not settings.IDENTIFIED_WARNINGS and not settings.IDENTIFIED_PHPINFO) or settings.MULTI_TARGETS:
       for payload in settings.PHPINFO_CHECK_PAYLOADS:
-        if not inject_http_headers or (inject_http_headers and "'Host'" in check_parameter):
+        if not inject_http_headers or (inject_http_headers and settings.HOST.capitalize() in check_parameter):
           if not any((settings.IS_JSON, settings.IS_XML)) or settings.COOKIE_INJECTION:
             payload = _urllib.parse.quote(payload)
         payload = parameters.prefixes(payload, prefix="")
@@ -402,7 +403,7 @@ def http_headers_injection(url, http_request_method, filename, timesec):
     referer = menu.options.referer
     if not menu.options.shellshock:
       if menu.options.referer is None:
-        menu.options.referer = ""
+        menu.options.referer = _urllib.parse.urljoin(url, _urllib.parse.urlparse(url).path)
       menu.options.referer = menu.options.referer + settings.INJECT_TAG
     settings.REFERER_INJECTION = True
     if settings.REFERER_INJECTION:
@@ -416,7 +417,7 @@ def http_headers_injection(url, http_request_method, filename, timesec):
   def host_injection(url, http_request_method, filename, timesec):
     host = menu.options.host
     if menu.options.host is None:
-      menu.options.host = ""
+      menu.options.host = _urllib.parse.urlparse(url).netloc
     menu.options.host = menu.options.host + settings.INJECT_TAG
     settings.HOST_INJECTION = True
     if settings.HOST_INJECTION:

@@ -1178,6 +1178,9 @@ def check_skipped_params(check_parameters, http_request_method):
 Print the non-listed parameters.
 """
 def testable_parameters(check_parameters, http_request_method, header_name):
+  if len([i for i in settings.TEST_PARAMETER if i in settings.HTTP_HEADERS]) != 0 :
+    menu.options.level = int(settings.HTTP_HEADER_INJECTION_LEVEL)
+
   _ = False
   if len([i for i in settings.TEST_PARAMETER if i in check_parameters]) == 0:
     _ = True
