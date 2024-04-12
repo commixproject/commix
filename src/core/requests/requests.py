@@ -416,7 +416,7 @@ def get_request_response(request):
       response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
     except Exception as err_msg:
       response = request_failed(err_msg)
-
+  
   return response
 
 """
@@ -560,15 +560,7 @@ Check if target host is vulnerable. (Host-based injection)
 """
 def host_injection(url, vuln_parameter, payload, http_request_method):
 
-  payload = _urllib.parse.urlparse(url).netloc + payload
-
   def inject_host(url, vuln_parameter, payload, http_request_method):
-
-    if proxy == None:
-      opener = _urllib.request.build_opener()
-    else:
-      opener = _urllib.request.build_opener(proxy)
-
     # Check if defined POST data
     if len(settings.USER_DEFINED_POST_DATA) != 0:
       data = settings.USER_DEFINED_POST_DATA.encode(settings.DEFAULT_CODEC)

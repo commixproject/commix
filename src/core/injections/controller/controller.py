@@ -114,7 +114,7 @@ def command_injection_heuristic_basic(url, http_request_method, check_parameter,
         request = _urllib.request.Request(tmp_url, data, method=http_request_method)
         if cookie:
           request.add_header(settings.COOKIE, cookie)
-        if inject_http_headers:
+        if inject_http_headers and settings.HOST.capitalize() not in check_parameter:
           request.add_header(check_parameter.replace("'", "").strip(), (settings.CUSTOM_HEADER_VALUE + payload).encode(settings.DEFAULT_CODEC))
         headers.do_check(request)
         response = requests.get_request_response(request)
@@ -163,7 +163,7 @@ def code_injections_heuristic_basic(url, http_request_method, check_parameter, t
         tmp_url = url
         if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
           cookie = menu.options.cookie.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC)
-        elif settings.IGNORE_USER_DEFINED_POST_DATA and menu.options.data and settings.INJECT_TAG in menu.options.data:
+        elif not settings.IGNORE_USER_DEFINED_POST_DATA and menu.options.data and settings.INJECT_TAG in menu.options.data:
           if inject_http_headers:
             data = menu.options.data.replace(settings.INJECT_TAG, "").encode(settings.DEFAULT_CODEC)
           else:
@@ -174,7 +174,7 @@ def code_injections_heuristic_basic(url, http_request_method, check_parameter, t
         request = _urllib.request.Request(tmp_url, data, method=http_request_method)
         if cookie:
           request.add_header(settings.COOKIE, cookie)
-        if inject_http_headers:
+        if inject_http_headers and settings.HOST.capitalize() not in check_parameter:
           request.add_header(check_parameter.replace("'", "").strip(), (settings.CUSTOM_HEADER_VALUE + payload).encode(settings.DEFAULT_CODEC))
         headers.do_check(request)
         response = requests.get_request_response(request)
