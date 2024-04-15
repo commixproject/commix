@@ -287,6 +287,7 @@ def do_POST_check(parameter, http_request_method):
     if not settings.IS_XML:
       data_type = "XML/SOAP"
       settings.IS_XML = checks.process_data(data_type, http_request_method)
+      settings.PARAMETER_DELIMITER = "\n"
 
   elif settings.TEST_PARAMETER and not any(ext in parameter for ext in settings.TEST_PARAMETER):
     settings.IGNORE_USER_DEFINED_POST_DATA = True
@@ -297,11 +298,10 @@ def do_POST_check(parameter, http_request_method):
   parameters_list = []
   # Split multiple parameters
   if settings.IS_XML:
-    settings.PARAMETER_DELIMITER = ""
-    parameter = re.sub(r">\s*<", '>\n<', parameter).replace("\\n","\n")
+    parameter = re.sub(r">\s*<", ">" + settings.PARAMETER_DELIMITER + "<", parameter)
     _ = []
     parameters = re.findall(r'(.*)', parameter)
-    parameters = [param + "\n" for param in parameters if param]
+    parameters = [param for param in parameters if param]
     for value in range(0,len(parameters)):
       _.append(parameters[value])
     multi_parameters = _
