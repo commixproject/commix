@@ -112,7 +112,7 @@ def check_http_traffic(request):
       unique_request_http_headers = []
       [unique_request_http_headers.append(item) for item in request_http_headers if item not in unique_request_http_headers]
       request_http_headers = [x for x in unique_request_http_headers if x]
-      if menu.options.data and \
+      if settings.USER_DEFINED_POST_DATA and \
          len(request_http_headers) == 1 and \
          settings.VERBOSITY_LEVEL >= 2:
         print(settings.SINGLE_WHITESPACE)

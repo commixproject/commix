@@ -270,13 +270,6 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
   if settings.PERFORM_BASIC_SCANS:
     basic_level_checks()
 
-  if menu.options.method:
-    http_request_method = menu.options.method.upper()
-  elif check_parameter in settings.USER_DEFINED_POST_DATA and not settings.IGNORE_USER_DEFINED_POST_DATA:
-    http_request_method = settings.HTTPMETHOD.POST
-  elif check_parameter in url:
-    http_request_method = settings.HTTPMETHOD.GET
-
   inject_http_headers = False
   if any(x in check_parameter.lower() for x in settings.HTTP_HEADERS) or \
      any(x in check_parameter.lower() for x in settings.CUSTOM_HEADER_NAME):
@@ -304,7 +297,7 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
 
   settings.CHECKING_PARAMETER = ""
   if not header_name == settings.COOKIE and not the_type == "HTTP header":
-    settings.CHECKING_PARAMETER = str(http_request_method)
+    settings.CHECKING_PARAMETER = checks.check_http_method(url)
     settings.CHECKING_PARAMETER += ('', ' JSON')[settings.IS_JSON] + ('', ' SOAP/XML')[settings.IS_XML]
   if header_name == settings.COOKIE :
      settings.CHECKING_PARAMETER += str(header_name) + str(the_type) + str(check_parameter)
@@ -550,7 +543,6 @@ def get_request(url, http_request_method, filename, timesec):
       check_parameters.append(check_parameter)
 
     header_name = ""
-    http_request_method = checks.check_http_method(url)
     checks.testable_parameters(check_parameters, http_request_method, header_name)
 
     for i in range(0, len(found_url)):
@@ -611,7 +603,6 @@ def post_request(url, http_request_method, filename, timesec):
     check_parameters.append(check_parameter)
 
   header_name = ""
-  http_request_method = checks.check_http_method(url)
   checks.testable_parameters(check_parameters, http_request_method, header_name)
 
   for i in range(0, len(found_parameter)):
