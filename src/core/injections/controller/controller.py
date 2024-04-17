@@ -495,8 +495,8 @@ def cookie_injection(url, http_request_method, filename, timesec):
       menu.options.cookie = cookie_parameters[i]
       check_parameter = parameters.specify_cookie_parameter(menu.options.cookie)
       check_parameters.append(check_parameter)
-
-    checks.testable_parameters(check_parameters, http_request_method, header_name)
+      
+    checks.testable_parameters(url, check_parameters, header_name)
 
     for i in range(0, len(cookie_parameters)):
       parameter = menu.options.cookie = cookie_parameters[i]
@@ -543,7 +543,7 @@ def get_request(url, http_request_method, filename, timesec):
       check_parameters.append(check_parameter)
 
     header_name = ""
-    checks.testable_parameters(check_parameters, http_request_method, header_name)
+    checks.testable_parameters(url, check_parameters, header_name)
 
     for i in range(0, len(found_url)):
       url = found_url[i]
@@ -603,7 +603,7 @@ def post_request(url, http_request_method, filename, timesec):
     check_parameters.append(check_parameter)
 
   header_name = ""
-  checks.testable_parameters(check_parameters, http_request_method, header_name)
+  checks.testable_parameters(url, check_parameters, header_name)
 
   for i in range(0, len(found_parameter)):
     #if settings.INJECT_TAG in found_parameter[i]:

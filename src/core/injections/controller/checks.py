@@ -1162,22 +1162,27 @@ def check_provided_parameters():
         settings.TEST_PARAMETER[i] = settings.TEST_PARAMETER[i].split("=")[0]
 
 """
-Check defined skipped parameters
+Remove skipped parameters
 """
-def check_skipped_params(check_parameters, http_request_method):
-  settings.TEST_PARAMETER = [x + "," for x in settings.TEST_PARAMETER]
+def remove_skipped_params(url, check_parameters):
+  testable_parameters = list(set(check_parameters) - set(menu.options.skip_parameter.split(",")))
+  settings.TEST_PARAMETER = [x for x in testable_parameters if x not in settings.PARAMETER_SPLITTING_REGEX.join(settings.TEST_PARAMETER).split(settings.PARAMETER_SPLITTING_REGEX)]
+  _ = []
   for parameter in check_parameters:
-    if parameter in settings.PARAMETER_SPLITTING_REGEX.join(settings.TEST_PARAMETER).split(settings.PARAMETER_SPLITTING_REGEX):
-      info_msg = "Skipping " + http_request_method + " parameter '" + parameter + "'."
-      print(settings.print_info_msg(info_msg))
-  settings.TEST_PARAMETER = [x for x in check_parameters if x not in settings.PARAMETER_SPLITTING_REGEX.join(settings.TEST_PARAMETER).split(settings.PARAMETER_SPLITTING_REGEX)]
-  settings.TEST_PARAMETER = settings.PARAMETER_SPLITTING_REGEX.join(settings.TEST_PARAMETER)
+    if parameter not in settings.PARAMETER_SPLITTING_REGEX.join(settings.TEST_PARAMETER).split(settings.PARAMETER_SPLITTING_REGEX):
+      _.append(parameter)
+  if _:    
+    info_msg = "Skipping " + check_http_method(url) + " parameter" + ('', 's')[len(_) > 1] + " '" + str(", ".join(_)) + "'."
+    print(settings.print_info_msg(info_msg))
   menu.options.test_parameter = True
 
 """
 Print the non-listed parameters.
 """
-def testable_parameters(check_parameters, http_request_method, header_name):
+def testable_parameters(url, check_parameters, header_name):
+  if menu.options.skip_parameter != None:
+    remove_skipped_params(url, check_parameters)
+
   if len([i for i in settings.TEST_PARAMETER if i in settings.HTTP_HEADERS]) != 0 :
     menu.options.level = int(settings.HTTP_HEADER_INJECTION_LEVEL)
 
@@ -1226,13 +1231,11 @@ def testable_parameters(check_parameters, http_request_method, header_name):
         if menu.options.level >= settings.COOKIE_INJECTION_LEVEL and header_name != "":
           warn_msg += settings.HTTP_HEADER.capitalize()
         else:
-          warn_msg += http_request_method
+          warn_msg += check_http_method(url)
         warn_msg += "."
         print(settings.print_warning_msg(warn_msg))
-  
-  if menu.options.skip_parameter != None:
-    check_skipped_params(check_parameters, http_request_method)
 
+  
 """
 Only time-relative injection techniques support tamper
 """
