@@ -47,16 +47,19 @@ def do_GET_check(url, http_request_method):
     value = ''.join(value)
     return value
 
+  if settings.USER_DEFINED_POST_DATA:
+    if settings.WILDCARD_CHAR in settings.USER_DEFINED_POST_DATA and not checks.process_non_custom():
+      return False
+    if settings.INJECT_TAG in url:
+      settings.IGNORE_USER_DEFINED_POST_DATA = True
+
   # Do replacement with the 'INJECT_HERE' tag, if the wild card char is provided.
   url = checks.wildcard_character(url)
-  if settings.USER_DEFINED_POST_DATA and settings.INJECT_TAG in url:
-    settings.IGNORE_USER_DEFINED_POST_DATA = True
-
   # Check for REST-ful URLs format.
   if "?" not in url:
     if settings.INJECT_TAG not in url and not menu.options.shellshock:
-      checks.check_injection_level()
-      if menu.options.level == settings.HTTP_HEADER_INJECTION_LEVEL or \
+      if len(settings.TEST_PARAMETER) != 0 or \
+         menu.options.level == settings.HTTP_HEADER_INJECTION_LEVEL or \
          menu.options.level == settings.COOKIE_INJECTION_LEVEL or \
          settings.USER_DEFINED_POST_DATA and not settings.IGNORE_USER_DEFINED_POST_DATA:
         return False
@@ -254,7 +257,6 @@ def do_POST_check(parameter, http_request_method):
       parameter = json_format(parameter)
 
     _ = True
-
     if isinstance(parameter, list):
       parameter = parameter[(len(parameter) - 1)]
 
@@ -271,9 +273,7 @@ def do_POST_check(parameter, http_request_method):
     return parameter
 
   # Do replacement with the 'INJECT_HERE' tag, if the wild card char is provided.
-
   parameter = checks.wildcard_character(parameter).replace("'","\"").replace(", ",",").replace(",\"", ", \"")
-  checks.check_injection_level()
   # Check if JSON Object.
   if checks.is_JSON_check(parameter) or checks.is_JSON_check(checks.check_quotes_json_data(parameter)):
     if checks.is_JSON_check(checks.check_quotes_json_data(parameter)):
@@ -506,6 +506,8 @@ def prefixes(payload, prefix):
     specify_referer_parameter(menu.options.referer)
   elif settings.HOST_INJECTION == True:
     specify_host_parameter(menu.options.host)
+  elif settings.CUSTOM_HEADER_INJECTION == True:
+    specify_host_parameter("")
 
   # Check if defined "--prefix" option.
   testable_value = settings.TESTABLE_VALUE
@@ -633,7 +635,6 @@ def do_cookie_check(cookie):
 Specify the cookie parameter(s).
 """
 def specify_cookie_parameter(cookie):
-
   # Specify the vulnerable cookie parameter
   if re.search(r"" + settings.COOKIE_DELIMITER + "(.*)=[\S*(\\/)]*" + settings.INJECT_TAG, cookie) or \
      re.search(r"(.*)=[\S*(\\/)]*" + settings.INJECT_TAG , cookie):
@@ -650,7 +651,6 @@ def specify_cookie_parameter(cookie):
         break
   else:
     inject_cookie = cookie
-
   return inject_cookie
 
 """
@@ -658,7 +658,6 @@ The user-agent based injection.
 """
 def specify_user_agent_parameter(user_agent):
   settings.TESTABLE_VALUE = user_agent.replace(settings.INJECT_TAG, "")
-
   return user_agent
 
 """
@@ -666,7 +665,6 @@ The referer based injection.
 """
 def specify_referer_parameter(referer):
   settings.TESTABLE_VALUE = referer.replace(settings.INJECT_TAG, "")
-
   return referer
 
 """
@@ -674,7 +672,6 @@ The host based injection.
 """
 def specify_host_parameter(host):
   settings.TESTABLE_VALUE = host.replace(settings.INJECT_TAG, "")
-
   return host
 
 """
@@ -682,7 +679,6 @@ The Custom http header based injection.
 """
 def specify_custom_header_parameter(header_name):
   header_name = settings.CUSTOM_HEADER_NAME
-
   return header_name
 
 # eof

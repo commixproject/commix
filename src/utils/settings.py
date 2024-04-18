@@ -247,7 +247,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.0"
-REVISION = "31"
+REVISION = "32"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -697,6 +697,7 @@ CHECK_TOR_PAGE = "https://check.torproject.org/"
 # Cookie injection
 COOKIE_INJECTION = None
 
+HTTP_HEADERS_INJECTION = None
 # User-Agent injection
 USER_AGENT_INJECTION = None
 
@@ -708,6 +709,8 @@ HOST_INJECTION = None
 
 # Custom HTTP Headers injection
 CUSTOM_HEADER_INJECTION = False
+CUSTOM_HEADERS_NAMES = []
+CUSTOM_HEADER_CHECK = ""
 CUSTOM_HEADER_NAME = ""
 CUSTOM_HEADER_VALUE = ""
 
@@ -888,7 +891,7 @@ SERVER_OS_BANNERS = [
     "Gentoo",
     r"Mac[\-\_\ ]?OSX",
     r"Red[\-\_\ ]?Hat",
-    "Unix"
+    "Unix",
 ]
 
 # Extensions skipped by crawler

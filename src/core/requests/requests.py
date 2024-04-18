@@ -704,10 +704,10 @@ def technology_detection(response):
     sys.stdout.flush()
     print(settings.SINGLE_WHITESPACE)
   try:
-    if len(response.info()['X-Powered-By']) != 0:
+    if len(response.info()[settings.X_POWERED_BY]) != 0:
       if settings.VERBOSITY_LEVEL != 0:
         debug_msg = "The target application is powered by "
-        debug_msg += response.info()['X-Powered-By'] + Style.RESET_ALL + "."
+        debug_msg += response.info()[settings.X_POWERED_BY] + Style.RESET_ALL + "."
         print(settings.print_bold_debug_msg(debug_msg))
 
   except Exception as e:

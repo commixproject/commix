@@ -297,7 +297,7 @@ def do_check(request):
 
   # Default value for "Accept-Encoding" HTTP header
   if not (menu.options.requestfile or menu.options.logfile):
-    request.add_header('Accept-Encoding', settings.HTTP_ACCEPT_ENCODING_HEADER_VALUE)
+    request.add_header(settings.ACCEPT_ENCODING, settings.HTTP_ACCEPT_ENCODING_HEADER_VALUE)
 
   # Appends a fake HTTP header 'X-Forwarded-For' (and alike)
   if settings.TAMPER_SCRIPTS["xforwardedfor"]:
@@ -343,26 +343,25 @@ def do_check(request):
     pass
 
   # Check if defined any extra HTTP headers.
-  if menu.options.headers or menu.options.header or len(settings.RAW_HTTP_HEADERS) >= 1:
-    if len(settings.RAW_HTTP_HEADERS) >= 1:
+  if menu.options.headers or menu.options.header or settings.RAW_HTTP_HEADERS:
+    if settings.RAW_HTTP_HEADERS:
       menu.options.headers = settings.RAW_HTTP_HEADERS
     # Do replacement with the 'INJECT_HERE' tag, if the wildcard char is provided.
     if menu.options.headers:
       menu.options.headers = checks.wildcard_character(menu.options.headers)
       extra_headers = menu.options.headers
-    else:
+    elif menu.options.header:
       menu.options.header = checks.wildcard_character(menu.options.header)
       extra_headers = menu.options.header
 
     extra_headers = extra_headers.replace(":",": ")
-
     if ": //" in extra_headers:
       extra_headers = extra_headers.replace(": //" ,"://")
 
     if "\\n" in extra_headers:
       extra_headers = extra_headers.split("\\n")
       # Remove empty strings and "Content-Length"
-      extra_headers = [x for x in extra_headers if "Content-Length" not in x]
+      extra_headers = [x for x in extra_headers if settings.CONTENT_LENGTH not in x]
     else:
       tmp_extra_header = []
       tmp_extra_header.append(extra_headers)
@@ -379,8 +378,8 @@ def do_check(request):
       elif re.search(settings.XML_RECOGNITION_REGEX, menu.options.data):
          if settings.CONTENT_TYPE not in str(extra_headers):
           request.add_header(settings.CONTENT_TYPE, settings.HTTP_CONTENT_TYPE_XML_HEADER_VALUE)
-    if "Accept-Encoding" not in str(extra_headers):
-      request.add_header('Accept-Encoding', settings.HTTP_ACCEPT_ENCODING_HEADER_VALUE)
+    if settings.ACCEPT_ENCODING not in str(extra_headers):
+      request.add_header(settings.ACCEPT_ENCODING, settings.HTTP_ACCEPT_ENCODING_HEADER_VALUE)
 
     for extra_header in extra_headers:
       try:
@@ -391,12 +390,17 @@ def do_check(request):
         http_header_value = extra_header.split(':', 1)[1]
         http_header_value = ''.join(http_header_value).strip().replace(": ",":")
         # Check if it is a custom header injection.
-        if settings.CUSTOM_HEADER_INJECTION == False and http_header_name in settings.TEST_PARAMETER:
-          settings.CUSTOM_HEADER_INJECTION = True
-          settings.CUSTOM_HEADER_NAME = http_header_name
-          settings.CUSTOM_HEADER_VALUE = http_header_value
-        # Add HTTP Header name / value to the HTTP request
-        if http_header_name not in [settings.HOST, settings.USER_AGENT, settings.REFERER, settings.COOKIE]:
+        if http_header_name not in [settings.ACCEPT, settings.HOST, settings.USER_AGENT, settings.REFERER, settings.COOKIE]:
+          if not settings.CUSTOM_HEADER_INJECTION and (http_header_name in settings.TEST_PARAMETER) or (settings.WILDCARD_CHAR in http_header_value):
+            settings.CUSTOM_HEADER_CHECK = http_header_name
+            if len(http_header_name) != 0 and \
+              http_header_name + ": " + http_header_value not in [settings.ACCEPT, settings.HOST, settings.USER_AGENT, settings.REFERER, settings.COOKIE] and \
+              http_header_name + ": " + http_header_value not in settings.CUSTOM_HEADERS_NAMES:
+              settings.CUSTOM_HEADERS_NAMES.append(http_header_name + ": " + http_header_value)
+            http_header_value = http_header_value.replace(settings.INJECT_TAG,"").replace(settings.WILDCARD_CHAR,"")
+            request.add_header(http_header_name, http_header_value)
+
+        if http_header_name not in [settings.HOST, settings.USER_AGENT, settings.REFERER, settings.COOKIE, settings.CUSTOM_HEADER_NAME]:
           request.add_header(http_header_name, http_header_value)
       except:
         pass

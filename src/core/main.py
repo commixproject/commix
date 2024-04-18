@@ -303,11 +303,6 @@ def main(filename, url, http_request_method):
 
     settings.WILDCARD_CHAR_APPLIED = checks.check_custom_injection_marker(url, http_request_method)
 
-    # Check injection level, due to the provided testable parameters.
-    if menu.options.level == settings.DEFAULT_INJECTION_LEVEL and \
-    menu.options.test_parameter != None:
-      checks.check_injection_level()
-
     # Define the level of tests to perform.
     if menu.options.level == settings.DEFAULT_INJECTION_LEVEL:
       settings.SEPARATORS = sorted(set(settings.SEPARATORS_LVL1), key=settings.SEPARATORS_LVL1.index)
@@ -489,8 +484,10 @@ def main(filename, url, http_request_method):
           requests.application_identification(url)
           # Specifies the technology supporting the web application
           requests.technology_detection(response)
-          if response.info()['server'] :
-            server_banner = response.info()['server']
+          if response.info()[settings.X_POWERED_BY] :
+            server_banner = response.info()[settings.X_POWERED_BY]
+          elif response.info()[settings.SERVER] :
+            server_banner = response.info()[settings.SERVER]
             # Procedure for target server's operating system identification.
             requests.check_target_os(server_banner)
             # Procedure for target server identification.

@@ -98,7 +98,30 @@ def quoted_value(value):
   return '"{}"'.format(value)
 
 """
-Check for custom injection marker (*)
+Check for non custom parameters.
+"""
+def process_non_custom():
+  if settings.WILDCARD_CHAR_APPLIED:
+    while True:
+      message = "Other non-custom parameters found."
+      message += " Do you want to process them too? [Y/n] > "
+      process = common.read_input(message, default="Y", check_batch=True)
+      if process in settings.CHOICE_YES:
+        settings.IGNORE_USER_DEFINED_POST_DATA = False
+        return True
+      elif process in settings.CHOICE_NO:
+        settings.IGNORE_USER_DEFINED_POST_DATA = True
+        return False
+      elif process in settings.CHOICE_QUIT:
+        raise SystemExit()
+      else:
+        common.invalid_option(process)
+        pass
+  else:
+    return True
+
+"""
+Check for custom injection marker ('*').
 """
 def check_custom_injection_marker(url, http_request_method):
   if url and settings.WILDCARD_CHAR in url:
@@ -113,40 +136,25 @@ def check_custom_injection_marker(url, http_request_method):
     option = "option '--headers/--user-agent/--referer/--cookie'"
     if menu.options.cookie and settings.WILDCARD_CHAR in menu.options.cookie:
       settings.WILDCARD_CHAR_APPLIED = settings.COOKIE_INJECTION = True
-      menu.options.level = settings.COOKIE_INJECTION_LEVEL
-
     elif menu.options.agent and settings.WILDCARD_CHAR in menu.options.agent:
       settings.WILDCARD_CHAR_APPLIED = settings.USER_AGENT_INJECTION = True
-      menu.options.level = settings.HTTP_HEADER_INJECTION_LEVEL
-
     elif menu.options.referer and settings.WILDCARD_CHAR in menu.options.referer:
       settings.WILDCARD_CHAR_APPLIED = settings.REFERER_INJECTION = True
-      menu.options.level = settings.HTTP_HEADER_INJECTION_LEVEL
-
-    elif menu.options.headers and settings.WILDCARD_CHAR in menu.options.headers:
-      _ = True
-      for data in menu.options.headers.split("\\n"):
-        # Ignore the Accept HTTP Header
-        if not data.startswith(settings.ACCEPT):
-          _ = False
-      if _:
-        settings.WILDCARD_CHAR_APPLIED = True
-        menu.options.level = settings.HTTP_HEADER_INJECTION_LEVEL
+    elif menu.options.host and settings.WILDCARD_CHAR in menu.options.host:
+      settings.WILDCARD_CHAR_APPLIED = settings.HOST_INJECTION = True
+    elif settings.CUSTOM_HEADER_CHECK and settings.CUSTOM_HEADER_CHECK != settings.ACCEPT:
+      if settings.CUSTOM_HEADER_CHECK in settings.TEST_PARAMETER:
+        settings.WILDCARD_CHAR_APPLIED = settings.CUSTOM_HEADER_INJECTION = True
 
   if settings.WILDCARD_CHAR_APPLIED:
     while True:
-      message = "Custom injection marker (" + settings.WILDCARD_CHAR + ") found in " + option +". "
+      message = "Custom injection marker ('" + settings.WILDCARD_CHAR + "') found in " + option +". "
       message += "Do you want to process it? [Y/n] > "
       procced_option = common.read_input(message, default="Y", check_batch=True)
       if procced_option in settings.CHOICE_YES:
-        if menu.options.test_parameter:
-          if not settings.MULTI_TARGETS or settings.STDIN_PARSING:
-            err_msg = "The custom injection marker (" + settings.WILDCARD_CHAR + ") "
-            err_msg += "and the option '-p', cannot be used simultaneously."
-            print(settings.print_critical_msg(err_msg))
-            raise SystemExit
         return True
       elif procced_option in settings.CHOICE_NO:
+        settings.CUSTOM_HEADER_INJECTION = False
         return False
       elif procced_option in settings.CHOICE_QUIT:
         raise SystemExit()
@@ -244,7 +252,7 @@ Check for HTTP Method
 def check_http_method(url):
   if menu.options.method:
     http_request_method = menu.options.method.upper()
-  elif any((settings.INJECT_TAG in url, settings.WILDCARD_CHAR in url)):
+  elif settings.INJECT_TAG in url:
     http_request_method = settings.HTTPMETHOD.GET
   else:
     if settings.USER_DEFINED_POST_DATA:
@@ -655,29 +663,6 @@ def assessment_phase():
       return "detection"
   else:
     return "exploitation"
-
-"""
-Check current assessment phase.
-"""
-def check_injection_level():
-  try:
-    # Checking testable parameters for cookies
-    if menu.options.cookie:
-      if settings.COOKIE_DELIMITER in menu.options.cookie:
-        cookies = menu.options.cookie.split(settings.COOKIE_DELIMITER)
-        for cookie in cookies:
-          if cookie.split("=")[0].strip() in menu.options.test_parameter:
-            menu.options.level = settings.COOKIE_INJECTION_LEVEL
-      elif menu.options.cookie.split("=")[0] in menu.options.test_parameter:
-        menu.options.level = settings.COOKIE_INJECTION_LEVEL
-
-    # Checking testable HTTP headers for user-agent / referer / host
-    if any(x in menu.options.test_parameter for x in settings.HTTP_HEADERS):
-      menu.options.level = settings.HTTP_HEADER_INJECTION_LEVEL
-
-  except Exception as e:
-    return
-
 
 """
 Procced to the next attack vector.
@@ -1135,8 +1120,10 @@ def wildcard_character(data):
       _ = _ + data + "\\n"
     data = _.rstrip("\\n")
     if data.count(settings.INJECT_TAG) > 1:
-      err_msg = "You specified more than one injecton markers. "
-      err_msg += "Use the '-p' option to define them (i.e -p \"id1,id2\"). "
+      if settings.VERBOSITY_LEVEL != 0:
+        print(settings.SINGLE_WHITESPACE)
+      err_msg = "You specified more than one custom injection markers ('" + settings.WILDCARD_CHAR + "'). "
+      err_msg += "Instead use the '-p' option to define them (i.e -p \"id1,id2\"). "
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
   return data
@@ -1180,11 +1167,9 @@ def remove_skipped_params(url, check_parameters):
 Print the non-listed parameters.
 """
 def testable_parameters(url, check_parameters, header_name):
+
   if menu.options.skip_parameter != None:
     remove_skipped_params(url, check_parameters)
-
-  if len([i for i in settings.TEST_PARAMETER if i in settings.HTTP_HEADERS]) != 0 :
-    menu.options.level = int(settings.HTTP_HEADER_INJECTION_LEVEL)
 
   _ = False
   if len([i for i in settings.TEST_PARAMETER if i in check_parameters]) == 0:
