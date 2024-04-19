@@ -115,9 +115,9 @@ def command_injection_heuristic_basic(url, http_request_method, check_parameter,
         if check_parameter_in_http_header(check_parameter) and check_parameter not in settings.HOST.capitalize():
           settings.CUSTOM_HEADER_NAME = check_parameter
           if settings.INJECT_TAG in settings.CUSTOM_HEADER_VALUE:
-            request.add_header(check_parameter, settings.CUSTOM_HEADER_VALUE.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC))
+            request.add_unredirected_header(check_parameter, settings.CUSTOM_HEADER_VALUE.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC))
           else:
-            request.add_header(check_parameter, (settings.CUSTOM_HEADER_VALUE + payload).encode(settings.DEFAULT_CODEC))
+            request.add_unredirected_header(check_parameter, (settings.CUSTOM_HEADER_VALUE + payload).encode(settings.DEFAULT_CODEC))
         headers.do_check(request)
         response = requests.get_request_response(request)
 
@@ -177,9 +177,9 @@ def code_injections_heuristic_basic(url, http_request_method, check_parameter, t
         if check_parameter_in_http_header(check_parameter) and check_parameter not in settings.HOST.capitalize():
           settings.CUSTOM_HEADER_NAME = check_parameter
           if settings.INJECT_TAG in settings.CUSTOM_HEADER_VALUE:
-            request.add_header(check_parameter, settings.CUSTOM_HEADER_VALUE.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC))
+            request.add_unredirected_header(check_parameter, settings.CUSTOM_HEADER_VALUE.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC))
           else:
-            request.add_header(check_parameter, (settings.CUSTOM_HEADER_VALUE + payload).encode(settings.DEFAULT_CODEC))
+            request.add_unredirected_header(check_parameter, (settings.CUSTOM_HEADER_VALUE + payload).encode(settings.DEFAULT_CODEC))
         headers.do_check(request)
         response = requests.get_request_response(request)
 

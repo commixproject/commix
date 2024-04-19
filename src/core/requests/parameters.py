@@ -188,6 +188,7 @@ def vuln_GET_param(url):
         vuln_parameter = pairs[param].split("=")[0]
         if settings.WILDCARD_CHAR_APPLIED:
           try:
+            settings.TEST_PARAMETER = vuln_parameter
             settings.POST_WILDCARD_CHAR = pairs[param].split("=")[1].split(settings.INJECT_TAG)[1]
           except Exception:
             pass
@@ -289,7 +290,7 @@ def do_POST_check(parameter, http_request_method):
       settings.IS_XML = checks.process_data(data_type, http_request_method)
       settings.PARAMETER_DELIMITER = "\n"
 
-  elif settings.TEST_PARAMETER and not any(ext in parameter for ext in settings.TEST_PARAMETER):
+  elif settings.TEST_PARAMETER and not any(ext in parameter for ext in settings.TEST_PARAMETER) and not settings.INJECT_TAG in parameter:
     settings.IGNORE_USER_DEFINED_POST_DATA = True
 
   if settings.IGNORE_USER_DEFINED_POST_DATA:
@@ -449,7 +450,9 @@ def vuln_POST_param(parameter, url):
     parameters = re.sub(settings.IGNORE_JSON_CHAR_REGEX, '', parameter.split(settings.INJECT_TAG)[0].replace(",\"", settings.RANDOM_TAG + "\""))
     parameters = ''.join(parameters.split(", ")[-1:]).strip()
     parameters = ''.join(parameters.split(":")[0]).strip()
-    vuln_parameter = ''.join(parameters.split(settings.RANDOM_TAG)[:1])
+    settings.TESTABLE_VALUE = vuln_parameter = ''.join(parameters.split(settings.RANDOM_TAG)[:1])
+    if settings.WILDCARD_CHAR_APPLIED:
+      settings.TEST_PARAMETER = vuln_parameter
 
   # XML data format.
   elif settings.IS_XML:
@@ -464,6 +467,7 @@ def vuln_POST_param(parameter, url):
           vuln_parameter = ''.join(_.groups()[0])
           if settings.WILDCARD_CHAR_APPLIED:
             try:
+              settings.TEST_PARAMETER = vuln_parameter
               settings.POST_WILDCARD_CHAR = result.split(settings.INJECT_TAG)[1]
             except Exception:
               pass
@@ -479,6 +483,7 @@ def vuln_POST_param(parameter, url):
           vuln_parameter = pairs[param].split("=")[0]
           if settings.WILDCARD_CHAR_APPLIED:
             try:
+              settings.TEST_PARAMETER = vuln_parameter
               settings.POST_WILDCARD_CHAR = pairs[param].split("=")[1].split(settings.INJECT_TAG)[1]
             except Exception:
               pass
@@ -644,6 +649,7 @@ def specify_cookie_parameter(cookie):
         inject_cookie = pairs[param].split("=")[0]
         if settings.WILDCARD_CHAR_APPLIED:
           try:
+            settings.TEST_PARAMETER = inject_cookie
             settings.POST_WILDCARD_CHAR = pairs[param].split("=")[1].split(settings.INJECT_TAG)[1]
           except Exception:
             pass

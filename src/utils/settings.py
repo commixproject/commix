@@ -247,7 +247,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.0"
-REVISION = "32"
+REVISION = "33"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -371,6 +371,7 @@ IGNORE_USER_DEFINED_POST_DATA = False
 
 # The wildcard character
 WILDCARD_CHAR = "*"
+ASTERISK_MARKER = "__ASTERISK__"
 WILDCARD_CHAR_APPLIED = False
 POST_WILDCARD_CHAR = ""
 
@@ -462,6 +463,8 @@ TESTABLE_VALUE = ""
 
 # The HTTP header name.
 HTTP_HEADER = ""
+
+EXTRA_HTTP_HEADERS = False
 
 # The command injection separators.
 SEPARATORS = []
@@ -859,6 +862,7 @@ ENCODING_LIST = [
 HTTP_ACCEPT_ENCODING_HEADER_VALUE = "gzip, deflate"
 HTTP_CONTENT_TYPE_JSON_HEADER_VALUE = "application/json"
 HTTP_CONTENT_TYPE_XML_HEADER_VALUE = "text/xml"
+DEFAULT_HTTP_CONTENT_TYPE_VALUE = "application/x-www-form-urlencoded"
 
 # Default server banner
 SERVER_BANNER = ""

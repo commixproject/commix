@@ -287,13 +287,16 @@ def do_check(request):
   if not checks.get_header(request.headers, settings.ACCEPT):
     request.add_header(settings.ACCEPT, settings.ACCEPT_VALUE)
 
+  if not checks.get_header(request.headers, settings.CONTENT_TYPE):
+    request.add_unredirected_header(settings.CONTENT_TYPE, settings.DEFAULT_HTTP_CONTENT_TYPE_VALUE)
+
   # The MIME media type for JSON.
   if menu.options.data and not (menu.options.requestfile or menu.options.logfile):
     if re.search(settings.JSON_RECOGNITION_REGEX, menu.options.data) or \
        re.search(settings.JSON_LIKE_RECOGNITION_REGEX, menu.options.data):
-      request.add_header(settings.CONTENT_TYPE, settings.HTTP_CONTENT_TYPE_JSON_HEADER_VALUE)
+      request.add_unredirected_header(settings.CONTENT_TYPE, settings.HTTP_CONTENT_TYPE_JSON_HEADER_VALUE)
     elif re.search(settings.XML_RECOGNITION_REGEX, menu.options.data):
-      request.add_header(settings.CONTENT_TYPE, settings.HTTP_CONTENT_TYPE_XML_HEADER_VALUE)
+      request.add_unredirected_header(settings.CONTENT_TYPE, settings.HTTP_CONTENT_TYPE_XML_HEADER_VALUE)
 
   # Default value for "Accept-Encoding" HTTP header
   if not (menu.options.requestfile or menu.options.logfile):
@@ -343,16 +346,14 @@ def do_check(request):
     pass
 
   # Check if defined any extra HTTP headers.
-  if menu.options.headers or menu.options.header or settings.RAW_HTTP_HEADERS:
+  if settings.EXTRA_HTTP_HEADERS or settings.RAW_HTTP_HEADERS:
     if settings.RAW_HTTP_HEADERS:
       menu.options.headers = settings.RAW_HTTP_HEADERS
     # Do replacement with the 'INJECT_HERE' tag, if the wildcard char is provided.
     if menu.options.headers:
-      menu.options.headers = checks.wildcard_character(menu.options.headers)
-      extra_headers = menu.options.headers
+      extra_headers = checks.wildcard_character(menu.options.headers)
     elif menu.options.header:
-      menu.options.header = checks.wildcard_character(menu.options.header)
-      extra_headers = menu.options.header
+      extra_headers = checks.wildcard_character(menu.options.header)
 
     extra_headers = extra_headers.replace(":",": ")
     if ": //" in extra_headers:
@@ -367,8 +368,10 @@ def do_check(request):
       tmp_extra_header.append(extra_headers)
       extra_headers = tmp_extra_header
 
-    # Remove empty strings
-    extra_headers = [x for x in extra_headers if x]
+    # Remove empty strings and/or duplicates
+    _ = [x for x in extra_headers if x]
+    extra_headers = (list(dict.fromkeys(_)))
+
     if menu.options.data:
       # The MIME media type for JSON.
       if re.search(settings.JSON_RECOGNITION_REGEX, menu.options.data) or \
@@ -391,7 +394,7 @@ def do_check(request):
         http_header_value = ''.join(http_header_value).strip().replace(": ",":")
         # Check if it is a custom header injection.
         if http_header_name not in [settings.ACCEPT, settings.HOST, settings.USER_AGENT, settings.REFERER, settings.COOKIE]:
-          if not settings.CUSTOM_HEADER_INJECTION and (http_header_name in settings.TEST_PARAMETER) or (settings.WILDCARD_CHAR in http_header_value):
+          if not settings.CUSTOM_HEADER_INJECTION and http_header_name in settings.TEST_PARAMETER or settings.INJECT_TAG in http_header_value:
             settings.CUSTOM_HEADER_CHECK = http_header_name
             if len(http_header_name) != 0 and \
               http_header_name + ": " + http_header_value not in [settings.ACCEPT, settings.HOST, settings.USER_AGENT, settings.REFERER, settings.COOKIE] and \

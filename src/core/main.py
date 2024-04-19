@@ -64,40 +64,70 @@ if settings.IS_WINDOWS:
 """
 Define HTTP User-Agent header.
 """
-def user_agent_header():
-  # Check if defined "--mobile" option.
-  if menu.options.mobile:
-    if ((menu.options.agent != settings.DEFAULT_USER_AGENT) and not menu.options.requestfile) or menu.options.random_agent:
-      if not settings.MULTI_TARGETS or not settings.STDIN_PARSING:
-        err_msg = "The switch '--mobile' is incompatible with option '--user-agent' or switch '--random-agent'."
-        print(settings.print_critical_msg(err_msg))
-        raise SystemExit()
-    else:
-      menu.options.agent = checks.mobile_user_agents()
-
-  # Check if defined "--random-agent" option.
-  if menu.options.random_agent:
-    if ((menu.options.agent != settings.DEFAULT_USER_AGENT) and not menu.options.requestfile) or menu.options.mobile:
-      if not settings.MULTI_TARGETS or not settings.STDIN_PARSING:
-        err_msg = "The switch '--random-agent' is incompatible with option '--user-agent' or switch '--mobile'."
-        print(settings.print_critical_msg(err_msg))
-        raise SystemExit()
-    else:
+def defined_http_headers():
+  def extra_headers():
+    if any((menu.options.header, menu.options.headers)):
+      settings.EXTRA_HTTP_HEADERS = True
       if settings.VERBOSITY_LEVEL != 0:
-        debug_msg = "Fetching random HTTP User-Agent header. "
-        print(settings.print_debug_msg(debug_msg))
-      else:
-        pass
-      try:
-        menu.options.agent = random.choice(settings.USER_AGENT_LIST)
-        info_msg = "The fetched random HTTP User-Agent header value is '" + menu.options.agent + "'."
-        print(settings.print_info_msg(info_msg))
-      except:
-        print(settings.SINGLE_WHITESPACE)
+        debug_msg = "Setting extra HTTP headers."
+        print(settings.print_debug_msg(debug_msg))  
 
-  if settings.VERBOSITY_LEVEL != 0:
-    debug_msg = "Setting the HTTP User-Agent header."
-    print(settings.print_debug_msg(debug_msg))
+  def cookie():
+    if menu.options.cookie and settings.VERBOSITY_LEVEL != 0:
+      debug_msg = "Setting the HTTP " + settings.COOKIE + " header."
+      print(settings.print_debug_msg(debug_msg))  
+
+  def referer():
+    if menu.options.referer and settings.VERBOSITY_LEVEL != 0:
+      debug_msg = "Setting the HTTP " + settings.REFERER + " header."
+      print(settings.print_debug_msg(debug_msg)) 
+
+  def host():
+    if menu.options.host and settings.VERBOSITY_LEVEL != 0:
+      debug_msg = "Setting the HTTP " + settings.HOST + " header."
+      print(settings.print_debug_msg(debug_msg)) 
+
+  def user_agent():
+    # Check if defined "--mobile" option.
+    if menu.options.mobile:
+      if ((menu.options.agent != settings.DEFAULT_USER_AGENT) and not menu.options.requestfile) or menu.options.random_agent:
+        if not settings.MULTI_TARGETS or not settings.STDIN_PARSING:
+          err_msg = "The switch '--mobile' is incompatible with option '--user-agent' or switch '--random-agent'."
+          print(settings.print_critical_msg(err_msg))
+          raise SystemExit()
+      else:
+        menu.options.agent = checks.mobile_user_agents()
+
+    # Check if defined "--random-agent" option.
+    if menu.options.random_agent:
+      if ((menu.options.agent != settings.DEFAULT_USER_AGENT) and not menu.options.requestfile) or menu.options.mobile:
+        if not settings.MULTI_TARGETS or not settings.STDIN_PARSING:
+          err_msg = "The switch '--random-agent' is incompatible with option '--user-agent' or switch '--mobile'."
+          print(settings.print_critical_msg(err_msg))
+          raise SystemExit()
+      else:
+        if settings.VERBOSITY_LEVEL != 0:
+          debug_msg = "Fetching random HTTP User-Agent header. "
+          print(settings.print_debug_msg(debug_msg))
+        else:
+          pass
+        try:
+          menu.options.agent = random.choice(settings.USER_AGENT_LIST)
+          info_msg = "The fetched random HTTP User-Agent header value is '" + menu.options.agent + "'."
+          print(settings.print_info_msg(info_msg))
+        except:
+          print(settings.SINGLE_WHITESPACE)
+
+    if settings.VERBOSITY_LEVEL != 0:
+      debug_msg = "Setting the HTTP User-Agent header."
+      print(settings.print_debug_msg(debug_msg))
+
+  extra_headers()
+  cookie()
+  referer()
+  host()
+  user_agent()
+
 
 """
 Examine the request
@@ -163,8 +193,8 @@ def init_request(url, http_request_method):
     print(settings.print_debug_msg(debug_msg))
   if menu.options.timeout:
     settings.TIMEOUT = menu.options.timeout
-  # Define HTTP User-Agent header
-  user_agent_header()
+  # Define HTTP headers
+  defined_http_headers()
   # Check the internet connection (--check-internet switch).
   if menu.options.check_internet:
     check_internet(url)
@@ -183,6 +213,7 @@ def init_request(url, http_request_method):
   if settings.VERBOSITY_LEVEL != 0:
     debug_msg = "Creating " + str(settings.SCHEME).upper() + " requests opener object."
     print(settings.print_debug_msg(debug_msg))
+  settings.WILDCARD_CHAR_APPLIED = checks.check_custom_injection_marker(url, http_request_method)
   # Check connection(s)
   checks.check_connection(url)
   return request
@@ -300,8 +331,6 @@ def main(filename, url, http_request_method):
 
     if settings.WILDCARD_CHAR_APPLIED and settings.MULTI_TARGETS or settings.STDIN_PARSING:
       settings.WILDCARD_CHAR_APPLIED = False
-
-    settings.WILDCARD_CHAR_APPLIED = checks.check_custom_injection_marker(url, http_request_method)
 
     # Define the level of tests to perform.
     if menu.options.level == settings.DEFAULT_INJECTION_LEVEL:

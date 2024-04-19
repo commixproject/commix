@@ -161,7 +161,7 @@ def logfile_parser():
       match = match.replace("('", "")
       match = match.replace("')","\\n")
       # Ignore some header.
-      if "Content-Length" or "Accept-Encoding" in match:
+      if settings.CONTENT_LENGTH or settings.ACCEPT_ENCODING in match:
         extra_headers = extra_headers
       else:
         extra_headers = extra_headers + match

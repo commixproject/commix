@@ -143,8 +143,11 @@ def check_custom_injection_marker(url, http_request_method):
     elif menu.options.host and settings.WILDCARD_CHAR in menu.options.host:
       settings.WILDCARD_CHAR_APPLIED = settings.HOST_INJECTION = True
     elif settings.CUSTOM_HEADER_CHECK and settings.CUSTOM_HEADER_CHECK != settings.ACCEPT:
-      if settings.CUSTOM_HEADER_CHECK in settings.TEST_PARAMETER:
-        settings.WILDCARD_CHAR_APPLIED = settings.CUSTOM_HEADER_INJECTION = True
+      if settings.CUSTOM_HEADER_CHECK not in settings.TEST_PARAMETER:
+        settings.WILDCARD_CHAR_APPLIED = True
+      else:
+        settings.CUSTOM_HEADER_INJECTION = True
+        return False
 
   if settings.WILDCARD_CHAR_APPLIED:
     while True:
@@ -154,7 +157,7 @@ def check_custom_injection_marker(url, http_request_method):
       if procced_option in settings.CHOICE_YES:
         return True
       elif procced_option in settings.CHOICE_NO:
-        settings.CUSTOM_HEADER_INJECTION = False
+        # settings.CUSTOM_HEADER_INJECTION = False
         return False
       elif procced_option in settings.CHOICE_QUIT:
         raise SystemExit()
@@ -1106,26 +1109,20 @@ def enable_all_enumeration_options():
   menu.options.passwords = True
 
 """
-Do replacement with the 'INJECT_HERE' tag,
-if the wildcard char is provided.
+Do check for injection marker.
 """
 def wildcard_character(data):
   if settings.WILDCARD_CHAR_APPLIED != None:
-    _ = ""
+    _ = []
     for data in data.split("\\n"):
-      # Ignore the Accept HTTP Header
-      if not data.startswith(settings.ACCEPT) and not settings.WILDCARD_CHAR is None and not settings.INJECT_TAG in data and settings.WILDCARD_CHAR in data :
-        if settings.WILDCARD_CHAR_APPLIED:
-          data = data.replace(settings.WILDCARD_CHAR, settings.INJECT_TAG)
-      _ = _ + data + "\\n"
-    data = _.rstrip("\\n")
-    if data.count(settings.INJECT_TAG) > 1:
-      if settings.VERBOSITY_LEVEL != 0:
-        print(settings.SINGLE_WHITESPACE)
-      err_msg = "You specified more than one custom injection markers ('" + settings.WILDCARD_CHAR + "'). "
-      err_msg += "Instead use the '-p' option to define them (i.e -p \"id1,id2\"). "
-      print(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+      if not data.startswith(settings.ACCEPT) and settings.WILDCARD_CHAR in data:
+        if menu.options.test_parameter != None and settings.WILDCARD_CHAR_APPLIED == False:
+          data = data.replace(settings.WILDCARD_CHAR, "")
+        elif settings.WILDCARD_CHAR_APPLIED:
+          data = data.replace(settings.WILDCARD_CHAR, settings.ASTERISK_MARKER)
+      _.append(data)
+    data = "\\n".join((list(dict.fromkeys(_)))).rstrip("\\n")
+    data = data.replace(settings.ASTERISK_MARKER, settings.INJECT_TAG)
   return data
 
 """
@@ -1208,17 +1205,17 @@ def testable_parameters(url, check_parameters, header_name):
         if http_header in non_exist_param:
           non_exist_param.remove(http_header)
 
-      if non_exist_param and _:
+      if settings.VERBOSITY_LEVEL != 0 and non_exist_param and _:
         non_exist_param_items = ", ".join(non_exist_param)
-        warn_msg = "Provided parameter" + "s"[len(non_exist_param) == 1:][::-1] + " '"
-        warn_msg += non_exist_param_items + "'" + (' are', ' is')[len(non_exist_param) == 1]
-        warn_msg += " not inside the "
-        if menu.options.level >= settings.COOKIE_INJECTION_LEVEL and header_name != "":
-          warn_msg += settings.HTTP_HEADER.capitalize()
+        debug_msg = "Provided parameter" + "s"[len(non_exist_param) == 1:][::-1] + " '"
+        debug_msg += non_exist_param_items + "'" + (' are', ' is')[len(non_exist_param) == 1]
+        debug_msg += " not inside the "
+        if settings.COOKIE_INJECTION:
+          debug_msg += settings.COOKIE
         else:
-          warn_msg += check_http_method(url)
-        warn_msg += "."
-        print(settings.print_warning_msg(warn_msg))
+          debug_msg += check_http_method(url)
+        debug_msg += "."
+        print(settings.print_debug_msg(debug_msg))
 
   
 """
@@ -1701,9 +1698,6 @@ Check if the provided value is empty.
 """
 def is_empty(multi_parameters, http_request_method):
   all_empty = False
-  if settings.VERBOSITY_LEVEL != 0:
-    debug_msg = "Checking for empty values in provided data."
-    print(settings.print_debug_msg(debug_msg))
   empty_parameters = []
   multi_params = [s for s in multi_parameters]
   if settings.IS_JSON:
