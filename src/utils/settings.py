@@ -247,7 +247,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.0"
-REVISION = "33"
+REVISION = "34"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -365,15 +365,14 @@ SKIP_COMMAND_INJECTIONS = False
 
 # User-defined stored POST data.
 USER_DEFINED_POST_DATA = ""
-
 # Ignore user-defined stored POST data.
 IGNORE_USER_DEFINED_POST_DATA = False
 
-# The wildcard character
-WILDCARD_CHAR = "*"
+# Custom injection marker
+CUSTOM_INJECTION_MARKER_CHAR = "*"
+CUSTOM_INJECTION_MARKER = False
 ASTERISK_MARKER = "__ASTERISK__"
-WILDCARD_CHAR_APPLIED = False
-POST_WILDCARD_CHAR = ""
+PRE_CUSTOM_INJECTION_MARKER_CHAR = ""
 
 # Testable parameter(s) - comma separated.
 TEST_PARAMETER = ""

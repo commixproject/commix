@@ -1,7 +1,7 @@
 ## Version 4.0 (TBA)
 * Revised: Improvement regarding option `--skip` for excluding certain parameter(s) from testing.
 * Revised: Improvement regarding specifying which parameter(s) to test (i.e. `-p` option).
-* Revised: Improvement regarding processing / ignoring injection marker (i.e. asterisk `*`).
+* Revised: Improvement regarding processing / ignoring custom injection marker (i.e. asterisk `*`).
 * Revised: Improvement regarding forcing usage of provided HTTP method (e.g. `PUT`).
 * Revised: Improvement regarding parsing raw HTTP request from a file (i.e. `-r` option).
 * Revised: Improvement regarding parsing JSON nested objects.
@@ -160,7 +160,7 @@ _Note: For more check the [detailed changeset](https://github.com/commixproject/
 * Revised: Minor improvement regarding verbose mode (i.e. debug messages).
 * Fixed: Bug-fix regarding Basic HTTP authentication.
 * Revised: Minor improvement regarding redirection mechanism.
-* Fixed: Bug-fix regarding defining wildcard character `*` in nested JSON objects.
+* Fixed: Bug-fix regarding defining custom injection marker (i.e. asterisk `*`) in nested JSON objects.
 * Revised: Minor improvement regarding Flatten_json (third party) module.
 * Revised: Minor improvement regarding parsing nested JSON objects.
 * Added: New tamper script "doublequotes.py" that adds double-quotes (`""`) between the characters of the generated payloads (for \*nix targets).
@@ -509,7 +509,7 @@ _Note: For more check the [detailed changeset](https://github.com/commixproject/
 ## Version 0.8b (2016-05-06)
 * Fixed: The `--file-read` option to ignore the carriage return (`\r`) character in a text file.
 * Added: The ability to check for empty value(s) in the defined GET, POST, Cookie data and skip.
-* Replaced: The `INJECT_HERE` tag has been replaced with the asterisk (`*`) wildcard character.
+* Replaced: The `INJECT_HERE` tag has been replaced with the custom injection marker (i.e. asterisk `*`).
 * Added: New option `--level` (1-3) that specifies level of tests to perform.
 * Added: New option `-p` that specifies a comma-separated list of GET and POST parameter.
 * Added: The ability to check every parameter in the provided cookie data.

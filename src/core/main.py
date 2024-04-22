@@ -155,7 +155,7 @@ def examine_request(request, url):
           print(settings.SINGLE_WHITESPACE)
         err_msg = "Use '--header=\"HEADER_NAME: HEADER_VALUE\"'"
         err_msg += "to provide an extra HTTP header or"
-        err_msg += " '--header=\"HEADER_NAME: " + settings.WILDCARD_CHAR  + "\"' "
+        err_msg += " '--header=\"HEADER_NAME: " + settings.CUSTOM_INJECTION_MARKER_CHAR  + "\"' "
         err_msg += "if you want to try to exploit the provided HTTP header."
         print(settings.print_critical_msg(err_msg))
         raise SystemExit()
@@ -213,7 +213,7 @@ def init_request(url, http_request_method):
   if settings.VERBOSITY_LEVEL != 0:
     debug_msg = "Creating " + str(settings.SCHEME).upper() + " requests opener object."
     print(settings.print_debug_msg(debug_msg))
-  settings.WILDCARD_CHAR_APPLIED = checks.check_custom_injection_marker(url, http_request_method)
+  settings.CUSTOM_INJECTION_MARKER = checks.custom_injection_marker_character(url, http_request_method)
   # Check connection(s)
   checks.check_connection(url)
   return request
@@ -329,8 +329,8 @@ def main(filename, url, http_request_method):
     if menu.options.url_reload and menu.options.data:
       settings.URL_RELOAD = True
 
-    if settings.WILDCARD_CHAR_APPLIED and settings.MULTI_TARGETS or settings.STDIN_PARSING:
-      settings.WILDCARD_CHAR_APPLIED = False
+    if settings.CUSTOM_INJECTION_MARKER and settings.MULTI_TARGETS or settings.STDIN_PARSING:
+      settings.CUSTOM_INJECTION_MARKER = False
 
     # Define the level of tests to perform.
     if menu.options.level == settings.DEFAULT_INJECTION_LEVEL:

@@ -101,7 +101,7 @@ def quoted_value(value):
 Check for non custom parameters.
 """
 def process_non_custom():
-  if settings.WILDCARD_CHAR_APPLIED:
+  if settings.CUSTOM_INJECTION_MARKER:
     while True:
       message = "Other non-custom parameters found."
       message += " Do you want to process them too? [Y/n] > "
@@ -121,37 +121,54 @@ def process_non_custom():
     return True
 
 """
-Check for custom injection marker ('*').
+Process data with custom injection marker character ('*').
 """
-def check_custom_injection_marker(url, http_request_method):
-  if url and settings.WILDCARD_CHAR in url:
+def process_custom_injection_data(data):
+  if settings.CUSTOM_INJECTION_MARKER != None:
+    _ = []
+    for data in data.split("\\n"):
+      if not data.startswith(settings.ACCEPT) and settings.CUSTOM_INJECTION_MARKER_CHAR in data:
+        if menu.options.test_parameter != None and settings.CUSTOM_INJECTION_MARKER == False:
+          data = data.replace(settings.CUSTOM_INJECTION_MARKER_CHAR, "")
+        elif settings.CUSTOM_INJECTION_MARKER:
+          data = data.replace(settings.CUSTOM_INJECTION_MARKER_CHAR, settings.ASTERISK_MARKER)
+      _.append(data)
+    data = "\\n".join((list(dict.fromkeys(_)))).rstrip("\\n")
+    data = data.replace(settings.ASTERISK_MARKER, settings.INJECT_TAG)
+  return data
+
+"""
+Check for custom injection marker character ('*').
+"""
+def custom_injection_marker_character(url, http_request_method):
+  if url and settings.CUSTOM_INJECTION_MARKER_CHAR in url:
     option = "'-u'"
-    settings.WILDCARD_CHAR_APPLIED = True
+    settings.CUSTOM_INJECTION_MARKER = True
     if menu.options.data:
       settings.IGNORE_USER_DEFINED_POST_DATA = True
-  elif menu.options.data and settings.WILDCARD_CHAR in menu.options.data:
+  elif menu.options.data and settings.CUSTOM_INJECTION_MARKER_CHAR in menu.options.data:
     option = str(http_request_method) + " body"
-    settings.WILDCARD_CHAR_APPLIED = True
+    settings.CUSTOM_INJECTION_MARKER = True
   else:
     option = "option '--headers/--user-agent/--referer/--cookie'"
-    if menu.options.cookie and settings.WILDCARD_CHAR in menu.options.cookie:
-      settings.WILDCARD_CHAR_APPLIED = settings.COOKIE_INJECTION = True
-    elif menu.options.agent and settings.WILDCARD_CHAR in menu.options.agent:
-      settings.WILDCARD_CHAR_APPLIED = settings.USER_AGENT_INJECTION = True
-    elif menu.options.referer and settings.WILDCARD_CHAR in menu.options.referer:
-      settings.WILDCARD_CHAR_APPLIED = settings.REFERER_INJECTION = True
-    elif menu.options.host and settings.WILDCARD_CHAR in menu.options.host:
-      settings.WILDCARD_CHAR_APPLIED = settings.HOST_INJECTION = True
+    if menu.options.cookie and settings.CUSTOM_INJECTION_MARKER_CHAR in menu.options.cookie:
+      settings.CUSTOM_INJECTION_MARKER = settings.COOKIE_INJECTION = True
+    elif menu.options.agent and settings.CUSTOM_INJECTION_MARKER_CHAR in menu.options.agent:
+      settings.CUSTOM_INJECTION_MARKER = settings.USER_AGENT_INJECTION = True
+    elif menu.options.referer and settings.CUSTOM_INJECTION_MARKER_CHAR in menu.options.referer:
+      settings.CUSTOM_INJECTION_MARKER = settings.REFERER_INJECTION = True
+    elif menu.options.host and settings.CUSTOM_INJECTION_MARKER_CHAR in menu.options.host:
+      settings.CUSTOM_INJECTION_MARKER = settings.HOST_INJECTION = True
     elif settings.CUSTOM_HEADER_CHECK and settings.CUSTOM_HEADER_CHECK != settings.ACCEPT:
       if settings.CUSTOM_HEADER_CHECK not in settings.TEST_PARAMETER:
-        settings.WILDCARD_CHAR_APPLIED = True
+        settings.CUSTOM_INJECTION_MARKER = True
       else:
         settings.CUSTOM_HEADER_INJECTION = True
         return False
 
-  if settings.WILDCARD_CHAR_APPLIED:
+  if settings.CUSTOM_INJECTION_MARKER:
     while True:
-      message = "Custom injection marker ('" + settings.WILDCARD_CHAR + "') found in " + option +". "
+      message = "Custom injection marker ('" + settings.CUSTOM_INJECTION_MARKER_CHAR + "') found in " + option +". "
       message += "Do you want to process it? [Y/n] > "
       procced_option = common.read_input(message, default="Y", check_batch=True)
       if procced_option in settings.CHOICE_YES:
@@ -397,7 +414,7 @@ def value_boundaries(parameter, value, http_request_method):
       return _
     while True:
       message = "Do you want to inject the provided value for " + http_request_method + " parameter '" + parameter.split("=")[0] + "' inside boundaries?"
-      message += " ('" + str(value.replace(_ ,_ + settings.WILDCARD_CHAR)) + "') [Y/n] > "
+      message += " ('" + str(value.replace(_ ,_ + settings.CUSTOM_INJECTION_MARKER_CHAR)) + "') [Y/n] > "
       procced_option = common.read_input(message, default="Y", check_batch=True)
       if procced_option in settings.CHOICE_YES:
         settings.INJECT_INSIDE_BOUNDARIES = True
@@ -438,7 +455,7 @@ def PCRE_e_modifier(parameter, http_request_method):
         while True:
           message = "It appears that provided value for " + http_request_method + " parameter '" + parameter.split("=")[0] + "' has boundaries. "
           message += "Do you want to add the PCRE '" + settings.PCRE_MODIFIER + "' modifier outside boundaries? ('"
-          message += parameter.split("=")[1].replace(settings.INJECT_TAG, settings.WILDCARD_CHAR) + settings.PCRE_MODIFIER[1:2] + "') [Y/n] > "
+          message += parameter.split("=")[1].replace(settings.INJECT_TAG, settings.CUSTOM_INJECTION_MARKER_CHAR) + settings.PCRE_MODIFIER[1:2] + "') [Y/n] > "
           modifier_check = common.read_input(message, default="Y", check_batch=True)
           if modifier_check in settings.CHOICE_YES:
             return original_parameter + settings.PCRE_MODIFIER[1:2]
@@ -1107,23 +1124,6 @@ def enable_all_enumeration_options():
   menu.options.privileges = True
   # Retrieve system users password hashes.
   menu.options.passwords = True
-
-"""
-Do check for injection marker.
-"""
-def wildcard_character(data):
-  if settings.WILDCARD_CHAR_APPLIED != None:
-    _ = []
-    for data in data.split("\\n"):
-      if not data.startswith(settings.ACCEPT) and settings.WILDCARD_CHAR in data:
-        if menu.options.test_parameter != None and settings.WILDCARD_CHAR_APPLIED == False:
-          data = data.replace(settings.WILDCARD_CHAR, "")
-        elif settings.WILDCARD_CHAR_APPLIED:
-          data = data.replace(settings.WILDCARD_CHAR, settings.ASTERISK_MARKER)
-      _.append(data)
-    data = "\\n".join((list(dict.fromkeys(_)))).rstrip("\\n")
-    data = data.replace(settings.ASTERISK_MARKER, settings.INJECT_TAG)
-  return data
 
 """
 Check provided parameters for tests

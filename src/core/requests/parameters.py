@@ -48,13 +48,13 @@ def do_GET_check(url, http_request_method):
     return value
 
   if settings.USER_DEFINED_POST_DATA:
-    if settings.WILDCARD_CHAR in settings.USER_DEFINED_POST_DATA and not checks.process_non_custom():
+    if settings.CUSTOM_INJECTION_MARKER_CHAR in settings.USER_DEFINED_POST_DATA and not checks.process_non_custom():
       return False
     if settings.INJECT_TAG in url:
       settings.IGNORE_USER_DEFINED_POST_DATA = True
 
-  # Do replacement with the 'INJECT_HERE' tag, if the wild card char is provided.
-  url = checks.wildcard_character(url)
+  # Do replacement with the 'INJECT_HERE' tag, if the custom injection marker character is provided.
+  url = checks.process_custom_injection_data(url)
   # Check for REST-ful URLs format.
   if "?" not in url:
     if settings.INJECT_TAG not in url and not menu.options.shellshock:
@@ -186,10 +186,10 @@ def vuln_GET_param(url):
     for param in range(0,len(pairs)):
       if settings.INJECT_TAG in pairs[param]:
         vuln_parameter = pairs[param].split("=")[0]
-        if settings.WILDCARD_CHAR_APPLIED:
+        if settings.CUSTOM_INJECTION_MARKER:
           try:
             settings.TEST_PARAMETER = vuln_parameter
-            settings.POST_WILDCARD_CHAR = pairs[param].split("=")[1].split(settings.INJECT_TAG)[1]
+            settings.PRE_CUSTOM_INJECTION_MARKER_CHAR = pairs[param].split("=")[1].split(settings.INJECT_TAG)[1]
           except Exception:
             pass
         settings.TESTABLE_VALUE = pairs[param].split("=")[1].replace(settings.INJECT_TAG, "")
@@ -273,8 +273,8 @@ def do_POST_check(parameter, http_request_method):
     parameter = json.dumps(parameter)
     return parameter
 
-  # Do replacement with the 'INJECT_HERE' tag, if the wild card char is provided.
-  parameter = checks.wildcard_character(parameter).replace("'","\"").replace(", ",",").replace(",\"", ", \"")
+  # Do replacement with the 'INJECT_HERE' tag, if the custom injection marker character is provided.
+  parameter = checks.process_custom_injection_data(parameter).replace("'","\"").replace(", ",",").replace(",\"", ", \"")
   # Check if JSON Object.
   if checks.is_JSON_check(parameter) or checks.is_JSON_check(checks.check_quotes_json_data(parameter)):
     if checks.is_JSON_check(checks.check_quotes_json_data(parameter)):
@@ -451,7 +451,7 @@ def vuln_POST_param(parameter, url):
     parameters = ''.join(parameters.split(", ")[-1:]).strip()
     parameters = ''.join(parameters.split(":")[0]).strip()
     settings.TESTABLE_VALUE = vuln_parameter = ''.join(parameters.split(settings.RANDOM_TAG)[:1])
-    if settings.WILDCARD_CHAR_APPLIED:
+    if settings.CUSTOM_INJECTION_MARKER:
       settings.TEST_PARAMETER = vuln_parameter
 
   # XML data format.
@@ -460,15 +460,15 @@ def vuln_POST_param(parameter, url):
     for item in parameters:
       if settings.INJECT_TAG in item:
         result = re.sub(re.compile('<.*?>'), '', item)
-        if not settings.WILDCARD_CHAR_APPLIED and settings.WILDCARD_CHAR in item:
-          item = item.replace(settings.WILDCARD_CHAR,"")
+        if not settings.CUSTOM_INJECTION_MARKER and settings.CUSTOM_INJECTION_MARKER_CHAR in item:
+          item = item.replace(settings.CUSTOM_INJECTION_MARKER_CHAR,"")
         _ = (re.search('<(.*)>' + result + '</(.*)>', item))
         if (_.groups()[0]) == (_.groups()[1]):
           vuln_parameter = ''.join(_.groups()[0])
-          if settings.WILDCARD_CHAR_APPLIED:
+          if settings.CUSTOM_INJECTION_MARKER:
             try:
               settings.TEST_PARAMETER = vuln_parameter
-              settings.POST_WILDCARD_CHAR = result.split(settings.INJECT_TAG)[1]
+              settings.PRE_CUSTOM_INJECTION_MARKER_CHAR = result.split(settings.INJECT_TAG)[1]
             except Exception:
               pass
           settings.TESTABLE_VALUE = result.split(settings.INJECT_TAG)[0]
@@ -481,10 +481,10 @@ def vuln_POST_param(parameter, url):
       for param in range(0,len(pairs)):
         if settings.INJECT_TAG in pairs[param]:
           vuln_parameter = pairs[param].split("=")[0]
-          if settings.WILDCARD_CHAR_APPLIED:
+          if settings.CUSTOM_INJECTION_MARKER:
             try:
               settings.TEST_PARAMETER = vuln_parameter
-              settings.POST_WILDCARD_CHAR = pairs[param].split("=")[1].split(settings.INJECT_TAG)[1]
+              settings.PRE_CUSTOM_INJECTION_MARKER_CHAR = pairs[param].split("=")[1].split(settings.INJECT_TAG)[1]
             except Exception:
               pass
           settings.TESTABLE_VALUE = pairs[param].split("=")[1].replace(settings.INJECT_TAG, "")
@@ -516,7 +516,7 @@ def prefixes(payload, prefix):
 
   # Check if defined "--prefix" option.
   testable_value = settings.TESTABLE_VALUE
-  if settings.WILDCARD_CHAR_APPLIED and len(settings.POST_WILDCARD_CHAR) != 0:
+  if settings.CUSTOM_INJECTION_MARKER and len(settings.PRE_CUSTOM_INJECTION_MARKER_CHAR) != 0:
     testable_value = ""
   if menu.options.prefix:
     payload = testable_value + menu.options.prefix + prefix + payload
@@ -552,8 +552,8 @@ def do_cookie_check(cookie):
     value = ''.join(value)
     return value
 
-  # Do replacement with the 'INJECT_HERE' tag, if the wild card char is provided.
-  cookie = checks.wildcard_character(cookie)
+  # Do replacement with the 'INJECT_HERE' tag, if the custom injection marker character is provided.
+  cookie = checks.process_custom_injection_data(cookie)
   try:
     multi_parameters = cookie.split(settings.COOKIE_DELIMITER)
   except ValueError as err_msg:
@@ -647,10 +647,10 @@ def specify_cookie_parameter(cookie):
     for param in range(0,len(pairs)):
       if settings.INJECT_TAG in pairs[param]:
         inject_cookie = pairs[param].split("=")[0]
-        if settings.WILDCARD_CHAR_APPLIED:
+        if settings.CUSTOM_INJECTION_MARKER:
           try:
             settings.TEST_PARAMETER = inject_cookie
-            settings.POST_WILDCARD_CHAR = pairs[param].split("=")[1].split(settings.INJECT_TAG)[1]
+            settings.PRE_CUSTOM_INJECTION_MARKER_CHAR = pairs[param].split("=")[1].split(settings.INJECT_TAG)[1]
           except Exception:
             pass
         settings.TESTABLE_VALUE = pairs[param].split("=")[1].replace(settings.INJECT_TAG, "")

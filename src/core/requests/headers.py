@@ -349,11 +349,11 @@ def do_check(request):
   if settings.EXTRA_HTTP_HEADERS or settings.RAW_HTTP_HEADERS:
     if settings.RAW_HTTP_HEADERS:
       menu.options.headers = settings.RAW_HTTP_HEADERS
-    # Do replacement with the 'INJECT_HERE' tag, if the wildcard char is provided.
+    # Do replacement with the 'INJECT_HERE' tag, if the custom injection marker character is provided.
     if menu.options.headers:
-      extra_headers = checks.wildcard_character(menu.options.headers)
+      extra_headers = checks.process_custom_injection_data(menu.options.headers)
     elif menu.options.header:
-      extra_headers = checks.wildcard_character(menu.options.header)
+      extra_headers = checks.process_custom_injection_data(menu.options.header)
 
     extra_headers = extra_headers.replace(":",": ")
     if ": //" in extra_headers:
@@ -400,7 +400,7 @@ def do_check(request):
               http_header_name + ": " + http_header_value not in [settings.ACCEPT, settings.HOST, settings.USER_AGENT, settings.REFERER, settings.COOKIE] and \
               http_header_name + ": " + http_header_value not in settings.CUSTOM_HEADERS_NAMES:
               settings.CUSTOM_HEADERS_NAMES.append(http_header_name + ": " + http_header_value)
-            http_header_value = http_header_value.replace(settings.INJECT_TAG,"").replace(settings.WILDCARD_CHAR,"")
+            http_header_value = http_header_value.replace(settings.INJECT_TAG,"").replace(settings.CUSTOM_INJECTION_MARKER_CHAR,"")
             request.add_header(http_header_name, http_header_value)
 
         if http_header_name not in [settings.HOST, settings.USER_AGENT, settings.REFERER, settings.COOKIE, settings.CUSTOM_HEADER_NAME]:

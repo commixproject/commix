@@ -667,13 +667,13 @@ def data_checks(url, http_request_method, filename, timesec):
 Perform HTTP Headers parameters checks
 """
 def headers_checks(url, http_request_method, filename, timesec):
-  if menu.options.level > settings.DEFAULT_INJECTION_LEVEL and not settings.WILDCARD_CHAR_APPLIED:
-    settings.COOKIE_INJECTION = True
-
+  if menu.options.level > settings.DEFAULT_INJECTION_LEVEL and not settings.CUSTOM_INJECTION_MARKER:
+    if menu.options.cookie:
+      settings.COOKIE_INJECTION = True
   if len([i for i in settings.TEST_PARAMETER if i in str(menu.options.cookie)]) != 0 or settings.COOKIE_INJECTION:
     cookie_injection(url, http_request_method, filename, timesec)
 
-  if menu.options.level > settings.COOKIE_INJECTION_LEVEL and not settings.WILDCARD_CHAR_APPLIED:
+  if menu.options.level > settings.COOKIE_INJECTION_LEVEL and not settings.CUSTOM_INJECTION_MARKER:
     settings.HTTP_HEADERS_INJECTION = True
 
   if len([i for i in settings.TEST_PARAMETER if i in settings.HTTP_HEADERS]) != 0 or settings.HTTP_HEADERS_INJECTION or any((settings.USER_AGENT_INJECTION, settings.REFERER_INJECTION, settings.HOST_INJECTION)):
@@ -684,11 +684,11 @@ def headers_checks(url, http_request_method, filename, timesec):
   if len(settings.CUSTOM_HEADERS_NAMES) != 0:
     settings.CUSTOM_HEADER_INJECTION = True
     for _ in settings.CUSTOM_HEADERS_NAMES:
-      if settings.WILDCARD_CHAR in _.split(": ")[1] and not settings.WILDCARD_CHAR_APPLIED:
+      if settings.CUSTOM_INJECTION_MARKER_CHAR in _.split(": ")[1] and not settings.CUSTOM_INJECTION_MARKER:
         settings.CUSTOM_HEADER_INJECTION = False
       else:
         settings.CUSTOM_HEADER_NAME = _.split(": ")[0]
-        settings.CUSTOM_HEADER_VALUE = _.split(": ")[1].replace(settings.WILDCARD_CHAR,"")
+        settings.CUSTOM_HEADER_VALUE = _.split(": ")[1].replace(settings.CUSTOM_INJECTION_MARKER_CHAR,"")
         check_parameter = header_name = settings.SINGLE_WHITESPACE + settings.CUSTOM_HEADER_NAME
         settings.HTTP_HEADER = header_name[1:].lower()
         check_for_stored_sessions(url, http_request_method)
@@ -728,12 +728,12 @@ def perform_checks(url, http_request_method, filename):
   if menu.options.shellshock:
     menu.options.level = settings.HTTP_HEADER_INJECTION_LEVEL
   else:
-    if menu.options.level != settings.DEFAULT_INJECTION_LEVEL and settings.WILDCARD_CHAR_APPLIED != True:
+    if menu.options.level != settings.DEFAULT_INJECTION_LEVEL and settings.CUSTOM_INJECTION_MARKER != True:
       menu.options.level = settings.USER_SUPPLIED_LEVEL
     check_for_stored_levels(url, http_request_method)
 
   _ = True
-  if not settings.WILDCARD_CHAR_APPLIED:
+  if not settings.CUSTOM_INJECTION_MARKER:
     data_checks(url, http_request_method, filename, timesec)
     _ = False
   headers_checks(url, http_request_method, filename, timesec)
