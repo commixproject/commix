@@ -429,7 +429,7 @@ def cookie_injection(url, vuln_parameter, payload, http_request_method):
       payload = _urllib.parse.quote(payload)
 
     # Check if defined POST data
-    if len(settings.USER_DEFINED_POST_DATA) != 0:
+    if settings.USER_DEFINED_POST_DATA:
       data = settings.USER_DEFINED_POST_DATA.encode(settings.DEFAULT_CODEC)
     else:
       data = None
@@ -476,7 +476,7 @@ def user_agent_injection(url, vuln_parameter, payload, http_request_method):
 
   def inject_user_agent(url, vuln_parameter, payload, http_request_method):
     # Check if defined POST data
-    if len(settings.USER_DEFINED_POST_DATA) != 0:
+    if settings.USER_DEFINED_POST_DATA:
       data = settings.USER_DEFINED_POST_DATA.encode(settings.DEFAULT_CODEC)
     else:
       data = None
@@ -519,7 +519,7 @@ def referer_injection(url, vuln_parameter, payload, http_request_method):
 
   def inject_referer(url, vuln_parameter, payload, http_request_method):
     # Check if defined POST data
-    if len(settings.USER_DEFINED_POST_DATA) != 0:
+    if settings.USER_DEFINED_POST_DATA:
       data = settings.USER_DEFINED_POST_DATA.encode(settings.DEFAULT_CODEC)
     else:
       data = None
@@ -562,7 +562,7 @@ def host_injection(url, vuln_parameter, payload, http_request_method):
 
   def inject_host(url, vuln_parameter, payload, http_request_method):
     # Check if defined POST data
-    if len(settings.USER_DEFINED_POST_DATA) != 0:
+    if settings.USER_DEFINED_POST_DATA:
       data = settings.USER_DEFINED_POST_DATA.encode(settings.DEFAULT_CODEC)
     else:
       data = None
@@ -605,7 +605,7 @@ def custom_header_injection(url, vuln_parameter, payload, http_request_method):
 
   def inject_custom_header(url, vuln_parameter, payload, http_request_method):
     # Check if defined POST data
-    if len(settings.USER_DEFINED_POST_DATA) != 0:
+    if settings.USER_DEFINED_POST_DATA:
       data = settings.USER_DEFINED_POST_DATA.encode(settings.DEFAULT_CODEC)
     else:
       data = None

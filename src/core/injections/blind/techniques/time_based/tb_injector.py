@@ -46,12 +46,12 @@ def examine_requests(payload, vuln_parameter, http_request_method, url, timesec,
   start = time.time()
 
   # Check if defined POST data
-  if len(settings.USER_DEFINED_POST_DATA) == 0 or settings.IGNORE_USER_DEFINED_POST_DATA:
+  if not settings.USER_DEFINED_POST_DATA or settings.IGNORE_USER_DEFINED_POST_DATA:
     # Encoding non-ASCII characters payload.
     # payload = _urllib.parse.quote(payload)
     target = url.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload)
     vuln_parameter = ''.join(vuln_parameter)
-    if len(settings.USER_DEFINED_POST_DATA) != 0:
+    if settings.USER_DEFINED_POST_DATA:
       request = _urllib.request.Request(target, settings.USER_DEFINED_POST_DATA.encode(settings.DEFAULT_CODEC), method=http_request_method)
     else:
       request = _urllib.request.Request(target, method=http_request_method)
@@ -96,14 +96,14 @@ def injection_test(payload, http_request_method, url):
   start = time.time()
 
   # Check if defined POST data
-  if len(settings.USER_DEFINED_POST_DATA) == 0 or settings.IGNORE_USER_DEFINED_POST_DATA:
+  if not settings.USER_DEFINED_POST_DATA or settings.IGNORE_USER_DEFINED_POST_DATA:
     # Encoding non-ASCII characters payload.
     # payload = _urllib.parse.quote(payload)
 
     # Define the vulnerable parameter
     vuln_parameter = parameters.vuln_GET_param(url)
     target = url.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload)
-    if len(settings.USER_DEFINED_POST_DATA) != 0:
+    if settings.USER_DEFINED_POST_DATA:
       request = _urllib.request.Request(target, settings.USER_DEFINED_POST_DATA.encode(settings.DEFAULT_CODEC), method=http_request_method)
     else:
       request = _urllib.request.Request(target, method=http_request_method)

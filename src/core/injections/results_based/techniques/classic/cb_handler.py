@@ -243,7 +243,7 @@ def cb_injection_handler(url, timesec, filename, http_request_method, injection_
               header_name = ""
               the_type = " parameter"
               # Check if defined POST data
-              if len(settings.USER_DEFINED_POST_DATA) == 0 or settings.IGNORE_USER_DEFINED_POST_DATA:
+              if not settings.USER_DEFINED_POST_DATA or settings.IGNORE_USER_DEFINED_POST_DATA:
                 found_vuln_parameter = parameters.vuln_GET_param(url)
               else :
                 found_vuln_parameter = vuln_parameter

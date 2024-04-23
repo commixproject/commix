@@ -76,7 +76,7 @@ def check_waf(url, http_request_method):
   else:
     payload = settings.PARAMETER_DELIMITER + payload
   url = url + payload
-  if len(settings.USER_DEFINED_POST_DATA) != 0:
+  if settings.USER_DEFINED_POST_DATA:
     request = _urllib.request.Request(url, settings.USER_DEFINED_POST_DATA.encode(), method=http_request_method)
   else:
     request = _urllib.request.Request(url, method=http_request_method)

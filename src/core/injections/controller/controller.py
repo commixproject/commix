@@ -96,7 +96,7 @@ def command_injection_heuristic_basic(url, http_request_method, check_parameter,
         payload = checks.perform_payload_modification(payload)
         if settings.VERBOSITY_LEVEL >= 1:
           print(settings.print_payload(payload))
-        if len(settings.USER_DEFINED_POST_DATA) != 0:
+        if settings.USER_DEFINED_POST_DATA:
           data = settings.USER_DEFINED_POST_DATA.encode(settings.DEFAULT_CODEC)
         else:
           data = None
@@ -104,8 +104,8 @@ def command_injection_heuristic_basic(url, http_request_method, check_parameter,
         tmp_url = url
         if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
           cookie = menu.options.cookie.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC)
-        elif not settings.IGNORE_USER_DEFINED_POST_DATA and menu.options.data and settings.INJECT_TAG in menu.options.data:
-            data = menu.options.data.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC)
+        elif not settings.IGNORE_USER_DEFINED_POST_DATA and settings.USER_DEFINED_POST_DATA and settings.INJECT_TAG in settings.USER_DEFINED_POST_DATA:
+            data = settings.USER_DEFINED_POST_DATA.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC)
         else:
           if settings.INJECT_TAG in url:
             tmp_url = url.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, _urllib.parse.quote(payload))
@@ -158,7 +158,7 @@ def code_injections_heuristic_basic(url, http_request_method, check_parameter, t
         payload = checks.perform_payload_modification(payload)
         if settings.VERBOSITY_LEVEL >= 1:
           print(settings.print_payload(payload))
-        if len(settings.USER_DEFINED_POST_DATA) != 0:
+        if settings.USER_DEFINED_POST_DATA:
           data = settings.USER_DEFINED_POST_DATA.encode(settings.DEFAULT_CODEC)
         else:
           data = None
@@ -166,8 +166,8 @@ def code_injections_heuristic_basic(url, http_request_method, check_parameter, t
         tmp_url = url
         if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
           cookie = menu.options.cookie.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC)
-        elif not settings.IGNORE_USER_DEFINED_POST_DATA and menu.options.data and settings.INJECT_TAG in menu.options.data:
-            data = menu.options.data.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC)
+        elif not settings.IGNORE_USER_DEFINED_POST_DATA and settings.USER_DEFINED_POST_DATA and settings.INJECT_TAG in settings.USER_DEFINED_POST_DATA:
+            data = settings.USER_DEFINED_POST_DATA.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC)
         else:
           if settings.INJECT_TAG in url:
             tmp_url = url.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, _urllib.parse.quote(payload))
