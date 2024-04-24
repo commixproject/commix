@@ -247,7 +247,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.0"
-REVISION = "35"
+REVISION = "36"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1249,6 +1249,7 @@ ACCEPT_VALUE = "*/*"
 
 # HTTP Headers
 HTTP_HEADERS = [ USER_AGENT.lower(), REFERER.lower(), HOST.lower() ]
+SHELLSHOCK_HTTP_HEADERS =[ COOKIE, USER_AGENT, REFERER ]
 
 # Regular expression used for ignoring some special chars
 IGNORE_SPECIAL_CHAR_REGEX = "[^/()A-Za-z0-9.:,_+]"
