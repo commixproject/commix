@@ -88,9 +88,9 @@ def command_injection_heuristic_basic(url, http_request_method, check_parameter,
       for payload in basic_payloads:
         _ = _ + 1
 
-        if not inject_http_headers or (inject_http_headers and settings.HOST.capitalize() in check_parameter):
-          if not any((settings.IS_JSON, settings.IS_XML)) or settings.COOKIE_INJECTION:
-            payload = _urllib.parse.quote(payload)
+        # if not inject_http_headers or (inject_http_headers and settings.HOST.capitalize() in check_parameter):
+        #   if not any((settings.IS_JSON, settings.IS_XML)) or settings.COOKIE_INJECTION:
+        #     payload = _urllib.parse.quote(payload)
         payload = parameters.prefixes(payload, prefix="")
         payload = parameters.suffixes(payload, suffix="")
         payload = checks.perform_payload_modification(payload)
@@ -115,9 +115,9 @@ def command_injection_heuristic_basic(url, http_request_method, check_parameter,
         if check_parameter_in_http_header(check_parameter) and check_parameter not in settings.HOST.capitalize():
           settings.CUSTOM_HEADER_NAME = check_parameter
           if settings.INJECT_TAG in settings.CUSTOM_HEADER_VALUE:
-            request.add_unredirected_header(check_parameter, settings.CUSTOM_HEADER_VALUE.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC))
+            request.add_header(check_parameter, settings.CUSTOM_HEADER_VALUE.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC))
           else:
-            request.add_unredirected_header(check_parameter, (settings.CUSTOM_HEADER_VALUE + payload).encode(settings.DEFAULT_CODEC))
+            request.add_header(check_parameter, (settings.CUSTOM_HEADER_VALUE + payload).encode(settings.DEFAULT_CODEC))
         headers.do_check(request)
         response = requests.get_request_response(request)
 
@@ -150,9 +150,9 @@ def code_injections_heuristic_basic(url, http_request_method, check_parameter, t
   try:
     if (not settings.IDENTIFIED_WARNINGS and not settings.IDENTIFIED_PHPINFO) or settings.MULTI_TARGETS:
       for payload in settings.PHPINFO_CHECK_PAYLOADS:
-        if not inject_http_headers or (inject_http_headers and settings.HOST.capitalize() in check_parameter):
-          if not any((settings.IS_JSON, settings.IS_XML)) or settings.COOKIE_INJECTION:
-            payload = _urllib.parse.quote(payload)
+        # if not inject_http_headers or (inject_http_headers and settings.HOST.capitalize() in check_parameter):
+        #   if not any((settings.IS_JSON, settings.IS_XML)) or settings.COOKIE_INJECTION:
+        #     payload = _urllib.parse.quote(payload)
         payload = parameters.prefixes(payload, prefix="")
         payload = parameters.suffixes(payload, suffix="")
         payload = checks.perform_payload_modification(payload)
@@ -177,9 +177,9 @@ def code_injections_heuristic_basic(url, http_request_method, check_parameter, t
         if check_parameter_in_http_header(check_parameter) and check_parameter not in settings.HOST.capitalize():
           settings.CUSTOM_HEADER_NAME = check_parameter
           if settings.INJECT_TAG in settings.CUSTOM_HEADER_VALUE:
-            request.add_unredirected_header(check_parameter, settings.CUSTOM_HEADER_VALUE.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC))
+            request.add_header(check_parameter, settings.CUSTOM_HEADER_VALUE.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC))
           else:
-            request.add_unredirected_header(check_parameter, (settings.CUSTOM_HEADER_VALUE + payload).encode(settings.DEFAULT_CODEC))
+            request.add_header(check_parameter, (settings.CUSTOM_HEADER_VALUE + payload).encode(settings.DEFAULT_CODEC))
         headers.do_check(request)
         response = requests.get_request_response(request)
 
@@ -293,7 +293,7 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
     basic_level_checks()
 
   inject_http_headers = check_parameter_in_http_header(check_parameter)
-
+  
   # User-Agent/Referer/Host/Custom HTTP header Injection(s)
   if check_parameter.startswith(settings.SINGLE_WHITESPACE):
     header_name = ""
@@ -490,11 +490,10 @@ def stored_http_header_injection(url, check_parameter, http_request_method, file
 Cookie injection
 """
 def cookie_injection(url, http_request_method, filename, timesec):
-
   settings.COOKIE_INJECTION = True
-
+  
   # Cookie Injection
-  if settings.COOKIE_INJECTION == True:
+  if settings.COOKIE_INJECTION:
     cookie_value = menu.options.cookie
 
     header_name = settings.SINGLE_WHITESPACE + settings.COOKIE
@@ -535,6 +534,10 @@ def cookie_injection(url, http_request_method, filename, timesec):
                 injection_proccess(url, check_parameter, http_request_method, filename, timesec)
               param_counter += 1
             break
+          else:
+            # Check for session file
+            check_for_stored_sessions(url, http_request_method)
+            injection_proccess(url, check_parameter, http_request_method, filename, timesec)
         else:
           # Check for session file
           check_for_stored_sessions(url, http_request_method)
@@ -656,20 +659,27 @@ def post_request(url, http_request_method, filename, timesec):
 Perform GET / POST parameters checks
 """
 def data_checks(url, http_request_method, filename, timesec):
+  settings.COOKIE_INJECTION = None
+  settings.HTTP_HEADERS_INJECTION = False
+  settings.CUSTOM_HEADER_INJECTION = False
+  checks.process_non_custom()
   if settings.USER_DEFINED_POST_DATA and not settings.IGNORE_USER_DEFINED_POST_DATA:
     if post_request(url, http_request_method, filename, timesec) is None:
-      get_request(url, http_request_method, filename, timesec)
+      if not settings.SKIP_NON_CUSTOM:
+        get_request(url, http_request_method, filename, timesec)
   else:
     if get_request(url, http_request_method, filename, timesec) is None:
-      if settings.USER_DEFINED_POST_DATA and checks.process_non_custom():
+      if settings.USER_DEFINED_POST_DATA and not settings.SKIP_NON_CUSTOM:
         post_request(url, http_request_method, filename, timesec) 
 """
 Perform HTTP Headers parameters checks
 """
 def headers_checks(url, http_request_method, filename, timesec):
-  if menu.options.level > settings.DEFAULT_INJECTION_LEVEL and not settings.CUSTOM_INJECTION_MARKER:
+
+  if menu.options.level == settings.COOKIE_INJECTION_LEVEL and not settings.CUSTOM_INJECTION_MARKER:
     if menu.options.cookie:
       settings.COOKIE_INJECTION = True
+
   if len([i for i in settings.TEST_PARAMETER if i in str(menu.options.cookie)]) != 0 or settings.COOKIE_INJECTION:
     cookie_injection(url, http_request_method, filename, timesec)
 
@@ -693,7 +703,7 @@ def headers_checks(url, http_request_method, filename, timesec):
         settings.HTTP_HEADER = header_name[1:].lower()
         check_for_stored_sessions(url, http_request_method)
         injection_proccess(url, check_parameter, http_request_method, filename, timesec)
-    settings.CUSTOM_HEADER_INJECTION = False
+    # settings.CUSTOM_HEADER_INJECTION = False
 
 """
 Perform checks
@@ -737,7 +747,7 @@ def perform_checks(url, http_request_method, filename):
     data_checks(url, http_request_method, filename, timesec)
     _ = False
   headers_checks(url, http_request_method, filename, timesec)
-  if settings.CUSTOM_HEADERS_NAMES and not checks.process_non_custom():
+  if any((settings.CUSTOM_HEADERS_NAMES, settings.COOKIE_INJECTION, settings.HTTP_HEADERS_INJECTION)) and settings.SKIP_NON_CUSTOM:
     _ = False
   if _:
     data_checks(url, http_request_method, filename, timesec)

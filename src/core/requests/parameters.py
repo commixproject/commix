@@ -47,8 +47,11 @@ def do_GET_check(url, http_request_method):
     value = ''.join(value)
     return value
 
+  if settings.CUSTOM_INJECTION_MARKER and settings.SKIP_NON_CUSTOM:
+      return False
+      
   if settings.USER_DEFINED_POST_DATA:
-    if settings.CUSTOM_INJECTION_MARKER_CHAR in settings.USER_DEFINED_POST_DATA and not checks.process_non_custom():
+    if settings.CUSTOM_INJECTION_MARKER_CHAR in settings.USER_DEFINED_POST_DATA and settings.SKIP_NON_CUSTOM:
       return False
     if settings.INJECT_TAG in url:
       settings.IGNORE_USER_DEFINED_POST_DATA = True
@@ -291,9 +294,10 @@ def do_POST_check(parameter, http_request_method):
       settings.PARAMETER_DELIMITER = "\n"
 
   elif settings.TEST_PARAMETER and not any(ext in parameter for ext in settings.TEST_PARAMETER) and not settings.INJECT_TAG in parameter:
-    settings.IGNORE_USER_DEFINED_POST_DATA = True
+    if settings.SKIP_NON_CUSTOM:
+      settings.IGNORE_USER_DEFINED_POST_DATA = True
 
-  if settings.IGNORE_USER_DEFINED_POST_DATA:
+  if settings.IGNORE_USER_DEFINED_POST_DATA and settings.SKIP_NON_CUSTOM:
     return ""
 
   parameters_list = []

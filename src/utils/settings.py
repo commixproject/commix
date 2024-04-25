@@ -247,7 +247,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.0"
-REVISION = "36"
+REVISION = "37"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -372,7 +372,10 @@ IGNORE_USER_DEFINED_POST_DATA = False
 CUSTOM_INJECTION_MARKER_CHAR = "*"
 CUSTOM_INJECTION_MARKER = False
 ASTERISK_MARKER = "__ASTERISK__"
+CUSTOM_INJECTION_MARKER_DATA = []
 PRE_CUSTOM_INJECTION_MARKER_CHAR = ""
+
+SKIP_NON_CUSTOM = False
 
 # Testable parameter(s) - comma separated.
 TEST_PARAMETER = ""

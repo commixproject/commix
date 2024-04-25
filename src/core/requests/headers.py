@@ -394,6 +394,10 @@ def do_check(request):
         http_header_value = ''.join(http_header_value).strip().replace(": ",":")
         # Check if it is a custom header injection.
         if http_header_name not in [settings.ACCEPT, settings.HOST, settings.USER_AGENT, settings.REFERER, settings.COOKIE]:
+
+          if not settings.CUSTOM_HEADER_INJECTION and settings.CUSTOM_INJECTION_MARKER_CHAR in http_header_value:
+            settings.CUSTOM_INJECTION_MARKER = True
+
           if not settings.CUSTOM_HEADER_INJECTION and http_header_name in settings.TEST_PARAMETER or settings.INJECT_TAG in http_header_value:
             settings.CUSTOM_HEADER_CHECK = http_header_name
             if len(http_header_name) != 0 and \

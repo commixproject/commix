@@ -101,24 +101,22 @@ def quoted_value(value):
 Check for non custom parameters.
 """
 def process_non_custom():
-  if settings.CUSTOM_INJECTION_MARKER:
+  if settings.CUSTOM_INJECTION_MARKER and not settings.SKIP_NON_CUSTOM:
     while True:
       message = "Other non-custom parameters found."
       message += " Do you want to process them too? [Y/n] > "
       process = common.read_input(message, default="Y", check_batch=True)
       if process in settings.CHOICE_YES:
-        settings.IGNORE_USER_DEFINED_POST_DATA = False
-        return True
+        settings.SKIP_NON_CUSTOM = settings.IGNORE_USER_DEFINED_POST_DATA = False
+        return 
       elif process in settings.CHOICE_NO:
-        settings.IGNORE_USER_DEFINED_POST_DATA = True
-        return False
+        settings.SKIP_NON_CUSTOM = settings.IGNORE_USER_DEFINED_POST_DATA = True
+        return 
       elif process in settings.CHOICE_QUIT:
         raise SystemExit()
       else:
         common.invalid_option(process)
         pass
-  else:
-    return True
 
 """
 Process data with custom injection marker character ('*').
@@ -135,6 +133,15 @@ def process_custom_injection_data(data):
       _.append(data)
     data = "\\n".join((list(dict.fromkeys(_)))).rstrip("\\n")
     data = data.replace(settings.ASTERISK_MARKER, settings.INJECT_TAG)
+    # if settings.INJECT_TAG in data:
+    #   settings.CUSTOM_INJECTION_MARKER_DATA.append(data)
+    #   settings.CUSTOM_INJECTION_MARKER_DATA = (list(dict.fromkeys(settings.CUSTOM_INJECTION_MARKER_DATA)))
+    # if ''.join(settings.CUSTOM_INJECTION_MARKER_DATA).count(settings.INJECT_TAG) > 1:
+    #   err_msg = "More than one custom injection markers ('" + settings.CUSTOM_INJECTION_MARKER_CHAR + "') found in the provided data. "
+    #   err_msg += "You can use the '-p' option, to define them (i.e -p \"id1,id2\"). "
+    #   print(settings.print_critical_msg(err_msg))
+    #   raise SystemExit()
+
   return data
 
 """
@@ -1172,7 +1179,7 @@ def testable_parameters(url, check_parameters, header_name):
   if len([i for i in settings.TEST_PARAMETER if i in check_parameters]) == 0:
     _ = True
 
-  if settings.TEST_PARAMETER:
+  if settings.TEST_PARAMETER and isinstance(settings.TEST_PARAMETER, list):
     testable_parameters = settings.PARAMETER_SPLITTING_REGEX.join(settings.TEST_PARAMETER).replace(settings.SINGLE_WHITESPACE, "")
     testable_parameters = testable_parameters.split(settings.PARAMETER_SPLITTING_REGEX)
     non_exist_param = list(set(testable_parameters) - set(check_parameters))
