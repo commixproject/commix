@@ -76,7 +76,6 @@ def logfile_parser():
       with open(request_file, 'r') as file:
         request = file.read()
     else:
-      r
       invalid_data(request_file)
 
     if menu.options.requestfile:
