@@ -39,7 +39,7 @@ def shell_options(option):
     print(settings.print_warning_msg(warn_msg))
   elif option.lower() == "?":
     menu.reverse_tcp_options()
-  elif any(("quit", "exit")):
+  elif option.lower() == "quit" or option.lower() == "exit":
     raise SystemExit()
   elif option[0:4].lower() == "set ":
     if option[4:10].lower() == "lhost ":
@@ -708,7 +708,7 @@ def configure_reverse_tcp(separator):
     if option.lower() == "?":
       menu.reverse_tcp_options()
       continue
-    if any(("quit", "exit")):
+    if option.lower() == "quit" or option.lower() == "exit":
       raise SystemExit()
     elif option.lower() == "os_shell" or option.lower() == "back":
       settings.REVERSE_TCP = False
