@@ -1,4 +1,5 @@
 ## Version 4.0 (TBA)
+* Fixed: Minor bug-fix regarding option `--output-dir`.
 * Revised: Improvement regarding option `--skip` for excluding certain parameter(s) from testing.
 * Revised: Improvement regarding specifying which parameter(s) to test (i.e. `-p` option).
 * Revised: Improvement regarding processing / ignoring custom injection marker (i.e. asterisk `*`).
