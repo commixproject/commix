@@ -467,7 +467,7 @@ def vuln_POST_param(parameter, url):
         if not settings.CUSTOM_INJECTION_MARKER and settings.CUSTOM_INJECTION_MARKER_CHAR in item:
           item = item.replace(settings.CUSTOM_INJECTION_MARKER_CHAR,"")
         _ = (re.search('<(.*)>' + result + '</(.*)>', item))
-        if (_.groups()[0]) == (_.groups()[1]):
+        if _ and (_.groups()[0]) == (_.groups()[1]):
           vuln_parameter = ''.join(_.groups()[0])
           if settings.CUSTOM_INJECTION_MARKER:
             try:
