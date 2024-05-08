@@ -110,7 +110,8 @@ def process_non_custom():
         settings.SKIP_NON_CUSTOM = settings.IGNORE_USER_DEFINED_POST_DATA = False
         return 
       elif process in settings.CHOICE_NO:
-        settings.SKIP_NON_CUSTOM = settings.IGNORE_USER_DEFINED_POST_DATA = True
+        settings.SKIP_NON_CUSTOM = True
+        settings.IGNORE_USER_DEFINED_POST_DATA = False
         return 
       elif process in settings.CHOICE_QUIT:
         raise SystemExit()
