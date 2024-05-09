@@ -2145,14 +2145,12 @@ def print_users(sys_users, filename, _, separator, TAG, cmd, prefix, suffix, whi
                   if not menu.options.no_logging:
                     output_file.write("      " + sys_users)
       else:
-        # print(settings.SINGLE_WHITESPACE)
-        warn_msg = "It seems that you don't have permissions to read the '"
-        warn_msg += settings.PASSWD_FILE + "'."
+        warn_msg = "It seems that you don't have permissions "
+        warn_msg += "to read the content of the file '" + settings.PASSWD_FILE + "'."
         print(settings.print_warning_msg(warn_msg))
     except TypeError:
       pass
     except IndexError:
-      # print(settings.SINGLE_WHITESPACE)
       warn_msg = "Some kind of WAF/IPS probably blocks the attempt to read '"
       warn_msg += settings.PASSWD_FILE + "' to enumerate operating system users."
       print(settings.print_warning_msg(warn_msg))
@@ -2201,8 +2199,8 @@ def print_passes(sys_passes, filename, _, alter_shell):
             if not menu.options.no_logging:
               output_file.write("      " + fields[0])
     else:
-      warn_msg = "It seems that you don't have permissions to read the '"
-      warn_msg += settings.SHADOW_FILE + "' file."
+      warn_msg = "It seems that you don't have permissions "
+      warn_msg += "to read the content of the file '" + settings.SHADOW_FILE + "'."
       print(settings.print_warning_msg(warn_msg))
 
 """
