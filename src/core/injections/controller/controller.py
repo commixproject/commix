@@ -778,30 +778,7 @@ def do_check(url, http_request_method, filename):
         warn_msg = "Commands substitution using backtics is only supported by the (results-based) classic command injection technique. "
         print(settings.print_warning_msg(warn_msg) + Style.RESET_ALL)
 
-    # Check for "wizard" switch.
-    if menu.options.wizard:
-      if perform_checks(url, http_request_method, filename) == False:
-        scan_level = menu.options.level
-        while int(scan_level) < int(settings.HTTP_HEADER_INJECTION_LEVEL) and settings.LOAD_SESSION != True:
-          while True:
-            message = "Do you want to increase to '--level=" + str(scan_level + 1)
-            message += "' in order to perform more tests? [Y/n] > "
-            next_level = common.read_input(message, default="Y", check_batch=True)
-            if next_level in settings.CHOICE_YES:
-              menu.options.level = int(menu.options.level + scan_level)
-              if perform_checks(url, http_request_method, filename) == False and scan_level < settings.HTTP_HEADER_INJECTION_LEVEL :
-                scan_level = scan_level + 1
-              else:
-                break
-            elif next_level in settings.CHOICE_NO:
-              break
-            elif next_level in settings.CHOICE_QUIT:
-              raise SystemExit()
-            else:
-              common.invalid_option(next_level)
-              pass
-    else:
-      perform_checks(url, http_request_method, filename)
+    perform_checks(url, http_request_method, filename)
       
     # All injection techniques seems to be failed!
     if not settings.INJECTION_CHECKER:
