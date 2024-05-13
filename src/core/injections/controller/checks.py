@@ -321,12 +321,13 @@ check for not declared cookie(s)
 """
 def not_declared_cookies(response):
   try:
-    set_cookie_headers = []
-    for set_cookie_header in response.getheaders():
-      if settings.SET_COOKIE in set_cookie_header:
-        set_cookie_headers.append(re.search(r'([^;]+);?', set_cookie_header[1]).group(1))
-
-    candidate = settings.COOKIE_DELIMITER.join(str(value) for value in set_cookie_headers)
+    set_cookie_header = []
+    for response_header in response.getheaders():
+      if settings.SET_COOKIE in response_header:
+        _ = re.search(r'([^;]+);?', response_header[1])
+        if _:
+          set_cookie_header.append(_.group(1))
+    candidate = settings.COOKIE_DELIMITER.join(str(value) for value in set_cookie_header)
     if candidate and settings.DECLARED_COOKIES is not False and settings.CRAWLING is False:
       settings.DECLARED_COOKIES = True
       if menu.options.cookie:
