@@ -513,9 +513,7 @@ def main(filename, url, http_request_method):
           requests.application_identification(url)
           # Specifies the technology supporting the web application
           requests.technology_detection(response)
-          if response.info()[settings.X_POWERED_BY] :
-            server_banner = response.info()[settings.X_POWERED_BY]
-          elif response.info()[settings.SERVER] :
+          if response.info()[settings.SERVER] :
             server_banner = response.info()[settings.SERVER]
             # Procedure for target server's operating system identification.
             requests.check_target_os(server_banner)
