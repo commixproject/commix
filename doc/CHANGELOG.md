@@ -1,4 +1,5 @@
 ## Version 4.0 (TBA)
+* Revised: Minor improvements regarding semiblind (i.e. "file-based") technique.
 * Fixed: Minor bug-fix regarding option `--output-dir`.
 * Revised: Improvement regarding option `--skip` for excluding certain parameter(s) from testing.
 * Revised: Improvement regarding specifying which parameter(s) to test (i.e. `-p` option).

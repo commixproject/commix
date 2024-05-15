@@ -49,7 +49,7 @@ then use the "/tmp/" directory for tempfile-based technique.
 def tfb_controller(no_result, url, timesec, filename, tmp_path, http_request_method, url_time_response):
   if no_result == True:
     if settings.VERBOSITY_LEVEL != 0:
-      debug_msg = "Using '" + tmp_path + "' as temporary writable directory."
+      debug_msg = "Using '" + tmp_path + "' for temporary writable directory."
       print(settings.print_debug_msg(debug_msg))
     info_msg = "Trying to create a file in temporary "
     info_msg += "directory ('" + tmp_path + "') for command execution output.\n"
@@ -78,20 +78,18 @@ def delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, h
 Provide custom server's root directory
 """
 def custom_web_root(url, timesec, filename, http_request_method, url_time_response):
-  if settings.TARGET_OS == settings.OS.WINDOWS :
-    example_root_dir = settings.WINDOWS_DEFAULT_DOC_ROOTS[0]
-  else:
-    example_root_dir = settings.LINUX_DEFAULT_DOC_ROOTS[0].replace(settings.DOC_ROOT_TARGET_MARK,settings.TARGET_URL)
-  message = "Please provide web server document root directory (e.g. '"
-  message += example_root_dir + "') > "
-  settings.WEB_ROOT = common.read_input(message, default=example_root_dir, check_batch=True)
-  if settings.WEB_ROOT.endswith(("\\", "/")):
-    settings.WEB_ROOT = settings.WEB_ROOT[:-1]
-  if len(settings.WEB_ROOT) == 0:
-    settings.WEB_ROOT = example_root_dir
-  if menu.options.web_root:
-    menu.options.web_root = settings.WEB_ROOT
-  settings.CUSTOM_WEB_ROOT = True
+  if not settings.CUSTOM_WEB_ROOT:
+    if settings.TARGET_OS == settings.OS.WINDOWS :
+      default_root_dir = settings.WINDOWS_DEFAULT_DOC_ROOTS[0]
+    else:
+      default_root_dir = settings.LINUX_DEFAULT_DOC_ROOTS[0].replace(settings.DOC_ROOT_TARGET_MARK,settings.TARGET_URL)
+    message = "Enter what you want to use for writable directory (e.g. '"
+    message += default_root_dir + "') > "
+    settings.WEB_ROOT = common.read_input(message, default=default_root_dir, check_batch=True)
+    if len(settings.WEB_ROOT) == 0:
+      settings.WEB_ROOT = default_root_dir
+    menu.options.web_root = settings.WEB_ROOT.strip()
+    settings.CUSTOM_WEB_ROOT = True
 
 """
 Return TEMP path for win / *nix targets.
@@ -124,52 +122,11 @@ def check_tmp_path(url, timesec, filename, http_request_method, url_time_respons
       menu.options.web_root = menu.options.web_root + "/"
     settings.WEB_ROOT = menu.options.web_root
   else:
-    # Debian/Ubunt have been updated to use /var/www/html as default instead of /var/www.
-    if "apache" in settings.SERVER_BANNER.lower():
-      if "debian" or "ubuntu" in settings.SERVER_BANNER.lower():
-        try:
-          check_version = re.findall(r"/(.*)\.", settings.SERVER_BANNER.lower())
-          if check_version[0] > "2.3" and not settings.TARGET_OS == settings.OS.WINDOWS:
-            # Add "/html" to servers root directory
-            settings.WEB_ROOT = settings.WEB_ROOT + "/html"
-          else:
-            settings.WEB_ROOT = settings.WEB_ROOT
-        except IndexError:
-          pass
-      # Add "/html" to servers root directory
-      elif "fedora" or "centos" in settings.SERVER_BANNER.lower():
-        settings.WEB_ROOT = settings.WEB_ROOT + "/html"
-      else:
-        pass
-    # On more recent versions (>= "1.2.4") the default root path has changed to "/usr/share/nginx/html"
-    elif "nginx" in settings.SERVER_BANNER.lower():
-      try:
-        check_version = re.findall(r"/(.*)\.", settings.SERVER_BANNER.lower())
-        if check_version[0] >= "1.2.4":
-          # Add "/html" to servers root directory
-          settings.WEB_ROOT = settings.WEB_ROOT + "/html"
-        else:
-          # Add "/www" to servers root directory
-          settings.WEB_ROOT = settings.WEB_ROOT + "/www"
-      except IndexError:
-        pass
-    elif "microsoft-iis" in settings.SERVER_BANNER.lower():
-      pass
-    else:
-      # Provide custom server's root directory.
-      custom_web_root(url, timesec, filename, http_request_method, url_time_response)
+    # Provide custom server's root directory.
+    custom_web_root(url, timesec, filename, http_request_method, url_time_response)
 
-    path = _urllib.parse.urlparse(url).path
-    path_parts = path.split('/')
-    count = 0
-    for part in path_parts:
-      count = count + 1
-    count = count - 1
-    last_param = path_parts[count]
-    EXTRA_DIR = path.replace(last_param, "")
-    settings.WEB_ROOT = settings.WEB_ROOT + EXTRA_DIR
-    if settings.TARGET_OS == settings.OS.WINDOWS:
-      settings.WEB_ROOT = settings.WEB_ROOT.replace("/","\\")
+  if settings.TARGET_OS == settings.OS.WINDOWS:
+    settings.WEB_ROOT = settings.WEB_ROOT.replace("/","\\")
 
   return tmp_path
 
@@ -215,7 +172,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
   if not settings.LOAD_SESSION or settings.RETEST == True:
     TAG = ''.join(random.choice(string.ascii_uppercase) for i in range(6))
     if settings.VERBOSITY_LEVEL != 0:
-      debug_msg = "Using '" + settings.WEB_ROOT + "' as writable directory."
+      debug_msg = "Using '" + settings.WEB_ROOT + "' for writable directory."
       print(settings.print_debug_msg(debug_msg))
     info_msg = "Trying to create a file in directory '" + settings.WEB_ROOT
     info_msg += "' for command execution output. "
@@ -600,6 +557,10 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                     cmd = common.read_input(message="", default="os_shell", check_batch=True)
                     cmd = checks.escaped_cmd(cmd)
                     if cmd.lower() in settings.SHELL_OPTIONS:
+                      if cmd.lower() == "quit" or cmd.lower() == "exit":
+                        # Delete previous shell (text) files (output)
+                        delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+                        raise SystemExit()
                       go_back, go_back_again = shell_options.check_option(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, technique, go_back, no_result, timesec, go_back_again, payload, OUTPUT_TEXTFILE)
                       if go_back and go_back_again == False:
                         break
@@ -632,7 +593,6 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                       return False
                     else:
                       return True
-
                 elif gotshell in settings.CHOICE_QUIT:
                   # Delete previous shell (text) files (output)
                   delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)

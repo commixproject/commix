@@ -522,6 +522,10 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                       cmd = common.read_input(message="", default="os_shell", check_batch=True)
                       cmd = checks.escaped_cmd(cmd)
                       if cmd.lower() in settings.SHELL_OPTIONS:
+                        if cmd.lower() == "quit" or cmd.lower() == "exit":
+                          # Delete previous shell (text) files (output) from temp.
+                          delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+                          raise SystemExit()
                         go_back, go_back_again = shell_options.check_option(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, technique, go_back, no_result, timesec, go_back_again, payload, OUTPUT_TEXTFILE="")
                         if go_back and go_back_again == False:
                           break

@@ -55,7 +55,7 @@ def logs_filename_creation(url):
     menu.options.output_dir = os.path.abspath(menu.options.output_dir)
     if os.path.isdir(menu.options.output_dir):
       output_dir = menu.options.output_dir
-      warn_msg = "Using '" + output_dir + "' as the output directory."
+      warn_msg = "Using '" + output_dir + "' for output directory."
       print(settings.print_warning_msg(warn_msg)) 
     else:
       output_dir = tempfile.mkdtemp(prefix=settings.APPLICATION)

@@ -277,13 +277,6 @@ def injection_output(url, OUTPUT_TEXTFILE, timesec):
       hostname = _urllib.parse.urlparse(url).hostname
       netloc = _urllib.parse.urlparse(url).netloc
       output = scheme + "://" + netloc + "/" + OUTPUT_TEXTFILE
-
-      for item in settings.LINUX_DEFAULT_DOC_ROOTS:
-        item = item.replace(settings.DOC_ROOT_TARGET_MARK, hostname)
-        if item == menu.options.web_root:
-          settings.DEFINED_WEBROOT = output
-          break
-
       if not settings.DEFINED_WEBROOT or (settings.MULTI_TARGETS and not settings.RECHECK_FILE_FOR_EXTRACTION):
         if settings.MULTI_TARGETS:
           settings.RECHECK_FILE_FOR_EXTRACTION = True
@@ -295,8 +288,8 @@ def injection_output(url, OUTPUT_TEXTFILE, timesec):
             settings.DEFINED_WEBROOT = output
             break
           elif procced_option in settings.CHOICE_NO:
-            message =  "Please enter URL to use "
-            message += "for command execution output: > "
+            message =  "Enter URL to use "
+            message += "for command execution output > "
             message = common.read_input(message, default=output, check_batch=True)
             output = settings.DEFINED_WEBROOT = message
             info_msg = "Using '" + output
@@ -317,7 +310,7 @@ def injection_output(url, OUTPUT_TEXTFILE, timesec):
     output = settings.DEFINED_WEBROOT
 
   if settings.VERBOSITY_LEVEL != 0:
-    debug_msg = "Checking if the file is accessible from '" + output + "'."
+    debug_msg = "Checking if the file '" + output + "' is accessible."
     print(settings.print_debug_msg(debug_msg))
 
   return output
