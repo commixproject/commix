@@ -72,6 +72,40 @@ def check_for_stored_levels(url, http_request_method):
         menu.options.level = settings.DEFAULT_INJECTION_LEVEL
 
 """
+Heuristic request(s)
+"""
+def heuristic_request(url, http_request_method, check_parameter, payload):
+  data = None
+  cookie = None
+  tmp_url = url
+  payload = parameters.prefixes(payload, prefix="")
+  payload = parameters.suffixes(payload, suffix="")
+  payload = checks.perform_payload_modification(payload)
+  if settings.VERBOSITY_LEVEL >= 1:
+    print(settings.print_payload(payload))
+  if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
+    cookie = menu.options.cookie.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC)
+  elif not settings.IGNORE_USER_DEFINED_POST_DATA and menu.options.data and settings.INJECT_TAG in menu.options.data:
+    if not any((settings.IS_JSON, settings.IS_XML)):
+      payload = _urllib.parse.quote(payload)
+    data = menu.options.data.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC)
+  else:
+    if settings.INJECT_TAG in url:
+      tmp_url = url.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, _urllib.parse.quote(payload))
+  request = _urllib.request.Request(tmp_url, data, method=http_request_method)
+  if cookie:
+    request.add_header(settings.COOKIE, cookie)
+  if check_parameter_in_http_header(check_parameter) and check_parameter not in settings.HOST.capitalize():
+    settings.CUSTOM_HEADER_NAME = check_parameter
+    if settings.INJECT_TAG in settings.CUSTOM_HEADER_VALUE:
+      request.add_header(check_parameter, settings.CUSTOM_HEADER_VALUE.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC))
+    else:
+      request.add_header(check_parameter, (settings.CUSTOM_HEADER_VALUE + payload).encode(settings.DEFAULT_CODEC))
+  headers.do_check(request)
+  response = requests.get_request_response(request)
+  return response
+
+"""
 Heuristic (basic) tests for command injection
 """
 def command_injection_heuristic_basic(url, http_request_method, check_parameter, the_type, header_name, inject_http_headers):
@@ -87,40 +121,7 @@ def command_injection_heuristic_basic(url, http_request_method, check_parameter,
       _ = 0
       for payload in basic_payloads:
         _ = _ + 1
-
-        # if not inject_http_headers or (inject_http_headers and settings.HOST.capitalize() in check_parameter):
-        #   if not any((settings.IS_JSON, settings.IS_XML)) or settings.COOKIE_INJECTION:
-        #     payload = _urllib.parse.quote(payload)
-        payload = parameters.prefixes(payload, prefix="")
-        payload = parameters.suffixes(payload, suffix="")
-        payload = checks.perform_payload_modification(payload)
-        if settings.VERBOSITY_LEVEL >= 1:
-          print(settings.print_payload(payload))
-        if settings.USER_DEFINED_POST_DATA:
-          data = settings.USER_DEFINED_POST_DATA.encode(settings.DEFAULT_CODEC)
-        else:
-          data = None
-        cookie = None
-        tmp_url = url
-        if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
-          cookie = menu.options.cookie.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC)
-        elif not settings.IGNORE_USER_DEFINED_POST_DATA and settings.USER_DEFINED_POST_DATA and settings.INJECT_TAG in settings.USER_DEFINED_POST_DATA:
-            data = settings.USER_DEFINED_POST_DATA.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC)
-        else:
-          if settings.INJECT_TAG in url:
-            tmp_url = url.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, _urllib.parse.quote(payload))
-        request = _urllib.request.Request(tmp_url, data, method=http_request_method)
-        if cookie:
-          request.add_header(settings.COOKIE, cookie)
-        if check_parameter_in_http_header(check_parameter) and check_parameter not in settings.HOST.capitalize():
-          settings.CUSTOM_HEADER_NAME = check_parameter
-          if settings.INJECT_TAG in settings.CUSTOM_HEADER_VALUE:
-            request.add_header(check_parameter, settings.CUSTOM_HEADER_VALUE.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC))
-          else:
-            request.add_header(check_parameter, (settings.CUSTOM_HEADER_VALUE + payload).encode(settings.DEFAULT_CODEC))
-        headers.do_check(request)
-        response = requests.get_request_response(request)
-
+        response = heuristic_request(url, http_request_method, check_parameter, payload)
         if type(response) is not bool and response is not None:
           html_data = checks.page_encoding(response, action="decode")
           match = re.search(settings.BASIC_COMMAND_INJECTION_RESULT, html_data)
@@ -150,39 +151,7 @@ def code_injections_heuristic_basic(url, http_request_method, check_parameter, t
   try:
     if (not settings.IDENTIFIED_WARNINGS and not settings.IDENTIFIED_PHPINFO) or settings.MULTI_TARGETS:
       for payload in settings.PHPINFO_CHECK_PAYLOADS:
-        # if not inject_http_headers or (inject_http_headers and settings.HOST.capitalize() in check_parameter):
-        #   if not any((settings.IS_JSON, settings.IS_XML)) or settings.COOKIE_INJECTION:
-        #     payload = _urllib.parse.quote(payload)
-        payload = parameters.prefixes(payload, prefix="")
-        payload = parameters.suffixes(payload, suffix="")
-        payload = checks.perform_payload_modification(payload)
-        if settings.VERBOSITY_LEVEL >= 1:
-          print(settings.print_payload(payload))
-        if settings.USER_DEFINED_POST_DATA:
-          data = settings.USER_DEFINED_POST_DATA.encode(settings.DEFAULT_CODEC)
-        else:
-          data = None
-        cookie = None
-        tmp_url = url
-        if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
-          cookie = menu.options.cookie.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC)
-        elif not settings.IGNORE_USER_DEFINED_POST_DATA and settings.USER_DEFINED_POST_DATA and settings.INJECT_TAG in settings.USER_DEFINED_POST_DATA:
-            data = settings.USER_DEFINED_POST_DATA.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC)
-        else:
-          if settings.INJECT_TAG in url:
-            tmp_url = url.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, _urllib.parse.quote(payload))
-        request = _urllib.request.Request(tmp_url, data, method=http_request_method)
-        if cookie:
-          request.add_header(settings.COOKIE, cookie)
-        if check_parameter_in_http_header(check_parameter) and check_parameter not in settings.HOST.capitalize():
-          settings.CUSTOM_HEADER_NAME = check_parameter
-          if settings.INJECT_TAG in settings.CUSTOM_HEADER_VALUE:
-            request.add_header(check_parameter, settings.CUSTOM_HEADER_VALUE.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC))
-          else:
-            request.add_header(check_parameter, (settings.CUSTOM_HEADER_VALUE + payload).encode(settings.DEFAULT_CODEC))
-        headers.do_check(request)
-        response = requests.get_request_response(request)
-
+        response = heuristic_request(url, http_request_method, check_parameter, payload)
         if type(response) is not bool and response is not None:
           html_data = checks.page_encoding(response, action="decode")
           match = re.search(settings.CODE_INJECTION_PHPINFO, html_data)
