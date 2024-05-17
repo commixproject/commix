@@ -41,8 +41,8 @@ Checks if the testable parameter is exploitable.
 """
 
 def basic_level_checks():
-  settings.SKIP_CODE_INJECTIONS = False
-  settings.SKIP_COMMAND_INJECTIONS = False
+  settings.SKIP_CODE_INJECTIONS = None
+  settings.SKIP_COMMAND_INJECTIONS = None
   settings.IDENTIFIED_COMMAND_INJECTION = False
   settings.IDENTIFIED_WARNINGS = False
   settings.IDENTIFIED_PHPINFO = False
@@ -187,7 +187,7 @@ def classic_command_injection_technique(url, timesec, filename, http_request_met
     if (len(menu.options.tech) == 0 or "c" in menu.options.tech):
       if cb_handler.exploitation(url, timesec, filename, http_request_method, injection_type, technique) != False:
         settings.CLASSIC_STATE = settings.IDENTIFIED_COMMAND_INJECTION = True
-        checks.skip_command_injection_tests()
+        checks.skip_testing(filename, url)
       else:
         settings.CLASSIC_STATE = False
   if settings.CLASSIC_STATE == None:
@@ -205,7 +205,7 @@ def dynamic_code_evaluation_technique(url, timesec, filename, http_request_metho
       if eb_handler.exploitation(url, timesec, filename, http_request_method, injection_type, technique) != False:
         settings.EVAL_BASED_STATE = True
         if not settings.IDENTIFIED_WARNINGS and not settings.IDENTIFIED_PHPINFO:
-          checks.skip_command_injection_tests()
+          checks.skip_testing(filename, url)
       else:
         settings.EVAL_BASED_STATE = False
   if settings.EVAL_BASED_STATE == None:
@@ -222,7 +222,7 @@ def timebased_command_injection_technique(url, timesec, filename, http_request_m
     if (len(menu.options.tech) == 0 or "t" in menu.options.tech):
       if tb_handler.exploitation(url, timesec, filename, http_request_method, url_time_response, injection_type, technique) != False:
         settings.TIME_BASED_STATE = settings.IDENTIFIED_COMMAND_INJECTION = True
-        checks.skip_command_injection_tests()
+        checks.skip_testing(filename, url)
       else:
         settings.TIME_BASED_STATE = False
   if settings.TIME_BASED_STATE == None:
@@ -259,6 +259,7 @@ Proceed to the injection process for the appropriate parameter.
 """
 def injection_proccess(url, check_parameter, http_request_method, filename, timesec):
   if settings.PERFORM_BASIC_SCANS:
+    checks.keep_testing_others(filename, url)
     basic_level_checks()
 
   inject_http_headers = check_parameter_in_http_header(check_parameter)
@@ -291,7 +292,7 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
      settings.CHECKING_PARAMETER += str(header_name) + str(the_type) + str(inject_parameter)
   else:
      settings.CHECKING_PARAMETER += str(the_type) + str(header_name) + str(inject_parameter)
-
+  
   info_msg = "Setting " + settings.CHECKING_PARAMETER  + " for tests."
   print(settings.print_info_msg(info_msg))
   
@@ -313,7 +314,7 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
         # Check for identified warnings
         url = code_injections_heuristic_basic(url, http_request_method, check_parameter, the_type, header_name, inject_http_headers)
         if settings.IDENTIFIED_WARNINGS or settings.IDENTIFIED_PHPINFO:
-          checks.skip_command_injection_tests()
+          checks.skip_testing(filename, url)
 
       if not settings.IDENTIFIED_COMMAND_INJECTION and not settings.IDENTIFIED_WARNINGS and not settings.IDENTIFIED_PHPINFO:
         settings.HEURISTIC_TEST.POSITIVE = False
@@ -459,6 +460,7 @@ def stored_http_header_injection(url, check_parameter, http_request_method, file
 Cookie injection
 """
 def cookie_injection(url, http_request_method, filename, timesec):
+
   settings.COOKIE_INJECTION = True
   
   # Cookie Injection
@@ -628,6 +630,7 @@ def post_request(url, http_request_method, filename, timesec):
 Perform GET / POST parameters checks
 """
 def data_checks(url, http_request_method, filename, timesec):
+
   settings.COOKIE_INJECTION = None
   settings.HTTP_HEADERS_INJECTION = False
   settings.CUSTOM_HEADER_INJECTION = False

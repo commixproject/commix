@@ -197,48 +197,49 @@ def skipping_technique(technique, injection_type, state):
     print(settings.print_debug_msg(debug_msg))
 
 """
-Skipping of code injection tests.
+Skipping of further tests.
 """
-def skip_code_injection_tests():
-  while True:
-    message = "Skipping of code injection tests is recommended. "
-    message += "Do you agree? [Y/n] > "
-    procced_option = common.read_input(message, default="Y", check_batch=True)
-    if procced_option in settings.CHOICE_YES:
-      settings.SKIP_CODE_INJECTIONS = True
-      return
-    elif procced_option in settings.CHOICE_NO:
-      return
-    elif procced_option in settings.CHOICE_QUIT:
-      raise SystemExit()
-    else:
-      common.invalid_option(procced_option)
-      pass
+def keep_testing_others(filename, url):
+  if settings.SKIP_COMMAND_INJECTIONS:
+    while True:
+      message = "Do you want to keep testing the others? [y/N] > "
+      procced_option = common.read_input(message, default="N", check_batch=True)
+      if procced_option in settings.CHOICE_YES:
+        settings.SKIP_COMMAND_INJECTIONS = True
+        return
+      elif procced_option in settings.CHOICE_NO:
+        quit(filename, url, _ = False)
+      elif procced_option in settings.CHOICE_QUIT:
+        raise SystemExit()
+      else:
+        common.invalid_option(procced_option)
+        pass
 
 """
 Skipping of further command injection tests.
 """
-def skip_command_injection_tests():
-  if settings.IDENTIFIED_WARNINGS or settings.IDENTIFIED_PHPINFO:
-    _ = ""
+def skip_testing(filename, url):
+  if len(menu.options.tech) == 1:
+    settings.SKIP_COMMAND_INJECTIONS = True
   else:
-    _ = "further "
-  while True:
-    message = "Skipping of "+ _ +"command injection tests is recommended. "
-    message += "Do you agree? [Y/n] > "
-    procced_option = common.read_input(message, default="Y", check_batch=True)
-    if procced_option in settings.CHOICE_YES:
-      settings.SKIP_COMMAND_INJECTIONS = True
-      return
-    elif procced_option in settings.CHOICE_NO:
-      if settings.SKIP_COMMAND_INJECTIONS:
-        settings.SKIP_COMMAND_INJECTIONS = False
-      return
-    elif procced_option in settings.CHOICE_QUIT:
-      raise SystemExit()
+    if settings.IDENTIFIED_WARNINGS or settings.IDENTIFIED_PHPINFO:
+      _ = " testing command injection techniques"
     else:
-      common.invalid_option(procced_option)
-      pass
+      _ = " further testing"
+    while True:
+      message = "Do you want to skip" + _ + " in " + settings.CHECKING_PARAMETER + "? [Y/n] > "
+      procced_option = common.read_input(message, default="Y", check_batch=True)
+      if procced_option in settings.CHOICE_YES:
+        settings.SKIP_COMMAND_INJECTIONS = True
+        return
+      elif procced_option in settings.CHOICE_NO:
+        settings.SKIP_COMMAND_INJECTIONS = False
+        return
+      elif procced_option in settings.CHOICE_QUIT:
+        raise SystemExit()
+      else:
+        common.invalid_option(procced_option)
+        pass
 
 """
 The available mobile user agents.
@@ -289,6 +290,14 @@ def check_http_method(url):
       http_request_method = settings.HTTPMETHOD.GET
   return http_request_method
 
+def quit(filename, url, _):
+  logs.print_logs_notification(filename, url)
+  common.show_http_error_codes()
+  if _:
+    raise exit()
+  else:
+    raise SystemExit()
+
 """
 User aborted procedure
 """
@@ -297,9 +306,7 @@ def user_aborted(filename, url):
   abort_msg += "during the " + assessment_phase()
   abort_msg += " phase (Ctrl-C was pressed)."
   print(settings.print_abort_msg(abort_msg))
-  logs.print_logs_notification(filename, url)
-  common.show_http_error_codes()
-  raise exit()
+  quit(filename, url, _=True)
 
 """
 Connection exceptions

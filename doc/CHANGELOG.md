@@ -1,4 +1,5 @@
 ## Version 4.0 (TBA)
+* Revised: Minor improvement for enabling end-users to choose whether to skip or continue testing the remaining parameters, if one is found vulnerable.
 * Revised: Minor improvements regarding semiblind (i.e. "file-based") technique.
 * Fixed: Minor bug-fix regarding option `--output-dir`.
 * Revised: Improvement regarding option `--skip` for excluding certain parameter(s) from testing.

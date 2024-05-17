@@ -179,10 +179,9 @@ def check_option(separator, TAG, cmd, prefix, suffix, whitespace, http_request_m
     go_back, go_back_again = reverse_tcp_config(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, os_shell_option, go_back, go_back_again, payload, OUTPUT_TEXTFILE)
     return go_back, go_back_again
 
-  # The "quit" option
+  # The "quit" / "exit" options
   elif os_shell_option == "quit" or os_shell_option == "exit":
-    logs.print_logs_notification(filename, url)
-    raise SystemExit()
+    checks.quit(filename, url, _ = True)
 
   else:
     return go_back, go_back_again

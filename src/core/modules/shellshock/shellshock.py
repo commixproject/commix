@@ -264,9 +264,9 @@ def check_options(url, cmd, cve, check_header, filename, os_shell_option, http_r
     go_back, go_back_again = reverse_tcp_config(url, cmd, cve, check_header, filename, os_shell_option, http_request_method, go_back, go_back_again)
     return go_back, go_back_again
 
-  # The "quit" option
+  # The "quit" / "exit" options
   elif os_shell_option == "quit" or os_shell_option == "exit":                    
-    raise SystemExit()
+    checks.quit(filename, url, _ = True)
 
 """
 The main shellshock handler
