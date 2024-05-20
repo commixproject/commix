@@ -247,7 +247,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.0"
-REVISION = "50"
+REVISION = "51"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -389,10 +389,13 @@ SCHEME = ""
 
 class OS(object):
   UNIX = "unix"
-  WINDOWS = "win"
+  WINDOWS = "windows"
 
 # Default target host OS (Unix-like)
 TARGET_OS = OS.UNIX
+
+IDENTIFIED_TARGET_OS = False
+IGNORE_IDENTIFIED_OS = None
 
 # Verbosity level: 0-1 (default 0)
 VERBOSITY_LEVEL = 0
@@ -632,7 +635,7 @@ CHOICE_NO = ['NO','N','no','n']
 CHOICE_QUIT = ['QUIT','Q','quit','q']
 
 # Accepts 'W','w','U','u','Q','q'
-CHOICE_OS = ['W','w','U','u','Q','q']
+CHOICE_OS = ['W','w','U','u','Q','q','N','n']
 
 # Accepts 'C','c','S','s','Q','q','a','A','n','N'
 CHOICE_PROCEED = ['C','c','S','s','Q','q','a','A','n','N']

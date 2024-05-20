@@ -505,20 +505,20 @@ def main(filename, url, http_request_method):
             print(settings.print_critical_msg(str(err_msg.reason) + "."))
             raise SystemExit()
         try:
-          info_msg = "Performing identification checks to the target URL."
+          info_msg = "Performing identification (passive) tests to the target URL."
           print(settings.print_info_msg(info_msg))
           # Webpage encoding detection.
           requests.encoding_detection(response)
+          # Procedure for target server identification.
+          requests.server_identification(response)
           # Procedure for target application identification
           requests.application_identification(url)
           # Specifies the technology supporting the web application
-          requests.technology_detection(response)
-          if response.info()[settings.SERVER] :
-            server_banner = response.info()[settings.SERVER]
-            # Procedure for target server's operating system identification.
-            requests.check_target_os(server_banner)
-            # Procedure for target server identification.
-            requests.server_identification(server_banner)
+          requests.technology_identification(response)
+          # Procedure for target server's operating system identification.
+          if not settings.IDENTIFIED_TARGET_OS:
+            requests.os_identification(response)
+          if settings.IDENTIFIED_TARGET_OS:
             # Store the Server's root dir
             settings.DEFAULT_WEB_ROOT = settings.WEB_ROOT
             if menu.options.is_admin or menu.options.is_root and not menu.options.current_user:
@@ -528,7 +528,7 @@ def main(filename, url, http_request_method):
             # Check for wrong flags.
             checks.check_wrong_flags()
           else:
-            found_os_server = checks.user_defined_os()
+            checks.user_defined_os()
         except (KeyError, AttributeError):
           pass
         # Load tamper scripts

@@ -1010,7 +1010,7 @@ def check_http_s(url):
   return url
 
 """
-Force the user-defined operating system name.
+Force the user-defined operating system.
 """
 def user_defined_os():
   if menu.options.os:
@@ -1020,31 +1020,62 @@ def user_defined_os():
     elif menu.options.os.lower() == "unix":
       return True
     else:
-      err_msg = "You specified wrong value '" + menu.options.os + "' "
-      err_msg += "as an operation system. The value, must be 'Windows' or 'Unix'."
+      err_msg = "You defined wrong value '" + menu.options.os + "' "
+      err_msg += "for operation system. The value, must be 'Windows' or 'Unix'."
       print(settings.print_critical_msg(err_msg))
       raise SystemExit()
+
+"""
+Define the target operating system.
+"""
+def define_target_os():
+  # If "--shellshock" option is provided then, by default is a Linux/Unix operating system.
+  if menu.options.shellshock:
+    return
+  else:
+    while True:
+      message = "Do you recognise the server's underlying operating system? "
+      message += "[(N)o/(u)nix-like/(w)indows/(q)uit] > "
+      got_os = common.read_input(message, default="N", check_batch=True)
+      if got_os.lower() in settings.CHOICE_OS :
+        if got_os.lower() == "u":
+          return
+        elif got_os.lower() == "w":
+          settings.TARGET_OS = settings.OS.WINDOWS
+          return
+        elif got_os.lower() == "n":
+          settings.CHECK_BOTH_OS = True
+
+          return
+        elif got_os.lower() == "q":
+          raise SystemExit()
+      else:
+        common.invalid_option(got_os)
+        pass
 
 """
 Decision if the user-defined operating system name,
 is different than the one identified by heuristics.
 """
 def identified_os():
-    warn_msg = "Heuristics have identified different operating system ("
-    warn_msg += settings.TARGET_OS + ") than that you have provided."
-    print(settings.print_warning_msg(warn_msg))
-    message = "How do you want to proceed? [(C)ontinue/(s)kip/(q)uit] > "
-    proceed_option = common.read_input(message, default="C", check_batch=True)
-    if proceed_option.lower() in settings.CHOICE_PROCEED :
-      if proceed_option.lower() == "s":
-        return False
-      elif proceed_option.lower() == "c":
-        return True
-      elif proceed_option.lower() == "q":
-        raise SystemExit()
-    else:
-      common.invalid_option(proceed_option)
-      pass
+    if settings.IGNORE_IDENTIFIED_OS == None:
+      warn_msg = "Identified different operating system (i.e. '"
+      warn_msg += settings.TARGET_OS.title() + "'), than the defined (i.e. '" + menu.options.os.title() + "')."
+      print(settings.print_bold_warning_msg(warn_msg))
+      message = "How do you want to proceed? [(c)ontinue/(S)kip/(q)uit] > "
+      proceed_option = common.read_input(message, default="S", check_batch=True)
+      if proceed_option.lower() in settings.CHOICE_PROCEED :
+        if proceed_option.lower() == "c":
+          settings.IGNORE_IDENTIFIED_OS = True
+          return settings.IGNORE_IDENTIFIED_OS
+        elif proceed_option.lower() == "s":
+          settings.IGNORE_IDENTIFIED_OS = False
+          return settings.IGNORE_IDENTIFIED_OS
+        elif proceed_option.lower() == "q":
+          raise SystemExit()
+      else:
+        common.invalid_option(proceed_option)
+        pass
 
 """
 Checking all required third-party library dependencies.
@@ -1099,7 +1130,7 @@ Decision if the user-defined HTTP authenticatiob type,
 is different than the one identified by heuristics.
 """
 def identified_http_auth_type(auth_type):
-  warn_msg = "Heuristics have identified different HTTP authentication type ("
+  warn_msg = "Identified different HTTP authentication type ("
   warn_msg += auth_type.lower() + ") than that you have provided ("
   warn_msg += menu.options.auth_type + ")."
   print(settings.print_warning_msg(warn_msg))
@@ -1900,7 +1931,7 @@ def print_ps_version(ps_version, filename, _):
         info_msg = "Powershell version: " + ps_version + "\n"
         output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
   except ValueError:
-    warn_msg = "Heuristics have failed to identify the version of Powershell, "
+    warn_msg = "Failed to identify the version of Powershell, "
     warn_msg += "which means that some payloads or injection techniques may be failed."
     print(settings.print_warning_msg(warn_msg))
     settings.PS_ENABLED = False
@@ -1921,7 +1952,7 @@ def print_hostname(shell, filename, _):
         info_msg = info_msg + "\n"
         output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
   else:
-    warn_msg = "Heuristics have failed to identify the hostname."
+    warn_msg = "Failed to identify the hostname."
     print(settings.print_warning_msg(warn_msg))
 
 """
@@ -1939,7 +1970,7 @@ def print_current_user(cu_account, filename, _):
         info_msg = info_msg + "\n"
         output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
   else:
-    warn_msg = "Heuristics have failed to fetch the current user."
+    warn_msg = "Failed to fetch the current user."
     print(settings.print_warning_msg(warn_msg))
 
 """
@@ -1976,7 +2007,7 @@ def print_os_info(target_os, target_arch, filename, _):
         info_msg = info_msg + "\n"
         output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
   else:
-    warn_msg = "Heuristics have failed to fetch underlying operating system information."
+    warn_msg = "Failed to fetch underlying operating system information."
     print(settings.print_warning_msg(warn_msg))
 
 """

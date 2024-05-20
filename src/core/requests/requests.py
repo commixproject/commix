@@ -184,9 +184,9 @@ def estimate_response_time(url, timesec, http_request_method):
                 warn_msg = menu.options.auth_type.capitalize() + " "
                 warn_msg += "HTTP authentication credentials are required."
                 print(settings.print_warning_msg(warn_msg))
-                # Check if heuristics have failed to identify the realm attribute.
+                # Check if failed to identify the realm attribute.
                 if not realm:
-                  warn_msg = "Heuristics have failed to identify the realm attribute."
+                  warn_msg = "Failed to identify the realm attribute."
                   print(settings.print_warning_msg(warn_msg))
                 while True:
                   message = "Do you want to perform a dictionary-based attack? [Y/n] > "
@@ -237,8 +237,6 @@ def estimate_response_time(url, timesec, http_request_method):
       warn_msg = "Due to the relatively slow response of 'cmd.exe' in target "
       warn_msg += "host, there might be delays during the data extraction procedure."
       print(settings.print_warning_msg(warn_msg))
-    if settings.VERBOSITY_LEVEL != 0:
-      print(settings.SINGLE_WHITESPACE)
     url_time_response = int(round(diff))
     warn_msg = "Target's estimated response time is " + str(url_time_response)
     warn_msg += " second" + "s"[url_time_response == 1:] + ". That may cause"
@@ -650,9 +648,8 @@ Target's encoding detection
 def encoding_detection(response):
   charset_detected = False
   if settings.VERBOSITY_LEVEL != 0:
-    debug_msg = "Identifying the indicated web-page charset. "
-    sys.stdout.write(settings.print_debug_msg(debug_msg))
-    sys.stdout.flush()
+    debug_msg = "Identifying the web page charset."
+    print(settings.print_debug_msg(debug_msg))
   try:
     # Detecting charset
     try:
@@ -674,48 +671,22 @@ def encoding_detection(response):
       if len(charset) != 0 :
         charset_detected = True
     # Check the identifyied charset
-    if charset_detected :
+    if charset_detected:
       settings.DEFAULT_PAGE_ENCODING = charset
-      if settings.VERBOSITY_LEVEL != 0:
-        print(settings.SINGLE_WHITESPACE)
       if settings.DEFAULT_PAGE_ENCODING.lower() not in settings.ENCODING_LIST:
-        warn_msg = "The indicated web-page charset "  + settings.DEFAULT_PAGE_ENCODING + " seems unknown."
+        warn_msg = "The web page charset " + settings.DEFAULT_PAGE_ENCODING + " seems unknown."
         print(settings.print_warning_msg(warn_msg))
       else:
         if settings.VERBOSITY_LEVEL != 0:
-          debug_msg = "The indicated web-page charset appears to be "
-          debug_msg += settings.DEFAULT_PAGE_ENCODING + Style.RESET_ALL + "."
+          debug_msg = "The web page charset appears to be " + settings.DEFAULT_PAGE_ENCODING + "."
           print(settings.print_bold_debug_msg(debug_msg))
     else:
       pass
   except:
     pass
   if charset_detected == False and settings.VERBOSITY_LEVEL != 0:
-    print(settings.SINGLE_WHITESPACE)
-    warn_msg = "Heuristics have failed to identify indicated web-page charset."
+    warn_msg = "Failed to identify the web page charset."
     print(settings.print_warning_msg(warn_msg))
-
-"""
-Procedure for target application identification
-"""
-def technology_detection(response):
-  if settings.VERBOSITY_LEVEL != 0:
-    debug_msg = "Identifying the technology supporting the target application. "
-    sys.stdout.write(settings.print_debug_msg(debug_msg))
-    sys.stdout.flush()
-    print(settings.SINGLE_WHITESPACE)
-  try:
-    if len(response.info()[settings.X_POWERED_BY]) != 0:
-      if settings.VERBOSITY_LEVEL != 0:
-        debug_msg = "The target application is powered by "
-        debug_msg += response.info()[settings.X_POWERED_BY] + Style.RESET_ALL + "."
-        print(settings.print_bold_debug_msg(debug_msg))
-
-  except Exception as e:
-    if settings.VERBOSITY_LEVEL != 0:
-      warn_msg = "Heuristics have failed to identify the technology supporting the target application."
-      print(settings.print_warning_msg(warn_msg))
-
 
 """
 Procedure for target application identification
@@ -724,17 +695,14 @@ def application_identification(url):
   found_application_extension = False
   if settings.VERBOSITY_LEVEL != 0:
     debug_msg = "Identifying the target application."
-    sys.stdout.write(settings.print_debug_msg(debug_msg))
-    sys.stdout.flush()
+    print(settings.print_debug_msg(debug_msg))
   root, application_extension = splitext(_urllib.parse.urlparse(url).path)
   settings.TARGET_APPLICATION = application_extension[1:].upper()
 
   if settings.TARGET_APPLICATION:
     found_application_extension = True
     if settings.VERBOSITY_LEVEL != 0:
-      print(settings.SINGLE_WHITESPACE)
-      debug_msg = "The target application identified as "
-      debug_msg += settings.TARGET_APPLICATION + Style.RESET_ALL + "."
+      debug_msg = "The target application appears to be " + settings.TARGET_APPLICATION + "."
       print(settings.print_bold_debug_msg(debug_msg))
 
     # Check for unsupported target applications
@@ -746,31 +714,80 @@ def application_identification(url):
 
   if not found_application_extension:
     if settings.VERBOSITY_LEVEL != 0:
-      print(settings.SINGLE_WHITESPACE)
-      warn_msg = "Heuristics have failed to identify target application."
+      warn_msg = "Failed to identify target's application."
       print(settings.print_warning_msg(warn_msg))
 
 """
-Procedure for target server's identification.
+Underlying operating system check.
 """
-def server_identification(server_banner):
-  found_server_banner = False
-  if settings.VERBOSITY_LEVEL != 0:
-    debug_msg = "Identifying the target server. "
-    sys.stdout.write(settings.print_debug_msg(debug_msg))
-    sys.stdout.flush()
+def check_os(_):
+  if menu.options.os and checks.user_defined_os():
+    user_defined_os = settings.TARGET_OS
 
+  for i in range(0,len(settings.SERVER_OS_BANNERS)):
+    match = re.search(settings.SERVER_OS_BANNERS[i].lower(), _.lower())
+    if match:
+      if settings.VERBOSITY_LEVEL != 0:
+        debug_msg = "Identifying the underlying operating system."
+        print(settings.print_debug_msg(debug_msg))
+      settings.IDENTIFIED_TARGET_OS = True
+      settings.TARGET_OS = match.group(0)
+      match = re.search(r"microsoft|win", settings.TARGET_OS)
+      if match:
+        settings.TARGET_OS = identified_os = settings.OS.WINDOWS
+        if menu.options.os and user_defined_os != settings.OS.WINDOWS:
+          if checks.identified_os():
+            settings.TARGET_OS = user_defined_os
+          else:
+            settings.TARGET_OS = settings.OS.WINDOWS
+        if menu.options.shellshock:
+          err_msg = "The shellshock module ('--shellshock') is not available for " + identified_os + " targets."
+          print(settings.print_critical_msg(err_msg))
+          raise SystemExit()
+      else:
+        identified_os = "Unix-like (" + settings.TARGET_OS + ")"
+        if menu.options.os and user_defined_os == settings.OS.WINDOWS:
+          if checks.identified_os():
+            settings.TARGET_OS = user_defined_os
+
+  if settings.VERBOSITY_LEVEL != 0 :
+    if settings.IDENTIFIED_TARGET_OS:
+      debug_msg = "The underlying operating system appears to be " + identified_os.title() +  "."
+      print(settings.print_bold_debug_msg(debug_msg))
+
+"""
+Target application identification
+"""
+def technology_identification(response):
+  x_powered_by = response.info()[settings.X_POWERED_BY]
+  if settings.VERBOSITY_LEVEL != 0:
+    debug_msg = "Identifying the technology supporting the target application."
+    print(settings.print_debug_msg(debug_msg))
+  try:
+    if len(x_powered_by) != 0:
+      if settings.VERBOSITY_LEVEL != 0:
+        debug_msg = "The target application is powered by " + x_powered_by + "."
+        print(settings.print_bold_debug_msg(debug_msg))
+      check_os(x_powered_by)
+
+  except Exception as e:
+    if settings.VERBOSITY_LEVEL != 0:
+      warn_msg = "Failed to identify the technology supporting the target application."
+      print(settings.print_warning_msg(warn_msg))
+
+"""
+Target server's identification.
+"""
+def server_identification(response):
+  if settings.VERBOSITY_LEVEL != 0:
+    debug_msg = "Identifying the software used by target server."
+    print(settings.print_debug_msg(debug_msg))
+
+  server_banner = response.info()[settings.SERVER]
   for i in range(0,len(settings.SERVER_BANNERS)):
     match = re.search(settings.SERVER_BANNERS[i].lower(), server_banner.lower())
     if match:
-      if settings.VERBOSITY_LEVEL != 0:
-        print(settings.SINGLE_WHITESPACE)
-      if settings.VERBOSITY_LEVEL != 0:
-        debug_msg = "The target server identified as "
-        debug_msg += server_banner + Style.RESET_ALL + "."
-        print(settings.print_bold_debug_msg(debug_msg))
       settings.SERVER_BANNER = match.group(0)
-      found_server_banner = True
       # Set up default root paths
       if "apache" in settings.SERVER_BANNER.lower():
         if settings.TARGET_OS == settings.OS.WINDOWS:
@@ -782,96 +799,24 @@ def server_identification(server_banner):
       elif "microsoft-iis" in settings.SERVER_BANNER.lower():
         settings.WEB_ROOT = settings.WINDOWS_DEFAULT_DOC_ROOTS[0]
       break
-  else:
-    if settings.VERBOSITY_LEVEL != 0:
-      print(settings.SINGLE_WHITESPACE)
-      warn_msg = "The server which identified as '"
-      warn_msg += server_banner + "' seems unknown."
-      print(settings.print_warning_msg(warn_msg))
+
+  if len(server_banner) != 0 and settings.VERBOSITY_LEVEL != 0:
+    debug_msg = "The target server's software appears to be " + server_banner + "."
+    print(settings.print_bold_debug_msg(debug_msg))
+
 
 """
 Procedure for target server's operating system identification.
 """
-def check_target_os(server_banner):
-  found_os_server = False
-  if menu.options.os and checks.user_defined_os():
-    user_defined_os = settings.TARGET_OS
+def os_identification(response):
+  if not settings.IGNORE_IDENTIFIED_OS:
+    server_banner = response.info()[settings.SERVER]
+    identified_os = check_os(server_banner)
 
-  if settings.VERBOSITY_LEVEL != 0:
-    debug_msg = "Identifying The underlying operating system. "
-    sys.stdout.write(settings.print_debug_msg(debug_msg))
-    sys.stdout.flush()
-
-  # Procedure for target OS identification.
-  for i in range(0,len(settings.SERVER_OS_BANNERS)):
-    match = re.search(settings.SERVER_OS_BANNERS[i].lower(), server_banner.lower())
-    if match:
-      found_os_server = True
-      settings.TARGET_OS = match.group(0)
-      match = re.search(r"microsoft|win", settings.TARGET_OS)
-      if match:
-        identified_os = "Windows"
-        if menu.options.os and user_defined_os != "win":
-          if not checks.identified_os():
-            settings.TARGET_OS = user_defined_os
-
-        settings.TARGET_OS = identified_os[:3].lower()
-        if menu.options.shellshock:
-          if settings.VERBOSITY_LEVEL != 0:
-            print(settings.SINGLE_WHITESPACE)
-          err_msg = "The shellshock module ('--shellshock') is not available for "
-          err_msg += identified_os + " targets."
-          print(settings.print_critical_msg(err_msg))
-          raise SystemExit()
-      else:
-        identified_os = "Unix-like (" + settings.TARGET_OS + ")"
-        if menu.options.os and user_defined_os == "win":
-          if not checks.identified_os():
-            settings.TARGET_OS = user_defined_os
-
-  if settings.VERBOSITY_LEVEL != 0 :
-    if found_os_server:
-      print(settings.SINGLE_WHITESPACE)
-      debug_msg = "The underlying operating system appears to be "
-      debug_msg += identified_os.title() + Style.RESET_ALL + "."
-      print(settings.print_bold_debug_msg(debug_msg))
-    else:
-      print(settings.SINGLE_WHITESPACE)
-      warn_msg = "Heuristics have failed to identify server's operating system."
-      print(settings.print_warning_msg(warn_msg))
-
-  if found_os_server == False and not menu.options.os:
-    # If "--shellshock" option is provided then, by default is a Linux/Unix operating system.
-    if menu.options.shellshock:
-      pass
-    else:
-      if menu.options.batch:
-        if not settings.CHECK_BOTH_OS:
-          settings.CHECK_BOTH_OS = True
-          check_type = "Unix-like based"
-        elif settings.CHECK_BOTH_OS:
-          settings.TARGET_OS = settings.OS.WINDOWS
-          settings.CHECK_BOTH_OS = False
-          settings.PERFORM_BASIC_SCANS = True
-          check_type = "windows based"
-        info_msg = "Setting the " + check_type + " payloads."
-        print(settings.print_info_msg(info_msg))
-      else:
-        while True:
-          message = "Do you recognise the server's operating system? "
-          message += "[(W)indows/(U)nix-like/(q)uit] > "
-          got_os = common.read_input(message, default="", check_batch=True)
-          if got_os.lower() in settings.CHOICE_OS :
-            if got_os.lower() == "w":
-              settings.TARGET_OS = settings.OS.WINDOWS
-              break
-            elif got_os.lower() == "u":
-              break
-            elif got_os.lower() == "q":
-              raise SystemExit()
-          else:
-            common.invalid_option(got_os)
-            pass
+  if not settings.IDENTIFIED_TARGET_OS and not menu.options.os:
+    warn_msg = "Failed to identify server's underlying operating system."
+    print(settings.print_warning_msg(warn_msg))
+    checks.define_target_os()
 
 """
 Perform target page reload (if it is required).
