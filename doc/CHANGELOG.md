@@ -1,4 +1,5 @@
 ## Version 4.0 (TBA)
+* Updated: Six (third party) module has been updated (Python 3.12 support).
 * Revised: Minor improvement regarding determining (passively) the target's underlying operating system.
 * Revised: Minor improvement for enabling end-users to choose whether to skip or continue testing the remaining parameters, if one is found vulnerable.
 * Revised: Minor improvements regarding semiblind (i.e. "file-based") technique.
