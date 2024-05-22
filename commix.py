@@ -13,17 +13,18 @@ the Free Software Foundation, either version 3 of the License, or
 For more see the file 'readme/COPYING' for copying permission.
 """
 
+import sys
+
 # Dummy check for missing module(s).
 try:
   __import__("src.utils.version")
   from src.utils import version
   version.python_version()
 
-except ImportError:
-  err_msg = "Wrong installation detected (missing modules). "
-  err_msg = "Visit 'https://github.com/commixproject/commix/' for further details. \n"
-  print(settings.print_critical_msg(err_msg))
-  raise SystemExit()
+except ImportError as ex:
+  err_msg = "Wrong installation detected (i.e \"" + str(ex) + "\"). "
+  err_msg += "Visit 'https://github.com/commixproject/commix/' for further details."
+  sys.exit(err_msg)
 
 # Main
 def main():
