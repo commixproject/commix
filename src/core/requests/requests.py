@@ -117,7 +117,7 @@ def estimate_response_time(url, timesec, http_request_method):
           auth_type = auth_line.split()[0]
           # Checking for the realm attribute.
           try:
-            auth_obj = re.match('''(\w*)\s+realm=(.*)''', auth_line).groups()
+            auth_obj = re.match(r'''(\w*)\s+realm=(.*)''', auth_line).groups()
             realm = auth_obj[1].split(',')[0].replace("\"", "")
           except:
             realm = False

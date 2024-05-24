@@ -247,7 +247,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.0"
-REVISION = "53"
+REVISION = "54"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -612,8 +612,7 @@ FILE_UPLOAD = "wget "
 # /etc/passwd
 PASSWD_FILE = "/etc/passwd"
 
-SYS_USERS = "awk -F ':' '{print $1}{print $3}{print $6}' " + PASSWD_FILE
-EVAL_SYS_USERS = "awk -F ':' '{print \$1}{print \$3}{print \$6}' " + PASSWD_FILE
+SYS_USERS = EVAL_SYS_USERS  = "awk -F ':' '{print $1}{print $3}{print $6}' " + PASSWD_FILE
 
 # Exports users of localgroup
 WIN_SYS_USERS = "powershell.exe -InputFormat none write-host (([string]$(net user)[4..($(net user).length-3)]))"
@@ -623,7 +622,7 @@ DEFAULT_WIN_USERS = ["Administrator", "DefaultAccount", "Guest"]
 SHADOW_FILE = "/etc/shadow"
 SYS_PASSES = FILE_READ + SHADOW_FILE
 
-WIN_REPLACE_WHITESPACE = "-replace('\s+',' '))"
+WIN_REPLACE_WHITESPACE = r"-replace('\s+',' '))"
 
 # Accepts 'YES','YE','Y','yes','ye','y'
 CHOICE_YES = ['YES','YE','Y','yes','ye','y']
@@ -723,7 +722,7 @@ CUSTOM_HEADER_NAME = ""
 CUSTOM_HEADER_VALUE = ""
 
 # Valid URL format check
-VALID_URL_FORMAT = "https?://(?:www)?(?:[\w-]{2,255}(?:\.\w{2,6}){1,2})(?:/[\w&%?#-]{1,310})?"
+VALID_URL_FORMAT = r"https?://(?:www)?(?:[\w-]{2,255}(?:\.\w{2,6}){1,2})(?:/[\w&%?#-]{1,310})?"
 
 VALID_URL = True
 
@@ -1259,7 +1258,7 @@ SHELLSHOCK_HTTP_HEADERS =[ COOKIE, USER_AGENT, REFERER ]
 
 # Regular expression used for ignoring some special chars
 IGNORE_SPECIAL_CHAR_REGEX = "[^/()A-Za-z0-9.:,_+]"
-IGNORE_JSON_CHAR_REGEX = "[{}\"\[\]]"
+IGNORE_JSON_CHAR_REGEX = r"[{}\"\[\]]"
 
 PERFORM_CRACKING = False
 

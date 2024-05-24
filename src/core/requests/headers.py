@@ -327,7 +327,7 @@ def do_check(request):
         except _urllib.error.HTTPError as e:
           try:
             authline = e.headers.get('www-authenticate', '')
-            authobj = re.match('''(\w*)\s+realm=(.*),''',authline).groups()
+            authobj = re.match(r'''(\w*)\s+realm=(.*),''',authline).groups()
             realm = authobj[1].split(',')[0].replace("\"", "")
             user_pass_pair = menu.options.auth_cred.split(":")
             username = user_pass_pair[0]

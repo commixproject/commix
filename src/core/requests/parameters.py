@@ -183,7 +183,7 @@ def vuln_GET_param(url):
     value = ''.join(value)
     vuln_parameter = re.sub(r"/(.*)/", "", value)
 
-  elif re.search(r"" + settings.PARAMETER_DELIMITER + "(.*)=[\S*(\\/)]*" + settings.INJECT_TAG, url) or \
+  elif re.search(r"" + settings.PARAMETER_DELIMITER + r"(.*)=[\S*(\\/)]*" + settings.INJECT_TAG, url) or \
        re.search(r"\?(.*)=[\S*(\\/)]*" + settings.INJECT_TAG , url):
     pairs = url.split("?")[1].split(settings.PARAMETER_DELIMITER)
     for param in range(0,len(pairs)):
@@ -479,7 +479,7 @@ def vuln_POST_param(parameter, url):
 
   # Regular POST data format.
   else:
-    if re.search(r"" + settings.PARAMETER_DELIMITER + "(.*)=[\S*(\\/)]*" + settings.INJECT_TAG, parameter) or \
+    if re.search(r"" + settings.PARAMETER_DELIMITER + r"(.*)=[\S*(\\/)]*" + settings.INJECT_TAG, parameter) or \
        re.search(r"(.*)=[\S*(\\/)]*" + settings.INJECT_TAG , parameter):
       pairs = parameter.split(settings.PARAMETER_DELIMITER)
       for param in range(0,len(pairs)):
@@ -645,7 +645,7 @@ Specify the cookie parameter(s).
 """
 def specify_cookie_parameter(cookie):
   # Specify the vulnerable cookie parameter
-  if re.search(r"" + settings.COOKIE_DELIMITER + "(.*)=[\S*(\\/)]*" + settings.INJECT_TAG, cookie) or \
+  if re.search(r"" + settings.COOKIE_DELIMITER + r"(.*)=[\S*(\\/)]*" + settings.INJECT_TAG, cookie) or \
      re.search(r"(.*)=[\S*(\\/)]*" + settings.INJECT_TAG , cookie):
     pairs = cookie.split(settings.COOKIE_DELIMITER)
     for param in range(0,len(pairs)):

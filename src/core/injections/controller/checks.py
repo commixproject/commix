@@ -727,8 +727,8 @@ def escaped_cmd(cmd):
     cmd = cmd.replace("\\\"","\"")
   if "\'" in cmd :
     cmd = cmd.replace("\'","'")
-  if "\$" in cmd :
-    cmd = cmd.replace("\$","$")
+  if r"\$" in cmd :
+    cmd = cmd.replace(r"\$","$")
   return cmd
 
 """

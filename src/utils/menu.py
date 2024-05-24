@@ -30,11 +30,11 @@ if settings.IS_WINDOWS:
 The commix's banner.
 """
 def banner():
-  print("""                                      __
+  print(r"""                                      __
    ___   ___     ___ ___     ___ ___ /\_\   __  _
- /`___\ / __`\ /' __` __`\ /' __` __`\/\ \ /\ \/'\  """ + settings.COLOR_VERSION + """
-/\ \__//\ \/\ \/\ \/\ \/\ \/\ \/\ \/\ \ \ \\\/>  </
-\ \____\ \____/\ \_\ \_\ \_\ \_\ \_\ \_\ \_\\/\_/\\_\\ """ + Fore.GREY + Style.UNDERLINE + settings.APPLICATION_URL + Style.RESET_ALL + """
+ /`___\ / __`\ /' __` __`\ /' __` __`\/\ \ /\ \/'\  """ + settings.COLOR_VERSION + r"""
+/\ \__//\ \/\ \/\ \/\ \/\ \/\ \/\ \/\ \ \ \\/>  </
+\ \____\ \____/\ \_\ \_\ \_\ \_\ \_\ \_\ \_\/\_/\_\ """ + Fore.GREY + Style.UNDERLINE + settings.APPLICATION_URL + Style.RESET_ALL + r"""
  \/____/\/___/  \/_/\/_/\/_/\/_/\/_/\/_/\/_/\//\/_/ (""" + Fore.LIGHTRED_EX + settings.APPLICATION_TWITTER + Style.RESET_ALL + """)
 
 +--

@@ -290,7 +290,7 @@ def injection_results(response, TAG, cmd):
         shell = re.findall(r"" + "(.*)" + TAG + TAG, shell)
       # Clear junks
       shell = [tags.replace(TAG + TAG , settings.SINGLE_WHITESPACE) for tags in shell]
-      shell = [backslash.replace("\/","/") for backslash in shell]
+      shell = [backslash.replace(r"\/","/") for backslash in shell]
     except UnicodeDecodeError:
       pass
     if settings.TARGET_OS == settings.OS.WINDOWS:

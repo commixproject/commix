@@ -98,7 +98,7 @@ def check_tmp_path(url, timesec, filename, http_request_method, url_time_respons
   # Set temp path
   if settings.TARGET_OS == settings.OS.WINDOWS:
     if "microsoft-iis" in settings.SERVER_BANNER.lower():
-      settings.TMP_PATH = "C:\\Windows\TEMP\\"
+      settings.TMP_PATH = r"C:\\Windows\TEMP\\"
     else:
       settings.TMP_PATH = "%temp%\\"
   else:

@@ -231,7 +231,7 @@ Masks sensitive data in the supplied message.
 """
 def mask_sensitive_data(err_msg):
   for item in settings.SENSITIVE_OPTIONS:
-    match = re.search(r"(?i)commix.+("+str(item)+")(\s+|=)([^-]+)", err_msg)
+    match = re.search(r"(?i)commix.+(" + str(item) + r")(\s+|=)([^-]+)", err_msg)
     if match:
       err_msg = err_msg.replace(match.group(3), '*' * len(match.group(3)) + settings.SINGLE_WHITESPACE)
 
@@ -346,7 +346,7 @@ def unhandled_exception():
     err_msg += "Operating system: " + os.name + "\n"
     err_msg += "Command line: " + re.sub(r".+?\bcommix\.py\b", "commix.py", " ".join(sys.argv)) + "\n"
     err_msg = mask_sensitive_data(err_msg)
-    exc_msg = re.sub(r'".+?[/\\](\w+\.py)', "\"\g<1>", exc_msg)
+    exc_msg = re.sub(r'".+?[/\\](\w+\.py)', r"\"\g<1>", exc_msg)
     print(settings.print_critical_msg(err_msg + "\n" + exc_msg.rstrip()))
     create_github_issue(err_msg, exc_msg[:])
 
