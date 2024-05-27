@@ -28,7 +28,7 @@ space2ifs = "${IFS}"
 def tamper(payload):
   if space2ifs in settings.WHITESPACES[0] and \
   settings.EVAL_BASED_STATE != False:
-    settings.WHITESPACES[0] = "\${IFS}"
+    settings.WHITESPACES[0] = r"\${IFS}"
   if settings.TARGET_OS != settings.OS.WINDOWS:
     settings.TAMPER_SCRIPTS[__tamper__] = True
     if settings.WHITESPACES[0] == "%20":

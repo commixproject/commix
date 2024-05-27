@@ -91,7 +91,7 @@ def enumeration(url, cve, check_header, filename):
 
   if menu.options.is_root:
     checks.print_enumenation().check_privs_msg()
-    cmd = re.findall(r"" + "\$(.*)", settings.IS_ROOT)
+    cmd = re.findall(r"" + r"\$(.*)", settings.IS_ROOT)
     cmd = ''.join(cmd)
     cmd = checks.remove_parenthesis(cmd)
     shell, payload = cmd_exec(url, cmd, cve, check_header, filename)

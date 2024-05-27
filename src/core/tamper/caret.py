@@ -31,10 +31,10 @@ if not settings.TAMPER_SCRIPTS[__tamper__]:
 def tamper(payload):
   def add_caret_symbol(payload):
     settings.TAMPER_SCRIPTS[__tamper__] = True
-    if re.compile("\w+").findall(payload):
+    if re.compile(r"\w+").findall(payload):
       long_string = ""
-      if len(max(re.compile("\w+").findall(payload), key=lambda word: len(word))) >= 5000:
-        long_string = max(re.compile("\w+").findall(payload), key=lambda word: len(word))
+      if len(max(re.compile(r"\w+").findall(payload), key=lambda word: len(word))) >= 5000:
+        long_string = max(re.compile(r"\w+").findall(payload), key=lambda word: len(word))
     rep = {
             "^^": "^",
             '"^t""^o""^k""^e""^n""^s"': '"t"^"o"^"k"^"e"^"n"^"s"',

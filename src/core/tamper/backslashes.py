@@ -19,7 +19,7 @@ from src.utils import menu
 from src.utils import settings
 
 """
-About: Adds back slashes (\) between the characters of the generated payloads.
+About: Adds back slashes ("\") between the characters of the generated payloads.
 Notes: This tamper script works against Unix-like target(s).
 """
 
