@@ -129,7 +129,7 @@ def current_user(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timese
 
 
 """
-Check if the current user has excessive privileges.
+Check if the Current user is privileged.
 """
 def check_current_user_privs(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response):
   _ = False

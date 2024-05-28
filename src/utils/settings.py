@@ -247,7 +247,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.0"
-REVISION = "55"
+REVISION = "56"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -573,7 +573,7 @@ WIN_CURRENT_USER = "echo %USERNAME%"
 HOSTNAME = "hostname"
 WIN_HOSTNAME = "echo %COMPUTERNAME%"
 
-# Check if current user has excessive privileges
+# Check if Current user is privileged
 # Unix-like: root
 IS_ROOT = "echo $(id -u)"
 # Windows: admin

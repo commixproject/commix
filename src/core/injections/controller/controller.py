@@ -244,6 +244,7 @@ def filebased_command_injection_technique(url, timesec, filename, http_request_m
     if (len(menu.options.tech) == 0 or "f" in menu.options.tech):
       if fb_handler.exploitation(url, timesec, filename, http_request_method, url_time_response, injection_type, technique) != False:
         settings.FILE_BASED_STATE = settings.IDENTIFIED_COMMAND_INJECTION = True
+        checks.skip_testing(filename, url)
       else:
         settings.FILE_BASED_STATE = False
   if settings.FILE_BASED_STATE == None:
