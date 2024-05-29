@@ -141,10 +141,7 @@ def finalize(exit_loops, no_result, float_percent, injection_type, technique):
           percent = ".. (" + str(float_percent) + "%)"
       else:
         percent = ".. (" + str(float_percent) + "%)"
-
-      info_msg = "Testing the " + "(" + injection_type.split(settings.SINGLE_WHITESPACE)[0] + ") " + technique + "." + "" + percent + ""
-      sys.stdout.write("\r" + settings.print_info_msg(info_msg))
-      sys.stdout.flush()
+      checks.injection_process(injection_type, technique, percent)
       return True
     else:
       return True
@@ -178,6 +175,8 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
     info_msg += "' for command execution output. "
     print(settings.print_info_msg(info_msg))
 
+  # checks.testing_technique_title(injection_type, technique)
+
   i = 0
   # Calculate all possible combinations
   total = len(settings.WHITESPACES) * len(settings.PREFIXES) * len(settings.SEPARATORS) * len(settings.SUFFIXES)
@@ -199,21 +198,18 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
               checks.check_for_stored_tamper(payload)
               OUTPUT_TEXTFILE = TAG + ".txt"
               session_handler.notification(url, technique, injection_type)
-              if technique == "tempfile-based injection technique":
+              if technique == settings.INJECTION_TECHNIQUE.FILE_BASED:
                 #settings.LOAD_SESSION = True
                 tfb_handler.exploitation(url, timesec, filename, tmp_path, http_request_method, url_time_response)
             except TypeError:
-              err_msg = "An error occurred while accessing session file ('"
-              err_msg += settings.SESSION_FILE + "'). "
-              err_msg += "Use the '--flush-session' option."
-              print(settings.print_critical_msg(err_msg))
-              raise SystemExit()
+              checks.error_loading_session_file()
 
           if settings.RETEST == True:
             settings.RETEST = False
             from src.core.injections.results_based.techniques.classic import cb_handler
-            cb_handler.exploitation(url, timesec, filename, http_request_method, injection_type, technique)
-
+            cb_handler.exploitation(url, timesec, filename, http_request_method, injection_type=settings.INJECTION_TYPE.RESULTS_BASED_CI, technique=settings.INJECTION_TECHNIQUE.CLASSIC)
+            checks.testing_technique_title(injection_type, technique)
+              
           if not settings.LOAD_SESSION:
             i = i + 1
             # The output file for file-based injection technique.
@@ -303,9 +299,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
 
                 if len(shell) != 0 and shell[0] == TAG and not settings.VERBOSITY_LEVEL != 0:
                   percent = settings.info_msg
-                  info_msg = "Testing the " + "(" + injection_type.split(settings.SINGLE_WHITESPACE)[0] + ") " + technique + "." + "" + percent + ""
-                  sys.stdout.write("\r" + settings.print_info_msg(info_msg))
-                  sys.stdout.flush()
+                  checks.injection_process(injection_type, technique, percent)
 
                 if len(shell) == 0 :
                   raise _urllib.error.HTTPError(url, 404, 'Error', {}, None)

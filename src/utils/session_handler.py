@@ -21,6 +21,7 @@ import sqlite3
 from src.utils import menu
 from src.utils import settings
 from src.utils import common
+from src.core.injections.controller import checks
 from src.thirdparty.six.moves import input as _input
 from src.thirdparty.colorama import Fore, Back, Style, init
 
@@ -125,11 +126,7 @@ def injection_point_importation(url, technique, injection_type, separator, shell
     raise SystemExit()
 
   except sqlite3.DatabaseError as err_msg:
-    err_msg = "An error occurred while accessing session file ('"
-    err_msg += settings.SESSION_FILE + "'). "
-    err_msg += "If the problem persists use the '--flush-session' option."
-    print("\n" + settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    checks.error_loading_session_file()
 
 """
 Export successful applied techniques from session file.
@@ -420,12 +417,7 @@ def import_valid_credentials(url, authentication_type, admin_panel, username, pa
   except sqlite3.OperationalError as err_msg:
     print(settings.print_critical_msg(err_msg))
   except sqlite3.DatabaseError as err_msg:
-    err_msg = "An error occurred while accessing session file ('"
-    err_msg += settings.SESSION_FILE + "'). "
-    err_msg += "If the problem persists use the '--flush-session' option."
-    print("\n" + settings.print_critical_msg(err_msg))
-    raise SystemExit()
-
+    checks.error_loading_session_file()
 
 """
 Export valid credentials from session file.

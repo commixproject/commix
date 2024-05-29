@@ -56,18 +56,15 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
   export_injection_info = False
   how_long = 0
 
-  if settings.VERBOSITY_LEVEL != 0:
-    info_msg = "Testing the " + "(" + injection_type.split(settings.SINGLE_WHITESPACE)[0] + ") " + technique + ". "
-    print(settings.print_info_msg(info_msg))
+  checks.testing_technique_title(injection_type, technique)
+
+  # Check if defined "--url-reload" option.
+  if menu.options.url_reload == True:
+    checks.reload_url_msg(technique)
 
   # Check if defined "--maxlen" option.
   if menu.options.maxlen:
     settings.MAXLEN = maxlen = menu.options.maxlen
-
-  # Check if defined "--url-reload" option.
-  if menu.options.url_reload == True:
-    warn_msg = "The '--url-reload' option is not available in " + technique + "."
-    print(settings.print_warning_msg(warn_msg))
 
   #whitespace = checks.check_whitespaces()
   # Calculate all possible combinations
@@ -90,16 +87,13 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
               settings.FOUND_HOW_LONG = how_long
               settings.FOUND_DIFF = how_long - timesec
             except TypeError:
-              err_msg = "An error occurred while accessing session file ('"
-              err_msg += settings.SESSION_FILE + "'). "
-              err_msg += "Use the '--flush-session' option."
-              print(settings.print_critical_msg(err_msg))
-              raise SystemExit()
+              checks.error_loading_session_file()
 
           if settings.RETEST == True:
             settings.RETEST = False
             from src.core.injections.results_based.techniques.classic import cb_handler
-            cb_handler.exploitation(url, timesec, filename, http_request_method, injection_type, technique)
+            cb_handler.exploitation(url, timesec, filename, http_request_method, injection_type=settings.INJECTION_TYPE.RESULTS_BASED_CI, technique=settings.INJECTION_TECHNIQUE.CLASSIC)
+            checks.testing_technique_title(injection_type, technique)
 
           if not settings.LOAD_SESSION:
             num_of_chars = num_of_chars + 1
@@ -230,9 +224,7 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
 
                     if settings.VERBOSITY_LEVEL == 0:
                       percent = ".. (" + str(float_percent) + "%)"
-                      info_msg = "Testing the " + "(" + injection_type.split(settings.SINGLE_WHITESPACE)[0] + ") " + technique + "." + "" + percent + ""
-                      sys.stdout.write("\r" + settings.print_info_msg(info_msg))
-                      sys.stdout.flush()
+                      checks.injection_process(injection_type, technique, percent)
 
                     # Check if false positive fixation is True.
                     if false_positive_fixation:
@@ -273,25 +265,16 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                             percent = ""
                       else:
                         break
+                        
                     # False positive
                     else:
-                      if settings.VERBOSITY_LEVEL == 0:
-                        percent = ".. (" + str(float_percent) + "%)"
-                        info_msg = "Testing the " + "(" + injection_type.split(settings.SINGLE_WHITESPACE)[0] + ") " + technique + "." + "" + percent + ""
-                        sys.stdout.write("\r" + settings.print_info_msg(info_msg))
-                        sys.stdout.flush()
+                      percent = ".. (" + str(float_percent) + "%)"
+                      checks.injection_process(injection_type, technique, percent)
                       continue
                   else:
-                    if settings.VERBOSITY_LEVEL == 0:
-                      percent = ".. (" + str(float_percent) + "%)"
-                      info_msg = "Testing the " + "(" + injection_type.split(settings.SINGLE_WHITESPACE)[0] + ") " + technique + "." + "" + percent + ""
-                      sys.stdout.write("\r" + settings.print_info_msg(info_msg))
-                      sys.stdout.flush()
+                    percent = ".. (" + str(float_percent) + "%)"
+                    checks.injection_process(injection_type, technique, percent)
                     continue
-                # if settings.VERBOSITY_LEVEL == 0:
-                #   info_msg = "Testing the " + "(" + injection_type.split(settings.SINGLE_WHITESPACE)[0] + ") " + technique + "." + "" + percent + ""
-                #   sys.stdout.write("\r" + settings.print_info_msg(info_msg))
-                #   sys.stdout.flush()
 
               except (KeyboardInterrupt, SystemExit):
                 print(settings.SINGLE_WHITESPACE)
@@ -311,9 +294,7 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                   if no_result == True:
                     if settings.VERBOSITY_LEVEL == 0:
                       percent = settings.FAIL_STATUS
-                      info_msg =  "Testing the " + "(" + injection_type.split(settings.SINGLE_WHITESPACE)[0] + ") " + technique + "." + "" + percent + ""
-                      sys.stdout.write("\r" + settings.print_info_msg(info_msg))
-                      sys.stdout.flush()
+                      checks.injection_process(injection_type, technique, percent)
                     else:
                       percent = ""
                   else:
@@ -470,9 +451,7 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                       checks.no_readline_module()
                     while True:
                       if false_positive_warning:
-                        warn_msg = "Due to unexpected time delays, it is highly "
-                        warn_msg += "recommended to enable the 'reverse_tcp' option.\n"
-                        sys.stdout.write("\r" + settings.print_warning_msg(warn_msg))
+                        checks.time_delay_recommendation()
                         false_positive_warning = False
                       if not settings.READLINE_ERROR:
                         checks.tab_autocompleter()
@@ -541,8 +520,7 @@ The exploitation function.
 def exploitation(url, timesec, filename, http_request_method, url_time_response, injection_type, technique):
   # Check if attack is based on time delays.
   if not settings.TIME_RELATIVE_ATTACK :
-    warn_msg = "It is very important to not stress the network connection during usage of time-based payloads to prevent potential disruptions."
-    print(settings.print_warning_msg(warn_msg) + Style.RESET_ALL)
+    checks.time_relative_attaks_msg()
     settings.TIME_RELATIVE_ATTACK = True
 
   if url_time_response >= settings.SLOW_TARGET_RESPONSE:

@@ -51,6 +51,7 @@ The "classic" technique on result-based OS command injection.
 The "classic" injection technique handler.
 """
 def cb_injection_handler(url, timesec, filename, http_request_method, injection_type, technique):
+
   shell = False
   counter = 1
   vp_flag = True
@@ -58,12 +59,7 @@ def cb_injection_handler(url, timesec, filename, http_request_method, injection_
   is_encoded = False
   export_injection_info = False
 
-  if not settings.LOAD_SESSION:
-    info_msg = "Testing the " + "(" + injection_type.split(settings.SINGLE_WHITESPACE)[0] + ") " + technique + ". "
-    sys.stdout.write(settings.print_info_msg(info_msg))
-    sys.stdout.flush()
-    if settings.VERBOSITY_LEVEL != 0:
-      print(settings.SINGLE_WHITESPACE)
+  checks.testing_technique_title(injection_type, technique)
 
   i = 0
   # Calculate all possible combinations
@@ -84,11 +80,7 @@ def cb_injection_handler(url, timesec, filename, http_request_method, injection_
               url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response, timesec, how_long, output_length, is_vulnerable = session_handler.injection_point_exportation(url, http_request_method)
               checks.check_for_stored_tamper(payload)
             except TypeError:
-              err_msg = "An error occurred while accessing session file ('"
-              err_msg += settings.SESSION_FILE + "'). "
-              err_msg += "Use the '--flush-session' option."
-              print(settings.print_critical_msg(err_msg))
-              raise SystemExit()
+              checks.error_loading_session_file()
 
           else:
             i = i + 1
@@ -175,22 +167,10 @@ def cb_injection_handler(url, timesec, filename, http_request_method, injection_
                 float_percent = "{0:.1f}".format(round(((i*100)/(total*1.0)),2))
 
                 if shell == False:
-                  info_msg = "Testing the " + "(" + injection_type.split(settings.SINGLE_WHITESPACE)[0] + ") " + technique + "..." +  " (" + str(float_percent) + "%)"
-                  sys.stdout.write("\r" + settings.print_info_msg(info_msg))
-                  sys.stdout.flush()
+                  checks.injection_process(injection_type, technique, float_percent)
 
-                if float(float_percent) >= 99.9:
-                  if no_result == True:
-                    percent = settings.FAIL_STATUS
-                  else:
-                    percent = ".. (" + str(float_percent) + "%)"
-                elif len(shell) != 0:
-                  percent = settings.info_msg
-                else:
-                  percent = ".. (" + str(float_percent) + "%)"
-                info_msg = "Testing the " + "(" + injection_type.split(settings.SINGLE_WHITESPACE)[0] + ") " + technique + "." + "" + percent + ""
-                sys.stdout.write("\r" + settings.print_info_msg(info_msg))
-                sys.stdout.flush()
+                percent = checks.result_based_injection_percentage_calculation(float_percent, no_result, shell)
+                checks.injection_process(injection_type, technique, percent)
 
             except (KeyboardInterrupt, SystemExit):
               print(settings.SINGLE_WHITESPACE)

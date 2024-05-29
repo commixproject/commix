@@ -53,7 +53,7 @@ Check for previously stored sessions.
 def check_for_stored_sessions(url, http_request_method):
   if not menu.options.ignore_session:
     if os.path.isfile(settings.SESSION_FILE) and not settings.REQUIRED_AUTHENTICATION:
-      if not menu.options.tech:
+      if session_handler.applied_techniques(url, http_request_method):
         settings.SESSION_APPLIED_TECHNIQUES = session_handler.applied_techniques(url, http_request_method)
         menu.options.tech = settings.SESSION_APPLIED_TECHNIQUES
       if session_handler.check_stored_parameter(url, http_request_method):
@@ -135,6 +135,7 @@ def command_injection_heuristic_basic(url, http_request_method, check_parameter,
             info_msg = "Heuristic (basic) tests shows that "
             info_msg += settings.CHECKING_PARAMETER + " might be injectable (possible OS: '" + possible_os + "')."
             print(settings.print_bold_info_msg(info_msg))
+            settings.SKIP_CODE_INJECTIONS = True
             break
 
     settings.CLASSIC_STATE = False
@@ -149,8 +150,8 @@ Heuristic (basic) tests for code injection warnings
 """
 def code_injections_heuristic_basic(url, http_request_method, check_parameter, the_type, header_name, inject_http_headers):
   check_parameter = check_parameter.lstrip().rstrip()
-  injection_type = "results-based dynamic code evaluation"
-  technique = "dynamic code evaluation technique"
+  injection_type = settings.INJECTION_TYPE.RESULTS_BASED_CE
+  technique = settings.INJECTION_TECHNIQUE.DYNAMIC_CODE
   technique = "(" + injection_type.split(settings.SINGLE_WHITESPACE)[0] + ") " + technique + ""
   settings.EVAL_BASED_STATE = True
   try:
@@ -185,8 +186,8 @@ def code_injections_heuristic_basic(url, http_request_method, check_parameter, t
 Check if it's exploitable via classic command injection technique.
 """
 def classic_command_injection_technique(url, timesec, filename, http_request_method):
-  injection_type = "results-based OS command injection"
-  technique = "classic command injection technique"
+  injection_type = settings.INJECTION_TYPE.RESULTS_BASED_CI
+  technique = settings.INJECTION_TECHNIQUE.CLASSIC
   settings.CLASSIC_STATE = None
   if not settings.SKIP_COMMAND_INJECTIONS:
     if (len(menu.options.tech) == 0 or "c" in menu.options.tech):
@@ -195,33 +196,33 @@ def classic_command_injection_technique(url, timesec, filename, http_request_met
         checks.skip_testing(filename, url)
       else:
         settings.CLASSIC_STATE = False
-  if settings.CLASSIC_STATE == None:
+  if settings.CLASSIC_STATE == None or settings.SKIP_COMMAND_INJECTIONS:
     checks.skipping_technique(technique, injection_type, settings.CLASSIC_STATE)
 
 """
 Check if it's exploitable via dynamic code evaluation technique.
 """
 def dynamic_code_evaluation_technique(url, timesec, filename, http_request_method):
-  injection_type = "results-based dynamic code evaluation"
-  technique = "dynamic code evaluation technique"
+  injection_type = settings.INJECTION_TYPE.RESULTS_BASED_CE
+  technique = settings.INJECTION_TECHNIQUE.DYNAMIC_CODE
   settings.EVAL_BASED_STATE = None
   if not settings.SKIP_CODE_INJECTIONS:
-    if (len(menu.options.tech) == 0 or "e" in menu.options.tech) or settings.SKIP_COMMAND_INJECTIONS:
+    if (len(menu.options.tech) == 0 or "e" in menu.options.tech):
       if eb_handler.exploitation(url, timesec, filename, http_request_method, injection_type, technique) != False:
         settings.EVAL_BASED_STATE = True
         if not settings.IDENTIFIED_WARNINGS and not settings.IDENTIFIED_PHPINFO:
           checks.skip_testing(filename, url)
       else:
         settings.EVAL_BASED_STATE = False
-  if settings.EVAL_BASED_STATE == None:
+  if settings.EVAL_BASED_STATE == None or not settings.SKIP_CODE_INJECTIONS:
     checks.skipping_technique(technique, injection_type, settings.EVAL_BASED_STATE)
 
 """
 Check if it's exploitable via time-based command injection technique.
 """
 def timebased_command_injection_technique(url, timesec, filename, http_request_method, url_time_response):
-  injection_type = "blind OS command injection"
-  technique = "time-based command injection technique"
+  injection_type = settings.INJECTION_TYPE.BLIND
+  technique = settings.INJECTION_TECHNIQUE.TIME_BASED
   settings.TIME_BASED_STATE = None
   if not settings.SKIP_COMMAND_INJECTIONS:
     if (len(menu.options.tech) == 0 or "t" in menu.options.tech):
@@ -230,15 +231,15 @@ def timebased_command_injection_technique(url, timesec, filename, http_request_m
         checks.skip_testing(filename, url)
       else:
         settings.TIME_BASED_STATE = False
-  if settings.TIME_BASED_STATE == None:
+  if settings.TIME_BASED_STATE == None or settings.SKIP_COMMAND_INJECTIONS:
     checks.skipping_technique(technique, injection_type, settings.TIME_BASED_STATE)
 
 """
 Check if it's exploitable via file-based command injection technique.
 """
 def filebased_command_injection_technique(url, timesec, filename, http_request_method, url_time_response):
-  injection_type = "semi-blind command injection"
-  technique = "file-based command injection technique"
+  injection_type = settings.INJECTION_TYPE.SEMI_BLIND
+  technique = settings.INJECTION_TECHNIQUE.FILE_BASED
   settings.FILE_BASED_STATE = None
   if not settings.SKIP_COMMAND_INJECTIONS:
     if (len(menu.options.tech) == 0 or "f" in menu.options.tech):
@@ -247,7 +248,7 @@ def filebased_command_injection_technique(url, timesec, filename, http_request_m
         checks.skip_testing(filename, url)
       else:
         settings.FILE_BASED_STATE = False
-  if settings.FILE_BASED_STATE == None:
+  if settings.FILE_BASED_STATE == None or settings.SKIP_COMMAND_INJECTIONS:
     checks.skipping_technique(technique, injection_type, settings.FILE_BASED_STATE)
 
 """
@@ -358,14 +359,10 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
           if checks.procced_with_file_based_technique():
             menu.options.tech = "f"
 
-      if settings.SKIP_COMMAND_INJECTIONS:
-        dynamic_code_evaluation_technique(url, timesec, filename, http_request_method)
-      else:
-        classic_command_injection_technique(url, timesec, filename, http_request_method)
-        if not settings.IDENTIFIED_COMMAND_INJECTION:
-          dynamic_code_evaluation_technique(url, timesec, filename, http_request_method)
-        timebased_command_injection_technique(url, timesec, filename, http_request_method, url_time_response)
-        filebased_command_injection_technique(url, timesec, filename, http_request_method, url_time_response)
+      classic_command_injection_technique(url, timesec, filename, http_request_method)
+      dynamic_code_evaluation_technique(url, timesec, filename, http_request_method)
+      timebased_command_injection_technique(url, timesec, filename, http_request_method, url_time_response)
+      filebased_command_injection_technique(url, timesec, filename, http_request_method, url_time_response)
 
       # All injection techniques seems to be failed!
       if checks.injection_techniques_status() == False:

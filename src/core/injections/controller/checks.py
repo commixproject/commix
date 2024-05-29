@@ -61,6 +61,8 @@ def exit():
     print(settings.execution("Ending"))
   os._exit(0)
 
+
+
 """
 Detection of WAF/IPS protection.
 """
@@ -390,6 +392,38 @@ def save_cmd_history():
   except (IOError, AttributeError) as e:
     warn_msg = "There was a problem writing the history file '" + cli_history + "'."
     print(settings.print_warning_msg(warn_msg))
+
+"""
+Testing technique (title)
+"""
+def testing_technique_title(injection_type, technique):
+  if settings.VERBOSITY_LEVEL != 0:
+    info_msg = "Testing the " + "(" + injection_type.split(settings.SINGLE_WHITESPACE)[0] + ") " + technique + ". "
+    print(settings.print_info_msg(info_msg))
+
+"""
+Injection process (percent)
+"""
+def injection_process(injection_type, technique, percent):
+ if settings.VERBOSITY_LEVEL == 0:
+  info_msg = "Testing the " + "(" + injection_type.split(settings.SINGLE_WHITESPACE)[0] + ") " + technique + "." + "" + percent + ""
+  sys.stdout.write("\r" + settings.print_info_msg(info_msg))
+  sys.stdout.flush()
+
+"""
+Percentage calculation
+"""
+def result_based_injection_percentage_calculation(float_percent, no_result, shell):
+  if float(float_percent) >= 99.9 or str(float_percent) == "100.0":
+    if no_result == True:
+      percent = settings.FAIL_STATUS
+    else:
+      percent = ".. (" + str(float_percent) + "%)"
+  elif len(shell) != 0:
+    percent = settings.info_msg
+  else:
+    percent = ".. (" + str(float_percent) + "%)"
+  return percent
 
 """
 Load commands from history.
@@ -1124,6 +1158,38 @@ def http_auth_err_msg():
   err_msg += " and continue tests without providing valid credentials."
   print(settings.print_critical_msg(err_msg))
   raise SystemExit()
+
+"""
+Error while accessing session file
+"""
+def error_loading_session_file():
+  err_msg = "An error occurred while accessing session file ('"
+  err_msg += settings.SESSION_FILE + "'). "
+  err_msg += "Use the '--flush-session' option."
+  print(settings.print_critical_msg(err_msg))
+  raise SystemExit()
+
+"""
+Message regarding unexpected time delays
+"""
+def time_delay_recommendation():
+  warn_msg = "Due to unexpected time delays, it is highly "
+  warn_msg += "recommended to enable the 'reverse_tcp' option.\n"
+  sys.stdout.write("\r" + settings.print_warning_msg(warn_msg))
+
+"""
+Message regarding time relative attcks
+"""
+def time_relative_attaks_msg():
+  warn_msg = "It is very important to not stress the network connection during usage of time-based payloads to prevent potential disruptions."
+  print(settings.print_warning_msg(warn_msg) + Style.RESET_ALL)
+
+"""
+Check if defined "--url-reload" option.
+"""
+def reload_url_msg(technique):
+  warn_msg = "On " + technique + "technique, the '--url-reload' option is not available."
+  print(settings.print_warning_msg(warn_msg))
 
 """
 Decision if the user-defined HTTP authenticatiob type,

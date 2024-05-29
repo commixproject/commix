@@ -247,7 +247,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.0"
-REVISION = "56"
+REVISION = "57"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -644,6 +644,22 @@ AVAILABLE_SHELLS = ["python"]
 
 # Available injection techniques.
 AVAILABLE_TECHNIQUES = ['c','e','t','f']
+
+# Supported injection types
+class INJECTION_TYPE(object):
+  RESULTS_BASED_CI = "results-based OS command injection"
+  RESULTS_BASED_CE = "results-based dynamic code evaluation"
+  BLIND = "blind OS command injection"
+  SEMI_BLIND = "semi-blind OS command injection"
+
+# Supported injection techniques
+class INJECTION_TECHNIQUE(object):
+  CLASSIC = "classic command injection technique"
+  DYNAMIC_CODE = "dynamic code evaluation technique"
+  TIME_BASED = "time-based command injection technique"
+  FILE_BASED = "file-based command injection technique"
+  TEMP_FILE_BASED = "tempfile-based injection technique"
+
 USER_SUPPLIED_TECHNIQUE = False
 SKIP_TECHNIQUES = False
 
