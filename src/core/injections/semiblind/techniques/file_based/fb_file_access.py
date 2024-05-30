@@ -17,12 +17,13 @@ import re
 import os
 import sys
 from src.utils import menu
+from src.utils import common
 from src.utils import settings
 from src.utils import session_handler
 from src.core.injections.controller import checks
 from src.thirdparty.six.moves import urllib as _urllib
 from src.thirdparty.colorama import Fore, Back, Style, init
-from src.core.injections.semiblind.techniques.file_based import fb_injector
+from src.core.injections.semiblind.techniques.file_based import fb_handler
 
 """
 The "file-based" technique on semiblind OS command injection.
@@ -101,5 +102,31 @@ def do_check(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_
   if menu.options.file_read:
     file_read(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
     settings.FILE_ACCESS_DONE = True
+
+"""
+Check stored session
+"""
+def stored_session(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
+  if settings.FILE_ACCESS_DONE == True :
+    while True:
+      message = "Do you want to ignore stored session and access files again? [y/N] > "
+      file_access_again = common.read_input(message, default="N", check_batch=True)
+      if file_access_again in settings.CHOICE_YES:
+        if not menu.options.ignore_session:
+          menu.options.ignore_session = True
+        do_check(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+        break
+      elif file_access_again in settings.CHOICE_NO:
+        break
+      elif file_access_again in settings.CHOICE_QUIT:
+        # Delete previous shell (text) files (output)
+        fb_handler.delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+        raise SystemExit()
+      else:
+        common.invalid_option(enumerate_again)
+        pass
+  else:
+    if menu.file_access_options():
+      do_check(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
 
 # eof

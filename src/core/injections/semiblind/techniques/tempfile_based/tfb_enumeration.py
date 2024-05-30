@@ -17,6 +17,7 @@ import re
 import sys
 from src.utils import logs
 from src.utils import menu
+from src.utils import common
 from src.utils import settings
 from src.utils import session_handler
 from src.core.injections.controller import checks
@@ -268,5 +269,31 @@ def do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, h
       checks.print_enumenation().print_passes_msg()
       system_passwords(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
     reset()
+
+"""
+Check stored session
+"""
+def stored_session(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response):
+  if settings.ENUMERATION_DONE == True :
+    while True:
+      message = "Do you want to ignore stored session and enumerate again? [y/N] > "
+      enumerate_again = common.read_input(message, default="N", check_batch=True)
+      if enumerate_again in settings.CHOICE_YES:
+        if not menu.options.ignore_session:
+          menu.options.ignore_session = True
+        do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
+        break
+      elif enumerate_again in settings.CHOICE_NO:
+        break
+      elif enumerate_again in settings.CHOICE_QUIT:
+        # Delete previous shell (text) files (output) from temp.
+        tfb_injector.delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+        raise SystemExit()
+      else:
+        common.invalid_option(enumerate_again)
+        pass
+  else:
+    if menu.enumeration_options():
+      do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
 
 # eof

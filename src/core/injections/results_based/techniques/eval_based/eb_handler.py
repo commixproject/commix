@@ -293,27 +293,10 @@ def eb_injection_handler(url, timesec, filename, http_request_method, injection_
               if menu.enumeration_options():
                 eb_enumeration.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec)
 
+            # Check for any enumeration options.
+            eb_enumeration.stored_session(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec)
             # Check for any system file access options.
-            if settings.FILE_ACCESS_DONE == True:
-              while True:
-                message = "Do you want to ignore stored session and access files again? [y/N] > "
-                file_access_again = common.read_input(message, default="N", check_batch=True)
-                if file_access_again in settings.CHOICE_YES:
-                  if not menu.options.ignore_session:
-                    menu.options.ignore_session = True
-                  eb_file_access.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec)
-                  break
-                elif file_access_again in settings.CHOICE_NO:
-                  break
-                elif file_access_again in settings.CHOICE_QUIT:
-                  raise SystemExit()
-                else:
-                  common.invalid_option(file_access_again)
-                  pass
-            else:
-              if menu.file_access_options():
-                eb_file_access.do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec)
-
+            eb_file_access.stored_session(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec)
             # Check if defined single cmd.
             if menu.options.os_cmd:
               eb_enumeration.single_os_cmd_exec(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec)

@@ -384,47 +384,9 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                 settings.LOAD_SESSION = False
 
               # Check for any enumeration options.
-              if settings.ENUMERATION_DONE == True:
-                while True:
-                  message = "Do you want to ignore stored session and enumerate again? [y/N] > "
-                  enumerate_again = common.read_input(message, default="N", check_batch=True)
-                  if enumerate_again in settings.CHOICE_YES:
-                    if not menu.options.ignore_session:
-                      menu.options.ignore_session = True
-                    tb_enumeration.do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
-                    break
-                  elif enumerate_again in settings.CHOICE_NO:
-                    break
-                  elif enumerate_again in settings.CHOICE_QUIT:
-                    raise SystemExit()
-                  else:
-                    common.invalid_option(enumerate_again)
-                    pass
-              else:
-                if menu.enumeration_options():
-                  tb_enumeration.do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
-
+              tb_enumeration.stored_session(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
               # Check for any system file access options.
-              if settings.FILE_ACCESS_DONE == True:
-                while True:
-                  message = "Do you want to ignore stored session and access files again? [y/N] > "
-                  file_access_again = common.read_input(message, default="N", check_batch=True)
-                  if file_access_again in settings.CHOICE_YES:
-                    if not menu.options.ignore_session:
-                      menu.options.ignore_session = True
-                    tb_file_access.do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
-                    break
-                  elif file_access_again in settings.CHOICE_NO:
-                    break
-                  elif file_access_again in settings.CHOICE_QUIT:
-                    raise SystemExit()
-                  else:
-                    common.invalid_option(file_access_again)
-                    pass
-              else:
-                if menu.file_access_options():
-                  tb_file_access.do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
-
+              tb_file_access.stored_session(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
               # Check if defined single cmd.
               if menu.options.os_cmd:
                 cmd = menu.options.os_cmd

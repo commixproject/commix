@@ -17,6 +17,7 @@ import re
 import os
 import sys
 from src.utils import menu
+from src.utils import common
 from src.utils import settings
 from src.utils import session_handler
 from src.core.injections.controller import checks
@@ -116,4 +117,28 @@ def do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, h
     if settings.FILE_ACCESS_DONE == False:
       settings.FILE_ACCESS_DONE = True
 
+"""
+Check stored session
+"""
+def stored_session(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response):
+  if settings.FILE_ACCESS_DONE == True:
+    while True:
+      message = "Do you want to ignore stored session and access files again? [y/N] > "
+      file_access_again = common.read_input(message, default="N", check_batch=True)
+      if file_access_again in settings.CHOICE_YES:
+        if not menu.options.ignore_session:
+          menu.options.ignore_session = True
+        do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
+        break
+      elif file_access_again in settings.CHOICE_NO:
+        break
+      elif file_access_again in settings.CHOICE_QUIT:
+        raise SystemExit()
+      else:
+        common.invalid_option(file_access_again)
+        pass
+  else:
+    if menu.file_access_options():
+      do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response)
+      
 # eof

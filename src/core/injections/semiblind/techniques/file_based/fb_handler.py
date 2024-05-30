@@ -468,56 +468,11 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
             else:
               whitespace = settings.WHITESPACES[0]
               settings.LOAD_SESSION = False
-
             # Check for any enumeration options.
-            new_line = True
-            if settings.ENUMERATION_DONE == True :
-              while True:
-                message = "Do you want to ignore stored session and enumerate again? [y/N] > "
-                enumerate_again = common.read_input(message, default="N", check_batch=True)
-                if enumerate_again in settings.CHOICE_YES:
-                  if not menu.options.ignore_session:
-                    menu.options.ignore_session = True
-                  fb_enumeration.do_check(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-                  break
-                elif enumerate_again in settings.CHOICE_NO:
-                  new_line = False
-                  break
-                elif file_access_again in settings.CHOICE_QUIT:
-                  # Delete previous shell (text) files (output)
-                  delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-                  raise SystemExit()
-                else:
-                  common.invalid_option(enumerate_again)
-                  pass
-            else:
-              if menu.enumeration_options():
-                fb_enumeration.do_check(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-
+            fb_enumeration.stored_session(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
             # Check for any system file access options.
-            if settings.FILE_ACCESS_DONE == True :
-              while True:
-                message = "Do you want to ignore stored session and access files again? [y/N] > "
-                file_access_again = common.read_input(message, default="N", check_batch=True)
-                if file_access_again in settings.CHOICE_YES:
-                  if not menu.options.ignore_session:
-                    menu.options.ignore_session = True
-                  fb_file_access.do_check(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-                  break
-                elif file_access_again in settings.CHOICE_NO:
-                  break
-                elif file_access_again in settings.CHOICE_QUIT:
-                  # Delete previous shell (text) files (output)
-                  delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-                  raise SystemExit()
-                else:
-                  common.invalid_option(enumerate_again)
-                  pass
-            else:
-              if menu.file_access_options():
-                fb_file_access.do_check(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-
-            # Check if defined single cmd.
+            fb_file_access.stored_session(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+             # Check if defined single cmd.
             if menu.options.os_cmd:
               fb_enumeration.single_os_cmd_exec(separator, payload, TAG, timesec, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
               # Delete previous shell (text) files (output)

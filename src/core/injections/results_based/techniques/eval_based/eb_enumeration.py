@@ -17,6 +17,7 @@ import re
 import sys
 from src.utils import logs
 from src.utils import menu
+from src.utils import common
 from src.utils import settings
 from src.utils import session_handler
 from src.core.injections.controller import checks
@@ -300,4 +301,31 @@ def do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, ur
       system_passwords(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec)
     settings.ENUMERATION_DONE = True
 
+"""
+Check stored session
+"""
+def stored_session(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec):
+  # Check for any enumeration options.
+  new_line = True
+  if settings.ENUMERATION_DONE == True :
+    while True:
+      message = "Do you want to ignore stored session and enumerate again? [y/N] > "
+      enumerate_again = common.read_input(message, default="N", check_batch=True)
+      if enumerate_again in settings.CHOICE_YES:
+        if not menu.options.ignore_session:
+          menu.options.ignore_session = True
+        do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec)
+        break
+      elif enumerate_again in settings.CHOICE_NO:
+        new_line = False
+        break
+      elif enumerate_again in settings.CHOICE_QUIT:
+        raise SystemExit()
+      else:
+        common.invalid_option(enumerate_again)
+        pass
+  else:
+    if menu.enumeration_options():
+      do_check(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, timesec)
+      
 # eof
