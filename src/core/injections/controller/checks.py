@@ -2653,4 +2653,70 @@ def define_py_working_dir():
         pass
     settings.USER_DEFINED_PYTHON_DIR = True
 
+"""
+Checks for identified vulnerable parameter
+"""
+def identified_vulnerable_param(url, technique, injection_type, vuln_parameter, payload, http_request_method, filename, export_injection_info, vp_flag, counter):
+  # Check injection state
+  settings.DETECTION_PHASE = False
+  settings.EXPLOITATION_PHASE = True
+  if settings.COOKIE_INJECTION == True:
+    header_name = settings.SINGLE_WHITESPACE + settings.COOKIE
+    found_vuln_parameter = vuln_parameter
+    the_type = " parameter"
+
+  elif settings.USER_AGENT_INJECTION == True:
+    header_name = settings.SINGLE_WHITESPACE + settings.USER_AGENT
+    found_vuln_parameter = ""
+    the_type = " HTTP header"
+
+  elif settings.REFERER_INJECTION == True:
+    header_name = settings.SINGLE_WHITESPACE + settings.REFERER
+    found_vuln_parameter = ""
+    the_type = " HTTP header"
+
+  elif settings.HOST_INJECTION == True:
+    header_name = settings.SINGLE_WHITESPACE + settings.HOST
+    found_vuln_parameter = ""
+    the_type = " HTTP header"
+
+  elif settings.CUSTOM_HEADER_INJECTION == True:
+    header_name = settings.SINGLE_WHITESPACE + settings.CUSTOM_HEADER_NAME
+    found_vuln_parameter = ""
+    the_type = " HTTP header"
+
+  else:
+    header_name = ""
+    the_type = " parameter"
+    # Check if defined POST data
+    if not settings.USER_DEFINED_POST_DATA or settings.IGNORE_USER_DEFINED_POST_DATA:
+      found_vuln_parameter = parameters.vuln_GET_param(url)
+    else :
+      found_vuln_parameter = vuln_parameter
+
+  if len(found_vuln_parameter) != 0 :
+    found_vuln_parameter = " '" +  found_vuln_parameter + Style.RESET_ALL  + Style.BRIGHT + "'"
+
+  # Print the findings to log file.
+  if export_injection_info == False:
+    export_injection_info = logs.add_type_and_technique(export_injection_info, filename, injection_type, technique)
+  if vp_flag == True:
+    vp_flag = logs.add_parameter(vp_flag, filename, the_type, header_name, http_request_method, vuln_parameter, payload)
+  logs.update_payload(filename, counter, payload)
+  counter = counter + 1
+
+  if not settings.LOAD_SESSION:
+    if settings.VERBOSITY_LEVEL == 0:
+      print(settings.SINGLE_WHITESPACE)
+    else:
+      total_of_requests()
+
+  # Print the findings to terminal.
+  info_msg = settings.CHECKING_PARAMETER + " appears to be injectable via "
+  info_msg += "(" + injection_type.split(settings.SINGLE_WHITESPACE)[0] + ") " + technique + "."
+  print(settings.print_bold_info_msg(info_msg))
+  sub_content = str(url_decode(payload))
+  print(settings.print_sub_content(sub_content))
+
+
 # eof
