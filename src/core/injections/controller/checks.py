@@ -1179,6 +1179,40 @@ def time_delay_recommendation():
   sys.stdout.write("\r" + settings.print_warning_msg(warn_msg))
 
 """
+Message regarding unexpected time delays due to unstable requests
+"""
+def time_delay_due_to_unstable_request(timesec):
+  message = "Unexpected time delays have been identified due to unstable "
+  message += "requests. This behavior may lead to false-positive results. "
+  sys.stdout.write("\r")
+  while True:
+    message = message + "How do you want to proceed? [(C)ontinue/(s)kip/(q)uit] > "
+    proceed_option = common.read_input(message, default="C", check_batch=True)
+    if proceed_option.lower() in settings.CHOICE_PROCEED :
+      if proceed_option.lower() == "c":
+        timesec = timesec + 1
+        false_positive_fixation = True
+        return timesec, false_positive_fixation 
+      elif proceed_option.lower() == "s":
+        false_positive_fixation = False
+        return timesec, false_positive_fixation
+      elif proceed_option.lower() == "q":
+        raise SystemExit()
+    else:
+      common.invalid_option(proceed_option)
+      pass
+
+"""
+"""
+def time_relative_shell(url_time_response, how_long, timesec):
+  if (url_time_response == 0 and (how_long - timesec) >= 0) or \
+     (url_time_response != 0 and (how_long - timesec) == 0 and (how_long == timesec)) or \
+     (url_time_response != 0 and (how_long - timesec) > 0 and (how_long >= timesec + 1)):
+    return True
+  else:
+    return False
+
+"""
 Message regarding time relative attcks
 """
 def time_relative_attaks_msg():

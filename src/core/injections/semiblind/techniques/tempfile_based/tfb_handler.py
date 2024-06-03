@@ -198,9 +198,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                   else:
                     percent = ""
                 else:
-                  if (url_time_response == 0 and (how_long - timesec) >= 0) or \
-                     (url_time_response != 0 and (how_long - timesec) == 0 and (how_long == timesec)) or \
-                     (url_time_response != 0 and (how_long - timesec) > 0 and (how_long >= timesec + 1)) :
+                  if checks.time_relative_shell(url_time_response, how_long, timesec):
 
                     # Time relative false positive fixation.
                     false_positive_fixation = False
@@ -220,25 +218,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
 
                     # Identified false positive warning message.
                     if false_positive_warning:
-                      message = "Unexpected time delays have been identified due to unstable "
-                      message += "requests. This behavior may lead to false-positive results. "
-                      sys.stdout.write("\r")
-                      while True:
-                        message = message + "How do you want to proceed? [(C)ontinue/(s)kip/(q)uit] > "
-                        proceed_option = common.read_input(message, default="C", check_batch=True)
-                        if proceed_option.lower() in settings.CHOICE_PROCEED :
-                          if proceed_option.lower() == "s":
-                            false_positive_fixation = False
-                            raise
-                          elif proceed_option.lower() == "c":
-                            timesec = timesec + 1
-                            false_positive_fixation = True
-                            break
-                          elif proceed_option.lower() == "q":
-                            raise SystemExit()
-                        else:
-                          common.invalid_option(proceed_option)
-                          pass
+                      timesec, false_positive_fixation = checks.time_delay_due_to_unstable_request(timesec)
 
                     if settings.VERBOSITY_LEVEL == 0:
                       percent = ".. (" + str(float_percent) + "%)"
@@ -270,10 +250,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                       # Check for false positive resutls
                       how_long, output = tfb_injector.false_positive_check(separator, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, randvcalc, alter_shell, how_long, url_time_response, false_positive_warning)
 
-                      if (url_time_response == 0 and (how_long - timesec) >= 0) or \
-                         (url_time_response != 0 and (how_long - timesec) == 0 and (how_long == timesec)) or \
-                         (url_time_response != 0 and (how_long - timesec) > 0 and (how_long >= timesec + 1)) :
-
+                      if checks.time_relative_shell(url_time_response, how_long, timesec):
                         if str(output) == str(randvcalc) and len(TAG) == output_length:
                           possibly_vulnerable = True
                           how_long_statistic = 0
@@ -335,9 +312,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
 
           # Yaw, got shellz!
           # Do some magic tricks!
-          if (url_time_response == 0 and (how_long - timesec) >= 0) or \
-             (url_time_response != 0 and (how_long - timesec) == 0 and (how_long == timesec)) or \
-             (url_time_response != 0 and (how_long - timesec) > 0 and (how_long >= timesec + 1)) :
+          if checks.time_relative_shell(url_time_response, how_long, timesec):
 
             if (len(TAG) == output_length) and \
                (possibly_vulnerable == True or settings.LOAD_SESSION and int(is_vulnerable) == menu.options.level):

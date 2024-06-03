@@ -43,7 +43,7 @@ The "file-based" technique on semiblind OS command injection.
 """
 
 """
-Check ff temp-based technique has failed,
+Check if file-based technique has failed,
 then use the "/tmp/" directory for tempfile-based technique.
 """
 def tfb_controller(no_result, url, timesec, filename, tmp_path, http_request_method, url_time_response):
