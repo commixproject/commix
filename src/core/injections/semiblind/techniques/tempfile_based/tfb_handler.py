@@ -34,7 +34,7 @@ from src.thirdparty.six.moves import input as _input
 from src.thirdparty.six.moves import urllib as _urllib
 from src.core.injections.controller import shell_options
 from src.thirdparty.colorama import Fore, Back, Style, init
-from src.core.injections.semiblind.techniques.file_based import fb_injector
+from src.core.injections.semiblind.techniques.file_based import fb_handler
 from src.core.injections.semiblind.techniques.tempfile_based import tfb_injector
 from src.core.injections.semiblind.techniques.tempfile_based import tfb_payloads
 from src.core.injections.semiblind.techniques.tempfile_based import tfb_enumeration
@@ -48,15 +48,8 @@ __Warning:__ This technique is still experimental, is not yet fully functional a
 """
 Delete previous shells outputs.
 """
-def delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
-  if settings.VERBOSITY_LEVEL != 0:
-    debug_msg = "Cleaning up the target operating system (i.e. deleting file '" + OUTPUT_TEXTFILE + "')."
-    print(settings.print_debug_msg(debug_msg))
-  if settings.TARGET_OS == settings.OS.WINDOWS:
-    cmd = settings.WIN_DEL + OUTPUT_TEXTFILE
-  else:
-    cmd = settings.DEL + OUTPUT_TEXTFILE + settings.SINGLE_WHITESPACE + settings.COMMENT
-  response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+def delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
+  fb_handler.delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
 
 """
 The "tempfile-based" injection technique handler
@@ -277,7 +270,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                 if 'cmd' in locals():
                   # Delete previous shell (text) files (output) from temp.
                   # print(settings.SINGLE_WHITESPACE)
-                  delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+                  delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
                 raise
 
               except EOFError:
@@ -287,7 +280,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                 print(settings.print_error_msg(err_msg))
                 if 'cmd' in locals():
                   # Delete previous shell (text) files (output) from temp.
-                  delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+                  delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
                 raise
 
               except:
@@ -329,7 +322,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                 settings.LOAD_SESSION = False
 
               # Delete previous shell (text) files (output) from temp.
-              delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+              delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
               if settings.TARGET_OS == settings.OS.WINDOWS:
                 time.sleep(1)
 
@@ -343,7 +336,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                 check_how_long, output = tfb_enumeration.single_os_cmd_exec(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
                 # Export injection result
                 if len(output) > 1:
-                  delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+                  delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
 
               # Pseudo-Terminal shell
               try:
@@ -374,7 +367,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                       if cmd.lower() in settings.SHELL_OPTIONS:
                         if cmd.lower() == "quit" or cmd.lower() == "exit":
                           # Delete previous shell (text) files (output) from temp.
-                          delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+                          delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
                           raise SystemExit()
                         go_back, go_back_again = shell_options.check_option(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, technique, go_back, no_result, timesec, go_back_again, payload, OUTPUT_TEXTFILE="")
                         if go_back and go_back_again == False:
@@ -404,11 +397,11 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                         return False
                       else:
                         # Delete previous shell (text) files (output) from temp.
-                        delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+                        delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
                         return True
                   elif gotshell in settings.CHOICE_QUIT:
                     # Delete previous shell (text) files (output) from temp.
-                    delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+                    delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
                     raise SystemExit()
                   else:
                     common.invalid_option(gotshell)
@@ -416,7 +409,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
 
               except (KeyboardInterrupt, SystemExit):
                 # Delete previous shell (text) files (output) from temp.
-                delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+                delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
                 sys.stdout.write("\r")
                 raise
 
@@ -426,7 +419,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                 err_msg = "Exiting, due to EOFError."
                 print(settings.print_error_msg(err_msg))
                 # Delete previous shell (text) files (output) from temp.
-                delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+                delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
                 sys.stdout.write("\r")
                 raise
 

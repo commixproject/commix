@@ -287,7 +287,7 @@ def stored_session(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, time
         break
       elif enumerate_again in settings.CHOICE_QUIT:
         # Delete previous shell (text) files (output) from temp.
-        tfb_injector.delete_previous_shell(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+        tfb_injector.delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
         raise SystemExit()
       else:
         common.invalid_option(enumerate_again)

