@@ -95,13 +95,28 @@ def custom_web_root(url, timesec, filename, http_request_method, url_time_respon
     settings.WEB_ROOT = common.read_input(message, default=default_root_dir, check_batch=True)
     if len(settings.WEB_ROOT) == 0:
       settings.WEB_ROOT = default_root_dir
-    menu.options.web_root = settings.WEB_ROOT.strip()
     settings.CUSTOM_WEB_ROOT = True
+
+  if not settings.LOAD_SESSION:
+    if settings.VERBOSITY_LEVEL != 0:
+      debug_msg = "Using '" + settings.WEB_ROOT + "' for writable directory."
+      print(settings.print_debug_msg(debug_msg))
+    info_msg = "Trying to create a file in directory '" + settings.WEB_ROOT
+    info_msg += "' for command execution output. "
+    print(settings.print_info_msg(info_msg))
+
+  menu.options.web_root = settings.WEB_ROOT.strip()
 
 """
 Return TEMP path for win / *nix targets.
 """
 def check_tmp_path(url, timesec, filename, http_request_method, url_time_response):
+  def check_trailing_slashes():
+    if settings.TARGET_OS == settings.OS.WINDOWS and not menu.options.web_root.endswith("\\"):
+      menu.options.web_root = settings.WEB_ROOT = menu.options.web_root + "\\"
+    elif not menu.options.web_root.endswith("/"):
+      menu.options.web_root = settings.WEB_ROOT = menu.options.web_root + "/"
+
   # Set temp path
   if settings.TARGET_OS == settings.OS.WINDOWS:
     if "microsoft-iis" in settings.SERVER_BANNER.lower():
@@ -116,17 +131,13 @@ def check_tmp_path(url, timesec, filename, http_request_method, url_time_respons
   else:
     tmp_path = settings.TMP_PATH
 
-  if settings.DEFAULT_WEB_ROOT != settings.WEB_ROOT:
+  if not settings.LOAD_SESSION and settings.DEFAULT_WEB_ROOT != settings.WEB_ROOT:
     settings.WEB_ROOT = settings.DEFAULT_WEB_ROOT
 
   if menu.options.file_dest and '/tmp/' in menu.options.file_dest:
     call_tmp_based = True
 
   if menu.options.web_root:
-    if settings.TARGET_OS == settings.OS.WINDOWS and not menu.options.web_root.endswith("\\"):
-      menu.options.web_root = menu.options.web_root + "\\"
-    elif not menu.options.web_root.endswith("/"):
-      menu.options.web_root = menu.options.web_root + "/"
     settings.WEB_ROOT = menu.options.web_root
   else:
     # Provide custom server's root directory.
@@ -134,6 +145,8 @@ def check_tmp_path(url, timesec, filename, http_request_method, url_time_respons
 
   if settings.TARGET_OS == settings.OS.WINDOWS:
     settings.WEB_ROOT = settings.WEB_ROOT.replace("/","\\")
+
+  check_trailing_slashes()
 
   return tmp_path
 
@@ -171,18 +184,9 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
   next_attack_vector = False
   export_injection_info = False
 
-  tmp_path = check_tmp_path(url, timesec, filename, http_request_method, url_time_response)
-
-  if not settings.LOAD_SESSION or settings.RETEST == True:
+  if not settings.LOAD_SESSION:
+    tmp_path = check_tmp_path(url, timesec, filename, http_request_method, url_time_response)
     TAG = ''.join(random.choice(string.ascii_uppercase) for i in range(6))
-    if settings.VERBOSITY_LEVEL != 0:
-      debug_msg = "Using '" + settings.WEB_ROOT + "' for writable directory."
-      print(settings.print_debug_msg(debug_msg))
-    info_msg = "Trying to create a file in directory '" + settings.WEB_ROOT
-    info_msg += "' for command execution output. "
-    print(settings.print_info_msg(info_msg))
-
-  # checks.testing_technique_title(injection_type, technique)
 
   i = 0
   # Calculate all possible combinations
@@ -204,9 +208,13 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
               url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response, timesec, how_long, output_length, is_vulnerable = session_handler.injection_point_exportation(url, http_request_method)
               checks.check_for_stored_tamper(payload)
               OUTPUT_TEXTFILE = TAG + ".txt"
+              if re.findall(settings.DIRECTORY_REGEX,payload):
+                filepath = re.findall(settings.DIRECTORY_REGEX,payload)[0]
+                settings.WEB_ROOT = os.path.dirname(filepath)
+                settings.CUSTOM_WEB_ROOT = True
+              tmp_path = check_tmp_path(url, timesec, filename, http_request_method, url_time_response)
               session_handler.notification(url, technique, injection_type)
-              if technique == settings.INJECTION_TECHNIQUE.FILE_BASED:
-                #settings.LOAD_SESSION = True
+              if technique == settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED:
                 tfb_handler.exploitation(url, timesec, filename, tmp_path, http_request_method, url_time_response)
             except TypeError:
               checks.error_loading_session_file()

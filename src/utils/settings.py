@@ -247,7 +247,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.0"
-REVISION = "61"
+REVISION = "62"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -982,6 +982,8 @@ HEX_RECOGNITION_REGEX = r'^(0[xX])?[0-9a-fA-F]+$'
 
 # GET parameters recognition
 GET_PARAMETERS_REGEX = r"(.*?)\?(.+)"
+
+DIRECTORY_REGEX = r'(?:/[^/]+)+?/\w+\.\w+'
 
 # TFB Decimal
 TFB_DECIMAL = False
