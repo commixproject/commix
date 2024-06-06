@@ -107,7 +107,7 @@ def store_crawling(output_href):
     message += "(for eventual further processing with other tools)? [y/N] > "
     message = common.read_input(message, default="N", check_batch=True)
     if message in settings.CHOICE_YES:
-      filename = tempfile.mkstemp(suffix=".txt")[1]
+      filename = tempfile.mkstemp(suffix=settings.OUTPUT_FILE_EXT)[1]
       info_msg = "Writing crawling results to a temporary file '" + str(filename) + "'."
       print(settings.print_info_msg(info_msg))
       with open(filename, "a") as crawling_results:

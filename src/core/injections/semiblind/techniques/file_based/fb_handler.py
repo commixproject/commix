@@ -207,7 +207,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
               settings.FILE_BASED_STATE = True
               url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response, timesec, how_long, output_length, is_vulnerable = session_handler.injection_point_exportation(url, http_request_method)
               checks.check_for_stored_tamper(payload)
-              OUTPUT_TEXTFILE = TAG + ".txt"
+              OUTPUT_TEXTFILE = TAG + settings.OUTPUT_FILE_EXT
               if re.findall(settings.DIRECTORY_REGEX,payload):
                 filepath = re.findall(settings.DIRECTORY_REGEX,payload)[0]
                 settings.WEB_ROOT = os.path.dirname(filepath)
@@ -228,7 +228,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
           if not settings.LOAD_SESSION:
             i = i + 1
             # The output file for file-based injection technique.
-            OUTPUT_TEXTFILE = TAG + ".txt"
+            OUTPUT_TEXTFILE = TAG + settings.OUTPUT_FILE_EXT
             # Check for bad combination of prefix and separator
             combination = prefix + separator
             if combination in settings.JUNK_COMBINATION:

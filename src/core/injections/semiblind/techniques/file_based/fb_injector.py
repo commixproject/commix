@@ -261,7 +261,7 @@ def injection_output(url, OUTPUT_TEXTFILE, timesec):
         count = count - 1
         last_param = path_parts[count]
         output = url.replace(last_param, OUTPUT_TEXTFILE)
-        if "?" and ".txt" in output:
+        if "?" and settings.OUTPUT_FILE_EXT in output:
           try:
             output = output.split("?")[0]
           except:

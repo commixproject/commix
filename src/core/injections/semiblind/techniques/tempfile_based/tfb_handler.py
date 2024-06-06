@@ -105,7 +105,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
               checks.check_for_stored_tamper(payload)
               settings.FOUND_HOW_LONG = how_long
               settings.FOUND_DIFF = how_long - timesec
-              OUTPUT_TEXTFILE = tmp_path + TAG + ".txt"
+              OUTPUT_TEXTFILE = tmp_path + TAG + settings.OUTPUT_FILE_EXT
             except TypeError:
               checks.error_loading_session_file()
 
@@ -117,7 +117,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
               prefix = ""
 
             # The output file for file-based injection technique.
-            OUTPUT_TEXTFILE = tmp_path + TAG + ".txt"
+            OUTPUT_TEXTFILE = tmp_path + TAG + settings.OUTPUT_FILE_EXT
             alter_shell = menu.options.alter_shell
             tag_length = len(TAG) + 4
 
