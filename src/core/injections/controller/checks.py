@@ -2667,6 +2667,17 @@ def check_wrong_flags():
       print(settings.print_warning_msg(warn_msg))
 
 """
+Set writable path name
+"""
+def setting_writable_dir(path):
+    if settings.VERBOSITY_LEVEL != 0:
+      debug_msg = "Using '" + path + "' for writable directory."
+      print(settings.print_debug_msg(debug_msg))
+    info_msg = "Trying to create a file in directory '" + path
+    info_msg += "' for command execution output. "
+    print(settings.print_info_msg(info_msg))
+
+"""
 Define python working dir (for windows targets)
 """
 def define_py_working_dir():

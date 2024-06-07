@@ -547,7 +547,6 @@ def main(filename, url, http_request_method):
     # Retrieve everything from the supported enumeration options.
     if menu.options.enum_all:
       checks.enable_all_enumeration_options()
-
     controller.do_check(url, http_request_method, filename)
     return filename
 

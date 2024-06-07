@@ -252,6 +252,7 @@ def filebased_command_injection_technique(url, timesec, filename, http_request_m
     checks.skipping_technique(technique, injection_type, settings.FILE_BASED_STATE)
 
 """
+Check parameter in HTTP header.
 """
 def check_parameter_in_http_header(check_parameter):
   inject_http_headers = False
@@ -591,7 +592,6 @@ def post_request(url, http_request_method, filename, timesec):
     found_parameter_list = []
     found_parameter_list.append(found_parameter)
     found_parameter = found_parameter_list
-
 
   if settings.IS_JSON or settings.IS_XML:
     # Remove junk data

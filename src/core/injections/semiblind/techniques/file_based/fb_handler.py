@@ -48,12 +48,8 @@ then use the "/tmp/" directory for tempfile-based technique.
 """
 def tfb_controller(no_result, url, timesec, filename, tmp_path, http_request_method, url_time_response):
   if no_result == True:
-    if settings.VERBOSITY_LEVEL != 0:
-      debug_msg = "Using '" + tmp_path + "' for temporary writable directory."
-      print(settings.print_debug_msg(debug_msg))
-    info_msg = "Trying to create a file in temporary "
-    info_msg += "directory ('" + tmp_path + "') for command execution output.\n"
-    sys.stdout.write(settings.print_info_msg(info_msg))
+    path = tmp_path
+    checks.setting_writable_dir(path)
     call_tfb = tfb_handler.exploitation(url, timesec, filename, tmp_path, http_request_method, url_time_response)
     return call_tfb
   else :
@@ -98,13 +94,8 @@ def custom_web_root(url, timesec, filename, http_request_method, url_time_respon
     settings.CUSTOM_WEB_ROOT = True
 
   if not settings.LOAD_SESSION:
-    if settings.VERBOSITY_LEVEL != 0:
-      debug_msg = "Using '" + settings.WEB_ROOT + "' for writable directory."
-      print(settings.print_debug_msg(debug_msg))
-    info_msg = "Trying to create a file in directory '" + settings.WEB_ROOT
-    info_msg += "' for command execution output. "
-    print(settings.print_info_msg(info_msg))
-
+    path = settings.WEB_ROOT
+    checks.setting_writable_dir(path)
   menu.options.web_root = settings.WEB_ROOT.strip()
 
 """
@@ -375,13 +366,13 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                       raise
 
                 elif str(e.getcode()) == settings.UNAUTHORIZED_ERROR:
-                  err_msg = "Authorization required!"
-                  print(settings.print_critical_msg(err_msg) + "\n")
+                  err_msg = "Authorization is required to access this page: '" + settings.DEFINED_WEBROOT + "'."
+                  print(settings.print_critical_msg(err_msg))
                   raise SystemExit()
 
                 elif str(e.getcode()) == settings.FORBIDDEN_ERROR:
-                  err_msg = "You don't have permission to access this page."
-                  print(settings.print_critical_msg(err_msg) + "\n")
+                  err_msg = "You don't have access to this page: '" + settings.DEFINED_WEBROOT + "'."
+                  print(settings.print_critical_msg(err_msg))
                   raise SystemExit()
 
             except (KeyboardInterrupt, SystemExit):
