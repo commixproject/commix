@@ -126,13 +126,13 @@ def store_crawling(output_href):
 """
 Check for URLs in sitemap.xml.
 """
-def sitemap(url):
+def sitemap(url, http_request_method):
   try:
     if not url.endswith(".xml"):
       if not url.endswith("/"):
         url = url + "/"
-      url = _urllib.parse.urljoin(url, "sitemap.xml")
-    response = request(url)
+      url = _urllib.parse.urljoin(url, settings.SITEMAP_XML_FILE)
+    response = request(url, http_request_method)
     content = checks.page_encoding(response, action="decode")
     for match in re.finditer(r"<loc>\s*([^<]+)", content or ""):
       url = match.group(1).strip()
@@ -145,7 +145,7 @@ def sitemap(url):
           message = "Do you want to follow? [Y/n] > "
           message = common.read_input(message, default="Y", check_batch=True)
           if message in settings.CHOICE_YES:
-            sitemap(url)
+            sitemap(url, http_request_method)
             break
           elif message in settings.CHOICE_NO:
             break
@@ -179,8 +179,8 @@ def store_hrefs(href, identified_hrefs, redirection):
 """
 Do a request to target URL.
 """
-def request(url):
-  return requests.crawler_request(url)
+def request(url, http_request_method):
+  return requests.crawler_request(url, http_request_method)
 
 """
 Enable crawler.
@@ -236,13 +236,13 @@ def no_usable_links(crawled_hrefs):
 """
 The crawing process.
 """
-def do_process(url):
+def do_process(url, http_request_method):
   identified_hrefs = False
   if settings.CRAWLED_SKIPPED_URLS_NUM == 0 or settings.CRAWLED_URLS_NUM != 0:
     sys.stdout.write("\r")
   # Grab the crawled hrefs.
   try:
-    response = request(url)
+    response = request(url, http_request_method)
     content = checks.page_encoding(response, action="decode")
     match = re.search(r"(?si)<html[^>]*>(.+)</html>", content)
     if match:
@@ -282,24 +282,24 @@ def do_process(url):
 """
 The main crawler.
 """
-def crawler(url, url_num, crawling_list):
+def crawler(url, url_num, crawling_list, http_request_method):
   init_global_vars()
   if crawling_list > 1:
     _ = " (" + str(url_num) + "/" + str(crawling_list) + ")"
   else:
     _ = ""
-  info_msg = "Starting crawler for target URL '" + url + "'" + _ + "."
-  print(settings.print_info_msg(info_msg))
-  response = request(url)
+  response = request(url, http_request_method)
   if type(response) is not bool and response is not None:
     if settings.SITEMAP_CHECK:
       enable_crawler()
     if settings.SITEMAP_CHECK is None:
       check_sitemap()
     if settings.SITEMAP_CHECK:
-      output_href = sitemap(url)
+      output_href = sitemap(url, http_request_method)
     if not settings.SITEMAP_CHECK or (settings.SITEMAP_CHECK and output_href is None):
-      output_href = do_process(url)
+      info_msg = "Starting crawler for target URL '" + url + "'" + _ + "."
+      print(settings.print_info_msg(info_msg))
+      output_href = do_process(url, http_request_method)
       if settings.MULTI_TARGETS and settings.DEFAULT_CRAWLING_DEPTH != 1:
         settings.DEFAULT_CRAWLING_DEPTH = 1
       while settings.DEFAULT_CRAWLING_DEPTH <= int(menu.options.crawldepth):
@@ -323,7 +323,7 @@ def crawler(url, url_num, crawling_list):
               if settings.SINGLE_WHITESPACE in url:
                 url = url.replace(settings.SINGLE_WHITESPACE, _urllib.parse.quote_plus(settings.SINGLE_WHITESPACE))
               visited_hrefs.append(url)
-              do_process(url)
+              do_process(url, http_request_method)
               info_msg = str(link)
               info_msg += "/" + str(len(output_href)) + " links visited."
               sys.stdout.write("\r" + settings.print_info_msg(info_msg))

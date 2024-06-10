@@ -43,12 +43,14 @@ from src.thirdparty.colorama import Fore, Back, Style, init
 """
 Do a request to target URL.
 """
-def crawler_request(url):
+def crawler_request(url, http_request_method):
   try:
-    if menu.options.data:
-      request = _urllib.request.Request(url, menu.options.data.encode(settings.DEFAULT_CODEC), method=http_request_method)
+    # Check if defined POST data
+    if settings.USER_DEFINED_POST_DATA:
+      data = settings.USER_DEFINED_POST_DATA.encode(settings.DEFAULT_CODEC)
     else:
-      request = _urllib.request.Request(url, method=http_request_method)
+      data = None
+    request = _urllib.request.Request(url, data, method=http_request_method)
     headers.do_check(request)
     headers.check_http_traffic(request)
     if menu.options.proxy or menu.options.ignore_proxy or menu.options.tor: 
@@ -65,7 +67,12 @@ def crawler_request(url):
     if url not in settings.HREF_SKIPPED:
       settings.HREF_SKIPPED.append(url)
       settings.CRAWLED_SKIPPED_URLS_NUM += 1
-      request_failed(err_msg)
+      if settings.SITEMAP_XML_FILE in url and settings.NOT_FOUND_ERROR in str(err_msg):
+        warn_msg = "'" + settings.SITEMAP_XML_FILE + "' not found."
+        print(settings.print_warning_msg(warn_msg))
+      else:
+        request_failed(err_msg)
+
 
 """
 Estimating the response time (in seconds).

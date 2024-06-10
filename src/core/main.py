@@ -874,7 +874,7 @@ try:
     else:
       url = menu.options.url
 
-    if menu.options.data:
+    if menu.options.data and not settings.CRAWLING:
       settings.USER_DEFINED_POST_DATA = menu.options.data
       # Check if defined character used for splitting parameter values.
       if menu.options.pdel and menu.options.pdel in settings.USER_DEFINED_POST_DATA:
@@ -884,8 +884,8 @@ try:
       if menu.options.pdel and menu.options.pdel in url:
         settings.PARAMETER_DELIMITER = menu.options.pdel
 
+    http_request_method  = checks.check_http_method(url)
     if not settings.STDIN_PARSING and not menu.options.bulkfile and not settings.CRAWLING:
-      http_request_method  = checks.check_http_method(url)
       if os_checks_num == 0:
         settings.INIT_TEST = True
       response, url = url_response(url, http_request_method)
@@ -926,14 +926,14 @@ try:
         url_num = 1
         if not menu.options.bulkfile and not settings.STDIN_PARSING:
           crawling_list = 1
-          output_href = crawler.crawler(url, url_num, crawling_list)
+          output_href = crawler.crawler(url, url_num, crawling_list, http_request_method)
           output_href.append(url)
         else:
           if settings.STDIN_PARSING:
             bulkfile = stdin_parsing_target(os_checks_num)
           crawling_list = len(bulkfile)
           for url in bulkfile:
-            output_href += (crawler.crawler(url, url_num, crawling_list))
+            output_href += (crawler.crawler(url, url_num, crawling_list, http_request_method))
             url_num += 1
           output_href = output_href + bulkfile
           output_href = [x for x in output_href if x not in settings.HREF_SKIPPED]
@@ -990,7 +990,7 @@ try:
             url_num += 1
             perform_check = True
             while True:
-              print(settings.print_message("[" + str(url_num) + "/" + str(len(clean_output_href)) + "] URL - " + url))
+              print(settings.print_message("[" + str(url_num) + "/" + str(len(clean_output_href)) + "] URL - " + http_request_method + " " + url))
               message = "Do you want to use URL #" + str(url_num) + " to perform tests? [Y/n] > "
               next_url = common.read_input(message, default="Y", check_batch=True)
               if next_url in settings.CHOICE_YES:
@@ -1024,7 +1024,7 @@ try:
                 pass
           else:
             url_num += 1
-            print(settings.print_message("[" + str(url_num) + "/" + str(len(clean_output_href)) + "] Skipping URL - " + url))
+            print(settings.print_message("[" + str(url_num) + "/" + str(len(clean_output_href)) + "] Skipping URL - " + http_request_method + " " + url))
 
         if url_num == len(clean_output_href):
           raise SystemExit()

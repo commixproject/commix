@@ -282,9 +282,11 @@ def alert():
 Check for HTTP Method
 """
 def check_http_method(url):
-  if menu.options.method:
+  if settings.CRAWLING:
+    http_request_method = settings.HTTPMETHOD.GET
+  elif menu.options.method:
     http_request_method = menu.options.method.upper()
-  elif settings.INJECT_TAG in url:
+  elif isinstance(url, str) and settings.INJECT_TAG in url:
     http_request_method = settings.HTTPMETHOD.GET
   else:
     if settings.USER_DEFINED_POST_DATA:
