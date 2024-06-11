@@ -172,17 +172,11 @@ def eb_injection_handler(url, timesec, filename, http_request_method, injection_
               if settings.URL_RELOAD:
                 response = requests.url_reload(url, timesec)
               # Evaluate test results.
-              shell = eb_injector.injection_test_results(response, TAG, randvcalc)
               time.sleep(timesec)
-
+              shell = eb_injector.injection_test_results(response, TAG, randvcalc)
               if settings.VERBOSITY_LEVEL == 0:
-                percent = ((i*100)/total)
-                float_percent = "{0:.1f}".format(round(((i*100)/(total * 1.0)),2))
-
-                if shell == False:
-                  checks.injection_process(injection_type, technique, float_percent)
-
-                percent = checks.result_based_injection_percentage_calculation(float_percent, no_result, shell)
+                percent, float_percent = checks.percentage_calculation(i, total)
+                percent = checks.print_percentage(float_percent, no_result, shell)
                 checks.injection_process(injection_type, technique, percent)
 
             except (KeyboardInterrupt, SystemExit):

@@ -69,6 +69,23 @@ def shellshock_exploitation(cve, cmd):
   return payload
 
 """
+Print percentage calculation
+"""
+def print_percentage(no_result, response_info, cve, float_percent):
+  if float(float_percent) == 100:
+    if no_result == True:
+      percent = settings.FAIL_STATUS
+    else:
+      percent = settings.info_msg
+      no_result = False
+  elif len(response_info) > 0 and cve in response_info:
+    percent = settings.info_msg
+    no_result = False
+  else:
+    percent = str(float_percent)+ "%"
+  return percent, no_result
+
+"""
 Enumeration Options
 """
 def enumeration(url, cve, check_header, filename):
@@ -320,22 +337,8 @@ def shellshock_handler(url, http_request_method, filename):
         if check_header == settings.USER_AGENT:
           menu.options.agent = default_user_agent  
 
-        percent = ((i*100)/total)
-        float_percent = "{0:.1f}".format(round(((i*100)/(total*1.0)),2))
-
-        if str(float_percent) == "100.0":
-          if no_result == True:
-            percent = settings.FAIL_STATUS
-          else:
-            percent = settings.info_msg
-            no_result = False
-
-        elif len(response_info) > 0 and cve in response_info:
-          percent = settings.info_msg
-          no_result = False
-
-        else:
-          percent = str(float_percent)+ "%"
+        percent, float_percent = checks.percentage_calculation(i, total)
+        percent, no_result = print_percentage(no_result, response_info, cve, float_percent)
 
         if settings.VERBOSITY_LEVEL == 0:
           info_msg = "Testing the " + technique + "." + "" + percent + ""

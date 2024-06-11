@@ -182,8 +182,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                 how_long_statistic.append(how_long)
 
                 # Injection percentage calculation
-                percent = ((num_of_chars * 100) / total)
-                float_percent = "{0:.1f}".format(round(((num_of_chars*100)/(total*1.0)),2))
+                percent, float_percent = checks.percentage_calculation(num_of_chars, total)
 
                 if percent == 100 and no_result == True:
                   if settings.VERBOSITY_LEVEL == 0:
@@ -192,7 +191,6 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                     percent = ""
                 else:
                   if checks.time_relative_shell(url_time_response, how_long, timesec):
-
                     # Time relative false positive fixation.
                     false_positive_fixation = False
                     if len(TAG) == output_length:

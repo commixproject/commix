@@ -408,21 +408,29 @@ def testing_technique_title(injection_type, technique):
 Injection process (percent)
 """
 def injection_process(injection_type, technique, percent):
- if settings.VERBOSITY_LEVEL == 0:
-  info_msg = "Testing the " + "(" + injection_type.split(settings.SINGLE_WHITESPACE)[0] + ") " + technique + "." + "" + percent + ""
-  sys.stdout.write("\r" + settings.print_info_msg(info_msg))
-  sys.stdout.flush()
+  if settings.VERBOSITY_LEVEL == 0:
+    info_msg = "Testing the " + "(" + injection_type.split(settings.SINGLE_WHITESPACE)[0] + ") " + technique + "." + "" + percent + ""
+    sys.stdout.write("\r" + settings.print_info_msg(info_msg))
+    sys.stdout.flush()
 
 """
 Percentage calculation
 """
-def result_based_injection_percentage_calculation(float_percent, no_result, shell):
-  if float(float_percent) >= 99.9 or str(float_percent) == "100.0":
-    if no_result == True:
+def percentage_calculation(i, total):
+  percent = ((i*100)/total)
+  float_percent = "{0:.1f}".format(round(((i*100)/(total*1.0)),2))
+  return percent, float_percent
+
+"""
+Print percentage calculation
+"""
+def print_percentage(float_percent, no_result, shell):
+  if float(float_percent) == 100:
+    if no_result:
       percent = settings.FAIL_STATUS
     else:
       percent = ".. (" + str(float_percent) + "%)"
-  elif len(shell) != 0:
+  elif shell:
     percent = settings.info_msg
   else:
     percent = ".. (" + str(float_percent) + "%)"

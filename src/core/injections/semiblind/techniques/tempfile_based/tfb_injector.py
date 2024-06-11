@@ -329,12 +329,11 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
         if injection_check == True:
           if settings.VERBOSITY_LEVEL == 0:
             output.append(chr(ascii_char))
-            percent = ((num_of_chars*100)/output_length)
-            float_percent = str("{0:.1f}".format(round(((num_of_chars * 100)/(output_length * 1.0)),2))) + "%"
+            percent, float_percent = checks.percentage_calculation(num_of_chars, output_length)
             if percent == 100:
               float_percent = settings.info_msg
             else:
-              float_percent = ".. (" + str(float_percent) + ")"
+              float_percent = ".. (" + str(float_percent) + "%)"
             info_msg = "Retrieving the execution output (via '" + OUTPUT_TEXTFILE +"')."
             info_msg += float_percent
             sys.stdout.write("\r" + settings.print_info_msg(info_msg))

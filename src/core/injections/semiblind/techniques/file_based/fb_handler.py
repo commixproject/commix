@@ -142,16 +142,10 @@ def check_tmp_path(url, timesec, filename, http_request_method, url_time_respons
   return tmp_path
 
 
-def finalize(exit_loops, no_result, float_percent, injection_type, technique):
+def finalize(exit_loops, no_result, float_percent, injection_type, technique, shell):
   if exit_loops == False:
     if settings.VERBOSITY_LEVEL == 0:
-      if str(float_percent) == "100.0":
-        if no_result == True:
-          percent = settings.FAIL_STATUS
-        else:
-          percent = ".. (" + str(float_percent) + "%)"
-      else:
-        percent = ".. (" + str(float_percent) + "%)"
+      percent = checks.print_percentage(float_percent, no_result, shell)
       checks.injection_process(injection_type, technique, percent)
       return True
     else:
@@ -312,8 +306,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
 
               except _urllib.error.HTTPError as e:
                 if str(e.getcode()) == settings.NOT_FOUND_ERROR:
-                  percent = ((i*100)/total)
-                  float_percent = "{0:.1f}".format(round(((i*100)/(total*1.0)),2))
+                  percent, float_percent = checks.percentage_calculation(i, total)
 
                   if call_tmp_based == True:
                     exit_loops = True
@@ -325,7 +318,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                   # Use the "/tmp/" directory for tempfile-based technique.
                   elif (i == int(menu.options.failed_tries) and no_result == True) or (i == total):
                     if i == total:
-                      if finalize(exit_loops, no_result, float_percent, injection_type, technique):
+                      if finalize(exit_loops, no_result, float_percent, injection_type, technique, shell):
                         continue
                       else:
                         raise
@@ -360,7 +353,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                     continue
 
                   else:
-                    if finalize(exit_loops, no_result, float_percent, injection_type, technique):
+                    if finalize(exit_loops, no_result, float_percent, injection_type, technique, shell):
                       continue
                     else:
                       raise

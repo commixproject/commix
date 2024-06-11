@@ -171,8 +171,7 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                 how_long_statistic.append(how_long)
 
                 # Injection percentage calculation
-                percent = ((num_of_chars * 100) / total)
-                float_percent = "{0:.1f}".format(round(((num_of_chars*100)/(total * 1.0)),2))
+                percent, float_percent = checks.percentage_calculation(num_of_chars, total)
 
                 if percent == 100 and no_result == True:
                   if settings.VERBOSITY_LEVEL == 0:
