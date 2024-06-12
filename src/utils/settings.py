@@ -247,7 +247,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.0"
-REVISION = "66"
+REVISION = "67"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -258,9 +258,9 @@ else:
   COLOR_VERSION = Style.UNDERLINE + Fore.WHITE + VERSION + Style.RESET_ALL
 
 YEAR = "2014-2024"
-AUTHOR_TWITTER = "@ancst"
+AUTHOR_X_ACCOUNT = "@ancst"
 APPLICATION_URL = "https://commixproject.com"
-APPLICATION_TWITTER = "@commixproject"
+APPLICATION_Χ_ACCOUNT = "@commixproject"
 
 # Default User-Agent
 DEFAULT_USER_AGENT = APPLICATION + "/" + VERSION + " (" + APPLICATION_URL + ")"

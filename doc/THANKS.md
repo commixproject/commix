@@ -4,7 +4,7 @@
 ## List of individual donors:
 * Thanks John Brinton for a donation.
 * Thanks [Himself132](https://github.com/Himself132) for a donation.
-* Thanks [m3g9tr0n](https://twitter.com/m3g9tr0n) for a donation.
+* Thanks [m3g9tr0n](https://x.com/m3g9tr0n) for a donation.
 
 ## List of individual contributors:
 * Thanks [anonymousdouble](https://github.com/anonymousdouble) for contributing code.
