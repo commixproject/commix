@@ -35,7 +35,7 @@ def banner():
  /`___\ / __`\ /' __` __`\ /' __` __`\/\ \ /\ \/'\  """ + settings.COLOR_VERSION + r"""
 /\ \__//\ \/\ \/\ \/\ \/\ \/\ \/\ \/\ \ \ \\/>  </
 \ \____\ \____/\ \_\ \_\ \_\ \_\ \_\ \_\ \_\/\_/\_\ """ + Fore.GREY + Style.UNDERLINE + settings.APPLICATION_URL + Style.RESET_ALL + r"""
- \/____/\/___/  \/_/\/_/\/_/\/_/\/_/\/_/\/_/\//\/_/ (""" + Fore.LIGHTRED_EX + settings.APPLICATION_Χ_ACCOUNT + Style.RESET_ALL + """)
+ \/____/\/___/  \/_/\/_/\/_/\/_/\/_/\/_/\/_/\//\/_/ (""" + Fore.LIGHTRED_EX + settings.APPLICATION_X_ACCOUNT + Style.RESET_ALL + """)
 
 +--
 """ + Style.BRIGHT + settings.DESCRIPTION_FULL + Style.RESET_ALL + """

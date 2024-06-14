@@ -209,7 +209,7 @@ def create_github_issue(err_msg, exc_msg):
   data = {"title": str(bug_report), "body": "```" + str(err_msg) + "\n```\n```\n" + str(exc_msg) + "```"}
   request = _urllib.request.Request(url = "https://api.github.com/repos/commixproject/commix/issues",
                                 data = json.dumps(data).encode(),
-                                headers = {"Authorization": "token " + base64.b64decode(settings.GITHUB_REPORT_OAUTH_TOKEN.encode(settings.DEFAULT_CODEC)).decode()}
+                                headers = {settings.AUTHORIZATION: "token " + base64.b64decode(settings.GITHUB_REPORT_OAUTH_TOKEN.encode(settings.DEFAULT_CODEC)).decode()}
                                 )
   try:
     content = _urllib.request.urlopen(request, timeout=settings.TIMEOUT).read()

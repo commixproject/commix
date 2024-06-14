@@ -84,13 +84,13 @@ def logfile_parser():
       request_lines = request.split("\n")
       while c < len(request_lines) and len(request_lines[c]) > 0:
         x = request_lines[c].find(':')
-        header_name = request_lines[c][:x]
+        header_name = request_lines[c][:x].title()
         header_value = request_lines[c][x + 1:]
         if menu.options.header:
           request_headers.append(menu.options.header)
         elif menu.options.headers:
           request_headers.extend(menu.options.headers.split("\\n"))
-        request_headers.append(header_name + ": " + header_value)
+        request_headers.append(header_name + ":" + header_value)
         c += 1
       c += 1  
       menu.options.data = "".join(request_lines[c:] if c < len(request_lines) else "")
@@ -114,9 +114,7 @@ def logfile_parser():
   else:
     http_method = settings.HTTP_METHOD
 
-  if "\\n" in request:
-    request = request.replace("\\n","\n")
-  request_url = re.findall(r"" + " (.*) HTTP/", request)
+  request_url = re.findall(r"" + " (.*)" + " HTTP/", request)
 
   if not request_url:
     invalid_data(request_file)
@@ -125,22 +123,23 @@ def logfile_parser():
   # Check for other headers
   extra_headers = ""
   scheme = "http://"
-  for line in request.splitlines():
-    if re.findall(r"" + settings.HOST + ": " + "(.*)", line):
-      menu.options.host = "".join([str(i) for i in re.findall(r"Host: " + "(.*)", line)])
+
+  for line in request_headers:
+    if re.findall(r"" + settings.HOST + ":" + " (.*)", line):
+      menu.options.host = "".join([str(i) for i in re.findall(r"" + settings.HOST + ":" + " (.*)", line)])
     # User-Agent Header
-    if re.findall(r"" + settings.USER_AGENT + ": " + "(.*)", line):
-      menu.options.agent = "".join([str(i) for i in re.findall(r"User-Agent: " + "(.*)", line)])
+    if re.findall(r"" + settings.USER_AGENT + ":" + " (.*)", line):
+      menu.options.agent = "".join([str(i) for i in re.findall(r"" + settings.USER_AGENT + ":" + " (.*)", line)])
     # Cookie Header
-    if re.findall(r"" + settings.COOKIE + ": " + "(.*)", line):
-      menu.options.cookie = "".join([str(i) for i in re.findall(r"Cookie: " + "(.*)", line)])
+    if re.findall(r"" + settings.COOKIE + ":" + " (.*)", line):
+      menu.options.cookie = "".join([str(i) for i in re.findall(r"" + settings.COOKIE + ":" + " (.*)", line)])
     # Referer Header
-    if re.findall(r"" + settings.REFERER + ": " + "(.*)", line):
-      menu.options.referer = "".join([str(i) for i in re.findall(r"Referer: " + "(.*)", line)])
+    if re.findall(r"" + settings.REFERER + ":" + " (.*)", line):
+      menu.options.referer = "".join([str(i) for i in re.findall(r"" + settings.REFERER + ":" + " (.*)", line)])
       if menu.options.referer and "https://" in menu.options.referer:
         scheme = "https://"
-    if re.findall(r"Authorization: " + "(.*)", line):
-      auth_provided = "".join([str(i) for i in re.findall(r"Authorization: " + "(.*)", line)]).split()
+    if re.findall(r"" + settings.AUTHORIZATION + ":" + " (.*)", line):
+      auth_provided = "".join([str(i) for i in re.findall(r"" + settings.AUTHORIZATION + ":" + " (.*)", line)]).split()
       if auth_provided:
         menu.options.auth_type = auth_provided[0].lower()
         if menu.options.auth_type.lower() == settings.AUTH_TYPE.BASIC:
