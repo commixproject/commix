@@ -136,7 +136,7 @@ def process_custom_injection_data(data):
           data = data.replace(settings.CUSTOM_INJECTION_MARKER_CHAR, settings.ASTERISK_MARKER)
       _.append(data)
     data = "\\n".join((list(dict.fromkeys(_)))).rstrip("\\n")
-    data = data.replace(settings.ASTERISK_MARKER, settings.INJECT_TAG)
+    # data = data.replace(settings.ASTERISK_MARKER, settings.INJECT_TAG)
     # if settings.INJECT_TAG in data:
     #   settings.CUSTOM_INJECTION_MARKER_DATA.append(data)
     #   settings.CUSTOM_INJECTION_MARKER_DATA = (list(dict.fromkeys(settings.CUSTOM_INJECTION_MARKER_DATA)))

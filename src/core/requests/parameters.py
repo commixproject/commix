@@ -154,7 +154,11 @@ def do_GET_check(url, http_request_method):
               if not menu.options.skip_empty:
                 all_params[param] = ''.join(all_params[param] + settings.INJECT_TAG)
             else:
-              all_params[param] = ''.join(all_params[param]).replace(value, value + settings.INJECT_TAG)
+              if settings.CUSTOM_INJECTION_MARKER:
+                if settings.ASTERISK_MARKER in value:
+                  all_params[param] = ''.join(all_params[param]).replace(value, value.replace(settings.ASTERISK_MARKER,"") + settings.INJECT_TAG)
+              else:
+                all_params[param] = ''.join(all_params[param]).replace(value, value + settings.INJECT_TAG)
             all_params[param - 1] = ''.join(all_params[param - 1]).replace(settings.INJECT_TAG, "")
             parameter = settings.PARAMETER_DELIMITER.join(all_params)
             # Reconstruct the URL
@@ -411,7 +415,11 @@ def do_POST_check(parameter, http_request_method):
             else:
               all_params[param] = ''.join(all_params[param] + settings.INJECT_TAG)
         else:
-          all_params[param] = ''.join(all_params[param]).replace(value, value + settings.INJECT_TAG)
+          if settings.CUSTOM_INJECTION_MARKER:
+            if settings.ASTERISK_MARKER in value:
+              all_params[param] = ''.join(all_params[param]).replace(value, value.replace(settings.ASTERISK_MARKER,"") + settings.INJECT_TAG)
+          else:
+            all_params[param] = ''.join(all_params[param]).replace(value, value + settings.INJECT_TAG)
           if settings.IS_JSON and len(all_params[param].split("\":")) == 2:
             check_parameter = all_params[param].split("\":")[0] 
             if settings.INJECT_TAG in check_parameter:
@@ -623,7 +631,11 @@ def do_cookie_check(cookie):
           if not menu.options.skip_empty:
             all_params[param] = ''.join(all_params[param] + settings.INJECT_TAG)
         else:
-          all_params[param] = ''.join(all_params[param]).replace(value, value + settings.INJECT_TAG)
+          if settings.CUSTOM_INJECTION_MARKER:
+            if settings.ASTERISK_MARKER in value:
+              all_params[param] = ''.join(all_params[param]).replace(value, value.replace(settings.ASTERISK_MARKER,"") + settings.INJECT_TAG)
+          else:
+            all_params[param] = ''.join(all_params[param]).replace(value, value + settings.INJECT_TAG)
         all_params[param - 1] = ''.join(all_params[param - 1]).replace(settings.INJECT_TAG, "")
         cookie = settings.COOKIE_DELIMITER.join(all_params)
         cookie = cookie.replace(settings.RANDOM_TAG, "")
