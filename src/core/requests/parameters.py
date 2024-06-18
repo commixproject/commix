@@ -60,6 +60,7 @@ def do_GET_check(url, http_request_method):
   url = checks.process_custom_injection_data(url)
   # Check for REST-ful URLs format.
   if "?" not in url:
+    settings.USER_DEFINED_URL_DATA = False
     if settings.INJECT_TAG not in url and not menu.options.shellshock:
       if len(settings.TEST_PARAMETER) != 0 or \
          menu.options.level == settings.HTTP_HEADER_INJECTION_LEVEL or \
@@ -119,10 +120,15 @@ def do_GET_check(url, http_request_method):
           if len(value) == 0:
             parameters = parameters + settings.INJECT_TAG
           else:
-            parameters = parameters.replace(value, value + settings.INJECT_TAG)
+            if settings.CUSTOM_INJECTION_MARKER:
+              if settings.ASTERISK_MARKER in value:
+                parameters = parameters.replace(value, value.replace(settings.ASTERISK_MARKER, settings.INJECT_TAG))
+            else:
+              if not settings.ASTERISK_MARKER in value and not settings.CUSTOM_INJECTION_MARKER_CHAR in value:
+                parameters = parameters.replace(value, value + settings.INJECT_TAG)
         # Reconstruct the URL
         url = url_part + "?" + parameters
-        url = url.replace(settings.RANDOM_TAG, "")
+        url = url.replace(settings.RANDOM_TAG, "").replace(settings.ASTERISK_MARKER,"")
         urls_list.append(url)
         return urls_list
       else:
@@ -156,14 +162,15 @@ def do_GET_check(url, http_request_method):
             else:
               if settings.CUSTOM_INJECTION_MARKER:
                 if settings.ASTERISK_MARKER in value:
-                  all_params[param] = ''.join(all_params[param]).replace(value, value.replace(settings.ASTERISK_MARKER,"") + settings.INJECT_TAG)
+                  all_params[param] = ''.join(all_params[param]).replace(value, value.replace(settings.ASTERISK_MARKER, settings.INJECT_TAG))
               else:
-                all_params[param] = ''.join(all_params[param]).replace(value, value + settings.INJECT_TAG)
+                if not settings.ASTERISK_MARKER in value and not settings.CUSTOM_INJECTION_MARKER_CHAR in value:
+                  all_params[param] = ''.join(all_params[param]).replace(value, value + settings.INJECT_TAG)
             all_params[param - 1] = ''.join(all_params[param - 1]).replace(settings.INJECT_TAG, "")
             parameter = settings.PARAMETER_DELIMITER.join(all_params)
             # Reconstruct the URL
             url = url_part + "?" + parameter
-            url = url.replace(settings.RANDOM_TAG, "")
+            url = url.replace(settings.RANDOM_TAG, "").replace(settings.ASTERISK_MARKER,"")
             urls_list.append(url)
         else:
           for param in range(0,len(multi_parameters)):
@@ -363,10 +370,16 @@ def do_POST_check(parameter, http_request_method):
           else:
             parameter = parameter + settings.INJECT_TAG
         else:
-          parameter = parameter.replace(value, value + settings.INJECT_TAG)
+          if settings.CUSTOM_INJECTION_MARKER:
+            if settings.ASTERISK_MARKER in value:
+              parameter = parameter.replace(value, value.replace(settings.ASTERISK_MARKER, settings.INJECT_TAG))
+          else:
+            if not settings.ASTERISK_MARKER in value and not settings.CUSTOM_INJECTION_MARKER_CHAR in value:
+              parameter = parameter.replace(value, value + settings.INJECT_TAG)
+
         if settings.IS_JSON:
           parameter = json_int_check(parameter, value)
-        parameter = parameter.replace(settings.RANDOM_TAG, "")
+        parameter = parameter.replace(settings.RANDOM_TAG, "").replace(settings.ASTERISK_MARKER,"")
         return parameter
     else:
       for param in range(0, len(multi_parameters)):
@@ -417,17 +430,18 @@ def do_POST_check(parameter, http_request_method):
         else:
           if settings.CUSTOM_INJECTION_MARKER:
             if settings.ASTERISK_MARKER in value:
-              all_params[param] = ''.join(all_params[param]).replace(value, value.replace(settings.ASTERISK_MARKER,"") + settings.INJECT_TAG)
+              all_params[param] = ''.join(all_params[param]).replace(value, value.replace(settings.ASTERISK_MARKER, settings.INJECT_TAG))
           else:
-            all_params[param] = ''.join(all_params[param]).replace(value, value + settings.INJECT_TAG)
+            if not settings.ASTERISK_MARKER in value and not settings.CUSTOM_INJECTION_MARKER_CHAR in value:
+              all_params[param] = ''.join(all_params[param]).replace(value, value + settings.INJECT_TAG)
           if settings.IS_JSON and len(all_params[param].split("\":")) == 2:
             check_parameter = all_params[param].split("\":")[0] 
             if settings.INJECT_TAG in check_parameter:
-              all_params[param] = all_params[param].replace(check_parameter,check_parameter.replace(settings.INJECT_TAG, ""))
+              all_params[param] = all_params[param].replace(check_parameter, check_parameter.replace(settings.INJECT_TAG, ""))
               
         all_params[param - 1] = ''.join(all_params[param - 1]).replace(settings.INJECT_TAG, "")
         parameter = settings.PARAMETER_DELIMITER.join(all_params)
-        parameter = parameter.replace(settings.RANDOM_TAG, "")
+        parameter = parameter.replace(settings.RANDOM_TAG, "").replace(settings.ASTERISK_MARKER,"")
         if settings.IS_JSON:
           if (len(all_params)) == 1 and settings.INJECT_TAG not in all_params[param]:
             parameter = parameter.replace(value, value + settings.INJECT_TAG)
@@ -597,8 +611,14 @@ def do_cookie_check(cookie):
       if len(value) == 0:
         cookie = cookie + settings.INJECT_TAG
       else:
-        cookie = cookie.replace(value, value + settings.INJECT_TAG)
-    cookie = cookie.replace(settings.RANDOM_TAG, "")
+        if settings.CUSTOM_INJECTION_MARKER:
+          if settings.ASTERISK_MARKER in value:
+            cookie = cookie.replace(value, value.replace(settings.ASTERISK_MARKER, settings.INJECT_TAG))
+        else:
+          if not settings.ASTERISK_MARKER in value and not settings.CUSTOM_INJECTION_MARKER_CHAR in value:
+            cookie = cookie.replace(value, value + settings.INJECT_TAG)
+
+    cookie = cookie.replace(settings.RANDOM_TAG, "").replace(settings.ASTERISK_MARKER,"")
     return cookie
 
   # Check if multiple parameters are supplied.
@@ -633,12 +653,13 @@ def do_cookie_check(cookie):
         else:
           if settings.CUSTOM_INJECTION_MARKER:
             if settings.ASTERISK_MARKER in value:
-              all_params[param] = ''.join(all_params[param]).replace(value, value.replace(settings.ASTERISK_MARKER,"") + settings.INJECT_TAG)
+              all_params[param] = ''.join(all_params[param]).replace(value, value.replace(settings.ASTERISK_MARKER, settings.INJECT_TAG))
           else:
-            all_params[param] = ''.join(all_params[param]).replace(value, value + settings.INJECT_TAG)
+            if not settings.ASTERISK_MARKER in value and not settings.CUSTOM_INJECTION_MARKER_CHAR in value:
+              all_params[param] = ''.join(all_params[param]).replace(value, value + settings.INJECT_TAG)
         all_params[param - 1] = ''.join(all_params[param - 1]).replace(settings.INJECT_TAG, "")
         cookie = settings.COOKIE_DELIMITER.join(all_params)
-        cookie = cookie.replace(settings.RANDOM_TAG, "")
+        cookie = cookie.replace(settings.RANDOM_TAG, "").replace(settings.ASTERISK_MARKER,"")
         if type(cookie) != list:
           cookies_list.append(cookie)
         cookie = cookies_list

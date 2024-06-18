@@ -1,4 +1,5 @@
 ## Version 4.0 (TBA)
+* Revised: Improvement regarding specifying multiple injection points by appending custom injection marker (i.e. asterisk `*`).
 * Fixed: Minor bug-fix regarding crawler (i.e. option `--crawl`).
 * Updated: Six (third party) module has been updated (Python 3.12 support).
 * Revised: Minor improvement regarding determining (passively) the target's underlying operating system.

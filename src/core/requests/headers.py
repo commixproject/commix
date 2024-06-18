@@ -394,18 +394,19 @@ def do_check(request):
         http_header_value = ''.join(http_header_value).strip().replace(": ",":")
         # Check if it is a custom header injection.
         if http_header_name not in [settings.ACCEPT, settings.HOST, settings.USER_AGENT, settings.REFERER, settings.COOKIE]:
-
-          if not settings.CUSTOM_HEADER_INJECTION and settings.CUSTOM_INJECTION_MARKER_CHAR in http_header_value:
-            settings.CUSTOM_INJECTION_MARKER = True
-
-          if not settings.CUSTOM_HEADER_INJECTION and http_header_name in settings.TEST_PARAMETER or settings.INJECT_TAG in http_header_value:
-            settings.CUSTOM_HEADER_CHECK = http_header_name
-            if len(http_header_name) != 0 and \
-              http_header_name + ": " + http_header_value not in [settings.ACCEPT, settings.HOST, settings.USER_AGENT, settings.REFERER, settings.COOKIE] and \
-              http_header_name + ": " + http_header_value not in settings.CUSTOM_HEADERS_NAMES:
-              settings.CUSTOM_HEADERS_NAMES.append(http_header_name + ": " + http_header_value)
-            http_header_value = http_header_value.replace(settings.INJECT_TAG,"").replace(settings.CUSTOM_INJECTION_MARKER_CHAR,"")
-            request.add_header(http_header_name, http_header_value)
+          if not settings.CUSTOM_HEADER_INJECTION:
+            if settings.CUSTOM_INJECTION_MARKER_CHAR in http_header_value:
+              settings.CUSTOM_INJECTION_MARKER = True
+              
+            if http_header_name in settings.TEST_PARAMETER or settings.INJECT_TAG in http_header_value or settings.ASTERISK_MARKER in http_header_value:
+              settings.INJECTION_MARKER_LOCATION.CUSTOM_HTTP_HEADERS = True
+              settings.CUSTOM_HEADER_CHECK = http_header_name
+              if len(http_header_name) != 0 and \
+                http_header_name + ": " + http_header_value not in [settings.ACCEPT, settings.HOST, settings.USER_AGENT, settings.REFERER, settings.COOKIE] and \
+                http_header_name + ": " + http_header_value not in settings.CUSTOM_HEADERS_NAMES:
+                settings.CUSTOM_HEADERS_NAMES.append(http_header_name + ": " + http_header_value)
+              http_header_value = http_header_value.replace(settings.INJECT_TAG,"").replace(settings.CUSTOM_INJECTION_MARKER_CHAR,"")
+              request.add_header(http_header_name, http_header_value)
 
         if http_header_name not in [settings.HOST, settings.USER_AGENT, settings.REFERER, settings.COOKIE, settings.CUSTOM_HEADER_NAME]:
           request.add_header(http_header_name, http_header_value)

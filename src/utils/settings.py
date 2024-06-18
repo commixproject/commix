@@ -247,7 +247,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.0"
-REVISION = "70"
+REVISION = "71"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -363,6 +363,7 @@ CODE_INJECTION_WARNINGS = ["eval()'d code", "runtime-created function", "usort()
 SKIP_CODE_INJECTIONS = False
 SKIP_COMMAND_INJECTIONS = False
 
+USER_DEFINED_URL_DATA = True
 # User-defined stored POST data.
 USER_DEFINED_POST_DATA = ""
 # Ignore user-defined stored POST data.
@@ -375,7 +376,14 @@ ASTERISK_MARKER = "__ASTERISK__"
 CUSTOM_INJECTION_MARKER_DATA = []
 PRE_CUSTOM_INJECTION_MARKER_CHAR = ""
 
-SKIP_NON_CUSTOM = False
+class INJECTION_MARKER_LOCATION(object):
+  URL = False
+  DATA = False
+  COOKIE = False
+  HTTP_HEADERS = False
+  CUSTOM_HTTP_HEADERS = False
+
+SKIP_NON_CUSTOM = None
 
 # Testable parameter(s) - comma separated.
 TEST_PARAMETER = ""
@@ -489,6 +497,7 @@ SUFFIXES = []
 SUFFIXES_LVL1 = [""]
 SUFFIXES_LVL2 = SEPARATORS_LVL1
 SUFFIXES_LVL3 = SUFFIXES_LVL2 + ["'", "\"", " #", "//", "\\\\"]
+
 
 # Bad combination of prefix and separator
 JUNK_COMBINATION = [SEPARATORS_LVL1[i] + SEPARATORS_LVL1[j] for i in range(len(SEPARATORS_LVL1)) for j in range(len(SEPARATORS_LVL1))]

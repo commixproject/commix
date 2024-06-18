@@ -154,28 +154,28 @@ Check for custom injection marker character ('*').
 def custom_injection_marker_character(url, http_request_method):
   if url and settings.CUSTOM_INJECTION_MARKER_CHAR in url:
     option = "'-u'"
-    settings.CUSTOM_INJECTION_MARKER = True
+    settings.CUSTOM_INJECTION_MARKER = settings.INJECTION_MARKER_LOCATION.URL = settings.USER_DEFINED_URL_DATA = True
     if menu.options.data:
       settings.IGNORE_USER_DEFINED_POST_DATA = True
   elif menu.options.data and settings.CUSTOM_INJECTION_MARKER_CHAR in menu.options.data:
     option = str(http_request_method) + " body"
-    settings.CUSTOM_INJECTION_MARKER = True
+    settings.CUSTOM_INJECTION_MARKER = settings.INJECTION_MARKER_LOCATION.DATA = True
   else:
     option = "option '--headers/--user-agent/--referer/--cookie'"
-    if menu.options.cookie and settings.CUSTOM_INJECTION_MARKER_CHAR in menu.options.cookie:
-      settings.CUSTOM_INJECTION_MARKER = settings.COOKIE_INJECTION = True
-    elif menu.options.agent and settings.CUSTOM_INJECTION_MARKER_CHAR in menu.options.agent:
-      settings.CUSTOM_INJECTION_MARKER = settings.USER_AGENT_INJECTION = True
-    elif menu.options.referer and settings.CUSTOM_INJECTION_MARKER_CHAR in menu.options.referer:
-      settings.CUSTOM_INJECTION_MARKER = settings.REFERER_INJECTION = True
-    elif menu.options.host and settings.CUSTOM_INJECTION_MARKER_CHAR in menu.options.host:
-      settings.CUSTOM_INJECTION_MARKER = settings.HOST_INJECTION = True
-    elif settings.CUSTOM_HEADER_CHECK and settings.CUSTOM_HEADER_CHECK != settings.ACCEPT:
-      if settings.CUSTOM_HEADER_CHECK not in settings.TEST_PARAMETER:
-        settings.CUSTOM_INJECTION_MARKER = True
-      else:
-        settings.CUSTOM_HEADER_INJECTION = True
-        return False
+  if menu.options.cookie and settings.CUSTOM_INJECTION_MARKER_CHAR in menu.options.cookie:
+    settings.CUSTOM_INJECTION_MARKER = settings.COOKIE_INJECTION = settings.INJECTION_MARKER_LOCATION.COOKIE = True
+  elif menu.options.agent and settings.CUSTOM_INJECTION_MARKER_CHAR in menu.options.agent:
+    settings.CUSTOM_INJECTION_MARKER = settings.INJECTION_MARKER_LOCATION.HTTP_HEADERS = settings.USER_AGENT_INJECTION = True
+  elif menu.options.referer and settings.CUSTOM_INJECTION_MARKER_CHAR in menu.options.referer:
+    settings.CUSTOM_INJECTION_MARKER = settings.INJECTION_MARKER_LOCATION.HTTP_HEADERS = settings.REFERER_INJECTION = True
+  elif menu.options.host and settings.CUSTOM_INJECTION_MARKER_CHAR in menu.options.host:
+    settings.CUSTOM_INJECTION_MARKER = settings.INJECTION_MARKER_LOCATION.HTTP_HEADERS = settings.HOST_INJECTION = True
+  elif settings.CUSTOM_HEADER_CHECK and settings.CUSTOM_HEADER_CHECK != settings.ACCEPT:
+    if settings.CUSTOM_HEADER_CHECK not in settings.TEST_PARAMETER:
+      settings.CUSTOM_INJECTION_MARKER = True
+    else:
+      settings.CUSTOM_HEADER_INJECTION = True
+      return False
 
   if settings.CUSTOM_INJECTION_MARKER:
     while True:
@@ -185,7 +185,6 @@ def custom_injection_marker_character(url, http_request_method):
       if procced_option in settings.CHOICE_YES:
         return True
       elif procced_option in settings.CHOICE_NO:
-        # settings.CUSTOM_HEADER_INJECTION = False
         return False
       elif procced_option in settings.CHOICE_QUIT:
         raise SystemExit()

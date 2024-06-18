@@ -480,7 +480,6 @@ def cookie_injection(url, http_request_method, filename, timesec):
   # Cookie Injection
   if settings.COOKIE_INJECTION:
     cookie_value = menu.options.cookie
-
     header_name = settings.SINGLE_WHITESPACE + settings.COOKIE
     settings.HTTP_HEADER = header_name[1:].lower()
     cookie_parameters = parameters.do_cookie_check(menu.options.cookie)
@@ -584,9 +583,9 @@ Check if HTTP Method is POST.
 """
 def post_request(url, http_request_method, filename, timesec):
 
-  parameter = menu.options.data
+  parameter = settings.USER_DEFINED_POST_DATA
   found_parameter = parameters.do_POST_check(parameter, http_request_method)
-  
+
   # Check if singe entry parameter
   if type(found_parameter) is str:
     found_parameter_list = []
@@ -643,58 +642,56 @@ def post_request(url, http_request_method, filename, timesec):
 Perform GET / POST parameters checks
 """
 def data_checks(url, http_request_method, filename, timesec):
-
   settings.COOKIE_INJECTION = None
   settings.HTTP_HEADERS_INJECTION = False
   settings.CUSTOM_HEADER_INJECTION = False
-  checks.process_non_custom()
+
   if settings.USER_DEFINED_POST_DATA and not settings.IGNORE_USER_DEFINED_POST_DATA:
     if post_request(url, http_request_method, filename, timesec) is None:
       if not settings.SKIP_NON_CUSTOM:
         get_request(url, http_request_method, filename, timesec)
   else:
     if get_request(url, http_request_method, filename, timesec) is None:
-      if settings.USER_DEFINED_POST_DATA and not settings.SKIP_NON_CUSTOM:
-        post_request(url, http_request_method, filename, timesec) 
+      if settings.USER_DEFINED_POST_DATA:
+        if not settings.SKIP_NON_CUSTOM:
+          post_request(url, http_request_method, filename, timesec) 
+
 """
-Perform HTTP Headers parameters checks
+Perform checks over cookie values.
+"""
+def cookies_checks(url, http_request_method, filename, timesec): 
+  if len([i for i in settings.TEST_PARAMETER if i in str(menu.options.cookie)]) != 0 or settings.COOKIE_INJECTION:
+    if not settings.SKIP_NON_CUSTOM:
+      cookie_injection(url, http_request_method, filename, timesec)
+
+"""
+Perform checks over HTTP Headers parameters.
 """
 def headers_checks(url, http_request_method, filename, timesec):
-
-  if menu.options.level == settings.COOKIE_INJECTION_LEVEL and not settings.CUSTOM_INJECTION_MARKER:
-    if menu.options.cookie:
-      settings.COOKIE_INJECTION = True
-
-  if len([i for i in settings.TEST_PARAMETER if i in str(menu.options.cookie)]) != 0 or settings.COOKIE_INJECTION:
-    cookie_injection(url, http_request_method, filename, timesec)
-
-  if menu.options.level > settings.COOKIE_INJECTION_LEVEL and not settings.CUSTOM_INJECTION_MARKER:
-    settings.HTTP_HEADERS_INJECTION = True
-
   if len([i for i in settings.TEST_PARAMETER if i in settings.HTTP_HEADERS]) != 0 or settings.HTTP_HEADERS_INJECTION or any((settings.USER_AGENT_INJECTION, settings.REFERER_INJECTION, settings.HOST_INJECTION)):
-    if settings.INJECTED_HTTP_HEADER == False:
-      check_parameter = ""
-    http_headers_injection(url, http_request_method, filename, timesec)
+    if not settings.SKIP_NON_CUSTOM:
+      http_headers_injection(url, http_request_method, filename, timesec)
 
-  if len(settings.CUSTOM_HEADERS_NAMES) != 0:
-    settings.CUSTOM_HEADER_INJECTION = True
-    for _ in settings.CUSTOM_HEADERS_NAMES:
-      if settings.CUSTOM_INJECTION_MARKER_CHAR in _.split(": ")[1] and not settings.CUSTOM_INJECTION_MARKER:
-        settings.CUSTOM_HEADER_INJECTION = False
-      else:
-        settings.CUSTOM_HEADER_NAME = _.split(": ")[0]
-        settings.CUSTOM_HEADER_VALUE = _.split(": ")[1].replace(settings.CUSTOM_INJECTION_MARKER_CHAR,"")
-        check_parameter = header_name = settings.SINGLE_WHITESPACE + settings.CUSTOM_HEADER_NAME
-        settings.HTTP_HEADER = header_name[1:].lower()
-        check_for_stored_sessions(url, http_request_method)
-        injection_proccess(url, check_parameter, http_request_method, filename, timesec)
-    # settings.CUSTOM_HEADER_INJECTION = False
+"""
+Perform checks over custom HTTP Headers parameters.
+"""
+def custom_headers_checks(url, http_request_method, filename, timesec): 
+  for _ in settings.CUSTOM_HEADERS_NAMES:
+    if settings.CUSTOM_INJECTION_MARKER_CHAR in _.split(": ")[1] and not settings.CUSTOM_INJECTION_MARKER:
+      settings.CUSTOM_HEADER_INJECTION = False
+    else:
+      settings.CUSTOM_HEADER_NAME = _.split(": ")[0]
+      settings.CUSTOM_HEADER_VALUE = _.split(": ")[1].replace(settings.CUSTOM_INJECTION_MARKER_CHAR,"")
+      check_parameter = header_name = settings.SINGLE_WHITESPACE + settings.CUSTOM_HEADER_NAME
+      settings.HTTP_HEADER = header_name[1:].lower()
+      check_for_stored_sessions(url, http_request_method)
+      injection_proccess(url, check_parameter, http_request_method, filename, timesec)
+  settings.CUSTOM_HEADER_INJECTION = False
 
 """
 Perform checks
 """
 def perform_checks(url, http_request_method, filename):
-
   # Initiate whitespaces
   if settings.MULTI_TARGETS or settings.STDIN_PARSING and len(settings.WHITESPACES) > 1:
     settings.WHITESPACES = ["%20"]
@@ -728,14 +725,31 @@ def perform_checks(url, http_request_method, filename):
     check_for_stored_levels(url, http_request_method)
 
   _ = True
-  if not settings.CUSTOM_INJECTION_MARKER:
-    data_checks(url, http_request_method, filename, timesec)
+  if settings.CUSTOM_INJECTION_MARKER:
     _ = False
-  headers_checks(url, http_request_method, filename, timesec)
-  if any((settings.CUSTOM_HEADERS_NAMES, settings.COOKIE_INJECTION, settings.HTTP_HEADERS_INJECTION)) and settings.SKIP_NON_CUSTOM:
-    _ = False
-  if _:
-    data_checks(url, http_request_method, filename, timesec)
+    if any((settings.INJECTION_MARKER_LOCATION.URL, settings.INJECTION_MARKER_LOCATION.DATA)):
+      data_checks(url, http_request_method, filename, timesec)
+    if settings.INJECTION_MARKER_LOCATION.COOKIE:
+      cookies_checks(url, http_request_method, filename, timesec)
+    if settings.INJECTION_MARKER_LOCATION.HTTP_HEADERS:
+      headers_checks(url, http_request_method, filename, timesec)
+    if settings.INJECTION_MARKER_LOCATION.CUSTOM_HTTP_HEADERS:
+      custom_headers_checks(url, http_request_method, filename, timesec)
+    if settings.USER_DEFINED_POST_DATA and not settings.INJECTION_MARKER_LOCATION.DATA \
+      or settings.USER_DEFINED_URL_DATA and not settings.INJECTION_MARKER_LOCATION.URL:
+      checks.process_non_custom()
+
+  if not settings.SKIP_NON_CUSTOM:
+    settings.CUSTOM_INJECTION_MARKER = False
+    if not settings.INJECTION_MARKER_LOCATION.URL or not settings.INJECTION_MARKER_LOCATION.DATA:
+      data_checks(url, http_request_method, filename, timesec)
+    if _:
+      if not settings.INJECTION_MARKER_LOCATION.COOKIE and menu.options.level >= settings.COOKIE_INJECTION_LEVEL and menu.options.cookie:
+        settings.COOKIE_INJECTION = True
+        cookies_checks(url, http_request_method, filename, timesec)
+      if not settings.INJECTION_MARKER_LOCATION.HTTP_HEADERS and menu.options.level > settings.COOKIE_INJECTION_LEVEL:
+        settings.HTTP_HEADERS_INJECTION = True
+        headers_checks(url, http_request_method, filename, timesec)
 
   if settings.INJECTION_CHECKER == False:
     return False
