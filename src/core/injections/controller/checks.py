@@ -1418,7 +1418,7 @@ def tamper_scripts(stored_tamper_scripts):
         print(settings.print_critical_msg(err_msg))
         raise SystemExit()
     if not stored_tamper_scripts:
-      info_msg = "Loading tamper script" + ('s', '')[len(provided_scripts) == 1] + ": "
+      info_msg = "Loaded tamper script" + ('s', '')[len(provided_scripts) == 1] + ": "
       print(settings.print_info_msg(info_msg))
     for script in provided_scripts:
       if "hexencode" or "base64encode" == script:
@@ -1633,26 +1633,32 @@ def check_quotes(payload):
         menu.options.tamper = "singlequotes"
 
 """
-Recognise the payload.
+Check for applied (hex / b64) encoders.
 """
-def recognise_payload(payload):
-  if "usleep" in payload and settings.TARGET_OS != settings.OS.WINDOWS:
-    if not settings.TAMPER_SCRIPTS['sleep2usleep']:
-      if menu.options.tamper:
-        menu.options.tamper = menu.options.tamper + ",sleep2usleep"
-      else:
-        menu.options.tamper = "sleep2usleep"
-
-  elif "timeout" in payload:
-    if not settings.TAMPER_SCRIPTS['sleep2timeout']:
-      if menu.options.tamper:
-        menu.options.tamper = menu.options.tamper + ",sleep2timeout"
-      else:
-        menu.options.tamper = "sleep2timeout"
-
+def check_encoders(payload):
   is_decoded = False
   encoded_with = ""
   check_value = payload
+
+  settings.MULTI_ENCODED_PAYLOAD = list(dict.fromkeys(settings.MULTI_ENCODED_PAYLOAD))
+  for encode_type in settings.MULTI_ENCODED_PAYLOAD:
+    if encode_type == 'base64encode' or encode_type == 'hexencode':
+      while True:
+        message = "Do you want to keep using the '" + encode_type + "' tamper script? [y/N] > "
+        procced_option = common.read_input(message, default="N", check_batch=True)
+        if procced_option in settings.CHOICE_YES:
+          break
+        elif procced_option in settings.CHOICE_NO:
+          if settings.VERBOSITY_LEVEL != 0:
+            debug_msg = "Unloading the '" + encode_type + "' tamper script."
+            print(settings.print_debug_msg(debug_msg))
+          settings.MULTI_ENCODED_PAYLOAD.remove(encode_type)
+          break
+        elif procced_option in settings.CHOICE_QUIT:
+          raise SystemExit()
+        else:
+          common.invalid_option(procced_option)
+          pass
 
   if (len(check_value.strip()) % 4 == 0) and \
     re.match(settings.BASE64_RECOGNITION_REGEX, check_value) and \
@@ -1687,30 +1693,24 @@ def recognise_payload(payload):
               encoded_with = "base64"
           except Exception:
             pass
-
   else:
     decoded_payload = payload
 
   if len(encoded_with) != 0:
     is_decoded = True
 
-  for encode_type in settings.MULTI_ENCODED_PAYLOAD:
-    # Encode payload to base64 format.
-    if encode_type == 'base64encode':
-      base64_output(payload)
-    # Encode payload to hex format.
-    if encode_type == 'hexencode':
-      hex_output(payload)
-
   if is_decoded:
     while True:
-      message = "The provided parameter appears to be '" + str(encode_type).split("encode")[0] + "' encoded. "
-      message += "Do you want to process it encoded? [Y/n] > "
+      message = "The provided value appears to be " + encoded_with + "-encoded. "
+      message += "Do you want to use '" + encoded_with + "encode' tamper script? [Y/n] > "
       procced_option = common.read_input(message, default="Y", check_batch=True)
       if procced_option in settings.CHOICE_YES:
         break
       elif procced_option in settings.CHOICE_NO:
-        settings.MULTI_ENCODED_PAYLOAD.remove(encode_type)
+        settings.MULTI_ENCODED_PAYLOAD.remove(encoded_with + "encode")
+        if settings.VERBOSITY_LEVEL != 0:
+          debug_msg = "Skipping load the '" + encoded_with + "encode' tamper script."
+          print(settings.print_debug_msg(debug_msg))
         break
       elif procced_option in settings.CHOICE_QUIT:
         raise SystemExit()
@@ -1723,6 +1723,26 @@ def recognise_payload(payload):
   else:
     return payload, encoded_with
 
+"""
+Recognise the payload.
+"""
+def recognise_payload(payload):
+  if "usleep" in payload and settings.TARGET_OS != settings.OS.WINDOWS:
+    if not settings.TAMPER_SCRIPTS['sleep2usleep']:
+      if menu.options.tamper:
+        menu.options.tamper = menu.options.tamper + ",sleep2usleep"
+      else:
+        menu.options.tamper = "sleep2usleep"
+
+  elif "timeout" in payload:
+    if not settings.TAMPER_SCRIPTS['sleep2timeout']:
+      if menu.options.tamper:
+        menu.options.tamper = menu.options.tamper + ",sleep2timeout"
+      else:
+        menu.options.tamper = "sleep2timeout"
+
+  return check_encoders(payload)
+  
 """
 Check for stored payloads and enable tamper scripts.
 """

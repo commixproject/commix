@@ -449,7 +449,6 @@ def do_POST_check(parameter, http_request_method):
         if type(parameter) != list:
           parameters_list.append(parameter)
         parameter = parameters_list
-
     else:
       for param in range(0, len(multi_parameters)):
         # Grab the value of parameter.
