@@ -25,10 +25,13 @@ Notes: This tamper script works against Unix-like target(s).
 __tamper__ = "space2ifs"
 space2ifs = "${IFS}"
 
+if not settings.TAMPER_SCRIPTS[__tamper__]:
+  settings.TAMPER_SCRIPTS[__tamper__] = True
+
 def tamper(payload):
   if space2ifs in settings.WHITESPACES[0] and \
   settings.EVAL_BASED_STATE != False:
-    settings.WHITESPACES[0] = r"\${IFS}"
+    settings.WHITESPACES[0] = space2ifs
   if settings.TARGET_OS != settings.OS.WINDOWS:
     settings.TAMPER_SCRIPTS[__tamper__] = True
     if settings.WHITESPACES[0] == "%20":

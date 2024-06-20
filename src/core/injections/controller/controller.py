@@ -74,24 +74,25 @@ def check_for_stored_levels(url, http_request_method):
 """
 Heuristic request(s)
 """
-def heuristic_request(url, http_request_method, check_parameter, payload):
+def heuristic_request(url, http_request_method, check_parameter, payload, whitespace):
   data = None
   cookie = None
   tmp_url = url
   payload = parameters.prefixes(payload, prefix="")
   payload = parameters.suffixes(payload, suffix="")
+  payload = payload.replace(settings.SINGLE_WHITESPACE, whitespace)
   payload = checks.perform_payload_modification(payload)
   if settings.VERBOSITY_LEVEL >= 1:
     print(settings.print_payload(payload))
+  payload = _urllib.parse.unquote(payload)
+  payload = _urllib.parse.quote(payload)
   if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
     cookie = menu.options.cookie.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC)
   elif not settings.IGNORE_USER_DEFINED_POST_DATA and menu.options.data and settings.INJECT_TAG in menu.options.data:
-    if not any((settings.IS_JSON, settings.IS_XML)):
-      payload = _urllib.parse.quote(payload)
     data = menu.options.data.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC)
   else:
     if settings.INJECT_TAG in url:
-      tmp_url = url.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, _urllib.parse.quote(payload))
+      tmp_url = url.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload)
   request = _urllib.request.Request(tmp_url, data, method=http_request_method)
   if cookie:
     request.add_header(settings.COOKIE, cookie)
@@ -116,27 +117,28 @@ def command_injection_heuristic_basic(url, http_request_method, check_parameter,
     basic_payloads = settings.BASIC_COMMAND_INJECTION_PAYLOADS
   settings.CLASSIC_STATE = True
   try:
-    whitespace = settings.WHITESPACES[0]
-    if not settings.IDENTIFIED_COMMAND_INJECTION or settings.MULTI_TARGETS:
-      _ = 0
-      for payload in basic_payloads:
-        _ = _ + 1
-        response = heuristic_request(url, http_request_method, check_parameter, payload)
-        if type(response) is not bool and response is not None:
-          html_data = checks.page_encoding(response, action="decode")
-          match = re.search(settings.BASIC_COMMAND_INJECTION_RESULT, html_data)
-          if match:
-            settings.IDENTIFIED_COMMAND_INJECTION = True
-            possible_os = ('Unix-like', 'Windows')[_ != 1]
-            if settings.OS.UNIX.lower() in possible_os.lower():
-              settings.TARGET_OS = settings.OS.UNIX
-            else:
-              settings.TARGET_OS = settings.OS.WINDOWS
-            info_msg = "Heuristic (basic) tests shows that "
-            info_msg += settings.CHECKING_PARAMETER + " might be injectable (possible OS: '" + possible_os + "')."
-            print(settings.print_bold_info_msg(info_msg))
-            settings.SKIP_CODE_INJECTIONS = True
-            break
+    checks.perform_payload_modification(payload="")
+    for whitespace in settings.WHITESPACES:
+      if not settings.IDENTIFIED_COMMAND_INJECTION or settings.MULTI_TARGETS:
+        _ = 0
+        for payload in basic_payloads:
+          _ = _ + 1
+          response = heuristic_request(url, http_request_method, check_parameter, payload, whitespace)
+          if type(response) is not bool and response is not None:
+            html_data = checks.page_encoding(response, action="decode")
+            match = re.search(settings.BASIC_COMMAND_INJECTION_RESULT, html_data)
+            if match:
+              settings.IDENTIFIED_COMMAND_INJECTION = True
+              possible_os = ('Unix-like', 'Windows')[_ != 1]
+              if settings.OS.UNIX.lower() in possible_os.lower():
+                settings.TARGET_OS = settings.OS.UNIX
+              else:
+                settings.TARGET_OS = settings.OS.WINDOWS
+              info_msg = "Heuristic (basic) tests shows that "
+              info_msg += settings.CHECKING_PARAMETER + " might be injectable (possible OS: '" + possible_os + "')."
+              print(settings.print_bold_info_msg(info_msg))
+              settings.SKIP_CODE_INJECTIONS = True
+              break
 
     settings.CLASSIC_STATE = False
     return url
@@ -155,9 +157,10 @@ def code_injections_heuristic_basic(url, http_request_method, check_parameter, t
   technique = "(" + injection_type.split(settings.SINGLE_WHITESPACE)[0] + ") " + technique + ""
   settings.EVAL_BASED_STATE = True
   try:
+    whitespace = settings.SINGLE_WHITESPACE
     if (not settings.IDENTIFIED_WARNINGS and not settings.IDENTIFIED_PHPINFO) or settings.MULTI_TARGETS:
       for payload in settings.PHPINFO_CHECK_PAYLOADS:
-        response = heuristic_request(url, http_request_method, check_parameter, payload)
+        response = heuristic_request(url, http_request_method, check_parameter, payload, whitespace)
         if type(response) is not bool and response is not None:
           html_data = checks.page_encoding(response, action="decode")
           match = re.search(settings.CODE_INJECTION_PHPINFO, html_data)
@@ -297,7 +300,7 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
 
     # Load modules
     modules_handler.load_modules(url, http_request_method, filename)
-    checks.tamper_scripts(stored_tamper_scripts=False)
+    # checks.tamper_scripts(stored_tamper_scripts=False)
 
     settings.CHECKING_PARAMETER = ""
     if not header_name == settings.COOKIE and not the_type == "HTTP header":

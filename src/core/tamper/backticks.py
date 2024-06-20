@@ -13,7 +13,6 @@ the Free Software Foundation, either version 3 of the License, or
 For more see the file 'readme/COPYING' for copying permission.
 """
 
-import sys
 from src.utils import settings
 
 """
@@ -23,7 +22,13 @@ Notes: This tamper script works against Unix-like target(s).
 
 __tamper__ = "backticks"
 
-settings.TAMPER_SCRIPTS[__tamper__] = True
-settings.USE_BACKTICKS = True
+if not settings.TAMPER_SCRIPTS[__tamper__]:
+  settings.TAMPER_SCRIPTS[__tamper__] = True
+
+def tamper(payload):
+  settings.TAMPER_SCRIPTS[__tamper__] = True
+  settings.USE_BACKTICKS = True
+  payload = payload.replace("$((", "`expr ").replace("))", "`")
+  return payload
 
 # eof

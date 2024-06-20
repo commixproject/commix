@@ -23,7 +23,10 @@ Notes: Useful to bypass very weak and bespoke web application firewalls that has
 
 __tamper__ = "multiplespaces"
 
-settings.TAMPER_SCRIPTS[__tamper__] = True
-settings.WHITESPACES[0] = settings.WHITESPACES[0] * random.randrange(2, 8)
-
+def tamper(payload):
+  if not (settings.TAMPER_SCRIPTS[__tamper__]):
+    settings.TAMPER_SCRIPTS[__tamper__] = True
+    for i in range(0, len(settings.WHITESPACES)):
+      settings.WHITESPACES[i] = settings.WHITESPACES[i] * random.randrange(3, 8)
+  return payload
 # eof

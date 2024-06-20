@@ -1765,6 +1765,12 @@ def perform_payload_modification(payload):
 
   for mod_type in list(set(settings.MULTI_ENCODED_PAYLOAD[::-1])):
     # Reverses (characterwise) the user-supplied operating system commands
+    if mod_type == 'backticks':
+      from src.core.tamper import backticks
+      payload = backticks.tamper(payload)
+
+  for mod_type in list(set(settings.MULTI_ENCODED_PAYLOAD[::-1])):
+    # Reverses (characterwise) the user-supplied operating system commands
     if mod_type == 'rev':
       from src.core.tamper import rev
       payload = rev.tamper(payload)
@@ -1834,6 +1840,9 @@ def perform_payload_modification(payload):
     if space_mod == 'space2vtab':
       from src.core.tamper import space2vtab
       payload = space2vtab.tamper(payload)
+    if space_mod == 'multiplespaces':
+      from src.core.tamper import multiplespaces
+      payload = multiplespaces.tamper(payload)
 
   for encode_type in list(set(settings.MULTI_ENCODED_PAYLOAD[::-1])):
     # Encode payload to hex format.

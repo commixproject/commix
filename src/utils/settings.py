@@ -247,7 +247,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.0"
-REVISION = "72"
+REVISION = "73"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -321,7 +321,7 @@ class HEURISTIC_TEST(object):
 #Basic heuristic checks for command injections
 RAND_A = random.randint(1,10000)
 RAND_B = random.randint(1,10000)
-CALC_STRING = str(RAND_A) + "+" + str(RAND_B)
+CALC_STRING = str(RAND_A) + " %2B " + str(RAND_B)
 BASIC_STRING = "(" + CALC_STRING + ")"
 BASIC_COMMAND_INJECTION_PAYLOADS = [";echo $(" + BASIC_STRING + ")%26%26echo $(" + BASIC_STRING + ")||echo $(" + BASIC_STRING + ")",
                                    "|set /a " + BASIC_STRING + "&set /a " + BASIC_STRING
