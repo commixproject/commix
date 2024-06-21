@@ -101,6 +101,15 @@ def quoted_value(value):
   return '"{}"'.format(value)
 
 """
+Payload fixation
+"""
+def payload_fixation(payload):
+
+  payload = _urllib.parse.unquote(payload)
+  payload = _urllib.parse.quote(payload)
+  return payload
+
+"""
 Check for non custom parameters.
 """
 def process_non_custom():

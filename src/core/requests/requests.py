@@ -430,8 +430,6 @@ Check if target host is vulnerable. (Cookie-based injection)
 def cookie_injection(url, vuln_parameter, payload, http_request_method):
 
   def inject_cookie(url, vuln_parameter, payload, http_request_method):
-    if settings.TIME_RELATIVE_ATTACK :
-      payload = _urllib.parse.quote(payload)
 
     # Check if defined POST data
     if settings.USER_DEFINED_POST_DATA:
@@ -442,7 +440,8 @@ def cookie_injection(url, vuln_parameter, payload, http_request_method):
     #Check if defined extra headers.
     headers.do_check(request)
     payload = checks.newline_fixation(payload)
-    payload = payload.replace("+", "%2B")
+    payload = checks.payload_fixation(payload)
+    # payload = payload.replace("+", "%2B")
     if settings.INJECT_TAG in menu.options.cookie:
       request.add_header(settings.COOKIE, menu.options.cookie.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload))
     else:

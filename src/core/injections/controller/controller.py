@@ -84,9 +84,8 @@ def heuristic_request(url, http_request_method, check_parameter, payload, whites
   payload = checks.perform_payload_modification(payload)
   if settings.VERBOSITY_LEVEL >= 1:
     print(settings.print_payload(payload))
-  payload = _urllib.parse.unquote(payload)
-  payload = _urllib.parse.quote(payload)
   if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
+    payload = checks.payload_fixation(payload)
     cookie = menu.options.cookie.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC)
   elif not settings.IGNORE_USER_DEFINED_POST_DATA and menu.options.data and settings.INJECT_TAG in menu.options.data:
     data = menu.options.data.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC)
