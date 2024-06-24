@@ -145,31 +145,23 @@ def process_custom_injection_data(data):
           data = data.replace(settings.CUSTOM_INJECTION_MARKER_CHAR, settings.ASTERISK_MARKER)
       _.append(data)
     data = "\\n".join((list(dict.fromkeys(_)))).rstrip("\\n")
-    # data = data.replace(settings.ASTERISK_MARKER, settings.INJECT_TAG)
-    # if settings.INJECT_TAG in data:
-    #   settings.CUSTOM_INJECTION_MARKER_DATA.append(data)
-    #   settings.CUSTOM_INJECTION_MARKER_DATA = (list(dict.fromkeys(settings.CUSTOM_INJECTION_MARKER_DATA)))
-    # if ''.join(settings.CUSTOM_INJECTION_MARKER_DATA).count(settings.INJECT_TAG) > 1:
-    #   err_msg = "More than one custom injection markers ('" + settings.CUSTOM_INJECTION_MARKER_CHAR + "') found in the provided data. "
-    #   err_msg += "You can use the '-p' option, to define them (i.e -p \"id1,id2\"). "
-    #   print(settings.print_critical_msg(err_msg))
-    #   raise SystemExit()
-
+    
   return data
 
 """
 Check for custom injection marker character ('*').
 """
 def custom_injection_marker_character(url, http_request_method):
+  _ = False
   if url and settings.CUSTOM_INJECTION_MARKER_CHAR in url:
     option = "'-u'"
-    settings.CUSTOM_INJECTION_MARKER = settings.INJECTION_MARKER_LOCATION.URL = settings.USER_DEFINED_URL_DATA = True
-    if menu.options.data:
-      settings.IGNORE_USER_DEFINED_POST_DATA = True
-  elif menu.options.data and settings.CUSTOM_INJECTION_MARKER_CHAR in menu.options.data:
+    _ = settings.CUSTOM_INJECTION_MARKER = settings.INJECTION_MARKER_LOCATION.URL = settings.USER_DEFINED_URL_DATA = True
+    # if menu.options.data:
+    #   settings.IGNORE_USER_DEFINED_POST_DATA = True
+  if menu.options.data and settings.CUSTOM_INJECTION_MARKER_CHAR in menu.options.data:
     option = str(http_request_method) + " body"
-    settings.CUSTOM_INJECTION_MARKER = settings.INJECTION_MARKER_LOCATION.DATA = True
-  else:
+    _ = settings.CUSTOM_INJECTION_MARKER = settings.INJECTION_MARKER_LOCATION.DATA = True
+  if not _:
     option = "option '--headers/--user-agent/--referer/--cookie'"
   if menu.options.cookie and settings.CUSTOM_INJECTION_MARKER_CHAR in menu.options.cookie:
     settings.CUSTOM_INJECTION_MARKER = settings.COOKIE_INJECTION = settings.INJECTION_MARKER_LOCATION.COOKIE = True
