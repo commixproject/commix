@@ -62,7 +62,7 @@ def do_GET_check(url, http_request_method):
   if "?" not in url:
     settings.USER_DEFINED_URL_DATA = False
     if settings.INJECT_TAG not in url and not menu.options.shellshock:
-      if len(settings.TEST_PARAMETER) != 0 or \
+      if len(settings.TESTABLE_PARAMETERS_LIST) != 0 or \
          menu.options.level == settings.HTTP_HEADER_INJECTION_LEVEL or \
          menu.options.level == settings.COOKIE_INJECTION_LEVEL or \
          settings.USER_DEFINED_POST_DATA and not settings.IGNORE_USER_DEFINED_POST_DATA:
@@ -202,7 +202,8 @@ def vuln_GET_param(url):
         vuln_parameter = pairs[param].split("=")[0]
         if settings.CUSTOM_INJECTION_MARKER:
           try:
-            settings.TEST_PARAMETER = vuln_parameter
+            settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST.append(vuln_parameter) if vuln_parameter not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST
+            settings.TESTABLE_PARAMETERS_LIST.append(vuln_parameter) if vuln_parameter not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.TESTABLE_PARAMETERS_LIST
             settings.PRE_CUSTOM_INJECTION_MARKER_CHAR = pairs[param].split("=")[1].split(settings.INJECT_TAG)[1]
           except Exception:
             pass
@@ -304,7 +305,7 @@ def do_POST_check(parameter, http_request_method):
       settings.IS_XML = checks.process_data(data_type, http_request_method)
       settings.PARAMETER_DELIMITER = "\n"
 
-  elif settings.TEST_PARAMETER and not any(ext in parameter for ext in settings.TEST_PARAMETER) and not settings.INJECT_TAG in parameter:
+  elif settings.TESTABLE_PARAMETERS_LIST and not any(ext in parameter for ext in settings.TESTABLE_PARAMETERS_LIST) and not settings.INJECT_TAG in parameter:
     if settings.SKIP_NON_CUSTOM:
       settings.IGNORE_USER_DEFINED_POST_DATA = True
 
@@ -477,7 +478,8 @@ def vuln_POST_param(parameter, url):
     parameters = ''.join(parameters.split(":")[0]).strip()
     settings.TESTABLE_VALUE = vuln_parameter = ''.join(parameters.split(settings.RANDOM_TAG)[:1])
     if settings.CUSTOM_INJECTION_MARKER:
-      settings.TEST_PARAMETER = vuln_parameter
+      settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST.append(vuln_parameter) if vuln_parameter not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST
+      settings.TESTABLE_PARAMETERS_LIST.append(vuln_parameter) if vuln_parameter not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.TESTABLE_PARAMETERS_LIST
 
   # XML data format.
   elif settings.IS_XML:
@@ -492,7 +494,8 @@ def vuln_POST_param(parameter, url):
           vuln_parameter = ''.join(_.groups()[0])
           if settings.CUSTOM_INJECTION_MARKER:
             try:
-              settings.TEST_PARAMETER = vuln_parameter
+              settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST.append(vuln_parameter) if vuln_parameter not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST
+              settings.TESTABLE_PARAMETERS_LIST.append(vuln_parameter) if vuln_parameter not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.TESTABLE_PARAMETERS_LIST
               settings.PRE_CUSTOM_INJECTION_MARKER_CHAR = result.split(settings.INJECT_TAG)[1]
             except Exception:
               pass
@@ -508,7 +511,8 @@ def vuln_POST_param(parameter, url):
           vuln_parameter = pairs[param].split("=")[0]
           if settings.CUSTOM_INJECTION_MARKER:
             try:
-              settings.TEST_PARAMETER = vuln_parameter
+              settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST.append(vuln_parameter) if vuln_parameter not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST
+              settings.TESTABLE_PARAMETERS_LIST.append(vuln_parameter) if vuln_parameter not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.TESTABLE_PARAMETERS_LIST
               settings.PRE_CUSTOM_INJECTION_MARKER_CHAR = pairs[param].split("=")[1].split(settings.INJECT_TAG)[1]
             except Exception:
               pass
@@ -682,18 +686,19 @@ def specify_cookie_parameter(cookie):
     pairs = cookie.split(settings.COOKIE_DELIMITER)
     for param in range(0,len(pairs)):
       if settings.INJECT_TAG in pairs[param]:
-        inject_cookie = pairs[param].split("=")[0]
+        vuln_parameter = pairs[param].split("=")[0]
         if settings.CUSTOM_INJECTION_MARKER:
           try:
-            settings.TEST_PARAMETER = inject_cookie
+            settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST.append(vuln_parameter) if vuln_parameter not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST
+            settings.TESTABLE_PARAMETERS_LIST.append(vuln_parameter) if vuln_parameter not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.TESTABLE_PARAMETERS_LIST
             settings.PRE_CUSTOM_INJECTION_MARKER_CHAR = pairs[param].split("=")[1].split(settings.INJECT_TAG)[1]
           except Exception:
             pass
         settings.TESTABLE_VALUE = pairs[param].split("=")[1].replace(settings.INJECT_TAG, "")
         break
   else:
-    inject_cookie = cookie
-  return inject_cookie
+    vuln_parameter = cookie
+  return vuln_parameter
 
 """
 The user-agent based injection.

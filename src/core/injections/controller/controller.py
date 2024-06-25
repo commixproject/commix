@@ -280,7 +280,7 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
       basic_level_checks()
 
     inject_http_headers = check_parameter_in_http_header(check_parameter)
-    
+
     # User-Agent/Referer/Host/Custom HTTP header Injection(s)
     if check_parameter.startswith(settings.SINGLE_WHITESPACE):
       header_name = ""
@@ -309,6 +309,9 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
        settings.CHECKING_PARAMETER += str(header_name) + str(the_type) + str(inject_parameter)
     else:
        settings.CHECKING_PARAMETER += str(the_type) + str(header_name) + str(inject_parameter)
+
+    if check_parameter in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST:
+      settings.CHECKING_PARAMETER = "(custom) " + settings.CHECKING_PARAMETER
     
     info_msg = "Setting " + settings.CHECKING_PARAMETER  + " for tests."
     print(settings.print_info_msg(info_msg))
@@ -476,9 +479,7 @@ Perform the injection proccess
 """
 def do_injection(found, data_type, header_name, url, http_request_method, filename, timesec):
 
-  # Check if multiple parameters
-  check_parameters = []
-  for i in range(0, len(found)):
+  def define_check_parameter(found, i, url):
     if data_type == settings.HTTPMETHOD.POST:
       menu.options.data = found[i]
       check_parameter = parameters.vuln_POST_param(found[i], url)
@@ -488,46 +489,45 @@ def do_injection(found, data_type, header_name, url, http_request_method, filena
     if data_type == settings.COOKIE:
       menu.options.cookie = found[i]
       check_parameter = parameters.specify_cookie_parameter(found[i])
+    return url, check_parameter
+
+  # Check if multiple parameters
+  check_parameters = []
+  for i in range(0, len(found)):
+    url, check_parameter = define_check_parameter(found, i, url)
     check_parameters.append(check_parameter)
 
   checks.testable_parameters(url, check_parameters, header_name)
   
   for i in range(0, len(found)):
-    if data_type == settings.HTTPMETHOD.POST:
-      menu.options.data = found[i]
-      check_parameter = parameters.vuln_POST_param(found[i], url)
-    if data_type == settings.HTTPMETHOD.GET:
-      url = found[i]
-      check_parameter = parameters.vuln_GET_param(url)
-    if data_type == settings.COOKIE:
-      menu.options.cookie = found[i]
-      check_parameter = parameters.specify_cookie_parameter(found[i])
+    url, check_parameter = define_check_parameter(found, i, url)
     if check_parameter != found[i] and check_parameter not in settings.SKIP_PARAMETER:
       if len(check_parameter) > 0:
         settings.TESTABLE_PARAMETER = check_parameter
       if len(settings.TESTABLE_PARAMETER) > 0:
-        if menu.options.test_parameter != None:
+        if settings.TESTABLE_PARAMETERS_LIST and not settings.CUSTOM_INJECTION_MARKER:
           counter = 0
           for check_parameter in check_parameters:
-            if settings.TEST_PARAMETER.count(check_parameter) != 0:
-              if data_type == settings.HTTPMETHOD.POST:
-                menu.options.data = found[counter]
-                check_parameter = parameters.vuln_POST_param(menu.options.data, url)
-              if data_type == settings.HTTPMETHOD.GET:
-                url = found[counter]
-                check_parameter = parameters.vuln_GET_param(url)
-              if data_type == settings.COOKIE:
-                menu.options.cookie = found[counter]
-                check_parameter = parameters.specify_cookie_parameter(menu.options.cookie)
+            if settings.TESTABLE_PARAMETERS_LIST.count(check_parameter) != 0:
+              url, check_parameter = define_check_parameter(found, counter, url)
+              # Check for session file
+              check_for_stored_sessions(url, http_request_method)
+              injection_proccess(url, check_parameter, http_request_method, filename, timesec)
+            counter += 1
+          break
+        elif settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST and settings.CUSTOM_INJECTION_MARKER:
+          counter = 0
+          for check_parameter in check_parameters:
+            if settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST.count(check_parameter) != 0:
+              url, check_parameter = define_check_parameter(found, counter, url)
               # Check for session file
               check_for_stored_sessions(url, http_request_method)
               injection_proccess(url, check_parameter, http_request_method, filename, timesec)
             counter += 1
           break
         else:
-          # Check for session file
           check_for_stored_sessions(url, http_request_method)
-          injection_proccess(url, check_parameter, http_request_method, filename, timesec)
+          injection_proccess(url, check_parameter, http_request_method, filename, timesec) 
       else:
         # Check for session file
         check_for_stored_sessions(url, http_request_method)
@@ -538,10 +538,10 @@ Cookie injection
 """
 def cookie_injection(url, http_request_method, filename, timesec):
 
-  settings.COOKIE_INJECTION = True
-  # Cookie Injection
-  if settings.COOKIE_INJECTION:
-    cookie_value = menu.options.cookie
+  cookie_value = menu.options.cookie
+  if cookie_value:
+    settings.COOKIE_INJECTION = True
+    # Cookie Injection
     header_name = settings.SINGLE_WHITESPACE + settings.COOKIE
     settings.HTTP_HEADER = header_name[1:].lower()
     cookie_parameters = parameters.do_cookie_check(menu.options.cookie)
@@ -553,7 +553,7 @@ def cookie_injection(url, http_request_method, filename, timesec):
     cookie_parameters = [x.replace(settings.SINGLE_WHITESPACE, "") for x in cookie_parameters]
     do_injection(cookie_parameters, settings.COOKIE, header_name, url, http_request_method, filename, timesec)
 
-  if settings.COOKIE_INJECTION == True:
+  if settings.COOKIE_INJECTION:
     # Restore cookie value
     menu.options.cookie = cookie_value
     # Disable cookie injection
@@ -567,12 +567,8 @@ def get_request(url, http_request_method, filename, timesec):
   found_url = parameters.do_GET_check(url, http_request_method)
   header_name = ""
 
-  if type(found_url) is str:
-    found_url = []
-    found_url_list.append(found_url)
-    found_url = found_url
-
-  do_injection(found_url, settings.HTTPMETHOD.GET, header_name, url, http_request_method, filename, timesec)
+  if found_url != False:
+    do_injection(found_url, settings.HTTPMETHOD.GET, header_name, url, http_request_method, filename, timesec)
 
 """
 Check if HTTP Method is POST.
@@ -619,7 +615,7 @@ def data_checks(url, http_request_method, filename, timesec):
 Perform checks over cookie values.
 """
 def cookies_checks(url, http_request_method, filename, timesec): 
-  if len([i for i in settings.TEST_PARAMETER if i in str(menu.options.cookie)]) != 0 or \
+  if len([i for i in settings.TESTABLE_PARAMETERS_LIST if i in str(menu.options.cookie)]) != 0 or \
     settings.INJECTION_MARKER_LOCATION.COOKIE or \
     settings.COOKIE_INJECTION:
     if not settings.SKIP_NON_CUSTOM:
@@ -629,7 +625,7 @@ def cookies_checks(url, http_request_method, filename, timesec):
 Perform checks over HTTP Headers parameters.
 """
 def headers_checks(url, http_request_method, filename, timesec):
-  if len([i for i in settings.TEST_PARAMETER if i in settings.HTTP_HEADERS]) != 0 or \
+  if len([i for i in settings.TESTABLE_PARAMETERS_LIST if i in settings.HTTP_HEADERS]) != 0 or \
     settings.INJECTION_MARKER_LOCATION.HTTP_HEADERS or settings.HTTP_HEADERS_INJECTION or \
     any((settings.USER_AGENT_INJECTION, settings.REFERER_INJECTION, settings.HOST_INJECTION)):
     if not settings.SKIP_NON_CUSTOM:
@@ -698,19 +694,18 @@ def perform_checks(url, http_request_method, filename):
       headers_checks(url, http_request_method, filename, timesec)
     if settings.INJECTION_MARKER_LOCATION.CUSTOM_HTTP_HEADERS:
       custom_headers_checks(url, http_request_method, filename, timesec)
-    if settings.USER_DEFINED_POST_DATA and not settings.INJECTION_MARKER_LOCATION.DATA \
-      or settings.USER_DEFINED_URL_DATA and not settings.INJECTION_MARKER_LOCATION.URL:
+    if settings.TESTABLE_PARAMETERS_LIST or (settings.USER_DEFINED_POST_DATA and not settings.INJECTION_MARKER_LOCATION.DATA) or (settings.USER_DEFINED_URL_DATA and not settings.INJECTION_MARKER_LOCATION.URL):
       checks.process_non_custom()
 
   if not settings.SKIP_NON_CUSTOM:
     settings.CUSTOM_INJECTION_MARKER = False
-    if not settings.INJECTION_MARKER_LOCATION.URL or not settings.INJECTION_MARKER_LOCATION.DATA:
+    if settings.TESTABLE_PARAMETERS_LIST or not settings.INJECTION_MARKER_LOCATION.URL or not settings.INJECTION_MARKER_LOCATION.DATA:
       data_checks(url, http_request_method, filename, timesec)
     if _:
-      if not settings.INJECTION_MARKER_LOCATION.COOKIE and menu.options.level >= settings.COOKIE_INJECTION_LEVEL and menu.options.cookie:
+      if settings.TESTABLE_PARAMETERS_LIST or not settings.INJECTION_MARKER_LOCATION.COOKIE and menu.options.level >= settings.COOKIE_INJECTION_LEVEL and menu.options.cookie:
         settings.COOKIE_INJECTION = True
         cookies_checks(url, http_request_method, filename, timesec)
-      if not settings.INJECTION_MARKER_LOCATION.HTTP_HEADERS and menu.options.level > settings.COOKIE_INJECTION_LEVEL:
+      if settings.TESTABLE_PARAMETERS_LIST or not settings.INJECTION_MARKER_LOCATION.HTTP_HEADERS and menu.options.level > settings.COOKIE_INJECTION_LEVEL:
         settings.HTTP_HEADERS_INJECTION = True
         headers_checks(url, http_request_method, filename, timesec)
 

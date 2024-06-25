@@ -1,4 +1,5 @@
 ## Version 4.0 (TBA)
+* Fixed: Minor bug-fix regarding combining custom injection marker (i.e. asterisk `*`) with `-p` option.
 * Revised: Improvement regarding specifying multiple injection points by appending custom injection marker (i.e. asterisk `*`).
 * Fixed: Minor bug-fix regarding crawler (i.e. option `--crawl`).
 * Updated: Six (third party) module has been updated (Python 3.12 support).

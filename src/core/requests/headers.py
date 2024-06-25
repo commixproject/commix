@@ -398,7 +398,7 @@ def do_check(request):
             if settings.CUSTOM_INJECTION_MARKER_CHAR in http_header_value:
               settings.CUSTOM_INJECTION_MARKER = True
               
-            if http_header_name in settings.TEST_PARAMETER or settings.INJECT_TAG in http_header_value or settings.ASTERISK_MARKER in http_header_value:
+            if http_header_name in settings.TESTABLE_PARAMETERS_LIST or settings.INJECT_TAG in http_header_value or settings.ASTERISK_MARKER in http_header_value:
               settings.INJECTION_MARKER_LOCATION.CUSTOM_HTTP_HEADERS = True
               settings.CUSTOM_HEADER_CHECK = http_header_name
               if len(http_header_name) != 0 and \

@@ -152,7 +152,7 @@ def process_custom_injection_data(data):
 Check for custom injection marker character ('*').
 """
 def custom_injection_marker_character(url, http_request_method):
-  _ = False
+  _ = settings.CUSTOM_INJECTION_MARKER = False
   if url and settings.CUSTOM_INJECTION_MARKER_CHAR in url:
     option = "'-u'"
     _ = settings.CUSTOM_INJECTION_MARKER = settings.INJECTION_MARKER_LOCATION.URL = settings.USER_DEFINED_URL_DATA = True
@@ -172,7 +172,7 @@ def custom_injection_marker_character(url, http_request_method):
   elif menu.options.host and settings.CUSTOM_INJECTION_MARKER_CHAR in menu.options.host:
     settings.CUSTOM_INJECTION_MARKER = settings.INJECTION_MARKER_LOCATION.HTTP_HEADERS = settings.HOST_INJECTION = True
   elif settings.CUSTOM_HEADER_CHECK and settings.CUSTOM_HEADER_CHECK != settings.ACCEPT:
-    if settings.CUSTOM_HEADER_CHECK not in settings.TEST_PARAMETER:
+    if settings.CUSTOM_HEADER_CHECK not in settings.TESTABLE_PARAMETERS_LIST:
       settings.CUSTOM_INJECTION_MARKER = True
     else:
       settings.CUSTOM_HEADER_INJECTION = True
@@ -537,7 +537,7 @@ Ignoring the anti-CSRF parameter(s).
 """
 def ignore_anticsrf_parameter(parameter):
   if any(parameter.lower().count(token) for token in settings.CSRF_TOKEN_PARAMETER_INFIXES):
-    if not any(parameter for token in settings.TEST_PARAMETER):
+    if not any(parameter for token in settings.TESTABLE_PARAMETERS_LIST):
       if (len(parameter.split("="))) == 2:
         info_msg = "Ignoring the parameter '" + parameter.split("=")[0]
         info_msg += "' that appears to hold anti-CSRF token '" + parameter.split("=")[1] +  "'."
@@ -1292,26 +1292,26 @@ def check_provided_parameters():
     if menu.options.test_parameter != None :
       if menu.options.test_parameter.startswith("="):
         menu.options.test_parameter = menu.options.test_parameter[1:]
-      settings.TEST_PARAMETER = menu.options.test_parameter.split(settings.PARAMETER_SPLITTING_REGEX)
+      settings.TESTABLE_PARAMETERS_LIST = menu.options.test_parameter.split(settings.PARAMETER_SPLITTING_REGEX)
 
     elif menu.options.skip_parameter != None :
       if menu.options.skip_parameter.startswith("="):
         menu.options.skip_parameter = menu.options.skip_parameter[1:]
-      settings.TEST_PARAMETER = menu.options.skip_parameter.split(settings.PARAMETER_SPLITTING_REGEX)
+      settings.TESTABLE_PARAMETERS_LIST = menu.options.skip_parameter.split(settings.PARAMETER_SPLITTING_REGEX)
 
-    for i in range(0,len(settings.TEST_PARAMETER)):
-      if "=" in settings.TEST_PARAMETER[i]:
-        settings.TEST_PARAMETER[i] = settings.TEST_PARAMETER[i].split("=")[0]
+    for i in range(0,len(settings.TESTABLE_PARAMETERS_LIST)):
+      if "=" in settings.TESTABLE_PARAMETERS_LIST[i]:
+        settings.TESTABLE_PARAMETERS_LIST[i] = settings.TESTABLE_PARAMETERS_LIST[i].split("=")[0]
 
 """
 Remove skipped parameters
 """
 def remove_skipped_params(url, check_parameters):
   testable_parameters = list(set(check_parameters) - set(menu.options.skip_parameter.split(",")))
-  settings.TEST_PARAMETER = [x for x in testable_parameters if x not in settings.PARAMETER_SPLITTING_REGEX.join(settings.TEST_PARAMETER).split(settings.PARAMETER_SPLITTING_REGEX)]
+  settings.TESTABLE_PARAMETERS_LIST = [x for x in testable_parameters if x not in settings.PARAMETER_SPLITTING_REGEX.join(settings.TESTABLE_PARAMETERS_LIST).split(settings.PARAMETER_SPLITTING_REGEX)]
   _ = []
   for parameter in check_parameters:
-    if parameter not in settings.PARAMETER_SPLITTING_REGEX.join(settings.TEST_PARAMETER).split(settings.PARAMETER_SPLITTING_REGEX):
+    if parameter not in settings.PARAMETER_SPLITTING_REGEX.join(settings.TESTABLE_PARAMETERS_LIST).split(settings.PARAMETER_SPLITTING_REGEX):
       _.append(parameter)
   if _:    
     info_msg = "Skipping " + check_http_method(url) + " parameter" + ('', 's')[len(_) > 1] + " '" + str(", ".join(_)) + "'."
@@ -1327,11 +1327,11 @@ def testable_parameters(url, check_parameters, header_name):
     remove_skipped_params(url, check_parameters)
 
   _ = False
-  if len([i for i in settings.TEST_PARAMETER if i in check_parameters]) == 0:
+  if len([i for i in settings.TESTABLE_PARAMETERS_LIST if i in check_parameters]) == 0:
     _ = True
 
-  if settings.TEST_PARAMETER and isinstance(settings.TEST_PARAMETER, list):
-    testable_parameters = settings.PARAMETER_SPLITTING_REGEX.join(settings.TEST_PARAMETER).replace(settings.SINGLE_WHITESPACE, "")
+  if settings.TESTABLE_PARAMETERS_LIST and isinstance(settings.TESTABLE_PARAMETERS_LIST, list):
+    testable_parameters = settings.PARAMETER_SPLITTING_REGEX.join(settings.TESTABLE_PARAMETERS_LIST).replace(settings.SINGLE_WHITESPACE, "")
     testable_parameters = testable_parameters.split(settings.PARAMETER_SPLITTING_REGEX)
     non_exist_param = list(set(testable_parameters) - set(check_parameters))
     if _ and settings.TESTABLE_PARAMETERS != False:
