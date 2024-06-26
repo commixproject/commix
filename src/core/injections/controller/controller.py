@@ -392,12 +392,11 @@ def http_headers_injection(url, http_request_method, filename, timesec):
     if not menu.options.shellshock:
       menu.options.agent = menu.options.agent + settings.INJECT_TAG
     settings.USER_AGENT_INJECTION = True
-    if settings.USER_AGENT_INJECTION:
-      check_parameter = header_name = settings.SINGLE_WHITESPACE + settings.USER_AGENT
-      settings.HTTP_HEADER = header_name[1:].replace("-", "").lower()
-      check_for_stored_sessions(url, http_request_method)
-      if not injection_proccess(url, check_parameter, http_request_method, filename, timesec):
-        settings.USER_AGENT_INJECTION = None
+    check_parameter = header_name = settings.SINGLE_WHITESPACE + settings.USER_AGENT
+    settings.HTTP_HEADER = header_name[1:].replace("-", "").lower()
+    check_for_stored_sessions(url, http_request_method)
+    if not injection_proccess(url, check_parameter, http_request_method, filename, timesec):
+      settings.USER_AGENT_INJECTION = None
     menu.options.agent = user_agent
 
   def referer_injection(url, http_request_method, filename, timesec):
@@ -407,12 +406,11 @@ def http_headers_injection(url, http_request_method, filename, timesec):
         menu.options.referer = _urllib.parse.urljoin(url, _urllib.parse.urlparse(url).path)
       menu.options.referer = menu.options.referer + settings.INJECT_TAG
     settings.REFERER_INJECTION = True
-    if settings.REFERER_INJECTION:
-      check_parameter = header_name = settings.SINGLE_WHITESPACE + settings.REFERER
-      settings.HTTP_HEADER = header_name[1:].lower()
-      check_for_stored_sessions(url, http_request_method)
-      if not injection_proccess(url, check_parameter, http_request_method, filename, timesec):
-        settings.REFERER_INJECTION = False
+    check_parameter = header_name = settings.SINGLE_WHITESPACE + settings.REFERER
+    settings.HTTP_HEADER = header_name[1:].lower()
+    check_for_stored_sessions(url, http_request_method)
+    if not injection_proccess(url, check_parameter, http_request_method, filename, timesec):
+      settings.REFERER_INJECTION = False
     menu.options.agent = referer
 
   def host_injection(url, http_request_method, filename, timesec):
@@ -421,12 +419,11 @@ def http_headers_injection(url, http_request_method, filename, timesec):
       menu.options.host = _urllib.parse.urlparse(url).netloc
     menu.options.host = menu.options.host + settings.INJECT_TAG
     settings.HOST_INJECTION = True
-    if settings.HOST_INJECTION:
-      check_parameter = header_name = settings.SINGLE_WHITESPACE + settings.HOST
-      settings.HTTP_HEADER = header_name[1:].lower()
-      check_for_stored_sessions(url, http_request_method)
-      if not injection_proccess(url, check_parameter, http_request_method, filename, timesec):
-        settings.HOST_INJECTION = False
+    check_parameter = header_name = settings.SINGLE_WHITESPACE + settings.HOST
+    settings.HTTP_HEADER = header_name[1:].lower()
+    check_for_stored_sessions(url, http_request_method)
+    if not injection_proccess(url, check_parameter, http_request_method, filename, timesec):
+      settings.HOST_INJECTION = False
     menu.options.host = host
 
   if not any((settings.USER_AGENT_INJECTION, settings.REFERER_INJECTION, settings.HOST_INJECTION)) and \

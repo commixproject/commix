@@ -329,8 +329,8 @@ def main(filename, url, http_request_method):
     if menu.options.url_reload and menu.options.data:
       settings.URL_RELOAD = True
 
-    if settings.CUSTOM_INJECTION_MARKER and settings.MULTI_TARGETS or settings.STDIN_PARSING:
-      settings.CUSTOM_INJECTION_MARKER = False
+    # if settings.CUSTOM_INJECTION_MARKER and settings.MULTI_TARGETS or settings.STDIN_PARSING:
+    #   settings.CUSTOM_INJECTION_MARKER = False
 
     # Define the level of tests to perform.
     if menu.options.level == settings.DEFAULT_INJECTION_LEVEL:

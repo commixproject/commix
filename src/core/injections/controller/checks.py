@@ -228,6 +228,7 @@ def skip_testing(filename, url):
     if settings.IDENTIFIED_WARNINGS or settings.IDENTIFIED_PHPINFO:
       _ = " testing command injection techniques"
     else:
+      settings.SKIP_CODE_INJECTIONS = False 
       _ = " further testing"
     while True:
       message = "Do you want to skip" + _ + " in " + settings.CHECKING_PARAMETER + "? [Y/n] > "
