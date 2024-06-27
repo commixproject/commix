@@ -228,7 +228,7 @@ def skip_testing(filename, url):
     if settings.IDENTIFIED_WARNINGS or settings.IDENTIFIED_PHPINFO:
       _ = " testing command injection techniques"
     else:
-      settings.SKIP_CODE_INJECTIONS = False 
+      settings.SKIP_COMMAND_INJECTIONS = False 
       _ = " further testing"
     while True:
       message = "Do you want to skip" + _ + " in " + settings.CHECKING_PARAMETER + "? [Y/n] > "
@@ -524,8 +524,7 @@ def PCRE_e_modifier(parameter, http_request_method):
           elif modifier_check in settings.CHOICE_NO:
             return original_parameter
           elif modifier_check in settings.CHOICE_QUIT:
-            print(settings.SINGLE_WHITESPACE)
-            os._exit(0)
+            raise SystemExit()
           else:
             common.invalid_option(modifier_check)
             pass
@@ -948,8 +947,7 @@ def ps_check():
       elif ps_check in settings.CHOICE_NO:
         break
       elif ps_check in settings.CHOICE_QUIT:
-        print(settings.SINGLE_WHITESPACE)
-        os._exit(0)
+        raise SystemExit()
       else:
         common.invalid_option(ps_check)
         pass
@@ -1011,8 +1009,7 @@ def check_CGI_scripts(url):
           menu.options.shellshock = False
           break
         elif shellshock_check in settings.CHOICE_QUIT:
-          print(settings.SINGLE_WHITESPACE)
-          os._exit(0)
+          raise SystemExit()
         else:
           common.invalid_option(shellshock_check)
           pass
