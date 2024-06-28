@@ -53,7 +53,7 @@ def authentication_process(http_request_method):
       if settings.VERBOSITY_LEVEL != 0:
         info_msg = "The received cookie is "
         info_msg += str(menu.options.cookie) + Style.RESET_ALL + "."
-        print(settings.print_bold_info_msg(info_msg))
+        settings.print_data_to_stdout(settings.print_bold_info_msg(info_msg))
     _urllib.request.install_opener(opener)
     request = _urllib.request.Request(auth_url, auth_data.encode(settings.DEFAULT_CODEC), method=http_request_method)
     # Check if defined extra headers.
@@ -77,7 +77,7 @@ def define_wordlists():
       username_txt_file = settings.USERNAMES_TXT_FILE
       passwords_txt_file = settings.PASSWORDS_TXT_FILE
       info_msg = "Setting default wordlists for dictionary-based attack."
-      print(settings.print_info_msg(info_msg))
+      settings.print_data_to_stdout(settings.print_info_msg(info_msg))
       break
     elif do_update in settings.CHOICE_NO:
       message = "Please enter usernames wordlist > "
@@ -95,14 +95,14 @@ def define_wordlists():
     usernames = []
     if settings.VERBOSITY_LEVEL != 0:
       debug_msg = "Parsing usernames wordlist '" + username_txt_file + "'."
-      print(settings.print_debug_msg(debug_msg))
+      settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
     if not os.path.isfile(username_txt_file):
       err_msg = "The specified file '" + str(username_txt_file) + "' does not exist."
-      print(settings.print_critical_msg(err_msg))
+      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
       raise SystemExit()
     if len(username_txt_file) == 0:
       err_msg = "The specified file '" + str(username_txt_file) + "' seems empty."
-      print(settings.print_critical_msg(err_msg))
+      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
       raise SystemExit()
     with open(username_txt_file, "r") as f:
       for line in f:
@@ -110,21 +110,21 @@ def define_wordlists():
         usernames.append(line)
   except IOError:
     err_msg = " Check if file '" + str(username_txt_file) + "' is readable or corrupted."
-    print(settings.print_critical_msg(err_msg))
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
   try:
     passwords = []
     if settings.VERBOSITY_LEVEL != 0:
       debug_msg = "Parsing passwords wordlist '" + passwords_txt_file + "'."
-      print(settings.print_debug_msg(debug_msg))
+      settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
     if not os.path.isfile(passwords_txt_file):
       err_msg = "The specified file '" + str(passwords_txt_file) + "' does not exist."
-      print(settings.print_critical_msg(err_msg))
+      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
       raise SystemExit()
     if len(passwords_txt_file) == 0:
       err_msg = "The specified file '" + str(passwords_txt_file) + "' seems empty."
-      print(settings.print_critical_msg(err_msg))
+      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
       raise SystemExit()
     with open(passwords_txt_file, "r") as f:
       for line in f:
@@ -132,7 +132,7 @@ def define_wordlists():
         passwords.append(line)
   except IOError:
     err_msg = " Check if file '" + str(passwords_txt_file) + "' is readable or corrupted."
-    print(settings.print_critical_msg(err_msg))
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
   return usernames, passwords
@@ -156,10 +156,10 @@ def http_auth_cracker(url, realm, http_request_method):
         if settings.VERBOSITY_LEVEL != 0:
           payload = "'" + username + ":" + password + "'"
           if settings.VERBOSITY_LEVEL >= 2:
-            print(settings.print_checking_msg(payload))
+            settings.print_data_to_stdout(settings.print_checking_msg(payload))
           else:
-            sys.stdout.write("\r" + settings.print_checking_msg(payload) + settings.SINGLE_WHITESPACE * 10)
-            sys.stdout.flush()
+            settings.print_data_to_stdout(settings.END_LINE.CR + settings.print_checking_msg(payload) + settings.SINGLE_WHITESPACE * 10)
+            
         try:
           # Basic authentication
           if authentication_type.lower() == settings.AUTH_TYPE.BASIC:
@@ -198,22 +198,22 @@ def http_auth_cracker(url, realm, http_request_method):
         if settings.VERBOSITY_LEVEL == 0:
           info_msg = "Checking for valid pair of HTTP authentication credentials."
           info_msg += float_percent
-          sys.stdout.write("\r\r" + settings.print_info_msg(info_msg))
-          sys.stdout.flush()
+          settings.print_data_to_stdout("\r\r" + settings.print_info_msg(info_msg))
+          
         if found:
           valid_pair =  "" + username + ":" + password + ""
           if not settings.VERBOSITY_LEVEL >= 2:
-            print(settings.SINGLE_WHITESPACE)
+            settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
           info_msg = "Identified valid pair of HTTP authentication credentials: '"
           info_msg += valid_pair + Style.RESET_ALL + Style.BRIGHT  + "'."
-          print(settings.print_bold_info_msg(info_msg))
+          settings.print_data_to_stdout(settings.print_bold_info_msg(info_msg))
           return valid_pair
 
     err_msg = "Use the '--auth-cred' option to provide a valid pair of "
     err_msg += "HTTP authentication credentials (i.e --auth-cred=\"admin:admin\") "
     err_msg += "or place an other dictionary into '"
     err_msg += os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'txt')) + "/' directory."
-    print("\n" + settings.print_critical_msg(err_msg))
+    settings.print_data_to_stdout("\n" + settings.print_critical_msg(err_msg))
     return False
 
 # eof

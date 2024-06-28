@@ -45,11 +45,11 @@ def ignore(url):
   if os.path.isfile(settings.SESSION_FILE):
     if settings.VERBOSITY_LEVEL != 0:
       debug_msg = "Ignoring the stored session from the session file due to '--ignore-session' switch."
-      print(settings.print_debug_msg(debug_msg))
+      settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
   else:
     if settings.VERBOSITY_LEVEL != 0:
       warn_msg = "Skipping ignoring the stored session, as the session file not exist."
-      print(settings.print_warning_msg(warn_msg))
+      settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
 """
 Flush session.
@@ -58,7 +58,7 @@ def flush(url):
   if os.path.isfile(settings.SESSION_FILE):
     if settings.VERBOSITY_LEVEL != 0:
       debug_msg = "Flushing the stored session from the session file."
-      print(settings.print_debug_msg(debug_msg))
+      settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
     try:
       conn = sqlite3.connect(settings.SESSION_FILE)
       tables = list(conn.execute("SELECT name FROM sqlite_master WHERE type is 'table'"))
@@ -66,13 +66,13 @@ def flush(url):
       conn.commit()
       conn.close()
     except sqlite3.OperationalError as err_msg:
-      print(settings.SINGLE_WHITESPACE)
+      settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
       err_msg = "Unable to flush the session file." + str(err_msg).title()
-      print(settings.print_critical_msg(err_msg))
+      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
   else:
     if settings.VERBOSITY_LEVEL != 0:
       warn_msg = "Skipping flushing the stored session, as the session file not exist."
-      print(settings.print_warning_msg(warn_msg))
+      settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
 """
 Clear injection point records
@@ -88,7 +88,7 @@ def clear(url):
       conn.commit()
       conn.close()
   except sqlite3.OperationalError as err_msg:
-    print(settings.print_critical_msg(err_msg))
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
   except:
     settings.LOAD_SESSION = False
     return False
@@ -122,7 +122,7 @@ def injection_point_importation(url, technique, injection_type, separator, shell
   except sqlite3.OperationalError as err_msg:
     err_msg = str(err_msg)[:1].upper() + str(err_msg)[1:] + "."
     err_msg += " You are advised to rerun with switch '--flush-session'."
-    print(settings.print_critical_msg(err_msg))
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
   except sqlite3.DatabaseError as err_msg:
@@ -162,7 +162,7 @@ def applied_techniques(url, http_request_method):
     applied_techniques = ''.join(list(set(values)))
     return applied_techniques
   except sqlite3.OperationalError as err_msg:
-    #print(settings.print_critical_msg(err_msg))
+    #settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     settings.LOAD_SESSION = False
     return False
   except:
@@ -192,7 +192,7 @@ def applied_levels(url, http_request_method):
       return session[0]
 
   except sqlite3.OperationalError as err_msg:
-    #print(settings.print_critical_msg(err_msg))
+    #settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     settings.LOAD_SESSION = False
     return False
   except:
@@ -266,7 +266,7 @@ def injection_point_exportation(url, http_request_method):
       no_such_table = True
       pass
   except sqlite3.OperationalError as err_msg:
-    #print(settings.print_critical_msg(err_msg))
+    #settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     settings.LOAD_SESSION = False
     return False
   except:
@@ -318,7 +318,7 @@ def notification(url, technique, injection_type):
           common.invalid_option(settings.LOAD_SESSION)
           pass
   except sqlite3.OperationalError as err_msg:
-    print(settings.print_critical_msg(err_msg))
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
   except (KeyboardInterrupt, SystemExit):
     raise
 
@@ -361,7 +361,7 @@ def store_cmd(url, cmd, shell, vuln_parameter):
       conn.commit()
       conn.close()
     except sqlite3.OperationalError as err_msg:
-      print(settings.print_critical_msg(err_msg))
+      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     except (TypeError, AttributeError) as err_msg:
       pass
 
@@ -415,7 +415,7 @@ def import_valid_credentials(url, authentication_type, admin_panel, username, pa
     conn.commit()
     conn.close()
   except sqlite3.OperationalError as err_msg:
-    print(settings.print_critical_msg(err_msg))
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
   except sqlite3.DatabaseError as err_msg:
     checks.error_loading_session_file()
 

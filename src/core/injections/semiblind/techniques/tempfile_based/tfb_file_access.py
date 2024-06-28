@@ -57,11 +57,11 @@ def file_write(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec,
     shell = "".join(str(p) for p in shell)
   cmd = checks.check_file(dest_to_write)
   if settings.VERBOSITY_LEVEL == 0 and not _:
-    print(settings.SINGLE_WHITESPACE)
+    settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
   check_how_long, shell = tfb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
   shell = "".join(str(p) for p in shell)
   if settings.VERBOSITY_LEVEL == 0:
-    print(settings.SINGLE_WHITESPACE)
+    settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
   checks.file_write_status(shell, dest_to_write)
 
 """
@@ -75,7 +75,7 @@ def file_upload(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec
   check_how_long, shell = tfb_injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response)
   shell = "".join(str(p) for p in shell)
   if settings.VERBOSITY_LEVEL == 0:
-    print(settings.SINGLE_WHITESPACE)
+    settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
   checks.file_upload_status(shell, dest_to_upload)
 
 """
@@ -92,7 +92,7 @@ def file_read(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
     shell = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
   shell = "".join(str(p) for p in shell)
   if settings.VERBOSITY_LEVEL == 0 and _ and len(shell) != 0:
-    print(settings.SINGLE_WHITESPACE)
+    settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
   checks.file_read_status(shell, file_to_read, filename)
 
 """

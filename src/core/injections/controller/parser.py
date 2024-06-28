@@ -33,7 +33,6 @@ def logfile_parser():
   Warning message for mutiple request in same log file.
   """
   def multi_requests():
-    print(settings.SINGLE_WHITESPACE)
     err_msg = "Multiple"
     if menu.options.requestfile:
       err_msg += " requests"
@@ -45,8 +44,8 @@ def logfile_parser():
     elif menu.options.logfile:
       err_msg += " targets "
     err_msg += "will be ignored."
-    sys.stdout.write(settings.print_critical_msg(err_msg) + "\n")
-    sys.stdout.flush()
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+    
     return False
 
   """
@@ -56,7 +55,7 @@ def logfile_parser():
     err_msg = "Specified file "
     err_msg += "'" + os.path.split(request_file)[1] + "'"
     err_msg += " does not contain a valid HTTP request."
-    print(settings.print_critical_msg(err_msg))
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
   if menu.options.requestfile:
@@ -68,7 +67,7 @@ def logfile_parser():
 
   if not os.path.exists(request_file):
     err_msg = "It seems that the '" + request_file + "' file, does not exist."
-    print(settings.print_critical_msg(err_msg))
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
   try:
@@ -99,8 +98,7 @@ def logfile_parser():
   except IOError as err_msg:
     error_msg = "The '" + request_file + "' "
     error_msg += str(err_msg.args[1]).lower() + "."
-    print(settings.SINGLE_WHITESPACE)
-    print(settings.print_critical_msg(error_msg))
+    settings.print_data_to_stdout(settings.print_critical_msg(error_msg))
     raise SystemExit()
 
   single_request = True
@@ -146,10 +144,9 @@ def logfile_parser():
           menu.options.auth_cred = base64.b64decode(auth_provided[1]).decode()
         elif menu.options.auth_type.lower() == settings.AUTH_TYPE.DIGEST:
           if not menu.options.auth_cred:
-            print(settings.SINGLE_WHITESPACE)
             err_msg = "Use the '--auth-cred' option to provide a valid pair of "
             err_msg += "HTTP authentication credentials (i.e --auth-cred=\"admin:admin\") "
-            print(settings.print_critical_msg(err_msg))
+            settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
             raise SystemExit()
 
     # Add extra headers
@@ -177,19 +174,17 @@ def logfile_parser():
       request_url = request_url.replace(scheme, scheme + menu.options.host)
     request_url = checks.check_http_s(request_url)
     info_msg += "using the '" + os.path.split(request_file)[1] + "' file. "
-    sys.stdout.write(settings.print_info_msg(info_msg))
-    sys.stdout.flush()
+    settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+    
     menu.options.url = request_url
-    if single_request:
-      print(settings.SINGLE_WHITESPACE)
     if menu.options.logfile and settings.VERBOSITY_LEVEL != 0:
       sub_content = http_method + settings.SINGLE_WHITESPACE + menu.options.url
-      print(settings.print_sub_content(sub_content))
+      settings.print_data_to_stdout(settings.print_sub_content(sub_content))
       if menu.options.cookie:
          sub_content = "Cookie: " + menu.options.cookie
-         print(settings.print_sub_content(sub_content))
+         settings.print_data_to_stdout(settings.print_sub_content(sub_content))
       if menu.options.data:
          sub_content = "POST data: " + menu.options.data
-         print(settings.print_sub_content(sub_content))
+         settings.print_data_to_stdout(settings.print_sub_content(sub_content))
 
 # eof

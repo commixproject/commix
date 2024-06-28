@@ -49,7 +49,7 @@ def flatten(nested_dict, separator="_", root_keys_to_ignore=""):
         assert isinstance(separator, str), "Separator must be a string"
         # assert isinstance(nested_dict, dict), "The flatten() requires a dictionary input."
     except AssertionError as err_msg:
-        print(settings.print_critical_msg(err_msg))
+        settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
         raise SystemExit()
 
     # This global dictionary stores the flattened keys and values and is ultimately returned
@@ -84,7 +84,7 @@ def _unflatten_asserts(flat_dict, separator):
         # assert isinstance(flat_dict, dict), "The unflatten() requires a dictionary input."
         # assert all(isinstance(value, (bool, float, int, str)) for value in flat_dict.values()), "The provided dictionary is not flat."
     except AssertionError as err_msg:
-        print(settings.print_critical_msg(err_msg))
+        settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
         raise SystemExit()
 
 def unflatten(flat_dict, separator='_'):

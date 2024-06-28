@@ -53,8 +53,8 @@ def tfb_controller(no_result, url, timesec, filename, tmp_path, http_request_met
     call_tfb = tfb_handler.exploitation(url, timesec, filename, tmp_path, http_request_method, url_time_response)
     return call_tfb
   else :
-    sys.stdout.write("\r")
-    sys.stdout.flush()
+    settings.print_data_to_stdout(settings.END_LINE.CR)
+    
 
 """
 Delete previous shells outputs.
@@ -63,7 +63,7 @@ def delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, h
   if settings.FILE_BASED_STATE != None or settings.TEMPFILE_BASED_STATE != None:
     if settings.VERBOSITY_LEVEL != 0:
       debug_msg = "Cleaning up the target operating system (i.e. deleting file '" + OUTPUT_TEXTFILE + "')."
-      print(settings.print_debug_msg(debug_msg))
+      settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
   if settings.FILE_BASED_STATE != None:
     if settings.TARGET_OS == settings.OS.WINDOWS:
       cmd = settings.WIN_DEL + settings.WEB_ROOT + OUTPUT_TEXTFILE
@@ -240,7 +240,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
               # Check if defined "--verbose" option.
               if settings.VERBOSITY_LEVEL != 0:
                 payload_msg = payload.replace("\n", "\\n")
-                print(settings.print_payload(payload_msg))
+                settings.print_data_to_stdout(settings.print_payload(payload_msg))
 
               # Cookie Injection
               if settings.COOKIE_INJECTION == True:
@@ -323,7 +323,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                       else:
                         raise
                     tmp_path = check_tmp_path(url, timesec, filename, http_request_method, url_time_response)
-                    sys.stdout.write("\r")
+                    settings.print_data_to_stdout(settings.END_LINE.CR)
                     message = "It seems that you don't have permissions to "
                     message += "read and/or write files in directory '" + settings.WEB_ROOT + "'."
                     if not menu.options.web_root:
@@ -345,7 +345,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                       elif tmp_upload in settings.CHOICE_NO:
                         break
                       elif tmp_upload in settings.CHOICE_QUIT:
-                        print(settings.SINGLE_WHITESPACE)
+                        settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
                         raise
                       else:
                         common.invalid_option(tmp_upload)
@@ -360,29 +360,29 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
 
                 elif str(e.getcode()) == settings.UNAUTHORIZED_ERROR:
                   err_msg = "Authorization is required to access this page: '" + settings.DEFINED_WEBROOT + "'."
-                  print(settings.print_critical_msg(err_msg))
+                  settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
                   raise SystemExit()
 
                 elif str(e.getcode()) == settings.FORBIDDEN_ERROR:
                   err_msg = "You don't have access to this page: '" + settings.DEFINED_WEBROOT + "'."
-                  print(settings.print_critical_msg(err_msg))
+                  settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
                   raise SystemExit()
 
             except (KeyboardInterrupt, SystemExit):
               # Delete previous shell (text) files (output)
               if 'vuln_parameter' in locals():
-                # print(settings.SINGLE_WHITESPACE)
+                # settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
                 delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
               raise
 
             except _urllib.error.URLError as e:
               warn_msg = "It seems that you don't have permissions to "
               warn_msg += "read and/or write files in directory '" + settings.WEB_ROOT + "'."
-              sys.stdout.write("\r" + settings.print_warning_msg(warn_msg))
+              settings.print_data_to_stdout(settings.END_LINE.CR + settings.print_warning_msg(warn_msg))
               err_msg = str(e).replace(": "," (") + ")."
               if settings.VERBOSITY_LEVEL >= 2:
-                print(settings.SINGLE_WHITESPACE)
-              print(settings.print_critical_msg(err_msg))
+                settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
+              settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
               # Provide custom server's root directory.
               if not menu.options.web_root:
                 custom_web_root(url, timesec, filename, http_request_method, url_time_response)
@@ -431,13 +431,13 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                 else:
                   gotshell = common.read_input(message, default="n", check_batch=True)
                 if gotshell in settings.CHOICE_YES:
-                  print(settings.OS_SHELL_TITLE)
+                  settings.print_data_to_stdout(settings.OS_SHELL_TITLE)
                   if settings.READLINE_ERROR:
                     checks.no_readline_module()
                   while True:
                     if not settings.READLINE_ERROR:
                       checks.tab_autocompleter()
-                    sys.stdout.write(settings.OS_SHELL)
+                    settings.print_data_to_stdout(settings.END_LINE.CR + settings.OS_SHELL)
                     cmd = common.read_input(message="", default="os_shell", check_batch=True)
                     cmd = checks.escaped_cmd(cmd)
                     if cmd.lower() in settings.SHELL_OPTIONS:
@@ -465,10 +465,10 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                       if shell or shell != "":
                         # Update logs with executed cmds and execution results.
                         logs.executed_command(filename, cmd, shell)
-                        print(settings.command_execution_output(shell))
+                        settings.print_data_to_stdout(settings.command_execution_output(shell))
                       else:
                         err_msg = common.invalid_cmd_output(cmd)
-                        print(settings.print_critical_msg(err_msg))
+                        settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
                 elif gotshell in settings.CHOICE_NO:
                   if checks.next_attack_vector(technique, go_back) == True:
                     break
@@ -492,11 +492,11 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
 
   if no_result == True:
     if settings.VERBOSITY_LEVEL == 0:
-      print(settings.SINGLE_WHITESPACE)
+      settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
     return False
   else :
-    sys.stdout.write("\r")
-    sys.stdout.flush()
+    settings.print_data_to_stdout(settings.END_LINE.CR)
+    
 
 """
 The exploitation function.

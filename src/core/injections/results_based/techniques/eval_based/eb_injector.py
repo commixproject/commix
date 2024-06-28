@@ -162,9 +162,8 @@ def injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_meth
     # Check if defined "--verbose" option.
     if settings.VERBOSITY_LEVEL != 0:
       debug_msg = "Executing the '" + cmd + "' command. "
-      sys.stdout.write(settings.print_debug_msg(debug_msg))
-      sys.stdout.flush()
-      sys.stdout.write("\n" + settings.print_payload(payload) + "\n")
+      settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
+      settings.print_data_to_stdout(settings.print_payload(payload))
 
     # Check if defined cookie with "INJECT_HERE" tag
     if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
@@ -242,7 +241,7 @@ def injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_meth
       tries = tries + 1
     else:
       err_msg = "Something went wrong, the request has failed (" + str(tries) + ") times continuously."
-      sys.stdout.write(settings.print_critical_msg(err_msg)+"\n")
+      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
       raise SystemExit()
 
   return response

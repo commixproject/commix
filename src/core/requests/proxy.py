@@ -49,6 +49,6 @@ def use_proxy(request):
 def do_check():
   if settings.VERBOSITY_LEVEL != 0:
     debug_msg = "Setting the HTTP proxy for all HTTP requests. "
-    print(settings.print_debug_msg(debug_msg))
+    settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
 
 # eof

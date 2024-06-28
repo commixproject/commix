@@ -34,15 +34,15 @@ def tor_connection_error():
     err_msg += "try again using option '--tor-port'."
   else:
     err_msg += "check again the provided option '--tor-port'."
-  print(settings.print_error_msg(err_msg))
+  settings.print_data_to_stdout(settings.print_error_msg(err_msg))
   raise SystemExit()
 
 def do_check():
   info_msg = "Testing Tor HTTP proxy settings."
-  print(settings.print_info_msg(info_msg))
+  settings.print_data_to_stdout(settings.print_info_msg(info_msg))
   if menu.options.offline:
     err_msg = "You cannot use Tor network while offline."
-    print(settings.print_critical_msg(err_msg))
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
   try:
     request = _urllib.request.Request(settings.CHECK_TOR_PAGE, method=settings.HTTPMETHOD.GET)
@@ -54,6 +54,6 @@ def do_check():
     tor_connection_error()
   else:
     info_msg = "Connection with the Tor HTTP proxy is properly set. "
-    print(settings.print_info_msg(info_msg))
+    settings.print_data_to_stdout(settings.print_info_msg(info_msg))
 
 # eof

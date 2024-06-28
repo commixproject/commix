@@ -42,7 +42,7 @@ if __name__ == '__main__':
     raise SystemExit()
   except IndentationError as err_msg:
     from src.utils import settings
-    print(settings.print_critical_msg(err_msg) + ".\n")
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
   except:
     from src.utils import common

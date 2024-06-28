@@ -191,6 +191,15 @@ def command_execution_output(shell):
   result = Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL
   return result
 
+"""
+Print data to stdout
+"""
+def print_data_to_stdout(data):
+  if END_LINE.CR not in data and data != "." and data != " (done)":
+    data = data + END_LINE.LF
+  sys.stdout.write(data)
+  sys.stdout.flush()
+
 # argv checks
 def sys_argv_checks():
   tamper_index = None
@@ -222,17 +231,17 @@ def sys_argv_errors():
     # Check for illegal (non-console) quote characters.
     if len(sys.argv[i]) > 1 and all(ord(_) in xrange(0x2018, 0x2020) for _ in ((sys.argv[i].split('=', 1)[-1].strip() or ' ')[0], sys.argv[i][-1])):
         err_msg = "Illegal (non-console) quote characters ('" + sys.argv[i] + "')."
-        print(print_critical_msg(err_msg))
+        print_data_to_stdout(print_critical_msg(err_msg))
         raise SystemExit()
     # Check for illegal (non-console) comma characters.
     elif len(sys.argv[i]) > 1 and u"\uff0c" in sys.argv[i].split('=', 1)[-1]:
         err_msg = "Illegal (non-console) comma character ('" + sys.argv[i] + "')."
-        print(print_critical_msg(err_msg))
+        print_data_to_stdout(print_critical_msg(err_msg))
         raise SystemExit()
     # Check for potentially miswritten (illegal '=') short option.
     elif re.search(r"\A-\w=.+", sys.argv[i]):
         err_msg = "Potentially miswritten (illegal '=') short option detected ('" + sys.argv[i] + "')."
-        print(print_critical_msg(err_msg))
+        print_data_to_stdout(print_critical_msg(err_msg))
         raise SystemExit()
 
 # argv checks
@@ -247,7 +256,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.0"
-REVISION = "78"
+REVISION = "79"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1159,7 +1168,13 @@ HTTP_ERROR_CODES = [  BAD_REQUEST,
 HTTP_ERROR_CODES_SUM = []
 
 # End line
-END_LINE = ["\r", "\n", "\r\n"]
+class END_LINE:
+  CR = "\r"
+  LF = "\n"
+  CRLF = "\r\n"
+
+# List of end lines
+END_LINES_LIST = [attr for attr in dir(END_LINE) if not callable(getattr(END_LINE, attr)) and not attr.startswith("__")]
 
 # Check for updates on start up.
 CHECK_FOR_UPDATES_ON_START = True

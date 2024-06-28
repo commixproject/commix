@@ -163,12 +163,8 @@ def injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_req
         payload = payload.split(settings.COMMENT)[0].strip()
         payload_msg = payload_msg.split(settings.COMMENT)[0].strip()
       debug_msg = "Executing the '" + cmd.split(settings.COMMENT)[0].strip() + "' command. "
-      sys.stdout.write(settings.print_debug_msg(debug_msg))
-      sys.stdout.flush()
-      output_payload = "\n" + settings.print_payload(payload)
-      if settings.VERBOSITY_LEVEL != 0:
-        output_payload = output_payload + "\n"
-      sys.stdout.write(output_payload)
+      settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
+      settings.print_data_to_stdout(settings.print_payload(payload))
 
     # Check if defined cookie with "INJECT_HERE" tag
     if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
@@ -294,7 +290,7 @@ def injection_output(url, OUTPUT_TEXTFILE, timesec):
             output = settings.DEFINED_WEBROOT = message
             info_msg = "Using '" + output
             info_msg += "' for command execution output."
-            print(settings.print_info_msg(info_msg))
+            settings.print_data_to_stdout(settings.print_info_msg(info_msg))
             if not settings.DEFINED_WEBROOT:
               pass
             else:
@@ -311,7 +307,7 @@ def injection_output(url, OUTPUT_TEXTFILE, timesec):
 
   if settings.VERBOSITY_LEVEL != 0:
     debug_msg = "Checking if the file '" + output + "' is accessible."
-    print(settings.print_debug_msg(debug_msg))
+    settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
 
   return output
 
@@ -337,7 +333,7 @@ def injection_results(url, OUTPUT_TEXTFILE, timesec):
       shell = checks.page_encoding(response, action="encode").rstrip().lstrip()
       #shell = [newline.replace("\n",settings.SINGLE_WHITESPACE) for newline in shell]
       if settings.TARGET_OS == settings.OS.WINDOWS:
-        shell = [newline.replace("\r", "") for newline in shell]
+        shell = [newline.replace(settings.END_LINE.CR, "") for newline in shell]
         #shell = [space.strip() for space in shell]
         shell = [empty for empty in shell if empty]
     except _urllib.error.HTTPError as e:

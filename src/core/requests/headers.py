@@ -50,7 +50,7 @@ def http_response_content(content):
     content = content.decode(settings.DEFAULT_CODEC)
   if settings.VERBOSITY_LEVEL >= 4:
     content = checks.remove_empty_lines(content)
-    print(settings.print_http_response_content(content))
+    settings.print_data_to_stdout(settings.print_http_response_content(content))
   if menu.options.traffic_file:
     logs.log_traffic(content)
     logs.log_traffic("\n\n" + "#" * 77 + "\n\n")
@@ -63,7 +63,7 @@ def http_response(headers, code):
   for header in response_http_headers:
     if len(header) > 1:
       if settings.VERBOSITY_LEVEL >= 3:
-        print(settings.print_traffic(header))
+        settings.print_data_to_stdout(settings.print_traffic(header))
       if menu.options.traffic_file:
         logs.log_traffic("\n" + header)
   if menu.options.traffic_file:
@@ -75,20 +75,20 @@ Print HTTP response headers / Body.
 def print_http_response(response_headers, code, page):
   if int(code) in settings.ABORT_CODE:
     err_msg = "Aborting due to detected HTTP code '" + str(code) + "'. "
-    print(settings.print_critical_msg(err_msg))
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
   if settings.VERBOSITY_LEVEL >= 3 or menu.options.traffic_file:
     if settings.VERBOSITY_LEVEL >= 3:
       resp_msg = "HTTP response [" + settings.print_request_num(settings.TOTAL_OF_REQUESTS) + "] (" + str(code) + "):"
-      print(settings.print_response_msg(resp_msg))
+      settings.print_data_to_stdout(settings.print_response_msg(resp_msg))
     if menu.options.traffic_file:
       resp_msg = "HTTP response [#" + str(settings.TOTAL_OF_REQUESTS) + "] (" + str(code) + "):"
       logs.log_traffic("\n" + resp_msg)
     http_response(response_headers, code)
   if settings.VERBOSITY_LEVEL >= 4 or menu.options.traffic_file:
     if settings.VERBOSITY_LEVEL >= 4:
-      print(settings.SINGLE_WHITESPACE)
+      settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
     try:
       http_response_content(page)
     except AttributeError:
@@ -115,10 +115,10 @@ def check_http_traffic(request):
       if settings.USER_DEFINED_POST_DATA and \
          len(request_http_headers) == 1 and \
          settings.VERBOSITY_LEVEL >= 2:
-        print(settings.SINGLE_WHITESPACE)
+        settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
       for header in request_http_headers:
         if settings.VERBOSITY_LEVEL >= 2:
-          print(settings.print_traffic(header))
+          settings.print_data_to_stdout(settings.print_traffic(header))
         if menu.options.traffic_file:
           logs.log_traffic("\n" + header)
       http_client.send(self, req)
@@ -132,7 +132,7 @@ def check_http_traffic(request):
       if settings.VERBOSITY_LEVEL >= 2 or menu.options.traffic_file:
         if settings.VERBOSITY_LEVEL >= 2:
           req_msg = "HTTP request [" + settings.print_request_num(settings.TOTAL_OF_REQUESTS) + "]:"
-          print(settings.print_request_msg(req_msg))
+          settings.print_data_to_stdout(settings.print_request_msg(req_msg))
         if menu.options.traffic_file:
           req_msg = "HTTP request [#" + str(settings.TOTAL_OF_REQUESTS) + "]:"
           logs.log_traffic(req_msg)
@@ -180,9 +180,9 @@ def check_http_traffic(request):
 
     except ValueError as err:
       if settings.VERBOSITY_LEVEL < 2:
-        print(settings.SINGLE_WHITESPACE)
+        settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
       err_msg = "Invalid target URL has been given."
-      print(settings.print_critical_msg(err_msg))
+      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
       raise SystemExit()
 
     except AttributeError:
@@ -245,7 +245,7 @@ def check_http_traffic(request):
     not str(err.code) == settings.BAD_REQUEST and \
     not settings.CRAWLED_URLS_NUM != 0 and \
     not settings.MULTI_TARGETS) and settings.CRAWLED_SKIPPED_URLS_NUM != 0:
-      print(settings.SINGLE_WHITESPACE)
+      settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
     # Check for 3xx, 4xx, 5xx HTTP error codes.
     if str(err.code).startswith(('3', '4', '5')):
       settings.HTTP_ERROR_CODES_SUM.append(err.code)
@@ -260,7 +260,7 @@ def check_http_traffic(request):
       else:
         err_msg = error_msg
 
-      print(settings.print_critical_msg(err_msg + ")."))
+      settings.print_data_to_stdout(settings.print_critical_msg(err_msg + ")."))
       raise SystemExit()
 
 """
@@ -312,7 +312,7 @@ def do_check(request):
   if menu.options.auth_cred and menu.options.auth_type:
     if menu.options.auth_type.lower() not in (settings.AUTH_TYPE.BASIC, settings.AUTH_TYPE.DIGEST, settings.AUTH_TYPE.BEARER):
       err_msg = "HTTP authentication type value must be Basic, Digest or Bearer."
-      print(settings.print_critical_msg(err_msg))
+      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
       raise SystemExit()
     if menu.options.auth_type.lower() == settings.AUTH_TYPE.BEARER:
       request.add_header(settings.AUTHORIZATION, "Bearer " + menu.options.auth_cred.strip())

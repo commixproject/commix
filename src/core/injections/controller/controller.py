@@ -83,7 +83,7 @@ def heuristic_request(url, http_request_method, check_parameter, payload, whites
   payload = payload.replace(settings.SINGLE_WHITESPACE, whitespace)
   payload = checks.perform_payload_modification(payload)
   if settings.VERBOSITY_LEVEL >= 1:
-    print(settings.print_payload(payload))
+    settings.print_data_to_stdout(settings.print_payload(payload))
   if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
     payload = checks.payload_fixation(payload)
     cookie = menu.options.cookie.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC)
@@ -135,7 +135,7 @@ def command_injection_heuristic_basic(url, http_request_method, check_parameter,
                 settings.TARGET_OS = settings.OS.WINDOWS
               info_msg = "Heuristic (basic) tests shows that "
               info_msg += settings.CHECKING_PARAMETER + " might be injectable (possible OS: '" + possible_os + "')."
-              print(settings.print_bold_info_msg(info_msg))
+              settings.print_data_to_stdout(settings.print_bold_info_msg(info_msg))
               settings.SKIP_CODE_INJECTIONS = True
               break
 
@@ -143,7 +143,7 @@ def command_injection_heuristic_basic(url, http_request_method, check_parameter,
     return url
 
   except (_urllib.error.URLError, _urllib.error.HTTPError) as err_msg:
-    print(settings.print_critical_msg(err_msg))
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
 """
@@ -174,14 +174,14 @@ def code_injections_heuristic_basic(url, http_request_method, check_parameter, t
           if settings.IDENTIFIED_WARNINGS or settings.IDENTIFIED_PHPINFO:
             info_msg = "Heuristic (basic) tests shows that "
             info_msg += settings.CHECKING_PARAMETER + " might be injectable via " + technique + "."
-            print(settings.print_bold_info_msg(info_msg))
+            settings.print_data_to_stdout(settings.print_bold_info_msg(info_msg))
             break
 
     settings.EVAL_BASED_STATE = False
     return url
 
   except (_urllib.error.URLError, _urllib.error.HTTPError) as err_msg:
-    print(settings.print_critical_msg(err_msg))
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
 """
@@ -314,18 +314,18 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
       settings.CHECKING_PARAMETER = "(custom) " + settings.CHECKING_PARAMETER
     
     info_msg = "Setting " + settings.CHECKING_PARAMETER  + " for tests."
-    print(settings.print_info_msg(info_msg))
+    settings.print_data_to_stdout(settings.print_info_msg(info_msg))
     
     if menu.options.skip_heuristics:
       if settings.VERBOSITY_LEVEL != 0:
         debug_msg = "Skipping heuristic (basic) tests to the " + settings.CHECKING_PARAMETER + "."
-        print(settings.print_debug_msg(debug_msg))
+        settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
     else:
       if not settings.LOAD_SESSION:
         checks.recognise_payload(payload=settings.TESTABLE_VALUE)
         if settings.VERBOSITY_LEVEL != 0:
           debug_msg = "Performing heuristic (basic) tests to the " + settings.CHECKING_PARAMETER + "."
-          print(settings.print_debug_msg(debug_msg))
+          settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
 
         if not (len(menu.options.tech) == 1 and "e" in menu.options.tech):
           url = command_injection_heuristic_basic(url, http_request_method, check_parameter, the_type, header_name, inject_http_headers)
@@ -340,12 +340,12 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
           settings.HEURISTIC_TEST.POSITIVE = False
           warn_msg = "Heuristic (basic) tests shows that "
           warn_msg += settings.CHECKING_PARAMETER + " might not be injectable."
-          print(settings.print_bold_warning_msg(warn_msg))
+          settings.print_data_to_stdout(settings.print_bold_warning_msg(warn_msg))
 
     if (menu.options.smart and not settings.HEURISTIC_TEST.POSITIVE) or (menu.options.smart and menu.options.skip_heuristics):
       info_msg = "Skipping "
       info_msg += settings.CHECKING_PARAMETER + "."
-      print(settings.print_info_msg(info_msg))
+      settings.print_data_to_stdout(settings.print_info_msg(info_msg))
       settings.HEURISTIC_TEST.POSITIVE = True
     else:
       if menu.options.failed_tries and \
@@ -354,7 +354,7 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
         warn_msg = "Due to the provided (unsuitable) injection technique"
         warn_msg += "s"[len(menu.options.tech) == 1:][::-1] + ", "
         warn_msg += "the option '--failed-tries' will be ignored."
-        print(settings.print_warning_msg(warn_msg) + Style.RESET_ALL)
+        settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
       # Procced with file-based semiblind command injection technique,
       # once the user provides the path of web server's root directory.
@@ -375,7 +375,7 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
         warn_msg = "The tested "
         warn_msg += settings.CHECKING_PARAMETER
         warn_msg += " does not seem to be injectable."
-        print(settings.print_bold_warning_msg(warn_msg))
+        settings.print_data_to_stdout(settings.print_bold_warning_msg(warn_msg))
 
     if not settings.CHECK_BOTH_OS:
       break
@@ -661,14 +661,14 @@ def perform_checks(url, http_request_method, filename):
       # Check if authentication page is the same with the next (injection) URL
       if _urllib.request.urlopen(url, timeout=settings.TIMEOUT).read() == _urllib.request.urlopen(menu.options.auth_url, timeout=settings.TIMEOUT).read():
         err_msg = "It seems that the authentication procedure has failed."
-        print(settings.print_critical_msg(err_msg))
+        settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
         raise SystemExit()
     except (_urllib.error.URLError, _urllib.error.HTTPError) as err_msg:
-      print(settings.print_critical_msg(err_msg))
+      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
       raise SystemExit()
   elif menu.options.auth_url or menu.options.auth_data:
     err_msg = "You must specify both login panel URL and login parameters."
-    print(settings.print_critical_msg(err_msg))
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
   else:
     pass
@@ -724,13 +724,13 @@ def do_check(url, http_request_method, filename):
       if not menu.options.tech or "t" in menu.options.tech or "f" in menu.options.tech:
         warn_msg = "It is highly recommended to avoid usage of switch '--tor' for "
         warn_msg += "time-based injections because of inherent high latency time."
-        print(settings.print_warning_msg(warn_msg))
+        settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
     # Check for "backticks" tamper script.
     if settings.USE_BACKTICKS == True:
       if not menu.options.tech or "e" in menu.options.tech or "t" in menu.options.tech or "f" in menu.options.tech:
         warn_msg = "Commands substitution using backtics is only supported by the (results-based) classic command injection technique. "
-        print(settings.print_warning_msg(warn_msg) + Style.RESET_ALL)
+        settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
     perform_checks(url, http_request_method, filename)
       
@@ -762,7 +762,7 @@ def do_check(url, http_request_method, filename):
         err_msg += "."
         if settings.MULTI_TARGETS:
           err_msg += " Skipping to the next target."
-      print(settings.print_critical_msg(err_msg))
+      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     else:
       logs.print_logs_notification(filename, url)
     if not settings.MULTI_TARGETS:

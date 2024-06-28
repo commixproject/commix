@@ -71,7 +71,7 @@ def do_GET_check(url, http_request_method):
         err_msg = "No parameter(s) found for testing in the provided data. "
         if not menu.options.crawldepth:
           err_msg += "You are advised to rerun with '--crawl=2'."
-        print(settings.print_critical_msg(err_msg))
+        settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
         raise SystemExit()
     elif menu.options.shellshock:
       return False
@@ -91,7 +91,7 @@ def do_GET_check(url, http_request_method):
         multi_parameters = parameters.split(settings.PARAMETER_DELIMITER)
         multi_parameters = [x for x in multi_parameters if x]
       except ValueError as err_msg:
-        print(settings.print_critical_msg(err_msg))
+        settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
         raise SystemExit()
       # Check for inappropriate format in provided parameter(s).
       if len([s for s in multi_parameters if "=" in s]) != (len(multi_parameters)):
@@ -326,7 +326,7 @@ def do_POST_check(parameter, http_request_method):
     try:
       multi_parameters = parameter.split(settings.PARAMETER_DELIMITER)
     except ValueError as err_msg:
-      print(settings.print_critical_msg(err_msg))
+      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
       raise SystemExit()
 
   # Check for inappropriate format in provided parameter(s).
@@ -483,7 +483,7 @@ def vuln_POST_param(parameter, url):
 
   # XML data format.
   elif settings.IS_XML:
-    parameters = list(parameter.replace("></",">" + settings.END_LINE[1] + "</").split(settings.END_LINE[1]))
+    parameters = list(parameter.replace("></",">" + settings.END_LINE.LF + "</").split(settings.END_LINE.LF))
     for item in parameters:
       if settings.INJECT_TAG in item:
         result = re.sub(re.compile('<.*?>'), '', item)
@@ -586,7 +586,7 @@ def do_cookie_check(cookie):
   try:
     multi_parameters = cookie.split(settings.COOKIE_DELIMITER)
   except ValueError as err_msg:
-    print(settings.print_critical_msg(err_msg))
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
   # Check for inappropriate format in provided parameter(s).
   if len([s for s in multi_parameters if "=" in s]) != (len(multi_parameters)):

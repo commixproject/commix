@@ -131,7 +131,7 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                 # Check if defined "--verbose" option.
                 if settings.VERBOSITY_LEVEL != 0:
                   payload_msg = payload.replace("\n", "\\n")
-                  print(settings.print_payload(payload_msg))
+                  settings.print_data_to_stdout(settings.print_payload(payload_msg))
 
                 # Cookie header injection
                 if settings.COOKIE_INJECTION == True:
@@ -252,14 +252,14 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                     continue
 
               except (KeyboardInterrupt, SystemExit):
-                print(settings.SINGLE_WHITESPACE)
+                settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
                 raise
 
               except EOFError:
                 if settings.STDIN_PARSING:
-                  print(settings.SINGLE_WHITESPACE)
+                  settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
                 err_msg = "Exiting, due to EOFError."
-                print(settings.print_error_msg(err_msg))
+                settings.print_data_to_stdout(settings.print_error_msg(err_msg))
                 raise
 
               except:
@@ -274,7 +274,7 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                       percent = ""
                   else:
                     percent = ".. (" + str(float_percent) + "%)"
-                    print(settings.SINGLE_WHITESPACE)
+                    settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
                     # Print logs notification message
                     logs.logs_notification(filename)
                   #raise
@@ -324,7 +324,7 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                   else:
                     gotshell = common.read_input(message, default="n", check_batch=True)
                   if gotshell in settings.CHOICE_YES:
-                    print(settings.OS_SHELL_TITLE)
+                    settings.print_data_to_stdout(settings.OS_SHELL_TITLE)
                     if settings.READLINE_ERROR:
                       checks.no_readline_module()
                     while True:
@@ -333,7 +333,7 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                         false_positive_warning = False
                       if not settings.READLINE_ERROR:
                         checks.tab_autocompleter()
-                      sys.stdout.write(settings.OS_SHELL)
+                      settings.print_data_to_stdout(settings.END_LINE.CR + settings.OS_SHELL)
                       cmd = common.read_input(message="", default="os_shell", check_batch=True)
                       cmd = checks.escaped_cmd(cmd)
                       if cmd.lower() in settings.SHELL_OPTIONS:
@@ -353,7 +353,7 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                             session_handler.store_cmd(url, cmd, output, vuln_parameter)
                         else:
                           output = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
-                          print(settings.print_output(output))
+                          settings.print_data_to_stdout(settings.print_output(output))
                         # Update logs with executed cmds and execution results.
                         logs.executed_command(filename, cmd, output)
                   elif gotshell in settings.CHOICE_NO:
@@ -377,19 +377,19 @@ def tb_injection_handler(url, timesec, filename, http_request_method, url_time_r
 
               except EOFError:
                 if settings.STDIN_PARSING:
-                  print(settings.SINGLE_WHITESPACE)
+                  settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
                 err_msg = "Exiting, due to EOFError."
-                print(settings.print_error_msg(err_msg))
+                settings.print_data_to_stdout(settings.print_error_msg(err_msg))
                 raise
 
   if no_result == True:
     if settings.VERBOSITY_LEVEL == 0:
-      print(settings.SINGLE_WHITESPACE)
+      settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
     return False
 
   else :
-    sys.stdout.write("\r")
-    sys.stdout.flush()
+    settings.print_data_to_stdout(settings.END_LINE.CR)
+    
 
 """
 The exploitation function.
@@ -405,12 +405,12 @@ def exploitation(url, timesec, filename, http_request_method, url_time_response,
     warn_msg = "It is highly recommended, due to serious response delays, "
     warn_msg += "to skip the time-based (blind) technique and to continue "
     warn_msg += "with the file-based (semiblind) technique."
-    print(settings.print_warning_msg(warn_msg))
+    settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
     go_back = False
     while True:
       if go_back == True:
         return False
-      message = "How do you want to proceed? [(C)ontinue/(s)kip/(q)uit] > "
+      message = "How do you want to proceed? [(C)ontinue/(s)kip] > "
       proceed_option = common.read_input(message, default="C", check_batch=True)
       if proceed_option.lower() in settings.CHOICE_PROCEED :
         if proceed_option.lower() == "c":

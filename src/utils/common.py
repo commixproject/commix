@@ -32,7 +32,7 @@ Invalid option msg
 """
 def invalid_option(option):
   err_msg = "'" + option + "' is not a valid answer."
-  print(settings.print_error_msg(err_msg))
+  settings.print_data_to_stdout(settings.print_error_msg(err_msg))
 
 """
 Invalid cmd output
@@ -70,7 +70,7 @@ def read_input(message, default=None, check_batch=True):
           answer = item.split('=')[1] if len(item.split('=')) > 1 else None
           if answer and question.lower() in message.lower():
             value = answer
-            print(settings.print_message(message + str(value)))
+            settings.print_data_to_stdout(settings.print_message(message + str(value)))
             return value
           elif answer is None and value:
             return is_empty()
@@ -78,21 +78,21 @@ def read_input(message, default=None, check_batch=True):
     if value:
       if settings.VERBOSITY_LEVEL != 0:
         debug_msg = "Used the given answer."
-        print(settings.print_debug_msg(debug_msg))
-      print(settings.print_message(message + str(value)))
+        settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
+      settings.print_data_to_stdout(settings.print_message(message + str(value)))
       return value
 
     elif value is None:
       if check_batch and menu.options.batch:
-        print(settings.print_message(message + str(default)))
+        settings.print_data_to_stdout(settings.print_message(message + str(default)))
         if settings.VERBOSITY_LEVEL != 0:
           debug_msg = "Used the default behavior, running in batch mode."
-          print(settings.print_debug_msg(debug_msg))
+          settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
         return default
       else:
         return is_empty()
   except KeyboardInterrupt:
-    print(settings.SINGLE_WHITESPACE)
+    settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
     raise
 
 """
@@ -124,7 +124,7 @@ def running_as_admin():
   else:
     err_msg = settings.APPLICATION + " is not able to check if you are running it "
     err_msg += "as an administrator account on this platform. "
-    print(settings.print_error_msg(err_msg))
+    settings.print_data_to_stdout(settings.print_error_msg(err_msg))
     is_admin = True
 
   return is_admin
@@ -138,7 +138,7 @@ def days_from_last_update():
     warn_msg = "You haven't updated " + settings.APPLICATION + " for more than "
     warn_msg += str(days_from_last_update) + " day"
     warn_msg += "s"[days_from_last_update == 1:] + "!"
-    print(settings.print_warning_msg(warn_msg))
+    settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
 """
 Shows all HTTP error codes raised
@@ -148,7 +148,7 @@ def show_http_error_codes():
     if any((str(_).startswith('4') or str(_).startswith('5')) and _ != settings.INTERNAL_SERVER_ERROR for _ in settings.HTTP_ERROR_CODES_SUM):
       debug_msg = "Too many 4xx and/or 5xx HTTP error codes "
       debug_msg += "could mean that some kind of protection is involved."
-      print(settings.print_bold_debug_msg(debug_msg))
+      settings.print_data_to_stdout(settings.print_bold_debug_msg(debug_msg))
 
 """
 Automatically create a Github issue with unhandled exception information.
@@ -176,13 +176,13 @@ def create_github_issue(err_msg, exc_msg):
       if choise in settings.CHOICE_YES:
         break
       elif choise in settings.CHOICE_NO:
-        print(settings.SINGLE_WHITESPACE)
+        settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
         return
       else:
         invalid_option(choise)
         pass
     except:
-      print("\n")
+      settings.print_data_to_stdout("")
       raise SystemExit()
 
   err_msg = err_msg[err_msg.find("\n"):]
@@ -201,7 +201,7 @@ def create_github_issue(err_msg, exc_msg):
           warn_msg += " and resolved. Please update to the latest "
           warn_msg += "(dev) version from official GitHub repository at '" + settings.GIT_URL + "'"
       warn_msg += ".\n"
-      print(settings.print_warning_msg(warn_msg))
+      settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
       return
   except:
     pass
@@ -219,12 +219,12 @@ def create_github_issue(err_msg, exc_msg):
   issue_url = re.search(r"https://github.com/commixproject/commix/issues/\d+", content.decode(settings.DEFAULT_CODEC) or "")
   if issue_url:
     info_msg = "The created Github issue can been found at the address '" + str(issue_url.group(0)) + "'.\n"
-    print(settings.print_info_msg(info_msg))
+    settings.print_data_to_stdout(settings.print_info_msg(info_msg))
   else:
     warn_msg = "Something went wrong while creating a Github issue."
     if settings.UNAUTHORIZED_ERROR in str(err):
       warn_msg += " Please update to the latest revision.\n"
-    print(settings.print_warning_msg(warn_msg))
+    settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
 """
 Masks sensitive data in the supplied message.
@@ -247,54 +247,54 @@ def unhandled_exception():
     match = re.search(r"\s*(.+)\s+ValueError", exc_msg)
     err_msg = "Identified corrupted .pyc file(s)."
     err_msg += "Please delete .pyc files on your system to fix the problem."
-    print(settings.print_critical_msg(err_msg))
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
   elif "must be pinned buffer, not bytearray" in exc_msg:
     err_msg = "Error occurred at Python interpreter which "
     err_msg += "is fixed in 2.7.x. Please update accordingly. "
     err_msg += "(Reference: https://bugs.python.org/issue8104)"
-    print(settings.print_critical_msg(err_msg))
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
   elif any(_ in exc_msg for _ in ("MemoryError", "Cannot allocate memory")):
     err_msg = "Memory exhaustion detected."
-    print(settings.print_critical_msg(err_msg))
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
   elif "Permission denied: '" in exc_msg:
     match = re.search(r"Permission denied: '([^']*)", exc_msg)
     err_msg = "Permission error occurred while accessing file '" + match.group(1) + "'."
-    print(settings.print_critical_msg(err_msg))
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
   elif all(_ in exc_msg for _ in ("Access is denied", "subprocess", "metasploit")):
     err_msg = "Permission error occurred while running Metasploit."
-    print(settings.print_critical_msg(err_msg))
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
   elif all(_ in exc_msg for _ in ("Permission denied", "metasploit")):
     err_msg = "Permission error occurred while using Metasploit."
-    print(settings.print_critical_msg(err_msg))
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
   elif "Invalid argument" in exc_msg:
     err_msg = "Corrupted installation detected. "
     err_msg += "You should retrieve the latest (dev) version from official GitHub "
     err_msg += "repository at '" + settings.GIT_URL + "'."
-    print(settings.print_critical_msg(err_msg))
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
   elif all(_ in exc_msg for _ in ("No such file", "_'")):
     err_msg = "Corrupted installation detected ('" + exc_msg.strip().split('\n')[-1] + "'). "
     err_msg += "You should retrieve the latest (dev) version from official GitHub "
     err_msg += "repository at '" + settings.GIT_URL + "'."
-    print(settings.print_critical_msg(err_msg))
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
   elif "Invalid IPv6 URL" in exc_msg:
     err_msg = "invalid URL ('" + exc_msg.strip().split('\n')[-1] + "')"
-    print(settings.print_critical_msg(err_msg))
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
   elif any(_ in exc_msg for _ in ("Broken pipe",)):
@@ -302,34 +302,34 @@ def unhandled_exception():
 
   elif any(_ in exc_msg for _ in ("The paging file is too small",)):
     err_msg = "No space left for paging file."
-    print(settings.print_critical_msg(err_msg))
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
   elif all(_ in exc_msg for _ in ("SyntaxError: Non-ASCII character", ".py on line", "but no encoding declared")) or \
        any(_ in exc_msg for _ in ("source code string cannot contain null bytes", "No module named")) or \
        any(_ in exc_msg for _ in ("ImportError", "ModuleNotFoundError", "<frozen", "Can't find file for module")):
     err_msg = "Invalid runtime environment ('" + exc_msg.split("Error: ")[-1].strip() + "')."
-    print(settings.print_critical_msg(err_msg))
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
   elif any(_ in exc_msg for _ in ("No space left", "Disk quota exceeded", "Disk full while accessing")):
     err_msg = "No space left on output device."
-    print(settings.print_critical_msg(err_msg))
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
   elif "Read-only file system" in exc_msg:
     err_msg = "Output device is mounted as read-only."
-    print(settings.print_critical_msg(err_msg))
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
   elif "OperationalError: disk I/O error" in exc_msg:
     err_msg = "I/O error on output device."
-    print(settings.print_critical_msg(err_msg))
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
   elif "Violation of BIDI" in exc_msg:
     err_msg = "Invalid URL (violation of Bidi IDNA rule - RFC 5893)."
-    print(settings.print_critical_msg(err_msg))
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
   else:
@@ -347,7 +347,7 @@ def unhandled_exception():
     err_msg += "Command line: " + re.sub(r".+?\bcommix\.py\b", "commix.py", " ".join(sys.argv)) + "\n"
     err_msg = mask_sensitive_data(err_msg)
     exc_msg = re.sub(r'".+?[/\\](\w+\.py)', r"\"\g<1>", exc_msg)
-    print(settings.print_critical_msg(err_msg + "\n" + exc_msg.rstrip()))
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg + "\n" + exc_msg.rstrip()))
     create_github_issue(err_msg, exc_msg[:])
 
 # eof

@@ -57,7 +57,7 @@ def do_check(request, url, redirect_url):
                        )
       else:
         err_msg = str(_urllib.error.HTTPError(request.get_full_url(), code, msg, headers, fp)).replace(": "," (")
-        print(settings.print_critical_msg(err_msg + ")."))
+        settings.print_data_to_stdout(settings.print_critical_msg(err_msg + ")."))
         raise SystemExit()
 
   try:
@@ -76,14 +76,14 @@ def do_check(request, url, redirect_url):
       while True:
         if not settings.FOLLOW_REDIRECT:
           if settings.CRAWLED_URLS_NUM != 0 and settings.CRAWLED_SKIPPED_URLS_NUM != 0:
-            print(settings.SINGLE_WHITESPACE)
+            settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
         message = "Got a " + str(settings.REDIRECT_CODE) + " redirect to '" + redirect_url
         message += "'. Do you want to follow? [Y/n] > "
         redirection_option = common.read_input(message, default="Y", check_batch=True)
         if redirection_option in settings.CHOICE_YES:
           settings.FOLLOW_REDIRECT = True
           info_msg = "Following redirection to '" + redirect_url + "'. "
-          print(settings.print_info_msg(info_msg))
+          settings.print_data_to_stdout(settings.print_info_msg(info_msg))
           if settings.CRAWLING:
             settings.HREF_SKIPPED.append(url)
           return checks.check_http_s(redirect_url)

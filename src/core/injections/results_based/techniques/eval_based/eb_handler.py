@@ -132,7 +132,7 @@ def eb_injection_handler(url, timesec, filename, http_request_method, injection_
 
               # Check if defined "--verbose" option.
               if settings.VERBOSITY_LEVEL != 0:
-                print(settings.print_payload(payload))
+                settings.print_data_to_stdout(settings.print_payload(payload))
 
               # Cookie header injection
               if settings.COOKIE_INJECTION == True:
@@ -180,14 +180,14 @@ def eb_injection_handler(url, timesec, filename, http_request_method, injection_
                 checks.injection_process(injection_type, technique, percent)
 
             except (KeyboardInterrupt, SystemExit):
-              print(settings.SINGLE_WHITESPACE)
+              settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
               raise
 
             except EOFError:
               if settings.STDIN_PARSING:
-                print(settings.SINGLE_WHITESPACE)
+                settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
               err_msg = "Exiting, due to EOFError."
-              print(settings.print_error_msg(err_msg))
+              settings.print_data_to_stdout(settings.print_error_msg(err_msg))
               raise
 
             except:
@@ -253,13 +253,13 @@ def eb_injection_handler(url, timesec, filename, http_request_method, injection_
                 else:
                   gotshell = common.read_input(message, default="n", check_batch=True)
                 if gotshell in settings.CHOICE_YES:
-                  print(settings.OS_SHELL_TITLE)
+                  settings.print_data_to_stdout(settings.OS_SHELL_TITLE)
                   if settings.READLINE_ERROR:
                     checks.no_readline_module()
                   while True:
                     if not settings.READLINE_ERROR:
                       checks.tab_autocompleter()
-                    sys.stdout.write(settings.OS_SHELL)
+                    settings.print_data_to_stdout(settings.END_LINE.CR + settings.OS_SHELL)
                     cmd = common.read_input(message="", default="os_shell", check_batch=True)
                     cmd = checks.escaped_cmd(cmd)
                     if cmd.lower() in settings.SHELL_OPTIONS:
@@ -289,10 +289,10 @@ def eb_injection_handler(url, timesec, filename, http_request_method, injection_
                         shell = "".join(str(p) for p in shell)
                         # Update logs with executed cmds and execution results.
                         logs.executed_command(filename, cmd, shell)
-                        print(settings.command_execution_output(shell))
+                        settings.print_data_to_stdout(settings.command_execution_output(shell))
                       else:
                         err_msg = common.invalid_cmd_output(cmd)
-                        print(settings.print_error_msg(err_msg))
+                        settings.print_data_to_stdout(settings.print_error_msg(err_msg))
                 elif gotshell in settings.CHOICE_NO:
                   if checks.next_attack_vector(technique, go_back) == True:
                     break
@@ -312,18 +312,18 @@ def eb_injection_handler(url, timesec, filename, http_request_method, injection_
 
             except EOFError:
               if settings.STDIN_PARSING:
-                print(settings.SINGLE_WHITESPACE)
+                settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
               err_msg = "Exiting, due to EOFError."
-              print(settings.print_error_msg(err_msg))
+              settings.print_data_to_stdout(settings.print_error_msg(err_msg))
               raise
 
   if no_result == True:
     if settings.VERBOSITY_LEVEL == 0:
-      print(settings.SINGLE_WHITESPACE)
+      settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
     return False
   else :
-    sys.stdout.write("\r")
-    sys.stdout.flush()
+    settings.print_data_to_stdout(settings.END_LINE.CR)
+    
 
 """
 The exploitation function.

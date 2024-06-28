@@ -142,7 +142,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                 # Check if defined "--verbose" option.
                 if settings.VERBOSITY_LEVEL != 0:
                   payload_msg = payload.replace("\n", "\\n")
-                  print(settings.print_payload(payload))
+                  settings.print_data_to_stdout(settings.print_payload(payload))
 
                 # Cookie header injection
                 if settings.COOKIE_INJECTION == True:
@@ -267,15 +267,15 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
               except (KeyboardInterrupt, SystemExit):
                 if 'cmd' in locals():
                   # Delete previous shell (text) files (output) from temp.
-                  # print(settings.SINGLE_WHITESPACE)
+                  # settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
                   delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
                 raise
 
               except EOFError:
                 if settings.STDIN_PARSING:
-                  print(settings.SINGLE_WHITESPACE)
+                  settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
                 err_msg = "Exiting, due to EOFError."
-                print(settings.print_error_msg(err_msg))
+                settings.print_data_to_stdout(settings.print_error_msg(err_msg))
                 if 'cmd' in locals():
                   # Delete previous shell (text) files (output) from temp.
                   delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
@@ -293,7 +293,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                       percent = ""
                   else:
                     percent = ".. (" + str(float_percent) + "%)"
-                    print(settings.SINGLE_WHITESPACE)
+                    settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
                     # Print logs notification message
                     logs.logs_notification(filename)
                   #raise
@@ -350,7 +350,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                   else:
                     gotshell = common.read_input(message, default="n", check_batch=True)
                   if gotshell in settings.CHOICE_YES:
-                    print(settings.OS_SHELL_TITLE)
+                    settings.print_data_to_stdout(settings.OS_SHELL_TITLE)
                     if settings.READLINE_ERROR:
                       checks.no_readline_module()
                     while True:
@@ -359,7 +359,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                         false_positive_warning = False
                       if not settings.READLINE_ERROR:
                         checks.tab_autocompleter()
-                      sys.stdout.write(settings.OS_SHELL)
+                      settings.print_data_to_stdout(settings.END_LINE.CR + settings.OS_SHELL)
                       cmd = common.read_input(message="", default="os_shell", check_batch=True)
                       cmd = checks.escaped_cmd(cmd)
                       if cmd.lower() in settings.SHELL_OPTIONS:
@@ -383,7 +383,7 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
                             session_handler.store_cmd(url, cmd, output, vuln_parameter)
                         else:
                           output = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
-                          print(settings.print_output(output))
+                          settings.print_data_to_stdout(settings.print_output(output))
                         # Update logs with executed cmds and execution results.
                         logs.executed_command(filename, cmd, output)
 
@@ -408,26 +408,26 @@ def tfb_injection_handler(url, timesec, filename, tmp_path, http_request_method,
               except (KeyboardInterrupt, SystemExit):
                 # Delete previous shell (text) files (output) from temp.
                 delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-                sys.stdout.write("\r")
+                settings.print_data_to_stdout(settings.END_LINE.CR)
                 raise
 
               except EOFError:
                 if settings.STDIN_PARSING:
-                  print(settings.SINGLE_WHITESPACE)
+                  settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
                 err_msg = "Exiting, due to EOFError."
-                print(settings.print_error_msg(err_msg))
+                settings.print_data_to_stdout(settings.print_error_msg(err_msg))
                 # Delete previous shell (text) files (output) from temp.
                 delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
-                sys.stdout.write("\r")
+                settings.print_data_to_stdout(settings.END_LINE.CR)
                 raise
 
   if no_result == True:
     if settings.VERBOSITY_LEVEL == 0:
-      print(settings.SINGLE_WHITESPACE)
+      settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
     return False
   else :
-    sys.stdout.write("\r")
-    sys.stdout.flush()
+    settings.print_data_to_stdout(settings.END_LINE.CR)
+    
 
 """
 The exploitation function.
