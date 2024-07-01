@@ -77,7 +77,7 @@ def logfile_parser():
     else:
       invalid_data(request_file)
 
-    if menu.options.requestfile:
+    if menu.options.requestfile or menu.options.logfile:
       c = 1
       request_headers = []
       request_lines = request.split("\n")
