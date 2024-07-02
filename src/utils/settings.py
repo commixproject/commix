@@ -25,6 +25,28 @@ from datetime import datetime
 from src.core.compat import xrange
 from src.thirdparty.six.moves import urllib as _urllib
 from src.thirdparty.six.moves import reload_module as _reload_module
+
+# argv checks
+def sys_argv_checks():
+  tamper_index = None
+  for i in xrange(len(sys.argv)):
+    # Disable coloring
+    if sys.argv[i] == "--disable-coloring":
+      from src.utils import colors
+      colors.ENABLE_COLORING = False
+    """
+    Dirty hack from sqlmap [1], regarding merging of tamper script arguments (e.g. --tamper A --tamper B -> --tamper=A,B)
+    [1] https://github.com/sqlmapproject/sqlmap/commit/f4a0820dcb5fded8bc4d0363c91276eb9a3445ae
+    """
+    if sys.argv[i].startswith("--tamper"):
+      if tamper_index is None:
+        tamper_index = i if '=' in sys.argv[i] else (i + 1 if i + 1 < len(sys.argv) and not sys.argv[i + 1].startswith('-') else None)
+      else:
+        sys.argv[tamper_index] = "%s,%s" % (sys.argv[tamper_index], sys.argv[i].split('=')[1] if '=' in sys.argv[i] else (sys.argv[i + 1] if i + 1 < len(sys.argv) and not sys.argv[i + 1].startswith('-') else ""))
+        sys.argv[i] = ""
+
+# argv checks
+sys_argv_checks()
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 class HTTPMETHOD(object):
@@ -200,26 +222,10 @@ def print_data_to_stdout(data):
   sys.stdout.write(data)
   sys.stdout.flush()
 
-# argv checks
-def sys_argv_checks():
-  tamper_index = None
-  for i in xrange(len(sys.argv)):
-    # Disable coloring
-    if sys.argv[i] == "--disable-coloring":
-      from src.utils import colors
-      colors.ENABLE_COLORING = False
-    """
-    Dirty hack from sqlmap [1], regarding merging of tamper script arguments (e.g. --tamper A --tamper B -> --tamper=A,B)
-    [1] https://github.com/sqlmapproject/sqlmap/commit/f4a0820dcb5fded8bc4d0363c91276eb9a3445ae
-    """
-    if sys.argv[i].startswith("--tamper"):
-      if tamper_index is None:
-        tamper_index = i if '=' in sys.argv[i] else (i + 1 if i + 1 < len(sys.argv) and not sys.argv[i + 1].startswith('-') else None)
-      else:
-        sys.argv[tamper_index] = "%s,%s" % (sys.argv[tamper_index], sys.argv[i].split('=')[1] if '=' in sys.argv[i] else (sys.argv[i + 1] if i + 1 < len(sys.argv) and not sys.argv[i + 1].startswith('-') else ""))
-        sys.argv[i] = ""
 
-# argv input errors
+"""
+argv input errors
+"""
 def sys_argv_errors():
   _reload_module(sys)
   try:
@@ -256,7 +262,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.0"
-REVISION = "80"
+REVISION = "81"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:

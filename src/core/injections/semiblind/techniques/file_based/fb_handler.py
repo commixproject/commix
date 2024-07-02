@@ -423,13 +423,7 @@ def fb_injection_handler(url, timesec, filename, http_request_method, url_time_r
                 delete_previous_shell(separator, payload, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename)
                 if go_back == True:
                   break
-                message = settings.CHECKING_PARAMETER + " is vulnerable. Do you want to prompt for a pseudo-terminal shell? [Y/n] > "
-                if settings.CRAWLING:
-                  settings.CRAWLED_URLS_INJECTED.append(_urllib.parse.urlparse(url).netloc)
-                if not settings.STDIN_PARSING:
-                  gotshell = common.read_input(message, default="Y", check_batch=True)
-                else:
-                  gotshell = common.read_input(message, default="n", check_batch=True)
+                gotshell = checks.enable_shell(url)
                 if gotshell in settings.CHOICE_YES:
                   settings.print_data_to_stdout(settings.OS_SHELL_TITLE)
                   if settings.READLINE_ERROR:

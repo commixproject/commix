@@ -790,6 +790,20 @@ def remove_empty_lines(content):
   return content
 
 """
+Enable pseudo-terminal shell
+"""
+def enable_shell(url):
+  message = settings.CHECKING_PARAMETER + " is vulnerable. "
+  message += "Do you want to prompt for a pseudo-terminal shell? [Y/n] > "
+  if settings.CRAWLING:
+    settings.CRAWLED_URLS_INJECTED.append(_urllib.parse.urlparse(url).netloc)
+  if not settings.STDIN_PARSING:
+    gotshell = common.read_input(message, default="Y", check_batch=True)
+  else:
+    gotshell = common.read_input(message, default="n", check_batch=True)
+  return gotshell
+
+"""
 Check 'os_shell' options
 """
 def check_os_shell_options(cmd, technique, go_back, no_result):
