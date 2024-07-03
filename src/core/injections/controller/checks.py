@@ -229,6 +229,7 @@ def skip_testing(filename, url):
       _ = " testing command injection techniques"
     else:
       settings.SKIP_COMMAND_INJECTIONS = False 
+      settings.SKIP_CODE_INJECTIONS = True
       _ = " further testing"
     while True:
       message = "Do you want to skip" + _ + " in " + settings.CHECKING_PARAMETER + "? [Y/n] > "
@@ -454,7 +455,7 @@ def load_cmd_history():
 """
 Get value inside boundaries.
 """
-def get_value_inside_boundaries(value):
+def get_value_value_inside_boundaries(value):
   try:
     value = re.search(settings.VALUE_BOUNDARIES, value).group(1)
   except Exception as e:
@@ -462,74 +463,53 @@ def get_value_inside_boundaries(value):
   return value
 
 """
-Check if the value has boundaries.
+Check value inside boundaries.
 """
-def value_boundaries(parameter, value, http_request_method):
-  def check_boundaries_value(parameter, value, http_request_method):
-    _ = get_value_inside_boundaries(value)
+def value_inside_boundaries(parameter, http_request_method):
+  try:
+    if isinstance(parameter, str):
+      value_inside_boundaries = re.search(r"=" + settings.VALUE_BOUNDARIES, parameter).group()
+      if value_inside_boundaries:
+        pcre_mod_value = value_inside_boundaries + settings.PCRE_MODIFIER[1:2]
+        if pcre_mod_value not in parameter:
+          while True:
+            message = "It appears that provided value '" + value_inside_boundaries + "' has boundaries."
+            message += " Do you want to add the PCRE '" + settings.PCRE_MODIFIER + "'"
+            message += " modifier outside boundaries? ('" + pcre_mod_value + "') [Y/n] > "
+            modifier_check = common.read_input(message, default="Y", check_batch=True)
+            if modifier_check in settings.CHOICE_YES:
+              parameter = parameter.replace(value_inside_boundaries, pcre_mod_value)
+              break
+            elif modifier_check in settings.CHOICE_NO:
+              break
+            elif modifier_check in settings.CHOICE_QUIT:
+              raise SystemExit()
+            else:
+              common.invalid_option(modifier_check)
+              pass
 
-    if settings.INJECT_TAG in _:
-      settings.INJECT_INSIDE_BOUNDARIES = False
-      return ""
-    if settings.INJECT_TAG in value:
-      settings.INJECT_INSIDE_BOUNDARIES = True
-      return _
-    while True:
-      message = "Do you want to inject the provided value for " + http_request_method + " parameter '" + parameter.split("=")[0] + "' inside boundaries?"
-      message += " ('" + str(value.replace(_ ,_ + settings.CUSTOM_INJECTION_MARKER_CHAR)) + "') [Y/n] > "
-      procced_option = common.read_input(message, default="Y", check_batch=True)
-      if procced_option in settings.CHOICE_YES:
-        settings.INJECT_INSIDE_BOUNDARIES = True
-        return _
-      elif procced_option in settings.CHOICE_NO:
-        settings.INJECT_INSIDE_BOUNDARIES = False
-        return ""
-      elif procced_option in settings.CHOICE_QUIT:
-        raise SystemExit()
-      else:
-        common.invalid_option(procced_option)
-        pass
+        value = re.search(settings.VALUE_BOUNDARIES, value_inside_boundaries).group(1)
+        if value:
+          value = value_inside_boundaries.replace(value, value + settings.CUSTOM_INJECTION_MARKER_CHAR)
+          while True:
+            message = "Do you want to inject the provided value '" + value + "' inside boundaries?"
+            message += " ('" + value + "') [Y/n] > "
+            procced_option = common.read_input(message, default="Y", check_batch=True)
+            if procced_option in settings.CHOICE_YES:
+              settings.INJECT_INSIDE_BOUNDARIES = True
+              parameter = parameter.replace(value_inside_boundaries, value)
+              break
+            elif procced_option in settings.CHOICE_NO:
+              settings.INJECT_INSIDE_BOUNDARIES = False
+              break
+            elif procced_option in settings.CHOICE_QUIT:
+              raise SystemExit()
+            else:
+              common.invalid_option(procced_option)
+              pass
+  except Exception as e:
+    pass
 
-  if menu.options.skip_parameter != None:
-    for skip_parameter in re.split(settings.PARAMETER_SPLITTING_REGEX, menu.options.skip_parameter):
-      if parameter.split("=")[0] != skip_parameter:
-        return check_boundaries_value(skip_parameter, value, http_request_method)
-      else:
-        return value
-
-  elif menu.options.test_parameter != None :
-    for test_parameter in re.split(settings.PARAMETER_SPLITTING_REGEX, menu.options.test_parameter):
-      if parameter.split("=")[0] == test_parameter:
-        return check_boundaries_value(test_parameter, value, http_request_method)
-      else:
-        return value
-  else:
-    return check_boundaries_value(parameter, value, http_request_method)
-
-"""
-Add the PCRE '/e' modifier outside boundaries.
-"""
-def PCRE_e_modifier(parameter, http_request_method):
-  original_parameter = parameter
-  if not settings.PCRE_MODIFIER in parameter:
-    try:
-      if get_value_inside_boundaries(parameter.split("=")[1]) != parameter.split("=")[1]:
-        while True:
-          message = "It appears that provided value for " + http_request_method + " parameter '" + parameter.split("=")[0] + "' has boundaries. "
-          message += "Do you want to add the PCRE '" + settings.PCRE_MODIFIER + "' modifier outside boundaries? ('"
-          message += parameter.split("=")[1].replace(settings.INJECT_TAG, settings.CUSTOM_INJECTION_MARKER_CHAR) + settings.PCRE_MODIFIER[1:2] + "') [Y/n] > "
-          modifier_check = common.read_input(message, default="Y", check_batch=True)
-          if modifier_check in settings.CHOICE_YES:
-            return original_parameter + settings.PCRE_MODIFIER[1:2]
-          elif modifier_check in settings.CHOICE_NO:
-            return original_parameter
-          elif modifier_check in settings.CHOICE_QUIT:
-            raise SystemExit()
-          else:
-            common.invalid_option(modifier_check)
-            pass
-    except Exception as e:
-      pass
   return parameter
 
 """

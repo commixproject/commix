@@ -97,9 +97,6 @@ def do_GET_check(url, http_request_method):
       if len([s for s in multi_parameters if "=" in s]) != (len(multi_parameters)):
         checks.inappropriate_format(multi_parameters)
 
-      for param in range(len(multi_parameters)):
-        multi_parameters[param] = checks.PCRE_e_modifier(multi_parameters[param], http_request_method)
-
       # Check for empty values (in provided parameters).
       if checks.is_empty(multi_parameters, http_request_method):
         return urls_list
@@ -110,8 +107,6 @@ def do_GET_check(url, http_request_method):
       value = multi_params_get_value(parameters)
       # Check if single parameter is supplied.
       if len(multi_parameters) == 1:
-        if re.search(settings.VALUE_BOUNDARIES, value):
-          value = checks.value_boundaries(parameters, value, http_request_method)
         # Check if defined the INJECT_TAG
         if settings.INJECT_TAG not in parameters:
           # Ignoring the anti-CSRF parameter(s).
@@ -149,8 +144,6 @@ def do_GET_check(url, http_request_method):
               old = value
             # Grab the value of parameter.
             value = multi_params_get_value(all_params[param])
-            if re.search(settings.VALUE_BOUNDARIES, value):
-              value = checks.value_boundaries(all_params[param], value, http_request_method)
             # Ignoring the anti-CSRF parameter(s).
             if checks.ignore_anticsrf_parameter(all_params[param]):
               all_params[param - 1] = ''.join(all_params[param - 1]).replace(settings.INJECT_TAG, "")
@@ -208,8 +201,6 @@ def vuln_GET_param(url):
           except Exception:
             pass
         settings.TESTABLE_VALUE = pairs[param].split("=")[1].replace(settings.INJECT_TAG, "")
-        if re.search(settings.VALUE_BOUNDARIES, settings.TESTABLE_VALUE) and settings.INJECT_INSIDE_BOUNDARIES:
-          settings.TESTABLE_VALUE  = checks.get_value_inside_boundaries(settings.TESTABLE_VALUE)
         if settings.BASE64_PADDING  in pairs[param]:
           settings.TESTABLE_VALUE = settings.TESTABLE_VALUE + settings.BASE64_PADDING
         break
@@ -335,9 +326,6 @@ def do_POST_check(parameter, http_request_method):
      not settings.IS_XML:
     return ""
 
-  for param in range(len(multi_parameters)):
-    multi_parameters[param] = checks.PCRE_e_modifier(multi_parameters[param], http_request_method)
-
   _ = []
   _.append(parameter)
   parameter = ''.join(checks.check_similarities(_))
@@ -362,8 +350,6 @@ def do_POST_check(parameter, http_request_method):
         # Ignoring the anti-CSRF parameter(s).
         if checks.ignore_anticsrf_parameter(parameter):
           return parameter
-        if re.search(settings.VALUE_BOUNDARIES, value):
-          value = checks.value_boundaries(parameter, value, http_request_method)
         # Replace the value of parameter with INJECT_HERE tag
         if len(value) == 0:
           if settings.IS_JSON:
@@ -413,8 +399,6 @@ def do_POST_check(parameter, http_request_method):
           old = value
         # Grab the value of parameter.
         value = multi_params_get_value(param, all_params)
-        if re.search(settings.VALUE_BOUNDARIES, value):
-          value = checks.value_boundaries(all_params[param], value, http_request_method)
         # Ignoring the anti-CSRF parameter(s).
         if checks.ignore_anticsrf_parameter(all_params[param]):
           all_params[param - 1] = ''.join(all_params[param - 1]).replace(settings.INJECT_TAG, "")
@@ -517,8 +501,6 @@ def vuln_POST_param(parameter, url):
             except Exception:
               pass
           settings.TESTABLE_VALUE = pairs[param].split("=")[1].replace(settings.INJECT_TAG, "")
-          if re.search(settings.VALUE_BOUNDARIES, settings.TESTABLE_VALUE) and settings.INJECT_INSIDE_BOUNDARIES:
-            settings.TESTABLE_VALUE  = checks.get_value_inside_boundaries(settings.TESTABLE_VALUE)
           if settings.BASE64_PADDING  in pairs[param]:
             settings.TESTABLE_VALUE = settings.TESTABLE_VALUE + settings.BASE64_PADDING
           break

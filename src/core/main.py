@@ -307,6 +307,14 @@ def check_for_injected_url(url):
   return _
 
 """
+Check if value is inside boundaries
+"""
+def check_value_inside_boundaries(url, http_request_method):
+  url = checks.value_inside_boundaries(url, http_request_method)
+  settings.USER_DEFINED_POST_DATA = checks.value_inside_boundaries(settings.USER_DEFINED_POST_DATA, http_request_method)
+  return url
+
+"""
 The main function.
 """
 def main(filename, url, http_request_method):
@@ -328,6 +336,8 @@ def main(filename, url, http_request_method):
     # Target URL reload.
     if menu.options.url_reload and menu.options.data:
       settings.URL_RELOAD = True
+
+    url = check_value_inside_boundaries(url, http_request_method)
 
     # if settings.CUSTOM_INJECTION_MARKER and settings.MULTI_TARGETS or settings.STDIN_PARSING:
     #   settings.CUSTOM_INJECTION_MARKER = False
@@ -883,8 +893,8 @@ try:
       # Check if defined character used for splitting parameter values.
       if menu.options.pdel and menu.options.pdel in url:
         settings.PARAMETER_DELIMITER = menu.options.pdel
-
     http_request_method  = checks.check_http_method(url)
+
     if not settings.STDIN_PARSING and not menu.options.bulkfile and not settings.CRAWLING:
       if os_checks_num == 0:
         settings.INIT_TEST = True
