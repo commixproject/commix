@@ -73,7 +73,7 @@ def check_waf(url, http_request_method):
   settings.print_data_to_stdout(settings.print_info_msg(info_msg))
   if settings.VERBOSITY_LEVEL >= 1:
     settings.print_data_to_stdout(settings.print_payload(payload))
-  payload = "".join(random.choices(string.ascii_uppercase, k=4)) + "=" + payload
+  payload = "".join(random.sample(string.ascii_uppercase, k=4)) + "=" + payload
   if not "?" in url:
     payload = "?" + payload
   else:
@@ -1997,7 +1997,7 @@ Check for similarity in provided parameter name and value.
 def check_similarities(all_params):
   if settings.IS_JSON:
     try:
-      _ = "".join(random.choices(string.ascii_uppercase, k=6))
+      _ = "".join(random.sample(string.ascii_uppercase, k=6))
       all_params = ','.join(all_params)
       json_data = json.loads(all_params, object_pairs_hook=OrderedDict)
       all_params = flatten(json_data)
