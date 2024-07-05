@@ -86,7 +86,7 @@ TRAFFIC_SIGN = HTTP_CONTENT_SIGN = ""
 ABORTION_SIGN = ERROR_SIGN
 DEBUG_SIGN = "[" + Back.BLUE + Fore.WHITE + "debug" + Style.RESET_ALL + "] "
 DEBUG_BOLD_SIGN = "[" + Back.BLUE + Style.BRIGHT + Fore.WHITE + "debug" + Style.RESET_ALL + "] " + Style.BRIGHT
-CHECK_SIGN = DEBUG_SIGN + "Checking pair of HTTP authentication credentials: "
+CHECK_SIGN = DEBUG_SIGN + "Checking for a valid pair of HTTP authentication credentials: "
 OS_SHELL_TITLE = Style.BRIGHT + "Pseudo-Terminal Shell (type '?' for available options)" + Style.RESET_ALL
 OS_SHELL = """commix(""" + Style.BRIGHT + Fore.RED + """os_shell""" + Style.RESET_ALL + """) > """
 REVERSE_TCP_SHELL = """commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp""" + Style.RESET_ALL + """) > """
@@ -190,7 +190,7 @@ def print_http_response_content(content):
 
 # Print checking message (verbose mode)
 def print_checking_msg(payload):
-  result = CHECK_SIGN + str(payload) + Style.RESET_ALL
+  result = print_time() + CHECK_SIGN + str(payload) + Style.RESET_ALL
   return result
 
 # Print question message
@@ -262,7 +262,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.0"
-REVISION = "83"
+REVISION = "84"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1055,8 +1055,8 @@ LOAD_SESSION = None
 RETEST = False
 
 # Define the default credentials files
-USERNAMES_TXT_FILE = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'txt')) + "/" + "usernames.txt"
-PASSWORDS_TXT_FILE = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'txt')) + "/" + "passwords_john.txt"
+USERNAMES_TXT_FILE = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'txt')) + "/" + "default_usernames.txt"
+PASSWORDS_TXT_FILE = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'txt')) + "/" + "default_passwords.txt"
 
 REQUIRED_AUTHENTICATION = False
 

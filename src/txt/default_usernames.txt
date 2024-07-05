@@ -1,0 +1,14 @@
+!root
+111111
+1234
+123456
+admin
+admin1
+administrator
+anonymous
+cisco
+root
+r00t
+test
+webadmin
+user
