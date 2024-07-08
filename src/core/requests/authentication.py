@@ -158,8 +158,7 @@ def http_auth_cracker(url, realm, http_request_method):
           if settings.VERBOSITY_LEVEL >= 2:
             settings.print_data_to_stdout(settings.print_checking_msg(payload))
           else:
-            settings.print_data_to_stdout(settings.END_LINE.CR + settings.print_checking_msg(payload) + settings.SINGLE_WHITESPACE * 10)
-            
+            settings.print_data_to_stdout(settings.END_LINE.CR + settings.print_checking_msg(payload) + settings.SINGLE_WHITESPACE * len(payload))
         try:
           # Basic authentication
           if authentication_type.lower() == settings.AUTH_TYPE.BASIC:
@@ -196,7 +195,7 @@ def http_auth_cracker(url, realm, http_request_method):
             i = i + 1
             float_percent = ".. (" + float_percent + ")"
         if settings.VERBOSITY_LEVEL == 0:
-          info_msg = "Checking for valid pair of HTTP authentication credentials."
+          info_msg = "Checking for a valid pair of HTTP authentication credentials."
           info_msg += float_percent
           settings.print_data_to_stdout("\r\r" + settings.print_info_msg(info_msg))
           
@@ -204,7 +203,7 @@ def http_auth_cracker(url, realm, http_request_method):
           valid_pair =  "" + username + ":" + password + ""
           if not settings.VERBOSITY_LEVEL >= 2:
             settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
-          info_msg = "Identified valid pair of HTTP authentication credentials: '"
+          info_msg = "Identified a valid pair of HTTP authentication credentials: '"
           info_msg += valid_pair + Style.RESET_ALL + Style.BRIGHT  + "'."
           settings.print_data_to_stdout(settings.print_bold_info_msg(info_msg))
           return valid_pair

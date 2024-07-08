@@ -535,20 +535,19 @@ Cookie injection
 """
 def cookie_injection(url, http_request_method, filename, timesec):
 
+  settings.COOKIE_INJECTION = True
+  # Cookie Injection
   cookie_value = menu.options.cookie
-  if cookie_value:
-    settings.COOKIE_INJECTION = True
-    # Cookie Injection
-    header_name = settings.SINGLE_WHITESPACE + settings.COOKIE
-    settings.HTTP_HEADER = header_name[1:].lower()
-    cookie_parameters = parameters.do_cookie_check(menu.options.cookie)
-    if type(cookie_parameters) is str:
-      cookie_parameters_list = []
-      cookie_parameters_list.append(cookie_parameters)
-      cookie_parameters = cookie_parameters_list
-    # Remove whitespaces
-    cookie_parameters = [x.replace(settings.SINGLE_WHITESPACE, "") for x in cookie_parameters]
-    do_injection(cookie_parameters, settings.COOKIE, header_name, url, http_request_method, filename, timesec)
+  header_name = settings.SINGLE_WHITESPACE + settings.COOKIE
+  settings.HTTP_HEADER = header_name[1:].lower()
+  cookie_parameters = parameters.do_cookie_check(menu.options.cookie)
+  if type(cookie_parameters) is str:
+    cookie_parameters_list = []
+    cookie_parameters_list.append(cookie_parameters)
+    cookie_parameters = cookie_parameters_list
+  # Remove whitespaces
+  cookie_parameters = [x.replace(settings.SINGLE_WHITESPACE, "") for x in cookie_parameters]
+  do_injection(cookie_parameters, settings.COOKIE, header_name, url, http_request_method, filename, timesec)
 
   if settings.COOKIE_INJECTION:
     # Restore cookie value
