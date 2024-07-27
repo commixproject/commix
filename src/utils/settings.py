@@ -262,7 +262,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.0"
-REVISION = "88"
+REVISION = "89"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -496,7 +496,7 @@ EXTRA_HTTP_HEADERS = False
 
 # The command injection separators.
 SEPARATORS = []
-DEFAULT_SEPARATORS = ["", ";", "%26", "|"]
+DEFAULT_SEPARATORS = [";", "%26", "|", ""]
 SPECIAL_SEPARATORS = ["%26%26", "||", "%0a", "%0d%0a", "%1a"]
 SEPARATORS_LVL1 = DEFAULT_SEPARATORS + SPECIAL_SEPARATORS
 SEPARATORS_LVL3 = SEPARATORS_LVL2 = SEPARATORS_LVL1
