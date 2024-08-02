@@ -96,23 +96,23 @@ def clear(url):
 """
 Import successful injection points to session file.
 """
-def injection_point_importation(url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response, timesec, how_long, output_length, is_vulnerable):
+def injection_point_importation(url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response, timesec, exec_time, output_length, is_vulnerable):
   try:
     conn = sqlite3.connect(settings.SESSION_FILE)
     conn.execute("CREATE TABLE IF NOT EXISTS " + table_name(url) + "_ip" + \
                  "(id INTEGER PRIMARY KEY, url VARCHAR, technique VARCHAR, injection_type VARCHAR, separator VARCHAR," \
                  "shell VARCHAR, vuln_parameter VARCHAR, prefix VARCHAR, suffix VARCHAR, "\
                  "TAG VARCHAR, alter_shell VARCHAR, payload VARCHAR, http_header VARCHAR, http_request_method VARCHAR, url_time_response INTEGER, "\
-                 "timesec INTEGER, how_long INTEGER, output_length INTEGER, is_vulnerable VARCHAR);")
+                 "timesec INTEGER, exec_time INTEGER, output_length INTEGER, is_vulnerable VARCHAR);")
 
     conn.execute("INSERT INTO " + table_name(url) + "_ip(url, technique, injection_type, separator, "\
                  "shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_header, http_request_method, "\
-                 "url_time_response, timesec, how_long, output_length, is_vulnerable) "\
+                 "url_time_response, timesec, exec_time, output_length, is_vulnerable) "\
                  "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", \
                  (str(url), str(technique), str(injection_type), \
                  str(separator), str(shell), str(vuln_parameter), str(prefix), str(suffix), \
                  str(TAG), str(alter_shell), str(payload), str(settings.HTTP_HEADER), str(http_request_method), \
-                 int(url_time_response), int(timesec), int(how_long), \
+                 int(url_time_response), int(timesec), int(exec_time), \
                  int(output_length), str(is_vulnerable)))
     conn.commit()
     conn.close()
@@ -209,27 +209,26 @@ def injection_point_exportation(url, http_request_method):
       result = conn.execute("SELECT * FROM sqlite_master WHERE name = '" + \
                              table_name(url) + "_ip' AND type = 'table';")
       if result:
-        if menu.options.tech[:1] == "c":
-          select_injection_type = "R"
-        elif menu.options.tech[:1] == "e":
-          settings.EVAL_BASED_STATE = True
-          select_injection_type = "R"
-        elif menu.options.tech[:1] == "t":
-          select_injection_type = "B"
-        else:
-          select_injection_type = "S"
-        if settings.TEMPFILE_BASED_STATE and select_injection_type == "S":
-          check_injection_technique = "t"
-        elif settings.EVAL_BASED_STATE and select_injection_type == "R":
-          check_injection_technique = "d"
-        else:
-          check_injection_technique = menu.options.tech[:1]
-
+        # if menu.options.tech[:1] == "c":
+        #   select_injection_type = "R"
+        # elif menu.options.tech[:1] == "e":
+        #   settings.EVAL_BASED_STATE = True
+        #   select_injection_type = "R"
+        # elif menu.options.tech[:1] == "t":
+        #   select_injection_type = "B"
+        # else:
+        #   select_injection_type = "S"
+        # if settings.TEMPFILE_BASED_STATE and select_injection_type == "S":
+        #   check_injection_technique = "t"
+        # elif settings.EVAL_BASED_STATE and select_injection_type == "R":
+        #   check_injection_technique = "d"
+        # else:
+        #   check_injection_technique = menu.options.tech[:1]
         if settings.TESTABLE_PARAMETER:
           cursor = conn.execute("SELECT * FROM " + table_name(url) + "_ip WHERE "\
                                 "url = '" + url + "' AND "\
-                                "injection_type like '" + select_injection_type + "%' AND "\
-                                "technique like '" + check_injection_technique + "%' AND "\
+                                # "injection_type like '" + select_injection_type + "%' AND "\
+                                # "technique like '" + check_injection_technique + "%' AND "\
                                 "vuln_parameter = '" + settings.TESTABLE_PARAMETER + "' AND "\
                                 "http_request_method = '" + http_request_method + "' "\
                                 "ORDER BY id DESC limit 1;")
@@ -237,8 +236,8 @@ def injection_point_exportation(url, http_request_method):
         else:
           cursor = conn.execute("SELECT * FROM " + table_name(url) + "_ip WHERE "\
                                 "url = '" + url + "' AND "\
-                                "injection_type like '" + select_injection_type + "%' AND "\
-                                "technique like '" + check_injection_technique + "%' AND "\
+                                # "injection_type like '" + select_injection_type + "%' AND "\
+                                # "technique like '" + check_injection_technique + "%' AND "\
                                 "http_header = '" + settings.HTTP_HEADER + "' AND "\
                                 "http_request_method = '" + http_request_method + "' "\
                                 "ORDER BY id DESC limit 1;")
@@ -258,10 +257,10 @@ def injection_point_exportation(url, http_request_method):
           http_request_method = session[13]
           url_time_response = session[14]
           timesec = session[15]
-          how_long = session[16]
+          exec_time = session[16]
           output_length = session[17]
           is_vulnerable = session[18]
-          return url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response, timesec, how_long, output_length, is_vulnerable
+          return url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response, timesec, exec_time, output_length, is_vulnerable
     else:
       no_such_table = True
       pass
@@ -280,37 +279,18 @@ def notification(url, technique, injection_type):
   try:
     if settings.LOAD_SESSION == True:
       while True:
-        message = "A previously stored session has been held against that target. "
-        message += "Do you want to resume to "
+        # message = "A previously stored session has been held against that target. "
+        message = "Do you want to resume to the "
         message += "(" + injection_type.split(settings.SINGLE_WHITESPACE)[0] + ") "
         message += technique.rsplit(' ', 2)[0]
-        message += " injection point? [Y/n] > "
+        message += " injection point from stored session? [Y/n] > "
         settings.LOAD_SESSION = common.read_input(message, default="Y", check_batch=True)
         if settings.LOAD_SESSION in settings.CHOICE_YES:
           settings.INJECTION_CHECKER = True
           return True
         elif settings.LOAD_SESSION in settings.CHOICE_NO:
           settings.LOAD_SESSION = False
-          if technique[:1] != "c":
-            while True:
-              message = "Which technique do you want to re-evaluate? [(C)urrent/(a)ll/(n)one] > "
-              proceed_option = common.read_input(message, default="C", check_batch=True)
-              if proceed_option.lower() in settings.CHOICE_PROCEED :
-                if proceed_option.lower() == "a":
-                  settings.RETEST = True
-                  break
-                elif proceed_option.lower() == "c" :
-                  settings.RETEST = False
-                  break
-                elif proceed_option.lower() == "n":
-                  raise SystemExit()
-                else:
-                  pass
-              else:
-                common.invalid_option(proceed_option)
-                pass
-          if settings.SESSION_APPLIED_TECHNIQUES:
-            menu.options.tech = ''.join(settings.AVAILABLE_TECHNIQUES)
+          settings.RESET_TESTS = True
           return False
         elif settings.LOAD_SESSION in settings.CHOICE_QUIT:
           raise SystemExit()

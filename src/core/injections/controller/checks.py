@@ -36,6 +36,7 @@ from src.utils import simple_http_server
 from src.thirdparty.odict import OrderedDict
 from src.core.convert import hexdecode
 from socket import error as SocketError
+from src.core.requests import headers
 from src.core.requests import requests
 from src.core.requests import parameters
 from src.thirdparty.six.moves import input as _input
@@ -57,12 +58,13 @@ except:
   except:
     settings.READLINE_ERROR = True
 
+"""
+Exiting
+"""
 def exit():
   if settings.VERBOSITY_LEVEL != 0:
     settings.print_data_to_stdout(settings.execution("Ending"))
   os._exit(0)
-
-
 
 """
 Detection of WAF/IPS protection.
@@ -110,6 +112,19 @@ def payload_fixation(payload):
   return payload
 
 """
+"""
+def get_response(output):
+  request = _urllib.request.Request(output)
+  headers.do_check(request)
+  headers.check_http_traffic(request)
+  # Check if defined any HTTP Proxy (--proxy option).
+  if menu.options.proxy or menu.options.ignore_proxy or menu.options.tor: 
+    response = proxy.use_proxy(request)
+  else:
+    response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
+  return response
+
+"""
 Check for non custom parameters.
 """
 def process_non_custom():
@@ -135,7 +150,7 @@ def process_non_custom():
 Process data with custom injection marker character ('*').
 """
 def process_custom_injection_data(data):
-  if settings.CUSTOM_INJECTION_MARKER != None:
+  if settings.CUSTOM_INJECTION_MARKER != None and isinstance(data, str):
     _ = []
     for data in data.split("\\n"):
       if not data.startswith(settings.ACCEPT) and settings.CUSTOM_INJECTION_MARKER_CHAR in data:
@@ -1173,6 +1188,15 @@ def error_loading_session_file():
   raise SystemExit()
 
 """
+EOFError
+"""
+def EOFError_err_msg():
+  if settings.STDIN_PARSING:
+    settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
+  err_msg = "Exiting, due to EOFError."
+  settings.print_data_to_stdout(settings.print_error_msg(err_msg))
+
+"""
 Message regarding unexpected time delays
 """
 def time_delay_recommendation():
@@ -1184,11 +1208,10 @@ def time_delay_recommendation():
 Message regarding unexpected time delays due to unstable requests
 """
 def time_delay_due_to_unstable_request(timesec):
-  message = "Unexpected time delays have been identified due to unstable "
-  message += "requests and may lead to false-positive results. "
+  message = "Unexpected time delays have been identified and may lead to false-positive results."
   settings.print_data_to_stdout(settings.END_LINE.CR)
   while True:
-    message = message + "How do you want to proceed? [(C)ontinue/(s)kip] > "
+    message = message + " How do you want to proceed? [(C)ontinue/(s)kip] > "
     proceed_option = common.read_input(message, default="C", check_batch=True)
     if proceed_option.lower() in settings.CHOICE_PROCEED :
       if proceed_option.lower() == "c":
@@ -1205,11 +1228,12 @@ def time_delay_due_to_unstable_request(timesec):
       pass
 
 """
+Time relative shell condition 
 """
-def time_relative_shell(url_time_response, how_long, timesec):
-  if (url_time_response == 0 and (how_long - timesec) >= 0) or \
-     (url_time_response != 0 and (how_long - timesec) == 0 and (how_long == timesec)) or \
-     (url_time_response != 0 and (how_long - timesec) > 0 and (how_long >= timesec + 1)):
+def time_relative_shell(url_time_response, exec_time, timesec):
+  if (url_time_response == 0 and (exec_time - timesec) >= 0) or \
+     (url_time_response != 0 and (exec_time - timesec) == 0 and (exec_time == timesec)) or \
+     (url_time_response != 0 and (exec_time - timesec) > 0 and (exec_time >= timesec + 1)):
     return True
   else:
     return False
@@ -2794,5 +2818,163 @@ def identified_vulnerable_param(url, technique, injection_type, vuln_parameter, 
   sub_content = str(url_decode(payload))
   settings.print_data_to_stdout(settings.print_sub_content(sub_content))
 
+"""
+Finalize injection process
+"""
+def finalize(exit_loops, no_result, float_percent, injection_type, technique, shell):
+  if exit_loops == False:
+    if settings.VERBOSITY_LEVEL == 0:
+      percent = print_percentage(float_percent, no_result, shell)
+      injection_process(injection_type, technique, percent)
+      return True
+    else:
+      return True
+  else:
+    return False
+
+"""
+Provide custom server's root directory
+"""
+def custom_web_root(url, timesec, filename, http_request_method, url_time_response):
+  if not settings.CUSTOM_WEB_ROOT:
+    if settings.TARGET_OS == settings.OS.WINDOWS :
+      default_root_dir = settings.WINDOWS_DEFAULT_DOC_ROOTS[0]
+    else:
+      default_root_dir = settings.LINUX_DEFAULT_DOC_ROOTS[0].replace(settings.DOC_ROOT_TARGET_MARK,settings.TARGET_URL)
+    message = "Enter what you want to use for writable directory (e.g. '"
+    message += default_root_dir + "') > "
+    settings.WEB_ROOT = common.read_input(message, default=default_root_dir, check_batch=True)
+    if len(settings.WEB_ROOT) == 0:
+      settings.WEB_ROOT = default_root_dir
+    settings.CUSTOM_WEB_ROOT = True
+
+  if not settings.LOAD_SESSION:
+    path = settings.WEB_ROOT
+    setting_writable_dir(path)
+  menu.options.web_root = settings.WEB_ROOT.strip()
+
+
+"""
+Return TEMP path for win / *nix targets.
+"""
+def check_tmp_path(url, timesec, filename, http_request_method, url_time_response):
+  def check_trailing_slashes():
+    if settings.TARGET_OS == settings.OS.WINDOWS and not menu.options.web_root.endswith("\\"):
+      menu.options.web_root = settings.WEB_ROOT = menu.options.web_root + "\\"
+    elif not menu.options.web_root.endswith("/"):
+      menu.options.web_root = settings.WEB_ROOT = menu.options.web_root + "/"
+
+  # Set temp path
+  if settings.TARGET_OS == settings.OS.WINDOWS:
+    if "microsoft-iis" in settings.SERVER_BANNER.lower():
+      settings.TMP_PATH = r"C:\\Windows\TEMP\\"
+    else:
+      settings.TMP_PATH = "%temp%\\"
+  else:
+    settings.TMP_PATH = "/tmp/"
+
+  if menu.options.tmp_path:
+    tmp_path = menu.options.tmp_path
+  else:
+    tmp_path = settings.TMP_PATH
+
+  if not settings.LOAD_SESSION and settings.DEFAULT_WEB_ROOT != settings.WEB_ROOT:
+    settings.WEB_ROOT = settings.DEFAULT_WEB_ROOT
+
+  if menu.options.file_dest and '/tmp/' in menu.options.file_dest:
+    call_tmp_based = True
+
+  if menu.options.web_root:
+    settings.WEB_ROOT = menu.options.web_root
+  else:
+    # Provide custom server's root directory.
+    custom_web_root(url, timesec, filename, http_request_method, url_time_response)
+
+  if settings.TARGET_OS == settings.OS.WINDOWS:
+    settings.WEB_ROOT = settings.WEB_ROOT.replace("/","\\")
+  check_trailing_slashes()
+
+  return tmp_path
+
+"""
+Check if file-based technique has failed,
+then use the "/tmp/" directory for tempfile-based technique.
+"""
+def tfb_controller(no_result, url, timesec, filename, tmp_path, http_request_method, url_time_response):
+  if no_result == True:
+    from src.core.injections.semiblind.techniques.tempfile_based import tfb_handler
+    path = tmp_path
+    setting_writable_dir(path)
+    call_tfb = tfb_handler.exploitation(url, timesec, filename, tmp_path, http_request_method, url_time_response)
+    return call_tfb
+  else:
+    settings.print_data_to_stdout(settings.END_LINE.CR)
+
+"""
+Check if to use the "/tmp/" directory for tempfile-based technique.
+"""
+def use_temp_folder(no_result, url, timesec, filename, tmp_path, http_request_method, url_time_response):
+  tmp_path = check_tmp_path(url, timesec, filename, http_request_method, url_time_response)
+  settings.print_data_to_stdout(settings.END_LINE.CR)
+  message = "It seems that you don't have permissions to "
+  message += "read and/or write files in directory '" + settings.WEB_ROOT + "'."
+  if not menu.options.web_root:
+    message += " You are advised to rerun with option '--web-root'."
+  while True:
+    message = message + settings.END_LINE.LF + "Do you want to use the temporary directory ('" + tmp_path + "')? [Y/n] > "
+    tmp_upload = common.read_input(message, default="Y", check_batch=True)
+    if tmp_upload in settings.CHOICE_YES:
+      exit_loops = True
+      settings.TEMPFILE_BASED_STATE = True
+      call_tfb = tfb_controller(no_result, url, timesec, filename, tmp_path, http_request_method, url_time_response)
+      if call_tfb != False:
+        return True
+      else:
+        if no_result == True:
+          return False
+        else:
+          return True
+    elif tmp_upload in settings.CHOICE_NO:
+      break
+    elif tmp_upload in settings.CHOICE_QUIT:
+      settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
+      raise
+    else:
+      common.invalid_option(tmp_upload)
+      pass
+  # continue
+
+"""
+Set time relative timesec 
+"""
+def time_relative_timesec(timesec):
+  if settings.TIME_RELATIVE_ATTACK and settings.TIMESEC < 1:
+    timesec = 1
+  else:
+    timesec = settings.TIMESEC
+  return timesec  
+
+"""
+Export the time relative injection results
+"""
+def time_relative_export_injection_results(cmd, separator, output, check_exec_time):
+  if settings.VERBOSITY_LEVEL == 0:
+    settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
+  if output != "" and check_exec_time != 0 :
+    info_msg = "Finished in " + time.strftime('%H:%M:%S', time.gmtime(check_exec_time)) + "."
+    settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+    # settings.print_data_to_stdout(settings.print_output(output))
+  else:
+    # Check for separator filtration on target host.
+    if output != False :
+      err_msg = "It seems that '" + cmd + "' command could not return "
+      err_msg += "any output due to '" + separator + "' filtration on target host. "
+      err_msg += "To bypass that limitation, use the '--alter-shell' option "
+      err_msg += "or try another injection technique."
+      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+    # Check for invalid provided command.
+    else:
+      err_msg = common.invalid_cmd_output(cmd)
+      settings.print_data_to_stdout(settings.print_error_msg(err_msg))
 
 # eof

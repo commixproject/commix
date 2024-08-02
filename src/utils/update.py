@@ -54,8 +54,8 @@ def revision_num():
     else:
       settings.print_data_to_stdout(Fore.MAGENTA + "\n" + stdout + Style.RESET_ALL)
       end  = time.time()
-      how_long = int(end - start)
-      info_msg = "Finished in " + time.strftime('%H:%M:%S', time.gmtime(how_long)) + "."
+      exec_time = int(end - start)
+      info_msg = "Finished in " + time.strftime('%H:%M:%S', time.gmtime(exec_time)) + "."
     settings.print_data_to_stdout(settings.print_info_msg(info_msg))
   except:
     raise SystemExit()
@@ -67,7 +67,6 @@ def updater():
   info_msg = "Checking requirements to update "
   info_msg += settings.APPLICATION + " from GitHub repository. "
   settings.print_data_to_stdout(settings.print_info_msg(info_msg))
-  
   if menu.options.offline:
     err_msg = "You cannot update commix via GitHub without access on the Internet."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
@@ -102,6 +101,7 @@ def updater():
           err_msg = requirment + " not found."
           settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
           raise SystemExit()
+
     except Exception as err_msg:
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()

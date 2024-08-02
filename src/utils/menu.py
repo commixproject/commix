@@ -486,11 +486,11 @@ injection.add_option("--delay",
                 help="Seconds to delay between each HTTP request.")
 
 injection.add_option("--time-sec",
-                default=1,
+                default=0,
                 action="store",
                 type="int",
                 dest="timesec",
-                help="Seconds to delay the OS response (Default: 1).")
+                help="Seconds to delay the OS response.")
 
 injection.add_option("--tmp-path",
                 action="store",

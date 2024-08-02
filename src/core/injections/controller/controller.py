@@ -41,6 +41,8 @@ Checks if the testable parameter is exploitable.
 """
 
 def basic_level_checks():
+  settings.LOAD_SESSION = None
+  settings.TIME_RELATIVE_ATTACK = False
   settings.SKIP_CODE_INJECTIONS = None
   settings.SKIP_COMMAND_INJECTIONS = None
   settings.IDENTIFIED_COMMAND_INJECTION = False
@@ -55,7 +57,7 @@ def check_for_stored_sessions(url, http_request_method):
     if os.path.isfile(settings.SESSION_FILE) and not settings.REQUIRED_AUTHENTICATION:
       if session_handler.applied_techniques(url, http_request_method):
         settings.SESSION_APPLIED_TECHNIQUES = session_handler.applied_techniques(url, http_request_method)
-        menu.options.tech = settings.SESSION_APPLIED_TECHNIQUES
+        # menu.options.tech = settings.SESSION_APPLIED_TECHNIQUES
       if session_handler.check_stored_parameter(url, http_request_method):
         if not settings.MULTI_TARGETS or not settings.STDIN_PARSING:
           settings.LOAD_SESSION = True
@@ -323,9 +325,8 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
     else:
       if not settings.LOAD_SESSION:
         checks.recognise_payload(payload=settings.TESTABLE_VALUE)
-        if settings.VERBOSITY_LEVEL != 0:
-          debug_msg = "Performing heuristic (basic) tests to the " + settings.CHECKING_PARAMETER + "."
-          settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
+        info_msg = "Performing heuristic (basic) tests to the " + settings.CHECKING_PARAMETER + "."
+        settings.print_data_to_stdout(settings.print_info_msg(info_msg))
 
         if not (len(menu.options.tech) == 1 and "e" in menu.options.tech):
           url = command_injection_heuristic_basic(url, http_request_method, check_parameter, the_type, header_name, inject_http_headers)
@@ -358,12 +359,11 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
 
       # Procced with file-based semiblind command injection technique,
       # once the user provides the path of web server's root directory.
-      if menu.options.web_root and \
-         menu.options.tech and not "f" in menu.options.tech:
-          if not menu.options.web_root.endswith("/"):
-             menu.options.web_root =  menu.options.web_root + "/"
-          if checks.procced_with_file_based_technique():
-            menu.options.tech = "f"
+      if menu.options.web_root and not settings.SESSION_APPLIED_TECHNIQUES and not "f" in menu.options.tech:
+        if not menu.options.web_root.endswith("/"):
+           menu.options.web_root =  menu.options.web_root + "/"
+        if checks.procced_with_file_based_technique():
+          menu.options.tech = "f"
 
       classic_command_injection_technique(url, timesec, filename, http_request_method)
       dynamic_code_evaluation_technique(url, timesec, filename, http_request_method)
@@ -495,7 +495,7 @@ def do_injection(found, data_type, header_name, url, http_request_method, filena
     check_parameters.append(check_parameter)
 
   checks.testable_parameters(url, check_parameters, header_name)
-  
+
   for i in range(0, len(found)):
     url, check_parameter = define_check_parameter(found, i, url)
     if check_parameter != found[i] and check_parameter not in settings.SKIP_PARAMETER:
@@ -523,8 +523,9 @@ def do_injection(found, data_type, header_name, url, http_request_method, filena
             counter += 1
           break
         else:
+          # Check for session file
           check_for_stored_sessions(url, http_request_method)
-          injection_proccess(url, check_parameter, http_request_method, filename, timesec) 
+          injection_proccess(url, check_parameter, http_request_method, filename, timesec)
       else:
         # Check for session file
         check_for_stored_sessions(url, http_request_method)
@@ -535,10 +536,10 @@ Cookie injection
 """
 def cookie_injection(url, http_request_method, filename, timesec):
 
-  # Cookie Injection
   cookie_value = menu.options.cookie
   if cookie_value:
     settings.COOKIE_INJECTION = True
+    # Cookie Injection
     header_name = settings.SINGLE_WHITESPACE + settings.COOKIE
     settings.HTTP_HEADER = header_name[1:].lower()
     cookie_parameters = parameters.do_cookie_check(menu.options.cookie)

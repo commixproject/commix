@@ -262,7 +262,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.0"
-REVISION = "89"
+REVISION = "90"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -555,8 +555,8 @@ URI_HTTP_HEADER = "URI"
 # Seconds to delay between each HTTP request.
 DELAY = 0
 
-# Seconds to delay the OS response. (Default 1)
-TIMESEC = 1
+# Seconds to delay the OS response.
+TIMESEC = 0
 
 # Seconds to delay between each HTTP retry.
 DELAY_RETRY = 1
@@ -660,8 +660,8 @@ CHOICE_QUIT = ['QUIT','Q','quit','q']
 # Accepts 'W','w','U','u','Q','q'
 CHOICE_OS = ['W','w','U','u','Q','q','N','n']
 
-# Accepts 'C','c','S','s','Q','q','a','A','n','N'
-CHOICE_PROCEED = ['C','c','S','s','Q','q','a','A','n','N']
+# Accepts 'C','c','S','s','Q','q','A','a','N','n','R','r'
+CHOICE_PROCEED = ['C','c','S','s','Q','q','A','a','N','n','R','r']
 
 # Available alternative shells
 AVAILABLE_SHELLS = ["python"]
@@ -1028,7 +1028,7 @@ WIN_DEL = "powershell.exe Remove-Item "
 DEL = "rm "
 
 # Time-based Variables
-FOUND_HOW_LONG = ""
+FOUND_EXEC_TIME = ""
 FOUND_DIFF = ""
 
 # Check for PowerShell
@@ -1051,8 +1051,8 @@ SRVPORT = 8080
 SESSION_FILE = ""
 LOAD_SESSION = None
 
-# Retest all techniques
-RETEST = False
+# Reset all tests (i.e. all techniques)
+RESET_TESTS = False
 
 # Define the default credentials files
 USERNAMES_TXT_FILE = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'txt')) + "/" + "default_usernames.txt"

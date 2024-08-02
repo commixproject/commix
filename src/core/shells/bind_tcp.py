@@ -52,7 +52,7 @@ def shell_options(option):
 Success msg.
 """
 def shell_success():
-  info_msg = "Everything is in place, cross your fingers and check for bind shell (on port " + settings.LPORT + ").\n"
+  info_msg = "Everything is in place, cross your fingers and check for bind shell (on port " + settings.LPORT + ")."
   settings.print_data_to_stdout(settings.print_info_msg(info_msg))
   
 

@@ -67,7 +67,7 @@ def gen_payload_msg(payload):
 Success msg.
 """
 def shell_success():
-  info_msg = "Everything is in place, cross your fingers and wait for reverse shell (on port " + settings.LPORT + ").\n"
+  info_msg = "Everything is in place, cross your fingers and wait for reverse shell (on port " + settings.LPORT + ")."
   settings.print_data_to_stdout(settings.print_info_msg(info_msg))
   
 
