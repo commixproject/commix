@@ -373,14 +373,18 @@ def injection_output(url, OUTPUT_TEXTFILE, timesec, technique):
             message =  "Enter URL to use "
             message += "for command execution output > "
             message = common.read_input(message, default=output, check_batch=True)
-            output = settings.DEFINED_WEBROOT = message
-            info_msg = "Using '" + output
-            info_msg += "' for command execution output."
-            settings.print_data_to_stdout(settings.print_info_msg(info_msg))
-            if not settings.DEFINED_WEBROOT:
+            if not re.search(r'^(?:http)s?://', message, re.I):
+              common.invalid_option(message)
               pass
             else:
-              break
+              output = settings.DEFINED_WEBROOT = message
+              info_msg = "Using '" + output
+              info_msg += "' for command execution output."
+              settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+              if not settings.DEFINED_WEBROOT:
+                pass
+              else:
+                break
           elif procced_option in settings.CHOICE_QUIT:
             raise SystemExit()
           else:
