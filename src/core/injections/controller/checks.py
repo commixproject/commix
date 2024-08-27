@@ -36,6 +36,7 @@ from src.utils import simple_http_server
 from src.thirdparty.odict import OrderedDict
 from src.core.convert import hexdecode
 from socket import error as SocketError
+from src.core.requests import proxy
 from src.core.requests import headers
 from src.core.requests import requests
 from src.core.requests import parameters
