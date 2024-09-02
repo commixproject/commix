@@ -2,7 +2,7 @@ name: 'LockBot'
 
 on:
   schedule:
-    - cron: '0 1 * * *'
+    - cron: '0 0 * * *'
 
 permissions:
   issues: write
@@ -13,5 +13,15 @@ jobs:
     steps:
       - uses: dessant/lock-threads@v2
         with:
-          issue-lock-inactive-days: '90'
-          issue-lock-comment: 'This issue has been automatically locked since there has not been any recent activity after it was closed. Please open a new issue for related issues.'
+          issue-lock-inactive-days: '30'
+          issue-lock-comment: >
+            This issue has been automatically locked due to inactivity.<br>
+            Please file a new issue if you are encountering a similar or related problem.<br><br>
+            <sub>_This action has been performed automatically by a bot._</sub>
+          issue-lock-reason: ''
+          pr-lock-inactive-days: 30
+          pr-lock-comment: >
+            This PR has been automatically locked due to inactivity.<br>
+            Please file a new issue if you are encountering a similar or related problem.<br><br>
+            <sub>_This action has been performed automatically by a bot._</sub>
+          pr-lock-reason: ''
