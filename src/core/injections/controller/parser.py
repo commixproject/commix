@@ -61,6 +61,7 @@ def logfile_parser():
   if menu.options.requestfile:
     info_msg = "Parsing HTTP request "
     request_file = menu.options.requestfile
+    
   elif menu.options.logfile:
     info_msg = "Parsing target "
     request_file = menu.options.logfile

@@ -85,7 +85,7 @@ def cmd_execution(separator, cmd, OUTPUT_TEXTFILE):
               "\"') do @set /p = %i " + settings.CMD_NUL
               )
   else:
-    settings.USER_SUPPLIED_CMD = cmd
+    settings.USER_APPLIED_CMD = cmd
     payload = (separator +
               cmd + settings.FILE_WRITE_OPERATOR + settings.WEB_ROOT + OUTPUT_TEXTFILE +
               separator

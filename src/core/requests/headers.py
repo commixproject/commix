@@ -166,7 +166,7 @@ def check_http_traffic(request):
     if settings.MULTI_TARGETS:
       if settings.INIT_TEST == True and len(settings.MULTI_ENCODED_PAYLOAD) != 0:
         settings.MULTI_ENCODED_PAYLOAD = []
-        menu.options.tamper = settings.USER_SUPPLIED_TAMPER
+        menu.options.tamper = settings.USER_APPLIED_TAMPER
     try:
       response = opener.open(request, timeout=settings.TIMEOUT)
       _ = True
@@ -269,20 +269,20 @@ Check for added headers.
 def do_check(request):
 
   # Check if defined any Cookie HTTP header.
-  if menu.options.cookie and settings.COOKIE_INJECTION == None:
-    request.add_header(settings.COOKIE, menu.options.cookie)
+  if menu.options.cookie and not settings.COOKIE_INJECTION:
+    request.add_header(settings.COOKIE, checks.remove_tags(menu.options.cookie))
 
   # Check if defined any User-Agent HTTP header.
-  if menu.options.agent and settings.USER_AGENT_INJECTION == None:
-    request.add_header(settings.USER_AGENT, menu.options.agent)
+  if menu.options.agent and not settings.USER_AGENT_INJECTION:
+    request.add_header(settings.USER_AGENT, checks.remove_tags(menu.options.agent))
 
   # Check if defined any Referer HTTP header.
-  if menu.options.referer and settings.REFERER_INJECTION == None:
-    request.add_header(settings.REFERER, menu.options.referer)
+  if menu.options.referer and not settings.REFERER_INJECTION:
+    request.add_header(settings.REFERER, checks.remove_tags(menu.options.referer))
 
   # Check if defined any Host HTTP header.
-  if menu.options.host and settings.HOST_INJECTION == None:
-    request.add_header(settings.HOST, menu.options.host)
+  if menu.options.host and not settings.HOST_INJECTION:
+    request.add_header(settings.HOST, checks.remove_tags(menu.options.host))
 
   if not checks.get_header(request.headers, settings.ACCEPT):
     request.add_header(settings.ACCEPT, settings.ACCEPT_VALUE)
@@ -396,7 +396,8 @@ def do_check(request):
         if http_header_name not in [settings.ACCEPT, settings.HOST, settings.USER_AGENT, settings.REFERER, settings.COOKIE]:
           if not settings.CUSTOM_HEADER_INJECTION:
             if settings.CUSTOM_INJECTION_MARKER_CHAR in http_header_value:
-              settings.CUSTOM_INJECTION_MARKER = True
+              settings.CUSTOM_HEADER_CHECK = http_header_name
+              # settings.CUSTOM_INJECTION_MARKER = True
               
             if http_header_name in settings.TESTABLE_PARAMETERS_LIST or settings.INJECT_TAG in http_header_value or settings.ASTERISK_MARKER in http_header_value:
               settings.INJECTION_MARKER_LOCATION.CUSTOM_HTTP_HEADERS = True
@@ -404,10 +405,11 @@ def do_check(request):
               if len(http_header_name) != 0 and \
                 http_header_name + ": " + http_header_value not in [settings.ACCEPT, settings.HOST, settings.USER_AGENT, settings.REFERER, settings.COOKIE] and \
                 http_header_name + ": " + http_header_value not in settings.CUSTOM_HEADERS_NAMES:
+                settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST.append(http_header_name) if http_header_name not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST
                 settings.CUSTOM_HEADERS_NAMES.append(http_header_name + ": " + http_header_value)
-              http_header_value = http_header_value.replace(settings.INJECT_TAG,"").replace(settings.CUSTOM_INJECTION_MARKER_CHAR,"")
+              http_header_value = checks.remove_tags(http_header_value)
               request.add_header(http_header_name, http_header_value)
-
+              
         if http_header_name not in [settings.HOST, settings.USER_AGENT, settings.REFERER, settings.COOKIE, settings.CUSTOM_HEADER_NAME]:
           request.add_header(http_header_name, http_header_value)
       except:

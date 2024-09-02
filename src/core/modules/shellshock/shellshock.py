@@ -440,9 +440,6 @@ def shellshock_handler(url, http_request_method, filename):
                         break
                       if go_back and go_back_again:
                         return True 
-                    # else:
-                    #   logs.logs_notification(filename)
-                    #   return True
                   else: 
                     shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
                     if shell != "":

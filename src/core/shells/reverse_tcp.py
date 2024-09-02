@@ -64,14 +64,6 @@ def gen_payload_msg(payload):
   
 
 """
-Success msg.
-"""
-def shell_success():
-  info_msg = "Everything is in place, cross your fingers and wait for reverse shell (on port " + settings.LPORT + ")."
-  settings.print_data_to_stdout(settings.print_info_msg(info_msg))
-  
-
-"""
 Error msg if the attack vector is available only for Windows targets.
 """
 def windows_only_attack_vector():
@@ -670,7 +662,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp""" + Style.RESET_ALL + """
     elif reverse_tcp_option == '1' :
       reverse_tcp_option = netcat_version(separator)
       if reverse_tcp_option.lower() not in settings.SHELL_OPTIONS:
-        shell_success()
+        common.shell_success("reverse")
         break
       elif reverse_tcp_option.lower() in settings.SHELL_OPTIONS:
         return reverse_tcp_option
@@ -680,7 +672,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp""" + Style.RESET_ALL + """
     elif reverse_tcp_option == '2' :
       reverse_tcp_option = other_reverse_shells(separator)
       if reverse_tcp_option.lower() not in settings.SHELL_OPTIONS:
-        shell_success()
+        common.shell_success("reverse")
         break
     # Check for available shell options
     elif any(option in reverse_tcp_option.lower() for option in settings.SHELL_OPTIONS):

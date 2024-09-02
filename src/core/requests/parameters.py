@@ -48,7 +48,7 @@ def do_GET_check(url, http_request_method):
     return value
 
   if settings.CUSTOM_INJECTION_MARKER and settings.SKIP_NON_CUSTOM:
-      return False
+    return False
       
   if settings.USER_DEFINED_POST_DATA:
     if settings.CUSTOM_INJECTION_MARKER_CHAR in settings.USER_DEFINED_POST_DATA and settings.SKIP_NON_CUSTOM:
@@ -63,16 +63,13 @@ def do_GET_check(url, http_request_method):
     settings.USER_DEFINED_URL_DATA = False
     if settings.INJECT_TAG not in url and not menu.options.shellshock:
       if len(settings.TESTABLE_PARAMETERS_LIST) != 0 or \
-         menu.options.level == settings.HTTP_HEADER_INJECTION_LEVEL or \
-         menu.options.level == settings.COOKIE_INJECTION_LEVEL or \
+         len(settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST) != 0 or \
+         settings.INJECTION_LEVEL == settings.HTTP_HEADER_INJECTION_LEVEL or \
+         (settings.INJECTION_LEVEL == settings.COOKIE_INJECTION_LEVEL and menu.options.cookie) or \
          settings.USER_DEFINED_POST_DATA and not settings.IGNORE_USER_DEFINED_POST_DATA:
         return False
       else:
-        err_msg = "No parameter(s) found for testing in the provided data. "
-        if not menu.options.crawldepth:
-          err_msg += "You are advised to rerun with '--crawl=2'."
-        settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-        raise SystemExit()
+        checks.no_parameters_found()
     elif menu.options.shellshock:
       return False
     return [url]
@@ -93,9 +90,10 @@ def do_GET_check(url, http_request_method):
       except ValueError as err_msg:
         settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
         raise SystemExit()
-      # Check for inappropriate format in provided parameter(s).
-      if len([s for s in multi_parameters if "=" in s]) != (len(multi_parameters)):
-        checks.inappropriate_format(multi_parameters)
+
+      # if len([s for s in multi_parameters if "=" in s]) != (len(multi_parameters)):
+      if len([s for s in multi_parameters if "=" in s]) == 0:
+        checks.no_parameters_found()
 
       # Check for empty values (in provided parameters).
       if checks.is_empty(multi_parameters, http_request_method):
@@ -197,7 +195,8 @@ def vuln_GET_param(url):
           try:
             settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST.append(vuln_parameter) if vuln_parameter not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST
             settings.TESTABLE_PARAMETERS_LIST.append(vuln_parameter) if vuln_parameter not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.TESTABLE_PARAMETERS_LIST
-            settings.PRE_CUSTOM_INJECTION_MARKER_CHAR = pairs[param].split("=")[1].split(settings.INJECT_TAG)[1]
+            settings.PRE_CUSTOM_INJECTION_MARKER_CHAR = pairs[param].split("=")[1].split(settings.INJECT_TAG)[0]
+            settings.POST_CUSTOM_INJECTION_MARKER_CHAR = pairs[param].split("=")[1].split(settings.INJECT_TAG)[1]
           except Exception:
             pass
         settings.TESTABLE_VALUE = pairs[param].split("=")[1].replace(settings.INJECT_TAG, "")
@@ -320,11 +319,12 @@ def do_POST_check(parameter, http_request_method):
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
       raise SystemExit()
 
-  # Check for inappropriate format in provided parameter(s).
-  if len([s for s in multi_parameters if "=" in s]) != (len(multi_parameters)) and \
-     not settings.IS_JSON and \
-     not settings.IS_XML:
-    return ""
+  # if len([s for s in multi_parameters if "=" in s]) != (len(multi_parameters)) and \
+  #    not settings.IS_JSON and \
+  #    not settings.IS_XML:
+  #   return ""
+  if len([s for s in multi_parameters if "=" in s]) == 0 and not any((settings.IS_JSON, settings.IS_XML)):
+    checks.no_parameters_found()
 
   _ = []
   _.append(parameter)
@@ -464,6 +464,8 @@ def vuln_POST_param(parameter, url):
     if settings.CUSTOM_INJECTION_MARKER:
       settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST.append(vuln_parameter) if vuln_parameter not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST
       settings.TESTABLE_PARAMETERS_LIST.append(vuln_parameter) if vuln_parameter not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.TESTABLE_PARAMETERS_LIST
+      # settings.PRE_CUSTOM_INJECTION_MARKER_CHAR = result.split(settings.INJECT_TAG)[0]
+      # settings.POST_CUSTOM_INJECTION_MARKER_CHAR = result.split(settings.INJECT_TAG)[1]
 
   # XML data format.
   elif settings.IS_XML:
@@ -480,7 +482,8 @@ def vuln_POST_param(parameter, url):
             try:
               settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST.append(vuln_parameter) if vuln_parameter not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST
               settings.TESTABLE_PARAMETERS_LIST.append(vuln_parameter) if vuln_parameter not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.TESTABLE_PARAMETERS_LIST
-              settings.PRE_CUSTOM_INJECTION_MARKER_CHAR = result.split(settings.INJECT_TAG)[1]
+              settings.PRE_CUSTOM_INJECTION_MARKER_CHAR = result.split(settings.INJECT_TAG)[0]
+              settings.POST_CUSTOM_INJECTION_MARKER_CHAR = result.split(settings.INJECT_TAG)[1]
             except Exception:
               pass
           settings.TESTABLE_VALUE = result.split(settings.INJECT_TAG)[0]
@@ -497,7 +500,8 @@ def vuln_POST_param(parameter, url):
             try:
               settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST.append(vuln_parameter) if vuln_parameter not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST
               settings.TESTABLE_PARAMETERS_LIST.append(vuln_parameter) if vuln_parameter not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.TESTABLE_PARAMETERS_LIST
-              settings.PRE_CUSTOM_INJECTION_MARKER_CHAR = pairs[param].split("=")[1].split(settings.INJECT_TAG)[1]
+              settings.PRE_CUSTOM_INJECTION_MARKER_CHAR = pairs[param].split("=")[1].split(settings.INJECT_TAG)[0]
+              settings.POST_CUSTOM_INJECTION_MARKER_CHAR = pairs[param].split("=")[1].split(settings.INJECT_TAG)[1]
             except Exception:
               pass
           settings.TESTABLE_VALUE = pairs[param].split("=")[1].replace(settings.INJECT_TAG, "")
@@ -514,41 +518,76 @@ def vuln_POST_param(parameter, url):
 Define the injection prefixes.
 """
 def prefixes(payload, prefix):
-  if settings.COOKIE_INJECTION == True:
-    specify_cookie_parameter(menu.options.cookie)
-  elif settings.USER_AGENT_INJECTION == True:
-    specify_user_agent_parameter(menu.options.agent)
-  elif settings.REFERER_INJECTION == True:
-    specify_referer_parameter(menu.options.referer)
-  elif settings.HOST_INJECTION == True:
-    specify_host_parameter(menu.options.host)
-  elif settings.CUSTOM_HEADER_INJECTION == True:
-    specify_host_parameter("")
+  parameter = ""
+  if settings.COOKIE_INJECTION:
+    if not settings.LOAD_SESSION:
+      parameter = menu.options.cookie
+    specify_cookie_parameter(parameter)
+  if settings.CUSTOM_HEADER_INJECTION:
+    specify_custom_header_parameter(parameter)
+  elif settings.USER_AGENT_INJECTION:
+    if not settings.LOAD_SESSION:
+      parameter = menu.options.agent
+    specify_user_agent_parameter(parameter)
+  elif settings.REFERER_INJECTION:
+    if not settings.LOAD_SESSION:
+      parameter = menu.options.referer
+    specify_referer_parameter(parameter)
+  elif settings.HOST_INJECTION:
+    if not settings.LOAD_SESSION:
+      parameter = menu.options.host
+    specify_host_parameter(parameter)
 
-  # Check if defined "--prefix" option.
-  testable_value = settings.TESTABLE_VALUE
+  _ = True
+  pre_custom = settings.TESTABLE_VALUE
   if settings.CUSTOM_INJECTION_MARKER and len(settings.PRE_CUSTOM_INJECTION_MARKER_CHAR) != 0:
-    testable_value = ""
-  if menu.options.prefix:
-    payload = testable_value + menu.options.prefix + prefix + payload
-  else:
-    payload = testable_value + prefix + payload
+    pre_custom = settings.PRE_CUSTOM_INJECTION_MARKER_CHAR
+  elif settings.IS_JSON or settings.LOAD_SESSION and not any((settings.COOKIE_INJECTION, settings.USER_AGENT_INJECTION, settings.REFERER_INJECTION, settings.HOST_INJECTION, settings.CUSTOM_HEADER_INJECTION)):
+    pre_custom = ""
+    _ = False
 
-  return payload
+  if _: 
+    if not pre_custom in prefix:
+      prefix = pre_custom + prefix
+  # Check if defined "--prefix" option.
+  if menu.options.prefix and not settings.LOAD_SESSION:
+    if not menu.options.prefix in prefix:
+      prefix = prefix + menu.options.prefix 
+
+  payload = prefix + payload
+  # Fixation for specific payload.
+  if ")%3B" + ")}" in payload:
+    payload = payload.replace(")%3B" + ")}", ")" + ")}")
+
+  return payload, prefix
 
 """
 Define the injection suffixes.
 """
 def suffixes(payload, suffix):
-  # Check if defined "--suffix" option.
+
   if settings.COOKIE_INJECTION and suffix == settings.COOKIE_DELIMITER:
     suffix = ""
-  if menu.options.suffix:
-    payload = payload + suffix + menu.options.suffix
-  else:
-    payload = payload + suffix
 
-  return payload
+  _ = True
+  post_custom = ""
+  if settings.CUSTOM_INJECTION_MARKER and len(settings.PRE_CUSTOM_INJECTION_MARKER_CHAR) != 0:
+    post_custom = settings.POST_CUSTOM_INJECTION_MARKER_CHAR
+  elif settings.IS_JSON or settings.LOAD_SESSION and not any((settings.COOKIE_INJECTION, settings.USER_AGENT_INJECTION, settings.REFERER_INJECTION, settings.HOST_INJECTION, settings.CUSTOM_HEADER_INJECTION)):
+    post_custom = ""
+    _ = False
+
+  if _:
+    if not post_custom in suffix:
+      suffix = suffix + post_custom
+  # Check if defined "--suffix" option.
+  if menu.options.suffix and not settings.LOAD_SESSION:
+    if not menu.options.suffix in suffix:
+      suffix = menu.options.suffix + suffix
+
+  payload = payload + suffix
+
+  return payload, suffix
 
 """
 The cookie based injection.
@@ -570,9 +609,10 @@ def do_cookie_check(cookie):
   except ValueError as err_msg:
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
-  # Check for inappropriate format in provided parameter(s).
-  if len([s for s in multi_parameters if "=" in s]) != (len(multi_parameters)):
-    checks.inappropriate_format(multi_parameters)
+
+  # if len([s for s in multi_parameters if "=" in s]) != (len(multi_parameters)):
+  if len([s for s in multi_parameters if "=" in s]) == 0:
+    checks.no_parameters_found()
 
   _ = []
   _.append(cookie)
@@ -673,34 +713,54 @@ def specify_cookie_parameter(cookie):
           try:
             settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST.append(vuln_parameter) if vuln_parameter not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST
             settings.TESTABLE_PARAMETERS_LIST.append(vuln_parameter) if vuln_parameter not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.TESTABLE_PARAMETERS_LIST
-            settings.PRE_CUSTOM_INJECTION_MARKER_CHAR = pairs[param].split("=")[1].split(settings.INJECT_TAG)[1]
+            settings.PRE_CUSTOM_INJECTION_MARKER_CHAR = pairs[param].split("=")[1].split(settings.INJECT_TAG)[0]
+            settings.POST_CUSTOM_INJECTION_MARKER_CHAR = pairs[param].split("=")[1].split(settings.INJECT_TAG)[1]
           except Exception:
             pass
         settings.TESTABLE_VALUE = pairs[param].split("=")[1].replace(settings.INJECT_TAG, "")
         break
   else:
     vuln_parameter = cookie
+    
   return vuln_parameter
 
 """
 The user-agent based injection.
 """
 def specify_user_agent_parameter(user_agent):
-  settings.TESTABLE_VALUE = user_agent.replace(settings.INJECT_TAG, "")
+  header_name = settings.USER_AGENT
+  settings.TESTABLE_VALUE = checks.process_custom_injection_data(user_agent).replace(settings.ASTERISK_MARKER, settings.INJECT_TAG)
+  if settings.CUSTOM_INJECTION_MARKER and settings.INJECT_TAG in settings.TESTABLE_VALUE:
+    settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST.append(header_name) if header_name not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST
+    settings.TESTABLE_PARAMETERS_LIST.append(user_agent) if header_name not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.TESTABLE_PARAMETERS_LIST
+    settings.PRE_CUSTOM_INJECTION_MARKER_CHAR = settings.TESTABLE_VALUE.split(settings.INJECT_TAG)[0]
+    settings.POST_CUSTOM_INJECTION_MARKER_CHAR = settings.TESTABLE_VALUE.split(settings.INJECT_TAG)[1]
   return user_agent
 
 """
 The referer based injection.
 """
 def specify_referer_parameter(referer):
-  settings.TESTABLE_VALUE = referer.replace(settings.INJECT_TAG, "")
+  header_name = settings.REFERER
+  settings.TESTABLE_VALUE = checks.process_custom_injection_data(referer).replace(settings.ASTERISK_MARKER, settings.INJECT_TAG)
+  if settings.CUSTOM_INJECTION_MARKER and settings.INJECT_TAG in settings.TESTABLE_VALUE:
+    settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST.append(header_name) if header_name not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST
+    settings.TESTABLE_PARAMETERS_LIST.append(referer) if header_name not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.TESTABLE_PARAMETERS_LIST
+    settings.PRE_CUSTOM_INJECTION_MARKER_CHAR = settings.TESTABLE_VALUE.split(settings.INJECT_TAG)[0]
+    settings.POST_CUSTOM_INJECTION_MARKER_CHAR = settings.TESTABLE_VALUE.split(settings.INJECT_TAG)[1]
   return referer
 
 """
 The host based injection.
 """
 def specify_host_parameter(host):
-  settings.TESTABLE_VALUE = host.replace(settings.INJECT_TAG, "")
+  header_name = settings.HOST
+  settings.TESTABLE_VALUE = checks.process_custom_injection_data(host).replace(settings.ASTERISK_MARKER, settings.INJECT_TAG)
+  if settings.CUSTOM_INJECTION_MARKER and settings.INJECT_TAG in settings.TESTABLE_VALUE:
+    settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST.append(header_name) if header_name not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST
+    settings.TESTABLE_PARAMETERS_LIST.append(host) if header_name not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.TESTABLE_PARAMETERS_LIST
+    settings.PRE_CUSTOM_INJECTION_MARKER_CHAR = settings.TESTABLE_VALUE.split(settings.INJECT_TAG)[0]
+    settings.POST_CUSTOM_INJECTION_MARKER_CHAR = settings.TESTABLE_VALUE.split(settings.INJECT_TAG)[1]
   return host
 
 """
@@ -708,6 +768,12 @@ The Custom http header based injection.
 """
 def specify_custom_header_parameter(header_name):
   header_name = settings.CUSTOM_HEADER_NAME
+  if settings.CUSTOM_INJECTION_MARKER:
+    settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST.append(header_name) if header_name not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST
+    settings.TESTABLE_PARAMETERS_LIST.append(vuln_parameter) if header_name not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.TESTABLE_PARAMETERS_LIST
+    settings.PRE_CUSTOM_INJECTION_MARKER_CHAR = settings.CUSTOM_HEADER_VALUE.split(settings.INJECT_TAG)[0]
+    settings.POST_CUSTOM_INJECTION_MARKER_CHAR = settings.CUSTOM_HEADER_VALUE.split(settings.INJECT_TAG)[1]
+
   return header_name
 
 # eof

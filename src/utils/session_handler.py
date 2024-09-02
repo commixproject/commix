@@ -31,6 +31,11 @@ Session handler via SQLite3 db.
 no_such_table = False
 
 """
+"""
+def split_url(url):
+  return url.split("?")[0]
+
+"""
 Generate table name for SQLite3 db.
 """
 def table_name(url):
@@ -66,8 +71,7 @@ def flush(url):
       conn.commit()
       conn.close()
     except sqlite3.OperationalError as err_msg:
-      settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
-      err_msg = "Unable to flush the session file." + str(err_msg).title()
+      err_msg = "Unable to flush the session file. " + str(err_msg)
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
   else:
     if settings.VERBOSITY_LEVEL != 0:
@@ -82,38 +86,39 @@ def clear(url):
   try:
     if no_such_table:
       conn = sqlite3.connect(settings.SESSION_FILE)
-      conn.execute("DELETE FROM " + table_name(url) + "_ip WHERE "\
-                   "id NOT IN (SELECT MAX(id) FROM " + \
-                   table_name(url) + "_ip GROUP BY technique);")
+      query = "DELETE FROM " + table_name(url) + "_ip WHERE " + \
+              "id NOT IN (SELECT MAX(id) FROM " + \
+              table_name(url) + "_ip GROUP BY technique);"
+      conn.execute(query)
       conn.commit()
       conn.close()
   except sqlite3.OperationalError as err_msg:
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
   except:
-    settings.LOAD_SESSION = False
+    settings.LOAD_SESSION = None
     return False
 
 """
 Import successful injection points to session file.
 """
-def injection_point_importation(url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response, timesec, exec_time, output_length, is_vulnerable):
+def import_injection_points(url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response, timesec, exec_time, output_length, is_vulnerable):
   try:
     conn = sqlite3.connect(settings.SESSION_FILE)
     conn.execute("CREATE TABLE IF NOT EXISTS " + table_name(url) + "_ip" + \
                  "(id INTEGER PRIMARY KEY, url VARCHAR, technique VARCHAR, injection_type VARCHAR, separator VARCHAR," \
                  "shell VARCHAR, vuln_parameter VARCHAR, prefix VARCHAR, suffix VARCHAR, "\
                  "TAG VARCHAR, alter_shell VARCHAR, payload VARCHAR, http_header VARCHAR, http_request_method VARCHAR, url_time_response INTEGER, "\
-                 "timesec INTEGER, exec_time INTEGER, output_length INTEGER, is_vulnerable VARCHAR);")
+                 "timesec INTEGER, exec_time INTEGER, output_length INTEGER, is_vulnerable VARCHAR, data VARCHAR, cookie VARCHAR);")
 
     conn.execute("INSERT INTO " + table_name(url) + "_ip(url, technique, injection_type, separator, "\
                  "shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_header, http_request_method, "\
-                 "url_time_response, timesec, exec_time, output_length, is_vulnerable) "\
-                 "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", \
+                 "url_time_response, timesec, exec_time, output_length, is_vulnerable, data, cookie) "\
+                 "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", \
                  (str(url), str(technique), str(injection_type), \
                  str(separator), str(shell), str(vuln_parameter), str(prefix), str(suffix), \
                  str(TAG), str(alter_shell), str(payload), str(settings.HTTP_HEADER), str(http_request_method), \
                  int(url_time_response), int(timesec), int(exec_time), \
-                 int(output_length), str(is_vulnerable)))
+                 int(output_length), str(is_vulnerable), str(menu.options.data), str(menu.options.cookie)))
     conn.commit()
     conn.close()
     if settings.INJECTION_CHECKER == False:
@@ -123,7 +128,7 @@ def injection_point_importation(url, technique, injection_type, separator, shell
     err_msg = str(err_msg)[:1].upper() + str(err_msg)[1:] + "."
     err_msg += " You are advised to rerun with switch '--flush-session'."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    checks.quit(filename, url, _ = False)
 
   except sqlite3.DatabaseError as err_msg:
     checks.error_loading_session_file()
@@ -131,117 +136,127 @@ def injection_point_importation(url, technique, injection_type, separator, shell
 """
 Export successful applied techniques from session file.
 """
-def applied_techniques(url, http_request_method):
-  try:
+def applied_techniques(url, http_request_method): 
+  try: 
+    techniques = []
     conn = sqlite3.connect(settings.SESSION_FILE)
-    if not menu.options.tech:
-      applied_techniques = conn.execute("SELECT technique FROM " + table_name(url) + "_ip "\
-                                        "ORDER BY id DESC;")
-
-    if settings.TESTABLE_PARAMETER:
-      applied_techniques = conn.execute("SELECT technique FROM " + table_name(url) + "_ip WHERE "\
-                                        "url = '" + url + "' AND "\
-                                        "vuln_parameter = '" + settings.TESTABLE_PARAMETER + "' AND "\
-                                        "http_request_method = '" + http_request_method + "' "\
-                                        "ORDER BY id DESC ;")
-    else:
-      applied_techniques = conn.execute("SELECT technique FROM " + table_name(url) + "_ip WHERE "\
-                                        "url = '" + url + "' AND "\
-                                        "vuln_parameter = '" + settings.INJECT_TAG + "' AND "\
-                                        "http_request_method = '" + http_request_method + "' "\
-                                        "ORDER BY id DESC ;")
-    values = []
-    for session in applied_techniques:
-      if "tempfile" in session[0][:8]:
-        settings.TEMPFILE_BASED_STATE = True
-        session = session[0][4:]
-      elif "dynamic" in session[0][:7]:
-        settings.EVAL_BASED_STATE = True
-        session = session[0][13:]
-      values += session[0][:1]
-    applied_techniques = ''.join(list(set(values)))
-    return applied_techniques
+    query = "SELECT * FROM sqlite_master WHERE name = '" + table_name(url) + "_ip' AND type = 'table';"
+    result = conn.execute(query)
+    if result:
+      query = "SELECT * FROM " + table_name(url) + "_ip WHERE url like '%" + split_url(url) + "%';"
+      cursor = conn.execute(query).fetchall()
+      if cursor:
+        for session in cursor:
+          if session[2] == settings.INJECTION_TECHNIQUE.DYNAMIC_CODE:
+            technique = session[2].split()[2][0]
+          else:
+            technique = session[2][0]
+          techniques.append(technique)
+      techniques = list(set(techniques))
+      techniques = "".join(str(x) for x in techniques)
+    return techniques
   except sqlite3.OperationalError as err_msg:
-    #settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    settings.LOAD_SESSION = False
-    return False
+    settings.LOAD_SESSION = None
+    return techniques
   except:
-    settings.LOAD_SESSION = False
-    return False
+    settings.LOAD_SESSION = None
+    return techniques
 
 """
-Export successful applied techniques from session file.
+Export successful applied injection level from session file.
 """
 def applied_levels(url, http_request_method):
-  try:
+  level = settings.DEFAULT_INJECTION_LEVEL
+  try: 
     conn = sqlite3.connect(settings.SESSION_FILE)
-    if settings.TESTABLE_PARAMETER:
-      applied_level = conn.execute("SELECT is_vulnerable FROM " + table_name(url) + "_ip WHERE "\
-                                    "url = '" + url + "' AND "\
-                                    "vuln_parameter = '" + settings.TESTABLE_PARAMETER + "' AND "\
-                                    "http_request_method = '" + http_request_method + "' "\
-                                    "ORDER BY id DESC;")
-    else:
-      applied_level = conn.execute("SELECT is_vulnerable FROM " + table_name(url) + "_ip WHERE "\
-                                    "url = '" + url + "' AND "\
-                                    "vuln_parameter = '" + settings.INJECT_TAG + "' AND "\
-                                    "http_request_method = '" + http_request_method + "' "\
-                                    "ORDER BY id DESC;")
-
-    for session in applied_level:
-      return session[0]
-
+    query = "SELECT * FROM sqlite_master WHERE name = '" + table_name(url) + "_ip' AND type = 'table';"
+    result = conn.execute(query)
+    if result:
+      query = "SELECT * FROM " + table_name(url) + "_ip WHERE url like '%" + split_url(url) + "%';"
+      cursor = conn.execute(query).fetchall()
+      if cursor:
+        for session in cursor:
+          http_header = session[12]
+          level = int(session[18])
+    if http_header:
+      if http_header == settings.COOKIE.lower(): 
+        level = settings.COOKIE_INJECTION_LEVEL
+      else:
+        level = settings.HTTP_HEADER_INJECTION_LEVEL
+    return level
   except sqlite3.OperationalError as err_msg:
-    #settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    settings.LOAD_SESSION = False
-    return False
+    settings.LOAD_SESSION = None
+    return level
   except:
-    settings.LOAD_SESSION = False
-    return False
+    settings.LOAD_SESSION = None
+    return level
 
 """
 Export successful injection points from session file.
 """
-def injection_point_exportation(url, http_request_method):
+def check_stored_injection_points(url, check_parameter, http_request_method):
+  _ = False 
   try:
-    if not menu.options.flush_session:
-      conn = sqlite3.connect(settings.SESSION_FILE)
-      result = conn.execute("SELECT * FROM sqlite_master WHERE name = '" + \
-                             table_name(url) + "_ip' AND type = 'table';")
-      if result:
-        # if menu.options.tech[:1] == "c":
-        #   select_injection_type = "R"
-        # elif menu.options.tech[:1] == "e":
-        #   settings.EVAL_BASED_STATE = True
-        #   select_injection_type = "R"
-        # elif menu.options.tech[:1] == "t":
-        #   select_injection_type = "B"
-        # else:
-        #   select_injection_type = "S"
-        # if settings.TEMPFILE_BASED_STATE and select_injection_type == "S":
-        #   check_injection_technique = "t"
-        # elif settings.EVAL_BASED_STATE and select_injection_type == "R":
-        #   check_injection_technique = "d"
-        # else:
-        #   check_injection_technique = menu.options.tech[:1]
-        if settings.TESTABLE_PARAMETER:
-          cursor = conn.execute("SELECT * FROM " + table_name(url) + "_ip WHERE "\
-                                "url = '" + url + "' AND "\
-                                # "injection_type like '" + select_injection_type + "%' AND "\
-                                # "technique like '" + check_injection_technique + "%' AND "\
-                                "vuln_parameter = '" + settings.TESTABLE_PARAMETER + "' AND "\
-                                "http_request_method = '" + http_request_method + "' "\
-                                "ORDER BY id DESC limit 1;")
+    techniques = []
+    conn = sqlite3.connect(settings.SESSION_FILE)
+    query = "SELECT * FROM sqlite_master WHERE name = '" + table_name(url) + "_ip' AND type = 'table';"
+    result = conn.execute(query).fetchall()
+    # vuln_parameter = check_parameter
+    if result:
+      query = "SELECT * FROM " + table_name(url) + "_ip WHERE url like '%" + split_url(url) + "%';"
+      cursor = conn.execute(query).fetchall()
+      if cursor:
+        for session in cursor:
+          url = session[1]
+          if session[2] == settings.INJECTION_TECHNIQUE.DYNAMIC_CODE:
+            technique = session[2].split()[2][0]
+          else:
+            technique = session[2][0]
+          if technique in menu.options.tech:
+            _ = True
+          techniques.append(technique)
+          cookie = session[20]
+          if cookie:
+            if settings.INJECT_TAG in cookie:
+              settings.COOKIE_INJECTION = True
+            menu.options.cookie = cookie
+      techniques = list(set(techniques))
+      techniques = "".join(str(x) for x in techniques)
+      if _:
+        vuln_parameter = session[6]
+        settings.LOAD_SESSION = True
+        settings.INJECTION_CHECKER = True
+        if not settings.MULTI_TARGETS:
+          settings.TESTABLE_PARAMETERS_LIST.append(vuln_parameter)
+        return url, vuln_parameter
+      else:
+        settings.LOAD_SESSION = False
+      return url, vuln_parameter
+    else:
+      settings.LOAD_SESSION = None
+      return url, check_parameter
+  except sqlite3.OperationalError as err_msg:
+    settings.LOAD_SESSION = None
+    return url, check_parameter
+  except:
+    settings.LOAD_SESSION = None
+    return url, check_parameter
 
-        else:
-          cursor = conn.execute("SELECT * FROM " + table_name(url) + "_ip WHERE "\
-                                "url = '" + url + "' AND "\
-                                # "injection_type like '" + select_injection_type + "%' AND "\
-                                # "technique like '" + check_injection_technique + "%' AND "\
-                                "http_header = '" + settings.HTTP_HEADER + "' AND "\
-                                "http_request_method = '" + http_request_method + "' "\
-                                "ORDER BY id DESC limit 1;")
-
+"""
+Export successful injection points from session file.
+"""
+def export_injection_points(url, technique, injection_type, http_request_method):
+  try:
+    conn = sqlite3.connect(settings.SESSION_FILE)
+    result = conn.execute("SELECT * FROM sqlite_master WHERE name = '" + table_name(url) + "_ip' AND type = 'table';")
+    if result:
+      query = "SELECT * FROM " + table_name(url) + "_ip WHERE " + \
+              "url like '%" + split_url(url) + "%' AND " + \
+              "technique == '" + technique + "' AND " + \
+              "injection_type == '" + injection_type + "' AND " + \
+              "http_request_method == '" + http_request_method + "';"
+      cursor = conn.execute(query).fetchall()
+      if cursor:
         for session in cursor:
           url = session[1]
           technique = session[2]
@@ -254,67 +269,36 @@ def injection_point_exportation(url, http_request_method):
           TAG = session[9]
           alter_shell = session[10]
           payload = session[11]
+          http_header = session[12]
           http_request_method = session[13]
           url_time_response = session[14]
           timesec = session[15]
           exec_time = session[16]
           output_length = session[17]
           is_vulnerable = session[18]
+          data = session[19]
+          cookie = session[20]
+          if http_header:
+            settings.HTTP_HEADER = http_header
+          if cookie:
+            menu.options.cookie = cookie
+          if data:
+            settings.IGNORE_USER_DEFINED_POST_DATA = False
+            menu.options.data = data
+          if settings.INJECTION_LEVEL != is_vulnerable:
+            settings.INJECTION_LEVEL = int(is_vulnerable)
           return url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response, timesec, exec_time, output_length, is_vulnerable
+      else:
+        settings.LOAD_SESSION = None
+        return False
     else:
       no_such_table = True
       pass
   except sqlite3.OperationalError as err_msg:
-    #settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    settings.LOAD_SESSION = False
+    settings.LOAD_SESSION = None
     return False
   except:
-    settings.LOAD_SESSION = False
-    return False
-
-"""
-Notification about session.
-"""
-def notification(url, technique, injection_type):
-  try:
-    if settings.LOAD_SESSION == True:
-      while True:
-        # message = "A previously stored session has been held against that target. "
-        message = "Do you want to resume to the "
-        message += "(" + injection_type.split(settings.SINGLE_WHITESPACE)[0] + ") "
-        message += technique.rsplit(' ', 2)[0]
-        message += " injection point from stored session? [Y/n] > "
-        settings.LOAD_SESSION = common.read_input(message, default="Y", check_batch=True)
-        if settings.LOAD_SESSION in settings.CHOICE_YES:
-          settings.INJECTION_CHECKER = True
-          return True
-        elif settings.LOAD_SESSION in settings.CHOICE_NO:
-          settings.LOAD_SESSION = False
-          settings.RESET_TESTS = True
-          return False
-        elif settings.LOAD_SESSION in settings.CHOICE_QUIT:
-          raise SystemExit()
-        else:
-          common.invalid_option(settings.LOAD_SESSION)
-          pass
-  except sqlite3.OperationalError as err_msg:
-    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-  except (KeyboardInterrupt, SystemExit):
-    raise
-
-"""
-Check for specific stored parameter.
-"""
-def check_stored_parameter(url, http_request_method):
-  if injection_point_exportation(url, http_request_method):
-    if injection_point_exportation(url, http_request_method)[16] == str(menu.options.level):
-      # Check for stored alternative shell
-      if injection_point_exportation(url, http_request_method)[9] != "":
-        menu.options.alter_shell = injection_point_exportation(url, http_request_method)[9]
-      return True
-    else:
-      return False
-  else:
+    settings.LOAD_SESSION = None
     return False
 
 """
@@ -326,18 +310,11 @@ def store_cmd(url, cmd, shell, vuln_parameter):
       conn = sqlite3.connect(settings.SESSION_FILE)
       conn.execute("CREATE TABLE IF NOT EXISTS " + table_name(url) + "_ir" + \
                    "(cmd VARCHAR, output VARCHAR, vuln_parameter VARCHAR);")
-      if settings.TESTABLE_PARAMETER:
-        conn.execute("INSERT INTO " + table_name(url) + "_ir(cmd, output, vuln_parameter) " \
-                     "VALUES(?,?,?)", \
-                     (str(base64.b64encode(cmd.encode(settings.DEFAULT_CODEC)).decode()), \
-                      str(base64.b64encode(shell.encode(settings.DEFAULT_CODEC)).decode()), \
-                      str(vuln_parameter)))
-      else:
-        conn.execute("INSERT INTO " + table_name(url) + "_ir(cmd, output, vuln_parameter) "\
-                     "VALUES(?,?,?)", \
-                     (str(base64.b64encode(cmd.encode(settings.DEFAULT_CODEC)).decode()), \
-                      str(base64.b64encode(shell.encode(settings.DEFAULT_CODEC)).decode()), \
-                      str(settings.HTTP_HEADER)))
+      conn.execute("INSERT INTO " + table_name(url) + "_ir(cmd, output, vuln_parameter) " \
+                   "VALUES(?,?,?)", \
+                   (str(base64.b64encode(cmd.encode(settings.DEFAULT_CODEC)).decode()), \
+                    str(base64.b64encode(shell.encode(settings.DEFAULT_CODEC)).decode()), \
+                    str(vuln_parameter)))
       conn.commit()
       conn.close()
     except sqlite3.OperationalError as err_msg:
@@ -350,31 +327,20 @@ Export successful command execution outputs from session file.
 """
 def export_stored_cmd(url, cmd, vuln_parameter):
   try:
-    if not menu.options.flush_session:
-      conn = sqlite3.connect(settings.SESSION_FILE)
-      output = None
-      conn = sqlite3.connect(settings.SESSION_FILE)
-      if settings.TESTABLE_PARAMETER:
-        cursor = conn.execute("SELECT output FROM " + table_name(url) + \
-                              "_ir WHERE cmd='" + base64.b64encode(cmd.encode(settings.DEFAULT_CODEC)).decode() + "' AND "\
-                              "vuln_parameter= '" + vuln_parameter + "';").fetchall()
-      else:
-        cursor = conn.execute("SELECT output FROM " + table_name(url) + \
-                            "_ir WHERE cmd='" + base64.b64encode(cmd.encode(settings.DEFAULT_CODEC)).decode() + "' AND "\
-                            "vuln_parameter= '" +  settings.HTTP_HEADER + "';").fetchall()
-
-      conn.commit()
-      conn.close()
-
-      for session in cursor:
-        output = base64.b64decode(session[0])
-      try:
-        return output.decode(settings.DEFAULT_CODEC)
-      except AttributeError:
-        return output
-    else:
-      no_such_table = True
-      pass
+    output = None
+    conn = sqlite3.connect(settings.SESSION_FILE)
+    query = "SELECT output FROM " + table_name(url) + \
+            "_ir WHERE cmd='" + base64.b64encode(cmd.encode(settings.DEFAULT_CODEC)).decode() + "' AND " + \
+            "vuln_parameter= '" + vuln_parameter + "';"
+    cursor = conn.execute(query).fetchall()
+    conn.commit()
+    conn.close()
+    for session in cursor:
+      output = base64.b64decode(session[0])
+    try:
+      return output.decode(settings.DEFAULT_CODEC)
+    except AttributeError:
+      return output
   except sqlite3.OperationalError as err_msg:
     pass
 
@@ -387,8 +353,7 @@ def import_valid_credentials(url, authentication_type, admin_panel, username, pa
     conn.execute("CREATE TABLE IF NOT EXISTS " + table_name(url) + "_creds" + \
                  "(id INTEGER PRIMARY KEY, url VARCHAR, authentication_type VARCHAR, admin_panel VARCHAR, "\
                  "username VARCHAR, password VARCHAR);")
-
-    conn.execute("INSERT INTO " + table_name(url) + "_creds(url, authentication_type, "\
+    conn.execute("INSERT INTO " + table_name(url) + "_creds(url, authentication_type, " \
                  "admin_panel, username, password) VALUES(?,?,?,?,?)", \
                  (str(url), str(authentication_type), str(admin_panel), \
                  str(username), str(password)))
@@ -404,19 +369,15 @@ Export valid credentials from session file.
 """
 def export_valid_credentials(url, authentication_type):
   try:
-    if not menu.options.flush_session:
-      conn = sqlite3.connect(settings.SESSION_FILE)
-      output = None
-      conn = sqlite3.connect(settings.SESSION_FILE)
-      cursor = conn.execute("SELECT username, password FROM " + table_name(url) + \
-                            "_creds WHERE url='" + url + "' AND "\
-                            "authentication_type= '" + authentication_type + "';").fetchall()
-
-      cursor = ":".join(cursor[0])
-      return cursor
-    else:
-      no_such_table = True
-      pass
+    output = None
+    conn = sqlite3.connect(settings.SESSION_FILE)
+    query = "SELECT username, password FROM " + table_name(url) + \
+            "_creds WHERE url like '%" + split_url(url) + "%' AND " + \
+            "authentication_type= '" + authentication_type + "';"
+    cursor = conn.execute(query).fetchall()
+    conn.commit()
+    conn.close()
+    return ":".join(cursor[0])
   except sqlite3.OperationalError as err_msg:
     pass
 

@@ -35,6 +35,13 @@ def invalid_option(option):
   settings.print_data_to_stdout(settings.print_error_msg(err_msg))
 
 """
+Success msg.
+"""
+def shell_success(option):
+  info_msg = "Everything is in place. Cross your fingers and check for " + option + " shell on port " + settings.LPORT + "."
+  settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+  
+"""
 Invalid cmd output
 """
 def invalid_cmd_output(cmd):

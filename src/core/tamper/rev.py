@@ -30,12 +30,12 @@ if not settings.TAMPER_SCRIPTS[__tamper__]:
 
 def tamper(payload):
   if settings.EXPLOITATION_PHASE:
-    if settings.USER_SUPPLIED_CMD in settings.RAW_PAYLOAD:
+    if settings.USER_APPLIED_CMD in settings.RAW_PAYLOAD:
       if settings.USE_BACKTICKS:
-        rev_cmd = "`echo " + settings.USER_SUPPLIED_CMD[::-1] + "|rev`"
+        rev_cmd = "`echo " + settings.USER_APPLIED_CMD[::-1] + "|rev`"
       else:
-        rev_cmd = "$(echo " + settings.USER_SUPPLIED_CMD[::-1] + "|rev)"
-      payload = settings.RAW_PAYLOAD.replace(settings.USER_SUPPLIED_CMD, rev_cmd).replace(settings.SINGLE_WHITESPACE, settings.WHITESPACES[0])
+        rev_cmd = "$(echo " + settings.USER_APPLIED_CMD[::-1] + "|rev)"
+      payload = settings.RAW_PAYLOAD.replace(settings.USER_APPLIED_CMD, rev_cmd).replace(settings.SINGLE_WHITESPACE, settings.WHITESPACES[0])
   return payload
 
 # eof

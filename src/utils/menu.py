@@ -540,8 +540,7 @@ detection = OptionGroup(parser, Style.BRIGHT + Style.UNDERLINE + "Detection" + S
 
 detection.add_option("--level",
                 dest="level",
-                type="int",
-                default=1,
+                default=False,
                 help="Level of tests to perform (1-3, Default: " + str(settings.DEFAULT_INJECTION_LEVEL) + ").")
 
 detection.add_option("--skip-calc",

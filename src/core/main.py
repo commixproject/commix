@@ -64,7 +64,7 @@ if settings.IS_WINDOWS:
 """
 Define HTTP User-Agent header.
 """
-def defined_http_headers():
+def defined_http_headers(url):
   def extra_headers():
     if any((menu.options.header, menu.options.headers)):
       settings.EXTRA_HTTP_HEADERS = True
@@ -77,12 +77,17 @@ def defined_http_headers():
       debug_msg = "Setting the HTTP " + settings.COOKIE + " header."
       settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))  
 
-  def referer():
+  def referer(url):
+    if menu.options.referer is None:
+      if menu.options.level and int(menu.options.level) == settings.HTTP_HEADER_INJECTION_LEVEL:
+        menu.options.referer = _urllib.parse.urljoin(url, _urllib.parse.urlparse(url).path)
     if menu.options.referer and settings.VERBOSITY_LEVEL != 0:
       debug_msg = "Setting the HTTP " + settings.REFERER + " header."
       settings.print_data_to_stdout(settings.print_debug_msg(debug_msg)) 
 
-  def host():
+  def host(url):
+    if menu.options.host is None:
+      menu.options.host = _urllib.parse.urlparse(url).netloc
     if menu.options.host and settings.VERBOSITY_LEVEL != 0:
       debug_msg = "Setting the HTTP " + settings.HOST + " header."
       settings.print_data_to_stdout(settings.print_debug_msg(debug_msg)) 
@@ -124,8 +129,8 @@ def defined_http_headers():
 
   extra_headers()
   cookie()
-  referer()
-  host()
+  referer(url)
+  host(url)
   user_agent()
 
 
@@ -194,7 +199,7 @@ def init_request(url, http_request_method):
   if menu.options.timeout:
     settings.TIMEOUT = menu.options.timeout
   # Define HTTP headers
-  defined_http_headers()
+  defined_http_headers(url)
   # Check the internet connection (--check-internet switch).
   if menu.options.check_internet:
     check_internet(url)
@@ -243,15 +248,15 @@ def url_response(url, http_request_method):
       if redirect_url is not None:
         url = redirect_url
   if not menu.options.skip_waf:
+    settings.COOKIE_INJECTION = None
     settings.WAF_DETECTION_PHASE = True
     waf_request, waf_url = checks.check_waf(url, http_request_method)
-    headers.do_check(waf_request)
     examine_request(waf_request, waf_url)
     settings.WAF_DETECTION_PHASE = False
   return response, url
 
 """
-Injection states initiation.
+Initializing injection status.
 """
 def init_injection(url):
   if settings.VERBOSITY_LEVEL != 0:
@@ -337,13 +342,24 @@ def main(filename, url, http_request_method):
     if menu.options.url_reload and menu.options.data:
       settings.URL_RELOAD = True
 
+    if menu.options.flush_session:
+      session_handler.flush(url)
+
     url = check_value_inside_boundaries(url, http_request_method)
 
-    # if settings.CUSTOM_INJECTION_MARKER and settings.MULTI_TARGETS or settings.STDIN_PARSING:
-    #   settings.CUSTOM_INJECTION_MARKER = False
+    if menu.options.level:
+      settings.INJECTION_LEVEL = int(menu.options.level)
+    else:
+      settings.INJECTION_LEVEL = settings.DEFAULT_INJECTION_LEVEL
+
+    if menu.options.level and settings.INJECTION_LEVEL >= settings.DEFAULT_INJECTION_LEVEL:
+        settings.USER_APPLIED_LEVEL = settings.INJECTION_LEVEL
+
+    if not settings.USER_APPLIED_LEVEL :
+      settings.INJECTION_LEVEL = settings.USER_APPLIED_LEVEL = session_handler.applied_levels(url, http_request_method)
 
     # Define the level of tests to perform.
-    if menu.options.level == settings.DEFAULT_INJECTION_LEVEL:
+    if settings.INJECTION_LEVEL == settings.DEFAULT_INJECTION_LEVEL:
       settings.SEPARATORS = sorted(set(settings.SEPARATORS_LVL1), key=settings.SEPARATORS_LVL1.index)
       settings.PREFIXES = sorted(set(settings.PREFIXES_LVL1), key=settings.PREFIXES_LVL1.index)
       settings.SUFFIXES = sorted(set(settings.SUFFIXES_LVL1), key=settings.SUFFIXES_LVL1.index)
@@ -351,7 +367,7 @@ def main(filename, url, http_request_method):
       settings.EVAL_SUFFIXES = sorted(set(settings.EVAL_SUFFIXES_LVL1), key=settings.EVAL_SUFFIXES_LVL1.index)
       settings.EVAL_SEPARATORS = sorted(set(settings.EVAL_SEPARATORS_LVL1), key=settings.EVAL_SEPARATORS_LVL1.index)
       settings.EXECUTION_FUNCTIONS = sorted(set(settings.EXECUTION_FUNCTIONS_LVL1), key=settings.EXECUTION_FUNCTIONS_LVL1.index)
-    elif menu.options.level == settings.COOKIE_INJECTION_LEVEL:
+    elif settings.INJECTION_LEVEL == settings.COOKIE_INJECTION_LEVEL:
       settings.SEPARATORS = sorted(set(settings.SEPARATORS_LVL2), key=settings.SEPARATORS_LVL2.index)
       settings.PREFIXES = sorted(set(settings.PREFIXES_LVL2), key=settings.PREFIXES_LVL2.index)
       settings.SUFFIXES = sorted(set(settings.SUFFIXES_LVL2), key=settings.SUFFIXES_LVL2.index)
@@ -359,7 +375,7 @@ def main(filename, url, http_request_method):
       settings.EVAL_SUFFIXES = sorted(set(settings.EVAL_SUFFIXES_LVL2), key=settings.EVAL_SUFFIXES_LVL2.index)
       settings.EVAL_SEPARATORS = sorted(set(settings.EVAL_SEPARATORS_LVL2), key=settings.EVAL_SEPARATORS_LVL2.index)
       settings.EXECUTION_FUNCTIONS = sorted(set(settings.EXECUTION_FUNCTIONS_LVL2), key=settings.EXECUTION_FUNCTIONS_LVL2.index)
-    elif menu.options.level == settings.HTTP_HEADER_INJECTION_LEVEL:
+    elif settings.INJECTION_LEVEL == settings.HTTP_HEADER_INJECTION_LEVEL:
       settings.SEPARATORS = sorted(set(settings.SEPARATORS_LVL3), key=settings.SEPARATORS_LVL3.index)
       settings.PREFIXES = sorted(set(settings.PREFIXES_LVL3), key=settings.PREFIXES_LVL3.index)
       settings.SUFFIXES = sorted(set(settings.SUFFIXES_LVL3), key=settings.SUFFIXES_LVL3.index)
@@ -381,7 +397,7 @@ def main(filename, url, http_request_method):
         err_msg = "The options '-p' and '--skip' cannot be used "
         err_msg += "simultaneously (i.e. only one option must be set)."
         settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-        raise SystemExit
+        raise SystemExit()
 
     if menu.options.ignore_session:
       # Ignore session
@@ -394,36 +410,26 @@ def main(filename, url, http_request_method):
     if menu.options.cdel:
      settings.COOKIE_DELIMITER = menu.options.cdel
 
-    if not menu.options.ignore_session and not menu.options.flush_session:
-      if session_handler.applied_techniques(url, http_request_method):
-        if not menu.options.tech:
-          menu.options.tech = session_handler.applied_techniques(url, http_request_method)
-        else:
-          settings.USER_SUPPLIED_TECHNIQUE = True
-      else:
-        menu.options.tech = list(menu.options.tech.lower())
-        _ = {settings.AVAILABLE_TECHNIQUES[i] : i for i in range(len(settings.AVAILABLE_TECHNIQUES))}
-        try:
-          menu.options.tech.sort(key=lambda x:_[x])
-        except KeyError:
-          pass
-        menu.options.tech = ''.join(menu.options.tech)
+    if menu.options.tech and settings.USER_APPLIED_TECHNIQUE != None:
+      settings.USER_APPLIED_TECHNIQUE = True
     else:
-      if not menu.options.tech:
-        menu.options.tech = ''.join([str(x) for x in settings.AVAILABLE_TECHNIQUES])
+      settings.USER_APPLIED_TECHNIQUE = None
+      if len(session_handler.applied_techniques(url, http_request_method)) != 0:
+        settings.SESSION_APPLIED_TECHNIQUES = session_handler.applied_techniques(url, http_request_method)
+        menu.options.tech = settings.SESSION_APPLIED_TECHNIQUES
       else:
-        settings.USER_SUPPLIED_TECHNIQUE = True
+        menu.options.tech = ''.join([str(x) for x in settings.AVAILABLE_TECHNIQUES])
 
     # Check for skipping injection techniques.
     if menu.options.skip_tech:
       # Convert injection technique(s) to lowercase
       menu.options.skip_tech = menu.options.skip_tech.lower()
       settings.SKIP_TECHNIQUES = True
-      if settings.USER_SUPPLIED_TECHNIQUE:
+      if settings.USER_APPLIED_TECHNIQUE:
         err_msg = "The options '--technique' and '--skip-technique' cannot be used "
         err_msg += "simultaneously (i.e. only one option must be set)."
         settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-        raise SystemExit
+        raise SystemExit()
       else:
         menu.options.tech = "".join(settings.AVAILABLE_TECHNIQUES)
       for skip_tech_name in settings.AVAILABLE_TECHNIQUES:
@@ -432,7 +438,7 @@ def main(filename, url, http_request_method):
       if len(menu.options.tech) == 0:
         err_msg = "Detection procedure was aborted due to skipping all injection techniques."
         settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-        raise SystemExit
+        raise SystemExit()
 
     # Check if specified wrong injection technique
     if menu.options.tech and menu.options.tech not in settings.AVAILABLE_TECHNIQUES:
@@ -467,11 +473,6 @@ def main(filename, url, http_request_method):
         settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
         raise SystemExit()
 
-    if not menu.options.tech:
-      menu.options.tech = "".join(settings.AVAILABLE_TECHNIQUES)
-    else:
-      settings.USER_SUPPLIED_TECHNIQUE = True
-
     # Check the file-destination
     if menu.options.file_write and not menu.options.file_dest or \
     menu.options.file_upload  and not menu.options.file_dest:
@@ -493,13 +494,12 @@ def main(filename, url, http_request_method):
         else:
           username = ""
           password = menu.options.auth_cred
-        session_handler.import_valid_credentials(url, authentication_type=menu.options.auth_type, \
-                                                 admin_panel=url, username=username, \
-                                                 password=password
-                                                 )
+        if not settings.LOAD_SESSION:
+          session_handler.import_valid_credentials(url, authentication_type=menu.options.auth_type, \
+                                                   admin_panel=url, username=username, \
+                                                   password=password
+                                                   )
       try:
-        if menu.options.flush_session:
-          session_handler.flush(url)
         # Check for CGI scripts on url
         checks.check_CGI_scripts(url)
         # Check if defined "--file-upload" option.
@@ -543,7 +543,7 @@ def main(filename, url, http_request_method):
           pass
         # Load tamper scripts
         if menu.options.tamper:
-          settings.USER_SUPPLIED_TAMPER = menu.options.tamper
+          settings.USER_APPLIED_TAMPER = menu.options.tamper
           checks.tamper_scripts(stored_tamper_scripts=False)
 
       except AttributeError:
@@ -793,11 +793,11 @@ try:
       while True:
         message = "Enter injection level (--level) [1-3, Default: 1] > "
         if settings.STDIN_PARSING:
-          settings.print_data_to_stdout(settings.print_message(message + str(menu.options.level)))
+          settings.print_data_to_stdout(settings.print_message(message + str(settings.INJECTION_LEVEL)))
           break
         try:
-          menu.options.level = int(common.read_input(message, default=settings.DEFAULT_INJECTION_LEVEL, check_batch=True))
-          if menu.options.level > int(settings.HTTP_HEADER_INJECTION_LEVEL):
+          settings.INJECTION_LEVEL = int(common.read_input(message, default=settings.DEFAULT_INJECTION_LEVEL, check_batch=True))
+          if settings.INJECTION_LEVEL > int(settings.HTTP_HEADER_INJECTION_LEVEL):
             pass
           else:
             break
@@ -856,9 +856,6 @@ try:
     # Check provided parameters for tests
     checks.check_provided_parameters()
 
-    if menu.options.level != settings.DEFAULT_INJECTION_LEVEL:
-      settings.USER_SUPPLIED_LEVEL = menu.options.level
-
     # Define the local path where Metasploit Framework is installed.
     if menu.options.msf_path:
       settings.METASPLOIT_PATH = menu.options.msf_path
@@ -915,13 +912,13 @@ try:
         if not os.path.exists(bulkfile):
           err_msg = "It seems that the '" + os.path.split(bulkfile)[1] + "' file, does not exist."
           settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-          
           raise SystemExit()
+
         elif os.stat(bulkfile).st_size == 0:
           err_msg = "It seems that the '" + os.path.split(bulkfile)[1] + "' file, is empty."
           settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-          
           raise SystemExit()
+
         else:
           settings.MULTI_TARGETS = True
           with open(menu.options.bulkfile) as f:
@@ -1019,8 +1016,9 @@ try:
               if url == clean_output_href[-1]:
                 settings.EOF = True
               # Reset the injection level
-              if menu.options.level > settings.HTTP_HEADER_INJECTION_LEVEL:
-                menu.options.level = 1
+              if settings.INJECTION_LEVEL > settings.HTTP_HEADER_INJECTION_LEVEL:
+                settings.INJECTION_LEVEL = 1
+              menu.options.url = url
               init_injection(url)
               try:
                 response, url = url_response(url, http_request_method)

@@ -79,7 +79,7 @@ def time_relative_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitesp
       else:
         payload = payloads.cmd_execution(separator, cmd, output_length, OUTPUT_TEXTFILE, timesec, http_request_method)
 
-    exec_time, vuln_parameter = requests.perform_injection(prefix, suffix, whitespace, payload, vuln_parameter, http_request_method, url)
+    exec_time, vuln_parameter, payload, prefix, suffix = requests.perform_injection(prefix, suffix, whitespace, payload, vuln_parameter, http_request_method, url)
     injection_check = False
     if (exec_time >= settings.FOUND_EXEC_TIME and exec_time - timesec >= settings.FOUND_DIFF):
       injection_check = True
@@ -130,7 +130,7 @@ def time_relative_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitesp
             payload = payloads.get_char(separator, cmd, num_of_chars, ascii_char, timesec, http_request_method)
           else:
             payload = payloads.get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, timesec, http_request_method)
-        exec_time, vuln_parameter = requests.perform_injection(prefix, suffix, whitespace, payload, vuln_parameter, http_request_method, url)
+        exec_time, vuln_parameter, payload, prefix, suffix = requests.perform_injection(prefix, suffix, whitespace, payload, vuln_parameter, http_request_method, url)
         injection_check = False
         if (exec_time >= settings.FOUND_EXEC_TIME and exec_time - timesec >= settings.FOUND_DIFF):
           injection_check = True
@@ -203,7 +203,7 @@ def results_based_injection(separator, TAG, cmd, prefix, suffix, whitespace, htt
           _ = cmd.split(settings.COMMENT)[0].strip()
       debug_msg = "Executing the '" + _ + "' command. "
       settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
-    response, vuln_parameter = requests.perform_injection(prefix, suffix, whitespace, payload, vuln_parameter, http_request_method, url)
+    response, vuln_parameter, payload, prefix, suffix = requests.perform_injection(prefix, suffix, whitespace, payload, vuln_parameter, http_request_method, url)
     return response
 
   response = check_injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, technique)
@@ -270,7 +270,7 @@ def false_positive_check(separator, TAG, cmd, prefix, suffix, whitespace, timese
       else:  
         payload = payloads.cmd_execution(separator, cmd, output_length, OUTPUT_TEXTFILE, timesec, http_request_method)
 
-    exec_time, vuln_parameter = requests.perform_injection(prefix, suffix, whitespace, payload, vuln_parameter, http_request_method, url)
+    exec_time, vuln_parameter, payload, prefix, suffix = requests.perform_injection(prefix, suffix, whitespace, payload, vuln_parameter, http_request_method, url)
     if (exec_time >= settings.FOUND_EXEC_TIME) and (exec_time - timesec >= settings.FOUND_DIFF):
       found_chars = True
       break
@@ -301,7 +301,7 @@ def false_positive_check(separator, TAG, cmd, prefix, suffix, whitespace, timese
             payload = payloads.fp_result(separator, cmd, num_of_chars, ascii_char, timesec, http_request_method)
           else:  
             payload = payloads.fp_result(separator, OUTPUT_TEXTFILE, ascii_char, timesec, http_request_method)
-        exec_time, vuln_parameter = requests.perform_injection(prefix, suffix, whitespace, payload, vuln_parameter, http_request_method, url)
+        exec_time, vuln_parameter, payload, prefix, suffix = requests.perform_injection(prefix, suffix, whitespace, payload, vuln_parameter, http_request_method, url)
         if (exec_time >= settings.FOUND_EXEC_TIME) and (exec_time - timesec >= settings.FOUND_DIFF):
           output.append(ascii_char)
           is_valid = True

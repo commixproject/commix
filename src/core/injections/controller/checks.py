@@ -83,9 +83,10 @@ def check_waf(url, http_request_method):
     payload = settings.PARAMETER_DELIMITER + payload
   url = url + payload
   if settings.USER_DEFINED_POST_DATA:
-    request = _urllib.request.Request(url, settings.USER_DEFINED_POST_DATA.encode(), method=http_request_method)
+    request = _urllib.request.Request(remove_tags(url), remove_tags(settings.USER_DEFINED_POST_DATA).encode(), method=http_request_method)
   else:
-    request = _urllib.request.Request(url, method=http_request_method)
+    request = _urllib.request.Request(remove_tags(url), method=http_request_method)
+  headers.do_check(request)
   return request, url
 
 """
@@ -135,6 +136,7 @@ def process_non_custom():
       message += " Do you want to process them too? [Y/n] > "
       process = common.read_input(message, default="Y", check_batch=True)
       if process in settings.CHOICE_YES:
+        settings.CUSTOM_INJECTION_MARKER = False
         settings.SKIP_NON_CUSTOM = settings.IGNORE_USER_DEFINED_POST_DATA = False
         return 
       elif process in settings.CHOICE_NO:
@@ -148,6 +150,24 @@ def process_non_custom():
         pass
 
 """
+Process the defined injectable value
+"""
+def process_injectable_value(payload, data):
+  _ = data.replace(settings.TESTABLE_VALUE, settings.RANDOM_TAG)
+  if settings.TESTABLE_VALUE in _.replace(settings.INJECT_TAG, ""):
+    return _.replace(settings.INJECT_TAG, "").replace(settings.TESTABLE_VALUE, payload).replace(settings.RANDOM_TAG, settings.TESTABLE_VALUE)
+  else:
+    return _.replace(settings.RANDOM_TAG + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload).replace(settings.RANDOM_TAG, settings.TESTABLE_VALUE)
+
+"""
+Remove all injection tags from provided data
+"""
+def remove_tags(data):
+  if not data:
+    data = ""
+  return data.replace(settings.INJECT_TAG,"").replace(settings.CUSTOM_INJECTION_MARKER_CHAR,"").replace(settings.ASTERISK_MARKER, "").replace(settings.RANDOM_TAG, "") 
+
+"""
 Process data with custom injection marker character ('*').
 """
 def process_custom_injection_data(data):
@@ -156,12 +176,12 @@ def process_custom_injection_data(data):
     for data in data.split("\\n"):
       if not data.startswith(settings.ACCEPT) and settings.CUSTOM_INJECTION_MARKER_CHAR in data:
         if menu.options.test_parameter != None and settings.CUSTOM_INJECTION_MARKER == False:
-          data = data.replace(settings.CUSTOM_INJECTION_MARKER_CHAR, "")
-        elif settings.CUSTOM_INJECTION_MARKER:
-          data = data.replace(settings.CUSTOM_INJECTION_MARKER_CHAR, settings.ASTERISK_MARKER)
+          data = remove_tags(data)
+        # elif settings.CUSTOM_INJECTION_MARKER:
+        data = data.replace(settings.CUSTOM_INJECTION_MARKER_CHAR, settings.ASTERISK_MARKER)
       _.append(data)
     data = "\\n".join((list(dict.fromkeys(_)))).rstrip("\\n")
-    
+  
   return data
 
 """
@@ -169,11 +189,11 @@ Check for custom injection marker character ('*').
 """
 def custom_injection_marker_character(url, http_request_method):
   _ = settings.CUSTOM_INJECTION_MARKER = False
+  settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST = []
+  
   if url and settings.CUSTOM_INJECTION_MARKER_CHAR in url:
     option = "'-u'"
     _ = settings.CUSTOM_INJECTION_MARKER = settings.INJECTION_MARKER_LOCATION.URL = settings.USER_DEFINED_URL_DATA = True
-    # if menu.options.data:
-    #   settings.IGNORE_USER_DEFINED_POST_DATA = True
   if menu.options.data and settings.CUSTOM_INJECTION_MARKER_CHAR in menu.options.data:
     option = str(http_request_method) + " body"
     _ = settings.CUSTOM_INJECTION_MARKER = settings.INJECTION_MARKER_LOCATION.DATA = True
@@ -181,13 +201,13 @@ def custom_injection_marker_character(url, http_request_method):
     option = "option '--headers/--user-agent/--referer/--cookie'"
   if menu.options.cookie and settings.CUSTOM_INJECTION_MARKER_CHAR in menu.options.cookie:
     settings.CUSTOM_INJECTION_MARKER = settings.COOKIE_INJECTION = settings.INJECTION_MARKER_LOCATION.COOKIE = True
-  elif menu.options.agent and settings.CUSTOM_INJECTION_MARKER_CHAR in menu.options.agent:
+  if menu.options.agent and settings.CUSTOM_INJECTION_MARKER_CHAR in menu.options.agent:
     settings.CUSTOM_INJECTION_MARKER = settings.INJECTION_MARKER_LOCATION.HTTP_HEADERS = settings.USER_AGENT_INJECTION = True
-  elif menu.options.referer and settings.CUSTOM_INJECTION_MARKER_CHAR in menu.options.referer:
+  if menu.options.referer and settings.CUSTOM_INJECTION_MARKER_CHAR in menu.options.referer:
     settings.CUSTOM_INJECTION_MARKER = settings.INJECTION_MARKER_LOCATION.HTTP_HEADERS = settings.REFERER_INJECTION = True
-  elif menu.options.host and settings.CUSTOM_INJECTION_MARKER_CHAR in menu.options.host:
+  if menu.options.host and settings.CUSTOM_INJECTION_MARKER_CHAR in menu.options.host:
     settings.CUSTOM_INJECTION_MARKER = settings.INJECTION_MARKER_LOCATION.HTTP_HEADERS = settings.HOST_INJECTION = True
-  elif settings.CUSTOM_HEADER_CHECK and settings.CUSTOM_HEADER_CHECK != settings.ACCEPT:
+  if settings.CUSTOM_HEADER_CHECK and settings.CUSTOM_HEADER_CHECK != settings.ACCEPT:
     if settings.CUSTOM_HEADER_CHECK not in settings.TESTABLE_PARAMETERS_LIST:
       settings.CUSTOM_INJECTION_MARKER = True
     else:
@@ -209,7 +229,8 @@ def custom_injection_marker_character(url, http_request_method):
         common.invalid_option(procced_option)
         pass
 
-
+"""
+"""
 def skipping_technique(technique, injection_type, state):
   if settings.VERBOSITY_LEVEL != 0 and state != True:
     debug_msg = "Skipping test the " + "(" + injection_type.split(settings.SINGLE_WHITESPACE)[0] + ") " + technique + ". "
@@ -219,28 +240,27 @@ def skipping_technique(technique, injection_type, state):
 Skipping of further tests.
 """
 def keep_testing_others(filename, url):
-  if settings.SKIP_COMMAND_INJECTIONS:
-    while True:
-      message = "Do you want to keep testing the others? [y/N] > "
-      procced_option = common.read_input(message, default="N", check_batch=True)
-      if procced_option in settings.CHOICE_YES:
-        settings.SKIP_COMMAND_INJECTIONS = True
-        return
-      elif procced_option in settings.CHOICE_NO:
-        quit(filename, url, _ = False)
-      elif procced_option in settings.CHOICE_QUIT:
-        raise SystemExit()
-      else:
-        common.invalid_option(procced_option)
-        pass
+  if not settings.LOAD_SESSION:
+    if settings.SKIP_COMMAND_INJECTIONS:
+      while True:
+        message = "Do you want to keep testing the others? [y/N] > "
+        procced_option = common.read_input(message, default="N", check_batch=True)
+        if procced_option in settings.CHOICE_YES:
+          settings.SKIP_COMMAND_INJECTIONS = True
+          return
+        elif procced_option in settings.CHOICE_NO:
+          quit(filename, url, _ = False)
+        elif procced_option in settings.CHOICE_QUIT:
+          raise SystemExit()
+        else:
+          common.invalid_option(procced_option)
+          pass
 
 """
 Skipping of further command injection tests.
 """
 def skip_testing(filename, url):
-  if len(menu.options.tech) == 1:
-    settings.SKIP_COMMAND_INJECTIONS = True
-  else:
+  if not settings.LOAD_SESSION:
     if settings.IDENTIFIED_WARNINGS or settings.IDENTIFIED_PHPINFO:
       _ = " testing command injection techniques"
     else:
@@ -252,6 +272,7 @@ def skip_testing(filename, url):
       procced_option = common.read_input(message, default="Y", check_batch=True)
       if procced_option in settings.CHOICE_YES:
         settings.SKIP_COMMAND_INJECTIONS = True
+        settings.LOAD_SESSION = False
         return
       elif procced_option in settings.CHOICE_NO:
         settings.SKIP_COMMAND_INJECTIONS = False
@@ -313,7 +334,12 @@ def check_http_method(url):
       http_request_method = settings.HTTPMETHOD.GET
   return http_request_method
 
+"""
+Quit
+"""
 def quit(filename, url, _):
+  if settings.LOAD_SESSION:
+    logs.logs_notification(filename)
   logs.print_logs_notification(filename, url)
   common.show_http_error_codes()
   if _:
@@ -329,7 +355,7 @@ def user_aborted(filename, url):
   abort_msg += "during the " + assessment_phase()
   abort_msg += " phase (Ctrl-C was pressed)."
   settings.print_data_to_stdout(settings.print_abort_msg(abort_msg))
-  quit(filename, url, _=True)
+  raise exit()
 
 """
 Connection exceptions
@@ -356,7 +382,8 @@ def not_declared_cookies(response):
       if settings.SET_COOKIE in response_header:
         _ = re.search(r'([^;]+);?', response_header[1])
         if _:
-          set_cookie_header.append(_.group(1))
+          if _.group(1).split("=")[0] not in menu.options.cookie:
+            set_cookie_header.append(_.group(1))
     candidate = settings.COOKIE_DELIMITER.join(str(value) for value in set_cookie_header)
     if candidate and settings.DECLARED_COOKIES is not False and settings.CRAWLING is False:
       settings.DECLARED_COOKIES = True
@@ -403,12 +430,27 @@ def tab_autocompleter():
     settings.print_data_to_stdout(settings.print_error_msg(error_msg))
 
 """
+Load commands from history.
+"""
+def load_cmd_history():
+  try:
+    cli_history = os.path.join(os.path.expanduser("~"), settings.CLI_HISTORY)
+    if os.path.exists(cli_history):
+      readline.read_history_file(cli_history)
+  except (IOError, AttributeError, UnicodeError) as e:
+    warn_msg = "There was a problem loading the history file '" + cli_history + "'."
+    if settings.IS_WINDOWS:
+      warn_msg += " More info can be found at 'https://github.com/pyreadline/pyreadline/issues/30'"
+    settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+
+"""
 Save command history.
 """
 def save_cmd_history():
   try:
-    cli_history = os.path.expanduser(settings.CLI_HISTORY)
+    cli_history = os.path.join(os.path.expanduser("~"), settings.CLI_HISTORY)
     if os.path.exists(cli_history):
+      readline.set_history_length(settings.MAX_HISTORY_LENGTH)
       readline.write_history_file(cli_history)
   except (IOError, AttributeError) as e:
     warn_msg = "There was a problem writing the history file '" + cli_history + "'."
@@ -453,20 +495,6 @@ def print_percentage(float_percent, no_result, shell):
   else:
     percent = ".. (" + str(float_percent) + "%)"
   return percent
-
-"""
-Load commands from history.
-"""
-def load_cmd_history():
-  try:
-    cli_history = os.path.expanduser(settings.CLI_HISTORY)
-    if os.path.exists(cli_history):
-      readline.read_history_file(cli_history)
-  except (IOError, AttributeError, UnicodeError) as e:
-    warn_msg = "There was a problem loading the history file '" + cli_history + "'."
-    if settings.IS_WINDOWS:
-      warn_msg += " More info can be found at 'https://github.com/pyreadline/pyreadline/issues/30'"
-    settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
 """
 Get value inside boundaries.
@@ -745,20 +773,21 @@ def assessment_phase():
 Procced to the next attack vector.
 """
 def next_attack_vector(technique, go_back):
-  while True:
-    message = "Do you want to continue with testing the " + technique + "? [y/N] > "
-    next_attack_vector = common.read_input(message, default="N", check_batch=True)
-    if next_attack_vector in settings.CHOICE_YES:
-      # Check injection state
-      assessment_phase()
-      return True
-    elif next_attack_vector in settings.CHOICE_NO:
-      return  False
-    elif next_attack_vector in settings.CHOICE_QUIT:
-      raise SystemExit()
-    else:
-      common.invalid_option(next_attack_vector)
-      pass
+  if not settings.LOAD_SESSION:
+    while True:
+      message = "Do you want to continue with testing the " + technique + "? [y/N] > "
+      next_attack_vector = common.read_input(message, default="N", check_batch=True)
+      if next_attack_vector in settings.CHOICE_YES:
+        # Check injection state
+        assessment_phase()
+        return True
+      elif next_attack_vector in settings.CHOICE_NO:
+        return  False
+      elif next_attack_vector in settings.CHOICE_QUIT:
+        raise SystemExit()
+      else:
+        common.invalid_option(next_attack_vector)
+        pass
 
 """
 Fix single / double quote escaping.
@@ -789,8 +818,15 @@ def remove_empty_lines(content):
 Enable pseudo-terminal shell
 """
 def enable_shell(url):
-  message = settings.CHECKING_PARAMETER + " is vulnerable. "
-  message += "Do you want to prompt for a pseudo-terminal shell? [Y/n] > "
+  message = ""
+  if settings.LOAD_SESSION:
+    message = "Resumed "
+  message += settings.CHECKING_PARAMETER
+  if settings.LOAD_SESSION: 
+    message += " injection point from stored session"
+  else:
+    message += " is vulnerable"
+  message += ". Do you want to prompt for a pseudo-terminal shell? [Y/n] > "
   if settings.CRAWLING:
     settings.CRAWLED_URLS_INJECTED.append(_urllib.parse.urlparse(url).netloc)
   if not settings.STDIN_PARSING:
@@ -1209,7 +1245,7 @@ def time_delay_recommendation():
 Message regarding unexpected time delays due to unstable requests
 """
 def time_delay_due_to_unstable_request(timesec):
-  message = "Unexpected time delays have been identified and may lead to false-positive results."
+  message = "Unexpected time delays that may lead to false-positive results, have been identified."
   settings.print_data_to_stdout(settings.END_LINE.CR)
   while True:
     message = message + " How do you want to proceed? [(C)ontinue/(s)kip] > "
@@ -1344,7 +1380,7 @@ def testable_parameters(url, check_parameters, header_name):
     remove_skipped_params(url, check_parameters)
 
   _ = False
-  if len([i for i in settings.TESTABLE_PARAMETERS_LIST if i in check_parameters]) == 0:
+  if settings.TESTABLE_PARAMETERS or [i for i in settings.TESTABLE_PARAMETERS_LIST if i in check_parameters]:
     _ = True
 
   if settings.TESTABLE_PARAMETERS_LIST and isinstance(settings.TESTABLE_PARAMETERS_LIST, list):
@@ -1358,7 +1394,7 @@ def testable_parameters(url, check_parameters, header_name):
     if non_exist_param:
       non_exist_param = settings.PARAMETER_SPLITTING_REGEX.join(non_exist_param).replace(settings.SINGLE_WHITESPACE, "")
       non_exist_param = non_exist_param.split(settings.PARAMETER_SPLITTING_REGEX)
-      if menu.options.level >= settings.COOKIE_INJECTION_LEVEL and \
+      if settings.INJECTION_LEVEL >= settings.COOKIE_INJECTION_LEVEL and \
          menu.options.test_parameter != None:
         if menu.options.cookie != None:
           if settings.COOKIE_DELIMITER in menu.options.cookie:
@@ -1378,6 +1414,7 @@ def testable_parameters(url, check_parameters, header_name):
       # Remove the defined HTTP headers
       for http_header in settings.HTTP_HEADERS:
         if http_header in non_exist_param:
+          settings.TESTABLE_PARAMETERS = True
           non_exist_param.remove(http_header)
 
       if settings.VERBOSITY_LEVEL != 0 and non_exist_param and _:
@@ -1898,6 +1935,17 @@ def json_data(data):
   return data
 
 """
+"No parameter(s) found for testing.
+"""
+def no_parameters_found():
+  err_msg = "No parameter(s) found for testing in the provided data "
+  err_msg += "(e.g. GET parameter 'id' in 'www.site.com/index.php?id=1'). "
+  if not menu.options.crawldepth:
+    err_msg += "You are advised to rerun with '--crawl=2'."
+  settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+  raise SystemExit()
+
+"""
 Check if the provided value is empty.
 """
 def is_empty(multi_parameters, http_request_method):
@@ -1928,13 +1976,11 @@ def is_empty(multi_parameters, http_request_method):
       elif len(empty.split("=")[1]) == 0:
         empty_parameters.append(empty.split("=")[0])
     except IndexError:
-      if not settings.IS_XML and not settings.IS_JSON:
-        err_msg = "No parameter(s) found for testing in the provided data."
-        settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-        raise SystemExit()
+      pass
 
   if len(empty_parameters) == len(multi_parameters):
     all_empty = True
+    
   if menu.options.skip_empty:
     settings.SKIP_PARAMETER = empty_parameters
 
@@ -2007,16 +2053,6 @@ def process_data(data_type, http_request_method):
       pass
 
 """
-Check if provided parameters are in inappropriate format.
-"""
-def inappropriate_format(multi_parameters):
-  err_msg = "The provided parameter" + "s"[len(multi_parameters) == 1:][::-1]
-  err_msg += (' are ', ' is ')[len(multi_parameters) == 1]
-  err_msg += "not in appropriate format."
-  settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-  raise SystemExit()
-
-"""
 Check for similarity in provided parameter name and value.
 """
 def check_similarities(all_params):
@@ -2046,7 +2082,8 @@ def check_similarities(all_params):
       else:
         if re.findall(r'(.*)=', all_params[param]) == re.findall(r'=(.*)', all_params[param]):
           parameter_name = ''.join(re.findall(r'=(.*)', all_params[param]))
-          all_params[param] = parameter_name + "=" + parameter_name + settings.RANDOM_TAG
+          if parameter_name:
+            all_params[param] = parameter_name + "=" + parameter_name + settings.RANDOM_TAG
         elif re.findall(r'=(.*)', all_params[param])[0] in re.findall(r'(.*)=', all_params[param])[0]:
           parameter_name = ''.join(re.findall(r'(.*)=', all_params[param]))
           parameter_value = ''.join(re.findall(r'=(.*)', all_params[param]))
@@ -2698,6 +2735,15 @@ def file_upload():
       else:
         common.invalid_option(enable_HTTP_server)
         pass
+
+def define_vulnerable_http_header(http_header_name):
+  if http_header_name == settings.USER_AGENT.lower():
+    settings.USER_AGENT_INJECTION = True
+  elif http_header_name == settings.REFERER.lower():
+    settings.REFERER_INJECTION = True
+  elif http_header_name == settings.HOST.lower():
+    settings.HOST_INJECTION = True
+  return http_header_name
 
 """
 Check for wrong flags

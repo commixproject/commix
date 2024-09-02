@@ -77,7 +77,6 @@ def logs_filename_creation(url):
 Create log files
 """
 def create_log_file(url, output_dir):
-
   host = _urllib.parse.urlparse(url).netloc.replace(":","_") + "/"
   logs_path = output_dir + host
 
@@ -99,7 +98,7 @@ def create_log_file(url, output_dir):
     settings.SESSION_FILE = logs_path + "session.db"
 
   # Load command history
-  if settings.LOAD_SESSION == True:
+  if settings.LOAD_SESSION == True and os.path.exists(settings.CLI_HISTORY):
     checks.load_cmd_history()
 
   # The logs filename construction.
@@ -200,9 +199,11 @@ def log_traffic(header):
 Print logs notification.
 """
 def print_logs_notification(filename, url):
-  checks.save_cmd_history()
+  if os.path.exists(settings.CLI_HISTORY):
+    checks.save_cmd_history()
   if settings.SHOW_LOGS_MSG == True and not menu.options.no_logging:
-    logs_notification(filename)
+    if not settings.LOAD_SESSION:
+      logs_notification(filename)
   if url:
     session_handler.clear(url)
 

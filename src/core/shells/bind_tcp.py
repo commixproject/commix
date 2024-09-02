@@ -49,14 +49,6 @@ def shell_options(option):
     return option
 
 """
-Success msg.
-"""
-def shell_success():
-  info_msg = "Everything is in place, cross your fingers and check for bind shell (on port " + settings.LPORT + ")."
-  settings.print_data_to_stdout(settings.print_info_msg(info_msg))
-  
-
-"""
 Error msg if the attack vector is available only for Windows targets.
 """
 def windows_only_attack_vector():
@@ -463,7 +455,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """bind_tcp""" + Style.RESET_ALL + """) >
     elif bind_tcp_option == '1' :
       bind_tcp_option = netcat_version(separator)
       if bind_tcp_option.lower() not in settings.SHELL_OPTIONS:
-        shell_success()
+        common.shell_success("bind")
         break
       elif bind_tcp_option.lower() in settings.SHELL_OPTIONS:
         return bind_tcp_option
@@ -473,7 +465,7 @@ commix(""" + Style.BRIGHT + Fore.RED + """bind_tcp""" + Style.RESET_ALL + """) >
     elif bind_tcp_option == '2' :
       bind_tcp_option = other_bind_shells(separator)
       if bind_tcp_option.lower() not in settings.SHELL_OPTIONS:
-        shell_success()
+        common.shell_success("bind")
         break
     # Check for available shell options
     elif any(option in bind_tcp_option.lower() for option in settings.SHELL_OPTIONS):

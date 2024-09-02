@@ -50,7 +50,7 @@ Execute the bind / reverse TCP shell
 def execute_shell(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, os_shell_option, timesec, payload, OUTPUT_TEXTFILE, technique):
 
   if technique == settings.INJECTION_TECHNIQUE.DYNAMIC_CODE:
-    from src.core.injections.results_based.techniques.eval_based import eb_injector as injecto
+    from src.core.injections.results_based.techniques.eval_based import eb_injector as injection
     # Command execution results.
     start = time.time()
     response = injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, technique)
@@ -77,10 +77,9 @@ def execute_shell(separator, TAG, cmd, prefix, suffix, whitespace, http_request_
 
   if settings.REVERSE_TCP and (int(diff) > 0 and int(diff) < 6):
     check_established_connection()
-  else:
-    if settings.VERBOSITY_LEVEL == 1:
-      settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
-
+  # else:
+  #   if settings.VERBOSITY_LEVEL == 1:
+  #     settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
   err_msg = "The " + os_shell_option.split("_")[0] + " "
   err_msg += os_shell_option.split("_")[1].upper() + " connection has failed."
   settings.print_data_to_stdout(settings.print_critical_msg(err_msg))

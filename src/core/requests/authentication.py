@@ -176,9 +176,6 @@ def http_auth_cracker(url, realm, http_request_method):
           if menu.options.proxy or menu.options.ignore_proxy or menu.options.tor: 
             proxy.use_proxy(request)
           response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
-          # Store valid results to session
-          admin_panel = url
-          session_handler.import_valid_credentials(url, authentication_type, admin_panel, username, password)
           found = True
         except KeyboardInterrupt :
           raise
@@ -200,11 +197,12 @@ def http_auth_cracker(url, realm, http_request_method):
           settings.print_data_to_stdout("\r\r" + settings.print_info_msg(info_msg))
           
         if found:
+          if not settings.LOAD_SESSION:
+            session_handler.import_valid_credentials(url, authentication_type, url, username, password)
           valid_pair =  "" + username + ":" + password + ""
           if not settings.VERBOSITY_LEVEL >= 2:
             settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
-          info_msg = "Identified a valid pair of HTTP authentication credentials: '"
-          info_msg += valid_pair + Style.RESET_ALL + Style.BRIGHT  + "'."
+          info_msg = "Identified a valid pair of credentials: '" + valid_pair + "'."
           settings.print_data_to_stdout(settings.print_bold_info_msg(info_msg))
           return valid_pair
 
