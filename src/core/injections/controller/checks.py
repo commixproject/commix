@@ -3024,4 +3024,202 @@ def time_relative_export_injection_results(cmd, separator, output, check_exec_ti
       err_msg = common.invalid_cmd_output(cmd)
       settings.print_data_to_stdout(settings.print_error_msg(err_msg))
 
+"""
+Success msg.
+"""
+def shell_success(option):
+  info_msg = "Everything is in place. Cross your fingers and check for " + option + " shell on port " + settings.LPORT + "."
+  settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+
+"""
+Payload generation message.
+"""
+def gen_payload_msg(payload):
+  info_msg = "Generating the '" + payload + "' shellcode. "
+  settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+  
+"""
+Error msg if the attack vector is available only for Windows targets.
+"""
+def windows_only_attack_vector():
+    error_msg = "This attack vector is available only for Windows targets."
+    settings.print_data_to_stdout(settings.print_error_msg(error_msg))
+
+"""
+Message regarding the MSF handler.
+"""
+def msf_launch_msg(output):
+    info_msg = "Type \"msfconsole -r " + os.path.abspath(output) + "\" (in a new window)."
+    settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+    info_msg = "Once the loading is done, press here any key to continue..."
+    settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+    sys.stdin.readline().replace("\n", "")
+    # Remove the ouput file.
+    os.remove(output)
+
+"""
+Check for available shell options.
+"""
+def shell_options(option):
+  if option.lower() == "reverse_tcp" or option.lower() == "bind_tcp" :
+    warn_msg = "You are into the '" + option.lower() + "' mode."
+    settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+  elif option.lower() == "?":
+    menu.reverse_tcp_options()
+  elif option.lower() == "quit" or option.lower() == "exit":
+    raise SystemExit()
+
+  elif option[0:4].lower() == "set ":
+    if option[4:10].lower() == "lhost ":
+      if option.lower() == "bind_tcp":
+        err_msg =  "The '" + option[4:9].upper() + "' option, is not "
+        err_msg += "usable for '" + option.lower() + "' mode. Use 'RHOST' option."
+        settings.print_data_to_stdout(settings.print_error_msg(err_msg))
+      else:
+        check_lhost(option[10:])
+    if option[4:10].lower() == "rhost ":
+      if option.lower() == "reverse_tcp":
+        err_msg =  "The '" + option[4:9].upper() + "' option, is not "
+        err_msg += "usable for '" + option.lower() + "' mode. Use 'LHOST' option."
+        settings.print_data_to_stdout(settings.print_error_msg(err_msg))
+      else:
+        check_rhost(option[10:])
+    if option.lower() == "reverse_tcp":    
+      if option[4:10].lower() == "lport ":
+        check_lport(option[10:])
+      if option[4:12].lower() == "srvport ":
+        check_srvport(option[12:])
+      if option[4:12].lower() == "uripath ":
+        check_uripath(option[12:])
+  else:
+    return option
+
+"""
+Set up the PHP working directory on the target host.
+"""
+def set_php_working_dir():
+  while True:
+    message = "Do you want to use '" + settings.WIN_PHP_DIR
+    message += "' as PHP working directory on the target host? [Y/n] > "
+    php_dir = common.read_input(message, default="Y", check_batch=True)
+    if php_dir in settings.CHOICE_YES:
+      break
+    elif php_dir in settings.CHOICE_NO:
+      message = "Please provide a custom working directory for PHP (e.g. '" + settings.WIN_PHP_DIR + "') > "
+      settings.WIN_PHP_DIR = common.read_input(message, default=settings.WIN_PHP_DIR, check_batch=True)
+      settings.USER_DEFINED_PHP_DIR = True
+      break
+    else:
+      common.invalid_option(php_dir)
+      pass
+
+"""
+Set up the Python working directory on the target host.
+"""
+def set_python_working_dir():
+  while True:
+    message = "Do you want to use '" + settings.WIN_PYTHON_INTERPRETER
+    message += "' as Python interpreter on the target host? [Y/n] > "
+    python_dir = common.read_input(message, default="Y", check_batch=True)
+    if python_dir in settings.CHOICE_YES:
+      break
+    elif python_dir in settings.CHOICE_NO:
+      message = "Please provide a full path directory for Python interpreter (e.g. '" + settings.WIN_CUSTOM_PYTHON_INTERPRETER  + "') > "
+      settings.WIN_PYTHON_INTERPRETER = common.read_input(message, default=settings.WIN_CUSTOM_PYTHON_INTERPRETER, check_batch=True)
+      settings.USER_DEFINED_PYTHON_DIR = True
+      break
+    else:
+      common.invalid_option(python_dir)
+      pass
+
+"""
+Check if to use '/bin' standard subdirectory
+"""
+def use_bin_subdir(nc_alternative, shell):
+  while True:
+    message = "Do you want to use '/bin' standard subdirectory? [y/N] > "
+    enable_bin_subdir = common.read_input(message, default="N", check_batch=True)
+    if enable_bin_subdir in settings.CHOICE_YES :
+      nc_alternative = "/bin/" + nc_alternative
+      shell = "/bin/" + shell
+      return nc_alternative, shell
+    elif enable_bin_subdir in settings.CHOICE_NO:
+      return nc_alternative, shell
+    elif enable_bin_dir in settings.CHOICE_QUIT:
+      raise SystemExit()
+    else:
+      common.invalid_option(enable_bin_subdir)
+      pass
+
+"""
+Set up the Python interpreter on linux target host.
+"""
+def set_python_interpreter():
+  while True:
+    message = "Do you want to use '" + settings.LINUX_PYTHON_INTERPRETER
+    message += "' as Python interpreter on the target host? [Y/n] > "
+    python_interpreter = common.read_input(message, default="Y", check_batch=True)
+    if python_interpreter in settings.CHOICE_YES:
+      break
+    elif python_interpreter in settings.CHOICE_NO:
+      message = "Please provide a custom working interpreter for Python (e.g. '" + settings.LINUX_CUSTOM_PYTHON_INTERPRETER + "') > "
+      settings.LINUX_PYTHON_INTERPRETER = common.read_input(message, default=settings.LINUX_CUSTOM_PYTHON_INTERPRETER, check_batch=True)
+      settings.USER_DEFINED_PYTHON_INTERPRETER = True
+      break
+    else:
+      common.invalid_option(python_interpreter)
+      pass
+
+"""
+check / set rhost option for bind TCP connection
+"""
+def check_rhost(rhost):
+  settings.RHOST = rhost
+  settings.print_data_to_stdout("RHOST => " + settings.RHOST)
+  return True
+
+"""
+check / set lhost option for reverse TCP connection
+"""
+def check_lhost(lhost):
+  settings.LHOST = lhost
+  settings.print_data_to_stdout("LHOST => " + settings.LHOST)
+  return True
+
+"""
+check / set lport option for reverse TCP connection
+"""
+def check_lport(lport):
+  try:
+    if float(lport):
+      settings.LPORT = lport
+      settings.print_data_to_stdout("LPORT => " + settings.LPORT)
+      return True
+  except ValueError:
+    err_msg = "The provided port must be numeric (i.e. 1234)"
+    settings.print_data_to_stdout(settings.print_error_msg(err_msg))
+    return False
+
+"""
+check / set srvport option for reverse TCP connection
+"""
+def check_srvport(srvport):
+  try:
+    if float(srvport):
+      settings.SRVPORT = srvport
+      settings.print_data_to_stdout("SRVPORT => " + settings.SRVPORT)
+      return True
+  except ValueError:
+    err_msg = "The provided port must be numeric (i.e. 1234)"
+    settings.print_data_to_stdout(settings.print_error_msg(err_msg))
+    return False
+
+"""
+check / set uripath option for reverse TCP connection
+"""
+def check_uripath(uripath):
+  settings.URIPATH = uripath
+  settings.print_data_to_stdout("URIPATH => " + settings.URIPATH)
+  return True
+  
 # eof

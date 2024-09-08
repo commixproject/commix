@@ -28,20 +28,6 @@ from src.thirdparty.six.moves import input as _input
 from src.thirdparty.six.moves import urllib as _urllib
 
 """
-Invalid option msg
-"""
-def invalid_option(option):
-  err_msg = "'" + option + "' is not a valid answer."
-  settings.print_data_to_stdout(settings.print_error_msg(err_msg))
-
-"""
-Success msg.
-"""
-def shell_success(option):
-  info_msg = "Everything is in place. Cross your fingers and check for " + option + " shell on port " + settings.LPORT + "."
-  settings.print_data_to_stdout(settings.print_info_msg(info_msg))
-  
-"""
 Invalid cmd output
 """
 def invalid_cmd_output(cmd):
@@ -49,25 +35,28 @@ def invalid_cmd_output(cmd):
   return err_msg
 
 """
+Invalid option msg
+"""
+def invalid_option(option):
+  err_msg = "'" + option + "' is not a valid answer."
+  settings.print_data_to_stdout(settings.print_error_msg(err_msg))
+
+"""
 Reads input from terminal
 """
 def read_input(message, default=None, check_batch=True):
-
   def is_empty():
     value = _input(settings.print_message(message))
     if len(value) == 0:
       return default
     else:
       return value
-
   try:
     value = None
     if "\n" in message:
       message += ("\n" if message.count("\n") > 1 else "")
-
     elif len(message) == 0:
       return is_empty()
-
     if settings.ANSWERS:
       if not any(_ in settings.ANSWERS for _ in ",="):
         return is_empty()
@@ -81,14 +70,12 @@ def read_input(message, default=None, check_batch=True):
             return value
           elif answer is None and value:
             return is_empty()
-
     if value:
       if settings.VERBOSITY_LEVEL != 0:
         debug_msg = "Used the given answer."
         settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
       settings.print_data_to_stdout(settings.print_message(message + str(value)))
       return value
-
     elif value is None:
       if check_batch and menu.options.batch:
         settings.print_data_to_stdout(settings.print_message(message + str(default)))
