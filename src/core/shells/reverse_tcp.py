@@ -76,7 +76,7 @@ def netcat_version(separator):
         return checks.shell_options(nc_version)
     # Invalid option
     else:
-      checks.invalid_option(nc_version)
+      common.invalid_option(nc_version)
       continue
 
   nc_alternative, shell = checks.use_bin_subdir(nc_alternative, shell)
@@ -315,7 +315,7 @@ def other_reverse_shells(separator):
           elif windows_reverse_shell == '2' :
             output = "powershell_attack.txt"
           else:
-            checks.invalid_option(windows_reverse_shell)
+            common.invalid_option(windows_reverse_shell)
             continue
 
           if not os.path.exists(settings.METASPLOIT_PATH):
@@ -412,7 +412,7 @@ def other_reverse_shells(separator):
         elif web_delivery == '3':
           payload = "windows/meterpreter/reverse_tcp"
         else:
-          checks.invalid_option(web_delivery)
+          common.invalid_option(web_delivery)
           continue
 
         if not os.path.exists(settings.METASPLOIT_PATH):
@@ -467,7 +467,7 @@ def other_reverse_shells(separator):
         return checks.shell_options(other_shell)
     # Invalid option
     else:
-      checks.invalid_option(other_shell)
+      common.invalid_option(other_shell)
       continue
 
   return other_shell
@@ -509,7 +509,7 @@ def reverse_tcp_options(separator):
         return checks.shell_options(reverse_tcp_option)
     # Invalid option
     else:
-      checks.invalid_option(reverse_tcp_option)
+      common.invalid_option(reverse_tcp_option)
       continue
 
   return reverse_tcp_option
@@ -567,10 +567,10 @@ def configure_reverse_tcp(separator):
       elif option[4:12].lower() == "uripath ":
         checks.check_uripath(option[12:])
       else:
-        checks.invalid_option(option)
+        common.invalid_option(option)
         pass
     else:
-      checks.invalid_option(option)
+      common.invalid_option(option)
       pass
 
 # eof

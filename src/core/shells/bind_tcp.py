@@ -71,7 +71,7 @@ def netcat_version(separator):
         return checks.shell_options(nc_version)
     # Invalid command
     else:
-      checks.invalid_option(nc_version)
+      common.invalid_option(nc_version)
       continue
 
   nc_alternative, shell = checks.use_bin_subdir(nc_alternative, shell)
@@ -291,7 +291,7 @@ def other_bind_shells(separator):
         return checks.shell_options(other_shell)
     # Invalid option
     else:
-      checks.invalid_option(other_shell)
+      common.invalid_option(other_shell)
       continue
 
   return other_shell
@@ -332,7 +332,7 @@ def bind_tcp_options(separator):
         return checks.shell_options(bind_tcp_option)
     # Invalid option
     else:
-      checks.invalid_option(bind_tcp_option)
+      common.invalid_option(bind_tcp_option)
       continue
 
   return bind_tcp_option
@@ -386,10 +386,10 @@ def configure_bind_tcp(separator):
         else:
           continue
       else:
-        checks.invalid_option(option)
+        common.invalid_option(option)
         pass
     else:
-      checks.invalid_option(option)
+      common.invalid_option(option)
       pass
 
 # eof
