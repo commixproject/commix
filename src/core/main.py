@@ -998,6 +998,8 @@ try:
               message = "Do you want to use URL #" + str(url_num) + " to perform tests? [Y/n] > "
               next_url = common.read_input(message, default="Y", check_batch=True)
               if next_url in settings.CHOICE_YES:
+                info_msg = "Testing URL '" + url + "'."
+                settings.print_data_to_stdout(settings.print_info_msg(info_msg))
                 break
               elif next_url in settings.CHOICE_NO:
                 perform_check = False

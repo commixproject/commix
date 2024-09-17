@@ -903,7 +903,7 @@ def continue_tests(err):
   # Ignoring (problematic) HTTP error codes.
   if len(settings.IGNORE_CODE) != 0 and any(str(x) in str(err).lower() for x in settings.IGNORE_CODE):
     return True
-    
+  
   # Possible WAF/IPS
   try:
     if (str(err.code) == settings.FORBIDDEN_ERROR or \
@@ -914,8 +914,12 @@ def continue_tests(err):
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
       settings.WAF_ENABLED = True
 
+    message = ""
+    if str(err.code) == settings.NOT_FOUND_ERROR:
+      message = "It is not recommended to continue in this kind of cases. "
+
     while True:
-      message = "Do you want to ignore the response HTTP error code '" + str(err.code)
+      message += "Do you want to ignore the response HTTP error code '" + str(err.code)
       message += "' and continue the tests? [Y/n] > "
       continue_tests = common.read_input(message, default="Y", check_batch=True)
       if continue_tests in settings.CHOICE_YES:
