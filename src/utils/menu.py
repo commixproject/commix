@@ -539,6 +539,7 @@ detection = OptionGroup(parser, Style.BRIGHT + Style.UNDERLINE + "Detection" + S
                         "used to customize the detection phase.")
 
 detection.add_option("--level",
+                type="int",
                 dest="level",
                 default=False,
                 help="Level of tests to perform (1-3, Default: " + str(settings.DEFAULT_INJECTION_LEVEL) + ").")
