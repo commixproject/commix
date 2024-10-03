@@ -731,33 +731,6 @@ def url_decode(payload):
   return payload
 
 """
-Checking connection (resolving hostname).
-"""
-def check_connection(url):
-  hostname = _urllib.parse.urlparse(url).hostname or ''
-  if not re.search(r"\A\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\Z", hostname):
-    if not any((menu.options.proxy, menu.options.tor, menu.options.offline)):
-      try:
-        if settings.VERBOSITY_LEVEL != 0:
-          debug_msg = "Resolving hostname '" + hostname + "'."
-          settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
-        socket.getaddrinfo(hostname, None)
-      except socket.gaierror:
-        err_msg = "Host '" + hostname + "' does not exist."
-        if not settings.MULTI_TARGETS:
-          settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-          raise SystemExit()
-      except socket.error:
-        err_msg = "Problem occurred while "
-        err_msg += "resolving a host name '" + hostname + "'"
-      except UnicodeError:
-        err_msg = "Problem occurred while "
-        err_msg += "handling a host name '" + hostname + "'"
-        if not settings.MULTI_TARGETS:
-          settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-          raise SystemExit()
-
-"""
 Check current assessment phase.
 """
 def assessment_phase():
@@ -1063,34 +1036,45 @@ def check_CGI_scripts(url):
         else:
           common.invalid_option(shellshock_check)
           pass
-
   if not _:
     menu.options.shellshock = False
+
+def check_url(url):
+  try:
+    return _urllib.parse.urlsplit(url)
+  except ValueError as ex:
+    err_msg = "Invalid target URL has been given. " 
+    err_msg += "Please be sure that you don't have any leftover characters (e.g. '[' or ']') "
+    err_msg += "in the hostname part."
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+    raise SystemExit()
 
 """
 Check if http / https.
 """
 def check_http_s(url):
+  url_split = check_url(url)
+  if url_split.username and url_split.password and "@" in url_split.netloc:
+    url = url.replace(url_split.netloc,url_split.netloc.split("@")[1])
+ 
   if settings.SINGLE_WHITESPACE in url:
     url = url.replace(settings.SINGLE_WHITESPACE, _urllib.parse.quote_plus(settings.SINGLE_WHITESPACE))
+
+  if not menu.options.proxy and (_urllib.parse.urlparse(url).hostname in ("localhost", "127.0.0.1") or menu.options.ignore_proxy):
+    menu.options.ignore_proxy = True
 
   if settings.CHECK_INTERNET:
       url = settings.CHECK_INTERNET_ADDRESS
   else:
-    try:
-      if re.search(r'^(?:http)s?://', url, re.I):
-        if not re.search(r"^https?://", url, re.I) and not re.search(r"^wss?://", url, re.I):
-          if re.search(r":443\b", url):
-            url = "https://" + url
-          else:
-            url = "http://" + url
-        settings.SCHEME = (_urllib.parse.urlparse(url).scheme.lower() or "http") if not menu.options.force_ssl else "https"
-      else:
-        err_msg = "Invalid target URL has been given."
-        settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-        raise SystemExit()
-    except ValueError as err:
-      err_msg = "Problem occurred while parsing target URL."
+    if re.search(r'^(?:http)s?://', url, re.I):
+      if not re.search(r"^(http|ws)s?://", url, re.I):
+        if re.search(r":443\b", url):
+          url = "https://" + url
+        else:
+          url = "http://" + url
+      settings.SCHEME = (url_split.scheme.strip().lower() or "http") if not menu.options.force_ssl else "https"
+    else:
+      err_msg = "Invalid target URL has been given. "
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
       raise SystemExit()
 
@@ -1101,6 +1085,33 @@ def check_http_s(url):
     url = url.replace(_urllib.parse.urlparse(url).scheme, settings.SCHEME)
 
   return url
+
+"""
+Checking connection (resolving hostname).
+"""
+def check_connection(url):
+  hostname = _urllib.parse.urlparse(url).hostname or ''
+  if not re.search(r"\A\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\Z", hostname):
+    if not any((menu.options.proxy, menu.options.tor, menu.options.offline)):
+      try:
+        if settings.VERBOSITY_LEVEL != 0:
+          debug_msg = "Resolving hostname '" + hostname + "'."
+          settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
+        socket.getaddrinfo(hostname, None)
+      except socket.gaierror:
+        err_msg = "Host '" + hostname + "' does not exist."
+        if not settings.MULTI_TARGETS:
+          settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+          raise SystemExit()
+      except socket.error:
+        err_msg = "Problem occurred while "
+        err_msg += "resolving a host name '" + hostname + "'"
+      except UnicodeError:
+        err_msg = "Problem occurred while "
+        err_msg += "handling a host name '" + hostname + "'"
+        if not settings.MULTI_TARGETS:
+          settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+          raise SystemExit()
 
 """
 Force the user-defined operating system.

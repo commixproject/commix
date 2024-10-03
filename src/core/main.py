@@ -702,10 +702,8 @@ try:
         raise SystemExit()
 
     if not menu.options.proxy:
-      if _urllib.parse.urlparse(menu.options.url).hostname in ("localhost", "127.0.0.1") or menu.options.ignore_proxy:
-        menu.options.ignore_proxy = True
       # Check if defined Tor (--tor option).
-      elif menu.options.tor:
+      if menu.options.tor:
         if menu.options.tor_port:
           settings.TOR_HTTP_PROXY_PORT = menu.options.tor_port
         menu.options.proxy = settings.TOR_HTTP_PROXY_IP + ":" + settings.TOR_HTTP_PROXY_PORT
