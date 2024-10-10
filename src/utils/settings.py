@@ -262,7 +262,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.0"
-REVISION = "98"
+REVISION = "99"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -549,10 +549,11 @@ EVAL_SUFFIXES_LVL3 = EVAL_SUFFIXES_LVL2 + [".\"", "\\\\", "//", ")}", "#"]
 # Raw payload (without tampering)
 RAW_PAYLOAD = ""
 
-# The default (url-ecoded) white-space.
-WHITESPACES = ["%20"]
-
+# Single whitespace
 SINGLE_WHITESPACE = " "
+
+# The default (url-ecoded) white-space.
+WHITESPACES = [_urllib.parse.quote(SINGLE_WHITESPACE)]
 
 # Reference: http://www.w3.org/Protocols/HTTP/Object_Headers.html#uri
 URI_HTTP_HEADER = "URI"

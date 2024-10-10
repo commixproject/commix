@@ -14,6 +14,7 @@ For more see the file 'readme/COPYING' for copying permission.
 """
 
 from src.utils import settings
+from src.thirdparty.six.moves import urllib as _urllib
 
 """
 About: Replaces space character ('%20') with plus ('+').
@@ -21,17 +22,18 @@ Notes: This tamper script works against all targets.
 """
 
 __tamper__ = "space2plus"
-space2plus = "+"
+space2plus = _urllib.parse.quote_plus(settings.SINGLE_WHITESPACE)
 
 if not settings.TAMPER_SCRIPTS[__tamper__]:
   settings.TAMPER_SCRIPTS[__tamper__] = True
 
 def tamper(payload):
   settings.TAMPER_SCRIPTS[__tamper__] = True
-  if settings.WHITESPACES[0] == "%20":
-    settings.WHITESPACES[0] = space2plus
-  elif space2plus not in settings.WHITESPACES:
-    settings.WHITESPACES.append(space2plus)
+  if len(settings.WHITESPACES) != 0:
+    if settings.WHITESPACES[0] == _urllib.parse.quote(settings.SINGLE_WHITESPACE):
+      settings.WHITESPACES[0] = space2plus
+    elif space2plus not in settings.WHITESPACES:
+      settings.WHITESPACES.append(space2plus)
   return payload
 
 # eof
