@@ -478,18 +478,18 @@ def http_headers_injection(url, http_request_method, filename, timesec):
   else:
     # User-Agent HTTP header injection
     if settings.USER_AGENT_INJECTION or \
-      menu.options.test_parameter and settings.USER_AGENT.lower() in menu.options.test_parameter.lower() or \
-      menu.options.skip_parameter and settings.USER_AGENT.lower() not in menu.options.skip_parameter.lower():
+      (type(menu.options.test_parameter) is str and settings.USER_AGENT.lower() in menu.options.test_parameter.lower()) or \
+      (type(menu.options.skip_parameter) is str and settings.USER_AGENT.lower() not in menu.options.skip_parameter.lower()):
       user_agent_injection(url, http_request_method, filename, timesec)
     # Referer HTTP header injection
     if settings.REFERER_INJECTION or \
-      menu.options.test_parameter and settings.REFERER.lower() in menu.options.test_parameter.lower() or \
-      menu.options.skip_parameter and settings.REFERER.lower() not in menu.options.skip_parameter.lower():
+      (type(menu.options.test_parameter) is str and settings.REFERER.lower() in menu.options.test_parameter.lower()) or \
+      (type(menu.options.skip_parameter) is str and settings.REFERER.lower() not in menu.options.skip_parameter.lower()):
       referer_injection(url, http_request_method, filename, timesec)
     # Host HTTP header injection
     if settings.HOST_INJECTION or \
-      menu.options.test_parameter and settings.HOST.lower() in menu.options.test_parameter.lower() or \
-      menu.options.skip_parameter and settings.HOST.lower() not in menu.options.skip_parameter.lower():
+      (type(menu.options.test_parameter) is str and settings.HOST.lower() in menu.options.test_parameter.lower()) or \
+      (type(menu.options.skip_parameter) is str and settings.HOST.lower() not in menu.options.skip_parameter.lower()):
       host_injection(url, http_request_method, filename, timesec)
 
 """
