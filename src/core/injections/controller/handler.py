@@ -394,7 +394,7 @@ def do_time_relative_proccess(url, timesec, filename, http_request_method, url_t
               if not settings.LOAD_SESSION:
                 shell = ""
                 checks.identified_vulnerable_param(url, technique, injection_type, vuln_parameter, payload, http_request_method, filename, export_injection_info, vp_flag, counter)
-                session_handler.import_injection_points(url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response, timesec, original_exec_time, output_length, is_vulnerable=settings.INJECTION_LEVEL)
+                session_handler.import_injection_points(url, technique, injection_type, filename, separator, shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response, timesec, original_exec_time, output_length, is_vulnerable=settings.INJECTION_LEVEL)
               else:
                 whitespace = settings.WHITESPACES[0]
               if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
@@ -643,7 +643,7 @@ def do_results_based_proccess(url, timesec, filename, http_request_method, injec
             # Export session
             if not settings.LOAD_SESSION:
               checks.identified_vulnerable_param(url, technique, injection_type, vuln_parameter, payload, http_request_method, filename, export_injection_info, vp_flag, counter)
-              session_handler.import_injection_points(url, technique, injection_type, separator, shell[0], vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response=0, timesec=0, exec_time=0, output_length=0, is_vulnerable=settings.INJECTION_LEVEL)
+              session_handler.import_injection_points(url, technique, injection_type, filename, separator, shell[0], vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response=0, timesec=0, exec_time=0, output_length=0, is_vulnerable=settings.INJECTION_LEVEL)
             else:
               whitespace = settings.WHITESPACES[0]
             cmd = maxlen =  ""
