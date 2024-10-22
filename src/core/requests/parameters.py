@@ -188,6 +188,7 @@ def vuln_GET_param(url):
   elif re.search(r"" + settings.PARAMETER_DELIMITER + r"(.*)=[\S*(\\/)]*" + settings.INJECT_TAG, url) or \
        re.search(r"\?(.*)=[\S*(\\/)]*" + settings.INJECT_TAG , url):
     pairs = url.split("?")[1].split(settings.PARAMETER_DELIMITER)
+    pairs[:] = [param for param in pairs if any(value in param for value in ["="])]
     for param in range(0,len(pairs)):
       if settings.INJECT_TAG in pairs[param]:
         vuln_parameter = pairs[param].split("=")[0]
@@ -493,6 +494,7 @@ def vuln_POST_param(parameter, url):
     if re.search(r"" + settings.PARAMETER_DELIMITER + r"(.*)=[\S*(\\/)]*" + settings.INJECT_TAG, parameter) or \
        re.search(r"(.*)=[\S*(\\/)]*" + settings.INJECT_TAG , parameter):
       pairs = parameter.split(settings.PARAMETER_DELIMITER)
+      pairs[:] = [param for param in pairs if any(value in param for value in ["="])]
       for param in range(0,len(pairs)):
         if settings.INJECT_TAG in pairs[param]:
           vuln_parameter = pairs[param].split("=")[0]
@@ -706,6 +708,7 @@ def specify_cookie_parameter(cookie):
   if re.search(r"" + settings.COOKIE_DELIMITER + r"(.*)=[\S*(\\/)]*" + settings.INJECT_TAG, cookie) or \
      re.search(r"(.*)=[\S*(\\/)]*" + settings.INJECT_TAG , cookie):
     pairs = cookie.split(settings.COOKIE_DELIMITER)
+    pairs[:] = [param for param in pairs if any(value in param for value in ["="])]
     for param in range(0,len(pairs)):
       if settings.INJECT_TAG in pairs[param]:
         vuln_parameter = pairs[param].split("=")[0]
