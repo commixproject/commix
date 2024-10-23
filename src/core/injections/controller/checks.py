@@ -114,6 +114,7 @@ def payload_fixation(payload):
   return payload
 
 """
+Get response output
 """
 def get_response(output):
   request = _urllib.request.Request(output)
@@ -3160,7 +3161,7 @@ def use_bin_subdir(nc_alternative, shell):
       return nc_alternative, shell
     elif enable_bin_subdir in settings.CHOICE_NO:
       return nc_alternative, shell
-    elif enable_bin_dir in settings.CHOICE_QUIT:
+    elif enable_bin_subdir in settings.CHOICE_QUIT:
       raise SystemExit()
     else:
       common.invalid_option(enable_bin_subdir)
