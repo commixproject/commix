@@ -33,6 +33,7 @@ The exploitation function.
 (call the injection handler)
 """
 def exploitation(url, timesec, filename, tmp_path, http_request_method, url_time_response):
+  settings.WEB_ROOT = ""
   # Check if attack is based on time delays.
   if not settings.TIME_RELATIVE_ATTACK :
     checks.time_relative_attaks_msg()

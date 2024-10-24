@@ -175,7 +175,7 @@ The main results-based command injection exploitation.
 def results_based_injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, technique):
 
   def check_injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, technique):
-    if technique == settings.INJECTION_TECHNIQUE.CLASSIC:
+    if technique == settings.INJECTION_TECHNIQUE.CLASSIC or technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
       from src.core.injections.results_based.techniques.classic import cb_payloads as payloads
     elif technique == settings.INJECTION_TECHNIQUE.DYNAMIC_CODE:
       from src.core.injections.results_based.techniques.eval_based import eb_payloads as payloads
@@ -183,12 +183,12 @@ def results_based_injection(separator, TAG, cmd, prefix, suffix, whitespace, htt
       from src.core.injections.semiblind.techniques.file_based import fb_payloads as payloads
 
     if alter_shell:
-      if technique != settings.INJECTION_TECHNIQUE.FILE_BASED:
+      if technique != settings.INJECTION_TECHNIQUE.FILE_BASED and technique != settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED:
         payload = payloads.cmd_execution_alter_shell(separator, TAG, cmd)
       else:
         payload = payloads.cmd_execution_alter_shell(separator, cmd, OUTPUT_TEXTFILE)
     else:
-      if technique != settings.INJECTION_TECHNIQUE.FILE_BASED:
+      if technique != settings.INJECTION_TECHNIQUE.FILE_BASED and technique != settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED:
         payload = payloads.cmd_execution(separator, TAG, cmd)
       else:
         payload = payloads.cmd_execution(separator, cmd, OUTPUT_TEXTFILE)
@@ -443,7 +443,7 @@ Command execution results.
 """
 def injection_results(response, TAG, cmd, technique, url, OUTPUT_TEXTFILE, timesec):
 
-  if technique == settings.INJECTION_TECHNIQUE.CLASSIC:
+  if technique == settings.INJECTION_TECHNIQUE.CLASSIC or technique == settings.INJECTION_TECHNIQUE.TIME_BASED or technique == settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED:
     try:
       import html
       unescape = html.unescape

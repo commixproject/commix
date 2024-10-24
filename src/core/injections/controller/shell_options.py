@@ -50,7 +50,7 @@ Execute the bind / reverse TCP shell
 def execute_shell(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, os_shell_option, timesec, payload, OUTPUT_TEXTFILE, technique):
 
   if technique == settings.INJECTION_TECHNIQUE.DYNAMIC_CODE:
-    from src.core.injections.results_based.techniques.eval_based import eb_injector as injection
+    from src.core.injections.results_based.techniques.eval_based import eb_injector as injector
     # Command execution results.
     start = time.time()
     response = injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, technique)
@@ -61,9 +61,9 @@ def execute_shell(separator, TAG, cmd, prefix, suffix, whitespace, http_request_
   else:
     # Command execution results.
     start = time.time()
-    if technique == settings.INJECTION_TECHNIQUE.FILE_BASED:
+    if technique == settings.INJECTION_TECHNIQUE.FILE_BASED or technique == settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED:
       from src.core.injections.semiblind.techniques.file_based import fb_injector as injector
-      response = injector.injection(separator, payload, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, technique)
+      response = injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, technique)
     else:
       from src.core.injections.results_based.techniques.classic import cb_injector as injector
       whitespace = settings.WHITESPACES[0]
