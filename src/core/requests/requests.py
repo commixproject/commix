@@ -261,6 +261,7 @@ def estimate_response_time(url, timesec, http_request_method):
 Exceptions regarding requests failure(s)
 """
 def request_failed(err_msg):
+
   settings.VALID_URL = False
 
   try:

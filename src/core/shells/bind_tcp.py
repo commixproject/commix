@@ -323,6 +323,8 @@ def bind_tcp_options(separator):
     # Option 2 - Other (Netcat-Without-Netcat) shells
     elif bind_tcp_option == '2' :
       bind_tcp_option = other_bind_shells(separator)
+      if settings.EVAL_BASED_STATE != False:
+        bind_tcp_option = bind_tcp_option.replace("$","\\$")
       if bind_tcp_option.lower() not in settings.SHELL_OPTIONS:
         checks.shell_success("bind")
         break
