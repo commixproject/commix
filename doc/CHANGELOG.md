@@ -1,4 +1,5 @@
 ## Version 4.0 (TBA)
+* Revised: Improvements regarding shell options `reverse_tcp`, `bind_tcp`.
 * Revised: Major code refactoring regarding session handler.
 * Revised: Minor improvement regarding options `--prefix`, `--suffix`.
 * Revised: Improvement regarding writing text to the stdout (console) stream.

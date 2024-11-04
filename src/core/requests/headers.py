@@ -163,6 +163,8 @@ def check_http_traffic(request):
   response = False
   unauthorized = False
   while not _ and settings.TOTAL_OF_REQUESTS <= settings.MAX_RETRIES and unauthorized is False:
+    if any((settings.REVERSE_TCP, settings.BIND_TCP)):
+      _ = True
     if settings.MULTI_TARGETS:
       if settings.INIT_TEST == True and len(settings.MULTI_ENCODED_PAYLOAD) != 0:
         settings.MULTI_ENCODED_PAYLOAD = []

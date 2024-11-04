@@ -27,24 +27,6 @@ from src.thirdparty.six.moves import urllib as _urllib
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 """
-Check for established connection
-"""
-def check_established_connection():
-  while True:
-    time.sleep(1)
-    if settings.VERBOSITY_LEVEL == 1:
-      settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
-    warn_msg = "Something went wrong with the reverse TCP connection."
-    warn_msg += " Please wait while checking state."
-    settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
-    lines = os.popen('netstat -anta').read().split("\n")
-    for line in lines:
-      if settings.LHOST + ":" + settings.LPORT in line and "ESTABLISHED" in line:
-        pass
-      else:
-        return
-
-"""
 Execute the bind / reverse TCP shell
 """
 def execute_shell(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, os_shell_option, timesec, payload, OUTPUT_TEXTFILE, technique):
@@ -74,15 +56,6 @@ def execute_shell(separator, TAG, cmd, prefix, suffix, whitespace, http_request_
     diff = end - start
     # Evaluate injection results.
     shell = injector.injection_results(response, TAG, cmd, technique, url, OUTPUT_TEXTFILE, timesec)
-
-  if settings.REVERSE_TCP and (int(diff) > 0 and int(diff) < 6):
-    check_established_connection()
-  # else:
-  #   if settings.VERBOSITY_LEVEL == 1:
-  #     settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
-  err_msg = "The " + os_shell_option.split("_")[0] + " "
-  err_msg += os_shell_option.split("_")[1].upper() + " connection has failed."
-  settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
 
 """
 Configure the bind TCP shell

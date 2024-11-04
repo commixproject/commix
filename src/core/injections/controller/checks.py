@@ -370,9 +370,9 @@ def connection_exceptions(err_msg):
   settings.TOTAL_OF_REQUESTS = settings.TOTAL_OF_REQUESTS + 1
   if settings.MAX_RETRIES > 1:
     time.sleep(settings.DELAY_RETRY)
-    if not settings.MULTI_TARGETS and not settings.CRAWLING:
-      info_msg = settings.APPLICATION.capitalize() + " is going to retry the request(s)."
-      settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+    if not any((settings.MULTI_TARGETS, settings.CRAWLING,settings.REVERSE_TCP,settings.BIND_TCP)):
+      warn_msg = settings.APPLICATION.capitalize() + " is going to retry the request(s)."
+      settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
   if not settings.VALID_URL :
     if settings.TOTAL_OF_REQUESTS == settings.MAX_RETRIES and not settings.MULTI_TARGETS:
       raise SystemExit()
@@ -3048,7 +3048,12 @@ def time_relative_export_injection_results(cmd, separator, output, check_exec_ti
 Success msg.
 """
 def shell_success(option):
-  info_msg = "Everything is in place. Cross your fingers and check for " + option + " shell on port " + settings.LPORT + "."
+  info_msg = "Sending payload to target, for " + option + " TCP connection "
+  if settings.BIND_TCP:
+    info_msg += "against " + settings.RHOST 
+  else:
+    info_msg += "on " + settings.LHOST 
+  info_msg += ":" + settings.LPORT + "."
   settings.print_data_to_stdout(settings.print_info_msg(info_msg))
 
 """

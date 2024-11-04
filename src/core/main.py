@@ -562,12 +562,15 @@ def main(filename, url, http_request_method):
 
   # Accidental stop / restart of the target host server.
   except (_http_client.BadStatusLine, SocketError) as err_msg:
-    if settings.VERBOSITY_LEVEL != 0:
-      settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
-    err_msg = "The target host is not responding."
-    err_msg += " Please ensure that is up and try again."
-    settings.print_data_to_stdout("\n" + settings.print_critical_msg(err_msg))
+    if any((settings.REVERSE_TCP, settings.BIND_TCP)):
+      err_msg = "Connection failed to be established."
+    else:
+      err_msg = "The target host is not responding."
+      err_msg += " Please ensure that is up and try again."
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     logs.print_logs_notification(filename, url)
+    if any((settings.REVERSE_TCP, settings.BIND_TCP)):
+      raise SystemExit()
 
 try:
   filename = ""
