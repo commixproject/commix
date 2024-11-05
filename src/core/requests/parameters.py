@@ -724,6 +724,9 @@ def specify_cookie_parameter(cookie):
         break
   else:
     vuln_parameter = cookie
+
+  if 'vuln_parameter' not in locals():
+    return cookie
     
   return vuln_parameter
 
