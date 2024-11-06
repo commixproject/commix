@@ -106,10 +106,11 @@ try:
 except NameError:
     from sets import Set as set
 
-try:
-    import sgmllib
-except ImportError:
-    from src.utils import sgmllib
+from src.utils import sgmllib
+# try:
+#     import sgmllib
+# except ImportError:
+#     from src.utils import sgmllib
 
 try:
     import markupbase
