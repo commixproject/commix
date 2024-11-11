@@ -73,7 +73,7 @@ def logfile_parser():
 
   try:
     if os.stat(request_file).st_size != 0:
-      with open(request_file, 'r') as file:
+      with open(request_file, encoding=settings.DEFAULT_CODEC) as file:
         request = file.read()
     else:
       invalid_data(request_file)
