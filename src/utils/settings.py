@@ -262,7 +262,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.0"
-REVISION = "113"
+REVISION = "114"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -509,15 +509,14 @@ SEPARATORS_LVL3 = SEPARATORS_LVL2 = SEPARATORS_LVL1
 # The command injection prefixes.
 PREFIXES = []
 PREFIXES_LVL1 = [""]
-PREFIXES_LVL2 = SEPARATORS_LVL1
+PREFIXES_LVL2 = PREFIXES_LVL1 + SEPARATORS_LVL1
 PREFIXES_LVL3 = PREFIXES_LVL2 + ["'", "\""]
 
 # The command injection suffixes.
 SUFFIXES = []
 SUFFIXES_LVL1 = [""]
-SUFFIXES_LVL2 = SEPARATORS_LVL1
+SUFFIXES_LVL2 = SUFFIXES_LVL1 + SEPARATORS_LVL1
 SUFFIXES_LVL3 = SUFFIXES_LVL2 + ["'", "\"", " #", "//", "\\\\"]
-
 
 # Bad combination of prefix and separator
 JUNK_COMBINATION = [SEPARATORS_LVL1[i] + SEPARATORS_LVL1[j] for i in range(len(SEPARATORS_LVL1)) for j in range(len(SEPARATORS_LVL1))]
