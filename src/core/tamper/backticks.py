@@ -28,7 +28,7 @@ if not settings.TAMPER_SCRIPTS[__tamper__]:
 def tamper(payload):
   settings.TAMPER_SCRIPTS[__tamper__] = True
   settings.USE_BACKTICKS = True
-  payload = payload.replace("$((", "`expr ").replace("))", "`")
+  payload = payload.replace("$((", "`expr" + settings.WHITESPACES[0]).replace("))", "`")
   return payload
 
 # eof
