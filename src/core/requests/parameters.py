@@ -207,6 +207,9 @@ def vuln_GET_param(url):
   else:
     vuln_parameter = url
 
+  if 'vuln_parameter' not in locals():
+    return url
+
   if settings.USER_DEFINED_POST_DATA and vuln_parameter:
     settings.IGNORE_USER_DEFINED_POST_DATA = True
 
