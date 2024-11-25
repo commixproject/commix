@@ -415,7 +415,7 @@ def not_declared_cookies(response):
           else:
             common.invalid_option(set_cookies)
             pass
-  except (KeyError, TypeError):
+  except (AttributeError, KeyError, TypeError):
     pass
 
 """
