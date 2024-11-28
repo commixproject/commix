@@ -737,52 +737,63 @@ def specify_cookie_parameter(cookie):
 The user-agent based injection.
 """
 def specify_user_agent_parameter(user_agent):
-  header_name = settings.USER_AGENT
-  settings.TESTABLE_VALUE = checks.process_custom_injection_data(user_agent).replace(settings.ASTERISK_MARKER, settings.INJECT_TAG)
-  if settings.CUSTOM_INJECTION_MARKER and settings.INJECT_TAG in settings.TESTABLE_VALUE:
-    settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST.append(header_name) if header_name not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST
-    settings.TESTABLE_PARAMETERS_LIST.append(user_agent) if header_name not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.TESTABLE_PARAMETERS_LIST
-    settings.PRE_CUSTOM_INJECTION_MARKER_CHAR = settings.TESTABLE_VALUE.split(settings.INJECT_TAG)[0]
-    settings.POST_CUSTOM_INJECTION_MARKER_CHAR = settings.TESTABLE_VALUE.split(settings.INJECT_TAG)[1]
+  try:
+    header_name = settings.USER_AGENT
+    settings.TESTABLE_VALUE = checks.process_custom_injection_data(user_agent).replace(settings.ASTERISK_MARKER, settings.INJECT_TAG)
+    if settings.CUSTOM_INJECTION_MARKER and settings.INJECT_TAG in settings.TESTABLE_VALUE:
+      settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST.append(header_name) if header_name not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST
+      settings.TESTABLE_PARAMETERS_LIST.append(user_agent) if header_name not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.TESTABLE_PARAMETERS_LIST
+      settings.PRE_CUSTOM_INJECTION_MARKER_CHAR = settings.TESTABLE_VALUE.split(settings.INJECT_TAG)[0]
+      settings.POST_CUSTOM_INJECTION_MARKER_CHAR = settings.TESTABLE_VALUE.split(settings.INJECT_TAG)[1]
+  except AttributeError:
+    pass
   return user_agent
 
 """
 The referer based injection.
 """
 def specify_referer_parameter(referer):
-  header_name = settings.REFERER
-  settings.TESTABLE_VALUE = checks.process_custom_injection_data(referer).replace(settings.ASTERISK_MARKER, settings.INJECT_TAG)
-  if settings.CUSTOM_INJECTION_MARKER and settings.INJECT_TAG in settings.TESTABLE_VALUE:
-    settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST.append(header_name) if header_name not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST
-    settings.TESTABLE_PARAMETERS_LIST.append(referer) if header_name not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.TESTABLE_PARAMETERS_LIST
-    settings.PRE_CUSTOM_INJECTION_MARKER_CHAR = settings.TESTABLE_VALUE.split(settings.INJECT_TAG)[0]
-    settings.POST_CUSTOM_INJECTION_MARKER_CHAR = settings.TESTABLE_VALUE.split(settings.INJECT_TAG)[1]
+  try:
+    header_name = settings.REFERER
+    settings.TESTABLE_VALUE = checks.process_custom_injection_data(referer).replace(settings.ASTERISK_MARKER, settings.INJECT_TAG)
+    if settings.CUSTOM_INJECTION_MARKER and settings.INJECT_TAG in settings.TESTABLE_VALUE:
+      settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST.append(header_name) if header_name not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST
+      settings.TESTABLE_PARAMETERS_LIST.append(referer) if header_name not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.TESTABLE_PARAMETERS_LIST
+      settings.PRE_CUSTOM_INJECTION_MARKER_CHAR = settings.TESTABLE_VALUE.split(settings.INJECT_TAG)[0]
+      settings.POST_CUSTOM_INJECTION_MARKER_CHAR = settings.TESTABLE_VALUE.split(settings.INJECT_TAG)[1]
+  except AttributeError:
+    pass
   return referer
 
 """
 The host based injection.
 """
 def specify_host_parameter(host):
-  header_name = settings.HOST
-  settings.TESTABLE_VALUE = checks.process_custom_injection_data(host).replace(settings.ASTERISK_MARKER, settings.INJECT_TAG)
-  if settings.CUSTOM_INJECTION_MARKER and settings.INJECT_TAG in settings.TESTABLE_VALUE:
-    settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST.append(header_name) if header_name not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST
-    settings.TESTABLE_PARAMETERS_LIST.append(host) if header_name not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.TESTABLE_PARAMETERS_LIST
-    settings.PRE_CUSTOM_INJECTION_MARKER_CHAR = settings.TESTABLE_VALUE.split(settings.INJECT_TAG)[0]
-    settings.POST_CUSTOM_INJECTION_MARKER_CHAR = settings.TESTABLE_VALUE.split(settings.INJECT_TAG)[1]
+  try:
+    header_name = settings.HOST
+    settings.TESTABLE_VALUE = checks.process_custom_injection_data(host).replace(settings.ASTERISK_MARKER, settings.INJECT_TAG)
+    if settings.CUSTOM_INJECTION_MARKER and settings.INJECT_TAG in settings.TESTABLE_VALUE:
+      settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST.append(header_name) if header_name not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST
+      settings.TESTABLE_PARAMETERS_LIST.append(host) if header_name not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.TESTABLE_PARAMETERS_LIST
+      settings.PRE_CUSTOM_INJECTION_MARKER_CHAR = settings.TESTABLE_VALUE.split(settings.INJECT_TAG)[0]
+      settings.POST_CUSTOM_INJECTION_MARKER_CHAR = settings.TESTABLE_VALUE.split(settings.INJECT_TAG)[1]
+  except AttributeError:
+    pass
   return host
 
 """
 The Custom http header based injection.
 """
 def specify_custom_header_parameter(header_name):
-  header_name = settings.CUSTOM_HEADER_NAME
-  if settings.CUSTOM_INJECTION_MARKER:
-    settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST.append(header_name) if header_name not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST
-    settings.TESTABLE_PARAMETERS_LIST.append(vuln_parameter) if header_name not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.TESTABLE_PARAMETERS_LIST
-    settings.PRE_CUSTOM_INJECTION_MARKER_CHAR = settings.CUSTOM_HEADER_VALUE.split(settings.INJECT_TAG)[0]
-    settings.POST_CUSTOM_INJECTION_MARKER_CHAR = settings.CUSTOM_HEADER_VALUE.split(settings.INJECT_TAG)[1]
-
+  try:
+    header_name = settings.CUSTOM_HEADER_NAME
+    if settings.CUSTOM_INJECTION_MARKER:
+      settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST.append(header_name) if header_name not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST
+      settings.TESTABLE_PARAMETERS_LIST.append(vuln_parameter) if header_name not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.TESTABLE_PARAMETERS_LIST
+      settings.PRE_CUSTOM_INJECTION_MARKER_CHAR = settings.CUSTOM_HEADER_VALUE.split(settings.INJECT_TAG)[0]
+      settings.POST_CUSTOM_INJECTION_MARKER_CHAR = settings.CUSTOM_HEADER_VALUE.split(settings.INJECT_TAG)[1]
+  except AttributeError:
+    pass
   return header_name
 
 # eof
