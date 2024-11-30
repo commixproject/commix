@@ -397,6 +397,7 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
         if checks.procced_with_file_based_technique():
           menu.options.tech = "f"
 
+      settings.START_SCANNING = True
       classic_command_injection_technique(url, timesec, filename, http_request_method)
       dynamic_code_evaluation_technique(url, timesec, filename, http_request_method)
       timebased_command_injection_technique(url, timesec, filename, http_request_method, url_time_response)

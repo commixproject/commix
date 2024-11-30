@@ -262,7 +262,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.0"
-REVISION = "118"
+REVISION = "119"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -575,6 +575,9 @@ HTTP_HEADER_INJECTION_LEVEL = 3
 INJECTION_LEVEL = 0
 USER_APPLIED_LEVEL = False
 PERFORM_BASIC_SCANS = True
+
+# Start scanning state
+START_SCANNING = None
 
 # Default Temp Directory
 TMP_PATH = ""
