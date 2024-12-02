@@ -376,17 +376,13 @@ def request_failed(err_msg):
     return False
 
   elif settings.IGNORE_ERR_MSG == False:
-    # if menu.options.skip_heuristics and settings.VERBOSITY_LEVEL == 0:
-    #   settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
     continue_tests = checks.continue_tests(err_msg)
-    if continue_tests == True:
+    if continue_tests:
       settings.IGNORE_ERR_MSG = True
-      return True
     else:
       if not settings.CRAWLING:
         raise SystemExit()
-      else:
-        return False
+    return False
 
   else:
     if settings.VERBOSITY_LEVEL >= 1:
