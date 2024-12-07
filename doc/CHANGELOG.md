@@ -1,4 +1,5 @@
 ## Version 4.0 (TBA)
+* Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
 * Revised: Minor bug-fix regarding tamper script "backticks.py"
 * Revised: Improvements regarding shell options `reverse_tcp`, `bind_tcp`.
 * Revised: Major code refactoring regarding session handler.
