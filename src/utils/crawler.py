@@ -102,27 +102,29 @@ def normalize_results(output_href):
 Store crawling results to a temporary file.
 """
 def store_crawling(output_href):
-  while True:
-    message = "Do you want to store crawling results to a temporary file "
-    message += "(for eventual further processing with other tools)? [y/N] > "
-    message = common.read_input(message, default="N", check_batch=True)
-    if message in settings.CHOICE_YES:
-      filename = tempfile.mkstemp(suffix=settings.OUTPUT_FILE_EXT)[1]
-      info_msg = "Writing crawling results to a temporary file '" + str(filename) + "'."
-      settings.print_data_to_stdout(settings.print_info_msg(info_msg))
-      with open(filename, "a") as crawling_results:
-        for url in output_href:
-          crawling_results.write(url.encode(settings.DEFAULT_CODEC).decode() + "\n")
-      return
-    elif message in settings.CHOICE_NO:
-      return
-    elif message in settings.CHOICE_QUIT:
-      raise SystemExit()
-    else:
-      common.invalid_option(message)
-      pass
-
-
+  try:
+    while True:
+      message = "Do you want to store crawling results to a temporary file "
+      message += "(for eventual further processing with other tools)? [y/N] > "
+      message = common.read_input(message, default="N", check_batch=True)
+      if message in settings.CHOICE_YES:
+        filename = tempfile.mkstemp(suffix=settings.OUTPUT_FILE_EXT)[1]
+        info_msg = "Writing crawling results to a temporary file '" + str(filename) + "'."
+        settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+        with open(filename, "a") as crawling_results:
+          for url in output_href:
+            crawling_results.write(url.encode(settings.DEFAULT_CODEC).decode() + "\n")
+        return
+      elif message in settings.CHOICE_NO:
+        return
+      elif message in settings.CHOICE_QUIT:
+        raise SystemExit()
+      else:
+        common.invalid_option(message)
+        pass
+  except:
+    pass
+    
 """
 Check for URLs in sitemap.xml.
 """
