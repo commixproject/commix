@@ -1,4 +1,4 @@
-## Version 4.0 (TBA)
+## Version 4.0 (2024-12-20)
 * Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
 * Revised: Minor bug-fix regarding tamper script "backticks.py"
 * Revised: Improvements regarding shell options `reverse_tcp`, `bind_tcp`.
@@ -23,6 +23,8 @@
 * Revised: Improvement regarding option `--ignore-code` for ignoring multiple (problematic) HTTP error codes.
 * Added: New option `--abort-code` for aborting on (problematic) HTTP error code(s) (e.g. 401)
 * Added: New option `--time-limit` for running with a time limit in seconds (e.g. 3600).
+
+_Note: For more check the [detailed changeset](https://github.com/commixproject/commix/compare/v3.9...v4.0)._
 
 ## Version 3.9 (2024-01-19)
 * Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.

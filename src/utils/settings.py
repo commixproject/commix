@@ -263,7 +263,7 @@ DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.0"
 REVISION = "121"
-STABLE_RELEASE = False
+STABLE_RELEASE = True
 VERSION = "v"
 if STABLE_RELEASE:
   VERSION = VERSION + VERSION_NUM + "-stable"
