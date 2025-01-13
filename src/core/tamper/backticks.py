@@ -13,7 +13,9 @@ the Free Software Foundation, either version 3 of the License, or
 For more see the file 'readme/COPYING' for copying permission.
 """
 
+from src.utils import menu
 from src.utils import settings
+
 
 """
 About: Uses backticks instead of "$()" for commands substitution on the generated payloads.
@@ -27,8 +29,9 @@ if not settings.TAMPER_SCRIPTS[__tamper__]:
 
 def tamper(payload):
   settings.TAMPER_SCRIPTS[__tamper__] = True
-  settings.USE_BACKTICKS = True
-  payload = payload.replace("$((", "`expr" + settings.WHITESPACES[0]).replace("))", "`")
+  if not menu.options.alter_shell and not settings.TARGET_OS == settings.OS.WINDOWS:
+    settings.USE_BACKTICKS = True
+    settings.CMD_SUB_PREFIX = settings.CMD_SUB_SUFFIX = "`"
   return payload
 
 # eof

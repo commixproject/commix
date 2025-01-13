@@ -40,6 +40,26 @@ Command Injection and exploitation controller.
 Checks if the testable parameter is exploitable.
 """
 
+"""
+Heuristic basic checks payloads generator
+"""
+def basic_payload_generator():
+  suffix = ""
+  if settings.USE_BACKTICKS:
+    prefix = "expr "
+  else:
+    prefix = "("
+    suffix = ")"
+  settings.BASIC_STRING = prefix + settings.CALC_STRING + suffix
+  settings.BASIC_COMMAND_INJECTION_PAYLOADS = [";echo " + settings.CMD_SUB_PREFIX + settings.BASIC_STRING + settings.CMD_SUB_SUFFIX + 
+                                              "%26echo " + settings.CMD_SUB_PREFIX + settings.BASIC_STRING + settings.CMD_SUB_SUFFIX + 
+                                              "|echo " + settings.CMD_SUB_PREFIX + settings.BASIC_STRING + settings.CMD_SUB_SUFFIX + 
+                                              settings.RANDOM_STRING_GENERATOR,
+                                              "|set /a " + settings.BASIC_STRING + "%26set /a " + settings.BASIC_STRING
+                                              ]
+"""
+Initializing basic level check status
+"""
 def basic_level_checks():
   settings.TIME_RELATIVE_ATTACK = False
   settings.SKIP_CODE_INJECTIONS = None
@@ -134,13 +154,15 @@ Heuristic (basic) tests for command injection
 """
 def command_injection_heuristic_basic(url, http_request_method, check_parameter, the_type, header_name, inject_http_headers):
   check_parameter = check_parameter.lstrip().rstrip()
+  checks.perform_payload_modification(payload="")
+  basic_payload_generator()
   if menu.options.alter_shell:
     basic_payloads = settings.ALTER_SHELL_BASIC_COMMAND_INJECTION_PAYLOADS
   else:
     basic_payloads = settings.BASIC_COMMAND_INJECTION_PAYLOADS
   settings.CLASSIC_STATE = True
   try:
-    checks.perform_payload_modification(payload="")
+    # checks.perform_payload_modification(payload="")
     for whitespace in settings.WHITESPACES:
       if not settings.IDENTIFIED_COMMAND_INJECTION:
         _ = 0
@@ -733,12 +755,6 @@ def do_check(url, http_request_method, filename):
       if not menu.options.tech or "t" in menu.options.tech or "f" in menu.options.tech:
         warn_msg = "It is highly recommended to avoid usage of switch '--tor' for "
         warn_msg += "time-based injections because of inherent high latency time."
-        settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
-
-    # Check for "backticks" tamper script.
-    if settings.USE_BACKTICKS == True:
-      if not menu.options.tech or "e" in menu.options.tech or "t" in menu.options.tech or "f" in menu.options.tech:
-        warn_msg = "Commands substitution using backtics is only supported by the (results-based) classic command injection technique. "
         settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
     perform_checks(url, http_request_method, filename)

@@ -1502,6 +1502,8 @@ def tamper_scripts(stored_tamper_scripts):
       if "hexencode" or "base64encode" == script:
         settings.MULTI_ENCODED_PAYLOAD.append(script)
       import_script = str(settings.TAMPER_SCRIPTS_PATH + script + ".py").replace("/",".").split(".py")[0]
+      if not stored_tamper_scripts:
+        settings.print_data_to_stdout(settings.SUB_CONTENT_SIGN + import_script.split(".")[-1])
       warn_msg = ""
       if settings.EVAL_BASED_STATE != False and script in settings.EVAL_NOT_SUPPORTED_TAMPER_SCRIPTS:
         warn_msg = "The dynamic code evaluation technique does "
@@ -1509,13 +1511,15 @@ def tamper_scripts(stored_tamper_scripts):
         warn_msg = "Windows targets do "
       elif settings.TARGET_OS != settings.OS.WINDOWS and script in settings.UNIX_NOT_SUPPORTED_TAMPER_SCRIPTS:
         warn_msg = "Unix-like targets do "
+      elif "backticks" == script and menu.options.alter_shell:
+          warn_msg = "Option '--alter-shell' "
       if len(warn_msg) != 0:
         if not stored_tamper_scripts:
           warn_msg = warn_msg + "not support the usage of '" + script + ".py'. Skipping tamper script."
           settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
       else:
-        if not stored_tamper_scripts:
-          settings.print_data_to_stdout(settings.SUB_CONTENT_SIGN + import_script.split(".")[-1])
+        # if not stored_tamper_scripts:
+        #   settings.print_data_to_stdout(settings.SUB_CONTENT_SIGN + import_script.split(".")[-1])
         try:
           module = __import__(import_script, fromlist=[None])
           if not hasattr(module, "__tamper__"):

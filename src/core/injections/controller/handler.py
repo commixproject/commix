@@ -311,15 +311,15 @@ def do_time_relative_proccess(url, timesec, filename, http_request_method, url_t
 
                       if settings.TARGET_OS == settings.OS.WINDOWS:
                         if alter_shell:
-                          if technique == settings.INJECTION_TECHNIQUE.TIME_BASED: 
-                            cmd = settings.WIN_PYTHON_INTERPRETER + "python.exe -c \"print (" + str(randv1) + " + " + str(randv2) + ")\""
-                          else:
-                            cmd = settings.WIN_PYTHON_INTERPRETER + " -c \"print (" + str(randv1) + " + " + str(randv2) + ")\""
+                          # if technique == settings.INJECTION_TECHNIQUE.TIME_BASED: 
+                          #   cmd = settings.WIN_PYTHON_INTERPRETER + "python.exe -c \"print (" + str(randv1) + " + " + str(randv2) + ")\""
+                          # else:
+                          cmd = settings.WIN_PYTHON_INTERPRETER + " -c \"print (" + str(randv1) + " + " + str(randv2) + ")\""
                         else:
                           rand_num = randv1 + randv2
                           cmd = "powershell.exe -InputFormat none write (" + str(rand_num) + ")"
                       else:
-                        if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
+                        if technique == settings.INJECTION_TECHNIQUE.TIME_BASED or technique == settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED:
                           cmd = "expr " + str(randv1) + " %2B " + str(randv2) + ""
                         else:
                           cmd = "echo $((" + str(randv1) + " %2B " + str(randv2) + "))"

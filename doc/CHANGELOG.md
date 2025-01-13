@@ -1,3 +1,6 @@
+## Version 4.1 (TBA)
+* Revised: Improvement regarding tamper script "backticks.py" for supporting time-related techniques (i.e. "time-based", "tempfile-based").
+
 ## Version 4.0 (2024-12-20)
 * Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
 * Revised: Minor bug-fix regarding tamper script "backticks.py"
