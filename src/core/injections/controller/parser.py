@@ -124,7 +124,7 @@ def logfile_parser():
   scheme = "http://"
 
   for line in request_headers:
-    if re.findall(r"" + settings.HOST + ":" + " (.*)", line):
+    if re.findall(r"^" + settings.HOST + ":" + " (.*)", line):
       menu.options.host = "".join([str(i) for i in re.findall(r"" + settings.HOST + ":" + " (.*)", line)])
     # User-Agent Header
     if re.findall(r"" + settings.USER_AGENT + ":" + " (.*)", line):
