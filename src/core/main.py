@@ -420,6 +420,7 @@ def main(filename, url, http_request_method):
       else:
         menu.options.tech = ''.join([str(x) for x in settings.AVAILABLE_TECHNIQUES])
 
+    menu.options.tech = menu.options.tech.lower()
     # Check for skipping injection techniques.
     if menu.options.skip_tech:
       # Convert injection technique(s) to lowercase
