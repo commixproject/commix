@@ -38,6 +38,7 @@ def exploitation(url, timesec, filename, http_request_method, url_time_response,
     checks.time_relative_attaks_msg()
     settings.TIME_RELATIVE_ATTACK = True
 
+  tmp_path = ""
   if url_time_response >= settings.SLOW_TARGET_RESPONSE:
     warn_msg = "It is highly recommended, due to serious response delays, "
     warn_msg += "to skip the time-based (blind) technique and to continue "
@@ -51,18 +52,17 @@ def exploitation(url, timesec, filename, http_request_method, url_time_response,
       proceed_option = common.read_input(message, default="C", check_batch=True)
       if proceed_option.lower() in settings.CHOICE_PROCEED :
         if proceed_option.lower() == "c":
-          if tb_injection_handler(url, timesec, filename, http_request_method, url_time_response, injection_type, technique) == False:
+          if tb_injection_handler(url, timesec, filename, http_request_method, url_time_response, injection_type, technique, tmp_path) == False:
             return False
         elif proceed_option.lower() == "s":
           from src.core.injections.semiblind.techniques.file_based import fb_handler
-          fb_handler.exploitation(url, timesec, filename, http_request_method, url_time_response, injection_type, technique)
+          fb_handler.exploitation(url, timesec, filename, http_request_method, url_time_response, injection_type, technique, tmp_path)
         elif proceed_option.lower() == "q":
           raise SystemExit()
       else:
         common.invalid_option(proceed_option)
         pass
   else:
-    tmp_path = ""
     if tb_injection_handler(url, timesec, filename, http_request_method, url_time_response, injection_type, technique, tmp_path) == False:
       settings.TIME_RELATIVE_ATTACK = False
       return False
