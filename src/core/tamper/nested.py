@@ -25,34 +25,22 @@ Notes: This tamper script works against Unix-like target(s).
 
 __tamper__ = "nested"
 
-if not settings.TAMPER_SCRIPTS[__tamper__]:
-  settings.TAMPER_SCRIPTS[__tamper__] = True
-
-double_quote = "\""
-def tamper(payload):
-  def nested(payload):
-    if settings.TARGET_OS != settings.OS.WINDOWS:
-      settings.TAMPER_SCRIPTS[__tamper__] = True
-      if not menu.options.prefix and not menu.options.suffix:
-        payload = double_quote + payload + double_quote
-      else:
-        if menu.options.prefix and menu.options.prefix != double_quote:
-          menu.options.prefix = menu.options.prefix + double_quote
-        else:
-          menu.options.prefix = double_quote
-
-        if menu.options.suffix and menu.options.suffix != double_quote:
-          menu.options.suffix = menu.options.suffix + double_quote
-        else:
-          menu.options.suffix = double_quote
-      return payload
-
-  if settings.TARGET_OS != settings.OS.WINDOWS:
-    if settings.EVAL_BASED_STATE != False:
-      return payload
-    else:
-      return nested(payload)
+def nested():
+  if menu.options.prefix:
+    menu.options.prefix = "\"" + menu.options.prefix 
   else:
-    return payload
+    menu.options.prefix = "\""
+  if menu.options.suffix: 
+    menu.options.suffix = menu.options.suffix + "\""
+  else:
+    menu.options.suffix = "\""
+
+if not settings.TAMPER_SCRIPTS[__tamper__]:
+  if settings.TARGET_OS != settings.OS.WINDOWS:
+    settings.TAMPER_SCRIPTS[__tamper__] = True
+    nested()
+
+def tamper(payload):
+  return payload
 
 # eof
