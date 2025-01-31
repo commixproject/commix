@@ -222,6 +222,7 @@ def cmd_execution_alter_shell(separator, TAG, cmd):
                     separator + "echo '" + TAG + "'`)%3B"
                   )
   else:
+    settings.USER_APPLIED_CMD = cmd
     if separator == "":
       payload = ("print(`echo " + TAG + "`." +
                   "`echo " + TAG + "`." +

