@@ -32,7 +32,9 @@ def tamper(payload):
   if not menu.options.alter_shell and not settings.TARGET_OS == settings.OS.WINDOWS:
     settings.USE_BACKTICKS = True
     settings.CMD_SUB_PREFIX = settings.CMD_SUB_SUFFIX = "`"
-    payload = payload.replace("${#str}", settings.CMD_SUB_PREFIX + "expr" + settings.WHITESPACES[0] + "length" + settings.WHITESPACES[0] + "\"$str\"" + settings.CMD_SUB_SUFFIX)
+    payload = payload.replace("${#" + settings.RANDOM_VAR_GENERATOR + "}", 
+                              settings.CMD_SUB_PREFIX + "expr" + settings.WHITESPACES[0] + "length" + settings.WHITESPACES[0] + "\"$" + settings.RANDOM_VAR_GENERATOR + "\"" + settings.CMD_SUB_SUFFIX
+                              )
   return payload
 
 # eof

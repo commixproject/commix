@@ -262,7 +262,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.1"
-REVISION = "8"
+REVISION = "9"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -287,6 +287,8 @@ LEGAL_DISCLAIMER_MSG = "Usage of " + APPLICATION + " for attacking targets witho
 
 # Random string generator
 RANDOM_STRING_GENERATOR = ''.join(random.choice(string.ascii_uppercase + string.digits + string.ascii_lowercase) for _ in range(10))
+# Random variable name
+RANDOM_VAR_GENERATOR = ''.join(random.choice(string.ascii_uppercase) for _ in range(3))
 
 START_TIME = time.time()
 
@@ -1154,9 +1156,9 @@ IGNORE_TAMPER_TRANSFORMATION = [
                   "then",
                   "else",
                   "fi",
-                  "str",
-                  "cmd",
-                  "char"
+                  RANDOM_VAR_GENERATOR,
+                  RANDOM_VAR_GENERATOR + "1",
+                  RANDOM_VAR_GENERATOR + "2"
 ]
 
 # HTTP Errors
