@@ -72,6 +72,7 @@
 * Thanks [pomil-1969](https://github.com/pomil-1969) for reporting a bug.
 * Thanks [powercrypt](https://github.com/powercrypt) for reporting a few bugs.
 * Thanks [prince74igor](https://github.com/prince74igor) for suggesting an enhancement.
+* Thanks [raeph123](https://github.com/raeph123) for contributing code.
 * Thanks [royharoush](https://github.com/royharoush) for suggesting an enhancement.
 * Thanks [royshum93](https://github.com/royshum93) for reporting a bug.
 * Thanks [SaifSalah](https://github.com/SaifSalah) for reporting a bug.
