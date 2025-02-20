@@ -26,15 +26,17 @@ Reference: https://www.secjuice.com/web-application-firewall-waf-evasion/
 
 __tamper__ = "uninitializedvariable"
 
+global obf_char
+
 if not settings.TAMPER_SCRIPTS[__tamper__]:
+  num = 2
+  obf_char = "${" + ''.join(random.choice(string.ascii_uppercase) for x in range(num)) + "}"
   settings.TAMPER_SCRIPTS[__tamper__] = True
 
 def tamper(payload):
   def add_uninitialized_variable(payload):
     settings.TAMPER_SCRIPTS[__tamper__] = True
-    num = 2
-    obf_char = "${" + ''.join(random.choice(string.ascii_letters) for x in range(num)) + "}"
-    payload = re.sub(r'([b-zD-Z])', lambda x: obf_char + x[0], payload)
+    payload = re.sub(r'([e-zD-Z])', lambda x: obf_char + x[0], payload)
     for word in settings.IGNORE_TAMPER_TRANSFORMATION:
       _ = obf_char.join(word[i:i+1] for i in range(-1, len(word), 1))
       if _ in payload:
@@ -42,10 +44,7 @@ def tamper(payload):
     return payload
 
   if settings.TARGET_OS != settings.OS.WINDOWS:
-    if settings.EVAL_BASED_STATE != False:
-      return payload
-    else:
-      return add_uninitialized_variable(payload)
+    return add_uninitialized_variable(payload)
   else:
     return payload
 

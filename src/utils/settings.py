@@ -262,7 +262,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.1"
-REVISION = "10"
+REVISION = "11"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1156,6 +1156,7 @@ IGNORE_TAMPER_TRANSFORMATION = [
                   "then",
                   "else",
                   "fi",
+                  "%0d",
                   RANDOM_VAR_GENERATOR,
                   RANDOM_VAR_GENERATOR + "1",
                   RANDOM_VAR_GENERATOR + "2"
