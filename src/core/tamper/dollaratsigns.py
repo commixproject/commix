@@ -30,7 +30,7 @@ def tamper(payload):
   def add_dollar_at_signs(payload):
     settings.TAMPER_SCRIPTS[__tamper__] = True
     obf_char = "$@"
-    payload = re.sub(r'([b-zD-Z])', lambda x: obf_char + x[0], payload)
+    payload = re.sub(r'([e-zE-Z])', lambda x: obf_char + x[0], payload)
     for word in settings.IGNORE_TAMPER_TRANSFORMATION:
       _ = obf_char.join(word[i:i+1] for i in range(-1, len(word), 1))
       if _ in payload:
@@ -38,10 +38,7 @@ def tamper(payload):
     return payload
 
   if settings.TARGET_OS != settings.OS.WINDOWS:
-    if settings.EVAL_BASED_STATE != False:
-      return payload
-    else:
-      return add_dollar_at_signs(payload)
+    return add_dollar_at_signs(payload)
   else:
     return payload
 
