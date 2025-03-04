@@ -1,4 +1,5 @@
 ## Version 4.1 (TBA)
+* Revised: Minor code refactoring regarding multiple tamper scripts.
 * Revised: Minor code refactoring regarding payloads for time-related techniques (i.e. "time-based", "tempfile-based").
 * Revised: Improvement regarding tamper script "backticks.py" for supporting time-related techniques (i.e. "time-based", "tempfile-based").
 

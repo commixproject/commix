@@ -20,7 +20,7 @@ from src.utils import settings
 from src.core.injections.controller import checks
 
 """
-About: Replaces "sleep" with "usleep" command in the generated payloads.
+About: Replaces "sleep" with "usleep" command in a given payload.
 Notes: This tamper script works against Unix-like target(s).
 Reference: http://man7.org/linux/man-pages/man3/usleep.3.html
 """
@@ -32,7 +32,6 @@ if not settings.TAMPER_SCRIPTS[__tamper__]:
 
 def tamper(payload):
   def sleep_to_usleep(payload):
-    settings.TAMPER_SCRIPTS[__tamper__] = True
     for match in re.finditer(r"sleep" + settings.WHITESPACES[0] + r"([1-9]\d+|[0-9])", payload):
       sleep_to_usleep = "u" + match.group(0).split(settings.WHITESPACES[0])[0]
       if match.group(0).split(settings.WHITESPACES[0])[1] != "0":
@@ -41,11 +40,8 @@ def tamper(payload):
         usleep_delay = match.group(0).split(settings.WHITESPACES[0])[1]
       payload = payload.replace(match.group(0), sleep_to_usleep + settings.WHITESPACES[0] + usleep_delay)
     return payload
-
   if settings.TARGET_OS != settings.OS.WINDOWS:
-    if settings.CLASSIC_STATE != False or \
-       settings.EVAL_BASED_STATE != False or \
-       settings.FILE_BASED_STATE != False:
+    if not settings.TIME_RELATIVE_ATTACK:
       if settings.TRANFROM_PAYLOAD == None:
         checks.time_relative_tamper(__tamper__)
         settings.TRANFROM_PAYLOAD = False

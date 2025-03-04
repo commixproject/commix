@@ -19,7 +19,7 @@ import string
 from src.utils import settings
 
 """
-About: Adds (randomly generated) uninitialized bash variables, between the characters of each command of the generated payloads.
+About: Adds (randomly generated) uninitialized bash variables, between the characters of each command in a given payload.
 Notes: This tamper script works against Unix-like target(s).
 Reference: https://www.secjuice.com/web-application-firewall-waf-evasion/
 """
@@ -35,8 +35,11 @@ if not settings.TAMPER_SCRIPTS[__tamper__]:
 
 def tamper(payload):
   def add_uninitialized_variable(payload):
-    settings.TAMPER_SCRIPTS[__tamper__] = True
-    payload = re.sub(r'([e-zD-Z])', lambda x: obf_char + x[0], payload)
+    if settings.TAMPER_SCRIPTS["backslashes"] or settings.TAMPER_SCRIPTS["dollaratsigns"]:
+      err_msg = "Tamper script '" +  __tamper__  + "' is unlikely to work combined with the tamper scripts: 'backslashes' and/or 'dollaratsigns'."
+      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+      raise SystemExit()
+    payload = re.sub(settings.TAMPER_MODIFICATION_LETTERS, lambda x: obf_char + x[0], payload)
     for word in settings.IGNORE_TAMPER_TRANSFORMATION:
       _ = obf_char.join(word[i:i+1] for i in range(-1, len(word), 1))
       if _ in payload:

@@ -20,7 +20,7 @@ from src.utils import settings
 from src.core.injections.controller import checks
 
 """
-About: Uses "timeout" function for time-based attacks.
+About: Replaces "sleep" with "timeout" command in a given payload.
   * Regarding Unix-like target(s), it replaces the "sleep XX" command with "timeout XX ping localhost".
   * Regarding windows target(s), it replaces the "powershell.exe -InputFormat none Start-Sleep -s XX" command with "timeout XX".
 Notes: This tamper script works against all targets.
@@ -33,7 +33,6 @@ if not settings.TAMPER_SCRIPTS[__tamper__]:
 
 def tamper(payload):
   def sleep_to_timeout_ping(payload):
-    settings.TAMPER_SCRIPTS[__tamper__] = True
     if settings.TARGET_OS != settings.OS.WINDOWS:
       for match in re.finditer(r"sleep" + settings.WHITESPACES[0] + r"([1-9]\d+|[0-9])", payload):
         payload = payload.replace(match.group(0), match.group(0).replace("sleep", "timeout") + " ping localhost".replace(settings.SINGLE_WHITESPACE,settings.WHITESPACES[0]))
@@ -41,10 +40,7 @@ def tamper(payload):
     else:
       payload = payload.replace("powershell.exe" + settings.WHITESPACES[0] + "-InputFormat" + settings.WHITESPACES[0] + "none" + settings.WHITESPACES[0] + "Start-Sleep" + settings.WHITESPACES[0] + "-s", "timeout")
     return payload
-
-  if settings.CLASSIC_STATE != False or \
-     settings.EVAL_BASED_STATE != False or \
-     settings.FILE_BASED_STATE != False:
+  if not settings.TIME_RELATIVE_ATTACK:
     if settings.TRANFROM_PAYLOAD == None:
       if settings.TRANFROM_PAYLOAD == None:
         checks.time_relative_tamper(__tamper__)

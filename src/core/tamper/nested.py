@@ -19,11 +19,14 @@ from src.utils import menu
 from src.utils import settings
 
 """
-About: Adds double quotes around of the generated payloads (nested).
+About: Adds double quotes (") around of a given payload.
 Notes: This tamper script works against Unix-like target(s).
 """
 
 __tamper__ = "nested"
+
+if not settings.TAMPER_SCRIPTS[__tamper__]:
+  settings.TAMPER_SCRIPTS[__tamper__] = True
 
 def nested():
   if menu.options.prefix:
@@ -35,10 +38,8 @@ def nested():
   else:
     menu.options.suffix = "\""
 
-if not settings.TAMPER_SCRIPTS[__tamper__]:
-  if settings.TARGET_OS != settings.OS.WINDOWS:
-    settings.TAMPER_SCRIPTS[__tamper__] = True
-    nested()
+if settings.TARGET_OS != settings.OS.WINDOWS:
+  nested()
 
 def tamper(payload):
   return payload

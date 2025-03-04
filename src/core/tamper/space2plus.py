@@ -17,7 +17,7 @@ from src.utils import settings
 from src.thirdparty.six.moves import urllib as _urllib
 
 """
-About: Replaces space character ('%20') with plus ('+').
+About: Replaces space character (%20) with plus (+) in a given payload.
 Notes: This tamper script works against all targets.
 """
 
@@ -27,8 +27,7 @@ space2plus = _urllib.parse.quote_plus(settings.SINGLE_WHITESPACE)
 if not settings.TAMPER_SCRIPTS[__tamper__]:
   settings.TAMPER_SCRIPTS[__tamper__] = True
 
-def tamper(payload):
-  settings.TAMPER_SCRIPTS[__tamper__] = True
+def tamper(payload): 
   if len(settings.WHITESPACES) != 0:
     if settings.WHITESPACES[0] == _urllib.parse.quote(settings.SINGLE_WHITESPACE):
       settings.WHITESPACES[0] = space2plus

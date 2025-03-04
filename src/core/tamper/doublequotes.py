@@ -17,24 +17,25 @@ import re
 from src.utils import settings
 
 """
-About: Adds double quotes (") between the characters of the generated payloads.
+About: Adds double quotes (") between the characters in a given payload.
 Notes: This tamper script works against Unix-like target(s).
 """
 
 __tamper__ = "doublequotes"
 
+global obf_char
+
 if settings.TRANFROM_PAYLOAD != None:
   settings.TRANFROM_PAYLOAD = None
 
 if not settings.TAMPER_SCRIPTS[__tamper__]:
+  obf_char = '""'
   settings.TAMPER_SCRIPTS[__tamper__] = True
 
 def tamper(payload):
   def add_double_quotes(payload):
-    settings.TAMPER_SCRIPTS[__tamper__] = True
-    obf_char = '""'
     if settings.TARGET_OS != settings.OS.WINDOWS:
-      payload = re.sub(r'([b-zD-Z])', r'""\1', payload)
+      payload = re.sub(settings.TAMPER_MODIFICATION_LETTERS, r'""\1', payload)
     else:
       word = "tokens"
       _ = obf_char.join(word[i:i+1] for i in range(-1, len(word), 1))
@@ -44,10 +45,6 @@ def tamper(payload):
       if _ in payload:
         payload = payload.replace(_,_.replace(obf_char, ""))
     return payload
-
-  if settings.EVAL_BASED_STATE != False:
-    return payload
-  else:
-    return add_double_quotes(payload)
+  return add_double_quotes(payload)
 
 # eof

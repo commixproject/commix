@@ -19,7 +19,7 @@ from src.utils import settings
 from src.core.compat import xrange
 
 """
-About: Append a fake HTTP header 'X-Forwarded-For' (and alike).
+About: Appends a fake HTTP header 'X-Forwarded-For' (and alike).
 """
 
 __tamper__ = "xforwardedfor"

@@ -17,7 +17,7 @@ from src.utils import settings
 from src.thirdparty.six.moves import urllib as _urllib
 
 """
-About: Replaces space character ('%20') with horizontal tab ('%09')
+About: Replaces space character (%20) with horizontal tab (%09) in a given payload.
 Notes: This tamper script works against all targets.
 """
 
@@ -28,7 +28,6 @@ if not settings.TAMPER_SCRIPTS[__tamper__]:
   settings.TAMPER_SCRIPTS[__tamper__] = True
 
 def tamper(payload):
-  settings.TAMPER_SCRIPTS[__tamper__] = True
   if len(settings.WHITESPACES) != 0:
     if settings.WHITESPACES[0] == _urllib.parse.quote(settings.SINGLE_WHITESPACE):
       settings.WHITESPACES[0] = space2htab

@@ -29,16 +29,11 @@ if not settings.TAMPER_SCRIPTS[__tamper__]:
   settings.TAMPER_SCRIPTS[__tamper__] = True
 
 def tamper(payload):
-  def add_slash2env(payload):
-    settings.TAMPER_SCRIPTS[__tamper__] = True
+  def add_slash2env(payload): 
     payload = payload.replace("/", "${PATH%%u*}")
     return payload
-
   if settings.TARGET_OS != settings.OS.WINDOWS:
-    if settings.EVAL_BASED_STATE != False:
-      return payload
-    else:
-      return add_slash2env(payload)
+    return add_slash2env(payload)
   else:
     return payload
 

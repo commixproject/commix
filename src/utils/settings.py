@@ -262,7 +262,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.1"
-REVISION = "12"
+REVISION = "13"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1094,6 +1094,9 @@ RAW_HTTP_HEADERS = ""
 
 USER_APPLIED_TAMPER = ""
 
+# Tamper payload modification letters
+TAMPER_MODIFICATION_LETTERS = r'([e-zE-Z])'
+
 # Tamper scripts dict
 TAMPER_SCRIPTS = {
                   "space2ifs": False,
@@ -1114,9 +1117,9 @@ TAMPER_SCRIPTS = {
                   "dollaratsigns": False,
                   "printf2echo": False,
                   "uninitializedvariable": False,
-                  "slash2env":False,
-                  "backticks":False,
-                  "rev":False
+                  "slash2env": False,
+                  "backticks": False,
+                  "rev": False
                  }
 
 UNIX_NOT_SUPPORTED_TAMPER_SCRIPTS = [
@@ -1156,7 +1159,9 @@ IGNORE_TAMPER_TRANSFORMATION = [
                   "then",
                   "else",
                   "fi",
+                  "cmd",
                   "%0d",
+                  "PATH%%u*",
                   RANDOM_VAR_GENERATOR,
                   RANDOM_VAR_GENERATOR + "1",
                   RANDOM_VAR_GENERATOR + "2"

@@ -14,10 +14,9 @@ For more see the file 'readme/COPYING' for copying permission.
 """
 
 from src.utils import settings
-from src.thirdparty.six.moves import urllib as _urllib
 
 """
-About: Is used to reverse (characterwise) the user-supplied operating system commands.
+About: Reverses (characterwise) the user-supplied operating system commands in a given payload.
 Notes: This tamper script works against Unix-like target(s).
 References: [1] https://github.com/commixproject/commix/issues/408
             [2] https://medium.com/picus-security/how-to-bypass-wafs-for-os-command-injection-2c5dd4e6a52b
