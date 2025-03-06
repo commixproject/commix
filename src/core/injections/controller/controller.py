@@ -317,12 +317,9 @@ Proceed to the injection process for the appropriate parameter.
 """
 def injection_proccess(url, check_parameter, http_request_method, filename, timesec):
   settings.NOT_TESTABLE_PARAMETERS = False
-  for i in range(0,int(settings.OS_CHECKS_NUM)):
-    if settings.CHECK_BOTH_OS:
-      if i == 0:
-        settings.TARGET_OS = settings.OS.UNIX
-      else:
-        settings.TARGET_OS = settings.OS.WINDOWS
+  target_os_list = [settings.OS.UNIX, settings.OS.WINDOWS] if settings.CHECK_BOTH_OS else [settings.TARGET_OS]
+  for current_os in target_os_list:
+    settings.TARGET_OS = current_os
 
     if settings.PERFORM_BASIC_SCANS:
       checks.keep_testing_others(filename, url)
@@ -360,13 +357,12 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
     if not header_name == settings.COOKIE and not the_type == "HTTP Header":
       settings.CHECKING_PARAMETER = checks.check_http_method(url)
       settings.CHECKING_PARAMETER += ('', ' JSON')[settings.IS_JSON] + ('', ' SOAP/XML')[settings.IS_XML]
-    if header_name == settings.COOKIE :
-       settings.CHECKING_PARAMETER += str(header_name) + str(the_type) + str(inject_parameter)
-    else:
-       settings.CHECKING_PARAMETER += str(the_type) + str(header_name) + str(inject_parameter)
+    settings.CHECKING_PARAMETER = f"{the_type}{header_name}{inject_parameter}"
+    if header_name == settings.COOKIE:
+        settings.CHECKING_PARAMETER = f"{header_name} {the_type}{inject_parameter}"
 
     if check_parameter in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST:
-      settings.CHECKING_PARAMETER = "(custom) " + settings.CHECKING_PARAMETER
+      settings.CHECKING_PARAMETER = f"(custom) {settings.CHECKING_PARAMETER}"
 
     if not settings.LOAD_SESSION:
       info_msg = "Setting " + settings.CHECKING_PARAMETER  + " for tests."
