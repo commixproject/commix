@@ -283,8 +283,8 @@ def init_injection(url):
     settings.FILE_BASED_STATE = False
   if settings.TEMPFILE_BASED_STATE:
     settings.TEMPFILE_BASED_STATE = False
-  if settings.TIME_RELATIVE_ATTACK:
-    settings.TIME_RELATIVE_ATTACK = False
+  if settings.TIME_RELATED_ATTACK:
+    settings.TIME_RELATED_ATTACK = False
 
 """
 Using 'stdin' for parsing targets.

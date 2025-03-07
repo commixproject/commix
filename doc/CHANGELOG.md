@@ -502,7 +502,7 @@ _Note: For more check the [detailed changeset](https://github.com/commixproject/
 _Note: For more check the [detailed changeset](https://github.com/commixproject/commix/compare/v1.0-20160614...v1.1-20160714)._
 
 ## Version 1.0 (2016-06-14)
-* Revised: Time-relative statistical analysis for recognition of unexpected time delays due to unstable requests.
+* Revised: Time-related statistical analysis for recognition of unexpected time delays due to unstable requests.
 * Added: A list of pages / scripts potentially vulnerable to shellshock.
 * Added: The ability to check if the url is probable to contain script(s) vulnerable to shellshock.
 * Revised: Multiple eye-candy revisions have been performed.
@@ -588,7 +588,7 @@ _Note: For more check the [detailed changeset](https://github.com/commixproject/
 _Note: For more check the [detailed changeset](https://github.com/commixproject/commix/compare/v0.3b-20160115...v0.4b-20160204)._
 
 ## Version 0.3b (2016-01-15)
-* Added: Time-relative false-positive identification, which identifies unexpected time delays due to unstable requests.
+* Added: Time-related false-positive identification, which identifies unexpected time delays due to unstable requests.
 * Added: New option `-l`, that parses target and data from HTTP proxy log file (i.e. Burp or WebScarab).
 * Added: Check if Powershell is enabled in target host, if the applied option's payload is requiring the use of PowerShell.
 * Added: New option `--ps-version`, that checks PowerShell's version number.

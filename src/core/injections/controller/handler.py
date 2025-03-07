@@ -105,13 +105,13 @@ def pseudo_terminal_shell(injector, separator, maxlen, TAG, cmd, prefix, suffix,
             time.sleep(timesec)
             if menu.options.ignore_session or session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
               # The main command injection exploitation.
-              if settings.TIME_RELATIVE_ATTACK:
+              if settings.TIME_RELATED_ATTACK:
                 if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
                   check_exec_time, shell = injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response, technique)
                 else:
                   check_exec_time, shell = injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response, technique)
                 # Export injection result
-                checks.time_relative_export_injection_results(cmd, separator, shell, check_exec_time)
+                checks.time_related_export_injection_results(cmd, separator, shell, check_exec_time)
               else:
                 if technique == settings.INJECTION_TECHNIQUE.FILE_BASED:
                   response = injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, technique)
@@ -164,9 +164,9 @@ def pseudo_terminal_shell(injector, separator, maxlen, TAG, cmd, prefix, suffix,
     settings.print_data_to_stdout(settings.END_LINE.CR)
 
 """
-The main time-relative exploitation proccess.
+The main Time-related exploitation proccess.
 """
-def do_time_relative_proccess(url, timesec, filename, http_request_method, url_time_response, injection_type, technique, tmp_path):
+def do_time_related_proccess(url, timesec, filename, http_request_method, url_time_response, injection_type, technique, tmp_path):
 
   counter = 1
   num_of_chars = 1
@@ -177,11 +177,11 @@ def do_time_relative_proccess(url, timesec, filename, http_request_method, url_t
   false_positive_warning = False
   export_injection_info = False
   exec_time = 0
-  timesec = checks.time_relative_timesec(timesec)
+  timesec = checks.time_related_timesec(timesec)
 
-  if settings.TIME_RELATIVE_ATTACK == False:
-    checks.time_relative_attaks_msg()
-    settings.TIME_RELATIVE_ATTACK = None
+  if settings.TIME_RELATED_ATTACK == False:
+    checks.time_related_attaks_msg()
+    settings.TIME_RELATED_ATTACK = None
 
   # Check if defined "--url-reload" option.
   if menu.options.url_reload == True:
@@ -273,8 +273,8 @@ def do_time_relative_proccess(url, timesec, filename, http_request_method, url_t
                   else:
                     percent = ""
                 else:
-                  if checks.time_relative_shell(url_time_response, exec_time, timesec):
-                    # Time relative false positive fixation.
+                  if checks.time_related_shell(url_time_response, exec_time, timesec):
+                    # Time related false positive fixation.
                     false_positive_fixation = False
                     if len(TAG) == output_length:
 
@@ -333,7 +333,7 @@ def do_time_relative_proccess(url, timesec, filename, http_request_method, url_t
                       else:  
                         exec_time, output = injector.false_positive_check(separator, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, randvcalc, alter_shell, exec_time, url_time_response, false_positive_warning, technique)
 
-                      if checks.time_relative_shell(url_time_response, exec_time, timesec):
+                      if checks.time_related_shell(url_time_response, exec_time, timesec):
                         if str(output) == str(randvcalc) and len(TAG) == output_length:
                           possibly_vulnerable = True
                           exec_time_statistic = 0
@@ -386,7 +386,7 @@ def do_time_relative_proccess(url, timesec, filename, http_request_method, url_t
 
           # Yaw, got shellz!
           # Do some magic tricks!
-          if checks.time_relative_shell(url_time_response, exec_time, timesec):
+          if checks.time_related_shell(url_time_response, exec_time, timesec):
             if (len(TAG) == output_length) and (possibly_vulnerable == True or settings.LOAD_SESSION and int(is_vulnerable) == settings.INJECTION_LEVEL):
               found = True
               no_result = False
@@ -433,7 +433,7 @@ def do_results_based_proccess(url, timesec, filename, http_request_method, injec
   call_tmp_based = False
   next_attack_vector = False
   export_injection_info = False
-  timesec = checks.time_relative_timesec(timesec)
+  timesec = checks.time_related_timesec(timesec)
   
   if technique == settings.INJECTION_TECHNIQUE.CLASSIC:
     try:

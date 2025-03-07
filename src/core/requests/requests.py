@@ -355,7 +355,7 @@ def request_failed(err_msg):
         return False
       return True
     else:
-      error_msg = "The provided target URL seems not reachable."
+      error_msg = "The provided target URL seems not reachable. "
       items = []
       if not menu.options.random_agent:
           items.append("'--random-agent' switch")
@@ -416,7 +416,7 @@ def get_request_response(request):
 Check if target host is vulnerable.
 """
 def init_injection(payload, http_request_method, url):
-  if settings.TIME_RELATIVE_ATTACK:
+  if settings.TIME_RELATED_ATTACK:
     start = 0
     end = 0
     start = time.time()
@@ -458,7 +458,7 @@ def init_injection(payload, http_request_method, url):
   headers.do_check(request)
   response = get_request_response(request)
 
-  if settings.TIME_RELATIVE_ATTACK:
+  if settings.TIME_RELATED_ATTACK:
     end = time.time()
     response = int(end - start)
   else:
@@ -500,7 +500,7 @@ def cookie_injection(url, vuln_parameter, payload, http_request_method):
     except ValueError:
       pass
 
-  if settings.TIME_RELATIVE_ATTACK :
+  if settings.TIME_RELATED_ATTACK :
     start = 0
     end = 0
     start = time.time()
@@ -510,7 +510,7 @@ def cookie_injection(url, vuln_parameter, payload, http_request_method):
   except Exception as err_msg:
     response = request_failed(err_msg)
 
-  if settings.TIME_RELATIVE_ATTACK :
+  if settings.TIME_RELATED_ATTACK :
     end  = time.time()
     exec_time = int(end - start)
     return exec_time
@@ -543,7 +543,7 @@ def user_agent_injection(url, vuln_parameter, payload, http_request_method):
     except ValueError:
       pass
 
-  if settings.TIME_RELATIVE_ATTACK :
+  if settings.TIME_RELATED_ATTACK :
     start = 0
     end = 0
     start = time.time()
@@ -553,7 +553,7 @@ def user_agent_injection(url, vuln_parameter, payload, http_request_method):
   except Exception as err_msg:
     response = request_failed(err_msg)
 
-  if settings.TIME_RELATIVE_ATTACK :
+  if settings.TIME_RELATED_ATTACK :
     end = time.time()
     exec_time = int(end - start)
     return exec_time
@@ -586,7 +586,7 @@ def referer_injection(url, vuln_parameter, payload, http_request_method):
     except ValueError:
       pass
 
-  if settings.TIME_RELATIVE_ATTACK :
+  if settings.TIME_RELATED_ATTACK :
     start = 0
     end = 0
     start = time.time()
@@ -596,7 +596,7 @@ def referer_injection(url, vuln_parameter, payload, http_request_method):
   except Exception as err_msg:
     response = request_failed(err_msg)
 
-  if settings.TIME_RELATIVE_ATTACK :
+  if settings.TIME_RELATED_ATTACK :
     end  = time.time()
     exec_time = int(end - start)
     return exec_time
@@ -629,7 +629,7 @@ def host_injection(url, vuln_parameter, payload, http_request_method):
     except ValueError:
       pass
 
-  if settings.TIME_RELATIVE_ATTACK :
+  if settings.TIME_RELATED_ATTACK :
     start = 0
     end = 0
     start = time.time()
@@ -639,7 +639,7 @@ def host_injection(url, vuln_parameter, payload, http_request_method):
   except Exception as err_msg:
     response = request_failed(err_msg)
 
-  if settings.TIME_RELATIVE_ATTACK :
+  if settings.TIME_RELATED_ATTACK :
     end  = time.time()
     exec_time = int(end - start)
     return exec_time
@@ -675,7 +675,7 @@ def custom_header_injection(url, vuln_parameter, payload, http_request_method):
     except ValueError:
       pass
 
-  if settings.TIME_RELATIVE_ATTACK :
+  if settings.TIME_RELATED_ATTACK :
     start = 0
     end = 0
     start = time.time()
@@ -685,7 +685,7 @@ def custom_header_injection(url, vuln_parameter, payload, http_request_method):
   except Exception as err_msg:
     response = request_failed(err_msg)
 
-  if settings.TIME_RELATIVE_ATTACK :
+  if settings.TIME_RELATED_ATTACK :
     end  = time.time()
     exec_time = int(end - start)
     return exec_time
@@ -879,7 +879,7 @@ def url_reload(url, timesec):
   return response
 
 """
-Calculate the time relative execution time
+Calculate the time related execution time
 """
 def perform_injection(prefix, suffix, whitespace, payload, vuln_parameter, http_request_method, url):
   # Fix prefixes / suffixes

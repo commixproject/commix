@@ -1288,9 +1288,9 @@ def time_delay_due_to_unstable_request(timesec):
       pass
 
 """
-Time relative shell condition 
+Time related shell condition 
 """
-def time_relative_shell(url_time_response, exec_time, timesec):
+def time_related_shell(url_time_response, exec_time, timesec):
   if (url_time_response == 0 and (exec_time - timesec) >= 0) or \
      (url_time_response != 0 and (exec_time - timesec) == 0 and (exec_time == timesec)) or \
      (url_time_response != 0 and (exec_time - timesec) > 0 and (exec_time >= timesec + 1)):
@@ -1299,9 +1299,9 @@ def time_relative_shell(url_time_response, exec_time, timesec):
     return False
 
 """
-Message regarding time relative attcks
+Message regarding time related attcks
 """
-def time_relative_attaks_msg():
+def time_related_attaks_msg():
   warn_msg = "It is very important to not stress the network connection during usage of time-based payloads to prevent potential disruptions."
   settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
@@ -1454,16 +1454,6 @@ def testable_parameters(url, check_parameters, header_name):
 
   
 """
-Only time-relative injection techniques support tamper
-"""
-def time_relative_tamper(tamper):
-  warn_msg = "All injection techniques, except for the time-relative ones, "
-  warn_msg += "do not support the '" + tamper  + ".py' tamper script."
-  if menu.options.skip_heuristics:
-    settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
-  settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
-
-"""
 Lists available tamper scripts
 """
 def list_tamper_scripts():
@@ -1504,6 +1494,10 @@ def tamper_scripts(stored_tamper_scripts):
       import_script = str(settings.TAMPER_SCRIPTS_PATH + script + ".py").replace("/",".").split(".py")[0]
       if not stored_tamper_scripts:
         settings.print_data_to_stdout(settings.SUB_CONTENT_SIGN + import_script.split(".")[-1])
+      warn_msg = ""
+      if not settings.TIME_RELATED_ATTACK and script in settings.TIME_RELATED_TAMPER_SCRIPTS:
+        warn_msg = "Only time-related techniques support the usage of '" + script  + ".py'."
+        settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
       warn_msg = ""
       if settings.EVAL_BASED_STATE != False and script in settings.EVAL_NOT_SUPPORTED_TAMPER_SCRIPTS:
         warn_msg = "The dynamic code evaluation technique does "
@@ -3020,19 +3014,19 @@ def use_temp_folder(no_result, url, timesec, filename, tmp_path, http_request_me
   # continue
 
 """
-Set time relative timesec 
+Set time related timesec 
 """
-def time_relative_timesec(timesec):
-  if settings.TIME_RELATIVE_ATTACK and settings.TIMESEC < 1:
+def time_related_timesec(timesec):
+  if settings.TIME_RELATED_ATTACK and settings.TIMESEC < 1:
     timesec = 1
   else:
     timesec = settings.TIMESEC
   return timesec  
 
 """
-Export the time relative injection results
+Export the time related injection results
 """
-def time_relative_export_injection_results(cmd, separator, output, check_exec_time):
+def time_related_export_injection_results(cmd, separator, output, check_exec_time):
   if settings.VERBOSITY_LEVEL == 0:
     settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
   if output != "" and check_exec_time != 0 :

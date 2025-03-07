@@ -262,7 +262,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.1"
-REVISION = "13"
+REVISION = "14"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -455,7 +455,7 @@ EVAL_BASED_STATE = False
 TIME_BASED_STATE = False
 FILE_BASED_STATE = False
 TEMPFILE_BASED_STATE = False
-TIME_RELATIVE_ATTACK = False
+TIME_RELATED_ATTACK = False
 
 # Stored applied techniques
 SESSION_APPLIED_TECHNIQUES = ""
@@ -1151,6 +1151,11 @@ EVAL_NOT_SUPPORTED_TAMPER_SCRIPTS = [
                   "slash2env",
                   "printf2echo",
                   "uninitializedvariable"
+]
+
+TIME_RELATED_TAMPER_SCRIPTS = [
+                  "sleep2usleep",
+                  "sleep2timeout"
 ]
 
 IGNORE_TAMPER_TRANSFORMATION = [

@@ -61,7 +61,7 @@ def basic_payload_generator():
 Initializing basic level check status
 """
 def basic_level_checks():
-  settings.TIME_RELATIVE_ATTACK = False
+  settings.TIME_RELATED_ATTACK = False
   settings.SKIP_CODE_INJECTIONS = None
   settings.SKIP_COMMAND_INJECTIONS = None
   settings.IDENTIFIED_COMMAND_INJECTION = False
