@@ -1620,6 +1620,14 @@ def whitespace_check(payload):
 Check for symbols (i.e "`", "^", "$@" etc) between the characters of the generated payloads.
 """
 def other_symbols(payload):
+  # Implemented check to replace each character in a user-supplied OS command with a random case.
+  if payload.count("|tr \"[A-Z]\" \"[a-z]\"") >= 1 and settings.TARGET_OS != settings.OS.WINDOWS:
+    if not settings.TAMPER_SCRIPTS['randomcase']:
+      if menu.options.tamper:
+        menu.options.tamper = menu.options.tamper + ",randomcase"
+      else:
+        menu.options.tamper = "randomcase"
+
   # Check for reversed (characterwise) user-supplied operating system commands.
   if payload.count("|rev") >= 1 and settings.TARGET_OS != settings.OS.WINDOWS:
     if not settings.TAMPER_SCRIPTS['rev']:
@@ -1850,6 +1858,12 @@ def perform_payload_modification(payload):
     if mod_type == 'rev':
       from src.core.tamper import rev
       payload = rev.tamper(payload)
+
+  for mod_type in list(settings.MULTI_ENCODED_PAYLOAD[::-1]):
+    # Replaces each user-supplied operating system command character with random case
+    if mod_type == 'randomcase':
+      from src.core.tamper import randomcase
+      payload = randomcase.tamper(payload)
 
   for print_type in list(settings.MULTI_ENCODED_PAYLOAD[::-1]):
     # printf to echo (for ascii to dec)
