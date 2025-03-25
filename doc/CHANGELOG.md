@@ -57,7 +57,7 @@ _Note: For more check the [detailed changeset](https://github.com/commixproject/
 * Revised: Minor improvement regarding tamper script "uninitializedvariable.py", for adding randomly generated uninitialized bash variables between the characters of each command of the generated payloads.
 * Revised: Minor improvement regarding skipping further tests involving target that an injection point has already been detected.
 * Revised: Minor code refactoring regarding multiple tamper scripts (i.e. "backslashes.py", "dollaratsigns.py", "doublequotes.py", "singlequotes.py", "uninitializedvariable.py").
-* Added: New tamper script "rev.py" that reverses (characterwise) the user-supplied operating system commands (for \*nix targets).
+* Added: New tamper script "rev.py" that reverses (characterwise) the user-supplied operating system commands.
 * Fixed: Minor bug-fix regarding checking for similarity in provided parameter(s) name(s) and value(s).
 * Fixed: Minor bug-fix regarding forcing usage of SSL/HTTPS requests toward the target (i.e. `--force-ssl` flag).
 * Fixed: Minor bug-fix regarding setting custom output directory path (i.e. `--output-dir` option).
@@ -136,7 +136,7 @@ _Note: For more check the [detailed changeset](https://github.com/commixproject/
 * Removed: The "Regsvr32.exe application whitelisting bypass" attack vector has been removed.
 * Updated: Minor update regarding web delivery script (i.e. Python meterpreter reverse TCP shell).
 * Replaced: The `--backticks` switch has been replaced with "backticks.py" tamper script.
-* Added: New tamper script "backticks.py" that uses backticks instead of `$()`, for commands substitution (for \*nix targets).
+* Added: New tamper script "backticks.py" that uses backticks instead of `$()`, for commands substitution.
 * Added: New option ( `--skip-heuristic`) for skipping dynamic code evaluation heuristic check.
 * Added: Support for parsing custom wordlists regarding HTTP authentication (i.e. `Basic`, `Digest`) dictionary-based cracker.
 * Revised: Improvements regarding dynamic code evaluation heuristic check.
@@ -149,10 +149,10 @@ _Note: For more check the [detailed changeset](https://github.com/commixproject/
 
 ## Version 3.2 (2021-04-12)
 * Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
-* Added: New tamper script "slash2env.py" that replaces slashes (`/`) with environment variable value `${PATH%%u*}` (for \*nix targets).
+* Added: New tamper script "slash2env.py" that replaces slashes (`/`) with environment variable value `${PATH%%u*}`.
 * Revised: Minor improvement regarding session handler for supporting Python 3.4+.
 * Revised: Minor improvement regarding `--web-root` option.
-* Added: New tamper script "uninitializedvariable.py" that adds uninitialized bash variables between the characters of each command of the generated payloads (for \*nix targets).
+* Added: New tamper script "uninitializedvariable.py" that adds uninitialized bash variables between the characters of each command of the generated payloads.
 * Revised: Improvement regarding decompressing `deflate`, `x-gzip` and `gzip` HTTP responses.
 * Fixed: Bug-fix regarding several charset-related unhandled exceptions.
 * Revised: Improvements regarding dynamic code evaluation heuristic check.
@@ -185,7 +185,7 @@ _Note: For more check the [detailed changeset](https://github.com/commixproject/
 * Fixed: Bug-fix regarding defining custom injection marker (i.e. asterisk `*`) in nested JSON objects.
 * Revised: Minor improvement regarding Flatten_json (third party) module.
 * Revised: Minor improvement regarding parsing nested JSON objects.
-* Added: New tamper script "doublequotes.py" that adds double-quotes (`""`) between the characters of the generated payloads (for \*nix targets).
+* Added: New tamper script "doublequotes.py" that adds double-quotes (`""`) between the characters of the generated payloads.
 * Fixed: Bug-fix regarding parsing raw HTTP headers from a file (i.e. `-r` option).
 * Revised: Improvements regarding data in the detailed message about occurred unhandled exception.
 * Revised: Minor bug-fixes and improvements regarding HTTP authentication dictionary-based cracker.
@@ -284,10 +284,10 @@ _Note: For more check the [detailed changeset](https://github.com/commixproject/
 * Added: Support regarding checking for potential CAPTCHA protection mechanism.
 * Revised: The separators list, has been shortly revised.
 * Revised: Minor improvement regarding the extracted HTTP response headers.
-* Added: New tamper script "nested.py" that adds double quotes around of the generated payloads (for \*nix targets).
+* Added: New tamper script "nested.py" that adds double quotes around of the generated payloads.
 * Fixed: Minor bug-fix regarding performing injections through HTTP Headers (e.g. User-Agent, Referer, Host etc).
 * Fixed: Major bug-fixes regarding testing time-related payloads (i.e. "time-based", "tempfile-based").
-* Added: New tamper script "backslashes.py" that adds back slashes (`\`) between the characters of the generated payloads (for \*nix targets).
+* Added: New tamper script "backslashes.py" that adds back slashes (`\`) between the characters of the generated payloads.
 * Fixed: Minor bug-fix regarding unicode decode exception error due to invalid codec, during connection on target host.
 * Revised: Improvement regarding combining tamper script "multiplespaces.py" with other space-related tamper script(s).
 * Added: New tamper script "multiplespaces.py" that adds multiple spaces around OS commands.
@@ -300,8 +300,8 @@ _Note: For more check the [detailed changeset](https://github.com/commixproject/
 * Updated: Colorama (third party) module has been updated.
 * Revised: Minor improvement regarding keeping the git folder 'clean' (via @g0tmi1k).
 * Fixed: Minor bug-fix regarding loading multiple tamper scripts (during the exploitation phase). 
-* Added: New tamper script "caret.py" that adds the caret symbol (`^`) between the characters of the generated payloads (for windows targets).
-* Added: New tamper script "singlequotes.py" that adds single quotes (`'`) between the characters of the generated payloads (for \*nix targets).
+* Added: New tamper script "caret.py" that adds the caret symbol (`^`) between the characters of the generated payloads.
+* Added: New tamper script "singlequotes.py" that adds single quotes (`'`) between the characters of the generated payloads.
 
 _Note: For more check the [detailed changeset](https://github.com/commixproject/commix/compare/v2.3-20180307...v2.4-20180521)._
 
@@ -343,7 +343,7 @@ _Note: For more check the [detailed changeset](https://github.com/commixproject/
 * Added: New option `--check-internet` that checks internet connection before assessing the target.
 * Fixed: Minor bug-fix regarding performing injections through HTTP Headers (i.e. Cookie, User-Agent, Referer).
 * Revised: Minor improvement regarding checking stored payloads and enabling appropriate tamper scripts during the exploitation phase.
-* Added: New tamper script "space2vtab.py" that replaces every space (`%20`) with vertical tab (`%0b`) (for Windows targets).
+* Added: New tamper script "space2vtab.py" that replaces every space (`%20`) with vertical tab (`%0b`).
 * Replaced: The tamper script "space2tab.py" has been replaced with "space2htab.py".
 * Fixed: Minor bug-fix regarding checking for similarity in provided parameter name and value (GET, POST).
 * Added: New option `--backticks` that uses backticks instead of `$()`, for commands substitution.
