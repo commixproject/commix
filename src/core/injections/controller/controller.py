@@ -678,7 +678,7 @@ Perform checks
 def perform_checks(url, http_request_method, filename):
   # Initiate whitespaces
   if settings.MULTI_TARGETS or settings.STDIN_PARSING and len(settings.WHITESPACES) > 1:
-    settings.WHITESPACES = ["%20"]
+    settings.WHITESPACES = [_urllib.parse.quote(SINGLE_WHITESPACE)]
 
   timesec = settings.TIMESEC
   # Check if authentication is needed.

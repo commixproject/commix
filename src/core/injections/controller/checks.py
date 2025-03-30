@@ -1841,8 +1841,11 @@ def check_for_stored_tamper(payload):
 Perform payload modification
 """
 def perform_payload_modification(payload):
-  settings.RAW_PAYLOAD = payload.replace(settings.WHITESPACES[0], settings.SINGLE_WHITESPACE)
-
+  try:
+    settings.RAW_PAYLOAD = payload.replace(settings.WHITESPACES[0], settings.SINGLE_WHITESPACE)
+  except IndexError:
+    settings.RAW_PAYLOAD = payload
+    
   for extra_http_headers in list(settings.MULTI_ENCODED_PAYLOAD[::-1]):
     if extra_http_headers == "xforwardedfor":
       from src.core.tamper import xforwardedfor

@@ -39,7 +39,12 @@ def tamper(payload):
         random_case_cmd = "\\`echo " + _ + "|tr \"[A-Z]\" \"[a-z]\"\\`"
       else:
         random_case_cmd = "$(echo " + _ + "|tr \"[A-Z]\" \"[a-z]\")"
-      payload = settings.RAW_PAYLOAD.replace(settings.USER_APPLIED_CMD, random_case_cmd).replace(settings.SINGLE_WHITESPACE, settings.WHITESPACES[0])
+      payload = settings.RAW_PAYLOAD.replace(settings.USER_APPLIED_CMD, random_case_cmd)
+      if len(settings.WHITESPACES) != 0:
+        try:
+          payload = payload.replace(settings.SINGLE_WHITESPACE, settings.WHITESPACES[0])
+        except:
+          pass
   return payload
 
 # eof

@@ -34,7 +34,12 @@ def tamper(payload):
         rev_cmd = "\\`echo " + settings.USER_APPLIED_CMD[::-1] + "|rev\\`"
       else:
         rev_cmd = "$(echo " + settings.USER_APPLIED_CMD[::-1] + "|rev)"
-      payload = settings.RAW_PAYLOAD.replace(settings.USER_APPLIED_CMD, rev_cmd).replace(settings.SINGLE_WHITESPACE, settings.WHITESPACES[0])
+      payload = settings.RAW_PAYLOAD.replace(settings.USER_APPLIED_CMD, rev_cmd)
+      if len(settings.WHITESPACES) != 0:
+        try:
+          payload = payload.replace(settings.SINGLE_WHITESPACE, settings.WHITESPACES[0])
+        except:
+          pass
   return payload
 
 # eof
