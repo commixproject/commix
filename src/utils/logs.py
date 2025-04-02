@@ -174,8 +174,8 @@ def executed_command(filename, cmd, output):
     with open(filename, 'a') as output_file:
       if not menu.options.no_logging:
         output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + "Executed command: " +  cmd + "\n")
-        output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_SIGN) + "Execution output: " + output.encode(settings.DEFAULT_CODEC).decode() + "\n")
-  except TypeError:
+        output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_SIGN) + "Execution output: " + str(output.encode(settings.DEFAULT_CODEC).decode()) + "\n")
+  except:
     pass
 
 """

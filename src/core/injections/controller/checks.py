@@ -2485,7 +2485,7 @@ def print_single_os_cmd(cmd, output, filename):
     try:
       with open(filename, 'a') as output_file:
         if not menu.options.no_logging:
-          output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + "User-supplied command " + _ + ": " + output.encode(settings.DEFAULT_CODEC).decode() + "\n")
+          output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + "User-supplied command " + _ + ": " + str(output.encode(settings.DEFAULT_CODEC).decode()) + "\n")
     except TypeError:
       pass
   else:

@@ -113,7 +113,7 @@ def store_crawling(output_href):
         settings.print_data_to_stdout(settings.print_info_msg(info_msg))
         with open(filename, "a") as crawling_results:
           for url in output_href:
-            crawling_results.write(url.encode(settings.DEFAULT_CODEC).decode() + "\n")
+            crawling_results.write(str(url.encode(settings.DEFAULT_CODEC).decode()) + "\n")
         return
       elif message in settings.CHOICE_NO:
         return
