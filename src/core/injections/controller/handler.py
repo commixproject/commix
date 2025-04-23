@@ -583,7 +583,7 @@ def do_results_based_proccess(url, timesec, filename, http_request_method, injec
                           continue
                         else:
                           raise
-                      checks.use_temp_folder(no_result, url, timesec, filename, tmp_path, http_request_method, url_time_response)
+                      checks.use_temp_folder(no_result, url, timesec, filename, http_request_method, url_time_response)
                     else:
                       if checks.finalize(exit_loops, no_result, float_percent, injection_type, technique, shell):
                         continue

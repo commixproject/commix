@@ -2999,7 +2999,7 @@ def tfb_controller(no_result, url, timesec, filename, tmp_path, http_request_met
 """
 Check if to use the "/tmp/" directory for tempfile-based technique.
 """
-def use_temp_folder(no_result, url, timesec, filename, tmp_path, http_request_method, url_time_response):
+def use_temp_folder(no_result, url, timesec, filename, http_request_method, url_time_response):
   tmp_path = check_tmp_path(url, timesec, filename, http_request_method, url_time_response)
   settings.print_data_to_stdout(settings.END_LINE.CR)
   message = "It seems that you don't have permissions to "
