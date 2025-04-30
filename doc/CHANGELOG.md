@@ -1,4 +1,5 @@
 ## Version 4.1 (TBA)
+* Fixed: Minor bug-fix regarding parsing empty or invalid JSON object.
 * Added: New tamper script "randomcase.py" that replaces each character in a user-supplied OS command with a random case.
 * Revised: Minor code refactoring regarding multiple tamper scripts.
 * Revised: Minor code refactoring regarding payloads for time-related techniques (i.e. "time-based", "tempfile-based").

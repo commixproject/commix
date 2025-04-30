@@ -223,6 +223,10 @@ def do_POST_check(parameter, http_request_method):
   Grab the value of parameter.
   """
   def multi_params_get_value(param, all_params):
+
+    if len(all_params) == 0 or (len(all_params) == 1 and (all_params[0] == "{}" or json.loads(all_params[0]) == {})):
+      checks.no_parameters_found()
+
     if settings.IS_JSON:
       value = re.findall(r'\:(.*)', all_params[param])
       if not value:
