@@ -647,8 +647,10 @@ def do_results_based_proccess(url, timesec, filename, http_request_method, injec
             else:
               whitespace = settings.WHITESPACES[0]
             cmd = maxlen =  ""
+            if not 'url_time_response' in locals():
+              url_time_response = ""
             if technique != settings.INJECTION_TECHNIQUE.FILE_BASED:
-              OUTPUT_TEXTFILE = url_time_response = ""
+              OUTPUT_TEXTFILE = ""
             # Check for any enumeration options.
             enumeration.stored_session(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response, technique)
             # Check for any system file access options.
