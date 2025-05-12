@@ -2058,19 +2058,22 @@ def check_quotes_json_data(data):
 
 # Check if valid JSON
 def is_JSON_check(parameter):
-  try:
-    json_object = json.loads(parameter.replace(settings.INJECT_TAG,""))
-    return True
-  except ValueError as err_msg:
-    _ = False
-    if "Expecting" in str(err_msg) and any(_ in str(err_msg) for _ in ("value", "delimiter")):
-      _ = True
-    if not "No JSON object could be decoded" in str(err_msg) and \
-       not _:
-      err_msg = "JSON " + str(err_msg) + ". "
+  if not settings.IS_JSON:
+    try:
+      # Attempt to load the JSON string
+      json_object = json.loads(parameter.replace(settings.INJECT_TAG,""))
+      return True
+    except json.JSONDecodeError as err_msg:
+      # Handle JSONDecodeError and identify common issues
+      error_str = str(err_msg)
+      if "No JSON object could be decoded" in error_str:
+          err_msg = "JSON is invalid. No valid JSON object found."
+      elif "Expecting" in error_str and any(_ in error_str for _ in ("value", "delimiter")):
+          err_msg = "JSON parsing error: " + error_str + ". Check for missing commas, colons, or improperly escaped characters."
+      elif "Expecting" in error_str and "end of data" in error_str:
+          err_msg = "JSON parsing error: " + error_str + ". Check for extra commas or missing closing brackets."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
       raise SystemExit()
-    return False
 
 # Process with JSON data
 def process_data(data_type, http_request_method):
