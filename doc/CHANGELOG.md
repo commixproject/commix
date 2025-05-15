@@ -1,4 +1,5 @@
 ## Version 4.1 (TBA)
+* Revised: Improved key transformation for nested structures using bracket notation and dot syntax.
 * Fixed: Minor bug-fix in parsing improperly escaped characters in JSON objects.
 * Fixed: Minor bug-fix in parsing empty or invalid JSON object.
 * Added: New tamper script "randomcase.py" that replaces each character in a user-supplied OS command with a random case.

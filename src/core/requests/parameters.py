@@ -468,6 +468,8 @@ def vuln_POST_param(parameter, url):
     parameters = re.sub(settings.IGNORE_JSON_CHAR_REGEX, '', parameter.split(settings.INJECT_TAG)[0].replace(",\"", settings.RANDOM_TAG + "\""))
     parameters = ''.join(parameters.split(", ")[-1:]).strip()
     parameters = ''.join(parameters.split(":")[0]).strip()
+    # Converts a key into a dot notation format, suitable for hierarchical or flattened structures.
+    parameters = re.sub(r'(\.(\d+))\.', r'[\2].', parameters.replace('_', '.'))
     settings.TESTABLE_VALUE = vuln_parameter = ''.join(parameters.split(settings.RANDOM_TAG)[:1])
     if settings.CUSTOM_INJECTION_MARKER:
       settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST.append(vuln_parameter) if vuln_parameter not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST
