@@ -1,4 +1,5 @@
 ## Version 4.1 (TBA)
+* Revised: Minor code refactoring to ensure compliance with PEP 440 versioning standards.
 * Revised: Improved key transformation for nested structures using bracket notation and dot syntax.
 * Fixed: Minor bug-fix in parsing improperly escaped characters in JSON objects.
 * Fixed: Minor bug-fix in parsing empty or invalid JSON object.
