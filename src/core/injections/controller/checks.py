@@ -584,6 +584,18 @@ def ignore_google_analytics_cookie(cookie):
     return True
 
 """
+Payload new line fixation
+"""
+def payload_newline_fixation(payload):
+  # New line fixation
+  if any([settings.USER_AGENT_INJECTION, settings.REFERER_INJECTION, settings.HOST_INJECTION, settings.CUSTOM_HEADER_INJECTION]):
+    payload = payload.replace("\n",";")
+  else:
+    if settings.TARGET_OS != settings.OS.WINDOWS:
+      payload = payload.replace("\n","%0d")
+  return payload
+
+"""
 Fix for %0a, %0d%0a separators
 """
 def newline_fixation(payload):
