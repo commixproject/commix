@@ -2070,13 +2070,14 @@ def check_quotes_json_data(data):
 
 # Check if valid JSON
 def is_JSON_check(parameter):
-  if not settings.IS_JSON:
-    try:
-      # Attempt to load the JSON string
-      json_object = json.loads(parameter.replace(settings.INJECT_TAG,""))
-      return True
-    except json.JSONDecodeError as err_msg:
-      # Handle JSONDecodeError and identify common issues
+  try:
+    # Attempt to load the JSON string
+    json_object = json.loads(parameter.replace(settings.INJECT_TAG,""))
+    settings.IS_VALID_JSON = True
+    return settings.IS_VALID_JSON
+  except json.JSONDecodeError as err_msg:
+    # Handle JSONDecodeError and identify common issues
+    if settings.IS_JSON and not settings.IS_VALID_JSON:
       error_str = str(err_msg)
       if "No JSON object could be decoded" in error_str:
           err_msg = "JSON is invalid. No valid JSON object found."
@@ -2086,6 +2087,7 @@ def is_JSON_check(parameter):
           err_msg = "JSON parsing error: " + error_str + ". Check for extra commas or missing closing brackets."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
       raise SystemExit()
+
 
 # Process with JSON data
 def process_data(data_type, http_request_method):

@@ -224,8 +224,15 @@ def do_POST_check(parameter, http_request_method):
   """
   def multi_params_get_value(param, all_params):
 
-    if len(all_params) == 0 or (len(all_params) == 1 and (all_params[0] == "{}" or json.loads(all_params[0]) == {})):
-      checks.no_parameters_found()
+    def is_empty_json_str(s):
+        try:
+          return json.loads(s) == {}
+        except Exception:
+          return False
+
+    # Check if parameters are empty or meaningless
+    if (len(all_params) == 0 or (len(all_params) == 1 and (all_params[0] == "{}" or is_empty_json_str(all_params[0])))):
+        checks.no_parameters_found()
 
     if settings.IS_JSON:
       value = re.findall(r'\:(.*)', all_params[param])

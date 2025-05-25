@@ -262,7 +262,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.1"
-REVISION = "28"
+REVISION = "29"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1006,6 +1006,7 @@ XML_RECOGNITION_REGEX = r'(?s)\A\s*<[^>]+>(.+>)?\s*\Z'
 
 # JSON Data
 IS_JSON = False
+IS_VALID_JSON = False
 
 # Infixes used for automatic recognition of parameters carrying anti-CSRF tokens
 CSRF_TOKEN_PARAMETER_INFIXES = ("csrf", "xsrf", "token")
