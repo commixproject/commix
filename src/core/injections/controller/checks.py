@@ -636,9 +636,9 @@ def page_encoding(response, action):
   _ = False
   try:
     if action == "encode" and type(page) == str:
-      return page.encode(settings.DEFAULT_CODEC, errors="ignore")
+      return page.encode(settings.DEFAULT_CODEC, errors="replace")
     else:
-      return page.decode(settings.DEFAULT_CODEC, errors="ignore")
+      return page.decode(settings.DEFAULT_CODEC, errors="replace")
   except (UnicodeEncodeError, UnicodeDecodeError) as err:
     err_msg = "The " + str(err).split(":")[0] + ". "
     _ = True
@@ -2176,7 +2176,7 @@ def print_ps_version(ps_version, filename, _):
     info_msg = "Powershell version: " + ps_version
     settings.print_data_to_stdout(settings.print_bold_info_msg(info_msg))
     # Add infos to logs file.
-    with open(filename, 'a') as output_file:
+    with open(filename, 'a', encoding=settings.DEFAULT_CODEC) as output_file:
       if not menu.options.no_logging:
         info_msg = "Powershell version: " + ps_version + "\n"
         output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
@@ -2197,7 +2197,7 @@ def print_hostname(shell, filename, _):
     info_msg = "Hostname: " +  str(shell)
     settings.print_data_to_stdout(settings.print_bold_info_msg(info_msg))
     # Add infos to logs file.
-    with open(filename, 'a') as output_file:
+    with open(filename, 'a', encoding=settings.DEFAULT_CODEC) as output_file:
       if not menu.options.no_logging:
         info_msg = info_msg + "\n"
         output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
@@ -2215,7 +2215,7 @@ def print_current_user(cu_account, filename, _):
     info_msg = "Current user: " +  str(cu_account)
     settings.print_data_to_stdout(settings.print_bold_info_msg(info_msg))
     # Add infos to logs file.
-    with open(filename, 'a') as output_file:
+    with open(filename, 'a', encoding=settings.DEFAULT_CODEC) as output_file:
       if not menu.options.no_logging:
         info_msg = info_msg + "\n"
         output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
@@ -2238,7 +2238,7 @@ def print_current_user_privs(shell, filename, _):
   info_msg = "Current user has excessive privileges: " +  str(priv)
   settings.print_data_to_stdout(settings.print_bold_info_msg(info_msg))
   # Add infos to logs file.
-  with open(filename, 'a') as output_file:
+  with open(filename, 'a', encoding=settings.DEFAULT_CODEC) as output_file:
     if not menu.options.no_logging:
       info_msg = info_msg + "\n"
       output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
@@ -2252,7 +2252,7 @@ def print_os_info(target_os, target_arch, filename, _):
     info_msg = "Operating system: " +  str(target_os) + settings.SINGLE_WHITESPACE + str(target_arch)
     settings.print_data_to_stdout(settings.print_bold_info_msg(info_msg))
     # Add infos to logs file.
-    with open(filename, 'a') as output_file:
+    with open(filename, 'a', encoding=settings.DEFAULT_CODEC) as output_file:
       if not menu.options.no_logging:
         info_msg = info_msg + "\n"
         output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
@@ -2322,7 +2322,7 @@ def print_users(sys_users, filename, _, separator, TAG, cmd, prefix, suffix, whi
           info_msg += " [" + str(len(sys_users_list)) + "]:"
           settings.print_data_to_stdout(settings.print_bold_info_msg(info_msg))
           # Add infos to logs file.
-          with open(filename, 'a') as output_file:
+          with open(filename, 'a', encoding=settings.DEFAULT_CODEC) as output_file:
             if not menu.options.no_logging:
               output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
           count = 0
@@ -2331,7 +2331,7 @@ def print_users(sys_users, filename, _, separator, TAG, cmd, prefix, suffix, whi
             is_privileged = is_privileged = ""
             settings.print_data_to_stdout(settings.SUB_CONTENT_SIGN + "(" +str(count)+ ") '" + Style.BRIGHT +  sys_users_list[user] + Style.RESET_ALL + "'" + Style.BRIGHT + is_privileged + Style.RESET_ALL)
             # Add infos to logs file.
-            with open(filename, 'a') as output_file:
+            with open(filename, 'a', encoding=settings.DEFAULT_CODEC) as output_file:
               if not menu.options.no_logging:
                 if count == 1 :
                   output_file.write("\n")
@@ -2364,7 +2364,7 @@ def print_users(sys_users, filename, _, separator, TAG, cmd, prefix, suffix, whi
           settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
           sys_users = " ".join(str(p) for p in sys_users).strip()
           settings.print_data_to_stdout(sys_users)
-          with open(filename, 'a') as output_file:
+          with open(filename, 'a', encoding=settings.DEFAULT_CODEC) as output_file:
             if not menu.options.no_logging:
               output_file.write("      " + sys_users)
         else:
@@ -2379,7 +2379,7 @@ def print_users(sys_users, filename, _, separator, TAG, cmd, prefix, suffix, whi
             info_msg += " [" + str(len(sys_users_list)) + "]:"
             settings.print_data_to_stdout(settings.print_bold_info_msg(info_msg))
             # Add infos to logs file.
-            with open(filename, 'a') as output_file:
+            with open(filename, 'a', encoding=settings.DEFAULT_CODEC) as output_file:
               if not menu.options.no_logging:
                 output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
             count = 0
@@ -2418,7 +2418,7 @@ def print_users(sys_users, filename, _, separator, TAG, cmd, prefix, suffix, whi
                   is_privileged_nh = ""
                 settings.print_data_to_stdout(settings.SUB_CONTENT_SIGN + "(" +str(count)+ ") '" + Style.BRIGHT + fields[0] + Style.RESET_ALL + "' " + Style.BRIGHT + is_privileged + Style.RESET_ALL + "(uid=" + fields[1] + "). Home directory is in '" + Style.BRIGHT + fields[2]+ Style.RESET_ALL + "'.")
                 # Add infos to logs file.
-                with open(filename, 'a') as output_file:
+                with open(filename, 'a', encoding=settings.DEFAULT_CODEC) as output_file:
                   if not menu.options.no_logging:
                     if count == 1 :
                       output_file.write("\n")
@@ -2430,7 +2430,7 @@ def print_users(sys_users, filename, _, separator, TAG, cmd, prefix, suffix, whi
                   settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
                 sys_users = " ".join(str(p) for p in sys_users.split(":"))
                 settings.print_data_to_stdout(sys_users)
-                with open(filename, 'a') as output_file:
+                with open(filename, 'a', encoding=settings.DEFAULT_CODEC) as output_file:
                   if not menu.options.no_logging:
                     output_file.write("      " + sys_users)
       else:
@@ -2460,7 +2460,7 @@ def print_passes(sys_passes, filename, _, alter_shell):
       info_msg += " password hashes [" + str(len(sys_passes)) + "]:"
       settings.print_data_to_stdout(settings.print_bold_info_msg(info_msg))
       # Add infos to logs file.
-      with open(filename, 'a') as output_file:
+      with open(filename, 'a', encoding=settings.DEFAULT_CODEC) as output_file:
         if not menu.options.no_logging:
           output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg )
       count = 0
@@ -2472,7 +2472,7 @@ def print_passes(sys_passes, filename, _, alter_shell):
             if not "*" in fields[1] and not "!" in fields[1] and fields[1] != "":
               settings.print_data_to_stdout("  (" +str(count)+ ") " + Style.BRIGHT + fields[0] + Style.RESET_ALL + " : " + Style.BRIGHT + fields[1]+ Style.RESET_ALL)
               # Add infos to logs file.
-              with open(filename, 'a') as output_file:
+              with open(filename, 'a', encoding=settings.DEFAULT_CODEC) as output_file:
                 if not menu.options.no_logging:
                   if count == 1 :
                     output_file.write("\n")
@@ -2484,7 +2484,7 @@ def print_passes(sys_passes, filename, _, alter_shell):
             warn_msg += "in the appropriate format. Thus, it is expoted as a text file."
             settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
           settings.print_data_to_stdout(fields[0])
-          with open(filename, 'a') as output_file:
+          with open(filename, 'a', encoding=settings.DEFAULT_CODEC) as output_file:
             if not menu.options.no_logging:
               output_file.write("      " + fields[0])
     else:
@@ -2500,7 +2500,7 @@ def print_single_os_cmd(cmd, output, filename):
     _ = "'" + cmd + "' execution output"
     settings.print_data_to_stdout(settings.print_retrieved_data(_, output))
     try:
-      with open(filename, 'a') as output_file:
+      with open(filename, 'a', encoding=settings.DEFAULT_CODEC) as output_file:
         if not menu.options.no_logging:
           output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + "User-supplied command " + _ + ": " + str(output.encode(settings.DEFAULT_CODEC).decode()) + "\n")
     except TypeError:
@@ -2632,7 +2632,7 @@ def file_read_status(shell, file_to_read, filename):
   if shell:
     _ = "Fetched file content"
     settings.print_data_to_stdout(settings.print_retrieved_data(_, shell))
-    with open(filename, 'a') as output_file:
+    with open(filename, 'a', encoding=settings.DEFAULT_CODEC) as output_file:
       if not menu.options.no_logging:
         info_msg = "Extracted content of the file '"
         info_msg += file_to_read + "' : " + shell + "\n"
