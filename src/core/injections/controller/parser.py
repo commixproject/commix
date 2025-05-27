@@ -142,7 +142,17 @@ def logfile_parser():
       if auth_provided:
         menu.options.auth_type = auth_provided[0].lower()
         if menu.options.auth_type.lower() == settings.AUTH_TYPE.BASIC:
-          menu.options.auth_cred = base64.b64decode(auth_provided[1]).decode()
+          # menu.options.auth_cred = base64.b64decode(auth_provided[1]).decode()
+          try:
+            # Add base64 padding if missing
+            b64_string = auth_provided[1]
+            b64_string += '=' * (-len(b64_string) % 4)
+            menu.options.auth_cred = base64.b64decode(b64_string).decode()
+          except (binascii.Error, UnicodeDecodeError) as e:
+            err_msg = "Invalid base64-encoded credentials provided in Authorization header: " + format(str(e))
+            settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+            raise SystemExit()
+
         elif menu.options.auth_type.lower() == settings.AUTH_TYPE.DIGEST:
           if not menu.options.auth_cred:
             err_msg = "Use the '--auth-cred' option to provide a valid pair of "

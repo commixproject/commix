@@ -1,4 +1,5 @@
 ## Version 4.1 (TBA)
+* Fixed: Minor bug-fix in parsing improperly padded `Base64` in Authorization headers.
 * Revised: Minor code refactoring to enhance file I/O reliability.
 * Revised: Minor code refactoring to ensure compliance with PEP 440 versioning standards.
 * Revised: Improved key transformation for nested structures using bracket notation and dot syntax.
