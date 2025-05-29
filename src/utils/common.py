@@ -42,11 +42,23 @@ def invalid_option(option):
   settings.print_data_to_stdout(settings.print_error_msg(err_msg))
 
 """
+Reads input from terminal safely
+"""
+def safe_input(message):
+  try:
+    return _input(message)
+  except UnicodeDecodeError as e:
+    return _input(message.encode("utf-8", "ignore").decode("utf-8"))
+  except Exception as err_msg:
+    settings.print_data_to_stdout(settings.print_error_msg(err_msg))
+    return ""
+
+"""
 Reads input from terminal
 """
 def read_input(message, default=None, check_batch=True):
   def is_empty():
-    value = _input(settings.print_message(message))
+    value = safe_input(settings.print_message(message))
     if len(value) == 0:
       return default
     else:

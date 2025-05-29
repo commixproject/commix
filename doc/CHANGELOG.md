@@ -1,4 +1,5 @@
 ## Version 4.1 (TBA)
+* Fixed: Improved handling of terminal input to prevent encoding errors.
 * Fixed: Minor bug-fix in parsing improperly padded `Base64` in Authorization headers.
 * Revised: Minor code refactoring to enhance file I/O reliability.
 * Revised: Minor code refactoring to ensure compliance with PEP 440 versioning standards.
