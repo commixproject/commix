@@ -2706,7 +2706,7 @@ def check_file_to_upload():
   file_to_upload = menu.options.file_upload.encode(settings.DEFAULT_CODEC).decode()
   try:
     _urllib.request.urlopen(file_to_upload, timeout=settings.TIMEOUT)
-  except _urllib.error.HTTPError as err_msg:
+  except (_urllib.error.HTTPError, _urllib.error.URLError) as err_msg:
     warn_msg = "It seems that the '" + file_to_upload + "' file, does not exist. (" +str(err_msg)+ ")"
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
     raise SystemExit()

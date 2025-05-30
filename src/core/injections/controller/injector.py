@@ -519,7 +519,7 @@ def injection_results(response, TAG, cmd, technique, url, OUTPUT_TEXTFILE, times
           shell = [newline.replace(settings.END_LINE.CR, "") for newline in shell]
           #shell = [space.strip() for space in shell]
           shell = [empty for empty in shell if empty]
-      except _urllib.error.HTTPError as e:
+      except (_urllib.error.HTTPError, _urllib.error.URLError) as e:
         if str(e.getcode()) == settings.NOT_FOUND_ERROR:
           shell = ""
 

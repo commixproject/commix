@@ -100,7 +100,7 @@ def estimate_response_time(url, timesec, http_request_method):
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
-  except _urllib.error.HTTPError as err:
+  except (_urllib.error.HTTPError, _urllib.error.URLError) as err:
     ignore_start = time.time()
     if settings.UNAUTHORIZED_ERROR in str(err) and int(settings.UNAUTHORIZED_ERROR) in settings.IGNORE_CODE:
       pass
