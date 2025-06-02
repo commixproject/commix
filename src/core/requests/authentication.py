@@ -58,6 +58,7 @@ def authentication_process(http_request_method):
     request = _urllib.request.Request(auth_url, auth_data.encode(settings.DEFAULT_CODEC), method=http_request_method)
     # Check if defined extra headers.
     headers.do_check(request)
+    headers.check_http_traffic(request)
     # Get the response of the request.
     return _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
 
