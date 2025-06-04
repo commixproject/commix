@@ -317,122 +317,242 @@ Proceed to the injection process for the appropriate parameter.
 """
 def injection_proccess(url, check_parameter, http_request_method, filename, timesec):
   settings.NOT_TESTABLE_PARAMETERS = False
-  target_os_list = [settings.OS.UNIX, settings.OS.WINDOWS] if settings.CHECK_BOTH_OS else [settings.TARGET_OS]
-  for current_os in target_os_list:
-    settings.TARGET_OS = current_os
+  initial_target_os_for_loop = settings.TARGET_OS # Store to restore if not CHECK_BOTH_OS
 
-    if settings.PERFORM_BASIC_SCANS:
-      checks.keep_testing_others(filename, url)
-      if not settings.LOAD_SESSION:
-        settings.LOAD_SESSION = None
-      basic_level_checks()
+  if settings.CHECK_BOTH_OS:
+      os_options_for_loop = [settings.OS.UNIX, settings.OS.WINDOWS]
+      # If OS_CHECKS_NUM is defined and positive, use it, otherwise iterate once per OS in os_options_for_loop
+      num_iterations_for_loop = settings.OS_CHECKS_NUM if hasattr(settings, 'OS_CHECKS_NUM') and settings.OS_CHECKS_NUM > 0 else len(os_options_for_loop)
 
-    inject_http_headers = check_parameter_in_http_header(check_parameter)
+      for i_for_loop in range(num_iterations_for_loop):
+          current_os_for_loop = os_options_for_loop[i_for_loop % len(os_options_for_loop)]
+          settings.TARGET_OS = current_os_for_loop
 
-    if inject_http_headers:
-      checks.define_vulnerable_http_header(check_parameter)
+          # BEGINNING OF PASTED ORIGINAL LOOP CONTENT (from original line 323 to 426)
+          if settings.PERFORM_BASIC_SCANS:
+            checks.keep_testing_others(filename, url)
+            if not settings.LOAD_SESSION:
+              settings.LOAD_SESSION = None
+            basic_level_checks()
 
-    # User-Agent/Referer/Host/Custom HTTP header Injection(s)
-    if any((settings.USER_AGENT_INJECTION, settings.REFERER_INJECTION, settings.HOST_INJECTION, settings.CUSTOM_HEADER_INJECTION)):
-      header_name = ""
-      the_type = "HTTP Header"
-      inject_parameter = " parameter '" + check_parameter + "'"
-    else:
-      if settings.COOKIE_INJECTION:
-        header_name = settings.COOKIE
-      else:
+          inject_http_headers = check_parameter_in_http_header(check_parameter)
+
+          if inject_http_headers:
+            checks.define_vulnerable_http_header(check_parameter)
+
+          # User-Agent/Referer/Host/Custom HTTP header Injection(s)
+          if any((settings.USER_AGENT_INJECTION, settings.REFERER_INJECTION, settings.HOST_INJECTION, settings.CUSTOM_HEADER_INJECTION)):
+            header_name = ""
+            the_type = "HTTP Header"
+            inject_parameter = " parameter '" + check_parameter + "'"
+          else:
+            if settings.COOKIE_INJECTION:
+              header_name = settings.COOKIE
+            else:
+              header_name = ""
+            the_type = " parameter"
+            inject_parameter = " '" + check_parameter + "'"
+
+          # Estimating the response time (in seconds)
+          timesec, url_time_response = requests.estimate_response_time(url, timesec, http_request_method)
+
+          # Load modules
+          modules_handler.load_modules(url, http_request_method, filename)
+          # checks.tamper_scripts(stored_tamper_scripts=False)
+
+          settings.CHECKING_PARAMETER = ""
+          settings.TESTABLE_PARAMETER = check_parameter
+          if not header_name == settings.COOKIE and not the_type == "HTTP Header":
+            settings.CHECKING_PARAMETER = checks.check_http_method(url)
+            settings.CHECKING_PARAMETER += ('', ' JSON')[settings.IS_JSON] + ('', ' SOAP/XML')[settings.IS_XML]
+          settings.CHECKING_PARAMETER = "{}{}{}".format(the_type, header_name, inject_parameter)
+          if header_name == settings.COOKIE:
+              settings.CHECKING_PARAMETER = "{} {}{}".format(header_name, the_type, inject_parameter)
+
+          if check_parameter in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST:
+            settings.CHECKING_PARAMETER = "(custom) {}".format(settings.CHECKING_PARAMETER)
+
+          if not settings.LOAD_SESSION:
+            info_msg = "Setting " + settings.CHECKING_PARAMETER  + " for tests."
+            settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+
+          if menu.options.skip_heuristics:
+            if settings.VERBOSITY_LEVEL != 0:
+              debug_msg = "Skipping heuristic (basic) tests to the " + settings.CHECKING_PARAMETER + "."
+              settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
+          else:
+            if not settings.LOAD_SESSION:
+              checks.recognise_payload(payload=settings.TESTABLE_VALUE)
+              info_msg = "Performing heuristic (basic) tests to the " + settings.CHECKING_PARAMETER + "."
+              settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+
+              if not (len(menu.options.tech) == 1 and "e" in menu.options.tech):
+                url = command_injection_heuristic_basic(url, http_request_method, check_parameter, the_type, header_name, inject_http_headers)
+
+              if not settings.IDENTIFIED_COMMAND_INJECTION and "e" in menu.options.tech:
+                # Check for identified warnings
+                url = code_injections_heuristic_basic(url, http_request_method, check_parameter, the_type, header_name, inject_http_headers)
+                if settings.IDENTIFIED_WARNINGS or settings.IDENTIFIED_PHPINFO:
+                  checks.skip_testing(filename, url)
+
+              if not settings.IDENTIFIED_COMMAND_INJECTION and not settings.IDENTIFIED_WARNINGS and not settings.IDENTIFIED_PHPINFO:
+                settings.HEURISTIC_TEST.POSITIVE = False
+                warn_msg = "Heuristic (basic) tests shows that "
+                warn_msg += settings.CHECKING_PARAMETER + " might not be injectable."
+                settings.print_data_to_stdout(settings.print_bold_warning_msg(warn_msg))
+
+          if (menu.options.smart and not settings.HEURISTIC_TEST.POSITIVE) or (menu.options.smart and menu.options.skip_heuristics):
+            info_msg = "Skipping "
+            info_msg += settings.CHECKING_PARAMETER + "."
+            settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+            settings.HEURISTIC_TEST.POSITIVE = True
+          else:
+            if menu.options.failed_tries and \
+               menu.options.tech and not "f" in menu.options.tech and not \
+               menu.options.failed_tries:
+              warn_msg = "Due to the provided (unsuitable) injection technique"
+              warn_msg += "s"[len(menu.options.tech) == 1:][::-1] + ", "
+              warn_msg += "the option '--failed-tries' will be ignored."
+              settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+
+            # Procced with file-based semiblind command injection technique,
+            # once the user provides the path of web server's root directory.
+            if menu.options.web_root and settings.USER_APPLIED_TECHNIQUE and not "f" in menu.options.tech:
+              if not menu.options.web_root.endswith("/"):
+                 menu.options.web_root =  menu.options.web_root + "/"
+              if checks.procced_with_file_based_technique():
+                menu.options.tech = "f"
+
+            settings.START_SCANNING = True
+            classic_command_injection_technique(url, timesec, filename, http_request_method)
+            dynamic_code_evaluation_technique(url, timesec, filename, http_request_method)
+            timebased_command_injection_technique(url, timesec, filename, http_request_method, url_time_response)
+            filebased_command_injection_technique(url, timesec, filename, http_request_method, url_time_response)
+
+            # All injection techniques seems to be failed!
+            if checks.injection_techniques_status() == False:
+              warn_msg = "The tested "
+              warn_msg += settings.CHECKING_PARAMETER
+              warn_msg += " does not seem to be injectable."
+              settings.print_data_to_stdout(settings.print_bold_warning_msg(warn_msg))
+            else:
+              if settings.LOAD_SESSION:
+                checks.quit(filename, url, _ = False)
+          # END OF PASTED ORIGINAL LOOP CONTENT
+  else: # This corresponds to 'if not settings.CHECK_BOTH_OS'
+      settings.TARGET_OS = initial_target_os_for_loop # Restore original TARGET_OS
+
+      # BEGINNING OF PASTED ORIGINAL LOOP CONTENT (from original line 323 to 426)
+      if settings.PERFORM_BASIC_SCANS:
+        checks.keep_testing_others(filename, url)
+        if not settings.LOAD_SESSION:
+          settings.LOAD_SESSION = None
+        basic_level_checks()
+
+      inject_http_headers = check_parameter_in_http_header(check_parameter)
+
+      if inject_http_headers:
+        checks.define_vulnerable_http_header(check_parameter)
+
+      # User-Agent/Referer/Host/Custom HTTP header Injection(s)
+      if any((settings.USER_AGENT_INJECTION, settings.REFERER_INJECTION, settings.HOST_INJECTION, settings.CUSTOM_HEADER_INJECTION)):
         header_name = ""
-      the_type = " parameter"
-      inject_parameter = " '" + check_parameter + "'"
+        the_type = "HTTP Header"
+        inject_parameter = " parameter '" + check_parameter + "'"
+      else:
+        if settings.COOKIE_INJECTION:
+          header_name = settings.COOKIE
+        else:
+          header_name = ""
+        the_type = " parameter"
+        inject_parameter = " '" + check_parameter + "'"
 
-    # Estimating the response time (in seconds)
-    timesec, url_time_response = requests.estimate_response_time(url, timesec, http_request_method)
+      # Estimating the response time (in seconds)
+      timesec, url_time_response = requests.estimate_response_time(url, timesec, http_request_method)
 
-    # Load modules
-    modules_handler.load_modules(url, http_request_method, filename)
-    # checks.tamper_scripts(stored_tamper_scripts=False)
+      # Load modules
+      modules_handler.load_modules(url, http_request_method, filename)
+      # checks.tamper_scripts(stored_tamper_scripts=False)
 
-    settings.CHECKING_PARAMETER = ""
-    settings.TESTABLE_PARAMETER = check_parameter
-    if not header_name == settings.COOKIE and not the_type == "HTTP Header":
-      settings.CHECKING_PARAMETER = checks.check_http_method(url)
-      settings.CHECKING_PARAMETER += ('', ' JSON')[settings.IS_JSON] + ('', ' SOAP/XML')[settings.IS_XML]
-    settings.CHECKING_PARAMETER = f"{the_type}{header_name}{inject_parameter}"
-    if header_name == settings.COOKIE:
-        settings.CHECKING_PARAMETER = f"{header_name} {the_type}{inject_parameter}"
+      settings.CHECKING_PARAMETER = ""
+      settings.TESTABLE_PARAMETER = check_parameter
+      if not header_name == settings.COOKIE and not the_type == "HTTP Header":
+        settings.CHECKING_PARAMETER = checks.check_http_method(url)
+        settings.CHECKING_PARAMETER += ('', ' JSON')[settings.IS_JSON] + ('', ' SOAP/XML')[settings.IS_XML]
+      settings.CHECKING_PARAMETER = "{}{}{}".format(the_type, header_name, inject_parameter)
+      if header_name == settings.COOKIE:
+          settings.CHECKING_PARAMETER = "{} {}{}".format(header_name, the_type, inject_parameter)
 
-    if check_parameter in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST:
-      settings.CHECKING_PARAMETER = f"(custom) {settings.CHECKING_PARAMETER}"
+      if check_parameter in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST:
+        settings.CHECKING_PARAMETER = "(custom) {}".format(settings.CHECKING_PARAMETER)
 
-    if not settings.LOAD_SESSION:
-      info_msg = "Setting " + settings.CHECKING_PARAMETER  + " for tests."
-      settings.print_data_to_stdout(settings.print_info_msg(info_msg))
-      
-    if menu.options.skip_heuristics:
-      if settings.VERBOSITY_LEVEL != 0:
-        debug_msg = "Skipping heuristic (basic) tests to the " + settings.CHECKING_PARAMETER + "."
-        settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
-    else:
       if not settings.LOAD_SESSION:
-        checks.recognise_payload(payload=settings.TESTABLE_VALUE)
-        info_msg = "Performing heuristic (basic) tests to the " + settings.CHECKING_PARAMETER + "."
+        info_msg = "Setting " + settings.CHECKING_PARAMETER  + " for tests."
         settings.print_data_to_stdout(settings.print_info_msg(info_msg))
 
-        if not (len(menu.options.tech) == 1 and "e" in menu.options.tech):
-          url = command_injection_heuristic_basic(url, http_request_method, check_parameter, the_type, header_name, inject_http_headers)
-
-        if not settings.IDENTIFIED_COMMAND_INJECTION and "e" in menu.options.tech:
-          # Check for identified warnings
-          url = code_injections_heuristic_basic(url, http_request_method, check_parameter, the_type, header_name, inject_http_headers)
-          if settings.IDENTIFIED_WARNINGS or settings.IDENTIFIED_PHPINFO:
-            checks.skip_testing(filename, url)
-
-        if not settings.IDENTIFIED_COMMAND_INJECTION and not settings.IDENTIFIED_WARNINGS and not settings.IDENTIFIED_PHPINFO:
-          settings.HEURISTIC_TEST.POSITIVE = False
-          warn_msg = "Heuristic (basic) tests shows that "
-          warn_msg += settings.CHECKING_PARAMETER + " might not be injectable."
-          settings.print_data_to_stdout(settings.print_bold_warning_msg(warn_msg))
-
-    if (menu.options.smart and not settings.HEURISTIC_TEST.POSITIVE) or (menu.options.smart and menu.options.skip_heuristics):
-      info_msg = "Skipping "
-      info_msg += settings.CHECKING_PARAMETER + "."
-      settings.print_data_to_stdout(settings.print_info_msg(info_msg))
-      settings.HEURISTIC_TEST.POSITIVE = True
-    else:
-      if menu.options.failed_tries and \
-         menu.options.tech and not "f" in menu.options.tech and not \
-         menu.options.failed_tries:
-        warn_msg = "Due to the provided (unsuitable) injection technique"
-        warn_msg += "s"[len(menu.options.tech) == 1:][::-1] + ", "
-        warn_msg += "the option '--failed-tries' will be ignored."
-        settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
-
-      # Procced with file-based semiblind command injection technique,
-      # once the user provides the path of web server's root directory.
-      if menu.options.web_root and settings.USER_APPLIED_TECHNIQUE and not "f" in menu.options.tech:
-        if not menu.options.web_root.endswith("/"):
-           menu.options.web_root =  menu.options.web_root + "/"
-        if checks.procced_with_file_based_technique():
-          menu.options.tech = "f"
-
-      settings.START_SCANNING = True
-      classic_command_injection_technique(url, timesec, filename, http_request_method)
-      dynamic_code_evaluation_technique(url, timesec, filename, http_request_method)
-      timebased_command_injection_technique(url, timesec, filename, http_request_method, url_time_response)
-      filebased_command_injection_technique(url, timesec, filename, http_request_method, url_time_response)
-
-      # All injection techniques seems to be failed!
-      if checks.injection_techniques_status() == False:
-        warn_msg = "The tested "
-        warn_msg += settings.CHECKING_PARAMETER
-        warn_msg += " does not seem to be injectable."
-        settings.print_data_to_stdout(settings.print_bold_warning_msg(warn_msg))
+      if menu.options.skip_heuristics:
+        if settings.VERBOSITY_LEVEL != 0:
+          debug_msg = "Skipping heuristic (basic) tests to the " + settings.CHECKING_PARAMETER + "."
+          settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
       else:
-        if settings.LOAD_SESSION:
-          checks.quit(filename, url, _ = False)
+        if not settings.LOAD_SESSION:
+          checks.recognise_payload(payload=settings.TESTABLE_VALUE)
+          info_msg = "Performing heuristic (basic) tests to the " + settings.CHECKING_PARAMETER + "."
+          settings.print_data_to_stdout(settings.print_info_msg(info_msg))
 
-    if not settings.CHECK_BOTH_OS:
-      break
+          if not (len(menu.options.tech) == 1 and "e" in menu.options.tech):
+            url = command_injection_heuristic_basic(url, http_request_method, check_parameter, the_type, header_name, inject_http_headers)
+
+          if not settings.IDENTIFIED_COMMAND_INJECTION and "e" in menu.options.tech:
+            # Check for identified warnings
+            url = code_injections_heuristic_basic(url, http_request_method, check_parameter, the_type, header_name, inject_http_headers)
+            if settings.IDENTIFIED_WARNINGS or settings.IDENTIFIED_PHPINFO:
+              checks.skip_testing(filename, url)
+
+          if not settings.IDENTIFIED_COMMAND_INJECTION and not settings.IDENTIFIED_WARNINGS and not settings.IDENTIFIED_PHPINFO:
+            settings.HEURISTIC_TEST.POSITIVE = False
+            warn_msg = "Heuristic (basic) tests shows that "
+            warn_msg += settings.CHECKING_PARAMETER + " might not be injectable."
+            settings.print_data_to_stdout(settings.print_bold_warning_msg(warn_msg))
+
+      if (menu.options.smart and not settings.HEURISTIC_TEST.POSITIVE) or (menu.options.smart and menu.options.skip_heuristics):
+        info_msg = "Skipping "
+        info_msg += settings.CHECKING_PARAMETER + "."
+        settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+        settings.HEURISTIC_TEST.POSITIVE = True
+      else:
+        if menu.options.failed_tries and \
+           menu.options.tech and not "f" in menu.options.tech and not \
+           menu.options.failed_tries:
+          warn_msg = "Due to the provided (unsuitable) injection technique"
+          warn_msg += "s"[len(menu.options.tech) == 1:][::-1] + ", "
+          warn_msg += "the option '--failed-tries' will be ignored."
+          settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+
+        # Procced with file-based semiblind command injection technique,
+        # once the user provides the path of web server's root directory.
+        if menu.options.web_root and settings.USER_APPLIED_TECHNIQUE and not "f" in menu.options.tech:
+          if not menu.options.web_root.endswith("/"):
+             menu.options.web_root =  menu.options.web_root + "/"
+          if checks.procced_with_file_based_technique():
+            menu.options.tech = "f"
+
+        settings.START_SCANNING = True
+        classic_command_injection_technique(url, timesec, filename, http_request_method)
+        dynamic_code_evaluation_technique(url, timesec, filename, http_request_method)
+        timebased_command_injection_technique(url, timesec, filename, http_request_method, url_time_response)
+        filebased_command_injection_technique(url, timesec, filename, http_request_method, url_time_response)
+
+        # All injection techniques seems to be failed!
+        if checks.injection_techniques_status() == False:
+          warn_msg = "The tested "
+          warn_msg += settings.CHECKING_PARAMETER
+          warn_msg += " does not seem to be injectable."
+          settings.print_data_to_stdout(settings.print_bold_warning_msg(warn_msg))
+        else:
+          if settings.LOAD_SESSION:
+            checks.quit(filename, url, _ = False)
+      # END OF PASTED ORIGINAL LOOP CONTENT
 
 """
 Perform checks over custom HTTP Headers parameters.
