@@ -104,7 +104,7 @@ def create_log_file(url, output_dir):
   # The logs filename construction.
   filename = logs_path + settings.OUTPUT_FILE
   try:
-    with open(filename, 'a') as output_file:
+    with open(filename, 'a', encoding=settings.DEFAULT_CODEC) as output_file:
       if not menu.options.no_logging:
         output_file.write("\n" + "=" * 37)
         output_file.write("\n" + "| Started in " + \
@@ -132,7 +132,7 @@ def add_type_and_technique(export_injection_info, filename, injection_type, tech
 
   if export_injection_info == False:
     settings.SHOW_LOGS_MSG = True
-    with open(filename, 'a') as output_file:
+    with open(filename, 'a', encoding=settings.DEFAULT_CODEC) as output_file:
       if not menu.options.no_logging:
         output_file.write("\n" + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + "Type: " + injection_type.title())
         output_file.write("\n" + re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + "Technique: " + technique.title())
@@ -143,7 +143,7 @@ def add_type_and_technique(export_injection_info, filename, injection_type, tech
 Add the vulnerable parameter in log files.
 """
 def add_parameter(vp_flag, filename, the_type, header_name, http_request_method, vuln_parameter, payload):
-  with open(filename, 'a') as output_file:
+  with open(filename, 'a', encoding=settings.DEFAULT_CODEC) as output_file:
     if not menu.options.no_logging:
       if header_name[1:] == settings.COOKIE.lower():
         header_name = " ("+ header_name[1:] + ") " + vuln_parameter
@@ -158,7 +158,7 @@ def add_parameter(vp_flag, filename, the_type, header_name, http_request_method,
 Add any payload in log files.
 """
 def update_payload(filename, counter, payload):
-  with open(filename, 'a') as output_file:
+  with open(filename, 'a', encoding=settings.DEFAULT_CODEC) as output_file:
     if not menu.options.no_logging:
       if "\n" in payload:
         output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + "Used payload: " + re.sub("%20", settings.SINGLE_WHITESPACE, _urllib.parse.unquote_plus(payload.replace("\n", "\\n"))) + "\n")
@@ -171,11 +171,11 @@ execution output result in log files.
 """
 def executed_command(filename, cmd, output):
   try:
-    with open(filename, 'a') as output_file:
+    with open(filename, 'a', encoding=settings.DEFAULT_CODEC) as output_file:
       if not menu.options.no_logging:
         output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + "Executed command: " +  cmd + "\n")
-        output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_SIGN) + "Execution output: " + output.encode(settings.DEFAULT_CODEC).decode() + "\n")
-  except TypeError:
+        output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_SIGN) + "Execution output: " + str(output.encode(settings.DEFAULT_CODEC).decode()) + "\n")
+  except:
     pass
 
 """

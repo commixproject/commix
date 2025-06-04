@@ -61,7 +61,7 @@ def basic_payload_generator():
 Initializing basic level check status
 """
 def basic_level_checks():
-  settings.TIME_RELATIVE_ATTACK = False
+  settings.TIME_RELATED_ATTACK = False
   settings.SKIP_CODE_INJECTIONS = None
   settings.SKIP_COMMAND_INJECTIONS = None
   settings.IDENTIFIED_COMMAND_INJECTION = False
@@ -109,29 +109,17 @@ def heuristic_request(url, http_request_method, check_parameter, payload, whites
   if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
     payload = checks.payload_fixation(payload)
     cookie = checks.process_injectable_value(payload, menu.options.cookie).encode(settings.DEFAULT_CODEC)
-    # if settings.TESTABLE_VALUE in menu.options.cookie.replace(settings.INJECT_TAG, ""):
-    #   cookie = menu.options.cookie.replace(settings.INJECT_TAG, "").replace(settings.TESTABLE_VALUE, payload).encode(settings.DEFAULT_CODEC)
-    # else:
-    #   cookie = menu.options.cookie.replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC)
   else:
     cookie = checks.remove_tags(menu.options.cookie).encode(settings.DEFAULT_CODEC)
 
   if not settings.IGNORE_USER_DEFINED_POST_DATA and menu.options.data and settings.INJECT_TAG in menu.options.data:
     data = checks.process_injectable_value(payload, menu.options.data).encode(settings.DEFAULT_CODEC)
-    # if settings.TESTABLE_VALUE in menu.options.data.replace(settings.INJECT_TAG, ""):
-    #   data = menu.options.data.replace(settings.INJECT_TAG, "").replace(settings.TESTABLE_VALUE, payload).encode(settings.DEFAULT_CODEC)
-    # else:
-    #   data = menu.options.data.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC)
   else:
     if settings.USER_DEFINED_POST_DATA:
       settings.USER_DEFINED_POST_DATA = checks.remove_tags(settings.USER_DEFINED_POST_DATA)
       data = settings.USER_DEFINED_POST_DATA.encode(settings.DEFAULT_CODEC)
   if settings.INJECT_TAG in url:
     tmp_url = checks.process_injectable_value(payload, url)
-    # if settings.TESTABLE_VALUE in url.replace(settings.INJECT_TAG, ""):
-    #   tmp_url = url.replace(settings.INJECT_TAG, "").replace(settings.TESTABLE_VALUE, payload)
-    # else:
-    #   tmp_url = url.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload)
   else:
     tmp_url = checks.remove_tags(tmp_url)
     url = checks.remove_tags(url)
@@ -140,7 +128,7 @@ def heuristic_request(url, http_request_method, check_parameter, payload, whites
   if cookie:
     request.add_header(settings.COOKIE, cookie)
   if check_parameter_in_http_header(check_parameter) and check_parameter not in settings.HOST.capitalize():
-    settings.CUSTOM_HEADER_NAME = check_parameter
+    settings.CUSTOM_HEADER_NAME = check_parameter.title()
     if settings.CUSTOM_HEADER_VALUE.replace(settings.INJECT_TAG, "") in settings.CUSTOM_HEADER_VALUE:
       request.add_header(settings.CUSTOM_HEADER_NAME, settings.CUSTOM_HEADER_VALUE.replace(settings.INJECT_TAG, "").replace(settings.CUSTOM_HEADER_VALUE, payload).encode(settings.DEFAULT_CODEC))
     else:
@@ -794,7 +782,7 @@ Perform checks
 def perform_checks(url, http_request_method, filename):
   # Initiate whitespaces
   if settings.MULTI_TARGETS or settings.STDIN_PARSING and len(settings.WHITESPACES) > 1:
-    settings.WHITESPACES = ["%20"]
+    settings.WHITESPACES = [_urllib.parse.quote(SINGLE_WHITESPACE)]
 
   timesec = settings.TIMESEC
   # Check if authentication is needed.

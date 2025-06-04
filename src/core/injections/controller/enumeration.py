@@ -41,10 +41,10 @@ def powershell_version(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, 
     from src.core.injections.semiblind.techniques.tempfile_based import tfb_injector as injector
   _ = False
   cmd = settings.PS_VERSION
-  if not settings.TIME_RELATIVE_ATTACK and alter_shell:
+  if not settings.TIME_RELATED_ATTACK and alter_shell:
     cmd = checks.escape_single_quoted_cmd(cmd)
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
-    if settings.TIME_RELATIVE_ATTACK:
+    if settings.TIME_RELATED_ATTACK:
       _ = True
       if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
         check_exec_time, shell = injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response, technique)
@@ -88,7 +88,7 @@ def hostname(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, h
   cmd = settings.HOSTNAME
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
     # Command execution results.
-    if settings.TIME_RELATIVE_ATTACK:
+    if settings.TIME_RELATED_ATTACK:
       _ = True
       if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
         check_exec_time, shell = injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response, technique)
@@ -133,11 +133,11 @@ def system_information(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, 
   if settings.TARGET_OS == settings.OS.WINDOWS:
     settings.RECOGNISE_OS = settings.WIN_RECOGNISE_OS
   cmd = settings.RECOGNISE_OS
-  if not settings.TIME_RELATIVE_ATTACK and settings.TARGET_OS == settings.OS.WINDOWS and alter_shell:
+  if not settings.TIME_RELATED_ATTACK and settings.TARGET_OS == settings.OS.WINDOWS and alter_shell:
     cmd = "cmd /c " + cmd
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
     # Command execution results.
-    if settings.TIME_RELATIVE_ATTACK:
+    if settings.TIME_RELATED_ATTACK:
       _ = True
       if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
         check_exec_time, target_os = injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response, technique)
@@ -158,19 +158,19 @@ def system_information(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, 
     session_handler.store_cmd(url, cmd, target_os, vuln_parameter)
   else:
     target_os = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
-  if settings.TIME_RELATIVE_ATTACK and settings.VERBOSITY_LEVEL == 0 and _:
+  if settings.TIME_RELATED_ATTACK and settings.VERBOSITY_LEVEL == 0 and _:
     settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
   if target_os:
-    if not settings.TIME_RELATIVE_ATTACK:
+    if not settings.TIME_RELATED_ATTACK:
       target_os = "".join(str(p) for p in target_os)
     if settings.TARGET_OS != settings.OS.WINDOWS:
       cmd = settings.DISTRO_INFO
-      if not settings.TIME_RELATIVE_ATTACK:
+      if not settings.TIME_RELATED_ATTACK:
         if settings.USE_BACKTICKS:
           cmd = checks.remove_command_substitution(cmd)
       if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
         # Command execution results.
-        if settings.TIME_RELATIVE_ATTACK:
+        if settings.TIME_RELATED_ATTACK:
           if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
             check_exec_time, distro_name = injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response, technique)
           else:
@@ -196,11 +196,11 @@ def system_information(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, 
       cmd = settings.WIN_RECOGNISE_HP
     else:
       cmd = settings.RECOGNISE_HP
-    if settings.TIME_RELATIVE_ATTACK and settings.VERBOSITY_LEVEL == 0 and _:
+    if settings.TIME_RELATED_ATTACK and settings.VERBOSITY_LEVEL == 0 and _:
       settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
     if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
       # Command execution results.
-      if settings.TIME_RELATIVE_ATTACK:
+      if settings.TIME_RELATED_ATTACK:
         _ = True
         if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
           check_exec_time, target_arch = injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response, technique)
@@ -246,7 +246,7 @@ def current_user(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timese
   cmd = settings.CURRENT_USER
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
     # Command execution results.
-    if settings.TIME_RELATIVE_ATTACK:
+    if settings.TIME_RELATED_ATTACK:
       _ = True
       if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
         check_exec_time, cu_account = injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response, technique)
@@ -293,7 +293,7 @@ def check_current_user_privs(separator, maxlen, TAG, cmd, prefix, suffix, whites
       cmd = checks.remove_command_substitution(cmd)
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
     # Command execution results.
-    if settings.TIME_RELATIVE_ATTACK:
+    if settings.TIME_RELATED_ATTACK:
       _ = True
       if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
         check_exec_time, shell = injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response, technique)
@@ -335,15 +335,15 @@ def system_users(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timese
   _ = False
   if settings.TARGET_OS == settings.OS.WINDOWS:
     cmd = settings.WIN_SYS_USERS
-    if settings.TIME_RELATIVE_ATTACK:
+    if settings.TIME_RELATED_ATTACK:
       cmd = cmd + settings.WIN_REPLACE_WHITESPACE
     if alter_shell:
       cmd = checks.escape_single_quoted_cmd(cmd)
-    if not settings.TIME_RELATIVE_ATTACK:
+    if not settings.TIME_RELATED_ATTACK:
       cmd = checks.add_new_cmd(cmd)
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
     # Command execution results.
-    if settings.TIME_RELATIVE_ATTACK:
+    if settings.TIME_RELATED_ATTACK:
       _ = True
       try:
         if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
@@ -388,7 +388,7 @@ def system_passwords(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, ti
   cmd = settings.SYS_PASSES
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
     # Command execution results.
-    if settings.TIME_RELATIVE_ATTACK:
+    if settings.TIME_RELATED_ATTACK:
       _ = True
       if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
         check_exec_time, sys_passes = injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response, technique)
@@ -432,7 +432,7 @@ def single_os_cmd_exec(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, 
   checks.print_enumenation().print_single_os_cmd_msg(cmd)
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
     # Command execution results.
-    if settings.TIME_RELATIVE_ATTACK:
+    if settings.TIME_RELATED_ATTACK:
       _ = True
       if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
         check_exec_time, shell = injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response, technique)
@@ -451,7 +451,7 @@ def single_os_cmd_exec(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, 
       shell = injector.injection_results(response, TAG, cmd, technique, url, OUTPUT_TEXTFILE, timesec)
       shell = "".join(str(p) for p in shell)
     session_handler.store_cmd(url, cmd, shell, vuln_parameter)
-    if settings.TIME_RELATIVE_ATTACK and settings.VERBOSITY_LEVEL == 0:
+    if settings.TIME_RELATED_ATTACK and settings.VERBOSITY_LEVEL == 0:
       settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
   else:
     shell = session_handler.export_stored_cmd(url, cmd, vuln_parameter)

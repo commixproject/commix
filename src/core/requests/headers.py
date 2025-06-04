@@ -190,7 +190,7 @@ def check_http_traffic(request):
     except AttributeError:
       raise SystemExit()
 
-    except _urllib.error.HTTPError as err_msg:
+    except (_urllib.error.HTTPError, _urllib.error.URLError) as err_msg:
       if settings.UNAUTHORIZED_ERROR in str(err_msg):
         settings.UNAUTHORIZED = unauthorized = True
         settings.MAX_RETRIES = settings.TOTAL_OF_REQUESTS
@@ -227,7 +227,7 @@ def check_http_traffic(request):
     checks.blocked_ip(page)
 
   # This is useful when handling exotic HTTP errors (i.e requests for authentication).
-  except _urllib.error.HTTPError as err:
+  except (_urllib.error.HTTPError, _urllib.error.URLError) as err:
     # Checks for not declared cookie(s), while server wants to set its own.
     if not menu.options.drop_set_cookie:
       checks.not_declared_cookies(err)
@@ -326,7 +326,7 @@ def do_check(request):
         url = menu.options.url
         try:
           response = _urllib.request.urlopen(url, timeout=settings.TIMEOUT)
-        except _urllib.error.HTTPError as e:
+        except (_urllib.error.HTTPError, _urllib.error.URLError) as e:
           try:
             authline = e.headers.get('www-authenticate', '')
             authobj = re.match(r'''(\w*)\s+realm=(.*),''',authline).groups()
@@ -341,7 +341,7 @@ def do_check(request):
             result = _urllib.request.urlopen(url, timeout=settings.TIMEOUT)
           except AttributeError:
             pass
-      except _urllib.error.HTTPError as e:
+      except (_urllib.error.HTTPError, _urllib.error.URLError) as e:
         pass
 
   else:

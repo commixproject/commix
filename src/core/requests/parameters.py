@@ -223,6 +223,17 @@ def do_POST_check(parameter, http_request_method):
   Grab the value of parameter.
   """
   def multi_params_get_value(param, all_params):
+
+    def is_empty_json_str(s):
+        try:
+          return json.loads(s) == {}
+        except Exception:
+          return False
+
+    # Check if parameters are empty or meaningless
+    if (len(all_params) == 0 or (len(all_params) == 1 and (all_params[0] == "{}" or is_empty_json_str(all_params[0])))):
+        checks.no_parameters_found()
+
     if settings.IS_JSON:
       value = re.findall(r'\:(.*)', all_params[param])
       if not value:
@@ -464,6 +475,8 @@ def vuln_POST_param(parameter, url):
     parameters = re.sub(settings.IGNORE_JSON_CHAR_REGEX, '', parameter.split(settings.INJECT_TAG)[0].replace(",\"", settings.RANDOM_TAG + "\""))
     parameters = ''.join(parameters.split(", ")[-1:]).strip()
     parameters = ''.join(parameters.split(":")[0]).strip()
+    # Converts a key into a dot notation format, suitable for hierarchical or flattened structures.
+    parameters = re.sub(r'(\.(\d+))\.', r'[\2].', parameters.replace('_', '.'))
     settings.TESTABLE_VALUE = vuln_parameter = ''.join(parameters.split(settings.RANDOM_TAG)[:1])
     if settings.CUSTOM_INJECTION_MARKER:
       settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST.append(vuln_parameter) if vuln_parameter not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST
@@ -743,9 +756,11 @@ def specify_user_agent_parameter(user_agent):
     if settings.CUSTOM_INJECTION_MARKER and settings.INJECT_TAG in settings.TESTABLE_VALUE:
       settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST.append(header_name) if header_name not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST
       settings.TESTABLE_PARAMETERS_LIST.append(user_agent) if header_name not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.TESTABLE_PARAMETERS_LIST
-      settings.PRE_CUSTOM_INJECTION_MARKER_CHAR = settings.TESTABLE_VALUE.split(settings.INJECT_TAG)[0]
-      settings.POST_CUSTOM_INJECTION_MARKER_CHAR = settings.TESTABLE_VALUE.split(settings.INJECT_TAG)[1]
-  except AttributeError:
+      # Safely handle the split to avoid IndexError
+      split_value = settings.TESTABLE_VALUE.split(settings.INJECT_TAG)
+      settings.PRE_CUSTOM_INJECTION_MARKER_CHAR = split_value[0] if len(split_value) > 0 else ''
+      settings.POST_CUSTOM_INJECTION_MARKER_CHAR = split_value[1] if len(split_value) > 1 else ''
+  except (AttributeError, IndexError):
     pass
   return user_agent
 
@@ -759,9 +774,11 @@ def specify_referer_parameter(referer):
     if settings.CUSTOM_INJECTION_MARKER and settings.INJECT_TAG in settings.TESTABLE_VALUE:
       settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST.append(header_name) if header_name not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST
       settings.TESTABLE_PARAMETERS_LIST.append(referer) if header_name not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.TESTABLE_PARAMETERS_LIST
-      settings.PRE_CUSTOM_INJECTION_MARKER_CHAR = settings.TESTABLE_VALUE.split(settings.INJECT_TAG)[0]
-      settings.POST_CUSTOM_INJECTION_MARKER_CHAR = settings.TESTABLE_VALUE.split(settings.INJECT_TAG)[1]
-  except AttributeError:
+      # Safely handle the split to avoid IndexError
+      split_value = settings.TESTABLE_VALUE.split(settings.INJECT_TAG)
+      settings.PRE_CUSTOM_INJECTION_MARKER_CHAR = split_value[0] if len(split_value) > 0 else ''
+      settings.POST_CUSTOM_INJECTION_MARKER_CHAR = split_value[1] if len(split_value) > 1 else ''
+  except (AttributeError, IndexError):
     pass
   return referer
 
@@ -775,9 +792,11 @@ def specify_host_parameter(host):
     if settings.CUSTOM_INJECTION_MARKER and settings.INJECT_TAG in settings.TESTABLE_VALUE:
       settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST.append(header_name) if header_name not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST
       settings.TESTABLE_PARAMETERS_LIST.append(host) if header_name not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.TESTABLE_PARAMETERS_LIST
-      settings.PRE_CUSTOM_INJECTION_MARKER_CHAR = settings.TESTABLE_VALUE.split(settings.INJECT_TAG)[0]
-      settings.POST_CUSTOM_INJECTION_MARKER_CHAR = settings.TESTABLE_VALUE.split(settings.INJECT_TAG)[1]
-  except AttributeError:
+      # Safely handle the split to avoid IndexError
+      split_value = settings.TESTABLE_VALUE.split(settings.INJECT_TAG)
+      settings.PRE_CUSTOM_INJECTION_MARKER_CHAR = split_value[0] if len(split_value) > 0 else ''
+      settings.POST_CUSTOM_INJECTION_MARKER_CHAR = split_value[1] if len(split_value) > 1 else ''
+  except (AttributeError, IndexError):
     pass
   return host
 
@@ -790,9 +809,11 @@ def specify_custom_header_parameter(header_name):
     if settings.CUSTOM_INJECTION_MARKER:
       settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST.append(header_name) if header_name not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST
       settings.TESTABLE_PARAMETERS_LIST.append(vuln_parameter) if header_name not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.TESTABLE_PARAMETERS_LIST
-      settings.PRE_CUSTOM_INJECTION_MARKER_CHAR = settings.CUSTOM_HEADER_VALUE.split(settings.INJECT_TAG)[0]
-      settings.POST_CUSTOM_INJECTION_MARKER_CHAR = settings.CUSTOM_HEADER_VALUE.split(settings.INJECT_TAG)[1]
-  except AttributeError:
+      # Safely handle the split to avoid IndexError
+      split_value = settings.TESTABLE_VALUE.split(settings.INJECT_TAG)
+      settings.PRE_CUSTOM_INJECTION_MARKER_CHAR = split_value[0] if len(split_value) > 0 else ''
+      settings.POST_CUSTOM_INJECTION_MARKER_CHAR = split_value[1] if len(split_value) > 1 else ''
+  except (AttributeError, IndexError):
     pass
   return header_name
 

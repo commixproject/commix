@@ -262,14 +262,14 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.1"
-REVISION = "13"
+REVISION = "35"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
-  VERSION = VERSION + VERSION_NUM + "-stable"
+  VERSION = VERSION + VERSION_NUM
   COLOR_VERSION = Style.BRIGHT + Style.UNDERLINE + Fore.WHITE + VERSION + Style.RESET_ALL
 else:
-  VERSION = VERSION + VERSION_NUM + "-dev#" + REVISION
+  VERSION = VERSION + VERSION_NUM + ".dev" + REVISION
   COLOR_VERSION = Style.UNDERLINE + Fore.WHITE + VERSION + Style.RESET_ALL
 
 YEAR = "2014-2025"
@@ -455,7 +455,7 @@ EVAL_BASED_STATE = False
 TIME_BASED_STATE = False
 FILE_BASED_STATE = False
 TEMPFILE_BASED_STATE = False
-TIME_RELATIVE_ATTACK = False
+TIME_RELATED_ATTACK = False
 
 # Stored applied techniques
 SESSION_APPLIED_TECHNIQUES = ""
@@ -1006,6 +1006,7 @@ XML_RECOGNITION_REGEX = r'(?s)\A\s*<[^>]+>(.+>)?\s*\Z'
 
 # JSON Data
 IS_JSON = False
+IS_VALID_JSON = False
 
 # Infixes used for automatic recognition of parameters carrying anti-CSRF tokens
 CSRF_TOKEN_PARAMETER_INFIXES = ("csrf", "xsrf", "token")
@@ -1119,6 +1120,7 @@ TAMPER_SCRIPTS = {
                   "uninitializedvariable": False,
                   "slash2env": False,
                   "backticks": False,
+                  "randomcase": False,
                   "rev": False
                  }
 
@@ -1138,6 +1140,7 @@ WIN_NOT_SUPPORTED_TAMPER_SCRIPTS = [
                   "printf2echo",
                   "space2ifs",
                   "uninitializedvariable",
+                  "randomcase",
                   "rev"
 ]
 
@@ -1151,6 +1154,11 @@ EVAL_NOT_SUPPORTED_TAMPER_SCRIPTS = [
                   "slash2env",
                   "printf2echo",
                   "uninitializedvariable"
+]
+
+TIME_RELATED_TAMPER_SCRIPTS = [
+                  "sleep2usleep",
+                  "sleep2timeout"
 ]
 
 IGNORE_TAMPER_TRANSFORMATION = [

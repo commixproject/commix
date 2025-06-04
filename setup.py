@@ -17,7 +17,7 @@ from setuptools import setup, find_packages
 
 setup(
       name='commix',
-      version='4.1-dev',
+      version='4.1.dev',
       description='Automated All-in-One OS Command Injection Exploitation Tool',
       long_description=open('README.md').read(),
       long_description_content_type='text/markdown',
@@ -31,6 +31,7 @@ setup(
       license='GNU General Public License v3 (GPLv3)',
       packages=find_packages(),
       include_package_data=True,
+      package_data={"": ["*.txt"]},
       zip_safe=False,
     classifiers=[
           'Development Status :: 5 - Production/Stable',

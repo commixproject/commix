@@ -36,7 +36,7 @@ def file_write(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec,
       from src.core.injections.results_based.techniques.eval_based import eb_injector as injector
     else:
       from src.core.injections.results_based.techniques.classic import cb_injector as injector
-      if settings.TIME_RELATIVE_ATTACK:
+      if settings.TIME_RELATED_ATTACK:
         whitespace = settings.WHITESPACES[0]
         _ = True
     cmd = checks.change_dir(dest_to_write)
@@ -61,7 +61,7 @@ def file_write(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec,
     else:
       from src.core.injections.semiblind.techniques.tempfile_based import tfb_injector as injector
     cmd = checks.write_content(content, dest_to_write)
-    if settings.TIME_RELATIVE_ATTACK:
+    if settings.TIME_RELATED_ATTACK:
       cmd = cmd + _urllib.parse.quote(separator) + settings.FILE_READ + dest_to_write
       if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
         check_exec_time, shell = injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response, technique)
@@ -76,7 +76,7 @@ def file_write(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec,
       shell = injector.injection_results(response, TAG, cmd, technique, url, OUTPUT_TEXTFILE, timesec)
     shell = "".join(str(p) for p in shell)
   cmd = checks.check_file(dest_to_write)
-  if settings.TIME_RELATIVE_ATTACK:
+  if settings.TIME_RELATED_ATTACK:
     if settings.VERBOSITY_LEVEL == 0 and not _:
       settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
       if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
@@ -92,7 +92,7 @@ def file_write(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec,
       response = injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, technique)
     shell = injector.injection_results(response, TAG, cmd, technique, url, OUTPUT_TEXTFILE, timesec)
   shell = "".join(str(p) for p in shell)
-  if settings.TIME_RELATIVE_ATTACK:
+  if settings.TIME_RELATED_ATTACK:
     if settings.VERBOSITY_LEVEL == 0:
       settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
   checks.file_write_status(shell, dest_to_write)
@@ -112,7 +112,7 @@ def file_upload(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec
   else:
     from src.core.injections.semiblind.techniques.tempfile_based import tfb_injector as injector
   cmd, dest_to_upload = checks.check_file_to_upload()
-  if settings.TIME_RELATIVE_ATTACK:
+  if settings.TIME_RELATED_ATTACK:
     if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
       check_exec_time, shell = injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response, technique)
     else:
@@ -125,7 +125,7 @@ def file_upload(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec
     shell = injector.injection_results(response, TAG, cmd, technique, url, OUTPUT_TEXTFILE, timesec)
   shell = "".join(str(p) for p in shell)
   cmd = checks.check_file(dest_to_upload)
-  if settings.TIME_RELATIVE_ATTACK:
+  if settings.TIME_RELATED_ATTACK:
     check_exec_time, shell = injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response, technique)
   else:
     if settings.USE_BACKTICKS:
@@ -136,7 +136,7 @@ def file_upload(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec
       response = injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, technique)
     shell = injector.injection_results(response, TAG, cmd, technique, url, OUTPUT_TEXTFILE, timesec)
   shell = "".join(str(p) for p in shell)
-  if settings.TIME_RELATIVE_ATTACK:
+  if settings.TIME_RELATED_ATTACK:
     if settings.VERBOSITY_LEVEL == 0:
       settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
   checks.file_upload_status(shell, dest_to_upload)
@@ -159,7 +159,7 @@ def file_read(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
   _ = False
   cmd, file_to_read = checks.file_content_to_read()
   if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
-    if settings.TIME_RELATIVE_ATTACK:
+    if settings.TIME_RELATED_ATTACK:
       if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
         check_exec_time, shell = injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response, technique)
       else:
@@ -178,7 +178,7 @@ def file_read(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
   else:
     shell = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
   shell = "".join(str(p) for p in shell)
-  if settings.TIME_RELATIVE_ATTACK:
+  if settings.TIME_RELATED_ATTACK:
     if settings.VERBOSITY_LEVEL == 0 and _ and len(shell) != 0:
       settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
   checks.file_read_status(shell, file_to_read, filename)

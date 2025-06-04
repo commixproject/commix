@@ -41,9 +41,8 @@ def tamper(payload):
       payload = payload.replace(match.group(0), sleep_to_usleep + settings.WHITESPACES[0] + usleep_delay)
     return payload
   if settings.TARGET_OS != settings.OS.WINDOWS:
-    if not settings.TIME_RELATIVE_ATTACK:
+    if not settings.TIME_RELATED_ATTACK:
       if settings.TRANFROM_PAYLOAD == None:
-        checks.time_relative_tamper(__tamper__)
         settings.TRANFROM_PAYLOAD = False
       return payload
     else:

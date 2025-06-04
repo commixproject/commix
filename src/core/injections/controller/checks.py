@@ -584,6 +584,18 @@ def ignore_google_analytics_cookie(cookie):
     return True
 
 """
+Payload new line fixation
+"""
+def payload_newline_fixation(payload):
+  # New line fixation
+  if any([settings.USER_AGENT_INJECTION, settings.REFERER_INJECTION, settings.HOST_INJECTION, settings.CUSTOM_HEADER_INJECTION]):
+    payload = payload.replace("\n",";")
+  else:
+    if settings.TARGET_OS != settings.OS.WINDOWS:
+      payload = payload.replace("\n","%0d")
+  return payload
+
+"""
 Fix for %0a, %0d%0a separators
 """
 def newline_fixation(payload):
@@ -619,9 +631,9 @@ def page_encoding(response, action):
   _ = False
   try:
     if action == "encode" and type(page) == str:
-      return page.encode(settings.DEFAULT_CODEC, errors="ignore")
+      return page.encode(settings.DEFAULT_CODEC, errors="replace")
     else:
-      return page.decode(settings.DEFAULT_CODEC, errors="ignore")
+      return page.decode(settings.DEFAULT_CODEC, errors="replace")
   except (UnicodeEncodeError, UnicodeDecodeError) as err:
     err_msg = "The " + str(err).split(":")[0] + ". "
     _ = True
@@ -1283,9 +1295,9 @@ def time_delay_due_to_unstable_request(timesec):
       pass
 
 """
-Time relative shell condition 
+Time related shell condition 
 """
-def time_relative_shell(url_time_response, exec_time, timesec):
+def time_related_shell(url_time_response, exec_time, timesec):
   if (url_time_response == 0 and (exec_time - timesec) >= 0) or \
      (url_time_response != 0 and (exec_time - timesec) == 0 and (exec_time == timesec)) or \
      (url_time_response != 0 and (exec_time - timesec) > 0 and (exec_time >= timesec + 1)):
@@ -1294,9 +1306,9 @@ def time_relative_shell(url_time_response, exec_time, timesec):
     return False
 
 """
-Message regarding time relative attcks
+Message regarding time related attcks
 """
-def time_relative_attaks_msg():
+def time_related_attaks_msg():
   warn_msg = "It is very important to not stress the network connection during usage of time-based payloads to prevent potential disruptions."
   settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
@@ -1449,16 +1461,6 @@ def testable_parameters(url, check_parameters, header_name):
 
   
 """
-Only time-relative injection techniques support tamper
-"""
-def time_relative_tamper(tamper):
-  warn_msg = "All injection techniques, except for the time-relative ones, "
-  warn_msg += "do not support the '" + tamper  + ".py' tamper script."
-  if menu.options.skip_heuristics:
-    settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
-  settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
-
-"""
 Lists available tamper scripts
 """
 def list_tamper_scripts():
@@ -1499,6 +1501,10 @@ def tamper_scripts(stored_tamper_scripts):
       import_script = str(settings.TAMPER_SCRIPTS_PATH + script + ".py").replace("/",".").split(".py")[0]
       if not stored_tamper_scripts:
         settings.print_data_to_stdout(settings.SUB_CONTENT_SIGN + import_script.split(".")[-1])
+      warn_msg = ""
+      if not settings.TIME_RELATED_ATTACK and script in settings.TIME_RELATED_TAMPER_SCRIPTS:
+        warn_msg = "Only time-related techniques support the usage of '" + script  + ".py'."
+        settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
       warn_msg = ""
       if settings.EVAL_BASED_STATE != False and script in settings.EVAL_NOT_SUPPORTED_TAMPER_SCRIPTS:
         warn_msg = "The dynamic code evaluation technique does "
@@ -1621,6 +1627,14 @@ def whitespace_check(payload):
 Check for symbols (i.e "`", "^", "$@" etc) between the characters of the generated payloads.
 """
 def other_symbols(payload):
+  # Implemented check to replace each character in a user-supplied OS command with a random case.
+  if payload.count("|tr \"[A-Z]\" \"[a-z]\"") >= 1 and settings.TARGET_OS != settings.OS.WINDOWS:
+    if not settings.TAMPER_SCRIPTS['randomcase']:
+      if menu.options.tamper:
+        menu.options.tamper = menu.options.tamper + ",randomcase"
+      else:
+        menu.options.tamper = "randomcase"
+
   # Check for reversed (characterwise) user-supplied operating system commands.
   if payload.count("|rev") >= 1 and settings.TARGET_OS != settings.OS.WINDOWS:
     if not settings.TAMPER_SCRIPTS['rev']:
@@ -1834,8 +1848,11 @@ def check_for_stored_tamper(payload):
 Perform payload modification
 """
 def perform_payload_modification(payload):
-  settings.RAW_PAYLOAD = payload.replace(settings.WHITESPACES[0], settings.SINGLE_WHITESPACE)
-
+  try:
+    settings.RAW_PAYLOAD = payload.replace(settings.WHITESPACES[0], settings.SINGLE_WHITESPACE)
+  except IndexError:
+    settings.RAW_PAYLOAD = payload
+    
   for extra_http_headers in list(settings.MULTI_ENCODED_PAYLOAD[::-1]):
     if extra_http_headers == "xforwardedfor":
       from src.core.tamper import xforwardedfor
@@ -1851,6 +1868,12 @@ def perform_payload_modification(payload):
     if mod_type == 'rev':
       from src.core.tamper import rev
       payload = rev.tamper(payload)
+
+  for mod_type in list(settings.MULTI_ENCODED_PAYLOAD[::-1]):
+    # Replaces each user-supplied operating system command character with random case
+    if mod_type == 'randomcase':
+      from src.core.tamper import randomcase
+      payload = randomcase.tamper(payload)
 
   for print_type in list(settings.MULTI_ENCODED_PAYLOAD[::-1]):
     # printf to echo (for ascii to dec)
@@ -2043,18 +2066,23 @@ def check_quotes_json_data(data):
 # Check if valid JSON
 def is_JSON_check(parameter):
   try:
+    # Attempt to load the JSON string
     json_object = json.loads(parameter.replace(settings.INJECT_TAG,""))
-    return True
-  except ValueError as err_msg:
-    _ = False
-    if "Expecting" in str(err_msg) and any(_ in str(err_msg) for _ in ("value", "delimiter")):
-      _ = True
-    if not "No JSON object could be decoded" in str(err_msg) and \
-       not _:
-      err_msg = "JSON " + str(err_msg) + ". "
+    settings.IS_VALID_JSON = True
+    return settings.IS_VALID_JSON
+  except json.JSONDecodeError as err_msg:
+    # Handle JSONDecodeError and identify common issues
+    if settings.IS_JSON and not settings.IS_VALID_JSON:
+      error_str = str(err_msg)
+      if "No JSON object could be decoded" in error_str:
+          err_msg = "JSON is invalid. No valid JSON object found."
+      elif "Expecting" in error_str and any(_ in error_str for _ in ("value", "delimiter")):
+          err_msg = "JSON parsing error: " + error_str + ". Check for missing commas, colons, or improperly escaped characters."
+      elif "Expecting" in error_str and "end of data" in error_str:
+          err_msg = "JSON parsing error: " + error_str + ". Check for extra commas or missing closing brackets."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
       raise SystemExit()
-    return False
+
 
 # Process with JSON data
 def process_data(data_type, http_request_method):
@@ -2143,7 +2171,7 @@ def print_ps_version(ps_version, filename, _):
     info_msg = "Powershell version: " + ps_version
     settings.print_data_to_stdout(settings.print_bold_info_msg(info_msg))
     # Add infos to logs file.
-    with open(filename, 'a') as output_file:
+    with open(filename, 'a', encoding=settings.DEFAULT_CODEC) as output_file:
       if not menu.options.no_logging:
         info_msg = "Powershell version: " + ps_version + "\n"
         output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
@@ -2164,7 +2192,7 @@ def print_hostname(shell, filename, _):
     info_msg = "Hostname: " +  str(shell)
     settings.print_data_to_stdout(settings.print_bold_info_msg(info_msg))
     # Add infos to logs file.
-    with open(filename, 'a') as output_file:
+    with open(filename, 'a', encoding=settings.DEFAULT_CODEC) as output_file:
       if not menu.options.no_logging:
         info_msg = info_msg + "\n"
         output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
@@ -2182,7 +2210,7 @@ def print_current_user(cu_account, filename, _):
     info_msg = "Current user: " +  str(cu_account)
     settings.print_data_to_stdout(settings.print_bold_info_msg(info_msg))
     # Add infos to logs file.
-    with open(filename, 'a') as output_file:
+    with open(filename, 'a', encoding=settings.DEFAULT_CODEC) as output_file:
       if not menu.options.no_logging:
         info_msg = info_msg + "\n"
         output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
@@ -2205,7 +2233,7 @@ def print_current_user_privs(shell, filename, _):
   info_msg = "Current user has excessive privileges: " +  str(priv)
   settings.print_data_to_stdout(settings.print_bold_info_msg(info_msg))
   # Add infos to logs file.
-  with open(filename, 'a') as output_file:
+  with open(filename, 'a', encoding=settings.DEFAULT_CODEC) as output_file:
     if not menu.options.no_logging:
       info_msg = info_msg + "\n"
       output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
@@ -2219,7 +2247,7 @@ def print_os_info(target_os, target_arch, filename, _):
     info_msg = "Operating system: " +  str(target_os) + settings.SINGLE_WHITESPACE + str(target_arch)
     settings.print_data_to_stdout(settings.print_bold_info_msg(info_msg))
     # Add infos to logs file.
-    with open(filename, 'a') as output_file:
+    with open(filename, 'a', encoding=settings.DEFAULT_CODEC) as output_file:
       if not menu.options.no_logging:
         info_msg = info_msg + "\n"
         output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
@@ -2289,7 +2317,7 @@ def print_users(sys_users, filename, _, separator, TAG, cmd, prefix, suffix, whi
           info_msg += " [" + str(len(sys_users_list)) + "]:"
           settings.print_data_to_stdout(settings.print_bold_info_msg(info_msg))
           # Add infos to logs file.
-          with open(filename, 'a') as output_file:
+          with open(filename, 'a', encoding=settings.DEFAULT_CODEC) as output_file:
             if not menu.options.no_logging:
               output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
           count = 0
@@ -2298,7 +2326,7 @@ def print_users(sys_users, filename, _, separator, TAG, cmd, prefix, suffix, whi
             is_privileged = is_privileged = ""
             settings.print_data_to_stdout(settings.SUB_CONTENT_SIGN + "(" +str(count)+ ") '" + Style.BRIGHT +  sys_users_list[user] + Style.RESET_ALL + "'" + Style.BRIGHT + is_privileged + Style.RESET_ALL)
             # Add infos to logs file.
-            with open(filename, 'a') as output_file:
+            with open(filename, 'a', encoding=settings.DEFAULT_CODEC) as output_file:
               if not menu.options.no_logging:
                 if count == 1 :
                   output_file.write("\n")
@@ -2331,7 +2359,7 @@ def print_users(sys_users, filename, _, separator, TAG, cmd, prefix, suffix, whi
           settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
           sys_users = " ".join(str(p) for p in sys_users).strip()
           settings.print_data_to_stdout(sys_users)
-          with open(filename, 'a') as output_file:
+          with open(filename, 'a', encoding=settings.DEFAULT_CODEC) as output_file:
             if not menu.options.no_logging:
               output_file.write("      " + sys_users)
         else:
@@ -2346,7 +2374,7 @@ def print_users(sys_users, filename, _, separator, TAG, cmd, prefix, suffix, whi
             info_msg += " [" + str(len(sys_users_list)) + "]:"
             settings.print_data_to_stdout(settings.print_bold_info_msg(info_msg))
             # Add infos to logs file.
-            with open(filename, 'a') as output_file:
+            with open(filename, 'a', encoding=settings.DEFAULT_CODEC) as output_file:
               if not menu.options.no_logging:
                 output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
             count = 0
@@ -2385,7 +2413,7 @@ def print_users(sys_users, filename, _, separator, TAG, cmd, prefix, suffix, whi
                   is_privileged_nh = ""
                 settings.print_data_to_stdout(settings.SUB_CONTENT_SIGN + "(" +str(count)+ ") '" + Style.BRIGHT + fields[0] + Style.RESET_ALL + "' " + Style.BRIGHT + is_privileged + Style.RESET_ALL + "(uid=" + fields[1] + "). Home directory is in '" + Style.BRIGHT + fields[2]+ Style.RESET_ALL + "'.")
                 # Add infos to logs file.
-                with open(filename, 'a') as output_file:
+                with open(filename, 'a', encoding=settings.DEFAULT_CODEC) as output_file:
                   if not menu.options.no_logging:
                     if count == 1 :
                       output_file.write("\n")
@@ -2397,7 +2425,7 @@ def print_users(sys_users, filename, _, separator, TAG, cmd, prefix, suffix, whi
                   settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
                 sys_users = " ".join(str(p) for p in sys_users.split(":"))
                 settings.print_data_to_stdout(sys_users)
-                with open(filename, 'a') as output_file:
+                with open(filename, 'a', encoding=settings.DEFAULT_CODEC) as output_file:
                   if not menu.options.no_logging:
                     output_file.write("      " + sys_users)
       else:
@@ -2427,7 +2455,7 @@ def print_passes(sys_passes, filename, _, alter_shell):
       info_msg += " password hashes [" + str(len(sys_passes)) + "]:"
       settings.print_data_to_stdout(settings.print_bold_info_msg(info_msg))
       # Add infos to logs file.
-      with open(filename, 'a') as output_file:
+      with open(filename, 'a', encoding=settings.DEFAULT_CODEC) as output_file:
         if not menu.options.no_logging:
           output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg )
       count = 0
@@ -2439,7 +2467,7 @@ def print_passes(sys_passes, filename, _, alter_shell):
             if not "*" in fields[1] and not "!" in fields[1] and fields[1] != "":
               settings.print_data_to_stdout("  (" +str(count)+ ") " + Style.BRIGHT + fields[0] + Style.RESET_ALL + " : " + Style.BRIGHT + fields[1]+ Style.RESET_ALL)
               # Add infos to logs file.
-              with open(filename, 'a') as output_file:
+              with open(filename, 'a', encoding=settings.DEFAULT_CODEC) as output_file:
                 if not menu.options.no_logging:
                   if count == 1 :
                     output_file.write("\n")
@@ -2451,7 +2479,7 @@ def print_passes(sys_passes, filename, _, alter_shell):
             warn_msg += "in the appropriate format. Thus, it is expoted as a text file."
             settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
           settings.print_data_to_stdout(fields[0])
-          with open(filename, 'a') as output_file:
+          with open(filename, 'a', encoding=settings.DEFAULT_CODEC) as output_file:
             if not menu.options.no_logging:
               output_file.write("      " + fields[0])
     else:
@@ -2467,9 +2495,9 @@ def print_single_os_cmd(cmd, output, filename):
     _ = "'" + cmd + "' execution output"
     settings.print_data_to_stdout(settings.print_retrieved_data(_, output))
     try:
-      with open(filename, 'a') as output_file:
+      with open(filename, 'a', encoding=settings.DEFAULT_CODEC) as output_file:
         if not menu.options.no_logging:
-          output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + "User-supplied command " + _ + ": " + output.encode(settings.DEFAULT_CODEC).decode() + "\n")
+          output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + "User-supplied command " + _ + ": " + str(output.encode(settings.DEFAULT_CODEC).decode()) + "\n")
     except TypeError:
       pass
   else:
@@ -2599,7 +2627,7 @@ def file_read_status(shell, file_to_read, filename):
   if shell:
     _ = "Fetched file content"
     settings.print_data_to_stdout(settings.print_retrieved_data(_, shell))
-    with open(filename, 'a') as output_file:
+    with open(filename, 'a', encoding=settings.DEFAULT_CODEC) as output_file:
       if not menu.options.no_logging:
         info_msg = "Extracted content of the file '"
         info_msg += file_to_read + "' : " + shell + "\n"
@@ -2673,7 +2701,7 @@ def check_file_to_upload():
   file_to_upload = menu.options.file_upload.encode(settings.DEFAULT_CODEC).decode()
   try:
     _urllib.request.urlopen(file_to_upload, timeout=settings.TIMEOUT)
-  except _urllib.error.HTTPError as err_msg:
+  except (_urllib.error.HTTPError, _urllib.error.URLError) as err_msg:
     warn_msg = "It seems that the '" + file_to_upload + "' file, does not exist. (" +str(err_msg)+ ")"
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
     raise SystemExit()
@@ -2983,7 +3011,7 @@ def tfb_controller(no_result, url, timesec, filename, tmp_path, http_request_met
 """
 Check if to use the "/tmp/" directory for tempfile-based technique.
 """
-def use_temp_folder(no_result, url, timesec, filename, tmp_path, http_request_method, url_time_response):
+def use_temp_folder(no_result, url, timesec, filename, http_request_method, url_time_response):
   tmp_path = check_tmp_path(url, timesec, filename, http_request_method, url_time_response)
   settings.print_data_to_stdout(settings.END_LINE.CR)
   message = "It seems that you don't have permissions to "
@@ -3015,19 +3043,19 @@ def use_temp_folder(no_result, url, timesec, filename, tmp_path, http_request_me
   # continue
 
 """
-Set time relative timesec 
+Set time related timesec 
 """
-def time_relative_timesec(timesec):
-  if settings.TIME_RELATIVE_ATTACK and settings.TIMESEC < 1:
+def time_related_timesec(timesec):
+  if settings.TIME_RELATED_ATTACK and settings.TIMESEC < 1:
     timesec = 1
   else:
     timesec = settings.TIMESEC
   return timesec  
 
 """
-Export the time relative injection results
+Export the time related injection results
 """
-def time_relative_export_injection_results(cmd, separator, output, check_exec_time):
+def time_related_export_injection_results(cmd, separator, output, check_exec_time):
   if settings.VERBOSITY_LEVEL == 0:
     settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
   if output != "" and check_exec_time != 0 :

@@ -26,7 +26,7 @@ The "time-based" injection technique on Blind OS Command Injection.
 The "time-based" injection technique handler.
 """
 def tb_injection_handler(url, timesec, filename, http_request_method, url_time_response, injection_type, technique, tmp_path):
-  return handler.do_time_relative_proccess(url, timesec, filename, http_request_method, url_time_response, injection_type, technique, tmp_path)
+  return handler.do_time_related_proccess(url, timesec, filename, http_request_method, url_time_response, injection_type, technique, tmp_path)
 
 """
 The exploitation function.
@@ -34,9 +34,9 @@ The exploitation function.
 """
 def exploitation(url, timesec, filename, http_request_method, url_time_response, injection_type, technique):
   # Check if attack is based on time delays.
-  if not settings.TIME_RELATIVE_ATTACK :
-    checks.time_relative_attaks_msg()
-    settings.TIME_RELATIVE_ATTACK = True
+  if not settings.TIME_RELATED_ATTACK :
+    checks.time_related_attaks_msg()
+    settings.TIME_RELATED_ATTACK = True
 
   tmp_path = ""
   if url_time_response >= settings.SLOW_TARGET_RESPONSE:
@@ -64,6 +64,6 @@ def exploitation(url, timesec, filename, http_request_method, url_time_response,
         pass
   else:
     if tb_injection_handler(url, timesec, filename, http_request_method, url_time_response, injection_type, technique, tmp_path) == False:
-      settings.TIME_RELATIVE_ATTACK = False
+      settings.TIME_RELATED_ATTACK = False
       return False
 # eof

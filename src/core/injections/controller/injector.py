@@ -36,7 +36,7 @@ from src.thirdparty.colorama import Fore, Back, Style, init
 """
 The main time-realative command injection exploitation.
 """
-def time_relative_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response, technique):
+def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response, technique):
 
   if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
     from src.core.injections.blind.techniques.time_based import tb_payloads as payloads
@@ -519,7 +519,7 @@ def injection_results(response, TAG, cmd, technique, url, OUTPUT_TEXTFILE, times
           shell = [newline.replace(settings.END_LINE.CR, "") for newline in shell]
           #shell = [space.strip() for space in shell]
           shell = [empty for empty in shell if empty]
-      except _urllib.error.HTTPError as e:
+      except (_urllib.error.HTTPError, _urllib.error.URLError) as e:
         if str(e.getcode()) == settings.NOT_FOUND_ERROR:
           shell = ""
 
