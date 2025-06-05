@@ -676,14 +676,14 @@ def perform_checks(url, http_request_method, filename):
     try:
       # Check if authentication page is the same with the next (injection) URL
       if _urllib.request.urlopen(url, timeout=settings.TIMEOUT).read() == _urllib.request.urlopen(menu.options.auth_url, timeout=settings.TIMEOUT).read():
-        err_msg = "It seems that the authentication procedure has failed."
+        err_msg = "Authentication failed using the specified credentials and URL."
         settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
         raise SystemExit()
     except (_urllib.error.URLError, _urllib.error.HTTPError) as err_msg:
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
       raise SystemExit()
   elif menu.options.auth_url or menu.options.auth_data:
-    err_msg = "You must specify both login panel URL and login parameters."
+    err_msg = "Authentication requires specifying both '--auth-url' and '--auth-data' options."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
   else:
