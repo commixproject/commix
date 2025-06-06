@@ -20,7 +20,7 @@ import time
 import subprocess
 from src.utils import menu
 from src.utils import settings
-from src.utils import requirments
+from src.utils import requirements
 from src.utils import common
 from src.thirdparty.six.moves import input as _input
 from src.thirdparty.colorama import Fore, Back, Style, init
@@ -79,12 +79,12 @@ def updater():
     raise SystemExit()
   else:
     try:
-      requirment = "git"
+      requirement = "git"
       # Check if 'git' is installed.
-      requirments.do_check(requirment)
-      if requirments.do_check(requirment) == True :
+      requirements.do_check(requirement)
+      if requirements.do_check(requirement) == True :
         if settings.VERBOSITY_LEVEL != 0:
-          debug_msg = "commix will try to update itself using '" + requirment + "' command."
+          debug_msg = "commix will try to update itself using '" + requirement + "' command."
           settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
         # Check if ".git" exists!
         if os.path.isdir("./.git"):
@@ -98,7 +98,7 @@ def updater():
           settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
           raise SystemExit()
       else:
-          err_msg = requirment + " not found."
+          err_msg = requirement + " not found."
           settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
           raise SystemExit()
 
@@ -157,10 +157,10 @@ def unicorn_updater(current_version):
     raise SystemExit()
   else:
     try:
-      requirment = "git"
+      requirement = "git"
       # Check if 'git' is installed.
-      requirments.do_check(requirment)
-      if requirments.do_check(requirment) == True :
+      requirements.do_check(requirement)
+      if requirements.do_check(requirement) == True :
         settings.print_data_to_stdout(settings.SUCCESS_STATUS)
         if len(current_version) == 0:
           unicorn_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../', 'thirdparty/'))
@@ -175,7 +175,7 @@ def unicorn_updater(current_version):
         settings.print_data_to_stdout(settings.print_info_msg(info_msg))
         revision_num()
       else:
-        err_msg = requirment + " not found."
+        err_msg = requirement + " not found."
         settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
         raise SystemExit()
     except Exception as err_msg:

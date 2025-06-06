@@ -16,14 +16,14 @@ import os
 import subprocess
 
 """
-Check for requirments.
+Check for requirements.
 """
-def do_check(requirment):
+def do_check(requirement):
   try:
     # Pipe output to the file path of the null device, for silence.
     # i.e '/dev/null' for POSIX, 'nul' for Windows
     null = open(os.devnull,"w")
-    subprocess.Popen(requirment, stdout=null, stderr=null)
+    subprocess.Popen(requirement, stdout=null, stderr=null)
     null.close()
     return True
 

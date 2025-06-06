@@ -19,7 +19,7 @@ from src.thirdparty.six.moves import urllib as _urllib
 from src.thirdparty.six.moves import http_client as _http_client
 from src.utils import menu
 from src.utils import settings
-from src.utils import requirments
+from src.utils import requirements
 from src.core.requests import proxy
 from src.core.requests import requests
 from src.thirdparty.colorama import Fore, Back, Style, init

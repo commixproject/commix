@@ -20,7 +20,7 @@ import subprocess
 from src.utils import menu
 from src.utils import common
 from src.utils import settings
-from src.utils import requirments
+from src.utils import requirements
 from src.thirdparty.six.moves import input as _input
 from src.thirdparty.colorama import Fore, Back, Style, init
 
@@ -95,7 +95,7 @@ def installer():
         # Check for dependencies.
         dependencies_items = dependencies.split()
         for item in dependencies_items:
-          requirments.do_check(item)
+          requirements.do_check(item)
       else:
         settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
         err_msg = "The installer is not designed for any "
