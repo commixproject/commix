@@ -14,8 +14,6 @@ For more see the file 'readme/COPYING' for copying permission.
 """
 
 import os
-import sys
-import platform
 import subprocess
 from src.utils import menu
 from src.utils import common
@@ -24,143 +22,111 @@ from src.utils import requirements
 from src.thirdparty.six.moves import input as _input
 from src.thirdparty.colorama import Fore, Back, Style, init
 
-"""
-Make a local installation of 'commix' on your system.
-"""
-
-"""
-The un-installer.
-"""
-def uninstaller():
-  info_msg = "Starting the uninstaller. "
-  settings.print_data_to_stdout(settings.print_info_msg(info_msg))
-  
+# Removal Function 
+def remove():
+  if settings.VERBOSITY_LEVEL != 0:
+    debug_msg = "Removing existing installation and performing cleanup..."
+    settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
   try:
-    subprocess.Popen("rm -rf /usr/bin/" + settings.APPLICATION + " >/dev/null 2>&1", shell=True).wait()
-    subprocess.Popen("rm -rf /usr/share/" + settings.APPLICATION + " >/dev/null 2>&1", shell=True).wait()
-  except:
-    settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
+    subprocess.call("rm -rf " + os.path.join(settings.WRAPPER_PATH, settings.APPLICATION) + " >/dev/null 2>&1", shell=True)
+    subprocess.call("rm -rf " + os.path.join(settings.INSTALL_DIR, settings.APPLICATION) + " >/dev/null 2>&1", shell=True)
+  except Exception as e:
+    err_msg = "An error occurred while removing the application: " + str(e)
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
-  settings.print_data_to_stdout(settings.SUCCESS_STATUS)
-  
-  info_msg = "The un-installation of commix has finished!"
-  settings.print_data_to_stdout(settings.print_bold_info_msg(info_msg))
+  info_msg = settings.APPLICATION.capitalize() + " and all related components have been successfully removed."
+  settings.print_data_to_stdout(settings.print_info_msg(info_msg))
 
-"""
-The installer.
-"""
+# Abort for Unsupported Systems 
+def abort_unsupported(packages, dependencies):
+  err_msg = "This installer is designed specifically for Ubuntu and Debian-based Linux distributions. "
+  err_msg += "To proceed on other systems, install the required packages (i.e. " + packages
+  err_msg += ") and dependencies (i.e. " + dependencies + ") manually."
+  settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+  raise SystemExit()
+
+# Installer Function 
 def installer():
   packages = "build-essential python-dev"
   dependencies = "git python-pip"
 
-  info_msg = "Starting the installer. "
+  info_msg = "Starting installation of " + settings.APPLICATION + " (" + settings.VERSION + ") on your system."
   settings.print_data_to_stdout(settings.print_info_msg(info_msg))
-  
 
-  # Check if OS is Linux.
-  if settings.PLATFORM == "posix":
-    # You need to have administrative privileges to run this script.
-    if not common.running_as_admin():
-      settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
-      err_msg = "You need to have administrative privileges to run this option."
-      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+  if settings.PLATFORM != "posix":
+    abort_unsupported(packages, dependencies)
 
-    # Check if commix is already installed.
-    if os.path.isdir("/usr/share/"  + settings.APPLICATION + ""):
-      settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
-      warn_msg = "It seems that "  + settings.APPLICATION
-      warn_msg += " is already installed in your system."
-      settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
-      while True:
-        message = "Do you want to remove commix? [Y/n] > "
-        uninstall = common.read_input(message, default="Y", check_batch=True)
-        if uninstall in settings.CHOICE_YES:
-          uninstaller()
-          raise SystemExit()
-        elif uninstall in settings.CHOICE_NO or \
-        uninstall in settings.CHOICE_QUIT:
-          raise SystemExit()
-        else:
-          common.invalid_option(uninstall)
-          pass
-
-    # Check for git.
-    if not os.path.isfile("/usr/bin/git") or not os.path.isfile("/usr/bin/pip"):
-      # Install requirement.
-      if os.path.isfile("/etc/apt/sources.list"):
-        settings.print_data_to_stdout(settings.SUCCESS_STATUS)
-        
-        # Check for dependencies.
-        dependencies_items = dependencies.split()
-        for item in dependencies_items:
-          requirements.do_check(item)
-      else:
-        settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
-        err_msg = "The installer is not designed for any "
-        err_msg += "other Linux distro than Ubuntu / Debian. "
-        err_msg += "Please install manually: " + dependencies
-        settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-        settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
-        raise SystemExit()
-
-    # Force install of necessary packages
-    subprocess.Popen("apt-get --force-yes -y install " + packages + ">/dev/null 2>&1", shell=True).wait()
-    settings.print_data_to_stdout(settings.SUCCESS_STATUS)
-    
-
-    info_msg =  "Installing " + settings.APPLICATION
-    info_msg += " into the /usr/share/"  + settings.APPLICATION + ". "
-    settings.print_data_to_stdout(settings.print_info_msg(info_msg))
-    try:
-      current_dir = os.getcwd()
-      subprocess.Popen("cp -r " + current_dir + " /usr/share/" + settings.APPLICATION + " >/dev/null 2>&1", shell=True).wait()
-      subprocess.Popen("chmod 775 /usr/share/"  + settings.APPLICATION + "/" + settings.APPLICATION + ".py >/dev/null 2>&1", shell=True).wait()
-    except:
-      settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
-      raise SystemExit()
-    settings.print_data_to_stdout(settings.SUCCESS_STATUS)
-    
-
-    info_msg = "Installing "  + settings.APPLICATION
-    info_msg += " to /usr/bin/"  + settings.APPLICATION + ". "
-    settings.print_data_to_stdout(settings.print_info_msg(info_msg))
-    try:
-      with open("/usr/bin/" + settings.APPLICATION, 'w') as f:
-        f.write('#!/bin/bash\n')
-        f.write('cd /usr/share/commix/ && ./commix.py "$@"\n')
-        subprocess.Popen("chmod +x /usr/bin/"  + settings.APPLICATION + " >/dev/null 2>&1", shell=True).wait()
-    except:
-      settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
-      raise SystemExit()
-    settings.print_data_to_stdout(settings.SUCCESS_STATUS)
-    
-
-    #Create the Output Directory
-    try:
-      os.stat(settings.OUTPUT_DIR)
-    except:
-      try:
-        os.mkdir(settings.OUTPUT_DIR)
-      except OSError as err_msg:
-        try:
-          error_msg = str(err_msg).split("] ")[1] + "."
-        except IndexError:
-          error_msg = str(err_msg) + "."
-        settings.print_data_to_stdout(settings.print_critical_msg(error_msg))
-        raise SystemExit()
-
-    info_msg = "The installation is finished! Type '"
-    info_msg += settings.APPLICATION + "' to launch it."
-    settings.print_data_to_stdout(settings.print_bold_info_msg(info_msg))
-
-  else :
-    settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
-    err_msg = "The installer is not designed for any other system other than Linux. "
-    err_msg += "Please install manually: " + packages + dependencies
+  if not common.running_as_admin():
+    err_msg = "Administrative privileges are required to run this option."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
     raise SystemExit()
 
-  # eof
+  app_install_path = os.path.join(settings.INSTALL_DIR, settings.APPLICATION)
+  launcher_path = os.path.join(settings.WRAPPER_PATH, settings.APPLICATION)
+
+  if os.path.isdir(app_install_path):
+    warn_msg = "An existing installation of " + settings.APPLICATION + " was detected."
+    settings.print_data_to_stdout(settings.print_bold_warning_msg(warn_msg))
+
+    while True:
+      message = "Would you like to remove the current installation? [Y/n] > "
+      user_input = common.read_input(message, default="Y", check_batch=True)
+      if user_input in settings.CHOICE_YES:
+        remove()
+        raise SystemExit()
+      elif user_input in settings.CHOICE_NO or user_input in settings.CHOICE_QUIT:
+        raise SystemExit()
+      else:
+        common.invalid_option(user_input)
+
+  if not os.path.isfile("/usr/bin/git") or not os.path.isfile("/usr/bin/pip"):
+    if os.path.isfile("/etc/apt/sources.list"):
+      for dep in dependencies.split():
+        requirements.do_check(dep)
+    else:
+      abort_unsupported(packages, dependencies)
+
+  subprocess.call("apt-get --force-yes -y install " + packages + " >/dev/null 2>&1", shell=True)
+
+  if settings.VERBOSITY_LEVEL != 0:
+    debug_msg = "Copying application files to '" + app_install_path + "'..."
+    settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
+
+  try:
+    current_dir = os.getcwd()
+    subprocess.call("cp -r " + current_dir + " " + app_install_path + " >/dev/null 2>&1", shell=True)
+    subprocess.call("chmod 775 " + os.path.join(app_install_path, settings.APPLICATION + ".py") + " >/dev/null 2>&1", shell=True)
+  except Exception as e:
+    settings.print_data_to_stdout(settings.print_critical_msg(str(e)))
+    raise SystemExit()
+
+  if settings.VERBOSITY_LEVEL != 0:
+    debug_msg = "Creating launcher script at '" + launcher_path + "'..."
+    settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
+
+  try:
+    with open(launcher_path, 'w') as f:
+      f.write("#!/bin/bash\n")
+      f.write("cd " + app_install_path + " && ./" + settings.APPLICATION + ".py \"$@\"\n")
+    subprocess.call("chmod +x " + launcher_path + " >/dev/null 2>&1", shell=True)
+  except Exception as e:
+    err_msg = "Failed to create launcher: " + str(e)
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+    raise SystemExit()
+
+  try:
+    if not os.path.exists(settings.OUTPUT_DIR):
+      os.mkdir(settings.OUTPUT_DIR)
+  except OSError as err_msg:
+    try:
+      error_msg = str(err_msg).split("] ")[1] + "."
+    except IndexError:
+      error_msg = str(err_msg) + "."
+    settings.print_data_to_stdout(settings.print_critical_msg(error_msg))
+    raise SystemExit()
+
+  info_msg = "Installation has been completed."
+  settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+
+# eof
