@@ -68,7 +68,7 @@ def updater():
   info_msg += settings.APPLICATION + " from GitHub repository. "
   settings.print_data_to_stdout(settings.print_info_msg(info_msg))
   if menu.options.offline:
-    err_msg = "You cannot update commix via GitHub without access on the Internet."
+    err_msg = "You cannot update " + settings.APPLICATION + " via GitHub without access on the Internet."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
   # Check if windows
@@ -84,7 +84,7 @@ def updater():
       requirements.do_check(requirement)
       if requirements.do_check(requirement) == True :
         if settings.VERBOSITY_LEVEL != 0:
-          debug_msg = "commix will try to update itself using '" + requirement + "' command."
+          debug_msg = settings.APPLICATION.capitalize() + " will try to update itself using '" + requirement + "' command."
           settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
         # Check if ".git" exists!
         if os.path.isdir("./.git"):

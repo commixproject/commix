@@ -347,7 +347,7 @@ def unhandled_exception():
     err_msg += "reproduce the bug. The "
     err_msg += "developers will try to reproduce the bug, fix it accordingly "
     err_msg += "and get back to you.\n"
-    err_msg += "Commix version: " + settings.VERSION[1:] + "\n"
+    err_msg += settings.APPLICATION.capitalize() + " version: " + settings.VERSION[1:] + "\n"
     err_msg += "Python version: " + settings.PYTHON_VERSION + "\n"
     err_msg += "Operating system: " + os.name + "\n"
     err_msg += "Command line: " + re.sub(r".+?\bcommix\.py\b", "commix.py", " ".join(sys.argv)) + "\n"
