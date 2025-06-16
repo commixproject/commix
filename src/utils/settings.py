@@ -262,7 +262,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.1"
-REVISION = "39"
+REVISION = "40"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -448,6 +448,9 @@ DISABLED_CONTENT_EXTENSIONS = (".py", ".pyc", ".md", ".txt", ".bak", ".conf", ".
 WAF_DETECTION_PHASE = False
 DETECTION_PHASE = False
 EXPLOITATION_PHASE = False
+
+# Prevent the shell from interpreting the redirection operators.
+NO_OUTPUT = ">/dev/null 2>&1"
 
 # Exploitation techniques states
 CLASSIC_STATE = False

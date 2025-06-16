@@ -28,8 +28,8 @@ def remove():
     debug_msg = "Removing existing installation and performing cleanup..."
     settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
   try:
-    subprocess.call("rm -rf " + os.path.join(settings.WRAPPER_PATH, settings.APPLICATION) + " >/dev/null 2>&1", shell=True)
-    subprocess.call("rm -rf " + os.path.join(settings.INSTALL_DIR, settings.APPLICATION) + " >/dev/null 2>&1", shell=True)
+    subprocess.call("rm -rf " + os.path.join(settings.WRAPPER_PATH, settings.APPLICATION) + settings.NO_OUTPUT, shell=True)
+    subprocess.call("rm -rf " + os.path.join(settings.INSTALL_DIR, settings.APPLICATION) + settings.NO_OUTPUT, shell=True)
   except Exception as e:
     err_msg = "An error occurred while removing the application: " + str(e)
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
@@ -87,7 +87,7 @@ def installer():
     else:
       abort_unsupported(packages, dependencies)
 
-  subprocess.call("apt-get --force-yes -y install " + packages + " >/dev/null 2>&1", shell=True)
+  subprocess.call("apt-get --force-yes -y install " + packages + settings.NO_OUTPUT, shell=True)
 
   if settings.VERBOSITY_LEVEL != 0:
     debug_msg = "Copying application files to '" + app_install_path + "'..."
@@ -95,8 +95,8 @@ def installer():
 
   try:
     current_dir = os.getcwd()
-    subprocess.call("cp -r " + current_dir + " " + app_install_path + " >/dev/null 2>&1", shell=True)
-    subprocess.call("chmod 775 " + os.path.join(app_install_path, settings.APPLICATION + ".py") + " >/dev/null 2>&1", shell=True)
+    subprocess.call("cp -r " + current_dir + " " + app_install_path + settings.NO_OUTPUT, shell=True)
+    subprocess.call("chmod 775 " + os.path.join(app_install_path, settings.APPLICATION + ".py") + settings.NO_OUTPUT, shell=True)
   except Exception as e:
     settings.print_data_to_stdout(settings.print_critical_msg(str(e)))
     raise SystemExit()
@@ -109,7 +109,7 @@ def installer():
     with open(launcher_path, 'w') as f:
       f.write("#!/bin/bash\n")
       f.write("cd " + app_install_path + " && ./" + settings.APPLICATION + ".py \"$@\"\n")
-    subprocess.call("chmod +x " + launcher_path + " >/dev/null 2>&1", shell=True)
+    subprocess.call("chmod +x " + launcher_path + settings.NO_OUTPUT, shell=True)
   except Exception as e:
     err_msg = "Failed to create launcher: " + str(e)
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
