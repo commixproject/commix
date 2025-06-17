@@ -486,9 +486,9 @@ injection.add_option("--delay",
                 help="Seconds to delay between each HTTP request.")
 
 injection.add_option("--time-sec",
-                default=0,
+                default=1,
                 action="store",
-                type="int",
+                type="float",
                 dest="timesec",
                 help="Seconds to delay the OS response.")
 

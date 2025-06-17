@@ -34,7 +34,7 @@ The exploitation function.
 """
 def exploitation(url, timesec, filename, http_request_method, url_time_response, injection_type, technique):
   # Check if attack is based on time delays.
-  if not settings.TIME_RELATED_ATTACK :
+  if not settings.TIME_RELATED_ATTACK:
     checks.time_related_attaks_msg()
     settings.TIME_RELATED_ATTACK = True
 

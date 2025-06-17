@@ -813,7 +813,7 @@ try:
     # Check if defined "--timesec" option.
     if menu.options.timesec != 0:
       settings.TIMESEC = menu.options.timesec
-
+    
     if menu.options.tor:
       settings.TIMESEC = settings.TIMESEC * 2
       warn_msg = "Increasing default value for option '--time-sec' to"

@@ -177,7 +177,7 @@ def do_time_related_proccess(url, timesec, filename, http_request_method, url_ti
   false_positive_warning = False
   export_injection_info = False
   exec_time = 0
-  timesec = checks.time_related_timesec(timesec)
+  timesec = checks.time_related_timesec()
 
   if settings.TIME_RELATED_ATTACK == False:
     checks.time_related_attaks_msg()
@@ -433,7 +433,7 @@ def do_results_based_proccess(url, timesec, filename, http_request_method, injec
   call_tmp_based = False
   next_attack_vector = False
   export_injection_info = False
-  timesec = checks.time_related_timesec(timesec)
+  timesec = checks.time_related_timesec()
   
   if technique == settings.INJECTION_TECHNIQUE.CLASSIC:
     try:

@@ -2163,6 +2163,7 @@ def generate_char_pool(num_of_chars):
                   [69, 84, 65, 79, 73, 78, 83, 72, 82, 68, 76, 67, 85, 77, 87, 70, 71, 89, 80, 66, 86, 75, 74, 88, 81, 90]
     char_pool = char_pool + list(range(49, 57)) + list(range(32, 48)) + list(range(91, 96)) + list(range(58, 64))  + list(range(123, 127))
   return char_pool
+  
 """
 Print powershell version
 """
@@ -3048,14 +3049,16 @@ def use_temp_folder(no_result, url, timesec, filename, http_request_method, url_
   # continue
 
 """
-Set time related timesec 
+Adjusts the timesec delay
 """
-def time_related_timesec(timesec):
-  if settings.TIME_RELATED_ATTACK and settings.TIMESEC < 1:
-    timesec = 1
+def time_related_timesec():
+  min_safe_delay = 0.5  # minimum safe delay
+  if settings.TIME_RELATED_ATTACK and settings.TIMESEC < min_safe_delay:
+    warn_msg = "Adjusting '--time-sec' to minimum safe delay of '" + str(min_safe_delay) + "'."
+    settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+    return min_safe_delay
   else:
-    timesec = settings.TIMESEC
-  return timesec  
+    return max(settings.TIMESEC, min_safe_delay)
 
 """
 Export the time related injection results
