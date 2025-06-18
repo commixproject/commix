@@ -1,4 +1,5 @@
 ## Version 4.1 (TBA)
+* Fixed: Improved handling of `URLError` without HTTP response.
 * Fixed: Minor bug fix for missing `.txt` files during setup/install.
 * Revised: Minor code refactoring to enhance the authentication process with detailed HTTP traffic inspection.
 * Fixed: Improved handling of terminal input to prevent encoding errors.

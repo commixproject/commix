@@ -228,18 +228,32 @@ def check_http_traffic(request):
 
   # This is useful when handling exotic HTTP errors (i.e requests for authentication).
   except (_urllib.error.HTTPError, _urllib.error.URLError) as err:
-    # Checks for not declared cookie(s), while server wants to set its own.
     if not menu.options.drop_set_cookie:
       checks.not_declared_cookies(err)
     try:
-      if err.fp is None:
+      if getattr(err, 'fp', None) is None:
         raise AttributeError
       page = checks.page_encoding(err, action="encode")
-    except Exception as e:
+    except Exception:
       page = ''
-      
-    print_http_response(err.info(), err.code, page)
-    
+    if isinstance(err, _urllib.error.HTTPError):
+      response_headers = err.info()
+      code = err.code
+    else:
+      code = ""
+      reason = str(getattr(err, 'reason', 'Unknown error'))
+      # process reason as before...
+      reason_parts = reason.split(settings.SINGLE_WHITESPACE)
+      if len(reason_parts) > 2:
+        response_headers = settings.SINGLE_WHITESPACE.join(reason_parts[2:]) + "."
+      else:
+        response_headers = reason
+      if not response_headers.endswith("."):
+        response_headers += "."
+
+    print_http_response(response_headers, code, page)
+
+
     if (not settings.PERFORM_CRACKING and \
     not settings.IS_JSON and \
     not settings.IS_XML and \
