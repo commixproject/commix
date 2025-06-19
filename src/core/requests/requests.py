@@ -99,7 +99,7 @@ def estimate_response_time(url, timesec, http_request_method):
   except _http_client.InvalidURL as err_msg:
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
-
+    
   except (_urllib.error.HTTPError, _urllib.error.URLError) as err:
     ignore_start = time.time()
     if settings.UNAUTHORIZED_ERROR in str(err) and int(settings.UNAUTHORIZED_ERROR) in settings.IGNORE_CODE:
@@ -110,20 +110,23 @@ def estimate_response_time(url, timesec, http_request_method):
         err_msg += " (Reason: " + str(err.args[0]).split("] ")[-1].lower() + ")."
       except IndexError:
         err_msg += " (" + str(err) + ")."
-      if str(err.getcode()) != settings.UNAUTHORIZED_ERROR:
+
+      # Use getattr to safely get the error code (HTTPError has it, URLError doesn't)
+      err_code = getattr(err, "code", None)
+      if str(err_code) != settings.UNAUTHORIZED_ERROR:
         settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      # Check for HTTP Error 401 (Unauthorized).
       else:
         try:
-          # Get the auth header value
-          auth_line = err.headers.get('www-authenticate', '')
-          # Checking for authentication type name.
-          auth_type = auth_line.split()[0]
-          # Checking for the realm attribute.
+          # Safely get auth header if present
+          auth_line = ''
+          if hasattr(err, 'headers') and err.headers:
+            auth_line = err.headers.get('www-authenticate', '')
+          auth_type = auth_line.split()[0] if auth_line else ''
+          
           try:
             auth_obj = re.match(r'''(\w*)\s+realm=(.*)''', auth_line).groups()
             realm = auth_obj[1].split(',')[0].replace("\"", "")
-          except:
+          except (AttributeError, IndexError, TypeError):
             realm = False
 
         except ValueError:
@@ -138,6 +141,7 @@ def estimate_response_time(url, timesec, http_request_method):
           err_msg += " seems to be invalid."
           settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
           raise SystemExit()
+
 
         if menu.options.auth_type and menu.options.auth_type != auth_type.lower():
           if checks.identified_http_auth_type(auth_type):
