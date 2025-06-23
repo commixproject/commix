@@ -43,6 +43,18 @@ from src.thirdparty.colorama import Fore, Back, Style, init
 from src.thirdparty.six.moves import urllib as _urllib
 
 """
+Encoding non-ASCII characters (in URL path and query).
+"""
+def encode_non_ascii_url(request):
+  url = request.get_full_url()
+  parts = _urllib.parse.urlsplit(url)
+  # Allow '%' safe to avoid double encoding already encoded sequences
+  path = _urllib.parse.quote(parts.path, safe="%/")  # Keep slashes safe too
+  query = _urllib.parse.quote(parts.query, safe="=?/%" + settings.PARAMETER_DELIMITER)  # Keep query delimiters + % safe
+  request.full_url = _urllib.parse.urlunsplit((parts.scheme, parts.netloc, path, query, parts.fragment))
+  return request
+
+"""
 Checking the HTTP response content.
 """
 def http_response_content(content):
@@ -170,6 +182,7 @@ def check_http_traffic(request):
         settings.MULTI_ENCODED_PAYLOAD = []
         menu.options.tamper = settings.USER_APPLIED_TAMPER
     try:
+      request = encode_non_ascii_url(request)
       response = opener.open(request, timeout=settings.TIMEOUT)
       _ = True
       settings.MAX_RETRIES = settings.TOTAL_OF_REQUESTS * 2

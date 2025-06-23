@@ -68,7 +68,7 @@ def do_check(request, url, redirect_url):
     requests.crawler_request(redirect_url)
 
   try:
-    if settings.CRAWLING and redirect_url in settings.HREF_SKIPPED:
+    if (len(settings.REDIRECT_CODE) == 0) or (settings.CRAWLING and redirect_url in settings.HREF_SKIPPED):
       return redirect_url
     elif settings.CRAWLING and url in settings.HREF_SKIPPED:
       return url

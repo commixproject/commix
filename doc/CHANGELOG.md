@@ -1,4 +1,5 @@
 ## Version 4.1 (TBA)
+* Fixed: Improved handling of non-ASCII characters in URL path and query components.
 * Fixed: Improved handling of HTTP errors missing response codes during authentication.
 * Fixed: Improved handling of `URLError` without HTTP response.
 * Fixed: Minor bug fix for missing `.txt` files during setup/install.
