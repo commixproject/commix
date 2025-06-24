@@ -235,6 +235,7 @@ def custom_injection_marker_character(url, http_request_method):
         pass
 
 """
+Logging a debug message when a specific injection technique is being skipped.
 """
 def skipping_technique(technique, injection_type, state):
   if settings.VERBOSITY_LEVEL != 0 and state != True:
@@ -1064,7 +1065,7 @@ def check_url(url):
     return _urllib.parse.urlsplit(url)
   except ValueError as ex:
     err_msg = "Invalid target URL has been given. " 
-    err_msg += "Please be sure that you don't have any leftover characters (e.g. '[' or ']') "
+    err_msg += "Please be sure that you do not have any leftover characters (e.g. '[' or ']') "
     err_msg += "in the hostname part."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
@@ -2339,13 +2340,13 @@ def print_users(sys_users, filename, _, separator, TAG, cmd, prefix, suffix, whi
                 output_file.write("(" +str(count)+ ") '" + sys_users_list[user] + is_privileged + "'\n" )
       else:
         # settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
-        warn_msg = "It seems that you don't have permissions to enumerate operating system users."
+        warn_msg = "It seems you do not have permissions to enumerate operating system users."
         settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
     except TypeError:
       pass
     except IndexError:
       # settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
-      warn_msg = "It seems that you don't have permissions to enumerate operating system users."
+      warn_msg = "It seems you do not have permissions to enumerate operating system users."
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
       pass
 
@@ -2435,7 +2436,7 @@ def print_users(sys_users, filename, _, separator, TAG, cmd, prefix, suffix, whi
                   if not menu.options.no_logging:
                     output_file.write("      " + sys_users)
       else:
-        warn_msg = "It seems that you don't have permissions "
+        warn_msg = "It seems you do not have permissions "
         warn_msg += "to read the content of the file '" + settings.PASSWD_FILE + "'."
         settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
     except TypeError:
@@ -2489,7 +2490,7 @@ def print_passes(sys_passes, filename, _, alter_shell):
             if not menu.options.no_logging:
               output_file.write("      " + fields[0])
     else:
-      warn_msg = "It seems that you don't have permissions "
+      warn_msg = "It seems you do not have permissions "
       warn_msg += "to read the content of the file '" + settings.SHADOW_FILE + "'."
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
@@ -2639,7 +2640,7 @@ def file_read_status(shell, file_to_read, filename):
         info_msg += file_to_read + "' : " + shell + "\n"
         output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
   else:
-    warn_msg = "It seems that you don't have permissions "
+    warn_msg = "It seems you do not have permissions "
     warn_msg += "to read the content of the file '" + file_to_read + "'."
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
@@ -2697,7 +2698,7 @@ def file_write_status(shell, dest_to_write):
     info_msg = "The file has been successfully created on remote directory: '" + dest_to_write + "'."
     settings.print_data_to_stdout(settings.print_bold_info_msg(info_msg))
   else:
-    warn_msg = "It seems that you don't have permissions to write files on the remote directory '" + dest_to_write + "'."
+    warn_msg = "It seems you do not have permissions to write files on the remote directory '" + dest_to_write + "'."
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
 """
@@ -2731,7 +2732,7 @@ def file_upload_status(shell, dest_to_upload):
     info_msg = "The file has been successfully uploaded on remote directory '" + dest_to_upload + "'."
     settings.print_data_to_stdout(settings.print_bold_info_msg(info_msg))
   else:
-    warn_msg = "It seems that you don't have permissions to upload files on the remote directory '" + dest_to_upload + "'."
+    warn_msg = "It seems you do not have permissions to upload files on the remote directory '" + dest_to_upload + "'."
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
 """
@@ -2945,7 +2946,7 @@ def custom_web_root(url, timesec, filename, http_request_method, url_time_respon
       default_root_dir = settings.WINDOWS_DEFAULT_DOC_ROOTS[0]
     else:
       default_root_dir = settings.LINUX_DEFAULT_DOC_ROOTS[0].replace(settings.DOC_ROOT_TARGET_MARK,settings.TARGET_URL)
-    message = "Enter what you want to use for writable directory (e.g. '"
+    message = "Enter a writable directory to use for file operations (e.g. '"
     message += default_root_dir + "') > "
     settings.WEB_ROOT = common.read_input(message, default=default_root_dir, check_batch=True)
     if len(settings.WEB_ROOT) == 0:
@@ -3020,12 +3021,12 @@ Check if to use the "/tmp/" directory for tempfile-based technique.
 def use_temp_folder(no_result, url, timesec, filename, http_request_method, url_time_response):
   tmp_path = check_tmp_path(url, timesec, filename, http_request_method, url_time_response)
   settings.print_data_to_stdout(settings.END_LINE.CR)
-  message = "It seems that you don't have permissions to "
+  message = "It seems you do not have permissions to "
   message += "read and/or write files in directory '" + settings.WEB_ROOT + "'."
   if not menu.options.web_root:
     message += " You are advised to rerun with option '--web-root'."
   while True:
-    message = message + settings.END_LINE.LF + "Do you want to use the temporary directory ('" + tmp_path + "')? [Y/n] > "
+    message = message + settings.END_LINE.LF + "Would you like to use the temporary directory ('" + tmp_path + "') instead? [Y/n] > "
     tmp_upload = common.read_input(message, default="Y", check_batch=True)
     if tmp_upload in settings.CHOICE_YES:
       exit_loops = True

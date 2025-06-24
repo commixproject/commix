@@ -40,9 +40,9 @@ def exploitation(url, timesec, filename, http_request_method, url_time_response,
 
   tmp_path = ""
   if url_time_response >= settings.SLOW_TARGET_RESPONSE:
-    warn_msg = "It is highly recommended, due to serious response delays, "
-    warn_msg += "to skip the time-based (blind) technique and to continue "
-    warn_msg += "with the file-based (semiblind) technique."
+    settings.RESPONSE_DELAYS = True
+    warn_msg = "Due to significant response delays, "
+    warn_msg += "skipping the time-based (blind) technique is strongly recommended."
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
     go_back = False
     while True:
@@ -56,7 +56,8 @@ def exploitation(url, timesec, filename, http_request_method, url_time_response,
             return False
         elif proceed_option.lower() == "s":
           from src.core.injections.semiblind.techniques.file_based import fb_handler
-          fb_handler.exploitation(url, timesec, filename, http_request_method, url_time_response, injection_type, technique, tmp_path)
+          fb_handler.exploitation(url, timesec, filename, http_request_method, url_time_response, injection_type, technique)
+          return False
         elif proceed_option.lower() == "q":
           raise SystemExit()
       else:

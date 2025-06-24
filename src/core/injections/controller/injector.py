@@ -363,15 +363,15 @@ def injection_output(url, OUTPUT_TEXTFILE, timesec, technique):
         if settings.MULTI_TARGETS:
           settings.RECHECK_FILE_FOR_EXTRACTION = True
         while True:
-          message =  "Do you want to use URL '" + output
-          message += "' for command execution output? [Y/n] > "
+          message =  "Would you like to use the URL '" + output
+          message += "' to receive the command execution output? [Y/n] > "
           procced_option = common.read_input(message, default="Y", check_batch=True)
           if procced_option in settings.CHOICE_YES:
             settings.DEFINED_WEBROOT = output
             break
           elif procced_option in settings.CHOICE_NO:
-            message =  "Enter URL to use "
-            message += "for command execution output > "
+            message =  "Enter URL to receive "
+            message += "the command execution output > "
             message = common.read_input(message, default=output, check_batch=True)
             if not re.search(r'^(?:http)s?://', message, re.I):
               common.invalid_option(message)

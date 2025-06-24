@@ -262,7 +262,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.1"
-REVISION = "45"
+REVISION = "46"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -498,6 +498,8 @@ MAX_CONNECTION_TOTAL_SIZE = 100 * 1024 * 1024
 
 # Slow target response.
 SLOW_TARGET_RESPONSE = 3
+
+RESPONSE_DELAYS = False
 
 # The testable parameter.
 TESTABLE_PARAMETER = ""

@@ -43,7 +43,10 @@ Exit handler
 def exit_handler(no_result):
   if no_result:
     if settings.VERBOSITY_LEVEL == 0 and settings.LOAD_SESSION == None:
-      settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
+      if not settings.RESPONSE_DELAYS:
+        settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
+      else:
+        settings.RESPONSE_DELAYS = False
     return False
   else :
     settings.print_data_to_stdout(settings.END_LINE.CR)
@@ -596,7 +599,7 @@ def do_results_based_proccess(url, timesec, filename, http_request_method, injec
                     checks.quit(filename, url, _ = False)
 
                   elif str(e.getcode()) == settings.FORBIDDEN_ERROR:
-                    err_msg = "You don't have access to this page: '" + settings.DEFINED_WEBROOT + "'."
+                    err_msg = "You do not have access to this page: '" + settings.DEFINED_WEBROOT + "'."
                     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
                     checks.quit(filename, url, _ = False)
 
@@ -613,7 +616,7 @@ def do_results_based_proccess(url, timesec, filename, http_request_method, injec
 
             except _urllib.error.URLError as e:
               if technique == settings.INJECTION_TECHNIQUE.FILE_BASED:
-                warn_msg = "It seems that you don't have permissions to "
+                warn_msg = "It seems you do not have permissions to "
                 warn_msg += "read and/or write files in directory '" + settings.WEB_ROOT + "'."
                 settings.print_data_to_stdout(settings.END_LINE.CR + settings.print_warning_msg(warn_msg))
                 err_msg = str(e).replace(": "," (") + ")."
