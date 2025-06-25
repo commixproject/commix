@@ -40,7 +40,7 @@ def purge():
     warn_msg = "Skipping purging of directory '" + directory + "', as it does not exist."
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
     return
-  info_msg = "Purging content of directory '" + directory + "'."
+  info_msg = "Purging contents of directory '" + directory + "'."
   settings.print_data_to_stdout(settings.print_info_msg(info_msg))
   
   # Purging content of target directory.

@@ -516,7 +516,7 @@ def main(filename, url, http_request_method):
             settings.print_data_to_stdout(settings.print_critical_msg(str(err_msg.reason) + "."))
             raise SystemExit()
         try:
-          info_msg = "Performing identification (passive) tests to the target URL."
+          info_msg = "Performing heuristic (passive) tests on the target URL."
           settings.print_data_to_stdout(settings.print_info_msg(info_msg))
           # Webpage encoding detection.
           requests.encoding_detection(response)
@@ -912,12 +912,12 @@ try:
           settings.print_data_to_stdout(settings.print_info_msg(info_msg))
           
         if not os.path.exists(bulkfile):
-          err_msg = "It seems that the '" + os.path.split(bulkfile)[1] + "' file, does not exist."
+          err_msg = "It seems the '" + os.path.split(bulkfile)[1] + "' file, does not exist."
           settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
           raise SystemExit()
 
         elif os.stat(bulkfile).st_size == 0:
-          err_msg = "It seems that the '" + os.path.split(bulkfile)[1] + "' file, is empty."
+          err_msg = "It seems the '" + os.path.split(bulkfile)[1] + "' file, is empty."
           settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
           raise SystemExit()
 

@@ -72,7 +72,7 @@ Detection of WAF/IPS protection.
 """
 def check_waf(url, http_request_method):
   payload = _urllib.parse.quote(settings.WAF_CHECK_PAYLOAD)
-  info_msg = "Checking if the target is protected by some kind of WAF/IPS."
+  info_msg = "Checking whether the target is protected by some kind of WAF/IPS."
   settings.print_data_to_stdout(settings.print_info_msg(info_msg))
   if settings.VERBOSITY_LEVEL >= 1:
     settings.print_data_to_stdout(settings.print_payload(payload))
@@ -432,7 +432,7 @@ def tab_autocompleter():
     # Tab compliter
     readline.set_completer(menu.tab_completer)
   except (TypeError, AttributeError) as e:
-    error_msg = "Failed while trying to use platform's readline library."
+    error_msg = "Failed to initialize tab completion with the platform's readline library."
     settings.print_data_to_stdout(settings.print_error_msg(error_msg))
 
 """
@@ -459,7 +459,7 @@ def save_cmd_history():
       readline.set_history_length(settings.MAX_HISTORY_LENGTH)
       readline.write_history_file(cli_history)
   except (IOError, AttributeError) as e:
-    warn_msg = "There was a problem writing the history file '" + cli_history + "'."
+    warn_msg = "Unable to write the history file '" + cli_history + "'."
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
 """
@@ -847,8 +847,8 @@ once the user provides the path of web server's root directory.
 """
 def procced_with_file_based_technique():
   while True:
-    message = "Due to the provided '--web-root' option,"
-    message += " do you want to procced with the (semi-blind) "
+    message = "Due to the provided '--web-root' option, "
+    message += "do you want to proceed with the (semi-blind) "
     message += "file-based injection technique? [y/N] > "
     enable_fb = common.read_input(message, default="N", check_batch=True)
     if enable_fb in settings.CHOICE_YES:
@@ -901,13 +901,13 @@ def continue_tests(err):
        str(err.code) == settings.NOT_ACCEPTABLE_ERROR) and \
        not menu.options.skip_waf and \
        not settings.HOST_INJECTION :
-      warn_msg = "It seems that target is protected by some kind of WAF/IPS."
+      warn_msg = "It seems the target is protected by some kind of WAF/IPS."
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
       settings.WAF_ENABLED = True
 
     message = ""
     if str(err.code) == settings.NOT_FOUND_ERROR:
-      message = "It is not recommended to continue in this kind of cases. "
+      message = "It is not recommended to continue in such cases. "
     
     if settings.START_SCANNING and settings.VERBOSITY_LEVEL == 0:
       settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
@@ -936,7 +936,7 @@ Check if option is unavailable
 """
 def unavailable_option(check_option):
   warn_msg = "The option '" + check_option + "' "
-  warn_msg += "is not yet supported Windows targets."
+  warn_msg += "is currently not supported on Windows targets."
   settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
 """
@@ -954,7 +954,7 @@ Information message if platform does not have
 GNU 'readline' module installed.
 """
 def no_readline_module():
-  err_msg =  "It seems that your platform does "
+  err_msg =  "It seems your platform does "
   err_msg += "not have GNU 'readline' module installed."
   err_msg += " Download the"
   if settings.IS_WINDOWS:
@@ -980,10 +980,9 @@ def ps_check():
     if settings.VERBOSITY_LEVEL != 0:
       settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
     while True:
-      message = "The payloads in some options that you "
-      message += "have chosen are requiring the use of powershell. "
-      message += "Do you want to use the \"--ps-version\" flag "
-      message += "to ensure that is enabled? [Y/n] > "
+      message = "Some payloads in the selected options require PowerShell. "
+      message += "Do you want to use the '--ps-version' flag "
+      message += "to ensure it is enabled? [Y/n] > "
       ps_check = common.read_input(message, default="Y", check_batch=True)
       if ps_check in settings.CHOICE_YES:
         menu.options.ps_version = True
@@ -1001,8 +1000,7 @@ If PowerShell is disabled.
 """
 def ps_check_failed():
   while True:
-    message = "Do you want to ignore the above warning "
-    message += "and continue the procedure? [Y/n] > "
+    message = "Do you want to proceed despite the above warning? [Y/n] > "
     ps_check = common.read_input(message, default="Y", check_batch=True)
     if ps_check in settings.CHOICE_YES:
       break
@@ -1020,11 +1018,11 @@ def check_CGI_scripts(url):
   try:
     CGI_SCRIPTS = []
     if not os.path.isfile(settings.CGI_SCRIPTS ):
-      err_msg = "The pages / scripts list (" + settings.CGI_SCRIPTS  + ") is not found"
+      err_msg = "The pages/scripts list '" + settings.CGI_SCRIPTS  + "' was not found"
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
       raise SystemExit()
     if len(settings.CGI_SCRIPTS ) == 0:
-      err_msg = "The " + settings.CGI_SCRIPTS  + " list is empty."
+      err_msg = "The pages/scripts list '" + settings.CGI_SCRIPTS  + "' is empty."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
       raise SystemExit()
     with open(settings.CGI_SCRIPTS , "r") as f:
@@ -1032,7 +1030,7 @@ def check_CGI_scripts(url):
         line = line.strip()
         CGI_SCRIPTS.append(line)
   except IOError:
-    err_msg = " Check if the " + settings.CGI_SCRIPTS  + " list is readable or corrupted."
+    err_msg = " Cannot read the pages/scripts list '" + settings.CGI_SCRIPTS  + "'. Check if the file is corrupted or unreadable."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
@@ -1064,8 +1062,8 @@ def check_url(url):
   try:
     return _urllib.parse.urlsplit(url)
   except ValueError as ex:
-    err_msg = "Invalid target URL has been given. " 
-    err_msg += "Please be sure that you do not have any leftover characters (e.g. '[' or ']') "
+    err_msg = "Invalid target URL provided. "
+    err_msg += "Please ensure there are no leftover characters (e.g., '[' or ']') "
     err_msg += "in the hostname part."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
@@ -1095,7 +1093,7 @@ def check_http_s(url):
           url = "http://" + url
       settings.SCHEME = (url_split.scheme.strip().lower() or "http") if not menu.options.force_ssl else "https"
     else:
-      err_msg = "Invalid target URL has been given. "
+      err_msg = "Invalid target URL provided. "
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
       raise SystemExit()
 
@@ -1124,12 +1122,9 @@ def check_connection(url):
         if not settings.MULTI_TARGETS:
           settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
           raise SystemExit()
-      except socket.error:
+      except (socket.error, UnicodeError) as e:
         err_msg = "Problem occurred while "
         err_msg += "resolving a host name '" + hostname + "'"
-      except UnicodeError:
-        err_msg = "Problem occurred while "
-        err_msg += "handling a host name '" + hostname + "'"
         if not settings.MULTI_TARGETS:
           settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
           raise SystemExit()
@@ -1145,7 +1140,7 @@ def user_defined_os():
     elif menu.options.os.lower() == "unix":
       return True
     else:
-      err_msg = "You defined wrong value '" + menu.options.os + "' "
+      err_msg = "You defined an invalid value '" + menu.options.os + "' "
       err_msg += "for operation system. The value, must be 'Windows' or 'Unix'."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
       raise SystemExit()
@@ -1159,7 +1154,7 @@ def define_target_os():
     return
   else:
     while True:
-      message = "Do you recognise the server's underlying operating system? "
+      message = "Do you recognize the server's underlying operating system? "
       message += "[(N)o/(u)nix-like/(w)indows/(q)uit] > "
       got_os = common.read_input(message, default="N", check_batch=True)
       if got_os.lower() in settings.CHOICE_OS :
@@ -1214,7 +1209,7 @@ def third_party_dependencies():
     import sqlite3
   except ImportError:
     err_msg = settings.APPLICATION + " requires 'sqlite3' third-party library "
-    err_msg += "in order to store previous injection points and commands. "
+    err_msg += "to store previous injection points and commands. "
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
@@ -1226,16 +1221,14 @@ def third_party_dependencies():
         import pyreadline
       except ImportError:
         err_msg = "The 'pyreadline' (third-party) library is required "
-        err_msg += "in order to be able to take advantage of the TAB "
-        err_msg += "completion and history support features."
+        err_msg += "to enable TAB completion and history support features."
         settings.print_data_to_stdout(settings.print_error_msg(err_msg))
     elif settings.PLATFORM == "posix":
       try:
         import gnureadline
       except ImportError:
         err_msg = "The 'gnureadline' (third-party) library is required "
-        err_msg += "in order to be able to take advantage of the TAB "
-        err_msg += "completion and history support features."
+        err_msg += "to enable TAB completion and history support features."
         settings.print_data_to_stdout(settings.print_error_msg(err_msg))
     pass
 
@@ -1244,9 +1237,9 @@ Print the authentiation error message.
 """
 def http_auth_err_msg():
   err_msg = "Use the '--auth-cred' option to provide a valid pair of "
-  err_msg += "HTTP authentication credentials (i.e --auth-cred=\"admin:admin\")"
-  err_msg += " or use the '--ignore-code=401' option to ignore HTTP error 401 (Unauthorized)"
-  err_msg += " and continue tests without providing valid credentials."
+  err_msg += "HTTP authentication credentials (e.g., --auth-cred=\"admin:admin\"), "
+  err_msg += "or use the '--ignore-code=401' option to ignore HTTP error 401 (Unauthorized) "
+  err_msg += "and continue tests without providing valid credentials."
   settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
   raise SystemExit()
 
@@ -1281,7 +1274,7 @@ def time_delay_recommendation():
 Message regarding unexpected time delays due to unstable requests
 """
 def time_delay_due_to_unstable_request(timesec):
-  message = "Unexpected time delays that may lead to false-positive results, have been identified."
+  message = "Unexpected time delays, which could cause false-positive results, have been identified."
   settings.print_data_to_stdout(settings.END_LINE.CR)
   while True:
     message = message + " How do you want to proceed? [(C)ontinue/(s)kip] > "
@@ -1322,7 +1315,7 @@ def time_related_attaks_msg():
 Check if defined "--url-reload" option.
 """
 def reload_url_msg(technique):
-  warn_msg = "On " + technique + "technique, the '--url-reload' option is not available."
+  warn_msg = "On the " + technique + "technique, the '--url-reload' option is not available."
   settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
 """
@@ -2237,7 +2230,7 @@ def print_current_user_privs(shell, filename, _):
   if settings.VERBOSITY_LEVEL == 0 and _:
     settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
 
-  info_msg = "Current user has excessive privileges: " +  str(priv)
+  info_msg = "Current user has elevated privileges: " +  str(priv)
   settings.print_data_to_stdout(settings.print_bold_info_msg(info_msg))
   # Add infos to logs file.
   with open(filename, 'a', encoding=settings.DEFAULT_CODEC) as output_file:
@@ -2279,28 +2272,28 @@ class print_enumenation():
     settings.print_data_to_stdout(settings.print_info_msg(info_msg))
 
   def check_privs_msg(self):
-    info_msg = "Testing if current user has excessive privileges."
+    info_msg = "Testing whether the current user has elevated privileges."
     settings.print_data_to_stdout(settings.print_info_msg(info_msg))
 
   def os_info_msg(self):
-    info_msg = "Fetching the underlying operating system information."
+    info_msg = "Fetching underlying operating system information."
     settings.print_data_to_stdout(settings.print_info_msg(info_msg))
 
   def print_users_msg(self):
     if settings.TARGET_OS == settings.OS.WINDOWS:
       info_msg = "Executing the 'net user' command "
     else:
-      info_msg = "Fetching content of the file '" + settings.PASSWD_FILE + "' "
-    info_msg += "in order to enumerate operating system users. "
+      info_msg = "Fetching contents of the file '" + settings.PASSWD_FILE + "' "
+    info_msg += "to enumerate operating system users. "
     settings.print_data_to_stdout(settings.print_info_msg(info_msg))
 
   def print_passes_msg(self):
-    info_msg = "Fetching content of the file '" + settings.SHADOW_FILE + "' "
-    info_msg += "in order to enumerate operating system users password hashes. "
+    info_msg = "Fetching contents of the file '" + settings.SHADOW_FILE + "' "
+    info_msg += "to enumerate operating system users password hashes. "
     settings.print_data_to_stdout(settings.print_info_msg(info_msg))
 
   def print_single_os_cmd_msg(self, cmd):
-    info_msg =  "Executing the user-supplied command: '" + cmd + "'."
+    info_msg =  "Executing user-supplied command '" + cmd + "'."
     settings.print_data_to_stdout(settings.print_info_msg(info_msg))
 
 """
@@ -2340,13 +2333,13 @@ def print_users(sys_users, filename, _, separator, TAG, cmd, prefix, suffix, whi
                 output_file.write("(" +str(count)+ ") '" + sys_users_list[user] + is_privileged + "'\n" )
       else:
         # settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
-        warn_msg = "It seems you do not have permissions to enumerate operating system users."
+        warn_msg = "It seems you do not have permission to enumerate operating system users."
         settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
     except TypeError:
       pass
     except IndexError:
       # settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
-      warn_msg = "It seems you do not have permissions to enumerate operating system users."
+      warn_msg = "It seems you do not have permission to enumerate operating system users."
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
       pass
 
@@ -2361,7 +2354,7 @@ def print_users(sys_users, filename, _, separator, TAG, cmd, prefix, suffix, whi
           sys_users = sys_users.split(settings.SINGLE_WHITESPACE)
         # Check for appropriate '/etc/passwd' format.
         if len(sys_users) % 3 != 0 :
-          warn_msg = "It seems that '" + settings.PASSWD_FILE + "' file is "
+          warn_msg = "It seems '" + settings.PASSWD_FILE + "' file is "
           warn_msg += "not in the appropriate format. Thus, it is expoted as a text file."
           settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
           sys_users = " ".join(str(p) for p in sys_users).strip()
@@ -2427,7 +2420,7 @@ def print_users(sys_users, filename, _, separator, TAG, cmd, prefix, suffix, whi
                     output_file.write("(" +str(count)+ ") '" + fields[0] + "' " + is_privileged_nh + "(uid=" + fields[1] + "). Home directory is in '" + fields[2] + "'.\n" )
               except ValueError:
                 if count == 1 :
-                  warn_msg = "It seems that '" + settings.PASSWD_FILE + "' file is not in the "
+                  warn_msg = "It seems '" + settings.PASSWD_FILE + "' file is not in the "
                   warn_msg += "appropriate format. Thus, it is expoted as a text file."
                   settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
                 sys_users = " ".join(str(p) for p in sys_users.split(":"))
@@ -2436,8 +2429,8 @@ def print_users(sys_users, filename, _, separator, TAG, cmd, prefix, suffix, whi
                   if not menu.options.no_logging:
                     output_file.write("      " + sys_users)
       else:
-        warn_msg = "It seems you do not have permissions "
-        warn_msg += "to read the content of the file '" + settings.PASSWD_FILE + "'."
+        warn_msg = "It seems you do not have permission "
+        warn_msg += "to read the contents of the file '" + settings.PASSWD_FILE + "'."
         settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
     except TypeError:
       pass
@@ -2482,7 +2475,7 @@ def print_passes(sys_passes, filename, _, alter_shell):
         # Check for appropriate '/etc/shadow' format.
         except IndexError:
           if count == 1 :
-            warn_msg = "It seems that '" + settings.SHADOW_FILE + "' file is not "
+            warn_msg = "It seems '" + settings.SHADOW_FILE + "' file is not "
             warn_msg += "in the appropriate format. Thus, it is expoted as a text file."
             settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
           settings.print_data_to_stdout(fields[0])
@@ -2490,8 +2483,8 @@ def print_passes(sys_passes, filename, _, alter_shell):
             if not menu.options.no_logging:
               output_file.write("      " + fields[0])
     else:
-      warn_msg = "It seems you do not have permissions "
-      warn_msg += "to read the content of the file '" + settings.SHADOW_FILE + "'."
+      warn_msg = "It seems you do not have permission "
+      warn_msg += "to read the contents of the file '" + settings.SHADOW_FILE + "'."
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
 """
@@ -2615,7 +2608,7 @@ File content to read.
 """
 def file_content_to_read():
   file_to_read = menu.options.file_read.encode(settings.DEFAULT_CODEC).decode()
-  info_msg = "Fetching content of the file: '"
+  info_msg = "Fetching contents of the file: '"
   info_msg += file_to_read + "'."
   settings.print_data_to_stdout(settings.print_info_msg(info_msg))
   if settings.TARGET_OS == settings.OS.WINDOWS:
@@ -2632,7 +2625,7 @@ File read status
 """
 def file_read_status(shell, file_to_read, filename):
   if shell:
-    _ = "Fetched file content"
+    _ = "Retrieved file content"
     settings.print_data_to_stdout(settings.print_retrieved_data(_, shell))
     with open(filename, 'a', encoding=settings.DEFAULT_CODEC) as output_file:
       if not menu.options.no_logging:
@@ -2640,8 +2633,8 @@ def file_read_status(shell, file_to_read, filename):
         info_msg += file_to_read + "' : " + shell + "\n"
         output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
   else:
-    warn_msg = "It seems you do not have permissions "
-    warn_msg += "to read the content of the file '" + file_to_read + "'."
+    warn_msg = "It seems you do not have permission "
+    warn_msg += "to read the contents of the file '" + file_to_read + "'."
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
 """
@@ -2663,12 +2656,12 @@ def check_destination(destination):
   return _
 
 """
-Write the content of the file
+Write the content of a local file to a remote destination.
 """
 def check_file_to_write():
   file_to_write = menu.options.file_write.encode(settings.DEFAULT_CODEC).decode()
   if not os.path.exists(file_to_write):
-    err_msg = "It seems that the provided local file '" + file_to_write + "' does not exist."
+    err_msg = "The specified local file '" + file_to_write + "' does not exist."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
@@ -2680,36 +2673,36 @@ def check_file_to_write():
       import base64
       content = base64.b64encode(content.encode(settings.DEFAULT_CODEC)).decode()
   else:
-    warn_msg = "It seems that '" + file_to_write + "' is not a file."
+    warn_msg = "The specified path '" + file_to_write + "' is not a file."
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
     settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
 
   dest_to_write = check_destination(destination=menu.options.file_dest)
-  info_msg = "Trying to write the content of the file '"
-  info_msg += file_to_write + "' on a remote directory '" + dest_to_write + "'."
+  info_msg = "Attempting to write the contents of file '"
+  info_msg += file_to_write + "' to the remote directory '" + dest_to_write + "'."
   settings.print_data_to_stdout(settings.print_info_msg(info_msg))
   return file_to_write, dest_to_write, content
 
 """
-File write status
+Display the result of an attempted file write to the remote target.
 """
 def file_write_status(shell, dest_to_write):
   if shell:
-    info_msg = "The file has been successfully created on remote directory: '" + dest_to_write + "'."
+    info_msg = "The file has been successfully created in remote directory: '" + dest_to_write + "'."
     settings.print_data_to_stdout(settings.print_bold_info_msg(info_msg))
   else:
-    warn_msg = "It seems you do not have permissions to write files on the remote directory '" + dest_to_write + "'."
+    warn_msg = "It seems you do not have permission to write files to the remote directory '" + dest_to_write + "'."
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
 """
-File upload procedure.
+Handle the file upload process to a remote target.
 """
 def check_file_to_upload():
   file_to_upload = menu.options.file_upload.encode(settings.DEFAULT_CODEC).decode()
   try:
     _urllib.request.urlopen(file_to_upload, timeout=settings.TIMEOUT)
   except (_urllib.error.HTTPError, _urllib.error.URLError) as err_msg:
-    warn_msg = "It seems that the '" + file_to_upload + "' file, does not exist. (" +str(err_msg)+ ")"
+    warn_msg = "The remote file '" + file_to_upload + "' does not appear to exist. (" +str(err_msg)+ ")"
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
     raise SystemExit()
   except ValueError as err_msg:
@@ -2717,8 +2710,8 @@ def check_file_to_upload():
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
   dest_to_upload = check_destination(destination=menu.options.file_dest)
-  info_msg = "Trying to upload the file from '"
-  info_msg += file_to_upload + "' on a remote directory '" + dest_to_upload + "'."
+  info_msg = "Attempting to upload the file '"
+  info_msg += file_to_upload + "' to the remote directory '" + dest_to_upload + "'."
   settings.print_data_to_stdout(settings.print_info_msg(info_msg))
   # Execute command
   cmd = settings.FILE_UPLOAD + file_to_upload + " -O " + dest_to_upload
@@ -2732,7 +2725,7 @@ def file_upload_status(shell, dest_to_upload):
     info_msg = "The file has been successfully uploaded on remote directory '" + dest_to_upload + "'."
     settings.print_data_to_stdout(settings.print_bold_info_msg(info_msg))
   else:
-    warn_msg = "It seems you do not have permissions to upload files on the remote directory '" + dest_to_upload + "'."
+    warn_msg = "It seems you do not have permission to upload files on the remote directory '" + dest_to_upload + "'."
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
 """
@@ -2809,20 +2802,20 @@ Check for wrong flags
 def check_wrong_flags():
   if settings.TARGET_OS == settings.OS.WINDOWS:
     if menu.options.is_root :
-      warn_msg = "Swithing '--is-root' to '--is-admin' because the "
+      warn_msg = "Switching '--is-root' to '--is-admin' because the "
       warn_msg += "target has been identified as Windows."
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
     if menu.options.passwords:
-      warn_msg = "The '--passwords' option, is not yet supported Windows targets."
+      warn_msg = "The '--passwords' option is not yet supported on Windows targets."
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
     if menu.options.file_upload :
-      warn_msg = "The '--file-upload' option, is not yet supported Windows targets. "
+      warn_msg = "The '--file-upload' option is not yet supported on Windows targets. "
       warn_msg += "Instead, use the '--file-write' option."
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
       raise SystemExit()
   else:
     if menu.options.is_admin :
-      warn_msg = "Swithing the '--is-admin' to '--is-root' because "
+      warn_msg = "Switching '--is-admin' to '--is-root' because "
       warn_msg += "the target has been identified as Unix-like. "
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
@@ -2833,7 +2826,7 @@ def setting_writable_dir(path):
     if settings.VERBOSITY_LEVEL != 0:
       debug_msg = "Using '" + path + "' for writable directory."
       settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
-    info_msg = "Trying to create a file in directory '" + path
+    info_msg = "Attempting to create a file in directory '" + path
     info_msg += "' for command execution output. "
     settings.print_data_to_stdout(settings.print_info_msg(info_msg))
 
@@ -3021,12 +3014,11 @@ Check if to use the "/tmp/" directory for tempfile-based technique.
 def use_temp_folder(no_result, url, timesec, filename, http_request_method, url_time_response):
   tmp_path = check_tmp_path(url, timesec, filename, http_request_method, url_time_response)
   settings.print_data_to_stdout(settings.END_LINE.CR)
-  message = "It seems you do not have permissions to "
-  message += "read and/or write files in directory '" + settings.WEB_ROOT + "'."
-  if not menu.options.web_root:
-    message += " You are advised to rerun with option '--web-root'."
   while True:
-    message = message + settings.END_LINE.LF + "Would you like to use the temporary directory ('" + tmp_path + "') instead? [Y/n] > "
+    message = "Insufficient permissions on directory '" + settings.WEB_ROOT + "'. "
+    # if not menu.options.web_root:
+    #   message += " You are advised to rerun with option '--web-root'."
+    message += "Use '" + tmp_path + "' instead? [Y/n] > "
     tmp_upload = common.read_input(message, default="Y", check_batch=True)
     if tmp_upload in settings.CHOICE_YES:
       exit_loops = True
@@ -3074,7 +3066,7 @@ def time_related_export_injection_results(cmd, separator, output, check_exec_tim
   else:
     # Check for separator filtration on target host.
     if output != False :
-      err_msg = "It seems that '" + cmd + "' command could not return "
+      err_msg = "It seems '" + cmd + "' command could not return "
       err_msg += "any output due to '" + separator + "' filtration on target host. "
       err_msg += "To bypass that limitation, use the '--alter-shell' option "
       err_msg += "or try another injection technique."
@@ -3189,7 +3181,7 @@ def set_python_working_dir():
     if python_dir in settings.CHOICE_YES:
       break
     elif python_dir in settings.CHOICE_NO:
-      message = "Please provide a full path directory for Python interpreter (e.g. '" + settings.WIN_CUSTOM_PYTHON_INTERPRETER  + "') > "
+      message = "Please specify the full path to the Python interpreter executable (e.g., '" + settings.WIN_CUSTOM_PYTHON_INTERPRETER  + "') > "
       settings.WIN_PYTHON_INTERPRETER = common.read_input(message, default=settings.WIN_CUSTOM_PYTHON_INTERPRETER, check_batch=True)
       settings.USER_DEFINED_PYTHON_DIR = True
       break
@@ -3227,7 +3219,7 @@ def set_python_interpreter():
     if python_interpreter in settings.CHOICE_YES:
       break
     elif python_interpreter in settings.CHOICE_NO:
-      message = "Please provide a custom working interpreter for Python (e.g. '" + settings.LINUX_CUSTOM_PYTHON_INTERPRETER + "') > "
+      message = "Please specify the full filesystem path of a custom Python interpreter to use (e.g. '" + settings.LINUX_CUSTOM_PYTHON_INTERPRETER + "') > "
       settings.LINUX_PYTHON_INTERPRETER = common.read_input(message, default=settings.LINUX_CUSTOM_PYTHON_INTERPRETER, check_batch=True)
       settings.USER_DEFINED_PYTHON_INTERPRETER = True
       break

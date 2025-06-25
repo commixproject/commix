@@ -31,7 +31,7 @@ from src.thirdparty.six.moves import urllib as _urllib
 Invalid cmd output
 """
 def invalid_cmd_output(cmd):
-  err_msg = "The execution of '" + cmd + "' command, does not return any output."
+  err_msg = "Execution of the '" + cmd + "' command did not return any output."
   return err_msg
 
 """

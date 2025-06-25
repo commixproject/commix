@@ -67,7 +67,7 @@ def logfile_parser():
     request_file = menu.options.logfile
 
   if not os.path.exists(request_file):
-    err_msg = "It seems that the '" + request_file + "' file, does not exist."
+    err_msg = "It seems the '" + request_file + "' file, does not exist."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
 

@@ -616,7 +616,7 @@ def do_results_based_proccess(url, timesec, filename, http_request_method, injec
 
             except _urllib.error.URLError as e:
               if technique == settings.INJECTION_TECHNIQUE.FILE_BASED:
-                warn_msg = "It seems you do not have permissions to "
+                warn_msg = "It seems you do not have permission to "
                 warn_msg += "read and/or write files in directory '" + settings.WEB_ROOT + "'."
                 settings.print_data_to_stdout(settings.END_LINE.CR + settings.print_warning_msg(warn_msg))
                 err_msg = str(e).replace(": "," (") + ")."
