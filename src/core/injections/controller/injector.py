@@ -353,7 +353,7 @@ def injection_output(url, OUTPUT_TEXTFILE, timesec, technique):
     settings.DEFINED_WEBROOT = output
     return output
 
-  if not settings.DEFINED_WEBROOT or settings.MULTI_TARGETS:
+  if not settings.DEFINED_WEBROOT or settings.MULTI_TARGETS or not settings.RECHECK_FILE_FOR_EXTRACTION:
     if menu.options.web_root:
       scheme = _urllib.parse.urlparse(url).scheme
       hostname = _urllib.parse.urlparse(url).hostname
@@ -381,6 +381,7 @@ def injection_output(url, OUTPUT_TEXTFILE, timesec, technique):
               info_msg = "Using '" + output
               info_msg += "' for command execution output."
               settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+              settings.RECHECK_FILE_FOR_EXTRACTION = True
               if not settings.DEFINED_WEBROOT:
                 pass
               else:
