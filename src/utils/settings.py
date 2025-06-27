@@ -262,7 +262,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.1"
-REVISION = "48"
+REVISION = "49"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -459,6 +459,7 @@ TIME_BASED_STATE = False
 FILE_BASED_STATE = False
 TEMPFILE_BASED_STATE = False
 TIME_RELATED_ATTACK = False
+TIME_RELATED_ATTACK_WARNING = False
 
 # Stored applied techniques
 SESSION_APPLIED_TECHNIQUES = ""

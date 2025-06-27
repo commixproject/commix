@@ -1308,8 +1308,10 @@ def time_related_shell(url_time_response, exec_time, timesec):
 Message regarding time related attcks
 """
 def time_related_attaks_msg():
-  warn_msg = "It is very important to not stress the network connection during usage of time-based payloads to prevent potential disruptions."
-  settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+  if not settings.TIME_RELATED_ATTACK_WARNING:
+    warn_msg = "It is very important to not stress the network connection during usage of time-based payloads to prevent potential disruptions."
+    settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+  settings.TIME_RELATED_ATTACK_WARNING = True
 
 """
 Check if defined "--url-reload" option.
