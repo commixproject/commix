@@ -262,7 +262,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.1"
-REVISION = "49"
+REVISION = "50"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -599,6 +599,7 @@ TMP_PATH = ""
 WEB_ROOT = ""
 DEFAULT_WEB_ROOT = ""
 CUSTOM_WEB_ROOT = False
+CUSTOM_FILENAME = ""
 
 # Counting the total of HTTP(S) requests
 TOTAL_OF_REQUESTS = 0

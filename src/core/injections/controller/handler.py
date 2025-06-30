@@ -226,7 +226,8 @@ def do_time_related_proccess(url, timesec, filename, http_request_method, url_ti
                 settings.TIME_BASED_STATE = True
               elif technique == settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED:  
                 settings.TEMPFILE_BASED_STATE = True
-                OUTPUT_TEXTFILE = tmp_path + TAG + settings.OUTPUT_FILE_EXT
+                #OUTPUT_TEXTFILE = tmp_path + TAG + settings.OUTPUT_FILE_EXT
+                OUTPUT_TEXTFILE = injector.select_output_filename(technique, tmp_path, TAG)
               cmd = shell = ""
               checks.check_for_stored_tamper(payload)
               settings.FOUND_EXEC_TIME = exec_time
@@ -247,7 +248,8 @@ def do_time_related_proccess(url, timesec, filename, http_request_method, url_ti
             alter_shell = menu.options.alter_shell
             tag_length = len(TAG) + 4
             if technique == settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED:
-              OUTPUT_TEXTFILE = tmp_path + TAG + settings.OUTPUT_FILE_EXT
+              #OUTPUT_TEXTFILE = tmp_path + TAG + settings.OUTPUT_FILE_EXT
+              OUTPUT_TEXTFILE = injector.select_output_filename(technique, tmp_path, TAG)
             for output_length in range(1, int(tag_length)):
               try:
                 # Tempfile-based decision payload (check if host is vulnerable).
@@ -492,7 +494,9 @@ def do_results_based_proccess(url, timesec, filename, http_request_method, injec
               if technique == settings.INJECTION_TECHNIQUE.FILE_BASED: 
                 settings.FILE_BASED_STATE = True
                 checks.check_for_stored_tamper(payload)
-                OUTPUT_TEXTFILE = TAG + settings.OUTPUT_FILE_EXT
+                #OUTPUT_TEXTFILE = TAG + settings.OUTPUT_FILE_EXT
+                tmp_path = ""
+                OUTPUT_TEXTFILE = injector.select_output_filename(technique, tmp_path, TAG)
                 if re.findall(settings.DIRECTORY_REGEX,payload):
                   filepath = re.findall(settings.DIRECTORY_REGEX,payload)[0]
                   settings.WEB_ROOT = os.path.dirname(filepath)
@@ -518,7 +522,8 @@ def do_results_based_proccess(url, timesec, filename, http_request_method, injec
 
             if technique == settings.INJECTION_TECHNIQUE.FILE_BASED:
               # The output file for file-based injection technique.
-              OUTPUT_TEXTFILE = TAG + settings.OUTPUT_FILE_EXT
+              #OUTPUT_TEXTFILE = TAG + settings.OUTPUT_FILE_EXT
+              OUTPUT_TEXTFILE = injector.select_output_filename(technique, tmp_path, TAG)
             else:
               randv1 = random.randrange(100)
               randv2 = random.randrange(100)

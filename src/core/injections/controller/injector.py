@@ -323,6 +323,59 @@ def false_positive_check(separator, TAG, cmd, prefix, suffix, whitespace, timese
     checks.unexploitable_point()
 
 """
+Prompt the user to confirm or set a custom filename for command execution output.
+Returns the chosen filename.
+"""
+def select_output_filename(technique, tmp_path, TAG):
+  # Ensure tmp_path ends with a slash for safe concatenation
+  if tmp_path and not tmp_path.endswith("/"):
+    tmp_path += "/"
+
+  # If a custom filename is already set, handle tmp_path prefix depending on technique
+  if settings.CUSTOM_FILENAME:
+    if technique == settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED:
+      if not settings.CUSTOM_FILENAME.startswith(tmp_path):
+        settings.CUSTOM_FILENAME = tmp_path + settings.CUSTOM_FILENAME
+    else:
+      # Remove tmp_path prefix if present but technique is different
+      if settings.CUSTOM_FILENAME.startswith(tmp_path):
+        settings.CUSTOM_FILENAME = settings.CUSTOM_FILENAME[len(tmp_path):]
+    return settings.CUSTOM_FILENAME
+
+  # Generate default filename
+  OUTPUT_TEXTFILE = TAG + settings.OUTPUT_FILE_EXT
+
+  while True:
+    message = "Would you like to use a random file '" + OUTPUT_TEXTFILE 
+    message += "' to receive the command execution output? [Y/n] > "
+    procced_option = common.read_input(message, default="Y", check_batch=True)
+
+    if procced_option in settings.CHOICE_YES:
+      break
+
+    elif procced_option in settings.CHOICE_NO:
+      message = "Enter a filename to receive the command execution output > "
+      message = common.read_input(message, default=OUTPUT_TEXTFILE, check_batch=True)
+
+      OUTPUT_TEXTFILE = message
+      info_msg = "Using '" + OUTPUT_TEXTFILE + "' for command execution output."
+      settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+      break
+
+    elif procced_option in settings.CHOICE_QUIT:
+      raise SystemExit()
+
+    else:
+      common.invalid_option(procced_option)
+
+  # Prepend tmp_path if needed
+  if technique == settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED:
+    OUTPUT_TEXTFILE = tmp_path + OUTPUT_TEXTFILE
+
+  settings.CUSTOM_FILENAME = OUTPUT_TEXTFILE
+  return OUTPUT_TEXTFILE
+
+"""
 Find the URL directory.
 """
 def injection_output(url, OUTPUT_TEXTFILE, timesec, technique):

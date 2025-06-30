@@ -1,4 +1,5 @@
 ## Version 4.1 (TBA)
+* Revised: Improved semiblind ("file-based") technique with filename customization prompt (random or user-defined).
 * Fixed: Improved handling of non-ASCII characters in URL path and query components.
 * Fixed: Improved handling of HTTP errors missing response codes during authentication.
 * Fixed: Improved handling of `URLError` without HTTP response.

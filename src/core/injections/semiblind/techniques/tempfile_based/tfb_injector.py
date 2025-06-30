@@ -27,6 +27,11 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
   return injector.time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response, technique)
 
 """
+"""
+def select_output_filename(technique, tmp_path, TAG):
+  return injector.select_output_filename(technique, tmp_path, TAG)
+
+"""
 False Positive check and evaluation.
 """
 def false_positive_check(separator, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, randvcalc, alter_shell, exec_time, url_time_response, false_positive_warning, technique):
