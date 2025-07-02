@@ -30,25 +30,45 @@ global obf_char
 
 if not settings.TAMPER_SCRIPTS[__tamper__]:
   num = 2
-  obf_char = "${" + ''.join(random.choice(string.ascii_uppercase) for x in range(num)) + "}"
+  obf_char = "${" + ''.join(random.choice(string.ascii_uppercase) for _ in range(num)) + "}"
   settings.TAMPER_SCRIPTS[__tamper__] = True
+
 
 def tamper(payload):
   def add_uninitialized_variable(payload):
-    if settings.TAMPER_SCRIPTS["backslashes"] or settings.TAMPER_SCRIPTS["dollaratsigns"]:
-      err_msg = "Tamper script '" +  __tamper__  + "' is unlikely to work combined with the tamper scripts: 'backslashes' and/or 'dollaratsigns'."
+    # Safety check for incompatible scripts
+    if settings.TAMPER_SCRIPTS.get("backslashes") or settings.TAMPER_SCRIPTS.get("dollaratsigns"):
+      err_msg = "Tamper script '" + __tamper__ + "' is unlikely to work in combination with "
+      err_msg += "the tamper scripts 'backslashes' and/or 'dollaratsigns'."
+
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
       raise SystemExit()
-    payload = re.sub(settings.TAMPER_MODIFICATION_LETTERS, lambda x: obf_char + x[0], payload)
+
+    # Split payload into parts: obfuscated (${XX}) and plain
+    parts = re.split(r'(\$\{[A-Z]+\})', payload)
+
+    # Apply obfuscation only on plain parts
+    for i in range(len(parts)):
+      if not re.match(r'\$\{[A-Z]+\}', parts[i]):
+        parts[i] = re.sub(
+          settings.TAMPER_MODIFICATION_LETTERS,
+          lambda x: obf_char + x.group(0),
+          parts[i]
+        )
+
+    payload = ''.join(parts)
+
+    # Undo obfuscation for ignored words
     for word in settings.IGNORE_TAMPER_TRANSFORMATION:
-      _ = obf_char.join(word[i:i+1] for i in range(-1, len(word), 1))
-      if _ in payload:
-        payload = payload.replace(_,_.replace(obf_char, ""))
+      obf_word = obf_char.join(word[i:i+1] for i in range(-1, len(word), 1))
+      if obf_word in payload:
+        payload = payload.replace(obf_word, word)
+
     return payload
 
+  # Only apply on non-Windows targets
   if settings.TARGET_OS != settings.OS.WINDOWS:
     return add_uninitialized_variable(payload)
   else:
     return payload
 
-# eof
