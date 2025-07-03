@@ -47,15 +47,18 @@ from src.thirdparty.colorama import Fore, Back, Style, init
 from src.thirdparty.flatten_json.flatten_json import flatten, unflatten_list
 
 try:
-  from readline import *
-  import readline as readline
   if settings.PLATFORM == "mac":
+    import readline
     if getattr(readline, '__doc__', '') is not None and 'libedit' in getattr(readline, '__doc__', ''):
       import gnureadline as readline
+    from readline import *
+  else:
+    import readline
+    from readline import *
 except:
   try:
-    from pyreadline import *
     import pyreadline as readline
+    from pyreadline import *
   except:
     settings.READLINE_ERROR = True
 
