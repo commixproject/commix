@@ -518,6 +518,7 @@ def main(filename, url, http_request_method):
         try:
           info_msg = "Performing heuristic (passive) tests on the target URL."
           settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+          requests.is_url_content_stable(url)
           # Webpage encoding detection.
           requests.encoding_detection(response)
           # Procedure for target server identification.
@@ -526,6 +527,7 @@ def main(filename, url, http_request_method):
           requests.application_identification(url)
           # Specifies the technology supporting the web application
           requests.technology_identification(response)
+
           # Procedure for target server's operating system identification.
           if not settings.IDENTIFIED_TARGET_OS:
             requests.os_identification(response)

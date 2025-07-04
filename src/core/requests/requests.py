@@ -39,6 +39,25 @@ from src.thirdparty.six.moves import urllib as _urllib
 from src.thirdparty.six.moves import http_client as _http_client
 from src.thirdparty.colorama import Fore, Back, Style, init
 
+"""
+Check if the content of the given URL is stable over time.
+"""
+def is_url_content_stable(url, delay=5):
+  status = "stable (static)"
+  if settings.VERBOSITY_LEVEL != 0:
+    debug_msg = "Testing if the target URL content is " + status + "."
+    settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
+  try:
+    first_response_content = _urllib.request.urlopen(url, timeout=settings.TIMEOUT).read().strip()
+    time.sleep(delay)
+    second_response_content = _urllib.request.urlopen(url, timeout=settings.TIMEOUT).read().strip()
+    if first_response_content != second_response_content:
+      status = "dynamic (changes between requests)"
+  except Exception:
+    pass
+  if settings.VERBOSITY_LEVEL != 0:
+    debug_msg = "The target URL is content " + status + "."
+    settings.print_data_to_stdout(settings.print_bold_debug_msg(debug_msg))
 
 """
 Do a request to target URL.
