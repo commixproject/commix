@@ -1,4 +1,5 @@
 ## Version 4.1 (TBA)
+* Revised: Enhanced target encoding detection with improved charset extraction and prioritization from HTTP headers and HTML meta tags.
 * Added: Ability to verify target URL content stability by comparing responses across delayed requests.
 * Revised: Improved session handler for enhanced stability and data integrity.
 * Revised: Improved semiblind ("file-based") technique with filename customization prompt (random or user-defined).

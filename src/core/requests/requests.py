@@ -716,50 +716,80 @@ def custom_header_injection(url, vuln_parameter, payload, http_request_method):
     return response
 
 """
-Target's encoding detection
+Detect the character encoding of the target web page.
 """
 def encoding_detection(response):
   charset_detected = False
+  charset = None
+
   if settings.VERBOSITY_LEVEL != 0:
     debug_msg = "Identifying the web page charset."
     settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
+
   try:
-    # Detecting charset
+    # Read once
+    content_bytes = response.read()
     try:
-      # Support for python 2.7.x
-      charset = response.headers.getparam('charset')
+      content_text = content_bytes.decode("utf-8", errors="ignore")
+    except:
+      content_text = ""
+
+    # 1. Get charset from HTTP header (may be None)
+    try:
+      header_charset = response.headers.getparam('charset')  # Python 2
     except AttributeError:
-      # Support for python 3.x
-      charset = response.headers.get_content_charset()
-    if charset != None and len(charset) != 0 :
-      charset_detected = True
+      try:
+        header_charset = response.headers.get_content_charset()  # Python 3
+      except:
+        header_charset = None
+
+    if header_charset:
+      header_charset = header_charset.strip().lower()
+
+    # 2. Find all meta charset declarations
+
+    # HTML5 <meta charset="...">
+    meta_charset_match = re.search(r'<meta\s+charset=["\']?([a-zA-Z0-9\-_]+)["\']?', content_text, re.I)
+
+    # HTML4 <meta http-equiv="Content-Type" content="text/html; charset=...">
+    meta_http_equiv_match = re.search(
+      r'<meta\s+http-equiv=["\']Content-Type["\']\s+content=["\'][^"\']*charset=([a-zA-Z0-9\-_]+)',
+      content_text, re.I)
+
+    # Decide priority: prefer meta charset, then meta http-equiv, then header
+    if meta_charset_match:
+      charset = meta_charset_match.group(1).strip().lower()
+    elif meta_http_equiv_match:
+      charset = meta_http_equiv_match.group(1).strip().lower()
+    elif header_charset:
+      charset = header_charset
     else:
-      content = re.findall(r"charset=['\"](.*)['\"]", response.read())[0]
-      if len(content) != 0 :
-        charset = content
-        charset_detected = True
-      else:
-         # Check if HTML5 format
-        charset = re.findall(r"charset=['\"](.*?)['\"]", response.read())[0]
-      if len(charset) != 0 :
-        charset_detected = True
-    # Check the identifyied charset
-    if charset_detected:
-      settings.DEFAULT_PAGE_ENCODING = charset
-      if settings.DEFAULT_PAGE_ENCODING.lower() not in settings.ENCODING_LIST:
-        warn_msg = "The web page charset " + settings.DEFAULT_PAGE_ENCODING + " seems unknown."
-        settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
-      else:
-        if settings.VERBOSITY_LEVEL != 0:
-          debug_msg = "The web page charset appears to be " + settings.DEFAULT_PAGE_ENCODING + "."
-          settings.print_data_to_stdout(settings.print_bold_debug_msg(debug_msg))
-    else:
-      pass
-  except:
-    pass
-  if charset_detected == False and settings.VERBOSITY_LEVEL != 0:
+      charset = None
+
+    # 3. If no charset yet, default to utf-8
+    if not charset:
+      charset = 'utf-8'
+
+    charset_detected = True
+    settings.DEFAULT_PAGE_ENCODING = charset
+
+    # 4. Logging
+    if charset not in settings.ENCODING_LIST:
+      warn_msg = "The web page charset '" + charset + "' seems unknown."
+      settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+    elif settings.VERBOSITY_LEVEL != 0:
+      debug_msg = "The declared web page charset is '" + charset + "'"
+      settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
+
+  except Exception as e:
+    if settings.VERBOSITY_LEVEL != 0:
+      warn_msg = "Error during charset detection: " + str(e)
+      settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+
+  if not charset_detected and settings.VERBOSITY_LEVEL != 0:
     warn_msg = "Failed to identify the web page charset."
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+
 
 """
 Procedure for target application identification
