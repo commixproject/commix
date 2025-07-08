@@ -43,21 +43,25 @@ from src.thirdparty.colorama import Fore, Back, Style, init
 Check if the content of the given URL is stable over time.
 """
 def is_url_content_stable(url, delay=5):
-  status = "stable (static)"
+  status = "stable"
   if settings.VERBOSITY_LEVEL != 0:
-    debug_msg = "Testing if the target URL content is " + status + "."
+    debug_msg = "Testing if the target URL content remains consistent between requests."
     settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
   try:
     first_response_content = _urllib.request.urlopen(url, timeout=settings.TIMEOUT).read().strip()
     time.sleep(delay)
     second_response_content = _urllib.request.urlopen(url, timeout=settings.TIMEOUT).read().strip()
     if first_response_content != second_response_content:
-      status = "dynamic (changes between requests)"
+      status = "dynamic"
   except Exception:
-    pass
+    msg = "Unable to determine target URL content stability due to retrieval errors."
+    settings.print_data_to_stdout(settings.print_warning_msg(msg))
+    return
+
   if settings.VERBOSITY_LEVEL != 0:
-    debug_msg = "The target URL is content " + status + "."
-    settings.print_data_to_stdout(settings.print_bold_debug_msg(debug_msg))
+    msg = "Target URL content is " + status + "."
+    settings.print_data_to_stdout(settings.print_bold_debug_msg(msg))
+
 
 """
 Do a request to target URL.
@@ -723,7 +727,7 @@ def encoding_detection(response):
   charset = None
 
   if settings.VERBOSITY_LEVEL != 0:
-    debug_msg = "Identifying the web page charset."
+    debug_msg = "Detecting the character encoding declared by the web page."
     settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
 
   try:
@@ -778,8 +782,8 @@ def encoding_detection(response):
       warn_msg = "The web page charset '" + charset + "' seems unknown."
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
     elif settings.VERBOSITY_LEVEL != 0:
-      debug_msg = "The declared web page charset is '" + charset + "'"
-      settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
+      debug_msg = "Web page declares character encoding as '" + charset + "'"
+      settings.print_data_to_stdout(settings.print_bold_debug_msg(debug_msg))
 
   except Exception as e:
     if settings.VERBOSITY_LEVEL != 0:
@@ -790,136 +794,152 @@ def encoding_detection(response):
     warn_msg = "Failed to identify the web page charset."
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
-
 """
-Procedure for target application identification
+Identify the target application's type based on the URL extension.
 """
 def application_identification(url):
   found_application_extension = False
+
   if settings.VERBOSITY_LEVEL != 0:
-    debug_msg = "Identifying the target application."
+    debug_msg = "Detecting the type of target application based on URL and headers."
     settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
+
   root, application_extension = splitext(_urllib.parse.urlparse(url).path)
   settings.TARGET_APPLICATION = application_extension[1:].upper()
 
   if settings.TARGET_APPLICATION:
     found_application_extension = True
+
     if settings.VERBOSITY_LEVEL != 0:
-      debug_msg = "The target application appears to be " + settings.TARGET_APPLICATION + "."
+      debug_msg = "Target application identified as " + settings.TARGET_APPLICATION + "."
       settings.print_data_to_stdout(settings.print_bold_debug_msg(debug_msg))
 
-    # Check for unsupported target applications
-    for i in range(0,len(settings.UNSUPPORTED_TARGET_APPLICATION)):
-      if settings.TARGET_APPLICATION.lower() in settings.UNSUPPORTED_TARGET_APPLICATION[i].lower():
+    for unsupported in settings.UNSUPPORTED_TARGET_APPLICATION:
+      if settings.TARGET_APPLICATION.lower() in unsupported.lower():
         err_msg = settings.TARGET_APPLICATION + " exploitation is not yet supported."
         settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
         raise SystemExit()
 
-  if not found_application_extension:
-    if settings.VERBOSITY_LEVEL != 0:
-      warn_msg = "Failed to identify target's application."
-      settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+  if not found_application_extension and settings.VERBOSITY_LEVEL != 0:
+    warn_msg = "Failed to identify the target application's type from the URL."
+    settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
 """
-Underlying operating system check.
+Detect the underlying operating system of the target server based on server headers.
 """
-def check_os(_):
+def check_os(server_header):
+  identified_os = "unknown"
+  user_defined_os = None
+
   if menu.options.os and checks.user_defined_os():
     user_defined_os = settings.TARGET_OS
 
-  for i in range(0,len(settings.SERVER_OS_BANNERS)):
-    match = re.search(settings.SERVER_OS_BANNERS[i].lower(), _.lower())
+  for banner in settings.SERVER_OS_BANNERS:
+    match = re.search(banner.lower(), server_header.lower())
     if match:
       if settings.VERBOSITY_LEVEL != 0:
-        debug_msg = "Identifying the underlying operating system."
+        debug_msg = "Detecting the operating system hosting the target server."
         settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
+
       settings.IDENTIFIED_TARGET_OS = True
       settings.TARGET_OS = match.group(0)
-      match = re.search(r"microsoft|win", settings.TARGET_OS)
-      if match:
-        settings.TARGET_OS = identified_os = settings.OS.WINDOWS
+
+      if re.search(r"microsoft|win", settings.TARGET_OS, re.IGNORECASE):
+        identified_os = settings.OS.WINDOWS
+        settings.TARGET_OS = identified_os
+
         if menu.options.os and user_defined_os != settings.OS.WINDOWS:
           if checks.identified_os():
             settings.TARGET_OS = user_defined_os
-          else:
-            settings.TARGET_OS = settings.OS.WINDOWS
+
         if menu.options.shellshock:
-          err_msg = "The shellshock module ('--shellshock') is not available for " + identified_os + " targets."
+          err_msg = "The shellshock module ('--shellshock') is not available for Windows targets."
           settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
           raise SystemExit()
       else:
         identified_os = "Unix-like (" + settings.TARGET_OS + ")"
+
         if menu.options.os and user_defined_os == settings.OS.WINDOWS:
           if checks.identified_os():
             settings.TARGET_OS = user_defined_os
+      break
 
-  if settings.VERBOSITY_LEVEL != 0 :
+  if settings.VERBOSITY_LEVEL != 0:
     if settings.IDENTIFIED_TARGET_OS:
-      debug_msg = "The underlying operating system appears to be " + identified_os.title() +  "."
+      debug_msg = "Underlying operating system identified as " + identified_os + "."
       settings.print_data_to_stdout(settings.print_bold_debug_msg(debug_msg))
 
+
 """
-Target application identification
+Identify the underlying technology or framework powering the target application.
 """
 def technology_identification(response):
-  x_powered_by = response.info()[settings.X_POWERED_BY]
-  if settings.VERBOSITY_LEVEL != 0:
-    debug_msg = "Identifying the technology supporting the target application."
-    settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
   try:
-    if len(x_powered_by) != 0:
-      if settings.VERBOSITY_LEVEL != 0:
-        debug_msg = "The target application is powered by " + x_powered_by + "."
-        settings.print_data_to_stdout(settings.print_bold_debug_msg(debug_msg))
-      check_os(x_powered_by)
+    x_powered_by = response.info().get(settings.X_POWERED_BY, "").strip()
 
-  except Exception as e:
+    if settings.VERBOSITY_LEVEL != 0:
+      debug_msg = "Detecting the underlying technology or framework powering the target application."
+      settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
+
+      if x_powered_by:
+        debug_msg = "Target application technology detected as " + x_powered_by + "."
+        settings.print_data_to_stdout(settings.print_bold_debug_msg(debug_msg))
+        check_os(x_powered_by)
+      else:
+        warn_msg = "Failed to identify the technology supporting the target application."
+        settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+
+  except Exception:
     if settings.VERBOSITY_LEVEL != 0:
       warn_msg = "Failed to identify the technology supporting the target application."
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
+
 """
-Target server's identification.
+Identify the software running on the target web server.
 """
 def server_identification(response):
   if settings.VERBOSITY_LEVEL != 0:
-    debug_msg = "Identifying the software used by target server."
+    debug_msg = "Detecting the software running on the target web server."
     settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
 
-  server_banner = response.info()[settings.SERVER]
-  for i in range(0,len(settings.SERVER_BANNERS)):
-    match = re.search(settings.SERVER_BANNERS[i].lower(), server_banner.lower())
+  server_banner = response.info().get(settings.SERVER, "").strip()
+  for banner in settings.SERVER_BANNERS:
+    match = re.search(banner.lower(), server_banner.lower())
     if match:
       settings.SERVER_BANNER = match.group(0)
-      # Set up default root paths
+
+      # Set up default document root paths
       if "apache" in settings.SERVER_BANNER.lower():
         if settings.TARGET_OS == settings.OS.WINDOWS:
           settings.WEB_ROOT = settings.WINDOWS_DEFAULT_DOC_ROOTS[1]
         else:
-          settings.WEB_ROOT = settings.LINUX_DEFAULT_DOC_ROOTS[0].replace(settings.DOC_ROOT_TARGET_MARK,settings.TARGET_URL)
+          settings.WEB_ROOT = settings.LINUX_DEFAULT_DOC_ROOTS[0].replace(
+            settings.DOC_ROOT_TARGET_MARK, settings.TARGET_URL)
       elif "nginx" in settings.SERVER_BANNER.lower():
         settings.WEB_ROOT = settings.LINUX_DEFAULT_DOC_ROOTS[6]
       elif "microsoft-iis" in settings.SERVER_BANNER.lower():
         settings.WEB_ROOT = settings.WINDOWS_DEFAULT_DOC_ROOTS[0]
       break
 
-  if len(server_banner) != 0 and settings.VERBOSITY_LEVEL != 0:
-    debug_msg = "The target server's software appears to be " + server_banner + "."
+  if server_banner and settings.VERBOSITY_LEVEL != 0:
+    debug_msg = "Target server software identified as " + server_banner + "."
     settings.print_data_to_stdout(settings.print_bold_debug_msg(debug_msg))
 
 
 """
-Procedure for target server's operating system identification.
+Identify the underlying operating system based on the server banner.
 """
 def os_identification(response):
   if not settings.IGNORE_IDENTIFIED_OS:
-    server_banner = response.info()[settings.SERVER]
-    identified_os = check_os(server_banner)
+    server_banner = response.info().get(settings.SERVER, "")
+    check_os(server_banner)
 
   if not settings.IDENTIFIED_TARGET_OS and not menu.options.os:
-    warn_msg = "Failed to identify server's underlying operating system."
+    warn_msg = "Failed to identify the server's underlying operating system."
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
     checks.define_target_os()
+
 
 """
 Perform target page reload (if it is required).
