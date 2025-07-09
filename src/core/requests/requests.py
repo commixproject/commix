@@ -942,13 +942,16 @@ def os_identification(response):
 
 
 """
-Perform target page reload (if it is required).
+Perform a target page reload after a specified delay (minimum 5 seconds).
 """
-def url_reload(url, timesec):
-  if int(timesec) <= 5:
-    timesec = 5
-    time.sleep(timesec)
-  response = urllib.urlopen(url)
+def url_reload(url, delay_seconds):
+  # Ensure a minimum delay of 5 seconds before reloading
+  if int(delay_seconds) < 5:
+    delay_seconds = 5
+  time.sleep(delay_seconds)
+
+  # Perform the URL request and return the response
+  response = _urllib.request.urlopen(url, timeout=settings.TIMEOUT)
   return response
 
 """
