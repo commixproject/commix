@@ -85,10 +85,14 @@ def http_response(headers, code):
 Print HTTP response headers / Body.
 """
 def print_http_response(response_headers, code, page):
-  if int(code) in settings.ABORT_CODE:
-    err_msg = "Aborting due to detected HTTP code '" + str(code) + "'. "
-    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+  try:
+    if int(code) in settings.ABORT_CODE:
+      err_msg = "Aborting due to detected HTTP code '" + str(code) + "'. "
+      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+      raise SystemExit()
+  except (ValueError, TypeError):
+    warn_msg = "Skipping abort check due to invalid (or missing) HTTP response code '" + str(code) + "'"
+    settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
   if settings.VERBOSITY_LEVEL >= 3 or menu.options.traffic_file:
     if settings.VERBOSITY_LEVEL >= 3:
