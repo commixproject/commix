@@ -176,20 +176,25 @@ def remove_tags(data):
   return data.replace(settings.INJECT_TAG,"").replace(settings.CUSTOM_INJECTION_MARKER_CHAR,"").replace(settings.ASTERISK_MARKER, "").replace(settings.RANDOM_TAG, "") 
 
 """
-Process data with custom injection marker character ('*').
+Process data with custom injection marker character ('*')
 """
 def process_custom_injection_data(data):
-  if settings.CUSTOM_INJECTION_MARKER != None and isinstance(data, str):
-    _ = []
-    for data in data.split("\\n"):
-      if not data.startswith(settings.ACCEPT) and settings.CUSTOM_INJECTION_MARKER_CHAR in data:
-        if menu.options.test_parameter != None and settings.CUSTOM_INJECTION_MARKER == False:
-          data = remove_tags(data)
-        # elif settings.CUSTOM_INJECTION_MARKER:
-        data = data.replace(settings.CUSTOM_INJECTION_MARKER_CHAR, settings.ASTERISK_MARKER)
-      _.append(data)
-    data = "\\n".join((list(dict.fromkeys(_)))).rstrip("\\n")
-  
+  if not isinstance(data, str):
+    # Safely return empty string if input is not a valid string
+    return ""
+
+  if settings.CUSTOM_INJECTION_MARKER is not None:
+    lines = []
+    for line in data.split("\\n"):
+      if not line.startswith(settings.ACCEPT) and settings.CUSTOM_INJECTION_MARKER_CHAR in line:
+        if menu.options.test_parameter is not None and settings.CUSTOM_INJECTION_MARKER is False:
+          line = remove_tags(line)
+        line = line.replace(settings.CUSTOM_INJECTION_MARKER_CHAR, settings.ASTERISK_MARKER)
+      lines.append(line)
+    
+    # Remove duplicates, then rejoin lines
+    data = "\\n".join(list(dict.fromkeys(lines))).rstrip("\\n")
+
   return data
 
 """
