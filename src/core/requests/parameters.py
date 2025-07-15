@@ -542,6 +542,8 @@ def prefixes(payload, prefix):
       parameter = menu.options.cookie
     specify_cookie_parameter(parameter)
   if settings.CUSTOM_HEADER_INJECTION:
+    if not settings.LOAD_SESSION:
+      parameter = settings.CUSTOM_HEADER_VALUE
     specify_custom_header_parameter(parameter)
   elif settings.USER_AGENT_INJECTION:
     if not settings.LOAD_SESSION:
@@ -747,74 +749,57 @@ def specify_cookie_parameter(cookie):
   return vuln_parameter
 
 """
-The user-agent based injection.
+Process a given HTTP header value for custom injection.
+"""
+def specify_header_injection_parameter(header_value, header_name):
+  try:
+    # Replace placeholder asterisk with actual injection tag
+    settings.TESTABLE_VALUE = checks.process_custom_injection_data(header_value).replace(settings.ASTERISK_MARKER, settings.INJECT_TAG)
+
+    # If a custom injection marker is in use and detected in the value
+    if settings.CUSTOM_INJECTION_MARKER and settings.INJECT_TAG in settings.TESTABLE_VALUE:
+      # Track which headers are involved in the injection process
+      if header_name not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST:
+        settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST.append(header_name)
+
+      # Keep a list of actual header values that were testable
+      if header_value not in settings.TESTABLE_PARAMETERS_LIST:
+        settings.TESTABLE_PARAMETERS_LIST.append(header_value)
+
+      # Split the value at the injection tag to get surrounding characters
+      split_value = settings.TESTABLE_VALUE.split(settings.INJECT_TAG)
+      settings.PRE_CUSTOM_INJECTION_MARKER_CHAR = split_value[0] if len(split_value) > 0 else ''
+      settings.POST_CUSTOM_INJECTION_MARKER_CHAR = split_value[1] if len(split_value) > 1 else ''
+
+  except (AttributeError, IndexError):
+    # Gracefully ignore errors from missing attributes or bad splits
+    pass
+
+  return header_value
+
+"""
+Wrapper for processing User-Agent header injection.
 """
 def specify_user_agent_parameter(user_agent):
-  try:
-    header_name = settings.USER_AGENT
-    settings.TESTABLE_VALUE = checks.process_custom_injection_data(user_agent).replace(settings.ASTERISK_MARKER, settings.INJECT_TAG)
-    if settings.CUSTOM_INJECTION_MARKER and settings.INJECT_TAG in settings.TESTABLE_VALUE:
-      settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST.append(header_name) if header_name not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST
-      settings.TESTABLE_PARAMETERS_LIST.append(user_agent) if header_name not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.TESTABLE_PARAMETERS_LIST
-      # Safely handle the split to avoid IndexError
-      split_value = settings.TESTABLE_VALUE.split(settings.INJECT_TAG)
-      settings.PRE_CUSTOM_INJECTION_MARKER_CHAR = split_value[0] if len(split_value) > 0 else ''
-      settings.POST_CUSTOM_INJECTION_MARKER_CHAR = split_value[1] if len(split_value) > 1 else ''
-  except (AttributeError, IndexError):
-    pass
-  return user_agent
+  return specify_header_injection_parameter(user_agent, settings.USER_AGENT)
 
 """
-The referer based injection.
+Wrapper for processing Referer header injection.
 """
 def specify_referer_parameter(referer):
-  try:
-    header_name = settings.REFERER
-    settings.TESTABLE_VALUE = checks.process_custom_injection_data(referer).replace(settings.ASTERISK_MARKER, settings.INJECT_TAG)
-    if settings.CUSTOM_INJECTION_MARKER and settings.INJECT_TAG in settings.TESTABLE_VALUE:
-      settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST.append(header_name) if header_name not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST
-      settings.TESTABLE_PARAMETERS_LIST.append(referer) if header_name not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.TESTABLE_PARAMETERS_LIST
-      # Safely handle the split to avoid IndexError
-      split_value = settings.TESTABLE_VALUE.split(settings.INJECT_TAG)
-      settings.PRE_CUSTOM_INJECTION_MARKER_CHAR = split_value[0] if len(split_value) > 0 else ''
-      settings.POST_CUSTOM_INJECTION_MARKER_CHAR = split_value[1] if len(split_value) > 1 else ''
-  except (AttributeError, IndexError):
-    pass
-  return referer
+  return specify_header_injection_parameter(referer, settings.REFERER)
 
 """
-The host based injection.
+Wrapper for processing Host header injection.
 """
 def specify_host_parameter(host):
-  try:
-    header_name = settings.HOST
-    settings.TESTABLE_VALUE = checks.process_custom_injection_data(host).replace(settings.ASTERISK_MARKER, settings.INJECT_TAG)
-    if settings.CUSTOM_INJECTION_MARKER and settings.INJECT_TAG in settings.TESTABLE_VALUE:
-      settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST.append(header_name) if header_name not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST
-      settings.TESTABLE_PARAMETERS_LIST.append(host) if header_name not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.TESTABLE_PARAMETERS_LIST
-      # Safely handle the split to avoid IndexError
-      split_value = settings.TESTABLE_VALUE.split(settings.INJECT_TAG)
-      settings.PRE_CUSTOM_INJECTION_MARKER_CHAR = split_value[0] if len(split_value) > 0 else ''
-      settings.POST_CUSTOM_INJECTION_MARKER_CHAR = split_value[1] if len(split_value) > 1 else ''
-  except (AttributeError, IndexError):
-    pass
-  return host
+  return specify_header_injection_parameter(host, settings.HOST)
 
 """
-The Custom http header based injection.
+Wrapper for processing a custom-defined HTTP header injection.
 """
-def specify_custom_header_parameter(header_name):
-  try:
-    header_name = settings.CUSTOM_HEADER_NAME
-    if settings.CUSTOM_INJECTION_MARKER:
-      settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST.append(header_name) if header_name not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST
-      settings.TESTABLE_PARAMETERS_LIST.append(vuln_parameter) if header_name not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.TESTABLE_PARAMETERS_LIST
-      # Safely handle the split to avoid IndexError
-      split_value = settings.TESTABLE_VALUE.split(settings.INJECT_TAG)
-      settings.PRE_CUSTOM_INJECTION_MARKER_CHAR = split_value[0] if len(split_value) > 0 else ''
-      settings.POST_CUSTOM_INJECTION_MARKER_CHAR = split_value[1] if len(split_value) > 1 else ''
-  except (AttributeError, IndexError):
-    pass
-  return header_name
+def specify_custom_header_parameter(custom_header_value):
+  return specify_header_injection_parameter(custom_header_value, settings.CUSTOM_HEADER_NAME)
+
 
 # eof
