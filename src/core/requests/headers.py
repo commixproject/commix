@@ -443,8 +443,20 @@ def do_check(request):
               http_header_value = checks.remove_tags(http_header_value)
               request.add_header(http_header_name, http_header_value)
               
-        if http_header_name not in [settings.HOST, settings.USER_AGENT, settings.REFERER, settings.COOKIE, settings.CUSTOM_HEADER_NAME]:
-          request.add_header(http_header_name, http_header_value)
+        # Normalize for comparison
+        excluded_headers = [
+          settings.HOST,
+          settings.USER_AGENT,
+          settings.REFERER,
+          settings.COOKIE,
+          settings.CUSTOM_HEADER_NAME
+        ]
+        excluded_headers = [h.lower() for h in excluded_headers if h]
+        # Check and apply Title-Case for final header name
+        if http_header_name.lower() not in excluded_headers:
+          normalized_name = '-'.join([part.capitalize() for part in http_header_name.split('-')])
+          request.add_header(normalized_name, http_header_value)
+
       except:
         pass
 
