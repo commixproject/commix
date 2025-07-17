@@ -452,6 +452,7 @@ def do_check(request):
           settings.CUSTOM_HEADER_NAME
         ]
         excluded_headers = [h.lower() for h in excluded_headers if h]
+        
         # Check and apply Title-Case for final header name
         if http_header_name.lower() not in excluded_headers:
           normalized_name = '-'.join([part.capitalize() for part in http_header_name.split('-')])

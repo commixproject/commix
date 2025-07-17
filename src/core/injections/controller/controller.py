@@ -427,28 +427,6 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
       break
 
 """
-Perform checks over custom HTTP Headers parameters.
-"""
-def custom_headers_checks(url, http_request_method, filename, timesec): 
-  # # Disable Cookie Injection
-  # settings.COOKIE_INJECTION = None
-
-  for name in range(len(settings.CUSTOM_HEADERS_NAMES)):
-    if settings.ASTERISK_MARKER in settings.CUSTOM_HEADERS_NAMES[name].split(": ")[1] and not settings.CUSTOM_INJECTION_MARKER:
-      settings.CUSTOM_HEADER_INJECTION = False
-    else:
-      settings.CUSTOM_HEADER_INJECTION = True
-      settings.CUSTOM_HEADER_NAME = settings.CUSTOM_HEADERS_NAMES[name].split(": ")[0]
-      settings.HTTP_HEADER = check_parameter = header_name = settings.CUSTOM_HEADER_NAME.lower()
-      settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST.append(check_parameter) if check_parameter not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST
-      settings.CUSTOM_HEADER_VALUE = settings.CUSTOM_HEADERS_NAMES[name].split(": ")[1].replace(settings.ASTERISK_MARKER, settings.INJECT_TAG)
-      url, check_parameter = check_for_stored_sessions(url, check_parameter, http_request_method)
-      if check_parameter != header_name or not injection_proccess(url, check_parameter, http_request_method, filename, timesec):
-        settings.CUSTOM_HEADER_INJECTION = False
-      settings.CUSTOM_HEADERS_NAMES[name] = checks.remove_tags(settings.CUSTOM_HEADERS_NAMES[name])
-  settings.CUSTOM_HEADER_INJECTION = False
-
-"""
 Inject HTTP headers parameters (User-agent / Referer / Host).
 """
 def http_headers_injection(url, http_request_method, filename, timesec):
@@ -655,80 +633,158 @@ Perform checks over HTTP Headers parameters.
 """
 def headers_checks(url, http_request_method, filename, timesec):
   if len([i for i in settings.TESTABLE_PARAMETERS_LIST if i in settings.HTTP_HEADERS]) != 0 or \
-    settings.INJECTION_MARKER_LOCATION.HTTP_HEADERS or settings.HTTP_HEADERS_INJECTION or \
-    any((settings.USER_AGENT_INJECTION, settings.REFERER_INJECTION, settings.HOST_INJECTION)):
+    settings.INJECTION_MARKER_LOCATION.HTTP_HEADERS or \
+    settings.HTTP_HEADERS_INJECTION:
     if not settings.SKIP_NON_CUSTOM:
       http_headers_injection(url, http_request_method, filename, timesec)
 
 """
-Perform checks
+Perform checks over custom HTTP Headers parameters.
+"""
+def custom_headers_checks(url, http_request_method, filename, timesec): 
+  for name in range(len(settings.CUSTOM_HEADERS_NAMES)):
+    if settings.ASTERISK_MARKER in settings.CUSTOM_HEADERS_NAMES[name].split(": ")[1] and not settings.CUSTOM_INJECTION_MARKER:
+      settings.CUSTOM_HEADER_INJECTION = False
+    else:
+      settings.CUSTOM_HEADER_INJECTION = True
+      settings.CUSTOM_HEADER_NAME = settings.CUSTOM_HEADERS_NAMES[name].split(": ")[0]
+      settings.HTTP_HEADER = check_parameter = header_name = settings.CUSTOM_HEADER_NAME.lower()
+      settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST.append(check_parameter) if check_parameter not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST
+      settings.CUSTOM_HEADER_VALUE = settings.CUSTOM_HEADERS_NAMES[name].split(": ")[1].replace(settings.ASTERISK_MARKER, settings.INJECT_TAG)
+      url, check_parameter = check_for_stored_sessions(url, check_parameter, http_request_method)
+      if check_parameter != header_name or not injection_proccess(url, check_parameter, http_request_method, filename, timesec):
+        settings.CUSTOM_HEADER_INJECTION = False
+      settings.CUSTOM_HEADERS_NAMES[name] = checks.remove_tags(settings.CUSTOM_HEADERS_NAMES[name])
+  settings.CUSTOM_HEADER_INJECTION = False
+
+"""
+Perform checks across multiple HTTP components (URL parameters, POST data, cookies,
+standard headers, and custom headers) to identify possible injection points.
 """
 def perform_checks(url, http_request_method, filename):
-  # Initiate whitespaces
-  if settings.MULTI_TARGETS or settings.STDIN_PARSING and len(settings.WHITESPACES) > 1:
+
+  # Prepare whitespaces if multiple targets or stdin parsing is used,
+  # and more than one whitespace character is defined. Keep only one.
+  if (settings.MULTI_TARGETS or settings.STDIN_PARSING) and \
+     len(settings.WHITESPACES) > 1:
     settings.WHITESPACES = [_urllib.parse.quote(SINGLE_WHITESPACE)]
 
   timesec = settings.TIMESEC
-  # Check if authentication is needed.
+
+  # Handle authentication if both the authentication URL and the authentication data are provided.
   if menu.options.auth_url and menu.options.auth_data:
-    # Do the authentication process.
     authentication.authentication_process(http_request_method)
     try:
-      # Check if authentication page is the same with the next (injection) URL
-      if _urllib.request.urlopen(url, timeout=settings.TIMEOUT).read() == _urllib.request.urlopen(menu.options.auth_url, timeout=settings.TIMEOUT).read():
+      # Verify authentication success by comparing the response content of the main URL and the auth URL.
+      if _urllib.request.urlopen(url, timeout=settings.TIMEOUT).read() == \
+         _urllib.request.urlopen(menu.options.auth_url, timeout=settings.TIMEOUT).read():
         err_msg = "Authentication failed using the specified credentials and URL."
         settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
         raise SystemExit()
     except (_urllib.error.URLError, _urllib.error.HTTPError) as err_msg:
+      # Authentication request failed due to a connection or HTTP error.
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
       raise SystemExit()
+
+  # If only one of the required authentication options is provided, display an error and exit.
   elif menu.options.auth_url or menu.options.auth_data:
     err_msg = "Authentication requires specifying both '--auth-url' and '--auth-data' options."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
-  else:
-    pass
 
+  # If shellshock testing is enabled, force the injection level to HTTP header level.
   if menu.options.shellshock:
     settings.INJECTION_LEVEL = settings.HTTP_HEADER_INJECTION_LEVEL
   else:
-    if settings.INJECTION_LEVEL != settings.DEFAULT_INJECTION_LEVEL and settings.CUSTOM_INJECTION_MARKER != True:
+    # If the user specified a custom injection level and no custom marker is used,
+    # set the level to the user-defined value.
+    if settings.INJECTION_LEVEL != settings.DEFAULT_INJECTION_LEVEL and \
+       not settings.CUSTOM_INJECTION_MARKER:
       settings.INJECTION_LEVEL = settings.USER_APPLIED_LEVEL
 
-  _ = True
+  proceed_non_custom = True
+
+  # Perform custom marker-based checks if custom injection marker is enabled.
   if settings.CUSTOM_INJECTION_MARKER:
-    _ = False
-    if any((settings.INJECTION_MARKER_LOCATION.URL, settings.INJECTION_MARKER_LOCATION.DATA)):
+    proceed_non_custom = False
+
+    # Perform checks over GET and POST parameters.
+    if settings.INJECTION_MARKER_LOCATION.URL or \
+       settings.INJECTION_MARKER_LOCATION.DATA:
       data_checks(url, http_request_method, filename, timesec)
+
+    # Perform checks over cookie values.
     if settings.INJECTION_MARKER_LOCATION.COOKIE:
       cookies_checks(url, http_request_method, filename, timesec)
+
+    # Perform checks over standard HTTP headers (User-Agent, Referer, Host).
     if settings.INJECTION_MARKER_LOCATION.HTTP_HEADERS:
       headers_checks(url, http_request_method, filename, timesec)
+
+    # Perform checks over custom user-defined HTTP headers.
     if settings.INJECTION_MARKER_LOCATION.CUSTOM_HTTP_HEADERS:
       custom_headers_checks(url, http_request_method, filename, timesec)
-    # if settings.TESTABLE_PARAMETERS_LIST or (settings.USER_DEFINED_POST_DATA and not settings.INJECTION_MARKER_LOCATION.DATA) or (settings.USER_DEFINED_URL_DATA and not settings.INJECTION_MARKER_LOCATION.URL):
-    # if settings.TESTABLE_PARAMETERS_LIST or not settings.INJECTION_MARKER_LOCATION.URL or not settings.INJECTION_MARKER_LOCATION.DATA:
-    if settings.TESTABLE_PARAMETERS_LIST or len(settings.USER_DEFINED_POST_DATA) != 0 and any((settings.INJECTION_MARKER_LOCATION.URL, settings.INJECTION_MARKER_LOCATION.DATA)):
+
+    # If parameters or POST data are present, and marker is in URL or DATA,
+    # perform remaining non-custom checks for completeness.
+    if (settings.TESTABLE_PARAMETERS_LIST or \
+        len(settings.USER_DEFINED_POST_DATA) != 0) and \
+        (settings.INJECTION_MARKER_LOCATION.URL or \
+         settings.INJECTION_MARKER_LOCATION.DATA):
       checks.process_non_custom()
 
+  # Perform default (non-custom) injection checks if not explicitly skipped.
   if not settings.SKIP_NON_CUSTOM:
+    # Disable custom injection mode before running default checks.
     settings.CUSTOM_INJECTION_MARKER = False
-    if settings.TESTABLE_PARAMETERS_LIST or not settings.INJECTION_MARKER_LOCATION.URL or not settings.INJECTION_MARKER_LOCATION.DATA:
+
+    # Perform checks over GET/POST parameters if allowed or marker is not set in URL/DATA.
+    if settings.TESTABLE_PARAMETERS_LIST or \
+       not settings.INJECTION_MARKER_LOCATION.URL or \
+       not settings.INJECTION_MARKER_LOCATION.DATA:
       data_checks(url, http_request_method, filename, timesec)
-    if _:
-      if settings.TESTABLE_PARAMETERS_LIST or not settings.INJECTION_MARKER_LOCATION.COOKIE and settings.INJECTION_LEVEL == settings.COOKIE_INJECTION_LEVEL:
-      # if settings.TESTABLE_PARAMETERS_LIST or not settings.INJECTION_MARKER_LOCATION.COOKIE and settings.INJECTION_LEVEL == settings.COOKIE_INJECTION_LEVEL:
+
+    if proceed_non_custom:
+      # Determine if we should perform cookie-based injection checks.
+      cookie_check = (settings.TESTABLE_PARAMETERS_LIST or \
+                      not settings.INJECTION_MARKER_LOCATION.COOKIE) and \
+                      settings.INJECTION_LEVEL == settings.COOKIE_INJECTION_LEVEL
+      if cookie_check:
         settings.COOKIE_INJECTION = True
         cookies_checks(url, http_request_method, filename, timesec)
-      if settings.TESTABLE_PARAMETERS_LIST or not settings.INJECTION_MARKER_LOCATION.HTTP_HEADERS and settings.INJECTION_LEVEL == settings.HTTP_HEADER_INJECTION_LEVEL:
-      # if settings.TESTABLE_PARAMETERS_LIST or not settings.INJECTION_MARKER_LOCATION.HTTP_HEADERS and settings.INJECTION_LEVEL == settings.HTTP_HEADER_INJECTION_LEVEL:
+
+      # Prepare headers list to evaluate whether header injection should be attempted.
+      testable = settings.TESTABLE_PARAMETERS_LIST
+      if isinstance(testable, str):
+        testable = [testable]
+      testable_lower = [t.lower() for t in testable if isinstance(t, str)]
+
+      header_flags = [
+        settings.USER_AGENT,
+        settings.REFERER,
+        settings.HOST
+      ]
+
+      # Check if any header flag is within the testable parameters list.
+      header_found = any(isinstance(h, str) and \
+                         h.lower() in testable_lower for h in header_flags)
+
+      # Decide if header-based injection should be tested.
+      header_check = (settings.TESTABLE_PARAMETERS_LIST or \
+                      not settings.INJECTION_MARKER_LOCATION.HTTP_HEADERS) and \
+                      settings.INJECTION_LEVEL == settings.HTTP_HEADER_INJECTION_LEVEL or header_found
+
+      if header_check:
         settings.HTTP_HEADERS_INJECTION = True
         headers_checks(url, http_request_method, filename, timesec)
+      else:
+        settings.CUSTOM_HEADER_INJECTION = True
+        # Perform custom headers injection checks.
+        custom_headers_checks(url, http_request_method, filename, timesec)
 
-  if settings.INJECTION_CHECKER == False:
-    return False
-  else:
-    return True
+  # Return True if injection checks are active/enabled, False otherwise.
+  return settings.INJECTION_CHECKER is not False
+
 
 """
 General check on every injection technique.

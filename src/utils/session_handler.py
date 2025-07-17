@@ -258,7 +258,9 @@ def check_stored_injection_points(url, check_parameter, http_request_method):
     for session in sessions:
       session_url = session[1]
       technique_info = session[2]
-
+      vuln_param = session[6]
+      http_header = session[12]
+      
       # Parse technique
       if technique_info == settings.INJECTION_TECHNIQUE.DYNAMIC_CODE:
         technique = technique_info.split()[2][0]
@@ -269,7 +271,8 @@ def check_stored_injection_points(url, check_parameter, http_request_method):
 
       if technique in menu.options.tech:
         found = True
-        vuln_parameter = session[6]  # Last matching session wins
+        # Prefer more specific vulnerable parameter (e.g., HTTP header), if available
+        vuln_parameter = vuln_param or http_header
 
       cookie = session[20] if len(session) > 20 else None
       if cookie:
@@ -280,7 +283,7 @@ def check_stored_injection_points(url, check_parameter, http_request_method):
     if found:
       settings.LOAD_SESSION = True
       settings.INJECTION_CHECKER = True
-      if not settings.MULTI_TARGETS:
+      if not settings.MULTI_TARGETS and vuln_parameter not in settings.TESTABLE_PARAMETERS_LIST:
         settings.TESTABLE_PARAMETERS_LIST.append(vuln_parameter)
       return session_url, vuln_parameter
 
