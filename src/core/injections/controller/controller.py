@@ -427,59 +427,67 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
       break
 
 """
-Inject HTTP headers parameters (User-agent / Referer / Host).
+Perform injection for a specific HTTP header (User-Agent, Referer, or Host)
 """
 def http_headers_injection(url, http_request_method, filename, timesec):
 
-  def user_agent_injection(url, http_request_method, filename, timesec):
-    user_agent = menu.options.agent
-    settings.USER_AGENT_INJECTION = True
-    settings.HTTP_HEADER = check_parameter = header_name = settings.USER_AGENT.lower()
-    url, check_parameter = check_for_stored_sessions(url, check_parameter, http_request_method)
-    if check_parameter != header_name or not injection_proccess(url, check_parameter, http_request_method, filename, timesec):
-      settings.USER_AGENT_INJECTION = None
-    menu.options.agent = user_agent
+  def inject_header(header_attr, option_attr, injection_flag_attr):
+    # Save the original value of the option (to restore later)
+    original_value = getattr(menu.options, option_attr)
 
-  def referer_injection(url, http_request_method, filename, timesec):
-    referer = menu.options.referer
-    settings.REFERER_INJECTION = True
-    settings.HTTP_HEADER = check_parameter = header_name = settings.REFERER.lower()
-    url, check_parameter = check_for_stored_sessions(url, check_parameter, http_request_method)
-    if check_parameter != header_name or not injection_proccess(url, check_parameter, http_request_method, filename, timesec):
-      settings.REFERER_INJECTION = None
-    menu.options.referer = referer
+    # Enable the corresponding injection flag
+    setattr(settings, injection_flag_attr, True)
 
-  def host_injection(url, http_request_method, filename, timesec):
-    host = menu.options.host
-    settings.HOST_INJECTION = True
-    settings.HTTP_HEADER = check_parameter = header_name = settings.HOST.lower()
-    url, check_parameter = check_for_stored_sessions(url, check_parameter, http_request_method)
-    if check_parameter != header_name and not injection_proccess(url, check_parameter, http_request_method, filename, timesec):
-      settings.HOST_INJECTION = None
-    menu.options.host = host
+    # Get the header name (e.g., "user-agent", "referer", "host")
+    header_name = getattr(settings, header_attr).lower()
+    settings.HTTP_HEADER = check_parameter = header_name
 
-  if not any((settings.USER_AGENT_INJECTION, settings.REFERER_INJECTION, settings.HOST_INJECTION)) and \
-    menu.options.test_parameter == None and \
-    menu.options.skip_parameter == None:
-    user_agent_injection(url, http_request_method, filename, timesec)
-    referer_injection(url, http_request_method, filename, timesec)
-    host_injection(url, http_request_method, filename, timesec)
+    # Check if the session has stored data for this header
+    new_url, check_parameter = check_for_stored_sessions(url, check_parameter, http_request_method)
+
+    # If the header was replaced or injection failed, reset the injection flag
+    if check_parameter != header_name or not injection_proccess(new_url, check_parameter, http_request_method, filename, timesec):
+      setattr(settings, injection_flag_attr, None)
+
+    # Restore the original option value
+    setattr(menu.options, option_attr, original_value)
+
+  # Determine whether a header should be tested for injection
+  def test_header(header_attr):
+    test_param = menu.options.test_parameter
+    skip_param = menu.options.skip_parameter
+    header_value = getattr(settings, header_attr).lower()
+
+    # Check if the corresponding injection flag is already active
+    if getattr(settings, header_attr.upper() + "_INJECTION"):
+      return True
+
+    # Check if explicitly included in test_parameter
+    if isinstance(test_param, str) and header_value in test_param.lower():
+      return True
+
+    # Check if not excluded via skip_parameter
+    if isinstance(skip_param, str) and header_value not in skip_param.lower():
+      return True
+
+    return False
+
+  # If no specific test or skip parameters and no injection flags are set, test all headers
+  no_injection_flags = not settings.USER_AGENT_INJECTION and not settings.REFERER_INJECTION and not settings.HOST_INJECTION
+  no_test_or_skip = menu.options.test_parameter is None and menu.options.skip_parameter is None
+
+  if no_injection_flags and no_test_or_skip:
+    inject_header("USER_AGENT", "agent", "USER_AGENT_INJECTION")
+    inject_header("REFERER", "referer", "REFERER_INJECTION")
+    inject_header("HOST", "host", "HOST_INJECTION")
   else:
-    # User-Agent HTTP header injection
-    if settings.USER_AGENT_INJECTION or \
-      (type(menu.options.test_parameter) is str and settings.USER_AGENT.lower() in menu.options.test_parameter.lower()) or \
-      (type(menu.options.skip_parameter) is str and settings.USER_AGENT.lower() not in menu.options.skip_parameter.lower()):
-      user_agent_injection(url, http_request_method, filename, timesec)
-    # Referer HTTP header injection
-    if settings.REFERER_INJECTION or \
-      (type(menu.options.test_parameter) is str and settings.REFERER.lower() in menu.options.test_parameter.lower()) or \
-      (type(menu.options.skip_parameter) is str and settings.REFERER.lower() not in menu.options.skip_parameter.lower()):
-      referer_injection(url, http_request_method, filename, timesec)
-    # Host HTTP header injection
-    if settings.HOST_INJECTION or \
-      (type(menu.options.test_parameter) is str and settings.HOST.lower() in menu.options.test_parameter.lower()) or \
-      (type(menu.options.skip_parameter) is str and settings.HOST.lower() not in menu.options.skip_parameter.lower()):
-      host_injection(url, http_request_method, filename, timesec)
+    # Conditional injection based on test/skip flags or predefined injection settings
+    if test_header("USER_AGENT"):
+      inject_header("USER_AGENT", "agent", "USER_AGENT_INJECTION")
+    if test_header("REFERER"):
+      inject_header("REFERER", "referer", "REFERER_INJECTION")
+    if test_header("HOST"):
+      inject_header("HOST", "host", "HOST_INJECTION")
 
 """
 Inject Cookie parameters
