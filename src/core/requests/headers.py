@@ -48,12 +48,15 @@ Encoding non-ASCII characters (in URL path and query).
 def encode_non_ascii_url(request):
   url = request.get_full_url()
   parts = _urllib.parse.urlsplit(url)
-  # Allow '%' safe to avoid double encoding already encoded sequences
-  path = _urllib.parse.quote(parts.path, safe="%/")  # Keep slashes safe too
-  query = _urllib.parse.quote(parts.query, safe="=?/%" + settings.PARAMETER_DELIMITER)  # Keep query delimiters + % safe
+  # Encode path, preserving '/', '*', and '%' to avoid over-encoding
+  path = _urllib.parse.quote(parts.path, safe="*%/")
+  # Encode query string, preserving delimiters and configured parameter delimiter
+  query = _urllib.parse.quote(parts.query, safe="*=?/%" + settings.PARAMETER_DELIMITER)
+  # Reconstruct the full URL with encoded path and query
   request.full_url = _urllib.parse.urlunsplit((parts.scheme, parts.netloc, path, query, parts.fragment))
-  return request
 
+  return request
+  
 """
 Checking the HTTP response content.
 """
