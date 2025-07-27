@@ -262,7 +262,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.1"
-REVISION = "65"
+REVISION = "66"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -409,12 +409,14 @@ class INJECTION_MARKER_LOCATION(object):
   HTTP_HEADERS = False
   CUSTOM_HTTP_HEADERS = False
 
-SKIP_NON_CUSTOM = None
+SKIP_NON_CUSTOM_PARAMS = None
 
 # Testable parameter(s) - comma separated.
 TESTABLE_PARAMETERS_LIST = []
 TESTABLE_PARAMETERS = None
 NOT_TESTABLE_PARAMETERS = True
+
+TESTED_PARAMETERS_LIST = []
 
 # Skip testing for given parameter(s) - comma separated.
 SKIP_PARAMETER = ""
@@ -812,14 +814,17 @@ SET_OPTIONS = [
         "URIPATH",
 ]
 
-# Cookie delimiter
-COOKIE_DELIMITER = ";"
+# Delimiter used to separate individual cookies in the Cookie HTTP header
+COOKIE_PARAM_DELIMITER = ";"
 
 # Split parameter value
 PARAMETER_SPLITTING_REGEX = ","
 
-# Cookie delimiter
-PARAMETER_DELIMITER = "&"
+# Delimiter used to separate parameters in POST request body
+POST_DATA_PARAM_DELIMITER = "&"
+
+# Delimiter used to separate query parameters in a URL
+URL_PARAM_DELIMITER = "&"
 
 DEFAULT_CODEC = "utf8"
 

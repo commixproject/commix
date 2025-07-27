@@ -83,7 +83,7 @@ def check_waf(url, http_request_method):
   if not "?" in url:
     payload = "?" + payload
   else:
-    payload = settings.PARAMETER_DELIMITER + payload
+    payload = settings.POST_DATA_PARAM_DELIMITER + payload
   url = url + payload
   if settings.USER_DEFINED_POST_DATA:
     request = _urllib.request.Request(remove_tags(url), remove_tags(settings.USER_DEFINED_POST_DATA).encode(), method=http_request_method)
@@ -138,17 +138,17 @@ def get_response(output):
 Check for non custom parameters.
 """
 def process_non_custom():
-  if settings.CUSTOM_INJECTION_MARKER and not settings.SKIP_NON_CUSTOM:
+  if settings.CUSTOM_INJECTION_MARKER and not settings.SKIP_NON_CUSTOM_PARAMS:
     while True:
       message = "Other non-custom parameters found."
       message += " Do you want to process them too? [Y/n] > "
       process = common.read_input(message, default="Y", check_batch=True)
       if process in settings.CHOICE_YES:
         settings.CUSTOM_INJECTION_MARKER = False
-        settings.SKIP_NON_CUSTOM = settings.IGNORE_USER_DEFINED_POST_DATA = False
+        settings.SKIP_NON_CUSTOM_PARAMS = settings.IGNORE_USER_DEFINED_POST_DATA = False
         return 
       elif process in settings.CHOICE_NO:
-        settings.SKIP_NON_CUSTOM = True
+        settings.SKIP_NON_CUSTOM_PARAMS = True
         settings.IGNORE_USER_DEFINED_POST_DATA = False
         return 
       elif process in settings.CHOICE_QUIT:
@@ -211,7 +211,7 @@ def custom_injection_marker_character(url, http_request_method):
     option = str(http_request_method) + " body"
     _ = settings.CUSTOM_INJECTION_MARKER = settings.INJECTION_MARKER_LOCATION.DATA = True
   if not _:
-    option = "option '--headers/--user-agent/--referer/--cookie'"
+    option = "option '--header(s)/--user-agent/--referer/--cookie'"
   if menu.options.cookie and settings.CUSTOM_INJECTION_MARKER_CHAR in menu.options.cookie:
     settings.CUSTOM_INJECTION_MARKER = settings.COOKIE_INJECTION = settings.INJECTION_MARKER_LOCATION.COOKIE = True
   if menu.options.agent and settings.CUSTOM_INJECTION_MARKER_CHAR in menu.options.agent:
@@ -220,12 +220,15 @@ def custom_injection_marker_character(url, http_request_method):
     settings.CUSTOM_INJECTION_MARKER = settings.INJECTION_MARKER_LOCATION.HTTP_HEADERS = settings.REFERER_INJECTION = True
   if menu.options.host and settings.CUSTOM_INJECTION_MARKER_CHAR in menu.options.host:
     settings.CUSTOM_INJECTION_MARKER = settings.INJECTION_MARKER_LOCATION.HTTP_HEADERS = settings.HOST_INJECTION = True
+  if (menu.options.header and settings.CUSTOM_INJECTION_MARKER_CHAR in menu.options.header) or \
+     (menu.options.headers and settings.CUSTOM_INJECTION_MARKER_CHAR in menu.options.headers):
+     settings.CUSTOM_INJECTION_MARKER = True
   if settings.CUSTOM_HEADER_CHECK and settings.CUSTOM_HEADER_CHECK != settings.ACCEPT:
     if settings.CUSTOM_HEADER_CHECK not in settings.TESTABLE_PARAMETERS_LIST:
       settings.CUSTOM_INJECTION_MARKER = True
     else:
       settings.CUSTOM_HEADER_INJECTION = True
-      return False
+      # return False
 
   if settings.CUSTOM_INJECTION_MARKER:
     while True:
@@ -398,11 +401,11 @@ def not_declared_cookies(response):
         if _:
           if _.group(1).split("=")[0] not in menu.options.cookie:
             set_cookie_header.append(_.group(1))
-    candidate = settings.COOKIE_DELIMITER.join(str(value) for value in set_cookie_header)
+    candidate = settings.COOKIE_PARAM_DELIMITER.join(str(value) for value in set_cookie_header)
     if candidate and settings.DECLARED_COOKIES is not False and settings.CRAWLING is False:
       settings.DECLARED_COOKIES = True
       if menu.options.cookie:
-        menu.options.cookie = menu.options.cookie + settings.COOKIE_DELIMITER + candidate
+        menu.options.cookie = menu.options.cookie + settings.COOKIE_PARAM_DELIMITER + candidate
         settings.DECLARED_COOKIES = False
       else:
         if settings.CRAWLED_SKIPPED_URLS_NUM != 0:
@@ -604,6 +607,7 @@ def payload_newline_fixation(payload):
       payload = payload.replace("\n","%0d")
   return payload
 
+
 """
 Fix for %0a, %0d%0a separators
 """
@@ -618,6 +622,7 @@ def newline_fixation(payload):
     #payload = _urllib.parse.quote(payload[:_]) + payload[_:]
     payload = payload.replace(settings.END_LINE.LF,"%0a")
   return payload
+
 
 """
 Page enc/decoding
@@ -1436,8 +1441,8 @@ def testable_parameters(url, check_parameters, header_name):
       if settings.INJECTION_LEVEL >= settings.COOKIE_INJECTION_LEVEL and \
          menu.options.test_parameter != None:
         if menu.options.cookie != None:
-          if settings.COOKIE_DELIMITER in menu.options.cookie:
-            cookies = menu.options.cookie.split(settings.COOKIE_DELIMITER)
+          if settings.COOKIE_PARAM_DELIMITER in menu.options.cookie:
+            cookies = menu.options.cookie.split(settings.COOKIE_PARAM_DELIMITER)
             for cookie in cookies:
               if cookie.split("=")[0].strip() in menu.options.test_parameter:
                 try:
@@ -2008,10 +2013,11 @@ def is_empty(multi_parameters, http_request_method):
   multi_params = [s for s in multi_parameters]
   if settings.IS_JSON:
     try:
-      multi_params = ','.join(multi_params)
-      if is_JSON_check(multi_params):
-        json_data = json.loads(multi_params, object_pairs_hook=OrderedDict)
-        multi_params = flatten(json_data)
+      multi_params = flatten(json.loads(','.join(multi_params), object_pairs_hook=OrderedDict)) if is_JSON_check(','.join(multi_params)) else multi_params
+      # multi_params = ','.join(multi_params)
+      # if is_JSON_check(multi_params):
+      #   json_data = json.loads(multi_params, object_pairs_hook=OrderedDict)
+      #   multi_params = flatten(json_data)
     except ValueError as err_msg:
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
       raise SystemExit()
@@ -2118,17 +2124,15 @@ def check_similarities(all_params):
   if settings.IS_JSON:
     try:
       _ = "".join(random.sample(string.ascii_uppercase, k=6))
-      all_params = ','.join(all_params)
-      json_data = json.loads(all_params, object_pairs_hook=OrderedDict)
-      all_params = flatten(json_data)
+      all_params = flatten(json.loads(','.join(all_params), object_pairs_hook=OrderedDict))
       for param in all_params:
         if isinstance(all_params[param], str):
           if all_params[param] in param:
             all_params[param] = all_params[param] + settings.RANDOM_TAG
           if settings.SINGLE_WHITESPACE in all_params[param]:
             all_params[param] = all_params[param].replace(settings.SINGLE_WHITESPACE, _)
-      all_params = [x.replace(settings.SINGLE_WHITESPACE, "").replace(_ ,settings.SINGLE_WHITESPACE) for x in json.dumps(all_params).split(", ")]
-    except Exception as e:
+      all_params = [x.replace(settings.SINGLE_WHITESPACE, "").replace(_, settings.SINGLE_WHITESPACE) for x in json.dumps(all_params).split(", ")]
+    except Exception:
       pass
   else:
     for param in range(0, len(all_params)):

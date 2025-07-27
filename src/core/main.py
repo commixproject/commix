@@ -256,35 +256,33 @@ def url_response(url, http_request_method):
   return response, url
 
 """
-Initializing injection status.
+Initialize injection-related settings and state.
 """
 def init_injection(url):
   if settings.VERBOSITY_LEVEL != 0:
     debug_msg = "Initializing the knowledge base."
     settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
-  # Initiate heuristic checks.
-  if not settings.FOLLOW_REDIRECT:
-    settings.FOLLOW_REDIRECT = True
-  if settings.SKIP_CODE_INJECTIONS:
-    settings.SKIP_CODE_INJECTIONS = False
-  if settings.SKIP_COMMAND_INJECTIONS:
-    settings.SKIP_COMMAND_INJECTIONS = False
-  # Initiate injection checker.
-  if settings.INJECTION_CHECKER:
-    settings.INJECTION_CHECKER = False
-  # Initiate exploitation techniques states.
-  if settings.INJECTION_CHECKER:
-    settings.CLASSIC_STATE = False
-  if settings.EVAL_BASED_STATE:
-    settings.EVAL_BASED_STATE = False
-  if settings.TIME_BASED_STATE:
-    settings.TIME_BASED_STATE = False
-  if settings.FILE_BASED_STATE:
-    settings.FILE_BASED_STATE = False
-  if settings.TEMPFILE_BASED_STATE:
-    settings.TEMPFILE_BASED_STATE = False
-  if settings.TIME_RELATED_ATTACK:
-    settings.TIME_RELATED_ATTACK = False
+
+  # Ensure redirection is followed and core injection paths are enabled
+  settings.FOLLOW_REDIRECT = True
+  settings.SKIP_CODE_INJECTIONS = False
+  settings.SKIP_COMMAND_INJECTIONS = False
+
+  # Reset injection checker and technique flags
+  settings.INJECTION_CHECKER = False
+  settings.CLASSIC_STATE = False
+  settings.EVAL_BASED_STATE = False
+  settings.TIME_BASED_STATE = False
+  settings.FILE_BASED_STATE = False
+  settings.TEMPFILE_BASED_STATE = False
+  settings.TIME_RELATED_ATTACK = False
+
+  # Reset custom and temporary settings
+  settings.TESTED_PARAMETERS_LIST = []
+  settings.SKIP_NON_CUSTOM_PARAMS = None
+  settings.CUSTOM_INJECTION_MARKER = None
+  settings.CUSTOM_FILENAME = ""
+  
 
 """
 Using 'stdin' for parsing targets.
@@ -408,7 +406,7 @@ def main(filename, url, http_request_method):
 
     # Check if defined character used for splitting cookie values.
     if menu.options.cdel:
-     settings.COOKIE_DELIMITER = menu.options.cdel
+     settings.COOKIE_PARAM_DELIMITER = menu.options.cdel
 
     if menu.options.tech and settings.USER_APPLIED_TECHNIQUE != None:
       settings.USER_APPLIED_TECHNIQUE = True
@@ -527,7 +525,6 @@ def main(filename, url, http_request_method):
           requests.application_identification(url)
           # Specifies the technology supporting the web application
           requests.technology_identification(response)
-
           # Procedure for target server's operating system identification.
           if not settings.IDENTIFIED_TARGET_OS:
             requests.os_identification(response)
@@ -889,13 +886,13 @@ try:
       settings.USER_DEFINED_POST_DATA = menu.options.data
       # Check if defined character used for splitting parameter values.
       if menu.options.pdel and menu.options.pdel in settings.USER_DEFINED_POST_DATA:
-        settings.PARAMETER_DELIMITER = menu.options.pdel
+        settings.POST_DATA_PARAM_DELIMITER = menu.options.pdel
     else:
       # Check if defined character used for splitting parameter values.
       if menu.options.pdel and menu.options.pdel in url:
-        settings.PARAMETER_DELIMITER = menu.options.pdel
+        settings.URL_PARAM_DELIMITER = menu.options.pdel
+        
     http_request_method  = checks.check_http_method(url)
-
     if not settings.STDIN_PARSING and not menu.options.bulkfile and not settings.CRAWLING:
       if os_checks_num == 0:
         settings.INIT_TEST = True

@@ -51,7 +51,7 @@ def encode_non_ascii_url(request):
   # Encode path, preserving '/', '*', and '%' to avoid over-encoding
   path = _urllib.parse.quote(parts.path, safe="*%/")
   # Encode query string, preserving delimiters and configured parameter delimiter
-  query = _urllib.parse.quote(parts.query, safe="*=?/%" + settings.PARAMETER_DELIMITER)
+  query = _urllib.parse.quote(parts.query, safe="*=?/%" + settings.URL_PARAM_DELIMITER)
   # Reconstruct the full URL with encoded path and query
   request.full_url = _urllib.parse.urlunsplit((parts.scheme, parts.netloc, path, query, parts.fragment))
 
@@ -432,10 +432,14 @@ def do_check(request):
         if http_header_name not in [settings.ACCEPT, settings.HOST, settings.USER_AGENT, settings.REFERER, settings.COOKIE]:
           if not settings.CUSTOM_HEADER_INJECTION:
             if settings.CUSTOM_INJECTION_MARKER_CHAR in http_header_value:
+              settings.CUSTOM_INJECTION_MARKER = True
               settings.CUSTOM_HEADER_CHECK = http_header_name
-              # settings.CUSTOM_INJECTION_MARKER = True
               
-            if http_header_name in settings.TESTABLE_PARAMETERS_LIST or settings.INJECT_TAG in http_header_value or settings.ASTERISK_MARKER in http_header_value:
+            if settings.CUSTOM_INJECTION_MARKER_CHAR in http_header_value or \
+               http_header_name in settings.TESTABLE_PARAMETERS_LIST or \
+               settings.INJECT_TAG in http_header_value or \
+               settings.ASTERISK_MARKER in http_header_value:
+
               settings.INJECTION_MARKER_LOCATION.CUSTOM_HTTP_HEADERS = True
               settings.CUSTOM_HEADER_CHECK = http_header_name
               if len(http_header_name) != 0 and \

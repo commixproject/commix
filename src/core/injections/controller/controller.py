@@ -353,7 +353,7 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
     else:
        settings.CHECKING_PARAMETER += str(the_type) + str(header_name) + str(inject_parameter)
 
-    if check_parameter in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST:
+    if check_parameter in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST and not http_request_method + ":" + check_parameter in settings.TESTED_PARAMETERS_LIST:
       settings.CHECKING_PARAMETER = "(custom) " + settings.CHECKING_PARAMETER
 
     if not settings.LOAD_SESSION:
@@ -415,8 +415,7 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
 
       # All injection techniques seems to be failed!
       if checks.injection_techniques_status() == False:
-        warn_msg = "The tested "
-        warn_msg += settings.CHECKING_PARAMETER
+        warn_msg = settings.CHECKING_PARAMETER
         warn_msg += " does not seem to be injectable."
         settings.print_data_to_stdout(settings.print_bold_warning_msg(warn_msg))
       else:
@@ -518,62 +517,120 @@ def cookie_injection(url, http_request_method, filename, timesec):
     # Disable cookie injection
     settings.COOKIE_INJECTION = False
 
+"""
+Remove parameters containing the injection tag from the testable parameters list.
+"""
+def filtered_testable_parameters():
+  settings.TESTABLE_PARAMETERS_LIST = [
+  param for param in settings.TESTABLE_PARAMETERS_LIST
+  if settings.INJECT_TAG not in param]
+  return settings.TESTABLE_PARAMETERS_LIST
 
 """
-Perform the injection proccess
+Process a list of parameters to test for injection vulnerabilities.
 """
 def do_injection(found, data_type, header_name, url, http_request_method, filename, timesec):
 
-  def define_check_parameter(found, i, url):
+  """
+  Validate parameter names using allowed characters:
+  letters, digits, underscores, hyphens, dots, and square brackets.
+  """
+  def is_valid_param_name(name):
+    if not isinstance(name, str):
+      return False
+    name = name.strip()
+    if not name:
+      return False
+    return bool(re.match(r'^[a-zA-Z0-9._\-\[\]]+$', name))
+
+  """
+  Define the check parameter based on the data type (POST, GET, COOKIE).
+  """
+  def define_check_parameter(param, current_url):
     if data_type == settings.HTTPMETHOD.POST:
-      menu.options.data = found[i]
-      check_parameter = parameters.vuln_POST_param(found[i], url)
-    if data_type == settings.HTTPMETHOD.GET:
-      url = found[i]
-      check_parameter = parameters.vuln_GET_param(url)
-    if data_type == settings.COOKIE:
-      menu.options.cookie = found[i]
-      check_parameter = parameters.specify_cookie_parameter(found[i])
-    return url, check_parameter
-    
-  # Check if multiple parameters
+      menu.options.data = param
+      check_param = parameters.vuln_POST_param(param, current_url)
+    elif data_type == settings.HTTPMETHOD.GET:
+      current_url = param
+      check_param = parameters.vuln_GET_param(current_url)
+    elif data_type == settings.COOKIE:
+      menu.options.cookie = param
+      check_param = parameters.specify_cookie_parameter(param)
+    else:
+      check_param = ""
+    return current_url, check_param
+
+  """
+  Return a unique identifier for the parameter by prefixing it with the data type.
+  """
+  def get_contextual_name(check_param):
+    return str(data_type) + ":" + str(check_param)
+
+  """
+  Perform the injection call and update tested parameters.
+  """
+  def injection_call(url, check_param):
+    contextual_name = get_contextual_name(check_param)
+    url, check_param = define_check_parameter(found[index], url)
+    url, check_param = check_for_stored_sessions(url, check_param, http_request_method)
+    injection_proccess(url, check_param, http_request_method, filename, timesec)
+    settings.TESTED_PARAMETERS_LIST.append(contextual_name)
+
   check_parameters = []
-  for i in range(0, len(found)):
-    url, check_parameter = define_check_parameter(found, i, url)
-    check_parameters.append(check_parameter)
+  param_mapping = {}
+
+  # Filter and validate parameters to prepare for injection tests
+  for param in found:
+    url, check_param = define_check_parameter(param, url)
+    if not check_param:
+      continue
+    contextual_name = get_contextual_name(check_param)
+    if contextual_name in settings.TESTED_PARAMETERS_LIST:
+      continue
+    if not is_valid_param_name(check_param):
+      continue
+    check_parameters.append(check_param)
+    param_mapping[check_param] = param
+
+  # Prepare testable parameters
   checks.testable_parameters(url, check_parameters, header_name)
-  
-  for i in range(0, len(found)):
-    url, check_parameter = define_check_parameter(found, i, url)
-    if check_parameter != found[i] and check_parameter not in settings.SKIP_PARAMETER:
-      if len(check_parameter) > 0:
-        settings.TESTABLE_PARAMETER = check_parameter
-      if len(settings.TESTABLE_PARAMETER) > 0:
-        if settings.TESTABLE_PARAMETERS_LIST and not settings.CUSTOM_INJECTION_MARKER:
-          counter = 0
-          for check_parameter in check_parameters:
-            if settings.TESTABLE_PARAMETERS_LIST.count(check_parameter) != 0:
-              url, check_parameter = define_check_parameter(found, counter, url)
-              url, check_parameter = check_for_stored_sessions(url, check_parameter, http_request_method)
-              injection_proccess(url, check_parameter, http_request_method, filename, timesec)
-            counter += 1
-          break
-        elif settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST and settings.CUSTOM_INJECTION_MARKER:
-          counter = 0
-          for check_parameter in check_parameters:
-            if settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST.count(check_parameter) != 0:
-              url, check_parameter = define_check_parameter(found, counter, url)
-              url, check_parameter = check_for_stored_sessions(url, check_parameter, http_request_method)
-              injection_proccess(url, check_parameter, http_request_method, filename, timesec)
-            counter += 1
-          break
-        else:
-          if not (check_parameter in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST and not settings.CUSTOM_INJECTION_MARKER):
-            url, check_parameter = check_for_stored_sessions(url, check_parameter, http_request_method)
-            injection_proccess(url, check_parameter, http_request_method, filename, timesec)
+
+  # Exclude parameters that already contain the inject tag
+  base_params = {
+    param for param in settings.TESTABLE_PARAMETERS_LIST
+    if settings.INJECT_TAG not in param
+  }
+
+  # Add custom marker parameters if enabled
+  custom_params = set(settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST) \
+    if settings.CUSTOM_INJECTION_MARKER else set()
+
+  # Final set of injection targets
+  injection_targets = base_params.union(custom_params)
+
+  for check_param in check_parameters:
+    contextual_name = get_contextual_name(check_param)
+    if contextual_name in settings.TESTED_PARAMETERS_LIST:
+      continue
+
+    try:
+      original_param = param_mapping[check_param]
+      index = found.index(original_param)
+    except (KeyError, ValueError):
+      continue
+
+    settings.TESTABLE_PARAMETER = check_param
+    
+    if settings.USER_DEFINED_POST_DATA:
+      active_targets = injection_targets
+    else:
+      if any(param in injection_targets for param in check_parameters):
+        active_targets = injection_targets
       else:
-        url, check_parameter = check_for_stored_sessions(url, check_parameter, http_request_method)
-        injection_proccess(url, check_parameter, http_request_method, filename, timesec)
+        active_targets = check_parameters
+
+    if check_param in active_targets or not filtered_testable_parameters():
+      injection_call(url, check_param)
 
 """
 Check if HTTP Method is GET.
@@ -618,12 +675,12 @@ def data_checks(url, http_request_method, filename, timesec):
   init_cookie_injection_status()
   if settings.USER_DEFINED_POST_DATA and not settings.IGNORE_USER_DEFINED_POST_DATA:
     if post_request(url, http_request_method, filename, timesec) is None:
-      if not settings.SKIP_NON_CUSTOM:
+      if not settings.SKIP_NON_CUSTOM_PARAMS:
         get_request(url, http_request_method, filename, timesec)
   else:
     if get_request(url, http_request_method, filename, timesec) is None:
       if settings.USER_DEFINED_POST_DATA:
-        if not settings.SKIP_NON_CUSTOM:
+        if not settings.SKIP_NON_CUSTOM_PARAMS:
           post_request(url, http_request_method, filename, timesec) 
 
 """
@@ -633,7 +690,7 @@ def cookies_checks(url, http_request_method, filename, timesec):
   if len([i for i in settings.TESTABLE_PARAMETERS_LIST if i in str(menu.options.cookie)]) != 0 or \
     settings.INJECTION_MARKER_LOCATION.COOKIE or \
     settings.COOKIE_INJECTION:
-    if not settings.SKIP_NON_CUSTOM:
+    if not settings.SKIP_NON_CUSTOM_PARAMS:
       cookie_injection(url, http_request_method, filename, timesec)
 
 """
@@ -643,7 +700,7 @@ def headers_checks(url, http_request_method, filename, timesec):
   if len([i for i in settings.TESTABLE_PARAMETERS_LIST if i in settings.HTTP_HEADERS]) != 0 or \
     settings.INJECTION_MARKER_LOCATION.HTTP_HEADERS or \
     settings.HTTP_HEADERS_INJECTION:
-    if not settings.SKIP_NON_CUSTOM:
+    if not settings.SKIP_NON_CUSTOM_PARAMS:
       http_headers_injection(url, http_request_method, filename, timesec)
 
 """
@@ -711,7 +768,7 @@ def perform_checks(url, http_request_method, filename):
       settings.INJECTION_LEVEL = settings.USER_APPLIED_LEVEL
 
   proceed_non_custom = True
-
+  
   # Perform custom marker-based checks if custom injection marker is enabled.
   if settings.CUSTOM_INJECTION_MARKER:
     proceed_non_custom = False
@@ -733,16 +790,17 @@ def perform_checks(url, http_request_method, filename):
     if settings.INJECTION_MARKER_LOCATION.CUSTOM_HTTP_HEADERS:
       custom_headers_checks(url, http_request_method, filename, timesec)
 
-    # If parameters or POST data are present, and marker is in URL or DATA,
-    # perform remaining non-custom checks for completeness.
-    if (settings.TESTABLE_PARAMETERS_LIST or \
-        len(settings.USER_DEFINED_POST_DATA) != 0) and \
-        (settings.INJECTION_MARKER_LOCATION.URL or \
-         settings.INJECTION_MARKER_LOCATION.DATA):
+    # Check if the injection marker is set in either URL or POST data (but not both)
+    has_exclusive_marker = settings.INJECTION_MARKER_LOCATION.URL ^ settings.INJECTION_MARKER_LOCATION.DATA
+    # Check if no injection marker is set in either URL or POST data
+    has_no_marker = not settings.INJECTION_MARKER_LOCATION.URL and not settings.INJECTION_MARKER_LOCATION.DATA
+    # If there’s user POST data and an exclusive marker, or no marker at all,
+    # and no testable GET parameters, proceed with non-custom checks
+    if has_exclusive_marker or has_no_marker:
       checks.process_non_custom()
 
   # Perform default (non-custom) injection checks if not explicitly skipped.
-  if not settings.SKIP_NON_CUSTOM:
+  if not settings.SKIP_NON_CUSTOM_PARAMS:
     # Disable custom injection mode before running default checks.
     settings.CUSTOM_INJECTION_MARKER = False
 

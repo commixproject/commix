@@ -1,4 +1,5 @@
 ## Version 4.1 (TBA)
+* Revised: Enhanced injection logic with better handling of custom injection markers and improved tracking of tested parameters.
 * Revised: Improved detection of custom injection marker (i.e. asterisk `*`) across HTTP input vectors (e.g., URL params, POST data, cookies, headers).
 * Revised: Improved heuristics for processing custom HTTP headers to correctly handle injection markers (i.e. asterisk `*`).
 * Revised: Enhanced target encoding detection with improved charset extraction and prioritization from HTTP headers and HTML meta tags.
