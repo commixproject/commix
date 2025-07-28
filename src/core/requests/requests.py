@@ -180,8 +180,8 @@ def estimate_response_time(url, timesec, http_request_method):
             stored_auth_creds = False
           if stored_auth_creds and not menu.options.ignore_session:
             menu.options.auth_cred = stored_auth_creds
-            info_msg = "Setting pair of credentials '"
-            info_msg += menu.options.auth_cred + "' from stored session."
+            info_msg = "Restoring credentials '"
+            info_msg += menu.options.auth_cred + "' from previous stored session."
             settings.print_data_to_stdout(settings.print_info_msg(info_msg))
           else:
             # Basic authentication
@@ -786,9 +786,7 @@ def encoding_detection(response):
       settings.print_data_to_stdout(settings.print_bold_debug_msg(debug_msg))
 
   except Exception as e:
-    if settings.VERBOSITY_LEVEL != 0:
-      warn_msg = "Error during charset detection: " + str(e)
-      settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+    pass
 
   if not charset_detected and settings.VERBOSITY_LEVEL != 0:
     warn_msg = "Failed to identify the web page charset."

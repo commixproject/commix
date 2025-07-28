@@ -77,7 +77,7 @@ def define_wordlists():
     if do_update in settings.CHOICE_YES:
       username_txt_file = settings.USERNAMES_TXT_FILE
       passwords_txt_file = settings.PASSWORDS_TXT_FILE
-      info_msg = "Setting default wordlists for dictionary-based attack."
+      info_msg = "Using default wordlists for dictionary-based authentication check."
       settings.print_data_to_stdout(settings.print_info_msg(info_msg))
       break
     elif do_update in settings.CHOICE_NO:
@@ -193,7 +193,7 @@ def http_auth_cracker(url, realm, http_request_method):
             i = i + 1
             float_percent = ".. (" + float_percent + ")"
         if settings.VERBOSITY_LEVEL == 0:
-          info_msg = "Checking for a valid pair of HTTP authentication credentials."
+          info_msg = "Testing for valid HTTP authentication credentials."
           info_msg += float_percent
           settings.print_data_to_stdout("\r\r" + settings.print_info_msg(info_msg))
           
@@ -203,7 +203,7 @@ def http_auth_cracker(url, realm, http_request_method):
           valid_pair =  "" + username + ":" + password + ""
           if not settings.VERBOSITY_LEVEL >= 2:
             settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
-          info_msg = "Identified a valid pair of credentials: '" + valid_pair + "'."
+          info_msg = "Authentication succeeded using: '" + valid_pair + "'."
           settings.print_data_to_stdout(settings.print_bold_info_msg(info_msg))
           return valid_pair
 
