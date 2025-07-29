@@ -920,19 +920,18 @@ def continue_tests(err):
 
     message = ""
     if str(err.code) == settings.NOT_FOUND_ERROR:
-      message = "It is not recommended to continue in such cases. "
+      message = "Continuing in such cases is not recommended. "
     
-    if settings.START_SCANNING and settings.VERBOSITY_LEVEL == 0:
-      settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
-
     while True:
-      message += "Do you want to ignore the response HTTP error code '" + str(err.code)
-      message += "' and continue the tests? [Y/n] > "
-      continue_tests = common.read_input(message, default="Y", check_batch=True)
+      message += "Do you want to ignore HTTP response code '" + str(err.code)
+      message += "' and proceed with testing? [y/N] > "
+      continue_tests = common.read_input(message, default="N", check_batch=True)
       if continue_tests in settings.CHOICE_YES:
         settings.IGNORE_CODE.append(err.code)
         return True
       elif continue_tests in settings.CHOICE_NO:
+        info_msg = "Skipping further testing on the target URL."
+        settings.print_data_to_stdout(settings.print_info_msg(info_msg))
         return False
       elif continue_tests in settings.CHOICE_QUIT:
         return False

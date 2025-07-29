@@ -996,7 +996,7 @@ try:
             perform_check = True
             while True:
               settings.print_data_to_stdout(settings.print_message("[" + str(url_num) + "/" + str(len(clean_output_href)) + "] URL - " + http_request_method + " " + url))
-              message = "Do you want to use URL #" + str(url_num) + " to perform tests? [Y/n] > "
+              message = "Do you want to use URL #" + str(url_num) + " for testing? [Y/n] > "
               next_url = common.read_input(message, default="Y", check_batch=True)
               if next_url in settings.CHOICE_YES:
                 info_msg = "Testing URL '" + url + "'."
