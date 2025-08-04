@@ -262,7 +262,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.1"
-REVISION = "68"
+REVISION = "69"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -411,12 +411,11 @@ class INJECTION_MARKER_LOCATION(object):
 
 SKIP_NON_CUSTOM_PARAMS = None
 
-# Testable parameter(s) - comma separated.
 TESTABLE_PARAMETERS_LIST = []
 TESTABLE_PARAMETERS = None
 NOT_TESTABLE_PARAMETERS = True
-
 TESTED_PARAMETERS_LIST = []
+METHODS_WITH_NON_LISTED_PARAMS = []
 
 # Skip testing for given parameter(s) - comma separated.
 SKIP_PARAMETER = ""

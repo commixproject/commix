@@ -1415,64 +1415,40 @@ def remove_skipped_params(url, check_parameters):
   menu.options.test_parameter = True
 
 """
-Print the non-listed parameters.
+Identify and print non-listed parameters that were provided but not part of the testable list.
 """
 def testable_parameters(url, check_parameters, header_name):
-
-  if menu.options.skip_parameter != None:
+  # Skip parameters if requested
+  if menu.options.skip_parameter is not None:
     remove_skipped_params(url, check_parameters)
 
-  _ = False
-  if settings.TESTABLE_PARAMETERS or [i for i in settings.TESTABLE_PARAMETERS_LIST if i in check_parameters]:
-    _ = True
+  if isinstance(settings.TESTABLE_PARAMETERS_LIST, list) and settings.TESTABLE_PARAMETERS_LIST:
+    raw_params = settings.PARAMETER_SPLITTING_REGEX.join(settings.TESTABLE_PARAMETERS_LIST)
+    normalized_params = raw_params.replace(settings.SINGLE_WHITESPACE, "")
+    testable_params = normalized_params.split(settings.PARAMETER_SPLITTING_REGEX)
 
-  if settings.TESTABLE_PARAMETERS_LIST and isinstance(settings.TESTABLE_PARAMETERS_LIST, list):
-    testable_parameters = settings.PARAMETER_SPLITTING_REGEX.join(settings.TESTABLE_PARAMETERS_LIST).replace(settings.SINGLE_WHITESPACE, "")
-    testable_parameters = testable_parameters.split(settings.PARAMETER_SPLITTING_REGEX)
-    non_exist_param = list(set(testable_parameters) - set(check_parameters))
-    if _ and settings.TESTABLE_PARAMETERS != False:
-      settings.TESTABLE_PARAMETERS = _
-    else:
-      settings.TESTABLE_PARAMETERS = False
-    if non_exist_param:
-      non_exist_param = settings.PARAMETER_SPLITTING_REGEX.join(non_exist_param).replace(settings.SINGLE_WHITESPACE, "")
-      non_exist_param = non_exist_param.split(settings.PARAMETER_SPLITTING_REGEX)
-      if settings.INJECTION_LEVEL >= settings.COOKIE_INJECTION_LEVEL and \
-         menu.options.test_parameter != None:
-        if menu.options.cookie != None:
-          if settings.COOKIE_PARAM_DELIMITER in menu.options.cookie:
-            cookies = menu.options.cookie.split(settings.COOKIE_PARAM_DELIMITER)
-            for cookie in cookies:
-              if cookie.split("=")[0].strip() in menu.options.test_parameter:
-                try:
-                  non_exist_param.remove(cookie.split("=")[0].strip())
-                except ValueError:
-                  pass
-          elif menu.options.cookie.split("=")[0] in menu.options.test_parameter:
-            try:
-              non_exist_param.remove(menu.options.cookie.split("=")[0])
-            except ValueError:
-              pass
+    non_listed_params = list(set(testable_params) - set(check_parameters))
 
-      # Remove the defined HTTP headers
-      for http_header in settings.HTTP_HEADERS:
-        if http_header in non_exist_param:
-          settings.TESTABLE_PARAMETERS = True
-          non_exist_param.remove(http_header)
+    # Determine testable state
+    settings.TESTABLE_PARAMETERS = bool(
+      settings.TESTABLE_PARAMETERS or 
+      any(p in check_parameters for p in settings.TESTABLE_PARAMETERS_LIST)
+    )
 
-      if settings.VERBOSITY_LEVEL != 0 and non_exist_param and _:
-        non_exist_param_items = ", ".join(non_exist_param)
-        debug_msg = "Provided parameter" + "s"[len(non_exist_param) == 1:][::-1] + " '"
-        debug_msg += non_exist_param_items + "'" + (' are', ' is')[len(non_exist_param) == 1]
-        debug_msg += " not inside the "
-        if settings.COOKIE_INJECTION:
-          debug_msg += settings.COOKIE
-        else:
-          debug_msg += check_http_method(url)
-        debug_msg += "."
-        settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
+    if non_listed_params:
+      normalized_non_exist = settings.PARAMETER_SPLITTING_REGEX.join(non_listed_params)
+      normalized_non_exist = normalized_non_exist.replace(settings.SINGLE_WHITESPACE, "")
+      non_listed_params = normalized_non_exist.split(settings.PARAMETER_SPLITTING_REGEX)
 
-  
+      http_method = check_http_method(url)
+      if non_listed_params and http_method not in settings.METHODS_WITH_NON_LISTED_PARAMS:
+        settings.METHODS_WITH_NON_LISTED_PARAMS.append(http_method)
+        non_listed_params_items = ", ".join(non_listed_params)
+        warn_msg = "Provided parameter" + ("s" if len(non_listed_params) != 1 else "") + " '"
+        warn_msg += non_listed_params_items + "'" + (" are", " is")[len(non_listed_params) == 1]
+        warn_msg += " not inside the " + http_method + "."
+        settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+        
 """
 Lists available tamper scripts
 """
