@@ -593,6 +593,7 @@ def do_injection(found, data_type, header_name, url, http_request_method, filena
     param_mapping[check_param] = param
 
   # Prepare testable parameters
+  filtered_testable_parameters()
   checks.testable_parameters(url, check_parameters, header_name)
 
   # Exclude parameters that already contain the inject tag
