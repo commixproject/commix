@@ -279,11 +279,12 @@ def init_injection(url):
 
   # Reset custom and temporary settings
   settings.TESTED_PARAMETERS_LIST = []
+  settings.METHODS_WITH_NON_LISTED_PARAMS = []
   settings.SKIP_NON_CUSTOM_PARAMS = None
   settings.CUSTOM_INJECTION_MARKER = None
   settings.CUSTOM_FILENAME = ""
   
-
+  
 """
 Using 'stdin' for parsing targets.
 """
