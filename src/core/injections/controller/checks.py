@@ -285,7 +285,7 @@ def skip_testing(filename, url):
       settings.SKIP_CODE_INJECTIONS = True
       _ = " further testing"
     while True:
-      message = "Do you want to skip" + _ + " in " + settings.CHECKING_PARAMETER + "? [Y/n] > "
+      message = "Do you want to skip" + _ + " on the " + settings.CHECKING_PARAMETER + "? [Y/n] > "
       procced_option = common.read_input(message, default="Y", check_batch=True)
       if procced_option in settings.CHOICE_YES:
         settings.SKIP_COMMAND_INJECTIONS = True
@@ -779,7 +779,7 @@ Procced to the next attack vector.
 def next_attack_vector(technique, go_back):
   if not settings.LOAD_SESSION:
     while True:
-      message = "Do you want to continue with testing the " + technique + "? [y/N] > "
+      message = "Do you want to continue testing using the " + technique + "? [y/N] > "
       next_attack_vector = common.read_input(message, default="N", check_batch=True)
       if next_attack_vector in settings.CHOICE_YES:
         # Check injection state
@@ -829,8 +829,8 @@ def enable_shell(url):
   if settings.LOAD_SESSION: 
     message += " injection point from stored session"
   else:
-    message += " is vulnerable"
-  message += ". Do you want to prompt for a pseudo-terminal shell? [Y/n] > "
+    message += " is likely vulnerable"
+  message += ". Do you want to spawn a pseudo-terminal shell? [Y/n] > "
   if settings.CRAWLING:
     settings.CRAWLED_URLS_INJECTED.append(_urllib.parse.urlparse(url).netloc)
   if not settings.STDIN_PARSING:
@@ -1049,7 +1049,7 @@ def check_CGI_scripts(url):
   _ = False
   for cgi_script in CGI_SCRIPTS:
     if cgi_script in url:
-      info_msg = "Heuristic (basic) tests shows that target URL might contain a script "
+      info_msg = "Heuristic (basic) tests show that target URL might contain a script "
       info_msg += "vulnerable to shellshock. "
       _ = True
       settings.print_data_to_stdout(settings.print_bold_info_msg(info_msg))
@@ -1781,8 +1781,8 @@ def check_encoders(payload):
 
   if is_decoded:
     while True:
-      message = "The provided value appears to be " + encoded_with + "-encoded. "
-      message += "Do you want to use '" + encoded_with + "encode' tamper script? [Y/n] > "
+      message = "The value appears to be " + encoded_with + "-encoded. "
+      message += "Do you want to use the '" + encoded_with + "encode' tamper script? [Y/n] > "
       procced_option = common.read_input(message, default="Y", check_batch=True)
       if procced_option in settings.CHOICE_YES:
         break
@@ -3007,7 +3007,7 @@ def use_temp_folder(no_result, url, timesec, filename, http_request_method, url_
     message = "Insufficient permissions on directory '" + settings.WEB_ROOT + "'. "
     # if not menu.options.web_root:
     #   message += " You are advised to rerun with option '--web-root'."
-    message += "Use '" + tmp_path + "' instead? [Y/n] > "
+    message += "Do you want to use '" + tmp_path + "' instead? [Y/n] > "
     tmp_upload = common.read_input(message, default="Y", check_batch=True)
     if tmp_upload in settings.CHOICE_YES:
       exit_loops = True
