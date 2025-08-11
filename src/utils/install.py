@@ -70,7 +70,7 @@ def installer():
     settings.print_data_to_stdout(settings.print_bold_warning_msg(warn_msg))
 
     while True:
-      message = "Would you like to remove the current installation? [Y/n] > "
+      message = "Do you want to remove the current installation? [Y/n] > "
       user_input = common.read_input(message, default="Y", check_batch=True)
       if user_input in settings.CHOICE_YES:
         remove()

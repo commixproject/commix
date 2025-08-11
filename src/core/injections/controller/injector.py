@@ -346,7 +346,7 @@ def select_output_filename(technique, tmp_path, TAG):
   OUTPUT_TEXTFILE = TAG + settings.OUTPUT_FILE_EXT
 
   while True:
-    message = "Would you like to use a random file '" + OUTPUT_TEXTFILE 
+    message = "Do you want to use a random file '" + OUTPUT_TEXTFILE 
     message += "' to receive the command execution output? [Y/n] > "
     procced_option = common.read_input(message, default="Y", check_batch=True)
 
@@ -416,7 +416,7 @@ def injection_output(url, OUTPUT_TEXTFILE, timesec, technique):
         if settings.MULTI_TARGETS:
           settings.RECHECK_FILE_FOR_EXTRACTION = True
         while True:
-          message =  "Would you like to use the URL '" + output
+          message =  "Do you want to use the URL '" + output
           message += "' to receive the command execution output? [Y/n] > "
           procced_option = common.read_input(message, default="Y", check_batch=True)
           if procced_option in settings.CHOICE_YES:
