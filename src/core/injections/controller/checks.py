@@ -345,6 +345,8 @@ def check_http_method(url):
   elif isinstance(url, str) and settings.INJECT_TAG in url:
     http_request_method = settings.HTTPMETHOD.GET
   else:
+    if settings.COOKIE_INJECTION:
+      http_request_method = settings.COOKIE
     if settings.USER_DEFINED_POST_DATA:
       http_request_method = settings.HTTPMETHOD.POST
     else:

@@ -815,7 +815,7 @@ def perform_checks(url, http_request_method, filename):
       # Determine if we should perform cookie-based injection checks.
       cookie_check = (settings.TESTABLE_PARAMETERS_LIST or \
                       not settings.INJECTION_MARKER_LOCATION.COOKIE) and \
-                      settings.INJECTION_LEVEL == settings.COOKIE_INJECTION_LEVEL
+                      settings.INJECTION_LEVEL >= settings.COOKIE_INJECTION_LEVEL
       if cookie_check:
         settings.COOKIE_INJECTION = True
         cookies_checks(url, http_request_method, filename, timesec)
@@ -824,6 +824,7 @@ def perform_checks(url, http_request_method, filename):
       testable = settings.TESTABLE_PARAMETERS_LIST
       if isinstance(testable, str):
         testable = [testable]
+        
       testable_lower = [t.lower() for t in testable if isinstance(t, str)]
 
       header_flags = [
@@ -842,12 +843,12 @@ def perform_checks(url, http_request_method, filename):
                       settings.INJECTION_LEVEL == settings.HTTP_HEADER_INJECTION_LEVEL or header_found
 
       if header_check:
+        # Perform custom headers injection checks.
+        settings.CUSTOM_HEADER_INJECTION = True
+        custom_headers_checks(url, http_request_method, filename, timesec)
+
         settings.HTTP_HEADERS_INJECTION = True
         headers_checks(url, http_request_method, filename, timesec)
-      else:
-        settings.CUSTOM_HEADER_INJECTION = True
-        # Perform custom headers injection checks.
-        custom_headers_checks(url, http_request_method, filename, timesec)
 
   # Return True if injection checks are active/enabled, False otherwise.
   return settings.INJECTION_CHECKER is not False

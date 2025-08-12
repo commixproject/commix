@@ -222,7 +222,6 @@ def print_data_to_stdout(data):
   sys.stdout.write(data)
   sys.stdout.flush()
 
-
 """
 argv input errors
 """
@@ -262,7 +261,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.1"
-REVISION = "74"
+REVISION = "75"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
