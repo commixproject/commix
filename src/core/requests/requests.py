@@ -778,12 +778,15 @@ def encoding_detection(response):
     settings.DEFAULT_PAGE_ENCODING = charset
 
     # 4. Logging
-    if charset not in settings.ENCODING_LIST:
-      warn_msg = "The web page charset '" + charset + "' seems unknown."
+    msg = "The web page declares the character encoding as '"
+
+    if charset in settings.ENCODING_LIST:
+      if settings.VERBOSITY_LEVEL != 0:
+        debug_msg = msg + charset + "'."
+        settings.print_data_to_stdout(settings.print_bold_debug_msg(debug_msg))
+    else:
+      warn_msg = msg + charset + "', which is not recognized."
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
-    elif settings.VERBOSITY_LEVEL != 0:
-      debug_msg = "Web page declares character encoding as '" + charset + "'"
-      settings.print_data_to_stdout(settings.print_bold_debug_msg(debug_msg))
 
   except Exception as e:
     pass
@@ -997,4 +1000,5 @@ def perform_injection(prefix, suffix, whitespace, payload, vuln_parameter, http_
     exec_time, vuln_parameter = init_injection(payload, http_request_method, url)
 
   return exec_time, vuln_parameter, payload, prefix, suffix
+  
 # eof
