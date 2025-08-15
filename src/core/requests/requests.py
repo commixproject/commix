@@ -448,15 +448,11 @@ def init_injection(payload, http_request_method, url):
     end = 0
     start = time.time()
 
-  if not settings.USER_DEFINED_POST_DATA or settings.IGNORE_USER_DEFINED_POST_DATA:
+  if settings.INJECT_TAG in url:
     payload = payload.replace("#","%23")
     vuln_parameter = parameters.vuln_GET_param(url)
     target = checks.process_injectable_value(payload, url)
-    # if settings.TESTABLE_VALUE in url.replace(settings.INJECT_TAG, ""):
-    #   target = url.replace(settings.INJECT_TAG, "").replace(settings.TESTABLE_VALUE, payload)
-    # else:
-    #   target = url.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload)
-    if settings.USER_DEFINED_POST_DATA:
+    if settings.USER_DEFINED_POST_DATA and not settings.IGNORE_USER_DEFINED_POST_DATA:
       request = _urllib.request.Request(target, settings.USER_DEFINED_POST_DATA.encode(settings.DEFAULT_CODEC), method=http_request_method)
     else:
       request = _urllib.request.Request(target, method=http_request_method)
@@ -467,20 +463,14 @@ def init_injection(payload, http_request_method, url):
     vuln_parameter = parameters.vuln_POST_param(parameter, url)
     if settings.IS_JSON:
       data = checks.process_injectable_value(_urllib.parse.unquote(payload.replace("\"", "\\\"")), menu.options.data)
-      # data = parameter.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, _urllib.parse.unquote(payload.replace("\"", "\\\"")))
       try:
         data = checks.json_data(data)
       except ValueError:
         pass
     elif settings.IS_XML:
       data = checks.process_injectable_value(_urllib.parse.unquote(payload), menu.options.data)
-      #data = parameter.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, _urllib.parse.unquote(payload))
     else:
       data = checks.process_injectable_value(payload, menu.options.data)
-      # if settings.TESTABLE_VALUE in parameter.replace(settings.INJECT_TAG, ""):
-      #   data = parameter.replace(settings.INJECT_TAG, "").replace(settings.TESTABLE_VALUE, payload)
-      # else:
-      #   data = parameter.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload)
     request = _urllib.request.Request(url, data.encode(settings.DEFAULT_CODEC), method=http_request_method)
   headers.do_check(request)
   response = get_request_response(request)
