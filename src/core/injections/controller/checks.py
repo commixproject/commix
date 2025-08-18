@@ -1212,11 +1212,11 @@ def identified_os():
         pass
 
 """
-Checking all required third-party library dependencies.
+Checking for all required third-party library dependencies.
 """
 def third_party_dependencies():
   if settings.VERBOSITY_LEVEL != 0:
-    debug_msg = "Checking all required third-party library dependencies."
+    debug_msg = "Checking for all required third-party library dependencies."
     settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
 
   try:
