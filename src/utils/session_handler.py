@@ -90,7 +90,7 @@ def flush(url):
       conn = sqlite3.connect(settings.SESSION_FILE)
       tables = [row[0] for row in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")]
       for table in tables:
-        conn.execute("DROP TABLE IF EXISTS %s" % table)
+        conn.execute("DROP TABLE IF EXISTS " + table)
       conn.commit()
       conn.close()
     except sqlite3.OperationalError as err_msg:
@@ -102,63 +102,95 @@ def flush(url):
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
 """
-Clean injection point records by removing all but the most recent entry for each injection technique.
-Helps keep the session file lean and relevant.
+Remove all but the earliest injection point record for each unique URL and injection technique.
+This helps keep the session database clean by preserving only the first discovered injection point,
+which might be useful for historical or consistency purposes.
 """
 def clear(url):
   try:
     conn = sqlite3.connect(settings.SESSION_FILE)
     table = table_name(url) + "_ip"
-    # Delete all except latest record per technique
-    query = ("DELETE FROM \"" + table + "\" WHERE id NOT IN "
-             "(SELECT MAX(id) FROM \"" + table + "\" GROUP BY technique);")
-    conn.execute(query)
+    
+    # Query to get the smallest (earliest) id for each unique combination of url and technique
+    query = "SELECT MIN(id) FROM \"" + table + "\" GROUP BY url, technique;"
+    cursor = conn.execute(query)
+    
+    # Collect the ids to keep as strings
+    earliest_ids = [str(row[0]) for row in cursor.fetchall()]
+    
+    # If no records found, close connection and return
+    if not earliest_ids:
+      conn.close()
+      return
+    
+    # Create a comma-separated string of ids to keep
+    ids_to_keep = ",".join(earliest_ids)
+    
+    # Delete all records that do NOT have an id in the earliest_ids list
+    delete_query = "DELETE FROM \"" + table + "\" WHERE id NOT IN (" + ids_to_keep + ");"
+    conn.execute(delete_query)
     conn.commit()
     conn.close()
+    
   except sqlite3.OperationalError as err_msg:
-    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-  except:
-    settings.LOAD_SESSION = None
-    return False
+    # Log SQLite operational errors critically
+    settings.print_data_to_stdout(settings.print_critical_msg("SQLite error: " + str(err_msg)))
+  except Exception as e:
+    # Log any other unexpected errors critically
+    settings.print_data_to_stdout(settings.print_critical_msg("Error in clear(): " + str(e)))
 
 
 """
-Store details about a successful injection point into the session database.
-Includes metadata such as technique, payload, timing, vulnerability status, etc.
+Store details of a successful injection point into the session database.
+Includes various metadata such as technique, payload, timing, vulnerability status, HTTP method, headers, and cookies.
 """
 def import_injection_points(url, technique, injection_type, filename, separator, shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response, timesec, exec_time, output_length, is_vulnerable):
   try:
     conn = sqlite3.connect(settings.SESSION_FILE)
     table = table_name(url) + "_ip"
+    
+    # Create the table if it does not exist
     conn.execute("CREATE TABLE IF NOT EXISTS \"" + table + "\" "
                  "(id INTEGER PRIMARY KEY, url VARCHAR, technique VARCHAR, injection_type VARCHAR, separator VARCHAR, "
                  "shell VARCHAR, vuln_parameter VARCHAR, prefix VARCHAR, suffix VARCHAR, "
                  "TAG VARCHAR, alter_shell VARCHAR, payload VARCHAR, http_header VARCHAR, http_request_method VARCHAR, url_time_response INTEGER, "
                  "timesec INTEGER, exec_time INTEGER, output_length INTEGER, is_vulnerable VARCHAR, data VARCHAR, cookie VARCHAR);")
 
-    conn.execute("INSERT INTO \"" + table + "\" (url, technique, injection_type, separator, "
-                 "shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_header, http_request_method, "
-                 "url_time_response, timesec, exec_time, output_length, is_vulnerable, data, cookie) "
-                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                 (str(url), str(technique), str(injection_type),
-                  str(separator), str(shell), str(vuln_parameter), str(prefix), str(suffix),
-                  str(TAG), str(alter_shell), str(payload), str(settings.HTTP_HEADER), str(http_request_method),
-                  int(url_time_response), int(timesec), int(exec_time),
-                  int(output_length), str(is_vulnerable), str(menu.options.data), str(menu.options.cookie)))
-    conn.commit()
+    # Check if an exact matching record already exists to avoid duplicates
+    query_check = ("SELECT 1 FROM \"" + table + "\" WHERE url = ? AND technique = ? AND injection_type = ? AND separator = ? AND "
+                   "shell = ? AND vuln_parameter = ? AND prefix = ? AND suffix = ? AND TAG = ? AND alter_shell = ? AND payload = ? AND "
+                   "http_header = ? AND http_request_method = ? AND url_time_response = ? AND timesec = ? AND exec_time = ? AND "
+                   "output_length = ? AND is_vulnerable = ? AND data = ? AND cookie = ? LIMIT 1;")
+    
+    params = (str(url), str(technique), str(injection_type), str(separator), str(shell), str(vuln_parameter),
+              str(prefix), str(suffix), str(TAG), str(alter_shell), str(payload), str(settings.HTTP_HEADER),
+              str(http_request_method), int(url_time_response), int(timesec), int(exec_time),
+              int(output_length), str(is_vulnerable), str(menu.options.data), str(menu.options.cookie))
+
+    cursor = conn.execute(query_check, params)
+    
+    # Insert new record only if no identical record exists
+    if cursor.fetchone() is None:
+      conn.execute("INSERT INTO \"" + table + "\" (url, technique, injection_type, separator, "
+                   "shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_header, http_request_method, "
+                   "url_time_response, timesec, exec_time, output_length, is_vulnerable, data, cookie) "
+                   "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", params)
+      conn.commit()
+    
     conn.close()
-    if settings.INJECTION_CHECKER == False:
+
+    # Mark injection checker as True to indicate session contains injection data
+    if not settings.INJECTION_CHECKER:
       settings.INJECTION_CHECKER = True
 
   except sqlite3.OperationalError as err_msg:
     err_msg = str(err_msg)[:1].upper() + str(err_msg)[1:] + "."
     err_msg += " You are advised to rerun with switch '--flush-session'."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    checks.quit(filename, url, _ = False)
+    checks.quit(filename, url, _=False)
 
   except sqlite3.DatabaseError:
     checks.error_loading_session_file()
-
 
 """
 Retrieve a summary string of all unique injection techniques that have been successfully applied
