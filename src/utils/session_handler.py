@@ -24,6 +24,7 @@ from src.utils import settings
 from src.utils import common
 from src.core.injections.controller import checks
 from src.thirdparty.six.moves import input as _input
+from src.thirdparty.six.moves import urllib as _urllib
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 """
@@ -139,12 +140,12 @@ def clear(url):
     # Log any other unexpected errors critically
     settings.print_data_to_stdout(settings.print_critical_msg("Error in clear(): " + str(e)))
 
-
 """
 Store details of a successful injection point into the session database.
 Includes various metadata such as technique, payload, timing, vulnerability status, HTTP method, headers, and cookies.
 """
 def import_injection_points(url, technique, injection_type, filename, separator, shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response, timesec, exec_time, output_length, is_vulnerable):
+  
   try:
     conn = sqlite3.connect(settings.SESSION_FILE)
     table = table_name(url) + "_ip"
@@ -166,6 +167,14 @@ def import_injection_points(url, technique, injection_type, filename, separator,
               str(prefix), str(suffix), str(TAG), str(alter_shell), str(payload), str(settings.HTTP_HEADER),
               str(http_request_method), int(url_time_response), int(timesec), int(exec_time),
               int(output_length), str(is_vulnerable), str(menu.options.data), str(menu.options.cookie))
+
+    # Apply urlencode_base64_padding to all string elements in params
+    # This ensures that any base64 padding is safely URL-encoded before database insertion.
+    params = tuple(
+      x.replace(settings.BASE64_PADDING, _urllib.parse.quote(settings.BASE64_PADDING)) 
+      if isinstance(x, str) and settings.BASE64_PADDING in x else x
+      for x in params
+    )
 
     cursor = conn.execute(query_check, params)
     
