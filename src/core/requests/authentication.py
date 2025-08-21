@@ -203,8 +203,8 @@ def http_auth_cracker(url, realm, http_request_method):
           valid_pair =  "" + username + ":" + password + ""
           if not settings.VERBOSITY_LEVEL >= 2:
             settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
-          info_msg = "Authentication succeeded using: '" + valid_pair + "'."
-          settings.print_data_to_stdout(settings.print_bold_info_msg(info_msg))
+          info_msg = "Authentication succeeded using credentials: '" + valid_pair + "'."
+          settings.print_data_to_stdout(settings.print_info_msg(info_msg))
           return valid_pair
 
     err_msg = "Use the '--auth-cred' option to provide a valid pair of "

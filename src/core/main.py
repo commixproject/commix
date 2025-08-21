@@ -284,7 +284,6 @@ def init_injection(url):
   settings.CUSTOM_INJECTION_MARKER = None
   settings.CUSTOM_FILENAME = ""
   
-  
 """
 Using 'stdin' for parsing targets.
 """
