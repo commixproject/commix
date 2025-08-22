@@ -247,7 +247,7 @@ def check_http_traffic(request):
     checks.blocked_ip(page)
 
   # This is useful when handling exotic HTTP errors (i.e requests for authentication).
-  except (_urllib.error.HTTPError, _urllib.error.URLError) as err:
+  except _urllib.error.HTTPError as err:
     if not menu.options.drop_set_cookie:
       checks.not_declared_cookies(err)
     try:
@@ -256,23 +256,9 @@ def check_http_traffic(request):
       page = checks.page_encoding(err, action="encode")
     except Exception:
       page = ''
-    if isinstance(err, _urllib.error.HTTPError):
-      response_headers = err.info()
-      code = err.code
-    else:
-      code = ""
-      reason = str(getattr(err, 'reason', 'Unknown error'))
-      # process reason as before...
-      reason_parts = reason.split(settings.SINGLE_WHITESPACE)
-      if len(reason_parts) > 2:
-        response_headers = settings.SINGLE_WHITESPACE.join(reason_parts[2:]) + "."
-      else:
-        response_headers = reason
-      if not response_headers.endswith("."):
-        response_headers += "."
-
+    response_headers = err.info()
+    code = err.code
     print_http_response(response_headers, code, page)
-
 
     if (not settings.PERFORM_CRACKING and \
     not settings.IS_JSON and \
@@ -286,18 +272,37 @@ def check_http_traffic(request):
     if str(err.code).startswith(('3', '4', '5')):
       settings.HTTP_ERROR_CODES_SUM.append(err.code)
       if settings.VERBOSITY_LEVEL >= 2:
-        if len(str(err).split(": ")[1]) == 0:
+        parts = str(err).split(": ")
+        if len(parts) > 1 and len(parts[1]) == 0:
           error_msg = "Non-standard HTTP status code"
       pass
     else:
-      error_msg = str(err).replace(": "," (")
-      if len(str(err).split(": ")[1]) == 0:
+      error_msg = str(err).replace(": ", " (")
+      parts = str(err).split(": ")
+      if len(parts) > 1 and len(parts[1]) == 0:
         err_msg = error_msg + "Non-standard HTTP status code"
       else:
         err_msg = error_msg
 
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg + ")."))
       raise SystemExit()
+
+  except _urllib.error.URLError as err:
+    if not menu.options.drop_set_cookie:
+      checks.not_declared_cookies(err)
+    reason = str(getattr(err, 'reason', 'Unknown error'))
+    reason_parts = reason.split(settings.SINGLE_WHITESPACE)
+    if len(reason_parts) > 2:
+      response_headers = settings.SINGLE_WHITESPACE.join(reason_parts[2:]) + "."
+    else:
+      response_headers = reason
+    if not response_headers.endswith("."):
+      response_headers += "."
+    code = ""
+    page = ""
+    print_http_response(response_headers, code, page)
+    settings.print_data_to_stdout(settings.print_critical_msg("URL Error: " + reason))
+    raise SystemExit()
 
 """
 Check for added headers.
