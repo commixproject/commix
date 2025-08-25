@@ -244,7 +244,7 @@ def url_response(url, http_request_method):
   # Check for URL redirection
   if type(response) is not bool and settings.FOLLOW_REDIRECT and response is not None:
     if response.geturl() != url:
-      redirect_url = redirection.do_check(request, url, response.geturl())
+      redirect_url = redirection.do_check(request, url, response.geturl(), http_request_method)
       if redirect_url is not None:
         url = redirect_url
   if not menu.options.skip_waf:
