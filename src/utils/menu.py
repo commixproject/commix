@@ -295,6 +295,12 @@ request.add_option("--abort-code",
                 default=False,
                 help="Abort on (problematic) HTTP error code(s) (e.g. 401).")
 
+request.add_option("--http1.0",
+                action="store_true", 
+                dest="http10", 
+                default=False,
+                help="Use (old) HTTP version 1.0")
+
 request.add_option("--ignore-code",
                 action="store",
                 dest="ignore_code",

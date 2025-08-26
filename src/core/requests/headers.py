@@ -124,6 +124,10 @@ def check_http_traffic(request):
   else:
     http_client = _http_client.HTTPConnection
 
+  if menu.options.http10:
+    _http_client.HTTPConnection._http_vsn = 10
+    _http_client.HTTPConnection._http_vsn_str = 'HTTP/1.0'
+
   class connection(http_client):
     def send(self, req):
       headers = req.decode()
