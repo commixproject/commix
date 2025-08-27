@@ -299,7 +299,7 @@ request.add_option("--http1.0",
                 action="store_true", 
                 dest="http10", 
                 default=False,
-                help="Use (old) HTTP version 1.0")
+                help="Use (old) HTTP version 1.0.")
 
 request.add_option("--ignore-code",
                 action="store",
