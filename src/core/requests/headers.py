@@ -239,9 +239,9 @@ def check_http_traffic(request):
     page = checks.page_encoding(response, action="encode")
     response_headers[settings.URI_HTTP_HEADER] = response.geturl()
     response_headers = str(response_headers).strip("\n")
-    # Checks for not declared cookie(s), while server wants to set its own.
+    # Handle server-set cookies.
     if not menu.options.drop_set_cookie:
-      checks.not_declared_cookies(response)
+      checks.handle_server_cookies(response)
     print_http_response(response_headers, code, page)
     # Checks regarding a potential CAPTCHA protection mechanism.
     checks.captcha_check(page)
@@ -253,7 +253,7 @@ def check_http_traffic(request):
   # This is useful when handling exotic HTTP errors (i.e requests for authentication).
   except _urllib.error.HTTPError as err:
     if not menu.options.drop_set_cookie:
-      checks.not_declared_cookies(err)
+      checks.handle_server_cookies(err)
     try:
       if getattr(err, 'fp', None) is None:
         raise AttributeError
@@ -293,7 +293,7 @@ def check_http_traffic(request):
 
   except _urllib.error.URLError as err:
     if not menu.options.drop_set_cookie:
-      checks.not_declared_cookies(err)
+      checks.handle_server_cookies(err)
     reason = str(getattr(err, 'reason', 'Unknown error'))
     reason_parts = reason.split(settings.SINGLE_WHITESPACE)
     if len(reason_parts) > 2:

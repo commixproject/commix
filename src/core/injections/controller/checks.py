@@ -392,31 +392,69 @@ def connection_exceptions(err_msg):
       raise SystemExit()
 
 """
-check for not declared cookie(s)
+Handle server-set cookies.
 """
-def not_declared_cookies(response):
+def handle_server_cookies(response):
+
+  """
+  Mask the middle part of long cookie values to avoid leaking sensitive data in prompts.
+  """
+  def mask_cookie_value(cookie_str):
+      return re.sub(
+          r"(=[^=;]{10}[^=;])[^=;]+([^=;]{10})",
+          r"\g<1>...\g<2>",
+          cookie_str
+      )
+
   try:
     set_cookie_header = []
-    for response_header in response.getheaders():
-      if settings.SET_COOKIE in response_header:
-        _ = re.search(r'([^;]+);?', response_header[1])
+    declared_cookies = set(menu.options.cookie.split(settings.COOKIE_PARAM_DELIMITER)) if menu.options.cookie else set()
+    added_cookies = set()
+    for header, value in response.getheaders():
+      if header.lower() == settings.SET_COOKIE.lower():
+        _ = re.search(r'^\s*([^=;\s]+=[^;]*)', value)
         if _:
-          if _.group(1).split("=")[0] not in menu.options.cookie:
-            set_cookie_header.append(_.group(1))
+          name_value = _.group(1)
+          cookie_name = name_value.split("=")[0]
+          if cookie_name not in declared_cookies and cookie_name not in added_cookies:
+            set_cookie_header.append(name_value)
+            added_cookies.add(cookie_name)
+
     candidate = settings.COOKIE_PARAM_DELIMITER.join(str(value) for value in set_cookie_header)
+
     if candidate and settings.DECLARED_COOKIES is not False and settings.CRAWLING is False:
       settings.DECLARED_COOKIES = True
+      if settings.CRAWLED_SKIPPED_URLS_NUM != 0:
+        settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
       if menu.options.cookie:
-        menu.options.cookie = menu.options.cookie + settings.COOKIE_PARAM_DELIMITER + candidate
+        user_cookies_set = set([c.split('=')[0] for c in menu.options.cookie.split(settings.COOKIE_PARAM_DELIMITER)]) 
+        # intersect_cookies = user_cookies_set.intersection(added_cookies)
+        if user_cookies_set:
+          while True:
+            message = "You declared some cookie(s), "
+            message += "but the server is setting additional ones ('"
+            message += mask_cookie_value(candidate)
+            message += "'). Do you want to merge them? [Y/n] > "
+            merge_option = common.read_input(message, default="Y", check_batch=True)
+            if merge_option in settings.CHOICE_YES:
+              menu.options.cookie += settings.COOKIE_PARAM_DELIMITER + candidate
+              break
+            elif merge_option in settings.CHOICE_NO:
+              break
+            elif merge_option in settings.CHOICE_QUIT:
+              raise SystemExit()
+            else:
+              common.invalid_option(merge_option)
+              pass
+        else:
+          menu.options.cookie += settings.COOKIE_PARAM_DELIMITER + candidate
         settings.DECLARED_COOKIES = False
       else:
-        if settings.CRAWLED_SKIPPED_URLS_NUM != 0:
-          settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
         while True:
-          message = "You have not declared cookie(s), while "
-          message += "server wants to set its own ('"
-          message += str(re.sub(r"(=[^=;]{10}[^=;])[^=;]+([^=;]{10})", r"\g<1>...\g<2>", candidate))
-          message += "'). Do you want to use those [Y/n] > "
+          message = "You have not declared any cookie(s), "
+          message += "but the server wants to set its own ('"
+          message += mask_cookie_value(candidate)
+          message += "'). Do you want to use those? [Y/n] > "
           set_cookies = common.read_input(message, default="Y", check_batch=True)
           if set_cookies in settings.CHOICE_YES:
             menu.options.cookie = candidate
@@ -431,6 +469,7 @@ def not_declared_cookies(response):
             pass
   except (AttributeError, KeyError, TypeError):
     pass
+
 
 """
 Tab Autocompleter
