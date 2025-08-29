@@ -235,6 +235,12 @@ request.add_option("--cookie-del",
                 dest="cdel",
                 help="Set character for splitting cookie values.")
 
+request.add_option("--http1.0",
+                action="store_true", 
+                dest="http10", 
+                default=False,
+                help="Force (legacy) HTTP/1.0 for requests.")
+
 request.add_option("-H","--header",
                 action="store",
                 dest="header",
@@ -294,12 +300,6 @@ request.add_option("--abort-code",
                 dest="abort_code",
                 default=False,
                 help="Abort on (problematic) HTTP error code(s) (e.g. 401).")
-
-request.add_option("--http1.0",
-                action="store_true", 
-                dest="http10", 
-                default=False,
-                help="Use (old) HTTP version 1.0.")
 
 request.add_option("--ignore-code",
                 action="store",

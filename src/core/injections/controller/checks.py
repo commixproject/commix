@@ -470,7 +470,6 @@ def handle_server_cookies(response):
   except (AttributeError, KeyError, TypeError):
     pass
 
-
 """
 Tab Autocompleter
 """
