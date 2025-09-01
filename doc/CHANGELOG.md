@@ -1,4 +1,5 @@
 ## Version 4.1 (TBA)
+* Revised: Improved handling of URL redirections and associated HTTP responses.
 * Revised: Improved prompts when merging or applying server-set cookies.
 * Added: New switch `--http1.0` to force all outgoing requests to use HTTP/1.0.
 * Revised: Enhanced validation of user-specified parameters by detecting and reporting those that are not part of any recognized testable source.

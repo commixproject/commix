@@ -192,61 +192,87 @@ def check_internet(url):
 The init (URL) request.
 """
 def init_request(url, http_request_method):
-  # Number of seconds to wait before timeout connection
+
+  def perform_init_request(url, http_request_method):
+    if settings.USER_DEFINED_POST_DATA:
+      request = _urllib.request.Request(url, settings.USER_DEFINED_POST_DATA.encode(), method=http_request_method)
+    else:
+      request = _urllib.request.Request(url, method=http_request_method)
+    headers.do_check(request)
+    return request
+
   if settings.VERBOSITY_LEVEL != 0:
     debug_msg = "Setting the HTTP timeout."
     settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
   if menu.options.timeout:
     settings.TIMEOUT = menu.options.timeout
+
+  if menu.options.proxy: 
+    proxy.do_check()
+
+  if menu.options.auth_cred and menu.options.auth_type and settings.VERBOSITY_LEVEL != 0 :
+    debug_msg = "Setting the HTTP authentication type and credentials."
+    settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
+
+  _ = None
+  response = None
+  redirect_url = None
+
+  try:
+    if settings.VERBOSITY_LEVEL != 0:
+      debug_msg = "Creating " + str(settings.SCHEME).upper() + " requests opener object."
+      settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
+    opener = _urllib.request.build_opener(redirection.RedirectHandler())
+    request = perform_init_request(url, http_request_method)
+    response = opener.open(request, timeout=settings.TIMEOUT)
+    if response.geturl() != url:
+      redirect_url = response.geturl()
+      
+  except _urllib.error.HTTPError as e:
+    _ = True
+    redirect_url = e.geturl()
+
+  except Exception as err_msg:
+    requests.request_failed(err_msg)
+
+  if redirect_url and redirect_url != url:
+    redirect_url = redirection.do_check(request, url, redirect_url, http_request_method)
+    if redirect_url is not None and settings.FOLLOW_REDIRECT:
+      if _:
+        url = redirect_url
+      request = perform_init_request(redirect_url, http_request_method)
+
   # Define HTTP headers
   defined_http_headers(url)
   # Check the internet connection (--check-internet switch).
   if menu.options.check_internet:
     check_internet(url)
-  # Check if defined POST data
-  if settings.USER_DEFINED_POST_DATA:
-    request = _urllib.request.Request(url, settings.USER_DEFINED_POST_DATA.encode(), method=http_request_method)
-  else:
-    request = _urllib.request.Request(url, method=http_request_method)
-  headers.do_check(request)
-  # Used a valid pair of valid credentials
-  if menu.options.auth_cred and menu.options.auth_type and settings.VERBOSITY_LEVEL != 0 :
-    debug_msg = "Setting the HTTP authentication type and credentials."
-    settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
-  if menu.options.proxy: 
-    proxy.do_check()
-  if settings.VERBOSITY_LEVEL != 0:
-    debug_msg = "Creating " + str(settings.SCHEME).upper() + " requests opener object."
-    settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
-  settings.CUSTOM_INJECTION_MARKER = checks.custom_injection_marker_character(url, http_request_method)
-  # Check connection(s)
+
   checks.check_connection(url)
-  return request
+  settings.CUSTOM_INJECTION_MARKER = checks.custom_injection_marker_character(url, http_request_method)
+
+  return request, url
   
 """
 Get the URL response.
 """
 def url_response(url, http_request_method):
-  # Check if http / https
-  url = checks.check_http_s(url)
-  settings.TARGET_URL = _urllib.parse.urlparse(url).hostname
-  if settings.MULTI_TARGETS or settings.CRAWLING:
-    settings.TOR_CHECK_AGAIN = False
-    # initiate total of requests
-    settings.TOTAL_OF_REQUESTS = 0
-  request = init_request(url, http_request_method)
   if settings.CHECK_INTERNET:
     settings.CHECK_INTERNET = False
   if settings.INIT_TEST == True:
     info_msg = "Testing connection to the target URL. "
     settings.print_data_to_stdout(settings.print_bold_info_msg(info_msg))
+
+  # Check if http / https
+  url = checks.check_http_s(url)
+  request, url = init_request(url, http_request_method)
   response = examine_request(request, url)
-  # Check for URL redirection
-  if type(response) is not bool and settings.FOLLOW_REDIRECT and response is not None:
-    if response.geturl() != url:
-      redirect_url = redirection.do_check(request, url, response.geturl(), http_request_method)
-      if redirect_url is not None:
-        url = redirect_url
+  settings.TARGET_URL = _urllib.parse.urlparse(url).hostname
+  if settings.MULTI_TARGETS or settings.CRAWLING:
+    settings.TOR_CHECK_AGAIN = False
+    # initiate total of requests
+    settings.TOTAL_OF_REQUESTS = 0
+
   if not menu.options.skip_waf:
     settings.COOKIE_INJECTION = None
     settings.WAF_DETECTION_PHASE = True

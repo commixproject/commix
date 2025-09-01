@@ -32,6 +32,26 @@ from src.thirdparty.six.moves import urllib as _urllib
 from src.thirdparty.six.moves import http_client as _http_client
 from src.thirdparty.colorama import Fore, Back, Style, init
 
+class Request(_urllib.request.Request):
+  def get_method(self):
+    return settings.HTTPMETHOD.HEAD
+
+class RedirectHandler(_urllib.request.HTTPRedirectHandler, object):
+  """
+  Subclass the HTTPRedirectHandler to make it use our
+  Request also on the redirected URL
+  """
+  def redirect_request(self, request, fp, code, msg, headers, newurl):
+    if code in (301, 302, 303, 307):
+      settings.REDIRECT_CODE = code
+      return Request(newurl.replace(' ', '%20'),
+                     data=request.data,
+                     headers=request.headers
+                     )
+    else:
+      err_msg = str(_urllib.error.HTTPError(request.get_full_url(), code, msg, headers, fp)).replace(": "," (")
+      settings.print_data_to_stdout(settings.print_critical_msg(err_msg + ")."))
+      raise SystemExit()
 
 def do_check(request, url, redirect_url, http_request_method):
   """
@@ -39,27 +59,6 @@ def do_check(request, url, redirect_url, http_request_method):
   ---
   [1] https://gist.github.com/FiloSottile/2077115
   """
-  class Request(_urllib.request.Request):
-    def get_method(self):
-        return settings.HTTPMETHOD.HEAD
-
-  class RedirectHandler(_urllib.request.HTTPRedirectHandler, object):
-    """
-    Subclass the HTTPRedirectHandler to make it use our
-    Request also on the redirected URL
-    """
-    def redirect_request(self, request, fp, code, msg, headers, newurl):
-      if code in (301, 302, 303, 307):
-        settings.REDIRECT_CODE = code
-        return Request(newurl.replace(' ', '%20'),
-                       data=request.data,
-                       headers=request.headers
-                       )
-      else:
-        err_msg = str(_urllib.error.HTTPError(request.get_full_url(), code, msg, headers, fp)).replace(": "," (")
-        settings.print_data_to_stdout(settings.print_critical_msg(err_msg + ")."))
-        raise SystemExit()
-
   try:
     opener = _urllib.request.build_opener(RedirectHandler())
     _urllib.request.install_opener(opener)
