@@ -161,6 +161,8 @@ def process_non_custom():
 Process the defined injectable value
 """
 def process_injectable_value(payload, data):
+  if len(settings.TESTABLE_VALUE) == 0:
+    settings.TESTABLE_VALUE = settings.SINGLE_WHITESPACE
   _ = data.replace(settings.TESTABLE_VALUE, settings.RANDOM_TAG)
   if settings.TESTABLE_VALUE in _.replace(settings.INJECT_TAG, ""):
     return _.replace(settings.INJECT_TAG, "").replace(settings.TESTABLE_VALUE, payload).replace(settings.RANDOM_TAG, settings.TESTABLE_VALUE)
