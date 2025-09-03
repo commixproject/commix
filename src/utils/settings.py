@@ -261,7 +261,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.1"
-REVISION = "90"
+REVISION = "91"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1301,8 +1301,27 @@ NAGGING_DAYS = 31
 
 TARGET_URL = ""
 DOC_ROOT_TARGET_MARK = "%TARGET%"
-WINDOWS_DEFAULT_DOC_ROOTS = ["C:\\\\Inetpub\\wwwroot\\", "C:\\\\Inetpub\\wwwroot\\", "C:\\\\xampp\\htdocs\\", "C:\\\\wamp\\www\\"]
-LINUX_DEFAULT_DOC_ROOTS = ["/var/www/" + DOC_ROOT_TARGET_MARK + "/public_html/", "/var/www/" + DOC_ROOT_TARGET_MARK + "/", "/usr/local/apache2/htdocs/", "/usr/local/www/data/", "/usr/share/nginx/", "/var/apache2/htdocs/", "/var/www/nginx-default/", "/srv/www/htdocs/"]  # Reference: https://wiki.apache.org/httpd/DistrosDefaultLayout
+
+# Windows common document roots
+WINDOWS_DEFAULT_DOC_ROOTS = [
+                  "C:\\Inetpub\\wwwroot\\",    # IIS default
+                  "C:\\xampp\\htdocs\\",       # XAMPP default
+                  "C:\\wamp\\www\\",           # WAMP default
+                  "C:\\laragon\\www\\",        # Laragon default
+                  "D:\\Inetpub\\wwwroot\\",    # IIS on D: drive (less common)
+]
+# Linux common document roots
+LINUX_DEFAULT_DOC_ROOTS = [
+                  "/var/www/html/",                                      # Debian/Ubuntu Apache default
+                  "/var/www/" + DOC_ROOT_TARGET_MARK + "/public_html/",  # Older Debian/Ubuntu with custom doc root
+                  "/var/www/" + DOC_ROOT_TARGET_MARK + "/",              # Alternative Debian/Ubuntu
+                  "/usr/share/nginx/html/",                              # Nginx default
+                  "/usr/local/apache2/htdocs/",                          # Apache default (source build)
+                  "/usr/local/www/data/",                                # BSD-style
+                  "/var/apache2/htdocs/",                                # Older Apache distros
+                  "/var/www/nginx-default/",                             # Nginx variation
+                  "/srv/www/htdocs/"                                     # SUSE/Fedora style
+]
 
 DEFINED_WEBROOT = RECHECK_FILE_FOR_EXTRACTION = False
 
