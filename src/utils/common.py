@@ -338,6 +338,14 @@ def unhandled_exception():
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
+  elif any(_ in exc_msg for _ in ("tempfile.mkdtemp", "tempfile.mkstemp", "tempfile.py")):
+    err_msg = "Unable to write to the temporary directory. "
+    err_msg += "Please make sure your disk is not full and "
+    err_msg += "that you have sufficient permissions to "
+    err_msg += "create temporary files and/or directories."
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+    raise SystemExit()
+
   else:
     err_msg = "Unhandled exception occurred in '" + settings.VERSION[1:] + "'. It is recommended to retry your "
     err_msg += "run with the latest (dev) version from official GitHub "

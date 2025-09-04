@@ -21,6 +21,7 @@ import sqlite3
 from datetime import date
 from datetime import datetime
 from src.utils import menu
+from src.utils import common
 from src.utils import settings
 from src.utils import session_handler
 from src.core.injections.controller import checks
@@ -55,14 +56,17 @@ def logs_filename_creation(url):
     menu.options.output_dir = os.path.abspath(menu.options.output_dir)
     if os.path.isdir(menu.options.output_dir):
       output_dir = menu.options.output_dir
-      warn_msg = "Using '" + output_dir + "' for output directory."
-      settings.print_data_to_stdout(settings.print_warning_msg(warn_msg)) 
+      info_msg = "Using '" + output_dir + "' for output directory."
+      settings.print_data_to_stdout(settings.print_info_msg(info_msg))
     else:
-      output_dir = tempfile.mkdtemp(prefix=settings.APPLICATION)
-      warn_msg = "Unable to create output directory '" + menu.options.output_dir + "'. "
-      warn_msg += "Using temporary directory '" + output_dir + "' instead."
-      settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
-  else:
+      try:
+        error_msg = "Unable to use missing output directory '" + output_dir + "'."
+        settings.print_data_to_stdout(settings.print_error_msg(error_msg))
+        output_dir = tempfile.mkdtemp(prefix=settings.APPLICATION)
+        warn_msg += "Using temporary output directory '" + output_dir + "' instead."
+        settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+      except (OSError, RuntimeError):
+        common.unhandled_exception()  else:
     output_dir = settings.OUTPUT_DIR
     path_creation(os.path.dirname(settings.OUTPUT_DIR))
 
