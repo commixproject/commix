@@ -66,7 +66,8 @@ def logs_filename_creation(url):
         warn_msg += "Using temporary output directory '" + output_dir + "' instead."
         settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
       except (OSError, RuntimeError):
-        common.unhandled_exception()  else:
+        common.unhandled_exception()
+  else:
     output_dir = settings.OUTPUT_DIR
     path_creation(os.path.dirname(settings.OUTPUT_DIR))
 
