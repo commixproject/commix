@@ -1,7 +1,7 @@
 ## Version 4.1 (TBA)
 * Revised: Improved handling of URL redirections and associated HTTP responses.
 * Revised: Improved prompts when merging or applying server-set cookies.
-* Added: New switch `--http1.0` to force all outgoing requests to use HTTP/1.0.
+* Added: New switch `--http1.0` to force all outgoing requests to use `HTTP/1.0` protocol.
 * Revised: Enhanced validation of user-specified parameters by detecting and reporting those that are not part of any recognized testable source.
 * Revised: Enhanced injection logic with better handling of custom injection marker (i.e. asterisk `*`) and improved tracking of tested parameters.
 * Revised: Improved detection of custom injection marker (i.e. asterisk `*`) across HTTP input vectors (e.g., URL params, POST data, cookies, headers).

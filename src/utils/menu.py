@@ -239,7 +239,7 @@ request.add_option("--http1.0",
                 action="store_true", 
                 dest="http10", 
                 default=False,
-                help="Force (legacy) HTTP/1.0 for requests.")
+                help="Force requests to use the HTTP/1.0 protocol.")
 
 request.add_option("-H","--header",
                 action="store",
