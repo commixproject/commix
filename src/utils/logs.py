@@ -52,31 +52,36 @@ def path_creation(path):
 Logs filename creation.
 """
 def logs_filename_creation(url):
-  if menu.options.output_dir:
-    menu.options.output_dir = os.path.abspath(menu.options.output_dir)
-    if os.path.isdir(menu.options.output_dir):
-      output_dir = menu.options.output_dir
-      info_msg = "Using '" + output_dir + "' for output directory."
+  output_dir = menu.options.output_dir
+
+  if output_dir:
+    output_dir = os.path.abspath(output_dir)
+    if os.path.isdir(output_dir):
+      info_msg = "Using output directory '" + output_dir + "'."
       settings.print_data_to_stdout(settings.print_info_msg(info_msg))
     else:
       try:
-        error_msg = "Unable to use missing output directory '" + output_dir + "'."
+        os.makedirs(output_dir, exist_ok=True)
+        info_msg = "Created missing output directory '" + output_dir + "'."
+        settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+      except OSError:
+        error_msg = "Unable to create missing output directory '" + output_dir + "'."
         settings.print_data_to_stdout(settings.print_error_msg(error_msg))
-        output_dir = tempfile.mkdtemp(prefix=settings.APPLICATION)
-        warn_msg += "Using temporary output directory '" + output_dir + "' instead."
-        settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
-      except (OSError, RuntimeError):
-        common.unhandled_exception()
+        try:
+          output_dir = tempfile.mkdtemp(prefix=settings.APPLICATION)
+          warn_msg = "Using temporary output directory '" + output_dir + "' instead."
+          settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+        except (OSError, RuntimeError):
+          common.unhandled_exception()
   else:
     output_dir = settings.OUTPUT_DIR
-    path_creation(os.path.dirname(settings.OUTPUT_DIR))
+    path_creation(os.path.dirname(output_dir))
 
-  if not output_dir.endswith("/"):
-    output_dir = output_dir + "/"
+  # Ensure path ends with OS-specific separator
+  output_dir = os.path.join(output_dir, '')
 
-  # The logs filename construction.
-  filename = create_log_file(url, output_dir)
-  return filename
+  # Create the logs filename
+  return create_log_file(url, output_dir)
 
 """
 Create log files
