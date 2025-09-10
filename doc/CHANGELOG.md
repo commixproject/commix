@@ -1,4 +1,5 @@
 ## Version 4.1 (TBA)
+* Revised: Refactored User-Agent strings to be loaded from external files rather than being hardcoded.
 * Revised: Improved handling of URL redirections and associated HTTP responses.
 * Revised: Improved prompts when merging or applying server-set cookies.
 * Added: New switch `--http1.0` to force all outgoing requests to use `HTTP/1.0` protocol.

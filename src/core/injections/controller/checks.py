@@ -303,24 +303,30 @@ def skip_testing(filename, url):
         pass
 
 """
-The available mobile user agents.
+Prompt the user to select a mobile User-Agent string.
 """
 def mobile_user_agents():
   menu.mobile_user_agents()
+  # Load the mobile user-agent list from file
+  mobile_agents = common.load_list_from_file(settings.MOBILE_USER_AGENT_LIST, "mobile user-agent list")
+  with open(settings.MOBILE_USER_AGENT_LIST, "r", encoding="utf-8") as f:
+    mobile_agents = [line.strip() for line in f if line.strip()]
+
   while True:
     message = "Which smartphone do you want to imitate through HTTP User-Agent header? > "
     mobile_user_agent = common.read_input(message, default="1", check_batch=True)
     try:
-      if int(mobile_user_agent) in range(1,len(settings.MOBILE_USER_AGENT_LIST)):
-        return settings.MOBILE_USER_AGENT_LIST[int(mobile_user_agent)]
-      elif mobile_user_agent.lower() == "q":
+      choice = int(mobile_user_agent)
+      if choice in range(1, len(mobile_agents) + 1):
+        return mobile_agents[choice - 1]
+      else:
+        common.invalid_option(mobile_user_agent)
+    except ValueError:
+      if mobile_user_agent.lower() == "q":
         raise SystemExit()
       else:
         common.invalid_option(mobile_user_agent)
-        pass
-    except ValueError:
-      common.invalid_option(mobile_user_agent)
-      pass
+
 
 """
 Run host OS command(s) when injection point is found.

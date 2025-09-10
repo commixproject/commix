@@ -261,7 +261,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.1"
-REVISION = "96"
+REVISION = "97"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -288,6 +288,9 @@ LEGAL_DISCLAIMER_MSG = "Usage of " + APPLICATION + " for attacking targets witho
 RANDOM_STRING_GENERATOR = ''.join(random.choice(string.ascii_uppercase + string.digits + string.ascii_lowercase) for _ in range(10))
 # Random variable name
 RANDOM_VAR_GENERATOR = ''.join(random.choice(string.ascii_uppercase) for _ in range(3))
+
+# Path to text resources folder
+TXT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'txt'))
 
 START_TIME = time.time()
 
@@ -712,51 +715,6 @@ class INJECTION_TECHNIQUE(object):
 USER_APPLIED_TECHNIQUE = False
 SKIP_TECHNIQUES = False
 
-# User Agent List
-USER_AGENT_LIST = [
-        # Opera
-        "Opera/8.0 (X11; Linux i686; U; en)",
-        "Opera/9.01 (X11; FreeBSD 6 i386; U; en)"
-        "Opera/8.51 (FreeBSD 5.1; U; en)",
-        "Opera/8.51 (Macintosh; PPC Mac OS X; U; de)",
-        "Opera/9.00 (Macintosh; PPC Mac OS X; U; es)",
-        "Opera/12.80 (Windows NT 5.1; U; en) Presto/2.10.289 Version/12.02",
-        # Mozilla Firefox
-        "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:21.0) Gecko/20131331 Firefox/31.0",
-        "Mozilla/5.0 (Windows; U; Windows NT 5.1; fr; rv:1.8.1.13) Gecko/20080311 Firefox/2.0.0.13 (.NET CLR 3.0.04506.31)",
-        "Mozilla/5.0 (X11; Linux i686; rv:21.0) Gecko/20100101 Firefox/21.0",
-        "Mozilla/5.0 (MSIE 7.0; Macintosh; U; SunOS; X11; gu; SV1; InfoPath.2; .NET CLR 3.0.04506.31; .NET CLR 3.0.04506.648)",
-        "Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; AS; rv:11.0) like Gecko",
-        "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/536.5 (KHTML, like Gecko) Chrome/19.0.1084.9 Safari/536.5",
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.6; rv:9.0) Gecko/20100101 Firefox/9.0",
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_8) AppleWebKit/534.57.2 (KHTML, like Gecko) Version/4.0.5 Safari/531.22.7",
-        "Mozilla/5.0 (Windows NT 5.1; rv:31.0) Gecko/20100101 Firefox/31.0",
-        "Mozilla/5.0 (X11; U; Linux i686; zh-CN; rv:1.9.1.6) Gecko/20091216 Fedora/3.5.6-1.fc11 Firefox/3.5.6 GTB6",
-        "Mozilla/5.0 (X11; U; Linux i686 (x86_64); en-US; rv:1.9.1b3) Gecko/20090315 Firefox/3.1b3",
-        "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:21.0) Gecko/20131401 Firefox/31.0",
-        "Mozilla/5.0 (Windows NT 5.1) AppleWebKit/534.34 (KHTML, like Gecko) Dooble/1.40 Safari/534.34",
-        # Oldies
-        "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0; de) Opera 8.0",
-        "Mozilla/4.0 (compatible; MSIE 7.0b; Windows NT 6.0)",
-        "Mozilla/4.0 (compatible; MSIE 7.0b; Windows NT 5.1; .NET CLR 1.1.4322; InfoPath.1; .NET CLR 2.0.50727)",
-        "mozilla/3.0 (Windows NT 6.1; rv:2.0.1) Gecko/20100101 Firefox/5.0.1",
-]
-
-# Mobile User Agents
-MOBILE_USER_AGENT_LIST = [
-        "Mozilla/5.0 (BB10; Kbd) AppleWebKit/537.35+ (KHTML, like Gecko) Version/10.3.3.2205 Mobile Safari/537.35+",
-        "Mozilla/5.0 (Linux; Android 7.0; SM-G931V Build/NRD90M) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3171.125 Mobile Safari/537.36",
-        "Mozilla/4.0 (compatible; MSIE 4.01; Windows CE; PPC; 240x320; HP iPAQ h6310)",
-        "Mozilla/5.0 (Linux; Android 8.0.0; HTC 10 Build/OPR1.170623.027) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Mobile Safari/537.36",
-        "Mozilla/5.0 (Linux; Android 4.4.4; HUAWEI H891L Build/HuaweiH891L) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/33.0.0.0 Mobile Safari/537.36",
-        "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1",
-        "Mozilla/5.0 (Windows Phone 10.0; Android 6.0.1; Microsoft; Lumia 950) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Mobile Safari/537.36 Edge/15.14977",
-        "Mozilla/5.0 (Linux; Android 4.1.1; Nexus 7 Build/JRO03D) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.166 Safari/535.19",
-        "Mozilla/5.0 (SymbianOS/9.4; Series60/5.0 NokiaN97-1/10.0.012; Profile/MIDP-2.1 Configuration/CLDC-1.1; en-us) AppleWebKit/525 (KHTML, like Gecko) WicKed/7.1.12344",
-        "Mozilla/5.0 (Linux; Android 8.0.0; Pixel Build/OPR3.170623.013) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.111 Mobile Safari/537.36",
-        "Mozilla/5.0 (Linux; U; Android 4.4.4; en-gb; MI 3W Build/KTU84P) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/39.0.0.0 Mobile Safari/537.36 XiaoMi/MiuiBrowser/2.1.1",
-]
-
 # Default Scheme
 SCHEME = ""
 
@@ -1080,17 +1038,25 @@ SRVPORT = 8080
 SESSION_FILE = ""
 LOAD_SESSION = None
 
-# Define the default credentials files
-USERNAMES_TXT_FILE = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'txt')) + "/" + "default_usernames.txt"
-PASSWORDS_TXT_FILE = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'txt')) + "/" + "default_passwords.txt"
+# Path to file containing desktop/browser User-Agent strings
+USER_AGENT_LIST = os.path.join(TXT_DIR, "user-agents.txt")
+
+# Path to file containing mobile User-Agent strings
+MOBILE_USER_AGENT_LIST = os.path.join(TXT_DIR, "mobile-user-agents.txt")
+
+# Path to file with default username values
+USERNAMES_TXT_FILE = os.path.join(TXT_DIR, "default_usernames.txt")
+
+# Path to file with default password values
+PASSWORDS_TXT_FILE = os.path.join(TXT_DIR, "default_passwords.txt")
+
+# Path to file with known CGI scripts/pages potentially vulnerable to Shellshock
+CGI_SCRIPTS = os.path.join(TXT_DIR, "shocker-cgi_list.txt")
 
 REQUIRED_AUTHENTICATION = False
 
 INJECTED_HTTP_HEADER = False
 INJECTION_CHECKER = False
-
-# List of pages / scripts potentially vulnerable to Shellshock
-CGI_SCRIPTS = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'txt')) + "/" + "shocker-cgi_list.txt"
 
 INSTALL_DIR = "/usr/share/"
 WRAPPER_PATH = "/usr/bin/"
