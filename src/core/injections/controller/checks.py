@@ -307,10 +307,9 @@ Prompt the user to select a mobile User-Agent string.
 """
 def mobile_user_agents():
   menu.mobile_user_agents()
+
   # Load the mobile user-agent list from file
   mobile_agents = common.load_list_from_file(settings.MOBILE_USER_AGENT_LIST, "mobile user-agent list")
-  with open(settings.MOBILE_USER_AGENT_LIST, "r", encoding="utf-8") as f:
-    mobile_agents = [line.strip() for line in f if line.strip()]
 
   while True:
     message = "Which smartphone do you want to imitate through HTTP User-Agent header? > "
@@ -1075,24 +1074,7 @@ def ps_check_failed():
 Check if CGI scripts (shellshock injection).
 """
 def check_CGI_scripts(url):
-  try:
-    CGI_SCRIPTS = []
-    if not os.path.isfile(settings.CGI_SCRIPTS ):
-      err_msg = "The pages/scripts list '" + settings.CGI_SCRIPTS  + "' was not found"
-      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
-    if len(settings.CGI_SCRIPTS ) == 0:
-      err_msg = "The pages/scripts list '" + settings.CGI_SCRIPTS  + "' is empty."
-      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
-    with open(settings.CGI_SCRIPTS , "r") as f:
-      for line in f:
-        line = line.strip()
-        CGI_SCRIPTS.append(line)
-  except IOError:
-    err_msg = " Cannot read the pages/scripts list '" + settings.CGI_SCRIPTS  + "'. Check if the file is corrupted or unreadable."
-    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+  CGI_SCRIPTS = common.load_list_from_file(settings.CGI_SCRIPTS, "CGI scripts list")
 
   _ = False
   for cgi_script in CGI_SCRIPTS:

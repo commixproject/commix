@@ -66,75 +66,35 @@ def authentication_process(http_request_method):
     checks.connection_exceptions(err_msg)
 
 """
-Define the HTTP authentication
-wordlists for usernames / passwords.
+HTTP auth wordlists for usernames and passwords
 """
 def define_wordlists():
 
   while True:
     message = "Do you want to use default wordlists for dictionary-based attack? [Y/n] > "
     do_update = common.read_input(message, default="Y", check_batch=True)
+    
     if do_update in settings.CHOICE_YES:
-      username_txt_file = settings.USERNAMES_TXT_FILE
-      passwords_txt_file = settings.PASSWORDS_TXT_FILE
+      # Load default wordlists
+      usernames = common.load_list_from_file(settings.USERNAMES_TXT_FILE, "usernames wordlist")
+      passwords = common.load_list_from_file(settings.PASSWORDS_TXT_FILE, "passwords wordlist")
       info_msg = "Using default wordlists for dictionary-based authentication check."
       settings.print_data_to_stdout(settings.print_info_msg(info_msg))
       break
+
     elif do_update in settings.CHOICE_NO:
-      message = "Please enter usernames wordlist > "
-      username_txt_file = common.read_input(message, default=None, check_batch=True)
-      message = "Please enter passwords wordlist > "
-      passwords_txt_file = common.read_input(message, default=None, check_batch=True)
+      # Load custom wordlists
+      username_txt_file = common.read_input("Please enter usernames wordlist > ", default=None, check_batch=True)
+      passwords_txt_file = common.read_input("Please enter passwords wordlist > ", default=None, check_batch=True)
+      usernames = common.load_list_from_file(username_txt_file, "usernames wordlist")
+      passwords = common.load_list_from_file(passwords_txt_file, "passwords wordlist")
       break
+
     elif do_update in settings.CHOICE_QUIT:
       raise SystemExit()
+
     else:
       common.invalid_option(do_update)
-      pass
-
-  try:
-    usernames = []
-    if settings.VERBOSITY_LEVEL != 0:
-      debug_msg = "Parsing usernames wordlist '" + username_txt_file + "'."
-      settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
-    if not os.path.isfile(username_txt_file):
-      err_msg = "The specified file '" + str(username_txt_file) + "' does not exist."
-      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
-    if len(username_txt_file) == 0:
-      err_msg = "The specified file '" + str(username_txt_file) + "' seems empty."
-      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
-    with open(username_txt_file, "r") as f:
-      for line in f:
-        line = line.strip()
-        usernames.append(line)
-  except IOError:
-    err_msg = " Check if file '" + str(username_txt_file) + "' is readable or corrupted."
-    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
-
-  try:
-    passwords = []
-    if settings.VERBOSITY_LEVEL != 0:
-      debug_msg = "Parsing passwords wordlist '" + passwords_txt_file + "'."
-      settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
-    if not os.path.isfile(passwords_txt_file):
-      err_msg = "The specified file '" + str(passwords_txt_file) + "' does not exist."
-      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
-    if len(passwords_txt_file) == 0:
-      err_msg = "The specified file '" + str(passwords_txt_file) + "' seems empty."
-      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
-    with open(passwords_txt_file, "r") as f:
-      for line in f:
-        line = line.strip()
-        passwords.append(line)
-  except IOError:
-    err_msg = " Check if file '" + str(passwords_txt_file) + "' is readable or corrupted."
-    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
 
   return usernames, passwords
 

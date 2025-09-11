@@ -364,4 +364,35 @@ def unhandled_exception():
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg + "\n" + exc_msg.rstrip()))
     create_github_issue(err_msg, exc_msg[:])
 
+"""
+Load a list of non-empty lines from a text file.
+"""
+def load_list_from_file(file_path, description="file"):
+
+  if not os.path.isfile(file_path):
+    err_msg = "The " + description + " '" + file_path + "' was not found."
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+    raise SystemExit()
+
+  try:
+    with open(file_path, "r", encoding="utf-8") as f:
+      items = [line.strip() for line in f if line.strip()]
+  except IOError:
+    err_msg = "Cannot read the " + description + " '" + file_path + "'. "
+    err_msg += "Check if the file is corrupted or unreadable."
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+    raise SystemExit()
+
+  if not items:
+    err_msg = "The " + description + " '" + file_path + "' is empty."
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+    raise SystemExit()
+
+  if settings.VERBOSITY_LEVEL > 0:
+    debug_msg = "Loaded " + str(len(items)) + " entries from " + description + " '" + file_path + "'."
+    settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
+
+  return items
+
+
 # eof

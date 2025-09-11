@@ -117,8 +117,7 @@ def defined_http_headers(url):
         else:
           pass
         try:
-          with open(settings.USER_AGENT_LIST, "r", encoding="utf-8") as f:
-              user_agents = [line.strip() for line in f if line.strip()]
+          user_agents = common.load_list_from_file(settings.USER_AGENT_LIST, "user-agent list")
           menu.options.agent = random.choice(user_agents)
           info_msg = "The fetched random HTTP User-Agent header value is '" + menu.options.agent + "'."
           settings.print_data_to_stdout(settings.print_info_msg(info_msg))
