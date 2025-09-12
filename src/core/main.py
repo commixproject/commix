@@ -526,8 +526,6 @@ def main(filename, url, http_request_method):
                                                    password=password
                                                    )
       try:
-        # Check for CGI scripts on url
-        checks.check_CGI_scripts(url)
         # Check if defined "--file-upload" option.
         if menu.options.file_upload:
           menu.options.file_upload = os.path.abspath(menu.options.file_upload)

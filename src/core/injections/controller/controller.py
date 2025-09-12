@@ -869,6 +869,8 @@ def do_check(url, http_request_method, filename):
         warn_msg += "time-based injections because of inherent high latency time."
         settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
+    # Check target URL for CGI scripts vulnerable to Shellshock.
+    checks.check_CGI_scripts(url)
     perform_checks(url, http_request_method, filename)
       
     # All injection techniques seems to be failed!
