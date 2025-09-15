@@ -93,47 +93,43 @@ def defined_http_headers(url):
       settings.print_data_to_stdout(settings.print_debug_msg(debug_msg)) 
 
   def user_agent():
-    # Check if defined "--mobile" option.
-    if menu.options.mobile:
-      if ((menu.options.agent != settings.DEFAULT_USER_AGENT) and not menu.options.requestfile) or menu.options.random_agent:
-        if not settings.MULTI_TARGETS or not settings.STDIN_PARSING:
-          err_msg = "The switch '--mobile' is incompatible with option '--user-agent' or switch '--random-agent'."
-          settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-          raise SystemExit()
-      else:
-        menu.options.agent = checks.mobile_user_agents()
+    # Determine which option is enabled
+    mobile_agent = menu.options.mobile
+    random_agent = menu.options.random_agent
+    custom_agent = menu.options.agent != settings.DEFAULT_USER_AGENT and not menu.options.requestfile
 
-    # Check if defined "--random-agent" option.
-    if menu.options.random_agent:
-      if ((menu.options.agent != settings.DEFAULT_USER_AGENT) and not menu.options.requestfile) or menu.options.mobile:
-        if not settings.MULTI_TARGETS or not settings.STDIN_PARSING:
-          err_msg = "The switch '--random-agent' is incompatible with option '--user-agent' or switch '--mobile'."
-          settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-          raise SystemExit()
-      else:
-        if settings.VERBOSITY_LEVEL != 0:
-          debug_msg = "Fetching random HTTP User-Agent header. "
-          settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
-        else:
-          pass
-        try:
-          user_agents = common.load_list_from_file(settings.USER_AGENT_LIST, "user-agent list")
-          menu.options.agent = random.choice(user_agents)
-          info_msg = "The fetched random HTTP User-Agent header value is '" + menu.options.agent + "'."
-          settings.print_data_to_stdout(settings.print_info_msg(info_msg))
-        except:
-          settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
-
+    # Final debug message
     if settings.VERBOSITY_LEVEL != 0:
       debug_msg = "Setting the HTTP User-Agent header."
       settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
+
+    # Combined check for incompatible combinations
+    if (mobile_agent and (custom_agent or random_agent)) or (random_agent and (custom_agent or mobile_agent)):
+      if not any([settings.MULTI_TARGETS, settings.STDIN_PARSING]):
+        if mobile_agent:
+          err_msg = "The switch '--mobile' is incompatible with option '--user-agent' or switch '--random-agent'."
+        else:
+          err_msg = "The switch '--random-agent' is incompatible with option '--user-agent' or switch '--mobile'."
+        settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+        raise SystemExit()
+
+    # Set the User-Agent
+    if mobile_agent:
+      menu.options.agent = checks.mobile_user_agents()
+    elif random_agent:
+      if settings.VERBOSITY_LEVEL != 0:
+        debug_msg = "Fetching random HTTP User-Agent header. "
+        settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
+      user_agents = common.load_list_from_file(settings.USER_AGENT_LIST, "user-agent list")
+      menu.options.agent = random.choice(user_agents)
+      info_msg = "The fetched random HTTP User-Agent header value is '" + menu.options.agent + "'."
+      settings.print_data_to_stdout(settings.print_info_msg(info_msg))
 
   extra_headers()
   cookie()
   referer(url)
   host(url)
   user_agent()
-
 
 """
 Examine the request
