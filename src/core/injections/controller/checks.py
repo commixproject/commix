@@ -1071,35 +1071,46 @@ def ps_check_failed():
       pass
 
 """
-Check if CGI scripts (shellshock injection).
+Perform basic heuristic checks for CGI scripts potentially vulnerable to Shellshock.
 """
 def check_CGI_scripts(url):
+
+  if settings.VERBOSITY_LEVEL != 0:
+    debug_msg = "Checking target URL for potentially vulnerable CGI scripts."
+    settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
+
   CGI_SCRIPTS = common.load_list_from_file(settings.CGI_SCRIPTS, "CGI scripts list")
 
   _ = False
   for cgi_script in CGI_SCRIPTS:
     if cgi_script in url:
-      info_msg = "Heuristic (basic) tests show that target URL might contain a script "
-      info_msg += "vulnerable to shellshock. "
+      info_msg = "Heuristic (basic) tests show that target URL might be vulnerable to Shellshock "
+      info_msg += "(detected script: '" + cgi_script + "')."
       _ = True
       settings.print_data_to_stdout(settings.print_bold_info_msg(info_msg))
       while True:
-        message = "Do you want to enable the shellshock module ('--shellshock')? [Y/n] > "
+        message = "Do you want to enable the Shellshock module ('--shellshock')? [Y/n] > "
         shellshock_check = common.read_input(message, default="Y", check_batch=True)
         if shellshock_check in settings.CHOICE_YES:
           menu.options.shellshock = True
-          break
+          return
         elif shellshock_check in settings.CHOICE_NO:
           menu.options.shellshock = False
-          break
+          return
         elif shellshock_check in settings.CHOICE_QUIT:
           raise SystemExit()
         else:
           common.invalid_option(shellshock_check)
           pass
+
   if not _:
+    debug_msg = "No potentially vulnerable CGI scripts detected in target URL."
+    settings.print_data_to_stdout(settings.print_bold_debug_msg(debug_msg))
     menu.options.shellshock = False
 
+"""
+Safely parse a target URL into components.
+"""
 def check_url(url):
   try:
     return _urllib.parse.urlsplit(url)
@@ -1111,7 +1122,7 @@ def check_url(url):
     raise SystemExit()
 
 """
-Check if http / https.
+Verify whether the URL scheme is HTTP or HTTPS.
 """
 def check_http_s(url):
   url_split = check_url(url)
