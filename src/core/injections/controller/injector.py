@@ -33,90 +33,8 @@ from src.thirdparty.six.moves import input as _input
 from src.thirdparty.six.moves import html_parser as _html_parser
 from src.thirdparty.colorama import Fore, Back, Style, init
 
-"""
-Efficient file size detection for Issue #783 improvement
-"""
-def efficient_file_size_detection(separator, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response, technique):
-  """
-  Efficiently detect file size using stat command instead of incremental length checking.
-  This significantly reduces the number of requests needed for file size detection.
-  """
-  if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
-    from src.core.injections.blind.techniques.time_based import tb_payloads as payloads
-  else:
-    from src.core.injections.semiblind.techniques.tempfile_based import tfb_payloads as payloads
-  
-  # Extract filename from the command
-  filename_to_check = checks.extract_filename_from_cmd(cmd)
-  if not filename_to_check:
-    return None, "Could not extract filename from command"
-  
-  if settings.VERBOSITY_LEVEL != 0:
-    debug_msg = "Using efficient file size detection for: " + filename_to_check
-    settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
-  
-  # Step 1: Check if file exists
-  payload = payloads.file_exists_check(filename_to_check, separator, timesec, http_request_method)
-  exec_time, vuln_parameter, payload, prefix, suffix = requests.perform_injection(prefix, suffix, whitespace, payload, vuln_parameter, http_request_method, url)
-  
-  if not (exec_time >= settings.FOUND_EXEC_TIME and exec_time - timesec >= settings.FOUND_DIFF):
-    return None, "File does not exist: " + filename_to_check
-  
-  # Step 2: Check if file is not empty
-  payload = payloads.file_not_empty_check(filename_to_check, separator, timesec, http_request_method)
-  exec_time, vuln_parameter, payload, prefix, suffix = requests.perform_injection(prefix, suffix, whitespace, payload, vuln_parameter, http_request_method, url)
-  
-  if not (exec_time >= settings.FOUND_EXEC_TIME and exec_time - timesec >= settings.FOUND_DIFF):
-    return 0, "File is empty: " + filename_to_check
-  
-  # Step 3: Get the length of file size (number of digits)
-  info_msg = "Detecting file size length for: " + filename_to_check
-  settings.print_data_to_stdout(settings.print_info_msg(info_msg))
-  
-  size_length = None
-  for length_test in range(1, 15):  # File sizes up to 999TB (14 digits)
-    payload = payloads.get_stat_output_length(filename_to_check, length_test, separator, timesec, http_request_method)
-    exec_time, vuln_parameter, payload, prefix, suffix = requests.perform_injection(prefix, suffix, whitespace, payload, vuln_parameter, http_request_method, url)
-    
-    if (exec_time >= settings.FOUND_EXEC_TIME and exec_time - timesec >= settings.FOUND_DIFF):
-      size_length = length_test
-      if settings.VERBOSITY_LEVEL != 0:
-        debug_msg = "File size has " + str(size_length) + " digits"
-        settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
-      break
-  
-  if size_length is None:
-    return None, "Could not determine file size length"
-  
-  # Step 4: Extract each digit of the file size
-  info_msg = "Extracting file size digits for: " + filename_to_check
-  settings.print_data_to_stdout(settings.print_info_msg(info_msg))
-  
-  file_size = ""
-  for digit_pos in range(1, size_length + 1):
-    digit_found = None
-    for digit_value in range(0, 10):  # Test digits 0-9
-      payload = payloads.get_file_size_digit(filename_to_check, digit_pos, digit_value, separator, timesec, http_request_method)
-      exec_time, vuln_parameter, payload, prefix, suffix = requests.perform_injection(prefix, suffix, whitespace, payload, vuln_parameter, http_request_method, url)
-      
-      if (exec_time >= settings.FOUND_EXEC_TIME and exec_time - timesec >= settings.FOUND_DIFF):
-        digit_found = digit_value
-        file_size += str(digit_value)
-        if settings.VERBOSITY_LEVEL != 0:
-          debug_msg = "Found digit " + str(digit_pos) + ": " + str(digit_value)
-          settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
-        break
-    
-    if digit_found is None:
-      return None, "Could not determine digit at position " + str(digit_pos)
-  
-  try:
-    final_size = int(file_size)
-    success_msg = "Efficiently detected file size: " + str(final_size) + " bytes"
-    settings.print_data_to_stdout(settings.print_info_msg(success_msg))
-    return final_size, "Success"
-  except ValueError:
-    return None, "Invalid file size detected: " + file_size
+# Import efficient file size detection from file_access module (Issue #783 improvement)
+from src.core.injections.controller import file_access
 
 """
 The main time-realative command injection exploitation.
@@ -156,7 +74,7 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
     else:
       original_cmd = cmd
     
-    efficient_size, status_msg = efficient_file_size_detection(separator, original_cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response, technique)
+    efficient_size, status_msg = file_access.efficient_file_size_detection(separator, original_cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response, technique)
     
     if efficient_size is not None:
       output_length = efficient_size
