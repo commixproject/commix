@@ -1104,8 +1104,9 @@ def check_CGI_scripts(url):
           pass
 
   if not _:
-    debug_msg = "No potentially vulnerable CGI scripts detected in target URL."
-    settings.print_data_to_stdout(settings.print_bold_debug_msg(debug_msg))
+    if settings.VERBOSITY_LEVEL != 0:
+      debug_msg = "No potentially vulnerable CGI scripts detected in target URL."
+      settings.print_data_to_stdout(settings.print_bold_debug_msg(debug_msg))
     menu.options.shellshock = False
 
 """
