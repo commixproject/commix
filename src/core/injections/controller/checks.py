@@ -660,16 +660,15 @@ Fix for %0a, %0d%0a separators
 """
 def newline_fixation(payload):
   payload = _urllib.parse.unquote(payload)
-  if settings.END_LINE.CR in payload:
-    #_ = payload.find("\r\n") + 1
-    #payload = _urllib.parse.quote(payload[:_]) + payload[_:]
-    payload = payload.replace(settings.END_LINE.CR,"%0d")
-  if settings.END_LINE.LF in payload:
-    #_ = payload.find("\n") + 1
-    #payload = _urllib.parse.quote(payload[:_]) + payload[_:]
-    payload = payload.replace(settings.END_LINE.LF,"%0a")
-  return payload
 
+  for seq in [settings.END_LINE.CRLF, settings.END_LINE.CR, settings.END_LINE.LF]:
+    encoded = _urllib.parse.quote(seq)
+    # raw newlines to lowercase encoding
+    payload = payload.replace(seq, encoded.lower())
+    # uppercase URL-encoded to lowercase
+    payload = payload.replace(encoded.upper(), encoded.lower())
+
+    return payload
 
 """
 Page enc/decoding
