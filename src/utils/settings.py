@@ -261,7 +261,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.1"
-REVISION = "104"
+REVISION = "105"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -433,7 +433,7 @@ class OS(object):
 TARGET_OS = OS.UNIX
 
 IDENTIFIED_TARGET_OS = False
-IGNORE_IDENTIFIED_OS = None
+IGNORE_IDENTIFIED_TARGET_OS = None
 
 # Verbosity level (0-4, Default: 0)
 VERBOSITY_LEVEL = 0

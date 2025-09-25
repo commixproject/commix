@@ -1231,7 +1231,7 @@ Decision if the user-defined operating system name,
 is different than the one identified by heuristics.
 """
 def identified_os():
-    if settings.IGNORE_IDENTIFIED_OS == None:
+    if settings.IGNORE_IDENTIFIED_TARGET_OS == None:
       warn_msg = "Identified different operating system (i.e. '"
       warn_msg += settings.TARGET_OS.title() + "'), than the defined (i.e. '" + menu.options.os.title() + "')."
       settings.print_data_to_stdout(settings.print_bold_warning_msg(warn_msg))
@@ -1239,11 +1239,11 @@ def identified_os():
       proceed_option = common.read_input(message, default="S", check_batch=True)
       if proceed_option.lower() in settings.CHOICE_PROCEED :
         if proceed_option.lower() == "c":
-          settings.IGNORE_IDENTIFIED_OS = True
-          return settings.IGNORE_IDENTIFIED_OS
+          settings.IGNORE_IDENTIFIED_TARGET_OS = True
+          return settings.IGNORE_IDENTIFIED_TARGET_OS
         elif proceed_option.lower() == "s":
-          settings.IGNORE_IDENTIFIED_OS = False
-          return settings.IGNORE_IDENTIFIED_OS
+          settings.IGNORE_IDENTIFIED_TARGET_OS = False
+          return settings.IGNORE_IDENTIFIED_TARGET_OS
         elif proceed_option.lower() == "q":
           raise SystemExit()
       else:

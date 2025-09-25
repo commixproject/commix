@@ -922,7 +922,7 @@ def server_identification(response):
 Identify the underlying operating system based on the server banner.
 """
 def os_identification(response):
-  if not settings.IGNORE_IDENTIFIED_OS:
+  if not settings.IGNORE_IDENTIFIED_TARGET_OS:
     server_banner = response.info().get(settings.SERVER, "")
     check_os(server_banner)
 
