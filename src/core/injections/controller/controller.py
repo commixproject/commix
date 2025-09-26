@@ -305,12 +305,14 @@ Proceed to the injection process for the appropriate parameter.
 """
 def injection_proccess(url, check_parameter, http_request_method, filename, timesec):
   settings.NOT_TESTABLE_PARAMETERS = False
-  for i in range(0,int(settings.OS_CHECKS_NUM)):
-    if settings.CHECK_BOTH_OS:
-      if i == 0:
-        settings.TARGET_OS = settings.OS.UNIX
-      else:
-        settings.TARGET_OS = settings.OS.WINDOWS
+
+  os_targets = ([settings.TARGET_OS] if settings.TARGET_OS else
+                list(vars(settings.OS).values())[:settings.OS_CHECKS_NUM] if settings.CHECK_BOTH_OS else
+                [settings.TARGET_OS or list(vars(settings.OS).values())[0]])
+
+  # Loop over the selected OS targets
+  for os_target in os_targets:
+    settings.TARGET_OS = os_target
 
     if settings.PERFORM_BASIC_SCANS:
       checks.keep_testing_others(filename, url)
