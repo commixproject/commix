@@ -287,7 +287,8 @@ def skip_testing(filename, url):
       settings.SKIP_CODE_INJECTIONS = True
       _ = " further testing"
     while True:
-      message = "Do you want to skip" + _ + " on the " + settings.CHECKING_PARAMETER + "? [Y/n] > "
+      message = "Do you want to skip" + _ + " on the " 
+      message += settings.CHECKING_PARAMETER + "? (recommended if certain) [Y/n] > "
       procced_option = common.read_input(message, default="Y", check_batch=True)
       if procced_option in settings.CHOICE_YES:
         settings.SKIP_COMMAND_INJECTIONS = True
