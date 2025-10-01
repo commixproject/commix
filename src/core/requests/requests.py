@@ -498,8 +498,8 @@ def cookie_injection(url, vuln_parameter, payload, http_request_method):
     request = _urllib.request.Request(url, data, method=http_request_method)
     #Check if defined extra headers.
     headers.do_check(request)
-    payload = checks.newline_fixation(payload)
-    payload = checks.payload_fixation(payload)
+    payload = checks.normalize_newlines(payload)
+    # payload = checks.payload_fixation(payload)
     # payload = payload.replace("+", "%2B")
     if settings.INJECT_TAG in menu.options.cookie:
       cookie = checks.process_injectable_value(payload, menu.options.cookie)
@@ -548,7 +548,7 @@ def user_agent_injection(url, vuln_parameter, payload, http_request_method):
     request = _urllib.request.Request(url, data, method=http_request_method)
     #Check if defined extra headers.
     headers.do_check(request)
-    payload = checks.newline_fixation(payload)
+    payload = checks.normalize_newlines(payload)
     request.add_header(settings.USER_AGENT, payload)
     try:
       headers.check_http_traffic(request)
@@ -591,7 +591,7 @@ def referer_injection(url, vuln_parameter, payload, http_request_method):
     request = _urllib.request.Request(url, data, method=http_request_method)
     #Check if defined extra headers.
     headers.do_check(request)
-    payload = checks.newline_fixation(payload)
+    payload = checks.normalize_newlines(payload)
     request.add_header(settings.REFERER, payload)
     try:
       headers.check_http_traffic(request)
@@ -634,7 +634,7 @@ def host_injection(url, vuln_parameter, payload, http_request_method):
     request = _urllib.request.Request(url, data, method=http_request_method)
     #Check if defined extra headers.
     headers.do_check(request)
-    payload = checks.newline_fixation(payload)
+    payload = checks.normalize_newlines(payload)
     request.add_header(settings.HOST, payload)
     try:
       headers.check_http_traffic(request)
@@ -677,7 +677,7 @@ def custom_header_injection(url, vuln_parameter, payload, http_request_method):
     request = _urllib.request.Request(url, data, method=http_request_method)
     #Check if defined extra headers.
     headers.do_check(request)
-    payload = checks.newline_fixation(payload)
+    payload = checks.normalize_newlines(payload)
     # if settings.CUSTOM_HEADER_VALUE in settings.CUSTOM_HEADER_VALUE.replace(settings.INJECT_TAG, ""):
     #   request.add_header(settings.CUSTOM_HEADER_NAME, settings.CUSTOM_HEADER_VALUE.replace(settings.INJECT_TAG, "").replace(settings.CUSTOM_HEADER_VALUE, payload))
     # else:

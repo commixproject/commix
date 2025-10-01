@@ -644,32 +644,34 @@ def ignore_google_analytics_cookie(cookie):
     return True
 
 """
-Payload new line fixation
+Adapt newline characters in the payload depending on injection settings and OS.
 """
-def payload_newline_fixation(payload):
-  # New line fixation
-  if any([settings.USER_AGENT_INJECTION, settings.REFERER_INJECTION, settings.HOST_INJECTION, settings.CUSTOM_HEADER_INJECTION]):
-    payload = payload.replace("\n",";")
-  else:
-    if settings.TARGET_OS != settings.OS.WINDOWS:
-      payload = payload.replace("\n","%0d")
+def sanitize_payload_newlines(payload):
+  if (
+    settings.USER_AGENT_INJECTION
+    or settings.REFERER_INJECTION
+    or settings.HOST_INJECTION
+    or settings.CUSTOM_HEADER_INJECTION
+  ):
+    return payload.replace("\n", ";")
+
+  if settings.TARGET_OS != settings.OS.WINDOWS:
+    return payload.replace("\n", "%0d")
+
   return payload
 
-
 """
-Fix for %0a, %0d%0a separators
+Normalize newline sequences (CRLF, CR, LF) into lowercase URL-encoded form.
 """
-def newline_fixation(payload):
+def normalize_newlines(payload):
   payload = _urllib.parse.unquote(payload)
 
   for seq in [settings.END_LINE.CRLF, settings.END_LINE.CR, settings.END_LINE.LF]:
     encoded = _urllib.parse.quote(seq)
-    # raw newlines to lowercase encoding
     payload = payload.replace(seq, encoded.lower())
-    # uppercase URL-encoded to lowercase
     payload = payload.replace(encoded.upper(), encoded.lower())
 
-    return payload
+  return payload
 
 """
 Page enc/decoding

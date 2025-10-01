@@ -147,7 +147,7 @@ def decision_alter_shell(separator, TAG, output_length, timesec, http_request_me
     if settings.CUSTOM_INJECTION_MARKER:
       payload = payload + separator
 
-  payload = checks.payload_newline_fixation(payload)
+  payload = checks.sanitize_payload_newlines(payload)
 
   return payload
 
@@ -283,7 +283,7 @@ def cmd_execution_alter_shell(separator, cmd, output_length, timesec, http_reque
     if settings.CUSTOM_INJECTION_MARKER:
       payload = payload + separator
 
-  return checks.payload_newline_fixation(payload)
+  return checks.sanitize_payload_newlines(payload)
 
 """
 Get the execution output, of shell execution.
@@ -423,7 +423,7 @@ def get_char_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, http
     if settings.CUSTOM_INJECTION_MARKER:
       payload = payload + separator
 
-  payload = checks.payload_newline_fixation(payload)
+  payload = checks.sanitize_payload_newlines(payload)
 
   return payload
 
@@ -546,6 +546,6 @@ def fp_result_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, htt
     if settings.CUSTOM_INJECTION_MARKER:
       payload = payload + separator
 
-  return checks.payload_newline_fixation(payload)
+  return checks.sanitize_payload_newlines(payload)
 
 # eof
