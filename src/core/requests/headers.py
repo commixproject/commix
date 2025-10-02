@@ -150,6 +150,28 @@ def check_http_traffic(request):
     """
     Print HTTP request headers.
     """
+    def __init__(self, debuglevel=0, context=None, check_hostname=None):
+      """
+      Initialize connection_handler with proper SSL context.
+
+      Fixes issue #127: AttributeError: connection_handler instance has no attribute '_context'
+      The HTTPSHandler parent class requires _context attribute for SSL connections.
+      """
+      # Use unverified SSL context if none provided (already configured at module level)
+      if context is None:
+        try:
+          context = ssl._create_unverified_context()
+        except AttributeError:
+          # Legacy Python that doesn't have _create_unverified_context
+          context = None
+
+      # Initialize HTTPSHandler with SSL context
+      _urllib.request.HTTPSHandler.__init__(self, debuglevel=debuglevel,
+                                           context=context,
+                                           check_hostname=check_hostname)
+      # Initialize HTTPHandler
+      _urllib.request.HTTPHandler.__init__(self, debuglevel=debuglevel)
+
     def print_http_response(self):
       settings.TOTAL_OF_REQUESTS = settings.TOTAL_OF_REQUESTS + 1
       if settings.VERBOSITY_LEVEL >= 2 or menu.options.traffic_file:
