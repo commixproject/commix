@@ -856,6 +856,9 @@ def escaped_cmd(cmd):
 Removing the first and/or last line of the html content (in case there are/is empty).
 """
 def remove_empty_lines(content):
+  # Handle empty content to prevent IndexError
+  if not content:
+    return content
   try:
     if content[0] == "\n":
       content = content[1:content.rfind("\n")]
