@@ -34,19 +34,40 @@ from src.thirdparty.colorama import Fore, Back, Style, init
 """
 
 """
-Directory creation
+Directory creation with fallback to temporary directory on permission errors
 """
 def path_creation(path):
   if not os.path.exists(path):
     try:
       os.mkdir(path)
     except OSError as err_msg:
-      try:
-        error_msg = str(err_msg).split("] ")[1] + "."
-      except IndexError:
-        error_msg = str(err_msg) + "."
-      settings.print_data_to_stdout(settings.print_critical_msg(error_msg))
-      raise SystemExit()
+      # Check if it's a permission error (errno 13)
+      if err_msg.errno == 13:
+        try:
+          error_msg = str(err_msg).split("] ")[1] + "."
+        except IndexError:
+          error_msg = str(err_msg) + "."
+        settings.print_data_to_stdout(settings.print_critical_msg(error_msg))
+
+        # Try to create a temporary directory as fallback
+        try:
+          temp_path = tempfile.mkdtemp(prefix=settings.APPLICATION)
+          warn_msg = "Using temporary directory '" + temp_path + "' instead."
+          settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+          return temp_path
+        except (OSError, RuntimeError):
+          error_msg = "Unable to create temporary directory."
+          settings.print_data_to_stdout(settings.print_critical_msg(error_msg))
+          raise SystemExit()
+      else:
+        # For non-permission errors, exit as before
+        try:
+          error_msg = str(err_msg).split("] ")[1] + "."
+        except IndexError:
+          error_msg = str(err_msg) + "."
+        settings.print_data_to_stdout(settings.print_critical_msg(error_msg))
+        raise SystemExit()
+  return path
 
 """
 Logs filename creation.
@@ -75,7 +96,11 @@ def logs_filename_creation(url):
           common.unhandled_exception()
   else:
     output_dir = settings.OUTPUT_DIR
-    path_creation(os.path.dirname(output_dir))
+    # Use the returned path (original or fallback)
+    fallback_path = path_creation(os.path.dirname(output_dir))
+    if fallback_path != os.path.dirname(output_dir):
+      # Fallback was used, update output_dir
+      output_dir = fallback_path + "/"
 
   # Ensure path ends with OS-specific separator
   output_dir = os.path.join(output_dir, '')
@@ -90,7 +115,11 @@ def create_log_file(url, output_dir):
   host = _urllib.parse.urlparse(url).netloc.replace(":","_") + "/"
   logs_path = output_dir + host
 
-  path_creation(logs_path)
+  # Use the returned path (original or fallback)
+  fallback_path = path_creation(logs_path)
+  if fallback_path != logs_path:
+    # Fallback was used, update logs_path
+    logs_path = fallback_path + "/"
 
   # Create cli history file if does not exist.
   settings.CLI_HISTORY = logs_path + "cli_history"
