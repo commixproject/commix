@@ -236,7 +236,7 @@ def check_http_traffic(request):
       response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
     code = response.getcode()
     response_headers = response.info()
-    page = checks.page_encoding(response, action="encode")
+    page = checks.process_page_content(response, action="encode")
     response_headers[settings.URI_HTTP_HEADER] = response.geturl()
     response_headers = str(response_headers).strip("\n")
     # Handle server-set cookies.
@@ -257,7 +257,7 @@ def check_http_traffic(request):
     try:
       if getattr(err, 'fp', None) is None:
         raise AttributeError
-      page = checks.page_encoding(err, action="encode")
+      page = checks.process_page_content(err, action="encode")
     except Exception:
       page = ''
     response_headers = err.info()

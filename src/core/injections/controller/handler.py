@@ -566,7 +566,7 @@ def do_results_based_proccess(url, timesec, filename, http_request_method, injec
                   if type(response) is bool:
                     html_data = ""
                   else:
-                    html_data = checks.page_encoding(response, action="decode")
+                    html_data = checks.process_page_content(response, action="decode")
                   shell = re.findall(r"" + TAG + "", str(html_data))
                   if len(shell) == 0 :
                     raise _urllib.error.HTTPError(url, int(settings.NOT_FOUND_ERROR), 'Error', {}, None)

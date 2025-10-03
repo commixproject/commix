@@ -555,7 +555,7 @@ def cmd_exec(url, cmd, cve, check_header, filename):
         response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
       if check_header == settings.USER_AGENT:
         menu.options.agent = default_user_agent  
-      shell = checks.page_encoding(response, action="decode").rstrip().replace('\n',' ')
+      shell = checks.process_page_content(response, action="decode").rstrip().replace('\n',' ')
       shell = re.findall(r"" + TAG + "(.*)" + TAG, shell)
       shell = ''.join(shell)
       return shell, payload

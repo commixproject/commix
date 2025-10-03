@@ -469,7 +469,7 @@ def injection_test_results(response, TAG, randvcalc, technique):
     except:  # Python 2
       unescape = _html_parser.HTMLParser().unescape
     # Check the execution results
-    html_data = checks.page_encoding(response, action="decode")
+    html_data = checks.process_page_content(response, action="decode")
     html_data = html_data.replace("\n",settings.SINGLE_WHITESPACE)
     # cleanup string / unescape html to string
     html_data = _urllib.parse.unquote(html_data)
@@ -483,7 +483,7 @@ def injection_test_results(response, TAG, randvcalc, technique):
     if len(shell) > 1:
       shell = shell[0]
   else:
-    html_data = checks.page_encoding(response, action="decode")
+    html_data = checks.process_page_content(response, action="decode")
     html_data = re.sub("\n", settings.SINGLE_WHITESPACE, html_data)
     if settings.SKIP_CALC:
       shell = re.findall(r"" + TAG + settings.SINGLE_WHITESPACE + TAG + settings.SINGLE_WHITESPACE + TAG + settings.SINGLE_WHITESPACE , html_data)
@@ -506,7 +506,7 @@ def injection_results(response, TAG, cmd, technique, url, OUTPUT_TEXTFILE, times
     false_result = False
     try:
       # Grab execution results
-      html_data = checks.page_encoding(response, action="decode")
+      html_data = checks.process_page_content(response, action="decode")
       html_data = html_data.replace("\n",settings.SINGLE_WHITESPACE)
       # cleanup string / unescape html to string
       html_data = _urllib.parse.unquote(html_data)
@@ -547,7 +547,7 @@ def injection_results(response, TAG, cmd, technique, url, OUTPUT_TEXTFILE, times
   elif technique == settings.INJECTION_TECHNIQUE.DYNAMIC_CODE:
     new_line = ''.join(random.choice(string.ascii_uppercase) for i in range(6))
     # Grab execution results
-    html_data = checks.page_encoding(response, action="decode")
+    html_data = checks.process_page_content(response, action="decode")
     html_data = re.sub("\n", new_line, html_data)
     shell = re.findall(r"" + TAG + new_line + TAG + "(.*)" + TAG + new_line + TAG + "", html_data)
     try:
@@ -567,7 +567,7 @@ def injection_results(response, TAG, cmd, technique, url, OUTPUT_TEXTFILE, times
       shell = ""
     else:
       try:
-        shell = checks.page_encoding(response, action="encode").rstrip().lstrip()
+        shell = checks.process_page_content(response, action="encode").rstrip().lstrip()
         #shell = [newline.replace("\n",settings.SINGLE_WHITESPACE) for newline in shell]
         if settings.TARGET_OS == settings.OS.WINDOWS:
           shell = [newline.replace(settings.END_LINE.CR, "") for newline in shell]

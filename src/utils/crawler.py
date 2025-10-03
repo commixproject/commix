@@ -135,7 +135,7 @@ def sitemap(url, http_request_method):
         url = url + "/"
       url = _urllib.parse.urljoin(url, settings.SITEMAP_XML_FILE)
     response = request(url, http_request_method)
-    content = checks.page_encoding(response, action="decode")
+    content = checks.process_page_content(response, action="decode")
     for match in re.finditer(r"<loc>\s*([^<]+)", content or ""):
       url = match.group(1).strip()
       if url not in sitemap_loc:
@@ -245,7 +245,7 @@ def do_process(url, http_request_method):
   # Grab the crawled hrefs.
   try:
     response = request(url, http_request_method)
-    content = checks.page_encoding(response, action="decode")
+    content = checks.process_page_content(response, action="decode")
     match = re.search(r"(?si)<html[^>]*>(.+)</html>", content)
     if match:
       content = "<html>%s</html>" % match.group(1)

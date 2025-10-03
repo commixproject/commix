@@ -27,6 +27,7 @@ import gzip
 import zlib
 import traceback
 import subprocess
+import contextlib
 from glob import glob
 from src.utils import common
 from src.utils import logs
@@ -674,45 +675,53 @@ def normalize_newlines(payload):
   return payload
 
 """
-Page enc/decoding
+Process HTTP response content: handle decompression and encode/decode page content.
 """
-def page_encoding(response, action):
+def process_page_content(response, action):
   try:
     page = response.read()
   except _http_client.IncompleteRead as err_msg:
     requests.request_failed(err_msg)
     page = err_msg.partial
-  if response.info().get('Content-Encoding') in ("gzip", "x-gzip", "deflate"):
+
+  # Handle compressed content
+  content_encoding = response.info().get('Content-Encoding')
+  if content_encoding in ("gzip", "x-gzip", "deflate"):
     try:
-      if response.info().get('Content-Encoding') == 'deflate':
-        data = io.BytesIO(zlib.decompress(page, -15))
-      elif response.info().get('Content-Encoding') == 'gzip' or \
-           response.info().get('Content-Encoding') == 'x-gzip':
-        data = gzip.GzipFile("", "rb", 9, io.BytesIO(page))
-      page = data.read()
+      if content_encoding == 'deflate':
+        # zlib decompression; -15 for raw deflate
+        page = zlib.decompress(page, -15)
+      else:  # gzip / x-gzip
+        with contextlib.closing(gzip.GzipFile(fileobj=io.BytesIO(page), mode='rb')) as gz:
+          page = gz.read()
       settings.PAGE_COMPRESSION = True
-    except Exception as e:
-      if settings.PAGE_COMPRESSION is None:
-        warn_msg = "Turning off page compression."
-        settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
-        settings.PAGE_COMPRESSION = False
-  _ = False
+    except (zlib.error, OSError, EOFError) as e:
+      # Only catch relevant decompression errors
+      warn_msg = "Page decompression failed, turning off page compression."
+      settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+      settings.PAGE_COMPRESSION = False
+
+  # Encode or decode page content
+  error_occurred = False
   try:
-    if action == "encode" and type(page) == str:
+    if action == "encode" and isinstance(page, str):
       return page.encode(settings.DEFAULT_CODEC, errors="replace")
     else:
       return page.decode(settings.DEFAULT_CODEC, errors="replace")
   except (UnicodeEncodeError, UnicodeDecodeError) as err:
     err_msg = "The " + str(err).split(":")[0] + ". "
-    _ = True
+    error_occurred = True
   except (LookupError, TypeError) as err:
     err_msg = "The '" + settings.DEFAULT_CODEC + "' is " + str(err).split(":")[0] + ". "
-    _ = True
-    pass
-  if _:
-    err_msg += "You are advised to rerun with"
-    err_msg += ('out', '')[menu.options.codec == None] + " option '--codec'."
-    settings.print_data_to_stdout(settings.print_critical_msg(str(err_msg)))
+    error_occurred = True
+
+  # If there was an error, advise the user
+  if error_occurred:
+    err_msg += "You are advised to rerun with "
+    if menu.options.codec is None:
+      err_msg += "out "
+    err_msg += "option '--codec'."
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
 """

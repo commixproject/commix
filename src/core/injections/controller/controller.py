@@ -158,7 +158,7 @@ def command_injection_heuristic_basic(url, http_request_method, check_parameter,
           _ = _ + 1
           response, url = heuristic_request(url, http_request_method, check_parameter, payload, whitespace)
           if type(response) is not bool and response is not None:
-            html_data = checks.page_encoding(response, action="decode")
+            html_data = checks.process_page_content(response, action="decode")
             match = re.search(settings.BASIC_COMMAND_INJECTION_RESULT, html_data)
             if match:
               settings.IDENTIFIED_COMMAND_INJECTION = True
@@ -195,7 +195,7 @@ def code_injections_heuristic_basic(url, http_request_method, check_parameter, t
       for payload in settings.PHPINFO_CHECK_PAYLOADS:
         response, url = heuristic_request(url, http_request_method, check_parameter, payload, whitespace)
         if type(response) is not bool and response is not None:
-          html_data = checks.page_encoding(response, action="decode")
+          html_data = checks.process_page_content(response, action="decode")
           match = re.search(settings.CODE_INJECTION_PHPINFO, html_data)
           if match:
             technique = technique + " (possible PHP version: '" + match.group(1) + "')"
