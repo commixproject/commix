@@ -162,8 +162,12 @@ def examine_request(request, url):
         settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
         raise SystemExit()
 
+      # Explicitly handle socket errors (Issue #160: Connection reset by peer)
+      except (SocketError, _urllib.error.URLError, _urllib.error.HTTPError, _http_client.IncompleteRead, _http_client.BadStatusLine) as err_msg:
+        return requests.request_failed(err_msg)
+
   except Exception as err_msg:
-    requests.request_failed(err_msg)
+    return requests.request_failed(err_msg)
 
 """
 Check internet connection before assessing the target.

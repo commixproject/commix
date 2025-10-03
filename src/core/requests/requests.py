@@ -318,6 +318,29 @@ def request_failed(err_msg):
     else:
       return False
 
+  # Handle socket-level errors (Issue #160: Connection reset by peer)
+  elif isinstance(err_msg, SocketError) or re.search(r"(connection\s*reset|reset\s*by\s*peer)", str(error_msg), re.IGNORECASE):
+    settings.MAX_RETRIES = 1
+    err = "Connection to the target URL was reset by the remote host"
+    if menu.options.tor:
+      err += " or Tor HTTP proxy"
+    elif menu.options.proxy or menu.options.ignore_proxy:
+      err += " or proxy"
+    err = err + " (Reason: " + str(error_msg) + "). "
+    err += "This may indicate network instability, firewall interference, or the target dropping connections. "
+    if menu.options.tor:
+      err += "Please make sure that you have "
+      err += "Tor bundle (https://www.torproject.org/download/) or Tor and Privoxy installed and setup "
+      err += "so you could be able to successfully use switch '--tor'. "
+    if settings.MULTI_TARGETS or settings.CRAWLING:
+      err = err + "Skipping to the next target."
+    error_msg = err
+    settings.print_data_to_stdout(settings.print_critical_msg(error_msg))
+    if not settings.CRAWLING:
+      raise SystemExit()
+    else:
+      return False
+
   elif re.search(r"(connection\s*refused|timed?\s*out)", str(error_msg), re.IGNORECASE):
     settings.MAX_RETRIES = 1
     err = "Unable to connect to the target URL"
