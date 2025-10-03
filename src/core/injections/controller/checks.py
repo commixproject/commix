@@ -867,6 +867,9 @@ def escaped_cmd(cmd):
 Removing the first and/or last line of the html content (in case there are/is empty).
 """
 def remove_empty_lines(content):
+  # Handle empty content to prevent IndexError
+  if not content:
+    return content
   try:
     if content[0] == "\n":
       content = content[1:content.rfind("\n")]
@@ -3319,6 +3322,72 @@ check / set uripath option for reverse TCP connection
 def check_uripath(uripath):
   settings.URIPATH = uripath
   settings.print_data_to_stdout("URIPATH => " + settings.URIPATH)
+  return True
+
+"""
+Helper functions for efficient file size detection (Issue #783 improvement)
+"""
+
+"""
+Extract filename from file read command
+"""
+def extract_filename_from_cmd(cmd):
+  """Extract the filename from a file read command like 'cat /etc/passwd'"""
+  import re
+  # For Unix commands like 'cat /path/to/file'
+  if settings.TARGET_OS != settings.OS.WINDOWS:
+    if 'cat ' in cmd:
+      # Extract filename after 'cat '
+      match = re.search(r'cat\s+([^\s;|&<>]+)', cmd)
+      if match:
+        return match.group(1)
+    elif settings.FILE_READ in cmd:
+      # Extract filename after FILE_READ command
+      return cmd.replace(settings.FILE_READ, '').strip()
+  else:
+    # For Windows commands
+    if 'type ' in cmd:
+      match = re.search(r'type\s+([^\s;|&<>]+)', cmd)
+      if match:
+        return match.group(1)
+  
+  # Fallback: assume the last part is the filename
+  parts = cmd.split()
+  if len(parts) >= 2:
+    return parts[-1]
+  
+  return None
+
+"""
+Check if command is a file read operation that can benefit from efficient size detection
+"""
+def is_file_read_operation(cmd):
+  """Check if the command is reading a file that can benefit from efficient size detection"""
+  if settings.TARGET_OS != settings.OS.WINDOWS:
+    file_read_patterns = ['cat ', 'head ', 'tail ', settings.FILE_READ]
+  else:
+    file_read_patterns = ['type ', settings.WIN_FILE_READ]
+  
+  return any(pattern in cmd for pattern in file_read_patterns)
+
+"""
+Check if efficient file size detection should be used based on settings and command
+"""
+def should_use_efficient_file_detection(cmd):
+  """Determine if efficient file size detection should be used for this command"""
+  # Only use for file read operations
+  if not is_file_read_operation(cmd):
+    return False
+  
+  # Only use for time-based attacks where it provides benefit
+  if not settings.TIME_RELATED_ATTACK:
+    return False
+  
+  # Can add more conditions here like:
+  # - Check if stat command is available
+  # - Check if file size is likely to be large
+  # - User preference settings
+  
   return True
   
 # eof
