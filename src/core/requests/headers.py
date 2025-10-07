@@ -131,7 +131,7 @@ def check_http_traffic(request):
   class connection(http_client):
     def send(self, req):
       headers = req.decode()
-      request_http_headers = str(headers).split("\r\n")
+      request_http_headers = str(headers).split(settings.END_LINE.CRLF)
       unique_request_http_headers = []
       [unique_request_http_headers.append(item) for item in request_http_headers if item not in unique_request_http_headers]
       request_http_headers = [x for x in unique_request_http_headers if x]

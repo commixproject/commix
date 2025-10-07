@@ -2709,7 +2709,7 @@ def check_file_to_write():
 
   if os.path.isfile(file_to_write):
     with open(file_to_write, 'r') as content_file:
-      content = [line.replace("\r\n", "\n").replace("\r", "\n").replace("\n", settings.SINGLE_WHITESPACE) for line in content_file]
+      content = [line.replace(settings.END_LINE.CRLF, "\n").replace("\r", "\n").replace("\n", settings.SINGLE_WHITESPACE) for line in content_file]
     content = "".join(str(p) for p in content).replace("'", "\"")
     if settings.TARGET_OS == settings.OS.WINDOWS:
       import base64
