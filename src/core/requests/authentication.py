@@ -155,7 +155,7 @@ def http_auth_cracker(url, realm, http_request_method):
         if settings.VERBOSITY_LEVEL == 0:
           info_msg = "Testing for valid HTTP authentication credentials."
           info_msg += float_percent
-          settings.print_data_to_stdout("\r\r" + settings.print_info_msg(info_msg))
+          settings.print_data_to_stdout((settings.END_LINE.CR * 2) + settings.print_info_msg(info_msg))
           
         if found:
           if not settings.LOAD_SESSION:
