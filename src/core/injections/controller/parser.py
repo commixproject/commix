@@ -81,7 +81,7 @@ def logfile_parser():
     if menu.options.requestfile or menu.options.logfile:
       c = 1
       request_headers = []
-      request_lines = request.split("\n")
+      request_lines = request.split(settings.END_LINE.LF)
       while c < len(request_lines) and len(request_lines[c]) > 0:
         x = request_lines[c].find(':')
         header_name = request_lines[c][:x].title()

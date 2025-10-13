@@ -654,10 +654,10 @@ def sanitize_payload_newlines(payload):
     or settings.HOST_INJECTION
     or settings.CUSTOM_HEADER_INJECTION
   ):
-    return payload.replace("\n", ";")
+    return payload.replace(settings.END_LINE.LF, ";")
 
   if settings.TARGET_OS != settings.OS.WINDOWS:
-    return payload.replace("\n", "%0d")
+    return payload.replace(settings.END_LINE.LF, "%0d")
 
   return payload
 
@@ -812,7 +812,7 @@ def url_decode(payload):
   rep = {
           "%20": " ",
           "%2B": "+",
-          "\n": "\\n"
+          settings.END_LINE.LF: "\\n"
         }
   rep = dict((re.escape(k), v) for k, v in rep.items())
   pattern = re.compile("|".join(rep.keys()))
@@ -868,10 +868,10 @@ Removing the first and/or last line of the html content (in case there are/is em
 """
 def remove_empty_lines(content):
   try:
-    if content[0] == "\n":
-      content = content[1:content.rfind("\n")]
-    if content[-1] == "\n":
-      content = content[:content.rfind("\n")]
+    if content[0] == settings.END_LINE.LF:
+      content = content[1:content.rfind(settings.END_LINE.LF)]
+    if content[-1] == settings.END_LINE.LF:
+      content = content[:content.rfind(settings.END_LINE.LF)]
   except IndexError:
     pass
   return content
@@ -2215,7 +2215,7 @@ def print_ps_version(ps_version, filename, _):
     # Add infos to logs file.
     with open(filename, 'a', encoding=settings.DEFAULT_CODEC) as output_file:
       if not menu.options.no_logging:
-        info_msg = "Powershell version: " + ps_version + "\n"
+        info_msg = "Powershell version: " + ps_version + settings.END_LINE.LF
         output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
   except ValueError:
     warn_msg = "Failed to identify the version of Powershell, "
@@ -2236,7 +2236,7 @@ def print_hostname(shell, filename, _):
     # Add infos to logs file.
     with open(filename, 'a', encoding=settings.DEFAULT_CODEC) as output_file:
       if not menu.options.no_logging:
-        info_msg = info_msg + "\n"
+        info_msg = info_msg + settings.END_LINE.LF
         output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
   else:
     warn_msg = "Failed to identify the hostname."
@@ -2254,7 +2254,7 @@ def print_current_user(cu_account, filename, _):
     # Add infos to logs file.
     with open(filename, 'a', encoding=settings.DEFAULT_CODEC) as output_file:
       if not menu.options.no_logging:
-        info_msg = info_msg + "\n"
+        info_msg = info_msg + settings.END_LINE.LF
         output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
   else:
     warn_msg = "Failed to fetch the current user."
@@ -2277,7 +2277,7 @@ def print_current_user_privs(shell, filename, _):
   # Add infos to logs file.
   with open(filename, 'a', encoding=settings.DEFAULT_CODEC) as output_file:
     if not menu.options.no_logging:
-      info_msg = info_msg + "\n"
+      info_msg = info_msg + settings.END_LINE.LF
       output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
 """
 Print OS info
@@ -2291,7 +2291,7 @@ def print_os_info(target_os, target_arch, filename, _):
     # Add infos to logs file.
     with open(filename, 'a', encoding=settings.DEFAULT_CODEC) as output_file:
       if not menu.options.no_logging:
-        info_msg = info_msg + "\n"
+        info_msg = info_msg + settings.END_LINE.LF
         output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
   else:
     warn_msg = "Failed to fetch underlying operating system information."
@@ -2371,7 +2371,7 @@ def print_users(sys_users, filename, _, separator, TAG, cmd, prefix, suffix, whi
             with open(filename, 'a', encoding=settings.DEFAULT_CODEC) as output_file:
               if not menu.options.no_logging:
                 if count == 1 :
-                  output_file.write("\n")
+                  output_file.write(settings.END_LINE.LF)
                 output_file.write("(" +str(count)+ ") '" + sys_users_list[user] + is_privileged + "'\n" )
       else:
         # settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
@@ -2391,7 +2391,7 @@ def print_users(sys_users, filename, _, separator, TAG, cmd, prefix, suffix, whi
       if sys_users:
         sys_users = "".join(str(p) for p in sys_users).strip()
         if len(sys_users.split(settings.SINGLE_WHITESPACE)) <= 1 :
-          sys_users = sys_users.split("\n")
+          sys_users = sys_users.split(settings.END_LINE.LF)
         else:
           sys_users = sys_users.split(settings.SINGLE_WHITESPACE)
         # Check for appropriate '/etc/passwd' format.
@@ -2458,8 +2458,8 @@ def print_users(sys_users, filename, _, separator, TAG, cmd, prefix, suffix, whi
                 with open(filename, 'a', encoding=settings.DEFAULT_CODEC) as output_file:
                   if not menu.options.no_logging:
                     if count == 1 :
-                      output_file.write("\n")
-                    output_file.write("(" +str(count)+ ") '" + fields[0] + "' " + is_privileged_nh + "(uid=" + fields[1] + "). Home directory is in '" + fields[2] + "'.\n" )
+                      output_file.write(settings.END_LINE.LF)
+                    output_file.write("(" +str(count)+ ") '" + fields[0] + "' " + is_privileged_nh + "(uid=" + fields[1] + "). Home directory is in '" + fields[2] + "'." + settings.END_LINE.LF)
               except ValueError:
                 if count == 1 :
                   warn_msg = "It seems '" + settings.PASSWD_FILE + "' file is not in the "
@@ -2488,7 +2488,7 @@ Print users enumeration.
 def print_passes(sys_passes, filename, _, alter_shell):
   if sys_passes == "":
     sys_passes = settings.SINGLE_WHITESPACE
-    sys_passes = sys_passes.replace(settings.SINGLE_WHITESPACE, "\n").split()
+    sys_passes = sys_passes.replace(settings.SINGLE_WHITESPACE, settings.END_LINE.LF).split()
     if len(sys_passes) != 0 :
       if settings.VERBOSITY_LEVEL == 0 and _:
         settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
@@ -2512,8 +2512,8 @@ def print_passes(sys_passes, filename, _, alter_shell):
               with open(filename, 'a', encoding=settings.DEFAULT_CODEC) as output_file:
                 if not menu.options.no_logging:
                   if count == 1 :
-                    output_file.write("\n")
-                  output_file.write("(" +str(count)+ ") " + fields[0] + " : " + fields[1] + "\n")
+                    output_file.write(settings.END_LINE.LF)
+                  output_file.write("(" +str(count)+ ") " + fields[0] + " : " + fields[1] + settings.END_LINE.LF)
         # Check for appropriate '/etc/shadow' format.
         except IndexError:
           if count == 1 :
@@ -2539,7 +2539,7 @@ def print_single_os_cmd(cmd, output, filename):
     try:
       with open(filename, 'a', encoding=settings.DEFAULT_CODEC) as output_file:
         if not menu.options.no_logging:
-          output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + "User-supplied command " + _ + ": " + str(output.encode(settings.DEFAULT_CODEC).decode()) + "\n")
+          output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + "User-supplied command " + _ + ": " + str(output.encode(settings.DEFAULT_CODEC).decode()) + settings.END_LINE.LF)
     except TypeError:
       pass
   else:
@@ -2672,7 +2672,7 @@ def file_read_status(shell, file_to_read, filename):
     with open(filename, 'a', encoding=settings.DEFAULT_CODEC) as output_file:
       if not menu.options.no_logging:
         info_msg = "Extracted content of the file '"
-        info_msg += file_to_read + "' : " + shell + "\n"
+        info_msg += file_to_read + "' : " + shell + settings.END_LINE.LF
         output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
   else:
     warn_msg = "It seems you do not have permission "
@@ -2709,7 +2709,7 @@ def check_file_to_write():
 
   if os.path.isfile(file_to_write):
     with open(file_to_write, 'r') as content_file:
-      content = [line.replace(settings.END_LINE.CRLF, "\n").replace(settings.END_LINE.CR, "\n").replace("\n", settings.SINGLE_WHITESPACE) for line in content_file]
+      content = [line.replace(settings.END_LINE.CRLF, settings.END_LINE.LF).replace(settings.END_LINE.CR, settings.END_LINE.LF).replace(settings.END_LINE.LF, settings.SINGLE_WHITESPACE) for line in content_file]
     content = "".join(str(p) for p in content).replace("'", "\"")
     if settings.TARGET_OS == settings.OS.WINDOWS:
       import base64
@@ -3152,7 +3152,7 @@ def msf_launch_msg(output):
     settings.print_data_to_stdout(settings.print_info_msg(info_msg))
     info_msg = "Once the loading is done, press here any key to continue..."
     settings.print_data_to_stdout(settings.print_info_msg(info_msg))
-    sys.stdin.readline().replace("\n", "")
+    sys.stdin.readline().replace(settings.END_LINE.LF, "")
     # Remove the ouput file.
     os.remove(output)
 

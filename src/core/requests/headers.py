@@ -68,21 +68,21 @@ def http_response_content(content):
     settings.print_data_to_stdout(settings.print_http_response_content(content))
   if menu.options.traffic_file:
     logs.log_traffic(content)
-    logs.log_traffic("\n\n" + "#" * 77 + "\n\n")
+    logs.log_traffic(settings.END_LINE.LF * 2 + "#" * 77 + settings.END_LINE.LF * 2)
 
 """
 Checking the HTTP response headers.
 """
 def http_response(headers, code):
-  response_http_headers = str(headers).split("\n")
+  response_http_headers = str(headers).split(settings.END_LINE.LF)
   for header in response_http_headers:
     if len(header) > 1:
       if settings.VERBOSITY_LEVEL >= 3:
         settings.print_data_to_stdout(settings.print_traffic(header))
       if menu.options.traffic_file:
-        logs.log_traffic("\n" + header)
+        logs.log_traffic(settings.END_LINE.LF + header)
   if menu.options.traffic_file:
-    logs.log_traffic("\n\n")
+    logs.log_traffic(settings.END_LINE.LF * 2)
 
 """
 Print HTTP response headers / Body.
@@ -103,7 +103,7 @@ def print_http_response(response_headers, code, page):
       settings.print_data_to_stdout(settings.print_response_msg(resp_msg))
     if menu.options.traffic_file:
       resp_msg = "HTTP response [#" + str(settings.TOTAL_OF_REQUESTS) + "] (" + str(code) + "):"
-      logs.log_traffic("\n" + resp_msg)
+      logs.log_traffic(settings.END_LINE.LF + resp_msg)
     http_response(response_headers, code)
   if settings.VERBOSITY_LEVEL >= 4 or menu.options.traffic_file:
     if settings.VERBOSITY_LEVEL >= 4:
@@ -143,7 +143,7 @@ def check_http_traffic(request):
         if settings.VERBOSITY_LEVEL >= 2:
           settings.print_data_to_stdout(settings.print_traffic(header))
         if menu.options.traffic_file:
-          logs.log_traffic("\n" + header)
+          logs.log_traffic(settings.END_LINE.LF + header)
       http_client.send(self, req)
 
   class connection_handler(_urllib.request.HTTPSHandler, _urllib.request.HTTPHandler, object):
@@ -238,7 +238,7 @@ def check_http_traffic(request):
     response_headers = response.info()
     page = checks.process_page_content(response, action="encode")
     response_headers[settings.URI_HTTP_HEADER] = response.geturl()
-    response_headers = str(response_headers).strip("\n")
+    response_headers = str(response_headers).strip(settings.END_LINE.LF)
     # Handle server-set cookies.
     if not menu.options.drop_set_cookie:
       checks.handle_server_cookies(response)
@@ -362,7 +362,7 @@ def do_check(request):
     if menu.options.auth_type.lower() == settings.AUTH_TYPE.BEARER:
       request.add_header(settings.AUTHORIZATION, "Bearer " + menu.options.auth_cred.strip())
     elif menu.options.auth_type.lower() == settings.AUTH_TYPE.BASIC:
-      b64_string = encodebytes(menu.options.auth_cred.encode(settings.DEFAULT_CODEC)).decode().replace('\n', '')
+      b64_string = encodebytes(menu.options.auth_cred.encode(settings.DEFAULT_CODEC)).decode().replace(settings.END_LINE.LF, '')
       request.add_header(settings.AUTHORIZATION, "Basic " + b64_string)
     elif menu.options.auth_type.lower() == settings.AUTH_TYPE.DIGEST:
       try:

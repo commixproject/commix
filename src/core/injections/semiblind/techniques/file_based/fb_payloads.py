@@ -67,10 +67,10 @@ def decision_alter_shell(separator, TAG, OUTPUT_TEXTFILE):
      settings.REFERER_INJECTION == True or \
      settings.HOST_INJECTION == True or \
      settings.CUSTOM_HEADER_INJECTION == True :
-    payload = payload.replace("\n", separator)
+    payload = payload.replace(settings.END_LINE.LF, separator)
   else:
     if settings.TARGET_OS != settings.OS.WINDOWS:
-      payload = payload.replace("\n","%0d")
+      payload = payload.replace(settings.END_LINE.LF,"%0d")
 
   return payload
 
@@ -130,10 +130,10 @@ def cmd_execution_alter_shell(separator, cmd, OUTPUT_TEXTFILE):
      settings.REFERER_INJECTION == True or \
      settings.HOST_INJECTION == True or \
      settings.CUSTOM_HEADER_INJECTION == True:
-    payload = payload.replace("\n", separator)
+    payload = payload.replace(settings.END_LINE.LF, separator)
   else:
     if settings.TARGET_OS != settings.OS.WINDOWS:
-      payload = payload.replace("\n","%0d")
+      payload = payload.replace(settings.END_LINE.LF,"%0d")
 
   return payload
 

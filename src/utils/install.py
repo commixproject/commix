@@ -108,7 +108,7 @@ def installer():
   try:
     with open(launcher_path, 'w') as f:
       f.write("#!/bin/bash\n")
-      f.write("cd " + app_install_path + " && ./" + settings.APPLICATION + ".py \"$@\"\n")
+      f.write("cd " + app_install_path + " && ./" + settings.APPLICATION + ".py \"$@\"" + settings.END_LINE.LF)
     subprocess.call("chmod +x " + launcher_path + settings.NO_OUTPUT, shell=True)
   except Exception as e:
     err_msg = "Failed to create launcher: " + str(e)

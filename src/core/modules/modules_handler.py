@@ -33,6 +33,6 @@ def load_modules(url, http_request_method, filename):
       # The shellshock handler
       shellshock.shellshock_handler(url, http_request_method, filename)
     except ImportError as err_msg:
-      settings.print_data_to_stdout("\n" + settings.print_critical_msg(err_msg))
+      settings.print_data_to_stdout(settings.END_LINE.LF + settings.print_critical_msg(err_msg))
       raise SystemExit()
     raise SystemExit()

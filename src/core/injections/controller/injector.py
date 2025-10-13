@@ -113,7 +113,7 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
     if settings.VERBOSITY_LEVEL == 0 :
       info_msg += ".. (" + str(percent) + ")"
     else:
-      info_msg +=  "\n"
+      info_msg +=  settings.END_LINE.LF
     if output_length > 1:
       settings.print_data_to_stdout(settings.END_LINE.CR + settings.print_info_msg(info_msg))
       
@@ -195,7 +195,7 @@ def results_based_injection(separator, TAG, cmd, prefix, suffix, whitespace, htt
     if settings.VERBOSITY_LEVEL != 0:
       _ = cmd
       if technique == settings.INJECTION_TECHNIQUE.FILE_BASED or technique == settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED:
-        payload_msg = payload.replace("\n", "\\n")
+        payload_msg = payload.replace(settings.END_LINE.LF, "\\n")
         if settings.COMMENT in payload_msg:
           payload = payload.split(settings.COMMENT)[0].strip()
           payload_msg = payload_msg.split(settings.COMMENT)[0].strip()
@@ -470,7 +470,7 @@ def injection_test_results(response, TAG, randvcalc, technique):
       unescape = _html_parser.HTMLParser().unescape
     # Check the execution results
     html_data = checks.process_page_content(response, action="decode")
-    html_data = html_data.replace("\n",settings.SINGLE_WHITESPACE)
+    html_data = html_data.replace(settings.END_LINE.LF,settings.SINGLE_WHITESPACE)
     # cleanup string / unescape html to string
     html_data = _urllib.parse.unquote(html_data)
     html_data = unescape(html_data)
@@ -484,7 +484,7 @@ def injection_test_results(response, TAG, randvcalc, technique):
       shell = shell[0]
   else:
     html_data = checks.process_page_content(response, action="decode")
-    html_data = re.sub("\n", settings.SINGLE_WHITESPACE, html_data)
+    html_data = re.sub(settings.END_LINE.LF, settings.SINGLE_WHITESPACE, html_data)
     if settings.SKIP_CALC:
       shell = re.findall(r"" + TAG + settings.SINGLE_WHITESPACE + TAG + settings.SINGLE_WHITESPACE + TAG + settings.SINGLE_WHITESPACE , html_data)
     else:
@@ -507,7 +507,7 @@ def injection_results(response, TAG, cmd, technique, url, OUTPUT_TEXTFILE, times
     try:
       # Grab execution results
       html_data = checks.process_page_content(response, action="decode")
-      html_data = html_data.replace("\n",settings.SINGLE_WHITESPACE)
+      html_data = html_data.replace(settings.END_LINE.LF,settings.SINGLE_WHITESPACE)
       # cleanup string / unescape html to string
       html_data = _urllib.parse.unquote(html_data)
       html_data = unescape(html_data)
@@ -548,14 +548,14 @@ def injection_results(response, TAG, cmd, technique, url, OUTPUT_TEXTFILE, times
     new_line = ''.join(random.choice(string.ascii_uppercase) for i in range(6))
     # Grab execution results
     html_data = checks.process_page_content(response, action="decode")
-    html_data = re.sub("\n", new_line, html_data)
+    html_data = re.sub(settings.END_LINE.LF, new_line, html_data)
     shell = re.findall(r"" + TAG + new_line + TAG + "(.*)" + TAG + new_line + TAG + "", html_data)
     try:
       if len(re.split(TAG  + "(.*)" + TAG, shell[0])) != 0:
         shell = re.findall(r"" + new_line + "(.*)" + new_line + "", \
                            re.split(TAG  + "(.*)" + TAG, \
                            re.split(TAG  + "(.*)" + TAG, shell[0])[0])[0])
-      shell = shell[0].replace(new_line, "\n").rstrip().lstrip()
+      shell = shell[0].replace(new_line, settings.END_LINE.LF).rstrip().lstrip()
     except IndexError:
       pass
 
@@ -568,7 +568,7 @@ def injection_results(response, TAG, cmd, technique, url, OUTPUT_TEXTFILE, times
     else:
       try:
         shell = checks.process_page_content(response, action="encode").rstrip().lstrip()
-        #shell = [newline.replace("\n",settings.SINGLE_WHITESPACE) for newline in shell]
+        #shell = [newline.replace(settings.END_LINE.LF,settings.SINGLE_WHITESPACE) for newline in shell]
         if settings.TARGET_OS == settings.OS.WINDOWS:
           shell = [newline.replace(settings.END_LINE.CR, "") for newline in shell]
           #shell = [space.strip() for space in shell]

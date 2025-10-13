@@ -65,8 +65,8 @@ def read_input(message, default=None, check_batch=True):
       return value
   try:
     value = None
-    if "\n" in message:
-      message += ("\n" if message.count("\n") > 1 else "")
+    if settings.END_LINE.LF in message:
+      message += (settings.END_LINE.LF if message.count(settings.END_LINE.LF) > 1 else "")
     elif len(message) == 0:
       return is_empty()
     if settings.ANSWERS:
@@ -171,7 +171,7 @@ def create_github_issue(err_msg, exc_msg):
 
   key = hashlib.md5(_).hexdigest()[:8]
 
-  bug_report =  "Bug Report: Unhandled exception \"" + str([i for i in exc_msg.split('\n') if i][-1]) + "\" " +  "(#" + key + ")"
+  bug_report =  "Bug Report: Unhandled exception \"" + str([i for i in exc_msg.split(settings.END_LINE.LF) if i][-1]) + "\" " +  "(#" + key + ")"
 
   while True:
     try:
@@ -191,7 +191,7 @@ def create_github_issue(err_msg, exc_msg):
       settings.print_data_to_stdout("")
       raise SystemExit()
 
-  err_msg = err_msg[err_msg.find("\n"):]
+  err_msg = err_msg[err_msg.find(settings.END_LINE.LF):]
   request = _urllib.request.Request(url="https://api.github.com/search/issues?q=" + \
         _urllib.parse.quote("repo:commixproject/commix" + settings.SINGLE_WHITESPACE + str(bug_report))
         )
@@ -224,7 +224,7 @@ def create_github_issue(err_msg, exc_msg):
 
   issue_url = re.search(r"https://github.com/commixproject/commix/issues/\d+", content.decode(settings.DEFAULT_CODEC) or "")
   if issue_url:
-    info_msg = "The created Github issue can been found at the address '" + str(issue_url.group(0)) + "'.\n"
+    info_msg = "The created Github issue can been found at the address '" + str(issue_url.group(0)) + "'." + settings.END_LINE.LF
     settings.print_data_to_stdout(settings.print_info_msg(info_msg))
   else:
     warn_msg = "Something went wrong while creating a Github issue."
@@ -292,14 +292,14 @@ def unhandled_exception():
     raise SystemExit()
 
   elif all(_ in exc_msg for _ in ("No such file", "_'")):
-    err_msg = "Corrupted installation detected ('" + exc_msg.strip().split('\n')[-1] + "'). "
+    err_msg = "Corrupted installation detected ('" + exc_msg.strip().split(settings.END_LINE.LF)[-1] + "'). "
     err_msg += "You should retrieve the latest (dev) version from official GitHub "
     err_msg += "repository at '" + settings.GIT_URL + "'."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
   elif "Invalid IPv6 URL" in exc_msg:
-    err_msg = "invalid URL ('" + exc_msg.strip().split('\n')[-1] + "')"
+    err_msg = "invalid URL ('" + exc_msg.strip().split(settings.END_LINE.LF)[-1] + "')"
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
@@ -355,13 +355,13 @@ def unhandled_exception():
     err_msg += "reproduce the bug. The "
     err_msg += "developers will try to reproduce the bug, fix it accordingly "
     err_msg += "and get back to you.\n"
-    err_msg += settings.APPLICATION.capitalize() + " version: " + settings.VERSION[1:] + "\n"
-    err_msg += "Python version: " + settings.PYTHON_VERSION + "\n"
-    err_msg += "Operating system: " + os.name + "\n"
-    err_msg += "Command line: " + re.sub(r".+?\bcommix\.py\b", "commix.py", " ".join(sys.argv)) + "\n"
+    err_msg += settings.APPLICATION.capitalize() + " version: " + settings.VERSION[1:] + settings.END_LINE.LF
+    err_msg += "Python version: " + settings.PYTHON_VERSION + settings.END_LINE.LF
+    err_msg += "Operating system: " + os.name + settings.END_LINE.LF
+    err_msg += "Command line: " + re.sub(r".+?\bcommix\.py\b", "commix.py", " ".join(sys.argv)) + settings.END_LINE.LF
     err_msg = mask_sensitive_data(err_msg)
     exc_msg = re.sub(r'".+?[/\\](\w+\.py)', r"\"\g<1>", exc_msg)
-    settings.print_data_to_stdout(settings.print_critical_msg(err_msg + "\n" + exc_msg.rstrip()))
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg + settings.END_LINE.LF + exc_msg.rstrip()))
     create_github_issue(err_msg, exc_msg[:])
 
 """

@@ -52,7 +52,7 @@ def revision_num():
       rev_num = match.group(0) if match else None
       info_msg += " the latest revision '" + str(rev_num[:7]) + "'."
     else:
-      settings.print_data_to_stdout(Fore.MAGENTA + "\n" + stdout + Style.RESET_ALL)
+      settings.print_data_to_stdout(Fore.MAGENTA + settings.END_LINE.LF + stdout + Style.RESET_ALL)
       end  = time.time()
       exec_time = int(end - start)
       info_msg = "Finished in " + time.strftime('%H:%M:%S', time.gmtime(exec_time)) + "."

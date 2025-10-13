@@ -308,7 +308,7 @@ def do_POST_check(parameter, http_request_method):
     if not settings.IS_XML:
       data_type = "XML/SOAP"
       settings.IS_XML = checks.process_data(data_type, http_request_method)
-      settings.POST_DATA_PARAM_DELIMITER = "\n"
+      settings.POST_DATA_PARAM_DELIMITER = settings.END_LINE.LF
 
   elif settings.TESTABLE_PARAMETERS_LIST and not any(ext in parameter for ext in settings.TESTABLE_PARAMETERS_LIST) and not settings.INJECT_TAG in parameter:
     if settings.SKIP_NON_CUSTOM_PARAMS:
