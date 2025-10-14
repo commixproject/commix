@@ -107,8 +107,14 @@ def logfile_parser():
   if len(re.findall(pattern, request)) > 1:
     single_request = multi_requests()
 
+  # Safely determine HTTP method
   if len(settings.HTTP_METHOD) == 0:
-    http_method = request.strip().splitlines()[0].split()[0]
+    lines = request.strip().splitlines()
+    if lines and len(lines[0].split()) >= 1:
+      http_method = lines[0].split()[0]
+    else:
+      # fallback to default method if malformed/empty
+      http_method = settings.HTTPMETHOD.GET
     settings.HTTP_METHOD = http_method
   else:
     http_method = settings.HTTP_METHOD
