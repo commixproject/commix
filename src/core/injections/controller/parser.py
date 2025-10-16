@@ -119,7 +119,9 @@ def logfile_parser():
   else:
     http_method = settings.HTTP_METHOD
 
-  request_url = re.findall(r"" + " (.*)" + " HTTP/", request)
+  # Safely extract request URL
+  match = re.search(r"\s(.*?)\sHTTP/", request or "")
+  request_url = match.group(1) if match else ""
 
   if not request_url:
     invalid_data(request_file)
