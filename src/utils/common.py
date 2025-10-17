@@ -171,7 +171,7 @@ def create_github_issue(err_msg, exc_msg):
 
   key = hashlib.md5(_).hexdigest()[:8]
 
-  bug_report =  "Bug Report: Unhandled exception \"" + str([i for i in exc_msg.split('\n') if i][-1]) + "\" " +  "(#" + key + ")"
+  bug_report =  "Bug Report: Unhandled exception \"" + str([i for i in exc_msg.split(settings.END_LINE.LF) if i][-1]) + "\" " +  "(#" + key + ")"
 
   while True:
     try:
@@ -292,14 +292,14 @@ def unhandled_exception():
     raise SystemExit()
 
   elif all(_ in exc_msg for _ in ("No such file", "_'")):
-    err_msg = "Corrupted installation detected ('" + exc_msg.strip().split('\n')[-1] + "'). "
+    err_msg = "Corrupted installation detected ('" + exc_msg.strip().split(settings.END_LINE.LF)[-1] + "'). "
     err_msg += "You should retrieve the latest (dev) version from official GitHub "
     err_msg += "repository at '" + settings.GIT_URL + "'."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
   elif "Invalid IPv6 URL" in exc_msg:
-    err_msg = "invalid URL ('" + exc_msg.strip().split('\n')[-1] + "')"
+    err_msg = "invalid URL ('" + exc_msg.strip().split(settings.END_LINE.LF)[-1] + "')"
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
