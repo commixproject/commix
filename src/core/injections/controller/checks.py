@@ -2180,7 +2180,7 @@ def check_similarities(all_params):
           parameter_value = ''.join(re.findall(r'=(.*)', all_params[param]))
           all_params[param] = parameter_name + "=" + parameter_value + settings.RANDOM_TAG
 
-  all_params = [x for x in all_params if x is not None]
+  all_params = [str(x) for x in all_params if x is not None]
   return all_params
 
 """
