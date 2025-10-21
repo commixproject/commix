@@ -49,9 +49,9 @@ def encode_non_ascii_url(request):
   url = request.get_full_url()
   parts = _urllib.parse.urlsplit(url)
   # Encode path, preserving '/', '*', and '%' to avoid over-encoding
-  path = _urllib.parse.quote(parts.path, safe="*%/")
+  path = _urllib.parse.quote(parts.path, safe=settings.SAFE_PATH)
   # Encode query string, preserving delimiters and configured parameter delimiter
-  query = _urllib.parse.quote(parts.query, safe="*=?/%" + settings.URL_PARAM_DELIMITER)
+  query = _urllib.parse.quote(parts.query, safe=settings.SAFE_QUERY + settings.URL_PARAM_DELIMITER)
   # Reconstruct the full URL with encoded path and query
   request.full_url = _urllib.parse.urlunsplit((parts.scheme, parts.netloc, path, query, parts.fragment))
 

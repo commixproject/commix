@@ -119,7 +119,9 @@ def heuristic_request(url, http_request_method, check_parameter, payload, whites
       settings.USER_DEFINED_POST_DATA = checks.remove_tags(settings.USER_DEFINED_POST_DATA)
       data = settings.USER_DEFINED_POST_DATA.encode(settings.DEFAULT_CODEC)
   if settings.INJECT_TAG in url:
-    tmp_url = checks.process_injectable_value(payload, url)
+    # Encode query string, preserving delimiters and configured parameter delimiter
+    encoded_payload = _urllib.parse.quote(payload, safe=settings.SAFE_QUERY)
+    tmp_url = checks.process_injectable_value(encoded_payload, url)
   else:
     tmp_url = checks.remove_tags(tmp_url)
     url = checks.remove_tags(url)
