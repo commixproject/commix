@@ -188,7 +188,7 @@ def process_custom_injection_data(data):
 
   if settings.CUSTOM_INJECTION_MARKER is not None:
     lines = []
-    for line in data.split("\\n"):
+    for line in data.split(settings.END_LINE.ESCAPED_LF):
       if not line.startswith(settings.ACCEPT) and settings.CUSTOM_INJECTION_MARKER_CHAR in line:
         if menu.options.test_parameter is not None and settings.CUSTOM_INJECTION_MARKER is False:
           line = remove_tags(line)
@@ -196,7 +196,7 @@ def process_custom_injection_data(data):
       lines.append(line)
     
     # Remove duplicates, then rejoin lines
-    data = "\\n".join(list(dict.fromkeys(lines))).rstrip("\\n")
+    data = settings.END_LINE.ESCAPED_LF.join(list(dict.fromkeys(lines))).rstrip(settings.END_LINE.ESCAPED_LF)
 
   return data
 
@@ -812,7 +812,7 @@ def url_decode(payload):
   rep = {
           "%20": " ",
           "%2B": "+",
-          settings.END_LINE.LF: "\\n"
+          settings.END_LINE.LF: settings.END_LINE.ESCAPED_LF
         }
   rep = dict((re.escape(k), v) for k, v in rep.items())
   pattern = re.compile("|".join(rep.keys()))

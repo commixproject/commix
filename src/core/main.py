@@ -691,7 +691,7 @@ try:
       else:
         settings.DEFAULT_CODEC  = menu.options.codec.lower()
 
-    if menu.options.header and len(menu.options.header.split("\\n"))> 1:
+    if menu.options.header and len(menu.options.header.split(settings.END_LINE.ESCAPED_LF))> 1:
         warn_msg = "Due to multiple provided HTTP headers, swithing '--header' to '--headers'."
         settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 

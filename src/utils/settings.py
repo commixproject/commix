@@ -261,7 +261,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.1"
-REVISION = "118"
+REVISION = "119"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1191,6 +1191,7 @@ class END_LINE:
   CR = "\r"
   LF = "\n"
   CRLF = "\r\n"
+  ESCAPED_LF = "\\n"
 
 # List of end lines
 END_LINES_LIST = [attr for attr in dir(END_LINE) if not callable(getattr(END_LINE, attr)) and not attr.startswith("__")]

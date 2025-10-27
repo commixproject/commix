@@ -404,8 +404,8 @@ def do_check(request):
     if ": //" in extra_headers:
       extra_headers = extra_headers.replace(": //" ,"://")
 
-    if "\\n" in extra_headers:
-      extra_headers = extra_headers.split("\\n")
+    if settings.END_LINE.ESCAPED_LF in extra_headers:
+      extra_headers = extra_headers.split(settings.END_LINE.ESCAPED_LF)
       # Remove empty strings and "Content-Length"
       extra_headers = [x for x in extra_headers if settings.CONTENT_LENGTH not in x]
     else:

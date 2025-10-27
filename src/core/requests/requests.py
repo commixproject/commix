@@ -958,7 +958,7 @@ def perform_injection(prefix, suffix, whitespace, payload, vuln_parameter, http_
   
   # Check if defined "--verbose" option.
   if settings.VERBOSITY_LEVEL != 0:
-    payload_msg = payload.replace(settings.END_LINE.LF, "\\n")
+    payload_msg = payload.replace(settings.END_LINE.LF, settings.END_LINE.ESCAPED_LF)
     settings.print_data_to_stdout(settings.print_payload(payload_msg))
 
   # Check if defined cookie with "INJECT_HERE" tag

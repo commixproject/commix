@@ -89,12 +89,12 @@ def logfile_parser():
         if menu.options.header:
           request_headers.append(menu.options.header)
         elif menu.options.headers:
-          request_headers.extend(menu.options.headers.split("\\n"))
+          request_headers.extend(menu.options.headers.split(settings.END_LINE.ESCAPED_LF))
         request_headers.append(header_name + ":" + header_value)
         c += 1
       c += 1  
       menu.options.data = "".join(request_lines[c:] if c < len(request_lines) else "")
-      settings.RAW_HTTP_HEADERS = '\\n'.join(request_headers)
+      settings.RAW_HTTP_HEADERS = settings.END_LINE.ESCAPED_LF.join(request_headers)
 
   except IOError as err_msg:
     error_msg = "The '" + request_file + "' "
@@ -173,7 +173,7 @@ def logfile_parser():
       match = re.findall(r"(.*): (.*)", line)
       match = "".join([str(i) for i in match]).replace("', '",":")
       match = match.replace("('", "")
-      match = match.replace("')","\\n")
+      match = match.replace("')",settings.END_LINE.ESCAPED_LF)
       # Ignore some header.
       if settings.CONTENT_LENGTH or settings.ACCEPT_ENCODING in match:
         extra_headers = extra_headers

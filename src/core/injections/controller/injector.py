@@ -195,7 +195,7 @@ def results_based_injection(separator, TAG, cmd, prefix, suffix, whitespace, htt
     if settings.VERBOSITY_LEVEL != 0:
       _ = cmd
       if technique == settings.INJECTION_TECHNIQUE.FILE_BASED or technique == settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED:
-        payload_msg = payload.replace(settings.END_LINE.LF, "\\n")
+        payload_msg = payload.replace(settings.END_LINE.LF, settings.END_LINE.ESCAPED_LF)
         if settings.COMMENT in payload_msg:
           payload = payload.split(settings.COMMENT)[0].strip()
           payload_msg = payload_msg.split(settings.COMMENT)[0].strip()

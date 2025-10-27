@@ -171,7 +171,7 @@ def update_payload(filename, counter, payload):
   with open(filename, 'a', encoding=settings.DEFAULT_CODEC) as output_file:
     if not menu.options.no_logging:
       if settings.END_LINE.LF in payload:
-        output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + "Used payload: " + re.sub("%20", settings.SINGLE_WHITESPACE, _urllib.parse.unquote_plus(payload.replace(settings.END_LINE.LF, "\\n"))) + settings.END_LINE.LF)
+        output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + "Used payload: " + re.sub("%20", settings.SINGLE_WHITESPACE, _urllib.parse.unquote_plus(payload.replace(settings.END_LINE.LF, settings.END_LINE.ESCAPED_LF))) + settings.END_LINE.LF)
       else:
         output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + "Used payload: " + payload.replace("%20", settings.SINGLE_WHITESPACE) + settings.END_LINE.LF)
 
