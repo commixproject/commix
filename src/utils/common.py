@@ -206,13 +206,13 @@ def create_github_issue(err_msg, exc_msg):
       if closed:
           warn_msg += " and resolved. Please update to the latest "
           warn_msg += "(dev) version from official GitHub repository at '" + settings.GIT_URL + "'"
-      warn_msg += ".\n"
+      warn_msg += "." + settings.END_LINE.LF
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
       return
   except:
     pass
 
-  data = {"title": str(bug_report), "body": "```" + str(err_msg) + "\n```\n```\n" + str(exc_msg) + "```"}
+  data = {"title": str(bug_report), "body": "```" + str(err_msg) + settings.END_LINE.LF + "```" + settings.END_LINE.LF + "```" + str(exc_msg) + "```"}
   request = _urllib.request.Request(url = "https://api.github.com/repos/commixproject/commix/issues",
                                 data = json.dumps(data).encode(),
                                 headers = {settings.AUTHORIZATION: "token " + base64.b64decode(settings.GITHUB_REPORT_OAUTH_TOKEN.encode(settings.DEFAULT_CODEC)).decode()}
@@ -229,7 +229,7 @@ def create_github_issue(err_msg, exc_msg):
   else:
     warn_msg = "Something went wrong while creating a Github issue."
     if settings.UNAUTHORIZED_ERROR in str(err):
-      warn_msg += " Please update to the latest revision.\n"
+      warn_msg += " Please update to the latest revision." + settings.END_LINE.LF
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
 """
@@ -354,7 +354,7 @@ def unhandled_exception():
     err_msg += "with the following text and any other information required to "
     err_msg += "reproduce the bug. The "
     err_msg += "developers will try to reproduce the bug, fix it accordingly "
-    err_msg += "and get back to you.\n"
+    err_msg += "and get back to you." + settings.END_LINE.LF
     err_msg += settings.APPLICATION.capitalize() + " version: " + settings.VERSION[1:] + settings.END_LINE.LF
     err_msg += "Python version: " + settings.PYTHON_VERSION + settings.END_LINE.LF
     err_msg += "Operating system: " + os.name + settings.END_LINE.LF

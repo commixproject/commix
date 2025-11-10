@@ -779,11 +779,11 @@ Checking the reliability of the used payload message.
 """
 def check_for_false_positive_result(false_positive_warning):
   info_msg = "Checking if the injection point on "
-  info_msg += settings.CHECKING_PARAMETER + " is a false positive.\n"
+  info_msg += settings.CHECKING_PARAMETER + " is a false positive." + settings.END_LINE.LF
   settings.print_data_to_stdout(settings.END_LINE.CR + settings.print_info_msg(info_msg))
   warn_msg = "Time-based comparison requires " + ('larger', 'reset of')[false_positive_warning] + " statistical model"
   if settings.VERBOSITY_LEVEL != 0:
-    warn_msg = warn_msg + ".\n"
+    warn_msg = warn_msg + "." + settings.END_LINE.LF
   else:
     warn_msg = warn_msg +", please wait..."
   settings.print_data_to_stdout(settings.END_LINE.CR + settings.print_warning_msg(warn_msg))
@@ -1332,7 +1332,7 @@ Message regarding unexpected time delays
 """
 def time_delay_recommendation():
   warn_msg = "Due to unexpected time delays, it is highly "
-  warn_msg += "recommended to enable the 'reverse_tcp' option.\n"
+  warn_msg += "recommended to enable the 'reverse_tcp' option." + settings.END_LINE.LF
   settings.print_data_to_stdout(settings.END_LINE.CR + settings.print_warning_msg(warn_msg))
 
 """
@@ -2372,7 +2372,7 @@ def print_users(sys_users, filename, _, separator, TAG, cmd, prefix, suffix, whi
               if not menu.options.no_logging:
                 if count == 1 :
                   output_file.write(settings.END_LINE.LF)
-                output_file.write("(" +str(count)+ ") '" + sys_users_list[user] + is_privileged + "'\n" )
+                output_file.write("(" +str(count)+ ") '" + sys_users_list[user] + is_privileged + "'" + settings.END_LINE.LF )
       else:
         # settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
         warn_msg = "It seems you do not have permission to enumerate operating system users."
