@@ -291,6 +291,11 @@ def unhandled_exception():
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
+  elif "database disk image is malformed" in exc_msg:
+    exc_msg = "Local session file seems to be malformed. Please rerun with '--flush-session'."
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+    raise SystemExit()
+
   elif all(_ in exc_msg for _ in ("No such file", "_'")):
     err_msg = "Corrupted installation detected ('" + exc_msg.strip().split(settings.END_LINE.LF)[-1] + "'). "
     err_msg += "You should retrieve the latest (dev) version from official GitHub "
