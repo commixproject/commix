@@ -1,4 +1,5 @@
 ## Version 4.1 (TBA)
+* Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
 * Revised: Refactored with improved page decompression and safer HTTP response handling.
 * Revised: Refactored OS looping to respect user-specified targets or automatically iterate over supported OSes if none are specified or detected.
 * Revised: Refactored User-Agent strings to be loaded from external files rather than being hardcoded.
