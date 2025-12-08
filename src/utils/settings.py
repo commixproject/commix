@@ -261,7 +261,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.1"
-REVISION = "122"
+REVISION = "123"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -321,10 +321,10 @@ INJECT_TAG_REGEX = r"(?i)INJECT[_]?HERE"
 VALUE_BOUNDARIES = r'[\\/](.+?)[\\/]'
 INJECT_INSIDE_BOUNDARIES = None
 
- # Safe characters to keep unescaped in URL paths
+# Safe characters to keep unescaped in URL paths
 SAFE_PATH = "*%/"
-  # Safe characters to keep unescaped in query strings
-SAFE_QUERY = SAFE_PATH + "=?"
+# Safe characters to keep unescaped in query strings
+SAFE_QUERY = SAFE_PATH + "=?&"
 
 # Default (windows) target host's python interpreter
 WIN_PYTHON_INTERPRETER = "python.exe"
