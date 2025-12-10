@@ -313,6 +313,8 @@ Check for added headers.
 """
 def do_check(request):
 
+  request = encode_non_ascii_url(request)
+  
   # Check if defined any Cookie HTTP header.
   if menu.options.cookie and not settings.COOKIE_INJECTION:
     request.add_header(settings.COOKIE, checks.remove_tags(menu.options.cookie))

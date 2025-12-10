@@ -472,6 +472,7 @@ def init_injection(payload, http_request_method, url):
     else:
       data = checks.process_injectable_value(payload, menu.options.data)
     request = _urllib.request.Request(url, data.encode(settings.DEFAULT_CODEC), method=http_request_method)
+
   headers.do_check(request)
   response = get_request_response(request)
 
