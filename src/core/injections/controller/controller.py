@@ -545,7 +545,7 @@ def do_injection(found, data_type, header_name, url, http_request_method, filena
     name = name.strip()
     if not name:
       return False
-    return bool(re.match(r'^[a-zA-Z0-9._\-\[\]]+$', name))
+    return bool(re.match(r'^[\w._\-\[\]]+$', name, re.UNICODE))
 
   """
   Define the check parameter based on the data type (POST, GET, COOKIE).

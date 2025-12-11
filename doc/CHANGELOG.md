@@ -1,5 +1,6 @@
 ## Version 4.1 (TBA)
 * Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
+* Fixed: Handling of parameter names containing non-ASCII characters.
 * Fixed: Handling of non-ASCII characters in URLs to ensure proper request encoding.
 * Revised: Refactored with improved page decompression and safer HTTP response handling.
 * Revised: Refactored OS looping to respect user-specified targets or automatically iterate over supported OSes if none are specified or detected.
