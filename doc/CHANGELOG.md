@@ -1,4 +1,4 @@
-## Version 4.1 (TBA)
+## Version 4.1 (2025-12-20)
 * Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
 * Fixed: Handling of parameter names containing non-ASCII characters.
 * Fixed: Handling of non-ASCII characters in URLs to ensure proper request encoding.
@@ -32,6 +32,8 @@
 * Revised: Minor code refactoring regarding multiple tamper scripts.
 * Revised: Minor code refactoring regarding payloads for time-related techniques (i.e. "time-based", "tempfile-based").
 * Revised: Improvement regarding tamper script "backticks.py" for supporting time-related techniques (i.e. "time-based", "tempfile-based").
+
+_Note: For more check the [detailed changeset](https://github.com/commixproject/commix/compare/v4.0...v4.1)._
 
 ## Version 4.0 (2024-12-20)
 * Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
