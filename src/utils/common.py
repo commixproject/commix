@@ -171,13 +171,16 @@ def create_github_issue(err_msg, exc_msg):
 
   key = hashlib.md5(_).hexdigest()[:8]
 
-  bug_report =  "Bug Report: Unhandled exception \"" + str([i for i in exc_msg.split(settings.END_LINE.LF) if i][-1]) + "\" " +  "(#" + key + ")"
+  bug_report = (
+    "Bug Report: Unhandled exception \""
+    + str([i for i in exc_msg.split(settings.END_LINE.LF) if i][-1])
+    + "\" (#" + key + ")"
+  )
 
   while True:
     try:
-      message = "Do you want to automatically create a new (anonymized) issue "
-      message += "with the unhandled exception information at "
-      message += "the official Github repository? [y/N] "
+      message = "Do you want to prepare a sanitized GitHub issue report "
+      message += "for manual submission? [y/N] "
       choise = read_input(message, default="N", check_batch=True)
       if choise in settings.CHOICE_YES:
         break
@@ -186,51 +189,66 @@ def create_github_issue(err_msg, exc_msg):
         return
       else:
         invalid_option(choise)
-        pass
     except:
       settings.print_data_to_stdout("")
       raise SystemExit()
 
   err_msg = err_msg[err_msg.find(settings.END_LINE.LF):]
-  request = _urllib.request.Request(url="https://api.github.com/search/issues?q=" + \
-        _urllib.parse.quote("repo:commixproject/commix" + settings.SINGLE_WHITESPACE + str(bug_report))
-        )
+
+  request = _urllib.request.Request(
+    url="https://api.github.com/search/issues?q=" +
+    _urllib.parse.quote(
+      "repo:commixproject/commix" +
+      settings.SINGLE_WHITESPACE +
+      str(bug_report)
+    )
+  )
 
   try:
-    content = _urllib.request.urlopen(request, timeout=settings.TIMEOUT).read()
+    content = _urllib.request.urlopen(
+      request,
+      timeout=settings.TIMEOUT
+    ).read()
     _ = json.loads(content)
     duplicate = _["total_count"] > 0
     closed = duplicate and _["items"][0]["state"] == "closed"
     if duplicate:
       warn_msg = "That issue seems to be already reported"
       if closed:
-          warn_msg += " and resolved. Please update to the latest "
-          warn_msg += "(dev) version from official GitHub repository at '" + settings.GIT_URL + "'"
+        warn_msg += " and resolved. Please update to the latest "
+        warn_msg += "(dev) version from official GitHub repository at '"
+        warn_msg += settings.GIT_URL + "'"
       warn_msg += "." + settings.END_LINE.LF
-      settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+      settings.print_data_to_stdout(
+        settings.print_warning_msg(warn_msg)
+      )
       return
   except:
     pass
 
-  data = {"title": str(bug_report), "body": "```" + str(err_msg) + settings.END_LINE.LF + "```" + settings.END_LINE.LF + "```" + str(exc_msg) + "```"}
-  request = _urllib.request.Request(url = "https://api.github.com/repos/commixproject/commix/issues",
-                                data = json.dumps(data).encode(),
-                                headers = {settings.AUTHORIZATION: "token " + base64.b64decode(settings.GITHUB_REPORT_OAUTH_TOKEN.encode(settings.DEFAULT_CODEC)).decode()}
-                                )
-  try:
-    content = _urllib.request.urlopen(request, timeout=settings.TIMEOUT).read()
-  except Exception as err:
-    content = None
+  params = {
+    "title": str(bug_report),
+    "body":
+      "```" + str(err_msg) + settings.END_LINE.LF +
+      "```" + settings.END_LINE.LF +
+      "```" + str(exc_msg) + "```"
+  }
 
-  issue_url = re.search(r"https://github.com/commixproject/commix/issues/\d+", content.decode(settings.DEFAULT_CODEC) or "")
-  if issue_url:
-    info_msg = "The created Github issue can been found at the address '" + str(issue_url.group(0)) + "'." + settings.END_LINE.LF
-    settings.print_data_to_stdout(settings.print_info_msg(info_msg))
-  else:
-    warn_msg = "Something went wrong while creating a Github issue."
-    if settings.UNAUTHORIZED_ERROR in str(err):
-      warn_msg += " Please update to the latest revision." + settings.END_LINE.LF
-    settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+  issue_url = (
+    "https://github.com/commixproject/commix/issues/new?"
+    + _urllib.parse.urlencode(params)
+  )
+
+  info_msg = (
+    "A sanitized GitHub issue has been prepared with " +
+    "relevant error details for manual review and submission:" +
+    settings.END_LINE.LF +
+    issue_url
+  )
+
+  settings.print_data_to_stdout(
+    settings.print_info_msg(info_msg)
+  )
 
 """
 Masks sensitive data in the supplied message.

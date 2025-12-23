@@ -1,3 +1,6 @@
+## Version 4.2 (TBA)
+* Revised: Refactored GitHub issue reporting; automatic submission replaced by manual sanitized reports.
+
 ## Version 4.1 (2025-12-20)
 * Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
 * Fixed: Handling of parameter names containing non-ASCII characters.

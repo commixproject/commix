@@ -260,9 +260,9 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
-VERSION_NUM = "4.1"
-REVISION = "126"
-STABLE_RELEASE = True
+VERSION_NUM = "4.2"
+REVISION = "1"
+STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
   VERSION = VERSION + VERSION_NUM
@@ -1245,9 +1245,6 @@ OS_CHECKS_NUM = 2
 
 # Options to explicitly mask in anonymous (unhandled exception) reports.
 SENSITIVE_OPTIONS = ["--data", "-d", "--cookie", "-p", "--url", "-u", "-x", "--auth-cred", "-r", "-l"]
-
-# Github OAuth token used for creating an automatic issue for unhandled exceptions.
-GITHUB_REPORT_OAUTH_TOKEN = "YjNiYjdhZDBlYzM2MmM2NGEzYTAzZTc4ZDg1NmYwZTUyZGZlN2EyZQ=="
 
 # Tranform payloads (via tamper script(s))
 TRANFROM_PAYLOAD = None
