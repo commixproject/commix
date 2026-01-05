@@ -2011,18 +2011,19 @@ def skip_empty(empty_parameters, http_request_method):
   warn_msg += " because user specified testing of only parameter(s) with non-empty value" + "s"[len(empty_parameters.split(",")) == 1:][::-1] + "."
   settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
-
 """
 Parsing and unflattening json data.
 """
 def json_data(data):
-  data = json.loads(data, object_pairs_hook=OrderedDict)
-  data = unflatten_list(data)
-  data = json.dumps(data)
-  return data
+  try:
+    data = json.loads(data, object_pairs_hook=OrderedDict)
+    data = unflatten_list(data)
+    return json.dumps(data)
+  except Exception:
+    return data
 
 """
-"No parameter(s) found for testing.
+No parameter(s) found for testing.
 """
 def no_parameters_found():
   err_msg = "No parameter(s) found for testing in the provided data "
