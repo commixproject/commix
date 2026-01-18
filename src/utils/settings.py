@@ -74,6 +74,7 @@ REQUEST_SIGN = Style.RESET_ALL + "[" + Style.BRIGHT + Back.MAGENTA + "traffic" +
 RESPONSE_SIGN = Style.RESET_ALL + "[" + Style.BRIGHT + Back.MAGENTA + "traffic" + Style.RESET_ALL + "] "
 QUESTION_SIGN = Style.BRIGHT
 TOTAL_OF_REQUESTS_COLOR = Fore.LIGHTYELLOW_EX
+TRACEBACK = Fore.LIGHTRED_EX
 WARNING_SIGN = "[" + Fore.LIGHTYELLOW_EX  + "warning" + Style.RESET_ALL + "] "
 WARNING_BOLD_SIGN = "[" + Style.BRIGHT + Fore.YELLOW  + "warning" + Style.RESET_ALL + "] " + Style.BRIGHT
 ERROR_SIGN = "[" + Fore.RED + "error" + Style.RESET_ALL  + "] "
@@ -261,7 +262,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "3"
+REVISION = "4"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:

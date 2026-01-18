@@ -157,10 +157,33 @@ def show_http_error_codes():
       settings.print_data_to_stdout(settings.print_bold_debug_msg(debug_msg))
 
 """
-Automatically create a Github issue with unhandled exception information.
+Masks sensitive data in the supplied message.
+"""
+def mask_sensitive_data(err_msg):
+  for item in settings.SENSITIVE_OPTIONS:
+    match = re.search(r"(?i)commix.+(" + str(item) + r")(\s+|=)([^-]+)", err_msg)
+    if match:
+      err_msg = err_msg.replace(match.group(3), '<sanitized>' + settings.SINGLE_WHITESPACE)
+  return err_msg
+
+"""
+Print a user-friendly message with a URL for reporting an issue.
+"""
+def print_report_issue(url, prepared):
+  if prepared:
+    msg = ("Sanitized GitHub issue has been generated. Submit it at: " + url)
+    settings.print_data_to_stdout(settings.print_info_msg(msg))
+  else:
+    msg = ("Sanitized GitHub issue generation skipped. Report it manually at: " + url)
+    settings.print_data_to_stdout(settings.print_warning_msg(msg))
+
+"""
+Create a Github issue with unhandled exception information.
 PS: Greetz @ sqlmap dev team for that great idea! :)
 """
 def create_github_issue(err_msg, exc_msg):
+
+  # Normalize exception message to generate a stable fingerprint
   _ = re.sub(r"'[^']+'", "''", exc_msg)
   _ = re.sub(r"\s+line \d+", "", _)
   _ = re.sub(r'File ".+?/(\w+\.py)', r"\g<1>", _)
@@ -169,23 +192,55 @@ def create_github_issue(err_msg, exc_msg):
   _ = re.sub(r"= _", "= ", _)
   _ = _.encode(settings.DEFAULT_CODEC)
 
+  # Generate short hash used as issue identifier
   key = hashlib.md5(_).hexdigest()[:8]
 
+  # Build GitHub issue title using the last non-empty exception line
   bug_report = (
     "Bug Report: Unhandled exception \""
     + str([i for i in exc_msg.split(settings.END_LINE.LF) if i][-1])
     + "\" (#" + key + ")"
   )
 
+  request = _urllib.request.Request(
+    url="https://api.github.com/search/issues?q=" +
+    _urllib.parse.quote(
+      "repo:commixproject/commix"
+      + settings.SINGLE_WHITESPACE
+      + str(bug_report)
+    )
+  )
+
+  try:
+    content = _urllib.request.urlopen(request, timeout=settings.TIMEOUT).read()
+    _ = json.loads(content)
+
+    duplicate = _["total_count"] > 0
+    closed = duplicate and _["items"][0]["state"] == "closed"
+
+    if duplicate:
+      info_msg = "That issue seems to be already reported"
+      if closed:
+        info_msg += " and resolved. Please update to the latest "
+        info_msg += "(dev) version from official GitHub repository at '"
+        info_msg += settings.GIT_URL + "'"
+      info_msg += "."
+      settings.print_data_to_stdout(settings.print_bold_info_msg(info_msg))
+      return
+  except:
+    # Ignore GitHub API errors and continue normally
+    pass
+
   while True:
     try:
-      message = "Do you want to prepare a sanitized GitHub issue report "
-      message += "for manual submission? [y/N] "
-      choise = read_input(message, default="N", check_batch=True)
+      message = "Do you want to generate a sanitized GitHub issue report? [Y/n] "
+      choise = read_input(message, default="Y", check_batch=True)
       if choise in settings.CHOICE_YES:
+        # Mask any potentially sensitive data before submission
+        err_msg = mask_sensitive_data(err_msg)
         break
       elif choise in settings.CHOICE_NO:
-        settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
+        print_report_issue(settings.ISSUES_PAGE, prepared=False)
         return
       else:
         invalid_option(choise)
@@ -193,73 +248,22 @@ def create_github_issue(err_msg, exc_msg):
       settings.print_data_to_stdout("")
       raise SystemExit()
 
+  # Trim banner/output lines before the actual error content
   err_msg = err_msg[err_msg.find(settings.END_LINE.LF):]
 
-  request = _urllib.request.Request(
-    url="https://api.github.com/search/issues?q=" +
-    _urllib.parse.quote(
-      "repo:commixproject/commix" +
-      settings.SINGLE_WHITESPACE +
-      str(bug_report)
-    )
-  )
-
-  try:
-    content = _urllib.request.urlopen(
-      request,
-      timeout=settings.TIMEOUT
-    ).read()
-    _ = json.loads(content)
-    duplicate = _["total_count"] > 0
-    closed = duplicate and _["items"][0]["state"] == "closed"
-    if duplicate:
-      warn_msg = "That issue seems to be already reported"
-      if closed:
-        warn_msg += " and resolved. Please update to the latest "
-        warn_msg += "(dev) version from official GitHub repository at '"
-        warn_msg += settings.GIT_URL + "'"
-      warn_msg += "." + settings.END_LINE.LF
-      settings.print_data_to_stdout(
-        settings.print_warning_msg(warn_msg)
-      )
-      return
-  except:
-    pass
-
+  # Prepare pre-filled GitHub issue parameters
   params = {
     "title": str(bug_report),
     "body":
-      "```" + str(err_msg) + settings.END_LINE.LF +
-      "```" + settings.END_LINE.LF +
-      "```" + str(exc_msg) + "```"
+      "**Runtime Information**```" + str(err_msg) + "```" + settings.END_LINE.LF +
+      "**Python Traceback**```" + settings.END_LINE.LF + str(exc_msg) + "```"
   }
 
-  issue_url = (
-    "https://github.com/commixproject/commix/issues/new?"
-    + _urllib.parse.urlencode(params)
-  )
+  # Build final GitHub issue URL (prefilled)
+  issue_url = (settings.ISSUES_PAGE + "?" + _urllib.parse.urlencode(params))
 
-  info_msg = (
-    "A sanitized GitHub issue has been prepared with " +
-    "relevant error details for manual review and submission:" +
-    settings.END_LINE.LF +
-    issue_url
-  )
-
-  settings.print_data_to_stdout(
-    settings.print_info_msg(info_msg)
-  )
-
-"""
-Masks sensitive data in the supplied message.
-"""
-def mask_sensitive_data(err_msg):
-  for item in settings.SENSITIVE_OPTIONS:
-    match = re.search(r"(?i)commix.+(" + str(item) + r")(\s+|=)([^-]+)", err_msg)
-    if match:
-      err_msg = err_msg.replace(match.group(3), '*' * len(match.group(3)) + settings.SINGLE_WHITESPACE)
-
-  return err_msg
+  # Inform user that a sanitized issue has been prepared
+  print_report_issue(issue_url, prepared=True)
 
 """
 Returns detailed message about occurred unhandled exception.
@@ -370,21 +374,17 @@ def unhandled_exception():
     raise SystemExit()
 
   else:
-    err_msg = "Unhandled exception occurred in '" + settings.VERSION[1:] + "'. It is recommended to retry your "
-    err_msg += "run with the latest (dev) version from official GitHub "
-    err_msg += "repository at '" + settings.GIT_URL + "'. If the exception persists, please open a new issue "
-    err_msg += "at '" + settings.ISSUES_PAGE + "' "
-    err_msg += "with the following text and any other information required to "
-    err_msg += "reproduce the bug. The "
-    err_msg += "developers will try to reproduce the bug, fix it accordingly "
-    err_msg += "and get back to you." + settings.END_LINE.LF
-    err_msg += settings.APPLICATION.capitalize() + " version: " + settings.VERSION[1:] + settings.END_LINE.LF
-    err_msg += "Python version: " + settings.PYTHON_VERSION + settings.END_LINE.LF
-    err_msg += "Operating system: " + os.name + settings.END_LINE.LF
-    err_msg += "Command line: " + re.sub(r".+?\bcommix\.py\b", "commix.py", " ".join(sys.argv)) + settings.END_LINE.LF
-    err_msg = mask_sensitive_data(err_msg)
-    exc_msg = re.sub(r'".+?[/\\](\w+\.py)', r"\"\g<1>", exc_msg)
-    settings.print_data_to_stdout(settings.print_critical_msg(err_msg + settings.END_LINE.LF + exc_msg.rstrip()))
+    err_msg = "Unhandled exception occurred in '" + settings.VERSION[1:] + "'. "
+    err_msg += "It is recommended to retry your run with the latest (dev) version from the official GitHub repository at '" + settings.GIT_URL + "'. "
+    err_msg += "If the issue still occurs, you can report it on GitHub by generating a sanitized report, that removes sensitive data, or by submitting the details manually." + settings.END_LINE.LF
+    err_msg += settings.SUB_CONTENT_SIGN_TYPE + " " + settings.APPLICATION.capitalize() + " version: " + settings.VERSION[1:] + settings.END_LINE.LF
+    err_msg += settings.SUB_CONTENT_SIGN_TYPE + " Python version: " + settings.PYTHON_VERSION + settings.END_LINE.LF
+    err_msg += settings.SUB_CONTENT_SIGN_TYPE + " Operating system: " + os.name + settings.END_LINE.LF
+    err_msg += settings.SUB_CONTENT_SIGN_TYPE + " Command summary: " + re.sub(r".+?\bcommix\.py\b", "commix.py", " ".join(sys.argv)) + settings.END_LINE.LF
+    exc_msg = settings.TRACEBACK + re.sub(r'".+?[/\\](\w+\.py)', r"\"\g<1>", exc_msg)
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg + exc_msg.rstrip()))
+    strip_ansi = lambda s: re.sub(r"\x1B\[[0-9;]*m", "", s)
+    err_msg, exc_msg = map(strip_ansi, (err_msg, exc_msg))
     create_github_issue(err_msg, exc_msg[:])
 
 """
