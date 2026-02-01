@@ -2012,13 +2012,19 @@ def skip_empty(empty_parameters, http_request_method):
   settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
 """
-Parsing and unflattening json data.
+Pretty-print data as valid JSON using 2-space indentation.
+"""
+def format_json(data):
+  return json.dumps(data, indent=2, ensure_ascii=False)
+
+"""
+Parsing and unflattening JSON data.
 """
 def json_data(data):
   try:
     data = json.loads(data, object_pairs_hook=OrderedDict)
     data = unflatten_list(data)
-    return json.dumps(data)
+    return format_json(data)
   except Exception:
     return data
 

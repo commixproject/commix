@@ -290,7 +290,7 @@ def do_POST_check(parameter, http_request_method):
     if _ and isinstance(parameter, OrderedDict):
       parameter = unflatten_list(parameter)
 
-    parameter = json.dumps(parameter)
+    parameter = checks.format_json(parameter)
     return parameter
 
   # Do replacement with the 'INJECT_HERE' tag, if the custom injection marker character is provided.

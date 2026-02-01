@@ -1,4 +1,5 @@
 ## Version 4.2 (TBA)
+* Added: Standardized JSON output formatting with 2-space indentation.
 * Revised: Improved JSON data handling to safely flatten/unflatten mixed nested structures.
 * Revised: Refactored GitHub issue reporting; automatic submission replaced by manual sanitized reports.
 
