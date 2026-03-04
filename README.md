@@ -19,8 +19,9 @@ You can visit the [collection of screenshots](https://github.com/commixproject/c
 
 You can download commix on any platform by cloning the official Git repository :
 
-  git clone https://github.com/commixproject/commix.git commix
-
+```
+git clone https://github.com/commixproject/commix.git commix
+```
 Alternatively, you can download the latest [tarball](https://github.com/commixproject/commix/tarball/master) or [zipball](https://github.com/commixproject/commix/zipball/master).
 
 *__Note:__ **[Python](http://www.python.org/download/)** (version **2.6**, **2.7** or **3.x**) is required for running commix.*
@@ -29,9 +30,9 @@ Alternatively, you can download the latest [tarball](https://github.com/commixpr
 ## Usage
 
 To get a list of all options and switches use:
-
-  python commix.py -h
-
+```
+python commix.py -h
+```
 To get an overview of commix available options, switches and/or basic ideas on how to use commix, check **[usage](https://github.com/commixproject/commix/wiki/Usage)**, **[usage examples](https://github.com/commixproject/commix/wiki/Usage-Examples)** and **[filters bypasses](https://github.com/commixproject/commix/wiki/Filters-Bypasses)** wiki pages.
 
 
