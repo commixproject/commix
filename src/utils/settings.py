@@ -262,7 +262,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "10"
+REVISION = "11"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1340,6 +1340,7 @@ IGNORE_SPECIAL_CHAR_REGEX = "[^/()A-Za-z0-9.:,_+]"
 IGNORE_JSON_CHAR_REGEX = r"[{}\"\[\]]"
 
 FLATTEN_JSON_SEPARATOR = ''.join(random.choice("{}") for _ in range(10)) + "_"
+JSON_ENUMERATION_STARTED = False
 
 PERFORM_CRACKING = False
 

@@ -2012,9 +2012,22 @@ def skip_empty(empty_parameters, http_request_method):
   settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
 """
+Prints an informational message if a nested JSON structure is detected 
+and JSON parameter enumeration has not started yet.
+"""
+def nested_json_msg(data):
+  if not settings.JSON_ENUMERATION_STARTED:
+    # Detect nested structure by checking if flattening increases the number of keys
+    if len(flatten(data)) > len(data):
+      settings.JSON_ENUMERATION_STARTED = True
+      info_msg = "Enumerating parameters due to nested JSON structure."
+      settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+
+"""
 Pretty-print data as valid JSON using 2-space indentation.
 """
 def format_json(data):
+  nested_json_msg(data)
   return json.dumps(data, indent=2, ensure_ascii=False)
 
 """
