@@ -262,7 +262,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "11"
+REVISION = "12"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -520,6 +520,36 @@ TESTABLE_VALUE = ""
 HTTP_HEADER = ""
 
 EXTRA_HTTP_HEADERS = False
+
+# Lowercase letters (most frequent first)
+FREQ_LOWER = [
+  101, 116, 97, 111, 105, 110, 115, 114, 104, 100,
+  108, 99, 117, 109, 119, 102, 103, 121, 112, 98,
+  118, 107, 106, 120, 113, 122
+]
+
+# Digits (1–9 first, 0 last)
+DIGITS = [49, 50, 51, 52, 53, 54, 55, 56, 57, 48]
+
+# Uppercase letters (most frequent first)
+FREQ_UPPER = [
+  69, 84, 65, 79, 73, 78, 83, 82, 72, 68,
+  76, 67, 85, 77, 87, 70, 71, 89, 80, 66,
+  86, 75, 74, 88, 81, 90
+]
+
+# Common symbols only (last)
+SYMBOLS = [
+    32, 95, 45, 46, 47, 64,  # most common
+    *range(33, 45),          # ! " # $ % & ' ( ) * + ,
+    *range(58, 64),          # : ; < = > ?
+    *range(91, 95),          # [ \ ] ^
+    *range(96, 97),          # `
+    *range(123, 127),        # { | } ~
+]
+
+CHAR_POOL_SINGLE = (FREQ_UPPER + FREQ_LOWER + DIGITS + SYMBOLS)
+CHAR_POOL_MULTI = (FREQ_LOWER + DIGITS + FREQ_UPPER + SYMBOLS)
 
 # The command injection separators.
 SEPARATORS = []
