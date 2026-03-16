@@ -262,7 +262,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "12"
+REVISION = "13"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -538,15 +538,23 @@ FREQ_UPPER = [
   86, 75, 74, 88, 81, 90
 ]
 
-# Common symbols only (last)
-SYMBOLS = [
-    32, 95, 45, 46, 47, 64,  # most common
-    *range(33, 45),          # ! " # $ % & ' ( ) * + ,
-    *range(58, 64),          # : ; < = > ?
-    *range(91, 95),          # [ \ ] ^
-    *range(96, 97),          # `
-    *range(123, 127),        # { | } ~
-]
+# Common printable ASCII symbols (ordered last in charset)
+# Includes space and frequently used separators first: _ - . / @
+# Followed by the remaining printable punctuation ranges:
+# 33–44  -> ! " # $ % & ' ( ) * + ,
+# 58–63  -> : ; < = > ?
+# 91–94  -> [ \ ] ^
+# 96     -> `
+# 123–126-> { | } ~
+# `set()` removes duplicates and `sorted()` keeps the list stable
+SYMBOLS = sorted(set(
+    [32, 95, 45, 46, 47, 64] +
+    list(range(33, 45)) +
+    list(range(58, 64)) +
+    list(range(91, 95)) +
+    list(range(96, 97)) +
+    list(range(123, 127))
+))
 
 CHAR_POOL_SINGLE = (FREQ_UPPER + FREQ_LOWER + DIGITS + SYMBOLS)
 CHAR_POOL_MULTI = (FREQ_LOWER + DIGITS + FREQ_UPPER + SYMBOLS)
