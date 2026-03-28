@@ -1,4 +1,5 @@
 ## Version 4.2 (TBA)
+* Revised: The deprecated `--tor-check` flag has been removed, and Tor connectivity is now handled internally with no separate check option.
 * Revised: Improved handling of injectable parameters in JSON objects.
 * Revised: Refactored heuristic payload preprocessing to normalize randomized placeholders.
 * Added: Standardized JSON output formatting with 2-space indentation.

@@ -765,12 +765,6 @@ try:
     if menu.options.os:
       checks.user_defined_os()
 
-    # Check if defined "--check-tor" option.
-    if menu.options.tor_check and not menu.options.tor:
-      err_msg = "The '--check-tor' swich requires usage of '--tor' switch."
-      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
-
     # Check if defined "--abort-code" option.
     if menu.options.abort_code:
       try:

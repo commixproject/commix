@@ -299,15 +299,7 @@ def request_failed(err_msg):
     except IndexError:
       error_msg = str(err_msg)
 
-  if "Tunnel connection failed" in str(error_msg) and menu.options.tor:
-      err_msg = "Can't establish connection with the Tor network. "  
-      err_msg += "Please make sure that you have "
-      err_msg += "Tor bundle (https://www.torproject.org/download/) or Tor and Privoxy installed and setup "
-      err_msg += "so you could be able to successfully use switch '--tor'."
-      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
-
-  elif any(x in str(error_msg).lower() for x in ["wrong version number", "ssl", "https"]):
+  if any(x in str(error_msg).lower() for x in ["wrong version number", "ssl", "https"]):
     settings.MAX_RETRIES = 1
     error_msg = "Can't establish SSL connection. "
     if settings.MULTI_TARGETS or settings.CRAWLING:
@@ -318,18 +310,18 @@ def request_failed(err_msg):
     else:
       return False
 
-  elif re.search(r"(connection\s*refused|timed?\s*out|no\s*route|unreachable)", str(error_msg), re.IGNORECASE):
+  elif re.search(r"(connection\s*refused|timed?\s*out|no\s*route|unreachable|tunnel)", str(error_msg), re.IGNORECASE):
     settings.MAX_RETRIES = 1
     err = "Unable to connect to the target URL"
     if menu.options.tor:
-      err += " or Tor HTTP proxy."
+      err += " using the Tor network"
     elif menu.options.proxy or menu.options.ignore_proxy: 
-      err += " or proxy"
+      err += " using the defined HTTP proxy"
     err = err + " (Reason: " + str(error_msg)  + "). "
     if menu.options.tor:
-      err += "Please make sure that you have "
-      err += "Tor bundle (https://www.torproject.org/download/) or Tor and Privoxy installed and setup "
-      err += "so you could be able to successfully use switch '--tor'."
+      err += "Please make sure that the Tor service is running and "
+      err += "that Privoxy is properly configured to forward traffic to Tor. "
+      err += "This is required in order to use the '--tor' switch."
     if settings.MULTI_TARGETS or settings.CRAWLING:
       err = err + "Skipping to the next target."
     error_msg = err

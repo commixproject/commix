@@ -29,31 +29,43 @@ Check if Tor HTTP proxy is defined.
 """
 
 def tor_connection_error():
-  err_msg = "It appears that Tor is not properly set. Please "
-  if not menu.options.tor_port:
-    err_msg += "try again using option '--tor-port'."
-  else:
-    err_msg += "check again the provided option '--tor-port'."
+  err_msg = "Tor connection could not be established. "
+  err_msg += "Please ensure Tor is running and reachable"
+  err_msg += " and that any provided options (e.g., '--tor-port') are correct."
   settings.print_data_to_stdout(settings.print_error_msg(err_msg))
   raise SystemExit()
 
+
 def do_check():
-  info_msg = "Testing Tor HTTP proxy settings."
+  info_msg = "Testing connection to the Tor network."
   settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+
   if menu.options.offline:
     err_msg = "You cannot use Tor network while offline."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
+
   try:
     request = _urllib.request.Request(settings.CHECK_TOR_PAGE, method=settings.HTTPMETHOD.GET)
     response = proxy.use_proxy(request)
     page = response.read().decode(settings.DEFAULT_CODEC)
-  except Exception as err_msg:
+  except Exception:
     page = None
-  if not page or "Congratulations" not in page:
+
+  if not page:
     tor_connection_error()
+
+  ip_match = re.search(r'Your IP address appears to be:\s*<strong>(\d+\.\d+\.\d+\.\d+)</strong>', page)
+  tor_ip = ip_match.group(1) if ip_match else "unknown"
+
+  if tor_ip == "unknown":
+    warn_msg = "Tor page fetched but no IP detected. Tor may not be routing traffic properly."
+    settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+
   else:
-    info_msg = "Connection with the Tor HTTP proxy is properly set. "
-    settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+    if settings.VERBOSITY_LEVEL >= 1:
+      debug_msg = "Tor connection established and traffic is routing through exit node: IP: " + tor_ip
+      settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
+
 
 # eof
