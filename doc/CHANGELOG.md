@@ -136,7 +136,7 @@ _Note: For more check the [detailed changeset](https://github.com/commixproject/
 * Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
 * Revised: Improvements regarding Windows-based payloads for every supported technique.
 * Revised: Improvement regarding alternative shell (i.e.`--alter-shell`) for generating Python 3x payloads.
-* Removed: The depricated modules "ICMP exfiltration" and "DNS exfiltration" have been removed.
+* Removed: The deprecated modules "ICMP exfiltration" and "DNS exfiltration" have been removed.
 * Revised: Improvement regarding identifying injection marker (i.e. asterisk `*`) in provided options.
 * Revised: Improvement regarding shellshock module.
 * Added: Support regarding parsing target(s) from piped-input (i.e. `stdin`).
