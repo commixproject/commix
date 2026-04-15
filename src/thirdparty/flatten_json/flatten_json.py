@@ -132,27 +132,43 @@ def unflatten_list(flat_dict, separator=settings.FLATTEN_JSON_SEPARATOR):
 
     def _convert_dict_to_list(obj, parent_obj=None, parent_key=None):
         if not isinstance(obj, dict):
-            return
+            return obj
 
         try:
-            # Attempt to convert all keys to integers
             keys = sorted(int(k) for k in obj)
         except (ValueError, TypeError):
             keys = []
 
-        if (keys and keys[0] == 0 and keys[-1] == len(keys) - 1 and
-                sum(keys) == len(keys) * (len(keys) - 1) // 2 and
-                check_if_numbers_are_consecutive(keys)):
-            # Looks like a list
+        is_list_like = (
+            keys and
+            keys[0] == 0 and
+            keys[-1] == len(keys) - 1 and
+            sum(keys) == len(keys) * (len(keys) - 1) // 2 and
+            check_if_numbers_are_consecutive(keys)
+        )
+
+        if is_list_like:
+            new_list = [obj[str(k)] for k in keys]
+
+            # Recursively process list elements
+            for i, item in enumerate(new_list):
+                if isinstance(item, dict):
+                    new_list[i] = _convert_dict_to_list(item)
+
+            # Replace in parent or return if root
             if parent_obj is not None and parent_key is not None:
-                parent_obj[parent_key] = [obj[str(k)] for k in keys]
-                obj = parent_obj[parent_key]  # update reference for nested recursion
+                parent_obj[parent_key] = new_list
+                return new_list
+            else:
+                return new_list
 
-        # Recursively process nested dictionaries
-        if isinstance(obj, dict):
-            for k, v in obj.items():
-                if isinstance(v, dict):
-                    _convert_dict_to_list(v, obj, k)
+        # Not list-like → recurse normally
+        for k, v in list(obj.items()):
+            if isinstance(v, dict):
+                obj[k] = _convert_dict_to_list(v, obj, k)
 
-    _convert_dict_to_list(unflattened_dict, None, None)
+        return obj
+
+
+    unflattened_dict = _convert_dict_to_list(unflattened_dict)
     return unflattened_dict
