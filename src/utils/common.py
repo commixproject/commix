@@ -141,9 +141,7 @@ Get total number of days from last update
 def days_from_last_update():
   days_from_last_update = int(time.time() - os.path.getmtime(settings.SETTINGS_PATH)) // (3600 * 24)
   if days_from_last_update > settings.NAGGING_DAYS:
-    warn_msg = "You haven't updated " + settings.APPLICATION + " for more than "
-    warn_msg += str(days_from_last_update) + " day"
-    warn_msg += "s"[days_from_last_update == 1:] + "!"
+    warn_msg = "Last update " + str(days_from_last_update) + " days ago, update check is recommended."
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
 """
