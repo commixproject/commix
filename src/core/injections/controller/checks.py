@@ -3104,7 +3104,7 @@ Adjusts the timesec delay
 def time_related_timesec():
   min_safe_delay = 0.5  # minimum safe delay
   if settings.TIME_RELATED_ATTACK and settings.TIMESEC < min_safe_delay:
-    warn_msg = "Adjusting '--time-sec' to minimum safe delay of '" + str(min_safe_delay) + "'."
+    warn_msg = "Adjusting '--time-sec' to minimum safe delay of " + str(min_safe_delay) + "s. In case of inconsistencies, increase it manually."
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
     return min_safe_delay
   else:

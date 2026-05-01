@@ -821,7 +821,7 @@ try:
           pass
 
     # Seconds to delay between each HTTP request.
-    if menu.options.delay > 0:
+    if menu.options.delay != 0:
       settings.DELAY = menu.options.delay
 
     # Check if defined "--timesec" option.

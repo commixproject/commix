@@ -438,8 +438,7 @@ def do_results_based_proccess(url, timesec, filename, http_request_method, injec
   call_tmp_based = False
   next_attack_vector = False
   export_injection_info = False
-  timesec = checks.time_related_timesec()
-  
+
   if technique == settings.INJECTION_TECHNIQUE.CLASSIC:
     try:
       import html
