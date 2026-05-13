@@ -9,8 +9,8 @@
 
 ## Version 4.1 (2025-12-20)
 * Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
-* Fixed: Handling of parameter names containing non-ASCII characters.
-* Fixed: Handling of non-ASCII characters in URLs to ensure proper request encoding.
+* Fixed: Improved handling of parameter names containing non-ASCII characters.
+* Fixed: Improved handling of non-ASCII characters in URLs to ensure proper request encoding.
 * Revised: Refactored with improved page decompression and safer HTTP response handling.
 * Revised: Refactored OS looping to respect user-specified targets or automatically iterate over supported OSes if none are specified or detected.
 * Revised: Refactored User-Agent strings to be loaded from external files rather than being hardcoded.
