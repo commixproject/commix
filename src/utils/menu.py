@@ -417,15 +417,10 @@ file_access.add_option("--file-write",
                 dest="file_write",
                 help="Write to a file on the target host.")
 
-file_access.add_option("--file-upload",
-                action="store",
-                dest="file_upload",
-                help="Upload a file on the target host.")
-
 file_access.add_option("--file-dest",
                 action="store",
                 dest="file_dest",
-                help="Host's absolute filepath to write and/or upload to.")
+                help="Host's absolute filepath to write to.")
 
 # Modules options
 modules = OptionGroup(parser, Style.BRIGHT + Style.UNDERLINE + "Modules" + Style.RESET_ALL,
@@ -753,7 +748,7 @@ def enumeration_options():
 Check if file access options are enabled.
 """
 def file_access_options():
-  if any((options.file_write, options.file_upload, options.file_read)):
+  if any((options.file_write, options.file_read)):
     return True
 
 # eof

@@ -496,14 +496,13 @@ def main(filename, url, http_request_method):
         raise SystemExit()
 
     # Check the file-destination
-    if menu.options.file_write and not menu.options.file_dest or \
-    menu.options.file_upload  and not menu.options.file_dest:
-      err_msg = "Host's absolute filepath to write and/or upload, must be specified (i.e. '--file-dest')."
+    if menu.options.file_write and not menu.options.file_dest:
+      err_msg = "Host's absolute filepath to write, must be specified (i.e. '--file-dest')."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
       raise SystemExit()
 
-    if menu.options.file_dest and menu.options.file_write == None and menu.options.file_upload == None:
-      err_msg = "You must enter the '--file-write' or '--file-upload' parameter."
+    if menu.options.file_dest and menu.options.file_write == None:
+      err_msg = "You must enter the '--file-write' parameter."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
       raise SystemExit()
 
@@ -522,18 +521,6 @@ def main(filename, url, http_request_method):
                                                    password=password
                                                    )
       try:
-        # Check if defined "--file-upload" option.
-        if menu.options.file_upload:
-          menu.options.file_upload = os.path.abspath(menu.options.file_upload)
-          checks.file_upload()
-          try:
-            _urllib.request.urlopen(menu.options.file_upload, timeout=settings.TIMEOUT)
-          except _urllib.error.HTTPError as err_msg:
-            settings.print_data_to_stdout(settings.print_critical_msg(str(err_msg.code)))
-            raise SystemExit()
-          except _urllib.error.URLError as err_msg:
-            settings.print_data_to_stdout(settings.print_critical_msg(str(err_msg.reason) + "."))
-            raise SystemExit()
         try:
           info_msg = "Performing heuristic (passive) tests on the target URL."
           settings.print_data_to_stdout(settings.print_info_msg(info_msg))
@@ -566,7 +553,6 @@ def main(filename, url, http_request_method):
         if menu.options.tamper:
           settings.USER_APPLIED_TAMPER = menu.options.tamper
           checks.tamper_scripts(stored_tamper_scripts=False)
-
       except AttributeError:
         pass
 

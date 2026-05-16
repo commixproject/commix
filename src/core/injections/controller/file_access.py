@@ -98,51 +98,6 @@ def file_write(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec,
   checks.file_write_status(shell, dest_to_write)
 
 """
-Upload a file on the target host.
-"""
-def file_upload(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response, technique):
-  if technique == settings.INJECTION_TECHNIQUE.CLASSIC:
-    from src.core.injections.results_based.techniques.classic import cb_injector as injector
-  elif technique == settings.INJECTION_TECHNIQUE.DYNAMIC_CODE:
-    from src.core.injections.results_based.techniques.eval_based import eb_injector as injector
-  elif technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
-    from src.core.injections.blind.techniques.time_based import tb_injector as injector
-  elif technique == settings.INJECTION_TECHNIQUE.FILE_BASED:   
-    from src.core.injections.semiblind.techniques.file_based import fb_injector as injector
-  else:
-    from src.core.injections.semiblind.techniques.tempfile_based import tfb_injector as injector
-  cmd, dest_to_upload = checks.check_file_to_upload()
-  if settings.TIME_RELATED_ATTACK:
-    if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
-      check_exec_time, shell = injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response, technique)
-    else:
-      check_exec_time, shell = injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response, technique)
-  else:
-    if technique == settings.INJECTION_TECHNIQUE.FILE_BASED:
-      response = injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, technique)
-    else:
-      response = injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, technique)
-    shell = injector.injection_results(response, TAG, cmd, technique, url, OUTPUT_TEXTFILE, timesec)
-  shell = "".join(str(p) for p in shell)
-  cmd = checks.check_file(dest_to_upload)
-  if settings.TIME_RELATED_ATTACK:
-    check_exec_time, shell = injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response, technique)
-  else:
-    if settings.USE_BACKTICKS:
-      cmd = checks.remove_command_substitution(cmd)
-    if technique == settings.INJECTION_TECHNIQUE.FILE_BASED:
-      response = injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, technique)
-    else:
-      response = injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, technique)
-    shell = injector.injection_results(response, TAG, cmd, technique, url, OUTPUT_TEXTFILE, timesec)
-  shell = "".join(str(p) for p in shell)
-  if settings.TIME_RELATED_ATTACK:
-    if settings.VERBOSITY_LEVEL == 0:
-      settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
-  checks.file_upload_status(shell, dest_to_upload)
-
-
-"""
 Read a file from the target host.
 """
 def file_read(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response, technique):
@@ -190,15 +145,7 @@ def do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, h
   if menu.options.file_write:
     file_write(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response, technique)
     settings.FILE_ACCESS_DONE = True
-
-  if menu.options.file_upload:
-    if settings.TARGET_OS == settings.OS.WINDOWS:
-      check_option = "--file-upload"
-      checks.unavailable_option(check_option)
-    else:
-      file_upload(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response, technique)
-    settings.FILE_ACCESS_DONE = True
-
+    
   if menu.options.file_read:
     file_read(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response, technique)
     settings.FILE_ACCESS_DONE = True

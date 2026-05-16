@@ -56,7 +56,7 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
       else:
         cmd = "powershell.exe -InputFormat none write-host ([string](cmd /c " + cmd + ")).trim()"
 
-  if menu.options.file_write or menu.options.file_upload:
+  if menu.options.file_write:
     minlen = 0
   else:
     minlen = 1

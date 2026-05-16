@@ -262,7 +262,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "20"
+REVISION = "21"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -703,9 +703,6 @@ CERTUTIL_DECODE_CMD = "certutil -decode "
 
 # Write file
 FILE_WRITE = "printf "
-
-# Write file
-FILE_UPLOAD = "wget "
 
 # /etc/passwd
 PASSWD_FILE = "/etc/passwd"

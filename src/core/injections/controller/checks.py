@@ -2642,11 +2642,11 @@ def delete_tmp(tmp_fname):
 """
 Check if file exists.
 """
-def check_file(dest_to_upload):
+def check_file(remote_file_path):
   if settings.TARGET_OS == settings.OS.WINDOWS:
-    cmd = settings.FILE_LIST_WIN + dest_to_upload.replace("\\","\\\\")
+    cmd = settings.FILE_LIST_WIN + remote_file_path.replace("\\","\\\\")
   else:
-    cmd = settings.FILE_LIST + dest_to_upload
+    cmd = settings.FILE_LIST + remote_file_path
     cmd = add_command_substitution(cmd)
   return cmd
 
@@ -2695,13 +2695,11 @@ def file_read_status(shell, file_to_read, filename):
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
 """
-Check upload/write destination
+Build the final destination path for file write operations.
 """
 def check_destination(destination):
   if menu.options.file_write:
     where = menu.options.file_write
-  else:
-    where = menu.options.file_upload
   if os.path.split(destination)[1] == "" :
     _ = os.path.split(destination)[0] + "/" + os.path.split(where)[1]
   elif os.path.split(destination)[0] == "/":
@@ -2751,98 +2749,6 @@ def file_write_status(shell, dest_to_write):
     warn_msg = "It seems you do not have permission to write files to the remote directory '" + dest_to_write + "'."
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
-"""
-Handle the file upload process to a remote target.
-"""
-def check_file_to_upload():
-  file_to_upload = menu.options.file_upload.encode(settings.DEFAULT_CODEC).decode()
-  try:
-    _urllib.request.urlopen(file_to_upload, timeout=settings.TIMEOUT)
-  except (_urllib.error.HTTPError, _urllib.error.URLError) as err_msg:
-    warn_msg = "The remote file '" + file_to_upload + "' does not appear to exist. (" +str(err_msg)+ ")"
-    settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
-    raise SystemExit()
-  except ValueError as err_msg:
-    err_msg = str(err_msg[0]).capitalize() + str(err_msg)[1]
-    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
-  dest_to_upload = check_destination(destination=menu.options.file_dest)
-  info_msg = "Attempting to upload the file '"
-  info_msg += file_to_upload + "' to the remote directory '" + dest_to_upload + "'."
-  settings.print_data_to_stdout(settings.print_info_msg(info_msg))
-  # Execute command
-  cmd = settings.FILE_UPLOAD + file_to_upload + " -O " + dest_to_upload
-  return cmd, dest_to_upload
-
-"""
-File upload status.
-"""
-def file_upload_status(shell, dest_to_upload):
-  if shell:
-    info_msg = "The file has been successfully uploaded on remote directory '" + dest_to_upload + "'."
-    settings.print_data_to_stdout(settings.print_bold_info_msg(info_msg))
-  else:
-    warn_msg = "It seems you do not have permission to upload files on the remote directory '" + dest_to_upload + "'."
-    settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
-
-"""
-Check if defined "--file-upload" option.
-"""
-def file_upload():
-  if not re.match(settings.VALID_URL_FORMAT, menu.options.file_upload):
-    # if not menu.options.file_dest.endswith("/"):
-    #   menu.options.file_dest = menu.options.file_dest + "/"
-    # Check if not defined URL for upload.
-    while True:
-      message = "Do you want to enable a local HTTP server? [Y/n] > "
-      enable_HTTP_server = common.read_input(message, default="Y", check_batch=True)
-      if enable_HTTP_server in settings.CHOICE_YES:
-
-        # Check if file exists
-        if not os.path.isfile(menu.options.file_upload):
-          err_msg = "The '" + menu.options.file_upload + "' file, does not exist."
-          settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-          raise SystemExit()
-
-        # Setting the local HTTP server.
-        if settings.LOCAL_HTTP_IP == None:
-          while True:
-            message = "Please enter your interface IP address > "
-            ip_addr = common.read_input(message, default=None, check_batch=True)
-            # check if IP address is valid
-            ip_check = simple_http_server.is_valid_ipv4(ip_addr)
-            if ip_check == False:
-              err_msg = "The provided IP address seems not valid."
-              settings.print_data_to_stdout(settings.print_error_msg(err_msg))
-              pass
-            else:
-              settings.LOCAL_HTTP_IP = ip_addr
-              break
-
-        # Check for invalid HTTP server's port.
-        if settings.LOCAL_HTTP_PORT < 1 or settings.LOCAL_HTTP_PORT > 65535:
-          err_msg = "Invalid HTTP server's port (" + str(settings.LOCAL_HTTP_PORT) + ")."
-          settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-          raise SystemExit()
-
-        http_server = "http://" + str(settings.LOCAL_HTTP_IP) + ":" + str(settings.LOCAL_HTTP_PORT)
-        info_msg = "Setting the HTTP server on '" + http_server + "/'. "
-        settings.print_data_to_stdout(settings.print_info_msg(info_msg))
-        menu.options.file_upload = http_server + menu.options.file_upload
-        simple_http_server.main()
-        break
-
-      elif enable_HTTP_server in settings.CHOICE_NO:
-        if not re.match(settings.VALID_URL_FORMAT, menu.options.file_upload):
-          err_msg = "The provided '--file-upload' option requires the activation of a local HTTP server."
-          settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-          raise SystemExit()
-        break
-      elif enable_HTTP_server in settings.CHOICE_QUIT:
-        raise SystemExit()
-      else:
-        common.invalid_option(enable_HTTP_server)
-        pass
 
 def define_vulnerable_http_header(http_header_name):
   if http_header_name == settings.USER_AGENT.lower():
@@ -2865,11 +2771,6 @@ def check_wrong_flags():
     if menu.options.passwords:
       warn_msg = "The '--passwords' option is not yet supported on Windows targets."
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
-    if menu.options.file_upload :
-      warn_msg = "The '--file-upload' option is not yet supported on Windows targets. "
-      warn_msg += "Instead, use the '--file-write' option."
-      settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
-      raise SystemExit()
   else:
     if menu.options.is_admin :
       warn_msg = "Switching '--is-admin' to '--is-root' because "

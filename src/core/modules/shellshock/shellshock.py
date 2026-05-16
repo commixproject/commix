@@ -164,17 +164,6 @@ def file_access(url, cve, check_header, filename):
     checks.file_write_status(shell, dest_to_write)
     settings.FILE_ACCESS_DONE = True
 
-  if menu.options.file_upload:
-    cmd, dest_to_upload = checks.check_file_to_upload()
-    shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
-    shell = "".join(str(p) for p in shell)
-    cmd = checks.check_file(dest_to_upload)
-    cmd = checks.remove_command_substitution(cmd)
-    shell, payload = cmd_exec(url, cmd, cve, check_header, filename)
-    shell = "".join(str(p) for p in shell)
-    checks.file_upload_status(shell, dest_to_upload)
-    settings.FILE_ACCESS_DONE = True
-
   if menu.options.file_read:
     cmd, file_to_read = checks.file_content_to_read()
     cmd = checks.remove_command_substitution(cmd)
