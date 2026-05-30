@@ -262,7 +262,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "21"
+REVISION = "22"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -443,12 +443,6 @@ IGNORE_IDENTIFIED_TARGET_OS = None
 
 # Verbosity level (0-4, Default: 0)
 VERBOSITY_LEVEL = 0
-
-# Local HTTP server ip
-LOCAL_HTTP_IP = ""
-
-# Local HTTP server port
-LOCAL_HTTP_PORT = random.randint(50000,60000)
 
 HTML_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "data", "html"))
 DISABLED_CONTENT_EXTENSIONS = (".py", ".pyc", ".md", ".txt", ".bak", ".conf", ".zip", "~")

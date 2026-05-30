@@ -33,7 +33,6 @@ from src.utils import common
 from src.utils import logs
 from src.utils import menu
 from src.utils import settings
-from src.utils import simple_http_server
 from src.thirdparty.odict import OrderedDict
 from src.core.convert import hexdecode
 from socket import error as SocketError

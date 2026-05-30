@@ -35,7 +35,6 @@ from src.utils import crawler
 from src.utils import settings
 from src.core.requests import parameters
 from src.utils import session_handler
-from src.utils import simple_http_server
 from src.thirdparty.colorama import Fore, Back, Style, init
 from src.core.testing import smoke_test
 from src.core.requests import tor
@@ -819,12 +818,6 @@ try:
       warn_msg = "Increasing default value for option '--time-sec' to"
       warn_msg += " " + str(settings.TIMESEC) + ", because switch '--tor' was provided."
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
-
-    # Local IP address
-    if not menu.options.offline:
-      settings.LOCAL_HTTP_IP = simple_http_server.grab_ip_addr()
-    else:
-      settings.LOCAL_HTTP_IP = None
 
     if menu.options.sitemap_url:
       settings.SITEMAP_CHECK = True
