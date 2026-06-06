@@ -773,6 +773,8 @@ try:
 
     # Check if defined "--wizard" option.
     if menu.options.wizard:
+      info_msg = "Starting wizard interface."
+      settings.print_data_to_stdout(settings.print_info_msg(info_msg))
       message = "Enter full target URL (-u) > "
       if menu.options.url:
         settings.print_data_to_stdout(settings.print_message(message + str(menu.options.url)))
