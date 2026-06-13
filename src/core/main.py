@@ -775,18 +775,17 @@ try:
     if menu.options.wizard:
       info_msg = "Starting wizard interface."
       settings.print_data_to_stdout(settings.print_info_msg(info_msg))
-      message = "Enter full target URL (-u) > "
+      message = "Please enter full target URL (-u) > "
       if menu.options.url:
         settings.print_data_to_stdout(settings.print_message(message + str(menu.options.url)))
       elif not menu.options.url and not settings.STDIN_PARSING:
         while True:
-          message = "Enter full target URL (-u) > "
           menu.options.url = common.read_input(message, default=None, check_batch=True)
           if menu.options.url is None or len(menu.options.url) == 0:
             pass
           else:
             break
-      message = "Enter POST data (--data) [Enter for none] > "
+      message = "POST data (--data) [Enter for None] > "
       if settings.STDIN_PARSING or menu.options.data:
         settings.print_data_to_stdout(settings.print_message(message + str(menu.options.data)))
       else:
@@ -794,7 +793,7 @@ try:
         if menu.options.data is not None and len(menu.options.data) == 0:
           menu.options.data = False
       while True:
-        message = "Enter injection level (--level) [1-3, Default: 1] > "
+        message = "Injection difficulty (--level) [1-3, Default: 1] > "
         if settings.STDIN_PARSING:
           settings.print_data_to_stdout(settings.print_message(message + str(settings.INJECTION_LEVEL)))
           break
