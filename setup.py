@@ -15,11 +15,14 @@ For more see the file 'readme/COPYING' for copying permission.
 
 from setuptools import setup, find_packages
 
+with open('README.md', 'r', encoding='utf-8') as f:
+    long_description = f.read()
+
 setup(
       name='commix',
       version='4.2.dev',
       description='Automated All-in-One OS Command Injection Exploitation Tool',
-      long_description=open('README.md').read(),
+      long_description=long_description,
       long_description_content_type='text/markdown',
       author='Anastasios Stasinopoulos',
       url='https://commixproject.com',

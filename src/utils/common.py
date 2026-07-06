@@ -210,7 +210,9 @@ def create_github_issue(err_msg, exc_msg):
   )
 
   try:
-    content = _urllib.request.urlopen(request, timeout=settings.TIMEOUT).read()
+    response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
+    content = response.read()
+    response.close()
     _ = json.loads(content)
 
     duplicate = _["total_count"] > 0
