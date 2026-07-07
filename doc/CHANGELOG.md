@@ -86,7 +86,7 @@ _Note: For more check the [detailed changeset](https://github.com/commixproject/
 * Added: New switch `--ignore-proxy` to ignore the system default HTTP proxy.
 * Revised: Minor improvement regarding parsing HTTP requests through HTTP proxy (i.e. `--proxy` option).
 * Added: New switch `--smart` for conducting through tests only in case of positive heuristic(s).
-* Added: Translation for [README.md](https://github.com/commixproject/commix/blob/master/doc/translations/README-tr-TR.md) in Turkish. (via @Kazgangap)
+* Added: Turkish translation of [README.md](https://github.com/commixproject/commix/blob/master/doc/translations/README-tr-TR.md) (via @Kazgangap).
 * Revised: Minor improvement regarding parsing SOAP/XML POST data.
 
 _Note: For more check the [detailed changeset](https://github.com/commixproject/commix/compare/v3.8...v3.9)._
@@ -95,7 +95,7 @@ _Note: For more check the [detailed changeset](https://github.com/commixproject/
 * Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
 * Revised: Minor improvement regarding parsing raw HTTP request from a file (i.e. `-r` option).
 * Revised: Minor improvement regarding dynamic code evaluation technique (i.e. command execution output).
-* Added: Translation for [README.md](https://github.com/commixproject/commix/blob/master/doc/translations/README-fa-FA.md) in Farsi(Persian) (via @verfosec)
+* Added: Farsi(Persian) translation of [README.md](https://github.com/commixproject/commix/blob/master/doc/translations/README-fa-FA.md) (via @verfosec).
 * Fixed: Minor bug-fix regarding `--skip-empty` flag, for skipping the testing of the parameter(s) with empty value(s).
 * Revised: Minor improvement regarding tamper script "uninitializedvariable.py", for adding randomly generated uninitialized bash variables between the characters of each command of the generated payloads.
 * Revised: Minor improvement regarding skipping further tests involving target that an injection point has already been detected.
@@ -114,7 +114,7 @@ _Note: For more check the [detailed changeset](https://github.com/commixproject/
 
 ## Version 3.7 (2023-02-17)
 * Fixed: Multiple bug-fixes regarding several reported unhandled exceptions.
-* Added: Translation for [README.md](https://github.com/commixproject/commix/blob/master/doc/translations/README-idn-IDN.md) in Indonesian (via @galihap76)
+* Added: Indonesian translation of [README.md](https://github.com/commixproject/commix/blob/master/doc/translations/README-idn-IDN.md) (via @galihap76).
 * Revised: Improvements regarding parsing HTTP requests through HTTP proxy (i.e. `--proxy` option).
 * Revised: Improvements regarding identifying injection marker (i.e. asterisk `*`) in provided parameter values (e.g. GET, POST or HTTP headers). 
 * Added: New option ` --crawl-exclude` regarding setting regular expression for excluding pages from crawling (e.g. `logout`).
