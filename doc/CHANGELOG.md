@@ -1,4 +1,5 @@
 ## Version 4.2 (TBA)
+* Added: Spanish translation of [README.md](https://github.com/commixproject/commix/blob/master/doc/translations/README-es-ES.md).
 * Added: French translation of [README.md](https://github.com/commixproject/commix/blob/master/doc/translations/README-fr-FR.md).
 * Removed: The local HTTP server functionality, previously used by the deprecated `--file-upload` option, has been removed.
 * Revised: The deprecated `--file-upload` option has been removed, as `--file-write` provides nearly identical functionality.

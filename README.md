@@ -11,8 +11,8 @@
 
 **Commix** (short for [**comm**]and [**i**]njection e[**x**]ploiter) is an open source penetration testing tool, written by **[Anastasios Stasinopoulos](https://github.com/stasinopoulos)** (**[@ancst](https://x.com/ancst)**), that automates the detection and exploitation of **[command injection](https://www.owasp.org/index.php/Command_Injection)** vulnerabilities.
 
-
 ![Screenshot](https://commixproject.com/images/background.png)
+
 You can visit the [collection of screenshots](https://github.com/commixproject/commix/wiki/Screenshots) demonstrating some of the features on the wiki.
 
 ## Installation
@@ -24,7 +24,6 @@ You can download commix on any platform by cloning the official Git repository :
 Alternatively, you can download the latest [tarball](https://github.com/commixproject/commix/tarball/master) or [zipball](https://github.com/commixproject/commix/zipball/master).
 
 *__Note:__ **[Python](http://www.python.org/download/)** (version **2.6**, **2.7** or **3.x**) is required for running commix.*
-
 
 ## Usage
 
@@ -47,4 +46,5 @@ To get an overview of commix available options, switches and/or basic ideas on h
 * [French](https://github.com/commixproject/commix/blob/master/doc/translations/README-fr-FR.md)
 * [Greek](https://github.com/commixproject/commix/blob/master/doc/translations/README-gr-GR.md)
 * [Indonesian](https://github.com/commixproject/commix/blob/master/doc/translations/README-idn-IDN.md)
+* [Spanish](https://github.com/commixproject/commix/blob/master/doc/translations/README-es-ES.md)
 * [Turkish](https://github.com/commixproject/commix/blob/master/doc/translations/README-tr-TR.md)
