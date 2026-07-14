@@ -22,9 +22,8 @@ def do_check(requirement):
   try:
     # Pipe output to the file path of the null device, for silence.
     # i.e '/dev/null' for POSIX, 'nul' for Windows
-    null = open(os.devnull,"w")
-    subprocess.Popen(requirement, stdout=null, stderr=null)
-    null.close()
+    with open(os.devnull, "w") as null:
+      subprocess.Popen(requirement, stdout=null, stderr=null)
     return True
 
   except OSError:
