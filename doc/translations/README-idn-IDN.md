@@ -9,7 +9,7 @@
   </p>
 </p>
 
-**Commix** (kependekan dari [**comm**]and [**i**]njection e[**x**]ploiter) adalah alat pengujian penetrasi open source, yang ditulis oleh **[Anastasios Stasinopoulos](https://github.com/stasinopoulos)** (**[@ancst](https://x.com/ancst)**), yang mengotomatiskan deteksi dan eksploitasi kerentanan **[command injection](https://www.owasp.org/index.php/Command_Injection)**.
+**Commix** (kependekan dari [**comm**]and [**i**]njection e[**x**]ploiter) adalah alat pengujian penetrasi open source, yang ditulis oleh **[Anastasios Stasinopoulos](https://github.com/stasinopoulos)** (**[@ancst](https://x.com/ancst)**), yang mengotomatiskan deteksi dan eksploitasi kerentanan **[command injection](https://owasp.org/www-community/attacks/Command_Injection)**.
 
 
 ![Screenshot](https://commixproject.com/images/background.png)

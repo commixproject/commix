@@ -11,7 +11,7 @@
 </p>
 
 
-**Commix** (abreviatura de [**comm**]and [**i**]njection e[**x**]ploiter) es una herramienta de pruebas de penetración de código abierto, escrita por **[Anastasios Stasinopoulos](https://github.com/stasinopoulos)** (**[@ancst](https://x.com/ancst)**), que automatiza la detección y explotación de vulnerabilidades de tipo **[command injection](https://www.owasp.org/index.php/Command_Injection)**.
+**Commix** (abreviatura de [**comm**]and [**i**]njection e[**x**]ploiter) es una herramienta de pruebas de penetración de código abierto, escrita por **[Anastasios Stasinopoulos](https://github.com/stasinopoulos)** (**[@ancst](https://x.com/ancst)**), que automatiza la detección y explotación de vulnerabilidades de tipo **[command injection](https://owasp.org/www-community/attacks/Command_Injection)**.
 
 ![Screenshot](https://commixproject.com/images/background.png)
 

@@ -9,7 +9,7 @@
   </p>
 </p>
 
-**کامیکس** (مخفف [**کام**]ند ا[**ی**]نجکشن ا[**کس**]پلویتر) یک ابزار متن‌باز تست‌نفوذ است که توسط **[آناستاسیوس استاسینوپولوس](https://github.com/stasinopoulos)** (**[@ancst](https://x.com/ancst)**) نوشته شده است که فرایند کشف و بهره‌برداری از آسیپ پذیری های **[کامند اینجکشن](https://www.owasp.org/index.php/Command_Injection)** را خودکار می‌کند.
+**کامیکس** (مخفف [**کام**]ند ا[**ی**]نجکشن ا[**کس**]پلویتر) یک ابزار متن‌باز تست‌نفوذ است که توسط **[آناستاسیوس استاسینوپولوس](https://github.com/stasinopoulos)** (**[@ancst](https://x.com/ancst)**) نوشته شده است که فرایند کشف و بهره‌برداری از آسیپ پذیری های **[کامند اینجکشن](https://owasp.org/www-community/attacks/Command_Injection)** را خودکار می‌کند.
 
 
 ![Screenshot](https://commixproject.com/images/background.png)
