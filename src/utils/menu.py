@@ -673,57 +673,77 @@ if not options.version:
 # argv input errors
 settings.sys_argv_errors()
 
-"""
-The "os_shell" available options.
-"""
+# Common interactive shell options.
+COMMON_OPTIONS = (
+    (("?",), "show this help"),
+    (("back",), "return to the previous menu"),
+    (("quit", "exit"), "exit Commix (or press <Ctrl-C>)"),
+)
+
+# OS shell specific options.
+OS_SHELL_OPTIONS = COMMON_OPTIONS + (
+    (("reverse_tcp",), "configure a reverse TCP shell"),
+    (("bind_tcp",), "configure a bind TCP shell"),
+)
+
+# Reverse TCP shell specific options.
+REVERSE_TCP_OPTIONS = COMMON_OPTIONS + (
+    (("set",), "set a context option"),
+    (("os_shell",), "return to the OS shell"),
+    (("bind_tcp",), "switch to the bind TCP shell"),
+)
+
+# Bind TCP shell specific options.
+BIND_TCP_OPTIONS = COMMON_OPTIONS + (
+    (("set",), "set a context option"),
+    (("os_shell",), "return to the OS shell"),
+    (("reverse_tcp",), "switch to the reverse TCP shell"),
+)
+
+# Available smartphones HTTP User-Agent headers.
+MOBILE_USER_AGENTS = (
+    ("1", "BlackBerry Z10"),
+    ("2", "Samsung Galaxy S7"),
+    ("3", "HP iPAQ 6365"),
+    ("4", "HTC 10"),
+    ("5", "Huawei P8"),
+    ("6", "Apple iPhone 8"),
+    ("7", "Microsoft Lumia 950"),
+    ("8", "Google Nexus 7"),
+    ("9", "Nokia N97"),
+    ("10", "Google Pixel"),
+    ("11", "Xiaomi Mi 3"),
+)
+
+
+# Print available context options.
+def _print_options(context, options):
+    ...
+
+
+# Print available mobile user agents.
+def _print_mobile_user_agents():
+    ...
+
+
+# Display OS shell options.
 def os_shell_options():
-    settings.print_data_to_stdout("""""" + Style.BRIGHT + """Available 'os_shell' options:""" + Style.RESET_ALL + """
-""" + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """?""" + Style.RESET_ALL + """' to get all the available options.
-""" + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """back""" + Style.RESET_ALL + """' to move back from the current context.
-""" + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """quit""" + Style.RESET_ALL + """' / '""" + Style.BRIGHT + """exit""" + Style.RESET_ALL + """' (or use <Ctrl-C>) to quit commix.
-""" + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """reverse_tcp""" + Style.RESET_ALL + """' to get a reverse TCP connection.
-""" + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """bind_tcp""" + Style.RESET_ALL + """' to set a bind TCP connection.""")
+    _print_options("os_shell", OS_SHELL_OPTIONS)
 
-"""
-The "reverse_tcp" available options.
-"""
+
+# Display reverse TCP options.
 def reverse_tcp_options():
-    settings.print_data_to_stdout("""""" + Style.BRIGHT + """Available 'reverse_tcp' options:""" + Style.RESET_ALL + """
-""" + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """?""" + Style.RESET_ALL + """' to get all the available options.
-""" + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """set""" + Style.RESET_ALL + """' to set a context-specific variable to a value.
-""" + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """back""" + Style.RESET_ALL + """' to move back from the current context.
-""" + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """quit""" + Style.RESET_ALL + """' / '""" + Style.BRIGHT + """exit""" + Style.RESET_ALL + """' (or use <Ctrl-C>) to quit commix.
-""" + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """os_shell""" + Style.RESET_ALL + """' to get into an operating system command shell.
-""" + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """bind_tcp""" + Style.RESET_ALL + """' to set a bind TCP connection.""")
+    _print_options("reverse_tcp", REVERSE_TCP_OPTIONS)
 
-"""
-The "bind_tcp" available options.
-"""
+
+# Display bind TCP options.
 def bind_tcp_options():
-    settings.print_data_to_stdout("""""" + Style.BRIGHT + """Available 'bind_tcp' options:""" + Style.RESET_ALL + """
-""" + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """?""" + Style.RESET_ALL + """' to get all the available options.
-""" + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """set""" + Style.RESET_ALL + """' to set a context-specific variable to a value.
-""" + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """back""" + Style.RESET_ALL + """' to move back from the current context.
-""" + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """quit""" + Style.RESET_ALL + """' / '""" + Style.BRIGHT + """exit""" + Style.RESET_ALL + """' (or use <Ctrl-C>) to quit commix.
-""" + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """os_shell""" + Style.RESET_ALL + """' to get into an operating system command shell.
-""" + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """reverse_tcp""" + Style.RESET_ALL + """' to get a reverse TCP connection.""")
+    _print_options("bind_tcp", BIND_TCP_OPTIONS)
 
-"""
-The available mobile user agents.
-"""
+
+# Display mobile user agents.
 def mobile_user_agents():
-    settings.print_data_to_stdout("""""" + Style.BRIGHT + """Available smartphones HTTP User-Agent headers:""" + Style.RESET_ALL + """
-""" + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """1""" + Style.RESET_ALL + """' for BlackBerry Z10.
-""" + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """2""" + Style.RESET_ALL + """' for Samsung Galaxy S7.
-""" + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """3""" + Style.RESET_ALL + """' for HP iPAQ 6365.
-""" + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """4""" + Style.RESET_ALL + """' for HTC 10.
-""" + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """5""" + Style.RESET_ALL + """' for Huawei P8.
-""" + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """6""" + Style.RESET_ALL + """' for Apple iPhone 8.
-""" + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """7""" + Style.RESET_ALL + """' for Microsoft Lumia 950.
-""" + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """8""" + Style.RESET_ALL + """' for Google Nexus 7.
-""" + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """9""" + Style.RESET_ALL + """' for Nokia N97.
-""" + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """10""" + Style.RESET_ALL + """' for Google Pixel".
-""" + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """11""" + Style.RESET_ALL + """' for Xiaomi Mi 3.""")
+    _print_mobile_user_agents()
 
 """
 The tab compliter (shell options).
