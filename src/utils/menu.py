@@ -673,34 +673,30 @@ if not options.version:
 # argv input errors
 settings.sys_argv_errors()
 
-# Common interactive shell options.
 COMMON_OPTIONS = (
     (("?",), "show this help"),
     (("back",), "return to the previous menu"),
     (("quit", "exit"), "exit Commix (or press <Ctrl-C>)"),
 )
 
-# OS shell specific options.
 OS_SHELL_OPTIONS = COMMON_OPTIONS + (
     (("reverse_tcp",), "configure a reverse TCP shell"),
     (("bind_tcp",), "configure a bind TCP shell"),
 )
 
-# Reverse TCP shell specific options.
 REVERSE_TCP_OPTIONS = COMMON_OPTIONS + (
     (("set",), "set a context option"),
     (("os_shell",), "return to the OS shell"),
     (("bind_tcp",), "switch to the bind TCP shell"),
 )
 
-# Bind TCP shell specific options.
 BIND_TCP_OPTIONS = COMMON_OPTIONS + (
     (("set",), "set a context option"),
     (("os_shell",), "return to the OS shell"),
     (("reverse_tcp",), "switch to the reverse TCP shell"),
 )
 
-# Available smartphones HTTP User-Agent headers.
+
 MOBILE_USER_AGENTS = (
     ("1", "BlackBerry Z10"),
     ("2", "Samsung Galaxy S7"),
@@ -716,32 +712,69 @@ MOBILE_USER_AGENTS = (
 )
 
 
-# Print available context options.
 def _print_options(context, options):
-    ...
+    message = (
+        Style.BRIGHT
+        + "Available '"
+        + context
+        + "' options:"
+        + Style.RESET_ALL
+        + "\n"
+    )
+
+    for commands, description in options:
+        command = " / ".join(
+            "'" + Style.BRIGHT + cmd + Style.RESET_ALL + "'"
+            for cmd in commands
+        )
+
+        message += (
+            settings.SUB_CONTENT_SIGN_TYPE
+            + "Type "
+            + command
+            + " to "
+            + description
+            + ".\n"
+        )
+
+    settings.print_data_to_stdout(message.rstrip())
 
 
-# Print available mobile user agents.
 def _print_mobile_user_agents():
-    ...
+    message = (
+        Style.BRIGHT
+        + "Available smartphones HTTP User-Agent headers:"
+        + Style.RESET_ALL
+        + "\n"
+    )
+
+    for option, device in MOBILE_USER_AGENTS:
+        message += (
+            settings.SUB_CONTENT_SIGN_TYPE
+            + "Type '"
+            + Style.BRIGHT
+            + option
+            + Style.RESET_ALL
+            + "' for "
+            + device
+            + ".\n"
+        )
+
+    settings.print_data_to_stdout(message.rstrip())
 
 
-# Display OS shell options.
 def os_shell_options():
     _print_options("os_shell", OS_SHELL_OPTIONS)
 
 
-# Display reverse TCP options.
 def reverse_tcp_options():
     _print_options("reverse_tcp", REVERSE_TCP_OPTIONS)
 
 
-# Display bind TCP options.
 def bind_tcp_options():
     _print_options("bind_tcp", BIND_TCP_OPTIONS)
 
 
-# Display mobile user agents.
 def mobile_user_agents():
     _print_mobile_user_agents()
 
