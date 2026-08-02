@@ -1507,14 +1507,36 @@ Lists available tamper scripts
 def list_tamper_scripts():
   info_msg = "Listing available tamper scripts."
   settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+  
   if menu.options.list_tampers:
+    message = (
+      Style.BRIGHT
+      + "Available tamper scripts:"
+      + Style.RESET_ALL
+      + "\n"
+    )
+    
     for script in sorted(glob(os.path.join(settings.TAMPER_SCRIPTS_PATH, "*.py"))):
       content = open(script, "rb").read().decode(settings.DEFAULT_CODEC)
       match = re.search(r"About:(.*)\n", content)
       if match:
         comment = match.group(1).strip()
-        settings.print_data_to_stdout(settings.SUB_CONTENT_SIGN_TYPE + os.path.basename(script) + Style.RESET_ALL +  " - " + comment)
-
+        # Lowercase the first letter of the comment
+        comment = comment[0].lower() + comment[1:] if comment else comment
+        script_name = os.path.basename(script)
+        message += (
+          settings.SUB_CONTENT_SIGN_TYPE
+          + "Use '"
+          + Style.BRIGHT
+          + script_name
+          + Style.RESET_ALL
+          + "' that "
+          + comment
+          + "\n"
+        )
+    
+    settings.print_data_to_stdout(message.rstrip())
+    
 """
 Tamper script checker
 """
