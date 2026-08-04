@@ -1706,7 +1706,7 @@ def other_symbols(payload):
       else:
         menu.options.tamper = "rev"
 
-  # Check for (multiple) backticks (instead of "$()") for commands substitution on the generated payloads.
+  # Check for (multiple) backticks (instead of "$()") for command substitution on the generated payloads.
   if payload.count("`") >= 2 and settings.TARGET_OS != settings.OS.WINDOWS:
     if menu.options.tamper:
       menu.options.tamper = menu.options.tamper + ",backticks"

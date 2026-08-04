@@ -18,7 +18,7 @@ from src.utils import settings
 
 
 """
-About: Uses backticks (`) instead of "$()" for commands substitution in a given payload.
+About: Uses backticks (`) instead of "$()" for command substitution in a given payload.
 Notes: This tamper script works against Unix-like target(s).
 """
 

@@ -180,7 +180,7 @@ _Note: For more check the [detailed changeset](https://github.com/commixproject/
 * Removed: The "Regsvr32.exe application whitelisting bypass" attack vector has been removed.
 * Updated: Minor update regarding web delivery script (i.e. Python meterpreter reverse TCP shell).
 * Replaced: The `--backticks` switch has been replaced with "backticks.py" tamper script.
-* Added: New tamper script "backticks.py" that uses backticks instead of `$()`, for commands substitution.
+* Added: New tamper script "backticks.py" that uses backticks instead of `$()`, for command substitution.
 * Added: New option ( `--skip-heuristic`) for skipping dynamic code evaluation heuristic check.
 * Added: Support for parsing custom wordlists regarding HTTP authentication (i.e. `Basic`, `Digest`) dictionary-based cracker.
 * Revised: Improvements regarding dynamic code evaluation heuristic check.
@@ -390,7 +390,7 @@ _Note: For more check the [detailed changeset](https://github.com/commixproject/
 * Added: New tamper script "space2vtab.py" that replaces every space (`%20`) with vertical tab (`%0b`).
 * Replaced: The tamper script "space2tab.py" has been replaced with "space2htab.py".
 * Fixed: Minor bug-fix regarding checking for similarity in provided parameter name and value (GET, POST).
-* Added: New option `--backticks` that uses backticks instead of `$()`, for commands substitution.
+* Added: New option `--backticks` that uses backticks instead of `$()`, for command substitution.
 * Revised: Minor improvement in Netcat shells, for giving to the end-user the choice of using the `/bin` standard subdirectory.
 * Added: New option `--disable-coloring` that disables console output coloring.
 * Added: New option `--check-tor` that checks if Tor is used properly.

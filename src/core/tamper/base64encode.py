@@ -19,7 +19,7 @@ from src.utils import settings
 from src.thirdparty.six.moves import urllib as _urllib
 
 """
-About: Base64 all characters in a given payload.
+About: base64-encodes all characters in a given payload.
 Notes: This tamper script works against all targets.
 """
 

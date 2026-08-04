@@ -19,7 +19,7 @@ from src.thirdparty.six.moves import urllib as _urllib
 from src.utils import settings
 
 """
-About: Hex all characters in a given payload.
+About: hex-encodes all characters in a given payload.
 Notes: This tamper script works against all targets.
 """
 

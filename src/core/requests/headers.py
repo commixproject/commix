@@ -349,7 +349,7 @@ def do_check(request):
   if not (menu.options.requestfile or menu.options.logfile):
     request.add_header(settings.ACCEPT_ENCODING, settings.HTTP_ACCEPT_ENCODING_HEADER_VALUE)
 
-  # Appends a fake HTTP header 'X-Forwarded-For' (and alike)
+  # Appends a fake HTTP header 'X-Forwarded-For' (and similar)
   if settings.TAMPER_SCRIPTS["xforwardedfor"]:
     from src.core.tamper import xforwardedfor
     xforwardedfor.tamper(request)

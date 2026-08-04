@@ -19,7 +19,7 @@ from src.utils import menu
 from src.utils import settings
 
 """
-About: Adds double quotes (") around of a given payload.
+About: Adds double quotes (") around a given payload.
 Notes: This tamper script works against Unix-like target(s).
 """
 
