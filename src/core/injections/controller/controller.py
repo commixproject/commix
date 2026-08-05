@@ -750,12 +750,24 @@ def perform_checks(url, http_request_method, filename):
   if menu.options.auth_url and menu.options.auth_data:
     authentication.authentication_process(http_request_method)
     try:
+      response = _urllib.request.urlopen(url, timeout=settings.TIMEOUT)
+      try:
+        main_content = response.read()
+      finally:
+        response.close()
+
+      response = _urllib.request.urlopen(menu.options.auth_url, timeout=settings.TIMEOUT)
+      try:
+        auth_content = response.read()
+      finally:
+        response.close()
+
       # Verify authentication success by comparing the response content of the main URL and the auth URL.
-      if _urllib.request.urlopen(url, timeout=settings.TIMEOUT).read() == \
-         _urllib.request.urlopen(menu.options.auth_url, timeout=settings.TIMEOUT).read():
+      if main_content == auth_content:
         err_msg = "Authentication failed using the specified credentials and URL."
         settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
         raise SystemExit()
+
     except (_urllib.error.URLError, _urllib.error.HTTPError) as err_msg:
       # Authentication request failed due to a connection or HTTP error.
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))

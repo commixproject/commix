@@ -48,11 +48,23 @@ def is_url_content_stable(url, delay=5):
     debug_msg = "Testing if the target URL content remains consistent between requests."
     settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
   try:
-    first_response_content = _urllib.request.urlopen(url, timeout=settings.TIMEOUT).read().strip()
+    response = _urllib.request.urlopen(url, timeout=settings.TIMEOUT)
+    try:
+      first_response_content = response.read().strip()
+    finally:
+      response.close()
+
     time.sleep(delay)
-    second_response_content = _urllib.request.urlopen(url, timeout=settings.TIMEOUT).read().strip()
+
+    response = _urllib.request.urlopen(url, timeout=settings.TIMEOUT)
+    try:
+      second_response_content = response.read().strip()
+    finally:
+      response.close()
+
     if first_response_content != second_response_content:
       status = "dynamic"
+
   except Exception:
     msg = "Unable to determine target URL content stability due to retrieval errors."
     settings.print_data_to_stdout(settings.print_warning_msg(msg))
