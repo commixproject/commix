@@ -742,7 +742,7 @@ def perform_checks(url, http_request_method, filename):
   # and more than one whitespace character is defined. Keep only one.
   if (settings.MULTI_TARGETS or settings.STDIN_PARSING) and \
      len(settings.WHITESPACES) > 1:
-    settings.WHITESPACES = [_urllib.parse.quote(SINGLE_WHITESPACE)]
+    settings.WHITESPACES = [_urllib.parse.quote(settings.SINGLE_WHITESPACE)]
 
   timesec = settings.TIMESEC
 
