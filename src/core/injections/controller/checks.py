@@ -1517,7 +1517,8 @@ def list_tamper_scripts():
     )
     
     for script in sorted(glob(os.path.join(settings.TAMPER_SCRIPTS_PATH, "*.py"))):
-      content = open(script, "rb").read().decode(settings.DEFAULT_CODEC)
+      with open(script, "rb") as script_file:
+        content = script_file.read().decode(settings.DEFAULT_CODEC)
       match = re.search(r"About:(.*)\n", content)
       if match:
         comment = match.group(1).strip()
