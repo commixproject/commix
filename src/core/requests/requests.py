@@ -94,7 +94,7 @@ def crawler_request(url, http_request_method):
       response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
     if type(response) is not bool and settings.FOLLOW_REDIRECT and response is not None:
       if response.geturl() != url:
-        href = redirection.do_check(request, url, response.geturl())
+        href = redirection.do_check(request, url, response.geturl(), http_request_method)
         if href != url:
           crawler.store_hrefs(href, identified_hrefs=True, redirection=True)
     return response
