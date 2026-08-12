@@ -13,8 +13,9 @@ the Free Software Foundation, either version 3 of the License, or
 For more see the file 'readme/COPYING' for copying permission.
 """
 
-from src.thirdparty.six.moves import urllib as _urllib
 from src.utils import settings
+from src.core.injections.controller import checks
+from src.thirdparty.six.moves import urllib as _urllib
 
 """
 The "time-based" injection technique on Blind OS Command Injection.
