@@ -33,9 +33,11 @@ from src.thirdparty.six.moves import input as _input
 from src.thirdparty.six.moves import urllib as _urllib
 from src.core.injections.controller import shell_options
 from src.thirdparty.colorama import Fore, Back, Style, init
+from src.thirdparty.six.moves import html_parser as _html_parser
 from src.core.injections.controller import file_access
 from src.core.injections.controller import enumeration
 from src.core.injections.controller import controller
+from src.core.injections.semiblind.techniques.tempfile_based import tfb_handler
 
 """
 Exit handler
