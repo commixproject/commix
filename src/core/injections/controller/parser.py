@@ -18,6 +18,7 @@ import re
 import sys
 import time
 import base64
+import binascii
 import datetime
 from src.utils import menu
 from src.utils import settings
