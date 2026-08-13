@@ -23,6 +23,7 @@ from src.utils import settings
 from src.utils import requirements
 from src.utils import common
 from src.thirdparty.six.moves import input as _input
+from src.thirdparty.six.moves import urllib as _urllib
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 """
