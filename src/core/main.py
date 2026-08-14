@@ -508,12 +508,7 @@ def main(filename, url, http_request_method):
     # Check if defined "--url" or "-m" option.
     if url:
       if menu.options.auth_cred and menu.options.auth_type:
-        if len(menu.options.auth_cred.split(":")) == 2:
-          username = menu.options.auth_cred.split(":")[0]
-          password = menu.options.auth_cred.split(":")[1]
-        else:
-          username = ""
-          password = menu.options.auth_cred
+        username, password = menu.options.auth_cred.split(":", 1)
         if not settings.LOAD_SESSION:
           session_handler.import_valid_credentials(url, authentication_type=menu.options.auth_type, \
                                                    admin_panel=url, username=username, \
