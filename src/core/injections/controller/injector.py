@@ -562,20 +562,20 @@ def injection_results(response, TAG, cmd, technique, url, OUTPUT_TEXTFILE, times
   else:
     #Find the directory.
     output = injection_output(url, OUTPUT_TEXTFILE, timesec, technique)
-    response = checks.get_response(output)
-    if type(response) is bool and response != True or response is None:
-      shell = ""
-    else:
-      try:
+    try:
+      response = checks.get_response(output)
+      if type(response) is bool and response != True or response is None:
+        shell = ""
+      else:
         shell = checks.process_page_content(response, action="encode").rstrip().lstrip()
         #shell = [newline.replace(settings.END_LINE.LF,settings.SINGLE_WHITESPACE) for newline in shell]
         if settings.TARGET_OS == settings.OS.WINDOWS:
           shell = [newline.replace(settings.END_LINE.CR, "") for newline in shell]
           #shell = [space.strip() for space in shell]
           shell = [empty for empty in shell if empty]
-      except (_urllib.error.HTTPError, _urllib.error.URLError) as e:
-        if str(e.getcode()) == settings.NOT_FOUND_ERROR:
-          shell = ""
+    except (_urllib.error.HTTPError, _urllib.error.URLError) as e:
+      if str(e.getcode()) == settings.NOT_FOUND_ERROR:
+        shell = ""
 
   return shell
 # eof
