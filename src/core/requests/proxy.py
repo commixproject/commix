@@ -34,7 +34,7 @@ def use_proxy(request):
       opener = _urllib.request.build_opener(proxy)
       _urllib.request.install_opener(opener)
     elif menu.options.tor:
-      proxy = _urllib.request.ProxyHandler({settings.TOR_HTTP_PROXY_SCHEME:menu.options.proxy})
+      proxy = _urllib.request.ProxyHandler({settings.SCHEME:menu.options.proxy})
       opener = _urllib.request.build_opener(proxy)
       _urllib.request.install_opener(opener)
     else:
