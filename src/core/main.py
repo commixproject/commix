@@ -369,6 +369,10 @@ def main(filename, url, http_request_method):
 
     if menu.options.level is not None and menu.options.level is not False:
       settings.INJECTION_LEVEL = int(menu.options.level)
+      if settings.INJECTION_LEVEL not in (settings.DEFAULT_INJECTION_LEVEL, settings.COOKIE_INJECTION_LEVEL, settings.HTTP_HEADER_INJECTION_LEVEL):
+        err_msg = "The value for option '--level' must be an integer value from range [1, 3]."
+        settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+        raise SystemExit()
     else:
       settings.INJECTION_LEVEL = settings.DEFAULT_INJECTION_LEVEL
 
