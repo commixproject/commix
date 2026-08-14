@@ -367,7 +367,7 @@ def main(filename, url, http_request_method):
 
     url = check_value_inside_boundaries(url, http_request_method)
 
-    if menu.options.level:
+    if menu.options.level is not None and menu.options.level is not False:
       settings.INJECTION_LEVEL = int(menu.options.level)
     else:
       settings.INJECTION_LEVEL = settings.DEFAULT_INJECTION_LEVEL
