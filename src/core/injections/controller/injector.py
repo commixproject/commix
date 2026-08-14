@@ -539,7 +539,7 @@ def injection_results(response, TAG, cmd, technique, url, OUTPUT_TEXTFILE, times
         else:
           if shell[0] == "%i" :
             false_result = True
-    except AttributeError:
+    except (AttributeError, TypeError):
       false_result = True
     if false_result:
       shell = ""
