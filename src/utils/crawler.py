@@ -36,6 +36,8 @@ def init_global_vars():
   crawled_hrefs = []
   global sitemap_loc
   sitemap_loc = []
+  global visited_sitemaps
+  visited_sitemaps = []
   global visited_hrefs
   visited_hrefs = []
   global new_crawled_hrefs
@@ -140,7 +142,8 @@ def sitemap(url, http_request_method):
       url = match.group(1).strip()
       if url not in sitemap_loc:
         sitemap_loc.append(url)
-      if url.endswith(".xml") and "sitemap" in url.lower():
+      if url.endswith(".xml") and "sitemap" in url.lower() and url not in visited_sitemaps:
+        visited_sitemaps.append(url)
         while True:
           warn_msg = "A sitemap recursion detected (" + url + ")."
           settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
