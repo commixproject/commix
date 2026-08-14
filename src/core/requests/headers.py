@@ -376,7 +376,7 @@ def do_check(request):
             authline = e.headers.get('www-authenticate', '')
             authobj = re.match(r'''(\w*)\s+realm=(.*),''',authline).groups()
             realm = authobj[1].split(',')[0].replace("\"", "")
-            user_pass_pair = menu.options.auth_cred.split(":")
+            user_pass_pair = menu.options.auth_cred.split(":", 1)
             username = user_pass_pair[0]
             password = user_pass_pair[1]
             authhandler = _urllib.request.HTTPDigestAuthHandler()
