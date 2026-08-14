@@ -94,7 +94,7 @@ def flush(url):
         conn.execute("DROP TABLE IF EXISTS " + table)
       conn.commit()
       conn.close()
-    except sqlite3.OperationalError as err_msg:
+    except (sqlite3.OperationalError, sqlite3.DatabaseError) as err_msg:
       err_msg = "Unable to flush the session file. " + str(err_msg)
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
   else:
@@ -428,7 +428,7 @@ def store_cmd(url, cmd, shell, vuln_parameter):
                     vuln_parameter))
       conn.commit()
       conn.close()
-    except sqlite3.OperationalError as err_msg:
+    except (sqlite3.OperationalError, sqlite3.DatabaseError) as err_msg:
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     except (TypeError, AttributeError):
       pass
@@ -453,7 +453,7 @@ def export_stored_cmd(url, cmd, vuln_parameter):
       return output.decode(settings.DEFAULT_CODEC)
     except AttributeError:
       return output
-  except sqlite3.OperationalError:
+  except (sqlite3.OperationalError, sqlite3.DatabaseError):
     pass
 
 
@@ -490,7 +490,7 @@ def export_valid_credentials(url, authentication_type):
     conn.close()
     if cursor:
       return ":".join(cursor[0])
-  except sqlite3.OperationalError:
+  except (sqlite3.OperationalError, sqlite3.DatabaseError):
     pass
 
 # eof
