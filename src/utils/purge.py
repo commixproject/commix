@@ -27,7 +27,6 @@ import string
 import functools
 from src.utils import menu
 from src.utils import settings
-from src.core.compat import xrange
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 """
@@ -73,7 +72,7 @@ def purge():
     try:
       filesize = os.path.getsize(file_path)
       with open(file_path, "w+b") as f:
-        f.write("".join(chr(random.randint(0, 255)) for _ in xrange(filesize)))
+        f.write(os.urandom(filesize))
     except:
       failed = True
       pass
