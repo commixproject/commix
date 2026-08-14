@@ -2753,6 +2753,7 @@ def check_file_to_write():
     warn_msg = "The specified path '" + file_to_write + "' is not a file."
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
     settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
+    raise SystemExit()
 
   dest_to_write = check_destination(destination=menu.options.file_dest)
   info_msg = "Attempting to write the contents of file '"
