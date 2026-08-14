@@ -582,7 +582,7 @@ def do_results_based_proccess(url, timesec, filename, http_request_method, injec
                     if call_tmp_based == True:
                       exit_loops = True
                       tmp_path = os.path.split(menu.options.file_dest)[0] + "/"
-                      tfb_controller(no_result, url, timesec, filename, tmp_path, http_request_method, url_time_response)
+                      checks.tfb_controller(no_result, url, timesec, filename, tmp_path, http_request_method, url_time_response)
                       raise
                     # Show an error message, after N failed tries.
                     # Use the "/tmp/" directory for tempfile-based technique.
