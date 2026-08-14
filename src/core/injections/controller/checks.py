@@ -3208,9 +3208,22 @@ def set_python_interpreter():
       pass
 
 """
+Hostnames are allowed, shell metacharacters are not.
+"""
+def _validate_host_or_path(option_name, value):
+  if re.match(r'^[A-Za-z0-9.\-:_/]+$', value) is None:
+    err_msg = "The provided " + option_name + " value contains characters that are not allowed (only letters, digits, '.', '-', ':', '_', '/')."
+    settings.print_data_to_stdout(settings.print_error_msg(err_msg))
+    return False
+  return True
+
+"""
 check / set rhost option for bind TCP connection
 """
 def check_rhost(rhost):
+  if not _validate_host_or_path("RHOST", rhost):
+    return False
+
   settings.RHOST = rhost
   settings.print_data_to_stdout("RHOST => " + settings.RHOST)
   return True
@@ -3219,6 +3232,10 @@ def check_rhost(rhost):
 check / set lhost option for reverse TCP connection
 """
 def check_lhost(lhost):
+
+  if not _validate_host_or_path("LHOST", lhost):
+    return False
+
   settings.LHOST = lhost
   settings.print_data_to_stdout("LHOST => " + settings.LHOST)
   return True
