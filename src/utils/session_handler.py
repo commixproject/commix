@@ -416,7 +416,7 @@ Store the output of a successfully executed command for a given URL and vulnerab
 Command and output are base64-encoded for storage.
 """
 def store_cmd(url, cmd, shell, vuln_parameter):
-  if any(type(_) is str for _ in (url, cmd, shell, vuln_parameter)):
+  if all(type(_) is str for _ in (url, cmd, shell, vuln_parameter)):
     try:
       conn = sqlite3.connect(settings.SESSION_FILE)
       table = table_name(url) + "_ir"
