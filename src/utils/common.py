@@ -49,6 +49,8 @@ def safe_input(message):
     return _input(message)
   except UnicodeDecodeError as e:
     return _input(message.encode("utf-8", "ignore").decode("utf-8"))
+  except EOFError:
+    raise
   except Exception as err_msg:
     settings.print_data_to_stdout(settings.print_error_msg(err_msg))
     return ""
