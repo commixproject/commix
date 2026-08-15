@@ -389,7 +389,8 @@ Connection exceptions
 """
 def connection_exceptions(err_msg):
   requests.request_failed(err_msg)
-  settings.TOTAL_OF_REQUESTS = settings.TOTAL_OF_REQUESTS + 1
+  with settings.REQUESTS_LOCK:
+    settings.TOTAL_OF_REQUESTS = settings.TOTAL_OF_REQUESTS + 1
   if settings.MAX_RETRIES > 1:
     time.sleep(settings.DELAY_RETRY)
     if not any((settings.MULTI_TARGETS, settings.CRAWLING,settings.REVERSE_TCP,settings.BIND_TCP)):
@@ -3026,10 +3027,10 @@ def use_temp_folder(no_result, url, timesec, filename, http_request_method, url_
 Adjusts the timesec delay
 """
 def time_related_timesec():
-  min_safe_delay = 0.5  # minimum safe delay
+  min_safe_delay = settings.MIN_SAFE_TIMESEC
   if settings.TIME_RELATED_ATTACK and settings.TIMESEC < min_safe_delay:
-    warn_msg = "Adjusting '--time-sec' to minimum safe delay of " + str(min_safe_delay) + "s. In case of inconsistencies, increase it manually."
-    settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+    info_msg = "Adjusting '--time-sec' to minimum safe delay of " + str(min_safe_delay) + "s. In case of inconsistencies, increase it manually."
+    settings.print_data_to_stdout(settings.print_info_msg(info_msg))
     return min_safe_delay
   else:
     return max(settings.TIMESEC, min_safe_delay)

@@ -151,7 +151,8 @@ def check_http_traffic(request):
     Print HTTP request headers.
     """
     def print_http_response(self):
-      settings.TOTAL_OF_REQUESTS = settings.TOTAL_OF_REQUESTS + 1
+      with settings.REQUESTS_LOCK:
+        settings.TOTAL_OF_REQUESTS = settings.TOTAL_OF_REQUESTS + 1
       if settings.VERBOSITY_LEVEL >= 2 or menu.options.traffic_file:
         if settings.VERBOSITY_LEVEL >= 2:
           req_msg = "HTTP request [" + settings.print_request_num(settings.TOTAL_OF_REQUESTS) + "]:"
@@ -163,16 +164,17 @@ def check_http_traffic(request):
     def http_open(self, req):
       try:
         self.print_http_response()
-        self.do_open(connection, req)
-        return super(connection_handler, self).http_open(req)
+        # do_open() already returns the real response - calling super().http_open()
+        # too would do_open() a SECOND time (its own default, unlogged connection),
+        # sending every request twice.
+        return self.do_open(connection, req)
       except (SocketError, _urllib.error.HTTPError, _urllib.error.URLError, _http_client.BadStatusLine, _http_client.RemoteDisconnected, _http_client.IncompleteRead, _http_client.InvalidURL, Exception) as err_msg:
         checks.connection_exceptions(err_msg)
 
     def https_open(self, req):
       try:
         self.print_http_response()
-        self.do_open(connection, req)
-        return super(connection_handler, self).https_open(req)
+        return self.do_open(connection, req, context=self._context)
       except (SocketError, _urllib.error.HTTPError, _urllib.error.URLError, _http_client.BadStatusLine, _http_client.RemoteDisconnected, _http_client.IncompleteRead, _http_client.InvalidURL, Exception) as err_msg:
         checks.connection_exceptions(err_msg)
 
@@ -196,7 +198,8 @@ def check_http_traffic(request):
       request = encode_non_ascii_url(request)
       response = opener.open(request, timeout=settings.TIMEOUT)
       _ = True
-      settings.MAX_RETRIES = settings.TOTAL_OF_REQUESTS * 2
+      with settings.REQUESTS_LOCK:
+        settings.MAX_RETRIES = settings.TOTAL_OF_REQUESTS * 2
       if (settings.INIT_TEST == True and not settings.UNAUTHORIZED) or \
          (settings.INIT_TEST == True and settings.MULTI_TARGETS):
         if settings.VALID_URL == False:
@@ -217,9 +220,11 @@ def check_http_traffic(request):
     except (_urllib.error.HTTPError, _urllib.error.URLError) as err_msg:
       if settings.UNAUTHORIZED_ERROR in str(err_msg):
         settings.UNAUTHORIZED = unauthorized = True
-        settings.MAX_RETRIES = settings.TOTAL_OF_REQUESTS
+        with settings.REQUESTS_LOCK:
+          settings.MAX_RETRIES = settings.TOTAL_OF_REQUESTS
       else:
-        settings.MAX_RETRIES = settings.TOTAL_OF_REQUESTS * 2
+        with settings.REQUESTS_LOCK:
+          settings.MAX_RETRIES = settings.TOTAL_OF_REQUESTS * 2
       if [True for err_code in settings.HTTP_ERROR_CODES if err_code in str(err_msg)]:
         break
 

@@ -817,7 +817,27 @@ try:
     # Check if defined "--timesec" option.
     if menu.options.timesec != 0:
       settings.TIMESEC = menu.options.timesec
-    
+
+    # Check if defined "--threads" option.
+    if menu.options.threads > 1:
+      try:
+        import concurrent.futures
+        threads_supported = True
+      except ImportError:
+        threads_supported = False
+      if not threads_supported:
+        warn_msg = "'--threads' needs Python 3.2+; continuing with a single thread."
+        settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+      elif menu.options.threads > settings.MAX_THREADS:
+        settings.THREADS = settings.MAX_THREADS
+        warn_msg = "Setting '--threads' to the maximum of " + str(settings.MAX_THREADS) + " concurrent HTTP requests."
+        settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+      else:
+        settings.THREADS = menu.options.threads
+      if settings.THREADS > 1:
+        info_msg = "Setting " + str(settings.THREADS) + " concurrent HTTP requests."
+        settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+
     if menu.options.tor:
       settings.TIMESEC = settings.TIMESEC * 2
       warn_msg = "Increasing default value for option '--time-sec' to"

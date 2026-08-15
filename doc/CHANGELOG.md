@@ -1,4 +1,7 @@
 ## Version 4.2 (TBA)
+* Added: New `--threads` option to support parallel data retrieval, reducing extraction time on supported techniques.
+* Revised: Refactored time-related techniques (i.e. "time-based", "tempfile-based") to use binary search for character extraction.
+* Fixed: A stored session could restore a `--time-sec` value from an earlier run without re-applying the minimum safe delay, silently bypassing the safety floor on resumed sessions.
 * Revised: Refactored `--tor` proxy handling to route HTTP traffic using the configured URL scheme.
 * Added: Spanish translation of [README.md](https://github.com/commixproject/commix/blob/master/doc/translations/README-es-ES.md).
 * Added: French translation of [README.md](https://github.com/commixproject/commix/blob/master/doc/translations/README-fr-FR.md).

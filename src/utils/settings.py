@@ -20,6 +20,7 @@ import time
 import random
 import string
 import codecs
+import threading as _threading
 from datetime import date
 from datetime import datetime
 from src.core.compat import xrange
@@ -220,8 +221,9 @@ Print data to stdout
 def print_data_to_stdout(data):
   if END_LINE.CR not in data and data != "." and data != " (done)":
     data = data + END_LINE.LF
-  sys.stdout.write(data)
-  sys.stdout.flush()
+  with PRINT_LOCK:
+    sys.stdout.write(data)
+    sys.stdout.flush()
 
 """
 argv input errors
@@ -262,7 +264,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "65"
+REVISION = "66"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -619,8 +621,19 @@ DELAY = 0
 # Seconds to delay the OS response.
 TIMESEC = 0
 
+# Minimum safe delay for time-related techniques.
+MIN_SAFE_TIMESEC = 0.5
+
 # Seconds to delay between each HTTP retry.
 DELAY_RETRY = 1
+
+# Max number of concurrent HTTP requests during data retrieval.
+THREADS = 1
+MAX_THREADS = 10
+
+# Locks for shared state accessed by concurrent threads.
+PRINT_LOCK = _threading.Lock()
+REQUESTS_LOCK = _threading.Lock()
 
 DEFAULT_INJECTION_LEVEL = 1
 COOKIE_INJECTION_LEVEL = 2

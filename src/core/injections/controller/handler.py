@@ -224,6 +224,9 @@ def do_time_related_proccess(url, timesec, filename, http_request_method, url_ti
           if settings.LOAD_SESSION and session_handler.export_injection_points(url, technique, injection_type, http_request_method):
             try:
               url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response, timesec, exec_time, output_length, is_vulnerable = session_handler.export_injection_points(url, technique, injection_type, http_request_method)
+              # Re-apply the minimum safe delay to the stored session.
+              if technique in (settings.INJECTION_TECHNIQUE.TIME_BASED, settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED):
+                timesec = max(timesec, settings.MIN_SAFE_TIMESEC)
               if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
                 settings.TIME_BASED_STATE = True
               elif technique == settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED:  
@@ -337,7 +340,7 @@ def do_time_related_proccess(url, timesec, filename, http_request_method, url_ti
                       # Check for false positive resutls
                       if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
                         exec_time, output = injector.false_positive_check(separator, TAG, cmd, whitespace, prefix, suffix, timesec, http_request_method, url, vuln_parameter, randvcalc, alter_shell, exec_time, url_time_response, false_positive_warning, technique)
-                      else:  
+                      else:
                         exec_time, output = injector.false_positive_check(separator, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, randvcalc, alter_shell, exec_time, url_time_response, false_positive_warning, technique)
 
                       if checks.time_related_shell(url_time_response, exec_time, timesec):

