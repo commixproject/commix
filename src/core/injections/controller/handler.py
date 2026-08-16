@@ -205,8 +205,10 @@ def do_time_related_proccess(url, timesec, filename, http_request_method, url_ti
     from src.core.injections.semiblind.techniques.tempfile_based import tfb_injector as injector
     from src.core.injections.semiblind.techniques.tempfile_based import tfb_payloads as payloads
 
-  if not settings.LOAD_SESSION:
+  if not settings.LOAD_SESSION or technique not in settings.STORED_TECHNIQUES:
     checks.testing_technique_title(injection_type, technique)
+    # Re-check tamper compatibility now that the technique and target OS are known.
+    checks.tamper_scripts(stored_tamper_scripts=True)
 
   prefixes = settings.PREFIXES
   suffixes = settings.SUFFIXES
@@ -221,28 +223,31 @@ def do_time_related_proccess(url, timesec, filename, http_request_method, url_ti
           # Check injection state
           settings.DETECTION_PHASE = True
           settings.EXPLOITATION_PHASE = False
-          # If a previous session is available.
+          # If a previous session is available for this specific technique.
           exec_time_statistic = []
-          if settings.LOAD_SESSION and session_handler.export_injection_points(url, technique, injection_type, http_request_method):
+          resumed = False
+          stored_row = settings.STORED_TECHNIQUES.get(technique) if settings.LOAD_SESSION else None
+          if stored_row:
             try:
-              url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response, timesec, exec_time, output_length, is_vulnerable = session_handler.export_injection_points(url, technique, injection_type, http_request_method)
+              url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response, timesec, exec_time, output_length, is_vulnerable = session_handler.apply_stored_technique(stored_row)
               # Re-apply the minimum safe delay to the stored session.
               if technique in (settings.INJECTION_TECHNIQUE.TIME_BASED, settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED):
                 timesec = max(timesec, settings.MIN_SAFE_TIMESEC)
               if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
                 settings.TIME_BASED_STATE = True
-              elif technique == settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED:  
+              elif technique == settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED:
                 settings.TEMPFILE_BASED_STATE = True
-                OUTPUT_TEXTFILE = injector.select_output_filename(technique, tmp_path, TAG)
+                OUTPUT_TEXTFILE = injector.select_output_filename(technique, tmp_path, TAG, prompt=False)
               cmd = shell = ""
               checks.check_for_stored_tamper(payload)
               settings.FOUND_EXEC_TIME = exec_time
               settings.FOUND_DIFF = exec_time - timesec
               possibly_vulnerable = True
+              resumed = True
             except TypeError:
               checks.error_loading_session_file()
 
-          if not settings.LOAD_SESSION:
+          if not resumed:
             num_of_chars = num_of_chars + 1
             # Check for bad combination of prefix and separator
             combination = prefix + separator
@@ -394,11 +399,11 @@ def do_time_related_proccess(url, timesec, filename, http_request_method, url_ti
           # Yaw, got shellz!
           # Do some magic tricks!
           if checks.time_related_shell(url_time_response, exec_time, timesec):
-            if (len(TAG) == output_length) and (possibly_vulnerable == True or settings.LOAD_SESSION and int(is_vulnerable) == settings.INJECTION_LEVEL):
+            if (len(TAG) == output_length) and (possibly_vulnerable == True or resumed and int(is_vulnerable) == settings.INJECTION_LEVEL):
               found = True
               no_result = False
               # Export session
-              if not settings.LOAD_SESSION:
+              if not resumed:
                 shell = ""
                 checks.identified_vulnerable_param(url, technique, injection_type, vuln_parameter, payload, http_request_method, filename, export_injection_info, vp_flag, counter)
                 session_handler.import_injection_points(url, technique, injection_type, filename, separator, shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response, timesec, original_exec_time, output_length, is_vulnerable=settings.INJECTION_LEVEL)
@@ -470,8 +475,10 @@ def do_results_based_proccess(url, timesec, filename, http_request_method, injec
     suffixes = settings.SUFFIXES
     separators = settings.SEPARATORS
 
-  if not settings.LOAD_SESSION:
+  if not settings.LOAD_SESSION or technique not in settings.STORED_TECHNIQUES:
     checks.testing_technique_title(injection_type, technique)
+    # Re-check tamper compatibility now that the technique and target OS are known.
+    checks.tamper_scripts(stored_tamper_scripts=True)
     if technique == settings.INJECTION_TECHNIQUE.FILE_BASED:
       url_time_response = 0
       tmp_path = checks.check_tmp_path(url, timesec, filename, http_request_method, url_time_response)
@@ -488,15 +495,17 @@ def do_results_based_proccess(url, timesec, filename, http_request_method, injec
           # Check injection state
           settings.DETECTION_PHASE = True
           settings.EXPLOITATION_PHASE = False
-          # If a previous session is available.
-          if settings.LOAD_SESSION and session_handler.export_injection_points(url, technique, injection_type, http_request_method):
+          # If a previous session is available for this specific technique.
+          resumed = False
+          stored_row = settings.STORED_TECHNIQUES.get(technique) if settings.LOAD_SESSION else None
+          if stored_row:
             try:
-              url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response, timesec, exec_time, output_length, is_vulnerable = session_handler.export_injection_points(url, technique, injection_type, http_request_method)
-              if technique == settings.INJECTION_TECHNIQUE.FILE_BASED: 
+              url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response, timesec, exec_time, output_length, is_vulnerable = session_handler.apply_stored_technique(stored_row)
+              if technique == settings.INJECTION_TECHNIQUE.FILE_BASED:
                 settings.FILE_BASED_STATE = True
                 checks.check_for_stored_tamper(payload)
                 tmp_path = ""
-                OUTPUT_TEXTFILE = injector.select_output_filename(technique, tmp_path, TAG)
+                OUTPUT_TEXTFILE = injector.select_output_filename(technique, tmp_path, TAG, prompt=False)
                 if re.findall(settings.DIRECTORY_REGEX,payload):
                   filepath = re.findall(settings.DIRECTORY_REGEX,payload)[0]
                   settings.WEB_ROOT = os.path.dirname(filepath)
@@ -510,10 +519,11 @@ def do_results_based_proccess(url, timesec, filename, http_request_method, injec
                 elif technique == settings.INJECTION_TECHNIQUE.DYNAMIC_CODE:
                   settings.EVAL_BASED_STATE = True
                 checks.check_for_stored_tamper(payload)
+              resumed = True
             except TypeError:
               checks.error_loading_session_file()
 
-          if not settings.LOAD_SESSION:
+          if not resumed:
             i = i + 1
             # Check for bad combination of prefix and separator
             combination = prefix + separator
@@ -647,7 +657,7 @@ def do_results_based_proccess(url, timesec, filename, http_request_method, injec
             found = True
             no_result = False
             # Export session
-            if not settings.LOAD_SESSION:
+            if not resumed:
               checks.identified_vulnerable_param(url, technique, injection_type, vuln_parameter, payload, http_request_method, filename, export_injection_info, vp_flag, counter)
               session_handler.import_injection_points(url, technique, injection_type, filename, separator, shell[0], vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response=0, timesec=0, exec_time=0, output_length=0, is_vulnerable=settings.INJECTION_LEVEL)
             else:

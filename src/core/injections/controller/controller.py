@@ -32,6 +32,7 @@ from src.thirdparty.six.moves import urllib as _urllib
 from src.thirdparty.colorama import Fore, Back, Style, init
 from src.core.injections.blind.techniques.time_based import tb_handler
 from src.core.injections.semiblind.techniques.file_based import fb_handler
+from src.core.injections.semiblind.techniques.tempfile_based import tfb_handler
 from src.core.injections.results_based.techniques.classic import cb_handler
 from src.core.injections.results_based.techniques.eval_based import eb_handler
 
@@ -87,10 +88,13 @@ def init_cookie_injection_status():
 Check for previously stored sessions.
 """
 def check_for_stored_sessions(url, check_parameter, http_request_method):
+  settings.STORED_TECHNIQUES = {}
   if not menu.options.ignore_session and not menu.options.flush_session:
     if os.path.isfile(settings.SESSION_FILE) and not settings.REQUIRED_AUTHENTICATION:
-      if settings.LOAD_SESSION == None:
-        url, check_parameter = session_handler.check_stored_injection_points(url, check_parameter, http_request_method)
+      # Check every call site instead of only the first parameter or header.
+      url, check_parameter = session_handler.check_stored_injection_points(url, check_parameter, http_request_method)
+      # Load stored techniques once so each technique can resume without re-querying.
+      settings.STORED_TECHNIQUES = session_handler.load_stored_techniques(url, check_parameter, http_request_method)
   return url, check_parameter
 
 """
@@ -288,7 +292,14 @@ def filebased_command_injection_technique(url, timesec, filename, http_request_m
   settings.FILE_BASED_STATE = None
   if not settings.SKIP_COMMAND_INJECTIONS:
     if (len(menu.options.tech) == 0 or "f" in menu.options.tech):
-      if fb_handler.exploitation(url, timesec, filename, http_request_method, url_time_response, injection_type, technique) != False:
+      # Resume parameters resolved via tempfile fallback instead of retrying file-based first.
+      if settings.LOAD_SESSION and settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED in settings.STORED_TECHNIQUES \
+         and settings.INJECTION_TECHNIQUE.FILE_BASED not in settings.STORED_TECHNIQUES:
+        # Skip the writable-directory prompt when resuming without live probing.
+        result = tfb_handler.exploitation(url, timesec, filename, "", http_request_method, url_time_response)
+      else:
+        result = fb_handler.exploitation(url, timesec, filename, http_request_method, url_time_response, injection_type, technique)
+      if result != False:
         settings.FILE_BASED_STATE = settings.IDENTIFIED_COMMAND_INJECTION = True
         checks.skip_testing(filename, url)
       else:

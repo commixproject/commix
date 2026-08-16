@@ -364,7 +364,11 @@ def json_int_check(parameter, value):
     if settings.INJECT_TAG in value and not checks.quoted_value(value) in parameter:
       value = re.sub(settings.IGNORE_JSON_CHAR_REGEX, '', value.lstrip())
       parameter = parameter.replace(value, checks.quoted_value(value))
-    parameter = json_format(parameter)
+    try:
+      parameter = json_format(parameter)
+    except Exception:
+      # Fall back to the raw value if JSON formatting fails.
+      return parameter
 
   _ = True
   if isinstance(parameter, list):
@@ -598,7 +602,11 @@ def vuln_POST_param(parameter, url):
 
   # JSON data format.
   if settings.IS_JSON:
-    flat = flatten(json.loads(parameter, object_pairs_hook=OrderedDict))
+    try:
+      flat = flatten(json.loads(parameter, object_pairs_hook=OrderedDict))
+    except Exception:
+      # Return unchanged if the value is not valid JSON.
+      return parameter
     vuln_key = None
     for key in flat:
       if settings.INJECT_TAG in str(flat[key]):

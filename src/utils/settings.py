@@ -264,7 +264,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "67"
+REVISION = "68"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1087,6 +1087,8 @@ SRVPORT = 8080
 # Session Handler
 SESSION_FILE = ""
 LOAD_SESSION = None
+# Cache stored techniques per parameter to avoid repeated session database queries.
+STORED_TECHNIQUES = {}
 
 # Path to file containing desktop/browser User-Agent strings
 USER_AGENT_LIST = os.path.join(TXT_DIR, "user-agents.txt")
@@ -1159,7 +1161,7 @@ UNIX_NOT_SUPPORTED_TAMPER_SCRIPTS = [
 ]
 
 WIN_NOT_SUPPORTED_TAMPER_SCRIPTS = [
-                  "backslashes"
+                  "backslashes",
                   "dollaratsigns",
                   "backticks",
                   "nested",
@@ -1174,7 +1176,7 @@ WIN_NOT_SUPPORTED_TAMPER_SCRIPTS = [
 ]
 
 EVAL_NOT_SUPPORTED_TAMPER_SCRIPTS = [
-                  "backslashes"
+                  "backslashes",
                   "caret",
                   "dollaratsigns",
                   "doublequotes",

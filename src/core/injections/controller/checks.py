@@ -997,7 +997,9 @@ def continue_tests(err):
         common.invalid_option(continue_tests)
         pass
   except AttributeError:
-    pass
+    # No HTTP status for raw connection errors; report the failure instead of exiting silently.
+    settings.print_data_to_stdout(settings.print_critical_msg(err))
+    return False
   except KeyboardInterrupt:
     raise
 
@@ -1561,7 +1563,8 @@ def tamper_scripts(stored_tamper_scripts):
       info_msg = "Loaded tamper script" + ('s', '')[len(provided_scripts) == 1] + ": "
       settings.print_data_to_stdout(settings.print_info_msg(info_msg))
     for script in provided_scripts:
-      if "hexencode" or "base64encode" == script:
+      # Register each script once; duplicate entries would apply the same tamper twice.
+      if script not in settings.MULTI_ENCODED_PAYLOAD:
         settings.MULTI_ENCODED_PAYLOAD.append(script)
       import_script = str(settings.TAMPER_SCRIPTS_PATH + script + ".py").replace("/",".").split(".py")[0]
       if not stored_tamper_scripts:
@@ -1580,9 +1583,11 @@ def tamper_scripts(stored_tamper_scripts):
       elif "backticks" == script and menu.options.alter_shell:
           warn_msg = "Option '--alter-shell' "
       if len(warn_msg) != 0:
-        if not stored_tamper_scripts:
-          warn_msg = warn_msg + "not support the usage of '" + script + ".py'. Skipping tamper script."
-          settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+        # Always warn and drop incompatible scripts, including resumed techniques.
+        warn_msg = warn_msg + "not support the usage of '" + script + ".py'. Skipping tamper script."
+        settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+        if script in settings.MULTI_ENCODED_PAYLOAD:
+          settings.MULTI_ENCODED_PAYLOAD.remove(script)
       else:
         try:
           module = __import__(import_script, fromlist=[None])
@@ -1605,26 +1610,6 @@ def tamper_scripts(stored_tamper_scripts):
     if _:
       warn_msg += "is not a good idea (may cause false positive / negative results)."
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
-
-"""
-Check if the payload output seems to be hex.
-"""
-def hex_output(payload):
-  if not settings.TAMPER_SCRIPTS['hexencode']:
-    if menu.options.tamper:
-      menu.options.tamper = menu.options.tamper + ",hexencode"
-    else:
-      menu.options.tamper = "hexencode"
-
-"""
-Check if the payload output seems to be base64.
-"""
-def base64_output(payload):
-  if not settings.TAMPER_SCRIPTS['base64encode']:
-    if menu.options.tamper:
-      menu.options.tamper = menu.options.tamper + ",base64encode"
-    else:
-      menu.options.tamper = "base64encode"
 
 """
 Check for modified whitespaces.
@@ -1680,11 +1665,12 @@ def whitespace_check(payload):
   # Enable the "multiplespaces" tamper script.
   count_spaces = payload.count(settings.WHITESPACES[0])
   if count_spaces > 15:
-    if menu.options.tamper:
-      menu.options.tamper = menu.options.tamper + ",multiplespaces"
-    else:
-      menu.options.tamper = "multiplespaces"
-    settings.WHITESPACES[0] = settings.WHITESPACES[0] * int(count_spaces / 2)
+    if not settings.TAMPER_SCRIPTS['multiplespaces']:
+      if menu.options.tamper:
+        menu.options.tamper = menu.options.tamper + ",multiplespaces"
+      else:
+        menu.options.tamper = "multiplespaces"
+      settings.WHITESPACES[0] = settings.WHITESPACES[0] * int(count_spaces / 2)
 
 """
 Check for symbols (i.e "`", "^", "$@" etc) between the characters of the generated payloads.
@@ -1708,11 +1694,12 @@ def other_symbols(payload):
 
   # Check for (multiple) backticks (instead of "$()") for command substitution on the generated payloads.
   if payload.count("`") >= 2 and settings.TARGET_OS != settings.OS.WINDOWS:
-    if menu.options.tamper:
-      menu.options.tamper = menu.options.tamper + ",backticks"
-    else:
-      menu.options.tamper = "backticks"
-    settings.USE_BACKTICKS == True
+    if not settings.TAMPER_SCRIPTS['backticks']:
+      if menu.options.tamper:
+        menu.options.tamper = menu.options.tamper + ",backticks"
+      else:
+        menu.options.tamper = "backticks"
+    settings.USE_BACKTICKS = True
 
   # Check for caret symbol
   if payload.count("^") >= 10:
@@ -1795,7 +1782,7 @@ def check_encoders(payload):
   check_value = payload
 
   settings.MULTI_ENCODED_PAYLOAD = list(dict.fromkeys(settings.MULTI_ENCODED_PAYLOAD))
-  for encode_type in settings.MULTI_ENCODED_PAYLOAD:
+  for encode_type in list(settings.MULTI_ENCODED_PAYLOAD):
     if encode_type == 'base64encode' or encode_type == 'hexencode':
       while True:
         message = "Do you want to keep using the '" + encode_type + "' tamper script? [y/N] > "
@@ -1904,6 +1891,7 @@ def check_for_stored_tamper(payload):
   decoded_payload, encoded_with = recognise_payload(payload)
   whitespace_check(decoded_payload)
   other_symbols(decoded_payload)
+  check_backslashes(decoded_payload)
   check_quotes(decoded_payload)
   tamper_scripts(stored_tamper_scripts=True)
 
@@ -3022,8 +3010,9 @@ Adjusts the timesec delay
 def time_related_timesec():
   min_safe_delay = settings.MIN_SAFE_TIMESEC
   if settings.TIME_RELATED_ATTACK and settings.TIMESEC < min_safe_delay:
-    info_msg = "Adjusting '--time-sec' to minimum safe delay of " + str(min_safe_delay) + "s. In case of inconsistencies, increase it manually."
-    settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+    if settings.VERBOSITY_LEVEL != 0:
+      debug_msg = "Adjusting '--time-sec' to minimum safe delay of " + str(min_safe_delay) + "s. In case of inconsistencies, increase it manually."
+      settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
     return min_safe_delay
   else:
     return max(settings.TIMESEC, min_safe_delay)

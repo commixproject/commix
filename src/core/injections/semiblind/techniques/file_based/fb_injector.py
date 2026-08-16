@@ -33,8 +33,8 @@ def injection_output(url, OUTPUT_TEXTFILE, timesec, technique):
 
 """
 """
-def select_output_filename(technique, tmp_path, TAG):
-  return injector.select_output_filename(technique, tmp_path, TAG)
+def select_output_filename(technique, tmp_path, TAG, prompt=True):
+  return injector.select_output_filename(technique, tmp_path, TAG, prompt=prompt)
 
 """
 Command execution results.

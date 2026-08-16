@@ -28,8 +28,8 @@ def injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
 
 """
 """
-def select_output_filename(technique, tmp_path, TAG):
-  return injector.select_output_filename(technique, tmp_path, TAG)
+def select_output_filename(technique, tmp_path, TAG, prompt=True):
+  return injector.select_output_filename(technique, tmp_path, TAG, prompt=prompt)
 
 """
 False Positive check and evaluation.

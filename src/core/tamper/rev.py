@@ -38,7 +38,7 @@ def tamper(payload):
       if len(settings.WHITESPACES) != 0:
         try:
           payload = payload.replace(settings.SINGLE_WHITESPACE, settings.WHITESPACES[0])
-        except:
+        except Exception:
           pass
   return payload
 

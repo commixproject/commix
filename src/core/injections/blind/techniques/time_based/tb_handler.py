@@ -52,8 +52,11 @@ def exploitation(url, timesec, filename, http_request_method, url_time_response,
       proceed_option = common.read_input(message, default="C", check_batch=True)
       if proceed_option.lower() in settings.CHOICE_PROCEED :
         if proceed_option.lower() == "c":
-          if tb_injection_handler(url, timesec, filename, http_request_method, url_time_response, injection_type, technique, tmp_path) == False:
+          result = tb_injection_handler(url, timesec, filename, http_request_method, url_time_response, injection_type, technique, tmp_path)
+          if result == False:
             return False
+          # Return when a technique was resumed or found; only False should continue prompting.
+          return result
         elif proceed_option.lower() == "s":
           from src.core.injections.semiblind.techniques.file_based import fb_handler
           fb_handler.exploitation(url, timesec, filename, http_request_method, url_time_response, injection_type, technique)
