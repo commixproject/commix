@@ -76,6 +76,8 @@ def logfile_parser():
     if os.stat(request_file).st_size != 0:
       with open(request_file, encoding=settings.DEFAULT_CODEC) as file:
         request = file.read()
+      # Normalize CRLF line endings.
+      request = request.replace(settings.END_LINE.CRLF, settings.END_LINE.LF)
     else:
       invalid_data(request_file)
 
@@ -83,7 +85,8 @@ def logfile_parser():
       c = 1
       request_headers = []
       request_lines = request.split(settings.END_LINE.LF)
-      while c < len(request_lines) and len(request_lines[c]) > 0:
+      # No ':' means body start, not a header (avoids dropping the body).
+      while c < len(request_lines) and len(request_lines[c]) > 0 and ':' in request_lines[c]:
         x = request_lines[c].find(':')
         header_name = request_lines[c][:x].title()
         header_value = request_lines[c][x + 1:]
@@ -93,7 +96,8 @@ def logfile_parser():
           request_headers.extend(menu.options.headers.split(settings.END_LINE.ESCAPED_LF))
         request_headers.append(header_name + ":" + header_value)
         c += 1
-      c += 1  
+      if c < len(request_lines) and len(request_lines[c]) == 0:
+        c += 1
       menu.options.data = "".join(request_lines[c:] if c < len(request_lines) else "")
       settings.RAW_HTTP_HEADERS = settings.END_LINE.ESCAPED_LF.join(request_headers)
 
@@ -151,7 +155,6 @@ def logfile_parser():
       if auth_provided:
         menu.options.auth_type = auth_provided[0].lower()
         if menu.options.auth_type.lower() == settings.AUTH_TYPE.BASIC:
-          # menu.options.auth_cred = base64.b64decode(auth_provided[1]).decode()
           try:
             # Add base64 padding if missing
             b64_string = auth_provided[1]

@@ -163,11 +163,15 @@ Process the defined injectable value
 def process_injectable_value(payload, data):
   if len(settings.TESTABLE_VALUE) == 0:
     settings.TESTABLE_VALUE = settings.SINGLE_WHITESPACE
-  _ = data.replace(settings.TESTABLE_VALUE, settings.RANDOM_TAG)
+  # Regenerate the tag if it overlaps the testable value.
+  random_tag = settings.RANDOM_TAG
+  while random_tag in settings.TESTABLE_VALUE or settings.TESTABLE_VALUE in random_tag:
+    random_tag = ''.join(random.choice(string.ascii_uppercase + string.digits + string.ascii_lowercase) for _ in range(10))
+  _ = data.replace(settings.TESTABLE_VALUE, random_tag)
   if settings.TESTABLE_VALUE in _.replace(settings.INJECT_TAG, ""):
-    return _.replace(settings.INJECT_TAG, "").replace(settings.TESTABLE_VALUE, payload).replace(settings.RANDOM_TAG, settings.TESTABLE_VALUE)
+    return _.replace(settings.INJECT_TAG, "").replace(settings.TESTABLE_VALUE, payload).replace(random_tag, settings.TESTABLE_VALUE)
   else:
-    return _.replace(settings.RANDOM_TAG + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload).replace(settings.RANDOM_TAG, settings.TESTABLE_VALUE)
+    return _.replace(random_tag + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload).replace(random_tag, settings.TESTABLE_VALUE)
 
 """
 Remove all injection tags from provided data
@@ -230,7 +234,6 @@ def custom_injection_marker_character(url, http_request_method):
       settings.CUSTOM_INJECTION_MARKER = True
     else:
       settings.CUSTOM_HEADER_INJECTION = True
-      # return False
 
   if settings.CUSTOM_INJECTION_MARKER:
     while True:
@@ -417,7 +420,8 @@ def handle_server_cookies(response):
 
   try:
     set_cookie_header = []
-    declared_cookies = set(menu.options.cookie.split(settings.COOKIE_PARAM_DELIMITER)) if menu.options.cookie else set()
+    # Compare cookie names to avoid duplicate server-set values overriding user input.
+    declared_cookies = set(c.split('=')[0].strip() for c in menu.options.cookie.split(settings.COOKIE_PARAM_DELIMITER)) if menu.options.cookie else set()
     added_cookies = set()
     for header, value in response.getheaders():
       if header.lower() == settings.SET_COOKIE.lower():
@@ -436,8 +440,7 @@ def handle_server_cookies(response):
       if settings.CRAWLED_SKIPPED_URLS_NUM != 0:
         settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
       if menu.options.cookie:
-        user_cookies_set = set([c.split('=')[0] for c in menu.options.cookie.split(settings.COOKIE_PARAM_DELIMITER)]) 
-        # intersect_cookies = user_cookies_set.intersection(added_cookies)
+        user_cookies_set = set([c.split('=')[0] for c in menu.options.cookie.split(settings.COOKIE_PARAM_DELIMITER)])
         if user_cookies_set:
           while True:
             message = "You declared some cookie(s), "
@@ -891,10 +894,7 @@ def enable_shell(url):
   message += ". Do you want to spawn a pseudo-terminal shell? [Y/n] > "
   if settings.CRAWLING:
     settings.CRAWLED_URLS_INJECTED.append(_urllib.parse.urlparse(url).netloc)
-  if not settings.STDIN_PARSING:
-    gotshell = common.read_input(message, default="Y", check_batch=True)
-  else:
-    gotshell = common.read_input(message, default="n", check_batch=True)
+  gotshell = common.read_input(message, default="Y", check_batch=True)
   return gotshell
 
 """
@@ -1584,8 +1584,6 @@ def tamper_scripts(stored_tamper_scripts):
           warn_msg = warn_msg + "not support the usage of '" + script + ".py'. Skipping tamper script."
           settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
       else:
-        # if not stored_tamper_scripts:
-        #   settings.print_data_to_stdout(settings.SUB_CONTENT_SIGN + import_script.split(".")[-1])
         try:
           module = __import__(import_script, fromlist=[None])
           if not hasattr(module, "__tamper__"):
@@ -2085,10 +2083,6 @@ def is_empty(multi_parameters, http_request_method):
   if settings.IS_JSON:
     try:
       multi_params = flatten(json.loads(','.join(multi_params), object_pairs_hook=OrderedDict)) if is_JSON_check(','.join(multi_params)) else multi_params
-      # multi_params = ','.join(multi_params)
-      # if is_JSON_check(multi_params):
-      #   json_data = json.loads(multi_params, object_pairs_hook=OrderedDict)
-      #   multi_params = flatten(json_data)
     except ValueError as err_msg:
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
       raise SystemExit()
@@ -2195,14 +2189,19 @@ def check_similarities(all_params):
   if settings.IS_JSON:
     try:
       _ = "".join(random.sample(string.ascii_uppercase, k=6))
-      all_params = flatten(json.loads(','.join(all_params), object_pairs_hook=OrderedDict))
-      for param in all_params:
-        if isinstance(all_params[param], str):
-          if all_params[param] in param:
-            all_params[param] = all_params[param] + settings.RANDOM_TAG
-          if settings.SINGLE_WHITESPACE in all_params[param]:
-            all_params[param] = all_params[param].replace(settings.SINGLE_WHITESPACE, _)
-      all_params = [x.replace(settings.SINGLE_WHITESPACE, "").replace(_, settings.SINGLE_WHITESPACE) for x in json.dumps(all_params).split(", ")]
+      flat = flatten(json.loads(','.join(all_params), object_pairs_hook=OrderedDict))
+      modified = False
+      for param in flat:
+        if isinstance(flat[param], str):
+          if flat[param] in param:
+            flat[param] = flat[param] + settings.RANDOM_TAG
+            modified = True
+          if settings.SINGLE_WHITESPACE in flat[param]:
+            flat[param] = flat[param].replace(settings.SINGLE_WHITESPACE, _)
+            modified = True
+      # Re-dump only on a real collision (avoids corrupting nested bodies).
+      if modified:
+        all_params = [x.replace(settings.SINGLE_WHITESPACE, "").replace(_, settings.SINGLE_WHITESPACE) for x in json.dumps(flat).split(", ")]
     except Exception:
       pass
   else:
@@ -2412,13 +2411,11 @@ def print_users(sys_users, filename, _, separator, TAG, cmd, prefix, suffix, whi
                   output_file.write(settings.END_LINE.LF)
                 output_file.write("(" +str(count)+ ") '" + sys_users_list[user] + is_privileged + "'" + settings.END_LINE.LF )
       else:
-        # settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
         warn_msg = "It seems you do not have permission to enumerate operating system users."
         settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
     except TypeError:
       pass
     except IndexError:
-      # settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
       warn_msg = "It seems you do not have permission to enumerate operating system users."
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
       pass
@@ -2611,9 +2608,7 @@ Find filename
 def find_filename(dest_to_write, content):
   fname = os.path.basename(dest_to_write)
   tmp_fname = fname + "_tmp"
-  # _ = settings.FILE_WRITE
   if settings.TARGET_OS == settings.OS.WINDOWS:
-    # _ = settings.FILE_WRITE_WIN
     cmd = settings.WIN_FILE_WRITE_OPERATOR  + tmp_fname.replace("\\","\\\\") + settings.SINGLE_WHITESPACE + "'" + content + "'"
   else:
     cmd = settings.FILE_WRITE + content + settings.FILE_WRITE_OPERATOR + tmp_fname
@@ -2998,8 +2993,6 @@ def use_temp_folder(no_result, url, timesec, filename, http_request_method, url_
   settings.print_data_to_stdout(settings.END_LINE.CR)
   while True:
     message = "Insufficient permissions on directory '" + settings.WEB_ROOT + "'. "
-    # if not menu.options.web_root:
-    #   message += " You are advised to rerun with option '--web-root'."
     message += "Do you want to use '" + tmp_path + "' instead? [Y/n] > "
     tmp_upload = common.read_input(message, default="Y", check_batch=True)
     if tmp_upload in settings.CHOICE_YES:

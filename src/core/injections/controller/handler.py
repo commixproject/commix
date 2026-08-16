@@ -167,6 +167,8 @@ def pseudo_terminal_shell(injector, separator, maxlen, TAG, cmd, prefix, suffix,
     if technique == settings.INJECTION_TECHNIQUE.FILE_BASED or technique == settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED:
       delete_previous_shell(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, technique)
     settings.print_data_to_stdout(settings.END_LINE.CR)
+    # Return False to stop searching after this combination was already reported.
+    return True
 
 """
 The main Time-related exploitation proccess.
@@ -231,7 +233,6 @@ def do_time_related_proccess(url, timesec, filename, http_request_method, url_ti
                 settings.TIME_BASED_STATE = True
               elif technique == settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED:  
                 settings.TEMPFILE_BASED_STATE = True
-                #OUTPUT_TEXTFILE = tmp_path + TAG + settings.OUTPUT_FILE_EXT
                 OUTPUT_TEXTFILE = injector.select_output_filename(technique, tmp_path, TAG)
               cmd = shell = ""
               checks.check_for_stored_tamper(payload)
@@ -253,7 +254,6 @@ def do_time_related_proccess(url, timesec, filename, http_request_method, url_ti
             alter_shell = menu.options.alter_shell
             tag_length = len(TAG) + 4
             if technique == settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED:
-              #OUTPUT_TEXTFILE = tmp_path + TAG + settings.OUTPUT_FILE_EXT
               OUTPUT_TEXTFILE = injector.select_output_filename(technique, tmp_path, TAG)
             for output_length in range(1, int(tag_length)):
               try:
@@ -321,9 +321,6 @@ def do_time_related_proccess(url, timesec, filename, http_request_method, url_ti
 
                       if settings.TARGET_OS == settings.OS.WINDOWS:
                         if alter_shell:
-                          # if technique == settings.INJECTION_TECHNIQUE.TIME_BASED: 
-                          #   cmd = settings.WIN_PYTHON_INTERPRETER + "python.exe -c \"print (" + str(randv1) + " + " + str(randv2) + ")\""
-                          # else:
                           cmd = settings.WIN_PYTHON_INTERPRETER + " -c \"print (" + str(randv1) + " + " + str(randv2) + ")\""
                         else:
                           rand_num = randv1 + randv2
@@ -377,7 +374,7 @@ def do_time_related_proccess(url, timesec, filename, http_request_method, url_ti
                   delete_previous_shell(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, technique)
                 raise
 
-              except:
+              except (Exception, SystemExit):
                 percent = ((num_of_chars * 100) / total)
                 float_percent = "{0:.1f}".format(round(((num_of_chars*100)/(total*1.0)),2))
                 if str(float_percent) == "100.0":
@@ -498,7 +495,6 @@ def do_results_based_proccess(url, timesec, filename, http_request_method, injec
               if technique == settings.INJECTION_TECHNIQUE.FILE_BASED: 
                 settings.FILE_BASED_STATE = True
                 checks.check_for_stored_tamper(payload)
-                #OUTPUT_TEXTFILE = TAG + settings.OUTPUT_FILE_EXT
                 tmp_path = ""
                 OUTPUT_TEXTFILE = injector.select_output_filename(technique, tmp_path, TAG)
                 if re.findall(settings.DIRECTORY_REGEX,payload):
@@ -526,7 +522,6 @@ def do_results_based_proccess(url, timesec, filename, http_request_method, injec
 
             if technique == settings.INJECTION_TECHNIQUE.FILE_BASED:
               # The output file for file-based injection technique.
-              #OUTPUT_TEXTFILE = TAG + settings.OUTPUT_FILE_EXT
               OUTPUT_TEXTFILE = injector.select_output_filename(technique, tmp_path, TAG)
             else:
               randv1 = random.randrange(100)
@@ -616,7 +611,6 @@ def do_results_based_proccess(url, timesec, filename, http_request_method, injec
               if technique == settings.INJECTION_TECHNIQUE.FILE_BASED:
                 # Delete previous shell (text) files (output)
                 if 'vuln_parameter' in locals():
-                  # settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
                   delete_previous_shell(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, technique)
                 raise
               else:
@@ -641,7 +635,7 @@ def do_results_based_proccess(url, timesec, filename, http_request_method, injec
               checks.EOFError_err_msg()
               raise
               
-            except:
+            except (Exception, SystemExit):
               if technique == settings.INJECTION_TECHNIQUE.FILE_BASED:
                 raise
               else:

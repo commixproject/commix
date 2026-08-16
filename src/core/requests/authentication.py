@@ -38,12 +38,24 @@ do the authentication process using the provided credentials (auth_data).
 The authentication process
 """
 def authentication_process(http_request_method):
+  if not menu.options.auth_data:
+    err_msg = "The '--auth-url' option requires the '--auth-data' option to be provided too."
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+    raise SystemExit()
+
   try:
     auth_url = menu.options.auth_url
     auth_data = menu.options.auth_data
-    #cj = cookielib.CookieJar()
     cj = _http_cookiejar.CookieJar()
     opener = _urllib.request.build_opener(_urllib.request.HTTPCookieProcessor(cj))
+    _urllib.request.install_opener(opener)
+    request = _urllib.request.Request(auth_url, auth_data.encode(settings.DEFAULT_CODEC), method=http_request_method)
+    # Check if defined extra headers.
+    headers.do_check(request)
+    headers.check_http_traffic(request)
+    # Get the response of the request.
+    response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
+    # HTTPCookieProcessor only fills the jar after the response is received.
     cookies = ""
     for cookie in cj:
         cookie_values = cookie.name + "=" + cookie.value + "; "
@@ -54,13 +66,7 @@ def authentication_process(http_request_method):
         info_msg = "The received cookie is "
         info_msg += str(menu.options.cookie) + Style.RESET_ALL + "."
         settings.print_data_to_stdout(settings.print_bold_info_msg(info_msg))
-    _urllib.request.install_opener(opener)
-    request = _urllib.request.Request(auth_url, auth_data.encode(settings.DEFAULT_CODEC), method=http_request_method)
-    # Check if defined extra headers.
-    headers.do_check(request)
-    headers.check_http_traffic(request)
-    # Get the response of the request.
-    return _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
+    return response
 
   except Exception as err_msg:
     checks.connection_exceptions(err_msg)
@@ -105,6 +111,10 @@ def http_auth_cracker(url, realm, http_request_method):
     settings.PERFORM_CRACKING = True
     # Define the HTTP authentication type.
     authentication_type = menu.options.auth_type
+    if authentication_type.lower() not in (settings.AUTH_TYPE.BASIC, settings.AUTH_TYPE.DIGEST):
+      err_msg = "Dictionary-based cracking is not supported for the '" + authentication_type + "' HTTP authentication type."
+      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+      return False
     # Define the authentication wordlists for usernames / passwords.
     usernames, passwords = define_wordlists()
     i = 1
@@ -140,7 +150,8 @@ def http_auth_cracker(url, realm, http_request_method):
           found = True
         except KeyboardInterrupt :
           raise
-        except (_urllib.error.HTTPError, _urllib.error.URLError):
+        except (Exception, SystemExit):
+          # Don't abort the whole wordlist attack on one failed request.
           pass
         if found:
           if settings.VERBOSITY_LEVEL == 0:

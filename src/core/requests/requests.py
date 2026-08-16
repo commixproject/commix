@@ -188,7 +188,7 @@ def estimate_response_time(url, timesec, http_request_method):
         if not menu.options.auth_cred:
           try:
             stored_auth_creds = session_handler.export_valid_credentials(url, auth_type.lower())
-          except:
+          except (Exception, SystemExit):
             stored_auth_creds = False
           if stored_auth_creds and not menu.options.ignore_session:
             menu.options.auth_cred = stored_auth_creds
@@ -208,7 +208,6 @@ def estimate_response_time(url, timesec, http_request_method):
                   if do_update in settings.CHOICE_YES:
                     auth_creds = authentication.http_auth_cracker(url, realm, http_request_method)
                     if auth_creds != False:
-                      # menu.options.auth_cred = auth_creds
                       settings.REQUIRED_AUTHENTICATION = True
                       break
                     else:
@@ -237,7 +236,6 @@ def estimate_response_time(url, timesec, http_request_method):
                   if do_update in settings.CHOICE_YES:
                     auth_creds = authentication.http_auth_cracker(url, realm, http_request_method)
                     if auth_creds != False:
-                      # menu.options.auth_cred = auth_creds
                       settings.REQUIRED_AUTHENTICATION = True
                       break
                     else:
@@ -291,9 +289,6 @@ def estimate_response_time(url, timesec, http_request_method):
   else:
     timesec = int(timesec)
 
-  # Against windows targets (for more stability), add one extra second delay.
-  # if settings.TARGET_OS == settings.OS.WINDOWS :
-  #   timesec = timesec + 1
   return timesec, url_time_response
 
 """
@@ -504,13 +499,13 @@ def cookie_injection(url, vuln_parameter, payload, http_request_method):
     #Check if defined extra headers.
     headers.do_check(request)
     payload = checks.normalize_newlines(payload)
-    # payload = checks.payload_fixation(payload)
-    # payload = payload.replace("+", "%2B")
     if settings.INJECT_TAG in menu.options.cookie:
-      cookie = checks.process_injectable_value(payload, menu.options.cookie)
-      # if settings.TESTABLE_VALUE in menu.options.cookie.replace(settings.INJECT_TAG, ""):
-      #   request.add_header(settings.COOKIE, menu.options.cookie.replace(settings.INJECT_TAG, "").replace(settings.TESTABLE_VALUE, payload))
-      # else:
+      # Percent-encode before inserting into the cookie value - ";" is the
+      # cookie-attribute delimiter itself, so a raw separator/space/etc. in
+      # the payload would truncate or corrupt the cookie. PHP's $_COOKIE
+      # decodes this automatically, same as $_GET.
+      encoded_payload = _urllib.parse.quote(payload, safe=settings.SAFE_QUERY)
+      cookie = checks.process_injectable_value(encoded_payload, menu.options.cookie)
       request.add_header(settings.COOKIE, cookie)
     try:
       headers.check_http_traffic(request)
@@ -683,9 +678,6 @@ def custom_header_injection(url, vuln_parameter, payload, http_request_method):
     #Check if defined extra headers.
     headers.do_check(request)
     payload = checks.normalize_newlines(payload)
-    # if settings.CUSTOM_HEADER_VALUE in settings.CUSTOM_HEADER_VALUE.replace(settings.INJECT_TAG, ""):
-    #   request.add_header(settings.CUSTOM_HEADER_NAME, settings.CUSTOM_HEADER_VALUE.replace(settings.INJECT_TAG, "").replace(settings.CUSTOM_HEADER_VALUE, payload))
-    # else:
     request.add_header(settings.CUSTOM_HEADER_NAME, payload)
     try:
       headers.check_http_traffic(request)
@@ -730,7 +722,7 @@ def encoding_detection(response):
     content_bytes = response.read()
     try:
       content_text = content_bytes.decode("utf-8", errors="ignore")
-    except:
+    except (Exception, SystemExit):
       content_text = ""
 
     # 1. Get charset from HTTP header (may be None)
@@ -739,7 +731,7 @@ def encoding_detection(response):
     except AttributeError:
       try:
         header_charset = response.headers.get_content_charset()  # Python 3
-      except:
+      except (Exception, SystemExit):
         header_charset = None
 
     if header_charset:

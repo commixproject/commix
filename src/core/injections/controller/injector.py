@@ -515,7 +515,7 @@ def injection_output(url, OUTPUT_TEXTFILE, timesec, technique):
         if "?" and settings.OUTPUT_FILE_EXT in output:
           try:
             output = output.split("?")[0]
-          except:
+          except (Exception, SystemExit):
             pass
       except IndexError:
         output = url + "/" + OUTPUT_TEXTFILE
@@ -684,10 +684,8 @@ def injection_results(response, TAG, cmd, technique, url, OUTPUT_TEXTFILE, times
         shell = ""
       else:
         shell = checks.process_page_content(response, action="encode").rstrip().lstrip()
-        #shell = [newline.replace(settings.END_LINE.LF,settings.SINGLE_WHITESPACE) for newline in shell]
         if settings.TARGET_OS == settings.OS.WINDOWS:
           shell = [newline.replace(settings.END_LINE.CR, "") for newline in shell]
-          #shell = [space.strip() for space in shell]
           shell = [empty for empty in shell if empty]
     except (_urllib.error.HTTPError, _urllib.error.URLError) as e:
       if str(e.getcode()) == settings.NOT_FOUND_ERROR:

@@ -1,4 +1,5 @@
 ## Version 4.2 (TBA)
+* Revised: Improved parameter parsing and injection point detection across all supported request formats.
 * Added: New `--threads` option to support parallel data retrieval, reducing extraction time on supported techniques.
 * Revised: Refactored time-related techniques (i.e. "time-based", "tempfile-based") to use binary search for character extraction.
 * Fixed: A stored session could restore a `--time-sec` value from an earlier run without re-applying the minimum safe delay, silently bypassing the safety floor on resumed sessions.

@@ -50,7 +50,6 @@ from src.thirdparty.six.moves import reload_module as _reload_module
 
 # Set default encoding
 _reload_module(sys)
-#sys.setdefaultencoding(settings.DEFAULT_CODEC)
 
 if settings.IS_WINDOWS:
   import codecs
@@ -179,7 +178,7 @@ def check_internet(url):
     request = _urllib.request.Request(settings.CHECK_INTERNET_ADDRESS, method=settings.HTTPMETHOD.GET)
     headers.do_check(request)
     examine_request(request, url)
-  except:
+  except (Exception, SystemExit):
     settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
     error_msg = "No internet connection detected."
     settings.print_data_to_stdout(settings.print_critical_msg(error_msg))
@@ -616,7 +615,9 @@ try:
     smoke_test()
 
   try:
-    if hasattr(sys.stdin, "fileno") and not any((os.isatty(sys.stdin.fileno()), menu.options.ignore_stdin)):
+    # Treat non-interactive stdin as targets only when no explicit target was given.
+    if hasattr(sys.stdin, "fileno") and not any((os.isatty(sys.stdin.fileno()), menu.options.ignore_stdin,
+                menu.options.url, menu.options.requestfile, menu.options.bulkfile, menu.options.logfile)):
       settings.STDIN_PARSING = True
   except Exception as ex:
     if "fileno" in str(ex) and settings.STDIN_PARSING:
@@ -1047,7 +1048,7 @@ try:
                 if response != False:
                   filename = logs.logs_filename_creation(url)
                   main(filename, url, http_request_method)
-              except:
+              except (Exception, SystemExit):
                 pass
           else:
             url_num += 1

@@ -110,7 +110,9 @@ def heuristic_request(url, http_request_method, check_parameter, payload, whites
     settings.print_data_to_stdout(settings.print_payload(payload))
   if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
     payload = checks.payload_fixation(payload)
-    cookie = checks.process_injectable_value(payload, menu.options.cookie).encode(settings.DEFAULT_CODEC)
+    # Percent-encode cookie values to safely handle delimiters and special characters.
+    encoded_payload = _urllib.parse.quote(payload, safe=settings.SAFE_QUERY)
+    cookie = checks.process_injectable_value(encoded_payload, menu.options.cookie).encode(settings.DEFAULT_CODEC)
   else:
     cookie = checks.remove_tags(menu.options.cookie).encode(settings.DEFAULT_CODEC)
 
@@ -516,8 +518,6 @@ def cookie_injection(url, http_request_method, filename, timesec):
       cookie_parameters_list = []
       cookie_parameters_list.append(cookie_parameters)
       cookie_parameters = cookie_parameters_list
-    # Remove whitespaces
-    cookie_parameters = [x.replace(settings.SINGLE_WHITESPACE, "") for x in cookie_parameters]
     do_injection(cookie_parameters, settings.COOKIE, header_name, url, http_request_method, filename, timesec)
 
   if settings.COOKIE_INJECTION:
