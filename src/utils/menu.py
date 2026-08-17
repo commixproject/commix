@@ -814,7 +814,7 @@ def enumeration_options():
 Check if file access options are enabled.
 """
 def file_access_options():
-  if any((options.file_write, options.file_read)):
+  if any(v is not None for v in (options.file_write, options.file_read)):
     return True
 
 # eof

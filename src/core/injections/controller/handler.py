@@ -442,7 +442,6 @@ def do_results_based_proccess(url, timesec, filename, http_request_method, injec
   no_result = True
   is_encoded = False
   stop_injection = False
-  call_tmp_based = False
   next_attack_vector = False
   export_injection_info = False
 
@@ -587,7 +586,7 @@ def do_results_based_proccess(url, timesec, filename, http_request_method, injec
                 except _urllib.error.HTTPError as e:
                   if str(e.getcode()) == settings.NOT_FOUND_ERROR:
                     percent, float_percent = checks.percentage_calculation(i, total)
-                    if call_tmp_based == True:
+                    if settings.CALL_TMP_BASED == True:
                       exit_loops = True
                       tmp_path = os.path.split(menu.options.file_dest)[0] + "/"
                       checks.tfb_controller(no_result, url, timesec, filename, tmp_path, http_request_method, url_time_response)

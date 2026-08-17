@@ -264,7 +264,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "70"
+REVISION = "71"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1015,6 +1015,9 @@ ENUMERATE_AGAIN = False
 # FIle access options
 FILE_ACCESS_DONE = False
 FILE_ACCESS_AGAIN = False
+
+# Set when '--file-dest' targets the "/tmp/" directory, to switch straight to the tempfile-based technique.
+CALL_TMP_BASED = False
 
 # XML Data
 IS_XML = False

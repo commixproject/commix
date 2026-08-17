@@ -2577,6 +2577,18 @@ def quoted_cmd(cmd):
   return cmd
 
 """
+Escape file content for a double-quoted "printf" argument.
+"""
+def escape_file_content(content):
+  content = content.replace("\\", "\\\\")
+  content = content.replace("\"", "\\\"")
+  content = content.replace("$", "\\$")
+  content = content.replace("`", "\\`")
+  content = content.replace("%", "%%")
+  content = content.replace(settings.END_LINE.LF, "\\n")
+  return content
+
+"""
 Add new "cmd /c"
 """
 def add_new_cmd(cmd):
@@ -2594,8 +2606,11 @@ def escape_single_quoted_cmd(cmd):
 Find filename
 """
 def find_filename(dest_to_write, content):
-  fname = os.path.basename(dest_to_write)
-  tmp_fname = fname + "_tmp"
+  # Build absolute paths to avoid relying on the shell's working directory.
+  norm_dest = dest_to_write.replace("\\", "/")
+  dirpath = os.path.dirname(norm_dest)
+  fname = norm_dest
+  tmp_fname = (dirpath + "/" if dirpath else "") + os.path.basename(norm_dest) + "_tmp"
   if settings.TARGET_OS == settings.OS.WINDOWS:
     cmd = settings.WIN_FILE_WRITE_OPERATOR  + tmp_fname.replace("\\","\\\\") + settings.SINGLE_WHITESPACE + "'" + content + "'"
   else:
@@ -2657,20 +2672,10 @@ def check_file(remote_file_path):
   return cmd
 
 """
-Change directory
-"""
-def change_dir(dest_to_write):
-  dest_to_write = dest_to_write.replace("\\","/")
-  path = os.path.dirname(dest_to_write)
-  path = path.replace("/","\\")
-  cmd = "cd " + path
-  return cmd
-
-"""
 File content to read.
 """
 def file_content_to_read():
-  file_to_read = menu.options.file_read.encode(settings.DEFAULT_CODEC).decode()
+  file_to_read = menu.options.file_read
   info_msg = "Fetching contents of the file: '"
   info_msg += file_to_read + "'."
   settings.print_data_to_stdout(settings.print_info_msg(info_msg))
@@ -2690,28 +2695,26 @@ def file_read_status(shell, file_to_read, filename):
   if shell:
     _ = "Retrieved file content"
     settings.print_data_to_stdout(settings.print_retrieved_data(_, shell))
-    with open(filename, 'a', encoding=settings.DEFAULT_CODEC) as output_file:
-      if not menu.options.no_logging:
+    if not menu.options.no_logging:
+      with open(filename, 'a', encoding=settings.DEFAULT_CODEC) as output_file:
         info_msg = "Extracted content of the file '"
         info_msg += file_to_read + "' : " + shell + settings.END_LINE.LF
-        output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
+        output_file.write(re.compile(settings.ANSI_COLOR_REMOVAL).sub("",settings.INFO_BOLD_SIGN) + info_msg)
   else:
-    warn_msg = "It seems you do not have permission "
-    warn_msg += "to read the contents of the file '" + file_to_read + "'."
+    warn_msg = "No content was retrieved for the file '" + file_to_read + "'. "
+    warn_msg += "This could mean the file does not exist, is empty, or you do not have permission to read it."
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
 """
 Build the final destination path for file write operations.
 """
 def check_destination(destination):
-  if menu.options.file_write:
-    where = menu.options.file_write
-  if os.path.split(destination)[1] == "" :
-    _ = os.path.split(destination)[0] + "/" + os.path.split(where)[1]
-  elif os.path.split(destination)[0] == "/":
-    _ = "/" + os.path.split(destination)[1] + "/" + os.path.split(where)[1]
-  elif os.path.split(destination)[0] == "\\":
-    _ = "\\" + os.path.split(destination)[1] + "\\" + os.path.split(where)[1]
+  where = menu.options.file_write
+  # Normalize path separators before splitting.
+  normalized = destination.replace("\\", "/")
+  # A destination with no trailing filename is a directory, so append the local filename.
+  if os.path.split(normalized)[1] == "":
+    _ = os.path.split(normalized)[0].rstrip("/") + "/" + os.path.split(where)[1]
   else:
     _ = destination
   return _
@@ -2720,19 +2723,27 @@ def check_destination(destination):
 Write the content of a local file to a remote destination.
 """
 def check_file_to_write():
-  file_to_write = menu.options.file_write.encode(settings.DEFAULT_CODEC).decode()
+  file_to_write = menu.options.file_write
   if not os.path.exists(file_to_write):
     err_msg = "The specified local file '" + file_to_write + "' does not exist."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
   if os.path.isfile(file_to_write):
-    with open(file_to_write, 'r') as content_file:
-      content = [line.replace(settings.END_LINE.CRLF, settings.END_LINE.LF).replace(settings.END_LINE.CR, settings.END_LINE.LF).replace(settings.END_LINE.LF, settings.SINGLE_WHITESPACE) for line in content_file]
-    content = "".join(str(p) for p in content).replace("'", "\"")
+    try:
+      with open(file_to_write, 'r', encoding=settings.DEFAULT_CODEC) as content_file:
+        content = content_file.read()
+    except (OSError, UnicodeDecodeError) as err:
+      err_msg = "Unable to read the local file '" + file_to_write + "' (" + str(err) + "). "
+      err_msg += "Note that '--file-write' does not support binary files."
+      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+      raise SystemExit()
+    content = content.replace(settings.END_LINE.CRLF, settings.END_LINE.LF).replace(settings.END_LINE.CR, settings.END_LINE.LF)
     if settings.TARGET_OS == settings.OS.WINDOWS:
       import base64
       content = base64.b64encode(content.encode(settings.DEFAULT_CODEC)).decode()
+    else:
+      content = escape_file_content(content)
   else:
     warn_msg = "The specified path '" + file_to_write + "' is not a file."
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
@@ -2753,7 +2764,8 @@ def file_write_status(shell, dest_to_write):
     info_msg = "The file has been successfully created in remote directory: '" + dest_to_write + "'."
     settings.print_data_to_stdout(settings.print_bold_info_msg(info_msg))
   else:
-    warn_msg = "It seems you do not have permission to write files to the remote directory '" + dest_to_write + "'."
+    warn_msg = "The file does not appear to exist in the remote directory '" + dest_to_write + "'. "
+    warn_msg += "This could mean the write failed, or you do not have permission to write to that directory."
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
 
@@ -2944,8 +2956,9 @@ def check_tmp_path(url, timesec, filename, http_request_method, url_time_respons
   if not settings.LOAD_SESSION and settings.DEFAULT_WEB_ROOT != settings.WEB_ROOT:
     settings.WEB_ROOT = settings.DEFAULT_WEB_ROOT
 
+  settings.CALL_TMP_BASED = False
   if menu.options.file_dest and '/tmp/' in menu.options.file_dest:
-    call_tmp_based = True
+    settings.CALL_TMP_BASED = True
 
   if menu.options.web_root:
     settings.WEB_ROOT = menu.options.web_root

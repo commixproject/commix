@@ -39,8 +39,6 @@ def file_write(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec,
       if settings.TIME_RELATED_ATTACK:
         whitespace = settings.WHITESPACES[0]
         _ = True
-    cmd = checks.change_dir(dest_to_write)
-    response = injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, technique)
     fname, tmp_fname, cmd = checks.find_filename(dest_to_write, content)
     response = injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, technique)
     cmd = checks.win_decode_b64_enc(fname, tmp_fname)
@@ -69,7 +67,7 @@ def file_write(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec,
         check_exec_time, shell = injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response, technique)
     else:
       if technique == settings.INJECTION_TECHNIQUE.FILE_BASED:
-        cmd = cmd + settings.COMMENT
+        cmd = cmd + settings.SINGLE_WHITESPACE + settings.COMMENT
         response = injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, technique)
       else:
         response = injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, technique)

@@ -352,6 +352,9 @@ The main function.
 """
 def main(filename, url, http_request_method):
   try:
+    # Reset per-target state so file access isn't silently skipped for later targets.
+    settings.FILE_ACCESS_DONE = False
+
     if menu.options.alert:
       if menu.options.alert.startswith('-'):
         err_msg = "Value for option '--alert' must be valid operating system command(s)."
@@ -507,7 +510,7 @@ def main(filename, url, http_request_method):
         raise SystemExit()
 
     # Check the file-destination
-    if menu.options.file_write and not menu.options.file_dest:
+    if menu.options.file_write is not None and not menu.options.file_dest:
       err_msg = "Host's absolute filepath to write, must be specified (i.e. '--file-dest')."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
       raise SystemExit()
@@ -516,6 +519,25 @@ def main(filename, url, http_request_method):
       err_msg = "You must enter the '--file-write' parameter."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
       raise SystemExit()
+
+    # The remote destination must be an absolute filepath (Unix-style, Windows drive-letter, or UNC).
+    if menu.options.file_dest and not (menu.options.file_dest.startswith(("/", "\\")) or \
+       re.match(r"^[A-Za-z]:[\\/]", menu.options.file_dest)):
+      err_msg = "The value for option '--file-dest' must be an absolute filepath "
+      err_msg += "(e.g. '/tmp/file' or 'C:\\Windows\\Temp\\file')."
+      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+      raise SystemExit()
+
+    # Check the local file to write, before any tests are performed.
+    if menu.options.file_write is not None:
+      if not os.path.exists(menu.options.file_write):
+        err_msg = "The specified local file '" + menu.options.file_write + "' does not exist."
+        settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+        raise SystemExit()
+      if not os.path.isfile(menu.options.file_write):
+        err_msg = "The specified path '" + menu.options.file_write + "' is not a file."
+        settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+        raise SystemExit()
 
     # Check if defined "--url" or "-m" option.
     if url:
