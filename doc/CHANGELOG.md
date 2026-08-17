@@ -1,4 +1,5 @@
 ## Version 4.2 (TBA)
+* Added: New `--forms` switch to parse and test forms on the target URL (requires `--crawl`).
 * Revised: Improved stored-session resume handling.
 * Revised: Improved parameter parsing and injection point detection across all supported request formats.
 * Added: New `--threads` option to support parallel data retrieval, reducing extraction time on supported techniques.
@@ -9,7 +10,7 @@
 * Removed: The local HTTP server functionality, previously used by the deprecated `--file-upload` option, has been removed.
 * Revised: The deprecated `--file-upload` option has been removed, as `--file-write` provides nearly identical functionality.
 * Revised: Refactored `--time-sec` option to apply only to time-related techniques.
-* Revised: The deprecated `--tor-check` flag has been removed, and Tor connectivity is now handled internally with no separate check option.
+* Revised: The deprecated `--tor-check` switch has been removed, and Tor connectivity is now handled internally with no separate check option.
 * Revised: Improved handling of injectable parameters in JSON objects.
 * Revised: Refactored heuristic payload preprocessing to normalize randomized placeholders.
 * Added: Standardized JSON output formatting with 2-space indentation.
@@ -102,13 +103,13 @@ _Note: For more check the [detailed changeset](https://github.com/commixproject/
 * Revised: Minor improvement regarding parsing raw HTTP request from a file (i.e. `-r` option).
 * Revised: Minor improvement regarding dynamic code evaluation technique (i.e. command execution output).
 * Added: Farsi(Persian) translation of [README.md](https://github.com/commixproject/commix/blob/master/doc/translations/README-fa-FA.md) (via @verfosec).
-* Fixed: Minor bug-fix regarding `--skip-empty` flag, for skipping the testing of the parameter(s) with empty value(s).
+* Fixed: Minor bug-fix regarding `--skip-empty` switch, for skipping the testing of the parameter(s) with empty value(s).
 * Revised: Minor improvement regarding tamper script "uninitializedvariable.py", for adding randomly generated uninitialized bash variables between the characters of each command of the generated payloads.
 * Revised: Minor improvement regarding skipping further tests involving target that an injection point has already been detected.
 * Revised: Minor code refactoring regarding multiple tamper scripts (i.e. "backslashes.py", "dollaratsigns.py", "doublequotes.py", "singlequotes.py", "uninitializedvariable.py").
 * Added: New tamper script "rev.py" that reverses (characterwise) the user-supplied operating system commands.
 * Fixed: Minor bug-fix regarding checking for similarity in provided parameter(s) name(s) and value(s).
-* Fixed: Minor bug-fix regarding forcing usage of SSL/HTTPS requests toward the target (i.e. `--force-ssl` flag).
+* Fixed: Minor bug-fix regarding forcing usage of SSL/HTTPS requests toward the target (i.e. `--force-ssl` switch).
 * Fixed: Minor bug-fix regarding setting custom output directory path (i.e. `--output-dir` option).
 * Added: Support for `Bearer` HTTP authentication type.
 * Revised: Minor improvement regarding tamper script "xforwardedfor.py" (that appends a fake HTTP header `X-Forwarded-For`).

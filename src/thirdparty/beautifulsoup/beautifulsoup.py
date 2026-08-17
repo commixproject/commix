@@ -643,6 +643,9 @@ class Tag(PageElement):
         "A tag is non-None even if it has no contents."
         return True
 
+    # Alias __bool__ for Python 3 to prevent empty tags from being dropped.
+    __bool__ = __nonzero__
+
     def __setitem__(self, key, value):
         """Setting tag[key] sets the value of the 'key' attribute for the
         tag."""

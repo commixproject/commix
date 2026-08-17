@@ -42,6 +42,8 @@ def init_global_vars():
   visited_hrefs = []
   global new_crawled_hrefs
   new_crawled_hrefs = []
+  global crawled_forms
+  crawled_forms = []
 
 """
 Change the crawling depth level.
@@ -76,17 +78,21 @@ def normalize_results(output_href):
     message = "Do you want to normalize crawling results? [Y/n] > "
     message = common.read_input(message, default="Y", check_batch=True)
     if message in settings.CHOICE_YES:
+      # Dedupe by path and parameter names, keeping the first occurrence.
       seen = set()
       for target in output_href:
         try:
-          value = "%s%s%s" % (target, '&' if '?' in target else '?', target or "")
-          match = re.search(r"/[^/?]*\?.+\Z", value)
-          if match:
-            key = re.sub(r"=[^=&]*", "=", match.group(0)).strip("&?")
-            if '=' in key and key not in seen:
-              results.append(target)
-              seen.add(key)
-        except TypeError:
+          parsed = _urllib.parse.urlparse(target)
+          if not parsed.query:
+            continue
+          param_names = tuple(sorted(_urllib.parse.parse_qs(parsed.query).keys()))
+          if not param_names:
+            continue
+          key = (parsed.path, param_names)
+          if key not in seen:
+            results.append(target)
+            seen.add(key)
+        except Exception:
           pass
       no_usable_links(results)
       return results
@@ -171,14 +177,48 @@ def sitemap(url, http_request_method):
 Store the identified (valid) hrefs.
 """
 def store_hrefs(href, identified_hrefs, redirection):
-  set(crawled_hrefs)
-  set(new_crawled_hrefs)
   if href not in crawled_hrefs:
     if (settings.DEFAULT_CRAWLING_DEPTH != 1 and href not in new_crawled_hrefs) or redirection:
       new_crawled_hrefs.append(href)
     identified_hrefs = True
     crawled_hrefs.append(href)
   return identified_hrefs
+
+
+"""
+Extract form fields as (name, value) pairs, using defaults for empty values.
+"""
+def extract_form_params(form):
+  params = []
+  for field in form.findAll(["input", "select", "textarea"]):
+    name = field.get("name")
+    if not name:
+      continue
+    field_type = (field.get("type") or "text").lower()
+    if field_type in ("submit", "button", "image", "reset", "file"):
+      continue
+    if field_type in ("checkbox", "radio") and field.get("checked") is None:
+      continue
+    value = ""
+    if field.name == "select":
+      option = field.find("option", selected=True) or field.find("option")
+      if option:
+        value = option.get("value") or option.text or ""
+    elif field.name == "textarea":
+      value = field.text or ""
+    else:
+      value = field.get("value") or ""
+    params.append((name, value or settings.CRAWL_FORM_DEFAULT_VALUE))
+  return params
+
+
+"""
+Store an identified (valid) POST form as an (action URL, POST data) pair.
+"""
+def store_forms(action_url, data):
+  entry = (action_url, data)
+  if entry not in crawled_forms:
+    crawled_forms.append(entry)
 
 
 """
@@ -232,7 +272,7 @@ def check_sitemap():
 Check if no usable links found.
 """
 def no_usable_links(crawled_hrefs):
-  if len(crawled_hrefs) == 0:
+  if len(crawled_hrefs) == 0 and len(crawled_forms) == 0:
     warn_msg = "No usable links found (with GET parameters)."
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
     if not settings.MULTI_TARGETS:
@@ -259,7 +299,7 @@ def do_process(url, http_request_method):
       tags += re.finditer(r'(?i)\s(href|src)=["\'](?P<href>[^>"\']+)', content)
       tags += re.finditer(r'(?i)window\.open\(["\'](?P<href>[^)"\']+)["\']', content)
     for tag in tags:
-      href = tag.get("href") if hasattr(tag, settings.HTTPMETHOD.GET) else tag.group("href")
+      href = tag.get("href") if hasattr(tag, "get") else tag.group("href")
       if href:
         href = _urllib.parse.urljoin(url, _urllib.parse.unquote(href))
         if _urllib.parse.urlparse(url).netloc in href:
@@ -273,11 +313,27 @@ def do_process(url, http_request_method):
                     settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
               else:
                 identified_hrefs = store_hrefs(href, identified_hrefs, redirection=False)
+    if menu.options.forms:
+      for form in soup('form'):
+        action_url = _urllib.parse.urljoin(url, form.get("action") or url)
+        if _urllib.parse.urlparse(url).netloc not in action_url:
+          continue
+        params = extract_form_params(form)
+        if not params:
+          continue
+        method = (form.get("method") or settings.HTTPMETHOD.GET).upper()
+        data = "&".join(_urllib.parse.quote(str(k), safe="") + "=" + _urllib.parse.quote(str(v), safe="") for k, v in params)
+        if method == settings.HTTPMETHOD.POST:
+          store_forms(action_url, data)
+        else:
+          href = action_url + ("&" if "?" in action_url else "?") + data
+          identified_hrefs = store_hrefs(href, identified_hrefs, redirection=False)
     no_usable_links(crawled_hrefs)
     if identified_hrefs:
+      # Already deduped by store_hrefs(); list() keeps order stable.
       if len(new_crawled_hrefs) != 0 and settings.DEFAULT_CRAWLING_DEPTH != 1:
-        return list(set(new_crawled_hrefs))
-      return list(set(crawled_hrefs))
+        return list(new_crawled_hrefs)
+      return list(crawled_hrefs)
     return list("")
 
   except Exception as e:  # for non-HTML files and non-valid links

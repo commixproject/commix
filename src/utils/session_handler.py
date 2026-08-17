@@ -349,8 +349,7 @@ def check_stored_injection_points(url, check_parameter, http_request_method):
 
 
 """
-Fetch every stored injection point for this (host, parameter/header, method) 
-in one query, keyed by technique - avoids re-querying storage per technique.
+Load all stored injection points once, keyed by technique.
 """
 def load_stored_techniques(url, check_parameter, http_request_method):
   stored = {}

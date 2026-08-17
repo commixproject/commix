@@ -179,6 +179,12 @@ target.add_option("--crawl-exclude",
                 default=None,
                 help="Regexp to exclude pages from crawling (e.g. 'logout').")
 
+target.add_option("--forms",
+                dest="forms",
+                action="store_true",
+                default=False,
+                help="Parse and test forms on target URL (requires '--crawl').")
+
 target.add_option("-x",
                 dest="sitemap_url",
                 help="Parse target(s) from remote sitemap(.xml) file.")

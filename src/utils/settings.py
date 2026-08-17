@@ -264,7 +264,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "68"
+REVISION = "69"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1423,6 +1423,9 @@ IGNORE_CODE = []
 
 # Default crawling depth
 DEFAULT_CRAWLING_DEPTH = 1
+
+# Default value used for a crawled form field that has no pre-filled value.
+CRAWL_FORM_DEFAULT_VALUE = "1"
 
 SITEMAP_CHECK = None
 

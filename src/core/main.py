@@ -863,6 +863,11 @@ try:
         settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
         raise SystemExit()
 
+    if menu.options.forms and not settings.CRAWLING:
+      err_msg = "The '--forms' switch requires the '--crawl' option."
+      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+      raise SystemExit()
+
     # Check arguments
     if len(sys.argv) == 1 and not settings.STDIN_PARSING:
       menu.parser.print_help()
@@ -923,6 +928,7 @@ try:
 
     else:
       output_href = []
+      output_forms = []
       # Check if option is "-m" for multiple urls test.
       if menu.options.bulkfile:
         bulkfile = menu.options.bulkfile
@@ -953,17 +959,25 @@ try:
           crawling_list = 1
           output_href = crawler.crawler(url, url_num, crawling_list, http_request_method)
           output_href.append(url)
+          output_forms += crawler.crawled_forms
         else:
           if settings.STDIN_PARSING:
             bulkfile = stdin_parsing_target(os_checks_num)
           crawling_list = len(bulkfile)
           for url in bulkfile:
             output_href += (crawler.crawler(url, url_num, crawling_list, http_request_method))
+            output_forms += crawler.crawled_forms
             url_num += 1
           output_href = output_href + bulkfile
           output_href = [x for x in output_href if x not in settings.HREF_SKIPPED]
         if not menu.options.shellshock:
-          output_href = crawler.normalize_results(output_href)
+          try:
+            output_href = crawler.normalize_results(output_href)
+          except SystemExit:
+            # No GET links; continue if crawled POST forms are available.
+            if not output_forms:
+              raise
+            output_href = []
         settings.CRAWLING_PHASE = False
       else:
         filename = None
@@ -982,6 +996,84 @@ try:
           filename = crawler.store_crawling(output_href)
         info_msg = "Found a total of " + str(len(clean_output_href)) + " target"+ "s"[len(clean_output_href) == 1:] + "."
         settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+
+      # Removing duplicates from the identified (crawled) forms.
+      clean_output_forms = []
+      [clean_output_forms.append(x) for x in output_forms if x not in clean_output_forms]
+      if len(clean_output_forms) != 0:
+        info_msg = "Found a total of " + str(len(clean_output_forms)) + " form" + "s"[len(clean_output_forms) == 1:] + "."
+        settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+
+      # Test crawled POST forms first; their method/data are handled separately.
+      form_num = 0
+      orig_data = menu.options.data
+      orig_user_defined_post_data = settings.USER_DEFINED_POST_DATA
+      for form_url, form_data in clean_output_forms:
+        if check_for_injected_url(form_url):
+          if settings.SKIP_VULNERABLE_HOST is None:
+            while True:
+              message = "An injection point has already been detected against '" + _urllib.parse.urlparse(form_url).netloc + "'. "
+              message += "Do you want to skip further tests involving it? [Y/n] > "
+              skip_host = common.read_input(message, default="Y", check_batch=True)
+              if skip_host in settings.CHOICE_YES:
+                settings.SKIP_VULNERABLE_HOST = True
+                break
+              elif skip_host in settings.CHOICE_NO:
+                settings.SKIP_VULNERABLE_HOST = False
+                break
+              elif skip_host in settings.CHOICE_QUIT:
+                raise SystemExit()
+              else:
+                common.invalid_option(skip_host)
+                pass
+
+        if settings.SKIP_VULNERABLE_HOST:
+          form_num += 1
+          info_msg = "Skipping form URL '" + form_url + "' (" + str(form_num) + "/" + str(len(clean_output_forms)) + ")."
+          settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+          continue
+
+        if not check_for_injected_url(form_url):
+          settings.SKIP_VULNERABLE_HOST = None
+        form_num += 1
+        perform_check = True
+        while True:
+          settings.print_data_to_stdout(settings.print_message("[" + str(form_num) + "/" + str(len(clean_output_forms)) + "] FORM - POST " + form_url + " - " + form_data))
+          message = "Do you want to use form #" + str(form_num) + " for testing? [Y/n] > "
+          next_form = common.read_input(message, default="Y", check_batch=True)
+          if next_form in settings.CHOICE_YES:
+            info_msg = "Testing form '" + form_url + "'."
+            settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+            break
+          elif next_form in settings.CHOICE_NO:
+            perform_check = False
+            break
+          elif next_form in settings.CHOICE_QUIT:
+            raise SystemExit()
+          else:
+            common.invalid_option(next_form)
+            pass
+        if perform_check:
+          if os_checks_num == 0:
+            settings.INIT_TEST = True
+          # Reset the injection level
+          if settings.INJECTION_LEVEL > settings.HTTP_HEADER_INJECTION_LEVEL:
+            settings.INJECTION_LEVEL = 1
+          menu.options.url = form_url
+          menu.options.data = form_data
+          settings.USER_DEFINED_POST_DATA = form_data
+          settings.IGNORE_USER_DEFINED_POST_DATA = False
+          init_injection(form_url)
+          try:
+            response, form_url = url_response(form_url, settings.HTTPMETHOD.POST)
+            if response != False:
+              filename = logs.logs_filename_creation(form_url)
+              main(filename, form_url, settings.HTTPMETHOD.POST)
+          except (Exception, SystemExit):
+            pass
+          menu.options.data = orig_data
+          settings.USER_DEFINED_POST_DATA = orig_user_defined_post_data
+
       url_num = 0
       for url in clean_output_href:
         if check_for_injected_url(url):
