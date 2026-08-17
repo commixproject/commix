@@ -44,6 +44,11 @@ class RedirectHandler(_urllib.request.HTTPRedirectHandler, object):
   def redirect_request(self, request, fp, code, msg, headers, newurl):
     if code in (301, 302, 303, 307):
       settings.REDIRECT_CODE = code
+      if not settings.FOLLOW_REDIRECT:
+        # Not following - don't treat its status code as an error either.
+        if code not in settings.IGNORE_CODE:
+          settings.IGNORE_CODE.append(code)
+        return None
       return Request(newurl.replace(' ', '%20'),
                      data=request.data,
                      headers=request.headers

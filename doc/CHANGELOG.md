@@ -1,4 +1,5 @@
 ## Version 4.2 (TBA)
+* Revised: Improved redirect handling and connection performance.
 * Fixed: Multiple bug-fixes affecting the reliability of `--tmp-path` and `--web-root`.
 * Revised: Improved validation and error handling reliability for file access options (i.e. `--file-write`/`--file-dest`/`--file-read`).
 * Revised: Improved target parsing performance and reliability for stdin and `-m` (bulk-file) input.

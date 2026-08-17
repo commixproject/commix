@@ -39,6 +39,7 @@ from src.utils import logs
 from src.utils import menu
 from src.utils import settings
 from src.core.injections.controller import checks
+from src.core.requests import redirection
 from src.thirdparty.colorama import Fore, Back, Style, init
 from src.thirdparty.six.moves import urllib as _urllib
 
@@ -178,7 +179,15 @@ def check_http_traffic(request):
       except (SocketError, _urllib.error.HTTPError, _urllib.error.URLError, _http_client.BadStatusLine, _http_client.RemoteDisconnected, _http_client.IncompleteRead, _http_client.InvalidURL, Exception) as err_msg:
         checks.connection_exceptions(err_msg)
 
-  opener = _urllib.request.build_opener(connection_handler())
+  # Also route through the configured proxy/Tor, so this fetch is reusable.
+  if menu.options.ignore_proxy:
+    opener = _urllib.request.build_opener(_urllib.request.ProxyHandler({}), connection_handler(), redirection.RedirectHandler())
+  elif menu.options.tor:
+    opener = _urllib.request.build_opener(_urllib.request.ProxyHandler({settings.SCHEME: menu.options.proxy}), connection_handler(), redirection.RedirectHandler())
+  else:
+    if menu.options.proxy:
+      request.set_proxy(menu.options.proxy, settings.SCHEME)
+    opener = _urllib.request.build_opener(connection_handler(), redirection.RedirectHandler())
 
   # Time limit mechanism.
   if menu.options.time_limit and (time.time() - settings.START_TIME > menu.options.time_limit):
@@ -218,6 +227,9 @@ def check_http_traffic(request):
       raise SystemExit()
 
     except (_urllib.error.HTTPError, _urllib.error.URLError) as err_msg:
+      # A deliberately unfollowed redirect - retrying won't help.
+      if not settings.FOLLOW_REDIRECT and getattr(err_msg, "code", None) in (301, 302, 303, 307):
+        break
       if settings.UNAUTHORIZED_ERROR in str(err_msg):
         settings.UNAUTHORIZED = unauthorized = True
         with settings.REQUESTS_LOCK:
@@ -239,6 +251,9 @@ def check_http_traffic(request):
   try:
     if response is False:
       response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
+    # Make .read() idempotent so callers can safely reuse this response.
+    _raw_body = response.read()
+    response.read = (lambda _b: lambda *a, **kw: _b)(_raw_body)
     code = response.getcode()
     response_headers = response.info()
     page = checks.process_page_content(response, action="encode")
@@ -254,6 +269,7 @@ def check_http_traffic(request):
     checks.browser_verification(page)
     # Checks regarding recognition of generic "your ip has been blocked" messages.
     checks.blocked_ip(page)
+    return response
 
   # This is useful when handling exotic HTTP errors (i.e requests for authentication).
   except _urllib.error.HTTPError as err:
@@ -386,7 +402,7 @@ def do_check(request):
             password = user_pass_pair[1]
             authhandler = _urllib.request.HTTPDigestAuthHandler()
             authhandler.add_password(realm, url, username, password)
-            opener = _urllib.request.build_opener(authhandler)
+            opener = _urllib.request.build_opener(authhandler, redirection.RedirectHandler())
             _urllib.request.install_opener(opener)
             result = _urllib.request.urlopen(url, timeout=settings.TIMEOUT)
           except AttributeError:

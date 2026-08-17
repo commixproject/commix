@@ -682,6 +682,9 @@ option.help = option.help.capitalize().replace("Show this help message and exit"
 # Remember whether '--web-root' was explicitly supplied on the CLI
 settings.USER_APPLIED_WEB_ROOT = bool(options.web_root)
 
+# Apply '--ignore-redirects' before the very first request is made
+settings.FOLLOW_REDIRECT = not options.ignore_redirects
+
 # Checkall the banner
 if not options.version:
     banner()

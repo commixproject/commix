@@ -19,6 +19,7 @@ from src.utils import menu
 from src.utils import settings
 from src.core.requests import headers
 from src.core.requests import requests
+from src.core.requests import redirection
 from src.core.injections.controller import checks
 from src.thirdparty.six.moves import urllib as _urllib
 from src.thirdparty.colorama import Fore, Back, Style, init
@@ -31,11 +32,11 @@ def use_proxy(request):
   try:
     if menu.options.ignore_proxy:
       proxy = _urllib.request.ProxyHandler({})
-      opener = _urllib.request.build_opener(proxy)
+      opener = _urllib.request.build_opener(proxy, redirection.RedirectHandler())
       _urllib.request.install_opener(opener)
     elif menu.options.tor:
       proxy = _urllib.request.ProxyHandler({settings.SCHEME:menu.options.proxy})
-      opener = _urllib.request.build_opener(proxy)
+      opener = _urllib.request.build_opener(proxy, redirection.RedirectHandler())
       _urllib.request.install_opener(opener)
     else:
       request.set_proxy(menu.options.proxy, settings.SCHEME)

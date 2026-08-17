@@ -44,9 +44,8 @@ Check if the content of the given URL is stable over time.
 """
 def is_url_content_stable(url, delay=5):
   status = "stable"
-  if settings.VERBOSITY_LEVEL != 0:
-    debug_msg = "Testing if the target URL content remains consistent between requests."
-    settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
+  debug_msg = "Testing if the target URL content remains consistent between requests."
+  settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
   try:
     response = _urllib.request.urlopen(url, timeout=settings.TIMEOUT)
     try:
@@ -70,9 +69,8 @@ def is_url_content_stable(url, delay=5):
     settings.print_data_to_stdout(settings.print_warning_msg(msg))
     return
 
-  if settings.VERBOSITY_LEVEL != 0:
-    msg = "Target URL content is " + status + "."
-    settings.print_data_to_stdout(settings.print_bold_debug_msg(msg))
+  msg = "Target URL content is " + status + "."
+  settings.print_data_to_stdout(settings.print_bold_debug_msg(msg))
 
 
 """
@@ -298,6 +296,11 @@ def request_failed(err_msg):
 
   settings.VALID_URL = False
 
+  # A deliberately unfollowed redirect isn't a real failure.
+  if not settings.FOLLOW_REDIRECT and getattr(err_msg, "code", None) in (301, 302, 303, 307):
+    settings.VALID_URL = True
+    return False
+
   try:
     error_msg = str(err_msg.args[0]).split("] ")[1]
   except IndexError:
@@ -424,8 +427,12 @@ Get the response of the request
 """
 def get_request_response(request):
 
-  headers.check_http_traffic(request)
-  if menu.options.proxy or menu.options.ignore_proxy or menu.options.tor: 
+  # Reuse check_http_traffic()'s own fetch instead of requesting twice.
+  response = headers.check_http_traffic(request)
+  if response is not None:
+    return response
+
+  if menu.options.proxy or menu.options.ignore_proxy or menu.options.tor:
     try:
       response = proxy.use_proxy(request)
     except Exception as err_msg:
@@ -435,7 +442,7 @@ def get_request_response(request):
       response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
     except Exception as err_msg:
       response = request_failed(err_msg)
-  
+
   return response
 
 """
@@ -938,9 +945,9 @@ def url_reload(url, delay_seconds):
     delay_seconds = 5
   time.sleep(delay_seconds)
 
-  # Perform the URL request and return the response
-  response = _urllib.request.urlopen(url, timeout=settings.TIMEOUT)
-  return response
+  request = _urllib.request.Request(url, method=settings.HTTPMETHOD.GET)
+  headers.do_check(request)
+  return get_request_response(request)
 
 """
 Calculate the time related execution time

@@ -22,6 +22,7 @@ from src.utils import settings
 from src.utils import session_handler
 from src.core.requests import proxy
 from src.core.requests import headers
+from src.core.requests import redirection
 from src.utils import common
 from src.core.injections.controller import checks
 from src.thirdparty.six.moves import input as _input
@@ -47,7 +48,7 @@ def authentication_process(http_request_method):
     auth_url = menu.options.auth_url
     auth_data = menu.options.auth_data
     cj = _http_cookiejar.CookieJar()
-    opener = _urllib.request.build_opener(_urllib.request.HTTPCookieProcessor(cj))
+    opener = _urllib.request.build_opener(_urllib.request.HTTPCookieProcessor(cj), redirection.RedirectHandler())
     _urllib.request.install_opener(opener)
     request = _urllib.request.Request(auth_url, auth_data.encode(settings.DEFAULT_CODEC), method=http_request_method)
     # Check if defined extra headers.
@@ -138,7 +139,7 @@ def http_auth_cracker(url, realm, http_request_method):
           elif authentication_type.lower() == settings.AUTH_TYPE.DIGEST:
             authhandler = _urllib.request.HTTPDigestAuthHandler()
           authhandler.add_password(realm, url, username, password)
-          opener = _urllib.request.build_opener(authhandler)
+          opener = _urllib.request.build_opener(authhandler, redirection.RedirectHandler())
           _urllib.request.install_opener(opener)
           request = _urllib.request.Request(url, method=http_request_method)
           headers.do_check(request)

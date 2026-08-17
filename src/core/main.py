@@ -140,9 +140,12 @@ def examine_request(request, url):
     if settings.MULTI_TARGETS:
       settings.MAX_RETRIES = 1
   try:
-    headers.check_http_traffic(request)
+    # Reuse check_http_traffic()'s own fetch instead of requesting twice.
+    response = headers.check_http_traffic(request)
+    if response is not None:
+      return response
     # Check if defined any HTTP Proxy (--proxy option).
-    if menu.options.proxy or menu.options.ignore_proxy: 
+    if menu.options.proxy or menu.options.ignore_proxy:
       return proxy.use_proxy(request)
     else:
       try:
@@ -218,6 +221,8 @@ def init_request(url, http_request_method):
       debug_msg = "Creating " + str(settings.SCHEME).upper() + " requests opener object."
       settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
     opener = _urllib.request.build_opener(redirection.RedirectHandler())
+    # Install globally so later bare urlopen() calls respect it too.
+    _urllib.request.install_opener(opener)
     request = perform_init_request(url, http_request_method)
     response = opener.open(request, timeout=settings.TIMEOUT)
     if response.geturl() != url:
@@ -230,7 +235,7 @@ def init_request(url, http_request_method):
   except Exception as err_msg:
     requests.request_failed(err_msg)
 
-  if redirect_url and redirect_url != url:
+  if redirect_url and redirect_url != url and settings.FOLLOW_REDIRECT:
     redirect_url = redirection.do_check(request, url, redirect_url, http_request_method)
     if redirect_url is not None and settings.FOLLOW_REDIRECT:
       if _:
@@ -284,8 +289,8 @@ def init_injection(url):
     debug_msg = "Initializing the knowledge base."
     settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
 
-  # Ensure redirection is followed and core injection paths are enabled
-  settings.FOLLOW_REDIRECT = True
+  # Ensure redirection is followed (unless ignored) and core injection paths are enabled
+  settings.FOLLOW_REDIRECT = not menu.options.ignore_redirects
   settings.SKIP_CODE_INJECTIONS = False
   settings.SKIP_COMMAND_INJECTIONS = False
 
@@ -379,6 +384,9 @@ def main(filename, url, http_request_method):
     # Target URL reload.
     if menu.options.url_reload and menu.options.data:
       settings.URL_RELOAD = True
+    elif menu.options.url_reload:
+      warn_msg = "The '--url-reload' option has no effect without '--data'."
+      settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
     if menu.options.flush_session:
       session_handler.flush(url)
@@ -559,7 +567,8 @@ def main(filename, url, http_request_method):
         try:
           info_msg = "Performing heuristic (passive) tests on the target URL."
           settings.print_data_to_stdout(settings.print_info_msg(info_msg))
-          requests.is_url_content_stable(url)
+          if settings.VERBOSITY_LEVEL != 0:
+            requests.is_url_content_stable(url)
           # Webpage encoding detection.
           requests.encoding_detection(response)
           # Procedure for target server identification.
@@ -660,9 +669,6 @@ try:
   except Exception as ex:
     if "fileno" in str(ex) and settings.STDIN_PARSING:
       settings.STDIN_PARSING = False
-
-  if menu.options.ignore_redirects:
-    settings.FOLLOW_REDIRECT = False
 
   if settings.STDIN_PARSING or settings.CRAWLING or menu.options.bulkfile or menu.options.shellshock:
     settings.OS_CHECKS_NUM = 1
