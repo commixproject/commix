@@ -1,8 +1,9 @@
 ## Version 4.2 (TBA)
-* Added: New `--forms` switch to parse and test forms on the target URL (requires `--crawl`).
+* Added: New `--forms` switch that parses and tests forms on target URL (requires `--crawl` option).
+* Revised: Improved target parsing performance and reliability for stdin and `-m` (bulk-file) input.
 * Revised: Improved stored-session resume handling.
 * Revised: Improved parameter parsing and injection point detection across all supported request formats.
-* Added: New `--threads` option to support parallel data retrieval, reducing extraction time on supported techniques.
+* Added: New `--threads` switch to support parallel data retrieval, reducing extraction time on supported techniques.
 * Revised: Refactored time-related techniques (i.e. "time-based", "tempfile-based") to use binary search for character extraction.
 * Revised: Refactored `--tor` proxy handling to route HTTP traffic using the configured URL scheme.
 * Added: Spanish translation of [README.md](https://github.com/commixproject/commix/blob/master/doc/translations/README-es-ES.md).

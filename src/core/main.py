@@ -306,6 +306,15 @@ def init_injection(url):
   settings.CUSTOM_FILENAME = ""
   
 """
+Validate and normalize a target line, returning the cleaned URL or None.
+"""
+def parse_target_line(line):
+  if re.search(r"\b(https?://[^\s'\"]+|[\w.]+\.\w{2,3}[/\w+]*\?[^\s'\"]+)", line, re.I):
+    line = line.replace(settings.SINGLE_WHITESPACE, _urllib.parse.quote_plus(settings.SINGLE_WHITESPACE)).strip()
+    return line.rstrip()
+  return None
+
+"""
 Using 'stdin' for parsing targets.
 """
 def stdin_parsing_target(os_checks_num):
@@ -316,9 +325,9 @@ def stdin_parsing_target(os_checks_num):
   menu.options.batch = True
   settings.MULTI_TARGETS = True
   for url in sys.stdin:
-    if re.search(r"\b(https?://[^\s'\"]+|[\w.]+\.\w{2,3}[/\w+]*\?[^\s'\"]+)", url, re.I):
-      url = url.replace(settings.SINGLE_WHITESPACE, _urllib.parse.quote_plus(settings.SINGLE_WHITESPACE)).strip()
-      _.append(url.rstrip())
+    target = parse_target_line(url)
+    if target:
+      _.append(target)
   return _
 
 """
@@ -948,8 +957,9 @@ try:
 
         else:
           settings.MULTI_TARGETS = True
-          with open(menu.options.bulkfile) as f:
-            bulkfile = [url.replace(settings.SINGLE_WHITESPACE, _urllib.parse.quote_plus(settings.SINGLE_WHITESPACE)).strip() for url in f]
+          menu.options.batch = True
+          with open(menu.options.bulkfile, encoding="utf-8-sig") as f:
+            bulkfile = [x for x in (parse_target_line(url) for url in f) if x]
 
       # Check if option "--crawl" is enabled.
       if settings.CRAWLING:
@@ -986,20 +996,28 @@ try:
         else:
           output_href = stdin_parsing_target(os_checks_num)
 
-      # Removing duplicates from list.
+      # Removing duplicates from list (order-preserving, O(n)).
       clean_output_href = []
-      [clean_output_href.append(x) for x in output_href if x not in clean_output_href]
+      seen_href = set()
+      for x in output_href:
+        if x not in seen_href:
+          seen_href.add(x)
+          clean_output_href.append(x)
       # Removing empty elements from list.
       clean_output_href = [x for x in clean_output_href if x]
-      if len(output_href) != 0 and not settings.STDIN_PARSING:
+      if len(output_href) != 0:
         if filename is not None:
           filename = crawler.store_crawling(output_href)
         info_msg = "Found a total of " + str(len(clean_output_href)) + " target"+ "s"[len(clean_output_href) == 1:] + "."
         settings.print_data_to_stdout(settings.print_info_msg(info_msg))
 
-      # Removing duplicates from the identified (crawled) forms.
+      # Removing duplicates from the identified (crawled) forms (order-preserving, O(n)).
       clean_output_forms = []
-      [clean_output_forms.append(x) for x in output_forms if x not in clean_output_forms]
+      seen_forms = set()
+      for x in output_forms:
+        if x not in seen_forms:
+          seen_forms.add(x)
+          clean_output_forms.append(x)
       if len(clean_output_forms) != 0:
         info_msg = "Found a total of " + str(len(clean_output_forms)) + " form" + "s"[len(clean_output_forms) == 1:] + "."
         settings.print_data_to_stdout(settings.print_info_msg(info_msg))
