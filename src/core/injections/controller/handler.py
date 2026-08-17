@@ -588,7 +588,8 @@ def do_results_based_proccess(url, timesec, filename, http_request_method, injec
                     percent, float_percent = checks.percentage_calculation(i, total)
                     if settings.CALL_TMP_BASED == True:
                       exit_loops = True
-                      tmp_path = os.path.split(menu.options.file_dest)[0] + "/"
+                      dest_dir = os.path.dirname(menu.options.file_dest.replace("\\", "/"))
+                      tmp_path = checks.normalize_target_dir(dest_dir)
                       checks.tfb_controller(no_result, url, timesec, filename, tmp_path, http_request_method, url_time_response)
                       raise
                     # Show an error message, after N failed tries.
@@ -636,7 +637,8 @@ def do_results_based_proccess(url, timesec, filename, http_request_method, injec
                   settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
                 settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
                 # Provide custom server's root directory.
-                if not menu.options.web_root:
+                if not settings.USER_APPLIED_WEB_ROOT:
+                  settings.CUSTOM_WEB_ROOT = False
                   checks.custom_web_root(url, timesec, filename, http_request_method, url_time_response)
                 continue
 

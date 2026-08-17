@@ -264,7 +264,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "71"
+REVISION = "72"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -656,6 +656,9 @@ WEB_ROOT = ""
 DEFAULT_WEB_ROOT = ""
 CUSTOM_WEB_ROOT = False
 CUSTOM_FILENAME = ""
+
+# Whether '--web-root' was explicitly supplied on the CLI
+USER_APPLIED_WEB_ROOT = False
 
 # Counting the total of HTTP(S) requests
 TOTAL_OF_REQUESTS = 0

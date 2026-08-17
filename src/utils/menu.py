@@ -679,6 +679,9 @@ option = parser.get_option("-h")
 option.help = option.help.capitalize().replace("Show this help message and exit", "Show help and exit.")
 (options, args) = parser.parse_args()
 
+# Remember whether '--web-root' was explicitly supplied on the CLI
+settings.USER_APPLIED_WEB_ROOT = bool(options.web_root)
+
 # Checkall the banner
 if not options.version:
     banner()

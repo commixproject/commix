@@ -1,8 +1,8 @@
 ## Version 4.2 (TBA)
+* Fixed: Multiple bug-fixes affecting the reliability of `--tmp-path` and `--web-root`.
 * Revised: Improved validation and error handling reliability for file access options (i.e. `--file-write`/`--file-dest`/`--file-read`).
 * Revised: Improved target parsing performance and reliability for stdin and `-m` (bulk-file) input.
 * Added: New `--forms` switch to parse and test forms on the target URL (requires `--crawl`).
-
 * Revised: Improved stored-session resume handling.
 * Revised: Improved parameter parsing and injection point detection across all supported request formats.
 * Added: New `--threads` switch to support parallel data retrieval, reducing extraction time on supported techniques.

@@ -304,6 +304,13 @@ def init_injection(url):
   settings.SKIP_NON_CUSTOM_PARAMS = None
   settings.CUSTOM_INJECTION_MARKER = None
   settings.CUSTOM_FILENAME = ""
+
+  # Reset web-root state
+  settings.WEB_ROOT = ""
+  settings.DEFAULT_WEB_ROOT = ""
+  settings.CUSTOM_WEB_ROOT = False
+  if not settings.USER_APPLIED_WEB_ROOT:
+    menu.options.web_root = False
   
 """
 Validate and normalize a target line, returning the cleaned URL or None.

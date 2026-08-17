@@ -2908,11 +2908,30 @@ def finalize(exit_loops, no_result, float_percent, injection_type, technique, sh
     return False
 
 """
+Normalize a directory path for the target OS
+"""
+def normalize_target_dir(path):
+  if not path:
+    return path
+  if settings.TARGET_OS == settings.OS.WINDOWS:
+    path = path.replace("/", "\\")
+    if not path.endswith("\\"):
+      path += "\\"
+  else:
+    path = path.replace("\\", "/")
+    if not path.endswith("/"):
+      path += "/"
+  return path
+
+"""
 Provide custom server's root directory
 """
 def custom_web_root(url, timesec, filename, http_request_method, url_time_response):
   if not settings.CUSTOM_WEB_ROOT:
-    if settings.TARGET_OS == settings.OS.WINDOWS :
+    # Prefer the already-detected default over the generic one.
+    if settings.WEB_ROOT:
+      default_root_dir = settings.WEB_ROOT
+    elif settings.TARGET_OS == settings.OS.WINDOWS :
       default_root_dir = settings.WINDOWS_DEFAULT_DOC_ROOTS[0]
     else:
       default_root_dir = settings.LINUX_DEFAULT_DOC_ROOTS[0].replace(settings.DOC_ROOT_TARGET_MARK,settings.TARGET_URL)
@@ -2933,16 +2952,10 @@ def custom_web_root(url, timesec, filename, http_request_method, url_time_respon
 Return TEMP path for win / *nix targets.
 """
 def check_tmp_path(url, timesec, filename, http_request_method, url_time_response):
-  def check_trailing_slashes():
-    if settings.TARGET_OS == settings.OS.WINDOWS and not menu.options.web_root.endswith("\\"):
-      menu.options.web_root = settings.WEB_ROOT = menu.options.web_root + "\\"
-    elif not menu.options.web_root.endswith("/"):
-      menu.options.web_root = settings.WEB_ROOT = menu.options.web_root + "/"
-
   # Set temp path
   if settings.TARGET_OS == settings.OS.WINDOWS:
     if "microsoft-iis" in settings.SERVER_BANNER.lower():
-      settings.TMP_PATH = r"C:\\Windows\TEMP\\"
+      settings.TMP_PATH = "C:\\Windows\\TEMP\\"
     else:
       settings.TMP_PATH = "%temp%\\"
   else:
@@ -2952,6 +2965,7 @@ def check_tmp_path(url, timesec, filename, http_request_method, url_time_respons
     tmp_path = menu.options.tmp_path
   else:
     tmp_path = settings.TMP_PATH
+  tmp_path = normalize_target_dir(tmp_path)
 
   if not settings.LOAD_SESSION and settings.DEFAULT_WEB_ROOT != settings.WEB_ROOT:
     settings.WEB_ROOT = settings.DEFAULT_WEB_ROOT
@@ -2966,9 +2980,8 @@ def check_tmp_path(url, timesec, filename, http_request_method, url_time_respons
     # Provide custom server's root directory.
     custom_web_root(url, timesec, filename, http_request_method, url_time_response)
 
-  if settings.TARGET_OS == settings.OS.WINDOWS:
-    settings.WEB_ROOT = settings.WEB_ROOT.replace("/","\\")
-  check_trailing_slashes()
+  settings.WEB_ROOT = normalize_target_dir(settings.WEB_ROOT)
+  menu.options.web_root = settings.WEB_ROOT
 
   return tmp_path
 

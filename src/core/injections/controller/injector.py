@@ -442,9 +442,8 @@ def false_positive_check(separator, TAG, cmd, prefix, suffix, whitespace, timese
 Get the command output filename, skipping the prompt when resuming.
 """
 def select_output_filename(technique, tmp_path, TAG, prompt=True):
-  # Ensure tmp_path ends with a slash for safe concatenation
-  if tmp_path and not tmp_path.endswith("/"):
-    tmp_path += "/"
+  # Ensure tmp_path is safe to concatenate.
+  tmp_path = checks.normalize_target_dir(tmp_path)
 
   # If a custom filename is already set, handle tmp_path prefix depending on technique
   if settings.CUSTOM_FILENAME:
