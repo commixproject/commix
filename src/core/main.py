@@ -647,6 +647,12 @@ def main(filename, url, http_request_method):
     if any((settings.REVERSE_TCP, settings.BIND_TCP)):
       raise SystemExit()
 
+  # Ctrl-C before controller.do_check() even starts (rare - do_check() has
+  # its own handling for everything inside it).
+  except KeyboardInterrupt:
+    checks.handle_early_interrupt(filename, url)
+    return
+
 try:
   filename = ""
 
@@ -1146,6 +1152,8 @@ try:
             if response != False:
               filename = logs.logs_filename_creation(form_url)
               main(filename, form_url, settings.HTTPMETHOD.POST)
+          except KeyboardInterrupt:
+            checks.handle_early_interrupt(filename, form_url)
           except (Exception, SystemExit):
             pass
           menu.options.data = orig_data
@@ -1217,6 +1225,8 @@ try:
                 if response != False:
                   filename = logs.logs_filename_creation(url)
                   main(filename, url, http_request_method)
+              except KeyboardInterrupt:
+                checks.handle_early_interrupt(filename, url)
               except (Exception, SystemExit):
                 pass
           else:

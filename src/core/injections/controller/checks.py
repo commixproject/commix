@@ -383,11 +383,67 @@ def quit(filename, url, _):
 User aborted procedure
 """
 def user_aborted(filename, url):
+  settings.clear_current_line()
   abort_msg = "User aborted procedure "
   abort_msg += "during the " + assessment_phase()
   abort_msg += " phase (Ctrl-C was pressed)."
   settings.print_data_to_stdout(settings.print_abort_msg(abort_msg))
   raise exit()
+
+"""
+Ctrl-C during detection - ask how to proceed instead of aborting outright.
+"""
+def handle_detection_interrupt(filename, url):
+  settings.clear_current_line()
+  warn_msg = "User aborted during the detection phase (Ctrl-C was pressed)."
+  settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+  if settings.MULTI_TARGETS:
+    msg = "How do you want to proceed? [ne(X)t target/(S)kip current technique/(e)nd detection phase/(n)ext parameter/(q)uit] > "
+    default = "X"
+  else:
+    msg = "How do you want to proceed? [(S)kip current technique/(e)nd detection phase/(n)ext parameter/(q)uit] > "
+    default = "S"
+  choice = common.read_input(msg, default=default, check_batch=True)
+  choice = (choice or default).strip().lower()
+  if choice == "x" and settings.MULTI_TARGETS:
+    raise settings.NextTargetException()
+  elif choice == "e":
+    raise settings.EndDetectionPhaseException()
+  elif choice == "n":
+    raise settings.NextParameterException()
+  elif choice == "q":
+    user_aborted(filename, url)
+  else:
+    # Anything else (including the default "s") - move on to the next technique.
+    raise settings.SkipTechniqueException()
+
+"""
+Ctrl-C outside the per-test loop (heuristics, WAF check, identification) -
+too coarse to resume one specific test, so just offer to move on or quit.
+"""
+def handle_early_interrupt(filename, url):
+  if not settings.MULTI_TARGETS:
+    user_aborted(filename, url)
+  settings.clear_current_line()
+  warn_msg = "User aborted during the detection phase (Ctrl-C was pressed)."
+  settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+  msg = "How do you want to proceed? [ne(X)t target/(q)uit] > "
+  choice = common.read_input(msg, default="X", check_batch=True)
+  if (choice or "X").strip().lower() == "q":
+    user_aborted(filename, url)
+
+"""
+Ctrl-C during exploitation (shell, calibration, enumeration) - a vulnerability
+is already confirmed, so the only real choice is whether to keep going.
+"""
+def handle_exploitation_interrupt(filename, url):
+  settings.clear_current_line()
+  warn_msg = "User aborted during the exploitation phase (Ctrl-C was pressed)."
+  settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+  msg = "How do you want to proceed? [(C)ontinue/(q)uit] > "
+  choice = common.read_input(msg, default="C", check_batch=True)
+  if (choice or "C").strip().lower() == "q":
+    user_aborted(filename, url)
 
 """
 Connection exceptions
@@ -826,11 +882,11 @@ def captcha_check(page):
 Checking the reliability of the used payload message.
 """
 def check_for_false_positive_result(false_positive_warning):
-  # Preserve completed progress lines; non-spinner output already ends the line.
-  info_msg = "Checking whether the identified injection point on "
-  info_msg += settings.CHECKING_PARAMETER + " is a false positive."
+  info_msg = "Identified a potential injection point on "
+  info_msg += settings.CHECKING_PARAMETER + "."
   settings.print_data_to_stdout(settings.print_info_msg(info_msg))
-  info_msg = ("Verifying the identified injection point", "Verifying the identified injection point with a longer delay to rule out noise")[false_positive_warning]
+  info_msg = "Testing" + (", with a longer delay to rule out noise," if false_positive_warning else "")
+  info_msg += " if the injection point is a false positive"  
   if settings.VERBOSITY_LEVEL != 0:
     info_msg = info_msg + "." + settings.END_LINE.LF
   else:

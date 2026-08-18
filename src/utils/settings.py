@@ -296,7 +296,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "75"
+REVISION = "76"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -801,6 +801,20 @@ class INJECTION_TECHNIQUE(object):
 
 USER_APPLIED_TECHNIQUE = False
 SKIP_TECHNIQUES = False
+
+# Raised by checks.handle_detection_interrupt() to unwind to the right point
+# in the detection loop.
+class SkipTechniqueException(Exception):
+  pass
+
+class EndDetectionPhaseException(Exception):
+  pass
+
+class NextParameterException(Exception):
+  pass
+
+class NextTargetException(Exception):
+  pass
 
 # Default Scheme
 SCHEME = ""

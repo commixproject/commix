@@ -429,10 +429,21 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
           menu.options.tech = "f"
 
       settings.START_SCANNING = True
-      classic_command_injection_technique(url, timesec, filename, http_request_method)
-      dynamic_code_evaluation_technique(url, timesec, filename, http_request_method)
-      timebased_command_injection_technique(url, timesec, filename, http_request_method, url_time_response)
-      filebased_command_injection_technique(url, timesec, filename, http_request_method, url_time_response)
+      end_detection = False
+      techniques = [
+        lambda: classic_command_injection_technique(url, timesec, filename, http_request_method),
+        lambda: dynamic_code_evaluation_technique(url, timesec, filename, http_request_method),
+        lambda: timebased_command_injection_technique(url, timesec, filename, http_request_method, url_time_response),
+        lambda: filebased_command_injection_technique(url, timesec, filename, http_request_method, url_time_response),
+      ]
+      for run_technique in techniques:
+        try:
+          run_technique()
+        except settings.SkipTechniqueException:
+          continue
+        except settings.EndDetectionPhaseException:
+          end_detection = True
+          break
 
       # All injection techniques seems to be failed!
       if checks.injection_techniques_status() == False:
@@ -443,7 +454,7 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
         if settings.LOAD_SESSION:
           checks.quit(filename, url, _ = False)
 
-    if not settings.CHECK_BOTH_OS:
+    if not settings.CHECK_BOTH_OS or end_detection:
       break
 
 """
@@ -466,7 +477,13 @@ def http_headers_injection(url, http_request_method, filename, timesec):
     new_url, check_parameter = check_for_stored_sessions(url, check_parameter, http_request_method)
 
     # If the header was replaced or injection failed, reset the injection flag
-    if check_parameter != header_name or not injection_proccess(new_url, check_parameter, http_request_method, filename, timesec):
+    reset_flag = check_parameter != header_name
+    if not reset_flag:
+      try:
+        reset_flag = not injection_proccess(new_url, check_parameter, http_request_method, filename, timesec)
+      except settings.NextParameterException:
+        reset_flag = True
+    if reset_flag:
       setattr(settings, injection_flag_attr, None)
 
     # Restore the original option value
@@ -650,7 +667,10 @@ def do_injection(found, data_type, header_name, url, http_request_method, filena
         active_targets = check_parameters
 
     if check_param in active_targets or not filtered_testable_parameters():
-      injection_call(url, check_param)
+      try:
+        injection_call(url, check_param)
+      except settings.NextParameterException:
+        continue
 
 """
 Check if HTTP Method is GET.
@@ -737,7 +757,10 @@ def custom_headers_checks(url, http_request_method, filename, timesec):
       settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST.append(check_parameter) if check_parameter not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST
       settings.CUSTOM_HEADER_VALUE = settings.CUSTOM_HEADERS_NAMES[name].split(": ")[1].replace(settings.ASTERISK_MARKER, settings.INJECT_TAG)
       url, check_parameter = check_for_stored_sessions(url, check_parameter, http_request_method)
-      if check_parameter != header_name or not injection_proccess(url, check_parameter, http_request_method, filename, timesec):
+      try:
+        if check_parameter != header_name or not injection_proccess(url, check_parameter, http_request_method, filename, timesec):
+          settings.CUSTOM_HEADER_INJECTION = False
+      except settings.NextParameterException:
         settings.CUSTOM_HEADER_INJECTION = False
       settings.CUSTOM_HEADERS_NAMES[name] = checks.remove_tags(settings.CUSTOM_HEADERS_NAMES[name])
   settings.CUSTOM_HEADER_INJECTION = False
@@ -937,6 +960,6 @@ def do_check(url, http_request_method, filename):
       raise SystemExit()
 
   except KeyboardInterrupt:
-    checks.user_aborted(filename, url)
+    checks.handle_early_interrupt(filename, url)
 
 # eof

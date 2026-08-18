@@ -128,11 +128,14 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
       # Sample with the same concurrency as extraction; a serial baseline underestimates response time.
       fan_out = settings.THREADS if (settings.THREADS > 1 and _THREADS_SUPPORTED) else 1
       while len(settings.RESPONSE_TIMES) < settings.MIN_TIME_RESPONSES:
-        if fan_out > 1:
-          with concurrent.futures.ThreadPoolExecutor(max_workers=fan_out) as executor:
-            concurrent.futures.wait([executor.submit(_probe) for _ in range(fan_out)])
-        else:
-          _probe()
+        try:
+          if fan_out > 1:
+            with concurrent.futures.ThreadPoolExecutor(max_workers=fan_out) as executor:
+              concurrent.futures.wait([executor.submit(_probe) for _ in range(fan_out)])
+          else:
+            _probe()
+        except KeyboardInterrupt:
+          checks.handle_exploitation_interrupt(filename, url)
       if settings.VERBOSITY_LEVEL == 0:
         settings.print_data_to_stdout(" (done)")
 
