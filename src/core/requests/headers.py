@@ -40,6 +40,7 @@ from src.utils import menu
 from src.utils import settings
 from src.core.injections.controller import checks
 from src.core.requests import redirection
+from src.core.requests import stability
 from src.thirdparty.colorama import Fore, Back, Style, init
 from src.thirdparty.six.moves import urllib as _urllib
 
@@ -196,7 +197,7 @@ def check_http_traffic(request):
   _ = False
   response = False
   unauthorized = False
-  while not _ and settings.TOTAL_OF_REQUESTS <= settings.MAX_RETRIES and unauthorized is False:
+  while stability.should_keep_retrying(_, unauthorized):
     if any((settings.REVERSE_TCP, settings.BIND_TCP)):
       _ = True
     if settings.MULTI_TARGETS:
@@ -208,11 +209,11 @@ def check_http_traffic(request):
       response = opener.open(request, timeout=settings.TIMEOUT)
       _ = True
       with settings.REQUESTS_LOCK:
-        settings.MAX_RETRIES = settings.TOTAL_OF_REQUESTS * 2
+        stability.expand_retry_budget()
       if (settings.INIT_TEST == True and not settings.UNAUTHORIZED) or \
          (settings.INIT_TEST == True and settings.MULTI_TARGETS):
-        if settings.VALID_URL == False:
-          settings.VALID_URL = True
+        if not settings.VALID_URL:
+          stability.mark_url_valid()
         if not settings.CHECK_INTERNET:
           settings.INIT_TEST = False
 
@@ -233,10 +234,10 @@ def check_http_traffic(request):
       if settings.UNAUTHORIZED_ERROR in str(err_msg):
         settings.UNAUTHORIZED = unauthorized = True
         with settings.REQUESTS_LOCK:
-          settings.MAX_RETRIES = settings.TOTAL_OF_REQUESTS
+          stability.freeze_retry_budget()
       else:
         with settings.REQUESTS_LOCK:
-          settings.MAX_RETRIES = settings.TOTAL_OF_REQUESTS * 2
+          stability.expand_retry_budget()
       if [True for err_code in settings.HTTP_ERROR_CODES if err_code in str(err_msg)]:
         break
 
@@ -248,86 +249,97 @@ def check_http_traffic(request):
           checks.connection_exceptions(err_msg)
         break
 
-  try:
-    if response is False:
-      response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
-    # Make .read() idempotent so callers can safely reuse this response.
-    _raw_body = response.read()
-    response.read = (lambda _b: lambda *a, **kw: _b)(_raw_body)
-    code = response.getcode()
-    response_headers = response.info()
-    page = checks.process_page_content(response, action="encode")
-    response_headers[settings.URI_HTTP_HEADER] = response.geturl()
-    response_headers = str(response_headers).strip(settings.END_LINE.LF)
-    # Handle server-set cookies.
-    if not menu.options.drop_set_cookie:
-      checks.handle_server_cookies(response)
-    print_http_response(response_headers, code, page)
-    # Checks regarding a potential CAPTCHA protection mechanism.
-    checks.captcha_check(page)
-    # Checks regarding a potential browser verification protection mechanism.
-    checks.browser_verification(page)
-    # Checks regarding recognition of generic "your ip has been blocked" messages.
-    checks.blocked_ip(page)
-    return response
-
-  # This is useful when handling exotic HTTP errors (i.e requests for authentication).
-  except _urllib.error.HTTPError as err:
-    if not menu.options.drop_set_cookie:
-      checks.handle_server_cookies(err)
+  while True:
     try:
-      if getattr(err, 'fp', None) is None:
-        raise AttributeError
-      page = checks.process_page_content(err, action="encode")
-    except Exception:
-      page = ''
-    response_headers = err.info()
-    code = err.code
-    print_http_response(response_headers, code, page)
+      if response is False:
+        response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
+      # Make .read() idempotent so callers can safely reuse this response.
+      _raw_body = response.read()
+      response.read = (lambda _b: lambda *a, **kw: _b)(_raw_body)
+      code = response.getcode()
+      response_headers = response.info()
+      page = checks.process_page_content(response, action="encode")
+      response_headers[settings.URI_HTTP_HEADER] = response.geturl()
+      response_headers = str(response_headers).strip(settings.END_LINE.LF)
+      # Handle server-set cookies.
+      if not menu.options.drop_set_cookie:
+        checks.handle_server_cookies(response)
+      print_http_response(response_headers, code, page)
+      # Checks regarding a potential CAPTCHA protection mechanism.
+      checks.captcha_check(page)
+      # Checks regarding a potential browser verification protection mechanism.
+      checks.browser_verification(page)
+      # Checks regarding recognition of generic "your ip has been blocked" messages.
+      checks.blocked_ip(page)
+      stability.reset_connection_error_budget()
+      return response
 
-    if (not settings.PERFORM_CRACKING and \
-    not settings.IS_JSON and \
-    not settings.IS_XML and \
-    not str(err.code) == settings.INTERNAL_SERVER_ERROR and \
-    not str(err.code) == settings.BAD_REQUEST and \
-    not settings.CRAWLED_URLS_NUM != 0 and \
-    not settings.MULTI_TARGETS) and settings.CRAWLED_SKIPPED_URLS_NUM != 0:
-      settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
-    # Check for 3xx, 4xx, 5xx HTTP error codes.
-    if str(err.code).startswith(('3', '4', '5')):
-      settings.HTTP_ERROR_CODES_SUM.append(err.code)
-      if settings.VERBOSITY_LEVEL >= 2:
+    # This is useful when handling exotic HTTP errors (i.e requests for authentication).
+    except _urllib.error.HTTPError as err:
+      if not menu.options.drop_set_cookie:
+        checks.handle_server_cookies(err)
+      try:
+        if getattr(err, 'fp', None) is None:
+          raise AttributeError
+        page = checks.process_page_content(err, action="encode")
+      except Exception:
+        page = ''
+      response_headers = err.info()
+      code = err.code
+      print_http_response(response_headers, code, page)
+
+      if (not settings.PERFORM_CRACKING and \
+      not settings.IS_JSON and \
+      not settings.IS_XML and \
+      not str(err.code) == settings.INTERNAL_SERVER_ERROR and \
+      not str(err.code) == settings.BAD_REQUEST and \
+      not settings.CRAWLED_URLS_NUM != 0 and \
+      not settings.MULTI_TARGETS) and settings.CRAWLED_SKIPPED_URLS_NUM != 0:
+        settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
+      # Check for 3xx, 4xx, 5xx HTTP error codes.
+      if str(err.code).startswith(('3', '4', '5')):
+        settings.HTTP_ERROR_CODES_SUM.append(err.code)
+        if settings.VERBOSITY_LEVEL >= 2:
+          parts = str(err).split(": ")
+          if len(parts) > 1 and len(parts[1]) == 0:
+            error_msg = "Non-standard HTTP status code"
+        return None
+      else:
+        error_msg = str(err).replace(": ", " (")
         parts = str(err).split(": ")
         if len(parts) > 1 and len(parts[1]) == 0:
-          error_msg = "Non-standard HTTP status code"
-      pass
-    else:
-      error_msg = str(err).replace(": ", " (")
-      parts = str(err).split(": ")
-      if len(parts) > 1 and len(parts[1]) == 0:
-        err_msg = error_msg + "Non-standard HTTP status code"
-      else:
-        err_msg = error_msg
+          err_msg = error_msg + "Non-standard HTTP status code"
+        else:
+          err_msg = error_msg
 
-      settings.print_data_to_stdout(settings.print_critical_msg(err_msg + ")."))
+        settings.print_data_to_stdout(settings.print_critical_msg(err_msg + ")."))
+        raise SystemExit()
+
+    except _urllib.error.URLError as err:
+      if not menu.options.drop_set_cookie:
+        checks.handle_server_cookies(err)
+      reason = str(getattr(err, 'reason', 'Unknown error'))
+      reason_parts = reason.split(settings.SINGLE_WHITESPACE)
+      if len(reason_parts) > 2:
+        response_headers = settings.SINGLE_WHITESPACE.join(reason_parts[2:]) + "."
+      else:
+        response_headers = reason
+      if not response_headers.endswith("."):
+        response_headers += "."
+      code = ""
+      page = ""
+      print_http_response(response_headers, code, page)
+      settings.print_data_to_stdout(settings.print_critical_msg("URL Error: " + reason))
       raise SystemExit()
 
-  except _urllib.error.URLError as err:
-    if not menu.options.drop_set_cookie:
-      checks.handle_server_cookies(err)
-    reason = str(getattr(err, 'reason', 'Unknown error'))
-    reason_parts = reason.split(settings.SINGLE_WHITESPACE)
-    if len(reason_parts) > 2:
-      response_headers = settings.SINGLE_WHITESPACE.join(reason_parts[2:]) + "."
-    else:
-      response_headers = reason
-    if not response_headers.endswith("."):
-      response_headers += "."
-    code = ""
-    page = ""
-    print_http_response(response_headers, code, page)
-    settings.print_data_to_stdout(settings.print_critical_msg("URL Error: " + reason))
-    raise SystemExit()
+    # A raw connection-level error - retry it like any other transient failure.
+    except (SocketError, _http_client.BadStatusLine, _http_client.RemoteDisconnected, _http_client.IncompleteRead) as err:
+      if stability.should_retry_connection_error(err):
+        response = False
+        continue
+      err_msg = "The target host is not responding. Please ensure that is up and try again."
+      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+      raise SystemExit()
 
 """
 Check for added headers.

@@ -36,7 +36,6 @@ def exploitation(url, timesec, filename, tmp_path, http_request_method, url_time
   settings.WEB_ROOT = ""
   # Check if attack is based on time delays.
   if not settings.TIME_RELATED_ATTACK :
-    checks.time_related_attaks_msg()
     settings.TIME_RELATED_ATTACK = True
 
   injection_type = settings.INJECTION_TYPE.SEMI_BLIND

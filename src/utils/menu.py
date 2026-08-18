@@ -663,8 +663,7 @@ parser.add_option_group(detection)
 parser.add_option_group(misc)
 
 """
-Dirty hack from sqlmap [1], to display longer options without breaking into two lines.
-[1] https://github.com/sqlmapproject/sqlmap/blob/fdc8e664dff305aca19acf143c7767b9a7626881/lib/parse/cmdline.py
+Truncate long option strings so they don't wrap onto a second line.
 """
 def _(self, *args):
     _ = parser.formatter._format_option_strings(*args)

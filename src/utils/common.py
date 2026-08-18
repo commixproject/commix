@@ -46,19 +46,25 @@ Reads input from terminal safely
 """
 def safe_input(message):
   try:
-    return _input(message)
+    value = _input(message)
   except UnicodeDecodeError as e:
-    return _input(message.encode("utf-8", "ignore").decode("utf-8"))
+    value = _input(message.encode("utf-8", "ignore").decode("utf-8"))
   except EOFError:
     raise
   except Exception as err_msg:
     settings.print_data_to_stdout(settings.print_error_msg(err_msg))
     return ""
+  # Enter starts a fresh line, bypassing print_data_to_stdout's tracking.
+  settings.PROGRESS_LINE_OPEN = False
+  return value
 
 """
 Reads input from terminal
 """
 def read_input(message, default=None, check_batch=True):
+  # Close the spinner line before prompting unless the message is empty.
+  if message:
+    settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
   def is_empty():
     value = safe_input(settings.print_message(message))
     if len(value) == 0:

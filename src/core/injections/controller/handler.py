@@ -108,7 +108,9 @@ def pseudo_terminal_shell(injector, separator, maxlen, TAG, cmd, prefix, suffix,
               return True
           else:
             time.sleep(timesec)
-            if menu.options.ignore_session or session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None:
+            _stored_shell = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
+            _resuming = _stored_shell is not None and _stored_shell.startswith(settings.PARTIAL_VALUE_MARKER)
+            if menu.options.ignore_session or _stored_shell is None or _resuming:
               # The main command injection exploitation.
               if settings.TIME_RELATED_ATTACK:
                 if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
@@ -130,7 +132,7 @@ def pseudo_terminal_shell(injector, separator, maxlen, TAG, cmd, prefix, suffix,
               if not menu.options.ignore_session:
                 session_handler.store_cmd(url, cmd, shell, vuln_parameter)
             else:
-              shell = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
+              shell = _stored_shell
             if shell or shell != "":
               settings.print_data_to_stdout(settings.command_execution_output(shell))
 
@@ -175,6 +177,11 @@ The main Time-related exploitation proccess.
 """
 def do_time_related_proccess(url, timesec, filename, http_request_method, url_time_response, injection_type, technique, tmp_path):
 
+  if settings.THREADS > 1 and settings.THREADED_TIME_RETRIEVAL_CHOICE is None:
+    msg = "Multi-threading is considered unsafe for time-related data retrieval. "
+    msg += "Do you want to continue using threads anyway? [Y/n] "
+    settings.THREADED_TIME_RETRIEVAL_CHOICE = common.read_input(msg, default="Y", check_batch=True) in settings.CHOICE_YES
+
   counter = 1
   num_of_chars = 1
   vp_flag = True
@@ -187,7 +194,6 @@ def do_time_related_proccess(url, timesec, filename, http_request_method, url_ti
   timesec = checks.time_related_timesec()
 
   if settings.TIME_RELATED_ATTACK == False:
-    checks.time_related_attaks_msg()
     settings.TIME_RELATED_ATTACK = None
 
   # Check if defined "--url-reload" option.
@@ -206,7 +212,11 @@ def do_time_related_proccess(url, timesec, filename, http_request_method, url_ti
     from src.core.injections.semiblind.techniques.tempfile_based import tfb_payloads as payloads
 
   if not settings.LOAD_SESSION or technique not in settings.STORED_TECHNIQUES:
-    checks.testing_technique_title(injection_type, technique)
+    # Skip redundant progress output when the fallback already announced the technique.
+    if settings.SKIP_NEXT_TECHNIQUE_TITLE == technique:
+      settings.SKIP_NEXT_TECHNIQUE_TITLE = None
+    else:
+      checks.testing_technique_title(injection_type, technique)
     # Re-check tamper compatibility now that the technique and target OS are known.
     checks.tamper_scripts(stored_tamper_scripts=True)
 
@@ -249,153 +259,161 @@ def do_time_related_proccess(url, timesec, filename, http_request_method, url_ti
 
           if not resumed:
             num_of_chars = num_of_chars + 1
-            # Check for bad combination of prefix and separator
-            combination = prefix + separator
-            if combination in settings.JUNK_COMBINATION:
-              prefix = ""
-            # Change TAG on every request to prevent false-positive resutls.
-            TAG = ''.join(random.choice(string.ascii_uppercase) for num_of_chars in range(6))
-            # The output file for file-based injection technique.
-            alter_shell = menu.options.alter_shell
-            tag_length = len(TAG) + 4
-            if technique == settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED:
-              OUTPUT_TEXTFILE = injector.select_output_filename(technique, tmp_path, TAG)
-            for output_length in range(1, int(tag_length)):
-              try:
-                # Tempfile-based decision payload (check if host is vulnerable).
-                if alter_shell:
-                  if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
-                    payload = payloads.decision_alter_shell(separator, TAG, output_length, timesec, http_request_method)
-                  else:
-                    payload = payloads.decision_alter_shell(separator, output_length, TAG, OUTPUT_TEXTFILE, timesec, http_request_method)
-                else:
-                  if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
-                    payload = payloads.decision(separator, TAG, output_length, timesec, http_request_method)
-                  else:
-                    payload = payloads.decision(separator, output_length, TAG, OUTPUT_TEXTFILE, timesec, http_request_method)
-                
-                vuln_parameter = ""
-                exec_time, vuln_parameter, payload, prefix, suffix = requests.perform_injection(prefix, suffix, whitespace, payload, vuln_parameter, http_request_method, url)
-
-                # Statistical analysis in time responses.
-                exec_time_statistic.append(exec_time)
-                # Injection percentage calculation
-                percent, float_percent = checks.percentage_calculation(num_of_chars, total)
-
-                if percent == 100 and no_result == True:
-                  if settings.VERBOSITY_LEVEL == 0:
-                    percent = settings.FAIL_STATUS
-                  else:
-                    percent = ""
-                else:
-                  if checks.time_related_shell(url_time_response, exec_time, timesec):
-                    # Time related false positive fixation.
-                    false_positive_fixation = False
-                    if len(TAG) == output_length:
-
-                      # Simple statical analysis
-                      statistical_anomaly = True
-                      if len(set(exec_time_statistic[0:5])) == 1:
-                        if max(xrange(len(exec_time_statistic)), key=lambda x: exec_time_statistic[x]) == len(TAG) - 1:
-                          statistical_anomaly = False
-                          exec_time_statistic = []
-
-                      if timesec <= exec_time and not statistical_anomaly:
-                        false_positive_fixation = True
-                      else:
-                        false_positive_warning = True
-
-                    # Identified false positive warning message.
-                    if false_positive_warning:
-                      timesec, false_positive_fixation = checks.time_delay_due_to_unstable_request(timesec)
-
-                    if settings.VERBOSITY_LEVEL == 0:
-                      percent = ".. (" + str(float_percent) + "%)"
-                      checks.injection_process(injection_type, technique, percent)
-
-                    # Check if false positive fixation is True.
-                    if false_positive_fixation:
-                      false_positive_fixation = False
-                      settings.FOUND_EXEC_TIME = exec_time
-                      settings.FOUND_DIFF = exec_time - timesec
-                      if false_positive_warning:
-                        time.sleep(timesec)
-                      randv1 = random.randrange(0, 4)
-                      randv2 = random.randrange(1, 5)
-                      randvcalc = randv1 + randv2
-
-                      if settings.TARGET_OS == settings.OS.WINDOWS:
-                        if alter_shell:
-                          cmd = settings.WIN_PYTHON_INTERPRETER + " -c \"print (" + str(randv1) + " + " + str(randv2) + ")\""
-                        else:
-                          rand_num = randv1 + randv2
-                          cmd = "powershell.exe -InputFormat none write (" + str(rand_num) + ")"
-                      else:
-                        if technique == settings.INJECTION_TECHNIQUE.TIME_BASED or technique == settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED:
-                          cmd = "expr " + str(randv1) + " %2B " + str(randv2) + ""
-                        else:
-                          cmd = "echo $((" + str(randv1) + " %2B " + str(randv2) + "))"
-
-                      # Set the original delay time
-                      original_exec_time = exec_time
-
-                      # Check for false positive resutls
-                      if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
-                        exec_time, output = injector.false_positive_check(separator, TAG, cmd, whitespace, prefix, suffix, timesec, http_request_method, url, vuln_parameter, randvcalc, alter_shell, exec_time, url_time_response, false_positive_warning, technique)
-                      else:
-                        exec_time, output = injector.false_positive_check(separator, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, randvcalc, alter_shell, exec_time, url_time_response, false_positive_warning, technique)
-
-                      if checks.time_related_shell(url_time_response, exec_time, timesec):
-                        if str(output) == str(randvcalc) and len(TAG) == output_length:
-                          possibly_vulnerable = True
-                          exec_time_statistic = 0
-                          if settings.VERBOSITY_LEVEL == 0:
-                            percent = settings.info_msg
-                          else:
-                            percent = ""
-                          #break
-                      else:
-                        break
-                    # False positive
+            # Retry the same separator once with a fresh TAG before moving to the next one.
+            for _false_positive_retry in range(settings.FALSE_POSITIVE_RETRIES):
+              # Check for bad combination of prefix and separator
+              combination = prefix + separator
+              if combination in settings.JUNK_COMBINATION:
+                prefix = ""
+              # Change TAG on every request to prevent false-positive resutls.
+              TAG = ''.join(random.choice(string.ascii_uppercase) for num_of_chars in range(6))
+              # The output file for file-based injection technique.
+              alter_shell = menu.options.alter_shell
+              tag_length = len(TAG) + 4
+              if technique == settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED:
+                OUTPUT_TEXTFILE = injector.select_output_filename(technique, tmp_path, TAG)
+              for output_length in range(1, int(tag_length)):
+                try:
+                  # Tempfile-based decision payload (check if host is vulnerable).
+                  if alter_shell:
+                    if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
+                      payload = payloads.decision_alter_shell(separator, TAG, output_length, timesec, http_request_method)
                     else:
+                      payload = payloads.decision_alter_shell(separator, output_length, TAG, OUTPUT_TEXTFILE, timesec, http_request_method)
+                  else:
+                    if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
+                      payload = payloads.decision(separator, TAG, output_length, timesec, http_request_method)
+                    else:
+                      payload = payloads.decision(separator, output_length, TAG, OUTPUT_TEXTFILE, timesec, http_request_method)
+                
+                  vuln_parameter = ""
+                  exec_time, vuln_parameter, payload, prefix, suffix = requests.perform_injection(prefix, suffix, whitespace, payload, vuln_parameter, http_request_method, url)
+
+                  # Statistical analysis in time responses.
+                  exec_time_statistic.append(exec_time)
+                  # Injection percentage calculation
+                  percent, float_percent = checks.percentage_calculation(num_of_chars, total)
+
+                  if percent == 100 and no_result == True:
+                    if settings.VERBOSITY_LEVEL == 0:
+                      percent = settings.FAIL_STATUS
+                    else:
+                      percent = ""
+                  else:
+                    if checks.time_related_shell(url_time_response, exec_time, timesec):
+                      # Time related false positive fixation.
+                      false_positive_fixation = False
+                      if len(TAG) == output_length:
+
+                        # Simple statical analysis. Uses a tolerance, not exact equality -
+                        # real (float) response times essentially never match bit-for-bit.
+                        statistical_anomaly = True
+                        first_few = exec_time_statistic[0:5]
+                        if first_few and max(first_few) - min(first_few) <= max(settings.MIN_VALID_DELAYED_RESPONSE, timesec * 0.5):
+                          if max(xrange(len(exec_time_statistic)), key=lambda x: exec_time_statistic[x]) == len(TAG) - 1:
+                            statistical_anomaly = False
+                            exec_time_statistic = []
+
+                        if timesec <= exec_time and not statistical_anomaly:
+                          false_positive_fixation = True
+                        else:
+                          false_positive_warning = True
+
+                      # Identified false positive warning message.
+                      if false_positive_warning:
+                        timesec, false_positive_fixation = checks.time_delay_due_to_unstable_request(timesec)
+
+                      if settings.VERBOSITY_LEVEL == 0:
+                        percent = ".. (" + str(float_percent) + "%)"
+                        checks.injection_process(injection_type, technique, percent)
+
+                      # Check if false positive fixation is True.
+                      if false_positive_fixation:
+                        false_positive_fixation = False
+                        settings.FOUND_EXEC_TIME = exec_time
+                        settings.FOUND_DIFF = exec_time - timesec
+                        if false_positive_warning:
+                          time.sleep(timesec)
+                        randv1 = random.randrange(0, 4)
+                        randv2 = random.randrange(1, 5)
+                        randvcalc = randv1 + randv2
+
+                        if settings.TARGET_OS == settings.OS.WINDOWS:
+                          if alter_shell:
+                            cmd = settings.WIN_PYTHON_INTERPRETER + " -c \"print (" + str(randv1) + " + " + str(randv2) + ")\""
+                          else:
+                            rand_num = randv1 + randv2
+                            cmd = "powershell.exe -InputFormat none write (" + str(rand_num) + ")"
+                        else:
+                          if technique == settings.INJECTION_TECHNIQUE.TIME_BASED or technique == settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED:
+                            cmd = "expr " + str(randv1) + " %2B " + str(randv2) + ""
+                          else:
+                            cmd = "echo $((" + str(randv1) + " %2B " + str(randv2) + "))"
+
+                        # Set the original delay time
+                        original_exec_time = exec_time
+
+                        # Check for false positive resutls
+                        if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
+                          exec_time, output = injector.false_positive_check(separator, TAG, cmd, whitespace, prefix, suffix, timesec, http_request_method, url, vuln_parameter, randvcalc, alter_shell, exec_time, url_time_response, false_positive_warning, technique, _false_positive_retry + 1, settings.FALSE_POSITIVE_RETRIES)
+                        else:
+                          exec_time, output = injector.false_positive_check(separator, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, randvcalc, alter_shell, exec_time, url_time_response, false_positive_warning, technique, _false_positive_retry + 1, settings.FALSE_POSITIVE_RETRIES)
+
+                        if checks.time_related_shell(url_time_response, exec_time, timesec):
+                          if str(output) == str(randvcalc) and len(TAG) == output_length:
+                            possibly_vulnerable = True
+                            exec_time_statistic = 0
+                            if settings.VERBOSITY_LEVEL == 0:
+                              percent = settings.info_msg
+                            else:
+                              percent = ""
+                            #break
+                        else:
+                          break
+                      # False positive
+                      else:
+                        if settings.VERBOSITY_LEVEL == 0:
+                          percent = ".. (" + str(float_percent) + "%)"
+                          checks.injection_process(injection_type, technique, percent)
+                        continue
+                    else:
+                      # Feed the baseline model even during detection, not just later phases.
+                      checks.record_baseline_response_time(exec_time)
                       if settings.VERBOSITY_LEVEL == 0:
                         percent = ".. (" + str(float_percent) + "%)"
                         checks.injection_process(injection_type, technique, percent)
                       continue
-                  else:
-                    if settings.VERBOSITY_LEVEL == 0:
-                      percent = ".. (" + str(float_percent) + "%)"
-                      checks.injection_process(injection_type, technique, percent)
-                    continue
 
-              except (KeyboardInterrupt, SystemExit):
-                if technique == settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED and 'cmd' in locals():
-                  delete_previous_shell(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, technique)
-                raise
+                except (KeyboardInterrupt, SystemExit):
+                  if technique == settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED and 'cmd' in locals():
+                    delete_previous_shell(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, technique)
+                  raise
 
-              except EOFError:
-                checks.EOFError_err_msg()
-                if technique == settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED and 'cmd' in locals():
-                  delete_previous_shell(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, technique)
-                raise
+                except EOFError:
+                  checks.EOFError_err_msg()
+                  if technique == settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED and 'cmd' in locals():
+                    delete_previous_shell(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, technique)
+                  raise
 
-              except (Exception, SystemExit):
-                percent = ((num_of_chars * 100) / total)
-                float_percent = "{0:.1f}".format(round(((num_of_chars*100)/(total*1.0)),2))
-                if str(float_percent) == "100.0":
-                  if no_result == True:
-                    if settings.VERBOSITY_LEVEL == 0:
-                      percent = settings.FAIL_STATUS
-                      checks.injection_process(injection_type, technique, percent)
+                except (Exception, SystemExit):
+                  percent = ((num_of_chars * 100) / total)
+                  float_percent = "{0:.1f}".format(round(((num_of_chars*100)/(total*1.0)),2))
+                  if str(float_percent) == "100.0":
+                    if no_result == True:
+                      if settings.VERBOSITY_LEVEL == 0:
+                        percent = settings.FAIL_STATUS
+                        checks.injection_process(injection_type, technique, percent)
+                      else:
+                        percent = ""
                     else:
-                      percent = ""
+                      percent = ".. (" + str(float_percent) + "%)"
+                      settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
                   else:
                     percent = ".. (" + str(float_percent) + "%)"
-                    settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
-                else:
-                  percent = ".. (" + str(float_percent) + "%)"
-              break
+                break
 
+              if possibly_vulnerable:
+                break
           # Yaw, got shellz!
           # Do some magic tricks!
           if checks.time_related_shell(url_time_response, exec_time, timesec):
@@ -475,13 +493,17 @@ def do_results_based_proccess(url, timesec, filename, http_request_method, injec
     separators = settings.SEPARATORS
 
   if not settings.LOAD_SESSION or technique not in settings.STORED_TECHNIQUES:
-    checks.testing_technique_title(injection_type, technique)
+    # Skip redundant progress output when the fallback already announced the technique.
+    if settings.SKIP_NEXT_TECHNIQUE_TITLE == technique:
+      settings.SKIP_NEXT_TECHNIQUE_TITLE = None
+    else:
+      checks.testing_technique_title(injection_type, technique)
     # Re-check tamper compatibility now that the technique and target OS are known.
     checks.tamper_scripts(stored_tamper_scripts=True)
     if technique == settings.INJECTION_TECHNIQUE.FILE_BASED:
       url_time_response = 0
       tmp_path = checks.check_tmp_path(url, timesec, filename, http_request_method, url_time_response)
-  
+
   TAG = ''.join(random.choice(string.ascii_uppercase) for i in range(6))
   i = 0
   total = len(settings.WHITESPACES) * len(prefixes) * len(suffixes) * len(separators)

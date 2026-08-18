@@ -129,7 +129,12 @@ def clear(url):
   try:
     conn = sqlite3.connect(settings.SESSION_FILE)
     table = table_name(url) + "_ip"
-    
+
+    # Nothing to clear if the table hasn't been created yet.
+    if conn.execute("SELECT name FROM sqlite_master WHERE name = ? AND type = 'table';", (table,)).fetchone() is None:
+      conn.close()
+      return
+
     # Query to get the smallest (earliest) id for each unique combination of url and technique
     query = "SELECT MIN(id) FROM \"" + table + "\" GROUP BY url, technique;"
     cursor = conn.execute(query)
@@ -226,7 +231,7 @@ def applied_techniques(url, http_request_method):
     conn = sqlite3.connect(settings.SESSION_FILE)
     table = table_name(url) + "_ip"
     query = "SELECT name FROM sqlite_master WHERE name = ? AND type = 'table';"
-    result = conn.execute(query, (table,))
+    result = conn.execute(query, (table,)).fetchone()
     if result:
       query = "SELECT technique FROM \"" + table + "\" WHERE url LIKE ? ESCAPE '\\';"
       cursor = conn.execute(query, ("%" + escape_like(split_url(url)) + "%",)).fetchall()
@@ -255,7 +260,7 @@ def applied_levels(url, http_request_method):
     conn = sqlite3.connect(settings.SESSION_FILE)
     table = table_name(url) + "_ip"
     query = "SELECT name FROM sqlite_master WHERE name = ? AND type = 'table';"
-    result = conn.execute(query, (table,))
+    result = conn.execute(query, (table,)).fetchone()
     if result:
       query = "SELECT http_header, is_vulnerable FROM \"" + table + "\" WHERE url LIKE ? ESCAPE '\\';"
       cursor = conn.execute(query, ("%" + escape_like(split_url(url)) + "%",)).fetchall()
@@ -278,7 +283,7 @@ def applied_levels(url, http_request_method):
 
 
 """
-Load a matching stored injection point and update settings when found.
+Find a stored injection point matching the URL, parameter, and HTTP method, then restore its settings.
 """
 def check_stored_injection_points(url, check_parameter, http_request_method):
   try:
@@ -349,7 +354,7 @@ def check_stored_injection_points(url, check_parameter, http_request_method):
 
 
 """
-Load all stored injection points once, keyed by technique.
+Fetch all stored injection points in one query, keyed by technique.
 """
 def load_stored_techniques(url, check_parameter, http_request_method):
   stored = {}

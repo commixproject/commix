@@ -33,6 +33,7 @@ from src.core.requests import requests
 from src.core.requests import parameters
 from src.core.requests import redirection
 from src.core.requests import authentication
+from src.core.requests import stability
 from src.core.injections.controller import checks
 from src.thirdparty.six.moves import input as _input
 from src.thirdparty.six.moves import urllib as _urllib
@@ -42,24 +43,36 @@ from src.thirdparty.colorama import Fore, Back, Style, init
 """
 Check if the content of the given URL is stable over time.
 """
-def is_url_content_stable(url, delay=5):
+def is_url_content_stable(url, response=None, fetch_time=None):
   status = "stable"
   debug_msg = "Testing if the target URL content remains consistent between requests."
   settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
   try:
-    response = _urllib.request.urlopen(url, timeout=settings.TIMEOUT)
-    try:
-      first_response_content = response.read().strip()
-    finally:
-      response.close()
+    if response is not None:
+      # Reuse the connection-test response and make .read() reusable for later checks.
+      raw_body = response.read()
+      first_response_content = raw_body.strip()
+      response.read = (lambda _b: lambda *a, **kw: _b)(raw_body)
+    else:
+      first_response = _urllib.request.urlopen(url, timeout=settings.TIMEOUT)
+      try:
+        first_response_content = first_response.read().strip()
+      finally:
+        first_response.close()
+      fetch_time = time.time()
 
-    time.sleep(delay)
+    # Only wait out what's left of the window - earlier steps (WAF check) count too.
+    remaining = settings.STABILITY_CHECK_DELAY
+    if fetch_time is not None:
+      remaining = max(0, min(settings.STABILITY_CHECK_DELAY, settings.STABILITY_CHECK_DELAY - (time.time() - fetch_time)))
+    if remaining:
+      time.sleep(remaining)
 
-    response = _urllib.request.urlopen(url, timeout=settings.TIMEOUT)
+    second_response = _urllib.request.urlopen(url, timeout=settings.TIMEOUT)
     try:
-      second_response_content = response.read().strip()
+      second_response_content = second_response.read().strip()
     finally:
-      response.close()
+      second_response.close()
 
     if first_response_content != second_response_content:
       status = "dynamic"
@@ -112,10 +125,17 @@ Estimating the response time (in seconds).
 def estimate_response_time(url, timesec, http_request_method):
   stored_auth_creds = False
   _ = False
+
+  # Reuse url_response()'s clean response to avoid a duplicate round-trip.
+  if settings.INIT_CONNECTION_TIME is not None:
+    diff = settings.INIT_CONNECTION_TIME
+    settings.INIT_CONNECTION_TIME = None
+    return _finish_response_time_estimate(diff, timesec)
+
   if settings.VERBOSITY_LEVEL != 0:
     debug_msg = "Estimating the target URL response time. "
     settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
-    
+
   # Check if defined POST data
   if menu.options.data:
     request = _urllib.request.Request(url, menu.options.data.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.TESTABLE_VALUE).encode(settings.DEFAULT_CODEC), method=http_request_method)
@@ -263,7 +283,12 @@ def estimate_response_time(url, timesec, http_request_method):
 
   end = time.time()
   diff = end - start
-    
+  return _finish_response_time_estimate(diff, timesec)
+
+"""
+Convert the measured round-trip time into the slow-target warning and adjusted timesec.
+"""
+def _finish_response_time_estimate(diff, timesec):
   if int(diff) < 1:
     url_time_response = int(diff)
   else:
@@ -273,12 +298,9 @@ def estimate_response_time(url, timesec, http_request_method):
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
     url_time_response = int(round(diff))
     warn_msg = "Target's estimated response time is " + str(url_time_response)
-    warn_msg += " second" + "s"[url_time_response == 1:] + ". That may cause"
+    warn_msg += " second" + "s"[url_time_response == 1:] + ". Data extraction may be delayed"
     if url_time_response >= 3:
-      warn_msg += " serious"
-    warn_msg += " delays during the data extraction procedure"
-    if url_time_response >= 3:
-      warn_msg += " and/or possible corruptions over the extracted data"
+      warn_msg += " and/or corrupted"
     warn_msg += "."
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
@@ -287,6 +309,7 @@ def estimate_response_time(url, timesec, http_request_method):
   else:
     timesec = int(timesec)
 
+  settings.URL_TIME_RESPONSE = url_time_response
   return timesec, url_time_response
 
 """
@@ -294,11 +317,11 @@ Exceptions regarding requests failure(s)
 """
 def request_failed(err_msg):
 
-  settings.VALID_URL = False
+  stability.mark_url_invalid()
 
   # A deliberately unfollowed redirect isn't a real failure.
   if not settings.FOLLOW_REDIRECT and getattr(err_msg, "code", None) in (301, 302, 303, 307):
-    settings.VALID_URL = True
+    stability.mark_url_valid()
     return False
 
   try:
@@ -310,7 +333,7 @@ def request_failed(err_msg):
       error_msg = str(err_msg)
 
   if any(x in str(error_msg).lower() for x in ["wrong version number", "ssl", "https"]):
-    settings.MAX_RETRIES = 1
+    stability.disable_retries()
     error_msg = "Can't establish SSL connection. "
     if settings.MULTI_TARGETS or settings.CRAWLING:
       error_msg = error_msg + "Skipping to the next target."
@@ -321,7 +344,7 @@ def request_failed(err_msg):
       return False
 
   elif re.search(r"(connection\s*refused|timed?\s*out|no\s*route|unreachable|tunnel)", str(error_msg), re.IGNORECASE):
-    settings.MAX_RETRIES = 1
+    stability.disable_retries()
     err = "Unable to connect to the target URL"
     if menu.options.tor:
       err += " using the Tor network"
@@ -382,6 +405,9 @@ def request_failed(err_msg):
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
       if not settings.NOT_FOUND_ERROR in str(err_msg).lower():
         return False
+      return True
+    elif stability.should_retry_connection_error(error_msg):
+      # Likely transient noise, not a dead target.
       return True
     else:
       error_msg = "The provided target URL seems not reachable. "
@@ -484,7 +510,7 @@ def init_injection(payload, http_request_method, url):
 
   if settings.TIME_RELATED_ATTACK:
     end = time.time()
-    response = int(end - start)
+    response = end - start
   else:
     exec_time = response
 
@@ -536,7 +562,7 @@ def cookie_injection(url, vuln_parameter, payload, http_request_method):
 
   if settings.TIME_RELATED_ATTACK :
     end  = time.time()
-    exec_time = int(end - start)
+    exec_time = end - start
     return exec_time
   else:
     return response
@@ -579,7 +605,7 @@ def user_agent_injection(url, vuln_parameter, payload, http_request_method):
 
   if settings.TIME_RELATED_ATTACK :
     end = time.time()
-    exec_time = int(end - start)
+    exec_time = end - start
     return exec_time
   else:
     return response
@@ -622,7 +648,7 @@ def referer_injection(url, vuln_parameter, payload, http_request_method):
 
   if settings.TIME_RELATED_ATTACK :
     end  = time.time()
-    exec_time = int(end - start)
+    exec_time = end - start
     return exec_time
   else:
     return response
@@ -665,7 +691,7 @@ def host_injection(url, vuln_parameter, payload, http_request_method):
 
   if settings.TIME_RELATED_ATTACK :
     end  = time.time()
-    exec_time = int(end - start)
+    exec_time = end - start
     return exec_time
   else:
     return response
@@ -708,7 +734,7 @@ def custom_header_injection(url, vuln_parameter, payload, http_request_method):
 
   if settings.TIME_RELATED_ATTACK :
     end  = time.time()
-    exec_time = int(end - start)
+    exec_time = end - start
     return exec_time
   else:
     return response

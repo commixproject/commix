@@ -35,20 +35,17 @@ The exploitation function.
 def exploitation(url, timesec, filename, http_request_method, url_time_response, injection_type, technique):
   # Check if attack is based on time delays.
   if not settings.TIME_RELATED_ATTACK:
-    checks.time_related_attaks_msg()
     settings.TIME_RELATED_ATTACK = True
 
   tmp_path = ""
   if url_time_response >= settings.SLOW_TARGET_RESPONSE:
     settings.RESPONSE_DELAYS = True
-    warn_msg = "Due to significant response delays, "
-    warn_msg += "skipping the time-based (blind) technique is strongly recommended."
-    settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
     go_back = False
     while True:
       if go_back == True:
         return False
-      message = "How do you want to proceed? [(C)ontinue/(s)kip] > "
+      message = "High response delays make time-related techniques unreliable. "
+      message += "How do you want to proceed? [(C)ontinue/(s)kip] > "
       proceed_option = common.read_input(message, default="C", check_batch=True)
       if proceed_option.lower() in settings.CHOICE_PROCEED :
         if proceed_option.lower() == "c":

@@ -54,5 +54,3 @@ def smoke_test():
       result = result + "failed."
       settings.print_data_to_stdout(settings.print_bold_error_msg(result))
     raise SystemExit()
-
-

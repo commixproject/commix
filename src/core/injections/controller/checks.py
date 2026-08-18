@@ -28,6 +28,7 @@ import zlib
 import traceback
 import subprocess
 import contextlib
+import statistics
 from glob import glob
 from src.utils import common
 from src.utils import logs
@@ -40,6 +41,7 @@ from src.core.requests import proxy
 from src.core.requests import headers
 from src.core.requests import requests
 from src.core.requests import parameters
+from src.core.requests import stability
 from src.thirdparty.six.moves import input as _input
 from src.thirdparty.six.moves import urllib as _urllib
 from src.thirdparty.six.moves import http_client as _http_client
@@ -395,12 +397,15 @@ def connection_exceptions(err_msg):
   with settings.REQUESTS_LOCK:
     settings.TOTAL_OF_REQUESTS = settings.TOTAL_OF_REQUESTS + 1
   if settings.MAX_RETRIES > 1:
-    time.sleep(settings.DELAY_RETRY)
+    delay = stability.retry_delay_seconds()
+    if delay:
+      time.sleep(delay)
     if not any((settings.MULTI_TARGETS, settings.CRAWLING,settings.REVERSE_TCP,settings.BIND_TCP)):
-      warn_msg = settings.APPLICATION.capitalize() + " is going to retry the request(s)."
+      warn_msg = "Connection error (" + str(err_msg) + "), retrying request (" + str(settings.TOTAL_OF_REQUESTS) + "/" + str(settings.MAX_RETRIES) + ")."
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+      settings.VISIBLE_CONNECTION_ERRORS += 1
   if not settings.VALID_URL :
-    if settings.TOTAL_OF_REQUESTS == settings.MAX_RETRIES and not settings.MULTI_TARGETS:
+    if stability.should_abandon_target():
       raise SystemExit()
 
 """
@@ -529,17 +534,42 @@ def save_cmd_history():
 Testing technique (title)
 """
 def testing_technique_title(injection_type, technique):
+  # A new technique's title - the completion label below is free to print again for it.
+  settings.LAST_COMPLETED_TECHNIQUE = None
+  settings.LAST_DOT_BUCKET = -1
   if settings.VERBOSITY_LEVEL != 0:
     info_msg = "Testing the " + "(" + injection_type.split(settings.SINGLE_WHITESPACE)[0] + ") " + technique + ". "
     settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+  else:
+    # Close a previous technique's dangling "... (done)" line first.
+    settings.clear_current_line()
+    info_msg = "Testing the " + "(" + injection_type.split(settings.SINGLE_WHITESPACE)[0] + ") " + technique + ", please wait..."
+    settings.print_data_to_stdout(settings.END_LINE.CR + settings.print_info_msg(info_msg))
 
 """
-Injection process (percent)
+Injection process (percent) - a "." per attempt instead of a live percentage, except for
+the terminal markers (all-tested-no-result / already-found), which still replace the line.
 """
 def injection_process(injection_type, technique, percent):
   if settings.VERBOSITY_LEVEL == 0:
-    info_msg = "Testing the " + "(" + injection_type.split(settings.SINGLE_WHITESPACE)[0] + ") " + technique + "." + "" + percent + ""
-    settings.print_data_to_stdout(settings.END_LINE.CR + settings.print_info_msg(info_msg))
+    # Ensure the progress label is shown before appending the prompt result.
+    if not settings.PROGRESS_LINE_OPEN:
+      testing_technique_title(injection_type, technique)
+    if "%" in str(percent):
+      # One dot per combination can get unreadably long - only cross a 4%-wide bucket.
+      match = re.search(r"([\d.]+)%", str(percent))
+      if match:
+        bucket = int(float(match.group(1)) // 4)
+        if bucket == settings.LAST_DOT_BUCKET:
+          return
+        settings.LAST_DOT_BUCKET = bucket
+      settings.print_data_to_stdout(".")
+      return
+    # Can be hit once per false-positive retry on the same technique - only print once.
+    if settings.LAST_COMPLETED_TECHNIQUE == technique:
+      return
+    settings.LAST_COMPLETED_TECHNIQUE = technique
+    settings.print_data_to_stdout(" (done)")
     
 
 """
@@ -781,23 +811,25 @@ def captcha_check(page):
 Checking the reliability of the used payload message.
 """
 def check_for_false_positive_result(false_positive_warning):
-  info_msg = "Checking if the injection point on "
-  info_msg += settings.CHECKING_PARAMETER + " is a false positive." + settings.END_LINE.LF
-  settings.print_data_to_stdout(settings.END_LINE.CR + settings.print_info_msg(info_msg))
-  warn_msg = "Time-based comparison requires " + ('larger', 'reset of')[false_positive_warning] + " statistical model"
+  # Preserve completed progress lines; non-spinner output already ends the line.
+  info_msg = "Checking whether the identified injection point on "
+  info_msg += settings.CHECKING_PARAMETER + " is a false positive."
+  settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+  info_msg = ("Verifying the identified injection point", "Verifying the identified injection point with a longer delay to rule out noise")[false_positive_warning]
   if settings.VERBOSITY_LEVEL != 0:
-    warn_msg = warn_msg + "." + settings.END_LINE.LF
+    info_msg = info_msg + "." + settings.END_LINE.LF
   else:
-    warn_msg = warn_msg +", please wait..."
-  settings.print_data_to_stdout(settings.END_LINE.CR + settings.print_warning_msg(warn_msg))
+    info_msg = info_msg +", please wait..."
+  settings.print_data_to_stdout(settings.END_LINE.CR + settings.print_info_msg(info_msg))
 
 """
 False positive or unexploitable injection point detected.
 """
-def unexploitable_point():
+def unexploitable_point(retry_attempt=None, retry_total=None):
   if settings.VERBOSITY_LEVEL == 0:
     settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
-  warn_msg = "False positive or unexploitable injection point has been detected."
+  warn_msg = "False positive or unexploitable injection point has been detected. Trying for re-verification"
+  warn_msg += (" (" + str(retry_attempt) + "/" + str(retry_total) + ").") if retry_attempt else "."
   settings.print_data_to_stdout(settings.print_bold_warning_msg(warn_msg))
 
 """
@@ -997,7 +1029,9 @@ def continue_tests(err):
         common.invalid_option(continue_tests)
         pass
   except AttributeError:
-    # No HTTP status for raw connection errors; report the failure instead of exiting silently.
+    # No HTTP code (e.g. connection reset) - retry a bounded number of times.
+    if stability.should_retry_connection_error(err):
+      return True
     settings.print_data_to_stdout(settings.print_critical_msg(err))
     return False
   except KeyboardInterrupt:
@@ -1341,17 +1375,27 @@ def time_delay_recommendation():
 Message regarding unexpected time delays due to unstable requests
 """
 def time_delay_due_to_unstable_request(timesec):
-  message = "Unexpected time delays, which could cause false-positive results, have been identified."
+  # Already answered this run - reapply it instead of asking again.
+  if settings.UNSTABLE_REQUEST_CHOICE:
+    if settings.UNSTABLE_REQUEST_CHOICE == "c" and settings.UNSTABLE_REQUEST_BUMPS < settings.MAX_UNSTABLE_TIMESEC_BUMP:
+      timesec = timesec + 1
+      settings.UNSTABLE_REQUEST_BUMPS = settings.UNSTABLE_REQUEST_BUMPS + 1
+    return timesec, settings.UNSTABLE_REQUEST_CHOICE == "c"
+
+  message = "Unexpected time delays have been identified."
   settings.print_data_to_stdout(settings.END_LINE.CR)
   while True:
-    message = message + " How do you want to proceed? [(C)ontinue/(s)kip] > "
+    message = message + " How do you want to proceed? [(C)ontinue with a longer delay/(s)kip this candidate and try the next] > "
     proceed_option = common.read_input(message, default="C", check_batch=True)
     if proceed_option.lower() in settings.CHOICE_PROCEED :
       if proceed_option.lower() == "c":
+        settings.UNSTABLE_REQUEST_CHOICE = "c"
+        settings.UNSTABLE_REQUEST_BUMPS = 1
         timesec = timesec + 1
         false_positive_fixation = True
-        return timesec, false_positive_fixation 
+        return timesec, false_positive_fixation
       elif proceed_option.lower() == "s":
+        settings.UNSTABLE_REQUEST_CHOICE = "s"
         false_positive_fixation = False
         return timesec, false_positive_fixation
       elif proceed_option.lower() == "q":
@@ -1361,22 +1405,60 @@ def time_delay_due_to_unstable_request(timesec):
       pass
 
 """
-Time related shell condition 
+Drop high-latency spikes from a response-time sample via a median/MAD cutoff.
+"""
+def strip_time_outliers(values):
+  if not values or len(values) < settings.MIN_TIME_RESPONSES // 2:
+    return values
+  ordered = sorted(values)
+  median = ordered[len(ordered) // 2]
+  mad = sorted(abs(value - median) for value in values)[len(values) // 2]
+  if mad <= 0:
+    return values
+  cutoff = median + settings.TIME_OUTLIER_MAD_COEFF * 1.4826 * mad
+  result = [value for value in values if value <= cutoff]
+  return result if len(result) >= max(settings.MIN_TIME_RESPONSES // 2, len(values) // 2) else values
+
+"""
+Feed a genuinely non-delayed response time into the rolling baseline model.
+"""
+def record_baseline_response_time(exec_time):
+  settings.RESPONSE_TIMES.append(exec_time)
+  if len(settings.RESPONSE_TIMES) > settings.MAX_TIME_RESPONSES:
+    settings.RESPONSE_TIMES[:] = settings.RESPONSE_TIMES[-(settings.MAX_TIME_RESPONSES // 2):]
+
+"""
+Return the adaptive delay threshold, or None until enough baseline data is available.
+"""
+def current_delay_threshold():
+  sample = strip_time_outliers(settings.RESPONSE_TIMES)
+  if len(sample) >= settings.MIN_TIME_RESPONSES:
+    deviation = statistics.pstdev(sample)
+    if deviation:
+      return max(settings.MIN_VALID_DELAYED_RESPONSE, statistics.mean(sample) + settings.TIME_STDEV_COEFF * deviation)
+  return None
+
+"""
+Time related shell condition. Uses the adaptive threshold once available, else a fixed one.
 """
 def time_related_shell(url_time_response, exec_time, timesec):
-  if (url_time_response == 0 and (exec_time - timesec) >= 0) or \
-     (url_time_response != 0 and (exec_time - timesec) == 0 and (exec_time == timesec)) or \
-     (url_time_response != 0 and (exec_time - timesec) > 0 and (exec_time >= timesec + 1)):
-    return True
-  else:
-    return False
+  lower_limit = current_delay_threshold()
+  delayed = exec_time >= lower_limit if lower_limit is not None else exec_time >= timesec
+
+  # Asked once, the first time any response actually reads as delayed - same gate
+  # governs both raising the delay on failure and shrinking it on good responses.
+  if delayed and settings.ADJUST_TIME_DELAY_CHOICE is None:
+    msg = "Do you want commix to try to optimize the value(s) for delay responses (option '--time-sec')? [Y/n] "
+    settings.ADJUST_TIME_DELAY_CHOICE = common.read_input(msg, default="Y", check_batch=True) in settings.CHOICE_YES
+
+  return delayed
 
 """
 Message regarding time related attcks
 """
 def time_related_attaks_msg():
   if not settings.TIME_RELATED_ATTACK_WARNING:
-    warn_msg = "It is very important to not stress the network connection during usage of time-based payloads to prevent potential disruptions."
+    warn_msg = "Excessive network load may affect the reliability of time-related payloads."
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
   settings.TIME_RELATED_ATTACK_WARNING = True
 
@@ -2994,7 +3076,15 @@ def tfb_controller(no_result, url, timesec, filename, tmp_path, http_request_met
     from src.core.injections.semiblind.techniques.tempfile_based import tfb_handler
     path = tmp_path
     setting_writable_dir(path)
+    # Runs mid file-based-technique, so label the detour or it reads as file-based's
+    # own result showing up in the wrong place.
+    info_msg = "Switching to the tempfile-based injection technique."
+    settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+    settings.SKIP_NEXT_TECHNIQUE_TITLE = settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED
     call_tfb = tfb_handler.exploitation(url, timesec, filename, tmp_path, http_request_method, url_time_response)
+    if call_tfb == False:
+      info_msg = "Resuming the file-based command injection technique tests."
+      settings.print_data_to_stdout(settings.print_info_msg(info_msg))
     return call_tfb
   else:
     settings.print_data_to_stdout(settings.END_LINE.CR)
@@ -3004,7 +3094,6 @@ Check if to use the "/tmp/" directory for tempfile-based technique.
 """
 def use_temp_folder(no_result, url, timesec, filename, http_request_method, url_time_response):
   tmp_path = check_tmp_path(url, timesec, filename, http_request_method, url_time_response)
-  settings.print_data_to_stdout(settings.END_LINE.CR)
   while True:
     message = "Insufficient permissions on directory '" + settings.WEB_ROOT + "'. "
     message += "Do you want to use '" + tmp_path + "' instead? [Y/n] > "
@@ -3034,10 +3123,17 @@ def use_temp_folder(no_result, url, timesec, filename, http_request_method, url_
 Adjusts the timesec delay
 """
 def time_related_timesec():
-  min_safe_delay = settings.MIN_SAFE_TIMESEC
+  # Scale the floor by confirmed instability.
+  if settings.UNSTABLE_REQUEST_CHOICE:
+    min_safe_delay = max(settings.MIN_SAFE_TIMESEC_UNSTABLE, settings.UNSTABLE_REQUEST_BUMPS)
+  else:
+    min_safe_delay = settings.MIN_SAFE_TIMESEC
+  # Never start below the measured baseline, or normal slow responses look delayed.
+  if settings.URL_TIME_RESPONSE:
+    min_safe_delay = max(min_safe_delay, settings.URL_TIME_RESPONSE + settings.TIME_DELAY_STEP)
   if settings.TIME_RELATED_ATTACK and settings.TIMESEC < min_safe_delay:
     if settings.VERBOSITY_LEVEL != 0:
-      debug_msg = "Adjusting '--time-sec' to minimum safe delay of " + str(min_safe_delay) + "s. In case of inconsistencies, increase it manually."
+      debug_msg = "Adjusting '--time-sec' to minimum safe delay of " + str(min_safe_delay) + " second" + ("s" if min_safe_delay > 1 else "") + ". In case of inconsistencies, it will be auto-increased."
       settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
     return min_safe_delay
   else:
@@ -3054,12 +3150,12 @@ def time_related_export_injection_results(cmd, separator, output, check_exec_tim
     settings.print_data_to_stdout(settings.print_info_msg(info_msg))
     # settings.print_data_to_stdout(settings.print_output(output))
   else:
-    # Check for separator filtration on target host.
+    # Could be separator filtration on target host, or simply an invalid/wrong command.
     if output != False :
-      err_msg = "It seems '" + cmd + "' command could not return "
-      err_msg += "any output due to '" + separator + "' filtration on target host. "
-      err_msg += "To bypass that limitation, use the '--alter-shell' option "
-      err_msg += "or try another injection technique."
+      err_msg = "The '" + cmd + "' command did not return any output. This could be due to "
+      err_msg += "'" + separator + "' filtration on the target host, or the command itself "
+      err_msg += "being invalid. If you're confident it's valid, try the '--alter-shell' "
+      err_msg += "option or another injection technique."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     # Check for invalid provided command.
     else:

@@ -16,6 +16,7 @@ For more see the file 'readme/COPYING' for copying permission.
 import re
 import os
 import sys
+import time
 import random
 from src.thirdparty.six.moves import http_client as _http_client
 # accept overly long result lines
@@ -199,6 +200,12 @@ def init_request(url, http_request_method):
     headers.do_check(request)
     return request
 
+  def redirect_probe_request(url, http_request_method):
+    # Redirect detection doesn't need the (possibly slow) POST body.
+    request = _urllib.request.Request(url, method=http_request_method)
+    headers.do_check(request)
+    return request
+
   if settings.VERBOSITY_LEVEL != 0:
     debug_msg = "Setting the HTTP timeout."
     settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
@@ -223,11 +230,11 @@ def init_request(url, http_request_method):
     opener = _urllib.request.build_opener(redirection.RedirectHandler())
     # Install globally so later bare urlopen() calls respect it too.
     _urllib.request.install_opener(opener)
-    request = perform_init_request(url, http_request_method)
-    response = opener.open(request, timeout=settings.TIMEOUT)
+    probe_request = redirect_probe_request(url, http_request_method)
+    response = opener.open(probe_request, timeout=settings.TIMEOUT)
     if response.geturl() != url:
       redirect_url = response.geturl()
-      
+
   except _urllib.error.HTTPError as e:
     _ = True
     redirect_url = e.geturl()
@@ -236,11 +243,13 @@ def init_request(url, http_request_method):
     requests.request_failed(err_msg)
 
   if redirect_url and redirect_url != url and settings.FOLLOW_REDIRECT:
-    redirect_url = redirection.do_check(request, url, redirect_url, http_request_method)
+    redirect_url = redirection.do_check(probe_request, url, redirect_url, http_request_method)
     if redirect_url is not None and settings.FOLLOW_REDIRECT:
       if _:
         url = redirect_url
-      request = perform_init_request(redirect_url, http_request_method)
+
+  # Build the real request (full data) now that the final URL is known.
+  request = perform_init_request(url, http_request_method)
 
   # Define HTTP headers
   defined_http_headers(url)
@@ -266,19 +275,34 @@ def url_response(url, http_request_method):
   # Check if http / https
   url = checks.check_http_s(url)
   request, url = init_request(url, http_request_method)
-  response = examine_request(request, url)
+  # Cache clean-request timing to avoid repeating the measurement, resetting it first to prevent stale values.
+  settings.INIT_CONNECTION_TIME = None
+  settings.INIT_CONNECTION_FETCH_TIME = None
+  settings.INIT_CONNECTION_URL = None
+
+  # Piggyback the WAF probe on the same request to avoid an extra round-trip.
+  conn_request, conn_url = request, url
+  do_waf = not menu.options.skip_waf
+  if do_waf:
+    settings.COOKIE_INJECTION = None
+    conn_request, conn_url = checks.check_waf(url, http_request_method)
+    settings.WAF_DETECTION_PHASE = True
+
+  _conn_start = time.time()
+  response = examine_request(conn_request, conn_url)
+  if do_waf:
+    settings.WAF_DETECTION_PHASE = False
+  if response is not False and response is not None:
+    _conn_end = time.time()
+    settings.INIT_CONNECTION_TIME = _conn_end - _conn_start
+    settings.INIT_CONNECTION_FETCH_TIME = _conn_end
+    settings.INIT_CONNECTION_URL = conn_url
   settings.TARGET_URL = _urllib.parse.urlparse(url).hostname
   if settings.MULTI_TARGETS or settings.CRAWLING:
     settings.TOR_CHECK_AGAIN = False
     # initiate total of requests
     settings.TOTAL_OF_REQUESTS = 0
 
-  if not menu.options.skip_waf:
-    settings.COOKIE_INJECTION = None
-    settings.WAF_DETECTION_PHASE = True
-    waf_request, waf_url = checks.check_waf(url, http_request_method)
-    examine_request(waf_request, waf_url)
-    settings.WAF_DETECTION_PHASE = False
   return response, url
 
 """
@@ -568,7 +592,7 @@ def main(filename, url, http_request_method):
           info_msg = "Performing heuristic (passive) tests on the target URL."
           settings.print_data_to_stdout(settings.print_info_msg(info_msg))
           if settings.VERBOSITY_LEVEL != 0:
-            requests.is_url_content_stable(url)
+            requests.is_url_content_stable(settings.INIT_CONNECTION_URL or url, response, settings.INIT_CONNECTION_FETCH_TIME)
           # Webpage encoding detection.
           requests.encoding_detection(response)
           # Procedure for target server identification.

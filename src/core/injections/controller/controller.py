@@ -93,7 +93,7 @@ def check_for_stored_sessions(url, check_parameter, http_request_method):
     if os.path.isfile(settings.SESSION_FILE) and not settings.REQUIRED_AUTHENTICATION:
       # Check every call site instead of only the first parameter or header.
       url, check_parameter = session_handler.check_stored_injection_points(url, check_parameter, http_request_method)
-      # Load stored techniques once so each technique can resume without re-querying.
+      # Load stored techniques once so each can resume without re-querying storage.
       settings.STORED_TECHNIQUES = session_handler.load_stored_techniques(url, check_parameter, http_request_method)
   return url, check_parameter
 

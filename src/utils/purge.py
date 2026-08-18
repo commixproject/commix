@@ -13,11 +13,6 @@ the Free Software Foundation, either version 3 of the License, or
 For more see the file 'readme/COPYING' for copying permission.
 """
 
-"""
-Based on "purge.py" script from sqlmap [1].
-[1] https://github.com/sqlmapproject/sqlmap/blob/master/lib/utils/purge.py
-"""
-
 import os
 import sys
 import stat

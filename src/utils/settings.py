@@ -219,11 +219,43 @@ def command_execution_output(shell):
 Print data to stdout
 """
 def print_data_to_stdout(data):
-  if END_LINE.CR not in data and data != "." and data != " (done)":
-    data = data + END_LINE.LF
+  global PROGRESS_LINE_OPEN
   with PRINT_LOCK:
+    # A bare "\r" only moves the cursor and does not open a line.
+    if data == END_LINE.CR:
+      sys.stdout.write(data)
+      sys.stdout.flush()
+      return
+
+    has_cr = END_LINE.CR in data
+    has_lf = END_LINE.LF in data
+    is_spinner_style = has_cr or data == "." or data == " (done)"
+    is_established_closer = data == SINGLE_WHITESPACE
+
+    if is_established_closer and not PROGRESS_LINE_OPEN:
+      return  # nothing open to close - skip the cosmetic blank line
+
+    # Spinner continuations can append directly; other output needs a newline first.
+    if PROGRESS_LINE_OPEN and not is_spinner_style and not is_established_closer:
+      sys.stdout.write(END_LINE.LF)
+
+    # Only spinner output stays unterminated; other messages always end with a newline.
+    if not is_spinner_style:
+      data = data + END_LINE.LF
+
     sys.stdout.write(data)
     sys.stdout.flush()
+    PROGRESS_LINE_OPEN = is_spinner_style and not has_lf
+
+"""
+Clear the current line before printing, without adding a blank line when already empty.
+"""
+def clear_current_line():
+  global PROGRESS_LINE_OPEN
+  with PRINT_LOCK:
+    sys.stdout.write(END_LINE.CR + "\033[K")
+    sys.stdout.flush()
+    PROGRESS_LINE_OPEN = False
 
 """
 argv input errors
@@ -264,7 +296,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "73"
+REVISION = "74"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -465,6 +497,8 @@ FILE_BASED_STATE = False
 TEMPFILE_BASED_STATE = False
 TIME_RELATED_ATTACK = False
 TIME_RELATED_ATTACK_WARNING = False
+LAST_COMPLETED_TECHNIQUE = None
+LAST_DOT_BUCKET = -1
 
 # Stored applied techniques
 SESSION_APPLIED_TECHNIQUES = ""
@@ -505,6 +539,21 @@ MAX_CONNECTION_TOTAL_SIZE = 100 * 1024 * 1024
 # Slow target response.
 SLOW_TARGET_RESPONSE = 3
 
+# Measure the target's baseline latency once to floor the initial --time-sec value.
+URL_TIME_RESPONSE = 0
+
+# Cache url_response()'s connection-test timing for reuse by estimate_response_time().
+INIT_CONNECTION_TIME = None
+
+# When that connection-test response was fetched (time.time()).
+INIT_CONNECTION_FETCH_TIME = None
+
+# URL actually used for that request (may carry the WAF probe marker).
+INIT_CONNECTION_URL = None
+
+# Max wait before re-checking page stability.
+STABILITY_CHECK_DELAY = 0.5
+
 RESPONSE_DELAYS = False
 
 # The testable parameter.
@@ -517,45 +566,9 @@ HTTP_HEADER = ""
 
 EXTRA_HTTP_HEADERS = False
 
-# Lowercase letters (most frequent first)
-FREQ_LOWER = [
-  101, 116, 97, 111, 105, 110, 115, 114, 104, 100,
-  108, 99, 117, 109, 119, 102, 103, 121, 112, 98,
-  118, 107, 106, 120, 113, 122
-]
-
-# Digits (1–9 first, 0 last)
-DIGITS = [49, 50, 51, 52, 53, 54, 55, 56, 57, 48]
-
-# Uppercase letters (most frequent first)
-FREQ_UPPER = [
-  69, 84, 65, 79, 73, 78, 83, 82, 72, 68,
-  76, 67, 85, 77, 87, 70, 71, 89, 80, 66,
-  86, 75, 74, 88, 81, 90
-]
-
-# Common printable ASCII symbols (ordered last in charset)
-# Includes space and frequently used separators first: _ - . / @
-# Followed by the remaining printable punctuation ranges:
-# 33–44  -> ! " # $ % & ' ( ) * + ,
-# 58–63  -> : ; < = > ?
-# 91–94  -> [ \ ] ^
-# 96     -> `
-# 123–126-> { | } ~
-# Remove duplicates while preserving the defined symbol order
-SYMBOLS = (
-    [32, 95, 45, 46, 47, 64] +
-    list(range(33, 45)) +
-    list(range(58, 64)) +
-    list(range(91, 95)) +
-    list(range(96, 97)) +
-    list(range(123, 127))
-)
-
-SYMBOLS = [x for i, x in enumerate(SYMBOLS) if x not in SYMBOLS[:i]]
-
-CHAR_POOL_SINGLE = (FREQ_UPPER + FREQ_LOWER + DIGITS + SYMBOLS)
-CHAR_POOL_MULTI = (FREQ_LOWER + DIGITS + FREQ_UPPER + SYMBOLS)
+# Use the full printable ASCII range; bisection only depends on ordinal bounds.
+CHAR_POOL_SINGLE = list(range(32, 127))
+CHAR_POOL_MULTI = list(range(32, 127))
 
 # The command injection separators.
 SEPARATORS = []
@@ -622,7 +635,10 @@ DELAY = 0
 TIMESEC = 0
 
 # Minimum safe delay for time-related techniques.
-MIN_SAFE_TIMESEC = 0.5
+MIN_SAFE_TIMESEC = 1
+
+# Higher minimum delay applied once this run has confirmed the target is unstable.
+MIN_SAFE_TIMESEC_UNSTABLE = 10
 
 # Seconds to delay between each HTTP retry.
 DELAY_RETRY = 1
@@ -634,6 +650,9 @@ MAX_THREADS = 10
 # Locks for shared state accessed by concurrent threads.
 PRINT_LOCK = _threading.Lock()
 REQUESTS_LOCK = _threading.Lock()
+
+# Whether the last stdout line is still open (progress refresh / spinner dot).
+PROGRESS_LINE_OPEN = False
 
 DEFAULT_INJECTION_LEVEL = 1
 COOKIE_INJECTION_LEVEL = 2
@@ -743,6 +762,15 @@ CHOICE_OS = ['W','w','U','u','Q','q','N','n']
 
 # Accepts 'C','c','S','s','Q','q','A','a'
 CHOICE_PROCEED = ['C','c','S','s','Q','q','A','a']
+
+# Remembers the answer to the "unexpected time delays" prompt so it isn't asked again this run.
+UNSTABLE_REQUEST_CHOICE = None
+
+# How many seconds "Continue" has already added to timesec, capped by MAX_UNSTABLE_TIMESEC_BUMP.
+UNSTABLE_REQUEST_BUMPS = 0
+
+# Maximum cumulative seconds "Continue" may add to timesec over the run.
+MAX_UNSTABLE_TIMESEC_BUMP = 5
 
 # Available alternative shells
 AVAILABLE_SHELLS = ["python"]
@@ -1274,6 +1302,65 @@ TIMEOUT = 30
 
 # Retries when the connection timeouts (Default: 3).
 MAX_RETRIES = 3
+
+# Consecutive connection errors tolerated before giving up.
+CONNECTION_ERROR_RETRIES = 0
+MAX_CONNECTION_ERROR_RETRIES = 5
+
+# Count of connection-error warnings actually shown - excludes silent, harmless retries.
+VISIBLE_CONNECTION_ERRORS = 0
+
+# Statistical model for recognizing a delay against this target's own response times.
+TIME_STDEV_COEFF = 7
+TIME_OUTLIER_MAD_COEFF = 10
+# Decision-threshold floor and shrink-candidate validity margin.
+MIN_VALID_DELAYED_RESPONSE = 0.5
+WARN_TIME_STDEV = 0.5
+
+# One escalate/shrink step, in seconds - separate from the floor above.
+TIME_DELAY_STEP = 1
+MIN_TIME_RESPONSES = 50
+MAX_TIME_RESPONSES = 200
+RESPONSE_TIMES = []
+LAGGING_CHECKED = False
+TIME_DELAY_CANDIDATES = 3
+
+# Best known timesec for this target, reused across commands to avoid recalibration.
+CALIBRATED_TIMESEC = None
+
+# Latched once a re-verification ever fails - widens retries and upgrades checks to a vote.
+JITTER_SEEN = False
+MAX_LENGTH_REVALIDATIONS = 5
+
+# Use the observed charset for bisection when it is small enough; otherwise use the full range.
+NARROWING_MIN_OBSERVED = 3
+NARROWING_MAX_SET_SIZE = 64
+
+# Prevent auto-shrink from undoing a delay increase after validation.
+ADJUST_TIME_DELAY_DISABLED = False
+
+# User's one-time answer to time-sec optimization; None means not asked yet.
+ADJUST_TIME_DELAY_CHOICE = None
+
+# Count clean validations since the last retry before re-enabling automatic delay adjustment.
+VALIDATION_RUN = 0
+VALID_TIME_CHARS_RUN_THRESHOLD = 100
+
+# User's one-time answer to the multi-threading safety prompt; None means not asked yet.
+THREADED_TIME_RETRIEVAL_CHOICE = None
+
+# Technique titles to suppress when a fallback already announced the transition.
+SKIP_NEXT_TECHNIQUE_TITLE = None
+
+# Retries for the false-positive/unexploitable-point re-verification during detection.
+FALSE_POSITIVE_RETRIES = 5
+
+# Prefix marking an interrupted command result for resumption instead of replay.
+PARTIAL_VALUE_MARKER = "\x02COMMIX_PARTIAL\x02"
+
+# Max characters shown at once in the live "characters extracted so far" progress line -
+# a long output shows only a trailing window of this width instead of growing unbounded.
+PROGRESS_DISPLAY_WIDTH = 60
 
 # End of file
 EOF = False
